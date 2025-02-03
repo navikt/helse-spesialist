@@ -12,7 +12,7 @@ internal class OpphevStansMutationHandlerTest : AbstractGraphQLApiTest() {
                 """
                 mutation OpphevStans {
                     opphevStans(
-                        fodselsnummer: "$FØDSELSNUMMER",
+                        fodselsnummer: "$FNR",
                         begrunnelse: "EN_BEGRUNNELSE"
                     )
                 }

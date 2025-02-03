@@ -17,9 +17,19 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.db.DBSessionContext
 import no.nav.helse.spesialist.db.DbQuery
+import no.nav.helse.spesialist.domain.Dialog
+import no.nav.helse.spesialist.domain.DialogId
+import no.nav.helse.spesialist.domain.Notat
+import no.nav.helse.spesialist.domain.NotatType
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.test.TestPerson
+import no.nav.helse.spesialist.test.lagEpostadresseFraFulltNavn
+import no.nav.helse.spesialist.test.lagSaksbehandlerident
+import no.nav.helse.spesialist.test.lagSaksbehandlernavn
 import no.nav.helse.spesialist.typer.Kjønn
+import no.nav.helse.util.Periode
+import no.nav.helse.util.Saksbehandler
+import no.nav.helse.util.januar
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import java.time.LocalDate
@@ -38,38 +48,42 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected open val UTBETALING_ID: UUID = testperson.utbetalingId1
 
     protected open var OPPGAVE_ID = nextLong()
-    protected val EGENSKAP = EgenskapForDatabase.SØKNAD
+    private val EGENSKAP = EgenskapForDatabase.SØKNAD
 
     protected val ORGNUMMER =
         with(testperson) {
             1.arbeidsgiver.organisasjonsnummer
         }
-    protected val ORGNAVN =
+    private val ORGNAVN =
         with(testperson) {
             1.arbeidsgiver.organisasjonsnavn
         }
 
-    protected val BRANSJER = listOf("EN BRANSJE")
+    private val BRANSJER = listOf("EN BRANSJE")
 
     protected val FNR = testperson.fødselsnummer
     protected val AKTØR = testperson.aktørId
-    protected val FORNAVN = testperson.fornavn
-    protected val MELLOMNAVN = testperson.mellomnavn
-    protected val ETTERNAVN = testperson.etternavn
-    protected val FØDSELSDATO: LocalDate = LocalDate.EPOCH
-    protected val KJØNN = testperson.kjønn
-    protected val ENHET = "0301"
+    private val FORNAVN = testperson.fornavn
+    private val MELLOMNAVN = testperson.mellomnavn
+    private val ETTERNAVN = testperson.etternavn
+    private val FØDSELSDATO: LocalDate = LocalDate.EPOCH
+    private val KJØNN = testperson.kjønn
+    private val ENHET = "0301"
 
     private val FOM: LocalDate = LocalDate.of(2018, 1, 1)
+    private val TOM: LocalDate = LocalDate.of(2018, 1, 31)
+    protected val PERIODE = Periode(VEDTAKSPERIODE, LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 31))
 
-    protected val TOM: LocalDate = LocalDate.of(2018, 1, 31)
+    protected val SAKSBEHANDLER by lazy {
+        val navn = lagSaksbehandlernavn()
+        Saksbehandler(
+            oid = UUID.randomUUID(),
+            navn = navn,
+            ident = lagSaksbehandlerident(),
+            epost = lagEpostadresseFraFulltNavn(navn),
+        )
+    }
 
-    protected open val SAKSBEHANDLER_OID: UUID = UUID.randomUUID()
-    protected open val SAKSBEHANDLER_EPOST = "sara.saksbehandler@nav.no"
-    protected open val SAKSBEHANDLER_NAVN = "Sara Saksbehandler"
-    protected open val SAKSBEHANDLER_IDENT = "Z999999"
-
-    protected val PERIODE = Periode(UUID.randomUUID(), LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 31))
 
     protected companion object {
         internal val objectMapper =
@@ -79,7 +93,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     }
 
     private var personId: Long = -1
-    internal var vedtakId: Long = -1
+    private var vedtakId: Long = -1
         private set
     internal var oppgaveId: Long = -1
         private set
@@ -92,6 +106,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
     internal val personDao = sessionContext.personDao
     internal val oppgaveDao = daos.oppgaveDao
+    internal val tildelingDao = daos.tildelingDao
     internal val periodehistorikkApiDao = daos.periodehistorikkApiDao
     internal val vedtakDao = daos.vedtakDao
     internal val commandContextDao = daos.commandContextDao
@@ -245,10 +260,10 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     ).let(::requireNotNull)
 
     protected fun opprettSaksbehandler(
-        saksbehandlerOID: UUID = SAKSBEHANDLER_OID,
-        navn: String = "SAKSBEHANDLER SAKSBEHANDLERSEN",
-        epost: String = "epost@nav.no",
-        ident: String = "Z999999",
+        saksbehandlerOID: UUID = SAKSBEHANDLER.oid,
+        navn: String = SAKSBEHANDLER.navn,
+        epost: String = SAKSBEHANDLER.epost,
+        ident: String = SAKSBEHANDLER.ident,
     ): UUID {
         saksbehandlerDao.opprettEllerOppdater(saksbehandlerOID, navn, epost, ident)
         return saksbehandlerOID
@@ -303,6 +318,32 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         opprettVedtakstype(vedtaksperiodeId, periodetype, inntektskilde)
     }
 
+    protected fun nyBehandlingFraSpleis(
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE,
+        spleisBehandlingId: UUID = UUID.randomUUID(),
+        utbetalingId: UUID = UUID.randomUUID(),
+        fom: LocalDate = 1.januar,
+        tom: LocalDate = 31.januar,
+    ) {
+        pgPersonRepository.brukPersonHvisFinnes(FNR) {
+            this.nySpleisBehandling(
+                SpleisBehandling(
+                    ORGNUMMER,
+                    vedtaksperiodeId,
+                    spleisBehandlingId,
+                    fom,
+                    tom
+                )
+            )
+            nyUtbetalingForVedtaksperiode(vedtaksperiodeId, utbetalingId)
+        }
+    }
+
+    protected fun finnBehandlingUnikId(spleisBehandlingId: UUID): UUID = dbQuery.single(
+        "select unik_id from behandling where spleis_behandling_id = :spleisBehandlingId order by id desc limit 1",
+        "spleisBehandlingId" to spleisBehandlingId
+    ) { it.uuid("unik_id") }
+
     protected fun opprettOppgave(
         contextId: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
@@ -327,6 +368,33 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         )
     }
 
+    fun finnOppgaveIdFor(vedtaksperiodeId: UUID = PERIODE.id): Long = oppgaveDao.finnIdForAktivOppgave(vedtaksperiodeId)!!
+
+    protected fun tildelOppgave(
+        oppgaveId: Long = OPPGAVE_ID,
+        saksbehandlerOid: UUID,
+        navn: String = "Sara Saksbehandler",
+        egenskaper: List<EgenskapForDatabase> = listOf(EgenskapForDatabase.SØKNAD),
+    ) {
+        opprettSaksbehandler(saksbehandlerOid, navn = navn, epost = SAKSBEHANDLER.epost, ident = SAKSBEHANDLER.ident)
+        oppgaveDao.updateOppgave(oppgaveId, oppgavestatus = "AvventerSaksbehandler", egenskaper = egenskaper)
+        tildelingDao.tildel(oppgaveId, saksbehandlerOid)
+    }
+
+    protected fun ferdigstillOppgave(
+        oppgaveId: Long,
+        ferdigstiltAv: String? = null,
+        ferdigstiltAvOid: UUID? = null,
+    ) {
+        oppgaveDao.updateOppgave(
+            oppgaveId = oppgaveId,
+            oppgavestatus = "Ferdigstilt",
+            ferdigstiltAv = ferdigstiltAv,
+            oid = ferdigstiltAvOid,
+            egenskaper = listOf(EGENSKAP),
+        )
+    }
+
     protected fun fagsystemId() = (0..31).map { 'A' + Random().nextInt('Z' - 'A') }.joinToString("")
 
     protected data class Persondata(
@@ -336,9 +404,41 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         val infotrygdutbetalingerId: Long,
     )
 
+    protected fun opprettDialog() =
+        sessionFactory.transactionalSessionScope { session ->
+            Dialog.Factory.ny().also(session.dialogRepository::lagre).id()
+        }
+
+    protected fun opprettNotat(
+        tekst: String = "Et notat",
+        saksbehandlerOid: SaksbehandlerOid = SaksbehandlerOid(SAKSBEHANDLER.oid),
+        vedtaksperiodeId: UUID = PERIODE.id,
+        dialogRef: DialogId = opprettDialog(),
+    ) = sessionFactory.transactionalSessionScope { session ->
+        Notat.Factory.ny(
+            type = NotatType.Generelt,
+            tekst = tekst,
+            dialogRef = dialogRef,
+            vedtaksperiodeId = vedtaksperiodeId,
+            saksbehandlerOid = saksbehandlerOid
+        ).also(session.notatRepository::lagre).id()
+    }
+
+    protected fun opprettKommentar(
+        tekst: String = "En kommentar",
+        saksbehandlerIdent: String = SAKSBEHANDLER.ident,
+        dialogRef: DialogId = opprettDialog(),
+    ) = dbQuery.updateAndReturnGeneratedKey(
+        "INSERT INTO kommentarer (tekst, saksbehandlerident, dialog_ref) VALUES (:tekst, :ident, :dialogRef)",
+        "tekst" to tekst,
+        "ident" to saksbehandlerIdent,
+        "dialogRef" to dialogRef.value,
+    )
+
+
     protected fun nyttVarsel(
         id: UUID = UUID.randomUUID(),
-        vedtaksperiodeId: UUID = UUID.randomUUID(),
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE,
         kode: String = "EN_KODE",
         definisjonRef: Long? = null,
         status: String,
@@ -346,7 +446,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     ) = dbQuery.update(
         """
         INSERT INTO selve_varsel (unik_id, kode, vedtaksperiode_id, generasjon_ref, definisjon_ref, opprettet, status, status_endret_ident, status_endret_tidspunkt) 
-        VALUES (:id, :kode, :vedtaksperiodeId, (SELECT id FROM behandling WHERE vedtaksperiode_id = :vedtaksperiodeId LIMIT 1), :definisjonRef, :opprettet, :status, :ident, :tidspunkt)
+        VALUES (:id, :kode, :vedtaksperiodeId, (SELECT id FROM behandling WHERE vedtaksperiode_id = :vedtaksperiodeId ORDER BY id DESC LIMIT 1), :definisjonRef, :opprettet, :status, :ident, :tidspunkt)
         """.trimIndent(),
         "id" to id,
         "kode" to kode,
@@ -401,11 +501,5 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         ) { it.int(1) }
         assertEquals(forventetAntall, antall)
     }
-
-    protected data class Periode(
-        val id: UUID,
-        val fom: LocalDate,
-        val tom: LocalDate,
-    )
 
 }

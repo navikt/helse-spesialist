@@ -9,7 +9,9 @@ internal class PaVentMutationHandlerTest : AbstractGraphQLApiTest() {
     @Test
     fun `legger på vent`() {
         val oid = opprettSaksbehandler()
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
 
         val body =
             runQuery(
@@ -32,7 +34,9 @@ internal class PaVentMutationHandlerTest : AbstractGraphQLApiTest() {
     @Test
     fun `legger på vent med årsaker`() {
         val oid = opprettSaksbehandler()
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
 
         val body =
             runQuery(
@@ -56,7 +60,9 @@ internal class PaVentMutationHandlerTest : AbstractGraphQLApiTest() {
     @Test
     fun `fjern fra på vent`() {
         opprettSaksbehandler()
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
 
         val body =
             runQuery(

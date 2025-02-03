@@ -1,32 +1,40 @@
 package no.nav.helse.spesialist.api.graphql
 
 import com.github.navikt.tbd_libs.jackson.asYearMonth
+import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
+import no.nav.helse.modell.vilkårsprøving.Beregningsgrunnlag
+import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
+import no.nav.helse.modell.vilkårsprøving.Inntekt
+import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
+import no.nav.helse.modell.vilkårsprøving.Sammenligningsgrunnlag
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
 import no.nav.helse.spesialist.api.april
 import no.nav.helse.spesialist.api.februar
 import no.nav.helse.spesialist.api.januar
 import no.nav.helse.spesialist.api.mars
-import no.nav.helse.spesialist.api.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
 
-internal class GraphQLApiTest : AbstractGraphQLApiTest() {
+internal open class GraphQLApiTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `henter refusjonsopplysninger`() {
         val vilkårsgrunnlagId = UUID.randomUUID()
         mockSnapshot(vilkårsgrunnlagId = vilkårsgrunnlagId)
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
         opprettAvviksvurdering(vilkårsgrunnlagId = vilkårsgrunnlagId)
 
         val body = runQuery(
             """
             {
-                person(fnr:"$FØDSELSNUMMER") {
+                person(fnr:"$FNR") {
                     vilkarsgrunnlag {
                         ... on VilkarsgrunnlagSpleis {
                           arbeidsgiverrefusjoner {
@@ -58,12 +66,14 @@ internal class GraphQLApiTest : AbstractGraphQLApiTest() {
         val vilkårsgrunnlagId = UUID.randomUUID()
         mockSnapshot(vilkårsgrunnlagId = vilkårsgrunnlagId)
         opprettAvviksvurdering(avviksprosent = 26.0, vilkårsgrunnlagId = vilkårsgrunnlagId)
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
 
         val body = runQuery(
             """
             {
-                person(fnr:"$FØDSELSNUMMER") {
+                person(fnr:"$FNR") {
                     vilkarsgrunnlag {
                         ... on VilkarsgrunnlagSpleis {
                           inntekter {
@@ -126,12 +136,14 @@ internal class GraphQLApiTest : AbstractGraphQLApiTest() {
         val vilkårsgrunnlagId = UUID.randomUUID()
         mockSnapshot(vilkårsgrunnlagId = vilkårsgrunnlagId)
         opprettAvviksvurdering(avviksprosent = 0.0, vilkårsgrunnlagId = vilkårsgrunnlagId)
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
 
         val body = runQuery(
             """
             {
-                person(fnr:"$FØDSELSNUMMER") {
+                person(fnr:"$FNR") {
                     vilkarsgrunnlag {
                         skjaeringstidspunkt
                          ... on VilkarsgrunnlagSpleis {
@@ -164,12 +176,14 @@ internal class GraphQLApiTest : AbstractGraphQLApiTest() {
         val vilkårsgrunnlagId = UUID.randomUUID()
         mockSnapshot(vilkårsgrunnlagId = vilkårsgrunnlagId)
         opprettAvviksvurdering(avviksprosent = avviksprosent, vilkårsgrunnlagId = vilkårsgrunnlagId)
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
 
         val body = runQuery(
             """
             {
-                person(fnr:"$FØDSELSNUMMER") {
+                person(fnr:"$FNR") {
                     vilkarsgrunnlag {
                         skjaeringstidspunkt
                         ... on VilkarsgrunnlagSpleis {
@@ -193,6 +207,79 @@ internal class GraphQLApiTest : AbstractGraphQLApiTest() {
         assertEquals(forventetError, body["errors"].first())
         assertNotNull(grunnlag)
         assertTrue(grunnlag["avviksprosent"].isNull)
+    }
+
+    private fun opprettAvviksvurdering(
+        fødselsnummer: String = FNR,
+        skjæringstidspunkt: LocalDate = 1.januar,
+        avviksvurderingId: UUID = UUID.randomUUID(),
+        vilkårsgrunnlagId: UUID = UUID.randomUUID(),
+        avviksprosent: Double = 25.0
+    ) {
+        sessionFactory.transactionalSessionScope {
+            it.avviksvurderingRepository.lagre(
+                Avviksvurdering(
+                    unikId = avviksvurderingId,
+                    vilkårsgrunnlagId = vilkårsgrunnlagId,
+                    fødselsnummer = fødselsnummer,
+                    skjæringstidspunkt = skjæringstidspunkt,
+                    opprettet = 1.januar.atStartOfDay(),
+                    avviksprosent = avviksprosent,
+                    sammenligningsgrunnlag =
+                        Sammenligningsgrunnlag(
+                            totalbeløp = 10000.0,
+                            innrapporterteInntekter =
+                                listOf(
+                                    InnrapportertInntekt(
+                                        arbeidsgiverreferanse = ORGNUMMER,
+                                        inntekter =
+                                            listOf(
+                                                Inntekt(
+                                                    årMåned = YearMonth.from(1.januar),
+                                                    beløp = 2000.0,
+                                                ),
+                                                Inntekt(
+                                                    årMåned = YearMonth.from(1.februar),
+                                                    beløp = 2000.0,
+                                                ),
+                                            ),
+                                    ),
+                                    InnrapportertInntekt(
+                                        arbeidsgiverreferanse = "987656789",
+                                        inntekter =
+                                            listOf(
+                                                Inntekt(
+                                                    årMåned = YearMonth.from(1.januar),
+                                                    beløp = 1500.0,
+                                                ),
+                                                Inntekt(
+                                                    årMåned = YearMonth.from(1.februar),
+                                                    beløp = 1500.0,
+                                                ),
+                                                Inntekt(
+                                                    årMåned = YearMonth.from(1.mars),
+                                                    beløp = 1500.0,
+                                                ),
+                                                Inntekt(
+                                                    årMåned = YearMonth.from(1.april),
+                                                    beløp = 1500.0,
+                                                ),
+                                            ),
+                                    ),
+                                ),
+                        ),
+                    beregningsgrunnlag =
+                        Beregningsgrunnlag(
+                            totalbeløp = 10000.0,
+                            omregnedeÅrsinntekter =
+                                listOf(
+                                    OmregnetÅrsinntekt(arbeidsgiverreferanse = ORGNUMMER, beløp = 10000.0),
+                                ),
+                        ),
+                )
+
+            )
+        }
     }
 
 }

@@ -21,8 +21,8 @@ internal class OpptegnelseQueryHandlerTest: AbstractGraphQLApiTest() {
             UTBETALING_ANNULLERING_OK,
             REVURDERING_FERDIGBEHANDLET
         )
-        abonner(AKTØRID)
-        every { saksbehandlerMediator.hentAbonnerteOpptegnelser(any()) } returns typer.mapIndexed { idx, type -> ApiOpptegnelse(AKTØRID, idx + 1, type, "{}") }
+        abonner(AKTØR)
+        every { saksbehandlerMediator.hentAbonnerteOpptegnelser(any()) } returns typer.mapIndexed { idx, type -> ApiOpptegnelse(AKTØR, idx + 1, type, "{}") }
 
         val body = runQuery(
             """query HentOpptegnelser {
@@ -37,7 +37,7 @@ internal class OpptegnelseQueryHandlerTest: AbstractGraphQLApiTest() {
         val opptegnelser = jacksonObjectMapper().treeToValue<List<ApiOpptegnelse>>(body["data"]["opptegnelser"])
         assertEquals(3, opptegnelser.size)
         opptegnelser.forEachIndexed { index, opptegnelse ->
-            assertEquals(AKTØRID, opptegnelse.aktorId)
+            assertEquals(AKTØR, opptegnelse.aktorId)
             assertEquals(index + 1, opptegnelse.sekvensnummer)
             assertEquals("""{}""", opptegnelse.payload)
             assertEquals(typer[index], opptegnelse.type)
@@ -52,8 +52,8 @@ internal class OpptegnelseQueryHandlerTest: AbstractGraphQLApiTest() {
             UTBETALING_ANNULLERING_OK,
             REVURDERING_FERDIGBEHANDLET
         )
-        abonner(AKTØRID)
-        every { saksbehandlerMediator.hentAbonnerteOpptegnelser(any(), any()) } returns listOf(ApiOpptegnelse(AKTØRID, 3, typer[2], "{}"))
+        abonner(AKTØR)
+        every { saksbehandlerMediator.hentAbonnerteOpptegnelser(any(), any()) } returns listOf(ApiOpptegnelse(AKTØR, 3, typer[2], "{}"))
         val body = runQuery(
             """query HentOpptegnelser {
                 opptegnelser(sekvensId: 2) {
@@ -68,7 +68,7 @@ internal class OpptegnelseQueryHandlerTest: AbstractGraphQLApiTest() {
         val opptegnelser = jacksonObjectMapper().treeToValue<List<ApiOpptegnelse>>(body["data"]["opptegnelser"])
         assertEquals(1, opptegnelser.size)
         val opptegnelse = opptegnelser.single()
-        assertEquals(AKTØRID, opptegnelse.aktorId)
+        assertEquals(AKTØR, opptegnelse.aktorId)
         assertEquals(3, opptegnelse.sekvensnummer)
         assertEquals("""{}""", opptegnelse.payload)
         assertEquals(typer[2], opptegnelse.type)

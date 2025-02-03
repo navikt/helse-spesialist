@@ -17,10 +17,7 @@ import io.ktor.server.routing.route
 import io.ktor.server.testing.ApplicationTestBuilder
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.helse.db.VedtakBegrunnelseDao
-import no.nav.helse.e2e.DatabaseIntegrationTest
 import no.nav.helse.mediator.SaksbehandlerMediator
-import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.spesialist.api.behandlingsstatistikk.IBehandlingsstatistikkService
 import no.nav.helse.spesialist.api.endepunkter.ApiTesting
 import no.nav.helse.spesialist.api.graphql.ContextFactory
@@ -51,35 +48,36 @@ import no.nav.helse.spesialist.api.graphql.queryHandler
 import no.nav.helse.spesialist.api.person.PersonService
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
 import no.nav.helse.spesialist.application.Reservasjonshenter
+import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.helse.spesialist.client.spleis.SpleisClient
-import no.nav.helse.spesialist.client.spleis.SpleisClientSnapshothenter
+import no.nav.helse.spesialist.db.TransactionalSessionFactory
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLArbeidsgiver
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import no.nav.helse.util.Periode
 import org.intellij.lang.annotations.Language
 import java.util.UUID
 
-internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
-    protected val kode7Saksbehandlergruppe: UUID = UUID.randomUUID()
-    protected val skjermedePersonerGruppeId: UUID = UUID.randomUUID()
+// Planen er å erstatte bruk av denne med no/nav/helse/spesialist/api/AbstractGraphQLApiTest.kt
+internal abstract class AbstractGraphQLApiTestOld : DatabaseIntegrationTestOld() {
+    private val kode7Saksbehandlergruppe: UUID = UUID.randomUUID()
+    private val skjermedePersonerGruppeId: UUID = UUID.randomUUID()
     private val beslutterGruppeId: UUID = UUID.randomUUID()
-    private val avviksvurderingId: UUID = UUID.randomUUID()
 
-    private val reservasjonshenter = mockk<Reservasjonshenter>(relaxed = true)
+    private val reservasjonClient = Reservasjonshenter { null }
     private val behandlingsstatistikkMediator = mockk<IBehandlingsstatistikkService>(relaxed = true)
-    protected val saksbehandlerMediator = mockk<SaksbehandlerMediator>(relaxed = true)
-    protected val vedtakBegrunnelseDao = mockk<VedtakBegrunnelseDao>(relaxed = true)
+    private val saksbehandlerMediator = mockk<SaksbehandlerMediator>(relaxed = true)
     private val godkjenninghåndterer = mockk<Godkjenninghåndterer>(relaxed = true)
     private val personhåndterer = mockk<Personhåndterer>(relaxed = true)
-    protected val dokumenthåndterer = mockk<Dokumenthåndterer>(relaxed = true)
+    private val dokumenthåndterer = mockk<Dokumenthåndterer>(relaxed = true)
     private val avviksvurderinghenter = mockk<Avviksvurderinghenter>(relaxed = true)
     private val stansAutomatiskBehandlinghåndterer = mockk<StansAutomatiskBehandlinghåndterer>(relaxed = true)
 
-    protected val apiOppgaveService = mockk<ApiOppgaveService>(relaxed = true)
-    protected val spleisClient = mockk<SpleisClient>(relaxed = true)
-    protected val snapshothenter = SpleisClientSnapshothenter(spleisClient)
-    private val personinfoDao = daos.personinfoDao
-    private val snapshotService = SnapshotService(personinfoDao, snapshothenter)
+    private val snapshothenter =
+        object : Snapshothenter {
+            override fun hentPerson(fødselsnummer: String) = null
+        }
+    private val spleisClient = mockk<SpleisClient>()
+    private val snapshotService = SnapshotService(daos.personinfoDao, snapshothenter)
 
     private val apiTesting = ApiTesting(
         jwtStub,
@@ -101,8 +99,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                         personoppslagService =
                             PersonService(
                                 personApiDao = daos.personApiDao,
-                                egenAnsattApiDao = daos.egenAnsattApiDao,
-                                vergemålApiDao = daos.vergemålApiDao,
+                                egenAnsattApiDao = egenAnsattApiDao,
                                 tildelingApiDao = daos.tildelingApiDao,
                                 arbeidsgiverApiDao = daos.arbeidsgiverApiDao,
                                 overstyringApiDao = daos.overstyringApiDao,
@@ -113,14 +110,15 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                                 notatDao = daos.notatApiDao,
                                 totrinnsvurderingApiDao = daos.totrinnsvurderingApiDao,
                                 påVentApiDao = daos.påVentApiDao,
+                                vergemålApiDao = daos.vergemålApiDao,
+                                snapshotService = snapshotService,
+                                reservasjonshenter = reservasjonClient,
                                 apiOppgaveService = apiOppgaveService,
                                 saksbehandlerMediator = saksbehandlerMediator,
-                                stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
                                 personhåndterer = personhåndterer,
-                                snapshotService = snapshotService,
-                                reservasjonshenter = reservasjonshenter,
-                                sessionFactory = sessionFactory,
-                                vedtakBegrunnelseDao = vedtakBegrunnelseDao,
+                                stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
+                                sessionFactory = TransactionalSessionFactory(dataSource),
+                                vedtakBegrunnelseDao = daos.vedtakBegrunnelseDao,
                             ),
                     ),
                     oppgaver = OppgaverQueryHandler(
@@ -129,23 +127,21 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                     behandlingsstatistikk = BehandlingsstatistikkQueryHandler(
                         behandlingsstatistikkMediator = behandlingsstatistikkMediator,
                     ),
-                    opptegnelse = OpptegnelseQueryHandler(
-                        saksbehandlerMediator = saksbehandlerMediator,
-                    ),
+                    opptegnelse = OpptegnelseQueryHandler(saksbehandlerMediator),
                     dokument = DokumentQueryHandler(
                         personApiDao = daos.personApiDao,
-                        egenAnsattApiDao = daos.egenAnsattApiDao,
+                        egenAnsattApiDao = egenAnsattApiDao,
                         dokumenthåndterer = dokumenthåndterer,
                     ),
                 ),
                 mutationHandlers = SpesialistSchema.MutationHandlers(
-                    notat = NotatMutationHandler(sessionFactory = sessionFactory),
+                    notat = NotatMutationHandler(sessionFactory),
                     varsel = VarselMutationHandler(varselRepository = daos.varselApiRepository),
-                    tildeling = TildelingMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
-                    opptegnelse = OpptegnelseMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
-                    overstyring = OverstyringMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
-                    skjonnsfastsettelse = SkjonnsfastsettelseMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
-                    minimumSykdomsgrad = MinimumSykdomsgradMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
+                    tildeling = TildelingMutationHandler(saksbehandlerMediator),
+                    opptegnelse = OpptegnelseMutationHandler(saksbehandlerMediator),
+                    overstyring = OverstyringMutationHandler(saksbehandlerMediator),
+                    skjonnsfastsettelse = SkjonnsfastsettelseMutationHandler(saksbehandlerMediator),
+                    minimumSykdomsgrad = MinimumSykdomsgradMutationHandler(saksbehandlerMediator),
                     totrinnsvurdering = TotrinnsvurderingMutationHandler(
                         saksbehandlerMediator = saksbehandlerMediator,
                     ),
@@ -177,23 +173,20 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
     }
 
     fun mockSnapshot(
-        fødselsnummer: String = FNR,
+        fødselsnummer: String = FØDSELSNUMMER,
         arbeidsgivere: List<GraphQLArbeidsgiver> = listOf(defaultArbeidsgivere()),
-        vilkårsgrunnlagId: UUID = UUID.randomUUID(),
     ) {
-        val respons = snapshot(fødselsnummer, arbeidsgivere, vilkårsgrunnlagId)
-        every { spleisClient.hentPerson(FNR) } returns respons
+        every { spleisClient.hentPerson(fødselsnummer) } returns snapshot(fødselsnummer, arbeidsgivere)
     }
 
     private fun snapshot(
-        fødselsnummer: String = FNR,
+        fødselsnummer: String = FØDSELSNUMMER,
         arbeidsgivere: List<GraphQLArbeidsgiver>,
-        vilkårsgrunnlagId: UUID,
     ): GraphQLPerson {
-        val vilkårsgrunnlag = graphQLSpleisVilkarsgrunnlag(ORGNUMMER, vilkårsgrunnlagId)
+        val vilkårsgrunnlag = graphQLSpleisVilkarsgrunnlag(ORGANISASJONSNUMMER)
 
         return GraphQLPerson(
-            aktorId = AKTØR,
+            aktorId = AKTØRID,
             arbeidsgivere = arbeidsgivere,
             dodsdato = null,
             fodselsnummer = fødselsnummer,
@@ -206,7 +199,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
         val periodeMedOppgave = Periode(UUID.randomUUID(), 1.januar, 25.januar)
         val graphQLperiodeMedOppgave = opprettBeregnetPeriode(4.januar(2023), 5.januar(2023), periodeMedOppgave.id)
         val snapshotGenerasjon = opprettSnapshotGenerasjon(listOf(graphQLperiodeMedOppgave))
-        val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGNUMMER, listOf(snapshotGenerasjon))
+        val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotGenerasjon))
         return arbeidsgiver
     }
 

@@ -2,7 +2,6 @@ package no.nav.helse.spesialist.api.graphql.mutation
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
-import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.domain.Dialog
 import no.nav.helse.spesialist.domain.DialogId
 import no.nav.helse.spesialist.domain.KommentarId
@@ -20,7 +19,9 @@ internal class NotatMutationHandlerTest : AbstractGraphQLApiTest() {
     @Test
     fun `leggTilNotat fungerer som forventet`() {
         opprettSaksbehandler()
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
 
         val body =
             runQuery(
@@ -113,7 +114,9 @@ internal class NotatMutationHandlerTest : AbstractGraphQLApiTest() {
     @Test
     fun `feilregistrererNotat fungerer som forventet`() {
         opprettSaksbehandler()
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
         val dialogRef = opprettDialog()
         val notatId = opprettNotat(dialogRef = dialogRef)
 

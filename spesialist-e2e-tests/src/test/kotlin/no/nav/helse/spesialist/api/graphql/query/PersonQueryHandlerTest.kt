@@ -12,7 +12,7 @@ import graphql.GraphQLException
 import io.mockk.every
 import no.nav.helse.db.VedtakBegrunnelseMedSaksbehandlerIdentFraDatabase
 import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
-import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
+import no.nav.helse.spesialist.api.AbstractGraphQLApiTestOld
 import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettBeregnetPeriode
 import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettSnapshotArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettSnapshotGenerasjon
@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
+internal class PersonQueryHandlerTest : AbstractGraphQLApiTestOld() {
 
     @Test
     @ResourceLock("auditlogg-lytter")

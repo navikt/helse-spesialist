@@ -61,7 +61,10 @@ internal class TildelingMutationHandlerTest : AbstractGraphQLApiTest() {
     @Test
     fun `kan fjerne tildeling`() {
         opprettSaksbehandler()
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettOppgave()
         val oppgaveId = finnOppgaveIdFor(PERIODE.id)
         tildelOppgave(oppgaveId, SAKSBEHANDLER.oid)
 

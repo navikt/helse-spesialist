@@ -10,6 +10,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringArbeidsgiver.Api
 import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringDag
 import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
 import no.nav.helse.spesialist.api.januar
+import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.util.UUID
@@ -21,9 +22,9 @@ internal class OverstyringMutationHandlerTest : AbstractOverstyringApiTest() {
             overstyrTidslinje(
                 ApiTidslinjeOverstyring(
                     UUID.randomUUID(),
-                    ORGANISASJONSNUMMER,
-                    FØDSELSNUMMER,
-                    AKTØRID,
+                    ORGNUMMER,
+                    FNR,
+                    AKTØR,
                     "En begrunnelse",
                     listOf(
                         ApiOverstyringDag(10.januar, "Feriedag", "Sykedag", null, 100, null),
@@ -39,9 +40,9 @@ internal class OverstyringMutationHandlerTest : AbstractOverstyringApiTest() {
             overstyrTidslinje(
                 ApiTidslinjeOverstyring(
                     UUID.randomUUID(),
-                    ORGANISASJONSNUMMER,
-                    FØDSELSNUMMER,
-                    AKTØRID,
+                    ORGNUMMER,
+                    FNR,
+                    AKTØR,
                     "En begrunnelse",
                     listOf(
                         ApiOverstyringDag(10.januar, "Arbeidsdag", "Sykedag", null, 100, null),
@@ -57,9 +58,9 @@ internal class OverstyringMutationHandlerTest : AbstractOverstyringApiTest() {
             overstyrTidslinje(
                 ApiTidslinjeOverstyring(
                     UUID.randomUUID(),
-                    ORGANISASJONSNUMMER,
-                    FØDSELSNUMMER,
-                    AKTØRID,
+                    ORGNUMMER,
+                    FNR,
+                    AKTØR,
                     "En begrunnelse",
                     listOf(
                         ApiOverstyringDag(10.januar, "Sykedag", "Arbeidsdag", null, 100, null),
@@ -74,11 +75,11 @@ internal class OverstyringMutationHandlerTest : AbstractOverstyringApiTest() {
         val body =
             overstyrArbeidsforhold(
                 ApiArbeidsforholdOverstyringHandling(
-                    FØDSELSNUMMER,
-                    AKTØRID,
+                    FNR,
+                    AKTØR,
                     10.januar,
                     listOf(
-                        ApiOverstyringArbeidsforhold(ORGANISASJONSNUMMER_GHOST, true, "En begrunnelse", "En forklaring", null),
+                        ApiOverstyringArbeidsforhold(lagOrganisasjonsnummer(), true, "En begrunnelse", "En forklaring", null),
                     ),
                     vedtaksperiodeId = UUID.randomUUID(),
                 ),
@@ -91,12 +92,12 @@ internal class OverstyringMutationHandlerTest : AbstractOverstyringApiTest() {
         val body =
             overstyrInntektOgRefusjon(
                 ApiInntektOgRefusjonOverstyring(
-                    AKTØRID,
-                    FØDSELSNUMMER,
+                    AKTØR,
+                    FNR,
                     9.januar,
                     listOf(
                         ApiOverstyringArbeidsgiver(
-                            ORGANISASJONSNUMMER_GHOST,
+                            lagOrganisasjonsnummer(),
                             24000.0,
                             25000.0,
                             listOf(

@@ -16,7 +16,10 @@ internal class TotrinnsvurderingMutationHandlerTest : AbstractGraphQLApiTest() {
             SendTilGodkjenningResult.Ok
         )
         opprettSaksbehandler()
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettOppgave()
         val oppgaveRef = finnOppgaveIdFor(PERIODE.id)
 
         val body = runQuery(
@@ -37,6 +40,11 @@ internal class TotrinnsvurderingMutationHandlerTest : AbstractGraphQLApiTest() {
         every { saksbehandlerMediator.sendIRetur(any(), any(), any()) }.returns(
             SendIReturResult.Ok
         )
+        opprettSaksbehandler()
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettOppgave()
 
         val body = runQuery(
             """

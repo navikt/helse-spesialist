@@ -10,20 +10,21 @@ internal class VarselMutationHandlerTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `sett status VURDERT`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val generasjonId = UUID.randomUUID()
         val definisjonId = UUID.randomUUID()
         opprettSaksbehandler()
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        opprettPerson()
+        opprettArbeidsgiver()
+        val spleisBehandlingId = UUID.randomUUID()
+        opprettVedtaksperiode(spleisBehandlingId = spleisBehandlingId)
+        val behandlingUnikId = finnBehandlingUnikId(spleisBehandlingId)
         opprettVarseldefinisjon(definisjonId = definisjonId)
-        val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId)
-        nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef)
+        nyttVarsel(kode = "EN_KODE", status = "AKTIV")
 
         val body = runQuery(
             """
             mutation SettVarselstatus {
                 settVarselstatus(
-                    generasjonIdString: "$generasjonId", 
+                    generasjonIdString: "$behandlingUnikId", 
                     definisjonIdString: "$definisjonId",
                     varselkode: "EN_KODE", 
                     ident: "${SAKSBEHANDLER.oid}" 
@@ -42,20 +43,21 @@ internal class VarselMutationHandlerTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `sett status AKTIV`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val generasjonId = UUID.randomUUID()
         val definisjonId = UUID.randomUUID()
         opprettSaksbehandler()
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        opprettPerson()
+        opprettArbeidsgiver()
+        val spleisBehandlingId = UUID.randomUUID()
+        opprettVedtaksperiode(spleisBehandlingId = spleisBehandlingId)
+        val behandlingUnikId = finnBehandlingUnikId(spleisBehandlingId)
         opprettVarseldefinisjon(definisjonId = definisjonId)
-        val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId)
-        nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef)
+        nyttVarsel(kode = "EN_KODE", status = "AKTIV")
 
         val body = runQuery(
             """
             mutation SettVarselstatus {
                 settVarselstatus(
-                    generasjonIdString: "$generasjonId", 
+                    generasjonIdString: "$behandlingUnikId", 
                     varselkode: "EN_KODE", 
                     ident: "${SAKSBEHANDLER.oid}" 
                 ) {
@@ -73,20 +75,21 @@ internal class VarselMutationHandlerTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `får 409-feil hvis status på varselet er noe annet enn AKTIV når man vurderer varsel`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val generasjonId = UUID.randomUUID()
         val definisjonId = UUID.randomUUID()
         opprettSaksbehandler()
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        opprettPerson()
+        opprettArbeidsgiver()
+        val spleisBehandlingId = UUID.randomUUID()
+        opprettVedtaksperiode(spleisBehandlingId = spleisBehandlingId)
+        val behandlingUnikId = finnBehandlingUnikId(spleisBehandlingId)
         opprettVarseldefinisjon(definisjonId = definisjonId)
-        val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId)
-        nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef, status = "GODKJENT")
+        nyttVarsel(kode = "EN_KODE", status = "GODKJENT")
 
         val body = runQuery(
             """
             mutation SettVarselstatus {
                 settVarselstatus(
-                    generasjonIdString: "$generasjonId", 
+                    generasjonIdString: "$behandlingUnikId", 
                     definisjonIdString: "$definisjonId",
                     varselkode: "EN_KODE", 
                     ident: "${SAKSBEHANDLER.oid}" 
@@ -105,20 +108,19 @@ internal class VarselMutationHandlerTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `får 409-feil hvis status på varselet er noe annet enn GODKJENT når gjør varsel aktivt`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val generasjonId = UUID.randomUUID()
-        val definisjonId = UUID.randomUUID()
         opprettSaksbehandler()
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
-        opprettVarseldefinisjon(definisjonId = definisjonId)
-        val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId)
-        nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef, status = "GODKJENT")
-
+        opprettPerson()
+        opprettArbeidsgiver()
+        val spleisBehandlingId = UUID.randomUUID()
+        opprettVedtaksperiode(spleisBehandlingId = spleisBehandlingId)
+        opprettVarseldefinisjon(definisjonId = UUID.randomUUID())
+        nyttVarsel(kode = "EN_KODE", status = "GODKJENT")
+        val behandlingUnikId = finnBehandlingUnikId(spleisBehandlingId)
         val body = runQuery(
             """
             mutation SettVarselstatus {
                 settVarselstatus(
-                    generasjonIdString: "$generasjonId", 
+                    generasjonIdString: "$behandlingUnikId", 
                     varselkode: "EN_KODE", 
                     ident: "${SAKSBEHANDLER.oid}" 
                 ) {
@@ -136,19 +138,21 @@ internal class VarselMutationHandlerTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `får 500-feil dersom oppdateringen tryner for settVarselstatus`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val generasjonId = UUID.randomUUID()
         opprettSaksbehandler()
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
-        val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId)
+        opprettPerson()
+        opprettArbeidsgiver()
+        val spleisBehandlingId = UUID.randomUUID()
+        opprettVedtaksperiode(spleisBehandlingId = spleisBehandlingId)
+        val behandlingUnikId = finnBehandlingUnikId(spleisBehandlingId)
+
         val kode = "DENNE_KODEN_FINNES_FORHÅPENTLIGVIS_IKKE_I_DATABASEN"
-        nyttVarsel(kode = kode, vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef)
+        nyttVarsel(kode = kode, status = "AKTIV")
 
         val body = runQuery(
             """
             mutation SettVarselstatus {
                 settVarselstatus(
-                    generasjonIdString: "$generasjonId", 
+                    generasjonIdString: "$behandlingUnikId", 
                     varselkode: "$kode", 
                     ident: "${SAKSBEHANDLER.oid}" 
                 ) {
@@ -166,17 +170,18 @@ internal class VarselMutationHandlerTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `får 404-feil hvis varselet ikke finnes for settVarselstatus`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val generasjonId = UUID.randomUUID()
         opprettSaksbehandler()
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
-        nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId)
+        opprettPerson()
+        opprettArbeidsgiver()
+        val spleisBehandlingId = UUID.randomUUID()
+        opprettVedtaksperiode(spleisBehandlingId = spleisBehandlingId)
+        val behandlingUnikId = finnBehandlingUnikId(spleisBehandlingId)
 
         val body = runQuery(
             """
             mutation SettVarselstatus {
                 settVarselstatus(
-                    generasjonIdString: "$generasjonId", 
+                    generasjonIdString: "$behandlingUnikId", 
                     varselkode: "EN_KODE", 
                     ident: "${SAKSBEHANDLER.oid}" 
                 ) {

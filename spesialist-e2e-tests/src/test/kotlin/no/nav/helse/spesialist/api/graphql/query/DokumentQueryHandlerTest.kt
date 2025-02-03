@@ -6,7 +6,6 @@ import io.mockk.every
 import io.mockk.verify
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
 import no.nav.helse.spesialist.api.graphql.schema.ApiSoknadstype
-import no.nav.helse.spesialist.api.objectMapper
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -20,13 +19,15 @@ internal class DokumentQueryHandlerTest : AbstractGraphQLApiTest() {
     @Test
     fun `Får 400 dersom man gjør oppslag uten dokumentId`() {
         opprettSaksbehandler()
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
         val dokument = runQuery(
             """
             {
                 hentSoknad(
                     dokumentId: ""
-                    fnr: "$FØDSELSNUMMER"
+                    fnr: "$FNR"
                 ) {
                     sykmeldingSkrevet
                 }
@@ -44,7 +45,7 @@ internal class DokumentQueryHandlerTest : AbstractGraphQLApiTest() {
             {
                 hentSoknad(
                     dokumentId: "${UUID.randomUUID()}"
-                    fnr: "$FØDSELSNUMMER"
+                    fnr: "$FNR"
                 ) {
                     sykmeldingSkrevet
                 }
@@ -58,14 +59,16 @@ internal class DokumentQueryHandlerTest : AbstractGraphQLApiTest() {
     @Test
     fun `Får 408 dersom man ikke har fått søknaden etter 30 retries`() {
         opprettSaksbehandler()
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
         every { dokumenthåndterer.håndter(any(), any(), any()) } returns objectMapper.createObjectNode().put("error", 408)
         val dokument = runQuery(
             """
             {
                 hentSoknad(
                     dokumentId: "${UUID.randomUUID()}"
-                    fnr: "$FØDSELSNUMMER"
+                    fnr: "$FNR"
                 ) {
                     sykmeldingSkrevet
                 }
@@ -79,14 +82,16 @@ internal class DokumentQueryHandlerTest : AbstractGraphQLApiTest() {
     @Test
     fun `Får 417 dersom man ikke har dokumentet`() {
         opprettSaksbehandler()
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
         every { dokumenthåndterer.håndter(any(), any(), any()) } returns objectMapper.createObjectNode()
         val dokument = runQuery(
             """
             {
                 hentSoknad(
                     dokumentId: "${UUID.randomUUID()}"
-                    fnr: "$FØDSELSNUMMER"
+                    fnr: "$FNR"
                 ) {
                     sykmeldingSkrevet
                 }
@@ -100,14 +105,16 @@ internal class DokumentQueryHandlerTest : AbstractGraphQLApiTest() {
     @Test
     fun `Får 404 dersom man ikke har fått dokumentet`() {
         opprettSaksbehandler()
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
         every { dokumenthåndterer.håndter(any(), any(), any()) } returns objectMapper.createObjectNode().put("error", 404)
         val dokument = runQuery(
             """
             {
                 hentInntektsmelding(
                     dokumentId: "${UUID.randomUUID()}"
-                    fnr: "$FØDSELSNUMMER"
+                    fnr: "$FNR"
                 ) {
                     foersteFravaersdag
                 }
@@ -126,7 +133,9 @@ internal class DokumentQueryHandlerTest : AbstractGraphQLApiTest() {
 
 
         opprettSaksbehandler()
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
         every { dokumenthåndterer.håndter(any(), any(), any()) } returns objectMapper.readTree(
             søknadJsonMedNeiSvar(
                 arbeidGjenopptatt,
@@ -138,7 +147,7 @@ internal class DokumentQueryHandlerTest : AbstractGraphQLApiTest() {
             {
                 hentSoknad(
                     dokumentId: "$dokumentId"
-                    fnr: "$FØDSELSNUMMER"
+                    fnr: "$FNR"
                 ) {
                     type, sykmeldingSkrevet, arbeidGjenopptatt, egenmeldingsdagerFraSykmelding, soknadsperioder {
                     fom, tom, grad, faktiskGrad, sykmeldingsgrad
@@ -160,7 +169,7 @@ internal class DokumentQueryHandlerTest : AbstractGraphQLApiTest() {
 
         verify(exactly = 1) {
             dokumenthåndterer.håndter(
-                fødselsnummer = FØDSELSNUMMER,
+                fødselsnummer = FNR,
                 dokumentId = dokumentId,
                 dokumentType = DokumentType.SØKNAD.name
             )
@@ -189,7 +198,9 @@ internal class DokumentQueryHandlerTest : AbstractGraphQLApiTest() {
         val dokumentId = UUID.randomUUID()
 
         opprettSaksbehandler()
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
         every { dokumenthåndterer.håndter(any(), any(), any()) } returns objectMapper.readTree(
             søknadJsonMedJaSvar()
         )
@@ -198,7 +209,7 @@ internal class DokumentQueryHandlerTest : AbstractGraphQLApiTest() {
             {
                 hentSoknad(
                     dokumentId: "$dokumentId"
-                    fnr: "$FØDSELSNUMMER"
+                    fnr: "$FNR"
                 ) {
                     type, sykmeldingSkrevet, arbeidGjenopptatt, egenmeldingsdagerFraSykmelding, soknadsperioder {
                     fom, tom, grad, faktiskGrad, sykmeldingsgrad
@@ -224,7 +235,7 @@ internal class DokumentQueryHandlerTest : AbstractGraphQLApiTest() {
 
         verify(exactly = 1) {
             dokumenthåndterer.håndter(
-                fødselsnummer = FØDSELSNUMMER,
+                fødselsnummer = FNR,
                 dokumentId = dokumentId,
                 dokumentType = DokumentType.SØKNAD.name
             )
@@ -264,7 +275,9 @@ internal class DokumentQueryHandlerTest : AbstractGraphQLApiTest() {
         val dokumentId = UUID.randomUUID()
 
         opprettSaksbehandler()
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
         every { dokumenthåndterer.håndter(any(), any(), any()) } returns objectMapper.readTree(
             inntektsmeldingJson()
         )
@@ -273,7 +286,7 @@ internal class DokumentQueryHandlerTest : AbstractGraphQLApiTest() {
             {
                 hentInntektsmelding(
                     dokumentId: "$dokumentId"
-                    fnr: "$FØDSELSNUMMER"
+                    fnr: "$FNR"
                 ) {
                     arbeidsforholdId,
                     virksomhetsnummer,
@@ -308,7 +321,7 @@ internal class DokumentQueryHandlerTest : AbstractGraphQLApiTest() {
 
         verify(exactly = 1) {
             dokumenthåndterer.håndter(
-                fødselsnummer = FØDSELSNUMMER,
+                fødselsnummer = FNR,
                 dokumentId = dokumentId,
                 dokumentType = DokumentType.INNTEKTSMELDING.name
             )

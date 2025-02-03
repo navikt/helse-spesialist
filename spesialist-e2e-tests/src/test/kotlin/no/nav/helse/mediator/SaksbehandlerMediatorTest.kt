@@ -113,18 +113,13 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     private val ORGANISASJONSNUMMER = lagOrganisasjonsnummer()
     private val ORGANISASJONSNUMMER_GHOST = lagOrganisasjonsnummer()
 
-    override val SAKSBEHANDLER_OID: UUID = UUID.randomUUID()
-    override val SAKSBEHANDLER_NAVN = "ET_NAVN"
-    override val SAKSBEHANDLER_IDENT = "EN_IDENT"
-    override val SAKSBEHANDLER_EPOST = "epost@nav.no"
-
     private val saksbehandler = saksbehandler()
 
     private fun saksbehandler(
-        oid: UUID = SAKSBEHANDLER_OID,
-        navn: String = SAKSBEHANDLER_NAVN,
-        epost: String = SAKSBEHANDLER_EPOST,
-        ident: String = SAKSBEHANDLER_IDENT,
+        oid: UUID = SAKSBEHANDLER.oid,
+        navn: String = SAKSBEHANDLER.navn,
+        epost: String = SAKSBEHANDLER.epost,
+        ident: String = SAKSBEHANDLER.ident,
         grupper: List<UUID> = emptyList(),
     ): SaksbehandlerFraApi = SaksbehandlerFraApi(oid, navn, epost, ident, grupper)
 
@@ -139,13 +134,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         nyPerson(vedtaksperiodeId = vedtaksperiodeId)
         opprettTotrinnsvurdering(vedtaksperiodeId)
         opprettSaksbehandler()
-        val saksbehandler = SaksbehandlerFraApi(
-            SAKSBEHANDLER_OID,
-            SAKSBEHANDLER_NAVN,
-            SAKSBEHANDLER_EPOST,
-            SAKSBEHANDLER_IDENT,
-            emptyList()
-        )
+        val saksbehandler = saksbehandler(grupper = emptyList())
         val definisjonRef = opprettVarseldefinisjon()
         nyttVarsel(
             vedtaksperiodeId = vedtaksperiodeId,
@@ -176,10 +165,10 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         opprettSaksbehandler()
         opprettVedtaksperiode()
         val saksbehandler = SaksbehandlerFraApi(
-            SAKSBEHANDLER_OID,
-            SAKSBEHANDLER_NAVN,
-            SAKSBEHANDLER_EPOST,
-            SAKSBEHANDLER_IDENT,
+            SAKSBEHANDLER.oid,
+            SAKSBEHANDLER.navn,
+            SAKSBEHANDLER.epost,
+            SAKSBEHANDLER.ident,
             emptyList()
         )
         val overstyring =
@@ -225,10 +214,10 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         opprettSaksbehandler(saksbehandler2Oid)
         opprettTotrinnsvurdering(VEDTAKSPERIODE, saksbehandler2Oid)
         val saksbehandler = SaksbehandlerFraApi(
-            SAKSBEHANDLER_OID,
-            SAKSBEHANDLER_NAVN,
-            SAKSBEHANDLER_EPOST,
-            SAKSBEHANDLER_IDENT,
+            SAKSBEHANDLER.oid,
+            SAKSBEHANDLER.navn,
+            SAKSBEHANDLER.epost,
+            SAKSBEHANDLER.ident,
             emptyList()
         )
         val overstyring =
@@ -268,10 +257,10 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         opprettTotrinnsvurdering(vedtaksperiodeId)
         opprettSaksbehandler()
         val saksbehandler = SaksbehandlerFraApi(
-            SAKSBEHANDLER_OID,
-            SAKSBEHANDLER_NAVN,
-            SAKSBEHANDLER_EPOST,
-            SAKSBEHANDLER_IDENT,
+            SAKSBEHANDLER.oid,
+            SAKSBEHANDLER.navn,
+            SAKSBEHANDLER.epost,
+            SAKSBEHANDLER.ident,
             emptyList()
         )
         val definisjonRef = opprettVarseldefinisjon()
@@ -313,13 +302,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         nyPerson(vedtaksperiodeId = vedtaksperiodeId)
         opprettTotrinnsvurdering(vedtaksperiodeId)
         opprettSaksbehandler()
-        val saksbehandler = SaksbehandlerFraApi(
-            SAKSBEHANDLER_OID,
-            SAKSBEHANDLER_NAVN,
-            SAKSBEHANDLER_EPOST,
-            SAKSBEHANDLER_IDENT,
-            emptyList()
-        )
+        val saksbehandler = saksbehandler(grupper = emptyList())
         val definisjonRef = opprettVarseldefinisjon()
         nyttVarsel(
             vedtaksperiodeId = vedtaksperiodeId,
@@ -344,14 +327,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
 
         opprettTotrinnsvurdering(vedtaksperiodeId)
         opprettSaksbehandler()
-        val saksbehandler = SaksbehandlerFraApi(
-            SAKSBEHANDLER_OID,
-            SAKSBEHANDLER_NAVN,
-            SAKSBEHANDLER_EPOST,
-            SAKSBEHANDLER_IDENT,
-            emptyList()
-        )
-
+        val saksbehandler = saksbehandler(grupper = emptyList())
         val result =
             mediator.håndterTotrinnsvurdering(oppgaveId, saksbehandler, ApiVedtakUtfall.INNVILGELSE, "Begrunnelse")
 
@@ -578,10 +554,10 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         val melding = testRapid.inspektør.message(0)
         assertEquals("annullering", melding["@event_name"].asText())
 
-        assertEquals(SAKSBEHANDLER_OID.toString(), melding["saksbehandler"]["oid"].asText())
-        assertEquals(SAKSBEHANDLER_EPOST, melding["saksbehandler"]["epostaddresse"].asText())
-        assertEquals(SAKSBEHANDLER_NAVN, melding["saksbehandler"]["navn"].asText())
-        assertEquals(SAKSBEHANDLER_IDENT, melding["saksbehandler"]["ident"].asText())
+        assertEquals(SAKSBEHANDLER.oid.toString(), melding["saksbehandler"]["oid"].asText())
+        assertEquals(SAKSBEHANDLER.epost, melding["saksbehandler"]["epostaddresse"].asText())
+        assertEquals(SAKSBEHANDLER.navn, melding["saksbehandler"]["navn"].asText())
+        assertEquals(SAKSBEHANDLER.ident, melding["saksbehandler"]["ident"].asText())
 
         assertEquals(VEDTAKSPERIODE, melding["vedtaksperiodeId"].asUUID())
         assertEquals(UTBETALING_ID, melding["utbetalingId"].asUUID())
@@ -600,10 +576,10 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
 
         assertEquals("annullering", melding["@event_name"].asText())
 
-        assertEquals(SAKSBEHANDLER_OID.toString(), melding["saksbehandler"]["oid"].asText())
-        assertEquals(SAKSBEHANDLER_EPOST, melding["saksbehandler"]["epostaddresse"].asText())
-        assertEquals(SAKSBEHANDLER_NAVN, melding["saksbehandler"]["navn"].asText())
-        assertEquals(SAKSBEHANDLER_IDENT, melding["saksbehandler"]["ident"].asText())
+        assertEquals(SAKSBEHANDLER.oid.toString(), melding["saksbehandler"]["oid"].asText())
+        assertEquals(SAKSBEHANDLER.epost, melding["saksbehandler"]["epostaddresse"].asText())
+        assertEquals(SAKSBEHANDLER.navn, melding["saksbehandler"]["navn"].asText())
+        assertEquals(SAKSBEHANDLER.ident, melding["saksbehandler"]["ident"].asText())
 
         assertEquals(VEDTAKSPERIODE, melding["vedtaksperiodeId"].asUUID())
         assertEquals(UTBETALING_ID, melding["utbetalingId"].asUUID())
@@ -740,10 +716,10 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         assertNotNull(hendelse["@id"].asText())
         assertEquals(FØDSELSNUMMER, hendelse["fødselsnummer"].asText())
         assertEquals(AKTØR_ID, hendelse["aktørId"].asText())
-        assertEquals(SAKSBEHANDLER_OID, hendelse["saksbehandlerOid"].asText().let { UUID.fromString(it) })
-        assertEquals(SAKSBEHANDLER_NAVN, hendelse["saksbehandlerNavn"].asText())
-        assertEquals(SAKSBEHANDLER_IDENT, hendelse["saksbehandlerIdent"].asText())
-        assertEquals(SAKSBEHANDLER_EPOST, hendelse["saksbehandlerEpost"].asText())
+        assertEquals(SAKSBEHANDLER.oid, hendelse["saksbehandlerOid"].asText().let { UUID.fromString(it) })
+        assertEquals(SAKSBEHANDLER.navn, hendelse["saksbehandlerNavn"].asText())
+        assertEquals(SAKSBEHANDLER.ident, hendelse["saksbehandlerIdent"].asText())
+        assertEquals(SAKSBEHANDLER.epost, hendelse["saksbehandlerEpost"].asText())
         assertEquals(1.januar, hendelse["skjæringstidspunkt"].asLocalDate())
 
         val overstyrtArbeidsforhold = hendelse["overstyrteArbeidsforhold"].toList().single()
@@ -814,10 +790,10 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         assertNotNull(hendelse["@id"].asText())
         assertEquals(FØDSELSNUMMER, hendelse["fødselsnummer"].asText())
         assertEquals(AKTØR_ID, hendelse["aktørId"].asText())
-        assertEquals(SAKSBEHANDLER_OID, hendelse["saksbehandlerOid"].asText().let { UUID.fromString(it) })
-        assertEquals(SAKSBEHANDLER_NAVN, hendelse["saksbehandlerNavn"].asText())
-        assertEquals(SAKSBEHANDLER_IDENT, hendelse["saksbehandlerIdent"].asText())
-        assertEquals(SAKSBEHANDLER_EPOST, hendelse["saksbehandlerEpost"].asText())
+        assertEquals(SAKSBEHANDLER.oid, hendelse["saksbehandlerOid"].asText().let { UUID.fromString(it) })
+        assertEquals(SAKSBEHANDLER.navn, hendelse["saksbehandlerNavn"].asText())
+        assertEquals(SAKSBEHANDLER.ident, hendelse["saksbehandlerIdent"].asText())
+        assertEquals(SAKSBEHANDLER.epost, hendelse["saksbehandlerEpost"].asText())
         assertEquals(1.januar, hendelse["skjæringstidspunkt"].asLocalDate())
         hendelse["arbeidsgivere"].first().let {
             assertEquals(ORGANISASJONSNUMMER, it["organisasjonsnummer"].asText())
@@ -888,10 +864,10 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         assertNotNull(hendelse["@id"].asText())
         assertEquals(FØDSELSNUMMER, hendelse["fødselsnummer"].asText())
         assertEquals(AKTØR_ID, hendelse["aktørId"].asText())
-        assertEquals(SAKSBEHANDLER_OID, hendelse["saksbehandlerOid"].asText().let { UUID.fromString(it) })
-        assertEquals(SAKSBEHANDLER_NAVN, hendelse["saksbehandlerNavn"].asText())
-        assertEquals(SAKSBEHANDLER_IDENT, hendelse["saksbehandlerIdent"].asText())
-        assertEquals(SAKSBEHANDLER_EPOST, hendelse["saksbehandlerEpost"].asText())
+        assertEquals(SAKSBEHANDLER.oid, hendelse["saksbehandlerOid"].asText().let { UUID.fromString(it) })
+        assertEquals(SAKSBEHANDLER.navn, hendelse["saksbehandlerNavn"].asText())
+        assertEquals(SAKSBEHANDLER.ident, hendelse["saksbehandlerIdent"].asText())
+        assertEquals(SAKSBEHANDLER.epost, hendelse["saksbehandlerEpost"].asText())
         assertEquals(1.januar, hendelse["skjæringstidspunkt"].asLocalDate())
         hendelse["arbeidsgivere"].first().let {
             assertEquals(ORGANISASJONSNUMMER, it["organisasjonsnummer"].asText())
@@ -953,10 +929,10 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         assertNotNull(hendelse["@id"].asText())
         assertEquals(FØDSELSNUMMER, hendelse["fødselsnummer"].asText())
         assertEquals(AKTØR_ID, hendelse["aktørId"].asText())
-        assertEquals(SAKSBEHANDLER_OID, hendelse["saksbehandlerOid"].asText().let { UUID.fromString(it) })
-        assertEquals(SAKSBEHANDLER_NAVN, hendelse["saksbehandlerNavn"].asText())
-        assertEquals(SAKSBEHANDLER_IDENT, hendelse["saksbehandlerIdent"].asText())
-        assertEquals(SAKSBEHANDLER_EPOST, hendelse["saksbehandlerEpost"].asText())
+        assertEquals(SAKSBEHANDLER.oid, hendelse["saksbehandlerOid"].asText().let { UUID.fromString(it) })
+        assertEquals(SAKSBEHANDLER.navn, hendelse["saksbehandlerNavn"].asText())
+        assertEquals(SAKSBEHANDLER.ident, hendelse["saksbehandlerIdent"].asText())
+        assertEquals(SAKSBEHANDLER.epost, hendelse["saksbehandlerEpost"].asText())
         hendelse["perioderMedMinimumSykdomsgradVurdertOk"].first().let {
             assertEquals(1.januar, it["fom"].asLocalDate())
             assertEquals(15.januar, it["tom"].asLocalDate())
@@ -997,7 +973,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     private fun godkjenning(
         oppgavereferanse: Long,
         godkjent: Boolean,
-        ident: String = SAKSBEHANDLER_IDENT,
+        ident: String = SAKSBEHANDLER.ident,
         avslag: Avslag? = null,
     ) = GodkjenningDto(
         oppgavereferanse = oppgavereferanse,
