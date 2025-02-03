@@ -28,8 +28,9 @@ import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.graphql.query.FetchPersonResult
 import no.nav.helse.spesialist.api.graphql.query.PersonoppslagService
+import no.nav.helse.spesialist.api.graphql.resolvers.ApiPersonResolver
+import no.nav.helse.spesialist.api.graphql.schema.ApiPerson
 import no.nav.helse.spesialist.api.graphql.schema.ApiPersoninfo
-import no.nav.helse.spesialist.api.graphql.schema.Person
 import no.nav.helse.spesialist.api.graphql.schema.Reservasjon
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import no.nav.helse.spesialist.api.saksbehandler.manglerTilgang
@@ -115,28 +116,32 @@ class PersonService(
     ): FetchPersonResult.Ok {
         val (personinfo, personSnapshot) = snapshot
         return FetchPersonResult.Ok(
-            Person(
-                snapshot = personSnapshot,
-                personinfo =
-                    personinfo.copy(
-                        reservasjon = reservasjon.await(),
-                        unntattFraAutomatisering = stansAutomatiskBehandlinghåndterer.unntattFraAutomatiskGodkjenning(fødselsnummer),
-                        fullmakt = vergemålApiDao.harFullmakt(fødselsnummer),
+            ApiPerson(
+                resolver =
+                    ApiPersonResolver(
+                        snapshot = personSnapshot,
+                        personinfo =
+                            personinfo.copy(
+                                reservasjon = reservasjon.await(),
+                                unntattFraAutomatisering =
+                                    stansAutomatiskBehandlinghåndterer.unntattFraAutomatiskGodkjenning(fødselsnummer),
+                                fullmakt = vergemålApiDao.harFullmakt(fødselsnummer),
+                            ),
+                        personApiDao = personApiDao,
+                        tildelingApiDao = tildelingApiDao,
+                        arbeidsgiverApiDao = arbeidsgiverApiDao,
+                        overstyringApiDao = overstyringApiDao,
+                        risikovurderinger = risikovurderingApiDao.finnRisikovurderinger(fødselsnummer),
+                        varselRepository = varselRepository,
+                        oppgaveApiDao = oppgaveApiDao,
+                        periodehistorikkApiDao = periodehistorikkApiDao,
+                        notatDao = notatDao,
+                        totrinnsvurderingApiDao = totrinnsvurderingApiDao,
+                        påVentApiDao = påVentApiDao,
+                        avviksvurderinghenter = avviksvurderinghenter,
+                        apiOppgaveService = apiOppgaveService,
+                        saksbehandlerhåndterer = saksbehandlerhåndterer,
                     ),
-                personApiDao = personApiDao,
-                tildelingApiDao = tildelingApiDao,
-                arbeidsgiverApiDao = arbeidsgiverApiDao,
-                overstyringApiDao = overstyringApiDao,
-                risikovurderinger = risikovurderingApiDao.finnRisikovurderinger(fødselsnummer),
-                varselRepository = varselRepository,
-                oppgaveApiDao = oppgaveApiDao,
-                periodehistorikkApiDao = periodehistorikkApiDao,
-                notatDao = notatDao,
-                totrinnsvurderingApiDao = totrinnsvurderingApiDao,
-                påVentApiDao = påVentApiDao,
-                avviksvurderinghenter = avviksvurderinghenter,
-                apiOppgaveService = apiOppgaveService,
-                saksbehandlerhåndterer = saksbehandlerhåndterer,
             ),
         )
     }

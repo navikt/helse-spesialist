@@ -14,7 +14,7 @@ import no.nav.helse.spesialist.api.graphql.forbiddenError
 import no.nav.helse.spesialist.api.graphql.notFoundError
 import no.nav.helse.spesialist.api.graphql.personNotReadyError
 import no.nav.helse.spesialist.api.graphql.query.Inputvalidering.UgyldigInput
-import no.nav.helse.spesialist.api.graphql.schema.Person
+import no.nav.helse.spesialist.api.graphql.schema.ApiPerson
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -47,7 +47,7 @@ interface PersonoppslagService {
 }
 
 sealed interface FetchPersonResult {
-    class Ok(val person: Person) : FetchPersonResult
+    class Ok(val person: ApiPerson) : FetchPersonResult
 
     sealed interface Feil : FetchPersonResult {
         class IkkeKlarTilVisning(val aktørId: String) : Feil
@@ -74,7 +74,7 @@ class PersonQuery(
         fnr: String? = null,
         aktorId: String? = null,
         env: DataFetchingEnvironment,
-    ): DataFetcherResult<Person?> {
+    ): DataFetcherResult<ApiPerson?> {
         val fødselsnummer =
             when (val validering = validerInput(fnr, aktorId)) {
                 is Inputvalidering.Ok -> validering.fødselsnummer
@@ -95,7 +95,7 @@ class PersonQuery(
 
             is FetchPersonResult.Ok -> {
                 auditLog(env.graphQlContext, fødselsnummer, true, null)
-                DataFetcherResult.newResult<Person?>().data(result.person).build()
+                DataFetcherResult.newResult<ApiPerson?>().data(result.person).build()
             }
         }
     }
@@ -125,7 +125,7 @@ class PersonQuery(
         }
     }
 
-    private fun FetchPersonResult.Feil.tilGraphqlError(fødselsnummer: String): DataFetcherResult<Person?> {
+    private fun FetchPersonResult.Feil.tilGraphqlError(fødselsnummer: String): DataFetcherResult<ApiPerson?> {
         val graphqlError =
             when (this) {
                 is FetchPersonResult.Feil.IkkeFunnet -> notFoundError(fødselsnummer)
@@ -175,7 +175,10 @@ class PersonQuery(
         return Inputvalidering.Ok(fødselsnumre.single())
     }
 
-    private fun GraphQLError.tilGraphqlResult(): DataFetcherResult<Person?> = DataFetcherResult.newResult<Person?>().error(this).build()
+    private fun GraphQLError.tilGraphqlResult(): DataFetcherResult<ApiPerson?> =
+        DataFetcherResult.newResult<ApiPerson?>().error(
+            this,
+        ).build()
 
     private fun loggNotFoundForAktørId(
         aktorId: String,

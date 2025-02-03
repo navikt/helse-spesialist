@@ -1,6 +1,5 @@
-package no.nav.helse.spesialist.api.graphql.schema
+package no.nav.helse.spesialist.api.graphql.resolvers
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.db.api.ArbeidsgiverApiDao
 import no.nav.helse.db.api.NotatApiDao
@@ -15,9 +14,25 @@ import no.nav.helse.db.api.VarselApiRepository
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.spesialist.api.Avviksvurderinghenter
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
-import no.nav.helse.spesialist.api.graphql.mutation.Avslagstype
-import no.nav.helse.spesialist.api.graphql.mutation.VedtakUtfall
-import no.nav.helse.spesialist.api.graphql.resolvers.ApiArbeidsgiverResolver
+import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdoverstyring
+import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsgiver
+import no.nav.helse.spesialist.api.graphql.schema.ApiDagoverstyring
+import no.nav.helse.spesialist.api.graphql.schema.ApiDagtype
+import no.nav.helse.spesialist.api.graphql.schema.ApiGhostPeriode
+import no.nav.helse.spesialist.api.graphql.schema.ApiInntektoverstyring
+import no.nav.helse.spesialist.api.graphql.schema.ApiMinimumSykdomsgradOverstyring
+import no.nav.helse.spesialist.api.graphql.schema.ApiNyttInntektsforholdPeriode
+import no.nav.helse.spesialist.api.graphql.schema.ApiPersoninfo
+import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettingstype
+import no.nav.helse.spesialist.api.graphql.schema.ApiSykepengegrunnlagskjonnsfastsetting
+import no.nav.helse.spesialist.api.graphql.schema.ApiTilleggsinfoForInntektskilde
+import no.nav.helse.spesialist.api.graphql.schema.ApiVilkårsgrunnlag
+import no.nav.helse.spesialist.api.graphql.schema.Enhet
+import no.nav.helse.spesialist.api.graphql.schema.Infotrygdutbetaling
+import no.nav.helse.spesialist.api.graphql.schema.PersonSchema
+import no.nav.helse.spesialist.api.graphql.schema.Saksbehandler
+import no.nav.helse.spesialist.api.graphql.schema.Tildeling
+import no.nav.helse.spesialist.api.graphql.schema.tilVilkarsgrunnlag
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.OverstyringArbeidsforholdDto
@@ -31,76 +46,9 @@ import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLGhostPeriode
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLNyttInntektsforholdPeriode
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.UUID
 
-data class Infotrygdutbetaling(
-    val fom: String,
-    val tom: String,
-    val grad: String,
-    val dagsats: Double,
-    val typetekst: String,
-    val organisasjonsnummer: String,
-)
-
-data class Saksbehandler(
-    val navn: String,
-    val ident: String?,
-)
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class Reservasjon(
-    val kanVarsles: Boolean,
-    val reservert: Boolean,
-)
-
-data class UnntattFraAutomatiskGodkjenning(
-    val erUnntatt: Boolean,
-    val arsaker: List<String>,
-    val tidspunkt: LocalDateTime?,
-)
-
-data class Enhet(
-    val id: String,
-    val navn: String,
-)
-
-data class Tildeling(
-    val navn: String,
-    val epost: String,
-    val oid: UUID,
-)
-
-data class PaVent(
-    val frist: LocalDate?,
-    val oid: UUID,
-)
-
-data class Avslag(
-    val type: Avslagstype,
-    val begrunnelse: String,
-    val opprettet: LocalDateTime,
-    val saksbehandlerIdent: String,
-    val invalidert: Boolean,
-)
-
-data class VedtakBegrunnelse(
-    val utfall: VedtakUtfall,
-    val begrunnelse: String?,
-    val opprettet: LocalDateTime,
-    val saksbehandlerIdent: String,
-)
-
-data class Annullering(
-    val saksbehandlerIdent: String,
-    val arbeidsgiverFagsystemId: String?,
-    val personFagsystemId: String?,
-    val tidspunkt: LocalDateTime,
-    val arsaker: List<String>,
-    val begrunnelse: String?,
-)
-
-data class Person(
+data class ApiPersonResolver(
     private val snapshot: GraphQLPerson,
     private val personinfo: ApiPersoninfo,
     private val personApiDao: PersonApiDao,
@@ -117,20 +65,20 @@ data class Person(
     private val avviksvurderinghenter: Avviksvurderinghenter,
     private val apiOppgaveService: ApiOppgaveService,
     private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
-) {
-    fun versjon(): Int = snapshot.versjon
+) : PersonSchema {
+    override fun versjon(): Int = snapshot.versjon
 
-    fun aktorId(): String = snapshot.aktorId
+    override fun aktorId(): String = snapshot.aktorId
 
-    fun fodselsnummer(): String = snapshot.fodselsnummer
+    override fun fodselsnummer(): String = snapshot.fodselsnummer
 
-    fun dodsdato(): LocalDate? = snapshot.dodsdato
+    override fun dodsdato(): LocalDate? = snapshot.dodsdato
 
-    fun personinfo(): ApiPersoninfo = personinfo
+    override fun personinfo(): ApiPersoninfo = personinfo
 
-    fun enhet(): Enhet = personApiDao.finnEnhet(snapshot.fodselsnummer).let { Enhet(it.id, it.navn) }
+    override fun enhet(): Enhet = personApiDao.finnEnhet(snapshot.fodselsnummer).let { Enhet(it.id, it.navn) }
 
-    fun tildeling(): Tildeling? =
+    override fun tildeling(): Tildeling? =
         tildelingApiDao.tildelingForPerson(snapshot.fodselsnummer)?.let {
             Tildeling(
                 navn = it.navn,
@@ -140,7 +88,7 @@ data class Person(
         }
 
     @Suppress("unused")
-    fun tilleggsinfoForInntektskilder(): List<ApiTilleggsinfoForInntektskilde> {
+    override fun tilleggsinfoForInntektskilder(): List<ApiTilleggsinfoForInntektskilde> {
         return snapshot.vilkarsgrunnlag.flatMap { vilkårsgrunnlag ->
             val avviksvurdering = avviksvurderinghenter.hentAvviksvurdering(vilkårsgrunnlag.id)
             (
@@ -156,7 +104,7 @@ data class Person(
         }
     }
 
-    fun arbeidsgivere(): List<ApiArbeidsgiver> {
+    override fun arbeidsgivere(): List<ApiArbeidsgiver> {
         val overstyringer = overstyringApiDao.finnOverstyringer(snapshot.fodselsnummer)
 
         return snapshot.arbeidsgivere.map { arbeidsgiver ->
@@ -198,12 +146,12 @@ data class Person(
     }
 
     @Suppress("unused")
-    fun infotrygdutbetalinger(): List<Infotrygdutbetaling>? =
+    override fun infotrygdutbetalinger(): List<Infotrygdutbetaling>? =
         personApiDao
             .finnInfotrygdutbetalinger(snapshot.fodselsnummer)
             ?.let { objectMapper.readValue(it) }
 
-    fun vilkarsgrunnlag(): List<ApiVilkårsgrunnlag> = snapshot.vilkarsgrunnlag.map { it.tilVilkarsgrunnlag(avviksvurderinghenter) }
+    override fun vilkarsgrunnlag(): List<ApiVilkårsgrunnlag> = snapshot.vilkarsgrunnlag.map { it.tilVilkarsgrunnlag(avviksvurderinghenter) }
 
     private fun List<GraphQLGhostPeriode>.tilGhostPerioder(organisasjonsnummer: String): List<ApiGhostPeriode> =
         map {

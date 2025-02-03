@@ -18,7 +18,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiInntektoverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiLovhjemmel
 import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringDag
-import no.nav.helse.spesialist.api.graphql.schema.Person
+import no.nav.helse.spesialist.api.graphql.schema.ApiPerson
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.Invalidert
 import no.nav.helse.spesialist.api.person.PersonService
@@ -199,7 +199,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
 
         mockSnapshot()
 
-        val snapshot: Person = runBlocking { personQuery.person(FØDSELSNUMMER, null, dataFetchingEnvironment).data!! }
+        val snapshot: ApiPerson = runBlocking { personQuery.person(FØDSELSNUMMER, null, dataFetchingEnvironment).data!! }
 
         assertNotNull(snapshot)
         val overstyringer = snapshot.arbeidsgivere().first().overstyringer()
