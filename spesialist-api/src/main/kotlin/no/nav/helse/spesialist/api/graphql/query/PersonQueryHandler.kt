@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.graphql.query
 
-import com.expediagroup.graphql.server.operations.Query
 import graphql.GraphQLContext
 import graphql.GraphQLError
 import graphql.GraphqlErrorException
@@ -60,9 +59,9 @@ sealed interface FetchPersonResult {
     }
 }
 
-class PersonQuery(
+class PersonQueryHandler(
     private val personoppslagService: PersonoppslagService,
-) : Query {
+) : PersonQuerySchema {
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
     private val auditLog = LoggerFactory.getLogger("auditLogger")
 
@@ -70,9 +69,9 @@ class PersonQuery(
         private const val GYLDIG_AKTØRID_LENDGE = 13
     }
 
-    suspend fun person(
-        fnr: String? = null,
-        aktorId: String? = null,
+    override suspend fun person(
+        fnr: String?,
+        aktorId: String?,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<ApiPerson?> {
         val fødselsnummer =

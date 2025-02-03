@@ -45,6 +45,7 @@ import no.nav.helse.spesialist.api.graphql.query.OppgaverQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.OpptegnelseQuery
 import no.nav.helse.spesialist.api.graphql.query.OpptegnelseQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.PersonQuery
+import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.api.person.PersonService
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
@@ -79,29 +80,32 @@ class SchemaBuilder(
     val queries =
         listOf(
             PersonQuery(
-                personoppslagService =
-                    PersonService(
-                        personApiDao = personApiDao,
-                        egenAnsattApiDao = egenAnsattApiDao,
-                        tildelingApiDao = tildelingApiDao,
-                        arbeidsgiverApiDao = arbeidsgiverApiDao,
-                        overstyringApiDao = overstyringApiDao,
-                        risikovurderingApiDao = risikovurderingApiDao,
-                        varselRepository = varselRepository,
-                        oppgaveApiDao = oppgaveApiDao,
-                        periodehistorikkApiDao = periodehistorikkApiDao,
-                        notatDao = notatDao,
-                        totrinnsvurderingApiDao = totrinnsvurderingApiDao,
-                        påVentApiDao = påVentApiDao,
-                        vergemålApiDao = vergemålApiDao,
-                        snapshotService = snapshotService,
-                        reservasjonClient = reservasjonClient,
-                        apiOppgaveService = apiOppgaveService,
-                        saksbehandlerhåndterer = saksbehandlerhåndterer,
-                        avviksvurderinghenter = avviksvurderinghenter,
-                        personhåndterer = personhåndterer,
-                        stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
-                        env = env,
+                handler =
+                    PersonQueryHandler(
+                        personoppslagService =
+                            PersonService(
+                                personApiDao = personApiDao,
+                                egenAnsattApiDao = egenAnsattApiDao,
+                                tildelingApiDao = tildelingApiDao,
+                                arbeidsgiverApiDao = arbeidsgiverApiDao,
+                                overstyringApiDao = overstyringApiDao,
+                                risikovurderingApiDao = risikovurderingApiDao,
+                                varselRepository = varselRepository,
+                                oppgaveApiDao = oppgaveApiDao,
+                                periodehistorikkApiDao = periodehistorikkApiDao,
+                                notatDao = notatDao,
+                                totrinnsvurderingApiDao = totrinnsvurderingApiDao,
+                                påVentApiDao = påVentApiDao,
+                                vergemålApiDao = vergemålApiDao,
+                                snapshotService = snapshotService,
+                                reservasjonClient = reservasjonClient,
+                                apiOppgaveService = apiOppgaveService,
+                                saksbehandlerhåndterer = saksbehandlerhåndterer,
+                                avviksvurderinghenter = avviksvurderinghenter,
+                                personhåndterer = personhåndterer,
+                                stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
+                                env = env,
+                            ),
                     ),
             ),
             OppgaverQuery(

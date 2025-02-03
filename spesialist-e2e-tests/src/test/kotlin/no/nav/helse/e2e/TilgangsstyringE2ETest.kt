@@ -11,6 +11,7 @@ import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGER
 import no.nav.helse.spesialist.api.graphql.query.PersonQuery
+import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.api.person.PersonService
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
@@ -157,31 +158,33 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
 
     private val personQuery =
         PersonQuery(
-            personoppslagService = PersonService(
-                personApiDao = repositories.personApiDao,
-                egenAnsattApiDao = repositories.egenAnsattApiDao,
-                tildelingApiDao = repositories.tildelingApiDao,
-                arbeidsgiverApiDao = repositories.arbeidsgiverApiDao,
-                overstyringApiDao = repositories.overstyringApiDao,
-                risikovurderingApiDao = repositories.risikovurderingApiDao,
-                varselRepository = repositories.varselApiRepository,
-                oppgaveApiDao = repositories.oppgaveApiDao,
-                periodehistorikkApiDao = repositories.periodehistorikkApiDao,
-                notatDao = repositories.notatApiDao,
-                totrinnsvurderingApiDao = repositories.totrinnsvurderingApiDao,
-                påVentApiDao = repositories.påVentApiDao,
-                vergemålApiDao = repositories.vergemålApiDao,
-                snapshotService = SnapshotService(repositories.snapshotApiDao, snapshotClient),
-                reservasjonClient = mockk(relaxed = true),
-                apiOppgaveService = mockk(relaxed = true),
-                saksbehandlerhåndterer = mockk(relaxed = true),
-                avviksvurderinghenter = mockk(relaxed = true),
-                personhåndterer = object : Personhåndterer {
-                    override fun oppdaterSnapshot(fødselsnummer: String) {}
-                    override fun klargjørPersonForVisning(fødselsnummer: String) {}
-                },
-                stansAutomatiskBehandlinghåndterer = mockk(relaxed = true),
-                env = environment,
+            handler = PersonQueryHandler(
+                personoppslagService = PersonService(
+                    personApiDao = repositories.personApiDao,
+                    egenAnsattApiDao = repositories.egenAnsattApiDao,
+                    tildelingApiDao = repositories.tildelingApiDao,
+                    arbeidsgiverApiDao = repositories.arbeidsgiverApiDao,
+                    overstyringApiDao = repositories.overstyringApiDao,
+                    risikovurderingApiDao = repositories.risikovurderingApiDao,
+                    varselRepository = repositories.varselApiRepository,
+                    oppgaveApiDao = repositories.oppgaveApiDao,
+                    periodehistorikkApiDao = repositories.periodehistorikkApiDao,
+                    notatDao = repositories.notatApiDao,
+                    totrinnsvurderingApiDao = repositories.totrinnsvurderingApiDao,
+                    påVentApiDao = repositories.påVentApiDao,
+                    vergemålApiDao = repositories.vergemålApiDao,
+                    snapshotService = SnapshotService(repositories.snapshotApiDao, snapshotClient),
+                    reservasjonClient = mockk(relaxed = true),
+                    apiOppgaveService = mockk(relaxed = true),
+                    saksbehandlerhåndterer = mockk(relaxed = true),
+                    avviksvurderinghenter = mockk(relaxed = true),
+                    personhåndterer = object : Personhåndterer {
+                        override fun oppdaterSnapshot(fødselsnummer: String) {}
+                        override fun klargjørPersonForVisning(fødselsnummer: String) {}
+                    },
+                    stansAutomatiskBehandlinghåndterer = mockk(relaxed = true),
+                    env = environment,
+                ),
             ),
         )
 
