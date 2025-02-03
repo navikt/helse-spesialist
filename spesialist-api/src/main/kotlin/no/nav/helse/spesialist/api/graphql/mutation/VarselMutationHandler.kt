@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.graphql.mutation
 
-import com.expediagroup.graphql.server.operations.Mutation
 import graphql.GraphQLError
 import graphql.GraphqlErrorException.newErrorException
 import graphql.execution.DataFetcherResult
@@ -13,17 +12,16 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiVarselDTO
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-class VarselMutation(private val varselRepository: VarselApiRepository) : Mutation {
+class VarselMutationHandler(private val varselRepository: VarselApiRepository) : VarselMutationSchema {
     private companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
 
-    @Suppress("unused")
-    suspend fun settVarselstatus(
+    override suspend fun settVarselstatus(
         generasjonIdString: String,
         varselkode: String,
         ident: String,
-        definisjonIdString: String? = null,
+        definisjonIdString: String?,
     ): DataFetcherResult<ApiVarselDTO?> =
         withContext(Dispatchers.IO) {
             val generasjonId = UUID.fromString(generasjonIdString)
