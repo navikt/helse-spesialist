@@ -3,8 +3,6 @@ package no.nav.helse.spesialist.api.graphql.schema
 import com.expediagroup.graphql.generator.annotations.GraphQLIgnore
 import com.expediagroup.graphql.generator.annotations.GraphQLName
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import no.nav.helse.spesialist.api.graphql.mutation.Avslagstype
-import no.nav.helse.spesialist.api.graphql.mutation.VedtakUtfall
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -60,7 +58,7 @@ data class ApiPaVent(
 
 @GraphQLName("Avslag")
 data class ApiAvslag(
-    val type: Avslagstype,
+    val type: ApiAvslagstype,
     val begrunnelse: String,
     val opprettet: LocalDateTime,
     val saksbehandlerIdent: String,
@@ -69,7 +67,7 @@ data class ApiAvslag(
 
 @GraphQLName("VedtakBegrunnelse")
 data class ApiVedtakBegrunnelse(
-    val utfall: VedtakUtfall,
+    val utfall: ApiVedtakUtfall,
     val begrunnelse: String?,
     val opprettet: LocalDateTime,
     val saksbehandlerIdent: String,

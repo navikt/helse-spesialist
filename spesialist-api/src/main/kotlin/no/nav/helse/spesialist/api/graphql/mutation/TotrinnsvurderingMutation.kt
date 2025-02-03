@@ -14,6 +14,7 @@ import no.nav.helse.spesialist.api.SendTilGodkjenningResult
 import no.nav.helse.spesialist.api.Totrinnsvurderinghåndterer
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.schema.ApiPaVentRequest
+import no.nav.helse.spesialist.api.graphql.schema.ApiVedtakUtfall
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import org.slf4j.LoggerFactory
 
@@ -30,7 +31,7 @@ class TotrinnsvurderingMutation(
     @Suppress("unused")
     suspend fun sendTilGodkjenningV2(
         oppgavereferanse: String,
-        vedtakUtfall: VedtakUtfall,
+        vedtakUtfall: ApiVedtakUtfall,
         vedtakBegrunnelse: String? = null,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> =

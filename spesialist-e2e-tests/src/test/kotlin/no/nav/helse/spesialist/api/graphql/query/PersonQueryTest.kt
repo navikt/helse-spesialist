@@ -17,8 +17,8 @@ import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettSnapshotArbeid
 import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettSnapshotGenerasjon
 import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettSnapshotHendelse
 import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettUberegnetPeriode
-import no.nav.helse.spesialist.api.graphql.mutation.Avslagstype
 import no.nav.helse.spesialist.api.graphql.schema.ApiAvslag
+import no.nav.helse.spesialist.api.graphql.schema.ApiAvslagstype
 import no.nav.helse.spesialist.api.graphql.schema.Handling
 import no.nav.helse.spesialist.api.graphql.schema.Periodehandling
 import no.nav.helse.spesialist.api.januar
@@ -357,7 +357,7 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
         } returns
             setOf(
                 ApiAvslag(
-                    type = Avslagstype.AVSLAG,
+                    type = ApiAvslagstype.AVSLAG,
                     begrunnelse = avslagsbegrunnelse,
                     opprettet = LocalDateTime.now(),
                     saksbehandlerIdent = "AIDENT",
@@ -378,7 +378,7 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
 
         val avslag = body["data"]["person"]["arbeidsgivere"].first()["generasjoner"].first()["perioder"].first()["avslag"].first()
         assertNotNull(avslag)
-        assertEquals(Avslagstype.AVSLAG, enumValueOf<Avslagstype>(avslag["type"].textValue()))
+        assertEquals(ApiAvslagstype.AVSLAG, enumValueOf<ApiAvslagstype>(avslag["type"].textValue()))
         assertEquals(avslagsbegrunnelse, avslag["begrunnelse"].textValue())
         assertEquals("AIDENT", avslag["saksbehandlerIdent"].textValue())
         assertFalse(avslag["invalidert"].booleanValue())

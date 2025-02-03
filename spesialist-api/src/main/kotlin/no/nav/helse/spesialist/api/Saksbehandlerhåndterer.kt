@@ -3,11 +3,11 @@ package no.nav.helse.spesialist.api
 import no.nav.helse.modell.Annullering
 import no.nav.helse.spesialist.api.feilhåndtering.Modellfeil
 import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutation
-import no.nav.helse.spesialist.api.graphql.mutation.VedtakUtfall
 import no.nav.helse.spesialist.api.graphql.schema.ApiAvslag
 import no.nav.helse.spesialist.api.graphql.schema.ApiOpptegnelse
 import no.nav.helse.spesialist.api.graphql.schema.ApiPaVentRequest
 import no.nav.helse.spesialist.api.graphql.schema.ApiVedtakBegrunnelse
+import no.nav.helse.spesialist.api.graphql.schema.ApiVedtakUtfall
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
@@ -47,7 +47,7 @@ interface Saksbehandlerhåndterer {
         saksbehandlerFraApi: SaksbehandlerFraApi,
         oppgavereferanse: Long,
         godkjent: Boolean,
-        utfall: VedtakUtfall,
+        utfall: ApiVedtakUtfall,
         begrunnelse: String?,
     ): VedtakMutation.VedtakResultat
 
@@ -89,7 +89,7 @@ interface Saksbehandlerhåndterer {
     fun håndterTotrinnsvurdering(
         oppgavereferanse: Long,
         saksbehandlerFraApi: SaksbehandlerFraApi,
-        utfall: VedtakUtfall,
+        utfall: ApiVedtakUtfall,
         begrunnelse: String?,
     ): SendTilGodkjenningResult
 
@@ -112,7 +112,7 @@ interface Saksbehandlerhåndterer {
     fun håndterVedtakBegrunnelse(
         oppgaveId: Long,
         saksbehandlerFraApi: SaksbehandlerFraApi,
-        utfall: VedtakUtfall,
+        utfall: ApiVedtakUtfall,
         begrunnelse: String?,
     )
 

@@ -66,12 +66,11 @@ import no.nav.helse.spesialist.api.feilhåndtering.IkkeTilgang
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagshandling
-import no.nav.helse.spesialist.api.graphql.mutation.Avslagstype
 import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutation.VedtakResultat
-import no.nav.helse.spesialist.api.graphql.mutation.VedtakUtfall
 import no.nav.helse.spesialist.api.graphql.schema.ApiAnnulleringData
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdOverstyringHandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiAvslag
+import no.nav.helse.spesialist.api.graphql.schema.ApiAvslagstype
 import no.nav.helse.spesialist.api.graphql.schema.ApiInntektOgRefusjonOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiMinimumSykdomsgrad
 import no.nav.helse.spesialist.api.graphql.schema.ApiOpptegnelse
@@ -83,6 +82,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse.ApiSkjo
 import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse.ApiSkjonnsfastsettelseArbeidsgiver.ApiSkjonnsfastsettelseType.RAPPORTERT_ARSINNTEKT
 import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiVedtakBegrunnelse
+import no.nav.helse.spesialist.api.graphql.schema.ApiVedtakUtfall
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
@@ -170,7 +170,7 @@ class SaksbehandlerMediator(
         saksbehandlerFraApi: SaksbehandlerFraApi,
         oppgavereferanse: Long,
         godkjent: Boolean,
-        utfall: VedtakUtfall,
+        utfall: ApiVedtakUtfall,
         begrunnelse: String?,
     ): VedtakResultat {
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
@@ -452,8 +452,8 @@ class SaksbehandlerMediator(
         vedtakBegrunnelseDao.finnAlleVedtakBegrunnelser(vedtaksperiodeId, utbetalingId)
             .mapNotNull { vedtakBegrunnelse ->
                 when (vedtakBegrunnelse.type) {
-                    VedtakBegrunnelseTypeFraDatabase.AVSLAG -> Avslagstype.AVSLAG
-                    VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE -> Avslagstype.DELVIS_AVSLAG
+                    VedtakBegrunnelseTypeFraDatabase.AVSLAG -> ApiAvslagstype.AVSLAG
+                    VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE -> ApiAvslagstype.DELVIS_AVSLAG
                     VedtakBegrunnelseTypeFraDatabase.INNVILGELSE -> null
                 }?.let { type ->
                     ApiAvslag(
@@ -475,9 +475,9 @@ class SaksbehandlerMediator(
                 ApiVedtakBegrunnelse(
                     utfall =
                         when (vedtakBegrunnelse.type) {
-                            VedtakBegrunnelseTypeFraDatabase.AVSLAG -> VedtakUtfall.AVSLAG
-                            VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE -> VedtakUtfall.DELVIS_INNVILGELSE
-                            VedtakBegrunnelseTypeFraDatabase.INNVILGELSE -> VedtakUtfall.INNVILGELSE
+                            VedtakBegrunnelseTypeFraDatabase.AVSLAG -> ApiVedtakUtfall.AVSLAG
+                            VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE -> ApiVedtakUtfall.DELVIS_INNVILGELSE
+                            VedtakBegrunnelseTypeFraDatabase.INNVILGELSE -> ApiVedtakUtfall.INNVILGELSE
                         },
                     begrunnelse = vedtakBegrunnelse.begrunnelse,
                     opprettet = vedtakBegrunnelse.opprettet,
@@ -500,7 +500,7 @@ class SaksbehandlerMediator(
     override fun håndterVedtakBegrunnelse(
         oppgaveId: Long,
         saksbehandlerFraApi: SaksbehandlerFraApi,
-        utfall: VedtakUtfall,
+        utfall: ApiVedtakUtfall,
         begrunnelse: String?,
     ) {
         håndterVedtakBegrunnelse(
@@ -531,7 +531,7 @@ class SaksbehandlerMediator(
     }
 
     private fun håndterVedtakBegrunnelse(
-        utfall: VedtakUtfall,
+        utfall: ApiVedtakUtfall,
         begrunnelse: String?,
         oppgaveId: Long,
         saksbehandlerOid: UUID,
@@ -600,7 +600,7 @@ class SaksbehandlerMediator(
     override fun håndterTotrinnsvurdering(
         oppgavereferanse: Long,
         saksbehandlerFraApi: SaksbehandlerFraApi,
-        utfall: VedtakUtfall,
+        utfall: ApiVedtakUtfall,
         begrunnelse: String?,
     ): SendTilGodkjenningResult {
         try {
@@ -944,17 +944,17 @@ class SaksbehandlerMediator(
         no.nav.helse.modell.saksbehandler.handlinger
             .OpphevStans(this.fødselsnummer, this.begrunnelse)
 
-    private fun Avslagstype.toVedtakBegrunnelseTypeFraDatabase() =
+    private fun ApiAvslagstype.toVedtakBegrunnelseTypeFraDatabase() =
         when (this) {
-            Avslagstype.AVSLAG -> VedtakBegrunnelseTypeFraDatabase.AVSLAG
-            Avslagstype.DELVIS_AVSLAG -> VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE
+            ApiAvslagstype.AVSLAG -> VedtakBegrunnelseTypeFraDatabase.AVSLAG
+            ApiAvslagstype.DELVIS_AVSLAG -> VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE
         }
 
-    private fun VedtakUtfall.toDatabaseType() =
+    private fun ApiVedtakUtfall.toDatabaseType() =
         when (this) {
-            VedtakUtfall.AVSLAG -> VedtakBegrunnelseTypeFraDatabase.AVSLAG
-            VedtakUtfall.DELVIS_INNVILGELSE -> VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE
-            VedtakUtfall.INNVILGELSE -> VedtakBegrunnelseTypeFraDatabase.INNVILGELSE
+            ApiVedtakUtfall.AVSLAG -> VedtakBegrunnelseTypeFraDatabase.AVSLAG
+            ApiVedtakUtfall.DELVIS_INNVILGELSE -> VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE
+            ApiVedtakUtfall.INNVILGELSE -> VedtakBegrunnelseTypeFraDatabase.INNVILGELSE
         }
 
     private fun SaksbehandlerFraApi.toDto(): SaksbehandlerDto =

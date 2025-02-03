@@ -13,6 +13,8 @@ import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.feilhåndtering.IkkeÅpenOppgave
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
+import no.nav.helse.spesialist.api.graphql.schema.ApiAvslagstype
+import no.nav.helse.spesialist.api.graphql.schema.ApiVedtakUtfall
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import org.slf4j.LoggerFactory
@@ -30,7 +32,7 @@ class VedtakMutation(
     suspend fun fattVedtak(
         oppgavereferanse: String,
         env: DataFetchingEnvironment,
-        utfall: VedtakUtfall,
+        utfall: ApiVedtakUtfall,
         begrunnelse: String? = null,
     ): DataFetcherResult<Boolean> =
         withContext(Dispatchers.IO) {
@@ -158,22 +160,11 @@ data class Avslag(
 )
 
 data class Avslagsdata(
-    val type: Avslagstype,
+    val type: ApiAvslagstype,
     val begrunnelse: String,
 )
-
-enum class Avslagstype {
-    AVSLAG,
-    DELVIS_AVSLAG,
-}
 
 enum class Avslagshandling {
     OPPRETT,
     INVALIDER,
-}
-
-enum class VedtakUtfall {
-    AVSLAG,
-    DELVIS_INNVILGELSE,
-    INNVILGELSE,
 }
