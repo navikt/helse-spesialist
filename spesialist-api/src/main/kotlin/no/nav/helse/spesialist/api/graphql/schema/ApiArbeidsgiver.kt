@@ -25,7 +25,7 @@ data class ApiGenerasjon(
 @GraphQLName("ArbeidsgiverInntekterFraAOrdningen")
 data class ApiArbeidsgiverInntekterFraAOrdningen(
     val skjaeringstidspunkt: String,
-    val inntekter: List<InntektFraAOrdningen>,
+    val inntekter: List<ApiInntektFraAOrdningen>,
 )
 
 @GraphQLName("Overstyring")

@@ -4,73 +4,35 @@ import no.nav.helse.spleis.graphql.enums.GraphQLInntektskilde
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLInntekterFraAOrdningen
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLOmregnetArsinntekt
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSkjonnsmessigFastsatt
-import java.time.LocalDate
-import java.time.YearMonth
 
-data class Arbeidsgiverinntekt(
-    val arbeidsgiver: String,
-    val omregnetArsinntekt: OmregnetArsinntekt?,
-    val sammenligningsgrunnlag: Sammenligningsgrunnlag?,
-    val skjonnsmessigFastsatt: OmregnetArsinntekt?,
-    val deaktivert: Boolean? = null,
-    val fom: LocalDate? = null,
-    val tom: LocalDate? = null,
-)
-
-data class Sammenligningsgrunnlag(
-    val belop: Double,
-    val inntektFraAOrdningen: List<InntektFraAOrdningen>,
-)
-
-data class OmregnetArsinntekt(
-    val belop: Double,
-    val inntektFraAOrdningen: List<InntektFraAOrdningen>?,
-    val kilde: Inntektskilde,
-    val manedsbelop: Double,
-)
-
-data class InntektFraAOrdningen(
-    val maned: YearMonth,
-    val sum: Double,
-)
-
-enum class Inntektskilde {
-    AORDNINGEN,
-    INFOTRYGD,
-    INNTEKTSMELDING,
-    SAKSBEHANDLER,
-    IKKE_RAPPORTERT,
-    SKJONNSMESSIG_FASTSATT,
-}
-
-fun GraphQLOmregnetArsinntekt.tilOmregnetÅrsinntekt(): OmregnetArsinntekt =
-    OmregnetArsinntekt(
+fun GraphQLOmregnetArsinntekt.tilOmregnetÅrsinntekt(): ApiOmregnetArsinntekt =
+    ApiOmregnetArsinntekt(
         belop = belop,
         inntektFraAOrdningen = inntekterFraAOrdningen?.map { it.tilInntektFraAOrdningen() },
         kilde = kilde.tilInntektskilde(),
         manedsbelop = manedsbelop,
     )
 
-fun GraphQLSkjonnsmessigFastsatt.tilOmregnetÅrsinntekt(): OmregnetArsinntekt =
-    OmregnetArsinntekt(
+fun GraphQLSkjonnsmessigFastsatt.tilOmregnetÅrsinntekt(): ApiOmregnetArsinntekt =
+    ApiOmregnetArsinntekt(
         belop = belop,
         inntektFraAOrdningen = null,
-        kilde = Inntektskilde.SKJONNSMESSIG_FASTSATT,
+        kilde = ApiInntektskilde.SKJONNSMESSIG_FASTSATT,
         manedsbelop = manedsbelop,
     )
 
-private fun GraphQLInntekterFraAOrdningen.tilInntektFraAOrdningen(): InntektFraAOrdningen =
-    InntektFraAOrdningen(
+private fun GraphQLInntekterFraAOrdningen.tilInntektFraAOrdningen(): ApiInntektFraAOrdningen =
+    ApiInntektFraAOrdningen(
         maned = maned,
         sum = sum,
     )
 
-private fun GraphQLInntektskilde.tilInntektskilde(): Inntektskilde =
+private fun GraphQLInntektskilde.tilInntektskilde(): ApiInntektskilde =
     when (this) {
-        GraphQLInntektskilde.AORDNINGEN -> Inntektskilde.AORDNINGEN
-        GraphQLInntektskilde.INFOTRYGD -> Inntektskilde.INFOTRYGD
-        GraphQLInntektskilde.INNTEKTSMELDING -> Inntektskilde.INNTEKTSMELDING
-        GraphQLInntektskilde.SAKSBEHANDLER -> Inntektskilde.SAKSBEHANDLER
-        GraphQLInntektskilde.IKKERAPPORTERT -> Inntektskilde.IKKE_RAPPORTERT
+        GraphQLInntektskilde.AORDNINGEN -> ApiInntektskilde.AORDNINGEN
+        GraphQLInntektskilde.INFOTRYGD -> ApiInntektskilde.INFOTRYGD
+        GraphQLInntektskilde.INNTEKTSMELDING -> ApiInntektskilde.INNTEKTSMELDING
+        GraphQLInntektskilde.SAKSBEHANDLER -> ApiInntektskilde.SAKSBEHANDLER
+        GraphQLInntektskilde.IKKERAPPORTERT -> ApiInntektskilde.IKKE_RAPPORTERT
         else -> throw Exception("Ukjent inntektskilde ${this.name}")
     }

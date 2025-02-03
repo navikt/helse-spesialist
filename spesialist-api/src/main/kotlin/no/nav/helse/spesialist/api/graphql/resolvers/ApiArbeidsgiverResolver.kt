@@ -13,11 +13,11 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforhold
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsgiverInntekterFraAOrdningen
 import no.nav.helse.spesialist.api.graphql.schema.ApiGenerasjon
 import no.nav.helse.spesialist.api.graphql.schema.ApiGhostPeriode
+import no.nav.helse.spesialist.api.graphql.schema.ApiInntektFraAOrdningen
 import no.nav.helse.spesialist.api.graphql.schema.ApiNyttInntektsforholdPeriode
 import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ArbeidsgiverSchema
 import no.nav.helse.spesialist.api.graphql.schema.BeregnetPeriode
-import no.nav.helse.spesialist.api.graphql.schema.InntektFraAOrdningen
 import no.nav.helse.spesialist.api.graphql.schema.UberegnetPeriode
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDto
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLBeregnetPeriode
@@ -118,7 +118,7 @@ class ApiArbeidsgiverResolver(
                 skjaeringstidspunkt = fraAO.skjaeringstidspunkt,
                 inntekter =
                     fraAO.inntekter.map { inntekt ->
-                        InntektFraAOrdningen(
+                        ApiInntektFraAOrdningen(
                             maned = inntekt.maned,
                             sum = inntekt.sum,
                         )

@@ -14,7 +14,7 @@ enum class Vilkarsgrunnlagtype { INFOTRYGD, SPLEIS, UKJENT }
 interface Vilkarsgrunnlag {
     val id: UUID
     val vilkarsgrunnlagtype: Vilkarsgrunnlagtype
-    val inntekter: List<Arbeidsgiverinntekt>
+    val inntekter: List<ApiArbeidsgiverinntekt>
     val arbeidsgiverrefusjoner: List<Arbeidsgiverrefusjon>
     val omregnetArsinntekt: Double
     val skjaeringstidspunkt: LocalDate
@@ -24,7 +24,7 @@ interface Vilkarsgrunnlag {
 data class VilkarsgrunnlagInfotrygd(
     override val id: UUID,
     override val vilkarsgrunnlagtype: Vilkarsgrunnlagtype,
-    override val inntekter: List<Arbeidsgiverinntekt>,
+    override val inntekter: List<ApiArbeidsgiverinntekt>,
     override val arbeidsgiverrefusjoner: List<Arbeidsgiverrefusjon>,
     override val omregnetArsinntekt: Double,
     override val skjaeringstidspunkt: LocalDate,
@@ -34,7 +34,7 @@ data class VilkarsgrunnlagInfotrygd(
 data class VilkarsgrunnlagSpleis(
     override val id: UUID,
     override val vilkarsgrunnlagtype: Vilkarsgrunnlagtype,
-    override val inntekter: List<Arbeidsgiverinntekt>,
+    override val inntekter: List<ApiArbeidsgiverinntekt>,
     override val omregnetArsinntekt: Double,
     override val skjaeringstidspunkt: LocalDate,
     override val sykepengegrunnlag: Double,
@@ -68,16 +68,16 @@ fun GraphQLVilkarsgrunnlag.tilVilkarsgrunnlag(avviksvurderinghenter: Avviksvurde
                         inntekter.singleOrNull { inntektFraSpleis -> inntektFraSpleis.arbeidsgiver == arbeidsgiverreferanse }
                     val sammenligningsgrunnlagInntekt =
                         avviksvurdering.sammenligningsgrunnlag.innrapporterteInntekter.singleOrNull { it.arbeidsgiverreferanse == arbeidsgiverreferanse }
-                    Arbeidsgiverinntekt(
+                    ApiArbeidsgiverinntekt(
                         arbeidsgiver = arbeidsgiverreferanse,
                         omregnetArsinntekt = inntektFraSpleis?.omregnetArsinntekt?.tilOmregnetÅrsinntekt(),
                         sammenligningsgrunnlag =
                             sammenligningsgrunnlagInntekt?.let {
-                                Sammenligningsgrunnlag(
+                                ApiSammenligningsgrunnlag(
                                     belop = sammenligningsgrunnlagInntekt.inntekter.sumOf { it.beløp },
                                     inntektFraAOrdningen =
                                         sammenligningsgrunnlagInntekt.inntekter.map { inntekt ->
-                                            InntektFraAOrdningen(
+                                            ApiInntektFraAOrdningen(
                                                 maned = inntekt.årMåned,
                                                 sum = inntekt.beløp,
                                             )
@@ -118,7 +118,7 @@ fun GraphQLVilkarsgrunnlag.tilVilkarsgrunnlag(avviksvurderinghenter: Avviksvurde
                 vilkarsgrunnlagtype = Vilkarsgrunnlagtype.INFOTRYGD,
                 inntekter =
                     inntekter.map {
-                        Arbeidsgiverinntekt(
+                        ApiArbeidsgiverinntekt(
                             arbeidsgiver = it.arbeidsgiver,
                             omregnetArsinntekt = it.omregnetArsinntekt.tilOmregnetÅrsinntekt(),
                             sammenligningsgrunnlag = null,
