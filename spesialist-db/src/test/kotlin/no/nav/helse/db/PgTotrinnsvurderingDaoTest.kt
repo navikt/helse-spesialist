@@ -34,7 +34,8 @@ internal class PgTotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
         opprettVedtaksperiode(FNR)
         val totrinnsvurderingOld: TotrinnsvurderingOld = totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
 
-        val totrinnsvurdering = totrinnsvurderingDao.hentAktivTotrinnsvurdering(FNR)
+        val totrinnsvurderingResult = totrinnsvurderingDao.hentAktivTotrinnsvurdering(FNR)
+        val totrinnsvurdering = totrinnsvurderingResult?.second
         assertNotNull(totrinnsvurdering)
         assertEquals(totrinnsvurderingOld.vedtaksperiodeId, totrinnsvurdering?.vedtaksperiodeId)
         assertEquals(totrinnsvurderingOld.erRetur, totrinnsvurdering?.erRetur)
@@ -272,7 +273,8 @@ internal class PgTotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
                 oppdatert = oppdatert
             )
         )
-        val aktivTotrinnsvurdering = totrinnsvurderingDao.hentAktivTotrinnsvurdering(OPPGAVE_ID)
+        val totrinnsvurderingResult = totrinnsvurderingDao.hentAktivTotrinnsvurdering(OPPGAVE_ID)
+        val aktivTotrinnsvurdering = totrinnsvurderingResult?.second
 
         assertEquals(VEDTAKSPERIODE, aktivTotrinnsvurdering?.vedtaksperiodeId)
         assertEquals(false, aktivTotrinnsvurdering?.erRetur)

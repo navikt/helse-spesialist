@@ -6,6 +6,7 @@ import io.mockk.verify
 import no.nav.helse.DatabaseIntegrationTest
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.mediator.oppgave.Oppgavelagrer
+import no.nav.helse.modell.NyId
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.Oppgave.Companion.toDto
@@ -297,6 +298,7 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
 
     private fun nyTotrinnsvurdering() =
         Totrinnsvurdering(
+            id = NyId,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             erRetur = false,
             saksbehandler = saksbehandler,

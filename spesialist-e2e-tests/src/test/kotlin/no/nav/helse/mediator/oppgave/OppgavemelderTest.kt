@@ -5,6 +5,7 @@ import no.nav.helse.MeldingPubliserer
 import no.nav.helse.TestRapidHelpers.meldinger
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.mediator.asUUID
+import no.nav.helse.modell.NyId
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.saksbehandler.Saksbehandler
@@ -98,6 +99,7 @@ class OppgavemelderTest {
     )
 
     private fun totrinnsvurdering(beslutter: Saksbehandler? = null) = Totrinnsvurdering(
+        id = NyId,
         vedtaksperiodeId = VEDTAKSPERIODE_ID,
         erRetur = false,
         saksbehandler = null,

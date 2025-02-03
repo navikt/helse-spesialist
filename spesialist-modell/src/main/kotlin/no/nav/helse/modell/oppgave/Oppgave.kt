@@ -386,26 +386,28 @@ class Oppgave private constructor(
                 ferdigstiltAvIdent = ferdigstiltAvIdent,
             )
 
-        fun OppgaveDto.gjenopprett(tilgangskontroll: Tilgangskontroll) =
-            Oppgave(
-                id = id,
-                tilstand =
-                    when (tilstand) {
-                        OppgaveDto.TilstandDto.AvventerSaksbehandler -> AvventerSaksbehandler
-                        OppgaveDto.TilstandDto.AvventerSystem -> AvventerSystem
-                        OppgaveDto.TilstandDto.Ferdigstilt -> Ferdigstilt
-                        OppgaveDto.TilstandDto.Invalidert -> Invalidert
-                    },
-                behandlingId = behandlingId,
-                vedtaksperiodeId = vedtaksperiodeId,
-                utbetalingId = utbetalingId,
-                godkjenningsbehovId = godkjenningsbehovId,
-                kanAvvises = kanAvvises,
-                totrinnsvurdering = totrinnsvurdering?.gjenopprett(tilgangskontroll),
-                ferdigstiltAvOid = ferdigstiltAvOid,
-                ferdigstiltAvIdent = ferdigstiltAvIdent,
-                tildeltTil = tildeltTil?.gjenopprett(tilgangskontroll),
-                egenskaper = egenskaper.map { it.gjenopprett() }.toMutableSet(),
-            )
+        fun OppgaveDto.gjenopprett(
+            tilgangskontroll: Tilgangskontroll,
+            totrinnsvurderingId: Long?,
+        ) = Oppgave(
+            id = id,
+            tilstand =
+                when (tilstand) {
+                    OppgaveDto.TilstandDto.AvventerSaksbehandler -> AvventerSaksbehandler
+                    OppgaveDto.TilstandDto.AvventerSystem -> AvventerSystem
+                    OppgaveDto.TilstandDto.Ferdigstilt -> Ferdigstilt
+                    OppgaveDto.TilstandDto.Invalidert -> Invalidert
+                },
+            behandlingId = behandlingId,
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetalingId = utbetalingId,
+            godkjenningsbehovId = godkjenningsbehovId,
+            kanAvvises = kanAvvises,
+            totrinnsvurdering = totrinnsvurdering?.gjenopprett(tilgangskontroll, totrinnsvurderingId),
+            ferdigstiltAvOid = ferdigstiltAvOid,
+            ferdigstiltAvIdent = ferdigstiltAvIdent,
+            tildeltTil = tildeltTil?.gjenopprett(tilgangskontroll),
+            egenskaper = egenskaper.map { it.gjenopprett() }.toMutableSet(),
+        )
     }
 }

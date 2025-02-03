@@ -1,5 +1,8 @@
 package no.nav.helse.modell.totrinnsvurdering
 
+import no.nav.helse.modell.EksisterendeId
+import no.nav.helse.modell.Id
+import no.nav.helse.modell.NyId
 import no.nav.helse.modell.OppgaveAlleredeSendtBeslutter
 import no.nav.helse.modell.OppgaveAlleredeSendtIRetur
 import no.nav.helse.modell.OppgaveKreverVurderingAvToSaksbehandlere
@@ -12,6 +15,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 class Totrinnsvurdering(
+    val id: Id,
     private val vedtaksperiodeId: UUID,
     erRetur: Boolean,
     saksbehandler: Saksbehandler?,
@@ -107,8 +111,12 @@ class Totrinnsvurdering(
     }
 
     companion object {
-        fun TotrinnsvurderingDto.gjenopprett(tilgangskontroll: Tilgangskontroll): Totrinnsvurdering =
+        fun TotrinnsvurderingDto.gjenopprett(
+            tilgangskontroll: Tilgangskontroll,
+            totrinnsvurderingId: Long?,
+        ): Totrinnsvurdering =
             Totrinnsvurdering(
+                id = totrinnsvurderingId?.let { EksisterendeId(it) } ?: NyId,
                 vedtaksperiodeId = vedtaksperiodeId,
                 erRetur = erRetur,
                 saksbehandler = saksbehandler?.gjenopprett(tilgangskontroll),

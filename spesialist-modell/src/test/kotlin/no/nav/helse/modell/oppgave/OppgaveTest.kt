@@ -1,6 +1,7 @@
 package no.nav.helse.modell.oppgave
 
 import no.nav.helse.modell.ManglerTilgang
+import no.nav.helse.modell.NyId
 import no.nav.helse.modell.OppgaveAlleredeSendtBeslutter
 import no.nav.helse.modell.OppgaveAlleredeSendtIRetur
 import no.nav.helse.modell.OppgaveIkkeTildelt
@@ -594,7 +595,7 @@ internal class OppgaveTest {
                 tildeltTil = saksbehandler().toDto(),
             )
 
-        assertEquals(saksbehandlerDto, saksbehandlerDto.gjenopprett(TilgangskontrollForTestHarIkkeTilgang).toDto())
+        assertEquals(saksbehandlerDto, saksbehandlerDto.gjenopprett(TilgangskontrollForTestHarIkkeTilgang, nextLong()).toDto())
     }
 
     @Test
@@ -654,6 +655,7 @@ internal class OppgaveTest {
 
     private fun totrinnsvurdering() =
         Totrinnsvurdering(
+            id = NyId,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             erRetur = false,
             saksbehandler = null,

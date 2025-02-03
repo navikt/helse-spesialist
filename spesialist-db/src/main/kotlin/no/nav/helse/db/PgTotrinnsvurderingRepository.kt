@@ -13,6 +13,7 @@ import no.nav.helse.db.overstyring.RefusjonselementForDatabase
 import no.nav.helse.db.overstyring.SkjønnsfastsattArbeidsgiverForDatabase
 import no.nav.helse.db.overstyring.SkjønnsfastsattSykepengegrunnlagForDatabase
 import no.nav.helse.db.overstyring.SkjønnsfastsettingstypeForDatabase
+import no.nav.helse.modell.EksisterendeId
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.modell.saksbehandler.handlinger.Arbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgrad
@@ -37,9 +38,10 @@ class PgTotrinnsvurderingRepository(
     private val tilgangskontroll: Tilgangskontroll,
 ) : TotrinnsvurderingRepository {
     override fun finnTotrinnsvurdering(fødselsnummer: String): Totrinnsvurdering? {
-        val totrinnsvurdering = totrinnsvurderingDao.hentAktivTotrinnsvurdering(fødselsnummer) ?: return null
+        val (id, totrinnsvurdering) = totrinnsvurderingDao.hentAktivTotrinnsvurdering(fødselsnummer) ?: return null
 
         return Totrinnsvurdering(
+            id = EksisterendeId(id),
             vedtaksperiodeId = totrinnsvurdering.vedtaksperiodeId,
             erRetur = totrinnsvurdering.erRetur,
             saksbehandler =

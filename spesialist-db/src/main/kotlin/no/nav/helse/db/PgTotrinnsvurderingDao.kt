@@ -13,10 +13,11 @@ class PgTotrinnsvurderingDao private constructor(
     internal constructor(session: Session) : this(MedSession(session))
     internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
-    override fun hentAktivTotrinnsvurdering(oppgaveId: Long) =
+    override fun hentAktivTotrinnsvurdering(oppgaveId: Long): Pair<Long, TotrinnsvurderingFraDatabase>? =
         asSQL(
             """
             SELECT v.vedtaksperiode_id,
+                   tv.id,
                    er_retur,
                    tv.saksbehandler,
                    tv.beslutter,
@@ -32,21 +33,23 @@ class PgTotrinnsvurderingDao private constructor(
             """.trimIndent(),
             "oppgaveId" to oppgaveId,
         ).singleOrNull { row ->
-            TotrinnsvurderingFraDatabase(
-                vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
-                erRetur = row.boolean("er_retur"),
-                saksbehandler = row.uuidOrNull("saksbehandler"),
-                beslutter = row.uuidOrNull("beslutter"),
-                utbetalingId = row.uuidOrNull("utbetaling_id"),
-                opprettet = row.localDateTime("opprettet"),
-                oppdatert = row.localDateTimeOrNull("oppdatert"),
-            )
+            row.long("id") to
+                TotrinnsvurderingFraDatabase(
+                    vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
+                    erRetur = row.boolean("er_retur"),
+                    saksbehandler = row.uuidOrNull("saksbehandler"),
+                    beslutter = row.uuidOrNull("beslutter"),
+                    utbetalingId = row.uuidOrNull("utbetaling_id"),
+                    opprettet = row.localDateTime("opprettet"),
+                    oppdatert = row.localDateTimeOrNull("oppdatert"),
+                )
         }
 
-    internal fun hentAktivTotrinnsvurdering(fødselsnummer: String) =
+    internal fun hentAktivTotrinnsvurdering(fødselsnummer: String): Pair<Long, TotrinnsvurderingFraDatabase>? =
         asSQL(
             """
-            SELECT v.vedtaksperiode_id,
+            SELECT tv.id,
+                   v.vedtaksperiode_id,
                    er_retur,
                    tv.saksbehandler,
                    tv.beslutter,
@@ -62,15 +65,16 @@ class PgTotrinnsvurderingDao private constructor(
             """.trimIndent(),
             "fodselsnummer" to fødselsnummer,
         ).singleOrNull { row ->
-            TotrinnsvurderingFraDatabase(
-                vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
-                erRetur = row.boolean("er_retur"),
-                saksbehandler = row.uuidOrNull("saksbehandler"),
-                beslutter = row.uuidOrNull("beslutter"),
-                utbetalingId = row.uuidOrNull("utbetaling_id"),
-                opprettet = row.localDateTime("opprettet"),
-                oppdatert = row.localDateTimeOrNull("oppdatert"),
-            )
+            row.long("id") to
+                TotrinnsvurderingFraDatabase(
+                    vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
+                    erRetur = row.boolean("er_retur"),
+                    saksbehandler = row.uuidOrNull("saksbehandler"),
+                    beslutter = row.uuidOrNull("beslutter"),
+                    utbetalingId = row.uuidOrNull("utbetaling_id"),
+                    opprettet = row.localDateTime("opprettet"),
+                    oppdatert = row.localDateTimeOrNull("oppdatert"),
+                )
         }
 
     override fun oppdater(totrinnsvurderingFraDatabase: TotrinnsvurderingFraDatabase) {

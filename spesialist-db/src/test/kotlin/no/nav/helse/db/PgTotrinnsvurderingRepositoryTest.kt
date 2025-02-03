@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
+import kotlin.random.Random.Default.nextLong
 
 
 class PgTotrinnsvurderingRepositoryTest {
@@ -36,7 +37,9 @@ class PgTotrinnsvurderingRepositoryTest {
     fun `finn en totrinnsvurdering`() {
         val fødselsnummer = "12345678910"
 
-        every { totrinnsvurderingDao.hentAktivTotrinnsvurdering(fødselsnummer) } returns mockk(relaxed = true)
+        every { totrinnsvurderingDao.hentAktivTotrinnsvurdering(fødselsnummer) } returns (nextLong() to mockk<TotrinnsvurderingFraDatabase>(
+            relaxed = true
+        ))
         every { overstyringDao.finnOverstyringer(fødselsnummer) } returns listOf(mockk(relaxed = true))
 
         val result = repository.finnTotrinnsvurdering(fødselsnummer)

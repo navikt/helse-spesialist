@@ -16,6 +16,7 @@ import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TotrinnsvurderingDao
+import no.nav.helse.db.TotrinnsvurderingFraDatabase
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.kommando.TestMelding
 import no.nav.helse.modell.melding.Behov
@@ -191,6 +192,9 @@ internal class OppgaveServiceTest {
 
     @Test
     fun `oppdaterer oppgave`() {
+        every { totrinnsvurderingDao.hentAktivTotrinnsvurdering(OPPGAVE_ID) } returns (nextLong() to mockk<TotrinnsvurderingFraDatabase>(
+            relaxed = true
+        ))
         every { oppgaveDao.finnOppgave(OPPGAVE_ID) } returns oppgaveFraDatabase()
         every { oppgaveDao.finnHendelseId(any()) } returns HENDELSE_ID
         every { saksbehandlerDao.finnSaksbehandler(any()) } returns saksbehandlerFraDatabase

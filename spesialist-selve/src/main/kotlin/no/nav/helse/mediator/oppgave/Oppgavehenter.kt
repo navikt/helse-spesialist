@@ -22,7 +22,9 @@ class Oppgavehenter(
         val oppgave =
             oppgaveDao.finnOppgave(id)
                 ?: throw IllegalStateException("Forventer å finne oppgave med oppgaveId=$id")
-        val totrinnsvurdering = totrinnsvurderingDao.hentAktivTotrinnsvurdering(id)
+        val totrinnsvurderingResult = totrinnsvurderingDao.hentAktivTotrinnsvurdering(id)
+        val totrinnsvurderingId = totrinnsvurderingResult?.first
+        val totrinnsvurdering = totrinnsvurderingResult?.second
 
         val dto =
             OppgaveDto(
@@ -57,7 +59,7 @@ class Oppgavehenter(
                 tildeltTil = oppgave.tildelt?.toDto(),
             )
 
-        return dto.gjenopprett(tilgangskontroll)
+        return dto.gjenopprett(tilgangskontroll, totrinnsvurderingId)
     }
 
     private fun tilstand(oppgavestatus: String): OppgaveDto.TilstandDto {

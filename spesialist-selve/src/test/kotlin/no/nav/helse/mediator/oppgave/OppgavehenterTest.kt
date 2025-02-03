@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.UUID
+import kotlin.random.Random.Default.nextLong
 
 class OppgavehenterTest {
 
@@ -180,7 +181,7 @@ class OppgavehenterTest {
     private fun totrinnsvurderingRepository(
         totrinnsvurdering: TotrinnsvurderingFraDatabase? = null
     ) = object : TotrinnsvurderingDao {
-        override fun hentAktivTotrinnsvurdering(oppgaveId: Long) = totrinnsvurdering
+        override fun hentAktivTotrinnsvurdering(oppgaveId: Long): Pair<Long, TotrinnsvurderingFraDatabase>? = totrinnsvurdering?.let { nextLong() to it }
         override fun oppdater(totrinnsvurderingFraDatabase: TotrinnsvurderingFraDatabase) {}
         override fun settBeslutter(oppgaveId: Long, saksbehandlerOid: UUID) = error("Not implemented in test")
         override fun settErRetur(vedtaksperiodeId: UUID) = error("Not implemented in test")

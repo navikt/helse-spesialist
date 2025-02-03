@@ -7,6 +7,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.helse.TestRapidHelpers.meldinger
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
+import no.nav.helse.modell.NyId
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.HentDokument
 import no.nav.helse.modell.melding.OppgaveOppdatert
@@ -192,6 +193,7 @@ internal class MessageContextMeldingPublisererTest {
             kanAvvises = true,
             egenskaper = setOf(Egenskap.SØKNAD),
             totrinnsvurdering = Totrinnsvurdering(
+                id = NyId,
                 vedtaksperiodeId = vedtaksperiodeId,
                 erRetur = false,
                 saksbehandler = null,

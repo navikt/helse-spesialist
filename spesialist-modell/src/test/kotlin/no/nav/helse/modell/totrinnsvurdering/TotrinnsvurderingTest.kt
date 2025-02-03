@@ -1,5 +1,6 @@
 package no.nav.helse.modell.totrinnsvurdering
 
+import no.nav.helse.modell.NyId
 import no.nav.helse.modell.OppgaveAlleredeSendtBeslutter
 import no.nav.helse.modell.OppgaveAlleredeSendtIRetur
 import no.nav.helse.modell.OppgaveKreverVurderingAvToSaksbehandlere
@@ -20,6 +21,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDateTime
 import java.util.UUID
+import kotlin.random.Random.Default.nextLong
 
 internal class TotrinnsvurderingTest {
 
@@ -159,7 +161,7 @@ internal class TotrinnsvurderingTest {
             oppdatert = LocalDateTime.now(),
         )
 
-        val toDto = totrinnsvurderingDto.gjenopprett(TilgangskontrollForTestHarIkkeTilgang).toDto()
+        val toDto = totrinnsvurderingDto.gjenopprett(TilgangskontrollForTestHarIkkeTilgang, nextLong()).toDto()
         assertEquals(totrinnsvurderingDto.vedtaksperiodeId, toDto.vedtaksperiodeId)
         assertEquals(totrinnsvurderingDto.erRetur, toDto.erRetur)
         assertEquals(totrinnsvurderingDto.saksbehandler, toDto.saksbehandler)
@@ -179,6 +181,7 @@ internal class TotrinnsvurderingTest {
         saksbehandler: Saksbehandler? = null,
         beslutter: Saksbehandler? = null,
     ) = Totrinnsvurdering(
+        id = NyId,
         vedtaksperiodeId = UUID.randomUUID(),
         erRetur = erRetur,
         saksbehandler = saksbehandler,
