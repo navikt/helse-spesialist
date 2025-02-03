@@ -23,9 +23,9 @@ import no.nav.helse.spesialist.api.graphql.mutation.Avslagstype
 import no.nav.helse.spesialist.api.graphql.mutation.VedtakUtfall
 import no.nav.helse.spesialist.api.graphql.schema.ApiAnnulleringData
 import no.nav.helse.spesialist.api.graphql.schema.ApiAnnulleringData.ApiAnnulleringArsak
+import no.nav.helse.spesialist.api.graphql.schema.ApiLovhjemmel
 import no.nav.helse.spesialist.api.graphql.schema.ArbeidsforholdOverstyringHandling
 import no.nav.helse.spesialist.api.graphql.schema.InntektOgRefusjonOverstyring
-import no.nav.helse.spesialist.api.graphql.schema.Lovhjemmel
 import no.nav.helse.spesialist.api.graphql.schema.MinimumSykdomsgrad
 import no.nav.helse.spesialist.api.graphql.schema.OverstyringArbeidsforhold
 import no.nav.helse.spesialist.api.graphql.schema.OverstyringArbeidsgiver
@@ -748,7 +748,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
                             deaktivert = true,
                             begrunnelse = "en begrunnelse",
                             forklaring = "en forklaring",
-                            lovhjemmel = Lovhjemmel("8-15", null, null, "folketrygdloven", "1998-12-18"),
+                            lovhjemmel = ApiLovhjemmel("8-15", null, null, "folketrygdloven", "1998-12-18"),
                         ),
                     ),
             )
@@ -797,7 +797,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
                                     OverstyringArbeidsgiver.OverstyringRefusjonselement(1.januar, 31.januar, 24000.0),
                                     OverstyringArbeidsgiver.OverstyringRefusjonselement(1.februar, null, 23000.0),
                                 ),
-                            lovhjemmel = Lovhjemmel("8-28", "3", null, "folketrygdloven", "1970-01-01"),
+                            lovhjemmel = ApiLovhjemmel("8-28", "3", null, "folketrygdloven", "1970-01-01"),
                             begrunnelse = "En begrunnelse",
                             forklaring = "En forklaring",
                             fom = null,
@@ -817,7 +817,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
                                     OverstyringArbeidsgiver.OverstyringRefusjonselement(1.januar, 31.januar, 22000.0),
                                     OverstyringArbeidsgiver.OverstyringRefusjonselement(1.februar, null, 23000.0),
                                 ),
-                            lovhjemmel = Lovhjemmel("8-28", "3", null, "folketrygdloven", "1970-01-01"),
+                            lovhjemmel = ApiLovhjemmel("8-28", "3", null, "folketrygdloven", "1970-01-01"),
                             begrunnelse = "En begrunnelse 2",
                             forklaring = "En forklaring 2",
                             fom = null,
@@ -876,7 +876,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
                             organisasjonsnummer = ORGANISASJONSNUMMER,
                             arlig = 25000.0,
                             fraArlig = 25001.0,
-                            lovhjemmel = Lovhjemmel("8-28", "3", null, "folketrygdloven", "1970-01-01"),
+                            lovhjemmel = ApiLovhjemmel("8-28", "3", null, "folketrygdloven", "1970-01-01"),
                             arsak = "En årsak",
                             type = Skjonnsfastsettelse.SkjonnsfastsettelseArbeidsgiver.SkjonnsfastsettelseType.OMREGNET_ARSINNTEKT,
                             begrunnelseMal = "En begrunnelsemal",
@@ -888,7 +888,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
                             organisasjonsnummer = ORGANISASJONSNUMMER_GHOST,
                             arlig = 21000.0,
                             fraArlig = 25001.0,
-                            lovhjemmel = Lovhjemmel("8-28", "3", null, "folketrygdloven", "1970-01-01"),
+                            lovhjemmel = ApiLovhjemmel("8-28", "3", null, "folketrygdloven", "1970-01-01"),
                             arsak = "En årsak 2",
                             type = Skjonnsfastsettelse.SkjonnsfastsettelseArbeidsgiver.SkjonnsfastsettelseType.OMREGNET_ARSINNTEKT,
                             begrunnelseMal = "En begrunnelsemal",

@@ -34,7 +34,7 @@ data class OverstyringArbeidsforhold(
     val deaktivert: Boolean,
     val begrunnelse: String,
     val forklaring: String,
-    val lovhjemmel: Lovhjemmel?,
+    val lovhjemmel: ApiLovhjemmel?,
 )
 
 data class OverstyringArbeidsgiver(
@@ -45,7 +45,7 @@ data class OverstyringArbeidsgiver(
     val fraRefusjonsopplysninger: List<OverstyringRefusjonselement>?,
     val begrunnelse: String,
     val forklaring: String,
-    val lovhjemmel: Lovhjemmel?,
+    val lovhjemmel: ApiLovhjemmel?,
     val fom: LocalDate?,
     val tom: LocalDate?,
 ) {
@@ -62,5 +62,5 @@ data class OverstyringDag(
     val fraType: String,
     val grad: Int?,
     val fraGrad: Int?,
-    val lovhjemmel: Lovhjemmel?,
+    val lovhjemmel: ApiLovhjemmel?,
 )

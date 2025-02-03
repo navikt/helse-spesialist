@@ -20,7 +20,7 @@ data class Skjonnsfastsettelse(
         val begrunnelseMal: String?,
         val begrunnelseFritekst: String?,
         val begrunnelseKonklusjon: String?,
-        val lovhjemmel: Lovhjemmel?,
+        val lovhjemmel: ApiLovhjemmel?,
         val initierendeVedtaksperiodeId: String?,
     ) {
         enum class SkjonnsfastsettelseType {

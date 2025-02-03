@@ -8,7 +8,7 @@ import no.nav.helse.modell.vedtaksperiode.Inntektsopplysningkilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.SykepengegrunnlagsArbeidsgiver
-import no.nav.helse.spesialist.api.graphql.schema.Lovhjemmel
+import no.nav.helse.spesialist.api.graphql.schema.ApiLovhjemmel
 import no.nav.helse.spesialist.api.graphql.schema.Skjonnsfastsettelse
 import no.nav.helse.spesialist.test.TestPerson
 import no.nav.helse.spesialist.test.lagFødselsnummer
@@ -180,7 +180,7 @@ object Testdata {
         begrunnelseMal = "begrunnelseMal",
         begrunnelseKonklusjon = "begrunnelseKonklusjon",
         begrunnelseFritekst = "begrunnelseFritekst",
-        lovhjemmel = Lovhjemmel(
+        lovhjemmel = ApiLovhjemmel(
             paragraf = "paragraf",
             ledd = "ledd",
             bokstav = "bokstav",

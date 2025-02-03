@@ -1,7 +1,7 @@
 package no.nav.helse.e2e
 
 import no.nav.helse.modell.OverstyringType
-import no.nav.helse.spesialist.api.graphql.schema.Lovhjemmel
+import no.nav.helse.spesialist.api.graphql.schema.ApiLovhjemmel
 import no.nav.helse.spesialist.api.graphql.schema.OverstyringArbeidsforhold
 import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
 import org.junit.jupiter.api.Test
@@ -42,7 +42,7 @@ internal class TotrinnsvurderingE2ETest : AbstractE2ETest() {
                         deaktivert = true,
                         begrunnelse = "begrunnelse",
                         forklaring = "forklaring",
-                        lovhjemmel = Lovhjemmel("8-15", null, null, "folketrygdloven", "1998-12-18"),
+                        lovhjemmel = ApiLovhjemmel("8-15", null, null, "folketrygdloven", "1998-12-18"),
                     ),
                 ),
         )

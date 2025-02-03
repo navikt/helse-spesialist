@@ -15,7 +15,7 @@ import no.nav.helse.spesialist.api.graphql.query.PersonQuery
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdoverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiDagoverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiInntektoverstyring
-import no.nav.helse.spesialist.api.graphql.schema.Lovhjemmel
+import no.nav.helse.spesialist.api.graphql.schema.ApiLovhjemmel
 import no.nav.helse.spesialist.api.graphql.schema.OverstyringArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.schema.OverstyringDag
 import no.nav.helse.spesialist.api.graphql.schema.Person
@@ -79,7 +79,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
                         grad = null,
                         fraGrad = 100,
                         lovhjemmel =
-                            Lovhjemmel(
+                            ApiLovhjemmel(
                                 paragraf = "EN PARAGRAF",
                                 ledd = "ET LEDD",
                                 bokstav = "EN BOKSTAV",
@@ -108,7 +108,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
                         manedligInntekt = 25000.0,
                         fraManedligInntekt = 25001.0,
                         forklaring = "testbortforklaring",
-                        lovhjemmel = Lovhjemmel("8-28", "LEDD_1", "BOKSTAV_A", "folketrygdloven", "1970-01-01"),
+                        lovhjemmel = ApiLovhjemmel("8-28", "LEDD_1", "BOKSTAV_A", "folketrygdloven", "1970-01-01"),
                         refusjonsopplysninger = null,
                         fraRefusjonsopplysninger = null,
                         begrunnelse = "begrunnelse",

@@ -38,9 +38,9 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
 import no.nav.helse.modell.vedtaksperiode.Inntektsopplysningkilde
 import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.SykepengegrunnlagsArbeidsgiver
+import no.nav.helse.spesialist.api.graphql.schema.ApiLovhjemmel
 import no.nav.helse.spesialist.api.graphql.schema.ArbeidsforholdOverstyringHandling
 import no.nav.helse.spesialist.api.graphql.schema.InntektOgRefusjonOverstyring
-import no.nav.helse.spesialist.api.graphql.schema.Lovhjemmel
 import no.nav.helse.spesialist.api.graphql.schema.OverstyringArbeidsforhold
 import no.nav.helse.spesialist.api.graphql.schema.OverstyringArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.schema.OverstyringArbeidsgiver.OverstyringRefusjonselement
@@ -1102,7 +1102,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                     manedligInntekt = 25000.0,
                     fraManedligInntekt = 25001.0,
                     forklaring = "testbortforklaring",
-                    lovhjemmel = Lovhjemmel("8-28", "LEDD_1", "BOKSTAV_A", "folketrygdloven", "1970-01-01"),
+                    lovhjemmel = ApiLovhjemmel("8-28", "LEDD_1", "BOKSTAV_A", "folketrygdloven", "1970-01-01"),
                     refusjonsopplysninger = null,
                     fraRefusjonsopplysninger = null,
                     begrunnelse = "en begrunnelse",
@@ -1137,7 +1137,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                     deaktivert = true,
                     begrunnelse = "begrunnelse",
                     forklaring = "forklaring",
-                    lovhjemmel = Lovhjemmel("8-15", null, null, "folketrygdloven", "1998-12-18"),
+                    lovhjemmel = ApiLovhjemmel("8-15", null, null, "folketrygdloven", "1998-12-18"),
                 ),
             ),
     ) {
