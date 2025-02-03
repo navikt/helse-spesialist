@@ -32,7 +32,7 @@ data class ApiArbeidsgiverInntekterFraAOrdningen(
 interface ApiOverstyring {
     val hendelseId: UUID
     val timestamp: LocalDateTime
-    val saksbehandler: Saksbehandler
+    val saksbehandler: ApiSaksbehandler
     val ferdigstilt: Boolean
     val vedtaksperiodeId: UUID
 }
@@ -41,7 +41,7 @@ interface ApiOverstyring {
 data class ApiDagoverstyring(
     override val hendelseId: UUID,
     override val timestamp: LocalDateTime,
-    override val saksbehandler: Saksbehandler,
+    override val saksbehandler: ApiSaksbehandler,
     override val ferdigstilt: Boolean,
     val dager: List<ApiOverstyrtDag>,
     val begrunnelse: String,
@@ -61,7 +61,7 @@ data class ApiDagoverstyring(
 data class ApiInntektoverstyring(
     override val hendelseId: UUID,
     override val timestamp: LocalDateTime,
-    override val saksbehandler: Saksbehandler,
+    override val saksbehandler: ApiSaksbehandler,
     override val ferdigstilt: Boolean,
     val inntekt: ApiOverstyrtInntekt,
     override val vedtaksperiodeId: UUID,
@@ -89,7 +89,7 @@ data class ApiInntektoverstyring(
 data class ApiMinimumSykdomsgradOverstyring(
     override val hendelseId: UUID,
     override val timestamp: LocalDateTime,
-    override val saksbehandler: Saksbehandler,
+    override val saksbehandler: ApiSaksbehandler,
     override val ferdigstilt: Boolean,
     val minimumSykdomsgrad: ApiOverstyrtMinimumSykdomsgrad,
     override val vedtaksperiodeId: UUID,
@@ -114,7 +114,7 @@ data class ApiMinimumSykdomsgradOverstyring(
 data class ApiSykepengegrunnlagskjonnsfastsetting(
     override val hendelseId: UUID,
     override val timestamp: LocalDateTime,
-    override val saksbehandler: Saksbehandler,
+    override val saksbehandler: ApiSaksbehandler,
     override val ferdigstilt: Boolean,
     val skjonnsfastsatt: ApiSkjonnsfastsattSykepengegrunnlag,
     override val vedtaksperiodeId: UUID,
@@ -137,7 +137,7 @@ data class ApiSykepengegrunnlagskjonnsfastsetting(
 data class ApiArbeidsforholdoverstyring(
     override val hendelseId: UUID,
     override val timestamp: LocalDateTime,
-    override val saksbehandler: Saksbehandler,
+    override val saksbehandler: ApiSaksbehandler,
     override val ferdigstilt: Boolean,
     val deaktivert: Boolean,
     val skjaeringstidspunkt: LocalDate,

@@ -9,7 +9,8 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-data class Infotrygdutbetaling(
+@GraphQLName("Infotrygdutbetaling")
+data class ApiInfotrygdutbetaling(
     val fom: String,
     val tom: String,
     val grad: String,
@@ -18,40 +19,47 @@ data class Infotrygdutbetaling(
     val organisasjonsnummer: String,
 )
 
-data class Saksbehandler(
+@GraphQLName("Saksbehandler")
+data class ApiSaksbehandler(
     val navn: String,
     val ident: String?,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class Reservasjon(
+@GraphQLName("Reservasjon")
+data class ApiReservasjon(
     val kanVarsles: Boolean,
     val reservert: Boolean,
 )
 
-data class UnntattFraAutomatiskGodkjenning(
+@GraphQLName("UnntattFraAutomatiskGodkjenning")
+data class ApiUnntattFraAutomatiskGodkjenning(
     val erUnntatt: Boolean,
     val arsaker: List<String>,
     val tidspunkt: LocalDateTime?,
 )
 
-data class Enhet(
+@GraphQLName("Enhet")
+data class ApiEnhet(
     val id: String,
     val navn: String,
 )
 
-data class Tildeling(
+@GraphQLName("Tildeling")
+data class ApiTildeling(
     val navn: String,
     val epost: String,
     val oid: UUID,
 )
 
-data class PaVent(
+@GraphQLName("PaVent")
+data class ApiPaVent(
     val frist: LocalDate?,
     val oid: UUID,
 )
 
-data class Avslag(
+@GraphQLName("Avslag")
+data class ApiAvslag(
     val type: Avslagstype,
     val begrunnelse: String,
     val opprettet: LocalDateTime,
@@ -59,14 +67,16 @@ data class Avslag(
     val invalidert: Boolean,
 )
 
-data class VedtakBegrunnelse(
+@GraphQLName("VedtakBegrunnelse")
+data class ApiVedtakBegrunnelse(
     val utfall: VedtakUtfall,
     val begrunnelse: String?,
     val opprettet: LocalDateTime,
     val saksbehandlerIdent: String,
 )
 
-data class Annullering(
+@GraphQLName("Annullering")
+data class ApiAnnullering(
     val saksbehandlerIdent: String,
     val arbeidsgiverFagsystemId: String?,
     val personFagsystemId: String?,
@@ -87,15 +97,15 @@ interface PersonSchema {
 
     fun personinfo(): ApiPersoninfo
 
-    fun enhet(): Enhet
+    fun enhet(): ApiEnhet
 
-    fun tildeling(): Tildeling?
+    fun tildeling(): ApiTildeling?
 
     fun tilleggsinfoForInntektskilder(): List<ApiTilleggsinfoForInntektskilde>
 
     fun arbeidsgivere(): List<ApiArbeidsgiver>
 
-    fun infotrygdutbetalinger(): List<Infotrygdutbetaling>?
+    fun infotrygdutbetalinger(): List<ApiInfotrygdutbetaling>?
 
     fun vilkarsgrunnlag(): List<ApiVilkårsgrunnlag>
 }

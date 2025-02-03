@@ -18,7 +18,7 @@ import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettSnapshotGenera
 import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettSnapshotHendelse
 import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettUberegnetPeriode
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagstype
-import no.nav.helse.spesialist.api.graphql.schema.Avslag
+import no.nav.helse.spesialist.api.graphql.schema.ApiAvslag
 import no.nav.helse.spesialist.api.graphql.schema.Handling
 import no.nav.helse.spesialist.api.graphql.schema.Periodehandling
 import no.nav.helse.spesialist.api.januar
@@ -356,7 +356,7 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
             saksbehandlerhåndterer.hentAvslag(any(), any())
         } returns
             setOf(
-                Avslag(
+                ApiAvslag(
                     type = Avslagstype.AVSLAG,
                     begrunnelse = avslagsbegrunnelse,
                     opprettet = LocalDateTime.now(),

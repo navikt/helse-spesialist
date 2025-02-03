@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.api
 
-import no.nav.helse.spesialist.api.graphql.schema.UnntattFraAutomatiskGodkjenning
+import no.nav.helse.spesialist.api.graphql.schema.ApiUnntattFraAutomatiskGodkjenning
 
 interface StansAutomatiskBehandlinghåndterer {
-    fun unntattFraAutomatiskGodkjenning(fødselsnummer: String): UnntattFraAutomatiskGodkjenning
+    fun unntattFraAutomatiskGodkjenning(fødselsnummer: String): ApiUnntattFraAutomatiskGodkjenning
 }

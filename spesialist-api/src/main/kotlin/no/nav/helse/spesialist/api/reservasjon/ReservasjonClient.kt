@@ -13,7 +13,7 @@ import io.micrometer.core.instrument.Timer
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.helse.spesialist.api.client.AccessTokenClient
-import no.nav.helse.spesialist.api.graphql.schema.Reservasjon
+import no.nav.helse.spesialist.api.graphql.schema.ApiReservasjon
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -33,7 +33,7 @@ private val statusEtterKallReservasjonsstatusBuilder =
         .tags(listOf(Tag.of("status", "success"), Tag.of("status", "failure")))
 
 interface ReservasjonClient {
-    suspend fun hentReservasjonsstatus(fnr: String): Reservasjon?
+    suspend fun hentReservasjonsstatus(fnr: String): ApiReservasjon?
 }
 
 class KRRClient(
@@ -45,7 +45,7 @@ class KRRClient(
     private val logg: Logger = LoggerFactory.getLogger(this.javaClass)
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
-    override suspend fun hentReservasjonsstatus(fnr: String): Reservasjon? {
+    override suspend fun hentReservasjonsstatus(fnr: String): ApiReservasjon? {
         val sample = Timer.start(registry)
         return try {
             logg.debug("Henter accessToken")
@@ -60,7 +60,7 @@ class KRRClient(
                         header("Nav-Personident", fnr)
                         header("Nav-Call-Id", callId)
                         accept(ContentType.Application.Json)
-                    }.body<Reservasjon>()
+                    }.body<ApiReservasjon>()
 
             statusEtterKallReservasjonsstatusBuilder
                 .withRegistry(registry)

@@ -18,20 +18,20 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdoverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.schema.ApiDagoverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiDagtype
+import no.nav.helse.spesialist.api.graphql.schema.ApiEnhet
 import no.nav.helse.spesialist.api.graphql.schema.ApiGhostPeriode
+import no.nav.helse.spesialist.api.graphql.schema.ApiInfotrygdutbetaling
 import no.nav.helse.spesialist.api.graphql.schema.ApiInntektoverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiMinimumSykdomsgradOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiNyttInntektsforholdPeriode
 import no.nav.helse.spesialist.api.graphql.schema.ApiPersoninfo
+import no.nav.helse.spesialist.api.graphql.schema.ApiSaksbehandler
 import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettingstype
 import no.nav.helse.spesialist.api.graphql.schema.ApiSykepengegrunnlagskjonnsfastsetting
+import no.nav.helse.spesialist.api.graphql.schema.ApiTildeling
 import no.nav.helse.spesialist.api.graphql.schema.ApiTilleggsinfoForInntektskilde
 import no.nav.helse.spesialist.api.graphql.schema.ApiVilkårsgrunnlag
-import no.nav.helse.spesialist.api.graphql.schema.Enhet
-import no.nav.helse.spesialist.api.graphql.schema.Infotrygdutbetaling
 import no.nav.helse.spesialist.api.graphql.schema.PersonSchema
-import no.nav.helse.spesialist.api.graphql.schema.Saksbehandler
-import no.nav.helse.spesialist.api.graphql.schema.Tildeling
 import no.nav.helse.spesialist.api.graphql.schema.tilVilkarsgrunnlag
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.overstyring.Dagtype
@@ -76,11 +76,11 @@ data class ApiPersonResolver(
 
     override fun personinfo(): ApiPersoninfo = personinfo
 
-    override fun enhet(): Enhet = personApiDao.finnEnhet(snapshot.fodselsnummer).let { Enhet(it.id, it.navn) }
+    override fun enhet(): ApiEnhet = personApiDao.finnEnhet(snapshot.fodselsnummer).let { ApiEnhet(it.id, it.navn) }
 
-    override fun tildeling(): Tildeling? =
+    override fun tildeling(): ApiTildeling? =
         tildelingApiDao.tildelingForPerson(snapshot.fodselsnummer)?.let {
-            Tildeling(
+            ApiTildeling(
                 navn = it.navn,
                 epost = it.epost,
                 oid = it.oid,
@@ -146,7 +146,7 @@ data class ApiPersonResolver(
     }
 
     @Suppress("unused")
-    override fun infotrygdutbetalinger(): List<Infotrygdutbetaling>? =
+    override fun infotrygdutbetalinger(): List<ApiInfotrygdutbetaling>? =
         personApiDao
             .finnInfotrygdutbetalinger(snapshot.fodselsnummer)
             ?.let { objectMapper.readValue(it) }
@@ -185,7 +185,7 @@ private fun OverstyringTidslinjeDto.tilDagoverstyring() =
         begrunnelse = begrunnelse,
         timestamp = timestamp,
         saksbehandler =
-            Saksbehandler(
+            ApiSaksbehandler(
                 navn = saksbehandlerNavn,
                 ident = saksbehandlerIdent,
             ),
@@ -228,7 +228,7 @@ private fun OverstyringInntektDto.tilInntektoverstyring() =
         hendelseId = hendelseId,
         timestamp = timestamp,
         saksbehandler =
-            Saksbehandler(
+            ApiSaksbehandler(
                 navn = saksbehandlerNavn,
                 ident = saksbehandlerIdent,
             ),
@@ -266,7 +266,7 @@ private fun OverstyringArbeidsforholdDto.tilArbeidsforholdoverstyring() =
         begrunnelse = begrunnelse,
         timestamp = timestamp,
         saksbehandler =
-            Saksbehandler(
+            ApiSaksbehandler(
                 navn = saksbehandlerNavn,
                 ident = saksbehandlerIdent,
             ),
@@ -282,7 +282,7 @@ private fun SkjønnsfastsettingSykepengegrunnlagDto.tilSykepengegrunnlagSkjønns
         hendelseId = hendelseId,
         timestamp = timestamp,
         saksbehandler =
-            Saksbehandler(
+            ApiSaksbehandler(
                 navn = saksbehandlerNavn,
                 ident = saksbehandlerIdent,
             ),
@@ -314,7 +314,7 @@ private fun OverstyringMinimumSykdomsgradDto.tilMinimumSykdomsgradOverstyring() 
         hendelseId = hendelseId,
         timestamp = timestamp,
         saksbehandler =
-            Saksbehandler(
+            ApiSaksbehandler(
                 navn = saksbehandlerNavn,
                 ident = saksbehandlerIdent,
             ),

@@ -71,6 +71,7 @@ import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutation.VedtakResulta
 import no.nav.helse.spesialist.api.graphql.mutation.VedtakUtfall
 import no.nav.helse.spesialist.api.graphql.schema.ApiAnnulleringData
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdOverstyringHandling
+import no.nav.helse.spesialist.api.graphql.schema.ApiAvslag
 import no.nav.helse.spesialist.api.graphql.schema.ApiInntektOgRefusjonOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiMinimumSykdomsgrad
 import no.nav.helse.spesialist.api.graphql.schema.ApiOpptegnelse
@@ -81,8 +82,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse.ApiSkjo
 import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse.ApiSkjonnsfastsettelseArbeidsgiver.ApiSkjonnsfastsettelseType.OMREGNET_ARSINNTEKT
 import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse.ApiSkjonnsfastsettelseArbeidsgiver.ApiSkjonnsfastsettelseType.RAPPORTERT_ARSINNTEKT
 import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
-import no.nav.helse.spesialist.api.graphql.schema.Avslag
-import no.nav.helse.spesialist.api.graphql.schema.VedtakBegrunnelse
+import no.nav.helse.spesialist.api.graphql.schema.ApiVedtakBegrunnelse
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
@@ -448,7 +448,7 @@ class SaksbehandlerMediator(
     override fun hentAvslag(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
-    ): Set<Avslag> =
+    ): Set<ApiAvslag> =
         vedtakBegrunnelseDao.finnAlleVedtakBegrunnelser(vedtaksperiodeId, utbetalingId)
             .mapNotNull { vedtakBegrunnelse ->
                 when (vedtakBegrunnelse.type) {
@@ -456,7 +456,7 @@ class SaksbehandlerMediator(
                     VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE -> Avslagstype.DELVIS_AVSLAG
                     VedtakBegrunnelseTypeFraDatabase.INNVILGELSE -> null
                 }?.let { type ->
-                    Avslag(
+                    ApiAvslag(
                         type = type,
                         begrunnelse = vedtakBegrunnelse.begrunnelse,
                         opprettet = vedtakBegrunnelse.opprettet,
@@ -469,10 +469,10 @@ class SaksbehandlerMediator(
     override fun hentVedtakBegrunnelser(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
-    ): List<VedtakBegrunnelse> =
+    ): List<ApiVedtakBegrunnelse> =
         vedtakBegrunnelseDao.finnAlleVedtakBegrunnelser(vedtaksperiodeId, utbetalingId)
             .map { vedtakBegrunnelse ->
-                VedtakBegrunnelse(
+                ApiVedtakBegrunnelse(
                     utfall =
                         when (vedtakBegrunnelse.type) {
                             VedtakBegrunnelseTypeFraDatabase.AVSLAG -> VedtakUtfall.AVSLAG

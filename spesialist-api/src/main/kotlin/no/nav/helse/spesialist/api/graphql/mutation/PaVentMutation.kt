@@ -15,8 +15,8 @@ import no.nav.helse.spesialist.api.feilhåndtering.FinnerIkkeLagtPåVent
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
+import no.nav.helse.spesialist.api.graphql.schema.ApiPaVent
 import no.nav.helse.spesialist.api.graphql.schema.ApiPaVentRequest
-import no.nav.helse.spesialist.api.graphql.schema.PaVent
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -37,7 +37,7 @@ class PaVentMutation(
         tildeling: Boolean,
         arsaker: List<ApiPaVentRequest.ApiPaVentArsak>? = emptyList(),
         env: DataFetchingEnvironment,
-    ): DataFetcherResult<PaVent?> {
+    ): DataFetcherResult<ApiPaVent?> {
         val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
         return withContext(Dispatchers.IO) {
             try {
@@ -52,20 +52,20 @@ class PaVentMutation(
                     ),
                     saksbehandler,
                 )
-                newResult<PaVent?>()
+                newResult<ApiPaVent?>()
                     .data(
-                        PaVent(
+                        ApiPaVent(
                             frist = frist,
                             oid = saksbehandler.oid,
                         ),
                     ).build()
             } catch (e: OppgaveIkkeTildelt) {
-                newResult<PaVent?>().error(ikkeTildeltError(e)).build()
+                newResult<ApiPaVent?>().error(ikkeTildeltError(e)).build()
             } catch (e: OppgaveTildeltNoenAndre) {
-                newResult<PaVent?>().error(tildeltNoenAndreError(e)).build()
+                newResult<ApiPaVent?>().error(tildeltNoenAndreError(e)).build()
             } catch (e: RuntimeException) {
                 sikkerlogg.error(e)
-                newResult<PaVent?>().error(getUpdateError(oppgaveId)).build()
+                newResult<ApiPaVent?>().error(getUpdateError(oppgaveId)).build()
             }
         }
     }
@@ -98,7 +98,7 @@ class PaVentMutation(
         tildeling: Boolean,
         arsaker: List<ApiPaVentRequest.ApiPaVentArsak>,
         env: DataFetchingEnvironment,
-    ): DataFetcherResult<PaVent?> {
+    ): DataFetcherResult<ApiPaVent?> {
         val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
         return withContext(Dispatchers.IO) {
             try {
@@ -113,19 +113,19 @@ class PaVentMutation(
                     ),
                     saksbehandler,
                 )
-                newResult<PaVent?>()
+                newResult<ApiPaVent?>()
                     .data(
-                        PaVent(
+                        ApiPaVent(
                             frist = frist,
                             oid = saksbehandler.oid,
                         ),
                     ).build()
             } catch (e: FinnerIkkeLagtPåVent) {
                 e.logger()
-                newResult<PaVent>().error(getUpdateError(oppgaveId)).build()
+                newResult<ApiPaVent>().error(getUpdateError(oppgaveId)).build()
             } catch (e: RuntimeException) {
                 sikkerlogg.error(e)
-                newResult<PaVent?>().error(getUpdateError(oppgaveId)).build()
+                newResult<ApiPaVent?>().error(getUpdateError(oppgaveId)).build()
             }
         }
     }

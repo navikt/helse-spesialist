@@ -31,7 +31,7 @@ import no.nav.helse.spesialist.api.graphql.query.PersonoppslagService
 import no.nav.helse.spesialist.api.graphql.resolvers.ApiPersonResolver
 import no.nav.helse.spesialist.api.graphql.schema.ApiPerson
 import no.nav.helse.spesialist.api.graphql.schema.ApiPersoninfo
-import no.nav.helse.spesialist.api.graphql.schema.Reservasjon
+import no.nav.helse.spesialist.api.graphql.schema.ApiReservasjon
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import no.nav.helse.spesialist.api.saksbehandler.manglerTilgang
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
@@ -112,7 +112,7 @@ class PersonService(
     private suspend fun person(
         fødselsnummer: String,
         snapshot: Pair<ApiPersoninfo, GraphQLPerson>,
-        reservasjon: Deferred<Reservasjon?>,
+        reservasjon: Deferred<ApiReservasjon?>,
     ): FetchPersonResult.Ok {
         val (personinfo, personSnapshot) = snapshot
         return FetchPersonResult.Ok(
@@ -148,7 +148,7 @@ class PersonService(
 
     private fun finnReservasjonsstatus(fødselsnummer: String) =
         if (env.erDev) {
-            CompletableDeferred<Reservasjon?>().also { it.complete(null) }
+            CompletableDeferred<ApiReservasjon?>().also { it.complete(null) }
         } else {
             CoroutineScope(Dispatchers.IO).async {
                 reservasjonClient.hentReservasjonsstatus(fødselsnummer)

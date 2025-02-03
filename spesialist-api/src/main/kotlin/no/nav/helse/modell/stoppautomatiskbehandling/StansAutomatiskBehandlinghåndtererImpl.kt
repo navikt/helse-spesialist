@@ -9,7 +9,7 @@ import no.nav.helse.modell.NotatType
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.handlinger.Personhandling
 import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
-import no.nav.helse.spesialist.api.graphql.schema.UnntattFraAutomatiskGodkjenning
+import no.nav.helse.spesialist.api.graphql.schema.ApiUnntattFraAutomatiskGodkjenning
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -30,7 +30,7 @@ class StansAutomatiskBehandlinghåndtererImpl(
         lagreNotat(handling.gjelderFødselsnummer(), handling.begrunnelse(), saksbehandler.oid())
     }
 
-    override fun unntattFraAutomatiskGodkjenning(fødselsnummer: String): UnntattFraAutomatiskGodkjenning =
+    override fun unntattFraAutomatiskGodkjenning(fødselsnummer: String): ApiUnntattFraAutomatiskGodkjenning =
         stansAutomatiskBehandlingDao
             .hentFor(fødselsnummer)
             .filtrerGjeldendeStopp()
@@ -69,13 +69,13 @@ class StansAutomatiskBehandlinghåndtererImpl(
 
     private fun List<StansAutomatiskBehandlingFraDatabase>.tilUnntattFraAutomatiskGodkjenning() =
         if (isEmpty()) {
-            UnntattFraAutomatiskGodkjenning(
+            ApiUnntattFraAutomatiskGodkjenning(
                 erUnntatt = false,
                 arsaker = emptyList(),
                 tidspunkt = null,
             )
         } else {
-            UnntattFraAutomatiskGodkjenning(
+            ApiUnntattFraAutomatiskGodkjenning(
                 erUnntatt = true,
                 arsaker = flatMap { it.årsaker.map(StoppknappÅrsak::name) },
                 tidspunkt = last().opprettet,

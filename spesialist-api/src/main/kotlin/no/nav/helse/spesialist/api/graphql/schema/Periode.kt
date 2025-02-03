@@ -743,29 +743,29 @@ data class BeregnetPeriode(
             )
         }
 
-    fun paVent(): PaVent? =
+    fun paVent(): ApiPaVent? =
         påVentApiDao.hentAktivPåVent(vedtaksperiodeId())?.let {
-            PaVent(
+            ApiPaVent(
                 frist = it.frist,
                 oid = it.oid,
             )
         }
 
-    fun avslag(): List<Avslag> = saksbehandlerhåndterer.hentAvslag(periode.vedtaksperiodeId, periode.utbetaling.id).toList()
+    fun avslag(): List<ApiAvslag> = saksbehandlerhåndterer.hentAvslag(periode.vedtaksperiodeId, periode.utbetaling.id).toList()
 
-    fun vedtakBegrunnelser(): List<VedtakBegrunnelse> =
+    fun vedtakBegrunnelser(): List<ApiVedtakBegrunnelse> =
         saksbehandlerhåndterer.hentVedtakBegrunnelser(
             periode.vedtaksperiodeId,
             periode.utbetaling.id,
         )
 
-    fun annullering(): Annullering? =
+    fun annullering(): ApiAnnullering? =
         if (erSisteGenerasjon) {
             saksbehandlerhåndterer.hentAnnullering(
                 periode.utbetaling.arbeidsgiverFagsystemId,
                 periode.utbetaling.personFagsystemId,
             )?.let {
-                Annullering(
+                ApiAnnullering(
                     saksbehandlerIdent = it.saksbehandlerIdent,
                     arbeidsgiverFagsystemId = it.arbeidsgiverFagsystemId,
                     personFagsystemId = it.personFagsystemId,

@@ -13,7 +13,7 @@ import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
-import no.nav.helse.spesialist.api.graphql.schema.Tildeling
+import no.nav.helse.spesialist.api.graphql.schema.ApiTildeling
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
@@ -31,18 +31,18 @@ class TildelingMutation(
     suspend fun opprettTildeling(
         oppgaveId: String,
         env: DataFetchingEnvironment,
-    ): DataFetcherResult<Tildeling?> {
+    ): DataFetcherResult<ApiTildeling?> {
         val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
         return withContext(Dispatchers.IO) {
             try {
                 saksbehandlerhåndterer.håndter(TildelOppgave(oppgaveId.toLong()), saksbehandler)
-                newResult<Tildeling?>().data(
-                    Tildeling(saksbehandler.navn, saksbehandler.epost, saksbehandler.oid),
+                newResult<ApiTildeling?>().data(
+                    ApiTildeling(saksbehandler.navn, saksbehandler.epost, saksbehandler.oid),
                 ).build()
             } catch (e: OppgaveTildeltNoenAndre) {
-                newResult<Tildeling?>().error(alleredeTildeltError(e)).build()
+                newResult<ApiTildeling?>().error(alleredeTildeltError(e)).build()
             } catch (e: RuntimeException) {
-                newResult<Tildeling?>().error(getUpdateError(oppgaveId)).build()
+                newResult<ApiTildeling?>().error(getUpdateError(oppgaveId)).build()
             }
         }
     }

@@ -16,9 +16,9 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveegenskap
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavetype
 import no.nav.helse.spesialist.api.graphql.schema.ApiPaVentInfo
 import no.nav.helse.spesialist.api.graphql.schema.ApiPersonnavn
+import no.nav.helse.spesialist.api.graphql.schema.ApiTildeling
 import no.nav.helse.spesialist.api.graphql.schema.Kommentar
 import no.nav.helse.spesialist.api.graphql.schema.Periodetype
-import no.nav.helse.spesialist.api.graphql.schema.Tildeling
 import no.nav.helse.spesialist.api.graphql.schema.ApiEgenskap as EgenskapForApi
 
 internal object OppgaveMapper {
@@ -61,7 +61,7 @@ internal object OppgaveMapper {
                 aktorId = oppgave.aktørId,
                 tildeling =
                     oppgave.tildelt?.let { tildelt ->
-                        Tildeling(
+                        ApiTildeling(
                             tildelt.navn,
                             tildelt.epostadresse,
                             tildelt.oid,

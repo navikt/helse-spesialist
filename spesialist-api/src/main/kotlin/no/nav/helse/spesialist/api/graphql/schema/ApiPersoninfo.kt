@@ -28,6 +28,6 @@ data class ApiPersoninfo(
     val kjonn: ApiKjonn,
     val adressebeskyttelse: ApiAdressebeskyttelse,
     val fullmakt: Boolean? = null,
-    val reservasjon: Reservasjon? = null,
-    val unntattFraAutomatisering: UnntattFraAutomatiskGodkjenning? = null,
+    val reservasjon: ApiReservasjon? = null,
+    val unntattFraAutomatisering: ApiUnntattFraAutomatiskGodkjenning? = null,
 )

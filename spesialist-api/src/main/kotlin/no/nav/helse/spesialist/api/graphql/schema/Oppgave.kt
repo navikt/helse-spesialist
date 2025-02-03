@@ -130,7 +130,7 @@ data class ApiOppgaveTilBehandling(
     val vedtaksperiodeId: UUID,
     val navn: ApiPersonnavn,
     val aktorId: String,
-    val tildeling: Tildeling?,
+    val tildeling: ApiTildeling?,
     val egenskaper: List<ApiOppgaveegenskap>,
     val periodetype: Periodetype,
     val oppgavetype: ApiOppgavetype,

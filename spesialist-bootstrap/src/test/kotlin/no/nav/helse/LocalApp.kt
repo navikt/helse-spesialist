@@ -25,7 +25,7 @@ import no.nav.helse.rapids_rivers.RapidApplication.Builder
 import no.nav.helse.spesialist.api.AzureConfig
 import no.nav.helse.spesialist.api.bootstrap.Gruppe
 import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
-import no.nav.helse.spesialist.api.graphql.schema.Reservasjon
+import no.nav.helse.spesialist.api.graphql.schema.ApiReservasjon
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import no.nav.helse.spesialist.api.snapshot.ISnapshotClient
 import no.nav.helse.spleis.graphql.HentSnapshot
@@ -143,7 +143,7 @@ private val snapshotClient =
 
 private val reservasjonClient =
     object : ReservasjonClient {
-        override suspend fun hentReservasjonsstatus(fnr: String): Reservasjon? {
+        override suspend fun hentReservasjonsstatus(fnr: String): ApiReservasjon? {
             return null
         }
     }
