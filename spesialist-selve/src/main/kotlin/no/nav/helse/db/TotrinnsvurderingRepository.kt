@@ -1,7 +1,11 @@
 package no.nav.helse.db
 
+import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 
 interface TotrinnsvurderingRepository {
-    fun finnTotrinnsvurdering(fødselsnummer: String): Totrinnsvurdering?
+    fun finnTotrinnsvurdering(
+        fødselsnummer: String,
+        tilgangskontroll: Tilgangskontroll,
+    ): Totrinnsvurdering?
 }

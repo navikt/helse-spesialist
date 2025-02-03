@@ -19,7 +19,6 @@ class PgTotrinnsvurderingRepositoryTest {
         overstyringDao,
         saksbehandlerDao,
         totrinnsvurderingDao,
-        mockk(relaxed = true)
     )
 
     @Test
@@ -28,7 +27,7 @@ class PgTotrinnsvurderingRepositoryTest {
 
         every { totrinnsvurderingDao.hentAktivTotrinnsvurdering(fødselsnummer) } returns null
 
-        val result: Totrinnsvurdering? = repository.finnTotrinnsvurdering(fødselsnummer)
+        val result: Totrinnsvurdering? = repository.finnTotrinnsvurdering(fødselsnummer, mockk(relaxed = true))
 
         assertNull(result)
     }
@@ -42,7 +41,7 @@ class PgTotrinnsvurderingRepositoryTest {
         ))
         every { overstyringDao.finnOverstyringer(fødselsnummer) } returns listOf(mockk(relaxed = true))
 
-        val result = repository.finnTotrinnsvurdering(fødselsnummer)
+        val result = repository.finnTotrinnsvurdering(fødselsnummer, mockk(relaxed = true))
 
         assertNotNull(result)
         assertEquals(1, result?.overstyringer()?.size)

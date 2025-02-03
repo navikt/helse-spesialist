@@ -35,9 +35,11 @@ class PgTotrinnsvurderingRepository(
     private val overstyringDao: PgOverstyringDao,
     private val saksbehandlerDao: PgSaksbehandlerDao,
     private val totrinnsvurderingDao: PgTotrinnsvurderingDao,
-    private val tilgangskontroll: Tilgangskontroll,
 ) : TotrinnsvurderingRepository {
-    override fun finnTotrinnsvurdering(fødselsnummer: String): Totrinnsvurdering? {
+    override fun finnTotrinnsvurdering(
+        fødselsnummer: String,
+        tilgangskontroll: Tilgangskontroll,
+    ): Totrinnsvurdering? {
         val (id, totrinnsvurdering) = totrinnsvurderingDao.hentAktivTotrinnsvurdering(fødselsnummer) ?: return null
 
         return Totrinnsvurdering(
