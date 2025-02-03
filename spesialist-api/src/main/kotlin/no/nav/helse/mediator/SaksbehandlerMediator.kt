@@ -66,7 +66,7 @@ import no.nav.helse.spesialist.api.feilhåndtering.IkkeTilgang
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.graphql.mutation.Avslagshandling
-import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutation.VedtakResultat
+import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutationHandler.VedtakResultat
 import no.nav.helse.spesialist.api.graphql.schema.ApiAnnulleringData
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdOverstyringHandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiAvslag

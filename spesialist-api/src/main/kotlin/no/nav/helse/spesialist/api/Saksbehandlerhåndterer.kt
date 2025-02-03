@@ -2,7 +2,7 @@ package no.nav.helse.spesialist.api
 
 import no.nav.helse.modell.Annullering
 import no.nav.helse.spesialist.api.feilhåndtering.Modellfeil
-import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutation
+import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutationHandler
 import no.nav.helse.spesialist.api.graphql.schema.ApiAvslag
 import no.nav.helse.spesialist.api.graphql.schema.ApiOpptegnelse
 import no.nav.helse.spesialist.api.graphql.schema.ApiPaVentRequest
@@ -41,7 +41,7 @@ interface Saksbehandlerhåndterer {
         oppgavereferanse: Long,
         godkjent: Boolean,
         avslag: no.nav.helse.spesialist.api.graphql.mutation.Avslag?,
-    ): VedtakMutation.VedtakResultat
+    ): VedtakMutationHandler.VedtakResultat
 
     fun vedtak(
         saksbehandlerFraApi: SaksbehandlerFraApi,
@@ -49,13 +49,13 @@ interface Saksbehandlerhåndterer {
         godkjent: Boolean,
         utfall: ApiVedtakUtfall,
         begrunnelse: String?,
-    ): VedtakMutation.VedtakResultat
+    ): VedtakMutationHandler.VedtakResultat
 
     fun infotrygdVedtak(
         saksbehandlerFraApi: SaksbehandlerFraApi,
         oppgavereferanse: Long,
         godkjent: Boolean,
-    ): VedtakMutation.VedtakResultat
+    ): VedtakMutationHandler.VedtakResultat
 
     fun håndter(
         handlingFraApi: HandlingFraApi,

@@ -48,6 +48,7 @@ import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutationHan
 import no.nav.helse.spesialist.api.graphql.mutation.VarselMutation
 import no.nav.helse.spesialist.api.graphql.mutation.VarselMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutation
+import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutationHandler
 import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQuery
 import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.DokumentQuery
@@ -180,8 +181,11 @@ class SchemaBuilder(
                     ),
             ),
             VedtakMutation(
-                saksbehandlerhåndterer = saksbehandlerhåndterer,
-                godkjenninghåndterer = godkjenninghåndterer,
+                handler =
+                    VedtakMutationHandler(
+                        saksbehandlerhåndterer = saksbehandlerhåndterer,
+                        godkjenninghåndterer = godkjenninghåndterer,
+                    ),
             ),
             PersonMutation(
                 handler = PersonMutationHandler(personhåndterer = personhåndterer),

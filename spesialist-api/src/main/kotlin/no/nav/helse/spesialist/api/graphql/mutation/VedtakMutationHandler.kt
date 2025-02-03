@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.graphql.mutation
 
-import com.expediagroup.graphql.server.operations.Mutation
 import graphql.GraphQLError
 import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
@@ -20,20 +19,19 @@ import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-class VedtakMutation(
+class VedtakMutationHandler(
     private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
     private val godkjenninghåndterer: Godkjenninghåndterer,
-) : Mutation {
+) : VedtakMutationSchema {
     private companion object {
-        private val logg = LoggerFactory.getLogger(VedtakMutation::class.java)
+        private val logg = LoggerFactory.getLogger(VedtakMutationHandler::class.java)
     }
 
-    @Suppress("unused")
-    suspend fun fattVedtak(
+    override suspend fun fattVedtak(
         oppgavereferanse: String,
         env: DataFetchingEnvironment,
         utfall: ApiVedtakUtfall,
-        begrunnelse: String? = null,
+        begrunnelse: String?,
     ): DataFetcherResult<Boolean> =
         withContext(Dispatchers.IO) {
             val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
@@ -71,8 +69,7 @@ class VedtakMutation(
             }
         }
 
-    @Suppress("unused")
-    suspend fun sendTilInfotrygd(
+    override suspend fun sendTilInfotrygd(
         oppgavereferanse: String,
         arsak: String,
         begrunnelser: List<String>,
