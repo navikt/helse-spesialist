@@ -2,7 +2,6 @@ package no.nav.helse.spesialist.api.graphql.schema
 
 import com.expediagroup.graphql.generator.annotations.GraphQLIgnore
 import com.expediagroup.graphql.generator.annotations.GraphQLName
-import no.nav.helse.spleis.graphql.hentsnapshot.Alder
 import no.nav.helse.spleis.graphql.hentsnapshot.Sykepengedager
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -147,7 +146,7 @@ data class ApiUtbetaling(
 
 @GraphQLName("Periodevilkar")
 data class ApiPeriodevilkar(
-    val alder: Alder,
+    val alder: ApiAlder,
     val sykepengedager: Sykepengedager,
 )
 
@@ -391,3 +390,9 @@ enum class ApiPeriodehistorikkType {
     FJERN_FRA_PA_VENT,
     STANS_AUTOMATISK_BEHANDLING,
 }
+
+@GraphQLName("Alder")
+data class ApiAlder(
+    val alderSisteSykedag: Int,
+    val oppfylt: Boolean,
+)

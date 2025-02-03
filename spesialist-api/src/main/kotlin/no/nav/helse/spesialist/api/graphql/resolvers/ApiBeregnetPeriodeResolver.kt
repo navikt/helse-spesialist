@@ -22,6 +22,7 @@ import no.nav.helse.spesialist.api.graphql.mapping.tilApiPeriodehistorikkType
 import no.nav.helse.spesialist.api.graphql.mapping.tilApiPeriodetilstand
 import no.nav.helse.spesialist.api.graphql.mapping.tilApiPeriodetype
 import no.nav.helse.spesialist.api.graphql.mapping.toVarselDto
+import no.nav.helse.spesialist.api.graphql.schema.ApiAlder
 import no.nav.helse.spesialist.api.graphql.schema.ApiAnnullering
 import no.nav.helse.spesialist.api.graphql.schema.ApiAvslag
 import no.nav.helse.spesialist.api.graphql.schema.ApiDag
@@ -253,7 +254,13 @@ data class ApiBeregnetPeriodeResolver(
 
     override fun periodevilkar(): ApiPeriodevilkar =
         ApiPeriodevilkar(
-            alder = periode.periodevilkar.alder,
+            alder =
+                periode.periodevilkar.alder.let {
+                    ApiAlder(
+                        alderSisteSykedag = it.alderSisteSykedag,
+                        oppfylt = it.oppfylt,
+                    )
+                },
             sykepengedager = periode.periodevilkar.sykepengedager,
         )
 
