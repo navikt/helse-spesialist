@@ -3,8 +3,6 @@ package no.nav.helse.spesialist.api.graphql.mutation
 import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdOverstyringHandling
@@ -19,53 +17,50 @@ class OverstyringMutationHandler(private val saksbehandlerhåndterer: Saksbehand
         private val logg: Logger = LoggerFactory.getLogger(OverstyringMutationHandler::class.java)
     }
 
-    override suspend fun overstyrDager(
+    override fun overstyrDager(
         overstyring: ApiTidslinjeOverstyring,
         env: DataFetchingEnvironment,
-    ): DataFetcherResult<Boolean> =
-        withContext(Dispatchers.IO) {
-            val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
-            try {
-                withContext(Dispatchers.IO) { saksbehandlerhåndterer.håndter(overstyring, saksbehandler) }
-            } catch (e: Exception) {
-                val feilmelding = "Kunne ikke overstyre dager"
-                logg.error(feilmelding, e)
-                return@withContext lagFeilrespons(feilmelding)
-            }
+    ): DataFetcherResult<Boolean> {
+        val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
+        return try {
+            saksbehandlerhåndterer.håndter(overstyring, saksbehandler)
             DataFetcherResult.newResult<Boolean>().data(true).build()
+        } catch (e: Exception) {
+            val feilmelding = "Kunne ikke overstyre dager"
+            logg.error(feilmelding, e)
+            lagFeilrespons(feilmelding)
         }
+    }
 
-    override suspend fun overstyrInntektOgRefusjon(
+    override fun overstyrInntektOgRefusjon(
         overstyring: ApiInntektOgRefusjonOverstyring,
         env: DataFetchingEnvironment,
-    ): DataFetcherResult<Boolean> =
-        withContext(Dispatchers.IO) {
-            val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
-            try {
-                withContext(Dispatchers.IO) { saksbehandlerhåndterer.håndter(overstyring, saksbehandler) }
-            } catch (e: Exception) {
-                val feilmelding = "Kunne ikke overstyre inntekt og refusjon"
-                logg.error(feilmelding, e)
-                return@withContext lagFeilrespons(feilmelding)
-            }
+    ): DataFetcherResult<Boolean> {
+        val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
+        return try {
+            saksbehandlerhåndterer.håndter(overstyring, saksbehandler)
             DataFetcherResult.newResult<Boolean>().data(true).build()
+        } catch (e: Exception) {
+            val feilmelding = "Kunne ikke overstyre inntekt og refusjon"
+            logg.error(feilmelding, e)
+            lagFeilrespons(feilmelding)
         }
+    }
 
-    override suspend fun overstyrArbeidsforhold(
+    override fun overstyrArbeidsforhold(
         overstyring: ApiArbeidsforholdOverstyringHandling,
         env: DataFetchingEnvironment,
-    ): DataFetcherResult<Boolean> =
-        withContext(Dispatchers.IO) {
-            val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
-            try {
-                withContext(Dispatchers.IO) { saksbehandlerhåndterer.håndter(overstyring, saksbehandler) }
-            } catch (e: Exception) {
-                val feilmelding = "Kunne ikke overstyre arbeidsforhold"
-                logg.error(feilmelding, e)
-                return@withContext lagFeilrespons(feilmelding)
-            }
+    ): DataFetcherResult<Boolean> {
+        val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
+        return try {
+            saksbehandlerhåndterer.håndter(overstyring, saksbehandler)
             DataFetcherResult.newResult<Boolean>().data(true).build()
+        } catch (e: Exception) {
+            val feilmelding = "Kunne ikke overstyre arbeidsforhold"
+            logg.error(feilmelding, e)
+            lagFeilrespons(feilmelding)
         }
+    }
 
     private fun lagFeilrespons(feilmelding: String): DataFetcherResult<Boolean> =
         DataFetcherResult.newResult<Boolean>().error(

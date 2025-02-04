@@ -8,17 +8,17 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiInntektOgRefusjonOverstyrin
 import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
 
 interface OverstyringMutationSchema : Mutation {
-    suspend fun overstyrDager(
+    fun overstyrDager(
         overstyring: ApiTidslinjeOverstyring,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean>
 
-    suspend fun overstyrInntektOgRefusjon(
+    fun overstyrInntektOgRefusjon(
         overstyring: ApiInntektOgRefusjonOverstyring,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean>
 
-    suspend fun overstyrArbeidsforhold(
+    fun overstyrArbeidsforhold(
         overstyring: ApiArbeidsforholdOverstyringHandling,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean>
