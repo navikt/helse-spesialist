@@ -153,6 +153,7 @@ class SpesialistApp(
             godkjenningMediator = godkjenningMediator,
             subsumsjonsmelderProvider = { subsumsjonsmelder },
             stikkprøver = stikkprøver,
+            featureToggles = featureToggles,
         )
 
     fun start(rapidsConnection: RapidsConnection) {
@@ -208,6 +209,7 @@ class SpesialistApp(
                 totrinnsvurderingService = totrinnsvurderingService,
                 annulleringRepository = repositories.annulleringRepository,
                 env = env,
+                featureToggles = featureToggles,
             )
         dokumentMediator = DokumentMediator(dokumentDao, meldingPubliserer)
         godkjenningService =

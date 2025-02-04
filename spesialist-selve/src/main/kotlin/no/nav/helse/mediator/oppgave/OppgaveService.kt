@@ -137,7 +137,7 @@ class OppgaveService(
         totrinnsvurderingDao.oppdater(totrinnsvurderingFraDatabase)
     }
 
-    fun håndter(
+    fun avbrytOppgave(
         handling: Oppgavehandling,
         saksbehandler: Saksbehandler,
     ) {
@@ -147,7 +147,7 @@ class OppgaveService(
         }
     }
 
-    fun håndter(handling: Overstyring) {
+    fun avbrytOppgave(handling: Overstyring) {
         oppgaveDao.finnOppgaveId(handling.gjelderFødselsnummer())?.let {
             oppgave(it) {
                 this.avbryt()

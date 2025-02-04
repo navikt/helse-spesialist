@@ -2,6 +2,7 @@ package no.nav.helse.mediator
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
+import no.nav.helse.FeatureToggles
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.TestRapidHelpers.hendelser
 import no.nav.helse.db.DBRepositories
@@ -106,6 +107,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             ),
             annulleringRepository = annulleringRepository,
             env = environment,
+            featureToggles = object : FeatureToggles {},
         )
 
     private val AKTØR_ID = lagAktørId()

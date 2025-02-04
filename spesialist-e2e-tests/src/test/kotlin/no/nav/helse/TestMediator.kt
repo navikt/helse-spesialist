@@ -94,7 +94,8 @@ internal class TestMediator(
                     dialogDao = dialogDao,
                 ),
             annulleringRepository = annulleringRepository,
-            env = environment
+            env = environment,
+            featureToggles = object : FeatureToggles{}
         )
 
     private val stikkprøver =
@@ -120,6 +121,7 @@ internal class TestMediator(
             godkjenningMediator = godkjenningMediator,
             subsumsjonsmelderProvider = { Subsumsjonsmelder("versjonAvKode", meldingPubliserer) },
             stikkprøver = stikkprøver,
+            featureToggles = object : FeatureToggles{}
         )
 
 

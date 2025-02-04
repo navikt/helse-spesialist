@@ -1,6 +1,7 @@
 package no.nav.helse.mediator
 
 import net.logstash.logback.argument.StructuredArguments
+import no.nav.helse.FeatureToggles
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.AnnulleringRepository
@@ -105,6 +106,7 @@ class SaksbehandlerMediator(
     private val totrinnsvurderingService: TotrinnsvurderingService,
     private val annulleringRepository: AnnulleringRepository,
     private val env: Environment,
+    private val featureToggles: FeatureToggles,
 ) : Saksbehandlerhåndterer {
     private val saksbehandlerDao = repositories.saksbehandlerDao
     private val generasjonRepository = repositories.generasjonApiRepository
@@ -290,7 +292,7 @@ class SaksbehandlerMediator(
         saksbehandler: Saksbehandler,
     ) {
         try {
-            oppgaveService.håndter(handling, saksbehandler)
+            oppgaveService.avbrytOppgave(handling, saksbehandler)
         } catch (e: Modellfeil) {
             throw e.tilApiversjon()
         }
@@ -389,7 +391,9 @@ class SaksbehandlerMediator(
         saksbehandler: Saksbehandler,
     ) {
         val fødselsnummer = handling.gjelderFødselsnummer()
-        oppgaveService.håndter(handling)
+        if (!featureToggles.skalAvbryteOppgavePåEtSenereTidspunkt()) {
+            oppgaveService.avbrytOppgave(handling)
+        }
         reservasjonDao.reserverPerson(saksbehandler.oid(), fødselsnummer)
         sikkerlogg.info("Reserverer person $fødselsnummer til saksbehandler $saksbehandler")
         Overstyringlagrer(overstyringDao).apply {
