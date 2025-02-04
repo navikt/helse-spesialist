@@ -30,6 +30,9 @@ dependencyResolutionManagement {
             version("postgres", "42.7.3")
             version("cloudsql", "1.16.0")
             version("graphql-kotlin", "8.3.0")
+            version("unleash", "10.0.0")
+
+            library("unleash", "io.getunleash", "unleash-client-java").versionRef("unleash")
 
             library("rapids-and-rivers", "com.github.navikt", "rapids-and-rivers").versionRef("rapids-and-rivers")
             library("rapids-and-rivers-test", "com.github.navikt.tbd-libs", "rapids-and-rivers-test").versionRef("tbd-libs")

@@ -47,6 +47,7 @@ class SpesialistApp(
     private val tilgangsgrupper: Tilgangsgrupper,
     reservasjonClient: ReservasjonClient,
     private val versjonAvKode: String,
+    private val featureToggles: FeatureToggles,
 ) : RapidsConnection.StatusListener {
     private val tilgangskontrollørForReservasjon = TilgangskontrollørForReservasjon(gruppekontroll, tilgangsgrupper)
 

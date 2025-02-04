@@ -89,6 +89,7 @@ object LocalApp {
             tilgangsgrupper = tilgangsgrupper,
             reservasjonClient = reservasjonClient,
             versjonAvKode = "versjon_1",
+            featureToggles = object : FeatureToggles{}
         )
 
     private val localModule: Application.() -> Unit  = {

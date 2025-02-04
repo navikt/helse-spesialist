@@ -21,6 +21,10 @@ fun main() {
 
 internal class RapidApp(env: Map<String, String>) {
     private val rapidsConnection: RapidsConnection
+    private val unleashFeatureToggles =
+        UnleashFeatureToggles(
+            env = env,
+        )
     private val azureConfig =
         AzureConfig(
             clientId = env.getValue("AZURE_APP_CLIENT_ID"),
@@ -61,6 +65,7 @@ internal class RapidApp(env: Map<String, String>) {
             tilgangsgrupper = tilgangsgrupper,
             reservasjonClient = reservasjonClient,
             versjonAvKode = versjonAvKode(env),
+            featureToggles = unleashFeatureToggles,
         )
 
     private fun versjonAvKode(env: Map<String, String>): String {

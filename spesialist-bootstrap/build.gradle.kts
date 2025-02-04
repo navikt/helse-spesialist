@@ -16,6 +16,8 @@ dependencies {
     api(project(":spesialist-db"))
     api(project(":spesialist-kafka"))
 
+    implementation(libs.unleash)
+
     testImplementation("org.testcontainers:postgresql:$testcontainersVersion")
     testImplementation("no.nav.security:mock-oauth2-server:$mockOAuth2ServerVersion")
     api("org.testcontainers:kafka:$testcontainersVersion")
