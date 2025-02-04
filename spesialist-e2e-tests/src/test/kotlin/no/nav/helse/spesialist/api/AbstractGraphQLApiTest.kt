@@ -139,7 +139,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                     ),
                 ),
                 mutationHandlers = SpesialistSchema.MutationHandlers(
-                    notat = NotatMutationHandler(notatDao = notatDao),
+                    notat = NotatMutationHandler(sessionFactory = sessionFactory),
                     varsel = VarselMutationHandler(varselRepository = apiVarselRepository),
                     tildeling = TildelingMutationHandler(saksbehandlerhåndterer = saksbehandlerhåndterer),
                     opptegnelse = OpptegnelseMutationHandler(saksbehandlerhåndterer = saksbehandlerhåndterer),

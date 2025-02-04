@@ -7,11 +7,13 @@ import no.nav.helse.db.api.EgenAnsattApiDao
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.db.AbstractDatabaseTest
-import no.nav.helse.spesialist.api.graphql.schema.ApiNotatType
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
 import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
+import no.nav.helse.spesialist.modell.Dialog
+import no.nav.helse.spesialist.modell.Notat
+import no.nav.helse.spesialist.modell.NotatType
 import no.nav.helse.spesialist.test.lagAktørId
 import no.nav.helse.spesialist.test.lagEtternavn
 import no.nav.helse.spesialist.test.lagFornavn
@@ -235,35 +237,36 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         "vedtakRef" to vedtakRef,
     )
 
-    protected fun opprettDialog() = dbQuery.updateAndReturnGeneratedKey("INSERT INTO dialog (opprettet) VALUES (now())")
+    protected fun opprettDialog() =
+        sessionFactory.transactionalSessionScope { session ->
+            Dialog.Factory.ny().also(session.dialogRepository::lagre).id()
+        }
 
     protected fun opprettNotat(
         tekst: String = "Et notat",
         saksbehandlerOid: UUID = SAKSBEHANDLER.oid,
         vedtaksperiodeId: UUID = PERIODE.id,
-        dialogRef: Long = opprettDialog()!!,
-    ) = dbQuery.updateAndReturnGeneratedKey(
-        """
-        INSERT INTO notat (tekst, saksbehandler_oid, vedtaksperiode_id, type, dialog_ref)
-        VALUES (:tekst, :oid, :vedtaksperiodeId, CAST(:type as notattype), :dialogRef)
-        """.trimIndent(),
-        "tekst" to tekst,
-        "oid" to saksbehandlerOid,
-        "vedtaksperiodeId" to vedtaksperiodeId,
-        "type" to ApiNotatType.Generelt.name,
-        "dialogRef" to dialogRef,
-    )
+        dialogRef: Long = opprettDialog(),
+    ) = sessionFactory.transactionalSessionScope { session ->
+        Notat.Factory.ny(
+            type = NotatType.Generelt,
+            tekst = tekst,
+            dialogRef = dialogRef,
+            vedtaksperiodeId = vedtaksperiodeId,
+            saksbehandlerOid = saksbehandlerOid
+        ).also(session.notatRepository::lagre).id()
+    }
 
     protected fun opprettKommentar(
         tekst: String = "En kommentar",
         saksbehandlerIdent: String = SAKSBEHANDLER.ident,
-        dialogRef: Long = opprettDialog()!!,
+        dialogRef: Long = opprettDialog(),
     ) = dbQuery.updateAndReturnGeneratedKey(
         "INSERT INTO kommentarer (tekst, saksbehandlerident, dialog_ref) VALUES (:tekst, :ident, :dialogRef)",
         "tekst" to tekst,
         "ident" to saksbehandlerIdent,
         "dialogRef" to dialogRef,
-    )
+    )!!.toInt()
 
     protected fun opprettPersonOld(
         fødselsnummer: String = FØDSELSNUMMER,

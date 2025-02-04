@@ -2,7 +2,7 @@ package no.nav.helse.db
 
 import kotliquery.Session
 import no.nav.helse.db.HelseDao.Companion.asSQL
-import no.nav.helse.modell.NotatType
+import no.nav.helse.spesialist.modell.NotatType
 import java.util.UUID
 import javax.sql.DataSource
 

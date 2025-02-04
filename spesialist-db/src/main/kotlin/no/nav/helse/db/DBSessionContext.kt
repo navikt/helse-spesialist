@@ -2,6 +2,12 @@ package no.nav.helse.db
 
 import kotliquery.Session
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
+import no.nav.helse.spesialist.application.DialogRepository
+import no.nav.helse.spesialist.application.NotatRepository
+import no.nav.helse.spesialist.application.SaksbehandlerRepository
+import no.nav.helse.spesialist.db.PgDialogRepository
+import no.nav.helse.spesialist.db.PgNotatRepository
+import no.nav.helse.spesialist.db.PgSaksbehandlerRepository
 
 class DBSessionContext(session: Session, tilgangskontroll: Tilgangskontroll) : SessionContext {
     override val arbeidsforholdDao = PgArbeidsforholdDao(session)
@@ -36,4 +42,8 @@ class DBSessionContext(session: Session, tilgangskontroll: Tilgangskontroll) : S
     override val vedtaksperiodeRepository = PgVedtaksperiodeRepository(generasjonDao, vedtakDao)
     override val personRepository = PgPersonRepository(vedtaksperiodeRepository, sykefraværstilfelleDao, avviksvurderingDao, personDao)
     override val totrinnsvurderingRepository = PgTotrinnsvurderingRepository(overstyringDao, saksbehandlerDao, totrinnsvurderingDao)
+
+    override val notatRepository: NotatRepository = PgNotatRepository(session)
+    override val dialogRepository: DialogRepository = PgDialogRepository(session)
+    override val saksbehandlerRepository: SaksbehandlerRepository = PgSaksbehandlerRepository(session)
 }

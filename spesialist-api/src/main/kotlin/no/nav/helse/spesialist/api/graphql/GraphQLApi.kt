@@ -12,6 +12,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import no.nav.helse.bootstrap.Environment
+import no.nav.helse.db.SessionFactory
 import no.nav.helse.db.api.ArbeidsgiverApiDao
 import no.nav.helse.db.api.EgenAnsattApiDao
 import no.nav.helse.db.api.NotatApiDao
@@ -63,6 +64,7 @@ import java.time.Duration
 import java.util.UUID
 
 fun Application.graphQLApi(
+    sessionFactory: SessionFactory,
     personApiDao: PersonApiDao,
     egenAnsattApiDao: EgenAnsattApiDao,
     tildelingApiDao: TildelingApiDao,
@@ -144,7 +146,7 @@ fun Application.graphQLApi(
                 ),
             mutationHandlers =
                 SpesialistSchema.MutationHandlers(
-                    notat = NotatMutationHandler(notatDao = notatDao),
+                    notat = NotatMutationHandler(sessionFactory = sessionFactory),
                     varsel = VarselMutationHandler(varselRepository = varselRepository),
                     tildeling = TildelingMutationHandler(saksbehandlerhåndterer = saksbehandlerhåndterer),
                     opptegnelse = OpptegnelseMutationHandler(saksbehandlerhåndterer = saksbehandlerhåndterer),

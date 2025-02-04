@@ -6,6 +6,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.DBRepositories
+import no.nav.helse.db.TransactionalSessionFactory
 import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import org.flywaydb.core.Flyway
 import org.intellij.lang.annotations.Language
@@ -20,6 +21,7 @@ abstract class AbstractDatabaseTest {
         override val erProd = false
     }
     protected val repositories = DBRepositories(dataSource, TilgangskontrollForTestHarIkkeTilgang)
+    protected val sessionFactory = TransactionalSessionFactory(dataSource, TilgangskontrollForTestHarIkkeTilgang)
 
     companion object {
         private val postgres = PostgreSQLContainer<Nothing>("postgres:14").apply {
@@ -51,7 +53,7 @@ abstract class AbstractDatabaseTest {
         }
 
         private fun resetDatabase() {
-            sessionOf(dataSource).use  {
+            sessionOf(dataSource).use {
                 it.run(queryOf("SELECT truncate_tables()").asExecute)
             }
         }
@@ -59,7 +61,7 @@ abstract class AbstractDatabaseTest {
 }
 
 private fun createTruncateFunction(dataSource: DataSource) {
-    sessionOf(dataSource).use  {
+    sessionOf(dataSource).use {
         @Language("PostgreSQL")
         val query = """
             CREATE OR REPLACE FUNCTION truncate_tables() RETURNS void AS $$

@@ -8,11 +8,10 @@ class TransactionalSessionFactory(
     private val dataSource: DataSource,
     private val tilgangskontroll: Tilgangskontroll,
 ) : SessionFactory {
-    override fun transactionalSessionScope(transactionalBlock: (SessionContext) -> Unit) {
+    override fun <T> transactionalSessionScope(transactionalBlock: (SessionContext) -> T): T =
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             session.transaction { transactionalSession ->
                 transactionalBlock(DBSessionContext(transactionalSession, tilgangskontroll))
             }
         }
-    }
 }

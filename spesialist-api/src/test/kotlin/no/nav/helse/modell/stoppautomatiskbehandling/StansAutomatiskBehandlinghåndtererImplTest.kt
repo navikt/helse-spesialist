@@ -8,11 +8,11 @@ import no.nav.helse.db.NotatDao
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.StansAutomatiskBehandlingFraDatabase
-import no.nav.helse.modell.NotatType
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.handlinger.OpphevStans
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.AKTIVITETSKRAV
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.MEDISINSK_VILKAR
+import no.nav.helse.spesialist.modell.NotatType
 import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue

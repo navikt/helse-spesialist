@@ -15,6 +15,11 @@ abstract class HelseDao(private val dataSource: DataSource) {
             vararg params: Pair<String, Any?>,
         ) = queryOf(sql, params.toMap())
 
+        fun insert(
+            @Language("SQL") sql: String,
+            params: Map<String, Any?>,
+        ) = queryOf(sql, params)
+
         // Plis bare bruk denne til ting det ikke går an å gjøre med navngitte parametere - eks. ".. AND orgnummer = ANY(?)"
         fun asSQLWithQuestionMarks(
             @Language("SQL") sql: String,

@@ -4,6 +4,7 @@ import io.ktor.server.application.Application
 import io.ktor.server.routing.routing
 import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.Repositories
+import no.nav.helse.db.SessionFactory
 import no.nav.helse.spesialist.api.AzureConfig
 import no.nav.helse.spesialist.api.azureAdAppAuthentication
 import no.nav.helse.spesialist.api.graphql.graphQLApi
@@ -13,6 +14,7 @@ import no.nav.helse.spesialist.api.websockets.webSocketsApi
 
 class Bootstrap(
     repositories: Repositories,
+    private val sessionFactory: SessionFactory,
     private val avhengigheter: ApiAvhengigheter,
     private val reservasjonClient: ReservasjonClient,
     private val tilgangsgrupper: Tilgangsgrupper,
@@ -40,6 +42,7 @@ class Bootstrap(
         installPlugins()
         azureAdAppAuthentication(azureConfig, env)
         graphQLApi(
+            sessionFactory = sessionFactory,
             personApiDao = personApiDao,
             egenAnsattApiDao = egenAnsattApiDao,
             tildelingApiDao = tildelingApiDao,

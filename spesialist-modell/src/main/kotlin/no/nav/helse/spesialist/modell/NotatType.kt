@@ -1,8 +1,6 @@
-package no.nav.helse.modell
+package no.nav.helse.spesialist.modell
 
 enum class NotatType {
-    Retur,
     Generelt,
-    PaaVent,
     OpphevStans,
 }
