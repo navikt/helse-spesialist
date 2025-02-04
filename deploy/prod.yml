@@ -78,6 +78,8 @@ spec:
         - application: digdir-krr-proxy
           namespace: team-rocket
           cluster: prod-gcp
+      external:
+        - host: tbd-unleash-api.nav.cloud.nais.io
   gcp:
     permissions:
       - resource:
@@ -104,6 +106,8 @@ spec:
             users:
               - name: bigquery_connection_user
               - name: spesialist-sidegig
+  envFrom:
+    - secret: spesialist-unleash-api-token
   env:
     - name: KAFKA_RAPID_TOPIC
       value: tbd.rapid.v1
