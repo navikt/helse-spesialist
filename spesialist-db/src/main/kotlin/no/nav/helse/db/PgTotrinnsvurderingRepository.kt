@@ -51,9 +51,9 @@ class PgTotrinnsvurderingRepository(
         totrinnsvurdering: Totrinnsvurdering,
         fødselsnummer: String,
         tilgangskontroll: Tilgangskontroll,
-    ): Totrinnsvurdering {
-        val (id, totrinnsvurderingFraDatabase) = totrinnsvurderingDao.opprett(totrinnsvurdering, fødselsnummer)
-        return totrinnsvurderingFraDatabase.tilDomene(id, tilgangskontroll, fødselsnummer)
+    ) {
+        val totrinnsvurderingFraDatabase = totrinnsvurdering.tilDatabase()
+        totrinnsvurderingDao.upsertTotrinnsvurdering(totrinnsvurdering.id, totrinnsvurderingFraDatabase)
     }
 
     private fun TotrinnsvurderingFraDatabase.tilDomene(
@@ -231,5 +231,16 @@ class PgTotrinnsvurderingRepository(
             bokstav = bokstav,
             lovverk = "",
             lovverksversjon = "",
+        )
+
+    private fun Totrinnsvurdering.tilDatabase() =
+        TotrinnsvurderingFraDatabase(
+            vedtaksperiodeId = vedtaksperiodeId,
+            erRetur = erRetur,
+            saksbehandler = saksbehandler?.oid,
+            beslutter = beslutter?.oid,
+            utbetalingId = utbetalingId,
+            opprettet = opprettet,
+            oppdatert = oppdatert,
         )
 }

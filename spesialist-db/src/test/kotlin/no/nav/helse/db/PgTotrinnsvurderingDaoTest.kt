@@ -2,10 +2,7 @@ package no.nav.helse.db
 
 import no.nav.helse.DatabaseIntegrationTest
 import no.nav.helse.modell.NyId
-import no.nav.helse.modell.saksbehandler.Saksbehandler
-import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
-import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -335,62 +332,27 @@ internal class PgTotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
         opprettSaksbehandler()
         opprettArbeidsgiver()
         opprettVedtaksperiode(FNR)
-        val totrinnsvurdering = Totrinnsvurdering(
-            id = NyId,
+        val opprettet = LocalDateTime.now()
+        val oppdatert = LocalDateTime.now()
+        val totrinnsvurdering = TotrinnsvurderingFraDatabase(
             vedtaksperiodeId = VEDTAKSPERIODE,
             erRetur = false,
-            saksbehandler = saksbehandler(),
-            beslutter = null,
+            saksbehandler = SAKSBEHANDLER_OID,
+            beslutter = SAKSBEHANDLER_OID,
             utbetalingId = null,
-            opprettet = LocalDateTime.now(),
-            oppdatert = LocalDateTime.now(),
-            overstyringer = emptyList(),
-            ferdigstilt = false,
+            opprettet = opprettet,
+            oppdatert = oppdatert,
         )
-        val (id, totrinnsvurderingFraDatabase) = totrinnsvurderingDao.opprett(totrinnsvurdering, FNR)
-        val (hentetId, hentetTotrinnsvurdering) = requireNotNull(totrinnsvurderingDao.hentAktivTotrinnsvurdering(FNR))
+        totrinnsvurderingDao.upsertTotrinnsvurdering(NyId, totrinnsvurdering)
+        val (_, hentetTotrinnsvurdering) = requireNotNull(totrinnsvurderingDao.hentAktivTotrinnsvurdering(FNR))
 
-        assertEquals(id, hentetId)
-        assertEquals(totrinnsvurderingFraDatabase, hentetTotrinnsvurdering)
-        assertEquals(VEDTAKSPERIODE, totrinnsvurderingFraDatabase.vedtaksperiodeId)
-        assertEquals(SAKSBEHANDLER_OID, totrinnsvurderingFraDatabase.saksbehandler)
-        assertEquals(totrinnsvurdering.opprettet, totrinnsvurderingFraDatabase.opprettet)
-        assertEquals(totrinnsvurdering.oppdatert, totrinnsvurderingFraDatabase.oppdatert)
+        assertEquals(VEDTAKSPERIODE, hentetTotrinnsvurdering.vedtaksperiodeId)
+        assertEquals(SAKSBEHANDLER_OID, hentetTotrinnsvurdering.saksbehandler)
+        assertEquals(SAKSBEHANDLER_OID, hentetTotrinnsvurdering.beslutter)
+        assertNull(hentetTotrinnsvurdering.utbetalingId)
+        assertEquals(opprettet, hentetTotrinnsvurdering.opprettet)
+        assertEquals(oppdatert, hentetTotrinnsvurdering.oppdatert)
     }
-
-    @Test
-    fun `Oppretter ikke ny hvis person har aktiv totrinnsvurdering, men returnerer den aktive i stedet`() {
-        opprettPerson()
-        opprettSaksbehandler()
-        opprettArbeidsgiver()
-        opprettVedtaksperiode(FNR)
-        val totrinnsvurdering = Totrinnsvurdering(
-            id = NyId,
-            vedtaksperiodeId = VEDTAKSPERIODE,
-            erRetur = false,
-            saksbehandler = saksbehandler(),
-            beslutter = null,
-            utbetalingId = null,
-            opprettet = LocalDateTime.now(),
-            oppdatert = LocalDateTime.now(),
-            overstyringer = emptyList(),
-            ferdigstilt = false,
-        )
-        val (id1, totrinnsvurderingFraDatabase1) = totrinnsvurderingDao.opprett(totrinnsvurdering, FNR)
-        val (id2, totrinnsvurderingFraDatabase2) = totrinnsvurderingDao.opprett(totrinnsvurdering, FNR)
-
-        assertEquals(id1, id2)
-        assertEquals(totrinnsvurderingFraDatabase1, totrinnsvurderingFraDatabase2)
-    }
-
-
-    private fun saksbehandler() = Saksbehandler(
-        oid = SAKSBEHANDLER_OID,
-        navn = SAKSBEHANDLER_NAVN,
-        ident = SAKSBEHANDLER_IDENT,
-        epostadresse = SAKSBEHANDLER_EPOST,
-        tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang
-    )
 
     private fun totrinnsvurdering(vedtaksperiodeId: UUID = VEDTAKSPERIODE) = dbQuery.single(
         "SELECT * FROM totrinnsvurdering WHERE vedtaksperiode_id = :vedtaksperiodeId",

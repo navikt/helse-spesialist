@@ -2,6 +2,7 @@ package no.nav.helse.db
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import no.nav.helse.modell.NyId
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
@@ -77,19 +78,22 @@ class PgTotrinnsvurderingRepositoryTest {
             ferdigstilt = false,
         )
 
-        every { totrinnsvurderingDao.opprett(totrinnsvurdering, FNR) } returns (1L to TotrinnsvurderingFraDatabase(
-            vedtaksperiodeId = totrinnsvurdering.vedtaksperiodeId,
-            erRetur = totrinnsvurdering.erRetur,
-            saksbehandler = totrinnsvurdering.saksbehandler?.oid,
-            beslutter = null,
-            utbetalingId = totrinnsvurdering.utbetalingId,
-            opprettet = totrinnsvurdering.opprettet,
-            oppdatert = totrinnsvurdering.oppdatert,
-        ))
-
         every { saksbehandlerDao.finnSaksbehandler(SAKSBEHANDLER.oid, any()) } returns SAKSBEHANDLER
 
-        val lagret = repository.lagre(totrinnsvurdering, FNR, mockk(relaxed = true))
-        assertEquals(totrinnsvurdering, lagret)
+        repository.lagre(totrinnsvurdering, FNR, mockk(relaxed = true))
+
+        verify(exactly = 1) {
+            totrinnsvurderingDao.upsertTotrinnsvurdering(
+                NyId, TotrinnsvurderingFraDatabase(
+                    vedtaksperiodeId = totrinnsvurdering.vedtaksperiodeId,
+                    erRetur = totrinnsvurdering.erRetur,
+                    saksbehandler = totrinnsvurdering.saksbehandler?.oid,
+                    beslutter = totrinnsvurdering.beslutter?.oid,
+                    utbetalingId = totrinnsvurdering.utbetalingId,
+                    opprettet = totrinnsvurdering.opprettet,
+                    oppdatert = totrinnsvurdering.oppdatert,
+                )
+            )
+        }
     }
 }

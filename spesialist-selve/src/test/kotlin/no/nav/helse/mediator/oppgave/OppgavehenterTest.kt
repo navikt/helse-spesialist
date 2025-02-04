@@ -15,7 +15,6 @@ import no.nav.helse.modell.oppgave.OppgaveDto
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.Saksbehandler.Companion.toDto
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
-import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -192,8 +191,6 @@ class OppgavehenterTest {
         override fun hentAktiv(oppgaveId: Long) = error("Not implemented in test")
         override fun hentAktiv(vedtaksperiodeId: UUID) = error("Not implemented in test")
         override fun ferdigstill(vedtaksperiodeId: UUID) = error("Not implemented in test")
-        override fun opprett(totrinnsvurdering: Totrinnsvurdering, fødselsnummer: String) =
-            error("Not implemented in test")
     }
 
     private val saksbehandlerDao = object : SaksbehandlerDao {

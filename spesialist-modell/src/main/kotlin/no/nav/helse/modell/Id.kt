@@ -4,4 +4,4 @@ sealed interface Id
 
 data object NyId : Id
 
-data class EksisterendeId(val id: Long) : Id
+data class EksisterendeId(val value: Long) : Id

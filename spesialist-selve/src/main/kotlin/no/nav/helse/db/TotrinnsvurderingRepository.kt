@@ -13,5 +13,5 @@ interface TotrinnsvurderingRepository {
         totrinnsvurdering: Totrinnsvurdering,
         fødselsnummer: String,
         tilgangskontroll: Tilgangskontroll,
-    ): Totrinnsvurdering
+    )
 }
