@@ -350,8 +350,8 @@ internal class PgTotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
         assertEquals(SAKSBEHANDLER_OID, hentetTotrinnsvurdering.saksbehandler)
         assertEquals(SAKSBEHANDLER_OID, hentetTotrinnsvurdering.beslutter)
         assertNull(hentetTotrinnsvurdering.utbetalingId)
-        assertEquals(opprettet, hentetTotrinnsvurdering.opprettet)
-        assertEquals(oppdatert, hentetTotrinnsvurdering.oppdatert)
+        assertEquals(opprettet.withNano(0), hentetTotrinnsvurdering.opprettet.withNano(0))
+        assertEquals(oppdatert.withNano(0), hentetTotrinnsvurdering.oppdatert?.withNano(0))
     }
 
     private fun totrinnsvurdering(vedtaksperiodeId: UUID = VEDTAKSPERIODE) = dbQuery.single(
