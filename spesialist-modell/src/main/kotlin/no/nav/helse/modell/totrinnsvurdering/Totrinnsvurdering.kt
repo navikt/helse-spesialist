@@ -16,12 +16,12 @@ import java.util.UUID
 
 class Totrinnsvurdering(
     val id: Id,
-    private val vedtaksperiodeId: UUID,
+    val vedtaksperiodeId: UUID,
     erRetur: Boolean,
     saksbehandler: Saksbehandler?,
     beslutter: Saksbehandler?,
     utbetalingId: UUID?,
-    private val opprettet: LocalDateTime,
+    val opprettet: LocalDateTime,
     oppdatert: LocalDateTime?,
     overstyringer: List<Overstyring> = emptyList(),
     ferdigstilt: Boolean = false,

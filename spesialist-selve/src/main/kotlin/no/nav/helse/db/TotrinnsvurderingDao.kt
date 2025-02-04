@@ -1,5 +1,6 @@
 package no.nav.helse.db
 
+import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
 import java.util.UUID
 
@@ -15,11 +16,16 @@ interface TotrinnsvurderingDao {
 
     fun settErRetur(vedtaksperiodeId: UUID)
 
-    fun opprett(vedtaksperiodeId: UUID): TotrinnsvurderingOld
+    fun opprettOld(vedtaksperiodeId: UUID): TotrinnsvurderingOld
 
     fun hentAktiv(oppgaveId: Long): TotrinnsvurderingOld?
 
     fun hentAktiv(vedtaksperiodeId: UUID): TotrinnsvurderingOld?
 
     fun ferdigstill(vedtaksperiodeId: UUID)
+
+    fun opprett(
+        totrinnsvurdering: Totrinnsvurdering,
+        fødselsnummer: String,
+    ): Pair<Long, TotrinnsvurderingFraDatabase>?
 }

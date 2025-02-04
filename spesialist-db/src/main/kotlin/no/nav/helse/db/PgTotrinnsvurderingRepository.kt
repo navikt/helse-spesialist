@@ -40,23 +40,48 @@ class PgTotrinnsvurderingRepository(
         fødselsnummer: String,
         tilgangskontroll: Tilgangskontroll,
     ): Totrinnsvurdering? {
-        val (id, totrinnsvurdering) = totrinnsvurderingDao.hentAktivTotrinnsvurdering(fødselsnummer) ?: return null
+        val (id, totrinnsvurderingFraDatabase) =
+            totrinnsvurderingDao.hentAktivTotrinnsvurdering(fødselsnummer)
+                ?: return null
 
+        return totrinnsvurderingFraDatabase.tilDomene(id, tilgangskontroll, fødselsnummer)
+    }
+
+    override fun lagre(
+        totrinnsvurdering: Totrinnsvurdering,
+        fødselsnummer: String,
+        tilgangskontroll: Tilgangskontroll,
+    ): Totrinnsvurdering {
+        val (id, totrinnsvurderingFraDatabase) = totrinnsvurderingDao.opprett(totrinnsvurdering, fødselsnummer)
+        return totrinnsvurderingFraDatabase.tilDomene(id, tilgangskontroll, fødselsnummer)
+    }
+
+    private fun TotrinnsvurderingFraDatabase.tilDomene(
+        id: Long,
+        tilgangskontroll: Tilgangskontroll,
+        fødselsnummer: String,
+    ): Totrinnsvurdering {
         return Totrinnsvurdering(
             id = EksisterendeId(id),
-            vedtaksperiodeId = totrinnsvurdering.vedtaksperiodeId,
-            erRetur = totrinnsvurdering.erRetur,
+            vedtaksperiodeId = this.vedtaksperiodeId,
+            erRetur = this.erRetur,
             saksbehandler =
-                totrinnsvurdering.saksbehandler?.let {
+                this.saksbehandler?.let {
                     saksbehandlerDao.finnSaksbehandler(
                         it,
                         tilgangskontroll,
                     )
                 },
-            beslutter = totrinnsvurdering.beslutter?.let { saksbehandlerDao.finnSaksbehandler(it, tilgangskontroll) },
-            utbetalingId = totrinnsvurdering.utbetalingId,
-            opprettet = totrinnsvurdering.opprettet,
-            oppdatert = totrinnsvurdering.oppdatert,
+            beslutter =
+                this.beslutter?.let {
+                    saksbehandlerDao.finnSaksbehandler(
+                        it,
+                        tilgangskontroll,
+                    )
+                },
+            utbetalingId = this.utbetalingId,
+            opprettet = this.opprettet,
+            oppdatert = this.oppdatert,
             ferdigstilt = false,
             overstyringer = overstyringDao.finnOverstyringer(fødselsnummer).tilDomene(),
         )

@@ -16,7 +16,7 @@ class TotrinnsvurderingService(
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val dialogDao: DialogDao,
 ) : Totrinnsvurderinghåndterer {
-    fun finnEllerOpprettNy(vedtaksperiodeId: UUID): TotrinnsvurderingOld = totrinnsvurderingDao.opprett(vedtaksperiodeId)
+    fun finnEllerOpprettNy(vedtaksperiodeId: UUID): TotrinnsvurderingOld = totrinnsvurderingDao.opprettOld(vedtaksperiodeId)
 
     override fun settBeslutter(
         oppgaveId: Long,

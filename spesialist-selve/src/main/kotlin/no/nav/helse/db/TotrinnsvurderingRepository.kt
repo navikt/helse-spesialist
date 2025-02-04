@@ -8,4 +8,10 @@ interface TotrinnsvurderingRepository {
         fødselsnummer: String,
         tilgangskontroll: Tilgangskontroll,
     ): Totrinnsvurdering?
+
+    fun lagre(
+        totrinnsvurdering: Totrinnsvurdering,
+        fødselsnummer: String,
+        tilgangskontroll: Tilgangskontroll,
+    ): Totrinnsvurdering
 }

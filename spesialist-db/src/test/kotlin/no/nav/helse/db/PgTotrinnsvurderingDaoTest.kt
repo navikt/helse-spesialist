@@ -1,7 +1,11 @@
 package no.nav.helse.db
 
 import no.nav.helse.DatabaseIntegrationTest
+import no.nav.helse.modell.NyId
+import no.nav.helse.modell.saksbehandler.Saksbehandler
+import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
+import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -16,7 +20,7 @@ internal class PgTotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `opprett totrinnsvurdering`() {
         opprettPerson()
-        val totrinnsvurderingOld: TotrinnsvurderingOld = totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
+        val totrinnsvurderingOld: TotrinnsvurderingOld = totrinnsvurderingDao.opprettOld(VEDTAKSPERIODE)
 
         assertEquals(VEDTAKSPERIODE, totrinnsvurderingOld.vedtaksperiodeId)
         assertFalse(totrinnsvurderingOld.erRetur)
@@ -32,7 +36,7 @@ internal class PgTotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
         opprettPerson()
         opprettArbeidsgiver()
         opprettVedtaksperiode(FNR)
-        val totrinnsvurderingOld: TotrinnsvurderingOld = totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
+        val totrinnsvurderingOld: TotrinnsvurderingOld = totrinnsvurderingDao.opprettOld(VEDTAKSPERIODE)
 
         val totrinnsvurderingResult = totrinnsvurderingDao.hentAktivTotrinnsvurdering(FNR)
         val totrinnsvurdering = totrinnsvurderingResult?.second
@@ -51,26 +55,26 @@ internal class PgTotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
     fun `Sett saksbehandler på totrinnsvurdering`() {
         opprettPerson()
         opprettSaksbehandler()
-        totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
+        totrinnsvurderingDao.opprettOld(VEDTAKSPERIODE)
         settSaksbehandler(VEDTAKSPERIODE, SAKSBEHANDLER_OID)
 
         val totrinnsvurdering = totrinnsvurdering()
 
-        assertEquals(SAKSBEHANDLER_OID, totrinnsvurdering?.saksbehandler)
-        assertNotNull(totrinnsvurdering?.oppdatert)
+        assertEquals(SAKSBEHANDLER_OID, totrinnsvurdering.saksbehandler)
+        assertNotNull(totrinnsvurdering.oppdatert)
     }
 
     @Test
     fun `Sett beslutter på totrinnsvurdering`() {
         opprettPerson()
         opprettSaksbehandler()
-        totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
+        totrinnsvurderingDao.opprettOld(VEDTAKSPERIODE)
         settBeslutter(VEDTAKSPERIODE, SAKSBEHANDLER_OID)
 
         val totrinnsvurdering = totrinnsvurdering()
 
-        assertEquals(SAKSBEHANDLER_OID, totrinnsvurdering?.beslutter)
-        assertNotNull(totrinnsvurdering?.oppdatert)
+        assertEquals(SAKSBEHANDLER_OID, totrinnsvurdering.beslutter)
+        assertNotNull(totrinnsvurdering.oppdatert)
     }
 
     @Test
@@ -80,24 +84,23 @@ internal class PgTotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
         opprettVedtaksperiode()
         opprettOppgave()
         opprettSaksbehandler()
-        totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
+        totrinnsvurderingDao.opprettOld(VEDTAKSPERIODE)
         totrinnsvurderingDao.settBeslutter(OPPGAVE_ID, SAKSBEHANDLER_OID)
 
         val totrinnsvurdering = totrinnsvurdering()
 
-        assertEquals(SAKSBEHANDLER_OID, totrinnsvurdering?.beslutter)
-        assertNotNull(totrinnsvurdering?.oppdatert)
+        assertEquals(SAKSBEHANDLER_OID, totrinnsvurdering.beslutter)
+        assertNotNull(totrinnsvurdering.oppdatert)
     }
 
     @Test
     fun `Sett er_retur true på totrinnsvurdering`() {
         opprettPerson()
-        totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
+        totrinnsvurderingDao.opprettOld(VEDTAKSPERIODE)
         totrinnsvurderingDao.settErRetur(VEDTAKSPERIODE)
 
         val totrinnsvurdering = totrinnsvurdering()
 
-        requireNotNull(totrinnsvurdering)
         assertTrue(totrinnsvurdering.erRetur)
         assertNotNull(totrinnsvurdering.oppdatert)
     }
@@ -108,12 +111,11 @@ internal class PgTotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
         opprettArbeidsgiver()
         opprettVedtaksperiode()
         opprettOppgave()
-        totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
+        totrinnsvurderingDao.opprettOld(VEDTAKSPERIODE)
         settErRetur(OPPGAVE_ID)
 
         val totrinnsvurdering = totrinnsvurdering()
 
-        requireNotNull(totrinnsvurdering)
         assertTrue(totrinnsvurdering.erRetur)
         assertNotNull(totrinnsvurdering.oppdatert)
     }
@@ -121,13 +123,12 @@ internal class PgTotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `Sett er_retur false på totrinnsvurdering`() {
         opprettPerson()
-        totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
+        totrinnsvurderingDao.opprettOld(VEDTAKSPERIODE)
         totrinnsvurderingDao.settErRetur(VEDTAKSPERIODE)
         settHåndtertRetur(VEDTAKSPERIODE)
 
         val totrinnsvurdering = totrinnsvurdering()
 
-        requireNotNull(totrinnsvurdering)
         assertFalse(totrinnsvurdering.erRetur)
         assertNotNull(totrinnsvurdering.oppdatert)
     }
@@ -138,13 +139,12 @@ internal class PgTotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
         opprettArbeidsgiver()
         opprettVedtaksperiode()
         opprettOppgave()
-        totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
+        totrinnsvurderingDao.opprettOld(VEDTAKSPERIODE)
         totrinnsvurderingDao.settErRetur(VEDTAKSPERIODE)
         settHåndtertRetur(OPPGAVE_ID)
 
         val totrinnsvurdering = totrinnsvurdering()
 
-        requireNotNull(totrinnsvurdering)
         assertFalse(totrinnsvurdering.erRetur)
         assertNotNull(totrinnsvurdering.oppdatert)
     }
@@ -161,13 +161,13 @@ internal class PgTotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
         val utbetaling_IdId = lagUtbetalingId(arbeidsgiverOppdragId, personOppdragId, UTBETALING_ID)
         opprettUtbetalingKobling(VEDTAKSPERIODE, UTBETALING_ID)
 
-        totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
+        totrinnsvurderingDao.opprettOld(VEDTAKSPERIODE)
         totrinnsvurderingDao.ferdigstill(VEDTAKSPERIODE)
 
         val totrinnsvurdering = totrinnsvurdering()
 
-        assertEquals(utbetaling_IdId, totrinnsvurdering?.utbetalingIdRef)
-        assertNotNull(totrinnsvurdering?.oppdatert)
+        assertEquals(utbetaling_IdId, totrinnsvurdering.utbetalingIdRef)
+        assertNotNull(totrinnsvurdering.oppdatert)
     }
 
     @Test
@@ -186,12 +186,11 @@ internal class PgTotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
         val utbetalingIdRef2 = lagUtbetalingId(arbeidsgiverOppdragId, personOppdragId, utbetalingId2)
         opprettUtbetalingKobling(VEDTAKSPERIODE, utbetalingId2)
 
-        totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
+        totrinnsvurderingDao.opprettOld(VEDTAKSPERIODE)
         totrinnsvurderingDao.ferdigstill(VEDTAKSPERIODE)
 
         val totrinnsvurdering = totrinnsvurdering()
 
-        requireNotNull(totrinnsvurdering)
         assertEquals(utbetalingIdRef2, totrinnsvurdering.utbetalingIdRef)
         assertNotNull(totrinnsvurdering.oppdatert)
     }
@@ -208,12 +207,11 @@ internal class PgTotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
         val utbetaling_IdId = lagUtbetalingId(arbeidsgiverOppdragId, personOppdragId, UTBETALING_ID)
         opprettUtbetalingKobling(VEDTAKSPERIODE, UTBETALING_ID)
         opprettOppgave()
-        totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
+        totrinnsvurderingDao.opprettOld(VEDTAKSPERIODE)
         totrinnsvurderingDao.ferdigstill(VEDTAKSPERIODE)
 
         val totrinnsvurdering = totrinnsvurdering()
 
-        requireNotNull(totrinnsvurdering)
         assertEquals(VEDTAKSPERIODE, totrinnsvurdering.vedtaksperiodeId)
         assertFalse(totrinnsvurdering.erRetur)
         assertNull(totrinnsvurdering.saksbehandler)
@@ -226,7 +224,6 @@ internal class PgTotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
 
         val totrinnsvurderingFerdigstilt = totrinnsvurdering()
 
-        requireNotNull(totrinnsvurderingFerdigstilt)
         assertFalse(totrinnsvurderingFerdigstilt.erRetur)
         assertNull(totrinnsvurderingFerdigstilt.saksbehandler)
         assertNull(totrinnsvurderingFerdigstilt.beslutter)
@@ -235,20 +232,20 @@ internal class PgTotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `Finner aktiv ikke-utbetalt totrinnsvurdering`() {
-        totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
-        totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
+        totrinnsvurderingDao.opprettOld(VEDTAKSPERIODE)
+        totrinnsvurderingDao.opprettOld(VEDTAKSPERIODE)
         totrinnsvurderingDao.settErRetur(VEDTAKSPERIODE)
         val aktivTotrinnsvurdering = totrinnsvurderingDao.hentAktiv(VEDTAKSPERIODE)
 
         val totrinnsvurdering = totrinnsvurdering()
 
-        assertEquals(aktivTotrinnsvurdering?.vedtaksperiodeId, totrinnsvurdering?.vedtaksperiodeId)
-        assertEquals(aktivTotrinnsvurdering?.erRetur, totrinnsvurdering?.erRetur)
-        assertEquals(aktivTotrinnsvurdering?.saksbehandler, totrinnsvurdering?.saksbehandler)
-        assertEquals(aktivTotrinnsvurdering?.beslutter, totrinnsvurdering?.beslutter)
-        assertEquals(aktivTotrinnsvurdering?.utbetalingIdRef, totrinnsvurdering?.utbetalingIdRef)
-        assertEquals(aktivTotrinnsvurdering?.oppdatert, totrinnsvurdering?.oppdatert)
-        assertEquals(aktivTotrinnsvurdering?.opprettet, totrinnsvurdering?.opprettet)
+        assertEquals(aktivTotrinnsvurdering?.vedtaksperiodeId, totrinnsvurdering.vedtaksperiodeId)
+        assertEquals(aktivTotrinnsvurdering?.erRetur, totrinnsvurdering.erRetur)
+        assertEquals(aktivTotrinnsvurdering?.saksbehandler, totrinnsvurdering.saksbehandler)
+        assertEquals(aktivTotrinnsvurdering?.beslutter, totrinnsvurdering.beslutter)
+        assertEquals(aktivTotrinnsvurdering?.utbetalingIdRef, totrinnsvurdering.utbetalingIdRef)
+        assertEquals(aktivTotrinnsvurdering?.oppdatert, totrinnsvurdering.oppdatert)
+        assertEquals(aktivTotrinnsvurdering?.opprettet, totrinnsvurdering.opprettet)
     }
 
     @Test
@@ -261,7 +258,7 @@ internal class PgTotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
         opprettArbeidsgiver()
         opprettVedtaksperiode()
         opprettOppgave()
-        totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
+        totrinnsvurderingDao.opprettOld(VEDTAKSPERIODE)
         totrinnsvurderingDao.oppdater(
             TotrinnsvurderingFraDatabase(
                 vedtaksperiodeId = VEDTAKSPERIODE,
@@ -291,20 +288,20 @@ internal class PgTotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
         opprettArbeidsgiver()
         opprettVedtaksperiode()
         opprettOppgave()
-        totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
-        totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
+        totrinnsvurderingDao.opprettOld(VEDTAKSPERIODE)
+        totrinnsvurderingDao.opprettOld(VEDTAKSPERIODE)
         totrinnsvurderingDao.settErRetur(VEDTAKSPERIODE)
         val aktivTotrinnsvurdering = totrinnsvurderingDao.hentAktiv(OPPGAVE_ID)
 
         val totrinnsvurdering = totrinnsvurdering()
 
-        assertEquals(aktivTotrinnsvurdering?.vedtaksperiodeId, totrinnsvurdering?.vedtaksperiodeId)
-        assertEquals(aktivTotrinnsvurdering?.erRetur, totrinnsvurdering?.erRetur)
-        assertEquals(aktivTotrinnsvurdering?.saksbehandler, totrinnsvurdering?.saksbehandler)
-        assertEquals(aktivTotrinnsvurdering?.beslutter, totrinnsvurdering?.beslutter)
-        assertEquals(aktivTotrinnsvurdering?.utbetalingIdRef, totrinnsvurdering?.utbetalingIdRef)
-        assertEquals(aktivTotrinnsvurdering?.oppdatert, totrinnsvurdering?.oppdatert)
-        assertEquals(aktivTotrinnsvurdering?.opprettet, totrinnsvurdering?.opprettet)
+        assertEquals(aktivTotrinnsvurdering?.vedtaksperiodeId, totrinnsvurdering.vedtaksperiodeId)
+        assertEquals(aktivTotrinnsvurdering?.erRetur, totrinnsvurdering.erRetur)
+        assertEquals(aktivTotrinnsvurdering?.saksbehandler, totrinnsvurdering.saksbehandler)
+        assertEquals(aktivTotrinnsvurdering?.beslutter, totrinnsvurdering.beslutter)
+        assertEquals(aktivTotrinnsvurdering?.utbetalingIdRef, totrinnsvurdering.utbetalingIdRef)
+        assertEquals(aktivTotrinnsvurdering?.oppdatert, totrinnsvurdering.oppdatert)
+        assertEquals(aktivTotrinnsvurdering?.opprettet, totrinnsvurdering.opprettet)
     }
 
     @Test
@@ -314,7 +311,7 @@ internal class PgTotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
         opprettArbeidsgiver()
         opprettVedtaksperiode()
         opprettOppgave()
-        totrinnsvurderingDao.opprett(VEDTAKSPERIODE)
+        totrinnsvurderingDao.opprettOld(VEDTAKSPERIODE)
         settSaksbehandler(OPPGAVE_ID, SAKSBEHANDLER_OID)
 
         assertEquals(SAKSBEHANDLER_OID, totrinnsvurderingDao.hentAktiv(VEDTAKSPERIODE)?.saksbehandler)
@@ -331,6 +328,69 @@ internal class PgTotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
 
         assertNull(totrinnsvurderingDao.hentAktiv(1L))
     }
+
+    @Test
+    fun `Kan opprette totrinnsvurdering`() {
+        opprettPerson()
+        opprettSaksbehandler()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode(FNR)
+        val totrinnsvurdering = Totrinnsvurdering(
+            id = NyId,
+            vedtaksperiodeId = VEDTAKSPERIODE,
+            erRetur = false,
+            saksbehandler = saksbehandler(),
+            beslutter = null,
+            utbetalingId = null,
+            opprettet = LocalDateTime.now(),
+            oppdatert = LocalDateTime.now(),
+            overstyringer = emptyList(),
+            ferdigstilt = false,
+        )
+        val (id, totrinnsvurderingFraDatabase) = totrinnsvurderingDao.opprett(totrinnsvurdering, FNR)
+        val (hentetId, hentetTotrinnsvurdering) = requireNotNull(totrinnsvurderingDao.hentAktivTotrinnsvurdering(FNR))
+
+        assertEquals(id, hentetId)
+        assertEquals(totrinnsvurderingFraDatabase, hentetTotrinnsvurdering)
+        assertEquals(VEDTAKSPERIODE, totrinnsvurderingFraDatabase.vedtaksperiodeId)
+        assertEquals(SAKSBEHANDLER_OID, totrinnsvurderingFraDatabase.saksbehandler)
+        assertEquals(totrinnsvurdering.opprettet, totrinnsvurderingFraDatabase.opprettet)
+        assertEquals(totrinnsvurdering.oppdatert, totrinnsvurderingFraDatabase.oppdatert)
+    }
+
+    @Test
+    fun `Oppretter ikke ny hvis person har aktiv totrinnsvurdering, men returnerer den aktive i stedet`() {
+        opprettPerson()
+        opprettSaksbehandler()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode(FNR)
+        val totrinnsvurdering = Totrinnsvurdering(
+            id = NyId,
+            vedtaksperiodeId = VEDTAKSPERIODE,
+            erRetur = false,
+            saksbehandler = saksbehandler(),
+            beslutter = null,
+            utbetalingId = null,
+            opprettet = LocalDateTime.now(),
+            oppdatert = LocalDateTime.now(),
+            overstyringer = emptyList(),
+            ferdigstilt = false,
+        )
+        val (id1, totrinnsvurderingFraDatabase1) = totrinnsvurderingDao.opprett(totrinnsvurdering, FNR)
+        val (id2, totrinnsvurderingFraDatabase2) = totrinnsvurderingDao.opprett(totrinnsvurdering, FNR)
+
+        assertEquals(id1, id2)
+        assertEquals(totrinnsvurderingFraDatabase1, totrinnsvurderingFraDatabase2)
+    }
+
+
+    private fun saksbehandler() = Saksbehandler(
+        oid = SAKSBEHANDLER_OID,
+        navn = SAKSBEHANDLER_NAVN,
+        ident = SAKSBEHANDLER_IDENT,
+        epostadresse = SAKSBEHANDLER_EPOST,
+        tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang
+    )
 
     private fun totrinnsvurdering(vedtaksperiodeId: UUID = VEDTAKSPERIODE) = dbQuery.single(
         "SELECT * FROM totrinnsvurdering WHERE vedtaksperiode_id = :vedtaksperiodeId",

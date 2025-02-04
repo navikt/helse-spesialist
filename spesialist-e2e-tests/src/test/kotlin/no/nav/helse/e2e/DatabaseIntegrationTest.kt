@@ -169,7 +169,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         erRetur: Boolean = false,
         ferdigstill: Boolean = false,
     ) {
-        totrinnsvurderingDao.opprett(vedtaksperiodeId)
+        totrinnsvurderingDao.opprettOld(vedtaksperiodeId)
 
         if (saksbehandler != null) {
             settSaksbehandler(vedtaksperiodeId, saksbehandler)

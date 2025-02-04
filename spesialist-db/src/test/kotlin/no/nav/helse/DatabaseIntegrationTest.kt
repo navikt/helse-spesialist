@@ -293,10 +293,10 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
     protected fun opprettEgenAnsatt(
         fødselsnummer: String,
-        erEgenAnsatt: Boolean,
+        @Suppress("SameParameterValue") erEgenAnsatt: Boolean,
     ) = egenAnsattDao.lagre(fødselsnummer, erEgenAnsatt, LocalDateTime.now())
 
-    protected fun oppdaterAdressebeskyttelse(adressebeskyttelse: Adressebeskyttelse) {
+    protected fun oppdaterAdressebeskyttelse(@Suppress("SameParameterValue") adressebeskyttelse: Adressebeskyttelse) {
         opprettPersoninfo(FNR, adressebeskyttelse = adressebeskyttelse)
     }
 
@@ -524,7 +524,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         erRetur: Boolean = false,
         ferdigstill: Boolean = false,
     ) {
-        totrinnsvurderingDao.opprett(vedtaksperiodeId)
+        totrinnsvurderingDao.opprettOld(vedtaksperiodeId)
 
         if (saksbehandler != null) {
             settSaksbehandler(vedtaksperiodeId, saksbehandler)
