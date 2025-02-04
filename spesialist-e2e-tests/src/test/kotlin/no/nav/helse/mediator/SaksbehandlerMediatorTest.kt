@@ -1008,7 +1008,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         assertEquals("NORMAL", status)
     }
 
-    private fun finnOverstyringId(fødselsnummer: String): UUID? {
+    private fun finnOverstyringId(fødselsnummer: String): UUID {
         return dbQuery.single(
             "select ekstern_hendelse_id from overstyring where person_ref = (select id from person where fødselsnummer = :fodselsnummer)",
             "fodselsnummer" to fødselsnummer

@@ -527,7 +527,7 @@ class SaksbehandlerMediator(
                 vedtakBegrunnelseDao.lagreVedtakBegrunnelse(
                     oppgaveId = oppgaveId,
                     type = avslag.data!!.type.toVedtakBegrunnelseTypeFraDatabase(),
-                    begrunnelse = avslag.data!!.begrunnelse,
+                    begrunnelse = avslag.data.begrunnelse,
                     saksbehandlerOid = saksbehandlerOid,
                 )
             }
