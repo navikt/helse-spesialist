@@ -6,7 +6,7 @@ import graphql.schema.DataFetchingEnvironment
 import no.nav.helse.spesialist.api.graphql.schema.ApiAnnulleringData
 
 interface AnnulleringMutationSchema : Mutation {
-    suspend fun annuller(
+    fun annuller(
         annullering: ApiAnnulleringData,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean>

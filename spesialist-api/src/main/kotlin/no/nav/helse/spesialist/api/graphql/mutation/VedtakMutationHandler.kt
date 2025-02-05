@@ -5,8 +5,6 @@ import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
 import graphql.execution.DataFetcherResult.newResult
 import graphql.schema.DataFetchingEnvironment
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import no.nav.helse.spesialist.api.Godkjenninghåndterer
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.feilhåndtering.IkkeÅpenOppgave
@@ -27,87 +25,85 @@ class VedtakMutationHandler(
         private val logg = LoggerFactory.getLogger(VedtakMutationHandler::class.java)
     }
 
-    override suspend fun fattVedtak(
+    override fun fattVedtak(
         oppgavereferanse: String,
         env: DataFetchingEnvironment,
         utfall: ApiVedtakUtfall,
         begrunnelse: String?,
-    ): DataFetcherResult<Boolean> =
-        withContext(Dispatchers.IO) {
-            val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
-            logg.info("Fatter vedtak for oppgave $oppgavereferanse")
+    ): DataFetcherResult<Boolean> {
+        val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
+        logg.info("Fatter vedtak for oppgave $oppgavereferanse")
 
-            val resultat =
-                saksbehandlerhåndterer.vedtak(
-                    saksbehandlerFraApi = saksbehandler,
-                    oppgavereferanse = oppgavereferanse.toLong(),
-                    godkjent = true,
-                    utfall = utfall,
-                    begrunnelse = begrunnelse,
-                )
-            when (resultat) {
-                is VedtakResultat.Ok -> {
-                    val dto =
-                        GodkjenningDto(
-                            oppgavereferanse = oppgavereferanse.toLong(),
-                            godkjent = true,
-                            saksbehandlerIdent = saksbehandler.ident,
-                            årsak = null,
-                            begrunnelser = null,
-                            kommentar = null,
-                            avslag = null,
-                        )
-                    godkjenninghåndterer.håndter(dto, saksbehandler.epost, saksbehandler.oid)
-                    newResult<Boolean>().data(true).build()
-                }
+        val resultat =
+            saksbehandlerhåndterer.vedtak(
+                saksbehandlerFraApi = saksbehandler,
+                oppgavereferanse = oppgavereferanse.toLong(),
+                godkjent = true,
+                utfall = utfall,
+                begrunnelse = begrunnelse,
+            )
+        return when (resultat) {
+            is VedtakResultat.Ok -> {
+                val dto =
+                    GodkjenningDto(
+                        oppgavereferanse = oppgavereferanse.toLong(),
+                        godkjent = true,
+                        saksbehandlerIdent = saksbehandler.ident,
+                        årsak = null,
+                        begrunnelser = null,
+                        kommentar = null,
+                        avslag = null,
+                    )
+                godkjenninghåndterer.håndter(dto, saksbehandler.epost, saksbehandler.oid)
+                newResult<Boolean>().data(true).build()
+            }
 
-                is VedtakResultat.Feil -> {
-                    logg.warn("Kunne ikke innvilge vedtak: ${resultat.melding}")
-                    newResult<Boolean>().error(vedtakGraphQLError(resultat.melding, resultat.code, resultat.exception))
-                        .data(false).build()
-                }
+            is VedtakResultat.Feil -> {
+                logg.warn("Kunne ikke innvilge vedtak: ${resultat.melding}")
+                newResult<Boolean>().error(vedtakGraphQLError(resultat.melding, resultat.code, resultat.exception))
+                    .data(false).build()
             }
         }
+    }
 
-    override suspend fun sendTilInfotrygd(
+    override fun sendTilInfotrygd(
         oppgavereferanse: String,
         arsak: String,
         begrunnelser: List<String>,
         kommentar: String?,
         env: DataFetchingEnvironment,
-    ): DataFetcherResult<Boolean> =
-        withContext(Dispatchers.IO) {
-            val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
-            logg.info("Sender oppgave $oppgavereferanse til Infotrygd")
+    ): DataFetcherResult<Boolean> {
+        val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
+        logg.info("Sender oppgave $oppgavereferanse til Infotrygd")
 
-            val resultat =
-                saksbehandlerhåndterer.infotrygdVedtak(
-                    saksbehandlerFraApi = saksbehandler,
-                    oppgavereferanse = oppgavereferanse.toLong(),
-                    godkjent = false,
-                )
-            when (resultat) {
-                is VedtakResultat.Ok -> {
-                    val godkjenning =
-                        GodkjenningDto(
-                            oppgavereferanse = oppgavereferanse.toLong(),
-                            godkjent = false,
-                            saksbehandlerIdent = saksbehandler.ident,
-                            årsak = arsak,
-                            begrunnelser = begrunnelser,
-                            kommentar = kommentar,
-                        )
-                    godkjenninghåndterer.håndter(godkjenning, saksbehandler.epost, saksbehandler.oid)
-                    newResult<Boolean>().data(true).build()
-                }
+        val resultat =
+            saksbehandlerhåndterer.infotrygdVedtak(
+                saksbehandlerFraApi = saksbehandler,
+                oppgavereferanse = oppgavereferanse.toLong(),
+                godkjent = false,
+            )
+        return when (resultat) {
+            is VedtakResultat.Ok -> {
+                val godkjenning =
+                    GodkjenningDto(
+                        oppgavereferanse = oppgavereferanse.toLong(),
+                        godkjent = false,
+                        saksbehandlerIdent = saksbehandler.ident,
+                        årsak = arsak,
+                        begrunnelser = begrunnelser,
+                        kommentar = kommentar,
+                    )
+                godkjenninghåndterer.håndter(godkjenning, saksbehandler.epost, saksbehandler.oid)
+                newResult<Boolean>().data(true).build()
+            }
 
-                is VedtakResultat.Feil -> {
-                    logg.warn("Kunne ikke sende oppgave til Infotrygd: ${resultat.melding}")
-                    newResult<Boolean>().error(vedtakGraphQLError(resultat.melding, resultat.code, resultat.exception))
-                        .data(false).build()
-                }
+            is VedtakResultat.Feil -> {
+                logg.warn("Kunne ikke sende oppgave til Infotrygd: ${resultat.melding}")
+                newResult<Boolean>().error(vedtakGraphQLError(resultat.melding, resultat.code, resultat.exception))
+                    .data(false).build()
             }
         }
+    }
 
     sealed interface VedtakResultat {
         data class Ok(val spleisBehandlingId: UUID) : VedtakResultat

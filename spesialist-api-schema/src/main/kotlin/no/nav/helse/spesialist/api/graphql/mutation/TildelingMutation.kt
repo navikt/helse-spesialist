@@ -6,12 +6,12 @@ import graphql.schema.DataFetchingEnvironment
 import no.nav.helse.spesialist.api.graphql.schema.ApiTildeling
 
 interface TildelingMutationSchema : Mutation {
-    suspend fun opprettTildeling(
+    fun opprettTildeling(
         oppgaveId: String,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<ApiTildeling?>
 
-    suspend fun fjernTildeling(
+    fun fjernTildeling(
         oppgaveId: String,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean>

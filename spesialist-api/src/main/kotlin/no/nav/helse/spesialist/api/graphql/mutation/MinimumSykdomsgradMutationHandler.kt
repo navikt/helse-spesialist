@@ -4,8 +4,6 @@ import graphql.GraphQLError
 import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.schema.ApiMinimumSykdomsgrad
@@ -13,43 +11,42 @@ import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class MinimumSykdomsgradMutationHandler(private val saksbehandlerhåndterer: Saksbehandlerhåndterer) : MinimumSykdomsgradMutationSchema {
+class MinimumSykdomsgradMutationHandler(private val saksbehandlerhåndterer: Saksbehandlerhåndterer) :
+    MinimumSykdomsgradMutationSchema {
     private companion object {
         private val logg: Logger = LoggerFactory.getLogger(MinimumSykdomsgradMutation::class.java)
     }
 
-    override suspend fun minimumSykdomsgrad(
+    override fun minimumSykdomsgrad(
         minimumSykdomsgrad: ApiMinimumSykdomsgrad,
         env: DataFetchingEnvironment,
-    ): DataFetcherResult<Boolean> =
-        withContext(Dispatchers.IO) {
-            val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
-            if (minimumSykdomsgrad.perioderVurdertOk.isEmpty() && minimumSykdomsgrad.perioderVurdertIkkeOk.isEmpty()) {
-                return@withContext DataFetcherResult.newResult<Boolean>()
-                    .error(
-                        GraphqlErrorException.newErrorException().message("Mangler vurderte perioder")
-                            .extensions(mapOf("code" to 400)).build(),
-                    )
-                    .data(false)
-                    .build()
-            }
-
-            try {
-                withContext(Dispatchers.IO) {
-                    saksbehandlerhåndterer.håndter(minimumSykdomsgrad, saksbehandler)
-                }
-            } catch (e: Exception) {
-                val kunneIkkeVurdereMinimumSykdomsgradError = kunneIkkeVurdereMinimumSykdomsgradError()
-                logg.error(kunneIkkeVurdereMinimumSykdomsgradError.message, e)
-                return@withContext DataFetcherResult.newResult<Boolean>()
-                    .error(kunneIkkeVurdereMinimumSykdomsgradError)
-                    .data(false)
-                    .build()
-            }
-            DataFetcherResult.newResult<Boolean>().data(true).build()
+    ): DataFetcherResult<Boolean> {
+        val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
+        if (minimumSykdomsgrad.perioderVurdertOk.isEmpty() && minimumSykdomsgrad.perioderVurdertIkkeOk.isEmpty()) {
+            return lagErrorRespons(manglerVurdertePerioderError())
         }
+
+        return try {
+            saksbehandlerhåndterer.håndter(minimumSykdomsgrad, saksbehandler)
+            DataFetcherResult.newResult<Boolean>().data(true).build()
+        } catch (e: Exception) {
+            val kunneIkkeVurdereMinimumSykdomsgradError = kunneIkkeVurdereMinimumSykdomsgradError()
+            logg.error(kunneIkkeVurdereMinimumSykdomsgradError.message, e)
+            lagErrorRespons(kunneIkkeVurdereMinimumSykdomsgradError)
+        }
+    }
+
+    private fun manglerVurdertePerioderError(): GraphQLError =
+        GraphqlErrorException.newErrorException().message("Mangler vurderte perioder")
+            .extensions(mapOf("code" to 400)).build()
 
     private fun kunneIkkeVurdereMinimumSykdomsgradError(): GraphQLError =
         GraphqlErrorException.newErrorException().message("Kunne ikke vurdere minimum sykdomsgrad")
             .extensions(mapOf("code" to 500)).build()
+
+    private fun lagErrorRespons(error: GraphQLError): DataFetcherResult<Boolean> =
+        DataFetcherResult.newResult<Boolean>()
+            .error(error)
+            .data(false)
+            .build()
 }

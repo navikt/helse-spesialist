@@ -8,7 +8,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiPaVentRequest
 import java.time.LocalDate
 
 interface PaVentMutationSchema : Mutation {
-    suspend fun leggPaVent(
+    fun leggPaVent(
         oppgaveId: String,
         notatTekst: String?,
         frist: LocalDate,
@@ -17,12 +17,12 @@ interface PaVentMutationSchema : Mutation {
         env: DataFetchingEnvironment,
     ): DataFetcherResult<ApiPaVent?>
 
-    suspend fun fjernPaVent(
+    fun fjernPaVent(
         oppgaveId: String,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean?>
 
-    suspend fun endrePaVent(
+    fun endrePaVent(
         oppgaveId: String,
         notatTekst: String?,
         frist: LocalDate,

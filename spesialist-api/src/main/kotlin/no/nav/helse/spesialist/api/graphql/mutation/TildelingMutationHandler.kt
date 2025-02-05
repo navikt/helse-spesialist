@@ -6,8 +6,6 @@ import graphql.execution.DataFetcherResult
 import graphql.execution.DataFetcherResult.newResult
 import graphql.schema.DataFetchingEnvironment
 import io.ktor.http.HttpStatusCode
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre
@@ -26,39 +24,35 @@ class TildelingMutationHandler(
         private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
     }
 
-    override suspend fun opprettTildeling(
+    override fun opprettTildeling(
         oppgaveId: String,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<ApiTildeling?> {
         val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
-        return withContext(Dispatchers.IO) {
-            try {
-                saksbehandlerhåndterer.håndter(TildelOppgave(oppgaveId.toLong()), saksbehandler)
-                newResult<ApiTildeling?>().data(
-                    ApiTildeling(saksbehandler.navn, saksbehandler.epost, saksbehandler.oid),
-                ).build()
-            } catch (e: OppgaveTildeltNoenAndre) {
-                newResult<ApiTildeling?>().error(alleredeTildeltError(e)).build()
-            } catch (e: RuntimeException) {
-                newResult<ApiTildeling?>().error(getUpdateError(oppgaveId)).build()
-            }
+        return try {
+            saksbehandlerhåndterer.håndter(TildelOppgave(oppgaveId.toLong()), saksbehandler)
+            newResult<ApiTildeling?>().data(
+                ApiTildeling(saksbehandler.navn, saksbehandler.epost, saksbehandler.oid),
+            ).build()
+        } catch (e: OppgaveTildeltNoenAndre) {
+            newResult<ApiTildeling?>().error(alleredeTildeltError(e)).build()
+        } catch (e: RuntimeException) {
+            newResult<ApiTildeling?>().error(getUpdateError(oppgaveId)).build()
         }
     }
 
-    override suspend fun fjernTildeling(
+    override fun fjernTildeling(
         oppgaveId: String,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> {
         val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
-        return withContext(Dispatchers.IO) {
-            try {
-                saksbehandlerhåndterer.håndter(AvmeldOppgave(oppgaveId.toLong()), saksbehandler)
-                newResult<Boolean>().data(true).build()
-            } catch (e: OppgaveIkkeTildelt) {
-                newResult<Boolean>().data(false).build()
-            } catch (e: RuntimeException) {
-                newResult<Boolean>().data(false).build()
-            }
+        return try {
+            saksbehandlerhåndterer.håndter(AvmeldOppgave(oppgaveId.toLong()), saksbehandler)
+            newResult<Boolean>().data(true).build()
+        } catch (e: OppgaveIkkeTildelt) {
+            newResult<Boolean>().data(false).build()
+        } catch (e: RuntimeException) {
+            newResult<Boolean>().data(false).build()
         }
     }
 

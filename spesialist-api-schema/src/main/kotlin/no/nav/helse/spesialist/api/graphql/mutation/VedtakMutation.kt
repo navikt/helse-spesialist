@@ -6,14 +6,14 @@ import graphql.schema.DataFetchingEnvironment
 import no.nav.helse.spesialist.api.graphql.schema.ApiVedtakUtfall
 
 interface VedtakMutationSchema : Mutation {
-    suspend fun fattVedtak(
+    fun fattVedtak(
         oppgavereferanse: String,
         env: DataFetchingEnvironment,
         utfall: ApiVedtakUtfall,
         begrunnelse: String? = null,
     ): DataFetcherResult<Boolean>
 
-    suspend fun sendTilInfotrygd(
+    fun sendTilInfotrygd(
         oppgavereferanse: String,
         arsak: String,
         begrunnelser: List<String>,

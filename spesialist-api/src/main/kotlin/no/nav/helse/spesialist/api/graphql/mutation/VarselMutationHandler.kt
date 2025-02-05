@@ -4,8 +4,6 @@ import graphql.GraphQLError
 import graphql.GraphqlErrorException.newErrorException
 import graphql.execution.DataFetcherResult
 import graphql.execution.DataFetcherResult.newResult
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import no.nav.helse.db.api.VarselApiRepository
 import no.nav.helse.spesialist.api.graphql.mapping.toVarselDto
 import no.nav.helse.spesialist.api.graphql.schema.ApiVarselDTO
@@ -17,40 +15,39 @@ class VarselMutationHandler(private val varselRepository: VarselApiRepository) :
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
 
-    override suspend fun settVarselstatus(
+    override fun settVarselstatus(
         generasjonIdString: String,
         varselkode: String,
         ident: String,
         definisjonIdString: String?,
-    ): DataFetcherResult<ApiVarselDTO?> =
-        withContext(Dispatchers.IO) {
-            val generasjonId = UUID.fromString(generasjonIdString)
+    ): DataFetcherResult<ApiVarselDTO?> {
+        val generasjonId = UUID.fromString(generasjonIdString)
 
-            if (definisjonIdString != null) {
-                when (varselRepository.erAktiv(varselkode, generasjonId)) {
-                    false -> varselError(getNotActiveError(varselkode, generasjonId))
-                    null -> varselError(getNotFoundError(varselkode, generasjonId))
-                    true ->
-                        varselRepository.settStatusVurdert(
-                            generasjonId = generasjonId,
-                            definisjonId = UUID.fromString(definisjonIdString),
-                            varselkode = varselkode,
-                            ident = ident,
-                        )?.toVarselDto().graphQlResult(varselkode, generasjonId)
-                }
-            } else {
-                when (varselRepository.erGodkjent(varselkode, generasjonId)) {
-                    true -> varselError(getIsGodkjentError(varselkode, generasjonId))
-                    null -> varselError(getNotFoundError(varselkode, generasjonId))
-                    false ->
-                        varselRepository.settStatusAktiv(
-                            generasjonId = generasjonId,
-                            varselkode = varselkode,
-                            ident = ident,
-                        )?.toVarselDto().graphQlResult(varselkode, generasjonId)
-                }
+        return if (definisjonIdString != null) {
+            when (varselRepository.erAktiv(varselkode, generasjonId)) {
+                false -> varselError(getNotActiveError(varselkode, generasjonId))
+                null -> varselError(getNotFoundError(varselkode, generasjonId))
+                true ->
+                    varselRepository.settStatusVurdert(
+                        generasjonId = generasjonId,
+                        definisjonId = UUID.fromString(definisjonIdString),
+                        varselkode = varselkode,
+                        ident = ident,
+                    )?.toVarselDto().graphQlResult(varselkode, generasjonId)
+            }
+        } else {
+            when (varselRepository.erGodkjent(varselkode, generasjonId)) {
+                true -> varselError(getIsGodkjentError(varselkode, generasjonId))
+                null -> varselError(getNotFoundError(varselkode, generasjonId))
+                false ->
+                    varselRepository.settStatusAktiv(
+                        generasjonId = generasjonId,
+                        varselkode = varselkode,
+                        ident = ident,
+                    )?.toVarselDto().graphQlResult(varselkode, generasjonId)
             }
         }
+    }
 
     private fun varselError(error: GraphQLError): DataFetcherResult<ApiVarselDTO?> = newResult<ApiVarselDTO>().error(error).build()
 

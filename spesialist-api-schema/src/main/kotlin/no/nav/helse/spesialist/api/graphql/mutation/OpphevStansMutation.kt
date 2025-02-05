@@ -5,7 +5,7 @@ import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 
 interface OpphevStansMutationSchema : Mutation {
-    suspend fun opphevStans(
+    fun opphevStans(
         env: DataFetchingEnvironment,
         fodselsnummer: String,
         begrunnelse: String,

@@ -6,7 +6,7 @@ import graphql.schema.DataFetchingEnvironment
 import no.nav.helse.spesialist.api.graphql.schema.ApiMinimumSykdomsgrad
 
 interface MinimumSykdomsgradMutationSchema : Mutation {
-    suspend fun minimumSykdomsgrad(
+    fun minimumSykdomsgrad(
         minimumSykdomsgrad: ApiMinimumSykdomsgrad,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean>

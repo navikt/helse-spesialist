@@ -7,8 +7,6 @@ import graphql.execution.DataFetcherResult.newResult
 import graphql.schema.DataFetchingEnvironment
 import io.ktor.http.HttpStatusCode
 import io.ktor.util.logging.error
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.feilhåndtering.FinnerIkkeLagtPåVent
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
@@ -28,7 +26,7 @@ class PaVentMutationHandler(
         private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
     }
 
-    override suspend fun leggPaVent(
+    override fun leggPaVent(
         oppgaveId: String,
         notatTekst: String?,
         frist: LocalDate,
@@ -37,57 +35,47 @@ class PaVentMutationHandler(
         env: DataFetchingEnvironment,
     ): DataFetcherResult<ApiPaVent?> {
         val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
-        return withContext(Dispatchers.IO) {
-            try {
-                saksbehandlerhåndterer.påVent(
-                    ApiPaVentRequest.ApiLeggPaVent(
-                        oppgaveId.toLong(),
-                        saksbehandler.oid,
-                        frist,
-                        tildeling,
-                        notatTekst,
-                        arsaker ?: emptyList(),
-                    ),
-                    saksbehandler,
-                )
-                newResult<ApiPaVent?>()
-                    .data(
-                        ApiPaVent(
-                            frist = frist,
-                            oid = saksbehandler.oid,
-                        ),
-                    ).build()
-            } catch (e: OppgaveIkkeTildelt) {
-                newResult<ApiPaVent?>().error(ikkeTildeltError(e)).build()
-            } catch (e: OppgaveTildeltNoenAndre) {
-                newResult<ApiPaVent?>().error(tildeltNoenAndreError(e)).build()
-            } catch (e: RuntimeException) {
-                sikkerlogg.error(e)
-                newResult<ApiPaVent?>().error(getUpdateError(oppgaveId)).build()
-            }
+        return try {
+            saksbehandlerhåndterer.påVent(
+                ApiPaVentRequest.ApiLeggPaVent(
+                    oppgaveId.toLong(),
+                    saksbehandler.oid,
+                    frist,
+                    tildeling,
+                    notatTekst,
+                    arsaker ?: emptyList(),
+                ),
+                saksbehandler,
+            )
+            newResult<ApiPaVent?>().data(ApiPaVent(frist = frist, oid = saksbehandler.oid)).build()
+        } catch (e: OppgaveIkkeTildelt) {
+            newResult<ApiPaVent?>().error(ikkeTildeltError(e)).build()
+        } catch (e: OppgaveTildeltNoenAndre) {
+            newResult<ApiPaVent?>().error(tildeltNoenAndreError(e)).build()
+        } catch (e: RuntimeException) {
+            sikkerlogg.error(e)
+            newResult<ApiPaVent?>().error(getUpdateError(oppgaveId)).build()
         }
     }
 
-    override suspend fun fjernPaVent(
+    override fun fjernPaVent(
         oppgaveId: String,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean?> {
         val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
-        return withContext(Dispatchers.IO) {
-            try {
-                saksbehandlerhåndterer.påVent(ApiPaVentRequest.ApiFjernPaVent(oppgaveId.toLong()), saksbehandler)
-                newResult<Boolean?>().data(true).build()
-            } catch (e: OppgaveIkkeTildelt) {
-                e.logger()
-                newResult<Boolean>().data(false).build()
-            } catch (e: OppgaveTildeltNoenAndre) {
-                e.logger()
-                newResult<Boolean>().data(false).build()
-            }
+        return try {
+            saksbehandlerhåndterer.påVent(ApiPaVentRequest.ApiFjernPaVent(oppgaveId.toLong()), saksbehandler)
+            newResult<Boolean?>().data(true).build()
+        } catch (e: OppgaveIkkeTildelt) {
+            e.logger()
+            newResult<Boolean>().data(false).build()
+        } catch (e: OppgaveTildeltNoenAndre) {
+            e.logger()
+            newResult<Boolean>().data(false).build()
         }
     }
 
-    override suspend fun endrePaVent(
+    override fun endrePaVent(
         oppgaveId: String,
         notatTekst: String?,
         frist: LocalDate,
@@ -96,33 +84,25 @@ class PaVentMutationHandler(
         env: DataFetchingEnvironment,
     ): DataFetcherResult<ApiPaVent?> {
         val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
-        return withContext(Dispatchers.IO) {
-            try {
-                saksbehandlerhåndterer.påVent(
-                    ApiPaVentRequest.ApiEndrePaVent(
-                        oppgaveId = oppgaveId.toLong(),
-                        saksbehandlerOid = saksbehandler.oid,
-                        frist = frist,
-                        skalTildeles = tildeling,
-                        notatTekst = notatTekst,
-                        årsaker = arsaker,
-                    ),
-                    saksbehandler,
-                )
-                newResult<ApiPaVent?>()
-                    .data(
-                        ApiPaVent(
-                            frist = frist,
-                            oid = saksbehandler.oid,
-                        ),
-                    ).build()
-            } catch (e: FinnerIkkeLagtPåVent) {
-                e.logger()
-                newResult<ApiPaVent>().error(getUpdateError(oppgaveId)).build()
-            } catch (e: RuntimeException) {
-                sikkerlogg.error(e)
-                newResult<ApiPaVent?>().error(getUpdateError(oppgaveId)).build()
-            }
+        return try {
+            saksbehandlerhåndterer.påVent(
+                ApiPaVentRequest.ApiEndrePaVent(
+                    oppgaveId = oppgaveId.toLong(),
+                    saksbehandlerOid = saksbehandler.oid,
+                    frist = frist,
+                    skalTildeles = tildeling,
+                    notatTekst = notatTekst,
+                    årsaker = arsaker,
+                ),
+                saksbehandler,
+            )
+            newResult<ApiPaVent?>().data(ApiPaVent(frist = frist, oid = saksbehandler.oid)).build()
+        } catch (e: FinnerIkkeLagtPåVent) {
+            e.logger()
+            newResult<ApiPaVent>().error(getUpdateError(oppgaveId)).build()
+        } catch (e: RuntimeException) {
+            sikkerlogg.error(e)
+            newResult<ApiPaVent?>().error(getUpdateError(oppgaveId)).build()
         }
     }
 

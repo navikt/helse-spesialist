@@ -6,7 +6,7 @@ import graphql.schema.DataFetchingEnvironment
 import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse
 
 interface SkjonnsfastsettelseMutationSchema : Mutation {
-    suspend fun skjonnsfastsettSykepengegrunnlag(
+    fun skjonnsfastsettSykepengegrunnlag(
         skjonnsfastsettelse: ApiSkjonnsfastsettelse,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean>

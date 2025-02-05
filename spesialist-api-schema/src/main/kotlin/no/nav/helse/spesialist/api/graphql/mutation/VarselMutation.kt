@@ -5,7 +5,7 @@ import graphql.execution.DataFetcherResult
 import no.nav.helse.spesialist.api.graphql.schema.ApiVarselDTO
 
 interface VarselMutationSchema : Mutation {
-    suspend fun settVarselstatus(
+    fun settVarselstatus(
         generasjonIdString: String,
         varselkode: String,
         ident: String,
