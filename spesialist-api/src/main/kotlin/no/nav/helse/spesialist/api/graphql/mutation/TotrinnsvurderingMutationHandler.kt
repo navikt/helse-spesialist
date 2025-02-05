@@ -42,101 +42,55 @@ class TotrinnsvurderingMutationHandler(
                     begrunnelse = vedtakBegrunnelse,
                 )
         ) {
-            is SendTilGodkjenningResult.Feil.KunneIkkeFinnePerioderTilBehandling ->
-                DataFetcherResult
-                    .newResult<Boolean>()
-                    .error(
-                        GraphqlErrorException
-                            .newErrorException()
-                            .message("Kunne ikke håndtere totrinnsvurdering, ukjennt feil")
-                            .extensions(mapOf("code" to 500))
-                            .build(),
-                    ).data(false)
-                    .build()
+            is SendTilGodkjenningResult.Feil.KunneIkkeFinnePerioderTilBehandling -> {
+                byggErrorRespons(
+                    "Kunne ikke håndtere totrinnsvurdering, ukjennt feil",
+                    HttpStatusCode.InternalServerError,
+                )
+            }
 
-            is SendTilGodkjenningResult.Feil.ManglerVurderingAvVarsler ->
-                DataFetcherResult
-                    .newResult<Boolean>()
-                    .error(
-                        GraphqlErrorException
-                            .newErrorException()
-                            .message(result.modellfeil.message)
-                            .extensions(mapOf("code" to result.modellfeil.httpkode))
-                            .build(),
-                    ).data(false)
-                    .build()
+            is SendTilGodkjenningResult.Feil.ManglerVurderingAvVarsler -> {
+                byggErrorRespons(
+                    result.modellfeil.message,
+                    result.modellfeil.httpkode,
+                )
+            }
 
             is SendTilGodkjenningResult.Feil.KunneIkkeHåndtereBegrunnelse ->
-                DataFetcherResult
-                    .newResult<Boolean>()
-                    .error(
-                        GraphqlErrorException
-                            .newErrorException()
-                            .message("Feil ved håndtering av begrunnelse: ${result.e.message}")
-                            .extensions(mapOf("code" to HttpStatusCode.InternalServerError))
-                            .build(),
-                    ).data(false)
-                    .build()
+                byggErrorRespons(
+                    "Feil ved håndtering av begrunnelse: ${result.e.message}",
+                    HttpStatusCode.InternalServerError,
+                )
 
             is SendTilGodkjenningResult.Feil.KunneIkkeSendeTilBeslutter ->
-                DataFetcherResult
-                    .newResult<Boolean>()
-                    .error(
-                        GraphqlErrorException
-                            .newErrorException()
-                            .message("Feil ved sending til beslutter: ${result.modellfeil.message}")
-                            .extensions(mapOf("code" to result.modellfeil.httpkode))
-                            .build(),
-                    ).data(false)
-                    .build()
+                byggErrorRespons(
+                    "Feil ved sending til beslutter: ${result.modellfeil.message}",
+                    result.modellfeil.httpkode,
+                )
 
             is SendTilGodkjenningResult.Feil.KunneIkkeFjerneFraPåVent ->
-                DataFetcherResult
-                    .newResult<Boolean>()
-                    .error(
-                        GraphqlErrorException
-                            .newErrorException()
-                            .message("Kunne ikke fjerne fra på vent: ${result.modellfeil.message}")
-                            .extensions(mapOf("code" to result.modellfeil.httpkode))
-                            .build(),
-                    ).data(false)
-                    .build()
+                byggErrorRespons(
+                    "Kunne ikke fjerne fra på vent: ${result.modellfeil.message}",
+                    result.modellfeil.httpkode,
+                )
 
             is SendTilGodkjenningResult.Feil.UventetFeilVedFjernFraPåVent ->
-                DataFetcherResult
-                    .newResult<Boolean>()
-                    .error(
-                        GraphqlErrorException
-                            .newErrorException()
-                            .message("Feil ved fjerning av på vent: ${result.e.message}")
-                            .extensions(mapOf("code" to HttpStatusCode.InternalServerError))
-                            .build(),
-                    ).data(false)
-                    .build()
+                byggErrorRespons(
+                    "Feil ved fjerning av på vent: ${result.e.message}",
+                    HttpStatusCode.InternalServerError,
+                )
 
             is SendTilGodkjenningResult.Feil.UventetFeilVedSendigTilBeslutter ->
-                DataFetcherResult
-                    .newResult<Boolean>()
-                    .error(
-                        GraphqlErrorException
-                            .newErrorException()
-                            .message("Feil ved sending til beslutter: ${result.e.message}")
-                            .extensions(mapOf("code" to HttpStatusCode.InternalServerError))
-                            .build(),
-                    ).data(false)
-                    .build()
+                byggErrorRespons(
+                    "Feil ved sending til beslutter: ${result.e.message}",
+                    HttpStatusCode.InternalServerError,
+                )
 
             is SendTilGodkjenningResult.Feil.UventetFeilVedOpprettingAvPeriodehistorikk ->
-                DataFetcherResult
-                    .newResult<Boolean>()
-                    .error(
-                        GraphqlErrorException
-                            .newErrorException()
-                            .message("Feil ved oppretting av periodehistorikk: ${result.e.message}")
-                            .extensions(mapOf("code" to HttpStatusCode.InternalServerError))
-                            .build(),
-                    ).data(false)
-                    .build()
+                byggErrorRespons(
+                    "Feil ved oppretting av periodehistorikk: ${result.e.message}",
+                    HttpStatusCode.InternalServerError,
+                )
 
             SendTilGodkjenningResult.Ok ->
                 DataFetcherResult.newResult<Boolean>().data(true).build()
@@ -172,4 +126,19 @@ class TotrinnsvurderingMutationHandler(
 
         return DataFetcherResult.newResult<Boolean>().data(true).build()
     }
+
+    private fun byggErrorRespons(
+        message: String,
+        statusCode: HttpStatusCode,
+    ): DataFetcherResult<Boolean> =
+        DataFetcherResult
+            .newResult<Boolean>()
+            .error(
+                GraphqlErrorException
+                    .newErrorException()
+                    .message(message)
+                    .extensions(mapOf("code" to statusCode.value))
+                    .build(),
+            ).data(false)
+            .build()
 }
