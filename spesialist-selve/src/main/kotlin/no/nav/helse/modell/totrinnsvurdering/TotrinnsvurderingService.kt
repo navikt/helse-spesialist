@@ -21,14 +21,6 @@ class TotrinnsvurderingService(
         saksbehandlerOid: UUID,
     ) = totrinnsvurderingDao.settBeslutter(oppgaveId, saksbehandlerOid)
 
-    fun settAutomatiskRetur(vedtaksperiodeId: UUID) {
-        oppgaveDao.finnIdForAktivOppgave(vedtaksperiodeId)?.let {
-            totrinnsvurderingDao.settErRetur(vedtaksperiodeId)
-            val innslag = Historikkinnslag.totrinnsvurderingAutomatiskRetur()
-            periodehistorikkDao.lagreMedOppgaveId(innslag, it)
-        }
-    }
-
     override fun totrinnsvurderingRetur(
         oppgaveId: Long,
         saksbehandlerFraApi: SaksbehandlerFraApi,
