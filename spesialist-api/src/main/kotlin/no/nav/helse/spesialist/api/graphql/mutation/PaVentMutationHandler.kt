@@ -49,9 +49,11 @@ class PaVentMutationHandler(
             )
             newResult<ApiPaVent?>().data(ApiPaVent(frist = frist, oid = saksbehandler.oid)).build()
         } catch (e: OppgaveIkkeTildelt) {
-            newResult<ApiPaVent?>().error(ikkeTildeltError(e)).build()
+            newResult<ApiPaVent?>().error(graphqlErrorException("Oppgave ikke tildelt", e.httpkode)).build()
         } catch (e: OppgaveTildeltNoenAndre) {
-            newResult<ApiPaVent?>().error(tildeltNoenAndreError(e)).build()
+            newResult<ApiPaVent?>().error(
+                graphqlErrorException("Oppgave tildelt noen andre", e.httpkode, "tildeling" to e.tildeling),
+            ).build()
         } catch (e: RuntimeException) {
             sikkerlogg.error(e)
             newResult<ApiPaVent?>().error(getUpdateError(oppgaveId)).build()
@@ -109,21 +111,15 @@ class PaVentMutationHandler(
     private fun getUpdateError(oppgaveId: String): GraphQLError {
         val message = "Kunne ikke tildele oppgave med oppgaveId=$oppgaveId"
         sikkerlogg.error(message)
-        return newErrorException()
-            .message(message)
-            .extensions(mapOf("code" to HttpStatusCode.InternalServerError))
-            .build()
+        return graphqlErrorException(message, HttpStatusCode.InternalServerError)
     }
 
-    private fun tildeltNoenAndreError(error: OppgaveTildeltNoenAndre): GraphQLError =
-        newErrorException()
-            .message("Oppgave tildelt noen andre")
-            .extensions(mapOf("code" to error.httpkode, "tildeling" to error.tildeling))
-            .build()
-
-    private fun ikkeTildeltError(error: OppgaveIkkeTildelt): GraphQLError =
-        newErrorException()
-            .message("Oppgave ikke tildelt")
-            .extensions(mapOf("code" to error.httpkode))
-            .build()
+    private fun graphqlErrorException(
+        message: String,
+        statusCode: HttpStatusCode,
+        vararg additionalExtensions: Pair<String, Any>,
+    ) = newErrorException()
+        .message(message)
+        .extensions(mapOf("code" to statusCode.value, *additionalExtensions))
+        .build()
 }

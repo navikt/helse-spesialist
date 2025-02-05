@@ -61,14 +61,14 @@ class TildelingMutationHandler(
         sikkerlogg.error(message)
         return newErrorException()
             .message(message)
-            .extensions(mapOf("code" to HttpStatusCode.InternalServerError))
+            .extensions(mapOf("code" to HttpStatusCode.InternalServerError.value))
             .build()
     }
 
     private fun alleredeTildeltError(error: OppgaveTildeltNoenAndre): GraphQLError {
         return newErrorException()
             .message("Oppgave allerede tildelt")
-            .extensions(mapOf("code" to error.httpkode, "tildeling" to error.tildeling))
+            .extensions(mapOf("code" to error.httpkode.value, "tildeling" to error.tildeling))
             .build()
     }
 }

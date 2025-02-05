@@ -55,7 +55,7 @@ internal class TildelingMutationTest : AbstractGraphQLApiTest() {
             """
         )
 
-        assertEquals(409, body["errors"].first()["extensions"]["code"]["value"].asInt())
+        assertEquals(409, body["errors"].first()["extensions"]["code"].asInt())
     }
 
     @Test

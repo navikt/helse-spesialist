@@ -56,7 +56,11 @@ class Oppgave private constructor(
 
     internal fun forsøkAvmelding(saksbehandler: Saksbehandler) {
         logg.info("Oppgave med {} forsøkes avmeldt av saksbehandler.", kv("oppgaveId", id))
-        val tildelt = tildeltTil ?: throw OppgaveIkkeTildelt(this.id)
+        val tildelt =
+            tildeltTil ?: run {
+                logg.info("Kan ikke fjerne tildeling når oppgave ikke er tildelt, {}", kv("oppgaveId", id))
+                throw OppgaveIkkeTildelt(this.id)
+            }
 
         if (tildelt != saksbehandler) {
             logg.info("Oppgave med {} er tildelt noen andre, avmeldes", kv("oppgaveId", id))
