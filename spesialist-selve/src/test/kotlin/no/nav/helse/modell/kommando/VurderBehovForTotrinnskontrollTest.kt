@@ -34,6 +34,7 @@ internal class VurderBehovForTotrinnskontrollTest {
     private companion object {
         private val VEDTAKSPERIODE_ID_2 = UUID.randomUUID()
         private val VEDTAKSPERIODE_ID_1 = UUID.randomUUID()
+        private val BEHANDLING_ID = UUID.randomUUID()
         private val FØDSELSNUMMER = "fnr"
     }
 
@@ -57,6 +58,7 @@ internal class VurderBehovForTotrinnskontrollTest {
         VurderBehovForTotrinnskontroll(
             fødselsnummer = FØDSELSNUMMER,
             vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
+            spleisBehandlingId = BEHANDLING_ID,
             oppgaveService = oppgaveService,
             overstyringDao = overstyringDao,
             periodehistorikkDao = periodehistorikkDao,

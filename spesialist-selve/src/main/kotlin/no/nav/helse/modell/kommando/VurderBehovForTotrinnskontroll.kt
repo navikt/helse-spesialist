@@ -16,6 +16,7 @@ import java.util.UUID
 internal class VurderBehovForTotrinnskontroll(
     private val fødselsnummer: String,
     private val vedtaksperiodeId: UUID,
+    private val spleisBehandlingId: UUID,
     private val oppgaveService: OppgaveService,
     private val overstyringDao: OverstyringDao,
     private val periodehistorikkDao: PeriodehistorikkDao,
@@ -37,15 +38,15 @@ internal class VurderBehovForTotrinnskontroll(
         if ((kreverTotrinnsvurdering && !vedtaksperiodeHarFerdigstiltOppgave) || overstyringer.isNotEmpty()) {
             logg.info("Vedtaksperioden: $vedtaksperiodeId trenger totrinnsvurdering")
 
-            val totrinnsvurdering = totrinnsvurderingRepository.finnTotrinnsvurdering(fødselsnummer) ?: Totrinnsvurdering.ny(vedtaksperiodeId)
+            val totrinnsvurdering =
+                totrinnsvurderingRepository.finnTotrinnsvurdering(fødselsnummer) ?: Totrinnsvurdering.ny(
+                    vedtaksperiodeId,
+                )
 
             if (totrinnsvurdering.erBeslutteroppgave) {
-                // Kan man finne behandlingsId i stedet for å finne det med oppgaveId?
-                oppgaveService.finnIdForAktivOppgave(vedtaksperiodeId)?.let {
-                    totrinnsvurdering.settRetur()
-                    val innslag = Historikkinnslag.totrinnsvurderingAutomatiskRetur()
-                    periodehistorikkDao.lagreMedOppgaveId(innslag, it)
-                }
+                totrinnsvurdering.settRetur()
+                val innslag = Historikkinnslag.totrinnsvurderingAutomatiskRetur()
+                periodehistorikkDao.lagre(innslag, spleisBehandlingId)
             }
             totrinnsvurderingRepository.lagre(totrinnsvurdering, fødselsnummer)
 
