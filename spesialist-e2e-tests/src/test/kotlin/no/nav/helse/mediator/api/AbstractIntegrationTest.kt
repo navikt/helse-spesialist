@@ -58,7 +58,6 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
                     periodehistorikkDao,
                     repositories.dialogDao,
                 ),
-            tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
         )
 
     protected fun sisteOppgaveId() = testRapid.inspektør.oppgaveId()

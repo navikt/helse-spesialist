@@ -228,7 +228,6 @@ class SpesialistApp(
                         periodehistorikkDao = periodehistorikkDao,
                         dialogDao = dialogDao,
                     ),
-                tilgangskontroll = tilgangskontrollørForReservasjon,
             )
         subsumsjonsmelder = Subsumsjonsmelder(versjonAvKode, meldingPubliserer)
 

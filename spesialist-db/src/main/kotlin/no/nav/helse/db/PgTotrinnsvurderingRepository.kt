@@ -14,7 +14,6 @@ import no.nav.helse.db.overstyring.SkjønnsfastsattArbeidsgiverForDatabase
 import no.nav.helse.db.overstyring.SkjønnsfastsattSykepengegrunnlagForDatabase
 import no.nav.helse.db.overstyring.SkjønnsfastsettingstypeForDatabase
 import no.nav.helse.modell.EksisterendeId
-import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.modell.saksbehandler.handlinger.Arbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgrad
 import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgradArbeidsgiver
@@ -36,21 +35,17 @@ class PgTotrinnsvurderingRepository(
     private val saksbehandlerDao: PgSaksbehandlerDao,
     private val totrinnsvurderingDao: PgTotrinnsvurderingDao,
 ) : TotrinnsvurderingRepository {
-    override fun finnTotrinnsvurdering(
-        fødselsnummer: String,
-        tilgangskontroll: Tilgangskontroll,
-    ): Totrinnsvurdering? {
+    override fun finnTotrinnsvurdering(fødselsnummer: String): Totrinnsvurdering? {
         val (id, totrinnsvurderingFraDatabase) =
             totrinnsvurderingDao.hentAktivTotrinnsvurdering(fødselsnummer)
                 ?: return null
 
-        return totrinnsvurderingFraDatabase.tilDomene(id, tilgangskontroll, fødselsnummer)
+        return totrinnsvurderingFraDatabase.tilDomene(id, fødselsnummer)
     }
 
     override fun lagre(
         totrinnsvurdering: Totrinnsvurdering,
         fødselsnummer: String,
-        tilgangskontroll: Tilgangskontroll,
     ) {
         val totrinnsvurderingFraDatabase = totrinnsvurdering.tilDatabase()
         totrinnsvurderingDao.upsertTotrinnsvurdering(totrinnsvurdering.id, totrinnsvurderingFraDatabase)
@@ -58,7 +53,6 @@ class PgTotrinnsvurderingRepository(
 
     private fun TotrinnsvurderingFraDatabase.tilDomene(
         id: Long,
-        tilgangskontroll: Tilgangskontroll,
         fødselsnummer: String,
     ): Totrinnsvurdering {
         return Totrinnsvurdering(

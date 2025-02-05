@@ -12,7 +12,6 @@ import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.melding.Saksbehandlerløsning
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
 import no.nav.helse.modell.saksbehandler.Saksbehandler
-import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import no.nav.helse.spesialist.api.Godkjenninghåndterer
@@ -31,7 +30,6 @@ class GodkjenningService(
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val saksbehandlerDao: SaksbehandlerDao,
     private val totrinnsvurderingService: TotrinnsvurderingService,
-    private val tilgangskontroll: Tilgangskontroll,
 ) : Godkjenninghåndterer {
     private companion object {
         private val logg = LoggerFactory.getLogger(GodkjenningService::class.java)

@@ -45,7 +45,7 @@ class PgTotrinnsvurderingRepositoryTest {
     fun `hvis det ikke finnes totrinnsvurdering, returnerer null`() {
         every { totrinnsvurderingDao.hentAktivTotrinnsvurdering(FNR) } returns null
 
-        val result: Totrinnsvurdering? = repository.finnTotrinnsvurdering(FNR, mockk(relaxed = true))
+        val result: Totrinnsvurdering? = repository.finnTotrinnsvurdering(FNR)
 
         assertNull(result)
     }
@@ -57,7 +57,7 @@ class PgTotrinnsvurderingRepositoryTest {
         ))
         every { overstyringDao.finnOverstyringer(FNR) } returns listOf(mockk(relaxed = true))
 
-        val result = repository.finnTotrinnsvurdering(FNR, mockk(relaxed = true))
+        val result = repository.finnTotrinnsvurdering(FNR)
 
         assertNotNull(result)
         assertEquals(1, result?.overstyringer()?.size)
@@ -80,7 +80,7 @@ class PgTotrinnsvurderingRepositoryTest {
 
         every { saksbehandlerDao.finnSaksbehandler(SAKSBEHANDLER.oid) } returns SAKSBEHANDLER
 
-        repository.lagre(totrinnsvurdering, FNR, mockk(relaxed = true))
+        repository.lagre(totrinnsvurdering, FNR)
 
         verify(exactly = 1) {
             totrinnsvurderingDao.upsertTotrinnsvurdering(
