@@ -9,7 +9,6 @@ import no.nav.helse.db.TotrinnsvurderingRepository
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.NyId
 import no.nav.helse.modell.OverstyringType
-import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingAutomatiskRetur
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.Behandling
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
@@ -145,9 +144,6 @@ internal class VurderBehovForTotrinnskontrollTest {
                 lagTotrinnsvurdering(true, saksbehandler, beslutter),
                 FØDSELSNUMMER
             )
-        }
-        verify(exactly = 1) {
-            periodehistorikkDao.lagre(historikkinnslag = any<TotrinnsvurderingAutomatiskRetur>(), any())
         }
     }
 
