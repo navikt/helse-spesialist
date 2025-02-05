@@ -328,6 +328,7 @@ internal class GodkjenningsbehovCommand(
             VurderBehovForTotrinnskontroll(
                 fødselsnummer = behovData.fødselsnummer,
                 vedtaksperiodeId = behovData.vedtaksperiodeId,
+                spleisBehandlingId = behovData.spleisBehandlingId,
                 oppgaveService = oppgaveService,
                 overstyringDao = overstyringDao,
                 periodehistorikkDao = periodehistorikkDao,
