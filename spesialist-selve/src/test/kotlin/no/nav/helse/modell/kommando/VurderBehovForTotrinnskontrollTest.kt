@@ -15,6 +15,7 @@ import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import no.nav.helse.spesialist.test.lagSaksbehandlerident
 import no.nav.helse.spesialist.test.lagSaksbehandlernavn
 import no.nav.helse.spesialist.test.lagTilfeldigSaksbehandlerepost
@@ -37,6 +38,7 @@ internal class VurderBehovForTotrinnskontrollTest {
         private val FØDSELSNUMMER = "fnr"
     }
 
+    private val totrinnsvurderingService = mockk<TotrinnsvurderingService>(relaxed = true)
     private val oppgaveService = mockk<OppgaveService>(relaxed = true)
     private val overstyringDao = mockk<OverstyringDao>(relaxed = true)
     private val periodehistorikkDao = mockk<PeriodehistorikkDao>(relaxed = true)
@@ -109,7 +111,7 @@ internal class VurderBehovForTotrinnskontrollTest {
         every { oppgaveService.harFerdigstiltOppgave(VEDTAKSPERIODE_ID_2) } returns false
 
         assertTrue(command.execute(context))
-        verify(exactly = 0) { totrinnsvurderingRepository.finnTotrinnsvurdering(any()) }
+        verify(exactly = 0) { totrinnsvurderingService.finnEllerOpprettNy(any()) }
     }
 
     @Test
@@ -151,7 +153,7 @@ internal class VurderBehovForTotrinnskontrollTest {
     fun `Oppretter ikke totrinnsvurdering om det ikke er overstyring eller varsel for lovvalg og medlemskap`() {
         assertTrue(command.execute(context))
 
-        verify(exactly = 0) { totrinnsvurderingRepository.finnTotrinnsvurdering(any()) }
+        verify(exactly = 0) { totrinnsvurderingService.finnEllerOpprettNy(any()) }
     }
 
     @Test
