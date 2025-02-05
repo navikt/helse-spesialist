@@ -9,6 +9,7 @@ import no.nav.helse.modell.OverstyringType
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
+import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -16,7 +17,7 @@ import java.util.UUID
 internal class VurderBehovForTotrinnskontroll(
     private val fødselsnummer: String,
     private val vedtaksperiodeId: UUID,
-    private val spleisBehandlingId: UUID,
+    private val vedtaksperiode: Vedtaksperiode,
     private val oppgaveService: OppgaveService,
     private val overstyringDao: OverstyringDao,
     private val periodehistorikkDao: PeriodehistorikkDao,
@@ -30,6 +31,7 @@ internal class VurderBehovForTotrinnskontroll(
     }
 
     override fun execute(context: CommandContext): Boolean {
+        val vedtaksperiodeId = vedtaksperiode.vedtaksperiodeId()
         val kreverTotrinnsvurdering = sykefraværstilfelle.harMedlemskapsvarsel(vedtaksperiodeId)
         val vedtaksperiodeHarFerdigstiltOppgave = oppgaveService.harFerdigstiltOppgave(vedtaksperiodeId)
         val overstyringer = finnOverstyringerMedType()
@@ -46,7 +48,7 @@ internal class VurderBehovForTotrinnskontroll(
             if (totrinnsvurdering.erBeslutteroppgave) {
                 totrinnsvurdering.settRetur()
                 val innslag = Historikkinnslag.totrinnsvurderingAutomatiskRetur()
-                periodehistorikkDao.lagre(innslag, spleisBehandlingId)
+                periodehistorikkDao.lagre(innslag, vedtaksperiode.gjeldendeUnikId)
             }
             totrinnsvurderingRepository.lagre(totrinnsvurdering, fødselsnummer)
 

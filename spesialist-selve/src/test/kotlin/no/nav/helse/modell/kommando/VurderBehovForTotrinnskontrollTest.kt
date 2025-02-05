@@ -12,8 +12,10 @@ import no.nav.helse.modell.OverstyringType
 import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingAutomatiskRetur
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.Behandling
+import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
+import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.spesialist.test.lagSaksbehandlerident
@@ -27,6 +29,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -34,7 +37,7 @@ internal class VurderBehovForTotrinnskontrollTest {
     private companion object {
         private val VEDTAKSPERIODE_ID_2 = UUID.randomUUID()
         private val VEDTAKSPERIODE_ID_1 = UUID.randomUUID()
-        private val BEHANDLING_ID = UUID.randomUUID()
+        private val VEDTAKSPERIODE = Vedtaksperiode.nyVedtaksperiode(SpleisBehandling("987654321", VEDTAKSPERIODE_ID_2, UUID.randomUUID(), LocalDate.now(), LocalDate.now()))
         private val FØDSELSNUMMER = "fnr"
     }
 
@@ -57,7 +60,7 @@ internal class VurderBehovForTotrinnskontrollTest {
         VurderBehovForTotrinnskontroll(
             fødselsnummer = FØDSELSNUMMER,
             vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
-            spleisBehandlingId = BEHANDLING_ID,
+            vedtaksperiode = VEDTAKSPERIODE,
             oppgaveService = oppgaveService,
             overstyringDao = overstyringDao,
             periodehistorikkDao = periodehistorikkDao,

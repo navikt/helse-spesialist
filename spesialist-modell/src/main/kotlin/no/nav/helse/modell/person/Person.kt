@@ -80,7 +80,7 @@ class Person private constructor(
 
     fun fattVedtak(avsluttetMedVedtak: AvsluttetMedVedtak) {
         val vedtakBuilder = SykepengevedtakBuilder()
-        val vedtaksperiode = vedtaksperiode(avsluttetMedVedtak.spleisBehandlingId)
+        val vedtaksperiode = vedtaksperiodeForBehandling(avsluttetMedVedtak.spleisBehandlingId)
         val behandling = vedtaksperiode.finnBehandling(avsluttetMedVedtak.spleisBehandlingId)
 
         vedtakBuilder.leggTilAvviksvurderinger(behandling)
@@ -136,7 +136,12 @@ class Person private constructor(
             ?: logg.warn("Vedtaksperiode med id={} finnes ikke", vedtaksperiodeId).let { return null }
     }
 
-    private fun vedtaksperiode(spleisBehandlingId: UUID): Vedtaksperiode {
+    fun vedtaksperiode(vedtaksperiodeId: UUID): Vedtaksperiode {
+        val vedtaksperiode = vedtaksperiodeOrNull(vedtaksperiodeId)
+        return checkNotNull(vedtaksperiode)
+    }
+
+    private fun vedtaksperiodeForBehandling(spleisBehandlingId: UUID): Vedtaksperiode {
         return vedtaksperioder.finnBehandling(spleisBehandlingId)
             ?: throw IllegalStateException("Behandling med spleisBehandlingId=$spleisBehandlingId finnes ikke")
     }

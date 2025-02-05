@@ -22,7 +22,7 @@ class Vedtaksperiode private constructor(
     private val tom get() = gjeldendeBehandling.tom()
     private val gjeldendeUtbetalingId get() = gjeldendeBehandling.utbetalingId
     internal val gjeldendeSkjæringstidspunkt get() = gjeldendeBehandling.skjæringstidspunkt()
-    val gjeldendeBehandlingId get() = gjeldendeBehandling.unikId()
+    val gjeldendeUnikId get() = gjeldendeBehandling.unikId()
 
     fun vedtaksperiodeId() = vedtaksperiodeId
 
@@ -41,7 +41,9 @@ class Vedtaksperiode private constructor(
         deaktiverVarselMedKode("RV_SØ_3")
     }
 
-    private fun deaktiverVarselMedKode(varselkode: String) {
+    private fun deaktiverVarselMedKode(
+        @Suppress("SameParameterValue") varselkode: String,
+    ) {
         gjeldendeBehandling.deaktiverVarsel(varselkode)
     }
 
