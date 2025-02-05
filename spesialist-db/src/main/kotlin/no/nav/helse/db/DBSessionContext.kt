@@ -1,8 +1,9 @@
 package no.nav.helse.db
 
 import kotliquery.Session
+import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 
-class DBSessionContext(session: Session) : SessionContext {
+class DBSessionContext(session: Session, tilgangskontroll: Tilgangskontroll) : SessionContext {
     override val arbeidsforholdDao = PgArbeidsforholdDao(session)
     override val arbeidsgiverDao = PgArbeidsgiverDao(session)
     override val automatiseringDao = PgAutomatiseringDao(session)
@@ -23,7 +24,7 @@ class DBSessionContext(session: Session) : SessionContext {
     override val påVentDao = PgPåVentDao(session)
     override val reservasjonDao = PgReservasjonDao(session)
     override val risikovurderingDao = PgRisikovurderingDao(session)
-    override val saksbehandlerDao = PgSaksbehandlerDao(session)
+    override val saksbehandlerDao = PgSaksbehandlerDao(session, tilgangskontroll)
     override val stansAutomatiskBehandlingDao = PgStansAutomatiskBehandlingDao(session)
     override val sykefraværstilfelleDao = PgSykefraværstilfelleDao(session)
     override val tildelingDao = PgTildelingDao(session)

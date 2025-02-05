@@ -8,9 +8,9 @@ import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 
-class PgSaksbehandlerDao private constructor(private val queryRunner: QueryRunner) : SaksbehandlerDao, QueryRunner by queryRunner {
-    internal constructor(session: Session) : this(MedSession(session))
-    internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
+class PgSaksbehandlerDao private constructor(private val queryRunner: QueryRunner, private val tilgangskontroll: Tilgangskontroll) : SaksbehandlerDao, QueryRunner by queryRunner {
+    internal constructor(session: Session, tilgangskontroll: Tilgangskontroll) : this(MedSession(session), tilgangskontroll)
+    internal constructor(dataSource: DataSource, tilgangskontroll: Tilgangskontroll) : this(MedDataSource(dataSource), tilgangskontroll)
 
     override fun opprettEllerOppdater(
         oid: UUID,
@@ -45,7 +45,7 @@ class PgSaksbehandlerDao private constructor(private val queryRunner: QueryRunne
         "siste_handling_utfort_tidspunkt" to sisteHandlingUtført,
     ).update()
 
-    override fun finnSaksbehandler(oid: UUID) =
+    override fun finnSaksbehandlerFraDatabase(oid: UUID) =
         asSQL("SELECT * FROM saksbehandler WHERE oid = :oid LIMIT 1", "oid" to oid)
             .singleOrNull { row ->
                 SaksbehandlerFraDatabase(
@@ -56,17 +56,15 @@ class PgSaksbehandlerDao private constructor(private val queryRunner: QueryRunne
                 )
             }
 
-    override fun finnSaksbehandler(
-        oid: UUID,
-        tilgangskontroll: Tilgangskontroll,
-    ) = asSQL("SELECT * FROM saksbehandler WHERE oid = :oid LIMIT 1", "oid" to oid)
-        .singleOrNull { row ->
-            Saksbehandler(
-                epostadresse = row.string("epost"),
-                oid = row.uuid("oid"),
-                navn = row.string("navn"),
-                ident = row.string("ident"),
-                tilgangskontroll = tilgangskontroll,
-            )
-        }
+    override fun finnSaksbehandler(oid: UUID) =
+        asSQL("SELECT * FROM saksbehandler WHERE oid = :oid LIMIT 1", "oid" to oid)
+            .singleOrNull { row ->
+                Saksbehandler(
+                    epostadresse = row.string("epost"),
+                    oid = row.uuid("oid"),
+                    navn = row.string("navn"),
+                    ident = row.string("ident"),
+                    tilgangskontroll = tilgangskontroll,
+                )
+            }
 }

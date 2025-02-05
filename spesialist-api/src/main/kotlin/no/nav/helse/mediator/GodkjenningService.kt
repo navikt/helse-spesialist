@@ -77,7 +77,7 @@ class GodkjenningService(
 
             if (totrinnsvurdering?.erBeslutteroppgave() == true && godkjenningDTO.godkjent) {
                 val beslutter =
-                    totrinnsvurdering.beslutter?.let { saksbehandlerDao.finnSaksbehandler(it)?.toDto() }
+                    totrinnsvurdering.beslutter?.let { saksbehandlerDao.finnSaksbehandlerFraDatabase(it)?.toDto() }
                 checkNotNull(beslutter) { "Forventer at beslutter er satt" }
                 val innslag = Historikkinnslag.totrinnsvurderingFerdigbehandletInnslag(beslutter)
                 periodehistorikkDao.lagreMedOppgaveId(innslag, godkjenningDTO.oppgavereferanse)
@@ -122,7 +122,7 @@ class GodkjenningService(
 
     private fun saksbehandlerForJson(oid: UUID): Saksbehandler =
         requireNotNull(
-            saksbehandlerDao.finnSaksbehandler(oid, tilgangskontroll),
+            saksbehandlerDao.finnSaksbehandler(oid),
         ) { "Finner ikke saksbehandleren i databasen. Det gir ikke noen mening" }
 
     private fun reserverPerson(

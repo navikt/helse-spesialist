@@ -78,7 +78,7 @@ class PgTotrinnsvurderingRepositoryTest {
             ferdigstilt = false,
         )
 
-        every { saksbehandlerDao.finnSaksbehandler(SAKSBEHANDLER.oid, any()) } returns SAKSBEHANDLER
+        every { saksbehandlerDao.finnSaksbehandler(SAKSBEHANDLER.oid) } returns SAKSBEHANDLER
 
         repository.lagre(totrinnsvurdering, FNR, mockk(relaxed = true))
 

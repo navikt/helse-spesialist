@@ -53,7 +53,7 @@ class SpesialistApp(
 
     private val dataSourceBuilder = DataSourceBuilder(env)
     private val dataSource = dataSourceBuilder.getDataSource()
-    private val repositories = DBRepositories(dataSource)
+    private val repositories = DBRepositories(dataSource, tilgangskontrollørForReservasjon)
 
     private val oppgaveDao = repositories.oppgaveDao
     private val periodehistorikkDao = repositories.periodehistorikkDao
@@ -180,7 +180,7 @@ class SpesialistApp(
             )
         meldingMediator =
             MeldingMediator(
-                sessionFactory = TransactionalSessionFactory(dataSource),
+                sessionFactory = TransactionalSessionFactory(dataSource, tilgangskontrollørForReservasjon),
                 personDao = repositories.personDao,
                 commandContextDao = repositories.commandContextDao,
                 meldingDao = repositories.meldingDao,

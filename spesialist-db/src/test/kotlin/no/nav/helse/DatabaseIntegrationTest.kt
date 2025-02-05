@@ -37,6 +37,7 @@ import no.nav.helse.spesialist.api.db.AbstractDatabaseTest
 import no.nav.helse.spesialist.test.TestPerson
 import no.nav.helse.spesialist.test.lagSaksbehandlerident
 import no.nav.helse.spesialist.typer.Kjønn
+import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import no.nav.helse.util.januar
 import org.junit.jupiter.api.AfterEach
 import java.time.LocalDate
@@ -109,7 +110,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         private set
 
     protected val session = sessionOf(dataSource, returnGeneratedKey = true)
-    private val sessionContext = DBSessionContext(session)
+    private val sessionContext = DBSessionContext(session, TilgangskontrollForTestHarIkkeTilgang)
 
     @AfterEach
     fun tearDown() = session.close()

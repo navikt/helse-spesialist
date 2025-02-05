@@ -12,6 +12,7 @@ import no.nav.helse.mediator.meldinger.PoisonPills
 import no.nav.helse.modell.person.SøknadSendtCommand
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.spesialist.test.lagFødselsnummer
+import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 
@@ -26,7 +27,7 @@ internal class MetrikkerFraMeldingMediatorTest : AbstractDatabaseTest() {
 
     init {
         MeldingMediator(
-            sessionFactory = TransactionalSessionFactory(dataSource),
+            sessionFactory = TransactionalSessionFactory(dataSource, TilgangskontrollForTestHarIkkeTilgang),
             personDao = repositories.personDao,
             commandContextDao = repositories.commandContextDao,
             meldingDao = repositories.meldingDao,

@@ -197,7 +197,7 @@ internal class OppgaveServiceTest {
         ))
         every { oppgaveDao.finnOppgave(OPPGAVE_ID) } returns oppgaveFraDatabase()
         every { oppgaveDao.finnHendelseId(any()) } returns HENDELSE_ID
-        every { saksbehandlerDao.finnSaksbehandler(any()) } returns saksbehandlerFraDatabase
+        every { saksbehandlerDao.finnSaksbehandlerFraDatabase(any()) } returns saksbehandlerFraDatabase
         mediator.oppgave(OPPGAVE_ID) {
             avventerSystem(SAKSBEHANDLERIDENT, SAKSBEHANDLEROID)
             ferdigstill()

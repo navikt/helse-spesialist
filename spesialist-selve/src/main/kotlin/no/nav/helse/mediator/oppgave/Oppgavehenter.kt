@@ -43,11 +43,11 @@ class Oppgavehenter(
                             erRetur = it.erRetur,
                             saksbehandler =
                                 it.saksbehandler?.let {
-                                    saksbehandlerDao.finnSaksbehandler(it)?.toDto()
+                                    saksbehandlerDao.finnSaksbehandlerFraDatabase(it)?.toDto()
                                 },
                             beslutter =
                                 it.beslutter?.let {
-                                    saksbehandlerDao.finnSaksbehandler(it)?.toDto()
+                                    saksbehandlerDao.finnSaksbehandlerFraDatabase(it)?.toDto()
                                 },
                             utbetalingId = it.utbetalingId,
                             opprettet = it.opprettet,

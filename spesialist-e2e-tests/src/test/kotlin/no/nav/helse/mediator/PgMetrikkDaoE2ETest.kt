@@ -5,6 +5,7 @@ import no.nav.helse.TestRapidHelpers.contextId
 import no.nav.helse.db.DBSessionContext
 import no.nav.helse.db.GodkjenningsbehovUtfall
 import no.nav.helse.e2e.AbstractE2ETest
+import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -12,7 +13,7 @@ import org.junit.jupiter.api.Test
 
 internal class PgMetrikkDaoE2ETest : AbstractE2ETest() {
     private val session = sessionOf(dataSource)
-    private val dao = DBSessionContext(session).metrikkDao
+    private val dao = DBSessionContext(session, TilgangskontrollForTestHarIkkeTilgang).metrikkDao
 
     @AfterEach
     fun lukkSession() = session.close()

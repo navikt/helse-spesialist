@@ -35,7 +35,7 @@ internal class TestMediator(
         override val erDev = false
         override val erProd = false
     }
-    private val repositories = DBRepositories(dataSource)
+    private val repositories = DBRepositories(dataSource, TilgangskontrollForTestHarIkkeTilgang)
     private val opptegnelseDao = repositories.opptegnelseDao
     private val oppgaveDao = repositories.oppgaveDao
     private val periodehistorikkDao = repositories.periodehistorikkDao
@@ -127,7 +127,7 @@ internal class TestMediator(
 
     init {
         val meldingMediator = MeldingMediator(
-            sessionFactory = TransactionalSessionFactory(dataSource),
+            sessionFactory = TransactionalSessionFactory(dataSource, TilgangskontrollForTestHarIkkeTilgang),
             personDao = repositories.personDao,
             commandContextDao = repositories.commandContextDao,
             meldingDao = repositories.meldingDao,

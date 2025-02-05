@@ -10,6 +10,7 @@ import no.nav.helse.mediator.meldinger.PoisonPills
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.varsel.Varseldefinisjon
+import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -24,7 +25,7 @@ internal class MeldingMediatorTest : AbstractDatabaseTest() {
 
     private val meldingMediator =
         MeldingMediator(
-            sessionFactory = TransactionalSessionFactory(dataSource),
+            sessionFactory = TransactionalSessionFactory(dataSource, TilgangskontrollForTestHarIkkeTilgang),
             personDao = repositories.personDao,
             commandContextDao = repositories.commandContextDao,
             meldingDao = repositories.meldingDao,

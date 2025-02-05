@@ -16,9 +16,10 @@ import no.nav.helse.db.api.PgTildelingApiDao
 import no.nav.helse.db.api.PgTotrinnsvurderingApiDao
 import no.nav.helse.db.api.PgVarselApiRepository
 import no.nav.helse.db.api.PgVergemålApiDao
+import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import javax.sql.DataSource
 
-class DBRepositories(dataSource: DataSource) : Repositories {
+class DBRepositories(dataSource: DataSource, tilgangskontroll: Tilgangskontroll) : Repositories {
     override val annulleringRepository = PgAnnulleringRepository(dataSource)
     override val avviksvurderingDao = PgAvviksvurderingDao(dataSource)
     override val behandlingsstatistikkDao = PgBehandlingsstatistikkDao(dataSource)
@@ -39,7 +40,7 @@ class DBRepositories(dataSource: DataSource) : Repositories {
     override val poisonPillDao = PgPoisonPillDao(dataSource)
     override val påVentDao = PgPåVentDao(dataSource)
     override val reservasjonDao = PgReservasjonDao(dataSource)
-    override val saksbehandlerDao = PgSaksbehandlerDao(dataSource)
+    override val saksbehandlerDao = PgSaksbehandlerDao(dataSource, tilgangskontroll)
     override val stansAutomatiskBehandlingDao = PgStansAutomatiskBehandlingDao(dataSource)
     override val tildelingDao = PgTildelingDao(dataSource)
     override val totrinnsvurderingDao = PgTotrinnsvurderingDao(dataSource)

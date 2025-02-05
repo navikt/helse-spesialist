@@ -15,6 +15,7 @@ import no.nav.helse.modell.vilkårsprøving.SammenligningsgrunnlagDto
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.spesialist.test.lagOrganisasjonsnavn
 import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
+import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import no.nav.helse.util.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -24,8 +25,8 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 internal class PgInntektskilderRepositoryTest : DatabaseIntegrationTest() {
-    private val inntektskilderRepository = DBSessionContext(session).inntektskilderRepository
-    private val avviksvurderingDao = DBSessionContext(session).avviksvurderingDao
+    private val inntektskilderRepository = DBSessionContext(session, TilgangskontrollForTestHarIkkeTilgang).inntektskilderRepository
+    private val avviksvurderingDao = DBSessionContext(session, TilgangskontrollForTestHarIkkeTilgang).avviksvurderingDao
 
     @Test
     fun `når det ikke finnes arbeidsgivere i databasen får vi kun tilbake nye inntektskilder`() {

@@ -9,6 +9,7 @@ import no.nav.helse.modell.vilkårsprøving.InnrapportertInntektDto
 import no.nav.helse.modell.vilkårsprøving.InntektDto
 import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntektDto
 import no.nav.helse.modell.vilkårsprøving.SammenligningsgrunnlagDto
+import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import no.nav.helse.util.januar
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -20,7 +21,7 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class PgAvviksvurderingDaoTest : DatabaseIntegrationTest() {
-    private val avviksvurderingDao = DBSessionContext(session).avviksvurderingDao
+    private val avviksvurderingDao = DBSessionContext(session, TilgangskontrollForTestHarIkkeTilgang).avviksvurderingDao
 
     @Test
     fun `lagre avviksvurdering`() {

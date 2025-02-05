@@ -69,14 +69,12 @@ class PgTotrinnsvurderingRepository(
                 this.saksbehandler?.let {
                     saksbehandlerDao.finnSaksbehandler(
                         it,
-                        tilgangskontroll,
                     )
                 },
             beslutter =
                 this.beslutter?.let {
                     saksbehandlerDao.finnSaksbehandler(
                         it,
-                        tilgangskontroll,
                     )
                 },
             utbetalingId = this.utbetalingId,

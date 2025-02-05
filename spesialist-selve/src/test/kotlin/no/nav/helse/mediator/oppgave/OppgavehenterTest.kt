@@ -14,7 +14,6 @@ import no.nav.helse.modell.oppgave.Oppgave.Companion.toDto
 import no.nav.helse.modell.oppgave.OppgaveDto
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.Saksbehandler.Companion.toDto
-import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -209,15 +208,15 @@ class OppgavehenterTest {
             ),
         )
 
-        override fun finnSaksbehandler(oid: UUID) = saksbehandlere[oid]
+        override fun finnSaksbehandlerFraDatabase(oid: UUID) = saksbehandlere[oid]
 
-        override fun finnSaksbehandler(oid: UUID, tilgangskontroll: Tilgangskontroll) = saksbehandlere[oid]?.let {
+        override fun finnSaksbehandler(oid: UUID) = saksbehandlere[oid]?.let {
             Saksbehandler(
                 epostadresse = it.epostadresse,
                 oid = it.oid,
                 navn = it.navn,
                 ident = it.ident,
-                tilgangskontroll = tilgangskontroll
+                tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang
             )
         }
 

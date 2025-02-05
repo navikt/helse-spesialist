@@ -92,7 +92,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     )
     private val mediator =
         SaksbehandlerMediator(
-            repositories = DBRepositories(dataSource),
+            repositories = DBRepositories(dataSource, TilgangskontrollForTestHarIkkeTilgang),
             versjonAvKode = "versjonAvKode",
             meldingPubliserer = meldingPubliserer,
             oppgaveService = oppgaveService,

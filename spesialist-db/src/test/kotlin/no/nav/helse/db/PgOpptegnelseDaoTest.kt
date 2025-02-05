@@ -6,12 +6,13 @@ import no.nav.helse.db.OpptegnelseDao.Opptegnelse.Type.NY_SAKSBEHANDLEROPPGAVE
 import no.nav.helse.db.OpptegnelseDao.Opptegnelse.Type.UTBETALING_ANNULLERING_OK
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
 import no.nav.helse.spesialist.api.abonnement.UtbetalingPayload
+import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
 internal class PgOpptegnelseDaoTest : DatabaseIntegrationTest() {
-    private val opptegnelseRepository = DBSessionContext(session).opptegnelseDao
+    private val opptegnelseRepository = DBSessionContext(session, TilgangskontrollForTestHarIkkeTilgang).opptegnelseDao
 
     private companion object {
         private val UTBETALING_PAYLOAD = UtbetalingPayload(UUID.randomUUID()).toJson()
