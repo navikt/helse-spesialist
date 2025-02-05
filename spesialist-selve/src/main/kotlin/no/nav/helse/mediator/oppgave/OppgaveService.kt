@@ -245,7 +245,15 @@ class OppgaveService(
         godkjenningsbehovId: UUID,
         kanAvvises: Boolean,
     ) {
-        oppgaveDao.opprettOppgave(id, godkjenningsbehovId, egenskaper, vedtaksperiodeId, behandlingId, utbetalingId, kanAvvises)
+        oppgaveDao.opprettOppgave(
+            id,
+            godkjenningsbehovId,
+            egenskaper,
+            vedtaksperiodeId,
+            behandlingId,
+            utbetalingId,
+            kanAvvises,
+        )
         opptegnelseDao.opprettOpptegnelse(
             oppgaveDao.finnFødselsnummer(id),
             GodkjenningsbehovPayload(godkjenningsbehovId).toJson(),
@@ -273,6 +281,8 @@ class OppgaveService(
             logg.warn("Kunne ikke reservere person")
         }
     }
+
+    fun finnIdForAktivOppgave(vedtaksperiodeId: UUID): Long? = oppgaveDao.finnIdForAktivOppgave(vedtaksperiodeId)
 
     private fun tildelVedReservasjon(
         fødselsnummer: String,

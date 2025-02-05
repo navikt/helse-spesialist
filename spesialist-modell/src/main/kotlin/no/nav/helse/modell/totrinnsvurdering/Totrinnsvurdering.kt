@@ -46,12 +46,16 @@ class Totrinnsvurdering(
     var ferdigstilt: Boolean = ferdigstilt
         private set
 
-    private val erBeslutteroppgave: Boolean get() = !erRetur && saksbehandler != null
+    val erBeslutteroppgave: Boolean get() = !erRetur && saksbehandler != null
 
     fun overstyringer(): List<Overstyring> = overstyringer
 
     fun ferdigstill() {
         ferdigstilt = true
+    }
+
+    fun settRetur() {
+        erRetur = true
     }
 
     fun nyOverstyring(overstyring: Overstyring) {
@@ -111,6 +115,21 @@ class Totrinnsvurdering(
     }
 
     companion object {
+        fun ny(vedtaksperiodeId: UUID): Totrinnsvurdering {
+            return Totrinnsvurdering(
+                id = NyId,
+                vedtaksperiodeId = vedtaksperiodeId,
+                erRetur = false,
+                saksbehandler = null,
+                beslutter = null,
+                utbetalingId = null,
+                opprettet = LocalDateTime.now(),
+                oppdatert = LocalDateTime.now(),
+                overstyringer = emptyList(),
+                ferdigstilt = false,
+            )
+        }
+
         fun TotrinnsvurderingDto.gjenopprett(
             tilgangskontroll: Tilgangskontroll,
             totrinnsvurderingId: Long?,

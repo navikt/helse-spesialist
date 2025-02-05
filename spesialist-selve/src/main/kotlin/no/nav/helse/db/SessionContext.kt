@@ -34,4 +34,5 @@ interface SessionContext {
     val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao
     val vedtaksperiodeRepository: VedtaksperiodeRepository
     val personRepository: PersonRepository
+    val totrinnsvurderingRepository: TotrinnsvurderingRepository
 }

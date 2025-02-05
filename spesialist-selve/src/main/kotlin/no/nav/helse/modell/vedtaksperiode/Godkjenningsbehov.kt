@@ -9,10 +9,12 @@ import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.InntektskilderRepository
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OverstyringDao
+import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.PåVentDao
 import no.nav.helse.db.RisikovurderingDao
 import no.nav.helse.db.SessionContext
+import no.nav.helse.db.TotrinnsvurderingRepository
 import no.nav.helse.db.UtbetalingDao
 import no.nav.helse.db.VedtakDao
 import no.nav.helse.db.VergemålDao
@@ -46,7 +48,6 @@ import no.nav.helse.modell.kommando.VurderVidereBehandlingAvGodkjenningsbehov
 import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.risiko.VurderVurderingsmomenter
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.VurderEnhetUtland
@@ -206,9 +207,10 @@ internal class GodkjenningsbehovCommand(
     automatiseringDao: AutomatiseringDao,
     oppgaveDao: OppgaveDao,
     avviksvurderingDao: AvviksvurderingDao,
+    periodehistorikkDao: PeriodehistorikkDao,
+    totrinnsvurderingRepository: TotrinnsvurderingRepository,
     oppgaveService: OppgaveService,
     godkjenningMediator: GodkjenningMediator,
-    totrinnsvurderingService: TotrinnsvurderingService,
     person: Person,
 ) : MacroCommand() {
     private val sykefraværstilfelle = person.sykefraværstilfelle(behovData.vedtaksperiodeId)
@@ -328,7 +330,8 @@ internal class GodkjenningsbehovCommand(
                 vedtaksperiodeId = behovData.vedtaksperiodeId,
                 oppgaveService = oppgaveService,
                 overstyringDao = overstyringDao,
-                totrinnsvurderingService = totrinnsvurderingService,
+                periodehistorikkDao = periodehistorikkDao,
+                totrinnsvurderingRepository = totrinnsvurderingRepository,
                 sykefraværstilfelle = sykefraværstilfelle,
                 spleisVedtaksperioder = behovData.spleisVedtaksperioder,
             ),

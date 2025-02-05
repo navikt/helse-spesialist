@@ -35,4 +35,5 @@ class DBSessionContext(session: Session, tilgangskontroll: Tilgangskontroll) : S
     override val åpneGosysOppgaverDao = PgÅpneGosysOppgaverDao(session)
     override val vedtaksperiodeRepository = PgVedtaksperiodeRepository(generasjonDao, vedtakDao)
     override val personRepository = PgPersonRepository(vedtaksperiodeRepository, sykefraværstilfelleDao, avviksvurderingDao, personDao)
+    override val totrinnsvurderingRepository = PgTotrinnsvurderingRepository(overstyringDao, saksbehandlerDao, totrinnsvurderingDao)
 }

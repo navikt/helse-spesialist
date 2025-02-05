@@ -4,14 +4,22 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.db.OverstyringDao
+import no.nav.helse.db.PeriodehistorikkDao
+import no.nav.helse.db.TotrinnsvurderingRepository
 import no.nav.helse.mediator.oppgave.OppgaveService
+import no.nav.helse.modell.NyId
 import no.nav.helse.modell.OverstyringType
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.Behandling
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
+import no.nav.helse.modell.saksbehandler.Saksbehandler
+import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
+import no.nav.helse.spesialist.test.lagSaksbehandlerident
+import no.nav.helse.spesialist.test.lagSaksbehandlernavn
+import no.nav.helse.spesialist.test.lagTilfeldigSaksbehandlerepost
+import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import no.nav.helse.util.februar
 import no.nav.helse.util.januar
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -32,6 +40,8 @@ internal class VurderBehovForTotrinnskontrollTest {
     private val totrinnsvurderingService = mockk<TotrinnsvurderingService>(relaxed = true)
     private val oppgaveService = mockk<OppgaveService>(relaxed = true)
     private val overstyringDao = mockk<OverstyringDao>(relaxed = true)
+    private val periodehistorikkDao = mockk<PeriodehistorikkDao>(relaxed = true)
+    private val totrinnsvurderingRepository = mockk<TotrinnsvurderingRepository>(relaxed = true)
     private lateinit var context: CommandContext
 
     val sykefraværstilfelle =
@@ -49,9 +59,18 @@ internal class VurderBehovForTotrinnskontrollTest {
             vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
             oppgaveService = oppgaveService,
             overstyringDao = overstyringDao,
-            totrinnsvurderingService = totrinnsvurderingService,
+            periodehistorikkDao = periodehistorikkDao,
+            totrinnsvurderingRepository = totrinnsvurderingRepository,
             sykefraværstilfelle = sykefraværstilfelle,
-            spleisVedtaksperioder = listOf(SpleisVedtaksperiode(VEDTAKSPERIODE_ID_1, UUID.randomUUID(), 1.januar, 31.januar, 1.januar), SpleisVedtaksperiode(VEDTAKSPERIODE_ID_2, UUID.randomUUID(), 1.februar, 28.februar, 1.januar)),
+            spleisVedtaksperioder = listOf(
+                SpleisVedtaksperiode(
+                    VEDTAKSPERIODE_ID_1,
+                    UUID.randomUUID(),
+                    1.januar,
+                    31.januar,
+                    1.januar
+                ), SpleisVedtaksperiode(VEDTAKSPERIODE_ID_2, UUID.randomUUID(), 1.februar, 28.februar, 1.januar)
+            ),
         )
 
     @BeforeEach
@@ -65,7 +84,7 @@ internal class VurderBehovForTotrinnskontrollTest {
 
         assertTrue(command.execute(context))
 
-        verify(exactly = 1) { totrinnsvurderingService.finnEllerOpprettNy(any()) }
+        verify(exactly = 1) { totrinnsvurderingRepository.finnTotrinnsvurdering(any()) }
     }
 
     @Test
@@ -76,7 +95,7 @@ internal class VurderBehovForTotrinnskontrollTest {
         every { oppgaveService.harFerdigstiltOppgave(VEDTAKSPERIODE_ID_2) } returns false
 
         assertTrue(command.execute(context))
-        verify(exactly = 1) { totrinnsvurderingService.finnEllerOpprettNy(any()) }
+        verify(exactly = 1) { totrinnsvurderingRepository.finnTotrinnsvurdering(any()) }
     }
 
     @ParameterizedTest
@@ -95,48 +114,37 @@ internal class VurderBehovForTotrinnskontrollTest {
 
     @Test
     fun `Hvis totrinnsvurdering har saksbehander skal oppgaven reserveres`() {
-        val saksbehander = UUID.randomUUID()
+        val saksbehandler = lagSaksbehandler(UUID.randomUUID())
 
         every { overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
-        every { totrinnsvurderingService.finnEllerOpprettNy(any()) } returns
-            TotrinnsvurderingOld(
-                vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
-                erRetur = false,
-                saksbehandler = saksbehander,
-                beslutter = null,
-                utbetalingIdRef = null,
-                opprettet = LocalDateTime.now(),
-                oppdatert = null,
-            )
+        every { totrinnsvurderingRepository.finnTotrinnsvurdering(any()) } returns
+                lagTotrinnsvurdering(saksbehandler = saksbehandler)
 
         assertTrue(command.execute(context))
 
-        verify(exactly = 1) { totrinnsvurderingService.finnEllerOpprettNy(any()) }
-        verify(exactly = 1) { oppgaveService.reserverOppgave(saksbehander, FØDSELSNUMMER) }
+        verify(exactly = 1) { totrinnsvurderingRepository.finnTotrinnsvurdering(any()) }
+        verify(exactly = 1) { oppgaveService.reserverOppgave(saksbehandler.oid, FØDSELSNUMMER) }
     }
 
     @Test
     fun `Hvis totrinnsvurdering har beslutter skal totrinnsvurderingen markeres som retur`() {
-        val saksbehander = UUID.randomUUID()
-        val beslutter = UUID.randomUUID()
+        val saksbehandler = lagSaksbehandler()
+        val beslutter = lagSaksbehandler()
 
         every { overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
-        every { totrinnsvurderingService.finnEllerOpprettNy(any()) } returns
-            TotrinnsvurderingOld(
-                vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
-                erRetur = false,
-                saksbehandler = saksbehander,
-                beslutter = beslutter,
-                utbetalingIdRef = null,
-                opprettet = LocalDateTime.now(),
-                oppdatert = null,
-            )
+        every { totrinnsvurderingRepository.finnTotrinnsvurdering(any()) } returns
+                lagTotrinnsvurdering(false, saksbehandler, beslutter)
 
         assertTrue(command.execute(context))
 
-        verify(exactly = 1) { totrinnsvurderingService.finnEllerOpprettNy(any()) }
-        verify(exactly = 1) { oppgaveService.reserverOppgave(saksbehander, FØDSELSNUMMER) }
-        verify(exactly = 1) { totrinnsvurderingService.settAutomatiskRetur(VEDTAKSPERIODE_ID_2) }
+        verify(exactly = 1) { totrinnsvurderingRepository.finnTotrinnsvurdering(any()) }
+        verify(exactly = 1) { oppgaveService.reserverOppgave(saksbehandler.oid, FØDSELSNUMMER) }
+        verify(exactly = 1) {
+            totrinnsvurderingRepository.lagre(
+                lagTotrinnsvurdering(true, saksbehandler, beslutter),
+                FØDSELSNUMMER
+            )
+        }
     }
 
     @Test
@@ -151,7 +159,7 @@ internal class VurderBehovForTotrinnskontrollTest {
         every { overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
 
         assertTrue(command.execute(context))
-        verify(exactly = 1) { totrinnsvurderingService.finnEllerOpprettNy(any()) }
+        verify(exactly = 1) { totrinnsvurderingRepository.finnTotrinnsvurdering(any()) }
     }
 
     @Test
@@ -159,6 +167,32 @@ internal class VurderBehovForTotrinnskontrollTest {
         every { overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Sykepengegrunnlag)
 
         assertTrue(command.execute(context))
-        verify(exactly = 1) { totrinnsvurderingService.finnEllerOpprettNy(any()) }
+        verify(exactly = 1) { totrinnsvurderingRepository.finnTotrinnsvurdering(any()) }
     }
+
+    private fun lagSaksbehandler(oid: UUID = UUID.randomUUID()) =
+        Saksbehandler(
+            epostadresse = lagTilfeldigSaksbehandlerepost(),
+            oid = oid,
+            navn = lagSaksbehandlernavn(),
+            ident = lagSaksbehandlerident(),
+            TilgangskontrollForTestHarIkkeTilgang
+        )
+
+    private fun lagTotrinnsvurdering(
+        erRetur: Boolean = false,
+        saksbehandler: Saksbehandler = lagSaksbehandler(),
+        beslutter: Saksbehandler = lagSaksbehandler()
+    ) =
+        Totrinnsvurdering(
+            id = NyId,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
+            erRetur = erRetur,
+            saksbehandler = saksbehandler,
+            beslutter = beslutter,
+            utbetalingId = null,
+            opprettet = LocalDateTime.now(),
+            oppdatert = LocalDateTime.now(),
+            overstyringer = emptyList(),
+        )
 }

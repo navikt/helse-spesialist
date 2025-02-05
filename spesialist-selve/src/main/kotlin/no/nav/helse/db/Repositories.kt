@@ -45,6 +45,7 @@ interface Repositories {
     val varselDao: VarselDao
     val vedtakDao: VedtakDao
     val vedtakBegrunnelseDao: VedtakBegrunnelseDao
+    val totrinnsvurderingRepository: TotrinnsvurderingRepository
 
     val abonnementApiDao: AbonnementApiDao
     val arbeidsgiverApiDao: ArbeidsgiverApiDao

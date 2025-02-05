@@ -47,6 +47,7 @@ class DBRepositories(dataSource: DataSource, tilgangskontroll: Tilgangskontroll)
     override val varselDao = PgVarselDao(dataSource)
     override val vedtakDao = PgVedtakDao(dataSource)
     override val vedtakBegrunnelseDao = PgVedtakBegrunnelseDao(dataSource)
+    override val totrinnsvurderingRepository = PgTotrinnsvurderingRepository(overstyringDao, saksbehandlerDao, totrinnsvurderingDao)
 
     override val abonnementApiDao = PgAbonnementApiDao(dataSource)
     override val arbeidsgiverApiDao = PgArbeidsgiverApiDao(dataSource)

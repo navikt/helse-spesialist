@@ -369,9 +369,10 @@ class Kommandofabrikk(
             automatiseringDao = sessionContext.automatiseringDao,
             oppgaveDao = sessionContext.oppgaveDao,
             avviksvurderingDao = sessionContext.avviksvurderingDao,
+            periodehistorikkDao = sessionContext.periodehistorikkDao,
+            totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository,
             oppgaveService = transaksjonellOppgaveService(sessionContext),
             godkjenningMediator = GodkjenningMediator(sessionContext.opptegnelseDao),
-            totrinnsvurderingService = lagTotrinnsvurderingService(sessionContext),
             person = person,
         )
     }
@@ -474,9 +475,9 @@ class Kommandofabrikk(
 
     private fun lagTotrinnsvurderingService(sessionContext: SessionContext) =
         TotrinnsvurderingService(
-            sessionContext.totrinnsvurderingDao,
-            sessionContext.oppgaveDao,
-            sessionContext.periodehistorikkDao,
-            sessionContext.dialogDao,
+            totrinnsvurderingDao = sessionContext.totrinnsvurderingDao,
+            oppgaveDao = sessionContext.oppgaveDao,
+            periodehistorikkDao = sessionContext.periodehistorikkDao,
+            dialogDao = sessionContext.dialogDao,
         )
 }

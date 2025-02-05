@@ -2,11 +2,14 @@ package no.nav.helse.modell.kommando
 
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.db.OverstyringDao
+import no.nav.helse.db.PeriodehistorikkDao
+import no.nav.helse.db.TotrinnsvurderingRepository
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.OverstyringType
+import no.nav.helse.modell.periodehistorikk.Historikkinnslag
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
+import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -15,7 +18,8 @@ internal class VurderBehovForTotrinnskontroll(
     private val vedtaksperiodeId: UUID,
     private val oppgaveService: OppgaveService,
     private val overstyringDao: OverstyringDao,
-    private val totrinnsvurderingService: TotrinnsvurderingService,
+    private val periodehistorikkDao: PeriodehistorikkDao,
+    private val totrinnsvurderingRepository: TotrinnsvurderingRepository,
     private val sykefraværstilfelle: Sykefraværstilfelle,
     private val spleisVedtaksperioder: List<SpleisVedtaksperiode>,
 ) : Command {
@@ -32,12 +36,20 @@ internal class VurderBehovForTotrinnskontroll(
 
         if ((kreverTotrinnsvurdering && !vedtaksperiodeHarFerdigstiltOppgave) || overstyringer.isNotEmpty()) {
             logg.info("Vedtaksperioden: $vedtaksperiodeId trenger totrinnsvurdering")
-            val totrinnsvurdering = totrinnsvurderingService.finnEllerOpprettNy(vedtaksperiodeId)
 
-            if (totrinnsvurdering.erBeslutteroppgave()) {
-                totrinnsvurderingService.settAutomatiskRetur(vedtaksperiodeId)
+            val totrinnsvurdering = totrinnsvurderingRepository.finnTotrinnsvurdering(fødselsnummer) ?: Totrinnsvurdering.ny(vedtaksperiodeId)
+
+            if (totrinnsvurdering.erBeslutteroppgave) {
+                // Kan man finne behandlingsId i stedet for å finne det med oppgaveId?
+                oppgaveService.finnIdForAktivOppgave(vedtaksperiodeId)?.let {
+                    totrinnsvurdering.settRetur()
+                    val innslag = Historikkinnslag.totrinnsvurderingAutomatiskRetur()
+                    periodehistorikkDao.lagreMedOppgaveId(innslag, it)
+                }
             }
-            val behandlendeSaksbehandlerOid = totrinnsvurdering.saksbehandler
+            totrinnsvurderingRepository.lagre(totrinnsvurdering, fødselsnummer)
+
+            val behandlendeSaksbehandlerOid = totrinnsvurdering.saksbehandler?.oid
             if (behandlendeSaksbehandlerOid != null) {
                 oppgaveService.reserverOppgave(
                     saksbehandleroid = behandlendeSaksbehandlerOid,
