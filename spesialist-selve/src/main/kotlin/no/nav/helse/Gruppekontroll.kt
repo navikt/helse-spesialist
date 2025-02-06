@@ -11,6 +11,7 @@ import io.ktor.http.contentType
 import io.ktor.http.path
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.spesialist.api.client.AccessTokenClient
+import org.slf4j.LoggerFactory
 import java.util.UUID
 
 interface Gruppekontroll {
@@ -43,7 +44,10 @@ class MsGraphClient(
 
         val responseNode = objectMapper.readTree(response.bodyAsText())
         val grupper = responseNode["value"].map { it.asUUID() }
+        logg.debug("Hentet ${grupper.size} grupper fra MS")
 
         return grupper.containsAll(gruppeIder)
     }
 }
+
+private val logg = LoggerFactory.getLogger(MsGraphClient::class.java)
