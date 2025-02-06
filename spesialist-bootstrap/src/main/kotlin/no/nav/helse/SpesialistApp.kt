@@ -89,8 +89,6 @@ class SpesialistApp(
     private val totrinnsvurderingService =
         TotrinnsvurderingService(
             totrinnsvurderingDao = totrinnsvurderingDao,
-            periodehistorikkDao = periodehistorikkDao,
-            dialogDao = dialogDao,
         )
 
     private lateinit var godkjenningService: GodkjenningService
@@ -222,8 +220,6 @@ class SpesialistApp(
                 totrinnsvurderingService =
                     TotrinnsvurderingService(
                         totrinnsvurderingDao = totrinnsvurderingDao,
-                        periodehistorikkDao = periodehistorikkDao,
-                        dialogDao = dialogDao,
                     ),
             )
         subsumsjonsmelder = Subsumsjonsmelder(versjonAvKode, meldingPubliserer)

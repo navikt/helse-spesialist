@@ -35,6 +35,18 @@ sealed interface SendTilGodkjenningResult {
     }
 }
 
+sealed interface SendIReturResult {
+    data object Ok : SendIReturResult
+
+    sealed interface Feil : SendIReturResult {
+        data class KunneIkkeSendeIRetur(val modellfeil: Modellfeil) : Feil
+
+        data class KunneIkkeLeggePåVent(val modellfeil: Modellfeil) : Feil
+
+        data class KunneIkkeOppretteHistorikkinnslag(val exception: Exception) : Feil
+    }
+}
+
 interface Saksbehandlerhåndterer {
     fun vedtak(
         saksbehandlerFraApi: SaksbehandlerFraApi,
@@ -120,4 +132,10 @@ interface Saksbehandlerhåndterer {
         arbeidsgiverFagsystemId: String,
         personFagsystemId: String,
     ): Annullering?
+
+    fun sendIRetur(
+        oppgavereferanse: Long,
+        besluttendeSaksbehandler: SaksbehandlerFraApi,
+        notatTekst: String,
+    ): SendIReturResult
 }
