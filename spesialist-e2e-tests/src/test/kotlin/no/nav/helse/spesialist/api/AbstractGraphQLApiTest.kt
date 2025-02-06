@@ -148,6 +148,8 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                     minimumSykdomsgrad = MinimumSykdomsgradMutationHandler(saksbehandlerhåndterer = saksbehandlerhåndterer),
                     totrinnsvurdering = TotrinnsvurderingMutationHandler(
                         saksbehandlerhåndterer = saksbehandlerhåndterer,
+                        apiOppgaveService = apiOppgaveService,
+                        totrinnsvurderinghåndterer = totrinnsvurderinghåndterer,
                     ),
                     vedtak = VedtakMutationHandler(
                         saksbehandlerhåndterer = saksbehandlerhåndterer,

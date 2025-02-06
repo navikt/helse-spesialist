@@ -4,16 +4,26 @@ import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import io.ktor.http.HttpStatusCode
+import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.SendIReturResult
 import no.nav.helse.spesialist.api.SendTilGodkjenningResult
+import no.nav.helse.spesialist.api.Totrinnsvurderinghåndterer
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.schema.ApiVedtakUtfall
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
+import org.slf4j.LoggerFactory
 
 class TotrinnsvurderingMutationHandler(
     private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
+    private val apiOppgaveService: ApiOppgaveService,
+    private val totrinnsvurderinghåndterer: Totrinnsvurderinghåndterer,
 ) : TotrinnsvurderingMutationSchema {
+    companion object {
+        private val log = LoggerFactory.getLogger("TotrinnsvurderingApi")
+        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
+    }
+
     override fun sendTilGodkjenningV2(
         oppgavereferanse: String,
         vedtakUtfall: ApiVedtakUtfall,

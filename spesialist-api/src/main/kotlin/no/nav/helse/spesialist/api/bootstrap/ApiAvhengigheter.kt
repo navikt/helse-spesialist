@@ -7,12 +7,14 @@ import no.nav.helse.spesialist.api.Godkjenninghåndterer
 import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
+import no.nav.helse.spesialist.api.Totrinnsvurderinghåndterer
 import no.nav.helse.spesialist.api.behandlingsstatistikk.IBehandlingsstatistikkService
 import no.nav.helse.spesialist.api.snapshot.ISnapshotClient
 
 data class ApiAvhengigheter(
     val saksbehandlerhåndtererProvider: () -> Saksbehandlerhåndterer,
     val apiOppgaveServiceProvider: () -> ApiOppgaveService,
+    val totrinnsvurderinghåndterer: () -> Totrinnsvurderinghåndterer,
     val godkjenninghåndtererProvider: () -> Godkjenninghåndterer,
     val personhåndtererProvider: () -> Personhåndterer,
     val dokumenthåndtererProvider: () -> Dokumenthåndterer,

@@ -34,6 +34,7 @@ import no.nav.helse.spesialist.api.GraphQLMetrikker
 import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
+import no.nav.helse.spesialist.api.Totrinnsvurderinghåndterer
 import no.nav.helse.spesialist.api.behandlingsstatistikk.IBehandlingsstatistikkService
 import no.nav.helse.spesialist.api.graphql.mutation.AnnulleringMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.MinimumSykdomsgradMutationHandler
@@ -84,6 +85,7 @@ fun Application.graphQLApi(
     behandlingsstatistikkMediator: IBehandlingsstatistikkService,
     saksbehandlerhåndterer: Saksbehandlerhåndterer,
     apiOppgaveService: ApiOppgaveService,
+    totrinnsvurderinghåndterer: Totrinnsvurderinghåndterer,
     godkjenninghåndterer: Godkjenninghåndterer,
     personhåndterer: Personhåndterer,
     dokumenthåndterer: Dokumenthåndterer,
@@ -152,6 +154,8 @@ fun Application.graphQLApi(
                     totrinnsvurdering =
                         TotrinnsvurderingMutationHandler(
                             saksbehandlerhåndterer = saksbehandlerhåndterer,
+                            apiOppgaveService = apiOppgaveService,
+                            totrinnsvurderinghåndterer = totrinnsvurderinghåndterer,
                         ),
                     vedtak =
                         VedtakMutationHandler(

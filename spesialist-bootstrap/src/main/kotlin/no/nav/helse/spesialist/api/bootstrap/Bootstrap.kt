@@ -62,6 +62,7 @@ class Bootstrap(
             behandlingsstatistikkMediator = avhengigheter.behandlingstatistikk,
             saksbehandlerhåndterer = avhengigheter.saksbehandlerhåndtererProvider(),
             apiOppgaveService = avhengigheter.apiOppgaveServiceProvider(),
+            totrinnsvurderinghåndterer = avhengigheter.totrinnsvurderinghåndterer(),
             godkjenninghåndterer = avhengigheter.godkjenninghåndtererProvider(),
             personhåndterer = avhengigheter.personhåndtererProvider(),
             dokumenthåndterer = avhengigheter.dokumenthåndtererProvider(),
