@@ -13,48 +13,6 @@ import javax.sql.DataSource
 class PgNotatApiDao internal constructor(
     private val dataSource: DataSource,
 ) : QueryRunner by MedDataSource(dataSource), NotatApiDao {
-    override fun opprettNotat(
-        vedtaksperiodeId: UUID,
-        tekst: String,
-        saksbehandlerOid: UUID,
-        type: NotatType,
-    ): NotatDto? =
-        asSQL(
-            """ 
-            with dialog_ref AS (
-                INSERT INTO dialog (opprettet)
-                     VALUES (now())
-                     RETURNING id
-            ),
-            inserted AS (
-                INSERT INTO notat (vedtaksperiode_id, tekst, saksbehandler_oid, type, dialog_ref)
-                VALUES (:vedtaksperiode_id, :tekst, :saksbehandler_oid, CAST(:type as notattype), (select id from dialog_ref))
-                RETURNING *
-            )
-            SELECT * FROM inserted i INNER JOIN saksbehandler s ON i.saksbehandler_oid = s.oid
-            """.trimIndent(),
-            "vedtaksperiode_id" to vedtaksperiodeId,
-            "tekst" to tekst,
-            "saksbehandler_oid" to saksbehandlerOid,
-            "type" to type.name,
-        ).singleOrNull { mapNotatDto(it) }
-
-    override fun leggTilKommentar(
-        dialogRef: Int,
-        tekst: String,
-        saksbehandlerident: String,
-    ): KommentarDto? =
-        asSQL(
-            """
-            insert into kommentarer (tekst, saksbehandlerident, dialog_ref)
-            values (:tekst, :saksbehandlerident, :dialogRef)
-            returning *
-            """.trimIndent(),
-            "tekst" to tekst,
-            "dialogRef" to dialogRef,
-            "saksbehandlerident" to saksbehandlerident,
-        ).singleOrNull { mapKommentarDto(it) }
-
     // PåVent-notater og Retur-notater lagres nå i periodehistorikk, og skal ikke være med til speil som en del av notater
     override fun finnNotater(vedtaksperiodeId: UUID): List<NotatDto> =
         asSQL(
@@ -66,38 +24,6 @@ class PgNotatApiDao internal constructor(
             """.trimIndent(),
             "vedtaksperiode_id" to vedtaksperiodeId,
         ).list { mapNotatDto(it) }
-
-    override fun feilregistrerNotat(notatId: Int): NotatDto? =
-        asSQL(
-            """ 
-            WITH inserted AS (
-                UPDATE notat
-                SET feilregistrert = true, feilregistrert_tidspunkt = now()
-                WHERE notat.id = :notatId
-                RETURNING *
-            )
-            SELECT *
-            FROM inserted i
-            INNER JOIN saksbehandler s on s.oid = i.saksbehandler_oid
-            """.trimIndent(),
-            "notatId" to notatId,
-        ).singleOrNull { mapNotatDto(it) }
-
-    override fun feilregistrerKommentar(kommentarId: Int): KommentarDto? =
-        asSQL(
-            """
-            WITH inserted AS (
-                UPDATE kommentarer
-                SET feilregistrert_tidspunkt = now()
-                WHERE id = :kommentarId
-                RETURNING *
-            )
-            SELECT *
-            FROM inserted AS i
-            INNER JOIN notat n on n.dialog_ref = i.dialog_ref
-            """.trimIndent(),
-            "kommentarId" to kommentarId,
-        ).singleOrNull { mapKommentarDto(it) }
 
     override fun finnKommentarer(dialogRef: Long): List<KommentarDto> =
         asSQL(

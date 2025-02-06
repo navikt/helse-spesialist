@@ -12,7 +12,6 @@ import no.nav.helse.db.PgPersonDao
 import no.nav.helse.db.TestMelding
 import no.nav.helse.db.api.PgAbonnementApiDao
 import no.nav.helse.db.api.PgArbeidsgiverApiDao
-import no.nav.helse.db.api.PgNotatApiDao
 import no.nav.helse.db.api.PgOppgaveApiDao
 import no.nav.helse.db.api.PgOverstyringApiDao
 import no.nav.helse.db.api.PgPeriodehistorikkApiDao
@@ -34,6 +33,7 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.spesialist.api.db.AbstractDatabaseTest
+import no.nav.helse.spesialist.modell.Dialog
 import no.nav.helse.spesialist.test.TestPerson
 import no.nav.helse.spesialist.test.lagSaksbehandlerident
 import no.nav.helse.spesialist.typer.Kjønn
@@ -119,7 +119,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected val personApiDao = PgPersonApiDao(dataSource)
     internal val oppgaveDao = repositories.oppgaveDao
     internal val oppgaveApiDao = PgOppgaveApiDao(dataSource)
-    internal val notatApiDao = PgNotatApiDao(dataSource)
     internal val periodehistorikkApiDao = PgPeriodehistorikkApiDao(dataSource)
     internal val periodehistorikkDao = repositories.periodehistorikkDao
     internal val arbeidsforholdDao = sessionContext.arbeidsforholdDao
@@ -249,9 +248,11 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         årsaker: List<PåVentÅrsak> = emptyList(),
         tekst: String = "En notattekst",
     ) {
-        val dialogRef = dialogDao.lagre()
-        påVentDao.lagrePåVent(oppgaveId, saksbehandlerOid, frist, årsaker, tekst, dialogRef)
-        notatApiDao.leggTilKommentar(dialogRef.toInt(), "En kommentar", SAKSBEHANDLER_IDENT)
+        val dialog = Dialog.Factory.ny().apply {
+            leggTilKommentar(tekst = "En kommentar", saksbehandlerident = SAKSBEHANDLER_IDENT)
+        }
+        sessionContext.dialogRepository.lagre(dialog)
+        påVentDao.lagrePåVent(oppgaveId, saksbehandlerOid, frist, årsaker, tekst, dialog.id())
     }
 
     private fun opprettVedtakstype(
