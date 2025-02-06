@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.api.graphql
 
 import com.expediagroup.graphql.server.execution.GraphQLServer
 import com.expediagroup.graphql.server.ktor.GraphQL
+import com.expediagroup.graphql.server.ktor.KtorGraphQLRequestParser
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
 import io.ktor.server.auth.authenticate
@@ -55,6 +56,7 @@ import no.nav.helse.spesialist.api.graphql.query.DokumentQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.OppgaverQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.OpptegnelseQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
+import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.person.PersonService
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
@@ -176,7 +178,7 @@ fun Application.graphQLApi(
     val graphQL =
         install(GraphQL) {
             server {
-                requestParser = RequestParser()
+                requestParser = KtorGraphQLRequestParser(objectMapper)
                 contextFactory =
                     ContextFactory(
                         kode7Saksbehandlergruppe = kode7Saksbehandlergruppe,

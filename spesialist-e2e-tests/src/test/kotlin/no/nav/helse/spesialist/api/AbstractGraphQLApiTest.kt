@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.api
 
 import com.expediagroup.graphql.client.types.GraphQLClientResponse
 import com.expediagroup.graphql.server.ktor.GraphQL
+import com.expediagroup.graphql.server.ktor.KtorGraphQLRequestParser
 import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.client.call.body
 import io.ktor.client.request.HttpRequestBuilder
@@ -30,7 +31,6 @@ import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.graphQLSpleisVilkarsg
 import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettBeregnetPeriode
 import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettSnapshotArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettSnapshotGenerasjon
-import no.nav.helse.spesialist.api.graphql.RequestParser
 import no.nav.helse.spesialist.api.graphql.SpesialistSchema
 import no.nav.helse.spesialist.api.graphql.mutation.AnnulleringMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.MinimumSykdomsgradMutationHandler
@@ -166,7 +166,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
 
         install(GraphQL) {
             server {
-                requestParser = RequestParser()
+                requestParser = KtorGraphQLRequestParser(objectMapper)
                 contextFactory =
                     ContextFactory(
                         kode7Saksbehandlergruppe = kode7Saksbehandlergruppe,
