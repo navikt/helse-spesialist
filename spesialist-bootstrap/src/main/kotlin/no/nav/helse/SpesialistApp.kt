@@ -86,10 +86,6 @@ class SpesialistApp(
             notatDao,
             dialogDao,
         )
-    private val totrinnsvurderingService =
-        TotrinnsvurderingService(
-            totrinnsvurderingDao = totrinnsvurderingDao,
-        )
 
     private lateinit var godkjenningService: GodkjenningService
 
@@ -97,7 +93,6 @@ class SpesialistApp(
         ApiAvhengigheter(
             saksbehandlerhåndtererProvider = { saksbehandlerMediator },
             apiOppgaveServiceProvider = { apiOppgaveService },
-            totrinnsvurderinghåndterer = { totrinnsvurderingService },
             godkjenninghåndtererProvider = { godkjenningService },
             personhåndtererProvider = { personhåndterer },
             dokumenthåndtererProvider = { dokumentMediator },
