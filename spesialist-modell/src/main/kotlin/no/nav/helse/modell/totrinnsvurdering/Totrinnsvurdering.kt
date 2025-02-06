@@ -52,14 +52,17 @@ class Totrinnsvurdering(
 
     fun ferdigstill() {
         ferdigstilt = true
+        oppdatert = LocalDateTime.now()
     }
 
     fun settRetur() {
         erRetur = true
+        oppdatert = LocalDateTime.now()
     }
 
     fun nyOverstyring(overstyring: Overstyring) {
         overstyringer.add(overstyring)
+        oppdatert = LocalDateTime.now()
     }
 
     internal fun sendTilBeslutter(
@@ -88,6 +91,7 @@ class Totrinnsvurdering(
 
     internal fun ferdigstill(utbetalingId: UUID) {
         this.utbetalingId = utbetalingId
+        oppdatert = LocalDateTime.now()
     }
 
     override fun equals(other: Any?): Boolean {
