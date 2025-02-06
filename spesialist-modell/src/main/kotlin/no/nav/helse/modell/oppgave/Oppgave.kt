@@ -26,7 +26,7 @@ import java.util.UUID
 
 class Oppgave private constructor(
     val id: Long,
-    var tilstand: Tilstand,
+    tilstand: Tilstand,
     private val vedtaksperiodeId: UUID,
     val behandlingId: UUID,
     private val utbetalingId: UUID,
@@ -36,9 +36,15 @@ class Oppgave private constructor(
     private var ferdigstiltAvIdent: String? = null,
     private var ferdigstiltAvOid: UUID? = null,
     val egenskaper: MutableSet<Egenskap> = mutableSetOf(),
-    var tildeltTil: Saksbehandler? = null,
+    tildeltTil: Saksbehandler? = null,
 ) {
     private val observers = mutableListOf<OppgaveObserver>()
+
+    var tilstand: Tilstand = tilstand
+        private set
+
+    var tildeltTil: Saksbehandler? = tildeltTil
+        private set
 
     fun register(observer: OppgaveObserver) {
         observers.add(observer)
