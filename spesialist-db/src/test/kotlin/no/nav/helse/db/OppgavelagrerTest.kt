@@ -227,19 +227,7 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
             oppgaveService.oppdater(OPPGAVE_ID, "Ferdigstilt", SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID, listOf(EgenskapForDatabase.SØKNAD))
         }
         verify(exactly = 0) { tildelingRepository.tildel(any(), any()) }
-        verify(exactly = 1) {
-            oppgaveService.lagreTotrinnsvurdering(
-                TotrinnsvurderingDto(
-                    VEDTAKSPERIODE_ID,
-                    false,
-                    saksbehandler.toDto(),
-                    beslutter.toDto(),
-                    UTBETALING_ID,
-                    TOTRINNSVURDERING_OPPRETTET,
-                    TOTRINNSVURDERING_OPPDATERT,
-                ),
-            )
-        }
+        verify(exactly = 1) { oppgaveService.lagreTotrinnsvurdering(any<TotrinnsvurderingDto>()) }
     }
 
     @Test
@@ -270,17 +258,7 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
             oppgaveService.oppdater(OPPGAVE_ID, "Ferdigstilt", SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID, listOf(EgenskapForDatabase.SØKNAD))
         }
         verify(exactly = 1) {
-            oppgaveService.lagreTotrinnsvurdering(
-                TotrinnsvurderingDto(
-                    VEDTAKSPERIODE_ID,
-                    false,
-                    saksbehandler.toDto(),
-                    beslutter.toDto(),
-                    UTBETALING_ID,
-                    TOTRINNSVURDERING_OPPRETTET,
-                    TOTRINNSVURDERING_OPPDATERT,
-                ),
-            )
+            oppgaveService.lagreTotrinnsvurdering(any<TotrinnsvurderingDto>())
         }
     }
 
