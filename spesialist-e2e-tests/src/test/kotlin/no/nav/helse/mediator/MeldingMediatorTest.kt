@@ -13,6 +13,8 @@ import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
@@ -20,8 +22,8 @@ import java.util.UUID
 
 internal class MeldingMediatorTest : AbstractDatabaseTest() {
     private val testRapid = TestRapid()
-
     private val kommandofabrikk = mockk<Kommandofabrikk>(relaxed = true)
+    private val poisonPills: MutableMap<String, Set<String>> = mutableMapOf()
 
     private val meldingMediator =
         MeldingMediator(
@@ -36,7 +38,7 @@ internal class MeldingMediatorTest : AbstractDatabaseTest() {
                 varselDao = repositories.varselDao,
                 definisjonDao = repositories.definisjonDao
             ),
-            poisonPills = PoisonPills(emptyMap()),
+            poisonPills = PoisonPills(poisonPills),
             env = environment,
         )
 
@@ -52,6 +54,13 @@ internal class MeldingMediatorTest : AbstractDatabaseTest() {
         val varseldefinisjon = Varseldefinisjon(id, "SB_EX_1", "En tittel", null, null, false, LocalDateTime.now())
         meldingMediator.håndter(varseldefinisjon)
         assertVarseldefinisjon(id)
+    }
+
+    @Test
+    fun `hopper over meldinger hvis de er flagget i poison pills`() {
+        poisonPills["@id"] = setOf("ekkel id")
+        assertFalse(meldingMediator.skalBehandleMelding(""" { "@id": "ekkel id" } """))
+        assertTrue(meldingMediator.skalBehandleMelding(""" { "@id": "fin id" } """))
     }
 
     private fun assertVarseldefinisjon(id: UUID) {

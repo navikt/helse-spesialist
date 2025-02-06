@@ -39,7 +39,12 @@ class MeldingMediator(
 
     fun skalBehandleMelding(melding: String): Boolean {
         val jsonNode = objectMapper.readTree(melding)
-        if (poisonPills.erPoisonPill(jsonNode)) return false
+        if (poisonPills.erPoisonPill(jsonNode)) {
+            logg.info("Hopper over melding med @id={}", jsonNode["@id"].asText())
+            sikkerlogg.info("Hopper over melding med @id={}, json=\n{}", jsonNode["@id"].asText(), jsonNode)
+
+            return false
+        }
         if (env.erProd) return true
         return skalBehandleMeldingIDev(jsonNode)
     }
