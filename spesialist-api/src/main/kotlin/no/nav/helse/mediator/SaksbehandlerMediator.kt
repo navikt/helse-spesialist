@@ -120,7 +120,6 @@ class SaksbehandlerMediator(
     private val periodehistorikkDao = repositories.periodehistorikkDao
     private val vedtakBegrunnelseDao = repositories.vedtakBegrunnelseDao
     private val dialogDao = repositories.dialogDao
-    private val totrinnsvurderingRepository = repositories.totrinnsvurderingRepository
 
     override fun håndter(
         handlingFraApi: HandlingFraApi,
@@ -208,16 +207,14 @@ class SaksbehandlerMediator(
         val fødselsnummer = oppgaveApiDao.finnFødselsnummer(oppgavereferanse)
         if (!erÅpenOppgave) return VedtakResultat.Feil.IkkeÅpenOppgave()
 
-        val totrinnsvurdering = totrinnsvurderingRepository.finnTotrinnsvurdering(fødselsnummer)
-        if (totrinnsvurdering?.erBeslutteroppgave == true) {
+        if (totrinnsvurderingService.erBeslutterOppgave(oppgavereferanse)) {
             if (!saksbehandler.harTilgangTil(listOf(Egenskap.BESLUTTER)) && !env.erDev) {
                 return VedtakResultat.Feil.BeslutterFeil.TrengerBeslutterRolle()
             }
-            if (totrinnsvurdering.saksbehandler == saksbehandler && !env.erDev) {
+            if (totrinnsvurderingService.erEgenOppgave(oppgavereferanse, saksbehandler.oid()) && !env.erDev) {
                 return VedtakResultat.Feil.BeslutterFeil.KanIkkeBeslutteEgenOppgave()
             }
-            totrinnsvurdering.settBeslutter(saksbehandler)
-            totrinnsvurderingRepository.lagre(totrinnsvurdering, fødselsnummer)
+            totrinnsvurderingService.settBeslutter(oppgavereferanse, saksbehandler.oid())
         }
 
         if (godkjent) {

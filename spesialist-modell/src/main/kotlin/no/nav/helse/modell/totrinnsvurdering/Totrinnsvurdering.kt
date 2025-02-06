@@ -90,10 +90,6 @@ class Totrinnsvurdering(
         this.utbetalingId = utbetalingId
     }
 
-    fun settBeslutter(saksbehandler: Saksbehandler) {
-        this.saksbehandler = saksbehandler
-    }
-
     override fun equals(other: Any?): Boolean {
         return this === other || (
             other is Totrinnsvurdering &&

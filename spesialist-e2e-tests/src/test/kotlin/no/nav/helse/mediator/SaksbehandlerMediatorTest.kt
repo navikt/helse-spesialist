@@ -11,6 +11,7 @@ import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlinghåndtererImpl
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import no.nav.helse.spesialist.api.SendTilGodkjenningResult
 import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
@@ -98,6 +99,12 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             apiOppgaveService = apiOppgaveService,
             tilgangsgrupper = tilgangsgrupper,
             stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
+            totrinnsvurderingService = TotrinnsvurderingService(
+                totrinnsvurderingDao = totrinnsvurderingDao,
+                oppgaveDao = oppgaveDao,
+                periodehistorikkDao = periodehistorikkDao,
+                dialogDao = dialogDao,
+            ),
             annulleringRepository = annulleringRepository,
             env = environment,
             featureToggles = object : FeatureToggles {},
