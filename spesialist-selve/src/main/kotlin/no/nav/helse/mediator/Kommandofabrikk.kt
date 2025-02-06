@@ -476,5 +476,7 @@ class Kommandofabrikk(
     private fun lagTotrinnsvurderingService(sessionContext: SessionContext) =
         TotrinnsvurderingService(
             totrinnsvurderingDao = sessionContext.totrinnsvurderingDao,
+            periodehistorikkDao = sessionContext.periodehistorikkDao,
+            dialogDao = sessionContext.dialogDao,
         )
 }

@@ -2,7 +2,6 @@ package no.nav.helse.spesialist.api.graphql.mutation
 
 import io.mockk.every
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
-import no.nav.helse.spesialist.api.SendIReturResult
 import no.nav.helse.spesialist.api.SendTilGodkjenningResult
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -34,18 +33,18 @@ internal class TotrinnsvurderingMutationTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `send oppgave i retur`() {
-        every { saksbehandlerhåndterer.sendIRetur(any(), any(), any()) }.returns(
-            SendIReturResult.Ok
-        )
+        opprettSaksbehandler()
+        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        val oppgaveRef = finnOppgaveIdFor(PERIODE.id)
 
         val body = runQuery(
             """
             mutation TotrinnsvurderingMutation {
-                sendIRetur(oppgavereferanse: "1", notatTekst: "Retur")
+                sendIRetur(oppgavereferanse: "$oppgaveRef", notatTekst: "Retur")
             }
         """
         )
 
-        assertTrue(body["data"]["sendIRetur"].asBoolean()) { body.toString() }
+        assertTrue(body["data"]["sendIRetur"].asBoolean())
     }
 }
