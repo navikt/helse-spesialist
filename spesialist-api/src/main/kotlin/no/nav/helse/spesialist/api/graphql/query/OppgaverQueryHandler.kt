@@ -2,8 +2,6 @@ package no.nav.helse.spesialist.api.graphql.query
 
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.schema.ApiAntallOppgaver
@@ -26,13 +24,11 @@ class OppgaverQueryHandler(private val apiOppgaveService: ApiOppgaveService) : O
     ): DataFetcherResult<ApiBehandledeOppgaver> {
         val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
         val behandledeOppgaver =
-            withContext(Dispatchers.IO) {
-                apiOppgaveService.behandledeOppgaver(
-                    saksbehandlerFraApi = saksbehandler,
-                    offset = offset,
-                    limit = limit,
-                )
-            }
+            apiOppgaveService.behandledeOppgaver(
+                saksbehandlerFraApi = saksbehandler,
+                offset = offset,
+                limit = limit,
+            )
 
         return DataFetcherResult.newResult<ApiBehandledeOppgaver>().data(behandledeOppgaver).build()
     }
@@ -48,15 +44,13 @@ class OppgaverQueryHandler(private val apiOppgaveService: ApiOppgaveService) : O
         sikkerLogg.debug("Henter OppgaverTilBehandling for ${saksbehandler.navn}")
         val (oppgaver, tid) =
             measureTimedValue {
-                withContext(Dispatchers.IO) {
-                    apiOppgaveService.oppgaver(
-                        saksbehandlerFraApi = saksbehandler,
-                        offset = offset,
-                        limit = limit,
-                        sortering = sortering,
-                        filtrering = filtrering,
-                    )
-                }
+                apiOppgaveService.oppgaver(
+                    saksbehandlerFraApi = saksbehandler,
+                    offset = offset,
+                    limit = limit,
+                    sortering = sortering,
+                    filtrering = filtrering,
+                )
             }
         sikkerLogg.debug("Query OppgaverTilBehandling er ferdig etter ${tid.inWholeMilliseconds} ms")
         val grense = 5000
@@ -72,11 +66,9 @@ class OppgaverQueryHandler(private val apiOppgaveService: ApiOppgaveService) : O
         sikkerLogg.info("Henter AntallOppgaver for ${saksbehandler.navn}")
         val (antallOppgaver, tid) =
             measureTimedValue {
-                withContext(Dispatchers.IO) {
-                    apiOppgaveService.antallOppgaver(
-                        saksbehandlerFraApi = saksbehandler,
-                    )
-                }
+                apiOppgaveService.antallOppgaver(
+                    saksbehandlerFraApi = saksbehandler,
+                )
             }
         sikkerLogg.debug("Query antallOppgaver er ferdig etter ${tid.inWholeMilliseconds} ms")
 

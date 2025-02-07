@@ -9,8 +9,6 @@ import graphql.GraphQLError
 import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import no.nav.helse.db.api.EgenAnsattApiDao
 import no.nav.helse.db.api.PersonApiDao
 import no.nav.helse.spesialist.api.Dokumenthåndterer
@@ -58,16 +56,14 @@ class DokumentQueryHandler(
         }
 
         val dokument =
-            withContext(Dispatchers.IO) {
-                dokumenthåndterer.håndter(fnr, UUID.fromString(dokumentId), DokumentType.SØKNAD.name)
-            }.let {
-                val error = it.path("error")?.takeUnless { error -> error.isMissingOrNull() }?.asInt()
-                if (it.size() == 0) {
+            dokumenthåndterer.håndter(fnr, UUID.fromString(dokumentId), DokumentType.SØKNAD.name).let { jsonNode ->
+                val error = jsonNode.path("error")?.takeUnless { error -> error.isMissingOrNull() }?.asInt()
+                if (jsonNode.size() == 0) {
                     return DataFetcherResult.newResult<ApiSoknad>().error(getExpectationFailedError()).build()
                 } else if (error == 408) {
                     return DataFetcherResult.newResult<ApiSoknad>().error(getEmptyResultTimeoutError()).build()
                 }
-                it.tilSøknad()
+                jsonNode.tilSøknad()
             }
 
         return DataFetcherResult.newResult<ApiSoknad>().data(dokument).build()
@@ -87,22 +83,21 @@ class DokumentQueryHandler(
         }
 
         val dokument =
-            withContext(Dispatchers.IO) {
-                dokumenthåndterer.håndter(fnr, UUID.fromString(dokumentId), DokumentType.INNTEKTSMELDING.name)
-            }.let {
-                val error = it.path("error")?.takeUnless { error -> error.isMissingOrNull() }?.asInt()
-                if (it.size() == 0) {
-                    return DataFetcherResult.newResult<ApiDokumentInntektsmelding>()
-                        .error(getExpectationFailedError()).build()
-                } else if (error == 404) {
-                    return DataFetcherResult.newResult<ApiDokumentInntektsmelding>()
-                        .error(getNotFoundErrorEkstern()).build()
-                } else if (error == 408) {
-                    return DataFetcherResult.newResult<ApiDokumentInntektsmelding>().error(getEmptyResultTimeoutError())
-                        .build()
+            dokumenthåndterer.håndter(fnr, UUID.fromString(dokumentId), DokumentType.INNTEKTSMELDING.name)
+                .let { jsonNode ->
+                    val error = jsonNode.path("error")?.takeUnless { error -> error.isMissingOrNull() }?.asInt()
+                    if (jsonNode.size() == 0) {
+                        return DataFetcherResult.newResult<ApiDokumentInntektsmelding>().error(getExpectationFailedError())
+                            .build()
+                    } else if (error == 404) {
+                        return DataFetcherResult.newResult<ApiDokumentInntektsmelding>().error(getNotFoundErrorEkstern())
+                            .build()
+                    } else if (error == 408) {
+                        return DataFetcherResult.newResult<ApiDokumentInntektsmelding>().error(getEmptyResultTimeoutError())
+                            .build()
+                    }
+                    jsonNode.tilInntektsmelding()
                 }
-                it.tilInntektsmelding()
-            }
 
         return DataFetcherResult.newResult<ApiDokumentInntektsmelding>().data(dokument).build()
     }
