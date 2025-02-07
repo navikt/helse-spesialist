@@ -2,6 +2,7 @@ package no.nav.helse.modell.saksbehandler.handlinger
 
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.saksbehandler.Saksbehandler
+import java.util.UUID
 
 interface Handling {
     fun utførAv(saksbehandler: Saksbehandler)
@@ -16,6 +17,8 @@ interface Personhandling : Handling {
 }
 
 interface Overstyring : Handling {
+    val id: UUID
+
     fun gjelderFødselsnummer(): String
 }
 

@@ -12,7 +12,7 @@ import java.time.LocalDate
 import java.util.UUID
 
 class MinimumSykdomsgrad(
-    private val id: UUID = UUID.randomUUID(),
+    override val id: UUID = UUID.randomUUID(),
     private val aktørId: String,
     private val fødselsnummer: String,
     private val perioderVurdertOk: List<MinimumSykdomsgradPeriode>,

@@ -13,7 +13,7 @@ import java.time.LocalDate
 import java.util.UUID
 
 class SkjønnsfastsattSykepengegrunnlag(
-    private val id: UUID = UUID.randomUUID(),
+    override val id: UUID = UUID.randomUUID(),
     private val aktørId: String,
     private val fødselsnummer: String,
     private val skjæringstidspunkt: LocalDate,
