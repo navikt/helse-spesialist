@@ -14,6 +14,10 @@ import no.nav.helse.db.api.PersonApiDao
 import no.nav.helse.spesialist.api.Dokumenthåndterer
 import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGER
 import no.nav.helse.spesialist.api.graphql.forbiddenError
+import no.nav.helse.spesialist.api.graphql.query.DokumentQueryHandler.GraphQLErrorFactory.getEmptyRequestError
+import no.nav.helse.spesialist.api.graphql.query.DokumentQueryHandler.GraphQLErrorFactory.getEmptyResultTimeoutError
+import no.nav.helse.spesialist.api.graphql.query.DokumentQueryHandler.GraphQLErrorFactory.getExpectationFailedError
+import no.nav.helse.spesialist.api.graphql.query.DokumentQueryHandler.GraphQLErrorFactory.getNotFoundErrorEkstern
 import no.nav.helse.spesialist.api.graphql.schema.ApiAvsenderSystem
 import no.nav.helse.spesialist.api.graphql.schema.ApiDokumentInntektsmelding
 import no.nav.helse.spesialist.api.graphql.schema.ApiEndringIRefusjon
@@ -48,25 +52,19 @@ class DokumentQueryHandler(
         env: DataFetchingEnvironment,
     ): DataFetcherResult<ApiSoknad?> {
         if (isForbidden(fnr, env)) {
-            return DataFetcherResult.newResult<ApiSoknad?>().error(getForbiddenError(fnr)).build()
+            return byggFeilrespons(getForbiddenError(fnr))
+        } else if (dokumentId.isEmpty()) {
+            return byggFeilrespons(getEmptyRequestError())
         }
 
-        if (dokumentId.isEmpty()) {
-            return DataFetcherResult.newResult<ApiSoknad>().error(getEmptyRequestError()).build()
+        val jsonNode = dokumenthåndterer.håndter(fnr, UUID.fromString(dokumentId), DokumentType.SØKNAD.name)
+        if (jsonNode.size() == 0) return byggFeilrespons(getExpectationFailedError())
+
+        val error = jsonNode.path("error")?.takeUnless { error -> error.isMissingOrNull() }?.asInt()
+        return when (error) {
+            408 -> byggFeilrespons(getEmptyResultTimeoutError())
+            else -> byggRespons(jsonNode.tilSøknad())
         }
-
-        val dokument =
-            dokumenthåndterer.håndter(fnr, UUID.fromString(dokumentId), DokumentType.SØKNAD.name).let { jsonNode ->
-                val error = jsonNode.path("error")?.takeUnless { error -> error.isMissingOrNull() }?.asInt()
-                if (jsonNode.size() == 0) {
-                    return DataFetcherResult.newResult<ApiSoknad>().error(getExpectationFailedError()).build()
-                } else if (error == 408) {
-                    return DataFetcherResult.newResult<ApiSoknad>().error(getEmptyResultTimeoutError()).build()
-                }
-                jsonNode.tilSøknad()
-            }
-
-        return DataFetcherResult.newResult<ApiSoknad>().data(dokument).build()
     }
 
     override suspend fun hentInntektsmelding(
@@ -75,50 +73,47 @@ class DokumentQueryHandler(
         env: DataFetchingEnvironment,
     ): DataFetcherResult<ApiDokumentInntektsmelding?> {
         if (isForbidden(fnr, env)) {
-            return DataFetcherResult.newResult<ApiDokumentInntektsmelding?>().error(getForbiddenError(fnr)).build()
+            return byggFeilrespons(getForbiddenError(fnr))
+        } else if (dokumentId.isEmpty()) {
+            return byggFeilrespons(getEmptyRequestError())
         }
 
-        if (dokumentId.isEmpty()) {
-            return DataFetcherResult.newResult<ApiDokumentInntektsmelding>().error(getEmptyRequestError()).build()
+        val jsonNode = dokumenthåndterer.håndter(fnr, UUID.fromString(dokumentId), DokumentType.INNTEKTSMELDING.name)
+        if (jsonNode.size() == 0) return byggFeilrespons(getExpectationFailedError())
+
+        val error = jsonNode.path("error")?.takeUnless { error -> error.isMissingOrNull() }?.asInt()
+        return when (error) {
+            404 -> byggFeilrespons(getNotFoundErrorEkstern())
+            408 -> byggFeilrespons(getEmptyResultTimeoutError())
+            else -> byggRespons(jsonNode.tilInntektsmelding())
         }
-
-        val dokument =
-            dokumenthåndterer.håndter(fnr, UUID.fromString(dokumentId), DokumentType.INNTEKTSMELDING.name)
-                .let { jsonNode ->
-                    val error = jsonNode.path("error")?.takeUnless { error -> error.isMissingOrNull() }?.asInt()
-                    if (jsonNode.size() == 0) {
-                        return DataFetcherResult.newResult<ApiDokumentInntektsmelding>().error(getExpectationFailedError())
-                            .build()
-                    } else if (error == 404) {
-                        return DataFetcherResult.newResult<ApiDokumentInntektsmelding>().error(getNotFoundErrorEkstern())
-                            .build()
-                    } else if (error == 408) {
-                        return DataFetcherResult.newResult<ApiDokumentInntektsmelding>().error(getEmptyResultTimeoutError())
-                            .build()
-                    }
-                    jsonNode.tilInntektsmelding()
-                }
-
-        return DataFetcherResult.newResult<ApiDokumentInntektsmelding>().data(dokument).build()
     }
 
-    private fun getEmptyRequestError(): GraphQLError =
-        GraphqlErrorException.newErrorException().message("Requesten mangler dokument-id.")
-            .extensions(mapOf("code" to 400)).build()
+    private fun <T> byggRespons(data: T) = DataFetcherResult.newResult<T>().data(data).build()
 
-    private fun getEmptyResultTimeoutError(): GraphQLError =
-        GraphqlErrorException.newErrorException()
-            .message("Det tar litt lengre tid enn forventet å hente dokumentet, vennligst prøv igjen.")
-            .extensions(mapOf("code" to 408)).build()
+    private fun <T> byggFeilrespons(error: GraphQLError) = DataFetcherResult.newResult<T>().error(error).build()
 
-    private fun getExpectationFailedError(): GraphQLError =
-        GraphqlErrorException.newErrorException().message("Noe gikk galt, vennligst prøv igjen.")
-            .extensions(mapOf("code" to 417)).build()
+    private object GraphQLErrorFactory {
+        fun getEmptyRequestError() = byggGraphqlError("Requesten mangler dokument-id.", "code" to 400)
 
-    private fun getNotFoundErrorEkstern(): GraphQLError =
-        GraphqlErrorException.newErrorException()
-            .message("Speil har ikke tilgang til denne inntektsmeldingen, den må åpnes i Gosys.")
-            .extensions(mapOf("code" to 404)).build()
+        fun getEmptyResultTimeoutError() =
+            byggGraphqlError(
+                "Det tar litt lengre tid enn forventet å hente dokumentet, vennligst prøv igjen.",
+                "code" to 408,
+            )
+
+        fun getExpectationFailedError() = byggGraphqlError("Noe gikk galt, vennligst prøv igjen.", "code" to 417)
+
+        fun getNotFoundErrorEkstern() =
+            byggGraphqlError("Speil har ikke tilgang til denne inntektsmeldingen, den må åpnes i Gosys.", "code" to 404)
+
+        fun byggGraphqlError(
+            melding: String,
+            vararg extensions: Pair<String, Any>,
+        ): GraphqlErrorException =
+            GraphqlErrorException.newErrorException().message(melding)
+                .extensions(mapOf(*extensions)).build()
+    }
 
     private fun JsonNode.tilInntektsmelding(): ApiDokumentInntektsmelding {
         return ApiDokumentInntektsmelding(
@@ -144,7 +139,9 @@ class DokumentQueryHandler(
             opphoerAvNaturalytelser =
                 getIfNotNull("opphoerAvNaturalytelser")?.map { opphørAvNaturalytelse ->
                     ApiOpphoerAvNaturalytelse(
-                        naturalytelse = opphørAvNaturalytelse.getIfNotNull("naturalytelse")?.asText()?.tilNaturalytelse(),
+                        naturalytelse =
+                            opphørAvNaturalytelse.getIfNotNull("naturalytelse")?.asText()
+                                ?.tilNaturalytelse(),
                         fom = opphørAvNaturalytelse.getIfNotNull("fom")?.asLocalDate(),
                         beloepPrMnd = opphørAvNaturalytelse.getIfNotNull("beloepPrMnd")?.asDouble(),
                     )
