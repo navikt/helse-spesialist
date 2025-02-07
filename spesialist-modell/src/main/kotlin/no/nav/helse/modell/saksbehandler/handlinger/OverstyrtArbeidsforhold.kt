@@ -2,19 +2,17 @@ package no.nav.helse.modell.saksbehandler.handlinger
 
 import no.nav.helse.modell.melding.OverstyrtArbeidsforholdEvent
 import no.nav.helse.modell.saksbehandler.Saksbehandler
-import no.nav.helse.modell.saksbehandler.handlinger.dto.ArbeidsforholdDto
-import no.nav.helse.modell.saksbehandler.handlinger.dto.OverstyrtArbeidsforholdDto
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import java.time.LocalDate
 import java.util.UUID
 
 class OverstyrtArbeidsforhold(
     override val id: UUID = UUID.randomUUID(),
-    private val fødselsnummer: String,
-    private val aktørId: String,
-    private val skjæringstidspunkt: LocalDate,
-    private val overstyrteArbeidsforhold: List<Arbeidsforhold>,
-    private val vedtaksperiodeId: UUID,
+    val fødselsnummer: String,
+    val aktørId: String,
+    val skjæringstidspunkt: LocalDate,
+    val overstyrteArbeidsforhold: List<Arbeidsforhold>,
+    val vedtaksperiodeId: UUID,
 ) : Overstyring {
     override fun gjelderFødselsnummer(): String = fødselsnummer
 
@@ -42,23 +40,13 @@ class OverstyrtArbeidsforhold(
             overstyrteArbeidsforhold = overstyrteArbeidsforhold.map { it.byggEvent() },
         )
     }
-
-    fun toDto() =
-        OverstyrtArbeidsforholdDto(
-            id = id,
-            fødselsnummer = fødselsnummer,
-            aktørId = aktørId,
-            skjæringstidspunkt = skjæringstidspunkt,
-            overstyrteArbeidsforhold = overstyrteArbeidsforhold.map(Arbeidsforhold::toDto),
-            vedtaksperiodeId = vedtaksperiodeId,
-        )
 }
 
 class Arbeidsforhold(
-    private val organisasjonsnummer: String,
-    private val deaktivert: Boolean,
-    private val begrunnelse: String,
-    private val forklaring: String,
+    val organisasjonsnummer: String,
+    val deaktivert: Boolean,
+    val begrunnelse: String,
+    val forklaring: String,
     private val lovhjemmel: Lovhjemmel?,
 ) {
     fun byggEvent(): OverstyrtArbeidsforholdEvent.Arbeidsforhold {
@@ -69,12 +57,4 @@ class Arbeidsforhold(
             forklaring = forklaring,
         )
     }
-
-    fun toDto() =
-        ArbeidsforholdDto(
-            organisasjonsnummer = organisasjonsnummer,
-            deaktivert = deaktivert,
-            begrunnelse = begrunnelse,
-            forklaring = forklaring,
-        )
 }

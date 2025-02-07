@@ -18,15 +18,10 @@ import no.nav.helse.modell.saksbehandler.handlinger.Overstyring
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtArbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtInntektOgRefusjon
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinje
+import no.nav.helse.modell.saksbehandler.handlinger.Refusjonselement
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlag
-import no.nav.helse.modell.saksbehandler.handlinger.dto.MinimumSykdomsgradDto
-import no.nav.helse.modell.saksbehandler.handlinger.dto.OverstyrtArbeidsforholdDto
-import no.nav.helse.modell.saksbehandler.handlinger.dto.OverstyrtInntektOgRefusjonDto
-import no.nav.helse.modell.saksbehandler.handlinger.dto.OverstyrtTidslinjeDto
-import no.nav.helse.modell.saksbehandler.handlinger.dto.RefusjonselementDto
-import no.nav.helse.modell.saksbehandler.handlinger.dto.SkjønnsfastsattSykepengegrunnlagDto
-import no.nav.helse.modell.vilkårsprøving.LovhjemmelDto
+import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -48,38 +43,38 @@ class Overstyringlagrer(private val overstyringDao: OverstyringDao) {
         overstyring: OverstyrtTidslinje,
         saksbehandlerOid: UUID,
     ) {
-        overstyringDao.persisterOverstyringTidslinje(overstyring.toDto().tilDatabase(), saksbehandlerOid)
+        overstyringDao.persisterOverstyringTidslinje(overstyring.tilDatabase(), saksbehandlerOid)
     }
 
     private fun lagreOverstyrtInntektOgRefusjon(
         overstyring: OverstyrtInntektOgRefusjon,
         saksbehandlerOid: UUID,
     ) {
-        overstyringDao.persisterOverstyringInntektOgRefusjon(overstyring.toDto().tilDatabase(), saksbehandlerOid)
+        overstyringDao.persisterOverstyringInntektOgRefusjon(overstyring.tilDatabase(), saksbehandlerOid)
     }
 
     private fun lagreOverstyrtArbeidsforhold(
         overstyring: OverstyrtArbeidsforhold,
         saksbehandlerOid: UUID,
     ) {
-        overstyringDao.persisterOverstyringArbeidsforhold(overstyring.toDto().tilDatabase(), saksbehandlerOid)
+        overstyringDao.persisterOverstyringArbeidsforhold(overstyring.tilDatabase(), saksbehandlerOid)
     }
 
     private fun lagreSkjønnsfastsattSykepengegrunnlag(
         overstyring: SkjønnsfastsattSykepengegrunnlag,
         saksbehandlerOid: UUID,
     ) {
-        overstyringDao.persisterSkjønnsfastsettingSykepengegrunnlag(overstyring.toDto().tilDatabase(), saksbehandlerOid)
+        overstyringDao.persisterSkjønnsfastsettingSykepengegrunnlag(overstyring.tilDatabase(), saksbehandlerOid)
     }
 
     private fun lagreMinimumSykdomsgrad(
         overstyring: MinimumSykdomsgrad,
         saksbehandlerOid: UUID,
     ) {
-        overstyringDao.persisterMinimumSykdomsgrad(overstyring.toDto().tilDatabase(), saksbehandlerOid)
+        overstyringDao.persisterMinimumSykdomsgrad(overstyring.tilDatabase(), saksbehandlerOid)
     }
 
-    private fun OverstyrtTidslinjeDto.tilDatabase() =
+    private fun OverstyrtTidslinje.tilDatabase() =
         OverstyrtTidslinjeForDatabase(
             id = id,
             aktørId = aktørId,
@@ -101,7 +96,7 @@ class Overstyringlagrer(private val overstyringDao: OverstyringDao) {
                 },
         )
 
-    private fun OverstyrtInntektOgRefusjonDto.tilDatabase() =
+    private fun OverstyrtInntektOgRefusjon.tilDatabase() =
         OverstyrtInntektOgRefusjonForDatabase(
             id = id,
             aktørId = aktørId,
@@ -126,7 +121,7 @@ class Overstyringlagrer(private val overstyringDao: OverstyringDao) {
                 },
         )
 
-    private fun OverstyrtArbeidsforholdDto.tilDatabase() =
+    private fun OverstyrtArbeidsforhold.tilDatabase() =
         OverstyrtArbeidsforholdForDatabase(
             id = id,
             aktørId = aktørId,
@@ -145,7 +140,7 @@ class Overstyringlagrer(private val overstyringDao: OverstyringDao) {
                 },
         )
 
-    private fun SkjønnsfastsattSykepengegrunnlagDto.tilDatabase() =
+    private fun SkjønnsfastsattSykepengegrunnlag.tilDatabase() =
         SkjønnsfastsattSykepengegrunnlagForDatabase(
             id = id,
             aktørId = aktørId,
@@ -170,7 +165,7 @@ class Overstyringlagrer(private val overstyringDao: OverstyringDao) {
                 },
         )
 
-    private fun MinimumSykdomsgradDto.tilDatabase() =
+    private fun MinimumSykdomsgrad.tilDatabase() =
         MinimumSykdomsgradForDatabase(
             id = id,
             aktørId = aktørId,
@@ -201,9 +196,9 @@ class Overstyringlagrer(private val overstyringDao: OverstyringDao) {
             initierendeVedtaksperiodeId = initierendeVedtaksperiodeId,
         )
 
-    private fun LovhjemmelDto.tilDatabase() = LovhjemmelForDatabase(paragraf = paragraf, ledd = ledd, bokstav = bokstav)
+    private fun Lovhjemmel.tilDatabase() = LovhjemmelForDatabase(paragraf = paragraf, ledd = ledd, bokstav = bokstav)
 
-    private fun List<RefusjonselementDto>.tilDatabase() =
+    private fun List<Refusjonselement>.tilDatabase() =
         this.map {
             RefusjonselementForDatabase(fom = it.fom, tom = it.tom, beløp = it.beløp)
         }

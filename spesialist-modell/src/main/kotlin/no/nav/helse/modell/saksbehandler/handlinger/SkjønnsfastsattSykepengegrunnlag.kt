@@ -3,8 +3,6 @@ package no.nav.helse.modell.saksbehandler.handlinger
 import no.nav.helse.modell.melding.SkjønnsfastsattSykepengegrunnlagEvent
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattArbeidsgiver.Companion.byggSubsumsjon
-import no.nav.helse.modell.saksbehandler.handlinger.dto.SkjønnsfastsattArbeidsgiverDto
-import no.nav.helse.modell.saksbehandler.handlinger.dto.SkjønnsfastsattSykepengegrunnlagDto
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.SporingSkjønnsfastsattSykepengegrunnlag
@@ -14,11 +12,11 @@ import java.util.UUID
 
 class SkjønnsfastsattSykepengegrunnlag(
     override val id: UUID = UUID.randomUUID(),
-    private val aktørId: String,
-    private val fødselsnummer: String,
-    private val skjæringstidspunkt: LocalDate,
-    private val arbeidsgivere: List<SkjønnsfastsattArbeidsgiver>,
-    private val vedtaksperiodeId: UUID,
+    val aktørId: String,
+    val fødselsnummer: String,
+    val skjæringstidspunkt: LocalDate,
+    val arbeidsgivere: List<SkjønnsfastsattArbeidsgiver>,
+    val vedtaksperiodeId: UUID,
 ) : Overstyring {
     override fun gjelderFødselsnummer(): String = fødselsnummer
 
@@ -47,32 +45,22 @@ class SkjønnsfastsattSykepengegrunnlag(
         )
     }
 
-    fun toDto() =
-        SkjønnsfastsattSykepengegrunnlagDto(
-            id = id,
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            skjæringstidspunkt = skjæringstidspunkt,
-            arbeidsgivere = arbeidsgivere.map(SkjønnsfastsattArbeidsgiver::toDto),
-            vedtaksperiodeId = vedtaksperiodeId,
-        )
-
     internal fun byggSubsumsjon(saksbehandlerEpost: String): Subsumsjon {
         return arbeidsgivere.byggSubsumsjon(saksbehandlerEpost, fødselsnummer)
     }
 }
 
 class SkjønnsfastsattArbeidsgiver(
-    private val organisasjonsnummer: String,
-    private val årlig: Double,
-    private val fraÅrlig: Double,
-    private val årsak: String,
-    private val type: Skjønnsfastsettingstype,
-    private val begrunnelseMal: String?,
-    private val begrunnelseFritekst: String?,
-    private val begrunnelseKonklusjon: String?,
-    private val lovhjemmel: Lovhjemmel?,
-    private val initierendeVedtaksperiodeId: String?,
+    val organisasjonsnummer: String,
+    val årlig: Double,
+    val fraÅrlig: Double,
+    val årsak: String,
+    val type: Skjønnsfastsettingstype,
+    val begrunnelseMal: String?,
+    val begrunnelseFritekst: String?,
+    val begrunnelseKonklusjon: String?,
+    val lovhjemmel: Lovhjemmel?,
+    val initierendeVedtaksperiodeId: String?,
 ) {
     internal companion object {
         internal fun List<SkjønnsfastsattArbeidsgiver>.byggSubsumsjon(
@@ -114,20 +102,6 @@ class SkjønnsfastsattArbeidsgiver(
             begrunnelseMal = begrunnelseMal,
             begrunnelseFritekst = begrunnelseFritekst,
             begrunnelseKonklusjon = begrunnelseKonklusjon,
-            initierendeVedtaksperiodeId = initierendeVedtaksperiodeId,
-        )
-
-    fun toDto() =
-        SkjønnsfastsattArbeidsgiverDto(
-            organisasjonsnummer = organisasjonsnummer,
-            årlig = årlig,
-            fraÅrlig = fraÅrlig,
-            årsak = årsak,
-            type = type,
-            begrunnelseMal = begrunnelseMal,
-            begrunnelseFritekst = begrunnelseFritekst,
-            begrunnelseKonklusjon = begrunnelseKonklusjon,
-            lovhjemmel = lovhjemmel?.toDto(),
             initierendeVedtaksperiodeId = initierendeVedtaksperiodeId,
         )
 

@@ -1,9 +1,9 @@
 package no.nav.helse.modell.vilkårsprøving
 
 data class Lovhjemmel(
-    private val paragraf: String,
-    private val ledd: String? = null,
-    private val bokstav: String? = null,
+    val paragraf: String,
+    val ledd: String? = null,
+    val bokstav: String? = null,
     private val lovverk: String,
     private val lovverksversjon: String,
 ) {

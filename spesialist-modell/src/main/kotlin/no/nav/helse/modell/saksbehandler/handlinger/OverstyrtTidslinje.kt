@@ -3,8 +3,6 @@ package no.nav.helse.modell.saksbehandler.handlinger
 import no.nav.helse.modell.melding.OverstyrtTidslinjeEvent
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinjedag.Companion.byggSubsumsjoner
-import no.nav.helse.modell.saksbehandler.handlinger.dto.OverstyrtTidslinjeDto
-import no.nav.helse.modell.saksbehandler.handlinger.dto.OverstyrtTidslinjedagDto
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.SporingOverstyrtTidslinje
@@ -14,12 +12,12 @@ import java.util.UUID
 
 class OverstyrtTidslinje(
     override val id: UUID = UUID.randomUUID(),
-    private val vedtaksperiodeId: UUID,
-    private val aktørId: String,
-    private val fødselsnummer: String,
-    private val organisasjonsnummer: String,
-    private val dager: List<OverstyrtTidslinjedag>,
-    private val begrunnelse: String,
+    val vedtaksperiodeId: UUID,
+    val aktørId: String,
+    val fødselsnummer: String,
+    val organisasjonsnummer: String,
+    val dager: List<OverstyrtTidslinjedag>,
+    val begrunnelse: String,
 ) : Overstyring {
     override fun gjelderFødselsnummer(): String = fødselsnummer
 
@@ -38,17 +36,6 @@ class OverstyrtTidslinje(
             dager = dager.map(OverstyrtTidslinjedag::byggEvent),
         )
 
-    fun toDto() =
-        OverstyrtTidslinjeDto(
-            id = id,
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
-            dager = dager.map(OverstyrtTidslinjedag::toDto),
-            begrunnelse = begrunnelse,
-            vedtaksperiodeId = vedtaksperiodeId,
-        )
-
     internal fun byggSubsumsjoner(saksbehandlerEpost: String): List<Subsumsjon> {
         return dager.byggSubsumsjoner(
             overstyringId = id,
@@ -62,12 +49,12 @@ class OverstyrtTidslinje(
 }
 
 class OverstyrtTidslinjedag(
-    private val dato: LocalDate,
-    private val type: String,
-    private val fraType: String,
-    private val grad: Int?,
-    private val fraGrad: Int?,
-    private val lovhjemmel: Lovhjemmel?,
+    val dato: LocalDate,
+    val type: String,
+    val fraType: String,
+    val grad: Int?,
+    val fraGrad: Int?,
+    val lovhjemmel: Lovhjemmel?,
 ) {
     internal companion object {
         internal fun List<OverstyrtTidslinjedag>.byggSubsumsjoner(
@@ -121,15 +108,5 @@ class OverstyrtTidslinjedag(
             fraType = fraType,
             grad = grad,
             fraGrad = fraGrad,
-        )
-
-    fun toDto() =
-        OverstyrtTidslinjedagDto(
-            dato = dato,
-            type = type,
-            fraType = fraType,
-            grad = grad,
-            fraGrad = fraGrad,
-            lovhjemmel = lovhjemmel?.toDto(),
         )
 }

@@ -2,20 +2,17 @@ package no.nav.helse.modell.saksbehandler.handlinger
 
 import no.nav.helse.modell.melding.OverstyrtInntektOgRefusjonEvent
 import no.nav.helse.modell.saksbehandler.Saksbehandler
-import no.nav.helse.modell.saksbehandler.handlinger.dto.OverstyrtArbeidsgiverDto
-import no.nav.helse.modell.saksbehandler.handlinger.dto.OverstyrtInntektOgRefusjonDto
-import no.nav.helse.modell.saksbehandler.handlinger.dto.RefusjonselementDto
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import java.time.LocalDate
 import java.util.UUID
 
 class OverstyrtInntektOgRefusjon(
     override val id: UUID = UUID.randomUUID(),
-    private val aktørId: String,
-    private val fødselsnummer: String,
-    private val skjæringstidspunkt: LocalDate,
-    private val arbeidsgivere: List<OverstyrtArbeidsgiver>,
-    private val vedtaksperiodeId: UUID,
+    val aktørId: String,
+    val fødselsnummer: String,
+    val skjæringstidspunkt: LocalDate,
+    val arbeidsgivere: List<OverstyrtArbeidsgiver>,
+    val vedtaksperiodeId: UUID,
 ) : Overstyring {
     override fun gjelderFødselsnummer(): String = fødselsnummer
 
@@ -41,29 +38,19 @@ class OverstyrtInntektOgRefusjon(
         saksbehandlerIdent = ident,
         saksbehandlerEpost = epost,
     )
-
-    fun toDto() =
-        OverstyrtInntektOgRefusjonDto(
-            id = id,
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            skjæringstidspunkt = skjæringstidspunkt,
-            arbeidsgivere = arbeidsgivere.map(OverstyrtArbeidsgiver::toDto),
-            vedtaksperiodeId = vedtaksperiodeId,
-        )
 }
 
 class OverstyrtArbeidsgiver(
-    private val organisasjonsnummer: String,
-    private val månedligInntekt: Double,
-    private val fraMånedligInntekt: Double,
-    private val refusjonsopplysninger: List<Refusjonselement>?,
-    private val fraRefusjonsopplysninger: List<Refusjonselement>?,
-    private val begrunnelse: String,
-    private val forklaring: String,
-    private val lovhjemmel: Lovhjemmel?,
-    private val fom: LocalDate?,
-    private val tom: LocalDate?,
+    val organisasjonsnummer: String,
+    val månedligInntekt: Double,
+    val fraMånedligInntekt: Double,
+    val refusjonsopplysninger: List<Refusjonselement>?,
+    val fraRefusjonsopplysninger: List<Refusjonselement>?,
+    val begrunnelse: String,
+    val forklaring: String,
+    val lovhjemmel: Lovhjemmel?,
+    val fom: LocalDate?,
+    val tom: LocalDate?,
 ) {
     fun byggEvent() =
         OverstyrtInntektOgRefusjonEvent.OverstyrtArbeidsgiverEvent(
@@ -77,28 +64,12 @@ class OverstyrtArbeidsgiver(
             fom = fom,
             tom = tom,
         )
-
-    fun toDto() =
-        OverstyrtArbeidsgiverDto(
-            organisasjonsnummer = organisasjonsnummer,
-            månedligInntekt = månedligInntekt,
-            fraMånedligInntekt = fraMånedligInntekt,
-            refusjonsopplysninger = refusjonsopplysninger?.map(Refusjonselement::toDto),
-            fraRefusjonsopplysninger = fraRefusjonsopplysninger?.map(Refusjonselement::toDto),
-            begrunnelse = begrunnelse,
-            forklaring = forklaring,
-            lovhjemmel = lovhjemmel?.toDto(),
-            fom = fom,
-            tom = tom,
-        )
 }
 
 class Refusjonselement(
-    private val fom: LocalDate,
-    private val tom: LocalDate? = null,
-    private val beløp: Double,
+    val fom: LocalDate,
+    val tom: LocalDate? = null,
+    val beløp: Double,
 ) {
     fun byggEvent() = OverstyrtInntektOgRefusjonEvent.OverstyrtArbeidsgiverEvent.OverstyrtRefusjonselementEvent(fom, tom, beløp)
-
-    fun toDto() = RefusjonselementDto(fom, tom, beløp)
 }

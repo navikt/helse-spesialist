@@ -3,7 +3,6 @@ package no.nav.helse.modell.saksbehandler.handlinger
 import no.nav.helse.modell.melding.MinimumSykdomsgradVurdertEvent
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgradPeriode.Companion.byggSubsumsjoner
-import no.nav.helse.modell.saksbehandler.handlinger.dto.MinimumSykdomsgradDto
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
@@ -13,13 +12,13 @@ import java.util.UUID
 
 class MinimumSykdomsgrad(
     override val id: UUID = UUID.randomUUID(),
-    private val aktørId: String,
-    private val fødselsnummer: String,
-    private val perioderVurdertOk: List<MinimumSykdomsgradPeriode>,
-    private val perioderVurdertIkkeOk: List<MinimumSykdomsgradPeriode>,
-    private val begrunnelse: String,
-    private val arbeidsgivere: List<MinimumSykdomsgradArbeidsgiver>,
-    private val initierendeVedtaksperiodeId: UUID,
+    val aktørId: String,
+    val fødselsnummer: String,
+    val perioderVurdertOk: List<MinimumSykdomsgradPeriode>,
+    val perioderVurdertIkkeOk: List<MinimumSykdomsgradPeriode>,
+    val begrunnelse: String,
+    val arbeidsgivere: List<MinimumSykdomsgradArbeidsgiver>,
+    val initierendeVedtaksperiodeId: UUID,
 ) : Overstyring {
     override fun gjelderFødselsnummer(): String = fødselsnummer
 
@@ -48,18 +47,6 @@ class MinimumSykdomsgrad(
         )
     }
 
-    fun toDto() =
-        MinimumSykdomsgradDto(
-            id = id,
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            perioderVurdertOk = perioderVurdertOk.map(MinimumSykdomsgradPeriode::toDto),
-            perioderVurdertIkkeOk = perioderVurdertIkkeOk.map(MinimumSykdomsgradPeriode::toDto),
-            begrunnelse = begrunnelse,
-            arbeidsgivere = arbeidsgivere.map(MinimumSykdomsgradArbeidsgiver::toDto),
-            initierendeVedtaksperiodeId = initierendeVedtaksperiodeId,
-        )
-
     internal fun byggSubsumsjoner(saksbehandlerEpost: String): List<Subsumsjon> {
         return perioderVurdertOk.byggSubsumsjoner(
             overstyringId = id,
@@ -82,15 +69,9 @@ class MinimumSykdomsgrad(
 }
 
 class MinimumSykdomsgradArbeidsgiver(
-    private val organisasjonsnummer: String,
-    private val berørtVedtaksperiodeId: UUID,
-) {
-    fun toDto() =
-        MinimumSykdomsgradDto.MinimumSykdomsgradArbeidsgiverDto(
-            organisasjonsnummer = organisasjonsnummer,
-            berørtVedtaksperiodeId = berørtVedtaksperiodeId,
-        )
-}
+    val organisasjonsnummer: String,
+    val berørtVedtaksperiodeId: UUID,
+)
 
 class MinimumSykdomsgradPeriode(
     val fom: LocalDate,
@@ -125,18 +106,12 @@ class MinimumSykdomsgradPeriode(
                     utfall = if (!avslag) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
                     sporing =
                         Subsumsjon.SporingVurdertMinimumSykdomsgrad(
-                            vedtaksperioder = arbeidsgivere.map { it.toDto().berørtVedtaksperiodeId },
-                            organisasjonsnummer = arbeidsgivere.map { it.toDto().organisasjonsnummer },
+                            vedtaksperioder = arbeidsgivere.map { it.berørtVedtaksperiodeId },
+                            organisasjonsnummer = arbeidsgivere.map { it.organisasjonsnummer },
                             minimumSykdomsgradId = overstyringId,
                             saksbehandler = listOf(saksbehandlerEpost),
                         ),
                 )
             }
     }
-
-    fun toDto() =
-        MinimumSykdomsgradDto.MinimumSykdomsgradPeriodeDto(
-            fom = fom,
-            tom = tom,
-        )
 }
