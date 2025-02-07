@@ -13,7 +13,6 @@ import no.nav.helse.db.overstyring.RefusjonselementForDatabase
 import no.nav.helse.db.overstyring.SkjønnsfastsattArbeidsgiverForDatabase
 import no.nav.helse.db.overstyring.SkjønnsfastsattSykepengegrunnlagForDatabase
 import no.nav.helse.db.overstyring.SkjønnsfastsettingstypeForDatabase
-import no.nav.helse.modell.EksisterendeId
 import no.nav.helse.modell.saksbehandler.handlinger.Arbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgrad
 import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgradArbeidsgiver
@@ -48,15 +47,19 @@ class PgTotrinnsvurderingRepository(
         fødselsnummer: String,
     ) {
         val totrinnsvurderingFraDatabase = totrinnsvurdering.tilDatabase()
-        totrinnsvurderingDao.upsertTotrinnsvurdering(totrinnsvurdering.id, totrinnsvurderingFraDatabase)
+        if (totrinnsvurdering.harFåttTildeltId()) {
+            totrinnsvurderingDao.update(totrinnsvurdering.id(), totrinnsvurderingFraDatabase)
+        } else {
+            totrinnsvurderingDao.insert(totrinnsvurderingFraDatabase).also { totrinnsvurdering.tildelId(it) }
+        }
     }
 
     private fun TotrinnsvurderingFraDatabase.tilDomene(
         id: Long,
         fødselsnummer: String,
     ): Totrinnsvurdering {
-        return Totrinnsvurdering(
-            id = EksisterendeId(id),
+        return Totrinnsvurdering.fraLagring(
+            id = id,
             vedtaksperiodeId = this.vedtaksperiodeId,
             erRetur = this.erRetur,
             saksbehandler =

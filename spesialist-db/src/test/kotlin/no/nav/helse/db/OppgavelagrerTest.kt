@@ -6,7 +6,6 @@ import io.mockk.verify
 import no.nav.helse.DatabaseIntegrationTest
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.mediator.oppgave.Oppgavelagrer
-import no.nav.helse.modell.NyId
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.Oppgave.Companion.toDto
@@ -21,7 +20,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.UUID
-import kotlin.random.Random
+import kotlin.random.Random.Default.nextLong
 
 class OppgavelagrerTest : DatabaseIntegrationTest() {
     private val OPPGAVETYPE = SØKNAD
@@ -29,7 +28,7 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
     private val BEHANDLING_ID = UUID.randomUUID()
     override val UTBETALING_ID: UUID = UUID.randomUUID()
     private val BESLUTTER_OID = UUID.randomUUID()
-    override var OPPGAVE_ID = Random.nextLong()
+    override var OPPGAVE_ID = nextLong()
     private val saksbehandler =
         Saksbehandler(
             oid = SAKSBEHANDLER_OID,
@@ -299,8 +298,8 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
         )
 
     private fun nyTotrinnsvurdering() =
-        Totrinnsvurdering(
-            id = NyId,
+        Totrinnsvurdering.fraLagring(
+            id = nextLong(),
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             erRetur = false,
             saksbehandler = saksbehandler,
@@ -308,5 +307,7 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
             utbetalingId = UTBETALING_ID,
             opprettet = TOTRINNSVURDERING_OPPRETTET,
             oppdatert = TOTRINNSVURDERING_OPPDATERT,
+            overstyringer = emptyList(),
+            ferdigstilt = false,
         )
 }

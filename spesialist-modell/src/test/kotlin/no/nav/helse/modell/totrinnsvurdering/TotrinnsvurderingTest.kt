@@ -1,6 +1,5 @@
 package no.nav.helse.modell.totrinnsvurdering
 
-import no.nav.helse.modell.NyId
 import no.nav.helse.modell.OppgaveAlleredeSendtBeslutter
 import no.nav.helse.modell.OppgaveAlleredeSendtIRetur
 import no.nav.helse.modell.OppgaveKreverVurderingAvToSaksbehandlere
@@ -180,14 +179,16 @@ internal class TotrinnsvurderingTest {
         erRetur: Boolean = false,
         saksbehandler: Saksbehandler? = null,
         beslutter: Saksbehandler? = null,
-    ) = Totrinnsvurdering(
-        id = NyId,
+    ) = Totrinnsvurdering.fraLagring(
+        id = nextLong(),
         vedtaksperiodeId = UUID.randomUUID(),
         erRetur = erRetur,
         saksbehandler = saksbehandler,
         beslutter = beslutter,
         utbetalingId = null,
         opprettet = LocalDateTime.now(),
-        oppdatert = null
+        oppdatert = LocalDateTime.now(),
+        overstyringer = emptyList(),
+        ferdigstilt = false,
     )
 }

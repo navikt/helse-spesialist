@@ -550,6 +550,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         beløpTilArbeidsgiver: Int,
         beløpTilSykmeldt: Int,
         utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING,
+        utbetalingId: UUID = UTBETALING_ID,
     ) {
         val arbeidsgiveroppdragId = lagArbeidsgiveroppdrag(fagsystemId())
         val personOppdragId = lagPersonoppdrag(fagsystemId())
@@ -557,13 +558,13 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             lagUtbetalingId(
                 arbeidsgiveroppdragId,
                 personOppdragId,
-                UTBETALING_ID,
+                utbetalingId,
                 arbeidsgiverbeløp = beløpTilArbeidsgiver,
                 personbeløp = beløpTilSykmeldt,
                 utbetalingtype = utbetalingtype,
             )
         utbetalingDao.nyUtbetalingStatus(utbetaling_idId, Utbetalingsstatus.UTBETALT, LocalDateTime.now(), "{}")
-        opprettUtbetalingKobling(VEDTAKSPERIODE, UTBETALING_ID)
+        opprettUtbetalingKobling(VEDTAKSPERIODE, utbetalingId)
     }
 
     protected fun lagArbeidsgiveroppdrag(

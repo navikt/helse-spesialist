@@ -1,8 +1,5 @@
 package no.nav.helse.modell.totrinnsvurdering
 
-import no.nav.helse.modell.EksisterendeId
-import no.nav.helse.modell.Id
-import no.nav.helse.modell.NyId
 import no.nav.helse.modell.OppgaveAlleredeSendtBeslutter
 import no.nav.helse.modell.OppgaveAlleredeSendtIRetur
 import no.nav.helse.modell.OppgaveKreverVurderingAvToSaksbehandlere
@@ -11,11 +8,12 @@ import no.nav.helse.modell.saksbehandler.Saksbehandler.Companion.gjenopprett
 import no.nav.helse.modell.saksbehandler.Saksbehandler.Companion.toDto
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.modell.saksbehandler.handlinger.Overstyring
+import no.nav.helse.spesialist.modell.ddd.AggregateRoot
 import java.time.LocalDateTime
 import java.util.UUID
 
-class Totrinnsvurdering(
-    val id: Id,
+class Totrinnsvurdering private constructor(
+    id: Long?,
     val vedtaksperiodeId: UUID,
     erRetur: Boolean,
     saksbehandler: Saksbehandler?,
@@ -25,7 +23,7 @@ class Totrinnsvurdering(
     oppdatert: LocalDateTime?,
     overstyringer: List<Overstyring> = emptyList(),
     ferdigstilt: Boolean = false,
-) {
+) : AggregateRoot<Long>(id) {
     private val overstyringer: MutableList<Overstyring> = overstyringer.toMutableList()
 
     var erRetur: Boolean = erRetur
@@ -130,16 +128,42 @@ class Totrinnsvurdering(
     companion object {
         fun ny(vedtaksperiodeId: UUID): Totrinnsvurdering {
             return Totrinnsvurdering(
-                id = NyId,
+                id = null,
                 vedtaksperiodeId = vedtaksperiodeId,
                 erRetur = false,
                 saksbehandler = null,
                 beslutter = null,
                 utbetalingId = null,
                 opprettet = LocalDateTime.now(),
-                oppdatert = LocalDateTime.now(),
+                oppdatert = null,
                 overstyringer = emptyList(),
                 ferdigstilt = false,
+            )
+        }
+
+        fun fraLagring(
+            id: Long,
+            vedtaksperiodeId: UUID,
+            erRetur: Boolean,
+            saksbehandler: Saksbehandler?,
+            beslutter: Saksbehandler?,
+            utbetalingId: UUID?,
+            opprettet: LocalDateTime,
+            oppdatert: LocalDateTime?,
+            overstyringer: List<Overstyring>,
+            ferdigstilt: Boolean,
+        ): Totrinnsvurdering {
+            return Totrinnsvurdering(
+                id = id,
+                vedtaksperiodeId = vedtaksperiodeId,
+                erRetur = erRetur,
+                saksbehandler = saksbehandler,
+                beslutter = beslutter,
+                utbetalingId = utbetalingId,
+                opprettet = opprettet,
+                oppdatert = oppdatert,
+                overstyringer = overstyringer,
+                ferdigstilt = ferdigstilt,
             )
         }
 
@@ -148,7 +172,7 @@ class Totrinnsvurdering(
             totrinnsvurderingId: Long?,
         ): Totrinnsvurdering =
             Totrinnsvurdering(
-                id = totrinnsvurderingId?.let { EksisterendeId(it) } ?: NyId,
+                id = totrinnsvurderingId,
                 vedtaksperiodeId = vedtaksperiodeId,
                 erRetur = erRetur,
                 saksbehandler = saksbehandler?.gjenopprett(tilgangskontroll),

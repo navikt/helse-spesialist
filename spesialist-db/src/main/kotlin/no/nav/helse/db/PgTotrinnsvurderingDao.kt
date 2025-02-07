@@ -3,9 +3,6 @@ package no.nav.helse.db
 import kotliquery.Query
 import kotliquery.Session
 import no.nav.helse.db.HelseDao.Companion.asSQL
-import no.nav.helse.modell.EksisterendeId
-import no.nav.helse.modell.Id
-import no.nav.helse.modell.NyId
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
 import java.util.UUID
 import javax.sql.DataSource
@@ -136,54 +133,42 @@ class PgTotrinnsvurderingDao private constructor(
 
     override fun opprettOld(vedtaksperiodeId: UUID) = hentAktiv(vedtaksperiodeId) ?: opprettTotrinnsvurderingOld(vedtaksperiodeId)
 
-    fun upsertTotrinnsvurdering(
-        id: Id,
-        totrinnsvurdering: TotrinnsvurderingFraDatabase,
-    ) {
-        asSQL(
+    fun insert(totrinnsvurdering: TotrinnsvurderingFraDatabase): Long {
+        return asSQL(
             """
-            INSERT INTO totrinnsvurdering (
-                    id, 
-                    vedtaksperiode_id, 
-                    er_retur, 
-                    saksbehandler, 
-                    beslutter, 
-                    utbetaling_id_ref, 
-                    opprettet, 
-                    oppdatert)
-            VALUES (:id,
-                    :vedtaksperiodeId,
-                    :erRetur,
-                    :saksbehandler,
-                    :beslutter,
-                    (SELECT id from utbetaling_id ui WHERE ui.utbetaling_id = :utbetalingId),
-                    :opprettet,
-                    :oppdatert)
-            ON CONFLICT (id) DO UPDATE SET er_retur          = excluded.er_retur,
-                                           saksbehandler     = excluded.saksbehandler,
-                                           beslutter         = excluded.beslutter,
-                                           utbetaling_id_ref = excluded.utbetaling_id_ref,
-                                           oppdatert         = excluded.oppdatert
+            INSERT INTO totrinnsvurdering (vedtaksperiode_id, er_retur, saksbehandler, beslutter, opprettet, oppdatert)
+            VALUES (:vedtaksperiodeId, :erRetur, :saksbehandler, :beslutter, :opprettet, null)
             """.trimIndent(),
-            "id" to if (id is NyId) reserverNesteId() else (id as EksisterendeId).value,
             "vedtaksperiodeId" to totrinnsvurdering.vedtaksperiodeId,
             "erRetur" to totrinnsvurdering.erRetur,
             "saksbehandler" to totrinnsvurdering.saksbehandler,
             "beslutter" to totrinnsvurdering.beslutter,
-            "utbetalingId" to totrinnsvurdering.utbetalingId,
             "opprettet" to totrinnsvurdering.opprettet,
+        ).updateAndReturnGeneratedKey()
+    }
+
+    fun update(
+        id: Long,
+        totrinnsvurdering: TotrinnsvurderingFraDatabase,
+    ) {
+        asSQL(
+            """
+            UPDATE totrinnsvurdering 
+            SET er_retur            = :erRetur,
+                saksbehandler       = :saksbehandler,
+                beslutter           = :beslutter,
+                utbetaling_id_ref   = (SELECT id from utbetaling_id ui WHERE ui.utbetaling_id = :utbetalingId),
+                oppdatert           = :oppdatert
+            WHERE id = :id
+            """.trimIndent(),
+            "id" to id,
+            "erRetur" to totrinnsvurdering.erRetur,
+            "saksbehandler" to totrinnsvurdering.saksbehandler,
+            "beslutter" to totrinnsvurdering.beslutter,
+            "utbetalingId" to totrinnsvurdering.utbetalingId,
             "oppdatert" to totrinnsvurdering.oppdatert,
         ).update()
     }
-
-    private fun reserverNesteId(): Long =
-        asSQL(
-            """
-            SELECT nextval(pg_get_serial_sequence('totrinnsvurdering', 'id')) as neste_id 
-            """,
-        ).single {
-            it.long("neste_id")
-        }
 
     private fun opprettTotrinnsvurderingOld(vedtaksperiodeId: UUID): TotrinnsvurderingOld {
         asSQL(

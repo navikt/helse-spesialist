@@ -1,7 +1,6 @@
 package no.nav.helse.db
 
 import no.nav.helse.DatabaseIntegrationTest
-import no.nav.helse.modell.NyId
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -333,7 +332,6 @@ internal class PgTotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
         opprettArbeidsgiver()
         opprettVedtaksperiode(FNR)
         val opprettet = LocalDateTime.now()
-        val oppdatert = LocalDateTime.now()
         val totrinnsvurdering = TotrinnsvurderingFraDatabase(
             vedtaksperiodeId = VEDTAKSPERIODE,
             erRetur = false,
@@ -341,9 +339,9 @@ internal class PgTotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
             beslutter = SAKSBEHANDLER_OID,
             utbetalingId = null,
             opprettet = opprettet,
-            oppdatert = oppdatert,
+            oppdatert = null,
         )
-        totrinnsvurderingDao.upsertTotrinnsvurdering(NyId, totrinnsvurdering)
+        totrinnsvurderingDao.insert(totrinnsvurdering)
         val (_, hentetTotrinnsvurdering) = requireNotNull(totrinnsvurderingDao.hentAktivTotrinnsvurdering(FNR))
 
         assertEquals(VEDTAKSPERIODE, hentetTotrinnsvurdering.vedtaksperiodeId)
@@ -351,8 +349,85 @@ internal class PgTotrinnsvurderingDaoTest : DatabaseIntegrationTest() {
         assertEquals(SAKSBEHANDLER_OID, hentetTotrinnsvurdering.beslutter)
         assertNull(hentetTotrinnsvurdering.utbetalingId)
         assertEquals(opprettet.withNano(0), hentetTotrinnsvurdering.opprettet.withNano(0))
+        assertEquals(null, hentetTotrinnsvurdering.oppdatert?.withNano(0))
+    }
+
+    @Test
+    fun `Kan oppdatere totrinnsvurdering`() {
+        opprettPerson()
+        opprettSaksbehandler()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode(FNR)
+        val totrinnsvurdering = TotrinnsvurderingFraDatabase(
+            vedtaksperiodeId = VEDTAKSPERIODE,
+            erRetur = false,
+            saksbehandler = SAKSBEHANDLER_OID,
+            beslutter = SAKSBEHANDLER_OID,
+            utbetalingId = null,
+            opprettet = LocalDateTime.now(),
+            oppdatert = null,
+        )
+        val id = totrinnsvurderingDao.insert(totrinnsvurdering)
+
+        val oppdatert = LocalDateTime.now()
+        val erReturEtterUpdate = true
+        val saksbehandlerEtterUpdate = UUID.randomUUID()
+        val beslutterEtterUpdate = UUID.randomUUID()
+        opprettSaksbehandler(saksbehandlerEtterUpdate)
+        opprettSaksbehandler(beslutterEtterUpdate)
+        totrinnsvurderingDao.update(
+            id = id,
+            totrinnsvurdering = totrinnsvurdering.copy(
+                oppdatert = oppdatert,
+                erRetur = erReturEtterUpdate,
+                saksbehandler = saksbehandlerEtterUpdate,
+                beslutter = beslutterEtterUpdate
+            )
+        )
+
+        val (_, hentetTotrinnsvurdering) = requireNotNull(totrinnsvurderingDao.hentAktivTotrinnsvurdering(FNR))
+
+        assertEquals(VEDTAKSPERIODE, hentetTotrinnsvurdering.vedtaksperiodeId)
+        assertEquals(saksbehandlerEtterUpdate, hentetTotrinnsvurdering.saksbehandler)
+        assertEquals(beslutterEtterUpdate, hentetTotrinnsvurdering.beslutter)
+        assertEquals(erReturEtterUpdate, hentetTotrinnsvurdering.erRetur)
+        assertNull(hentetTotrinnsvurdering.utbetalingId)
         assertEquals(oppdatert.withNano(0), hentetTotrinnsvurdering.oppdatert?.withNano(0))
     }
+
+    @Test
+    fun `Kan sette utbetalingId på totrinnsvurdering`() {
+        opprettPerson()
+        opprettSaksbehandler()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode(FNR)
+        val totrinnsvurdering = TotrinnsvurderingFraDatabase(
+            vedtaksperiodeId = VEDTAKSPERIODE,
+            erRetur = false,
+            saksbehandler = SAKSBEHANDLER_OID,
+            beslutter = SAKSBEHANDLER_OID,
+            utbetalingId = null,
+            opprettet = LocalDateTime.now(),
+            oppdatert = null,
+        )
+        val id = totrinnsvurderingDao.insert(totrinnsvurdering)
+
+        val utbetalingIdEtterUpdate = UUID.randomUUID()
+        utbetalingsopplegg(0,  0, utbetalingId = utbetalingIdEtterUpdate)
+        totrinnsvurderingDao.update(id, totrinnsvurdering.copy(utbetalingId = utbetalingIdEtterUpdate))
+
+        assertNotNull(utbetalingIdFor(id))
+    }
+
+    private fun utbetalingIdFor(totrinnsvurderingId: Long): Long? {
+        return dbQuery.singleOrNull(
+            "SELECT utbetaling_id_ref FROM totrinnsvurdering WHERE id = :id",
+            "id" to totrinnsvurderingId
+        ) {
+            it.long("utbetaling_id_ref")
+        }
+    }
+
 
     private fun totrinnsvurdering(vedtaksperiodeId: UUID = VEDTAKSPERIODE) = dbQuery.single(
         "SELECT * FROM totrinnsvurdering WHERE vedtaksperiode_id = :vedtaksperiodeId",

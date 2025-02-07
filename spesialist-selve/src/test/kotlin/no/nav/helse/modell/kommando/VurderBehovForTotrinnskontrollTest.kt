@@ -7,7 +7,6 @@ import no.nav.helse.db.OverstyringDao
 import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.TotrinnsvurderingRepository
 import no.nav.helse.mediator.oppgave.OppgaveService
-import no.nav.helse.modell.NyId
 import no.nav.helse.modell.OverstyringType
 import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingAutomatiskRetur
 import no.nav.helse.modell.person.Sykefraværstilfelle
@@ -32,6 +31,7 @@ import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import kotlin.random.Random.Default.nextLong
 
 internal class VurderBehovForTotrinnskontrollTest {
     private companion object {
@@ -191,8 +191,8 @@ internal class VurderBehovForTotrinnskontrollTest {
         saksbehandler: Saksbehandler = lagSaksbehandler(),
         beslutter: Saksbehandler = lagSaksbehandler()
     ) =
-        Totrinnsvurdering(
-            id = NyId,
+        Totrinnsvurdering.fraLagring(
+            id = nextLong(),
             vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
             erRetur = erRetur,
             saksbehandler = saksbehandler,
@@ -201,5 +201,6 @@ internal class VurderBehovForTotrinnskontrollTest {
             opprettet = LocalDateTime.now(),
             oppdatert = LocalDateTime.now(),
             overstyringer = emptyList(),
+            ferdigstilt = false,
         )
 }
