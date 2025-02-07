@@ -4,7 +4,7 @@ import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class OpphevStansMutationTest : AbstractGraphQLApiTest() {
+internal class ApiOpphevStansMutationTest : AbstractGraphQLApiTest() {
     @Test
     fun `opphev stans`() {
         val body =

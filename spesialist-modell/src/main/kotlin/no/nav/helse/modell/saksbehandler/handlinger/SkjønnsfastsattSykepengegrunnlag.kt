@@ -13,13 +13,11 @@ import java.util.UUID
 class SkjønnsfastsattSykepengegrunnlag(
     override val id: UUID = UUID.randomUUID(),
     val aktørId: String,
-    val fødselsnummer: String,
+    override val fødselsnummer: String,
     val skjæringstidspunkt: LocalDate,
     val arbeidsgivere: List<SkjønnsfastsattArbeidsgiver>,
     val vedtaksperiodeId: UUID,
 ) : Overstyring {
-    override fun gjelderFødselsnummer(): String = fødselsnummer
-
     override fun utførAv(saksbehandler: Saksbehandler) {
         saksbehandler.håndter(this)
     }

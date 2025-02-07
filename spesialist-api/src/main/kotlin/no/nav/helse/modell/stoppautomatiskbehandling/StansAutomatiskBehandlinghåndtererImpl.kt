@@ -6,7 +6,7 @@ import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.StansAutomatiskBehandlingFraDatabase
 import no.nav.helse.modell.saksbehandler.Saksbehandler
-import no.nav.helse.modell.saksbehandler.handlinger.Personhandling
+import no.nav.helse.modell.saksbehandler.handlinger.OpphevStans
 import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.graphql.schema.ApiUnntattFraAutomatiskGodkjenning
 import no.nav.helse.spesialist.modell.NotatType
@@ -23,11 +23,11 @@ class StansAutomatiskBehandlinghåndtererImpl(
     private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
     fun håndter(
-        handling: Personhandling,
+        handling: OpphevStans,
         saksbehandler: Saksbehandler,
     ) {
-        stansAutomatiskBehandlingDao.lagreFraSpeil(handling.gjelderFødselsnummer())
-        lagreNotat(handling.gjelderFødselsnummer(), handling.begrunnelse(), saksbehandler.oid())
+        stansAutomatiskBehandlingDao.lagreFraSpeil(handling.fødselsnummer)
+        lagreNotat(handling.fødselsnummer, handling.begrunnelse, saksbehandler.oid())
     }
 
     override fun unntattFraAutomatiskGodkjenning(fødselsnummer: String): ApiUnntattFraAutomatiskGodkjenning =

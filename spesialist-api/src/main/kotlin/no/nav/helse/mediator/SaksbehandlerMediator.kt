@@ -44,6 +44,7 @@ import no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent
 import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgradArbeidsgiver
 import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgradPeriode
 import no.nav.helse.modell.saksbehandler.handlinger.Oppgavehandling
+import no.nav.helse.modell.saksbehandler.handlinger.OpphevStans
 import no.nav.helse.modell.saksbehandler.handlinger.Overstyring
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtArbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtArbeidsgiver
@@ -85,9 +86,9 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiVedtakBegrunnelse
 import no.nav.helse.spesialist.api.graphql.schema.ApiVedtakUtfall
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.ApiOpphevStans
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OpphevStans
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
@@ -145,6 +146,7 @@ class SaksbehandlerMediator(
                 is Overstyring -> håndter(modellhandling, saksbehandler)
                 is Oppgavehandling -> håndter(modellhandling, saksbehandler)
                 is PåVent -> error("dette burde ikke skje")
+                is OpphevStans -> håndter(modellhandling, saksbehandler)
                 is Personhandling -> håndter(modellhandling, saksbehandler)
                 is Annullering -> håndter(modellhandling, saksbehandler)
                 else -> modellhandling.utførAv(saksbehandler)
@@ -302,10 +304,19 @@ class SaksbehandlerMediator(
     }
 
     private fun håndter(
-        handling: Personhandling,
+        handling: OpphevStans,
         saksbehandler: Saksbehandler,
     ) = try {
         stansAutomatiskBehandlinghåndterer.håndter(handling, saksbehandler)
+        handling.utførAv(saksbehandler)
+    } catch (e: Modellfeil) {
+        throw e.tilApiversjon()
+    }
+
+    private fun håndter(
+        handling: Personhandling,
+        saksbehandler: Saksbehandler,
+    ) = try {
         handling.utførAv(saksbehandler)
     } catch (e: Modellfeil) {
         throw e.tilApiversjon()
@@ -393,7 +404,7 @@ class SaksbehandlerMediator(
         handling: Overstyring,
         saksbehandler: Saksbehandler,
     ) {
-        val fødselsnummer = handling.gjelderFødselsnummer()
+        val fødselsnummer = handling.fødselsnummer
         if (!featureToggles.skalAvbryteOppgavePåEtSenereTidspunkt()) {
             oppgaveService.avbrytOppgave(handling)
         }
@@ -584,14 +595,14 @@ class SaksbehandlerMediator(
         )
 
         try {
-            apiOppgaveService.sendIRetur(oppgavereferanse.toLong(), besluttendeSaksbehandler)
+            apiOppgaveService.sendIRetur(oppgavereferanse, besluttendeSaksbehandler)
         } catch (modellfeil: ApiModellfeil) {
             return SendIReturResult.Feil.KunneIkkeSendeIRetur(modellfeil)
         }
 
         try {
             påVent(
-                ApiPaVentRequest.ApiFjernPaVentUtenHistorikkinnslag(oppgavereferanse.toLong()),
+                ApiPaVentRequest.ApiFjernPaVentUtenHistorikkinnslag(oppgavereferanse),
                 besluttendeSaksbehandler,
             )
         } catch (modellfeil: ApiModellfeil) {
@@ -789,7 +800,7 @@ class SaksbehandlerMediator(
             is ApiAnnulleringData -> this.tilModellversjon()
             is TildelOppgave -> this.tilModellversjon()
             is AvmeldOppgave -> this.tilModellversjon()
-            is OpphevStans -> this.tilModellversjon()
+            is ApiOpphevStans -> this.tilModellversjon()
             else -> throw IllegalStateException("Støtter ikke handling ${this::class.simpleName}")
         }
 
@@ -991,9 +1002,7 @@ class SaksbehandlerMediator(
         no.nav.helse.modell.saksbehandler.handlinger
             .AvmeldOppgave(this.oppgaveId)
 
-    private fun OpphevStans.tilModellversjon(): no.nav.helse.modell.saksbehandler.handlinger.OpphevStans =
-        no.nav.helse.modell.saksbehandler.handlinger
-            .OpphevStans(this.fødselsnummer, this.begrunnelse)
+    private fun ApiOpphevStans.tilModellversjon(): OpphevStans = OpphevStans(this.fødselsnummer, this.begrunnelse)
 
     private fun ApiAvslagstype.toVedtakBegrunnelseTypeFraDatabase() =
         when (this) {

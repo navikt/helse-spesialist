@@ -8,14 +8,12 @@ import java.util.UUID
 
 class OverstyrtArbeidsforhold(
     override val id: UUID = UUID.randomUUID(),
-    val fødselsnummer: String,
+    override val fødselsnummer: String,
     val aktørId: String,
     val skjæringstidspunkt: LocalDate,
     val overstyrteArbeidsforhold: List<Arbeidsforhold>,
     val vedtaksperiodeId: UUID,
 ) : Overstyring {
-    override fun gjelderFødselsnummer(): String = fødselsnummer
-
     override fun utførAv(saksbehandler: Saksbehandler) {
         saksbehandler.håndter(this)
     }

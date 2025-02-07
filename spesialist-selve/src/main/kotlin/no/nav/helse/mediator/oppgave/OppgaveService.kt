@@ -148,7 +148,7 @@ class OppgaveService(
     }
 
     fun avbrytOppgave(handling: Overstyring) {
-        oppgaveDao.finnOppgaveId(handling.gjelderFødselsnummer())?.let {
+        oppgaveDao.finnOppgaveId(handling.fødselsnummer)?.let {
             oppgave(it) {
                 this.avbryt()
             }

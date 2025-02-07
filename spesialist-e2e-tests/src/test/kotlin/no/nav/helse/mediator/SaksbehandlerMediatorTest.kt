@@ -36,7 +36,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiVedtakUtfall
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OpphevStans
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.ApiOpphevStans
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import no.nav.helse.spesialist.test.lagAktørId
@@ -988,7 +988,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     @Test
     fun `opphev stans`() {
         nyPerson()
-        mediator.håndter(OpphevStans(FNR, "EN_ÅRSAK"), saksbehandler)
+        mediator.håndter(ApiOpphevStans(FNR, "EN_ÅRSAK"), saksbehandler)
         assertStansOpphevet(FNR)
     }
 

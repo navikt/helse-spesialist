@@ -5,7 +5,7 @@ import graphql.schema.DataFetchingEnvironment
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.graphql.ContextValues
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.OpphevStans
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.ApiOpphevStans
 
 class OpphevStansMutationHandler(private val saksbehandlerhåndterer: Saksbehandlerhåndterer) :
     OpphevStansMutationSchema {
@@ -15,7 +15,7 @@ class OpphevStansMutationHandler(private val saksbehandlerhåndterer: Saksbehand
         begrunnelse: String,
     ): DataFetcherResult<Boolean> {
         val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(ContextValues.SAKSBEHANDLER)
-        saksbehandlerhåndterer.håndter(OpphevStans(fodselsnummer, begrunnelse), saksbehandler)
+        saksbehandlerhåndterer.håndter(ApiOpphevStans(fodselsnummer, begrunnelse), saksbehandler)
         return DataFetcherResult.newResult<Boolean>().data(true).build()
     }
 }

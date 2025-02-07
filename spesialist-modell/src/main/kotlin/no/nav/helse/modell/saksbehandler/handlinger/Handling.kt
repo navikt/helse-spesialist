@@ -11,15 +11,11 @@ interface Handling {
 }
 
 interface Personhandling : Handling {
-    fun gjelderFødselsnummer(): String
-
-    fun begrunnelse(): String
+    val fødselsnummer: String
 }
 
-interface Overstyring : Handling {
+interface Overstyring : Personhandling {
     val id: UUID
-
-    fun gjelderFødselsnummer(): String
 }
 
 abstract class Oppgavehandling(private val oppgaveId: Long) : Handling {
