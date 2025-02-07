@@ -26,16 +26,13 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 class Overstyringlagrer(private val overstyringDao: OverstyringDao) {
-    fun lagre(
-        overstyring: Overstyring,
-        saksbehandlerOid: UUID,
-    ) {
+    fun lagre(overstyring: Overstyring) {
         when (overstyring) {
-            is OverstyrtTidslinje -> lagreOverstyrTidslinje(overstyring, saksbehandlerOid)
-            is OverstyrtInntektOgRefusjon -> lagreOverstyrtInntektOgRefusjon(overstyring, saksbehandlerOid)
-            is OverstyrtArbeidsforhold -> lagreOverstyrtArbeidsforhold(overstyring, saksbehandlerOid)
-            is SkjønnsfastsattSykepengegrunnlag -> lagreSkjønnsfastsattSykepengegrunnlag(overstyring, saksbehandlerOid)
-            is MinimumSykdomsgrad -> lagreMinimumSykdomsgrad(overstyring, saksbehandlerOid)
+            is OverstyrtTidslinje -> lagreOverstyrTidslinje(overstyring, overstyring.saksbehandler.oid)
+            is OverstyrtInntektOgRefusjon -> lagreOverstyrtInntektOgRefusjon(overstyring, overstyring.saksbehandler.oid)
+            is OverstyrtArbeidsforhold -> lagreOverstyrtArbeidsforhold(overstyring, overstyring.saksbehandler.oid)
+            is SkjønnsfastsattSykepengegrunnlag -> lagreSkjønnsfastsattSykepengegrunnlag(overstyring, overstyring.saksbehandler.oid)
+            is MinimumSykdomsgrad -> lagreMinimumSykdomsgrad(overstyring, overstyring.saksbehandler.oid)
         }
     }
 
@@ -83,6 +80,7 @@ class Overstyringlagrer(private val overstyringDao: OverstyringDao) {
             vedtaksperiodeId = vedtaksperiodeId,
             begrunnelse = begrunnelse,
             opprettet = LocalDateTime.now(),
+            saksbehandlerOid = saksbehandler.oid,
             dager =
                 dager.map {
                     OverstyrtTidslinjedagForDatabase(
@@ -104,6 +102,7 @@ class Overstyringlagrer(private val overstyringDao: OverstyringDao) {
             skjæringstidspunkt = skjæringstidspunkt,
             vedtaksperiodeId = vedtaksperiodeId,
             opprettet = LocalDateTime.now(),
+            saksbehandlerOid = saksbehandler.oid,
             arbeidsgivere =
                 arbeidsgivere.map {
                     OverstyrtArbeidsgiverForDatabase(
@@ -129,6 +128,7 @@ class Overstyringlagrer(private val overstyringDao: OverstyringDao) {
             skjæringstidspunkt = skjæringstidspunkt,
             opprettet = LocalDateTime.now(),
             vedtaksperiodeId = vedtaksperiodeId,
+            saksbehandlerOid = saksbehandler.oid,
             overstyrteArbeidsforhold =
                 overstyrteArbeidsforhold.map {
                     ArbeidsforholdForDatabase(
@@ -148,6 +148,7 @@ class Overstyringlagrer(private val overstyringDao: OverstyringDao) {
             skjæringstidspunkt = skjæringstidspunkt,
             opprettet = LocalDateTime.now(),
             vedtaksperiodeId = vedtaksperiodeId,
+            saksbehandlerOid = saksbehandler.oid,
             arbeidsgivere =
                 arbeidsgivere.map {
                     SkjønnsfastsattArbeidsgiverForDatabase(
@@ -194,6 +195,7 @@ class Overstyringlagrer(private val overstyringDao: OverstyringDao) {
                 },
             opprettet = LocalDateTime.now(),
             initierendeVedtaksperiodeId = initierendeVedtaksperiodeId,
+            saksbehandlerOid = saksbehandler.oid,
         )
 
     private fun Lovhjemmel.tilDatabase() = LovhjemmelForDatabase(paragraf = paragraf, ledd = ledd, bokstav = bokstav)

@@ -13,6 +13,7 @@ import no.nav.helse.db.overstyring.RefusjonselementForDatabase
 import no.nav.helse.db.overstyring.SkjønnsfastsattArbeidsgiverForDatabase
 import no.nav.helse.db.overstyring.SkjønnsfastsattSykepengegrunnlagForDatabase
 import no.nav.helse.db.overstyring.SkjønnsfastsettingstypeForDatabase
+import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.handlinger.Arbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgrad
 import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgradArbeidsgiver
@@ -102,7 +103,14 @@ class PgTotrinnsvurderingRepository(
             organisasjonsnummer = organisasjonsnummer,
             dager = dager.map { it.tilDomene() },
             begrunnelse = begrunnelse,
+            saksbehandler = finnSaksbehandler(),
         )
+
+    private fun OverstyringForDatabase.finnSaksbehandler(): Saksbehandler {
+        return checkNotNull(
+            saksbehandlerDao.finnSaksbehandler(saksbehandlerOid),
+        ) { "Forventer å finne saksbehandler med id $saksbehandlerOid" }
+    }
 
     private fun MinimumSykdomsgradForDatabase.tilDomene(): MinimumSykdomsgrad =
         MinimumSykdomsgrad(
@@ -114,6 +122,7 @@ class PgTotrinnsvurderingRepository(
             begrunnelse = begrunnelse,
             arbeidsgivere = arbeidsgivere.map { it.tilDomene() },
             initierendeVedtaksperiodeId = initierendeVedtaksperiodeId,
+            saksbehandler = finnSaksbehandler(),
         )
 
     private fun OverstyrtArbeidsforholdForDatabase.tilDomene() =
@@ -124,6 +133,7 @@ class PgTotrinnsvurderingRepository(
             aktørId = aktørId,
             skjæringstidspunkt = skjæringstidspunkt,
             overstyrteArbeidsforhold = overstyrteArbeidsforhold.map { it.tilDomene() },
+            saksbehandler = finnSaksbehandler(),
         )
 
     private fun OverstyrtInntektOgRefusjonForDatabase.tilDomene() =
@@ -134,6 +144,7 @@ class PgTotrinnsvurderingRepository(
             fødselsnummer = fødselsnummer,
             skjæringstidspunkt = skjæringstidspunkt,
             arbeidsgivere = arbeidsgivere.map { it.tilDomene() },
+            saksbehandler = finnSaksbehandler(),
         )
 
     private fun SkjønnsfastsattSykepengegrunnlagForDatabase.tilDomene() =
@@ -144,6 +155,7 @@ class PgTotrinnsvurderingRepository(
             skjæringstidspunkt = skjæringstidspunkt,
             arbeidsgivere = arbeidsgivere.map { it.tilDomene() },
             vedtaksperiodeId = vedtaksperiodeId,
+            saksbehandler = finnSaksbehandler(),
         )
 
     private fun SkjønnsfastsattArbeidsgiverForDatabase.tilDomene() =

@@ -127,5 +127,6 @@ internal class PgSykefraværstilfelleDaoTest : DatabaseIntegrationTest() {
                     ),
                 ),
             opprettet = opprettet,
+            saksbehandlerOid = SAKSBEHANDLER_OID,
         )
 }

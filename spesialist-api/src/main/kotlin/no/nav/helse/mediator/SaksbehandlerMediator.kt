@@ -41,6 +41,7 @@ import no.nav.helse.modell.saksbehandler.handlinger.FjernPåVent
 import no.nav.helse.modell.saksbehandler.handlinger.FjernPåVentUtenHistorikkinnslag
 import no.nav.helse.modell.saksbehandler.handlinger.Handling
 import no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent
+import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgrad
 import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgradArbeidsgiver
 import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgradPeriode
 import no.nav.helse.modell.saksbehandler.handlinger.Oppgavehandling
@@ -128,7 +129,7 @@ class SaksbehandlerMediator(
         saksbehandlerFraApi: SaksbehandlerFraApi,
     ) {
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
-        val modellhandling = handlingFraApi.tilModellversjon()
+        val modellhandling = handlingFraApi.tilModellversjon(saksbehandler)
         SaksbehandlerLagrer(saksbehandlerDao).lagre(saksbehandler)
         tell(modellhandling)
         saksbehandler.register(Saksbehandlingsmelder(meldingPubliserer))
@@ -410,9 +411,7 @@ class SaksbehandlerMediator(
         }
         reservasjonDao.reserverPerson(saksbehandler.oid(), fødselsnummer)
         sikkerlogg.info("Reserverer person $fødselsnummer til saksbehandler $saksbehandler")
-        Overstyringlagrer(overstyringDao).apply {
-            this.lagre(handling, saksbehandler.oid())
-        }
+        Overstyringlagrer(overstyringDao).lagre(handling)
         handling.utførAv(saksbehandler)
     }
 
@@ -790,13 +789,13 @@ class SaksbehandlerMediator(
     private fun SaksbehandlerFraApi.tilSaksbehandler() =
         Saksbehandler(epost, oid, navn, ident, TilgangskontrollørForApi(this.grupper, tilgangsgrupper))
 
-    private fun HandlingFraApi.tilModellversjon(): Handling =
+    private fun HandlingFraApi.tilModellversjon(saksbehandler: Saksbehandler): Handling =
         when (this) {
-            is ApiArbeidsforholdOverstyringHandling -> this.tilModellversjon()
-            is ApiInntektOgRefusjonOverstyring -> this.tilModellversjon()
-            is ApiTidslinjeOverstyring -> this.tilModellversjon()
-            is ApiSkjonnsfastsettelse -> this.tilModellversjon()
-            is ApiMinimumSykdomsgrad -> this.tilModellversjon()
+            is ApiArbeidsforholdOverstyringHandling -> this.tilModellversjon(saksbehandler)
+            is ApiInntektOgRefusjonOverstyring -> this.tilModellversjon(saksbehandler)
+            is ApiTidslinjeOverstyring -> this.tilModellversjon(saksbehandler)
+            is ApiSkjonnsfastsettelse -> this.tilModellversjon(saksbehandler)
+            is ApiMinimumSykdomsgrad -> this.tilModellversjon(saksbehandler)
             is ApiAnnulleringData -> this.tilModellversjon()
             is TildelOppgave -> this.tilModellversjon()
             is AvmeldOppgave -> this.tilModellversjon()
@@ -812,12 +811,13 @@ class SaksbehandlerMediator(
             is ApiPaVentRequest.ApiEndrePaVent -> this.tilModellversjon()
         }
 
-    private fun ApiArbeidsforholdOverstyringHandling.tilModellversjon(): OverstyrtArbeidsforhold =
+    private fun ApiArbeidsforholdOverstyringHandling.tilModellversjon(saksbehandler: Saksbehandler): OverstyrtArbeidsforhold =
         OverstyrtArbeidsforhold(
             fødselsnummer = fodselsnummer,
             aktørId = aktorId,
             skjæringstidspunkt = skjaringstidspunkt,
             vedtaksperiodeId = vedtaksperiodeId,
+            saksbehandler = saksbehandler,
             overstyrteArbeidsforhold =
                 overstyrteArbeidsforhold.map { overstyrtArbeidsforhold ->
                     Arbeidsforhold(
@@ -833,12 +833,13 @@ class SaksbehandlerMediator(
                 },
         )
 
-    private fun ApiSkjonnsfastsettelse.tilModellversjon(): SkjønnsfastsattSykepengegrunnlag =
+    private fun ApiSkjonnsfastsettelse.tilModellversjon(saksbehandler: Saksbehandler): SkjønnsfastsattSykepengegrunnlag =
         SkjønnsfastsattSykepengegrunnlag(
             aktørId = aktorId,
             fødselsnummer = fodselsnummer,
             skjæringstidspunkt = skjaringstidspunkt,
             vedtaksperiodeId = vedtaksperiodeId,
+            saksbehandler = saksbehandler,
             arbeidsgivere =
                 arbeidsgivere.map { ag ->
                     SkjønnsfastsattArbeidsgiver(
@@ -864,10 +865,11 @@ class SaksbehandlerMediator(
                 },
         )
 
-    private fun ApiMinimumSykdomsgrad.tilModellversjon(): no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgrad =
-        no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgrad(
+    private fun ApiMinimumSykdomsgrad.tilModellversjon(saksbehandler: Saksbehandler): MinimumSykdomsgrad =
+        MinimumSykdomsgrad(
             aktørId = aktorId,
             fødselsnummer = fodselsnummer,
+            saksbehandler = saksbehandler,
             perioderVurdertOk =
                 perioderVurdertOk.map {
                     MinimumSykdomsgradPeriode(
@@ -893,12 +895,13 @@ class SaksbehandlerMediator(
             initierendeVedtaksperiodeId = initierendeVedtaksperiodeId,
         )
 
-    private fun ApiInntektOgRefusjonOverstyring.tilModellversjon(): OverstyrtInntektOgRefusjon =
+    private fun ApiInntektOgRefusjonOverstyring.tilModellversjon(saksbehandler: Saksbehandler): OverstyrtInntektOgRefusjon =
         OverstyrtInntektOgRefusjon(
             aktørId = aktorId,
             fødselsnummer = fodselsnummer,
             skjæringstidspunkt = skjaringstidspunkt,
             vedtaksperiodeId = vedtaksperiodeId,
+            saksbehandler = saksbehandler,
             arbeidsgivere =
                 arbeidsgivere.map { overstyrArbeidsgiver ->
                     OverstyrtArbeidsgiver(
@@ -923,12 +926,13 @@ class SaksbehandlerMediator(
                 },
         )
 
-    private fun ApiTidslinjeOverstyring.tilModellversjon(): OverstyrtTidslinje =
+    private fun ApiTidslinjeOverstyring.tilModellversjon(saksbehandler: Saksbehandler): OverstyrtTidslinje =
         OverstyrtTidslinje(
             vedtaksperiodeId = vedtaksperiodeId,
             aktørId = aktorId,
             fødselsnummer = fodselsnummer,
             organisasjonsnummer = organisasjonsnummer,
+            saksbehandler = saksbehandler,
             dager =
                 dager.map {
                     OverstyrtTidslinjedag(

@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 data class MinimumSykdomsgradForDatabase(
-    val id: UUID,
+    override val id: UUID,
     val aktørId: String,
     override val fødselsnummer: String,
     val perioderVurdertOk: List<MinimumSykdomsgradPeriodeForDatabase>,
@@ -14,6 +14,7 @@ data class MinimumSykdomsgradForDatabase(
     val initierendeVedtaksperiodeId: UUID,
     val arbeidsgivere: List<MinimumSykdomsgradArbeidsgiverForDatabase>,
     override val opprettet: LocalDateTime,
+    override val saksbehandlerOid: UUID,
 ) : OverstyringForDatabase {
     override val eksternHendelseId: UUID = id
     override val vedtaksperiodeId: UUID = initierendeVedtaksperiodeId

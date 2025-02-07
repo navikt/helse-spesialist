@@ -333,6 +333,7 @@ internal class PgOverstyringDaoTest : DatabaseIntegrationTest() {
                 skjæringstidspunkt = 1.januar,
                 opprettet = OPPRETTET,
                 vedtaksperiodeId = VEDTAKSPERIODE,
+                saksbehandlerOid = UUID.randomUUID(),
                 arbeidsgivere =
                     listOf(
                         SkjønnsfastsattArbeidsgiverForDatabase(
@@ -369,6 +370,7 @@ internal class PgOverstyringDaoTest : DatabaseIntegrationTest() {
                 begrunnelse = "en begrunnelse",
                 opprettet = OPPRETTET,
                 initierendeVedtaksperiodeId = VEDTAKSPERIODE,
+                saksbehandlerOid = UUID.randomUUID(),
                 arbeidsgivere =
                     listOf(
                         MinimumSykdomsgradForDatabase.MinimumSykdomsgradArbeidsgiverForDatabase(
@@ -390,6 +392,7 @@ internal class PgOverstyringDaoTest : DatabaseIntegrationTest() {
                 skjæringstidspunkt = SKJÆRINGSTIDSPUNKT,
                 opprettet = OPPRETTET,
                 vedtaksperiodeId = VEDTAKSPERIODE,
+                saksbehandlerOid = UUID.randomUUID(),
                 arbeidsgivere =
                     overstyrteArbeidsgivere,
             ),
@@ -428,6 +431,7 @@ internal class PgOverstyringDaoTest : DatabaseIntegrationTest() {
                 skjæringstidspunkt = SKJÆRINGSTIDSPUNKT,
                 opprettet = OPPRETTET,
                 vedtaksperiodeId = VEDTAKSPERIODE,
+                saksbehandlerOid = UUID.randomUUID(),
                 overstyrteArbeidsforhold =
                     overstyrteArbeidsforhold,
             ),
@@ -445,14 +449,15 @@ internal class PgOverstyringDaoTest : DatabaseIntegrationTest() {
     private fun persisterOverstyringTidslinje() {
         overstyringDao.persisterOverstyringTidslinje(
             OverstyrtTidslinjeForDatabase(
-                EKSTERN_HENDELSE_ID,
-                AKTØR,
-                FNR,
-                ORGNUMMER,
-                OVERSTYRTE_DAGER,
-                BEGRUNNELSE,
-                OPPRETTET,
-                VEDTAKSPERIODE,
+                id = EKSTERN_HENDELSE_ID,
+                aktørId = AKTØR,
+                fødselsnummer = FNR,
+                organisasjonsnummer = ORGNUMMER,
+                dager = OVERSTYRTE_DAGER,
+                begrunnelse = BEGRUNNELSE,
+                opprettet = OPPRETTET,
+                vedtaksperiodeId = VEDTAKSPERIODE,
+                saksbehandlerOid = UUID.randomUUID(),
             ),
             OID,
         )

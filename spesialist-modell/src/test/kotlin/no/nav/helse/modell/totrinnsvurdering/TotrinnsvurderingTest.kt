@@ -131,6 +131,7 @@ internal class TotrinnsvurderingTest {
             organisasjonsnummer = lagOrganisasjonsnummer(),
             dager = emptyList(),
             begrunnelse = "begrunnelse",
+            saksbehandler = nySaksbehandler(),
         ))
         assertEquals(1, totrinnsvurdering.overstyringer().size)
     }

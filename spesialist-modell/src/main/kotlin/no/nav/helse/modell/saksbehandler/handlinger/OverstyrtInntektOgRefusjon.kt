@@ -8,6 +8,7 @@ import java.util.UUID
 
 class OverstyrtInntektOgRefusjon(
     override val id: UUID = UUID.randomUUID(),
+    override val saksbehandler: Saksbehandler,
     val aktørId: String,
     override val fødselsnummer: String,
     val skjæringstidspunkt: LocalDate,

@@ -12,6 +12,7 @@ import java.util.UUID
 
 class MinimumSykdomsgrad(
     override val id: UUID = UUID.randomUUID(),
+    override val saksbehandler: Saksbehandler,
     val aktørId: String,
     override val fødselsnummer: String,
     val perioderVurdertOk: List<MinimumSykdomsgradPeriode>,

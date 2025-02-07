@@ -15,6 +15,7 @@ interface Personhandling : Handling {
 }
 
 interface Overstyring : Personhandling {
+    val saksbehandler: Saksbehandler
     val id: UUID
 }
 

@@ -4,20 +4,11 @@ data class Lovhjemmel(
     val paragraf: String,
     val ledd: String? = null,
     val bokstav: String? = null,
-    private val lovverk: String,
-    private val lovverksversjon: String,
+    val lovverk: String,
+    val lovverksversjon: String,
 ) {
     fun byggEvent() =
         LovhjemmelEvent(
-            paragraf = paragraf,
-            ledd = ledd,
-            bokstav = bokstav,
-            lovverk = lovverk,
-            lovverksversjon = lovverksversjon,
-        )
-
-    fun toDto() =
-        LovhjemmelDto(
             paragraf = paragraf,
             ledd = ledd,
             bokstav = bokstav,
@@ -32,12 +23,4 @@ data class LovhjemmelEvent(
     val bokstav: String? = null,
     val lovverk: String,
     val lovverksversjon: String,
-)
-
-data class LovhjemmelDto(
-    val paragraf: String,
-    val ledd: String?,
-    val bokstav: String?,
-    val lovverk: String?,
-    val lovverksversjon: String?,
 )

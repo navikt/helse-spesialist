@@ -12,6 +12,7 @@ import java.util.UUID
 
 class OverstyrtTidslinje(
     override val id: UUID = UUID.randomUUID(),
+    override val saksbehandler: Saksbehandler,
     val vedtaksperiodeId: UUID,
     val aktørId: String,
     override val fødselsnummer: String,

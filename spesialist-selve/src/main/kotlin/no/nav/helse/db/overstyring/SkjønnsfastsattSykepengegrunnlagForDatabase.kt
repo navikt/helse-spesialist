@@ -5,13 +5,14 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 data class SkjønnsfastsattSykepengegrunnlagForDatabase(
-    val id: UUID,
+    override val id: UUID,
     val aktørId: String,
     override val fødselsnummer: String,
     val skjæringstidspunkt: LocalDate,
     val arbeidsgivere: List<SkjønnsfastsattArbeidsgiverForDatabase>,
     override val opprettet: LocalDateTime,
     override val vedtaksperiodeId: UUID,
+    override val saksbehandlerOid: UUID,
 ) : OverstyringForDatabase {
     override val eksternHendelseId: UUID = id
 }

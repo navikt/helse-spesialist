@@ -8,6 +8,7 @@ import java.util.UUID
 
 class OverstyrtArbeidsforhold(
     override val id: UUID = UUID.randomUUID(),
+    override val saksbehandler: Saksbehandler,
     override val fødselsnummer: String,
     val aktørId: String,
     val skjæringstidspunkt: LocalDate,
@@ -45,7 +46,7 @@ class Arbeidsforhold(
     val deaktivert: Boolean,
     val begrunnelse: String,
     val forklaring: String,
-    private val lovhjemmel: Lovhjemmel?,
+    val lovhjemmel: Lovhjemmel?,
 ) {
     fun byggEvent(): OverstyrtArbeidsforholdEvent.Arbeidsforhold {
         return OverstyrtArbeidsforholdEvent.Arbeidsforhold(

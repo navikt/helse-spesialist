@@ -5,14 +5,16 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 sealed interface OverstyringForDatabase {
+    val id: UUID
     val eksternHendelseId: UUID
     val fødselsnummer: String
     val opprettet: LocalDateTime
     val vedtaksperiodeId: UUID
+    val saksbehandlerOid: UUID
 }
 
 data class OverstyrtTidslinjeForDatabase(
-    val id: UUID,
+    override val id: UUID,
     val aktørId: String,
     override val fødselsnummer: String,
     val organisasjonsnummer: String,
@@ -20,6 +22,7 @@ data class OverstyrtTidslinjeForDatabase(
     val begrunnelse: String,
     override val opprettet: LocalDateTime,
     override val vedtaksperiodeId: UUID,
+    override val saksbehandlerOid: UUID,
 ) : OverstyringForDatabase {
     override val eksternHendelseId: UUID = id
 }
@@ -34,13 +37,14 @@ data class OverstyrtTidslinjedagForDatabase(
 )
 
 data class OverstyrtInntektOgRefusjonForDatabase(
-    val id: UUID,
+    override val id: UUID,
     val aktørId: String,
     override val fødselsnummer: String,
     val skjæringstidspunkt: LocalDate,
     val arbeidsgivere: List<OverstyrtArbeidsgiverForDatabase>,
     override val opprettet: LocalDateTime,
     override val vedtaksperiodeId: UUID,
+    override val saksbehandlerOid: UUID,
 ) : OverstyringForDatabase {
     override val eksternHendelseId: UUID = id
 }
@@ -65,13 +69,14 @@ data class RefusjonselementForDatabase(
 )
 
 data class OverstyrtArbeidsforholdForDatabase(
-    val id: UUID,
+    override val id: UUID,
     override val fødselsnummer: String,
     val aktørId: String,
     val skjæringstidspunkt: LocalDate,
     val overstyrteArbeidsforhold: List<ArbeidsforholdForDatabase>,
     override val opprettet: LocalDateTime,
     override val vedtaksperiodeId: UUID,
+    override val saksbehandlerOid: UUID,
 ) : OverstyringForDatabase {
     override val eksternHendelseId: UUID = id
 }
