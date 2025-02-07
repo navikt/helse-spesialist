@@ -3,6 +3,8 @@ package no.nav.helse.spesialist.api.graphql
 import com.expediagroup.graphql.server.execution.GraphQLServer
 import com.expediagroup.graphql.server.ktor.GraphQL
 import com.expediagroup.graphql.server.ktor.KtorGraphQLRequestParser
+import com.expediagroup.graphql.server.types.GraphQLResponse
+import com.expediagroup.graphql.server.types.GraphQLServerResponse
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
 import io.ktor.server.auth.authenticate
@@ -202,11 +204,21 @@ fun Route.queryHandler(server: GraphQLServer<ApplicationRequest>) {
     post {
         val start = System.nanoTime()
 
-        val result = server.execute(call.request)
+        val result = checkNotNull(server.execute(call.request)) { "Kall mot GraphQL server feilet" }
+
+        loggFeil(result)
 
         val tidBrukt = Duration.ofNanos(System.nanoTime() - start)
         sikkerLogg.trace("Kall behandlet etter ${tidBrukt.toMillis()} ms")
-        call.respond(result ?: throw RuntimeException("Kall mot GraphQL server feilet"))
+        call.respond(result)
+    }
+}
+
+private fun loggFeil(result: GraphQLServerResponse) {
+    if (result is GraphQLResponse<*>) {
+        result.errors.takeUnless { it.isNullOrEmpty() }?.let {
+            sikkerLogg.warn("GraphQL-respons inneholder feil: ${it.joinToString()}")
+        }
     }
 }
 
