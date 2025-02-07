@@ -62,7 +62,6 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
     protected val egenAnsattApiDao = mockk<EgenAnsattApiDao>(relaxed = true)
     protected val apiOppgaveService = mockk<ApiOppgaveService>(relaxed = true)
-    protected val totrinnsvurderinghåndterer = mockk<Totrinnsvurderinghåndterer>(relaxed = true)
 
     protected fun opprettVedtaksperiode(
         personId: Long,
