@@ -90,7 +90,6 @@ class SpesialistApp(
     private val totrinnsvurderingService =
         TotrinnsvurderingService(
             totrinnsvurderingDao = totrinnsvurderingDao,
-            oppgaveDao = oppgaveDao,
             periodehistorikkDao = periodehistorikkDao,
             dialogDao = dialogDao,
         )
@@ -208,7 +207,6 @@ class SpesialistApp(
                 apiOppgaveService = apiOppgaveService,
                 tilgangsgrupper = tilgangsgrupper,
                 stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
-                totrinnsvurderingService = totrinnsvurderingService,
                 annulleringRepository = repositories.annulleringRepository,
                 env = env,
                 featureToggles = featureToggles,
@@ -225,7 +223,6 @@ class SpesialistApp(
                 saksbehandlerDao = saksbehandlerDao,
                 totrinnsvurderingService =
                     TotrinnsvurderingService(
-                        oppgaveDao = oppgaveDao,
                         totrinnsvurderingDao = totrinnsvurderingDao,
                         periodehistorikkDao = periodehistorikkDao,
                         dialogDao = dialogDao,

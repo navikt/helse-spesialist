@@ -1,7 +1,6 @@
 package no.nav.helse.modell.totrinnsvurdering
 
 import no.nav.helse.db.DialogDao
-import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
@@ -12,15 +11,9 @@ import java.util.UUID
 
 class TotrinnsvurderingService(
     private val totrinnsvurderingDao: TotrinnsvurderingDao,
-    private val oppgaveDao: OppgaveDao,
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val dialogDao: DialogDao,
 ) : Totrinnsvurderinghåndterer {
-    override fun settBeslutter(
-        oppgaveId: Long,
-        saksbehandlerOid: UUID,
-    ) = totrinnsvurderingDao.settBeslutter(oppgaveId, saksbehandlerOid)
-
     override fun totrinnsvurderingRetur(
         oppgaveId: Long,
         saksbehandlerFraApi: SaksbehandlerFraApi,
