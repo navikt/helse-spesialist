@@ -11,7 +11,7 @@ import java.time.LocalDate
 import java.util.UUID
 
 class OverstyrtTidslinje(
-    override val id: UUID = UUID.randomUUID(),
+    override val eksternHendelseId: UUID = UUID.randomUUID(),
     override val saksbehandler: Saksbehandler,
     val vedtaksperiodeId: UUID,
     val aktørId: String,
@@ -28,7 +28,7 @@ class OverstyrtTidslinje(
 
     fun byggEvent() =
         OverstyrtTidslinjeEvent(
-            id = id,
+            eksternHendelseId = eksternHendelseId,
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
             organisasjonsnummer = organisasjonsnummer,
@@ -37,7 +37,7 @@ class OverstyrtTidslinje(
 
     internal fun byggSubsumsjoner(saksbehandlerEpost: String): List<Subsumsjon> {
         return dager.byggSubsumsjoner(
-            overstyringId = id,
+            overstyringId = eksternHendelseId,
             vedtaksperiodeId = vedtaksperiodeId,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,

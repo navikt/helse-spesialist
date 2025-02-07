@@ -16,7 +16,7 @@ interface Personhandling : Handling {
 
 interface Overstyring : Personhandling {
     val saksbehandler: Saksbehandler
-    val id: UUID
+    val eksternHendelseId: UUID
 }
 
 abstract class Oppgavehandling(private val oppgaveId: Long) : Handling {

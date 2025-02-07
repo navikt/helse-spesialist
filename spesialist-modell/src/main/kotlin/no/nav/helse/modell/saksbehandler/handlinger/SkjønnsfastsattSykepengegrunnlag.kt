@@ -11,7 +11,7 @@ import java.time.LocalDate
 import java.util.UUID
 
 class SkjønnsfastsattSykepengegrunnlag(
-    override val id: UUID = UUID.randomUUID(),
+    override val eksternHendelseId: UUID = UUID.randomUUID(),
     override val saksbehandler: Saksbehandler,
     val aktørId: String,
     override val fødselsnummer: String,
@@ -32,7 +32,7 @@ class SkjønnsfastsattSykepengegrunnlag(
         ident: String,
     ): SkjønnsfastsattSykepengegrunnlagEvent {
         return SkjønnsfastsattSykepengegrunnlagEvent(
-            id = id,
+            eksternHendelseId = eksternHendelseId,
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
             saksbehandlerOid = oid,

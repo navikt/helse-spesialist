@@ -327,7 +327,7 @@ internal class PgOverstyringDaoTest : DatabaseIntegrationTest() {
     private fun persisterSkjønnsfastsettingSykepengegrunnlag() {
         overstyringDao.persisterSkjønnsfastsettingSykepengegrunnlag(
             SkjønnsfastsattSykepengegrunnlagForDatabase(
-                id = EKSTERN_HENDELSE_ID,
+                eksternHendelseId = EKSTERN_HENDELSE_ID,
                 aktørId = AKTØR,
                 fødselsnummer = FNR,
                 skjæringstidspunkt = 1.januar,
@@ -357,7 +357,7 @@ internal class PgOverstyringDaoTest : DatabaseIntegrationTest() {
     private fun persisterOverstyringMinimumSykdomsgrad() {
         overstyringDao.persisterMinimumSykdomsgrad(
             MinimumSykdomsgradForDatabase(
-                id = EKSTERN_HENDELSE_ID,
+                eksternHendelseId = EKSTERN_HENDELSE_ID,
                 aktørId = AKTØR,
                 fødselsnummer = FNR,
                 perioderVurdertOk = listOf(
@@ -386,7 +386,7 @@ internal class PgOverstyringDaoTest : DatabaseIntegrationTest() {
     private fun persisterOverstyringInntektOgRefusjon(overstyrteArbeidsgivere: List<OverstyrtArbeidsgiverForDatabase> = listOf(overstyrtArbeidsgiverForDatabase())) {
         overstyringDao.persisterOverstyringInntektOgRefusjon(
             OverstyrtInntektOgRefusjonForDatabase(
-                id = EKSTERN_HENDELSE_ID,
+                eksternHendelseId = EKSTERN_HENDELSE_ID,
                 aktørId = AKTØR,
                 fødselsnummer = FNR,
                 skjæringstidspunkt = SKJÆRINGSTIDSPUNKT,
@@ -425,7 +425,7 @@ internal class PgOverstyringDaoTest : DatabaseIntegrationTest() {
     ) {
         overstyringDao.persisterOverstyringArbeidsforhold(
             OverstyrtArbeidsforholdForDatabase(
-                id = eksternHendelsesIdArbeidsforhold,
+                eksternHendelseId = eksternHendelsesIdArbeidsforhold,
                 fødselsnummer = FNR,
                 aktørId = AKTØR,
                 skjæringstidspunkt = SKJÆRINGSTIDSPUNKT,
@@ -449,7 +449,7 @@ internal class PgOverstyringDaoTest : DatabaseIntegrationTest() {
     private fun persisterOverstyringTidslinje() {
         overstyringDao.persisterOverstyringTidslinje(
             OverstyrtTidslinjeForDatabase(
-                id = EKSTERN_HENDELSE_ID,
+                eksternHendelseId = EKSTERN_HENDELSE_ID,
                 aktørId = AKTØR,
                 fødselsnummer = FNR,
                 organisasjonsnummer = ORGNUMMER,

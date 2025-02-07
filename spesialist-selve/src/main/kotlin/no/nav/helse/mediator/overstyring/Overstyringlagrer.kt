@@ -73,7 +73,7 @@ class Overstyringlagrer(private val overstyringDao: OverstyringDao) {
 
     private fun OverstyrtTidslinje.tilDatabase() =
         OverstyrtTidslinjeForDatabase(
-            id = id,
+            eksternHendelseId = eksternHendelseId,
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
@@ -96,7 +96,7 @@ class Overstyringlagrer(private val overstyringDao: OverstyringDao) {
 
     private fun OverstyrtInntektOgRefusjon.tilDatabase() =
         OverstyrtInntektOgRefusjonForDatabase(
-            id = id,
+            eksternHendelseId = eksternHendelseId,
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             skjæringstidspunkt = skjæringstidspunkt,
@@ -122,7 +122,7 @@ class Overstyringlagrer(private val overstyringDao: OverstyringDao) {
 
     private fun OverstyrtArbeidsforhold.tilDatabase() =
         OverstyrtArbeidsforholdForDatabase(
-            id = id,
+            eksternHendelseId = eksternHendelseId,
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             skjæringstidspunkt = skjæringstidspunkt,
@@ -142,7 +142,7 @@ class Overstyringlagrer(private val overstyringDao: OverstyringDao) {
 
     private fun SkjønnsfastsattSykepengegrunnlag.tilDatabase() =
         SkjønnsfastsattSykepengegrunnlagForDatabase(
-            id = id,
+            eksternHendelseId = eksternHendelseId,
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             skjæringstidspunkt = skjæringstidspunkt,
@@ -168,7 +168,7 @@ class Overstyringlagrer(private val overstyringDao: OverstyringDao) {
 
     private fun MinimumSykdomsgrad.tilDatabase() =
         MinimumSykdomsgradForDatabase(
-            id = id,
+            eksternHendelseId = eksternHendelseId,
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             perioderVurdertOk =

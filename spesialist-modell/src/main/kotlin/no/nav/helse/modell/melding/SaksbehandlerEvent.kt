@@ -7,7 +7,7 @@ import java.time.LocalDate
 import java.util.UUID
 
 data class OverstyrtInntektOgRefusjonEvent(
-    val id: UUID,
+    val eksternHendelseId: UUID,
     val fødselsnummer: String,
     val aktørId: String,
     val skjæringstidspunkt: LocalDate,
@@ -37,7 +37,7 @@ data class OverstyrtInntektOgRefusjonEvent(
 }
 
 data class OverstyrtTidslinjeEvent(
-    val id: UUID,
+    val eksternHendelseId: UUID,
     val fødselsnummer: String,
     val aktørId: String,
     val organisasjonsnummer: String,
@@ -53,7 +53,7 @@ data class OverstyrtTidslinjeEvent(
 }
 
 data class OverstyrtArbeidsforholdEvent(
-    val id: UUID,
+    val eksternHendelseId: UUID,
     val fødselsnummer: String,
     val aktørId: String,
     val saksbehandlerOid: UUID,
@@ -72,7 +72,7 @@ data class OverstyrtArbeidsforholdEvent(
 }
 
 data class SkjønnsfastsattSykepengegrunnlagEvent(
-    val id: UUID,
+    val eksternHendelseId: UUID,
     val fødselsnummer: String,
     val aktørId: String,
     val saksbehandlerOid: UUID,
@@ -96,7 +96,7 @@ data class SkjønnsfastsattSykepengegrunnlagEvent(
 }
 
 data class MinimumSykdomsgradVurdertEvent(
-    val id: UUID,
+    val eksternHendelseId: UUID,
     val fødselsnummer: String,
     val aktørId: String,
     val saksbehandlerOid: UUID,

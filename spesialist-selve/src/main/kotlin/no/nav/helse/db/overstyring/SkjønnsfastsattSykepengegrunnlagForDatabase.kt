@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 data class SkjønnsfastsattSykepengegrunnlagForDatabase(
-    override val id: UUID,
+    override val eksternHendelseId: UUID,
     val aktørId: String,
     override val fødselsnummer: String,
     val skjæringstidspunkt: LocalDate,
@@ -13,9 +13,7 @@ data class SkjønnsfastsattSykepengegrunnlagForDatabase(
     override val opprettet: LocalDateTime,
     override val vedtaksperiodeId: UUID,
     override val saksbehandlerOid: UUID,
-) : OverstyringForDatabase {
-    override val eksternHendelseId: UUID = id
-}
+) : OverstyringForDatabase
 
 data class SkjønnsfastsattArbeidsgiverForDatabase(
     val organisasjonsnummer: String,

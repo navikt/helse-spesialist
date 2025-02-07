@@ -106,7 +106,7 @@ internal class PgSykefraværstilfelleDaoTest : DatabaseIntegrationTest() {
         skjæringstidspunkt: LocalDate = 1.januar,
     ): SkjønnsfastsattSykepengegrunnlagForDatabase =
         SkjønnsfastsattSykepengegrunnlagForDatabase(
-            id = UUID.randomUUID(),
+            eksternHendelseId = UUID.randomUUID(),
             aktørId = AKTØR,
             fødselsnummer = fødselsnummer,
             skjæringstidspunkt = skjæringstidspunkt,

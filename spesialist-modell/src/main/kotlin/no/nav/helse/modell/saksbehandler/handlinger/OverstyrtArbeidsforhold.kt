@@ -7,7 +7,7 @@ import java.time.LocalDate
 import java.util.UUID
 
 class OverstyrtArbeidsforhold(
-    override val id: UUID = UUID.randomUUID(),
+    override val eksternHendelseId: UUID = UUID.randomUUID(),
     override val saksbehandler: Saksbehandler,
     override val fødselsnummer: String,
     val aktørId: String,
@@ -28,7 +28,7 @@ class OverstyrtArbeidsforhold(
         ident: String,
     ): OverstyrtArbeidsforholdEvent {
         return OverstyrtArbeidsforholdEvent(
-            id = id,
+            eksternHendelseId = eksternHendelseId,
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
             saksbehandlerOid = oid,

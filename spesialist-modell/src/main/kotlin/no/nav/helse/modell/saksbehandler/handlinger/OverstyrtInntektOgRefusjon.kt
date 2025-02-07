@@ -7,7 +7,7 @@ import java.time.LocalDate
 import java.util.UUID
 
 class OverstyrtInntektOgRefusjon(
-    override val id: UUID = UUID.randomUUID(),
+    override val eksternHendelseId: UUID = UUID.randomUUID(),
     override val saksbehandler: Saksbehandler,
     val aktørId: String,
     override val fødselsnummer: String,
@@ -27,7 +27,7 @@ class OverstyrtInntektOgRefusjon(
         epost: String,
         ident: String,
     ) = OverstyrtInntektOgRefusjonEvent(
-        id = id,
+        eksternHendelseId = eksternHendelseId,
         fødselsnummer = fødselsnummer,
         aktørId = aktørId,
         skjæringstidspunkt = skjæringstidspunkt,

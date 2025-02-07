@@ -11,7 +11,7 @@ import java.time.LocalDate
 import java.util.UUID
 
 class MinimumSykdomsgrad(
-    override val id: UUID = UUID.randomUUID(),
+    override val eksternHendelseId: UUID = UUID.randomUUID(),
     override val saksbehandler: Saksbehandler,
     val aktørId: String,
     override val fødselsnummer: String,
@@ -34,7 +34,7 @@ class MinimumSykdomsgrad(
         ident: String,
     ): MinimumSykdomsgradVurdertEvent {
         return MinimumSykdomsgradVurdertEvent(
-            id = id,
+            eksternHendelseId = eksternHendelseId,
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
             saksbehandlerOid = oid,
@@ -48,7 +48,7 @@ class MinimumSykdomsgrad(
 
     internal fun byggSubsumsjoner(saksbehandlerEpost: String): List<Subsumsjon> {
         return perioderVurdertOk.byggSubsumsjoner(
-            overstyringId = id,
+            overstyringId = eksternHendelseId,
             fødselsnummer = fødselsnummer,
             saksbehandlerEpost = saksbehandlerEpost,
             initierendeVedtaksperiodeId = initierendeVedtaksperiodeId,
@@ -56,7 +56,7 @@ class MinimumSykdomsgrad(
             avslag = false,
         ).plus(
             perioderVurdertIkkeOk.byggSubsumsjoner(
-                overstyringId = id,
+                overstyringId = eksternHendelseId,
                 fødselsnummer = fødselsnummer,
                 saksbehandlerEpost = saksbehandlerEpost,
                 initierendeVedtaksperiodeId = initierendeVedtaksperiodeId,

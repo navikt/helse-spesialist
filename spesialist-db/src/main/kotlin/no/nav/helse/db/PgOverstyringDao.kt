@@ -410,7 +410,7 @@ class PgOverstyringDao private constructor(queryRunner: QueryRunner) : Overstyri
             .list { overstyringRow ->
                 val id = overstyringRow.long("overstyring_tidslinje_id")
                 OverstyrtTidslinjeForDatabase(
-                    id = overstyringRow.uuid("ekstern_hendelse_id"),
+                    eksternHendelseId = overstyringRow.uuid("ekstern_hendelse_id"),
                     fødselsnummer = overstyringRow.string("fødselsnummer"),
                     aktørId = overstyringRow.string("aktør_id"),
                     organisasjonsnummer = overstyringRow.string("organisasjonsnummer"),
@@ -470,7 +470,7 @@ class PgOverstyringDao private constructor(queryRunner: QueryRunner) : Overstyri
                 )
                     .single { it.localDate("skjaeringstidspunkt") }
             OverstyrtInntektOgRefusjonForDatabase(
-                id = overstyringRow.uuid("ekstern_hendelse_id"),
+                eksternHendelseId = overstyringRow.uuid("ekstern_hendelse_id"),
                 fødselsnummer = overstyringRow.string("fødselsnummer"),
                 aktørId = overstyringRow.string("aktør_id"),
                 opprettet = overstyringRow.localDateTime("tidspunkt"),
@@ -548,7 +548,7 @@ class PgOverstyringDao private constructor(queryRunner: QueryRunner) : Overstyri
             val id = overstyringRow.long("overstyring_skjonn_id")
             val subsumsjon: LovhjemmelForDatabase? = overstyringRow.stringOrNull("subsumsjon")?.let { objectMapper.readValue(it) }
             SkjønnsfastsattSykepengegrunnlagForDatabase(
-                id = overstyringRow.uuid("ekstern_hendelse_id"),
+                eksternHendelseId = overstyringRow.uuid("ekstern_hendelse_id"),
                 fødselsnummer = overstyringRow.string("fødselsnummer"),
                 aktørId = overstyringRow.string("aktør_id"),
                 opprettet = overstyringRow.localDateTime("tidspunkt"),
@@ -675,7 +675,7 @@ class PgOverstyringDao private constructor(queryRunner: QueryRunner) : Overstyri
                 )
                     .single { it.localDate("skjaeringstidspunkt") }
             OverstyrtArbeidsforholdForDatabase(
-                id = overstyringRow.uuid("ekstern_hendelse_id"),
+                eksternHendelseId = overstyringRow.uuid("ekstern_hendelse_id"),
                 fødselsnummer = overstyringRow.string("fødselsnummer"),
                 aktørId = overstyringRow.string("aktør_id"),
                 opprettet = overstyringRow.localDateTime("tidspunkt"),

@@ -96,7 +96,7 @@ class PgTotrinnsvurderingRepository(
 
     private fun OverstyrtTidslinjeForDatabase.tilDomene(): OverstyrtTidslinje =
         OverstyrtTidslinje(
-            id = id,
+            eksternHendelseId = eksternHendelseId,
             vedtaksperiodeId = vedtaksperiodeId,
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
@@ -114,7 +114,7 @@ class PgTotrinnsvurderingRepository(
 
     private fun MinimumSykdomsgradForDatabase.tilDomene(): MinimumSykdomsgrad =
         MinimumSykdomsgrad(
-            id = id,
+            eksternHendelseId = eksternHendelseId,
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             perioderVurdertOk = perioderVurdertOk.map { it.tilDomene() },
@@ -127,7 +127,7 @@ class PgTotrinnsvurderingRepository(
 
     private fun OverstyrtArbeidsforholdForDatabase.tilDomene() =
         OverstyrtArbeidsforhold(
-            id = id,
+            eksternHendelseId = eksternHendelseId,
             vedtaksperiodeId = vedtaksperiodeId,
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
@@ -138,7 +138,7 @@ class PgTotrinnsvurderingRepository(
 
     private fun OverstyrtInntektOgRefusjonForDatabase.tilDomene() =
         OverstyrtInntektOgRefusjon(
-            id = id,
+            eksternHendelseId = eksternHendelseId,
             vedtaksperiodeId = vedtaksperiodeId,
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
@@ -149,7 +149,7 @@ class PgTotrinnsvurderingRepository(
 
     private fun SkjønnsfastsattSykepengegrunnlagForDatabase.tilDomene() =
         SkjønnsfastsattSykepengegrunnlag(
-            id = id,
+            eksternHendelseId = eksternHendelseId,
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             skjæringstidspunkt = skjæringstidspunkt,

@@ -349,7 +349,7 @@ private fun LagtPåVentEvent.detaljer(): Map<String, Any> =
 
 private fun MinimumSykdomsgradVurdertEvent.detaljer(): Map<String, Any> =
     mapOf(
-        "@id" to id,
+        "@id" to eksternHendelseId,
         "aktørId" to aktørId,
         "perioderMedMinimumSykdomsgradVurdertOk" to perioderMedMinimumSykdomsgradVurdertOk,
         "perioderMedMinimumSykdomsgradVurdertIkkeOk" to perioderMedMinimumSykdomsgradVurdertIkkeOk,
@@ -361,7 +361,7 @@ private fun MinimumSykdomsgradVurdertEvent.detaljer(): Map<String, Any> =
 
 private fun OverstyrtArbeidsforholdEvent.detaljer(): Map<String, Any> =
     mapOf(
-        "@id" to id,
+        "@id" to eksternHendelseId,
         "aktørId" to aktørId,
         "saksbehandlerOid" to saksbehandlerOid,
         "saksbehandlerNavn" to saksbehandlerNavn,
@@ -373,7 +373,7 @@ private fun OverstyrtArbeidsforholdEvent.detaljer(): Map<String, Any> =
 
 private fun OverstyrtInntektOgRefusjonEvent.detaljer(): Map<String, Any> =
     mapOf(
-        "@id" to id,
+        "@id" to eksternHendelseId,
         "aktørId" to aktørId,
         "skjæringstidspunkt" to skjæringstidspunkt,
         "arbeidsgivere" to arbeidsgivere,
@@ -385,7 +385,7 @@ private fun OverstyrtInntektOgRefusjonEvent.detaljer(): Map<String, Any> =
 
 private fun OverstyrtTidslinjeEvent.detaljer(): Map<String, Any> =
     mapOf(
-        "@id" to id,
+        "@id" to eksternHendelseId,
         "aktørId" to aktørId,
         "organisasjonsnummer" to organisasjonsnummer,
         "dager" to dager,
@@ -393,7 +393,7 @@ private fun OverstyrtTidslinjeEvent.detaljer(): Map<String, Any> =
 
 private fun SkjønnsfastsattSykepengegrunnlagEvent.detaljer(): Map<String, Any> =
     mapOf(
-        "@id" to id,
+        "@id" to eksternHendelseId,
         "aktørId" to aktørId,
         "skjæringstidspunkt" to skjæringstidspunkt,
         "arbeidsgivere" to arbeidsgivere,

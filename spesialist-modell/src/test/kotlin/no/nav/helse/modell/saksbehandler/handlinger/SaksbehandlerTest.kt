@@ -62,7 +62,7 @@ internal class SaksbehandlerTest {
         saksbehandler.register(observer)
         saksbehandler.håndter(
             OverstyrtTidslinje(
-                id = overstyringId,
+                eksternHendelseId = overstyringId,
                 vedtaksperiodeId = vedtaksperiodeId,
                 aktørId = "123",
                 fødselsnummer = "1234",
