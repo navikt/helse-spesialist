@@ -54,8 +54,6 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
             totrinnsvurderingService =
                 TotrinnsvurderingService(
                     totrinnsvurderingDao,
-                    periodehistorikkDao,
-                    repositories.dialogDao,
                 ),
         )
 

@@ -4,13 +4,12 @@ import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import io.ktor.http.HttpStatusCode
-import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
+import no.nav.helse.spesialist.api.SendIReturResult
 import no.nav.helse.spesialist.api.SendTilGodkjenningResult
 import no.nav.helse.spesialist.api.Totrinnsvurderinghåndterer
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
-import no.nav.helse.spesialist.api.graphql.schema.ApiPaVentRequest
 import no.nav.helse.spesialist.api.graphql.schema.ApiVedtakUtfall
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import org.slf4j.LoggerFactory
@@ -104,27 +103,34 @@ class TotrinnsvurderingMutationHandler(
     ): DataFetcherResult<Boolean> {
         val besluttendeSaksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
 
-        sikkerlogg.info(
-            "Oppgave med {} sendes i retur av beslutter med {}",
-            StructuredArguments.kv("oppgaveId", oppgavereferanse),
-            StructuredArguments.kv("oid", besluttendeSaksbehandler.oid),
-        )
+        return when (
+            val result =
+                saksbehandlerhåndterer.sendIRetur(
+                    oppgavereferanse = oppgavereferanse.toLong(),
+                    besluttendeSaksbehandler = besluttendeSaksbehandler,
+                    notatTekst = notatTekst,
+                )
+        ) {
+            is SendIReturResult.Feil.KunneIkkeLeggePåVent ->
+                byggErrorRespons(
+                    "Feil ved legg på vent: ${result.modellfeil.message}",
+                    result.modellfeil.httpkode,
+                )
 
-        apiOppgaveService.sendIRetur(oppgavereferanse.toLong(), besluttendeSaksbehandler)
-        saksbehandlerhåndterer.påVent(
-            ApiPaVentRequest.ApiFjernPaVentUtenHistorikkinnslag(oppgavereferanse.toLong()),
-            besluttendeSaksbehandler,
-        )
+            is SendIReturResult.Feil.KunneIkkeOppretteHistorikkinnslag ->
+                byggErrorRespons(
+                    "Feil ved oppretting av periodehistorikk: ${result.exception.message}",
+                    HttpStatusCode.InternalServerError,
+                )
 
-        totrinnsvurderinghåndterer.totrinnsvurderingRetur(
-            oppgaveId = oppgavereferanse.toLong(),
-            saksbehandlerFraApi = besluttendeSaksbehandler,
-            notattekst = notatTekst,
-        )
+            is SendIReturResult.Feil.KunneIkkeSendeIRetur ->
+                byggErrorRespons(
+                    "Feil ved oppretting av periodehistorikk: ${result.modellfeil.message}",
+                    result.modellfeil.httpkode,
+                )
 
-        log.info("OppgaveId $oppgavereferanse sendt i retur")
-
-        return DataFetcherResult.newResult<Boolean>().data(true).build()
+            SendIReturResult.Ok -> DataFetcherResult.newResult<Boolean>().data(true).build()
+        }
     }
 
     private fun byggErrorRespons(

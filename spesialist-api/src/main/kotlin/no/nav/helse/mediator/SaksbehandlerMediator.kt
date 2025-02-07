@@ -57,9 +57,9 @@ import no.nav.helse.modell.saksbehandler.handlinger.Refusjonselement
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlinghåndtererImpl
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
+import no.nav.helse.spesialist.api.SendIReturResult
 import no.nav.helse.spesialist.api.SendTilGodkjenningResult
 import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
 import no.nav.helse.spesialist.api.feilhåndtering.FinnerIkkeLagtPåVent
@@ -94,6 +94,7 @@ import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import no.nav.helse.tell
 import org.slf4j.LoggerFactory
 import java.util.UUID
+import no.nav.helse.spesialist.api.feilhåndtering.Modellfeil as ApiModellfeil
 
 class SaksbehandlerMediator(
     repositories: Repositories,
@@ -103,7 +104,6 @@ class SaksbehandlerMediator(
     private val apiOppgaveService: ApiOppgaveService,
     private val tilgangsgrupper: Tilgangsgrupper,
     private val stansAutomatiskBehandlinghåndterer: StansAutomatiskBehandlinghåndtererImpl,
-    private val totrinnsvurderingService: TotrinnsvurderingService,
     private val annulleringRepository: AnnulleringRepository,
     private val env: Environment,
     private val featureToggles: FeatureToggles,
@@ -571,6 +571,50 @@ class SaksbehandlerMediator(
             arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
             personFagsystemId = personFagsystemId,
         )
+
+    override fun sendIRetur(
+        oppgavereferanse: Long,
+        besluttendeSaksbehandler: SaksbehandlerFraApi,
+        notatTekst: String,
+    ): SendIReturResult {
+        sikkerlogg.info(
+            "Oppgave med {} sendes i retur av beslutter med {}",
+            StructuredArguments.kv("oppgaveId", oppgavereferanse),
+            StructuredArguments.kv("oid", besluttendeSaksbehandler.oid),
+        )
+
+        try {
+            apiOppgaveService.sendIRetur(oppgavereferanse.toLong(), besluttendeSaksbehandler)
+        } catch (modellfeil: ApiModellfeil) {
+            return SendIReturResult.Feil.KunneIkkeSendeIRetur(modellfeil)
+        }
+
+        try {
+            påVent(
+                ApiPaVentRequest.ApiFjernPaVentUtenHistorikkinnslag(oppgavereferanse.toLong()),
+                besluttendeSaksbehandler,
+            )
+        } catch (modellfeil: ApiModellfeil) {
+            return SendIReturResult.Feil.KunneIkkeLeggePåVent(modellfeil)
+        }
+
+        try {
+            val dialogRef = dialogDao.lagre()
+            val innslag =
+                Historikkinnslag.totrinnsvurderingRetur(
+                    notattekst = notatTekst,
+                    saksbehandler = besluttendeSaksbehandler.toDto(),
+                    dialogRef = dialogRef,
+                )
+            periodehistorikkDao.lagreMedOppgaveId(innslag, oppgavereferanse)
+        } catch (e: Exception) {
+            return SendIReturResult.Feil.KunneIkkeOppretteHistorikkinnslag(e)
+        }
+
+        log.info("OppgaveId $oppgavereferanse sendt i retur")
+
+        return SendIReturResult.Ok
+    }
 
     override fun håndter(
         godkjenning: GodkjenningDto,
