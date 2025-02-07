@@ -50,52 +50,57 @@ class Totrinnsvurdering(
 
     fun overstyringer(): List<Overstyring> = overstyringer
 
-    fun ferdigstill() {
-        ferdigstilt = true
-        oppdatert = LocalDateTime.now()
-    }
+    fun ferdigstill() =
+        oppdatering {
+            ferdigstilt = true
+        }
 
-    fun settRetur() {
-        erRetur = true
-        oppdatert = LocalDateTime.now()
-    }
+    fun settRetur() =
+        oppdatering {
+            erRetur = true
+        }
 
-    fun nyOverstyring(overstyring: Overstyring) {
-        overstyringer.add(overstyring)
-        oppdatert = LocalDateTime.now()
-    }
+    fun settBeslutter(beslutter: Saksbehandler) =
+        oppdatering {
+            this.beslutter = beslutter
+        }
+
+    fun nyOverstyring(overstyring: Overstyring) =
+        oppdatering {
+            overstyringer.add(overstyring)
+        }
 
     internal fun sendTilBeslutter(
         oppgaveId: Long,
         behandlendeSaksbehandler: Saksbehandler,
-    ) {
+    ) = oppdatering {
         if (erBeslutteroppgave) throw OppgaveAlleredeSendtBeslutter(oppgaveId)
         if (behandlendeSaksbehandler == beslutter) throw OppgaveKreverVurderingAvToSaksbehandlere(oppgaveId)
 
         saksbehandler = behandlendeSaksbehandler
-        oppdatert = LocalDateTime.now()
         if (erRetur) erRetur = false
     }
 
     internal fun sendIRetur(
         oppgaveId: Long,
         beslutter: Saksbehandler,
-    ) {
+    ) = oppdatering {
         if (!erBeslutteroppgave) throw OppgaveAlleredeSendtIRetur(oppgaveId)
         if (beslutter == saksbehandler) throw OppgaveKreverVurderingAvToSaksbehandlere(oppgaveId)
 
         this.beslutter = beslutter
-        oppdatert = LocalDateTime.now()
         erRetur = true
     }
 
-    internal fun ferdigstill(utbetalingId: UUID) {
-        this.utbetalingId = utbetalingId
-        oppdatert = LocalDateTime.now()
-    }
+    internal fun ferdigstill(utbetalingId: UUID) =
+        oppdatering {
+            this.utbetalingId = utbetalingId
+        }
 
-    fun settBeslutter(saksbehandler: Saksbehandler) {
-        this.saksbehandler = saksbehandler
+    private fun <T> oppdatering(block: () -> T): T {
+        return block().also {
+            oppdatert = LocalDateTime.now()
+        }
     }
 
     override fun equals(other: Any?): Boolean {

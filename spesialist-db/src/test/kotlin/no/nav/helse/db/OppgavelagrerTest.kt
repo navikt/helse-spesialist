@@ -15,6 +15,8 @@ import no.nav.helse.modell.saksbehandler.Saksbehandler.Companion.toDto
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDto
 import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
@@ -227,7 +229,19 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
             oppgaveService.oppdater(OPPGAVE_ID, "Ferdigstilt", SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID, listOf(EgenskapForDatabase.SØKNAD))
         }
         verify(exactly = 0) { tildelingRepository.tildel(any(), any()) }
-        verify(exactly = 1) { oppgaveService.lagreTotrinnsvurdering(any<TotrinnsvurderingDto>()) }
+        verify(exactly = 1) {
+            oppgaveService.lagreTotrinnsvurdering(
+                withArg<TotrinnsvurderingDto> {
+                    assertEquals(VEDTAKSPERIODE_ID, it.vedtaksperiodeId)
+                    assertEquals(false, it.erRetur)
+                    assertEquals(saksbehandler.toDto(), it.saksbehandler)
+                    assertEquals(beslutter.toDto(), it.beslutter)
+                    assertEquals(UTBETALING_ID, it.utbetalingId)
+                    assertEquals(TOTRINNSVURDERING_OPPRETTET, it.opprettet)
+                    assertNotEquals(TOTRINNSVURDERING_OPPDATERT, it.oppdatert)
+                }
+            )
+        }
     }
 
     @Test
@@ -258,7 +272,17 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
             oppgaveService.oppdater(OPPGAVE_ID, "Ferdigstilt", SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID, listOf(EgenskapForDatabase.SØKNAD))
         }
         verify(exactly = 1) {
-            oppgaveService.lagreTotrinnsvurdering(any<TotrinnsvurderingDto>())
+            oppgaveService.lagreTotrinnsvurdering(
+                withArg<TotrinnsvurderingDto> {
+                    assertEquals(VEDTAKSPERIODE_ID, it.vedtaksperiodeId)
+                    assertEquals(false, it.erRetur)
+                    assertEquals(saksbehandler.toDto(), it.saksbehandler)
+                    assertEquals(beslutter.toDto(), it.beslutter)
+                    assertEquals(UTBETALING_ID, it.utbetalingId)
+                    assertEquals(TOTRINNSVURDERING_OPPRETTET, it.opprettet)
+                    assertNotEquals(TOTRINNSVURDERING_OPPDATERT, it.oppdatert)
+                }
+            )
         }
     }
 
