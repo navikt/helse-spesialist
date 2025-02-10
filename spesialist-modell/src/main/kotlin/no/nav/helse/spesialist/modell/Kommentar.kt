@@ -3,13 +3,16 @@ package no.nav.helse.spesialist.modell
 import no.nav.helse.spesialist.modell.ddd.Entity
 import java.time.LocalDateTime
 
+@JvmInline
+value class KommentarId(val value: Int)
+
 class Kommentar private constructor(
-    id: Int?,
+    id: KommentarId?,
     val tekst: String,
     val saksbehandlerident: String,
     val opprettetTidspunkt: LocalDateTime,
     feilregistrertTidspunkt: LocalDateTime?,
-) : Entity<Int>(id) {
+) : Entity<KommentarId>(id) {
     var feilregistrertTidspunkt: LocalDateTime? = feilregistrertTidspunkt
         private set
 
@@ -30,7 +33,7 @@ class Kommentar private constructor(
         )
 
         fun fraLagring(
-            id: Int,
+            id: KommentarId,
             tekst: String,
             saksbehandlerident: String,
             opprettetTidspunkt: LocalDateTime,

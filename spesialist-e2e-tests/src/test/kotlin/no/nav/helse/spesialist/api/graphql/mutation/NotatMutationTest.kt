@@ -4,6 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.modell.Dialog
+import no.nav.helse.spesialist.modell.DialogId
+import no.nav.helse.spesialist.modell.KommentarId
+import no.nav.helse.spesialist.modell.NotatId
 import no.nav.helse.spesialist.modell.NotatType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -53,10 +56,10 @@ internal class NotatMutationTest : AbstractGraphQLApiTest() {
         """,
             )
 
-        val notatId = body["data"]?.get("leggTilNotat")?.get("id")?.asInt()
+        val notatId = body["data"]?.get("leggTilNotat")?.get("id")?.asInt()?.let(::NotatId)
         assertNotNull(notatId, "Fikk ikke noen ID på opprettet notat i svaret: $body")
 
-        val dialogRef = body["data"]?.get("leggTilNotat")?.get("dialogRef")?.asInt()
+        val dialogRef = body["data"]?.get("leggTilNotat")?.get("dialogRef")?.asLong()?.let(::DialogId)
         assertNotNull(dialogRef, "Fikk ikke noen ID på opprettet dialog i svaret: $body")
 
         // Bekreft persistert resultat
@@ -68,9 +71,9 @@ internal class NotatMutationTest : AbstractGraphQLApiTest() {
         assertEquals(notatId, lagretNotat.id())
         assertEquals(NotatType.Generelt, lagretNotat.type)
         assertEquals("Dette er et notat", lagretNotat.tekst)
-        assertEquals(dialogRef.toLong(), lagretNotat.dialogRef)
+        assertEquals(dialogRef, lagretNotat.dialogRef)
         assertEquals(PERIODE.id, lagretNotat.vedtaksperiodeId)
-        assertEquals(SAKSBEHANDLER.oid, lagretNotat.saksbehandlerOid)
+        assertEquals(SAKSBEHANDLER.oid, lagretNotat.saksbehandlerOid.value)
         val opprettetTidspunkt = lagretNotat.opprettetTidspunkt
         with(opprettetTidspunkt) {
             val now = LocalDateTime.now()
@@ -86,8 +89,8 @@ internal class NotatMutationTest : AbstractGraphQLApiTest() {
                             {
                               "data" : {
                                 "leggTilNotat" : {
-                                  "id" : $notatId,
-                                  "dialogRef" : $dialogRef,
+                                  "id" : ${notatId.value},
+                                  "dialogRef" : ${dialogRef.value},
                                   "tekst" : "Dette er et notat",
                                   "opprettet" : "$opprettetTidspunkt",
                                   "saksbehandlerOid" : "${SAKSBEHANDLER.oid}",
@@ -118,7 +121,7 @@ internal class NotatMutationTest : AbstractGraphQLApiTest() {
             runQuery(
                 """
             mutation FeilregistrerNotat {
-                feilregistrerNotat(id: $notatId) { 
+                feilregistrerNotat(id: ${notatId.value}) { 
                     id,
                     dialogRef,
                     tekst,
@@ -165,8 +168,8 @@ internal class NotatMutationTest : AbstractGraphQLApiTest() {
                             {
                               "data" : {
                                 "feilregistrerNotat" : {
-                                  "id" : $notatId,
-                                  "dialogRef" : $dialogRef,
+                                  "id" : ${notatId.value},
+                                  "dialogRef" : ${dialogRef.value},
                                   "tekst" : "Et notat",
                                   "opprettet" : "$opprettetTidspunkt",
                                   "saksbehandlerOid" : "${SAKSBEHANDLER.oid}",
@@ -195,7 +198,7 @@ internal class NotatMutationTest : AbstractGraphQLApiTest() {
             runQuery(
                 """
             mutation LeggTilKommentar {
-                leggTilKommentar(dialogRef: $dialogRef, tekst: "En kommentar", saksbehandlerident: "${SAKSBEHANDLER.ident}") {
+                leggTilKommentar(dialogRef: ${dialogRef.value}, tekst: "En kommentar", saksbehandlerident: "${SAKSBEHANDLER.ident}") {
                     id,
                     tekst,
                     opprettet,
@@ -206,7 +209,7 @@ internal class NotatMutationTest : AbstractGraphQLApiTest() {
         """,
             )
 
-        val kommentarId = body["data"]?.get("leggTilKommentar")?.get("id")?.asInt()
+        val kommentarId = body["data"]?.get("leggTilKommentar")?.get("id")?.asInt()?.let(::KommentarId)
         assertNotNull(kommentarId, "Fikk ikke noen ID på opprettet kommentar i svaret: $body")
 
         // Bekreft persistert resultat
@@ -234,7 +237,7 @@ internal class NotatMutationTest : AbstractGraphQLApiTest() {
                             {
                               "data" : {
                                 "leggTilKommentar" : {
-                                  "id" : $kommentarId,
+                                  "id" : ${kommentarId.value},
                                   "tekst" : "En kommentar",
                                   "opprettet" : "$opprettetTidspunkt",
                                   "saksbehandlerident" : "${SAKSBEHANDLER.ident}",
@@ -263,7 +266,7 @@ internal class NotatMutationTest : AbstractGraphQLApiTest() {
             runQuery(
                 """
             mutation FeilregistrerKommentar {
-                feilregistrerKommentar(id: $kommentarId) {
+                feilregistrerKommentar(id: ${kommentarId.value}) {
                     id,
                     tekst,
                     opprettet,
@@ -298,7 +301,7 @@ internal class NotatMutationTest : AbstractGraphQLApiTest() {
                             {
                               "data" : {
                                 "feilregistrerKommentar" : {
-                                  "id" : $kommentarId,
+                                  "id" : ${kommentarId.value},
                                   "tekst" : "En kommentar",
                                   "opprettet" : "$opprettetTidspunkt",
                                   "saksbehandlerident" : "${SAKSBEHANDLER.ident}",

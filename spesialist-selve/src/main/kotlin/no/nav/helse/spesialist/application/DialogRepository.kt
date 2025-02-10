@@ -1,11 +1,13 @@
 package no.nav.helse.spesialist.application
 
 import no.nav.helse.spesialist.modell.Dialog
+import no.nav.helse.spesialist.modell.DialogId
+import no.nav.helse.spesialist.modell.KommentarId
 
 interface DialogRepository {
     fun lagre(dialog: Dialog)
 
-    fun finn(dialogId: Long): Dialog?
+    fun finn(id: DialogId): Dialog?
 
-    fun finnForKommentar(kommentarId: Int): Dialog?
+    fun finnForKommentar(id: KommentarId): Dialog?
 }

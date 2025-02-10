@@ -12,8 +12,10 @@ import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
 import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.modell.Dialog
+import no.nav.helse.spesialist.modell.DialogId
 import no.nav.helse.spesialist.modell.Notat
 import no.nav.helse.spesialist.modell.NotatType
+import no.nav.helse.spesialist.modell.SaksbehandlerOid
 import no.nav.helse.spesialist.test.lagAktørId
 import no.nav.helse.spesialist.test.lagEtternavn
 import no.nav.helse.spesialist.test.lagFornavn
@@ -243,9 +245,9 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
     protected fun opprettNotat(
         tekst: String = "Et notat",
-        saksbehandlerOid: UUID = SAKSBEHANDLER.oid,
+        saksbehandlerOid: SaksbehandlerOid = SaksbehandlerOid(SAKSBEHANDLER.oid),
         vedtaksperiodeId: UUID = PERIODE.id,
-        dialogRef: Long = opprettDialog(),
+        dialogRef: DialogId = opprettDialog(),
     ) = sessionFactory.transactionalSessionScope { session ->
         Notat.Factory.ny(
             type = NotatType.Generelt,

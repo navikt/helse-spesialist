@@ -9,9 +9,13 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiKommentar
 import no.nav.helse.spesialist.api.graphql.schema.ApiNotat
 import no.nav.helse.spesialist.api.graphql.schema.ApiNotatType
 import no.nav.helse.spesialist.modell.Dialog
+import no.nav.helse.spesialist.modell.DialogId
 import no.nav.helse.spesialist.modell.Kommentar
+import no.nav.helse.spesialist.modell.KommentarId
 import no.nav.helse.spesialist.modell.Notat
+import no.nav.helse.spesialist.modell.NotatId
 import no.nav.helse.spesialist.modell.NotatType
+import no.nav.helse.spesialist.modell.SaksbehandlerOid
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -44,7 +48,7 @@ class NotatMutationHandler(
                     tekst = tekst,
                     dialogRef = dialog.id(),
                     vedtaksperiodeId = UUID.fromString(vedtaksperiodeId),
-                    saksbehandlerOid = UUID.fromString(saksbehandlerOid),
+                    saksbehandlerOid = SaksbehandlerOid(UUID.fromString(saksbehandlerOid)),
                 )
             session.notatRepository.lagre(notat)
 
@@ -56,7 +60,7 @@ class NotatMutationHandler(
             feilmeldingSupplier = { "Kunne ikke feilregistrere notat med id $id" },
         ) { session ->
             val notat =
-                session.notatRepository.finn(id)
+                session.notatRepository.finn(NotatId(id))
                     ?: error("Kunne ikke finne notat med id $id")
 
             notat.feilregistrer()
@@ -75,7 +79,7 @@ class NotatMutationHandler(
             feilmeldingSupplier = { "Kunne ikke legge til kommentar med dialog-ref: $dialogRef" },
         ) { session ->
             val dialog =
-                session.dialogRepository.finn(dialogRef.toLong())
+                session.dialogRepository.finn(DialogId(dialogRef.toLong()))
                     ?: error("Kunne ikke finne dialog med id $dialogRef")
 
             val kommentar =
@@ -86,28 +90,29 @@ class NotatMutationHandler(
 
             session.dialogRepository.lagre(dialog)
 
-            hentKommentarApi(kommentar.id(), dialogRef.toLong(), session)
+            hentKommentarApi(kommentar.id(), DialogId(dialogRef.toLong()), session)
         }
 
     override fun feilregistrerKommentar(id: Int): DataFetcherResult<ApiKommentar?> =
         håndterITransaksjon(
             feilmeldingSupplier = { "Kunne ikke feilregistrere kommentar med id $id" },
         ) { session ->
+            val kommentarId = KommentarId(id)
             val dialog =
-                session.dialogRepository.finnForKommentar(id)
+                session.dialogRepository.finnForKommentar(kommentarId)
                     ?: error("Kunne ikke finne dialog for kommentar med id $id")
 
-            dialog.feilregistrerKommentar(id)
+            dialog.feilregistrerKommentar(kommentarId)
 
             session.dialogRepository.lagre(dialog)
 
-            hentKommentarApi(id, dialog.id(), session)
+            hentKommentarApi(kommentarId, dialog.id(), session)
         }
 
     override fun feilregistrerKommentarV2(id: Int): DataFetcherResult<ApiKommentar?> = feilregistrerKommentar(id)
 
     private fun hentApiNotat(
-        notatId: Int,
+        notatId: NotatId,
         session: SessionContext,
     ): ApiNotat {
         val notat =
@@ -123,11 +128,11 @@ class NotatMutationHandler(
                 ?: error("Kunne ikke finne saksbehandler med oid ${notat.saksbehandlerOid}")
 
         return ApiNotat(
-            id = notat.id(),
-            dialogRef = notat.dialogRef.toInt(), // TODO: Dette vil bli et problem på et tidspunkt!
+            id = notat.id().value,
+            dialogRef = notat.dialogRef.value.toInt(), // TODO: Dette vil bli et problem på et tidspunkt!
             tekst = notat.tekst,
             opprettet = notat.opprettetTidspunkt,
-            saksbehandlerOid = notat.saksbehandlerOid,
+            saksbehandlerOid = notat.saksbehandlerOid.value,
             saksbehandlerNavn = saksbehandler.navn,
             saksbehandlerEpost = saksbehandler.epost,
             saksbehandlerIdent = saksbehandler.ident,
@@ -154,8 +159,8 @@ class NotatMutationHandler(
         }
 
     private fun hentKommentarApi(
-        kommentarId: Int,
-        dialogId: Long,
+        kommentarId: KommentarId,
+        dialogId: DialogId,
         session: SessionContext,
     ): ApiKommentar {
         val dialog =
@@ -171,7 +176,7 @@ class NotatMutationHandler(
 
     private fun Kommentar.tilApiKommentar() =
         ApiKommentar(
-            id = id(),
+            id = id().value,
             tekst = tekst,
             opprettet = opprettetTidspunkt,
             saksbehandlerident = saksbehandlerident,

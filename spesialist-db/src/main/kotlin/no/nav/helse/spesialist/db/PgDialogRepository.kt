@@ -7,34 +7,36 @@ import no.nav.helse.db.MedSession
 import no.nav.helse.db.QueryRunner
 import no.nav.helse.spesialist.application.DialogRepository
 import no.nav.helse.spesialist.modell.Dialog
+import no.nav.helse.spesialist.modell.DialogId
 import no.nav.helse.spesialist.modell.Kommentar
+import no.nav.helse.spesialist.modell.KommentarId
 
 internal class PgDialogRepository(
     private val session: Session,
 ) : QueryRunner by MedSession(session), DialogRepository {
     override fun lagre(dialog: Dialog) {
-        val dialogId = if (dialog.harFåttTildeltId()) dialog.id() else insertDialog(dialog).also(dialog::tildelId)
+        val dialogId = if (dialog.harFåttTildeltId()) dialog.id() else insertDialog(dialog).let(::DialogId).also(dialog::tildelId)
 
         dialog.kommentarer.forEach { kommentar ->
             if (!kommentar.harFåttTildeltId()) {
-                insertKommentar(kommentar, dialogId).let(kommentar::tildelId)
+                insertKommentar(kommentar, dialogId).let(::KommentarId).let(kommentar::tildelId)
             } else {
                 updateKommentar(kommentar, dialogId)
             }
         }
     }
 
-    override fun finn(dialogId: Long): Dialog? {
+    override fun finn(id: DialogId): Dialog? {
         val kommentarer =
-            asSQL("SELECT * FROM kommentarer WHERE dialog_ref = :dialogId", "dialogId" to dialogId)
+            asSQL("SELECT * FROM kommentarer WHERE dialog_ref = :dialogId", "dialogId" to id.value)
                 .list { it.tilKommentar() }
-        return asSQL("SELECT * FROM dialog WHERE id = :dialogId", "dialogId" to dialogId)
+        return asSQL("SELECT * FROM dialog WHERE id = :dialogId", "dialogId" to id.value)
             .singleOrNull { it.tilDialog(kommentarer) }
     }
 
-    override fun finnForKommentar(kommentarId: Int): Dialog? =
-        asSQL("SELECT dialog_ref FROM kommentarer WHERE id = :kommentarId", "kommentarId" to kommentarId)
-            .singleOrNull { it.long("dialog_ref") }
+    override fun finnForKommentar(id: KommentarId): Dialog? =
+        asSQL("SELECT dialog_ref FROM kommentarer WHERE id = :kommentarId", "kommentarId" to id.value)
+            .singleOrNull { DialogId(it.long("dialog_ref")) }
             ?.let { finn(it) }
 
     private fun insertDialog(dialog: Dialog) =
@@ -48,14 +50,14 @@ internal class PgDialogRepository(
 
     private fun Row.tilDialog(kommentarer: List<Kommentar>) =
         Dialog.Factory.fraLagring(
-            id = long("id"),
+            id = DialogId(long("id")),
             opprettetTidspunkt = localDateTime("opprettet"),
             kommentarer = kommentarer,
         )
 
     private fun insertKommentar(
         kommentar: Kommentar,
-        dialogId: Long,
+        dialogId: DialogId,
     ) = asSQL(
         """
         INSERT INTO kommentarer (tekst, feilregistrert_tidspunkt, opprettet, saksbehandlerident, dialog_ref)
@@ -65,12 +67,12 @@ internal class PgDialogRepository(
         "feilregistrert_tidspunkt" to kommentar.feilregistrertTidspunkt,
         "opprettet" to kommentar.opprettetTidspunkt,
         "saksbehandlerident" to kommentar.saksbehandlerident,
-        "dialog_ref" to dialogId,
+        "dialog_ref" to dialogId.value,
     ).updateAndReturnGeneratedKey().toInt()
 
     private fun updateKommentar(
         kommentar: Kommentar,
-        dialogId: Long,
+        dialogId: DialogId,
     ) {
         asSQL(
             """
@@ -85,14 +87,14 @@ internal class PgDialogRepository(
             "tekst" to kommentar.tekst,
             "feilregistrert_tidspunkt" to kommentar.feilregistrertTidspunkt,
             "saksbehandlerident" to kommentar.saksbehandlerident,
-            "dialog_ref" to dialogId,
-            "id" to kommentar.id(),
+            "dialog_ref" to dialogId.value,
+            "id" to kommentar.id().value,
         ).update()
     }
 
     private fun Row.tilKommentar(): Kommentar =
         Kommentar.Factory.fraLagring(
-            id = int("id"),
+            id = KommentarId(int("id")),
             tekst = string("tekst"),
             saksbehandlerident = string("saksbehandlerident"),
             opprettetTidspunkt = localDateTime("opprettet"),

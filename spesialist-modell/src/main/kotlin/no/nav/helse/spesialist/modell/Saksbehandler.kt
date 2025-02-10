@@ -3,15 +3,18 @@ package no.nav.helse.spesialist.modell
 import no.nav.helse.spesialist.modell.ddd.Entity
 import java.util.UUID
 
+@JvmInline
+value class SaksbehandlerOid(val value: UUID)
+
 class Saksbehandler private constructor(
-    id: UUID?,
+    id: SaksbehandlerOid?,
     val navn: String,
     val epost: String,
     val ident: String,
-) : Entity<UUID>(id) {
+) : Entity<SaksbehandlerOid>(id) {
     object Factory {
         fun fraLagring(
-            id: UUID,
+            id: SaksbehandlerOid,
             navn: String,
             epost: String,
             ident: String,

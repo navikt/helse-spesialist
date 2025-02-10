@@ -1,8 +1,8 @@
 package no.nav.helse.spesialist.application
 
 import no.nav.helse.spesialist.modell.Saksbehandler
-import java.util.UUID
+import no.nav.helse.spesialist.modell.SaksbehandlerOid
 
 interface SaksbehandlerRepository {
-    fun finn(saksbehandlerId: UUID): Saksbehandler?
+    fun finn(oid: SaksbehandlerOid): Saksbehandler?
 }

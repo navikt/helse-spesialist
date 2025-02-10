@@ -252,7 +252,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             leggTilKommentar(tekst = "En kommentar", saksbehandlerident = SAKSBEHANDLER_IDENT)
         }
         sessionContext.dialogRepository.lagre(dialog)
-        påVentDao.lagrePåVent(oppgaveId, saksbehandlerOid, frist, årsaker, tekst, dialog.id())
+        påVentDao.lagrePåVent(oppgaveId, saksbehandlerOid, frist, årsaker, tekst, dialog.id().value)
     }
 
     private fun opprettVedtakstype(

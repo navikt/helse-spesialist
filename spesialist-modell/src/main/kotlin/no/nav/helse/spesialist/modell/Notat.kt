@@ -4,17 +4,20 @@ import no.nav.helse.spesialist.modell.ddd.AggregateRoot
 import java.time.LocalDateTime
 import java.util.UUID
 
+@JvmInline
+value class NotatId(val value: Int)
+
 class Notat private constructor(
-    id: Int?,
+    id: NotatId?,
     val type: NotatType,
     val tekst: String,
-    val dialogRef: Long,
+    val dialogRef: DialogId,
     val vedtaksperiodeId: UUID,
-    val saksbehandlerOid: UUID,
+    val saksbehandlerOid: SaksbehandlerOid,
     val opprettetTidspunkt: LocalDateTime,
     feilregistrert: Boolean,
     feilregistrertTidspunkt: LocalDateTime?,
-) : AggregateRoot<Int>(id) {
+) : AggregateRoot<NotatId>(id) {
     var feilregistrert: Boolean = feilregistrert
         private set
     var feilregistrertTidspunkt: LocalDateTime? = feilregistrertTidspunkt
@@ -29,9 +32,9 @@ class Notat private constructor(
         fun ny(
             type: NotatType,
             tekst: String,
-            dialogRef: Long,
+            dialogRef: DialogId,
             vedtaksperiodeId: UUID,
-            saksbehandlerOid: UUID,
+            saksbehandlerOid: SaksbehandlerOid,
         ) = Notat(
             id = null,
             type = type,
@@ -45,12 +48,12 @@ class Notat private constructor(
         )
 
         fun fraLagring(
-            id: Int,
+            id: NotatId,
             type: NotatType,
             tekst: String,
-            dialogRef: Long,
+            dialogRef: DialogId,
             vedtaksperiodeId: UUID,
-            saksbehandlerOid: UUID,
+            saksbehandlerOid: SaksbehandlerOid,
             opprettetTidspunkt: LocalDateTime,
             feilregistrert: Boolean,
             feilregistrertTidspunkt: LocalDateTime?,

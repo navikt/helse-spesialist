@@ -3,11 +3,14 @@ package no.nav.helse.spesialist.modell
 import no.nav.helse.spesialist.modell.ddd.AggregateRoot
 import java.time.LocalDateTime
 
+@JvmInline
+value class DialogId(val value: Long)
+
 class Dialog private constructor(
-    id: Long?,
+    id: DialogId?,
     val opprettetTidspunkt: LocalDateTime,
     kommentarer: List<Kommentar>,
-) : AggregateRoot<Long>(id) {
+) : AggregateRoot<DialogId>(id) {
     private val _kommentarer: MutableList<Kommentar> = kommentarer.toMutableList()
     val kommentarer: List<Kommentar>
         get() = _kommentarer
@@ -21,9 +24,9 @@ class Dialog private constructor(
             saksbehandlerident = saksbehandlerident,
         ).also(_kommentarer::add)
 
-    fun finnKommentar(kommentarId: Int): Kommentar? = kommentarer.firstOrNull { it.harFåttTildeltId() && it.id() == kommentarId }
+    fun finnKommentar(kommentarId: KommentarId): Kommentar? = kommentarer.firstOrNull { it.harFåttTildeltId() && it.id() == kommentarId }
 
-    fun feilregistrerKommentar(kommentarId: Int) {
+    fun feilregistrerKommentar(kommentarId: KommentarId) {
         kommentarer.first { it.harFåttTildeltId() && it.id() == kommentarId }.feilregistrer()
     }
 
@@ -36,7 +39,7 @@ class Dialog private constructor(
             )
 
         fun fraLagring(
-            id: Long,
+            id: DialogId,
             opprettetTidspunkt: LocalDateTime,
             kommentarer: List<Kommentar>,
         ) = Dialog(

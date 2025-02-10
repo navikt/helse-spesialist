@@ -6,8 +6,11 @@ import no.nav.helse.db.HelseDao.Companion.asSQL
 import no.nav.helse.db.MedSession
 import no.nav.helse.db.QueryRunner
 import no.nav.helse.spesialist.application.NotatRepository
+import no.nav.helse.spesialist.modell.DialogId
 import no.nav.helse.spesialist.modell.Notat
+import no.nav.helse.spesialist.modell.NotatId
 import no.nav.helse.spesialist.modell.NotatType
+import no.nav.helse.spesialist.modell.SaksbehandlerOid
 import java.util.UUID
 
 internal class PgNotatRepository(
@@ -15,20 +18,20 @@ internal class PgNotatRepository(
 ) : QueryRunner by MedSession(session), NotatRepository {
     override fun lagre(notat: Notat) {
         if (!notat.harFåttTildeltId()) {
-            insertNotat(notat).let(notat::tildelId)
+            insertNotat(notat).let(::NotatId).let(notat::tildelId)
         } else {
             updateNotat(notat)
         }
     }
 
-    override fun finn(notatId: Int): Notat? =
+    override fun finn(id: NotatId): Notat? =
         asSQL(
             """
             SELECT * FROM notat
             WHERE id = :notatId
             AND type NOT IN ('PaaVent', 'Retur')
             """.trimIndent(),
-            "notatId" to notatId,
+            "notatId" to id.value,
         ).singleOrNull { it.toNotat() }
 
     override fun finnAlleForVedtaksperiode(vedtaksperiodeId: UUID): List<Notat> =
@@ -49,12 +52,12 @@ internal class PgNotatRepository(
             """.trimIndent(),
             "tekst" to notat.tekst,
             "opprettet" to notat.opprettetTidspunkt,
-            "saksbehandler_oid" to notat.saksbehandlerOid,
+            "saksbehandler_oid" to notat.saksbehandlerOid.value,
             "vedtaksperiode_id" to notat.vedtaksperiodeId,
             "feilregistrert" to notat.feilregistrert,
             "feilregistrert_tidspunkt" to notat.feilregistrertTidspunkt,
             "type" to notat.type.name,
-            "dialog_ref" to notat.dialogRef,
+            "dialog_ref" to notat.dialogRef.value,
         ).updateAndReturnGeneratedKey().toInt()
 
     private fun updateNotat(notat: Notat) {
@@ -71,24 +74,24 @@ internal class PgNotatRepository(
             WHERE id = :id
             """.trimIndent(),
             "tekst" to notat.tekst,
-            "saksbehandler_oid" to notat.saksbehandlerOid,
+            "saksbehandler_oid" to notat.saksbehandlerOid.value,
             "vedtaksperiode_id" to notat.vedtaksperiodeId,
             "feilregistrert" to notat.feilregistrert,
             "feilregistrert_tidspunkt" to notat.feilregistrertTidspunkt,
             "type" to notat.type.name,
-            "dialog_ref" to notat.dialogRef,
-            "id" to notat.id(),
+            "dialog_ref" to notat.dialogRef.value,
+            "id" to notat.id().value,
         ).update()
     }
 
     private fun Row.toNotat(): Notat =
         Notat.Factory.fraLagring(
-            id = int("id"),
+            id = NotatId(int("id")),
             type = NotatType.valueOf(string("type")),
             tekst = string("tekst"),
-            dialogRef = long("dialog_ref"),
+            dialogRef = DialogId(long("dialog_ref")),
             vedtaksperiodeId = UUID.fromString(string("vedtaksperiode_id")),
-            saksbehandlerOid = UUID.fromString(string("saksbehandler_oid")),
+            saksbehandlerOid = SaksbehandlerOid(UUID.fromString(string("saksbehandler_oid"))),
             opprettetTidspunkt = localDateTime("opprettet"),
             feilregistrert = boolean("feilregistrert"),
             feilregistrertTidspunkt = localDateTimeOrNull("feilregistrert_tidspunkt"),
