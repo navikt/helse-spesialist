@@ -1,6 +1,7 @@
 package no.nav.helse.modell.kommando
 
 import net.logstash.logback.argument.StructuredArguments.kv
+import no.nav.helse.FeatureToggles
 import no.nav.helse.db.OverstyringDao
 import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.TotrinnsvurderingRepository
@@ -24,6 +25,7 @@ internal class VurderBehovForTotrinnskontroll(
     private val totrinnsvurderingRepository: TotrinnsvurderingRepository,
     private val sykefraværstilfelle: Sykefraværstilfelle,
     private val spleisVedtaksperioder: List<SpleisVedtaksperiode>,
+    private val featureToggles: FeatureToggles,
 ) : Command {
     private companion object {
         private val logg = LoggerFactory.getLogger(VurderBehovForTotrinnskontroll::class.java)
@@ -40,10 +42,7 @@ internal class VurderBehovForTotrinnskontroll(
         if ((kreverTotrinnsvurdering && !vedtaksperiodeHarFerdigstiltOppgave) || overstyringer.isNotEmpty()) {
             logg.info("Vedtaksperioden: $vedtaksperiodeId trenger totrinnsvurdering")
 
-            val totrinnsvurdering =
-                totrinnsvurderingRepository.finnTotrinnsvurdering(fødselsnummer) ?: Totrinnsvurdering.ny(
-                    vedtaksperiodeId,
-                )
+            val totrinnsvurdering = eksisterendeTotrinnsvurdering() ?: Totrinnsvurdering.ny(vedtaksperiodeId)
 
             if (totrinnsvurdering.erBeslutteroppgave) {
                 totrinnsvurdering.settRetur()
@@ -62,6 +61,14 @@ internal class VurderBehovForTotrinnskontroll(
         }
 
         return true
+    }
+
+    private fun eksisterendeTotrinnsvurdering(): Totrinnsvurdering? {
+        return if (featureToggles.skalBenytteNyTotrinnsvurderingsløsning()) {
+            totrinnsvurderingRepository.finnTotrinnsvurdering(fødselsnummer)
+        } else {
+            totrinnsvurderingRepository.finnTotrinnsvurdering(vedtaksperiodeId)
+        }
     }
 
     private fun sjekkMotNyttOppslag(

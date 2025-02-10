@@ -29,6 +29,7 @@ import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
+import java.util.UUID
 
 class PgTotrinnsvurderingRepository(
     private val overstyringDao: PgOverstyringDao,
@@ -40,7 +41,16 @@ class PgTotrinnsvurderingRepository(
             totrinnsvurderingDao.hentAktivTotrinnsvurdering(fødselsnummer)
                 ?: return null
 
-        return totrinnsvurderingFraDatabase.tilDomene(id, fødselsnummer)
+        return totrinnsvurderingFraDatabase.tilDomene(id, overstyringDao.finnOverstyringer(fødselsnummer).tilDomene())
+    }
+
+    @Deprecated("Skal fjernes, midlertidig i bruk for å tette et hull")
+    override fun finnTotrinnsvurdering(vedtaksperiodeId: UUID): Totrinnsvurdering? {
+        val (id, totrinnsvurderingFraDatabase) =
+            totrinnsvurderingDao.hentAktivTotrinnsvurdering(vedtaksperiodeId)
+                ?: return null
+
+        return totrinnsvurderingFraDatabase.tilDomene(id, emptyList())
     }
 
     override fun lagre(
@@ -57,7 +67,7 @@ class PgTotrinnsvurderingRepository(
 
     private fun TotrinnsvurderingFraDatabase.tilDomene(
         id: Long,
-        fødselsnummer: String,
+        overstyringer: List<Overstyring>,
     ): Totrinnsvurdering {
         return Totrinnsvurdering.fraLagring(
             id = id,
@@ -79,7 +89,7 @@ class PgTotrinnsvurderingRepository(
             opprettet = this.opprettet,
             oppdatert = this.oppdatert,
             ferdigstilt = false,
-            overstyringer = overstyringDao.finnOverstyringer(fødselsnummer).tilDomene(),
+            overstyringer = overstyringer,
         )
     }
 

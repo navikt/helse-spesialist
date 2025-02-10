@@ -45,6 +45,39 @@ class PgTotrinnsvurderingDao private constructor(
                 )
         }
 
+    @Deprecated("Skal fjernes, midlertidig i bruk for å tette et hull")
+    internal fun hentAktivTotrinnsvurdering(vedtaksperiodeId: UUID): Pair<Long, TotrinnsvurderingFraDatabase>? =
+        asSQL(
+            """
+            SELECT v.vedtaksperiode_id,
+                   tv.id,
+                   er_retur,
+                   tv.saksbehandler,
+                   tv.beslutter,
+                   ui.id as utbetaling_id,
+                   tv.opprettet,
+                   tv.oppdatert
+            FROM totrinnsvurdering tv
+                     INNER JOIN vedtak v on tv.vedtaksperiode_id = v.vedtaksperiode_id
+                     INNER JOIN oppgave o on v.id = o.vedtak_ref
+                     LEFT JOIN utbetaling_id ui on ui.id = tv.utbetaling_id_ref
+            WHERE v.vedtaksperiode_id = :vedtaksperiodeId
+              AND utbetaling_id_ref IS NULL
+            """.trimIndent(),
+            "vedtaksperiodeId" to vedtaksperiodeId,
+        ).singleOrNull { row ->
+            row.long("id") to
+                TotrinnsvurderingFraDatabase(
+                    vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
+                    erRetur = row.boolean("er_retur"),
+                    saksbehandler = row.uuidOrNull("saksbehandler"),
+                    beslutter = row.uuidOrNull("beslutter"),
+                    utbetalingId = row.uuidOrNull("utbetaling_id"),
+                    opprettet = row.localDateTime("opprettet"),
+                    oppdatert = row.localDateTimeOrNull("oppdatert"),
+                )
+        }
+
     internal fun hentAktivTotrinnsvurdering(fødselsnummer: String): Pair<Long, TotrinnsvurderingFraDatabase>? =
         asSQL(
             """
@@ -60,7 +93,7 @@ class PgTotrinnsvurderingDao private constructor(
                      INNER JOIN vedtak v on tv.vedtaksperiode_id = v.vedtaksperiode_id
                      INNER JOIN person p on v.person_ref = p.id
                      LEFT JOIN utbetaling_id ui on ui.id = tv.utbetaling_id_ref
-            WHERE p.fødselsnummer= :fodselsnummer
+            WHERE p.fødselsnummer = :fodselsnummer
               AND utbetaling_id_ref IS NULL
             """.trimIndent(),
             "fodselsnummer" to fødselsnummer,
