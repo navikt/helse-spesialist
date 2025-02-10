@@ -13,13 +13,13 @@ import java.util.UUID
 class MinimumSykdomsgrad(
     override val eksternHendelseId: UUID = UUID.randomUUID(),
     override val saksbehandler: Saksbehandler,
-    val aktørId: String,
     override val fødselsnummer: String,
+    val aktørId: String,
+    val initierendeVedtaksperiodeId: UUID,
     val perioderVurdertOk: List<MinimumSykdomsgradPeriode>,
     val perioderVurdertIkkeOk: List<MinimumSykdomsgradPeriode>,
     val begrunnelse: String,
     val arbeidsgivere: List<MinimumSykdomsgradArbeidsgiver>,
-    val initierendeVedtaksperiodeId: UUID,
 ) : Overstyring {
     override fun utførAv(saksbehandler: Saksbehandler) {
         saksbehandler.håndter(this)

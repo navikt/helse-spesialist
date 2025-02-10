@@ -11,9 +11,9 @@ class OverstyrtArbeidsforhold(
     override val saksbehandler: Saksbehandler,
     override val fødselsnummer: String,
     val aktørId: String,
+    val vedtaksperiodeId: UUID,
     val skjæringstidspunkt: LocalDate,
     val overstyrteArbeidsforhold: List<Arbeidsforhold>,
-    val vedtaksperiodeId: UUID,
 ) : Overstyring {
     override fun utførAv(saksbehandler: Saksbehandler) {
         saksbehandler.håndter(this)

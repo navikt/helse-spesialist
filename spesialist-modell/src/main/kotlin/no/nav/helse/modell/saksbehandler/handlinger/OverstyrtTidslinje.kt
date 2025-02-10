@@ -13,9 +13,9 @@ import java.util.UUID
 class OverstyrtTidslinje(
     override val eksternHendelseId: UUID = UUID.randomUUID(),
     override val saksbehandler: Saksbehandler,
-    val vedtaksperiodeId: UUID,
-    val aktørId: String,
     override val fødselsnummer: String,
+    val aktørId: String,
+    val vedtaksperiodeId: UUID,
     val organisasjonsnummer: String,
     val dager: List<OverstyrtTidslinjedag>,
     val begrunnelse: String,
