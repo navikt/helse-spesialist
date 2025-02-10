@@ -282,6 +282,8 @@ class OppgaveService(
         }
     }
 
+    fun finnVedtaksperiodeId(oppgavereferanse: Long): UUID = oppgaveDao.finnVedtaksperiodeId(oppgavereferanse)
+
     private fun tildelVedReservasjon(
         fødselsnummer: String,
         oppgave: Oppgave,

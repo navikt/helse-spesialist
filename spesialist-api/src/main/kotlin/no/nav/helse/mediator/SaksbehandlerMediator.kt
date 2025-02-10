@@ -59,6 +59,7 @@ import no.nav.helse.modell.saksbehandler.handlinger.Refusjonselement
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlinghåndtererImpl
+import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.SendIReturResult
@@ -201,6 +202,17 @@ class SaksbehandlerMediator(
             godkjent,
         )
 
+    private fun eksisterendeTotrinnsvurdering(
+        vedtaksperiodeId: UUID,
+        fødselsnummer: String,
+    ): Totrinnsvurdering? {
+        return if (featureToggles.skalBenytteNyTotrinnsvurderingsløsning()) {
+            totrinnsvurderingRepository.finnTotrinnsvurdering(fødselsnummer)
+        } else {
+            totrinnsvurderingRepository.finnTotrinnsvurdering(vedtaksperiodeId)
+        }
+    }
+
     private fun vedtak(
         oppgavereferanse: Long,
         saksbehandler: Saksbehandler,
@@ -208,10 +220,11 @@ class SaksbehandlerMediator(
     ): VedtakResultat {
         val erÅpenOppgave = apiOppgaveService.venterPåSaksbehandler(oppgavereferanse)
         val spleisBehandlingId = apiOppgaveService.spleisBehandlingId(oppgavereferanse)
+        val vedtaksperiodeId = oppgaveService.finnVedtaksperiodeId(oppgavereferanse)
         val fødselsnummer = oppgaveApiDao.finnFødselsnummer(oppgavereferanse)
         if (!erÅpenOppgave) return VedtakResultat.Feil.IkkeÅpenOppgave()
 
-        val totrinnsvurdering = totrinnsvurderingRepository.finnTotrinnsvurdering(fødselsnummer)
+        val totrinnsvurdering = eksisterendeTotrinnsvurdering(vedtaksperiodeId, fødselsnummer)
         if (totrinnsvurdering?.erBeslutteroppgave == true) {
             if (!saksbehandler.harTilgangTil(listOf(Egenskap.BESLUTTER)) && !env.erDev) {
                 return VedtakResultat.Feil.BeslutterFeil.TrengerBeslutterRolle()
