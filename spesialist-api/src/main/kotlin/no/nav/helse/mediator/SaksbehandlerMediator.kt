@@ -130,7 +130,7 @@ class SaksbehandlerMediator(
         saksbehandlerFraApi: SaksbehandlerFraApi,
     ) {
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
-        val modellhandling = handlingFraApi.tilModellversjon(saksbehandler)
+        val modellhandling = handlingFraApi.tilModellversjon(saksbehandler.oid)
         SaksbehandlerLagrer(saksbehandlerDao).lagre(saksbehandler)
         tell(modellhandling)
         saksbehandler.register(Saksbehandlingsmelder(meldingPubliserer))
@@ -802,13 +802,13 @@ class SaksbehandlerMediator(
     private fun SaksbehandlerFraApi.tilSaksbehandler() =
         Saksbehandler(epost, oid, navn, ident, TilgangskontrollørForApi(this.grupper, tilgangsgrupper))
 
-    private fun HandlingFraApi.tilModellversjon(saksbehandler: Saksbehandler): Handling =
+    private fun HandlingFraApi.tilModellversjon(saksbehandlerOid: UUID): Handling =
         when (this) {
-            is ApiArbeidsforholdOverstyringHandling -> this.tilModellversjon(saksbehandler)
-            is ApiInntektOgRefusjonOverstyring -> this.tilModellversjon(saksbehandler)
-            is ApiTidslinjeOverstyring -> this.tilModellversjon(saksbehandler)
-            is ApiSkjonnsfastsettelse -> this.tilModellversjon(saksbehandler)
-            is ApiMinimumSykdomsgrad -> this.tilModellversjon(saksbehandler)
+            is ApiArbeidsforholdOverstyringHandling -> this.tilModellversjon(saksbehandlerOid)
+            is ApiInntektOgRefusjonOverstyring -> this.tilModellversjon(saksbehandlerOid)
+            is ApiTidslinjeOverstyring -> this.tilModellversjon(saksbehandlerOid)
+            is ApiSkjonnsfastsettelse -> this.tilModellversjon(saksbehandlerOid)
+            is ApiMinimumSykdomsgrad -> this.tilModellversjon(saksbehandlerOid)
             is ApiAnnulleringData -> this.tilModellversjon()
             is TildelOppgave -> this.tilModellversjon()
             is AvmeldOppgave -> this.tilModellversjon()
@@ -824,13 +824,13 @@ class SaksbehandlerMediator(
             is ApiPaVentRequest.ApiEndrePaVent -> this.tilModellversjon()
         }
 
-    private fun ApiArbeidsforholdOverstyringHandling.tilModellversjon(saksbehandler: Saksbehandler): OverstyrtArbeidsforhold =
+    private fun ApiArbeidsforholdOverstyringHandling.tilModellversjon(saksbehandlerOid: UUID): OverstyrtArbeidsforhold =
         OverstyrtArbeidsforhold.ny(
             fødselsnummer = fodselsnummer,
             aktørId = aktorId,
             skjæringstidspunkt = skjaringstidspunkt,
             vedtaksperiodeId = vedtaksperiodeId,
-            saksbehandler = saksbehandler,
+            saksbehandlerOid = saksbehandlerOid,
             overstyrteArbeidsforhold =
                 overstyrteArbeidsforhold.map { overstyrtArbeidsforhold ->
                     Arbeidsforhold(
@@ -846,13 +846,13 @@ class SaksbehandlerMediator(
                 },
         )
 
-    private fun ApiSkjonnsfastsettelse.tilModellversjon(saksbehandler: Saksbehandler): SkjønnsfastsattSykepengegrunnlag =
+    private fun ApiSkjonnsfastsettelse.tilModellversjon(saksbehandlerOid: UUID): SkjønnsfastsattSykepengegrunnlag =
         SkjønnsfastsattSykepengegrunnlag.ny(
             aktørId = aktorId,
             fødselsnummer = fodselsnummer,
             skjæringstidspunkt = skjaringstidspunkt,
             vedtaksperiodeId = vedtaksperiodeId,
-            saksbehandler = saksbehandler,
+            saksbehandlerOid = saksbehandlerOid,
             arbeidsgivere =
                 arbeidsgivere.map { ag ->
                     SkjønnsfastsattArbeidsgiver(
@@ -878,11 +878,11 @@ class SaksbehandlerMediator(
                 },
         )
 
-    private fun ApiMinimumSykdomsgrad.tilModellversjon(saksbehandler: Saksbehandler): MinimumSykdomsgrad =
+    private fun ApiMinimumSykdomsgrad.tilModellversjon(saksbehandlerOid: UUID): MinimumSykdomsgrad =
         MinimumSykdomsgrad.ny(
             aktørId = aktorId,
             fødselsnummer = fodselsnummer,
-            saksbehandler = saksbehandler,
+            saksbehandlerOid = saksbehandlerOid,
             perioderVurdertOk =
                 perioderVurdertOk.map {
                     MinimumSykdomsgradPeriode(
@@ -908,13 +908,13 @@ class SaksbehandlerMediator(
             vedtaksperiodeId = initierendeVedtaksperiodeId,
         )
 
-    private fun ApiInntektOgRefusjonOverstyring.tilModellversjon(saksbehandler: Saksbehandler): OverstyrtInntektOgRefusjon =
+    private fun ApiInntektOgRefusjonOverstyring.tilModellversjon(saksbehandlerOid: UUID): OverstyrtInntektOgRefusjon =
         OverstyrtInntektOgRefusjon.ny(
             aktørId = aktorId,
             fødselsnummer = fodselsnummer,
             skjæringstidspunkt = skjaringstidspunkt,
             vedtaksperiodeId = vedtaksperiodeId,
-            saksbehandler = saksbehandler,
+            saksbehandlerOid = saksbehandlerOid,
             arbeidsgivere =
                 arbeidsgivere.map { overstyrArbeidsgiver ->
                     OverstyrtArbeidsgiver(
@@ -939,13 +939,13 @@ class SaksbehandlerMediator(
                 },
         )
 
-    private fun ApiTidslinjeOverstyring.tilModellversjon(saksbehandler: Saksbehandler): OverstyrtTidslinje =
+    private fun ApiTidslinjeOverstyring.tilModellversjon(saksbehandlerOid: UUID): OverstyrtTidslinje =
         OverstyrtTidslinje.ny(
             vedtaksperiodeId = vedtaksperiodeId,
             aktørId = aktorId,
             fødselsnummer = fodselsnummer,
             organisasjonsnummer = organisasjonsnummer,
-            saksbehandler = saksbehandler,
+            saksbehandlerOid = saksbehandlerOid,
             dager =
                 dager.map {
                     OverstyrtTidslinjedag(

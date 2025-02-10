@@ -13,7 +13,7 @@ import java.util.UUID
 class OverstyrtTidslinje private constructor(
     id: Long?,
     override val eksternHendelseId: UUID,
-    override val saksbehandler: Saksbehandler,
+    override val saksbehandlerOid: UUID,
     override val fødselsnummer: String,
     override val aktørId: String,
     override val vedtaksperiodeId: UUID,
@@ -29,7 +29,7 @@ class OverstyrtTidslinje private constructor(
 
     companion object {
         fun ny(
-            saksbehandler: Saksbehandler,
+            saksbehandlerOid: UUID,
             fødselsnummer: String,
             aktørId: String,
             vedtaksperiodeId: UUID,
@@ -39,7 +39,7 @@ class OverstyrtTidslinje private constructor(
         ) = OverstyrtTidslinje(
             id = null,
             eksternHendelseId = UUID.randomUUID(),
-            saksbehandler = saksbehandler,
+            saksbehandlerOid = saksbehandlerOid,
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
             vedtaksperiodeId = vedtaksperiodeId,
@@ -51,7 +51,7 @@ class OverstyrtTidslinje private constructor(
         fun fraLagring(
             id: Long,
             eksternHendelseId: UUID,
-            saksbehandler: Saksbehandler,
+            saksbehandlerOid: UUID,
             fødselsnummer: String,
             aktørId: String,
             vedtaksperiodeId: UUID,
@@ -61,7 +61,7 @@ class OverstyrtTidslinje private constructor(
         ) = OverstyrtTidslinje(
             id = id,
             eksternHendelseId = eksternHendelseId,
-            saksbehandler = saksbehandler,
+            saksbehandlerOid = saksbehandlerOid,
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
             vedtaksperiodeId = vedtaksperiodeId,

@@ -130,7 +130,7 @@ internal class TotrinnsvurderingTest {
             organisasjonsnummer = lagOrganisasjonsnummer(),
             dager = emptyList(),
             begrunnelse = "begrunnelse",
-            saksbehandler = nySaksbehandler(),
+            saksbehandlerOid = nySaksbehandler().oid,
         ))
         assertEquals(1, totrinnsvurdering.overstyringer().size)
     }

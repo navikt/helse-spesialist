@@ -13,7 +13,7 @@ import java.util.UUID
 class MinimumSykdomsgrad private constructor(
     id: Long?,
     override val eksternHendelseId: UUID,
-    override val saksbehandler: Saksbehandler,
+    override val saksbehandlerOid: UUID,
     override val fødselsnummer: String,
     override val aktørId: String,
     override val vedtaksperiodeId: UUID,
@@ -30,7 +30,7 @@ class MinimumSykdomsgrad private constructor(
 
     companion object {
         fun ny(
-            saksbehandler: Saksbehandler,
+            saksbehandlerOid: UUID,
             fødselsnummer: String,
             aktørId: String,
             vedtaksperiodeId: UUID,
@@ -41,7 +41,7 @@ class MinimumSykdomsgrad private constructor(
         ) = MinimumSykdomsgrad(
             id = null,
             eksternHendelseId = UUID.randomUUID(),
-            saksbehandler = saksbehandler,
+            saksbehandlerOid = saksbehandlerOid,
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
             vedtaksperiodeId = vedtaksperiodeId,
@@ -54,7 +54,7 @@ class MinimumSykdomsgrad private constructor(
         fun fraLagring(
             id: Long,
             eksternHendelseId: UUID,
-            saksbehandler: Saksbehandler,
+            saksbehandlerOid: UUID,
             fødselsnummer: String,
             aktørId: String,
             vedtaksperiodeId: UUID,
@@ -65,7 +65,7 @@ class MinimumSykdomsgrad private constructor(
         ) = MinimumSykdomsgrad(
             id = id,
             eksternHendelseId = eksternHendelseId,
-            saksbehandler = saksbehandler,
+            saksbehandlerOid = saksbehandlerOid,
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
             vedtaksperiodeId = vedtaksperiodeId,

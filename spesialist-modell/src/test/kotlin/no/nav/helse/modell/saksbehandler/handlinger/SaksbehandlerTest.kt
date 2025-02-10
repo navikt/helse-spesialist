@@ -41,7 +41,7 @@ internal class SaksbehandlerTest {
                 organisasjonsnummer = "12345",
                 dager = emptyList(),
                 begrunnelse = "begrunnelse",
-                saksbehandler = saksbehandler,
+                saksbehandlerOid = saksbehandler.oid,
             )
         )
         assertEquals(true, observert)
@@ -66,7 +66,7 @@ internal class SaksbehandlerTest {
             organisasjonsnummer = "12345",
             dager = overstyrteDager(),
             begrunnelse = "begrunnelse",
-            saksbehandler = saksbehandler,
+            saksbehandlerOid = saksbehandler.oid,
         )
         saksbehandler.håndter(
             overstyring
@@ -166,7 +166,7 @@ internal class SaksbehandlerTest {
                 skjæringstidspunkt = 1.januar,
                 arbeidsgivere = emptyList(),
                 vedtaksperiodeId = UUID.randomUUID(),
-                saksbehandler = saksbehandler,
+                saksbehandlerOid = saksbehandler.oid,
             )
         )
         assertEquals(true, observert)
@@ -190,7 +190,7 @@ internal class SaksbehandlerTest {
                 skjæringstidspunkt = 1.januar,
                 overstyrteArbeidsforhold = emptyList(),
                 vedtaksperiodeId = UUID.randomUUID(),
-                saksbehandler = saksbehandler,
+                saksbehandlerOid = saksbehandler.oid,
             )
         )
         assertEquals(true, observert)
@@ -216,7 +216,7 @@ internal class SaksbehandlerTest {
                 perioderVurdertOk = emptyList(),
                 perioderVurdertIkkeOk = listOf(MinimumSykdomsgradPeriode(1.januar, 31.januar)),
                 arbeidsgivere = listOf(MinimumSykdomsgradArbeidsgiver(organisasjonsnummer = "12345", berørtVedtaksperiodeId = UUID.randomUUID())),
-                saksbehandler = saksbehandler,
+                saksbehandlerOid = saksbehandler.oid,
             )
         )
         assertEquals(true, observert)

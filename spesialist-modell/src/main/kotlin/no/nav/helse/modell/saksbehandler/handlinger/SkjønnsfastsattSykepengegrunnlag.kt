@@ -13,7 +13,7 @@ import java.util.UUID
 class SkjønnsfastsattSykepengegrunnlag private constructor(
     id: Long?,
     override val eksternHendelseId: UUID,
-    override val saksbehandler: Saksbehandler,
+    override val saksbehandlerOid: UUID,
     override val fødselsnummer: String,
     override val aktørId: String,
     override val vedtaksperiodeId: UUID,
@@ -28,7 +28,7 @@ class SkjønnsfastsattSykepengegrunnlag private constructor(
 
     companion object {
         fun ny(
-            saksbehandler: Saksbehandler,
+            saksbehandlerOid: UUID,
             fødselsnummer: String,
             aktørId: String,
             vedtaksperiodeId: UUID,
@@ -37,7 +37,7 @@ class SkjønnsfastsattSykepengegrunnlag private constructor(
         ) = SkjønnsfastsattSykepengegrunnlag(
             id = null,
             eksternHendelseId = UUID.randomUUID(),
-            saksbehandler = saksbehandler,
+            saksbehandlerOid = saksbehandlerOid,
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
             vedtaksperiodeId = vedtaksperiodeId,
@@ -48,7 +48,7 @@ class SkjønnsfastsattSykepengegrunnlag private constructor(
         fun fraLagring(
             id: Long,
             eksternHendelseId: UUID,
-            saksbehandler: Saksbehandler,
+            saksbehandlerOid: UUID,
             fødselsnummer: String,
             aktørId: String,
             vedtaksperiodeId: UUID,
@@ -57,7 +57,7 @@ class SkjønnsfastsattSykepengegrunnlag private constructor(
         ) = SkjønnsfastsattSykepengegrunnlag(
             id = id,
             eksternHendelseId = eksternHendelseId,
-            saksbehandler = saksbehandler,
+            saksbehandlerOid = saksbehandlerOid,
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
             vedtaksperiodeId = vedtaksperiodeId,
