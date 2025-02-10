@@ -10,7 +10,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.path
 import no.nav.helse.mediator.asUUID
-import no.nav.helse.spesialist.api.client.AccessTokenClient
+import no.nav.helse.spesialist.application.AccessTokenGenerator
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -23,14 +23,14 @@ interface Gruppekontroll {
 
 class MsGraphClient(
     private val httpClient: HttpClient,
-    private val tokenClient: AccessTokenClient,
+    private val accessTokenGenerator: AccessTokenGenerator,
     private val graphUrl: String = "https://graph.microsoft.com/v1.0",
 ) : Gruppekontroll {
     override suspend fun erIGrupper(
         oid: UUID,
         gruppeIder: List<UUID>,
     ): Boolean {
-        val token = tokenClient.hentAccessToken("https://graph.microsoft.com/.default")
+        val token = accessTokenGenerator.hentAccessToken("https://graph.microsoft.com/.default")
         val response =
             httpClient.post(graphUrl) {
                 url {

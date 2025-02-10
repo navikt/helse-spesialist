@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.api.client
+package no.nav.helse.spesialist.client.entraid
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
@@ -17,6 +17,7 @@ import io.ktor.http.Parameters
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import no.nav.helse.spesialist.api.AzureConfig
+import no.nav.helse.spesialist.application.AccessTokenGenerator
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.Instant
@@ -25,19 +26,19 @@ import java.util.Date
 import java.util.UUID
 import kotlin.collections.set
 
-class AccessTokenClient(
+class EntraIDAccessTokenGenerator(
     private val httpClient: HttpClient,
     private val azureConfig: AzureConfig,
     private val privateJwk: String,
-) {
-    private val log = LoggerFactory.getLogger(AccessTokenClient::class.java)
+) : AccessTokenGenerator {
+    private val log = LoggerFactory.getLogger(EntraIDAccessTokenGenerator::class.java)
     private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     private val mutex = Mutex()
 
     @Volatile
     private var tokenMap = HashMap<String, AadAccessToken>()
 
-    suspend fun hentAccessToken(scope: String): String {
+    override suspend fun hentAccessToken(scope: String): String {
         val omToMinutter = Instant.now().plusSeconds(120L)
         return mutex.withLock {
             (

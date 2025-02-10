@@ -17,7 +17,7 @@ import io.ktor.http.contentType
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import net.logstash.logback.argument.StructuredArguments
-import no.nav.helse.spesialist.api.client.AccessTokenClient
+import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spleis.graphql.HentSnapshot
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -31,7 +31,7 @@ interface ISnapshotClient {
 
 class SnapshotClient(
     private val httpClient: HttpClient,
-    private val accessTokenClient: AccessTokenClient,
+    private val accessTokenGenerator: AccessTokenGenerator,
     private val spleisUrl: URI,
     private val spleisClientId: String,
     private val retries: Int = 5,
@@ -87,7 +87,7 @@ class SnapshotClient(
         }
 
     private suspend fun <T : Any> execute(request: GraphQLClientRequest<T>): GraphQLClientResponse<T> {
-        val accessToken = accessTokenClient.hentAccessToken(spleisClientId)
+        val accessToken = accessTokenGenerator.hentAccessToken(spleisClientId)
         val callId = UUID.randomUUID().toString()
 
         val response =

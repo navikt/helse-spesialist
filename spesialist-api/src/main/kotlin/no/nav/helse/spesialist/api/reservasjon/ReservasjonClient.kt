@@ -12,8 +12,8 @@ import io.micrometer.core.instrument.Tag
 import io.micrometer.core.instrument.Timer
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
-import no.nav.helse.spesialist.api.client.AccessTokenClient
 import no.nav.helse.spesialist.api.graphql.schema.ApiReservasjon
+import no.nav.helse.spesialist.application.AccessTokenGenerator
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -40,7 +40,7 @@ class KRRClient(
     private val httpClient: HttpClient,
     private val apiUrl: String,
     private val scope: String,
-    private val accessTokenClient: AccessTokenClient,
+    private val accessTokenGenerator: AccessTokenGenerator,
 ) : ReservasjonClient {
     private val logg: Logger = LoggerFactory.getLogger(this.javaClass)
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
@@ -49,7 +49,7 @@ class KRRClient(
         val sample = Timer.start(registry)
         return try {
             logg.debug("Henter accessToken")
-            val accessToken = accessTokenClient.hentAccessToken(scope)
+            val accessToken = accessTokenGenerator.hentAccessToken(scope)
             val callId = UUID.randomUUID().toString()
 
             logg.debug("Henter reservasjon fra $apiUrl/rest/v1/person, callId=$callId")

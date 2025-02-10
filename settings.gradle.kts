@@ -4,6 +4,7 @@ include(
     "spesialist-selve",
     "spesialist-api-schema",
     "spesialist-api",
+    "spesialist-client-entra-id",
     "spesialist-db-migrations",
     "spesialist-db",
     "spesialist-kafka",
