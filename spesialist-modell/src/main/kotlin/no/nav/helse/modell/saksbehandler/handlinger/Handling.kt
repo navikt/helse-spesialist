@@ -2,7 +2,6 @@ package no.nav.helse.modell.saksbehandler.handlinger
 
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.saksbehandler.Saksbehandler
-import java.util.UUID
 
 interface Handling {
     fun utførAv(saksbehandler: Saksbehandler)
@@ -12,11 +11,6 @@ interface Handling {
 
 interface Personhandling : Handling {
     val fødselsnummer: String
-}
-
-interface Overstyring : Personhandling {
-    val saksbehandler: Saksbehandler
-    val eksternHendelseId: UUID
 }
 
 abstract class Oppgavehandling(private val oppgaveId: Long) : Handling {
