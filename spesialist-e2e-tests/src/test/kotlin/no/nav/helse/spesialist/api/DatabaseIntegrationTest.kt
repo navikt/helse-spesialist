@@ -256,17 +256,6 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         ).also(session.notatRepository::lagre).id()
     }
 
-    protected fun opprettKommentar(
-        tekst: String = "En kommentar",
-        saksbehandlerIdent: String = SAKSBEHANDLER.ident,
-        dialogRef: Long = opprettDialog(),
-    ) = dbQuery.updateAndReturnGeneratedKey(
-        "INSERT INTO kommentarer (tekst, saksbehandlerident, dialog_ref) VALUES (:tekst, :ident, :dialogRef)",
-        "tekst" to tekst,
-        "ident" to saksbehandlerIdent,
-        "dialogRef" to dialogRef,
-    )!!.toInt()
-
     protected fun opprettPersonOld(
         fødselsnummer: String = FØDSELSNUMMER,
         aktørId: String = AKTØRID,

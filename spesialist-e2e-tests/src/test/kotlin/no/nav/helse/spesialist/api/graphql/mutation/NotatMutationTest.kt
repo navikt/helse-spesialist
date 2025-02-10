@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.api.graphql.mutation
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
 import no.nav.helse.spesialist.api.objectMapper
+import no.nav.helse.spesialist.modell.Dialog
 import no.nav.helse.spesialist.modell.NotatType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -249,8 +250,14 @@ internal class NotatMutationTest : AbstractGraphQLApiTest() {
     @Test
     fun `feilregistrererKommentar fungerer som forventet`() {
         opprettSaksbehandler()
-        val dialogRef = opprettDialog()
-        val kommentarId = opprettKommentar(dialogRef = dialogRef)
+        val dialog = Dialog.Factory.ny()
+        val kommentar = dialog.leggTilKommentar("En kommentar", SAKSBEHANDLER.ident)
+        sessionFactory.transactionalSessionScope { session ->
+            session.dialogRepository.lagre(dialog)
+        }
+
+        val dialogRef = dialog.id()
+        val kommentarId = kommentar.id()
 
         val body =
             runQuery(
