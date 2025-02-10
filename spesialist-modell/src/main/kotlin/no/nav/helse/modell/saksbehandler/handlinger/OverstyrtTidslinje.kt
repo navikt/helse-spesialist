@@ -10,8 +10,9 @@ import no.nav.helse.modell.vilkårsprøving.Subsumsjon.Utfall.VILKAR_BEREGNET
 import java.time.LocalDate
 import java.util.UUID
 
-class OverstyrtTidslinje(
-    override val eksternHendelseId: UUID = UUID.randomUUID(),
+class OverstyrtTidslinje private constructor(
+    id: Long?,
+    override val eksternHendelseId: UUID,
     override val saksbehandler: Saksbehandler,
     override val fødselsnummer: String,
     override val aktørId: String,
@@ -19,12 +20,56 @@ class OverstyrtTidslinje(
     val organisasjonsnummer: String,
     val dager: List<OverstyrtTidslinjedag>,
     val begrunnelse: String,
-) : Overstyring {
+) : Overstyring(id) {
     override fun utførAv(saksbehandler: Saksbehandler) {
         saksbehandler.håndter(this)
     }
 
     override fun loggnavn(): String = "overstyr_tidslinje"
+
+    companion object {
+        fun ny(
+            saksbehandler: Saksbehandler,
+            fødselsnummer: String,
+            aktørId: String,
+            vedtaksperiodeId: UUID,
+            organisasjonsnummer: String,
+            dager: List<OverstyrtTidslinjedag>,
+            begrunnelse: String,
+        ) = OverstyrtTidslinje(
+            id = null,
+            eksternHendelseId = UUID.randomUUID(),
+            saksbehandler = saksbehandler,
+            fødselsnummer = fødselsnummer,
+            aktørId = aktørId,
+            vedtaksperiodeId = vedtaksperiodeId,
+            organisasjonsnummer = organisasjonsnummer,
+            dager = dager,
+            begrunnelse = begrunnelse,
+        )
+
+        fun fraLagring(
+            id: Long,
+            eksternHendelseId: UUID,
+            saksbehandler: Saksbehandler,
+            fødselsnummer: String,
+            aktørId: String,
+            vedtaksperiodeId: UUID,
+            organisasjonsnummer: String,
+            dager: List<OverstyrtTidslinjedag>,
+            begrunnelse: String,
+        ) = OverstyrtTidslinje(
+            id = id,
+            eksternHendelseId = eksternHendelseId,
+            saksbehandler = saksbehandler,
+            fødselsnummer = fødselsnummer,
+            aktørId = aktørId,
+            vedtaksperiodeId = vedtaksperiodeId,
+            organisasjonsnummer = organisasjonsnummer,
+            dager = dager,
+            begrunnelse = begrunnelse,
+        )
+    }
 
     fun byggEvent() =
         OverstyrtTidslinjeEvent(

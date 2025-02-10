@@ -6,20 +6,61 @@ import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import java.time.LocalDate
 import java.util.UUID
 
-class OverstyrtInntektOgRefusjon(
-    override val eksternHendelseId: UUID = UUID.randomUUID(),
+class OverstyrtInntektOgRefusjon internal constructor(
+    id: Long?,
+    override val eksternHendelseId: UUID,
     override val saksbehandler: Saksbehandler,
     override val fødselsnummer: String,
     override val aktørId: String,
     override val vedtaksperiodeId: UUID,
     val skjæringstidspunkt: LocalDate,
     val arbeidsgivere: List<OverstyrtArbeidsgiver>,
-) : Overstyring {
+) : Overstyring(id) {
     override fun utførAv(saksbehandler: Saksbehandler) {
         saksbehandler.håndter(this)
     }
 
     override fun loggnavn(): String = "overstyr_inntekt_og_refusjon"
+
+    companion object {
+        fun ny(
+            saksbehandler: Saksbehandler,
+            fødselsnummer: String,
+            aktørId: String,
+            vedtaksperiodeId: UUID,
+            skjæringstidspunkt: LocalDate,
+            arbeidsgivere: List<OverstyrtArbeidsgiver>,
+        ) = OverstyrtInntektOgRefusjon(
+            id = null,
+            eksternHendelseId = UUID.randomUUID(),
+            saksbehandler = saksbehandler,
+            fødselsnummer = fødselsnummer,
+            aktørId = aktørId,
+            vedtaksperiodeId = vedtaksperiodeId,
+            skjæringstidspunkt = skjæringstidspunkt,
+            arbeidsgivere = arbeidsgivere,
+        )
+
+        fun fraLagring(
+            id: Long,
+            eksternHendelseId: UUID,
+            saksbehandler: Saksbehandler,
+            fødselsnummer: String,
+            aktørId: String,
+            vedtaksperiodeId: UUID,
+            skjæringstidspunkt: LocalDate,
+            arbeidsgivere: List<OverstyrtArbeidsgiver>,
+        ) = OverstyrtInntektOgRefusjon(
+            id = id,
+            eksternHendelseId = eksternHendelseId,
+            saksbehandler = saksbehandler,
+            fødselsnummer = fødselsnummer,
+            aktørId = aktørId,
+            vedtaksperiodeId = vedtaksperiodeId,
+            skjæringstidspunkt = skjæringstidspunkt,
+            arbeidsgivere = arbeidsgivere,
+        )
+    }
 
     fun byggEvent(
         oid: UUID,

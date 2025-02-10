@@ -381,16 +381,17 @@ class PgOverstyringDao private constructor(queryRunner: QueryRunner) : Overstyri
             "vedtaksperiodeId" to request.vedtaksperiodeId,
         ).updateAndReturnGeneratedKey()
 
-    internal fun finnOverstyringer(fødselsnummer: String): List<OverstyringForDatabase> =
+    internal fun finnOverstyringer(fødselsnummer: String): List<Pair<Long, OverstyringForDatabase>> =
         finnTidslinjeoverstyringer(fødselsnummer) +
             finnInntektsoverstyringer(fødselsnummer) +
             finnArbeidsforholdoverstyringer(fødselsnummer) +
             finnMinimumSykdomsgradsoverstyringer(fødselsnummer) +
             finnSkjønnsfastsatteSykepengegrunnlag(fødselsnummer)
 
-    private fun finnTidslinjeoverstyringer(fødselsnummer: String): List<OverstyrtTidslinjeForDatabase> {
+    private fun finnTidslinjeoverstyringer(fødselsnummer: String): List<Pair<Long, OverstyrtTidslinjeForDatabase>> {
         return asSQL(
-            """SELECT ot.id AS overstyring_tidslinje_id,
+            """SELECT o.id,
+                      ot.id AS overstyring_tidslinje_id,
                       o.ekstern_hendelse_id,
                       p.fødselsnummer,
                       p.aktør_id,
@@ -409,18 +410,19 @@ class PgOverstyringDao private constructor(queryRunner: QueryRunner) : Overstyri
         )
             .list { overstyringRow ->
                 val id = overstyringRow.long("overstyring_tidslinje_id")
-                OverstyrtTidslinjeForDatabase(
-                    eksternHendelseId = overstyringRow.uuid("ekstern_hendelse_id"),
-                    fødselsnummer = overstyringRow.string("fødselsnummer"),
-                    aktørId = overstyringRow.string("aktør_id"),
-                    organisasjonsnummer = overstyringRow.string("organisasjonsnummer"),
-                    vedtaksperiodeId = overstyringRow.uuid("vedtaksperiode_id"),
-                    begrunnelse = overstyringRow.string("begrunnelse"),
-                    opprettet = overstyringRow.localDateTime("tidspunkt"),
-                    saksbehandlerOid = overstyringRow.uuid("saksbehandler_ref"),
-                    dager =
-                        asSQL(
-                            """
+                overstyringRow.long("id") to
+                    OverstyrtTidslinjeForDatabase(
+                        eksternHendelseId = overstyringRow.uuid("ekstern_hendelse_id"),
+                        fødselsnummer = overstyringRow.string("fødselsnummer"),
+                        aktørId = overstyringRow.string("aktør_id"),
+                        organisasjonsnummer = overstyringRow.string("organisasjonsnummer"),
+                        vedtaksperiodeId = overstyringRow.uuid("vedtaksperiode_id"),
+                        begrunnelse = overstyringRow.string("begrunnelse"),
+                        opprettet = overstyringRow.localDateTime("tidspunkt"),
+                        saksbehandlerOid = overstyringRow.uuid("saksbehandler_ref"),
+                        dager =
+                            asSQL(
+                                """
                                 SELECT dato, 
                                        dagtype, 
                                        fra_dagtype, 
@@ -429,22 +431,22 @@ class PgOverstyringDao private constructor(queryRunner: QueryRunner) : Overstyri
                                 FROM overstyring_dag
                                 WHERE overstyring_tidslinje_ref = :id
                                 """,
-                            "id" to id,
-                        ).list { overstyringDagRow ->
-                            OverstyrtTidslinjedagForDatabase(
-                                dato = overstyringDagRow.localDate("dato"),
-                                type = overstyringDagRow.string("dagtype"),
-                                fraType = overstyringDagRow.string("fra_dagtype"),
-                                grad = overstyringDagRow.intOrNull("grad"),
-                                fraGrad = overstyringDagRow.intOrNull("fra_grad"),
-                                lovhjemmel = null,
-                            )
-                        },
-                )
+                                "id" to id,
+                            ).list { overstyringDagRow ->
+                                OverstyrtTidslinjedagForDatabase(
+                                    dato = overstyringDagRow.localDate("dato"),
+                                    type = overstyringDagRow.string("dagtype"),
+                                    fraType = overstyringDagRow.string("fra_dagtype"),
+                                    grad = overstyringDagRow.intOrNull("grad"),
+                                    fraGrad = overstyringDagRow.intOrNull("fra_grad"),
+                                    lovhjemmel = null,
+                                )
+                            },
+                    )
             }
     }
 
-    private fun finnInntektsoverstyringer(fødselsnummer: String): List<OverstyrtInntektOgRefusjonForDatabase> {
+    private fun finnInntektsoverstyringer(fødselsnummer: String): List<Pair<Long, OverstyrtInntektOgRefusjonForDatabase>> {
         return asSQL(
             """
                 SELECT DISTINCT ON (o.id)
@@ -469,58 +471,62 @@ class PgOverstyringDao private constructor(queryRunner: QueryRunner) : Overstyri
                     "id" to id,
                 )
                     .single { it.localDate("skjaeringstidspunkt") }
-            OverstyrtInntektOgRefusjonForDatabase(
-                eksternHendelseId = overstyringRow.uuid("ekstern_hendelse_id"),
-                fødselsnummer = overstyringRow.string("fødselsnummer"),
-                aktørId = overstyringRow.string("aktør_id"),
-                opprettet = overstyringRow.localDateTime("tidspunkt"),
-                skjæringstidspunkt = skjæringstidspunkt,
-                vedtaksperiodeId = overstyringRow.uuid("vedtaksperiode_id"),
-                saksbehandlerOid = overstyringRow.uuid("saksbehandler_ref"),
-                arbeidsgivere =
-                    asSQL(
-                        """
-                        SELECT organisasjonsnummer,
-                               manedlig_inntekt,
-                               fra_manedlig_inntekt,
-                               begrunnelse,
-                               forklaring,
-                               fom,
-                               tom,
-                               refusjonsopplysninger,
-                               fra_refusjonsopplysninger,
-                               subsumsjon
-                        FROM overstyring_inntekt oi
-                                 JOIN arbeidsgiver a ON oi.arbeidsgiver_ref = a.id
-                        WHERE overstyring_ref = :id
-                        """.trimIndent(),
-                        "id" to id,
-                    ).list { arbeidsgiverRow ->
-                        OverstyrtArbeidsgiverForDatabase(
-                            organisasjonsnummer = arbeidsgiverRow.string("organisasjonsnummer"),
-                            månedligInntekt = arbeidsgiverRow.double("manedlig_inntekt"),
-                            fraMånedligInntekt = arbeidsgiverRow.double("fra_manedlig_inntekt"),
-                            begrunnelse = arbeidsgiverRow.string("begrunnelse"),
-                            forklaring = arbeidsgiverRow.string("forklaring"),
-                            fom = arbeidsgiverRow.localDateOrNull("fom"),
-                            tom = arbeidsgiverRow.localDateOrNull("tom"),
-                            refusjonsopplysninger =
-                                arbeidsgiverRow.stringOrNull("refusjonsopplysninger")
-                                    ?.let { objectMapper.readValue(it) },
-                            fraRefusjonsopplysninger =
-                                arbeidsgiverRow.stringOrNull("fra_refusjonsopplysninger")
-                                    ?.let { objectMapper.readValue(it) },
-                            lovhjemmel = arbeidsgiverRow.stringOrNull("subsumsjon")?.let { objectMapper.readValue(it) },
-                        )
-                    },
-            )
+            id to
+                OverstyrtInntektOgRefusjonForDatabase(
+                    eksternHendelseId = overstyringRow.uuid("ekstern_hendelse_id"),
+                    fødselsnummer = overstyringRow.string("fødselsnummer"),
+                    aktørId = overstyringRow.string("aktør_id"),
+                    opprettet = overstyringRow.localDateTime("tidspunkt"),
+                    skjæringstidspunkt = skjæringstidspunkt,
+                    vedtaksperiodeId = overstyringRow.uuid("vedtaksperiode_id"),
+                    saksbehandlerOid = overstyringRow.uuid("saksbehandler_ref"),
+                    arbeidsgivere =
+                        asSQL(
+                            """
+                            SELECT organisasjonsnummer,
+                                   manedlig_inntekt,
+                                   fra_manedlig_inntekt,
+                                   begrunnelse,
+                                   forklaring,
+                                   fom,
+                                   tom,
+                                   refusjonsopplysninger,
+                                   fra_refusjonsopplysninger,
+                                   subsumsjon
+                            FROM overstyring_inntekt oi
+                                     JOIN arbeidsgiver a ON oi.arbeidsgiver_ref = a.id
+                            WHERE overstyring_ref = :id
+                            """.trimIndent(),
+                            "id" to id,
+                        ).list { arbeidsgiverRow ->
+                            OverstyrtArbeidsgiverForDatabase(
+                                organisasjonsnummer = arbeidsgiverRow.string("organisasjonsnummer"),
+                                månedligInntekt = arbeidsgiverRow.double("manedlig_inntekt"),
+                                fraMånedligInntekt = arbeidsgiverRow.double("fra_manedlig_inntekt"),
+                                begrunnelse = arbeidsgiverRow.string("begrunnelse"),
+                                forklaring = arbeidsgiverRow.string("forklaring"),
+                                fom = arbeidsgiverRow.localDateOrNull("fom"),
+                                tom = arbeidsgiverRow.localDateOrNull("tom"),
+                                refusjonsopplysninger =
+                                    arbeidsgiverRow.stringOrNull("refusjonsopplysninger")
+                                        ?.let { objectMapper.readValue(it) },
+                                fraRefusjonsopplysninger =
+                                    arbeidsgiverRow.stringOrNull("fra_refusjonsopplysninger")
+                                        ?.let { objectMapper.readValue(it) },
+                                lovhjemmel = arbeidsgiverRow.stringOrNull("subsumsjon")?.let { objectMapper.readValue(it) },
+                            )
+                        },
+                )
         }
     }
 
-    private fun finnSkjønnsfastsatteSykepengegrunnlag(fødselsnummer: String): List<SkjønnsfastsattSykepengegrunnlagForDatabase> {
+    private fun finnSkjønnsfastsatteSykepengegrunnlag(
+        fødselsnummer: String,
+    ): List<Pair<Long, SkjønnsfastsattSykepengegrunnlagForDatabase>> {
         return asSQL(
             """
-                SELECT ss.id    as overstyring_skjonn_id,
+                SELECT o.id,
+                       ss.id    as overstyring_skjonn_id,
                        ss.subsumsjon,
                        o.ekstern_hendelse_id,
                        p.fødselsnummer,
@@ -547,44 +553,46 @@ class PgOverstyringDao private constructor(queryRunner: QueryRunner) : Overstyri
         ).list { overstyringRow ->
             val id = overstyringRow.long("overstyring_skjonn_id")
             val subsumsjon: LovhjemmelForDatabase? = overstyringRow.stringOrNull("subsumsjon")?.let { objectMapper.readValue(it) }
-            SkjønnsfastsattSykepengegrunnlagForDatabase(
-                eksternHendelseId = overstyringRow.uuid("ekstern_hendelse_id"),
-                fødselsnummer = overstyringRow.string("fødselsnummer"),
-                aktørId = overstyringRow.string("aktør_id"),
-                opprettet = overstyringRow.localDateTime("tidspunkt"),
-                skjæringstidspunkt = overstyringRow.localDate("skjaeringstidspunkt"),
-                vedtaksperiodeId = overstyringRow.uuid("vedtaksperiode_id"),
-                saksbehandlerOid = overstyringRow.uuid("saksbehandler_ref"),
-                arbeidsgivere =
-                    asSQL(
-                        """
+            overstyringRow.long("id") to
+                SkjønnsfastsattSykepengegrunnlagForDatabase(
+                    eksternHendelseId = overstyringRow.uuid("ekstern_hendelse_id"),
+                    fødselsnummer = overstyringRow.string("fødselsnummer"),
+                    aktørId = overstyringRow.string("aktør_id"),
+                    opprettet = overstyringRow.localDateTime("tidspunkt"),
+                    skjæringstidspunkt = overstyringRow.localDate("skjaeringstidspunkt"),
+                    vedtaksperiodeId = overstyringRow.uuid("vedtaksperiode_id"),
+                    saksbehandlerOid = overstyringRow.uuid("saksbehandler_ref"),
+                    arbeidsgivere =
+                        asSQL(
+                            """
                         SELECT arlig, fra_arlig, organisasjonsnummer FROM skjonnsfastsetting_sykepengegrunnlag_arbeidsgiver ssa
                         JOIN arbeidsgiver a ON a.id = ssa.arbeidsgiver_ref
                         WHERE skjonnsfastsetting_sykepengegrunnlag_ref = :id
                         """,
-                        "id" to id,
-                    ).list {
-                        SkjønnsfastsattArbeidsgiverForDatabase(
-                            organisasjonsnummer = it.string("organisasjonsnummer"),
-                            årlig = it.double("arlig"),
-                            fraÅrlig = it.double("fra_arlig"),
-                            årsak = overstyringRow.string("arsak"),
-                            type = enumValueOf(overstyringRow.string("type")),
-                            begrunnelseMal = overstyringRow.string("mal"),
-                            begrunnelseFritekst = overstyringRow.string("fritekst"),
-                            begrunnelseKonklusjon = overstyringRow.string("konklusjon"),
-                            lovhjemmel = subsumsjon,
-                            initierendeVedtaksperiodeId = overstyringRow.stringOrNull("initierende_vedtaksperiode_id"),
-                        )
-                    },
-            )
+                            "id" to id,
+                        ).list {
+                            SkjønnsfastsattArbeidsgiverForDatabase(
+                                organisasjonsnummer = it.string("organisasjonsnummer"),
+                                årlig = it.double("arlig"),
+                                fraÅrlig = it.double("fra_arlig"),
+                                årsak = overstyringRow.string("arsak"),
+                                type = enumValueOf(overstyringRow.string("type")),
+                                begrunnelseMal = overstyringRow.string("mal"),
+                                begrunnelseFritekst = overstyringRow.string("fritekst"),
+                                begrunnelseKonklusjon = overstyringRow.string("konklusjon"),
+                                lovhjemmel = subsumsjon,
+                                initierendeVedtaksperiodeId = overstyringRow.stringOrNull("initierende_vedtaksperiode_id"),
+                            )
+                        },
+                )
         }
     }
 
-    private fun finnMinimumSykdomsgradsoverstyringer(fødselsnummer: String): List<MinimumSykdomsgradForDatabase> {
+    private fun finnMinimumSykdomsgradsoverstyringer(fødselsnummer: String): List<Pair<Long, MinimumSykdomsgradForDatabase>> {
         return asSQL(
             """
-            SELECT 
+            SELECT
+                o.id,
                 oms.id AS overstyring_minimum_sykdomsgrad_id,
                 ekstern_hendelse_id,
                 aktør_id,
@@ -633,22 +641,23 @@ class PgOverstyringDao private constructor(queryRunner: QueryRunner) : Overstyri
                     )
                 }
 
-            MinimumSykdomsgradForDatabase(
-                overstyringRow.uuid("ekstern_hendelse_id"),
-                aktørId = overstyringRow.string("aktør_id"),
-                fødselsnummer = overstyringRow.string("fødselsnummer"),
-                perioderVurdertOk = perioderSomErOk,
-                perioderVurdertIkkeOk = perioderSomIkkeErOk,
-                begrunnelse = overstyringRow.string("begrunnelse"),
-                vedtaksperiodeId = overstyringRow.uuid("vedtaksperiode_id"),
-                arbeidsgivere = arbeidsgivere,
-                opprettet = overstyringRow.localDateTime("tidspunkt"),
-                saksbehandlerOid = overstyringRow.uuid("saksbehandler_ref"),
-            )
+            overstyringRow.long("id") to
+                MinimumSykdomsgradForDatabase(
+                    eksternHendelseId = overstyringRow.uuid("ekstern_hendelse_id"),
+                    aktørId = overstyringRow.string("aktør_id"),
+                    fødselsnummer = overstyringRow.string("fødselsnummer"),
+                    perioderVurdertOk = perioderSomErOk,
+                    perioderVurdertIkkeOk = perioderSomIkkeErOk,
+                    begrunnelse = overstyringRow.string("begrunnelse"),
+                    vedtaksperiodeId = overstyringRow.uuid("vedtaksperiode_id"),
+                    arbeidsgivere = arbeidsgivere,
+                    opprettet = overstyringRow.localDateTime("tidspunkt"),
+                    saksbehandlerOid = overstyringRow.uuid("saksbehandler_ref"),
+                )
         }
     }
 
-    private fun finnArbeidsforholdoverstyringer(fødselsnummer: String): List<OverstyrtArbeidsforholdForDatabase> {
+    private fun finnArbeidsforholdoverstyringer(fødselsnummer: String): List<Pair<Long, OverstyrtArbeidsforholdForDatabase>> {
         return asSQL(
             """
                 SELECT DISTINCT ON (o.id)
@@ -674,17 +683,18 @@ class PgOverstyringDao private constructor(queryRunner: QueryRunner) : Overstyri
                     "id" to id,
                 )
                     .single { it.localDate("skjaeringstidspunkt") }
-            OverstyrtArbeidsforholdForDatabase(
-                eksternHendelseId = overstyringRow.uuid("ekstern_hendelse_id"),
-                fødselsnummer = overstyringRow.string("fødselsnummer"),
-                aktørId = overstyringRow.string("aktør_id"),
-                opprettet = overstyringRow.localDateTime("tidspunkt"),
-                skjæringstidspunkt = skjæringstidspunkt,
-                vedtaksperiodeId = overstyringRow.uuid("vedtaksperiode_id"),
-                saksbehandlerOid = overstyringRow.uuid("saksbehandler_ref"),
-                overstyrteArbeidsforhold =
-                    asSQL(
-                        """
+            id to
+                OverstyrtArbeidsforholdForDatabase(
+                    eksternHendelseId = overstyringRow.uuid("ekstern_hendelse_id"),
+                    fødselsnummer = overstyringRow.string("fødselsnummer"),
+                    aktørId = overstyringRow.string("aktør_id"),
+                    opprettet = overstyringRow.localDateTime("tidspunkt"),
+                    skjæringstidspunkt = skjæringstidspunkt,
+                    vedtaksperiodeId = overstyringRow.uuid("vedtaksperiode_id"),
+                    saksbehandlerOid = overstyringRow.uuid("saksbehandler_ref"),
+                    overstyrteArbeidsforhold =
+                        asSQL(
+                            """
                         SELECT 
                             organisasjonsnummer, 
                             deaktivert, 
@@ -694,16 +704,16 @@ class PgOverstyringDao private constructor(queryRunner: QueryRunner) : Overstyri
                             JOIN arbeidsgiver a ON oa.arbeidsgiver_ref = a.id
                         WHERE overstyring_ref = :id
                         """,
-                        "id" to id,
-                    ).list {
-                        ArbeidsforholdForDatabase(
-                            it.string("organisasjonsnummer"),
-                            it.boolean("deaktivert"),
-                            it.string("begrunnelse"),
-                            it.string("forklaring"),
-                        )
-                    },
-            )
+                            "id" to id,
+                        ).list {
+                            ArbeidsforholdForDatabase(
+                                it.string("organisasjonsnummer"),
+                                it.boolean("deaktivert"),
+                                it.string("begrunnelse"),
+                                it.string("forklaring"),
+                            )
+                        },
+                )
         }
     }
 }

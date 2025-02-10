@@ -93,19 +93,20 @@ class PgTotrinnsvurderingRepository(
         )
     }
 
-    private fun List<OverstyringForDatabase>.tilDomene(): List<Overstyring> =
-        map { overstyring ->
+    private fun List<Pair<Long, OverstyringForDatabase>>.tilDomene(): List<Overstyring> =
+        map { (id, overstyring) ->
             when (overstyring) {
-                is OverstyrtTidslinjeForDatabase -> overstyring.tilDomene()
-                is MinimumSykdomsgradForDatabase -> overstyring.tilDomene()
-                is OverstyrtArbeidsforholdForDatabase -> overstyring.tilDomene()
-                is OverstyrtInntektOgRefusjonForDatabase -> overstyring.tilDomene()
-                is SkjønnsfastsattSykepengegrunnlagForDatabase -> overstyring.tilDomene()
+                is OverstyrtTidslinjeForDatabase -> overstyring.tilDomene(id)
+                is MinimumSykdomsgradForDatabase -> overstyring.tilDomene(id)
+                is OverstyrtArbeidsforholdForDatabase -> overstyring.tilDomene(id)
+                is OverstyrtInntektOgRefusjonForDatabase -> overstyring.tilDomene(id)
+                is SkjønnsfastsattSykepengegrunnlagForDatabase -> overstyring.tilDomene(id)
             }
         }
 
-    private fun OverstyrtTidslinjeForDatabase.tilDomene(): OverstyrtTidslinje =
-        OverstyrtTidslinje(
+    private fun OverstyrtTidslinjeForDatabase.tilDomene(id: Long): OverstyrtTidslinje =
+        OverstyrtTidslinje.fraLagring(
+            id = id,
             eksternHendelseId = eksternHendelseId,
             vedtaksperiodeId = vedtaksperiodeId,
             aktørId = aktørId,
@@ -122,8 +123,9 @@ class PgTotrinnsvurderingRepository(
         ) { "Forventer å finne saksbehandler med id $saksbehandlerOid" }
     }
 
-    private fun MinimumSykdomsgradForDatabase.tilDomene(): MinimumSykdomsgrad =
-        MinimumSykdomsgrad(
+    private fun MinimumSykdomsgradForDatabase.tilDomene(id: Long): MinimumSykdomsgrad =
+        MinimumSykdomsgrad.fraLagring(
+            id = id,
             eksternHendelseId = eksternHendelseId,
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
@@ -135,8 +137,9 @@ class PgTotrinnsvurderingRepository(
             saksbehandler = finnSaksbehandler(),
         )
 
-    private fun OverstyrtArbeidsforholdForDatabase.tilDomene() =
-        OverstyrtArbeidsforhold(
+    private fun OverstyrtArbeidsforholdForDatabase.tilDomene(id: Long) =
+        OverstyrtArbeidsforhold.fraLagring(
+            id = id,
             eksternHendelseId = eksternHendelseId,
             vedtaksperiodeId = vedtaksperiodeId,
             fødselsnummer = fødselsnummer,
@@ -146,8 +149,9 @@ class PgTotrinnsvurderingRepository(
             saksbehandler = finnSaksbehandler(),
         )
 
-    private fun OverstyrtInntektOgRefusjonForDatabase.tilDomene() =
-        OverstyrtInntektOgRefusjon(
+    private fun OverstyrtInntektOgRefusjonForDatabase.tilDomene(id: Long) =
+        OverstyrtInntektOgRefusjon.fraLagring(
+            id = id,
             eksternHendelseId = eksternHendelseId,
             vedtaksperiodeId = vedtaksperiodeId,
             aktørId = aktørId,
@@ -157,8 +161,9 @@ class PgTotrinnsvurderingRepository(
             saksbehandler = finnSaksbehandler(),
         )
 
-    private fun SkjønnsfastsattSykepengegrunnlagForDatabase.tilDomene() =
-        SkjønnsfastsattSykepengegrunnlag(
+    private fun SkjønnsfastsattSykepengegrunnlagForDatabase.tilDomene(id: Long) =
+        SkjønnsfastsattSykepengegrunnlag.fraLagring(
+            id = id,
             eksternHendelseId = eksternHendelseId,
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,

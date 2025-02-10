@@ -812,7 +812,7 @@ class SaksbehandlerMediator(
         }
 
     private fun ApiArbeidsforholdOverstyringHandling.tilModellversjon(saksbehandler: Saksbehandler): OverstyrtArbeidsforhold =
-        OverstyrtArbeidsforhold(
+        OverstyrtArbeidsforhold.ny(
             fødselsnummer = fodselsnummer,
             aktørId = aktorId,
             skjæringstidspunkt = skjaringstidspunkt,
@@ -834,7 +834,7 @@ class SaksbehandlerMediator(
         )
 
     private fun ApiSkjonnsfastsettelse.tilModellversjon(saksbehandler: Saksbehandler): SkjønnsfastsattSykepengegrunnlag =
-        SkjønnsfastsattSykepengegrunnlag(
+        SkjønnsfastsattSykepengegrunnlag.ny(
             aktørId = aktorId,
             fødselsnummer = fodselsnummer,
             skjæringstidspunkt = skjaringstidspunkt,
@@ -866,7 +866,7 @@ class SaksbehandlerMediator(
         )
 
     private fun ApiMinimumSykdomsgrad.tilModellversjon(saksbehandler: Saksbehandler): MinimumSykdomsgrad =
-        MinimumSykdomsgrad(
+        MinimumSykdomsgrad.ny(
             aktørId = aktorId,
             fødselsnummer = fodselsnummer,
             saksbehandler = saksbehandler,
@@ -896,7 +896,7 @@ class SaksbehandlerMediator(
         )
 
     private fun ApiInntektOgRefusjonOverstyring.tilModellversjon(saksbehandler: Saksbehandler): OverstyrtInntektOgRefusjon =
-        OverstyrtInntektOgRefusjon(
+        OverstyrtInntektOgRefusjon.ny(
             aktørId = aktorId,
             fødselsnummer = fodselsnummer,
             skjæringstidspunkt = skjaringstidspunkt,
@@ -927,7 +927,7 @@ class SaksbehandlerMediator(
         )
 
     private fun ApiTidslinjeOverstyring.tilModellversjon(saksbehandler: Saksbehandler): OverstyrtTidslinje =
-        OverstyrtTidslinje(
+        OverstyrtTidslinje.ny(
             vedtaksperiodeId = vedtaksperiodeId,
             aktørId = aktorId,
             fødselsnummer = fodselsnummer,

@@ -55,7 +55,7 @@ class PgTotrinnsvurderingRepositoryTest {
         every { totrinnsvurderingDao.hentAktivTotrinnsvurdering(FNR) } returns (nextLong() to mockk<TotrinnsvurderingFraDatabase>(
             relaxed = true
         ))
-        every { overstyringDao.finnOverstyringer(FNR) } returns listOf(mockk(relaxed = true))
+        every { overstyringDao.finnOverstyringer(FNR) } returns listOf(nextLong() to mockk(relaxed = true))
 
         val result = repository.finnTotrinnsvurdering(FNR)
 

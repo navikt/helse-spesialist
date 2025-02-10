@@ -34,7 +34,7 @@ internal class SaksbehandlerTest {
         val saksbehandler = saksbehandler()
         saksbehandler.register(observer)
         saksbehandler.håndter(
-            OverstyrtTidslinje(
+            OverstyrtTidslinje.ny(
                 vedtaksperiodeId = UUID.randomUUID(),
                 aktørId = "123",
                 fødselsnummer = "1234",
@@ -58,19 +58,18 @@ internal class SaksbehandlerTest {
 
         val saksbehandler = saksbehandler()
         val vedtaksperiodeId = UUID.randomUUID()
-        val overstyringId = UUID.randomUUID()
         saksbehandler.register(observer)
+        val overstyring = OverstyrtTidslinje.ny(
+            vedtaksperiodeId = vedtaksperiodeId,
+            aktørId = "123",
+            fødselsnummer = "1234",
+            organisasjonsnummer = "12345",
+            dager = overstyrteDager(),
+            begrunnelse = "begrunnelse",
+            saksbehandler = saksbehandler,
+        )
         saksbehandler.håndter(
-            OverstyrtTidslinje(
-                eksternHendelseId = overstyringId,
-                vedtaksperiodeId = vedtaksperiodeId,
-                aktørId = "123",
-                fødselsnummer = "1234",
-                organisasjonsnummer = "12345",
-                dager = overstyrteDager(),
-                begrunnelse = "begrunnelse",
-                saksbehandler = saksbehandler,
-            )
+            overstyring
         )
 
         assertEquals(2, subsumsjoner.size)
@@ -107,7 +106,7 @@ internal class SaksbehandlerTest {
                     "organisasjonsnummer" to listOf("12345"),
                     "vedtaksperiode" to listOf(vedtaksperiodeId.toString()),
                     "saksbehandler" to listOf("epost@nav.no"),
-                    "overstyrtidslinje" to listOf(overstyringId.toString()),
+                    "overstyrtidslinje" to listOf(overstyring.eksternHendelseId.toString()),
                 ),
                 tidsstempel = subsumsjoner[0].tidsstempel,
                 kilde = "spesialist",
@@ -140,7 +139,7 @@ internal class SaksbehandlerTest {
                     "organisasjonsnummer" to listOf("12345"),
                     "vedtaksperiode" to listOf(vedtaksperiodeId.toString()),
                     "saksbehandler" to listOf("epost@nav.no"),
-                    "overstyrtidslinje" to listOf(overstyringId.toString()),
+                    "overstyrtidslinje" to listOf(overstyring.eksternHendelseId.toString()),
                 ),
                 tidsstempel = subsumsjoner[1].tidsstempel,
                 kilde = "spesialist",
@@ -161,7 +160,7 @@ internal class SaksbehandlerTest {
         val saksbehandler = saksbehandler()
         saksbehandler.register(observer)
         saksbehandler.håndter(
-            OverstyrtInntektOgRefusjon(
+            OverstyrtInntektOgRefusjon.ny(
                 aktørId = "123",
                 fødselsnummer = "1234",
                 skjæringstidspunkt = 1.januar,
@@ -185,7 +184,7 @@ internal class SaksbehandlerTest {
         val saksbehandler = saksbehandler()
         saksbehandler.register(observer)
         saksbehandler.håndter(
-            OverstyrtArbeidsforhold(
+            OverstyrtArbeidsforhold.ny(
                 aktørId = "123",
                 fødselsnummer = "1234",
                 skjæringstidspunkt = 1.januar,
@@ -209,7 +208,7 @@ internal class SaksbehandlerTest {
         val saksbehandler = saksbehandler()
         saksbehandler.register(observer)
         saksbehandler.håndter(
-            MinimumSykdomsgrad(
+            MinimumSykdomsgrad.ny(
                 aktørId = "123",
                 fødselsnummer = "1234",
                 begrunnelse = "begrunnelse",

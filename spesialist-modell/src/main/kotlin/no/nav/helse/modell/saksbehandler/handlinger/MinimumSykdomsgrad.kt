@@ -10,8 +10,9 @@ import no.nav.helse.modell.vilkårsprøving.Subsumsjon.Utfall.VILKAR_OPPFYLT
 import java.time.LocalDate
 import java.util.UUID
 
-class MinimumSykdomsgrad(
-    override val eksternHendelseId: UUID = UUID.randomUUID(),
+class MinimumSykdomsgrad private constructor(
+    id: Long?,
+    override val eksternHendelseId: UUID,
     override val saksbehandler: Saksbehandler,
     override val fødselsnummer: String,
     override val aktørId: String,
@@ -20,12 +21,60 @@ class MinimumSykdomsgrad(
     val perioderVurdertIkkeOk: List<MinimumSykdomsgradPeriode>,
     val begrunnelse: String,
     val arbeidsgivere: List<MinimumSykdomsgradArbeidsgiver>,
-) : Overstyring {
+) : Overstyring(id) {
     override fun utførAv(saksbehandler: Saksbehandler) {
         saksbehandler.håndter(this)
     }
 
     override fun loggnavn(): String = "minimum_sykdomsgrad_vurdert"
+
+    companion object {
+        fun ny(
+            saksbehandler: Saksbehandler,
+            fødselsnummer: String,
+            aktørId: String,
+            vedtaksperiodeId: UUID,
+            perioderVurdertOk: List<MinimumSykdomsgradPeriode>,
+            perioderVurdertIkkeOk: List<MinimumSykdomsgradPeriode>,
+            begrunnelse: String,
+            arbeidsgivere: List<MinimumSykdomsgradArbeidsgiver>,
+        ) = MinimumSykdomsgrad(
+            id = null,
+            eksternHendelseId = UUID.randomUUID(),
+            saksbehandler = saksbehandler,
+            fødselsnummer = fødselsnummer,
+            aktørId = aktørId,
+            vedtaksperiodeId = vedtaksperiodeId,
+            perioderVurdertOk = perioderVurdertOk,
+            perioderVurdertIkkeOk = perioderVurdertIkkeOk,
+            begrunnelse = begrunnelse,
+            arbeidsgivere = arbeidsgivere,
+        )
+
+        fun fraLagring(
+            id: Long,
+            eksternHendelseId: UUID,
+            saksbehandler: Saksbehandler,
+            fødselsnummer: String,
+            aktørId: String,
+            vedtaksperiodeId: UUID,
+            perioderVurdertOk: List<MinimumSykdomsgradPeriode>,
+            perioderVurdertIkkeOk: List<MinimumSykdomsgradPeriode>,
+            begrunnelse: String,
+            arbeidsgivere: List<MinimumSykdomsgradArbeidsgiver>,
+        ) = MinimumSykdomsgrad(
+            id = id,
+            eksternHendelseId = eksternHendelseId,
+            saksbehandler = saksbehandler,
+            fødselsnummer = fødselsnummer,
+            aktørId = aktørId,
+            vedtaksperiodeId = vedtaksperiodeId,
+            perioderVurdertOk = perioderVurdertOk,
+            perioderVurdertIkkeOk = perioderVurdertIkkeOk,
+            begrunnelse = begrunnelse,
+            arbeidsgivere = arbeidsgivere,
+        )
+    }
 
     fun byggEvent(
         oid: UUID,

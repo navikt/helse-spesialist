@@ -123,8 +123,7 @@ internal class TotrinnsvurderingTest {
     @Test
     fun `kan legge til ny overstyring`() {
         val totrinnsvurdering = nyTotrinnsvurdering()
-        totrinnsvurdering.nyOverstyring(OverstyrtTidslinje(
-            eksternHendelseId = UUID.randomUUID(),
+        totrinnsvurdering.nyOverstyring(OverstyrtTidslinje.ny(
             vedtaksperiodeId = UUID.randomUUID(),
             aktørId = lagAktørId(),
             fødselsnummer = lagFødselsnummer(),

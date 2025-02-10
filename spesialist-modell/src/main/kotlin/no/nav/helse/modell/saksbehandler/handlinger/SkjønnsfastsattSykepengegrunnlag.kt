@@ -10,20 +10,61 @@ import no.nav.helse.modell.vilkårsprøving.Subsumsjon.Utfall.VILKAR_BEREGNET
 import java.time.LocalDate
 import java.util.UUID
 
-class SkjønnsfastsattSykepengegrunnlag(
-    override val eksternHendelseId: UUID = UUID.randomUUID(),
+class SkjønnsfastsattSykepengegrunnlag private constructor(
+    id: Long?,
+    override val eksternHendelseId: UUID,
     override val saksbehandler: Saksbehandler,
     override val fødselsnummer: String,
     override val aktørId: String,
     override val vedtaksperiodeId: UUID,
     val skjæringstidspunkt: LocalDate,
     val arbeidsgivere: List<SkjønnsfastsattArbeidsgiver>,
-) : Overstyring {
+) : Overstyring(id) {
     override fun utførAv(saksbehandler: Saksbehandler) {
         saksbehandler.håndter(this)
     }
 
     override fun loggnavn(): String = "skjønnsfastsett_sykepengegrunnlag"
+
+    companion object {
+        fun ny(
+            saksbehandler: Saksbehandler,
+            fødselsnummer: String,
+            aktørId: String,
+            vedtaksperiodeId: UUID,
+            skjæringstidspunkt: LocalDate,
+            arbeidsgivere: List<SkjønnsfastsattArbeidsgiver>,
+        ) = SkjønnsfastsattSykepengegrunnlag(
+            id = null,
+            eksternHendelseId = UUID.randomUUID(),
+            saksbehandler = saksbehandler,
+            fødselsnummer = fødselsnummer,
+            aktørId = aktørId,
+            vedtaksperiodeId = vedtaksperiodeId,
+            skjæringstidspunkt = skjæringstidspunkt,
+            arbeidsgivere = arbeidsgivere,
+        )
+
+        fun fraLagring(
+            id: Long,
+            eksternHendelseId: UUID,
+            saksbehandler: Saksbehandler,
+            fødselsnummer: String,
+            aktørId: String,
+            vedtaksperiodeId: UUID,
+            skjæringstidspunkt: LocalDate,
+            arbeidsgivere: List<SkjønnsfastsattArbeidsgiver>,
+        ) = SkjønnsfastsattSykepengegrunnlag(
+            id = id,
+            eksternHendelseId = eksternHendelseId,
+            saksbehandler = saksbehandler,
+            fødselsnummer = fødselsnummer,
+            aktørId = aktørId,
+            vedtaksperiodeId = vedtaksperiodeId,
+            skjæringstidspunkt = skjæringstidspunkt,
+            arbeidsgivere = arbeidsgivere,
+        )
+    }
 
     fun byggEvent(
         oid: UUID,

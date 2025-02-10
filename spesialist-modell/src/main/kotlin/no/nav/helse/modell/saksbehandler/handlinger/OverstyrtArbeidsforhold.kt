@@ -6,20 +6,61 @@ import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import java.time.LocalDate
 import java.util.UUID
 
-class OverstyrtArbeidsforhold(
-    override val eksternHendelseId: UUID = UUID.randomUUID(),
+class OverstyrtArbeidsforhold private constructor(
+    id: Long?,
+    override val eksternHendelseId: UUID,
     override val saksbehandler: Saksbehandler,
     override val fødselsnummer: String,
     override val aktørId: String,
     override val vedtaksperiodeId: UUID,
     val skjæringstidspunkt: LocalDate,
     val overstyrteArbeidsforhold: List<Arbeidsforhold>,
-) : Overstyring {
+) : Overstyring(id) {
     override fun utførAv(saksbehandler: Saksbehandler) {
         saksbehandler.håndter(this)
     }
 
     override fun loggnavn(): String = "overstyr_arbeidsforhold"
+
+    companion object {
+        fun ny(
+            saksbehandler: Saksbehandler,
+            fødselsnummer: String,
+            aktørId: String,
+            vedtaksperiodeId: UUID,
+            skjæringstidspunkt: LocalDate,
+            overstyrteArbeidsforhold: List<Arbeidsforhold>,
+        ) = OverstyrtArbeidsforhold(
+            id = null,
+            eksternHendelseId = UUID.randomUUID(),
+            saksbehandler = saksbehandler,
+            fødselsnummer = fødselsnummer,
+            aktørId = aktørId,
+            vedtaksperiodeId = vedtaksperiodeId,
+            skjæringstidspunkt = skjæringstidspunkt,
+            overstyrteArbeidsforhold = overstyrteArbeidsforhold,
+        )
+
+        fun fraLagring(
+            id: Long,
+            eksternHendelseId: UUID,
+            saksbehandler: Saksbehandler,
+            fødselsnummer: String,
+            aktørId: String,
+            vedtaksperiodeId: UUID,
+            skjæringstidspunkt: LocalDate,
+            overstyrteArbeidsforhold: List<Arbeidsforhold>,
+        ) = OverstyrtArbeidsforhold(
+            id = id,
+            eksternHendelseId = eksternHendelseId,
+            saksbehandler = saksbehandler,
+            fødselsnummer = fødselsnummer,
+            aktørId = aktørId,
+            vedtaksperiodeId = vedtaksperiodeId,
+            skjæringstidspunkt = skjæringstidspunkt,
+            overstyrteArbeidsforhold = overstyrteArbeidsforhold,
+        )
+    }
 
     fun byggEvent(
         oid: UUID,
