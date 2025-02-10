@@ -131,7 +131,7 @@ class PgTotrinnsvurderingRepository(
             perioderVurdertIkkeOk = perioderVurdertIkkeOk.map { it.tilDomene() },
             begrunnelse = begrunnelse,
             arbeidsgivere = arbeidsgivere.map { it.tilDomene() },
-            initierendeVedtaksperiodeId = initierendeVedtaksperiodeId,
+            vedtaksperiodeId = vedtaksperiodeId,
             saksbehandler = finnSaksbehandler(),
         )
 

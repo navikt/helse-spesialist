@@ -194,7 +194,7 @@ class Overstyringlagrer(private val overstyringDao: OverstyringDao) {
                     )
                 },
             opprettet = LocalDateTime.now(),
-            initierendeVedtaksperiodeId = initierendeVedtaksperiodeId,
+            vedtaksperiodeId = this@tilDatabase.vedtaksperiodeId,
             saksbehandlerOid = saksbehandler.oid,
         )
 

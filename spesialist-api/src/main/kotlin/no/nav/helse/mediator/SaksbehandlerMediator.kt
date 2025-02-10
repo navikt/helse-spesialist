@@ -892,7 +892,7 @@ class SaksbehandlerMediator(
                         berørtVedtaksperiodeId = it.berortVedtaksperiodeId,
                     )
                 },
-            initierendeVedtaksperiodeId = initierendeVedtaksperiodeId,
+            vedtaksperiodeId = initierendeVedtaksperiodeId,
         )
 
     private fun ApiInntektOgRefusjonOverstyring.tilModellversjon(saksbehandler: Saksbehandler): OverstyrtInntektOgRefusjon =

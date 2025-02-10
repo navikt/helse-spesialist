@@ -369,7 +369,7 @@ internal class PgOverstyringDaoTest : DatabaseIntegrationTest() {
                 perioderVurdertIkkeOk = emptyList(),
                 begrunnelse = "en begrunnelse",
                 opprettet = OPPRETTET,
-                initierendeVedtaksperiodeId = VEDTAKSPERIODE,
+                vedtaksperiodeId = VEDTAKSPERIODE,
                 saksbehandlerOid = UUID.randomUUID(),
                 arbeidsgivere =
                     listOf(

@@ -213,7 +213,7 @@ internal class SaksbehandlerTest {
                 aktørId = "123",
                 fødselsnummer = "1234",
                 begrunnelse = "begrunnelse",
-                initierendeVedtaksperiodeId = UUID.randomUUID(),
+                vedtaksperiodeId = UUID.randomUUID(),
                 perioderVurdertOk = emptyList(),
                 perioderVurdertIkkeOk = listOf(MinimumSykdomsgradPeriode(1.januar, 31.januar)),
                 arbeidsgivere = listOf(MinimumSykdomsgradArbeidsgiver(organisasjonsnummer = "12345", berørtVedtaksperiodeId = UUID.randomUUID())),

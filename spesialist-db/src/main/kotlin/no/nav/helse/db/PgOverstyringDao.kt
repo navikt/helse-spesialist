@@ -640,7 +640,7 @@ class PgOverstyringDao private constructor(queryRunner: QueryRunner) : Overstyri
                 perioderVurdertOk = perioderSomErOk,
                 perioderVurdertIkkeOk = perioderSomIkkeErOk,
                 begrunnelse = overstyringRow.string("begrunnelse"),
-                initierendeVedtaksperiodeId = overstyringRow.uuid("vedtaksperiode_id"),
+                vedtaksperiodeId = overstyringRow.uuid("vedtaksperiode_id"),
                 arbeidsgivere = arbeidsgivere,
                 opprettet = overstyringRow.localDateTime("tidspunkt"),
                 saksbehandlerOid = overstyringRow.uuid("saksbehandler_ref"),

@@ -11,13 +11,11 @@ data class MinimumSykdomsgradForDatabase(
     val perioderVurdertOk: List<MinimumSykdomsgradPeriodeForDatabase>,
     val perioderVurdertIkkeOk: List<MinimumSykdomsgradPeriodeForDatabase>,
     val begrunnelse: String,
-    val initierendeVedtaksperiodeId: UUID,
+    override val vedtaksperiodeId: UUID,
     val arbeidsgivere: List<MinimumSykdomsgradArbeidsgiverForDatabase>,
     override val opprettet: LocalDateTime,
     override val saksbehandlerOid: UUID,
 ) : OverstyringForDatabase {
-    override val vedtaksperiodeId: UUID = initierendeVedtaksperiodeId
-
     data class MinimumSykdomsgradArbeidsgiverForDatabase(
         val organisasjonsnummer: String,
         val berørtVedtaksperiodeId: UUID,
