@@ -8,7 +8,6 @@ import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
 import no.nav.helse.modell.person.HentEnhetløsning
-import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import org.slf4j.LoggerFactory
@@ -19,27 +18,17 @@ internal class VurderAutomatiskAvvisning(
     private val godkjenningMediator: GodkjenningMediator,
     private val utbetaling: Utbetaling,
     private val godkjenningsbehov: GodkjenningsbehovData,
-    private val sykefraværstilfelle: Sykefraværstilfelle,
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
         val fødselsnummer = godkjenningsbehov.fødselsnummer
         val vedtaksperiodeId = godkjenningsbehov.vedtaksperiodeId
 
-        val stoppesForManglendeIM =
-            sykefraværstilfelle.harVarselOmManglendeInntektsmelding(vedtaksperiodeId) &&
-                !(fødselsnummer.length == 11 && (30..31).contains(fødselsnummer.take(2).toInt()))
-
-        // Midlertid logging så lenge vi potensielt avviser disse.
-        if (sykefraværstilfelle.harVarselOmManglendeInntektsmelding(vedtaksperiodeId)) {
-            sikkerlogg.info("Mottatt godkjenningsbehov med varsel for manglende IM for fnr $fødselsnummer, avvises=$stoppesForManglendeIM")
-        }
-
         val tilhørerEnhetUtland = HentEnhetløsning.erEnhetUtland(personDao.finnEnhetId(fødselsnummer))
         val underVergemål = vergemålDao.harVergemål(fødselsnummer) ?: false
 
-        if (!(tilhørerEnhetUtland || underVergemål || stoppesForManglendeIM)) return true
+        if (!(tilhørerEnhetUtland || underVergemål)) return true
 
-        val avvisningsårsaker = årsaker(tilhørerEnhetUtland, underVergemål, stoppesForManglendeIM)
+        val avvisningsårsaker = årsaker(tilhørerEnhetUtland, underVergemål)
         if (!godkjenningsbehov.kanAvvises) {
             logg.info(
                 "Avviser ikke {} som har $avvisningsårsaker, fordi: {}",
@@ -62,15 +51,12 @@ internal class VurderAutomatiskAvvisning(
     private fun årsaker(
         tilhørerEnhetUtland: Boolean,
         underVergemål: Boolean,
-        manglerIM: Boolean,
     ) = mutableListOf<String>().apply {
         if (tilhørerEnhetUtland) add("Utland")
         if (underVergemål) add("Vergemål")
-        if (manglerIM) add("Mangler inntektsmelding")
     }
 
     private companion object {
         private val logg = LoggerFactory.getLogger(VurderAutomatiskAvvisning::class.java)
-        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
 }

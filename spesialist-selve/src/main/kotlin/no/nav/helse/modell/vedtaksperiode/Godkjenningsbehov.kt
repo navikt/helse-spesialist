@@ -303,7 +303,6 @@ internal class GodkjenningsbehovCommand(
                 godkjenningMediator = godkjenningMediator,
                 utbetaling = utbetaling,
                 godkjenningsbehov = behovData,
-                sykefraværstilfelle = sykefraværstilfelle,
             ),
             VurderAutomatiskInnvilgelse(
                 automatisering = automatisering,

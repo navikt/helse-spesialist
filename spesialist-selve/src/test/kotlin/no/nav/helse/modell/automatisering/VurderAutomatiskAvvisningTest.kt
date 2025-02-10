@@ -46,24 +46,6 @@ internal class VurderAutomatiskAvvisningTest {
     }
 
     @Test
-    fun `skal ikke avvise dersom IM er mottatt`() {
-        every { sykefraværstilfelle.harVarselOmManglendeInntektsmelding(any()) } returns false
-        assertIkkeAvvisning(lagCommand(fødselsnummer = "01111111111", kanAvvises = true))
-    }
-
-    @Test
-    fun `skal avvise dersom IM mangler og fødselsdato faller utenfor toggle`() {
-        every { sykefraværstilfelle.harVarselOmManglendeInntektsmelding(any()) } returns true
-        assertAvvisning(lagCommand(fødselsnummer = "41111111111", kanAvvises = true), "Mangler inntektsmelding")
-    }
-
-    @Test
-    fun `skal ikke avvise dersom IM mangler, men fødselsdato treffer toggle`() {
-        every { sykefraværstilfelle.harVarselOmManglendeInntektsmelding(any()) } returns true
-        assertIkkeAvvisning(lagCommand(fødselsnummer = "30111111111", kanAvvises = true))
-    }
-
-    @Test
     fun `skal avvise ved utland dersom perioden kan avvises`() {
         every { personDao.finnEnhetId(fødselsnummer) } returns "0393"
         assertAvvisning(lagCommand(kanAvvises = true), "Utland")
@@ -107,7 +89,6 @@ internal class VurderAutomatiskAvvisningTest {
             fødselsnummer = fødselsnummer,
             kanAvvises = kanAvvises,
         ),
-        sykefraværstilfelle = sykefraværstilfelle
     )
 
     private companion object {
