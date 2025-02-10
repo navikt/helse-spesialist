@@ -6,4 +6,6 @@ import java.util.UUID
 interface Overstyring : Personhandling {
     val saksbehandler: Saksbehandler
     val eksternHendelseId: UUID
+    val aktørId: String
+    val vedtaksperiodeId: UUID
 }

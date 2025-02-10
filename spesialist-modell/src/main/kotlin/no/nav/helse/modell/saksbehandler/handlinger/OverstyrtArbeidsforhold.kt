@@ -10,8 +10,8 @@ class OverstyrtArbeidsforhold(
     override val eksternHendelseId: UUID = UUID.randomUUID(),
     override val saksbehandler: Saksbehandler,
     override val fødselsnummer: String,
-    val aktørId: String,
-    val vedtaksperiodeId: UUID,
+    override val aktørId: String,
+    override val vedtaksperiodeId: UUID,
     val skjæringstidspunkt: LocalDate,
     val overstyrteArbeidsforhold: List<Arbeidsforhold>,
 ) : Overstyring {

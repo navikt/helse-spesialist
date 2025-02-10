@@ -14,8 +14,8 @@ class SkjønnsfastsattSykepengegrunnlag(
     override val eksternHendelseId: UUID = UUID.randomUUID(),
     override val saksbehandler: Saksbehandler,
     override val fødselsnummer: String,
-    val aktørId: String,
-    val vedtaksperiodeId: UUID,
+    override val aktørId: String,
+    override val vedtaksperiodeId: UUID,
     val skjæringstidspunkt: LocalDate,
     val arbeidsgivere: List<SkjønnsfastsattArbeidsgiver>,
 ) : Overstyring {
