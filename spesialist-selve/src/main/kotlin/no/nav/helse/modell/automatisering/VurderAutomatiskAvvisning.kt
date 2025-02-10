@@ -27,7 +27,7 @@ internal class VurderAutomatiskAvvisning(
 
         val stoppesForManglendeIM =
             sykefraværstilfelle.harVarselOmManglendeInntektsmelding(vedtaksperiodeId) &&
-                !(fødselsnummer.length == 11 && (1..31).contains(fødselsnummer.take(2).toInt()))
+                !(fødselsnummer.length == 11 && (30..31).contains(fødselsnummer.take(2).toInt()))
 
         // Midlertid logging så lenge vi potensielt avviser disse.
         if (sykefraværstilfelle.harVarselOmManglendeInntektsmelding(vedtaksperiodeId)) {

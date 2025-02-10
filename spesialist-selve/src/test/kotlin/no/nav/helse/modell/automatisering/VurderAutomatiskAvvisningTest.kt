@@ -60,7 +60,7 @@ internal class VurderAutomatiskAvvisningTest {
     @Test
     fun `skal ikke avvise dersom IM mangler, men fødselsdato treffer toggle`() {
         every { sykefraværstilfelle.harVarselOmManglendeInntektsmelding(any()) } returns true
-        assertIkkeAvvisning(lagCommand(fødselsnummer = "29111111111", kanAvvises = true))
+        assertIkkeAvvisning(lagCommand(fødselsnummer = "30111111111", kanAvvises = true))
     }
 
     @Test
