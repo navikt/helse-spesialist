@@ -49,7 +49,8 @@ class PgTotrinnsvurderingDao private constructor(
     internal fun hentAktivTotrinnsvurdering(vedtaksperiodeId: UUID): Pair<Long, TotrinnsvurderingFraDatabase>? =
         asSQL(
             """
-            SELECT v.vedtaksperiode_id,
+            SELECT DISTINCT ON (tv.id)
+                   v.vedtaksperiode_id,
                    tv.id,
                    er_retur,
                    tv.saksbehandler,
