@@ -15,6 +15,15 @@ import org.junit.jupiter.api.Test
 @WireMockTest
 class KRRClientReservasjonshenterTest {
     @Test
+    fun `tåler svar med ekstra felter`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        test(
+            givenResponse = okJson("""{ "something-else": "?", "kanVarsles": false, "x": "YZ", "reservert": true }"""),
+            expectedReservasjon = ReservasjonDto(kanVarsles = false, reservert = true),
+            wmRuntimeInfo = wmRuntimeInfo
+        )
+    }
+
+    @Test
     fun `mapper svar som forventet`(wmRuntimeInfo: WireMockRuntimeInfo) {
         test(
             givenResponse = okJson("""{ "kanVarsles": false, "reservert": true }"""),
@@ -24,17 +33,26 @@ class KRRClientReservasjonshenterTest {
     }
 
     @Test
-    fun `tåler svar med ekstra felter`(wmRuntimeInfo: WireMockRuntimeInfo) {
+    fun `gir null om ett felt mangler`(wmRuntimeInfo: WireMockRuntimeInfo) {
         test(
-            givenResponse = okJson("""{ "something-else": "?", "kanVarsles": false, "x": "YZ", "reservert": true }"""),
-            expectedReservasjon = ReservasjonDto(kanVarsles = false, reservert = true),
+            givenResponse = okJson("""{ "reservert": true }"""),
+            expectedReservasjon = null,
+            wmRuntimeInfo = wmRuntimeInfo
+        )
+    }
+
+    @Test
+    fun `gir null om ett felt har feil type`(wmRuntimeInfo: WireMockRuntimeInfo) {
+        test(
+            givenResponse = okJson("""{ "kanVarsles": "false", "reservert": true }"""),
+            expectedReservasjon = null,
             wmRuntimeInfo = wmRuntimeInfo
         )
     }
 
     private fun test(
-        givenResponse: ResponseDefinitionBuilder?,
-        expectedReservasjon: ReservasjonDto,
+        givenResponse: ResponseDefinitionBuilder,
+        expectedReservasjon: ReservasjonDto?,
         wmRuntimeInfo: WireMockRuntimeInfo
     ) {
         // Given:

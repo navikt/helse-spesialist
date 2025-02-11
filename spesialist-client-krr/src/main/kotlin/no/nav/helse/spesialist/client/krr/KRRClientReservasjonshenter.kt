@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.client.krr
 
+import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.apache.Apache
@@ -63,19 +64,23 @@ class KRRClientReservasjonshenter(
             val callId = UUID.randomUUID().toString()
 
             logg.debug("Henter reservasjon fra $apiUrl/rest/v1/person, callId=$callId")
-            val reservasjon =
+            val response =
                 httpClient
                     .get("$apiUrl/rest/v1/person") {
                         header("Authorization", "Bearer $accessToken")
                         header("Nav-Personident", fødselsnummer)
                         header("Nav-Call-Id", callId)
                         accept(ContentType.Application.Json)
-                    }.body<ReservasjonDto>()
+                    }.body<JsonNode>()
 
             statusEtterKallReservasjonsstatusBuilder
                 .withRegistry(registry)
                 .withTag("status", "success")
-            reservasjon
+
+            ReservasjonDto(
+                kanVarsles = response.getBoolean("kanVarsles"),
+                reservert = response.getBoolean("reservert"),
+            )
         } catch (e: Exception) {
             statusEtterKallReservasjonsstatusBuilder
                 .withRegistry(registry)
@@ -87,4 +92,9 @@ class KRRClientReservasjonshenter(
             sample.stop(responstidReservasjonsstatus)
         }
     }
+
+    private fun JsonNode.getBoolean(fieldName: String) =
+        this[fieldName].let { fieldNode ->
+            fieldNode.takeIf(JsonNode::isBoolean)?.asBoolean() ?: error("Fikk ugyldig boolean-verdi: $fieldNode")
+        }
 }
