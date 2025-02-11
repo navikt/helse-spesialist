@@ -51,7 +51,7 @@ class EntraIDAccessTokenGenerator(
         return mutex.withLock {
             (
                 tokenMap[scope]
-                    ?.takeUnless { Instant.now().plus(it.expires_in).isBefore(omToMinutter) }
+                    ?.takeUnless { it.expiry.isBefore(omToMinutter) }
                     ?: run {
                         log.info("Henter token fra Azure AD for $scope")
 
@@ -110,7 +110,9 @@ class EntraIDAccessTokenGenerator(
     private data class TokenEndpointResponse(
         val access_token: String,
         val expires_in: Duration,
-    )
+    ) {
+        val expiry: Instant = Instant.now().plus(expires_in)
+    }
 
     private fun createHttpClient() =
         HttpClient(Apache) {
