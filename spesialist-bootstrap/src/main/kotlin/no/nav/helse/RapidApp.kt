@@ -8,7 +8,6 @@ import no.nav.helse.bootstrap.EnvironmentImpl
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.spesialist.api.AzureConfig
 import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
-import no.nav.helse.spesialist.api.bootstrap.azureAdClient
 import no.nav.helse.spesialist.api.bootstrap.httpClient
 import no.nav.helse.spesialist.api.reservasjon.KRRClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
@@ -34,8 +33,8 @@ internal class RapidApp(env: Map<String, String>) {
         )
     private val accessTokenGenerator =
         EntraIDAccessTokenGenerator(
-            httpClient = azureAdClient(),
-            azureConfig = azureConfig,
+            clientId = env.getValue("AZURE_APP_CLIENT_ID"),
+            tokenEndpoint = env.getValue("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
             privateJwk = env.getValue("AZURE_APP_JWK"),
         )
     private val snapshotClient =

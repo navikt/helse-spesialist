@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.api.bootstrap
+package no.nav.helse.spesialist.client.entraid
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper

@@ -4,7 +4,6 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.nimbusds.jose.jwk.RSAKey
-import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.accept
 import io.ktor.client.request.forms.FormDataContent
@@ -16,7 +15,6 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.Parameters
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import no.nav.helse.spesialist.api.AzureConfig
 import no.nav.helse.spesialist.application.AccessTokenGenerator
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -27,12 +25,13 @@ import java.util.UUID
 import kotlin.collections.set
 
 class EntraIDAccessTokenGenerator(
-    private val httpClient: HttpClient,
-    private val azureConfig: AzureConfig,
+    private val clientId: String,
+    private val tokenEndpoint: String,
     private val privateJwk: String,
 ) : AccessTokenGenerator {
     private val log = LoggerFactory.getLogger(EntraIDAccessTokenGenerator::class.java)
     private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
+    private val httpClient = azureAdClient()
     private val mutex = Mutex()
 
     @Volatile
@@ -50,16 +49,19 @@ class EntraIDAccessTokenGenerator(
                         val response: AadAccessToken =
                             try {
                                 val response =
-                                    httpClient.post(azureConfig.tokenEndpoint) {
+                                    httpClient.post(tokenEndpoint) {
                                         accept(ContentType.Application.Json)
                                         method = HttpMethod.Post
                                         setBody(
                                             FormDataContent(
                                                 Parameters.build {
-                                                    append("client_id", azureConfig.clientId)
+                                                    append("client_id", clientId)
                                                     append("scope", scope)
                                                     append("grant_type", "client_credentials")
-                                                    append("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
+                                                    append(
+                                                        "client_assertion_type",
+                                                        "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
+                                                    )
                                                     append("client_assertion", lagAssertion())
                                                 },
                                             ),
@@ -85,9 +87,9 @@ class EntraIDAccessTokenGenerator(
         val now = Instant.now()
         return JWT.create().apply {
             withKeyId(privateKey.keyID)
-            withSubject(azureConfig.clientId)
-            withIssuer(azureConfig.clientId)
-            withAudience(azureConfig.tokenEndpoint)
+            withSubject(clientId)
+            withIssuer(clientId)
+            withAudience(tokenEndpoint)
             withJWTId(UUID.randomUUID().toString())
             withIssuedAt(Date.from(now))
             withNotBefore(Date.from(now))
