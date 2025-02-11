@@ -4,10 +4,12 @@ import no.nav.helse.db.api.NotatApiDao
 import no.nav.helse.db.api.VarselDbDto
 import no.nav.helse.spesialist.api.graphql.schema.ApiNotatType
 import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodehistorikkType
+import no.nav.helse.spesialist.api.graphql.schema.ApiReservasjon
 import no.nav.helse.spesialist.api.graphql.schema.ApiVarselDTO
 import no.nav.helse.spesialist.api.graphql.schema.ApiVarselDTO.ApiVarselvurderingDTO
 import no.nav.helse.spesialist.api.graphql.schema.ApiVarselstatus
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
+import no.nav.helse.spesialist.application.Reservasjonshenter
 
 fun VarselDbDto.toVarselDto(): ApiVarselDTO {
     val varseldefinisjon = this.varseldefinisjon
@@ -69,3 +71,9 @@ fun PeriodehistorikkType.tilApiPeriodehistorikkType() =
         PeriodehistorikkType.FJERN_FRA_PA_VENT -> ApiPeriodehistorikkType.FJERN_FRA_PA_VENT
         PeriodehistorikkType.STANS_AUTOMATISK_BEHANDLING -> ApiPeriodehistorikkType.STANS_AUTOMATISK_BEHANDLING
     }
+
+fun Reservasjonshenter.ReservasjonDto.toApiReservasjon(): ApiReservasjon =
+    ApiReservasjon(
+        kanVarsles = kanVarsles,
+        reservert = reservert,
+    )

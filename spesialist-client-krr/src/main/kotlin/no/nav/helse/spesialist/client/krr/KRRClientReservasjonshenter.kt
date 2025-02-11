@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.api.reservasjon
+package no.nav.helse.spesialist.client.krr
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -12,8 +12,9 @@ import io.micrometer.core.instrument.Tag
 import io.micrometer.core.instrument.Timer
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
-import no.nav.helse.spesialist.api.graphql.schema.ApiReservasjon
 import no.nav.helse.spesialist.application.AccessTokenGenerator
+import no.nav.helse.spesialist.application.Reservasjonshenter
+import no.nav.helse.spesialist.application.Reservasjonshenter.ReservasjonDto
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -32,20 +33,16 @@ private val statusEtterKallReservasjonsstatusBuilder =
         .description("Status på kall til digdir-krr-proxy, success eller failure")
         .tags(listOf(Tag.of("status", "success"), Tag.of("status", "failure")))
 
-interface ReservasjonClient {
-    suspend fun hentReservasjonsstatus(fnr: String): ApiReservasjon?
-}
-
-class KRRClient(
+class KRRClientReservasjonshenter(
     private val httpClient: HttpClient,
     private val apiUrl: String,
     private val scope: String,
     private val accessTokenGenerator: AccessTokenGenerator,
-) : ReservasjonClient {
+) : Reservasjonshenter {
     private val logg: Logger = LoggerFactory.getLogger(this.javaClass)
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
-    override suspend fun hentReservasjonsstatus(fnr: String): ApiReservasjon? {
+    override suspend fun hentForPerson(fødselsnummer: String): ReservasjonDto? {
         val sample = Timer.start(registry)
         return try {
             logg.debug("Henter accessToken")
@@ -57,10 +54,10 @@ class KRRClient(
                 httpClient
                     .get("$apiUrl/rest/v1/person") {
                         header("Authorization", "Bearer $accessToken")
-                        header("Nav-Personident", fnr)
+                        header("Nav-Personident", fødselsnummer)
                         header("Nav-Call-Id", callId)
                         accept(ContentType.Application.Json)
-                    }.body<ApiReservasjon>()
+                    }.body<ReservasjonDto>()
 
             statusEtterKallReservasjonsstatusBuilder
                 .withRegistry(registry)

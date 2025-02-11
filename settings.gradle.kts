@@ -5,6 +5,7 @@ include(
     "spesialist-api-schema",
     "spesialist-api",
     "spesialist-client-entra-id",
+    "spesialist-client-krr",
     "spesialist-db-migrations",
     "spesialist-db",
     "spesialist-kafka",

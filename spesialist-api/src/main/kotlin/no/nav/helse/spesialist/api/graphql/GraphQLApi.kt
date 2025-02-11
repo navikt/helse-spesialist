@@ -59,8 +59,8 @@ import no.nav.helse.spesialist.api.graphql.query.OpptegnelseQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.person.PersonService
-import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
+import no.nav.helse.spesialist.application.Reservasjonshenter
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -81,7 +81,7 @@ fun Application.graphQLApi(
     totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
     påVentApiDao: PåVentApiDao,
     vergemålApiDao: VergemålApiDao,
-    reservasjonClient: ReservasjonClient,
+    reservasjonshenter: Reservasjonshenter,
     avviksvurderinghenter: Avviksvurderinghenter,
     skjermedePersonerGruppeId: UUID,
     kode7Saksbehandlergruppe: UUID,
@@ -118,7 +118,7 @@ fun Application.graphQLApi(
                                     påVentApiDao = påVentApiDao,
                                     vergemålApiDao = vergemålApiDao,
                                     snapshotService = snapshotService,
-                                    reservasjonClient = reservasjonClient,
+                                    reservasjonshenter = reservasjonshenter,
                                     apiOppgaveService = apiOppgaveService,
                                     saksbehandlerhåndterer = saksbehandlerhåndterer,
                                     avviksvurderinghenter = avviksvurderinghenter,

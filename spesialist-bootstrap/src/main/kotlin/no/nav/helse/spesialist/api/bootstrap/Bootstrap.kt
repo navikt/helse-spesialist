@@ -8,15 +8,15 @@ import no.nav.helse.db.SessionFactory
 import no.nav.helse.spesialist.api.AzureConfig
 import no.nav.helse.spesialist.api.azureAdAppAuthentication
 import no.nav.helse.spesialist.api.graphql.graphQLApi
-import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
 import no.nav.helse.spesialist.api.websockets.webSocketsApi
+import no.nav.helse.spesialist.application.Reservasjonshenter
 
 class Bootstrap(
     repositories: Repositories,
     private val sessionFactory: SessionFactory,
     private val avhengigheter: ApiAvhengigheter,
-    private val reservasjonClient: ReservasjonClient,
+    private val reservasjonshenter: Reservasjonshenter,
     private val tilgangsgrupper: Tilgangsgrupper,
 ) {
     private val personinfoDao = repositories.personinfoDao
@@ -56,7 +56,7 @@ class Bootstrap(
             totrinnsvurderingApiDao = totrinnsvurderingApiDao,
             påVentApiDao = påVentApiDao,
             vergemålApiDao = vergemålApiDao,
-            reservasjonClient = reservasjonClient,
+            reservasjonshenter = reservasjonshenter,
             avviksvurderinghenter = avhengigheter.avviksvurderinghenter,
             skjermedePersonerGruppeId = tilgangsgrupper.skjermedePersonerGruppeId,
             kode7Saksbehandlergruppe = tilgangsgrupper.kode7GruppeId,

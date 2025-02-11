@@ -51,9 +51,9 @@ import no.nav.helse.spesialist.api.graphql.query.OpptegnelseQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.api.graphql.queryHandler
 import no.nav.helse.spesialist.api.person.PersonService
-import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
+import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLArbeidsgiver
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import org.intellij.lang.annotations.Language
@@ -66,7 +66,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
     private val beslutterGruppeId: UUID = UUID.randomUUID()
     private val avviksvurderingId: UUID = UUID.randomUUID()
 
-    private val reservasjonClient = mockk<ReservasjonClient>(relaxed = true)
+    private val reservasjonshenter = mockk<Reservasjonshenter>(relaxed = true)
     private val behandlingsstatistikkMediator = mockk<IBehandlingsstatistikkService>(relaxed = true)
     protected val saksbehandlerhåndterer = mockk<Saksbehandlerhåndterer>(relaxed = true)
     private val godkjenninghåndterer = mockk<Godkjenninghåndterer>(relaxed = true)
@@ -112,7 +112,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                                 påVentApiDao = påVentApiDao,
                                 vergemålApiDao = vergemålApiDao,
                                 snapshotService = snapshotService,
-                                reservasjonClient = reservasjonClient,
+                                reservasjonshenter = reservasjonshenter,
                                 apiOppgaveService = apiOppgaveService,
                                 saksbehandlerhåndterer = saksbehandlerhåndterer,
                                 avviksvurderinghenter = avviksvurderinghenter,

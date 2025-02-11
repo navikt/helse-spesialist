@@ -26,15 +26,16 @@ import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
+import no.nav.helse.spesialist.api.graphql.mapping.toApiReservasjon
 import no.nav.helse.spesialist.api.graphql.query.FetchPersonResult
 import no.nav.helse.spesialist.api.graphql.query.PersonoppslagService
 import no.nav.helse.spesialist.api.graphql.resolvers.ApiPersonResolver
 import no.nav.helse.spesialist.api.graphql.schema.ApiPerson
 import no.nav.helse.spesialist.api.graphql.schema.ApiPersoninfo
-import no.nav.helse.spesialist.api.graphql.schema.ApiReservasjon
-import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import no.nav.helse.spesialist.api.saksbehandler.manglerTilgang
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
+import no.nav.helse.spesialist.application.Reservasjonshenter
+import no.nav.helse.spesialist.application.Reservasjonshenter.ReservasjonDto
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import org.slf4j.LoggerFactory
 
@@ -68,7 +69,7 @@ class PersonService(
     private val stansAutomatiskBehandlinghåndterer: StansAutomatiskBehandlinghåndterer,
     private val personhåndterer: Personhåndterer,
     private val snapshotService: SnapshotService,
-    private val reservasjonClient: ReservasjonClient,
+    private val reservasjonshenter: Reservasjonshenter,
     private val env: Environment,
 ) : PersonoppslagService {
     private companion object {
@@ -112,7 +113,7 @@ class PersonService(
     private suspend fun person(
         fødselsnummer: String,
         snapshot: Pair<ApiPersoninfo, GraphQLPerson>,
-        reservasjon: Deferred<ApiReservasjon?>,
+        reservasjon: Deferred<ReservasjonDto?>,
     ): FetchPersonResult.Ok {
         val (personinfo, personSnapshot) = snapshot
         return FetchPersonResult.Ok(
@@ -122,7 +123,7 @@ class PersonService(
                         snapshot = personSnapshot,
                         personinfo =
                             personinfo.copy(
-                                reservasjon = reservasjon.await(),
+                                reservasjon = reservasjon.await()?.toApiReservasjon(),
                                 unntattFraAutomatisering =
                                     stansAutomatiskBehandlinghåndterer.unntattFraAutomatiskGodkjenning(fødselsnummer),
                                 fullmakt = vergemålApiDao.harFullmakt(fødselsnummer),
@@ -148,10 +149,10 @@ class PersonService(
 
     private fun finnReservasjonsstatus(fødselsnummer: String) =
         if (env.erDev) {
-            CompletableDeferred<ApiReservasjon?>().also { it.complete(null) }
+            CompletableDeferred<ReservasjonDto?>().also { it.complete(null) }
         } else {
             CoroutineScope(Dispatchers.IO).async {
-                reservasjonClient.hentReservasjonsstatus(fødselsnummer)
+                reservasjonshenter.hentForPerson(fødselsnummer)
             }
         }
 

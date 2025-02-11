@@ -9,10 +9,10 @@ import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.spesialist.api.AzureConfig
 import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
 import no.nav.helse.spesialist.api.bootstrap.httpClient
-import no.nav.helse.spesialist.api.reservasjon.KRRClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spesialist.client.entraid.EntraIDAccessTokenGenerator
 import no.nav.helse.spesialist.client.entraid.MsGraphGruppekontroll
+import no.nav.helse.spesialist.client.krr.KRRClientReservasjonshenter
 import java.net.URI
 
 fun main() {
@@ -46,7 +46,7 @@ internal class RapidApp(env: Map<String, String>) {
             spleisClientId = env.getValue("SPLEIS_CLIENT_ID"),
         )
     private val reservasjonClient =
-        KRRClient(
+        KRRClientReservasjonshenter(
             httpClient = httpClient(5_000, 5_000, 5_000),
             accessTokenGenerator = accessTokenGenerator,
             apiUrl = env.getValue("KONTAKT_OG_RESERVASJONSREGISTERET_API_URL"),
@@ -61,7 +61,7 @@ internal class RapidApp(env: Map<String, String>) {
             snapshotClient = snapshotClient,
             azureConfig = azureConfig,
             tilgangsgrupper = tilgangsgrupper,
-            reservasjonClient = reservasjonClient,
+            reservasjonshenter = reservasjonClient,
             versjonAvKode = versjonAvKode(env),
             featureToggles = unleashFeatureToggles,
         )

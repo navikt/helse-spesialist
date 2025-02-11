@@ -30,8 +30,8 @@ import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.bootstrap.ApiAvhengigheter
 import no.nav.helse.spesialist.api.bootstrap.Bootstrap
 import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
-import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import no.nav.helse.spesialist.api.snapshot.ISnapshotClient
+import no.nav.helse.spesialist.application.Reservasjonshenter
 import org.slf4j.LoggerFactory
 import java.lang.management.GarbageCollectorMXBean
 import java.lang.management.ManagementFactory
@@ -45,7 +45,7 @@ class SpesialistApp(
     snapshotClient: ISnapshotClient,
     private val azureConfig: AzureConfig,
     private val tilgangsgrupper: Tilgangsgrupper,
-    reservasjonClient: ReservasjonClient,
+    reservasjonshenter: Reservasjonshenter,
     private val versjonAvKode: String,
     private val featureToggles: FeatureToggles,
 ) : RapidsConnection.StatusListener {
@@ -108,7 +108,7 @@ class SpesialistApp(
             repositories = repositories,
             sessionFactory = sessionFactory,
             avhengigheter = apiAvhengigheter,
-            reservasjonClient = reservasjonClient,
+            reservasjonshenter = reservasjonshenter,
             tilgangsgrupper = tilgangsgrupper,
         )
 

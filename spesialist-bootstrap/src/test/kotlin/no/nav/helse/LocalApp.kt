@@ -20,9 +20,8 @@ import no.nav.helse.rapids_rivers.RapidApplication.Builder
 import no.nav.helse.spesialist.api.AzureConfig
 import no.nav.helse.spesialist.api.bootstrap.Gruppe
 import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
-import no.nav.helse.spesialist.api.graphql.schema.ApiReservasjon
-import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import no.nav.helse.spesialist.api.snapshot.ISnapshotClient
+import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
@@ -81,7 +80,7 @@ object LocalApp {
             snapshotClient = snapshotClient,
             azureConfig = azureConfig,
             tilgangsgrupper = tilgangsgrupper,
-            reservasjonClient = reservasjonClient,
+            reservasjonshenter = reservasjonshenter,
             versjonAvKode = "versjon_1",
             featureToggles = object : FeatureToggles{}
         )
@@ -124,11 +123,9 @@ private val snapshotClient =
         override fun hentSnapshot(fnr: String) = null
     }
 
-private val reservasjonClient =
-    object : ReservasjonClient {
-        override suspend fun hentReservasjonsstatus(fnr: String): ApiReservasjon? {
-            return null
-        }
+private val reservasjonshenter =
+    object : Reservasjonshenter {
+        override suspend fun hentForPerson(fødselsnummer: String) = null
     }
 
 private val tilgangsgrupper =

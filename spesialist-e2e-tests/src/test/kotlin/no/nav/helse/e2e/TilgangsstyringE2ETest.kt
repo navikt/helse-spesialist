@@ -174,7 +174,7 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
                     påVentApiDao = repositories.påVentApiDao,
                     vergemålApiDao = repositories.vergemålApiDao,
                     snapshotService = SnapshotService(repositories.personinfoDao, snapshotClient),
-                    reservasjonClient = mockk(relaxed = true),
+                    reservasjonshenter = mockk(relaxed = true),
                     apiOppgaveService = mockk(relaxed = true),
                     saksbehandlerhåndterer = mockk(relaxed = true),
                     avviksvurderinghenter = mockk(relaxed = true),
