@@ -399,6 +399,7 @@ class PgOverstyringDao private constructor(queryRunner: QueryRunner) : Overstyri
                       o.vedtaksperiode_id,
                       ot.begrunnelse,
                       o.tidspunkt,
+                      o.ferdigstilt,
                       o.saksbehandler_ref
                FROM overstyring o
                         INNER JOIN overstyring_tidslinje ot ON ot.overstyring_ref = o.id
@@ -420,6 +421,7 @@ class PgOverstyringDao private constructor(queryRunner: QueryRunner) : Overstyri
                         begrunnelse = overstyringRow.string("begrunnelse"),
                         opprettet = overstyringRow.localDateTime("tidspunkt"),
                         saksbehandlerOid = overstyringRow.uuid("saksbehandler_ref"),
+                        ferdigstilt = overstyringRow.boolean("ferdigstilt"),
                         dager =
                             asSQL(
                                 """
@@ -456,7 +458,8 @@ class PgOverstyringDao private constructor(queryRunner: QueryRunner) : Overstyri
                     p.aktør_id,
                     o.tidspunkt,
                     o.vedtaksperiode_id,
-                    o.saksbehandler_ref
+                    o.saksbehandler_ref,
+                    o.ferdigstilt
                 FROM overstyring o
                     INNER JOIN overstyring_inntekt oi on o.id = oi.overstyring_ref
                     INNER JOIN person p ON p.id = o.person_ref
@@ -480,6 +483,7 @@ class PgOverstyringDao private constructor(queryRunner: QueryRunner) : Overstyri
                     skjæringstidspunkt = skjæringstidspunkt,
                     vedtaksperiodeId = overstyringRow.uuid("vedtaksperiode_id"),
                     saksbehandlerOid = overstyringRow.uuid("saksbehandler_ref"),
+                    ferdigstilt = overstyringRow.boolean("ferdigstilt"),
                     arbeidsgivere =
                         asSQL(
                             """
@@ -540,7 +544,8 @@ class PgOverstyringDao private constructor(queryRunner: QueryRunner) : Overstyri
                        b2.tekst as mal,
                        b1.tekst as fritekst,
                        b3.tekst as konklusjon,
-                       ss.initierende_vedtaksperiode_id
+                       ss.initierende_vedtaksperiode_id,
+                       o.ferdigstilt
                 FROM overstyring o
                          INNER JOIN skjonnsfastsetting_sykepengegrunnlag ss ON o.id = ss.overstyring_ref
                          INNER JOIN person p ON p.id = o.person_ref
@@ -562,6 +567,7 @@ class PgOverstyringDao private constructor(queryRunner: QueryRunner) : Overstyri
                     skjæringstidspunkt = overstyringRow.localDate("skjaeringstidspunkt"),
                     vedtaksperiodeId = overstyringRow.uuid("vedtaksperiode_id"),
                     saksbehandlerOid = overstyringRow.uuid("saksbehandler_ref"),
+                    ferdigstilt = overstyringRow.boolean("ferdigstilt"),
                     arbeidsgivere =
                         asSQL(
                             """
@@ -600,7 +606,8 @@ class PgOverstyringDao private constructor(queryRunner: QueryRunner) : Overstyri
                 tidspunkt,
                 vedtaksperiode_id,
                 begrunnelse,
-                o.saksbehandler_ref
+                o.saksbehandler_ref,
+                o.ferdigstilt
             FROM overstyring o
                 JOIN person p ON o.person_ref = p.id
                 JOIN overstyring_minimum_sykdomsgrad oms ON oms.overstyring_ref = o.id
@@ -653,6 +660,7 @@ class PgOverstyringDao private constructor(queryRunner: QueryRunner) : Overstyri
                     arbeidsgivere = arbeidsgivere,
                     opprettet = overstyringRow.localDateTime("tidspunkt"),
                     saksbehandlerOid = overstyringRow.uuid("saksbehandler_ref"),
+                    ferdigstilt = overstyringRow.boolean("ferdigstilt"),
                 )
         }
     }
@@ -668,7 +676,8 @@ class PgOverstyringDao private constructor(queryRunner: QueryRunner) : Overstyri
                     p.aktør_id,
                     o.ferdigstilt,
                     o.vedtaksperiode_id,
-                    o.saksbehandler_ref
+                    o.saksbehandler_ref,
+                    o.ferdigstilt
                 FROM overstyring o
                     INNER JOIN overstyring_arbeidsforhold oa on o.id = oa.overstyring_ref
                     INNER JOIN person p ON p.id = o.person_ref
@@ -692,6 +701,7 @@ class PgOverstyringDao private constructor(queryRunner: QueryRunner) : Overstyri
                     skjæringstidspunkt = skjæringstidspunkt,
                     vedtaksperiodeId = overstyringRow.uuid("vedtaksperiode_id"),
                     saksbehandlerOid = overstyringRow.uuid("saksbehandler_ref"),
+                    ferdigstilt = overstyringRow.boolean("ferdigstilt"),
                     overstyrteArbeidsforhold =
                         asSQL(
                             """

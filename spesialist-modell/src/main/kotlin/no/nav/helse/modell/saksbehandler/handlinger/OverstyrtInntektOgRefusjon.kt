@@ -4,6 +4,7 @@ import no.nav.helse.modell.melding.OverstyrtInntektOgRefusjonEvent
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 class OverstyrtInntektOgRefusjon private constructor(
@@ -13,6 +14,8 @@ class OverstyrtInntektOgRefusjon private constructor(
     override val fødselsnummer: String,
     override val aktørId: String,
     override val vedtaksperiodeId: UUID,
+    override val opprettet: LocalDateTime,
+    override val ferdigstilt: Boolean,
     val skjæringstidspunkt: LocalDate,
     val arbeidsgivere: List<OverstyrtArbeidsgiver>,
 ) : Overstyring(id) {
@@ -33,6 +36,8 @@ class OverstyrtInntektOgRefusjon private constructor(
         ) = OverstyrtInntektOgRefusjon(
             id = null,
             eksternHendelseId = UUID.randomUUID(),
+            opprettet = LocalDateTime.now(),
+            ferdigstilt = false,
             saksbehandlerOid = saksbehandlerOid,
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
@@ -44,6 +49,8 @@ class OverstyrtInntektOgRefusjon private constructor(
         fun fraLagring(
             id: OverstyringId,
             eksternHendelseId: UUID,
+            opprettet: LocalDateTime,
+            ferdigstilt: Boolean,
             saksbehandlerOid: UUID,
             fødselsnummer: String,
             aktørId: String,
@@ -53,6 +60,8 @@ class OverstyrtInntektOgRefusjon private constructor(
         ) = OverstyrtInntektOgRefusjon(
             id = id,
             eksternHendelseId = eksternHendelseId,
+            opprettet = opprettet,
+            ferdigstilt = ferdigstilt,
             saksbehandlerOid = saksbehandlerOid,
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,

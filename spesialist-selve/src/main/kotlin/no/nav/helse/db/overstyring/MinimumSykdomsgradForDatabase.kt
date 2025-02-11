@@ -15,6 +15,7 @@ data class MinimumSykdomsgradForDatabase(
     val arbeidsgivere: List<MinimumSykdomsgradArbeidsgiverForDatabase>,
     override val opprettet: LocalDateTime,
     override val saksbehandlerOid: UUID,
+    override val ferdigstilt: Boolean,
 ) : OverstyringForDatabase {
     data class MinimumSykdomsgradArbeidsgiverForDatabase(
         val organisasjonsnummer: String,

@@ -13,6 +13,7 @@ data class SkjønnsfastsattSykepengegrunnlagForDatabase(
     override val opprettet: LocalDateTime,
     override val vedtaksperiodeId: UUID,
     override val saksbehandlerOid: UUID,
+    override val ferdigstilt: Boolean,
 ) : OverstyringForDatabase
 
 data class SkjønnsfastsattArbeidsgiverForDatabase(

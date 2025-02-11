@@ -22,7 +22,6 @@ import no.nav.helse.modell.saksbehandler.handlinger.Refusjonselement
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
-import java.time.LocalDateTime
 import java.util.UUID
 
 class Overstyringlagrer(private val overstyringDao: OverstyringDao) {
@@ -79,8 +78,9 @@ class Overstyringlagrer(private val overstyringDao: OverstyringDao) {
             organisasjonsnummer = organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             begrunnelse = begrunnelse,
-            opprettet = LocalDateTime.now(),
             saksbehandlerOid = saksbehandlerOid,
+            opprettet = opprettet,
+            ferdigstilt = ferdigstilt,
             dager =
                 dager.map {
                     OverstyrtTidslinjedagForDatabase(
@@ -101,8 +101,9 @@ class Overstyringlagrer(private val overstyringDao: OverstyringDao) {
             fødselsnummer = fødselsnummer,
             skjæringstidspunkt = skjæringstidspunkt,
             vedtaksperiodeId = vedtaksperiodeId,
-            opprettet = LocalDateTime.now(),
             saksbehandlerOid = saksbehandlerOid,
+            opprettet = opprettet,
+            ferdigstilt = ferdigstilt,
             arbeidsgivere =
                 arbeidsgivere.map {
                     OverstyrtArbeidsgiverForDatabase(
@@ -126,9 +127,10 @@ class Overstyringlagrer(private val overstyringDao: OverstyringDao) {
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             skjæringstidspunkt = skjæringstidspunkt,
-            opprettet = LocalDateTime.now(),
             vedtaksperiodeId = vedtaksperiodeId,
             saksbehandlerOid = saksbehandlerOid,
+            opprettet = opprettet,
+            ferdigstilt = ferdigstilt,
             overstyrteArbeidsforhold =
                 overstyrteArbeidsforhold.map {
                     ArbeidsforholdForDatabase(
@@ -146,9 +148,10 @@ class Overstyringlagrer(private val overstyringDao: OverstyringDao) {
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             skjæringstidspunkt = skjæringstidspunkt,
-            opprettet = LocalDateTime.now(),
             vedtaksperiodeId = vedtaksperiodeId,
             saksbehandlerOid = saksbehandlerOid,
+            opprettet = opprettet,
+            ferdigstilt = ferdigstilt,
             arbeidsgivere =
                 arbeidsgivere.map {
                     SkjønnsfastsattArbeidsgiverForDatabase(
@@ -193,9 +196,10 @@ class Overstyringlagrer(private val overstyringDao: OverstyringDao) {
                         berørtVedtaksperiodeId = it.berørtVedtaksperiodeId,
                     )
                 },
-            opprettet = LocalDateTime.now(),
             vedtaksperiodeId = this@tilDatabase.vedtaksperiodeId,
             saksbehandlerOid = saksbehandlerOid,
+            opprettet = opprettet,
+            ferdigstilt = ferdigstilt,
         )
 
     private fun Lovhjemmel.tilDatabase() = LovhjemmelForDatabase(paragraf = paragraf, ledd = ledd, bokstav = bokstav)

@@ -8,6 +8,7 @@ import no.nav.helse.modell.vilkårsprøving.Subsumsjon
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.Utfall.VILKAR_OPPFYLT
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 class MinimumSykdomsgrad private constructor(
@@ -17,6 +18,8 @@ class MinimumSykdomsgrad private constructor(
     override val fødselsnummer: String,
     override val aktørId: String,
     override val vedtaksperiodeId: UUID,
+    override val opprettet: LocalDateTime,
+    override val ferdigstilt: Boolean,
     val perioderVurdertOk: List<MinimumSykdomsgradPeriode>,
     val perioderVurdertIkkeOk: List<MinimumSykdomsgradPeriode>,
     val begrunnelse: String,
@@ -41,6 +44,8 @@ class MinimumSykdomsgrad private constructor(
         ) = MinimumSykdomsgrad(
             id = null,
             eksternHendelseId = UUID.randomUUID(),
+            opprettet = LocalDateTime.now(),
+            ferdigstilt = false,
             saksbehandlerOid = saksbehandlerOid,
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
@@ -54,6 +59,8 @@ class MinimumSykdomsgrad private constructor(
         fun fraLagring(
             id: OverstyringId,
             eksternHendelseId: UUID,
+            opprettet: LocalDateTime,
+            ferdigstilt: Boolean,
             saksbehandlerOid: UUID,
             fødselsnummer: String,
             aktørId: String,
@@ -65,6 +72,8 @@ class MinimumSykdomsgrad private constructor(
         ) = MinimumSykdomsgrad(
             id = id,
             eksternHendelseId = eksternHendelseId,
+            opprettet = opprettet,
+            ferdigstilt = ferdigstilt,
             saksbehandlerOid = saksbehandlerOid,
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,

@@ -10,6 +10,7 @@ sealed interface OverstyringForDatabase {
     val opprettet: LocalDateTime
     val vedtaksperiodeId: UUID
     val saksbehandlerOid: UUID
+    val ferdigstilt: Boolean
 }
 
 data class OverstyrtTidslinjeForDatabase(
@@ -22,6 +23,7 @@ data class OverstyrtTidslinjeForDatabase(
     override val opprettet: LocalDateTime,
     override val vedtaksperiodeId: UUID,
     override val saksbehandlerOid: UUID,
+    override val ferdigstilt: Boolean,
 ) : OverstyringForDatabase
 
 data class OverstyrtTidslinjedagForDatabase(
@@ -42,6 +44,7 @@ data class OverstyrtInntektOgRefusjonForDatabase(
     override val opprettet: LocalDateTime,
     override val vedtaksperiodeId: UUID,
     override val saksbehandlerOid: UUID,
+    override val ferdigstilt: Boolean,
 ) : OverstyringForDatabase
 
 data class OverstyrtArbeidsgiverForDatabase(
@@ -72,6 +75,7 @@ data class OverstyrtArbeidsforholdForDatabase(
     override val opprettet: LocalDateTime,
     override val vedtaksperiodeId: UUID,
     override val saksbehandlerOid: UUID,
+    override val ferdigstilt: Boolean,
 ) : OverstyringForDatabase
 
 data class ArbeidsforholdForDatabase(

@@ -8,6 +8,7 @@ import no.nav.helse.modell.vilkårsprøving.Subsumsjon
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.SporingSkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.Utfall.VILKAR_BEREGNET
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 class SkjønnsfastsattSykepengegrunnlag private constructor(
@@ -17,6 +18,8 @@ class SkjønnsfastsattSykepengegrunnlag private constructor(
     override val fødselsnummer: String,
     override val aktørId: String,
     override val vedtaksperiodeId: UUID,
+    override val opprettet: LocalDateTime,
+    override val ferdigstilt: Boolean,
     val skjæringstidspunkt: LocalDate,
     val arbeidsgivere: List<SkjønnsfastsattArbeidsgiver>,
 ) : Overstyring(id) {
@@ -37,6 +40,8 @@ class SkjønnsfastsattSykepengegrunnlag private constructor(
         ) = SkjønnsfastsattSykepengegrunnlag(
             id = null,
             eksternHendelseId = UUID.randomUUID(),
+            opprettet = LocalDateTime.now(),
+            ferdigstilt = false,
             saksbehandlerOid = saksbehandlerOid,
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
@@ -48,6 +53,8 @@ class SkjønnsfastsattSykepengegrunnlag private constructor(
         fun fraLagring(
             id: OverstyringId,
             eksternHendelseId: UUID,
+            opprettet: LocalDateTime,
+            ferdigstilt: Boolean,
             saksbehandlerOid: UUID,
             fødselsnummer: String,
             aktørId: String,
@@ -57,6 +64,8 @@ class SkjønnsfastsattSykepengegrunnlag private constructor(
         ) = SkjønnsfastsattSykepengegrunnlag(
             id = id,
             eksternHendelseId = eksternHendelseId,
+            opprettet = opprettet,
+            ferdigstilt = ferdigstilt,
             saksbehandlerOid = saksbehandlerOid,
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,

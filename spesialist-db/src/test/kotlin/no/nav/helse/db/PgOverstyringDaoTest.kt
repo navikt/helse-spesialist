@@ -334,6 +334,7 @@ internal class PgOverstyringDaoTest : DatabaseIntegrationTest() {
                 opprettet = OPPRETTET,
                 vedtaksperiodeId = VEDTAKSPERIODE,
                 saksbehandlerOid = UUID.randomUUID(),
+                ferdigstilt = false,
                 arbeidsgivere =
                     listOf(
                         SkjønnsfastsattArbeidsgiverForDatabase(
@@ -371,6 +372,7 @@ internal class PgOverstyringDaoTest : DatabaseIntegrationTest() {
                 opprettet = OPPRETTET,
                 vedtaksperiodeId = VEDTAKSPERIODE,
                 saksbehandlerOid = UUID.randomUUID(),
+                ferdigstilt = false,
                 arbeidsgivere =
                     listOf(
                         MinimumSykdomsgradForDatabase.MinimumSykdomsgradArbeidsgiverForDatabase(
@@ -393,6 +395,7 @@ internal class PgOverstyringDaoTest : DatabaseIntegrationTest() {
                 opprettet = OPPRETTET,
                 vedtaksperiodeId = VEDTAKSPERIODE,
                 saksbehandlerOid = UUID.randomUUID(),
+                ferdigstilt = false,
                 arbeidsgivere =
                     overstyrteArbeidsgivere,
             ),
@@ -432,6 +435,7 @@ internal class PgOverstyringDaoTest : DatabaseIntegrationTest() {
                 opprettet = OPPRETTET,
                 vedtaksperiodeId = VEDTAKSPERIODE,
                 saksbehandlerOid = UUID.randomUUID(),
+                ferdigstilt = false,
                 overstyrteArbeidsforhold =
                     overstyrteArbeidsforhold,
             ),
@@ -457,6 +461,7 @@ internal class PgOverstyringDaoTest : DatabaseIntegrationTest() {
                 begrunnelse = BEGRUNNELSE,
                 opprettet = OPPRETTET,
                 vedtaksperiodeId = VEDTAKSPERIODE,
+                ferdigstilt = false,
                 saksbehandlerOid = UUID.randomUUID(),
             ),
             OID,

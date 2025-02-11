@@ -8,6 +8,7 @@ import no.nav.helse.modell.vilkårsprøving.Subsumsjon
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.SporingOverstyrtTidslinje
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.Utfall.VILKAR_BEREGNET
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 class OverstyrtTidslinje private constructor(
@@ -17,6 +18,8 @@ class OverstyrtTidslinje private constructor(
     override val fødselsnummer: String,
     override val aktørId: String,
     override val vedtaksperiodeId: UUID,
+    override val opprettet: LocalDateTime,
+    override val ferdigstilt: Boolean,
     val organisasjonsnummer: String,
     val dager: List<OverstyrtTidslinjedag>,
     val begrunnelse: String,
@@ -39,6 +42,8 @@ class OverstyrtTidslinje private constructor(
         ) = OverstyrtTidslinje(
             id = null,
             eksternHendelseId = UUID.randomUUID(),
+            opprettet = LocalDateTime.now(),
+            ferdigstilt = false,
             saksbehandlerOid = saksbehandlerOid,
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
@@ -51,6 +56,8 @@ class OverstyrtTidslinje private constructor(
         fun fraLagring(
             id: OverstyringId,
             eksternHendelseId: UUID,
+            opprettet: LocalDateTime,
+            ferdigstilt: Boolean,
             saksbehandlerOid: UUID,
             fødselsnummer: String,
             aktørId: String,
@@ -61,6 +68,8 @@ class OverstyrtTidslinje private constructor(
         ) = OverstyrtTidslinje(
             id = id,
             eksternHendelseId = eksternHendelseId,
+            opprettet = opprettet,
+            ferdigstilt = ferdigstilt,
             saksbehandlerOid = saksbehandlerOid,
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,

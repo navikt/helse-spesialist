@@ -120,6 +120,8 @@ class PgTotrinnsvurderingRepository(
             dager = dager.map { it.tilDomene() },
             begrunnelse = begrunnelse,
             saksbehandlerOid = saksbehandlerOid,
+            opprettet = opprettet,
+            ferdigstilt = ferdigstilt,
         )
 
     private fun MinimumSykdomsgradForDatabase.tilDomene(id: Long): MinimumSykdomsgrad =
@@ -134,6 +136,8 @@ class PgTotrinnsvurderingRepository(
             arbeidsgivere = arbeidsgivere.map { it.tilDomene() },
             vedtaksperiodeId = vedtaksperiodeId,
             saksbehandlerOid = saksbehandlerOid,
+            opprettet = opprettet,
+            ferdigstilt = ferdigstilt,
         )
 
     private fun OverstyrtArbeidsforholdForDatabase.tilDomene(id: Long) =
@@ -146,6 +150,8 @@ class PgTotrinnsvurderingRepository(
             skjæringstidspunkt = skjæringstidspunkt,
             overstyrteArbeidsforhold = overstyrteArbeidsforhold.map { it.tilDomene() },
             saksbehandlerOid = saksbehandlerOid,
+            opprettet = opprettet,
+            ferdigstilt = ferdigstilt,
         )
 
     private fun OverstyrtInntektOgRefusjonForDatabase.tilDomene(id: Long) =
@@ -158,6 +164,8 @@ class PgTotrinnsvurderingRepository(
             skjæringstidspunkt = skjæringstidspunkt,
             arbeidsgivere = arbeidsgivere.map { it.tilDomene() },
             saksbehandlerOid = saksbehandlerOid,
+            opprettet = opprettet,
+            ferdigstilt = ferdigstilt,
         )
 
     private fun SkjønnsfastsattSykepengegrunnlagForDatabase.tilDomene(id: Long) =
@@ -170,6 +178,8 @@ class PgTotrinnsvurderingRepository(
             arbeidsgivere = arbeidsgivere.map { it.tilDomene() },
             vedtaksperiodeId = vedtaksperiodeId,
             saksbehandlerOid = saksbehandlerOid,
+            opprettet = opprettet,
+            ferdigstilt = ferdigstilt,
         )
 
     private fun SkjønnsfastsattArbeidsgiverForDatabase.tilDomene() =

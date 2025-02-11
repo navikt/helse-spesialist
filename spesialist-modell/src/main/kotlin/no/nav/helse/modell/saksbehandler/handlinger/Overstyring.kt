@@ -1,6 +1,7 @@
 package no.nav.helse.modell.saksbehandler.handlinger
 
 import no.nav.helse.spesialist.modell.ddd.Entity
+import java.time.LocalDateTime
 import java.util.UUID
 
 @JvmInline
@@ -11,4 +12,6 @@ abstract class Overstyring(id: OverstyringId?) : Personhandling, Entity<Overstyr
     abstract val eksternHendelseId: UUID
     abstract val aktørId: String
     abstract val vedtaksperiodeId: UUID
+    abstract val opprettet: LocalDateTime
+    abstract val ferdigstilt: Boolean
 }
