@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api
 
-import com.expediagroup.graphql.client.types.GraphQLClientResponse
 import com.expediagroup.graphql.server.ktor.GraphQL
 import com.expediagroup.graphql.server.ktor.KtorGraphQLRequestParser
 import com.fasterxml.jackson.databind.JsonNode
@@ -55,7 +54,6 @@ import no.nav.helse.spesialist.api.person.PersonService
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
-import no.nav.helse.spleis.graphql.HentSnapshot
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLArbeidsgiver
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import org.intellij.lang.annotations.Language
@@ -78,8 +76,8 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
     private val stansAutomatiskBehandlinghåndterer = mockk<StansAutomatiskBehandlinghåndterer>(relaxed = true)
 
     protected val snapshotClient = mockk<SnapshotClient>(relaxed = true)
-    private val snapshotApiDao = repositories.snapshotApiDao
-    private val snapshotService = SnapshotService(snapshotApiDao, snapshotClient)
+    private val personinfoDao = repositories.personinfoDao
+    private val snapshotService = SnapshotService(personinfoDao, snapshotClient)
 
     private val apiTesting = ApiTesting(
         jwtStub,
@@ -180,9 +178,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
         fødselsnummer: String = FØDSELSNUMMER,
         arbeidsgivere: List<GraphQLArbeidsgiver> = listOf(defaultArbeidsgivere()),
     ) {
-        val respons = object : GraphQLClientResponse<HentSnapshot.Result> {
-            override val data = HentSnapshot.Result(snapshot(fødselsnummer, arbeidsgivere))
-        }
+        val respons = snapshot(fødselsnummer, arbeidsgivere)
         every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns respons
     }
 

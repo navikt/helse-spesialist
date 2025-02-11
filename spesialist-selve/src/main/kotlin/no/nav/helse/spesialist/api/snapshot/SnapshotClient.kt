@@ -19,6 +19,7 @@ import kotlinx.coroutines.runBlocking
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spleis.graphql.HentSnapshot
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.IOException
@@ -26,7 +27,7 @@ import java.net.URI
 import java.util.UUID
 
 interface ISnapshotClient {
-    fun hentSnapshot(fnr: String): GraphQLClientResponse<HentSnapshot.Result>
+    fun hentSnapshot(fnr: String): GraphQLPerson?
 }
 
 class SnapshotClient(
@@ -43,11 +44,11 @@ class SnapshotClient(
         val serializer: GraphQLClientSerializer = GraphQLClientJacksonSerializer(jacksonObjectMapper().disable(FAIL_ON_UNKNOWN_PROPERTIES))
     }
 
-    override fun hentSnapshot(fnr: String): GraphQLClientResponse<HentSnapshot.Result> {
+    override fun hentSnapshot(fnr: String): GraphQLPerson? {
         val request = HentSnapshot(variables = HentSnapshot.Variables(fnr = fnr))
 
         return runBlocking {
-            execute(request, fnr, retries)
+            execute(request, fnr, retries).data?.person
         }
     }
 

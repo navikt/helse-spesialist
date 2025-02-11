@@ -1,10 +1,5 @@
 package no.nav.helse
 
-import com.expediagroup.graphql.client.jackson.GraphQLClientJacksonSerializer
-import com.expediagroup.graphql.client.serializer.GraphQLClientSerializer
-import com.expediagroup.graphql.client.types.GraphQLClientResponse
-import com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.kafka.Config
 import com.github.navikt.tbd_libs.kafka.ConsumerProducerFactory
 import com.github.navikt.tbd_libs.rapids_and_rivers.KafkaRapid
@@ -28,7 +23,6 @@ import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
 import no.nav.helse.spesialist.api.graphql.schema.ApiReservasjon
 import no.nav.helse.spesialist.api.reservasjon.ReservasjonClient
 import no.nav.helse.spesialist.api.snapshot.ISnapshotClient
-import no.nav.helse.spleis.graphql.HentSnapshot
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
@@ -127,19 +121,7 @@ object LocalApp {
 
 private val snapshotClient =
     object : ISnapshotClient {
-        private val serializer: GraphQLClientSerializer =
-            GraphQLClientJacksonSerializer(
-                jacksonObjectMapper().disable(
-                    FAIL_ON_UNKNOWN_PROPERTIES,
-                ),
-            )
-
-        override fun hentSnapshot(fnr: String): GraphQLClientResponse<HentSnapshot.Result> {
-            return serializer.deserialize(
-                rawResponse = "{}",
-                responseType = HentSnapshot(variables = HentSnapshot.Variables(fnr = fnr)).responseType(),
-            )
-        }
+        override fun hentSnapshot(fnr: String) = null
     }
 
 private val reservasjonClient =

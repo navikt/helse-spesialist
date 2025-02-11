@@ -44,7 +44,7 @@ private sealed interface HentSnapshotResult {
     sealed interface Feil : HentSnapshotResult {
         data object IkkeFunnet : Feil
 
-        data object Ugyldig : Feil
+        data object KlarteIkkeHente : Feil
     }
 }
 
@@ -102,7 +102,7 @@ class PersonService(
         val snapshot =
             when (val snapshotResult = hentSnapshot(fødselsnummer)) {
                 HentSnapshotResult.Feil.IkkeFunnet -> return FetchPersonResult.Feil.IkkeFunnet
-                HentSnapshotResult.Feil.Ugyldig -> return FetchPersonResult.Feil.UgyldigSnapshot
+                HentSnapshotResult.Feil.KlarteIkkeHente -> return FetchPersonResult.Feil.KlarteIkkeHente
                 is HentSnapshotResult.Ok -> snapshotResult.snapshot
             }
 
@@ -161,7 +161,7 @@ class PersonService(
                 snapshotService.hentSnapshot(fødselsnummer)
             } catch (e: Exception) {
                 sikkerlogg.error("feilet under henting av snapshot for {}", keyValue("fnr", fødselsnummer), e)
-                return HentSnapshotResult.Feil.Ugyldig
+                return HentSnapshotResult.Feil.KlarteIkkeHente
             } ?: return HentSnapshotResult.Feil.IkkeFunnet
         if (snapshot.second.arbeidsgivere.isEmpty()) {
             return HentSnapshotResult.Feil.IkkeFunnet

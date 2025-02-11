@@ -187,7 +187,7 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
 
         assertEquals(501, body["errors"].first()["extensions"]["code"].asInt())
         logglytter.assertBleLogget(
-                    "suid=${SAKSBEHANDLER.ident} duid=$FØDSELSNUMMER operation=PersonQuery msg=Lagret snapshot stemmer ikke overens med forventet format. Dette kommer som regel av at noen har gjort endringer på formatet men glemt å bumpe versjonsnummeret.", Level.WARN)
+                    "suid=${SAKSBEHANDLER.ident} duid=$FØDSELSNUMMER operation=PersonQuery msg=Feil ved henting av snapshot for person", Level.WARN)
     }
 
     @Test

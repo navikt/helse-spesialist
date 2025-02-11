@@ -9,9 +9,9 @@ import no.nav.helse.db.api.OppgaveApiDao
 import no.nav.helse.db.api.OverstyringApiDao
 import no.nav.helse.db.api.PeriodehistorikkApiDao
 import no.nav.helse.db.api.PersonApiDao
+import no.nav.helse.db.api.PersoninfoDao
 import no.nav.helse.db.api.PåVentApiDao
 import no.nav.helse.db.api.RisikovurderingApiDao
-import no.nav.helse.db.api.SnapshotApiDao
 import no.nav.helse.db.api.TildelingApiDao
 import no.nav.helse.db.api.TotrinnsvurderingApiDao
 import no.nav.helse.db.api.VarselApiRepository
@@ -59,7 +59,7 @@ interface Repositories {
     val personApiDao: PersonApiDao
     val påVentApiDao: PåVentApiDao
     val risikovurderingApiDao: RisikovurderingApiDao
-    val snapshotApiDao: SnapshotApiDao
+    val personinfoDao: PersoninfoDao
     val tildelingApiDao: TildelingApiDao
     val totrinnsvurderingApiDao: TotrinnsvurderingApiDao
     val varselApiRepository: VarselApiRepository

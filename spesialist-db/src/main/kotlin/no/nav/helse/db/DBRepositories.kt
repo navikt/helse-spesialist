@@ -9,9 +9,9 @@ import no.nav.helse.db.api.PgOppgaveApiDao
 import no.nav.helse.db.api.PgOverstyringApiDao
 import no.nav.helse.db.api.PgPeriodehistorikkApiDao
 import no.nav.helse.db.api.PgPersonApiDao
+import no.nav.helse.db.api.PgPersoninfoDao
 import no.nav.helse.db.api.PgPåVentApiDao
 import no.nav.helse.db.api.PgRisikovurderingApiDao
-import no.nav.helse.db.api.PgSnapshotApiDao
 import no.nav.helse.db.api.PgTildelingApiDao
 import no.nav.helse.db.api.PgTotrinnsvurderingApiDao
 import no.nav.helse.db.api.PgVarselApiRepository
@@ -64,7 +64,7 @@ class DBRepositories(dataSource: DataSource, tilgangskontroll: Tilgangskontroll)
     override val personApiDao = PgPersonApiDao(dataSource)
     override val påVentApiDao = PgPåVentApiDao(dataSource)
     override val risikovurderingApiDao = PgRisikovurderingApiDao(dataSource)
-    override val snapshotApiDao = PgSnapshotApiDao(dataSource)
+    override val personinfoDao = PgPersoninfoDao(dataSource)
     override val tildelingApiDao = PgTildelingApiDao(dataSource)
     override val totrinnsvurderingApiDao = PgTotrinnsvurderingApiDao(dataSource)
     override val varselApiRepository = PgVarselApiRepository(dataSource)

@@ -55,7 +55,7 @@ sealed interface FetchPersonResult {
 
         data object IkkeFunnet : Feil
 
-        data object UgyldigSnapshot : Feil
+        data object KlarteIkkeHente : Feil
     }
 }
 
@@ -114,12 +114,12 @@ class PersonQueryHandler(
 
             is FetchPersonResult.Feil.IkkeKlarTilVisning -> auditLog(env.graphQlContext, fødselsnummer, false, null)
             is FetchPersonResult.Feil.ManglerTilgang -> auditLog(env.graphQlContext, fødselsnummer, false, null)
-            is FetchPersonResult.Feil.UgyldigSnapshot ->
+            is FetchPersonResult.Feil.KlarteIkkeHente ->
                 auditLog(
                     env.graphQlContext,
                     fødselsnummer,
                     null,
-                    getSnapshotValidationError().message,
+                    getSnapshotFetchError().message,
                 )
         }
     }
@@ -130,7 +130,7 @@ class PersonQueryHandler(
                 is FetchPersonResult.Feil.IkkeFunnet -> notFoundError(fødselsnummer)
                 is FetchPersonResult.Feil.IkkeKlarTilVisning -> personNotReadyError(fødselsnummer, aktørId)
                 is FetchPersonResult.Feil.ManglerTilgang -> forbiddenError(fødselsnummer)
-                is FetchPersonResult.Feil.UgyldigSnapshot -> getSnapshotValidationError()
+                is FetchPersonResult.Feil.KlarteIkkeHente -> getSnapshotFetchError()
             }
 
         return graphqlError.tilGraphqlResult()
@@ -207,12 +207,11 @@ class PersonQueryHandler(
                 ),
             ).build()
 
-    private fun getSnapshotValidationError(): GraphQLError =
+    private fun getSnapshotFetchError(): GraphQLError =
         GraphqlErrorException
             .newErrorException()
-            .message(
-                "Lagret snapshot stemmer ikke overens med forventet format. Dette kommer som regel av at noen har gjort endringer på formatet men glemt å bumpe versjonsnummeret.",
-            ).extensions(mapOf("code" to 501, "field" to "person"))
+            .message("Feil ved henting av snapshot for person")
+            .extensions(mapOf("code" to 501, "field" to "person"))
             .build()
 
     private fun getBadRequestError(melding: String): GraphQLError =

@@ -19,7 +19,7 @@ class Bootstrap(
     private val reservasjonClient: ReservasjonClient,
     private val tilgangsgrupper: Tilgangsgrupper,
 ) {
-    private val snapshotApiDao = repositories.snapshotApiDao
+    private val personinfoDao = repositories.personinfoDao
     private val personApiDao = repositories.personApiDao
     private val oppgaveApiDao = repositories.oppgaveApiDao
     private val periodehistorikkApiDao = repositories.periodehistorikkApiDao
@@ -61,7 +61,7 @@ class Bootstrap(
             skjermedePersonerGruppeId = tilgangsgrupper.skjermedePersonerGruppeId,
             kode7Saksbehandlergruppe = tilgangsgrupper.kode7GruppeId,
             beslutterGruppeId = tilgangsgrupper.beslutterGruppeId,
-            snapshotService = SnapshotService(snapshotApiDao, avhengigheter.snapshotClient),
+            snapshotService = SnapshotService(personinfoDao, avhengigheter.snapshotClient),
             behandlingsstatistikkMediator = avhengigheter.behandlingstatistikk,
             saksbehandlerhåndterer = avhengigheter.saksbehandlerhåndtererProvider(),
             apiOppgaveService = avhengigheter.apiOppgaveServiceProvider(),
