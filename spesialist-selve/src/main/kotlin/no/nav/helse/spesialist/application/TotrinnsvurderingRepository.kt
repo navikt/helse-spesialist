@@ -1,4 +1,4 @@
-package no.nav.helse.db
+package no.nav.helse.spesialist.application
 
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import java.util.UUID

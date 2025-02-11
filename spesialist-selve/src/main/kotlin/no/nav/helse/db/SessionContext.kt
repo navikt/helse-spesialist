@@ -4,6 +4,7 @@ import no.nav.helse.modell.person.PersonRepository
 import no.nav.helse.spesialist.application.DialogRepository
 import no.nav.helse.spesialist.application.NotatRepository
 import no.nav.helse.spesialist.application.SaksbehandlerRepository
+import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 
 interface SessionContext {
     val arbeidsforholdDao: ArbeidsforholdDao

@@ -28,6 +28,7 @@ import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
+import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import java.util.UUID
 
 class PgTotrinnsvurderingRepository(

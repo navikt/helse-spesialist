@@ -6,7 +6,6 @@ import io.mockk.verify
 import no.nav.helse.FeatureToggles
 import no.nav.helse.db.OverstyringDao
 import no.nav.helse.db.PeriodehistorikkDao
-import no.nav.helse.db.TotrinnsvurderingRepository
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.OverstyringType
 import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingAutomatiskRetur
@@ -18,6 +17,7 @@ import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
+import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.test.lagSaksbehandlerident
 import no.nav.helse.spesialist.test.lagSaksbehandlernavn
 import no.nav.helse.spesialist.test.lagTilfeldigSaksbehandlerepost

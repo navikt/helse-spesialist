@@ -15,7 +15,6 @@ import no.nav.helse.db.PersonDao
 import no.nav.helse.db.PåVentDao
 import no.nav.helse.db.RisikovurderingDao
 import no.nav.helse.db.SessionContext
-import no.nav.helse.db.TotrinnsvurderingRepository
 import no.nav.helse.db.UtbetalingDao
 import no.nav.helse.db.VedtakDao
 import no.nav.helse.db.VergemålDao
@@ -53,6 +52,7 @@ import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.VurderEnhetUtland
 import no.nav.helse.modell.vergemal.VurderVergemålOgFullmakt
+import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import java.time.LocalDate
 import java.util.UUID
 
