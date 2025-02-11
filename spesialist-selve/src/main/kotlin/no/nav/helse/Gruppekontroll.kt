@@ -1,17 +1,5 @@
 package no.nav.helse
 
-import io.ktor.client.HttpClient
-import io.ktor.client.request.accept
-import io.ktor.client.request.bearerAuth
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
-import io.ktor.client.statement.bodyAsText
-import io.ktor.http.ContentType
-import io.ktor.http.contentType
-import io.ktor.http.path
-import no.nav.helse.mediator.asUUID
-import no.nav.helse.spesialist.application.AccessTokenGenerator
-import org.slf4j.LoggerFactory
 import java.util.UUID
 
 interface Gruppekontroll {
@@ -20,34 +8,3 @@ interface Gruppekontroll {
         gruppeIder: List<UUID>,
     ): Boolean
 }
-
-class MsGraphClient(
-    private val httpClient: HttpClient,
-    private val accessTokenGenerator: AccessTokenGenerator,
-    private val graphUrl: String = "https://graph.microsoft.com/v1.0",
-) : Gruppekontroll {
-    override suspend fun erIGrupper(
-        oid: UUID,
-        gruppeIder: List<UUID>,
-    ): Boolean {
-        val token = accessTokenGenerator.hentAccessToken("https://graph.microsoft.com/.default")
-        val response =
-            httpClient.post(graphUrl) {
-                url {
-                    path("v1.0/users/$oid/checkMemberGroups")
-                }
-                bearerAuth(token)
-                accept(ContentType.Application.Json)
-                contentType(ContentType.Application.Json)
-                setBody(mapOf("groupIds" to gruppeIder.map { it.toString() }))
-            }
-
-        val responseNode = objectMapper.readTree(response.bodyAsText())
-        val grupper = responseNode["value"].map { it.asUUID() }
-        logg.debug("Hentet ${grupper.size} grupper fra MS")
-
-        return grupper.containsAll(gruppeIder)
-    }
-}
-
-private val logg = LoggerFactory.getLogger(MsGraphClient::class.java)

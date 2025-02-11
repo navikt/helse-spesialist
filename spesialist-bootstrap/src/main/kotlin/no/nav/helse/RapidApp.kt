@@ -12,6 +12,7 @@ import no.nav.helse.spesialist.api.bootstrap.httpClient
 import no.nav.helse.spesialist.api.reservasjon.KRRClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spesialist.client.entraid.EntraIDAccessTokenGenerator
+import no.nav.helse.spesialist.client.entraid.MsGraphGruppekontroll
 import java.net.URI
 
 fun main() {
@@ -52,13 +53,11 @@ internal class RapidApp(env: Map<String, String>) {
             scope = env.getValue("KONTAKT_OG_RESERVASJONSREGISTERET_SCOPE"),
         )
 
-    private val msGraphClient = MsGraphClient(httpClient(120_000, 1_000, 40_000), accessTokenGenerator)
-
     private val tilgangsgrupper = SpeilTilgangsgrupper(System.getenv())
     private val spesialistApp =
         SpesialistApp(
             env = EnvironmentImpl(),
-            gruppekontroll = msGraphClient,
+            gruppekontroll = MsGraphGruppekontroll(accessTokenGenerator),
             snapshotClient = snapshotClient,
             azureConfig = azureConfig,
             tilgangsgrupper = tilgangsgrupper,
