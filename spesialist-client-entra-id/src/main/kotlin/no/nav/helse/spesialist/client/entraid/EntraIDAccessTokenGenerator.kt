@@ -3,8 +3,14 @@ package no.nav.helse.spesialist.client.entraid
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.nimbusds.jose.jwk.RSAKey
+import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.engine.apache.Apache
+import io.ktor.client.plugins.HttpRequestRetry
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.accept
 import io.ktor.client.request.forms.FormDataContent
 import io.ktor.client.request.post
@@ -13,10 +19,13 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.Parameters
+import io.ktor.serialization.jackson.JacksonConverter
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import no.nav.helse.spesialist.application.AccessTokenGenerator
+import org.apache.http.impl.conn.SystemDefaultRoutePlanner
 import org.slf4j.LoggerFactory
+import java.net.ProxySelector
 import java.time.Duration
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -31,22 +40,22 @@ class EntraIDAccessTokenGenerator(
 ) : AccessTokenGenerator {
     private val log = LoggerFactory.getLogger(EntraIDAccessTokenGenerator::class.java)
     private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
-    private val httpClient = azureAdClient()
+    private val httpClient = createHttpClient()
     private val mutex = Mutex()
 
     @Volatile
-    private var tokenMap = HashMap<String, AadAccessToken>()
+    private var tokenMap = HashMap<String, TokenEndpointResponse>()
 
     override suspend fun hentAccessToken(scope: String): String {
         val omToMinutter = Instant.now().plusSeconds(120L)
         return mutex.withLock {
             (
                 tokenMap[scope]
-                    ?.takeUnless { it.expiry.isBefore(omToMinutter) }
+                    ?.takeUnless { Instant.now().plus(it.expires_in).isBefore(omToMinutter) }
                     ?: run {
                         log.info("Henter token fra Azure AD for $scope")
 
-                        val response: AadAccessToken =
+                        val response: TokenEndpointResponse =
                             try {
                                 val response =
                                     httpClient.post(tokenEndpoint) {
@@ -96,12 +105,44 @@ class EntraIDAccessTokenGenerator(
             withExpiresAt(Date.from(now.plus(1, ChronoUnit.HOURS)))
         }.sign(Algorithm.RSA256(null, privateKey.toRSAPrivateKey()))
     }
-}
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class AadAccessToken(
-    val access_token: String,
-    val expires_in: Duration,
-) {
-    internal val expiry = Instant.now().plus(expires_in)
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    private data class TokenEndpointResponse(
+        val access_token: String,
+        val expires_in: Duration,
+    )
+
+    private fun createHttpClient() =
+        HttpClient(Apache) {
+            install(HttpRequestRetry) {
+                retryOnExceptionIf(3) { request, throwable ->
+                    log.warn("Caught exception ${throwable.message}, for url ${request.url}")
+                    true
+                }
+                retryIf(maxRetries) { request, response ->
+                    if (response.status.value.let { it in 500..599 }) {
+                        log.warn(
+                            "Retrying for statuscode ${response.status.value}, for url ${request.url}",
+                        )
+                        true
+                    } else {
+                        false
+                    }
+                }
+            }
+            engine {
+                customizeClient {
+                    setRoutePlanner(SystemDefaultRoutePlanner(ProxySelector.getDefault()))
+                }
+            }
+            install(ContentNegotiation) {
+                register(
+                    ContentType.Application.Json,
+                    JacksonConverter(
+                        jacksonObjectMapper()
+                            .registerModule(JavaTimeModule()),
+                    ),
+                )
+            }
+        }
 }
