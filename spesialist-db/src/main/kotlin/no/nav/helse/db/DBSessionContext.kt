@@ -9,6 +9,7 @@ import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.db.PgDialogRepository
 import no.nav.helse.spesialist.db.PgNotatRepository
 import no.nav.helse.spesialist.db.PgSaksbehandlerRepository
+import no.nav.helse.spesialist.db.PgTotrinnsvurderingRepository
 
 class DBSessionContext(session: Session, tilgangskontroll: Tilgangskontroll) : SessionContext {
     override val arbeidsforholdDao = PgArbeidsforholdDao(session)

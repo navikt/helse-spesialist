@@ -18,6 +18,7 @@ import no.nav.helse.db.api.PgVarselApiRepository
 import no.nav.helse.db.api.PgVergemålApiDao
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
+import no.nav.helse.spesialist.db.PgTotrinnsvurderingRepository
 import javax.sql.DataSource
 
 class DBRepositories(dataSource: DataSource, tilgangskontroll: Tilgangskontroll) : Repositories {

@@ -1,5 +1,9 @@
-package no.nav.helse.db
+package no.nav.helse.spesialist.db
 
+import no.nav.helse.db.PgOverstyringDao
+import no.nav.helse.db.PgSaksbehandlerDao
+import no.nav.helse.db.PgTotrinnsvurderingDao
+import no.nav.helse.db.TotrinnsvurderingFraDatabase
 import no.nav.helse.db.overstyring.ArbeidsforholdForDatabase
 import no.nav.helse.db.overstyring.LovhjemmelForDatabase
 import no.nav.helse.db.overstyring.MinimumSykdomsgradForDatabase
@@ -69,7 +73,7 @@ class PgTotrinnsvurderingRepository(
         id: Long,
         overstyringer: List<Overstyring>,
     ): Totrinnsvurdering {
-        return Totrinnsvurdering.fraLagring(
+        return Totrinnsvurdering.Companion.fraLagring(
             id = id,
             vedtaksperiodeId = this.vedtaksperiodeId,
             erRetur = this.erRetur,
@@ -105,7 +109,7 @@ class PgTotrinnsvurderingRepository(
         }
 
     private fun OverstyrtTidslinjeForDatabase.tilDomene(id: Long): OverstyrtTidslinje =
-        OverstyrtTidslinje.fraLagring(
+        OverstyrtTidslinje.Companion.fraLagring(
             id = id,
             eksternHendelseId = eksternHendelseId,
             vedtaksperiodeId = vedtaksperiodeId,
@@ -118,7 +122,7 @@ class PgTotrinnsvurderingRepository(
         )
 
     private fun MinimumSykdomsgradForDatabase.tilDomene(id: Long): MinimumSykdomsgrad =
-        MinimumSykdomsgrad.fraLagring(
+        MinimumSykdomsgrad.Companion.fraLagring(
             id = id,
             eksternHendelseId = eksternHendelseId,
             aktørId = aktørId,
@@ -132,7 +136,7 @@ class PgTotrinnsvurderingRepository(
         )
 
     private fun OverstyrtArbeidsforholdForDatabase.tilDomene(id: Long) =
-        OverstyrtArbeidsforhold.fraLagring(
+        OverstyrtArbeidsforhold.Companion.fraLagring(
             id = id,
             eksternHendelseId = eksternHendelseId,
             vedtaksperiodeId = vedtaksperiodeId,
@@ -144,7 +148,7 @@ class PgTotrinnsvurderingRepository(
         )
 
     private fun OverstyrtInntektOgRefusjonForDatabase.tilDomene(id: Long) =
-        OverstyrtInntektOgRefusjon.fraLagring(
+        OverstyrtInntektOgRefusjon.Companion.fraLagring(
             id = id,
             eksternHendelseId = eksternHendelseId,
             vedtaksperiodeId = vedtaksperiodeId,
@@ -156,7 +160,7 @@ class PgTotrinnsvurderingRepository(
         )
 
     private fun SkjønnsfastsattSykepengegrunnlagForDatabase.tilDomene(id: Long) =
-        SkjønnsfastsattSykepengegrunnlag.fraLagring(
+        SkjønnsfastsattSykepengegrunnlag.Companion.fraLagring(
             id = id,
             eksternHendelseId = eksternHendelseId,
             aktørId = aktørId,
