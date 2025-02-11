@@ -11,7 +11,7 @@ import java.time.LocalDate
 import java.util.UUID
 
 class SkjønnsfastsattSykepengegrunnlag private constructor(
-    id: Long?,
+    id: OverstyringId?,
     override val eksternHendelseId: UUID,
     override val saksbehandlerOid: UUID,
     override val fødselsnummer: String,
@@ -46,7 +46,7 @@ class SkjønnsfastsattSykepengegrunnlag private constructor(
         )
 
         fun fraLagring(
-            id: Long,
+            id: OverstyringId,
             eksternHendelseId: UUID,
             saksbehandlerOid: UUID,
             fødselsnummer: String,

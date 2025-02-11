@@ -11,7 +11,7 @@ import java.time.LocalDate
 import java.util.UUID
 
 class OverstyrtTidslinje private constructor(
-    id: Long?,
+    id: OverstyringId?,
     override val eksternHendelseId: UUID,
     override val saksbehandlerOid: UUID,
     override val fødselsnummer: String,
@@ -49,7 +49,7 @@ class OverstyrtTidslinje private constructor(
         )
 
         fun fraLagring(
-            id: Long,
+            id: OverstyringId,
             eksternHendelseId: UUID,
             saksbehandlerOid: UUID,
             fødselsnummer: String,

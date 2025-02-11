@@ -6,8 +6,8 @@ import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import java.time.LocalDate
 import java.util.UUID
 
-class OverstyrtInntektOgRefusjon internal constructor(
-    id: Long?,
+class OverstyrtInntektOgRefusjon private constructor(
+    id: OverstyringId?,
     override val eksternHendelseId: UUID,
     override val saksbehandlerOid: UUID,
     override val fødselsnummer: String,
@@ -42,7 +42,7 @@ class OverstyrtInntektOgRefusjon internal constructor(
         )
 
         fun fraLagring(
-            id: Long,
+            id: OverstyringId,
             eksternHendelseId: UUID,
             saksbehandlerOid: UUID,
             fødselsnummer: String,
