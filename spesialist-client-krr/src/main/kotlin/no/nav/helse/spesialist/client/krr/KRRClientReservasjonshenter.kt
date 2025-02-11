@@ -2,10 +2,13 @@ package no.nav.helse.spesialist.client.krr
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.engine.apache.Apache
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.http.ContentType
+import io.ktor.serialization.jackson.JacksonConverter
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import io.micrometer.core.instrument.Tag
@@ -34,13 +37,23 @@ private val statusEtterKallReservasjonsstatusBuilder =
         .tags(listOf(Tag.of("status", "success"), Tag.of("status", "failure")))
 
 class KRRClientReservasjonshenter(
-    private val httpClient: HttpClient,
     private val apiUrl: String,
     private val scope: String,
     private val accessTokenGenerator: AccessTokenGenerator,
 ) : Reservasjonshenter {
     private val logg: Logger = LoggerFactory.getLogger(this.javaClass)
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
+    private val httpClient: HttpClient =
+        HttpClient(Apache) {
+            install(ContentNegotiation) {
+                register(ContentType.Application.Json, JacksonConverter())
+            }
+            engine {
+                socketTimeout = 5_000
+                connectTimeout = 5_000
+                connectionRequestTimeout = 5_000
+            }
+        }
 
     override suspend fun hentForPerson(fødselsnummer: String): ReservasjonDto? {
         val sample = Timer.start(registry)
