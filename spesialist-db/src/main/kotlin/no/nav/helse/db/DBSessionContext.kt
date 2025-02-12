@@ -4,10 +4,12 @@ import kotliquery.Session
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.spesialist.application.DialogRepository
 import no.nav.helse.spesialist.application.NotatRepository
+import no.nav.helse.spesialist.application.OverstyringRepository
 import no.nav.helse.spesialist.application.SaksbehandlerRepository
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.db.PgDialogRepository
 import no.nav.helse.spesialist.db.PgNotatRepository
+import no.nav.helse.spesialist.db.PgOverstyringRepository
 import no.nav.helse.spesialist.db.PgSaksbehandlerRepository
 import no.nav.helse.spesialist.db.PgTotrinnsvurderingRepository
 
@@ -44,6 +46,7 @@ class DBSessionContext(session: Session, tilgangskontroll: Tilgangskontroll) : S
     override val vedtaksperiodeRepository = PgVedtaksperiodeRepository(generasjonDao, vedtakDao)
     override val personRepository = PgPersonRepository(vedtaksperiodeRepository, sykefraværstilfelleDao, avviksvurderingDao, personDao)
 
+    override val overstyringRepository: OverstyringRepository = PgOverstyringRepository(session)
     override val totrinnsvurderingRepository: TotrinnsvurderingRepository =
         PgTotrinnsvurderingRepository(overstyringDao, saksbehandlerDao, totrinnsvurderingDao)
     override val notatRepository: NotatRepository = PgNotatRepository(session)

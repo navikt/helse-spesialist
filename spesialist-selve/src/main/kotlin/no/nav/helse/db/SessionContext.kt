@@ -3,6 +3,7 @@ package no.nav.helse.db
 import no.nav.helse.modell.person.PersonRepository
 import no.nav.helse.spesialist.application.DialogRepository
 import no.nav.helse.spesialist.application.NotatRepository
+import no.nav.helse.spesialist.application.OverstyringRepository
 import no.nav.helse.spesialist.application.SaksbehandlerRepository
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 
@@ -38,8 +39,9 @@ interface SessionContext {
     val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao
     val vedtaksperiodeRepository: VedtaksperiodeRepository
     val personRepository: PersonRepository
-    val totrinnsvurderingRepository: TotrinnsvurderingRepository
 
+    val totrinnsvurderingRepository: TotrinnsvurderingRepository
+    val overstyringRepository: OverstyringRepository
     val notatRepository: NotatRepository
     val dialogRepository: DialogRepository
     val saksbehandlerRepository: SaksbehandlerRepository

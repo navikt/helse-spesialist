@@ -30,8 +30,8 @@ class PgOverstyringRepository(
         overstyringer.forEach { overstyring ->
             when (overstyring) {
                 is OverstyrtTidslinje -> lagre(overstyring)
-                is OverstyrtArbeidsforhold -> lagre(overstyring)
                 is OverstyrtInntektOgRefusjon -> lagre(overstyring)
+                is OverstyrtArbeidsforhold -> lagre(overstyring)
                 is MinimumSykdomsgrad -> lagre(overstyring)
                 is SkjønnsfastsattSykepengegrunnlag -> lagre(overstyring)
             }
@@ -40,7 +40,7 @@ class PgOverstyringRepository(
 
     override fun finn(fødselsnummer: String): List<Overstyring> =
         finnTidslinjeOverstyringer(fødselsnummer) +
-            finnInntektsOverstyringer(fødselsnummer) +
+            finnInntektOgRefusjonOverstyringer(fødselsnummer) +
             finnArbeidsforholdOverstyringer(fødselsnummer) +
             finnMinimumSykdomsgradsOverstyringer(fødselsnummer) +
             finnSkjønnsfastsattSykepengegrunnlag(fødselsnummer)
@@ -379,7 +379,7 @@ class PgOverstyringRepository(
             "fodselsnummer" to fødselsnummer,
         ).list { it.toOverstyrtTidslinje() }
 
-    private fun finnInntektsOverstyringer(fødselsnummer: String): List<OverstyrtInntektOgRefusjon> =
+    private fun finnInntektOgRefusjonOverstyringer(fødselsnummer: String): List<OverstyrtInntektOgRefusjon> =
         asSQL(
             """
             SELECT DISTINCT ON (o.id)
@@ -549,7 +549,7 @@ class PgOverstyringRepository(
             opprettet = localDateTime("tidspunkt"),
             saksbehandlerOid = uuid("saksbehandler_ref"),
             ferdigstilt = boolean("ferdigstilt"),
-            dager = finnOverstyrtTidslinjeDager(long("overstring_tidslinje_id")),
+            dager = finnOverstyrtTidslinjeDager(long("overstyring_tidslinje_id")),
         )
 
     private fun Row.toOverstyrtInntektOgRefusjon(): OverstyrtInntektOgRefusjon =
@@ -584,7 +584,7 @@ class PgOverstyringRepository(
         val minimumSykdomsgradId = long("overstyring_minimum_sykdomsgrad_id")
         val (ok, ikkeOk) =
             asSQL(
-                "SELECT vurdering, fom, tom FROM overstyring_minimum_sykdomsgrad_periode WHERE id = :id",
+                "SELECT vurdering, fom, tom FROM overstyring_minimum_sykdomsgrad_periode WHERE overstyring_minimum_sykdomsgrad_ref = :id",
                 "id" to minimumSykdomsgradId,
             ).list { it.toMinimumSykdomsgradPeriode() }
                 .partition { (vurdering, _) -> vurdering }

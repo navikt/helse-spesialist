@@ -125,12 +125,12 @@ class MinimumSykdomsgrad private constructor(
     }
 }
 
-class MinimumSykdomsgradArbeidsgiver(
+data class MinimumSykdomsgradArbeidsgiver(
     val organisasjonsnummer: String,
     val berørtVedtaksperiodeId: UUID,
 )
 
-class MinimumSykdomsgradPeriode(
+data class MinimumSykdomsgradPeriode(
     val fom: LocalDate,
     val tom: LocalDate,
 ) {

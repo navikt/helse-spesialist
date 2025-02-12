@@ -4,7 +4,6 @@ import kotliquery.sessionOf
 import no.nav.helse.DatabaseIntegrationTest
 import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettInntektskildeDto
-import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
@@ -12,7 +11,6 @@ import java.time.LocalDate
 
 
 internal class PgArbeidsgiverDaoTest : DatabaseIntegrationTest() {
-    private val inntektskilderRepository = DBSessionContext(sessionOf(dataSource, returnGeneratedKey = true), TilgangskontrollForTestHarIkkeTilgang).inntektskilderRepository
 
     @Test
     fun `Oppretter minimal arbeidsgiver`() {

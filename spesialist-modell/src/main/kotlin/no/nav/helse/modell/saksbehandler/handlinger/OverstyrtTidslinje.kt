@@ -101,7 +101,7 @@ class OverstyrtTidslinje private constructor(
     }
 }
 
-class OverstyrtTidslinjedag(
+data class OverstyrtTidslinjedag(
     val dato: LocalDate,
     val type: String,
     val fraType: String,

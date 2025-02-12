@@ -26,7 +26,6 @@ import no.nav.helse.spesialist.api.overstyring.Skjonnsfastsettingstype
 import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsettingSykepengegrunnlagDto
 import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.typer.Kjønn
-import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import no.nav.helse.util.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -37,7 +36,6 @@ import java.time.LocalDate
 import java.util.UUID
 
 internal class PgOverstyringDaoTest : DatabaseIntegrationTest() {
-    private val inntektskilderRepository = DBSessionContext(session, TilgangskontrollForTestHarIkkeTilgang).inntektskilderRepository
     private val PERSON_FORNAVN = "Per"
     private val PERSON_ETTERNAVN = "Son"
     private val PERSON_FØDSELSDATO = LocalDate.of(1998, 4, 20)

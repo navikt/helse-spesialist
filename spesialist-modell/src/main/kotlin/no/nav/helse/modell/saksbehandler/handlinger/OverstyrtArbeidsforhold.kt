@@ -91,7 +91,7 @@ class OverstyrtArbeidsforhold private constructor(
     }
 }
 
-class Arbeidsforhold(
+data class Arbeidsforhold(
     val organisasjonsnummer: String,
     val deaktivert: Boolean,
     val begrunnelse: String,

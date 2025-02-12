@@ -52,7 +52,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected open val HENDELSE_ID: UUID = UUID.randomUUID()
 
     protected val VEDTAKSPERIODE: UUID = testperson.vedtaksperiodeId1
-    protected val ARBEIDSFORHOLD = Arbeidsforhold(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 2), "EN TITTEL", 100)
+    protected val ARBEIDSFORHOLD = ArbeidsforholdForTest(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 2), "EN TITTEL", 100)
     protected open val UTBETALING_ID: UUID = testperson.utbetalingId1
 
     protected open var OPPGAVE_ID = nextLong()
@@ -148,7 +148,8 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val dialogDao = repositories.dialogDao
     internal val annulleringRepository = repositories.annulleringRepository
     private val pgPersonRepository = sessionContext.personRepository
-    private val inntektskilderRepository = sessionContext.inntektskilderRepository
+    internal val inntektskilderRepository = sessionContext.inntektskilderRepository
+    internal val overstyringRepository = sessionContext.overstyringRepository
 
     internal fun testhendelse(
         hendelseId: UUID = HENDELSE_ID,
@@ -634,7 +635,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         val epost: String,
     )
 
-    protected data class Arbeidsforhold(
+    protected data class ArbeidsforholdForTest(
         val start: LocalDate,
         val slutt: LocalDate,
         val tittel: String,

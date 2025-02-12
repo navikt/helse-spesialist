@@ -89,7 +89,7 @@ class OverstyrtInntektOgRefusjon private constructor(
     )
 }
 
-class OverstyrtArbeidsgiver(
+data class OverstyrtArbeidsgiver(
     val organisasjonsnummer: String,
     val månedligInntekt: Double,
     val fraMånedligInntekt: Double,
@@ -115,7 +115,7 @@ class OverstyrtArbeidsgiver(
         )
 }
 
-class Refusjonselement(
+data class Refusjonselement(
     val fom: LocalDate,
     val tom: LocalDate? = null,
     val beløp: Double,

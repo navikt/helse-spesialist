@@ -99,7 +99,7 @@ class SkjønnsfastsattSykepengegrunnlag private constructor(
     }
 }
 
-class SkjønnsfastsattArbeidsgiver(
+data class SkjønnsfastsattArbeidsgiver(
     val organisasjonsnummer: String,
     val årlig: Double,
     val fraÅrlig: Double,

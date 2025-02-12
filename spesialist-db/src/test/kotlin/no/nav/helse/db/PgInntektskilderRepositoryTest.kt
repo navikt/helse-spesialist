@@ -25,7 +25,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 internal class PgInntektskilderRepositoryTest : DatabaseIntegrationTest() {
-    private val inntektskilderRepository = DBSessionContext(session, TilgangskontrollForTestHarIkkeTilgang).inntektskilderRepository
     private val avviksvurderingDao = DBSessionContext(session, TilgangskontrollForTestHarIkkeTilgang).avviksvurderingDao
 
     @Test
