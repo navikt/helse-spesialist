@@ -1,12 +1,10 @@
 package no.nav.helse.spesialist.api.person
 
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.api.ArbeidsgiverApiDao
 import no.nav.helse.db.api.EgenAnsattApiDao
 import no.nav.helse.db.api.NotatApiDao
@@ -70,7 +68,6 @@ class PersonService(
     private val personhåndterer: Personhåndterer,
     private val snapshotService: SnapshotService,
     private val reservasjonshenter: Reservasjonshenter,
-    private val env: Environment,
 ) : PersonoppslagService {
     private companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
@@ -148,12 +145,8 @@ class PersonService(
     }
 
     private fun finnReservasjonsstatus(fødselsnummer: String) =
-        if (env.erDev) {
-            CompletableDeferred<ReservasjonDto?>().also { it.complete(null) }
-        } else {
-            CoroutineScope(Dispatchers.IO).async {
-                reservasjonshenter.hentForPerson(fødselsnummer)
-            }
+        CoroutineScope(Dispatchers.IO).async {
+            reservasjonshenter.hentForPerson(fødselsnummer)
         }
 
     private fun hentSnapshot(fødselsnummer: String): HentSnapshotResult {

@@ -14,7 +14,6 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
-import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.db.api.ArbeidsgiverApiDao
 import no.nav.helse.db.api.EgenAnsattApiDao
@@ -94,7 +93,6 @@ fun Application.graphQLApi(
     personhåndterer: Personhåndterer,
     dokumenthåndterer: Dokumenthåndterer,
     stansAutomatiskBehandlinghåndterer: StansAutomatiskBehandlinghåndterer,
-    env: Environment,
 ) {
     val spesialistSchema =
         SpesialistSchema(
@@ -106,6 +104,7 @@ fun Application.graphQLApi(
                                 PersonService(
                                     personApiDao = personApiDao,
                                     egenAnsattApiDao = egenAnsattApiDao,
+                                    vergemålApiDao = vergemålApiDao,
                                     tildelingApiDao = tildelingApiDao,
                                     arbeidsgiverApiDao = arbeidsgiverApiDao,
                                     overstyringApiDao = overstyringApiDao,
@@ -116,15 +115,13 @@ fun Application.graphQLApi(
                                     notatDao = notatDao,
                                     totrinnsvurderingApiDao = totrinnsvurderingApiDao,
                                     påVentApiDao = påVentApiDao,
-                                    vergemålApiDao = vergemålApiDao,
-                                    snapshotService = snapshotService,
-                                    reservasjonshenter = reservasjonshenter,
+                                    avviksvurderinghenter = avviksvurderinghenter,
                                     apiOppgaveService = apiOppgaveService,
                                     saksbehandlerhåndterer = saksbehandlerhåndterer,
-                                    avviksvurderinghenter = avviksvurderinghenter,
-                                    personhåndterer = personhåndterer,
                                     stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
-                                    env = env,
+                                    personhåndterer = personhåndterer,
+                                    snapshotService = snapshotService,
+                                    reservasjonshenter = reservasjonshenter,
                                 ),
                         ),
                     oppgaver =

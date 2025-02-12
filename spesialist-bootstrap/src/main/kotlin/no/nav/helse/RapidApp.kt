@@ -10,9 +10,11 @@ import no.nav.helse.spesialist.api.AzureConfig
 import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
 import no.nav.helse.spesialist.api.bootstrap.httpClient
 import no.nav.helse.spesialist.api.snapshot.SnapshotClient
+import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.client.entraid.EntraIDAccessTokenGenerator
 import no.nav.helse.spesialist.client.entraid.MsGraphGruppekontroll
 import no.nav.helse.spesialist.client.krr.KRRClientReservasjonshenter
+import org.slf4j.LoggerFactory
 import java.net.URI
 
 fun main() {
@@ -20,6 +22,7 @@ fun main() {
 }
 
 internal class RapidApp(env: Map<String, String>) {
+    private val logger = LoggerFactory.getLogger(RapidApp::class.java)
     private val rapidsConnection: RapidsConnection
     private val unleashFeatureToggles =
         UnleashFeatureToggles(
@@ -45,22 +48,28 @@ internal class RapidApp(env: Map<String, String>) {
             spleisUrl = URI.create(env.getValue("SPLEIS_API_URL")),
             spleisClientId = env.getValue("SPLEIS_CLIENT_ID"),
         )
-    private val reservasjonClient =
-        KRRClientReservasjonshenter(
-            apiUrl = env.getValue("KONTAKT_OG_RESERVASJONSREGISTERET_API_URL"),
-            scope = env.getValue("KONTAKT_OG_RESERVASJONSREGISTERET_SCOPE"),
-            accessTokenGenerator = accessTokenGenerator,
-        )
+    val environment = EnvironmentImpl()
+    private val reservasjonshenter =
+        if (environment.erDev) {
+            logger.info("Bruker nulloperasjonsversjon av reservasjonshenter siden vi er i dev")
+            Reservasjonshenter { null }
+        } else {
+            KRRClientReservasjonshenter(
+                apiUrl = env.getValue("KONTAKT_OG_RESERVASJONSREGISTERET_API_URL"),
+                scope = env.getValue("KONTAKT_OG_RESERVASJONSREGISTERET_SCOPE"),
+                accessTokenGenerator = accessTokenGenerator,
+            )
+        }
 
     private val tilgangsgrupper = SpeilTilgangsgrupper(System.getenv())
     private val spesialistApp =
         SpesialistApp(
-            env = EnvironmentImpl(),
+            env = environment,
             gruppekontroll = MsGraphGruppekontroll(accessTokenGenerator),
             snapshotClient = snapshotClient,
             azureConfig = azureConfig,
             tilgangsgrupper = tilgangsgrupper,
-            reservasjonshenter = reservasjonClient,
+            reservasjonshenter = reservasjonshenter,
             versjonAvKode = versjonAvKode(env),
             featureToggles = unleashFeatureToggles,
         )

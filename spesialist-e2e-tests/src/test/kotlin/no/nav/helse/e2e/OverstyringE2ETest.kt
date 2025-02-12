@@ -318,6 +318,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
                 personoppslagService = PersonService(
                     personApiDao = repositories.personApiDao,
                     egenAnsattApiDao = repositories.egenAnsattApiDao,
+                    vergemålApiDao = repositories.vergemålApiDao,
                     tildelingApiDao = repositories.tildelingApiDao,
                     arbeidsgiverApiDao = repositories.arbeidsgiverApiDao,
                     overstyringApiDao = repositories.overstyringApiDao,
@@ -328,18 +329,16 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
                     notatDao = repositories.notatApiDao,
                     totrinnsvurderingApiDao = repositories.totrinnsvurderingApiDao,
                     påVentApiDao = repositories.påVentApiDao,
-                    vergemålApiDao = repositories.vergemålApiDao,
-                    snapshotService = SnapshotService(repositories.personinfoDao, snapshotClient),
-                    reservasjonshenter = mockk(relaxed = true),
+                    avviksvurderinghenter = mockk(relaxed = true),
                     apiOppgaveService = mockk(relaxed = true),
                     saksbehandlerhåndterer = mockk(relaxed = true),
-                    avviksvurderinghenter = mockk(relaxed = true),
+                    stansAutomatiskBehandlinghåndterer = mockk(relaxed = true),
                     personhåndterer = object : Personhåndterer {
                         override fun oppdaterSnapshot(fødselsnummer: String) {}
                         override fun klargjørPersonForVisning(fødselsnummer: String) {}
                     },
-                    stansAutomatiskBehandlinghåndterer = mockk(relaxed = true),
-                    env = environment,
+                    snapshotService = SnapshotService(repositories.personinfoDao, snapshotClient),
+                    reservasjonshenter = mockk(relaxed = true),
                 ),
             ),
         )

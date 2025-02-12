@@ -123,10 +123,7 @@ private val snapshotClient =
         override fun hentSnapshot(fnr: String) = null
     }
 
-private val reservasjonshenter =
-    object : Reservasjonshenter {
-        override suspend fun hentForPerson(fødselsnummer: String) = null
-    }
+private val reservasjonshenter = Reservasjonshenter { null }
 
 private val tilgangsgrupper =
     object : Tilgangsgrupper {

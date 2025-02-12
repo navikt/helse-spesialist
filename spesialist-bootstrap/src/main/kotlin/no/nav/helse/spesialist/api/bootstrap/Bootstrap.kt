@@ -69,7 +69,6 @@ class Bootstrap(
             personhåndterer = avhengigheter.personhåndtererProvider(),
             dokumenthåndterer = avhengigheter.dokumenthåndtererProvider(),
             stansAutomatiskBehandlinghåndterer = avhengigheter.stansAutomatiskBehandlinghåndterer(),
-            env = env,
         )
 
         routing {

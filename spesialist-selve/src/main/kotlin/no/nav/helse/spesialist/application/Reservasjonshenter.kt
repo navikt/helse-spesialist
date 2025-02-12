@@ -1,6 +1,6 @@
 package no.nav.helse.spesialist.application
 
-interface Reservasjonshenter {
+fun interface Reservasjonshenter {
     suspend fun hentForPerson(fødselsnummer: String): ReservasjonDto?
 
     data class ReservasjonDto(
