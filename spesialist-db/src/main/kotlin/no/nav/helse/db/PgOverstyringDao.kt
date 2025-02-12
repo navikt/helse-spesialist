@@ -618,7 +618,7 @@ class PgOverstyringDao private constructor(queryRunner: QueryRunner) : Overstyri
             val minimumSykdomsgradId = overstyringRow.long("overstyring_minimum_sykdomsgrad_id")
             val (ok, ikkeOk) =
                 asSQL(
-                    "SELECT vurdering, fom, tom FROM overstyring_minimum_sykdomsgrad_periode WHERE id = :id",
+                    "SELECT vurdering, fom, tom FROM overstyring_minimum_sykdomsgrad_periode WHERE overstyring_minimum_sykdomsgrad_ref = :id",
                     "id" to minimumSykdomsgradId,
                 ).list { periodeRow ->
                     periodeRow.boolean("vurdering") to
