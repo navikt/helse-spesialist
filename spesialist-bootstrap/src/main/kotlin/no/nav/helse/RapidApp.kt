@@ -9,11 +9,11 @@ import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.spesialist.api.AzureConfig
 import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
 import no.nav.helse.spesialist.api.bootstrap.httpClient
-import no.nav.helse.spesialist.api.snapshot.SnapshotClient
 import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.client.entraid.EntraIDAccessTokenGenerator
 import no.nav.helse.spesialist.client.entraid.MsGraphGruppekontroll
 import no.nav.helse.spesialist.client.krr.KRRClientReservasjonshenter
+import no.nav.helse.spesialist.client.spleis.SnapshotClient
 import org.slf4j.LoggerFactory
 import java.net.URI
 

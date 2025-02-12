@@ -1,10 +1,10 @@
-package no.nav.helse.spesialist.api.snapshot
+package no.nav.helse.spesialist.client.spleis
 
 import com.expediagroup.graphql.client.jackson.GraphQLClientJacksonSerializer
 import com.expediagroup.graphql.client.serializer.GraphQLClientSerializer
 import com.expediagroup.graphql.client.types.GraphQLClientRequest
 import com.expediagroup.graphql.client.types.GraphQLClientResponse
-import com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES
+import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -17,6 +17,7 @@ import io.ktor.http.contentType
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import net.logstash.logback.argument.StructuredArguments
+import no.nav.helse.spesialist.api.snapshot.ISnapshotClient
 import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spleis.graphql.HentSnapshot
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
@@ -25,10 +26,6 @@ import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.net.URI
 import java.util.UUID
-
-interface ISnapshotClient {
-    fun hentSnapshot(fnr: String): GraphQLPerson?
-}
 
 class SnapshotClient(
     private val httpClient: HttpClient,
@@ -41,7 +38,8 @@ class SnapshotClient(
     private companion object {
         val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
         val logg: Logger = LoggerFactory.getLogger(SnapshotClient::class.java)
-        val serializer: GraphQLClientSerializer = GraphQLClientJacksonSerializer(jacksonObjectMapper().disable(FAIL_ON_UNKNOWN_PROPERTIES))
+        val serializer: GraphQLClientSerializer =
+            GraphQLClientJacksonSerializer(jacksonObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES))
     }
 
     override fun hentSnapshot(fnr: String): GraphQLPerson? {
@@ -117,10 +115,10 @@ class SnapshotClient(
 
         return graphQLResponse
     }
-}
 
-private data class GraphQLRequestBody(
-    val query: String,
-    val variables: Any?,
-    val operationName: String?,
-)
+    private data class GraphQLRequestBody(
+        val query: String,
+        val variables: Any?,
+        val operationName: String?,
+    )
+}

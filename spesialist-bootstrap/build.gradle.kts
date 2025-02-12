@@ -15,6 +15,7 @@ dependencies {
     api(project(":spesialist-api"))
     api(project(":spesialist-client-entra-id"))
     api(project(":spesialist-client-krr"))
+    api(project(":spesialist-client-spleis"))
     api(project(":spesialist-db"))
     api(project(":spesialist-kafka"))
 
