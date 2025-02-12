@@ -1,6 +1,6 @@
 package no.nav.helse.mediator.meldinger
 
-import no.nav.helse.objectMapper
+import no.nav.helse.spesialist.kafka.objectMapper
 import org.intellij.lang.annotations.Language
 
 internal class Risikofunn(

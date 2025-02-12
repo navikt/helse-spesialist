@@ -9,7 +9,7 @@ import no.nav.helse.kafka.NyeVarslerRiver
 import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.vedtaksperiode.NyeVarsler
-import no.nav.helse.objectMapper
+import no.nav.helse.spesialist.kafka.objectMapper
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime

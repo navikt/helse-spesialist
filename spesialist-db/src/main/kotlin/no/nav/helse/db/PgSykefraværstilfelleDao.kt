@@ -7,7 +7,7 @@ import no.nav.helse.db.HelseDao.Companion.list
 import no.nav.helse.db.overstyring.LovhjemmelForDatabase
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlagDto
 import no.nav.helse.modell.vedtak.SkjønnsfastsettingsårsakDto
-import no.nav.helse.objectMapper
+import no.nav.helse.spesialist.db.objectMapper
 
 class PgSykefraværstilfelleDao internal constructor(private val session: Session) : SykefraværstilfelleDao {
     override fun finnSkjønnsfastsatteSykepengegrunnlag(fødselsnummer: String): List<SkjønnsfastsattSykepengegrunnlagDto> =

@@ -43,7 +43,7 @@ import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetaling
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnet
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
-import no.nav.helse.objectMapper
+import no.nav.helse.spesialist.db.objectMapper
 import java.time.LocalDate
 import java.util.UUID
 import javax.sql.DataSource

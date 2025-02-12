@@ -17,13 +17,13 @@ import no.nav.helse.db.api.PgTildelingApiDao
 import no.nav.helse.db.api.PgTotrinnsvurderingApiDao
 import no.nav.helse.db.api.PgVarselApiRepository
 import no.nav.helse.db.api.PgVergemålApiDao
-import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.db.AbstractDatabaseTest
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
 import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
+import no.nav.helse.spesialist.db.objectMapper
 import no.nav.helse.spesialist.test.lagAktørId
 import no.nav.helse.spesialist.test.lagEtternavn
 import no.nav.helse.spesialist.test.lagFornavn

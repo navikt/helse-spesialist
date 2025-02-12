@@ -29,7 +29,7 @@ import no.nav.helse.modell.oppgave.Oppgave.AvventerSaksbehandler
 import no.nav.helse.modell.oppgave.Oppgave.AvventerSystem
 import no.nav.helse.modell.oppgave.Oppgave.Ferdigstilt
 import no.nav.helse.modell.oppgave.Oppgave.Invalidert
-import no.nav.helse.objectMapper
+import no.nav.helse.spesialist.kafka.objectMapper
 import java.time.LocalDateTime
 import java.util.UUID
 

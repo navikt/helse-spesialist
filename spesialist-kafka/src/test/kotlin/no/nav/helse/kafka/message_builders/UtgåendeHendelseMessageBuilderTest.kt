@@ -11,7 +11,7 @@ import no.nav.helse.modell.melding.VedtaksperiodeGodkjentAutomatisk
 import no.nav.helse.modell.melding.VedtaksperiodeGodkjentManuelt
 import no.nav.helse.modell.utbetaling.Refusjonstype
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.objectMapper
+import no.nav.helse.spesialist.kafka.objectMapper
 import no.nav.helse.spesialist.test.lagEpostadresseFraFulltNavn
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.spesialist.test.lagSaksbehandlerident

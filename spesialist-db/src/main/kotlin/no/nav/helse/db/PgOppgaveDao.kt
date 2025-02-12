@@ -5,7 +5,7 @@ import kotliquery.Session
 import no.nav.helse.db.HelseDao.Companion.asSQL
 import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.oppgave.Egenskap
-import no.nav.helse.objectMapper
+import no.nav.helse.spesialist.db.objectMapper
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID

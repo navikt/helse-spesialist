@@ -12,6 +12,7 @@ dependencies {
     implementation(libs.bundles.logging)
     implementation(libs.jackson.datatype)
     implementation(libs.jackson.helpers)
+    implementation(libs.jackson.kotlin)
 
     implementation(libs.ktor.micrometer)
     implementation(libs.micrometer.prometheus)

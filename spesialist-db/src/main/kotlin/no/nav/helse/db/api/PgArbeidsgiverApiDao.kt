@@ -8,7 +8,7 @@ import no.nav.helse.db.QueryRunner
 import no.nav.helse.db.api.ArbeidsgiverApiDao.ArbeidsgiverInntekterFraAOrdningen
 import no.nav.helse.db.api.ArbeidsgiverApiDao.InntektFraAOrdningen
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsforholdApiDto
-import no.nav.helse.spesialist.api.objectMapper
+import no.nav.helse.spesialist.db.objectMapper
 import javax.sql.DataSource
 
 class PgArbeidsgiverApiDao internal constructor(dataSource: DataSource) : QueryRunner by MedDataSource(dataSource), ArbeidsgiverApiDao {

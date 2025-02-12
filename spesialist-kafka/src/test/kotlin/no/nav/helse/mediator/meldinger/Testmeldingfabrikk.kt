@@ -10,7 +10,7 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.objectMapper
+import no.nav.helse.spesialist.kafka.objectMapper
 import no.nav.helse.util.januar
 import java.time.LocalDate
 import java.time.LocalDate.now

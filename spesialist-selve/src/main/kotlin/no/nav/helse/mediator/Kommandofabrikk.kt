@@ -379,7 +379,7 @@ class Kommandofabrikk(
     }
 
     // Kanskje prøve å få håndtering av søknad inn i samme flyt som andre kommandokjeder
-    internal fun iverksettSøknadSendt(
+    fun iverksettSøknadSendt(
         melding: SøknadSendt,
         commandContextObservers: CommandContextObserver,
         sessionContext: SessionContext,
@@ -401,7 +401,7 @@ class Kommandofabrikk(
         opprett(transactionalCommandContextDao, meldingId)
     }
 
-    internal fun lagKommandostarter(
+    fun lagKommandostarter(
         commandContextObservers: Set<CommandContextObserver>,
         commandContext: CommandContext,
         sessionContext: SessionContext,

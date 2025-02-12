@@ -19,7 +19,7 @@ class VarselRepository(
         )
     }
 
-    internal fun avvikleVarsel(definisjonDto: VarseldefinisjonDto) {
+    fun avvikleVarsel(definisjonDto: VarseldefinisjonDto) {
         varselDao.avvikleVarsel(varselkode = definisjonDto.varselkode, definisjonId = definisjonDto.id)
     }
 }

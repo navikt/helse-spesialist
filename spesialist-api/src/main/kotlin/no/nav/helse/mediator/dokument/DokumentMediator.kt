@@ -6,8 +6,8 @@ import kotlinx.coroutines.runBlocking
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.DokumentDao
 import no.nav.helse.modell.melding.HentDokument
-import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.Dokumenthåndterer
+import no.nav.helse.spesialist.api.objectMapper
 import java.util.UUID
 
 class DokumentMediator(

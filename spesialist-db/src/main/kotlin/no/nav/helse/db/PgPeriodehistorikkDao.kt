@@ -12,7 +12,7 @@ import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingAutomatiskRetur
 import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingFerdigbehandlet
 import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingRetur
 import no.nav.helse.modell.periodehistorikk.VedtaksperiodeReberegnet
-import no.nav.helse.objectMapper
+import no.nav.helse.spesialist.db.objectMapper
 import java.util.UUID
 import javax.sql.DataSource
 

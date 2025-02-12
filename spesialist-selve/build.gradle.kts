@@ -12,20 +12,8 @@ plugins {
 dependencies {
     api(project(":spesialist-modell"))
 
-    api("com.nimbusds:nimbus-jose-jwt:9.37.3")
-
     implementation(libs.bundles.logging)
-    implementation(libs.jackson.datatype)
-    implementation(libs.jackson.helpers)
-    implementation(libs.jackson.kotlin)
-
-    implementation(libs.ktor.micrometer)
     implementation(libs.micrometer.prometheus)
-
-    api(libs.bundles.ktor.server)
-    api(libs.bundles.ktor.client)
-
-    testImplementation(libs.bundles.ktor.server.test)
 }
 
 val graphqlDir = "${project.projectDir}/src/main/resources/graphql"

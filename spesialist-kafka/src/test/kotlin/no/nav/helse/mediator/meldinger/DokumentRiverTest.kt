@@ -6,7 +6,7 @@ import io.mockk.verify
 import no.nav.helse.kafka.DokumentRiver
 import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
-import no.nav.helse.objectMapper
+import no.nav.helse.spesialist.kafka.objectMapper
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.UUID

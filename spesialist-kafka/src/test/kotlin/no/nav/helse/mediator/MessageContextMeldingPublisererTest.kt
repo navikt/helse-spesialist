@@ -16,8 +16,8 @@ import no.nav.helse.modell.melding.VedtaksperiodeGodkjentAutomatisk
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
-import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
+import no.nav.helse.spesialist.kafka.objectMapper
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.spesialist.test.lagSaksbehandler
 import org.junit.jupiter.api.Assertions.assertEquals

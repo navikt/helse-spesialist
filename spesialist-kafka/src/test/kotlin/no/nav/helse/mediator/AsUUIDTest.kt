@@ -1,13 +1,13 @@
 package no.nav.helse.mediator
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.objectMapper
+import no.nav.helse.spesialist.kafka.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.util.UUID
 
-class UtilsTest {
+class AsUUIDTest {
     @Test
     fun `asUUID henter UUID fra en JsonNode`() {
         val uuid = UUID.randomUUID()

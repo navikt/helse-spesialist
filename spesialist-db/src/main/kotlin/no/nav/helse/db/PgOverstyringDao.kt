@@ -16,7 +16,7 @@ import no.nav.helse.db.overstyring.OverstyrtTidslinjedagForDatabase
 import no.nav.helse.db.overstyring.SkjønnsfastsattArbeidsgiverForDatabase
 import no.nav.helse.db.overstyring.SkjønnsfastsattSykepengegrunnlagForDatabase
 import no.nav.helse.modell.OverstyringType
-import no.nav.helse.objectMapper
+import no.nav.helse.spesialist.db.objectMapper
 import java.util.UUID
 import javax.sql.DataSource
 

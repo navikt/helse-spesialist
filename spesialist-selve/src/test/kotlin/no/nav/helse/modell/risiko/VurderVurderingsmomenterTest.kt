@@ -1,5 +1,6 @@
 package no.nav.helse.modell.risiko
 
+import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
@@ -17,7 +18,6 @@ import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.Inntektsopplysningkilde
 import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.SykepengegrunnlagsArbeidsgiver
-import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.test.TestPerson
 import no.nav.helse.util.januar
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -42,7 +42,7 @@ internal class VurderVurderingsmomenterTest {
             vedtaksperiodeId = vedtaksperiodeId,
             opprettet = LocalDateTime.now(),
             kanGodkjennesAutomatisk = kanGodkjennesAutomatisk,
-            løsning = objectMapper.readTree("""{}"""),
+            løsning = JsonNodeFactory.instance.objectNode(),
         )
 
     }

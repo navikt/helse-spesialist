@@ -19,7 +19,7 @@ import no.nav.helse.modell.vedtak.VedtakBegrunnelse
 import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
 import no.nav.helse.modell.vilkårsprøving.Inntekt
 import no.nav.helse.modell.vilkårsprøving.Sammenligningsgrunnlag
-import no.nav.helse.objectMapper
+import no.nav.helse.spesialist.kafka.objectMapper
 import no.nav.helse.util.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

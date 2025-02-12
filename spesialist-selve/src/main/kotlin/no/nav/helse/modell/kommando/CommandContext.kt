@@ -44,7 +44,7 @@ class CommandContext(
         observers.forEach { it.tilstandEndret(kommandokjedeEndretEvent) }
     }
 
-    internal fun add(data: Any) {
+    fun add(data: Any) {
         this.data.add(data)
     }
 

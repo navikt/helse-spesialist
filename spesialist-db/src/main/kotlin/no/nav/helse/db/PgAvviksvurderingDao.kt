@@ -6,11 +6,11 @@ import no.nav.helse.db.HelseDao.Companion.asSQL
 import no.nav.helse.modell.vilkårsprøving.AvviksvurderingDto
 import no.nav.helse.modell.vilkårsprøving.BeregningsgrunnlagDto
 import no.nav.helse.modell.vilkårsprøving.SammenligningsgrunnlagDto
-import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.Avviksvurderinghenter
 import no.nav.helse.spesialist.api.avviksvurdering.Avviksvurdering
 import no.nav.helse.spesialist.api.avviksvurdering.Beregningsgrunnlag
 import no.nav.helse.spesialist.api.avviksvurdering.Sammenligningsgrunnlag
+import no.nav.helse.spesialist.db.objectMapper
 import java.util.UUID
 import javax.sql.DataSource
 import no.nav.helse.spesialist.api.avviksvurdering.Avviksvurdering as ApiAvviksvurdering

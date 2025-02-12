@@ -4,7 +4,6 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.TransactionalSession
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.OverstyringArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
@@ -13,6 +12,7 @@ import no.nav.helse.spesialist.api.overstyring.OverstyringInntektDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringMinimumSykdomsgradDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringTidslinjeDto
 import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsettingSykepengegrunnlagDto
+import no.nav.helse.spesialist.db.objectMapper
 import org.intellij.lang.annotations.Language
 import javax.sql.DataSource
 

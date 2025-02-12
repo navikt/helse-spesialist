@@ -12,7 +12,7 @@ class Varseldefinisjon(
     private val avviklet: Boolean,
     private val opprettet: LocalDateTime,
 ) {
-    internal fun toDto() = VarseldefinisjonDto(id, varselkode, tittel, forklaring, handling, avviklet, opprettet)
+    fun toDto() = VarseldefinisjonDto(id, varselkode, tittel, forklaring, handling, avviklet, opprettet)
 
     override fun equals(other: Any?) =
         this === other || (

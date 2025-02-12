@@ -16,7 +16,7 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.varsel.Varseldefinisjon
-import no.nav.helse.objectMapper
+import no.nav.helse.spesialist.kafka.objectMapper
 import org.slf4j.LoggerFactory
 import java.util.UUID
 

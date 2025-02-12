@@ -8,7 +8,7 @@ import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.modell.kommando.MinimalPersonDto
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.person.PersonDto
-import no.nav.helse.objectMapper
+import no.nav.helse.spesialist.db.objectMapper
 import no.nav.helse.spesialist.typer.Kjønn
 import java.time.LocalDate
 import java.time.LocalDateTime

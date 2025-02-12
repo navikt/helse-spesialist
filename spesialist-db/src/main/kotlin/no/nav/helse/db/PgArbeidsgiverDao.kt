@@ -6,7 +6,7 @@ import no.nav.helse.db.HelseDao.Companion.asSQL
 import no.nav.helse.db.HelseDao.Companion.single
 import no.nav.helse.db.HelseDao.Companion.update
 import no.nav.helse.db.HelseDao.Companion.updateAndReturnGeneratedKey
-import no.nav.helse.objectMapper
+import no.nav.helse.spesialist.db.objectMapper
 import org.intellij.lang.annotations.Language
 
 class PgArbeidsgiverDao internal constructor(
