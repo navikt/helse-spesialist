@@ -14,6 +14,7 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import io.ktor.http.isSuccess
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import net.logstash.logback.argument.StructuredArguments
@@ -103,12 +104,22 @@ class SpleisClient(
                             )
                         },
                     )
-                }.body<String>()
+                }
+        val responseBody = response.body<String>()
+        if (!response.status.isSuccess()) {
+            logg.error("Fikk HTTP ${response.status.value} i svar fra Spleis. Se sikkerlogg for mer info.")
+            sikkerLogg.error("Fikk HTTP ${response.status.value}-svar fra Spleis: $responseBody")
+        }
 
-        val graphQLResponse = serializer.deserialize(response, request.responseType())
+        val graphQLResponse = serializer.deserialize(responseBody, request.responseType())
+
+        if (graphQLResponse.data == null && graphQLResponse.errors == null) {
+            logg.error("GraphQL-svar fra Spleis manglet både data og feil. Se sikkerlogg for mer info.")
+            sikkerLogg.error("Fikk GraphQL-svar fra Spleis som manglet både data og feil: $responseBody")
+        }
 
         if (graphQLResponse.errors !== null) {
-            logg.error("Feil i graphQL-response. Se sikkerlogg for mer info")
+            logg.error("Feil i GraphQL-response. Se sikkerlogg for mer info")
             sikkerLogg.error("Fikk følgende graphql-feil: ${graphQLResponse.errors}")
         }
 
