@@ -132,7 +132,7 @@ internal class TotrinnsvurderingTest {
             begrunnelse = "begrunnelse",
             saksbehandlerOid = nySaksbehandler().oid,
         ))
-        assertEquals(1, totrinnsvurdering.overstyringer().size)
+        assertEquals(1, totrinnsvurdering.overstyringer.size)
     }
 
     @Test

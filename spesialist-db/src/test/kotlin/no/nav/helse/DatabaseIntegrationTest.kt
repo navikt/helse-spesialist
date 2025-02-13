@@ -25,6 +25,7 @@ import no.nav.helse.modell.kommando.MinimalPersonDto
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
+import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinjedag
 import no.nav.helse.modell.saksbehandler.handlinger.PåVentÅrsak
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
@@ -33,6 +34,7 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.spesialist.api.db.AbstractDatabaseTest
+import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.modell.Dialog
 import no.nav.helse.spesialist.test.TestPerson
 import no.nav.helse.spesialist.test.lagSaksbehandlerident
@@ -150,6 +152,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     private val pgPersonRepository = sessionContext.personRepository
     internal val inntektskilderRepository = sessionContext.inntektskilderRepository
     internal val overstyringRepository = sessionContext.overstyringRepository
+    internal val totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository
 
     internal fun testhendelse(
         hendelseId: UUID = HENDELSE_ID,
@@ -596,6 +599,16 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         )
 
     protected fun fagsystemId() = (0..31).map { 'A' + Random().nextInt('Z' - 'A') }.joinToString("")
+
+    protected fun nyOverstyrtTidslinjedag(): OverstyrtTidslinjedag =
+        OverstyrtTidslinjedag(
+            dato = 1.januar,
+            type = Dagtype.Sykedag.toString(),
+            grad = 100,
+            fraType = Dagtype.Feriedag.toString(),
+            fraGrad = null,
+            lovhjemmel = null,
+        )
 
     protected fun settSaksbehandler(
         vedtaksperiodeId: UUID,

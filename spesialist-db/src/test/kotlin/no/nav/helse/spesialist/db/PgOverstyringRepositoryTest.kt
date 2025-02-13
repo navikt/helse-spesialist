@@ -9,12 +9,10 @@ import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtArbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtArbeidsgiver
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtInntektOgRefusjon
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinje
-import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinjedag
 import no.nav.helse.modell.saksbehandler.handlinger.Refusjonselement
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
-import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.util.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -173,16 +171,6 @@ class PgOverstyringRepositoryTest : DatabaseIntegrationTest() {
             organisasjonsnummer = ORGNUMMER,
             begrunnelse = "begrunnelse",
             dager = listOf(nyOverstyrtTidslinjedag()),
-        )
-
-    private fun nyOverstyrtTidslinjedag(): OverstyrtTidslinjedag =
-        OverstyrtTidslinjedag(
-            dato = 1.januar,
-            type = Dagtype.Sykedag.toString(),
-            grad = 100,
-            fraType = Dagtype.Feriedag.toString(),
-            fraGrad = null,
-            lovhjemmel = null,
         )
 
     private fun nyArbeidsforholdOverstyring(): OverstyrtArbeidsforhold =

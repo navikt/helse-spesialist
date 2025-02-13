@@ -27,12 +27,18 @@ class PgOverstyringRepository(
 ) : QueryRunner by MedSession(session), OverstyringRepository {
     override fun lagre(overstyringer: List<Overstyring>) {
         overstyringer.forEach { overstyring ->
-            when (overstyring) {
-                is OverstyrtTidslinje -> lagre(overstyring)
-                is OverstyrtInntektOgRefusjon -> lagre(overstyring)
-                is OverstyrtArbeidsforhold -> lagre(overstyring)
-                is MinimumSykdomsgrad -> lagre(overstyring)
-                is SkjønnsfastsattSykepengegrunnlag -> lagre(overstyring)
+            if (overstyring.harFåttTildeltId()) {
+                updateOverstyring(overstyring)
+            } else {
+                val id: Long =
+                    when (overstyring) {
+                        is OverstyrtTidslinje -> insertTidslinjeOverstyring(overstyring)
+                        is OverstyrtInntektOgRefusjon -> insertInntektOgRefusjonOverstyring(overstyring)
+                        is OverstyrtArbeidsforhold -> insertArbeidsforholdOverstyring(overstyring)
+                        is MinimumSykdomsgrad -> insertMinimumSykdomsgradOverstyring(overstyring)
+                        is SkjønnsfastsattSykepengegrunnlag -> insertSkjønnsfastsattSykepengegrunnlag(overstyring)
+                    }
+                overstyring.tildelId(OverstyringId(id))
             }
         }
     }
@@ -43,56 +49,6 @@ class PgOverstyringRepository(
             finnArbeidsforholdOverstyringer(fødselsnummer) +
             finnMinimumSykdomsgradsOverstyringer(fødselsnummer) +
             finnSkjønnsfastsattSykepengegrunnlag(fødselsnummer)
-
-    private fun lagre(tidslinjeOverstyring: OverstyrtTidslinje) {
-        if (!tidslinjeOverstyring.harFåttTildeltId()) {
-            insertTidslinjeOverstyring(tidslinjeOverstyring)
-                .let(::OverstyringId)
-                .let(tidslinjeOverstyring::tildelId)
-        } else {
-            updateOverstyring(tidslinjeOverstyring)
-        }
-    }
-
-    private fun lagre(overstyrtArbeidsforhold: OverstyrtArbeidsforhold) {
-        if (!overstyrtArbeidsforhold.harFåttTildeltId()) {
-            insertArbeidsforholdOverstyring(overstyrtArbeidsforhold)
-                .let(::OverstyringId)
-                .let(overstyrtArbeidsforhold::tildelId)
-        } else {
-            updateOverstyring(overstyrtArbeidsforhold)
-        }
-    }
-
-    private fun lagre(overstyrtInntektOgRefusjon: OverstyrtInntektOgRefusjon) {
-        if (!overstyrtInntektOgRefusjon.harFåttTildeltId()) {
-            insertInntektOgRefusjonOverstyring(overstyrtInntektOgRefusjon)
-                .let(::OverstyringId)
-                .let(overstyrtInntektOgRefusjon::tildelId)
-        } else {
-            updateOverstyring(overstyrtInntektOgRefusjon)
-        }
-    }
-
-    private fun lagre(minimumSykdomsgrad: MinimumSykdomsgrad) {
-        if (!minimumSykdomsgrad.harFåttTildeltId()) {
-            insertMinimumSykdomsgradOverstyring(minimumSykdomsgrad)
-                .let(::OverstyringId)
-                .let(minimumSykdomsgrad::tildelId)
-        } else {
-            updateOverstyring(minimumSykdomsgrad)
-        }
-    }
-
-    private fun lagre(skjønnsfastsattSykepengegrunnlag: SkjønnsfastsattSykepengegrunnlag) {
-        if (!skjønnsfastsattSykepengegrunnlag.harFåttTildeltId()) {
-            insertSkjønnsfastsattSykepengegrunnlag(skjønnsfastsattSykepengegrunnlag)
-                .let(::OverstyringId)
-                .let(skjønnsfastsattSykepengegrunnlag::tildelId)
-        } else {
-            updateOverstyring(skjønnsfastsattSykepengegrunnlag)
-        }
-    }
 
     private fun insertOverstyring(overstyring: Overstyring): Long =
         asSQL(

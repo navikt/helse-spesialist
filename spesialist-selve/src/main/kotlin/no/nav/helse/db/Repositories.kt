@@ -16,7 +16,6 @@ import no.nav.helse.db.api.TildelingApiDao
 import no.nav.helse.db.api.TotrinnsvurderingApiDao
 import no.nav.helse.db.api.VarselApiRepository
 import no.nav.helse.db.api.VergemålApiDao
-import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 
 interface Repositories {
     val annulleringRepository: AnnulleringRepository
@@ -46,7 +45,6 @@ interface Repositories {
     val varselDao: VarselDao
     val vedtakDao: VedtakDao
     val vedtakBegrunnelseDao: VedtakBegrunnelseDao
-    val totrinnsvurderingRepository: TotrinnsvurderingRepository
 
     val abonnementApiDao: AbonnementApiDao
     val arbeidsgiverApiDao: ArbeidsgiverApiDao
