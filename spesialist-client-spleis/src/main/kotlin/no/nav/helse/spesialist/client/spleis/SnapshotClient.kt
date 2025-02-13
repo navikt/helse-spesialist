@@ -17,6 +17,7 @@ import io.ktor.http.contentType
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import net.logstash.logback.argument.StructuredArguments
+import no.nav.helse.spesialist.api.snapshot.ISnapshotClient
 import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spleis.graphql.HentSnapshot
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
@@ -26,26 +27,26 @@ import java.io.IOException
 import java.net.URI
 import java.util.UUID
 
-class SpleisClient(
+class SnapshotClient(
     private val httpClient: HttpClient,
     private val accessTokenGenerator: AccessTokenGenerator,
     private val spleisUrl: URI,
     private val spleisClientId: String,
     private val retries: Int = 5,
     private val retryInterval: Long = 5000L,
-) {
+) : ISnapshotClient {
     private companion object {
         val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
-        val logg: Logger = LoggerFactory.getLogger(SpleisClientSnapshothenter::class.java)
+        val logg: Logger = LoggerFactory.getLogger(SnapshotClient::class.java)
         val serializer: GraphQLClientSerializer =
             GraphQLClientJacksonSerializer(jacksonObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES))
     }
 
-    fun hentPerson(fødselsnummer: String): GraphQLPerson? {
-        val request = HentSnapshot(variables = HentSnapshot.Variables(fnr = fødselsnummer))
+    override fun hentSnapshot(fnr: String): GraphQLPerson? {
+        val request = HentSnapshot(variables = HentSnapshot.Variables(fnr = fnr))
 
         return runBlocking {
-            execute(request, fødselsnummer, retries).data?.person
+            execute(request, fnr, retries).data?.person
         }
     }
 
@@ -90,7 +91,7 @@ class SpleisClient(
 
         val response =
             httpClient
-                .post(spleisUrl.resolve("/resources/graphql").toURL()) {
+                .post(spleisUrl.resolve("/graphql").toURL()) {
                     header("Authorization", "Bearer $accessToken")
                     header("callId", callId)
                     contentType(ContentType.Application.Json)

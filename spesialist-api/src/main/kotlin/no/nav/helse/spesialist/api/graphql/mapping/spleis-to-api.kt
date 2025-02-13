@@ -38,39 +38,39 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiVilkårsgrunnlag
 import no.nav.helse.spesialist.api.graphql.schema.ApiVilkårsgrunnlagInfotrygd
 import no.nav.helse.spesialist.api.graphql.schema.ApiVilkårsgrunnlagSpleis
 import no.nav.helse.spesialist.api.graphql.schema.ApiVilkårsgrunnlagtype
-import no.nav.helse.spesialist.application.snapshot.SnapshotArbeidsgiverrefusjon
-import no.nav.helse.spesialist.application.snapshot.SnapshotBegrunnelse
-import no.nav.helse.spesialist.application.snapshot.SnapshotDag
-import no.nav.helse.spesialist.application.snapshot.SnapshotHendelse
-import no.nav.helse.spesialist.application.snapshot.SnapshotInfotrygdVilkarsgrunnlag
-import no.nav.helse.spesialist.application.snapshot.SnapshotInntektFraAOrdningen
-import no.nav.helse.spesialist.application.snapshot.SnapshotInntekterFraAOrdningen
-import no.nav.helse.spesialist.application.snapshot.SnapshotInntektskilde
-import no.nav.helse.spesialist.application.snapshot.SnapshotInntektsmelding
-import no.nav.helse.spesialist.application.snapshot.SnapshotInntektstype
-import no.nav.helse.spesialist.application.snapshot.SnapshotOmregnetArsinntekt
-import no.nav.helse.spesialist.application.snapshot.SnapshotPeriodetilstand
-import no.nav.helse.spesialist.application.snapshot.SnapshotPeriodetype
-import no.nav.helse.spesialist.application.snapshot.SnapshotRefusjonselement
-import no.nav.helse.spesialist.application.snapshot.SnapshotSkjonnsmessigFastsatt
-import no.nav.helse.spesialist.application.snapshot.SnapshotSoknadArbeidsgiver
-import no.nav.helse.spesialist.application.snapshot.SnapshotSoknadArbeidsledig
-import no.nav.helse.spesialist.application.snapshot.SnapshotSoknadFrilans
-import no.nav.helse.spesialist.application.snapshot.SnapshotSoknadNav
-import no.nav.helse.spesialist.application.snapshot.SnapshotSoknadSelvstendig
-import no.nav.helse.spesialist.application.snapshot.SnapshotSpleisVilkarsgrunnlag
-import no.nav.helse.spesialist.application.snapshot.SnapshotSykdomsdagkilde
-import no.nav.helse.spesialist.application.snapshot.SnapshotSykdomsdagkildetype
-import no.nav.helse.spesialist.application.snapshot.SnapshotSykdomsdagtype
-import no.nav.helse.spesialist.application.snapshot.SnapshotSykepengegrunnlagsgrense
-import no.nav.helse.spesialist.application.snapshot.SnapshotSykmelding
-import no.nav.helse.spesialist.application.snapshot.SnapshotTidslinjeperiode
-import no.nav.helse.spesialist.application.snapshot.SnapshotUtbetalingsdagType
-import no.nav.helse.spesialist.application.snapshot.SnapshotUtbetalingsinfo
-import no.nav.helse.spesialist.application.snapshot.SnapshotVilkarsgrunnlag
+import no.nav.helse.spleis.graphql.enums.GraphQLBegrunnelse
+import no.nav.helse.spleis.graphql.enums.GraphQLInntektskilde
+import no.nav.helse.spleis.graphql.enums.GraphQLInntektstype
+import no.nav.helse.spleis.graphql.enums.GraphQLPeriodetilstand
+import no.nav.helse.spleis.graphql.enums.GraphQLPeriodetype
+import no.nav.helse.spleis.graphql.enums.GraphQLSykdomsdagkildetype
+import no.nav.helse.spleis.graphql.enums.GraphQLSykdomsdagtype
+import no.nav.helse.spleis.graphql.enums.GraphQLUtbetalingsdagType
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLArbeidsgiverrefusjon
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLDag
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLHendelse
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLInfotrygdVilkarsgrunnlag
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLInntektFraAOrdningen
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLInntekterFraAOrdningen
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLInntektsmelding
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLOmregnetArsinntekt
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLRefusjonselement
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSkjonnsmessigFastsatt
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSoknadArbeidsgiver
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSoknadArbeidsledig
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSoknadFrilans
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSoknadNav
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSoknadSelvstendig
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSpleisVilkarsgrunnlag
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSykdomsdagkilde
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSykepengegrunnlagsgrense
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSykmelding
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLTidslinjeperiode
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUtbetalingsinfo
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLVilkarsgrunnlag
 import java.util.UUID
 
-fun SnapshotDag.tilApiDag() =
+fun GraphQLDag.tilApiDag() =
     ApiDag(
         dato = dato,
         grad = grad,
@@ -81,59 +81,59 @@ fun SnapshotDag.tilApiDag() =
         begrunnelser = begrunnelser?.map { it.tilApiBegrunnelse() },
     )
 
-private fun SnapshotSykdomsdagkilde.tilApiKilde() =
+private fun GraphQLSykdomsdagkilde.tilApiKilde() =
     ApiKilde(
         id = id,
         type = type.tilApiKildetype(),
     )
 
-private fun SnapshotSykdomsdagkildetype.tilApiKildetype() =
+private fun GraphQLSykdomsdagkildetype.tilApiKildetype() =
     when (this) {
-        SnapshotSykdomsdagkildetype.INNTEKTSMELDING -> ApiKildetype.INNTEKTSMELDING
-        SnapshotSykdomsdagkildetype.SAKSBEHANDLER -> ApiKildetype.SAKSBEHANDLER
-        SnapshotSykdomsdagkildetype.SOKNAD -> ApiKildetype.SOKNAD
-        SnapshotSykdomsdagkildetype.SYKMELDING -> ApiKildetype.SYKMELDING
+        GraphQLSykdomsdagkildetype.INNTEKTSMELDING -> ApiKildetype.INNTEKTSMELDING
+        GraphQLSykdomsdagkildetype.SAKSBEHANDLER -> ApiKildetype.SAKSBEHANDLER
+        GraphQLSykdomsdagkildetype.SOKNAD -> ApiKildetype.SOKNAD
+        GraphQLSykdomsdagkildetype.SYKMELDING -> ApiKildetype.SYKMELDING
         else -> ApiKildetype.UKJENT
     }
 
-private fun SnapshotSykdomsdagtype.tilApiSykdomsdagtype() =
+private fun GraphQLSykdomsdagtype.tilApiSykdomsdagtype() =
     when (this) {
-        SnapshotSykdomsdagtype.ARBEIDSDAG -> ApiSykdomsdagtype.ARBEIDSDAG
-        SnapshotSykdomsdagtype.ARBEIDSGIVERDAG -> ApiSykdomsdagtype.ARBEIDSGIVERDAG
-        SnapshotSykdomsdagtype.AVSLATT -> ApiSykdomsdagtype.AVSLATT
-        SnapshotSykdomsdagtype.ARBEIDIKKEGJENOPPTATTDAG -> ApiSykdomsdagtype.ARBEIDIKKEGJENOPPTATTDAG
-        SnapshotSykdomsdagtype.FERIEDAG -> ApiSykdomsdagtype.FERIEDAG
-        SnapshotSykdomsdagtype.FORELDETSYKEDAG -> ApiSykdomsdagtype.FORELDET_SYKEDAG
-        SnapshotSykdomsdagtype.FRISKHELGEDAG -> ApiSykdomsdagtype.FRISK_HELGEDAG
-        SnapshotSykdomsdagtype.PERMISJONSDAG -> ApiSykdomsdagtype.PERMISJONSDAG
-        SnapshotSykdomsdagtype.SYKHELGEDAG -> ApiSykdomsdagtype.SYK_HELGEDAG
-        SnapshotSykdomsdagtype.SYKEDAG -> ApiSykdomsdagtype.SYKEDAG
-        SnapshotSykdomsdagtype.SYKEDAGNAV -> ApiSykdomsdagtype.SYKEDAG_NAV
-        SnapshotSykdomsdagtype.UBESTEMTDAG -> ApiSykdomsdagtype.UBESTEMTDAG
-        SnapshotSykdomsdagtype.ANDREYTELSERAAP -> ApiSykdomsdagtype.ANDRE_YTELSER_AAP
-        SnapshotSykdomsdagtype.ANDREYTELSERDAGPENGER -> ApiSykdomsdagtype.ANDRE_YTELSER_DAGPENGER
-        SnapshotSykdomsdagtype.ANDREYTELSERFORELDREPENGER -> ApiSykdomsdagtype.ANDRE_YTELSER_FORELDREPENGER
-        SnapshotSykdomsdagtype.ANDREYTELSEROMSORGSPENGER -> ApiSykdomsdagtype.ANDRE_YTELSER_OMSORGSPENGER
-        SnapshotSykdomsdagtype.ANDREYTELSEROPPLARINGSPENGER -> ApiSykdomsdagtype.ANDRE_YTELSER_OPPLARINGSPENGER
-        SnapshotSykdomsdagtype.ANDREYTELSERPLEIEPENGER -> ApiSykdomsdagtype.ANDRE_YTELSER_PLEIEPENGER
-        SnapshotSykdomsdagtype.ANDREYTELSERSVANGERSKAPSPENGER -> ApiSykdomsdagtype.ANDRE_YTELSER_SVANGERSKAPSPENGER
+        GraphQLSykdomsdagtype.ARBEIDSDAG -> ApiSykdomsdagtype.ARBEIDSDAG
+        GraphQLSykdomsdagtype.ARBEIDSGIVERDAG -> ApiSykdomsdagtype.ARBEIDSGIVERDAG
+        GraphQLSykdomsdagtype.AVSLATT -> ApiSykdomsdagtype.AVSLATT
+        GraphQLSykdomsdagtype.ARBEIDIKKEGJENOPPTATTDAG -> ApiSykdomsdagtype.ARBEIDIKKEGJENOPPTATTDAG
+        GraphQLSykdomsdagtype.FERIEDAG -> ApiSykdomsdagtype.FERIEDAG
+        GraphQLSykdomsdagtype.FORELDETSYKEDAG -> ApiSykdomsdagtype.FORELDET_SYKEDAG
+        GraphQLSykdomsdagtype.FRISKHELGEDAG -> ApiSykdomsdagtype.FRISK_HELGEDAG
+        GraphQLSykdomsdagtype.PERMISJONSDAG -> ApiSykdomsdagtype.PERMISJONSDAG
+        GraphQLSykdomsdagtype.SYKHELGEDAG -> ApiSykdomsdagtype.SYK_HELGEDAG
+        GraphQLSykdomsdagtype.SYKEDAG -> ApiSykdomsdagtype.SYKEDAG
+        GraphQLSykdomsdagtype.SYKEDAGNAV -> ApiSykdomsdagtype.SYKEDAG_NAV
+        GraphQLSykdomsdagtype.UBESTEMTDAG -> ApiSykdomsdagtype.UBESTEMTDAG
+        GraphQLSykdomsdagtype.ANDREYTELSERAAP -> ApiSykdomsdagtype.ANDRE_YTELSER_AAP
+        GraphQLSykdomsdagtype.ANDREYTELSERDAGPENGER -> ApiSykdomsdagtype.ANDRE_YTELSER_DAGPENGER
+        GraphQLSykdomsdagtype.ANDREYTELSERFORELDREPENGER -> ApiSykdomsdagtype.ANDRE_YTELSER_FORELDREPENGER
+        GraphQLSykdomsdagtype.ANDREYTELSEROMSORGSPENGER -> ApiSykdomsdagtype.ANDRE_YTELSER_OMSORGSPENGER
+        GraphQLSykdomsdagtype.ANDREYTELSEROPPLARINGSPENGER -> ApiSykdomsdagtype.ANDRE_YTELSER_OPPLARINGSPENGER
+        GraphQLSykdomsdagtype.ANDREYTELSERPLEIEPENGER -> ApiSykdomsdagtype.ANDRE_YTELSER_PLEIEPENGER
+        GraphQLSykdomsdagtype.ANDREYTELSERSVANGERSKAPSPENGER -> ApiSykdomsdagtype.ANDRE_YTELSER_SVANGERSKAPSPENGER
         else -> throw Exception("Ukjent sykdomsdagtype $name")
     }
 
-private fun SnapshotUtbetalingsdagType.tilApiUtbetalingsdagtype() =
+private fun GraphQLUtbetalingsdagType.tilApiUtbetalingsdagtype() =
     when (this) {
-        SnapshotUtbetalingsdagType.ARBEIDSDAG -> ApiUtbetalingsdagtype.ARBEIDSDAG
-        SnapshotUtbetalingsdagType.ARBEIDSGIVERPERIODEDAG -> ApiUtbetalingsdagtype.ARBEIDSGIVERPERIODEDAG
-        SnapshotUtbetalingsdagType.AVVISTDAG -> ApiUtbetalingsdagtype.AVVIST_DAG
-        SnapshotUtbetalingsdagType.FERIEDAG -> ApiUtbetalingsdagtype.FERIEDAG
-        SnapshotUtbetalingsdagType.FORELDETDAG -> ApiUtbetalingsdagtype.FORELDET_DAG
-        SnapshotUtbetalingsdagType.HELGEDAG -> ApiUtbetalingsdagtype.HELGEDAG
-        SnapshotUtbetalingsdagType.NAVDAG -> ApiUtbetalingsdagtype.NAVDAG
-        SnapshotUtbetalingsdagType.NAVHELGDAG -> ApiUtbetalingsdagtype.NAVHELGDAG
+        GraphQLUtbetalingsdagType.ARBEIDSDAG -> ApiUtbetalingsdagtype.ARBEIDSDAG
+        GraphQLUtbetalingsdagType.ARBEIDSGIVERPERIODEDAG -> ApiUtbetalingsdagtype.ARBEIDSGIVERPERIODEDAG
+        GraphQLUtbetalingsdagType.AVVISTDAG -> ApiUtbetalingsdagtype.AVVIST_DAG
+        GraphQLUtbetalingsdagType.FERIEDAG -> ApiUtbetalingsdagtype.FERIEDAG
+        GraphQLUtbetalingsdagType.FORELDETDAG -> ApiUtbetalingsdagtype.FORELDET_DAG
+        GraphQLUtbetalingsdagType.HELGEDAG -> ApiUtbetalingsdagtype.HELGEDAG
+        GraphQLUtbetalingsdagType.NAVDAG -> ApiUtbetalingsdagtype.NAVDAG
+        GraphQLUtbetalingsdagType.NAVHELGDAG -> ApiUtbetalingsdagtype.NAVHELGDAG
         else -> ApiUtbetalingsdagtype.UKJENT_DAG
     }
 
-private fun SnapshotUtbetalingsinfo.tilApiUtbetalingsinfo() =
+private fun GraphQLUtbetalingsinfo.tilApiUtbetalingsinfo() =
     ApiUtbetalingsinfo(
         arbeidsgiverbelop = arbeidsgiverbelop,
         inntekt = inntekt,
@@ -143,25 +143,25 @@ private fun SnapshotUtbetalingsinfo.tilApiUtbetalingsinfo() =
         utbetaling = utbetaling,
     )
 
-private fun SnapshotBegrunnelse.tilApiBegrunnelse() =
+private fun GraphQLBegrunnelse.tilApiBegrunnelse() =
     when (this) {
-        SnapshotBegrunnelse.EGENMELDINGUTENFORARBEIDSGIVERPERIODE -> ApiBegrunnelse.EGENMELDING_UTENFOR_ARBEIDSGIVERPERIODE
-        SnapshotBegrunnelse.ETTERDODSDATO -> ApiBegrunnelse.ETTER_DODSDATO
-        SnapshotBegrunnelse.MANGLERMEDLEMSKAP -> ApiBegrunnelse.MANGLER_MEDLEMSKAP
-        SnapshotBegrunnelse.MANGLEROPPTJENING -> ApiBegrunnelse.MANGLER_OPPTJENING
-        SnapshotBegrunnelse.MINIMUMINNTEKT -> ApiBegrunnelse.MINIMUM_INNTEKT
-        SnapshotBegrunnelse.MINIMUMINNTEKTOVER67 -> ApiBegrunnelse.MINIMUM_INNTEKT_OVER_67
-        SnapshotBegrunnelse.MINIMUMSYKDOMSGRAD -> ApiBegrunnelse.MINIMUM_SYKDOMSGRAD
-        SnapshotBegrunnelse.OVER70 -> ApiBegrunnelse.OVER_70
-        SnapshotBegrunnelse.SYKEPENGEDAGEROPPBRUKT -> ApiBegrunnelse.SYKEPENGEDAGER_OPPBRUKT
-        SnapshotBegrunnelse.SYKEPENGEDAGEROPPBRUKTOVER67 -> ApiBegrunnelse.SYKEPENGEDAGER_OPPBRUKT_OVER_67
-        SnapshotBegrunnelse.ANDREYTELSER -> ApiBegrunnelse.ANDREYTELSER
-        SnapshotBegrunnelse.__UNKNOWN_VALUE -> ApiBegrunnelse.UKJENT
+        GraphQLBegrunnelse.EGENMELDINGUTENFORARBEIDSGIVERPERIODE -> ApiBegrunnelse.EGENMELDING_UTENFOR_ARBEIDSGIVERPERIODE
+        GraphQLBegrunnelse.ETTERDODSDATO -> ApiBegrunnelse.ETTER_DODSDATO
+        GraphQLBegrunnelse.MANGLERMEDLEMSKAP -> ApiBegrunnelse.MANGLER_MEDLEMSKAP
+        GraphQLBegrunnelse.MANGLEROPPTJENING -> ApiBegrunnelse.MANGLER_OPPTJENING
+        GraphQLBegrunnelse.MINIMUMINNTEKT -> ApiBegrunnelse.MINIMUM_INNTEKT
+        GraphQLBegrunnelse.MINIMUMINNTEKTOVER67 -> ApiBegrunnelse.MINIMUM_INNTEKT_OVER_67
+        GraphQLBegrunnelse.MINIMUMSYKDOMSGRAD -> ApiBegrunnelse.MINIMUM_SYKDOMSGRAD
+        GraphQLBegrunnelse.OVER70 -> ApiBegrunnelse.OVER_70
+        GraphQLBegrunnelse.SYKEPENGEDAGEROPPBRUKT -> ApiBegrunnelse.SYKEPENGEDAGER_OPPBRUKT
+        GraphQLBegrunnelse.SYKEPENGEDAGEROPPBRUKTOVER67 -> ApiBegrunnelse.SYKEPENGEDAGER_OPPBRUKT_OVER_67
+        GraphQLBegrunnelse.ANDREYTELSER -> ApiBegrunnelse.ANDREYTELSER
+        GraphQLBegrunnelse.__UNKNOWN_VALUE -> ApiBegrunnelse.UKJENT
     }
 
-fun SnapshotHendelse.tilApiHendelse(): ApiHendelse =
+fun GraphQLHendelse.tilApiHendelse(): ApiHendelse =
     when (this) {
-        is SnapshotInntektsmelding ->
+        is GraphQLInntektsmelding ->
             ApiInntektsmelding(
                 id = UUID.fromString(id),
                 type = ApiHendelsetype.INNTEKTSMELDING,
@@ -170,7 +170,7 @@ fun SnapshotHendelse.tilApiHendelse(): ApiHendelse =
                 eksternDokumentId = UUID.fromString(eksternDokumentId),
             )
 
-        is SnapshotSoknadArbeidsgiver ->
+        is GraphQLSoknadArbeidsgiver ->
             ApiSoknadArbeidsgiver(
                 id = UUID.fromString(id),
                 type = ApiHendelsetype.SENDT_SOKNAD_ARBEIDSGIVER,
@@ -181,7 +181,7 @@ fun SnapshotHendelse.tilApiHendelse(): ApiHendelse =
                 eksternDokumentId = UUID.fromString(eksternDokumentId),
             )
 
-        is SnapshotSoknadNav ->
+        is GraphQLSoknadNav ->
             ApiSoknadNav(
                 id = UUID.fromString(id),
                 type = ApiHendelsetype.SENDT_SOKNAD_NAV,
@@ -192,7 +192,7 @@ fun SnapshotHendelse.tilApiHendelse(): ApiHendelse =
                 eksternDokumentId = UUID.fromString(eksternDokumentId),
             )
 
-        is SnapshotSoknadArbeidsledig ->
+        is GraphQLSoknadArbeidsledig ->
             ApiSoknadArbeidsledig(
                 id = UUID.fromString(id),
                 type = ApiHendelsetype.SENDT_SOKNAD_ARBEIDSLEDIG,
@@ -203,7 +203,7 @@ fun SnapshotHendelse.tilApiHendelse(): ApiHendelse =
                 eksternDokumentId = UUID.fromString(eksternDokumentId),
             )
 
-        is SnapshotSoknadFrilans ->
+        is GraphQLSoknadFrilans ->
             ApiSoknadFrilans(
                 id = UUID.fromString(id),
                 type = ApiHendelsetype.SENDT_SOKNAD_FRILANS,
@@ -214,7 +214,7 @@ fun SnapshotHendelse.tilApiHendelse(): ApiHendelse =
                 eksternDokumentId = UUID.fromString(eksternDokumentId),
             )
 
-        is SnapshotSoknadSelvstendig ->
+        is GraphQLSoknadSelvstendig ->
             ApiSoknadSelvstendig(
                 id = UUID.fromString(id),
                 type = ApiHendelsetype.SENDT_SOKNAD_SELVSTENDIG,
@@ -225,7 +225,7 @@ fun SnapshotHendelse.tilApiHendelse(): ApiHendelse =
                 eksternDokumentId = UUID.fromString(eksternDokumentId),
             )
 
-        is SnapshotSykmelding ->
+        is GraphQLSykmelding ->
             ApiSykmelding(
                 id = UUID.fromString(id),
                 type = ApiHendelsetype.NY_SOKNAD,
@@ -234,7 +234,7 @@ fun SnapshotHendelse.tilApiHendelse(): ApiHendelse =
                 rapportertDato = rapportertDato,
             )
 
-        is SnapshotInntektFraAOrdningen ->
+        is GraphQLInntektFraAOrdningen ->
             ApiInntektHentetFraAOrdningen(
                 id = UUID.fromString(id),
                 type = ApiHendelsetype.INNTEKT_HENTET_FRA_AORDNINGEN,
@@ -244,7 +244,7 @@ fun SnapshotHendelse.tilApiHendelse(): ApiHendelse =
         else -> throw Exception("Ukjent hendelsestype ${javaClass.name}")
     }
 
-fun SnapshotOmregnetArsinntekt.tilApiOmregnetArsinntekt() =
+fun GraphQLOmregnetArsinntekt.tilApiOmregnetArsinntekt() =
     ApiOmregnetArsinntekt(
         belop = belop,
         inntektFraAOrdningen = inntekterFraAOrdningen?.map { it.tilApiInntektFraAOrdningen() },
@@ -252,7 +252,7 @@ fun SnapshotOmregnetArsinntekt.tilApiOmregnetArsinntekt() =
         manedsbelop = manedsbelop,
     )
 
-fun SnapshotSkjonnsmessigFastsatt.tilApiOmregnetArsinntekt() =
+fun GraphQLSkjonnsmessigFastsatt.tilApiOmregnetArsinntekt() =
     ApiOmregnetArsinntekt(
         belop = belop,
         inntektFraAOrdningen = null,
@@ -260,29 +260,29 @@ fun SnapshotSkjonnsmessigFastsatt.tilApiOmregnetArsinntekt() =
         manedsbelop = manedsbelop,
     )
 
-private fun SnapshotInntekterFraAOrdningen.tilApiInntektFraAOrdningen() =
+private fun GraphQLInntekterFraAOrdningen.tilApiInntektFraAOrdningen() =
     ApiInntektFraAOrdningen(
         maned = maned,
         sum = sum,
     )
 
-private fun SnapshotInntektskilde.tilApiInntektskilde() =
+private fun GraphQLInntektskilde.tilApiInntektskilde() =
     when (this) {
-        SnapshotInntektskilde.AORDNINGEN -> ApiInntektskilde.AORDNINGEN
-        SnapshotInntektskilde.INFOTRYGD -> ApiInntektskilde.INFOTRYGD
-        SnapshotInntektskilde.INNTEKTSMELDING -> ApiInntektskilde.INNTEKTSMELDING
-        SnapshotInntektskilde.SAKSBEHANDLER -> ApiInntektskilde.SAKSBEHANDLER
-        SnapshotInntektskilde.IKKERAPPORTERT -> ApiInntektskilde.IKKE_RAPPORTERT
+        GraphQLInntektskilde.AORDNINGEN -> ApiInntektskilde.AORDNINGEN
+        GraphQLInntektskilde.INFOTRYGD -> ApiInntektskilde.INFOTRYGD
+        GraphQLInntektskilde.INNTEKTSMELDING -> ApiInntektskilde.INNTEKTSMELDING
+        GraphQLInntektskilde.SAKSBEHANDLER -> ApiInntektskilde.SAKSBEHANDLER
+        GraphQLInntektskilde.IKKERAPPORTERT -> ApiInntektskilde.IKKE_RAPPORTERT
         else -> throw Exception("Ukjent inntektskilde ${this.name}")
     }
 
-fun SnapshotArbeidsgiverrefusjon.tilApiArbeidsgiverrefusjon() =
+fun GraphQLArbeidsgiverrefusjon.tilApiArbeidsgiverrefusjon() =
     ApiArbeidsgiverrefusjon(
         arbeidsgiver = arbeidsgiver,
         refusjonsopplysninger = refusjonsopplysninger.map { it.tilApiRefusjonselement() },
     )
 
-private fun SnapshotRefusjonselement.tilApiRefusjonselement() =
+private fun GraphQLRefusjonselement.tilApiRefusjonselement() =
     ApiRefusjonselement(
         fom = fom,
         tom = tom,
@@ -290,22 +290,22 @@ private fun SnapshotRefusjonselement.tilApiRefusjonselement() =
         meldingsreferanseId = meldingsreferanseId,
     )
 
-fun SnapshotPeriodetilstand.tilApiPeriodetilstand(erSisteGenerasjon: Boolean) =
+fun GraphQLPeriodetilstand.tilApiPeriodetilstand(erSisteGenerasjon: Boolean) =
     when (this) {
-        SnapshotPeriodetilstand.ANNULLERINGFEILET -> ApiPeriodetilstand.AnnulleringFeilet
-        SnapshotPeriodetilstand.ANNULLERT -> ApiPeriodetilstand.Annullert
-        SnapshotPeriodetilstand.INGENUTBETALING -> ApiPeriodetilstand.IngenUtbetaling
-        SnapshotPeriodetilstand.REVURDERINGFEILET -> ApiPeriodetilstand.RevurderingFeilet
-        SnapshotPeriodetilstand.TILANNULLERING -> ApiPeriodetilstand.TilAnnullering
-        SnapshotPeriodetilstand.TILINFOTRYGD -> ApiPeriodetilstand.TilInfotrygd
-        SnapshotPeriodetilstand.TILUTBETALING -> ApiPeriodetilstand.TilUtbetaling
-        SnapshotPeriodetilstand.UTBETALT -> ApiPeriodetilstand.Utbetalt
-        SnapshotPeriodetilstand.FORBEREDERGODKJENNING -> ApiPeriodetilstand.ForberederGodkjenning
-        SnapshotPeriodetilstand.MANGLERINFORMASJON -> ApiPeriodetilstand.ManglerInformasjon
-        SnapshotPeriodetilstand.TILGODKJENNING -> ApiPeriodetilstand.TilGodkjenning
-        SnapshotPeriodetilstand.UTBETALINGFEILET -> ApiPeriodetilstand.UtbetalingFeilet
-        SnapshotPeriodetilstand.VENTERPAANNENPERIODE -> ApiPeriodetilstand.VenterPaEnAnnenPeriode
-        SnapshotPeriodetilstand.UTBETALTVENTERPAANNENPERIODE -> {
+        GraphQLPeriodetilstand.ANNULLERINGFEILET -> ApiPeriodetilstand.AnnulleringFeilet
+        GraphQLPeriodetilstand.ANNULLERT -> ApiPeriodetilstand.Annullert
+        GraphQLPeriodetilstand.INGENUTBETALING -> ApiPeriodetilstand.IngenUtbetaling
+        GraphQLPeriodetilstand.REVURDERINGFEILET -> ApiPeriodetilstand.RevurderingFeilet
+        GraphQLPeriodetilstand.TILANNULLERING -> ApiPeriodetilstand.TilAnnullering
+        GraphQLPeriodetilstand.TILINFOTRYGD -> ApiPeriodetilstand.TilInfotrygd
+        GraphQLPeriodetilstand.TILUTBETALING -> ApiPeriodetilstand.TilUtbetaling
+        GraphQLPeriodetilstand.UTBETALT -> ApiPeriodetilstand.Utbetalt
+        GraphQLPeriodetilstand.FORBEREDERGODKJENNING -> ApiPeriodetilstand.ForberederGodkjenning
+        GraphQLPeriodetilstand.MANGLERINFORMASJON -> ApiPeriodetilstand.ManglerInformasjon
+        GraphQLPeriodetilstand.TILGODKJENNING -> ApiPeriodetilstand.TilGodkjenning
+        GraphQLPeriodetilstand.UTBETALINGFEILET -> ApiPeriodetilstand.UtbetalingFeilet
+        GraphQLPeriodetilstand.VENTERPAANNENPERIODE -> ApiPeriodetilstand.VenterPaEnAnnenPeriode
+        GraphQLPeriodetilstand.UTBETALTVENTERPAANNENPERIODE -> {
             if (Toggle.BehandleEnOgEnPeriode.enabled && erSisteGenerasjon) {
                 ApiPeriodetilstand.VenterPaEnAnnenPeriode
             } else {
@@ -313,8 +313,8 @@ fun SnapshotPeriodetilstand.tilApiPeriodetilstand(erSisteGenerasjon: Boolean) =
             }
         }
 
-        SnapshotPeriodetilstand.AVVENTERINNTEKTSOPPLYSNINGER -> ApiPeriodetilstand.AvventerInntektsopplysninger
-        SnapshotPeriodetilstand.TILSKJONNSFASTSETTELSE -> ApiPeriodetilstand.TilSkjonnsfastsettelse
+        GraphQLPeriodetilstand.AVVENTERINNTEKTSOPPLYSNINGER -> ApiPeriodetilstand.AvventerInntektsopplysninger
+        GraphQLPeriodetilstand.TILSKJONNSFASTSETTELSE -> ApiPeriodetilstand.TilSkjonnsfastsettelse
         else -> ApiPeriodetilstand.Ukjent
     }
 
@@ -344,25 +344,25 @@ fun NotatApiDao.NotatDto.tilApiNotat() =
             },
     )
 
-fun SnapshotTidslinjeperiode.tilApiPeriodetype() =
+fun GraphQLTidslinjeperiode.tilApiPeriodetype() =
     when (periodetype) {
-        SnapshotPeriodetype.FORLENGELSE -> ApiPeriodetype.FORLENGELSE
-        SnapshotPeriodetype.FORSTEGANGSBEHANDLING -> ApiPeriodetype.FORSTEGANGSBEHANDLING
-        SnapshotPeriodetype.INFOTRYGDFORLENGELSE -> ApiPeriodetype.INFOTRYGDFORLENGELSE
-        SnapshotPeriodetype.OVERGANGFRAIT -> ApiPeriodetype.OVERGANG_FRA_IT
+        GraphQLPeriodetype.FORLENGELSE -> ApiPeriodetype.FORLENGELSE
+        GraphQLPeriodetype.FORSTEGANGSBEHANDLING -> ApiPeriodetype.FORSTEGANGSBEHANDLING
+        GraphQLPeriodetype.INFOTRYGDFORLENGELSE -> ApiPeriodetype.INFOTRYGDFORLENGELSE
+        GraphQLPeriodetype.OVERGANGFRAIT -> ApiPeriodetype.OVERGANG_FRA_IT
         else -> throw Exception("Ukjent periodetype $periodetype")
     }
 
-fun SnapshotInntektstype.tilApiInntektstype() =
+fun GraphQLInntektstype.tilApiInntektstype() =
     when (this) {
-        SnapshotInntektstype.ENARBEIDSGIVER -> ApiInntektstype.ENARBEIDSGIVER
-        SnapshotInntektstype.FLEREARBEIDSGIVERE -> ApiInntektstype.FLEREARBEIDSGIVERE
+        GraphQLInntektstype.ENARBEIDSGIVER -> ApiInntektstype.ENARBEIDSGIVER
+        GraphQLInntektstype.FLEREARBEIDSGIVERE -> ApiInntektstype.FLEREARBEIDSGIVERE
         else -> throw Exception("Ukjent inntektstype $this")
     }
 
-fun SnapshotVilkarsgrunnlag.tilVilkarsgrunnlag(avviksvurderinghenter: Avviksvurderinghenter): ApiVilkårsgrunnlag {
+fun GraphQLVilkarsgrunnlag.tilVilkarsgrunnlag(avviksvurderinghenter: Avviksvurderinghenter): ApiVilkårsgrunnlag {
     return when (this) {
-        is SnapshotSpleisVilkarsgrunnlag -> {
+        is GraphQLSpleisVilkarsgrunnlag -> {
             val avviksvurdering: Avviksvurdering =
                 checkNotNull(avviksvurderinghenter.hentAvviksvurdering(id)) { "Fant ikke avviksvurdering for vilkårsgrunnlagId $id" }
             val orgnrs =
@@ -421,7 +421,7 @@ fun SnapshotVilkarsgrunnlag.tilVilkarsgrunnlag(avviksvurderinghenter: Avviksvurd
             )
         }
 
-        is SnapshotInfotrygdVilkarsgrunnlag ->
+        is GraphQLInfotrygdVilkarsgrunnlag ->
             ApiVilkårsgrunnlagInfotrygd(
                 id = id,
                 vilkarsgrunnlagtype = ApiVilkårsgrunnlagtype.INFOTRYGD,
@@ -445,7 +445,7 @@ fun SnapshotVilkarsgrunnlag.tilVilkarsgrunnlag(avviksvurderinghenter: Avviksvurd
     }
 }
 
-internal fun SnapshotSykepengegrunnlagsgrense.tilSykepengegrunnlaggrense() =
+internal fun GraphQLSykepengegrunnlagsgrense.tilSykepengegrunnlaggrense() =
     ApiSykepengegrunnlagsgrense(
         grunnbelop,
         grense,

@@ -20,8 +20,8 @@ import no.nav.helse.rapids_rivers.RapidApplication.Builder
 import no.nav.helse.spesialist.api.AzureConfig
 import no.nav.helse.spesialist.api.bootstrap.Gruppe
 import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
+import no.nav.helse.spesialist.api.snapshot.ISnapshotClient
 import no.nav.helse.spesialist.application.Reservasjonshenter
-import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
@@ -77,7 +77,7 @@ object LocalApp {
         SpesialistApp(
             env = EnvironmentImpl(database.envvars + mapOf("LOKAL_UTVIKLING" to "true")),
             gruppekontroll = gruppekontroll,
-            snapshothenter = snapshothenter,
+            snapshotClient = snapshotClient,
             azureConfig = azureConfig,
             tilgangsgrupper = tilgangsgrupper,
             reservasjonshenter = reservasjonshenter,
@@ -118,9 +118,9 @@ object LocalApp {
     }
 }
 
-private val snapshothenter =
-    object : Snapshothenter {
-        override fun hentPerson(fødselsnummer: String) = null
+private val snapshotClient =
+    object : ISnapshotClient {
+        override fun hentSnapshot(fnr: String) = null
     }
 
 private val reservasjonshenter = Reservasjonshenter { null }

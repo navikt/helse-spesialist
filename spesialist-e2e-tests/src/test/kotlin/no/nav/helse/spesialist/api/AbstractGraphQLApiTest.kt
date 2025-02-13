@@ -53,8 +53,7 @@ import no.nav.helse.spesialist.api.graphql.queryHandler
 import no.nav.helse.spesialist.api.person.PersonService
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
 import no.nav.helse.spesialist.application.Reservasjonshenter
-import no.nav.helse.spesialist.client.spleis.SpleisClient
-import no.nav.helse.spesialist.client.spleis.SpleisClientSnapshothenter
+import no.nav.helse.spesialist.client.spleis.SnapshotClient
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLArbeidsgiver
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import org.intellij.lang.annotations.Language
@@ -76,10 +75,9 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
     private val avviksvurderinghenter = mockk<Avviksvurderinghenter>(relaxed = true)
     private val stansAutomatiskBehandlinghåndterer = mockk<StansAutomatiskBehandlinghåndterer>(relaxed = true)
 
-    protected val spleisClient = mockk<SpleisClient>(relaxed = true)
-    protected val snapshothenter = SpleisClientSnapshothenter(spleisClient)
+    protected val snapshotClient = mockk<SnapshotClient>(relaxed = true)
     private val personinfoDao = repositories.personinfoDao
-    private val snapshotService = SnapshotService(personinfoDao, snapshothenter)
+    private val snapshotService = SnapshotService(personinfoDao, snapshotClient)
 
     private val apiTesting = ApiTesting(
         jwtStub,
@@ -180,7 +178,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
         arbeidsgivere: List<GraphQLArbeidsgiver> = listOf(defaultArbeidsgivere()),
     ) {
         val respons = snapshot(fødselsnummer, arbeidsgivere)
-        every { spleisClient.hentPerson(FØDSELSNUMMER) } returns respons
+        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } returns respons
     }
 
     private fun snapshot(

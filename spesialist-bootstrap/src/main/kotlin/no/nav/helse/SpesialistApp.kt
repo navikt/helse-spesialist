@@ -30,8 +30,8 @@ import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.bootstrap.ApiAvhengigheter
 import no.nav.helse.spesialist.api.bootstrap.Bootstrap
 import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
+import no.nav.helse.spesialist.api.snapshot.ISnapshotClient
 import no.nav.helse.spesialist.application.Reservasjonshenter
-import no.nav.helse.spesialist.application.Snapshothenter
 import org.slf4j.LoggerFactory
 import java.lang.management.GarbageCollectorMXBean
 import java.lang.management.ManagementFactory
@@ -42,7 +42,7 @@ private val logg = LoggerFactory.getLogger("SpesialistApp")
 class SpesialistApp(
     private val env: Environment,
     gruppekontroll: Gruppekontroll,
-    snapshothenter: Snapshothenter,
+    snapshotClient: ISnapshotClient,
     private val azureConfig: AzureConfig,
     private val tilgangsgrupper: Tilgangsgrupper,
     reservasjonshenter: Reservasjonshenter,
@@ -99,7 +99,7 @@ class SpesialistApp(
             dokumenthåndtererProvider = { dokumentMediator },
             stansAutomatiskBehandlinghåndterer = { stansAutomatiskBehandlinghåndterer },
             behandlingstatistikk = behandlingsstatistikkService,
-            snapshothenter = snapshothenter,
+            snapshotClient = snapshotClient,
             avviksvurderinghenter = repositories.avviksvurderingDao,
         )
 

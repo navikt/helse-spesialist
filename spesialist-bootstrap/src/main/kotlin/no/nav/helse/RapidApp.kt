@@ -13,8 +13,7 @@ import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.client.entraid.EntraIDAccessTokenGenerator
 import no.nav.helse.spesialist.client.entraid.MsGraphGruppekontroll
 import no.nav.helse.spesialist.client.krr.KRRClientReservasjonshenter
-import no.nav.helse.spesialist.client.spleis.SpleisClient
-import no.nav.helse.spesialist.client.spleis.SpleisClientSnapshothenter
+import no.nav.helse.spesialist.client.spleis.SnapshotClient
 import org.slf4j.LoggerFactory
 import java.net.URI
 
@@ -42,14 +41,12 @@ internal class RapidApp(env: Map<String, String>) {
             tokenEndpoint = env.getValue("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
             privateJwk = env.getValue("AZURE_APP_JWK"),
         )
-    private val snapshothenter =
-        SpleisClientSnapshothenter(
-            SpleisClient(
-                httpClient = httpClient(120_000, 1_000, 40_000),
-                accessTokenGenerator = accessTokenGenerator,
-                spleisUrl = URI.create(env.getValue("SPLEIS_API_URL")),
-                spleisClientId = env.getValue("SPLEIS_CLIENT_ID"),
-            ),
+    private val snapshotClient =
+        SnapshotClient(
+            httpClient = httpClient(120_000, 1_000, 40_000),
+            accessTokenGenerator = accessTokenGenerator,
+            spleisUrl = URI.create(env.getValue("SPLEIS_API_URL")),
+            spleisClientId = env.getValue("SPLEIS_CLIENT_ID"),
         )
     val environment = EnvironmentImpl()
     private val reservasjonshenter =
@@ -69,7 +66,7 @@ internal class RapidApp(env: Map<String, String>) {
         SpesialistApp(
             env = environment,
             gruppekontroll = MsGraphGruppekontroll(accessTokenGenerator),
-            snapshothenter = snapshothenter,
+            snapshotClient = snapshotClient,
             azureConfig = azureConfig,
             tilgangsgrupper = tilgangsgrupper,
             reservasjonshenter = reservasjonshenter,

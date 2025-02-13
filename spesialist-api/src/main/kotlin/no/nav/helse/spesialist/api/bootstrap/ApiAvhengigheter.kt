@@ -8,7 +8,7 @@ import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.behandlingsstatistikk.IBehandlingsstatistikkService
-import no.nav.helse.spesialist.application.Snapshothenter
+import no.nav.helse.spesialist.api.snapshot.ISnapshotClient
 
 data class ApiAvhengigheter(
     val saksbehandlerhåndtererProvider: () -> Saksbehandlerhåndterer,
@@ -18,6 +18,6 @@ data class ApiAvhengigheter(
     val dokumenthåndtererProvider: () -> Dokumenthåndterer,
     val stansAutomatiskBehandlinghåndterer: () -> StansAutomatiskBehandlinghåndterer,
     val behandlingstatistikk: IBehandlingsstatistikkService,
-    val snapshothenter: Snapshothenter,
+    val snapshotClient: ISnapshotClient,
     val avviksvurderinghenter: Avviksvurderinghenter,
 )

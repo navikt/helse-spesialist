@@ -19,7 +19,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodetilstand
 import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodetype
 import no.nav.helse.spesialist.api.graphql.schema.ApiVarselDTO
 import no.nav.helse.spesialist.api.graphql.schema.UberegnetPeriodeSchema
-import no.nav.helse.spesialist.application.snapshot.SnapshotTidslinjeperiode
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLTidslinjeperiode
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -27,7 +27,7 @@ import java.util.UUID
 @GraphQLIgnore
 data class ApiUberegnetPeriodeResolver(
     private val varselRepository: VarselApiRepository,
-    private val periode: SnapshotTidslinjeperiode,
+    private val periode: GraphQLTidslinjeperiode,
     private val skalViseAktiveVarsler: Boolean,
     private val notatDao: NotatApiDao,
     private val index: Int,

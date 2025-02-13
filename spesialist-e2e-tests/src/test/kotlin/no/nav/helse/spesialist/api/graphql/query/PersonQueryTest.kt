@@ -179,7 +179,7 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
     @Test
     @ResourceLock("auditlogg-lytter")
     fun `får 501-feil når oppdatering av snapshot feiler`() {
-        every { spleisClient.hentPerson(FØDSELSNUMMER) } throws GraphQLException("Oops")
+        every { snapshotClient.hentSnapshot(FØDSELSNUMMER) } throws GraphQLException("Oops")
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
 
         val logglytter = Logglytter()

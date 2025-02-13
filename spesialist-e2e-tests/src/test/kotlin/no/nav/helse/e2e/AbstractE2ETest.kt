@@ -50,8 +50,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
-import no.nav.helse.spesialist.client.spleis.SpleisClient
-import no.nav.helse.spesialist.client.spleis.SpleisClientSnapshothenter
+import no.nav.helse.spesialist.client.spleis.SnapshotClient
 import no.nav.helse.spesialist.test.TestPerson
 import no.nav.helse.util.januar
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -104,8 +103,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     private val avviksvurderingTestdata = AvviksvurderingTestdata()
     internal lateinit var utbetalingId: UUID
         private set
-    internal val spleisClient = mockk<SpleisClient>()
-    internal val snapshothenter = SpleisClientSnapshothenter(spleisClient)
+    internal val snapshotClient = mockk<SnapshotClient>()
     private val testRapid = TestRapid()
     internal val inspektør get() = testRapid.inspektør
     private val meldingssender = Meldingssender(testRapid)
@@ -1543,7 +1541,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun mockSnapshot(fødselsnummer: String = FØDSELSNUMMER) {
-        every { spleisClient.hentPerson(fødselsnummer) } returns
+        every { snapshotClient.hentSnapshot(fødselsnummer) } returns
                 snapshot(
                     versjon = 1,
                     fødselsnummer = godkjenningsbehovTestdata.fødselsnummer,

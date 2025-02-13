@@ -42,14 +42,14 @@ import no.nav.helse.spesialist.api.overstyring.OverstyringTidslinjeDto
 import no.nav.helse.spesialist.api.overstyring.Skjonnsfastsettingstype
 import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsettingSykepengegrunnlagDto
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDto
-import no.nav.helse.spesialist.application.snapshot.SnapshotGhostPeriode
-import no.nav.helse.spesialist.application.snapshot.SnapshotNyttInntektsforholdPeriode
-import no.nav.helse.spesialist.application.snapshot.SnapshotPerson
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLGhostPeriode
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLNyttInntektsforholdPeriode
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import java.time.LocalDate
 import java.util.UUID
 
 data class ApiPersonResolver(
-    private val snapshot: SnapshotPerson,
+    private val snapshot: GraphQLPerson,
     private val personinfo: ApiPersoninfo,
     private val personApiDao: PersonApiDao,
     private val tildelingApiDao: TildelingApiDao,
@@ -153,7 +153,7 @@ data class ApiPersonResolver(
 
     override fun vilkarsgrunnlag(): List<ApiVilkårsgrunnlag> = snapshot.vilkarsgrunnlag.map { it.tilVilkarsgrunnlag(avviksvurderinghenter) }
 
-    private fun List<SnapshotGhostPeriode>.tilGhostPerioder(organisasjonsnummer: String): List<ApiGhostPeriode> =
+    private fun List<GraphQLGhostPeriode>.tilGhostPerioder(organisasjonsnummer: String): List<ApiGhostPeriode> =
         map {
             ApiGhostPeriode(
                 fom = it.fom,
@@ -165,7 +165,7 @@ data class ApiPersonResolver(
             )
         }
 
-    private fun List<SnapshotNyttInntektsforholdPeriode>.tilNyeInntektsforholdPerioder(): List<ApiNyttInntektsforholdPeriode> =
+    private fun List<GraphQLNyttInntektsforholdPeriode>.tilNyeInntektsforholdPerioder(): List<ApiNyttInntektsforholdPeriode> =
         map {
             ApiNyttInntektsforholdPeriode(
                 id = it.id,
