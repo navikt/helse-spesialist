@@ -180,7 +180,7 @@ internal class TotrinnsvurderingTest {
         saksbehandler: Saksbehandler? = null,
         beslutter: Saksbehandler? = null,
     ) = Totrinnsvurdering.fraLagring(
-        id = nextLong(),
+        id = TotrinnsvurderingId(nextLong()),
         vedtaksperiodeId = UUID.randomUUID(),
         erRetur = erRetur,
         saksbehandler = saksbehandler,

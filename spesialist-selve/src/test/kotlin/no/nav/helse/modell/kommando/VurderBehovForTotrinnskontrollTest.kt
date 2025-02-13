@@ -17,6 +17,7 @@ import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.test.lagSaksbehandlerident
 import no.nav.helse.spesialist.test.lagSaksbehandlernavn
@@ -196,7 +197,7 @@ internal class VurderBehovForTotrinnskontrollTest {
         beslutter: Saksbehandler = lagSaksbehandler()
     ) =
         Totrinnsvurdering.fraLagring(
-            id = nextLong(),
+            id = TotrinnsvurderingId(nextLong()),
             vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
             erRetur = erRetur,
             saksbehandler = saksbehandler,

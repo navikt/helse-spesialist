@@ -12,8 +12,11 @@ import no.nav.helse.spesialist.modell.ddd.AggregateRoot
 import java.time.LocalDateTime
 import java.util.UUID
 
+@JvmInline
+value class TotrinnsvurderingId(val value: Long)
+
 class Totrinnsvurdering private constructor(
-    id: Long?,
+    id: TotrinnsvurderingId?,
     val vedtaksperiodeId: UUID,
     erRetur: Boolean,
     saksbehandler: Saksbehandler?,
@@ -23,7 +26,7 @@ class Totrinnsvurdering private constructor(
     oppdatert: LocalDateTime?,
     overstyringer: List<Overstyring> = emptyList(),
     ferdigstilt: Boolean = false,
-) : AggregateRoot<Long>(id) {
+) : AggregateRoot<TotrinnsvurderingId>(id) {
     private val _overstyringer: MutableList<Overstyring> = overstyringer.toMutableList()
     val overstyringer: List<Overstyring>
         get() = _overstyringer
@@ -142,7 +145,7 @@ class Totrinnsvurdering private constructor(
         }
 
         fun fraLagring(
-            id: Long,
+            id: TotrinnsvurderingId,
             vedtaksperiodeId: UUID,
             erRetur: Boolean,
             saksbehandler: Saksbehandler?,
@@ -172,7 +175,7 @@ class Totrinnsvurdering private constructor(
             totrinnsvurderingId: Long?,
         ): Totrinnsvurdering =
             Totrinnsvurdering(
-                id = totrinnsvurderingId,
+                id = totrinnsvurderingId?.let { TotrinnsvurderingId(totrinnsvurderingId) },
                 vedtaksperiodeId = vedtaksperiodeId,
                 erRetur = erRetur,
                 saksbehandler = saksbehandler?.gjenopprett(tilgangskontroll),

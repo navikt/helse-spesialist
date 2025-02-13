@@ -9,6 +9,7 @@ import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -98,7 +99,7 @@ class OppgavemelderTest {
     )
 
     private fun totrinnsvurdering(beslutter: Saksbehandler? = null) = Totrinnsvurdering.fraLagring(
-        id = nextLong(),
+        id = TotrinnsvurderingId(nextLong()),
         vedtaksperiodeId = VEDTAKSPERIODE_ID,
         erRetur = false,
         saksbehandler = null,

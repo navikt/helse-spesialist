@@ -8,6 +8,7 @@ import no.nav.helse.db.PgSaksbehandlerDao
 import no.nav.helse.db.QueryRunner
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import java.util.UUID
 
@@ -34,7 +35,7 @@ class PgTotrinnsvurderingRepository(
         if (totrinnsvurdering.harFåttTildeltId()) {
             update(totrinnsvurdering)
         } else {
-            insert(totrinnsvurdering).also { totrinnsvurdering.tildelId(it) }
+            insert(totrinnsvurdering).let(::TotrinnsvurderingId).let(totrinnsvurdering::tildelId)
         }
 
         overstyringRepository.lagre(totrinnsvurdering.overstyringer)
@@ -111,7 +112,7 @@ class PgTotrinnsvurderingRepository(
                 oppdatert           = :oppdatert
             WHERE id = :id
             """.trimIndent(),
-            "id" to totrinnsvurdering.id(),
+            "id" to totrinnsvurdering.id().value,
             "erRetur" to totrinnsvurdering.erRetur,
             "saksbehandler" to totrinnsvurdering.saksbehandler?.oid,
             "beslutter" to totrinnsvurdering.beslutter?.oid,
@@ -122,7 +123,7 @@ class PgTotrinnsvurderingRepository(
 
     private fun Row.toTotrinnsvurdering(): Totrinnsvurdering =
         Totrinnsvurdering.fraLagring(
-            id = long("id"),
+            id = TotrinnsvurderingId(long("id")),
             vedtaksperiodeId = uuid("vedtaksperiode_id"),
             erRetur = boolean("er_retur"),
             saksbehandler = uuidOrNull("saksbehandler_oid")?.let { saksbehandlerDao.finnSaksbehandler(it) },

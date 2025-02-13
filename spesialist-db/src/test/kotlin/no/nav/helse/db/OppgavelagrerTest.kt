@@ -13,6 +13,7 @@ import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.Saksbehandler.Companion.toDto
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDto
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
 import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -299,7 +300,7 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
 
     private fun nyTotrinnsvurdering() =
         Totrinnsvurdering.fraLagring(
-            id = nextLong(),
+            id = TotrinnsvurderingId(nextLong()),
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             erRetur = false,
             saksbehandler = saksbehandler,
