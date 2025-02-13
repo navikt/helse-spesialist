@@ -619,9 +619,7 @@ class PgOverstyringRepository(
             fraRefusjonsopplysninger =
                 stringOrNull("fra_refusjonsopplysninger")
                     ?.let { objectMapper.readValue(it) },
-            lovhjemmel =
-                stringOrNull("subsumsjon")
-                    ?.let { objectMapper.readValue(it) },
+            lovhjemmel = null,
         )
 
     private fun Row.toArbeidsforhold(): Arbeidsforhold =
