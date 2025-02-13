@@ -1,6 +1,5 @@
 package no.nav.helse.db
 
-import io.ktor.utils.io.core.use
 import kotliquery.Query
 import kotliquery.Row
 import kotliquery.Session

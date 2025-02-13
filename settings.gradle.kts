@@ -34,6 +34,7 @@ dependencyResolutionManagement {
             version("cloudsql", "1.16.0")
             version("graphql-kotlin", "8.3.0")
             version("unleash", "10.0.0")
+            version("kotlinx-coroutines", "1.10.1")
 
             library("unleash", "io.getunleash", "unleash-client-java").versionRef("unleash")
 
@@ -55,6 +56,8 @@ dependencyResolutionManagement {
             library("jackson-helpers", "com.github.navikt.tbd-libs", "jackson").versionRef("tbd-libs")
             library("jackson-kotlin", "com.fasterxml.jackson.module", "jackson-module-kotlin").versionRef("jackson")
             library("jackson-datatype", "com.fasterxml.jackson.datatype", "jackson-datatype-jsr310").versionRef("jackson")
+
+            library("kotlinx-coroutines", "org.jetbrains.kotlinx", "kotlinx-coroutines-core").versionRef("kotlinx-coroutines")
 
             library("ktor-micrometer", "io.ktor", "ktor-server-metrics-micrometer").versionRef("ktor")
             library("micrometer-prometheus", "io.micrometer", "micrometer-registry-prometheus").versionRef("micrometer")

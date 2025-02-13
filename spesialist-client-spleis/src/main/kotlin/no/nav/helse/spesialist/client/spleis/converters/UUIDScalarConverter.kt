@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.api.graphql.schema.converter
+package no.nav.helse.spesialist.client.spleis.converters
 
 import com.expediagroup.graphql.client.converter.ScalarConverter
 import java.util.UUID

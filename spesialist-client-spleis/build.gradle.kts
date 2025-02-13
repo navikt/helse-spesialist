@@ -1,12 +1,23 @@
 import com.expediagroup.graphql.plugin.gradle.config.GraphQLScalar
 import com.expediagroup.graphql.plugin.gradle.tasks.GraphQLIntrospectSchemaTask
 
+val graphqlKotlinVersion = "8.3.0"
+
 plugins {
     id("com.expediagroup.graphql") version libs.versions.graphql.kotlin
 }
 
 dependencies {
     api(project(":spesialist-selve"))
+
+    implementation("com.expediagroup:graphql-kotlin-client:$graphqlKotlinVersion")
+    implementation("com.expediagroup:graphql-kotlin-client-jackson:$graphqlKotlinVersion") {
+        exclude(group = "com.fasterxml.jackson.core")
+        exclude(group = "com.fasterxml.jackson.module")
+    }
+    implementation("com.expediagroup:graphql-kotlin-ktor-client:$graphqlKotlinVersion") {
+        exclude("com.expediagroup:graphql-kotlin-client-serialization")
+    }
 
     implementation(libs.bundles.logging)
     implementation(libs.bundles.ktor.client)
@@ -22,21 +33,21 @@ graphql {
         // Ved å sette opp UUID her vil koden som genereres for spleis-typene bruke UUID
         customScalars =
             listOf(
-                GraphQLScalar("UUID", "java.util.UUID", "no.nav.helse.spesialist.api.graphql.schema.converter.UUIDScalarConverter"),
+                GraphQLScalar("UUID", "java.util.UUID", "no.nav.helse.spesialist.client.spleis.converters.UUIDScalarConverter"),
                 GraphQLScalar(
                     "LocalDateTime",
                     "java.time.LocalDateTime",
-                    "no.nav.helse.spesialist.api.graphql.schema.converter.LocalDateTimeScalarConverter",
+                    "no.nav.helse.spesialist.client.spleis.converters.LocalDateTimeScalarConverter",
                 ),
                 GraphQLScalar(
                     "LocalDate",
                     "java.time.LocalDate",
-                    "no.nav.helse.spesialist.api.graphql.schema.converter.LocalDateScalarConverter",
+                    "no.nav.helse.spesialist.client.spleis.converters.LocalDateScalarConverter",
                 ),
                 GraphQLScalar(
                     "YearMonth",
                     "java.time.YearMonth",
-                    "no.nav.helse.spesialist.api.graphql.schema.converter.YearMonthScalarConverter",
+                    "no.nav.helse.spesialist.client.spleis.converters.YearMonthScalarConverter",
                 ),
             )
         queryFileDirectory = graphqlDir

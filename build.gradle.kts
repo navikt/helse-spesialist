@@ -1,6 +1,5 @@
 val junitJupiterVersion = "5.11.4"
 val jvmTargetVersion = "21"
-val graphqlKotlinVersion = "8.3.0"
 val logbackSyslog4jVersion = "1.0.0"
 val mockkVersion = "1.13.10"
 
@@ -58,14 +57,6 @@ allprojects {
             }
         }
 
-        implementation("com.expediagroup:graphql-kotlin-client:$graphqlKotlinVersion")
-        implementation("com.expediagroup:graphql-kotlin-client-jackson:$graphqlKotlinVersion") {
-            exclude(group = "com.fasterxml.jackson.core")
-            exclude(group = "com.fasterxml.jackson.module")
-        }
-        implementation("com.expediagroup:graphql-kotlin-ktor-client:$graphqlKotlinVersion") {
-            exclude("com.expediagroup:graphql-kotlin-client-serialization")
-        }
         testRuntimeOnly("org.junit.platform:junit-platform-launcher")
         testImplementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
         testImplementation("io.mockk:mockk:$mockkVersion")
