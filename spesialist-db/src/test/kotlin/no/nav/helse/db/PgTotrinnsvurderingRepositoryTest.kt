@@ -26,7 +26,7 @@ class PgTotrinnsvurderingRepositoryTest: DatabaseIntegrationTest() {
 
     @Test
     fun `hvis det ikke finnes totrinnsvurdering, returnerer null`() {
-        val totrinnsvurdering = totrinnsvurderingRepository.finnTotrinnsvurdering(FNR)
+        val totrinnsvurdering = totrinnsvurderingRepository.finn(FNR)
 
         assertNull(totrinnsvurdering)
     }
@@ -38,7 +38,7 @@ class PgTotrinnsvurderingRepositoryTest: DatabaseIntegrationTest() {
         totrinnsvurderingRepository.lagre(totrinnsvurdering, FNR)
         assertTrue(totrinnsvurdering.harFåttTildeltId())
 
-        val hentetTotrinnsvurdering = totrinnsvurderingRepository.finnTotrinnsvurdering(FNR)
+        val hentetTotrinnsvurdering = totrinnsvurderingRepository.finn(FNR)
 
         assertEquals(totrinnsvurdering, hentetTotrinnsvurdering)
     }
@@ -46,13 +46,13 @@ class PgTotrinnsvurderingRepositoryTest: DatabaseIntegrationTest() {
     @Test
     fun `oppdater totrinsvurdering`() {
         totrinnsvurderingRepository.lagre(nyTotrinnsvurdering(), FNR)
-        val hentetTotrinnsvurdering = totrinnsvurderingRepository.finnTotrinnsvurdering(FNR)
+        val hentetTotrinnsvurdering = totrinnsvurderingRepository.finn(FNR)
         checkNotNull(hentetTotrinnsvurdering)
         hentetTotrinnsvurdering.nyOverstyring(nyOverstyring())
         hentetTotrinnsvurdering.settBeslutter(nySaksbehandler())
         hentetTotrinnsvurdering.settRetur()
         totrinnsvurderingRepository.lagre(hentetTotrinnsvurdering, FNR)
-        val oppdatertTotrinnsvurdering = totrinnsvurderingRepository.finnTotrinnsvurdering(FNR)
+        val oppdatertTotrinnsvurdering = totrinnsvurderingRepository.finn(FNR)
         checkNotNull(oppdatertTotrinnsvurdering)
 
         assertEquals(1, oppdatertTotrinnsvurdering.overstyringer.size)

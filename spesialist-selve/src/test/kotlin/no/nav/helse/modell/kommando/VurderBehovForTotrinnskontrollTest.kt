@@ -92,7 +92,7 @@ internal class VurderBehovForTotrinnskontrollTest {
 
         assertTrue(command.execute(context))
 
-        verify(exactly = 1) { totrinnsvurderingRepository.finnTotrinnsvurdering(any<String>()) }
+        verify(exactly = 1) { totrinnsvurderingRepository.finn(any<String>()) }
     }
 
     @Test
@@ -103,7 +103,7 @@ internal class VurderBehovForTotrinnskontrollTest {
         every { oppgaveService.harFerdigstiltOppgave(VEDTAKSPERIODE_ID_2) } returns false
 
         assertTrue(command.execute(context))
-        verify(exactly = 1) { totrinnsvurderingRepository.finnTotrinnsvurdering(any<String>()) }
+        verify(exactly = 1) { totrinnsvurderingRepository.finn(any<String>()) }
     }
 
     @ParameterizedTest
@@ -117,7 +117,7 @@ internal class VurderBehovForTotrinnskontrollTest {
         every { oppgaveService.harFerdigstiltOppgave(VEDTAKSPERIODE_ID_2) } returns false
 
         assertTrue(command.execute(context))
-        verify(exactly = 0) { totrinnsvurderingRepository.finnTotrinnsvurdering(any<String>()) }
+        verify(exactly = 0) { totrinnsvurderingRepository.finn(any<String>()) }
     }
 
     @Test
@@ -125,12 +125,12 @@ internal class VurderBehovForTotrinnskontrollTest {
         val saksbehandler = lagSaksbehandler(UUID.randomUUID())
 
         every { overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
-        every { totrinnsvurderingRepository.finnTotrinnsvurdering(any<String>()) } returns
+        every { totrinnsvurderingRepository.finn(any<String>()) } returns
                 lagTotrinnsvurdering(saksbehandler = saksbehandler)
 
         assertTrue(command.execute(context))
 
-        verify(exactly = 1) { totrinnsvurderingRepository.finnTotrinnsvurdering(any<String>()) }
+        verify(exactly = 1) { totrinnsvurderingRepository.finn(any<String>()) }
         verify(exactly = 1) { oppgaveService.reserverOppgave(saksbehandler.oid, FØDSELSNUMMER) }
     }
 
@@ -140,12 +140,12 @@ internal class VurderBehovForTotrinnskontrollTest {
         val beslutter = lagSaksbehandler()
 
         every { overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
-        every { totrinnsvurderingRepository.finnTotrinnsvurdering(any<String>()) } returns
+        every { totrinnsvurderingRepository.finn(any<String>()) } returns
                 lagTotrinnsvurdering(false, saksbehandler, beslutter)
 
         assertTrue(command.execute(context))
 
-        verify(exactly = 1) { totrinnsvurderingRepository.finnTotrinnsvurdering(any<String>()) }
+        verify(exactly = 1) { totrinnsvurderingRepository.finn(any<String>()) }
         verify(exactly = 1) { oppgaveService.reserverOppgave(saksbehandler.oid, FØDSELSNUMMER) }
         verify(exactly = 1) {
             totrinnsvurderingRepository.lagre(
@@ -162,7 +162,7 @@ internal class VurderBehovForTotrinnskontrollTest {
     fun `Oppretter ikke totrinnsvurdering om det ikke er overstyring eller varsel for lovvalg og medlemskap`() {
         assertTrue(command.execute(context))
 
-        verify(exactly = 0) { totrinnsvurderingRepository.finnTotrinnsvurdering(any<String>()) }
+        verify(exactly = 0) { totrinnsvurderingRepository.finn(any<String>()) }
     }
 
     @Test
@@ -170,7 +170,7 @@ internal class VurderBehovForTotrinnskontrollTest {
         every { overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
 
         assertTrue(command.execute(context))
-        verify(exactly = 1) { totrinnsvurderingRepository.finnTotrinnsvurdering(any<String>()) }
+        verify(exactly = 1) { totrinnsvurderingRepository.finn(any<String>()) }
     }
 
     @Test
@@ -178,7 +178,7 @@ internal class VurderBehovForTotrinnskontrollTest {
         every { overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Sykepengegrunnlag)
 
         assertTrue(command.execute(context))
-        verify(exactly = 1) { totrinnsvurderingRepository.finnTotrinnsvurdering(any<String>()) }
+        verify(exactly = 1) { totrinnsvurderingRepository.finn(any<String>()) }
     }
 
     private fun lagSaksbehandler(oid: UUID = UUID.randomUUID()) =

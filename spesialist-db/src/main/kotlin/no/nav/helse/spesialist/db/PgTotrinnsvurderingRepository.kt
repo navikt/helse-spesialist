@@ -18,7 +18,7 @@ class PgTotrinnsvurderingRepository(
     private val totrinnsvurderingDao = PgTotrinnsvurderingDao(session)
     private val saksbehandlerDao = PgSaksbehandlerDao(session, tilgangskontroll)
 
-    override fun finnTotrinnsvurdering(fødselsnummer: String): Totrinnsvurdering? {
+    override fun finn(fødselsnummer: String): Totrinnsvurdering? {
         val (id, totrinnsvurderingFraDatabase) =
             totrinnsvurderingDao.hentAktivTotrinnsvurdering(fødselsnummer)
                 ?: return null
@@ -29,7 +29,7 @@ class PgTotrinnsvurderingRepository(
     }
 
     @Deprecated("Skal fjernes, midlertidig i bruk for å tette et hull")
-    override fun finnTotrinnsvurdering(vedtaksperiodeId: UUID): Totrinnsvurdering? {
+    override fun finn(vedtaksperiodeId: UUID): Totrinnsvurdering? {
         val (id, totrinnsvurderingFraDatabase) =
             totrinnsvurderingDao.hentAktivTotrinnsvurdering(vedtaksperiodeId)
                 ?: return null

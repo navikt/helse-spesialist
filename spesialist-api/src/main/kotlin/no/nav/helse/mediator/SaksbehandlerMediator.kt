@@ -210,9 +210,9 @@ class SaksbehandlerMediator(
         totrinnsvurderingRepository: TotrinnsvurderingRepository,
     ): Totrinnsvurdering? {
         return if (featureToggles.skalBenytteNyTotrinnsvurderingsløsning()) {
-            totrinnsvurderingRepository.finnTotrinnsvurdering(fødselsnummer)
+            totrinnsvurderingRepository.finn(fødselsnummer)
         } else {
-            totrinnsvurderingRepository.finnTotrinnsvurdering(vedtaksperiodeId)
+            totrinnsvurderingRepository.finn(vedtaksperiodeId)
         }
     }
 
