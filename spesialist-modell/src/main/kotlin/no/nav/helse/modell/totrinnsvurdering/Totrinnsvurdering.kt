@@ -24,7 +24,9 @@ class Totrinnsvurdering private constructor(
     overstyringer: List<Overstyring> = emptyList(),
     ferdigstilt: Boolean = false,
 ) : AggregateRoot<Long>(id) {
-    private val overstyringer: MutableList<Overstyring> = overstyringer.toMutableList()
+    private val _overstyringer: MutableList<Overstyring> = overstyringer.toMutableList()
+    val overstyringer: List<Overstyring>
+        get() = _overstyringer
 
     var erRetur: Boolean = erRetur
         private set
@@ -46,8 +48,6 @@ class Totrinnsvurdering private constructor(
 
     val erBeslutteroppgave: Boolean get() = !erRetur && saksbehandler != null
 
-    fun overstyringer(): List<Overstyring> = overstyringer
-
     fun ferdigstill() =
         oppdatering {
             ferdigstilt = true
@@ -65,7 +65,7 @@ class Totrinnsvurdering private constructor(
 
     fun nyOverstyring(overstyring: Overstyring) =
         oppdatering {
-            overstyringer.add(overstyring)
+            _overstyringer.add(overstyring)
         }
 
     internal fun sendTilBeslutter(

@@ -7,7 +7,7 @@ import java.util.UUID
 @JvmInline
 value class OverstyringId(val value: Long)
 
-abstract class Overstyring(id: OverstyringId?) : Personhandling, Entity<OverstyringId>(id) {
+sealed class Overstyring(id: OverstyringId?) : Personhandling, Entity<OverstyringId>(id) {
     abstract val saksbehandlerOid: UUID
     abstract val eksternHendelseId: UUID
     abstract val aktørId: String
