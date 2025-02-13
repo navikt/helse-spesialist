@@ -5,9 +5,7 @@ import kotliquery.Session
 import no.nav.helse.db.HelseDao.Companion.asSQL
 import no.nav.helse.db.MedSession
 import no.nav.helse.db.PgSaksbehandlerDao
-import no.nav.helse.db.PgTotrinnsvurderingDao
 import no.nav.helse.db.QueryRunner
-import no.nav.helse.db.TotrinnsvurderingFraDatabase
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
@@ -18,7 +16,6 @@ class PgTotrinnsvurderingRepository(
     tilgangskontroll: Tilgangskontroll,
 ) : QueryRunner by MedSession(session), TotrinnsvurderingRepository {
     private val overstyringRepository = PgOverstyringRepository(session)
-    private val totrinnsvurderingDao = PgTotrinnsvurderingDao(session)
     private val saksbehandlerDao = PgSaksbehandlerDao(session, tilgangskontroll)
 
     override fun finn(fødselsnummer: String): Totrinnsvurdering? {
@@ -34,11 +31,10 @@ class PgTotrinnsvurderingRepository(
         totrinnsvurdering: Totrinnsvurdering,
         fødselsnummer: String,
     ) {
-        val totrinnsvurderingFraDatabase = totrinnsvurdering.tilDatabase()
         if (totrinnsvurdering.harFåttTildeltId()) {
-            totrinnsvurderingDao.update(totrinnsvurdering.id(), totrinnsvurderingFraDatabase)
+            update(totrinnsvurdering)
         } else {
-            totrinnsvurderingDao.insert(totrinnsvurderingFraDatabase).also { totrinnsvurdering.tildelId(it) }
+            insert(totrinnsvurdering).also { totrinnsvurdering.tildelId(it) }
         }
 
         overstyringRepository.lagre(totrinnsvurdering.overstyringer)
@@ -91,6 +87,39 @@ class PgTotrinnsvurderingRepository(
             "vedtaksperiodeId" to vedtaksperiodeId,
         ).singleOrNull { it.toTotrinnsvurdering() }
 
+    private fun insert(totrinnsvurdering: Totrinnsvurdering): Long =
+        asSQL(
+            """
+            INSERT INTO totrinnsvurdering (vedtaksperiode_id, er_retur, saksbehandler, beslutter, opprettet, oppdatert)
+            VALUES (:vedtaksperiodeId, :erRetur, :saksbehandler, :beslutter, :opprettet, null)
+            """.trimIndent(),
+            "vedtaksperiodeId" to totrinnsvurdering.vedtaksperiodeId,
+            "erRetur" to totrinnsvurdering.erRetur,
+            "saksbehandler" to totrinnsvurdering.saksbehandler?.oid,
+            "beslutter" to totrinnsvurdering.beslutter?.oid,
+            "opprettet" to totrinnsvurdering.opprettet,
+        ).updateAndReturnGeneratedKey()
+
+    private fun update(totrinnsvurdering: Totrinnsvurdering) {
+        asSQL(
+            """
+            UPDATE totrinnsvurdering 
+            SET er_retur            = :erRetur,
+                saksbehandler       = :saksbehandler,
+                beslutter           = :beslutter,
+                utbetaling_id_ref   = (SELECT id from utbetaling_id ui WHERE ui.utbetaling_id = :utbetalingId),
+                oppdatert           = :oppdatert
+            WHERE id = :id
+            """.trimIndent(),
+            "id" to totrinnsvurdering.id(),
+            "erRetur" to totrinnsvurdering.erRetur,
+            "saksbehandler" to totrinnsvurdering.saksbehandler?.oid,
+            "beslutter" to totrinnsvurdering.beslutter?.oid,
+            "utbetalingId" to totrinnsvurdering.utbetalingId,
+            "oppdatert" to totrinnsvurdering.oppdatert,
+        ).update()
+    }
+
     private fun Row.toTotrinnsvurdering(): Totrinnsvurdering =
         Totrinnsvurdering.fraLagring(
             id = long("id"),
@@ -103,16 +132,5 @@ class PgTotrinnsvurderingRepository(
             oppdatert = localDateTimeOrNull("oppdatert"),
             ferdigstilt = false,
             overstyringer = overstyringRepository.finn(string("fødselsnummer")),
-        )
-
-    private fun Totrinnsvurdering.tilDatabase() =
-        TotrinnsvurderingFraDatabase(
-            vedtaksperiodeId = vedtaksperiodeId,
-            erRetur = erRetur,
-            saksbehandler = saksbehandler?.oid,
-            beslutter = beslutter?.oid,
-            utbetalingId = utbetalingId,
-            opprettet = opprettet,
-            oppdatert = oppdatert,
         )
 }
