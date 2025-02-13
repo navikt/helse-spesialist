@@ -57,7 +57,6 @@ class RiverSetup(
             TilbakedateringBehandletRiver(mediator),
             EndretSkjermetinfoRiver(mediator),
             DokumentRiver(mediator),
-            VedtakFattetRiver(mediator),
             NyeVarslerRiver(mediator),
             AvvikVurdertRiver(mediator),
             VarseldefinisjonRiver(mediator),

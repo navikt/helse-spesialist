@@ -192,7 +192,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 behandlinger[vedtaksperiodeId]?.last()
                     ?: throw IllegalArgumentException("Det finnes ingen behandlinger for vedtaksperiodeId=$vedtaksperiodeId"),
         )
-        håndterVedtakFattet()
     }
 
     protected fun spesialistInnvilgerManuelt(
@@ -212,7 +211,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         håndterSaksbehandlerløsning(vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId)
         håndterUtbetalingUtbetalt()
         håndterAvsluttetMedVedtak()
-        håndterVedtakFattet(vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId)
     }
 
     protected fun spesialistBehandlerGodkjenningsbehovFremTilVergemål(
@@ -955,6 +953,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         settInnAvviksvurderingFraSpleis: Boolean = true,
     ) {
         val utbetalingId = if (this::utbetalingId.isInitialized) this.utbetalingId else null
+        if (utbetalingId != null) håndterUtbetalingUtbetalt(aktørId, fødselsnummer, organisasjonsnummer)
         sisteMeldingId =
             meldingssender.sendAvsluttetMedVedtak(
                 aktørId = aktørId,
@@ -992,23 +991,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 tom = tom,
                 skjæringstidspunkt = skjæringstidspunkt,
             )
-    }
-
-    protected fun håndterVedtakFattet(
-        aktørId: String = AKTØR,
-        fødselsnummer: String = FØDSELSNUMMER,
-        organisasjonsnummer: String = ORGNR,
-        vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
-        spleisBehandlingId: UUID = UUID.randomUUID(),
-    ) {
-        if (this::utbetalingId.isInitialized) håndterUtbetalingUtbetalt(aktørId, fødselsnummer, organisasjonsnummer)
-        sisteMeldingId = meldingssender.sendVedtakFattet(
-            aktørId,
-            fødselsnummer,
-            organisasjonsnummer,
-            vedtaksperiodeId,
-            spleisBehandlingId
-        )
     }
 
     protected fun håndterAdressebeskyttelseEndret(

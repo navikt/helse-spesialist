@@ -21,7 +21,6 @@ import no.nav.helse.db.PgMeldingDao.Meldingtype.UTBETALING_ENDRET
 import no.nav.helse.db.PgMeldingDao.Meldingtype.VEDTAKSPERIODE_FORKASTET
 import no.nav.helse.db.PgMeldingDao.Meldingtype.VEDTAKSPERIODE_NY_UTBETALING
 import no.nav.helse.db.PgMeldingDao.Meldingtype.VEDTAKSPERIODE_REBEREGNET
-import no.nav.helse.db.PgMeldingDao.Meldingtype.VEDTAK_FATTET
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
@@ -44,7 +43,6 @@ import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetaling
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnet
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
-import no.nav.helse.modell.vedtaksperiode.vedtak.VedtakFattet
 import no.nav.helse.objectMapper
 import java.time.LocalDate
 import java.util.UUID
@@ -182,7 +180,6 @@ class PgMeldingDao private constructor(queryRunner: QueryRunner) : MeldingDao, Q
             UTBETALING_ENDRET -> UtbetalingEndret(jsonNode)
             VEDTAKSPERIODE_REBEREGNET -> VedtaksperiodeReberegnet(jsonNode)
             ENDRET_EGEN_ANSATT_STATUS -> EndretEgenAnsattStatus(jsonNode)
-            VEDTAK_FATTET -> VedtakFattet(jsonNode)
             NYE_VARSLER -> NyeVarsler(jsonNode)
             SØKNAD_SENDT -> SøknadSendt(jsonNode)
             VEDTAKSPERIODE_NY_UTBETALING -> VedtaksperiodeNyUtbetaling(jsonNode)
@@ -205,7 +202,6 @@ class PgMeldingDao private constructor(queryRunner: QueryRunner) : MeldingDao, Q
             is VedtaksperiodeReberegnet -> VEDTAKSPERIODE_REBEREGNET
             is GosysOppgaveEndret -> GOSYS_OPPGAVE_ENDRET
             is EndretEgenAnsattStatus -> ENDRET_EGEN_ANSATT_STATUS
-            is VedtakFattet -> VEDTAK_FATTET
             is NyeVarsler -> NYE_VARSLER
             is SøknadSendt -> SØKNAD_SENDT
             is VedtaksperiodeNyUtbetaling -> VEDTAKSPERIODE_NY_UTBETALING
@@ -231,7 +227,6 @@ class PgMeldingDao private constructor(queryRunner: QueryRunner) : MeldingDao, Q
         OVERSTYRING_IGANGSATT,
         GOSYS_OPPGAVE_ENDRET,
         ENDRET_EGEN_ANSATT_STATUS,
-        VEDTAK_FATTET,
         NYE_VARSLER,
         SØKNAD_SENDT,
         VEDTAKSPERIODE_NY_UTBETALING,

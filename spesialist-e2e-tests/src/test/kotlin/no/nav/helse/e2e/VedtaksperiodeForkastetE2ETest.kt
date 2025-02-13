@@ -11,7 +11,7 @@ internal class VedtaksperiodeForkastetE2ETest : AbstractE2ETest() {
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         håndterSaksbehandlerløsning()
-        håndterVedtakFattet()
+        håndterAvsluttetMedVedtak()
 
         assertSaksbehandleroppgave(oppgavestatus = Ferdigstilt)
         håndterVedtaksperiodeForkastet()

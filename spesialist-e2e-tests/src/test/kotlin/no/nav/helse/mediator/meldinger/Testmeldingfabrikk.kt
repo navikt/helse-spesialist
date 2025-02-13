@@ -1001,23 +1001,6 @@ internal object Testmeldingfabrikk {
         )
     )
 
-    fun lagVedtakFattet(
-        aktørId: String,
-        fødselsnummer: String,
-        organisasjonsnummer: String,
-        vedtaksperiodeId: UUID,
-        spleisBehandlingId: UUID = UUID.randomUUID(),
-        id: UUID,
-    ): String = nyHendelse(
-        id, "vedtak_fattet", mapOf(
-            "aktørId" to aktørId,
-            "fødselsnummer" to fødselsnummer,
-            "organisasjonsnummer" to organisasjonsnummer,
-            "vedtaksperiodeId" to vedtaksperiodeId,
-            "behandlingId" to spleisBehandlingId
-        )
-    )
-
     fun lagAvsluttetMedVedtak(
         aktørId: String,
         fødselsnummer: String,

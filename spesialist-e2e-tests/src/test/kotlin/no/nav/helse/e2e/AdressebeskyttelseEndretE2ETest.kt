@@ -38,7 +38,7 @@ internal class AdressebeskyttelseEndretE2ETest : AbstractE2ETest() {
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         håndterSaksbehandlerløsning()
-        håndterVedtakFattet()
+        håndterAvsluttetMedVedtak()
 
         håndterAdressebeskyttelseEndret()
         assertSisteEtterspurteBehov("HentPersoninfoV2")

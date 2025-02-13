@@ -17,7 +17,7 @@ internal class OppdaterPersondataE2ETest : AbstractE2ETest() {
             godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(vedtaksperiodeId = v1)
         )
         håndterSaksbehandlerløsning(vedtaksperiodeId = v1)
-        håndterVedtakFattet(vedtaksperiodeId = v1)
+        håndterAvsluttetMedVedtak(vedtaksperiodeId = v1)
 
         håndterOppdaterPersondata()
 

@@ -17,7 +17,7 @@ internal class VedtakFattetE2ETest : AbstractE2ETest() {
         spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         håndterSaksbehandlerløsning()
         assertDoesNotThrow {
-            håndterVedtakFattet(spleisBehandlingId = spleisBehandlingId)
+            håndterAvsluttetMedVedtak(spleisBehandlingId = spleisBehandlingId)
         }
         assertFerdigbehandletGenerasjon(VEDTAKSPERIODE_ID)
     }

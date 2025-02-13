@@ -6,7 +6,7 @@ import java.util.UUID
 class AvsluttetUtenVedtak(
     private val vedtaksperiodeId: UUID,
     private val hendelser: List<UUID>,
-    private val spleisBehandlingId: UUID,
+    val spleisBehandlingId: UUID,
 ) {
     fun vedtaksperiodeId() = vedtaksperiodeId
 

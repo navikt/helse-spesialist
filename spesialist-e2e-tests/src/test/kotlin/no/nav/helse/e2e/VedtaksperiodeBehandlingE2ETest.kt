@@ -31,7 +31,7 @@ internal class VedtaksperiodeBehandlingE2ETest : AbstractE2ETest() {
         spleisOppretterNyBehandling(spleisBehandlingId = spleisBehandlingId)
         spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         håndterSaksbehandlerløsning()
-        håndterVedtakFattet(spleisBehandlingId = spleisBehandlingId)
+        håndterAvsluttetMedVedtak(spleisBehandlingId = spleisBehandlingId)
         assertFerdigBehandledeGenerasjoner(VEDTAKSPERIODE_ID, 1)
     }
 
@@ -42,7 +42,7 @@ internal class VedtaksperiodeBehandlingE2ETest : AbstractE2ETest() {
         spleisOppretterNyBehandling(spleisBehandlingId = spleisBehandlingId)
         spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         håndterSaksbehandlerløsning()
-        håndterVedtakFattet(spleisBehandlingId = spleisBehandlingId)
+        håndterAvsluttetMedVedtak(spleisBehandlingId = spleisBehandlingId)
 
         spleisOppretterNyBehandling()
         assertGenerasjoner(VEDTAKSPERIODE_ID, 2)
@@ -103,7 +103,7 @@ internal class VedtaksperiodeBehandlingE2ETest : AbstractE2ETest() {
         håndterAktivitetsloggNyAktivitet(varselkoder = listOf("TESTKODE_42"))
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(kanGodkjennesAutomatisk = true)
         håndterSaksbehandlerløsning()
-        håndterVedtakFattet(spleisBehandlingId = spleisBehandlingId)
+        håndterAvsluttetMedVedtak(spleisBehandlingId = spleisBehandlingId)
         håndterAktivitetsloggNyAktivitet(varselkoder = listOf("RV_IM_1"))
 
         val utbetalingId = UUID.randomUUID()

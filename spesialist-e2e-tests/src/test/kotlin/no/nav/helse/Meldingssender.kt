@@ -601,25 +601,6 @@ internal class Meldingssender(private val testRapid: TestRapid) {
         }
     }
 
-    fun sendVedtakFattet(
-        aktørId: String,
-        fødselsnummer: String,
-        organisasjonsnummer: String,
-        vedtaksperiodeId: UUID,
-        spleisBehandlingId: UUID,
-    ): UUID = newUUID.also { id ->
-        testRapid.sendTestMessage(
-            Testmeldingfabrikk.lagVedtakFattet(
-                aktørId = aktørId,
-                fødselsnummer = fødselsnummer,
-                organisasjonsnummer = organisasjonsnummer,
-                vedtaksperiodeId = vedtaksperiodeId,
-                spleisBehandlingId = spleisBehandlingId,
-                id = id,
-            )
-        )
-    }
-
     fun sendAvsluttetMedVedtak(
         aktørId: String,
         fødselsnummer: String,

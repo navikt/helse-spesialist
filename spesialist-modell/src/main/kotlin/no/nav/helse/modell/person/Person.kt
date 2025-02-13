@@ -90,8 +90,13 @@ class Person private constructor(
         behandling.byggVedtak(vedtakBuilder)
         avsluttetMedVedtak.byggVedtak(vedtakBuilder)
         byggVedtak(vedtakBuilder)
-
+        behandling.håndterVedtakFattet()
         fattVedtak(vedtakBuilder.build())
+    }
+
+    fun avsluttetUtenVedtak(avsluttetUtenVedtak: AvsluttetUtenVedtak) {
+        vedtaksperiodeOrNull(avsluttetUtenVedtak.vedtaksperiodeId())
+            ?.avsluttetUtenVedtak(this, avsluttetUtenVedtak)
     }
 
     private fun SykepengevedtakBuilder.leggTilAvviksvurderinger(behandling: Behandling) {
@@ -105,11 +110,6 @@ class Person private constructor(
         skjønnsfastsatteSykepengegrunnlag.relevanteFor(behandling.skjæringstidspunkt()).lastOrNull()?.let {
             skjønnsfastsattSykepengegrunnlag(it)
         }
-    }
-
-    fun avsluttetUtenVedtak(avsluttetUtenVedtak: AvsluttetUtenVedtak) {
-        vedtaksperiodeOrNull(avsluttetUtenVedtak.vedtaksperiodeId())
-            ?.avsluttetUtenVedtak(this, avsluttetUtenVedtak)
     }
 
     fun vedtaksperiodeForkastet(vedtaksperiodeId: UUID) {

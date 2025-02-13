@@ -11,7 +11,7 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(regelverksvarsler = listOf("RV_IM_1"))
         håndterSaksbehandlerløsning()
-        håndterVedtakFattet()
+        håndterAvsluttetMedVedtak()
         assertSaksbehandleroppgave(oppgavestatus = Oppgavestatus.Ferdigstilt)
 
         val utbetalingId2 = UUID.randomUUID()
@@ -31,7 +31,7 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
         val spleisBehandlingId = UUID.randomUUID()
         spleisOppretterNyBehandling(spleisBehandlingId = spleisBehandlingId)
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(kanGodkjennesAutomatisk = true)
-        håndterVedtakFattet(spleisBehandlingId = spleisBehandlingId)
+        håndterAvsluttetMedVedtak(spleisBehandlingId = spleisBehandlingId)
 
         val utbetalingId2 = UUID.randomUUID()
 
@@ -52,7 +52,7 @@ internal class RevurderingE2ETest : AbstractE2ETest() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(kanGodkjennesAutomatisk = true)
-        håndterVedtakFattet()
+        håndterAvsluttetMedVedtak()
 
         val utbetalingId2 = UUID.randomUUID()
 
