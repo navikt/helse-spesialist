@@ -7,6 +7,7 @@ import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.AnnulleringRepository
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.Repositories
+import no.nav.helse.db.SessionFactory
 import no.nav.helse.db.VedtakBegrunnelseFraDatabase
 import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
 import no.nav.helse.db.api.VarselDbDto
@@ -111,7 +112,7 @@ class SaksbehandlerMediator(
     private val annulleringRepository: AnnulleringRepository,
     private val env: Environment,
     private val featureToggles: FeatureToggles,
-    private val totrinnsvurderingRepository: TotrinnsvurderingRepository,
+    private val sessionFactory: SessionFactory,
 ) : Saksbehandlerhåndterer {
     private val saksbehandlerDao = repositories.saksbehandlerDao
     private val generasjonRepository = repositories.generasjonApiRepository
@@ -206,6 +207,7 @@ class SaksbehandlerMediator(
     private fun eksisterendeTotrinnsvurdering(
         vedtaksperiodeId: UUID,
         fødselsnummer: String,
+        totrinnsvurderingRepository: TotrinnsvurderingRepository,
     ): Totrinnsvurdering? {
         return if (featureToggles.skalBenytteNyTotrinnsvurderingsløsning()) {
             totrinnsvurderingRepository.finnTotrinnsvurdering(fødselsnummer)
@@ -225,40 +227,48 @@ class SaksbehandlerMediator(
         val fødselsnummer = oppgaveApiDao.finnFødselsnummer(oppgavereferanse)
         if (!erÅpenOppgave) return VedtakResultat.Feil.IkkeÅpenOppgave()
 
-        val totrinnsvurdering = eksisterendeTotrinnsvurdering(vedtaksperiodeId, fødselsnummer)
-        if (totrinnsvurdering?.erBeslutteroppgave == true) {
-            if (!saksbehandler.harTilgangTil(listOf(Egenskap.BESLUTTER)) && !env.erDev) {
-                return VedtakResultat.Feil.BeslutterFeil.TrengerBeslutterRolle()
+        return sessionFactory.transactionalSessionScope { sessionContext ->
+            val totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository
+            val totrinnsvurdering =
+                eksisterendeTotrinnsvurdering(vedtaksperiodeId, fødselsnummer, totrinnsvurderingRepository)
+            if (totrinnsvurdering?.erBeslutteroppgave == true) {
+                if (!saksbehandler.harTilgangTil(listOf(Egenskap.BESLUTTER)) && !env.erDev) {
+                    return@transactionalSessionScope VedtakResultat.Feil.BeslutterFeil.TrengerBeslutterRolle()
+                }
+                if (totrinnsvurdering.saksbehandler == saksbehandler && !env.erDev) {
+                    return@transactionalSessionScope VedtakResultat.Feil.BeslutterFeil.KanIkkeBeslutteEgenOppgave()
+                }
+                totrinnsvurdering.settBeslutter(saksbehandler)
+                totrinnsvurderingRepository.lagre(totrinnsvurdering, fødselsnummer)
             }
-            if (totrinnsvurdering.saksbehandler == saksbehandler && !env.erDev) {
-                return VedtakResultat.Feil.BeslutterFeil.KanIkkeBeslutteEgenOppgave()
+
+            if (godkjent) {
+                val perioderTilBehandling = generasjonRepository.perioderTilBehandling(oppgavereferanse)
+                if (perioderTilBehandling.harAktiveVarsler()) {
+                    return@transactionalSessionScope VedtakResultat.Feil.HarAktiveVarsler(
+                        oppgavereferanse,
+                    )
+                }
+
+                perioderTilBehandling.godkjennVarsler(
+                    fødselsnummer = fødselsnummer,
+                    behandlingId = spleisBehandlingId,
+                    ident = saksbehandler.ident(),
+                    godkjenner = this::vurderVarsel,
+                )
+            } else {
+                val periodeTilGodkjenning = generasjonRepository.periodeTilGodkjenning(oppgavereferanse)
+                periodeTilGodkjenning.avvisVarsler(
+                    fødselsnummer = fødselsnummer,
+                    behandlingId = spleisBehandlingId,
+                    ident = saksbehandler.ident(),
+                    godkjenner = this::vurderVarsel,
+                )
             }
-            totrinnsvurdering.settBeslutter(saksbehandler)
-            totrinnsvurderingRepository.lagre(totrinnsvurdering, fødselsnummer)
+
+            påVentDao.slettPåVent(oppgavereferanse)
+            return@transactionalSessionScope VedtakResultat.Ok(spleisBehandlingId)
         }
-
-        if (godkjent) {
-            val perioderTilBehandling = generasjonRepository.perioderTilBehandling(oppgavereferanse)
-            if (perioderTilBehandling.harAktiveVarsler()) return VedtakResultat.Feil.HarAktiveVarsler(oppgavereferanse)
-
-            perioderTilBehandling.godkjennVarsler(
-                fødselsnummer = fødselsnummer,
-                behandlingId = spleisBehandlingId,
-                ident = saksbehandler.ident(),
-                godkjenner = this::vurderVarsel,
-            )
-        } else {
-            val periodeTilGodkjenning = generasjonRepository.periodeTilGodkjenning(oppgavereferanse)
-            periodeTilGodkjenning.avvisVarsler(
-                fødselsnummer = fødselsnummer,
-                behandlingId = spleisBehandlingId,
-                ident = saksbehandler.ident(),
-                godkjenner = this::vurderVarsel,
-            )
-        }
-
-        påVentDao.slettPåVent(oppgavereferanse)
-        return VedtakResultat.Ok(spleisBehandlingId)
     }
 
     override fun påVent(

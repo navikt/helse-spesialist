@@ -203,11 +203,7 @@ class SpesialistApp(
                 annulleringRepository = repositories.annulleringRepository,
                 env = env,
                 featureToggles = featureToggles,
-                totrinnsvurderingRepository =
-                    sessionFactory.transactionalSessionScope {
-                            sessionContext ->
-                        sessionContext.totrinnsvurderingRepository
-                    },
+                sessionFactory = sessionFactory,
             )
         dokumentMediator = DokumentMediator(dokumentDao, meldingPubliserer)
         godkjenningService =

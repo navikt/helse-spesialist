@@ -102,10 +102,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             annulleringRepository = annulleringRepository,
             env = environment,
             featureToggles = object : FeatureToggles {},
-            totrinnsvurderingRepository = TransactionalSessionFactory(
-                dataSource,
-                TilgangskontrollForTestHarIkkeTilgang
-            ).transactionalSessionScope { sessionContext -> sessionContext.totrinnsvurderingRepository }
+            sessionFactory = TransactionalSessionFactory(dataSource, TilgangskontrollForTestHarIkkeTilgang)
         )
 
     private val AKTØR_ID = lagAktørId()
