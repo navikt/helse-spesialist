@@ -587,7 +587,7 @@ class PgOverstyringRepository(
             begrunnelseMal = overstyringRow.string("mal"),
             begrunnelseFritekst = overstyringRow.string("fritekst"),
             begrunnelseKonklusjon = overstyringRow.string("konklusjon"),
-            lovhjemmel = overstyringRow.stringOrNull("subsumsjon")?.let { objectMapper.readValue(it) },
+            lovhjemmel = null,
             initierendeVedtaksperiodeId = overstyringRow.stringOrNull("initierende_vedtaksperiode_id"),
         )
 
