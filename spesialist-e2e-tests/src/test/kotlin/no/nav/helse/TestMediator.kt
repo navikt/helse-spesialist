@@ -37,6 +37,7 @@ internal class TestMediator(
     private val repositories = DBRepositories(dataSource, TilgangskontrollForTestHarIkkeTilgang)
     private val opptegnelseDao = repositories.opptegnelseDao
     private val oppgaveDao = repositories.oppgaveDao
+    private val periodehistorikkDao = repositories.periodehistorikkDao
     private val overstyringDao = repositories.overstyringDao
     private val totrinnsvurderingDao = repositories.totrinnsvurderingDao
     private val saksbehandlerDao = repositories.saksbehandlerDao
@@ -86,11 +87,7 @@ internal class TestMediator(
             stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
             annulleringRepository = annulleringRepository,
             env = environment,
-            featureToggles = object : FeatureToggles {},
-            totrinnsvurderingRepository = TransactionalSessionFactory(
-                dataSource,
-                TilgangskontrollForTestHarIkkeTilgang
-            ).transactionalSessionScope { sessionContext -> sessionContext.totrinnsvurderingRepository }
+            featureToggles = object : FeatureToggles{}
         )
 
     private val stikkprøver =
@@ -116,7 +113,7 @@ internal class TestMediator(
             godkjenningMediator = godkjenningMediator,
             subsumsjonsmelderProvider = { Subsumsjonsmelder("versjonAvKode", meldingPubliserer) },
             stikkprøver = stikkprøver,
-            featureToggles = object : FeatureToggles {}
+            featureToggles = object : FeatureToggles{}
         )
 
 

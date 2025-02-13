@@ -17,6 +17,8 @@ import no.nav.helse.db.api.PgTotrinnsvurderingApiDao
 import no.nav.helse.db.api.PgVarselApiRepository
 import no.nav.helse.db.api.PgVergemålApiDao
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
+import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
+import no.nav.helse.spesialist.db.PgTotrinnsvurderingRepository
 import javax.sql.DataSource
 
 class DBRepositories(dataSource: DataSource, tilgangskontroll: Tilgangskontroll) : Repositories {
@@ -47,6 +49,9 @@ class DBRepositories(dataSource: DataSource, tilgangskontroll: Tilgangskontroll)
     override val varselDao = PgVarselDao(dataSource)
     override val vedtakDao = PgVedtakDao(dataSource)
     override val vedtakBegrunnelseDao = PgVedtakBegrunnelseDao(dataSource)
+
+    override val totrinnsvurderingRepository: TotrinnsvurderingRepository =
+        PgTotrinnsvurderingRepository(overstyringDao, saksbehandlerDao, totrinnsvurderingDao)
 
     override val abonnementApiDao = PgAbonnementApiDao(dataSource)
     override val arbeidsgiverApiDao = PgArbeidsgiverApiDao(dataSource)

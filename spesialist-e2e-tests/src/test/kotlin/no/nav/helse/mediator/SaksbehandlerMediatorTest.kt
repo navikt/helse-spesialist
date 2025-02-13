@@ -6,7 +6,6 @@ import no.nav.helse.FeatureToggles
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.TestRapidHelpers.hendelser
 import no.nav.helse.db.DBRepositories
-import no.nav.helse.db.TransactionalSessionFactory
 import no.nav.helse.e2e.DatabaseIntegrationTest
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
@@ -36,8 +35,8 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiVedtakUtfall
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.ApiOpphevStans
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
+import no.nav.helse.spesialist.api.saksbehandler.handlinger.ApiOpphevStans
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import no.nav.helse.spesialist.test.lagAktørId
@@ -102,10 +101,6 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             annulleringRepository = annulleringRepository,
             env = environment,
             featureToggles = object : FeatureToggles {},
-            totrinnsvurderingRepository = TransactionalSessionFactory(
-                dataSource,
-                TilgangskontrollForTestHarIkkeTilgang
-            ).transactionalSessionScope { sessionContext -> sessionContext.totrinnsvurderingRepository }
         )
 
     private val AKTØR_ID = lagAktørId()

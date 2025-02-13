@@ -44,12 +44,11 @@ class DBSessionContext(session: Session, tilgangskontroll: Tilgangskontroll) : S
     override val vergemålDao = PgVergemålDao(session)
     override val åpneGosysOppgaverDao = PgÅpneGosysOppgaverDao(session)
     override val vedtaksperiodeRepository = PgVedtaksperiodeRepository(generasjonDao, vedtakDao)
-    override val personRepository =
-        PgPersonRepository(vedtaksperiodeRepository, sykefraværstilfelleDao, avviksvurderingDao, personDao)
+    override val personRepository = PgPersonRepository(vedtaksperiodeRepository, sykefraværstilfelleDao, avviksvurderingDao, personDao)
 
     override val overstyringRepository: OverstyringRepository = PgOverstyringRepository(session)
     override val totrinnsvurderingRepository: TotrinnsvurderingRepository =
-        PgTotrinnsvurderingRepository(session, tilgangskontroll)
+        PgTotrinnsvurderingRepository(overstyringDao, saksbehandlerDao, totrinnsvurderingDao)
     override val notatRepository: NotatRepository = PgNotatRepository(session)
     override val dialogRepository: DialogRepository = PgDialogRepository(session)
     override val saksbehandlerRepository: SaksbehandlerRepository = PgSaksbehandlerRepository(session)

@@ -94,7 +94,6 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
-import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.tell
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -111,7 +110,6 @@ class SaksbehandlerMediator(
     private val annulleringRepository: AnnulleringRepository,
     private val env: Environment,
     private val featureToggles: FeatureToggles,
-    private val totrinnsvurderingRepository: TotrinnsvurderingRepository,
 ) : Saksbehandlerhåndterer {
     private val saksbehandlerDao = repositories.saksbehandlerDao
     private val generasjonRepository = repositories.generasjonApiRepository
@@ -125,6 +123,7 @@ class SaksbehandlerMediator(
     private val periodehistorikkDao = repositories.periodehistorikkDao
     private val vedtakBegrunnelseDao = repositories.vedtakBegrunnelseDao
     private val dialogDao = repositories.dialogDao
+    private val totrinnsvurderingRepository = repositories.totrinnsvurderingRepository
 
     override fun håndter(
         handlingFraApi: HandlingFraApi,
