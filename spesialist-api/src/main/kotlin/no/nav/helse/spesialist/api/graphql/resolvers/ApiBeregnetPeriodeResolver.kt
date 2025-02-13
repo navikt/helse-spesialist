@@ -64,10 +64,10 @@ import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.oppgave.OppgaveForPeriodevisningDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDto
-import no.nav.helse.spleis.graphql.enums.GraphQLUtbetalingstatus
-import no.nav.helse.spleis.graphql.enums.Utbetalingtype
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLBeregnetPeriode
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLOppdrag
+import no.nav.helse.spesialist.application.snapshot.SnapshotBeregnetPeriode
+import no.nav.helse.spesialist.application.snapshot.SnapshotOppdrag
+import no.nav.helse.spesialist.application.snapshot.SnapshotUtbetalingstatus
+import no.nav.helse.spesialist.application.snapshot.SnapshotUtbetalingtype
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -75,7 +75,7 @@ import java.util.UUID
 @GraphQLIgnore
 data class ApiBeregnetPeriodeResolver(
     private val orgnummer: String,
-    private val periode: GraphQLBeregnetPeriode,
+    private val periode: SnapshotBeregnetPeriode,
     private val apiOppgaveService: ApiOppgaveService,
     private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
     private val risikovurderinger: Map<UUID, RisikovurderingApiDto>,
@@ -286,26 +286,26 @@ data class ApiBeregnetPeriodeResolver(
                 personNettoBelop = it.personNettoBelop,
                 status =
                     when (it.statusEnum) {
-                        GraphQLUtbetalingstatus.ANNULLERT -> ApiUtbetalingstatus.ANNULLERT
-                        GraphQLUtbetalingstatus.FORKASTET -> ApiUtbetalingstatus.FORKASTET
-                        GraphQLUtbetalingstatus.GODKJENT -> ApiUtbetalingstatus.GODKJENT
-                        GraphQLUtbetalingstatus.GODKJENTUTENUTBETALING -> ApiUtbetalingstatus.GODKJENTUTENUTBETALING
-                        GraphQLUtbetalingstatus.IKKEGODKJENT -> ApiUtbetalingstatus.IKKEGODKJENT
-                        GraphQLUtbetalingstatus.OVERFORT -> ApiUtbetalingstatus.OVERFORT
-                        GraphQLUtbetalingstatus.SENDT -> ApiUtbetalingstatus.SENDT
-                        GraphQLUtbetalingstatus.UBETALT -> ApiUtbetalingstatus.UBETALT
-                        GraphQLUtbetalingstatus.UTBETALINGFEILET -> ApiUtbetalingstatus.UTBETALINGFEILET
-                        GraphQLUtbetalingstatus.UTBETALT -> ApiUtbetalingstatus.UTBETALT
-                        GraphQLUtbetalingstatus.__UNKNOWN_VALUE -> ApiUtbetalingstatus.UKJENT
+                        SnapshotUtbetalingstatus.ANNULLERT -> ApiUtbetalingstatus.ANNULLERT
+                        SnapshotUtbetalingstatus.FORKASTET -> ApiUtbetalingstatus.FORKASTET
+                        SnapshotUtbetalingstatus.GODKJENT -> ApiUtbetalingstatus.GODKJENT
+                        SnapshotUtbetalingstatus.GODKJENTUTENUTBETALING -> ApiUtbetalingstatus.GODKJENTUTENUTBETALING
+                        SnapshotUtbetalingstatus.IKKEGODKJENT -> ApiUtbetalingstatus.IKKEGODKJENT
+                        SnapshotUtbetalingstatus.OVERFORT -> ApiUtbetalingstatus.OVERFORT
+                        SnapshotUtbetalingstatus.SENDT -> ApiUtbetalingstatus.SENDT
+                        SnapshotUtbetalingstatus.UBETALT -> ApiUtbetalingstatus.UBETALT
+                        SnapshotUtbetalingstatus.UTBETALINGFEILET -> ApiUtbetalingstatus.UTBETALINGFEILET
+                        SnapshotUtbetalingstatus.UTBETALT -> ApiUtbetalingstatus.UTBETALT
+                        SnapshotUtbetalingstatus.__UNKNOWN_VALUE -> ApiUtbetalingstatus.UKJENT
                     },
                 type =
                     when (it.typeEnum) {
-                        Utbetalingtype.ANNULLERING -> ApiUtbetalingtype.ANNULLERING
-                        Utbetalingtype.ETTERUTBETALING -> ApiUtbetalingtype.ETTERUTBETALING
-                        Utbetalingtype.FERIEPENGER -> ApiUtbetalingtype.FERIEPENGER
-                        Utbetalingtype.REVURDERING -> ApiUtbetalingtype.REVURDERING
-                        Utbetalingtype.UTBETALING -> ApiUtbetalingtype.UTBETALING
-                        Utbetalingtype.__UNKNOWN_VALUE -> ApiUtbetalingtype.UKJENT
+                        SnapshotUtbetalingtype.ANNULLERING -> ApiUtbetalingtype.ANNULLERING
+                        SnapshotUtbetalingtype.ETTERUTBETALING -> ApiUtbetalingtype.ETTERUTBETALING
+                        SnapshotUtbetalingtype.FERIEPENGER -> ApiUtbetalingtype.FERIEPENGER
+                        SnapshotUtbetalingtype.REVURDERING -> ApiUtbetalingtype.REVURDERING
+                        SnapshotUtbetalingtype.UTBETALING -> ApiUtbetalingtype.UTBETALING
+                        SnapshotUtbetalingtype.__UNKNOWN_VALUE -> ApiUtbetalingtype.UKJENT
                     },
                 vurdering =
                     it.vurdering?.let { vurdering ->
@@ -398,7 +398,7 @@ data class ApiBeregnetPeriodeResolver(
         }
 }
 
-private fun GraphQLOppdrag.tilSimulering(): ApiSimulering =
+private fun SnapshotOppdrag.tilSimulering(): ApiSimulering =
     ApiSimulering(
         fagsystemId = fagsystemId,
         tidsstempel = tidsstempel,

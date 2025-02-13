@@ -337,7 +337,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
                         override fun oppdaterSnapshot(fødselsnummer: String) {}
                         override fun klargjørPersonForVisning(fødselsnummer: String) {}
                     },
-                    snapshotService = SnapshotService(repositories.personinfoDao, snapshotClient),
+                    snapshotService = SnapshotService(repositories.personinfoDao, snapshothenter),
                     reservasjonshenter = mockk(relaxed = true),
                 ),
             ),
