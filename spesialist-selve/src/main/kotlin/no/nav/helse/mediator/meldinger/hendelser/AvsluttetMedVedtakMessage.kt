@@ -32,7 +32,7 @@ class AvsluttetMedVedtakMessage(
         person: Person,
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
-    ) = person.fattVedtak(avsluttetMedVedtak)
+    ) = person.avsluttetMedVedtak(avsluttetMedVedtak)
 
     override fun toJson(): String = json
 

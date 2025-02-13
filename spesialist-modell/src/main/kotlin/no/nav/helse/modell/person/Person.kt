@@ -78,7 +78,7 @@ class Person private constructor(
             ?.vedtakFattet(spleisBehandlingId)
     }
 
-    fun fattVedtak(avsluttetMedVedtak: AvsluttetMedVedtak) {
+    fun avsluttetMedVedtak(avsluttetMedVedtak: AvsluttetMedVedtak) {
         val vedtakBuilder = SykepengevedtakBuilder()
         val vedtaksperiode = vedtaksperiodeForBehandling(avsluttetMedVedtak.spleisBehandlingId)
         val behandling = vedtaksperiode.finnBehandling(avsluttetMedVedtak.spleisBehandlingId)
@@ -91,7 +91,7 @@ class Person private constructor(
         avsluttetMedVedtak.byggVedtak(vedtakBuilder)
         byggVedtak(vedtakBuilder)
         behandling.håndterVedtakFattet()
-        fattVedtak(vedtakBuilder.build())
+        avsluttetMedVedtak(vedtakBuilder.build())
     }
 
     fun avsluttetUtenVedtak(avsluttetUtenVedtak: AvsluttetUtenVedtak) {
@@ -181,7 +181,7 @@ class Person private constructor(
         vedtakBuilder.aktørId(aktørId)
     }
 
-    private fun fattVedtak(vedtak: Sykepengevedtak) = meldingslogg.nyMelding(vedtak)
+    private fun avsluttetMedVedtak(vedtak: Sykepengevedtak) = meldingslogg.nyMelding(vedtak)
 
     companion object {
         private val logg = LoggerFactory.getLogger(this::class.java)
