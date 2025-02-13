@@ -70,14 +70,6 @@ class Person private constructor(
         vedtaksperiodeOrNull(vedtaksperiodeId)?.mottaBehandlingsinformasjon(tags, spleisBehandlingId, utbetalingId)
     }
 
-    fun vedtakFattet(
-        vedtaksperiodeId: UUID,
-        spleisBehandlingId: UUID,
-    ) {
-        vedtaksperiodeOrNull(vedtaksperiodeId)
-            ?.vedtakFattet(spleisBehandlingId)
-    }
-
     fun avsluttetMedVedtak(avsluttetMedVedtak: AvsluttetMedVedtak) {
         val vedtakBuilder = SykepengevedtakBuilder()
         val vedtaksperiode = vedtaksperiodeForBehandling(avsluttetMedVedtak.spleisBehandlingId)
