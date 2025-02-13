@@ -91,7 +91,7 @@ class SpleisClient(
 
         val response =
             httpClient
-                .post(spleisUrl.resolve("/resources/graphql").toURL()) {
+                .post(spleisUrl.resolve("/graphql").toURL()) {
                     header("Authorization", "Bearer $accessToken")
                     header("callId", callId)
                     contentType(ContentType.Application.Json)
