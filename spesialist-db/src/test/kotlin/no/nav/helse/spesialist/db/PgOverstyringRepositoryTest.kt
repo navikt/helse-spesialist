@@ -12,7 +12,6 @@ import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinje
 import no.nav.helse.modell.saksbehandler.handlinger.Refusjonselement
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlag
-import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import no.nav.helse.util.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -270,13 +269,7 @@ class PgOverstyringRepositoryTest : DatabaseIntegrationTest() {
             begrunnelseKonklusjon = "konklusjon",
             begrunnelseFritekst = "fritekst",
             initierendeVedtaksperiodeId = VEDTAKSPERIODE.toString(),
-            lovhjemmel = Lovhjemmel(
-                paragraf = "paragraf",
-                ledd = null,
-                bokstav = null,
-                lovverk = "lovverk",
-                lovverksversjon = "lovverkversjon",
-            ),
+            lovhjemmel = null,
         )
 
 }
