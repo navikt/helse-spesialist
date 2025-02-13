@@ -1,0 +1,14 @@
+package no.nav.helse.spesialist.application.snapshot
+
+enum class SnapshotHendelsetype {
+    INNTEKTFRAAORDNINGEN,
+    INNTEKTSMELDING,
+    NYSOKNAD,
+    SENDTSOKNADARBEIDSGIVER,
+    SENDTSOKNADARBEIDSLEDIG,
+    SENDTSOKNADFRILANS,
+    SENDTSOKNADNAV,
+    SENDTSOKNADSELVSTENDIG,
+    UKJENT,
+    __UNKNOWN_VALUE,
+}

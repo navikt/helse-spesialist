@@ -20,9 +20,9 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiUberegnetPeriode
 import no.nav.helse.spesialist.api.graphql.schema.ArbeidsgiverSchema
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDto
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLBeregnetPeriode
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLGenerasjon
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUberegnetPeriode
+import no.nav.helse.spesialist.application.snapshot.SnapshotBeregnetPeriode
+import no.nav.helse.spesialist.application.snapshot.SnapshotGenerasjon
+import no.nav.helse.spesialist.application.snapshot.SnapshotUberegnetPeriode
 import java.util.UUID
 
 class ApiArbeidsgiverResolver(
@@ -32,7 +32,7 @@ class ApiArbeidsgiverResolver(
     private val ghostPerioder: List<ApiGhostPeriode>,
     private val nyeInntektsforholdPerioder: List<ApiNyttInntektsforholdPeriode>,
     private val fødselsnummer: String,
-    private val generasjoner: List<GraphQLGenerasjon>,
+    private val generasjoner: List<SnapshotGenerasjon>,
     private val apiOppgaveService: ApiOppgaveService,
     private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
     private val arbeidsgiverApiDao: ArbeidsgiverApiDao,
@@ -64,7 +64,7 @@ class ApiArbeidsgiverResolver(
                 perioder =
                     generasjon.perioder.map {
                         when (it) {
-                            is GraphQLUberegnetPeriode ->
+                            is SnapshotUberegnetPeriode ->
                                 ApiUberegnetPeriode(
                                     resolver =
                                         ApiUberegnetPeriodeResolver(
@@ -76,7 +76,7 @@ class ApiArbeidsgiverResolver(
                                         ),
                                 )
 
-                            is GraphQLBeregnetPeriode ->
+                            is SnapshotBeregnetPeriode ->
                                 ApiBeregnetPeriode(
                                     resolver =
                                         ApiBeregnetPeriodeResolver(
