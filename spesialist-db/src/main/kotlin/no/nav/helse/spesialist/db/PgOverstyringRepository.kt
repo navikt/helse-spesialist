@@ -306,7 +306,7 @@ class PgOverstyringRepository(
     private fun updateOverstyring(overstyring: Overstyring) {
         asSQL(
             "UPDATE overstyring SET ferdigstilt = :ferdigstilt WHERE id = :overstyringId".trimIndent(),
-            "overstyringId" to overstyring.id(),
+            "overstyringId" to overstyring.id().value,
             "ferdigstilt" to overstyring.ferdigstilt,
         ).update()
     }
