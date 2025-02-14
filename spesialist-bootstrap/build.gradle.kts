@@ -19,7 +19,7 @@ dependencies {
     api(project(":spesialist-db"))
     api(project(":spesialist-kafka"))
 
-    implementation(libs.unleash)
+    implementation(libs.unleash.client)
     implementation(libs.bundles.logback)
 
     testImplementation("org.testcontainers:postgresql:$testcontainersVersion")

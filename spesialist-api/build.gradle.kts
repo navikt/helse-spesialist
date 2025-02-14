@@ -6,8 +6,8 @@ dependencies {
     implementation(libs.graphql.kotlin.ktor.server)
 
     implementation(libs.bundles.logback)
-    implementation(libs.jackson.datatype)
-    implementation(libs.jackson.helpers)
+    implementation(libs.jackson.jsr310)
+    implementation(libs.tbs.libs.jackson)
     implementation(libs.jackson.kotlin)
 
     implementation(libs.ktor.micrometer)

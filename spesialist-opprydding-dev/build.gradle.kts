@@ -5,7 +5,7 @@ repositories {
 }
 
 dependencies {
-    implementation(libs.cloudsql)
+    implementation(libs.postgres.socket.factory)
     implementation(libs.rapids.and.rivers)
     implementation(libs.postgres)
     implementation(libs.kotliquery)
@@ -14,9 +14,9 @@ dependencies {
 
     testImplementation(project(":spesialist-db-migrations"))
     testImplementation(libs.testcontainers.postgresql)
-    testImplementation(libs.rapids.and.rivers.test)
+    testImplementation(libs.tbd.libs.rapids.and.rivers.test)
     testImplementation(libs.flyway.core)
-    testImplementation(libs.flyway.pg)
+    testImplementation(libs.flyway.postgres)
 }
 
 tasks {

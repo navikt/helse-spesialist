@@ -2,9 +2,9 @@ dependencies {
     api(project(":spesialist-selve"))
 
     api(libs.rapids.and.rivers)
-    implementation(libs.jackson.datatype)
-    implementation(libs.jackson.helpers)
+    implementation(libs.jackson.jsr310)
+    implementation(libs.tbs.libs.jackson)
     implementation(libs.jackson.kotlin)
 
-    testImplementation(libs.rapids.and.rivers.test)
+    testImplementation(libs.tbd.libs.rapids.and.rivers.test)
 }

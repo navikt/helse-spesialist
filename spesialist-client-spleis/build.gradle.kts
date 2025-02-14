@@ -21,7 +21,7 @@ dependencies {
 
     implementation(libs.bundles.logback)
     implementation(libs.bundles.ktor.client)
-    implementation(libs.jackson.datatype)
+    implementation(libs.jackson.jsr310)
 }
 
 val graphqlDir = "${project.projectDir}/src/main/resources/graphql"
