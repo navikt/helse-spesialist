@@ -19,7 +19,7 @@ dependencies {
         exclude("com.expediagroup:graphql-kotlin-client-serialization")
     }
 
-    implementation(libs.bundles.logging)
+    implementation(libs.bundles.logback)
     implementation(libs.bundles.ktor.client)
     implementation(libs.jackson.datatype)
 }

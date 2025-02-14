@@ -1,7 +1,7 @@
 [versions]
 rapids-and-rivers = "2025012712551737978926.de930d8e0feb"
 logback = "1.5.7"
-logstash = "8.0"
+logstash-logback-encoder = "8.0"
 jackson = "2.18.1"
 tbd-libs = "2025.01.27-12.50-76316f3b"
 ktor = "3.0.1"
@@ -15,6 +15,7 @@ cloudsql = "1.16.0"
 graphql-kotlin = "8.3.0"
 unleash = "10.0.0"
 kotlinx-coroutines = "1.10.1"
+slf4j = "2.0.16"
 
 [libraries]
 unleash = { module = "io.getunleash:unleash-client-java", version.ref = "unleash" }
@@ -31,8 +32,9 @@ hikari = { module = "com.zaxxer:HikariCP", version.ref = "hikari" }
 postgres = { module = "org.postgresql:postgresql", version.ref = "postgres" }
 cloudsql = { module = "com.google.cloud.sql:postgres-socket-factory", version.ref = "cloudsql" }
 
-logback = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
-logstash = { module = "net.logstash.logback:logstash-logback-encoder", version.ref = "logstash" }
+slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
+logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+logstash-logback-encoder = { module = "net.logstash.logback:logstash-logback-encoder", version.ref = "logstash-logback-encoder" }
 
 jackson-helpers = { module = "com.github.navikt.tbd-libs:jackson", version.ref = "tbd-libs" }
 jackson-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
@@ -65,9 +67,15 @@ ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negoti
 testcontainers-postgresql = { module = "org.testcontainers:postgresql", version.ref = "testcontainers" }
 
 [bundles]
-logging = [
-    "logback",
-    "logstash"
+logback = [
+    "slf4j-api",
+    "logback-classic",
+    "logstash-logback-encoder"
+]
+jackson = [
+    "jackson-datatype",
+    "jackson-helpers",
+    "jackson-kotlin"
 ]
 ktor-server = [
     "ktor-server-core",

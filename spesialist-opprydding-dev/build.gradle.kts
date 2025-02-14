@@ -10,6 +10,7 @@ dependencies {
     implementation(libs.postgres)
     implementation(libs.kotliquery)
     implementation(libs.hikari)
+    implementation(libs.bundles.logback)
 
     testImplementation(project(":spesialist-db-migrations"))
     testImplementation(libs.testcontainers.postgresql)

@@ -10,6 +10,7 @@ dependencies {
     implementation(libs.hikari)
     implementation(libs.kotliquery)
     implementation(libs.postgres)
+    implementation(libs.bundles.logback)
 
     testImplementation(kotlin("test"))
     testImplementation(libs.rapids.and.rivers.test)

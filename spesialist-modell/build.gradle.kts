@@ -1,3 +1,3 @@
 dependencies {
-    implementation(libs.bundles.logging)
+    implementation(libs.bundles.logback)
 }
