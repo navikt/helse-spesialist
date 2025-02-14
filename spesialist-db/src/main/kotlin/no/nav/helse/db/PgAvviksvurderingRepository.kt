@@ -41,15 +41,9 @@ class PgAvviksvurderingRepository(private val session: Session) : Avviksvurderin
             "sammenligningsgrunnlagRef" to sammenligningsgrunnlagRef,
         ).update(session)
 
-        if (avviksvurdering.vilkårsgrunnlagId != null) {
-            asSQL(
-                """
-                INSERT INTO vilkarsgrunnlag_per_avviksvurdering (avviksvurdering_ref, vilkårsgrunnlag_id)
-                VALUES (:unikId, :vilkaarsgrunnlagId) ON CONFLICT DO NOTHING;
-                """.trimIndent(),
-                "unikId" to avviksvurdering.unikId,
-                "vilkaarsgrunnlagId" to avviksvurdering.vilkårsgrunnlagId,
-            ).update(session)
+        val vilkårsgrunnlagId = avviksvurdering.vilkårsgrunnlagId
+        if (vilkårsgrunnlagId != null) {
+            opprettKobling(avviksvurdering.unikId, vilkårsgrunnlagId)
         }
     }
 

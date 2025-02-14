@@ -19,6 +19,26 @@ data class Avviksvurdering(
         fun List<Avviksvurdering>.finnRiktigAvviksvurdering(skjæringstidspunkt: LocalDate) =
             filter { it.skjæringstidspunkt == skjæringstidspunkt }.maxByOrNull { it.opprettet }
 
+        fun ny(
+            id: UUID,
+            vilkårsgrunnlagId: UUID,
+            fødselsnummer: String,
+            skjæringstidspunkt: LocalDate,
+            opprettet: LocalDateTime,
+            avviksprosent: Double,
+            sammenligningsgrunnlag: Sammenligningsgrunnlag,
+            beregningsgrunnlag: Beregningsgrunnlag,
+        ) = Avviksvurdering(
+            unikId = id,
+            vilkårsgrunnlagId = vilkårsgrunnlagId,
+            fødselsnummer = fødselsnummer,
+            skjæringstidspunkt = skjæringstidspunkt,
+            opprettet = opprettet,
+            avviksprosent = avviksprosent,
+            sammenligningsgrunnlag = sammenligningsgrunnlag,
+            beregningsgrunnlag = beregningsgrunnlag,
+        )
+
         fun gjenopprett(avviksvurderingDto: AvviksvurderingDto): Avviksvurdering {
             return Avviksvurdering(
                 unikId = avviksvurderingDto.unikId,

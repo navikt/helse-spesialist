@@ -38,6 +38,7 @@ fun Behov.behovName() =
         is Behov.Risikovurdering -> "Risikovurdering"
         is Behov.Vergemål -> "Vergemål"
         is Behov.ÅpneOppgaver -> "ÅpneOppgaver"
+        is Behov.Avviksvurdering -> error("Ikke implementert enda")
     }
 
 private fun Behov.detaljer(): Map<String, Any?> {
@@ -54,6 +55,7 @@ private fun Behov.detaljer(): Map<String, Any?> {
         is Behov.Personinfo -> emptyMap()
         is Behov.Risikovurdering -> this.detaljer()
         is Behov.ÅpneOppgaver -> this.detaljer()
+        is Behov.Avviksvurdering -> error("Ikke implementert enda")
     }
 }
 
