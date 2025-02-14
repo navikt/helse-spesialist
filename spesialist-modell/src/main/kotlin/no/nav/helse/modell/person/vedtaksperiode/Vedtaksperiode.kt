@@ -1,11 +1,8 @@
 package no.nav.helse.modell.person.vedtaksperiode
 
 import net.logstash.logback.argument.StructuredArguments.kv
-import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.person.vedtaksperiode.Behandling.Companion.finnBehandlingForSpleisBehandling
-import no.nav.helse.modell.person.vedtaksperiode.Behandling.Companion.finnSisteBehandlingUtenSpleisBehandlingId
 import no.nav.helse.modell.person.vedtaksperiode.Behandling.Companion.logg
-import no.nav.helse.modell.vedtak.AvsluttetUtenVedtak
 import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
 import java.time.LocalDate
 import java.util.UUID
@@ -35,6 +32,8 @@ class Vedtaksperiode private constructor(
             forkastet = forkastet,
             behandlinger = behandlinger.map { it.toDto() },
         )
+
+    internal fun erForkastet() = forkastet
 
     internal fun behandleTilbakedateringGodkjent(perioder: List<Periode>) {
         if (forkastet || perioder.none { it.overlapperMed(Periode(fom, tom)) }) return
@@ -74,7 +73,7 @@ class Vedtaksperiode private constructor(
         gjeldendeBehandling.håndterForkastetUtbetaling(utbetalingId)
     }
 
-    internal fun nyBehandling(behandling: Behandling) {
+    private fun nyBehandling(behandling: Behandling) {
         behandlinger.addLast(behandling)
     }
 
@@ -86,41 +85,6 @@ class Vedtaksperiode private constructor(
             "Fant ikke behandling for {} som kan håndtere vedtak_fattet",
             kv("spleisBehandlingId", spleisBehandlingId),
         )
-    }
-
-    internal fun avsluttetUtenVedtak(
-        person: Person,
-        avsluttetUtenVedtak: AvsluttetUtenVedtak,
-    ) {
-        if (forkastet) return
-        val sykepengevedtakBuilder = SykepengevedtakBuilder()
-
-        val relevantBehandling =
-            behandlinger.finnBehandlingForSpleisBehandling(avsluttetUtenVedtak.spleisBehandlingId())
-                ?: behandlinger.finnSisteBehandlingUtenSpleisBehandlingId().also {
-                    if (it != null) {
-                        logg.info(
-                            "Fant ikke behandling basert på {}, velger siste behandling der spleisBehandlingId er null {}",
-                            kv("spleisBehandlingId", avsluttetUtenVedtak.spleisBehandlingId()),
-                            kv("unikId", it.unikId()),
-                        )
-                    }
-                }
-
-        if (relevantBehandling == null) {
-            logg.error(
-                "Fant ikke behandling for {} som kan håndtere avsluttet_uten_vedtak",
-                kv("spleisBehandlingId", avsluttetUtenVedtak.spleisBehandlingId()),
-            )
-            return
-        }
-        relevantBehandling.avsluttetUtenVedtak(avsluttetUtenVedtak, sykepengevedtakBuilder)
-        sykepengevedtakBuilder
-            .organisasjonsnummer(organisasjonsnummer)
-            .vedtaksperiodeId(vedtaksperiodeId)
-        avsluttetUtenVedtak
-            .byggMelding(sykepengevedtakBuilder)
-        person.supplerVedtakFattet(sykepengevedtakBuilder)
     }
 
     internal fun vedtaksperiodeForkastet() {

@@ -1,10 +1,10 @@
 package no.nav.helse.modell.vedtak
 
-import no.nav.helse.modell.melding.Sykepengevedtak
 import no.nav.helse.modell.januar
+import no.nav.helse.modell.melding.Sykepengevedtak
+import no.nav.helse.modell.melding.Sykepengevedtak.VedtakMedSkjønnsvurdering
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Infotrygd
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Spleis
-import no.nav.helse.modell.melding.Sykepengevedtak.VedtakMedSkjønnsvurdering
 import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
 import no.nav.helse.modell.vilkårsprøving.Inntekt
 import no.nav.helse.modell.vilkårsprøving.Sammenligningsgrunnlag
@@ -360,121 +360,6 @@ class SykepengevedtakBuilderTest {
             ),
             utkast,
         )
-    }
-
-    @Test
-    fun `Bygg AUU-vedtak`() {
-        val utkast = SykepengevedtakBuilder()
-            .fødselsnummer(fødselsnummer)
-            .aktørId(aktørId)
-            .organisasjonsnummer(organisasjonsnummer)
-            .vedtaksperiodeId(vedtaksperiodeId)
-            .spleisBehandlingId(spleisBehandlingId)
-            .fom(fom)
-            .tom(tom)
-            .skjæringstidspunkt(skjæringstidspunkt)
-            .hendelser(hendelser)
-            .sykepengegrunnlag(sykepengegrunnlag)
-            .grunnlagForSykepengegrunnlag(grunnlagForSykepengegrunnlag)
-            .grunnlagForSykepengegrunnlagPerArbeidsgiver(grunnlagForSykepengegrunnlagPerArbeidsgiver)
-            .begrensning(begrensning)
-            .inntekt(inntekt)
-            .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
-            .tags(listOf("IngenNyArbeidsgiverperiode"))
-            .build()
-
-        assertTrue(utkast is Sykepengevedtak.IkkeRealitetsbehandlet)
-        assertEquals(
-            Sykepengevedtak.IkkeRealitetsbehandlet(
-                fødselsnummer = fødselsnummer,
-                aktørId = aktørId,
-                vedtaksperiodeId = vedtaksperiodeId,
-                spleisBehandlingId = spleisBehandlingId,
-                organisasjonsnummer = organisasjonsnummer,
-                fom = fom,
-                tom = tom,
-                skjæringstidspunkt = skjæringstidspunkt,
-                hendelser = hendelser,
-                sykepengegrunnlag = sykepengegrunnlag,
-                grunnlagForSykepengegrunnlag = grunnlagForSykepengegrunnlag,
-                grunnlagForSykepengegrunnlagPerArbeidsgiver = grunnlagForSykepengegrunnlagPerArbeidsgiver,
-                begrensning = begrensning,
-                inntekt = inntekt,
-                vedtakFattetTidspunkt = vedtakFattetTidspunkt,
-                tags = setOf("IngenNyArbeidsgiverperiode"),
-            ),
-            utkast,
-        )
-    }
-
-    @Test
-    fun `Mangel på både utbetalingId og sykepengegrunnlagsfakta medfører AUU-vedtak`() {
-        val builder = SykepengevedtakBuilder()
-            .fødselsnummer(fødselsnummer)
-            .aktørId(aktørId)
-            .organisasjonsnummer(organisasjonsnummer)
-            .vedtaksperiodeId(vedtaksperiodeId)
-            .spleisBehandlingId(spleisBehandlingId)
-            .fom(fom)
-            .tom(tom)
-            .skjæringstidspunkt(skjæringstidspunkt)
-            .hendelser(hendelser)
-            .sykepengegrunnlag(sykepengegrunnlag)
-            .grunnlagForSykepengegrunnlag(grunnlagForSykepengegrunnlag)
-            .grunnlagForSykepengegrunnlagPerArbeidsgiver(grunnlagForSykepengegrunnlagPerArbeidsgiver)
-            .begrensning(begrensning)
-            .inntekt(inntekt)
-            .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
-            .tags(listOf("IngenNyArbeidsgiverperiode"))
-
-        assertTrue(builder.build() is Sykepengevedtak.IkkeRealitetsbehandlet)
-    }
-
-    @Test
-    fun `Mangel på sykepengegrunnlagsfakta medfører bygging av AUU-vedtak`() {
-        val builder = SykepengevedtakBuilder()
-            .fødselsnummer(fødselsnummer)
-            .aktørId(aktørId)
-            .organisasjonsnummer(organisasjonsnummer)
-            .vedtaksperiodeId(vedtaksperiodeId)
-            .spleisBehandlingId(spleisBehandlingId)
-            .utbetalingId(utbetalingId)
-            .fom(fom)
-            .tom(tom)
-            .skjæringstidspunkt(skjæringstidspunkt)
-            .hendelser(hendelser)
-            .sykepengegrunnlag(sykepengegrunnlag)
-            .grunnlagForSykepengegrunnlag(grunnlagForSykepengegrunnlag)
-            .grunnlagForSykepengegrunnlagPerArbeidsgiver(grunnlagForSykepengegrunnlagPerArbeidsgiver)
-            .begrensning(begrensning)
-            .inntekt(inntekt)
-            .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
-            .tags(listOf("IngenNyArbeidsgiverperiode"))
-
-        assertTrue(builder.build() is Sykepengevedtak.IkkeRealitetsbehandlet)
-    }
-
-    @Test
-    fun `Mangel på utbetalingId medfører bygging av AUU-vedtak`() {
-        val builder = SykepengevedtakBuilder()
-            .fødselsnummer(fødselsnummer)
-            .aktørId(aktørId)
-            .organisasjonsnummer(organisasjonsnummer)
-            .vedtaksperiodeId(vedtaksperiodeId)
-            .spleisBehandlingId(spleisBehandlingId)
-            .fom(fom)
-            .tom(tom)
-            .skjæringstidspunkt(skjæringstidspunkt)
-            .hendelser(hendelser)
-            .sykepengegrunnlag(sykepengegrunnlag)
-            .grunnlagForSykepengegrunnlag(grunnlagForSykepengegrunnlag)
-            .grunnlagForSykepengegrunnlagPerArbeidsgiver(grunnlagForSykepengegrunnlagPerArbeidsgiver)
-            .begrensning(begrensning)
-            .inntekt(inntekt)
-            .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
-            .tags(listOf("IngenNyArbeidsgiverperiode"))
-
-        assertTrue(builder.build() is Sykepengevedtak.IkkeRealitetsbehandlet)
     }
 
     @Test

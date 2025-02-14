@@ -87,8 +87,12 @@ class Person private constructor(
     }
 
     fun avsluttetUtenVedtak(avsluttetUtenVedtak: AvsluttetUtenVedtak) {
-        vedtaksperiodeOrNull(avsluttetUtenVedtak.vedtaksperiodeId())
-            ?.avsluttetUtenVedtak(this, avsluttetUtenVedtak)
+        val vedtaksperiode = vedtaksperiodeForBehandling(avsluttetUtenVedtak.spleisBehandlingId)
+        if (vedtaksperiode.erForkastet()) return
+
+        vedtaksperiode
+            .finnBehandling(avsluttetUtenVedtak.spleisBehandlingId)
+            .avsluttetUtenVedtak()
     }
 
     private fun SykepengevedtakBuilder.leggTilAvviksvurderinger(behandling: Behandling) {

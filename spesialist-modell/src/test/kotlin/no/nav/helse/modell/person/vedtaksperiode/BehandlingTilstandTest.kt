@@ -1,8 +1,6 @@
 package no.nav.helse.modell.person.vedtaksperiode
 
 import no.nav.helse.modell.januar
-import no.nav.helse.modell.vedtak.AvsluttetUtenVedtak
-import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -29,7 +27,7 @@ internal class BehandlingTilstandTest {
         val generasjonId = UUID.randomUUID()
         val generasjon = generasjon(generasjonId, UUID.randomUUID())
         generasjon.assertTilstand(TilstandDto.VidereBehandlingAvklares)
-        generasjon.avsluttetUtenVedtak(AvsluttetUtenVedtak(UUID.randomUUID(), emptyList(), UUID.randomUUID()), SykepengevedtakBuilder())
+        generasjon.avsluttetUtenVedtak()
         generasjon.assertTilstand(TilstandDto.AvsluttetUtenVedtak)
     }
 
@@ -39,7 +37,7 @@ internal class BehandlingTilstandTest {
         val generasjon = generasjon(generasjonId, UUID.randomUUID())
         generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), UUID.randomUUID()))
         generasjon.assertTilstand(TilstandDto.VidereBehandlingAvklares)
-        generasjon.avsluttetUtenVedtak(AvsluttetUtenVedtak(UUID.randomUUID(), emptyList(), UUID.randomUUID()), SykepengevedtakBuilder())
+        generasjon.avsluttetUtenVedtak()
         generasjon.assertTilstand(TilstandDto.AvsluttetUtenVedtak)
     }
 
@@ -87,7 +85,7 @@ internal class BehandlingTilstandTest {
         val generasjon = generasjon(generasjonId, vedtaksperiodeId)
         generasjon.assertTilstand(TilstandDto.VidereBehandlingAvklares)
 
-        generasjon.avsluttetUtenVedtak(AvsluttetUtenVedtak(vedtaksperiodeId, emptyList(), UUID.randomUUID()), SykepengevedtakBuilder())
+        generasjon.avsluttetUtenVedtak()
         generasjon.assertTilstand(TilstandDto.AvsluttetUtenVedtak)
 
         generasjon.håndterVedtakFattet()
@@ -100,7 +98,7 @@ internal class BehandlingTilstandTest {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon = generasjon(generasjonId, vedtaksperiodeId)
 
-        generasjon.avsluttetUtenVedtak(AvsluttetUtenVedtak(vedtaksperiodeId, emptyList(), UUID.randomUUID()), SykepengevedtakBuilder())
+        generasjon.avsluttetUtenVedtak()
         generasjon.assertTilstand(TilstandDto.AvsluttetUtenVedtak)
 
         generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId))
@@ -114,7 +112,7 @@ internal class BehandlingTilstandTest {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon = generasjon(generasjonId, vedtaksperiodeId)
 
-        generasjon.avsluttetUtenVedtak(AvsluttetUtenVedtak(vedtaksperiodeId, emptyList(), UUID.randomUUID()), SykepengevedtakBuilder())
+        generasjon.avsluttetUtenVedtak()
         generasjon.assertTilstand(TilstandDto.AvsluttetUtenVedtak)
 
         generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId))
@@ -131,7 +129,7 @@ internal class BehandlingTilstandTest {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon = generasjon(generasjonId, vedtaksperiodeId)
 
-        generasjon.avsluttetUtenVedtak(AvsluttetUtenVedtak(vedtaksperiodeId, emptyList(), UUID.randomUUID()), SykepengevedtakBuilder())
+        generasjon.avsluttetUtenVedtak()
         generasjon.assertTilstand(TilstandDto.AvsluttetUtenVedtak)
 
         generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId))

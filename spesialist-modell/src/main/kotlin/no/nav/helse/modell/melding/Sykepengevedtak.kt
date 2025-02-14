@@ -27,25 +27,6 @@ sealed interface Sykepengevedtak : UtgåendeHendelse {
     val vedtakFattetTidspunkt: LocalDateTime
     val tags: Set<String>
 
-    data class IkkeRealitetsbehandlet(
-        override val fødselsnummer: String,
-        override val aktørId: String,
-        override val vedtaksperiodeId: UUID,
-        override val spleisBehandlingId: UUID,
-        override val organisasjonsnummer: String,
-        override val fom: LocalDate,
-        override val tom: LocalDate,
-        override val skjæringstidspunkt: LocalDate,
-        override val hendelser: List<UUID>,
-        override val sykepengegrunnlag: Double,
-        override val grunnlagForSykepengegrunnlag: Double,
-        override val grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Double>,
-        override val begrensning: String,
-        override val inntekt: Double,
-        override val vedtakFattetTidspunkt: LocalDateTime,
-        override val tags: Set<String>,
-    ) : Sykepengevedtak
-
     sealed interface VedtakMedOpphavISpleis : Sykepengevedtak {
         val avviksprosent: Double
         val sammenligningsgrunnlag: Sammenligningsgrunnlag

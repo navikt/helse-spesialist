@@ -1,52 +1,16 @@
 package no.nav.helse.e2e
 
-import com.fasterxml.jackson.module.kotlin.convertValue
-import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
-import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import no.nav.helse.AvviksvurderingTestdata
 import no.nav.helse.GodkjenningsbehovTestdata
-import no.nav.helse.TestRapidHelpers.hendelser
 import no.nav.helse.TestRapidHelpers.meldinger
 import no.nav.helse.Testdata.skjønnsvurdering
-import no.nav.helse.mediator.asUUID
-import no.nav.helse.objectMapper
 import no.nav.helse.util.januar
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 import java.util.UUID
 
 internal class FattVedtakE2ETest: AbstractE2ETest() {
-
-    @Test
-    fun `Fatt vedtak for auu-periode`() {
-        val spleisBehandlingId = UUID.randomUUID()
-        vedtaksløsningenMottarNySøknad()
-        spleisOppretterNyBehandling(spleisBehandlingId = spleisBehandlingId, fom = 1.januar, tom = 11.januar)
-        håndterAvsluttetUtenVedtak(spleisBehandlingId = spleisBehandlingId)
-        val hendelser = inspektør.hendelser("vedtak_fattet")
-        assertEquals(1, hendelser.size)
-        val hendelse = hendelser.single()
-        assertEquals("vedtak_fattet", hendelse["@event_name"].asText())
-        assertEquals(0, hendelse["begrunnelser"].size())
-        assertNull(hendelse["utbetalingId"])
-        assertNull(hendelse["sykepengegrunnlagsfakta"])
-        assertEquals(0.0, hendelse["grunnlagForSykepengegrunnlag"].asDouble())
-        assertEquals(
-            emptyMap<String, Double>(),
-            objectMapper.convertValue<Map<String, Double>>(hendelse["grunnlagForSykepengegrunnlagPerArbeidsgiver"])
-        )
-        assertEquals("VET_IKKE", hendelse["begrensning"].asText())
-        assertEquals(0.0, hendelse["inntekt"].asDouble())
-        assertEquals(0.0, hendelse["sykepengegrunnlag"].asDouble())
-        assertEquals(1.januar, hendelse["fom"].asLocalDate())
-        assertEquals(11.januar, hendelse["tom"].asLocalDate())
-        assertEquals(AKTØR, hendelse["aktørId"].asText())
-        assertEquals(LocalDate.now(), hendelse["vedtakFattetTidspunkt"].asLocalDateTime().toLocalDate())
-        assertEquals(spleisBehandlingId, hendelse["behandlingId"].asUUID())
-    }
 
     @Test
     fun `Fatt vedtak for periode der SP er fastsatt etter hovedregel`() {

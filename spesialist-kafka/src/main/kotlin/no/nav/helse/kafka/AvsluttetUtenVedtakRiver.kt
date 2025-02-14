@@ -21,8 +21,7 @@ class AvsluttetUtenVedtakRiver(
     override fun validations() =
         River.PacketValidation {
             it.requireKey("@id", "fødselsnummer", "vedtaksperiodeId", "organisasjonsnummer")
-            it.requireKey("fom", "tom", "skjæringstidspunkt", "behandlingId")
-            it.requireArray("hendelser")
+            it.requireKey("skjæringstidspunkt", "behandlingId")
         }
 
     override fun onPacket(
@@ -40,7 +39,6 @@ class AvsluttetUtenVedtakRiver(
             fødselsnummer = this["fødselsnummer"].asText(),
             vedtaksperiodeId = this["vedtaksperiodeId"].asUUID(),
             spleisBehandlingId = this["behandlingId"].asUUID(),
-            hendelser = this["hendelser"].map { it.asUUID() },
             json = this.toJson(),
         )
 }

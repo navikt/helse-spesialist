@@ -6,7 +6,6 @@ import no.nav.helse.modell.vedtak.VedtakBegrunnelse
 
 internal fun Sykepengevedtak.detaljer(): Map<String, Any> =
     when (this) {
-        is Sykepengevedtak.IkkeRealitetsbehandlet -> auuVedtakdetaljer()
         is Sykepengevedtak.VedtakMedOpphavIInfotrygd -> vedtakMedOpphavIInfotrygddetaljer()
         is Sykepengevedtak.Vedtak -> vedtakdetaljer()
         is Sykepengevedtak.VedtakMedSkjønnsvurdering -> vedtakMedSkjønnsvurderingdetaljer()
@@ -139,28 +138,6 @@ private fun Sykepengevedtak.VedtakMedOpphavIInfotrygd.vedtakMedOpphavIInfotrygdd
                 "omregnetÅrsinntekt" to sykepengegrunnlagsfakta.omregnetÅrsinntekt,
             ),
         "begrunnelser" to begrunnelser,
-    )
-}
-
-private fun Sykepengevedtak.IkkeRealitetsbehandlet.auuVedtakdetaljer(): Map<String, Any> {
-    return mapOf(
-        "fødselsnummer" to fødselsnummer,
-        "aktørId" to aktørId,
-        "vedtaksperiodeId" to "$vedtaksperiodeId",
-        "behandlingId" to "$spleisBehandlingId",
-        "organisasjonsnummer" to organisasjonsnummer,
-        "fom" to "$fom",
-        "tom" to "$tom",
-        "skjæringstidspunkt" to "$skjæringstidspunkt",
-        "hendelser" to hendelser,
-        "sykepengegrunnlag" to sykepengegrunnlag,
-        "grunnlagForSykepengegrunnlag" to grunnlagForSykepengegrunnlag,
-        "grunnlagForSykepengegrunnlagPerArbeidsgiver" to grunnlagForSykepengegrunnlagPerArbeidsgiver,
-        "begrensning" to begrensning,
-        "inntekt" to inntekt,
-        "vedtakFattetTidspunkt" to "$vedtakFattetTidspunkt",
-        "begrunnelser" to emptyList<Map<String, Any>>(),
-        "tags" to tags,
     )
 }
 

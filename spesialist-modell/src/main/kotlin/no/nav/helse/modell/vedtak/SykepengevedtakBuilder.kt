@@ -24,13 +24,13 @@ class SykepengevedtakBuilder {
     private lateinit var begrensning: String
     private var inntekt by Delegates.notNull<Double>()
     private lateinit var vedtakFattetTidspunkt: LocalDateTime
-    private var utbetalingId: UUID? = null
-    private var sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta? = null
+    private lateinit var utbetalingId: UUID
+    private lateinit var sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta
     private var skjønnsfastsattSykepengegrunnlag: SkjønnsfastsattSykepengegrunnlag? = null
     private var skjønnsfastsettingopplysninger: VedtakMedSkjønnsvurdering.Skjønnsfastsettingopplysninger? = null
     private var vedtakBegrunnelse: VedtakBegrunnelse? = null
-    private var avviksprosent: Double? = null
-    private var sammenligningsgrunnlag: Sammenligningsgrunnlag? = null
+    private var avviksprosent by Delegates.notNull<Double>()
+    private lateinit var sammenligningsgrunnlag: Sammenligningsgrunnlag
     private val tags: MutableSet<String> = mutableSetOf()
     private val tagsForSykepengegrunnlagsfakta: MutableSet<String> = mutableSetOf()
 
@@ -130,56 +130,26 @@ class SykepengevedtakBuilder {
             this.vedtakBegrunnelse = vedtakBegrunnelse
         }
 
-    fun build(): Sykepengevedtak {
-        if (utbetalingId != null && sykepengegrunnlagsfakta != null) return buildSykepengevedtak()
-        return buildIkkeRealitetsbehandlet()
-    }
-
-    private fun buildIkkeRealitetsbehandlet(): Sykepengevedtak.IkkeRealitetsbehandlet {
-        return Sykepengevedtak.IkkeRealitetsbehandlet(
-            fødselsnummer = fødselsnummer,
-            aktørId = aktørId,
-            vedtaksperiodeId = vedtaksperiodeId,
-            spleisBehandlingId = spleisBehandlingId,
-            organisasjonsnummer = organisasjonsnummer,
-            fom = fom,
-            tom = tom,
-            skjæringstidspunkt = skjæringstidspunkt,
-            hendelser = hendelser,
-            sykepengegrunnlag = sykepengegrunnlag,
-            grunnlagForSykepengegrunnlag = grunnlagForSykepengegrunnlag,
-            grunnlagForSykepengegrunnlagPerArbeidsgiver = grunnlagForSykepengegrunnlagPerArbeidsgiver,
-            begrensning = begrensning,
-            inntekt = inntekt,
-            vedtakFattetTidspunkt = vedtakFattetTidspunkt,
-            tags = tags,
-        )
-    }
+    fun build(): Sykepengevedtak = buildSykepengevedtak()
 
     private fun buildSykepengevedtak(): Sykepengevedtak {
-        val sykepengegrunnlagsfakta =
-            requireNotNull(sykepengegrunnlagsfakta) { "Forventer å finne sykepengegrunnlagsfakta ved bygging av vedtak" }
-        val utbetalingId = requireNotNull(utbetalingId) { "Forventer å finne utbetalingId ved bygging av vedtak" }
-        return when (sykepengegrunnlagsfakta) {
+        return when (val sykepengegrunnlagsfakta = this.sykepengegrunnlagsfakta) {
             is Sykepengegrunnlagsfakta.Infotrygd -> buildVedtakMedOpphavIInfotrygd(utbetalingId, sykepengegrunnlagsfakta)
             is Sykepengegrunnlagsfakta.Spleis -> {
-                val avviksprosent = requireNotNull(avviksprosent) { "Forventer å finne avviksprosent ved bygging av vedtak" }
-                val sammenligningsgrunnlag =
-                    requireNotNull(sammenligningsgrunnlag) { "Forventer å finne sammenligningsgrunnlag ved bygging av vedtak" }
                 when (sykepengegrunnlagsfakta) {
                     is Sykepengegrunnlagsfakta.Spleis.EtterHovedregel ->
                         buildVedtakEtterHovedregel(
-                            utbetalingId,
-                            sykepengegrunnlagsfakta,
-                            avviksprosent,
-                            sammenligningsgrunnlag,
+                            utbetalingId = utbetalingId,
+                            sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
+                            avviksprosent = avviksprosent,
+                            sammenligningsgrunnlag = sammenligningsgrunnlag,
                         )
                     is Sykepengegrunnlagsfakta.Spleis.EtterSkjønn ->
                         buildVedtakEtterSkjønn(
-                            utbetalingId,
-                            sykepengegrunnlagsfakta,
-                            avviksprosent,
-                            sammenligningsgrunnlag,
+                            utbetalingId = utbetalingId,
+                            sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
+                            avviksprosent = avviksprosent,
+                            sammenligningsgrunnlag = sammenligningsgrunnlag,
                         )
                 }
             }

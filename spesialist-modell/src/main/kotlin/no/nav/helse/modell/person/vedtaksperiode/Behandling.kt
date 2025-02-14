@@ -153,12 +153,8 @@ class Behandling private constructor(
         tilstand.vedtakFattet(this)
     }
 
-    internal fun avsluttetUtenVedtak(
-        avsluttetUtenVedtak: no.nav.helse.modell.vedtak.AvsluttetUtenVedtak,
-        sykepengevedtakBuilder: SykepengevedtakBuilder,
-    ) {
-        if (spleisBehandlingId == null) spleisBehandlingId = avsluttetUtenVedtak.spleisBehandlingId()
-        tilstand.avsluttetUtenVedtak(this, sykepengevedtakBuilder)
+    internal fun avsluttetUtenVedtak() {
+        tilstand.avsluttetUtenVedtak(this)
     }
 
     internal fun byggVedtak(vedtakBuilder: SykepengevedtakBuilder) {
@@ -188,15 +184,6 @@ class Behandling private constructor(
 
     private fun nyTilstand(ny: Tilstand) {
         this.tilstand = ny
-    }
-
-    private fun supplerAvsluttetUtenVedtak(sykepengevedtakBuilder: SykepengevedtakBuilder) {
-        spleisBehandlingId?.let { sykepengevedtakBuilder.spleisBehandlingId(it) }
-        sykepengevedtakBuilder
-            .tags(tags)
-            .skjæringstidspunkt(skjæringstidspunkt)
-            .fom(fom())
-            .tom(tom())
     }
 
     private fun nyUtbetaling(utbetalingId: UUID) {
@@ -272,10 +259,8 @@ class Behandling private constructor(
                 KlarTilBehandling -> TilstandDto.KlarTilBehandling
             }
 
-        fun avsluttetUtenVedtak(
-            behandling: Behandling,
-            sykepengevedtakBuilder: SykepengevedtakBuilder,
-        ): Unit = throw IllegalStateException("Forventer ikke avsluttet_uten_vedtak i tilstand=${this::class.simpleName}")
+        fun avsluttetUtenVedtak(behandling: Behandling): Unit =
+            throw IllegalStateException("Forventer ikke avsluttet_uten_vedtak i tilstand=${this::class.simpleName}")
 
         fun vedtakFattet(behandling: Behandling) {
             sikkerlogg.info("Forventet ikke vedtak_fattet i {}", kv("tilstand", this::class.simpleName))
@@ -354,10 +339,7 @@ class Behandling private constructor(
             behandling.spleisVedtaksperiode(spleisVedtaksperiode)
         }
 
-        override fun avsluttetUtenVedtak(
-            behandling: Behandling,
-            sykepengevedtakBuilder: SykepengevedtakBuilder,
-        ) {
+        override fun avsluttetUtenVedtak(behandling: Behandling) {
             check(
                 behandling.utbetalingId == null,
             ) { "Mottatt avsluttet_uten_vedtak på behandling som har utbetaling. Det gir ingen mening." }
@@ -367,7 +349,6 @@ class Behandling private constructor(
                     else -> AvsluttetUtenVedtak
                 }
             behandling.nyTilstand(nesteTilstand)
-            behandling.supplerAvsluttetUtenVedtak(sykepengevedtakBuilder)
         }
     }
 

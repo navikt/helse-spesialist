@@ -1,9 +1,7 @@
 package no.nav.helse.modell.person.vedtaksperiode
 
-import io.mockk.mockk
 import no.nav.helse.modell.februar
 import no.nav.helse.modell.januar
-import no.nav.helse.modell.vedtak.AvsluttetUtenVedtak
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
@@ -140,7 +138,7 @@ class VedtaksperiodeTest {
         val vedtaksperiodeId = UUID.randomUUID()
         val spleisBehandlingId = UUID.randomUUID()
         val vedtaksperiode = nyVedtaksperiode(vedtaksperiodeId, spleisBehandlingId)
-        vedtaksperiode.avsluttetUtenVedtak(mockk(relaxed = true), AvsluttetUtenVedtak(vedtaksperiodeId, emptyList(), spleisBehandlingId))
+        vedtaksperiode.finnBehandling(spleisBehandlingId).avsluttetUtenVedtak()
         vedtaksperiode.nyttGodkjenningsbehov(
             listOf(SpleisVedtaksperiode(vedtaksperiodeId, spleisBehandlingId, 1.januar, 31.januar, 1.januar)),
         )
@@ -154,7 +152,7 @@ class VedtaksperiodeTest {
         val spleisBehandlingId = UUID.randomUUID()
         val vedtaksperiode = nyVedtaksperiode(vedtaksperiodeId, spleisBehandlingId)
         vedtaksperiode.nyeVarsler(listOf(Varsel(UUID.randomUUID(), "RV_IM_1", LocalDateTime.now(), vedtaksperiodeId)))
-        vedtaksperiode.avsluttetUtenVedtak(mockk(relaxed = true), AvsluttetUtenVedtak(vedtaksperiodeId, emptyList(), spleisBehandlingId))
+        vedtaksperiode.finnBehandling(spleisBehandlingId).avsluttetUtenVedtak()
 
         vedtaksperiode.nyttGodkjenningsbehov(
             listOf(SpleisVedtaksperiode(vedtaksperiodeId, spleisBehandlingId, 1.januar, 31.januar, 1.januar)),

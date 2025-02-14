@@ -63,58 +63,6 @@ internal class PubliserSykepengevedtakTest {
     }
 
     @Test
-    fun auuVedtak() {
-        val ikkeRealitetsbehandlet =
-            Sykepengevedtak.IkkeRealitetsbehandlet(
-                fødselsnummer = FØDSELSNUMMER,
-                aktørId = AKTØRID,
-                vedtaksperiodeId = vedtaksperiodeId,
-                spleisBehandlingId = spleisBehandlingId,
-                organisasjonsnummer = ORGANISASJONSNUMMER,
-                fom = fom,
-                tom = tom,
-                skjæringstidspunkt = skjæringstidspunkt,
-                hendelser = hendelser,
-                sykepengegrunnlag = 0.0,
-                grunnlagForSykepengegrunnlag = 0.0,
-                grunnlagForSykepengegrunnlagPerArbeidsgiver = emptyMap(),
-                begrensning = "VET_IKKE",
-                inntekt = 0.0,
-                vedtakFattetTidspunkt = vedtakFattetTidspunkt,
-                tags = setOf("IngenNyArbeidsgiverperiode"),
-            )
-        utgåendeMeldingerMediator.hendelse(ikkeRealitetsbehandlet)
-        utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, publiserer)
-        val eventer = testRapid.inspektør.meldinger()
-
-        assertEquals(1, eventer.size)
-
-        val event = eventer.first()
-
-        assertEquals("vedtak_fattet", event["@event_name"].asText())
-        assertEquals(FØDSELSNUMMER, event["fødselsnummer"].asText())
-        assertEquals(AKTØRID, event["aktørId"].asText())
-        assertEquals(vedtaksperiodeId.toString(), event["vedtaksperiodeId"].asText())
-        assertEquals(ORGANISASJONSNUMMER, event["organisasjonsnummer"].asText())
-        assertEquals(fom, event["fom"].asLocalDate())
-        assertEquals(tom, event["tom"].asLocalDate())
-        assertEquals(skjæringstidspunkt, event["skjæringstidspunkt"].asLocalDate())
-        assertEquals(hendelser, event["hendelser"].map { UUID.fromString(it.asText()) })
-        assertEquals(0.0, event["sykepengegrunnlag"].asDouble())
-        assertEquals(0.0, event["grunnlagForSykepengegrunnlag"].asDouble())
-        assertEquals(
-            emptyMap<String, Double>(),
-            objectMapper.convertValue<Map<String, Double>>(event["grunnlagForSykepengegrunnlagPerArbeidsgiver"]),
-        )
-        assertEquals("VET_IKKE", event["begrensning"].asText())
-        assertEquals(0.0, event["inntekt"].asDouble())
-        assertEquals(vedtakFattetTidspunkt, event["vedtakFattetTidspunkt"].asLocalDateTime())
-        assertEquals(0, event["begrunnelser"].size())
-        assertEquals(1, event["tags"].size())
-        assertEquals("IngenNyArbeidsgiverperiode", event["tags"].first().asText())
-    }
-
-    @Test
     fun `vedtak med opphav i infotrygd`() {
         val infotrygd =
             Sykepengevedtak.VedtakMedOpphavIInfotrygd(

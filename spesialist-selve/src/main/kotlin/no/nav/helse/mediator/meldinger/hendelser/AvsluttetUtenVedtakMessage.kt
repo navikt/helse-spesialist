@@ -14,7 +14,6 @@ class AvsluttetUtenVedtakMessage(
     private val fødselsnummer: String,
     private val vedtaksperiodeId: UUID,
     private val spleisBehandlingId: UUID,
-    private val hendelser: List<UUID>,
     private val json: String,
 ) : Vedtaksperiodemelding {
     constructor(jsonNode: JsonNode) : this(
@@ -22,7 +21,6 @@ class AvsluttetUtenVedtakMessage(
         fødselsnummer = jsonNode["fødselsnummer"].asText(),
         vedtaksperiodeId = UUID.fromString(jsonNode["vedtaksperiodeId"].asText()),
         spleisBehandlingId = UUID.fromString(jsonNode["behandlingId"].asText()),
-        hendelser = jsonNode["hendelser"].map { it.asUUID() },
         json = jsonNode.toString(),
     )
 
@@ -30,7 +28,6 @@ class AvsluttetUtenVedtakMessage(
         AvsluttetUtenVedtak(
             vedtaksperiodeId = vedtaksperiodeId,
             spleisBehandlingId = spleisBehandlingId,
-            hendelser = hendelser,
         )
 
     override fun fødselsnummer(): String = fødselsnummer

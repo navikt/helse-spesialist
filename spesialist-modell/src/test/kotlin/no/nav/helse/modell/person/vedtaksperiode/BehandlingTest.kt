@@ -13,8 +13,6 @@ import no.nav.helse.modell.person.vedtaksperiode.Behandling.Companion.kreverSkj�
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.AKTIV
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.VURDERT
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_EX_1
-import no.nav.helse.modell.vedtak.AvsluttetUtenVedtak
-import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -475,7 +473,7 @@ internal class BehandlingTest {
         val generasjonId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjon1 = generasjon(generasjonId, vedtaksperiodeId, skjæringstidspunkt = 1.januar)
-        generasjon1.avsluttetUtenVedtak(AvsluttetUtenVedtak(vedtaksperiodeId, emptyList(), UUID.randomUUID()), SykepengevedtakBuilder())
+        generasjon1.avsluttetUtenVedtak()
         val generasjon2 = generasjon(generasjonId, vedtaksperiodeId, skjæringstidspunkt = 1.januar)
         assertNotEquals(generasjon1, generasjon2)
         assertNotEquals(generasjon1.hashCode(), generasjon2.hashCode())
