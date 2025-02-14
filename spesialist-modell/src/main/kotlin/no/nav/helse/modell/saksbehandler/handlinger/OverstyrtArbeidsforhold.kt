@@ -15,7 +15,7 @@ class OverstyrtArbeidsforhold private constructor(
     override val aktørId: String,
     override val vedtaksperiodeId: UUID,
     override val opprettet: LocalDateTime,
-    override val ferdigstilt: Boolean,
+    override var ferdigstilt: Boolean,
     val skjæringstidspunkt: LocalDate,
     val overstyrteArbeidsforhold: List<Arbeidsforhold>,
 ) : Overstyring(id) {

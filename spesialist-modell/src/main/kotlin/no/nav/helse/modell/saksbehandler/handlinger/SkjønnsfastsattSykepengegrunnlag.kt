@@ -19,7 +19,7 @@ class SkjønnsfastsattSykepengegrunnlag private constructor(
     override val aktørId: String,
     override val vedtaksperiodeId: UUID,
     override val opprettet: LocalDateTime,
-    override val ferdigstilt: Boolean,
+    override var ferdigstilt: Boolean,
     val skjæringstidspunkt: LocalDate,
     val arbeidsgivere: List<SkjønnsfastsattArbeidsgiver>,
 ) : Overstyring(id) {

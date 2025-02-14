@@ -5,6 +5,7 @@ import no.nav.helse.modell.saksbehandler.handlinger.Arbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgrad
 import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgradArbeidsgiver
 import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgradPeriode
+import no.nav.helse.modell.saksbehandler.handlinger.OverstyringId
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtArbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtArbeidsgiver
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtInntektOgRefusjon
@@ -46,15 +47,42 @@ class PgOverstyringRepositoryTest : DatabaseIntegrationTest() {
                 skjønnsfastsattOverstyring
             )
         )
-        val overstyringer = overstyringRepository.finn(FNR)
+        val overstyringer = overstyringRepository.finnAktive(FNR)
         assertEquals(5, overstyringer.size)
+    }
+
+    @Test
+    fun `Kan ferdigstille overstyringer`() {
+        val tidslinjeOverstyring = nyTidslinjeOverstyring()
+        val inntektOgRefusjonOverstyring = nyInntektOgRefusjonOverstyring()
+        val arbeidsforholdOverstyring = nyArbeidsforholdOverstyring()
+        val minimumSykdomsgradOverstyring = nyMinimumSykdomsgradOverstyring()
+        val skjønnsfastsattOverstyring = nySkjønnsfastsattOverstyring()
+
+        overstyringRepository.lagre(
+            listOf(
+                tidslinjeOverstyring,
+                inntektOgRefusjonOverstyring,
+                arbeidsforholdOverstyring,
+                minimumSykdomsgradOverstyring,
+                skjønnsfastsattOverstyring
+            )
+        )
+        val overstyringer = overstyringRepository.finnAktive(FNR)
+        overstyringer.forEach { overstyring ->
+            overstyring.ferdigstill()
+        }
+        overstyringRepository.lagre(overstyringer)
+        val ferdigstilteOverstyringer = finnFerdigstilteOverstyringer(FNR)
+
+        assertEquals(5, ferdigstilteOverstyringer.size)
     }
 
     @Test
     fun `TidslinjeOverstyring lagres riktig`() {
         val tidslinjeOverstyring = nyTidslinjeOverstyring()
         overstyringRepository.lagre(listOf(tidslinjeOverstyring))
-        val overstyringer = overstyringRepository.finn(FNR)
+        val overstyringer = overstyringRepository.finnAktive(FNR)
         val hentetTidslinjeOverstyring = overstyringer.first()
 
         assertEquals(1, overstyringer.size)
@@ -75,7 +103,7 @@ class PgOverstyringRepositoryTest : DatabaseIntegrationTest() {
     fun `InntektOgRefusjonOverstyring lagres riktig`() {
         val inntektOgRefusjonOverstyring = nyInntektOgRefusjonOverstyring()
         overstyringRepository.lagre(listOf(inntektOgRefusjonOverstyring))
-        val overstyringer = overstyringRepository.finn(FNR)
+        val overstyringer = overstyringRepository.finnAktive(FNR)
         val hentetInntektOgRefusjonOverstyring = overstyringer.first()
 
         assertEquals(1, overstyringer.size)
@@ -95,7 +123,7 @@ class PgOverstyringRepositoryTest : DatabaseIntegrationTest() {
     fun `ArbeidsforholdOverstyring lagres riktig`() {
         val arbeidsforholdOverstyring = nyArbeidsforholdOverstyring()
         overstyringRepository.lagre(listOf(arbeidsforholdOverstyring))
-        val overstyringer = overstyringRepository.finn(FNR)
+        val overstyringer = overstyringRepository.finnAktive(FNR)
         val hentetArbeidsforholdOverstyring = overstyringer.first()
 
         assertEquals(1, overstyringer.size)
@@ -114,7 +142,7 @@ class PgOverstyringRepositoryTest : DatabaseIntegrationTest() {
     fun `MinimumSykdomsgradOverstyring lagres riktig`() {
         val minimumSykdomsgradOverstyring = nyMinimumSykdomsgradOverstyring()
         overstyringRepository.lagre(listOf(minimumSykdomsgradOverstyring))
-        val overstyringer = overstyringRepository.finn(FNR)
+        val overstyringer = overstyringRepository.finnAktive(FNR)
         val hentetMinimumSykdomsgradOverstyring = overstyringer.first()
 
         assertEquals(1, overstyringer.size)
@@ -142,7 +170,7 @@ class PgOverstyringRepositoryTest : DatabaseIntegrationTest() {
     fun `SkjønnsfastsattSykepengegrunnlag lagres riktig`() {
         val skjønnsfastsattSykepengegrunnlag = nySkjønnsfastsattOverstyring()
         overstyringRepository.lagre(listOf(skjønnsfastsattSykepengegrunnlag))
-        val overstyringer = overstyringRepository.finn(FNR)
+        val overstyringer = overstyringRepository.finnAktive(FNR)
         val hentetSkjønnsfastsattSykepengegrunnlag = overstyringer.first()
 
         assertEquals(1, overstyringer.size)
@@ -271,5 +299,15 @@ class PgOverstyringRepositoryTest : DatabaseIntegrationTest() {
             initierendeVedtaksperiodeId = VEDTAKSPERIODE.toString(),
             lovhjemmel = null,
         )
+
+    private fun finnFerdigstilteOverstyringer(fødselsnummer: String): List<OverstyringId> =
+        dbQuery.list(
+            """
+                select o.id from overstyring o 
+                    inner join person p on o.person_ref = p.id
+                where p.fødselsnummer = :fodselsnummer and ferdigstilt = true
+            """.trimMargin(),
+            "fodselsnummer" to fødselsnummer,
+        ) { OverstyringId(it.long("id")) }
 
 }

@@ -132,6 +132,6 @@ class PgTotrinnsvurderingRepository(
             opprettet = localDateTime("opprettet"),
             oppdatert = localDateTimeOrNull("oppdatert"),
             ferdigstilt = false,
-            overstyringer = overstyringRepository.finn(string("fødselsnummer")),
+            overstyringer = overstyringRepository.finnAktive(string("fødselsnummer")),
         )
 }

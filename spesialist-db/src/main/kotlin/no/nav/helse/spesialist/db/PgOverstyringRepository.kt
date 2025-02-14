@@ -43,7 +43,7 @@ class PgOverstyringRepository(
         }
     }
 
-    override fun finn(fødselsnummer: String): List<Overstyring> =
+    override fun finnAktive(fødselsnummer: String): List<Overstyring> =
         finnTidslinjeOverstyringer(fødselsnummer) +
             finnInntektOgRefusjonOverstyringer(fødselsnummer) +
             finnArbeidsforholdOverstyringer(fødselsnummer) +

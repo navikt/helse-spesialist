@@ -5,5 +5,5 @@ import no.nav.helse.modell.saksbehandler.handlinger.Overstyring
 interface OverstyringRepository {
     fun lagre(overstyringer: List<Overstyring>)
 
-    fun finn(fødselsnummer: String): List<Overstyring>
+    fun finnAktive(fødselsnummer: String): List<Overstyring>
 }
