@@ -1,3 +1,3 @@
 dependencies {
-    implementation(libs.graphql.kotlin.ktor.server)
+    implementation(libs.graphqlKotlin.server.ktor)
 }

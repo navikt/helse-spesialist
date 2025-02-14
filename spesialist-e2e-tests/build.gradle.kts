@@ -1,11 +1,19 @@
 dependencies {
     testImplementation(project(":spesialist-bootstrap"))
 
-    testImplementation(libs.tbd.libs.rapids.and.rivers.test)
-    testImplementation(libs.tbs.libs.jackson)
-    testImplementation(platform("org.junit:junit-bom:5.10.0"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
-    testImplementation(libs.testcontainers.postgresql)
+    testImplementation(libs.rapidsAndRivers)
+    testImplementation(libs.tbdLibs.rapidsAndRiversTest)
+
+    testImplementation(libs.bundles.flyway.postgres)
+    testImplementation(libs.hikari)
+    testImplementation(libs.kotliquery)
+    testImplementation(libs.testcontainers.postgres)
+
+    testImplementation(libs.bundles.ktor.server)
     testImplementation(libs.bundles.ktor.server.test)
-    testImplementation(libs.graphql.kotlin.ktor.server)
+    testImplementation(libs.graphqlKotlin.server.ktor)
+
+    testImplementation(libs.bundles.ktor.client)
+
+    testImplementation(libs.bundles.jackson)
 }

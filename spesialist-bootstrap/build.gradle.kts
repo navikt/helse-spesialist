@@ -1,16 +1,3 @@
-plugins {
-    kotlin("jvm")
-}
-
-group = "no.nav.helse"
-
-val testcontainersVersion = "1.20.4"
-val mockOAuth2ServerVersion = "2.1.10"
-
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     api(project(":spesialist-api"))
     api(project(":spesialist-client-entra-id"))
@@ -21,14 +8,14 @@ dependencies {
 
     implementation(libs.unleash.client)
     implementation(libs.bundles.logback)
+    implementation(libs.rapidsAndRivers)
+    implementation(libs.micrometer.prometheus)
 
-    testImplementation("org.testcontainers:postgresql:$testcontainersVersion")
-    testImplementation("no.nav.security:mock-oauth2-server:$mockOAuth2ServerVersion")
-    api("org.testcontainers:kafka:$testcontainersVersion")
-}
-
-kotlin {
-    jvmToolchain(21)
+    testImplementation(libs.hikari)
+    testImplementation(libs.bundles.flyway.postgres)
+    testImplementation(libs.mockOauth2Server)
+    testImplementation(libs.testcontainers.kafka)
+    testImplementation(libs.testcontainers.postgres)
 }
 
 tasks {

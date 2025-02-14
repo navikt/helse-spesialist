@@ -1,7 +1,3 @@
-val junitJupiterVersion = "5.11.4"
-val jvmTargetVersion = "21"
-val mockkVersion = "1.13.10"
-
 plugins {
     kotlin("jvm") version "2.0.20"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.2"
@@ -51,9 +47,10 @@ allprojects {
             }
         }
 
-        testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-        testImplementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
-        testImplementation("io.mockk:mockk:$mockkVersion")
+        testImplementation(platform("org.junit:junit-bom:5.11.4"))
+        testImplementation("org.junit.jupiter:junit-jupiter")
+        testImplementation(kotlin("test"))
+        testImplementation("io.mockk:mockk:1.13.10")
     }
 }
 

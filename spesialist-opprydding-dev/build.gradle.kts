@@ -1,22 +1,18 @@
 val mainClass = "no.nav.helse.opprydding.AppKt"
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
-    implementation(libs.postgres.socket.factory)
-    implementation(libs.rapids.and.rivers)
-    implementation(libs.postgres)
+    implementation(libs.postgresSocketFactory)
+    implementation(libs.rapidsAndRivers)
+    implementation(libs.postgresJdbcDriver)
     implementation(libs.kotliquery)
     implementation(libs.hikari)
     implementation(libs.bundles.logback)
 
     testImplementation(project(":spesialist-db-migrations"))
-    testImplementation(libs.testcontainers.postgresql)
-    testImplementation(libs.tbd.libs.rapids.and.rivers.test)
-    testImplementation(libs.flyway.core)
-    testImplementation(libs.flyway.postgres)
+
+    testImplementation(libs.testcontainers.postgres)
+    testImplementation(libs.tbdLibs.rapidsAndRiversTest)
+    testImplementation(libs.bundles.flyway.postgres)
 }
 
 tasks {

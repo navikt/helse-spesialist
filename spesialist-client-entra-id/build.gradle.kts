@@ -2,9 +2,9 @@ dependencies {
     api(project(":spesialist-selve"))
 
     implementation(libs.bundles.ktor.client)
-    implementation(libs.jackson.jsr310)
+    implementation(libs.bundles.jackson)
 
     // TODO: Trenger vi kanskje bare én av disse?
-    implementation("com.nimbusds:nimbus-jose-jwt:9.37.3")
-    implementation("com.auth0:java-jwt:4.4.0")
+    implementation(libs.nimbus.joseJwt)
+    implementation(libs.auth0.jwt)
 }

@@ -63,7 +63,7 @@ class DataSourceBuilder(env: Environment) {
             .load()
             .migrate()
 
-    fun getDataSource(): HikariDataSource {
+    fun getDataSource(): DataSource {
         return HikariDataSource(hikariConfig)
     }
 

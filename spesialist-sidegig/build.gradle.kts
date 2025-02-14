@@ -1,23 +1,18 @@
 val mainClass = "no.nav.helse.sidegig.AppKt"
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
-    implementation(libs.postgres.socket.factory)
-    implementation(libs.rapids.and.rivers)
+    implementation(libs.postgresSocketFactory)
+    implementation(libs.rapidsAndRivers)
     implementation(libs.hikari)
     implementation(libs.kotliquery)
-    implementation(libs.postgres)
+    implementation(libs.postgresJdbcDriver)
     implementation(libs.bundles.logback)
 
-    testImplementation(kotlin("test"))
-    testImplementation(libs.tbd.libs.rapids.and.rivers.test)
-    testImplementation(libs.testcontainers.postgresql)
-    testImplementation(libs.flyway.core)
-    testImplementation(libs.flyway.postgres)
     testImplementation(project(":spesialist-db-migrations"))
+
+    testImplementation(libs.tbdLibs.rapidsAndRiversTest)
+    testImplementation(libs.testcontainers.postgres)
+    testImplementation(libs.bundles.flyway.postgres)
 }
 
 tasks {

@@ -1,8 +1,6 @@
 import com.expediagroup.graphql.plugin.gradle.config.GraphQLScalar
 import com.expediagroup.graphql.plugin.gradle.tasks.GraphQLIntrospectSchemaTask
 
-val graphqlKotlinVersion = "8.3.0"
-
 plugins {
     alias(libs.plugins.graphql)
 }
@@ -10,18 +8,10 @@ plugins {
 dependencies {
     api(project(":spesialist-selve"))
 
-    implementation("com.expediagroup:graphql-kotlin-client:$graphqlKotlinVersion")
-    implementation("com.expediagroup:graphql-kotlin-client-jackson:$graphqlKotlinVersion") {
-        exclude(group = "com.fasterxml.jackson.core")
-        exclude(group = "com.fasterxml.jackson.module")
-    }
-    implementation("com.expediagroup:graphql-kotlin-ktor-client:$graphqlKotlinVersion") {
-        exclude("com.expediagroup:graphql-kotlin-client-serialization")
-    }
-
-    implementation(libs.bundles.logback)
+    implementation(libs.bundles.graphql.ktor.client)
     implementation(libs.bundles.ktor.client)
-    implementation(libs.jackson.jsr310)
+    implementation(libs.bundles.jackson)
+    implementation(libs.bundles.logback)
 }
 
 val graphqlDir = "${project.projectDir}/src/main/resources/graphql"
@@ -33,7 +23,11 @@ graphql {
         // Ved å sette opp UUID her vil koden som genereres for spleis-typene bruke UUID
         customScalars =
             listOf(
-                GraphQLScalar("UUID", "java.util.UUID", "no.nav.helse.spesialist.client.spleis.converters.UUIDScalarConverter"),
+                GraphQLScalar(
+                    "UUID",
+                    "java.util.UUID",
+                    "no.nav.helse.spesialist.client.spleis.converters.UUIDScalarConverter",
+                ),
                 GraphQLScalar(
                     "LocalDateTime",
                     "java.time.LocalDateTime",

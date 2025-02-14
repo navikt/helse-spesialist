@@ -1,12 +1,14 @@
-val micrometerRegistryPrometheusVersion = "1.14.3"
-
 dependencies {
-    implementation(project(":spesialist-db-migrations"))
+    api(project(":spesialist-db-migrations"))
     api(project(":spesialist-selve"))
-    api(libs.bundles.db)
 
-    implementation("io.micrometer:micrometer-registry-prometheus:$micrometerRegistryPrometheusVersion")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
-    testImplementation(libs.testcontainers.postgresql)
+    implementation(libs.kotliquery)
+    implementation(libs.bundles.flyway.postgres)
+    implementation(libs.postgresJdbcDriver)
+    implementation(libs.hikari)
+
+    implementation(libs.bundles.jackson)
+    implementation(libs.micrometer.prometheus)
+
+    testImplementation(libs.testcontainers.postgres)
 }

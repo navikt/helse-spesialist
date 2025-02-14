@@ -1,107 +1,110 @@
 [versions]
-cloudsql = "1.16.0"
 flyway = "10.9.0"
-graphql-kotlin = "8.3.0"
-hikari = "5.1.0"
+graphqlKotlin = "8.3.0"
 jackson = "2.18.1"
-kotlinx-coroutines = "1.10.1"
-kotliquery = "1.9.1"
 ktor = "3.0.1"
-logback = "1.5.7"
-logstash-logback-encoder = "8.0"
-micrometer = "1.13.3"
-postgres = "42.7.3"
-rapids-and-rivers = "2025012712551737978926.de930d8e0feb"
-slf4j = "2.0.16"
-tbd-libs = "2025.01.27-12.50-76316f3b"
+tbdLibs = "2025.01.27-12.50-76316f3b"
 testcontainers = "1.20.4"
-unleash = "10.0.0"
 
 [libraries]
+auth0-jwt = "com.auth0:java-jwt:4.4.0"
+
 flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
 flyway-postgres = { module = "org.flywaydb:flyway-database-postgresql", version.ref = "flyway" }
 
-graphql-kotlin-ktor-server = { module = "com.expediagroup:graphql-kotlin-ktor-server", version.ref = "graphql-kotlin" }
-hikari = { module = "com.zaxxer:HikariCP", version.ref = "hikari" }
+graphqlKotlin-client = { module = "com.expediagroup:graphql-kotlin-client", version.ref = "graphqlKotlin" }
+graphqlKotlin-client-jackson = { module = "com.expediagroup:graphql-kotlin-client-jackson", version.ref = "graphqlKotlin" }
+graphqlKotlin-client-ktor = { module = "com.expediagroup:graphql-kotlin-ktor-client", version.ref = "graphqlKotlin" }
+graphqlKotlin-server-ktor = { module = "com.expediagroup:graphql-kotlin-ktor-server", version.ref = "graphqlKotlin" }
+
+hikari = "com.zaxxer:HikariCP:5.1.0"
 
 jackson-jsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310", version.ref = "jackson" }
 jackson-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
 
-kotlinx-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
-
-kotliquery = { module = "com.github.seratch:kotliquery", version.ref = "kotliquery" }
+kotlinx-coroutines = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1"
+kotliquery = "com.github.seratch:kotliquery:1.9.1"
 
 ktor-client-apache = { module = "io.ktor:ktor-client-apache", version.ref = "ktor" }
-ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-client-contentNegotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-micrometer = { module = "io.ktor:ktor-server-metrics-micrometer", version.ref = "ktor" }
 ktor-serialization-jackson = { module = "io.ktor:ktor-serialization-jackson", version.ref = "ktor" }
 ktor-server-auth = { module = "io.ktor:ktor-server-auth", version.ref = "ktor" }
-ktor-server-auth-jwt = { module = "io.ktor:ktor-server-auth-jwt", version.ref = "ktor" }
-ktor-server-call-id = { module = "io.ktor:ktor-server-call-id", version.ref = "ktor" }
-ktor-server-call-logging = { module = "io.ktor:ktor-server-call-logging", version.ref = "ktor" }
+ktor-server-authJwt = { module = "io.ktor:ktor-server-auth-jwt", version.ref = "ktor" }
+ktor-server-callId = { module = "io.ktor:ktor-server-call-id", version.ref = "ktor" }
+ktor-server-callLogging = { module = "io.ktor:ktor-server-call-logging", version.ref = "ktor" }
 ktor-server-cio = { module = "io.ktor:ktor-server-cio", version.ref = "ktor" }
-ktor-server-content-negotiation = { module = "io.ktor:ktor-server-content-negotiation", version.ref = "ktor" }
+ktor-server-contentNegotiation = { module = "io.ktor:ktor-server-content-negotiation", version.ref = "ktor" }
 ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }
-ktor-server-double-receive = { module = "io.ktor:ktor-server-double-receive", version.ref = "ktor" }
-ktor-server-status-pages = { module = "io.ktor:ktor-server-status-pages", version.ref = "ktor" }
-ktor-server-test-host = { module = "io.ktor:ktor-server-test-host", version.ref = "ktor" }
+ktor-server-doubleReceive = { module = "io.ktor:ktor-server-double-receive", version.ref = "ktor" }
+ktor-server-statusPages = { module = "io.ktor:ktor-server-status-pages", version.ref = "ktor" }
+ktor-server-testHost = { module = "io.ktor:ktor-server-test-host", version.ref = "ktor" }
 ktor-server-websockets = { module = "io.ktor:ktor-server-websockets", version.ref = "ktor" }
 
-logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
-logstash-logback-encoder = { module = "net.logstash.logback:logstash-logback-encoder", version.ref = "logstash-logback-encoder" }
-micrometer-prometheus = { module = "io.micrometer:micrometer-registry-prometheus", version.ref = "micrometer" }
-postgres = { module = "org.postgresql:postgresql", version.ref = "postgres" }
-postgres-socket-factory = { module = "com.google.cloud.sql:postgres-socket-factory", version.ref = "cloudsql" }
-rapids-and-rivers = { module = "com.github.navikt:rapids-and-rivers", version.ref = "rapids-and-rivers" }
-slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
+logback-classic = "ch.qos.logback:logback-classic:1.5.7"
+logback-logstashEncoder = "net.logstash.logback:logstash-logback-encoder:8.0"
+logback-syslog4j = "com.papertrailapp:logback-syslog4j:1.0.0"
+micrometer-prometheus = "io.micrometer:micrometer-registry-prometheus:1.13.3"
+mockOauth2Server = "no.nav.security:mock-oauth2-server:2.1.10"
+nimbus-joseJwt = "com.nimbusds:nimbus-jose-jwt:9.37.3"
+postgresJdbcDriver = "org.postgresql:postgresql:42.7.3"
+postgresSocketFactory = "com.google.cloud.sql:postgres-socket-factory:1.16.0"
+rapidsAndRivers = "com.github.navikt:rapids-and-rivers:2025012712551737978926.de930d8e0feb"
+slf4jApi = "org.slf4j:slf4j-api:2.0.16"
 
-tbs-libs-jackson = { module = "com.github.navikt.tbd-libs:jackson", version.ref = "tbd-libs" }
-tbd-libs-rapids-and-rivers-test = { module = "com.github.navikt.tbd-libs:rapids-and-rivers-test", version.ref = "tbd-libs" }
+tbdLibs-jackson = { module = "com.github.navikt.tbd-libs:jackson", version.ref = "tbdLibs" }
+tbdLibs-rapidsAndRiversTest = { module = "com.github.navikt.tbd-libs:rapids-and-rivers-test", version.ref = "tbdLibs" }
 
-testcontainers-postgresql = { module = "org.testcontainers:postgresql", version.ref = "testcontainers" }
-unleash-client = { module = "io.getunleash:unleash-client-java", version.ref = "unleash" }
+testcontainers-kafka = { module = "org.testcontainers:kafka", version.ref = "testcontainers" }
+testcontainers-postgres = { module = "org.testcontainers:postgresql", version.ref = "testcontainers" }
+
+unleash-client = "io.getunleash:unleash-client-java:10.0.0"
+wiremock = "org.wiremock:wiremock:3.11.0"
 
 [bundles]
-db = [
+flyway-postgres = [
     "flyway-core",
-    "flyway-postgres",
-    "hikari",
-    "kotliquery",
-    "postgres"
+    "flyway-postgres"
+]
+graphql-ktor-client = [
+    "graphqlKotlin-client",
+    "graphqlKotlin-client-jackson",
+    "graphqlKotlin-client-ktor"
 ]
 jackson = [
     "jackson-jsr310",
     "jackson-kotlin",
-    "tbs-libs-jackson"
+    "tbdLibs-jackson"
 ]
 ktor-client = [
     "ktor-client-apache",
-    "ktor-client-content-negotiation",
+    "ktor-client-contentNegotiation",
     "ktor-client-core",
     "ktor-serialization-jackson"
 ]
 ktor-server = [
+    "ktor-micrometer",
     "ktor-serialization-jackson",
     "ktor-server-auth",
-    "ktor-server-auth-jwt",
-    "ktor-server-call-id",
-    "ktor-server-call-logging",
+    "ktor-server-authJwt",
+    "ktor-server-callId",
+    "ktor-server-callLogging",
     "ktor-server-cio",
-    "ktor-server-content-negotiation",
+    "ktor-server-contentNegotiation",
     "ktor-server-core",
-    "ktor-server-double-receive",
-    "ktor-server-status-pages",
+    "ktor-server-doubleReceive",
+    "ktor-server-statusPages",
     "ktor-server-websockets"
 ]
 ktor-server-test = [
-    "ktor-server-test-host"
+    "ktor-server-testHost"
 ]
 logback = [
     "logback-classic",
-    "logstash-logback-encoder",
-    "slf4j-api"
+    "logback-logstashEncoder",
+    "slf4jApi"
 ]
 
 [plugins]
-graphql = { id = "com.expediagroup.graphql", version.ref = "graphql-kotlin" }
+graphql = { id = "com.expediagroup.graphql", version.ref = "graphqlKotlin" }
