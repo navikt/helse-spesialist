@@ -8,45 +8,53 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.engine.apache.Apache
 import io.ktor.client.plugins.ServerResponseException
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
+import io.ktor.serialization.jackson.JacksonConverter
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spleis.graphql.HentSnapshot
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
-import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.net.URI
 import java.util.UUID
 
 class SpleisClient(
-    private val httpClient: HttpClient,
     private val accessTokenGenerator: AccessTokenGenerator,
     private val spleisUrl: URI,
     private val spleisClientId: String,
-    private val retries: Int = 5,
-    private val retryInterval: Long = 5000L,
 ) {
-    private companion object {
-        val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
-        val logg: Logger = LoggerFactory.getLogger(SpleisClientSnapshothenter::class.java)
-        val serializer: GraphQLClientSerializer =
-            GraphQLClientJacksonSerializer(jacksonObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES))
-    }
+    private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
+    private val logg = LoggerFactory.getLogger(javaClass)
+    private val serializer: GraphQLClientSerializer =
+        GraphQLClientJacksonSerializer(jacksonObjectMapper().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES))
+    private val httpClient =
+        HttpClient(Apache) {
+            install(ContentNegotiation) {
+                register(ContentType.Application.Json, JacksonConverter())
+            }
+            engine {
+                socketTimeout = 120_000
+                connectTimeout = 1_000
+                connectionRequestTimeout = 40_000
+            }
+        }
 
     fun hentPerson(fødselsnummer: String): GraphQLPerson? {
         val request = HentSnapshot(variables = HentSnapshot.Variables(fnr = fødselsnummer))
 
         return runBlocking {
-            execute(request, fødselsnummer, retries).data?.person
+            execute(request, fødselsnummer, RETRIES).data?.person
         }
     }
 
@@ -67,11 +75,11 @@ class SpleisClient(
                 is IOException,
                 -> {
                     if (retries > 0) {
-                        delay(retryInterval)
+                        delay(RETRY_INTERVAL)
                         execute(request, fnr, retries - 1)
                     } else {
                         sikkerLogg.error(
-                            "Gir opp etter ${this.retries} forsøk på å hente graphql-snapshot for fødselsnummer: $fnr",
+                            "Gir opp etter $RETRIES forsøk på å hente graphql-snapshot for fødselsnummer: $fnr",
                             e,
                         )
                         throw e
@@ -131,4 +139,9 @@ class SpleisClient(
         val variables: Any?,
         val operationName: String?,
     )
+
+    private companion object {
+        private const val RETRIES = 5
+        private const val RETRY_INTERVAL = 5000L
+    }
 }

@@ -8,7 +8,6 @@ import no.nav.helse.bootstrap.EnvironmentImpl
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.spesialist.api.AzureConfig
 import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
-import no.nav.helse.spesialist.api.bootstrap.httpClient
 import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.client.entraid.EntraIDAccessTokenGenerator
 import no.nav.helse.spesialist.client.entraid.MsGraphGruppekontroll
@@ -45,7 +44,6 @@ internal class RapidApp(env: Map<String, String>) {
     private val snapshothenter =
         SpleisClientSnapshothenter(
             SpleisClient(
-                httpClient = httpClient(120_000, 1_000, 40_000),
                 accessTokenGenerator = accessTokenGenerator,
                 spleisUrl = URI.create(env.getValue("SPLEIS_API_URL")),
                 spleisClientId = env.getValue("SPLEIS_CLIENT_ID"),
