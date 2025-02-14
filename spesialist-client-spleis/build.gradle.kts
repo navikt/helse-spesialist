@@ -6,7 +6,7 @@ plugins {
 }
 
 dependencies {
-    api(project(":spesialist-selve"))
+    api(project(":spesialist-application"))
 
     implementation(libs.bundles.graphql.ktor.client)
     implementation(libs.bundles.ktor.client)

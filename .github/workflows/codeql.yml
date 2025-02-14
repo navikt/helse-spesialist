@@ -40,7 +40,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Gradle build
-        run: ./gradlew :spesialist-selve:build --no-build-cache # felles- og api-modulene bygges fordi selve avhenger av dem
+        run: ./gradlew :spesialist-bootstrap:build --no-build-cache # alle modulene bygges fordi bootstrap avhenger av dem
         env:
           ORG_GRADLE_PROJECT_githubUser: x-access-token
           ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}

@@ -1,5 +1,5 @@
 dependencies {
-    api(project(":spesialist-selve"))
+    api(project(":spesialist-application"))
 
     implementation(libs.rapidsAndRivers)
     implementation(libs.bundles.jackson)

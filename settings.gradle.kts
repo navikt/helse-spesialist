@@ -1,7 +1,7 @@
 rootProject.name = "spesialist"
 include(
-    "spesialist-modell",
-    "spesialist-selve",
+    "spesialist-domain",
+    "spesialist-application",
     "spesialist-api-schema",
     "spesialist-api",
     "spesialist-client-entra-id",

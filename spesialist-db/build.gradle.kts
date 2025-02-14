@@ -1,6 +1,6 @@
 dependencies {
     api(project(":spesialist-db-migrations"))
-    api(project(":spesialist-selve"))
+    api(project(":spesialist-application"))
 
     implementation(libs.kotliquery)
     implementation(libs.bundles.flyway.postgres)

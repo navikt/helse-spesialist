@@ -1,6 +1,6 @@
 dependencies {
     api(project(":spesialist-api-schema"))
-    api(project(":spesialist-selve"))
+    api(project(":spesialist-application"))
 
     implementation(libs.graphqlKotlin.server.ktor)
     implementation(libs.bundles.ktor.server)
