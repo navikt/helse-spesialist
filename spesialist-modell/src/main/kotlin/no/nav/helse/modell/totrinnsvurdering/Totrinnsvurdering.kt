@@ -71,7 +71,7 @@ class Totrinnsvurdering private constructor(
             _overstyringer.add(overstyring)
         }
 
-    internal fun sendTilBeslutter(
+    fun sendTilBeslutter(
         oppgaveId: Long,
         behandlendeSaksbehandler: Saksbehandler,
     ) = oppdatering {
@@ -82,7 +82,7 @@ class Totrinnsvurdering private constructor(
         if (erRetur) erRetur = false
     }
 
-    internal fun sendIRetur(
+    fun sendIRetur(
         oppgaveId: Long,
         beslutter: Saksbehandler,
     ) = oppdatering {
@@ -93,7 +93,7 @@ class Totrinnsvurdering private constructor(
         erRetur = true
     }
 
-    internal fun ferdigstill(utbetalingId: UUID) =
+    fun ferdigstill(utbetalingId: UUID) =
         oppdatering {
             this.utbetalingId = utbetalingId
         }

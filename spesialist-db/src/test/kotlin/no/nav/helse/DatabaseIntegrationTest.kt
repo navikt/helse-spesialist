@@ -27,6 +27,7 @@ import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinjedag
 import no.nav.helse.modell.saksbehandler.handlinger.PåVentÅrsak
+import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
@@ -38,6 +39,8 @@ import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.modell.Dialog
 import no.nav.helse.spesialist.test.TestPerson
 import no.nav.helse.spesialist.test.lagSaksbehandlerident
+import no.nav.helse.spesialist.test.lagSaksbehandlernavn
+import no.nav.helse.spesialist.test.lagTilfeldigSaksbehandlerepost
 import no.nav.helse.spesialist.typer.Kjønn
 import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import no.nav.helse.util.januar
@@ -54,7 +57,8 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected open val HENDELSE_ID: UUID = UUID.randomUUID()
 
     protected val VEDTAKSPERIODE: UUID = testperson.vedtaksperiodeId1
-    protected val ARBEIDSFORHOLD = ArbeidsforholdForTest(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 2), "EN TITTEL", 100)
+    protected val ARBEIDSFORHOLD =
+        ArbeidsforholdForTest(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 2), "EN TITTEL", 100)
     protected open val UTBETALING_ID: UUID = testperson.utbetalingId1
 
     protected open var OPPGAVE_ID = nextLong()
@@ -526,22 +530,33 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
     protected fun opprettTotrinnsvurdering(
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
-        saksbehandler: UUID? = null,
+        saksbehandlerOid: UUID? = null,
         erRetur: Boolean = false,
         ferdigstill: Boolean = false,
     ) {
-        totrinnsvurderingDao.opprettOld(vedtaksperiodeId)
+        val totrinnsvurdering = Totrinnsvurdering.ny(vedtaksperiodeId = vedtaksperiodeId)
+        totrinnsvurderingRepository.lagre(totrinnsvurdering, FNR)
+        saksbehandlerOid?.let {
+            totrinnsvurdering.sendTilBeslutter(
+                OPPGAVE_ID, nySaksbehandler(saksbehandlerOid)
+            )
+        }
 
-        if (saksbehandler != null) {
-            settSaksbehandler(vedtaksperiodeId, saksbehandler)
-        }
-        if (erRetur) {
-            totrinnsvurderingDao.settErRetur(vedtaksperiodeId)
-        }
-        if (ferdigstill) {
-            totrinnsvurderingDao.ferdigstill(vedtaksperiodeId)
-        }
+        if (erRetur) totrinnsvurdering.sendIRetur(OPPGAVE_ID, nySaksbehandler(UUID.randomUUID()))
+
+        if (ferdigstill) totrinnsvurdering.ferdigstill(UTBETALING_ID)
+
+        totrinnsvurderingRepository.lagre(totrinnsvurdering, FNR)
     }
+
+    private fun nySaksbehandler(saksbehandlerOid: UUID): no.nav.helse.modell.saksbehandler.Saksbehandler =
+        no.nav.helse.modell.saksbehandler.Saksbehandler(
+            oid = saksbehandlerOid,
+            epostadresse = lagTilfeldigSaksbehandlerepost(),
+            navn = lagSaksbehandlernavn(),
+            ident = lagSaksbehandlerident(),
+            tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang
+        )
 
     protected fun opprettUtbetalingKobling(
         vedtaksperiodeId: UUID,

@@ -73,7 +73,7 @@ internal class PgBehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
             egenskaper = listOf(EGENSKAP, EgenskapForDatabase.BESLUTTER)
         )
         assertEquals(0, behandlingsstatistikkDao.getAntallTilgjengeligeBeslutteroppgaver())
-        opprettTotrinnsvurdering(saksbehandler = SAKSBEHANDLER_OID)
+        opprettTotrinnsvurdering(saksbehandlerOid = SAKSBEHANDLER_OID)
         assertEquals(1, behandlingsstatistikkDao.getAntallTilgjengeligeBeslutteroppgaver())
         oppgaveDao.updateOppgave(
             oppgaveId = OPPGAVE_ID,
@@ -89,7 +89,7 @@ internal class PgBehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
         opprettSaksbehandler()
         utbetalingsopplegg(1000, 0)
         assertEquals(0, behandlingsstatistikkDao.getAntallFullførteBeslutteroppgaver(LocalDate.now().minusDays(1)))
-        opprettTotrinnsvurdering(saksbehandler = SAKSBEHANDLER_OID, ferdigstill = true)
+        opprettTotrinnsvurdering(saksbehandlerOid = SAKSBEHANDLER_OID, ferdigstill = true)
         assertEquals(1, behandlingsstatistikkDao.getAntallFullførteBeslutteroppgaver(LocalDate.now().minusDays(1)))
     }
 

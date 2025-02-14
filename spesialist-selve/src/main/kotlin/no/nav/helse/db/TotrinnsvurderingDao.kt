@@ -8,18 +8,5 @@ interface TotrinnsvurderingDao {
 
     fun oppdater(totrinnsvurderingFraDatabase: TotrinnsvurderingFraDatabase)
 
-    fun settBeslutter(
-        oppgaveId: Long,
-        saksbehandlerOid: UUID,
-    )
-
-    fun settErRetur(vedtaksperiodeId: UUID)
-
-    fun opprettOld(vedtaksperiodeId: UUID): TotrinnsvurderingOld
-
-    fun hentAktiv(oppgaveId: Long): TotrinnsvurderingOld?
-
     fun hentAktiv(vedtaksperiodeId: UUID): TotrinnsvurderingOld?
-
-    fun ferdigstill(vedtaksperiodeId: UUID)
 }

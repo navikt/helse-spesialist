@@ -11,12 +11,16 @@ import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettInntektskildeDto
 import no.nav.helse.modell.kommando.TestMelding
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
+import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.test.TestPerson
+import no.nav.helse.spesialist.test.lagSaksbehandlerident
+import no.nav.helse.spesialist.test.lagSaksbehandlernavn
+import no.nav.helse.spesialist.test.lagTilfeldigSaksbehandlerepost
 import no.nav.helse.spesialist.typer.Kjønn
 import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import org.junit.jupiter.api.AfterEach
@@ -92,7 +96,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val personDao = sessionContext.personDao
     internal val oppgaveDao = repositories.oppgaveDao
     internal val periodehistorikkApiDao = repositories.periodehistorikkApiDao
-    internal val periodehistorikkDao = repositories.periodehistorikkDao
     internal val vedtakDao = repositories.vedtakDao
     internal val commandContextDao = repositories.commandContextDao
     internal val saksbehandlerDao = repositories.saksbehandlerDao
@@ -107,6 +110,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val annulleringRepository = repositories.annulleringRepository
     private val pgPersonRepository = sessionContext.personRepository
     private val inntektskilderRepository = sessionContext.inntektskilderRepository
+    private val totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository
 
     internal fun testhendelse(
         hendelseId: UUID = HENDELSE_ID,
@@ -166,35 +170,33 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
     protected fun opprettTotrinnsvurdering(
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
-        saksbehandler: UUID? = null,
+        saksbehandlerOid: UUID? = null,
         erRetur: Boolean = false,
         ferdigstill: Boolean = false,
     ) {
-        totrinnsvurderingDao.opprettOld(vedtaksperiodeId)
+        val totrinnsvurdering = Totrinnsvurdering.ny(vedtaksperiodeId = vedtaksperiodeId)
+        totrinnsvurderingRepository.lagre(totrinnsvurdering, FNR)
+        saksbehandlerOid?.let {
+            totrinnsvurdering.sendTilBeslutter(
+                OPPGAVE_ID, nySaksbehandler(saksbehandlerOid)
+            )
+        }
 
-        if (saksbehandler != null) {
-            settSaksbehandler(vedtaksperiodeId, saksbehandler)
-        }
-        if (erRetur) {
-            totrinnsvurderingDao.settErRetur(vedtaksperiodeId)
-        }
-        if (ferdigstill) {
-            totrinnsvurderingDao.ferdigstill(vedtaksperiodeId)
-        }
+        if (erRetur) totrinnsvurdering.sendIRetur(OPPGAVE_ID, nySaksbehandler(UUID.randomUUID()))
+
+        if (ferdigstill) totrinnsvurdering.ferdigstill(UTBETALING_ID)
+
+        totrinnsvurderingRepository.lagre(totrinnsvurdering, FNR)
     }
 
-    protected fun settSaksbehandler(
-        vedtaksperiodeId: UUID,
-        saksbehandlerOid: UUID,
-    ) = dbQuery.update(
-        """
-        UPDATE totrinnsvurdering
-        SET saksbehandler = :saksbehandlerOid, oppdatert = now()
-        WHERE vedtaksperiode_id = :vedtaksperiodeId AND utbetaling_id_ref IS null
-        """.trimIndent(),
-        "vedtaksperiodeId" to vedtaksperiodeId,
-        "saksbehandlerOid" to saksbehandlerOid,
-    )
+    private fun nySaksbehandler(saksbehandlerOid: UUID): no.nav.helse.modell.saksbehandler.Saksbehandler =
+        no.nav.helse.modell.saksbehandler.Saksbehandler(
+            oid = saksbehandlerOid,
+            epostadresse = lagTilfeldigSaksbehandlerepost(),
+            navn = lagSaksbehandlernavn(),
+            ident = lagSaksbehandlerident(),
+            tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang
+        )
 
     private fun opprettCommandContext(
         hendelse: TestMelding,

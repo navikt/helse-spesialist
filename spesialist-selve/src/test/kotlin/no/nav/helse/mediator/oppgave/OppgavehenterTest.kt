@@ -184,12 +184,7 @@ class OppgavehenterTest {
             totrinnsvurdering?.let { nextLong() to it }
 
         override fun oppdater(totrinnsvurderingFraDatabase: TotrinnsvurderingFraDatabase) {}
-        override fun settBeslutter(oppgaveId: Long, saksbehandlerOid: UUID) = error("Not implemented in test")
-        override fun settErRetur(vedtaksperiodeId: UUID) = error("Not implemented in test")
-        override fun opprettOld(vedtaksperiodeId: UUID) = error("Not implemented in test")
-        override fun hentAktiv(oppgaveId: Long) = error("Not implemented in test")
         override fun hentAktiv(vedtaksperiodeId: UUID) = error("Not implemented in test")
-        override fun ferdigstill(vedtaksperiodeId: UUID) = error("Not implemented in test")
     }
 
     private val saksbehandlerDao = object : SaksbehandlerDao {

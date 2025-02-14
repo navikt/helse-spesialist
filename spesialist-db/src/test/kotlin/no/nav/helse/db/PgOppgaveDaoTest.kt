@@ -457,7 +457,7 @@ class PgOppgaveDaoTest : DatabaseIntegrationTest() {
         opprettSaksbehandler(saksbehandlerOID = saksbehandlerOid)
         opprettSaksbehandler(beslutterOid, navn = "NAVN TIL BESLUTTER")
         opprettSaksbehandler(annenSaksbehandlerOid)
-        opprettTotrinnsvurdering(vedtaksperiodeId = VEDTAKSPERIODE, saksbehandler = saksbehandlerOid, ferdigstill = true)
+        opprettTotrinnsvurdering(vedtaksperiodeId = VEDTAKSPERIODE, saksbehandlerOid = saksbehandlerOid, ferdigstill = true)
         ferdigstillOppgave(OPPGAVE_ID, ferdigstiltAvOid = beslutterOid, ferdigstiltAv = "NAVN TIL BESLUTTER")
 
         val behandletIDagForSaksbehandler = oppgaveDao.finnBehandledeOppgaver(saksbehandlerOid)
