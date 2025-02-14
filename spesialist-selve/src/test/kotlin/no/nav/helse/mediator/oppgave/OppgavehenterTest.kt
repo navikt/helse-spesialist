@@ -184,7 +184,6 @@ class OppgavehenterTest {
             totrinnsvurdering?.let { nextLong() to it }
 
         override fun oppdater(totrinnsvurderingFraDatabase: TotrinnsvurderingFraDatabase) {}
-        override fun hentAktiv(vedtaksperiodeId: UUID) = error("Not implemented in test")
     }
 
     private val saksbehandlerDao = object : SaksbehandlerDao {

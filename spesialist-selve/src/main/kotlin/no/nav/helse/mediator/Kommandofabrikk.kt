@@ -31,7 +31,6 @@ import no.nav.helse.modell.person.SøknadSendtCommand
 import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMelding
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import no.nav.helse.modell.utbetaling.UtbetalingEndretCommand
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovCommand
@@ -167,7 +166,7 @@ class Kommandofabrikk(
             reservasjonDao = sessionContext.reservasjonDao,
             tildelingDao = sessionContext.tildelingDao,
             oppgaveDao = sessionContext.oppgaveDao,
-            totrinnsvurderingService = lagTotrinnsvurderingService(sessionContext),
+            totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository,
             featureToggles = featureToggles,
         )
 
@@ -271,7 +270,7 @@ class Kommandofabrikk(
             oppgaveDao = sessionContext.oppgaveDao,
             tildelingDao = sessionContext.tildelingDao,
             oppgaveService = transaksjonellOppgaveService(sessionContext),
-            totrinnsvurderingService = lagTotrinnsvurderingService(sessionContext),
+            totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository,
             json = hendelse.toJson(),
         )
 
@@ -288,7 +287,7 @@ class Kommandofabrikk(
             reservasjonDao = sessionContext.reservasjonDao,
             tildelingDao = sessionContext.tildelingDao,
             oppgaveDao = sessionContext.oppgaveDao,
-            totrinnsvurderingService = lagTotrinnsvurderingService(sessionContext),
+            totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository,
         )
 
     internal fun stansAutomatiskBehandling(
@@ -473,9 +472,4 @@ class Kommandofabrikk(
         }
         registrerTidsbrukForHendelse(hendelsenavn, kjøretidMs)
     }
-
-    private fun lagTotrinnsvurderingService(sessionContext: SessionContext) =
-        TotrinnsvurderingService(
-            totrinnsvurderingDao = sessionContext.totrinnsvurderingDao,
-        )
 }

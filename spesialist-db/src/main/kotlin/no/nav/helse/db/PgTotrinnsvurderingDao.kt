@@ -1,10 +1,7 @@
 package no.nav.helse.db
 
-import kotliquery.Query
 import kotliquery.Session
 import no.nav.helse.db.HelseDao.Companion.asSQL
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
-import java.util.UUID
 import javax.sql.DataSource
 
 class PgTotrinnsvurderingDao private constructor(
@@ -65,27 +62,4 @@ class PgTotrinnsvurderingDao private constructor(
             "vedtaksperiode_id" to totrinnsvurderingFraDatabase.vedtaksperiodeId,
         ).update()
     }
-
-    override fun hentAktiv(vedtaksperiodeId: UUID) =
-        asSQL(
-            """
-            SELECT * FROM totrinnsvurdering
-            WHERE vedtaksperiode_id = :vedtaksperiodeId
-            AND utbetaling_id_ref IS NULL
-            """.trimIndent(),
-            "vedtaksperiodeId" to vedtaksperiodeId,
-        ).tilTotrinnsvurderingOld()
-
-    private fun Query.tilTotrinnsvurderingOld() =
-        singleOrNull { row ->
-            TotrinnsvurderingOld(
-                vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
-                erRetur = row.boolean("er_retur"),
-                saksbehandler = row.uuidOrNull("saksbehandler"),
-                beslutter = row.uuidOrNull("beslutter"),
-                utbetalingIdRef = row.longOrNull("utbetaling_id_ref"),
-                opprettet = row.localDateTime("opprettet"),
-                oppdatert = row.localDateTimeOrNull("oppdatert"),
-            )
-        }
 }

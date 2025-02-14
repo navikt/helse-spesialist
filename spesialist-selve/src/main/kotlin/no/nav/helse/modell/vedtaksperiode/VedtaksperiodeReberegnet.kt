@@ -19,7 +19,7 @@ import no.nav.helse.modell.kommando.ReserverPersonHvisTildeltCommand
 import no.nav.helse.modell.kommando.VedtaksperiodeReberegnetPeriodehistorikk
 import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
+import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import java.util.UUID
 
 class VedtaksperiodeReberegnet(
@@ -61,7 +61,7 @@ internal class VedtaksperiodeReberegnetCommand(
     reservasjonDao: ReservasjonDao,
     tildelingDao: TildelingDao,
     oppgaveDao: OppgaveDao,
-    totrinnsvurderingService: TotrinnsvurderingService,
+    totrinnsvurderingRepository: TotrinnsvurderingRepository,
     featureToggles: FeatureToggles,
 ) : MacroCommand() {
     override val commands: List<Command> =
@@ -78,7 +78,7 @@ internal class VedtaksperiodeReberegnetCommand(
                     reservasjonDao = reservasjonDao,
                     tildelingDao = tildelingDao,
                     oppgaveDao = oppgaveDao,
-                    totrinnsvurderingService = totrinnsvurderingService,
+                    totrinnsvurderingRepository = totrinnsvurderingRepository,
                 ),
             )
             if (featureToggles.skalAvbryteOppgavePåEtSenereTidspunkt()) {
@@ -98,7 +98,7 @@ internal class VedtaksperiodeReberegnetCommand(
                     reservasjonDao = reservasjonDao,
                     tildelingDao = tildelingDao,
                     oppgaveDao = oppgaveDao,
-                    totrinnsvurderingService = totrinnsvurderingService,
+                    totrinnsvurderingRepository = totrinnsvurderingRepository,
                 ),
             )
         }

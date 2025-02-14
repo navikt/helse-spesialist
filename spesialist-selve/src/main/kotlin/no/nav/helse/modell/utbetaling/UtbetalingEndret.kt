@@ -15,7 +15,7 @@ import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.ReserverPersonHvisTildeltCommand
 import no.nav.helse.modell.oppgave.OppdaterOppgavestatusCommand
 import no.nav.helse.modell.person.Person
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
+import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -89,7 +89,7 @@ internal class UtbetalingEndretCommand(
     oppgaveDao: OppgaveDao,
     tildelingDao: TildelingDao,
     oppgaveService: OppgaveService,
-    totrinnsvurderingService: TotrinnsvurderingService,
+    totrinnsvurderingRepository: TotrinnsvurderingRepository,
     json: String,
 ) : MacroCommand() {
     override val commands: List<Command> =
@@ -114,7 +114,7 @@ internal class UtbetalingEndretCommand(
                 reservasjonDao = reservasjonDao,
                 tildelingDao = tildelingDao,
                 oppgaveDao = oppgaveDao,
-                totrinnsvurderingService = totrinnsvurderingService,
+                totrinnsvurderingRepository = totrinnsvurderingRepository,
             ),
             OppdaterOppgavestatusCommand(utbetalingId, gjeldendeStatus, oppgaveService),
         )

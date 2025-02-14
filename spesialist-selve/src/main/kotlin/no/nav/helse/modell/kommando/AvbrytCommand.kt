@@ -5,7 +5,7 @@ import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.mediator.oppgave.OppgaveService
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
+import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import java.util.UUID
 
 internal class AvbrytCommand(
@@ -16,7 +16,7 @@ internal class AvbrytCommand(
     reservasjonDao: ReservasjonDao,
     tildelingDao: TildelingDao,
     oppgaveDao: OppgaveDao,
-    totrinnsvurderingService: TotrinnsvurderingService,
+    totrinnsvurderingRepository: TotrinnsvurderingRepository,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
@@ -25,7 +25,7 @@ internal class AvbrytCommand(
                 reservasjonDao = reservasjonDao,
                 tildelingDao = tildelingDao,
                 oppgaveDao = oppgaveDao,
-                totrinnsvurderingService = totrinnsvurderingService,
+                totrinnsvurderingRepository = totrinnsvurderingRepository,
             ),
             AvbrytOppgaveCommand(vedtaksperiodeId = vedtaksperiodeId, oppgaveService = oppgaveService),
             AvbrytContextCommand(vedtaksperiodeId = vedtaksperiodeId, commandContextDao = commandContextDao),
