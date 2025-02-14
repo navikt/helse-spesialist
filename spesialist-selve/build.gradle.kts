@@ -2,6 +2,12 @@ dependencies {
     api(project(":spesialist-modell"))
 
     implementation(libs.bundles.logging)
+
+    // Nødvendig for audit logging, men dette biblioteket har ikke blitt oppdatert siden august 2014 (!)
+    implementation("com.papertrailapp:logback-syslog4j:1.0.0") {
+        exclude(group = "ch.qos.logback")
+    }
+
     implementation(libs.kotlinx.coroutines)
     implementation(libs.micrometer.prometheus)
 }

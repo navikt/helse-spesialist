@@ -1,6 +1,5 @@
 val junitJupiterVersion = "5.11.4"
 val jvmTargetVersion = "21"
-val logbackSyslog4jVersion = "1.0.0"
 val mockkVersion = "1.13.10"
 
 plugins {
@@ -40,11 +39,6 @@ allprojects {
     }
 
     dependencies {
-        implementation("com.papertrailapp:logback-syslog4j:$logbackSyslog4jVersion") // August, 2014
-        {
-            exclude(group = "ch.qos.logback")
-        }
-
         constraints {
             implementation("io.netty:netty-all:4.1.117.Final") {
                 because("sårbarhet i 4.1.107.final")
