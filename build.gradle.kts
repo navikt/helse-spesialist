@@ -36,8 +36,8 @@ allprojects {
 
     dependencies {
         constraints {
-            implementation("io.netty:netty-all:4.1.117.Final") {
-                because("sårbarhet i 4.1.107.final")
+            implementation("io.netty:netty-codec-http:4.1.118.Final") {
+                because("sårbarhet i >= 4.1.91.Final, <= 4.1.117.Final")
             }
             implementation("org.apache.commons:commons-compress:1.27.1") {
                 because("org.testcontainers:postgresql:1.19.7 -> 1.24.0 har en sårbarhet")
