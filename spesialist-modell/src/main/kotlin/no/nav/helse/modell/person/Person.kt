@@ -113,13 +113,6 @@ class Person private constructor(
             ?.vedtaksperiodeForkastet()
     }
 
-    internal fun supplerVedtakFattet(sykepengevedtakBuilder: SykepengevedtakBuilder) {
-        sykepengevedtakBuilder
-            .aktørId(aktørId)
-            .fødselsnummer(fødselsnummer)
-        meldingslogg.nyMelding(sykepengevedtakBuilder.build())
-    }
-
     fun nySpleisBehandling(spleisBehandling: SpleisBehandling) {
         vedtaksperioder
             .find { spleisBehandling.erRelevantFor(it.vedtaksperiodeId()) }
