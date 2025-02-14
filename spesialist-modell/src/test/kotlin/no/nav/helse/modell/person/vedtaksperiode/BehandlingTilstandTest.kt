@@ -11,132 +11,132 @@ internal class BehandlingTilstandTest {
 
     @Test
     fun `Går fra MedVedtaksforslag til VidereBehandlingAvklares dersom utbetalingen blir forkastet`() {
-        val generasjonId = UUID.randomUUID()
-        val generasjon = generasjon(generasjonId, UUID.randomUUID())
+        val behandlingId = UUID.randomUUID()
+        val behandling = behandling(behandlingId, UUID.randomUUID())
 
         val utbetalingId = UUID.randomUUID()
-        generasjon.håndterNyUtbetaling(utbetalingId)
-        generasjon.assertTilstand(TilstandDto.KlarTilBehandling)
-        generasjon.håndterForkastetUtbetaling(utbetalingId)
-        generasjon.assertTilstand(TilstandDto.VidereBehandlingAvklares)
-        generasjon.assertUtbetaling(null)
+        behandling.håndterNyUtbetaling(utbetalingId)
+        behandling.assertTilstand(TilstandDto.KlarTilBehandling)
+        behandling.håndterForkastetUtbetaling(utbetalingId)
+        behandling.assertTilstand(TilstandDto.VidereBehandlingAvklares)
+        behandling.assertUtbetaling(null)
     }
 
     @Test
     fun `Går fra VidereBehandlingAvklares til AvsluttetUtenVedtak ved avsluttet uten vedtak`() {
-        val generasjonId = UUID.randomUUID()
-        val generasjon = generasjon(generasjonId, UUID.randomUUID())
-        generasjon.assertTilstand(TilstandDto.VidereBehandlingAvklares)
-        generasjon.avsluttetUtenVedtak()
-        generasjon.assertTilstand(TilstandDto.AvsluttetUtenVedtak)
+        val behandlingId = UUID.randomUUID()
+        val behandling = behandling(behandlingId, UUID.randomUUID())
+        behandling.assertTilstand(TilstandDto.VidereBehandlingAvklares)
+        behandling.avsluttetUtenVedtak()
+        behandling.assertTilstand(TilstandDto.AvsluttetUtenVedtak)
     }
 
     @Test
     fun `Går fra VidereBehandlingAvklares til AvsluttetUtenVedtakMedVarsler ved avsluttet uten vedtak og har varsler`() {
-        val generasjonId = UUID.randomUUID()
-        val generasjon = generasjon(generasjonId, UUID.randomUUID())
-        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), UUID.randomUUID()))
-        generasjon.assertTilstand(TilstandDto.VidereBehandlingAvklares)
-        generasjon.avsluttetUtenVedtak()
-        generasjon.assertTilstand(TilstandDto.AvsluttetUtenVedtak)
+        val behandlingId = UUID.randomUUID()
+        val behandling = behandling(behandlingId, UUID.randomUUID())
+        behandling.håndterNyttVarsel(Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), UUID.randomUUID()))
+        behandling.assertTilstand(TilstandDto.VidereBehandlingAvklares)
+        behandling.avsluttetUtenVedtak()
+        behandling.assertTilstand(TilstandDto.AvsluttetUtenVedtak)
     }
 
     @Test
     fun `Går fra VidereBehandlingAvklares til KlarTilBehandling når vi mottar utbetaling`() {
-        val generasjonId = UUID.randomUUID()
-        val generasjon = generasjon(generasjonId, UUID.randomUUID())
-        generasjon.assertTilstand(TilstandDto.VidereBehandlingAvklares)
-        generasjon.håndterNyUtbetaling(UUID.randomUUID())
-        generasjon.assertTilstand(TilstandDto.KlarTilBehandling)
+        val behandlingId = UUID.randomUUID()
+        val behandling = behandling(behandlingId, UUID.randomUUID())
+        behandling.assertTilstand(TilstandDto.VidereBehandlingAvklares)
+        behandling.håndterNyUtbetaling(UUID.randomUUID())
+        behandling.assertTilstand(TilstandDto.KlarTilBehandling)
     }
 
     @Test
     fun `Går fra KlarTilBehandling til VedtakFattet når vi mottar vedtak_fattet`() {
-        val generasjonId = UUID.randomUUID()
-        val generasjon = generasjon(generasjonId, UUID.randomUUID())
-        generasjon.assertTilstand(TilstandDto.VidereBehandlingAvklares)
-        generasjon.håndterNyUtbetaling(UUID.randomUUID())
-        generasjon.assertTilstand(TilstandDto.KlarTilBehandling)
-        generasjon.håndterVedtakFattet()
-        generasjon.assertTilstand(TilstandDto.VedtakFattet)
+        val behandlingId = UUID.randomUUID()
+        val behandling = behandling(behandlingId, UUID.randomUUID())
+        behandling.assertTilstand(TilstandDto.VidereBehandlingAvklares)
+        behandling.håndterNyUtbetaling(UUID.randomUUID())
+        behandling.assertTilstand(TilstandDto.KlarTilBehandling)
+        behandling.håndterVedtakFattet()
+        behandling.assertTilstand(TilstandDto.VedtakFattet)
     }
 
     @Test
     fun `Håndterer ikke vedtak fattet i VedtakFattet tilstand`() {
-        val generasjonId = UUID.randomUUID()
+        val behandlingId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon = generasjon(generasjonId, vedtaksperiodeId)
+        val behandling = behandling(behandlingId, vedtaksperiodeId)
 
         val utbetalingId = UUID.randomUUID()
-        generasjon.håndterNyUtbetaling(utbetalingId)
+        behandling.håndterNyUtbetaling(utbetalingId)
 
-        generasjon.assertTilstand(TilstandDto.KlarTilBehandling)
-        generasjon.håndterVedtakFattet()
-        generasjon.assertTilstand(TilstandDto.VedtakFattet)
+        behandling.assertTilstand(TilstandDto.KlarTilBehandling)
+        behandling.håndterVedtakFattet()
+        behandling.assertTilstand(TilstandDto.VedtakFattet)
 
-        generasjon.håndterVedtakFattet()
-        generasjon.assertTilstand(TilstandDto.VedtakFattet)
+        behandling.håndterVedtakFattet()
+        behandling.assertTilstand(TilstandDto.VedtakFattet)
     }
 
     @Test
     fun `AUU - håndterer ikke vedtak fattet`() {
-        val generasjonId = UUID.randomUUID()
+        val behandlingId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon = generasjon(generasjonId, vedtaksperiodeId)
-        generasjon.assertTilstand(TilstandDto.VidereBehandlingAvklares)
+        val behandling = behandling(behandlingId, vedtaksperiodeId)
+        behandling.assertTilstand(TilstandDto.VidereBehandlingAvklares)
 
-        generasjon.avsluttetUtenVedtak()
-        generasjon.assertTilstand(TilstandDto.AvsluttetUtenVedtak)
+        behandling.avsluttetUtenVedtak()
+        behandling.assertTilstand(TilstandDto.AvsluttetUtenVedtak)
 
-        generasjon.håndterVedtakFattet()
-        generasjon.assertTilstand(TilstandDto.AvsluttetUtenVedtak)
+        behandling.håndterVedtakFattet()
+        behandling.assertTilstand(TilstandDto.AvsluttetUtenVedtak)
     }
 
     @Test
     fun `AUU - håndterer nytt varsel medfører tilstandsbytte`() {
-        val generasjonId = UUID.randomUUID()
+        val behandlingId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon = generasjon(generasjonId, vedtaksperiodeId)
+        val behandling = behandling(behandlingId, vedtaksperiodeId)
 
-        generasjon.avsluttetUtenVedtak()
-        generasjon.assertTilstand(TilstandDto.AvsluttetUtenVedtak)
+        behandling.avsluttetUtenVedtak()
+        behandling.assertTilstand(TilstandDto.AvsluttetUtenVedtak)
 
-        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId))
-        generasjon.assertTilstand(TilstandDto.AvsluttetUtenVedtakMedVarsler)
-        generasjon.assertAntallVarsler(1)
+        behandling.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId))
+        behandling.assertTilstand(TilstandDto.AvsluttetUtenVedtakMedVarsler)
+        behandling.assertAntallVarsler(1)
     }
 
     @Test
     fun `AvsluttetUtenVedtakMedVarsler - godkjent forlengelse medfører tilstandsendring`() {
-        val generasjonId = UUID.randomUUID()
+        val behandlingId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon = generasjon(generasjonId, vedtaksperiodeId)
+        val behandling = behandling(behandlingId, vedtaksperiodeId)
 
-        generasjon.avsluttetUtenVedtak()
-        generasjon.assertTilstand(TilstandDto.AvsluttetUtenVedtak)
+        behandling.avsluttetUtenVedtak()
+        behandling.assertTilstand(TilstandDto.AvsluttetUtenVedtak)
 
-        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId))
-        generasjon.assertTilstand(TilstandDto.AvsluttetUtenVedtakMedVarsler)
-        generasjon.assertAntallVarsler(1)
+        behandling.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId))
+        behandling.assertTilstand(TilstandDto.AvsluttetUtenVedtakMedVarsler)
+        behandling.assertAntallVarsler(1)
 
-        generasjon.håndterGodkjentAvSaksbehandler()
-        generasjon.assertTilstand(TilstandDto.AvsluttetUtenVedtak)
+        behandling.håndterGodkjentAvSaksbehandler()
+        behandling.assertTilstand(TilstandDto.AvsluttetUtenVedtak)
     }
 
     @Test
     fun `AvsluttetUtenVedtakMedVarsler - håndterer ikke vedtak fattet`() {
-        val generasjonId = UUID.randomUUID()
+        val behandlingId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
-        val generasjon = generasjon(generasjonId, vedtaksperiodeId)
+        val behandling = behandling(behandlingId, vedtaksperiodeId)
 
-        generasjon.avsluttetUtenVedtak()
-        generasjon.assertTilstand(TilstandDto.AvsluttetUtenVedtak)
+        behandling.avsluttetUtenVedtak()
+        behandling.assertTilstand(TilstandDto.AvsluttetUtenVedtak)
 
-        generasjon.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId))
-        generasjon.assertTilstand(TilstandDto.AvsluttetUtenVedtakMedVarsler)
+        behandling.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId))
+        behandling.assertTilstand(TilstandDto.AvsluttetUtenVedtakMedVarsler)
 
-        generasjon.håndterVedtakFattet()
-        generasjon.assertTilstand(TilstandDto.AvsluttetUtenVedtakMedVarsler)
+        behandling.håndterVedtakFattet()
+        behandling.assertTilstand(TilstandDto.AvsluttetUtenVedtakMedVarsler)
     }
 
     private fun Behandling.assertTilstand(tilstandDto: TilstandDto) {
@@ -151,14 +151,14 @@ internal class BehandlingTilstandTest {
         assertEquals(utbetalingId, toDto().utbetalingId)
     }
 
-    private fun generasjon(
-        generasjonId: UUID = UUID.randomUUID(),
+    private fun behandling(
+        behandlingId: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         fom: LocalDate = 1.januar,
         tom: LocalDate = 31.januar,
         skjæringstidspunkt: LocalDate = 1.januar,
     ) = Behandling(
-        id = generasjonId,
+        id = behandlingId,
         vedtaksperiodeId = vedtaksperiodeId,
         fom = fom,
         tom = tom,
