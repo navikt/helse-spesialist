@@ -4,7 +4,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 // Alle Varselkoder må følge formatet
-internal const val VARSELKODEFORMAT = "SB_\\D{2}_\\d{1,3}"
+internal const val VARSELKODEFORMAT = "(SB_|RV_)\\D{2}_\\d{1,3}"
 private val regex = "^$VARSELKODEFORMAT$".toRegex()
 
 // RV = Risikovurdering
@@ -38,6 +38,8 @@ enum class Varselkode(
     SB_EX_5(
         "Det har kommet inn dokumentasjon som igangsetter en revurdering, og den sykmeldte er nå registrert på bokommune 0393 (NAV utland og fellestjenester)",
     ),
+
+    RV_IV_2("Over 25% avvik"),
     ;
 
     init {

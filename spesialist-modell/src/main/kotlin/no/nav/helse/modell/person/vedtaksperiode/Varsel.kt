@@ -88,7 +88,7 @@ class Varsel(
 
         internal fun List<Varsel>.inneholderAktivtVarselOmAvvik(): Boolean = any { it.status == AKTIV && it.varselkode == "RV_IV_2" }
 
-        internal fun List<Varsel>.inneholderVarselOmAvvik(): Boolean = any { it.varselkode == "RV_IV_2" }
+        fun List<Varsel>.inneholderVarselOmAvvik(): Boolean = any { it.varselkode == "RV_IV_2" }
 
         internal fun List<Varsel>.inneholderVarselOmTilbakedatering(): Boolean = any { it.status == AKTIV && it.varselkode == "RV_SØ_3" }
 

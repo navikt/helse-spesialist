@@ -2,6 +2,8 @@ package no.nav.helse.modell.kommando
 
 import no.nav.helse.db.AvviksvurderingRepository
 import no.nav.helse.modell.melding.Behov
+import no.nav.helse.modell.person.vedtaksperiode.Behandling
+import no.nav.helse.modell.person.vedtaksperiode.Varselkode.RV_IV_2
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.modell.vilkårsprøving.AvviksvurderingBehovLøsning
 import no.nav.helse.modell.vilkårsprøving.Beregningsgrunnlag
@@ -14,6 +16,7 @@ class VurderBehovForAvviksvurdering(
     private val avviksvurderingRepository: AvviksvurderingRepository,
     private val beregningsgrunnlag: Beregningsgrunnlag,
     private val vilkårsgrunnlagId: UUID,
+    private val behandling: Behandling,
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
         // TODO: Toggle her
@@ -37,6 +40,8 @@ class VurderBehovForAvviksvurdering(
                         beregningsgrunnlag = løsning.beregningsgrunnlag,
                     )
                 avviksvurderingRepository.lagre(avviksvurdering)
+
+                if (!løsning.harAkseptabeltAvvik) behandling.håndterNyttVarsel(RV_IV_2.nyttVarsel(behandling.vedtaksperiodeId()))
                 // TODO: lage varsel dersom over akseptabelt avvik
             }
             is AvviksvurderingBehovLøsning.TrengerIkkeNyVurdering -> {

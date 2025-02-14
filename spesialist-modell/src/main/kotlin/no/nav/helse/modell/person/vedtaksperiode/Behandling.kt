@@ -59,6 +59,10 @@ class Behandling private constructor(
 
     internal fun skjæringstidspunkt() = skjæringstidspunkt
 
+    fun vedtaksperiodeId() = vedtaksperiodeId
+
+    fun varsler(): List<Varsel> = varsler.toList()
+
     internal fun unikId() = id
 
     internal fun hasterÅBehandle() = varsler.inneholderVarselOmNegativtBeløp()
