@@ -4,7 +4,7 @@ import com.expediagroup.graphql.plugin.gradle.tasks.GraphQLIntrospectSchemaTask
 val graphqlKotlinVersion = "8.3.0"
 
 plugins {
-    id("com.expediagroup.graphql") version libs.versions.graphql.kotlin
+    alias(libs.plugins.graphql)
 }
 
 dependencies {

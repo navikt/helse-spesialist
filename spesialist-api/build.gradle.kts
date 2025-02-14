@@ -1,7 +1,3 @@
-plugins {
-    id("com.expediagroup.graphql") version libs.versions.graphql.kotlin
-}
-
 dependencies {
     api(project(":spesialist-api-schema"))
     api(project(":spesialist-selve"))

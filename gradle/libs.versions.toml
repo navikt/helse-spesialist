@@ -106,3 +106,6 @@ db = [
     "hikari",
     "postgres"
 ]
+
+[plugins]
+graphql = { id = "com.expediagroup.graphql", version.ref = "graphql-kotlin" }
