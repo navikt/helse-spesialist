@@ -1,6 +1,8 @@
 package no.nav.helse.modell.kommando
 
 import no.nav.helse.db.AvviksvurderingRepository
+import no.nav.helse.mediator.CommandContextObserver
+import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.vedtaksperiode.Behandling
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderVarselOmAvvik
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
@@ -17,6 +19,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertInstanceOf
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
@@ -71,9 +74,37 @@ class VurderBehovForAvviksvurderingTest {
         override fun finnAvviksvurderinger(fødselsnummer: String): List<Avviksvurdering> = error("Ikke implementert i test")
     }
 
+    private val observer = object: CommandContextObserver {
+        val behov = mutableListOf<Behov>()
+        override fun behov(behov: Behov, commandContextId: UUID) {
+            this.behov.add(behov)
+        }
+    }
+
+    @Test
+    fun `Ikke send ut behov dersom inngangsvilkårene ikke er vurdert i Spleis`() {
+        val command = VurderBehovForAvviksvurdering(fødselsnummer, skjæringstidspunkt, repository, beregningsgrunnlag, vilkårsgrunnlagId, behandling, false)
+        val context = CommandContext(UUID.randomUUID())
+        context.nyObserver(observer)
+        assertTrue(command.execute(context))
+        assertEquals(0, observer.behov.size)
+    }
+
+    @Test
+    fun `Send ut behov dersom inngangsvilkårene er vurdert i Spleis`() {
+        val command = VurderBehovForAvviksvurdering(fødselsnummer, skjæringstidspunkt, repository, beregningsgrunnlag, vilkårsgrunnlagId, behandling, true)
+        val context = CommandContext(UUID.randomUUID())
+        context.nyObserver(observer)
+        assertFalse(command.execute(context))
+        assertEquals(1, observer.behov.size)
+        val behov = observer.behov.single()
+        assertInstanceOf<Behov.Avviksvurdering>(behov)
+        assertEquals(beregningsgrunnlag, behov.beregningsgrunnlag)
+    }
+
     @Test
     fun `lagrer ned ny avviksvurdering ved løsning med ny vurdering`() {
-        val command = VurderBehovForAvviksvurdering(fødselsnummer, skjæringstidspunkt, repository, beregningsgrunnlag, vilkårsgrunnlagId, behandling)
+        val command = VurderBehovForAvviksvurdering(fødselsnummer, skjæringstidspunkt, repository, beregningsgrunnlag, vilkårsgrunnlagId, behandling, true)
         val context = CommandContext(UUID.randomUUID())
         context.add(
             AvviksvurderingBehovLøsning.NyVurderingForetatt(
@@ -105,7 +136,7 @@ class VurderBehovForAvviksvurderingTest {
 
     @Test
     fun `legg til varsel RV_IV_2 dersom avviket er mer enn akseptabelt avvik`() {
-        val command = VurderBehovForAvviksvurdering(fødselsnummer, skjæringstidspunkt, repository, beregningsgrunnlag, vilkårsgrunnlagId, behandling)
+        val command = VurderBehovForAvviksvurdering(fødselsnummer, skjæringstidspunkt, repository, beregningsgrunnlag, vilkårsgrunnlagId, behandling, true)
         val context = CommandContext(UUID.randomUUID())
         context.add(
             AvviksvurderingBehovLøsning.NyVurderingForetatt(
@@ -124,7 +155,7 @@ class VurderBehovForAvviksvurderingTest {
 
     @Test
     fun `ikke legg til varsel RV_IV_2 dersom avviket er innenfor akseptabelt avvik`() {
-        val command = VurderBehovForAvviksvurdering(fødselsnummer, skjæringstidspunkt, repository, beregningsgrunnlag, vilkårsgrunnlagId, behandling)
+        val command = VurderBehovForAvviksvurdering(fødselsnummer, skjæringstidspunkt, repository, beregningsgrunnlag, vilkårsgrunnlagId, behandling, true)
         val context = CommandContext(UUID.randomUUID())
         context.add(
             AvviksvurderingBehovLøsning.NyVurderingForetatt(
@@ -143,7 +174,7 @@ class VurderBehovForAvviksvurderingTest {
 
     @Test
     fun `lagrer ned kobling ved løsning med uten vurdering`() {
-        val command = VurderBehovForAvviksvurdering(fødselsnummer, skjæringstidspunkt, repository, beregningsgrunnlag, vilkårsgrunnlagId, behandling)
+        val command = VurderBehovForAvviksvurdering(fødselsnummer, skjæringstidspunkt, repository, beregningsgrunnlag, vilkårsgrunnlagId, behandling, true)
         val context = CommandContext(UUID.randomUUID())
         context.add(AvviksvurderingBehovLøsning.TrengerIkkeNyVurdering(avviksvurderingId = avviksvurderingId))
         command.resume(context)
@@ -154,7 +185,7 @@ class VurderBehovForAvviksvurderingTest {
 
     @Test
     fun `lager ikke varsel om avvik dersom det ikke har blitt foretatt en ny vurdering`() {
-        val command = VurderBehovForAvviksvurdering(fødselsnummer, skjæringstidspunkt, repository, beregningsgrunnlag, vilkårsgrunnlagId, behandling)
+        val command = VurderBehovForAvviksvurdering(fødselsnummer, skjæringstidspunkt, repository, beregningsgrunnlag, vilkårsgrunnlagId, behandling, true)
         val context = CommandContext(UUID.randomUUID())
         context.add(AvviksvurderingBehovLøsning.TrengerIkkeNyVurdering(avviksvurderingId = avviksvurderingId))
         command.resume(context)

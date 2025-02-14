@@ -17,10 +17,12 @@ class VurderBehovForAvviksvurdering(
     private val beregningsgrunnlag: Beregningsgrunnlag,
     private val vilkårsgrunnlagId: UUID,
     private val behandling: Behandling,
+    private val erInngangsvilkårVurdertISpleis: Boolean,
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
+        if (!erInngangsvilkårVurdertISpleis) return true
         // TODO: Toggle her
-        // TODO: sende ut behov
+        context.behov(Behov.Avviksvurdering(beregningsgrunnlag))
         return false
     }
 
@@ -42,7 +44,6 @@ class VurderBehovForAvviksvurdering(
                 avviksvurderingRepository.lagre(avviksvurdering)
 
                 if (!løsning.harAkseptabeltAvvik) behandling.håndterNyttVarsel(RV_IV_2.nyttVarsel(behandling.vedtaksperiodeId()))
-                // TODO: lage varsel dersom over akseptabelt avvik
             }
             is AvviksvurderingBehovLøsning.TrengerIkkeNyVurdering -> {
                 avviksvurderingRepository.opprettKobling(løsning.avviksvurderingId, vilkårsgrunnlagId)
