@@ -53,4 +53,5 @@ class DBSessionContext(session: Session, tilgangskontroll: Tilgangskontroll) : S
     override val notatRepository: NotatRepository = PgNotatRepository(session)
     override val dialogRepository: DialogRepository = PgDialogRepository(session)
     override val saksbehandlerRepository: SaksbehandlerRepository = PgSaksbehandlerRepository(session)
+    override val avviksvurderingRepository: AvviksvurderingRepository = PgAvviksvurderingRepository(session)
 }

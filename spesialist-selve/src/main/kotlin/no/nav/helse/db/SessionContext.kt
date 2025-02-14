@@ -45,4 +45,5 @@ interface SessionContext {
     val notatRepository: NotatRepository
     val dialogRepository: DialogRepository
     val saksbehandlerRepository: SaksbehandlerRepository
+    val avviksvurderingRepository: AvviksvurderingRepository
 }
