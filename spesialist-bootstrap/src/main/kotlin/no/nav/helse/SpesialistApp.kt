@@ -23,7 +23,6 @@ import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.PlukkTilManuell
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlinghåndtererImpl
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.spesialist.api.AzureConfig
 import no.nav.helse.spesialist.api.Personhåndterer
@@ -215,10 +214,7 @@ class SpesialistApp(
                 reservasjonDao = reservasjonDao,
                 periodehistorikkDao = periodehistorikkDao,
                 saksbehandlerDao = saksbehandlerDao,
-                totrinnsvurderingService =
-                    TotrinnsvurderingService(
-                        totrinnsvurderingDao = totrinnsvurderingDao,
-                    ),
+                sessionFactory = sessionFactory,
             )
         subsumsjonsmelder = Subsumsjonsmelder(versjonAvKode, meldingPubliserer)
 

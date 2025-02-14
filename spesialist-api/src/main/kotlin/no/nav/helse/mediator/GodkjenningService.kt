@@ -7,13 +7,13 @@ import no.nav.helse.db.OverstyringDao
 import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
+import no.nav.helse.db.SessionFactory
 import no.nav.helse.db.toDto
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.melding.Saksbehandlerløsning
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
 import no.nav.helse.modell.saksbehandler.Saksbehandler
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingOld
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
+import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.spesialist.api.Godkjenninghåndterer
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import org.slf4j.LoggerFactory
@@ -29,7 +29,7 @@ class GodkjenningService(
     private val reservasjonDao: ReservasjonDao,
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val saksbehandlerDao: SaksbehandlerDao,
-    private val totrinnsvurderingService: TotrinnsvurderingService,
+    private val sessionFactory: SessionFactory,
 ) : Godkjenninghåndterer {
     private companion object {
         private val logg = LoggerFactory.getLogger(GodkjenningService::class.java)
@@ -43,8 +43,12 @@ class GodkjenningService(
         val hendelseId = oppgaveDao.finnHendelseId(godkjenningDTO.oppgavereferanse)
         val fødselsnummer = oppgaveDao.finnFødselsnummer(godkjenningDTO.oppgavereferanse)
         val vedtaksperiodeId = oppgaveDao.finnVedtaksperiodeId(godkjenningDTO.oppgavereferanse)
-        val totrinnsvurdering = totrinnsvurderingService.hentAktiv(vedtaksperiodeId)
-        val reserverPersonOid: UUID = totrinnsvurdering?.saksbehandler ?: oid
+        val totrinnsvurdering =
+            sessionFactory.transactionalSessionScope {
+                    session ->
+                session.totrinnsvurderingRepository.finn(vedtaksperiodeId)
+            }
+        val reserverPersonOid: UUID = totrinnsvurdering?.saksbehandler?.oid ?: oid
         val saksbehandlerløsning =
             Saksbehandlerløsning(
                 godkjenningsbehovId = hendelseId,
@@ -73,9 +77,9 @@ class GodkjenningService(
             avventerSystem(godkjenningDTO.saksbehandlerIdent, oid)
             overstyringDao.ferdigstillOverstyringerForVedtaksperiode(vedtaksperiodeId)
 
-            if (totrinnsvurdering?.erBeslutteroppgave() == true && godkjenningDTO.godkjent) {
+            if (totrinnsvurdering?.erBeslutteroppgave == true && godkjenningDTO.godkjent) {
                 val beslutter =
-                    totrinnsvurdering.beslutter?.let { saksbehandlerDao.finnSaksbehandlerFraDatabase(it)?.toDto() }
+                    totrinnsvurdering.beslutter?.oid?.let { saksbehandlerDao.finnSaksbehandlerFraDatabase(it)?.toDto() }
                 checkNotNull(beslutter) { "Forventer at beslutter er satt" }
                 val innslag = Historikkinnslag.totrinnsvurderingFerdigbehandletInnslag(beslutter)
                 periodehistorikkDao.lagreMedOppgaveId(innslag, godkjenningDTO.oppgavereferanse)
@@ -85,7 +89,7 @@ class GodkjenningService(
 
     private fun saksbehandler(
         godkjenningDTO: GodkjenningDto,
-        totrinnsvurdering: TotrinnsvurderingOld?,
+        totrinnsvurdering: Totrinnsvurdering?,
         oid: UUID,
     ): Saksbehandler =
         when {
@@ -93,7 +97,7 @@ class GodkjenningService(
             totrinnsvurdering == null -> saksbehandlerForJson(oid)
 
             else -> {
-                val saksbehandler = totrinnsvurdering.saksbehandler
+                val saksbehandler = totrinnsvurdering.saksbehandler?.oid
                 checkNotNull(
                     saksbehandler,
                 ) { "Totrinnsvurdering uten saksbehandler gir ikke noen mening ved godkjenning av periode" }
@@ -103,14 +107,14 @@ class GodkjenningService(
 
     private fun beslutter(
         godkjenningDTO: GodkjenningDto,
-        totrinnsvurdering: TotrinnsvurderingOld?,
+        totrinnsvurdering: Totrinnsvurdering?,
     ): Saksbehandler? =
         when {
             !godkjenningDTO.godkjent -> null
             totrinnsvurdering == null -> null
 
             else -> {
-                val beslutter = totrinnsvurdering.beslutter
+                val beslutter = totrinnsvurdering.beslutter?.oid
                 checkNotNull(
                     beslutter,
                 ) { "Totrinnsvurdering uten beslutter gir ikke noen mening ved godkjenning av periode" }

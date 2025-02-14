@@ -8,7 +8,6 @@ import no.nav.helse.e2e.AbstractE2ETest
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.mediator.GodkjenningService
 import no.nav.helse.mediator.oppgave.OppgaveService
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingService
 import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
 import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import no.nav.helse.util.testEnv
@@ -51,10 +50,7 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
             reservasjonDao = reservasjonDao,
             periodehistorikkDao = periodehistorikkDao,
             saksbehandlerDao = saksbehandlerDao,
-            totrinnsvurderingService =
-                TotrinnsvurderingService(
-                    totrinnsvurderingDao,
-                ),
+            sessionFactory = sessionFactory,
         )
 
     protected fun sisteOppgaveId() = testRapid.inspektør.oppgaveId()
