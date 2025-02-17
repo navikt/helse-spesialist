@@ -58,6 +58,7 @@ object Testdata {
                     )
                 )
             ),
+            erInngangsvilkårVurdertISpleis = true,
             json = json,
         )
     }

@@ -94,6 +94,7 @@ class Godkjenningsbehov(
     val orgnummereMedRelevanteArbeidsforhold: List<String>,
     val skjæringstidspunkt: LocalDate,
     val spleisSykepengegrunnlagsfakta: SpleisSykepengegrunnlagsfakta,
+    val erInngangsvilkårVurdertISpleis: Boolean,
     private val json: String,
 ) : Vedtaksperiodemelding {
     override fun fødselsnummer() = fødselsnummer
@@ -132,6 +133,7 @@ class Godkjenningsbehov(
             spleisSykepengegrunnlagsfakta = spleisSykepengegrunnlagsfakta,
             orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
             skjæringstidspunkt = skjæringstidspunkt,
+            erInngangsvilkårVurdertISpleis = erInngangsvilkårVurdertISpleis,
             json = json,
         )
 
@@ -184,6 +186,7 @@ class Godkjenningsbehov(
                 .takeUnless { it.isMissingNode || it.isNull }
                 ?.map { it.asText() } ?: emptyList(),
         kanAvvises = jsonNode.path("Godkjenning").path("kanAvvises").asBoolean(),
+        erInngangsvilkårVurdertISpleis = jsonNode.path("Godkjenning").get("sykepengegrunnlagsfakta").get("fastsatt").asText() != "IInfotrygd",
         json = jsonNode.toString(),
     )
 }

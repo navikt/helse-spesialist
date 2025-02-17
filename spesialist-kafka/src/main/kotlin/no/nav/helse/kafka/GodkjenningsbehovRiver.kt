@@ -120,6 +120,7 @@ class GodkjenningsbehovRiver(
                         ?.map { it.asText() } ?: emptyList(),
                 spleisSykepengegrunnlagsfakta = spleisSykepengegrunnlagsfakta(packet),
                 kanAvvises = packet["Godkjenning.kanAvvises"].asBoolean(),
+                erInngangsvilkårVurdertISpleis = packet["Godkjenning.sykepengegrunnlagsfakta.fastsatt"].asText() != "IInfotrygd",
                 json = packet.toJson(),
             ),
             MessageContextMeldingPubliserer(context),
