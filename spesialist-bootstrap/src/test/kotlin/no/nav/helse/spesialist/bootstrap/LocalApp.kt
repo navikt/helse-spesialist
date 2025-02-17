@@ -1,4 +1,4 @@
-package no.nav.helse
+package no.nav.helse.spesialist.bootstrap
 
 import com.github.navikt.tbd_libs.kafka.Config
 import com.github.navikt.tbd_libs.kafka.ConsumerProducerFactory
@@ -15,6 +15,9 @@ import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
+import no.nav.helse.FeatureToggles
+import no.nav.helse.Gruppekontroll
+import no.nav.helse.SpesialistApp
 import no.nav.helse.bootstrap.EnvironmentImpl
 import no.nav.helse.rapids_rivers.RapidApplication.Builder
 import no.nav.helse.spesialist.api.AzureConfig
@@ -82,7 +85,7 @@ object LocalApp {
             tilgangsgrupper = tilgangsgrupper,
             reservasjonshenter = reservasjonshenter,
             versjonAvKode = "versjon_1",
-            featureToggles = object : FeatureToggles{}
+            featureToggles = object : FeatureToggles {}
         )
 
     private val localModule: Application.() -> Unit  = {
