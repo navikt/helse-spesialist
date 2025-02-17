@@ -362,7 +362,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         sisteMeldingId = meldingssender.sendSøknadSendt(aktørId, fødselsnummer, organisasjonsnummer)
         assertIngenEtterspurteBehov()
         assertPersonEksisterer(fødselsnummer, aktørId)
-        assertArbeidsgiverEksisterer(organisasjonsnummer)
     }
 
     protected fun spleisOppretterNyBehandling(
@@ -386,6 +385,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 spleisBehandlingId = spleisBehandlingId,
             )
         assertIngenEtterspurteBehov()
+        assertArbeidsgiverEksisterer(organisasjonsnummer)
         assertVedtaksperiodeEksisterer(vedtaksperiodeId)
     }
 

@@ -37,6 +37,9 @@ class BehandlingOpprettet(
         sessionContext: SessionContext,
     ) {
         person.nySpleisBehandling(SpleisBehandling(organisasjonsnummer, vedtaksperiodeId, spleisBehandlingId, fom, tom))
+        kommandostarter {
+            opprettArbeidsgiver(organisasjonsnummer, sessionContext)
+        }
     }
 
     override fun fødselsnummer(): String = fødselsnummer

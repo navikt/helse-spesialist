@@ -16,6 +16,8 @@ import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.LøsGodkjenningsbehov
+import no.nav.helse.modell.kommando.OpprettMinimalArbeidsgiverCommand
+import no.nav.helse.modell.kommando.OpprettMinimalPersonCommand
 import no.nav.helse.modell.kommando.OverstyringIgangsattCommand
 import no.nav.helse.modell.kommando.TilbakedateringBehandlet
 import no.nav.helse.modell.kommando.TilbakedateringGodkjentCommand
@@ -27,7 +29,6 @@ import no.nav.helse.modell.person.KlargjørTilgangsrelaterteDataCommand
 import no.nav.helse.modell.person.OppdaterPersondataCommand
 import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.person.SøknadSendt
-import no.nav.helse.modell.person.SøknadSendtCommand
 import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMelding
@@ -63,6 +64,13 @@ class Kommandofabrikk(
     }
 
     private val oppgaveService: OppgaveService by lazy { oppgaveService() }
+
+    internal fun opprettArbeidsgiver(
+        organisasjonsnummer: String,
+        sessionContext: SessionContext,
+    ): OpprettMinimalArbeidsgiverCommand {
+        return OpprettMinimalArbeidsgiverCommand(organisasjonsnummer, sessionContext.inntektskilderRepository)
+    }
 
     internal fun endretEgenAnsattStatus(
         melding: EndretEgenAnsattStatus,
@@ -178,18 +186,6 @@ class Kommandofabrikk(
             vedtaksperiodeId = hendelse.vedtaksperiodeId(),
             utbetalingId = hendelse.utbetalingId,
             utbetalingDao = sessionContext.utbetalingDao,
-        )
-
-    fun søknadSendt(
-        hendelse: SøknadSendt,
-        sessionContext: SessionContext,
-    ): SøknadSendtCommand =
-        SøknadSendtCommand(
-            fødselsnummer = hendelse.fødselsnummer(),
-            aktørId = hendelse.aktørId,
-            organisasjonsnummer = hendelse.organisasjonsnummer,
-            personDao = sessionContext.personDao,
-            inntektskilderRepository = sessionContext.inntektskilderRepository,
         )
 
     internal fun adressebeskyttelseEndret(
@@ -384,7 +380,7 @@ class Kommandofabrikk(
         sessionContext: SessionContext,
     ) {
         iverksett(
-            command = søknadSendt(melding, sessionContext),
+            command = OpprettMinimalPersonCommand(melding.fødselsnummer(), melding.aktørId, sessionContext.personDao),
             meldingId = melding.id,
             commandContext = nyContext(melding.id, sessionContext.commandContextDao),
             commandContextObservers = setOf(commandContextObservers),

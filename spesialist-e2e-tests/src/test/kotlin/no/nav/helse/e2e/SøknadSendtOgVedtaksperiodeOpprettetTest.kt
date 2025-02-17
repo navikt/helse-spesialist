@@ -11,6 +11,7 @@ internal class SøknadSendtOgVedtaksperiodeOpprettetTest : AbstractE2ETest() {
 
         vedtaksløsningenMottarNySøknad(AKTØR, FØDSELSNUMMER, ORGNR)
         assertPersonEksisterer(FØDSELSNUMMER, AKTØR)
+        spleisOppretterNyBehandling(AKTØR, FØDSELSNUMMER, ORGNR)
         assertArbeidsgiverEksisterer(ORGNR)
         vedtaksløsningenMottarNySøknad(AKTØR, FØDSELSNUMMER, ORGNR)
         spleisOppretterNyBehandling(

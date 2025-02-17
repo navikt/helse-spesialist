@@ -26,7 +26,7 @@ class SøknadSendtRiver(
 
     override fun validations() =
         River.PacketValidation {
-            it.requireKey("@id", "fnr", "aktorId", "arbeidsgiver.orgnummer")
+            it.requireKey("@id", "fnr", "aktorId")
         }
 
     override fun onPacket(
@@ -55,7 +55,6 @@ class SøknadSendtRiver(
             id = packet["@id"].asUUID(),
             fødselsnummer = packet["fnr"].asText(),
             aktørId = packet["aktorId"].asText(),
-            organisasjonsnummer = packet["arbeidsgiver.orgnummer"].asText(),
             json = packet.toJson(),
         )
 }

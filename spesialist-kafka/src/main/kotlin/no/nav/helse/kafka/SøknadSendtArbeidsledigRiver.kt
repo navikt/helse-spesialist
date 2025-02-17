@@ -21,18 +21,12 @@ class SøknadSendtArbeidsledigRiver(
     override fun preconditions(): River.PacketValidation {
         return River.PacketValidation {
             it.requireValue("@event_name", "sendt_søknad_arbeidsledig")
-            it.requireKey("tidligereArbeidsgiverOrgnummer")
         }
     }
 
     override fun validations() =
         River.PacketValidation {
-            it.forbid("arbeidsgiver.orgnummer")
-            it.requireKey(
-                "@id",
-                "fnr",
-                "aktorId",
-            )
+            it.requireKey("@id", "fnr", "aktorId")
         }
 
     override fun onPacket(
@@ -61,7 +55,6 @@ class SøknadSendtArbeidsledigRiver(
             id = packet["@id"].asUUID(),
             fødselsnummer = packet["fnr"].asText(),
             aktørId = packet["aktorId"].asText(),
-            organisasjonsnummer = packet["tidligereArbeidsgiverOrgnummer"].asText(),
             json = packet.toJson(),
         )
 }

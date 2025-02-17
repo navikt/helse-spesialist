@@ -3,13 +3,11 @@ package no.nav.helse.mediator
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
-import io.mockk.every
 import io.mockk.mockk
 import no.nav.helse.Meldingssender
 import no.nav.helse.db.TransactionalSessionFactory
 import no.nav.helse.e2e.AbstractDatabaseTest
 import no.nav.helse.mediator.meldinger.PoisonPills
-import no.nav.helse.modell.person.SøknadSendtCommand
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
@@ -45,15 +43,6 @@ internal class MetrikkerFraMeldingMediatorTest : AbstractDatabaseTest() {
 
     @Test
     fun `Registrerer tidsbruk for command`() {
-        every { kommandofabrikk.søknadSendt(any(), any()) } returns
-            SøknadSendtCommand(
-                fødselsnummer,
-                "aktørId",
-                "organisasjonsnummer",
-                personDao = mockk(relaxed = true),
-                inntektskilderRepository = mockk(relaxed = true),
-            )
-
         meldingssender.sendSøknadSendt("aktørId", fødselsnummer, "organisasjonsnummer")
 
         val innslag =
