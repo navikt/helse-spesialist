@@ -296,7 +296,7 @@ data class ApiBeregnetPeriodeResolver(
                         SnapshotUtbetalingstatus.UBETALT -> ApiUtbetalingstatus.UBETALT
                         SnapshotUtbetalingstatus.UTBETALINGFEILET -> ApiUtbetalingstatus.UTBETALINGFEILET
                         SnapshotUtbetalingstatus.UTBETALT -> ApiUtbetalingstatus.UTBETALT
-                        SnapshotUtbetalingstatus.__UNKNOWN_VALUE -> ApiUtbetalingstatus.UKJENT
+                        SnapshotUtbetalingstatus.UNKNOWN_VALUE -> ApiUtbetalingstatus.UKJENT
                     },
                 type =
                     when (it.typeEnum) {
@@ -305,7 +305,7 @@ data class ApiBeregnetPeriodeResolver(
                         SnapshotUtbetalingtype.FERIEPENGER -> ApiUtbetalingtype.FERIEPENGER
                         SnapshotUtbetalingtype.REVURDERING -> ApiUtbetalingtype.REVURDERING
                         SnapshotUtbetalingtype.UTBETALING -> ApiUtbetalingtype.UTBETALING
-                        SnapshotUtbetalingtype.__UNKNOWN_VALUE -> ApiUtbetalingtype.UKJENT
+                        SnapshotUtbetalingtype.UNKNOWN_VALUE -> ApiUtbetalingtype.UKJENT
                     },
                 vurdering =
                     it.vurdering?.let { vurdering ->

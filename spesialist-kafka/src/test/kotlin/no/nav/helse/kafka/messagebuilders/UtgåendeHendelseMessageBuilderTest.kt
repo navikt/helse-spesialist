@@ -1,4 +1,4 @@
-package no.nav.helse.kafka.message_builders
+package no.nav.helse.kafka.messagebuilders
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime

@@ -5,5 +5,5 @@ enum class SnapshotPeriodetype {
     FORSTEGANGSBEHANDLING,
     INFOTRYGDFORLENGELSE,
     OVERGANGFRAIT,
-    __UNKNOWN_VALUE,
+    UNKNOWN_VALUE,
 }

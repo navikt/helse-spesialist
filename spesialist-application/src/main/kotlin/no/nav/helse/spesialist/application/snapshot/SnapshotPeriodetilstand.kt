@@ -17,5 +17,5 @@ enum class SnapshotPeriodetilstand {
     UTBETALT,
     UTBETALTVENTERPAANNENPERIODE,
     VENTERPAANNENPERIODE,
-    __UNKNOWN_VALUE,
+    UNKNOWN_VALUE,
 }

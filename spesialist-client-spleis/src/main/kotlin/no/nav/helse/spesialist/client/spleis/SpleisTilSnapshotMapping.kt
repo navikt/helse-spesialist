@@ -547,7 +547,7 @@ fun GraphQLBegrunnelse.tilSnapshotBegrunnelse() =
         GraphQLBegrunnelse.OVER70 -> SnapshotBegrunnelse.OVER70
         GraphQLBegrunnelse.SYKEPENGEDAGEROPPBRUKT -> SnapshotBegrunnelse.SYKEPENGEDAGEROPPBRUKT
         GraphQLBegrunnelse.SYKEPENGEDAGEROPPBRUKTOVER67 -> SnapshotBegrunnelse.SYKEPENGEDAGEROPPBRUKTOVER67
-        GraphQLBegrunnelse.__UNKNOWN_VALUE -> SnapshotBegrunnelse.__UNKNOWN_VALUE
+        GraphQLBegrunnelse.__UNKNOWN_VALUE -> SnapshotBegrunnelse.UNKNOWN_VALUE
     }
 
 fun GraphQLHendelsetype.tilSnapshotHendelsetype() =
@@ -561,7 +561,7 @@ fun GraphQLHendelsetype.tilSnapshotHendelsetype() =
         GraphQLHendelsetype.SENDTSOKNADNAV -> SnapshotHendelsetype.SENDTSOKNADNAV
         GraphQLHendelsetype.SENDTSOKNADSELVSTENDIG -> SnapshotHendelsetype.SENDTSOKNADSELVSTENDIG
         GraphQLHendelsetype.UKJENT -> SnapshotHendelsetype.UKJENT
-        GraphQLHendelsetype.__UNKNOWN_VALUE -> SnapshotHendelsetype.__UNKNOWN_VALUE
+        GraphQLHendelsetype.__UNKNOWN_VALUE -> SnapshotHendelsetype.UNKNOWN_VALUE
     }
 
 fun GraphQLInntektskilde.tilSnapshotInntektskilde() =
@@ -571,14 +571,14 @@ fun GraphQLInntektskilde.tilSnapshotInntektskilde() =
         GraphQLInntektskilde.INFOTRYGD -> SnapshotInntektskilde.INFOTRYGD
         GraphQLInntektskilde.INNTEKTSMELDING -> SnapshotInntektskilde.INNTEKTSMELDING
         GraphQLInntektskilde.SAKSBEHANDLER -> SnapshotInntektskilde.SAKSBEHANDLER
-        GraphQLInntektskilde.__UNKNOWN_VALUE -> SnapshotInntektskilde.__UNKNOWN_VALUE
+        GraphQLInntektskilde.__UNKNOWN_VALUE -> SnapshotInntektskilde.UNKNOWN_VALUE
     }
 
 fun GraphQLInntektstype.tilSnapshotInntektstype() =
     when (this) {
         GraphQLInntektstype.ENARBEIDSGIVER -> SnapshotInntektstype.ENARBEIDSGIVER
         GraphQLInntektstype.FLEREARBEIDSGIVERE -> SnapshotInntektstype.FLEREARBEIDSGIVERE
-        GraphQLInntektstype.__UNKNOWN_VALUE -> SnapshotInntektstype.__UNKNOWN_VALUE
+        GraphQLInntektstype.__UNKNOWN_VALUE -> SnapshotInntektstype.UNKNOWN_VALUE
     }
 
 fun GraphQLPeriodetilstand.tilSnapshotPeriodetilstand() =
@@ -599,7 +599,7 @@ fun GraphQLPeriodetilstand.tilSnapshotPeriodetilstand() =
         GraphQLPeriodetilstand.UTBETALT -> SnapshotPeriodetilstand.UTBETALT
         GraphQLPeriodetilstand.UTBETALTVENTERPAANNENPERIODE -> SnapshotPeriodetilstand.UTBETALTVENTERPAANNENPERIODE
         GraphQLPeriodetilstand.VENTERPAANNENPERIODE -> SnapshotPeriodetilstand.VENTERPAANNENPERIODE
-        GraphQLPeriodetilstand.__UNKNOWN_VALUE -> SnapshotPeriodetilstand.__UNKNOWN_VALUE
+        GraphQLPeriodetilstand.__UNKNOWN_VALUE -> SnapshotPeriodetilstand.UNKNOWN_VALUE
     }
 
 fun GraphQLPeriodetype.tilSnapshotPeriodetype() =
@@ -608,7 +608,7 @@ fun GraphQLPeriodetype.tilSnapshotPeriodetype() =
         GraphQLPeriodetype.FORSTEGANGSBEHANDLING -> SnapshotPeriodetype.FORSTEGANGSBEHANDLING
         GraphQLPeriodetype.INFOTRYGDFORLENGELSE -> SnapshotPeriodetype.INFOTRYGDFORLENGELSE
         GraphQLPeriodetype.OVERGANGFRAIT -> SnapshotPeriodetype.OVERGANGFRAIT
-        GraphQLPeriodetype.__UNKNOWN_VALUE -> SnapshotPeriodetype.__UNKNOWN_VALUE
+        GraphQLPeriodetype.__UNKNOWN_VALUE -> SnapshotPeriodetype.UNKNOWN_VALUE
     }
 
 fun GraphQLSykdomsdagkildetype.tilSnapshotSykdomsdagkildetype() =
@@ -618,7 +618,7 @@ fun GraphQLSykdomsdagkildetype.tilSnapshotSykdomsdagkildetype() =
         GraphQLSykdomsdagkildetype.SOKNAD -> SnapshotSykdomsdagkildetype.SOKNAD
         GraphQLSykdomsdagkildetype.SYKMELDING -> SnapshotSykdomsdagkildetype.SYKMELDING
         GraphQLSykdomsdagkildetype.UKJENT -> SnapshotSykdomsdagkildetype.UKJENT
-        GraphQLSykdomsdagkildetype.__UNKNOWN_VALUE -> SnapshotSykdomsdagkildetype.__UNKNOWN_VALUE
+        GraphQLSykdomsdagkildetype.__UNKNOWN_VALUE -> SnapshotSykdomsdagkildetype.UNKNOWN_VALUE
     }
 
 fun GraphQLSykdomsdagtype.tilSnapshotSykdomsdagtype() =
@@ -642,7 +642,7 @@ fun GraphQLSykdomsdagtype.tilSnapshotSykdomsdagtype() =
         GraphQLSykdomsdagtype.SYKEDAG -> SnapshotSykdomsdagtype.SYKEDAG
         GraphQLSykdomsdagtype.SYKEDAGNAV -> SnapshotSykdomsdagtype.SYKEDAGNAV
         GraphQLSykdomsdagtype.UBESTEMTDAG -> SnapshotSykdomsdagtype.UBESTEMTDAG
-        GraphQLSykdomsdagtype.__UNKNOWN_VALUE -> SnapshotSykdomsdagtype.__UNKNOWN_VALUE
+        GraphQLSykdomsdagtype.__UNKNOWN_VALUE -> SnapshotSykdomsdagtype.UNKNOWN_VALUE
     }
 
 fun GraphQLUtbetalingsdagType.tilSnapshotUtbetalingsdagType() =
@@ -656,7 +656,7 @@ fun GraphQLUtbetalingsdagType.tilSnapshotUtbetalingsdagType() =
         GraphQLUtbetalingsdagType.NAVDAG -> SnapshotUtbetalingsdagType.NAVDAG
         GraphQLUtbetalingsdagType.NAVHELGDAG -> SnapshotUtbetalingsdagType.NAVHELGDAG
         GraphQLUtbetalingsdagType.UKJENTDAG -> SnapshotUtbetalingsdagType.UKJENTDAG
-        GraphQLUtbetalingsdagType.__UNKNOWN_VALUE -> SnapshotUtbetalingsdagType.__UNKNOWN_VALUE
+        GraphQLUtbetalingsdagType.__UNKNOWN_VALUE -> SnapshotUtbetalingsdagType.UNKNOWN_VALUE
     }
 
 fun GraphQLUtbetalingstatus.tilSnapshotUtbetalingstatus() =
@@ -671,7 +671,7 @@ fun GraphQLUtbetalingstatus.tilSnapshotUtbetalingstatus() =
         GraphQLUtbetalingstatus.UBETALT -> SnapshotUtbetalingstatus.UBETALT
         GraphQLUtbetalingstatus.UTBETALINGFEILET -> SnapshotUtbetalingstatus.UTBETALINGFEILET
         GraphQLUtbetalingstatus.UTBETALT -> SnapshotUtbetalingstatus.UTBETALT
-        GraphQLUtbetalingstatus.__UNKNOWN_VALUE -> SnapshotUtbetalingstatus.__UNKNOWN_VALUE
+        GraphQLUtbetalingstatus.__UNKNOWN_VALUE -> SnapshotUtbetalingstatus.UNKNOWN_VALUE
     }
 
 fun Utbetalingtype.tilSnapshotUtbetalingtype() =
@@ -681,5 +681,5 @@ fun Utbetalingtype.tilSnapshotUtbetalingtype() =
         Utbetalingtype.FERIEPENGER -> SnapshotUtbetalingtype.FERIEPENGER
         Utbetalingtype.REVURDERING -> SnapshotUtbetalingtype.REVURDERING
         Utbetalingtype.UTBETALING -> SnapshotUtbetalingtype.UTBETALING
-        Utbetalingtype.__UNKNOWN_VALUE -> SnapshotUtbetalingtype.__UNKNOWN_VALUE
+        Utbetalingtype.__UNKNOWN_VALUE -> SnapshotUtbetalingtype.UNKNOWN_VALUE
     }

@@ -10,5 +10,5 @@ enum class SnapshotUtbetalingsdagType {
     NAVDAG,
     NAVHELGDAG,
     UKJENTDAG,
-    __UNKNOWN_VALUE,
+    UNKNOWN_VALUE,
 }

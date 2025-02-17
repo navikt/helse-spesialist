@@ -3,8 +3,8 @@ package no.nav.helse.kafka
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import no.nav.helse.MeldingPubliserer
-import no.nav.helse.kafka.message_builders.behovName
-import no.nav.helse.kafka.message_builders.somJsonMessage
+import no.nav.helse.kafka.messagebuilders.behovName
+import no.nav.helse.kafka.messagebuilders.somJsonMessage
 import no.nav.helse.mediator.KommandokjedeEndretEvent
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.SubsumsjonEvent

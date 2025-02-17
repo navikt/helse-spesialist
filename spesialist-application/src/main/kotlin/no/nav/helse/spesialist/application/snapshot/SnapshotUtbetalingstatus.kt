@@ -11,5 +11,5 @@ enum class SnapshotUtbetalingstatus {
     UBETALT,
     UTBETALINGFEILET,
     UTBETALT,
-    __UNKNOWN_VALUE,
+    UNKNOWN_VALUE,
 }

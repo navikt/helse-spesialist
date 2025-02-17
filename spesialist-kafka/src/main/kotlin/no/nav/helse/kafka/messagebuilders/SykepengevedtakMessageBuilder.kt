@@ -1,4 +1,4 @@
-package no.nav.helse.kafka.message_builders
+package no.nav.helse.kafka.messagebuilders
 
 import no.nav.helse.modell.melding.Sykepengevedtak
 import no.nav.helse.modell.vedtak.Utfall

@@ -156,7 +156,7 @@ private fun SnapshotBegrunnelse.tilApiBegrunnelse() =
         SnapshotBegrunnelse.SYKEPENGEDAGEROPPBRUKT -> ApiBegrunnelse.SYKEPENGEDAGER_OPPBRUKT
         SnapshotBegrunnelse.SYKEPENGEDAGEROPPBRUKTOVER67 -> ApiBegrunnelse.SYKEPENGEDAGER_OPPBRUKT_OVER_67
         SnapshotBegrunnelse.ANDREYTELSER -> ApiBegrunnelse.ANDREYTELSER
-        SnapshotBegrunnelse.__UNKNOWN_VALUE -> ApiBegrunnelse.UKJENT
+        SnapshotBegrunnelse.UNKNOWN_VALUE -> ApiBegrunnelse.UKJENT
     }
 
 fun SnapshotHendelse.tilApiHendelse(): ApiHendelse =

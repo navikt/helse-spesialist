@@ -10,5 +10,5 @@ enum class SnapshotHendelsetype {
     SENDTSOKNADNAV,
     SENDTSOKNADSELVSTENDIG,
     UKJENT,
-    __UNKNOWN_VALUE,
+    UNKNOWN_VALUE,
 }

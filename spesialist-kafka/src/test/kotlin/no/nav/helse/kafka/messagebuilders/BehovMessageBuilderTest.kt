@@ -1,4 +1,4 @@
-package no.nav.helse.kafka.message_builders
+package no.nav.helse.kafka.messagebuilders
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.mediator.asUUID

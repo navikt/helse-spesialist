@@ -6,5 +6,5 @@ enum class SnapshotUtbetalingtype {
     FERIEPENGER,
     REVURDERING,
     UTBETALING,
-    __UNKNOWN_VALUE,
+    UNKNOWN_VALUE,
 }

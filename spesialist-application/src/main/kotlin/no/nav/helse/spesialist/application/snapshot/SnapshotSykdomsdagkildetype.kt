@@ -6,5 +6,5 @@ enum class SnapshotSykdomsdagkildetype {
     SOKNAD,
     SYKMELDING,
     UKJENT,
-    __UNKNOWN_VALUE,
+    UNKNOWN_VALUE,
 }

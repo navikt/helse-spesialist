@@ -6,5 +6,5 @@ enum class SnapshotInntektskilde {
     INFOTRYGD,
     INNTEKTSMELDING,
     SAKSBEHANDLER,
-    __UNKNOWN_VALUE,
+    UNKNOWN_VALUE,
 }

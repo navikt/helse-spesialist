@@ -146,7 +146,8 @@ class NotatMutationHandler(
         dialog: Dialog,
     ) = ApiNotat(
         id = id().value,
-        dialogRef = dialogRef.value.toInt(), // TODO: Dette vil bli et problem på et tidspunkt!
+        // TODO: Dette vil bli et problem på et tidspunkt!
+        dialogRef = dialogRef.value.toInt(),
         tekst = tekst,
         opprettet = opprettetTidspunkt.roundToMicroseconds(),
         saksbehandlerOid = saksbehandlerOid.value,
