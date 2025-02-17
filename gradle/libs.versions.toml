@@ -7,7 +7,7 @@ tbdLibs = "2025.01.27-12.50-76316f3b"
 testcontainers = "1.20.4"
 
 [libraries]
-auth0-jwt = "com.auth0:java-jwt:4.4.0"
+auth0-jwt = "com.auth0:java-jwt:4.5.0"
 
 flyway-core = { module = "org.flywaydb:flyway-core", version.ref = "flyway" }
 flyway-postgres = { module = "org.flywaydb:flyway-database-postgresql", version.ref = "flyway" }
