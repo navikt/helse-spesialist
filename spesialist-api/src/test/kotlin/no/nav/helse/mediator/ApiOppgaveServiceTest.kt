@@ -38,9 +38,6 @@ import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.test.lagEpostadresseFraFulltNavn
 import no.nav.helse.spesialist.test.lagSaksbehandlerident
 import no.nav.helse.spesialist.test.lagSaksbehandlernavn
-import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
-import no.nav.helse.util.idForGruppe
-import no.nav.helse.util.testEnv
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -107,7 +104,7 @@ internal class ApiOppgaveServiceTest {
                 totrinnsvurderingDao = totrinnsvurderingDao,
                 saksbehandlerDao = saksbehandlerDao,
                 meldingPubliserer = meldingPubliserer,
-                tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
+                tilgangskontroll = { _, _ -> false },
                 tilgangsgrupper = SpeilTilgangsgrupper(testEnv),
                 repositories = repositories
             )
@@ -540,3 +537,6 @@ internal class ApiOppgaveServiceTest {
             else -> throw IllegalArgumentException("Kunne ikke mappe egenskap til periodetype")
         }
 }
+
+private fun idForGruppe(gruppe: Gruppe) = SpeilTilgangsgrupper(testEnv).gruppeId(gruppe).toString()
+private val testEnv = Gruppe.__indreInnhold_kunForTest().values.associateWith { _ -> UUID.randomUUID().toString() }

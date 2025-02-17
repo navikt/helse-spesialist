@@ -13,7 +13,6 @@ import no.nav.helse.modell.saksbehandler.handlinger.OpphevStans
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.AKTIVITETSKRAV
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.MEDISINSK_VILKAR
 import no.nav.helse.spesialist.modell.NotatType
-import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -49,7 +48,7 @@ class StansAutomatiskBehandlinghåndtererImplTest {
                     oid = oid,
                     navn = "navn",
                     ident = "ident",
-                    tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
+                    tilgangskontroll = { _, _ -> false },
                 ),
         )
 
