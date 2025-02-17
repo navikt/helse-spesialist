@@ -70,6 +70,7 @@ class RiverSetup(
             BehandlingOpprettetRiver(mediator),
             KommandokjedePåminnelseRiver(mediator),
             StansAutomatiskBehandlingRiver(mediator),
+            AvviksvurderingLøsningRiver(mediator),
         ).forEach { river ->
             River(delegatedRapid)
                 .precondition(river.preconditions())
