@@ -35,13 +35,8 @@ import java.util.UUID
 internal class PgVarselApiDaoTest : AbstractDatabaseTest() {
     private val apiVarselDao = PgVarselApiDao(dataSource)
     private val dbQuery = DbQuery(dataSource)
-    private val NAVN = Navn(lagFornavn(), lagFornavn(), lagEtternavn())
-    private val ENHET = Enhet(101, "Halden")
     private val PERIODE = Periode(UUID.randomUUID(), LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 31))
     private val FØDSELSNUMMER = lagFødselsnummer()
-    private val AKTØRID = lagAktørId()
-    private val ARBEIDSGIVER_NAVN = lagOrganisasjonsnavn()
-    private val ORGANISASJONSNUMMER = lagOrganisasjonsnummer()
 
     @Test
     fun `Tom liste ved manglende varsler`() {
@@ -806,9 +801,9 @@ internal class PgVarselApiDaoTest : AbstractDatabaseTest() {
 
     private fun opprettPerson(
         fødselsnummer: String = FØDSELSNUMMER,
-        aktørId: String = AKTØRID,
+        aktørId: String = lagAktørId(),
         adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert,
-        bostedId: Int = ENHET.id,
+        bostedId: Int = 101,
         erEgenAnsatt: Boolean = false,
     ): Long {
         val personId = opprettMinimalPerson(fødselsnummer, aktørId)
@@ -821,8 +816,8 @@ internal class PgVarselApiDaoTest : AbstractDatabaseTest() {
     }
 
     private fun opprettMinimalPerson(
-        fødselsnummer: String = FØDSELSNUMMER,
-        aktørId: String = AKTØRID,
+        fødselsnummer: String,
+        aktørId: String,
     ) = opprettHelPerson(fødselsnummer, aktørId, null, null, null)
 
     private fun opprettHelPerson(
@@ -850,9 +845,9 @@ internal class PgVarselApiDaoTest : AbstractDatabaseTest() {
         INSERT INTO person_info (fornavn, mellomnavn, etternavn, fodselsdato, kjonn, adressebeskyttelse)
         VALUES (:fornavn, :mellomnavn, :etternavn, :foedselsdato::date, :kjoenn::person_kjonn, :adressebeskyttelse)
         """.trimIndent(),
-        "fornavn" to NAVN.fornavn,
-        "mellomnavn" to NAVN.mellomnavn,
-        "etternavn" to NAVN.etternavn,
+        "fornavn" to lagFornavn(),
+        "mellomnavn" to lagFornavn(),
+        "etternavn" to lagEtternavn(),
         "foedselsdato" to LocalDate.of(1970, 1, 1),
         "kjoenn" to "Ukjent",
         "adressebeskyttelse" to adressebeskyttelse.name,
@@ -907,7 +902,7 @@ internal class PgVarselApiDaoTest : AbstractDatabaseTest() {
     )
 
     private fun opprettArbeidsgiver(
-        organisasjonsnummer: String = ORGANISASJONSNUMMER,
+        organisasjonsnummer: String = lagOrganisasjonsnummer(),
         bransjer: List<String> = emptyList(),
     ): Long {
         val bransjeId = opprettBransjer(bransjer)
@@ -932,7 +927,7 @@ internal class PgVarselApiDaoTest : AbstractDatabaseTest() {
     )
 
     private fun opprettArbeidsgivernavn() = dbQuery.updateAndReturnGeneratedKey(
-        "INSERT INTO arbeidsgiver_navn (navn) VALUES (:arbeidsgivernavn)", "arbeidsgivernavn" to ARBEIDSGIVER_NAVN
+        "INSERT INTO arbeidsgiver_navn (navn) VALUES (:arbeidsgivernavn)", "arbeidsgivernavn" to lagOrganisasjonsnavn()
     )
 
     private fun opprettInfotrygdutbetalinger() = dbQuery.updateAndReturnGeneratedKey(
