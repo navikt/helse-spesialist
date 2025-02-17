@@ -20,6 +20,7 @@ import no.nav.helse.modell.vedtaksperiode.Inntektsopplysningkilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.SykepengegrunnlagsArbeidsgiver
+import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
 import java.time.LocalDate
 import java.util.UUID
 
@@ -85,6 +86,9 @@ class GodkjenningsbehovRiver(
             it.interestedIn("avviksvurderingId")
             it.requireAny("Godkjenning.utbetalingtype", Utbetalingtype.gyldigeTyper.values())
             it.interestedIn("Godkjenning.orgnummereMedRelevanteArbeidsforhold")
+            it.requireArray("Godkjenning.omregnedeÅrsinntekter") {
+                requireKey("organisasjonsnummer", "beløp")
+            }
         }
 
     override fun onPacket(
@@ -121,6 +125,13 @@ class GodkjenningsbehovRiver(
                 spleisSykepengegrunnlagsfakta = spleisSykepengegrunnlagsfakta(packet),
                 kanAvvises = packet["Godkjenning.kanAvvises"].asBoolean(),
                 erInngangsvilkårVurdertISpleis = packet["Godkjenning.sykepengegrunnlagsfakta.fastsatt"].asText() != "IInfotrygd",
+                omregnedeÅrsinntekter =
+                    packet["Godkjenning.omregnedeÅrsinntekter"].map {
+                        OmregnetÅrsinntekt(
+                            arbeidsgiverreferanse = it["organisasjonsnummer"].asText(),
+                            beløp = it["beløp"].asDouble(),
+                        )
+                    },
                 json = packet.toJson(),
             ),
             MessageContextMeldingPubliserer(context),

@@ -14,6 +14,7 @@ import no.nav.helse.modell.vedtaksperiode.Inntektsopplysningkilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.SykepengegrunnlagsArbeidsgiver
+import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -91,6 +92,9 @@ internal class GodkjenningsbehovRiverTest {
                                 )
                             )
                         ), it.spleisSykepengegrunnlagsfakta
+                    )
+                    assertEquals(
+                        listOf(OmregnetÅrsinntekt(arbeidsgiverreferanse = ORGNR, beløp = 123456.7)), it.omregnedeÅrsinntekter
                     )
                 },
                 kontekstbasertPubliserer = any()

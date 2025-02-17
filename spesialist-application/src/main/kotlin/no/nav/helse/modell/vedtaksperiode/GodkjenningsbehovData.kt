@@ -10,6 +10,7 @@ import no.nav.helse.modell.utbetaling.Refusjonstype
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
+import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -36,6 +37,7 @@ data class GodkjenningsbehovData(
     val skjæringstidspunkt: LocalDate,
     val spleisSykepengegrunnlagsfakta: SpleisSykepengegrunnlagsfakta,
     val erInngangsvilkårVurdertISpleis: Boolean,
+    val omregnedeÅrsinntekter: List<OmregnetÅrsinntekt>,
     private val json: String,
 ) {
     private lateinit var løsning: Løsning

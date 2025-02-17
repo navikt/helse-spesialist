@@ -305,6 +305,12 @@ internal object Testmeldingfabrikk {
                             }
                         )
                     ),
+                    "omregnedeÅrsinntekter" to listOf(
+                        mapOf(
+                            "organisasjonsnummer" to organisasjonsnummer,
+                            "beløp" to 123456.7,
+                        )
+                    ),
                 ),
             ).apply {
                 if (avviksvurderingId != null) {

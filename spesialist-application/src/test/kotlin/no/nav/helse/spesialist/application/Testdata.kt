@@ -7,6 +7,7 @@ import no.nav.helse.modell.vedtaksperiode.Inntektsopplysningkilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.SykepengegrunnlagsArbeidsgiver
+import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
 import no.nav.helse.spesialist.api.bootstrap.Gruppe
 import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
 import java.time.LocalDate
@@ -151,6 +152,12 @@ object Testdata {
                 )
             ),
             erInngangsvilkårVurdertISpleis = true,
+            omregnedeÅrsinntekter = listOf(
+                OmregnetÅrsinntekt(
+                    arbeidsgiverreferanse = organisasjonsnummer,
+                    beløp = 123456.7,
+                )
+            ),
             json = json,
         )
     }

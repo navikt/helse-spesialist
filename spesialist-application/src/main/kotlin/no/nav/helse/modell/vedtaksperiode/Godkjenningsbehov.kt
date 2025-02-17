@@ -52,6 +52,7 @@ import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.VurderEnhetUtland
 import no.nav.helse.modell.vergemal.VurderVergemålOgFullmakt
+import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import java.time.LocalDate
 import java.util.UUID
@@ -95,6 +96,7 @@ class Godkjenningsbehov(
     val skjæringstidspunkt: LocalDate,
     val spleisSykepengegrunnlagsfakta: SpleisSykepengegrunnlagsfakta,
     val erInngangsvilkårVurdertISpleis: Boolean,
+    val omregnedeÅrsinntekter: List<OmregnetÅrsinntekt>,
     private val json: String,
 ) : Vedtaksperiodemelding {
     override fun fødselsnummer() = fødselsnummer
@@ -134,6 +136,7 @@ class Godkjenningsbehov(
             orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
             skjæringstidspunkt = skjæringstidspunkt,
             erInngangsvilkårVurdertISpleis = erInngangsvilkårVurdertISpleis,
+            omregnedeÅrsinntekter = omregnedeÅrsinntekter,
             json = json,
         )
 
@@ -187,6 +190,13 @@ class Godkjenningsbehov(
                 ?.map { it.asText() } ?: emptyList(),
         kanAvvises = jsonNode.path("Godkjenning").path("kanAvvises").asBoolean(),
         erInngangsvilkårVurdertISpleis = jsonNode.path("Godkjenning").get("sykepengegrunnlagsfakta").get("fastsatt").asText() != "IInfotrygd",
+        omregnedeÅrsinntekter =
+            jsonNode.path("Godkjenning").get("omregnedeÅrsinntekter").map {
+                OmregnetÅrsinntekt(
+                    arbeidsgiverreferanse = it["organisasjonsnummer"].asText(),
+                    beløp = it["beløp"].asDouble(),
+                )
+            },
         json = jsonNode.toString(),
     )
 }

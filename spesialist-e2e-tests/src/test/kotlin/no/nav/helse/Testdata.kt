@@ -7,6 +7,7 @@ import no.nav.helse.modell.vedtaksperiode.Inntektsopplysningkilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.SykepengegrunnlagsArbeidsgiver
+import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
 import no.nav.helse.spesialist.api.graphql.schema.ApiLovhjemmel
 import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse
 import no.nav.helse.spesialist.test.TestPerson
@@ -161,6 +162,12 @@ object Testdata {
                 )
             ),
             erInngangsvilkårVurdertISpleis = true,
+            omregnedeÅrsinntekter = listOf(
+                OmregnetÅrsinntekt(
+                    arbeidsgiverreferanse = organisasjonsnummer,
+                    beløp = 123456.7,
+                )
+            ),
             json = json,
         )
     }
