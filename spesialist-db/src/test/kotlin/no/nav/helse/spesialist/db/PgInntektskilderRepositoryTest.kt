@@ -99,7 +99,7 @@ internal class PgInntektskilderRepositoryTest : DatabaseIntegrationTest() {
                 unikId = UUID.randomUUID(),
                 vilkårsgrunnlagId = UUID.randomUUID(),
                 fødselsnummer = fødselsnummer,
-                skjæringstidspunkt = 1.januar,
+                skjæringstidspunkt = 1 jan 2018,
                 opprettet = LocalDateTime.now(),
                 avviksprosent = 0.0,
                 sammenligningsgrunnlag = SammenligningsgrunnlagDto(
@@ -126,12 +126,14 @@ internal class PgInntektskilderRepositoryTest : DatabaseIntegrationTest() {
                 unikId = UUID.randomUUID(),
                 vilkårsgrunnlagId = UUID.randomUUID(),
                 fødselsnummer = fødselsnummer,
-                skjæringstidspunkt = 1.januar,
+                skjæringstidspunkt = 1 jan 2018,
                 opprettet = LocalDateTime.now(),
                 avviksprosent = 0.0,
                 sammenligningsgrunnlag = SammenligningsgrunnlagDto(
-                    600_000.0, listOf(InnrapportertInntektDto(organisasjonsnummerSomSpleisKjennerTil, emptyList()),
-                        InnrapportertInntektDto(enAnnenArbeidsgiverForPersonen, emptyList()))
+                    600_000.0, listOf(
+                        InnrapportertInntektDto(organisasjonsnummerSomSpleisKjennerTil, emptyList()),
+                        InnrapportertInntektDto(enAnnenArbeidsgiverForPersonen, emptyList())
+                    )
                 ),
                 beregningsgrunnlag = BeregningsgrunnlagDto(600_000.0, emptyList())
             )
@@ -153,7 +155,7 @@ internal class PgInntektskilderRepositoryTest : DatabaseIntegrationTest() {
                 unikId = UUID.randomUUID(),
                 vilkårsgrunnlagId = UUID.randomUUID(),
                 fødselsnummer = fødselsnummer,
-                skjæringstidspunkt = 1.januar,
+                skjæringstidspunkt = 1 jan 2018,
                 opprettet = LocalDateTime.now(),
                 avviksprosent = 0.0,
                 sammenligningsgrunnlag = SammenligningsgrunnlagDto(

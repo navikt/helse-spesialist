@@ -111,7 +111,7 @@ class PgOverstyringRepositoryTest : DatabaseIntegrationTest() {
         assertEquals(VEDTAKSPERIODE, hentetInntektOgRefusjonOverstyring.vedtaksperiodeId)
         assertEquals(SAKSBEHANDLER_OID, hentetInntektOgRefusjonOverstyring.saksbehandlerOid)
         assertEquals(FNR, hentetInntektOgRefusjonOverstyring.fødselsnummer)
-        assertEquals(1.januar, hentetInntektOgRefusjonOverstyring.skjæringstidspunkt)
+        assertEquals(1 jan 2018, hentetInntektOgRefusjonOverstyring.skjæringstidspunkt)
         assertEquals(nyOverstyrtArbeidsgiver(), hentetInntektOgRefusjonOverstyring.arbeidsgivere.first())
         assertTrue(hentetInntektOgRefusjonOverstyring.opprettet.isBefore(LocalDateTime.now()))
         assertTrue(hentetInntektOgRefusjonOverstyring.harFåttTildeltId())
@@ -153,11 +153,11 @@ class PgOverstyringRepositoryTest : DatabaseIntegrationTest() {
         assertEquals("begrunnelse", hentetMinimumSykdomsgradOverstyring.begrunnelse)
         assertEquals(nyMinimumSykdomsgradArbeidsgiver(), hentetMinimumSykdomsgradOverstyring.arbeidsgivere.first())
         assertEquals(
-            nyMinimumSykdomsgradPeriode(fom = 1.januar, tom = 15.januar),
+            nyMinimumSykdomsgradPeriode(fom = 1 jan 2018, tom = 15 jan 2018),
             hentetMinimumSykdomsgradOverstyring.perioderVurdertOk.first()
         )
         assertEquals(
-            nyMinimumSykdomsgradPeriode(fom = 16.januar, tom = 31.januar),
+            nyMinimumSykdomsgradPeriode(fom = 16 jan 2018, tom = 31 jan 2018),
             hentetMinimumSykdomsgradOverstyring.perioderVurdertIkkeOk.first()
         )
         assertTrue(hentetMinimumSykdomsgradOverstyring.opprettet.isBefore(LocalDateTime.now()))
@@ -181,7 +181,7 @@ class PgOverstyringRepositoryTest : DatabaseIntegrationTest() {
         assertEquals(VEDTAKSPERIODE, hentetSkjønnsfastsattSykepengegrunnlag.vedtaksperiodeId)
         assertEquals(SAKSBEHANDLER_OID, hentetSkjønnsfastsattSykepengegrunnlag.saksbehandlerOid)
         assertEquals(FNR, hentetSkjønnsfastsattSykepengegrunnlag.fødselsnummer)
-        assertEquals(1.januar, hentetSkjønnsfastsattSykepengegrunnlag.skjæringstidspunkt)
+        assertEquals(1 jan 2018, hentetSkjønnsfastsattSykepengegrunnlag.skjæringstidspunkt)
         assertEquals(nySkjønnsfastsattArbeidsgiver(), hentetSkjønnsfastsattSykepengegrunnlag.arbeidsgivere.first())
         assertTrue(hentetSkjønnsfastsattSykepengegrunnlag.opprettet.isBefore(LocalDateTime.now()))
         assertTrue(hentetSkjønnsfastsattSykepengegrunnlag.harFåttTildeltId())
@@ -204,7 +204,7 @@ class PgOverstyringRepositoryTest : DatabaseIntegrationTest() {
             fødselsnummer = FNR,
             aktørId = AKTØR,
             vedtaksperiodeId = VEDTAKSPERIODE,
-            skjæringstidspunkt = 1.januar,
+            skjæringstidspunkt = 1 jan 2018,
             overstyrteArbeidsforhold = listOf(nyArbeidsforhold())
         )
 
@@ -223,7 +223,7 @@ class PgOverstyringRepositoryTest : DatabaseIntegrationTest() {
             fødselsnummer = FNR,
             aktørId = AKTØR,
             vedtaksperiodeId = VEDTAKSPERIODE,
-            skjæringstidspunkt = 1.januar,
+            skjæringstidspunkt = 1 jan 2018,
             arbeidsgivere = listOf(nyOverstyrtArbeidsgiver()),
         )
 
@@ -235,16 +235,16 @@ class PgOverstyringRepositoryTest : DatabaseIntegrationTest() {
             fraRefusjonsopplysninger = null,
             refusjonsopplysninger = listOf(
                 Refusjonselement(
-                    fom = 1.januar,
-                    tom = 31.januar,
+                    fom = 1 jan 2018,
+                    tom = 31 jan 2018,
                     beløp = 1000.0,
                 ),
             ),
             begrunnelse = "begrunnelse",
             forklaring = "forklaring",
             lovhjemmel = null,
-            fom = 1.januar,
-            tom = 31.januar,
+            fom = 1 jan 2018,
+            tom = 31 jan 2018,
         )
 
     private fun nyMinimumSykdomsgradOverstyring(): MinimumSykdomsgrad =
@@ -254,14 +254,14 @@ class PgOverstyringRepositoryTest : DatabaseIntegrationTest() {
             aktørId = AKTØR,
             vedtaksperiodeId = VEDTAKSPERIODE,
             begrunnelse = "begrunnelse",
-            perioderVurdertOk = listOf(nyMinimumSykdomsgradPeriode(fom = 1.januar, tom = 15.januar)),
-            perioderVurdertIkkeOk = listOf(nyMinimumSykdomsgradPeriode(fom = 16.januar, tom = 31.januar)),
+            perioderVurdertOk = listOf(nyMinimumSykdomsgradPeriode(fom = 1 jan 2018, tom = 15 jan 2018)),
+            perioderVurdertIkkeOk = listOf(nyMinimumSykdomsgradPeriode(fom = 16 jan 2018, tom = 31 jan 2018)),
             arbeidsgivere = listOf(nyMinimumSykdomsgradArbeidsgiver()),
         )
 
     private fun nyMinimumSykdomsgradPeriode(
-        fom: LocalDate = 1.januar,
-        tom: LocalDate = 31.januar
+        fom: LocalDate = 1 jan 2018,
+        tom: LocalDate = 31 jan 2018
     ): MinimumSykdomsgradPeriode =
         MinimumSykdomsgradPeriode(
             fom = fom,
@@ -280,7 +280,7 @@ class PgOverstyringRepositoryTest : DatabaseIntegrationTest() {
             fødselsnummer = FNR,
             aktørId = AKTØR,
             vedtaksperiodeId = VEDTAKSPERIODE,
-            skjæringstidspunkt = 1.januar,
+            skjæringstidspunkt = 1 jan 2018,
             arbeidsgivere = listOf(nySkjønnsfastsattArbeidsgiver()),
         )
 

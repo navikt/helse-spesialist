@@ -43,7 +43,7 @@ internal class PgSykefraværstilfelleDaoTest : DatabaseIntegrationTest() {
             SkjønnsfastsattSykepengegrunnlagDto(
                 SkjønnsfastsettingstypeDto.OMREGNET_ÅRSINNTEKT,
                 SkjønnsfastsettingsårsakDto.ANDRE_AVSNITT,
-                1.januar,
+                1 jan 2018,
                 "mal",
                 "fritekst",
                 "konklusjon",
@@ -87,7 +87,7 @@ internal class PgSykefraværstilfelleDaoTest : DatabaseIntegrationTest() {
             SkjønnsfastsattSykepengegrunnlagDto(
                 SkjønnsfastsettingstypeDto.OMREGNET_ÅRSINNTEKT,
                 SkjønnsfastsettingsårsakDto.ANDRE_AVSNITT,
-                1.januar,
+                1 jan 2018,
                 "mal",
                 "fritekst",
                 "konklusjon",
@@ -102,7 +102,7 @@ internal class PgSykefraværstilfelleDaoTest : DatabaseIntegrationTest() {
         fødselsnummer: String = FNR,
         orgnummer: String = ORGNUMMER,
         type: SkjønnsfastsettingstypeForDatabase = OMREGNET_ÅRSINNTEKT,
-        skjæringstidspunkt: LocalDate = 1.januar,
+        skjæringstidspunkt: LocalDate = 1 jan 2018,
     ): SkjønnsfastsattSykepengegrunnlagForDatabase =
         SkjønnsfastsattSykepengegrunnlagForDatabase(
             eksternHendelseId = UUID.randomUUID(),

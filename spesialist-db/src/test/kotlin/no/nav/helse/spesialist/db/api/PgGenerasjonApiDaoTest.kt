@@ -3,9 +3,9 @@ package no.nav.helse.spesialist.db.api
 import no.nav.helse.db.api.PgGenerasjonApiDao
 import no.nav.helse.db.api.VedtaksperiodeDbDto
 import no.nav.helse.spesialist.db.DatabaseIntegrationTest
-import no.nav.helse.spesialist.db.februar
-import no.nav.helse.spesialist.db.januar
-import no.nav.helse.spesialist.db.mars
+import no.nav.helse.spesialist.db.feb
+import no.nav.helse.spesialist.db.jan
+import no.nav.helse.spesialist.db.mar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
@@ -71,17 +71,17 @@ internal class PgGenerasjonApiDaoTest: DatabaseIntegrationTest() {
 
         val v1 = UUID.randomUUID()
         opprettVedtaksperiode(vedtaksperiodeId = v1)
-        opprettGenerasjon(v1, fom = 1.januar, tom = 31.januar)
+        opprettGenerasjon(v1, fom = 1 jan 2018, tom = 31 jan 2018)
         val spleisBehandlingId1 = UUID.randomUUID()
-        opprettGenerasjon(v1, fom = 1.februar, tom = 28.februar, spleisBehandlingId = spleisBehandlingId1)
-        oppdaterSkjæringstidspunkt(spleisBehandlingId1, 1.februar)
+        opprettGenerasjon(v1, fom = 1 feb 2018, tom = 28 feb 2018, spleisBehandlingId = spleisBehandlingId1)
+        oppdaterSkjæringstidspunkt(spleisBehandlingId1, 1 feb 2018)
 
         val v2 = UUID.randomUUID()
         val periode2 = Periode(v2, LocalDate.now(), LocalDate.now())
         opprettVedtaksperiode(vedtaksperiodeId = periode2.id)
         val spleisBehandlingId2 = UUID.randomUUID()
-        opprettGenerasjon(v2, fom = 1.mars, tom = 31.mars, spleisBehandlingId = spleisBehandlingId2)
-        oppdaterSkjæringstidspunkt(spleisBehandlingId2, 1.mars)
+        opprettGenerasjon(v2, fom = 1 mar 2018, tom = 31 mar 2018, spleisBehandlingId = spleisBehandlingId2)
+        oppdaterSkjæringstidspunkt(spleisBehandlingId2, 1 mar 2018)
 
         val v3 = UUID.randomUUID()
         val periode3 = Periode(v3, LocalDate.now(), LocalDate.now())
@@ -91,8 +91,8 @@ internal class PgGenerasjonApiDaoTest: DatabaseIntegrationTest() {
         val alleVedtaksperioderForPerson = generasjonDao.gjeldendeGenerasjonerForPerson(finnOppgaveIdFor(periode3.id))
 
         assertEquals(3, alleVedtaksperioderForPerson.size)
-        val forventetVedtaksperiode1 = VedtaksperiodeDbDto(v1, 1.februar, 28.februar, 1.februar, emptySet())
-        val forventetVedtaksperiode2 = VedtaksperiodeDbDto(v2, 1.mars, 31.mars, 1.mars, emptySet())
+        val forventetVedtaksperiode1 = VedtaksperiodeDbDto(v1, 1 feb 2018, 28 feb 2018, 1 feb 2018, emptySet())
+        val forventetVedtaksperiode2 = VedtaksperiodeDbDto(v2, 1 mar 2018, 31 mar 2018, 1 mar 2018, emptySet())
         val forventetVedtaksperiode3 = VedtaksperiodeDbDto(v3, periode3.fom, periode3.tom, periode3.fom, emptySet())
 
         assertEquals(setOf(forventetVedtaksperiode1, forventetVedtaksperiode2, forventetVedtaksperiode3), alleVedtaksperioderForPerson)

@@ -368,8 +368,8 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
         spleisBehandlingId: UUID = UUID.randomUUID(),
         utbetalingId: UUID = UUID.randomUUID(),
-        fom: LocalDate = 1.januar,
-        tom: LocalDate = 31.januar,
+        fom: LocalDate = 1 jan 2018,
+        tom: LocalDate = 31 jan 2018,
     ) {
         pgPersonRepository.brukPersonHvisFinnes(FNR) {
             this.nySpleisBehandling(
@@ -609,7 +609,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
     protected fun nyOverstyrtTidslinjedag(): OverstyrtTidslinjedag =
         OverstyrtTidslinjedag(
-            dato = 1.januar,
+            dato = 1 jan 2018,
             type = Dagtype.Sykedag.toString(),
             grad = 100,
             fraType = Dagtype.Feriedag.toString(),

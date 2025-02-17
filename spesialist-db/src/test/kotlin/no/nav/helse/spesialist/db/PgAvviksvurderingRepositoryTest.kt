@@ -38,7 +38,7 @@ internal class PgAvviksvurderingRepositoryTest : DatabaseIntegrationTest() {
 
     @Test
     fun `finner avviksvurderinger basert på fødselsnummer`() {
-        val skjæringstidspunkt = 1.januar
+        val skjæringstidspunkt = 1 jan 2018
         val unikId = UUID.randomUUID()
         val vilkårsgrunnlagId = UUID.randomUUID()
         val opprettet = LocalDateTime.now().withNano(0)
@@ -66,7 +66,7 @@ internal class PgAvviksvurderingRepositoryTest : DatabaseIntegrationTest() {
 
     @Test
     fun `samme avviksvurdering med forskjellig vilkårsgrunnlagId`() {
-        val skjæringstidspunkt = 1.januar
+        val skjæringstidspunkt = 1 jan 2018
         val unikId = UUID.randomUUID()
         val vilkårsgrunnlagId1 = UUID.randomUUID()
         val vilkårsgrunnlagId2 = UUID.randomUUID()
@@ -100,7 +100,7 @@ internal class PgAvviksvurderingRepositoryTest : DatabaseIntegrationTest() {
 
     @Test
     fun `samme avviksvurdering med samme vilkårsgrunnlagId`() {
-        val skjæringstidspunkt = 1.januar
+        val skjæringstidspunkt = 1 jan 2018
         val unikId = UUID.randomUUID()
         val vilkårsgrunnlagId = UUID.randomUUID()
         val opprettet = LocalDateTime.now()
@@ -133,7 +133,7 @@ internal class PgAvviksvurderingRepositoryTest : DatabaseIntegrationTest() {
 
     @Test
     fun `forskjellige avviksvurderinger`() {
-        val skjæringstidspunkt = 1.januar
+        val skjæringstidspunkt = 1 jan 2018
         val unikId1 = UUID.randomUUID()
         val unikId2 = UUID.randomUUID()
         val vilkårsgrunnlagId1 = UUID.randomUUID()
@@ -170,7 +170,7 @@ internal class PgAvviksvurderingRepositoryTest : DatabaseIntegrationTest() {
 
     @Test
     fun `opprettes kobling hvis vilkårsgrunnlagId ikke er null`() {
-        val skjæringstidspunkt = 1.januar
+        val skjæringstidspunkt = 1 jan 2018
         val unikId = UUID.randomUUID()
         val vilkårsgrunnlagId = UUID.randomUUID()
         val opprettet = LocalDateTime.now()
@@ -193,7 +193,7 @@ internal class PgAvviksvurderingRepositoryTest : DatabaseIntegrationTest() {
 
     @Test
     fun `opprettes ikke kobling hvis vilkårsgrunnlagId er null`() {
-        val skjæringstidspunkt = 1.januar
+        val skjæringstidspunkt = 1 jan 2018
         val unikId = UUID.randomUUID()
         val opprettet = LocalDateTime.now()
         avviksvurderingDao.lagre(
@@ -216,7 +216,7 @@ internal class PgAvviksvurderingRepositoryTest : DatabaseIntegrationTest() {
             avviksvurdering(
                 fødselsnummer = FNR,
                 vilkårsgrunnlagId = UUID.randomUUID(),
-                skjæringstidspunkt = 1.januar,
+                skjæringstidspunkt = 1 jan 2018,
                 unikId = unikId,
                 opprettet = LocalDateTime.now(),
             ),
@@ -286,7 +286,7 @@ internal class PgAvviksvurderingRepositoryTest : DatabaseIntegrationTest() {
 
     private fun avviksvurdering(
         fødselsnummer: String = "12345678910",
-        skjæringstidspunkt: LocalDate = 1.januar,
+        skjæringstidspunkt: LocalDate = 1 jan 2018,
         unikId: UUID = UUID.randomUUID(),
         vilkårsgrunnlagId: UUID? = null,
         opprettet: LocalDateTime = LocalDateTime.now(),

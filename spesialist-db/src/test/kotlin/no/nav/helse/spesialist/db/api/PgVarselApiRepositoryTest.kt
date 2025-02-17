@@ -2,7 +2,7 @@ package no.nav.helse.spesialist.db.api
 
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.spesialist.db.DatabaseIntegrationTest
-import no.nav.helse.spesialist.db.januar
+import no.nav.helse.spesialist.db.jan
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
@@ -147,8 +147,8 @@ internal class PgVarselApiRepositoryTest: DatabaseIntegrationTest() {
 
     @Test
     fun `Uberegnet periode skal vise varsler fordi den er tilstøtende perioden med oppgave`() {
-        val uberegnetPeriode = periode(2.januar(2023), 3.januar(2023))
-        val periodeMedOppgave = periode(4.januar(2023), 5.januar(2023))
+        val uberegnetPeriode = periode(2 jan 2023, 3 jan 2023)
+        val periodeMedOppgave = periode(4 jan 2023, 5 jan 2023)
         opprettPerson()
         opprettArbeidsgiver()
         with(uberegnetPeriode) {
@@ -172,8 +172,8 @@ internal class PgVarselApiRepositoryTest: DatabaseIntegrationTest() {
 
     @Test
     fun `Uberegnet periode skal ikke vise varsler når den ikke er tilstøtende perioden med oppgave`() {
-        val uberegnetPeriode = periode(2.januar(2023), 3.januar(2023))
-        val periodeMedOppgave = periode(5.januar(2023), 6.januar(2023))
+        val uberegnetPeriode = periode(2 jan 2023, 3 jan 2023)
+        val periodeMedOppgave = periode(5 jan 2023, 6 jan 2023)
         opprettPerson()
         opprettArbeidsgiver()
         opprettVedtaksperiode(fom = uberegnetPeriode.fom, tom = uberegnetPeriode.tom, utbetalingId = UUID.randomUUID())
@@ -192,8 +192,8 @@ internal class PgVarselApiRepositoryTest: DatabaseIntegrationTest() {
 
     @Test
     fun `Uberegnet periode skal vise varsler fordi den er tilstøtende perioden med oppgave (over helg)`() {
-        val uberegnetPeriode = periode(2.januar(2023), 6.januar(2023))
-        val periodeMedOppgave = periode(9.januar(2023), 13.januar(2023))
+        val uberegnetPeriode = periode(2 jan 2023, 6 jan 2023)
+        val periodeMedOppgave = periode(9 jan 2023, 13 jan 2023)
         opprettPerson()
         opprettArbeidsgiver()
         with(uberegnetPeriode) {
@@ -215,9 +215,9 @@ internal class PgVarselApiRepositoryTest: DatabaseIntegrationTest() {
 
     @Test
     fun `Uberegnet periode skal vise varsler fordi den er tilstøtende de to andre periodene`() {
-        val uberegnetPeriode = periode(1.januar(2023), 2.januar(2023))
-        val beregnetPeriode = periode(3.januar(2023), 4.januar(2023))
-        val periodeMedOppgave = periode(5.januar(2023), 6.januar(2023))
+        val uberegnetPeriode = periode(1 jan 2023, 2 jan 2023)
+        val beregnetPeriode = periode(3 jan 2023, 4 jan 2023)
+        val periodeMedOppgave = periode(5 jan 2023, 6 jan 2023)
         opprettPerson()
         opprettArbeidsgiver()
         with(uberegnetPeriode) {
@@ -246,9 +246,9 @@ internal class PgVarselApiRepositoryTest: DatabaseIntegrationTest() {
 
     @Test
     fun `Begge uberegnede perioder skal vise varsler fordi de henger sammen med perioden med oppgave`() {
-        val uberegnetPeriode1 = periode(1.januar(2023), 2.januar(2023))
-        val uberegnetPeriode2 = periode(3.januar(2023), 4.januar(2023))
-        val periodeMedOppgave = periode(5.januar(2023), 6.januar(2023))
+        val uberegnetPeriode1 = periode(1 jan 2023, 2 jan 2023)
+        val uberegnetPeriode2 = periode(3 jan 2023, 4 jan 2023)
+        val periodeMedOppgave = periode(5 jan 2023, 6 jan 2023)
         opprettPerson()
         opprettArbeidsgiver()
         with(uberegnetPeriode1) {
@@ -283,9 +283,9 @@ internal class PgVarselApiRepositoryTest: DatabaseIntegrationTest() {
 
     @Test
     fun `Ingen uberegnede perioder skal vise varsler fordi de ikke henger sammen med perioden med oppgave`() {
-        val uberegnetPeriode1 = periode(1.januar(2023), 2.januar(2023))
-        val uberegnetPeriode2 = periode(3.januar(2023), 4.januar(2023))
-        val periodeMedOppgave = periode(6.januar(2023), 7.januar(2023))
+        val uberegnetPeriode1 = periode(1 jan 2023, 2 jan 2023)
+        val uberegnetPeriode2 = periode(3 jan 2023, 4 jan 2023)
+        val periodeMedOppgave = periode(6 jan 2023, 7 jan 2023)
         opprettPerson()
         opprettArbeidsgiver()
         with(uberegnetPeriode1) {
@@ -307,9 +307,9 @@ internal class PgVarselApiRepositoryTest: DatabaseIntegrationTest() {
 
     @Test
     fun `Bare den tilstøtende uberegnede perioden skal vise varsler`() {
-        val uberegnetPeriode1 = periode(1.januar(2023), 2.januar(2023))
-        val uberegnetPeriode2 = periode(3.januar(2023), 4.januar(2023))
-        val periodeMedOppgave = periode(5.januar(2023), 6.januar(2023))
+        val uberegnetPeriode1 = periode(1 jan 2023, 2 jan 2023)
+        val uberegnetPeriode2 = periode(3 jan 2023, 4 jan 2023)
+        val periodeMedOppgave = periode(5 jan 2023, 6 jan 2023)
         opprettPerson()
         opprettArbeidsgiver()
         with(uberegnetPeriode1) {

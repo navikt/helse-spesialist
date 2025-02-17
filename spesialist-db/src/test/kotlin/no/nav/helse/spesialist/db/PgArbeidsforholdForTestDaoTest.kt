@@ -107,8 +107,8 @@ internal class PgArbeidsforholdForTestDaoTest : DatabaseIntegrationTest() {
     fun `skriver ikke over alle arbeidsforhold med samme informasjon`() {
         val løsninger = Arbeidsforholdløsning(
             listOf(
-                Arbeidsforholdløsning.Løsning(1.januar, null, "Nerd", 50),
-                Arbeidsforholdløsning.Løsning(20.april, null, "Noe annet", 50)
+                Arbeidsforholdløsning.Løsning(1 jan 2018, null, "Nerd", 50),
+                Arbeidsforholdløsning.Løsning(20 apr 2018, null, "Noe annet", 50)
             )
         )
 
@@ -124,14 +124,14 @@ internal class PgArbeidsforholdForTestDaoTest : DatabaseIntegrationTest() {
     fun `fjerner arbeidsforhold som er borte fra aareg`() {
         Arbeidsforholdløsning(
             listOf(
-                Arbeidsforholdløsning.Løsning(1.januar, null, "Nerd", 50),
-                Arbeidsforholdløsning.Løsning(20.april, null, "Noe annet", 50)
+                Arbeidsforholdløsning.Løsning(1 jan 2018, null, "Nerd", 50),
+                Arbeidsforholdløsning.Løsning(20 apr 2018, null, "Noe annet", 50)
             )
         ).upsert(arbeidsforholdDao, FNR, ORGNUMMER)
 
         Arbeidsforholdløsning(
             listOf(
-                Arbeidsforholdløsning.Løsning(1.januar, null, "Nerd", 50)
+                Arbeidsforholdløsning.Løsning(1 jan 2018, null, "Nerd", 50)
             )
         ).upsert(arbeidsforholdDao, FNR, ORGNUMMER)
 

@@ -241,10 +241,10 @@ internal class PgOverstyringDaoTest : DatabaseIntegrationTest() {
         assertFalse(hentetOverstyring.ferdigstilt)
         assertEquals(1, hentetOverstyring.refusjonsopplysninger?.size)
         val refusjonsopplysning = hentetOverstyring.refusjonsopplysninger?.first()
-        assertEquals(1.januar, refusjonsopplysning?.fom)
-        assertEquals(31.januar, refusjonsopplysning?.tom)
+        assertEquals(1 jan 2018, refusjonsopplysning?.fom)
+        assertEquals(31 jan 2018, refusjonsopplysning?.tom)
         assertEquals(1000.0, refusjonsopplysning?.beløp)
-        assertEquals(1.januar, hentetOverstyring.fom)
+        assertEquals(1 jan 2018, hentetOverstyring.fom)
         assertNull(hentetOverstyring.tom)
     }
 
@@ -285,8 +285,8 @@ internal class PgOverstyringDaoTest : DatabaseIntegrationTest() {
 
         assertEquals(FNR, hentetMinimumSykdomsgrad.fødselsnummer)
         assertEquals(ORGNUMMER, hentetMinimumSykdomsgrad.organisasjonsnummer)
-        assertEquals(1.januar, hentetMinimumSykdomsgrad.perioderVurdertOk.first().fom)
-        assertEquals(31.januar, hentetMinimumSykdomsgrad.perioderVurdertOk.first().tom)
+        assertEquals(1 jan 2018, hentetMinimumSykdomsgrad.perioderVurdertOk.first().fom)
+        assertEquals(31 jan 2018, hentetMinimumSykdomsgrad.perioderVurdertOk.first().tom)
         assertTrue(hentetMinimumSykdomsgrad.perioderVurdertOk.isNotEmpty())
         assertTrue(hentetMinimumSykdomsgrad.perioderVurdertIkkeOk.isEmpty())
         assertEquals("en begrunnelse", hentetMinimumSykdomsgrad.begrunnelse)
@@ -325,7 +325,7 @@ internal class PgOverstyringDaoTest : DatabaseIntegrationTest() {
                 eksternHendelseId = EKSTERN_HENDELSE_ID,
                 aktørId = AKTØR,
                 fødselsnummer = FNR,
-                skjæringstidspunkt = 1.januar,
+                skjæringstidspunkt = 1 jan 2018,
                 opprettet = OPPRETTET,
                 vedtaksperiodeId = VEDTAKSPERIODE,
                 saksbehandlerOid = UUID.randomUUID(),
@@ -358,8 +358,8 @@ internal class PgOverstyringDaoTest : DatabaseIntegrationTest() {
                 fødselsnummer = FNR,
                 perioderVurdertOk = listOf(
                     MinimumSykdomsgradForDatabase.MinimumSykdomsgradPeriodeForDatabase(
-                        fom = 1.januar,
-                        tom = 31.januar
+                        fom = 1 jan 2018,
+                        tom = 31 jan 2018
                     )
                 ),
                 perioderVurdertIkkeOk = emptyList(),
@@ -398,25 +398,26 @@ internal class PgOverstyringDaoTest : DatabaseIntegrationTest() {
         )
     }
 
-    private fun overstyrtArbeidsgiverForDatabase(organisasjonsnummer: String = ORGNUMMER) = OverstyrtArbeidsgiverForDatabase(
-        organisasjonsnummer = organisasjonsnummer,
-        månedligInntekt = INNTEKT,
-        fraMånedligInntekt = INNTEKT + 1,
-        refusjonsopplysninger =
-            listOf(
-                RefusjonselementForDatabase(
-                    fom = 1.januar,
-                    tom = 31.januar,
-                    beløp = 1000.0,
+    private fun overstyrtArbeidsgiverForDatabase(organisasjonsnummer: String = ORGNUMMER) =
+        OverstyrtArbeidsgiverForDatabase(
+            organisasjonsnummer = organisasjonsnummer,
+            månedligInntekt = INNTEKT,
+            fraMånedligInntekt = INNTEKT + 1,
+            refusjonsopplysninger =
+                listOf(
+                    RefusjonselementForDatabase(
+                        fom = 1 jan 2018,
+                        tom = 31 jan 2018,
+                        beløp = 1000.0,
+                    ),
                 ),
-            ),
-        fraRefusjonsopplysninger = null,
-        begrunnelse = BEGRUNNELSE,
-        forklaring = FORKLARING,
-        lovhjemmel = null,
-        fom = 1.januar,
-        tom = null
-    )
+            fraRefusjonsopplysninger = null,
+            begrunnelse = BEGRUNNELSE,
+            forklaring = FORKLARING,
+            lovhjemmel = null,
+            fom = 1 jan 2018,
+            tom = null
+        )
 
     private fun persisterOverstyringArbeidsforhold(
         eksternHendelsesIdArbeidsforhold: UUID, overstyrteArbeidsforhold: List<ArbeidsforholdForDatabase> = listOf(arbeidsforholdForDatabase())
