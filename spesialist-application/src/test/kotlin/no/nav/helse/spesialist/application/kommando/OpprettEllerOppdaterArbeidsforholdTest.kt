@@ -1,9 +1,11 @@
-package no.nav.helse.modell.kommando
+package no.nav.helse.spesialist.application.kommando
 
 import no.nav.helse.db.ArbeidsforholdDao
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.modell.KomplettArbeidsforholdDto
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
+import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.kommando.OpprettEllerOppdaterArbeidsforhold
 import no.nav.helse.modell.melding.Behov
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse

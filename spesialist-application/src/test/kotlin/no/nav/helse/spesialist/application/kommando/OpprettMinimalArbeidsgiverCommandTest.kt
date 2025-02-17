@@ -1,9 +1,11 @@
-package no.nav.helse.modell.kommando
+package no.nav.helse.spesialist.application.kommando
 
 import no.nav.helse.db.InntektskilderRepository
 import no.nav.helse.modell.InntektskildeDto
 import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.NyInntektskildeDto
+import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.kommando.OpprettMinimalArbeidsgiverCommand
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach

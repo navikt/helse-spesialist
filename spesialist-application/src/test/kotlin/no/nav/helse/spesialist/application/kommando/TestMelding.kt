@@ -1,4 +1,4 @@
-package no.nav.helse.modell.kommando
+package no.nav.helse.spesialist.application.kommando
 
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.Kommandostarter

@@ -1,4 +1,4 @@
-package no.nav.helse.modell.kommando
+package no.nav.helse.spesialist.application.kommando
 
 import no.nav.helse.db.InntektskilderRepository
 import no.nav.helse.mediator.CommandContextObserver
@@ -10,6 +10,8 @@ import no.nav.helse.modell.KomplettInntektskilde
 import no.nav.helse.modell.KomplettInntektskildeDto
 import no.nav.helse.modell.NyInntektskilde
 import no.nav.helse.modell.arbeidsgiver.Arbeidsgiverinformasjonløsning
+import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.kommando.OpprettEllerOppdaterInntektskilder
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.person.HentPersoninfoløsning

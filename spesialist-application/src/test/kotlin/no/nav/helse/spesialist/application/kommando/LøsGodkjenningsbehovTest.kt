@@ -1,10 +1,12 @@
-package no.nav.helse.modell.kommando
+package no.nav.helse.spesialist.application.kommando
 
 import io.mockk.clearMocks
 import io.mockk.mockk
 import no.nav.helse.db.MeldingDao
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.GodkjenningMediator
+import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.kommando.LøsGodkjenningsbehov
 import no.nav.helse.modell.melding.Godkjenningsbehovløsning
 import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.person.Sykefraværstilfelle

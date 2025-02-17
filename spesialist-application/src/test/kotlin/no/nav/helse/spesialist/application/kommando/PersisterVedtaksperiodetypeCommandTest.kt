@@ -1,8 +1,10 @@
-package no.nav.helse.modell.kommando
+package no.nav.helse.spesialist.application.kommando
 
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.db.VedtakDao
+import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.kommando.PersisterVedtaksperiodetypeCommand
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import org.junit.jupiter.api.Test

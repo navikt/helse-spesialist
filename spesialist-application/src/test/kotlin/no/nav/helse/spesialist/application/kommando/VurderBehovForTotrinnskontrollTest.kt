@@ -1,4 +1,4 @@
-package no.nav.helse.modell.kommando
+package no.nav.helse.spesialist.application.kommando
 
 import io.mockk.every
 import io.mockk.mockk
@@ -8,6 +8,8 @@ import no.nav.helse.db.OverstyringDao
 import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.OverstyringType
+import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.kommando.VurderBehovForTotrinnskontroll
 import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingAutomatiskRetur
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.Behandling

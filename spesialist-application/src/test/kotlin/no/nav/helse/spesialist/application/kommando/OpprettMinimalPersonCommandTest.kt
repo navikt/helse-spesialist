@@ -1,10 +1,13 @@
-package no.nav.helse.modell.kommando
+package no.nav.helse.spesialist.application.kommando
 
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import no.nav.helse.db.PersonDao
+import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.kommando.MinimalPersonDto
+import no.nav.helse.modell.kommando.OpprettMinimalPersonCommand
 import no.nav.helse.spesialist.application.lagAktørId
 import no.nav.helse.spesialist.application.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals

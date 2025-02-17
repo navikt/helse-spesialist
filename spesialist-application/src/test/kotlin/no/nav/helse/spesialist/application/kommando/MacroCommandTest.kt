@@ -1,6 +1,9 @@
-package no.nav.helse.modell.kommando
+package no.nav.helse.spesialist.application.kommando
 
+import no.nav.helse.modell.kommando.Command
+import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
+import no.nav.helse.modell.kommando.MacroCommand
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue

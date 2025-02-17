@@ -1,9 +1,11 @@
-package no.nav.helse.modell.kommando
+package no.nav.helse.spesialist.application.kommando
 
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.db.CommandContextDao
 import no.nav.helse.mediator.oppgave.OppgaveService
+import no.nav.helse.modell.kommando.AvbrytCommand
+import no.nav.helse.modell.kommando.CommandContext
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.util.UUID

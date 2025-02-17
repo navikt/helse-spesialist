@@ -1,4 +1,4 @@
-package no.nav.helse.modell.kommando
+package no.nav.helse.spesialist.application.kommando
 
 import io.mockk.clearMocks
 import io.mockk.every
@@ -6,6 +6,8 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.db.PersonDao
 import no.nav.helse.mediator.CommandContextObserver
+import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.kommando.OppdaterPersonCommand
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.HentEnhetløsning
 import no.nav.helse.modell.person.HentInfotrygdutbetalingerløsning

@@ -1,4 +1,4 @@
-package no.nav.helse.modell.kommando
+package no.nav.helse.spesialist.application.kommando
 
 import io.mockk.clearMocks
 import io.mockk.every
@@ -8,6 +8,8 @@ import no.nav.helse.db.PersonDao
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.mediator.meldinger.løsninger.Inntektløsning
+import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.kommando.PersisterInntektCommand
 import no.nav.helse.modell.melding.Behov
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue

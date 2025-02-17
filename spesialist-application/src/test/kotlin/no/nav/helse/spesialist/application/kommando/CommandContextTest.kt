@@ -1,4 +1,4 @@
-package no.nav.helse.modell.kommando
+package no.nav.helse.spesialist.application.kommando
 
 import io.mockk.every
 import io.mockk.mockk
@@ -6,6 +6,8 @@ import io.mockk.verify
 import no.nav.helse.db.CommandContextDao
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.KommandokjedeEndretEvent
+import no.nav.helse.modell.kommando.Command
+import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.CommandContext.Companion.convertToUUID
 import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
 import no.nav.helse.modell.melding.Behov

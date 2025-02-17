@@ -1,8 +1,10 @@
-package no.nav.helse.modell.kommando
+package no.nav.helse.spesialist.application.kommando
 
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.db.PeriodehistorikkDao
+import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.modell.kommando.VedtaksperiodeReberegnetPeriodehistorikk
 import no.nav.helse.modell.periodehistorikk.VedtaksperiodeReberegnet
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
