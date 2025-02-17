@@ -3,7 +3,6 @@ package no.nav.helse.modell.automatisering
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.Testdata.godkjenningsbehovData
 import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.CommandContextDao
 import no.nav.helse.mediator.CommandContextObserver
@@ -17,7 +16,8 @@ import no.nav.helse.modell.person.vedtaksperiode.Behandling
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.util.januar
+import no.nav.helse.spesialist.application.Testdata.godkjenningsbehovData
+import no.nav.helse.spesialist.application.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue

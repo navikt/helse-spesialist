@@ -1,10 +1,11 @@
-package no.nav.helse.mediator
+package no.nav.helse.spesialist.application
 
 import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.Testdata.godkjenningsbehovData
 import no.nav.helse.db.OpptegnelseDao
+import no.nav.helse.mediator.CommandContextObserver
+import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.gosysoppgaver.inspektør
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.melding.UtgåendeHendelse
@@ -18,9 +19,7 @@ import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
-import no.nav.helse.spesialist.test.lagSaksbehandlerident
-import no.nav.helse.spesialist.test.lagTilfeldigSaksbehandlerepost
-import no.nav.helse.util.januar
+import no.nav.helse.spesialist.application.Testdata.godkjenningsbehovData
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach

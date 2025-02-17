@@ -1,10 +1,10 @@
 package no.nav.helse.modell
 
-import no.nav.helse.Testdata.godkjenningsbehovData
 import no.nav.helse.modell.melding.Godkjenningsbehovløsning
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
+import no.nav.helse.spesialist.application.Testdata.godkjenningsbehovData
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull

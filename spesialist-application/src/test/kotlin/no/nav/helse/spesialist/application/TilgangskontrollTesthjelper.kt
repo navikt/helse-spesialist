@@ -1,4 +1,4 @@
-package no.nav.helse.util
+package no.nav.helse.spesialist.application
 
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll

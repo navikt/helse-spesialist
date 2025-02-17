@@ -1,4 +1,4 @@
-package no.nav.helse.mediator.oppgave
+package no.nav.helse.spesialist.application
 
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveDao
@@ -8,13 +8,13 @@ import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.db.TotrinnsvurderingFraDatabase
+import no.nav.helse.mediator.oppgave.Oppgavehenter
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.EgenskapDto
 import no.nav.helse.modell.oppgave.Oppgave.Companion.toDto
 import no.nav.helse.modell.oppgave.OppgaveDto
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.Saksbehandler.Companion.toDto
-import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test

@@ -1,4 +1,4 @@
-package no.nav.helse.kafka
+package no.nav.helse.spesialist.application
 
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.SessionContext
@@ -12,7 +12,6 @@ import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.melding.VedtaksperiodeGodkjentAutomatisk
 import no.nav.helse.modell.person.Person
-import no.nav.helse.spesialist.test.lagFødselsnummer
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach

@@ -5,8 +5,8 @@ import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
 import no.nav.helse.db.PersonDao
-import no.nav.helse.spesialist.test.lagAktørId
-import no.nav.helse.spesialist.test.lagFødselsnummer
+import no.nav.helse.spesialist.application.lagAktørId
+import no.nav.helse.spesialist.application.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach

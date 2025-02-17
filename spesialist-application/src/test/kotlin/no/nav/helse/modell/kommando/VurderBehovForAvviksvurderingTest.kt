@@ -13,9 +13,9 @@ import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
 import no.nav.helse.modell.vilkårsprøving.Inntekt
 import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
 import no.nav.helse.modell.vilkårsprøving.Sammenligningsgrunnlag
-import no.nav.helse.spesialist.test.lagFødselsnummer
-import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
-import no.nav.helse.util.januar
+import no.nav.helse.spesialist.application.januar
+import no.nav.helse.spesialist.application.lagFødselsnummer
+import no.nav.helse.spesialist.application.lagOrganisasjonsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue

@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.api.varsel
+package no.nav.helse.spesialist.application
 
 import no.nav.helse.db.api.VarselDbDto
 import org.junit.jupiter.api.Assertions.assertEquals

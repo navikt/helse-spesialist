@@ -1,4 +1,4 @@
-package no.nav.helse.mediator
+package no.nav.helse.spesialist.application
 
 import io.mockk.clearMocks
 import io.mockk.every
@@ -17,6 +17,7 @@ import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.db.TotrinnsvurderingFraDatabase
+import no.nav.helse.mediator.KommandokjedeEndretEvent
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.kommando.TestMelding
 import no.nav.helse.modell.melding.Behov
@@ -25,12 +26,6 @@ import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
-import no.nav.helse.spesialist.test.lagEpostadresseFraFulltNavn
-import no.nav.helse.spesialist.test.lagFødselsnummer
-import no.nav.helse.spesialist.test.lagSaksbehandlerident
-import no.nav.helse.spesialist.test.lagSaksbehandlernavn
-import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
-import no.nav.helse.util.testEnv
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

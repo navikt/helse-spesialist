@@ -4,7 +4,6 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.Testdata.godkjenningsbehovData
 import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.PåVentDao
@@ -43,7 +42,8 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.modell.vedtaksperiode.Periodetype.INFOTRYGDFORLENGELSE
 import no.nav.helse.modell.vedtaksperiode.Periodetype.OVERGANG_FRA_IT
-import no.nav.helse.spesialist.test.lagFødselsnummer
+import no.nav.helse.spesialist.application.Testdata.godkjenningsbehovData
+import no.nav.helse.spesialist.application.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

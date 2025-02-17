@@ -1,10 +1,10 @@
-package no.nav.helse.mediator.saksbehandler
+package no.nav.helse.spesialist.application
 
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.db.SaksbehandlerDao
+import no.nav.helse.mediator.saksbehandler.SaksbehandlerLagrer
 import no.nav.helse.modell.saksbehandler.Saksbehandler
-import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import org.junit.jupiter.api.Test
 import java.util.UUID
 

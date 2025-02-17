@@ -1,4 +1,4 @@
-package no.nav.helse
+package no.nav.helse.spesialist.application
 
 import no.nav.helse.modell.utbetaling.Utbetalingtype.UTBETALING
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
@@ -7,9 +7,6 @@ import no.nav.helse.modell.vedtaksperiode.Inntektsopplysningkilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.SykepengegrunnlagsArbeidsgiver
-import no.nav.helse.spesialist.test.lagFødselsnummer
-import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
-import no.nav.helse.util.januar
 import java.util.UUID
 
 object Testdata {

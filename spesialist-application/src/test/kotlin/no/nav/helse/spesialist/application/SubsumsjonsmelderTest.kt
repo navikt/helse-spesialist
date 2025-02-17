@@ -1,10 +1,11 @@
-package no.nav.helse.mediator
+package no.nav.helse.spesialist.application
 
 import no.nav.helse.MeldingPubliserer
+import no.nav.helse.mediator.KommandokjedeEndretEvent
+import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.modell.melding.UtgåendeHendelse
-import no.nav.helse.spesialist.test.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime

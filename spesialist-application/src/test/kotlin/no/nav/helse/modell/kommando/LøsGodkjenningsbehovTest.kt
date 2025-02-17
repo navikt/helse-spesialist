@@ -2,7 +2,6 @@ package no.nav.helse.modell.kommando
 
 import io.mockk.clearMocks
 import io.mockk.mockk
-import no.nav.helse.Testdata.godkjenningsbehovData
 import no.nav.helse.db.MeldingDao
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.GodkjenningMediator
@@ -13,7 +12,8 @@ import no.nav.helse.modell.person.vedtaksperiode.Behandling
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
-import no.nav.helse.util.januar
+import no.nav.helse.spesialist.application.Testdata.godkjenningsbehovData
+import no.nav.helse.spesialist.application.januar
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
