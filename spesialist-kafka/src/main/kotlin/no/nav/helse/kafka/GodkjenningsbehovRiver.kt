@@ -31,9 +31,7 @@ class GodkjenningsbehovRiver(
     override fun preconditions(): River.PacketValidation {
         return River.PacketValidation {
             it.requireAll("@behov", listOf("Godkjenning"))
-            if (!featureToggles.skalBenytteNyAvviksvurderingløype()) {
-                it.requireValue("behandletAvSpinnvill", true)
-            }
+            it.interestedIn("behandletAvSpinnvill")
             it.forbid("@løsning")
         }
     }
@@ -97,6 +95,9 @@ class GodkjenningsbehovRiver(
         metadata: MessageMetadata,
         meterRegistry: MeterRegistry,
     ) {
+        if (!featureToggles.skalBenytteNyAvviksvurderingløype()) {
+            if (packet["behandletAvSpinnvill"].isMissingOrNull()) return
+        }
         mediator.mottaMelding(
             Godkjenningsbehov(
                 id = packet["@id"].asUUID(),
