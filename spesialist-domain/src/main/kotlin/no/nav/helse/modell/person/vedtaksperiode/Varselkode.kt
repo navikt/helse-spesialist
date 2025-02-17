@@ -12,23 +12,18 @@ private val regex = "^$VARSELKODEFORMAT$".toRegex()
 // EX = Eksterne systemer
 // IK = Inngangskriterier
 
-enum class Varselkode(
-    private val varseltekst: String,
-    private val avviklet: Boolean = false,
-) {
-    SB_BO_1("Beslutteroppgave: Lovvalg og medlemskap", avviklet = true),
-    SB_BO_2("Beslutteroppgave: Overstyring av utbetalingsdager", avviklet = true),
-    SB_BO_3("Beslutteroppgave: Overstyring av inntekt", avviklet = true),
-    SB_BO_4("Beslutteroppgave: Overstyring av annet arbeidsforhold", avviklet = true),
+enum class Varselkode(private val varseltekst: String) {
+    SB_BO_1("Beslutteroppgave: Lovvalg og medlemskap"), // Avviklet
+    SB_BO_2("Beslutteroppgave: Overstyring av utbetalingsdager"), // Avviklet
+    SB_BO_3("Beslutteroppgave: Overstyring av inntekt"), // Avviklet
+    SB_BO_4("Beslutteroppgave: Overstyring av annet arbeidsforhold"), // Avviklet
     SB_BO_5(
         "Beslutteroppgave: Lovvalg og medlemskap og/eller overstyring av utbetalingsdager og/eller overstyring av inntekt og/eller overstyring av annet arbeidsforhold",
-        avviklet = true,
-    ),
+    ), // Avviklet
     SB_EX_1("Det finnes åpne oppgaver på sykepenger i Gosys"),
     SB_EX_2(
         "Ikke registrert eller mangler samtykke i Kontakt- og reservasjonsregisteret, eventuell kommunikasjon må skje i brevform",
-        avviklet = true,
-    ),
+    ), // Avviklet
     SB_EX_3("Kunne ikke sjekke åpne oppgaver på sykepenger i Gosys"),
     SB_IK_1("Registrert fullmakt på personen"),
     SB_RV_1("Faresignaler oppdaget. Kontroller om faresignalene påvirker retten til sykepenger"),

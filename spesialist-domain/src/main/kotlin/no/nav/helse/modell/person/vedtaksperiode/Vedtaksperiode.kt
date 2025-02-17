@@ -77,16 +77,6 @@ class Vedtaksperiode private constructor(
         behandlinger.addLast(behandling)
     }
 
-    internal fun vedtakFattet(spleisBehandlingId: UUID) {
-        if (forkastet) return
-        // Finn den behandlingen som ble avsluttet, det kan ha blitt opprettet nye behandlinger etter at vedtak_fattet
-        // ble sendt ut
-        behandlinger.finnBehandlingForSpleisBehandling(spleisBehandlingId)?.håndterVedtakFattet() ?: logg.error(
-            "Fant ikke behandling for {} som kan håndtere vedtak_fattet",
-            kv("spleisBehandlingId", spleisBehandlingId),
-        )
-    }
-
     internal fun vedtaksperiodeForkastet() {
         forkastet = true
     }
