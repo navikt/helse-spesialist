@@ -24,7 +24,6 @@ import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
-import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
 import no.nav.helse.spesialist.application.kommando.TestMelding
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -87,8 +86,8 @@ internal class OppgaveServiceTest {
             totrinnsvurderingDao = totrinnsvurderingDao,
             saksbehandlerDao = saksbehandlerDao,
             meldingPubliserer = meldingPubliserer,
-            tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
-            tilgangsgrupper = SpeilTilgangsgrupper(testEnv),
+            tilgangskontroll = { _, _ -> false },
+            tilgangsgrupper = tilgangsgrupper,
             repositories = repositories
         )
     private val saksbehandlerFraDatabase =

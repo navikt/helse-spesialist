@@ -56,7 +56,7 @@ class OppgavehenterTest {
             oppgaveDao = oppgaveRepository(),
             totrinnsvurderingDao = totrinnsvurderingRepository(),
             saksbehandlerDao = saksbehandlerDao,
-            tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang
+            tilgangskontroll = { _, _ -> false }
         )
         val oppgave = oppgavehenter.oppgave(OPPGAVE_ID).toDto()
         assertEquals(OPPGAVE_ID, oppgave.id)
@@ -86,7 +86,7 @@ class OppgavehenterTest {
             oppgaveDao = oppgaveRepository(),
             totrinnsvurderingDao = totrinnsvurderingRepository(totrinnsvurdering),
             saksbehandlerDao = saksbehandlerDao,
-            tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang
+            tilgangskontroll = { _, _ -> false }
         )
         val oppgave = oppgavehenter.oppgave(OPPGAVE_ID).toDto()
         assertEquals(OPPGAVE_ID, oppgave.id)
@@ -210,7 +210,7 @@ class OppgavehenterTest {
                 oid = it.oid,
                 navn = it.navn,
                 ident = it.ident,
-                tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang
+                tilgangskontroll = { _, _ -> false }
             )
         }
 
@@ -233,6 +233,6 @@ class OppgavehenterTest {
         oid = oid,
         navn = navn,
         ident = ident,
-        tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
+        tilgangskontroll = { _, _ -> false },
     )
 }

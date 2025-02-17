@@ -14,7 +14,7 @@ class SaksbehandlerLagrerTest {
     private val NAVN = "Saksbehandler I Nav"
     private val IDENT = "S199999"
     private val dao = mockk<SaksbehandlerDao>(relaxed = true)
-    private val saksbehandler = Saksbehandler(EPOST, OID, NAVN, IDENT, TilgangskontrollForTestHarIkkeTilgang)
+    private val saksbehandler = Saksbehandler(EPOST, OID, NAVN, IDENT) { _, _ -> false }
 
     @Test
     fun `lagre saksbehandler`() {

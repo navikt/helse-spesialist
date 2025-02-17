@@ -20,7 +20,6 @@ import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
-import no.nav.helse.spesialist.application.TilgangskontrollForTestHarIkkeTilgang
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.application.feb
 import no.nav.helse.spesialist.application.jan
@@ -190,7 +189,7 @@ internal class VurderBehovForTotrinnskontrollTest {
             oid = oid,
             navn = lagSaksbehandlernavn(),
             ident = lagSaksbehandlerident(),
-            TilgangskontrollForTestHarIkkeTilgang
+            tilgangskontroll = { _, _ -> false }
         )
 
     private fun lagTotrinnsvurdering(

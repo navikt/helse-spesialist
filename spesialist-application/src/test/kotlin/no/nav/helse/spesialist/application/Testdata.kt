@@ -7,6 +7,8 @@ import no.nav.helse.modell.vedtaksperiode.Inntektsopplysningkilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.SykepengegrunnlagsArbeidsgiver
+import no.nav.helse.spesialist.api.bootstrap.Gruppe
+import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
 import java.time.LocalDate
 import java.util.UUID
 import kotlin.random.Random.Default.nextInt
@@ -153,3 +155,7 @@ object Testdata {
     }
 
 }
+
+val tilgangsgrupper = SpeilTilgangsgrupper(
+    env = Gruppe.__indreInnhold_kunForTest().values.associateWith { _ -> UUID.randomUUID().toString() }
+)

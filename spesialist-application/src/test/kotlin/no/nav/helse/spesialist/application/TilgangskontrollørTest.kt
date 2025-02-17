@@ -12,7 +12,6 @@ import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
 import no.nav.helse.spesialist.api.bootstrap.Gruppe
 import no.nav.helse.spesialist.api.bootstrap.Gruppe.KODE7
 import no.nav.helse.spesialist.api.bootstrap.Gruppe.SKJERMEDE
-import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -21,8 +20,6 @@ import java.util.EnumSet
 import java.util.UUID
 
 class TilgangskontrollørTest {
-    private val tilgangsgrupper = SpeilTilgangsgrupper(testEnv)
-
     private val forespørsler = mutableMapOf<UUID, List<String>>()
 
     private val gruppekontroll =
@@ -99,3 +96,5 @@ class TilgangskontrollørTest {
         assertEquals(false, tilgangskontrollørForApi.harTilgangTil(UUID.randomUUID(), Egenskap.alleTilgangsstyrteEgenskaper))
     }
 }
+
+private fun idForGruppe(gruppe: Gruppe): String = tilgangsgrupper.gruppeId(gruppe).toString()
