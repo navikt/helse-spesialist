@@ -15,7 +15,7 @@ import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
 import no.nav.helse.modell.vilkårsprøving.Inntekt
 import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
 import no.nav.helse.modell.vilkårsprøving.Sammenligningsgrunnlag
-import no.nav.helse.spesialist.application.januar
+import no.nav.helse.spesialist.application.jan
 import no.nav.helse.spesialist.application.lagFødselsnummer
 import no.nav.helse.spesialist.application.lagOrganisasjonsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -32,7 +32,7 @@ class VurderBehovForAvviksvurderingTest {
     private val fødselsnummer = lagFødselsnummer()
     private val organisasjonsnummer = lagOrganisasjonsnummer()
     private val vilkårsgrunnlagId = UUID.randomUUID()
-    private val skjæringstidspunkt = 1.januar
+    private val skjæringstidspunkt = 1 jan 2018
     private val opprettet = LocalDateTime.now()
     private val avviksvurderingId = UUID.randomUUID()
     private val maksimaltTillattAvvik = 25.0
@@ -58,9 +58,9 @@ class VurderBehovForAvviksvurderingTest {
     private val behandling = Behandling(
         id = UUID.randomUUID(),
         vedtaksperiodeId = UUID.randomUUID(),
-        fom = 1.januar,
-        tom = 31.januar,
-        skjæringstidspunkt = 1.januar,
+        fom = 1 jan 2018,
+        tom = 31 jan 2018,
+        skjæringstidspunkt = 1 jan 2018,
         spleisBehandlingId = UUID.randomUUID(),
         utbetalingId = null
     )
@@ -71,13 +71,16 @@ class VurderBehovForAvviksvurderingTest {
         override fun lagre(avviksvurdering: Avviksvurdering) {
             avviksvurderinger.add(avviksvurdering)
         }
+
         override fun opprettKobling(avviksvurderingId: UUID, vilkårsgrunnlagId: UUID) {
             koblinger.add(avviksvurderingId to vilkårsgrunnlagId)
         }
-        override fun finnAvviksvurderinger(fødselsnummer: String): List<Avviksvurdering> = error("Ikke implementert i test")
+
+        override fun finnAvviksvurderinger(fødselsnummer: String): List<Avviksvurdering> =
+            error("Ikke implementert i test")
     }
 
-    private val observer = object: CommandContextObserver {
+    private val observer = object : CommandContextObserver {
         val behov = mutableListOf<Behov>()
         override fun behov(behov: Behov, commandContextId: UUID) {
             this.behov.add(behov)
@@ -90,7 +93,16 @@ class VurderBehovForAvviksvurderingTest {
 
     @Test
     fun `Ikke send ut behov dersom inngangsvilkårene ikke er vurdert i Spleis`() {
-        val command = VurderBehovForAvviksvurdering(fødselsnummer, skjæringstidspunkt, repository, beregningsgrunnlag, vilkårsgrunnlagId, behandling, false, featureToggles)
+        val command = VurderBehovForAvviksvurdering(
+            fødselsnummer,
+            skjæringstidspunkt,
+            repository,
+            beregningsgrunnlag,
+            vilkårsgrunnlagId,
+            behandling,
+            false,
+            featureToggles
+        )
         val context = CommandContext(UUID.randomUUID())
         context.nyObserver(observer)
         assertTrue(command.execute(context))
@@ -99,7 +111,16 @@ class VurderBehovForAvviksvurderingTest {
 
     @Test
     fun `Send ut behov dersom inngangsvilkårene er vurdert i Spleis`() {
-        val command = VurderBehovForAvviksvurdering(fødselsnummer, skjæringstidspunkt, repository, beregningsgrunnlag, vilkårsgrunnlagId, behandling, true, featureToggles)
+        val command = VurderBehovForAvviksvurdering(
+            fødselsnummer,
+            skjæringstidspunkt,
+            repository,
+            beregningsgrunnlag,
+            vilkårsgrunnlagId,
+            behandling,
+            true,
+            featureToggles
+        )
         val context = CommandContext(UUID.randomUUID())
         context.nyObserver(observer)
         assertFalse(command.execute(context))
@@ -111,7 +132,16 @@ class VurderBehovForAvviksvurderingTest {
 
     @Test
     fun `lagrer ned ny avviksvurdering ved løsning med ny vurdering`() {
-        val command = VurderBehovForAvviksvurdering(fødselsnummer, skjæringstidspunkt, repository, beregningsgrunnlag, vilkårsgrunnlagId, behandling, true, featureToggles)
+        val command = VurderBehovForAvviksvurdering(
+            fødselsnummer,
+            skjæringstidspunkt,
+            repository,
+            beregningsgrunnlag,
+            vilkårsgrunnlagId,
+            behandling,
+            true,
+            featureToggles
+        )
         val context = CommandContext(UUID.randomUUID())
         context.add(
             AvviksvurderingBehovLøsning.NyVurderingForetatt(
@@ -143,7 +173,16 @@ class VurderBehovForAvviksvurderingTest {
 
     @Test
     fun `legg til varsel RV_IV_2 dersom avviket er mer enn akseptabelt avvik`() {
-        val command = VurderBehovForAvviksvurdering(fødselsnummer, skjæringstidspunkt, repository, beregningsgrunnlag, vilkårsgrunnlagId, behandling, true, featureToggles)
+        val command = VurderBehovForAvviksvurdering(
+            fødselsnummer,
+            skjæringstidspunkt,
+            repository,
+            beregningsgrunnlag,
+            vilkårsgrunnlagId,
+            behandling,
+            true,
+            featureToggles
+        )
         val context = CommandContext(UUID.randomUUID())
         context.add(
             AvviksvurderingBehovLøsning.NyVurderingForetatt(
@@ -162,7 +201,16 @@ class VurderBehovForAvviksvurderingTest {
 
     @Test
     fun `ikke legg til varsel RV_IV_2 dersom avviket er innenfor akseptabelt avvik`() {
-        val command = VurderBehovForAvviksvurdering(fødselsnummer, skjæringstidspunkt, repository, beregningsgrunnlag, vilkårsgrunnlagId, behandling, true, featureToggles)
+        val command = VurderBehovForAvviksvurdering(
+            fødselsnummer,
+            skjæringstidspunkt,
+            repository,
+            beregningsgrunnlag,
+            vilkårsgrunnlagId,
+            behandling,
+            true,
+            featureToggles
+        )
         val context = CommandContext(UUID.randomUUID())
         context.add(
             AvviksvurderingBehovLøsning.NyVurderingForetatt(
@@ -181,7 +229,16 @@ class VurderBehovForAvviksvurderingTest {
 
     @Test
     fun `lagrer ned kobling ved løsning med uten vurdering`() {
-        val command = VurderBehovForAvviksvurdering(fødselsnummer, skjæringstidspunkt, repository, beregningsgrunnlag, vilkårsgrunnlagId, behandling, true, featureToggles)
+        val command = VurderBehovForAvviksvurdering(
+            fødselsnummer,
+            skjæringstidspunkt,
+            repository,
+            beregningsgrunnlag,
+            vilkårsgrunnlagId,
+            behandling,
+            true,
+            featureToggles
+        )
         val context = CommandContext(UUID.randomUUID())
         context.add(AvviksvurderingBehovLøsning.TrengerIkkeNyVurdering(avviksvurderingId = avviksvurderingId))
         command.resume(context)
@@ -192,7 +249,16 @@ class VurderBehovForAvviksvurderingTest {
 
     @Test
     fun `lager ikke varsel om avvik dersom det ikke har blitt foretatt en ny vurdering`() {
-        val command = VurderBehovForAvviksvurdering(fødselsnummer, skjæringstidspunkt, repository, beregningsgrunnlag, vilkårsgrunnlagId, behandling, true, featureToggles)
+        val command = VurderBehovForAvviksvurdering(
+            fødselsnummer,
+            skjæringstidspunkt,
+            repository,
+            beregningsgrunnlag,
+            vilkårsgrunnlagId,
+            behandling,
+            true,
+            featureToggles
+        )
         val context = CommandContext(UUID.randomUUID())
         context.add(AvviksvurderingBehovLøsning.TrengerIkkeNyVurdering(avviksvurderingId = avviksvurderingId))
         command.resume(context)

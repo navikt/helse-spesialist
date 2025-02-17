@@ -22,8 +22,8 @@ import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
 import no.nav.helse.spesialist.application.TilgangskontrollForTestHarIkkeTilgang
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
-import no.nav.helse.spesialist.application.februar
-import no.nav.helse.spesialist.application.januar
+import no.nav.helse.spesialist.application.feb
+import no.nav.helse.spesialist.application.jan
 import no.nav.helse.spesialist.application.lagSaksbehandlerident
 import no.nav.helse.spesialist.application.lagSaksbehandlernavn
 import no.nav.helse.spesialist.application.lagTilfeldigSaksbehandlerepost
@@ -54,10 +54,10 @@ internal class VurderBehovForTotrinnskontrollTest {
     val sykefraværstilfelle =
         Sykefraværstilfelle(
             FØDSELSNUMMER,
-            1.januar,
+            1 jan 2018,
             listOf(
-                Behandling(UUID.randomUUID(), VEDTAKSPERIODE_ID_1, 1.januar, 31.januar, 1.januar),
-                Behandling(UUID.randomUUID(), VEDTAKSPERIODE_ID_2, 1.februar, 28.februar, 1.januar),
+                Behandling(UUID.randomUUID(), VEDTAKSPERIODE_ID_1, 1 jan 2018, 31 jan 2018, 1 jan 2018),
+                Behandling(UUID.randomUUID(), VEDTAKSPERIODE_ID_2, 1 feb 2018, 28 feb 2018, 1 jan 2018),
             ),
         )
     private val command =
@@ -74,10 +74,10 @@ internal class VurderBehovForTotrinnskontrollTest {
                 SpleisVedtaksperiode(
                     VEDTAKSPERIODE_ID_1,
                     UUID.randomUUID(),
-                    1.januar,
-                    31.januar,
-                    1.januar
-                ), SpleisVedtaksperiode(VEDTAKSPERIODE_ID_2, UUID.randomUUID(), 1.februar, 28.februar, 1.januar)
+                    1 jan 2018,
+                    31 jan 2018,
+                    1 jan 2018
+                ), SpleisVedtaksperiode(VEDTAKSPERIODE_ID_2, UUID.randomUUID(), 1 feb 2018, 28 feb 2018, 1 jan 2018)
             ),
             featureToggles = object : FeatureToggles {
                 override fun skalBenytteNyTotrinnsvurderingsløsning(): Boolean = true

@@ -36,15 +36,15 @@ object Testdata {
             avviksvurderingId = UUID.randomUUID(),
             vilkårsgrunnlagId = UUID.randomUUID(),
             tags = tags,
-            periodeFom = 1.januar,
-            periodeTom = 31.januar,
+            periodeFom = 1 jan 2018,
+            periodeTom = 31 jan 2018,
             periodetype = periodetype,
             førstegangsbehandling = true,
             utbetalingtype = utbetalingtype,
             kanAvvises = kanAvvises,
             inntektskilde = inntektskilde,
             orgnummereMedRelevanteArbeidsforhold = emptyList(),
-            skjæringstidspunkt = 1.januar,
+            skjæringstidspunkt = 1 jan 2018,
             spleisSykepengegrunnlagsfakta = SpleisSykepengegrunnlagsfakta(
                 arbeidsgivere = listOf(
                     SykepengegrunnlagsArbeidsgiver(

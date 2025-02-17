@@ -15,7 +15,7 @@ import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.spesialist.application.Testdata.godkjenningsbehovData
-import no.nav.helse.spesialist.application.januar
+import no.nav.helse.spesialist.application.jan
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -68,8 +68,8 @@ internal class LøsGodkjenningsbehovTest {
             utbetaling = utbetaling,
             sykefraværstilfelle = Sykefraværstilfelle(
                 fødselsnummer,
-                1.januar,
-                listOf(Behandling(UUID.randomUUID(), UUID.randomUUID(), 1.januar, 31.januar, 1.januar))
+                1 jan 2018,
+                listOf(Behandling(UUID.randomUUID(), UUID.randomUUID(), 1 jan 2018, 31 jan 2018, 1 jan 2018))
             ),
             godkjent = GODKJENT,
             godkjenttidspunkt = TIDSPUNKT,

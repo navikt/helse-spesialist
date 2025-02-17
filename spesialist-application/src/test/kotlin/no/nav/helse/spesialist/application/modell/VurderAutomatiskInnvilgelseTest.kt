@@ -20,7 +20,7 @@ import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.application.Testdata.godkjenningsbehovData
-import no.nav.helse.spesialist.application.januar
+import no.nav.helse.spesialist.application.jan
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -39,7 +39,7 @@ internal class VurderAutomatiskInnvilgelseTest {
     }
 
     private val automatisering = mockk<Automatisering>(relaxed = true)
-    private val behandling = Behandling(UUID.randomUUID(), vedtaksperiodeId, 1.januar, 31.januar, 1.januar)
+    private val behandling = Behandling(UUID.randomUUID(), vedtaksperiodeId, 1 jan 2018, 31 jan 2018, 1 jan 2018)
     private val automatiseringDao = mockk<AutomatiseringDao>(relaxed = true)
     private val command =
         VurderAutomatiskInnvilgelse(
@@ -50,7 +50,7 @@ internal class VurderAutomatiskInnvilgelseTest {
             utbetaling = Utbetaling(utbetalingId, 0, 0, Utbetalingtype.UTBETALING),
             sykefraværstilfelle = Sykefraværstilfelle(
                 fødselsnummer = fødselsnummer,
-                skjæringstidspunkt = 1.januar,
+                skjæringstidspunkt = 1 jan 2018,
                 gjeldendeBehandlinger = listOf(behandling),
             ),
             godkjenningsbehov = godkjenningsbehovData(

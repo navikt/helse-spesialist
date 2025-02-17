@@ -15,7 +15,7 @@ import no.nav.helse.modell.person.vedtaksperiode.Behandling
 import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
-import no.nav.helse.spesialist.application.januar
+import no.nav.helse.spesialist.application.jan
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -168,9 +168,9 @@ internal class VurderÅpenGosysoppgaveTest {
         Behandling(
             id = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeId,
-            fom = 1.januar,
-            tom = 31.januar,
-            skjæringstidspunkt = 1.januar,
+            fom = 1 jan 2018,
+            tom = 31 jan 2018,
+            skjæringstidspunkt = 1 jan 2018,
         )
 }
 

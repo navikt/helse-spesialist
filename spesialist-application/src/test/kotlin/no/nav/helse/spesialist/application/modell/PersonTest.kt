@@ -3,7 +3,7 @@ package no.nav.helse.spesialist.application.modell
 import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.spesialist.application.TestPerson
-import no.nav.helse.spesialist.application.januar
+import no.nav.helse.spesialist.application.jan
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.UUID
@@ -27,7 +27,7 @@ class PersonTest {
             organisasjonsnummer = arbeidsgiver1.organisasjonsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             spleisBehandlingId = UUID.randomUUID(),
-            fom = 1.januar,
-            tom = 31.januar,
+            fom = 1 jan 2018,
+            tom = 31 jan 2018,
         )
 }

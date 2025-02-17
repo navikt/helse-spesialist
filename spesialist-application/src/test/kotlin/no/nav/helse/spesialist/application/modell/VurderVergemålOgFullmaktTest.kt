@@ -13,7 +13,7 @@ import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.Behandling
 import no.nav.helse.modell.vergemal.VurderVergemålOgFullmakt
-import no.nav.helse.spesialist.application.januar
+import no.nav.helse.spesialist.application.jan
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -28,8 +28,8 @@ class VurderVergemålOgFullmaktTest {
     }
 
     private val vergemålDao = mockk<VergemålDao>(relaxed = true)
-    private val behandling = Behandling(UUID.randomUUID(), VEDTAKSPERIODE_ID, 1.januar, 31.januar, 1.januar)
-    private val sykefraværstilfelle = Sykefraværstilfelle(FNR, 1.januar, listOf(behandling))
+    private val behandling = Behandling(UUID.randomUUID(), VEDTAKSPERIODE_ID, 1 jan 2018, 31 jan 2018, 1 jan 2018)
+    private val sykefraværstilfelle = Sykefraværstilfelle(FNR, 1 jan 2018, listOf(behandling))
 
     private val command =
         VurderVergemålOgFullmakt(

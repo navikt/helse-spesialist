@@ -74,7 +74,7 @@ internal class GodkjenningMediatorTest {
             beslutter = beslutter,
             godkjenttidspunkt = LocalDateTime.now(),
             saksbehandleroverstyringer = emptyList(),
-            sykefraværstilfelle = Sykefraværstilfelle(fnr, 1.januar, listOf(generasjon())),
+            sykefraværstilfelle = Sykefraværstilfelle(fnr, 1 jan 2018, listOf(generasjon())),
             utbetaling = utbetaling,
         )
         assertNotNull(hendelserInspektør.hendelseOrNull<VedtaksperiodeGodkjentManuelt>())
@@ -151,7 +151,7 @@ internal class GodkjenningMediatorTest {
             beslutter = beslutter,
             godkjenttidspunkt = LocalDateTime.now(),
             saksbehandleroverstyringer = emptyList(),
-            sykefraværstilfelle = Sykefraværstilfelle(fnr, 1.januar, listOf(generasjon())),
+            sykefraværstilfelle = Sykefraværstilfelle(fnr, 1 jan 2018, listOf(generasjon())),
             utbetaling = utbetaling,
         )
         assertOpptegnelseIkkeOpprettet()
@@ -205,9 +205,9 @@ internal class GodkjenningMediatorTest {
     ) = Behandling(
         id = id,
         vedtaksperiodeId = vedtaksperiodeId,
-        fom = 1.januar,
-        tom = 31.januar,
-        skjæringstidspunkt = 1.januar,
+        fom = 1 jan 2018,
+        tom = 31 jan 2018,
+        skjæringstidspunkt = 1 jan 2018,
     )
 
     private fun godkjenning(generasjoner: List<Behandling>) =
@@ -220,7 +220,7 @@ internal class GodkjenningMediatorTest {
             beslutter = beslutter,
             godkjenttidspunkt = LocalDateTime.now(),
             saksbehandleroverstyringer = emptyList(),
-            sykefraværstilfelle = Sykefraværstilfelle(fnr, 1.januar, generasjoner),
+            sykefraværstilfelle = Sykefraværstilfelle(fnr, 1 jan 2018, generasjoner),
             utbetaling = utbetaling,
         )
 

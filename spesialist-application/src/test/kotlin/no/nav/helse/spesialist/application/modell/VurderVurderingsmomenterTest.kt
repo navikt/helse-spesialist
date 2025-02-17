@@ -20,7 +20,7 @@ import no.nav.helse.modell.vedtaksperiode.Inntektsopplysningkilde
 import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.SykepengegrunnlagsArbeidsgiver
 import no.nav.helse.spesialist.application.TestPerson
-import no.nav.helse.spesialist.application.januar
+import no.nav.helse.spesialist.application.jan
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -48,9 +48,10 @@ internal class VurderVurderingsmomenterTest {
 
     }
 
-    private val behandling = Behandling(UUID.randomUUID(), testperson.vedtaksperiodeId1, 1.januar, 31.januar, 1.januar)
+    private val behandling =
+        Behandling(UUID.randomUUID(), testperson.vedtaksperiodeId1, 1 jan 2018, 31 jan 2018, 1 jan 2018)
     private val sykefraværstilfelle =
-        Sykefraværstilfelle(testperson.fødselsnummer, 1.januar, listOf(behandling))
+        Sykefraværstilfelle(testperson.fødselsnummer, 1 jan 2018, listOf(behandling))
 
     private lateinit var context: CommandContext
 

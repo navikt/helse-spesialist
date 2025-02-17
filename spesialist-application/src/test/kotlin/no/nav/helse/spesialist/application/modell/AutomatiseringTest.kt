@@ -28,7 +28,7 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
-import no.nav.helse.spesialist.application.januar
+import no.nav.helse.spesialist.application.jan
 import no.nav.helse.spesialist.application.lagFødselsnummer
 import no.nav.helse.spesialist.application.lagOrganisasjonsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -299,14 +299,21 @@ internal class AutomatiseringTest {
 
     private fun forsøkAutomatisering(
         periodetype: Periodetype = FORLENGELSE,
-        generasjoners: List<Behandling> = listOf(Behandling(UUID.randomUUID(), vedtaksperiodeId, 1.januar, 31.januar, 1.januar)),
+        generasjoners: List<Behandling> = listOf(
+            Behandling(
+                UUID.randomUUID(),
+                vedtaksperiodeId,
+                1 jan 2018,
+                31 jan 2018,
+                1 jan 2018
+            )),
         utbetaling: Utbetaling = enUtbetaling(),
     ) = automatisering.utfør(
         fødselsnummer,
         vedtaksperiodeId,
         utbetaling,
         periodetype,
-        sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, 1.januar, generasjoners),
+        sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, 1 jan 2018, generasjoners),
         orgnummer,
     )
 
@@ -317,8 +324,8 @@ internal class AutomatiseringTest {
     ) = Utbetaling(utbetalingId, arbeidsgiverbeløp, personbeløp, type)
 
     private fun enGenerasjon(
-        fom: LocalDate = 1.januar,
-        tom: LocalDate = 31.januar,
+        fom: LocalDate = 1 jan 2018,
+        tom: LocalDate = 31 jan 2018,
         skjæringstidspunkt: LocalDate = fom,
         vedtaksperiodeId: UUID = this.vedtaksperiodeId,
         generasjonId: UUID = UUID.randomUUID(),
