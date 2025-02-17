@@ -1,4 +1,4 @@
-package no.nav.helse.mediator
+package no.nav.helse.spesialist.api
 
 import io.mockk.clearMocks
 import io.mockk.every
@@ -18,6 +18,7 @@ import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TotrinnsvurderingDao
+import no.nav.helse.mediator.KommandokjedeEndretEvent
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.melding.Behov
@@ -35,9 +36,6 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveegenskap
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavetype
 import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodetype
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
-import no.nav.helse.spesialist.test.lagEpostadresseFraFulltNavn
-import no.nav.helse.spesialist.test.lagSaksbehandlerident
-import no.nav.helse.spesialist.test.lagSaksbehandlernavn
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

@@ -1,4 +1,4 @@
-package no.nav.helse.mediator.oppgave
+package no.nav.helse.spesialist.api
 
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.EgenskapForDatabase.DELVIS_REFUSJON

@@ -1,16 +1,15 @@
-package no.nav.helse.mediator
+package no.nav.helse.spesialist.api
 
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.DokumentDao
+import no.nav.helse.mediator.KommandokjedeEndretEvent
 import no.nav.helse.mediator.dokument.DokumentMediator
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.modell.melding.UtgåendeHendelse
-import no.nav.helse.spesialist.api.objectMapper
-import no.nav.helse.spesialist.test.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.UUID

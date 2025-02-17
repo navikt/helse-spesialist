@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.test
+package no.nav.helse.spesialist.api
 
 import no.nav.helse.spesialist.typer.Kjønn
 import java.time.LocalDate
