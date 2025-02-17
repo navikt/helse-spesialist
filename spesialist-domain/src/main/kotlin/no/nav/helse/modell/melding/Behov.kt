@@ -1,6 +1,6 @@
 package no.nav.helse.modell.melding
 
-import no.nav.helse.modell.vilkårsprøving.Beregningsgrunnlag
+import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.UUID
@@ -30,7 +30,12 @@ sealed interface Behov : UtgåendeMelding {
 
     data class InntekterForSykepengegrunnlag(val fom: YearMonth, val tom: YearMonth) : Behov
 
-    data class Avviksvurdering(val beregningsgrunnlag: Beregningsgrunnlag) : Behov
+    data class Avviksvurdering(
+        val omregnedeÅrsinntekter: List<OmregnetÅrsinntekt>,
+        val vilkårsgrunnlagId: UUID,
+        val skjæringstidspunkt: LocalDate,
+        val organisasjonsnummer: String,
+    ) : Behov
 
     data class Risikovurdering(
         val vedtaksperiodeId: UUID,

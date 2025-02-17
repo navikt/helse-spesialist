@@ -7,7 +7,7 @@ import no.nav.helse.modell.person.vedtaksperiode.Behandling
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode.RV_IV_2
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.modell.vilkårsprøving.AvviksvurderingBehovLøsning
-import no.nav.helse.modell.vilkårsprøving.Beregningsgrunnlag
+import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
 import java.time.LocalDate
 import java.util.UUID
 
@@ -15,21 +15,21 @@ class VurderBehovForAvviksvurdering(
     private val fødselsnummer: String,
     private val skjæringstidspunkt: LocalDate,
     private val avviksvurderingRepository: AvviksvurderingRepository,
-    private val beregningsgrunnlag: Beregningsgrunnlag,
+    private val omregnedeÅrsinntekter: List<OmregnetÅrsinntekt>,
     private val vilkårsgrunnlagId: UUID,
     private val behandling: Behandling,
     private val erInngangsvilkårVurdertISpleis: Boolean,
+    private val organisasjonsnummer: String,
     private val featureToggles: FeatureToggles,
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
         if (!featureToggles.skalBenytteNyAvviksvurderingløype()) return true
         if (!erInngangsvilkårVurdertISpleis) return true
-        context.behov(Behov.Avviksvurdering(beregningsgrunnlag))
-        return false
+        return behov(context)
     }
 
     override fun resume(context: CommandContext): Boolean {
-        val løsning = context.get<AvviksvurderingBehovLøsning>() ?: context.behov(Behov.Avviksvurdering(beregningsgrunnlag)).let { return false }
+        val løsning = context.get<AvviksvurderingBehovLøsning>() ?: return behov(context)
         when (løsning) {
             is AvviksvurderingBehovLøsning.NyVurderingForetatt -> {
                 val avviksvurdering =
@@ -47,10 +47,23 @@ class VurderBehovForAvviksvurdering(
 
                 if (!løsning.harAkseptabeltAvvik) behandling.håndterNyttVarsel(RV_IV_2.nyttVarsel(behandling.vedtaksperiodeId()))
             }
+
             is AvviksvurderingBehovLøsning.TrengerIkkeNyVurdering -> {
                 avviksvurderingRepository.opprettKobling(løsning.avviksvurderingId, vilkårsgrunnlagId)
             }
         }
         return true
+    }
+
+    private fun behov(context: CommandContext): Boolean {
+        context.behov(
+            Behov.Avviksvurdering(
+                omregnedeÅrsinntekter,
+                vilkårsgrunnlagId,
+                skjæringstidspunkt,
+                organisasjonsnummer,
+            ),
+        )
+        return false
     }
 }

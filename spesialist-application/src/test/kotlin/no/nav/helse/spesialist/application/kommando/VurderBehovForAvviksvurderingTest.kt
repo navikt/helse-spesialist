@@ -40,9 +40,10 @@ class VurderBehovForAvviksvurderingTest {
     private val harAkseptabeltAvvik = false
     private val beregningsgrunnlagTotalbeløp = 900000.0
     private val sammenligningsgrunnlagTotalbeløp = 600000.0
+    private val omregnedeÅrsinntekter = listOf(OmregnetÅrsinntekt(organisasjonsnummer, beregningsgrunnlagTotalbeløp))
     private val beregningsgrunnlag = Beregningsgrunnlag(
         totalbeløp = beregningsgrunnlagTotalbeløp,
-        omregnedeÅrsinntekter = listOf(OmregnetÅrsinntekt(organisasjonsnummer, beregningsgrunnlagTotalbeløp))
+        omregnedeÅrsinntekter = omregnedeÅrsinntekter
     )
 
     private val sammenligningsgrunnlag = Sammenligningsgrunnlag(
@@ -97,10 +98,11 @@ class VurderBehovForAvviksvurderingTest {
             fødselsnummer,
             skjæringstidspunkt,
             repository,
-            beregningsgrunnlag,
+            omregnedeÅrsinntekter,
             vilkårsgrunnlagId,
             behandling,
             false,
+            organisasjonsnummer,
             featureToggles
         )
         val context = CommandContext(UUID.randomUUID())
@@ -115,10 +117,11 @@ class VurderBehovForAvviksvurderingTest {
             fødselsnummer,
             skjæringstidspunkt,
             repository,
-            beregningsgrunnlag,
+            omregnedeÅrsinntekter,
             vilkårsgrunnlagId,
             behandling,
             true,
+            organisasjonsnummer,
             featureToggles
         )
         val context = CommandContext(UUID.randomUUID())
@@ -127,7 +130,10 @@ class VurderBehovForAvviksvurderingTest {
         assertEquals(1, observer.behov.size)
         val behov = observer.behov.single()
         assertInstanceOf<Behov.Avviksvurdering>(behov)
-        assertEquals(beregningsgrunnlag, behov.beregningsgrunnlag)
+        assertEquals(omregnedeÅrsinntekter, behov.omregnedeÅrsinntekter)
+        assertEquals(organisasjonsnummer, behov.organisasjonsnummer)
+        assertEquals(vilkårsgrunnlagId, behov.vilkårsgrunnlagId)
+        assertEquals(skjæringstidspunkt, behov.skjæringstidspunkt)
     }
 
     @Test
@@ -136,10 +142,11 @@ class VurderBehovForAvviksvurderingTest {
             fødselsnummer,
             skjæringstidspunkt,
             repository,
-            beregningsgrunnlag,
+            omregnedeÅrsinntekter,
             vilkårsgrunnlagId,
             behandling,
             true,
+            organisasjonsnummer,
             featureToggles
         )
         val context = CommandContext(UUID.randomUUID())
@@ -177,10 +184,11 @@ class VurderBehovForAvviksvurderingTest {
             fødselsnummer,
             skjæringstidspunkt,
             repository,
-            beregningsgrunnlag,
+            omregnedeÅrsinntekter,
             vilkårsgrunnlagId,
             behandling,
             true,
+            organisasjonsnummer,
             featureToggles
         )
         val context = CommandContext(UUID.randomUUID())
@@ -205,10 +213,11 @@ class VurderBehovForAvviksvurderingTest {
             fødselsnummer,
             skjæringstidspunkt,
             repository,
-            beregningsgrunnlag,
+            omregnedeÅrsinntekter,
             vilkårsgrunnlagId,
             behandling,
             true,
+            organisasjonsnummer,
             featureToggles
         )
         val context = CommandContext(UUID.randomUUID())
@@ -233,10 +242,11 @@ class VurderBehovForAvviksvurderingTest {
             fødselsnummer,
             skjæringstidspunkt,
             repository,
-            beregningsgrunnlag,
+            omregnedeÅrsinntekter,
             vilkårsgrunnlagId,
             behandling,
             true,
+            organisasjonsnummer,
             featureToggles
         )
         val context = CommandContext(UUID.randomUUID())
@@ -253,10 +263,11 @@ class VurderBehovForAvviksvurderingTest {
             fødselsnummer,
             skjæringstidspunkt,
             repository,
-            beregningsgrunnlag,
+            omregnedeÅrsinntekter,
             vilkårsgrunnlagId,
             behandling,
             true,
+            organisasjonsnummer,
             featureToggles
         )
         val context = CommandContext(UUID.randomUUID())
