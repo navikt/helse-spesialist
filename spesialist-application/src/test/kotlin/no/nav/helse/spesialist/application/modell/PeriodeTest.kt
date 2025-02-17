@@ -1,4 +1,4 @@
-package no.nav.helse.modell.vedtaksperiode
+package no.nav.helse.spesialist.application.modell
 
 import no.nav.helse.modell.person.vedtaksperiode.Periode
 import no.nav.helse.modell.person.vedtaksperiode.Periode.Companion.til

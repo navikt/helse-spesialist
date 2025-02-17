@@ -1,5 +1,6 @@
-package no.nav.helse.modell.person
+package no.nav.helse.spesialist.application.modell
 
+import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.spesialist.application.TestPerson
 import no.nav.helse.spesialist.application.januar

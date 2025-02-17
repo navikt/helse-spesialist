@@ -1,4 +1,4 @@
-package no.nav.helse.modell.stoppautomatiskbehandling
+package no.nav.helse.spesialist.application.modell
 
 import io.mockk.every
 import io.mockk.mockk
@@ -14,6 +14,9 @@ import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.periodehistorikk.AutomatiskBehandlingStanset
+import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
+import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMelding
+import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.AKTIVITETSKRAV
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.BESTRIDELSE_SYKMELDING
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.MANGLENDE_MEDVIRKING

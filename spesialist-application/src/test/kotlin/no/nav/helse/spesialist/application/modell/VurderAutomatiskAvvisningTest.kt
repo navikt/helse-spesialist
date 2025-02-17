@@ -1,4 +1,4 @@
-package no.nav.helse.modell.automatisering
+package no.nav.helse.spesialist.application.modell
 
 import io.mockk.clearMocks
 import io.mockk.every
@@ -8,6 +8,7 @@ import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.VergemålDao
 import no.nav.helse.mediator.GodkjenningMediator
+import no.nav.helse.modell.automatisering.VurderAutomatiskAvvisning
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling

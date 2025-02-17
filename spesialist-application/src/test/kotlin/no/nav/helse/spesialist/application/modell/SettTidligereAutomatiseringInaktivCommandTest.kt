@@ -1,7 +1,9 @@
-package no.nav.helse.modell.automatisering
+package no.nav.helse.spesialist.application.modell
 
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.helse.modell.automatisering.Automatisering
+import no.nav.helse.modell.automatisering.SettTidligereAutomatiseringInaktivCommand
 import no.nav.helse.modell.kommando.CommandContext
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach

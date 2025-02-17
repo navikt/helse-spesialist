@@ -1,14 +1,17 @@
-package no.nav.helse.modell.oppgave
+package no.nav.helse.spesialist.application.modell
 
 import no.nav.helse.mediator.oppgave.Oppgavefinner
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
-import no.nav.helse.modell.oppgave.OppgaveInspector.Companion.oppgaveinspektør
+import no.nav.helse.modell.oppgave.OppdaterOppgavestatusCommand
+import no.nav.helse.modell.oppgave.Oppgave
+import no.nav.helse.modell.oppgave.OppgaveDto
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.ANNULLERT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.FORKASTET
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.GODKJENT_UTEN_UTBETALING
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_GODKJENT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
+import no.nav.helse.spesialist.application.modell.OppgaveInspector.Companion.oppgaveinspektør
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach

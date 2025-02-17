@@ -1,4 +1,4 @@
-package no.nav.helse.modell.risiko
+package no.nav.helse.spesialist.application.modell
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory
 import io.mockk.Runs
@@ -14,6 +14,7 @@ import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.InntektTilRisk
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.Behandling
+import no.nav.helse.modell.risiko.VurderVurderingsmomenter
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.Inntektsopplysningkilde
 import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta

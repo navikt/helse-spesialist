@@ -1,4 +1,4 @@
-package no.nav.helse.modell.automatisering
+package no.nav.helse.spesialist.application.modell
 
 import io.mockk.every
 import io.mockk.mockk
@@ -12,6 +12,9 @@ import no.nav.helse.db.RisikovurderingDao
 import no.nav.helse.db.VedtakDao
 import no.nav.helse.db.VergemålDao
 import no.nav.helse.db.ÅpneGosysOppgaverDao
+import no.nav.helse.modell.automatisering.Automatisering
+import no.nav.helse.modell.automatisering.Automatiseringsresultat
+import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.Behandling

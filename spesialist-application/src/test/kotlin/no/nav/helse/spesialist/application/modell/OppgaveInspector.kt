@@ -1,6 +1,8 @@
-package no.nav.helse.modell.oppgave
+package no.nav.helse.spesialist.application.modell
 
+import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.Oppgave.Companion.toDto
+import no.nav.helse.modell.oppgave.OppgaveDto
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDto
 
 internal class OppgaveInspector private constructor(oppgaveDto: OppgaveDto) {

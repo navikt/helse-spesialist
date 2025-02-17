@@ -1,5 +1,7 @@
-package no.nav.helse.modell.varsel
+package no.nav.helse.spesialist.application.modell
 
+import no.nav.helse.modell.varsel.Varseldefinisjon
+import no.nav.helse.modell.varsel.VarseldefinisjonDto
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test

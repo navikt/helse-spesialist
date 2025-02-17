@@ -1,10 +1,12 @@
-package no.nav.helse.modell.utbetaling
+package no.nav.helse.spesialist.application.modell
 
 import no.nav.helse.modell.utbetaling.Refusjonstype.DELVIS_REFUSJON
 import no.nav.helse.modell.utbetaling.Refusjonstype.FULL_REFUSJON
 import no.nav.helse.modell.utbetaling.Refusjonstype.INGEN_REFUSJON
 import no.nav.helse.modell.utbetaling.Refusjonstype.INGEN_UTBETALING
 import no.nav.helse.modell.utbetaling.Refusjonstype.NEGATIVT_BELØP
+import no.nav.helse.modell.utbetaling.Utbetaling
+import no.nav.helse.modell.utbetaling.Utbetalingtype
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test

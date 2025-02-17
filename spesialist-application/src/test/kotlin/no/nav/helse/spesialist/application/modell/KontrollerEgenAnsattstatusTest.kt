@@ -1,4 +1,4 @@
-package no.nav.helse.modell.egenansatt
+package no.nav.helse.spesialist.application.modell
 
 import io.mockk.clearMocks
 import io.mockk.every
@@ -7,6 +7,7 @@ import io.mockk.verify
 import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.meldinger.løsninger.EgenAnsattløsning
+import no.nav.helse.modell.egenansatt.KontrollerEgenAnsattstatus
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.melding.Behov
 import org.junit.jupiter.api.Assertions.assertEquals

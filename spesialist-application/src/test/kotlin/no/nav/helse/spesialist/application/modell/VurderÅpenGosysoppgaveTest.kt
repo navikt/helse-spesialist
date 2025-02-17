@@ -1,4 +1,4 @@
-package no.nav.helse.modell.gosysoppgaver
+package no.nav.helse.spesialist.application.modell
 
 import io.mockk.clearMocks
 import io.mockk.mockk
@@ -7,6 +7,7 @@ import no.nav.helse.db.ÅpneGosysOppgaverDao
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.meldinger.løsninger.ÅpneGosysOppgaverløsning
 import no.nav.helse.mediator.oppgave.OppgaveService
+import no.nav.helse.modell.gosysoppgaver.VurderÅpenGosysoppgave
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.Sykefraværstilfelle

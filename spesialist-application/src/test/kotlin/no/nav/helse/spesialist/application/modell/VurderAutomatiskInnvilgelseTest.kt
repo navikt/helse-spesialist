@@ -1,4 +1,4 @@
-package no.nav.helse.modell.automatisering
+package no.nav.helse.spesialist.application.modell
 
 import io.mockk.every
 import io.mockk.mockk
@@ -8,6 +8,9 @@ import no.nav.helse.db.CommandContextDao
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.KommandokjedeEndretEvent
+import no.nav.helse.modell.automatisering.Automatisering
+import no.nav.helse.modell.automatisering.Automatiseringsresultat
+import no.nav.helse.modell.automatisering.VurderAutomatiskInnvilgelse
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.melding.Godkjenningsbehovløsning
 import no.nav.helse.modell.melding.UtgåendeHendelse
@@ -107,7 +110,9 @@ internal class VurderAutomatiskInnvilgelseTest {
     @Test
     fun `automatiserer ikke når resultat er at perioden kan ikke automatiseres`() {
         val problemer = listOf("Problem 1", "Problem 2")
-        every { automatisering.utfør(any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanIkkeAutomatiseres(problemer)
+        every { automatisering.utfør(any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanIkkeAutomatiseres(
+            problemer
+        )
         assertTrue(command.execute(context))
         verify(exactly = 0) { automatiseringDao.automatisert(any(), any(), any()) }
         verify(exactly = 1) { automatiseringDao.manuellSaksbehandling(problemer, vedtaksperiodeId, hendelseId, utbetalingId) }
@@ -115,7 +120,9 @@ internal class VurderAutomatiskInnvilgelseTest {
 
     @Test
     fun `automatiserer ikke når resultat er at perioden er stikkprøve`() {
-        every { automatisering.utfør(any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.Stikkprøve("En årsak")
+        every { automatisering.utfør(any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.Stikkprøve(
+            "En årsak"
+        )
         assertTrue(command.execute(context))
         verify(exactly = 0) { automatiseringDao.automatisert(any(), any(), any()) }
         verify(exactly = 1) { automatiseringDao.stikkprøve(vedtaksperiodeId, hendelseId, utbetalingId) }

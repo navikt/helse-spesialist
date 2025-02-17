@@ -1,4 +1,4 @@
-package no.nav.helse.modell.varsel
+package no.nav.helse.spesialist.application.modell
 
 import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode

@@ -1,4 +1,4 @@
-package no.nav.helse.modell
+package no.nav.helse.spesialist.application.modell
 
 import no.nav.helse.modell.melding.Godkjenningsbehovløsning
 import no.nav.helse.modell.utbetaling.Utbetaling
