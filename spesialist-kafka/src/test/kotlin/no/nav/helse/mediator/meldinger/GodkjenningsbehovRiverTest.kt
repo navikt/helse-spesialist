@@ -3,6 +3,7 @@ package no.nav.helse.mediator.meldinger
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.helse.FeatureToggles
 import no.nav.helse.kafka.GodkjenningsbehovRiver
 import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
@@ -30,7 +31,7 @@ internal class GodkjenningsbehovRiverTest {
     private val TOM = LocalDate.of(2020, 1, 31)
 
     private val mediator = mockk<MeldingMediator>(relaxed = true)
-    private val testRapid = TestRapid().medRivers(GodkjenningsbehovRiver(mediator))
+    private val testRapid = TestRapid().medRivers(GodkjenningsbehovRiver(mediator, object : FeatureToggles {}))
 
     @BeforeEach
     fun setup() {

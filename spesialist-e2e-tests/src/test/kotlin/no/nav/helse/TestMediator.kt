@@ -133,7 +133,7 @@ internal class TestMediator(
             poisonPills = PoisonPills(emptyMap()),
             env = environment,
         )
-        RiverSetup(testRapid, meldingMediator, repositories.meldingDuplikatkontrollDao).setUp()
+        RiverSetup(testRapid, meldingMediator, repositories.meldingDuplikatkontrollDao, object : FeatureToggles {}).setUp()
     }
 
     internal fun overstyringstyperForVedtaksperiode(vedtaksperiodeId: UUID) =

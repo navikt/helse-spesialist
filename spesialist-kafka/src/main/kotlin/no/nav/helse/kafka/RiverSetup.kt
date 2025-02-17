@@ -7,6 +7,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.micrometer.core.instrument.MeterRegistry
+import no.nav.helse.FeatureToggles
 import no.nav.helse.db.MeldingDuplikatkontrollDao
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.registrerTidsbrukForDuplikatsjekk
@@ -19,6 +20,7 @@ class RiverSetup(
     private val rapidsConnection: RapidsConnection,
     private val mediator: MeldingMediator,
     private val meldingDuplikatkontrollDao: MeldingDuplikatkontrollDao,
+    private val featureToggles: FeatureToggles,
 ) {
     fun setUp() {
         val delegatedRapid =
@@ -30,7 +32,7 @@ class RiverSetup(
                 errorAction = mediator::errorHandler,
             )
         sequenceOf(
-            GodkjenningsbehovRiver(mediator),
+            GodkjenningsbehovRiver(mediator, featureToggles),
             SøknadSendtRiver(mediator),
             SøknadSendtArbeidsledigRiver(mediator),
             PersoninfoløsningRiver(mediator),

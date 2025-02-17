@@ -8,6 +8,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import io.micrometer.core.instrument.MeterRegistry
+import no.nav.helse.FeatureToggles
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
@@ -24,11 +25,14 @@ import java.util.UUID
 
 class GodkjenningsbehovRiver(
     private val mediator: MeldingMediator,
+    private val featureToggles: FeatureToggles,
 ) : SpesialistRiver {
     override fun preconditions(): River.PacketValidation {
         return River.PacketValidation {
             it.requireAll("@behov", listOf("Godkjenning"))
-            it.requireValue("behandletAvSpinnvill", true)
+            if (!featureToggles.skalBenytteNyAvviksvurderingløype()) {
+                it.requireValue("behandletAvSpinnvill", true)
+            }
             it.forbid("@løsning")
         }
     }

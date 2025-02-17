@@ -189,7 +189,7 @@ class SpesialistApp(
                 env = env,
             )
         personhåndterer = PersonhåndtererImpl(publiserer = meldingPubliserer)
-        RiverSetup(rapidsConnection, meldingMediator, repositories.meldingDuplikatkontrollDao).setUp()
+        RiverSetup(rapidsConnection, meldingMediator, repositories.meldingDuplikatkontrollDao, featureToggles).setUp()
         saksbehandlerMediator =
             SaksbehandlerMediator(
                 repositories = repositories,

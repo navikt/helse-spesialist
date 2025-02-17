@@ -10,6 +10,11 @@ class UnleashFeatureToggles(env: Map<String, String>) : FeatureToggles {
             "spesialist-skal-avbryte-oppgave-paa-et-senere-tidspunkt",
         )
 
+    override fun skalBenytteNyAvviksvurderingløype(): Boolean =
+        unleash.isEnabled(
+            "skal-bruke-ny-avviksvurdering-loype",
+        )
+
     private val apiKey = requireNotNull(env["UNLEASH_SERVER_API_TOKEN"])
     private val apiUrl = requireNotNull(env["UNLEASH_SERVER_API_URL"]) + "/api"
     private val apiEnv = requireNotNull(env["UNLEASH_SERVER_API_ENV"])
