@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.application
 
-import no.nav.helse.spesialist.typer.Kjønn
 import java.time.LocalDate
 import java.util.UUID
 import kotlin.random.Random.Default.nextInt
@@ -23,18 +22,6 @@ private val fornavnListe = listOf(
     "Rund",
     "Internasjonal"
 )
-private val mellomnavnListe = listOf(
-    "Lysende",
-    "Spennende",
-    "Tidløs",
-    "Hjertelig",
-    "Storslått",
-    "Sjarmerende",
-    "Uforutsigbar",
-    "Behagelig",
-    "Robust",
-    "Sofistikert",
-) + List(10) { null }
 
 private val etternavnListe =
     listOf("Diode", "Flom", "Damesykkel", "Undulat", "Bakgrunn", "Genser", "Fornøyelse", "Campingvogn", "Bakkeklaring")
@@ -63,10 +50,6 @@ fun lagEtternavn() = etternavnListe.random()
 class TestPerson {
     val fødselsnummer: String = lagFødselsnummer()
     val aktørId: String = lagAktørId()
-    val fornavn: String = fornavnListe.random()
-    val mellomnavn: String? = mellomnavnListe.shuffled().random()
-    val etternavn: String = etternavnListe.random()
-    val kjønn = Kjønn.entries.toTypedArray().random()
     private val arbeidsgivere = mutableMapOf<Int, TestArbeidsgiver>()
     private val arbeidsgiver1 = nyArbeidsgiver()
     private val arbeidsgiver2 = nyArbeidsgiver()
@@ -86,20 +69,18 @@ class TestPerson {
     val Int.arbeidsgiver
         get() = arbeidsgivere[this - 1] ?: throw IllegalArgumentException("Arbeidsgiver med index $this finnes ikke")
 
-    fun nyArbeidsgiver() = TestArbeidsgiver(fødselsnummer, aktørId).also {
+    fun nyArbeidsgiver() = TestArbeidsgiver(fødselsnummer).also {
         arbeidsgivere[arbeidsgivere.size] = it
     }
 }
 
 class TestArbeidsgiver(
     val fødselsnummer: String,
-    val aktørId: String,
 ) {
     private val vedtaksperioder = mutableMapOf<Int, TestVedtaksperiode>()
     val organisasjonsnummer = lagOrganisasjonsnummer()
-    val organisasjonsnavn = lagOrganisasjonsnavn()
 
-    fun nyVedtaksperiode() = TestVedtaksperiode(fødselsnummer, aktørId, organisasjonsnummer).also {
+    fun nyVedtaksperiode() = TestVedtaksperiode(fødselsnummer, organisasjonsnummer).also {
         vedtaksperioder[vedtaksperioder.size] = it
     }
 
@@ -111,10 +92,8 @@ class TestArbeidsgiver(
 
 class TestVedtaksperiode(
     val fødselsnummer: String,
-    val aktørId: String,
     val organisasjonsnummer: String,
 ) {
     val vedtaksperiodeId: UUID = UUID.randomUUID()
-    val spleisBehandlingId: UUID = UUID.randomUUID()
     val utbetalingId: UUID = UUID.randomUUID()
 }
