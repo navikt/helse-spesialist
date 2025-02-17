@@ -1,4 +1,4 @@
-package no.nav.helse.spleis
+package no.nav.helse.spesialist.client.spleis
 
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
