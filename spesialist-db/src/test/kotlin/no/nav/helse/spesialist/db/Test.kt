@@ -1,7 +1,6 @@
 package no.nav.helse.spesialist.db
 
 import no.nav.helse.spesialist.typer.Kjønn
-import java.time.LocalDate
 import java.util.UUID
 import kotlin.random.Random.Default.nextInt
 import kotlin.random.Random.Default.nextLong
@@ -48,13 +47,6 @@ fun lagSaksbehandlerident() = ('A'..'Z').random() + "${nextInt(from = 100_000, u
 fun lagSaksbehandlernavn() = "${lagFornavn()} ${lagEtternavn()}"
 fun lagEpostadresseFraFulltNavn(navn: String) = navn.split(" ").joinToString(".").lowercase() + "@nav.no"
 fun lagTilfeldigSaksbehandlerepost() = lagEpostadresseFraFulltNavn(lagSaksbehandlernavn())
-
-fun fødselsdato(): LocalDate {
-    val end = LocalDate.now().minusYears(18)
-    val start = end.minusYears(100)
-    val randomDayInEpoch = nextLong(start.toEpochDay(), end.toEpochDay())
-    return LocalDate.ofEpochDay(randomDayInEpoch)
-}
 
 fun lagFornavn() = fornavnListe.random()
 
@@ -115,6 +107,5 @@ class TestVedtaksperiode(
     val organisasjonsnummer: String,
 ) {
     val vedtaksperiodeId: UUID = UUID.randomUUID()
-    val spleisBehandlingId: UUID = UUID.randomUUID()
     val utbetalingId: UUID = UUID.randomUUID()
 }
