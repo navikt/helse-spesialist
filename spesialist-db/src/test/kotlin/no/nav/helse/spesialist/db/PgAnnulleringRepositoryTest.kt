@@ -78,6 +78,6 @@ class PgAnnulleringRepositoryTest : DatabaseIntegrationTest() {
             oid = saksbehandlerOid,
             navn = SAKSBEHANDLER_NAVN,
             ident = SAKSBEHANDLER_IDENT,
-            tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
+            tilgangskontroll = { _, _ -> false },
         )
 }

@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 internal class PgOpptegnelseDaoTest : DatabaseIntegrationTest() {
-    private val opptegnelseRepository = DBSessionContext(session, TilgangskontrollForTestHarIkkeTilgang).opptegnelseDao
+    private val opptegnelseRepository = DBSessionContext(session) { _, _ -> false }.opptegnelseDao
 
     private companion object {
         private val UTBETALING_PAYLOAD = UtbetalingPayload(UUID.randomUUID()).toJson()

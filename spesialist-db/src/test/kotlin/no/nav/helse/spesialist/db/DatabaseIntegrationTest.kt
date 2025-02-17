@@ -108,7 +108,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         private set
 
     protected val session = sessionOf(dataSource, returnGeneratedKey = true)
-    private val sessionContext = DBSessionContext(session, TilgangskontrollForTestHarIkkeTilgang)
+    private val sessionContext = DBSessionContext(session) { _, _ -> false }
 
     @AfterEach
     fun tearDown() = session.close()
@@ -547,7 +547,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             epostadresse = lagTilfeldigSaksbehandlerepost(),
             navn = lagSaksbehandlernavn(),
             ident = lagSaksbehandlerident(),
-            tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang
+            tilgangskontroll = { _, _ -> false }
         )
 
     protected fun opprettUtbetalingKobling(

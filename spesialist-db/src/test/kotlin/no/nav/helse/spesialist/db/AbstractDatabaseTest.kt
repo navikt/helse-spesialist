@@ -13,7 +13,7 @@ import javax.sql.DataSource
 
 abstract class AbstractDatabaseTest {
 
-    protected val repositories = DBRepositories(dataSource, TilgangskontrollForTestHarIkkeTilgang)
+    protected val repositories = DBRepositories(dataSource) { _, _ -> false }
 
     companion object {
         private val postgres = PostgreSQLContainer<Nothing>("postgres:14").apply {

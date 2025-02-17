@@ -79,6 +79,6 @@ class PgTotrinnsvurderingRepositoryTest: DatabaseIntegrationTest() {
             oid = SAKSBEHANDLER_OID,
             navn = SAKSBEHANDLER_NAVN,
             ident = SAKSBEHANDLER_IDENT,
-            tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
+            tilgangskontroll = { _, _ -> false },
         )
 }

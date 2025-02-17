@@ -20,7 +20,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 internal class PgInntektskilderRepositoryTest : DatabaseIntegrationTest() {
-    private val avviksvurderingDao = DBSessionContext(session, TilgangskontrollForTestHarIkkeTilgang).avviksvurderingDao
+    private val avviksvurderingDao = DBSessionContext(session) { _, _ -> false }.avviksvurderingDao
 
     @Test
     fun `når det ikke finnes arbeidsgivere i databasen får vi kun tilbake nye inntektskilder`() {

@@ -36,7 +36,7 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
             epostadresse = SAKSBEHANDLER_EPOST,
             navn = SAKSBEHANDLER_NAVN,
             ident = SAKSBEHANDLER_IDENT,
-            tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
+            tilgangskontroll = { _, _ -> false },
         )
     private val beslutter =
         Saksbehandler(
@@ -44,7 +44,7 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
             epostadresse = SAKSBEHANDLER_EPOST,
             navn = SAKSBEHANDLER_NAVN,
             ident = SAKSBEHANDLER_IDENT,
-            tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
+            tilgangskontroll = { _, _ -> false },
         )
 
     private val TOTRINNSVURDERING_OPPRETTET = LocalDateTime.now()
