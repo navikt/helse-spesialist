@@ -1,6 +1,6 @@
 package no.nav.helse.modell.person.vedtaksperiode
 
-import no.nav.helse.modell.januar
+import no.nav.helse.modell.jan
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -154,9 +154,9 @@ internal class BehandlingTilstandTest {
     private fun behandling(
         behandlingId: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID = UUID.randomUUID(),
-        fom: LocalDate = 1.januar,
-        tom: LocalDate = 31.januar,
-        skjæringstidspunkt: LocalDate = 1.januar,
+        fom: LocalDate = 1 jan 2018,
+        tom: LocalDate = 31 jan 2018,
+        skjæringstidspunkt: LocalDate = 1 jan 2018,
     ) = Behandling(
         id = behandlingId,
         vedtaksperiodeId = vedtaksperiodeId,

@@ -1,7 +1,7 @@
 package no.nav.helse.modell.person
 
-import no.nav.helse.modell.februar
-import no.nav.helse.modell.januar
+import no.nav.helse.modell.feb
+import no.nav.helse.modell.jan
 import no.nav.helse.modell.person.vedtaksperiode.Behandling
 import no.nav.helse.modell.person.vedtaksperiode.Behandling.Companion.forhindrerAutomatisering
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
@@ -25,7 +25,7 @@ internal class SykefraværstilfelleTest {
     fun `har ikke aktive varsler`() {
         val gjeldendeGenerasjon1 = generasjon(UUID.randomUUID())
         val gjeldendeGenerasjon2 = generasjon(UUID.randomUUID())
-        assertFalse(listOf(gjeldendeGenerasjon1, gjeldendeGenerasjon2).forhindrerAutomatisering(28.februar))
+        assertFalse(listOf(gjeldendeGenerasjon1, gjeldendeGenerasjon2).forhindrerAutomatisering(28 feb 2018))
     }
 
     @Test
@@ -35,7 +35,7 @@ internal class SykefraværstilfelleTest {
         val utbetalingId = UUID.randomUUID()
         gjeldendeGenerasjon1.håndterNyUtbetaling(utbetalingId)
         gjeldendeGenerasjon2.håndterNyUtbetaling(utbetalingId)
-        assertFalse(listOf(gjeldendeGenerasjon1, gjeldendeGenerasjon2).forhindrerAutomatisering(28.februar))
+        assertFalse(listOf(gjeldendeGenerasjon1, gjeldendeGenerasjon2).forhindrerAutomatisering(28 feb 2018))
     }
 
     @Test
@@ -46,7 +46,7 @@ internal class SykefraværstilfelleTest {
         gjeldendeGenerasjon2.håndterNyttVarsel(
             Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId2),
         )
-        assertTrue(listOf(gjeldendeGenerasjon1, gjeldendeGenerasjon2).forhindrerAutomatisering(28.februar))
+        assertTrue(listOf(gjeldendeGenerasjon1, gjeldendeGenerasjon2).forhindrerAutomatisering(28 feb 2018))
     }
 
     @Test
@@ -58,14 +58,14 @@ internal class SykefraværstilfelleTest {
         Behandling(
             id = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeId,
-            fom = 1.januar,
-            tom = 31.januar,
-            skjæringstidspunkt = 1.januar,
+            fom = 1 jan 2018,
+            tom = 31 jan 2018,
+            skjæringstidspunkt = 1 jan 2018,
         )
 
     private fun sykefraværstilfelle(
         fødselsnummer: String = "12345678910",
-        skjæringstidspunkt: LocalDate = 1.januar,
+        skjæringstidspunkt: LocalDate = 1 jan 2018,
         gjeldendeGenerasjoner: List<Behandling> = listOf(generasjon()),
     ) = Sykefraværstilfelle(
         fødselsnummer,

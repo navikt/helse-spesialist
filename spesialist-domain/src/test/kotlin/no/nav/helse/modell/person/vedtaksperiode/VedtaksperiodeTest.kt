@@ -1,7 +1,7 @@
 package no.nav.helse.modell.person.vedtaksperiode
 
-import no.nav.helse.modell.februar
-import no.nav.helse.modell.januar
+import no.nav.helse.modell.feb
+import no.nav.helse.modell.jan
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
@@ -70,13 +70,13 @@ class VedtaksperiodeTest {
         )
         vedtaksperiode.nyUtbetaling(UUID.randomUUID())
         vedtaksperiode.nyttGodkjenningsbehov(
-            listOf(SpleisVedtaksperiode(vedtaksperiodeId, spleisBehandlingId, 1.februar, 28.februar, 1.februar)),
+            listOf(SpleisVedtaksperiode(vedtaksperiodeId, spleisBehandlingId, 1 feb 2018, 28 feb 2018, 1 feb 2018)),
         )
         val dto = vedtaksperiode.toDto()
         assertEquals(1, dto.behandlinger.size)
-        assertEquals(1.februar, dto.behandlinger.single().fom)
-        assertEquals(28.februar, dto.behandlinger.single().tom)
-        assertEquals(1.februar, dto.behandlinger.single().skjæringstidspunkt)
+        assertEquals(1 feb 2018, dto.behandlinger.single().fom)
+        assertEquals(28 feb 2018, dto.behandlinger.single().tom)
+        assertEquals(1 feb 2018, dto.behandlinger.single().skjæringstidspunkt)
         assertEquals(spleisBehandlingId, dto.behandlinger.single().spleisBehandlingId)
     }
 
@@ -89,13 +89,13 @@ class VedtaksperiodeTest {
             spleisBehandlingId = spleisBehandlingId
         )
         vedtaksperiode.nyttGodkjenningsbehov(
-            listOf(SpleisVedtaksperiode(vedtaksperiodeId, spleisBehandlingId, 1.februar, 28.februar, 1.februar)),
+            listOf(SpleisVedtaksperiode(vedtaksperiodeId, spleisBehandlingId, 1 feb 2018, 28 feb 2018, 1 feb 2018)),
         )
         val dto = vedtaksperiode.toDto()
         assertEquals(1, dto.behandlinger.size)
-        assertEquals(1.februar, dto.behandlinger.single().fom)
-        assertEquals(28.februar, dto.behandlinger.single().tom)
-        assertEquals(1.februar, dto.behandlinger.single().skjæringstidspunkt)
+        assertEquals(1 feb 2018, dto.behandlinger.single().fom)
+        assertEquals(28 feb 2018, dto.behandlinger.single().tom)
+        assertEquals(1 feb 2018, dto.behandlinger.single().skjæringstidspunkt)
         assertEquals(spleisBehandlingId, dto.behandlinger.single().spleisBehandlingId)
     }
 
@@ -109,13 +109,13 @@ class VedtaksperiodeTest {
             spleisBehandlingId = enBehandlingId
         )
         vedtaksperiode.nyttGodkjenningsbehov(
-            listOf(SpleisVedtaksperiode(vedtaksperiodeId, enAnnenBehandlingId, 1.februar, 28.februar, 1.februar)),
+            listOf(SpleisVedtaksperiode(vedtaksperiodeId, enAnnenBehandlingId, 1 feb 2018, 28 feb 2018, 1 feb 2018)),
         )
         val dto = vedtaksperiode.toDto()
         assertEquals(1, dto.behandlinger.size)
-        assertEquals(1.januar, dto.behandlinger.single().fom)
-        assertEquals(31.januar, dto.behandlinger.single().tom)
-        assertEquals(1.januar, dto.behandlinger.single().skjæringstidspunkt)
+        assertEquals(1 jan 2018, dto.behandlinger.single().fom)
+        assertEquals(31 jan 2018, dto.behandlinger.single().tom)
+        assertEquals(1 jan 2018, dto.behandlinger.single().skjæringstidspunkt)
         assertEquals(enBehandlingId, dto.behandlinger.single().spleisBehandlingId)
     }
 
@@ -127,7 +127,7 @@ class VedtaksperiodeTest {
         vedtaksperiode.nyUtbetaling(UUID.randomUUID())
 
         vedtaksperiode.nyttGodkjenningsbehov(
-            listOf(SpleisVedtaksperiode(vedtaksperiodeId, spleisBehandlingId, 1.januar, 31.januar, 1.januar)),
+            listOf(SpleisVedtaksperiode(vedtaksperiodeId, spleisBehandlingId, 1 jan 2018, 31 jan 2018, 1 jan 2018)),
         )
         val dto = vedtaksperiode.toDto()
         assertEquals(1, dto.behandlinger.size)
@@ -140,7 +140,7 @@ class VedtaksperiodeTest {
         val vedtaksperiode = nyVedtaksperiode(vedtaksperiodeId, spleisBehandlingId)
         vedtaksperiode.finnBehandling(spleisBehandlingId).avsluttetUtenVedtak()
         vedtaksperiode.nyttGodkjenningsbehov(
-            listOf(SpleisVedtaksperiode(vedtaksperiodeId, spleisBehandlingId, 1.januar, 31.januar, 1.januar)),
+            listOf(SpleisVedtaksperiode(vedtaksperiodeId, spleisBehandlingId, 1 jan 2018, 31 jan 2018, 1 jan 2018)),
         )
         val dto = vedtaksperiode.toDto()
         assertEquals(1, dto.behandlinger.size)
@@ -155,7 +155,7 @@ class VedtaksperiodeTest {
         vedtaksperiode.finnBehandling(spleisBehandlingId).avsluttetUtenVedtak()
 
         vedtaksperiode.nyttGodkjenningsbehov(
-            listOf(SpleisVedtaksperiode(vedtaksperiodeId, spleisBehandlingId, 1.januar, 31.januar, 1.januar)),
+            listOf(SpleisVedtaksperiode(vedtaksperiodeId, spleisBehandlingId, 1 jan 2018, 31 jan 2018, 1 jan 2018)),
         )
         val dto = vedtaksperiode.toDto()
         assertEquals(1, dto.behandlinger.size)
@@ -172,7 +172,7 @@ class VedtaksperiodeTest {
     private fun nySpleisBehandling(
         vedtaksperiodeId: UUID,
         spleisBehandlingId: UUID = UUID.randomUUID(),
-    ) = SpleisBehandling("987654321", vedtaksperiodeId, spleisBehandlingId, 1.januar, 31.januar)
+    ) = SpleisBehandling("987654321", vedtaksperiodeId, spleisBehandlingId, 1 jan 2018, 31 jan 2018)
 
     private fun nyttVarsel(
         vedtaksperiodeId: UUID,

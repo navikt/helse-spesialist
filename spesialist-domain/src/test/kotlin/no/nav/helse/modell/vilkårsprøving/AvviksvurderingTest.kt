@@ -1,6 +1,6 @@
 package no.nav.helse.modell.vilkårsprøving
 
-import no.nav.helse.modell.januar
+import no.nav.helse.modell.jan
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
@@ -12,7 +12,7 @@ internal class AvviksvurderingTest {
     fun `avviksvurdering toDto`() {
         val unikId = UUID.randomUUID()
         val fødselsnummer = "12345678910"
-        val skjæringstidspunkt = 1.januar
+        val skjæringstidspunkt = 1 jan 2018
         val opprettet = LocalDateTime.now()
         val avviksprosent = 25.0
         val vilkårsgrunnlagId = UUID.randomUUID()
@@ -51,7 +51,7 @@ internal class AvviksvurderingTest {
     fun equals() {
         val unikId = UUID.randomUUID()
         val fødselsnummer = "12345678910"
-        val skjæringstidspunkt = 1.januar
+        val skjæringstidspunkt = 1 jan 2018
         val opprettet = LocalDateTime.now()
         val avviksprosent = 25.0
 

@@ -1,6 +1,6 @@
 package no.nav.helse.modell.saksbehandler.handlinger
 
-import no.nav.helse.modell.januar
+import no.nav.helse.modell.jan
 import no.nav.helse.modell.melding.LagtPåVentEvent
 import no.nav.helse.modell.melding.MinimumSykdomsgradVurdertEvent
 import no.nav.helse.modell.melding.OverstyrtArbeidsforholdEvent
@@ -86,14 +86,14 @@ internal class SaksbehandlerTest {
                 output = mapOf(
                     "dager" to listOf(
                         mapOf(
-                            "dato" to 1.januar,
+                            "dato" to (1 jan 2018),
                             "type" to "Sykedag",
                             "fraType" to "Sykedag",
                             "grad" to 100,
                             "fraGrad" to 100,
                         ),
                         mapOf(
-                            "dato" to 2.januar,
+                            "dato" to (2 jan 2018),
                             "type" to "Sykedag",
                             "fraType" to "Sykedag",
                             "grad" to 100,
@@ -126,7 +126,7 @@ internal class SaksbehandlerTest {
                 output = mapOf(
                     "dager" to listOf(
                         mapOf(
-                            "dato" to 3.januar,
+                            "dato" to (3 jan 2018),
                             "type" to "Sykedag",
                             "fraType" to "Sykedag",
                             "grad" to 100,
@@ -163,7 +163,7 @@ internal class SaksbehandlerTest {
             OverstyrtInntektOgRefusjon.ny(
                 aktørId = "123",
                 fødselsnummer = "1234",
-                skjæringstidspunkt = 1.januar,
+                skjæringstidspunkt = 1 jan 2018,
                 arbeidsgivere = emptyList(),
                 vedtaksperiodeId = UUID.randomUUID(),
                 saksbehandlerOid = saksbehandler.oid,
@@ -187,7 +187,7 @@ internal class SaksbehandlerTest {
             OverstyrtArbeidsforhold.ny(
                 aktørId = "123",
                 fødselsnummer = "1234",
-                skjæringstidspunkt = 1.januar,
+                skjæringstidspunkt = 1 jan 2018,
                 overstyrteArbeidsforhold = emptyList(),
                 vedtaksperiodeId = UUID.randomUUID(),
                 saksbehandlerOid = saksbehandler.oid,
@@ -214,7 +214,7 @@ internal class SaksbehandlerTest {
                 begrunnelse = "begrunnelse",
                 vedtaksperiodeId = UUID.randomUUID(),
                 perioderVurdertOk = emptyList(),
-                perioderVurdertIkkeOk = listOf(MinimumSykdomsgradPeriode(1.januar, 31.januar)),
+                perioderVurdertIkkeOk = listOf(MinimumSykdomsgradPeriode(1 jan 2018, 31 jan 2018)),
                 arbeidsgivere = listOf(MinimumSykdomsgradArbeidsgiver(organisasjonsnummer = "12345", berørtVedtaksperiodeId = UUID.randomUUID())),
                 saksbehandlerOid = saksbehandler.oid,
             )
@@ -312,7 +312,7 @@ internal class SaksbehandlerTest {
 
     private fun overstyrteDager(): List<OverstyrtTidslinjedag> = listOf(
         OverstyrtTidslinjedag(
-            dato = 1.januar,
+            dato = 1 jan 2018,
             type = "Sykedag",
             fraType = "Sykedag",
             grad = 100,
@@ -325,7 +325,7 @@ internal class SaksbehandlerTest {
             )
         ),
         OverstyrtTidslinjedag(
-            dato = 2.januar,
+            dato = 2 jan 2018,
             type = "Sykedag",
             fraType = "Sykedag",
             grad = 100,
@@ -338,7 +338,7 @@ internal class SaksbehandlerTest {
             )
         ),
         OverstyrtTidslinjedag(
-            dato = 3.januar,
+            dato = 3 jan 2018,
             type = "Sykedag",
             fraType = "Sykedag",
             grad = 100,
@@ -352,7 +352,7 @@ internal class SaksbehandlerTest {
             )
         ),
         OverstyrtTidslinjedag(
-            dato = 4.januar,
+            dato = 4 jan 2018,
             type = "Feriedag",
             fraType = "Sykedag",
             grad = 100,

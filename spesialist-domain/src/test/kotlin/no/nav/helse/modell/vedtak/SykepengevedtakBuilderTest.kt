@@ -1,6 +1,6 @@
 package no.nav.helse.modell.vedtak
 
-import no.nav.helse.modell.januar
+import no.nav.helse.modell.jan
 import no.nav.helse.modell.melding.Sykepengevedtak
 import no.nav.helse.modell.melding.Sykepengevedtak.VedtakMedSkjønnsvurdering
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Infotrygd
@@ -24,9 +24,9 @@ class SykepengevedtakBuilderTest {
         private val vedtaksperiodeId = UUID.randomUUID()
         private val spleisBehandlingId = UUID.randomUUID()
         private val utbetalingId = UUID.randomUUID()
-        private val fom = 1.januar
-        private val tom = 31.januar
-        private val skjæringstidspunkt = 1.januar
+        private val fom = 1 jan 2018
+        private val tom = 31 jan 2018
+        private val skjæringstidspunkt = 1 jan 2018
         private val hendelser = listOf(UUID.randomUUID(), UUID.randomUUID())
         private const val sykepengegrunnlag = 600000.00
         private const val grunnlagForSykepengegrunnlag = 600000.00

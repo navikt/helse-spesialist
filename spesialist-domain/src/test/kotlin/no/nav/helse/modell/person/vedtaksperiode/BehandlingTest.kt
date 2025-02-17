@@ -1,9 +1,9 @@
 package no.nav.helse.modell.person.vedtaksperiode
 
 import io.mockk.mockk
-import no.nav.helse.modell.desember
-import no.nav.helse.modell.februar
-import no.nav.helse.modell.januar
+import no.nav.helse.modell.des
+import no.nav.helse.modell.feb
+import no.nav.helse.modell.jan
 import no.nav.helse.modell.person.vedtaksperiode.Behandling.Companion.finnBehandlingForSpleisBehandling
 import no.nav.helse.modell.person.vedtaksperiode.Behandling.Companion.finnBehandlingForVedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.Behandling.Companion.finnSisteBehandlingUtenSpleisBehandlingId
@@ -27,11 +27,11 @@ import java.util.UUID
 internal class BehandlingTest {
     @Test
     fun `behandling ligger før dato`() {
-        val behandling = Behandling(UUID.randomUUID(), UUID.randomUUID(), 1.januar, 31.januar, 1.januar)
-        assertTrue(behandling.tilhører(31.januar))
-        assertTrue(behandling.tilhører(1.februar))
-        assertFalse(behandling.tilhører(1.januar))
-        assertFalse(behandling.tilhører(31.desember(2017)))
+        val behandling = Behandling(UUID.randomUUID(), UUID.randomUUID(), 1 jan 2018, 31 jan 2018, 1 jan 2018)
+        assertTrue(behandling.tilhører(31 jan 2018))
+        assertTrue(behandling.tilhører(1 feb 2018))
+        assertFalse(behandling.tilhører(1 jan 2018))
+        assertFalse(behandling.tilhører(31 des 2017))
     }
 
     @Test
@@ -292,29 +292,29 @@ internal class BehandlingTest {
     @Test
     fun `har behandling medlemskapsvarsel`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val behandling1 = behandlingMedVarsel(1.februar, 28.februar, vedtaksperiodeId, "RV_MV_1")
+        val behandling1 = behandlingMedVarsel(1 feb 2018, 28 feb 2018, vedtaksperiodeId, "RV_MV_1")
         assertTrue(listOf(behandling1).harMedlemskapsvarsel(vedtaksperiodeId))
     }
 
     @Test
     fun `har minst en behandling medlemskapsvarsel`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val behandling1 = behandlingMedVarsel(1.februar, 28.februar, vedtaksperiodeId, "RV_MV_1")
-        val behandling2 = behandling(fom = 1.januar, tom = 31.januar, skjæringstidspunkt = 1.januar)
+        val behandling1 = behandlingMedVarsel(1 feb 2018, 28 feb 2018, vedtaksperiodeId, "RV_MV_1")
+        val behandling2 = behandling(fom = 1 jan 2018, tom = 31 jan 2018, skjæringstidspunkt = 1 jan 2018)
         assertTrue(listOf(behandling1, behandling2).harMedlemskapsvarsel(vedtaksperiodeId))
     }
 
     @Test
     fun `har kun åpen oppgave i gosys`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val behandling = behandlingMedVarsel(1.februar, 28.februar, vedtaksperiodeId, "SB_EX_1")
+        val behandling = behandlingMedVarsel(1 feb 2018, 28 feb 2018, vedtaksperiodeId, "SB_EX_1")
         assertTrue(listOf(behandling).harÅpenGosysOppgave(vedtaksperiodeId))
     }
 
     @Test
     fun `flere varsler enn kun åpen oppgave i gosys`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val behandling = behandlingMedVarsel(1.februar, 28.februar, vedtaksperiodeId, "SB_EX_1")
+        val behandling = behandlingMedVarsel(1 feb 2018, 28 feb 2018, vedtaksperiodeId, "SB_EX_1")
         assertTrue(listOf(behandling).harÅpenGosysOppgave(vedtaksperiodeId))
 
         behandling.håndterNyttVarsel(Varsel(UUID.randomUUID(), "RV_MV_1", LocalDateTime.now(), vedtaksperiodeId))
@@ -350,13 +350,14 @@ internal class BehandlingTest {
     @Test
     fun `oppdaterer fom, tom, skjæringstidspunkt, behandlingId`() {
         val behandlingId = UUID.randomUUID()
-        val behandling = behandling(fom = 1.januar, tom = 31.januar, skjæringstidspunkt = 1.januar)
-        behandling.håndter(mockk(relaxed = true), SpleisVedtaksperiode(UUID.randomUUID(), behandlingId, 2.januar, 30.januar, 2.januar))
+        val behandling = behandling(fom = 1 jan 2018, tom = 31 jan 2018, skjæringstidspunkt = 1 jan 2018)
+        behandling.håndter(mockk(relaxed = true),
+            SpleisVedtaksperiode(UUID.randomUUID(), behandlingId, 2 jan 2018, 30 jan 2018, 2 jan 2018))
         val dto = behandling.toDto()
 
-        assertEquals(2.januar, dto.fom)
-        assertEquals(30.januar, dto.tom)
-        assertEquals(2.januar, dto.skjæringstidspunkt)
+        assertEquals(2 jan 2018, dto.fom)
+        assertEquals(30 jan 2018, dto.tom)
+        assertEquals(2 jan 2018, dto.skjæringstidspunkt)
         assertEquals(behandlingId, dto.spleisBehandlingId)
     }
 
@@ -452,8 +453,8 @@ internal class BehandlingTest {
     fun `forskjellig periode`() {
         val behandlingId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
-        val behandling1 = behandling(behandlingId, vedtaksperiodeId, fom = 1.januar, tom = 31.januar)
-        val behandling2 = behandling(behandlingId, vedtaksperiodeId, fom = 1.februar, tom = 28.februar)
+        val behandling1 = behandling(behandlingId, vedtaksperiodeId, fom = 1 jan 2018, tom = 31 jan 2018)
+        val behandling2 = behandling(behandlingId, vedtaksperiodeId, fom = 1 feb 2018, tom = 28 feb 2018)
         assertNotEquals(behandling1, behandling2)
         assertNotEquals(behandling1.hashCode(), behandling2.hashCode())
     }
@@ -462,8 +463,8 @@ internal class BehandlingTest {
     fun `forskjellig skjæringstidspunkt`() {
         val behandlingId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
-        val behandling1 = behandling(behandlingId, vedtaksperiodeId, skjæringstidspunkt = 1.januar)
-        val behandling2 = behandling(behandlingId, vedtaksperiodeId, skjæringstidspunkt = 1.februar)
+        val behandling1 = behandling(behandlingId, vedtaksperiodeId, skjæringstidspunkt = 1 jan 2018)
+        val behandling2 = behandling(behandlingId, vedtaksperiodeId, skjæringstidspunkt = 1 feb 2018)
         assertNotEquals(behandling1, behandling2)
         assertNotEquals(behandling1.hashCode(), behandling2.hashCode())
     }
@@ -472,9 +473,9 @@ internal class BehandlingTest {
     fun `forskjellig tilstand`() {
         val behandlingId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
-        val behandling1 = behandling(behandlingId, vedtaksperiodeId, skjæringstidspunkt = 1.januar)
+        val behandling1 = behandling(behandlingId, vedtaksperiodeId, skjæringstidspunkt = 1 jan 2018)
         behandling1.avsluttetUtenVedtak()
-        val behandling2 = behandling(behandlingId, vedtaksperiodeId, skjæringstidspunkt = 1.januar)
+        val behandling2 = behandling(behandlingId, vedtaksperiodeId, skjæringstidspunkt = 1 jan 2018)
         assertNotEquals(behandling1, behandling2)
         assertNotEquals(behandling1.hashCode(), behandling2.hashCode())
     }
@@ -483,9 +484,9 @@ internal class BehandlingTest {
     fun `behandling toDto`() {
         val behandlingId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
-        val fom = 1.januar
-        val tom = 31.januar
-        val skjæringstidspunkt = 1.januar
+        val fom = 1 jan 2018
+        val tom = 31 jan 2018
+        val skjæringstidspunkt = 1 jan 2018
         val utbetalingId = UUID.randomUUID()
         val spleisBehandlingId = UUID.randomUUID()
         val behandling = Behandling(behandlingId, vedtaksperiodeId, fom, tom, skjæringstidspunkt)
@@ -526,8 +527,8 @@ internal class BehandlingTest {
     }
 
     private fun behandlingMedVarsel(
-        fom: LocalDate = 1.januar,
-        tom: LocalDate = 31.januar,
+        fom: LocalDate = 1 jan 2018,
+        tom: LocalDate = 31 jan 2018,
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         varselkode: String = "SB_EX_1",
     ): Behandling =
@@ -539,9 +540,9 @@ internal class BehandlingTest {
         behandlingId: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         spleisBehandlingId: UUID? = null,
-        fom: LocalDate = 1.januar,
-        tom: LocalDate = 31.januar,
-        skjæringstidspunkt: LocalDate = 1.januar,
+        fom: LocalDate = 1 jan 2018,
+        tom: LocalDate = 31 jan 2018,
+        skjæringstidspunkt: LocalDate = 1 jan 2018,
     ) = Behandling(
         id = behandlingId,
         vedtaksperiodeId = vedtaksperiodeId,
