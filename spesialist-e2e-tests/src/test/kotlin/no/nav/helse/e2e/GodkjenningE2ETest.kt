@@ -123,19 +123,18 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         val spleisBehandlingId1 = UUID.randomUUID()
         val tags1 = listOf("tag 1", "tag 2")
         vedtaksløsningenMottarNySøknad()
-        spleisOppretterNyBehandling()
+        spleisOppretterNyBehandling(spleisBehandlingId = spleisBehandlingId1)
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             kanGodkjennesAutomatisk = true,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(tags = tags1, spleisBehandlingId = spleisBehandlingId1),
         )
         assertBehandlingsinformasjon(VEDTAKSPERIODE_ID, tags1, spleisBehandlingId1)
 
-        val spleisBehandlingId2 = UUID.randomUUID()
         val tags2 = listOf("tag 2", "tag 3")
         håndterGodkjenningsbehovUtenValidering(
-            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(tags = tags2, spleisBehandlingId = spleisBehandlingId2),
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(tags = tags2, spleisBehandlingId = spleisBehandlingId1),
         )
-        assertBehandlingsinformasjon(VEDTAKSPERIODE_ID, tags2, spleisBehandlingId2)
+        assertBehandlingsinformasjon(VEDTAKSPERIODE_ID, tags2, spleisBehandlingId1)
     }
 
     @Test
@@ -287,8 +286,9 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
 
         val revurdertUtbetaling = UUID.randomUUID()
         val kanAvvises = false
+        val spleisBehandlingId = UUID.randomUUID()
 
-        spleisOppretterNyBehandling()
+        spleisOppretterNyBehandling(spleisBehandlingId = spleisBehandlingId)
         håndterVedtaksperiodeNyUtbetaling(utbetalingId = revurdertUtbetaling)
         håndterGodkjenningsbehov(
             harOppdatertMetainfo = true,
@@ -302,6 +302,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
                     fødselsnummer = FØDSELSNUMMER,
                     aktørId = AKTØR,
                     organisasjonsnummer = ORGNR,
+                    spleisBehandlingId = spleisBehandlingId,
                 ),
         )
 

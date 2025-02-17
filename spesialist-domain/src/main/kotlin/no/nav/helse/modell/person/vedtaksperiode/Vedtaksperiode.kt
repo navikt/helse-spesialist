@@ -101,7 +101,7 @@ class Vedtaksperiode private constructor(
         gjeldendeBehandling.håndterNyUtbetaling(utbetalingId)
     }
 
-    internal fun finnBehandling(spleisBehandlingId: UUID): Behandling =
+    fun finnBehandling(spleisBehandlingId: UUID): Behandling =
         behandlinger.find { it.spleisBehandlingId() == spleisBehandlingId }
             ?: throw IllegalArgumentException("Forventer at behandling med spleisBehandlingId=$spleisBehandlingId finnes")
 

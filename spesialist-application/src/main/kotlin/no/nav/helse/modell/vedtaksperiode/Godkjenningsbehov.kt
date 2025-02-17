@@ -5,6 +5,7 @@ import no.nav.helse.FeatureToggles
 import no.nav.helse.db.ArbeidsforholdDao
 import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.AvviksvurderingDao
+import no.nav.helse.db.AvviksvurderingRepository
 import no.nav.helse.db.CommandContextDao
 import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.InntektskilderRepository
@@ -43,6 +44,7 @@ import no.nav.helse.modell.kommando.OpprettKoblingTilUtbetalingCommand
 import no.nav.helse.modell.kommando.OpprettSaksbehandleroppgave
 import no.nav.helse.modell.kommando.PersisterInntektCommand
 import no.nav.helse.modell.kommando.PersisterVedtaksperiodetypeCommand
+import no.nav.helse.modell.kommando.VurderBehovForAvviksvurdering
 import no.nav.helse.modell.kommando.VurderBehovForTotrinnskontroll
 import no.nav.helse.modell.kommando.VurderVidereBehandlingAvGodkjenningsbehov
 import no.nav.helse.modell.person.Person
@@ -223,6 +225,7 @@ internal class GodkjenningsbehovCommand(
     avviksvurderingDao: AvviksvurderingDao,
     periodehistorikkDao: PeriodehistorikkDao,
     totrinnsvurderingRepository: TotrinnsvurderingRepository,
+    avviksvurderingRepository: AvviksvurderingRepository,
     oppgaveService: OppgaveService,
     godkjenningMediator: GodkjenningMediator,
     person: Person,
@@ -257,6 +260,17 @@ internal class GodkjenningsbehovCommand(
             AvbrytContextCommand(
                 vedtaksperiodeId = behovData.vedtaksperiodeId,
                 commandContextDao = commandContextDao,
+            ),
+            VurderBehovForAvviksvurdering(
+                fødselsnummer = behovData.fødselsnummer,
+                skjæringstidspunkt = behovData.skjæringstidspunkt,
+                avviksvurderingRepository = avviksvurderingRepository,
+                omregnedeÅrsinntekter = behovData.omregnedeÅrsinntekter,
+                vilkårsgrunnlagId = behovData.vilkårsgrunnlagId,
+                behandling = person.vedtaksperiode(behovData.vedtaksperiodeId).finnBehandling(behovData.spleisBehandlingId),
+                erInngangsvilkårVurdertISpleis = behovData.erInngangsvilkårVurdertISpleis,
+                organisasjonsnummer = behovData.organisasjonsnummer,
+                featureToggles = featureToggles,
             ),
             PersisterVedtaksperiodetypeCommand(
                 vedtaksperiodeId = behovData.vedtaksperiodeId,
