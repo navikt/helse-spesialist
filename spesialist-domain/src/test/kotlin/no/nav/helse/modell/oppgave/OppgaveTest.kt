@@ -1,10 +1,7 @@
 package no.nav.helse.modell.oppgave
 
 import no.nav.helse.modell.ManglerTilgang
-import no.nav.helse.modell.OppgaveAlleredeSendtBeslutter
-import no.nav.helse.modell.OppgaveAlleredeSendtIRetur
 import no.nav.helse.modell.OppgaveIkkeTildelt
-import no.nav.helse.modell.OppgaveKreverVurderingAvToSaksbehandlere
 import no.nav.helse.modell.OppgaveTildeltNoenAndre
 import no.nav.helse.modell.oppgave.Egenskap.FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Egenskap.PÅ_VENT
@@ -248,27 +245,10 @@ internal class OppgaveTest {
     }
 
     @Test
-    fun `kaster exception dersom oppgave allerede er sendt til beslutter når man forsøker å sende til beslutter`() {
-        val oppgave = nyOppgave(SØKNAD, medTotrinnsvurdering = true)
-        oppgave.sendTilBeslutter(saksbehandlerUtenTilgang)
-        assertThrows<OppgaveAlleredeSendtBeslutter> {
-            oppgave.sendTilBeslutter(saksbehandlerUtenTilgang)
-        }
-    }
-
-    @Test
-    fun `kaster exception dersom oppgave sendes til beslutter uten at oppgaven krever totrinnsvurdering`() {
-        val oppgave = nyOppgave(SØKNAD, medTotrinnsvurdering = false)
-        assertThrows<IllegalArgumentException> {
-            oppgave.sendTilBeslutter(saksbehandlerUtenTilgang)
-        }
-    }
-
-    @Test
     fun `oppgave sendt til beslutter tildeles ingen dersom det ikke finnes noen tidligere beslutter`() {
         val oppgave = nyOppgave(SØKNAD, medTotrinnsvurdering = true)
         oppgave.forsøkTildelingVedReservasjon(saksbehandlerUtenTilgang)
-        oppgave.sendTilBeslutter(saksbehandlerUtenTilgang)
+        oppgave.sendTilBeslutter(null)
         inspektør(oppgave) {
             assertEquals(null, tildeltTil)
         }
@@ -321,8 +301,8 @@ internal class OppgaveTest {
     @Test
     fun `oppgave sendt i retur tildeles opprinnelig saksbehandler`() {
         val oppgave = nyOppgave(SØKNAD, medTotrinnsvurdering = true)
-        oppgave.sendTilBeslutter(saksbehandlerUtenTilgang)
-        oppgave.sendIRetur(beslutter)
+        oppgave.sendTilBeslutter(beslutter)
+        oppgave.sendIRetur(saksbehandlerUtenTilgang)
         inspektør(oppgave) {
             assertEquals(saksbehandlerUtenTilgang.toDto(), tildeltTil)
         }
@@ -331,30 +311,11 @@ internal class OppgaveTest {
     @Test
     fun `oppgave sendt i retur og deretter tilbake til beslutter tildeles opprinnelig beslutter`() {
         val oppgave = nyOppgave(SØKNAD, medTotrinnsvurdering = true)
-        oppgave.sendTilBeslutter(saksbehandlerUtenTilgang)
-        oppgave.sendIRetur(beslutter)
-        oppgave.sendTilBeslutter(saksbehandlerUtenTilgang)
+        oppgave.sendTilBeslutter(beslutter)
+        oppgave.sendIRetur(saksbehandlerUtenTilgang)
+        oppgave.sendTilBeslutter(beslutter)
         inspektør(oppgave) {
             assertEquals(beslutter.toDto(), tildeltTil)
-        }
-    }
-
-    @Test
-    fun `Kaster exception dersom oppgave allerede er sendt i retur`() {
-        val oppgave = nyOppgave(SØKNAD, medTotrinnsvurdering = true)
-        oppgave.sendTilBeslutter(saksbehandlerUtenTilgang)
-        oppgave.sendIRetur(beslutter)
-        assertThrows<OppgaveAlleredeSendtIRetur> {
-            oppgave.sendIRetur(beslutter)
-        }
-    }
-
-    @Test
-    fun `Kaster exception dersom beslutter er samme som opprinnelig saksbehandler ved retur`() {
-        val oppgave = nyOppgave(SØKNAD, medTotrinnsvurdering = true)
-        oppgave.sendTilBeslutter(saksbehandlerUtenTilgang)
-        assertThrows<OppgaveKreverVurderingAvToSaksbehandlere> {
-            oppgave.sendIRetur(saksbehandlerUtenTilgang)
         }
     }
 

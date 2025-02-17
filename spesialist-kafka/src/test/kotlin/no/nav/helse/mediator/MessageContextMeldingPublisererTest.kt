@@ -195,11 +195,11 @@ internal class MessageContextMeldingPublisererTest {
         )
 
         val saksbehandler = lagSaksbehandler()
-        oppgave.forsøkTildeling(saksbehandler)
-        oppgave.sendTilBeslutter(saksbehandler)
-
         val beslutter = lagSaksbehandler()
-        oppgave.sendIRetur(beslutter)
+        oppgave.forsøkTildeling(saksbehandler)
+        oppgave.sendTilBeslutter(beslutter)
+
+        oppgave.sendIRetur(saksbehandler)
 
         // When:
         meldingPubliserer.publiser(
@@ -223,16 +223,7 @@ internal class MessageContextMeldingPublisererTest {
             assertEquals(Oppgavestatus.AvventerSaksbehandler, enumValueOf<Oppgavestatus>(it["tilstand"].asText()))
             assertEquals(setOf("SØKNAD", "RETUR"), it["egenskaper"].map(JsonNode::asText).toSet())
             assertEquals(behandlingId, UUID.fromString(it["behandlingId"]?.asText()))
-
-            it["saksbehandler"]?.let { saksbehandlerObject ->
-                assertEquals(saksbehandler.epostadresse, saksbehandlerObject["epostadresse"]?.asText())
-                assertEquals(saksbehandler.oid, UUID.fromString(saksbehandlerObject["oid"]?.asText()))
-            } ?: fail("Mangler saksbehandler")
-
-            it["beslutter"]?.let { beslutterObject ->
-                assertEquals(beslutter.epostadresse, beslutterObject["epostadresse"]?.asText())
-                assertEquals(beslutter.oid, UUID.fromString(beslutterObject["oid"]?.asText()))
-            } ?: fail("Mangler beslutter")
+            assertEquals(saksbehandler.oid, it["saksbehandler"]?.asUUID())
         }
     }
 

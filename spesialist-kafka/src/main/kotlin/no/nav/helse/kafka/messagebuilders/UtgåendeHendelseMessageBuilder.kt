@@ -299,19 +299,8 @@ private fun Oppgave.toDetaljer(): Map<String, Any> =
                 }
             },
         "behandlingId" to behandlingId,
-        totrinnsvurdering?.beslutter?.let {
-            "beslutter" to
-                mapOf(
-                    "epostadresse" to it.epostadresse,
-                    "oid" to it.oid,
-                )
-        },
         tildeltTil?.let {
-            "saksbehandler" to
-                mapOf(
-                    "epostadresse" to it.epostadresse,
-                    "oid" to it.oid,
-                )
+            "saksbehandler" to it.oid
         },
     ).toMap()
 

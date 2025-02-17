@@ -618,7 +618,22 @@ class SaksbehandlerMediator(
         )
 
         try {
-            apiOppgaveService.sendIRetur(oppgavereferanse, besluttendeSaksbehandler)
+            sessionFactory.transactionalSessionScope { session ->
+                val vedtaksperiodeId = oppgaveService.finnVedtaksperiodeId(oppgavereferanse)
+                val fødselsnummer = oppgaveService.finnFødselsnummer(oppgavereferanse)
+                val totrinnsvurdering = session.totrinnsvurderingRepository.finn(vedtaksperiodeId)
+                checkNotNull(totrinnsvurdering) {
+                    "Forventer at det eksisterer en aktiv totrinnsvurdering når oppgave sendes i retur"
+                }
+                val opprinneligSaksbehandler =
+                    checkNotNull(totrinnsvurdering.saksbehandler) {
+                        "Opprinnelig saksbehandler kan ikke være null ved retur av beslutteroppgave"
+                    }
+
+                apiOppgaveService.sendIRetur(oppgavereferanse, opprinneligSaksbehandler)
+                totrinnsvurdering.sendIRetur(oppgavereferanse, besluttendeSaksbehandler.tilSaksbehandler())
+                session.totrinnsvurderingRepository.lagre(totrinnsvurdering, fødselsnummer)
+            }
         } catch (modellfeil: ApiModellfeil) {
             return SendIReturResult.Feil.KunneIkkeSendeIRetur(modellfeil)
         }
@@ -648,38 +663,6 @@ class SaksbehandlerMediator(
         log.info("OppgaveId $oppgavereferanse sendt i retur")
 
         return SendIReturResult.Ok
-    }
-
-    override fun håndter(
-        godkjenning: GodkjenningDto,
-        behandlingId: UUID,
-        saksbehandlerFraApi: SaksbehandlerFraApi,
-    ) {
-        val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
-        val fødselsnummer = oppgaveApiDao.finnFødselsnummer(godkjenning.oppgavereferanse)
-
-        if (godkjenning.godkjent) {
-            val perioderTilBehandling = generasjonRepository.perioderTilBehandling(godkjenning.oppgavereferanse)
-            if (perioderTilBehandling.harAktiveVarsler()) {
-                throw ManglerVurderingAvVarsler(godkjenning.oppgavereferanse)
-            }
-            perioderTilBehandling.godkjennVarsler(
-                fødselsnummer,
-                behandlingId,
-                saksbehandler.ident(),
-                this::vurderVarsel,
-            )
-        } else {
-            val periodeTilGodkjenning = generasjonRepository.periodeTilGodkjenning(godkjenning.oppgavereferanse)
-            periodeTilGodkjenning.avvisVarsler(fødselsnummer, behandlingId, saksbehandler.ident(), this::vurderVarsel)
-        }
-
-        påVentDao.slettPåVent(godkjenning.oppgavereferanse)
-        håndterAvslag(
-            avslag = godkjenning.avslag,
-            oppgaveId = godkjenning.oppgavereferanse,
-            saksbehandlerOid = saksbehandler.oid(),
-        )
     }
 
     override fun håndterTotrinnsvurdering(
@@ -713,7 +696,19 @@ class SaksbehandlerMediator(
         }
 
         try {
-            apiOppgaveService.sendTilBeslutter(oppgavereferanse, saksbehandlerFraApi)
+            sessionFactory.transactionalSessionScope { session ->
+                val vedtaksperiodeId = oppgaveService.finnVedtaksperiodeId(oppgavereferanse)
+                val fødselsnummer = oppgaveService.finnFødselsnummer(oppgavereferanse)
+                val totrinnsvurdering = session.totrinnsvurderingRepository.finn(vedtaksperiodeId)
+
+                checkNotNull(totrinnsvurdering) {
+                    "Forventer at det eksisterer en aktiv totrinnsvurdering når oppgave sendes til beslutter"
+                }
+
+                apiOppgaveService.sendTilBeslutter(oppgavereferanse, totrinnsvurdering.beslutter)
+                totrinnsvurdering.sendTilBeslutter(oppgavereferanse, saksbehandlerFraApi.tilSaksbehandler())
+                session.totrinnsvurderingRepository.lagre(totrinnsvurdering, fødselsnummer)
+            }
         } catch (modellfeil: no.nav.helse.spesialist.api.feilhåndtering.Modellfeil) {
             return SendTilGodkjenningResult.Feil.KunneIkkeSendeTilBeslutter(modellfeil)
         } catch (e: Exception) {
@@ -744,6 +739,38 @@ class SaksbehandlerMediator(
         log.info("OppgaveId $oppgavereferanse sendt til godkjenning")
 
         return SendTilGodkjenningResult.Ok
+    }
+
+    override fun håndter(
+        godkjenning: GodkjenningDto,
+        behandlingId: UUID,
+        saksbehandlerFraApi: SaksbehandlerFraApi,
+    ) {
+        val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
+        val fødselsnummer = oppgaveApiDao.finnFødselsnummer(godkjenning.oppgavereferanse)
+
+        if (godkjenning.godkjent) {
+            val perioderTilBehandling = generasjonRepository.perioderTilBehandling(godkjenning.oppgavereferanse)
+            if (perioderTilBehandling.harAktiveVarsler()) {
+                throw ManglerVurderingAvVarsler(godkjenning.oppgavereferanse)
+            }
+            perioderTilBehandling.godkjennVarsler(
+                fødselsnummer,
+                behandlingId,
+                saksbehandler.ident(),
+                this::vurderVarsel,
+            )
+        } else {
+            val periodeTilGodkjenning = generasjonRepository.periodeTilGodkjenning(godkjenning.oppgavereferanse)
+            periodeTilGodkjenning.avvisVarsler(fødselsnummer, behandlingId, saksbehandler.ident(), this::vurderVarsel)
+        }
+
+        påVentDao.slettPåVent(godkjenning.oppgavereferanse)
+        håndterAvslag(
+            avslag = godkjenning.avslag,
+            oppgaveId = godkjenning.oppgavereferanse,
+            saksbehandlerOid = saksbehandler.oid(),
+        )
     }
 
     private fun vurderVarsel(

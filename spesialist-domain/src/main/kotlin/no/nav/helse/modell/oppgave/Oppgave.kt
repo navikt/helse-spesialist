@@ -85,36 +85,16 @@ class Oppgave private constructor(
         tilstand.tildel(this, saksbehandler)
     }
 
-    fun sendTilBeslutter(behandlendeSaksbehandler: Saksbehandler) {
-        val totrinnsvurdering =
-            requireNotNull(totrinnsvurdering) {
-                "Forventer at det eksisterer en aktiv totrinnsvurdering når oppgave sendes til beslutter"
-            }
-
-        totrinnsvurdering.sendTilBeslutter(id, behandlendeSaksbehandler)
-
+    fun sendTilBeslutter(beslutter: Saksbehandler?) {
         egenskaper.remove(RETUR)
         egenskaper.add(BESLUTTER)
-        tildeltTil = totrinnsvurdering.beslutter
+        tildeltTil = beslutter
         oppgaveEndret()
     }
 
-    fun sendIRetur(besluttendeSaksbehandler: Saksbehandler) {
-        val totrinnsvurdering =
-            requireNotNull(totrinnsvurdering) {
-                "Forventer at det eksisterer en aktiv totrinnsvurdering når oppgave sendes til beslutter"
-            }
-
-        totrinnsvurdering.sendIRetur(id, besluttendeSaksbehandler)
-
-        val opprinneligSaksbehandler =
-            requireNotNull(totrinnsvurdering.saksbehandler) {
-                "Opprinnelig saksbehandler kan ikke være null ved retur av beslutteroppgave"
-            }
-
+    fun sendIRetur(opprinneligSaksbehandler: Saksbehandler) {
         egenskaper.remove(BESLUTTER)
         egenskaper.add(RETUR)
-
         tildeltTil = opprinneligSaksbehandler
         oppgaveEndret()
     }

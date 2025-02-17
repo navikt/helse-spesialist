@@ -159,11 +159,11 @@ class ApiOppgaveService(
 
     fun sendTilBeslutter(
         oppgaveId: Long,
-        behandlendeSaksbehandler: SaksbehandlerFraApi,
+        beslutter: Saksbehandler?,
     ) {
         oppgaveService.oppgave(oppgaveId) {
             try {
-                sendTilBeslutter(behandlendeSaksbehandler.tilSaksbehandler())
+                sendTilBeslutter(beslutter)
             } catch (e: Modellfeil) {
                 throw e.tilApiversjon()
             }
@@ -172,12 +172,11 @@ class ApiOppgaveService(
 
     fun sendIRetur(
         oppgaveId: Long,
-        besluttendeSaksbehandler: SaksbehandlerFraApi,
+        opprinneligSaksbehandler: Saksbehandler,
     ) {
-        val saksbehandler = besluttendeSaksbehandler.tilSaksbehandler()
         oppgaveService.oppgave(oppgaveId) {
             try {
-                sendIRetur(saksbehandler)
+                sendIRetur(opprinneligSaksbehandler)
             } catch (e: Modellfeil) {
                 throw e.tilApiversjon()
             }

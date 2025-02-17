@@ -72,10 +72,7 @@ class OppgavemelderTest {
         assertEquals(BEHANDLING_ID, melding["behandlingId"].asUUID())
         assertEquals("AvventerSystem", melding["tilstand"].asText())
         assertEquals(FNR, melding["fødselsnummer"].asText())
-        assertEquals(beslutter.epostadresse(), melding["beslutter"]["epostadresse"].asText())
-        assertEquals(beslutter.oid(), melding["beslutter"]["oid"].asUUID())
-        assertEquals(saksbehandler.epostadresse(), melding["saksbehandler"]["epostadresse"].asText())
-        assertEquals(saksbehandler.oid(), melding["saksbehandler"]["oid"].asUUID())
+        assertEquals(saksbehandler.oid(), melding["saksbehandler"].asUUID())
         assertEquals(listOf("SØKNAD"), melding["egenskaper"].map { it.asText() })
     }
 

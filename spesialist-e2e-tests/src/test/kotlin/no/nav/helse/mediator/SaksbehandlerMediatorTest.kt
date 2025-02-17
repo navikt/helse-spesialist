@@ -12,6 +12,7 @@ import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlinghåndtererImpl
+import no.nav.helse.spesialist.api.SendIReturResult
 import no.nav.helse.spesialist.api.SendTilGodkjenningResult
 import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
@@ -41,8 +42,12 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import no.nav.helse.spesialist.test.lagAktørId
+import no.nav.helse.spesialist.test.lagEpostadresseFraFulltNavn
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
+import no.nav.helse.spesialist.test.lagSaksbehandlerident
+import no.nav.helse.spesialist.test.lagSaksbehandlernavn
+import no.nav.helse.spesialist.test.lagTilfeldigSaksbehandlerepost
 import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import no.nav.helse.util.februar
 import no.nav.helse.util.januar
@@ -231,6 +236,46 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             mediator.håndterTotrinnsvurdering(oppgaveId, saksbehandler, ApiVedtakUtfall.INNVILGELSE, "Begrunnelse")
 
         assertEquals(SendTilGodkjenningResult.Ok, result)
+    }
+
+    @Test
+    fun `håndter totrinnsvurdering send i retur`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        nyPerson(vedtaksperiodeId = vedtaksperiodeId)
+        opprettTotrinnsvurdering(vedtaksperiodeId)
+        opprettSaksbehandler()
+        val saksbehandler = SaksbehandlerFraApi(
+            SAKSBEHANDLER_OID,
+            SAKSBEHANDLER_NAVN,
+            SAKSBEHANDLER_EPOST,
+            SAKSBEHANDLER_IDENT,
+            emptyList()
+        )
+        val definisjonRef = opprettVarseldefinisjon()
+        nyttVarsel(
+            vedtaksperiodeId = vedtaksperiodeId,
+            definisjonRef = definisjonRef,
+            status = "VURDERT",
+        )
+
+        val result =
+            mediator.håndterTotrinnsvurdering(oppgaveId, saksbehandler, ApiVedtakUtfall.INNVILGELSE, "Begrunnelse")
+
+        assertEquals(SendTilGodkjenningResult.Ok, result)
+
+        val beslutter = SaksbehandlerFraApi(
+            UUID.randomUUID(),
+            lagSaksbehandlernavn(),
+            lagTilfeldigSaksbehandlerepost(),
+            lagSaksbehandlerident(),
+            emptyList()
+        )
+        opprettSaksbehandler(beslutter.oid, beslutter.navn, beslutter.epost, beslutter.ident)
+        val resultRetur = mediator.sendIRetur(oppgaveId, beslutter, "begrunnelse")
+
+        assertEquals(SendIReturResult.Ok, resultRetur)
+
+
     }
 
     @Test
