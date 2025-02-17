@@ -1,0 +1,43 @@
+package no.nav.helse.spesialist.db.api
+
+import no.nav.helse.db.api.PgVergemålApiDao
+import no.nav.helse.spesialist.db.DatabaseIntegrationTest
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
+
+private class PgVergemålApiDaoTest : DatabaseIntegrationTest() {
+
+    private val vergemålApiDao = PgVergemålApiDao(dataSource)
+
+    @Test
+    fun `kan hente ut om person har vergemål`() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode()
+        opprettVergemål(FNR, harFullmakt = true)
+
+        assertEquals(true, vergemålApiDao.harFullmakt(FNR))
+    }
+
+    private fun opprettVergemål(
+        fødselsnummer: String,
+        harVergemål: Boolean = false,
+        harFullmakt: Boolean = false,
+        harFremtidsFullmakt: Boolean = false
+    ) = dbQuery.update(
+        """
+        insert into vergemal (person_ref, har_vergemal, har_fremtidsfullmakter, har_fullmakter, vergemål_oppdatert, fullmakt_oppdatert) 
+        select id, :harVergemal, :harFremtidsFullmakt, :harFullmakter, :oppdatert, :oppdatert
+        from person
+        where fødselsnummer = :foedselsnummer
+        """.trimIndent(),
+        "foedselsnummer" to fødselsnummer,
+        "harVergemal" to harVergemål,
+        "harFremtidsFullmakt" to harFremtidsFullmakt,
+        "harFullmakter" to harFullmakt,
+        "oppdatert" to LocalDateTime.now()
+    )
+
+
+}

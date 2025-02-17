@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.db
 
-import no.nav.helse.DatabaseIntegrationTest
 import no.nav.helse.modell.saksbehandler.handlinger.Arbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgrad
 import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgradArbeidsgiver
@@ -13,7 +12,6 @@ import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinje
 import no.nav.helse.modell.saksbehandler.handlinger.Refusjonselement
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlag
-import no.nav.helse.util.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
