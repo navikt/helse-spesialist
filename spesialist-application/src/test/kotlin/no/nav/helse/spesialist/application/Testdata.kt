@@ -73,9 +73,6 @@ class TestPerson {
         return "Testdatasett(fødselsnummer='$fødselsnummer', aktørId='$aktørId', orgnummer='$orgnummer', orgnummer2='$orgnummer2', vedtaksperiodeId1=$vedtaksperiodeId1, vedtaksperiodeId2=$vedtaksperiodeId2, utbetalingId1=$utbetalingId1, utbetalingId2=$utbetalingId2)"
     }
 
-    val Int.arbeidsgiver
-        get() = arbeidsgivere[this - 1] ?: throw IllegalArgumentException("Arbeidsgiver med index $this finnes ikke")
-
     fun nyArbeidsgiver() = TestArbeidsgiver(fødselsnummer).also {
         arbeidsgivere[arbeidsgivere.size] = it
     }
