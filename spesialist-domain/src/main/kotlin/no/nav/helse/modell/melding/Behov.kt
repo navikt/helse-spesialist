@@ -35,6 +35,7 @@ sealed interface Behov : UtgåendeMelding {
         val vilkårsgrunnlagId: UUID,
         val skjæringstidspunkt: LocalDate,
         val organisasjonsnummer: String,
+        val vedtaksperiodeId: UUID,
     ) : Behov
 
     data class Risikovurdering(

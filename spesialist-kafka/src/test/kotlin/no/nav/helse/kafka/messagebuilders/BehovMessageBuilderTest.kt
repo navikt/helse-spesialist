@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.InntektTilRisk
+import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
 import no.nav.helse.spesialist.kafka.objectMapper
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
@@ -124,6 +125,36 @@ class BehovMessageBuilderTest {
     fun `EgenAnsatt-behov`() {
         val behov = Behov.EgenAnsatt.somJson()
         behov.assertBehov("EgenAnsatt", emptyMap())
+    }
+
+    @Test
+    fun `Avviksvurdering-behov`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val vilkårsgrunnlagId = UUID.randomUUID()
+        val skjæringstidspunkt = LocalDate.now()
+        val organisasjonsnummer = lagOrganisasjonsnummer()
+        val behov = Behov.Avviksvurdering(
+            listOf(OmregnetÅrsinntekt(organisasjonsnummer, 1000.0)),
+            vilkårsgrunnlagId,
+            skjæringstidspunkt,
+            organisasjonsnummer,
+            vedtaksperiodeId
+        ).somJson()
+        behov.assertBehov(
+            "Avviksvurdering",
+            mapOf(
+                "vedtaksperiodeId" to vedtaksperiodeId,
+                "organisasjonsnummer" to organisasjonsnummer,
+                "skjæringstidspunkt" to skjæringstidspunkt,
+                "vilkårsgrunnlagId" to vilkårsgrunnlagId,
+                "omregnedeÅrsinntekter" to listOf(
+                    mapOf(
+                        "organisasjonsnummer" to organisasjonsnummer,
+                        "beløp" to 1000.0
+                    )
+                ),
+            )
+        )
     }
 
     private fun JsonNode.assertStandardfelter() {

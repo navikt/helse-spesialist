@@ -62,6 +62,7 @@ class VurderBehovForAvviksvurdering(
                 vilkårsgrunnlagId,
                 skjæringstidspunkt,
                 organisasjonsnummer,
+                behandling.vedtaksperiodeId(),
             ),
         )
         return false

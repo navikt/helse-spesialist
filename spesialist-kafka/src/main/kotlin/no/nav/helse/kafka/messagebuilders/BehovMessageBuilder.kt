@@ -38,7 +38,7 @@ fun Behov.behovName() =
         is Behov.Risikovurdering -> "Risikovurdering"
         is Behov.Vergemål -> "Vergemål"
         is Behov.ÅpneOppgaver -> "ÅpneOppgaver"
-        is Behov.Avviksvurdering -> error("Ikke implementert enda")
+        is Behov.Avviksvurdering -> "Avviksvurdering"
     }
 
 private fun Behov.detaljer(): Map<String, Any?> {
@@ -55,8 +55,24 @@ private fun Behov.detaljer(): Map<String, Any?> {
         is Behov.Personinfo -> emptyMap()
         is Behov.Risikovurdering -> this.detaljer()
         is Behov.ÅpneOppgaver -> this.detaljer()
-        is Behov.Avviksvurdering -> error("Ikke implementert enda")
+        is Behov.Avviksvurdering -> this.detaljer()
     }
+}
+
+private fun Behov.Avviksvurdering.detaljer(): Map<String, Any> {
+    return mapOf(
+        "organisasjonsnummer" to organisasjonsnummer,
+        "vedtaksperiodeId" to vedtaksperiodeId,
+        "vilkårsgrunnlagId" to vilkårsgrunnlagId,
+        "skjæringstidspunkt" to skjæringstidspunkt,
+        "omregnedeÅrsinntekter" to
+            omregnedeÅrsinntekter.map {
+                mapOf(
+                    "organisasjonsnummer" to it.arbeidsgiverreferanse,
+                    "beløp" to it.beløp,
+                )
+            },
+    )
 }
 
 private fun Behov.Arbeidsforhold.detaljer(): Map<String, Any> {

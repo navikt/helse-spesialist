@@ -134,6 +134,7 @@ class VurderBehovForAvviksvurderingTest {
         assertEquals(organisasjonsnummer, behov.organisasjonsnummer)
         assertEquals(vilkårsgrunnlagId, behov.vilkårsgrunnlagId)
         assertEquals(skjæringstidspunkt, behov.skjæringstidspunkt)
+        assertEquals(behandling.vedtaksperiodeId(), behov.vedtaksperiodeId)
     }
 
     @Test
