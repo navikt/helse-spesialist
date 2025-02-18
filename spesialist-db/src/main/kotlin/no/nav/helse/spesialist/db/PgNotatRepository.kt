@@ -14,7 +14,7 @@ import no.nav.helse.spesialist.modell.SaksbehandlerOid
 import java.util.UUID
 
 internal class PgNotatRepository(
-    private val session: Session,
+    session: Session,
 ) : QueryRunner by MedSession(session), NotatRepository {
     override fun lagre(notat: Notat) {
         if (!notat.harFåttTildeltId()) {

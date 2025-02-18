@@ -11,7 +11,7 @@ import no.nav.helse.spesialist.modell.SaksbehandlerOid
 import java.util.UUID
 
 internal class PgSaksbehandlerRepository(
-    private val session: Session,
+    session: Session,
 ) : QueryRunner by MedSession(session), SaksbehandlerRepository {
     override fun finn(oid: SaksbehandlerOid): Saksbehandler? =
         asSQL(

@@ -23,7 +23,7 @@ import no.nav.helse.spesialist.application.OverstyringRepository
 import java.util.UUID
 
 class PgOverstyringRepository(
-    private val session: Session,
+    session: Session,
 ) : QueryRunner by MedSession(session), OverstyringRepository {
     override fun lagre(overstyringer: List<Overstyring>) {
         overstyringer.forEach { overstyring ->
