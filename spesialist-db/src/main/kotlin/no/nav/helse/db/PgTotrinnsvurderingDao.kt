@@ -41,25 +41,4 @@ class PgTotrinnsvurderingDao private constructor(
                     oppdatert = row.localDateTimeOrNull("oppdatert"),
                 )
         }
-
-    override fun oppdater(totrinnsvurderingFraDatabase: TotrinnsvurderingFraDatabase) {
-        asSQL(
-            """
-            UPDATE totrinnsvurdering
-            SET saksbehandler     = :saksbehandler,
-                beslutter         = :beslutter,
-                er_retur          = :er_retur,
-                oppdatert         = :oppdatert,
-                utbetaling_id_ref = (SELECT id FROM utbetaling_id ui WHERE ui.utbetaling_id = :utbetaling_id)
-            WHERE vedtaksperiode_id = :vedtaksperiode_id
-              AND utbetaling_id_ref IS NULL
-            """.trimIndent(),
-            "saksbehandler" to totrinnsvurderingFraDatabase.saksbehandler,
-            "beslutter" to totrinnsvurderingFraDatabase.beslutter,
-            "er_retur" to totrinnsvurderingFraDatabase.erRetur,
-            "oppdatert" to totrinnsvurderingFraDatabase.oppdatert,
-            "utbetaling_id" to totrinnsvurderingFraDatabase.utbetalingId,
-            "vedtaksperiode_id" to totrinnsvurderingFraDatabase.vedtaksperiodeId,
-        ).update()
-    }
 }

@@ -182,8 +182,6 @@ class OppgavehenterTest {
     ) = object : TotrinnsvurderingDao {
         override fun hentAktivTotrinnsvurdering(oppgaveId: Long): Pair<Long, TotrinnsvurderingFraDatabase>? =
             totrinnsvurdering?.let { nextLong() to it }
-
-        override fun oppdater(totrinnsvurderingFraDatabase: TotrinnsvurderingFraDatabase) {}
     }
 
     private val saksbehandlerDao = object : SaksbehandlerDao {
