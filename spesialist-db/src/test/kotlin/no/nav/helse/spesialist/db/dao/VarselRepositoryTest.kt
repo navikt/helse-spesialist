@@ -3,13 +3,13 @@ package no.nav.helse.spesialist.db.dao
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.modell.varsel.VarseldefinisjonDto
-import no.nav.helse.spesialist.db.AbstractDatabaseTest
+import no.nav.helse.spesialist.db.DatabaseIntegrationTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class VarselRepositoryTest : AbstractDatabaseTest() {
+internal class VarselRepositoryTest : DatabaseIntegrationTest() {
     private val varselRepository  = VarselRepository(
         varselDao = repositories.varselDao,
         definisjonDao = repositories.definisjonDao
