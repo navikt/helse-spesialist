@@ -3,12 +3,12 @@ package no.nav.helse.spesialist.db
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.db.DBSessionContext
-import no.nav.helse.modell.vilkårsprøving.AvviksvurderingDto
-import no.nav.helse.modell.vilkårsprøving.BeregningsgrunnlagDto
-import no.nav.helse.modell.vilkårsprøving.InnrapportertInntektDto
-import no.nav.helse.modell.vilkårsprøving.InntektDto
-import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntektDto
-import no.nav.helse.modell.vilkårsprøving.SammenligningsgrunnlagDto
+import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
+import no.nav.helse.modell.vilkårsprøving.Beregningsgrunnlag
+import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
+import no.nav.helse.modell.vilkårsprøving.Inntekt
+import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
+import no.nav.helse.modell.vilkårsprøving.Sammenligningsgrunnlag
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -20,19 +20,20 @@ import java.util.UUID
 
 internal class PgAvviksvurderingDaoTest : DatabaseIntegrationTest() {
     private val avviksvurderingDao = DBSessionContext(session) { _, _ -> false }.avviksvurderingDao
+    private val avviksvurderingRepository = DBSessionContext(session) { _, _ -> false }.avviksvurderingRepository
 
     @Test
     fun `lagre avviksvurdering`() {
         val unikId = UUID.randomUUID()
         val vilkårsgrunnlagId = UUID.randomUUID()
 
-        avviksvurderingDao.lagre(
+        avviksvurderingRepository.lagre(
             avviksvurdering(
                 fødselsnummer = FNR,
                 unikId = unikId,
             ),
         )
-        avviksvurderingDao.opprettKobling(unikId, vilkårsgrunnlagId)
+        avviksvurderingRepository.opprettKobling(unikId, vilkårsgrunnlagId)
         assertNotNull(avviksvurderingDao.finnAvviksvurderinger(FNR).first())
     }
 
@@ -42,7 +43,7 @@ internal class PgAvviksvurderingDaoTest : DatabaseIntegrationTest() {
         val unikId = UUID.randomUUID()
         val vilkårsgrunnlagId = UUID.randomUUID()
         val opprettet = LocalDateTime.now().withNano(0)
-        avviksvurderingDao.lagre(
+        avviksvurderingRepository.lagre(
             avviksvurdering(
                 fødselsnummer = FNR,
                 skjæringstidspunkt = skjæringstidspunkt,
@@ -50,7 +51,7 @@ internal class PgAvviksvurderingDaoTest : DatabaseIntegrationTest() {
                 opprettet = opprettet,
             ),
         )
-        avviksvurderingDao.opprettKobling(unikId, vilkårsgrunnlagId)
+        avviksvurderingRepository.opprettKobling(unikId, vilkårsgrunnlagId)
 
         val avviksvurderinger = avviksvurderingDao.finnAvviksvurderinger(FNR)
         val forventetAvviksvurdering =
@@ -61,7 +62,7 @@ internal class PgAvviksvurderingDaoTest : DatabaseIntegrationTest() {
                 unikId = unikId,
                 opprettet = opprettet,
             )
-        assertEquals(forventetAvviksvurdering, avviksvurderinger.first())
+        assertEquals(forventetAvviksvurdering.toDto(), avviksvurderinger.first())
     }
 
     @Test
@@ -71,7 +72,7 @@ internal class PgAvviksvurderingDaoTest : DatabaseIntegrationTest() {
         val vilkårsgrunnlagId1 = UUID.randomUUID()
         val vilkårsgrunnlagId2 = UUID.randomUUID()
         val opprettet = LocalDateTime.now()
-        avviksvurderingDao.lagre(
+        avviksvurderingRepository.lagre(
             avviksvurdering(
                 fødselsnummer = FNR,
                 skjæringstidspunkt = skjæringstidspunkt,
@@ -79,9 +80,9 @@ internal class PgAvviksvurderingDaoTest : DatabaseIntegrationTest() {
                 opprettet = opprettet,
             ),
         )
-        avviksvurderingDao.opprettKobling(unikId, vilkårsgrunnlagId1)
+        avviksvurderingRepository.opprettKobling(unikId, vilkårsgrunnlagId1)
 
-        avviksvurderingDao.lagre(
+        avviksvurderingRepository.lagre(
             avviksvurdering(
                 fødselsnummer = FNR,
                 skjæringstidspunkt = skjæringstidspunkt,
@@ -89,7 +90,7 @@ internal class PgAvviksvurderingDaoTest : DatabaseIntegrationTest() {
                 opprettet = opprettet,
             ),
         )
-        avviksvurderingDao.opprettKobling(unikId, vilkårsgrunnlagId2)
+        avviksvurderingRepository.opprettKobling(unikId, vilkårsgrunnlagId2)
 
         val avviksvurderinger = avviksvurderingDao.finnAvviksvurderinger(FNR)
 
@@ -104,7 +105,7 @@ internal class PgAvviksvurderingDaoTest : DatabaseIntegrationTest() {
         val unikId = UUID.randomUUID()
         val vilkårsgrunnlagId = UUID.randomUUID()
         val opprettet = LocalDateTime.now()
-        avviksvurderingDao.lagre(
+        avviksvurderingRepository.lagre(
             avviksvurdering(
                 fødselsnummer = FNR,
                 skjæringstidspunkt = skjæringstidspunkt,
@@ -112,9 +113,9 @@ internal class PgAvviksvurderingDaoTest : DatabaseIntegrationTest() {
                 opprettet = opprettet,
             ),
         )
-        avviksvurderingDao.opprettKobling(unikId, vilkårsgrunnlagId)
+        avviksvurderingRepository.opprettKobling(unikId, vilkårsgrunnlagId)
 
-        avviksvurderingDao.lagre(
+        avviksvurderingRepository.lagre(
             avviksvurdering(
                 fødselsnummer = FNR,
                 skjæringstidspunkt = skjæringstidspunkt,
@@ -122,7 +123,7 @@ internal class PgAvviksvurderingDaoTest : DatabaseIntegrationTest() {
                 opprettet = opprettet,
             ),
         )
-        avviksvurderingDao.opprettKobling(unikId, vilkårsgrunnlagId)
+        avviksvurderingRepository.opprettKobling(unikId, vilkårsgrunnlagId)
 
         val avviksvurderinger = avviksvurderingDao.finnAvviksvurderinger(FNR)
 
@@ -139,7 +140,7 @@ internal class PgAvviksvurderingDaoTest : DatabaseIntegrationTest() {
         val vilkårsgrunnlagId1 = UUID.randomUUID()
         val vilkårsgrunnlagId2 = UUID.randomUUID()
         val opprettet = LocalDateTime.now()
-        avviksvurderingDao.lagre(
+        avviksvurderingRepository.lagre(
             avviksvurdering(
                 fødselsnummer = FNR,
                 skjæringstidspunkt = skjæringstidspunkt,
@@ -147,9 +148,9 @@ internal class PgAvviksvurderingDaoTest : DatabaseIntegrationTest() {
                 opprettet = opprettet,
             ),
         )
-        avviksvurderingDao.opprettKobling(unikId1, vilkårsgrunnlagId1)
+        avviksvurderingRepository.opprettKobling(unikId1, vilkårsgrunnlagId1)
 
-        avviksvurderingDao.lagre(
+        avviksvurderingRepository.lagre(
             avviksvurdering(
                 fødselsnummer = FNR,
                 skjæringstidspunkt = skjæringstidspunkt,
@@ -157,7 +158,7 @@ internal class PgAvviksvurderingDaoTest : DatabaseIntegrationTest() {
                 opprettet = opprettet,
             ),
         )
-        avviksvurderingDao.opprettKobling(unikId2, vilkårsgrunnlagId2)
+        avviksvurderingRepository.opprettKobling(unikId2, vilkårsgrunnlagId2)
 
         val avviksvurderinger = avviksvurderingDao.finnAvviksvurderinger(FNR)
 
@@ -174,7 +175,7 @@ internal class PgAvviksvurderingDaoTest : DatabaseIntegrationTest() {
         val unikId = UUID.randomUUID()
         val vilkårsgrunnlagId = UUID.randomUUID()
         val opprettet = LocalDateTime.now()
-        avviksvurderingDao.lagre(
+        avviksvurderingRepository.lagre(
             avviksvurdering(
                 fødselsnummer = FNR,
                 vilkårsgrunnlagId = vilkårsgrunnlagId,
@@ -196,7 +197,7 @@ internal class PgAvviksvurderingDaoTest : DatabaseIntegrationTest() {
         val skjæringstidspunkt = 1 jan 2018
         val unikId = UUID.randomUUID()
         val opprettet = LocalDateTime.now()
-        avviksvurderingDao.lagre(
+        avviksvurderingRepository.lagre(
             avviksvurdering(
                 fødselsnummer = FNR,
                 vilkårsgrunnlagId = null,
@@ -212,7 +213,7 @@ internal class PgAvviksvurderingDaoTest : DatabaseIntegrationTest() {
     @Test
     fun `ignorerer slettede avviksvurderinger`() {
         val unikId = UUID.randomUUID()
-        avviksvurderingDao.lagre(
+        avviksvurderingRepository.lagre(
             avviksvurdering(
                 fødselsnummer = FNR,
                 vilkårsgrunnlagId = UUID.randomUUID(),
@@ -271,8 +272,8 @@ internal class PgAvviksvurderingDaoTest : DatabaseIntegrationTest() {
         unikId: UUID,
         vilkårsgrunnlagId: UUID,
         opprettet: LocalDateTime,
-    ): AvviksvurderingDto {
-        return AvviksvurderingDto(
+    ): Avviksvurdering {
+        return Avviksvurdering(
             unikId = unikId,
             vilkårsgrunnlagId = vilkårsgrunnlagId,
             fødselsnummer = fødselsnummer,
@@ -290,8 +291,8 @@ internal class PgAvviksvurderingDaoTest : DatabaseIntegrationTest() {
         unikId: UUID = UUID.randomUUID(),
         vilkårsgrunnlagId: UUID? = null,
         opprettet: LocalDateTime = LocalDateTime.now(),
-    ): AvviksvurderingDto =
-        AvviksvurderingDto(
+    ): Avviksvurdering =
+        Avviksvurdering(
             unikId = unikId,
             vilkårsgrunnlagId = vilkårsgrunnlagId,
             fødselsnummer = fødselsnummer,
@@ -302,32 +303,32 @@ internal class PgAvviksvurderingDaoTest : DatabaseIntegrationTest() {
             beregningsgrunnlag = beregningsggrunnlag(),
         )
 
-    private fun sammenligningsgrunnlag(): SammenligningsgrunnlagDto =
-        SammenligningsgrunnlagDto(
+    private fun sammenligningsgrunnlag(): Sammenligningsgrunnlag =
+        Sammenligningsgrunnlag(
             totalbeløp = 50000.0,
             innrapporterteInntekter = listOf(innrapportertInntekt()),
         )
 
-    private fun innrapportertInntekt(): InnrapportertInntektDto =
-        InnrapportertInntektDto(
+    private fun innrapportertInntekt(): InnrapportertInntekt =
+        InnrapportertInntekt(
             arbeidsgiverreferanse = "000000000",
             inntekter = listOf(inntekt()),
         )
 
-    private fun inntekt(): InntektDto =
-        InntektDto(
+    private fun inntekt(): Inntekt =
+        Inntekt(
             årMåned = YearMonth.of(2018, 1),
             beløp = 50000.0,
         )
 
-    private fun beregningsggrunnlag(): BeregningsgrunnlagDto =
-        BeregningsgrunnlagDto(
+    private fun beregningsggrunnlag(): Beregningsgrunnlag =
+        Beregningsgrunnlag(
             totalbeløp = 120000.0,
             omregnedeÅrsinntekter = listOf(omregnetÅrsinntekt()),
         )
 
-    private fun omregnetÅrsinntekt(): OmregnetÅrsinntektDto =
-        OmregnetÅrsinntektDto(
+    private fun omregnetÅrsinntekt(): OmregnetÅrsinntekt =
+        OmregnetÅrsinntekt(
             arbeidsgiverreferanse = "000000000",
             beløp = 10000.0,
         )

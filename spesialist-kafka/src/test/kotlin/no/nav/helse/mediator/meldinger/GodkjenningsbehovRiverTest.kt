@@ -3,7 +3,6 @@ package no.nav.helse.mediator.meldinger
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.FeatureToggles
 import no.nav.helse.kafka.GodkjenningsbehovRiver
 import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
@@ -32,7 +31,7 @@ internal class GodkjenningsbehovRiverTest {
     private val TOM = LocalDate.of(2020, 1, 31)
 
     private val mediator = mockk<MeldingMediator>(relaxed = true)
-    private val testRapid = TestRapid().medRivers(GodkjenningsbehovRiver(mediator, object : FeatureToggles {}))
+    private val testRapid = TestRapid().medRivers(GodkjenningsbehovRiver(mediator))
 
     @BeforeEach
     fun setup() {
@@ -43,7 +42,6 @@ internal class GodkjenningsbehovRiverTest {
     fun `leser Godkjenningbehov`() {
         val relevanteArbeidsforhold = listOf(ORGNR)
         val vilkårsgrunnlagId = UUID.randomUUID()
-        val avviksvurderingId = UUID.randomUUID()
         testRapid.sendTestMessage(
             Testmeldingfabrikk.lagGodkjenningsbehov(
                 aktørId = AKTØR,
@@ -54,15 +52,14 @@ internal class GodkjenningsbehovRiverTest {
                 periodeFom = FOM,
                 periodeTom = TOM,
                 skjæringstidspunkt = FOM,
+                periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
+                førstegangsbehandling = true,
+                utbetalingtype = Utbetalingtype.UTBETALING,
                 inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE,
                 orgnummereMedRelevanteArbeidsforhold = relevanteArbeidsforhold,
-                id = HENDELSE,
                 kanAvvises = true,
-                førstegangsbehandling = true,
+                id = HENDELSE,
                 vilkårsgrunnlagId = vilkårsgrunnlagId,
-                avviksvurderingId = avviksvurderingId,
-                periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
-                utbetalingtype = Utbetalingtype.UTBETALING,
             )
         )
         verify(exactly = 1) {
@@ -106,7 +103,6 @@ internal class GodkjenningsbehovRiverTest {
     fun `leser Godkjenningbehov fastsatt etter skjønn`() {
         val relevanteArbeidsforhold = listOf(ORGNR)
         val vilkårsgrunnlagId = UUID.randomUUID()
-        val avviksvurderingId = UUID.randomUUID()
         val skjønnsfastsatt = 1000.0
         testRapid.sendTestMessage(
             Testmeldingfabrikk.lagGodkjenningsbehov(
@@ -118,15 +114,14 @@ internal class GodkjenningsbehovRiverTest {
                 periodeFom = FOM,
                 periodeTom = TOM,
                 skjæringstidspunkt = FOM,
+                periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
+                førstegangsbehandling = true,
+                utbetalingtype = Utbetalingtype.UTBETALING,
                 inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE,
                 orgnummereMedRelevanteArbeidsforhold = relevanteArbeidsforhold,
-                id = HENDELSE,
                 kanAvvises = true,
-                førstegangsbehandling = true,
+                id = HENDELSE,
                 vilkårsgrunnlagId = vilkårsgrunnlagId,
-                avviksvurderingId = avviksvurderingId,
-                periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
-                utbetalingtype = Utbetalingtype.UTBETALING,
                 fastsatt = "EtterSkjønn",
                 skjønnsfastsatt = skjønnsfastsatt,
             )
@@ -169,7 +164,6 @@ internal class GodkjenningsbehovRiverTest {
     fun `leser Godkjenningbehov fastsatt i Infortrygd`() {
         val relevanteArbeidsforhold = listOf(ORGNR)
         val vilkårsgrunnlagId = UUID.randomUUID()
-        val avviksvurderingId = UUID.randomUUID()
         testRapid.sendTestMessage(
             Testmeldingfabrikk.lagGodkjenningsbehov(
                 aktørId = AKTØR,
@@ -180,15 +174,14 @@ internal class GodkjenningsbehovRiverTest {
                 periodeFom = FOM,
                 periodeTom = TOM,
                 skjæringstidspunkt = FOM,
+                periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
+                førstegangsbehandling = true,
+                utbetalingtype = Utbetalingtype.UTBETALING,
                 inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE,
                 orgnummereMedRelevanteArbeidsforhold = relevanteArbeidsforhold,
-                id = HENDELSE,
                 kanAvvises = true,
-                førstegangsbehandling = true,
+                id = HENDELSE,
                 vilkårsgrunnlagId = vilkårsgrunnlagId,
-                avviksvurderingId = avviksvurderingId,
-                periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
-                utbetalingtype = Utbetalingtype.UTBETALING,
                 fastsatt = "IInfotrygd"
             )
         )

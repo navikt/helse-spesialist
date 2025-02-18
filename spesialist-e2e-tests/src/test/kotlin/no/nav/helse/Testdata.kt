@@ -139,7 +139,6 @@ object Testdata {
             spleisVedtaksperioder = emptyList(),
             utbetalingId = utbetalingId,
             spleisBehandlingId = spleisBehandlingId,
-            avviksvurderingId = UUID.randomUUID(),
             vilkårsgrunnlagId = UUID.randomUUID(),
             tags = tags,
             periodeFom = 1.januar,

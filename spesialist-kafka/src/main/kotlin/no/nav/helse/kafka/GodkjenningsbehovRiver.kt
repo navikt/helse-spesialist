@@ -8,7 +8,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import io.micrometer.core.instrument.MeterRegistry
-import no.nav.helse.FeatureToggles
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
@@ -22,16 +21,13 @@ import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.SykepengegrunnlagsArbeidsgiver
 import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
 import java.time.LocalDate
-import java.util.UUID
 
 class GodkjenningsbehovRiver(
     private val mediator: MeldingMediator,
-    private val featureToggles: FeatureToggles,
 ) : SpesialistRiver {
     override fun preconditions(): River.PacketValidation {
         return River.PacketValidation {
             it.requireAll("@behov", listOf("Godkjenning"))
-            it.interestedIn("behandletAvSpinnvill")
             it.forbid("@løsning")
         }
     }
@@ -81,7 +77,6 @@ class GodkjenningsbehovRiver(
             it.requireArray("Godkjenning.perioderMedSammeSkjæringstidspunkt") {
                 requireKey("vedtaksperiodeId", "behandlingId", "fom", "tom")
             }
-            it.interestedIn("avviksvurderingId")
             it.requireAny("Godkjenning.utbetalingtype", Utbetalingtype.gyldigeTyper.values())
             it.interestedIn("Godkjenning.orgnummereMedRelevanteArbeidsforhold")
             it.requireArray("Godkjenning.omregnedeÅrsinntekter") {
@@ -95,36 +90,30 @@ class GodkjenningsbehovRiver(
         metadata: MessageMetadata,
         meterRegistry: MeterRegistry,
     ) {
-        if (!featureToggles.skalBenytteNyAvviksvurderingløype()) {
-            if (packet["behandletAvSpinnvill"].isMissingOrNull()) return
-        }
         mediator.mottaMelding(
             Godkjenningsbehov(
                 id = packet["@id"].asUUID(),
                 fødselsnummer = packet["fødselsnummer"].asText(),
                 organisasjonsnummer = packet["organisasjonsnummer"].asText(),
+                vedtaksperiodeId = packet["vedtaksperiodeId"].asUUID(),
+                spleisVedtaksperioder = spleisvedtaksperioder(packet),
+                utbetalingId = packet["utbetalingId"].asUUID(),
+                spleisBehandlingId = packet["Godkjenning.behandlingId"].asUUID(),
+                vilkårsgrunnlagId = packet["Godkjenning.vilkårsgrunnlagId"].asUUID(),
+                tags = packet["Godkjenning.tags"].map { it.asText() },
                 periodeFom = LocalDate.parse(packet["Godkjenning.periodeFom"].asText()),
                 periodeTom = LocalDate.parse(packet["Godkjenning.periodeTom"].asText()),
-                skjæringstidspunkt = LocalDate.parse(packet["Godkjenning.skjæringstidspunkt"].asText()),
-                vedtaksperiodeId = packet["vedtaksperiodeId"].asUUID(),
-                avviksvurderingId =
-                    packet["avviksvurderingId"].takeUnless { it.isMissingOrNull() }
-                        ?.let { UUID.fromString(it.asText()) },
-                vilkårsgrunnlagId = packet["Godkjenning.vilkårsgrunnlagId"].asUUID(),
-                spleisVedtaksperioder = spleisvedtaksperioder(packet),
-                spleisBehandlingId = packet["Godkjenning.behandlingId"].asUUID(),
-                tags = packet["Godkjenning.tags"].map { it.asText() },
-                utbetalingId = packet["utbetalingId"].asUUID(),
                 periodetype = Periodetype.valueOf(packet["Godkjenning.periodetype"].asText()),
                 førstegangsbehandling = packet["Godkjenning.førstegangsbehandling"].asBoolean(),
                 utbetalingtype = Utbetalingtype.valueOf(packet["Godkjenning.utbetalingtype"].asText()),
+                kanAvvises = packet["Godkjenning.kanAvvises"].asBoolean(),
                 inntektskilde = Inntektskilde.valueOf(packet["Godkjenning.inntektskilde"].asText()),
                 orgnummereMedRelevanteArbeidsforhold =
                     packet["Godkjenning.orgnummereMedRelevanteArbeidsforhold"]
                         .takeUnless(JsonNode::isMissingOrNull)
                         ?.map { it.asText() } ?: emptyList(),
+                skjæringstidspunkt = LocalDate.parse(packet["Godkjenning.skjæringstidspunkt"].asText()),
                 spleisSykepengegrunnlagsfakta = spleisSykepengegrunnlagsfakta(packet),
-                kanAvvises = packet["Godkjenning.kanAvvises"].asBoolean(),
                 erInngangsvilkårVurdertISpleis = packet["Godkjenning.sykepengegrunnlagsfakta.fastsatt"].asText() != "IInfotrygd",
                 omregnedeÅrsinntekter =
                     packet["Godkjenning.omregnedeÅrsinntekter"].map {

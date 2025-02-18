@@ -127,7 +127,7 @@ internal class PgMeldingDaoTest : DatabaseIntegrationTest() {
         )
     }
 
-    fun lagGodkjenningsbehov(
+    private fun lagGodkjenningsbehov(
         aktørId: String,
         fødselsnummer: String,
         vedtaksperiodeId: UUID = UUID.randomUUID(),
@@ -144,7 +144,6 @@ internal class PgMeldingDaoTest : DatabaseIntegrationTest() {
         kanAvvises: Boolean = true,
         id: UUID = UUID.randomUUID(),
         vilkårsgrunnlagId: UUID = UUID.randomUUID(),
-        avviksvurderingId: UUID? = UUID.randomUUID(),
         spleisBehandlingId: UUID = UUID.randomUUID(),
         tags: List<String> = emptyList(),
         fastsatt: String = "EtterHovedregel",
@@ -152,7 +151,7 @@ internal class PgMeldingDaoTest : DatabaseIntegrationTest() {
     ) =
         nyHendelse(
             id, "behov",
-            mutableMapOf(
+            mapOf(
                 "@behov" to listOf("Godkjenning"),
                 "aktørId" to aktørId,
                 "fødselsnummer" to fødselsnummer,
@@ -201,20 +200,15 @@ internal class PgMeldingDaoTest : DatabaseIntegrationTest() {
                         )
                     ),
                 ),
-            ).apply {
-                if (avviksvurderingId != null) {
-                    put("behandletAvSpinnvill", true)
-                    put("avviksvurderingId", avviksvurderingId)
-                }
-            }
+            )
         )
 
-    fun lagSaksbehandlerløsning(
+    private fun lagSaksbehandlerløsning(
         fødselsnummer: String
     ) =
         nyHendelse(
             UUID.randomUUID(), "saksbehandler_løsning",
-            mutableMapOf(
+            mapOf(
                 "fødselsnummer" to fødselsnummer,
                 "oppgaveId" to 3333333,
                 "hendelseId" to UUID.randomUUID(),
@@ -233,7 +227,7 @@ internal class PgMeldingDaoTest : DatabaseIntegrationTest() {
         )
 
 
-    fun lagOverstyringIgangsatt(
+    private fun lagOverstyringIgangsatt(
         fødselsnummer: String,
         berørtePerioder: List<Map<String, String>> = listOf(
             mapOf(

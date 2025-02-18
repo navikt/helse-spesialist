@@ -82,7 +82,6 @@ class Godkjenningsbehov(
     private val spleisVedtaksperioder: List<SpleisVedtaksperiode>,
     private val utbetalingId: UUID,
     private val spleisBehandlingId: UUID,
-    private val avviksvurderingId: UUID?,
     private val vilkårsgrunnlagId: UUID,
     private val tags: List<String>,
     val periodeFom: LocalDate,
@@ -122,7 +121,6 @@ class Godkjenningsbehov(
             spleisVedtaksperioder = spleisVedtaksperioder,
             utbetalingId = utbetalingId,
             spleisBehandlingId = spleisBehandlingId,
-            avviksvurderingId = avviksvurderingId,
             vilkårsgrunnlagId = vilkårsgrunnlagId,
             tags = tags,
             periodeFom = periodeFom,
@@ -144,13 +142,7 @@ class Godkjenningsbehov(
         id = UUID.fromString(jsonNode.path("@id").asText()),
         fødselsnummer = jsonNode.path("fødselsnummer").asText(),
         organisasjonsnummer = jsonNode.path("organisasjonsnummer").asText(),
-        periodeFom = LocalDate.parse(jsonNode.path("Godkjenning").path("periodeFom").asText()),
-        periodeTom = LocalDate.parse(jsonNode.path("Godkjenning").path("periodeTom").asText()),
         vedtaksperiodeId = UUID.fromString(jsonNode.path("vedtaksperiodeId").asText()),
-        avviksvurderingId =
-            jsonNode.path("avviksvurderingId").takeUnless { it.isMissingNode || it.isNull }
-                ?.let { UUID.fromString(it.asText()) },
-        vilkårsgrunnlagId = UUID.fromString(jsonNode.path("Godkjenning").path("vilkårsgrunnlagId").asText()),
         spleisVedtaksperioder =
             jsonNode.path("Godkjenning").path("perioderMedSammeSkjæringstidspunkt").map { periodeNode ->
                 SpleisVedtaksperiode(
@@ -161,14 +153,24 @@ class Godkjenningsbehov(
                     skjæringstidspunkt = jsonNode.path("Godkjenning").path("skjæringstidspunkt").asText().let(LocalDate::parse),
                 )
             },
-        spleisBehandlingId = UUID.fromString(jsonNode.path("Godkjenning").path("behandlingId").asText()),
-        tags = jsonNode.path("Godkjenning").path("tags").map { it.asText() },
         utbetalingId = UUID.fromString(jsonNode.path("utbetalingId").asText()),
-        skjæringstidspunkt = LocalDate.parse(jsonNode.path("Godkjenning").path("skjæringstidspunkt").asText()),
+        spleisBehandlingId = UUID.fromString(jsonNode.path("Godkjenning").path("behandlingId").asText()),
+        vilkårsgrunnlagId = UUID.fromString(jsonNode.path("Godkjenning").path("vilkårsgrunnlagId").asText()),
+        tags = jsonNode.path("Godkjenning").path("tags").map { it.asText() },
+        periodeFom = LocalDate.parse(jsonNode.path("Godkjenning").path("periodeFom").asText()),
+        periodeTom = LocalDate.parse(jsonNode.path("Godkjenning").path("periodeTom").asText()),
         periodetype = Periodetype.valueOf(jsonNode.path("Godkjenning").path("periodetype").asText()),
         førstegangsbehandling = jsonNode.path("Godkjenning").path("førstegangsbehandling").asBoolean(),
         utbetalingtype = Utbetalingtype.valueOf(jsonNode.path("Godkjenning").path("utbetalingtype").asText()),
+        kanAvvises = jsonNode.path("Godkjenning").path("kanAvvises").asBoolean(),
         inntektskilde = Inntektskilde.valueOf(jsonNode.path("Godkjenning").path("inntektskilde").asText()),
+        orgnummereMedRelevanteArbeidsforhold =
+            jsonNode
+                .path("Godkjenning")
+                .path("orgnummereMedRelevanteArbeidsforhold")
+                .takeUnless { it.isMissingNode || it.isNull }
+                ?.map { it.asText() } ?: emptyList(),
+        skjæringstidspunkt = LocalDate.parse(jsonNode.path("Godkjenning").path("skjæringstidspunkt").asText()),
         spleisSykepengegrunnlagsfakta =
             SpleisSykepengegrunnlagsfakta(
                 arbeidsgivere =
@@ -182,13 +184,6 @@ class Godkjenningsbehov(
                         )
                     } ?: emptyList(),
             ),
-        orgnummereMedRelevanteArbeidsforhold =
-            jsonNode
-                .path("Godkjenning")
-                .path("orgnummereMedRelevanteArbeidsforhold")
-                .takeUnless { it.isMissingNode || it.isNull }
-                ?.map { it.asText() } ?: emptyList(),
-        kanAvvises = jsonNode.path("Godkjenning").path("kanAvvises").asBoolean(),
         erInngangsvilkårVurdertISpleis = jsonNode.path("Godkjenning").get("sykepengegrunnlagsfakta").get("fastsatt").asText() != "IInfotrygd",
         omregnedeÅrsinntekter =
             jsonNode.path("Godkjenning").get("omregnedeÅrsinntekter").map {
@@ -263,7 +258,6 @@ internal class GodkjenningsbehovCommand(
                 behandling = person.vedtaksperiode(behovData.vedtaksperiodeId).finnBehandling(behovData.spleisBehandlingId),
                 erInngangsvilkårVurdertISpleis = behovData.erInngangsvilkårVurdertISpleis,
                 organisasjonsnummer = behovData.organisasjonsnummer,
-                featureToggles = featureToggles,
             ),
             PersisterVedtaksperiodetypeCommand(
                 vedtaksperiodeId = behovData.vedtaksperiodeId,

@@ -8,10 +8,10 @@ import no.nav.helse.db.HelseDao.Companion.single
 import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettInntektskildeDto
 import no.nav.helse.modell.NyInntektskildeDto
-import no.nav.helse.modell.vilkårsprøving.AvviksvurderingDto
-import no.nav.helse.modell.vilkårsprøving.BeregningsgrunnlagDto
-import no.nav.helse.modell.vilkårsprøving.InnrapportertInntektDto
-import no.nav.helse.modell.vilkårsprøving.SammenligningsgrunnlagDto
+import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
+import no.nav.helse.modell.vilkårsprøving.Beregningsgrunnlag
+import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
+import no.nav.helse.modell.vilkårsprøving.Sammenligningsgrunnlag
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -20,7 +20,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 internal class PgInntektskilderRepositoryTest : DatabaseIntegrationTest() {
-    private val avviksvurderingDao = DBSessionContext(session) { _, _ -> false }.avviksvurderingDao
+    private val avviksvurderingRepository = DBSessionContext(session) { _, _ -> false }.avviksvurderingRepository
 
     @Test
     fun `når det ikke finnes arbeidsgivere i databasen får vi kun tilbake nye inntektskilder`() {
@@ -94,18 +94,18 @@ internal class PgInntektskilderRepositoryTest : DatabaseIntegrationTest() {
         val fødselsnummer = lagFødselsnummer()
         val organisasjonsnummer = lagOrganisasjonsnummer()
 
-        avviksvurderingDao.lagre(
-            AvviksvurderingDto(
+        avviksvurderingRepository.lagre(
+            Avviksvurdering(
                 unikId = UUID.randomUUID(),
                 vilkårsgrunnlagId = UUID.randomUUID(),
                 fødselsnummer = fødselsnummer,
                 skjæringstidspunkt = 1 jan 2018,
                 opprettet = LocalDateTime.now(),
                 avviksprosent = 0.0,
-                sammenligningsgrunnlag = SammenligningsgrunnlagDto(
-                    600_000.0, listOf(InnrapportertInntektDto(organisasjonsnummer, emptyList()))
+                sammenligningsgrunnlag = Sammenligningsgrunnlag(
+                    600_000.0, listOf(InnrapportertInntekt(organisasjonsnummer, emptyList()))
                 ),
-                beregningsgrunnlag = BeregningsgrunnlagDto(600_000.0, emptyList())
+                beregningsgrunnlag = Beregningsgrunnlag(600_000.0, emptyList())
             )
         )
 
@@ -121,21 +121,21 @@ internal class PgInntektskilderRepositoryTest : DatabaseIntegrationTest() {
         val organisasjonsnummerSomSpleisKjennerTil = lagOrganisasjonsnummer()
         val enAnnenArbeidsgiverForPersonen = lagOrganisasjonsnummer()
 
-        avviksvurderingDao.lagre(
-            AvviksvurderingDto(
+        avviksvurderingRepository.lagre(
+            Avviksvurdering(
                 unikId = UUID.randomUUID(),
                 vilkårsgrunnlagId = UUID.randomUUID(),
                 fødselsnummer = fødselsnummer,
                 skjæringstidspunkt = 1 jan 2018,
                 opprettet = LocalDateTime.now(),
                 avviksprosent = 0.0,
-                sammenligningsgrunnlag = SammenligningsgrunnlagDto(
+                sammenligningsgrunnlag = Sammenligningsgrunnlag(
                     600_000.0, listOf(
-                        InnrapportertInntektDto(organisasjonsnummerSomSpleisKjennerTil, emptyList()),
-                        InnrapportertInntektDto(enAnnenArbeidsgiverForPersonen, emptyList())
+                        InnrapportertInntekt(organisasjonsnummerSomSpleisKjennerTil, emptyList()),
+                        InnrapportertInntekt(enAnnenArbeidsgiverForPersonen, emptyList())
                     )
                 ),
-                beregningsgrunnlag = BeregningsgrunnlagDto(600_000.0, emptyList())
+                beregningsgrunnlag = Beregningsgrunnlag(600_000.0, emptyList())
             )
         )
 
@@ -150,21 +150,21 @@ internal class PgInntektskilderRepositoryTest : DatabaseIntegrationTest() {
         val organisasjonsnummer = lagOrganisasjonsnummer()
         val navn = lagOrganisasjonsnavn()
 
-        avviksvurderingDao.lagre(
-            AvviksvurderingDto(
+        avviksvurderingRepository.lagre(
+            Avviksvurdering(
                 unikId = UUID.randomUUID(),
                 vilkårsgrunnlagId = UUID.randomUUID(),
                 fødselsnummer = fødselsnummer,
                 skjæringstidspunkt = 1 jan 2018,
                 opprettet = LocalDateTime.now(),
                 avviksprosent = 0.0,
-                sammenligningsgrunnlag = SammenligningsgrunnlagDto(
+                sammenligningsgrunnlag = Sammenligningsgrunnlag(
                     600_000.0,
                     listOf(
-                        InnrapportertInntektDto(organisasjonsnummer, emptyList())
+                        InnrapportertInntekt(organisasjonsnummer, emptyList())
                     )
                 ),
-                beregningsgrunnlag = BeregningsgrunnlagDto(600_000.0, emptyList())
+                beregningsgrunnlag = Beregningsgrunnlag(600_000.0, emptyList())
             )
         )
 

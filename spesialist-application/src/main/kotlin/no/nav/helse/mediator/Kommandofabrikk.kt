@@ -43,7 +43,6 @@ import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetalingCommand
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnetCommand
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
-import no.nav.helse.modell.vilkårsprøving.AvviksvurderingDto
 import no.nav.helse.registrerTidsbrukForGodkjenningsbehov
 import no.nav.helse.registrerTidsbrukForHendelse
 import org.slf4j.LoggerFactory
@@ -295,13 +294,6 @@ class Kommandofabrikk(
                 sessionContext,
                 subsumsjonsmelderProvider,
             ).håndter(hendelse)
-    }
-
-    internal fun håndterAvvikVurdert(
-        avviksvurdering: AvviksvurderingDto,
-        sessionContext: SessionContext,
-    ) = ikkesuspenderendeCommand {
-        sessionContext.avviksvurderingDao.lagre(avviksvurdering)
     }
 
     internal fun løsGodkjenningsbehov(

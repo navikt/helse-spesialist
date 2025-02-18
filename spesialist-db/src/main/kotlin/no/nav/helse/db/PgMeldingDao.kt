@@ -5,7 +5,6 @@ import no.nav.helse.db.HelseDao.Companion.asSQL
 import no.nav.helse.db.PgMeldingDao.Meldingtype.ADRESSEBESKYTTELSE_ENDRET
 import no.nav.helse.db.PgMeldingDao.Meldingtype.AVSLUTTET_MED_VEDTAK
 import no.nav.helse.db.PgMeldingDao.Meldingtype.AVSLUTTET_UTEN_VEDTAK
-import no.nav.helse.db.PgMeldingDao.Meldingtype.AVVIK_VURDERT
 import no.nav.helse.db.PgMeldingDao.Meldingtype.BEHANDLING_OPPRETTET
 import no.nav.helse.db.PgMeldingDao.Meldingtype.ENDRET_EGEN_ANSATT_STATUS
 import no.nav.helse.db.PgMeldingDao.Meldingtype.GODKJENNING
@@ -26,7 +25,6 @@ import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.mediator.meldinger.hendelser.AvsluttetMedVedtakMessage
 import no.nav.helse.mediator.meldinger.hendelser.AvsluttetUtenVedtakMessage
-import no.nav.helse.mediator.meldinger.hendelser.AvvikVurdertMessage
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
 import no.nav.helse.modell.kommando.TilbakedateringBehandlet
 import no.nav.helse.modell.overstyring.OverstyringIgangsatt
@@ -211,7 +209,6 @@ class PgMeldingDao private constructor(queryRunner: QueryRunner) : MeldingDao, Q
             is AvsluttetMedVedtakMessage -> AVSLUTTET_MED_VEDTAK
             is KlargjørTilgangsrelaterteData -> KLARGJØR_TILGANGSRELATERTE_DATA
             is StansAutomatiskBehandlingMelding -> Meldingtype.STANS_AUTOMATISK_BEHANDLING
-            is AvvikVurdertMessage -> AVVIK_VURDERT
             else -> throw IllegalArgumentException("ukjent meldingtype: ${melding::class.simpleName}")
         }
 
@@ -235,6 +232,5 @@ class PgMeldingDao private constructor(queryRunner: QueryRunner) : MeldingDao, Q
         AVSLUTTET_MED_VEDTAK,
         KLARGJØR_TILGANGSRELATERTE_DATA,
         STANS_AUTOMATISK_BEHANDLING,
-        AVVIK_VURDERT,
     }
 }

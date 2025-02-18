@@ -2,7 +2,6 @@ package no.nav.helse.mediator.meldinger
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
-import no.nav.helse.AvviksvurderingTestdata
 import no.nav.helse.mediator.meldinger.Risikofunn.Companion.tilJson
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.person.vedtaksperiode.Periode
@@ -255,7 +254,6 @@ internal object Testmeldingfabrikk {
         kanAvvises: Boolean = true,
         id: UUID = UUID.randomUUID(),
         vilkårsgrunnlagId: UUID = UUID.randomUUID(),
-        avviksvurderingId: UUID? = UUID.randomUUID(),
         spleisBehandlingId: UUID = UUID.randomUUID(),
         tags: List<String> = emptyList(),
         fastsatt: String = "EtterHovedregel",
@@ -263,7 +261,7 @@ internal object Testmeldingfabrikk {
     ) =
         nyHendelse(
             id, "behov",
-            mutableMapOf(
+            mapOf(
                 "@behov" to listOf("Godkjenning"),
                 "aktørId" to aktørId,
                 "fødselsnummer" to fødselsnummer,
@@ -312,12 +310,7 @@ internal object Testmeldingfabrikk {
                         )
                     ),
                 ),
-            ).apply {
-                if (avviksvurderingId != null) {
-                    put("behandletAvSpinnvill", true)
-                    put("avviksvurderingId", avviksvurderingId)
-                }
-            }
+            )
         )
 
     fun lagSaksbehandlerløsning(
@@ -1155,50 +1148,6 @@ internal object Testmeldingfabrikk {
         "@id" to id,
         "@opprettet" to LocalDateTime.now()
     )
-
-    fun lagAvvikVurdert(
-        avviksvurderingTestdata: AvviksvurderingTestdata,
-        id: UUID,
-        fødselsnummer: String,
-        aktørId: String,
-        organisasjonsnummer: String,
-    ): String =
-        nyHendelse(
-            id, "avvik_vurdert", mapOf(
-                "fødselsnummer" to fødselsnummer,
-                "aktørId" to aktørId,
-                "skjæringstidspunkt" to avviksvurderingTestdata.skjæringstidspunkt,
-                "vedtaksperiodeId" to avviksvurderingTestdata.vedtaksperiodeId,
-                "avviksvurdering" to mapOf(
-                    "id" to avviksvurderingTestdata.avviksvurderingId,
-                    "opprettet" to 1.januar.atStartOfDay(),
-                    "beregningsgrunnlag" to mapOf(
-                        "totalbeløp" to 550000.0, "omregnedeÅrsinntekter" to listOf(
-                            mapOf(
-                                "arbeidsgiverreferanse" to organisasjonsnummer,
-                                "beløp" to 250000.0
-                            ),
-                        )
-                    ),
-                    "sammenligningsgrunnlag" to mapOf(
-                        "id" to "887b2e4c-5222-45f1-9831-1846a028193b",
-                        "totalbeløp" to avviksvurderingTestdata.sammenligningsgrunnlag,
-                        "innrapporterteInntekter" to listOf(
-                            mapOf(
-                                "arbeidsgiverreferanse" to organisasjonsnummer,
-                                "inntekter" to listOf(
-                                    mapOf(
-                                        "årMåned" to YearMonth.from(1.januar),
-                                        "beløp" to 10000.0
-                                    ),
-                                )
-                            )
-                        )
-                    ),
-                    "avviksprosent" to avviksvurderingTestdata.avviksprosent,
-                )
-            )
-        )
 
     fun lagKommandokjedePåminnelse(commandContextId: UUID, meldingId: UUID, id: UUID) =
         nyHendelse(

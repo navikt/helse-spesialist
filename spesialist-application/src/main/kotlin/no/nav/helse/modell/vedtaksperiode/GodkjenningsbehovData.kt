@@ -23,7 +23,6 @@ data class GodkjenningsbehovData(
     val spleisVedtaksperioder: List<SpleisVedtaksperiode>,
     val utbetalingId: UUID,
     val spleisBehandlingId: UUID,
-    val avviksvurderingId: UUID?,
     val vilkårsgrunnlagId: UUID,
     val tags: List<String>,
     val periodeFom: LocalDate,

@@ -245,20 +245,19 @@ internal class Meldingssender(private val testRapid: TestRapid) {
             Testmeldingfabrikk.lagGodkjenningsbehov(
                 aktørId = godkjenningsbehovTestdata.aktørId,
                 fødselsnummer = godkjenningsbehovTestdata.fødselsnummer,
-                organisasjonsnummer = godkjenningsbehovTestdata.organisasjonsnummer,
                 vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId,
                 utbetalingId = godkjenningsbehovTestdata.utbetalingId,
+                organisasjonsnummer = godkjenningsbehovTestdata.organisasjonsnummer,
                 periodeFom = godkjenningsbehovTestdata.periodeFom,
                 periodeTom = godkjenningsbehovTestdata.periodeTom,
-                periodetype = godkjenningsbehovTestdata.periodetype,
-                kanAvvises = godkjenningsbehovTestdata.kanAvvises,
                 skjæringstidspunkt = godkjenningsbehovTestdata.skjæringstidspunkt,
+                periodetype = godkjenningsbehovTestdata.periodetype,
                 førstegangsbehandling = godkjenningsbehovTestdata.førstegangsbehandling,
                 utbetalingtype = godkjenningsbehovTestdata.utbetalingtype,
                 inntektskilde = godkjenningsbehovTestdata.inntektskilde,
                 orgnummereMedRelevanteArbeidsforhold = godkjenningsbehovTestdata.orgnummereMedRelevanteArbeidsforhold,
+                kanAvvises = godkjenningsbehovTestdata.kanAvvises,
                 id = id,
-                avviksvurderingId = godkjenningsbehovTestdata.avviksvurderingId,
                 vilkårsgrunnlagId = godkjenningsbehovTestdata.vilkårsgrunnlagId,
                 spleisBehandlingId = godkjenningsbehovTestdata.spleisBehandlingId,
                 tags = godkjenningsbehovTestdata.tags
@@ -727,19 +726,6 @@ internal class Meldingssender(private val testRapid: TestRapid) {
                 berørtePerioder = berørtePerioder,
                 kilde = kilde,
                 id = id,
-            )
-        )
-    }
-
-    fun sendAvvikVurdert(
-        avviksvurderingTestdata: AvviksvurderingTestdata,
-        fødselsnummer: String,
-        aktørId: String,
-        organisasjonsnummer: String,
-    ): UUID = newUUID.also { id ->
-        testRapid.sendTestMessage(
-            Testmeldingfabrikk.lagAvvikVurdert(
-                avviksvurderingTestdata, id, fødselsnummer, aktørId, organisasjonsnummer
             )
         )
     }

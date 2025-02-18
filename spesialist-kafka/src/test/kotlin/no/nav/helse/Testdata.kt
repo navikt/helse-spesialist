@@ -37,7 +37,6 @@ object Testdata {
             spleisVedtaksperioder = emptyList(),
             utbetalingId = utbetalingId,
             spleisBehandlingId = spleisBehandlingId,
-            avviksvurderingId = UUID.randomUUID(),
             vilkårsgrunnlagId = UUID.randomUUID(),
             tags = tags,
             periodeFom = 1.januar,
@@ -86,19 +85,10 @@ internal data class GodkjenningsbehovTestdata(
     val inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
     val orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList(),
     val utbetalingtype: no.nav.helse.modell.utbetaling.Utbetalingtype = UTBETALING,
-    val avviksvurderingId: UUID = UUID.randomUUID(),
     val vilkårsgrunnlagId: UUID = UUID.randomUUID(),
     val spleisBehandlingId: UUID = UUID.randomUUID(),
     val tags: List<String> = emptyList(),
     val spleisSykepengegrunnlagsfakta: SpleisSykepengegrunnlagsfakta = SpleisSykepengegrunnlagsfakta(
         arbeidsgivere = emptyList()
     ),
-)
-
-internal data class AvviksvurderingTestdata(
-    val avviksprosent: Double = 10.0,
-    val sammenligningsgrunnlag: Double = 650_000.0,
-    val skjæringstidspunkt: LocalDate = 1.januar,
-    val avviksvurderingId: UUID = UUID.randomUUID(),
-    val vedtaksperiodeId: UUID = UUID.randomUUID(),
 )

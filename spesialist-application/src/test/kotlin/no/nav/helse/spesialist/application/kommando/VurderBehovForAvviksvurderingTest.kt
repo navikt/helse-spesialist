@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.application.kommando
 
-import no.nav.helse.FeatureToggles
 import no.nav.helse.db.AvviksvurderingRepository
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.modell.kommando.CommandContext
@@ -88,10 +87,6 @@ class VurderBehovForAvviksvurderingTest {
         }
     }
 
-    private val featureToggles = object : FeatureToggles {
-        override fun skalBenytteNyAvviksvurderingløype() = true
-    }
-
     @Test
     fun `Ikke send ut behov dersom inngangsvilkårene ikke er vurdert i Spleis`() {
         val command = VurderBehovForAvviksvurdering(
@@ -102,8 +97,7 @@ class VurderBehovForAvviksvurderingTest {
             vilkårsgrunnlagId,
             behandling,
             false,
-            organisasjonsnummer,
-            featureToggles
+            organisasjonsnummer
         )
         val context = CommandContext(UUID.randomUUID())
         context.nyObserver(observer)
@@ -121,8 +115,7 @@ class VurderBehovForAvviksvurderingTest {
             vilkårsgrunnlagId,
             behandling,
             true,
-            organisasjonsnummer,
-            featureToggles
+            organisasjonsnummer
         )
         val context = CommandContext(UUID.randomUUID())
         context.nyObserver(observer)
@@ -147,8 +140,7 @@ class VurderBehovForAvviksvurderingTest {
             vilkårsgrunnlagId,
             behandling,
             true,
-            organisasjonsnummer,
-            featureToggles
+            organisasjonsnummer
         )
         val context = CommandContext(UUID.randomUUID())
         context.add(
@@ -189,8 +181,7 @@ class VurderBehovForAvviksvurderingTest {
             vilkårsgrunnlagId,
             behandling,
             true,
-            organisasjonsnummer,
-            featureToggles
+            organisasjonsnummer
         )
         val context = CommandContext(UUID.randomUUID())
         context.add(
@@ -218,8 +209,7 @@ class VurderBehovForAvviksvurderingTest {
             vilkårsgrunnlagId,
             behandling,
             true,
-            organisasjonsnummer,
-            featureToggles
+            organisasjonsnummer
         )
         val context = CommandContext(UUID.randomUUID())
         context.add(
@@ -247,8 +237,7 @@ class VurderBehovForAvviksvurderingTest {
             vilkårsgrunnlagId,
             behandling,
             true,
-            organisasjonsnummer,
-            featureToggles
+            organisasjonsnummer
         )
         val context = CommandContext(UUID.randomUUID())
         context.add(AvviksvurderingBehovLøsning.TrengerIkkeNyVurdering(avviksvurderingId = avviksvurderingId))
@@ -268,8 +257,7 @@ class VurderBehovForAvviksvurderingTest {
             vilkårsgrunnlagId,
             behandling,
             true,
-            organisasjonsnummer,
-            featureToggles
+            organisasjonsnummer
         )
         val context = CommandContext(UUID.randomUUID())
         context.add(AvviksvurderingBehovLøsning.TrengerIkkeNyVurdering(avviksvurderingId = avviksvurderingId))

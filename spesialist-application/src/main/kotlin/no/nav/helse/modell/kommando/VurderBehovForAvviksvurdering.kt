@@ -1,6 +1,5 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.FeatureToggles
 import no.nav.helse.db.AvviksvurderingRepository
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.vedtaksperiode.Behandling
@@ -20,10 +19,8 @@ class VurderBehovForAvviksvurdering(
     private val behandling: Behandling,
     private val erInngangsvilkårVurdertISpleis: Boolean,
     private val organisasjonsnummer: String,
-    private val featureToggles: FeatureToggles,
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
-        if (!featureToggles.skalBenytteNyAvviksvurderingløype()) return true
         if (!erInngangsvilkårVurdertISpleis) return true
         return behov(context)
     }

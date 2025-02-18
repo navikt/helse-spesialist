@@ -19,46 +19,6 @@ class PgAvviksvurderingDao private constructor(private val queryRunner: QueryRun
     internal constructor(session: Session) : this(MedSession(session))
     internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
-    override fun lagre(avviksvurdering: AvviksvurderingDto) {
-        val sammenligningsgrunnlagRef =
-            asSQL(
-                """
-                INSERT INTO sammenligningsgrunnlag (fødselsnummer, skjæringstidspunkt, opprettet, sammenligningsgrunnlag)
-                VALUES (:foedselsnummer, :skjaeringstidspunkt, :opprettet, CAST(:sammenligningsgrunnlag as json));
-                """.trimIndent(),
-                "foedselsnummer" to avviksvurdering.fødselsnummer,
-                "skjaeringstidspunkt" to avviksvurdering.skjæringstidspunkt,
-                "opprettet" to avviksvurdering.opprettet,
-                "sammenligningsgrunnlag" to objectMapper.writeValueAsString(avviksvurdering.sammenligningsgrunnlag),
-            ).updateAndReturnGeneratedKey()
-
-        asSQL(
-            """
-            INSERT INTO avviksvurdering (unik_id, fødselsnummer, skjæringstidspunkt, opprettet, avviksprosent, beregningsgrunnlag, sammenligningsgrunnlag_ref)
-            VALUES (:unikId, :foedselsnummer, :skjaeringstidspunkt, :opprettet, :avviksprosent, CAST(:beregningsgrunnlag as json), :sammenligningsgrunnlagRef)
-            ON CONFLICT (unik_id) DO UPDATE SET opprettet = excluded.opprettet, avviksprosent = excluded.avviksprosent, beregningsgrunnlag = excluded.beregningsgrunnlag, sammenligningsgrunnlag_ref = excluded.sammenligningsgrunnlag_ref;
-            """.trimIndent(),
-            "unikId" to avviksvurdering.unikId,
-            "foedselsnummer" to avviksvurdering.fødselsnummer,
-            "skjaeringstidspunkt" to avviksvurdering.skjæringstidspunkt,
-            "opprettet" to avviksvurdering.opprettet,
-            "avviksprosent" to avviksvurdering.avviksprosent,
-            "beregningsgrunnlag" to objectMapper.writeValueAsString(avviksvurdering.beregningsgrunnlag),
-            "sammenligningsgrunnlagRef" to sammenligningsgrunnlagRef,
-        ).update()
-
-        if (avviksvurdering.vilkårsgrunnlagId != null) {
-            asSQL(
-                """
-                INSERT INTO vilkarsgrunnlag_per_avviksvurdering (avviksvurdering_ref, vilkårsgrunnlag_id)
-                VALUES (:unikId, :vilkaarsgrunnlagId) ON CONFLICT DO NOTHING;
-                """.trimIndent(),
-                "unikId" to avviksvurdering.unikId,
-                "vilkaarsgrunnlagId" to avviksvurdering.vilkårsgrunnlagId,
-            ).update()
-        }
-    }
-
     override fun finnAvviksvurderinger(fødselsnummer: String): List<AvviksvurderingDto> =
         asSQL(
             """
@@ -107,18 +67,4 @@ class PgAvviksvurderingDao private constructor(private val queryRunner: QueryRun
                 beregningsgrunnlag = objectMapper.readValue<Beregningsgrunnlag>(it.string("beregningsgrunnlag")),
             )
         }
-
-    override fun opprettKobling(
-        avviksvurderingId: UUID,
-        vilkårsgrunnlagId: UUID,
-    ) {
-        asSQL(
-            """
-            INSERT INTO vilkarsgrunnlag_per_avviksvurdering (avviksvurdering_ref, vilkårsgrunnlag_id)
-            VALUES (:avviksvurderingId, :vilkaarsgrunnlagId) ON CONFLICT DO NOTHING;
-            """.trimIndent(),
-            "avviksvurderingId" to avviksvurderingId,
-            "vilkaarsgrunnlagId" to vilkårsgrunnlagId,
-        ).update()
-    }
 }
