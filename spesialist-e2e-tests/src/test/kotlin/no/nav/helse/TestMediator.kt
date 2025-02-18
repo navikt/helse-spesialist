@@ -34,19 +34,19 @@ internal class TestMediator(
         override val erDev = false
         override val erProd = false
     }
-    private val repositories = DBDaos(dataSource, TilgangskontrollForTestHarIkkeTilgang)
-    private val opptegnelseDao = repositories.opptegnelseDao
-    private val oppgaveDao = repositories.oppgaveDao
-    private val overstyringDao = repositories.overstyringDao
-    private val tildelingDao = repositories.tildelingDao
-    private val notatDao = repositories.notatDao
-    private val dialogDao = repositories.dialogDao
-    private val annulleringRepository = repositories.annulleringRepository
+    private val daos = DBDaos(dataSource, TilgangskontrollForTestHarIkkeTilgang)
+    private val opptegnelseDao = daos.opptegnelseDao
+    private val oppgaveDao = daos.oppgaveDao
+    private val overstyringDao = daos.overstyringDao
+    private val tildelingDao = daos.tildelingDao
+    private val notatDao = daos.notatDao
+    private val dialogDao = daos.dialogDao
+    private val annulleringRepository = daos.annulleringRepository
     private val meldingPubliserer = MessageContextMeldingPubliserer(testRapid)
 
     private val stansAutomatiskBehandlinghåndterer =
         StansAutomatiskBehandlinghåndtererImpl(
-            repositories.stansAutomatiskBehandlingDao,
+            daos.stansAutomatiskBehandlingDao,
             oppgaveDao,
             notatDao,
             dialogDao,
@@ -56,24 +56,24 @@ internal class TestMediator(
     private val tilgangsgrupper = SpeilTilgangsgrupper(testEnv)
     private val oppgaveService =
         OppgaveService(
-            oppgaveDao = repositories.oppgaveDao,
+            oppgaveDao = daos.oppgaveDao,
             tildelingDao = tildelingDao,
-            reservasjonDao = repositories.reservasjonDao,
+            reservasjonDao = daos.reservasjonDao,
             opptegnelseDao = opptegnelseDao,
             meldingPubliserer = meldingPubliserer,
             tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
             tilgangsgrupper = tilgangsgrupper,
-            daos = repositories,
+            daos = daos,
         )
     private val apiOppgaveService = ApiOppgaveService(
-        oppgaveDao = repositories.oppgaveDao,
+        oppgaveDao = daos.oppgaveDao,
         tilgangsgrupper = tilgangsgrupper,
         oppgaveService = oppgaveService
     )
 
     private val saksbehandlerMediator =
         SaksbehandlerMediator(
-            daos = repositories,
+            daos = daos,
             versjonAvKode = "versjonAvKode",
             meldingPubliserer = meldingPubliserer,
             oppgaveService = oppgaveService,
@@ -116,20 +116,20 @@ internal class TestMediator(
     init {
         val meldingMediator = MeldingMediator(
             sessionFactory = TransactionalSessionFactory(dataSource, TilgangskontrollForTestHarIkkeTilgang),
-            personDao = repositories.personDao,
-            commandContextDao = repositories.commandContextDao,
-            meldingDao = repositories.meldingDao,
-            meldingDuplikatkontrollDao = repositories.meldingDuplikatkontrollDao,
+            personDao = daos.personDao,
+            commandContextDao = daos.commandContextDao,
+            meldingDao = daos.meldingDao,
+            meldingDuplikatkontrollDao = daos.meldingDuplikatkontrollDao,
             kommandofabrikk = kommandofabrikk,
-            dokumentDao = repositories.dokumentDao,
+            dokumentDao = daos.dokumentDao,
             varselRepository = VarselRepository(
-                varselDao = repositories.varselDao,
-                definisjonDao = repositories.definisjonDao
+                varselDao = daos.varselDao,
+                definisjonDao = daos.definisjonDao
             ),
             poisonPills = PoisonPills(emptyMap()),
             env = environment,
         )
-        RiverSetup(testRapid, meldingMediator, repositories.meldingDuplikatkontrollDao).setUp()
+        RiverSetup(testRapid, meldingMediator, daos.meldingDuplikatkontrollDao).setUp()
     }
 
     internal fun overstyringstyperForVedtaksperiode(vedtaksperiodeId: UUID) =
