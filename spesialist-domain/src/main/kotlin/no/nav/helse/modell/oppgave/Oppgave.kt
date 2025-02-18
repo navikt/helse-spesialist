@@ -49,7 +49,7 @@ class Oppgave private constructor(
     fun forsøkTildeling(saksbehandler: Saksbehandler) {
         logg.info("Oppgave med {} forsøkes tildelt av saksbehandler.", kv("oppgaveId", id))
         val tildelt = tildeltTil
-        if (tildelt != null && tildelt != saksbehandler) {
+        if (tildelt != null && tildelt.oid != saksbehandler.oid) {
             logg.warn("Oppgave med {} kan ikke tildeles fordi den er tildelt noen andre.", kv("oppgaveId", id))
             throw OppgaveTildeltNoenAndre(tildelt, false)
         }
@@ -64,7 +64,7 @@ class Oppgave private constructor(
                 throw OppgaveIkkeTildelt(this.id)
             }
 
-        if (tildelt != saksbehandler) {
+        if (tildelt.oid != saksbehandler.oid) {
             logg.info("Oppgave med {} er tildelt noen andre, avmeldes", kv("oppgaveId", id))
             sikkerlogg.info("Oppgave med {} er tildelt $tildelt, avmeldes av $saksbehandler", kv("oppgaveId", id))
         }
@@ -126,10 +126,10 @@ class Oppgave private constructor(
         skalTildeles: Boolean,
         saksbehandler: Saksbehandler,
     ) {
-        if (this.tildeltTil != saksbehandler && skalTildeles) {
+        if (this.tildeltTil?.oid != saksbehandler.oid && skalTildeles) {
             tildel(saksbehandler)
         }
-        if (this.tildeltTil != null && !skalTildeles) {
+        if (this.tildeltTil?.oid != null && !skalTildeles) {
             avmeld(saksbehandler)
         }
         egenskaper.add(PÅ_VENT)
@@ -140,7 +140,7 @@ class Oppgave private constructor(
         skalVæreTildeltSaksbehandler: Boolean,
         saksbehandler: Saksbehandler,
     ) {
-        if (tildeltTil == saksbehandler) {
+        if (tildeltTil?.oid == saksbehandler.oid) {
             if (!skalVæreTildeltSaksbehandler) {
                 avmeld(saksbehandler)
             }
