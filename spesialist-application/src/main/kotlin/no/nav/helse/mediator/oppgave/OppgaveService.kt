@@ -11,7 +11,6 @@ import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.SessionContext
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.TotrinnsvurderingDao
-import no.nav.helse.db.TotrinnsvurderingFraDatabase
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.Oppgave.Companion.nyOppgave
@@ -22,7 +21,6 @@ import no.nav.helse.modell.saksbehandler.handlinger.EndrePåVent
 import no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent
 import no.nav.helse.modell.saksbehandler.handlinger.Oppgavehandling
 import no.nav.helse.modell.saksbehandler.handlinger.Overstyring
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDto
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
 import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
@@ -121,20 +119,6 @@ class OppgaveService(
         oppgaveId?.let {
             oppgave(it, oppgaveBlock)
         }
-    }
-
-    fun lagreTotrinnsvurdering(totrinnsvurderingDto: TotrinnsvurderingDto) {
-        val totrinnsvurderingFraDatabase =
-            TotrinnsvurderingFraDatabase(
-                vedtaksperiodeId = totrinnsvurderingDto.vedtaksperiodeId,
-                erRetur = totrinnsvurderingDto.erRetur,
-                saksbehandler = totrinnsvurderingDto.saksbehandler?.oid,
-                beslutter = totrinnsvurderingDto.beslutter?.oid,
-                utbetalingId = totrinnsvurderingDto.utbetalingId,
-                opprettet = totrinnsvurderingDto.opprettet,
-                oppdatert = totrinnsvurderingDto.oppdatert,
-            )
-        totrinnsvurderingDao.oppdater(totrinnsvurderingFraDatabase)
     }
 
     fun avbrytOppgave(

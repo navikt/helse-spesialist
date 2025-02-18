@@ -91,27 +91,6 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `lagre oppgave uten tildeling eller totrinnsvurdering`() {
-        val oppgave = nyOppgave(medTotrinnsvurdering = false)
-        val oppgavelagrer = Oppgavelagrer(tildelingRepository)
-
-        oppgavelagrer.lagre(oppgaveService, oppgave.toDto())
-        verify(exactly = 1) {
-            oppgaveService.opprett(
-                id = OPPGAVE_ID,
-                vedtaksperiodeId = VEDTAKSPERIODE_ID,
-                behandlingId = BEHANDLING_ID,
-                utbetalingId = UTBETALING_ID,
-                egenskaper = listOf(EgenskapForDatabase.SØKNAD),
-                godkjenningsbehovId = HENDELSE_ID,
-                kanAvvises = true,
-            )
-        }
-        verify(exactly = 0) { tildelingRepository.tildel(any(), any()) }
-        verify(exactly = 0) { oppgaveService.lagreTotrinnsvurdering(any()) }
-    }
-
-    @Test
     fun `lagre oppgave uten tildeling`() {
         val oppgave = nyOppgave(medTotrinnsvurdering = true)
         val oppgavelagrer = Oppgavelagrer(tildelingRepository)
@@ -129,28 +108,6 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
             )
         }
         verify(exactly = 0) { tildelingRepository.tildel(any(), any()) }
-    }
-
-    @Test
-    fun `lagre oppgave uten totrinnsvurdering`() {
-        val oppgave = nyOppgave(medTotrinnsvurdering = false)
-        oppgave.forsøkTildelingVedReservasjon(saksbehandler)
-        val oppgavelagrer = Oppgavelagrer(tildelingRepository)
-
-        oppgavelagrer.lagre(oppgaveService, oppgave.toDto())
-        verify(exactly = 1) {
-            oppgaveService.opprett(
-                id = OPPGAVE_ID,
-                vedtaksperiodeId = VEDTAKSPERIODE_ID,
-                behandlingId = BEHANDLING_ID,
-                utbetalingId = UTBETALING_ID,
-                egenskaper = listOf(EgenskapForDatabase.SØKNAD),
-                godkjenningsbehovId = HENDELSE_ID,
-                kanAvvises = true,
-            )
-        }
-        verify(exactly = 1) { tildelingRepository.tildel(OPPGAVE_ID, SAKSBEHANDLER_OID) }
-        verify(exactly = 0) { oppgaveService.lagreTotrinnsvurdering(any()) }
     }
 
     @Test
@@ -175,23 +132,6 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `oppdatere oppgave uten tildeling eller totrinnsvurdering`() {
-        val oppgave = nyOppgave(medTotrinnsvurdering = false)
-        oppgave.avventerSystem(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
-        oppgave.ferdigstill()
-        val oppgavelagrer = Oppgavelagrer(tildelingRepository)
-
-        oppgavelagrer.oppdater(oppgaveService, oppgave.toDto())
-        verify(exactly = 1) {
-            oppgaveService.oppdater(OPPGAVE_ID, "Ferdigstilt", SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID, listOf(
-                EgenskapForDatabase.SØKNAD
-            ))
-        }
-        verify(exactly = 0) { tildelingRepository.tildel(any(), any()) }
-        verify(exactly = 0) { oppgaveService.lagreTotrinnsvurdering(any()) }
-    }
-
-    @Test
     fun `oppdatere oppgave uten tildeling`() {
         val oppgave = nyOppgave(medTotrinnsvurdering = true)
         oppgave.avventerSystem(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
@@ -205,23 +145,6 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
             ))
         }
         verify(exactly = 0) { tildelingRepository.tildel(any(), any()) }
-    }
-
-    @Test
-    fun `oppdatere oppgave uten totrinnsvurdering`() {
-        val oppgave = nyOppgave(medTotrinnsvurdering = false)
-        oppgave.forsøkTildelingVedReservasjon(saksbehandler)
-        oppgave.avventerSystem(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
-        oppgave.ferdigstill()
-        val oppgavelagrer = Oppgavelagrer(tildelingRepository)
-
-        oppgavelagrer.oppdater(oppgaveService, oppgave.toDto())
-        verify(exactly = 1) {
-            oppgaveService.oppdater(OPPGAVE_ID, "Ferdigstilt", SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID, listOf(
-                EgenskapForDatabase.SØKNAD
-            ))
-        }
-        verify(exactly = 0) { oppgaveService.lagreTotrinnsvurdering(any()) }
     }
 
     @Test
