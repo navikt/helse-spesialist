@@ -5,7 +5,6 @@ import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OppgaveFraDatabase
 import no.nav.helse.db.OppgavesorteringForDatabase
 import no.nav.helse.db.SaksbehandlerFraDatabase
-import no.nav.helse.db.TotrinnsvurderingFraDatabase
 import no.nav.helse.mediator.oppgave.Oppgavehenter
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.EgenskapDto
@@ -14,7 +13,6 @@ import no.nav.helse.modell.oppgave.OppgaveDto
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
 import java.util.UUID
 
 class OppgavehenterTest {
@@ -31,7 +29,6 @@ class OppgavehenterTest {
         private const val SAKSBEHANDLER_EPOST = "saksbehandler@nav.no"
         private const val SAKSBEHANDLER_NAVN = "Saksbehandler"
         private val SAKSBEHANDLER_OID = UUID.randomUUID()
-        private val BESLUTTER_OID = UUID.randomUUID()
         private val TILDELT_TIL = SaksbehandlerFraDatabase(
             epostadresse = SAKSBEHANDLER_EPOST,
             oid = SAKSBEHANDLER_OID,
@@ -39,41 +36,11 @@ class OppgavehenterTest {
             ident = SAKSBEHANDLER_IDENT
         )
         private const val PÅ_VENT = false
-        private const val ER_RETUR = false
         private const val KAN_AVVISES = true
-        private val TOTRINNSVURDERING_OPPRETTET = LocalDateTime.now()
-        private val TOTRINNSVURDERING_OPPDATERT = LocalDateTime.now()
     }
 
     @Test
     fun `konverter fra OppgaveFraDatabase til Oppgave`() {
-        val oppgavehenter = Oppgavehenter(
-            oppgaveDao = oppgaveRepository(),
-            tilgangskontroll = { _, _ -> false }
-        )
-        val oppgave = oppgavehenter.oppgave(OPPGAVE_ID).toDto()
-        assertEquals(OPPGAVE_ID, oppgave.id)
-        assertEquals(OppgaveDto.TilstandDto.AvventerSaksbehandler, oppgave.tilstand)
-        assertEquals(VEDTAKSPERIODE_ID, oppgave.vedtaksperiodeId)
-        assertEquals(UTBETALING_ID, oppgave.utbetalingId)
-        assertEquals(SAKSBEHANDLER_OID, oppgave.ferdigstiltAvOid)
-        assertEquals(SAKSBEHANDLER_IDENT, oppgave.ferdigstiltAvIdent)
-        assertTrue(oppgave.egenskaper.contains(EgenskapDto.SØKNAD))
-        assertEquals(PÅ_VENT, oppgave.egenskaper.contains(EgenskapDto.PÅ_VENT))
-    }
-
-    @Test
-    fun `konverter fra OppgaveFraDatabase til Oppgave med totrinnsvurdering`() {
-        val totrinnsvurdering = TotrinnsvurderingFraDatabase(
-            vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            erRetur = ER_RETUR,
-            saksbehandler = SAKSBEHANDLER_OID,
-            beslutter = BESLUTTER_OID,
-            utbetalingId = UTBETALING_ID,
-            opprettet = TOTRINNSVURDERING_OPPRETTET,
-            oppdatert = TOTRINNSVURDERING_OPPDATERT,
-        )
-
         val oppgavehenter = Oppgavehenter(
             oppgaveDao = oppgaveRepository(),
             tilgangskontroll = { _, _ -> false }

@@ -11,11 +11,8 @@ import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.Oppgave.Companion.toDto
 import no.nav.helse.modell.saksbehandler.Saksbehandler
-import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.random.Random.Default.nextLong
 
@@ -24,7 +21,6 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
     private val VEDTAKSPERIODE_ID = UUID.randomUUID()
     private val BEHANDLING_ID = UUID.randomUUID()
     override val UTBETALING_ID: UUID = UUID.randomUUID()
-    private val BESLUTTER_OID = UUID.randomUUID()
     override var OPPGAVE_ID = nextLong()
     private val saksbehandler =
         Saksbehandler(
@@ -34,17 +30,6 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
             ident = SAKSBEHANDLER_IDENT,
             tilgangskontroll = { _, _ -> false },
         )
-    private val beslutter =
-        Saksbehandler(
-            oid = BESLUTTER_OID,
-            epostadresse = SAKSBEHANDLER_EPOST,
-            navn = SAKSBEHANDLER_NAVN,
-            ident = SAKSBEHANDLER_IDENT,
-            tilgangskontroll = { _, _ -> false },
-        )
-
-    private val TOTRINNSVURDERING_OPPRETTET = LocalDateTime.now()
-    private val TOTRINNSVURDERING_OPPDATERT = LocalDateTime.now()
 
     override val HENDELSE_ID: UUID = UUID.randomUUID()
 
@@ -92,7 +77,7 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
 
     @Test
     fun `lagre oppgave uten tildeling`() {
-        val oppgave = nyOppgave(medTotrinnsvurdering = true)
+        val oppgave = nyOppgave()
         val oppgavelagrer = Oppgavelagrer(tildelingRepository)
 
         oppgavelagrer.lagre(oppgaveService, oppgave.toDto())
@@ -112,7 +97,7 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
 
     @Test
     fun `lagre oppgave`() {
-        val oppgave = nyOppgave(medTotrinnsvurdering = true)
+        val oppgave = nyOppgave()
         oppgave.forsøkTildelingVedReservasjon(saksbehandler)
         val oppgavelagrer = Oppgavelagrer(tildelingRepository)
 
@@ -133,7 +118,7 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
 
     @Test
     fun `oppdatere oppgave uten tildeling`() {
-        val oppgave = nyOppgave(medTotrinnsvurdering = true)
+        val oppgave = nyOppgave()
         oppgave.avventerSystem(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
         oppgave.ferdigstill()
         val oppgavelagrer = Oppgavelagrer(tildelingRepository)
@@ -149,7 +134,7 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
 
     @Test
     fun `oppdatere oppgave`() {
-        val oppgave = nyOppgave(medTotrinnsvurdering = true)
+        val oppgave = nyOppgave()
         oppgave.forsøkTildelingVedReservasjon(saksbehandler)
         oppgave.avventerSystem(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
         oppgave.ferdigstill()
@@ -163,7 +148,7 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
         }
     }
 
-    private fun nyOppgave(medTotrinnsvurdering: Boolean = false) =
+    private fun nyOppgave() =
         Oppgave.nyOppgave(
             id = OPPGAVE_ID,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
@@ -172,19 +157,5 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
             hendelseId = HENDELSE_ID,
             kanAvvises = true,
             egenskaper = setOf(OPPGAVETYPE),
-        )
-
-    private fun nyTotrinnsvurdering() =
-        Totrinnsvurdering.fraLagring(
-            id = TotrinnsvurderingId(nextLong()),
-            vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            erRetur = false,
-            saksbehandler = saksbehandler,
-            beslutter = beslutter,
-            utbetalingId = UTBETALING_ID,
-            opprettet = TOTRINNSVURDERING_OPPRETTET,
-            oppdatert = TOTRINNSVURDERING_OPPDATERT,
-            overstyringer = emptyList(),
-            ferdigstilt = false,
         )
 }

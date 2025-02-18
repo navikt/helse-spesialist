@@ -8,13 +8,10 @@ import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.saksbehandler.Saksbehandler
-import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.random.Random.Default.nextLong
 
@@ -32,7 +29,6 @@ class OppgavemelderTest {
     private val testRapid = TestRapid()
     private val meldingPubliserer: MeldingPubliserer = MessageContextMeldingPubliserer(testRapid)
     private val saksbehandler = saksbehandler("saksbehandler@nav.no")
-    private val beslutter = saksbehandler("beslutter@nav.no")
 
     @Test
     fun `bygg kafkamelding`() {
@@ -57,7 +53,7 @@ class OppgavemelderTest {
 
     @Test
     fun `bygg kafkamelding med saksbehandler og beslutter`() {
-        val oppgave = nyOppgave(totrinnsvurdering = totrinnsvurdering(beslutter))
+        val oppgave = nyOppgave()
         oppgave.forsøkTildelingVedReservasjon(saksbehandler = saksbehandler)
         oppgave.register(Oppgavemelder(FNR, meldingPubliserer))
         oppgave.avventerSystem("IDENT", UUID.randomUUID())
@@ -84,7 +80,7 @@ class OppgavemelderTest {
         tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang
     )
 
-    private fun nyOppgave(totrinnsvurdering: Totrinnsvurdering? = null) = Oppgave.nyOppgave(
+    private fun nyOppgave() = Oppgave.nyOppgave(
         id = OPPGAVE_ID,
         vedtaksperiodeId = VEDTAKSPERIODE_ID,
         behandlingId = BEHANDLING_ID,
@@ -92,18 +88,5 @@ class OppgavemelderTest {
         hendelseId = HENDELSE_ID,
         kanAvvises = true,
         egenskaper = setOf(SØKNAD),
-    )
-
-    private fun totrinnsvurdering(beslutter: Saksbehandler? = null) = Totrinnsvurdering.fraLagring(
-        id = TotrinnsvurderingId(nextLong()),
-        vedtaksperiodeId = VEDTAKSPERIODE_ID,
-        erRetur = false,
-        saksbehandler = null,
-        beslutter = beslutter,
-        utbetalingId = UUID.randomUUID(),
-        opprettet = LocalDateTime.now(),
-        oppdatert = LocalDateTime.now(),
-        overstyringer = emptyList(),
-        ferdigstilt = false,
     )
 }
