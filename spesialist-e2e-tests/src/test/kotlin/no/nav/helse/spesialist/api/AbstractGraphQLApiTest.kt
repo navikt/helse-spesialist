@@ -17,12 +17,6 @@ import io.ktor.server.routing.route
 import io.ktor.server.testing.ApplicationTestBuilder
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.helse.spesialist.api.avviksvurdering.Avviksvurdering
-import no.nav.helse.spesialist.api.avviksvurdering.Beregningsgrunnlag
-import no.nav.helse.spesialist.api.avviksvurdering.InnrapportertInntekt
-import no.nav.helse.spesialist.api.avviksvurdering.Inntekt
-import no.nav.helse.spesialist.api.avviksvurdering.OmregnetÅrsinntekt
-import no.nav.helse.spesialist.api.avviksvurdering.Sammenligningsgrunnlag
 import no.nav.helse.spesialist.api.behandlingsstatistikk.IBehandlingsstatistikkService
 import no.nav.helse.spesialist.api.endepunkter.ApiTesting
 import no.nav.helse.spesialist.api.graphql.ContextFactory
@@ -58,7 +52,6 @@ import no.nav.helse.spesialist.client.spleis.SpleisClientSnapshothenter
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLArbeidsgiver
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import org.intellij.lang.annotations.Language
-import java.time.YearMonth
 import java.util.UUID
 
 internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
@@ -113,13 +106,13 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                                 notatDao = notatDao,
                                 totrinnsvurderingApiDao = totrinnsvurderingApiDao,
                                 påVentApiDao = påVentApiDao,
-                                avviksvurderinghenter = avviksvurderinghenter,
                                 apiOppgaveService = apiOppgaveService,
                                 saksbehandlerhåndterer = saksbehandlerhåndterer,
                                 stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
                                 personhåndterer = personhåndterer,
                                 snapshotService = snapshotService,
                                 reservasjonshenter = reservasjonshenter,
+                                sessionFactory = sessionFactory
                             ),
                     ),
                     oppgaver = OppgaverQueryHandler(
@@ -178,16 +171,18 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
     fun mockSnapshot(
         fødselsnummer: String = FØDSELSNUMMER,
         arbeidsgivere: List<GraphQLArbeidsgiver> = listOf(defaultArbeidsgivere()),
+        vilkårsgrunnlagId: UUID = UUID.randomUUID(),
     ) {
-        val respons = snapshot(fødselsnummer, arbeidsgivere)
+        val respons = snapshot(fødselsnummer, arbeidsgivere, vilkårsgrunnlagId)
         every { spleisClient.hentPerson(FØDSELSNUMMER) } returns respons
     }
 
     private fun snapshot(
         fødselsnummer: String = FØDSELSNUMMER,
         arbeidsgivere: List<GraphQLArbeidsgiver>,
+        vilkårsgrunnlagId: UUID,
     ): GraphQLPerson {
-        val vilkårsgrunnlag = graphQLSpleisVilkarsgrunnlag(ORGANISASJONSNUMMER)
+        val vilkårsgrunnlag = graphQLSpleisVilkarsgrunnlag(ORGANISASJONSNUMMER, vilkårsgrunnlagId)
 
         return GraphQLPerson(
             aktorId = AKTØRID,
@@ -205,72 +200,6 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
         val snapshotGenerasjon = opprettSnapshotGenerasjon(listOf(graphQLperiodeMedOppgave))
         val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotGenerasjon))
         return arbeidsgiver
-    }
-
-    fun mockAvviksvurdering(
-        fødselsnummer: String = FØDSELSNUMMER,
-        avviksprosent: Double = 0.0,
-    ) {
-        every { avviksvurderinghenter.hentAvviksvurdering(any()) } returns
-            Avviksvurdering(
-                unikId = avviksvurderingId,
-                vilkårsgrunnlagId = UUID.randomUUID(),
-                fødselsnummer = fødselsnummer,
-                skjæringstidspunkt = 1.januar,
-                opprettet = 1.januar.atStartOfDay(),
-                avviksprosent = avviksprosent,
-                sammenligningsgrunnlag =
-                    Sammenligningsgrunnlag(
-                        totalbeløp = 10000.0,
-                        innrapporterteInntekter =
-                            listOf(
-                                InnrapportertInntekt(
-                                    arbeidsgiverreferanse = ORGANISASJONSNUMMER,
-                                    inntekter =
-                                        listOf(
-                                            Inntekt(
-                                                årMåned = YearMonth.from(1.januar),
-                                                beløp = 2000.0,
-                                            ),
-                                            Inntekt(
-                                                årMåned = YearMonth.from(1.februar),
-                                                beløp = 2000.0,
-                                            ),
-                                        ),
-                                ),
-                                InnrapportertInntekt(
-                                    arbeidsgiverreferanse = "987656789",
-                                    inntekter =
-                                        listOf(
-                                            Inntekt(
-                                                årMåned = YearMonth.from(1.januar),
-                                                beløp = 1500.0,
-                                            ),
-                                            Inntekt(
-                                                årMåned = YearMonth.from(1.februar),
-                                                beløp = 1500.0,
-                                            ),
-                                            Inntekt(
-                                                årMåned = YearMonth.from(1.mars),
-                                                beløp = 1500.0,
-                                            ),
-                                            Inntekt(
-                                                årMåned = YearMonth.from(1.april),
-                                                beløp = 1500.0,
-                                            ),
-                                        ),
-                                ),
-                            ),
-                    ),
-                beregningsgrunnlag =
-                    Beregningsgrunnlag(
-                        totalbeløp = 10000.0,
-                        omregnedeÅrsinntekter =
-                            listOf(
-                                OmregnetÅrsinntekt(arbeidsgiverreferanse = ORGANISASJONSNUMMER, beløp = 10000.0),
-                            ),
-                    ),
-            )
     }
 
     companion object {

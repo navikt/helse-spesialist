@@ -12,13 +12,16 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
+import java.util.UUID
 
 internal class GraphQLApiTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `henter refusjonsopplysninger`() {
-        mockSnapshot()
+        val vilkårsgrunnlagId = UUID.randomUUID()
+        mockSnapshot(vilkårsgrunnlagId = vilkårsgrunnlagId)
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        opprettAvviksvurdering(vilkårsgrunnlagId = vilkårsgrunnlagId)
 
         val body = runQuery(
             """
@@ -42,7 +45,8 @@ internal class GraphQLApiTest : AbstractGraphQLApiTest() {
         """
         )
         val refusjonsopplysning =
-            body["data"]["person"]["vilkarsgrunnlag"].first()["arbeidsgiverrefusjoner"].first().get("refusjonsopplysninger").first()
+            body["data"]["person"]["vilkarsgrunnlag"].first()["arbeidsgiverrefusjoner"].first()
+                .get("refusjonsopplysninger").first()
         assertEquals("2020-01-01", refusjonsopplysning["fom"].asText())
         assertTrue(refusjonsopplysning["tom"].isNull)
         assertEquals(30000.0, refusjonsopplysning["belop"].asDouble())
@@ -51,8 +55,9 @@ internal class GraphQLApiTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `beriker vilkårsgrunnlag med data fra avviksvurdering`() {
-        mockSnapshot()
-        mockAvviksvurdering(avviksprosent = 26.0)
+        val vilkårsgrunnlagId = UUID.randomUUID()
+        mockSnapshot(vilkårsgrunnlagId = vilkårsgrunnlagId)
+        opprettAvviksvurdering(avviksprosent = 26.0, vilkårsgrunnlagId = vilkårsgrunnlagId)
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
 
         val body = runQuery(
@@ -118,8 +123,9 @@ internal class GraphQLApiTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `henter sykepengegrunnlagsgrense`() {
-        mockSnapshot()
-        mockAvviksvurdering()
+        val vilkårsgrunnlagId = UUID.randomUUID()
+        mockSnapshot(vilkårsgrunnlagId = vilkårsgrunnlagId)
+        opprettAvviksvurdering(avviksprosent = 0.0, vilkårsgrunnlagId = vilkårsgrunnlagId)
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
 
         val body = runQuery(
@@ -155,8 +161,9 @@ internal class GraphQLApiTest : AbstractGraphQLApiTest() {
     fun `Nan avviksprosent gir error`() = ugyldigAvvikprosent(Double.NaN)
 
     private fun ugyldigAvvikprosent(avviksprosent: Double) {
-        mockSnapshot()
-        mockAvviksvurdering(avviksprosent = avviksprosent)
+        val vilkårsgrunnlagId = UUID.randomUUID()
+        mockSnapshot(vilkårsgrunnlagId = vilkårsgrunnlagId)
+        opprettAvviksvurdering(avviksprosent = avviksprosent, vilkårsgrunnlagId = vilkårsgrunnlagId)
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
 
         val body = runQuery(

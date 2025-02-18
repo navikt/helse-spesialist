@@ -5,6 +5,7 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.helse.db.SessionFactory
 import no.nav.helse.db.api.ArbeidsgiverApiDao
 import no.nav.helse.db.api.EgenAnsattApiDao
 import no.nav.helse.db.api.NotatApiDao
@@ -19,7 +20,6 @@ import no.nav.helse.db.api.TotrinnsvurderingApiDao
 import no.nav.helse.db.api.VarselApiRepository
 import no.nav.helse.db.api.VergemålApiDao
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
-import no.nav.helse.spesialist.api.Avviksvurderinghenter
 import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
@@ -61,13 +61,13 @@ class PersonService(
     private val notatDao: NotatApiDao,
     private val totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
     private val påVentApiDao: PåVentApiDao,
-    private val avviksvurderinghenter: Avviksvurderinghenter,
     private val apiOppgaveService: ApiOppgaveService,
     private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
     private val stansAutomatiskBehandlinghåndterer: StansAutomatiskBehandlinghåndterer,
     private val personhåndterer: Personhåndterer,
     private val snapshotService: SnapshotService,
     private val reservasjonshenter: Reservasjonshenter,
+    private val sessionFactory: SessionFactory,
 ) : PersonoppslagService {
     private companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
@@ -136,9 +136,9 @@ class PersonService(
                         notatDao = notatDao,
                         totrinnsvurderingApiDao = totrinnsvurderingApiDao,
                         påVentApiDao = påVentApiDao,
-                        avviksvurderinghenter = avviksvurderinghenter,
                         apiOppgaveService = apiOppgaveService,
                         saksbehandlerhåndterer = saksbehandlerhåndterer,
+                        sessionFactory = sessionFactory,
                     ),
             ),
         )

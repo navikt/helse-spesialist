@@ -99,7 +99,6 @@ class SpesialistApp(
             stansAutomatiskBehandlinghåndterer = { stansAutomatiskBehandlinghåndterer },
             behandlingstatistikk = behandlingsstatistikkService,
             snapshothenter = snapshothenter,
-            avviksvurderinghenter = repositories.avviksvurderingDao,
         )
 
     private val bootstrap =

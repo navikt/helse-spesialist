@@ -29,7 +29,6 @@ import no.nav.helse.db.api.TotrinnsvurderingApiDao
 import no.nav.helse.db.api.VarselApiRepository
 import no.nav.helse.db.api.VergemålApiDao
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
-import no.nav.helse.spesialist.api.Avviksvurderinghenter
 import no.nav.helse.spesialist.api.Dokumenthåndterer
 import no.nav.helse.spesialist.api.Godkjenninghåndterer
 import no.nav.helse.spesialist.api.GraphQLCallLogging
@@ -81,7 +80,6 @@ fun Application.graphQLApi(
     påVentApiDao: PåVentApiDao,
     vergemålApiDao: VergemålApiDao,
     reservasjonshenter: Reservasjonshenter,
-    avviksvurderinghenter: Avviksvurderinghenter,
     skjermedePersonerGruppeId: UUID,
     kode7Saksbehandlergruppe: UUID,
     beslutterGruppeId: UUID,
@@ -115,13 +113,13 @@ fun Application.graphQLApi(
                                     notatDao = notatDao,
                                     totrinnsvurderingApiDao = totrinnsvurderingApiDao,
                                     påVentApiDao = påVentApiDao,
-                                    avviksvurderinghenter = avviksvurderinghenter,
                                     apiOppgaveService = apiOppgaveService,
                                     saksbehandlerhåndterer = saksbehandlerhåndterer,
                                     stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
                                     personhåndterer = personhåndterer,
                                     snapshotService = snapshotService,
                                     reservasjonshenter = reservasjonshenter,
+                                    sessionFactory = sessionFactory,
                                 ),
                         ),
                     oppgaver =

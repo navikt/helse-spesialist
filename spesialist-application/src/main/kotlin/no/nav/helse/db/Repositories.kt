@@ -19,7 +19,6 @@ import no.nav.helse.db.api.VergemålApiDao
 
 interface Repositories {
     val annulleringRepository: AnnulleringRepository
-    val avviksvurderingDao: AvviksvurderingDao
     val behandlingsstatistikkDao: BehandlingsstatistikkDao
     val commandContextDao: CommandContextDao
     val definisjonDao: DefinisjonDao

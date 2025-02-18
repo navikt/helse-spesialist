@@ -1,7 +1,6 @@
 package no.nav.helse.spesialist.api.bootstrap
 
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
-import no.nav.helse.spesialist.api.Avviksvurderinghenter
 import no.nav.helse.spesialist.api.Dokumenthåndterer
 import no.nav.helse.spesialist.api.Godkjenninghåndterer
 import no.nav.helse.spesialist.api.Personhåndterer
@@ -19,5 +18,4 @@ data class ApiAvhengigheter(
     val stansAutomatiskBehandlinghåndterer: () -> StansAutomatiskBehandlinghåndterer,
     val behandlingstatistikk: IBehandlingsstatistikkService,
     val snapshothenter: Snapshothenter,
-    val avviksvurderinghenter: Avviksvurderinghenter,
 )

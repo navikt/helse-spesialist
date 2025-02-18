@@ -21,7 +21,6 @@ import javax.sql.DataSource
 
 class DBRepositories(dataSource: DataSource, tilgangskontroll: Tilgangskontroll) : Repositories {
     override val annulleringRepository = PgAnnulleringRepository(dataSource)
-    override val avviksvurderingDao = PgAvviksvurderingDao(dataSource)
     override val behandlingsstatistikkDao = PgBehandlingsstatistikkDao(dataSource)
     override val commandContextDao = PgCommandContextDao(dataSource)
     override val definisjonDao = PgDefinisjonDao(dataSource)

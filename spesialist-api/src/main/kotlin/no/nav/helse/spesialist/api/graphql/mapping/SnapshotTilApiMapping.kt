@@ -1,9 +1,9 @@
 package no.nav.helse.spesialist.api.graphql.mapping
 
+import no.nav.helse.db.AvviksvurderingRepository
 import no.nav.helse.db.api.NotatApiDao
-import no.nav.helse.spesialist.api.Avviksvurderinghenter
+import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.spesialist.api.Toggle
-import no.nav.helse.spesialist.api.avviksvurdering.Avviksvurdering
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsgiverinntekt
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsgiverrefusjon
 import no.nav.helse.spesialist.api.graphql.schema.ApiBegrunnelse
@@ -360,11 +360,11 @@ fun SnapshotInntektstype.tilApiInntektstype() =
         else -> throw Exception("Ukjent inntektstype $this")
     }
 
-fun SnapshotVilkarsgrunnlag.tilVilkarsgrunnlag(avviksvurderinghenter: Avviksvurderinghenter): ApiVilkårsgrunnlag {
+fun SnapshotVilkarsgrunnlag.tilVilkarsgrunnlag(avviksvurderingRepository: AvviksvurderingRepository): ApiVilkårsgrunnlag {
     return when (this) {
         is SnapshotSpleisVilkarsgrunnlag -> {
             val avviksvurdering: Avviksvurdering =
-                checkNotNull(avviksvurderinghenter.hentAvviksvurdering(id)) { "Fant ikke avviksvurdering for vilkårsgrunnlagId $id" }
+                checkNotNull(avviksvurderingRepository.hentAvviksvurdering(id)) { "Fant ikke avviksvurdering for vilkårsgrunnlagId $id" }
             val orgnrs =
                 (
                     avviksvurdering.sammenligningsgrunnlag.innrapporterteInntekter.map {

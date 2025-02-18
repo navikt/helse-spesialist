@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.api.graphql.resolvers
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import no.nav.helse.db.SessionFactory
 import no.nav.helse.db.api.ArbeidsgiverApiDao
 import no.nav.helse.db.api.NotatApiDao
 import no.nav.helse.db.api.OppgaveApiDao
@@ -12,7 +13,6 @@ import no.nav.helse.db.api.TildelingApiDao
 import no.nav.helse.db.api.TotrinnsvurderingApiDao
 import no.nav.helse.db.api.VarselApiRepository
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
-import no.nav.helse.spesialist.api.Avviksvurderinghenter
 import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.graphql.mapping.tilVilkarsgrunnlag
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdoverstyring
@@ -49,6 +49,7 @@ import java.time.LocalDate
 import java.util.UUID
 
 data class ApiPersonResolver(
+    private val sessionFactory: SessionFactory,
     private val snapshot: SnapshotPerson,
     private val personinfo: ApiPersoninfo,
     private val personApiDao: PersonApiDao,
@@ -62,7 +63,6 @@ data class ApiPersonResolver(
     private val notatDao: NotatApiDao,
     private val totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
     private val påVentApiDao: PåVentApiDao,
-    private val avviksvurderinghenter: Avviksvurderinghenter,
     private val apiOppgaveService: ApiOppgaveService,
     private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
 ) : PersonSchema {
@@ -90,7 +90,10 @@ data class ApiPersonResolver(
     @Suppress("unused")
     override fun tilleggsinfoForInntektskilder(): List<ApiTilleggsinfoForInntektskilde> {
         return snapshot.vilkarsgrunnlag.flatMap { vilkårsgrunnlag ->
-            val avviksvurdering = avviksvurderinghenter.hentAvviksvurdering(vilkårsgrunnlag.id)
+            val avviksvurdering =
+                sessionFactory.transactionalSessionScope {
+                    it.avviksvurderingRepository.hentAvviksvurdering(vilkårsgrunnlag.id)
+                }
             (
                 avviksvurdering?.sammenligningsgrunnlag?.innrapporterteInntekter?.map { innrapportertInntekt ->
                     innrapportertInntekt.arbeidsgiverreferanse
@@ -151,7 +154,11 @@ data class ApiPersonResolver(
             .finnInfotrygdutbetalinger(snapshot.fodselsnummer)
             ?.let { objectMapper.readValue(it) }
 
-    override fun vilkarsgrunnlag(): List<ApiVilkårsgrunnlag> = snapshot.vilkarsgrunnlag.map { it.tilVilkarsgrunnlag(avviksvurderinghenter) }
+    override fun vilkarsgrunnlag(): List<ApiVilkårsgrunnlag> {
+        return sessionFactory.transactionalSessionScope { sessionContext ->
+            snapshot.vilkarsgrunnlag.map { it.tilVilkarsgrunnlag(sessionContext.avviksvurderingRepository) }
+        }
+    }
 
     private fun List<SnapshotGhostPeriode>.tilGhostPerioder(organisasjonsnummer: String): List<ApiGhostPeriode> =
         map {

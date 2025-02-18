@@ -124,8 +124,8 @@ object GraphQLTestdata {
         hendelser = emptyList(),
     )
 
-    fun graphQLSpleisVilkarsgrunnlag(organisasjonsnummer: String) = GraphQLSpleisVilkarsgrunnlag(
-        id = UUID.randomUUID(),
+    fun graphQLSpleisVilkarsgrunnlag(organisasjonsnummer: String, id: UUID = UUID.randomUUID()) = GraphQLSpleisVilkarsgrunnlag(
+        id = id,
         inntekter =
             listOf(
                 GraphQLArbeidsgiverinntekt(

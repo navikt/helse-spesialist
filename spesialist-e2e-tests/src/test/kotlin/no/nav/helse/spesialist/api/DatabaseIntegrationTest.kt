@@ -5,6 +5,12 @@ import no.nav.helse.db.DbQuery
 import no.nav.helse.db.api.ArbeidsgiverApiDao.Inntekter
 import no.nav.helse.db.api.EgenAnsattApiDao
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
+import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
+import no.nav.helse.modell.vilkårsprøving.Beregningsgrunnlag
+import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
+import no.nav.helse.modell.vilkårsprøving.Inntekt
+import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
+import no.nav.helse.modell.vilkårsprøving.Sammenligningsgrunnlag
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.db.AbstractDatabaseTest
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
@@ -26,6 +32,7 @@ import no.nav.helse.spesialist.test.lagSaksbehandlerident
 import org.junit.jupiter.api.Assertions.assertEquals
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.util.UUID
 
 internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
@@ -99,6 +106,79 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             "skjaeringstidspunkt" to skjæringstidspunkt,
         )
     )
+
+    protected fun opprettAvviksvurdering(
+        fødselsnummer: String = FØDSELSNUMMER,
+        skjæringstidspunkt: LocalDate = 1.januar,
+        avviksvurderingId: UUID = UUID.randomUUID(),
+        vilkårsgrunnlagId: UUID = UUID.randomUUID(),
+        avviksprosent: Double = 25.0
+    ) {
+        sessionFactory.transactionalSessionScope {
+            it.avviksvurderingRepository.lagre(
+                Avviksvurdering(
+                    unikId = avviksvurderingId,
+                    vilkårsgrunnlagId = vilkårsgrunnlagId,
+                    fødselsnummer = fødselsnummer,
+                    skjæringstidspunkt = skjæringstidspunkt,
+                    opprettet = 1.januar.atStartOfDay(),
+                    avviksprosent = avviksprosent,
+                    sammenligningsgrunnlag =
+                        Sammenligningsgrunnlag(
+                            totalbeløp = 10000.0,
+                            innrapporterteInntekter =
+                                listOf(
+                                    InnrapportertInntekt(
+                                        arbeidsgiverreferanse = ORGANISASJONSNUMMER,
+                                        inntekter =
+                                            listOf(
+                                                Inntekt(
+                                                    årMåned = YearMonth.from(1.januar),
+                                                    beløp = 2000.0,
+                                                ),
+                                                Inntekt(
+                                                    årMåned = YearMonth.from(1.februar),
+                                                    beløp = 2000.0,
+                                                ),
+                                            ),
+                                    ),
+                                    InnrapportertInntekt(
+                                        arbeidsgiverreferanse = "987656789",
+                                        inntekter =
+                                            listOf(
+                                                Inntekt(
+                                                    årMåned = YearMonth.from(1.januar),
+                                                    beløp = 1500.0,
+                                                ),
+                                                Inntekt(
+                                                    årMåned = YearMonth.from(1.februar),
+                                                    beløp = 1500.0,
+                                                ),
+                                                Inntekt(
+                                                    årMåned = YearMonth.from(1.mars),
+                                                    beløp = 1500.0,
+                                                ),
+                                                Inntekt(
+                                                    årMåned = YearMonth.from(1.april),
+                                                    beløp = 1500.0,
+                                                ),
+                                            ),
+                                    ),
+                                ),
+                        ),
+                    beregningsgrunnlag =
+                        Beregningsgrunnlag(
+                            totalbeløp = 10000.0,
+                            omregnedeÅrsinntekter =
+                                listOf(
+                                    OmregnetÅrsinntekt(arbeidsgiverreferanse = ORGANISASJONSNUMMER, beløp = 10000.0),
+                                ),
+                        ),
+                )
+
+            )
+        }
+    }
 
     private fun opprettOpprinneligSøknadsdato(periode: Periode) = dbQuery.update(
         "INSERT INTO opprinnelig_soknadsdato VALUES (:vedtaksperiode_id, now())",

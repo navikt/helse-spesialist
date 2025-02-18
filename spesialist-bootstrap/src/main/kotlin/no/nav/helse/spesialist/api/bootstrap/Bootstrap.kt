@@ -57,7 +57,6 @@ class Bootstrap(
             påVentApiDao = påVentApiDao,
             vergemålApiDao = vergemålApiDao,
             reservasjonshenter = reservasjonshenter,
-            avviksvurderinghenter = avhengigheter.avviksvurderinghenter,
             skjermedePersonerGruppeId = tilgangsgrupper.skjermedePersonerGruppeId,
             kode7Saksbehandlergruppe = tilgangsgrupper.kode7GruppeId,
             beslutterGruppeId = tilgangsgrupper.beslutterGruppeId,

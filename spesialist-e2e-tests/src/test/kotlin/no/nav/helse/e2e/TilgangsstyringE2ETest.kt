@@ -173,7 +173,6 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
                     notatDao = repositories.notatApiDao,
                     totrinnsvurderingApiDao = repositories.totrinnsvurderingApiDao,
                     påVentApiDao = repositories.påVentApiDao,
-                    avviksvurderinghenter = mockk(relaxed = true),
                     apiOppgaveService = mockk(relaxed = true),
                     saksbehandlerhåndterer = mockk(relaxed = true),
                     stansAutomatiskBehandlinghåndterer = mockk(relaxed = true),
@@ -183,6 +182,7 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
                     },
                     snapshotService = SnapshotService(repositories.personinfoDao, snapshothenter),
                     reservasjonshenter = mockk(relaxed = true),
+                    sessionFactory = sessionFactory
                 ),
             ),
         )
