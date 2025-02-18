@@ -20,7 +20,6 @@ import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlagDto
 import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering.Companion.finnRiktigAvviksvurdering
-import no.nav.helse.modell.vilkårsprøving.AvviksvurderingDto
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.UUID
@@ -40,7 +39,7 @@ class Person private constructor(
             aktørId = aktørId,
             fødselsnummer = fødselsnummer,
             vedtaksperioder = vedtaksperioder.map { it.toDto() },
-            avviksvurderinger = avviksvurderinger.map { it.toDto() },
+            avviksvurderinger = avviksvurderinger,
             skjønnsfastsatteSykepengegrunnlag = skjønnsfastsatteSykepengegrunnlag.map { it.toDto() },
         )
 
@@ -180,7 +179,7 @@ class Person private constructor(
             fødselsnummer: String,
             vedtaksperioder: List<VedtaksperiodeDto>,
             skjønnsfastsattSykepengegrunnlag: List<SkjønnsfastsattSykepengegrunnlagDto>,
-            avviksvurderinger: List<AvviksvurderingDto>,
+            avviksvurderinger: List<Avviksvurdering>,
         ): Person {
             return Person(
                 aktørId = aktørId,
@@ -194,7 +193,7 @@ class Person private constructor(
                             behandlinger = it.behandlinger,
                         )
                     },
-                avviksvurderinger = avviksvurderinger.map { Avviksvurdering.gjenopprett(it) },
+                avviksvurderinger = avviksvurderinger,
                 skjønnsfastsatteSykepengegrunnlag =
                     skjønnsfastsattSykepengegrunnlag
                         .sortedBy { it.opprettet }

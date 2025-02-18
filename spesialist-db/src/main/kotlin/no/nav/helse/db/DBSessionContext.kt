@@ -17,12 +17,11 @@ class DBSessionContext(session: Session, tilgangskontroll: Tilgangskontroll) : S
     override val arbeidsforholdDao = PgArbeidsforholdDao(session)
     override val arbeidsgiverDao = PgArbeidsgiverDao(session)
     override val automatiseringDao = PgAutomatiseringDao(session)
-    override val avviksvurderingDao = PgAvviksvurderingDao(session)
     override val commandContextDao = PgCommandContextDao(session)
     override val dialogDao = PgDialogDao(session)
     override val egenAnsattDao = PgEgenAnsattDao(session)
     override val generasjonDao = PgGenerasjonDao(session)
-    override val inntektskilderRepository = PgInntektskilderRepository(session, arbeidsgiverDao, avviksvurderingDao)
+    override val inntektskilderRepository = PgInntektskilderRepository(session, arbeidsgiverDao)
     override val meldingDao = PgMeldingDao(session)
     override val metrikkDao = PgMetrikkDao(session)
     override val notatDao = PgNotatDao(session)
@@ -44,8 +43,7 @@ class DBSessionContext(session: Session, tilgangskontroll: Tilgangskontroll) : S
     override val vergemålDao = PgVergemålDao(session)
     override val åpneGosysOppgaverDao = PgÅpneGosysOppgaverDao(session)
     override val vedtaksperiodeRepository = PgVedtaksperiodeRepository(generasjonDao, vedtakDao)
-    override val personRepository =
-        PgPersonRepository(vedtaksperiodeRepository, sykefraværstilfelleDao, avviksvurderingDao, personDao)
+    override val personRepository = PgPersonRepository(session, vedtaksperiodeRepository, sykefraværstilfelleDao, personDao)
 
     override val overstyringRepository: OverstyringRepository = PgOverstyringRepository(session)
     override val totrinnsvurderingRepository: TotrinnsvurderingRepository =

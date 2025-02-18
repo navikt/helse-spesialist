@@ -11,5 +11,7 @@ interface AvviksvurderingRepository {
         vilkårsgrunnlagId: UUID,
     )
 
+    fun hentAvviksvurdering(vilkårsgrunnlagId: UUID): Avviksvurdering?
+
     fun finnAvviksvurderinger(fødselsnummer: String): List<Avviksvurdering>
 }

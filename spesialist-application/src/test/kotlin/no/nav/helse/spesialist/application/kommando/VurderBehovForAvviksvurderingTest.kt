@@ -76,6 +76,8 @@ class VurderBehovForAvviksvurderingTest {
             koblinger.add(avviksvurderingId to vilkårsgrunnlagId)
         }
 
+        override fun hentAvviksvurdering(vilkårsgrunnlagId: UUID): Avviksvurdering = error("Ikke implementert i test")
+
         override fun finnAvviksvurderinger(fødselsnummer: String): List<Avviksvurdering> =
             error("Ikke implementert i test")
     }

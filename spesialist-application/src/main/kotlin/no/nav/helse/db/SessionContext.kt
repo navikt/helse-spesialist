@@ -11,7 +11,6 @@ interface SessionContext {
     val arbeidsforholdDao: ArbeidsforholdDao
     val arbeidsgiverDao: ArbeidsgiverDao
     val automatiseringDao: AutomatiseringDao
-    val avviksvurderingDao: AvviksvurderingDao
     val commandContextDao: CommandContextDao
     val dialogDao: DialogDao
     val egenAnsattDao: EgenAnsattDao

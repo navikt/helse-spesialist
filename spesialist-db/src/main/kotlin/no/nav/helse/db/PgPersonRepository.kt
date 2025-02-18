@@ -1,16 +1,19 @@
 package no.nav.helse.db
 
+import kotliquery.Session
 import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.person.PersonDto
 import no.nav.helse.modell.person.PersonRepository
 import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
 
 class PgPersonRepository(
+    session: Session,
     private val vedtaksperiodeRepository: VedtaksperiodeRepository,
     private val sykefraværstilfelleDao: SykefraværstilfelleDao,
-    private val avviksvurderingDao: AvviksvurderingDao,
     private val personDao: PersonDao,
 ) : PersonRepository {
+    private val avviksvurderingRepository = PgAvviksvurderingRepository(session)
+
     override fun brukPersonHvisFinnes(
         fødselsnummer: String,
         personScope: Person.() -> Unit,
@@ -42,7 +45,7 @@ class PgPersonRepository(
             ?.copy(
                 skjønnsfastsatteSykepengegrunnlag = sykefraværstilfelleDao.finnSkjønnsfastsatteSykepengegrunnlag(fødselsnummer),
             )?.copy(
-                avviksvurderinger = avviksvurderingDao.finnAvviksvurderinger(fødselsnummer),
+                avviksvurderinger = avviksvurderingRepository.finnAvviksvurderinger(fødselsnummer),
             )?.let {
                 Person.gjenopprett(
                     aktørId = it.aktørId,

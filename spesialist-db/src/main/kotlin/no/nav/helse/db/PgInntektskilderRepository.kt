@@ -11,8 +11,9 @@ import no.nav.helse.modell.NyInntektskildeDto
 class PgInntektskilderRepository internal constructor(
     private val session: Session,
     private val arbeidsgiverDao: ArbeidsgiverDao,
-    private val avviksvurderingDao: AvviksvurderingDao,
 ) : InntektskilderRepository {
+    private val avviksvurderingRepository = PgAvviksvurderingRepository(session)
+
     override fun lagreInntektskilder(inntektskilder: List<InntektskildeDto>) {
         inntektskilder.forEach { inntekt ->
             when (inntekt) {
@@ -74,7 +75,7 @@ class PgInntektskilderRepository internal constructor(
     }
 
     private fun organisasjonsnumreFraSammenligningsgrunnlag(fødselsnummer: String): List<String> =
-        avviksvurderingDao
+        avviksvurderingRepository
             .finnAvviksvurderinger(fødselsnummer)
             .flatMap { it.sammenligningsgrunnlag.innrapporterteInntekter }
             .map { it.arbeidsgiverreferanse }

@@ -1,36 +1,23 @@
 package no.nav.helse.mediator.meldinger
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
-import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.kafka.AvsluttetMedVedtakRiver
 import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.meldinger.hendelser.AvsluttetMedVedtakMessage
-import no.nav.helse.modell.vilkårsprøving.AvviksvurderingDto
-import no.nav.helse.modell.vilkårsprøving.BeregningsgrunnlagDto
-import no.nav.helse.modell.vilkårsprøving.InnrapportertInntektDto
-import no.nav.helse.modell.vilkårsprøving.InntektDto
-import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntektDto
-import no.nav.helse.modell.vilkårsprøving.SammenligningsgrunnlagDto
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.YearMonth
 import java.util.UUID
 
 internal class AvsluttetMedVedtakRiverTest {
     private val mediator = mockk<MeldingMediator>(relaxed = true)
-    private val avviksvurderingDao = mockk<AvviksvurderingDao>(relaxed = true)
     private val testRapid =
         TestRapid().medRivers(AvsluttetMedVedtakRiver(mediator))
 
     @Test
     fun `Leser inn utkast_til_vedtak-event`() {
-        every { avviksvurderingDao.finnAvviksvurderinger(any()) } returns listOf(avviksvurdering())
         testRapid.sendTestMessage(utkastTilVedtak("EtterSkjønn"))
         verify(exactly = 1) { mediator.mottaMelding(any<AvsluttetMedVedtakMessage>(), any()) }
         testRapid.sendTestMessage(utkastTilVedtak("EtterHovedregel"))
@@ -38,44 +25,6 @@ internal class AvsluttetMedVedtakRiverTest {
         testRapid.sendTestMessage(utkastTilVedtak("IInfotrygd"))
         verify(exactly = 3) { mediator.mottaMelding(any<AvsluttetMedVedtakMessage>(), any()) }
     }
-
-    private fun avviksvurdering(): AvviksvurderingDto =
-        AvviksvurderingDto(
-            unikId = UUID.randomUUID(),
-            vilkårsgrunnlagId = UUID.randomUUID(),
-            fødselsnummer = "12345678910",
-            skjæringstidspunkt = LocalDate.of(2018, 1, 1),
-            opprettet = LocalDateTime.now(),
-            avviksprosent = 10.0,
-            sammenligningsgrunnlag =
-                SammenligningsgrunnlagDto(
-                    totalbeløp = 10000.0,
-                    innrapporterteInntekter =
-                        listOf(
-                            InnrapportertInntektDto(
-                                arbeidsgiverreferanse = "123456789",
-                                inntekter =
-                                    listOf(
-                                        InntektDto(
-                                            årMåned = YearMonth.now(),
-                                            beløp = 10000.0,
-                                        ),
-                                    ),
-                            ),
-                        ),
-                ),
-            beregningsgrunnlag =
-                BeregningsgrunnlagDto(
-                    totalbeløp = 10000.0,
-                    omregnedeÅrsinntekter =
-                        listOf(
-                            OmregnetÅrsinntektDto(
-                                arbeidsgiverreferanse = "123456789",
-                                beløp = 10000.0,
-                            ),
-                        ),
-                ),
-        )
 
     @Language("JSON")
     private fun utkastTilVedtak(faktaType: String): String {
