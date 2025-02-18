@@ -4,7 +4,7 @@ import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.handlinger.Overstyring
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinje
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
-import no.nav.helse.spesialist.db.DatabaseIntegrationTest
+import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -13,7 +13,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 
-class PgTotrinnsvurderingRepositoryTest: DatabaseIntegrationTest() {
+class PgTotrinnsvurderingRepositoryTest: AbstractDBIntegrationTest() {
 
     @BeforeEach
     fun setup() {

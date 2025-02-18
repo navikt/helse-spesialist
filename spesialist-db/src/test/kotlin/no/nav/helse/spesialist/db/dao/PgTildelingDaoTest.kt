@@ -2,13 +2,13 @@ package no.nav.helse.spesialist.db.dao
 
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.spesialist.db.DatabaseIntegrationTest
+import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-internal class PgTildelingDaoTest : DatabaseIntegrationTest() {
+internal class PgTildelingDaoTest : AbstractDBIntegrationTest() {
 
     @Test
     fun tildel() {

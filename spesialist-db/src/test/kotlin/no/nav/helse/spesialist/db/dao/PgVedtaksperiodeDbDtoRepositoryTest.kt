@@ -6,7 +6,7 @@ import no.nav.helse.db.PgVedtaksperiodeRepository
 import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
 import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
 import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
-import no.nav.helse.spesialist.db.DatabaseIntegrationTest
+import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.db.feb
 import no.nav.helse.spesialist.db.jan
 import no.nav.helse.spesialist.db.lagAktørId
@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-class PgVedtaksperiodeDbDtoRepositoryTest: DatabaseIntegrationTest() {
+class PgVedtaksperiodeDbDtoRepositoryTest: AbstractDBIntegrationTest() {
 
     private val pgVedtaksperiodeRepository = PgVedtaksperiodeRepository(
         generasjonDao = PgGenerasjonDao(session),

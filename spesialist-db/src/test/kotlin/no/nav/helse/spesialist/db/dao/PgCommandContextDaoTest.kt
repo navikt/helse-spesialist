@@ -4,7 +4,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.mediator.meldinger.Melding
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.spesialist.db.DatabaseIntegrationTest
+import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.db.TestMelding
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -12,7 +12,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-internal class PgCommandContextDaoTest : DatabaseIntegrationTest() {
+internal class PgCommandContextDaoTest : AbstractDBIntegrationTest() {
 
     private val VEDTAKSPERIODE_ID1 = UUID.randomUUID()
     private val VEDTAKSPERIODE_ID2 = UUID.randomUUID()

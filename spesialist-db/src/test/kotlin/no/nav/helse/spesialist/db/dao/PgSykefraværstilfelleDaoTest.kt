@@ -10,7 +10,7 @@ import no.nav.helse.db.overstyring.SkjønnsfastsettingstypeForDatabase.RAPPORTER
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlagDto
 import no.nav.helse.modell.vedtak.SkjønnsfastsettingstypeDto
 import no.nav.helse.modell.vedtak.SkjønnsfastsettingsårsakDto
-import no.nav.helse.spesialist.db.DatabaseIntegrationTest
+import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.db.jan
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -19,7 +19,7 @@ import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.UUID
 
-internal class PgSykefraværstilfelleDaoTest : DatabaseIntegrationTest() {
+internal class PgSykefraværstilfelleDaoTest : AbstractDBIntegrationTest() {
 
     private val sykefraværstilfelleDao = PgSykefraværstilfelleDao(session)
 

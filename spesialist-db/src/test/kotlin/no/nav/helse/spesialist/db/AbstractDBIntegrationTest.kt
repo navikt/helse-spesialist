@@ -51,7 +51,7 @@ import java.util.UUID
 import javax.sql.DataSource
 import kotlin.random.Random.Default.nextLong
 
-abstract class DatabaseIntegrationTest {
+abstract class AbstractDBIntegrationTest {
     protected val dbQuery = DbQuery(dataSource)
     protected val repositories = DBRepositories(dataSource) { _, _ -> false }
     private val testperson = TestPerson()

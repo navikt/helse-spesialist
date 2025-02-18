@@ -9,7 +9,7 @@ import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
 import no.nav.helse.modell.vilkårsprøving.Inntekt
 import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
 import no.nav.helse.modell.vilkårsprøving.Sammenligningsgrunnlag
-import no.nav.helse.spesialist.db.DatabaseIntegrationTest
+import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.db.jan
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -20,7 +20,7 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 
-internal class PgAvviksvurderingRepositoryTest : DatabaseIntegrationTest() {
+internal class PgAvviksvurderingRepositoryTest : AbstractDBIntegrationTest() {
     private val avviksvurderingDao = DBSessionContext(session) { _, _ -> false }.avviksvurderingRepository
 
     @Test

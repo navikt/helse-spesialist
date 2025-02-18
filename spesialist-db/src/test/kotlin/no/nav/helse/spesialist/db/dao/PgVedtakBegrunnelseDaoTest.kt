@@ -2,7 +2,7 @@ package no.nav.helse.spesialist.db.dao
 
 import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
 import no.nav.helse.modell.vedtak.Utfall
-import no.nav.helse.spesialist.db.DatabaseIntegrationTest
+import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-internal class PgVedtakBegrunnelseDaoTest : DatabaseIntegrationTest() {
+internal class PgVedtakBegrunnelseDaoTest : AbstractDBIntegrationTest() {
 
     private val dao = repositories.vedtakBegrunnelseDao
 

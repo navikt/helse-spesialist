@@ -1,6 +1,6 @@
 package no.nav.helse.spesialist.db.dao
 
-import no.nav.helse.spesialist.db.DatabaseIntegrationTest
+import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
@@ -9,7 +9,7 @@ import java.time.LocalDateTime.now
 import java.time.temporal.ChronoUnit
 import java.util.UUID
 
-internal class PgSaksbehandlerDaoTest : DatabaseIntegrationTest() {
+internal class PgSaksbehandlerDaoTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `lagre saksbehandler`() {

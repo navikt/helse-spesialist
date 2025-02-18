@@ -4,14 +4,14 @@ import kotliquery.sessionOf
 import no.nav.helse.db.PgArbeidsgiverDao
 import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettInntektskildeDto
-import no.nav.helse.spesialist.db.DatabaseIntegrationTest
+import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 
-internal class PgArbeidsgiverDaoTest : DatabaseIntegrationTest() {
+internal class PgArbeidsgiverDaoTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `Oppretter minimal arbeidsgiver`() {

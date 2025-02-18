@@ -2,7 +2,7 @@ package no.nav.helse.spesialist.db.dao
 
 import no.nav.helse.db.PgDefinisjonDao
 import no.nav.helse.modell.varsel.Varseldefinisjon
-import no.nav.helse.spesialist.db.DatabaseIntegrationTest
+import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
@@ -12,7 +12,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 @Isolated
-internal class PgDefinisjonDaoTest: DatabaseIntegrationTest() {
+internal class PgDefinisjonDaoTest: AbstractDBIntegrationTest() {
 
     private val definisjonDao = PgDefinisjonDao(dataSource)
 

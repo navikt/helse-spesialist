@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.db.dao.api
 
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
-import no.nav.helse.spesialist.db.DatabaseIntegrationTest
+import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.db.jan
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.UUID
 
-internal class PgVarselApiRepositoryTest: DatabaseIntegrationTest() {
+internal class PgVarselApiRepositoryTest: AbstractDBIntegrationTest() {
 
     @Test
     fun `Finner varsler med vedtaksperiodeId og utbetalingId`() {

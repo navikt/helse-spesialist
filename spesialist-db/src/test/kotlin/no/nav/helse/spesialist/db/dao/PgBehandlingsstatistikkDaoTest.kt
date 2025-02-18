@@ -7,7 +7,7 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
-import no.nav.helse.spesialist.db.DatabaseIntegrationTest
+import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -16,7 +16,7 @@ import org.junit.jupiter.api.parallel.Isolated
 import java.time.LocalDate
 
 @Isolated
-internal class PgBehandlingsstatistikkDaoTest : DatabaseIntegrationTest() {
+internal class PgBehandlingsstatistikkDaoTest : AbstractDBIntegrationTest() {
 
     private val NOW = LocalDate.now()
 

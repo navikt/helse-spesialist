@@ -23,7 +23,7 @@ import no.nav.helse.spesialist.api.overstyring.OverstyringMinimumSykdomsgradDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringTidslinjeDto
 import no.nav.helse.spesialist.api.overstyring.Skjonnsfastsettingstype
 import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsettingSykepengegrunnlagDto
-import no.nav.helse.spesialist.db.DatabaseIntegrationTest
+import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.db.jan
 import no.nav.helse.spesialist.db.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.typer.Kjønn
@@ -35,7 +35,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.UUID
 
-internal class PgOverstyringDaoTest : DatabaseIntegrationTest() {
+internal class PgOverstyringDaoTest : AbstractDBIntegrationTest() {
     private val PERSON_FORNAVN = "Per"
     private val PERSON_ETTERNAVN = "Son"
     private val PERSON_FØDSELSDATO = LocalDate.of(1998, 4, 20)

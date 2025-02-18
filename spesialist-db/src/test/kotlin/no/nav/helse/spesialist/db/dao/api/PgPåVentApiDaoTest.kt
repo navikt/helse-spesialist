@@ -1,14 +1,14 @@
 package no.nav.helse.spesialist.db.dao.api
 
 import no.nav.helse.db.api.PgPåVentApiDao
-import no.nav.helse.spesialist.db.DatabaseIntegrationTest
+import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.UUID
 
-internal class PgPåVentApiDaoTest : DatabaseIntegrationTest() {
+internal class PgPåVentApiDaoTest : AbstractDBIntegrationTest() {
 
     private val påVentApiDao = PgPåVentApiDao(dataSource)
 

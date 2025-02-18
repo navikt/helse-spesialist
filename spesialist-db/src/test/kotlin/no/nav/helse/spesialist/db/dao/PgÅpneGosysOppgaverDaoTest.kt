@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.db.dao
 
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDto
-import no.nav.helse.spesialist.db.DatabaseIntegrationTest
+import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 
 
-internal class PgÅpneGosysOppgaverDaoTest : DatabaseIntegrationTest() {
+internal class PgÅpneGosysOppgaverDaoTest : AbstractDBIntegrationTest() {
 
     @BeforeEach
     fun setup() {

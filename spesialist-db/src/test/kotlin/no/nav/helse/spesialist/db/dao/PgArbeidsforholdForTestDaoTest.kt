@@ -2,7 +2,7 @@ package no.nav.helse.spesialist.db.dao
 
 import no.nav.helse.modell.KomplettArbeidsforholdDto
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
-import no.nav.helse.spesialist.db.DatabaseIntegrationTest
+import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.db.apr
 import no.nav.helse.spesialist.db.jan
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-internal class PgArbeidsforholdForTestDaoTest : DatabaseIntegrationTest() {
+internal class PgArbeidsforholdForTestDaoTest : AbstractDBIntegrationTest() {
     private companion object {
         const val STILLINGSPROSENT = 100
         const val STILLINGSTITTEL = "Slabberasansvarlig"

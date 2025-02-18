@@ -1,14 +1,14 @@
 package no.nav.helse.spesialist.db.dao.api
 
 import no.nav.helse.db.api.ArbeidsgiverApiDao.Inntekter
-import no.nav.helse.spesialist.db.DatabaseIntegrationTest
+import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.YearMonth
 
-internal class PgArbeidsgiverApiDaoTest : DatabaseIntegrationTest() {
+internal class PgArbeidsgiverApiDaoTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `finner bransjer`() {

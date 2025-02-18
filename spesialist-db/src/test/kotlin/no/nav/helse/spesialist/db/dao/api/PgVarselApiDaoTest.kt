@@ -10,7 +10,7 @@ import no.nav.helse.db.api.VarselDbDto.VarselvurderingDbDto
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
 import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
-import no.nav.helse.spesialist.db.DatabaseIntegrationTest
+import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.db.feb
 import no.nav.helse.spesialist.db.jan
 import no.nav.helse.spesialist.db.lagAktørId
@@ -31,7 +31,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 @Isolated
-internal class PgVarselApiDaoTest : DatabaseIntegrationTest() {
+internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
     private val apiVarselDao = PgVarselApiDao(dataSource)
 
     private val varseldefinisjoner: List<TestVarseldefinisjon> =

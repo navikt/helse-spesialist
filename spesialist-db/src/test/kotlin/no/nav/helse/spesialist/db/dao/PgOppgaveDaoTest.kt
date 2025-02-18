@@ -23,7 +23,7 @@ import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.spesialist.db.DatabaseIntegrationTest
+import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.db.TestMelding
 import no.nav.helse.spesialist.db.lagAktørId
 import no.nav.helse.spesialist.db.lagFødselsnummer
@@ -46,7 +46,7 @@ import java.util.UUID
 
 @Isolated
 @Execution(ExecutionMode.SAME_THREAD)
-class PgOppgaveDaoTest : DatabaseIntegrationTest() {
+class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
     private val CONTEXT_ID = UUID.randomUUID()
     private val TESTHENDELSE = TestMelding(HENDELSE_ID, UUID.randomUUID(), FNR)
     private val OPPGAVETYPE = "SØKNAD"

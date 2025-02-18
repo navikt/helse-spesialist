@@ -3,7 +3,7 @@ package no.nav.helse.spesialist.db.dao
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
-import no.nav.helse.spesialist.db.DatabaseIntegrationTest
+import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
@@ -12,7 +12,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.random.Random.Default.nextLong
 
-class PgUtbetalingDaoTest : DatabaseIntegrationTest() {
+class PgUtbetalingDaoTest : AbstractDBIntegrationTest() {
     @Test
     fun `finner utbetaling`() {
         nyPerson()

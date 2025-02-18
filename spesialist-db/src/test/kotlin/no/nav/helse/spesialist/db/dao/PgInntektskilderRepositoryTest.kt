@@ -12,7 +12,7 @@ import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.modell.vilkårsprøving.Beregningsgrunnlag
 import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
 import no.nav.helse.modell.vilkårsprøving.Sammenligningsgrunnlag
-import no.nav.helse.spesialist.db.DatabaseIntegrationTest
+import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.db.jan
 import no.nav.helse.spesialist.db.lagFødselsnummer
 import no.nav.helse.spesialist.db.lagOrganisasjonsnavn
@@ -24,7 +24,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class PgInntektskilderRepositoryTest : DatabaseIntegrationTest() {
+internal class PgInntektskilderRepositoryTest : AbstractDBIntegrationTest() {
     private val avviksvurderingRepository = DBSessionContext(session) { _, _ -> false }.avviksvurderingRepository
 
     @Test

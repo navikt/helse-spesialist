@@ -2,7 +2,7 @@ package no.nav.helse.spesialist.db.dao.api
 
 import no.nav.helse.db.api.PgGenerasjonApiDao
 import no.nav.helse.db.api.VedtaksperiodeDbDto
-import no.nav.helse.spesialist.db.DatabaseIntegrationTest
+import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.db.feb
 import no.nav.helse.spesialist.db.jan
 import no.nav.helse.spesialist.db.mar
@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.UUID
 
-internal class PgGenerasjonApiDaoTest: DatabaseIntegrationTest() {
+internal class PgGenerasjonApiDaoTest: AbstractDBIntegrationTest() {
 
     private val generasjonDao = PgGenerasjonApiDao(dataSource)
 

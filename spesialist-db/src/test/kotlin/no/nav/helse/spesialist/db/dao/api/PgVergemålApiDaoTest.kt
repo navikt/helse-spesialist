@@ -1,12 +1,12 @@
 package no.nav.helse.spesialist.db.dao.api
 
 import no.nav.helse.db.api.PgVergemålApiDao
-import no.nav.helse.spesialist.db.DatabaseIntegrationTest
+import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 
-private class PgVergemålApiDaoTest : DatabaseIntegrationTest() {
+private class PgVergemålApiDaoTest : AbstractDBIntegrationTest() {
 
     private val vergemålApiDao = PgVergemålApiDao(dataSource)
 

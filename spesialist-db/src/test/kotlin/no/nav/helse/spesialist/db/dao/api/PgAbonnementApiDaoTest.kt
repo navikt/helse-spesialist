@@ -1,6 +1,6 @@
 package no.nav.helse.spesialist.db.dao.api
 
-import no.nav.helse.spesialist.db.DatabaseIntegrationTest
+import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.db.lagAktørId
 import no.nav.helse.spesialist.db.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -10,7 +10,7 @@ import org.junit.jupiter.api.parallel.Isolated
 import java.util.UUID
 
 @Isolated
-internal class PgAbonnementApiDaoTest : DatabaseIntegrationTest() {
+internal class PgAbonnementApiDaoTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `får nytt sekvensnummer selvom det allerede fins et`() {

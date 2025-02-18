@@ -2,7 +2,7 @@ package no.nav.helse.spesialist.db.dao
 
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.spesialist.db.DatabaseIntegrationTest
+import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -12,7 +12,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class PgReservasjonDaoTest : DatabaseIntegrationTest() {
+internal class PgReservasjonDaoTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `reserverer person`() {

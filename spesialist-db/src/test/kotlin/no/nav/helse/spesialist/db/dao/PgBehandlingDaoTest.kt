@@ -6,7 +6,7 @@ import no.nav.helse.modell.person.vedtaksperiode.VarselDto
 import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
 import no.nav.helse.modell.vedtak.Utfall
 import no.nav.helse.modell.vedtak.VedtakBegrunnelse
-import no.nav.helse.spesialist.db.DatabaseIntegrationTest
+import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.db.jan
 import no.nav.helse.spesialist.db.lagAktørId
 import no.nav.helse.spesialist.db.lagFødselsnummer
@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class PgBehandlingDaoTest : DatabaseIntegrationTest() {
+internal class PgBehandlingDaoTest : AbstractDBIntegrationTest() {
 
     private val generasjonDao = repositories.generasjonDao
 

@@ -3,14 +3,14 @@ package no.nav.helse.spesialist.db.dao
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMelding
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.AKTIVITETSKRAV
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.MEDISINSK_VILKAR
-import no.nav.helse.spesialist.db.DatabaseIntegrationTest
+import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.time.LocalDateTime.now
 import java.util.UUID
 
-internal class PgStansAutomatiskBehandlingDaoTest : DatabaseIntegrationTest() {
+internal class PgStansAutomatiskBehandlingDaoTest : AbstractDBIntegrationTest() {
     @Test
     fun `kan lagre fra iSyfo`() {
         lagreFraISyfo()

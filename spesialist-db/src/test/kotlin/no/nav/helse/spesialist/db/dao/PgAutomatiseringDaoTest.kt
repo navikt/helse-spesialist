@@ -2,7 +2,7 @@ package no.nav.helse.spesialist.db.dao
 
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.spesialist.db.DatabaseIntegrationTest
+import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -13,7 +13,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-internal class PgAutomatiseringDaoTest : DatabaseIntegrationTest() {
+internal class PgAutomatiseringDaoTest : AbstractDBIntegrationTest() {
 
     @BeforeEach
     fun setup() {

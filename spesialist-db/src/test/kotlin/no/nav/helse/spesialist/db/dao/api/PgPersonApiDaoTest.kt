@@ -6,12 +6,12 @@ import no.nav.helse.modell.person.Adressebeskyttelse.StrengtFortrolig
 import no.nav.helse.modell.person.Adressebeskyttelse.StrengtFortroligUtland
 import no.nav.helse.modell.person.Adressebeskyttelse.Ugradert
 import no.nav.helse.modell.person.Adressebeskyttelse.Ukjent
-import no.nav.helse.spesialist.db.DatabaseIntegrationTest
+import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class PgPersonApiDaoTest : DatabaseIntegrationTest() {
+internal class PgPersonApiDaoTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `skal oppdage at en person har fortrolig adresse`() {

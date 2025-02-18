@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.db.dao.api
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.spesialist.db.DatabaseIntegrationTest
+import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-internal class PgRisikovurderingApiDaoTest : DatabaseIntegrationTest() {
+internal class PgRisikovurderingApiDaoTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `finner risikovurdering`() {

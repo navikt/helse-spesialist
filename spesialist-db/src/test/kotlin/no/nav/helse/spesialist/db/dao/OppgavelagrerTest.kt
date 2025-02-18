@@ -11,13 +11,13 @@ import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.Oppgave.Companion.toDto
 import no.nav.helse.modell.saksbehandler.Saksbehandler
-import no.nav.helse.spesialist.db.DatabaseIntegrationTest
+import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.UUID
 import kotlin.random.Random.Default.nextLong
 
-class OppgavelagrerTest : DatabaseIntegrationTest() {
+class OppgavelagrerTest : AbstractDBIntegrationTest() {
     private val OPPGAVETYPE = SØKNAD
     private val VEDTAKSPERIODE_ID = UUID.randomUUID()
     private val BEHANDLING_ID = UUID.randomUUID()

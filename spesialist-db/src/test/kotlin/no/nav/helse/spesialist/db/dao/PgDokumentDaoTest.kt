@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.db.dao
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.spesialist.db.DatabaseIntegrationTest
+import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -11,7 +11,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 
-internal class PgDokumentDaoTest : DatabaseIntegrationTest() {
+internal class PgDokumentDaoTest : AbstractDBIntegrationTest() {
     @BeforeEach
     fun setup() {
         testhendelse()

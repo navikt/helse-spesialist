@@ -3,7 +3,7 @@ package no.nav.helse.spesialist.db.dao
 import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.spesialist.db.DatabaseIntegrationTest
+import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -11,7 +11,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class PgRisikovurderingDaoTest : DatabaseIntegrationTest() {
+internal class PgRisikovurderingDaoTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `lagrer risikovurdering`() {

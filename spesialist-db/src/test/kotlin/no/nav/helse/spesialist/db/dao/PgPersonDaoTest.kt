@@ -7,7 +7,7 @@ import kotliquery.sessionOf
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.modell.kommando.MinimalPersonDto
 import no.nav.helse.modell.person.Adressebeskyttelse
-import no.nav.helse.spesialist.db.DatabaseIntegrationTest
+import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.typer.Kjønn
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -21,7 +21,7 @@ import java.time.LocalDateTime.now
 import java.time.YearMonth
 
 @Isolated
-internal class PgPersonDaoTest : DatabaseIntegrationTest() {
+internal class PgPersonDaoTest : AbstractDBIntegrationTest() {
     @BeforeEach
     fun tømTabeller() {
         sessionOf(dataSource).use {
