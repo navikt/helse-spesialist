@@ -49,7 +49,7 @@ micrometer-prometheus = "io.micrometer:micrometer-registry-prometheus:1.14.4"
 mockOauth2Server = "no.nav.security:mock-oauth2-server:2.1.10"
 nimbus-joseJwt = "com.nimbusds:nimbus-jose-jwt:10.0.1"
 postgresJdbcDriver = "org.postgresql:postgresql:42.7.3"
-postgresSocketFactory = "com.google.cloud.sql:postgres-socket-factory:1.16.0"
+postgresSocketFactory = "com.google.cloud.sql:postgres-socket-factory:1.23.1"
 rapidsAndRivers = "com.github.navikt:rapids-and-rivers:2025012712551737978926.de930d8e0feb"
 slf4jApi = "org.slf4j:slf4j-api:2.0.16"
 
