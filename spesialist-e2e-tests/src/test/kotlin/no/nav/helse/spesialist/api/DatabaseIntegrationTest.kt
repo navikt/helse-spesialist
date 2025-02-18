@@ -17,11 +17,11 @@ import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
 import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.db.DbQuery
-import no.nav.helse.spesialist.modell.Dialog
-import no.nav.helse.spesialist.modell.DialogId
-import no.nav.helse.spesialist.modell.Notat
-import no.nav.helse.spesialist.modell.NotatType
-import no.nav.helse.spesialist.modell.SaksbehandlerOid
+import no.nav.helse.spesialist.domain.Dialog
+import no.nav.helse.spesialist.domain.DialogId
+import no.nav.helse.spesialist.domain.Notat
+import no.nav.helse.spesialist.domain.NotatType
+import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.test.lagAktørId
 import no.nav.helse.spesialist.test.lagEtternavn
 import no.nav.helse.spesialist.test.lagFornavn

@@ -1,6 +1,6 @@
 package no.nav.helse.modell.saksbehandler.handlinger
 
-import no.nav.helse.spesialist.modell.ddd.Entity
+import no.nav.helse.spesialist.domain.ddd.Entity
 import java.time.LocalDateTime
 import java.util.UUID
 

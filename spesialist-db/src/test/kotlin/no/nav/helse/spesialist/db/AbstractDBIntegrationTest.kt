@@ -35,7 +35,7 @@ import no.nav.helse.spesialist.db.dao.api.PgPeriodehistorikkApiDao
 import no.nav.helse.spesialist.db.dao.api.PgPersonApiDao
 import no.nav.helse.spesialist.db.dao.api.PgRisikovurderingApiDao
 import no.nav.helse.spesialist.db.dao.api.PgVarselApiRepository
-import no.nav.helse.spesialist.modell.Dialog
+import no.nav.helse.spesialist.domain.Dialog
 import no.nav.helse.spesialist.typer.Kjønn
 import org.flywaydb.core.Flyway
 import org.intellij.lang.annotations.Language

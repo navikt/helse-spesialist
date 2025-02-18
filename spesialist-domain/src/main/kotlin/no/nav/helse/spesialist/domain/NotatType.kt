@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.modell
+package no.nav.helse.spesialist.domain
 
 enum class NotatType {
     Generelt,

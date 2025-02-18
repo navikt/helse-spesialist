@@ -1,6 +1,6 @@
-package no.nav.helse.spesialist.modell
+package no.nav.helse.spesialist.domain
 
-import no.nav.helse.spesialist.modell.ddd.Entity
+import no.nav.helse.spesialist.domain.ddd.Entity
 import java.util.UUID
 
 @JvmInline

@@ -6,10 +6,10 @@ import no.nav.helse.spesialist.application.DialogRepository
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
-import no.nav.helse.spesialist.modell.Dialog
-import no.nav.helse.spesialist.modell.DialogId
-import no.nav.helse.spesialist.modell.Kommentar
-import no.nav.helse.spesialist.modell.KommentarId
+import no.nav.helse.spesialist.domain.Dialog
+import no.nav.helse.spesialist.domain.DialogId
+import no.nav.helse.spesialist.domain.Kommentar
+import no.nav.helse.spesialist.domain.KommentarId
 
 internal class PgDialogRepository(
     session: Session,

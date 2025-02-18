@@ -6,8 +6,8 @@ import no.nav.helse.spesialist.application.SaksbehandlerRepository
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
-import no.nav.helse.spesialist.modell.Saksbehandler
-import no.nav.helse.spesialist.modell.SaksbehandlerOid
+import no.nav.helse.spesialist.domain.Saksbehandler
+import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import java.util.UUID
 
 internal class PgSaksbehandlerRepository(

@@ -14,7 +14,7 @@ import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingh�
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.AKTIVITETSKRAV
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.MEDISINSK_VILKAR
-import no.nav.helse.spesialist.modell.NotatType
+import no.nav.helse.spesialist.domain.NotatType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test

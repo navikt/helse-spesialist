@@ -6,11 +6,11 @@ import no.nav.helse.spesialist.application.NotatRepository
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
-import no.nav.helse.spesialist.modell.DialogId
-import no.nav.helse.spesialist.modell.Notat
-import no.nav.helse.spesialist.modell.NotatId
-import no.nav.helse.spesialist.modell.NotatType
-import no.nav.helse.spesialist.modell.SaksbehandlerOid
+import no.nav.helse.spesialist.domain.DialogId
+import no.nav.helse.spesialist.domain.Notat
+import no.nav.helse.spesialist.domain.NotatId
+import no.nav.helse.spesialist.domain.NotatType
+import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import java.util.UUID
 
 internal class PgNotatRepository(

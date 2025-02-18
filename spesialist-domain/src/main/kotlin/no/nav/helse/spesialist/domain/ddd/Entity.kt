@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.modell.ddd
+package no.nav.helse.spesialist.domain.ddd
 
 abstract class Entity<IDTYPE>(private var id: IDTYPE?) {
     fun harFåttTildeltId() = id != null

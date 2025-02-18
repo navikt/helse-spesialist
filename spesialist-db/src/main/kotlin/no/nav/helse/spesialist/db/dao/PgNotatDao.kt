@@ -6,7 +6,7 @@ import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
-import no.nav.helse.spesialist.modell.NotatType
+import no.nav.helse.spesialist.domain.NotatType
 import java.util.UUID
 import javax.sql.DataSource
 

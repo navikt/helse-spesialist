@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.application
 
-import no.nav.helse.spesialist.modell.Notat
-import no.nav.helse.spesialist.modell.NotatId
+import no.nav.helse.spesialist.domain.Notat
+import no.nav.helse.spesialist.domain.NotatId
 import java.util.UUID
 
 interface NotatRepository {

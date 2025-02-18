@@ -8,7 +8,7 @@ import no.nav.helse.modell.saksbehandler.Saksbehandler.Companion.gjenopprett
 import no.nav.helse.modell.saksbehandler.Saksbehandler.Companion.toDto
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.modell.saksbehandler.handlinger.Overstyring
-import no.nav.helse.spesialist.modell.ddd.AggregateRoot
+import no.nav.helse.spesialist.domain.ddd.AggregateRoot
 import java.time.LocalDateTime
 import java.util.UUID
 

@@ -9,7 +9,7 @@ import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.handlinger.OpphevStans
 import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.graphql.schema.ApiUnntattFraAutomatiskGodkjenning
-import no.nav.helse.spesialist.modell.NotatType
+import no.nav.helse.spesialist.domain.NotatType
 import org.slf4j.LoggerFactory
 import java.util.UUID
 

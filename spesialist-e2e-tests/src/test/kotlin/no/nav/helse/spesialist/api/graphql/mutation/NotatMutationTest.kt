@@ -3,11 +3,11 @@ package no.nav.helse.spesialist.api.graphql.mutation
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
 import no.nav.helse.spesialist.api.objectMapper
-import no.nav.helse.spesialist.modell.Dialog
-import no.nav.helse.spesialist.modell.DialogId
-import no.nav.helse.spesialist.modell.KommentarId
-import no.nav.helse.spesialist.modell.NotatId
-import no.nav.helse.spesialist.modell.NotatType
+import no.nav.helse.spesialist.domain.Dialog
+import no.nav.helse.spesialist.domain.DialogId
+import no.nav.helse.spesialist.domain.KommentarId
+import no.nav.helse.spesialist.domain.NotatId
+import no.nav.helse.spesialist.domain.NotatType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull

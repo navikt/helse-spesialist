@@ -1,6 +1,6 @@
-package no.nav.helse.spesialist.modell
+package no.nav.helse.spesialist.domain
 
-import no.nav.helse.spesialist.modell.ddd.AggregateRoot
+import no.nav.helse.spesialist.domain.ddd.AggregateRoot
 import java.time.LocalDateTime
 import java.util.UUID
 

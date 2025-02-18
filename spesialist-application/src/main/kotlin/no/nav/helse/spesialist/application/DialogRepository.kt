@@ -1,8 +1,8 @@
 package no.nav.helse.spesialist.application
 
-import no.nav.helse.spesialist.modell.Dialog
-import no.nav.helse.spesialist.modell.DialogId
-import no.nav.helse.spesialist.modell.KommentarId
+import no.nav.helse.spesialist.domain.Dialog
+import no.nav.helse.spesialist.domain.DialogId
+import no.nav.helse.spesialist.domain.KommentarId
 
 interface DialogRepository {
     fun lagre(dialog: Dialog)
