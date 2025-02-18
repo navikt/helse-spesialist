@@ -36,6 +36,9 @@ allprojects {
 
     dependencies {
         constraints {
+            implementation("commons-io:commons-io:[2.14.0,)") {
+                because("Sårbarhet CVE-2024-47554")
+            }
             implementation("io.netty:netty-codec-http:4.1.118.Final") {
                 because("sårbarhet i >= 4.1.91.Final, <= 4.1.117.Final")
             }
