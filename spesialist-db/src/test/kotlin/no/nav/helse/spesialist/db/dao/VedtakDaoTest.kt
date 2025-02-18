@@ -2,7 +2,6 @@ package no.nav.helse.spesialist.db.dao
 
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.db.PgVedtakDao
 import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
 import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
 import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto

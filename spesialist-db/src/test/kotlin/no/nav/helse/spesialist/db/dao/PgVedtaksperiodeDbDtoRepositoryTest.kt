@@ -1,8 +1,5 @@
 package no.nav.helse.spesialist.db.dao
 
-import no.nav.helse.db.PgGenerasjonDao
-import no.nav.helse.db.PgVedtakDao
-import no.nav.helse.db.PgVedtaksperiodeRepository
 import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
 import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
 import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto

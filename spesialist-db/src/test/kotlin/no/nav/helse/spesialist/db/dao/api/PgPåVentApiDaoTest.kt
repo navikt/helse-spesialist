@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.db.dao.api
 
-import no.nav.helse.db.api.PgPåVentApiDao
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull

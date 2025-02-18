@@ -1,7 +1,6 @@
 package no.nav.helse.spesialist.db.dao
 
 import kotliquery.sessionOf
-import no.nav.helse.db.PgArbeidsgiverDao
 import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettInntektskildeDto
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest

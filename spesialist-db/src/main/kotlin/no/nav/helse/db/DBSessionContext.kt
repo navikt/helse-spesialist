@@ -7,11 +7,40 @@ import no.nav.helse.spesialist.application.NotatRepository
 import no.nav.helse.spesialist.application.OverstyringRepository
 import no.nav.helse.spesialist.application.SaksbehandlerRepository
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
-import no.nav.helse.spesialist.db.PgDialogRepository
-import no.nav.helse.spesialist.db.PgNotatRepository
-import no.nav.helse.spesialist.db.PgOverstyringRepository
-import no.nav.helse.spesialist.db.PgSaksbehandlerRepository
-import no.nav.helse.spesialist.db.PgTotrinnsvurderingRepository
+import no.nav.helse.spesialist.db.dao.PgArbeidsforholdDao
+import no.nav.helse.spesialist.db.dao.PgArbeidsgiverDao
+import no.nav.helse.spesialist.db.dao.PgAutomatiseringDao
+import no.nav.helse.spesialist.db.dao.PgAvviksvurderingRepository
+import no.nav.helse.spesialist.db.dao.PgCommandContextDao
+import no.nav.helse.spesialist.db.dao.PgDialogDao
+import no.nav.helse.spesialist.db.dao.PgEgenAnsattDao
+import no.nav.helse.spesialist.db.dao.PgGenerasjonDao
+import no.nav.helse.spesialist.db.dao.PgInntektskilderRepository
+import no.nav.helse.spesialist.db.dao.PgMeldingDao
+import no.nav.helse.spesialist.db.dao.PgMetrikkDao
+import no.nav.helse.spesialist.db.dao.PgNotatDao
+import no.nav.helse.spesialist.db.dao.PgOppgaveDao
+import no.nav.helse.spesialist.db.dao.PgOpptegnelseDao
+import no.nav.helse.spesialist.db.dao.PgOverstyringDao
+import no.nav.helse.spesialist.db.dao.PgPeriodehistorikkDao
+import no.nav.helse.spesialist.db.dao.PgPersonDao
+import no.nav.helse.spesialist.db.dao.PgPersonRepository
+import no.nav.helse.spesialist.db.dao.PgPåVentDao
+import no.nav.helse.spesialist.db.dao.PgReservasjonDao
+import no.nav.helse.spesialist.db.dao.PgRisikovurderingDao
+import no.nav.helse.spesialist.db.dao.PgSaksbehandlerDao
+import no.nav.helse.spesialist.db.dao.PgStansAutomatiskBehandlingDao
+import no.nav.helse.spesialist.db.dao.PgTildelingDao
+import no.nav.helse.spesialist.db.dao.PgUtbetalingDao
+import no.nav.helse.spesialist.db.dao.PgVedtakDao
+import no.nav.helse.spesialist.db.dao.PgVedtaksperiodeRepository
+import no.nav.helse.spesialist.db.dao.PgVergemålDao
+import no.nav.helse.spesialist.db.dao.PgÅpneGosysOppgaverDao
+import no.nav.helse.spesialist.db.repository.PgDialogRepository
+import no.nav.helse.spesialist.db.repository.PgNotatRepository
+import no.nav.helse.spesialist.db.repository.PgOverstyringRepository
+import no.nav.helse.spesialist.db.repository.PgSaksbehandlerRepository
+import no.nav.helse.spesialist.db.repository.PgTotrinnsvurderingRepository
 
 class DBSessionContext(session: Session, tilgangskontroll: Tilgangskontroll) : SessionContext {
     override val arbeidsforholdDao = PgArbeidsforholdDao(session)

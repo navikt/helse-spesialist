@@ -2,7 +2,6 @@ package no.nav.helse.spesialist.db.dao.api
 
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.db.api.PgVarselApiDao
 import no.nav.helse.db.api.VarselDbDto
 import no.nav.helse.db.api.VarselDbDto.VarseldefinisjonDbDto
 import no.nav.helse.db.api.VarselDbDto.Varselstatus

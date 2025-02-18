@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.db.dao.api
 
-import no.nav.helse.db.api.PgGenerasjonApiDao
 import no.nav.helse.db.api.VedtaksperiodeDbDto
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.db.feb

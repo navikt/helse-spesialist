@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.db.dao
 
-import no.nav.helse.db.PgDefinisjonDao
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import org.junit.jupiter.api.Assertions.assertEquals
