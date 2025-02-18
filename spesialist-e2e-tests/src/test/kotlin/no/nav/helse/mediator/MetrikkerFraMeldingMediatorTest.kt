@@ -26,15 +26,15 @@ internal class MetrikkerFraMeldingMediatorTest : AbstractDatabaseTest() {
     init {
         MeldingMediator(
             sessionFactory = TransactionalSessionFactory(dataSource, TilgangskontrollForTestHarIkkeTilgang),
-            personDao = repositories.personDao,
-            commandContextDao = repositories.commandContextDao,
-            meldingDao = repositories.meldingDao,
-            meldingDuplikatkontrollDao = repositories.meldingDuplikatkontrollDao,
+            personDao = daos.personDao,
+            commandContextDao = daos.commandContextDao,
+            meldingDao = daos.meldingDao,
+            meldingDuplikatkontrollDao = daos.meldingDuplikatkontrollDao,
             kommandofabrikk = kommandofabrikk,
-            dokumentDao = repositories.dokumentDao,
+            dokumentDao = daos.dokumentDao,
             varselRepository = VarselRepository(
-                varselDao = repositories.varselDao,
-                definisjonDao = repositories.definisjonDao
+                varselDao = daos.varselDao,
+                definisjonDao = daos.definisjonDao
             ),
             poisonPills = PoisonPills(emptyMap()),
             env = environment,

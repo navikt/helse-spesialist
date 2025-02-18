@@ -71,7 +71,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
 
     protected val spleisClient = mockk<SpleisClient>(relaxed = true)
     protected val snapshothenter = SpleisClientSnapshothenter(spleisClient)
-    private val personinfoDao = repositories.personinfoDao
+    private val personinfoDao = daos.personinfoDao
     private val snapshotService = SnapshotService(personinfoDao, snapshothenter)
 
     private val apiTesting = ApiTesting(

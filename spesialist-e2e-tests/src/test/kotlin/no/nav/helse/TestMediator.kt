@@ -18,7 +18,7 @@ import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
-import no.nav.helse.spesialist.db.DBRepositories
+import no.nav.helse.spesialist.db.DBDaos
 import no.nav.helse.spesialist.db.TransactionalSessionFactory
 import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import no.nav.helse.util.testEnv
@@ -34,7 +34,7 @@ internal class TestMediator(
         override val erDev = false
         override val erProd = false
     }
-    private val repositories = DBRepositories(dataSource, TilgangskontrollForTestHarIkkeTilgang)
+    private val repositories = DBDaos(dataSource, TilgangskontrollForTestHarIkkeTilgang)
     private val opptegnelseDao = repositories.opptegnelseDao
     private val oppgaveDao = repositories.oppgaveDao
     private val overstyringDao = repositories.overstyringDao

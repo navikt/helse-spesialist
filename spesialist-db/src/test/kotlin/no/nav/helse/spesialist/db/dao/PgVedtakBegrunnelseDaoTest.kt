@@ -12,7 +12,7 @@ import java.util.UUID
 
 internal class PgVedtakBegrunnelseDaoTest : AbstractDBIntegrationTest() {
 
-    private val dao = repositories.vedtakBegrunnelseDao
+    private val dao = daos.vedtakBegrunnelseDao
 
     @Test
     fun `lagrer og finner vedtaksbegrunnelse`() {

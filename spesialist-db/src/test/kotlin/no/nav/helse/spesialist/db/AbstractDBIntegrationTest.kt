@@ -50,7 +50,7 @@ import kotlin.random.Random.Default.nextLong
 
 abstract class AbstractDBIntegrationTest {
     protected val dbQuery = DbQuery(dataSource)
-    protected val repositories = DBRepositories(dataSource) { _, _ -> false }
+    protected val daos = DBDaos(dataSource) { _, _ -> false }
     private val testperson = TestPerson()
     protected open val HENDELSE_ID: UUID = UUID.randomUUID()
 
@@ -148,17 +148,17 @@ abstract class AbstractDBIntegrationTest {
 
     internal val personDao = PgPersonDao(session)
     protected val personApiDao = PgPersonApiDao(dataSource)
-    internal val oppgaveDao = repositories.oppgaveDao
+    internal val oppgaveDao = daos.oppgaveDao
     internal val oppgaveApiDao = PgOppgaveApiDao(dataSource)
     internal val periodehistorikkApiDao = PgPeriodehistorikkApiDao(dataSource)
-    internal val periodehistorikkDao = repositories.periodehistorikkDao
+    internal val periodehistorikkDao = daos.periodehistorikkDao
     internal val arbeidsforholdDao = sessionContext.arbeidsforholdDao
     internal val arbeidsgiverApiDao = PgArbeidsgiverApiDao(dataSource)
-    internal val vedtakDao = repositories.vedtakDao
+    internal val vedtakDao = daos.vedtakDao
     protected val apiVarselRepository = PgVarselApiRepository(dataSource)
-    internal val commandContextDao = repositories.commandContextDao
-    internal val tildelingDao = repositories.tildelingDao
-    internal val saksbehandlerDao = repositories.saksbehandlerDao
+    internal val commandContextDao = daos.commandContextDao
+    internal val tildelingDao = daos.tildelingDao
+    internal val saksbehandlerDao = daos.saksbehandlerDao
     internal val overstyringDao = sessionContext.overstyringDao
     internal val overstyringApiDao = PgOverstyringApiDao(dataSource)
     internal val reservasjonDao = sessionContext.reservasjonDao
@@ -170,13 +170,13 @@ abstract class AbstractDBIntegrationTest {
     internal val egenAnsattDao = sessionContext.egenAnsattDao
     internal val abonnementDao = PgAbonnementApiDao(dataSource)
     internal val utbetalingDao = sessionContext.utbetalingDao
-    internal val behandlingsstatistikkDao = repositories.behandlingsstatistikkDao
+    internal val behandlingsstatistikkDao = daos.behandlingsstatistikkDao
     internal val vergemålDao = sessionContext.vergemålDao
-    internal val dokumentDao = repositories.dokumentDao
+    internal val dokumentDao = daos.dokumentDao
     internal val påVentDao = sessionContext.påVentDao
     internal val stansAutomatiskBehandlingDao = sessionContext.stansAutomatiskBehandlingDao
-    internal val dialogDao = repositories.dialogDao
-    internal val annulleringRepository = repositories.annulleringRepository
+    internal val dialogDao = daos.dialogDao
+    internal val annulleringRepository = daos.annulleringRepository
     private val pgPersonRepository = sessionContext.personRepository
     internal val inntektskilderRepository = sessionContext.inntektskilderRepository
     internal val overstyringRepository = sessionContext.overstyringRepository

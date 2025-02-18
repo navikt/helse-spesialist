@@ -21,27 +21,27 @@ import org.junit.jupiter.api.Assertions.assertTrue
 internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
     protected val testRapid = __ikke_bruk_denne
     private val meldingPubliserer: MeldingPubliserer = MessageContextMeldingPubliserer(testRapid)
-    protected val oppgaveDao = repositories.oppgaveDao
-    private val reservasjonDao = repositories.reservasjonDao
-    private val periodehistorikkDao = repositories.periodehistorikkDao
-    private val saksbehandlerDao = repositories.saksbehandlerDao
+    protected val oppgaveDao = daos.oppgaveDao
+    private val reservasjonDao = daos.reservasjonDao
+    private val periodehistorikkDao = daos.periodehistorikkDao
+    private val saksbehandlerDao = daos.saksbehandlerDao
 
     private val oppgaveService =
         OppgaveService(
             oppgaveDao = oppgaveDao,
-            tildelingDao = repositories.tildelingDao,
+            tildelingDao = daos.tildelingDao,
             reservasjonDao = reservasjonDao,
-            opptegnelseDao = repositories.opptegnelseDao,
+            opptegnelseDao = daos.opptegnelseDao,
             meldingPubliserer = meldingPubliserer,
             tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
             tilgangsgrupper = SpeilTilgangsgrupper(testEnv),
-            repositories = repositories
+            repositories = daos
         )
 
     val godkjenningService =
         GodkjenningService(
             oppgaveDao = oppgaveDao,
-            overstyringDao = repositories.overstyringDao,
+            overstyringDao = daos.overstyringDao,
             publiserer = MessageContextMeldingPubliserer(testRapid),
             oppgaveService = oppgaveService,
             reservasjonDao = reservasjonDao,

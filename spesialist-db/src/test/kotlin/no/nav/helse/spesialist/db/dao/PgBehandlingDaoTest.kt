@@ -19,7 +19,7 @@ import java.util.UUID
 
 internal class PgBehandlingDaoTest : AbstractDBIntegrationTest() {
 
-    private val generasjonDao = repositories.generasjonDao
+    private val generasjonDao = daos.generasjonDao
 
     @Test
     fun `finner liste av unike vedtaksperiodeIder med fnr`() {

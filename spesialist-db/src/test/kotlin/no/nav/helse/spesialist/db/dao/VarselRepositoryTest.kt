@@ -11,10 +11,10 @@ import java.util.UUID
 
 internal class VarselRepositoryTest : AbstractDBIntegrationTest() {
     private val varselRepository  = VarselRepository(
-        varselDao = repositories.varselDao,
-        definisjonDao = repositories.definisjonDao
+        varselDao = daos.varselDao,
+        definisjonDao = daos.definisjonDao
     )
-    private val definisjonDao = repositories.definisjonDao
+    private val definisjonDao = daos.definisjonDao
 
     @Test
     fun `lagre definisjon`() {

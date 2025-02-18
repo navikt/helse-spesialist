@@ -39,7 +39,7 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.ApiOpphevStans
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
-import no.nav.helse.spesialist.db.DBRepositories
+import no.nav.helse.spesialist.db.DBDaos
 import no.nav.helse.spesialist.db.TransactionalSessionFactory
 import no.nav.helse.spesialist.test.lagAktørId
 import no.nav.helse.spesialist.test.lagFødselsnummer
@@ -67,8 +67,8 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     private val tilgangsgrupper = SpeilTilgangsgrupper(testEnv)
     private val testRapid = TestRapid()
     private val meldingPubliserer: MeldingPubliserer = MessageContextMeldingPubliserer(testRapid)
-    private val tildelingDbDao = repositories.tildelingDao
-    private val opptegnelseRepository = repositories.opptegnelseDao
+    private val tildelingDbDao = daos.tildelingDao
+    private val opptegnelseRepository = daos.opptegnelseDao
     private val stansAutomatiskBehandlinghåndterer =
         StansAutomatiskBehandlinghåndtererImpl(
             stansAutomatiskBehandlingDao,
@@ -85,7 +85,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             meldingPubliserer = meldingPubliserer,
             tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
             tilgangsgrupper = tilgangsgrupper,
-            repositories = repositories
+            repositories = daos
         )
     private val apiOppgaveService = ApiOppgaveService(
         oppgaveDao = oppgaveDao,
@@ -94,7 +94,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     )
     private val mediator =
         SaksbehandlerMediator(
-            repositories = DBRepositories(dataSource, TilgangskontrollForTestHarIkkeTilgang),
+            repositories = DBDaos(dataSource, TilgangskontrollForTestHarIkkeTilgang),
             versjonAvKode = "versjonAvKode",
             meldingPubliserer = meldingPubliserer,
             oppgaveService = oppgaveService,

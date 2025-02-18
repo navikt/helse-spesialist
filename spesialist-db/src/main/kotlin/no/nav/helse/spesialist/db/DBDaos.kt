@@ -45,7 +45,7 @@ import no.nav.helse.spesialist.db.dao.api.PgVarselApiRepository
 import no.nav.helse.spesialist.db.dao.api.PgVergemålApiDao
 import javax.sql.DataSource
 
-class DBRepositories(dataSource: DataSource, tilgangskontroll: Tilgangskontroll) : Repositories {
+class DBDaos(dataSource: DataSource, tilgangskontroll: Tilgangskontroll) : Repositories {
     override val annulleringRepository = PgAnnulleringRepository(dataSource)
     override val behandlingsstatistikkDao = PgBehandlingsstatistikkDao(dataSource)
     override val commandContextDao = PgCommandContextDao(dataSource)

@@ -56,18 +56,18 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     val ORGANISASJONSNUMMER = lagOrganisasjonsnummer()
     val ORGANISASJONSNUMMER_GHOST = lagOrganisasjonsnummer()
 
-    protected val apiVarselRepository = repositories.varselApiRepository
-    protected val arbeidsgiverApiDao = repositories.arbeidsgiverApiDao
-    protected val risikovurderingApiDao = repositories.risikovurderingApiDao
-    protected val notatDao = repositories.notatApiDao
-    protected val totrinnsvurderingApiDao = repositories.totrinnsvurderingApiDao
-    protected val påVentApiDao = repositories.påVentApiDao
-    protected val personApiDao = repositories.personApiDao
-    protected val tildelingApiDao = repositories.tildelingApiDao
-    protected val overstyringApiDao = repositories.overstyringApiDao
-    protected val oppgaveApiDao = repositories.oppgaveApiDao
-    protected val periodehistorikkApiDao = repositories.periodehistorikkApiDao
-    protected val vergemålApiDao = repositories.vergemålApiDao
+    protected val apiVarselRepository = daos.varselApiRepository
+    protected val arbeidsgiverApiDao = daos.arbeidsgiverApiDao
+    protected val risikovurderingApiDao = daos.risikovurderingApiDao
+    protected val notatDao = daos.notatApiDao
+    protected val totrinnsvurderingApiDao = daos.totrinnsvurderingApiDao
+    protected val påVentApiDao = daos.påVentApiDao
+    protected val personApiDao = daos.personApiDao
+    protected val tildelingApiDao = daos.tildelingApiDao
+    protected val overstyringApiDao = daos.overstyringApiDao
+    protected val oppgaveApiDao = daos.oppgaveApiDao
+    protected val periodehistorikkApiDao = daos.periodehistorikkApiDao
+    protected val vergemålApiDao = daos.vergemålApiDao
 
     protected val egenAnsattApiDao = mockk<EgenAnsattApiDao>(relaxed = true)
     protected val apiOppgaveService = mockk<ApiOppgaveService>(relaxed = true)

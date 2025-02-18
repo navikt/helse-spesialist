@@ -1342,14 +1342,14 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         fødselsnummer: String = FØDSELSNUMMER,
         skjermet: Boolean?,
     ) {
-        assertEquals(skjermet, repositories.egenAnsattDao.erEgenAnsatt(fødselsnummer))
+        assertEquals(skjermet, daos.egenAnsattDao.erEgenAnsatt(fødselsnummer))
     }
 
     protected fun assertAdressebeskyttelse(
         fødselsnummer: String = FØDSELSNUMMER,
         adressebeskyttelse: Adressebeskyttelse?,
     ) {
-        assertEquals(adressebeskyttelse, repositories.personDao.finnAdressebeskyttelse(fødselsnummer))
+        assertEquals(adressebeskyttelse, daos.personDao.finnAdressebeskyttelse(fødselsnummer))
     }
 
     protected fun assertVedtaksperiodeEksisterer(vedtaksperiodeId: UUID) {

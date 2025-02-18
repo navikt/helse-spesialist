@@ -28,7 +28,7 @@ import no.nav.helse.spesialist.api.bootstrap.Bootstrap
 import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
 import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.application.Snapshothenter
-import no.nav.helse.spesialist.db.DBRepositories
+import no.nav.helse.spesialist.db.DBDaos
 import no.nav.helse.spesialist.db.DataSourceBuilder
 import no.nav.helse.spesialist.db.TransactionalSessionFactory
 import org.slf4j.LoggerFactory
@@ -52,20 +52,20 @@ class SpesialistApp(
 
     private val dataSourceBuilder = DataSourceBuilder(env)
     private val dataSource = dataSourceBuilder.getDataSource()
-    private val repositories = DBRepositories(dataSource, tilgangskontrollørForReservasjon)
+    private val daos = DBDaos(dataSource, tilgangskontrollørForReservasjon)
     private val sessionFactory = TransactionalSessionFactory(dataSource, tilgangskontrollørForReservasjon)
 
-    private val oppgaveDao = repositories.oppgaveDao
-    private val periodehistorikkDao = repositories.periodehistorikkDao
-    private val saksbehandlerDao = repositories.saksbehandlerDao
-    private val tildelingDao = repositories.tildelingDao
-    private val reservasjonDao = repositories.reservasjonDao
-    private val opptegnelseDao = repositories.opptegnelseDao
-    private val behandlingsstatistikkDao = repositories.behandlingsstatistikkDao
-    private val notatDao = repositories.notatDao
-    private val dialogDao = repositories.dialogDao
-    private val dokumentDao = repositories.dokumentDao
-    private val stansAutomatiskBehandlingDao = repositories.stansAutomatiskBehandlingDao
+    private val oppgaveDao = daos.oppgaveDao
+    private val periodehistorikkDao = daos.periodehistorikkDao
+    private val saksbehandlerDao = daos.saksbehandlerDao
+    private val tildelingDao = daos.tildelingDao
+    private val reservasjonDao = daos.reservasjonDao
+    private val opptegnelseDao = daos.opptegnelseDao
+    private val behandlingsstatistikkDao = daos.behandlingsstatistikkDao
+    private val notatDao = daos.notatDao
+    private val dialogDao = daos.dialogDao
+    private val dokumentDao = daos.dokumentDao
+    private val stansAutomatiskBehandlingDao = daos.stansAutomatiskBehandlingDao
 
     private lateinit var meldingMediator: MeldingMediator
     private lateinit var personhåndterer: Personhåndterer
@@ -102,7 +102,7 @@ class SpesialistApp(
 
     private val bootstrap =
         Bootstrap(
-            repositories = repositories,
+            repositories = daos,
             sessionFactory = sessionFactory,
             avhengigheter = apiAvhengigheter,
             reservasjonshenter = reservasjonshenter,
@@ -159,7 +159,7 @@ class SpesialistApp(
                 meldingPubliserer = meldingPubliserer,
                 tilgangskontroll = tilgangskontrollørForReservasjon,
                 tilgangsgrupper = tilgangsgrupper,
-                repositories = repositories,
+                repositories = daos,
             )
         apiOppgaveService =
             ApiOppgaveService(
@@ -170,32 +170,32 @@ class SpesialistApp(
         meldingMediator =
             MeldingMediator(
                 sessionFactory = sessionFactory,
-                personDao = repositories.personDao,
-                commandContextDao = repositories.commandContextDao,
-                meldingDao = repositories.meldingDao,
-                meldingDuplikatkontrollDao = repositories.meldingDuplikatkontrollDao,
+                personDao = daos.personDao,
+                commandContextDao = daos.commandContextDao,
+                meldingDao = daos.meldingDao,
+                meldingDuplikatkontrollDao = daos.meldingDuplikatkontrollDao,
                 kommandofabrikk = kommandofabrikk,
                 dokumentDao = dokumentDao,
                 varselRepository =
                     VarselRepository(
-                        varselDao = repositories.varselDao,
-                        definisjonDao = repositories.definisjonDao,
+                        varselDao = daos.varselDao,
+                        definisjonDao = daos.definisjonDao,
                     ),
-                poisonPills = repositories.poisonPillDao.poisonPills(),
+                poisonPills = daos.poisonPillDao.poisonPills(),
                 env = env,
             )
         personhåndterer = PersonhåndtererImpl(publiserer = meldingPubliserer)
-        RiverSetup(rapidsConnection, meldingMediator, repositories.meldingDuplikatkontrollDao).setUp()
+        RiverSetup(rapidsConnection, meldingMediator, daos.meldingDuplikatkontrollDao).setUp()
         saksbehandlerMediator =
             SaksbehandlerMediator(
-                repositories = repositories,
+                repositories = daos,
                 versjonAvKode = versjonAvKode,
                 meldingPubliserer = meldingPubliserer,
                 oppgaveService = oppgaveService,
                 apiOppgaveService = apiOppgaveService,
                 tilgangsgrupper = tilgangsgrupper,
                 stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
-                annulleringRepository = repositories.annulleringRepository,
+                annulleringRepository = daos.annulleringRepository,
                 env = env,
                 featureToggles = featureToggles,
                 sessionFactory = sessionFactory,
@@ -204,7 +204,7 @@ class SpesialistApp(
         godkjenningService =
             GodkjenningService(
                 oppgaveDao = oppgaveDao,
-                overstyringDao = repositories.overstyringDao,
+                overstyringDao = daos.overstyringDao,
                 publiserer = meldingPubliserer,
                 oppgaveService = oppgaveService,
                 reservasjonDao = reservasjonDao,

@@ -316,19 +316,19 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
         PersonQuery(
             handler = PersonQueryHandler(
                 personoppslagService = PersonService(
-                    personApiDao = repositories.personApiDao,
-                    egenAnsattApiDao = repositories.egenAnsattApiDao,
-                    vergemålApiDao = repositories.vergemålApiDao,
-                    tildelingApiDao = repositories.tildelingApiDao,
-                    arbeidsgiverApiDao = repositories.arbeidsgiverApiDao,
-                    overstyringApiDao = repositories.overstyringApiDao,
-                    risikovurderingApiDao = repositories.risikovurderingApiDao,
-                    varselRepository = repositories.varselApiRepository,
-                    oppgaveApiDao = repositories.oppgaveApiDao,
-                    periodehistorikkApiDao = repositories.periodehistorikkApiDao,
-                    notatDao = repositories.notatApiDao,
-                    totrinnsvurderingApiDao = repositories.totrinnsvurderingApiDao,
-                    påVentApiDao = repositories.påVentApiDao,
+                    personApiDao = daos.personApiDao,
+                    egenAnsattApiDao = daos.egenAnsattApiDao,
+                    vergemålApiDao = daos.vergemålApiDao,
+                    tildelingApiDao = daos.tildelingApiDao,
+                    arbeidsgiverApiDao = daos.arbeidsgiverApiDao,
+                    overstyringApiDao = daos.overstyringApiDao,
+                    risikovurderingApiDao = daos.risikovurderingApiDao,
+                    varselRepository = daos.varselApiRepository,
+                    oppgaveApiDao = daos.oppgaveApiDao,
+                    periodehistorikkApiDao = daos.periodehistorikkApiDao,
+                    notatDao = daos.notatApiDao,
+                    totrinnsvurderingApiDao = daos.totrinnsvurderingApiDao,
+                    påVentApiDao = daos.påVentApiDao,
                     apiOppgaveService = mockk(relaxed = true),
                     saksbehandlerhåndterer = mockk(relaxed = true),
                     stansAutomatiskBehandlinghåndterer = mockk(relaxed = true),
@@ -336,7 +336,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
                         override fun oppdaterSnapshot(fødselsnummer: String) {}
                         override fun klargjørPersonForVisning(fødselsnummer: String) {}
                     },
-                    snapshotService = SnapshotService(repositories.personinfoDao, snapshothenter),
+                    snapshotService = SnapshotService(daos.personinfoDao, snapshothenter),
                     reservasjonshenter = mockk(relaxed = true),
                     sessionFactory = sessionFactory
                 ),

@@ -5,7 +5,7 @@ import com.zaxxer.hikari.HikariDataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.bootstrap.Environment
-import no.nav.helse.spesialist.db.DBRepositories
+import no.nav.helse.spesialist.db.DBDaos
 import no.nav.helse.spesialist.db.TransactionalSessionFactory
 import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import org.flywaydb.core.Flyway
@@ -20,7 +20,7 @@ abstract class AbstractDatabaseTest {
         override val erDev = false
         override val erProd = false
     }
-    protected val repositories = DBRepositories(dataSource, TilgangskontrollForTestHarIkkeTilgang)
+    protected val daos = DBDaos(dataSource, TilgangskontrollForTestHarIkkeTilgang)
     protected val sessionFactory = TransactionalSessionFactory(dataSource, TilgangskontrollForTestHarIkkeTilgang)
 
     companion object {
