@@ -51,7 +51,7 @@ class Oppgave private constructor(
         val tildelt = tildeltTil
         if (tildelt != null && tildelt.oid != saksbehandler.oid) {
             logg.warn("Oppgave med {} kan ikke tildeles fordi den er tildelt noen andre.", kv("oppgaveId", id))
-            throw OppgaveTildeltNoenAndre(tildelt, false)
+            throw OppgaveTildeltNoenAndre(tildelt.oid, false)
         }
         tilstand.tildel(this, saksbehandler)
     }

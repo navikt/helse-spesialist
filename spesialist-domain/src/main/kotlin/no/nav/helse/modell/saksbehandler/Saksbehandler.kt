@@ -15,7 +15,7 @@ import java.util.UUID
 class Saksbehandler(
     val epostadresse: String,
     val oid: UUID,
-    private val navn: String,
+    val navn: String,
     private val ident: String,
     private val tilgangskontroll: Tilgangskontroll,
 ) {

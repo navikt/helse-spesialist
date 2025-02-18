@@ -631,8 +631,8 @@ class SaksbehandlerMediator(
                 totrinnsvurdering.sendIRetur(oppgavereferanse, besluttendeSaksbehandler.tilSaksbehandler())
                 session.totrinnsvurderingRepository.lagre(totrinnsvurdering, fødselsnummer)
             }
-        } catch (modellfeil: ApiModellfeil) {
-            return SendIReturResult.Feil.KunneIkkeSendeIRetur(modellfeil)
+        } catch (modellfeil: Modellfeil) {
+            return SendIReturResult.Feil.KunneIkkeSendeIRetur(modellfeil.tilApiversjon())
         }
 
         try {
@@ -706,8 +706,8 @@ class SaksbehandlerMediator(
                 totrinnsvurdering.sendTilBeslutter(oppgavereferanse, saksbehandlerFraApi.tilSaksbehandler())
                 session.totrinnsvurderingRepository.lagre(totrinnsvurdering, fødselsnummer)
             }
-        } catch (modellfeil: no.nav.helse.spesialist.api.feilhåndtering.Modellfeil) {
-            return SendTilGodkjenningResult.Feil.KunneIkkeSendeTilBeslutter(modellfeil)
+        } catch (modellfeil: Modellfeil) {
+            return SendTilGodkjenningResult.Feil.KunneIkkeSendeTilBeslutter(modellfeil.tilApiversjon())
         } catch (e: Exception) {
             return SendTilGodkjenningResult.Feil.UventetFeilVedSendigTilBeslutter(e)
         }
@@ -798,41 +798,42 @@ class SaksbehandlerMediator(
     internal companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
         private val log = LoggerFactory.getLogger(SaksbehandlerMediator::class.java.simpleName)
-
-        internal fun Modellfeil.tilApiversjon(): no.nav.helse.spesialist.api.feilhåndtering.Modellfeil =
-            when (this) {
-                is no.nav.helse.modell.OppgaveIkkeTildelt -> OppgaveIkkeTildelt(oppgaveId)
-                is OppgaveTildeltNoenAndre -> {
-                    val (epost, oid, navn) = this.saksbehandler.toDto()
-                    no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre(
-                        TildelingApiDto(navn, epost, oid),
-                    )
-                }
-
-                is OppgaveAlleredeSendtBeslutter ->
-                    no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtBeslutter(
-                        oppgaveId,
-                    )
-
-                is OppgaveAlleredeSendtIRetur ->
-                    no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtIRetur(
-                        oppgaveId,
-                    )
-
-                is OppgaveKreverVurderingAvToSaksbehandlere ->
-                    no.nav.helse.spesialist.api.feilhåndtering.OppgaveKreverVurderingAvToSaksbehandlere(
-                        oppgaveId,
-                    )
-
-                is ManglerTilgang -> IkkeTilgang(oid, oppgaveId)
-
-                is AlleredeAnnullert ->
-                    no.nav.helse.spesialist.api.feilhåndtering
-                        .AlleredeAnnullert(handling.toDto().vedtaksperiodeId)
-
-                is FinnerIkkePåVent -> FinnerIkkeLagtPåVent(oppgaveId)
-            }
     }
+
+    private fun Modellfeil.tilApiversjon(): no.nav.helse.spesialist.api.feilhåndtering.Modellfeil =
+        when (this) {
+            is no.nav.helse.modell.OppgaveIkkeTildelt -> OppgaveIkkeTildelt(oppgaveId)
+            is OppgaveTildeltNoenAndre -> {
+                val saksbehandler =
+                    checkNotNull(saksbehandlerDao.finnSaksbehandler(this.saksbehandlerOid))
+                no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre(
+                    TildelingApiDto(saksbehandler.navn, saksbehandler.epostadresse, saksbehandler.oid),
+                )
+            }
+
+            is OppgaveAlleredeSendtBeslutter ->
+                no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtBeslutter(
+                    oppgaveId,
+                )
+
+            is OppgaveAlleredeSendtIRetur ->
+                no.nav.helse.spesialist.api.feilhåndtering.OppgaveAlleredeSendtIRetur(
+                    oppgaveId,
+                )
+
+            is OppgaveKreverVurderingAvToSaksbehandlere ->
+                no.nav.helse.spesialist.api.feilhåndtering.OppgaveKreverVurderingAvToSaksbehandlere(
+                    oppgaveId,
+                )
+
+            is ManglerTilgang -> IkkeTilgang(oid, oppgaveId)
+
+            is AlleredeAnnullert ->
+                no.nav.helse.spesialist.api.feilhåndtering
+                    .AlleredeAnnullert(handling.toDto().vedtaksperiodeId)
+
+            is FinnerIkkePåVent -> FinnerIkkeLagtPåVent(oppgaveId)
+        }
 
     private fun SaksbehandlerFraApi.tilSaksbehandler() =
         Saksbehandler(epost, oid, navn, ident, TilgangskontrollørForApi(this.grupper, tilgangsgrupper))

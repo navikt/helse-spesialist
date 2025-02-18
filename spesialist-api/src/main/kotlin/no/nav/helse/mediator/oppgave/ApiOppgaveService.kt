@@ -4,14 +4,12 @@ import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OppgavesorteringForDatabase
 import no.nav.helse.db.SorteringsnøkkelForDatabase
-import no.nav.helse.mediator.SaksbehandlerMediator.Companion.tilApiversjon
 import no.nav.helse.mediator.TilgangskontrollørForApi
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilApiversjon
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilBehandledeOppgaver
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilDatabaseversjon
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilEgenskaperForVisning
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilOppgaverTilBehandling
-import no.nav.helse.modell.Modellfeil
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
@@ -162,11 +160,7 @@ class ApiOppgaveService(
         beslutter: Saksbehandler?,
     ) {
         oppgaveService.oppgave(oppgaveId) {
-            try {
-                sendTilBeslutter(beslutter)
-            } catch (e: Modellfeil) {
-                throw e.tilApiversjon()
-            }
+            sendTilBeslutter(beslutter)
         }
     }
 
@@ -175,11 +169,7 @@ class ApiOppgaveService(
         opprinneligSaksbehandler: Saksbehandler,
     ) {
         oppgaveService.oppgave(oppgaveId) {
-            try {
-                sendIRetur(opprinneligSaksbehandler)
-            } catch (e: Modellfeil) {
-                throw e.tilApiversjon()
-            }
+            sendIRetur(opprinneligSaksbehandler)
         }
     }
 
