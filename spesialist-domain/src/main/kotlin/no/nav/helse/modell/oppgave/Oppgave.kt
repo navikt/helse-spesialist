@@ -29,7 +29,7 @@ class Oppgave private constructor(
     tilstand: Tilstand,
     private val vedtaksperiodeId: UUID,
     val behandlingId: UUID,
-    private val utbetalingId: UUID,
+    val utbetalingId: UUID,
     val godkjenningsbehovId: UUID,
     private val kanAvvises: Boolean,
     val totrinnsvurdering: Totrinnsvurdering?,
@@ -263,7 +263,6 @@ class Oppgave private constructor(
         ) {
             oppgave.ferdigstiltAvIdent = ident
             oppgave.ferdigstiltAvOid = oid
-            oppgave.totrinnsvurdering?.ferdigstill(oppgave.utbetalingId)
             oppgave.nesteTilstand(AvventerSystem)
         }
 

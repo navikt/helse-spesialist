@@ -43,47 +43,51 @@ class GodkjenningService(
         val hendelseId = oppgaveDao.finnHendelseId(godkjenningDTO.oppgavereferanse)
         val fødselsnummer = oppgaveDao.finnFødselsnummer(godkjenningDTO.oppgavereferanse)
         val vedtaksperiodeId = oppgaveDao.finnVedtaksperiodeId(godkjenningDTO.oppgavereferanse)
-        val totrinnsvurdering =
-            sessionFactory.transactionalSessionScope {
-                    session ->
-                session.totrinnsvurderingRepository.finn(vedtaksperiodeId)
-            }
-        val reserverPersonOid: UUID = totrinnsvurdering?.saksbehandler?.oid ?: oid
-        val saksbehandlerløsning =
-            Saksbehandlerløsning(
-                godkjenningsbehovId = hendelseId,
-                oppgaveId = godkjenningDTO.oppgavereferanse,
-                godkjent = godkjenningDTO.godkjent,
-                saksbehandlerIdent = godkjenningDTO.saksbehandlerIdent,
-                saksbehandlerOid = oid,
-                saksbehandlerEpost = epost,
-                godkjenttidspunkt = LocalDateTime.now(),
-                saksbehandleroverstyringer = overstyringDao.finnAktiveOverstyringer(vedtaksperiodeId),
-                saksbehandler = saksbehandler(godkjenningDTO, totrinnsvurdering, oid),
-                årsak = godkjenningDTO.årsak,
-                begrunnelser = godkjenningDTO.begrunnelser,
-                kommentar = godkjenningDTO.kommentar,
-                beslutter = beslutter(godkjenningDTO, totrinnsvurdering),
+
+        sessionFactory.transactionalSessionScope { session ->
+            val totrinnsvurdering = session.totrinnsvurderingRepository.finn(vedtaksperiodeId)
+
+            val reserverPersonOid: UUID = totrinnsvurdering?.saksbehandler?.oid ?: oid
+            val saksbehandlerløsning =
+                Saksbehandlerløsning(
+                    godkjenningsbehovId = hendelseId,
+                    oppgaveId = godkjenningDTO.oppgavereferanse,
+                    godkjent = godkjenningDTO.godkjent,
+                    saksbehandlerIdent = godkjenningDTO.saksbehandlerIdent,
+                    saksbehandlerOid = oid,
+                    saksbehandlerEpost = epost,
+                    godkjenttidspunkt = LocalDateTime.now(),
+                    saksbehandleroverstyringer = overstyringDao.finnAktiveOverstyringer(vedtaksperiodeId),
+                    saksbehandler = saksbehandler(godkjenningDTO, totrinnsvurdering, oid),
+                    årsak = godkjenningDTO.årsak,
+                    begrunnelser = godkjenningDTO.begrunnelser,
+                    kommentar = godkjenningDTO.kommentar,
+                    beslutter = beslutter(godkjenningDTO, totrinnsvurdering),
+                )
+            logg.info(
+                "Publiserer saksbehandler-løsning for {}, {}",
+                StructuredArguments.keyValue("oppgaveId", godkjenningDTO.oppgavereferanse),
+                StructuredArguments.keyValue("hendelseId", hendelseId),
             )
-        logg.info(
-            "Publiserer saksbehandler-løsning for {}, {}",
-            StructuredArguments.keyValue("oppgaveId", godkjenningDTO.oppgavereferanse),
-            StructuredArguments.keyValue("hendelseId", hendelseId),
-        )
-        publiserer.publiser(fødselsnummer, saksbehandlerløsning, "saksbehandlergodkjenning")
+            publiserer.publiser(fødselsnummer, saksbehandlerløsning, "saksbehandlergodkjenning")
 
-        reserverPerson(reserverPersonOid, fødselsnummer)
-        oppgaveService.oppgave(godkjenningDTO.oppgavereferanse) {
-            avventerSystem(godkjenningDTO.saksbehandlerIdent, oid)
-            overstyringDao.ferdigstillOverstyringerForVedtaksperiode(vedtaksperiodeId)
+            reserverPerson(reserverPersonOid, fødselsnummer)
+            oppgaveService.oppgave(godkjenningDTO.oppgavereferanse) {
+                avventerSystem(godkjenningDTO.saksbehandlerIdent, oid)
+                totrinnsvurdering?.ferdigstill(this.utbetalingId)
+                overstyringDao.ferdigstillOverstyringerForVedtaksperiode(vedtaksperiodeId)
 
-            if (totrinnsvurdering?.erBeslutteroppgave == true && godkjenningDTO.godkjent) {
-                val beslutter =
-                    totrinnsvurdering.beslutter?.oid?.let { saksbehandlerDao.finnSaksbehandlerFraDatabase(it)?.toDto() }
-                checkNotNull(beslutter) { "Forventer at beslutter er satt" }
-                val innslag = Historikkinnslag.totrinnsvurderingFerdigbehandletInnslag(beslutter)
-                periodehistorikkDao.lagreMedOppgaveId(innslag, godkjenningDTO.oppgavereferanse)
+                if (totrinnsvurdering?.erBeslutteroppgave == true && godkjenningDTO.godkjent) {
+                    val beslutter =
+                        totrinnsvurdering.beslutter?.oid?.let {
+                            saksbehandlerDao.finnSaksbehandlerFraDatabase(it)?.toDto()
+                        }
+                    checkNotNull(beslutter) { "Forventer at beslutter er satt" }
+                    val innslag = Historikkinnslag.totrinnsvurderingFerdigbehandletInnslag(beslutter)
+                    periodehistorikkDao.lagreMedOppgaveId(innslag, godkjenningDTO.oppgavereferanse)
+                }
             }
+            if (totrinnsvurdering != null) session.totrinnsvurderingRepository.lagre(totrinnsvurdering, fødselsnummer)
         }
     }
 

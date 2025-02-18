@@ -20,9 +20,6 @@ class Oppgavelagrer(private val tildelingDao: TildelingDao) {
             kanAvvises = oppgaveDto.kanAvvises,
         )
         oppdaterTildeling(oppgaveDto)
-
-        val totrinnsvurdering = oppgaveDto.totrinnsvurdering
-        if (totrinnsvurdering != null) oppgaveService.lagreTotrinnsvurdering(totrinnsvurdering)
     }
 
     fun oppdater(
@@ -37,9 +34,6 @@ class Oppgavelagrer(private val tildelingDao: TildelingDao) {
             egenskaper = oppgaveDto.egenskaper.map { it.tilDatabaseversjon() },
         )
         oppdaterTildeling(oppgaveDto)
-
-        val totrinnsvurdering = oppgaveDto.totrinnsvurdering
-        if (totrinnsvurdering != null) oppgaveService.lagreTotrinnsvurdering(totrinnsvurdering)
     }
 
     private fun oppdaterTildeling(oppgaveDto: OppgaveDto) {

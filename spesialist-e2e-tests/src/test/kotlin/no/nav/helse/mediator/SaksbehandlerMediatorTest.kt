@@ -42,7 +42,6 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import no.nav.helse.spesialist.test.lagAktørId
-import no.nav.helse.spesialist.test.lagEpostadresseFraFulltNavn
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.test.lagSaksbehandlerident
@@ -236,6 +235,12 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             mediator.håndterTotrinnsvurdering(oppgaveId, saksbehandler, ApiVedtakUtfall.INNVILGELSE, "Begrunnelse")
 
         assertEquals(SendTilGodkjenningResult.Ok, result)
+        val totrinnsvurdering = sessionFactory.transactionalSessionScope { session ->
+            session.totrinnsvurderingRepository.finn(vedtaksperiodeId)
+        }
+        checkNotNull(totrinnsvurdering)
+        assertEquals(saksbehandler.oid, totrinnsvurdering.saksbehandler?.oid)
+        assertTrue(totrinnsvurdering.erBeslutteroppgave)
     }
 
     @Test
@@ -275,7 +280,13 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
 
         assertEquals(SendIReturResult.Ok, resultRetur)
 
-
+        val totrinnsvurdering = sessionFactory.transactionalSessionScope { session ->
+            session.totrinnsvurderingRepository.finn(vedtaksperiodeId)
+        }
+        checkNotNull(totrinnsvurdering)
+        assertEquals(saksbehandler.oid, totrinnsvurdering.saksbehandler?.oid)
+        assertEquals(beslutter.oid, totrinnsvurdering.beslutter?.oid)
+        assertTrue(totrinnsvurdering.erRetur)
     }
 
     @Test
