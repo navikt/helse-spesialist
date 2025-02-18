@@ -174,7 +174,6 @@ class Kommandofabrikk(
             tildelingDao = sessionContext.tildelingDao,
             oppgaveDao = sessionContext.oppgaveDao,
             totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository,
-            featureToggles = featureToggles,
         )
 
     internal fun vedtaksperiodeNyUtbetaling(

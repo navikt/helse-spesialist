@@ -430,9 +430,6 @@ class SaksbehandlerMediator(
         saksbehandler: Saksbehandler,
     ) {
         val fødselsnummer = handling.fødselsnummer
-        if (!featureToggles.skalAvbryteOppgavePåEtSenereTidspunkt()) {
-            oppgaveService.avbrytOppgave(handling)
-        }
         reservasjonDao.reserverPerson(saksbehandler.oid(), fødselsnummer)
         sikkerlogg.info("Reserverer person $fødselsnummer til saksbehandler $saksbehandler")
         Overstyringlagrer(overstyringDao).lagre(handling)

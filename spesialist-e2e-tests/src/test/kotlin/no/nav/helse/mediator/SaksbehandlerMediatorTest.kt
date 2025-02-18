@@ -185,17 +185,6 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     }
 
     @Test
-    fun `invalider eksisterende oppgave ved overstyring`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        nyPerson(vedtaksperiodeId = vedtaksperiodeId, organisasjonsnummer = ORGANISASJONSNUMMER)
-        mediator.håndter(
-            ApiTidslinjeOverstyring(VEDTAKSPERIODE, ORGANISASJONSNUMMER, FNR, AKTØR, "", dager = emptyList()),
-            saksbehandler,
-        )
-        assertOppgave(OPPGAVE_ID, "Invalidert")
-    }
-
-    @Test
     fun `håndter godkjenning når godkjenning er avvist`() {
         val vedtaksperiodeId = UUID.randomUUID()
         nyPerson(vedtaksperiodeId = vedtaksperiodeId)
@@ -1064,17 +1053,6 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             "select ekstern_hendelse_id from overstyring where person_ref = (select id from person where fødselsnummer = :fodselsnummer)",
             "fodselsnummer" to fødselsnummer
         ) { it.uuid("ekstern_hendelse_id") }
-    }
-
-    private fun assertOppgave(
-        oppgaveId: Long,
-        @Suppress("SameParameterValue") forventetStatus: String,
-    ) {
-        val status = dbQuery.single(
-            "SELECT status FROM oppgave WHERE id = :oppgaveId",
-            "oppgaveId" to oppgaveId
-        ) { it.string(1) }
-        assertEquals(forventetStatus, status)
     }
 
     private fun godkjenning(

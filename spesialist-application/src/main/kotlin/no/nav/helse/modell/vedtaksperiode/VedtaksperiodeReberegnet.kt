@@ -1,7 +1,6 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.FeatureToggles
 import no.nav.helse.db.CommandContextDao
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.PeriodehistorikkDao
@@ -62,44 +61,33 @@ internal class VedtaksperiodeReberegnetCommand(
     tildelingDao: TildelingDao,
     oppgaveDao: OppgaveDao,
     totrinnsvurderingRepository: TotrinnsvurderingRepository,
-    featureToggles: FeatureToggles,
 ) : MacroCommand() {
     override val commands: List<Command> =
-        buildList {
-            add(
-                VedtaksperiodeReberegnetPeriodehistorikk(
-                    vedtaksperiode = vedtaksperiode,
-                    periodehistorikkDao = periodehistorikkDao,
-                ),
-            )
-            add(
-                ReserverPersonHvisTildeltCommand(
-                    fødselsnummer = fødselsnummer,
-                    reservasjonDao = reservasjonDao,
-                    tildelingDao = tildelingDao,
-                    oppgaveDao = oppgaveDao,
-                    totrinnsvurderingRepository = totrinnsvurderingRepository,
-                ),
-            )
-            if (featureToggles.skalAvbryteOppgavePåEtSenereTidspunkt()) {
-                add(
-                    AvbrytOppgaveCommand(
-                        vedtaksperiodeId = vedtaksperiode.vedtaksperiodeId(),
-                        oppgaveService = oppgaveService,
-                    ),
-                )
-            }
-            add(
-                AvbrytCommand(
-                    fødselsnummer = fødselsnummer,
-                    vedtaksperiodeId = vedtaksperiode.vedtaksperiodeId(),
-                    commandContextDao = commandContextDao,
-                    oppgaveService = oppgaveService,
-                    reservasjonDao = reservasjonDao,
-                    tildelingDao = tildelingDao,
-                    oppgaveDao = oppgaveDao,
-                    totrinnsvurderingRepository = totrinnsvurderingRepository,
-                ),
-            )
-        }
+        listOf(
+            VedtaksperiodeReberegnetPeriodehistorikk(
+                vedtaksperiode = vedtaksperiode,
+                periodehistorikkDao = periodehistorikkDao,
+            ),
+            ReserverPersonHvisTildeltCommand(
+                fødselsnummer = fødselsnummer,
+                reservasjonDao = reservasjonDao,
+                tildelingDao = tildelingDao,
+                oppgaveDao = oppgaveDao,
+                totrinnsvurderingRepository = totrinnsvurderingRepository,
+            ),
+            AvbrytOppgaveCommand(
+                vedtaksperiodeId = vedtaksperiode.vedtaksperiodeId(),
+                oppgaveService = oppgaveService,
+            ),
+            AvbrytCommand(
+                fødselsnummer = fødselsnummer,
+                vedtaksperiodeId = vedtaksperiode.vedtaksperiodeId(),
+                commandContextDao = commandContextDao,
+                oppgaveService = oppgaveService,
+                reservasjonDao = reservasjonDao,
+                tildelingDao = tildelingDao,
+                oppgaveDao = oppgaveDao,
+                totrinnsvurderingRepository = totrinnsvurderingRepository,
+            ),
+        )
 }
