@@ -102,7 +102,7 @@ class SpesialistApp(
 
     private val bootstrap =
         Bootstrap(
-            repositories = daos,
+            daos = daos,
             sessionFactory = sessionFactory,
             avhengigheter = apiAvhengigheter,
             reservasjonshenter = reservasjonshenter,
@@ -159,7 +159,7 @@ class SpesialistApp(
                 meldingPubliserer = meldingPubliserer,
                 tilgangskontroll = tilgangskontrollørForReservasjon,
                 tilgangsgrupper = tilgangsgrupper,
-                repositories = daos,
+                daos = daos,
             )
         apiOppgaveService =
             ApiOppgaveService(
@@ -188,7 +188,7 @@ class SpesialistApp(
         RiverSetup(rapidsConnection, meldingMediator, daos.meldingDuplikatkontrollDao).setUp()
         saksbehandlerMediator =
             SaksbehandlerMediator(
-                repositories = daos,
+                daos = daos,
                 versjonAvKode = versjonAvKode,
                 meldingPubliserer = meldingPubliserer,
                 oppgaveService = oppgaveService,

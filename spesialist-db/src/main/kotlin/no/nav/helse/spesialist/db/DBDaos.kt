@@ -1,6 +1,6 @@
 package no.nav.helse.spesialist.db
 
-import no.nav.helse.db.Repositories
+import no.nav.helse.db.Daos
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.spesialist.db.dao.PgAnnulleringRepository
 import no.nav.helse.spesialist.db.dao.PgBehandlingsstatistikkDao
@@ -45,7 +45,7 @@ import no.nav.helse.spesialist.db.dao.api.PgVarselApiRepository
 import no.nav.helse.spesialist.db.dao.api.PgVergemålApiDao
 import javax.sql.DataSource
 
-class DBDaos(dataSource: DataSource, tilgangskontroll: Tilgangskontroll) : Repositories {
+class DBDaos(dataSource: DataSource, tilgangskontroll: Tilgangskontroll) : Daos {
     override val annulleringRepository = PgAnnulleringRepository(dataSource)
     override val behandlingsstatistikkDao = PgBehandlingsstatistikkDao(dataSource)
     override val commandContextDao = PgCommandContextDao(dataSource)

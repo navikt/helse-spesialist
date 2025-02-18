@@ -17,7 +17,7 @@ import no.nav.helse.db.api.TotrinnsvurderingApiDao
 import no.nav.helse.db.api.VarselApiRepository
 import no.nav.helse.db.api.VergemålApiDao
 
-interface Repositories {
+interface Daos {
     val annulleringRepository: AnnulleringRepository
     val behandlingsstatistikkDao: BehandlingsstatistikkDao
     val commandContextDao: CommandContextDao

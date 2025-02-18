@@ -85,7 +85,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             meldingPubliserer = meldingPubliserer,
             tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
             tilgangsgrupper = tilgangsgrupper,
-            repositories = daos
+            daos = daos
         )
     private val apiOppgaveService = ApiOppgaveService(
         oppgaveDao = oppgaveDao,
@@ -94,7 +94,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     )
     private val mediator =
         SaksbehandlerMediator(
-            repositories = DBDaos(dataSource, TilgangskontrollForTestHarIkkeTilgang),
+            daos = DBDaos(dataSource, TilgangskontrollForTestHarIkkeTilgang),
             versjonAvKode = "versjonAvKode",
             meldingPubliserer = meldingPubliserer,
             oppgaveService = oppgaveService,

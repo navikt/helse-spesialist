@@ -5,8 +5,8 @@ import no.nav.helse.FeatureToggles
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.AnnulleringRepository
+import no.nav.helse.db.Daos
 import no.nav.helse.db.OpptegnelseDao
-import no.nav.helse.db.Repositories
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.db.VedtakBegrunnelseFraDatabase
 import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
@@ -102,7 +102,7 @@ import java.util.UUID
 import no.nav.helse.spesialist.api.feilhåndtering.Modellfeil as ApiModellfeil
 
 class SaksbehandlerMediator(
-    repositories: Repositories,
+    daos: Daos,
     private val versjonAvKode: String,
     private val meldingPubliserer: MeldingPubliserer,
     private val oppgaveService: OppgaveService,
@@ -114,18 +114,18 @@ class SaksbehandlerMediator(
     private val featureToggles: FeatureToggles,
     private val sessionFactory: SessionFactory,
 ) : Saksbehandlerhåndterer {
-    private val saksbehandlerDao = repositories.saksbehandlerDao
-    private val generasjonRepository = repositories.generasjonApiRepository
-    private val varselRepository = repositories.varselApiRepository
-    private val oppgaveApiDao = repositories.oppgaveApiDao
-    private val opptegnelseRepository = repositories.opptegnelseDao
-    private val abonnementDao = repositories.abonnementApiDao
-    private val reservasjonDao = repositories.reservasjonDao
-    private val overstyringDao = repositories.overstyringDao
-    private val påVentDao = repositories.påVentDao
-    private val periodehistorikkDao = repositories.periodehistorikkDao
-    private val vedtakBegrunnelseDao = repositories.vedtakBegrunnelseDao
-    private val dialogDao = repositories.dialogDao
+    private val saksbehandlerDao = daos.saksbehandlerDao
+    private val generasjonRepository = daos.generasjonApiRepository
+    private val varselRepository = daos.varselApiRepository
+    private val oppgaveApiDao = daos.oppgaveApiDao
+    private val opptegnelseRepository = daos.opptegnelseDao
+    private val abonnementDao = daos.abonnementApiDao
+    private val reservasjonDao = daos.reservasjonDao
+    private val overstyringDao = daos.overstyringDao
+    private val påVentDao = daos.påVentDao
+    private val periodehistorikkDao = daos.periodehistorikkDao
+    private val vedtakBegrunnelseDao = daos.vedtakBegrunnelseDao
+    private val dialogDao = daos.dialogDao
 
     override fun håndter(
         handlingFraApi: HandlingFraApi,

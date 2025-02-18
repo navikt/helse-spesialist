@@ -63,7 +63,7 @@ internal class TestMediator(
             meldingPubliserer = meldingPubliserer,
             tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
             tilgangsgrupper = tilgangsgrupper,
-            repositories = repositories,
+            daos = repositories,
         )
     private val apiOppgaveService = ApiOppgaveService(
         oppgaveDao = repositories.oppgaveDao,
@@ -73,7 +73,7 @@ internal class TestMediator(
 
     private val saksbehandlerMediator =
         SaksbehandlerMediator(
-            repositories = repositories,
+            daos = repositories,
             versjonAvKode = "versjonAvKode",
             meldingPubliserer = meldingPubliserer,
             oppgaveService = oppgaveService,

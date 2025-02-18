@@ -3,7 +3,7 @@ package no.nav.helse.spesialist.api.bootstrap
 import io.ktor.server.application.Application
 import io.ktor.server.routing.routing
 import no.nav.helse.bootstrap.Environment
-import no.nav.helse.db.Repositories
+import no.nav.helse.db.Daos
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.spesialist.api.AzureConfig
 import no.nav.helse.spesialist.api.azureAdAppAuthentication
@@ -13,26 +13,26 @@ import no.nav.helse.spesialist.api.websockets.webSocketsApi
 import no.nav.helse.spesialist.application.Reservasjonshenter
 
 class Bootstrap(
-    repositories: Repositories,
+    daos: Daos,
     private val sessionFactory: SessionFactory,
     private val avhengigheter: ApiAvhengigheter,
     private val reservasjonshenter: Reservasjonshenter,
     private val tilgangsgrupper: Tilgangsgrupper,
 ) {
-    private val personinfoDao = repositories.personinfoDao
-    private val personApiDao = repositories.personApiDao
-    private val oppgaveApiDao = repositories.oppgaveApiDao
-    private val periodehistorikkApiDao = repositories.periodehistorikkApiDao
-    private val risikovurderingApiDao = repositories.risikovurderingApiDao
-    private val tildelingApiDao = repositories.tildelingApiDao
-    private val overstyringApiDao = repositories.overstyringApiDao
-    private val arbeidsgiverApiDao = repositories.arbeidsgiverApiDao
-    private val egenAnsattApiDao = repositories.egenAnsattApiDao
-    private val notatApiDao = repositories.notatApiDao
-    private val totrinnsvurderingApiDao = repositories.totrinnsvurderingApiDao
-    private val apiVarselRepository = repositories.varselApiRepository
-    private val påVentApiDao = repositories.påVentApiDao
-    private val vergemålApiDao = repositories.vergemålApiDao
+    private val personinfoDao = daos.personinfoDao
+    private val personApiDao = daos.personApiDao
+    private val oppgaveApiDao = daos.oppgaveApiDao
+    private val periodehistorikkApiDao = daos.periodehistorikkApiDao
+    private val risikovurderingApiDao = daos.risikovurderingApiDao
+    private val tildelingApiDao = daos.tildelingApiDao
+    private val overstyringApiDao = daos.overstyringApiDao
+    private val arbeidsgiverApiDao = daos.arbeidsgiverApiDao
+    private val egenAnsattApiDao = daos.egenAnsattApiDao
+    private val notatApiDao = daos.notatApiDao
+    private val totrinnsvurderingApiDao = daos.totrinnsvurderingApiDao
+    private val apiVarselRepository = daos.varselApiRepository
+    private val påVentApiDao = daos.påVentApiDao
+    private val vergemålApiDao = daos.vergemålApiDao
 
     fun ktorApp(
         application: Application,

@@ -5,11 +5,11 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.MeldingPubliserer
+import no.nav.helse.db.Daos
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OppgaveFraDatabase
 import no.nav.helse.db.OpptegnelseDao
-import no.nav.helse.db.Repositories
 import no.nav.helse.db.Reservasjon
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
@@ -47,7 +47,7 @@ internal class OppgaveServiceTest {
     private val EGENSKAP_SØKNAD = EgenskapForDatabase.SØKNAD
 
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
-    private val repositories = mockk<Repositories>(relaxed = true)
+    private val daos = mockk<Daos>(relaxed = true)
     private val tildelingDao = mockk<TildelingDao>(relaxed = true)
     private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
     private val opptegnelseDao = mockk<OpptegnelseDao>(relaxed = true)
@@ -83,7 +83,7 @@ internal class OppgaveServiceTest {
             meldingPubliserer = meldingPubliserer,
             tilgangskontroll = { _, _ -> false },
             tilgangsgrupper = tilgangsgrupper,
-            repositories = repositories
+            daos = daos
         )
     private val saksbehandlerFraDatabase =
         SaksbehandlerFraDatabase(SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, SAKSBEHANDLERNAVN, SAKSBEHANDLERIDENT)
