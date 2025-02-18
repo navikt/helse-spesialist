@@ -18,9 +18,6 @@ import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.Saksbehandler.Companion.gjenopprett
 import no.nav.helse.modell.saksbehandler.Saksbehandler.Companion.toDto
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
-import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
-import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering.Companion.gjenopprett
-import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering.Companion.toDto
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -32,7 +29,6 @@ class Oppgave private constructor(
     val utbetalingId: UUID,
     val godkjenningsbehovId: UUID,
     private val kanAvvises: Boolean,
-    val totrinnsvurdering: Totrinnsvurdering?,
     private var ferdigstiltAvIdent: String? = null,
     private var ferdigstiltAvOid: UUID? = null,
     val egenskaper: MutableSet<Egenskap> = mutableSetOf(),
@@ -338,7 +334,6 @@ class Oppgave private constructor(
             hendelseId: UUID,
             kanAvvises: Boolean,
             egenskaper: Set<Egenskap>,
-            totrinnsvurdering: Totrinnsvurdering? = null,
         ): Oppgave {
             return Oppgave(
                 id = id,
@@ -348,7 +343,6 @@ class Oppgave private constructor(
                 utbetalingId = utbetalingId,
                 godkjenningsbehovId = hendelseId,
                 kanAvvises = kanAvvises,
-                totrinnsvurdering = totrinnsvurdering,
                 egenskaper = egenskaper.toMutableSet(),
             )
         }
@@ -368,35 +362,31 @@ class Oppgave private constructor(
                 utbetalingId = utbetalingId,
                 godkjenningsbehovId = godkjenningsbehovId,
                 kanAvvises = kanAvvises,
-                totrinnsvurdering = totrinnsvurdering?.toDto(),
                 egenskaper = egenskaper.map { it.toDto() },
                 tildeltTil = tildeltTil?.toDto(),
                 ferdigstiltAvOid = ferdigstiltAvOid,
                 ferdigstiltAvIdent = ferdigstiltAvIdent,
             )
 
-        fun OppgaveDto.gjenopprett(
-            tilgangskontroll: Tilgangskontroll,
-            totrinnsvurderingId: Long?,
-        ) = Oppgave(
-            id = id,
-            tilstand =
-                when (tilstand) {
-                    OppgaveDto.TilstandDto.AvventerSaksbehandler -> AvventerSaksbehandler
-                    OppgaveDto.TilstandDto.AvventerSystem -> AvventerSystem
-                    OppgaveDto.TilstandDto.Ferdigstilt -> Ferdigstilt
-                    OppgaveDto.TilstandDto.Invalidert -> Invalidert
-                },
-            behandlingId = behandlingId,
-            vedtaksperiodeId = vedtaksperiodeId,
-            utbetalingId = utbetalingId,
-            godkjenningsbehovId = godkjenningsbehovId,
-            kanAvvises = kanAvvises,
-            totrinnsvurdering = totrinnsvurdering?.gjenopprett(tilgangskontroll, totrinnsvurderingId),
-            ferdigstiltAvOid = ferdigstiltAvOid,
-            ferdigstiltAvIdent = ferdigstiltAvIdent,
-            tildeltTil = tildeltTil?.gjenopprett(tilgangskontroll),
-            egenskaper = egenskaper.map { it.gjenopprett() }.toMutableSet(),
-        )
+        fun OppgaveDto.gjenopprett(tilgangskontroll: Tilgangskontroll) =
+            Oppgave(
+                id = id,
+                tilstand =
+                    when (tilstand) {
+                        OppgaveDto.TilstandDto.AvventerSaksbehandler -> AvventerSaksbehandler
+                        OppgaveDto.TilstandDto.AvventerSystem -> AvventerSystem
+                        OppgaveDto.TilstandDto.Ferdigstilt -> Ferdigstilt
+                        OppgaveDto.TilstandDto.Invalidert -> Invalidert
+                    },
+                behandlingId = behandlingId,
+                vedtaksperiodeId = vedtaksperiodeId,
+                utbetalingId = utbetalingId,
+                godkjenningsbehovId = godkjenningsbehovId,
+                kanAvvises = kanAvvises,
+                ferdigstiltAvOid = ferdigstiltAvOid,
+                ferdigstiltAvIdent = ferdigstiltAvIdent,
+                tildeltTil = tildeltTil?.gjenopprett(tilgangskontroll),
+                egenskaper = egenskaper.map { it.gjenopprett() }.toMutableSet(),
+            )
     }
 }

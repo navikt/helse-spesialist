@@ -29,11 +29,11 @@ internal class OppdaterOppgavestatusCommandTest {
         oppgave = Oppgave.nyOppgave(
             id = 1L,
             vedtaksperiodeId = UUID.randomUUID(),
+            behandlingId = UUID.randomUUID(),
             utbetalingId = UTBETALING_ID,
             hendelseId = UUID.randomUUID(),
-            egenskaper = setOf(SØKNAD),
             kanAvvises = true,
-            behandlingId = UUID.randomUUID(),
+            egenskaper = setOf(SØKNAD),
         )
     }
 

@@ -170,9 +170,8 @@ class OppgavelagrerTest : DatabaseIntegrationTest() {
             behandlingId = BEHANDLING_ID,
             utbetalingId = UTBETALING_ID,
             hendelseId = HENDELSE_ID,
-            egenskaper = setOf(OPPGAVETYPE),
-            totrinnsvurdering = if (medTotrinnsvurdering) nyTotrinnsvurdering() else null,
             kanAvvises = true,
+            egenskaper = setOf(OPPGAVETYPE),
         )
 
     private fun nyTotrinnsvurdering() =

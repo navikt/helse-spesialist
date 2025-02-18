@@ -90,9 +90,8 @@ class OppgavemelderTest {
         behandlingId = BEHANDLING_ID,
         utbetalingId = UTBETALING_ID,
         hendelseId = HENDELSE_ID,
-        egenskaper = setOf(SØKNAD),
-        totrinnsvurdering = totrinnsvurdering,
         kanAvvises = true,
+        egenskaper = setOf(SØKNAD),
     )
 
     private fun totrinnsvurdering(beslutter: Saksbehandler? = null) = Totrinnsvurdering.fraLagring(

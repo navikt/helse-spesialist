@@ -18,7 +18,6 @@ import no.nav.helse.modell.saksbehandler.handlinger.TilgangskontrollForTestHarIk
 import no.nav.helse.modell.saksbehandler.handlinger.TilgangskontrollForTestHarTilgang
 import no.nav.helse.modell.saksbehandler.handlinger.TilgangskontrollForTestMedKunFortroligAdresse
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDto
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -28,7 +27,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
-import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.random.Random.Default.nextLong
 
@@ -540,22 +538,12 @@ internal class OppgaveTest {
                 godkjenningsbehovId = UUID.randomUUID(),
                 kanAvvises = true,
                 egenskaper = EgenskapDto.entries,
-                totrinnsvurdering =
-                    TotrinnsvurderingDto(
-                        vedtaksperiodeId = vedtaksperiodeId,
-                        erRetur = true,
-                        saksbehandler = saksbehandler().toDto(),
-                        beslutter = saksbehandler().toDto(),
-                        utbetalingId = utbetalingId,
-                        opprettet = LocalDateTime.now(),
-                        oppdatert = LocalDateTime.now(),
-                    ),
                 ferdigstiltAvOid = UUID.randomUUID(),
                 ferdigstiltAvIdent = "IDENT",
                 tildeltTil = saksbehandler().toDto(),
             )
 
-        assertEquals(saksbehandlerDto, saksbehandlerDto.gjenopprett(TilgangskontrollForTestHarIkkeTilgang, nextLong()).toDto())
+        assertEquals(saksbehandlerDto, saksbehandlerDto.gjenopprett(TilgangskontrollForTestHarIkkeTilgang).toDto())
     }
 
     @Test
@@ -571,13 +559,45 @@ internal class OppgaveTest {
                 egenskaper = setOf(OPPGAVETYPE),
             )
         val oppgave1 =
-            Oppgave.nyOppgave(OPPGAVE_ID, VEDTAKSPERIODE_ID, BEHANDLING_ID, UTBETALING_ID, UUID.randomUUID(), true, setOf(SØKNAD))
+            Oppgave.nyOppgave(
+                OPPGAVE_ID,
+                VEDTAKSPERIODE_ID,
+                BEHANDLING_ID,
+                UTBETALING_ID,
+                UUID.randomUUID(),
+                true,
+                setOf(SØKNAD)
+            )
         val oppgave2 =
-            Oppgave.nyOppgave(OPPGAVE_ID, VEDTAKSPERIODE_ID, BEHANDLING_ID, UTBETALING_ID, UUID.randomUUID(), true, setOf(SØKNAD))
+            Oppgave.nyOppgave(
+                OPPGAVE_ID,
+                VEDTAKSPERIODE_ID,
+                BEHANDLING_ID,
+                UTBETALING_ID,
+                UUID.randomUUID(),
+                true,
+                setOf(SØKNAD)
+            )
         val oppgave3 =
-            Oppgave.nyOppgave(OPPGAVE_ID, UUID.randomUUID(), BEHANDLING_ID, UTBETALING_ID, UUID.randomUUID(), true, setOf(SØKNAD))
+            Oppgave.nyOppgave(
+                OPPGAVE_ID,
+                UUID.randomUUID(),
+                BEHANDLING_ID,
+                UTBETALING_ID,
+                UUID.randomUUID(),
+                true,
+                setOf(SØKNAD)
+            )
         val oppgave4 =
-            Oppgave.nyOppgave(OPPGAVE_ID, VEDTAKSPERIODE_ID, BEHANDLING_ID, UTBETALING_ID, UUID.randomUUID(), true, setOf(STIKKPRØVE))
+            Oppgave.nyOppgave(
+                OPPGAVE_ID,
+                VEDTAKSPERIODE_ID,
+                BEHANDLING_ID,
+                UTBETALING_ID,
+                UUID.randomUUID(),
+                true,
+                setOf(STIKKPRØVE)
+            )
         assertEquals(oppgave1, oppgave2)
         assertEquals(oppgave1.hashCode(), oppgave2.hashCode())
         assertNotEquals(oppgave1, oppgave3)
@@ -609,7 +629,6 @@ internal class OppgaveTest {
             hendelseId = UUID.randomUUID(),
             kanAvvises = true,
             egenskaper = egenskaper.toSet(),
-            totrinnsvurdering = totrinnsvurdering,
         )
     }
 

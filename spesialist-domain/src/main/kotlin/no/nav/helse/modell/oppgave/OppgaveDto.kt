@@ -1,7 +1,6 @@
 package no.nav.helse.modell.oppgave
 
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDto
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingDto
 import java.util.UUID
 
 data class OppgaveDto(
@@ -13,7 +12,6 @@ data class OppgaveDto(
     val godkjenningsbehovId: UUID,
     val kanAvvises: Boolean,
     val egenskaper: List<EgenskapDto>,
-    val totrinnsvurdering: TotrinnsvurderingDto?,
     val ferdigstiltAvIdent: String?,
     val ferdigstiltAvOid: UUID?,
     val tildeltTil: SaksbehandlerDto?,

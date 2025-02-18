@@ -100,8 +100,6 @@ class OppgaveService(
         val oppgave =
             Oppgavehenter(
                 oppgaveDao,
-                totrinnsvurderingDao,
-                saksbehandlerDao,
                 tilgangskontroll,
             ).oppgave(id)
         val fødselsnummer = oppgaveDao.finnFødselsnummer(id)
