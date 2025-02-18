@@ -1,9 +1,9 @@
 package no.nav.helse.spesialist.db.dao.api
 
-import no.nav.helse.db.HelseDao.Companion.asSQL
-import no.nav.helse.db.MedDataSource
-import no.nav.helse.db.QueryRunner
 import no.nav.helse.db.api.EgenAnsattApiDao
+import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
+import no.nav.helse.spesialist.db.MedDataSource
+import no.nav.helse.spesialist.db.QueryRunner
 import javax.sql.DataSource
 
 class PgEgenAnsattApiDao internal constructor(private val dataSource: DataSource) :

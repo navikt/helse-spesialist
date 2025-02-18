@@ -2,9 +2,9 @@ package no.nav.helse.spesialist.db.dao
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.db.DokumentDao
-import no.nav.helse.db.HelseDao
-import no.nav.helse.db.MedDataSource
-import no.nav.helse.db.QueryRunner
+import no.nav.helse.spesialist.db.HelseDao
+import no.nav.helse.spesialist.db.MedDataSource
+import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.db.objectMapper
 import java.util.UUID
 import javax.sql.DataSource

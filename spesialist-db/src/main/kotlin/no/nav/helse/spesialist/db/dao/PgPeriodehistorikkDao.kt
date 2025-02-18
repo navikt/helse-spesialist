@@ -1,11 +1,7 @@
 package no.nav.helse.spesialist.db.dao
 
 import kotliquery.Session
-import no.nav.helse.db.HelseDao.Companion.asSQL
-import no.nav.helse.db.MedDataSource
-import no.nav.helse.db.MedSession
 import no.nav.helse.db.PeriodehistorikkDao
-import no.nav.helse.db.QueryRunner
 import no.nav.helse.modell.periodehistorikk.AutomatiskBehandlingStanset
 import no.nav.helse.modell.periodehistorikk.AvventerTotrinnsvurdering
 import no.nav.helse.modell.periodehistorikk.EndrePåVent
@@ -16,6 +12,10 @@ import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingAutomatiskRetur
 import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingFerdigbehandlet
 import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingRetur
 import no.nav.helse.modell.periodehistorikk.VedtaksperiodeReberegnet
+import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
+import no.nav.helse.spesialist.db.MedDataSource
+import no.nav.helse.spesialist.db.MedSession
+import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.db.objectMapper
 import java.util.UUID
 import javax.sql.DataSource

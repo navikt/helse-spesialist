@@ -2,8 +2,6 @@ package no.nav.helse
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.helse.bootstrap.Environment
-import no.nav.helse.db.DBRepositories
-import no.nav.helse.db.TransactionalSessionFactory
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.kafka.RiverSetup
 import no.nav.helse.mediator.GodkjenningMediator
@@ -20,6 +18,8 @@ import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
+import no.nav.helse.spesialist.db.DBRepositories
+import no.nav.helse.spesialist.db.TransactionalSessionFactory
 import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import no.nav.helse.util.testEnv
 import java.util.UUID

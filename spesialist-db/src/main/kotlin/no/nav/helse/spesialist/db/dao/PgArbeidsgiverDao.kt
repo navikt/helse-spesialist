@@ -3,10 +3,10 @@ package no.nav.helse.spesialist.db.dao
 import kotliquery.Session
 import kotliquery.queryOf
 import no.nav.helse.db.ArbeidsgiverDao
-import no.nav.helse.db.HelseDao.Companion.asSQL
-import no.nav.helse.db.HelseDao.Companion.single
-import no.nav.helse.db.HelseDao.Companion.update
-import no.nav.helse.db.HelseDao.Companion.updateAndReturnGeneratedKey
+import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
+import no.nav.helse.spesialist.db.HelseDao.Companion.single
+import no.nav.helse.spesialist.db.HelseDao.Companion.update
+import no.nav.helse.spesialist.db.HelseDao.Companion.updateAndReturnGeneratedKey
 import no.nav.helse.spesialist.db.objectMapper
 import org.intellij.lang.annotations.Language
 

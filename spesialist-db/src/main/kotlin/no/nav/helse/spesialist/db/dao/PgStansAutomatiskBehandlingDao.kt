@@ -1,14 +1,14 @@
 package no.nav.helse.spesialist.db.dao
 
 import kotliquery.Session
-import no.nav.helse.db.HelseDao.Companion.asSQL
-import no.nav.helse.db.MedDataSource
-import no.nav.helse.db.MedSession
-import no.nav.helse.db.QueryRunner
 import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.StansAutomatiskBehandlingFraDatabase
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMelding
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak
+import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
+import no.nav.helse.spesialist.db.MedDataSource
+import no.nav.helse.spesialist.db.MedSession
+import no.nav.helse.spesialist.db.QueryRunner
 import javax.sql.DataSource
 
 class PgStansAutomatiskBehandlingDao private constructor(queryRunner: QueryRunner) :

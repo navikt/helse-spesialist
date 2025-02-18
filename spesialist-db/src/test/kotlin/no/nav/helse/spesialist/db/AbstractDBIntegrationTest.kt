@@ -7,9 +7,6 @@ import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.db.DBRepositories
-import no.nav.helse.db.DBSessionContext
-import no.nav.helse.db.DbQuery
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettArbeidsforholdDto

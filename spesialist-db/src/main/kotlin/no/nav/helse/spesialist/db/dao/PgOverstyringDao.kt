@@ -3,12 +3,7 @@ package no.nav.helse.spesialist.db.dao
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Session
 import no.nav.helse.db.EksternHendelseId
-import no.nav.helse.db.HelseDao.Companion.asSQL
-import no.nav.helse.db.HelseDao.Companion.asSQLWithQuestionMarks
-import no.nav.helse.db.MedDataSource
-import no.nav.helse.db.MedSession
 import no.nav.helse.db.OverstyringDao
-import no.nav.helse.db.QueryRunner
 import no.nav.helse.db.overstyring.ArbeidsforholdForDatabase
 import no.nav.helse.db.overstyring.LovhjemmelForDatabase
 import no.nav.helse.db.overstyring.MinimumSykdomsgradForDatabase
@@ -21,6 +16,11 @@ import no.nav.helse.db.overstyring.OverstyrtTidslinjedagForDatabase
 import no.nav.helse.db.overstyring.SkjønnsfastsattArbeidsgiverForDatabase
 import no.nav.helse.db.overstyring.SkjønnsfastsattSykepengegrunnlagForDatabase
 import no.nav.helse.modell.OverstyringType
+import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
+import no.nav.helse.spesialist.db.HelseDao.Companion.asSQLWithQuestionMarks
+import no.nav.helse.spesialist.db.MedDataSource
+import no.nav.helse.spesialist.db.MedSession
+import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.db.objectMapper
 import java.util.UUID
 import javax.sql.DataSource

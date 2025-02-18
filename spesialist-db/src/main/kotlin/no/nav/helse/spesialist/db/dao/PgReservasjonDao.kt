@@ -1,13 +1,13 @@
 package no.nav.helse.spesialist.db.dao
 
 import kotliquery.Session
-import no.nav.helse.db.HelseDao
-import no.nav.helse.db.MedDataSource
-import no.nav.helse.db.MedSession
-import no.nav.helse.db.QueryRunner
 import no.nav.helse.db.Reservasjon
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerFraDatabase
+import no.nav.helse.spesialist.db.HelseDao
+import no.nav.helse.spesialist.db.MedDataSource
+import no.nav.helse.spesialist.db.MedSession
+import no.nav.helse.spesialist.db.QueryRunner
 import java.util.UUID
 import javax.sql.DataSource
 

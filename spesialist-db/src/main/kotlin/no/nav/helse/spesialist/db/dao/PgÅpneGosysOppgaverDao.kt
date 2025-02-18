@@ -1,11 +1,11 @@
 package no.nav.helse.spesialist.db.dao
 
 import kotliquery.Session
-import no.nav.helse.db.HelseDao.Companion.asSQL
-import no.nav.helse.db.MedSession
-import no.nav.helse.db.QueryRunner
 import no.nav.helse.db.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.gosysoppgaver.ÅpneGosysOppgaverDto
+import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
+import no.nav.helse.spesialist.db.MedSession
+import no.nav.helse.spesialist.db.QueryRunner
 
 class PgÅpneGosysOppgaverDao internal constructor(session: Session) : ÅpneGosysOppgaverDao, QueryRunner by MedSession(session) {
     override fun persisterÅpneGosysOppgaver(åpneGosysOppgaver: ÅpneGosysOppgaverDto) {

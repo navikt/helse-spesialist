@@ -1,11 +1,7 @@
 package no.nav.helse.spesialist.db.dao
 
 import kotliquery.Session
-import no.nav.helse.db.HelseDao.Companion.asSQL
-import no.nav.helse.db.MedDataSource
-import no.nav.helse.db.MedSession
 import no.nav.helse.db.MeldingDao
-import no.nav.helse.db.QueryRunner
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
@@ -27,6 +23,10 @@ import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetaling
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnet
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
+import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
+import no.nav.helse.spesialist.db.MedDataSource
+import no.nav.helse.spesialist.db.MedSession
+import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.db.dao.PgMeldingDao.Meldingtype.ADRESSEBESKYTTELSE_ENDRET
 import no.nav.helse.spesialist.db.dao.PgMeldingDao.Meldingtype.AVSLUTTET_MED_VEDTAK
 import no.nav.helse.spesialist.db.dao.PgMeldingDao.Meldingtype.AVSLUTTET_UTEN_VEDTAK

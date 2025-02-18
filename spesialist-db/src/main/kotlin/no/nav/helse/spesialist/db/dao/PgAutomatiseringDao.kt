@@ -4,10 +4,10 @@ import kotliquery.Row
 import kotliquery.Session
 import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.AutomatiseringDto
-import no.nav.helse.db.HelseDao.Companion.asSQL
-import no.nav.helse.db.HelseDao.Companion.list
-import no.nav.helse.db.HelseDao.Companion.single
-import no.nav.helse.db.HelseDao.Companion.update
+import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
+import no.nav.helse.spesialist.db.HelseDao.Companion.list
+import no.nav.helse.spesialist.db.HelseDao.Companion.single
+import no.nav.helse.spesialist.db.HelseDao.Companion.update
 import java.util.UUID
 
 class PgAutomatiseringDao internal constructor(val session: Session) : AutomatiseringDao {

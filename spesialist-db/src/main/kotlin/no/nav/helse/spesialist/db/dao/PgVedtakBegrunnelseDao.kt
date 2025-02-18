@@ -1,14 +1,14 @@
 package no.nav.helse.spesialist.db.dao
 
-import no.nav.helse.db.HelseDao.Companion.asSQL
-import no.nav.helse.db.MedDataSource
-import no.nav.helse.db.QueryRunner
 import no.nav.helse.db.VedtakBegrunnelseDao
 import no.nav.helse.db.VedtakBegrunnelseFraDatabase
 import no.nav.helse.db.VedtakBegrunnelseMedSaksbehandlerIdentFraDatabase
 import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
 import no.nav.helse.modell.vedtak.Utfall
 import no.nav.helse.modell.vedtak.VedtakBegrunnelse
+import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
+import no.nav.helse.spesialist.db.MedDataSource
+import no.nav.helse.spesialist.db.QueryRunner
 import java.util.UUID
 import javax.sql.DataSource
 

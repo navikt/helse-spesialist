@@ -1,8 +1,8 @@
 package no.nav.helse.spesialist.db.dao
 
-import no.nav.helse.db.HelseDao
 import no.nav.helse.db.PoisonPillDao
 import no.nav.helse.mediator.meldinger.PoisonPills
+import no.nav.helse.spesialist.db.HelseDao
 import javax.sql.DataSource
 
 class PgPoisonPillDao internal constructor(dataSource: DataSource) : HelseDao(dataSource), PoisonPillDao {

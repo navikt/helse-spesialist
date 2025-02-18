@@ -17,7 +17,6 @@ import no.nav.helse.TestRapidHelpers.siste
 import no.nav.helse.TestRapidHelpers.sisteBehov
 import no.nav.helse.Testdata
 import no.nav.helse.Testdata.snapshot
-import no.nav.helse.db.DbQuery
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Fullmakt
@@ -52,6 +51,7 @@ import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.client.spleis.SpleisClient
 import no.nav.helse.spesialist.client.spleis.SpleisClientSnapshothenter
+import no.nav.helse.spesialist.db.DbQuery
 import no.nav.helse.spesialist.test.TestPerson
 import no.nav.helse.util.januar
 import org.junit.jupiter.api.Assertions.assertEquals

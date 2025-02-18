@@ -2,9 +2,9 @@ package no.nav.helse.mediator
 
 import kotliquery.sessionOf
 import no.nav.helse.TestRapidHelpers.contextId
-import no.nav.helse.db.DBSessionContext
 import no.nav.helse.db.GodkjenningsbehovUtfall
 import no.nav.helse.e2e.AbstractE2ETest
+import no.nav.helse.spesialist.db.DBSessionContext
 import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals

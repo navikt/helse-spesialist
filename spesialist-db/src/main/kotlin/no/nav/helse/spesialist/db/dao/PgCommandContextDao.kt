@@ -4,11 +4,11 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Session
 import no.nav.helse.db.CommandContextDao
-import no.nav.helse.db.HelseDao.Companion.asSQL
-import no.nav.helse.db.MedDataSource
-import no.nav.helse.db.MedSession
-import no.nav.helse.db.QueryRunner
 import no.nav.helse.modell.kommando.CommandContext
+import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
+import no.nav.helse.spesialist.db.MedDataSource
+import no.nav.helse.spesialist.db.MedSession
+import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.db.dao.PgCommandContextDao.CommandContextTilstand.AVBRUTT
 import no.nav.helse.spesialist.db.dao.PgCommandContextDao.CommandContextTilstand.FEIL
 import no.nav.helse.spesialist.db.dao.PgCommandContextDao.CommandContextTilstand.FERDIG

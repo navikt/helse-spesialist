@@ -1,12 +1,12 @@
 package no.nav.helse.spesialist.db.dao.api
 
 import kotliquery.Row
-import no.nav.helse.db.HelseDao.Companion.asSQL
-import no.nav.helse.db.MedDataSource
-import no.nav.helse.db.QueryRunner
 import no.nav.helse.db.api.PeriodehistorikkApiDao
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
+import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
+import no.nav.helse.spesialist.db.MedDataSource
+import no.nav.helse.spesialist.db.QueryRunner
 import java.util.UUID
 import javax.sql.DataSource
 

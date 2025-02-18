@@ -2,13 +2,13 @@ package no.nav.helse.spesialist.db.dao.api
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Row
-import no.nav.helse.db.HelseDao.Companion.asSQL
-import no.nav.helse.db.MedDataSource
-import no.nav.helse.db.QueryRunner
 import no.nav.helse.db.api.ArbeidsgiverApiDao
 import no.nav.helse.db.api.ArbeidsgiverApiDao.ArbeidsgiverInntekterFraAOrdningen
 import no.nav.helse.db.api.ArbeidsgiverApiDao.InntektFraAOrdningen
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsforholdApiDto
+import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
+import no.nav.helse.spesialist.db.MedDataSource
+import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.db.objectMapper
 import javax.sql.DataSource
 

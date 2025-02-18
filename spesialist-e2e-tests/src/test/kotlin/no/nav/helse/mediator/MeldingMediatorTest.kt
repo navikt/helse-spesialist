@@ -4,12 +4,12 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import io.mockk.mockk
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.db.TransactionalSessionFactory
 import no.nav.helse.e2e.AbstractDatabaseTest
 import no.nav.helse.mediator.meldinger.PoisonPills
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.varsel.Varseldefinisjon
+import no.nav.helse.spesialist.db.TransactionalSessionFactory
 import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals

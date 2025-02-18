@@ -2,10 +2,10 @@ package no.nav.helse.spesialist.db.dao
 
 import kotliquery.Row
 import no.nav.helse.db.DefinisjonDao
-import no.nav.helse.db.HelseDao.Companion.asSQL
-import no.nav.helse.db.MedDataSource
-import no.nav.helse.db.QueryRunner
 import no.nav.helse.modell.varsel.Varseldefinisjon
+import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
+import no.nav.helse.spesialist.db.MedDataSource
+import no.nav.helse.spesialist.db.QueryRunner
 import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource

@@ -1,13 +1,13 @@
 package no.nav.helse.spesialist.db.dao
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import no.nav.helse.db.DBSessionContext
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.OpptegnelseDao.Opptegnelse.Type.NY_SAKSBEHANDLEROPPGAVE
 import no.nav.helse.db.OpptegnelseDao.Opptegnelse.Type.UTBETALING_ANNULLERING_OK
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
 import no.nav.helse.spesialist.api.abonnement.UtbetalingPayload
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
+import no.nav.helse.spesialist.db.DBSessionContext
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.UUID

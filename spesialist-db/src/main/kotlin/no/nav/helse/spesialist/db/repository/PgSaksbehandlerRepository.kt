@@ -2,10 +2,10 @@ package no.nav.helse.spesialist.db.repository
 
 import kotliquery.Row
 import kotliquery.Session
-import no.nav.helse.db.HelseDao.Companion.asSQL
-import no.nav.helse.db.MedSession
-import no.nav.helse.db.QueryRunner
 import no.nav.helse.spesialist.application.SaksbehandlerRepository
+import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
+import no.nav.helse.spesialist.db.MedSession
+import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.modell.Saksbehandler
 import no.nav.helse.spesialist.modell.SaksbehandlerOid
 import java.util.UUID

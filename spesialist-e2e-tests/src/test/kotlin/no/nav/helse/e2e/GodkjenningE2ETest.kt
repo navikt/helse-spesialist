@@ -2,7 +2,6 @@ package no.nav.helse.e2e
 
 import no.nav.helse.GodkjenningsbehovTestdata
 import no.nav.helse.TestRapidHelpers.oppgaveId
-import no.nav.helse.db.DbQuery
 import no.nav.helse.e2e.AbstractE2ETest.Kommandokjedetilstand.AVBRUTT
 import no.nav.helse.e2e.AbstractE2ETest.Kommandokjedetilstand.FERDIG
 import no.nav.helse.e2e.AbstractE2ETest.Kommandokjedetilstand.NY
@@ -14,6 +13,7 @@ import no.nav.helse.modell.person.Adressebeskyttelse.StrengtFortrolig
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSystem
+import no.nav.helse.spesialist.db.DbQuery
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.util.januar
 import org.junit.jupiter.api.Assertions.assertEquals

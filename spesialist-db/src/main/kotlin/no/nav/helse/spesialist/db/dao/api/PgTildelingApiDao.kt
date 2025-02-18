@@ -1,9 +1,9 @@
 package no.nav.helse.spesialist.db.dao.api
 
 import kotliquery.Row
-import no.nav.helse.db.HelseDao
 import no.nav.helse.db.api.TildelingApiDao
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
+import no.nav.helse.spesialist.db.HelseDao
 import java.util.UUID
 import javax.sql.DataSource
 

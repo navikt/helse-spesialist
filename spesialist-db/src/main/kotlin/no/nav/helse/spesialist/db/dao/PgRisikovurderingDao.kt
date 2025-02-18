@@ -2,11 +2,11 @@ package no.nav.helse.spesialist.db.dao
 
 import com.fasterxml.jackson.databind.JsonNode
 import kotliquery.Session
-import no.nav.helse.db.HelseDao.Companion.asSQL
-import no.nav.helse.db.MedSession
-import no.nav.helse.db.QueryRunner
 import no.nav.helse.db.RisikovurderingDao
 import no.nav.helse.modell.risiko.Risikovurdering
+import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
+import no.nav.helse.spesialist.db.MedSession
+import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.db.objectMapper
 import java.time.LocalDateTime
 import java.util.UUID

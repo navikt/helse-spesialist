@@ -1,6 +1,8 @@
-package no.nav.helse.db
+package no.nav.helse.spesialist.db
 
 import kotliquery.sessionOf
+import no.nav.helse.db.SessionContext
+import no.nav.helse.db.SessionFactory
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import javax.sql.DataSource
 

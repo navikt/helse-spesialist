@@ -1,6 +1,8 @@
-package no.nav.helse.db
+package no.nav.helse.spesialist.db
 
+import no.nav.helse.db.Repositories
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
+import no.nav.helse.spesialist.db.dao.PgAnnulleringRepository
 import no.nav.helse.spesialist.db.dao.PgBehandlingsstatistikkDao
 import no.nav.helse.spesialist.db.dao.PgCommandContextDao
 import no.nav.helse.spesialist.db.dao.PgDefinisjonDao

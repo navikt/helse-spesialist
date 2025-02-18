@@ -2,14 +2,14 @@ package no.nav.helse.spesialist.db.dao
 
 import kotliquery.Session
 import no.nav.helse.db.GenerasjonDao
-import no.nav.helse.db.HelseDao.Companion.asSQL
-import no.nav.helse.db.HelseDao.Companion.asSQLWithQuestionMarks
-import no.nav.helse.db.MedDataSource
-import no.nav.helse.db.MedSession
-import no.nav.helse.db.QueryRunner
 import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
 import no.nav.helse.modell.person.vedtaksperiode.VarselDto
 import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
+import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
+import no.nav.helse.spesialist.db.HelseDao.Companion.asSQLWithQuestionMarks
+import no.nav.helse.spesialist.db.MedDataSource
+import no.nav.helse.spesialist.db.MedSession
+import no.nav.helse.spesialist.db.QueryRunner
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID

@@ -2,8 +2,8 @@ package no.nav.helse.spesialist.db.dao.api
 
 import kotliquery.Query
 import kotliquery.Row
-import no.nav.helse.db.HelseDao
 import no.nav.helse.db.api.VarselDbDto
+import no.nav.helse.spesialist.db.HelseDao
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.UUID

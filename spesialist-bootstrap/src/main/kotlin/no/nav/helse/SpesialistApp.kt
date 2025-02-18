@@ -3,9 +3,6 @@ package no.nav.helse
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.ktor.server.application.Application
 import no.nav.helse.bootstrap.Environment
-import no.nav.helse.db.DBRepositories
-import no.nav.helse.db.DataSourceBuilder
-import no.nav.helse.db.TransactionalSessionFactory
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.kafka.RiverSetup
 import no.nav.helse.mediator.BehandlingsstatistikkService
@@ -31,6 +28,9 @@ import no.nav.helse.spesialist.api.bootstrap.Bootstrap
 import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
 import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.application.Snapshothenter
+import no.nav.helse.spesialist.db.DBRepositories
+import no.nav.helse.spesialist.db.DataSourceBuilder
+import no.nav.helse.spesialist.db.TransactionalSessionFactory
 import org.slf4j.LoggerFactory
 import java.lang.management.GarbageCollectorMXBean
 import java.lang.management.ManagementFactory

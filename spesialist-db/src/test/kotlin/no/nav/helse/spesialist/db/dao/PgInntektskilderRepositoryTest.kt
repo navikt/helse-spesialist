@@ -2,9 +2,6 @@ package no.nav.helse.spesialist.db.dao
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Session
-import no.nav.helse.db.DBSessionContext
-import no.nav.helse.db.HelseDao.Companion.asSQL
-import no.nav.helse.db.HelseDao.Companion.single
 import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettInntektskildeDto
 import no.nav.helse.modell.NyInntektskildeDto
@@ -13,6 +10,9 @@ import no.nav.helse.modell.vilkårsprøving.Beregningsgrunnlag
 import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
 import no.nav.helse.modell.vilkårsprøving.Sammenligningsgrunnlag
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
+import no.nav.helse.spesialist.db.DBSessionContext
+import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
+import no.nav.helse.spesialist.db.HelseDao.Companion.single
 import no.nav.helse.spesialist.db.jan
 import no.nav.helse.spesialist.db.lagFødselsnummer
 import no.nav.helse.spesialist.db.lagOrganisasjonsnavn

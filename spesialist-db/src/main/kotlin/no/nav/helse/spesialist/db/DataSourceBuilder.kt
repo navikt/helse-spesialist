@@ -1,4 +1,4 @@
-package no.nav.helse.db
+package no.nav.helse.spesialist.db
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource

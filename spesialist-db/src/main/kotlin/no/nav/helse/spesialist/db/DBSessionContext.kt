@@ -1,6 +1,8 @@
-package no.nav.helse.db
+package no.nav.helse.spesialist.db
 
 import kotliquery.Session
+import no.nav.helse.db.AvviksvurderingRepository
+import no.nav.helse.db.SessionContext
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.spesialist.application.DialogRepository
 import no.nav.helse.spesialist.application.NotatRepository
@@ -30,6 +32,7 @@ import no.nav.helse.spesialist.db.dao.PgReservasjonDao
 import no.nav.helse.spesialist.db.dao.PgRisikovurderingDao
 import no.nav.helse.spesialist.db.dao.PgSaksbehandlerDao
 import no.nav.helse.spesialist.db.dao.PgStansAutomatiskBehandlingDao
+import no.nav.helse.spesialist.db.dao.PgSykefraværstilfelleDao
 import no.nav.helse.spesialist.db.dao.PgTildelingDao
 import no.nav.helse.spesialist.db.dao.PgUtbetalingDao
 import no.nav.helse.spesialist.db.dao.PgVedtakDao

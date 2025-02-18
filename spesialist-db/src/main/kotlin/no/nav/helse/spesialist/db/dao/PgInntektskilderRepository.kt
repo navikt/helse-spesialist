@@ -2,13 +2,13 @@ package no.nav.helse.spesialist.db.dao
 
 import kotliquery.Session
 import no.nav.helse.db.ArbeidsgiverDao
-import no.nav.helse.db.HelseDao.Companion.asSQLWithQuestionMarks
-import no.nav.helse.db.HelseDao.Companion.list
 import no.nav.helse.db.InntektskilderRepository
 import no.nav.helse.modell.InntektskildeDto
 import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettInntektskildeDto
 import no.nav.helse.modell.NyInntektskildeDto
+import no.nav.helse.spesialist.db.HelseDao.Companion.asSQLWithQuestionMarks
+import no.nav.helse.spesialist.db.HelseDao.Companion.list
 
 class PgInntektskilderRepository internal constructor(
     private val session: Session,

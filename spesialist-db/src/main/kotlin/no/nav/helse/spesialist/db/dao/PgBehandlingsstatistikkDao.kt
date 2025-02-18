@@ -5,9 +5,9 @@ import no.nav.helse.db.BehandlingsstatistikkDao.StatistikkPerKombinasjon
 import no.nav.helse.db.BehandlingsstatistikkDao.StatistikkPerKombinasjon.Mottakertype
 import no.nav.helse.db.BehandlingsstatistikkDao.StatistikkPerKombinasjon.Utbetalingtype
 import no.nav.helse.db.EgenskapForDatabase
-import no.nav.helse.db.HelseDao
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.spesialist.db.HelseDao
 import java.time.LocalDate
 import javax.sql.DataSource
 

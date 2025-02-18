@@ -1,7 +1,6 @@
 package no.nav.helse.spesialist.api
 
 import io.mockk.mockk
-import no.nav.helse.db.DbQuery
 import no.nav.helse.db.api.ArbeidsgiverApiDao.Inntekter
 import no.nav.helse.db.api.EgenAnsattApiDao
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
@@ -17,6 +16,7 @@ import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
 import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
+import no.nav.helse.spesialist.db.DbQuery
 import no.nav.helse.spesialist.modell.Dialog
 import no.nav.helse.spesialist.modell.DialogId
 import no.nav.helse.spesialist.modell.Notat

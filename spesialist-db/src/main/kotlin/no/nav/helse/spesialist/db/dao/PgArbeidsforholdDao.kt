@@ -2,10 +2,10 @@ package no.nav.helse.spesialist.db.dao
 
 import kotliquery.Session
 import no.nav.helse.db.ArbeidsforholdDao
-import no.nav.helse.db.HelseDao.Companion.asSQL
-import no.nav.helse.db.HelseDao.Companion.list
-import no.nav.helse.db.HelseDao.Companion.update
 import no.nav.helse.modell.KomplettArbeidsforholdDto
+import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
+import no.nav.helse.spesialist.db.HelseDao.Companion.list
+import no.nav.helse.spesialist.db.HelseDao.Companion.update
 
 class PgArbeidsforholdDao internal constructor(
     private val session: Session,

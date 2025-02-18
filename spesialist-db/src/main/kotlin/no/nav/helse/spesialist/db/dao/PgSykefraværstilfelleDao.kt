@@ -1,12 +1,13 @@
-package no.nav.helse.db
+package no.nav.helse.spesialist.db.dao
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotliquery.Session
-import no.nav.helse.db.HelseDao.Companion.asSQL
-import no.nav.helse.db.HelseDao.Companion.list
+import no.nav.helse.db.SykefraværstilfelleDao
 import no.nav.helse.db.overstyring.LovhjemmelForDatabase
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlagDto
 import no.nav.helse.modell.vedtak.SkjønnsfastsettingsårsakDto
+import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
+import no.nav.helse.spesialist.db.HelseDao.Companion.list
 import no.nav.helse.spesialist.db.objectMapper
 
 class PgSykefraværstilfelleDao internal constructor(private val session: Session) : SykefraværstilfelleDao {
@@ -35,12 +36,12 @@ class PgSykefraværstilfelleDao internal constructor(private val session: Sessio
                 opprettet = it.localDateTime("tidspunkt"),
             )
         }
-}
 
-private fun String.tilÅrsakDto(): SkjønnsfastsettingsårsakDto {
-    return when (this) {
-        "2" -> SkjønnsfastsettingsårsakDto.ANDRE_AVSNITT
-        "3" -> SkjønnsfastsettingsårsakDto.TREDJE_AVSNITT
-        else -> SkjønnsfastsettingsårsakDto.ANDRE_AVSNITT
+    private fun String.tilÅrsakDto(): SkjønnsfastsettingsårsakDto {
+        return when (this) {
+            "2" -> SkjønnsfastsettingsårsakDto.ANDRE_AVSNITT
+            "3" -> SkjønnsfastsettingsårsakDto.TREDJE_AVSNITT
+            else -> SkjønnsfastsettingsårsakDto.ANDRE_AVSNITT
+        }
     }
 }

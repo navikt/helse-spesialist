@@ -5,8 +5,8 @@ import com.zaxxer.hikari.HikariDataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.bootstrap.Environment
-import no.nav.helse.db.DBRepositories
-import no.nav.helse.db.TransactionalSessionFactory
+import no.nav.helse.spesialist.db.DBRepositories
+import no.nav.helse.spesialist.db.TransactionalSessionFactory
 import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import org.flywaydb.core.Flyway
 import org.intellij.lang.annotations.Language

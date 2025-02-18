@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.db.dao
 
-import no.nav.helse.db.PgSykefraværstilfelleDao
 import no.nav.helse.db.overstyring.LovhjemmelForDatabase
 import no.nav.helse.db.overstyring.SkjønnsfastsattArbeidsgiverForDatabase
 import no.nav.helse.db.overstyring.SkjønnsfastsattSykepengegrunnlagForDatabase
