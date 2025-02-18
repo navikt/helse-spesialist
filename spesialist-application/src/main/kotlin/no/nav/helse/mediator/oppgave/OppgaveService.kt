@@ -7,10 +7,8 @@ import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.Repositories
 import no.nav.helse.db.ReservasjonDao
-import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.SessionContext
 import no.nav.helse.db.TildelingDao
-import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.Oppgave.Companion.nyOppgave
@@ -40,8 +38,6 @@ class OppgaveService(
     private val tildelingDao: TildelingDao,
     private val reservasjonDao: ReservasjonDao,
     private val opptegnelseDao: OpptegnelseDao,
-    private val totrinnsvurderingDao: TotrinnsvurderingDao,
-    private val saksbehandlerDao: SaksbehandlerDao,
     private val meldingPubliserer: MeldingPubliserer,
     private val tilgangskontroll: Tilgangskontroll,
     private val tilgangsgrupper: Tilgangsgrupper,
@@ -56,8 +52,6 @@ class OppgaveService(
             tildelingDao = sessionContext.tildelingDao,
             reservasjonDao = sessionContext.reservasjonDao,
             opptegnelseDao = sessionContext.opptegnelseDao,
-            totrinnsvurderingDao = sessionContext.totrinnsvurderingDao,
-            saksbehandlerDao = sessionContext.saksbehandlerDao,
             meldingPubliserer = meldingPubliserer,
             tilgangskontroll = tilgangskontroll,
             tilgangsgrupper = tilgangsgrupper,

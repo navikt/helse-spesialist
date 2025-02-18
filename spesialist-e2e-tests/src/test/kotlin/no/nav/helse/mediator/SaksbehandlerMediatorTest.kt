@@ -82,8 +82,6 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             tildelingDao = tildelingDbDao,
             reservasjonDao = reservasjonDao,
             opptegnelseDao = opptegnelseRepository,
-            totrinnsvurderingDao = totrinnsvurderingDao,
-            saksbehandlerDao = saksbehandlerDao,
             meldingPubliserer = meldingPubliserer,
             tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
             tilgangsgrupper = tilgangsgrupper,

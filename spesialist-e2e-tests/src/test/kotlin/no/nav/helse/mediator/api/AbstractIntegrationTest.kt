@@ -24,7 +24,6 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
     protected val oppgaveDao = repositories.oppgaveDao
     private val reservasjonDao = repositories.reservasjonDao
     private val periodehistorikkDao = repositories.periodehistorikkDao
-    private val totrinnsvurderingDao = repositories.totrinnsvurderingDao
     private val saksbehandlerDao = repositories.saksbehandlerDao
 
     private val oppgaveService =
@@ -33,8 +32,6 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
             tildelingDao = repositories.tildelingDao,
             reservasjonDao = reservasjonDao,
             opptegnelseDao = repositories.opptegnelseDao,
-            totrinnsvurderingDao = totrinnsvurderingDao,
-            saksbehandlerDao = saksbehandlerDao,
             meldingPubliserer = meldingPubliserer,
             tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
             tilgangsgrupper = SpeilTilgangsgrupper(testEnv),

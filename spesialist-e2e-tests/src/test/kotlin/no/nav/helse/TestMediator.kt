@@ -38,8 +38,6 @@ internal class TestMediator(
     private val opptegnelseDao = repositories.opptegnelseDao
     private val oppgaveDao = repositories.oppgaveDao
     private val overstyringDao = repositories.overstyringDao
-    private val totrinnsvurderingDao = repositories.totrinnsvurderingDao
-    private val saksbehandlerDao = repositories.saksbehandlerDao
     private val tildelingDao = repositories.tildelingDao
     private val notatDao = repositories.notatDao
     private val dialogDao = repositories.dialogDao
@@ -62,8 +60,6 @@ internal class TestMediator(
             tildelingDao = tildelingDao,
             reservasjonDao = repositories.reservasjonDao,
             opptegnelseDao = opptegnelseDao,
-            totrinnsvurderingDao = totrinnsvurderingDao,
-            saksbehandlerDao = saksbehandlerDao,
             meldingPubliserer = meldingPubliserer,
             tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
             tilgangsgrupper = tilgangsgrupper,

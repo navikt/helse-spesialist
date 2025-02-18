@@ -139,7 +139,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     internal val utbetalingDao = sessionContext.utbetalingDao
     internal val behandlingsstatistikkDao = repositories.behandlingsstatistikkDao
     internal val vergemålDao = sessionContext.vergemålDao
-    internal val totrinnsvurderingDao = sessionContext.totrinnsvurderingDao
     internal val dokumentDao = repositories.dokumentDao
     internal val påVentDao = sessionContext.påVentDao
     internal val stansAutomatiskBehandlingDao = sessionContext.stansAutomatiskBehandlingDao

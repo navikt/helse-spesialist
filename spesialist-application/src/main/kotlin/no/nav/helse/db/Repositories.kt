@@ -40,7 +40,6 @@ interface Repositories {
     val saksbehandlerDao: SaksbehandlerDao
     val stansAutomatiskBehandlingDao: StansAutomatiskBehandlingDao
     val tildelingDao: TildelingDao
-    val totrinnsvurderingDao: TotrinnsvurderingDao
     val varselDao: VarselDao
     val vedtakDao: VedtakDao
     val vedtakBegrunnelseDao: VedtakBegrunnelseDao

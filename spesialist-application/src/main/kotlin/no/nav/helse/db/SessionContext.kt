@@ -31,7 +31,6 @@ interface SessionContext {
     val stansAutomatiskBehandlingDao: StansAutomatiskBehandlingDao
     val sykefraværstilfelleDao: SykefraværstilfelleDao
     val tildelingDao: TildelingDao
-    val totrinnsvurderingDao: TotrinnsvurderingDao
     val utbetalingDao: UtbetalingDao
     val vedtakDao: VedtakDao
     val vergemålDao: VergemålDao

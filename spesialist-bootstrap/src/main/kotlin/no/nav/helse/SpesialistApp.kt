@@ -64,7 +64,6 @@ class SpesialistApp(
     private val behandlingsstatistikkDao = repositories.behandlingsstatistikkDao
     private val notatDao = repositories.notatDao
     private val dialogDao = repositories.dialogDao
-    private val totrinnsvurderingDao = repositories.totrinnsvurderingDao
     private val dokumentDao = repositories.dokumentDao
     private val stansAutomatiskBehandlingDao = repositories.stansAutomatiskBehandlingDao
 
@@ -157,8 +156,6 @@ class SpesialistApp(
                 tildelingDao = tildelingDao,
                 reservasjonDao = reservasjonDao,
                 opptegnelseDao = opptegnelseDao,
-                totrinnsvurderingDao = totrinnsvurderingDao,
-                saksbehandlerDao = saksbehandlerDao,
                 meldingPubliserer = meldingPubliserer,
                 tilgangskontroll = tilgangskontrollørForReservasjon,
                 tilgangsgrupper = tilgangsgrupper,

@@ -15,8 +15,6 @@ import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.TildelingDao
-import no.nav.helse.db.TotrinnsvurderingDao
-import no.nav.helse.db.TotrinnsvurderingFraDatabase
 import no.nav.helse.mediator.KommandokjedeEndretEvent
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.melding.Behov
@@ -53,7 +51,6 @@ internal class OppgaveServiceTest {
     private val tildelingDao = mockk<TildelingDao>(relaxed = true)
     private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
     private val opptegnelseDao = mockk<OpptegnelseDao>(relaxed = true)
-    private val totrinnsvurderingDao = mockk<TotrinnsvurderingDao>(relaxed = true)
     private val saksbehandlerDao = mockk<SaksbehandlerDao>()
 
     private val meldingPubliserer = object : MeldingPubliserer {
@@ -83,8 +80,6 @@ internal class OppgaveServiceTest {
             tildelingDao = tildelingDao,
             reservasjonDao = reservasjonDao,
             opptegnelseDao = opptegnelseDao,
-            totrinnsvurderingDao = totrinnsvurderingDao,
-            saksbehandlerDao = saksbehandlerDao,
             meldingPubliserer = meldingPubliserer,
             tilgangskontroll = { _, _ -> false },
             tilgangsgrupper = tilgangsgrupper,
@@ -186,9 +181,6 @@ internal class OppgaveServiceTest {
 
     @Test
     fun `oppdaterer oppgave`() {
-        every { totrinnsvurderingDao.hentAktivTotrinnsvurdering(OPPGAVE_ID) } returns (nextLong() to mockk<TotrinnsvurderingFraDatabase>(
-            relaxed = true
-        ))
         every { oppgaveDao.finnOppgave(OPPGAVE_ID) } returns oppgaveFraDatabase()
         every { oppgaveDao.finnHendelseId(any()) } returns HENDELSE_ID
         every { saksbehandlerDao.finnSaksbehandlerFraDatabase(any()) } returns saksbehandlerFraDatabase

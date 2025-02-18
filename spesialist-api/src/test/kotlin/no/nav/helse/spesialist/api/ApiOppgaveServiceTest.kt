@@ -14,10 +14,8 @@ import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PersonnavnFraDatabase
 import no.nav.helse.db.Repositories
 import no.nav.helse.db.ReservasjonDao
-import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.TildelingDao
-import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.mediator.KommandokjedeEndretEvent
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.mediator.oppgave.OppgaveService
@@ -66,8 +64,6 @@ internal class ApiOppgaveServiceTest {
     private val tildelingDao = mockk<TildelingDao>(relaxed = true)
     private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
     private val opptegnelseDao = mockk<OpptegnelseDao>(relaxed = true)
-    private val totrinnsvurderingDao = mockk<TotrinnsvurderingDao>(relaxed = true)
-    private val saksbehandlerDao = mockk<SaksbehandlerDao>()
 
     private val meldingPubliserer = object : MeldingPubliserer {
         var antallMeldinger: Int = 0
@@ -99,8 +95,6 @@ internal class ApiOppgaveServiceTest {
                 tildelingDao = tildelingDao,
                 reservasjonDao = reservasjonDao,
                 opptegnelseDao = opptegnelseDao,
-                totrinnsvurderingDao = totrinnsvurderingDao,
-                saksbehandlerDao = saksbehandlerDao,
                 meldingPubliserer = meldingPubliserer,
                 tilgangskontroll = { _, _ -> false },
                 tilgangsgrupper = SpeilTilgangsgrupper(testEnv),

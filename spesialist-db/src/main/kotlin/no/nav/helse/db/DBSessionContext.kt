@@ -37,7 +37,6 @@ class DBSessionContext(session: Session, tilgangskontroll: Tilgangskontroll) : S
     override val stansAutomatiskBehandlingDao = PgStansAutomatiskBehandlingDao(session)
     override val sykefraværstilfelleDao = PgSykefraværstilfelleDao(session)
     override val tildelingDao = PgTildelingDao(session)
-    override val totrinnsvurderingDao = PgTotrinnsvurderingDao(session)
     override val utbetalingDao = PgUtbetalingDao(session)
     override val vedtakDao = PgVedtakDao(session)
     override val vergemålDao = PgVergemålDao(session)

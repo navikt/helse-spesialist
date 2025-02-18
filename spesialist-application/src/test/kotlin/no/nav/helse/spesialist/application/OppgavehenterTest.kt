@@ -4,22 +4,18 @@ import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OppgaveFraDatabase
 import no.nav.helse.db.OppgavesorteringForDatabase
-import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.SaksbehandlerFraDatabase
-import no.nav.helse.db.TotrinnsvurderingDao
 import no.nav.helse.db.TotrinnsvurderingFraDatabase
 import no.nav.helse.mediator.oppgave.Oppgavehenter
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.EgenskapDto
 import no.nav.helse.modell.oppgave.Oppgave.Companion.toDto
 import no.nav.helse.modell.oppgave.OppgaveDto
-import no.nav.helse.modell.saksbehandler.Saksbehandler
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.UUID
-import kotlin.random.Random.Default.nextLong
 
 class OppgavehenterTest {
 
@@ -162,61 +158,4 @@ class OppgavehenterTest {
         override fun oppdaterPekerTilGodkjenningsbehov(godkjenningsbehovId: UUID, utbetalingId: UUID) =
             error("Not implemented in test")
     }
-
-    private fun totrinnsvurderingRepository(
-        totrinnsvurdering: TotrinnsvurderingFraDatabase? = null
-    ) = object : TotrinnsvurderingDao {
-        override fun hentAktivTotrinnsvurdering(oppgaveId: Long): Pair<Long, TotrinnsvurderingFraDatabase>? =
-            totrinnsvurdering?.let { nextLong() to it }
-    }
-
-    private val saksbehandlerDao = object : SaksbehandlerDao {
-        val saksbehandlere = mapOf(
-            SAKSBEHANDLER_OID to SaksbehandlerFraDatabase(
-                epostadresse = SAKSBEHANDLER_EPOST,
-                oid = SAKSBEHANDLER_OID,
-                navn = SAKSBEHANDLER_NAVN,
-                ident = SAKSBEHANDLER_IDENT
-            ),
-            BESLUTTER_OID to SaksbehandlerFraDatabase(
-                epostadresse = SAKSBEHANDLER_EPOST,
-                oid = BESLUTTER_OID,
-                navn = SAKSBEHANDLER_NAVN,
-                ident = SAKSBEHANDLER_IDENT
-            ),
-        )
-
-        override fun finnSaksbehandlerFraDatabase(oid: UUID) = saksbehandlere[oid]
-
-        override fun finnSaksbehandler(oid: UUID) = saksbehandlere[oid]?.let {
-            Saksbehandler(
-                epostadresse = it.epostadresse,
-                oid = it.oid,
-                navn = it.navn,
-                ident = it.ident,
-                tilgangskontroll = { _, _ -> false }
-            )
-        }
-
-        override fun opprettEllerOppdater(oid: UUID, navn: String, epost: String, ident: String): Int {
-            error("Not implemented in test")
-        }
-
-        override fun oppdaterSistObservert(oid: UUID, sisteHandlingUtført: LocalDateTime): Int {
-            error("Not implemented in test")
-        }
-    }
-
-    private fun saksbehandler(
-        epost: String = SAKSBEHANDLER_EPOST,
-        oid: UUID = SAKSBEHANDLER_OID,
-        navn: String = SAKSBEHANDLER_NAVN,
-        ident: String = SAKSBEHANDLER_IDENT,
-    ) = Saksbehandler(
-        epostadresse = epost,
-        oid = oid,
-        navn = navn,
-        ident = ident,
-        tilgangskontroll = { _, _ -> false },
-    )
 }
