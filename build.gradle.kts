@@ -36,6 +36,9 @@ allprojects {
 
     dependencies {
         constraints {
+            implementation("net.minidev:json-smart:[2.5.2,)") {
+                because("Sårbarhet CVE-2024-57699")
+            }
             implementation("commons-io:commons-io:[2.14.0,)") {
                 because("Sårbarhet CVE-2024-47554")
             }
