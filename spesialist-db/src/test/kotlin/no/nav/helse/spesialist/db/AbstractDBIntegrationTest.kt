@@ -652,19 +652,6 @@ abstract class AbstractDBIntegrationTest {
             lovhjemmel = null,
         )
 
-    protected fun settSaksbehandler(
-        vedtaksperiodeId: UUID,
-        saksbehandlerOid: UUID,
-    ) = dbQuery.update(
-        """
-        UPDATE totrinnsvurdering
-        SET saksbehandler = :saksbehandlerOid, oppdatert = now()
-        WHERE vedtaksperiode_id = :vedtaksperiodeId AND utbetaling_id_ref IS null
-        """.trimIndent(),
-        "vedtaksperiodeId" to vedtaksperiodeId,
-        "saksbehandlerOid" to saksbehandlerOid,
-    )
-
     protected data class Persondata(
         val personinfoId: Long,
         val enhetId: Int,
