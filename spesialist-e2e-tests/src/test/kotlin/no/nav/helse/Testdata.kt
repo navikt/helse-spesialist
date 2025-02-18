@@ -208,7 +208,6 @@ internal data class GodkjenningsbehovTestdata(
     val inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
     val orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList(),
     val utbetalingtype: no.nav.helse.modell.utbetaling.Utbetalingtype = UTBETALING,
-    val avviksvurderingId: UUID = UUID.randomUUID(),
     val vilkårsgrunnlagId: UUID = UUID.randomUUID(),
     val spleisBehandlingId: UUID = UUID.randomUUID(),
     val tags: List<String> = emptyList(),

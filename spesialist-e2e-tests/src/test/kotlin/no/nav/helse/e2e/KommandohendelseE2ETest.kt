@@ -31,7 +31,7 @@ internal class KommandohendelseE2ETest : AbstractE2ETest() {
         håndterGodkjenningsbehov()
         håndterVedtaksperiodeForkastet()
         håndterPersoninfoløsningUtenValidering()
-        assertKommandokjedetilstander(sisteGodkjenningsbehovId, NY, SUSPENDERT, AVBRUTT)
+        assertKommandokjedetilstander(sisteGodkjenningsbehovId, NY, SUSPENDERT, SUSPENDERT, AVBRUTT)
     }
 
 

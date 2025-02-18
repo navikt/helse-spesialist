@@ -217,31 +217,4 @@ internal class GodkjenningsbehovRiverTest {
             )
         }
     }
-
-    @Test
-    fun `leser ikke Godkjenningbehov uten behandletAvSpinnvill`() {
-        val relevanteArbeidsforhold = listOf(ORGNR)
-        testRapid.sendTestMessage(
-            Testmeldingfabrikk.lagGodkjenningsbehov(
-                aktørId = AKTØR,
-                fødselsnummer = FNR,
-                vedtaksperiodeId = VEDTAKSPERIODE,
-                utbetalingId = UTBETALING_ID,
-                organisasjonsnummer = ORGNR,
-                periodeFom = FOM,
-                periodeTom = TOM,
-                skjæringstidspunkt = FOM,
-                inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE,
-                orgnummereMedRelevanteArbeidsforhold = relevanteArbeidsforhold,
-                id = HENDELSE,
-                avviksvurderingId = null,
-            )
-        )
-        verify(exactly = 0) {
-            mediator.mottaMelding(
-                melding = any(),
-                kontekstbasertPubliserer = any(),
-            )
-        }
-    }
 }

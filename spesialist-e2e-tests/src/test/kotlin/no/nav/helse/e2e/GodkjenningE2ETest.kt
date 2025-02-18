@@ -86,6 +86,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
             SUSPENDERT,
             SUSPENDERT,
             SUSPENDERT,
+            SUSPENDERT,
             FERDIG,
         )
     }
@@ -95,9 +96,9 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         håndterGodkjenningsbehov()
-        val godkjenningsbehovId1 = sisteMeldingId
+        val godkjenningsbehovId1 = sisteGodkjenningsbehovId
         håndterGodkjenningsbehov()
-        assertKommandokjedetilstander(godkjenningsbehovId1, NY, SUSPENDERT, AVBRUTT)
+        assertKommandokjedetilstander(godkjenningsbehovId1, NY, SUSPENDERT, SUSPENDERT, AVBRUTT)
     }
 
     @Test
@@ -196,7 +197,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         håndterEnhetløsning()
         håndterInfotrygdutbetalingerløsning()
         håndterArbeidsgiverinformasjonløsning()
-        assertKommandokjedetilstander(sisteGodkjenningsbehovId, NY, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT)
+        assertKommandokjedetilstander(sisteGodkjenningsbehovId, NY, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT, SUSPENDERT)
         assertSisteEtterspurteBehov("Arbeidsforhold")
     }
 
@@ -264,6 +265,7 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
         assertKommandokjedetilstander(
             sisteGodkjenningsbehovId,
             NY,
+            SUSPENDERT,
             SUSPENDERT,
             SUSPENDERT,
             SUSPENDERT,

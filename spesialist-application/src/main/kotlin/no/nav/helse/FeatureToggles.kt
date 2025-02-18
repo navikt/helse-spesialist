@@ -5,5 +5,5 @@ interface FeatureToggles {
 
     fun skalBenytteNyTotrinnsvurderingsløsning(): Boolean = false
 
-    fun skalBenytteNyAvviksvurderingløype(): Boolean = false
+    fun skalBenytteNyAvviksvurderingløype(): Boolean = true
 }

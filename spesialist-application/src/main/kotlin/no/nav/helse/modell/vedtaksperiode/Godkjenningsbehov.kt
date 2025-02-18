@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.FeatureToggles
 import no.nav.helse.db.ArbeidsforholdDao
 import no.nav.helse.db.AutomatiseringDao
-import no.nav.helse.db.AvviksvurderingDao
 import no.nav.helse.db.AvviksvurderingRepository
 import no.nav.helse.db.CommandContextDao
 import no.nav.helse.db.EgenAnsattDao
@@ -38,7 +37,6 @@ import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OppdaterPersonCommand
 import no.nav.helse.modell.kommando.OpprettEllerOppdaterArbeidsforhold
 import no.nav.helse.modell.kommando.OpprettEllerOppdaterInntektskilder
-import no.nav.helse.modell.kommando.OpprettKoblingTilAvviksvurdering
 import no.nav.helse.modell.kommando.OpprettKoblingTilHendelseCommand
 import no.nav.helse.modell.kommando.OpprettKoblingTilUtbetalingCommand
 import no.nav.helse.modell.kommando.OpprettSaksbehandleroppgave
@@ -222,7 +220,6 @@ internal class GodkjenningsbehovCommand(
     overstyringDao: OverstyringDao,
     automatiseringDao: AutomatiseringDao,
     oppgaveDao: OppgaveDao,
-    avviksvurderingDao: AvviksvurderingDao,
     periodehistorikkDao: PeriodehistorikkDao,
     totrinnsvurderingRepository: TotrinnsvurderingRepository,
     avviksvurderingRepository: AvviksvurderingRepository,
@@ -242,10 +239,6 @@ internal class GodkjenningsbehovCommand(
             ForberedBehandlingAvGodkjenningsbehov(
                 commandData = behovData,
                 person = person,
-            ),
-            OpprettKoblingTilAvviksvurdering(
-                commandData = behovData,
-                avviksvurderingDao = avviksvurderingDao,
             ),
             VurderVidereBehandlingAvGodkjenningsbehov(
                 commandData = behovData,

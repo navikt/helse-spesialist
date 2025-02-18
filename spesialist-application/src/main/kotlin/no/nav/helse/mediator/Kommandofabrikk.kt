@@ -363,7 +363,6 @@ class Kommandofabrikk(
             overstyringDao = sessionContext.overstyringDao,
             automatiseringDao = sessionContext.automatiseringDao,
             oppgaveDao = sessionContext.oppgaveDao,
-            avviksvurderingDao = sessionContext.avviksvurderingDao,
             periodehistorikkDao = sessionContext.periodehistorikkDao,
             totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository,
             avviksvurderingRepository = sessionContext.avviksvurderingRepository,

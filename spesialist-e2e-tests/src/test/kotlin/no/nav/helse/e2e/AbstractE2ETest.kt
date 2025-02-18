@@ -275,6 +275,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             avviksvurderingTestdata = avviksvurderingTestdata,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata,
         )
+
         if (!harOppdatertMetadata) {
             håndterPersoninfoløsning(fødselsnummer = godkjenningsbehovTestdata.fødselsnummer)
             håndterEnhetløsning(fødselsnummer = godkjenningsbehovTestdata.fødselsnummer, vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId, enhet = enhet)
@@ -285,16 +286,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             )
             håndterArbeidsforholdløsning(fødselsnummer = godkjenningsbehovTestdata.fødselsnummer, vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId)
         }
-    }
-
-    private fun spinnvillAvviksvurderer(
-        avviksvurderingTestdata: AvviksvurderingTestdata,
-        fødselsnummer: String,
-        aktørId: String,
-        organisasjonsnummer: String,
-    ) {
-        sisteMeldingId =
-            meldingssender.sendAvvikVurdert(avviksvurderingTestdata, fødselsnummer, aktørId, organisasjonsnummer)
     }
 
     protected fun spesialistBehandlerGodkjenningsbehovFremTilOppgave(
@@ -658,7 +649,6 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected fun håndterGodkjenningsbehovUtenValidering(
         arbeidsgiverbeløp: Int = 20000,
         personbeløp: Int = 0,
-        avviksvurderingTestdata: AvviksvurderingTestdata = this.avviksvurderingTestdata,
         godkjenningsbehovTestdata: GodkjenningsbehovTestdata = this.godkjenningsbehovTestdata,
     ) {
         val erRevurdering = erRevurdering(godkjenningsbehovTestdata.vedtaksperiodeId)
@@ -675,16 +665,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
             personbeløp = personbeløp,
         )
         håndterVedtaksperiodeEndret(fødselsnummer = godkjenningsbehovTestdata.fødselsnummer, vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId)
-        spinnvillAvviksvurderer(
-            avviksvurderingTestdata,
-            godkjenningsbehovTestdata.fødselsnummer,
-            godkjenningsbehovTestdata.aktørId,
-            godkjenningsbehovTestdata.organisasjonsnummer,
-        )
-        sisteMeldingId =
-            sendGodkjenningsbehov(
-                godkjenningsbehovTestdata.copy(avviksvurderingId = avviksvurderingTestdata.avviksvurderingId),
-            )
+        sisteMeldingId = sendGodkjenningsbehov(godkjenningsbehovTestdata)
         sisteGodkjenningsbehovId = sisteMeldingId
     }
 
@@ -700,8 +681,15 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         håndterGodkjenningsbehovUtenValidering(
             arbeidsgiverbeløp = arbeidsgiverbeløp,
             personbeløp = personbeløp,
-            avviksvurderingTestdata = avviksvurderingTestdata,
-            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(avviksvurderingId = avviksvurderingTestdata.avviksvurderingId),
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata,
+        )
+
+        håndterAvviksvurderingløsning(
+            fødselsnummer = godkjenningsbehovTestdata.fødselsnummer,
+            organisasjonsnummer = godkjenningsbehovTestdata.organisasjonsnummer,
+            sammenligningsgrunnlagTotalbeløp = avviksvurderingTestdata.sammenligningsgrunnlag,
+            avviksprosent = avviksvurderingTestdata.avviksprosent,
+            avviksvurderingId = avviksvurderingTestdata.avviksvurderingId
         )
 
         when {
@@ -716,6 +704,24 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     private fun sendGodkjenningsbehov(godkjenningsbehovTestdata: GodkjenningsbehovTestdata) =
         meldingssender.sendGodkjenningsbehov(godkjenningsbehovTestdata).also { sisteMeldingId = it }
+
+    private fun håndterAvviksvurderingløsning(
+        fødselsnummer: String = FØDSELSNUMMER,
+        organisasjonsnummer: String = ORGNR,
+        sammenligningsgrunnlagTotalbeløp: Double,
+        avviksprosent: Double,
+        avviksvurderingId: UUID,
+    ) {
+        assertEtterspurteBehov("Avviksvurdering")
+        sisteMeldingId =
+            meldingssender.sendAvviksvurderingløsning(
+                fødselsnummer = fødselsnummer,
+                organisasjonsnummer = organisasjonsnummer,
+                sammenligningsgrunnlagTotalbeløp = sammenligningsgrunnlagTotalbeløp,
+                avviksprosent = avviksprosent,
+                avviksvurderingId = avviksvurderingId
+            )
+    }
 
     protected fun håndterPersoninfoløsning(
         aktørId: String = AKTØR,

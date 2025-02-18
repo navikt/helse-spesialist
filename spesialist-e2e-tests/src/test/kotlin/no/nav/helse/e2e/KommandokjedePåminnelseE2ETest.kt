@@ -13,6 +13,6 @@ internal class KommandokjedePåminnelseE2ETest : AbstractE2ETest() {
         håndterGodkjenningsbehov()
 
         håndterKommandokjedePåminnelse(commandContextId(sisteGodkjenningsbehovId), sisteGodkjenningsbehovId)
-        assertEquals(2, inspektør.behov().size)
+        assertEquals(3, inspektør.behov().size)
     }
 }

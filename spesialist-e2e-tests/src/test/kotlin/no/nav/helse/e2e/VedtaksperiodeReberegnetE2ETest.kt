@@ -26,6 +26,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
             SUSPENDERT,
             SUSPENDERT,
             SUSPENDERT,
+            SUSPENDERT,
             AVBRUTT,
         )
         assertSaksbehandleroppgaveBleIkkeOpprettet()
@@ -40,6 +41,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
         assertKommandokjedetilstander(
             sisteGodkjenningsbehovId,
             NY,
+            SUSPENDERT,
             SUSPENDERT,
             SUSPENDERT,
             SUSPENDERT,
@@ -72,6 +74,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
             SUSPENDERT,
             SUSPENDERT,
             SUSPENDERT,
+            SUSPENDERT,
             AVBRUTT,
         )
         assertSaksbehandleroppgaveBleIkkeOpprettet()
@@ -83,6 +86,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
         assertKommandokjedetilstander(
             sisteGodkjenningsbehovId,
             NY,
+            SUSPENDERT,
             SUSPENDERT,
             SUSPENDERT,
             SUSPENDERT,
@@ -105,7 +109,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
         spleisOppretterNyBehandling()
         håndterGodkjenningsbehov()
         håndterVedtaksperiodeEndret(forrigeTilstand = "TIL_UTBETALING", gjeldendeTilstand = "UTBETALING_FEILET")
-        assertKommandokjedetilstander(sisteGodkjenningsbehovId, NY, SUSPENDERT)
+        assertKommandokjedetilstander(sisteGodkjenningsbehovId, NY, SUSPENDERT, SUSPENDERT)
     }
 
     @Test
@@ -114,7 +118,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
         spleisOppretterNyBehandling()
         håndterGodkjenningsbehov()
         håndterVedtaksperiodeEndret(forrigeTilstand = "AVVENTER_GODKJENNING_REVURDERING", gjeldendeTilstand = "TIL_INFOTRYGD")
-        assertKommandokjedetilstander(sisteGodkjenningsbehovId, NY, SUSPENDERT)
+        assertKommandokjedetilstander(sisteGodkjenningsbehovId, NY, SUSPENDERT, SUSPENDERT)
     }
 
     @Test
@@ -123,7 +127,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
         spleisOppretterNyBehandling()
         håndterGodkjenningsbehov()
         håndterVedtaksperiodeEndret(forrigeTilstand = "AVVENTER_GODKJENNING_REVURDERING", gjeldendeTilstand = "AVSLUTTET")
-        assertKommandokjedetilstander(sisteGodkjenningsbehovId, NY, SUSPENDERT)
+        assertKommandokjedetilstander(sisteGodkjenningsbehovId, NY, SUSPENDERT, SUSPENDERT)
     }
 
     @Test
@@ -132,7 +136,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
         spleisOppretterNyBehandling()
         håndterGodkjenningsbehov()
         håndterVedtaksperiodeEndret(forrigeTilstand = "AVVENTER_GODKJENNING_REVURDERING", gjeldendeTilstand = "TIL_UTBETALING")
-        assertKommandokjedetilstander(sisteGodkjenningsbehovId, NY, SUSPENDERT)
+        assertKommandokjedetilstander(sisteGodkjenningsbehovId, NY, SUSPENDERT, SUSPENDERT)
     }
 
     @Test
@@ -141,7 +145,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
         spleisOppretterNyBehandling()
         håndterGodkjenningsbehov()
         håndterVedtaksperiodeEndret(gjeldendeTilstand = "TIL_INFOTRYGD")
-        assertKommandokjedetilstander(sisteGodkjenningsbehovId, NY, SUSPENDERT)
+        assertKommandokjedetilstander(sisteGodkjenningsbehovId, NY, SUSPENDERT, SUSPENDERT)
     }
 
     @Test
@@ -150,7 +154,7 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
         spleisOppretterNyBehandling()
         håndterGodkjenningsbehov()
         håndterVedtaksperiodeEndret(gjeldendeTilstand = "AVSLUTTET")
-        assertKommandokjedetilstander(sisteGodkjenningsbehovId, NY, SUSPENDERT)
+        assertKommandokjedetilstander(sisteGodkjenningsbehovId, NY, SUSPENDERT, SUSPENDERT)
     }
 
     @Test
@@ -159,6 +163,6 @@ internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
         spleisOppretterNyBehandling()
         håndterGodkjenningsbehov()
         håndterVedtaksperiodeEndret(gjeldendeTilstand = "TIL_UTBETALING")
-        assertKommandokjedetilstander(sisteGodkjenningsbehovId, NY, SUSPENDERT)
+        assertKommandokjedetilstander(sisteGodkjenningsbehovId, NY, SUSPENDERT, SUSPENDERT)
     }
 }
