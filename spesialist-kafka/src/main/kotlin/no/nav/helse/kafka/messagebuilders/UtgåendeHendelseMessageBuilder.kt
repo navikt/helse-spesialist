@@ -226,8 +226,8 @@ private fun Saksbehandlerløsning.detaljer(): Map<String, Any> =
         "saksbehandleroverstyringer" to saksbehandleroverstyringer,
         "saksbehandler" to
             mapOf(
-                "ident" to saksbehandler.ident(),
-                "epostadresse" to saksbehandler.epostadresse(),
+                "ident" to saksbehandler.ident,
+                "epostadresse" to saksbehandler.epost,
             ),
         årsak?.let { "årsak" to it },
         begrunnelser?.let { "begrunnelser" to it },
@@ -235,8 +235,8 @@ private fun Saksbehandlerløsning.detaljer(): Map<String, Any> =
         beslutter?.let {
             "beslutter" to
                 mapOf(
-                    "ident" to it.ident(),
-                    "epostadresse" to it.epostadresse(),
+                    "ident" to it.ident,
+                    "epostadresse" to it.epost,
                 )
         },
     ).toMap()

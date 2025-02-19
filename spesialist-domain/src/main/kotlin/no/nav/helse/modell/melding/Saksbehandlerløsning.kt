@@ -1,6 +1,6 @@
 package no.nav.helse.modell.melding
 
-import no.nav.helse.modell.saksbehandler.Saksbehandler
+import no.nav.helse.spesialist.domain.Saksbehandler
 import java.time.LocalDateTime
 import java.util.UUID
 

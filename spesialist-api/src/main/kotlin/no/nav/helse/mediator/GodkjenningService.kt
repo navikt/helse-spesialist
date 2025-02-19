@@ -12,10 +12,11 @@ import no.nav.helse.db.toDto
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.melding.Saksbehandlerløsning
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
-import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.spesialist.api.Godkjenninghåndterer
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
+import no.nav.helse.spesialist.domain.Saksbehandler
+import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import org.slf4j.LoggerFactory
 import java.sql.SQLException
 import java.time.LocalDateTime
@@ -128,7 +129,7 @@ class GodkjenningService(
 
     private fun saksbehandlerForJson(oid: UUID): Saksbehandler =
         requireNotNull(
-            saksbehandlerDao.finnSaksbehandler(oid),
+            sessionFactory.transactionalSessionScope { it.saksbehandlerRepository.finn(SaksbehandlerOid(oid)) },
         ) { "Finner ikke saksbehandleren i databasen. Det gir ikke noen mening" }
 
     private fun reserverPerson(
