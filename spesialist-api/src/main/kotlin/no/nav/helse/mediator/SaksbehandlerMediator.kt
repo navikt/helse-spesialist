@@ -96,6 +96,7 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
+import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.tell
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -235,10 +236,10 @@ class SaksbehandlerMediator(
                 if (!saksbehandler.harTilgangTil(listOf(Egenskap.BESLUTTER)) && !env.erDev) {
                     return@transactionalSessionScope VedtakResultat.Feil.BeslutterFeil.TrengerBeslutterRolle()
                 }
-                if (totrinnsvurdering.saksbehandler == saksbehandler && !env.erDev) {
+                if (totrinnsvurdering.saksbehandler?.value == saksbehandler.oid && !env.erDev) {
                     return@transactionalSessionScope VedtakResultat.Feil.BeslutterFeil.KanIkkeBeslutteEgenOppgave()
                 }
-                totrinnsvurdering.settBeslutter(saksbehandler)
+                totrinnsvurdering.settBeslutter(SaksbehandlerOid(saksbehandler.oid))
                 totrinnsvurderingRepository.lagre(totrinnsvurdering, fødselsnummer)
             }
 
@@ -623,12 +624,12 @@ class SaksbehandlerMediator(
                     "Forventer at det eksisterer en aktiv totrinnsvurdering når oppgave sendes i retur"
                 }
                 val opprinneligSaksbehandler =
-                    checkNotNull(totrinnsvurdering.saksbehandler) {
+                    checkNotNull(totrinnsvurdering.saksbehandler?.value?.let(saksbehandlerDao::finnSaksbehandler)) {
                         "Opprinnelig saksbehandler kan ikke være null ved retur av beslutteroppgave"
                     }
 
                 apiOppgaveService.sendIRetur(oppgavereferanse, opprinneligSaksbehandler)
-                totrinnsvurdering.sendIRetur(oppgavereferanse, besluttendeSaksbehandler.tilSaksbehandler())
+                totrinnsvurdering.sendIRetur(oppgavereferanse, SaksbehandlerOid(besluttendeSaksbehandler.oid))
                 session.totrinnsvurderingRepository.lagre(totrinnsvurdering, fødselsnummer)
             }
         } catch (modellfeil: Modellfeil) {
@@ -702,8 +703,9 @@ class SaksbehandlerMediator(
                     "Forventer at det eksisterer en aktiv totrinnsvurdering når oppgave sendes til beslutter"
                 }
 
-                apiOppgaveService.sendTilBeslutter(oppgavereferanse, totrinnsvurdering.beslutter)
-                totrinnsvurdering.sendTilBeslutter(oppgavereferanse, saksbehandlerFraApi.tilSaksbehandler())
+                val beslutter = totrinnsvurdering.beslutter?.value?.let(session.saksbehandlerDao::finnSaksbehandler)
+                apiOppgaveService.sendTilBeslutter(oppgavereferanse, beslutter)
+                totrinnsvurdering.sendTilBeslutter(oppgavereferanse, SaksbehandlerOid(saksbehandlerFraApi.oid))
                 session.totrinnsvurderingRepository.lagre(totrinnsvurdering, fødselsnummer)
             }
         } catch (modellfeil: Modellfeil) {

@@ -3,8 +3,8 @@ package no.nav.helse.modell.totrinnsvurdering
 import no.nav.helse.modell.OppgaveAlleredeSendtBeslutter
 import no.nav.helse.modell.OppgaveAlleredeSendtIRetur
 import no.nav.helse.modell.OppgaveKreverVurderingAvToSaksbehandlere
-import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.handlinger.Overstyring
+import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.ddd.AggregateRoot
 import java.time.LocalDateTime
 import java.util.UUID
@@ -16,8 +16,8 @@ class Totrinnsvurdering private constructor(
     id: TotrinnsvurderingId?,
     val vedtaksperiodeId: UUID,
     erRetur: Boolean,
-    saksbehandler: Saksbehandler?,
-    beslutter: Saksbehandler?,
+    saksbehandler: SaksbehandlerOid?,
+    beslutter: SaksbehandlerOid?,
     utbetalingId: UUID?,
     val opprettet: LocalDateTime,
     oppdatert: LocalDateTime?,
@@ -31,10 +31,10 @@ class Totrinnsvurdering private constructor(
     var erRetur: Boolean = erRetur
         private set
 
-    var saksbehandler: Saksbehandler? = saksbehandler
+    var saksbehandler: SaksbehandlerOid? = saksbehandler
         private set
 
-    var beslutter: Saksbehandler? = beslutter
+    var beslutter: SaksbehandlerOid? = beslutter
         private set
 
     var utbetalingId: UUID? = utbetalingId
@@ -58,7 +58,7 @@ class Totrinnsvurdering private constructor(
             erRetur = true
         }
 
-    fun settBeslutter(beslutter: Saksbehandler) =
+    fun settBeslutter(beslutter: SaksbehandlerOid) =
         oppdatering {
             this.beslutter = beslutter
         }
@@ -70,7 +70,7 @@ class Totrinnsvurdering private constructor(
 
     fun sendTilBeslutter(
         oppgaveId: Long,
-        behandlendeSaksbehandler: Saksbehandler,
+        behandlendeSaksbehandler: SaksbehandlerOid,
     ) = oppdatering {
         if (erBeslutteroppgave) throw OppgaveAlleredeSendtBeslutter(oppgaveId)
         if (behandlendeSaksbehandler == beslutter) throw OppgaveKreverVurderingAvToSaksbehandlere(oppgaveId)
@@ -81,7 +81,7 @@ class Totrinnsvurdering private constructor(
 
     fun sendIRetur(
         oppgaveId: Long,
-        beslutter: Saksbehandler,
+        beslutter: SaksbehandlerOid,
     ) = oppdatering {
         if (!erBeslutteroppgave) throw OppgaveAlleredeSendtIRetur(oppgaveId)
         if (beslutter == saksbehandler) throw OppgaveKreverVurderingAvToSaksbehandlere(oppgaveId)
@@ -145,8 +145,8 @@ class Totrinnsvurdering private constructor(
             id: TotrinnsvurderingId,
             vedtaksperiodeId: UUID,
             erRetur: Boolean,
-            saksbehandler: Saksbehandler?,
-            beslutter: Saksbehandler?,
+            saksbehandler: SaksbehandlerOid?,
+            beslutter: SaksbehandlerOid?,
             utbetalingId: UUID?,
             opprettet: LocalDateTime,
             oppdatert: LocalDateTime?,

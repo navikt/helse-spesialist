@@ -226,7 +226,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             session.totrinnsvurderingRepository.finn(vedtaksperiodeId)
         }
         checkNotNull(totrinnsvurdering)
-        assertEquals(saksbehandler.oid, totrinnsvurdering.saksbehandler?.oid)
+        assertEquals(saksbehandler.oid, totrinnsvurdering.saksbehandler?.value)
         assertTrue(totrinnsvurdering.erBeslutteroppgave)
     }
 
@@ -271,8 +271,8 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             session.totrinnsvurderingRepository.finn(vedtaksperiodeId)
         }
         checkNotNull(totrinnsvurdering)
-        assertEquals(saksbehandler.oid, totrinnsvurdering.saksbehandler?.oid)
-        assertEquals(beslutter.oid, totrinnsvurdering.beslutter?.oid)
+        assertEquals(saksbehandler.oid, totrinnsvurdering.saksbehandler?.value)
+        assertEquals(beslutter.oid, totrinnsvurdering.beslutter?.value)
         assertTrue(totrinnsvurdering.erRetur)
     }
 

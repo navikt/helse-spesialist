@@ -6,10 +6,8 @@ import no.nav.helse.modell.OppgaveKreverVurderingAvToSaksbehandlere
 import no.nav.helse.modell.lagAktørId
 import no.nav.helse.modell.lagFødselsnummer
 import no.nav.helse.modell.lagOrganisasjonsnummer
-import no.nav.helse.modell.saksbehandler.Saksbehandler
-import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinje
-import no.nav.helse.modell.saksbehandler.handlinger.TilgangskontrollForTestHarIkkeTilgang
+import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -127,7 +125,7 @@ internal class TotrinnsvurderingTest {
             organisasjonsnummer = lagOrganisasjonsnummer(),
             dager = emptyList(),
             begrunnelse = "begrunnelse",
-            saksbehandlerOid = nySaksbehandler().oid,
+            saksbehandlerOid = nySaksbehandler().value,
         ))
         assertEquals(1, totrinnsvurdering.overstyringer.size)
     }
@@ -146,14 +144,13 @@ internal class TotrinnsvurderingTest {
     }
 
     private fun nySaksbehandler(
-        oid: UUID = UUID.randomUUID(),
-        tilgangskontroll: Tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang
-    ) = Saksbehandler("epostadresse@nav.no", oid, "navn", "ident", tilgangskontroll)
+        oid: UUID = UUID.randomUUID()
+    ) = SaksbehandlerOid(oid)
 
     private fun nyTotrinnsvurdering(
         erRetur: Boolean = false,
-        saksbehandler: Saksbehandler? = null,
-        beslutter: Saksbehandler? = null,
+        saksbehandler: SaksbehandlerOid? = null,
+        beslutter: SaksbehandlerOid? = null,
     ) = Totrinnsvurdering.fraLagring(
         id = TotrinnsvurderingId(nextLong()),
         vedtaksperiodeId = UUID.randomUUID(),

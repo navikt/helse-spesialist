@@ -2,22 +2,17 @@ package no.nav.helse.spesialist.db.repository
 
 import kotliquery.Row
 import kotliquery.Session
-import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
-import no.nav.helse.spesialist.db.dao.PgSaksbehandlerDao
+import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import java.util.UUID
 
-class PgTotrinnsvurderingRepository(
-    session: Session,
-    tilgangskontroll: Tilgangskontroll,
-) : QueryRunner by MedSession(session), TotrinnsvurderingRepository {
+class PgTotrinnsvurderingRepository(session: Session) : QueryRunner by MedSession(session), TotrinnsvurderingRepository {
     private val overstyringRepository = PgOverstyringRepository(session)
-    private val saksbehandlerDao = PgSaksbehandlerDao(session, tilgangskontroll)
 
     override fun finn(fødselsnummer: String): Totrinnsvurdering? {
         return finnAktivTotrinnsvurdering(fødselsnummer)
@@ -96,8 +91,8 @@ class PgTotrinnsvurderingRepository(
             """.trimIndent(),
             "vedtaksperiodeId" to totrinnsvurdering.vedtaksperiodeId,
             "erRetur" to totrinnsvurdering.erRetur,
-            "saksbehandler" to totrinnsvurdering.saksbehandler?.oid,
-            "beslutter" to totrinnsvurdering.beslutter?.oid,
+            "saksbehandler" to totrinnsvurdering.saksbehandler?.value,
+            "beslutter" to totrinnsvurdering.beslutter?.value,
             "opprettet" to totrinnsvurdering.opprettet,
         ).updateAndReturnGeneratedKey()
 
@@ -114,8 +109,8 @@ class PgTotrinnsvurderingRepository(
             """.trimIndent(),
             "id" to totrinnsvurdering.id().value,
             "erRetur" to totrinnsvurdering.erRetur,
-            "saksbehandler" to totrinnsvurdering.saksbehandler?.oid,
-            "beslutter" to totrinnsvurdering.beslutter?.oid,
+            "saksbehandler" to totrinnsvurdering.saksbehandler?.value,
+            "beslutter" to totrinnsvurdering.beslutter?.value,
             "utbetalingId" to totrinnsvurdering.utbetalingId,
             "oppdatert" to totrinnsvurdering.oppdatert,
         ).update()
@@ -126,8 +121,8 @@ class PgTotrinnsvurderingRepository(
             id = TotrinnsvurderingId(long("id")),
             vedtaksperiodeId = uuid("vedtaksperiode_id"),
             erRetur = boolean("er_retur"),
-            saksbehandler = uuidOrNull("saksbehandler_oid")?.let { saksbehandlerDao.finnSaksbehandler(it) },
-            beslutter = uuidOrNull("beslutter_oid")?.let { saksbehandlerDao.finnSaksbehandler(it) },
+            saksbehandler = uuidOrNull("saksbehandler_oid")?.let(::SaksbehandlerOid),
+            beslutter = uuidOrNull("beslutter_oid")?.let(::SaksbehandlerOid),
             utbetalingId = uuidOrNull("utbetaling_id"),
             opprettet = localDateTime("opprettet"),
             oppdatert = localDateTimeOrNull("oppdatert"),

@@ -17,10 +17,8 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.db.DBSessionContext
 import no.nav.helse.spesialist.db.DbQuery
+import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.test.TestPerson
-import no.nav.helse.spesialist.test.lagSaksbehandlerident
-import no.nav.helse.spesialist.test.lagSaksbehandlernavn
-import no.nav.helse.spesialist.test.lagTilfeldigSaksbehandlerepost
 import no.nav.helse.spesialist.typer.Kjønn
 import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import org.junit.jupiter.api.AfterEach
@@ -177,25 +175,20 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         totrinnsvurderingRepository.lagre(totrinnsvurdering, FNR)
         saksbehandlerOid?.let {
             totrinnsvurdering.sendTilBeslutter(
-                OPPGAVE_ID, nySaksbehandler(saksbehandlerOid)
+                oppgaveId = OPPGAVE_ID,
+                behandlendeSaksbehandler = SaksbehandlerOid(saksbehandlerOid)
             )
         }
 
-        if (erRetur) totrinnsvurdering.sendIRetur(OPPGAVE_ID, nySaksbehandler(UUID.randomUUID()))
+        if (erRetur) totrinnsvurdering.sendIRetur(
+            oppgaveId = OPPGAVE_ID,
+            beslutter = SaksbehandlerOid(UUID.randomUUID())
+        )
 
         if (ferdigstill) totrinnsvurdering.ferdigstill(UTBETALING_ID)
 
         totrinnsvurderingRepository.lagre(totrinnsvurdering, FNR)
     }
-
-    private fun nySaksbehandler(saksbehandlerOid: UUID): no.nav.helse.modell.saksbehandler.Saksbehandler =
-        no.nav.helse.modell.saksbehandler.Saksbehandler(
-            oid = saksbehandlerOid,
-            epostadresse = lagTilfeldigSaksbehandlerepost(),
-            navn = lagSaksbehandlernavn(),
-            ident = lagSaksbehandlerident(),
-            tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang
-        )
 
     private fun opprettCommandContext(
         hendelse: TestMelding,

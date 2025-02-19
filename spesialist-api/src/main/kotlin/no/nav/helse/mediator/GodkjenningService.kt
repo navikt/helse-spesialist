@@ -48,7 +48,7 @@ class GodkjenningService(
         sessionFactory.transactionalSessionScope { session ->
             val totrinnsvurdering = session.totrinnsvurderingRepository.finn(vedtaksperiodeId)
 
-            val reserverPersonOid: UUID = totrinnsvurdering?.saksbehandler?.oid ?: oid
+            val reserverPersonOid: UUID = totrinnsvurdering?.saksbehandler?.value ?: oid
             val saksbehandlerløsning =
                 Saksbehandlerløsning(
                     godkjenningsbehovId = hendelseId,
@@ -80,7 +80,7 @@ class GodkjenningService(
 
                 if (totrinnsvurdering?.erBeslutteroppgave == true && godkjenningDTO.godkjent) {
                     val beslutter =
-                        totrinnsvurdering.beslutter?.oid?.let {
+                        totrinnsvurdering.beslutter?.value?.let {
                             saksbehandlerDao.finnSaksbehandlerFraDatabase(it)?.toDto()
                         }
                     checkNotNull(beslutter) { "Forventer at beslutter er satt" }
@@ -102,7 +102,7 @@ class GodkjenningService(
             totrinnsvurdering == null -> saksbehandlerForJson(oid)
 
             else -> {
-                val saksbehandler = totrinnsvurdering.saksbehandler?.oid
+                val saksbehandler = totrinnsvurdering.saksbehandler?.value
                 checkNotNull(
                     saksbehandler,
                 ) { "Totrinnsvurdering uten saksbehandler gir ikke noen mening ved godkjenning av periode" }
@@ -119,7 +119,7 @@ class GodkjenningService(
             totrinnsvurdering == null -> null
 
             else -> {
-                val beslutter = totrinnsvurdering.beslutter?.oid
+                val beslutter = totrinnsvurdering.beslutter?.value
                 checkNotNull(
                     beslutter,
                 ) { "Totrinnsvurdering uten beslutter gir ikke noen mening ved godkjenning av periode" }

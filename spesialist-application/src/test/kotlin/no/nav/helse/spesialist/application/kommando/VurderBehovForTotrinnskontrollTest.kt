@@ -17,15 +17,12 @@ import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode
-import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.application.feb
 import no.nav.helse.spesialist.application.jan
-import no.nav.helse.spesialist.application.lagSaksbehandlerident
-import no.nav.helse.spesialist.application.lagSaksbehandlernavn
-import no.nav.helse.spesialist.application.lagTilfeldigSaksbehandlerepost
+import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -137,7 +134,7 @@ internal class VurderBehovForTotrinnskontrollTest {
 
     @Test
     fun `Hvis totrinnsvurdering har saksbehander skal oppgaven reserveres`() {
-        val saksbehandler = lagSaksbehandler(UUID.randomUUID())
+        val saksbehandler = lagSaksbehandlerOid(UUID.randomUUID())
 
         every { overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
         totrinnsvurderingRepository.totrinnsvurderingSomSkalReturneres = lagTotrinnsvurdering(saksbehandler = saksbehandler)
@@ -145,13 +142,13 @@ internal class VurderBehovForTotrinnskontrollTest {
         assertTrue(command.execute(context))
 
         assertEquals(1, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.size)
-        verify(exactly = 1) { oppgaveService.reserverOppgave(saksbehandler.oid, FØDSELSNUMMER) }
+        verify(exactly = 1) { oppgaveService.reserverOppgave(saksbehandler.value, FØDSELSNUMMER) }
     }
 
     @Test
     fun `Hvis totrinnsvurdering har beslutter skal totrinnsvurderingen markeres som retur`() {
-        val saksbehandler = lagSaksbehandler()
-        val beslutter = lagSaksbehandler()
+        val saksbehandler = lagSaksbehandlerOid()
+        val beslutter = lagSaksbehandlerOid()
 
         every { overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
         totrinnsvurderingRepository.totrinnsvurderingSomSkalReturneres = lagTotrinnsvurdering(false, saksbehandler, beslutter)
@@ -159,7 +156,7 @@ internal class VurderBehovForTotrinnskontrollTest {
         assertTrue(command.execute(context))
 
         assertEquals(1, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.size)
-        verify(exactly = 1) { oppgaveService.reserverOppgave(saksbehandler.oid, FØDSELSNUMMER) }
+        verify(exactly = 1) { oppgaveService.reserverOppgave(saksbehandler.value, FØDSELSNUMMER) }
 
         assertEquals(true, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.single().erRetur)
 
@@ -191,19 +188,12 @@ internal class VurderBehovForTotrinnskontrollTest {
         assertEquals(1, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.size)
     }
 
-    private fun lagSaksbehandler(oid: UUID = UUID.randomUUID()) =
-        Saksbehandler(
-            epostadresse = lagTilfeldigSaksbehandlerepost(),
-            oid = oid,
-            navn = lagSaksbehandlernavn(),
-            ident = lagSaksbehandlerident(),
-            tilgangskontroll = { _, _ -> false }
-        )
+    private fun lagSaksbehandlerOid(oid: UUID = UUID.randomUUID()) = SaksbehandlerOid(oid)
 
     private fun lagTotrinnsvurdering(
         erRetur: Boolean = false,
-        saksbehandler: Saksbehandler = lagSaksbehandler(),
-        beslutter: Saksbehandler = lagSaksbehandler()
+        saksbehandler: SaksbehandlerOid = lagSaksbehandlerOid(),
+        beslutter: SaksbehandlerOid = lagSaksbehandlerOid()
     ) =
         Totrinnsvurdering.fraLagring(
             id = TotrinnsvurderingId(nextLong()),

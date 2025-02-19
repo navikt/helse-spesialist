@@ -25,7 +25,7 @@ internal class ReserverPersonHvisTildeltCommand(
         val totrinnsvurdering = totrinnsvurderingRepository.finn(vedtaksperiodeId)
         val saksbehandlerOid: UUID =
             if (totrinnsvurdering?.erBeslutteroppgave == true) {
-                totrinnsvurdering.saksbehandler?.oid ?: tildeltSaksbehandler.oid
+                totrinnsvurdering.saksbehandler?.value ?: tildeltSaksbehandler.oid
             } else {
                 tildeltSaksbehandler.oid
             }

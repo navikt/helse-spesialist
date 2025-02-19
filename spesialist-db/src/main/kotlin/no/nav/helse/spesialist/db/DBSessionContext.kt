@@ -77,8 +77,7 @@ class DBSessionContext(session: Session, tilgangskontroll: Tilgangskontroll) : S
     override val personRepository = PgPersonRepository(session, vedtaksperiodeRepository, sykefraværstilfelleDao, personDao)
 
     override val overstyringRepository: OverstyringRepository = PgOverstyringRepository(session)
-    override val totrinnsvurderingRepository: TotrinnsvurderingRepository =
-        PgTotrinnsvurderingRepository(session, tilgangskontroll)
+    override val totrinnsvurderingRepository: TotrinnsvurderingRepository = PgTotrinnsvurderingRepository(session)
     override val notatRepository: NotatRepository = PgNotatRepository(session)
     override val dialogRepository: DialogRepository = PgDialogRepository(session)
     override val saksbehandlerRepository: SaksbehandlerRepository = PgSaksbehandlerRepository(session)

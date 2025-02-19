@@ -51,7 +51,7 @@ internal class VurderBehovForTotrinnskontroll(
             }
             totrinnsvurderingRepository.lagre(totrinnsvurdering, fødselsnummer)
 
-            val behandlendeSaksbehandlerOid = totrinnsvurdering.saksbehandler?.oid
+            val behandlendeSaksbehandlerOid = totrinnsvurdering.saksbehandler?.value
             if (behandlendeSaksbehandlerOid != null) {
                 oppgaveService.reserverOppgave(
                     saksbehandleroid = behandlendeSaksbehandlerOid,

@@ -36,6 +36,7 @@ import no.nav.helse.spesialist.db.dao.api.PgPersonApiDao
 import no.nav.helse.spesialist.db.dao.api.PgRisikovurderingApiDao
 import no.nav.helse.spesialist.db.dao.api.PgVarselApiRepository
 import no.nav.helse.spesialist.domain.Dialog
+import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.typer.Kjønn
 import org.flywaydb.core.Flyway
 import org.intellij.lang.annotations.Language
@@ -562,25 +563,20 @@ abstract class AbstractDBIntegrationTest {
         totrinnsvurderingRepository.lagre(totrinnsvurdering, FNR)
         saksbehandlerOid?.let {
             totrinnsvurdering.sendTilBeslutter(
-                OPPGAVE_ID, nySaksbehandler(saksbehandlerOid)
+                oppgaveId = OPPGAVE_ID,
+                behandlendeSaksbehandler = SaksbehandlerOid(saksbehandlerOid)
             )
         }
 
-        if (erRetur) totrinnsvurdering.sendIRetur(OPPGAVE_ID, nySaksbehandler(UUID.randomUUID()))
+        if (erRetur) totrinnsvurdering.sendIRetur(
+            oppgaveId = OPPGAVE_ID,
+            beslutter = SaksbehandlerOid(UUID.randomUUID())
+        )
 
         if (ferdigstill) totrinnsvurdering.ferdigstill(UTBETALING_ID)
 
         totrinnsvurderingRepository.lagre(totrinnsvurdering, FNR)
     }
-
-    private fun nySaksbehandler(saksbehandlerOid: UUID): no.nav.helse.modell.saksbehandler.Saksbehandler =
-        no.nav.helse.modell.saksbehandler.Saksbehandler(
-            oid = saksbehandlerOid,
-            epostadresse = lagTilfeldigSaksbehandlerepost(),
-            navn = lagSaksbehandlernavn(),
-            ident = lagSaksbehandlerident(),
-            tilgangskontroll = { _, _ -> false }
-        )
 
     protected fun opprettUtbetalingKobling(
         vedtaksperiodeId: UUID,
