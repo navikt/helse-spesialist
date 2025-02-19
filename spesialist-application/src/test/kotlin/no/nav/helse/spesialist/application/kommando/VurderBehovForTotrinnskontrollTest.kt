@@ -144,9 +144,21 @@ internal class VurderBehovForTotrinnskontrollTest {
         every { overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
         val totrinnsvurdering = lagTotrinnsvurdering(false, saksbehandler, beslutter)
         every { totrinnsvurderingRepository.finn(any<String>()) } returns
-                totrinnsvurdering
+                Totrinnsvurdering.fraLagring(
+                    id = totrinnsvurdering.id(),
+                    vedtaksperiodeId = totrinnsvurdering.vedtaksperiodeId,
+                    erRetur = false,
+                    saksbehandler = totrinnsvurdering.saksbehandler,
+                    beslutter = totrinnsvurdering.beslutter,
+                    utbetalingId = totrinnsvurdering.utbetalingId,
+                    opprettet = totrinnsvurdering.opprettet,
+                    oppdatert = totrinnsvurdering.oppdatert,
+                    overstyringer = totrinnsvurdering.overstyringer,
+                    ferdigstilt = totrinnsvurdering.ferdigstilt
+                )
 
         assertTrue(command.execute(context))
+        totrinnsvurdering.settRetur()
 
         verify(exactly = 1) { totrinnsvurderingRepository.finn(any<String>()) }
         verify(exactly = 1) { oppgaveService.reserverOppgave(saksbehandler.oid, FØDSELSNUMMER) }
