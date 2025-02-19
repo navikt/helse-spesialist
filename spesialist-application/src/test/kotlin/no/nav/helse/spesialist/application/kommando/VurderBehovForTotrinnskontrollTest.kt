@@ -142,8 +142,9 @@ internal class VurderBehovForTotrinnskontrollTest {
         val beslutter = lagSaksbehandler()
 
         every { overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
+        val totrinnsvurdering = lagTotrinnsvurdering(false, saksbehandler, beslutter)
         every { totrinnsvurderingRepository.finn(any<String>()) } returns
-                lagTotrinnsvurdering(false, saksbehandler, beslutter)
+                totrinnsvurdering
 
         assertTrue(command.execute(context))
 
@@ -151,7 +152,7 @@ internal class VurderBehovForTotrinnskontrollTest {
         verify(exactly = 1) { oppgaveService.reserverOppgave(saksbehandler.oid, FØDSELSNUMMER) }
         verify(exactly = 1) {
             totrinnsvurderingRepository.lagre(
-                lagTotrinnsvurdering(true, saksbehandler, beslutter),
+                totrinnsvurdering,
                 FØDSELSNUMMER
             )
         }
