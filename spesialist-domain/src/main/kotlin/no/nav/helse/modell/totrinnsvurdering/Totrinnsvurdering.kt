@@ -48,11 +48,6 @@ class Totrinnsvurdering private constructor(
 
     val erBeslutteroppgave: Boolean get() = !erRetur && saksbehandler != null
 
-    fun ferdigstill() =
-        oppdatering {
-            ferdigstilt = true
-        }
-
     fun settRetur() =
         oppdatering {
             erRetur = true

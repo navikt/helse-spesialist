@@ -164,13 +164,6 @@ internal class TotrinnsvurderingTest {
         assertFalse(totrinnsvurdering.ferdigstilt)
     }
 
-    @Test
-    fun `kan ferdistille totrinnsurdering`() {
-        val totrinnsvurdering = nyTotrinnsvurdering()
-        totrinnsvurdering.ferdigstill()
-        assertTrue(totrinnsvurdering.ferdigstilt)
-    }
-
     private fun nySaksbehandler(
         oid: UUID = UUID.randomUUID()
     ) = SaksbehandlerOid(oid)
