@@ -9,7 +9,7 @@ spec:
   groups:
     - name: applikasjon-alerts
       rules:
-        - alert: CrashLoopBackoff
+        - alert: Pod restartet
           expr: >-
             sum(
               changes(
@@ -18,8 +18,8 @@ spec:
             ) by (container, namespace) > 0
           for: 15s
           annotations:
-            hva: 'En eller flere av poddene til *{{ $labels.container }}* er i CrashLoopBackOff'
-            handling: 'Du må se på hvorfor appen kræsjer'
+            hva: 'En eller flere av poddene til *{{ $labels.container }}* har restartet'
+            handling: 'Du må se på hvorfor appen restartet'
           labels:
             namespace: tbd
             severity: critical
