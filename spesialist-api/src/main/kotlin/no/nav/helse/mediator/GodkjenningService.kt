@@ -74,7 +74,6 @@ class GodkjenningService(
             oppgaveService.oppgave(godkjenningDTO.oppgavereferanse) {
                 avventerSystem(godkjenningDTO.saksbehandlerIdent, oid)
                 totrinnsvurdering?.ferdigstill(this.utbetalingId)
-                overstyringDao.ferdigstillOverstyringerForVedtaksperiode(vedtaksperiodeId)
 
                 if (totrinnsvurdering?.erBeslutteroppgave == true && godkjenningDTO.godkjent) {
                     val beslutter =
