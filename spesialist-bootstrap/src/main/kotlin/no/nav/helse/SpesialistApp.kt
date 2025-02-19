@@ -52,8 +52,8 @@ class SpesialistApp(
 
     private val dataSourceBuilder = DataSourceBuilder(env)
     private val dataSource = dataSourceBuilder.getDataSource()
-    private val daos = DBDaos(dataSource, tilgangskontrollørForReservasjon)
-    private val sessionFactory = TransactionalSessionFactory(dataSource, tilgangskontrollørForReservasjon)
+    private val daos = DBDaos(dataSource)
+    private val sessionFactory = TransactionalSessionFactory(dataSource)
 
     private val oppgaveDao = daos.oppgaveDao
     private val periodehistorikkDao = daos.periodehistorikkDao

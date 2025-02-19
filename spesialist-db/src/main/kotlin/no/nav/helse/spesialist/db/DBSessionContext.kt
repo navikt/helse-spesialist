@@ -3,7 +3,6 @@ package no.nav.helse.spesialist.db
 import kotliquery.Session
 import no.nav.helse.db.AvviksvurderingRepository
 import no.nav.helse.db.SessionContext
-import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.spesialist.application.DialogRepository
 import no.nav.helse.spesialist.application.NotatRepository
 import no.nav.helse.spesialist.application.OverstyringRepository
@@ -45,7 +44,7 @@ import no.nav.helse.spesialist.db.repository.PgOverstyringRepository
 import no.nav.helse.spesialist.db.repository.PgSaksbehandlerRepository
 import no.nav.helse.spesialist.db.repository.PgTotrinnsvurderingRepository
 
-class DBSessionContext(session: Session, tilgangskontroll: Tilgangskontroll) : SessionContext {
+class DBSessionContext(session: Session) : SessionContext {
     override val arbeidsforholdDao = PgArbeidsforholdDao(session)
     override val arbeidsgiverDao = PgArbeidsgiverDao(session)
     override val automatiseringDao = PgAutomatiseringDao(session)
@@ -65,7 +64,7 @@ class DBSessionContext(session: Session, tilgangskontroll: Tilgangskontroll) : S
     override val påVentDao = PgPåVentDao(session)
     override val reservasjonDao = PgReservasjonDao(session)
     override val risikovurderingDao = PgRisikovurderingDao(session)
-    override val saksbehandlerDao = PgSaksbehandlerDao(session, tilgangskontroll)
+    override val saksbehandlerDao = PgSaksbehandlerDao(session)
     override val stansAutomatiskBehandlingDao = PgStansAutomatiskBehandlingDao(session)
     override val sykefraværstilfelleDao = PgSykefraværstilfelleDao(session)
     override val tildelingDao = PgTildelingDao(session)

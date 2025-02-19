@@ -34,7 +34,7 @@ internal class TestMediator(
         override val erDev = false
         override val erProd = false
     }
-    private val daos = DBDaos(dataSource, TilgangskontrollForTestHarIkkeTilgang)
+    private val daos = DBDaos(dataSource)
     private val opptegnelseDao = daos.opptegnelseDao
     private val oppgaveDao = daos.oppgaveDao
     private val overstyringDao = daos.overstyringDao
@@ -83,7 +83,7 @@ internal class TestMediator(
             annulleringRepository = annulleringRepository,
             env = environment,
             featureToggles = object : FeatureToggles {},
-            sessionFactory = TransactionalSessionFactory(dataSource, TilgangskontrollForTestHarIkkeTilgang),
+            sessionFactory = TransactionalSessionFactory(dataSource),
             tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
         )
 
@@ -116,7 +116,7 @@ internal class TestMediator(
 
     init {
         val meldingMediator = MeldingMediator(
-            sessionFactory = TransactionalSessionFactory(dataSource, TilgangskontrollForTestHarIkkeTilgang),
+            sessionFactory = TransactionalSessionFactory(dataSource),
             personDao = daos.personDao,
             commandContextDao = daos.commandContextDao,
             meldingDao = daos.meldingDao,

@@ -10,7 +10,6 @@ import no.nav.helse.modell.person.vedtaksperiode.Varselkode
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.spesialist.db.TransactionalSessionFactory
-import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -27,7 +26,7 @@ internal class MeldingMediatorTest : AbstractDatabaseTest() {
 
     private val meldingMediator =
         MeldingMediator(
-            sessionFactory = TransactionalSessionFactory(dataSource, TilgangskontrollForTestHarIkkeTilgang),
+            sessionFactory = TransactionalSessionFactory(dataSource),
             personDao = daos.personDao,
             commandContextDao = daos.commandContextDao,
             meldingDao = daos.meldingDao,

@@ -1,7 +1,6 @@
 package no.nav.helse.spesialist.db
 
 import no.nav.helse.db.Daos
-import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.spesialist.db.dao.PgAnnulleringRepository
 import no.nav.helse.spesialist.db.dao.PgBehandlingsstatistikkDao
 import no.nav.helse.spesialist.db.dao.PgCommandContextDao
@@ -45,7 +44,7 @@ import no.nav.helse.spesialist.db.dao.api.PgVarselApiRepository
 import no.nav.helse.spesialist.db.dao.api.PgVergemålApiDao
 import javax.sql.DataSource
 
-class DBDaos(dataSource: DataSource, tilgangskontroll: Tilgangskontroll) : Daos {
+class DBDaos(dataSource: DataSource) : Daos {
     override val annulleringRepository = PgAnnulleringRepository(dataSource)
     override val behandlingsstatistikkDao = PgBehandlingsstatistikkDao(dataSource)
     override val commandContextDao = PgCommandContextDao(dataSource)
@@ -65,7 +64,7 @@ class DBDaos(dataSource: DataSource, tilgangskontroll: Tilgangskontroll) : Daos 
     override val poisonPillDao = PgPoisonPillDao(dataSource)
     override val påVentDao = PgPåVentDao(dataSource)
     override val reservasjonDao = PgReservasjonDao(dataSource)
-    override val saksbehandlerDao = PgSaksbehandlerDao(dataSource, tilgangskontroll)
+    override val saksbehandlerDao = PgSaksbehandlerDao(dataSource)
     override val stansAutomatiskBehandlingDao = PgStansAutomatiskBehandlingDao(dataSource)
     override val tildelingDao = PgTildelingDao(dataSource)
     override val varselDao = PgVarselDao(dataSource)

@@ -94,7 +94,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     )
     private val mediator =
         SaksbehandlerMediator(
-            daos = DBDaos(dataSource, TilgangskontrollForTestHarIkkeTilgang),
+            daos = DBDaos(dataSource),
             versjonAvKode = "versjonAvKode",
             meldingPubliserer = meldingPubliserer,
             oppgaveService = oppgaveService,
@@ -104,7 +104,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             annulleringRepository = annulleringRepository,
             env = environment,
             featureToggles = object : FeatureToggles {},
-            sessionFactory = TransactionalSessionFactory(dataSource, TilgangskontrollForTestHarIkkeTilgang),
+            sessionFactory = TransactionalSessionFactory(dataSource),
             tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
         )
 

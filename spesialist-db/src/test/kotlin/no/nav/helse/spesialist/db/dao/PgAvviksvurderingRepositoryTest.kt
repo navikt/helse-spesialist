@@ -21,7 +21,7 @@ import java.time.YearMonth
 import java.util.UUID
 
 internal class PgAvviksvurderingRepositoryTest : AbstractDBIntegrationTest() {
-    private val avviksvurderingDao = DBSessionContext(session) { _, _ -> false }.avviksvurderingRepository
+    private val avviksvurderingDao = DBSessionContext(session).avviksvurderingRepository
 
     @Test
     fun `lagre avviksvurdering`() {

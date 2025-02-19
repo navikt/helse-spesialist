@@ -2,8 +2,6 @@ package no.nav.helse.spesialist.db.dao
 
 import kotliquery.Session
 import no.nav.helse.db.SaksbehandlerDao
-import no.nav.helse.modell.saksbehandler.Saksbehandler
-import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.MedSession
@@ -12,9 +10,9 @@ import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 
-class PgSaksbehandlerDao private constructor(private val queryRunner: QueryRunner, private val tilgangskontroll: Tilgangskontroll) : SaksbehandlerDao, QueryRunner by queryRunner {
-    internal constructor(session: Session, tilgangskontroll: Tilgangskontroll) : this(MedSession(session), tilgangskontroll)
-    internal constructor(dataSource: DataSource, tilgangskontroll: Tilgangskontroll) : this(MedDataSource(dataSource), tilgangskontroll)
+class PgSaksbehandlerDao private constructor(private val queryRunner: QueryRunner) : SaksbehandlerDao, QueryRunner by queryRunner {
+    internal constructor(session: Session) : this(MedSession(session))
+    internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
     override fun opprettEllerOppdater(
         oid: UUID,
@@ -48,16 +46,4 @@ class PgSaksbehandlerDao private constructor(private val queryRunner: QueryRunne
         "oid" to oid,
         "siste_handling_utfort_tidspunkt" to sisteHandlingUtført,
     ).update()
-
-    override fun finnSaksbehandler(oid: UUID) =
-        asSQL("SELECT * FROM saksbehandler WHERE oid = :oid LIMIT 1", "oid" to oid)
-            .singleOrNull { row ->
-                Saksbehandler(
-                    epostadresse = row.string("epost"),
-                    oid = row.uuid("oid"),
-                    navn = row.string("navn"),
-                    ident = row.string("ident"),
-                    tilgangskontroll = tilgangskontroll,
-                )
-            }
 }

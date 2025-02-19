@@ -25,7 +25,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 internal class PgInntektskilderRepositoryTest : AbstractDBIntegrationTest() {
-    private val avviksvurderingRepository = DBSessionContext(session) { _, _ -> false }.avviksvurderingRepository
+    private val avviksvurderingRepository = DBSessionContext(session).avviksvurderingRepository
 
     @Test
     fun `når det ikke finnes arbeidsgivere i databasen får vi kun tilbake nye inntektskilder`() {

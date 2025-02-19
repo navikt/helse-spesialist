@@ -51,7 +51,7 @@ import kotlin.random.Random.Default.nextLong
 
 abstract class AbstractDBIntegrationTest {
     protected val dbQuery = DbQuery(dataSource)
-    protected val daos = DBDaos(dataSource) { _, _ -> false }
+    protected val daos = DBDaos(dataSource)
     private val testperson = TestPerson()
     protected open val HENDELSE_ID: UUID = UUID.randomUUID()
 
@@ -142,7 +142,7 @@ abstract class AbstractDBIntegrationTest {
         private set
 
     protected val session = sessionOf(dataSource, returnGeneratedKey = true)
-    private val sessionContext = DBSessionContext(session) { _, _ -> false }
+    private val sessionContext = DBSessionContext(session)
 
     @AfterEach
     fun tearDown() = session.close()
