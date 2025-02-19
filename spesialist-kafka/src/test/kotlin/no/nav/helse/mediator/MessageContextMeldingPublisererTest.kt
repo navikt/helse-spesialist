@@ -137,7 +137,7 @@ internal class MessageContextMeldingPublisererTest {
         val hendelseId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
 
-        val oppgave = Oppgave.nyOppgave(
+        val oppgave = Oppgave.ny(
             id = oppgaveId,
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
@@ -182,7 +182,7 @@ internal class MessageContextMeldingPublisererTest {
         val hendelseId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
 
-        val oppgave = Oppgave.nyOppgave(
+        val oppgave = Oppgave.ny(
             id = oppgaveId,
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,

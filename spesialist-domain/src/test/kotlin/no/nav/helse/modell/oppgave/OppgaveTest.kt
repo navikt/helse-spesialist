@@ -17,7 +17,6 @@ import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.modell.saksbehandler.handlinger.TilgangskontrollForTestHarIkkeTilgang
 import no.nav.helse.modell.saksbehandler.handlinger.TilgangskontrollForTestHarTilgang
 import no.nav.helse.modell.saksbehandler.handlinger.TilgangskontrollForTestMedKunFortroligAdresse
-import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -74,7 +73,7 @@ internal class OppgaveTest {
 
     @Test
     fun `Kan tildele ved reservasjon dersom saksbehandler har tilgang til alle tilgangsstyrte egenskaper på oppgaven`() {
-        val oppgave = nyOppgave(SØKNAD, STRENGT_FORTROLIG_ADRESSE, FORTROLIG_ADRESSE)
+        val oppgave = nyOppgave(SØKNAD, FORTROLIG_ADRESSE)
         val saksbehandler = saksbehandler(tilgangskontroll = TilgangskontrollForTestHarTilgang)
         oppgave.forsøkTildelingVedReservasjon(saksbehandler)
 
@@ -86,7 +85,7 @@ internal class OppgaveTest {
 
     @Test
     fun `Kan ikke tildele ved reservasjon dersom saksbehandler ikke har tilgang til alle tilgangsstyrte egenskaper på oppgaven`() {
-        val oppgave = nyOppgave(SØKNAD, FORTROLIG_ADRESSE, STRENGT_FORTROLIG_ADRESSE)
+        val oppgave = nyOppgave(SØKNAD, STRENGT_FORTROLIG_ADRESSE)
         assertThrows<ManglerTilgang> {
             oppgave.forsøkTildelingVedReservasjon(saksbehandler(tilgangskontroll = TilgangskontrollForTestMedKunFortroligAdresse))
         }
@@ -99,7 +98,7 @@ internal class OppgaveTest {
 
     @Test
     fun `Forsøker tildeling ved reservasjon med påVent`() {
-        val oppgave = nyOppgave(PÅ_VENT, SØKNAD)
+        val oppgave = nyOppgave(PÅ_VENT)
         oppgave.forsøkTildelingVedReservasjon(saksbehandlerUtenTilgang)
 
         inspektør(oppgave) {
@@ -111,7 +110,7 @@ internal class OppgaveTest {
 
     @Test
     fun `Forsøker tildeling ved reservasjon ved stikkprøve`() {
-        val oppgave = nyOppgave(PÅ_VENT, STIKKPRØVE)
+        val oppgave = nyOppgave(PÅ_VENT)
         oppgave.forsøkTildelingVedReservasjon(saksbehandlerUtenTilgang)
 
         inspektør(oppgave) {
@@ -244,7 +243,7 @@ internal class OppgaveTest {
 
     @Test
     fun `oppgave sendt til beslutter tildeles ingen dersom det ikke finnes noen tidligere beslutter`() {
-        val oppgave = nyOppgave(SØKNAD, medTotrinnsvurdering = true)
+        val oppgave = nyOppgave(SØKNAD)
         oppgave.forsøkTildelingVedReservasjon(saksbehandlerUtenTilgang)
         oppgave.sendTilBeslutter(null)
         inspektør(oppgave) {
@@ -254,7 +253,7 @@ internal class OppgaveTest {
 
     @Test
     fun `oppgave sendt til beslutter får egenskap BESLUTTER`() {
-        val oppgave = nyOppgave(SØKNAD, medTotrinnsvurdering = true)
+        val oppgave = nyOppgave(SØKNAD)
         oppgave.sendTilBeslutter(saksbehandlerUtenTilgang)
         inspektør(oppgave) {
             assertTrue(egenskaper.contains(EgenskapDto.BESLUTTER))
@@ -263,7 +262,7 @@ internal class OppgaveTest {
 
     @Test
     fun `oppgave sendt i retur får egenskap RETUR`() {
-        val oppgave = nyOppgave(SØKNAD, medTotrinnsvurdering = true)
+        val oppgave = nyOppgave(SØKNAD)
         oppgave.sendTilBeslutter(saksbehandlerUtenTilgang)
         oppgave.sendIRetur(beslutter)
         inspektør(oppgave) {
@@ -274,7 +273,7 @@ internal class OppgaveTest {
 
     @Test
     fun `oppgave sendt i retur ligger ikke lenger på vent`() {
-        val oppgave = nyOppgave(SØKNAD, medTotrinnsvurdering = true)
+        val oppgave = nyOppgave(SØKNAD)
         oppgave.forsøkTildelingVedReservasjon(saksbehandlerUtenTilgang)
         oppgave.sendTilBeslutter(saksbehandlerUtenTilgang)
         oppgave.forsøkTildelingVedReservasjon(beslutter)
@@ -286,7 +285,7 @@ internal class OppgaveTest {
 
     @Test
     fun `oppgave sendt til beslutter etter å ha vært sendt i retur har ikke egenskap RETUR`() {
-        val oppgave = nyOppgave(SØKNAD, medTotrinnsvurdering = true)
+        val oppgave = nyOppgave(SØKNAD)
         oppgave.sendTilBeslutter(saksbehandlerUtenTilgang)
         oppgave.sendIRetur(beslutter)
         oppgave.sendTilBeslutter(saksbehandlerUtenTilgang)
@@ -298,7 +297,7 @@ internal class OppgaveTest {
 
     @Test
     fun `oppgave sendt i retur tildeles opprinnelig saksbehandler`() {
-        val oppgave = nyOppgave(SØKNAD, medTotrinnsvurdering = true)
+        val oppgave = nyOppgave(SØKNAD)
         oppgave.sendTilBeslutter(beslutter)
         oppgave.sendIRetur(saksbehandlerUtenTilgang)
         inspektør(oppgave) {
@@ -308,7 +307,7 @@ internal class OppgaveTest {
 
     @Test
     fun `oppgave sendt i retur og deretter tilbake til beslutter tildeles opprinnelig beslutter`() {
-        val oppgave = nyOppgave(SØKNAD, medTotrinnsvurdering = true)
+        val oppgave = nyOppgave(SØKNAD)
         oppgave.sendTilBeslutter(beslutter)
         oppgave.sendIRetur(saksbehandlerUtenTilgang)
         oppgave.sendTilBeslutter(beslutter)
@@ -388,7 +387,7 @@ internal class OppgaveTest {
 
     @Test
     fun `sender ut oppgaveEndret når oppgave sendes til beslutter`() {
-        val oppgave = nyOppgave(SØKNAD, medTotrinnsvurdering = true)
+        val oppgave = nyOppgave(SØKNAD)
         oppgave.register(observer)
         oppgave.sendTilBeslutter(saksbehandlerUtenTilgang)
 
@@ -402,7 +401,7 @@ internal class OppgaveTest {
 
     @Test
     fun `sender ut oppgaveEndret når oppgave sendes i retur`() {
-        val oppgave = nyOppgave(SØKNAD, medTotrinnsvurdering = true)
+        val oppgave = nyOppgave(SØKNAD)
         oppgave.register(observer)
         oppgave.sendTilBeslutter(saksbehandlerUtenTilgang)
         oppgave.sendIRetur(beslutter)
@@ -549,7 +548,7 @@ internal class OppgaveTest {
     @Test
     fun equals() {
         val gjenopptattOppgave =
-            Oppgave.nyOppgave(
+            Oppgave.ny(
                 id = 1L,
                 vedtaksperiodeId = VEDTAKSPERIODE_ID,
                 behandlingId = BEHANDLING_ID,
@@ -559,7 +558,7 @@ internal class OppgaveTest {
                 egenskaper = setOf(OPPGAVETYPE),
             )
         val oppgave1 =
-            Oppgave.nyOppgave(
+            Oppgave.ny(
                 OPPGAVE_ID,
                 VEDTAKSPERIODE_ID,
                 BEHANDLING_ID,
@@ -569,7 +568,7 @@ internal class OppgaveTest {
                 setOf(SØKNAD)
             )
         val oppgave2 =
-            Oppgave.nyOppgave(
+            Oppgave.ny(
                 OPPGAVE_ID,
                 VEDTAKSPERIODE_ID,
                 BEHANDLING_ID,
@@ -579,7 +578,7 @@ internal class OppgaveTest {
                 setOf(SØKNAD)
             )
         val oppgave3 =
-            Oppgave.nyOppgave(
+            Oppgave.ny(
                 OPPGAVE_ID,
                 UUID.randomUUID(),
                 BEHANDLING_ID,
@@ -589,7 +588,7 @@ internal class OppgaveTest {
                 setOf(SØKNAD)
             )
         val oppgave4 =
-            Oppgave.nyOppgave(
+            Oppgave.ny(
                 OPPGAVE_ID,
                 VEDTAKSPERIODE_ID,
                 BEHANDLING_ID,
@@ -616,24 +615,15 @@ internal class OppgaveTest {
         assertEquals(oppgave1.hashCode(), oppgave2.hashCode())
     }
 
-    private fun nyOppgave(
-        vararg egenskaper: Egenskap,
-        medTotrinnsvurdering: Boolean = false,
-    ): Oppgave {
-        val totrinnsvurdering = if (medTotrinnsvurdering) totrinnsvurdering() else null
-        return Oppgave.nyOppgave(
-            id = OPPGAVE_ID,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            behandlingId = UTBETALING_ID,
-            utbetalingId = BEHANDLING_ID,
-            hendelseId = UUID.randomUUID(),
-            kanAvvises = true,
-            egenskaper = egenskaper.toSet(),
-        )
-    }
-
-    private fun totrinnsvurdering() =
-        Totrinnsvurdering.ny(vedtaksperiodeId = VEDTAKSPERIODE_ID)
+    private fun nyOppgave(vararg egenskaper: Egenskap, ) = Oppgave.ny(
+        id = OPPGAVE_ID,
+        vedtaksperiodeId = VEDTAKSPERIODE_ID,
+        behandlingId = UTBETALING_ID,
+        utbetalingId = BEHANDLING_ID,
+        hendelseId = UUID.randomUUID(),
+        kanAvvises = true,
+        egenskaper = egenskaper.toSet(),
+    )
 
     private val observer =
         object : OppgaveObserver {

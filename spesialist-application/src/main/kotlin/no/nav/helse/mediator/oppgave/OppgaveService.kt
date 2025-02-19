@@ -11,14 +11,13 @@ import no.nav.helse.db.SessionContext
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
-import no.nav.helse.modell.oppgave.Oppgave.Companion.nyOppgave
+import no.nav.helse.modell.oppgave.Oppgave.Companion.ny
 import no.nav.helse.modell.oppgave.Oppgave.Companion.toDto
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.modell.saksbehandler.handlinger.EndrePåVent
 import no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent
 import no.nav.helse.modell.saksbehandler.handlinger.Oppgavehandling
-import no.nav.helse.modell.saksbehandler.handlinger.Overstyring
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
 import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
@@ -72,7 +71,7 @@ class OppgaveService(
         val nesteId = oppgaveDao.reserverNesteId()
         val oppgavemelder = Oppgavemelder(fødselsnummer, meldingPubliserer)
         val oppgave =
-            nyOppgave(
+            ny(
                 id = nesteId,
                 vedtaksperiodeId = vedtaksperiodeId,
                 behandlingId = behandlingId,
@@ -120,14 +119,6 @@ class OppgaveService(
         oppgave(handling.oppgaveId()) {
             handling.oppgave(this)
             handling.utførAv(saksbehandler)
-        }
-    }
-
-    fun avbrytOppgave(handling: Overstyring) {
-        oppgaveDao.finnOppgaveId(handling.fødselsnummer)?.let {
-            oppgave(it) {
-                this.avbryt()
-            }
         }
     }
 
@@ -254,7 +245,8 @@ class OppgaveService(
         try {
             reservasjonDao.reserverPerson(saksbehandleroid, fødselsnummer)
         } catch (e: SQLException) {
-            logg.warn("Kunne ikke reservere person")
+            logg.warn("Kunne ikke reservere person. Se sikker logg for mer informasjon")
+            sikkerlogg.warn("Kunne ikke reservere person", e)
         }
     }
 

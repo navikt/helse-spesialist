@@ -72,7 +72,7 @@ class OppgavemelderTest {
         assertEquals(listOf("SØKNAD"), melding["egenskaper"].map { it.asText() })
     }
 
-    private fun saksbehandler(epostadresse: String) = Saksbehandler(
+    private fun saksbehandler(@Suppress("SameParameterValue") epostadresse: String) = Saksbehandler(
         epostadresse = epostadresse,
         oid = UUID.randomUUID(),
         navn = "En Saksbehandler",
@@ -80,7 +80,7 @@ class OppgavemelderTest {
         tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang
     )
 
-    private fun nyOppgave() = Oppgave.nyOppgave(
+    private fun nyOppgave() = Oppgave.ny(
         id = OPPGAVE_ID,
         vedtaksperiodeId = VEDTAKSPERIODE_ID,
         behandlingId = BEHANDLING_ID,

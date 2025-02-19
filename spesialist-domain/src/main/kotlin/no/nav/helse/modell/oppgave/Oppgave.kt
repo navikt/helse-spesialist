@@ -326,7 +326,7 @@ class Oppgave private constructor(
         private val logg = LoggerFactory.getLogger(this::class.java)
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
-        fun nyOppgave(
+        fun ny(
             id: Long,
             vedtaksperiodeId: UUID,
             behandlingId: UUID,
@@ -334,18 +334,16 @@ class Oppgave private constructor(
             hendelseId: UUID,
             kanAvvises: Boolean,
             egenskaper: Set<Egenskap>,
-        ): Oppgave {
-            return Oppgave(
-                id = id,
-                tilstand = AvventerSaksbehandler,
-                vedtaksperiodeId = vedtaksperiodeId,
-                behandlingId = behandlingId,
-                utbetalingId = utbetalingId,
-                godkjenningsbehovId = hendelseId,
-                kanAvvises = kanAvvises,
-                egenskaper = egenskaper.toMutableSet(),
-            )
-        }
+        ) = Oppgave(
+            id = id,
+            tilstand = AvventerSaksbehandler,
+            vedtaksperiodeId = vedtaksperiodeId,
+            behandlingId = behandlingId,
+            utbetalingId = utbetalingId,
+            godkjenningsbehovId = hendelseId,
+            kanAvvises = kanAvvises,
+            egenskaper = egenskaper.toMutableSet(),
+        )
 
         fun Oppgave.toDto() =
             OppgaveDto(

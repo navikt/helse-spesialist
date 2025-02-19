@@ -150,7 +150,7 @@ class OppgavelagrerTest : AbstractDBIntegrationTest() {
     }
 
     private fun nyOppgave() =
-        Oppgave.nyOppgave(
+        Oppgave.ny(
             id = OPPGAVE_ID,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             behandlingId = BEHANDLING_ID,
