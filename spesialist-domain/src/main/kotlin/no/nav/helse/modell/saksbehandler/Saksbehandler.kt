@@ -112,5 +112,14 @@ class Saksbehandler(
             Saksbehandler(epostadresse, oid, navn, ident, tilgangskontroll)
 
         fun Saksbehandler.toDto(): SaksbehandlerDto = SaksbehandlerDto(epostadresse = epostadresse, oid = oid, navn = navn, ident = ident)
+
+        fun no.nav.helse.spesialist.domain.Saksbehandler.gjenopprett(tilgangskontroll: Tilgangskontroll): Saksbehandler =
+            Saksbehandler(
+                epostadresse = epost,
+                oid = id().value,
+                navn = navn,
+                ident = ident,
+                tilgangskontroll = tilgangskontroll,
+            )
     }
 }

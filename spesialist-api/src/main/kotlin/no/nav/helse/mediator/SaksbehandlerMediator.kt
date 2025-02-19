@@ -32,8 +32,10 @@ import no.nav.helse.modell.melding.VarselEndret
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
 import no.nav.helse.modell.saksbehandler.Saksbehandler
+import no.nav.helse.modell.saksbehandler.Saksbehandler.Companion.gjenopprett
 import no.nav.helse.modell.saksbehandler.Saksbehandler.Companion.toDto
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDto
+import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.modell.saksbehandler.handlinger.Annullering
 import no.nav.helse.modell.saksbehandler.handlinger.AnnulleringArsak
 import no.nav.helse.modell.saksbehandler.handlinger.Arbeidsforhold
@@ -114,6 +116,7 @@ class SaksbehandlerMediator(
     private val env: Environment,
     private val featureToggles: FeatureToggles,
     private val sessionFactory: SessionFactory,
+    private val tilgangskontroll: Tilgangskontroll,
 ) : Saksbehandlerhåndterer {
     private val saksbehandlerDao = daos.saksbehandlerDao
     private val generasjonRepository = daos.generasjonApiRepository
@@ -624,7 +627,9 @@ class SaksbehandlerMediator(
                     "Forventer at det eksisterer en aktiv totrinnsvurdering når oppgave sendes i retur"
                 }
                 val opprinneligSaksbehandler =
-                    checkNotNull(totrinnsvurdering.saksbehandler?.value?.let(saksbehandlerDao::finnSaksbehandler)) {
+                    checkNotNull(
+                        totrinnsvurdering.saksbehandler?.let(session.saksbehandlerRepository::finn)?.let(::tilLegacySaksbehandler),
+                    ) {
                         "Opprinnelig saksbehandler kan ikke være null ved retur av beslutteroppgave"
                     }
 
@@ -703,7 +708,7 @@ class SaksbehandlerMediator(
                     "Forventer at det eksisterer en aktiv totrinnsvurdering når oppgave sendes til beslutter"
                 }
 
-                val beslutter = totrinnsvurdering.beslutter?.value?.let(session.saksbehandlerDao::finnSaksbehandler)
+                val beslutter = totrinnsvurdering.beslutter?.let(session.saksbehandlerRepository::finn)?.let(::tilLegacySaksbehandler)
                 apiOppgaveService.sendTilBeslutter(oppgavereferanse, beslutter)
                 totrinnsvurdering.sendTilBeslutter(oppgavereferanse, SaksbehandlerOid(saksbehandlerFraApi.oid))
                 session.totrinnsvurderingRepository.lagre(totrinnsvurdering, fødselsnummer)
@@ -739,6 +744,9 @@ class SaksbehandlerMediator(
 
         return SendTilGodkjenningResult.Ok
     }
+
+    private fun tilLegacySaksbehandler(saksbehandler: no.nav.helse.spesialist.domain.Saksbehandler): Saksbehandler =
+        saksbehandler.gjenopprett(tilgangskontroll = tilgangskontroll)
 
     override fun håndter(
         godkjenning: GodkjenningDto,
@@ -807,7 +815,11 @@ class SaksbehandlerMediator(
             is no.nav.helse.modell.OppgaveIkkeTildelt -> OppgaveIkkeTildelt(oppgaveId)
             is OppgaveTildeltNoenAndre -> {
                 val saksbehandler =
-                    checkNotNull(saksbehandlerDao.finnSaksbehandler(this.saksbehandlerOid))
+                    checkNotNull(
+                        sessionFactory.transactionalSessionScope { session ->
+                            session.saksbehandlerRepository.finn(SaksbehandlerOid(saksbehandlerOid))
+                        },
+                    ).let(::tilLegacySaksbehandler)
                 no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre(
                     TildelingApiDto(saksbehandler.navn, saksbehandler.epostadresse, saksbehandler.oid),
                 )

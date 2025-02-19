@@ -83,7 +83,8 @@ internal class TestMediator(
             annulleringRepository = annulleringRepository,
             env = environment,
             featureToggles = object : FeatureToggles {},
-            sessionFactory = TransactionalSessionFactory(dataSource, TilgangskontrollForTestHarIkkeTilgang)
+            sessionFactory = TransactionalSessionFactory(dataSource, TilgangskontrollForTestHarIkkeTilgang),
+            tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
         )
 
     private val stikkprøver =

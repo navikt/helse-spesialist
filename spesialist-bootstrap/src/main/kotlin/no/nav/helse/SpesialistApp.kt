@@ -198,6 +198,7 @@ class SpesialistApp(
                 env = env,
                 featureToggles = featureToggles,
                 sessionFactory = sessionFactory,
+                tilgangskontroll = tilgangskontrollørForReservasjon,
             )
         dokumentMediator = DokumentMediator(dokumentDao, meldingPubliserer)
         godkjenningService =
