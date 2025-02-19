@@ -24,8 +24,6 @@ interface OverstyringDao {
 
     fun finnAktiveOverstyringer(vedtaksperiodeId: UUID): List<EksternHendelseId>
 
-    fun ferdigstillOverstyringerForVedtaksperiode(vedtaksperiodeId: UUID): Int
-
     fun persisterOverstyringTidslinje(
         overstyrtTidslinje: OverstyrtTidslinjeForDatabase,
         saksbehandlerOid: UUID,

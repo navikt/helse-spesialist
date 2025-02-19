@@ -106,26 +106,6 @@ internal class PgOverstyringDaoTest : AbstractDBIntegrationTest() {
     }
 
     @Test
-    fun `Vedtaksperiode har ikke pågående overstyring etter ferdigstilling`() {
-        opprettPerson()
-        persisterOverstyringTidslinje()
-        overstyringDao.kobleOverstyringOgVedtaksperiode(listOf(VEDTAKSPERIODE), EKSTERN_HENDELSE_ID)
-
-        val hentetOverstyring = overstyringApiDao.finnOverstyringer(FNR).first()
-        check(hentetOverstyring is OverstyringTidslinjeDto)
-        assertFalse(hentetOverstyring.ferdigstilt)
-
-        assertTrue(overstyringDao.harVedtaksperiodePågåendeOverstyring(VEDTAKSPERIODE))
-        overstyringDao.ferdigstillOverstyringerForVedtaksperiode(VEDTAKSPERIODE)
-        assertFalse(overstyringDao.harVedtaksperiodePågåendeOverstyring(VEDTAKSPERIODE))
-
-        val hentetOverstyringEtterFerdigstilling =
-            overstyringApiDao.finnOverstyringer(FNR).first()
-        check(hentetOverstyringEtterFerdigstilling is OverstyringTidslinjeDto)
-        assertTrue(hentetOverstyringEtterFerdigstilling.ferdigstilt)
-    }
-
-    @Test
     fun `Finner opprettede overstyringer for fødselsnummer`() {
         opprettPerson()
 

@@ -91,19 +91,6 @@ class PgOverstyringDao private constructor(queryRunner: QueryRunner) : Overstyri
             "vedtaksperiode_id" to vedtaksperiodeId,
         ).list { it.uuid("ekstern_hendelse_id") }
 
-    override fun ferdigstillOverstyringerForVedtaksperiode(vedtaksperiodeId: UUID) =
-        asSQL(
-            """
-            UPDATE overstyring
-            SET ferdigstilt = true
-            WHERE id IN (
-                SELECT overstyring_ref FROM overstyringer_for_vedtaksperioder
-                WHERE vedtaksperiode_id = :vedtaksperiode_id
-            )
-            """.trimIndent(),
-            "vedtaksperiode_id" to vedtaksperiodeId,
-        ).update()
-
     override fun kobleOverstyringOgVedtaksperiode(
         vedtaksperiodeIder: List<UUID>,
         overstyringHendelseId: UUID,
