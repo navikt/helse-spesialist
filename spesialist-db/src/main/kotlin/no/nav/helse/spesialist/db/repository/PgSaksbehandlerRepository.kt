@@ -8,6 +8,7 @@ import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
+import java.time.LocalDateTime
 import java.util.UUID
 
 internal class PgSaksbehandlerRepository(
@@ -28,4 +29,22 @@ internal class PgSaksbehandlerRepository(
             epost = string("epost"),
             ident = string("ident"),
         )
+
+    override fun lagre(saksbehandler: Saksbehandler) {
+        asSQL(
+            """ 
+            INSERT INTO saksbehandler (oid, navn, epost, ident, siste_handling_utført_tidspunkt)
+            VALUES (:oid, :navn, :epost, :ident, :siste_handling_utfort_tidspunkt)
+            ON CONFLICT (oid)
+                DO UPDATE SET navn = :navn, epost = :epost, ident = :ident, siste_handling_utført_tidspunkt = :siste_handling_utfort_tidspunkt
+                WHERE (saksbehandler.navn, saksbehandler.epost, saksbehandler.ident, saksbehandler.siste_handling_utført_tidspunkt)
+                    IS DISTINCT FROM (excluded.navn, excluded.epost, excluded.ident, excluded.siste_handling_utført_tidspunkt)
+            """.trimIndent(),
+            "oid" to saksbehandler.id().value,
+            "navn" to saksbehandler.navn,
+            "epost" to saksbehandler.epost,
+            "ident" to saksbehandler.ident,
+            "siste_handling_utfort_tidspunkt" to LocalDateTime.now(),
+        ).update()
+    }
 }

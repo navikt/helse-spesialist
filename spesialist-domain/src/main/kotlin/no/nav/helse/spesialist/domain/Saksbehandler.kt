@@ -12,6 +12,8 @@ class Saksbehandler private constructor(
     val epost: String,
     val ident: String,
 ) : Entity<SaksbehandlerOid>(id) {
+    override fun toString(): String = "epostadresse=$epost, oid=${id().value}"
+
     object Factory {
         fun fraLagring(
             id: SaksbehandlerOid,
