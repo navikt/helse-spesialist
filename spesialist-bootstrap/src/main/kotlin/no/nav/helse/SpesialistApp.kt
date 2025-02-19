@@ -57,7 +57,6 @@ class SpesialistApp(
 
     private val oppgaveDao = daos.oppgaveDao
     private val periodehistorikkDao = daos.periodehistorikkDao
-    private val saksbehandlerDao = daos.saksbehandlerDao
     private val tildelingDao = daos.tildelingDao
     private val reservasjonDao = daos.reservasjonDao
     private val opptegnelseDao = daos.opptegnelseDao
@@ -209,7 +208,6 @@ class SpesialistApp(
                 oppgaveService = oppgaveService,
                 reservasjonDao = reservasjonDao,
                 periodehistorikkDao = periodehistorikkDao,
-                saksbehandlerDao = saksbehandlerDao,
                 sessionFactory = sessionFactory,
             )
         subsumsjonsmelder = Subsumsjonsmelder(versjonAvKode, meldingPubliserer)

@@ -2,7 +2,6 @@ package no.nav.helse.spesialist.db.dao
 
 import kotliquery.Session
 import no.nav.helse.db.SaksbehandlerDao
-import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
@@ -49,17 +48,6 @@ class PgSaksbehandlerDao private constructor(private val queryRunner: QueryRunne
         "oid" to oid,
         "siste_handling_utfort_tidspunkt" to sisteHandlingUtført,
     ).update()
-
-    override fun finnSaksbehandlerFraDatabase(oid: UUID) =
-        asSQL("SELECT * FROM saksbehandler WHERE oid = :oid LIMIT 1", "oid" to oid)
-            .singleOrNull { row ->
-                SaksbehandlerFraDatabase(
-                    epostadresse = row.string("epost"),
-                    oid = row.uuid("oid"),
-                    navn = row.string("navn"),
-                    ident = row.string("ident"),
-                )
-            }
 
     override fun finnSaksbehandler(oid: UUID) =
         asSQL("SELECT * FROM saksbehandler WHERE oid = :oid LIMIT 1", "oid" to oid)

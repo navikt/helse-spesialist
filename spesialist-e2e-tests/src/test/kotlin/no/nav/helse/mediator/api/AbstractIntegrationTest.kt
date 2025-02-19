@@ -24,7 +24,6 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
     protected val oppgaveDao = daos.oppgaveDao
     private val reservasjonDao = daos.reservasjonDao
     private val periodehistorikkDao = daos.periodehistorikkDao
-    private val saksbehandlerDao = daos.saksbehandlerDao
 
     private val oppgaveService =
         OppgaveService(
@@ -46,7 +45,6 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
             oppgaveService = oppgaveService,
             reservasjonDao = reservasjonDao,
             periodehistorikkDao = periodehistorikkDao,
-            saksbehandlerDao = saksbehandlerDao,
             sessionFactory = sessionFactory,
         )
 

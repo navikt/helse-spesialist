@@ -12,7 +12,6 @@ import no.nav.helse.db.OppgaveFraDatabase
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.Reservasjon
 import no.nav.helse.db.ReservasjonDao
-import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.mediator.KommandokjedeEndretEvent
@@ -51,7 +50,6 @@ internal class OppgaveServiceTest {
     private val tildelingDao = mockk<TildelingDao>(relaxed = true)
     private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
     private val opptegnelseDao = mockk<OpptegnelseDao>(relaxed = true)
-    private val saksbehandlerDao = mockk<SaksbehandlerDao>()
 
     private val meldingPubliserer = object : MeldingPubliserer {
         var antallMeldinger: Int = 0
@@ -183,7 +181,6 @@ internal class OppgaveServiceTest {
     fun `oppdaterer oppgave`() {
         every { oppgaveDao.finnOppgave(OPPGAVE_ID) } returns oppgaveFraDatabase()
         every { oppgaveDao.finnHendelseId(any()) } returns HENDELSE_ID
-        every { saksbehandlerDao.finnSaksbehandlerFraDatabase(any()) } returns saksbehandlerFraDatabase
         mediator.oppgave(OPPGAVE_ID) {
             avventerSystem(SAKSBEHANDLERIDENT, SAKSBEHANDLEROID)
             ferdigstill()

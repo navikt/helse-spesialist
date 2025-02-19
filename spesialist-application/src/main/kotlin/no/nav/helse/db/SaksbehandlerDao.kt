@@ -5,8 +5,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 interface SaksbehandlerDao {
-    fun finnSaksbehandlerFraDatabase(oid: UUID): SaksbehandlerFraDatabase?
-
     fun finnSaksbehandler(oid: UUID): Saksbehandler?
 
     fun opprettEllerOppdater(

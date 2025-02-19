@@ -6,12 +6,11 @@ import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OverstyringDao
 import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.ReservasjonDao
-import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.SessionFactory
-import no.nav.helse.db.toDto
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.melding.Saksbehandlerløsning
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
+import no.nav.helse.modell.saksbehandler.SaksbehandlerDto
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.spesialist.api.Godkjenninghåndterer
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
@@ -29,7 +28,6 @@ class GodkjenningService(
     private val oppgaveService: OppgaveService,
     private val reservasjonDao: ReservasjonDao,
     private val periodehistorikkDao: PeriodehistorikkDao,
-    private val saksbehandlerDao: SaksbehandlerDao,
     private val sessionFactory: SessionFactory,
 ) : Godkjenninghåndterer {
     private companion object {
@@ -80,8 +78,15 @@ class GodkjenningService(
 
                 if (totrinnsvurdering?.erBeslutteroppgave == true && godkjenningDTO.godkjent) {
                     val beslutter =
-                        totrinnsvurdering.beslutter?.value?.let {
-                            saksbehandlerDao.finnSaksbehandlerFraDatabase(it)?.toDto()
+                        totrinnsvurdering.beslutter?.let { saksbehandlerId ->
+                            session.saksbehandlerRepository.finn(saksbehandlerId)?.let { saksbehandler ->
+                                SaksbehandlerDto(
+                                    epostadresse = saksbehandler.epost,
+                                    oid = saksbehandler.id().value,
+                                    navn = saksbehandler.navn,
+                                    ident = saksbehandler.ident,
+                                )
+                            }
                         }
                     checkNotNull(beslutter) { "Forventer at beslutter er satt" }
                     val innslag = Historikkinnslag.totrinnsvurderingFerdigbehandletInnslag(beslutter)
