@@ -7,12 +7,9 @@ import no.nav.helse.modell.lagAktørId
 import no.nav.helse.modell.lagFødselsnummer
 import no.nav.helse.modell.lagOrganisasjonsnummer
 import no.nav.helse.modell.saksbehandler.Saksbehandler
-import no.nav.helse.modell.saksbehandler.Saksbehandler.Companion.toDto
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinje
 import no.nav.helse.modell.saksbehandler.handlinger.TilgangskontrollForTestHarIkkeTilgang
-import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering.Companion.gjenopprett
-import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering.Companion.toDto
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -146,28 +143,6 @@ internal class TotrinnsvurderingTest {
         val totrinnsvurdering = nyTotrinnsvurdering()
         totrinnsvurdering.ferdigstill()
         assertTrue(totrinnsvurdering.ferdigstilt)
-    }
-
-    @Test
-    fun `fra og til dto`() {
-        val totrinnsvurderingDto = TotrinnsvurderingDto(
-            vedtaksperiodeId = UUID.randomUUID(),
-            erRetur = false,
-            saksbehandler = nySaksbehandler().toDto(),
-            beslutter = nySaksbehandler().toDto(),
-            utbetalingId = UUID.randomUUID(),
-            opprettet = LocalDateTime.now(),
-            oppdatert = LocalDateTime.now(),
-        )
-
-        val toDto = totrinnsvurderingDto.gjenopprett(TilgangskontrollForTestHarIkkeTilgang, nextLong()).toDto()
-        assertEquals(totrinnsvurderingDto.vedtaksperiodeId, toDto.vedtaksperiodeId)
-        assertEquals(totrinnsvurderingDto.erRetur, toDto.erRetur)
-        assertEquals(totrinnsvurderingDto.saksbehandler, toDto.saksbehandler)
-        assertEquals(totrinnsvurderingDto.beslutter, toDto.beslutter)
-        assertEquals(totrinnsvurderingDto.utbetalingId, toDto.utbetalingId)
-        assertEquals(totrinnsvurderingDto.opprettet.withNano(0), toDto.opprettet.withNano(0))
-        assertEquals(totrinnsvurderingDto.oppdatert?.withNano(0), toDto.oppdatert?.withNano(0))
     }
 
     private fun nySaksbehandler(
