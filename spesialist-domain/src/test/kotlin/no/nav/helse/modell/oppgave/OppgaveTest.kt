@@ -73,7 +73,7 @@ internal class OppgaveTest {
 
     @Test
     fun `Kan tildele ved reservasjon dersom saksbehandler har tilgang til alle tilgangsstyrte egenskaper på oppgaven`() {
-        val oppgave = nyOppgave(SØKNAD, FORTROLIG_ADRESSE)
+        val oppgave = nyOppgave(SØKNAD, STRENGT_FORTROLIG_ADRESSE, FORTROLIG_ADRESSE)
         val saksbehandler = saksbehandler(tilgangskontroll = TilgangskontrollForTestHarTilgang)
         oppgave.forsøkTildelingVedReservasjon(saksbehandler)
 
@@ -85,7 +85,7 @@ internal class OppgaveTest {
 
     @Test
     fun `Kan ikke tildele ved reservasjon dersom saksbehandler ikke har tilgang til alle tilgangsstyrte egenskaper på oppgaven`() {
-        val oppgave = nyOppgave(SØKNAD, STRENGT_FORTROLIG_ADRESSE)
+        val oppgave = nyOppgave(SØKNAD, FORTROLIG_ADRESSE, STRENGT_FORTROLIG_ADRESSE)
         assertThrows<ManglerTilgang> {
             oppgave.forsøkTildelingVedReservasjon(saksbehandler(tilgangskontroll = TilgangskontrollForTestMedKunFortroligAdresse))
         }
@@ -98,7 +98,7 @@ internal class OppgaveTest {
 
     @Test
     fun `Forsøker tildeling ved reservasjon med påVent`() {
-        val oppgave = nyOppgave(PÅ_VENT)
+        val oppgave = nyOppgave(PÅ_VENT, SØKNAD)
         oppgave.forsøkTildelingVedReservasjon(saksbehandlerUtenTilgang)
 
         inspektør(oppgave) {
@@ -110,7 +110,7 @@ internal class OppgaveTest {
 
     @Test
     fun `Forsøker tildeling ved reservasjon ved stikkprøve`() {
-        val oppgave = nyOppgave(PÅ_VENT)
+        val oppgave = nyOppgave(PÅ_VENT, STIKKPRØVE)
         oppgave.forsøkTildelingVedReservasjon(saksbehandlerUtenTilgang)
 
         inspektør(oppgave) {
