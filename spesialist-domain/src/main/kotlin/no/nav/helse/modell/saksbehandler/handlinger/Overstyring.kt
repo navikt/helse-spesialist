@@ -13,10 +13,17 @@ sealed class Overstyring(id: OverstyringId?) : Personhandling, Entity<Overstyrin
     abstract val aktørId: String
     abstract val vedtaksperiodeId: UUID
     abstract val opprettet: LocalDateTime
+    protected abstract val kobledeVedtaksperioder: MutableList<UUID>
     abstract var ferdigstilt: Boolean
         protected set
 
     fun ferdigstill() {
         ferdigstilt = true
     }
+
+    fun kobleVedtaksperiode(vedtaksperiodeId: UUID) {
+        kobledeVedtaksperioder.add(vedtaksperiodeId)
+    }
+
+    fun kobledeVedtaksperioder() = kobledeVedtaksperioder.toList()
 }

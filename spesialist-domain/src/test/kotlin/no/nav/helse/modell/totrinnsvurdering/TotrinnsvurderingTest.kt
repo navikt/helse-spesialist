@@ -78,15 +78,27 @@ internal class TotrinnsvurderingTest {
     @Test
     fun `ferdigstill ferdigstiller også overstyringer`() {
         val vedtaksperiodeId = UUID.randomUUID()
-        val totrinnsvurdering = nyTotrinnsvurdering(vedtaksperiodeId = vedtaksperiodeId, overstyringer = listOf(OverstyrtTidslinje.ny(
-                vedtaksperiodeId = vedtaksperiodeId,
-                aktørId = "123",
-                fødselsnummer = "1234",
-                organisasjonsnummer = "12345",
-                dager = overstyrteDager(),
-                begrunnelse = "begrunnelse",
-                saksbehandlerOid = UUID.randomUUID()
-        )))
+        val totrinnsvurdering = nyTotrinnsvurdering(
+            vedtaksperiodeId = vedtaksperiodeId, overstyringer = listOf(
+                OverstyrtTidslinje.ny(
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    aktørId = "123",
+                    fødselsnummer = "1234",
+                    organisasjonsnummer = "12345",
+                    dager = overstyrteDager(),
+                    begrunnelse = "begrunnelse",
+                    saksbehandlerOid = UUID.randomUUID()
+                ), OverstyrtTidslinje.ny(
+                    vedtaksperiodeId = UUID.randomUUID(),
+                    aktørId = "123",
+                    fødselsnummer = "1234",
+                    organisasjonsnummer = "12345",
+                    dager = overstyrteDager(),
+                    begrunnelse = "begrunnelse",
+                    saksbehandlerOid = UUID.randomUUID()
+                ).also { it.kobleVedtaksperiode(vedtaksperiodeId) }
+            )
+        )
         val behandlendeSaksbehandler = nySaksbehandler()
         totrinnsvurdering.sendTilBeslutter(1L, behandlendeSaksbehandler)
         val utbetalingId = UUID.randomUUID()
@@ -146,15 +158,17 @@ internal class TotrinnsvurderingTest {
     @Test
     fun `kan legge til ny overstyring`() {
         val totrinnsvurdering = nyTotrinnsvurdering()
-        totrinnsvurdering.nyOverstyring(OverstyrtTidslinje.ny(
-            vedtaksperiodeId = UUID.randomUUID(),
-            aktørId = lagAktørId(),
-            fødselsnummer = lagFødselsnummer(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            dager = emptyList(),
-            begrunnelse = "begrunnelse",
-            saksbehandlerOid = nySaksbehandler().value,
-        ))
+        totrinnsvurdering.nyOverstyring(
+            OverstyrtTidslinje.ny(
+                vedtaksperiodeId = UUID.randomUUID(),
+                aktørId = lagAktørId(),
+                fødselsnummer = lagFødselsnummer(),
+                organisasjonsnummer = lagOrganisasjonsnummer(),
+                dager = emptyList(),
+                begrunnelse = "begrunnelse",
+                saksbehandlerOid = nySaksbehandler().value,
+            )
+        )
         assertEquals(1, totrinnsvurdering.overstyringer.size)
     }
 

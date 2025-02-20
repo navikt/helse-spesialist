@@ -493,9 +493,10 @@ class PgOverstyringRepository(
             "id" to id,
         ).list { it.toArbeidsforhold() }
 
-    private fun Row.toOverstyrtTidslinje(): OverstyrtTidslinje =
-        OverstyrtTidslinje.fraLagring(
-            id = OverstyringId(long("id")),
+    private fun Row.toOverstyrtTidslinje(): OverstyrtTidslinje {
+        val id = OverstyringId(long("id"))
+        return OverstyrtTidslinje.fraLagring(
+            id = id,
             eksternHendelseId = uuid("ekstern_hendelse_id"),
             fødselsnummer = string("fødselsnummer"),
             aktørId = string("aktør_id"),
@@ -506,11 +507,14 @@ class PgOverstyringRepository(
             saksbehandlerOid = uuid("saksbehandler_ref"),
             ferdigstilt = boolean("ferdigstilt"),
             dager = finnOverstyrtTidslinjeDager(long("overstyring_tidslinje_id")),
+            kobledeVedtaksperioder = finnKobledeVedtaksperioderForOverstyring(id),
         )
+    }
 
-    private fun Row.toOverstyrtInntektOgRefusjon(): OverstyrtInntektOgRefusjon =
-        OverstyrtInntektOgRefusjon.fraLagring(
-            id = OverstyringId(long("id")),
+    private fun Row.toOverstyrtInntektOgRefusjon(): OverstyrtInntektOgRefusjon {
+        val id = OverstyringId(long("id"))
+        return OverstyrtInntektOgRefusjon.fraLagring(
+            id = id,
             eksternHendelseId = uuid("ekstern_hendelse_id"),
             fødselsnummer = string("fødselsnummer"),
             aktørId = string("aktør_id"),
@@ -520,11 +524,14 @@ class PgOverstyringRepository(
             saksbehandlerOid = uuid("saksbehandler_ref"),
             ferdigstilt = boolean("ferdigstilt"),
             arbeidsgivere = finnOverstyrtArbeidsgiver(long("id")),
+            kobledeVedtaksperioder = finnKobledeVedtaksperioderForOverstyring(id),
         )
+    }
 
-    private fun Row.toOverstyrtArbeidsforhold(): OverstyrtArbeidsforhold =
-        OverstyrtArbeidsforhold.fraLagring(
-            id = OverstyringId(long("id")),
+    private fun Row.toOverstyrtArbeidsforhold(): OverstyrtArbeidsforhold {
+        val id = OverstyringId(long("id"))
+        return OverstyrtArbeidsforhold.fraLagring(
+            id = id,
             eksternHendelseId = uuid("ekstern_hendelse_id"),
             fødselsnummer = string("fødselsnummer"),
             aktørId = string("aktør_id"),
@@ -534,7 +541,9 @@ class PgOverstyringRepository(
             saksbehandlerOid = uuid("saksbehandler_ref"),
             ferdigstilt = boolean("ferdigstilt"),
             overstyrteArbeidsforhold = finnArbeidsforhold(long("id")),
+            kobledeVedtaksperioder = finnKobledeVedtaksperioderForOverstyring(id),
         )
+    }
 
     private fun Row.toMinimumSykdomsgrad(): MinimumSykdomsgrad {
         val minimumSykdomsgradId = long("overstyring_minimum_sykdomsgrad_id")
@@ -548,8 +557,10 @@ class PgOverstyringRepository(
         val perioderSomErOk = ok.map { it.second }
         val perioderSomIkkeErOk = ikkeOk.map { it.second }
 
+        val id = OverstyringId(long("id"))
+
         return MinimumSykdomsgrad.fraLagring(
-            id = OverstyringId(long("id")),
+            id = id,
             eksternHendelseId = uuid("ekstern_hendelse_id"),
             aktørId = string("aktør_id"),
             fødselsnummer = string("fødselsnummer"),
@@ -561,12 +572,20 @@ class PgOverstyringRepository(
             opprettet = localDateTime("tidspunkt"),
             saksbehandlerOid = uuid("saksbehandler_ref"),
             ferdigstilt = boolean("ferdigstilt"),
+            kobledeVedtaksperioder = finnKobledeVedtaksperioderForOverstyring(id),
         )
     }
 
-    private fun Row.toSkjønnsfastsattSykepengegrunnlag(): SkjønnsfastsattSykepengegrunnlag =
-        SkjønnsfastsattSykepengegrunnlag.fraLagring(
-            id = OverstyringId(long("id")),
+    private fun finnKobledeVedtaksperioderForOverstyring(overstyringRef: OverstyringId): List<UUID> =
+        asSQL(
+            "SELECT vedtaksperiode_id FROM overstyringer_for_vedtaksperioder WHERE overstyring_ref = :overstyringRef",
+            "overstyringRef" to overstyringRef.value,
+        ).list { row -> row.uuid("vedtaksperiode_id") }
+
+    private fun Row.toSkjønnsfastsattSykepengegrunnlag(): SkjønnsfastsattSykepengegrunnlag {
+        val id = OverstyringId(long("id"))
+        return SkjønnsfastsattSykepengegrunnlag.fraLagring(
+            id = id,
             eksternHendelseId = uuid("ekstern_hendelse_id"),
             fødselsnummer = string("fødselsnummer"),
             aktørId = string("aktør_id"),
@@ -576,7 +595,9 @@ class PgOverstyringRepository(
             saksbehandlerOid = uuid("saksbehandler_ref"),
             ferdigstilt = boolean("ferdigstilt"),
             arbeidsgivere = finnSkjønnsfastsattArbeidsgiver(this),
+            kobledeVedtaksperioder = finnKobledeVedtaksperioderForOverstyring(id),
         )
+    }
 
     private fun Row.toSkjønnsfastsattArbeidsgiver(overstyringRow: Row): SkjønnsfastsattArbeidsgiver =
         SkjønnsfastsattArbeidsgiver(

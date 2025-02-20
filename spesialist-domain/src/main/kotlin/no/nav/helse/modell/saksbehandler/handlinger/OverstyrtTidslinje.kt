@@ -20,10 +20,13 @@ class OverstyrtTidslinje private constructor(
     override val vedtaksperiodeId: UUID,
     override val opprettet: LocalDateTime,
     override var ferdigstilt: Boolean,
+    kobledeVedtaksperioder: List<UUID>,
     val organisasjonsnummer: String,
     val dager: List<OverstyrtTidslinjedag>,
     val begrunnelse: String,
 ) : Overstyring(id) {
+    override val kobledeVedtaksperioder = kobledeVedtaksperioder.toMutableList()
+
     override fun utførAv(saksbehandler: Saksbehandler) {
         saksbehandler.håndter(this)
     }
@@ -51,6 +54,7 @@ class OverstyrtTidslinje private constructor(
             organisasjonsnummer = organisasjonsnummer,
             dager = dager,
             begrunnelse = begrunnelse,
+            kobledeVedtaksperioder = emptyList(),
         )
 
         fun fraLagring(
@@ -65,6 +69,7 @@ class OverstyrtTidslinje private constructor(
             organisasjonsnummer: String,
             dager: List<OverstyrtTidslinjedag>,
             begrunnelse: String,
+            kobledeVedtaksperioder: List<UUID>,
         ) = OverstyrtTidslinje(
             id = id,
             eksternHendelseId = eksternHendelseId,
@@ -77,6 +82,7 @@ class OverstyrtTidslinje private constructor(
             organisasjonsnummer = organisasjonsnummer,
             dager = dager,
             begrunnelse = begrunnelse,
+            kobledeVedtaksperioder = kobledeVedtaksperioder,
         )
     }
 

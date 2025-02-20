@@ -98,7 +98,7 @@ class Totrinnsvurdering private constructor(
             this.utbetalingId = utbetalingId
             this.ferdigstilt = true
             this._overstyringer
-                .filter { it.vedtaksperiodeId == vedtaksperiodeId }
+                .filter { it.vedtaksperiodeId == vedtaksperiodeId || it.kobledeVedtaksperioder().contains(vedtaksperiodeId) }
                 .forEach { it.ferdigstill() }
         }
 
