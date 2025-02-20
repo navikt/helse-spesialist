@@ -1,5 +1,5 @@
 [versions]
-flyway = "11.3.2"
+flyway = "11.3.3"
 graphqlKotlin = "8.3.0"
 jackson = "2.18.2"
 ktor = "3.1.0"
