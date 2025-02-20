@@ -93,14 +93,25 @@ class Totrinnsvurdering private constructor(
         erRetur = true
     }
 
-    fun ferdigstill(utbetalingId: UUID) =
-        oppdatering {
-            this.utbetalingId = utbetalingId
-            this.ferdigstilt = true
+    fun ferdigstill(
+        utbetalingId: UUID,
+        skalBenytteNyTotrinnsvurderingsløsning: Boolean = false,
+    ) = oppdatering {
+        this.utbetalingId = utbetalingId
+        this.ferdigstilt = true
+        if (!skalBenytteNyTotrinnsvurderingsløsning) {
             this._overstyringer
-                .filter { it.vedtaksperiodeId == vedtaksperiodeId || it.kobledeVedtaksperioder().contains(vedtaksperiodeId) }
+                .filter {
+                    it.vedtaksperiodeId == vedtaksperiodeId ||
+                        it.kobledeVedtaksperioder()
+                            .contains(vedtaksperiodeId)
+                }
                 .forEach { it.ferdigstill() }
+            return@oppdatering
         }
+        this._overstyringer
+            .forEach { it.ferdigstill() }
+    }
 
     private fun <T> oppdatering(block: () -> T): T {
         return block().also {

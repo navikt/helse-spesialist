@@ -1,6 +1,7 @@
 package no.nav.helse.mediator
 
 import net.logstash.logback.argument.StructuredArguments
+import no.nav.helse.FeatureToggles
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OverstyringDao
@@ -29,6 +30,7 @@ class GodkjenningService(
     private val reservasjonDao: ReservasjonDao,
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val sessionFactory: SessionFactory,
+    private val featureToggles: FeatureToggles,
 ) : Godkjenninghåndterer {
     private companion object {
         private val logg = LoggerFactory.getLogger(GodkjenningService::class.java)
@@ -73,7 +75,7 @@ class GodkjenningService(
             reserverPerson(reserverPersonOid, fødselsnummer)
             oppgaveService.oppgave(godkjenningDTO.oppgavereferanse) {
                 avventerSystem(godkjenningDTO.saksbehandlerIdent, oid)
-                totrinnsvurdering?.ferdigstill(this.utbetalingId)
+                totrinnsvurdering?.ferdigstill(this.utbetalingId, featureToggles.skalBenytteNyTotrinnsvurderingsløsning())
 
                 if (totrinnsvurdering?.erBeslutteroppgave == true && godkjenningDTO.godkjent) {
                     val beslutter =

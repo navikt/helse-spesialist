@@ -210,6 +210,7 @@ class SpesialistApp(
                 reservasjonDao = reservasjonDao,
                 periodehistorikkDao = periodehistorikkDao,
                 sessionFactory = sessionFactory,
+                featureToggles = featureToggles,
             )
         subsumsjonsmelder = Subsumsjonsmelder(versjonAvKode, meldingPubliserer)
 

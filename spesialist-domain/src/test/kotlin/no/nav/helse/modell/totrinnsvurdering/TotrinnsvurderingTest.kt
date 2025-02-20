@@ -69,9 +69,44 @@ internal class TotrinnsvurderingTest {
         val behandlendeSaksbehandler = nySaksbehandler()
         totrinnsvurdering.sendTilBeslutter(1L, behandlendeSaksbehandler)
         val utbetalingId = UUID.randomUUID()
-        totrinnsvurdering.ferdigstill(utbetalingId)
+        totrinnsvurdering.ferdigstill(utbetalingId, false)
         assertEquals(behandlendeSaksbehandler, totrinnsvurdering.saksbehandler)
         assertEquals(false, totrinnsvurdering.erRetur)
+        assertEquals(utbetalingId, totrinnsvurdering.utbetalingId)
+    }
+
+    @Test
+    fun `ferdigstiller alle overstyringer for person`() {
+        val totrinnsvurdering = nyTotrinnsvurdering(
+            vedtaksperiodeId = UUID.randomUUID(), overstyringer = listOf(
+                OverstyrtTidslinje.ny(
+                    vedtaksperiodeId = UUID.randomUUID(),
+                    aktørId = "123",
+                    fødselsnummer = "1234",
+                    organisasjonsnummer = "12345",
+                    dager = overstyrteDager(),
+                    begrunnelse = "begrunnelse",
+                    saksbehandlerOid = UUID.randomUUID()
+                ), OverstyrtTidslinje.ny(
+                    vedtaksperiodeId = UUID.randomUUID(),
+                    aktørId = "123",
+                    fødselsnummer = "1234",
+                    organisasjonsnummer = "12345",
+                    dager = overstyrteDager(),
+                    begrunnelse = "begrunnelse",
+                    saksbehandlerOid = UUID.randomUUID()
+                )
+            )
+        )
+        val behandlendeSaksbehandler = nySaksbehandler()
+        totrinnsvurdering.sendTilBeslutter(1L, behandlendeSaksbehandler)
+        val utbetalingId = UUID.randomUUID()
+        totrinnsvurdering.ferdigstill(utbetalingId, true)
+        assertEquals(behandlendeSaksbehandler, totrinnsvurdering.saksbehandler)
+        assertEquals(false, totrinnsvurdering.erRetur)
+        totrinnsvurdering.overstyringer.forEach {
+            assertTrue(it.ferdigstilt)
+        }
         assertEquals(utbetalingId, totrinnsvurdering.utbetalingId)
     }
 
