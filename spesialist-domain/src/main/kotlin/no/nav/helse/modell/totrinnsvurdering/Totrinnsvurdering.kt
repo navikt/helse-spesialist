@@ -54,9 +54,17 @@ class Totrinnsvurdering private constructor(
         }
 
     fun settBeslutter(beslutter: SaksbehandlerOid) =
+
         oppdatering {
             this.beslutter = beslutter
         }
+
+    fun settSaksbehandler(saksbehandlerOid: SaksbehandlerOid) {
+        check(saksbehandler == null) { "Forsøker å overskrive satt saskbehandler" }
+        oppdatering {
+            this.saksbehandler = saksbehandlerOid
+        }
+    }
 
     fun nyOverstyring(overstyring: Overstyring) =
         oppdatering {

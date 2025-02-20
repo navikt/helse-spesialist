@@ -60,6 +60,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.random.Random
 
@@ -228,6 +229,101 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         }
         checkNotNull(totrinnsvurdering)
         assertEquals(saksbehandler.oid, totrinnsvurdering.saksbehandler?.value)
+        assertTrue(totrinnsvurdering.erBeslutteroppgave)
+    }
+
+    @Test
+    fun `ny overstyring uten eksisterende totrinnsvurdering lager totrinnsvurdering`() {
+        val person =
+            person {
+                arbeidsgivere = arbeidsgivere(2)
+            }
+        nyPerson(fødselsnummer = person.fødselsnummer, aktørId = person.aktørId, organisasjonsnummer = person { 2.ag })
+        opprettSaksbehandler()
+        opprettVedtaksperiode()
+        val saksbehandler = SaksbehandlerFraApi(
+            SAKSBEHANDLER_OID,
+            SAKSBEHANDLER_NAVN,
+            SAKSBEHANDLER_EPOST,
+            SAKSBEHANDLER_IDENT,
+            emptyList()
+        )
+        val overstyring =
+            ApiTidslinjeOverstyring(
+                vedtaksperiodeId = VEDTAKSPERIODE,
+                organisasjonsnummer = person { 2.ag },
+                fodselsnummer = person.fødselsnummer,
+                aktorId = person.aktørId,
+                begrunnelse = "En begrunnelse",
+                dager =
+                    listOf(
+                        ApiOverstyringDag(
+                            dato = 10.januar,
+                            type = "Sykedag",
+                            fraType = "Arbeidsdag",
+                            grad = null,
+                            fraGrad = 100,
+                            null,
+                        ),
+                    ),
+            )
+
+        mediator.håndter(overstyring, saksbehandler)
+        val totrinnsvurdering = sessionFactory.transactionalSessionScope { session ->
+            session.totrinnsvurderingRepository.finn(VEDTAKSPERIODE)
+        }
+        checkNotNull(totrinnsvurdering)
+        assertEquals(saksbehandler.oid, totrinnsvurdering.saksbehandler?.value)
+        assertTrue(totrinnsvurdering.overstyringer.single().opprettet.isAfter(LocalDateTime.now().minusSeconds(5)))
+        assertTrue(totrinnsvurdering.erBeslutteroppgave)
+    }
+
+    @Test
+    fun `ny overstyring med eksisterende totrinnsvurdering legges på eksisterende totrinnsvurdering med opprinnelig saksbehandler`() {
+        val person =
+            person {
+                arbeidsgivere = arbeidsgivere(2)
+            }
+        nyPerson(fødselsnummer = person.fødselsnummer, aktørId = person.aktørId, organisasjonsnummer = person { 2.ag })
+        opprettSaksbehandler()
+        opprettVedtaksperiode()
+        val saksbehandler2Oid = UUID.randomUUID()
+        opprettSaksbehandler(saksbehandler2Oid)
+        opprettTotrinnsvurdering(VEDTAKSPERIODE, saksbehandler2Oid)
+        val saksbehandler = SaksbehandlerFraApi(
+            SAKSBEHANDLER_OID,
+            SAKSBEHANDLER_NAVN,
+            SAKSBEHANDLER_EPOST,
+            SAKSBEHANDLER_IDENT,
+            emptyList()
+        )
+        val overstyring =
+            ApiTidslinjeOverstyring(
+                vedtaksperiodeId = VEDTAKSPERIODE,
+                organisasjonsnummer = person { 2.ag },
+                fodselsnummer = person.fødselsnummer,
+                aktorId = person.aktørId,
+                begrunnelse = "En begrunnelse",
+                dager =
+                    listOf(
+                        ApiOverstyringDag(
+                            dato = 10.januar,
+                            type = "Sykedag",
+                            fraType = "Arbeidsdag",
+                            grad = null,
+                            fraGrad = 100,
+                            null,
+                        ),
+                    ),
+            )
+
+        mediator.håndter(overstyring, saksbehandler)
+        val totrinnsvurdering = sessionFactory.transactionalSessionScope { session ->
+            session.totrinnsvurderingRepository.finn(VEDTAKSPERIODE)
+        }
+        checkNotNull(totrinnsvurdering)
+        assertEquals(saksbehandler2Oid, totrinnsvurdering.saksbehandler?.value)
+        assertTrue(totrinnsvurdering.overstyringer.single().opprettet.isAfter(LocalDateTime.now().minusSeconds(5)))
         assertTrue(totrinnsvurdering.erBeslutteroppgave)
     }
 
