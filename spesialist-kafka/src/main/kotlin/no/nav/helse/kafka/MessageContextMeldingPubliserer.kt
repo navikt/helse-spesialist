@@ -60,7 +60,7 @@ class MessageContextMeldingPubliserer(private val context: MessageContext) : Mel
             "Publiserer CommandContext tilstandendring i forbindelse med $hendelseNavn, ny tilstand: $${event::class.simpleName}\n{}",
             message,
         )
-        context.publish(message)
+        context.publish(event.commandContextId.toString(), message)
     }
 
     private companion object {
