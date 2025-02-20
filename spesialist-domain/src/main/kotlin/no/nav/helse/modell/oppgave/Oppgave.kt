@@ -12,29 +12,29 @@ import no.nav.helse.modell.oppgave.Egenskap.PÅ_VENT
 import no.nav.helse.modell.oppgave.Egenskap.RETUR
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.TILBAKEDATERT
-import no.nav.helse.modell.oppgave.EgenskapDto.Companion.gjenopprett
-import no.nav.helse.modell.oppgave.EgenskapDto.Companion.toDto
 import no.nav.helse.modell.saksbehandler.Saksbehandler
-import no.nav.helse.modell.saksbehandler.Saksbehandler.Companion.gjenopprett
-import no.nav.helse.modell.saksbehandler.Saksbehandler.Companion.toDto
-import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class Oppgave private constructor(
     val id: Long,
     tilstand: Tilstand,
-    private val vedtaksperiodeId: UUID,
+    val vedtaksperiodeId: UUID,
     val behandlingId: UUID,
     val utbetalingId: UUID,
     val godkjenningsbehovId: UUID,
-    private val kanAvvises: Boolean,
-    private var ferdigstiltAvIdent: String? = null,
-    private var ferdigstiltAvOid: UUID? = null,
+    val kanAvvises: Boolean,
+    ferdigstiltAvIdent: String? = null,
+    ferdigstiltAvOid: UUID? = null,
     val egenskaper: MutableSet<Egenskap> = mutableSetOf(),
     tildeltTil: Saksbehandler? = null,
 ) {
     private val observers = mutableListOf<OppgaveObserver>()
+
+    var ferdigstiltAvOid = ferdigstiltAvOid
+        private set
+    var ferdigstiltAvIdent = ferdigstiltAvIdent
+        private set
 
     var tilstand: Tilstand = tilstand
         private set
@@ -345,46 +345,30 @@ class Oppgave private constructor(
             egenskaper = egenskaper.toMutableSet(),
         )
 
-        fun Oppgave.toDto() =
-            OppgaveDto(
-                id = id,
-                tilstand =
-                    when (tilstand) {
-                        AvventerSaksbehandler -> OppgaveDto.TilstandDto.AvventerSaksbehandler
-                        AvventerSystem -> OppgaveDto.TilstandDto.AvventerSystem
-                        Ferdigstilt -> OppgaveDto.TilstandDto.Ferdigstilt
-                        Invalidert -> OppgaveDto.TilstandDto.Invalidert
-                    },
-                vedtaksperiodeId = vedtaksperiodeId,
-                behandlingId = behandlingId,
-                utbetalingId = utbetalingId,
-                godkjenningsbehovId = godkjenningsbehovId,
-                kanAvvises = kanAvvises,
-                egenskaper = egenskaper.map { it.toDto() },
-                tildeltTil = tildeltTil?.toDto(),
-                ferdigstiltAvOid = ferdigstiltAvOid,
-                ferdigstiltAvIdent = ferdigstiltAvIdent,
-            )
-
-        fun OppgaveDto.gjenopprett(tilgangskontroll: Tilgangskontroll) =
-            Oppgave(
-                id = id,
-                tilstand =
-                    when (tilstand) {
-                        OppgaveDto.TilstandDto.AvventerSaksbehandler -> AvventerSaksbehandler
-                        OppgaveDto.TilstandDto.AvventerSystem -> AvventerSystem
-                        OppgaveDto.TilstandDto.Ferdigstilt -> Ferdigstilt
-                        OppgaveDto.TilstandDto.Invalidert -> Invalidert
-                    },
-                behandlingId = behandlingId,
-                vedtaksperiodeId = vedtaksperiodeId,
-                utbetalingId = utbetalingId,
-                godkjenningsbehovId = godkjenningsbehovId,
-                kanAvvises = kanAvvises,
-                ferdigstiltAvOid = ferdigstiltAvOid,
-                ferdigstiltAvIdent = ferdigstiltAvIdent,
-                tildeltTil = tildeltTil?.gjenopprett(tilgangskontroll),
-                egenskaper = egenskaper.map { it.gjenopprett() }.toMutableSet(),
-            )
+        fun fraLagring(
+            id: Long,
+            tilstand: Tilstand,
+            behandlingId: UUID,
+            vedtaksperiodeId: UUID,
+            utbetalingId: UUID,
+            godkjenningsbehovId: UUID,
+            kanAvvises: Boolean,
+            ferdigstiltAvOid: UUID?,
+            ferdigstiltAvIdent: String?,
+            tildeltTil: Saksbehandler?,
+            egenskaper: MutableSet<Egenskap>,
+        ) = Oppgave(
+            id = id,
+            tilstand = tilstand,
+            behandlingId = behandlingId,
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetalingId = utbetalingId,
+            godkjenningsbehovId = godkjenningsbehovId,
+            kanAvvises = kanAvvises,
+            ferdigstiltAvOid = ferdigstiltAvOid,
+            ferdigstiltAvIdent = ferdigstiltAvIdent,
+            tildeltTil = tildeltTil,
+            egenskaper = egenskaper,
+        )
     }
 }

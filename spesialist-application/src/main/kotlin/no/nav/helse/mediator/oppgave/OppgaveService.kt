@@ -12,7 +12,6 @@ import no.nav.helse.db.TildelingDao
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.Oppgave.Companion.ny
-import no.nav.helse.modell.oppgave.Oppgave.Companion.toDto
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.modell.saksbehandler.handlinger.EndrePåVent
@@ -83,7 +82,7 @@ class OppgaveService(
         oppgave.register(oppgavemelder)
         oppgavemelder.oppgaveOpprettet(oppgave)
         tildelVedReservasjon(fødselsnummer, oppgave)
-        Oppgavelagrer(tildelingDao).lagre(this, oppgave.toDto())
+        Oppgavelagrer(tildelingDao).lagre(this, oppgave)
     }
 
     fun <T> oppgave(
@@ -98,7 +97,7 @@ class OppgaveService(
         val fødselsnummer = oppgaveDao.finnFødselsnummer(id)
         oppgave.register(Oppgavemelder(fødselsnummer, meldingPubliserer))
         val returverdi = oppgaveBlock(oppgave)
-        Oppgavelagrer(tildelingDao).oppdater(this@OppgaveService, oppgave.toDto())
+        Oppgavelagrer(tildelingDao).oppdater(this@OppgaveService, oppgave)
         return returverdi
     }
 

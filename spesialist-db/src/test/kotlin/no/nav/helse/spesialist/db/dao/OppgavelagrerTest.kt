@@ -9,7 +9,6 @@ import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.mediator.oppgave.Oppgavelagrer
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Oppgave
-import no.nav.helse.modell.oppgave.Oppgave.Companion.toDto
 import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import org.junit.jupiter.api.BeforeEach
@@ -47,7 +46,7 @@ class OppgavelagrerTest : AbstractDBIntegrationTest() {
         val oppgave = nyOppgave()
         val oppgavelagrer = Oppgavelagrer(tildelingRepository)
 
-        oppgavelagrer.lagre(oppgaveService, oppgave.toDto())
+        oppgavelagrer.lagre(oppgaveService, oppgave)
         verify(exactly = 1) {
             oppgaveService.opprett(
                 id = OPPGAVE_ID,
@@ -68,7 +67,7 @@ class OppgavelagrerTest : AbstractDBIntegrationTest() {
         val oppgave = nyOppgave()
         val oppgavelagrer = Oppgavelagrer(tildelingRepository)
 
-        oppgavelagrer.oppdater(oppgaveService, oppgave.toDto())
+        oppgavelagrer.oppdater(oppgaveService, oppgave)
         verify(exactly = 1) { oppgaveService.oppdater(OPPGAVE_ID, "AvventerSaksbehandler", null, null, listOf(
             EgenskapForDatabase.SØKNAD
         )) }
@@ -81,7 +80,7 @@ class OppgavelagrerTest : AbstractDBIntegrationTest() {
         val oppgave = nyOppgave()
         val oppgavelagrer = Oppgavelagrer(tildelingRepository)
 
-        oppgavelagrer.lagre(oppgaveService, oppgave.toDto())
+        oppgavelagrer.lagre(oppgaveService, oppgave)
         verify(exactly = 1) {
             oppgaveService.opprett(
                 id = OPPGAVE_ID,
@@ -102,7 +101,7 @@ class OppgavelagrerTest : AbstractDBIntegrationTest() {
         oppgave.forsøkTildelingVedReservasjon(saksbehandler)
         val oppgavelagrer = Oppgavelagrer(tildelingRepository)
 
-        oppgavelagrer.lagre(oppgaveService, oppgave.toDto())
+        oppgavelagrer.lagre(oppgaveService, oppgave)
         verify(exactly = 1) {
             oppgaveService.opprett(
                 id = OPPGAVE_ID,
@@ -124,7 +123,7 @@ class OppgavelagrerTest : AbstractDBIntegrationTest() {
         oppgave.ferdigstill()
         val oppgavelagrer = Oppgavelagrer(tildelingRepository)
 
-        oppgavelagrer.oppdater(oppgaveService, oppgave.toDto())
+        oppgavelagrer.oppdater(oppgaveService, oppgave)
         verify(exactly = 1) {
             oppgaveService.oppdater(OPPGAVE_ID, "Ferdigstilt", SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID, listOf(
                 EgenskapForDatabase.SØKNAD
@@ -141,7 +140,7 @@ class OppgavelagrerTest : AbstractDBIntegrationTest() {
         oppgave.ferdigstill()
         val oppgavelagrer = Oppgavelagrer(tildelingRepository)
 
-        oppgavelagrer.oppdater(oppgaveService, oppgave.toDto())
+        oppgavelagrer.oppdater(oppgaveService, oppgave)
         verify(exactly = 1) {
             oppgaveService.oppdater(OPPGAVE_ID, "Ferdigstilt", SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID, listOf(
                 EgenskapForDatabase.SØKNAD

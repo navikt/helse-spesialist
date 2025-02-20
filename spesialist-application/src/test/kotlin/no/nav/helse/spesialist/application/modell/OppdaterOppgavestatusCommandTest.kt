@@ -5,7 +5,6 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.OppdaterOppgavestatusCommand
 import no.nav.helse.modell.oppgave.Oppgave
-import no.nav.helse.modell.oppgave.OppgaveDto
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.ANNULLERT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.FORKASTET
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.GODKJENT_UTEN_UTBETALING
@@ -45,7 +44,7 @@ internal class OppdaterOppgavestatusCommandTest {
 
         assertTrue(command.execute(context))
         oppgaveinspektør(oppgave) {
-            assertEquals(OppgaveDto.TilstandDto.Ferdigstilt, this.tilstand)
+            assertEquals(Oppgave.Ferdigstilt, this.tilstand)
         }
     }
 
@@ -57,7 +56,7 @@ internal class OppdaterOppgavestatusCommandTest {
 
         assertTrue(command.execute(context))
         oppgaveinspektør(oppgave) {
-            assertEquals(OppgaveDto.TilstandDto.Ferdigstilt, this.tilstand)
+            assertEquals(Oppgave.Ferdigstilt, this.tilstand)
         }
 
     }
@@ -70,7 +69,7 @@ internal class OppdaterOppgavestatusCommandTest {
 
         assertTrue(command.execute(context))
         oppgaveinspektør(oppgave) {
-            assertEquals(OppgaveDto.TilstandDto.Ferdigstilt, this.tilstand)
+            assertEquals(Oppgave.Ferdigstilt, this.tilstand)
         }
     }
 
@@ -81,7 +80,7 @@ internal class OppdaterOppgavestatusCommandTest {
 
         assertTrue(command.execute(context))
         oppgaveinspektør(oppgave) {
-            assertEquals(OppgaveDto.TilstandDto.Invalidert, this.tilstand)
+            assertEquals(Oppgave.Invalidert, this.tilstand)
         }
     }
 
@@ -93,7 +92,7 @@ internal class OppdaterOppgavestatusCommandTest {
 
         assertTrue(command.execute(context))
         oppgaveinspektør(oppgave) {
-            assertEquals(OppgaveDto.TilstandDto.AvventerSystem, this.tilstand)
+            assertEquals(Oppgave.AvventerSystem, this.tilstand)
         }
     }
 

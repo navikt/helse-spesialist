@@ -8,11 +8,8 @@ import no.nav.helse.modell.oppgave.Egenskap.PÅ_VENT
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
-import no.nav.helse.modell.oppgave.Oppgave.Companion.gjenopprett
-import no.nav.helse.modell.oppgave.Oppgave.Companion.toDto
 import no.nav.helse.modell.oppgave.OppgaveInspektør.Companion.inspektør
 import no.nav.helse.modell.saksbehandler.Saksbehandler
-import no.nav.helse.modell.saksbehandler.Saksbehandler.Companion.toDto
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.modell.saksbehandler.handlinger.TilgangskontrollForTestHarIkkeTilgang
 import no.nav.helse.modell.saksbehandler.handlinger.TilgangskontrollForTestHarTilgang
@@ -67,7 +64,7 @@ internal class OppgaveTest {
         inspektør(oppgave) {
             assertEquals(true, tildelt)
             assertEquals(false, påVent)
-            assertEquals(saksbehandlerUtenTilgang.toDto(), tildeltTil)
+            assertEquals(saksbehandlerUtenTilgang, tildeltTil)
         }
     }
 
@@ -79,7 +76,7 @@ internal class OppgaveTest {
 
         inspektør(oppgave) {
             assertEquals(true, tildelt)
-            assertEquals(saksbehandler.toDto(), tildeltTil)
+            assertEquals(saksbehandler, tildeltTil)
         }
     }
 
@@ -104,7 +101,7 @@ internal class OppgaveTest {
         inspektør(oppgave) {
             assertEquals(true, tildelt)
             assertEquals(true, påVent)
-            assertEquals(saksbehandlerUtenTilgang.toDto(), tildeltTil)
+            assertEquals(saksbehandlerUtenTilgang, tildeltTil)
         }
     }
 
@@ -191,7 +188,7 @@ internal class OppgaveTest {
         inspektør(oppgave) {
             assertEquals(true, tildelt)
             assertEquals(false, påVent)
-            assertEquals(saksbehandlerMedTilgang.toDto(), tildeltTil)
+            assertEquals(saksbehandlerMedTilgang, tildeltTil)
         }
     }
 
@@ -206,7 +203,7 @@ internal class OppgaveTest {
         inspektør(oppgave) {
             assertEquals(true, tildelt)
             assertEquals(false, påVent)
-            assertEquals(saksbehandlerUtenTilgang.toDto(), tildeltTil)
+            assertEquals(saksbehandlerUtenTilgang, tildeltTil)
         }
     }
 
@@ -216,7 +213,7 @@ internal class OppgaveTest {
         oppgave.avventerSystem(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
 
         inspektør(oppgave) {
-            assertEquals(OppgaveDto.TilstandDto.AvventerSystem, tilstand)
+            assertEquals(Oppgave.AvventerSystem, tilstand)
         }
     }
 
@@ -226,7 +223,7 @@ internal class OppgaveTest {
         oppgave.avbryt()
 
         inspektør(oppgave) {
-            assertEquals(OppgaveDto.TilstandDto.Invalidert, tilstand)
+            assertEquals(Oppgave.Invalidert, tilstand)
         }
     }
 
@@ -237,7 +234,7 @@ internal class OppgaveTest {
         oppgave.ferdigstill()
 
         inspektør(oppgave) {
-            assertEquals(OppgaveDto.TilstandDto.Ferdigstilt, tilstand)
+            assertEquals(Oppgave.Ferdigstilt, tilstand)
         }
     }
 
@@ -256,7 +253,7 @@ internal class OppgaveTest {
         val oppgave = nyOppgave(SØKNAD)
         oppgave.sendTilBeslutter(saksbehandlerUtenTilgang)
         inspektør(oppgave) {
-            assertTrue(egenskaper.contains(EgenskapDto.BESLUTTER))
+            assertTrue(egenskaper.contains(Egenskap.BESLUTTER))
         }
     }
 
@@ -266,8 +263,8 @@ internal class OppgaveTest {
         oppgave.sendTilBeslutter(saksbehandlerUtenTilgang)
         oppgave.sendIRetur(beslutter)
         inspektør(oppgave) {
-            assertTrue(egenskaper.contains(EgenskapDto.RETUR))
-            assertFalse(egenskaper.contains(EgenskapDto.BESLUTTER))
+            assertTrue(egenskaper.contains(Egenskap.RETUR))
+            assertFalse(egenskaper.contains(Egenskap.BESLUTTER))
         }
     }
 
@@ -290,8 +287,8 @@ internal class OppgaveTest {
         oppgave.sendIRetur(beslutter)
         oppgave.sendTilBeslutter(saksbehandlerUtenTilgang)
         inspektør(oppgave) {
-            assertFalse(egenskaper.contains(EgenskapDto.RETUR))
-            assertTrue(egenskaper.contains(EgenskapDto.BESLUTTER))
+            assertFalse(egenskaper.contains(Egenskap.RETUR))
+            assertTrue(egenskaper.contains(Egenskap.BESLUTTER))
         }
     }
 
@@ -301,7 +298,7 @@ internal class OppgaveTest {
         oppgave.sendTilBeslutter(beslutter)
         oppgave.sendIRetur(saksbehandlerUtenTilgang)
         inspektør(oppgave) {
-            assertEquals(saksbehandlerUtenTilgang.toDto(), tildeltTil)
+            assertEquals(saksbehandlerUtenTilgang, tildeltTil)
         }
     }
 
@@ -312,7 +309,7 @@ internal class OppgaveTest {
         oppgave.sendIRetur(saksbehandlerUtenTilgang)
         oppgave.sendTilBeslutter(beslutter)
         inspektør(oppgave) {
-            assertEquals(beslutter.toDto(), tildeltTil)
+            assertEquals(beslutter, tildeltTil)
         }
     }
 
@@ -321,7 +318,7 @@ internal class OppgaveTest {
         val oppgave = nyOppgave(SØKNAD)
         oppgave.ferdigstill()
         inspektør(oppgave) {
-            assertEquals(OppgaveDto.TilstandDto.AvventerSaksbehandler, this.tilstand)
+            assertEquals(Oppgave.AvventerSaksbehandler, this.tilstand)
         }
     }
 
@@ -332,7 +329,7 @@ internal class OppgaveTest {
         oppgave.ferdigstill()
         oppgave.avbryt()
         inspektør(oppgave) {
-            assertEquals(OppgaveDto.TilstandDto.Ferdigstilt, this.tilstand)
+            assertEquals(Oppgave.Ferdigstilt, this.tilstand)
         }
     }
 
@@ -343,7 +340,7 @@ internal class OppgaveTest {
         oppgave.ferdigstill()
         oppgave.avventerSystem(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
         inspektør(oppgave) {
-            assertEquals(OppgaveDto.TilstandDto.Ferdigstilt, this.tilstand)
+            assertEquals(Oppgave.Ferdigstilt, this.tilstand)
         }
     }
 
@@ -353,7 +350,7 @@ internal class OppgaveTest {
         oppgave.avbryt()
         oppgave.avventerSystem(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
         inspektør(oppgave) {
-            assertEquals(OppgaveDto.TilstandDto.Invalidert, this.tilstand)
+            assertEquals(Oppgave.Invalidert, this.tilstand)
         }
     }
 
@@ -362,7 +359,7 @@ internal class OppgaveTest {
         val oppgave = nyOppgave(SØKNAD)
         oppgave.avbryt()
         inspektør(oppgave) {
-            assertEquals(OppgaveDto.TilstandDto.Invalidert, this.tilstand)
+            assertEquals(Oppgave.Invalidert, this.tilstand)
         }
     }
 
@@ -371,7 +368,7 @@ internal class OppgaveTest {
         val oppgave = nyOppgave(SØKNAD)
         oppgave.avbryt()
         inspektør(oppgave) {
-            assertEquals(OppgaveDto.TilstandDto.Invalidert, this.tilstand)
+            assertEquals(Oppgave.Invalidert, this.tilstand)
         }
     }
 
@@ -381,7 +378,7 @@ internal class OppgaveTest {
         oppgave.avventerSystem(SAKSBEHANDLER_IDENT, SAKSBEHANDLER_OID)
         oppgave.avbryt()
         inspektør(oppgave) {
-            assertEquals(OppgaveDto.TilstandDto.Invalidert, this.tilstand)
+            assertEquals(Oppgave.Invalidert, this.tilstand)
         }
     }
 
@@ -395,7 +392,7 @@ internal class OppgaveTest {
         assertEquals(oppgave, observer.oppgaverEndret[0])
 
         inspektør(oppgave) {
-            assertEquals(OppgaveDto.TilstandDto.AvventerSaksbehandler, this.tilstand)
+            assertEquals(Oppgave.AvventerSaksbehandler, this.tilstand)
         }
     }
 
@@ -411,7 +408,7 @@ internal class OppgaveTest {
         assertEquals(oppgave, observer.oppgaverEndret[1])
 
         inspektør(oppgave) {
-            assertEquals(OppgaveDto.TilstandDto.AvventerSaksbehandler, this.tilstand)
+            assertEquals(Oppgave.AvventerSaksbehandler, this.tilstand)
         }
     }
 
@@ -422,7 +419,7 @@ internal class OppgaveTest {
         oppgave.leggTilGosys()
 
         inspektør(oppgave) {
-            assertEquals(1, egenskaper.filter { it == EgenskapDto.GOSYS }.size)
+            assertEquals(1, egenskaper.filter { it == Egenskap.GOSYS }.size)
         }
     }
 
@@ -444,8 +441,8 @@ internal class OppgaveTest {
 
         inspektør(oppgave) {
             assertEquals(true, påVent)
-            assertTrue(egenskaper.contains(EgenskapDto.PÅ_VENT))
-            assertEquals(saksbehandlerUtenTilgang.toDto(), this.tildeltTil)
+            assertTrue(egenskaper.contains(PÅ_VENT))
+            assertEquals(saksbehandlerUtenTilgang, this.tildeltTil)
         }
     }
 
@@ -457,8 +454,8 @@ internal class OppgaveTest {
 
         inspektør(oppgave) {
             assertEquals(true, påVent)
-            assertTrue(egenskaper.contains(EgenskapDto.PÅ_VENT))
-            assertEquals(beslutter.toDto(), this.tildeltTil)
+            assertTrue(egenskaper.contains(PÅ_VENT))
+            assertEquals(beslutter, this.tildeltTil)
         }
     }
 
@@ -470,7 +467,7 @@ internal class OppgaveTest {
 
         inspektør(oppgave) {
             assertEquals(true, påVent)
-            assertTrue(egenskaper.contains(EgenskapDto.PÅ_VENT))
+            assertTrue(egenskaper.contains(PÅ_VENT))
             assertNull(this.tildeltTil)
         }
     }
@@ -483,7 +480,7 @@ internal class OppgaveTest {
 
         inspektør(oppgave) {
             assertEquals(false, påVent)
-            assertTrue(egenskaper.none { it == EgenskapDto.PÅ_VENT })
+            assertTrue(egenskaper.none { it == PÅ_VENT })
             assertNull(this.tildeltTil)
         }
     }
@@ -500,7 +497,7 @@ internal class OppgaveTest {
         assertEquals(oppgave, observer.oppgaverEndret[1])
 
         inspektør(oppgave) {
-            assertEquals(OppgaveDto.TilstandDto.AvventerSaksbehandler, this.tilstand)
+            assertEquals(Oppgave.AvventerSaksbehandler, this.tilstand)
         }
     }
 
@@ -518,31 +515,8 @@ internal class OppgaveTest {
         assertEquals(oppgave, observer.oppgaverEndret[2])
 
         inspektør(oppgave) {
-            assertEquals(OppgaveDto.TilstandDto.AvventerSaksbehandler, this.tilstand)
+            assertEquals(Oppgave.AvventerSaksbehandler, this.tilstand)
         }
-    }
-
-    @EnumSource(value = OppgaveDto.TilstandDto::class)
-    @ParameterizedTest
-    fun `fra og til dto`(tilstand: OppgaveDto.TilstandDto) {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val utbetalingId = UUID.randomUUID()
-        val saksbehandlerDto =
-            OppgaveDto(
-                id = nextLong(),
-                tilstand = tilstand,
-                vedtaksperiodeId = vedtaksperiodeId,
-                behandlingId = UUID.randomUUID(),
-                utbetalingId = utbetalingId,
-                godkjenningsbehovId = UUID.randomUUID(),
-                kanAvvises = true,
-                egenskaper = EgenskapDto.entries,
-                ferdigstiltAvOid = UUID.randomUUID(),
-                ferdigstiltAvIdent = "IDENT",
-                tildeltTil = saksbehandler().toDto(),
-            )
-
-        assertEquals(saksbehandlerDto, saksbehandlerDto.gjenopprett(TilgangskontrollForTestHarIkkeTilgang).toDto())
     }
 
     @Test
@@ -615,7 +589,7 @@ internal class OppgaveTest {
         assertEquals(oppgave1.hashCode(), oppgave2.hashCode())
     }
 
-    private fun nyOppgave(vararg egenskaper: Egenskap, ) = Oppgave.ny(
+    private fun nyOppgave(vararg egenskaper: Egenskap) = Oppgave.ny(
         id = OPPGAVE_ID,
         vedtaksperiodeId = VEDTAKSPERIODE_ID,
         behandlingId = UTBETALING_ID,

@@ -7,9 +7,7 @@ import no.nav.helse.db.OppgavesorteringForDatabase
 import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.mediator.oppgave.Oppgavehenter
 import no.nav.helse.modell.oppgave.Egenskap
-import no.nav.helse.modell.oppgave.EgenskapDto
-import no.nav.helse.modell.oppgave.Oppgave.Companion.toDto
-import no.nav.helse.modell.oppgave.OppgaveDto
+import no.nav.helse.modell.oppgave.Oppgave
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -45,15 +43,15 @@ class OppgavehenterTest {
             oppgaveDao = oppgaveRepository(),
             tilgangskontroll = { _, _ -> false }
         )
-        val oppgave = oppgavehenter.oppgave(OPPGAVE_ID).toDto()
+        val oppgave = oppgavehenter.oppgave(OPPGAVE_ID)
         assertEquals(OPPGAVE_ID, oppgave.id)
-        assertEquals(OppgaveDto.TilstandDto.AvventerSaksbehandler, oppgave.tilstand)
+        assertEquals(Oppgave.AvventerSaksbehandler, oppgave.tilstand)
         assertEquals(VEDTAKSPERIODE_ID, oppgave.vedtaksperiodeId)
         assertEquals(UTBETALING_ID, oppgave.utbetalingId)
         assertEquals(SAKSBEHANDLER_OID, oppgave.ferdigstiltAvOid)
         assertEquals(SAKSBEHANDLER_IDENT, oppgave.ferdigstiltAvIdent)
-        assertTrue(oppgave.egenskaper.contains(EgenskapDto.SØKNAD))
-        assertEquals(PÅ_VENT, oppgave.egenskaper.contains(EgenskapDto.PÅ_VENT))
+        assertTrue(oppgave.egenskaper.contains(Egenskap.SØKNAD))
+        assertEquals(PÅ_VENT, oppgave.egenskaper.contains(Egenskap.PÅ_VENT))
     }
 
     private fun oppgaveRepository(oppgaveegenskaper: List<EgenskapForDatabase> = listOf(TYPE)) = object : OppgaveDao {
