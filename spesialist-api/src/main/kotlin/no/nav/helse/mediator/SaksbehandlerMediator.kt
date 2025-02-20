@@ -438,7 +438,11 @@ class SaksbehandlerMediator(
         sikkerlogg.info("Reserverer person $fødselsnummer til saksbehandler $saksbehandler")
         sessionFactory.transactionalSessionScope { session ->
             val totrinnsvurdering =
-                session.totrinnsvurderingRepository.finn(handling.vedtaksperiodeId)
+                if (featureToggles.skalBenytteNyTotrinnsvurderingsløsning()) {
+                    session.totrinnsvurderingRepository.finn(handling.fødselsnummer)
+                } else {
+                    session.totrinnsvurderingRepository.finn(handling.vedtaksperiodeId)
+                }
                     ?: Totrinnsvurdering.ny(handling.vedtaksperiodeId)
                         .also { it.settSaksbehandler(SaksbehandlerOid(saksbehandler.oid)) }
             totrinnsvurdering.nyOverstyring(handling)
@@ -630,7 +634,12 @@ class SaksbehandlerMediator(
             sessionFactory.transactionalSessionScope { session ->
                 val vedtaksperiodeId = oppgaveService.finnVedtaksperiodeId(oppgavereferanse)
                 val fødselsnummer = oppgaveService.finnFødselsnummer(oppgavereferanse)
-                val totrinnsvurdering = session.totrinnsvurderingRepository.finn(vedtaksperiodeId)
+                val totrinnsvurdering =
+                    if (featureToggles.skalBenytteNyTotrinnsvurderingsløsning()) {
+                        session.totrinnsvurderingRepository.finn(fødselsnummer)
+                    } else {
+                        session.totrinnsvurderingRepository.finn(vedtaksperiodeId)
+                    }
                 checkNotNull(totrinnsvurdering) {
                     "Forventer at det eksisterer en aktiv totrinnsvurdering når oppgave sendes i retur"
                 }
@@ -711,7 +720,12 @@ class SaksbehandlerMediator(
             sessionFactory.transactionalSessionScope { session ->
                 val vedtaksperiodeId = oppgaveService.finnVedtaksperiodeId(oppgavereferanse)
                 val fødselsnummer = oppgaveService.finnFødselsnummer(oppgavereferanse)
-                val totrinnsvurdering = session.totrinnsvurderingRepository.finn(vedtaksperiodeId)
+                val totrinnsvurdering =
+                    if (featureToggles.skalBenytteNyTotrinnsvurderingsløsning()) {
+                        session.totrinnsvurderingRepository.finn(fødselsnummer)
+                    } else {
+                        session.totrinnsvurderingRepository.finn(vedtaksperiodeId)
+                    }
 
                 checkNotNull(totrinnsvurdering) {
                     "Forventer at det eksisterer en aktiv totrinnsvurdering når oppgave sendes til beslutter"

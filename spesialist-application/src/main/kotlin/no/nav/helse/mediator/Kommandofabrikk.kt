@@ -174,6 +174,7 @@ class Kommandofabrikk(
             tildelingDao = sessionContext.tildelingDao,
             oppgaveDao = sessionContext.oppgaveDao,
             totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository,
+            featureToggles = featureToggles,
         )
 
     internal fun vedtaksperiodeNyUtbetaling(
@@ -241,6 +242,7 @@ class Kommandofabrikk(
             berørteVedtaksperiodeIder = melding.berørteVedtaksperiodeIder,
             kilde = melding.kilde,
             overstyringDao = sessionContext.overstyringDao,
+            featureToggles = featureToggles,
         )
 
     internal fun utbetalingEndret(
@@ -266,6 +268,7 @@ class Kommandofabrikk(
             oppgaveService = transaksjonellOppgaveService(sessionContext),
             totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository,
             json = hendelse.toJson(),
+            featureToggles = featureToggles,
         )
 
     internal fun vedtaksperiodeForkastet(
@@ -282,6 +285,7 @@ class Kommandofabrikk(
             tildelingDao = sessionContext.tildelingDao,
             oppgaveDao = sessionContext.oppgaveDao,
             totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository,
+            featureToggles = featureToggles,
         )
 
     internal fun stansAutomatiskBehandling(

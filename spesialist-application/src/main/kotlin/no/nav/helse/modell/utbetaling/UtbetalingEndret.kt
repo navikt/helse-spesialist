@@ -1,6 +1,7 @@
 package no.nav.helse.modell.utbetaling
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.helse.FeatureToggles
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.ReservasjonDao
@@ -91,6 +92,7 @@ internal class UtbetalingEndretCommand(
     oppgaveService: OppgaveService,
     totrinnsvurderingRepository: TotrinnsvurderingRepository,
     json: String,
+    featureToggles: FeatureToggles,
 ) : MacroCommand() {
     override val commands: List<Command> =
         mutableListOf(
@@ -115,6 +117,7 @@ internal class UtbetalingEndretCommand(
                 tildelingDao = tildelingDao,
                 oppgaveDao = oppgaveDao,
                 totrinnsvurderingRepository = totrinnsvurderingRepository,
+                featureToggles = featureToggles,
             ),
             OppdaterOppgavestatusCommand(utbetalingId, gjeldendeStatus, oppgaveService),
         )

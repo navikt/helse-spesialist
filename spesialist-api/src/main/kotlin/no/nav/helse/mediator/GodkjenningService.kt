@@ -46,7 +46,12 @@ class GodkjenningService(
         val vedtaksperiodeId = oppgaveDao.finnVedtaksperiodeId(godkjenningDTO.oppgavereferanse)
 
         sessionFactory.transactionalSessionScope { session ->
-            val totrinnsvurdering = session.totrinnsvurderingRepository.finn(vedtaksperiodeId)
+            val totrinnsvurdering =
+                if (featureToggles.skalBenytteNyTotrinnsvurderingsløsning()) {
+                    session.totrinnsvurderingRepository.finn(fødselsnummer)
+                } else {
+                    session.totrinnsvurderingRepository.finn(vedtaksperiodeId)
+                }
 
             val reserverPersonOid: UUID = totrinnsvurdering?.saksbehandler?.value ?: oid
             val saksbehandlerløsning =

@@ -1,5 +1,6 @@
 package no.nav.helse.modell.kommando
 
+import no.nav.helse.FeatureToggles
 import no.nav.helse.db.CommandContextDao
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.ReservasjonDao
@@ -17,6 +18,7 @@ internal class AvbrytCommand(
     tildelingDao: TildelingDao,
     oppgaveDao: OppgaveDao,
     totrinnsvurderingRepository: TotrinnsvurderingRepository,
+    featureToggles: FeatureToggles,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
@@ -26,6 +28,7 @@ internal class AvbrytCommand(
                 tildelingDao = tildelingDao,
                 oppgaveDao = oppgaveDao,
                 totrinnsvurderingRepository = totrinnsvurderingRepository,
+                featureToggles = featureToggles,
             ),
             AvbrytOppgaveCommand(vedtaksperiodeId = vedtaksperiodeId, oppgaveService = oppgaveService),
             AvbrytContextCommand(vedtaksperiodeId = vedtaksperiodeId, commandContextDao = commandContextDao),
