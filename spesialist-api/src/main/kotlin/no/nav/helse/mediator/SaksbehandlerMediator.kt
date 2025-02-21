@@ -16,7 +16,6 @@ import no.nav.helse.db.api.VedtaksperiodeDbDto.Companion.godkjennVarsler
 import no.nav.helse.db.api.VedtaksperiodeDbDto.Companion.harAktiveVarsler
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.mediator.oppgave.OppgaveService
-import no.nav.helse.mediator.overstyring.Overstyringlagrer
 import no.nav.helse.mediator.overstyring.Saksbehandlingsmelder
 import no.nav.helse.mediator.påvent.PåVentRepository
 import no.nav.helse.modell.AlleredeAnnullert
@@ -123,7 +122,6 @@ class SaksbehandlerMediator(
     private val opptegnelseRepository = daos.opptegnelseDao
     private val abonnementDao = daos.abonnementApiDao
     private val reservasjonDao = daos.reservasjonDao
-    private val overstyringDao = daos.overstyringDao
     private val påVentDao = daos.påVentDao
     private val periodehistorikkDao = daos.periodehistorikkDao
     private val vedtakBegrunnelseDao = daos.vedtakBegrunnelseDao
@@ -438,7 +436,18 @@ class SaksbehandlerMediator(
         val fødselsnummer = handling.fødselsnummer
         reservasjonDao.reserverPerson(saksbehandler.oid(), fødselsnummer)
         sikkerlogg.info("Reserverer person $fødselsnummer til saksbehandler $saksbehandler")
-        Overstyringlagrer(overstyringDao).lagre(handling)
+        sessionFactory.transactionalSessionScope { session ->
+            if (featureToggles.skalBenytteNyTotrinnsvurderingsløsning()) {
+                val totrinnsvurdering =
+                    session.totrinnsvurderingRepository.finn(handling.fødselsnummer)
+                        ?: Totrinnsvurdering.ny(handling.vedtaksperiodeId)
+                totrinnsvurdering.settSaksbehandler(SaksbehandlerOid(saksbehandler.oid))
+                totrinnsvurdering.nyOverstyring(handling)
+                session.totrinnsvurderingRepository.lagre(totrinnsvurdering, fødselsnummer)
+            } else {
+                session.overstyringRepository.lagre(listOf(handling))
+            }
+        }
         handling.utførAv(saksbehandler)
     }
 
