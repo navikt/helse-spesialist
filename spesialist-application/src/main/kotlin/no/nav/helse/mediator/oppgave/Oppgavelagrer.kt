@@ -21,15 +21,12 @@ class Oppgavelagrer(private val oppgaveDao: OppgaveDao, private val tildelingDao
         oppdaterTildeling(oppgave)
     }
 
-    fun oppdater(
-        oppgaveService: OppgaveService,
-        oppgave: Oppgave,
-    ) {
-        oppgaveService.oppdater(
+    fun oppdater(oppgave: Oppgave) {
+        oppgaveDao.updateOppgave(
             oppgaveId = oppgave.id,
-            status = status(oppgave.tilstand),
-            ferdigstiltAvIdent = oppgave.ferdigstiltAvIdent,
-            ferdigstiltAvOid = oppgave.ferdigstiltAvOid,
+            oppgavestatus = status(oppgave.tilstand),
+            ferdigstiltAv = oppgave.ferdigstiltAvIdent,
+            oid = oppgave.ferdigstiltAvOid,
             egenskaper = oppgave.egenskaper.map { it.tilDatabaseversjon() },
         )
         oppdaterTildeling(oppgave)

@@ -72,10 +72,14 @@ class OppgavelagrerTest {
         val oppgave = nyOppgave()
         val oppgavelagrer = Oppgavelagrer(oppgaveDaoMock, tildelingDaoMock)
 
-        oppgavelagrer.oppdater(oppgaveService, oppgave)
-        verify(exactly = 1) { oppgaveService.oppdater(oppgaveId, "AvventerSaksbehandler", null, null, listOf(
-            EgenskapForDatabase.SØKNAD
-        )) }
+        oppgavelagrer.oppdater(oppgave)
+        verify(exactly = 1) {
+            oppgaveDaoMock.updateOppgave(
+                oppgaveId, "AvventerSaksbehandler", null, null, listOf(
+                    EgenskapForDatabase.SØKNAD
+                )
+            )
+        }
         verify(exactly = 0) { tildelingDaoMock.tildel(any(), any()) }
         verify(exactly = 1) { tildelingDaoMock.avmeld(oppgaveId) }
     }
@@ -128,11 +132,13 @@ class OppgavelagrerTest {
         oppgave.ferdigstill()
         val oppgavelagrer = Oppgavelagrer(oppgaveDaoMock, tildelingDaoMock)
 
-        oppgavelagrer.oppdater(oppgaveService, oppgave)
+        oppgavelagrer.oppdater(oppgave)
         verify(exactly = 1) {
-            oppgaveService.oppdater(oppgaveId, "Ferdigstilt", saksbehandler.ident(), saksbehandler.oid, listOf(
-                EgenskapForDatabase.SØKNAD
-            ))
+            oppgaveDaoMock.updateOppgave(
+                oppgaveId, "Ferdigstilt", saksbehandler.ident(), saksbehandler.oid, listOf(
+                    EgenskapForDatabase.SØKNAD
+                )
+            )
         }
         verify(exactly = 0) { tildelingDaoMock.tildel(any(), any()) }
     }
@@ -145,11 +151,13 @@ class OppgavelagrerTest {
         oppgave.ferdigstill()
         val oppgavelagrer = Oppgavelagrer(oppgaveDaoMock, tildelingDaoMock)
 
-        oppgavelagrer.oppdater(oppgaveService, oppgave)
+        oppgavelagrer.oppdater(oppgave)
         verify(exactly = 1) {
-            oppgaveService.oppdater(oppgaveId, "Ferdigstilt", saksbehandler.ident(), saksbehandler.oid, listOf(
-                EgenskapForDatabase.SØKNAD
-            ))
+            oppgaveDaoMock.updateOppgave(
+                oppgaveId, "Ferdigstilt", saksbehandler.ident(), saksbehandler.oid, listOf(
+                    EgenskapForDatabase.SØKNAD
+                )
+            )
         }
     }
 

@@ -3,7 +3,6 @@ package no.nav.helse.mediator.oppgave
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.Daos
-import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SessionContext
@@ -93,7 +92,7 @@ class OppgaveService(
         val fødselsnummer = oppgaveDao.finnFødselsnummer(id)
         oppgave.register(Oppgavemelder(fødselsnummer, meldingPubliserer))
         val returverdi = oppgaveBlock(oppgave)
-        Oppgavelagrer(oppgaveDao, tildelingDao).oppdater(this@OppgaveService, oppgave)
+        Oppgavelagrer(oppgaveDao, tildelingDao).oppdater(oppgave)
         return returverdi
     }
 
@@ -196,16 +195,6 @@ class OppgaveService(
                 leggTilGosys()
             }
         }
-    }
-
-    fun oppdater(
-        oppgaveId: Long,
-        status: String,
-        ferdigstiltAvIdent: String?,
-        ferdigstiltAvOid: UUID?,
-        egenskaper: List<EgenskapForDatabase>,
-    ) {
-        oppgaveDao.updateOppgave(oppgaveId, status, ferdigstiltAvIdent, ferdigstiltAvOid, egenskaper)
     }
 
     fun reserverOppgave(
