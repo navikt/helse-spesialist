@@ -348,7 +348,10 @@ class MeldingMediator(
         private val commandContext: CommandContext,
     ) {
         fun fortsett(mediator: MeldingMediator) {
-            logg.info("fortsetter utførelse av kommandokontekst som følge av påminnelse")
+            "Fortsetter utførelse av kommandokontekst som følge av påminnelse".let {
+                logg.info(it)
+                sikkerlogg.info("$it:\n{}", melding.toJson())
+            }
             mediator.gjenopptaMelding(melding, commandContext, kontekstbasertPubliserer)
         }
     }
