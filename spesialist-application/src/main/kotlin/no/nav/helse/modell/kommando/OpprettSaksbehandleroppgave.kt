@@ -1,6 +1,7 @@
 package no.nav.helse.modell.kommando
 
 import no.nav.helse.db.EgenAnsattDao
+import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.PåVentDao
 import no.nav.helse.db.RisikovurderingDao
@@ -45,6 +46,7 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
 import java.util.UUID
 
 internal class OpprettSaksbehandleroppgave(
@@ -59,6 +61,7 @@ internal class OpprettSaksbehandleroppgave(
     private val utbetaling: Utbetaling,
     private val vergemålDao: VergemålDao,
     private val påVentDao: PåVentDao,
+    private val opptegnelseDao: OpptegnelseDao,
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
         val fødselsnummer = behovData.fødselsnummer
@@ -100,6 +103,11 @@ internal class OpprettSaksbehandleroppgave(
             hendelseId = hendelseId,
             kanAvvises = kanAvvises,
             egenskaper = egenskaper,
+        )
+        opptegnelseDao.opprettOpptegnelse(
+            fødselsnummer,
+            GodkjenningsbehovPayload(behovData.id).toJson(),
+            OpptegnelseDao.Opptegnelse.Type.NY_SAKSBEHANDLEROPPGAVE,
         )
         return true
     }

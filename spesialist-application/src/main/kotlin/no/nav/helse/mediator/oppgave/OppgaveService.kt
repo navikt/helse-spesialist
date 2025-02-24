@@ -5,7 +5,6 @@ import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.Daos
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveDao
-import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SessionContext
 import no.nav.helse.db.TildelingDao
@@ -17,7 +16,6 @@ import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.modell.saksbehandler.handlinger.EndrePåVent
 import no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent
 import no.nav.helse.modell.saksbehandler.handlinger.Oppgavehandling
-import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
 import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import org.slf4j.LoggerFactory
@@ -35,7 +33,6 @@ class OppgaveService(
     private val oppgaveDao: OppgaveDao,
     private val tildelingDao: TildelingDao,
     private val reservasjonDao: ReservasjonDao,
-    private val opptegnelseDao: OpptegnelseDao,
     private val meldingPubliserer: MeldingPubliserer,
     private val tilgangskontroll: Tilgangskontroll,
     private val tilgangsgrupper: Tilgangsgrupper,
@@ -49,7 +46,6 @@ class OppgaveService(
             oppgaveDao = sessionContext.oppgaveDao,
             tildelingDao = sessionContext.tildelingDao,
             reservasjonDao = sessionContext.reservasjonDao,
-            opptegnelseDao = sessionContext.opptegnelseDao,
             meldingPubliserer = meldingPubliserer,
             tilgangskontroll = tilgangskontroll,
             tilgangsgrupper = tilgangsgrupper,
@@ -82,7 +78,7 @@ class OppgaveService(
         oppgave.register(oppgavemelder)
         oppgavemelder.oppgaveOpprettet(oppgave)
         tildelVedReservasjon(fødselsnummer, oppgave)
-        Oppgavelagrer(tildelingDao).lagre(this, oppgave)
+        Oppgavelagrer(oppgaveDao, tildelingDao).lagre(oppgave)
     }
 
     fun <T> oppgave(
@@ -97,7 +93,7 @@ class OppgaveService(
         val fødselsnummer = oppgaveDao.finnFødselsnummer(id)
         oppgave.register(Oppgavemelder(fødselsnummer, meldingPubliserer))
         val returverdi = oppgaveBlock(oppgave)
-        Oppgavelagrer(tildelingDao).oppdater(this@OppgaveService, oppgave)
+        Oppgavelagrer(oppgaveDao, tildelingDao).oppdater(this@OppgaveService, oppgave)
         return returverdi
     }
 
@@ -200,31 +196,6 @@ class OppgaveService(
                 leggTilGosys()
             }
         }
-    }
-
-    fun opprett(
-        id: Long,
-        vedtaksperiodeId: UUID,
-        behandlingId: UUID,
-        utbetalingId: UUID,
-        egenskaper: List<EgenskapForDatabase>,
-        godkjenningsbehovId: UUID,
-        kanAvvises: Boolean,
-    ) {
-        oppgaveDao.opprettOppgave(
-            id,
-            godkjenningsbehovId,
-            egenskaper,
-            vedtaksperiodeId,
-            behandlingId,
-            utbetalingId,
-            kanAvvises,
-        )
-        opptegnelseDao.opprettOpptegnelse(
-            oppgaveDao.finnFødselsnummer(id),
-            GodkjenningsbehovPayload(godkjenningsbehovId).toJson(),
-            OpptegnelseDao.Opptegnelse.Type.NY_SAKSBEHANDLEROPPGAVE,
-        )
     }
 
     fun oppdater(

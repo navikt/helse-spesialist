@@ -21,7 +21,6 @@ import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
-import no.nav.helse.spesialist.application.kommando.TestMelding
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -29,7 +28,6 @@ import java.util.UUID
 import kotlin.random.Random.Default.nextLong
 
 internal class OppgaveServiceTest {
-    private val FNR = lagFødselsnummer()
     private val VEDTAKSPERIODE_ID = UUID.randomUUID()
     private val VEDTAKSPERIODE_ID_2 = UUID.randomUUID()
     private val BEHANDLING_ID = UUID.randomUUID()
@@ -37,7 +35,6 @@ internal class OppgaveServiceTest {
     private val UTBETALING_ID = UUID.randomUUID()
     private val UTBETALING_ID_2 = UUID.randomUUID()
     private val HENDELSE_ID = UUID.randomUUID()
-    private val TESTHENDELSE = TestMelding(HENDELSE_ID, VEDTAKSPERIODE_ID, FNR)
     private val OPPGAVE_ID = nextLong()
     private val SAKSBEHANDLERIDENT = lagSaksbehandlerident()
     private val SAKSBEHANDLEROID = UUID.randomUUID()
@@ -77,7 +74,6 @@ internal class OppgaveServiceTest {
             oppgaveDao = oppgaveDao,
             tildelingDao = tildelingDao,
             reservasjonDao = reservasjonDao,
-            opptegnelseDao = opptegnelseDao,
             meldingPubliserer = meldingPubliserer,
             tilgangskontroll = { _, _ -> false },
             tilgangsgrupper = tilgangsgrupper,
@@ -140,7 +136,6 @@ internal class OppgaveServiceTest {
             )
         }
         assertEquals(1, meldingPubliserer.antallMeldinger)
-        assertAntallOpptegnelser(1, fødselsnummer)
     }
 
     @Test
@@ -151,7 +146,6 @@ internal class OppgaveServiceTest {
         every { oppgaveDao.finnFødselsnummer(0L) } returns fødselsnummer
         lagSøknadsoppgave(fødselsnummer)
         verify(exactly = 1) { tildelingDao.tildel(0L, SAKSBEHANDLEROID) }
-        assertAntallOpptegnelser(1, fødselsnummer)
     }
 
     @Test
@@ -163,7 +157,6 @@ internal class OppgaveServiceTest {
         every { oppgaveDao.finnFødselsnummer(oppgaveId) } returns fødselsnummer
         lagStikkprøveoppgave(fødselsnummer)
         verify(exactly = 0) { tildelingDao.tildel(any(), any()) }
-        assertAntallOpptegnelser(1, fødselsnummer)
     }
 
     @Test
@@ -174,7 +167,6 @@ internal class OppgaveServiceTest {
         every { oppgaveDao.reserverNesteId() } returns oppgaveId
         every { oppgaveDao.finnFødselsnummer(oppgaveId) } returns fødselsnummer
         lagStikkprøveoppgave(fødselsnummer)
-        assertAntallOpptegnelser(1, fødselsnummer)
     }
 
     @Test
@@ -186,7 +178,6 @@ internal class OppgaveServiceTest {
             ferdigstill()
         }
         assertEquals(2, meldingPubliserer.antallMeldinger)
-        assertOpptegnelseIkkeOpprettet(TESTHENDELSE.fødselsnummer())
     }
 
     @Test
@@ -200,21 +191,7 @@ internal class OppgaveServiceTest {
         lagSøknadsoppgave(fødselsnummer)
 
         assertEquals(1, meldingPubliserer.antallMeldinger)
-        assertAntallOpptegnelser(1, fødselsnummer)
     }
-
-    private fun assertAntallOpptegnelser(
-        antallOpptegnelser: Int,
-        fødselsnummer: String,
-    ) = verify(exactly = antallOpptegnelser) {
-        opptegnelseDao.opprettOpptegnelse(
-            eq(fødselsnummer),
-            any(),
-            eq(OpptegnelseDao.Opptegnelse.Type.NY_SAKSBEHANDLEROPPGAVE),
-        )
-    }
-
-    private fun assertOpptegnelseIkkeOpprettet(fødselsnummer: String) = assertAntallOpptegnelser(0, fødselsnummer)
 
     private fun oppgaveFraDatabase(
         oppgaveId: Long = OPPGAVE_ID,

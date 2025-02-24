@@ -1,23 +1,21 @@
 package no.nav.helse.mediator.oppgave
 
 import no.nav.helse.db.EgenskapForDatabase
+import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.Oppgave.Tilstand
 
-class Oppgavelagrer(private val tildelingDao: TildelingDao) {
-    fun lagre(
-        oppgaveService: OppgaveService,
-        oppgave: Oppgave,
-    ) {
-        oppgaveService.opprett(
+class Oppgavelagrer(private val oppgaveDao: OppgaveDao, private val tildelingDao: TildelingDao) {
+    fun lagre(oppgave: Oppgave) {
+        oppgaveDao.opprettOppgave(
             id = oppgave.id,
+            godkjenningsbehovId = oppgave.godkjenningsbehovId,
+            egenskaper = oppgave.egenskaper.map { it.tilDatabaseversjon() },
             vedtaksperiodeId = oppgave.vedtaksperiodeId,
             behandlingId = oppgave.behandlingId,
             utbetalingId = oppgave.utbetalingId,
-            egenskaper = oppgave.egenskaper.map { it.tilDatabaseversjon() },
-            godkjenningsbehovId = oppgave.godkjenningsbehovId,
             kanAvvises = oppgave.kanAvvises,
         )
         oppdaterTildeling(oppgave)

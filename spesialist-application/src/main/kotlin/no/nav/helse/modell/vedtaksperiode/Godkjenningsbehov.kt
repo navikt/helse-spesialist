@@ -9,6 +9,7 @@ import no.nav.helse.db.CommandContextDao
 import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.InntektskilderRepository
 import no.nav.helse.db.OppgaveDao
+import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.OverstyringDao
 import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.PersonDao
@@ -218,6 +219,7 @@ internal class GodkjenningsbehovCommand(
     periodehistorikkDao: PeriodehistorikkDao,
     totrinnsvurderingRepository: TotrinnsvurderingRepository,
     avviksvurderingRepository: AvviksvurderingRepository,
+    opptegnelseDao: OpptegnelseDao,
     oppgaveService: OppgaveService,
     godkjenningMediator: GodkjenningMediator,
     person: Person,
@@ -339,6 +341,7 @@ internal class GodkjenningsbehovCommand(
                 utbetaling = utbetaling,
                 vergemålDao = vergemålDao,
                 påVentDao = påVentDao,
+                opptegnelseDao = opptegnelseDao,
             ),
             VurderBehovForTotrinnskontroll(
                 fødselsnummer = behovData.fødselsnummer,

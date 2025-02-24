@@ -59,7 +59,6 @@ internal class TestMediator(
             oppgaveDao = daos.oppgaveDao,
             tildelingDao = tildelingDao,
             reservasjonDao = daos.reservasjonDao,
-            opptegnelseDao = opptegnelseDao,
             meldingPubliserer = meldingPubliserer,
             tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
             tilgangsgrupper = tilgangsgrupper,

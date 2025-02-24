@@ -31,7 +31,6 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
             oppgaveDao = oppgaveDao,
             tildelingDao = daos.tildelingDao,
             reservasjonDao = reservasjonDao,
-            opptegnelseDao = daos.opptegnelseDao,
             meldingPubliserer = meldingPubliserer,
             tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
             tilgangsgrupper = SpeilTilgangsgrupper(testEnv),

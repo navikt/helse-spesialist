@@ -5,6 +5,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.db.EgenAnsattDao
+import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.PåVentDao
 import no.nav.helse.db.RisikovurderingDao
@@ -68,6 +69,7 @@ internal class OpprettSaksbehandleroppgaveTest {
     private val vergemålDao = mockk<VergemålDao>(relaxed = true)
     private val sykefraværstilfelle = mockk<Sykefraværstilfelle>(relaxed = true)
     private val påVentDao = mockk<PåVentDao>(relaxed = true)
+    private val opptegnelseDao = mockk<OpptegnelseDao>(relaxed = true)
 
     private val command get() = opprettSaksbehandlerOppgaveCommand()
     private val utbetaling = mockk<Utbetaling>(relaxed = true)
@@ -82,6 +84,9 @@ internal class OpprettSaksbehandleroppgaveTest {
     fun `oppretter oppgave`() {
         assertTrue(command.execute(context))
         assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING)
+        verify(exactly = 1) {
+            opptegnelseDao.opprettOpptegnelse(FNR, any(), OpptegnelseDao.Opptegnelse.Type.NY_SAKSBEHANDLEROPPGAVE)
+        }
     }
 
     @Test
@@ -288,6 +293,7 @@ internal class OpprettSaksbehandleroppgaveTest {
         sykefraværstilfelle = sykefraværstilfelle,
         utbetaling = utbetaling,
         vergemålDao = vergemålDao,
-        påVentDao = påVentDao
+        påVentDao = påVentDao,
+        opptegnelseDao = opptegnelseDao
     )
 }

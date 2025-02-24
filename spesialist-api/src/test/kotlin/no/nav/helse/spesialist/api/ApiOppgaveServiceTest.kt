@@ -94,7 +94,6 @@ internal class ApiOppgaveServiceTest {
                 oppgaveDao = oppgaveDao,
                 tildelingDao = tildelingDao,
                 reservasjonDao = reservasjonDao,
-                opptegnelseDao = opptegnelseDao,
                 meldingPubliserer = meldingPubliserer,
                 tilgangskontroll = { _, _ -> false },
                 tilgangsgrupper = SpeilTilgangsgrupper(testEnv),

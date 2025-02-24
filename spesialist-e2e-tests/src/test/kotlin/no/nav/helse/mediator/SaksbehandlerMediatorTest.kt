@@ -70,7 +70,6 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     private val testRapid = TestRapid()
     private val meldingPubliserer: MeldingPubliserer = MessageContextMeldingPubliserer(testRapid)
     private val tildelingDbDao = daos.tildelingDao
-    private val opptegnelseRepository = daos.opptegnelseDao
     private val stansAutomatiskBehandlinghåndterer =
         StansAutomatiskBehandlinghåndtererImpl(
             stansAutomatiskBehandlingDao,
@@ -83,7 +82,6 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             oppgaveDao = oppgaveDao,
             tildelingDao = tildelingDbDao,
             reservasjonDao = reservasjonDao,
-            opptegnelseDao = opptegnelseRepository,
             meldingPubliserer = meldingPubliserer,
             tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
             tilgangsgrupper = tilgangsgrupper,

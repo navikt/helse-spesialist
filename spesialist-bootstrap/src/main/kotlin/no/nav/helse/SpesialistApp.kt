@@ -154,7 +154,6 @@ class SpesialistApp(
                 oppgaveDao = oppgaveDao,
                 tildelingDao = tildelingDao,
                 reservasjonDao = reservasjonDao,
-                opptegnelseDao = opptegnelseDao,
                 meldingPubliserer = meldingPubliserer,
                 tilgangskontroll = tilgangskontrollørForReservasjon,
                 tilgangsgrupper = tilgangsgrupper,

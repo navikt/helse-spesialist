@@ -361,6 +361,7 @@ class Kommandofabrikk(
             periodehistorikkDao = sessionContext.periodehistorikkDao,
             totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository,
             avviksvurderingRepository = sessionContext.avviksvurderingRepository,
+            opptegnelseDao = sessionContext.opptegnelseDao,
             oppgaveService = transaksjonellOppgaveService(sessionContext),
             godkjenningMediator = GodkjenningMediator(sessionContext.opptegnelseDao),
             person = person,
