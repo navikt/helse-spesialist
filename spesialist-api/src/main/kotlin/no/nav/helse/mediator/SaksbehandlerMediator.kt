@@ -69,7 +69,6 @@ import no.nav.helse.spesialist.api.feilhåndtering.FinnerIkkeLagtPåVent
 import no.nav.helse.spesialist.api.feilhåndtering.IkkeTilgang
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
-import no.nav.helse.spesialist.api.graphql.mutation.Avslagshandling
 import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutationHandler.VedtakResultat
 import no.nav.helse.spesialist.api.graphql.schema.ApiAnnulleringData
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdOverstyringHandling
@@ -155,23 +154,6 @@ class SaksbehandlerMediator(
                 else -> modellhandling.utførAv(legacySaksbehandler)
             }
             sikkerlogg.info("Handling ${modellhandling.loggnavn()} utført")
-        }
-    }
-
-    fun vedtak(
-        saksbehandlerFraApi: SaksbehandlerFraApi,
-        oppgavereferanse: Long,
-        godkjent: Boolean,
-        avslag: no.nav.helse.spesialist.api.graphql.mutation.Avslag?,
-    ): VedtakResultat {
-        val legacySaksbehandler =
-            saksbehandlerFraApi.tilSaksbehandler().tilLegacySaksbehandler(saksbehandlerFraApi.grupper)
-        return vedtak(oppgavereferanse, legacySaksbehandler, godkjent).also {
-            håndterAvslag(
-                avslag = avslag,
-                oppgaveId = oppgavereferanse,
-                saksbehandlerOid = legacySaksbehandler.oid(),
-            )
         }
     }
 
@@ -536,51 +518,6 @@ class SaksbehandlerMediator(
                     saksbehandlerIdent = vedtakBegrunnelse.saksbehandlerIdent,
                 )
             }
-
-    fun håndterAvslag(
-        oppgaveId: Long,
-        saksbehandlerFraApi: SaksbehandlerFraApi,
-        avslag: no.nav.helse.spesialist.api.graphql.mutation.Avslag,
-    ) {
-        håndterAvslag(
-            avslag = avslag,
-            oppgaveId = oppgaveId,
-            saksbehandlerOid = saksbehandlerFraApi.oid,
-        )
-    }
-
-    fun håndterVedtakBegrunnelse(
-        oppgaveId: Long,
-        saksbehandlerFraApi: SaksbehandlerFraApi,
-        utfall: ApiVedtakUtfall,
-        begrunnelse: String?,
-    ) {
-        håndterVedtakBegrunnelse(
-            utfall = utfall,
-            begrunnelse = begrunnelse,
-            oppgaveId = oppgaveId,
-            saksbehandlerOid = saksbehandlerFraApi.oid,
-        )
-    }
-
-    private fun håndterAvslag(
-        avslag: no.nav.helse.spesialist.api.graphql.mutation.Avslag?,
-        oppgaveId: Long,
-        saksbehandlerOid: UUID,
-    ) {
-        if (avslag != null) {
-            if (avslag.handling == Avslagshandling.INVALIDER) {
-                vedtakBegrunnelseDao.invaliderVedtakBegrunnelse(oppgaveId = oppgaveId)
-            } else {
-                vedtakBegrunnelseDao.lagreVedtakBegrunnelse(
-                    oppgaveId = oppgaveId,
-                    type = avslag.data!!.type.toVedtakBegrunnelseTypeFraDatabase(),
-                    begrunnelse = avslag.data.begrunnelse,
-                    saksbehandlerOid = saksbehandlerOid,
-                )
-            }
-        }
-    }
 
     private fun håndterVedtakBegrunnelse(
         utfall: ApiVedtakUtfall,
@@ -1069,12 +1006,6 @@ class SaksbehandlerMediator(
             .AvmeldOppgave(this.oppgaveId)
 
     private fun ApiOpphevStans.tilModellversjon(): OpphevStans = OpphevStans(this.fødselsnummer, this.begrunnelse)
-
-    private fun ApiAvslagstype.toVedtakBegrunnelseTypeFraDatabase() =
-        when (this) {
-            ApiAvslagstype.AVSLAG -> VedtakBegrunnelseTypeFraDatabase.AVSLAG
-            ApiAvslagstype.DELVIS_AVSLAG -> VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE
-        }
 
     private fun ApiVedtakUtfall.toDatabaseType() =
         when (this) {
