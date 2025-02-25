@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-internal class OverstyringMutationTest : AbstractOverstyringApiTest() {
+internal class OverstyringMutationHandlerTest : AbstractOverstyringApiTest() {
     @Test
     fun `overstyr tidslinje`() {
         val body =

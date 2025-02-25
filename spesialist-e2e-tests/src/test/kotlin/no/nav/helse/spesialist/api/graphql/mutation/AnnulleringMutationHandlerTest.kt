@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-internal class AnnulleringMutationTest : AbstractGraphQLApiTest() {
+internal class AnnulleringMutationHandlerTest : AbstractGraphQLApiTest() {
     @Test
     fun `annullering ok`() {
         val body =

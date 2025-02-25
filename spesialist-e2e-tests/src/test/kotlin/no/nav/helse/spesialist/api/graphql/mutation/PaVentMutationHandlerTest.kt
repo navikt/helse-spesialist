@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class PaVentMutationTest : AbstractGraphQLApiTest() {
+internal class PaVentMutationHandlerTest : AbstractGraphQLApiTest() {
     @Test
     fun `legger på vent`() {
         val oid = opprettSaksbehandler()

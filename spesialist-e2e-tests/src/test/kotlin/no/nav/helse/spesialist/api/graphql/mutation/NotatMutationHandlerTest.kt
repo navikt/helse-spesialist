@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import kotlin.test.assertNotNull
 
-internal class NotatMutationTest : AbstractGraphQLApiTest() {
+internal class NotatMutationHandlerTest : AbstractGraphQLApiTest() {
     @Test
     fun `leggTilNotat fungerer som forventet`() {
         opprettSaksbehandler()

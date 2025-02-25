@@ -4,7 +4,7 @@ import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class OpptegnelseMutationTest: AbstractGraphQLApiTest() {
+internal class OpptegnelseMutationHandlerTest: AbstractGraphQLApiTest() {
     @Test
     fun `opprett abonnement`() {
         val body = runQuery(

@@ -4,7 +4,7 @@ import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class BehandlingsstatistikkQueryTest : AbstractGraphQLApiTest() {
+internal class BehandlingsstatistikkQueryHandlerTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `henter behandlingsstatistikk`() {

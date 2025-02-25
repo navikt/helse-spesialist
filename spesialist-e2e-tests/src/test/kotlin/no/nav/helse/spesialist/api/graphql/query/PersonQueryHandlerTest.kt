@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class PersonQueryTest : AbstractGraphQLApiTest() {
+internal class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
 
     @Test
     @ResourceLock("auditlogg-lytter")

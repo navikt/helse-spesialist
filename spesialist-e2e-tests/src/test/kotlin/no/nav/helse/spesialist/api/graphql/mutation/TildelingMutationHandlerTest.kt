@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-internal class TildelingMutationTest : AbstractGraphQLApiTest() {
+internal class TildelingMutationHandlerTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `oppretter tildeling`() {
