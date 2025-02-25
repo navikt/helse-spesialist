@@ -17,6 +17,7 @@ import io.ktor.server.routing.route
 import io.ktor.server.testing.ApplicationTestBuilder
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.helse.db.VedtakBegrunnelseDao
 import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.behandlingsstatistikk.IBehandlingsstatistikkService
 import no.nav.helse.spesialist.api.endepunkter.ApiTesting
@@ -64,6 +65,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
     private val reservasjonshenter = mockk<Reservasjonshenter>(relaxed = true)
     private val behandlingsstatistikkMediator = mockk<IBehandlingsstatistikkService>(relaxed = true)
     protected val saksbehandlerMediator = mockk<SaksbehandlerMediator>(relaxed = true)
+    protected val vedtakBegrunnelseDao = mockk<VedtakBegrunnelseDao>(relaxed = true)
     private val godkjenninghåndterer = mockk<Godkjenninghåndterer>(relaxed = true)
     private val personhåndterer = mockk<Personhåndterer>(relaxed = true)
     protected val dokumenthåndterer = mockk<Dokumenthåndterer>(relaxed = true)
@@ -113,7 +115,8 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                                 personhåndterer = personhåndterer,
                                 snapshotService = snapshotService,
                                 reservasjonshenter = reservasjonshenter,
-                                sessionFactory = sessionFactory
+                                sessionFactory = sessionFactory,
+                                vedtakBegrunnelseDao = vedtakBegrunnelseDao,
                             ),
                     ),
                     oppgaver = OppgaverQueryHandler(

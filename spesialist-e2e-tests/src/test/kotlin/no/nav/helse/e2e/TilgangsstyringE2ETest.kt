@@ -182,7 +182,8 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
                     },
                     snapshotService = SnapshotService(daos.personinfoDao, snapshothenter),
                     reservasjonshenter = mockk(relaxed = true),
-                    sessionFactory = sessionFactory
+                    sessionFactory = sessionFactory,
+                    vedtakBegrunnelseDao = daos.vedtakBegrunnelseDao,
                 ),
             ),
         )

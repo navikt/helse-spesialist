@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.api.graphql.resolvers
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.db.SessionFactory
+import no.nav.helse.db.VedtakBegrunnelseDao
 import no.nav.helse.db.api.ArbeidsgiverApiDao
 import no.nav.helse.db.api.NotatApiDao
 import no.nav.helse.db.api.OppgaveApiDao
@@ -65,6 +66,7 @@ data class ApiPersonResolver(
     private val påVentApiDao: PåVentApiDao,
     private val apiOppgaveService: ApiOppgaveService,
     private val saksbehandlerMediator: SaksbehandlerMediator,
+    private val vedtakBegrunnelseDao: VedtakBegrunnelseDao,
 ) : PersonSchema {
     override fun versjon(): Int = snapshot.versjon
 
@@ -143,6 +145,7 @@ data class ApiPersonResolver(
                                         is OverstyringMinimumSykdomsgradDto -> overstyring.tilMinimumSykdomsgradOverstyring()
                                     }
                                 },
+                        vedtakBegrunnelseDao = vedtakBegrunnelseDao,
                     ),
             )
         }

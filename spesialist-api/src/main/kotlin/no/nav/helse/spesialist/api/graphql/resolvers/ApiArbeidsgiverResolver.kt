@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.api.graphql.resolvers
 
+import no.nav.helse.db.VedtakBegrunnelseDao
 import no.nav.helse.db.api.ArbeidsgiverApiDao
 import no.nav.helse.db.api.NotatApiDao
 import no.nav.helse.db.api.OppgaveApiDao
@@ -44,6 +45,7 @@ class ApiArbeidsgiverResolver(
     private val totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
     private val påVentApiDao: PåVentApiDao,
     private val overstyringer: List<ApiOverstyring>,
+    private val vedtakBegrunnelseDao: VedtakBegrunnelseDao,
 ) : ArbeidsgiverSchema {
     override fun organisasjonsnummer(): String = organisasjonsnummer
 
@@ -93,6 +95,7 @@ class ApiArbeidsgiverResolver(
                                             påVentApiDao = påVentApiDao,
                                             erSisteGenerasjon = index == 0,
                                             index = index,
+                                            vedtakBegrunnelseDao = vedtakBegrunnelseDao,
                                         ),
                                 )
 

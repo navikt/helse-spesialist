@@ -72,8 +72,6 @@ import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutationHandler.VedtakResultat
 import no.nav.helse.spesialist.api.graphql.schema.ApiAnnulleringData
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdOverstyringHandling
-import no.nav.helse.spesialist.api.graphql.schema.ApiAvslag
-import no.nav.helse.spesialist.api.graphql.schema.ApiAvslagstype
 import no.nav.helse.spesialist.api.graphql.schema.ApiInntektOgRefusjonOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiMinimumSykdomsgrad
 import no.nav.helse.spesialist.api.graphql.schema.ApiOpptegnelse
@@ -84,7 +82,6 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse.ApiSkjo
 import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse.ApiSkjonnsfastsettelseArbeidsgiver.ApiSkjonnsfastsettelseType.OMREGNET_ARSINNTEKT
 import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse.ApiSkjonnsfastsettelseArbeidsgiver.ApiSkjonnsfastsettelseType.RAPPORTERT_ARSINNTEKT
 import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
-import no.nav.helse.spesialist.api.graphql.schema.ApiVedtakBegrunnelse
 import no.nav.helse.spesialist.api.graphql.schema.ApiVedtakUtfall
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.ApiOpphevStans
@@ -478,46 +475,6 @@ class SaksbehandlerMediator(
                 payload = opptegnelse.payload,
             )
         }
-
-    fun hentAvslag(
-        vedtaksperiodeId: UUID,
-        utbetalingId: UUID,
-    ): Set<ApiAvslag> =
-        vedtakBegrunnelseDao.finnAlleVedtakBegrunnelser(vedtaksperiodeId, utbetalingId)
-            .mapNotNull { vedtakBegrunnelse ->
-                when (vedtakBegrunnelse.type) {
-                    VedtakBegrunnelseTypeFraDatabase.AVSLAG -> ApiAvslagstype.AVSLAG
-                    VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE -> ApiAvslagstype.DELVIS_AVSLAG
-                    VedtakBegrunnelseTypeFraDatabase.INNVILGELSE -> null
-                }?.let { type ->
-                    ApiAvslag(
-                        type = type,
-                        begrunnelse = vedtakBegrunnelse.begrunnelse,
-                        opprettet = vedtakBegrunnelse.opprettet,
-                        saksbehandlerIdent = vedtakBegrunnelse.saksbehandlerIdent,
-                        invalidert = vedtakBegrunnelse.invalidert,
-                    )
-                }
-            }.toSet()
-
-    fun hentVedtakBegrunnelser(
-        vedtaksperiodeId: UUID,
-        utbetalingId: UUID,
-    ): List<ApiVedtakBegrunnelse> =
-        vedtakBegrunnelseDao.finnAlleVedtakBegrunnelser(vedtaksperiodeId, utbetalingId)
-            .map { vedtakBegrunnelse ->
-                ApiVedtakBegrunnelse(
-                    utfall =
-                        when (vedtakBegrunnelse.type) {
-                            VedtakBegrunnelseTypeFraDatabase.AVSLAG -> ApiVedtakUtfall.AVSLAG
-                            VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE -> ApiVedtakUtfall.DELVIS_INNVILGELSE
-                            VedtakBegrunnelseTypeFraDatabase.INNVILGELSE -> ApiVedtakUtfall.INNVILGELSE
-                        },
-                    begrunnelse = vedtakBegrunnelse.begrunnelse,
-                    opprettet = vedtakBegrunnelse.opprettet,
-                    saksbehandlerIdent = vedtakBegrunnelse.saksbehandlerIdent,
-                )
-            }
 
     private fun håndterVedtakBegrunnelse(
         utfall: ApiVedtakUtfall,

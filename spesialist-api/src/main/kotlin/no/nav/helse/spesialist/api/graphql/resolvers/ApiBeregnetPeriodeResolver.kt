@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.jackson.asLocalDate
 import com.github.navikt.tbd_libs.jackson.isMissingOrNull
 import io.ktor.utils.io.core.toByteArray
+import no.nav.helse.db.VedtakBegrunnelseDao
+import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
 import no.nav.helse.db.api.NotatApiDao
 import no.nav.helse.db.api.OppgaveApiDao
 import no.nav.helse.db.api.PeriodehistorikkApiDao
@@ -25,6 +27,7 @@ import no.nav.helse.spesialist.api.graphql.mapping.toVarselDto
 import no.nav.helse.spesialist.api.graphql.schema.ApiAlder
 import no.nav.helse.spesialist.api.graphql.schema.ApiAnnullering
 import no.nav.helse.spesialist.api.graphql.schema.ApiAvslag
+import no.nav.helse.spesialist.api.graphql.schema.ApiAvslagstype
 import no.nav.helse.spesialist.api.graphql.schema.ApiDag
 import no.nav.helse.spesialist.api.graphql.schema.ApiEndrePaVent
 import no.nav.helse.spesialist.api.graphql.schema.ApiFaresignal
@@ -58,6 +61,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiUtbetalingstatus
 import no.nav.helse.spesialist.api.graphql.schema.ApiUtbetalingtype
 import no.nav.helse.spesialist.api.graphql.schema.ApiVarselDTO
 import no.nav.helse.spesialist.api.graphql.schema.ApiVedtakBegrunnelse
+import no.nav.helse.spesialist.api.graphql.schema.ApiVedtakUtfall
 import no.nav.helse.spesialist.api.graphql.schema.ApiVurdering
 import no.nav.helse.spesialist.api.graphql.schema.BeregnetPeriodeSchema
 import no.nav.helse.spesialist.api.objectMapper
@@ -87,6 +91,7 @@ data class ApiBeregnetPeriodeResolver(
     private val påVentApiDao: PåVentApiDao,
     private val erSisteGenerasjon: Boolean,
     private val index: Int,
+    private val vedtakBegrunnelseDao: VedtakBegrunnelseDao,
 ) : BeregnetPeriodeSchema {
     private val periodetilstand = periode.periodetilstand.tilApiPeriodetilstand(erSisteGenerasjon)
 
@@ -370,13 +375,50 @@ data class ApiBeregnetPeriodeResolver(
             )
         }
 
-    override fun avslag(): List<ApiAvslag> = saksbehandlerMediator.hentAvslag(periode.vedtaksperiodeId, periode.utbetaling.id).toList()
+    override fun avslag(): List<ApiAvslag> =
+        vedtakBegrunnelseDao.finnAlleVedtakBegrunnelser(
+            vedtaksperiodeId = periode.vedtaksperiodeId,
+            utbetalingId = periode.utbetaling.id,
+        )
+            .filter {
+                it.type in
+                    setOf(
+                        VedtakBegrunnelseTypeFraDatabase.AVSLAG,
+                        VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE,
+                    )
+            }
+            .map { vedtakBegrunnelse ->
+                ApiAvslag(
+                    type =
+                        when (vedtakBegrunnelse.type) {
+                            VedtakBegrunnelseTypeFraDatabase.AVSLAG -> ApiAvslagstype.AVSLAG
+                            VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE -> ApiAvslagstype.DELVIS_AVSLAG
+                            else -> error("")
+                        },
+                    begrunnelse = vedtakBegrunnelse.begrunnelse,
+                    opprettet = vedtakBegrunnelse.opprettet,
+                    saksbehandlerIdent = vedtakBegrunnelse.saksbehandlerIdent,
+                    invalidert = vedtakBegrunnelse.invalidert,
+                )
+            }
 
     override fun vedtakBegrunnelser(): List<ApiVedtakBegrunnelse> =
-        saksbehandlerMediator.hentVedtakBegrunnelser(
-            periode.vedtaksperiodeId,
-            periode.utbetaling.id,
-        )
+        vedtakBegrunnelseDao.finnAlleVedtakBegrunnelser(
+            vedtaksperiodeId = periode.vedtaksperiodeId,
+            utbetalingId = periode.utbetaling.id,
+        ).map { vedtakBegrunnelse ->
+            ApiVedtakBegrunnelse(
+                utfall =
+                    when (vedtakBegrunnelse.type) {
+                        VedtakBegrunnelseTypeFraDatabase.AVSLAG -> ApiVedtakUtfall.AVSLAG
+                        VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE -> ApiVedtakUtfall.DELVIS_INNVILGELSE
+                        VedtakBegrunnelseTypeFraDatabase.INNVILGELSE -> ApiVedtakUtfall.INNVILGELSE
+                    },
+                begrunnelse = vedtakBegrunnelse.begrunnelse,
+                opprettet = vedtakBegrunnelse.opprettet,
+                saksbehandlerIdent = vedtakBegrunnelse.saksbehandlerIdent,
+            )
+        }
 
     override fun annullering(): ApiAnnullering? =
         if (erSisteGenerasjon) {

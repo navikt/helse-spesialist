@@ -6,6 +6,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.db.SessionFactory
+import no.nav.helse.db.VedtakBegrunnelseDao
 import no.nav.helse.db.api.ArbeidsgiverApiDao
 import no.nav.helse.db.api.EgenAnsattApiDao
 import no.nav.helse.db.api.NotatApiDao
@@ -68,6 +69,7 @@ class PersonService(
     private val snapshotService: SnapshotService,
     private val reservasjonshenter: Reservasjonshenter,
     private val sessionFactory: SessionFactory,
+    private val vedtakBegrunnelseDao: VedtakBegrunnelseDao,
 ) : PersonoppslagService {
     private companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
@@ -139,6 +141,7 @@ class PersonService(
                         apiOppgaveService = apiOppgaveService,
                         saksbehandlerMediator = saksbehandlerMediator,
                         sessionFactory = sessionFactory,
+                        vedtakBegrunnelseDao = vedtakBegrunnelseDao,
                     ),
             ),
         )

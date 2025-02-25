@@ -13,7 +13,7 @@ import no.nav.helse.spesialist.api.websockets.webSocketsApi
 import no.nav.helse.spesialist.application.Reservasjonshenter
 
 class Bootstrap(
-    daos: Daos,
+    private val daos: Daos,
     private val sessionFactory: SessionFactory,
     private val avhengigheter: ApiAvhengigheter,
     private val reservasjonshenter: Reservasjonshenter,
@@ -68,6 +68,7 @@ class Bootstrap(
             personhåndterer = avhengigheter.personhåndtererProvider(),
             dokumenthåndterer = avhengigheter.dokumenthåndtererProvider(),
             stansAutomatiskBehandlinghåndterer = avhengigheter.stansAutomatiskBehandlinghåndterer(),
+            vedtakBegrunnelseDao = daos.vedtakBegrunnelseDao,
         )
 
         routing {

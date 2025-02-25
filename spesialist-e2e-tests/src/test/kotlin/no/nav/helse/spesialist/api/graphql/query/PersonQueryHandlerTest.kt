@@ -10,6 +10,8 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import com.fasterxml.jackson.module.kotlin.treeToValue
 import graphql.GraphQLException
 import io.mockk.every
+import no.nav.helse.db.VedtakBegrunnelseMedSaksbehandlerIdentFraDatabase
+import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
 import no.nav.helse.spesialist.api.DatabaseIntegrationTest.Periode.Companion.til
 import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettBeregnetPeriode
@@ -17,7 +19,6 @@ import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettSnapshotArbeid
 import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettSnapshotGenerasjon
 import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettSnapshotHendelse
 import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettUberegnetPeriode
-import no.nav.helse.spesialist.api.graphql.schema.ApiAvslag
 import no.nav.helse.spesialist.api.graphql.schema.ApiAvslagstype
 import no.nav.helse.spesialist.api.graphql.schema.ApiHandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodehandling
@@ -352,18 +353,16 @@ internal class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
     @Test
     fun `periode med avslag`() {
         val avslagsbegrunnelse = "En individuell begrunnelse"
-        every {
-            saksbehandlerMediator.hentAvslag(any(), any())
-        } returns
-            setOf(
-                ApiAvslag(
-                    type = ApiAvslagstype.AVSLAG,
-                    begrunnelse = avslagsbegrunnelse,
-                    opprettet = LocalDateTime.now(),
-                    saksbehandlerIdent = "AIDENT",
-                    invalidert = false,
-                ),
-            )
+        every { vedtakBegrunnelseDao.finnAlleVedtakBegrunnelser(any(), any()) } returns
+                listOf(
+                    VedtakBegrunnelseMedSaksbehandlerIdentFraDatabase(
+                        type = VedtakBegrunnelseTypeFraDatabase.AVSLAG,
+                        begrunnelse = avslagsbegrunnelse,
+                        opprettet = LocalDateTime.now(),
+                        saksbehandlerIdent = "AIDENT",
+                        invalidert = false,
+                    ),
+                )
 
         val personRef = opprettPerson()
         val arbeidsgiverRef = opprettArbeidsgiver()

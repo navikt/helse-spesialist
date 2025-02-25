@@ -15,6 +15,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import no.nav.helse.db.SessionFactory
+import no.nav.helse.db.VedtakBegrunnelseDao
 import no.nav.helse.db.api.ArbeidsgiverApiDao
 import no.nav.helse.db.api.EgenAnsattApiDao
 import no.nav.helse.db.api.NotatApiDao
@@ -91,6 +92,7 @@ fun Application.graphQLApi(
     personhåndterer: Personhåndterer,
     dokumenthåndterer: Dokumenthåndterer,
     stansAutomatiskBehandlinghåndterer: StansAutomatiskBehandlinghåndterer,
+    vedtakBegrunnelseDao: VedtakBegrunnelseDao,
 ) {
     val spesialistSchema =
         SpesialistSchema(
@@ -120,6 +122,7 @@ fun Application.graphQLApi(
                                     snapshotService = snapshotService,
                                     reservasjonshenter = reservasjonshenter,
                                     sessionFactory = sessionFactory,
+                                    vedtakBegrunnelseDao = vedtakBegrunnelseDao,
                                 ),
                         ),
                     oppgaver =
