@@ -31,13 +31,6 @@ class PgVedtakBegrunnelseDao internal constructor(queryRunner: QueryRunner) :
 
         override fun lagreVedtakBegrunnelse(
             oppgaveId: Long,
-            type: VedtakBegrunnelseTypeFraDatabase,
-            begrunnelse: String,
-            saksbehandlerOid: UUID,
-        ) = lagreVedtakBegrunnelse(oppgaveId, VedtakBegrunnelseFraDatabase(type, begrunnelse), saksbehandlerOid)
-
-        override fun lagreVedtakBegrunnelse(
-            oppgaveId: Long,
             vedtakBegrunnelse: VedtakBegrunnelseFraDatabase,
             saksbehandlerOid: UUID,
         ) = lagreBegrunnelse(vedtakBegrunnelse, saksbehandlerOid).let { begrunnelseId ->

@@ -4,13 +4,6 @@ import no.nav.helse.modell.vedtak.VedtakBegrunnelse
 import java.util.UUID
 
 interface VedtakBegrunnelseDao {
-    fun lagreVedtakBegrunnelse(
-        oppgaveId: Long,
-        type: VedtakBegrunnelseTypeFraDatabase,
-        begrunnelse: String,
-        saksbehandlerOid: UUID,
-    ): Int
-
     fun invaliderVedtakBegrunnelse(oppgaveId: Long): Int
 
     fun finnVedtakBegrunnelse(

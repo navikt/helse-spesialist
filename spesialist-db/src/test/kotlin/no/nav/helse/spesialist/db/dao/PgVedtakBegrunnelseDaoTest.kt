@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.db.dao
 
+import no.nav.helse.db.VedtakBegrunnelseFraDatabase
 import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
 import no.nav.helse.modell.vedtak.Utfall
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
@@ -22,8 +23,10 @@ internal class PgVedtakBegrunnelseDaoTest : AbstractDBIntegrationTest() {
         opprettSaksbehandler(oid)
         dao.lagreVedtakBegrunnelse(
             oppgaveId = OPPGAVE_ID,
-            type = VedtakBegrunnelseTypeFraDatabase.AVSLAG,
-            begrunnelse = "En individuell begrunelse",
+            vedtakBegrunnelse = VedtakBegrunnelseFraDatabase(
+                type = VedtakBegrunnelseTypeFraDatabase.AVSLAG,
+                tekst = "En individuell begrunelse"
+            ),
             saksbehandlerOid = oid
         )
 
@@ -45,8 +48,10 @@ internal class PgVedtakBegrunnelseDaoTest : AbstractDBIntegrationTest() {
         opprettSaksbehandler(oid)
         dao.lagreVedtakBegrunnelse(
             oppgaveId = OPPGAVE_ID,
-            type = VedtakBegrunnelseTypeFraDatabase.AVSLAG,
-            begrunnelse = "En individuell begrunelse",
+            vedtakBegrunnelse = VedtakBegrunnelseFraDatabase(
+                type = VedtakBegrunnelseTypeFraDatabase.AVSLAG,
+                tekst = "En individuell begrunelse"
+            ),
             saksbehandlerOid = oid
         )
 
@@ -68,8 +73,10 @@ internal class PgVedtakBegrunnelseDaoTest : AbstractDBIntegrationTest() {
         opprettSaksbehandler(oid)
         dao.lagreVedtakBegrunnelse(
             oppgaveId = OPPGAVE_ID,
-            type = VedtakBegrunnelseTypeFraDatabase.AVSLAG,
-            begrunnelse = "En individuell begrunelse",
+            vedtakBegrunnelse = VedtakBegrunnelseFraDatabase(
+                type = VedtakBegrunnelseTypeFraDatabase.AVSLAG,
+                tekst = "En individuell begrunelse"
+            ),
             saksbehandlerOid = oid
         )
 
@@ -90,8 +97,10 @@ internal class PgVedtakBegrunnelseDaoTest : AbstractDBIntegrationTest() {
         val generasjonId = finnGenerasjonId(vedtaksperiodeId)
         dao.lagreVedtakBegrunnelse(
             oppgaveId = OPPGAVE_ID,
-            type = VedtakBegrunnelseTypeFraDatabase.AVSLAG,
-            begrunnelse = "En individuell begrunelse",
+            vedtakBegrunnelse = VedtakBegrunnelseFraDatabase(
+                type = VedtakBegrunnelseTypeFraDatabase.AVSLAG,
+                tekst = "En individuell begrunelse"
+            ),
             saksbehandlerOid = oid
         )
         dao.invaliderVedtakBegrunnelse(OPPGAVE_ID)
@@ -106,20 +115,26 @@ internal class PgVedtakBegrunnelseDaoTest : AbstractDBIntegrationTest() {
         opprettSaksbehandler(oid)
         dao.lagreVedtakBegrunnelse(
             oppgaveId = OPPGAVE_ID,
-            type = VedtakBegrunnelseTypeFraDatabase.AVSLAG,
-            begrunnelse = "En individuell begrunelse",
+            vedtakBegrunnelse = VedtakBegrunnelseFraDatabase(
+                type = VedtakBegrunnelseTypeFraDatabase.AVSLAG,
+                tekst = "En individuell begrunelse"
+            ),
             saksbehandlerOid = oid
         )
         dao.lagreVedtakBegrunnelse(
             oppgaveId = OPPGAVE_ID,
-            type = VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE,
-            begrunnelse = "En individuell begrunelse delvis innvilgelse retter skrivefeil",
+            vedtakBegrunnelse = VedtakBegrunnelseFraDatabase(
+                type = VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE,
+                tekst = "En individuell begrunelse delvis innvilgelse retter skrivefeil"
+            ),
             saksbehandlerOid = oid
         )
         dao.lagreVedtakBegrunnelse(
             oppgaveId = OPPGAVE_ID,
-            type = VedtakBegrunnelseTypeFraDatabase.INNVILGELSE,
-            begrunnelse = "En individuell begrunelse innvilgelse beholder skrivefeil",
+            vedtakBegrunnelse = VedtakBegrunnelseFraDatabase(
+                type = VedtakBegrunnelseTypeFraDatabase.INNVILGELSE,
+                tekst = "En individuell begrunelse innvilgelse beholder skrivefeil"
+            ),
             saksbehandlerOid = oid
         )
 
