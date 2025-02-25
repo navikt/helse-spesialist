@@ -10,7 +10,6 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiVedtakBegrunnelse
 import no.nav.helse.spesialist.api.graphql.schema.ApiVedtakUtfall
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
-import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import java.util.UUID
 
 sealed interface SendTilGodkjenningResult {
@@ -90,13 +89,6 @@ interface Saksbehandlerhåndterer {
     ): List<ApiOpptegnelse>
 
     fun hentAbonnerteOpptegnelser(saksbehandlerFraApi: SaksbehandlerFraApi): List<ApiOpptegnelse>
-
-    // TODO: Ser ut til å være død kode, brukes bare av tester
-    fun håndter(
-        godkjenning: GodkjenningDto,
-        behandlingId: UUID,
-        saksbehandlerFraApi: SaksbehandlerFraApi,
-    )
 
     fun håndterTotrinnsvurdering(
         oppgavereferanse: Long,

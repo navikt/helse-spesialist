@@ -94,7 +94,6 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
-import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.tell
@@ -772,38 +771,6 @@ class SaksbehandlerMediator(
 
     private fun tilLegacySaksbehandler(saksbehandler: no.nav.helse.spesialist.domain.Saksbehandler): Saksbehandler =
         saksbehandler.gjenopprett(tilgangskontroll = tilgangskontroll)
-
-    override fun håndter(
-        godkjenning: GodkjenningDto,
-        behandlingId: UUID,
-        saksbehandlerFraApi: SaksbehandlerFraApi,
-    ) {
-        val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
-        val fødselsnummer = oppgaveApiDao.finnFødselsnummer(godkjenning.oppgavereferanse)
-
-        if (godkjenning.godkjent) {
-            val perioderTilBehandling = generasjonRepository.perioderTilBehandling(godkjenning.oppgavereferanse)
-            if (perioderTilBehandling.harAktiveVarsler()) {
-                throw ManglerVurderingAvVarsler(godkjenning.oppgavereferanse)
-            }
-            perioderTilBehandling.godkjennVarsler(
-                fødselsnummer,
-                behandlingId,
-                saksbehandler.ident,
-                this::vurderVarsel,
-            )
-        } else {
-            val periodeTilGodkjenning = generasjonRepository.periodeTilGodkjenning(godkjenning.oppgavereferanse)
-            periodeTilGodkjenning.avvisVarsler(fødselsnummer, behandlingId, saksbehandler.ident, this::vurderVarsel)
-        }
-
-        påVentDao.slettPåVent(godkjenning.oppgavereferanse)
-        håndterAvslag(
-            avslag = godkjenning.avslag,
-            oppgaveId = godkjenning.oppgavereferanse,
-            saksbehandlerOid = saksbehandler.id().value,
-        )
-    }
 
     private fun vurderVarsel(
         fødselsnummer: String,

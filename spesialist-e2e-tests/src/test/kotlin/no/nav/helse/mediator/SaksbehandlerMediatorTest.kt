@@ -13,16 +13,12 @@ import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingh�
 import no.nav.helse.spesialist.api.SendIReturResult
 import no.nav.helse.spesialist.api.SendTilGodkjenningResult
 import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
-import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre
 import no.nav.helse.spesialist.api.graphql.mutation.Avslag
-import no.nav.helse.spesialist.api.graphql.mutation.Avslagsdata
-import no.nav.helse.spesialist.api.graphql.mutation.Avslagshandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiAnnulleringData
 import no.nav.helse.spesialist.api.graphql.schema.ApiAnnulleringData.ApiAnnulleringArsak
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdOverstyringHandling
-import no.nav.helse.spesialist.api.graphql.schema.ApiAvslagstype
 import no.nav.helse.spesialist.api.graphql.schema.ApiInntektOgRefusjonOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiLovhjemmel
 import no.nav.helse.spesialist.api.graphql.schema.ApiMinimumSykdomsgrad
@@ -57,7 +53,6 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -136,72 +131,6 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     @BeforeEach
     internal fun beforeEach() {
         testRapid.reset()
-    }
-
-    @Test
-    fun `håndter godkjenning`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        nyPerson(vedtaksperiodeId = vedtaksperiodeId)
-        val definisjonRef = opprettVarseldefinisjon()
-        nyttVarsel(
-            vedtaksperiodeId = vedtaksperiodeId,
-            definisjonRef = definisjonRef,
-            status = "VURDERT",
-        )
-        nyttVarsel(
-            vedtaksperiodeId = vedtaksperiodeId,
-            kode = "EN_ANNEN_KODE",
-            definisjonRef = definisjonRef,
-            status = "VURDERT",
-        )
-        assertDoesNotThrow {
-            mediator.håndter(godkjenning(oppgaveId, true), UUID.randomUUID(), saksbehandler)
-        }
-        assertGodkjenteVarsler(vedtaksperiodeId, 2)
-    }
-
-    @Test
-    fun `håndter godkjenning når periode har aktivt varsel`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        nyPerson(vedtaksperiodeId = vedtaksperiodeId)
-
-        val definisjonRef = opprettVarseldefinisjon()
-        nyttVarsel(
-            vedtaksperiodeId = vedtaksperiodeId,
-            definisjonRef = definisjonRef,
-            status = "AKTIV",
-        )
-        assertThrows<ManglerVurderingAvVarsler> {
-            mediator.håndter(godkjenning(oppgaveId, true), UUID.randomUUID(), saksbehandler)
-        }
-        assertGodkjenteVarsler(vedtaksperiodeId, 0)
-    }
-
-    @Test
-    fun `håndter godkjenning når periode ikke har noen varsler`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        nyPerson(vedtaksperiodeId = vedtaksperiodeId)
-
-        assertDoesNotThrow {
-            mediator.håndter(godkjenning(OPPGAVE_ID, true), UUID.randomUUID(), saksbehandler)
-        }
-        assertGodkjenteVarsler(vedtaksperiodeId, 0)
-    }
-
-    @Test
-    fun `håndter godkjenning når godkjenning er avvist`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        nyPerson(vedtaksperiodeId = vedtaksperiodeId)
-
-        val definisjonRef = opprettVarseldefinisjon()
-        nyttVarsel(
-            vedtaksperiodeId = vedtaksperiodeId,
-            definisjonRef = definisjonRef,
-            status = "AKTIV",
-        )
-        mediator.håndter(godkjenning(oppgaveId, false), UUID.randomUUID(), saksbehandler)
-        assertGodkjenteVarsler(vedtaksperiodeId, 0)
-        assertAvvisteVarsler(vedtaksperiodeId, 1)
     }
 
     @Test
@@ -427,96 +356,6 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             mediator.håndterTotrinnsvurdering(oppgaveId, saksbehandler, ApiVedtakUtfall.INNVILGELSE, "Begrunnelse")
 
         assertEquals(SendTilGodkjenningResult.Ok, result)
-    }
-
-    @Test
-    fun `håndterer godkjenning med avslag`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        nyPerson(vedtaksperiodeId = vedtaksperiodeId)
-
-        assertDoesNotThrow {
-            mediator.håndter(
-                godkjenning(
-                    oppgavereferanse = oppgaveId,
-                    godkjent = true,
-                    avslag =
-                        Avslag(
-                            handling = Avslagshandling.OPPRETT,
-                            data = Avslagsdata(ApiAvslagstype.AVSLAG, "En individuell begrunnelse"),
-                        ),
-                ),
-                UUID.randomUUID(),
-                saksbehandler,
-            )
-        }
-    }
-
-    @Test
-    fun `håndterer at på vent blir fjernet ved godkjenning`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        nyPerson(vedtaksperiodeId = vedtaksperiodeId)
-        val dialogId = dialogDao.lagre()
-        påVentDao.lagrePåVent(oppgaveId, saksbehandler.oid, LocalDate.now(), emptyList(), null, dialogId)
-        assertDoesNotThrow {
-            mediator.håndter(godkjenning(oppgaveId, true), UUID.randomUUID(), saksbehandler)
-        }
-        assertFalse(påVentDao.erPåVent(vedtaksperiodeId))
-    }
-
-    @Test
-    fun `sender ut varsel_endret ved godkjenning av varsler`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val varselId = UUID.randomUUID()
-        val behandlingId = UUID.randomUUID()
-        nyPerson(vedtaksperiodeId = vedtaksperiodeId)
-        val definisjonRef = opprettVarseldefinisjon(tittel = "EN_TITTEL")
-        nyttVarsel(
-            id = varselId,
-            vedtaksperiodeId = vedtaksperiodeId,
-            kode = "EN_KODE",
-            definisjonRef = definisjonRef,
-            status = "VURDERT",
-        )
-        mediator.håndter(godkjenning(oppgaveId, true), behandlingId, saksbehandler)
-
-        assertEquals(1, testRapid.inspektør.size)
-        val melding = testRapid.inspektør.message(0)
-        assertEquals("varsel_endret", melding["@event_name"].asText())
-        assertEquals(vedtaksperiodeId.toString(), melding["vedtaksperiode_id"].asText())
-        assertEquals(behandlingId.toString(), melding["behandling_id"].asText())
-        assertEquals(varselId.toString(), melding["varsel_id"].asText())
-        assertEquals("EN_TITTEL", melding["varseltittel"].asText())
-        assertEquals("EN_KODE", melding["varselkode"].asText())
-        assertEquals("GODKJENT", melding["gjeldende_status"].asText())
-        assertEquals("VURDERT", melding["forrige_status"].asText())
-    }
-
-    @Test
-    fun `sender ut varsel_endret ved avvisning av varsler`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val varselId = UUID.randomUUID()
-        val behandlingId = UUID.randomUUID()
-        nyPerson(vedtaksperiodeId = vedtaksperiodeId)
-        val definisjonRef = opprettVarseldefinisjon(tittel = "EN_TITTEL")
-        nyttVarsel(
-            id = varselId,
-            vedtaksperiodeId = vedtaksperiodeId,
-            kode = "EN_KODE",
-            definisjonRef = definisjonRef,
-            status = "AKTIV",
-        )
-        mediator.håndter(godkjenning(oppgaveId, false), behandlingId, saksbehandler)
-
-        assertEquals(1, testRapid.inspektør.size)
-        val melding = testRapid.inspektør.message(0)
-        assertEquals("varsel_endret", melding["@event_name"].asText())
-        assertEquals(vedtaksperiodeId.toString(), melding["vedtaksperiode_id"].asText())
-        assertEquals(behandlingId.toString(), melding["behandling_id"].asText())
-        assertEquals(varselId.toString(), melding["varsel_id"].asText())
-        assertEquals("EN_TITTEL", melding["varseltittel"].asText())
-        assertEquals("EN_KODE", melding["varselkode"].asText())
-        assertEquals("AVVIST", melding["gjeldende_status"].asText())
-        assertEquals("AKTIV", melding["forrige_status"].asText())
     }
 
     @Test
