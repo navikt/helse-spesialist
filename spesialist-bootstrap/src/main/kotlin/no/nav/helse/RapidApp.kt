@@ -88,7 +88,7 @@ internal class RapidApp(env: Map<String, String>) {
                 env = env,
                 meterRegistry = prometheusMeterRegistry,
                 builder = {
-                    withKtorModule(spesialistApp::ktorApp)
+                    withKtorModule(spesialistApp::konfigurerKtorApp)
                 },
             )
         spesialistApp.start(rapidsConnection)
