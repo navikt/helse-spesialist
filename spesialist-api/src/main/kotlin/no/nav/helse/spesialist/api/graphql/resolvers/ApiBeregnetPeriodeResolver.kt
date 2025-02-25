@@ -347,7 +347,7 @@ data class ApiBeregnetPeriodeResolver(
         }
 
     private val oppgaveDto: OppgaveForPeriodevisningDto? by lazy {
-        oppgaveApiDao.finnPeriodeoppgave(periode.vedtaksperiodeId)
+        if (erSisteGenerasjon) oppgaveApiDao.finnPeriodeoppgave(periode.vedtaksperiodeId) else null
     }
 
     override fun oppgave() = oppgaveDto?.let { oppgaveDto -> ApiOppgaveForPeriodevisning(id = oppgaveDto.id) }
