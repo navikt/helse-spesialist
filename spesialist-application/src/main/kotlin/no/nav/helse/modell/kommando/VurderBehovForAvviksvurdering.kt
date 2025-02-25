@@ -27,28 +27,25 @@ class VurderBehovForAvviksvurdering(
 
     override fun resume(context: CommandContext): Boolean {
         val løsning = context.get<AvviksvurderingBehovLøsning>() ?: return behov(context)
-        when (løsning) {
-            is AvviksvurderingBehovLøsning.NyVurderingForetatt -> {
-                val avviksvurdering =
-                    Avviksvurdering.ny(
-                        id = løsning.avviksvurderingId,
-                        vilkårsgrunnlagId = vilkårsgrunnlagId,
-                        fødselsnummer = fødselsnummer,
-                        skjæringstidspunkt = skjæringstidspunkt,
-                        opprettet = løsning.opprettet,
-                        avviksprosent = løsning.avviksprosent,
-                        sammenligningsgrunnlag = løsning.sammenligningsgrunnlag,
-                        beregningsgrunnlag = løsning.beregningsgrunnlag,
-                    )
-                avviksvurderingRepository.lagre(avviksvurdering)
+        val eksisterendeAvviksvurdering = avviksvurderingRepository.hentAvviksvurderingFor(løsning.avviksvurderingId)
 
-                if (!løsning.harAkseptabeltAvvik) behandling.håndterNyttVarsel(RV_IV_2.nyttVarsel(behandling.vedtaksperiodeId()))
-            }
-
-            is AvviksvurderingBehovLøsning.TrengerIkkeNyVurdering -> {
-                avviksvurderingRepository.opprettKobling(løsning.avviksvurderingId, vilkårsgrunnlagId)
-            }
+        if (eksisterendeAvviksvurdering != null) {
+            avviksvurderingRepository.opprettKobling(eksisterendeAvviksvurdering.unikId, vilkårsgrunnlagId)
+            return true
         }
+        val avviksvurdering =
+            Avviksvurdering.ny(
+                id = løsning.avviksvurderingId,
+                vilkårsgrunnlagId = vilkårsgrunnlagId,
+                fødselsnummer = fødselsnummer,
+                skjæringstidspunkt = skjæringstidspunkt,
+                opprettet = løsning.opprettet,
+                avviksprosent = løsning.avviksprosent,
+                sammenligningsgrunnlag = løsning.sammenligningsgrunnlag,
+                beregningsgrunnlag = løsning.beregningsgrunnlag,
+            )
+        avviksvurderingRepository.lagre(avviksvurdering)
+        if (!løsning.harAkseptabeltAvvik) behandling.håndterNyttVarsel(RV_IV_2.nyttVarsel(behandling.vedtaksperiodeId()))
         return true
     }
 

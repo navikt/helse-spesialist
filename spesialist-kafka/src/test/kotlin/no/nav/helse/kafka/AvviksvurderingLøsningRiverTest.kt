@@ -51,7 +51,7 @@ class AvviksvurderingLøsningRiverTest {
     @Test
     fun `kan lese løsning på avviksvurdering-behov med ny vurdering`() {
         testRapid.sendTestMessage(løsningMedNyVurdering())
-        val forventetLøsning = AvviksvurderingBehovLøsning.NyVurderingForetatt(
+        val forventetLøsning = AvviksvurderingBehovLøsning(
             avviksvurderingId,
             maksimaltTillattAvvik,
             avviksprosent,
@@ -68,7 +68,15 @@ class AvviksvurderingLøsningRiverTest {
     @Test
     fun `kan lese løsning på avviksvurdering-behov uten ny vurdering`() {
         testRapid.sendTestMessage(løsningUtenNyVurdering())
-        val forventetLøsning = AvviksvurderingBehovLøsning.TrengerIkkeNyVurdering(avviksvurderingId)
+        val forventetLøsning = AvviksvurderingBehovLøsning(
+            avviksvurderingId = avviksvurderingId,
+            maksimaltTillattAvvik = maksimaltTillattAvvik,
+            avviksprosent = avviksprosent,
+            harAkseptabeltAvvik = harAkseptabeltAvvik,
+            opprettet = opprettet,
+            beregningsgrunnlag = beregningsgrunnlag,
+            sammenligningsgrunnlag = sammenligningsgrunnlag
+        )
         verify(exactly = 1) {
             mediator.løsning(hendelseId, contextId, id, forventetLøsning, any())
         }
@@ -167,7 +175,34 @@ class AvviksvurderingLøsningRiverTest {
           "@løsning": {
             "Avviksvurdering": {
               "utfall": "TrengerIkkeNyVurdering",
-              "avviksvurderingId": "$avviksvurderingId"
+              "avviksvurderingId": "$avviksvurderingId",
+              "avviksprosent": $avviksprosent,
+              "harAkseptabeltAvvik": $harAkseptabeltAvvik,
+              "maksimaltTillattAvvik": $maksimaltTillattAvvik,
+              "opprettet": "$opprettet",
+              "beregningsgrunnlag": {
+                "totalbeløp": 900000.0,
+                "omregnedeÅrsinntekter": [
+                  {
+                    "arbeidsgiverreferanse": "$organisasjonsnummer",
+                    "beløp": 900000.0
+                  }
+                ]
+              },
+              "sammenligningsgrunnlag": {
+                "totalbeløp": 600000.0,
+                "innrapporterteInntekter": [
+                  {
+                    "arbeidsgiverreferanse": "$organisasjonsnummer",
+                    "inntekter": [
+                      {
+                        "beløp": 600000.0,
+                        "årMåned": "2018-01"
+                      }
+                    ]
+                  }
+                ]
+              }
             }
           },
           "skjæringstidspunkt": "2018-01-01"

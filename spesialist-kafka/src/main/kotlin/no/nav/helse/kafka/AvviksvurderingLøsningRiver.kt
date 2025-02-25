@@ -32,31 +32,24 @@ class AvviksvurderingLøsningRiver(
     override fun validations(): River.PacketValidation {
         return River.PacketValidation {
             it.requireKey("@løsning.Avviksvurdering.avviksvurderingId")
-            it.require("@løsning.Avviksvurdering.utfall") { fastsattNode ->
-                when (fastsattNode.asText()) {
-                    "NyVurderingForetatt" -> {
-                        it.requireKey(
-                            "@løsning.Avviksvurdering.avviksprosent",
-                            "@løsning.Avviksvurdering.harAkseptabeltAvvik",
-                            "@løsning.Avviksvurdering.maksimaltTillattAvvik",
-                            "@løsning.Avviksvurdering.opprettet",
-                            "@løsning.Avviksvurdering.beregningsgrunnlag",
-                            "@løsning.Avviksvurdering.beregningsgrunnlag.totalbeløp",
-                            "@løsning.Avviksvurdering.sammenligningsgrunnlag",
-                            "@løsning.Avviksvurdering.sammenligningsgrunnlag.totalbeløp",
-                        )
-                        it.requireArray("@løsning.Avviksvurdering.beregningsgrunnlag.omregnedeÅrsinntekter") {
-                            requireKey("arbeidsgiverreferanse", "beløp")
-                        }
+            it.requireKey(
+                "@løsning.Avviksvurdering.avviksprosent",
+                "@løsning.Avviksvurdering.harAkseptabeltAvvik",
+                "@løsning.Avviksvurdering.maksimaltTillattAvvik",
+                "@løsning.Avviksvurdering.opprettet",
+                "@løsning.Avviksvurdering.beregningsgrunnlag",
+                "@løsning.Avviksvurdering.beregningsgrunnlag.totalbeløp",
+                "@løsning.Avviksvurdering.sammenligningsgrunnlag",
+                "@løsning.Avviksvurdering.sammenligningsgrunnlag.totalbeløp",
+            )
+            it.requireArray("@løsning.Avviksvurdering.beregningsgrunnlag.omregnedeÅrsinntekter") {
+                requireKey("arbeidsgiverreferanse", "beløp")
+            }
 
-                        it.requireArray("@løsning.Avviksvurdering.sammenligningsgrunnlag.innrapporterteInntekter") {
-                            requireKey("arbeidsgiverreferanse")
-                            requireArray("inntekter") {
-                                requireKey("årMåned", "beløp")
-                            }
-                        }
-                    }
-                    else -> {}
+            it.requireArray("@løsning.Avviksvurdering.sammenligningsgrunnlag.innrapporterteInntekter") {
+                requireKey("arbeidsgiverreferanse")
+                requireArray("inntekter") {
+                    requireKey("årMåned", "beløp")
                 }
             }
         }
@@ -78,26 +71,15 @@ class AvviksvurderingLøsningRiver(
     }
 
     private fun løsning(packet: JsonMessage): AvviksvurderingBehovLøsning {
-        val utfall = enumValueOf<Utfall>(packet["@løsning.Avviksvurdering.utfall"].asText())
-        val avviksvurderingId = packet["@løsning.Avviksvurdering.avviksvurderingId"].asUUID()
-        return when (utfall) {
-            Utfall.TrengerIkkeNyVurdering -> AvviksvurderingBehovLøsning.TrengerIkkeNyVurdering(avviksvurderingId)
-            Utfall.NyVurderingForetatt ->
-                AvviksvurderingBehovLøsning.NyVurderingForetatt(
-                    avviksvurderingId = avviksvurderingId,
-                    avviksprosent = packet["@løsning.Avviksvurdering.avviksprosent"].asDouble(),
-                    harAkseptabeltAvvik = packet["@løsning.Avviksvurdering.harAkseptabeltAvvik"].asBoolean(),
-                    maksimaltTillattAvvik = packet["@løsning.Avviksvurdering.maksimaltTillattAvvik"].asDouble(),
-                    opprettet = packet["@løsning.Avviksvurdering.opprettet"].asLocalDateTime(),
-                    beregningsgrunnlag = beregningsgrunnlag(packet["@løsning.Avviksvurdering.beregningsgrunnlag"]),
-                    sammenligningsgrunnlag = sammenligningsgrunnlag(packet["@løsning.Avviksvurdering.sammenligningsgrunnlag"]),
-                )
-        }
-    }
-
-    private enum class Utfall {
-        NyVurderingForetatt,
-        TrengerIkkeNyVurdering,
+        return AvviksvurderingBehovLøsning(
+            avviksvurderingId = packet["@løsning.Avviksvurdering.avviksvurderingId"].asUUID(),
+            avviksprosent = packet["@løsning.Avviksvurdering.avviksprosent"].asDouble(),
+            harAkseptabeltAvvik = packet["@løsning.Avviksvurdering.harAkseptabeltAvvik"].asBoolean(),
+            maksimaltTillattAvvik = packet["@løsning.Avviksvurdering.maksimaltTillattAvvik"].asDouble(),
+            opprettet = packet["@løsning.Avviksvurdering.opprettet"].asLocalDateTime(),
+            beregningsgrunnlag = beregningsgrunnlag(packet["@løsning.Avviksvurdering.beregningsgrunnlag"]),
+            sammenligningsgrunnlag = sammenligningsgrunnlag(packet["@løsning.Avviksvurdering.sammenligningsgrunnlag"]),
+        )
     }
 
     private fun beregningsgrunnlag(json: JsonNode): Beregningsgrunnlag =

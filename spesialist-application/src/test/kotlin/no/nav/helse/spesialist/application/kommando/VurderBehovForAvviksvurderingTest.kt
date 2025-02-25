@@ -66,6 +66,7 @@ class VurderBehovForAvviksvurderingTest {
     )
 
     private val repository = object : AvviksvurderingRepository {
+        var avviksvurderingSomSkalReturneres: Avviksvurdering? = null
         val avviksvurderinger = mutableListOf<Avviksvurdering>()
         val koblinger = mutableListOf<Pair<UUID, UUID>>()
         override fun lagre(avviksvurdering: Avviksvurdering) {
@@ -77,7 +78,7 @@ class VurderBehovForAvviksvurderingTest {
         }
 
         override fun hentAvviksvurdering(vilkårsgrunnlagId: UUID): Avviksvurdering = error("Ikke implementert i test")
-
+        override fun hentAvviksvurderingFor(avviksvurderingId: UUID): Avviksvurdering? = avviksvurderingSomSkalReturneres
         override fun finnAvviksvurderinger(fødselsnummer: String): List<Avviksvurdering> =
             error("Ikke implementert i test")
     }
@@ -146,7 +147,7 @@ class VurderBehovForAvviksvurderingTest {
         )
         val context = CommandContext(UUID.randomUUID())
         context.add(
-            AvviksvurderingBehovLøsning.NyVurderingForetatt(
+            AvviksvurderingBehovLøsning(
                 avviksvurderingId = avviksvurderingId,
                 maksimaltTillattAvvik = maksimaltTillattAvvik,
                 avviksprosent = avviksprosent,
@@ -187,7 +188,7 @@ class VurderBehovForAvviksvurderingTest {
         )
         val context = CommandContext(UUID.randomUUID())
         context.add(
-            AvviksvurderingBehovLøsning.NyVurderingForetatt(
+            AvviksvurderingBehovLøsning(
                 avviksvurderingId = avviksvurderingId,
                 maksimaltTillattAvvik = maksimaltTillattAvvik,
                 avviksprosent = avviksprosent,
@@ -215,7 +216,7 @@ class VurderBehovForAvviksvurderingTest {
         )
         val context = CommandContext(UUID.randomUUID())
         context.add(
-            AvviksvurderingBehovLøsning.NyVurderingForetatt(
+            AvviksvurderingBehovLøsning(
                 avviksvurderingId = avviksvurderingId,
                 maksimaltTillattAvvik = maksimaltTillattAvvik,
                 avviksprosent = 25.0,
@@ -230,7 +231,7 @@ class VurderBehovForAvviksvurderingTest {
     }
 
     @Test
-    fun `lagrer ned kobling ved løsning med uten vurdering`() {
+    fun `lagrer kun ned kobling ved løsning med avviksvurdering som finnes fra før av`() {
         val command = VurderBehovForAvviksvurdering(
             fødselsnummer,
             skjæringstidspunkt,
@@ -241,8 +242,9 @@ class VurderBehovForAvviksvurderingTest {
             true,
             organisasjonsnummer
         )
+        repository.avviksvurderingSomSkalReturneres = enAvviksvurdering(avviksvurderingId = avviksvurderingId)
         val context = CommandContext(UUID.randomUUID())
-        context.add(AvviksvurderingBehovLøsning.TrengerIkkeNyVurdering(avviksvurderingId = avviksvurderingId))
+        context.add(enAvviksvurderingBehovløsning(avviksvurderingId = avviksvurderingId))
         command.resume(context)
         assertEquals(0, repository.avviksvurderinger.size)
         assertEquals(1, repository.koblinger.size)
@@ -262,8 +264,34 @@ class VurderBehovForAvviksvurderingTest {
             organisasjonsnummer
         )
         val context = CommandContext(UUID.randomUUID())
-        context.add(AvviksvurderingBehovLøsning.TrengerIkkeNyVurdering(avviksvurderingId = avviksvurderingId))
+        repository.avviksvurderingSomSkalReturneres = enAvviksvurdering(avviksvurderingId = avviksvurderingId)
+        context.add(enAvviksvurderingBehovløsning(avviksvurderingId = avviksvurderingId))
         command.resume(context)
         assertFalse(behandling.varsler().inneholderVarselOmAvvik())
+    }
+
+    private fun enAvviksvurdering(avviksvurderingId: UUID = this.avviksvurderingId): Avviksvurdering {
+        return Avviksvurdering(
+            unikId = avviksvurderingId,
+            vilkårsgrunnlagId = vilkårsgrunnlagId,
+            fødselsnummer = fødselsnummer,
+            skjæringstidspunkt = skjæringstidspunkt,
+            opprettet = opprettet,
+            avviksprosent = avviksprosent,
+            sammenligningsgrunnlag = sammenligningsgrunnlag,
+            beregningsgrunnlag = beregningsgrunnlag
+        )
+    }
+
+    private fun enAvviksvurderingBehovløsning(avviksvurderingId: UUID = this.avviksvurderingId): AvviksvurderingBehovLøsning {
+        return AvviksvurderingBehovLøsning(
+            avviksvurderingId = avviksvurderingId,
+            opprettet = opprettet,
+            avviksprosent = avviksprosent,
+            maksimaltTillattAvvik = maksimaltTillattAvvik,
+            harAkseptabeltAvvik = harAkseptabeltAvvik,
+            sammenligningsgrunnlag = sammenligningsgrunnlag,
+            beregningsgrunnlag = beregningsgrunnlag
+        )
     }
 }
