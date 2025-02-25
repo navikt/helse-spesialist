@@ -2,13 +2,13 @@ package no.nav.helse.spesialist.api.graphql.query
 
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
-import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
+import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.schema.ApiOpptegnelse
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 
 class OpptegnelseQueryHandler(
-    private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
+    private val saksbehandlerMediator: SaksbehandlerMediator,
 ) : OpptegnelseQuerySchema {
     override fun opptegnelser(
         sekvensId: Int?,
@@ -17,9 +17,9 @@ class OpptegnelseQueryHandler(
         val saksbehandler = environment.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
         val opptegnelser =
             if (sekvensId != null) {
-                saksbehandlerhåndterer.hentAbonnerteOpptegnelser(saksbehandler, sekvensId)
+                saksbehandlerMediator.hentAbonnerteOpptegnelser(saksbehandler, sekvensId)
             } else {
-                saksbehandlerhåndterer.hentAbonnerteOpptegnelser(saksbehandler)
+                saksbehandlerMediator.hentAbonnerteOpptegnelser(saksbehandler)
             }
 
         return DataFetcherResult.newResult<List<ApiOpptegnelse>>().data(opptegnelser).build()

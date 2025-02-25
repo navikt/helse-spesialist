@@ -62,7 +62,7 @@ class Bootstrap(
             beslutterGruppeId = tilgangsgrupper.beslutterGruppeId,
             snapshotService = SnapshotService(personinfoDao, avhengigheter.snapshothenter),
             behandlingsstatistikkMediator = avhengigheter.behandlingstatistikk,
-            saksbehandlerhåndterer = avhengigheter.saksbehandlerhåndtererProvider(),
+            saksbehandlerMediator = avhengigheter.saksbehandlerMediatorProvider(),
             apiOppgaveService = avhengigheter.apiOppgaveServiceProvider(),
             godkjenninghåndterer = avhengigheter.godkjenninghåndtererProvider(),
             personhåndterer = avhengigheter.personhåndtererProvider(),

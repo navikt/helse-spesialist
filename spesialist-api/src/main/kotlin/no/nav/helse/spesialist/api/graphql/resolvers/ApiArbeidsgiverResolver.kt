@@ -7,8 +7,8 @@ import no.nav.helse.db.api.PeriodehistorikkApiDao
 import no.nav.helse.db.api.PåVentApiDao
 import no.nav.helse.db.api.TotrinnsvurderingApiDao
 import no.nav.helse.db.api.VarselApiRepository
+import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
-import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforhold
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsgiverInntekterFraAOrdningen
 import no.nav.helse.spesialist.api.graphql.schema.ApiBeregnetPeriode
@@ -34,7 +34,7 @@ class ApiArbeidsgiverResolver(
     private val fødselsnummer: String,
     private val generasjoner: List<SnapshotGenerasjon>,
     private val apiOppgaveService: ApiOppgaveService,
-    private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
+    private val saksbehandlerMediator: SaksbehandlerMediator,
     private val arbeidsgiverApiDao: ArbeidsgiverApiDao,
     private val risikovurderinger: Map<UUID, RisikovurderingApiDto>,
     private val varselRepository: VarselApiRepository,
@@ -83,7 +83,7 @@ class ApiArbeidsgiverResolver(
                                             orgnummer = organisasjonsnummer,
                                             periode = it,
                                             apiOppgaveService = apiOppgaveService,
-                                            saksbehandlerhåndterer = saksbehandlerhåndterer,
+                                            saksbehandlerMediator = saksbehandlerMediator,
                                             risikovurderinger = risikovurderinger,
                                             varselRepository = varselRepository,
                                             oppgaveApiDao = oppgaveApiDao,

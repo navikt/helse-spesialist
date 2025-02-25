@@ -89,7 +89,7 @@ class SpesialistApp(
 
     private val apiAvhengigheter =
         ApiAvhengigheter(
-            saksbehandlerhåndtererProvider = { saksbehandlerMediator },
+            saksbehandlerMediatorProvider = { saksbehandlerMediator },
             apiOppgaveServiceProvider = { apiOppgaveService },
             godkjenninghåndtererProvider = { godkjenningService },
             personhåndtererProvider = { personhåndterer },

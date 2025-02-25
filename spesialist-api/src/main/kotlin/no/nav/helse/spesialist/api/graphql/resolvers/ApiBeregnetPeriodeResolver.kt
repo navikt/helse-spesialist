@@ -12,8 +12,8 @@ import no.nav.helse.db.api.PeriodehistorikkApiDao
 import no.nav.helse.db.api.PåVentApiDao
 import no.nav.helse.db.api.TotrinnsvurderingApiDao
 import no.nav.helse.db.api.VarselApiRepository
+import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
-import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.graphql.mapping.tilApiDag
 import no.nav.helse.spesialist.api.graphql.mapping.tilApiHendelse
 import no.nav.helse.spesialist.api.graphql.mapping.tilApiInntektstype
@@ -77,7 +77,7 @@ data class ApiBeregnetPeriodeResolver(
     private val orgnummer: String,
     private val periode: SnapshotBeregnetPeriode,
     private val apiOppgaveService: ApiOppgaveService,
-    private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
+    private val saksbehandlerMediator: SaksbehandlerMediator,
     private val risikovurderinger: Map<UUID, RisikovurderingApiDto>,
     private val varselRepository: VarselApiRepository,
     private val oppgaveApiDao: OppgaveApiDao,
@@ -370,17 +370,17 @@ data class ApiBeregnetPeriodeResolver(
             )
         }
 
-    override fun avslag(): List<ApiAvslag> = saksbehandlerhåndterer.hentAvslag(periode.vedtaksperiodeId, periode.utbetaling.id).toList()
+    override fun avslag(): List<ApiAvslag> = saksbehandlerMediator.hentAvslag(periode.vedtaksperiodeId, periode.utbetaling.id).toList()
 
     override fun vedtakBegrunnelser(): List<ApiVedtakBegrunnelse> =
-        saksbehandlerhåndterer.hentVedtakBegrunnelser(
+        saksbehandlerMediator.hentVedtakBegrunnelser(
             periode.vedtaksperiodeId,
             periode.utbetaling.id,
         )
 
     override fun annullering(): ApiAnnullering? =
         if (erSisteGenerasjon) {
-            saksbehandlerhåndterer.hentAnnullering(
+            saksbehandlerMediator.hentAnnullering(
                 periode.utbetaling.arbeidsgiverFagsystemId,
                 periode.utbetaling.personFagsystemId,
             )?.let {

@@ -4,14 +4,14 @@ import graphql.GraphQLError
 import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
-import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
+import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class SkjonnsfastsettelseMutationHandler(private val saksbehandlerhåndterer: Saksbehandlerhåndterer) :
+class SkjonnsfastsettelseMutationHandler(private val saksbehandlerMediator: SaksbehandlerMediator) :
     SkjonnsfastsettelseMutationSchema {
     private companion object {
         private val logg: Logger = LoggerFactory.getLogger(SkjonnsfastsettelseMutationHandler::class.java)
@@ -23,7 +23,7 @@ class SkjonnsfastsettelseMutationHandler(private val saksbehandlerhåndterer: Sa
     ): DataFetcherResult<Boolean> {
         val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
         return try {
-            saksbehandlerhåndterer.håndter(skjonnsfastsettelse, saksbehandler)
+            saksbehandlerMediator.håndter(skjonnsfastsettelse, saksbehandler)
             DataFetcherResult.newResult<Boolean>().data(true).build()
         } catch (e: Exception) {
             val kunneIkkeSkjønnsfastsetteSykepengegrunnlagError = kunneIkkeSkjønnsfastsetteSykepengegrunnlagError()

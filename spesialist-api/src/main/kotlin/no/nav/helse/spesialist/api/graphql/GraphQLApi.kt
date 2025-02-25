@@ -28,13 +28,13 @@ import no.nav.helse.db.api.TildelingApiDao
 import no.nav.helse.db.api.TotrinnsvurderingApiDao
 import no.nav.helse.db.api.VarselApiRepository
 import no.nav.helse.db.api.VergemålApiDao
+import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.spesialist.api.Dokumenthåndterer
 import no.nav.helse.spesialist.api.Godkjenninghåndterer
 import no.nav.helse.spesialist.api.GraphQLCallLogging
 import no.nav.helse.spesialist.api.GraphQLMetrikker
 import no.nav.helse.spesialist.api.Personhåndterer
-import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.behandlingsstatistikk.IBehandlingsstatistikkService
 import no.nav.helse.spesialist.api.graphql.mutation.AnnulleringMutationHandler
@@ -85,7 +85,7 @@ fun Application.graphQLApi(
     beslutterGruppeId: UUID,
     snapshotService: SnapshotService,
     behandlingsstatistikkMediator: IBehandlingsstatistikkService,
-    saksbehandlerhåndterer: Saksbehandlerhåndterer,
+    saksbehandlerMediator: SaksbehandlerMediator,
     apiOppgaveService: ApiOppgaveService,
     godkjenninghåndterer: Godkjenninghåndterer,
     personhåndterer: Personhåndterer,
@@ -114,7 +114,7 @@ fun Application.graphQLApi(
                                     totrinnsvurderingApiDao = totrinnsvurderingApiDao,
                                     påVentApiDao = påVentApiDao,
                                     apiOppgaveService = apiOppgaveService,
-                                    saksbehandlerhåndterer = saksbehandlerhåndterer,
+                                    saksbehandlerMediator = saksbehandlerMediator,
                                     stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
                                     personhåndterer = personhåndterer,
                                     snapshotService = snapshotService,
@@ -132,7 +132,7 @@ fun Application.graphQLApi(
                         ),
                     opptegnelse =
                         OpptegnelseQueryHandler(
-                            saksbehandlerhåndterer = saksbehandlerhåndterer,
+                            saksbehandlerMediator = saksbehandlerMediator,
                         ),
                     dokument =
                         DokumentQueryHandler(
@@ -145,27 +145,27 @@ fun Application.graphQLApi(
                 SpesialistSchema.MutationHandlers(
                     notat = NotatMutationHandler(sessionFactory = sessionFactory),
                     varsel = VarselMutationHandler(varselRepository = varselRepository),
-                    tildeling = TildelingMutationHandler(saksbehandlerhåndterer = saksbehandlerhåndterer),
-                    opptegnelse = OpptegnelseMutationHandler(saksbehandlerhåndterer = saksbehandlerhåndterer),
-                    overstyring = OverstyringMutationHandler(saksbehandlerhåndterer = saksbehandlerhåndterer),
-                    skjonnsfastsettelse = SkjonnsfastsettelseMutationHandler(saksbehandlerhåndterer = saksbehandlerhåndterer),
-                    minimumSykdomsgrad = MinimumSykdomsgradMutationHandler(saksbehandlerhåndterer = saksbehandlerhåndterer),
+                    tildeling = TildelingMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
+                    opptegnelse = OpptegnelseMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
+                    overstyring = OverstyringMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
+                    skjonnsfastsettelse = SkjonnsfastsettelseMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
+                    minimumSykdomsgrad = MinimumSykdomsgradMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
                     totrinnsvurdering =
                         TotrinnsvurderingMutationHandler(
-                            saksbehandlerhåndterer = saksbehandlerhåndterer,
+                            saksbehandlerMediator = saksbehandlerMediator,
                         ),
                     vedtak =
                         VedtakMutationHandler(
-                            saksbehandlerhåndterer = saksbehandlerhåndterer,
+                            saksbehandlerMediator = saksbehandlerMediator,
                             godkjenninghåndterer = godkjenninghåndterer,
                         ),
                     person = PersonMutationHandler(personhåndterer = personhåndterer),
                     annullering =
                         AnnulleringMutationHandler(
-                            saksbehandlerhåndterer = saksbehandlerhåndterer,
+                            saksbehandlerMediator = saksbehandlerMediator,
                         ),
-                    paVent = PaVentMutationHandler(saksbehandlerhåndterer = saksbehandlerhåndterer),
-                    opphevStans = OpphevStansMutationHandler(saksbehandlerhåndterer = saksbehandlerhåndterer),
+                    paVent = PaVentMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
+                    opphevStans = OpphevStansMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
                 ),
         )
     val graphQL =

@@ -4,7 +4,7 @@ import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import io.ktor.http.HttpStatusCode
-import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
+import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.SendIReturResult
 import no.nav.helse.spesialist.api.SendTilGodkjenningResult
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
@@ -12,7 +12,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiVedtakUtfall
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 
 class TotrinnsvurderingMutationHandler(
-    private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
+    private val saksbehandlerMediator: SaksbehandlerMediator,
 ) : TotrinnsvurderingMutationSchema {
     override fun sendTilGodkjenningV2(
         oppgavereferanse: String,
@@ -24,7 +24,7 @@ class TotrinnsvurderingMutationHandler(
 
         return when (
             val result =
-                saksbehandlerhåndterer.håndterTotrinnsvurdering(
+                saksbehandlerMediator.håndterTotrinnsvurdering(
                     oppgavereferanse = oppgavereferanse.toLong(),
                     saksbehandlerFraApi = behandlendeSaksbehandler,
                     utfall = vedtakUtfall,
@@ -95,7 +95,7 @@ class TotrinnsvurderingMutationHandler(
 
         return when (
             val result =
-                saksbehandlerhåndterer.sendIRetur(
+                saksbehandlerMediator.sendIRetur(
                     oppgavereferanse = oppgavereferanse.toLong(),
                     besluttendeSaksbehandler = besluttendeSaksbehandler,
                     notatTekst = notatTekst,

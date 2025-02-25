@@ -174,7 +174,7 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
                     totrinnsvurderingApiDao = daos.totrinnsvurderingApiDao,
                     påVentApiDao = daos.påVentApiDao,
                     apiOppgaveService = mockk(relaxed = true),
-                    saksbehandlerhåndterer = mockk(relaxed = true),
+                    saksbehandlerMediator = mockk(relaxed = true),
                     stansAutomatiskBehandlinghåndterer = mockk(relaxed = true),
                     personhåndterer = object : Personhåndterer {
                         override fun oppdaterSnapshot(fødselsnummer: String) {}

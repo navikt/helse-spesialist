@@ -22,7 +22,7 @@ internal class OpptegnelseQueryTest: AbstractGraphQLApiTest() {
             REVURDERING_FERDIGBEHANDLET
         )
         abonner(AKTØRID)
-        every { saksbehandlerhåndterer.hentAbonnerteOpptegnelser(any()) } returns typer.mapIndexed { idx, type -> ApiOpptegnelse(AKTØRID, idx + 1, type, "{}") }
+        every { saksbehandlerMediator.hentAbonnerteOpptegnelser(any()) } returns typer.mapIndexed { idx, type -> ApiOpptegnelse(AKTØRID, idx + 1, type, "{}") }
 
         val body = runQuery(
             """query HentOpptegnelser {
@@ -53,7 +53,7 @@ internal class OpptegnelseQueryTest: AbstractGraphQLApiTest() {
             REVURDERING_FERDIGBEHANDLET
         )
         abonner(AKTØRID)
-        every { saksbehandlerhåndterer.hentAbonnerteOpptegnelser(any(), any()) } returns listOf(ApiOpptegnelse(AKTØRID, 3, typer[2], "{}"))
+        every { saksbehandlerMediator.hentAbonnerteOpptegnelser(any(), any()) } returns listOf(ApiOpptegnelse(AKTØRID, 3, typer[2], "{}"))
         val body = runQuery(
             """query HentOpptegnelser {
                 opptegnelser(sekvensId: 2) {

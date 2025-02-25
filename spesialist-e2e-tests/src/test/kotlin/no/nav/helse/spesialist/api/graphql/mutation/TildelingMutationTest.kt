@@ -32,7 +32,7 @@ internal class TildelingMutationTest : AbstractGraphQLApiTest() {
             """
         )
 
-        verify(exactly = 1) { saksbehandlerhåndterer.håndter(TildelOppgave(oppgaveId), any()) }
+        verify(exactly = 1) { saksbehandlerMediator.håndter(TildelOppgave(oppgaveId), any()) }
 
         assertEquals(SAKSBEHANDLER.oid, UUID.fromString(body["data"]["opprettTildeling"]["oid"].asText()))
     }
@@ -41,7 +41,7 @@ internal class TildelingMutationTest : AbstractGraphQLApiTest() {
     fun `kan ikke tildele allerede tildelt oppgave`() {
         val oppgaveId = 1L
 
-        every { saksbehandlerhåndterer.håndter(any<TildelOppgave>(), any()) } throws OppgaveTildeltNoenAndre(TildelingApiDto("navn", "epost", UUID.randomUUID()))
+        every { saksbehandlerMediator.håndter(any<TildelOppgave>(), any()) } throws OppgaveTildeltNoenAndre(TildelingApiDto("navn", "epost", UUID.randomUUID()))
 
         val body = runQuery(
             """
@@ -81,7 +81,7 @@ internal class TildelingMutationTest : AbstractGraphQLApiTest() {
     @Test
     fun `returnerer false hvis oppgaven ikke er tildelt`() {
         val oppgaveId = 1L
-        every { saksbehandlerhåndterer.håndter(any<AvmeldOppgave>(), any()) } throws OppgaveIkkeTildelt(oppgaveId)
+        every { saksbehandlerMediator.håndter(any<AvmeldOppgave>(), any()) } throws OppgaveIkkeTildelt(oppgaveId)
         val body = runQuery(
             """
                 mutation FjernTildeling {
@@ -97,7 +97,7 @@ internal class TildelingMutationTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `returnerer false hvis oppgaven ikke finnes`() {
-        every { saksbehandlerhåndterer.håndter(any<AvmeldOppgave>(), any()) } throws IllegalStateException()
+        every { saksbehandlerMediator.håndter(any<AvmeldOppgave>(), any()) } throws IllegalStateException()
 
         val body = runQuery(
             """

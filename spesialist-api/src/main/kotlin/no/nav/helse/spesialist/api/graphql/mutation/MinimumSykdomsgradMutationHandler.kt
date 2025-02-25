@@ -4,14 +4,14 @@ import graphql.GraphQLError
 import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
-import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
+import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.schema.ApiMinimumSykdomsgrad
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class MinimumSykdomsgradMutationHandler(private val saksbehandlerhåndterer: Saksbehandlerhåndterer) :
+class MinimumSykdomsgradMutationHandler(private val saksbehandlerMediator: SaksbehandlerMediator) :
     MinimumSykdomsgradMutationSchema {
     private companion object {
         private val logg: Logger = LoggerFactory.getLogger(MinimumSykdomsgradMutation::class.java)
@@ -27,7 +27,7 @@ class MinimumSykdomsgradMutationHandler(private val saksbehandlerhåndterer: Sak
         }
 
         return try {
-            saksbehandlerhåndterer.håndter(minimumSykdomsgrad, saksbehandler)
+            saksbehandlerMediator.håndter(minimumSykdomsgrad, saksbehandler)
             DataFetcherResult.newResult<Boolean>().data(true).build()
         } catch (e: Exception) {
             val kunneIkkeVurdereMinimumSykdomsgradError = kunneIkkeVurdereMinimumSykdomsgradError()

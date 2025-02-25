@@ -353,7 +353,7 @@ internal class PersonQueryTest : AbstractGraphQLApiTest() {
     fun `periode med avslag`() {
         val avslagsbegrunnelse = "En individuell begrunnelse"
         every {
-            saksbehandlerhåndterer.hentAvslag(any(), any())
+            saksbehandlerMediator.hentAvslag(any(), any())
         } returns
             setOf(
                 ApiAvslag(

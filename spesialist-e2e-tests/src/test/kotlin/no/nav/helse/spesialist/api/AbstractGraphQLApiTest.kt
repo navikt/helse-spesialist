@@ -17,6 +17,7 @@ import io.ktor.server.routing.route
 import io.ktor.server.testing.ApplicationTestBuilder
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.behandlingsstatistikk.IBehandlingsstatistikkService
 import no.nav.helse.spesialist.api.endepunkter.ApiTesting
 import no.nav.helse.spesialist.api.graphql.ContextFactory
@@ -62,7 +63,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
 
     private val reservasjonshenter = mockk<Reservasjonshenter>(relaxed = true)
     private val behandlingsstatistikkMediator = mockk<IBehandlingsstatistikkService>(relaxed = true)
-    protected val saksbehandlerhåndterer = mockk<Saksbehandlerhåndterer>(relaxed = true)
+    protected val saksbehandlerMediator = mockk<SaksbehandlerMediator>(relaxed = true)
     private val godkjenninghåndterer = mockk<Godkjenninghåndterer>(relaxed = true)
     private val personhåndterer = mockk<Personhåndterer>(relaxed = true)
     protected val dokumenthåndterer = mockk<Dokumenthåndterer>(relaxed = true)
@@ -107,7 +108,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                                 totrinnsvurderingApiDao = totrinnsvurderingApiDao,
                                 påVentApiDao = påVentApiDao,
                                 apiOppgaveService = apiOppgaveService,
-                                saksbehandlerhåndterer = saksbehandlerhåndterer,
+                                saksbehandlerMediator = saksbehandlerMediator,
                                 stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
                                 personhåndterer = personhåndterer,
                                 snapshotService = snapshotService,
@@ -122,7 +123,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                         behandlingsstatistikkMediator = behandlingsstatistikkMediator,
                     ),
                     opptegnelse = OpptegnelseQueryHandler(
-                        saksbehandlerhåndterer = saksbehandlerhåndterer,
+                        saksbehandlerMediator = saksbehandlerMediator,
                     ),
                     dokument = DokumentQueryHandler(
                         personApiDao = personApiDao,
@@ -133,24 +134,24 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                 mutationHandlers = SpesialistSchema.MutationHandlers(
                     notat = NotatMutationHandler(sessionFactory = sessionFactory),
                     varsel = VarselMutationHandler(varselRepository = apiVarselRepository),
-                    tildeling = TildelingMutationHandler(saksbehandlerhåndterer = saksbehandlerhåndterer),
-                    opptegnelse = OpptegnelseMutationHandler(saksbehandlerhåndterer = saksbehandlerhåndterer),
-                    overstyring = OverstyringMutationHandler(saksbehandlerhåndterer = saksbehandlerhåndterer),
-                    skjonnsfastsettelse = SkjonnsfastsettelseMutationHandler(saksbehandlerhåndterer = saksbehandlerhåndterer),
-                    minimumSykdomsgrad = MinimumSykdomsgradMutationHandler(saksbehandlerhåndterer = saksbehandlerhåndterer),
+                    tildeling = TildelingMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
+                    opptegnelse = OpptegnelseMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
+                    overstyring = OverstyringMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
+                    skjonnsfastsettelse = SkjonnsfastsettelseMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
+                    minimumSykdomsgrad = MinimumSykdomsgradMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
                     totrinnsvurdering = TotrinnsvurderingMutationHandler(
-                        saksbehandlerhåndterer = saksbehandlerhåndterer,
+                        saksbehandlerMediator = saksbehandlerMediator,
                     ),
                     vedtak = VedtakMutationHandler(
-                        saksbehandlerhåndterer = saksbehandlerhåndterer,
+                        saksbehandlerMediator = saksbehandlerMediator,
                         godkjenninghåndterer = godkjenninghåndterer,
                     ),
                     person = PersonMutationHandler(personhåndterer = personhåndterer),
                     annullering = AnnulleringMutationHandler(
-                        saksbehandlerhåndterer = saksbehandlerhåndterer,
+                        saksbehandlerMediator = saksbehandlerMediator,
                     ),
-                    paVent = PaVentMutationHandler(saksbehandlerhåndterer = saksbehandlerhåndterer),
-                    opphevStans = OpphevStansMutationHandler(saksbehandlerhåndterer = saksbehandlerhåndterer)
+                    paVent = PaVentMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
+                    opphevStans = OpphevStansMutationHandler(saksbehandlerMediator = saksbehandlerMediator)
                 ),
             )
 

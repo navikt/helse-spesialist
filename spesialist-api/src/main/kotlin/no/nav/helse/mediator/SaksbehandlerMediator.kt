@@ -62,7 +62,6 @@ import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegru
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlinghåndtererImpl
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
-import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.SendIReturResult
 import no.nav.helse.spesialist.api.SendTilGodkjenningResult
 import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
@@ -114,7 +113,7 @@ class SaksbehandlerMediator(
     private val featureToggles: FeatureToggles,
     private val sessionFactory: SessionFactory,
     private val tilgangskontroll: Tilgangskontroll,
-) : Saksbehandlerhåndterer {
+) {
     private val generasjonRepository = daos.generasjonApiRepository
     private val varselRepository = daos.varselApiRepository
     private val oppgaveApiDao = daos.oppgaveApiDao
@@ -126,7 +125,7 @@ class SaksbehandlerMediator(
     private val vedtakBegrunnelseDao = daos.vedtakBegrunnelseDao
     private val dialogDao = daos.dialogDao
 
-    override fun håndter(
+    fun håndter(
         handlingFraApi: HandlingFraApi,
         saksbehandlerFraApi: SaksbehandlerFraApi,
     ) {
@@ -159,7 +158,7 @@ class SaksbehandlerMediator(
         }
     }
 
-    override fun vedtak(
+    fun vedtak(
         saksbehandlerFraApi: SaksbehandlerFraApi,
         oppgavereferanse: Long,
         godkjent: Boolean,
@@ -176,7 +175,7 @@ class SaksbehandlerMediator(
         }
     }
 
-    override fun vedtak(
+    fun vedtak(
         saksbehandlerFraApi: SaksbehandlerFraApi,
         oppgavereferanse: Long,
         godkjent: Boolean,
@@ -195,7 +194,7 @@ class SaksbehandlerMediator(
         }
     }
 
-    override fun infotrygdVedtak(
+    fun infotrygdVedtak(
         saksbehandlerFraApi: SaksbehandlerFraApi,
         oppgavereferanse: Long,
         godkjent: Boolean,
@@ -273,7 +272,7 @@ class SaksbehandlerMediator(
         }
     }
 
-    override fun påVent(
+    fun påVent(
         handling: ApiPaVentRequest,
         saksbehandlerFraApi: SaksbehandlerFraApi,
     ) {
@@ -450,7 +449,7 @@ class SaksbehandlerMediator(
         handling.utførAv(saksbehandler)
     }
 
-    override fun opprettAbonnement(
+    fun opprettAbonnement(
         saksbehandlerFraApi: SaksbehandlerFraApi,
         personidentifikator: String,
     ) {
@@ -459,7 +458,7 @@ class SaksbehandlerMediator(
         abonnementDao.opprettAbonnement(saksbehandler.id().value, personidentifikator)
     }
 
-    override fun hentAbonnerteOpptegnelser(
+    fun hentAbonnerteOpptegnelser(
         saksbehandlerFraApi: SaksbehandlerFraApi,
         sisteSekvensId: Int,
     ): List<ApiOpptegnelse> {
@@ -469,7 +468,7 @@ class SaksbehandlerMediator(
         return opptegnelseRepository.finnOpptegnelser(saksbehandler.id().value).toApiOpptegnelser()
     }
 
-    override fun hentAbonnerteOpptegnelser(saksbehandlerFraApi: SaksbehandlerFraApi): List<ApiOpptegnelse> =
+    fun hentAbonnerteOpptegnelser(saksbehandlerFraApi: SaksbehandlerFraApi): List<ApiOpptegnelse> =
         sessionFactory.transactionalSessionScope { session ->
             val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
             session.saksbehandlerRepository.lagre(saksbehandler)
@@ -498,7 +497,7 @@ class SaksbehandlerMediator(
             )
         }
 
-    override fun hentAvslag(
+    fun hentAvslag(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
     ): Set<ApiAvslag> =
@@ -519,7 +518,7 @@ class SaksbehandlerMediator(
                 }
             }.toSet()
 
-    override fun hentVedtakBegrunnelser(
+    fun hentVedtakBegrunnelser(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
     ): List<ApiVedtakBegrunnelse> =
@@ -538,7 +537,7 @@ class SaksbehandlerMediator(
                 )
             }
 
-    override fun håndterAvslag(
+    fun håndterAvslag(
         oppgaveId: Long,
         saksbehandlerFraApi: SaksbehandlerFraApi,
         avslag: no.nav.helse.spesialist.api.graphql.mutation.Avslag,
@@ -550,7 +549,7 @@ class SaksbehandlerMediator(
         )
     }
 
-    override fun håndterVedtakBegrunnelse(
+    fun håndterVedtakBegrunnelse(
         oppgaveId: Long,
         saksbehandlerFraApi: SaksbehandlerFraApi,
         utfall: ApiVedtakUtfall,
@@ -609,7 +608,7 @@ class SaksbehandlerMediator(
         }
     }
 
-    override fun hentAnnullering(
+    fun hentAnnullering(
         arbeidsgiverFagsystemId: String,
         personFagsystemId: String,
     ): no.nav.helse.modell.Annullering? =
@@ -618,7 +617,7 @@ class SaksbehandlerMediator(
             personFagsystemId = personFagsystemId,
         )
 
-    override fun sendIRetur(
+    fun sendIRetur(
         oppgavereferanse: Long,
         besluttendeSaksbehandler: SaksbehandlerFraApi,
         notatTekst: String,
@@ -685,7 +684,7 @@ class SaksbehandlerMediator(
         return SendIReturResult.Ok
     }
 
-    override fun håndterTotrinnsvurdering(
+    fun håndterTotrinnsvurdering(
         oppgavereferanse: Long,
         saksbehandlerFraApi: SaksbehandlerFraApi,
         utfall: ApiVedtakUtfall,

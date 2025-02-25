@@ -5,8 +5,8 @@ import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
 import graphql.execution.DataFetcherResult.newResult
 import graphql.schema.DataFetchingEnvironment
+import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.Godkjenninghåndterer
-import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.feilhåndtering.IkkeÅpenOppgave
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class VedtakMutationHandler(
-    private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
+    private val saksbehandlerMediator: SaksbehandlerMediator,
     private val godkjenninghåndterer: Godkjenninghåndterer,
 ) : VedtakMutationSchema {
     private companion object {
@@ -35,7 +35,7 @@ class VedtakMutationHandler(
         logg.info("Fatter vedtak for oppgave $oppgavereferanse")
 
         val resultat =
-            saksbehandlerhåndterer.vedtak(
+            saksbehandlerMediator.vedtak(
                 saksbehandlerFraApi = saksbehandler,
                 oppgavereferanse = oppgavereferanse.toLong(),
                 godkjent = true,
@@ -77,7 +77,7 @@ class VedtakMutationHandler(
         logg.info("Sender oppgave $oppgavereferanse til Infotrygd")
 
         val resultat =
-            saksbehandlerhåndterer.infotrygdVedtak(
+            saksbehandlerMediator.infotrygdVedtak(
                 saksbehandlerFraApi = saksbehandler,
                 oppgavereferanse = oppgavereferanse.toLong(),
                 godkjent = false,

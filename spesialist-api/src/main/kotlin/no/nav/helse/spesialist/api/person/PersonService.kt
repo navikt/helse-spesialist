@@ -19,10 +19,10 @@ import no.nav.helse.db.api.TildelingApiDao
 import no.nav.helse.db.api.TotrinnsvurderingApiDao
 import no.nav.helse.db.api.VarselApiRepository
 import no.nav.helse.db.api.VergemålApiDao
+import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
-import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.graphql.mapping.toApiReservasjon
 import no.nav.helse.spesialist.api.graphql.query.FetchPersonResult
@@ -62,7 +62,7 @@ class PersonService(
     private val totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
     private val påVentApiDao: PåVentApiDao,
     private val apiOppgaveService: ApiOppgaveService,
-    private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
+    private val saksbehandlerMediator: SaksbehandlerMediator,
     private val stansAutomatiskBehandlinghåndterer: StansAutomatiskBehandlinghåndterer,
     private val personhåndterer: Personhåndterer,
     private val snapshotService: SnapshotService,
@@ -137,7 +137,7 @@ class PersonService(
                         totrinnsvurderingApiDao = totrinnsvurderingApiDao,
                         påVentApiDao = påVentApiDao,
                         apiOppgaveService = apiOppgaveService,
-                        saksbehandlerhåndterer = saksbehandlerhåndterer,
+                        saksbehandlerMediator = saksbehandlerMediator,
                         sessionFactory = sessionFactory,
                     ),
             ),

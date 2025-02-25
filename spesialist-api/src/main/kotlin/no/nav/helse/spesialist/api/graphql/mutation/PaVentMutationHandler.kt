@@ -7,7 +7,7 @@ import graphql.execution.DataFetcherResult.newResult
 import graphql.schema.DataFetchingEnvironment
 import io.ktor.http.HttpStatusCode
 import io.ktor.util.logging.error
-import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
+import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.feilhåndtering.FinnerIkkeLagtPåVent
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre
@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
 class PaVentMutationHandler(
-    private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
+    private val saksbehandlerMediator: SaksbehandlerMediator,
 ) : PaVentMutationSchema {
     private companion object {
         private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
@@ -36,7 +36,7 @@ class PaVentMutationHandler(
     ): DataFetcherResult<ApiPaVent?> {
         val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
         return try {
-            saksbehandlerhåndterer.påVent(
+            saksbehandlerMediator.påVent(
                 ApiPaVentRequest.ApiLeggPaVent(
                     oppgaveId.toLong(),
                     saksbehandler.oid,
@@ -66,7 +66,7 @@ class PaVentMutationHandler(
     ): DataFetcherResult<Boolean?> {
         val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
         return try {
-            saksbehandlerhåndterer.påVent(ApiPaVentRequest.ApiFjernPaVent(oppgaveId.toLong()), saksbehandler)
+            saksbehandlerMediator.påVent(ApiPaVentRequest.ApiFjernPaVent(oppgaveId.toLong()), saksbehandler)
             newResult<Boolean?>().data(true).build()
         } catch (e: OppgaveIkkeTildelt) {
             e.logger()
@@ -87,7 +87,7 @@ class PaVentMutationHandler(
     ): DataFetcherResult<ApiPaVent?> {
         val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
         return try {
-            saksbehandlerhåndterer.påVent(
+            saksbehandlerMediator.påVent(
                 ApiPaVentRequest.ApiEndrePaVent(
                     oppgaveId = oppgaveId.toLong(),
                     saksbehandlerOid = saksbehandler.oid,

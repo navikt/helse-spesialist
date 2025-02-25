@@ -12,8 +12,8 @@ import no.nav.helse.db.api.PåVentApiDao
 import no.nav.helse.db.api.TildelingApiDao
 import no.nav.helse.db.api.TotrinnsvurderingApiDao
 import no.nav.helse.db.api.VarselApiRepository
+import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
-import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
 import no.nav.helse.spesialist.api.graphql.mapping.tilVilkarsgrunnlag
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdoverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsgiver
@@ -64,7 +64,7 @@ data class ApiPersonResolver(
     private val totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
     private val påVentApiDao: PåVentApiDao,
     private val apiOppgaveService: ApiOppgaveService,
-    private val saksbehandlerhåndterer: Saksbehandlerhåndterer,
+    private val saksbehandlerMediator: SaksbehandlerMediator,
 ) : PersonSchema {
     override fun versjon(): Int = snapshot.versjon
 
@@ -122,7 +122,7 @@ data class ApiPersonResolver(
                         fødselsnummer = snapshot.fodselsnummer,
                         generasjoner = arbeidsgiver.generasjoner,
                         apiOppgaveService = apiOppgaveService,
-                        saksbehandlerhåndterer = saksbehandlerhåndterer,
+                        saksbehandlerMediator = saksbehandlerMediator,
                         arbeidsgiverApiDao = arbeidsgiverApiDao,
                         risikovurderinger = risikovurderinger,
                         varselRepository = varselRepository,

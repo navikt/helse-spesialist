@@ -3,7 +3,7 @@ package no.nav.helse.spesialist.api.graphql.mutation
 import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
-import no.nav.helse.spesialist.api.Saksbehandlerhåndterer
+import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdOverstyringHandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiInntektOgRefusjonOverstyring
@@ -12,7 +12,7 @@ import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class OverstyringMutationHandler(private val saksbehandlerhåndterer: Saksbehandlerhåndterer) : OverstyringMutationSchema {
+class OverstyringMutationHandler(private val saksbehandlerMediator: SaksbehandlerMediator) : OverstyringMutationSchema {
     private companion object {
         private val logg: Logger = LoggerFactory.getLogger(OverstyringMutationHandler::class.java)
     }
@@ -23,7 +23,7 @@ class OverstyringMutationHandler(private val saksbehandlerhåndterer: Saksbehand
     ): DataFetcherResult<Boolean> {
         val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
         return try {
-            saksbehandlerhåndterer.håndter(overstyring, saksbehandler)
+            saksbehandlerMediator.håndter(overstyring, saksbehandler)
             DataFetcherResult.newResult<Boolean>().data(true).build()
         } catch (e: Exception) {
             val feilmelding = "Kunne ikke overstyre dager"
@@ -38,7 +38,7 @@ class OverstyringMutationHandler(private val saksbehandlerhåndterer: Saksbehand
     ): DataFetcherResult<Boolean> {
         val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
         return try {
-            saksbehandlerhåndterer.håndter(overstyring, saksbehandler)
+            saksbehandlerMediator.håndter(overstyring, saksbehandler)
             DataFetcherResult.newResult<Boolean>().data(true).build()
         } catch (e: Exception) {
             val feilmelding = "Kunne ikke overstyre inntekt og refusjon"
@@ -53,7 +53,7 @@ class OverstyringMutationHandler(private val saksbehandlerhåndterer: Saksbehand
     ): DataFetcherResult<Boolean> {
         val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
         return try {
-            saksbehandlerhåndterer.håndter(overstyring, saksbehandler)
+            saksbehandlerMediator.håndter(overstyring, saksbehandler)
             DataFetcherResult.newResult<Boolean>().data(true).build()
         } catch (e: Exception) {
             val feilmelding = "Kunne ikke overstyre arbeidsforhold"

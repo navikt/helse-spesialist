@@ -12,7 +12,7 @@ internal class TotrinnsvurderingMutationTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `send oppgave til godkjenning med V2`() {
-        every { saksbehandlerhåndterer.håndterTotrinnsvurdering(any(), any(), any(), any()) }.returns(
+        every { saksbehandlerMediator.håndterTotrinnsvurdering(any(), any(), any(), any()) }.returns(
             SendTilGodkjenningResult.Ok
         )
         opprettSaksbehandler()
@@ -34,7 +34,7 @@ internal class TotrinnsvurderingMutationTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `send oppgave i retur`() {
-        every { saksbehandlerhåndterer.sendIRetur(any(), any(), any()) }.returns(
+        every { saksbehandlerMediator.sendIRetur(any(), any(), any()) }.returns(
             SendIReturResult.Ok
         )
 
