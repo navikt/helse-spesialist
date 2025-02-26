@@ -51,7 +51,7 @@ nimbus-joseJwt = "com.nimbusds:nimbus-jose-jwt:10.0.1"
 postgresJdbcDriver = "org.postgresql:postgresql:42.7.5"
 postgresSocketFactory = "com.google.cloud.sql:postgres-socket-factory:1.23.1"
 rapidsAndRivers = "com.github.navikt:rapids-and-rivers:2025012712551737978926.de930d8e0feb"
-slf4jApi = "org.slf4j:slf4j-api:2.0.16"
+slf4jApi = "org.slf4j:slf4j-api:2.0.17"
 
 tbdLibs-jackson = { module = "com.github.navikt.tbd-libs:jackson", version.ref = "tbdLibs" }
 tbdLibs-rapidsAndRiversTest = { module = "com.github.navikt.tbd-libs:rapids-and-rivers-test", version.ref = "tbdLibs" }
