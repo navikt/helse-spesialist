@@ -1,8 +1,9 @@
-package no.nav.helse
+package no.nav.helse.spesialist.bootstrap
 
 import io.getunleash.DefaultUnleash
 import io.getunleash.Unleash
 import io.getunleash.util.UnleashConfig
+import no.nav.helse.FeatureToggles
 
 class UnleashFeatureToggles(env: Map<String, String>) : FeatureToggles {
     private val apiKey = requireNotNull(env["UNLEASH_SERVER_API_TOKEN"])

@@ -1,7 +1,9 @@
-package no.nav.helse
+package no.nav.helse.spesialist.bootstrap
 
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.ktor.server.application.Application
+import no.nav.helse.FeatureToggles
+import no.nav.helse.Gruppekontroll
 import no.nav.helse.bootstrap.Environment
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.kafka.RiverSetup
@@ -23,7 +25,6 @@ import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingh√
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.spesialist.api.AzureConfig
 import no.nav.helse.spesialist.api.Personh√•ndterer
-import no.nav.helse.spesialist.api.bootstrap.ApiBootstrap
 import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
 import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.application.Snapshothenter
@@ -34,8 +35,6 @@ import org.slf4j.LoggerFactory
 import java.lang.management.GarbageCollectorMXBean
 import java.lang.management.ManagementFactory
 import kotlin.random.Random
-
-private val logg = LoggerFactory.getLogger("SpesialistApp")
 
 class SpesialistApp(
     private val env: Environment,
@@ -211,3 +210,5 @@ class SpesialistApp(
         ).konfigurerKtorApp(application, azureConfig, env)
     }
 }
+
+private val logg = LoggerFactory.getLogger("SpesialistApp")

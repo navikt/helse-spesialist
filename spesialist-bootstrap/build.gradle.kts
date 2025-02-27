@@ -35,7 +35,7 @@ tasks {
         archiveBaseName.set("app")
 
         manifest {
-            attributes["Main-Class"] = "no.nav.helse.RapidAppKt"
+            attributes["Main-Class"] = "no.nav.helse.spesialist.bootstrap.RapidAppKt"
             attributes["Class-Path"] =
                 configurations.runtimeClasspath.get().joinToString(separator = " ") {
                     it.name

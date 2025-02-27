@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.api.bootstrap
+package no.nav.helse.spesialist.bootstrap
 
 import io.ktor.server.application.Application
 import io.ktor.server.routing.routing
@@ -14,6 +14,9 @@ import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.azureAdAppAuthentication
 import no.nav.helse.spesialist.api.behandlingsstatistikk.IBehandlingsstatistikkService
+import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
+import no.nav.helse.spesialist.api.bootstrap.debugMinneApi
+import no.nav.helse.spesialist.api.bootstrap.installPlugins
 import no.nav.helse.spesialist.api.graphql.settOppGraphQLApi
 import no.nav.helse.spesialist.api.websockets.webSocketsApi
 import no.nav.helse.spesialist.application.Reservasjonshenter

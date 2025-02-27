@@ -17,8 +17,6 @@ import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.helse.FeatureToggles
 import no.nav.helse.Gruppekontroll
-import no.nav.helse.SpesialistApp
-import no.nav.helse.bootstrap.EnvironmentImpl
 import no.nav.helse.rapids_rivers.RapidApplication.Builder
 import no.nav.helse.spesialist.api.AzureConfig
 import no.nav.helse.spesialist.api.bootstrap.Gruppe

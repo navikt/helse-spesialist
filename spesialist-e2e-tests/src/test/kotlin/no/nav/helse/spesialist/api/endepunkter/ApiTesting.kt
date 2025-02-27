@@ -7,11 +7,11 @@ import io.ktor.server.auth.authenticate
 import io.ktor.server.routing.Route
 import io.ktor.server.testing.ApplicationTestBuilder
 import io.ktor.server.testing.testApplication
-import no.nav.helse.bootstrap.EnvironmentImpl
 import no.nav.helse.spesialist.api.AzureConfig
 import no.nav.helse.spesialist.api.JwtStub
 import no.nav.helse.spesialist.api.azureAdAppAuthentication
 import no.nav.helse.spesialist.api.objectMapper
+import no.nav.helse.spesialist.bootstrap.EnvironmentImpl
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation as ClientContentNegotiation
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ServerContentNegotiation
 

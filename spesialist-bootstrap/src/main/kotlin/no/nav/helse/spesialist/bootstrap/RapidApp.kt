@@ -1,10 +1,9 @@
-package no.nav.helse
+package no.nav.helse.spesialist.bootstrap
 
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.micrometer.core.instrument.Metrics
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
-import no.nav.helse.bootstrap.EnvironmentImpl
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.spesialist.api.AzureConfig
 import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
