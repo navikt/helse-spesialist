@@ -54,7 +54,6 @@ class Totrinnsvurdering private constructor(
         }
 
     fun settBeslutter(beslutter: SaksbehandlerOid) =
-
         oppdatering {
             this.beslutter = beslutter
         }

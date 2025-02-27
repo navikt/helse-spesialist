@@ -153,12 +153,14 @@ type BehandledeOppgaver {
 type BehandletOppgave {
     aktorId: String!
     antallArbeidsforhold: AntallArbeidsforhold!
+    beslutter: String
     ferdigstiltAv: String
     ferdigstiltTidspunkt: LocalDateTime!
     id: String!
     oppgavetype: Oppgavetype!
     periodetype: Periodetype!
     personnavn: Personnavn!
+    saksbehandler: String
 }
 
 type Behandlingsstatistikk {

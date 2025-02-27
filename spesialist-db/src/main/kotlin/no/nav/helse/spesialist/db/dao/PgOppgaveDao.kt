@@ -484,16 +484,20 @@ class PgOppgaveDao internal constructor(
                 o.egenskaper,
                 o.oppdatert as ferdigstilt_tidspunkt,
                 o.ferdigstilt_av,
+                ttv.beslutter,
+                ttv.saksbehandler,
                 pi.fornavn, pi.mellomnavn, pi.etternavn,
                 count(1) OVER() AS filtered_count
             FROM oppgave o
                 INNER JOIN vedtak v ON o.vedtak_ref = v.id
                 INNER JOIN person p ON v.person_ref = p.id
                 INNER JOIN person_info pi ON p.info_ref = pi.id
-                LEFT JOIN (SELECT DISTINCT ON (vedtaksperiode_id) utbetaling_id
-                         FROM totrinnsvurdering
+                LEFT JOIN (SELECT DISTINCT ON (vedtaksperiode_id) utbetaling_id, beslutter.ident as beslutter, saksbehandler.ident as saksbehandler
+                         FROM totrinnsvurdering tv
                          INNER JOIN utbetaling_id ui ON ui.id = utbetaling_id_ref
-                         WHERE saksbehandler = :oid AND totrinnsvurdering.oppdatert::date = :fom::date
+                         INNER JOIN saksbehandler beslutter on tv.beslutter = beslutter.oid
+                         INNER JOIN saksbehandler saksbehandler on tv.saksbehandler = saksbehandler.oid
+                         WHERE (saksbehandler = :oid OR beslutter = :oid) AND tv.oppdatert::date = :fom::date
                      ) ttv ON ttv.utbetaling_id = o.utbetaling_id
             WHERE (ttv.utbetaling_id IS NOT NULL OR o.ferdigstilt_av_oid = :oid)
                 AND (o.status in ('Ferdigstilt', 'AvventerSystem'))
@@ -517,6 +521,8 @@ class PgOppgaveDao internal constructor(
                         .toSet(),
                 ferdigstiltTidspunkt = row.localDateTime("ferdigstilt_tidspunkt"),
                 ferdigstiltAv = row.stringOrNull("ferdigstilt_av"),
+                saksbehandler = row.stringOrNull("saksbehandler") ?: row.stringOrNull("ferdigstilt_av"),
+                beslutter = row.stringOrNull("beslutter"),
                 navn =
                     PersonnavnFraDatabase(
                         row.string("fornavn"),

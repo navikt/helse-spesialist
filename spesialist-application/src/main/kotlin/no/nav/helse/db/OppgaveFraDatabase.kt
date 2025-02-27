@@ -61,6 +61,8 @@ data class BehandletOppgaveFraDatabaseForVisning(
     val egenskaper: Set<EgenskapForDatabase>,
     val ferdigstiltTidspunkt: LocalDateTime,
     val ferdigstiltAv: String?,
+    val saksbehandler: String?,
+    val beslutter: String?,
     val navn: PersonnavnFraDatabase,
     val filtrertAntall: Int,
 )

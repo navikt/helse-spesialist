@@ -182,5 +182,7 @@ data class ApiBehandletOppgave(
     val antallArbeidsforhold: ApiAntallArbeidsforhold,
     val ferdigstiltTidspunkt: LocalDateTime,
     val ferdigstiltAv: String?,
+    val beslutter: String?,
+    val saksbehandler: String?,
     val personnavn: ApiPersonnavn,
 )

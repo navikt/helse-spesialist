@@ -100,6 +100,8 @@ internal object OppgaveMapper {
                 antallArbeidsforhold = egenskaper.antallArbeidsforhold(),
                 ferdigstiltTidspunkt = it.ferdigstiltTidspunkt,
                 ferdigstiltAv = it.ferdigstiltAv,
+                beslutter = it.beslutter,
+                saksbehandler = it.saksbehandler,
                 personnavn =
                     ApiPersonnavn(
                         fornavn = it.navn.fornavn,

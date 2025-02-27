@@ -14,6 +14,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.parallel.Isolated
 import java.time.LocalDate
+import java.util.UUID
 
 @Isolated
 internal class PgBehandlingsstatistikkDaoTest : AbstractDBIntegrationTest() {
@@ -68,14 +69,16 @@ internal class PgBehandlingsstatistikkDaoTest : AbstractDBIntegrationTest() {
     @Test
     fun`Får antall tilgjengelige beslutteroppgaver`() {
         nyPerson()
+        val beslutter = UUID.randomUUID()
         opprettSaksbehandler()
+        opprettSaksbehandler(saksbehandlerOID = beslutter)
         oppgaveDao.updateOppgave(
             oppgaveId = OPPGAVE_ID,
             oppgavestatus = Oppgavestatus.AvventerSaksbehandler.toString(),
             egenskaper = listOf(EGENSKAP, EgenskapForDatabase.BESLUTTER)
         )
         assertEquals(0, behandlingsstatistikkDao.getAntallTilgjengeligeBeslutteroppgaver())
-        opprettTotrinnsvurdering(saksbehandlerOid = SAKSBEHANDLER_OID)
+        opprettTotrinnsvurdering(saksbehandlerOid = SAKSBEHANDLER_OID, beslutterOid = beslutter)
         assertEquals(1, behandlingsstatistikkDao.getAntallTilgjengeligeBeslutteroppgaver())
         oppgaveDao.updateOppgave(
             oppgaveId = OPPGAVE_ID,
@@ -88,10 +91,12 @@ internal class PgBehandlingsstatistikkDaoTest : AbstractDBIntegrationTest() {
     @Test
     fun`Får antall fullførte beslutteroppgaver`() {
         nyPerson()
+        val beslutter = UUID.randomUUID()
         opprettSaksbehandler()
+        opprettSaksbehandler(saksbehandlerOID = beslutter)
         utbetalingsopplegg(1000, 0)
         assertEquals(0, behandlingsstatistikkDao.getAntallFullførteBeslutteroppgaver(LocalDate.now().minusDays(1)))
-        opprettTotrinnsvurdering(saksbehandlerOid = SAKSBEHANDLER_OID, ferdigstill = true)
+        opprettTotrinnsvurdering(saksbehandlerOid = SAKSBEHANDLER_OID, beslutterOid = beslutter, ferdigstill = true)
         assertEquals(1, behandlingsstatistikkDao.getAntallFullførteBeslutteroppgaver(LocalDate.now().minusDays(1)))
     }
 

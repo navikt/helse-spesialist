@@ -387,7 +387,7 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
         val saksbehandlerOid = UUID.randomUUID()
         nyPerson(fødselsnummer = fnr, aktørId = aktørId, organisasjonsnummer = arbeidsgiver)
         tildelOppgave(saksbehandlerOid = saksbehandlerOid)
-        ferdigstillOppgave(OPPGAVE_ID, ferdigstiltAvOid = saksbehandlerOid, ferdigstiltAv = SAKSBEHANDLER_NAVN)
+        ferdigstillOppgave(OPPGAVE_ID, ferdigstiltAvOid = saksbehandlerOid, ferdigstiltAv = SAKSBEHANDLER_IDENT)
 
         val oppgaver = oppgaveDao.finnBehandledeOppgaver(saksbehandlerOid)
         assertEquals(1, oppgaver.size)
@@ -395,7 +395,9 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
         assertEquals(OPPGAVE_ID, førsteOppgave.id)
         assertEquals(aktørId, førsteOppgave.aktørId)
         assertEquals(setOf(EGENSKAP), førsteOppgave.egenskaper)
-        assertEquals(SAKSBEHANDLER_NAVN, førsteOppgave.ferdigstiltAv)
+        assertEquals(SAKSBEHANDLER_IDENT, førsteOppgave.ferdigstiltAv)
+        assertEquals(SAKSBEHANDLER_IDENT, førsteOppgave.saksbehandler)
+        assertNull(førsteOppgave.beslutter)
         assertEquals(FORNAVN, førsteOppgave.navn.fornavn)
         assertEquals(MELLOMNAVN, førsteOppgave.navn.mellomnavn)
         assertEquals(ETTERNAVN, førsteOppgave.navn.etternavn)
@@ -460,19 +462,23 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
         )
         utbetalingsopplegg(1000, 0)
         opprettSaksbehandler(saksbehandlerOID = saksbehandlerOid)
-        opprettSaksbehandler(beslutterOid, navn = "NAVN TIL BESLUTTER")
+        opprettSaksbehandler(beslutterOid, ident = "BESLUTTER-IDENT")
         opprettSaksbehandler(annenSaksbehandlerOid)
-        opprettTotrinnsvurdering(vedtaksperiodeId = VEDTAKSPERIODE, saksbehandlerOid = saksbehandlerOid, ferdigstill = true)
-        ferdigstillOppgave(OPPGAVE_ID, ferdigstiltAvOid = beslutterOid, ferdigstiltAv = "NAVN TIL BESLUTTER")
+        opprettTotrinnsvurdering(vedtaksperiodeId = VEDTAKSPERIODE, saksbehandlerOid = saksbehandlerOid, beslutterOid = beslutterOid, ferdigstill = true)
+        ferdigstillOppgave(OPPGAVE_ID, ferdigstiltAvOid = beslutterOid, ferdigstiltAv = "BESLUTTER-IDENT")
 
         val behandletIDagForSaksbehandler = oppgaveDao.finnBehandledeOppgaver(saksbehandlerOid)
         val behandletIDagForBeslutter = oppgaveDao.finnBehandledeOppgaver(beslutterOid)
         val behandletIDagForAnnenSaksbehandler = oppgaveDao.finnBehandledeOppgaver(annenSaksbehandlerOid)
 
         assertEquals(1, behandletIDagForSaksbehandler.size)
-        assertEquals("NAVN TIL BESLUTTER", behandletIDagForSaksbehandler.first().ferdigstiltAv)
+        assertEquals("BESLUTTER-IDENT", behandletIDagForSaksbehandler.first().ferdigstiltAv)
+        assertEquals("BESLUTTER-IDENT", behandletIDagForSaksbehandler.first().beslutter)
+        assertEquals(SAKSBEHANDLER_IDENT, behandletIDagForSaksbehandler.first().saksbehandler)
         assertEquals(1, behandletIDagForBeslutter.size)
-        assertEquals("NAVN TIL BESLUTTER", behandletIDagForBeslutter.first().ferdigstiltAv)
+        assertEquals("BESLUTTER-IDENT", behandletIDagForBeslutter.first().ferdigstiltAv)
+        assertEquals("BESLUTTER-IDENT", behandletIDagForBeslutter.first().beslutter)
+        assertEquals(SAKSBEHANDLER_IDENT, behandletIDagForBeslutter.first().saksbehandler)
         assertEquals(0, behandletIDagForAnnenSaksbehandler.size)
     }
 
@@ -1207,6 +1213,7 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
     fun `Saksbehandler får ikke med oppgaver hen har sendt til beslutter selv om hen har beslutter-tilgang`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val saksbehandlerOid = UUID.randomUUID()
+        val beslutterOid = UUID.randomUUID()
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
@@ -1218,7 +1225,12 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
                 ),
         )
         opprettSaksbehandler(saksbehandlerOid)
-        opprettTotrinnsvurdering(vedtaksperiodeId, saksbehandlerOid)
+        opprettSaksbehandler(beslutterOid)
+        opprettTotrinnsvurdering(
+            vedtaksperiodeId = vedtaksperiodeId,
+            saksbehandlerOid = saksbehandlerOid,
+            beslutterOid = beslutterOid
+        )
         val oppgaver = oppgaveDao.finnOppgaverForVisning(ekskluderEgenskaper = emptyList(), saksbehandlerOid = saksbehandlerOid)
         assertEquals(0, oppgaver.size)
     }
@@ -1227,6 +1239,7 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
     fun `Saksbehandler får ikke med oppgaver med egenskap STRENGT_FORTROLIG_ADRESSE`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val saksbehandlerOid = UUID.randomUUID()
+        val beslutterOid = UUID.randomUUID()
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
@@ -1238,7 +1251,12 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
                 ),
         )
         opprettSaksbehandler(saksbehandlerOid)
-        opprettTotrinnsvurdering(vedtaksperiodeId, saksbehandlerOid)
+        opprettSaksbehandler(beslutterOid)
+        opprettTotrinnsvurdering(
+            vedtaksperiodeId = vedtaksperiodeId,
+            saksbehandlerOid = saksbehandlerOid,
+            beslutterOid = beslutterOid
+        )
         val oppgaver =
             oppgaveDao.finnOppgaverForVisning(
                 ekskluderEgenskaper = listOf("STRENGT_FORTROLIG_ADRESSE"),

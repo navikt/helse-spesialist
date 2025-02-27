@@ -240,7 +240,9 @@ internal class OppgaverQueryHandlerTest : AbstractGraphQLApiTest() {
             periodetype = ApiPeriodetype.FORSTEGANGSBEHANDLING,
             antallArbeidsforhold = ApiAntallArbeidsforhold.ET_ARBEIDSFORHOLD,
             ferdigstiltTidspunkt = LocalDateTime.now(),
-            ferdigstiltAv = "SAKSBEHANDLER",
+            ferdigstiltAv = "BESLUTTER",
+            beslutter = "BESLUTTER",
+            saksbehandler = "SAKSBEHANDLER",
             personnavn =
                 ApiPersonnavn(
                     fornavn = "Aage",

@@ -37,6 +37,7 @@ import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertNull
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
@@ -211,7 +212,7 @@ internal class ApiOppgaveServiceTest {
                         oppgaveId = 1L,
                         aktørId = "1234567891011",
                         personnavnFraDatabase = PersonnavnFraDatabase("fornavn", "mellomnavn", "etternavn"),
-                        ferdigstiltAv = "Kurt",
+                        ferdigstiltAv = "EN-SAKSBEHANDLER-IDENT",
                         ferdigstiltTidspunkt = ferdigstiltTidspunkt,
                     ),
                 )
@@ -224,7 +225,9 @@ internal class ApiOppgaveServiceTest {
         assertEquals("fornavn", oppgave.personnavn.fornavn)
         assertEquals("mellomnavn", oppgave.personnavn.mellomnavn)
         assertEquals("etternavn", oppgave.personnavn.etternavn)
-        assertEquals("Kurt", oppgave.ferdigstiltAv)
+        assertEquals("EN-SAKSBEHANDLER-IDENT", oppgave.ferdigstiltAv)
+        assertNull(oppgave.beslutter)
+        assertEquals("EN-SAKSBEHANDLER-IDENT", oppgave.saksbehandler)
         assertEquals(ferdigstiltTidspunkt, oppgave.ferdigstiltTidspunkt)
         assertEquals(ApiOppgavetype.SOKNAD, oppgave.oppgavetype)
         assertEquals(ApiPeriodetype.FORSTEGANGSBEHANDLING, oppgave.periodetype)
@@ -454,7 +457,9 @@ internal class ApiOppgaveServiceTest {
         oppgaveId: Long = nextLong(),
         aktørId: String = nextLong(1000000000000, 2000000000000).toString(),
         egenskaper: Set<EgenskapForDatabase> = EGENSKAPER,
-        ferdigstiltAv: String? = "saksbehandler",
+        ferdigstiltAv: String? = "EN-SAKSBEHANDLER-IDENT",
+        beslutter: String? = null,
+        saksbehandler: String? = null,
         personnavnFraDatabase: PersonnavnFraDatabase = PersonnavnFraDatabase("navn", "mellomnavn", "etternavn"),
         ferdigstiltTidspunkt: LocalDateTime = LocalDateTime.now(),
         filtrertAntall: Int = 1,
@@ -463,6 +468,8 @@ internal class ApiOppgaveServiceTest {
         aktørId = aktørId,
         egenskaper = egenskaper,
         ferdigstiltAv = ferdigstiltAv,
+        saksbehandler = saksbehandler ?: ferdigstiltAv,
+        beslutter = beslutter,
         ferdigstiltTidspunkt = ferdigstiltTidspunkt,
         navn = personnavnFraDatabase,
         filtrertAntall = filtrertAntall,

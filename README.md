@@ -96,7 +96,7 @@ Hvis du nylig har gjort endringer i GraphQL-typer, -mutations, -queries eller -s
 endringene, er det lurt å først oppdatere lokalt testskjema, slik at du får syntax highlighting, code completion og et
 bedre liv. Da gjør du følgende:
 
-- Kjør opp [LocalApp.kt](spesialist-bootstrap/src/test/kotlin/no/nav/helse/LocalApp.kt) sin main-metode, det starter en
+- Kjør opp [LocalApp.kt](spesialist-bootstrap/src/test/kotlin/no/nav/helse/spesialist/bootstrap/LocalApp.kt) sin main-metode, det starter en
   lokal GraphQL-server.
 - Finn filen [graphql.config.yml](spesialist-api/src/test/graphql.config.yml) og kjør `spesialist-local`, som vil
   oppdatere [schema_til_bruk_fra_tester.grapqhl](spesialist-api/src/test/schema_til_bruk_fra_tester.graphql).

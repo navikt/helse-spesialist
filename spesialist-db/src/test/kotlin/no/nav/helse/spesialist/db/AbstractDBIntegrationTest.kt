@@ -556,10 +556,12 @@ abstract class AbstractDBIntegrationTest {
     protected fun opprettTotrinnsvurdering(
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
         saksbehandlerOid: UUID? = null,
+        beslutterOid: UUID? = null,
         erRetur: Boolean = false,
         ferdigstill: Boolean = false,
     ) {
         val totrinnsvurdering = Totrinnsvurdering.ny(vedtaksperiodeId = vedtaksperiodeId)
+        val beslutter = SaksbehandlerOid(beslutterOid ?: UUID.randomUUID())
         totrinnsvurderingRepository.lagre(totrinnsvurdering, FNR)
         saksbehandlerOid?.let {
             totrinnsvurdering.sendTilBeslutter(
@@ -570,8 +572,10 @@ abstract class AbstractDBIntegrationTest {
 
         if (erRetur) totrinnsvurdering.sendIRetur(
             oppgaveId = OPPGAVE_ID,
-            beslutter = SaksbehandlerOid(UUID.randomUUID())
+            beslutter = beslutter
         )
+
+        totrinnsvurdering.settBeslutter(beslutter)
 
         if (ferdigstill) totrinnsvurdering.ferdigstill(UTBETALING_ID)
 
