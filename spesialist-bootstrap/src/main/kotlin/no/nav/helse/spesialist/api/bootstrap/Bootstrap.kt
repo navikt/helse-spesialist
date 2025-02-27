@@ -19,21 +19,6 @@ class Bootstrap(
     private val reservasjonshenter: Reservasjonshenter,
     private val tilgangsgrupper: Tilgangsgrupper,
 ) {
-    private val personinfoDao = daos.personinfoDao
-    private val personApiDao = daos.personApiDao
-    private val oppgaveApiDao = daos.oppgaveApiDao
-    private val periodehistorikkApiDao = daos.periodehistorikkApiDao
-    private val risikovurderingApiDao = daos.risikovurderingApiDao
-    private val tildelingApiDao = daos.tildelingApiDao
-    private val overstyringApiDao = daos.overstyringApiDao
-    private val arbeidsgiverApiDao = daos.arbeidsgiverApiDao
-    private val egenAnsattApiDao = daos.egenAnsattApiDao
-    private val notatApiDao = daos.notatApiDao
-    private val totrinnsvurderingApiDao = daos.totrinnsvurderingApiDao
-    private val apiVarselRepository = daos.varselApiRepository
-    private val påVentApiDao = daos.påVentApiDao
-    private val vergemålApiDao = daos.vergemålApiDao
-
     fun ktorApp(
         application: Application,
         azureConfig: AzureConfig,
@@ -43,24 +28,24 @@ class Bootstrap(
         azureAdAppAuthentication(azureConfig, env)
         graphQLApi(
             sessionFactory = sessionFactory,
-            personApiDao = personApiDao,
-            egenAnsattApiDao = egenAnsattApiDao,
-            tildelingApiDao = tildelingApiDao,
-            arbeidsgiverApiDao = arbeidsgiverApiDao,
-            overstyringApiDao = overstyringApiDao,
-            risikovurderingApiDao = risikovurderingApiDao,
-            varselRepository = apiVarselRepository,
-            oppgaveApiDao = oppgaveApiDao,
-            periodehistorikkApiDao = periodehistorikkApiDao,
-            notatDao = notatApiDao,
-            totrinnsvurderingApiDao = totrinnsvurderingApiDao,
-            påVentApiDao = påVentApiDao,
-            vergemålApiDao = vergemålApiDao,
+            personApiDao = daos.personApiDao,
+            egenAnsattApiDao = daos.egenAnsattApiDao,
+            tildelingApiDao = daos.tildelingApiDao,
+            arbeidsgiverApiDao = daos.arbeidsgiverApiDao,
+            overstyringApiDao = daos.overstyringApiDao,
+            risikovurderingApiDao = daos.risikovurderingApiDao,
+            varselRepository = daos.varselApiRepository,
+            oppgaveApiDao = daos.oppgaveApiDao,
+            periodehistorikkApiDao = daos.periodehistorikkApiDao,
+            notatDao = daos.notatApiDao,
+            totrinnsvurderingApiDao = daos.totrinnsvurderingApiDao,
+            påVentApiDao = daos.påVentApiDao,
+            vergemålApiDao = daos.vergemålApiDao,
             reservasjonshenter = reservasjonshenter,
             skjermedePersonerGruppeId = tilgangsgrupper.skjermedePersonerGruppeId,
             kode7Saksbehandlergruppe = tilgangsgrupper.kode7GruppeId,
             beslutterGruppeId = tilgangsgrupper.beslutterGruppeId,
-            snapshotService = SnapshotService(personinfoDao, avhengigheter.snapshothenter),
+            snapshotService = SnapshotService(daos.personinfoDao, avhengigheter.snapshothenter),
             behandlingsstatistikkMediator = avhengigheter.behandlingstatistikk,
             saksbehandlerMediator = avhengigheter.saksbehandlerMediatorProvider(),
             apiOppgaveService = avhengigheter.apiOppgaveServiceProvider(),
