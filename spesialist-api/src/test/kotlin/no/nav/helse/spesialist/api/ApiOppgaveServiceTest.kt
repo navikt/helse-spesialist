@@ -84,7 +84,7 @@ internal class ApiOppgaveServiceTest {
             behov: List<Behov>
         ) = error("Not implemented for test")
 
-        override fun publiser(event: KommandokjedeEndretEvent, hendelseNavn: String) = error("Not implemented for test")
+        override fun publiser(fødselsnummer: String, event: KommandokjedeEndretEvent, hendelseNavn: String) = error("Not implemented for test")
     }
 
     private val apiOppgaveService =

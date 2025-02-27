@@ -45,7 +45,7 @@ internal class UtgåendeMeldingerMediatorTest {
             behov: List<Behov>
         ) = error("Not implemented in test")
 
-        override fun publiser(event: KommandokjedeEndretEvent, hendelseNavn: String) = error("Not implemented in test")
+        override fun publiser(fødselsnummer: String, event: KommandokjedeEndretEvent, hendelseNavn: String) = error("Not implemented in test")
     }
 
     private val utgåendeMeldingerMediator: UtgåendeMeldingerMediator = UtgåendeMeldingerMediator()

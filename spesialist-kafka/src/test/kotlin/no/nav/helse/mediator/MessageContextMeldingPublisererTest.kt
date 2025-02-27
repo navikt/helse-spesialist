@@ -99,6 +99,7 @@ internal class MessageContextMeldingPublisererTest {
         )
 
         meldingPubliserer.publiser(
+            fødselsnummer = fødselsnummer,
             event = event,
             hendelseNavn = årsak,
         )

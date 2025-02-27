@@ -49,6 +49,7 @@ class MessageContextMeldingPubliserer(private val context: MessageContext) : Mel
     }
 
     override fun publiser(
+        fødselsnummer: String,
         event: KommandokjedeEndretEvent,
         hendelseNavn: String,
     ) {
@@ -60,7 +61,7 @@ class MessageContextMeldingPubliserer(private val context: MessageContext) : Mel
             "Publiserer CommandContext tilstandendring i forbindelse med $hendelseNavn, ny tilstand: $${event::class.simpleName}\n{}",
             message,
         )
-        context.publish(event.commandContextId.toString(), message)
+        context.publish(fødselsnummer, message)
     }
 
     private companion object {

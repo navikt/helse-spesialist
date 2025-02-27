@@ -36,7 +36,7 @@ internal class DokumentMediatorTest {
         override fun publiser(hendelseId: UUID, commandContextId: UUID, fødselsnummer: String, behov: List<Behov>) =
             error("Not implemented in test")
 
-        override fun publiser(event: KommandokjedeEndretEvent, hendelseNavn: String) =
+        override fun publiser(fødselsnummer: String, event: KommandokjedeEndretEvent, hendelseNavn: String) =
             error("Not implemented in test")
     }
 

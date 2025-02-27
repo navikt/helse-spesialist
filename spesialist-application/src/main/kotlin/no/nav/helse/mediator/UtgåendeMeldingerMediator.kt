@@ -84,6 +84,7 @@ class UtgåendeMeldingerMediator : CommandContextObserver {
     ) {
         kommandokjedetilstandsendringer.forEach { event ->
             publiserer.publiser(
+                fødselsnummer = hendelse.fødselsnummer(),
                 event = event,
                 hendelseNavn = hendelse.javaClass.simpleName,
             )

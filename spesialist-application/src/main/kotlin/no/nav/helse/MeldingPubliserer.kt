@@ -27,6 +27,7 @@ interface MeldingPubliserer {
     )
 
     fun publiser(
+        fødselsnummer: String,
         event: KommandokjedeEndretEvent,
         hendelseNavn: String,
     )
