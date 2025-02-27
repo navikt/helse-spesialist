@@ -55,6 +55,17 @@ class SpesialistApp(
     private val daos = DBDaos(dataSource)
     private val sessionFactory = TransactionalSessionFactory(dataSource)
 
+    private val oppgaveDao = daos.oppgaveDao
+    private val periodehistorikkDao = daos.periodehistorikkDao
+    private val tildelingDao = daos.tildelingDao
+    private val reservasjonDao = daos.reservasjonDao
+    private val opptegnelseDao = daos.opptegnelseDao
+    private val behandlingsstatistikkDao = daos.behandlingsstatistikkDao
+    private val notatDao = daos.notatDao
+    private val dialogDao = daos.dialogDao
+    private val dokumentDao = daos.dokumentDao
+    private val stansAutomatiskBehandlingDao = daos.stansAutomatiskBehandlingDao
+
     private lateinit var meldingMediator: MeldingMediator
     private lateinit var personhåndterer: Personhåndterer
     private lateinit var saksbehandlerMediator: SaksbehandlerMediator
@@ -64,14 +75,14 @@ class SpesialistApp(
     private lateinit var subsumsjonsmelder: Subsumsjonsmelder
 
     private val behandlingsstatistikkService =
-        BehandlingsstatistikkService(behandlingsstatistikkDao = daos.behandlingsstatistikkDao)
-    private val godkjenningMediator = GodkjenningMediator(daos.opptegnelseDao)
+        BehandlingsstatistikkService(behandlingsstatistikkDao = behandlingsstatistikkDao)
+    private val godkjenningMediator = GodkjenningMediator(opptegnelseDao)
     private val stansAutomatiskBehandlinghåndterer =
         StansAutomatiskBehandlinghåndtererImpl(
-            daos.stansAutomatiskBehandlingDao,
-            daos.oppgaveDao,
-            daos.notatDao,
-            daos.dialogDao,
+            stansAutomatiskBehandlingDao,
+            oppgaveDao,
+            notatDao,
+            dialogDao,
         )
 
     private lateinit var godkjenningService: GodkjenningService
@@ -140,9 +151,9 @@ class SpesialistApp(
         val meldingPubliserer = MessageContextMeldingPubliserer(rapidsConnection)
         oppgaveService =
             OppgaveService(
-                oppgaveDao = daos.oppgaveDao,
-                tildelingDao = daos.tildelingDao,
-                reservasjonDao = daos.reservasjonDao,
+                oppgaveDao = oppgaveDao,
+                tildelingDao = tildelingDao,
+                reservasjonDao = reservasjonDao,
                 meldingPubliserer = meldingPubliserer,
                 tilgangskontroll = tilgangskontrollørForReservasjon,
                 tilgangsgrupper = tilgangsgrupper,
@@ -150,7 +161,7 @@ class SpesialistApp(
             )
         apiOppgaveService =
             ApiOppgaveService(
-                oppgaveDao = daos.oppgaveDao,
+                oppgaveDao = oppgaveDao,
                 tilgangsgrupper = tilgangsgrupper,
                 oppgaveService = oppgaveService,
             )
@@ -162,7 +173,7 @@ class SpesialistApp(
                 meldingDao = daos.meldingDao,
                 meldingDuplikatkontrollDao = daos.meldingDuplikatkontrollDao,
                 kommandofabrikk = kommandofabrikk,
-                dokumentDao = daos.dokumentDao,
+                dokumentDao = dokumentDao,
                 varselRepository =
                     VarselRepository(
                         varselDao = daos.varselDao,
@@ -188,15 +199,15 @@ class SpesialistApp(
                 sessionFactory = sessionFactory,
                 tilgangskontroll = tilgangskontrollørForReservasjon,
             )
-        dokumentMediator = DokumentMediator(daos.dokumentDao, meldingPubliserer)
+        dokumentMediator = DokumentMediator(dokumentDao, meldingPubliserer)
         godkjenningService =
             GodkjenningService(
-                oppgaveDao = daos.oppgaveDao,
+                oppgaveDao = oppgaveDao,
                 overstyringDao = daos.overstyringDao,
                 publiserer = meldingPubliserer,
                 oppgaveService = oppgaveService,
-                reservasjonDao = daos.reservasjonDao,
-                periodehistorikkDao = daos.periodehistorikkDao,
+                reservasjonDao = reservasjonDao,
+                periodehistorikkDao = periodehistorikkDao,
                 sessionFactory = sessionFactory,
                 featureToggles = featureToggles,
             )
