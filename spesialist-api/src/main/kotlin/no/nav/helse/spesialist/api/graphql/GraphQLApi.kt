@@ -14,21 +14,8 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
+import no.nav.helse.db.Daos
 import no.nav.helse.db.SessionFactory
-import no.nav.helse.db.VedtakBegrunnelseDao
-import no.nav.helse.db.api.ArbeidsgiverApiDao
-import no.nav.helse.db.api.EgenAnsattApiDao
-import no.nav.helse.db.api.NotatApiDao
-import no.nav.helse.db.api.OppgaveApiDao
-import no.nav.helse.db.api.OverstyringApiDao
-import no.nav.helse.db.api.PeriodehistorikkApiDao
-import no.nav.helse.db.api.PersonApiDao
-import no.nav.helse.db.api.PåVentApiDao
-import no.nav.helse.db.api.RisikovurderingApiDao
-import no.nav.helse.db.api.TildelingApiDao
-import no.nav.helse.db.api.TotrinnsvurderingApiDao
-import no.nav.helse.db.api.VarselApiRepository
-import no.nav.helse.db.api.VergemålApiDao
 import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.spesialist.api.Dokumenthåndterer
@@ -38,6 +25,7 @@ import no.nav.helse.spesialist.api.GraphQLMetrikker
 import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.behandlingsstatistikk.IBehandlingsstatistikkService
+import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
 import no.nav.helse.spesialist.api.graphql.mutation.AnnulleringMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.MinimumSykdomsgradMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.NotatMutationHandler
@@ -60,141 +48,152 @@ import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.person.PersonService
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
 import no.nav.helse.spesialist.application.Reservasjonshenter
+import no.nav.helse.spesialist.application.Snapshothenter
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.Duration
-import java.util.UUID
 
-fun Application.graphQLApi(
+fun Application.settOppGraphQLApi(
+    daos: Daos,
     sessionFactory: SessionFactory,
-    personApiDao: PersonApiDao,
-    egenAnsattApiDao: EgenAnsattApiDao,
-    tildelingApiDao: TildelingApiDao,
-    arbeidsgiverApiDao: ArbeidsgiverApiDao,
-    overstyringApiDao: OverstyringApiDao,
-    risikovurderingApiDao: RisikovurderingApiDao,
-    varselRepository: VarselApiRepository,
-    oppgaveApiDao: OppgaveApiDao,
-    periodehistorikkApiDao: PeriodehistorikkApiDao,
-    notatDao: NotatApiDao,
-    totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
-    påVentApiDao: PåVentApiDao,
-    vergemålApiDao: VergemålApiDao,
-    reservasjonshenter: Reservasjonshenter,
-    skjermedePersonerGruppeId: UUID,
-    kode7Saksbehandlergruppe: UUID,
-    beslutterGruppeId: UUID,
-    snapshotService: SnapshotService,
-    behandlingsstatistikkMediator: IBehandlingsstatistikkService,
     saksbehandlerMediator: SaksbehandlerMediator,
     apiOppgaveService: ApiOppgaveService,
     godkjenninghåndterer: Godkjenninghåndterer,
     personhåndterer: Personhåndterer,
     dokumenthåndterer: Dokumenthåndterer,
     stansAutomatiskBehandlinghåndterer: StansAutomatiskBehandlinghåndterer,
-    vedtakBegrunnelseDao: VedtakBegrunnelseDao,
+    behandlingstatistikk: IBehandlingsstatistikkService,
+    snapshothenter: Snapshothenter,
+    reservasjonshenter: Reservasjonshenter,
+    tilgangsgrupper: Tilgangsgrupper,
 ) {
     val spesialistSchema =
-        SpesialistSchema(
-            queryHandlers =
-                SpesialistSchema.QueryHandlers(
-                    person =
-                        PersonQueryHandler(
-                            personoppslagService =
-                                PersonService(
-                                    personApiDao = personApiDao,
-                                    egenAnsattApiDao = egenAnsattApiDao,
-                                    vergemålApiDao = vergemålApiDao,
-                                    tildelingApiDao = tildelingApiDao,
-                                    arbeidsgiverApiDao = arbeidsgiverApiDao,
-                                    overstyringApiDao = overstyringApiDao,
-                                    risikovurderingApiDao = risikovurderingApiDao,
-                                    varselRepository = varselRepository,
-                                    oppgaveApiDao = oppgaveApiDao,
-                                    periodehistorikkApiDao = periodehistorikkApiDao,
-                                    notatDao = notatDao,
-                                    totrinnsvurderingApiDao = totrinnsvurderingApiDao,
-                                    påVentApiDao = påVentApiDao,
-                                    apiOppgaveService = apiOppgaveService,
-                                    saksbehandlerMediator = saksbehandlerMediator,
-                                    stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
-                                    personhåndterer = personhåndterer,
-                                    snapshotService = snapshotService,
-                                    reservasjonshenter = reservasjonshenter,
-                                    sessionFactory = sessionFactory,
-                                    vedtakBegrunnelseDao = vedtakBegrunnelseDao,
-                                ),
-                        ),
-                    oppgaver =
-                        OppgaverQueryHandler(
-                            apiOppgaveService = apiOppgaveService,
-                        ),
-                    behandlingsstatistikk =
-                        BehandlingsstatistikkQueryHandler(
-                            behandlingsstatistikkMediator = behandlingsstatistikkMediator,
-                        ),
-                    opptegnelse =
-                        OpptegnelseQueryHandler(
-                            saksbehandlerMediator = saksbehandlerMediator,
-                        ),
-                    dokument =
-                        DokumentQueryHandler(
-                            personApiDao = personApiDao,
-                            egenAnsattApiDao = egenAnsattApiDao,
-                            dokumenthåndterer = dokumenthåndterer,
-                        ),
-                ),
-            mutationHandlers =
-                SpesialistSchema.MutationHandlers(
-                    notat = NotatMutationHandler(sessionFactory = sessionFactory),
-                    varsel = VarselMutationHandler(varselRepository = varselRepository),
-                    tildeling = TildelingMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
-                    opptegnelse = OpptegnelseMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
-                    overstyring = OverstyringMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
-                    skjonnsfastsettelse = SkjonnsfastsettelseMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
-                    minimumSykdomsgrad = MinimumSykdomsgradMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
-                    totrinnsvurdering =
-                        TotrinnsvurderingMutationHandler(
-                            saksbehandlerMediator = saksbehandlerMediator,
-                        ),
-                    vedtak =
-                        VedtakMutationHandler(
-                            saksbehandlerMediator = saksbehandlerMediator,
-                            godkjenninghåndterer = godkjenninghåndterer,
-                        ),
-                    person = PersonMutationHandler(personhåndterer = personhåndterer),
-                    annullering =
-                        AnnulleringMutationHandler(
-                            saksbehandlerMediator = saksbehandlerMediator,
-                        ),
-                    paVent = PaVentMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
-                    opphevStans = OpphevStansMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
-                ),
+        lagSchemaMedResolversOgHandlers(
+            daos = daos,
+            apiOppgaveService = apiOppgaveService,
+            saksbehandlerMediator = saksbehandlerMediator,
+            stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
+            personhåndterer = personhåndterer,
+            snapshothenter = snapshothenter,
+            reservasjonshenter = reservasjonshenter,
+            sessionFactory = sessionFactory,
+            behandlingstatistikk = behandlingstatistikk,
+            dokumenthåndterer = dokumenthåndterer,
+            godkjenninghåndterer = godkjenninghåndterer,
         )
-    val graphQL =
+    val graphQLPlugin =
         install(GraphQL) {
             server {
                 requestParser = KtorGraphQLRequestParser(objectMapper)
                 contextFactory =
                     ContextFactory(
-                        kode7Saksbehandlergruppe = kode7Saksbehandlergruppe,
-                        skjermedePersonerSaksbehandlergruppe = skjermedePersonerGruppeId,
-                        beslutterSaksbehandlergruppe = beslutterGruppeId,
+                        kode7Saksbehandlergruppe = tilgangsgrupper.kode7GruppeId,
+                        skjermedePersonerSaksbehandlergruppe = tilgangsgrupper.skjermedePersonerGruppeId,
+                        beslutterSaksbehandlergruppe = tilgangsgrupper.beslutterGruppeId,
                     )
             }
             schema(spesialistSchema::setup)
         }
-
     routing {
         route("graphql") {
             authenticate("oidc") {
                 install(GraphQLMetrikker)
                 install(GraphQLCallLogging)
-                queryHandler(graphQL.server)
+                queryHandler(graphQLPlugin.server)
             }
         }
     }
 }
+
+private fun lagSchemaMedResolversOgHandlers(
+    daos: Daos,
+    apiOppgaveService: ApiOppgaveService,
+    saksbehandlerMediator: SaksbehandlerMediator,
+    stansAutomatiskBehandlinghåndterer: StansAutomatiskBehandlinghåndterer,
+    personhåndterer: Personhåndterer,
+    snapshothenter: Snapshothenter,
+    reservasjonshenter: Reservasjonshenter,
+    sessionFactory: SessionFactory,
+    behandlingstatistikk: IBehandlingsstatistikkService,
+    dokumenthåndterer: Dokumenthåndterer,
+    godkjenninghåndterer: Godkjenninghåndterer,
+): SpesialistSchema =
+    SpesialistSchema(
+        queryHandlers =
+            SpesialistSchema.QueryHandlers(
+                person =
+                    PersonQueryHandler(
+                        personoppslagService =
+                            PersonService(
+                                personApiDao = daos.personApiDao,
+                                egenAnsattApiDao = daos.egenAnsattApiDao,
+                                vergemålApiDao = daos.vergemålApiDao,
+                                tildelingApiDao = daos.tildelingApiDao,
+                                arbeidsgiverApiDao = daos.arbeidsgiverApiDao,
+                                overstyringApiDao = daos.overstyringApiDao,
+                                risikovurderingApiDao = daos.risikovurderingApiDao,
+                                varselRepository = daos.varselApiRepository,
+                                oppgaveApiDao = daos.oppgaveApiDao,
+                                periodehistorikkApiDao = daos.periodehistorikkApiDao,
+                                notatDao = daos.notatApiDao,
+                                totrinnsvurderingApiDao = daos.totrinnsvurderingApiDao,
+                                påVentApiDao = daos.påVentApiDao,
+                                apiOppgaveService = apiOppgaveService,
+                                saksbehandlerMediator = saksbehandlerMediator,
+                                stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
+                                personhåndterer = personhåndterer,
+                                snapshotService = SnapshotService(daos.personinfoDao, snapshothenter),
+                                reservasjonshenter = reservasjonshenter,
+                                sessionFactory = sessionFactory,
+                                vedtakBegrunnelseDao = daos.vedtakBegrunnelseDao,
+                            ),
+                    ),
+                oppgaver =
+                    OppgaverQueryHandler(
+                        apiOppgaveService = apiOppgaveService,
+                    ),
+                behandlingsstatistikk =
+                    BehandlingsstatistikkQueryHandler(
+                        behandlingsstatistikkMediator = behandlingstatistikk,
+                    ),
+                opptegnelse =
+                    OpptegnelseQueryHandler(
+                        saksbehandlerMediator = saksbehandlerMediator,
+                    ),
+                dokument =
+                    DokumentQueryHandler(
+                        personApiDao = daos.personApiDao,
+                        egenAnsattApiDao = daos.egenAnsattApiDao,
+                        dokumenthåndterer = dokumenthåndterer,
+                    ),
+            ),
+        mutationHandlers =
+            SpesialistSchema.MutationHandlers(
+                notat = NotatMutationHandler(sessionFactory = sessionFactory),
+                varsel = VarselMutationHandler(varselRepository = daos.varselApiRepository),
+                tildeling = TildelingMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
+                opptegnelse = OpptegnelseMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
+                overstyring = OverstyringMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
+                skjonnsfastsettelse = SkjonnsfastsettelseMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
+                minimumSykdomsgrad = MinimumSykdomsgradMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
+                totrinnsvurdering =
+                    TotrinnsvurderingMutationHandler(
+                        saksbehandlerMediator = saksbehandlerMediator,
+                    ),
+                vedtak =
+                    VedtakMutationHandler(
+                        saksbehandlerMediator = saksbehandlerMediator,
+                        godkjenninghåndterer = godkjenninghåndterer,
+                    ),
+                person = PersonMutationHandler(personhåndterer = personhåndterer),
+                annullering =
+                    AnnulleringMutationHandler(
+                        saksbehandlerMediator = saksbehandlerMediator,
+                    ),
+                paVent = PaVentMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
+                opphevStans = OpphevStansMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
+            ),
+    )
 
 // TODO Erstatt denne med å bruke graphQLPostRoute() i routingen
 //  Per nå feiler det med ClassNotFoundException: io.ktor.server.routing.RoutingKt

@@ -115,7 +115,7 @@ object LocalApp {
             rapid = kafkaRapid,
             meterRegistry = meterRegistry,
         ).apply {
-            withKtorModule(spesialistApp::ktorApp)
+            withKtorModule(spesialistApp::konfigurerKtorApp)
             withKtorModule(localModule)
         }.build()
     }
