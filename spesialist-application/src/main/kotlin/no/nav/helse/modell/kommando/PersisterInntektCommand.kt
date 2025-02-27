@@ -3,7 +3,7 @@ package no.nav.helse.modell.kommando
 import no.nav.helse.db.PersonDao
 import no.nav.helse.mediator.meldinger.løsninger.Inntektløsning
 import no.nav.helse.modell.melding.Behov
-import org.slf4j.LoggerFactory
+import no.nav.helse.spesialist.application.logg.sikkerlogg
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -12,25 +12,19 @@ internal class PersisterInntektCommand(
     private val skjæringstidspunkt: LocalDate,
     private val personDao: PersonDao,
 ) : Command {
-    private companion object {
-        private val sikkerLog = LoggerFactory.getLogger("tjenestekall")
-    }
-
     override fun execute(context: CommandContext): Boolean {
-        personDao.finnInntekter(fødselsnummer, skjæringstidspunkt) ?: return trengerInntekt(context).also {
-            sikkerLog.info("Inntekter er ikke tidligere lagret for person med fødselsnummer: $fødselsnummer, sender behov")
-        }
+        if (personDao.finnInntekter(fødselsnummer, skjæringstidspunkt) != null) return true
 
-        return true
+        sikkerlogg.info("Inntekter er ikke tidligere lagret for person med fødselsnummer: $fødselsnummer, sender behov")
+        return trengerInntekt(context)
     }
 
     override fun resume(context: CommandContext): Boolean {
+        if (personDao.finnInntekter(fødselsnummer, skjæringstidspunkt) != null) return true
         val løsning = context.get<Inntektløsning>() ?: return trengerInntekt(context)
 
-        løsning.lagre(personDao, fødselsnummer, skjæringstidspunkt).also {
-            sikkerLog.info("Lagrer inntekter for person med fødselsnummer: $fødselsnummer")
-        }
-
+        sikkerlogg.info("Lagrer inntekter for person med fødselsnummer: $fødselsnummer")
+        løsning.lagre(personDao, fødselsnummer, skjæringstidspunkt)
         return true
     }
 

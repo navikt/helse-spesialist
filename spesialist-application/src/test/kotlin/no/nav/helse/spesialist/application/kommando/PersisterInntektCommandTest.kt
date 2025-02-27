@@ -78,6 +78,17 @@ internal class PersisterInntektCommandTest {
         verify(exactly = 1) { personDao.lagreInntekter(FNR, skjæringtidspunkt, inntekter()) }
     }
 
+    @Test
+    fun `Bryr oss ikke om løsning dersom vi har inntekter alt`() {
+        val skjæringtidspunkt = LocalDate.now()
+        every { personDao.finnInntekter(FNR, skjæringtidspunkt) } returns inntekter()
+
+        val command = PersisterInntektCommand(FNR, skjæringtidspunkt, personDao)
+
+        assertTrue(command.resume(context))
+        verify(exactly = 0) { personDao.lagreInntekter(any(), any(), any()) }
+    }
+
     private fun løsning(inntekter: List<Inntekter> = inntekter()) = Inntektløsning(inntekter)
 
     private fun inntekter() = listOf(
