@@ -40,10 +40,10 @@ private val logg = LoggerFactory.getLogger("SpesialistApp")
 class SpesialistApp(
     private val env: Environment,
     gruppekontroll: Gruppekontroll,
-    snapshothenter: Snapshothenter,
+    private val snapshothenter: Snapshothenter,
     private val azureConfig: AzureConfig,
     private val tilgangsgrupper: Tilgangsgrupper,
-    reservasjonshenter: Reservasjonshenter,
+    private val reservasjonshenter: Reservasjonshenter,
     private val versjonAvKode: String,
     private val featureToggles: FeatureToggles,
 ) : RapidsConnection.StatusListener {
@@ -74,22 +74,6 @@ class SpesialistApp(
         )
 
     private lateinit var godkjenningService: GodkjenningService
-
-    private val apiBootstrap =
-        ApiBootstrap(
-            daos = daos,
-            sessionFactory = sessionFactory,
-            saksbehandlerMediator = saksbehandlerMediator,
-            apiOppgaveService = apiOppgaveService,
-            godkjenninghåndterer = godkjenningService,
-            personhåndterer = personhåndterer,
-            dokumenthåndterer = dokumentMediator,
-            stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
-            behandlingstatistikk = behandlingsstatistikkService,
-            snapshothenter = snapshothenter,
-            reservasjonshenter = reservasjonshenter,
-            tilgangsgrupper = tilgangsgrupper,
-        )
 
     private val plukkTilManuell: PlukkTilManuell<String> = (
         {
@@ -211,6 +195,19 @@ class SpesialistApp(
     }
 
     fun konfigurerKtorApp(application: Application) {
-        apiBootstrap.konfigurerKtorApp(application, azureConfig, env)
+        ApiBootstrap(
+            daos = daos,
+            sessionFactory = sessionFactory,
+            saksbehandlerMediator = saksbehandlerMediator,
+            apiOppgaveService = apiOppgaveService,
+            godkjenninghåndterer = godkjenningService,
+            personhåndterer = personhåndterer,
+            dokumenthåndterer = dokumentMediator,
+            stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
+            behandlingstatistikk = behandlingsstatistikkService,
+            snapshothenter = snapshothenter,
+            reservasjonshenter = reservasjonshenter,
+            tilgangsgrupper = tilgangsgrupper,
+        ).konfigurerKtorApp(application, azureConfig, env)
     }
 }
