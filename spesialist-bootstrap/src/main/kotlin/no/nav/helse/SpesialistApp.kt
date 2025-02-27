@@ -23,8 +23,7 @@ import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingh�
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.spesialist.api.AzureConfig
 import no.nav.helse.spesialist.api.Personhåndterer
-import no.nav.helse.spesialist.api.bootstrap.ApiAvhengigheter
-import no.nav.helse.spesialist.api.bootstrap.Bootstrap
+import no.nav.helse.spesialist.api.bootstrap.ApiBootstrap
 import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
 import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.application.Snapshothenter
@@ -76,23 +75,18 @@ class SpesialistApp(
 
     private lateinit var godkjenningService: GodkjenningService
 
-    private val apiAvhengigheter =
-        ApiAvhengigheter(
-            saksbehandlerMediatorProvider = { saksbehandlerMediator },
-            apiOppgaveServiceProvider = { apiOppgaveService },
-            godkjenninghåndtererProvider = { godkjenningService },
-            personhåndtererProvider = { personhåndterer },
-            dokumenthåndtererProvider = { dokumentMediator },
-            stansAutomatiskBehandlinghåndterer = { stansAutomatiskBehandlinghåndterer },
-            behandlingstatistikk = behandlingsstatistikkService,
-            snapshothenter = snapshothenter,
-        )
-
-    private val bootstrap =
-        Bootstrap(
+    private val apiBootstrap =
+        ApiBootstrap(
             daos = daos,
             sessionFactory = sessionFactory,
-            avhengigheter = apiAvhengigheter,
+            saksbehandlerMediator = saksbehandlerMediator,
+            apiOppgaveService = apiOppgaveService,
+            godkjenninghåndterer = godkjenningService,
+            personhåndterer = personhåndterer,
+            dokumenthåndterer = dokumentMediator,
+            stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
+            behandlingstatistikk = behandlingsstatistikkService,
+            snapshothenter = snapshothenter,
             reservasjonshenter = reservasjonshenter,
             tilgangsgrupper = tilgangsgrupper,
         )
@@ -216,5 +210,5 @@ class SpesialistApp(
         dataSourceBuilder.migrate()
     }
 
-    fun ktorApp(application: Application) = bootstrap.ktorApp(application, azureConfig, env)
+    fun ktorApp(application: Application) = apiBootstrap.konfigurerKtorApp(application, azureConfig, env)
 }
