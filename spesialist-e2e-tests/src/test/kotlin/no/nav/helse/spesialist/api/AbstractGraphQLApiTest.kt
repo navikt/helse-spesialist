@@ -18,6 +18,7 @@ import io.ktor.server.testing.ApplicationTestBuilder
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.helse.db.VedtakBegrunnelseDao
+import no.nav.helse.db.api.EgenAnsattApiDao
 import no.nav.helse.e2e.DatabaseIntegrationTest
 import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
@@ -66,6 +67,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
     private val avviksvurderingId: UUID = UUID.randomUUID()
 
     private val reservasjonshenter = mockk<Reservasjonshenter>(relaxed = true)
+    protected val egenAnsattApiDao = mockk<EgenAnsattApiDao>(relaxed = true)
     private val behandlingsstatistikkMediator = mockk<IBehandlingsstatistikkService>(relaxed = true)
     protected val saksbehandlerMediator = mockk<SaksbehandlerMediator>(relaxed = true)
     protected val vedtakBegrunnelseDao = mockk<VedtakBegrunnelseDao>(relaxed = true)
@@ -101,7 +103,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                         personoppslagService =
                             PersonService(
                                 personApiDao = daos.personApiDao,
-                                egenAnsattApiDao = daos.egenAnsattApiDao,
+                                egenAnsattApiDao = egenAnsattApiDao,
                                 vergemålApiDao = daos.vergemålApiDao,
                                 tildelingApiDao = daos.tildelingApiDao,
                                 arbeidsgiverApiDao = daos.arbeidsgiverApiDao,
@@ -134,7 +136,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                     ),
                     dokument = DokumentQueryHandler(
                         personApiDao = daos.personApiDao,
-                        egenAnsattApiDao = daos.egenAnsattApiDao,
+                        egenAnsattApiDao = egenAnsattApiDao,
                         dokumenthåndterer = dokumenthåndterer,
                     ),
                 ),
