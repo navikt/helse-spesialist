@@ -14,7 +14,8 @@ import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.azureAdAppAuthentication
 import no.nav.helse.spesialist.api.behandlingsstatistikk.IBehandlingsstatistikkService
-import no.nav.helse.spesialist.api.graphql.settOppGraphQLApi
+import no.nav.helse.spesialist.api.graphql.graphQLApi
+import no.nav.helse.spesialist.api.snapshot.SnapshotService
 import no.nav.helse.spesialist.api.websockets.webSocketsApi
 import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.application.Snapshothenter
@@ -37,23 +38,38 @@ class ApiBootstrap(
         application: Application,
         azureConfig: AzureConfig,
         env: Environment,
-    ) {
+    ): Application =
         application.apply {
             installPlugins()
             azureAdAppAuthentication(azureConfig, env)
-            settOppGraphQLApi(
-                daos = daos,
+            graphQLApi(
                 sessionFactory = sessionFactory,
+                personApiDao = daos.personApiDao,
+                egenAnsattApiDao = daos.egenAnsattApiDao,
+                tildelingApiDao = daos.tildelingApiDao,
+                arbeidsgiverApiDao = daos.arbeidsgiverApiDao,
+                overstyringApiDao = daos.overstyringApiDao,
+                risikovurderingApiDao = daos.risikovurderingApiDao,
+                varselRepository = daos.varselApiRepository,
+                oppgaveApiDao = daos.oppgaveApiDao,
+                periodehistorikkApiDao = daos.periodehistorikkApiDao,
+                notatDao = daos.notatApiDao,
+                totrinnsvurderingApiDao = daos.totrinnsvurderingApiDao,
+                påVentApiDao = daos.påVentApiDao,
+                vergemålApiDao = daos.vergemålApiDao,
+                reservasjonshenter = reservasjonshenter,
+                skjermedePersonerGruppeId = tilgangsgrupper.skjermedePersonerGruppeId,
+                kode7Saksbehandlergruppe = tilgangsgrupper.kode7GruppeId,
+                beslutterGruppeId = tilgangsgrupper.beslutterGruppeId,
+                snapshotService = SnapshotService(daos.personinfoDao, snapshothenter),
+                behandlingsstatistikkMediator = behandlingstatistikk,
                 saksbehandlerMediator = saksbehandlerMediator,
                 apiOppgaveService = apiOppgaveService,
                 godkjenninghåndterer = godkjenninghåndterer,
                 personhåndterer = personhåndterer,
                 dokumenthåndterer = dokumenthåndterer,
                 stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
-                behandlingstatistikk = behandlingstatistikk,
-                snapshothenter = snapshothenter,
-                reservasjonshenter = reservasjonshenter,
-                tilgangsgrupper = tilgangsgrupper,
+                vedtakBegrunnelseDao = daos.vedtakBegrunnelseDao,
             )
 
             routing {
@@ -61,5 +77,4 @@ class ApiBootstrap(
                 debugMinneApi()
             }
         }
-    }
 }

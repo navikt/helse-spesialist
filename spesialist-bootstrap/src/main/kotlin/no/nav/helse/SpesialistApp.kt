@@ -210,7 +210,5 @@ class SpesialistApp(
         dataSourceBuilder.migrate()
     }
 
-    fun konfigurerKtorApp(application: Application) {
-        apiBootstrap.konfigurerKtorApp(application, azureConfig, env)
-    }
+    fun ktorApp(application: Application) = apiBootstrap.konfigurerKtorApp(application, azureConfig, env)
 }
