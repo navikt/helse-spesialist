@@ -111,18 +111,18 @@ class Oppgave private constructor(
     }
 
     fun fjernGosys() {
-        egenskaper.remove(GOSYS)
-        logg.info(
-            "Fjerner egenskap GOSYS på {} for {}",
-            kv("oppgaveId", id),
-            kv("vedtaksperiodeId", vedtaksperiodeId),
-        )
-        oppgaveEndret()
+        if (egenskaper.remove(GOSYS)) {
+            logg.info(
+                "Fjerner egenskap GOSYS på {} for {}",
+                kv("oppgaveId", id),
+                kv("vedtaksperiodeId", vedtaksperiodeId),
+            )
+            oppgaveEndret()
+        }
     }
 
     fun leggTilGosys() {
-        if (!egenskaper.contains(GOSYS)) {
-            egenskaper.add(GOSYS)
+        if (egenskaper.add(GOSYS)) {
             logg.info(
                 "Legger til egenskap GOSYS på {} for {}",
                 kv("oppgaveId", id),
