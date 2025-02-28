@@ -4,6 +4,7 @@ import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.AKTIV
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.AVVIST
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.INAKTIV
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.VURDERT
+import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -42,11 +43,13 @@ class Varsel(
 
     internal fun reaktiver() {
         if (status != INAKTIV) return
+        logg.info("Reaktiverer varsel $varselkode for vedtaksperiode $vedtaksperiodeId")
         this.status = AKTIV
     }
 
     internal fun deaktiver() {
         if (status != AKTIV) return
+        logg.info("Deaktiverer varsel $varselkode")
         this.status = INAKTIV
     }
 
@@ -97,3 +100,5 @@ class Varsel(
         internal fun List<Varsel>.forhindrerAutomatisering() = any { it.status in listOf(VURDERT, AKTIV, AVVIST) }
     }
 }
+
+private val logg = LoggerFactory.getLogger(Varsel::class.java)

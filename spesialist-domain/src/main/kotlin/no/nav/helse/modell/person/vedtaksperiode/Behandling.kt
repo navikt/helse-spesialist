@@ -223,6 +223,7 @@ class Behandling private constructor(
     }
 
     private fun nyttVarsel(varsel: Varsel) {
+        logg.info("Legger til varsel $varsel")
         varsler.add(varsel)
         tilstand.nyttVarsel(this)
     }

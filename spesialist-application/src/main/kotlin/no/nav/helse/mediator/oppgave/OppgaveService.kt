@@ -193,19 +193,13 @@ class OppgaveService(
 
     fun fjernGosysEgenskap(vedtaksperiodeId: UUID) {
         oppgaveDao.finnIdForAktivOppgave(vedtaksperiodeId)?.also { oppgaveId ->
-            oppgave(oppgaveId) {
-                logg.info("Fjerner egenskap GOSYS på {}", kv("oppgaveId", oppgaveId))
-                fjernGosys()
-            }
+            oppgave(oppgaveId) { fjernGosys() }
         }
     }
 
     fun leggTilGosysEgenskap(vedtaksperiodeId: UUID) {
         oppgaveDao.finnIdForAktivOppgave(vedtaksperiodeId)?.also { oppgaveId ->
-            oppgave(oppgaveId) {
-                logg.info("Legger til egenskap GOSYS på {}", kv("oppgaveId", oppgaveId))
-                leggTilGosys()
-            }
+            oppgave(oppgaveId) { leggTilGosys() }
         }
     }
 
