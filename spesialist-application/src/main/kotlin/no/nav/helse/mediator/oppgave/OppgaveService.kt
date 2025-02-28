@@ -120,8 +120,12 @@ class OppgaveService(
         handling: LeggPåVent,
         saksbehandler: Saksbehandler,
     ) {
-        oppgave(handling.oppgaveId) {
-            this.leggPåVent(handling.skalTildeles, saksbehandler)
+        oppgaveDao.finnVedtaksperiodeId(handling.oppgaveId).also {
+            oppgaveDao.finnIdForAktivOppgave(it)?.also { oppgaveId ->
+                oppgave(oppgaveId) {
+                    this.leggPåVent(handling.skalTildeles, saksbehandler)
+                }
+            }
         }
     }
 
@@ -129,14 +133,22 @@ class OppgaveService(
         handling: EndrePåVent,
         saksbehandler: Saksbehandler,
     ) {
-        oppgave(handling.oppgaveId) {
-            this.endrePåVent(handling.skalTildeles, saksbehandler)
+        oppgaveDao.finnVedtaksperiodeId(handling.oppgaveId).also {
+            oppgaveDao.finnIdForAktivOppgave(it)?.also { oppgaveId ->
+                oppgave(oppgaveId) {
+                    this.endrePåVent(handling.skalTildeles, saksbehandler)
+                }
+            }
         }
     }
 
     fun fjernFraPåVent(oppgaveId: Long) {
-        oppgave(oppgaveId) {
-            this.fjernFraPåVent()
+        oppgaveDao.finnVedtaksperiodeId(oppgaveId).also {
+            oppgaveDao.finnIdForAktivOppgave(it)?.also { aktivOppgaveId ->
+                oppgave(aktivOppgaveId) {
+                    this.fjernFraPåVent()
+                }
+            }
         }
     }
 
