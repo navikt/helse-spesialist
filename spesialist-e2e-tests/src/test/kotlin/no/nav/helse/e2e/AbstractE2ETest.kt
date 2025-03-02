@@ -65,7 +65,7 @@ import java.util.UUID
 
 internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val testperson = TestPerson().also { println("Bruker testdata: $it") }
-    private val dbQuery = DbQuery(dataSource)
+    protected val dbQuery = DbQuery(dataSource)
 
     val FØDSELSNUMMER = testperson.fødselsnummer
     val ORGNR =

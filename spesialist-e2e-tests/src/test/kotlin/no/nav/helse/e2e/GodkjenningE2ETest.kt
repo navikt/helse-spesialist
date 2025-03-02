@@ -13,7 +13,6 @@ import no.nav.helse.modell.person.Adressebeskyttelse.StrengtFortrolig
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSystem
-import no.nav.helse.spesialist.db.DbQuery
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.util.januar
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -25,8 +24,6 @@ internal class GodkjenningE2ETest : AbstractE2ETest() {
     private companion object {
         private const val ENHET_UTLAND = "0393"
     }
-
-    private val dbQuery = DbQuery(dataSource)
 
     @Test
     fun `oppretter vedtak ved godkjenningsbehov`() {

@@ -1,7 +1,5 @@
 package no.nav.helse.e2e
 
-import kotliquery.queryOf
-import kotliquery.sessionOf
 import no.nav.helse.e2e.AbstractE2ETest.Kommandokjedetilstand.AVBRUTT
 import no.nav.helse.e2e.AbstractE2ETest.Kommandokjedetilstand.NY
 import no.nav.helse.e2e.AbstractE2ETest.Kommandokjedetilstand.SUSPENDERT
@@ -12,16 +10,9 @@ import java.util.UUID
 internal class KommandohendelseE2ETest : AbstractE2ETest() {
 
     @Test
-    fun `ignorerer behov uten tilhørende command`() {
-        håndterVedtaksperiodeEndret()
-        assertIkkeHendelse(sisteMeldingId)
-    }
-
-    @Test
-    fun `vedtaksperiode forkastet`() {
-        håndterVedtaksperiodeForkastet()
-        assertIkkeHendelse(sisteMeldingId)
-        assertVedtaksperiodeEksistererIkke(VEDTAKSPERIODE_ID)
+    fun `lagrer melding som starter en command context`() {
+        vedtaksløsningenMottarNySøknad()
+        assertHendelseLagret(sisteMeldingId)
     }
 
     @Test
@@ -32,12 +23,19 @@ internal class KommandohendelseE2ETest : AbstractE2ETest() {
         håndterVedtaksperiodeForkastet()
         håndterPersoninfoløsningUtenValidering()
         assertKommandokjedetilstander(sisteGodkjenningsbehovId, NY, SUSPENDERT, SUSPENDERT, AVBRUTT)
+        assertHendelseIkkeLagret(sisteMeldingId)
     }
 
-
-    private fun assertIkkeHendelse(hendelseId: UUID) {
-        assertEquals(0, sessionOf(dataSource).use {
-            it.run(queryOf("SELECT COUNT(1) FROM hendelse WHERE id = ?", hendelseId).map { row -> row.int(1) }.asSingle)
-        })
+    private fun assertHendelseIkkeLagret(hendelseId: UUID) {
+        assertEquals(0, antallHendelser(hendelseId))
     }
+
+    private fun assertHendelseLagret(hendelseId: UUID) {
+        assertEquals(1, antallHendelser(hendelseId))
+    }
+
+    private fun antallHendelser(hendelseId: UUID) = dbQuery.single(
+        "select count(1) from hendelse where id = :hendelseId",
+        "hendelseId" to hendelseId
+    ) { it.int(1) }
 }
