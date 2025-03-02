@@ -17,7 +17,10 @@ fun Application.azureAdAppAuthentication(
 ) {
     authentication {
         jwt("oidc") {
-            skipWhen { call -> (env.erLokal || env.erDev) && gjelderIntrospection(call) || call.request.uri == "/graphql/playground" }
+            skipWhen {
+                    call ->
+                (env.erLokal || env.isTrue("TILLATT_UAUTENTISERT_INTROSPECTION")) && gjelderIntrospection(call) || call.request.uri == "/graphql/playground"
+            }
             config.configureAuthentication(this)
         }
     }

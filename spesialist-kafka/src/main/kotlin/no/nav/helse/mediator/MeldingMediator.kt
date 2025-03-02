@@ -45,7 +45,7 @@ class MeldingMediator(
 
             return false
         }
-        if (env.erProd) return true
+        if (!env.isTrue("IGNORER_MELDINGER_FOR_IKKE-EKSISTERENDE_PERSONER")) return true
         return skalBehandleMeldingIDev(jsonNode)
     }
 

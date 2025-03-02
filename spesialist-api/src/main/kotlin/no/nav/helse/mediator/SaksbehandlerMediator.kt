@@ -212,10 +212,10 @@ class SaksbehandlerMediator(
             val totrinnsvurdering =
                 eksisterendeTotrinnsvurdering(vedtaksperiodeId, fødselsnummer, totrinnsvurderingRepository)
             if (totrinnsvurdering?.erBeslutteroppgave == true) {
-                if (!legacySaksbehandler.harTilgangTil(listOf(Egenskap.BESLUTTER)) && !env.erDev) {
+                if (!legacySaksbehandler.harTilgangTil(listOf(Egenskap.BESLUTTER)) && !env.isTrue("TILLAT_GODKJENNING_UTEN_BESLUTTERTILGANG")) {
                     return@transactionalSessionScope VedtakResultat.Feil.BeslutterFeil.TrengerBeslutterRolle()
                 }
-                if (totrinnsvurdering.saksbehandler?.value == legacySaksbehandler.oid && !env.erDev) {
+                if (totrinnsvurdering.saksbehandler?.value == legacySaksbehandler.oid && !env.isTrue("TILLAT_GODKJENNING_AV_EGEN_SAK")) {
                     return@transactionalSessionScope VedtakResultat.Feil.BeslutterFeil.KanIkkeBeslutteEgenOppgave()
                 }
                 totrinnsvurdering.settBeslutter(SaksbehandlerOid(legacySaksbehandler.oid))
