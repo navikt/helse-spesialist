@@ -418,7 +418,6 @@ class SaksbehandlerMediator(
                 val totrinnsvurdering =
                     session.totrinnsvurderingRepository.finn(handling.fødselsnummer)
                         ?: Totrinnsvurdering.ny(handling.vedtaksperiodeId)
-                totrinnsvurdering.settSaksbehandler(SaksbehandlerOid(legacySaksbehandler.oid))
                 totrinnsvurdering.nyOverstyring(handling)
                 session.totrinnsvurderingRepository.lagre(totrinnsvurdering, fødselsnummer)
             } else {

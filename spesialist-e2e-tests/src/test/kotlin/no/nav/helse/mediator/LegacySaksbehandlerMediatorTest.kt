@@ -207,9 +207,8 @@ internal class LegacySaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             session.totrinnsvurderingRepository.finn(VEDTAKSPERIODE)
         }
         checkNotNull(totrinnsvurdering)
-        assertEquals(saksbehandler.oid, totrinnsvurdering.saksbehandler?.value)
         assertTrue(totrinnsvurdering.overstyringer.single().opprettet.isAfter(LocalDateTime.now().minusSeconds(5)))
-        assertTrue(totrinnsvurdering.erBeslutteroppgave)
+        assertFalse(totrinnsvurdering.erBeslutteroppgave)
     }
 
     @Test
