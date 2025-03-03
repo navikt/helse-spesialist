@@ -6,9 +6,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.Daos
-import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveDao
-import no.nav.helse.db.OppgaveFraDatabase
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.Reservasjon
 import no.nav.helse.db.ReservasjonDao
@@ -20,10 +18,10 @@ import no.nav.helse.mediator.oppgave.Oppgavelagrer
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.modell.melding.UtgåendeHendelse
-import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Oppgave
+import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -43,7 +41,7 @@ internal class OppgaveServiceTest {
     private val SAKSBEHANDLEROID = UUID.randomUUID()
     private val SAKSBEHANDLERNAVN = lagSaksbehandlernavn()
     private val SAKSBEHANDLEREPOST = lagEpostadresseFraFulltNavn(SAKSBEHANDLERNAVN)
-    private val EGENSKAP_SØKNAD = Egenskap.SØKNAD
+    private val EGENSKAP_SØKNAD = SØKNAD
 
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
     private val daos = mockk<Daos>(relaxed = true)
@@ -73,7 +71,7 @@ internal class OppgaveServiceTest {
         override fun publiser(fødselsnummer: String, event: KommandokjedeEndretEvent, hendelseNavn: String) = error("Not implemented for test")
     }
 
-    private val mediator =
+    private val oppgaveService =
         OppgaveService(
             oppgaveDao = oppgaveDao,
             reservasjonDao = reservasjonDao,
@@ -89,7 +87,7 @@ internal class OppgaveServiceTest {
     private fun lagSøknadsoppgave(
         fødselsnummer: String,
     ) {
-        mediator.nyOppgave(
+        oppgaveService.nyOppgave(
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = VEDTAKSPERIODE_ID,
             behandlingId = BEHANDLING_ID,
@@ -103,7 +101,7 @@ internal class OppgaveServiceTest {
     private fun lagStikkprøveoppgave(
         fødselsnummer: String,
     ) {
-        mediator.nyOppgave(
+        oppgaveService.nyOppgave(
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
             behandlingId = BEHANDLING_ID_2,
@@ -167,9 +165,9 @@ internal class OppgaveServiceTest {
 
     @Test
     fun `oppdaterer oppgave`() {
-        every { oppgaveDao.finnOppgave(OPPGAVE_ID) } returns oppgaveFraDatabase()
+        every { oppgavelagrer.oppgave(OPPGAVE_ID, any()) } returns oppgave()
         every { oppgaveDao.finnHendelseId(any()) } returns HENDELSE_ID
-        mediator.oppgave(OPPGAVE_ID) {
+        oppgaveService.oppgave(OPPGAVE_ID) {
             avventerSystem(SAKSBEHANDLERIDENT, SAKSBEHANDLEROID)
             ferdigstill()
         }
@@ -189,13 +187,13 @@ internal class OppgaveServiceTest {
         assertEquals(1, meldingPubliserer.antallMeldinger)
     }
 
-    private fun oppgaveFraDatabase(
+    private fun oppgave(
         oppgaveId: Long = OPPGAVE_ID,
         tildelt: Boolean = false,
-    ) = OppgaveFraDatabase(
+    ) = Oppgave.fraLagring(
         id = oppgaveId,
-        egenskaper = listOf(EgenskapForDatabase.SØKNAD),
-        status = "AvventerSaksbehandler",
+        egenskaper = mutableSetOf(EGENSKAP_SØKNAD),
+        tilstand = Oppgave.AvventerSaksbehandler,
         vedtaksperiodeId = VEDTAKSPERIODE_ID,
         behandlingId = BEHANDLING_ID,
         utbetalingId = UTBETALING_ID,
@@ -203,13 +201,14 @@ internal class OppgaveServiceTest {
         kanAvvises = true,
         ferdigstiltAvIdent = null,
         ferdigstiltAvOid = null,
-        tildelt =
+        tildeltTil =
             if (tildelt) {
-                SaksbehandlerFraDatabase(
+                LegacySaksbehandler(
                     SAKSBEHANDLEREPOST,
                     SAKSBEHANDLEROID,
                     SAKSBEHANDLERNAVN,
                     SAKSBEHANDLERIDENT,
+                    {_, _ -> false}
                 )
             } else {
                 null

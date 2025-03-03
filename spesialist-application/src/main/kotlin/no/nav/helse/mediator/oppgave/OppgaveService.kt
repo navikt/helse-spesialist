@@ -83,11 +83,7 @@ class OppgaveService(
         id: Long,
         oppgaveBlock: Oppgave.() -> T,
     ): T {
-        val oppgave =
-            Oppgavehenter(
-                oppgaveDao,
-                tilgangskontroll,
-            ).oppgave(id)
+        val oppgave = oppgavelagrer.oppgave(id, tilgangskontroll)
         val fødselsnummer = oppgaveDao.finnFødselsnummer(id)
         oppgave.register(Oppgavemelder(fødselsnummer, meldingPubliserer))
         val returverdi = oppgaveBlock(oppgave)
