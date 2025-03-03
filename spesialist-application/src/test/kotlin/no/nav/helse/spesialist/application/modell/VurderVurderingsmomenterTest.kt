@@ -13,7 +13,6 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.InntektTilRisk
 import no.nav.helse.modell.person.Sykefraværstilfelle
-import no.nav.helse.modell.person.vedtaksperiode.Behandling
 import no.nav.helse.modell.risiko.VurderVurderingsmomenter
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.Inntektsopplysningkilde
@@ -21,6 +20,7 @@ import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.SykepengegrunnlagsArbeidsgiver
 import no.nav.helse.spesialist.application.TestPerson
 import no.nav.helse.spesialist.application.jan
+import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -48,10 +48,10 @@ internal class VurderVurderingsmomenterTest {
 
     }
 
-    private val behandling =
-        Behandling(UUID.randomUUID(), testperson.vedtaksperiodeId1, 1 jan 2018, 31 jan 2018, 1 jan 2018)
+    private val legacyBehandling =
+        LegacyBehandling(UUID.randomUUID(), testperson.vedtaksperiodeId1, 1 jan 2018, 31 jan 2018, 1 jan 2018)
     private val sykefraværstilfelle =
-        Sykefraværstilfelle(testperson.fødselsnummer, 1 jan 2018, listOf(behandling))
+        Sykefraværstilfelle(testperson.fødselsnummer, 1 jan 2018, listOf(legacyBehandling))
 
     private lateinit var context: CommandContext
 
@@ -206,7 +206,7 @@ internal class VurderVurderingsmomenterTest {
 
         risikoCommand().execute(context)
 
-        assertEquals(listOf("SB_RV_1"), behandling.toDto().varsler.map { it.varselkode })
+        assertEquals(listOf("SB_RV_1"), legacyBehandling.toDto().varsler.map { it.varselkode })
     }
 
     private fun risikoCommand(

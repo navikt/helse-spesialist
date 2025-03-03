@@ -14,7 +14,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-internal class BehandlingOpprettetRiverTest {
+internal class LegacyBehandlingOpprettetRiverTest {
 
     private val mediator = mockk<MeldingMediator>(relaxed = true)
     private val rapid = TestRapid().medRivers(BehandlingOpprettetRiver(mediator))

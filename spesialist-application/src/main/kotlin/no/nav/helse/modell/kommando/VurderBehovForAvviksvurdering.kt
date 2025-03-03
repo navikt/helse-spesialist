@@ -2,11 +2,11 @@ package no.nav.helse.modell.kommando
 
 import no.nav.helse.db.AvviksvurderingRepository
 import no.nav.helse.modell.melding.Behov
-import no.nav.helse.modell.person.vedtaksperiode.Behandling
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode.RV_IV_2
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.modell.vilkårsprøving.AvviksvurderingBehovLøsning
 import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
+import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import java.time.LocalDate
 import java.util.UUID
 
@@ -16,7 +16,7 @@ class VurderBehovForAvviksvurdering(
     private val avviksvurderingRepository: AvviksvurderingRepository,
     private val omregnedeÅrsinntekter: List<OmregnetÅrsinntekt>,
     private val vilkårsgrunnlagId: UUID,
-    private val behandling: Behandling,
+    private val legacyBehandling: LegacyBehandling,
     private val erInngangsvilkårVurdertISpleis: Boolean,
     private val organisasjonsnummer: String,
 ) : Command {
@@ -45,7 +45,7 @@ class VurderBehovForAvviksvurdering(
                 beregningsgrunnlag = løsning.beregningsgrunnlag,
             )
         avviksvurderingRepository.lagre(avviksvurdering)
-        if (!løsning.harAkseptabeltAvvik) behandling.håndterNyttVarsel(RV_IV_2.nyttVarsel(behandling.vedtaksperiodeId()))
+        if (!løsning.harAkseptabeltAvvik) legacyBehandling.håndterNyttVarsel(RV_IV_2.nyttVarsel(legacyBehandling.vedtaksperiodeId()))
         return true
     }
 
@@ -56,7 +56,7 @@ class VurderBehovForAvviksvurdering(
                 vilkårsgrunnlagId,
                 skjæringstidspunkt,
                 organisasjonsnummer,
-                behandling.vedtaksperiodeId(),
+                legacyBehandling.vedtaksperiodeId(),
             ),
         )
         return false

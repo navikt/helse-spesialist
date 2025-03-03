@@ -2,8 +2,6 @@ package no.nav.helse.modell.person
 
 import no.nav.helse.modell.Meldingslogg
 import no.nav.helse.modell.melding.Sykepengevedtak
-import no.nav.helse.modell.person.vedtaksperiode.Behandling
-import no.nav.helse.modell.person.vedtaksperiode.Behandling.Companion.flyttEventueltAvviksvarselTil
 import no.nav.helse.modell.person.vedtaksperiode.Periode
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
@@ -20,6 +18,8 @@ import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlagDto
 import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering.Companion.finnRiktigAvviksvurdering
+import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
+import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.flyttEventueltAvviksvarselTil
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.UUID
@@ -94,15 +94,15 @@ class Person private constructor(
             .avsluttetUtenVedtak()
     }
 
-    private fun SykepengevedtakBuilder.leggTilAvviksvurderinger(behandling: Behandling) {
-        avviksvurderinger.finnRiktigAvviksvurdering(behandling.skjæringstidspunkt())?.let {
+    private fun SykepengevedtakBuilder.leggTilAvviksvurderinger(legacyBehandling: LegacyBehandling) {
+        avviksvurderinger.finnRiktigAvviksvurdering(legacyBehandling.skjæringstidspunkt())?.let {
             sammenligningsgrunnlag(it.sammenligningsgrunnlag)
             avviksprosent(it.avviksprosent)
         }
     }
 
-    private fun SykepengevedtakBuilder.leggTilSkjønnsmessigFastsettelse(behandling: Behandling) {
-        skjønnsfastsatteSykepengegrunnlag.relevanteFor(behandling.skjæringstidspunkt()).lastOrNull()?.let {
+    private fun SykepengevedtakBuilder.leggTilSkjønnsmessigFastsettelse(legacyBehandling: LegacyBehandling) {
+        skjønnsfastsatteSykepengegrunnlag.relevanteFor(legacyBehandling.skjæringstidspunkt()).lastOrNull()?.let {
             skjønnsfastsattSykepengegrunnlag(it)
         }
     }

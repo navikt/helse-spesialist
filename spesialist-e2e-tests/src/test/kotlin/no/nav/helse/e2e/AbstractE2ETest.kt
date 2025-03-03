@@ -25,7 +25,6 @@ import no.nav.helse.modell.OverstyringType
 import no.nav.helse.modell.melding.OverstyrtInntektOgRefusjonEvent.OverstyrtArbeidsgiverEvent.OverstyrtRefusjonselementEvent
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.person.Adressebeskyttelse
-import no.nav.helse.modell.person.vedtaksperiode.Behandling
 import no.nav.helse.modell.person.vedtaksperiode.Periode
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
@@ -52,6 +51,7 @@ import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.client.spleis.SpleisClient
 import no.nav.helse.spesialist.client.spleis.SpleisClientSnapshothenter
 import no.nav.helse.spesialist.db.DbQuery
+import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import no.nav.helse.spesialist.test.TestPerson
 import no.nav.helse.util.januar
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -1180,7 +1180,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     private fun erRevurdering(vedtaksperiodeId: UUID) = dbQuery.singleOrNull(
         """
         SELECT 1 FROM behandling
-        WHERE vedtaksperiode_id = :vedtaksperiodeId AND tilstand = '${Behandling.VedtakFattet.navn()}'
+        WHERE vedtaksperiode_id = :vedtaksperiodeId AND tilstand = '${LegacyBehandling.VedtakFattet.navn()}'
         """.trimIndent(),
         "vedtaksperiodeId" to vedtaksperiodeId,
     ) { true } ?: false

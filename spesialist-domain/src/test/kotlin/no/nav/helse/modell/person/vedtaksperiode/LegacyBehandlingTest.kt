@@ -4,15 +4,16 @@ import io.mockk.mockk
 import no.nav.helse.modell.des
 import no.nav.helse.modell.feb
 import no.nav.helse.modell.jan
-import no.nav.helse.modell.person.vedtaksperiode.Behandling.Companion.finnBehandlingForSpleisBehandling
-import no.nav.helse.modell.person.vedtaksperiode.Behandling.Companion.finnBehandlingForVedtaksperiode
-import no.nav.helse.modell.person.vedtaksperiode.Behandling.Companion.finnSisteBehandlingUtenSpleisBehandlingId
-import no.nav.helse.modell.person.vedtaksperiode.Behandling.Companion.harMedlemskapsvarsel
-import no.nav.helse.modell.person.vedtaksperiode.Behandling.Companion.harÅpenGosysOppgave
-import no.nav.helse.modell.person.vedtaksperiode.Behandling.Companion.kreverSkjønnsfastsettelse
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.AKTIV
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.VURDERT
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_EX_1
+import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
+import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.finnBehandlingForSpleisBehandling
+import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.finnBehandlingForVedtaksperiode
+import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.finnSisteBehandlingUtenSpleisBehandlingId
+import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.harMedlemskapsvarsel
+import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.harÅpenGosysOppgave
+import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.kreverSkjønnsfastsettelse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -24,14 +25,14 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class BehandlingTest {
+internal class LegacyBehandlingTest {
     @Test
     fun `behandling ligger før dato`() {
-        val behandling = Behandling(UUID.randomUUID(), UUID.randomUUID(), 1 jan 2018, 31 jan 2018, 1 jan 2018)
-        assertTrue(behandling.tilhører(31 jan 2018))
-        assertTrue(behandling.tilhører(1 feb 2018))
-        assertFalse(behandling.tilhører(1 jan 2018))
-        assertFalse(behandling.tilhører(31 des 2017))
+        val legacyBehandling = LegacyBehandling(UUID.randomUUID(), UUID.randomUUID(), 1 jan 2018, 31 jan 2018, 1 jan 2018)
+        assertTrue(legacyBehandling.tilhører(31 jan 2018))
+        assertTrue(legacyBehandling.tilhører(1 feb 2018))
+        assertFalse(legacyBehandling.tilhører(1 jan 2018))
+        assertFalse(legacyBehandling.tilhører(31 des 2017))
     }
 
     @Test
@@ -489,16 +490,16 @@ internal class BehandlingTest {
         val skjæringstidspunkt = 1 jan 2018
         val utbetalingId = UUID.randomUUID()
         val spleisBehandlingId = UUID.randomUUID()
-        val behandling = Behandling(behandlingId, vedtaksperiodeId, fom, tom, skjæringstidspunkt)
-        behandling.håndterNyUtbetaling(utbetalingId)
+        val legacyBehandling = LegacyBehandling(behandlingId, vedtaksperiodeId, fom, tom, skjæringstidspunkt)
+        legacyBehandling.håndterNyUtbetaling(utbetalingId)
         val tags = listOf("tag 1")
-        behandling.oppdaterBehandlingsinformasjon(tags, spleisBehandlingId, utbetalingId)
+        legacyBehandling.oppdaterBehandlingsinformasjon(tags, spleisBehandlingId, utbetalingId)
 
         val varselId = UUID.randomUUID()
         val opprettet = LocalDateTime.now()
         val varsel = Varsel(varselId, "SB_EX_1", opprettet, vedtaksperiodeId, AKTIV)
-        behandling.håndterNyttVarsel(varsel)
-        val dto = behandling.toDto()
+        legacyBehandling.håndterNyttVarsel(varsel)
+        val dto = legacyBehandling.toDto()
 
         assertEquals(
             BehandlingDto(
@@ -520,10 +521,10 @@ internal class BehandlingTest {
 
     @Test
     fun `behandlingTilstand toDto`() {
-        assertEquals(TilstandDto.VedtakFattet, Behandling.VedtakFattet.toDto())
-        assertEquals(TilstandDto.VidereBehandlingAvklares, Behandling.VidereBehandlingAvklares.toDto())
-        assertEquals(TilstandDto.AvsluttetUtenVedtak, Behandling.AvsluttetUtenVedtak.toDto())
-        assertEquals(TilstandDto.AvsluttetUtenVedtakMedVarsler, Behandling.AvsluttetUtenVedtakMedVarsler.toDto())
+        assertEquals(TilstandDto.VedtakFattet, LegacyBehandling.VedtakFattet.toDto())
+        assertEquals(TilstandDto.VidereBehandlingAvklares, LegacyBehandling.VidereBehandlingAvklares.toDto())
+        assertEquals(TilstandDto.AvsluttetUtenVedtak, LegacyBehandling.AvsluttetUtenVedtak.toDto())
+        assertEquals(TilstandDto.AvsluttetUtenVedtakMedVarsler, LegacyBehandling.AvsluttetUtenVedtakMedVarsler.toDto())
     }
 
     private fun behandlingMedVarsel(
@@ -531,7 +532,7 @@ internal class BehandlingTest {
         tom: LocalDate = 31 jan 2018,
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         varselkode: String = "SB_EX_1",
-    ): Behandling =
+    ): LegacyBehandling =
         behandling(vedtaksperiodeId = vedtaksperiodeId, fom = fom, tom = tom).also {
             it.håndterNyttVarsel(Varsel(UUID.randomUUID(), varselkode, LocalDateTime.now(), vedtaksperiodeId))
         }
@@ -543,7 +544,7 @@ internal class BehandlingTest {
         fom: LocalDate = 1 jan 2018,
         tom: LocalDate = 31 jan 2018,
         skjæringstidspunkt: LocalDate = 1 jan 2018,
-    ) = Behandling(
+    ) = LegacyBehandling(
         id = behandlingId,
         vedtaksperiodeId = vedtaksperiodeId,
         spleisBehandlingId = spleisBehandlingId,
@@ -552,7 +553,7 @@ internal class BehandlingTest {
         skjæringstidspunkt = skjæringstidspunkt,
     )
 
-    private fun Behandling.assertVarsler(
+    private fun LegacyBehandling.assertVarsler(
         forventetAntall: Int,
         status: VarselStatusDto,
         varselkode: Varselkode,
@@ -560,7 +561,7 @@ internal class BehandlingTest {
         this.assertVarsler(forventetAntall, status, varselkode.name)
     }
 
-    private fun Behandling.assertVarsler(
+    private fun LegacyBehandling.assertVarsler(
         forventetAntall: Int,
         status: VarselStatusDto,
         varselkode: String,
@@ -571,7 +572,7 @@ internal class BehandlingTest {
         assertEquals(forventetAntall, varsel.size)
     }
 
-    private fun Behandling.assertUtbetalingId(utbetalingId: UUID?) {
+    private fun LegacyBehandling.assertUtbetalingId(utbetalingId: UUID?) {
         val dto = this.toDto()
         assertEquals(utbetalingId, dto.utbetalingId)
     }

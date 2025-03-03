@@ -17,7 +17,6 @@ import no.nav.helse.modell.automatisering.Automatiseringsresultat
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.person.Sykefraværstilfelle
-import no.nav.helse.modell.person.vedtaksperiode.Behandling
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.risiko.Risikovurdering
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
@@ -31,6 +30,7 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.spesialist.application.jan
 import no.nav.helse.spesialist.application.lagFødselsnummer
 import no.nav.helse.spesialist.application.lagOrganisasjonsnummer
+import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -143,7 +143,7 @@ internal class AutomatiseringTest {
     fun `vedtaksperiode med warnings er ikke automatiserbar`() {
         val gjeldendeGenerasjon = enGenerasjon()
         gjeldendeGenerasjon.håndterNyttVarsel(etVarsel())
-        blirManuellOppgave(behandling = gjeldendeGenerasjon)
+        blirManuellOppgave(legacyBehandling = gjeldendeGenerasjon)
     }
 
     @Test
@@ -299,14 +299,15 @@ internal class AutomatiseringTest {
 
     private fun forsøkAutomatisering(
         periodetype: Periodetype = FORLENGELSE,
-        generasjoners: List<Behandling> = listOf(
-            Behandling(
+        generasjoners: List<LegacyBehandling> = listOf(
+            LegacyBehandling(
                 UUID.randomUUID(),
                 vedtaksperiodeId,
                 1 jan 2018,
                 31 jan 2018,
                 1 jan 2018
-            )),
+            )
+        ),
         utbetaling: Utbetaling = enUtbetaling(),
     ) = automatisering.utfør(
         fødselsnummer,
@@ -329,7 +330,7 @@ internal class AutomatiseringTest {
         skjæringstidspunkt: LocalDate = fom,
         vedtaksperiodeId: UUID = this.vedtaksperiodeId,
         generasjonId: UUID = UUID.randomUUID(),
-    ) = Behandling(generasjonId, vedtaksperiodeId, fom, tom, skjæringstidspunkt)
+    ) = LegacyBehandling(generasjonId, vedtaksperiodeId, fom, tom, skjæringstidspunkt)
 
     private fun etVarsel(
         varselId: UUID = UUID.randomUUID(),
@@ -337,8 +338,8 @@ internal class AutomatiseringTest {
         varselkode: String = "RV_IM_1",
     ) = Varsel(varselId, varselkode, LocalDateTime.now(), vedtaksperiodeId)
 
-    private fun blirManuellOppgave(utbetaling: Utbetaling = enUtbetaling(), behandling: Behandling = enGenerasjon()) =
-        assertKanIkkeAutomatiseres(forsøkAutomatisering(utbetaling = utbetaling, generasjoners = listOf(behandling)))
+    private fun blirManuellOppgave(utbetaling: Utbetaling = enUtbetaling(), legacyBehandling: LegacyBehandling = enGenerasjon()) =
+        assertKanIkkeAutomatiseres(forsøkAutomatisering(utbetaling = utbetaling, generasjoners = listOf(legacyBehandling)))
 
     private fun blirStikkprøve(utbetaling: Utbetaling = enUtbetaling(), periodetype: Periodetype = FØRSTEGANGSBEHANDLING) =
         assertStikkprøve(forsøkAutomatisering(utbetaling = utbetaling, periodetype = periodetype))

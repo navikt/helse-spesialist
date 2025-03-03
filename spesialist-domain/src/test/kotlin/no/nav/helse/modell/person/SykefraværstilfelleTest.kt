@@ -2,9 +2,9 @@ package no.nav.helse.modell.person
 
 import no.nav.helse.modell.feb
 import no.nav.helse.modell.jan
-import no.nav.helse.modell.person.vedtaksperiode.Behandling
-import no.nav.helse.modell.person.vedtaksperiode.Behandling.Companion.forhindrerAutomatisering
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
+import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
+import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.forhindrerAutomatisering
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -55,7 +55,7 @@ internal class SykefraværstilfelleTest {
     }
 
     private fun generasjon(vedtaksperiodeId: UUID = UUID.randomUUID()) =
-        Behandling(
+        LegacyBehandling(
             id = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeId,
             fom = 1 jan 2018,
@@ -66,7 +66,7 @@ internal class SykefraværstilfelleTest {
     private fun sykefraværstilfelle(
         fødselsnummer: String = "12345678910",
         skjæringstidspunkt: LocalDate = 1 jan 2018,
-        gjeldendeGenerasjoner: List<Behandling> = listOf(generasjon()),
+        gjeldendeGenerasjoner: List<LegacyBehandling> = listOf(generasjon()),
     ) = Sykefraværstilfelle(
         fødselsnummer,
         skjæringstidspunkt,

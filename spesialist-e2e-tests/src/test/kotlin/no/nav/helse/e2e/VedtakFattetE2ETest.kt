@@ -1,8 +1,8 @@
 package no.nav.helse.e2e
 
 import kotliquery.sessionOf
-import no.nav.helse.modell.person.vedtaksperiode.Behandling
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
+import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -29,7 +29,7 @@ internal class VedtakFattetE2ETest : AbstractE2ETest() {
             WHERE vedtaksperiode_id = :vedtaksperiode_id AND tilstand = :tilstand::generasjon_tilstand
             """.trimIndent(),
             "vedtaksperiode_id" to vedtaksperiodeId,
-            "tilstand" to Behandling.VedtakFattet.navn(),
+            "tilstand" to LegacyBehandling.VedtakFattet.navn(),
         )
         val behandlingenErFerdig =
             sessionOf(dataSource, strict = true).use { it.run(query.map { true }.asSingle) ?: false }

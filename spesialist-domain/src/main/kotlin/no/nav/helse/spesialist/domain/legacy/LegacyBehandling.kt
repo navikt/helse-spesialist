@@ -1,7 +1,13 @@
-package no.nav.helse.modell.person.vedtaksperiode
+package no.nav.helse.spesialist.domain.legacy
 
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import net.logstash.logback.argument.StructuredArguments.kv
+import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
+import no.nav.helse.modell.person.vedtaksperiode.Periode
+import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
+import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
+import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
+import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.finnEksisterendeVarsel
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.forhindrerAutomatisering
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderAktivtVarselOmAvvik
@@ -10,6 +16,7 @@ import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderVars
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderVarselOmNegativtBeløp
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderVarselOmTilbakedatering
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderVarselOmÅpenGosysOppgave
+import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
 import no.nav.helse.modell.vedtak.VedtakBegrunnelse
 import org.slf4j.Logger
@@ -17,7 +24,7 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.UUID
 
-class Behandling private constructor(
+class LegacyBehandling private constructor(
     private val id: UUID,
     private val vedtaksperiodeId: UUID,
     utbetalingId: UUID?,
@@ -194,9 +201,9 @@ class Behandling private constructor(
         this.utbetalingId = utbetalingId
     }
 
-    private fun nyBehandling(spleisBehandling: SpleisBehandling): Behandling {
-        val nyBehandling =
-            Behandling(
+    private fun nyBehandling(spleisBehandling: SpleisBehandling): LegacyBehandling {
+        val nyLegacyBehandling =
+            LegacyBehandling(
                 id = UUID.randomUUID(),
                 vedtaksperiodeId = vedtaksperiodeId,
                 fom = spleisBehandling.fom,
@@ -204,19 +211,19 @@ class Behandling private constructor(
                 skjæringstidspunkt = skjæringstidspunkt,
                 spleisBehandlingId = spleisBehandling.spleisBehandlingId,
             )
-        flyttAktiveVarslerTil(nyBehandling)
-        return nyBehandling
+        flyttAktiveVarslerTil(nyLegacyBehandling)
+        return nyLegacyBehandling
     }
 
-    private fun flyttAktiveVarslerTil(behandling: Behandling) {
+    private fun flyttAktiveVarslerTil(legacyBehandling: LegacyBehandling) {
         val aktiveVarsler = varsler.filter(Varsel::erAktiv)
         this.varsler.removeAll(aktiveVarsler)
-        behandling.varsler.addAll(aktiveVarsler)
+        legacyBehandling.varsler.addAll(aktiveVarsler)
         if (aktiveVarsler.isNotEmpty()) {
             sikkerlogg.info(
                 "Flytter ${aktiveVarsler.size} varsler fra {} til {}. Gammel behandling har {}",
                 kv("gammel_behandling", this.id),
-                kv("ny_behandling", behandling.id),
+                kv("ny_behandling", legacyBehandling.id),
                 kv("utbetalingId", this.utbetalingId),
             )
         }
@@ -264,28 +271,28 @@ class Behandling private constructor(
                 KlarTilBehandling -> TilstandDto.KlarTilBehandling
             }
 
-        fun avsluttetUtenVedtak(behandling: Behandling): Unit =
+        fun avsluttetUtenVedtak(legacyBehandling: LegacyBehandling): Unit =
             throw IllegalStateException("Forventer ikke avsluttet_uten_vedtak i tilstand=${this::class.simpleName}")
 
-        fun vedtakFattet(behandling: Behandling) {
+        fun vedtakFattet(legacyBehandling: LegacyBehandling) {
             sikkerlogg.info("Forventet ikke vedtak_fattet i {}", kv("tilstand", this::class.simpleName))
         }
 
         fun spleisVedtaksperiode(
             vedtaksperiode: Vedtaksperiode,
-            behandling: Behandling,
+            legacyBehandling: LegacyBehandling,
             spleisVedtaksperiode: SpleisVedtaksperiode,
         ) {
         }
 
         fun nyUtbetaling(
-            behandling: Behandling,
+            legacyBehandling: LegacyBehandling,
             utbetalingId: UUID,
         ) {
             sikkerlogg.error(
                 "Mottatt ny utbetaling med {} for {} i {}",
                 keyValue("utbetalingId", utbetalingId),
-                keyValue("behandling", behandling),
+                keyValue("behandling", legacyBehandling),
                 keyValue("tilstand", this::class.simpleName),
             )
             logg.error(
@@ -296,29 +303,29 @@ class Behandling private constructor(
         }
 
         fun invaliderUtbetaling(
-            behandling: Behandling,
+            legacyBehandling: LegacyBehandling,
             utbetalingId: UUID,
         ) {
             logg.error(
                 "Utbetaling med {} ble forsøkt forkastet, men det støttes ikke for {} som er i {}.",
-                keyValue("Behandling", behandling),
+                keyValue("Behandling", legacyBehandling),
                 keyValue("utbetalingId", utbetalingId),
                 keyValue("tilstand", this::class.simpleName),
             )
             sikkerlogg.error(
                 "Utbetaling med {} ble forsøkt forkastet, men det støttes ikke for {} som er i {}.",
-                keyValue("Behandling", behandling),
+                keyValue("Behandling", legacyBehandling),
                 keyValue("utbetalingId", utbetalingId),
                 keyValue("tilstand", this::class.simpleName),
             )
         }
 
-        fun nyttVarsel(behandling: Behandling) {}
+        fun nyttVarsel(legacyBehandling: LegacyBehandling) {}
 
-        fun håndterGodkjenning(behandling: Behandling) {}
+        fun håndterGodkjenning(legacyBehandling: LegacyBehandling) {}
 
         fun oppdaterBehandlingsinformasjon(
-            behandling: Behandling,
+            legacyBehandling: LegacyBehandling,
             tags: List<String>,
             spleisBehandlingId: UUID,
             utbetalingId: UUID,
@@ -329,67 +336,67 @@ class Behandling private constructor(
         override fun navn(): String = "VidereBehandlingAvklares"
 
         override fun nyUtbetaling(
-            behandling: Behandling,
+            legacyBehandling: LegacyBehandling,
             utbetalingId: UUID,
         ) {
-            behandling.nyUtbetaling(utbetalingId)
-            behandling.nyTilstand(KlarTilBehandling)
+            legacyBehandling.nyUtbetaling(utbetalingId)
+            legacyBehandling.nyTilstand(KlarTilBehandling)
         }
 
         override fun spleisVedtaksperiode(
             vedtaksperiode: Vedtaksperiode,
-            behandling: Behandling,
+            legacyBehandling: LegacyBehandling,
             spleisVedtaksperiode: SpleisVedtaksperiode,
         ) {
-            behandling.spleisVedtaksperiode(spleisVedtaksperiode)
+            legacyBehandling.spleisVedtaksperiode(spleisVedtaksperiode)
         }
 
-        override fun avsluttetUtenVedtak(behandling: Behandling) {
+        override fun avsluttetUtenVedtak(legacyBehandling: LegacyBehandling) {
             check(
-                behandling.utbetalingId == null,
+                legacyBehandling.utbetalingId == null,
             ) { "Mottatt avsluttet_uten_vedtak på behandling som har utbetaling. Det gir ingen mening." }
             val nesteTilstand =
                 when {
-                    behandling.varsler.isNotEmpty() -> AvsluttetUtenVedtakMedVarsler
+                    legacyBehandling.varsler.isNotEmpty() -> AvsluttetUtenVedtakMedVarsler
                     else -> AvsluttetUtenVedtak
                 }
-            behandling.nyTilstand(nesteTilstand)
+            legacyBehandling.nyTilstand(nesteTilstand)
         }
     }
 
     internal data object KlarTilBehandling : Tilstand {
         override fun navn(): String = "KlarTilBehandling"
 
-        override fun vedtakFattet(behandling: Behandling) {
-            checkNotNull(behandling.utbetalingId) { "Mottatt vedtak_fattet i tilstand=${navn()}, men mangler utbetalingId" }
-            behandling.nyTilstand(VedtakFattet)
+        override fun vedtakFattet(legacyBehandling: LegacyBehandling) {
+            checkNotNull(legacyBehandling.utbetalingId) { "Mottatt vedtak_fattet i tilstand=${navn()}, men mangler utbetalingId" }
+            legacyBehandling.nyTilstand(VedtakFattet)
         }
 
         override fun oppdaterBehandlingsinformasjon(
-            behandling: Behandling,
+            legacyBehandling: LegacyBehandling,
             tags: List<String>,
             spleisBehandlingId: UUID,
             utbetalingId: UUID,
         ) {
-            behandling.tags = tags
-            behandling.spleisBehandlingId = spleisBehandlingId
-            behandling.utbetalingId = utbetalingId
+            legacyBehandling.tags = tags
+            legacyBehandling.spleisBehandlingId = spleisBehandlingId
+            legacyBehandling.utbetalingId = utbetalingId
         }
 
         override fun invaliderUtbetaling(
-            behandling: Behandling,
+            legacyBehandling: LegacyBehandling,
             utbetalingId: UUID,
         ) {
-            behandling.utbetalingId = null
-            behandling.nyTilstand(VidereBehandlingAvklares)
+            legacyBehandling.utbetalingId = null
+            legacyBehandling.nyTilstand(VidereBehandlingAvklares)
         }
 
         override fun spleisVedtaksperiode(
             vedtaksperiode: Vedtaksperiode,
-            behandling: Behandling,
+            legacyBehandling: LegacyBehandling,
             spleisVedtaksperiode: SpleisVedtaksperiode,
         ) {
-            behandling.spleisVedtaksperiode(spleisVedtaksperiode)
+            legacyBehandling.spleisVedtaksperiode(spleisVedtaksperiode)
         }
     }
 
@@ -400,22 +407,22 @@ class Behandling private constructor(
     internal data object AvsluttetUtenVedtak : Tilstand {
         override fun navn(): String = "AvsluttetUtenVedtak"
 
-        override fun nyttVarsel(behandling: Behandling) {
+        override fun nyttVarsel(legacyBehandling: LegacyBehandling) {
             sikkerlogg.warn("Mottar nytt varsel i tilstand ${navn()}")
-            behandling.nyTilstand(AvsluttetUtenVedtakMedVarsler)
+            legacyBehandling.nyTilstand(AvsluttetUtenVedtakMedVarsler)
         }
 
-        override fun vedtakFattet(behandling: Behandling) {}
+        override fun vedtakFattet(legacyBehandling: LegacyBehandling) {}
     }
 
     internal data object AvsluttetUtenVedtakMedVarsler : Tilstand {
         override fun navn(): String = "AvsluttetUtenVedtakMedVarsler"
 
-        override fun håndterGodkjenning(behandling: Behandling) {
-            behandling.nyTilstand(AvsluttetUtenVedtak)
+        override fun håndterGodkjenning(legacyBehandling: LegacyBehandling) {
+            legacyBehandling.nyTilstand(AvsluttetUtenVedtak)
         }
 
-        override fun vedtakFattet(behandling: Behandling) {}
+        override fun vedtakFattet(legacyBehandling: LegacyBehandling) {}
     }
 
     override fun toString(): String = "spesialistBehandlingId=$id, vedtaksperiodeId=$vedtaksperiodeId"
@@ -423,7 +430,7 @@ class Behandling private constructor(
     override fun equals(other: Any?): Boolean =
         this === other ||
             (
-                other is Behandling &&
+                other is LegacyBehandling &&
                     javaClass == other.javaClass &&
                     id == other.id &&
                     vedtaksperiodeId == other.vedtaksperiodeId &&
@@ -446,16 +453,16 @@ class Behandling private constructor(
     }
 
     companion object {
-        val logg: Logger = LoggerFactory.getLogger(Behandling::class.java)
+        val logg: Logger = LoggerFactory.getLogger(LegacyBehandling::class.java)
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
-        internal fun List<Behandling>.finnBehandlingForVedtaksperiode(vedtaksperiodeId: UUID): Behandling? =
+        internal fun List<LegacyBehandling>.finnBehandlingForVedtaksperiode(vedtaksperiodeId: UUID): LegacyBehandling? =
             this.find { it.vedtaksperiodeId == vedtaksperiodeId }
 
-        internal fun List<Behandling>.finnBehandlingForSpleisBehandling(spleisBehandlingId: UUID): Behandling? =
+        internal fun List<LegacyBehandling>.finnBehandlingForSpleisBehandling(spleisBehandlingId: UUID): LegacyBehandling? =
             this.find { it.spleisBehandlingId == spleisBehandlingId }
 
-        internal fun List<Behandling>.finnSisteBehandlingUtenSpleisBehandlingId(): Behandling? =
+        internal fun List<LegacyBehandling>.finnSisteBehandlingUtenSpleisBehandlingId(): LegacyBehandling? =
             this.lastOrNull { it.spleisBehandlingId == null }
 
         internal fun fraLagring(
@@ -470,7 +477,7 @@ class Behandling private constructor(
             tags: List<String>,
             varsler: Set<Varsel>,
             vedtakBegrunnelse: VedtakBegrunnelse?,
-        ) = Behandling(
+        ) = LegacyBehandling(
             id = id,
             vedtaksperiodeId = vedtaksperiodeId,
             utbetalingId = utbetalingId,
@@ -483,61 +490,61 @@ class Behandling private constructor(
             varsler = varsler,
         )
 
-        internal fun List<Behandling>.håndterNyttVarsel(varsler: List<Varsel>) {
+        internal fun List<LegacyBehandling>.håndterNyttVarsel(varsler: List<Varsel>) {
             forEach { behandling ->
                 varsler.forEach { behandling.håndterNyttVarsel(it) }
             }
         }
 
-        fun List<Behandling>.forhindrerAutomatisering(tilOgMed: LocalDate): Boolean =
+        fun List<LegacyBehandling>.forhindrerAutomatisering(tilOgMed: LocalDate): Boolean =
             this
                 .filter {
                     it.tilhører(tilOgMed)
                 }.any { it.forhindrerAutomatisering() }
 
-        internal fun List<Behandling>.forhindrerAutomatisering(behandling: Behandling): Boolean =
+        internal fun List<LegacyBehandling>.forhindrerAutomatisering(legacyBehandling: LegacyBehandling): Boolean =
             this
                 .filter {
-                    it.tilhører(behandling.periode.tom())
+                    it.tilhører(legacyBehandling.periode.tom())
                 }.any { it.forhindrerAutomatisering() }
 
-        internal fun List<Behandling>.harKunGosysvarsel(behandling: Behandling): Boolean =
+        internal fun List<LegacyBehandling>.harKunGosysvarsel(legacyBehandling: LegacyBehandling): Boolean =
             this
                 .filter {
-                    it.tilhører(behandling.periode.tom())
+                    it.tilhører(legacyBehandling.periode.tom())
                 }.filter { it.varsler.isNotEmpty() }
                 .all { it.harKunGosysvarsel() }
 
-        internal fun List<Behandling>.harVarselOmManglendeInntektsmelding(behandling: Behandling): Boolean =
-            filter { it.tilhører(behandling.periode.tom()) }
+        internal fun List<LegacyBehandling>.harVarselOmManglendeInntektsmelding(legacyBehandling: LegacyBehandling): Boolean =
+            filter { it.tilhører(legacyBehandling.periode.tom()) }
                 .filter { it.varsler.isNotEmpty() }
                 .any { it.harVarselOmManglendeInntektsmelding() }
 
-        internal fun List<Behandling>.harMedlemskapsvarsel(vedtaksperiodeId: UUID): Boolean =
+        internal fun List<LegacyBehandling>.harMedlemskapsvarsel(vedtaksperiodeId: UUID): Boolean =
             overlapperMedEllerTidligereEnn(vedtaksperiodeId).any {
                 it.harMedlemskapsvarsel()
             }
 
-        internal fun List<Behandling>.kreverSkjønnsfastsettelse(vedtaksperiodeId: UUID): Boolean =
+        internal fun List<LegacyBehandling>.kreverSkjønnsfastsettelse(vedtaksperiodeId: UUID): Boolean =
             overlapperMedEllerTidligereEnn(vedtaksperiodeId).any {
                 it.kreverSkjønnsfastsettelse()
             }
 
-        internal fun List<Behandling>.erTilbakedatert(vedtaksperiodeId: UUID): Boolean =
+        internal fun List<LegacyBehandling>.erTilbakedatert(vedtaksperiodeId: UUID): Boolean =
             overlapperMedEllerTidligereEnn(vedtaksperiodeId).any {
                 it.erTilbakedatert()
             }
 
-        internal fun List<Behandling>.harÅpenGosysOppgave(vedtaksperiodeId: UUID): Boolean =
+        internal fun List<LegacyBehandling>.harÅpenGosysOppgave(vedtaksperiodeId: UUID): Boolean =
             overlapperMedEllerTidligereEnn(vedtaksperiodeId).any {
                 it.harKunÅpenGosysOppgave()
             }
 
-        internal fun List<Behandling>.deaktiver(varsel: Varsel) {
+        internal fun List<LegacyBehandling>.deaktiver(varsel: Varsel) {
             find { varsel.erRelevantFor(it.vedtaksperiodeId) }?.håndterDeaktivertVarsel(varsel)
         }
 
-        internal fun List<Behandling>.flyttEventueltAvviksvarselTil(vedtaksperiodeId: UUID) {
+        internal fun List<LegacyBehandling>.flyttEventueltAvviksvarselTil(vedtaksperiodeId: UUID) {
             val behandlingForPeriodeTilGodkjenning =
                 finnBehandlingForVedtaksperiode(vedtaksperiodeId) ?: run {
                     logg.warn("Finner ikke behandling for vedtaksperiode $vedtaksperiodeId, sjekker ikke om avviksvarsel skal flyttes")
@@ -556,13 +563,13 @@ class Behandling private constructor(
             behandlingForPeriodeTilGodkjenning.varsler.add(varsel)
         }
 
-        internal fun List<Behandling>.håndterGodkjent(vedtaksperiodeId: UUID) {
+        internal fun List<LegacyBehandling>.håndterGodkjent(vedtaksperiodeId: UUID) {
             overlapperMedEllerTidligereEnn(vedtaksperiodeId).forEach {
                 it.håndterGodkjentAvSaksbehandler()
             }
         }
 
-        private fun List<Behandling>.overlapperMedEllerTidligereEnn(vedtaksperiodeId: UUID): List<Behandling> {
+        private fun List<LegacyBehandling>.overlapperMedEllerTidligereEnn(vedtaksperiodeId: UUID): List<LegacyBehandling> {
             val gjeldende = find { it.vedtaksperiodeId == vedtaksperiodeId } ?: return emptyList()
             return sortedByDescending { it.periode.tom() }
                 .filter { it.periode.fom() <= gjeldende.periode.tom() }

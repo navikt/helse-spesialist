@@ -257,7 +257,7 @@ internal class GodkjenningsbehovCommand(
                 avviksvurderingRepository = avviksvurderingRepository,
                 omregnedeÅrsinntekter = behovData.omregnedeÅrsinntekter,
                 vilkårsgrunnlagId = behovData.vilkårsgrunnlagId,
-                behandling = person.vedtaksperiode(behovData.vedtaksperiodeId).finnBehandling(behovData.spleisBehandlingId),
+                legacyBehandling = person.vedtaksperiode(behovData.vedtaksperiodeId).finnBehandling(behovData.spleisBehandlingId),
                 erInngangsvilkårVurdertISpleis = behovData.erInngangsvilkårVurdertISpleis,
                 organisasjonsnummer = behovData.organisasjonsnummer,
             ),

@@ -13,13 +13,13 @@ import no.nav.helse.modell.melding.VedtaksperiodeAvvistManuelt
 import no.nav.helse.modell.melding.VedtaksperiodeGodkjentAutomatisk
 import no.nav.helse.modell.melding.VedtaksperiodeGodkjentManuelt
 import no.nav.helse.modell.person.Sykefraværstilfelle
-import no.nav.helse.modell.person.vedtaksperiode.Behandling
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.spesialist.application.Testdata.godkjenningsbehovData
 import no.nav.helse.spesialist.application.modell.inspektør
+import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
@@ -202,7 +202,7 @@ internal class GodkjenningMediatorTest {
     private fun generasjon(
         id: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID = UUID.randomUUID(),
-    ) = Behandling(
+    ) = LegacyBehandling(
         id = id,
         vedtaksperiodeId = vedtaksperiodeId,
         fom = 1 jan 2018,
@@ -210,7 +210,7 @@ internal class GodkjenningMediatorTest {
         skjæringstidspunkt = 1 jan 2018,
     )
 
-    private fun godkjenning(generasjoner: List<Behandling>) =
+    private fun godkjenning(generasjoner: List<LegacyBehandling>) =
         mediator.saksbehandlerUtbetaling(
             context = context,
             behov = godkjenningsbehovData(fødselsnummer = fnr),

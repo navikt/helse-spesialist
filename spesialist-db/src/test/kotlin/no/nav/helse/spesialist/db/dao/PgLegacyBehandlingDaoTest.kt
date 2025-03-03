@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class PgBehandlingDaoTest : AbstractDBIntegrationTest() {
+internal class PgLegacyBehandlingDaoTest : AbstractDBIntegrationTest() {
 
     private val generasjonDao = daos.generasjonDao
 

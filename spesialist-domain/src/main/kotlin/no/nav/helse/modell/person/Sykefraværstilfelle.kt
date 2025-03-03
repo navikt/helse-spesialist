@@ -1,25 +1,25 @@
 package no.nav.helse.modell.person
 
-import no.nav.helse.modell.person.vedtaksperiode.Behandling
-import no.nav.helse.modell.person.vedtaksperiode.Behandling.Companion.deaktiver
-import no.nav.helse.modell.person.vedtaksperiode.Behandling.Companion.erTilbakedatert
-import no.nav.helse.modell.person.vedtaksperiode.Behandling.Companion.finnBehandlingForVedtaksperiode
-import no.nav.helse.modell.person.vedtaksperiode.Behandling.Companion.forhindrerAutomatisering
-import no.nav.helse.modell.person.vedtaksperiode.Behandling.Companion.harKunGosysvarsel
-import no.nav.helse.modell.person.vedtaksperiode.Behandling.Companion.harMedlemskapsvarsel
-import no.nav.helse.modell.person.vedtaksperiode.Behandling.Companion.harVarselOmManglendeInntektsmelding
-import no.nav.helse.modell.person.vedtaksperiode.Behandling.Companion.harÅpenGosysOppgave
-import no.nav.helse.modell.person.vedtaksperiode.Behandling.Companion.håndterGodkjent
-import no.nav.helse.modell.person.vedtaksperiode.Behandling.Companion.håndterNyttVarsel
-import no.nav.helse.modell.person.vedtaksperiode.Behandling.Companion.kreverSkjønnsfastsettelse
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
+import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
+import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.deaktiver
+import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.erTilbakedatert
+import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.finnBehandlingForVedtaksperiode
+import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.forhindrerAutomatisering
+import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.harKunGosysvarsel
+import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.harMedlemskapsvarsel
+import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.harVarselOmManglendeInntektsmelding
+import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.harÅpenGosysOppgave
+import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.håndterGodkjent
+import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.håndterNyttVarsel
+import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.kreverSkjønnsfastsettelse
 import java.time.LocalDate
 import java.util.UUID
 
 class Sykefraværstilfelle(
     private val fødselsnummer: String,
     private val skjæringstidspunkt: LocalDate,
-    private val gjeldendeBehandlinger: List<Behandling>,
+    private val gjeldendeBehandlinger: List<LegacyBehandling>,
 ) {
     init {
         check(gjeldendeBehandlinger.isNotEmpty()) { "Kan ikke opprette et sykefraværstilfelle uten behandlinger" }

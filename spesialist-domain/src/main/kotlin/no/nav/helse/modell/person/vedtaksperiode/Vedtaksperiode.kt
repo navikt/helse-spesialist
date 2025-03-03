@@ -1,9 +1,10 @@
 package no.nav.helse.modell.person.vedtaksperiode
 
 import net.logstash.logback.argument.StructuredArguments.kv
-import no.nav.helse.modell.person.vedtaksperiode.Behandling.Companion.finnBehandlingForSpleisBehandling
-import no.nav.helse.modell.person.vedtaksperiode.Behandling.Companion.logg
 import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
+import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
+import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.finnBehandlingForSpleisBehandling
+import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.logg
 import java.time.LocalDate
 import java.util.UUID
 
@@ -11,7 +12,7 @@ class Vedtaksperiode private constructor(
     private val vedtaksperiodeId: UUID,
     private val organisasjonsnummer: String,
     private var forkastet: Boolean,
-    behandlinger: List<Behandling>,
+    behandlinger: List<LegacyBehandling>,
 ) {
     private val behandlinger = behandlinger.toMutableList()
     private val gjeldendeBehandling get() = behandlinger.last()
@@ -73,8 +74,8 @@ class Vedtaksperiode private constructor(
         gjeldendeBehandling.håndterForkastetUtbetaling(utbetalingId)
     }
 
-    private fun nyBehandling(behandling: Behandling) {
-        behandlinger.addLast(behandling)
+    private fun nyBehandling(legacyBehandling: LegacyBehandling) {
+        behandlinger.addLast(legacyBehandling)
     }
 
     internal fun vedtaksperiodeForkastet() {
@@ -101,7 +102,7 @@ class Vedtaksperiode private constructor(
         gjeldendeBehandling.håndterNyUtbetaling(utbetalingId)
     }
 
-    fun finnBehandling(spleisBehandlingId: UUID): Behandling =
+    fun finnBehandling(spleisBehandlingId: UUID): LegacyBehandling =
         behandlinger.find { it.spleisBehandlingId() == spleisBehandlingId }
             ?: throw IllegalArgumentException("Forventer at behandling med spleisBehandlingId=$spleisBehandlingId finnes")
 
@@ -119,7 +120,7 @@ class Vedtaksperiode private constructor(
                 organisasjonsnummer = spleisBehandling.organisasjonsnummer,
                 behandlinger =
                     listOf(
-                        Behandling(
+                        LegacyBehandling(
                             id = UUID.randomUUID(),
                             vedtaksperiodeId = spleisBehandling.vedtaksperiodeId,
                             spleisBehandlingId = spleisBehandling.spleisBehandlingId,
@@ -156,8 +157,8 @@ class Vedtaksperiode private constructor(
             filter { it.gjeldendeSkjæringstidspunkt == skjæringstidspunkt }
                 .map { it.gjeldendeBehandling }
 
-        private fun BehandlingDto.tilBehandling(): Behandling =
-            Behandling.fraLagring(
+        private fun BehandlingDto.tilBehandling(): LegacyBehandling =
+            LegacyBehandling.fraLagring(
                 id = id,
                 vedtaksperiodeId = vedtaksperiodeId,
                 utbetalingId = utbetalingId,
@@ -167,11 +168,11 @@ class Vedtaksperiode private constructor(
                 tom = tom,
                 tilstand =
                     when (tilstand) {
-                        TilstandDto.VedtakFattet -> Behandling.VedtakFattet
-                        TilstandDto.VidereBehandlingAvklares -> Behandling.VidereBehandlingAvklares
-                        TilstandDto.AvsluttetUtenVedtak -> Behandling.AvsluttetUtenVedtak
-                        TilstandDto.AvsluttetUtenVedtakMedVarsler -> Behandling.AvsluttetUtenVedtakMedVarsler
-                        TilstandDto.KlarTilBehandling -> Behandling.KlarTilBehandling
+                        TilstandDto.VedtakFattet -> LegacyBehandling.VedtakFattet
+                        TilstandDto.VidereBehandlingAvklares -> LegacyBehandling.VidereBehandlingAvklares
+                        TilstandDto.AvsluttetUtenVedtak -> LegacyBehandling.AvsluttetUtenVedtak
+                        TilstandDto.AvsluttetUtenVedtakMedVarsler -> LegacyBehandling.AvsluttetUtenVedtakMedVarsler
+                        TilstandDto.KlarTilBehandling -> LegacyBehandling.KlarTilBehandling
                     },
                 tags = tags.toList(),
                 varsler =

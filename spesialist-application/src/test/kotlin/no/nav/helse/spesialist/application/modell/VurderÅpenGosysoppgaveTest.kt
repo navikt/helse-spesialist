@@ -11,11 +11,11 @@ import no.nav.helse.modell.gosysoppgaver.VurderÅpenGosysoppgave
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.Sykefraværstilfelle
-import no.nav.helse.modell.person.vedtaksperiode.Behandling
 import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
 import no.nav.helse.spesialist.application.jan
+import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -165,7 +165,7 @@ internal class VurderÅpenGosysoppgaveTest {
     }
 
     private fun generasjon(vedtaksperiodeId: UUID = UUID.randomUUID()) =
-        Behandling(
+        LegacyBehandling(
             id = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeId,
             fom = 1 jan 2018,
@@ -174,6 +174,6 @@ internal class VurderÅpenGosysoppgaveTest {
         )
 }
 
-internal fun Behandling.inspektør(block: BehandlingDto.() -> Unit) {
+internal fun LegacyBehandling.inspektør(block: BehandlingDto.() -> Unit) {
     this.toDto().block()
 }

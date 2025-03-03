@@ -1,13 +1,14 @@
 package no.nav.helse.modell.person.vedtaksperiode
 
 import no.nav.helse.modell.jan
+import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class BehandlingTilstandTest {
+internal class LegacyBehandlingTilstandTest {
 
     @Test
     fun `Går fra MedVedtaksforslag til VidereBehandlingAvklares dersom utbetalingen blir forkastet`() {
@@ -139,15 +140,15 @@ internal class BehandlingTilstandTest {
         behandling.assertTilstand(TilstandDto.AvsluttetUtenVedtakMedVarsler)
     }
 
-    private fun Behandling.assertTilstand(tilstandDto: TilstandDto) {
+    private fun LegacyBehandling.assertTilstand(tilstandDto: TilstandDto) {
         assertEquals(tilstandDto, toDto().tilstand)
     }
 
-    private fun Behandling.assertAntallVarsler(antall: Int) {
+    private fun LegacyBehandling.assertAntallVarsler(antall: Int) {
         assertEquals(antall, toDto().varsler.size)
     }
 
-    private fun Behandling.assertUtbetaling(utbetalingId: UUID?) {
+    private fun LegacyBehandling.assertUtbetaling(utbetalingId: UUID?) {
         assertEquals(utbetalingId, toDto().utbetalingId)
     }
 
@@ -157,7 +158,7 @@ internal class BehandlingTilstandTest {
         fom: LocalDate = 1 jan 2018,
         tom: LocalDate = 31 jan 2018,
         skjæringstidspunkt: LocalDate = 1 jan 2018,
-    ) = Behandling(
+    ) = LegacyBehandling(
         id = behandlingId,
         vedtaksperiodeId = vedtaksperiodeId,
         fom = fom,

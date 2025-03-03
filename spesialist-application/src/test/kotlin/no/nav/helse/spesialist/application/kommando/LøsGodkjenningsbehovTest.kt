@@ -10,12 +10,12 @@ import no.nav.helse.modell.kommando.LøsGodkjenningsbehov
 import no.nav.helse.modell.melding.Godkjenningsbehovløsning
 import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.person.Sykefraværstilfelle
-import no.nav.helse.modell.person.vedtaksperiode.Behandling
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.spesialist.application.Testdata.godkjenningsbehovData
 import no.nav.helse.spesialist.application.jan
+import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -69,7 +69,7 @@ internal class LøsGodkjenningsbehovTest {
             sykefraværstilfelle = Sykefraværstilfelle(
                 fødselsnummer,
                 1 jan 2018,
-                listOf(Behandling(UUID.randomUUID(), UUID.randomUUID(), 1 jan 2018, 31 jan 2018, 1 jan 2018))
+                listOf(LegacyBehandling(UUID.randomUUID(), UUID.randomUUID(), 1 jan 2018, 31 jan 2018, 1 jan 2018))
             ),
             godkjent = GODKJENT,
             godkjenttidspunkt = TIDSPUNKT,

@@ -9,12 +9,12 @@ import no.nav.helse.modell.kommando.LøsGodkjenningsbehov
 import no.nav.helse.modell.melding.Godkjenningsbehovløsning
 import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.person.Sykefraværstilfelle
-import no.nav.helse.modell.person.vedtaksperiode.Behandling
 import no.nav.helse.modell.utbetaling.Refusjonstype
 import no.nav.helse.modell.utbetaling.Refusjonstype.DELVIS_REFUSJON
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
+import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import no.nav.helse.util.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -51,7 +51,7 @@ internal class SaksbehandlerløsningTest {
             sykefraværstilfelle = Sykefraværstilfelle(
                 fødselsnummer = FNR,
                 skjæringstidspunkt = 1.januar,
-                gjeldendeBehandlinger = listOf(Behandling(randomUUID(), vedtaksperiodeId, 1.januar, 31.januar, 1.januar))
+                gjeldendeBehandlinger = listOf(LegacyBehandling(randomUUID(), vedtaksperiodeId, 1.januar, 31.januar, 1.januar))
             ),
             godkjent = godkjent,
             godkjenttidspunkt = GODKJENTTIDSPUNKT,

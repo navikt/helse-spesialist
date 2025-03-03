@@ -5,7 +5,6 @@ import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.VurderBehovForAvviksvurdering
 import no.nav.helse.modell.melding.Behov
-import no.nav.helse.modell.person.vedtaksperiode.Behandling
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderVarselOmAvvik
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.modell.vilkårsprøving.AvviksvurderingBehovLøsning
@@ -17,6 +16,7 @@ import no.nav.helse.modell.vilkårsprøving.Sammenligningsgrunnlag
 import no.nav.helse.spesialist.application.jan
 import no.nav.helse.spesialist.application.lagFødselsnummer
 import no.nav.helse.spesialist.application.lagOrganisasjonsnummer
+import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -55,7 +55,7 @@ class VurderBehovForAvviksvurderingTest {
         )
     )
 
-    private val behandling = Behandling(
+    private val legacyBehandling = LegacyBehandling(
         id = UUID.randomUUID(),
         vedtaksperiodeId = UUID.randomUUID(),
         fom = 1 jan 2018,
@@ -98,7 +98,7 @@ class VurderBehovForAvviksvurderingTest {
             repository,
             omregnedeÅrsinntekter,
             vilkårsgrunnlagId,
-            behandling,
+            legacyBehandling,
             false,
             organisasjonsnummer
         )
@@ -116,7 +116,7 @@ class VurderBehovForAvviksvurderingTest {
             repository,
             omregnedeÅrsinntekter,
             vilkårsgrunnlagId,
-            behandling,
+            legacyBehandling,
             true,
             organisasjonsnummer
         )
@@ -130,7 +130,7 @@ class VurderBehovForAvviksvurderingTest {
         assertEquals(organisasjonsnummer, behov.organisasjonsnummer)
         assertEquals(vilkårsgrunnlagId, behov.vilkårsgrunnlagId)
         assertEquals(skjæringstidspunkt, behov.skjæringstidspunkt)
-        assertEquals(behandling.vedtaksperiodeId(), behov.vedtaksperiodeId)
+        assertEquals(legacyBehandling.vedtaksperiodeId(), behov.vedtaksperiodeId)
     }
 
     @Test
@@ -141,7 +141,7 @@ class VurderBehovForAvviksvurderingTest {
             repository,
             omregnedeÅrsinntekter,
             vilkårsgrunnlagId,
-            behandling,
+            legacyBehandling,
             true,
             organisasjonsnummer
         )
@@ -182,7 +182,7 @@ class VurderBehovForAvviksvurderingTest {
             repository,
             omregnedeÅrsinntekter,
             vilkårsgrunnlagId,
-            behandling,
+            legacyBehandling,
             true,
             organisasjonsnummer
         )
@@ -199,7 +199,7 @@ class VurderBehovForAvviksvurderingTest {
             )
         )
         command.resume(context)
-        assertTrue(behandling.varsler().inneholderVarselOmAvvik())
+        assertTrue(legacyBehandling.varsler().inneholderVarselOmAvvik())
     }
 
     @Test
@@ -210,7 +210,7 @@ class VurderBehovForAvviksvurderingTest {
             repository,
             omregnedeÅrsinntekter,
             vilkårsgrunnlagId,
-            behandling,
+            legacyBehandling,
             true,
             organisasjonsnummer
         )
@@ -227,7 +227,7 @@ class VurderBehovForAvviksvurderingTest {
             )
         )
         command.resume(context)
-        assertFalse(behandling.varsler().inneholderVarselOmAvvik())
+        assertFalse(legacyBehandling.varsler().inneholderVarselOmAvvik())
     }
 
     @Test
@@ -238,7 +238,7 @@ class VurderBehovForAvviksvurderingTest {
             repository,
             omregnedeÅrsinntekter,
             vilkårsgrunnlagId,
-            behandling,
+            legacyBehandling,
             true,
             organisasjonsnummer
         )
@@ -259,7 +259,7 @@ class VurderBehovForAvviksvurderingTest {
             repository,
             omregnedeÅrsinntekter,
             vilkårsgrunnlagId,
-            behandling,
+            legacyBehandling,
             true,
             organisasjonsnummer
         )
@@ -267,7 +267,7 @@ class VurderBehovForAvviksvurderingTest {
         repository.avviksvurderingSomSkalReturneres = enAvviksvurdering(avviksvurderingId = avviksvurderingId)
         context.add(enAvviksvurderingBehovløsning(avviksvurderingId = avviksvurderingId))
         command.resume(context)
-        assertFalse(behandling.varsler().inneholderVarselOmAvvik())
+        assertFalse(legacyBehandling.varsler().inneholderVarselOmAvvik())
     }
 
     private fun enAvviksvurdering(avviksvurderingId: UUID = this.avviksvurderingId): Avviksvurdering {

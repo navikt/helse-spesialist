@@ -10,7 +10,7 @@ import java.time.LocalDateTime
 import java.time.LocalDateTime.now
 import java.util.UUID
 
-internal class PgStansAutomatiskBehandlingDaoTest : AbstractDBIntegrationTest() {
+internal class PgStansAutomatiskLegacyBehandlingDaoTest : AbstractDBIntegrationTest() {
     @Test
     fun `kan lagre fra iSyfo`() {
         lagreFraISyfo()

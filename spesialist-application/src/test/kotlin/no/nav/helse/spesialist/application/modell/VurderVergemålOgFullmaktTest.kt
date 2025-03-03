@@ -11,9 +11,9 @@ import no.nav.helse.mediator.meldinger.løsninger.Vergemålløsning
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.Sykefraværstilfelle
-import no.nav.helse.modell.person.vedtaksperiode.Behandling
 import no.nav.helse.modell.vergemal.VurderVergemålOgFullmakt
 import no.nav.helse.spesialist.application.jan
+import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -28,8 +28,8 @@ class VurderVergemålOgFullmaktTest {
     }
 
     private val vergemålDao = mockk<VergemålDao>(relaxed = true)
-    private val behandling = Behandling(UUID.randomUUID(), VEDTAKSPERIODE_ID, 1 jan 2018, 31 jan 2018, 1 jan 2018)
-    private val sykefraværstilfelle = Sykefraværstilfelle(FNR, 1 jan 2018, listOf(behandling))
+    private val legacyBehandling = LegacyBehandling(UUID.randomUUID(), VEDTAKSPERIODE_ID, 1 jan 2018, 31 jan 2018, 1 jan 2018)
+    private val sykefraværstilfelle = Sykefraværstilfelle(FNR, 1 jan 2018, listOf(legacyBehandling))
 
     private val command =
         VurderVergemålOgFullmakt(
@@ -77,7 +77,7 @@ class VurderVergemålOgFullmaktTest {
         assertTrue(command.resume(context))
         verify(exactly = 1) { vergemålDao.lagre(FNR, ingenVergemål, false) }
         assertEquals(0, observer.hendelser.size)
-        behandling.inspektør {
+        legacyBehandling.inspektør {
             assertEquals(0, varsler.size)
         }
     }
@@ -120,7 +120,7 @@ class VurderVergemålOgFullmaktTest {
         assertTrue(command.resume(context))
         verify(exactly = 1) { vergemålDao.lagre(FNR, harAlt, false) }
         assertEquals(0, observer.hendelser.size)
-        behandling.inspektør {
+        legacyBehandling.inspektør {
             assertEquals(1, varsler.size)
         }
     }

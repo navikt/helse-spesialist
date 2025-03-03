@@ -12,7 +12,6 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.VurderBehovForTotrinnskontroll
 import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingAutomatiskRetur
 import no.nav.helse.modell.person.Sykefraværstilfelle
-import no.nav.helse.modell.person.vedtaksperiode.Behandling
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
@@ -23,6 +22,7 @@ import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.application.feb
 import no.nav.helse.spesialist.application.jan
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
+import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -66,8 +66,8 @@ internal class VurderBehovForTotrinnskontrollTest {
             FØDSELSNUMMER,
             1 jan 2018,
             listOf(
-                Behandling(UUID.randomUUID(), VEDTAKSPERIODE_ID_1, 1 jan 2018, 31 jan 2018, 1 jan 2018),
-                Behandling(UUID.randomUUID(), VEDTAKSPERIODE_ID_2, 1 feb 2018, 28 feb 2018, 1 jan 2018),
+                LegacyBehandling(UUID.randomUUID(), VEDTAKSPERIODE_ID_1, 1 jan 2018, 31 jan 2018, 1 jan 2018),
+                LegacyBehandling(UUID.randomUUID(), VEDTAKSPERIODE_ID_2, 1 feb 2018, 28 feb 2018, 1 jan 2018),
             ),
         )
     private val command =

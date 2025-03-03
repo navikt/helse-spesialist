@@ -32,7 +32,7 @@ import java.time.LocalDateTime.now
 import java.util.UUID
 import java.util.UUID.randomUUID
 
-class StansAutomatiskBehandlingMediatorTest {
+class StansAutomatiskLegacyBehandlingMediatorTest {
     private val stansAutomatiskBehandlingDao = mockk<StansAutomatiskBehandlingDao>(relaxed = true)
     private val periodehistorikkDao = mockk<PeriodehistorikkDao>(relaxed = true)
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)

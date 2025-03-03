@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class StansAutomatiskBehandlingRiverTest {
+internal class StansAutomatiskLegacyBehandlingRiverTest {
     private val mediator = mockk<MeldingMediator>(relaxed = true)
     private val testRapid = TestRapid().medRivers(StansAutomatiskBehandlingRiver(mediator))
 
