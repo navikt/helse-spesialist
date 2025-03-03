@@ -1,6 +1,9 @@
-package no.nav.helse.modell.saksbehandler
+package no.nav.helse.spesialist.domain.legacy
 
 import no.nav.helse.modell.oppgave.Egenskap
+import no.nav.helse.modell.saksbehandler.SaksbehandlerDto
+import no.nav.helse.modell.saksbehandler.SaksbehandlerObserver
+import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.modell.saksbehandler.handlinger.Annullering
 import no.nav.helse.modell.saksbehandler.handlinger.EndrePåVent
 import no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent
@@ -12,7 +15,7 @@ import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinje
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlag
 import java.util.UUID
 
-class Saksbehandler(
+class LegacySaksbehandler(
     val epostadresse: String,
     val oid: UUID,
     val navn: String,
@@ -92,7 +95,7 @@ class Saksbehandler(
 
     override fun equals(other: Any?) =
         this === other || (
-            other is Saksbehandler &&
+            other is LegacySaksbehandler &&
                 epostadresse == other.epostadresse &&
                 navn == other.navn &&
                 oid == other.oid &&
@@ -108,13 +111,19 @@ class Saksbehandler(
     }
 
     companion object {
-        fun SaksbehandlerDto.gjenopprett(tilgangskontroll: Tilgangskontroll): Saksbehandler =
-            Saksbehandler(epostadresse, oid, navn, ident, tilgangskontroll)
+        fun SaksbehandlerDto.gjenopprett(tilgangskontroll: Tilgangskontroll): LegacySaksbehandler =
+            LegacySaksbehandler(epostadresse, oid, navn, ident, tilgangskontroll)
 
-        fun Saksbehandler.toDto(): SaksbehandlerDto = SaksbehandlerDto(epostadresse = epostadresse, oid = oid, navn = navn, ident = ident)
+        fun LegacySaksbehandler.toDto(): SaksbehandlerDto =
+            SaksbehandlerDto(
+                epostadresse = epostadresse,
+                oid = oid,
+                navn = navn,
+                ident = ident,
+            )
 
-        fun no.nav.helse.spesialist.domain.Saksbehandler.gjenopprett(tilgangskontroll: Tilgangskontroll): Saksbehandler =
-            Saksbehandler(
+        fun no.nav.helse.spesialist.domain.Saksbehandler.gjenopprett(tilgangskontroll: Tilgangskontroll): LegacySaksbehandler =
+            LegacySaksbehandler(
                 epostadresse = epost,
                 oid = id().value,
                 navn = navn,

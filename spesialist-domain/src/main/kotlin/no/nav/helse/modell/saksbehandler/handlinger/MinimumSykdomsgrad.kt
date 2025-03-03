@@ -1,12 +1,12 @@
 package no.nav.helse.modell.saksbehandler.handlinger
 
 import no.nav.helse.modell.melding.MinimumSykdomsgradVurdertEvent
-import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgradPeriode.Companion.byggSubsumsjoner
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.Utfall.VILKAR_OPPFYLT
+import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -28,8 +28,8 @@ class MinimumSykdomsgrad private constructor(
 ) : Overstyring(id) {
     override val kobledeVedtaksperioder = kobledeVedtaksperioder.toMutableList()
 
-    override fun utførAv(saksbehandler: Saksbehandler) {
-        saksbehandler.håndter(this)
+    override fun utførAv(legacySaksbehandler: LegacySaksbehandler) {
+        legacySaksbehandler.håndter(this)
     }
 
     override fun loggnavn(): String = "minimum_sykdomsgrad_vurdert"

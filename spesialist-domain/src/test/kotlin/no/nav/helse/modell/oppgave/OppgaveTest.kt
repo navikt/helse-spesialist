@@ -9,11 +9,11 @@ import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.OppgaveInspektør.Companion.inspektør
-import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.modell.saksbehandler.handlinger.TilgangskontrollForTestHarIkkeTilgang
 import no.nav.helse.modell.saksbehandler.handlinger.TilgangskontrollForTestHarTilgang
 import no.nav.helse.modell.saksbehandler.handlinger.TilgangskontrollForTestMedKunFortroligAdresse
+import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -47,7 +47,7 @@ internal class OppgaveTest {
             navn: String = SAKSBEHANDLER_NAVN,
             ident: String = SAKSBEHANDLER_IDENT,
             tilgangskontroll: Tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
-        ) = Saksbehandler(
+        ) = LegacySaksbehandler(
             epostadresse = epost,
             oid = oid,
             navn = navn,

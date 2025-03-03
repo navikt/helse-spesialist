@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-internal class SaksbehandlerTilgangerTest {
+internal class LegacySaksbehandlerTilgangerTest {
     private val kode7Saksbehandlergruppe = UUID.randomUUID()
     private val beslutterSaksbehandlergruppe = UUID.randomUUID()
     private val skjermedePersonerSaksbehandlergruppe = UUID.randomUUID()

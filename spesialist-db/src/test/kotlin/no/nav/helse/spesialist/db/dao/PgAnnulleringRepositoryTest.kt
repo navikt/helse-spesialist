@@ -1,9 +1,9 @@
 package no.nav.helse.spesialist.db.dao
 
-import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.handlinger.AnnulleringArsak
 import no.nav.helse.modell.saksbehandler.handlinger.AnnulleringDto
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
+import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -74,7 +74,7 @@ class PgAnnulleringRepositoryTest : AbstractDBIntegrationTest() {
     )
 
     private fun saksbehandler(saksbehandlerOid: UUID = SAKSBEHANDLER_OID) =
-        Saksbehandler(
+        LegacySaksbehandler(
             epostadresse = SAKSBEHANDLER_EPOST,
             oid = saksbehandlerOid,
             navn = SAKSBEHANDLER_NAVN,

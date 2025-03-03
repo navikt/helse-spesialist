@@ -8,7 +8,7 @@ import no.nav.helse.db.NotatDao
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.StansAutomatiskBehandlingFraDatabase
-import no.nav.helse.modell.saksbehandler.Saksbehandler
+import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 import no.nav.helse.modell.saksbehandler.handlinger.OpphevStans
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlinghåndtererImpl
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak
@@ -44,8 +44,8 @@ class StansAutomatiskBehandlinghåndtererImplTest {
         val oid = randomUUID()
         stansAutomatiskBehandlinghåndterer.håndter(
             handling = OpphevStans(FNR, "begrunnelse"),
-            saksbehandler =
-                Saksbehandler(
+            legacySaksbehandler =
+                LegacySaksbehandler(
                     epostadresse = "epost",
                     oid = oid,
                     navn = "navn",

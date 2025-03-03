@@ -1,6 +1,6 @@
 package no.nav.helse.spesialist.test
 
-import no.nav.helse.modell.saksbehandler.Saksbehandler
+import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.spesialist.typer.Kjønn
 import java.time.LocalDate
@@ -56,7 +56,7 @@ fun lagSaksbehandler(
     oid: UUID = UUID.randomUUID(),
     ident: String = lagSaksbehandlerident(),
     tilgangskontroll: Tilgangskontroll = Tilgangskontroll { _, _ -> true },
-) = Saksbehandler(
+) = LegacySaksbehandler(
     epostadresse = epostadresse,
     oid = oid,
     navn = navn,

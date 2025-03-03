@@ -1,12 +1,12 @@
 package no.nav.helse.modell.saksbehandler.handlinger
 
 import no.nav.helse.modell.melding.SkjønnsfastsattSykepengegrunnlagEvent
-import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattArbeidsgiver.Companion.byggSubsumsjon
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.SporingSkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.Utfall.VILKAR_BEREGNET
+import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -26,8 +26,8 @@ class SkjønnsfastsattSykepengegrunnlag private constructor(
 ) : Overstyring(id) {
     override val kobledeVedtaksperioder = kobledeVedtaksperioder.toMutableList()
 
-    override fun utførAv(saksbehandler: Saksbehandler) {
-        saksbehandler.håndter(this)
+    override fun utførAv(legacySaksbehandler: LegacySaksbehandler) {
+        legacySaksbehandler.håndter(this)
     }
 
     override fun loggnavn(): String = "skjønnsfastsett_sykepengegrunnlag"

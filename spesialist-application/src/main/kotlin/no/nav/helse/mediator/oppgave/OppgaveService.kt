@@ -10,13 +10,13 @@ import no.nav.helse.db.TildelingDao
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.Oppgave.Companion.ny
-import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.modell.saksbehandler.handlinger.EndrePåVent
 import no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent
 import no.nav.helse.modell.saksbehandler.handlinger.Oppgavehandling
 import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
+import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 import org.slf4j.LoggerFactory
 import java.sql.SQLException
 import java.util.UUID
@@ -108,22 +108,22 @@ class OppgaveService(
 
     fun avbrytOppgave(
         handling: Oppgavehandling,
-        saksbehandler: Saksbehandler,
+        legacySaksbehandler: LegacySaksbehandler,
     ) {
         oppgave(handling.oppgaveId()) {
             handling.oppgave(this)
-            handling.utførAv(saksbehandler)
+            handling.utførAv(legacySaksbehandler)
         }
     }
 
     fun leggPåVent(
         handling: LeggPåVent,
-        saksbehandler: Saksbehandler,
+        legacySaksbehandler: LegacySaksbehandler,
     ) {
         oppgaveDao.finnVedtaksperiodeId(handling.oppgaveId).also {
             oppgaveDao.finnIdForAktivOppgave(it)?.also { oppgaveId ->
                 oppgave(oppgaveId) {
-                    this.leggPåVent(handling.skalTildeles, saksbehandler)
+                    this.leggPåVent(handling.skalTildeles, legacySaksbehandler)
                 }
             }
         }
@@ -131,12 +131,12 @@ class OppgaveService(
 
     fun endrePåVent(
         handling: EndrePåVent,
-        saksbehandler: Saksbehandler,
+        legacySaksbehandler: LegacySaksbehandler,
     ) {
         oppgaveDao.finnVedtaksperiodeId(handling.oppgaveId).also {
             oppgaveDao.finnIdForAktivOppgave(it)?.also { oppgaveId ->
                 oppgave(oppgaveId) {
-                    this.endrePåVent(handling.skalTildeles, saksbehandler)
+                    this.endrePåVent(handling.skalTildeles, legacySaksbehandler)
                 }
             }
         }
@@ -228,15 +228,15 @@ class OppgaveService(
                 logg.info("Finner ingen reservasjon for $oppgave, blir ikke tildelt.")
                 return
             }
-        val saksbehandler =
-            Saksbehandler(
+        val legacySaksbehandler =
+            LegacySaksbehandler(
                 epostadresse = saksbehandlerFraDatabase.epostadresse,
                 oid = saksbehandlerFraDatabase.oid,
                 navn = saksbehandlerFraDatabase.navn,
                 ident = saksbehandlerFraDatabase.ident,
                 tilgangskontroll = tilgangskontroll,
             )
-        oppgave.forsøkTildelingVedReservasjon(saksbehandler)
+        oppgave.forsøkTildelingVedReservasjon(legacySaksbehandler)
     }
 
     fun harFerdigstiltOppgave(vedtaksperiodeId: UUID) = oppgaveDao.harFerdigstiltOppgave(vedtaksperiodeId)

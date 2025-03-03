@@ -8,8 +8,8 @@ import no.nav.helse.modell.oppgave.Oppgave.AvventerSaksbehandler
 import no.nav.helse.modell.oppgave.Oppgave.AvventerSystem
 import no.nav.helse.modell.oppgave.Oppgave.Ferdigstilt
 import no.nav.helse.modell.oppgave.Oppgave.Invalidert
-import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
+import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 
 class Oppgavehenter(
     private val oppgaveDao: OppgaveDao,
@@ -33,7 +33,7 @@ class Oppgavehenter(
             ferdigstiltAvOid = oppgave.ferdigstiltAvOid,
             tildeltTil =
                 oppgave.tildelt?.let {
-                    Saksbehandler(
+                    LegacySaksbehandler(
                         epostadresse = it.epostadresse,
                         oid = it.oid,
                         navn = it.navn,

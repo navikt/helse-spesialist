@@ -1,7 +1,7 @@
 package no.nav.helse.modell.saksbehandler.handlinger
 
 import no.nav.helse.modell.melding.AnnullertUtbetalingEvent
-import no.nav.helse.modell.saksbehandler.Saksbehandler
+import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 import java.util.UUID
 
 class Annullering(
@@ -16,8 +16,8 @@ class Annullering(
     private val arsaker: List<AnnulleringArsak>,
     private val kommentar: String?,
 ) : Handling {
-    override fun utførAv(saksbehandler: Saksbehandler) {
-        saksbehandler.håndter(this)
+    override fun utførAv(legacySaksbehandler: LegacySaksbehandler) {
+        legacySaksbehandler.håndter(this)
     }
 
     override fun loggnavn(): String = "annuller_utbetaling"

@@ -10,10 +10,10 @@ import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.mediator.oppgave.Oppgavelagrer
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Oppgave
-import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.spesialist.db.lagEpostadresseFraFulltNavn
 import no.nav.helse.spesialist.db.lagSaksbehandlerident
 import no.nav.helse.spesialist.db.lagSaksbehandlernavn
+import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.UUID
@@ -26,8 +26,8 @@ class OppgavelagrerTest {
     private val utbetalingId: UUID = UUID.randomUUID()
     private val oppgaveId = nextLong()
     private val saksbehandlernavn = lagSaksbehandlernavn()
-    private val saksbehandler =
-        Saksbehandler(
+    private val legacySaksbehandler =
+        LegacySaksbehandler(
             oid = UUID.randomUUID(),
             epostadresse = lagEpostadresseFraFulltNavn(saksbehandlernavn),
             navn = saksbehandlernavn,
@@ -107,7 +107,7 @@ class OppgavelagrerTest {
     @Test
     fun `lagre oppgave`() {
         val oppgave = nyOppgave()
-        oppgave.forsøkTildelingVedReservasjon(saksbehandler)
+        oppgave.forsøkTildelingVedReservasjon(legacySaksbehandler)
         val oppgavelagrer = Oppgavelagrer(oppgaveDaoMock, tildelingDaoMock)
 
         oppgavelagrer.lagre(oppgave)
@@ -122,20 +122,20 @@ class OppgavelagrerTest {
                 kanAvvises = true,
             )
         }
-        verify(exactly = 1) { tildelingDaoMock.tildel(oppgaveId, saksbehandler.oid) }
+        verify(exactly = 1) { tildelingDaoMock.tildel(oppgaveId, legacySaksbehandler.oid) }
     }
 
     @Test
     fun `oppdatere oppgave uten tildeling`() {
         val oppgave = nyOppgave()
-        oppgave.avventerSystem(saksbehandler.ident(), saksbehandler.oid)
+        oppgave.avventerSystem(legacySaksbehandler.ident(), legacySaksbehandler.oid)
         oppgave.ferdigstill()
         val oppgavelagrer = Oppgavelagrer(oppgaveDaoMock, tildelingDaoMock)
 
         oppgavelagrer.oppdater(oppgave)
         verify(exactly = 1) {
             oppgaveDaoMock.updateOppgave(
-                oppgaveId, "Ferdigstilt", saksbehandler.ident(), saksbehandler.oid, listOf(
+                oppgaveId, "Ferdigstilt", legacySaksbehandler.ident(), legacySaksbehandler.oid, listOf(
                     EgenskapForDatabase.SØKNAD
                 )
             )
@@ -146,15 +146,15 @@ class OppgavelagrerTest {
     @Test
     fun `oppdatere oppgave`() {
         val oppgave = nyOppgave()
-        oppgave.forsøkTildelingVedReservasjon(saksbehandler)
-        oppgave.avventerSystem(saksbehandler.ident(), saksbehandler.oid)
+        oppgave.forsøkTildelingVedReservasjon(legacySaksbehandler)
+        oppgave.avventerSystem(legacySaksbehandler.ident(), legacySaksbehandler.oid)
         oppgave.ferdigstill()
         val oppgavelagrer = Oppgavelagrer(oppgaveDaoMock, tildelingDaoMock)
 
         oppgavelagrer.oppdater(oppgave)
         verify(exactly = 1) {
             oppgaveDaoMock.updateOppgave(
-                oppgaveId, "Ferdigstilt", saksbehandler.ident(), saksbehandler.oid, listOf(
+                oppgaveId, "Ferdigstilt", legacySaksbehandler.ident(), legacySaksbehandler.oid, listOf(
                     EgenskapForDatabase.SØKNAD
                 )
             )

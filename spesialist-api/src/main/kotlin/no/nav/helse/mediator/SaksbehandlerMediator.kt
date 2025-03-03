@@ -29,9 +29,6 @@ import no.nav.helse.modell.OppgaveTildeltNoenAndre
 import no.nav.helse.modell.melding.VarselEndret
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
-import no.nav.helse.modell.saksbehandler.Saksbehandler
-import no.nav.helse.modell.saksbehandler.Saksbehandler.Companion.gjenopprett
-import no.nav.helse.modell.saksbehandler.Saksbehandler.Companion.toDto
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDto
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.modell.saksbehandler.handlinger.Annullering
@@ -91,6 +88,9 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
+import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
+import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler.Companion.gjenopprett
+import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler.Companion.toDto
 import no.nav.helse.tell
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -198,7 +198,7 @@ class SaksbehandlerMediator(
 
     private fun vedtak(
         oppgavereferanse: Long,
-        legacySaksbehandler: Saksbehandler,
+        legacySaksbehandler: LegacySaksbehandler,
         godkjent: Boolean,
     ): VedtakResultat {
         val erÅpenOppgave = apiOppgaveService.venterPåSaksbehandler(oppgavereferanse)
@@ -287,12 +287,12 @@ class SaksbehandlerMediator(
 
     private fun håndter(
         handling: Annullering,
-        saksbehandler: Saksbehandler,
+        legacySaksbehandler: LegacySaksbehandler,
     ) {
         try {
             if (annulleringRepository.finnAnnullering(handling.toDto()) != null) throw AlleredeAnnullert(handling)
-            annulleringRepository.lagreAnnullering(handling.toDto(), saksbehandler)
-            handling.utførAv(saksbehandler)
+            annulleringRepository.lagreAnnullering(handling.toDto(), legacySaksbehandler)
+            handling.utførAv(legacySaksbehandler)
         } catch (e: Modellfeil) {
             throw e.tilApiversjon()
         }
@@ -300,10 +300,10 @@ class SaksbehandlerMediator(
 
     private fun håndter(
         handling: Oppgavehandling,
-        saksbehandler: Saksbehandler,
+        legacySaksbehandler: LegacySaksbehandler,
     ) {
         try {
-            oppgaveService.avbrytOppgave(handling, saksbehandler)
+            oppgaveService.avbrytOppgave(handling, legacySaksbehandler)
         } catch (e: Modellfeil) {
             throw e.tilApiversjon()
         }
@@ -311,42 +311,42 @@ class SaksbehandlerMediator(
 
     private fun håndter(
         handling: OpphevStans,
-        saksbehandler: Saksbehandler,
+        legacySaksbehandler: LegacySaksbehandler,
     ) = try {
-        stansAutomatiskBehandlinghåndterer.håndter(handling, saksbehandler)
-        handling.utførAv(saksbehandler)
+        stansAutomatiskBehandlinghåndterer.håndter(handling, legacySaksbehandler)
+        handling.utførAv(legacySaksbehandler)
     } catch (e: Modellfeil) {
         throw e.tilApiversjon()
     }
 
     private fun håndter(
         handling: Personhandling,
-        saksbehandler: Saksbehandler,
+        legacySaksbehandler: LegacySaksbehandler,
     ) = try {
-        handling.utførAv(saksbehandler)
+        handling.utførAv(legacySaksbehandler)
     } catch (e: Modellfeil) {
         throw e.tilApiversjon()
     }
 
     private fun leggPåVent(
         handling: LeggPåVent,
-        saksbehandler: Saksbehandler,
+        legacySaksbehandler: LegacySaksbehandler,
     ) {
         try {
             val dialogRef = dialogDao.lagre()
             val innslag =
                 Historikkinnslag.lagtPåVentInnslag(
                     notattekst = handling.notatTekst,
-                    saksbehandler = saksbehandler.toDto(),
+                    saksbehandler = legacySaksbehandler.toDto(),
                     årsaker = handling.årsaker,
                     frist = handling.frist,
                     dialogRef = dialogRef,
                 )
             periodehistorikkDao.lagreMedOppgaveId(innslag, handling.oppgaveId)
-            oppgaveService.leggPåVent(handling, saksbehandler)
-            PåVentRepository(påVentDao).leggPåVent(saksbehandler.oid(), handling, dialogRef)
-            saksbehandler.register(Saksbehandlingsmelder(meldingPubliserer))
-            handling.utførAv(saksbehandler)
+            oppgaveService.leggPåVent(handling, legacySaksbehandler)
+            PåVentRepository(påVentDao).leggPåVent(legacySaksbehandler.oid(), handling, dialogRef)
+            legacySaksbehandler.register(Saksbehandlingsmelder(meldingPubliserer))
+            handling.utførAv(legacySaksbehandler)
         } catch (e: Modellfeil) {
             throw e.tilApiversjon()
         }
@@ -354,7 +354,7 @@ class SaksbehandlerMediator(
 
     private fun endrePåVent(
         handling: EndrePåVent,
-        saksbehandler: Saksbehandler,
+        legacySaksbehandler: LegacySaksbehandler,
     ) {
         if (!påVentDao.erPåVent(handling.oppgaveId)) throw FinnerIkkeLagtPåVent(handling.oppgaveId)
 
@@ -362,29 +362,29 @@ class SaksbehandlerMediator(
         val innslag =
             Historikkinnslag.endrePåVentInnslag(
                 notattekst = handling.notatTekst,
-                saksbehandler = saksbehandler.toDto(),
+                saksbehandler = legacySaksbehandler.toDto(),
                 årsaker = handling.årsaker,
                 frist = handling.frist,
                 dialogRef = dialogRef,
             )
         periodehistorikkDao.lagreMedOppgaveId(innslag, handling.oppgaveId)
-        oppgaveService.endrePåVent(handling, saksbehandler)
-        PåVentRepository(påVentDao).endrePåVent(saksbehandler.oid(), handling, dialogRef)
+        oppgaveService.endrePåVent(handling, legacySaksbehandler)
+        PåVentRepository(påVentDao).endrePåVent(legacySaksbehandler.oid(), handling, dialogRef)
 
-        saksbehandler.register(Saksbehandlingsmelder(meldingPubliserer))
-        handling.utførAv(saksbehandler)
+        legacySaksbehandler.register(Saksbehandlingsmelder(meldingPubliserer))
+        handling.utførAv(legacySaksbehandler)
     }
 
     private fun fjernFraPåVent(
         handling: FjernPåVent,
-        saksbehandler: Saksbehandler,
+        legacySaksbehandler: LegacySaksbehandler,
     ) {
         if (!påVentDao.erPåVent(handling.oppgaveId)) {
             sikkerlogg.info("Oppgave ${handling.oppgaveId} er ikke på vent")
             return
         }
         try {
-            val innslag = Historikkinnslag.fjernetFraPåVentInnslag(saksbehandler.toDto())
+            val innslag = Historikkinnslag.fjernetFraPåVentInnslag(legacySaksbehandler.toDto())
             periodehistorikkDao.lagreMedOppgaveId(innslag, handling.oppgaveId)
             oppgaveService.fjernFraPåVent(handling.oppgaveId)
             PåVentRepository(påVentDao).fjernFraPåVent(handling.oppgaveId)
@@ -408,24 +408,24 @@ class SaksbehandlerMediator(
 
     private fun håndter(
         handling: Overstyring,
-        saksbehandler: Saksbehandler,
+        legacySaksbehandler: LegacySaksbehandler,
     ) {
         val fødselsnummer = handling.fødselsnummer
-        reservasjonDao.reserverPerson(saksbehandler.oid(), fødselsnummer)
-        sikkerlogg.info("Reserverer person $fødselsnummer til saksbehandler $saksbehandler")
+        reservasjonDao.reserverPerson(legacySaksbehandler.oid(), fødselsnummer)
+        sikkerlogg.info("Reserverer person $fødselsnummer til saksbehandler $legacySaksbehandler")
         sessionFactory.transactionalSessionScope { session ->
             if (featureToggles.skalBenytteNyTotrinnsvurderingsløsning()) {
                 val totrinnsvurdering =
                     session.totrinnsvurderingRepository.finn(handling.fødselsnummer)
                         ?: Totrinnsvurdering.ny(handling.vedtaksperiodeId)
-                totrinnsvurdering.settSaksbehandler(SaksbehandlerOid(saksbehandler.oid))
+                totrinnsvurdering.settSaksbehandler(SaksbehandlerOid(legacySaksbehandler.oid))
                 totrinnsvurdering.nyOverstyring(handling)
                 session.totrinnsvurderingRepository.lagre(totrinnsvurdering, fødselsnummer)
             } else {
                 session.overstyringRepository.lagre(listOf(handling))
             }
         }
-        handling.utførAv(saksbehandler)
+        handling.utførAv(legacySaksbehandler)
     }
 
     fun opprettAbonnement(
@@ -662,7 +662,7 @@ class SaksbehandlerMediator(
         return SendTilGodkjenningResult.Ok
     }
 
-    private fun tilLegacySaksbehandler(saksbehandler: no.nav.helse.spesialist.domain.Saksbehandler): Saksbehandler =
+    private fun tilLegacySaksbehandler(saksbehandler: no.nav.helse.spesialist.domain.Saksbehandler): LegacySaksbehandler =
         saksbehandler.gjenopprett(tilgangskontroll = tilgangskontroll)
 
     private fun vurderVarsel(
@@ -742,7 +742,7 @@ class SaksbehandlerMediator(
             ident = ident,
         )
 
-    private fun no.nav.helse.spesialist.domain.Saksbehandler.tilLegacySaksbehandler(saksbehandlergrupper: List<UUID>): Saksbehandler =
+    private fun no.nav.helse.spesialist.domain.Saksbehandler.tilLegacySaksbehandler(saksbehandlergrupper: List<UUID>): LegacySaksbehandler =
         gjenopprett(TilgangskontrollørForApi(saksbehandlergrupper, tilgangsgrupper))
 
     private fun HandlingFraApi.tilModellversjon(saksbehandlerOid: UUID): Handling =

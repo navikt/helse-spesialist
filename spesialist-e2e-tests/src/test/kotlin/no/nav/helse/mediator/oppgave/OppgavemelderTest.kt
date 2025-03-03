@@ -7,7 +7,7 @@ import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Oppgave
-import no.nav.helse.modell.saksbehandler.Saksbehandler
+import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -54,7 +54,7 @@ class OppgavemelderTest {
     @Test
     fun `bygg kafkamelding med saksbehandler og beslutter`() {
         val oppgave = nyOppgave()
-        oppgave.forsøkTildelingVedReservasjon(saksbehandler = saksbehandler)
+        oppgave.forsøkTildelingVedReservasjon(legacySaksbehandler = saksbehandler)
         oppgave.register(Oppgavemelder(FNR, meldingPubliserer))
         oppgave.avventerSystem("IDENT", UUID.randomUUID())
         val meldinger = testRapid.inspektør.meldinger()
@@ -72,7 +72,7 @@ class OppgavemelderTest {
         assertEquals(listOf("SØKNAD"), melding["egenskaper"].map { it.asText() })
     }
 
-    private fun saksbehandler(@Suppress("SameParameterValue") epostadresse: String) = Saksbehandler(
+    private fun saksbehandler(@Suppress("SameParameterValue") epostadresse: String) = LegacySaksbehandler(
         epostadresse = epostadresse,
         oid = UUID.randomUUID(),
         navn = "En Saksbehandler",

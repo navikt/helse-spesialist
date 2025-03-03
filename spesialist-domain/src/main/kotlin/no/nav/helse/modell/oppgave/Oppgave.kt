@@ -12,7 +12,7 @@ import no.nav.helse.modell.oppgave.Egenskap.PÅ_VENT
 import no.nav.helse.modell.oppgave.Egenskap.RETUR
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.TILBAKEDATERT
-import no.nav.helse.modell.saksbehandler.Saksbehandler
+import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -27,7 +27,7 @@ class Oppgave private constructor(
     ferdigstiltAvIdent: String? = null,
     ferdigstiltAvOid: UUID? = null,
     val egenskaper: MutableSet<Egenskap> = mutableSetOf(),
-    tildeltTil: Saksbehandler? = null,
+    tildeltTil: LegacySaksbehandler? = null,
 ) {
     private val observers = mutableListOf<OppgaveObserver>()
 
@@ -39,24 +39,24 @@ class Oppgave private constructor(
     var tilstand: Tilstand = tilstand
         private set
 
-    var tildeltTil: Saksbehandler? = tildeltTil
+    var tildeltTil: LegacySaksbehandler? = tildeltTil
         private set
 
     fun register(observer: OppgaveObserver) {
         observers.add(observer)
     }
 
-    fun forsøkTildeling(saksbehandler: Saksbehandler) {
+    fun forsøkTildeling(legacySaksbehandler: LegacySaksbehandler) {
         logg.info("Oppgave med {} forsøkes tildelt av saksbehandler.", kv("oppgaveId", id))
         val tildelt = tildeltTil
-        if (tildelt != null && tildelt.oid != saksbehandler.oid) {
+        if (tildelt != null && tildelt.oid != legacySaksbehandler.oid) {
             logg.warn("Oppgave med {} kan ikke tildeles fordi den er tildelt noen andre.", kv("oppgaveId", id))
             throw OppgaveTildeltNoenAndre(tildelt.oid, false)
         }
-        tilstand.tildel(this, saksbehandler)
+        tilstand.tildel(this, legacySaksbehandler)
     }
 
-    internal fun forsøkAvmelding(saksbehandler: Saksbehandler) {
+    internal fun forsøkAvmelding(legacySaksbehandler: LegacySaksbehandler) {
         logg.info("Oppgave med {} forsøkes avmeldt av saksbehandler.", kv("oppgaveId", id))
         val tildelt =
             tildeltTil ?: run {
@@ -64,34 +64,34 @@ class Oppgave private constructor(
                 throw OppgaveIkkeTildelt(this.id)
             }
 
-        if (tildelt.oid != saksbehandler.oid) {
+        if (tildelt.oid != legacySaksbehandler.oid) {
             logg.info("Oppgave med {} er tildelt noen andre, avmeldes", kv("oppgaveId", id))
-            sikkerlogg.info("Oppgave med {} er tildelt $tildelt, avmeldes av $saksbehandler", kv("oppgaveId", id))
+            sikkerlogg.info("Oppgave med {} er tildelt $tildelt, avmeldes av $legacySaksbehandler", kv("oppgaveId", id))
         }
-        tilstand.avmeld(this, saksbehandler)
+        tilstand.avmeld(this, legacySaksbehandler)
     }
 
-    fun forsøkTildelingVedReservasjon(saksbehandler: Saksbehandler) {
+    fun forsøkTildelingVedReservasjon(legacySaksbehandler: LegacySaksbehandler) {
         logg.info("Oppgave med {} forsøkes tildelt grunnet reservasjon.", kv("oppgaveId", id))
-        sikkerlogg.info("Oppgave med {} forsøkes tildelt $saksbehandler grunnet reservasjon.", kv("oppgaveId", id))
+        sikkerlogg.info("Oppgave med {} forsøkes tildelt $legacySaksbehandler grunnet reservasjon.", kv("oppgaveId", id))
         if (egenskaper.contains(STIKKPRØVE)) {
             logg.info("Oppgave med {} er stikkprøve og tildeles ikke på tross av reservasjon.", kv("oppgaveId", id))
             return
         }
-        tilstand.tildel(this, saksbehandler)
+        tilstand.tildel(this, legacySaksbehandler)
     }
 
-    fun sendTilBeslutter(beslutter: Saksbehandler?) {
+    fun sendTilBeslutter(beslutter: LegacySaksbehandler?) {
         egenskaper.remove(RETUR)
         egenskaper.add(BESLUTTER)
         tildeltTil = beslutter
         oppgaveEndret()
     }
 
-    fun sendIRetur(opprinneligSaksbehandler: Saksbehandler) {
+    fun sendIRetur(opprinneligLegacySaksbehandler: LegacySaksbehandler) {
         egenskaper.remove(BESLUTTER)
         egenskaper.add(RETUR)
-        tildeltTil = opprinneligSaksbehandler
+        tildeltTil = opprinneligLegacySaksbehandler
         oppgaveEndret()
     }
 
@@ -134,13 +134,13 @@ class Oppgave private constructor(
 
     fun leggPåVent(
         skalTildeles: Boolean,
-        saksbehandler: Saksbehandler,
+        legacySaksbehandler: LegacySaksbehandler,
     ) {
-        if (this.tildeltTil?.oid != saksbehandler.oid && skalTildeles) {
-            tildel(saksbehandler)
+        if (this.tildeltTil?.oid != legacySaksbehandler.oid && skalTildeles) {
+            tildel(legacySaksbehandler)
         }
         if (this.tildeltTil?.oid != null && !skalTildeles) {
-            avmeld(saksbehandler)
+            avmeld(legacySaksbehandler)
         }
         egenskaper.add(PÅ_VENT)
         oppgaveEndret()
@@ -148,14 +148,14 @@ class Oppgave private constructor(
 
     fun endrePåVent(
         skalVæreTildeltSaksbehandler: Boolean,
-        saksbehandler: Saksbehandler,
+        legacySaksbehandler: LegacySaksbehandler,
     ) {
-        if (tildeltTil?.oid == saksbehandler.oid) {
+        if (tildeltTil?.oid == legacySaksbehandler.oid) {
             if (!skalVæreTildeltSaksbehandler) {
-                avmeld(saksbehandler)
+                avmeld(legacySaksbehandler)
             }
         } else if (skalVæreTildeltSaksbehandler) {
-            tildel(saksbehandler)
+            tildel(legacySaksbehandler)
         }
     }
 
@@ -179,17 +179,17 @@ class Oppgave private constructor(
         tilstand.invalider(this)
     }
 
-    private fun tildel(saksbehandler: Saksbehandler) {
-        this.tildeltTil = saksbehandler
-        logg.info("Oppgave med {} tildeles saksbehandler med {}", kv("oppgaveId", id), kv("oid", saksbehandler.oid()))
-        sikkerlogg.info("Oppgave med {} tildeles $saksbehandler", kv("oppgaveId", id))
+    private fun tildel(legacySaksbehandler: LegacySaksbehandler) {
+        this.tildeltTil = legacySaksbehandler
+        logg.info("Oppgave med {} tildeles saksbehandler med {}", kv("oppgaveId", id), kv("oid", legacySaksbehandler.oid()))
+        sikkerlogg.info("Oppgave med {} tildeles $legacySaksbehandler", kv("oppgaveId", id))
         oppgaveEndret()
     }
 
-    private fun avmeld(saksbehandler: Saksbehandler) {
+    private fun avmeld(legacySaksbehandler: LegacySaksbehandler) {
         this.tildeltTil = null
-        logg.info("Oppgave med {} avmeldes saksbehandler med {}", kv("oppgaveId", id), kv("oid", saksbehandler.oid()))
-        sikkerlogg.info("Oppgave med {} avmeldes $saksbehandler", kv("oppgaveId", id))
+        logg.info("Oppgave med {} avmeldes saksbehandler med {}", kv("oppgaveId", id), kv("oid", legacySaksbehandler.oid()))
+        sikkerlogg.info("Oppgave med {} avmeldes $legacySaksbehandler", kv("oppgaveId", id))
         oppgaveEndret()
     }
 
@@ -240,10 +240,10 @@ class Oppgave private constructor(
 
         fun tildel(
             oppgave: Oppgave,
-            saksbehandler: Saksbehandler,
+            legacySaksbehandler: LegacySaksbehandler,
         ) {
             logg.warn(
-                "Forventer ikke forsøk på tildeling i {} for oppgave med {} av $saksbehandler",
+                "Forventer ikke forsøk på tildeling i {} for oppgave med {} av $legacySaksbehandler",
                 kv("tilstand", this),
                 kv("oppgaveId", oppgave.id),
             )
@@ -251,10 +251,10 @@ class Oppgave private constructor(
 
         fun avmeld(
             oppgave: Oppgave,
-            saksbehandler: Saksbehandler,
+            legacySaksbehandler: LegacySaksbehandler,
         ) {
             logg.warn(
-                "Forventer ikke forsøk på avmelding i {} for oppgave med {} av $saksbehandler",
+                "Forventer ikke forsøk på avmelding i {} for oppgave med {} av $legacySaksbehandler",
                 kv("tilstand", this),
                 kv("oppgaveId", oppgave.id),
             )
@@ -278,25 +278,25 @@ class Oppgave private constructor(
 
         override fun tildel(
             oppgave: Oppgave,
-            saksbehandler: Saksbehandler,
+            legacySaksbehandler: LegacySaksbehandler,
         ) {
             val tilgangsstyrteEgenskaper = oppgave.egenskaper.tilgangsstyrteEgenskaper()
-            if (tilgangsstyrteEgenskaper.isNotEmpty() && !saksbehandler.harTilgangTil(tilgangsstyrteEgenskaper)) {
+            if (tilgangsstyrteEgenskaper.isNotEmpty() && !legacySaksbehandler.harTilgangTil(tilgangsstyrteEgenskaper)) {
                 logg.info(
                     "Oppgave med {} har egenskaper som saksbehandler med {} ikke har tilgang til å behandle.",
                     kv("oppgaveId", oppgave.id),
-                    kv("oid", saksbehandler.oid()),
+                    kv("oid", legacySaksbehandler.oid()),
                 )
-                throw ManglerTilgang(saksbehandler.oid(), oppgave.id)
+                throw ManglerTilgang(legacySaksbehandler.oid(), oppgave.id)
             }
-            oppgave.tildel(saksbehandler)
+            oppgave.tildel(legacySaksbehandler)
         }
 
         override fun avmeld(
             oppgave: Oppgave,
-            saksbehandler: Saksbehandler,
+            legacySaksbehandler: LegacySaksbehandler,
         ) {
-            oppgave.avmeld(saksbehandler)
+            oppgave.avmeld(legacySaksbehandler)
         }
     }
 
@@ -365,7 +365,7 @@ class Oppgave private constructor(
             kanAvvises: Boolean,
             ferdigstiltAvOid: UUID?,
             ferdigstiltAvIdent: String?,
-            tildeltTil: Saksbehandler?,
+            tildeltTil: LegacySaksbehandler?,
             egenskaper: MutableSet<Egenskap>,
         ) = Oppgave(
             id = id,

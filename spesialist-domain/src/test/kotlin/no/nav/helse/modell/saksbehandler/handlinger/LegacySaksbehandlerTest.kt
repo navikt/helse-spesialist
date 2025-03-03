@@ -7,20 +7,20 @@ import no.nav.helse.modell.melding.OverstyrtArbeidsforholdEvent
 import no.nav.helse.modell.melding.OverstyrtInntektOgRefusjonEvent
 import no.nav.helse.modell.melding.OverstyrtTidslinjeEvent
 import no.nav.helse.modell.melding.SubsumsjonEvent
-import no.nav.helse.modell.saksbehandler.Saksbehandler
-import no.nav.helse.modell.saksbehandler.Saksbehandler.Companion.gjenopprett
-import no.nav.helse.modell.saksbehandler.Saksbehandler.Companion.toDto
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDto
 import no.nav.helse.modell.saksbehandler.SaksbehandlerObserver
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon
+import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
+import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler.Companion.gjenopprett
+import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler.Companion.toDto
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.UUID
 
-internal class SaksbehandlerTest {
+internal class LegacySaksbehandlerTest {
 
     @Test
     fun `håndtering av OverstyrtTidslinje medfører utgående event`() {
@@ -366,7 +366,7 @@ internal class SaksbehandlerTest {
         oid: UUID = UUID.randomUUID(),
         navn: String = "navn",
         ident: String = "Z999999",
-    ) = Saksbehandler(
+    ) = LegacySaksbehandler(
         epostadresse = epost,
         oid = oid,
         navn = navn,

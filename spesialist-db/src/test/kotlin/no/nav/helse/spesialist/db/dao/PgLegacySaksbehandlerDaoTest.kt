@@ -9,7 +9,7 @@ import java.time.LocalDateTime.now
 import java.time.temporal.ChronoUnit
 import java.util.UUID
 
-internal class PgSaksbehandlerDaoTest : AbstractDBIntegrationTest() {
+internal class PgLegacySaksbehandlerDaoTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `lagre saksbehandler`() {

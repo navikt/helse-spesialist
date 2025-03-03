@@ -11,7 +11,6 @@ import no.nav.helse.mediator.oppgave.OppgaveMapper.tilDatabaseversjon
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilEgenskaperForVisning
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilOppgaverTilBehandling
 import no.nav.helse.modell.oppgave.Egenskap
-import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
 import no.nav.helse.spesialist.api.graphql.schema.ApiAntallOppgaver
 import no.nav.helse.spesialist.api.graphql.schema.ApiBehandledeOppgaver
@@ -21,6 +20,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaverTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavesortering
 import no.nav.helse.spesialist.api.graphql.schema.ApiSorteringsnokkel
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
+import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 import java.util.UUID
 
 class ApiOppgaveService(
@@ -118,7 +118,7 @@ class ApiOppgaveService(
     }
 
     private fun SaksbehandlerFraApi.tilSaksbehandler() =
-        Saksbehandler(
+        LegacySaksbehandler(
             epostadresse = epost,
             oid = oid,
             navn = navn,
@@ -157,7 +157,7 @@ class ApiOppgaveService(
 
     fun sendTilBeslutter(
         oppgaveId: Long,
-        beslutter: Saksbehandler?,
+        beslutter: LegacySaksbehandler?,
     ) {
         oppgaveService.oppgave(oppgaveId) {
             sendTilBeslutter(beslutter)
@@ -166,10 +166,10 @@ class ApiOppgaveService(
 
     fun sendIRetur(
         oppgaveId: Long,
-        opprinneligSaksbehandler: Saksbehandler,
+        opprinneligLegacySaksbehandler: LegacySaksbehandler,
     ) {
         oppgaveService.oppgave(oppgaveId) {
-            sendIRetur(opprinneligSaksbehandler)
+            sendIRetur(opprinneligLegacySaksbehandler)
         }
     }
 

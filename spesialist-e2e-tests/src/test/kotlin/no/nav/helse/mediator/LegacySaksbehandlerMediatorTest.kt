@@ -59,7 +59,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.random.Random
 
-internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
+internal class LegacySaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     private val tilgangsgrupper = SpeilTilgangsgrupper(testEnv)
     private val testRapid = TestRapid()
     private val meldingPubliserer: MeldingPubliserer = MessageContextMeldingPubliserer(testRapid)
@@ -652,7 +652,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     private data class ARBEIDSGIVERBUILDER(
         var orgnrs: List<String>,
     ) {
-        fun build() = orgnrs.map(SaksbehandlerMediatorTest::ARBEIDSGIVER)
+        fun build() = orgnrs.map(LegacySaksbehandlerMediatorTest::ARBEIDSGIVER)
     }
 
     private data class ARBEIDSGIVER(

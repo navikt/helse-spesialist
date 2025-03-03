@@ -1,8 +1,8 @@
 package no.nav.helse.modell.saksbehandler.handlinger
 
 import no.nav.helse.modell.melding.OverstyrtArbeidsforholdEvent
-import no.nav.helse.modell.saksbehandler.Saksbehandler
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
+import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -22,8 +22,8 @@ class OverstyrtArbeidsforhold private constructor(
 ) : Overstyring(id) {
     override val kobledeVedtaksperioder = kobledeVedtaksperioder.toMutableList()
 
-    override fun utførAv(saksbehandler: Saksbehandler) {
-        saksbehandler.håndter(this)
+    override fun utførAv(legacySaksbehandler: LegacySaksbehandler) {
+        legacySaksbehandler.håndter(this)
     }
 
     override fun loggnavn(): String = "overstyr_arbeidsforhold"
