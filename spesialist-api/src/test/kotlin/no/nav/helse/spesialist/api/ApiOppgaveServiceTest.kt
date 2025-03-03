@@ -19,6 +19,7 @@ import no.nav.helse.db.TildelingDao
 import no.nav.helse.mediator.KommandokjedeEndretEvent
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.mediator.oppgave.OppgaveService
+import no.nav.helse.mediator.oppgave.PgOppgavelagrer
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.modell.melding.UtgåendeHendelse
@@ -93,11 +94,11 @@ internal class ApiOppgaveServiceTest {
             tilgangsgrupper = SpeilTilgangsgrupper(testEnv),
             oppgaveService = OppgaveService(
                 oppgaveDao = oppgaveDao,
-                tildelingDao = tildelingDao,
                 reservasjonDao = reservasjonDao,
                 meldingPubliserer = meldingPubliserer,
                 tilgangskontroll = { _, _ -> false },
                 tilgangsgrupper = SpeilTilgangsgrupper(testEnv),
+                oppgavelagrer = PgOppgavelagrer(oppgaveDao, tildelingDao),
                 daos = daos
             )
         )

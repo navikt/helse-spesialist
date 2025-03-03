@@ -9,6 +9,7 @@ import no.nav.helse.e2e.AbstractE2ETest
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.mediator.GodkjenningService
 import no.nav.helse.mediator.oppgave.OppgaveService
+import no.nav.helse.mediator.oppgave.PgOppgavelagrer
 import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
 import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import no.nav.helse.util.testEnv
@@ -29,12 +30,12 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
     private val oppgaveService =
         OppgaveService(
             oppgaveDao = oppgaveDao,
-            tildelingDao = daos.tildelingDao,
             reservasjonDao = reservasjonDao,
             meldingPubliserer = meldingPubliserer,
             tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
             tilgangsgrupper = SpeilTilgangsgrupper(testEnv),
-            daos = daos
+            daos = daos,
+            oppgavelagrer = PgOppgavelagrer(oppgaveDao, daos.tildelingDao)
         )
 
     val godkjenningService =

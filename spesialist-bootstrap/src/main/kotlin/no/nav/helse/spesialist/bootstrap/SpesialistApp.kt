@@ -20,6 +20,7 @@ import no.nav.helse.mediator.TilgangskontrollørForReservasjon
 import no.nav.helse.mediator.dokument.DokumentMediator
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.mediator.oppgave.OppgaveService
+import no.nav.helse.mediator.oppgave.PgOppgavelagrer
 import no.nav.helse.modell.automatisering.PlukkTilManuell
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlinghåndtererImpl
@@ -124,12 +125,12 @@ class SpesialistApp(
         oppgaveService =
             OppgaveService(
                 oppgaveDao = daos.oppgaveDao,
-                tildelingDao = daos.tildelingDao,
                 reservasjonDao = daos.reservasjonDao,
                 meldingPubliserer = meldingPubliserer,
                 tilgangskontroll = tilgangskontrollørForReservasjon,
                 tilgangsgrupper = tilgangsgrupper,
                 daos = daos,
+                oppgavelagrer = PgOppgavelagrer(daos.oppgaveDao, daos.tildelingDao),
             )
         apiOppgaveService =
             ApiOppgaveService(

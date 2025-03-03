@@ -6,7 +6,6 @@ import no.nav.helse.db.Daos
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SessionContext
-import no.nav.helse.db.TildelingDao
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.Oppgave.Companion.ny
@@ -30,11 +29,11 @@ interface Oppgavefinner {
 
 class OppgaveService(
     private val oppgaveDao: OppgaveDao,
-    private val tildelingDao: TildelingDao,
     private val reservasjonDao: ReservasjonDao,
     private val meldingPubliserer: MeldingPubliserer,
     private val tilgangskontroll: Tilgangskontroll,
     private val tilgangsgrupper: Tilgangsgrupper,
+    private val oppgavelagrer: Oppgavelagrer,
     private val daos: Daos,
 ) : Oppgavehåndterer, Oppgavefinner {
     private val logg = LoggerFactory.getLogger(this::class.java)
@@ -43,11 +42,11 @@ class OppgaveService(
     internal fun nyOppgaveService(sessionContext: SessionContext): OppgaveService =
         OppgaveService(
             oppgaveDao = sessionContext.oppgaveDao,
-            tildelingDao = sessionContext.tildelingDao,
             reservasjonDao = sessionContext.reservasjonDao,
             meldingPubliserer = meldingPubliserer,
             tilgangskontroll = tilgangskontroll,
             tilgangsgrupper = tilgangsgrupper,
+            oppgavelagrer = sessionContext.oppgavelagrer,
             daos = daos,
         )
 
@@ -77,7 +76,7 @@ class OppgaveService(
         oppgave.register(oppgavemelder)
         oppgavemelder.oppgaveOpprettet(oppgave)
         tildelVedReservasjon(fødselsnummer, oppgave)
-        Oppgavelagrer(oppgaveDao, tildelingDao).lagre(oppgave)
+        oppgavelagrer.lagre(oppgave)
     }
 
     fun <T> oppgave(
@@ -92,7 +91,7 @@ class OppgaveService(
         val fødselsnummer = oppgaveDao.finnFødselsnummer(id)
         oppgave.register(Oppgavemelder(fødselsnummer, meldingPubliserer))
         val returverdi = oppgaveBlock(oppgave)
-        Oppgavelagrer(oppgaveDao, tildelingDao).oppdater(oppgave)
+        oppgavelagrer.oppdater(oppgave)
         return returverdi
     }
 

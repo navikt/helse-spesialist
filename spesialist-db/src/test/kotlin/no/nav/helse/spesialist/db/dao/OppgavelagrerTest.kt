@@ -7,7 +7,7 @@ import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.mediator.oppgave.OppgaveService
-import no.nav.helse.mediator.oppgave.Oppgavelagrer
+import no.nav.helse.mediator.oppgave.PgOppgavelagrer
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.spesialist.db.lagEpostadresseFraFulltNavn
@@ -49,7 +49,7 @@ class OppgavelagrerTest {
     @Test
     fun `lagre oppgave uten tildeling medfører forsøk på å slette eksisterende tildeling`() {
         val oppgave = nyOppgave()
-        val oppgavelagrer = Oppgavelagrer(oppgaveDaoMock, tildelingDaoMock)
+        val oppgavelagrer = PgOppgavelagrer(oppgaveDaoMock, tildelingDaoMock)
 
         oppgavelagrer.lagre(oppgave)
         verify(exactly = 1) {
@@ -70,7 +70,7 @@ class OppgavelagrerTest {
     @Test
     fun `oppdatere oppgave uten tildeling medfører forsøk på å slette eksisterende tildeling`() {
         val oppgave = nyOppgave()
-        val oppgavelagrer = Oppgavelagrer(oppgaveDaoMock, tildelingDaoMock)
+        val oppgavelagrer = PgOppgavelagrer(oppgaveDaoMock, tildelingDaoMock)
 
         oppgavelagrer.oppdater(oppgave)
         verify(exactly = 1) {
@@ -87,7 +87,7 @@ class OppgavelagrerTest {
     @Test
     fun `lagre oppgave uten tildeling`() {
         val oppgave = nyOppgave()
-        val oppgavelagrer = Oppgavelagrer(oppgaveDaoMock, tildelingDaoMock)
+        val oppgavelagrer = PgOppgavelagrer(oppgaveDaoMock, tildelingDaoMock)
 
         oppgavelagrer.lagre(oppgave)
         verify(exactly = 1) {
@@ -108,7 +108,7 @@ class OppgavelagrerTest {
     fun `lagre oppgave`() {
         val oppgave = nyOppgave()
         oppgave.forsøkTildelingVedReservasjon(legacySaksbehandler)
-        val oppgavelagrer = Oppgavelagrer(oppgaveDaoMock, tildelingDaoMock)
+        val oppgavelagrer = PgOppgavelagrer(oppgaveDaoMock, tildelingDaoMock)
 
         oppgavelagrer.lagre(oppgave)
         verify(exactly = 1) {
@@ -130,7 +130,7 @@ class OppgavelagrerTest {
         val oppgave = nyOppgave()
         oppgave.avventerSystem(legacySaksbehandler.ident(), legacySaksbehandler.oid)
         oppgave.ferdigstill()
-        val oppgavelagrer = Oppgavelagrer(oppgaveDaoMock, tildelingDaoMock)
+        val oppgavelagrer = PgOppgavelagrer(oppgaveDaoMock, tildelingDaoMock)
 
         oppgavelagrer.oppdater(oppgave)
         verify(exactly = 1) {
@@ -149,7 +149,7 @@ class OppgavelagrerTest {
         oppgave.forsøkTildelingVedReservasjon(legacySaksbehandler)
         oppgave.avventerSystem(legacySaksbehandler.ident(), legacySaksbehandler.oid)
         oppgave.ferdigstill()
-        val oppgavelagrer = Oppgavelagrer(oppgaveDaoMock, tildelingDaoMock)
+        val oppgavelagrer = PgOppgavelagrer(oppgaveDaoMock, tildelingDaoMock)
 
         oppgavelagrer.oppdater(oppgave)
         verify(exactly = 1) {

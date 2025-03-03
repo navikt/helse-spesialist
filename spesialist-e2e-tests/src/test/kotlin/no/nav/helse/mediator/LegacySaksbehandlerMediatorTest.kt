@@ -9,6 +9,7 @@ import no.nav.helse.e2e.DatabaseIntegrationTest
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.mediator.oppgave.OppgaveService
+import no.nav.helse.mediator.oppgave.PgOppgavelagrer
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlinghåndtererImpl
 import no.nav.helse.spesialist.api.SendIReturResult
 import no.nav.helse.spesialist.api.SendTilGodkjenningResult
@@ -74,12 +75,12 @@ internal class LegacySaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     private val oppgaveService =
         OppgaveService(
             oppgaveDao = oppgaveDao,
-            tildelingDao = tildelingDbDao,
             reservasjonDao = reservasjonDao,
             meldingPubliserer = meldingPubliserer,
             tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
             tilgangsgrupper = tilgangsgrupper,
-            daos = daos
+            daos = daos,
+            oppgavelagrer = PgOppgavelagrer(oppgaveDao, tildelingDbDao),
         )
     private val apiOppgaveService = ApiOppgaveService(
         oppgaveDao = oppgaveDao,

@@ -12,6 +12,7 @@ import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.mediator.meldinger.PoisonPills
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.mediator.oppgave.OppgaveService
+import no.nav.helse.mediator.oppgave.PgOppgavelagrer
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlinghåndtererImpl
 import no.nav.helse.modell.varsel.VarselRepository
@@ -57,12 +58,12 @@ internal class TestMediator(
     private val oppgaveService =
         OppgaveService(
             oppgaveDao = daos.oppgaveDao,
-            tildelingDao = tildelingDao,
             reservasjonDao = daos.reservasjonDao,
             meldingPubliserer = meldingPubliserer,
             tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
             tilgangsgrupper = tilgangsgrupper,
             daos = daos,
+            oppgavelagrer = PgOppgavelagrer(oppgaveDao, tildelingDao),
         )
     private val apiOppgaveService = ApiOppgaveService(
         oppgaveDao = daos.oppgaveDao,

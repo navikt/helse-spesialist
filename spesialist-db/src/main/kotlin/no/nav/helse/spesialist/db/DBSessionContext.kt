@@ -3,6 +3,8 @@ package no.nav.helse.spesialist.db
 import kotliquery.Session
 import no.nav.helse.db.AvviksvurderingRepository
 import no.nav.helse.db.SessionContext
+import no.nav.helse.mediator.oppgave.Oppgavelagrer
+import no.nav.helse.mediator.oppgave.PgOppgavelagrer
 import no.nav.helse.spesialist.application.DialogRepository
 import no.nav.helse.spesialist.application.NotatRepository
 import no.nav.helse.spesialist.application.OverstyringRepository
@@ -81,4 +83,5 @@ class DBSessionContext(session: Session) : SessionContext {
     override val dialogRepository: DialogRepository = PgDialogRepository(session)
     override val saksbehandlerRepository: SaksbehandlerRepository = PgSaksbehandlerRepository(session)
     override val avviksvurderingRepository: AvviksvurderingRepository = PgAvviksvurderingRepository(session)
+    override val oppgavelagrer: Oppgavelagrer = PgOppgavelagrer(oppgaveDao, tildelingDao)
 }

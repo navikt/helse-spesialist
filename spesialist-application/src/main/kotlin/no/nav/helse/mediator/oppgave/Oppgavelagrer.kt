@@ -7,8 +7,14 @@ import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.Oppgave.Tilstand
 
-class Oppgavelagrer(private val oppgaveDao: OppgaveDao, private val tildelingDao: TildelingDao) {
-    fun lagre(oppgave: Oppgave) {
+interface Oppgavelagrer {
+    fun lagre(oppgave: Oppgave)
+
+    fun oppdater(oppgave: Oppgave)
+}
+
+class PgOppgavelagrer(private val oppgaveDao: OppgaveDao, private val tildelingDao: TildelingDao) : Oppgavelagrer {
+    override fun lagre(oppgave: Oppgave) {
         oppgaveDao.opprettOppgave(
             id = oppgave.id,
             godkjenningsbehovId = oppgave.godkjenningsbehovId,
@@ -21,7 +27,7 @@ class Oppgavelagrer(private val oppgaveDao: OppgaveDao, private val tildelingDao
         oppdaterTildeling(oppgave)
     }
 
-    fun oppdater(oppgave: Oppgave) {
+    override fun oppdater(oppgave: Oppgave) {
         oppgaveDao.updateOppgave(
             oppgaveId = oppgave.id,
             oppgavestatus = status(oppgave.tilstand),

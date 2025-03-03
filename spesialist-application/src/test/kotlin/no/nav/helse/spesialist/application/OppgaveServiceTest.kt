@@ -16,11 +16,14 @@ import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.mediator.KommandokjedeEndretEvent
 import no.nav.helse.mediator.oppgave.OppgaveService
+import no.nav.helse.mediator.oppgave.Oppgavelagrer
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.modell.melding.UtgåendeHendelse
+import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
+import no.nav.helse.modell.oppgave.Oppgave
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -40,13 +43,14 @@ internal class OppgaveServiceTest {
     private val SAKSBEHANDLEROID = UUID.randomUUID()
     private val SAKSBEHANDLERNAVN = lagSaksbehandlernavn()
     private val SAKSBEHANDLEREPOST = lagEpostadresseFraFulltNavn(SAKSBEHANDLERNAVN)
-    private val EGENSKAP_SØKNAD = EgenskapForDatabase.SØKNAD
+    private val EGENSKAP_SØKNAD = Egenskap.SØKNAD
 
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
     private val daos = mockk<Daos>(relaxed = true)
     private val tildelingDao = mockk<TildelingDao>(relaxed = true)
     private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
     private val opptegnelseDao = mockk<OpptegnelseDao>(relaxed = true)
+    private val oppgavelagrer = mockk<Oppgavelagrer>(relaxed = true)
 
     private val meldingPubliserer = object : MeldingPubliserer {
         var antallMeldinger: Int = 0
@@ -72,12 +76,12 @@ internal class OppgaveServiceTest {
     private val mediator =
         OppgaveService(
             oppgaveDao = oppgaveDao,
-            tildelingDao = tildelingDao,
             reservasjonDao = reservasjonDao,
             meldingPubliserer = meldingPubliserer,
             tilgangskontroll = { _, _ -> false },
             tilgangsgrupper = tilgangsgrupper,
-            daos = daos
+            daos = daos,
+            oppgavelagrer = oppgavelagrer
         )
     private val saksbehandlerFraDatabase =
         SaksbehandlerFraDatabase(SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, SAKSBEHANDLERNAVN, SAKSBEHANDLERIDENT)
@@ -125,27 +129,19 @@ internal class OppgaveServiceTest {
         every { reservasjonDao.hentReservasjonFor(fødselsnummer) } returns null
         lagSøknadsoppgave(fødselsnummer)
         verify(exactly = 1) {
-            oppgaveDao.opprettOppgave(
-                id = oppgaveId,
-                godkjenningsbehovId = HENDELSE_ID,
-                egenskaper = listOf(EGENSKAP_SØKNAD),
-                vedtaksperiodeId = VEDTAKSPERIODE_ID,
-                behandlingId = BEHANDLING_ID,
-                utbetalingId = UTBETALING_ID,
-                kanAvvises = true,
+            oppgavelagrer.lagre(
+                Oppgave.ny(
+                    id = oppgaveId,
+                    hendelseId = HENDELSE_ID,
+                    egenskaper = setOf(EGENSKAP_SØKNAD),
+                    vedtaksperiodeId = VEDTAKSPERIODE_ID,
+                    behandlingId = BEHANDLING_ID,
+                    utbetalingId = UTBETALING_ID,
+                    kanAvvises = true,
+                )
             )
         }
         assertEquals(1, meldingPubliserer.antallMeldinger)
-    }
-
-    @Test
-    fun `lagrer oppgave og tildeler til saksbehandler som har reservert personen`() {
-        every { oppgaveDao.reserverNesteId() } returns 0L
-        val fødselsnummer = lagFødselsnummer()
-        every { reservasjonDao.hentReservasjonFor(fødselsnummer) } returns Reservasjon(saksbehandlerFraDatabase)
-        every { oppgaveDao.finnFødselsnummer(0L) } returns fødselsnummer
-        lagSøknadsoppgave(fødselsnummer)
-        verify(exactly = 1) { tildelingDao.tildel(0L, SAKSBEHANDLEROID) }
     }
 
     @Test
