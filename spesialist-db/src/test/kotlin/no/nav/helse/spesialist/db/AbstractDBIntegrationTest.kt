@@ -403,6 +403,7 @@ abstract class AbstractDBIntegrationTest {
         utbetalingId: UUID = UUID.randomUUID(),
         fom: LocalDate = 1 jan 2018,
         tom: LocalDate = 31 jan 2018,
+        tags: List<String>? = emptyList(),
     ) {
         pgPersonRepository.brukPersonHvisFinnes(FNR) {
             this.nySpleisBehandling(
@@ -415,6 +416,9 @@ abstract class AbstractDBIntegrationTest {
                 )
             )
             nyUtbetalingForVedtaksperiode(vedtaksperiodeId, utbetalingId)
+            if (tags != null) {
+                this.oppdaterPeriodeTilGodkjenning(vedtaksperiodeId, tags, spleisBehandlingId, utbetalingId)
+            }
         }
     }
 
