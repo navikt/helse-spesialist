@@ -13,8 +13,8 @@ import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.mediator.KommandokjedeEndretEvent
+import no.nav.helse.mediator.oppgave.OppgaveRepository
 import no.nav.helse.mediator.oppgave.OppgaveService
-import no.nav.helse.mediator.oppgave.Oppgavelagrer
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.modell.melding.UtgåendeHendelse
@@ -48,7 +48,7 @@ internal class OppgaveServiceTest {
     private val tildelingDao = mockk<TildelingDao>(relaxed = true)
     private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
     private val opptegnelseDao = mockk<OpptegnelseDao>(relaxed = true)
-    private val oppgavelagrer = mockk<Oppgavelagrer>(relaxed = true)
+    private val oppgaveRepository = mockk<OppgaveRepository>(relaxed = true)
 
     private val meldingPubliserer = object : MeldingPubliserer {
         var antallMeldinger: Int = 0
@@ -79,7 +79,7 @@ internal class OppgaveServiceTest {
             tilgangskontroll = { _, _ -> false },
             tilgangsgrupper = tilgangsgrupper,
             daos = daos,
-            oppgavelagrer = oppgavelagrer
+            oppgaveRepository = oppgaveRepository
         )
     private val saksbehandlerFraDatabase =
         SaksbehandlerFraDatabase(SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, SAKSBEHANDLERNAVN, SAKSBEHANDLERIDENT)
@@ -127,7 +127,7 @@ internal class OppgaveServiceTest {
         every { reservasjonDao.hentReservasjonFor(fødselsnummer) } returns null
         lagSøknadsoppgave(fødselsnummer)
         verify(exactly = 1) {
-            oppgavelagrer.lagre(
+            oppgaveRepository.lagre(
                 Oppgave.ny(
                     id = oppgaveId,
                     hendelseId = HENDELSE_ID,
@@ -165,7 +165,7 @@ internal class OppgaveServiceTest {
 
     @Test
     fun `oppdaterer oppgave`() {
-        every { oppgavelagrer.oppgave(OPPGAVE_ID, any()) } returns oppgave()
+        every { oppgaveRepository.oppgave(OPPGAVE_ID, any()) } returns oppgave()
         every { oppgaveDao.finnHendelseId(any()) } returns HENDELSE_ID
         oppgaveService.oppgave(OPPGAVE_ID) {
             avventerSystem(SAKSBEHANDLERIDENT, SAKSBEHANDLEROID)

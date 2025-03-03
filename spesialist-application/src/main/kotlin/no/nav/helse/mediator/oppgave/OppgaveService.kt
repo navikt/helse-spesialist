@@ -33,7 +33,7 @@ class OppgaveService(
     private val meldingPubliserer: MeldingPubliserer,
     private val tilgangskontroll: Tilgangskontroll,
     private val tilgangsgrupper: Tilgangsgrupper,
-    private val oppgavelagrer: Oppgavelagrer,
+    private val oppgaveRepository: OppgaveRepository,
     private val daos: Daos,
 ) : Oppgavehåndterer, Oppgavefinner {
     private val logg = LoggerFactory.getLogger(this::class.java)
@@ -46,7 +46,7 @@ class OppgaveService(
             meldingPubliserer = meldingPubliserer,
             tilgangskontroll = tilgangskontroll,
             tilgangsgrupper = tilgangsgrupper,
-            oppgavelagrer = sessionContext.oppgavelagrer,
+            oppgaveRepository = sessionContext.oppgaveRepository,
             daos = daos,
         )
 
@@ -76,18 +76,18 @@ class OppgaveService(
         oppgave.register(oppgavemelder)
         oppgavemelder.oppgaveOpprettet(oppgave)
         tildelVedReservasjon(fødselsnummer, oppgave)
-        oppgavelagrer.lagre(oppgave)
+        oppgaveRepository.lagre(oppgave)
     }
 
     fun <T> oppgave(
         id: Long,
         oppgaveBlock: Oppgave.() -> T,
     ): T {
-        val oppgave = oppgavelagrer.oppgave(id, tilgangskontroll)
+        val oppgave = oppgaveRepository.oppgave(id, tilgangskontroll)
         val fødselsnummer = oppgaveDao.finnFødselsnummer(id)
         oppgave.register(Oppgavemelder(fødselsnummer, meldingPubliserer))
         val returverdi = oppgaveBlock(oppgave)
-        oppgavelagrer.oppdater(oppgave)
+        oppgaveRepository.oppdater(oppgave)
         return returverdi
     }
 

@@ -1,25 +1,23 @@
-package no.nav.helse.spesialist.db.dao
+package no.nav.helse.spesialist.db.repository
 
-import io.mockk.clearMocks
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveDao
+import no.nav.helse.db.OppgaveFraDatabase
 import no.nav.helse.db.TildelingDao
-import no.nav.helse.mediator.oppgave.OppgaveService
-import no.nav.helse.mediator.oppgave.PgOppgavelagrer
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.spesialist.db.lagEpostadresseFraFulltNavn
 import no.nav.helse.spesialist.db.lagSaksbehandlerident
 import no.nav.helse.spesialist.db.lagSaksbehandlernavn
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.UUID
 import kotlin.random.Random.Default.nextLong
 
-class OppgavelagrerTest {
+class PgOppgaveRepositoryTest {
     private val oppgavetype = SØKNAD
     private val vedtaksperiodeId = UUID.randomUUID()
     private val behandlingId = UUID.randomUUID()
@@ -39,17 +37,32 @@ class OppgavelagrerTest {
 
     private val oppgaveDaoMock = mockk<OppgaveDao>(relaxed = true)
     private val tildelingDaoMock = mockk<TildelingDao>(relaxed = true)
-    private val oppgaveService = mockk<OppgaveService>(relaxed = true)
 
-    @BeforeEach
-    fun beforeEach() {
-        clearMocks(this.tildelingDaoMock, oppgaveService)
+    @Test
+    fun `finn oppgave`() {
+        every { oppgaveDaoMock.finnOppgave(any()) } returns OppgaveFraDatabase(
+            id = oppgaveId,
+            egenskaper = listOf(EgenskapForDatabase.SØKNAD),
+            status = "AvventerSaksbehandler",
+            vedtaksperiodeId = vedtaksperiodeId,
+            behandlingId = behandlingId,
+            utbetalingId = utbetalingId,
+            godkjenningsbehovId = godkjenningsbehovId,
+            kanAvvises = false,
+            ferdigstiltAvIdent = legacySaksbehandler.ident(),
+            ferdigstiltAvOid = legacySaksbehandler.oid,
+            tildelt = null,
+        )
+        val oppgavelagrer = PgOppgaveRepository(oppgaveDaoMock, tildelingDaoMock)
+
+        oppgavelagrer.oppgave(oppgaveId) {_, _ -> false }
+        verify(exactly = 1) { oppgaveDaoMock.finnOppgave(oppgaveId) }
     }
 
     @Test
     fun `lagre oppgave uten tildeling medfører forsøk på å slette eksisterende tildeling`() {
         val oppgave = nyOppgave()
-        val oppgavelagrer = PgOppgavelagrer(oppgaveDaoMock, tildelingDaoMock)
+        val oppgavelagrer = PgOppgaveRepository(oppgaveDaoMock, tildelingDaoMock)
 
         oppgavelagrer.lagre(oppgave)
         verify(exactly = 1) {
@@ -70,7 +83,7 @@ class OppgavelagrerTest {
     @Test
     fun `oppdatere oppgave uten tildeling medfører forsøk på å slette eksisterende tildeling`() {
         val oppgave = nyOppgave()
-        val oppgavelagrer = PgOppgavelagrer(oppgaveDaoMock, tildelingDaoMock)
+        val oppgavelagrer = PgOppgaveRepository(oppgaveDaoMock, tildelingDaoMock)
 
         oppgavelagrer.oppdater(oppgave)
         verify(exactly = 1) {
@@ -87,7 +100,7 @@ class OppgavelagrerTest {
     @Test
     fun `lagre oppgave uten tildeling`() {
         val oppgave = nyOppgave()
-        val oppgavelagrer = PgOppgavelagrer(oppgaveDaoMock, tildelingDaoMock)
+        val oppgavelagrer = PgOppgaveRepository(oppgaveDaoMock, tildelingDaoMock)
 
         oppgavelagrer.lagre(oppgave)
         verify(exactly = 1) {
@@ -108,7 +121,7 @@ class OppgavelagrerTest {
     fun `lagre oppgave`() {
         val oppgave = nyOppgave()
         oppgave.forsøkTildelingVedReservasjon(legacySaksbehandler)
-        val oppgavelagrer = PgOppgavelagrer(oppgaveDaoMock, tildelingDaoMock)
+        val oppgavelagrer = PgOppgaveRepository(oppgaveDaoMock, tildelingDaoMock)
 
         oppgavelagrer.lagre(oppgave)
         verify(exactly = 1) {
@@ -130,7 +143,7 @@ class OppgavelagrerTest {
         val oppgave = nyOppgave()
         oppgave.avventerSystem(legacySaksbehandler.ident(), legacySaksbehandler.oid)
         oppgave.ferdigstill()
-        val oppgavelagrer = PgOppgavelagrer(oppgaveDaoMock, tildelingDaoMock)
+        val oppgavelagrer = PgOppgaveRepository(oppgaveDaoMock, tildelingDaoMock)
 
         oppgavelagrer.oppdater(oppgave)
         verify(exactly = 1) {
@@ -149,7 +162,7 @@ class OppgavelagrerTest {
         oppgave.forsøkTildelingVedReservasjon(legacySaksbehandler)
         oppgave.avventerSystem(legacySaksbehandler.ident(), legacySaksbehandler.oid)
         oppgave.ferdigstill()
-        val oppgavelagrer = PgOppgavelagrer(oppgaveDaoMock, tildelingDaoMock)
+        val oppgavelagrer = PgOppgaveRepository(oppgaveDaoMock, tildelingDaoMock)
 
         oppgavelagrer.oppdater(oppgave)
         verify(exactly = 1) {

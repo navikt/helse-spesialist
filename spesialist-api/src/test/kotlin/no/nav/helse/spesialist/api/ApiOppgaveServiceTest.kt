@@ -18,8 +18,8 @@ import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.mediator.KommandokjedeEndretEvent
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
+import no.nav.helse.mediator.oppgave.OppgaveRepository
 import no.nav.helse.mediator.oppgave.OppgaveService
-import no.nav.helse.mediator.oppgave.PgOppgavelagrer
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.modell.melding.UtgåendeHendelse
@@ -66,6 +66,7 @@ internal class ApiOppgaveServiceTest {
     private val tildelingDao = mockk<TildelingDao>(relaxed = true)
     private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
     private val opptegnelseDao = mockk<OpptegnelseDao>(relaxed = true)
+    private val oppgaveRepository = mockk<OppgaveRepository>(relaxed = true)
 
     private val meldingPubliserer = object : MeldingPubliserer {
         var antallMeldinger: Int = 0
@@ -98,7 +99,7 @@ internal class ApiOppgaveServiceTest {
                 meldingPubliserer = meldingPubliserer,
                 tilgangskontroll = { _, _ -> false },
                 tilgangsgrupper = SpeilTilgangsgrupper(testEnv),
-                oppgavelagrer = PgOppgavelagrer(oppgaveDao, tildelingDao),
+                oppgaveRepository = oppgaveRepository,
                 daos = daos
             )
         )

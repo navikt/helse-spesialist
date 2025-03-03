@@ -3,8 +3,7 @@ package no.nav.helse.spesialist.db
 import kotliquery.Session
 import no.nav.helse.db.AvviksvurderingRepository
 import no.nav.helse.db.SessionContext
-import no.nav.helse.mediator.oppgave.Oppgavelagrer
-import no.nav.helse.mediator.oppgave.PgOppgavelagrer
+import no.nav.helse.mediator.oppgave.OppgaveRepository
 import no.nav.helse.spesialist.application.DialogRepository
 import no.nav.helse.spesialist.application.NotatRepository
 import no.nav.helse.spesialist.application.OverstyringRepository
@@ -42,6 +41,7 @@ import no.nav.helse.spesialist.db.dao.PgVergemålDao
 import no.nav.helse.spesialist.db.dao.PgÅpneGosysOppgaverDao
 import no.nav.helse.spesialist.db.repository.PgDialogRepository
 import no.nav.helse.spesialist.db.repository.PgNotatRepository
+import no.nav.helse.spesialist.db.repository.PgOppgaveRepository
 import no.nav.helse.spesialist.db.repository.PgOverstyringRepository
 import no.nav.helse.spesialist.db.repository.PgSaksbehandlerRepository
 import no.nav.helse.spesialist.db.repository.PgTotrinnsvurderingRepository
@@ -83,5 +83,5 @@ class DBSessionContext(session: Session) : SessionContext {
     override val dialogRepository: DialogRepository = PgDialogRepository(session)
     override val saksbehandlerRepository: SaksbehandlerRepository = PgSaksbehandlerRepository(session)
     override val avviksvurderingRepository: AvviksvurderingRepository = PgAvviksvurderingRepository(session)
-    override val oppgavelagrer: Oppgavelagrer = PgOppgavelagrer(oppgaveDao, tildelingDao)
+    override val oppgaveRepository: OppgaveRepository = PgOppgaveRepository(oppgaveDao, tildelingDao)
 }

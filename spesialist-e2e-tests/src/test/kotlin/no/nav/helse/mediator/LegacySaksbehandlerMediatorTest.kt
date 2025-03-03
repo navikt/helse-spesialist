@@ -9,7 +9,6 @@ import no.nav.helse.e2e.DatabaseIntegrationTest
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.mediator.oppgave.OppgaveService
-import no.nav.helse.mediator.oppgave.PgOppgavelagrer
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlinghåndtererImpl
 import no.nav.helse.spesialist.api.SendIReturResult
 import no.nav.helse.spesialist.api.SendTilGodkjenningResult
@@ -38,6 +37,7 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import no.nav.helse.spesialist.db.DBDaos
 import no.nav.helse.spesialist.db.TransactionalSessionFactory
+import no.nav.helse.spesialist.db.repository.PgOppgaveRepository
 import no.nav.helse.spesialist.test.lagAktørId
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
@@ -80,7 +80,7 @@ internal class LegacySaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
             tilgangsgrupper = tilgangsgrupper,
             daos = daos,
-            oppgavelagrer = PgOppgavelagrer(oppgaveDao, tildelingDbDao),
+            oppgaveRepository = PgOppgaveRepository(oppgaveDao, tildelingDbDao),
         )
     private val apiOppgaveService = ApiOppgaveService(
         oppgaveDao = oppgaveDao,

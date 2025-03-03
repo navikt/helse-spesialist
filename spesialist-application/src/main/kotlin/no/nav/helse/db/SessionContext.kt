@@ -1,6 +1,6 @@
 package no.nav.helse.db
 
-import no.nav.helse.mediator.oppgave.Oppgavelagrer
+import no.nav.helse.mediator.oppgave.OppgaveRepository
 import no.nav.helse.modell.person.PersonRepository
 import no.nav.helse.spesialist.application.DialogRepository
 import no.nav.helse.spesialist.application.NotatRepository
@@ -45,5 +45,5 @@ interface SessionContext {
     val dialogRepository: DialogRepository
     val saksbehandlerRepository: SaksbehandlerRepository
     val avviksvurderingRepository: AvviksvurderingRepository
-    val oppgavelagrer: Oppgavelagrer
+    val oppgaveRepository: OppgaveRepository
 }

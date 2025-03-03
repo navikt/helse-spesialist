@@ -20,7 +20,6 @@ import no.nav.helse.mediator.TilgangskontrollørForReservasjon
 import no.nav.helse.mediator.dokument.DokumentMediator
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.mediator.oppgave.OppgaveService
-import no.nav.helse.mediator.oppgave.PgOppgavelagrer
 import no.nav.helse.modell.automatisering.PlukkTilManuell
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlinghåndtererImpl
@@ -38,6 +37,7 @@ import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.helse.spesialist.db.DBDaos
 import no.nav.helse.spesialist.db.DataSourceBuilder
 import no.nav.helse.spesialist.db.TransactionalSessionFactory
+import no.nav.helse.spesialist.db.repository.PgOppgaveRepository
 import org.slf4j.LoggerFactory
 import java.lang.management.GarbageCollectorMXBean
 import java.lang.management.ManagementFactory
@@ -130,7 +130,7 @@ class SpesialistApp(
                 tilgangskontroll = tilgangskontrollørForReservasjon,
                 tilgangsgrupper = tilgangsgrupper,
                 daos = daos,
-                oppgavelagrer = PgOppgavelagrer(daos.oppgaveDao, daos.tildelingDao),
+                oppgaveRepository = PgOppgaveRepository(daos.oppgaveDao, daos.tildelingDao),
             )
         apiOppgaveService =
             ApiOppgaveService(

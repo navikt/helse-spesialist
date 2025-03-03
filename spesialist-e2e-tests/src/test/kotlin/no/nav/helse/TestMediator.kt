@@ -12,7 +12,6 @@ import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.mediator.meldinger.PoisonPills
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.mediator.oppgave.OppgaveService
-import no.nav.helse.mediator.oppgave.PgOppgavelagrer
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlinghåndtererImpl
 import no.nav.helse.modell.varsel.VarselRepository
@@ -21,6 +20,7 @@ import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
 import no.nav.helse.spesialist.db.DBDaos
 import no.nav.helse.spesialist.db.TransactionalSessionFactory
+import no.nav.helse.spesialist.db.repository.PgOppgaveRepository
 import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import no.nav.helse.util.testEnv
 import java.util.UUID
@@ -63,7 +63,7 @@ internal class TestMediator(
             tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
             tilgangsgrupper = tilgangsgrupper,
             daos = daos,
-            oppgavelagrer = PgOppgavelagrer(oppgaveDao, tildelingDao),
+            oppgaveRepository = PgOppgaveRepository(oppgaveDao, tildelingDao),
         )
     private val apiOppgaveService = ApiOppgaveService(
         oppgaveDao = daos.oppgaveDao,

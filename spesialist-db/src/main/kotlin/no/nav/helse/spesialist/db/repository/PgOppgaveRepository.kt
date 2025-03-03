@@ -1,30 +1,16 @@
-package no.nav.helse.mediator.oppgave
+package no.nav.helse.spesialist.db.repository
 
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.TildelingDao
+import no.nav.helse.mediator.oppgave.OppgaveRepository
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
-import no.nav.helse.modell.oppgave.Oppgave.AvventerSaksbehandler
-import no.nav.helse.modell.oppgave.Oppgave.AvventerSystem
-import no.nav.helse.modell.oppgave.Oppgave.Ferdigstilt
-import no.nav.helse.modell.oppgave.Oppgave.Invalidert
-import no.nav.helse.modell.oppgave.Oppgave.Tilstand
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 
-interface Oppgavelagrer {
-    fun lagre(oppgave: Oppgave)
-
-    fun oppdater(oppgave: Oppgave)
-
-    fun oppgave(
-        id: Long,
-        tilgangskontroll: Tilgangskontroll,
-    ): Oppgave
-}
-
-class PgOppgavelagrer(private val oppgaveDao: OppgaveDao, private val tildelingDao: TildelingDao) : Oppgavelagrer {
+class PgOppgaveRepository(private val oppgaveDao: OppgaveDao, private val tildelingDao: TildelingDao) :
+    OppgaveRepository {
     override fun lagre(oppgave: Oppgave) {
         oppgaveDao.opprettOppgave(
             id = oppgave.id,
@@ -117,10 +103,10 @@ class PgOppgavelagrer(private val oppgaveDao: OppgaveDao, private val tildelingD
 
     private fun tilstand(oppgavestatus: String): Oppgave.Tilstand {
         return when (oppgavestatus) {
-            "AvventerSaksbehandler" -> AvventerSaksbehandler
-            "AvventerSystem" -> AvventerSystem
-            "Ferdigstilt" -> Ferdigstilt
-            "Invalidert" -> Invalidert
+            "AvventerSaksbehandler" -> Oppgave.AvventerSaksbehandler
+            "AvventerSystem" -> Oppgave.AvventerSystem
+            "Ferdigstilt" -> Oppgave.Ferdigstilt
+            "Invalidert" -> Oppgave.Invalidert
             else -> throw IllegalStateException("Oppgavestatus $oppgavestatus er ikke en gyldig status")
         }
     }
@@ -134,7 +120,7 @@ class PgOppgavelagrer(private val oppgaveDao: OppgaveDao, private val tildelingD
         }
     }
 
-    private fun status(tilstand: Tilstand): String {
+    private fun status(tilstand: Oppgave.Tilstand): String {
         return when (tilstand) {
             Oppgave.AvventerSaksbehandler -> "AvventerSaksbehandler"
             Oppgave.AvventerSystem -> "AvventerSystem"
