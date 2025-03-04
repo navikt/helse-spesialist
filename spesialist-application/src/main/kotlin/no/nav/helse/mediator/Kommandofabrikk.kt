@@ -420,6 +420,7 @@ class Kommandofabrikk(
             sessionContext,
             subsumsjonsmelderProvider,
             stikkprøver,
+            featureToggles,
         )
 
     private fun iverksett(

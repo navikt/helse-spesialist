@@ -1,6 +1,7 @@
 package no.nav.helse.modell.automatisering
 
 import no.nav.helse.AutomatiseringStansetSjekker
+import no.nav.helse.FeatureToggles
 import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.GenerasjonDao
@@ -25,6 +26,7 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
+import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.UUID
@@ -42,12 +44,15 @@ internal class Automatisering(
     private val meldingDao: MeldingDao,
     private val generasjonDao: GenerasjonDao,
     private val egenAnsattDao: EgenAnsattDao,
+    private val totrinnsvurderingRepository: TotrinnsvurderingRepository,
+    private val featureToggles: FeatureToggles,
 ) {
     object Factory {
         fun automatisering(
             sessionContext: SessionContext,
             subsumsjonsmelderProvider: () -> Subsumsjonsmelder,
             stikkprøver: Stikkprøver,
+            featureToggles: FeatureToggles,
         ): Automatisering {
             return Automatisering(
                 risikovurderingDao = sessionContext.risikovurderingDao,
@@ -66,6 +71,8 @@ internal class Automatisering(
                 meldingDao = sessionContext.meldingDao,
                 generasjonDao = sessionContext.generasjonDao,
                 egenAnsattDao = sessionContext.egenAnsattDao,
+                totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository,
+                featureToggles = featureToggles,
             )
         }
     }
@@ -102,9 +109,11 @@ internal class Automatisering(
         when (val resultat = vurderOmBehandlingSkyldesKorrigertSøknad(fødselsnummer, vedtaksperiodeId)) {
             is SkyldesKorrigertSøknad.KanIkkeAutomatiseres,
             -> return Automatiseringsresultat.KanIkkeAutomatiseres(listOf(resultat.årsak))
+
             is AutomatiserKorrigertSøknadResultat.SkyldesIkkeKorrigertSøknad,
             is SkyldesKorrigertSøknad.KanAutomatiseres,
-            -> {}
+            -> {
+            }
         }
 
         if (!erEgenAnsattEllerSkjermet(fødselsnummer)) {
@@ -207,17 +216,20 @@ internal class Automatisering(
                             førstegangsbehandling && stikkprøver.utsFlereArbeidsgivereFørstegangsbehandling() -> return "UTS, flere arbeidsgivere, førstegangsbehandling"
                             !førstegangsbehandling && stikkprøver.utsFlereArbeidsgivereForlengelse() -> return "UTS, flere arbeidsgivere, forlengelse"
                         }
+
                     !flereArbeidsgivere ->
                         when {
                             førstegangsbehandling && stikkprøver.utsEnArbeidsgiverFørstegangsbehandling() -> return "UTS, en arbeidsgiver, førstegangsbehandling"
                             !førstegangsbehandling && stikkprøver.utsEnArbeidsgiverForlengelse() -> return "UTS, en arbeidsgiver, forlengelse"
                         }
                 }
+
             flereArbeidsgivere ->
                 when {
                     førstegangsbehandling && stikkprøver.fullRefusjonFlereArbeidsgivereFørstegangsbehandling() -> return "Refusjon, flere arbeidsgivere, førstegangsbehandling"
                     !førstegangsbehandling && stikkprøver.fullRefusjonFlereArbeidsgivereForlengelse() -> return "Refusjon, flere arbeidsgivere, forlengelse"
                 }
+
             stikkprøver.fullRefusjonEnArbeidsgiver() -> return "Refusjon, en arbeidsgiver"
         }
         return null
@@ -244,7 +256,13 @@ internal class Automatisering(
         val harVergemål = vergemålDao.harVergemål(fødselsnummer) ?: false
         val tilhørerUtlandsenhet = erEnhetUtland(personDao.finnEnhetId(fødselsnummer))
         val antallÅpneGosysoppgaver = åpneGosysOppgaverDao.antallÅpneOppgaver(fødselsnummer)
-        val harPågåendeOverstyring = overstyringDao.harVedtaksperiodePågåendeOverstyring(vedtaksperiodeId)
+        val harPågåendeOverstyring =
+            if (featureToggles.skalBenytteNyTotrinnsvurderingsløsning()) {
+                totrinnsvurderingRepository.finn(fødselsnummer)?.ferdigstilt
+                    ?: false
+            } else {
+                overstyringDao.harVedtaksperiodePågåendeOverstyring(vedtaksperiodeId)
+            }
         val harUtbetalingTilSykmeldt = utbetaling.harEndringIUtbetalingTilSykmeldt()
 
         val skalStoppesPgaUTS = harUtbetalingTilSykmeldt && periodetype !in listOf(FORLENGELSE, FØRSTEGANGSBEHANDLING)

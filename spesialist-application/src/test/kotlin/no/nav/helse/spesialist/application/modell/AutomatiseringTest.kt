@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.application.modell
 
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.helse.FeatureToggles
 import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.GenerasjonDao
@@ -27,6 +28,7 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
+import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.application.jan
 import no.nav.helse.spesialist.application.lagFødselsnummer
 import no.nav.helse.spesialist.application.lagOrganisasjonsnummer
@@ -58,6 +60,7 @@ internal class AutomatiseringTest {
         }
     private val åpneGosysOppgaverDaoMock = mockk<ÅpneGosysOppgaverDao>(relaxed = true)
     private val egenAnsattDao = mockk<EgenAnsattDao>(relaxed = true)
+    private val totrinnsvurderingRepository = mockk<TotrinnsvurderingRepository>(relaxed = true)
     private val personDaoMock =
         mockk<PersonDao>(relaxed = true) {
             every { finnAdressebeskyttelse(any()) } returns Adressebeskyttelse.Ugradert
@@ -101,6 +104,8 @@ internal class AutomatiseringTest {
             meldingDao = meldingDaoMock,
             generasjonDao = generasjonDaoMock,
             egenAnsattDao = egenAnsattDao,
+            totrinnsvurderingRepository = totrinnsvurderingRepository,
+            featureToggles = object: FeatureToggles {},
         )
 
     @BeforeEach
