@@ -7,6 +7,7 @@ import no.nav.helse.bootstrap.Environment
 import no.nav.helse.db.AnnulleringRepository
 import no.nav.helse.db.Daos
 import no.nav.helse.db.OpptegnelseDao
+import no.nav.helse.db.SessionContext
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.db.VedtakBegrunnelseFraDatabase
 import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
@@ -58,6 +59,7 @@ import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlinghåndtererImpl
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
+import no.nav.helse.modell.vedtak.Utfall
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import no.nav.helse.spesialist.api.SendIReturResult
 import no.nav.helse.spesialist.api.SendTilGodkjenningResult
@@ -88,6 +90,7 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
+import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler.Companion.gjenopprett
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler.Companion.toDto
@@ -176,7 +179,7 @@ class SaksbehandlerMediator(
                     totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository,
                 ) ?: håndterGodkjenning(oppgavereferanse, fødselsnummer, spleisBehandlingId, legacySaksbehandler).also {
                     håndterVedtakBegrunnelse(
-                        utfall = utfall,
+                        utfall = hentUtfallFraBehandling(spleisBehandlingId, sessionContext),
                         begrunnelse = begrunnelse,
                         oppgaveId = oppgavereferanse,
                         saksbehandlerOid = legacySaksbehandler.oid(),
@@ -184,6 +187,16 @@ class SaksbehandlerMediator(
                 }
             }
         }
+
+    private fun hentUtfallFraBehandling(
+        spleisBehandlingId: UUID,
+        sessionContext: SessionContext,
+    ): Utfall {
+        val behandling =
+            sessionContext.behandlingRepository.finn(SpleisBehandlingId(spleisBehandlingId))
+                ?: error("Fant ikke behandling for SpleisBehandlingId $spleisBehandlingId")
+        return behandling.utfall()
+    }
 
     fun infotrygdVedtak(
         saksbehandlerFraApi: SaksbehandlerFraApi,
@@ -511,7 +524,7 @@ class SaksbehandlerMediator(
         }
 
     private fun håndterVedtakBegrunnelse(
-        utfall: ApiVedtakUtfall,
+        utfall: Utfall,
         begrunnelse: String?,
         oppgaveId: Long,
         saksbehandlerOid: UUID,
@@ -633,7 +646,12 @@ class SaksbehandlerMediator(
 
         try {
             håndterVedtakBegrunnelse(
-                utfall = utfall,
+                utfall =
+                    when (utfall) {
+                        ApiVedtakUtfall.AVSLAG -> Utfall.AVSLAG
+                        ApiVedtakUtfall.DELVIS_INNVILGELSE -> Utfall.DELVIS_INNVILGELSE
+                        ApiVedtakUtfall.INNVILGELSE -> Utfall.INNVILGELSE
+                    },
                 begrunnelse = begrunnelse,
                 oppgaveId = oppgavereferanse,
                 saksbehandlerOid = saksbehandlerFraApi.oid,
@@ -998,11 +1016,11 @@ class SaksbehandlerMediator(
 
     private fun ApiOpphevStans.tilModellversjon(): OpphevStans = OpphevStans(this.fødselsnummer, this.begrunnelse)
 
-    private fun ApiVedtakUtfall.toDatabaseType() =
+    private fun Utfall.toDatabaseType() =
         when (this) {
-            ApiVedtakUtfall.AVSLAG -> VedtakBegrunnelseTypeFraDatabase.AVSLAG
-            ApiVedtakUtfall.DELVIS_INNVILGELSE -> VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE
-            ApiVedtakUtfall.INNVILGELSE -> VedtakBegrunnelseTypeFraDatabase.INNVILGELSE
+            Utfall.AVSLAG -> VedtakBegrunnelseTypeFraDatabase.AVSLAG
+            Utfall.DELVIS_INNVILGELSE -> VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE
+            Utfall.INNVILGELSE -> VedtakBegrunnelseTypeFraDatabase.INNVILGELSE
         }
 
     private fun SaksbehandlerFraApi.toDto(): SaksbehandlerDto =

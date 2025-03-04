@@ -5,6 +5,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.helse.FeatureToggles
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.TestRapidHelpers.hendelser
+import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
 import no.nav.helse.e2e.DatabaseIntegrationTest
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
@@ -16,6 +17,7 @@ import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre
 import no.nav.helse.spesialist.api.graphql.mutation.Avslag
+import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutationHandler.VedtakResultat
 import no.nav.helse.spesialist.api.graphql.schema.ApiAnnulleringData
 import no.nav.helse.spesialist.api.graphql.schema.ApiAnnulleringData.ApiAnnulleringArsak
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdOverstyringHandling
@@ -55,6 +57,8 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -619,6 +623,52 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         assertThrows<no.nav.helse.spesialist.api.feilhåndtering.AlleredeAnnullert> {
             mediator.håndter(annullering, saksbehandler)
         }
+    }
+
+    @ParameterizedTest
+    @CsvSource("Innvilget,INNVILGELSE", "DelvisInnvilget,DELVIS_INNVILGELSE", "Avslag,AVSLAG")
+    fun `fatter vedtak med utfall innvilgelse basert på tags fra Spleis`(tag: String, utfall: VedtakBegrunnelseTypeFraDatabase) {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val fødselsnummer = lagFødselsnummer()
+        val utbetalingId = UUID.randomUUID()
+        val spleisBehandlingId = UUID.randomUUID()
+        nyPerson(
+            fødselsnummer = fødselsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetalingId = utbetalingId,
+            spleisBehandlingId = spleisBehandlingId
+        )
+        opprettSaksbehandler()
+        val saksbehandler = SaksbehandlerFraApi(
+            SAKSBEHANDLER_OID,
+            SAKSBEHANDLER_NAVN,
+            SAKSBEHANDLER_EPOST,
+            SAKSBEHANDLER_IDENT,
+            emptyList()
+        )
+        sessionFactory.transactionalSessionScope { session ->
+            session.personRepository.brukPersonHvisFinnes(fødselsnummer = fødselsnummer) {
+                oppdaterPeriodeTilGodkjenning(
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    spleisBehandlingId = spleisBehandlingId,
+                    tags = listOf(tag),
+                    utbetalingId = utbetalingId,
+                )
+            }
+        }
+
+        val result = mediator.vedtak(
+            saksbehandlerFraApi = saksbehandler,
+            oppgavereferanse = oppgaveId,
+            utfall = ApiVedtakUtfall.AVSLAG,
+            begrunnelse = "En begrunnelse",
+        )
+
+        assertEquals(VedtakResultat.Ok(spleisBehandlingId = spleisBehandlingId), result)
+        val vedtakBegrunnelse = daos.vedtakBegrunnelseDao.finnVedtakBegrunnelse(oppgaveId = oppgaveId)
+        checkNotNull(vedtakBegrunnelse)
+        assertEquals(utfall, vedtakBegrunnelse.type)
+        assertEquals("En begrunnelse", vedtakBegrunnelse.tekst)
     }
 
     // Eksperimentering med DSL for å lage testdata
