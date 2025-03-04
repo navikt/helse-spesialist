@@ -88,9 +88,7 @@ class PgOppgaveRepositoryTest {
         oppgavelagrer.oppdater(oppgave)
         verify(exactly = 1) {
             oppgaveDaoMock.updateOppgave(
-                oppgaveId, "AvventerSaksbehandler", null, null, listOf(
-                    EgenskapForDatabase.SØKNAD
-                )
+                oppgaveId
             )
         }
         verify(exactly = 0) { tildelingDaoMock.tildel(any(), any()) }
@@ -148,9 +146,7 @@ class PgOppgaveRepositoryTest {
         oppgavelagrer.oppdater(oppgave)
         verify(exactly = 1) {
             oppgaveDaoMock.updateOppgave(
-                oppgaveId, "Ferdigstilt", legacySaksbehandler.ident(), legacySaksbehandler.oid, listOf(
-                    EgenskapForDatabase.SØKNAD
-                )
+                oppgaveId
             )
         }
         verify(exactly = 0) { tildelingDaoMock.tildel(any(), any()) }
@@ -167,9 +163,7 @@ class PgOppgaveRepositoryTest {
         oppgavelagrer.oppdater(oppgave)
         verify(exactly = 1) {
             oppgaveDaoMock.updateOppgave(
-                oppgaveId, "Ferdigstilt", legacySaksbehandler.ident(), legacySaksbehandler.oid, listOf(
-                    EgenskapForDatabase.SØKNAD
-                )
+                oppgaveId
             )
         }
     }

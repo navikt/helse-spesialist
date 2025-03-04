@@ -61,7 +61,7 @@ internal class PgBehandlingsstatistikkDaoTest : AbstractDBIntegrationTest() {
     @Test
     fun `hent antall ferdigstilte oppgaver for gitt egenskap`() {
         nyPerson()
-        oppgaveDao.updateOppgave(OPPGAVE_ID, oppgavestatus = "Ferdigstilt", egenskaper = listOf(EgenskapForDatabase.SØKNAD))
+        oppgaveDao.updateOppgave(OPPGAVE_ID)
         val antall = behandlingsstatistikkDao.antallFerdigstilteOppgaverFor(EgenskapForDatabase.SØKNAD, LocalDate.now())
         assertEquals(1, antall)
     }

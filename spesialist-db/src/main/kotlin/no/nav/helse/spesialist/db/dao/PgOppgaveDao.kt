@@ -7,7 +7,6 @@ import no.nav.helse.db.BehandletOppgaveFraDatabaseForVisning
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.KommentarFraDatabase
 import no.nav.helse.db.OppgaveDao
-import no.nav.helse.db.OppgaveFraDatabase
 import no.nav.helse.db.OppgaveFraDatabaseForVisning
 import no.nav.helse.db.OppgavesorteringForDatabase
 import no.nav.helse.db.PaVentInfoFraDatabase
@@ -16,11 +15,14 @@ import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.SorteringsnøkkelForDatabase
 import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.oppgave.Egenskap
+import no.nav.helse.modell.oppgave.Oppgave
+import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.db.objectMapper
+import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -53,7 +55,10 @@ class PgOppgaveDao internal constructor(
             it.long("oppgaveId")
         }
 
-    fun finnOppgave(id: Long): OppgaveFraDatabase? =
+    fun finnOppgave(
+        id: Long,
+        tilgangskontroll: Tilgangskontroll,
+    ): Oppgave? =
         asSQL(
             """
             SELECT o.egenskaper, o.status, v.vedtaksperiode_id, o.behandling_id, o.hendelse_id_godkjenningsbehov, o.ferdigstilt_av, o.ferdigstilt_av_oid, o.utbetaling_id, s.navn, s.epost, s.ident, s.oid, o.kan_avvises
@@ -66,12 +71,15 @@ class PgOppgaveDao internal constructor(
             """,
             "oppgaveId" to id,
         ).singleOrNull { row ->
-            val egenskaper: List<EgenskapForDatabase> =
-                row.array<String>("egenskaper").toList().map { enumValueOf(it) }
-            OppgaveFraDatabase(
+            val egenskaper: Set<Egenskap> =
+                row
+                    .array<String>("egenskaper")
+                    .map { enumValueOf<Egenskap>(it) }
+                    .toSet()
+            Oppgave.fraLagring(
                 id = id,
                 egenskaper = egenskaper,
-                status = row.string("status"),
+                tilstand = tilstand(row.string("status")),
                 vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
                 behandlingId = row.uuid("behandling_id"),
                 utbetalingId = row.uuid("utbetaling_id"),
@@ -79,13 +87,14 @@ class PgOppgaveDao internal constructor(
                 kanAvvises = row.boolean("kan_avvises"),
                 ferdigstiltAvIdent = row.stringOrNull("ferdigstilt_av"),
                 ferdigstiltAvOid = row.uuidOrNull("ferdigstilt_av_oid"),
-                tildelt =
+                tildeltTil =
                     row.uuidOrNull("oid")?.let {
-                        SaksbehandlerFraDatabase(
+                        LegacySaksbehandler(
                             epostadresse = row.string("epost"),
                             oid = it,
                             navn = row.string("navn"),
                             ident = row.string("ident"),
+                            tilgangskontroll = tilgangskontroll,
                         )
                     },
             )
@@ -423,25 +432,19 @@ class PgOppgaveDao internal constructor(
             it.string("fødselsnummer")
         }
 
-    fun updateOppgave(
-        oppgaveId: Long,
-        oppgavestatus: String,
-        ferdigstiltAv: String? = null,
-        oid: UUID? = null,
-        egenskaper: List<EgenskapForDatabase>,
-    ): Int =
+    fun updateOppgave(oppgave: Oppgave): Int =
         asSQL(
             """
             UPDATE oppgave
             SET ferdigstilt_av = :ferdigstiltAv, ferdigstilt_av_oid = :oid, status = :oppgavestatus::oppgavestatus, egenskaper = :egenskaper::varchar[], oppdatert = :oppdatert
             WHERE id=:oppgaveId
             """,
-            "ferdigstiltAv" to ferdigstiltAv,
-            "oid" to oid,
-            "oppgavestatus" to oppgavestatus,
-            "egenskaper" to egenskaper.joinToString(prefix = "{", postfix = "}"),
+            "ferdigstiltAv" to oppgave.ferdigstiltAvIdent,
+            "oid" to oppgave.ferdigstiltAvOid,
+            "oppgavestatus" to status(oppgave.tilstand),
+            "egenskaper" to oppgave.egenskaper.joinToString(prefix = "{", postfix = "}"),
             "oppdatert" to LocalDateTime.now(),
-            "oppgaveId" to oppgaveId,
+            "oppgaveId" to oppgave.id,
         ).update()
 
     override fun oppdaterPekerTilGodkjenningsbehov(
@@ -567,19 +570,11 @@ class PgOppgaveDao internal constructor(
             it.long("id")
         }
 
-    fun opprettOppgave(
-        id: Long,
-        godkjenningsbehovId: UUID,
-        egenskaper: List<EgenskapForDatabase>,
-        vedtaksperiodeId: UUID,
-        behandlingId: UUID,
-        utbetalingId: UUID,
-        kanAvvises: Boolean,
-    ) {
-        val vedtakRef = vedtakRef(vedtaksperiodeId)
-        val personRef = personRef(vedtaksperiodeId)
+    fun opprettOppgave(oppgave: Oppgave) {
+        val vedtakRef = vedtakRef(oppgave.vedtaksperiodeId)
+        val personRef = personRef(oppgave.vedtaksperiodeId)
 
-        val (arbeidsgiverBeløp, personBeløp) = finnArbeidsgiverbeløpOgPersonbeløp(vedtaksperiodeId, utbetalingId)
+        val (arbeidsgiverBeløp, personBeløp) = finnArbeidsgiverbeløpOgPersonbeløp(oppgave.vedtaksperiodeId, oppgave.utbetalingId)
         val mottaker = finnMottaker(arbeidsgiverBeløp > 0, personBeløp > 0)
 
         asSQL(
@@ -611,18 +606,18 @@ class PgOppgaveDao internal constructor(
                             AND v.person_ref=:personRef
                 )
             """,
-            "id" to id,
+            "id" to oppgave.id,
             "oppdatert" to LocalDateTime.now(),
-            "oppgavestatus" to "AvventerSaksbehandler",
-            "ferdigstiltAv" to null,
-            "ferdigstiltAvOid" to null,
+            "oppgavestatus" to oppgave.tilstand,
+            "ferdigstiltAv" to oppgave.ferdigstiltAvIdent,
+            "ferdigstiltAvOid" to oppgave.ferdigstiltAvOid,
             "vedtakRef" to vedtakRef,
-            "behandlingId" to behandlingId,
-            "godkjenningsbehovId" to godkjenningsbehovId,
-            "utbetalingId" to utbetalingId,
+            "behandlingId" to oppgave.behandlingId,
+            "godkjenningsbehovId" to oppgave.godkjenningsbehovId,
+            "utbetalingId" to oppgave.utbetalingId,
             "mottaker" to mottaker?.name,
-            "egenskaper" to egenskaper.joinToString(prefix = "{", postfix = "}"),
-            "kanAvvises" to kanAvvises,
+            "egenskaper" to oppgave.egenskaper.joinToString(prefix = "{", postfix = "}"),
+            "kanAvvises" to oppgave.kanAvvises,
             "personRef" to personRef,
         ).updateAndReturnGeneratedKey()
     }
@@ -651,6 +646,25 @@ class PgOppgaveDao internal constructor(
         ).single { row ->
             Pair(row.intOrNull("sumArbeidsgiverbeløp") ?: 0, row.intOrNull("sumPersonbeløp") ?: 0)
         }
+
+    private fun tilstand(oppgavestatus: String): Oppgave.Tilstand {
+        return when (oppgavestatus) {
+            "AvventerSaksbehandler" -> Oppgave.AvventerSaksbehandler
+            "AvventerSystem" -> Oppgave.AvventerSystem
+            "Ferdigstilt" -> Oppgave.Ferdigstilt
+            "Invalidert" -> Oppgave.Invalidert
+            else -> throw IllegalStateException("Oppgavestatus $oppgavestatus er ikke en gyldig status")
+        }
+    }
+
+    private fun status(tilstand: Oppgave.Tilstand): String {
+        return when (tilstand) {
+            Oppgave.AvventerSaksbehandler -> "AvventerSaksbehandler"
+            Oppgave.AvventerSystem -> "AvventerSystem"
+            Oppgave.Ferdigstilt -> "Ferdigstilt"
+            Oppgave.Invalidert -> "Invalidert"
+        }
+    }
 
     private fun finnMottaker(
         harArbeidsgiverbeløp: Boolean,

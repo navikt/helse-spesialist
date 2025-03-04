@@ -12,6 +12,8 @@ import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettArbeidsforholdDto
 import no.nav.helse.modell.KomplettInntektskildeDto
 import no.nav.helse.modell.kommando.MinimalPersonDto
+import no.nav.helse.modell.oppgave.Egenskap
+import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
@@ -61,7 +63,7 @@ abstract class AbstractDBIntegrationTest {
     protected open val UTBETALING_ID: UUID = testperson.utbetalingId1
 
     protected open var OPPGAVE_ID = nextLong()
-    protected val EGENSKAP = EgenskapForDatabase.SØKNAD
+    protected val EGENSKAP = Egenskap.SØKNAD
     protected val OPPGAVESTATUS = "AvventerSaksbehandler"
 
     protected val ORGNUMMER =
@@ -234,7 +236,7 @@ abstract class AbstractDBIntegrationTest {
         contextId: UUID = UUID.randomUUID(),
         godkjenningsbehovId: UUID = UUID.randomUUID(),
         spleisBehandlingId: UUID = UUID.randomUUID(),
-        oppgaveEgenskaper: List<EgenskapForDatabase> = listOf(EGENSKAP),
+        oppgaveEgenskaper: Set<Egenskap> = setOf(EGENSKAP),
     ) {
         opprettPerson(fødselsnummer = fødselsnummer, aktørId = aktørId)
         opprettArbeidsgiver(organisasjonsnummer = organisasjonsnummer)
@@ -270,7 +272,7 @@ abstract class AbstractDBIntegrationTest {
         egenskaper: List<EgenskapForDatabase> = listOf(EgenskapForDatabase.SØKNAD),
     ) {
         opprettSaksbehandler(saksbehandlerOid, navn = navn, epost = SAKSBEHANDLER_EPOST, ident = SAKSBEHANDLER_IDENT)
-        oppgaveDao.updateOppgave(oppgaveId, oppgavestatus = "AvventerSaksbehandler", egenskaper = egenskaper)
+        oppgaveDao.updateOppgave(oppgaveId)
         tildelingDao.tildel(oppgaveId, saksbehandlerOid)
     }
 
@@ -506,25 +508,19 @@ abstract class AbstractDBIntegrationTest {
     protected fun opprettOppgave(
         contextId: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
-        egenskaper: List<EgenskapForDatabase> = listOf(EGENSKAP),
+        egenskaper: Set<Egenskap> = setOf(EGENSKAP),
         kanAvvises: Boolean = true,
         utbetalingId: UUID = UTBETALING_ID,
         behandlingId: UUID = UUID.randomUUID(),
         godkjenningsbehovId: UUID = UUID.randomUUID(),
-    ) {
+    ): Oppgave {
         val hendelse = testhendelse(hendelseId = godkjenningsbehovId)
         opprettCommandContext(hendelse, contextId)
         oppgaveId = nextLong()
         OPPGAVE_ID = oppgaveId
-        oppgaveDao.opprettOppgave(
-            id = oppgaveId,
-            godkjenningsbehovId = godkjenningsbehovId,
-            egenskaper = egenskaper,
-            vedtaksperiodeId = vedtaksperiodeId,
-            behandlingId = behandlingId,
-            utbetalingId = utbetalingId,
-            kanAvvises = kanAvvises,
-        )
+        val oppgave = Oppgave.ny(oppgaveId, vedtaksperiodeId, behandlingId, utbetalingId, godkjenningsbehovId, kanAvvises, egenskaper)
+        oppgaveDao.opprettOppgave(oppgave)
+        return oppgave
     }
 
     fun finnOppgaveIdFor(vedtaksperiodeId: UUID): Long = oppgaveDao.finnIdForAktivOppgave(vedtaksperiodeId)!!
