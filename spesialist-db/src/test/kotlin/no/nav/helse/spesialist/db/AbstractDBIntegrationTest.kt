@@ -397,7 +397,7 @@ abstract class AbstractDBIntegrationTest {
         arbeidsforholdDao.upsertArbeidsforhold(fødselsnummer, orgnummer, listOf(arbeidsforholdDto))
     }
 
-    protected fun opprettGenerasjon(
+    protected fun opprettBehandling(
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
         spleisBehandlingId: UUID = UUID.randomUUID(),
         utbetalingId: UUID = UUID.randomUUID(),

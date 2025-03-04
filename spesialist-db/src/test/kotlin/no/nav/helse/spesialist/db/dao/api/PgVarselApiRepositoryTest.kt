@@ -22,7 +22,7 @@ internal class PgVarselApiRepositoryTest: AbstractDBIntegrationTest() {
         opprettVedtaksperiode()
         opprettVarseldefinisjon(kode = "EN_KODE")
         opprettVarseldefinisjon(kode = "EN_ANNEN_KODE")
-        opprettGenerasjon(spleisBehandlingId = spleisBehandlingId, utbetalingId = utbetalingId)
+        opprettBehandling(spleisBehandlingId = spleisBehandlingId, utbetalingId = utbetalingId)
         nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = PERIODE.id, spleisBehandlingId = spleisBehandlingId)
         nyttVarsel(kode = "EN_ANNEN_KODE", status = "INAKTIV", vedtaksperiodeId = PERIODE.id, spleisBehandlingId = spleisBehandlingId)
 
@@ -42,7 +42,7 @@ internal class PgVarselApiRepositoryTest: AbstractDBIntegrationTest() {
         opprettVarseldefinisjon(kode = "EN_TREDJE_KODE")
 
         val spleisBehandlingId2 = UUID.randomUUID()
-        opprettGenerasjon(spleisBehandlingId = spleisBehandlingId2)
+        opprettBehandling(spleisBehandlingId = spleisBehandlingId2)
         nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = PERIODE.id, spleisBehandlingId = spleisBehandlingId2)
         nyttVarsel(kode = "EN_ANNEN_KODE", vedtaksperiodeId = PERIODE.id, spleisBehandlingId = spleisBehandlingId2)
         nyttVarsel(kode = "EN_TREDJE_KODE", vedtaksperiodeId = PERIODE.id, spleisBehandlingId = spleisBehandlingId2, status = "INAKTIV")
@@ -121,7 +121,7 @@ internal class PgVarselApiRepositoryTest: AbstractDBIntegrationTest() {
         opprettArbeidsgiver()
         opprettVedtaksperiode(spleisBehandlingId = spleisBehandlingId)
         opprettVarseldefinisjon(definisjonId = definisjonId, kode = "EN_KODE")
-        opprettGenerasjon(vedtaksperiodeId = PERIODE.id, spleisBehandlingId = spleisBehandlingId)
+        opprettBehandling(vedtaksperiodeId = PERIODE.id, spleisBehandlingId = spleisBehandlingId)
         val generasjonId = finnGenerasjonId(spleisBehandlingId)
         assertNull(apiVarselRepository.erGodkjent("EN_KODE", generasjonId))
     }
@@ -134,7 +134,7 @@ internal class PgVarselApiRepositoryTest: AbstractDBIntegrationTest() {
         opprettArbeidsgiver()
         opprettVedtaksperiode(spleisBehandlingId = spleisBehandlingId)
         opprettVarseldefinisjon(definisjonId = definisjonId, kode = "EN_KODE")
-        opprettGenerasjon(vedtaksperiodeId = PERIODE.id, spleisBehandlingId = spleisBehandlingId)
+        opprettBehandling(vedtaksperiodeId = PERIODE.id, spleisBehandlingId = spleisBehandlingId)
         val generasjonId = finnGenerasjonId(spleisBehandlingId)
         assertNull(apiVarselRepository.erAktiv("EN_KODE", generasjonId))
     }

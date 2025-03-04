@@ -32,10 +32,10 @@ internal class PgLegacyBehandlingDaoTest : AbstractDBIntegrationTest() {
         opprettPerson()
         opprettArbeidsgiver()
         opprettVedtaksperiode(vedtaksperiodeId = vedtaksperiodeId1)
-        opprettGenerasjon(vedtaksperiodeId1, generasjonId1)
+        opprettBehandling(vedtaksperiodeId1, generasjonId1)
         opprettVedtaksperiode(vedtaksperiodeId = vedtaksperiodeId2)
-        opprettGenerasjon(vedtaksperiodeId2, generasjonId2)
-        opprettGenerasjon(vedtaksperiodeId2, generasjonId3)
+        opprettBehandling(vedtaksperiodeId2, generasjonId2)
+        opprettBehandling(vedtaksperiodeId2, generasjonId3)
 
         val vedtaksperiodeIder = generasjonDao.finnVedtaksperiodeIderFor(FNR)
         assertEquals(2, vedtaksperiodeIder.size)

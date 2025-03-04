@@ -16,7 +16,7 @@ class PgBehandlingRepositoryTest: AbstractDBIntegrationTest() {
         val tags = listOf("FOOBAR")
         opprettPerson()
         opprettArbeidsgiver()
-        opprettGenerasjon(spleisBehandlingId = spleisBehandlingId, tags = tags)
+        opprettBehandling(spleisBehandlingId = spleisBehandlingId, tags = tags)
 
         // when
         val funnet = repository.finn(SpleisBehandlingId(spleisBehandlingId))

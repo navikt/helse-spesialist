@@ -36,7 +36,7 @@ internal class PgGenerasjonApiDaoTest: AbstractDBIntegrationTest() {
         val nyFom = PERIODE.fom.plusDays(1)
         val nyTom = PERIODE.tom.plusDays(1)
         val spleisBehandlingId = UUID.randomUUID()
-        opprettGenerasjon(fom = nyFom, tom = nyTom, spleisBehandlingId = spleisBehandlingId)
+        opprettBehandling(fom = nyFom, tom = nyTom, spleisBehandlingId = spleisBehandlingId)
         oppdaterSkjæringstidspunkt(spleisBehandlingId, nyFom)
         opprettOppgave()
 
@@ -70,16 +70,16 @@ internal class PgGenerasjonApiDaoTest: AbstractDBIntegrationTest() {
 
         val v1 = UUID.randomUUID()
         opprettVedtaksperiode(vedtaksperiodeId = v1)
-        opprettGenerasjon(v1, fom = 1 jan 2018, tom = 31 jan 2018)
+        opprettBehandling(v1, fom = 1 jan 2018, tom = 31 jan 2018)
         val spleisBehandlingId1 = UUID.randomUUID()
-        opprettGenerasjon(v1, fom = 1 feb 2018, tom = 28 feb 2018, spleisBehandlingId = spleisBehandlingId1)
+        opprettBehandling(v1, fom = 1 feb 2018, tom = 28 feb 2018, spleisBehandlingId = spleisBehandlingId1)
         oppdaterSkjæringstidspunkt(spleisBehandlingId1, 1 feb 2018)
 
         val v2 = UUID.randomUUID()
         val periode2 = Periode(v2, LocalDate.now(), LocalDate.now())
         opprettVedtaksperiode(vedtaksperiodeId = periode2.id)
         val spleisBehandlingId2 = UUID.randomUUID()
-        opprettGenerasjon(v2, fom = 1 mar 2018, tom = 31 mar 2018, spleisBehandlingId = spleisBehandlingId2)
+        opprettBehandling(v2, fom = 1 mar 2018, tom = 31 mar 2018, spleisBehandlingId = spleisBehandlingId2)
         oppdaterSkjæringstidspunkt(spleisBehandlingId2, 1 mar 2018)
 
         val v3 = UUID.randomUUID()
