@@ -138,10 +138,19 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         testRapid.reset()
     }
 
-    @Test
-    fun `håndter totrinnsvurdering`() {
+    @ParameterizedTest
+    @CsvSource("Innvilget,INNVILGELSE", "DelvisInnvilget,DELVIS_INNVILGELSE", "Avslag,AVSLAG")
+    fun `håndter totrinnsvurdering med utfall innvilgelse basert på tags fra Spleis`(tag: String, utfall: VedtakBegrunnelseTypeFraDatabase) {
+        val fødselsnummer = lagFødselsnummer()
         val vedtaksperiodeId = UUID.randomUUID()
-        nyPerson(vedtaksperiodeId = vedtaksperiodeId)
+        val utbetalingId = UUID.randomUUID()
+        val spleisBehandlingId = UUID.randomUUID()
+        nyPerson(
+            fødselsnummer = fødselsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetalingId = utbetalingId,
+            spleisBehandlingId = spleisBehandlingId
+        )
         opprettTotrinnsvurdering(vedtaksperiodeId)
         opprettSaksbehandler()
         val saksbehandler = SaksbehandlerFraApi(
@@ -151,6 +160,61 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             SAKSBEHANDLER_IDENT,
             emptyList()
         )
+        sessionFactory.transactionalSessionScope { session ->
+            session.personRepository.brukPersonHvisFinnes(fødselsnummer = fødselsnummer) {
+                oppdaterPeriodeTilGodkjenning(
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    spleisBehandlingId = spleisBehandlingId,
+                    tags = listOf(tag),
+                    utbetalingId = utbetalingId,
+                )
+            }
+        }
+
+        val result =
+            mediator.håndterTotrinnsvurdering(oppgaveId, saksbehandler, ApiVedtakUtfall.INNVILGELSE, "Begrunnelse")
+
+        assertEquals(SendTilGodkjenningResult.Ok, result)
+        val totrinnsvurdering = sessionFactory.transactionalSessionScope { session ->
+            session.totrinnsvurderingRepository.finn(vedtaksperiodeId)
+        }
+        checkNotNull(totrinnsvurdering)
+        assertEquals(saksbehandler.oid, totrinnsvurdering.saksbehandler?.value)
+        assertTrue(totrinnsvurdering.erBeslutteroppgave)
+        assertVedtakBegrunnelse(expectedUtfall = utfall, expectedBegrunnelse = "Begrunnelse")
+    }
+
+    @Test
+    fun `håndter totrinnsvurdering når periode har vurdert varsel`() {
+        val fødselsnummer = lagFødselsnummer()
+        val vedtaksperiodeId = UUID.randomUUID()
+        val utbetalingId = UUID.randomUUID()
+        val spleisBehandlingId = UUID.randomUUID()
+        nyPerson(
+            fødselsnummer = fødselsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetalingId = utbetalingId,
+            spleisBehandlingId = spleisBehandlingId
+        )
+        opprettTotrinnsvurdering(vedtaksperiodeId)
+        opprettSaksbehandler()
+        val saksbehandler = SaksbehandlerFraApi(
+            SAKSBEHANDLER_OID,
+            SAKSBEHANDLER_NAVN,
+            SAKSBEHANDLER_EPOST,
+            SAKSBEHANDLER_IDENT,
+            emptyList()
+        )
+        sessionFactory.transactionalSessionScope { session ->
+            session.personRepository.brukPersonHvisFinnes(fødselsnummer = fødselsnummer) {
+                oppdaterPeriodeTilGodkjenning(
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    spleisBehandlingId = spleisBehandlingId,
+                    tags = listOf("Innvilget"),
+                    utbetalingId = utbetalingId,
+                )
+            }
+        }
         val definisjonRef = opprettVarseldefinisjon()
         nyttVarsel(
             vedtaksperiodeId = vedtaksperiodeId,
@@ -267,8 +331,16 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
 
     @Test
     fun `håndter totrinnsvurdering send i retur`() {
+        val fødselsnummer = lagFødselsnummer()
         val vedtaksperiodeId = UUID.randomUUID()
-        nyPerson(vedtaksperiodeId = vedtaksperiodeId)
+        val utbetalingId = UUID.randomUUID()
+        val spleisBehandlingId = UUID.randomUUID()
+        nyPerson(
+            fødselsnummer = fødselsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetalingId = utbetalingId,
+            spleisBehandlingId = spleisBehandlingId
+        )
         opprettTotrinnsvurdering(vedtaksperiodeId)
         opprettSaksbehandler()
         val saksbehandler = SaksbehandlerFraApi(
@@ -278,6 +350,16 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             SAKSBEHANDLER_IDENT,
             emptyList()
         )
+        sessionFactory.transactionalSessionScope { session ->
+            session.personRepository.brukPersonHvisFinnes(fødselsnummer = fødselsnummer) {
+                oppdaterPeriodeTilGodkjenning(
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    spleisBehandlingId = spleisBehandlingId,
+                    tags = listOf("Innvilget"),
+                    utbetalingId = utbetalingId,
+                )
+            }
+        }
         val definisjonRef = opprettVarseldefinisjon()
         nyttVarsel(
             vedtaksperiodeId = vedtaksperiodeId,
@@ -313,8 +395,16 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
 
     @Test
     fun `håndter totrinnsvurdering når periode har aktivt varsel`() {
+        val fødselsnummer = lagFødselsnummer()
         val vedtaksperiodeId = UUID.randomUUID()
-        nyPerson(vedtaksperiodeId = vedtaksperiodeId)
+        val utbetalingId = UUID.randomUUID()
+        val spleisBehandlingId = UUID.randomUUID()
+        nyPerson(
+            fødselsnummer = fødselsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetalingId = utbetalingId,
+            spleisBehandlingId = spleisBehandlingId
+        )
         opprettTotrinnsvurdering(vedtaksperiodeId)
         opprettSaksbehandler()
         val saksbehandler = SaksbehandlerFraApi(
@@ -330,6 +420,16 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             definisjonRef = definisjonRef,
             status = "AKTIV",
         )
+        sessionFactory.transactionalSessionScope { session ->
+            session.personRepository.brukPersonHvisFinnes(fødselsnummer = fødselsnummer) {
+                oppdaterPeriodeTilGodkjenning(
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    spleisBehandlingId = spleisBehandlingId,
+                    tags = listOf("Innvilget"),
+                    utbetalingId = utbetalingId,
+                )
+            }
+        }
 
         assertTrue(
             mediator.håndterTotrinnsvurdering(
@@ -343,8 +443,16 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
 
     @Test
     fun `håndter totrinnsvurdering når periode ikke har noen varsler`() {
+        val fødselsnummer = lagFødselsnummer()
         val vedtaksperiodeId = UUID.randomUUID()
-        nyPerson(vedtaksperiodeId = vedtaksperiodeId)
+        val utbetalingId = UUID.randomUUID()
+        val spleisBehandlingId = UUID.randomUUID()
+        nyPerson(
+            fødselsnummer = fødselsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetalingId = utbetalingId,
+            spleisBehandlingId = spleisBehandlingId
+        )
 
         opprettTotrinnsvurdering(vedtaksperiodeId)
         opprettSaksbehandler()
@@ -355,6 +463,16 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             SAKSBEHANDLER_IDENT,
             emptyList()
         )
+        sessionFactory.transactionalSessionScope { session ->
+            session.personRepository.brukPersonHvisFinnes(fødselsnummer = fødselsnummer) {
+                oppdaterPeriodeTilGodkjenning(
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    spleisBehandlingId = spleisBehandlingId,
+                    tags = listOf("Innvilget"),
+                    utbetalingId = utbetalingId,
+                )
+            }
+        }
 
         val result =
             mediator.håndterTotrinnsvurdering(oppgaveId, saksbehandler, ApiVedtakUtfall.INNVILGELSE, "Begrunnelse")
@@ -664,10 +782,14 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         )
 
         assertEquals(VedtakResultat.Ok(spleisBehandlingId = spleisBehandlingId), result)
+        assertVedtakBegrunnelse(expectedUtfall = utfall, expectedBegrunnelse = "En begrunnelse")
+    }
+
+    private fun assertVedtakBegrunnelse(expectedUtfall: VedtakBegrunnelseTypeFraDatabase, expectedBegrunnelse: String) {
         val vedtakBegrunnelse = daos.vedtakBegrunnelseDao.finnVedtakBegrunnelse(oppgaveId = oppgaveId)
         checkNotNull(vedtakBegrunnelse)
-        assertEquals(utfall, vedtakBegrunnelse.type)
-        assertEquals("En begrunnelse", vedtakBegrunnelse.tekst)
+        assertEquals(expectedUtfall, vedtakBegrunnelse.type)
+        assertEquals(expectedBegrunnelse, vedtakBegrunnelse.tekst)
     }
 
     // Eksperimentering med DSL for å lage testdata

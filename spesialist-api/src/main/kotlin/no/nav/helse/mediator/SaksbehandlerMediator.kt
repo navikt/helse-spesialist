@@ -630,87 +630,85 @@ class SaksbehandlerMediator(
         utfall: ApiVedtakUtfall,
         begrunnelse: String?,
     ): SendTilGodkjenningResult {
-        try {
-            val perioderTilBehandling = generasjonRepository.perioderTilBehandling(oppgavereferanse)
-            if (perioderTilBehandling.harAktiveVarsler()) {
-                return SendTilGodkjenningResult.Feil.ManglerVurderingAvVarsler(
-                    ManglerVurderingAvVarsler(
-                        oppgavereferanse,
-                    ),
-                )
+        return sessionFactory.transactionalSessionScope { sessionContext ->
+            try {
+                val perioderTilBehandling = generasjonRepository.perioderTilBehandling(oppgavereferanse)
+                if (perioderTilBehandling.harAktiveVarsler()) {
+                    return@transactionalSessionScope SendTilGodkjenningResult.Feil.ManglerVurderingAvVarsler(
+                        ManglerVurderingAvVarsler(
+                            oppgavereferanse,
+                        ),
+                    )
+                }
+            } catch (e: Exception) {
+                return@transactionalSessionScope SendTilGodkjenningResult.Feil.KunneIkkeFinnePerioderTilBehandling(e)
             }
-        } catch (e: Exception) {
-            return SendTilGodkjenningResult.Feil.KunneIkkeFinnePerioderTilBehandling(e)
-        }
 
-        try {
-            håndterVedtakBegrunnelse(
-                utfall =
-                    when (utfall) {
-                        ApiVedtakUtfall.AVSLAG -> Utfall.AVSLAG
-                        ApiVedtakUtfall.DELVIS_INNVILGELSE -> Utfall.DELVIS_INNVILGELSE
-                        ApiVedtakUtfall.INNVILGELSE -> Utfall.INNVILGELSE
-                    },
-                begrunnelse = begrunnelse,
-                oppgaveId = oppgavereferanse,
-                saksbehandlerOid = saksbehandlerFraApi.oid,
-            )
-        } catch (e: Exception) {
-            return SendTilGodkjenningResult.Feil.KunneIkkeHåndtereBegrunnelse(e)
-        }
+            val spleisBehandlingId = apiOppgaveService.spleisBehandlingId(oppgavereferanse)
+            try {
+                håndterVedtakBegrunnelse(
+                    utfall = hentUtfallFraBehandling(spleisBehandlingId, sessionContext),
+                    begrunnelse = begrunnelse,
+                    oppgaveId = oppgavereferanse,
+                    saksbehandlerOid = saksbehandlerFraApi.oid,
+                )
+            } catch (e: Exception) {
+                return@transactionalSessionScope SendTilGodkjenningResult.Feil.KunneIkkeHåndtereBegrunnelse(e)
+            }
 
-        try {
-            sessionFactory.transactionalSessionScope { session ->
-                val vedtaksperiodeId = oppgaveService.finnVedtaksperiodeId(oppgavereferanse)
-                val fødselsnummer = oppgaveService.finnFødselsnummer(oppgavereferanse)
-                val totrinnsvurdering =
-                    if (featureToggles.skalBenytteNyTotrinnsvurderingsløsning()) {
-                        session.totrinnsvurderingRepository.finn(fødselsnummer)
-                    } else {
-                        session.totrinnsvurderingRepository.finn(vedtaksperiodeId)
+            try {
+                sessionFactory.transactionalSessionScope { session ->
+                    val vedtaksperiodeId = oppgaveService.finnVedtaksperiodeId(oppgavereferanse)
+                    val fødselsnummer = oppgaveService.finnFødselsnummer(oppgavereferanse)
+                    val totrinnsvurdering =
+                        if (featureToggles.skalBenytteNyTotrinnsvurderingsløsning()) {
+                            session.totrinnsvurderingRepository.finn(fødselsnummer)
+                        } else {
+                            session.totrinnsvurderingRepository.finn(vedtaksperiodeId)
+                        }
+
+                    checkNotNull(totrinnsvurdering) {
+                        "Forventer at det eksisterer en aktiv totrinnsvurdering når oppgave sendes til beslutter"
                     }
 
-                checkNotNull(totrinnsvurdering) {
-                    "Forventer at det eksisterer en aktiv totrinnsvurdering når oppgave sendes til beslutter"
+                    val beslutter =
+                        totrinnsvurdering.beslutter?.let(session.saksbehandlerRepository::finn)
+                            ?.let(this::tilLegacySaksbehandler)
+                    apiOppgaveService.sendTilBeslutter(oppgavereferanse, beslutter)
+                    totrinnsvurdering.sendTilBeslutter(oppgavereferanse, SaksbehandlerOid(saksbehandlerFraApi.oid))
+                    session.totrinnsvurderingRepository.lagre(totrinnsvurdering, fødselsnummer)
                 }
-
-                val beslutter =
-                    totrinnsvurdering.beslutter?.let(session.saksbehandlerRepository::finn)
-                        ?.let(this::tilLegacySaksbehandler)
-                apiOppgaveService.sendTilBeslutter(oppgavereferanse, beslutter)
-                totrinnsvurdering.sendTilBeslutter(oppgavereferanse, SaksbehandlerOid(saksbehandlerFraApi.oid))
-                session.totrinnsvurderingRepository.lagre(totrinnsvurdering, fødselsnummer)
+            } catch (modellfeil: Modellfeil) {
+                return@transactionalSessionScope SendTilGodkjenningResult.Feil.KunneIkkeSendeTilBeslutter(modellfeil.tilApiversjon())
+            } catch (e: Exception) {
+                return@transactionalSessionScope SendTilGodkjenningResult.Feil.UventetFeilVedSendigTilBeslutter(e)
             }
-        } catch (modellfeil: Modellfeil) {
-            return SendTilGodkjenningResult.Feil.KunneIkkeSendeTilBeslutter(modellfeil.tilApiversjon())
-        } catch (e: Exception) {
-            return SendTilGodkjenningResult.Feil.UventetFeilVedSendigTilBeslutter(e)
+
+            try {
+                påVent(ApiPaVentRequest.ApiFjernPaVentUtenHistorikkinnslag(oppgavereferanse), saksbehandlerFraApi)
+            } catch (modellfeil: no.nav.helse.spesialist.api.feilhåndtering.Modellfeil) {
+                return@transactionalSessionScope SendTilGodkjenningResult.Feil.KunneIkkeFjerneFraPåVent(modellfeil)
+            } catch (e: Exception) {
+                return@transactionalSessionScope SendTilGodkjenningResult.Feil.UventetFeilVedFjernFraPåVent(e)
+            }
+
+            sikkerlogg.info(
+                "Oppgave med {} sendes til godkjenning av saksbehandler med {}",
+                StructuredArguments.kv("oppgaveId", oppgavereferanse),
+                StructuredArguments.kv("oid", saksbehandlerFraApi.oid),
+            )
+
+            try {
+                val innslag = Historikkinnslag.avventerTotrinnsvurdering(saksbehandlerFraApi.toDto())
+                periodehistorikkDao.lagreMedOppgaveId(innslag, oppgavereferanse)
+            } catch (e: Exception) {
+                return@transactionalSessionScope SendTilGodkjenningResult.Feil.UventetFeilVedOpprettingAvPeriodehistorikk(e)
+            }
+
+            log.info("OppgaveId $oppgavereferanse sendt til godkjenning")
+
+            return@transactionalSessionScope SendTilGodkjenningResult.Ok
         }
-
-        try {
-            påVent(ApiPaVentRequest.ApiFjernPaVentUtenHistorikkinnslag(oppgavereferanse), saksbehandlerFraApi)
-        } catch (modellfeil: no.nav.helse.spesialist.api.feilhåndtering.Modellfeil) {
-            return SendTilGodkjenningResult.Feil.KunneIkkeFjerneFraPåVent(modellfeil)
-        } catch (e: Exception) {
-            return SendTilGodkjenningResult.Feil.UventetFeilVedFjernFraPåVent(e)
-        }
-
-        sikkerlogg.info(
-            "Oppgave med {} sendes til godkjenning av saksbehandler med {}",
-            StructuredArguments.kv("oppgaveId", oppgavereferanse),
-            StructuredArguments.kv("oid", saksbehandlerFraApi.oid),
-        )
-
-        try {
-            val innslag = Historikkinnslag.avventerTotrinnsvurdering(saksbehandlerFraApi.toDto())
-            periodehistorikkDao.lagreMedOppgaveId(innslag, oppgavereferanse)
-        } catch (e: Exception) {
-            return SendTilGodkjenningResult.Feil.UventetFeilVedOpprettingAvPeriodehistorikk(e)
-        }
-
-        log.info("OppgaveId $oppgavereferanse sendt til godkjenning")
-
-        return SendTilGodkjenningResult.Ok
     }
 
     private fun tilLegacySaksbehandler(saksbehandler: no.nav.helse.spesialist.domain.Saksbehandler): LegacySaksbehandler =
