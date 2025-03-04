@@ -111,15 +111,18 @@ class OppgaveService(
         }
     }
 
+    // Sørger for at vi alltid bruker den aktive oppgaven, i tilfelle saksbehandler har utdaterte data når de forsøker å utføre handlingen
+    private fun finnAktivOppgaveId(oppgaveId: Long): Long? {
+        return oppgaveDao.finnVedtaksperiodeId(oppgaveId).let { oppgaveDao.finnIdForAktivOppgave(it) }
+    }
+
     fun leggPåVent(
         handling: LeggPåVent,
         legacySaksbehandler: LegacySaksbehandler,
     ) {
-        oppgaveDao.finnVedtaksperiodeId(handling.oppgaveId).also {
-            oppgaveDao.finnIdForAktivOppgave(it)?.also { oppgaveId ->
-                oppgave(oppgaveId) {
-                    this.leggPåVent(handling.skalTildeles, legacySaksbehandler)
-                }
+        finnAktivOppgaveId(handling.oppgaveId)?.let { oppgaveId ->
+            oppgave(oppgaveId) {
+                this.leggPåVent(handling.skalTildeles, legacySaksbehandler)
             }
         }
     }
@@ -128,21 +131,17 @@ class OppgaveService(
         handling: EndrePåVent,
         legacySaksbehandler: LegacySaksbehandler,
     ) {
-        oppgaveDao.finnVedtaksperiodeId(handling.oppgaveId).also {
-            oppgaveDao.finnIdForAktivOppgave(it)?.also { oppgaveId ->
-                oppgave(oppgaveId) {
-                    this.endrePåVent(handling.skalTildeles, legacySaksbehandler)
-                }
+        finnAktivOppgaveId(handling.oppgaveId)?.let { oppgaveId ->
+            oppgave(oppgaveId) {
+                this.endrePåVent(handling.skalTildeles, legacySaksbehandler)
             }
         }
     }
 
     fun fjernFraPåVent(oppgaveId: Long) {
-        oppgaveDao.finnVedtaksperiodeId(oppgaveId).also {
-            oppgaveDao.finnIdForAktivOppgave(it)?.also { aktivOppgaveId ->
-                oppgave(aktivOppgaveId) {
-                    this.fjernFraPåVent()
-                }
+        finnAktivOppgaveId(oppgaveId)?.let { aktivOppgaveId ->
+            oppgave(aktivOppgaveId) {
+                this.fjernFraPåVent()
             }
         }
     }
