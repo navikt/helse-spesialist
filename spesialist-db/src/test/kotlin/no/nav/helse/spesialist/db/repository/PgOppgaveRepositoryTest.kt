@@ -4,11 +4,11 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.db.EgenskapForDatabase
-import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OppgaveFraDatabase
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Oppgave
+import no.nav.helse.spesialist.db.dao.PgOppgaveDao
 import no.nav.helse.spesialist.db.lagEpostadresseFraFulltNavn
 import no.nav.helse.spesialist.db.lagSaksbehandlerident
 import no.nav.helse.spesialist.db.lagSaksbehandlernavn
@@ -35,7 +35,7 @@ class PgOppgaveRepositoryTest {
 
     private val godkjenningsbehovId: UUID = UUID.randomUUID()
 
-    private val oppgaveDaoMock = mockk<OppgaveDao>(relaxed = true)
+    private val oppgaveDaoMock = mockk<PgOppgaveDao>(relaxed = true)
     private val tildelingDaoMock = mockk<TildelingDao>(relaxed = true)
 
     @Test
