@@ -14,7 +14,7 @@ class PgTildelingDao private constructor(queryRunner: QueryRunner) : TildelingDa
     internal constructor(session: Session) : this(MedSession(session))
     internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
-    override fun tildel(
+    fun tildel(
         oppgaveId: Long,
         saksbehandlerOid: UUID,
     ) {
@@ -28,7 +28,7 @@ class PgTildelingDao private constructor(queryRunner: QueryRunner) : TildelingDa
         ).update()
     }
 
-    override fun avmeld(oppgaveId: Long) {
+    fun avmeld(oppgaveId: Long) {
         asSQL(
             """
             DELETE FROM tildeling WHERE oppgave_id_ref = :oppgave_id

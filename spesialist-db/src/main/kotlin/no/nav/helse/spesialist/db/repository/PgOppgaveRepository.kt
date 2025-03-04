@@ -1,16 +1,18 @@
 package no.nav.helse.spesialist.db.repository
 
 import no.nav.helse.db.EgenskapForDatabase
-import no.nav.helse.db.TildelingDao
 import no.nav.helse.mediator.oppgave.OppgaveRepository
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.spesialist.db.dao.PgOppgaveDao
+import no.nav.helse.spesialist.db.dao.PgTildelingDao
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 
-class PgOppgaveRepository(private val oppgaveDao: PgOppgaveDao, private val tildelingDao: TildelingDao) :
-    OppgaveRepository {
+class PgOppgaveRepository(
+    private val oppgaveDao: PgOppgaveDao,
+    private val tildelingDao: PgTildelingDao,
+) : OppgaveRepository {
     override fun lagre(oppgave: Oppgave) {
         oppgaveDao.opprettOppgave(
             id = oppgave.id,

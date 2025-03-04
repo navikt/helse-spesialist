@@ -8,10 +8,7 @@ import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.Daos
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OpptegnelseDao
-import no.nav.helse.db.Reservasjon
 import no.nav.helse.db.ReservasjonDao
-import no.nav.helse.db.SaksbehandlerFraDatabase
-import no.nav.helse.db.TildelingDao
 import no.nav.helse.mediator.KommandokjedeEndretEvent
 import no.nav.helse.mediator.oppgave.OppgaveRepository
 import no.nav.helse.mediator.oppgave.OppgaveService
@@ -45,7 +42,6 @@ internal class OppgaveServiceTest {
 
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
     private val daos = mockk<Daos>(relaxed = true)
-    private val tildelingDao = mockk<TildelingDao>(relaxed = true)
     private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
     private val opptegnelseDao = mockk<OpptegnelseDao>(relaxed = true)
     private val oppgaveRepository = mockk<OppgaveRepository>(relaxed = true)
@@ -81,8 +77,6 @@ internal class OppgaveServiceTest {
             daos = daos,
             oppgaveRepository = oppgaveRepository
         )
-    private val saksbehandlerFraDatabase =
-        SaksbehandlerFraDatabase(SAKSBEHANDLEREPOST, SAKSBEHANDLEROID, SAKSBEHANDLERNAVN, SAKSBEHANDLERIDENT)
 
     private fun lagSøknadsoppgave(
         fødselsnummer: String,
@@ -114,7 +108,7 @@ internal class OppgaveServiceTest {
 
     @BeforeEach
     fun setup() {
-        clearMocks(oppgaveDao, tildelingDao, opptegnelseDao)
+        clearMocks(oppgaveDao, opptegnelseDao)
     }
 
     @Test
@@ -140,17 +134,6 @@ internal class OppgaveServiceTest {
             )
         }
         assertEquals(1, meldingPubliserer.antallMeldinger)
-    }
-
-    @Test
-    fun `tildeler ikke reservert personen når oppgave er stikkprøve`() {
-        val fødselsnummer = lagFødselsnummer()
-        val oppgaveId = 0L
-        every { oppgaveDao.reserverNesteId() } returns oppgaveId
-        every { reservasjonDao.hentReservasjonFor(fødselsnummer) } returns Reservasjon(saksbehandlerFraDatabase)
-        every { oppgaveDao.finnFødselsnummer(oppgaveId) } returns fødselsnummer
-        lagStikkprøveoppgave(fødselsnummer)
-        verify(exactly = 0) { tildelingDao.tildel(any(), any()) }
     }
 
     @Test
