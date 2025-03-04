@@ -53,7 +53,7 @@ class PgOppgaveDao internal constructor(
             it.long("oppgaveId")
         }
 
-    override fun finnOppgave(id: Long): OppgaveFraDatabase? =
+    fun finnOppgave(id: Long): OppgaveFraDatabase? =
         asSQL(
             """
             SELECT o.egenskaper, o.status, v.vedtaksperiode_id, o.behandling_id, o.hendelse_id_godkjenningsbehov, o.ferdigstilt_av, o.ferdigstilt_av_oid, o.utbetaling_id, s.navn, s.epost, s.ident, s.oid, o.kan_avvises
@@ -423,11 +423,11 @@ class PgOppgaveDao internal constructor(
             it.string("fødselsnummer")
         }
 
-    override fun updateOppgave(
+    fun updateOppgave(
         oppgaveId: Long,
         oppgavestatus: String,
-        ferdigstiltAv: String?,
-        oid: UUID?,
+        ferdigstiltAv: String? = null,
+        oid: UUID? = null,
         egenskaper: List<EgenskapForDatabase>,
     ): Int =
         asSQL(
@@ -567,7 +567,7 @@ class PgOppgaveDao internal constructor(
             it.long("id")
         }
 
-    override fun opprettOppgave(
+    fun opprettOppgave(
         id: Long,
         godkjenningsbehovId: UUID,
         egenskaper: List<EgenskapForDatabase>,

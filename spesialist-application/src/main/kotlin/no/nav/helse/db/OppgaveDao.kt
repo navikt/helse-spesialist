@@ -9,8 +9,6 @@ interface OppgaveDao {
 
     fun finnGenerasjonId(oppgaveId: Long): UUID
 
-    fun finnOppgave(id: Long): OppgaveFraDatabase?
-
     fun finnOppgaveId(fødselsnummer: String): Long?
 
     fun finnOppgaveId(utbetalingId: UUID): Long?
@@ -60,25 +58,7 @@ interface OppgaveDao {
 
     fun finnIdForAktivOppgave(vedtaksperiodeId: UUID): Long?
 
-    fun opprettOppgave(
-        id: Long,
-        godkjenningsbehovId: UUID,
-        egenskaper: List<EgenskapForDatabase>,
-        vedtaksperiodeId: UUID,
-        behandlingId: UUID,
-        utbetalingId: UUID,
-        kanAvvises: Boolean,
-    )
-
     fun finnFødselsnummer(oppgaveId: Long): String
-
-    fun updateOppgave(
-        oppgaveId: Long,
-        oppgavestatus: String,
-        ferdigstiltAv: String? = null,
-        oid: UUID? = null,
-        egenskaper: List<EgenskapForDatabase>,
-    ): Int
 
     fun harFerdigstiltOppgave(vedtaksperiodeId: UUID): Boolean
 
