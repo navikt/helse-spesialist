@@ -13,14 +13,14 @@ class BehandlingTest {
 
     @ParameterizedTest()
     @MethodSource("utfallGittTagsSource")
-    fun `utfall gitt tags`(tags: Set<String>, expected: Utfall) {
+    fun `tags gir utfall`(tags: Set<String>, expected: Utfall) {
         val behandling = Behandling.fraLagring(SpleisBehandlingId(UUID.randomUUID()), tags = tags)
         assertEquals(expected, behandling.utfall())
     }
 
     @ParameterizedTest
     @MethodSource("exceptionGittTagsSource")
-    fun `exception gitt tags`(tags: Set<String>) {
+    fun `tags gir exception`(tags: Set<String>) {
         val behandling = Behandling.fraLagring(SpleisBehandlingId(UUID.randomUUID()), tags = tags)
         assertThrows<IllegalStateException> {
             behandling.utfall()
