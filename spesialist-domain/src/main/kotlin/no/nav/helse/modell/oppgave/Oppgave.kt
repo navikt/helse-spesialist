@@ -24,12 +24,13 @@ class Oppgave private constructor(
     val utbetalingId: UUID,
     val godkjenningsbehovId: UUID,
     val kanAvvises: Boolean,
-    ferdigstiltAvIdent: String? = null,
-    ferdigstiltAvOid: UUID? = null,
-    val egenskaper: MutableSet<Egenskap> = mutableSetOf(),
-    tildeltTil: LegacySaksbehandler? = null,
+    ferdigstiltAvIdent: String?,
+    ferdigstiltAvOid: UUID?,
+    egenskaper: Set<Egenskap>,
+    tildeltTil: LegacySaksbehandler?,
 ) {
     private val observers = mutableListOf<OppgaveObserver>()
+    private val _egenskaper = egenskaper.toMutableSet()
 
     var ferdigstiltAvOid = ferdigstiltAvOid
         private set
@@ -41,6 +42,8 @@ class Oppgave private constructor(
 
     var tildeltTil: LegacySaksbehandler? = tildeltTil
         private set
+
+    val egenskaper: Set<Egenskap> get() = _egenskaper.toSet()
 
     fun register(observer: OppgaveObserver) {
         observers.add(observer)
@@ -74,7 +77,7 @@ class Oppgave private constructor(
     fun forsøkTildelingVedReservasjon(legacySaksbehandler: LegacySaksbehandler) {
         logg.info("Oppgave med {} forsøkes tildelt grunnet reservasjon.", kv("oppgaveId", id))
         sikkerlogg.info("Oppgave med {} forsøkes tildelt $legacySaksbehandler grunnet reservasjon.", kv("oppgaveId", id))
-        if (egenskaper.contains(STIKKPRØVE)) {
+        if (_egenskaper.contains(STIKKPRØVE)) {
             logg.info("Oppgave med {} er stikkprøve og tildeles ikke på tross av reservasjon.", kv("oppgaveId", id))
             return
         }
@@ -82,36 +85,36 @@ class Oppgave private constructor(
     }
 
     fun sendTilBeslutter(beslutter: LegacySaksbehandler?) {
-        egenskaper.remove(RETUR)
-        egenskaper.add(BESLUTTER)
+        _egenskaper.remove(RETUR)
+        _egenskaper.add(BESLUTTER)
         tildeltTil = beslutter
         oppgaveEndret()
     }
 
     fun sendIRetur(opprinneligLegacySaksbehandler: LegacySaksbehandler) {
-        egenskaper.remove(BESLUTTER)
-        egenskaper.add(RETUR)
+        _egenskaper.remove(BESLUTTER)
+        _egenskaper.add(RETUR)
         tildeltTil = opprinneligLegacySaksbehandler
         oppgaveEndret()
     }
 
     fun leggTilEgenAnsatt() {
-        egenskaper.add(EGEN_ANSATT)
+        _egenskaper.add(EGEN_ANSATT)
         oppgaveEndret()
     }
 
     fun fjernEgenAnsatt() {
-        egenskaper.remove(EGEN_ANSATT)
+        _egenskaper.remove(EGEN_ANSATT)
         oppgaveEndret()
     }
 
     fun fjernTilbakedatert() {
-        egenskaper.remove(TILBAKEDATERT)
+        _egenskaper.remove(TILBAKEDATERT)
         oppgaveEndret()
     }
 
     fun fjernGosys() {
-        if (egenskaper.remove(GOSYS)) {
+        if (_egenskaper.remove(GOSYS)) {
             logg.info(
                 "Fjerner egenskap GOSYS på {} for {}",
                 kv("oppgaveId", id),
@@ -122,7 +125,7 @@ class Oppgave private constructor(
     }
 
     fun leggTilGosys() {
-        if (egenskaper.add(GOSYS)) {
+        if (_egenskaper.add(GOSYS)) {
             logg.info(
                 "Legger til egenskap GOSYS på {} for {}",
                 kv("oppgaveId", id),
@@ -142,7 +145,7 @@ class Oppgave private constructor(
         if (this.tildeltTil?.oid != null && !skalTildeles) {
             avmeld(legacySaksbehandler)
         }
-        egenskaper.add(PÅ_VENT)
+        _egenskaper.add(PÅ_VENT)
         oppgaveEndret()
     }
 
@@ -160,7 +163,7 @@ class Oppgave private constructor(
     }
 
     fun fjernFraPåVent() {
-        egenskaper.remove(PÅ_VENT)
+        _egenskaper.remove(PÅ_VENT)
         oppgaveEndret()
     }
 
@@ -280,7 +283,7 @@ class Oppgave private constructor(
             oppgave: Oppgave,
             legacySaksbehandler: LegacySaksbehandler,
         ) {
-            val tilgangsstyrteEgenskaper = oppgave.egenskaper.tilgangsstyrteEgenskaper()
+            val tilgangsstyrteEgenskaper = oppgave._egenskaper.tilgangsstyrteEgenskaper()
             if (tilgangsstyrteEgenskaper.isNotEmpty() && !legacySaksbehandler.harTilgangTil(tilgangsstyrteEgenskaper)) {
                 logg.info(
                     "Oppgave med {} har egenskaper som saksbehandler med {} ikke har tilgang til å behandle.",
@@ -317,7 +320,7 @@ class Oppgave private constructor(
     override fun equals(other: Any?): Boolean {
         if (other !is Oppgave) return false
         if (this.id != other.id) return false
-        return this.egenskaper.toSet() == other.egenskaper.toSet() &&
+        return this.egenskaper == other.egenskaper &&
             this.vedtaksperiodeId == other.vedtaksperiodeId
     }
 
@@ -352,7 +355,10 @@ class Oppgave private constructor(
             utbetalingId = utbetalingId,
             godkjenningsbehovId = hendelseId,
             kanAvvises = kanAvvises,
-            egenskaper = egenskaper.toMutableSet(),
+            egenskaper = egenskaper,
+            ferdigstiltAvIdent = null,
+            ferdigstiltAvOid = null,
+            tildeltTil = null,
         )
 
         fun fraLagring(
@@ -366,7 +372,7 @@ class Oppgave private constructor(
             ferdigstiltAvOid: UUID?,
             ferdigstiltAvIdent: String?,
             tildeltTil: LegacySaksbehandler?,
-            egenskaper: MutableSet<Egenskap>,
+            egenskaper: Set<Egenskap>,
         ) = Oppgave(
             id = id,
             tilstand = tilstand,
