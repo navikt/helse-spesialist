@@ -160,7 +160,6 @@ class SaksbehandlerMediator(
     fun vedtak(
         saksbehandlerFraApi: SaksbehandlerFraApi,
         oppgavereferanse: Long,
-        utfall: ApiVedtakUtfall,
         begrunnelse: String?,
     ): VedtakResultat =
         sessionFactory.transactionalSessionScope { sessionContext ->

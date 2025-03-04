@@ -9,7 +9,7 @@ interface VedtakMutationSchema : Mutation {
     fun fattVedtak(
         oppgavereferanse: String,
         env: DataFetchingEnvironment,
-        utfall: ApiVedtakUtfall,
+        utfall: ApiVedtakUtfall? = null,
         begrunnelse: String? = null,
     ): DataFetcherResult<Boolean>
 

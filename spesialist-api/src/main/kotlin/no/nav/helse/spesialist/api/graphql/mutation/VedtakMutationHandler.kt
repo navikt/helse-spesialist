@@ -28,7 +28,7 @@ class VedtakMutationHandler(
     override fun fattVedtak(
         oppgavereferanse: String,
         env: DataFetchingEnvironment,
-        utfall: ApiVedtakUtfall,
+        utfall: ApiVedtakUtfall?,
         begrunnelse: String?,
     ): DataFetcherResult<Boolean> {
         val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
@@ -38,7 +38,6 @@ class VedtakMutationHandler(
             saksbehandlerMediator.vedtak(
                 saksbehandlerFraApi = saksbehandler,
                 oppgavereferanse = oppgavereferanse.toLong(),
-                utfall = utfall,
                 begrunnelse = begrunnelse,
             )
         return when (resultat) {

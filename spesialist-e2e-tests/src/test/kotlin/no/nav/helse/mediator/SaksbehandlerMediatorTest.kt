@@ -660,7 +660,6 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         val result = mediator.vedtak(
             saksbehandlerFraApi = saksbehandler,
             oppgavereferanse = oppgaveId,
-            utfall = ApiVedtakUtfall.AVSLAG,
             begrunnelse = "En begrunnelse",
         )
 
