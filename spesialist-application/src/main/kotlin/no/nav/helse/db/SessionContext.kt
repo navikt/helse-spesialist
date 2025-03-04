@@ -46,4 +46,5 @@ interface SessionContext {
     val saksbehandlerRepository: SaksbehandlerRepository
     val avviksvurderingRepository: AvviksvurderingRepository
     val oppgaveRepository: OppgaveRepository
+    val behandlingRepository: BehandlingRepository
 }
