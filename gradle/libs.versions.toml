@@ -60,7 +60,7 @@ testcontainers-kafka = { module = "org.testcontainers:kafka", version.ref = "tes
 testcontainers-postgres = { module = "org.testcontainers:postgresql", version.ref = "testcontainers" }
 
 unleash-client = "io.getunleash:unleash-client-java:10.0.2"
-wiremock = "org.wiremock:wiremock-jetty12:3.12.0"
+wiremock = "org.wiremock:wiremock-jetty12:3.12.1"
 
 [bundles]
 flyway-postgres = [
