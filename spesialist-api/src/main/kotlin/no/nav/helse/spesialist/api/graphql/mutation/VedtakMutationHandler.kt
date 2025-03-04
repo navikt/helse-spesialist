@@ -38,7 +38,6 @@ class VedtakMutationHandler(
             saksbehandlerMediator.vedtak(
                 saksbehandlerFraApi = saksbehandler,
                 oppgavereferanse = oppgavereferanse.toLong(),
-                godkjent = true,
                 utfall = utfall,
                 begrunnelse = begrunnelse,
             )
@@ -80,7 +79,6 @@ class VedtakMutationHandler(
             saksbehandlerMediator.infotrygdVedtak(
                 saksbehandlerFraApi = saksbehandler,
                 oppgavereferanse = oppgavereferanse.toLong(),
-                godkjent = false,
             )
         return when (resultat) {
             is VedtakResultat.Ok -> {

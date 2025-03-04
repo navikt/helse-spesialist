@@ -157,32 +157,55 @@ class SaksbehandlerMediator(
     fun vedtak(
         saksbehandlerFraApi: SaksbehandlerFraApi,
         oppgavereferanse: Long,
-        godkjent: Boolean,
         utfall: ApiVedtakUtfall,
         begrunnelse: String?,
-    ): VedtakResultat {
-        val legacySaksbehandler =
-            saksbehandlerFraApi.tilSaksbehandler().tilLegacySaksbehandler(saksbehandlerFraApi.grupper)
-        return vedtak(oppgavereferanse, legacySaksbehandler, godkjent).also {
-            håndterVedtakBegrunnelse(
-                utfall = utfall,
-                begrunnelse = begrunnelse,
-                oppgaveId = oppgavereferanse,
-                saksbehandlerOid = legacySaksbehandler.oid(),
-            )
+    ): VedtakResultat =
+        sessionFactory.transactionalSessionScope { sessionContext ->
+            val legacySaksbehandler =
+                saksbehandlerFraApi.tilSaksbehandler().tilLegacySaksbehandler(saksbehandlerFraApi.grupper)
+            val spleisBehandlingId = apiOppgaveService.spleisBehandlingId(oppgavereferanse)
+            val vedtaksperiodeId = oppgaveService.finnVedtaksperiodeId(oppgavereferanse)
+            val fødselsnummer = oppgaveApiDao.finnFødselsnummer(oppgavereferanse)
+            if (!apiOppgaveService.venterPåSaksbehandler(oppgavereferanse)) {
+                VedtakResultat.Feil.IkkeÅpenOppgave()
+            } else {
+                håndterTotrinnsvurderingBeslutning(
+                    fødselsnummer = fødselsnummer,
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    legacySaksbehandler = legacySaksbehandler,
+                    totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository,
+                ) ?: håndterGodkjenning(oppgavereferanse, fødselsnummer, spleisBehandlingId, legacySaksbehandler).also {
+                    håndterVedtakBegrunnelse(
+                        utfall = utfall,
+                        begrunnelse = begrunnelse,
+                        oppgaveId = oppgavereferanse,
+                        saksbehandlerOid = legacySaksbehandler.oid(),
+                    )
+                }
+            }
         }
-    }
 
     fun infotrygdVedtak(
         saksbehandlerFraApi: SaksbehandlerFraApi,
         oppgavereferanse: Long,
-        godkjent: Boolean,
     ): VedtakResultat =
-        vedtak(
-            oppgavereferanse,
-            saksbehandlerFraApi.tilSaksbehandler().tilLegacySaksbehandler(saksbehandlerFraApi.grupper),
-            godkjent,
-        )
+        sessionFactory.transactionalSessionScope { sessionContext ->
+            val legacySaksbehandler =
+                saksbehandlerFraApi.tilSaksbehandler().tilLegacySaksbehandler(saksbehandlerFraApi.grupper)
+            val spleisBehandlingId = apiOppgaveService.spleisBehandlingId(oppgavereferanse)
+            val vedtaksperiodeId = oppgaveService.finnVedtaksperiodeId(oppgavereferanse)
+            val fødselsnummer = oppgaveApiDao.finnFødselsnummer(oppgavereferanse)
+            if (!apiOppgaveService.venterPåSaksbehandler(oppgavereferanse)) {
+                VedtakResultat.Feil.IkkeÅpenOppgave()
+            } else {
+                håndterTotrinnsvurderingBeslutning(
+                    fødselsnummer = fødselsnummer,
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    legacySaksbehandler = legacySaksbehandler,
+                    totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository,
+                ) ?: håndterAvvisning(oppgavereferanse, fødselsnummer, spleisBehandlingId, legacySaksbehandler)
+            }
+        }
 
     private fun eksisterendeTotrinnsvurdering(
         vedtaksperiodeId: UUID,
@@ -196,59 +219,71 @@ class SaksbehandlerMediator(
         }
     }
 
-    private fun vedtak(
+    private fun håndterAvvisning(
         oppgavereferanse: Long,
+        fødselsnummer: String,
+        spleisBehandlingId: UUID,
         legacySaksbehandler: LegacySaksbehandler,
-        godkjent: Boolean,
+    ): VedtakResultat.Ok {
+        val periodeTilGodkjenning = generasjonRepository.periodeTilGodkjenning(oppgavereferanse)
+        periodeTilGodkjenning.avvisVarsler(
+            fødselsnummer = fødselsnummer,
+            behandlingId = spleisBehandlingId,
+            ident = legacySaksbehandler.ident(),
+            godkjenner = this::vurderVarsel,
+        )
+
+        påVentDao.slettPåVent(oppgavereferanse)
+        return VedtakResultat.Ok(spleisBehandlingId)
+    }
+
+    private fun håndterGodkjenning(
+        oppgavereferanse: Long,
+        fødselsnummer: String,
+        spleisBehandlingId: UUID,
+        legacySaksbehandler: LegacySaksbehandler,
     ): VedtakResultat {
-        val erÅpenOppgave = apiOppgaveService.venterPåSaksbehandler(oppgavereferanse)
-        val spleisBehandlingId = apiOppgaveService.spleisBehandlingId(oppgavereferanse)
-        val vedtaksperiodeId = oppgaveService.finnVedtaksperiodeId(oppgavereferanse)
-        val fødselsnummer = oppgaveApiDao.finnFødselsnummer(oppgavereferanse)
-        if (!erÅpenOppgave) return VedtakResultat.Feil.IkkeÅpenOppgave()
-
-        return sessionFactory.transactionalSessionScope { sessionContext ->
-            val totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository
-            val totrinnsvurdering =
-                eksisterendeTotrinnsvurdering(vedtaksperiodeId, fødselsnummer, totrinnsvurderingRepository)
-            if (totrinnsvurdering?.erBeslutteroppgave == true) {
-                if (!legacySaksbehandler.harTilgangTil(listOf(Egenskap.BESLUTTER)) && !env.erDev) {
-                    return@transactionalSessionScope VedtakResultat.Feil.BeslutterFeil.TrengerBeslutterRolle()
-                }
-                if (totrinnsvurdering.saksbehandler?.value == legacySaksbehandler.oid && !env.erDev) {
-                    return@transactionalSessionScope VedtakResultat.Feil.BeslutterFeil.KanIkkeBeslutteEgenOppgave()
-                }
-                totrinnsvurdering.settBeslutter(SaksbehandlerOid(legacySaksbehandler.oid))
-                totrinnsvurderingRepository.lagre(totrinnsvurdering, fødselsnummer)
-            }
-
-            if (godkjent) {
-                val perioderTilBehandling = generasjonRepository.perioderTilBehandling(oppgavereferanse)
-                if (perioderTilBehandling.harAktiveVarsler()) {
-                    return@transactionalSessionScope VedtakResultat.Feil.HarAktiveVarsler(
-                        oppgavereferanse,
-                    )
-                }
-
-                perioderTilBehandling.godkjennVarsler(
-                    fødselsnummer = fødselsnummer,
-                    behandlingId = spleisBehandlingId,
-                    ident = legacySaksbehandler.ident(),
-                    godkjenner = this::vurderVarsel,
-                )
-            } else {
-                val periodeTilGodkjenning = generasjonRepository.periodeTilGodkjenning(oppgavereferanse)
-                periodeTilGodkjenning.avvisVarsler(
-                    fødselsnummer = fødselsnummer,
-                    behandlingId = spleisBehandlingId,
-                    ident = legacySaksbehandler.ident(),
-                    godkjenner = this::vurderVarsel,
-                )
-            }
+        val perioderTilBehandling = generasjonRepository.perioderTilBehandling(oppgavereferanse)
+        return if (perioderTilBehandling.harAktiveVarsler()) {
+            VedtakResultat.Feil.HarAktiveVarsler(
+                oppgavereferanse,
+            )
+        } else {
+            perioderTilBehandling.godkjennVarsler(
+                fødselsnummer = fødselsnummer,
+                behandlingId = spleisBehandlingId,
+                ident = legacySaksbehandler.ident(),
+                godkjenner = this::vurderVarsel,
+            )
 
             påVentDao.slettPåVent(oppgavereferanse)
-            return@transactionalSessionScope VedtakResultat.Ok(spleisBehandlingId)
+            VedtakResultat.Ok(spleisBehandlingId)
         }
+    }
+
+    private fun håndterTotrinnsvurderingBeslutning(
+        fødselsnummer: String,
+        vedtaksperiodeId: UUID,
+        legacySaksbehandler: LegacySaksbehandler,
+        totrinnsvurderingRepository: TotrinnsvurderingRepository,
+    ): VedtakResultat.Feil.BeslutterFeil? {
+        val totrinnsvurdering =
+            eksisterendeTotrinnsvurdering(vedtaksperiodeId, fødselsnummer, totrinnsvurderingRepository)
+        val feil =
+            if (totrinnsvurdering?.erBeslutteroppgave == true) {
+                if (!legacySaksbehandler.harTilgangTil(listOf(Egenskap.BESLUTTER)) && !env.erDev) {
+                    VedtakResultat.Feil.BeslutterFeil.TrengerBeslutterRolle()
+                } else if (totrinnsvurdering.saksbehandler?.value == legacySaksbehandler.oid && !env.erDev) {
+                    VedtakResultat.Feil.BeslutterFeil.KanIkkeBeslutteEgenOppgave()
+                } else {
+                    totrinnsvurdering.settBeslutter(SaksbehandlerOid(legacySaksbehandler.oid))
+                    totrinnsvurderingRepository.lagre(totrinnsvurdering, fødselsnummer)
+                    null
+                }
+            } else {
+                null
+            }
+        return feil
     }
 
     fun påVent(
