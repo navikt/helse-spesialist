@@ -5,6 +5,7 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.helse.FeatureToggles
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.db.VedtakBegrunnelseDao
 import no.nav.helse.db.api.ArbeidsgiverApiDao
@@ -70,6 +71,7 @@ class PersonService(
     private val reservasjonshenter: Reservasjonshenter,
     private val sessionFactory: SessionFactory,
     private val vedtakBegrunnelseDao: VedtakBegrunnelseDao,
+    private val featureToggles: FeatureToggles,
 ) : PersonoppslagService {
     private companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
@@ -106,13 +108,14 @@ class PersonService(
                 is HentSnapshotResult.Ok -> snapshotResult.snapshot
             }
 
-        return person(fødselsnummer, snapshot, reservasjon)
+        return person(fødselsnummer, snapshot, reservasjon, featureToggles)
     }
 
     private suspend fun person(
         fødselsnummer: String,
         snapshot: Pair<ApiPersoninfo, SnapshotPerson>,
         reservasjon: Deferred<ReservasjonDto?>,
+        featureToggles: FeatureToggles,
     ): FetchPersonResult.Ok {
         val (personinfo, personSnapshot) = snapshot
         return FetchPersonResult.Ok(
@@ -142,6 +145,7 @@ class PersonService(
                         saksbehandlerMediator = saksbehandlerMediator,
                         sessionFactory = sessionFactory,
                         vedtakBegrunnelseDao = vedtakBegrunnelseDao,
+                        featureToggles = featureToggles,
                     ),
             ),
         )

@@ -5,6 +5,7 @@ import graphql.schema.DataFetchingEnvironment
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.helse.FeatureToggles
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
@@ -147,7 +148,7 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
             }
     }
 
-    private fun saksbehandlertilgangTilKode7(harTilgang: Boolean) {
+    private fun saksbehandlertilgangTilKode7(@Suppress("SameParameterValue") harTilgang: Boolean) {
         every { dataFetchingEnvironment.graphQlContext.get<SaksbehandlerTilganger>(TILGANGER) } returns
             mockk(relaxed = true) {
                 every { harTilgangTilKode7() } returns harTilgang
@@ -184,6 +185,7 @@ internal class TilgangsstyringE2ETest : AbstractE2ETest() {
                     reservasjonshenter = mockk(relaxed = true),
                     sessionFactory = sessionFactory,
                     vedtakBegrunnelseDao = daos.vedtakBegrunnelseDao,
+                    featureToggles = object: FeatureToggles {},
                 ),
             ),
         )

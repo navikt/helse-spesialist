@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.jackson.asLocalDate
 import com.github.navikt.tbd_libs.jackson.isMissingOrNull
 import io.ktor.utils.io.core.toByteArray
+import no.nav.helse.FeatureToggles
+import no.nav.helse.db.SessionFactory
 import no.nav.helse.db.VedtakBegrunnelseDao
 import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
 import no.nav.helse.db.api.NotatApiDao
@@ -78,6 +80,7 @@ import java.util.UUID
 
 @GraphQLIgnore
 data class ApiBeregnetPeriodeResolver(
+    private val fødselsnummer: String,
     private val orgnummer: String,
     private val periode: SnapshotBeregnetPeriode,
     private val apiOppgaveService: ApiOppgaveService,
@@ -92,6 +95,8 @@ data class ApiBeregnetPeriodeResolver(
     private val erSisteGenerasjon: Boolean,
     private val index: Int,
     private val vedtakBegrunnelseDao: VedtakBegrunnelseDao,
+    private val sessionFactory: SessionFactory,
+    private val featureToggles: FeatureToggles,
 ) : BeregnetPeriodeSchema {
     private val periodetilstand = periode.periodetilstand.tilApiPeriodetilstand(erSisteGenerasjon)
 
@@ -357,15 +362,30 @@ data class ApiBeregnetPeriodeResolver(
 
     override fun oppgave() = oppgaveDto?.let { oppgaveDto -> ApiOppgaveForPeriodevisning(id = oppgaveDto.id) }
 
-    override fun totrinnsvurdering(): ApiTotrinnsvurdering? =
-        totrinnsvurderingApiDao.hentAktiv(vedtaksperiodeId())?.let {
-            ApiTotrinnsvurdering(
-                erRetur = it.erRetur,
-                saksbehandler = it.saksbehandler,
-                beslutter = it.beslutter,
-                erBeslutteroppgave = !it.erRetur && it.saksbehandler != null,
-            )
+    override fun totrinnsvurdering(): ApiTotrinnsvurdering? {
+        if (featureToggles.skalBenytteNyTotrinnsvurderingsløsning()) {
+            if (oppgaveDto == null) return null
+            return sessionFactory.transactionalSessionScope { sessionContext ->
+                sessionContext.totrinnsvurderingRepository.finn(fødselsnummer)?.let {
+                    ApiTotrinnsvurdering(
+                        erRetur = it.erRetur,
+                        saksbehandler = it.saksbehandler?.value,
+                        beslutter = it.beslutter?.value,
+                        erBeslutteroppgave = !it.erRetur && it.saksbehandler != null,
+                    )
+                }
+            }
+        } else {
+            return totrinnsvurderingApiDao.hentAktiv(vedtaksperiodeId())?.let {
+                ApiTotrinnsvurdering(
+                    erRetur = it.erRetur,
+                    saksbehandler = it.saksbehandler,
+                    beslutter = it.beslutter,
+                    erBeslutteroppgave = !it.erRetur && it.saksbehandler != null,
+                )
+            }
         }
+    }
 
     override fun paVent(): ApiPaVent? =
         påVentApiDao.hentAktivPåVent(vedtaksperiodeId())?.let {

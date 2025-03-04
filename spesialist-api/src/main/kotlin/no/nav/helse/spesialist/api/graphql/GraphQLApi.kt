@@ -14,6 +14,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
+import no.nav.helse.FeatureToggles
 import no.nav.helse.db.Daos
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.mediator.SaksbehandlerMediator
@@ -66,6 +67,7 @@ fun Application.settOppGraphQLApi(
     snapshothenter: Snapshothenter,
     reservasjonshenter: Reservasjonshenter,
     tilgangsgrupper: Tilgangsgrupper,
+    featureToggles: FeatureToggles,
 ) {
     val spesialistSchema =
         lagSchemaMedResolversOgHandlers(
@@ -80,6 +82,7 @@ fun Application.settOppGraphQLApi(
             behandlingstatistikk = behandlingstatistikk,
             dokumenthåndterer = dokumenthåndterer,
             godkjenninghåndterer = godkjenninghåndterer,
+            featureToggles = featureToggles,
         )
     val graphQLPlugin =
         install(GraphQL) {
@@ -117,6 +120,7 @@ private fun lagSchemaMedResolversOgHandlers(
     behandlingstatistikk: IBehandlingsstatistikkService,
     dokumenthåndterer: Dokumenthåndterer,
     godkjenninghåndterer: Godkjenninghåndterer,
+    featureToggles: FeatureToggles,
 ): SpesialistSchema =
     SpesialistSchema(
         queryHandlers =
@@ -146,6 +150,7 @@ private fun lagSchemaMedResolversOgHandlers(
                                 reservasjonshenter = reservasjonshenter,
                                 sessionFactory = sessionFactory,
                                 vedtakBegrunnelseDao = daos.vedtakBegrunnelseDao,
+                                featureToggles = featureToggles,
                             ),
                     ),
                 oppgaver =

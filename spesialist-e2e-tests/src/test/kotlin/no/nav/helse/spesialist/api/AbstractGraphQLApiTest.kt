@@ -17,6 +17,7 @@ import io.ktor.server.routing.route
 import io.ktor.server.testing.ApplicationTestBuilder
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.helse.FeatureToggles
 import no.nav.helse.db.VedtakBegrunnelseDao
 import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.behandlingsstatistikk.IBehandlingsstatistikkService
@@ -117,6 +118,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                                 reservasjonshenter = reservasjonshenter,
                                 sessionFactory = sessionFactory,
                                 vedtakBegrunnelseDao = vedtakBegrunnelseDao,
+                                featureToggles = object: FeatureToggles {},
                             ),
                     ),
                     oppgaver = OppgaverQueryHandler(

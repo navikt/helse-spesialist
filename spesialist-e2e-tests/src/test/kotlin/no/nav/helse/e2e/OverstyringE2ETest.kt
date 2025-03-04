@@ -6,6 +6,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.FeatureToggles
 import no.nav.helse.TestRapidHelpers.siste
 import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
@@ -215,7 +216,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
 
     private fun assertOverstyrTidslinje(
         fødselsnummer: String,
-        forventetAntall: Int,
+        @Suppress("SameParameterValue") forventetAntall: Int,
     ) {
         @Language("PostgreSQL")
         val query =
@@ -241,7 +242,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
 
     private fun assertOverstyrArbeidsforhold(
         fødselsnummer: String,
-        forventetAntall: Int,
+        @Suppress("SameParameterValue") forventetAntall: Int,
     ) {
         @Language("PostgreSQL")
         val query =
@@ -267,7 +268,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
 
     private fun assertOverstyrInntektOgRefusjon(
         fødselsnummer: String,
-        forventetAntall: Int,
+        @Suppress("SameParameterValue") forventetAntall: Int,
     ) {
         @Language("PostgreSQL")
         val query =
@@ -340,6 +341,7 @@ internal class OverstyringE2ETest : AbstractE2ETest() {
                     reservasjonshenter = mockk(relaxed = true),
                     sessionFactory = sessionFactory,
                     vedtakBegrunnelseDao = daos.vedtakBegrunnelseDao,
+                    featureToggles = object: FeatureToggles {},
                 ),
             ),
         )

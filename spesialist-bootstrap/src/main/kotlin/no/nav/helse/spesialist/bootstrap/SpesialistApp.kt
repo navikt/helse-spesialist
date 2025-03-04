@@ -217,6 +217,7 @@ class SpesialistApp(
                 snapshothenter = snapshothenter,
                 reservasjonshenter = reservasjonshenter,
                 tilgangsgrupper = tilgangsgrupper,
+                featureToggles = featureToggles,
             )
 
             routing {
