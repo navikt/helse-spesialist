@@ -126,7 +126,7 @@ class PgTotrinnsvurderingRepository(session: Session) : QueryRunner by MedSessio
             utbetalingId = uuidOrNull("utbetaling_id"),
             opprettet = localDateTime("opprettet"),
             oppdatert = localDateTimeOrNull("oppdatert"),
-            ferdigstilt = false,
+            ferdigstilt = uuidOrNull("utbetaling_id") != null,
             overstyringer = overstyringRepository.finnAktive(string("fødselsnummer")),
         )
 }
