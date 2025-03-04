@@ -8,7 +8,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiVedtakUtfall
 interface TotrinnsvurderingMutationSchema : Mutation {
     fun sendTilGodkjenningV2(
         oppgavereferanse: String,
-        vedtakUtfall: ApiVedtakUtfall,
+        vedtakUtfall: ApiVedtakUtfall? = null,
         vedtakBegrunnelse: String? = null,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean>

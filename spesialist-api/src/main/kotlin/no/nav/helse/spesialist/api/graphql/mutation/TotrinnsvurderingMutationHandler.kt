@@ -16,7 +16,7 @@ class TotrinnsvurderingMutationHandler(
 ) : TotrinnsvurderingMutationSchema {
     override fun sendTilGodkjenningV2(
         oppgavereferanse: String,
-        vedtakUtfall: ApiVedtakUtfall,
+        vedtakUtfall: ApiVedtakUtfall?,
         vedtakBegrunnelse: String?,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> {
@@ -27,7 +27,6 @@ class TotrinnsvurderingMutationHandler(
                 saksbehandlerMediator.håndterTotrinnsvurdering(
                     oppgavereferanse = oppgavereferanse.toLong(),
                     saksbehandlerFraApi = behandlendeSaksbehandler,
-                    utfall = vedtakUtfall,
                     begrunnelse = vedtakBegrunnelse,
                 )
         ) {

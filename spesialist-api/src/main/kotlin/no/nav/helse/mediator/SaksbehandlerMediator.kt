@@ -81,7 +81,6 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse.ApiSkjo
 import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse.ApiSkjonnsfastsettelseArbeidsgiver.ApiSkjonnsfastsettelseType.OMREGNET_ARSINNTEKT
 import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse.ApiSkjonnsfastsettelseArbeidsgiver.ApiSkjonnsfastsettelseType.RAPPORTERT_ARSINNTEKT
 import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
-import no.nav.helse.spesialist.api.graphql.schema.ApiVedtakUtfall
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.ApiOpphevStans
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
@@ -627,10 +626,9 @@ class SaksbehandlerMediator(
     fun håndterTotrinnsvurdering(
         oppgavereferanse: Long,
         saksbehandlerFraApi: SaksbehandlerFraApi,
-        utfall: ApiVedtakUtfall,
         begrunnelse: String?,
-    ): SendTilGodkjenningResult {
-        return sessionFactory.transactionalSessionScope { sessionContext ->
+    ): SendTilGodkjenningResult =
+        sessionFactory.transactionalSessionScope { sessionContext ->
             try {
                 val perioderTilBehandling = generasjonRepository.perioderTilBehandling(oppgavereferanse)
                 if (perioderTilBehandling.harAktiveVarsler()) {
@@ -709,7 +707,6 @@ class SaksbehandlerMediator(
 
             return@transactionalSessionScope SendTilGodkjenningResult.Ok
         }
-    }
 
     private fun tilLegacySaksbehandler(saksbehandler: no.nav.helse.spesialist.domain.Saksbehandler): LegacySaksbehandler =
         saksbehandler.gjenopprett(tilgangskontroll = tilgangskontroll)

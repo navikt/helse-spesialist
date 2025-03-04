@@ -30,7 +30,6 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringDag
 import no.nav.helse.spesialist.api.graphql.schema.ApiPaVentRequest
 import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse
 import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
-import no.nav.helse.spesialist.api.graphql.schema.ApiVedtakUtfall
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.ApiOpphevStans
@@ -172,7 +171,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         }
 
         val result =
-            mediator.håndterTotrinnsvurdering(oppgaveId, saksbehandler, ApiVedtakUtfall.INNVILGELSE, "Begrunnelse")
+            mediator.håndterTotrinnsvurdering(oppgaveId, saksbehandler, "Begrunnelse")
 
         assertEquals(SendTilGodkjenningResult.Ok, result)
         val totrinnsvurdering = sessionFactory.transactionalSessionScope { session ->
@@ -223,7 +222,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         )
 
         val result =
-            mediator.håndterTotrinnsvurdering(oppgaveId, saksbehandler, ApiVedtakUtfall.INNVILGELSE, "Begrunnelse")
+            mediator.håndterTotrinnsvurdering(oppgaveId, saksbehandler, "Begrunnelse")
 
         assertEquals(SendTilGodkjenningResult.Ok, result)
         val totrinnsvurdering = sessionFactory.transactionalSessionScope { session ->
@@ -368,7 +367,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         )
 
         val result =
-            mediator.håndterTotrinnsvurdering(oppgaveId, saksbehandler, ApiVedtakUtfall.INNVILGELSE, "Begrunnelse")
+            mediator.håndterTotrinnsvurdering(oppgaveId, saksbehandler, "Begrunnelse")
 
         assertEquals(SendTilGodkjenningResult.Ok, result)
 
@@ -435,7 +434,6 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             mediator.håndterTotrinnsvurdering(
                 oppgaveId,
                 saksbehandler,
-                ApiVedtakUtfall.INNVILGELSE,
                 "Begrunnelse"
             ) is SendTilGodkjenningResult.Feil.ManglerVurderingAvVarsler
         )
@@ -475,7 +473,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         }
 
         val result =
-            mediator.håndterTotrinnsvurdering(oppgaveId, saksbehandler, ApiVedtakUtfall.INNVILGELSE, "Begrunnelse")
+            mediator.håndterTotrinnsvurdering(oppgaveId, saksbehandler, "Begrunnelse")
 
         assertEquals(SendTilGodkjenningResult.Ok, result)
     }

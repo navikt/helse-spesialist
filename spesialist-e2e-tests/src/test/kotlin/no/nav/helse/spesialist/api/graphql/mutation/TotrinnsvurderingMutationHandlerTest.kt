@@ -12,7 +12,7 @@ internal class TotrinnsvurderingMutationHandlerTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `send oppgave til godkjenning med V2`() {
-        every { saksbehandlerMediator.håndterTotrinnsvurdering(any(), any(), any(), any()) }.returns(
+        every { saksbehandlerMediator.håndterTotrinnsvurdering(any(), any(), any()) }.returns(
             SendTilGodkjenningResult.Ok
         )
         opprettSaksbehandler()
