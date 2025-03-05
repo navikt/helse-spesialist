@@ -8,7 +8,6 @@ import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.SendIReturResult
 import no.nav.helse.spesialist.api.SendTilGodkjenningResult
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
-import no.nav.helse.spesialist.api.graphql.schema.ApiVedtakUtfall
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 
 class TotrinnsvurderingMutationHandler(
@@ -16,7 +15,6 @@ class TotrinnsvurderingMutationHandler(
 ) : TotrinnsvurderingMutationSchema {
     override fun sendTilGodkjenningV2(
         oppgavereferanse: String,
-        vedtakUtfall: ApiVedtakUtfall?,
         vedtakBegrunnelse: String?,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> {

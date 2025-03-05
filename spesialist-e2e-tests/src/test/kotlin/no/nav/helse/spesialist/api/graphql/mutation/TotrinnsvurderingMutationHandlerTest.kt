@@ -22,7 +22,7 @@ internal class TotrinnsvurderingMutationHandlerTest : AbstractGraphQLApiTest() {
         val body = runQuery(
             """
             mutation TotrinnsvurderingMutation {
-                sendTilGodkjenningV2(oppgavereferanse: "$oppgaveRef", vedtakUtfall: INNVILGELSE)
+                sendTilGodkjenningV2(oppgavereferanse: "$oppgaveRef")
             }
         """
         )

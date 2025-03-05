@@ -11,7 +11,6 @@ import no.nav.helse.spesialist.api.feilhåndtering.IkkeÅpenOppgave
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.schema.ApiAvslagstype
-import no.nav.helse.spesialist.api.graphql.schema.ApiVedtakUtfall
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import org.slf4j.LoggerFactory
@@ -28,7 +27,6 @@ class VedtakMutationHandler(
     override fun fattVedtak(
         oppgavereferanse: String,
         env: DataFetchingEnvironment,
-        utfall: ApiVedtakUtfall?,
         begrunnelse: String?,
     ): DataFetcherResult<Boolean> {
         val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
