@@ -37,7 +37,6 @@ import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.helse.spesialist.db.DBDaos
 import no.nav.helse.spesialist.db.DataSourceBuilder
 import no.nav.helse.spesialist.db.TransactionalSessionFactory
-import no.nav.helse.spesialist.db.repository.PgOppgaveRepository
 import org.slf4j.LoggerFactory
 import java.lang.management.GarbageCollectorMXBean
 import java.lang.management.ManagementFactory
@@ -130,7 +129,7 @@ class SpesialistApp(
                 tilgangskontroll = tilgangskontrollørForReservasjon,
                 tilgangsgrupper = tilgangsgrupper,
                 daos = daos,
-                oppgaveRepository = PgOppgaveRepository(daos.oppgaveDao, daos.tildelingDao),
+                oppgaveRepository = daos.oppgaveRepository,
             )
         apiOppgaveService =
             ApiOppgaveService(

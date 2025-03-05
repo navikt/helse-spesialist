@@ -20,7 +20,6 @@ import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
 import no.nav.helse.spesialist.db.DBDaos
 import no.nav.helse.spesialist.db.TransactionalSessionFactory
-import no.nav.helse.spesialist.db.repository.PgOppgaveRepository
 import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import no.nav.helse.util.testEnv
 import java.util.UUID
@@ -35,7 +34,6 @@ internal class TestMediator(
     private val opptegnelseDao = daos.opptegnelseDao
     private val oppgaveDao = daos.oppgaveDao
     private val overstyringDao = daos.overstyringDao
-    private val tildelingDao = daos.tildelingDao
     private val notatDao = daos.notatDao
     private val dialogDao = daos.dialogDao
     private val annulleringRepository = daos.annulleringRepository
@@ -59,7 +57,7 @@ internal class TestMediator(
             tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
             tilgangsgrupper = tilgangsgrupper,
             daos = daos,
-            oppgaveRepository = PgOppgaveRepository(oppgaveDao, tildelingDao),
+            oppgaveRepository = daos.oppgaveRepository,
         )
     private val apiOppgaveService = ApiOppgaveService(
         oppgaveDao = daos.oppgaveDao,

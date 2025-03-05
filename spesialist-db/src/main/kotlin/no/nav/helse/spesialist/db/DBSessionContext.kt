@@ -85,6 +85,6 @@ class DBSessionContext(session: Session) : SessionContext {
     override val dialogRepository: DialogRepository = PgDialogRepository(session)
     override val saksbehandlerRepository: SaksbehandlerRepository = PgSaksbehandlerRepository(session)
     override val avviksvurderingRepository: AvviksvurderingRepository = PgAvviksvurderingRepository(session)
-    override val oppgaveRepository: OppgaveRepository = PgOppgaveRepository(oppgaveDao, tildelingDao)
+    override val oppgaveRepository: OppgaveRepository = PgOppgaveRepository(session)
     override val behandlingRepository: BehandlingRepository = PgBehandlingRepository(session)
 }

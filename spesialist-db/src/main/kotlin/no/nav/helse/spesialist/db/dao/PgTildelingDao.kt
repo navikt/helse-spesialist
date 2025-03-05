@@ -10,7 +10,7 @@ import no.nav.helse.spesialist.db.QueryRunner
 import java.util.UUID
 import javax.sql.DataSource
 
-class PgTildelingDao private constructor(queryRunner: QueryRunner) : TildelingDao, QueryRunner by queryRunner {
+class PgTildelingDao internal constructor(queryRunner: QueryRunner) : TildelingDao, QueryRunner by queryRunner {
     internal constructor(session: Session) : this(MedSession(session))
     internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 

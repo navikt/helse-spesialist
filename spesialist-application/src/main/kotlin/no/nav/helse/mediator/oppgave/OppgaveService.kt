@@ -83,11 +83,11 @@ class OppgaveService(
         id: Long,
         oppgaveBlock: Oppgave.() -> T,
     ): T {
-        val oppgave = oppgaveRepository.oppgave(id, tilgangskontroll)
+        val oppgave = oppgaveRepository.finn(id, tilgangskontroll) ?: error("Forventer å finne oppgave med oppgaveId=$id")
         val fødselsnummer = oppgaveDao.finnFødselsnummer(id)
         oppgave.register(Oppgavemelder(fødselsnummer, meldingPubliserer))
         val returverdi = oppgaveBlock(oppgave)
-        oppgaveRepository.oppdater(oppgave)
+        oppgaveRepository.lagre(oppgave)
         return returverdi
     }
 

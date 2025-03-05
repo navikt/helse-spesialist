@@ -10,7 +10,6 @@ import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.mediator.GodkjenningService
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
-import no.nav.helse.spesialist.db.repository.PgOppgaveRepository
 import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import no.nav.helse.util.testEnv
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -35,7 +34,7 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
             tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
             tilgangsgrupper = SpeilTilgangsgrupper(testEnv),
             daos = daos,
-            oppgaveRepository = PgOppgaveRepository(oppgaveDao, daos.tildelingDao)
+            oppgaveRepository = daos.oppgaveRepository,
         )
 
     val godkjenningService =

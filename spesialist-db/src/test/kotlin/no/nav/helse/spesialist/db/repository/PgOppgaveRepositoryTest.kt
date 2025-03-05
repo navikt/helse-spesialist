@@ -1,29 +1,30 @@
 package no.nav.helse.spesialist.db.repository
 
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
-import no.nav.helse.db.EgenskapForDatabase
-import no.nav.helse.db.OppgaveFraDatabase
+import no.nav.helse.modell.oppgave.Egenskap
+import no.nav.helse.modell.oppgave.Egenskap.PÅ_VENT
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Oppgave
-import no.nav.helse.spesialist.db.dao.PgOppgaveDao
-import no.nav.helse.spesialist.db.dao.PgTildelingDao
+import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.db.lagEpostadresseFraFulltNavn
 import no.nav.helse.spesialist.db.lagSaksbehandlerident
 import no.nav.helse.spesialist.db.lagSaksbehandlernavn
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.util.UUID
 import kotlin.random.Random.Default.nextLong
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 
-class PgOppgaveRepositoryTest {
-    private val oppgavetype = SØKNAD
+class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
+    private val repository = PgOppgaveRepository(session)
     private val vedtaksperiodeId = UUID.randomUUID()
     private val behandlingId = UUID.randomUUID()
     private val utbetalingId: UUID = UUID.randomUUID()
-    private val oppgaveId = nextLong()
     private val saksbehandlernavn = lagSaksbehandlernavn()
+    private val godkjenningsbehovId: UUID = UUID.randomUUID()
+
     private val legacySaksbehandler =
         LegacySaksbehandler(
             oid = UUID.randomUUID(),
@@ -33,155 +34,137 @@ class PgOppgaveRepositoryTest {
             tilgangskontroll = { _, _ -> false },
         )
 
-    private val godkjenningsbehovId: UUID = UUID.randomUUID()
-
-    private val oppgaveDaoMock = mockk<PgOppgaveDao>(relaxed = true)
-    private val tildelingDaoMock = mockk<PgTildelingDao>(relaxed = true)
-
-    @Test
-    fun `finn oppgave`() {
-        every { oppgaveDaoMock.finnOppgave(any()) } returns OppgaveFraDatabase(
-            id = oppgaveId,
-            egenskaper = listOf(EgenskapForDatabase.SØKNAD),
-            status = "AvventerSaksbehandler",
-            vedtaksperiodeId = vedtaksperiodeId,
-            behandlingId = behandlingId,
-            utbetalingId = utbetalingId,
-            godkjenningsbehovId = godkjenningsbehovId,
-            kanAvvises = false,
-            ferdigstiltAvIdent = legacySaksbehandler.ident(),
-            ferdigstiltAvOid = legacySaksbehandler.oid,
-            tildelt = null,
-        )
-        val oppgavelagrer = PgOppgaveRepository(oppgaveDaoMock, tildelingDaoMock)
-
-        oppgavelagrer.oppgave(oppgaveId) {_, _ -> false }
-        verify(exactly = 1) { oppgaveDaoMock.finnOppgave(oppgaveId) }
+    @BeforeEach
+    fun beforeEach() {
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode(vedtaksperiodeId = vedtaksperiodeId, spleisBehandlingId = behandlingId)
     }
 
     @Test
-    fun `lagre oppgave uten tildeling medfører forsøk på å slette eksisterende tildeling`() {
-        val oppgave = nyOppgave()
-        val oppgavelagrer = PgOppgaveRepository(oppgaveDaoMock, tildelingDaoMock)
-
-        oppgavelagrer.lagre(oppgave)
-        verify(exactly = 1) {
-            oppgaveDaoMock.opprettOppgave(
-                id = oppgaveId,
-                godkjenningsbehovId = godkjenningsbehovId,
-                egenskaper = listOf(EgenskapForDatabase.SØKNAD),
-                vedtaksperiodeId = vedtaksperiodeId,
-                behandlingId = behandlingId,
-                utbetalingId = utbetalingId,
-                kanAvvises = true,
-            )
-        }
-        verify(exactly = 0) { tildelingDaoMock.tildel(any(), any()) }
-        verify(exactly = 1) { tildelingDaoMock.avmeld(oppgaveId) }
-    }
-
-    @Test
-    fun `oppdatere oppgave uten tildeling medfører forsøk på å slette eksisterende tildeling`() {
-        val oppgave = nyOppgave()
-        val oppgavelagrer = PgOppgaveRepository(oppgaveDaoMock, tildelingDaoMock)
-
-        oppgavelagrer.oppdater(oppgave)
-        verify(exactly = 1) {
-            oppgaveDaoMock.updateOppgave(
-                oppgaveId, "AvventerSaksbehandler", null, null, listOf(
-                    EgenskapForDatabase.SØKNAD
-                )
-            )
-        }
-        verify(exactly = 0) { tildelingDaoMock.tildel(any(), any()) }
-        verify(exactly = 1) { tildelingDaoMock.avmeld(oppgaveId) }
-    }
-
-    @Test
-    fun `lagre oppgave uten tildeling`() {
-        val oppgave = nyOppgave()
-        val oppgavelagrer = PgOppgaveRepository(oppgaveDaoMock, tildelingDaoMock)
-
-        oppgavelagrer.lagre(oppgave)
-        verify(exactly = 1) {
-            oppgaveDaoMock.opprettOppgave(
-                id = oppgaveId,
-                godkjenningsbehovId = godkjenningsbehovId,
-                egenskaper = listOf(EgenskapForDatabase.SØKNAD),
-                vedtaksperiodeId = vedtaksperiodeId,
-                behandlingId = behandlingId,
-                utbetalingId = utbetalingId,
-                kanAvvises = true,
-            )
-        }
-        verify(exactly = 0) { tildelingDaoMock.tildel(any(), any()) }
-    }
-
-    @Test
-    fun `lagre oppgave`() {
-        val oppgave = nyOppgave()
-        oppgave.forsøkTildelingVedReservasjon(legacySaksbehandler)
-        val oppgavelagrer = PgOppgaveRepository(oppgaveDaoMock, tildelingDaoMock)
-
-        oppgavelagrer.lagre(oppgave)
-        verify(exactly = 1) {
-            oppgaveDaoMock.opprettOppgave(
-                id = oppgaveId,
-                godkjenningsbehovId = godkjenningsbehovId,
-                egenskaper = listOf(EgenskapForDatabase.SØKNAD),
-                vedtaksperiodeId = vedtaksperiodeId,
-                behandlingId = behandlingId,
-                utbetalingId = utbetalingId,
-                kanAvvises = true,
-            )
-        }
-        verify(exactly = 1) { tildelingDaoMock.tildel(oppgaveId, legacySaksbehandler.oid) }
-    }
-
-    @Test
-    fun `oppdatere oppgave uten tildeling`() {
-        val oppgave = nyOppgave()
-        oppgave.avventerSystem(legacySaksbehandler.ident(), legacySaksbehandler.oid)
-        oppgave.ferdigstill()
-        val oppgavelagrer = PgOppgaveRepository(oppgaveDaoMock, tildelingDaoMock)
-
-        oppgavelagrer.oppdater(oppgave)
-        verify(exactly = 1) {
-            oppgaveDaoMock.updateOppgave(
-                oppgaveId, "Ferdigstilt", legacySaksbehandler.ident(), legacySaksbehandler.oid, listOf(
-                    EgenskapForDatabase.SØKNAD
-                )
-            )
-        }
-        verify(exactly = 0) { tildelingDaoMock.tildel(any(), any()) }
-    }
-
-    @Test
-    fun `oppdatere oppgave`() {
-        val oppgave = nyOppgave()
-        oppgave.forsøkTildelingVedReservasjon(legacySaksbehandler)
-        oppgave.avventerSystem(legacySaksbehandler.ident(), legacySaksbehandler.oid)
-        oppgave.ferdigstill()
-        val oppgavelagrer = PgOppgaveRepository(oppgaveDaoMock, tildelingDaoMock)
-
-        oppgavelagrer.oppdater(oppgave)
-        verify(exactly = 1) {
-            oppgaveDaoMock.updateOppgave(
-                oppgaveId, "Ferdigstilt", legacySaksbehandler.ident(), legacySaksbehandler.oid, listOf(
-                    EgenskapForDatabase.SØKNAD
-                )
-            )
-        }
-    }
-
-    private fun nyOppgave() =
-        Oppgave.ny(
-            id = oppgaveId,
+    fun `lagre og finn oppgave`() {
+        val oppgave = Oppgave.ny(
+            id = nextLong(),
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
             utbetalingId = utbetalingId,
             hendelseId = godkjenningsbehovId,
             kanAvvises = true,
-            egenskaper = setOf(oppgavetype),
+            egenskaper = setOf(SØKNAD)
         )
+
+        repository.lagre(oppgave)
+        val funnetOppgave = repository.finn(oppgave.id) { _, _ -> false }
+        assertNotNull(funnetOppgave)
+        assertEquals(oppgave, funnetOppgave)
+    }
+
+    @Test
+    fun `tildel oppgave`() {
+        opprettSaksbehandler(legacySaksbehandler.oid, legacySaksbehandler.navn, legacySaksbehandler.epostadresse, legacySaksbehandler.ident())
+        val oppgave = Oppgave.ny(
+            id = nextLong(),
+            vedtaksperiodeId = vedtaksperiodeId,
+            behandlingId = behandlingId,
+            utbetalingId = utbetalingId,
+            hendelseId = godkjenningsbehovId,
+            kanAvvises = true,
+            egenskaper = setOf(SØKNAD)
+        )
+        oppgave.forsøkTildeling(legacySaksbehandler)
+
+        repository.lagre(oppgave)
+        val funnetOppgave = repository.finn(oppgave.id) { _, _ -> false }
+        assertNotNull(funnetOppgave)
+        assertEquals(legacySaksbehandler, funnetOppgave.tildeltTil)
+    }
+
+    @Test
+    fun `endre egenskaper`() {
+        val oppgave = Oppgave.ny(
+            id = nextLong(),
+            vedtaksperiodeId = vedtaksperiodeId,
+            behandlingId = behandlingId,
+            utbetalingId = utbetalingId,
+            hendelseId = godkjenningsbehovId,
+            kanAvvises = true,
+            egenskaper = setOf(SØKNAD, PÅ_VENT)
+        )
+        repository.lagre(oppgave)
+        oppgave.leggTilEgenAnsatt()
+        oppgave.fjernFraPåVent()
+        repository.lagre(oppgave)
+        val funnetOppgave = repository.finn(oppgave.id) { _, _ -> false }
+        assertNotNull(funnetOppgave)
+        assertEquals(setOf(Egenskap.EGEN_ANSATT, SØKNAD), funnetOppgave.egenskaper)
+    }
+
+    @Test
+    fun `endre tilstand`() {
+        opprettSaksbehandler(legacySaksbehandler.oid, legacySaksbehandler.navn, legacySaksbehandler.epostadresse, legacySaksbehandler.ident())
+        val oppgave = Oppgave.ny(
+            id = nextLong(),
+            vedtaksperiodeId = vedtaksperiodeId,
+            behandlingId = behandlingId,
+            utbetalingId = utbetalingId,
+            hendelseId = godkjenningsbehovId,
+            kanAvvises = true,
+            egenskaper = setOf(SØKNAD)
+        )
+        repository.lagre(oppgave)
+        oppgave.avventerSystem(legacySaksbehandler.ident(), legacySaksbehandler.oid)
+        repository.lagre(oppgave)
+        val funnetOppgave = repository.finn(oppgave.id) { _, _ -> false }
+        assertNotNull(funnetOppgave)
+        assertEquals(Oppgave.AvventerSystem, funnetOppgave.tilstand)
+    }
+
+    @Test
+    fun ferdigstill() {
+        opprettSaksbehandler(legacySaksbehandler.oid, legacySaksbehandler.navn, legacySaksbehandler.epostadresse, legacySaksbehandler.ident())
+        val oppgave = Oppgave.ny(
+            id = nextLong(),
+            vedtaksperiodeId = vedtaksperiodeId,
+            behandlingId = behandlingId,
+            utbetalingId = utbetalingId,
+            hendelseId = godkjenningsbehovId,
+            kanAvvises = true,
+            egenskaper = setOf(SØKNAD)
+        )
+        repository.lagre(oppgave)
+        oppgave.avventerSystem(legacySaksbehandler.ident(), legacySaksbehandler.oid)
+        oppgave.ferdigstill()
+        repository.lagre(oppgave)
+        val funnetOppgave = repository.finn(oppgave.id) { _, _ -> false }
+        assertNotNull(funnetOppgave)
+        assertEquals(Oppgave.Ferdigstilt, funnetOppgave.tilstand)
+        assertEquals(legacySaksbehandler.ident(), funnetOppgave.ferdigstiltAvIdent)
+        assertEquals(legacySaksbehandler.oid, funnetOppgave.ferdigstiltAvOid)
+    }
+
+    @Test
+    fun `exception om det finnes en annen aktiv oppgave for personen ved lagring`() {
+        val oppgave1 = Oppgave.ny(
+            id = nextLong(),
+            vedtaksperiodeId = vedtaksperiodeId,
+            behandlingId = behandlingId,
+            utbetalingId = utbetalingId,
+            hendelseId = godkjenningsbehovId,
+            kanAvvises = true,
+            egenskaper = setOf(SØKNAD)
+        )
+        val oppgave2 = Oppgave.ny(
+            id = nextLong(),
+            vedtaksperiodeId = vedtaksperiodeId,
+            behandlingId = behandlingId,
+            utbetalingId = utbetalingId,
+            hendelseId = godkjenningsbehovId,
+            kanAvvises = true,
+            egenskaper = setOf(SØKNAD)
+        )
+        repository.lagre(oppgave1)
+        assertThrows<IllegalStateException> {
+            repository.lagre(oppgave2)
+        }
+    }
 }

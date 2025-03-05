@@ -16,7 +16,6 @@ import no.nav.helse.spesialist.api.SendTilGodkjenningResult
 import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre
-import no.nav.helse.spesialist.api.graphql.mutation.Avslag
 import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutationHandler.VedtakResultat
 import no.nav.helse.spesialist.api.graphql.schema.ApiAnnulleringData
 import no.nav.helse.spesialist.api.graphql.schema.ApiAnnulleringData.ApiAnnulleringArsak
@@ -35,10 +34,8 @@ import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.ApiOpphevStans
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
-import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import no.nav.helse.spesialist.db.DBDaos
 import no.nav.helse.spesialist.db.TransactionalSessionFactory
-import no.nav.helse.spesialist.db.repository.PgOppgaveRepository
 import no.nav.helse.spesialist.test.lagAktørId
 import no.nav.helse.spesialist.test.lagFødselsnummer
 import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
@@ -67,7 +64,6 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     private val tilgangsgrupper = SpeilTilgangsgrupper(testEnv)
     private val testRapid = TestRapid()
     private val meldingPubliserer: MeldingPubliserer = MessageContextMeldingPubliserer(testRapid)
-    private val tildelingDbDao = daos.tildelingDao
     private val stansAutomatiskBehandlinghåndterer =
         StansAutomatiskBehandlinghåndtererImpl(
             stansAutomatiskBehandlingDao,
@@ -83,7 +79,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
             tilgangsgrupper = tilgangsgrupper,
             daos = daos,
-            oppgaveRepository = PgOppgaveRepository(oppgaveDao, tildelingDbDao),
+            oppgaveRepository = daos.oppgaveRepository,
         )
     private val apiOppgaveService = ApiOppgaveService(
         oppgaveDao = oppgaveDao,
@@ -1162,21 +1158,6 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             "fodselsnummer" to fødselsnummer
         ) { it.uuid("ekstern_hendelse_id") }
     }
-
-    private fun godkjenning(
-        oppgavereferanse: Long,
-        godkjent: Boolean,
-        ident: String = SAKSBEHANDLER_IDENT,
-        avslag: Avslag? = null,
-    ) = GodkjenningDto(
-        oppgavereferanse = oppgavereferanse,
-        saksbehandlerIdent = ident,
-        godkjent = godkjent,
-        begrunnelser = emptyList(),
-        kommentar = if (!godkjent) "Kommentar" else null,
-        årsak = if (!godkjent) "Årsak" else null,
-        avslag = avslag,
-    )
 
     private fun annullering(
         begrunnelser: List<String> = listOf("EN_BEGRUNNELSE"),

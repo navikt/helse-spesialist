@@ -14,7 +14,6 @@ import no.nav.helse.db.EgenskapForDatabase.STRENGT_FORTROLIG_ADRESSE
 import no.nav.helse.db.EgenskapForDatabase.SØKNAD
 import no.nav.helse.db.EgenskapForDatabase.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.db.EgenskapForDatabase.UTLAND
-import no.nav.helse.db.OppgaveFraDatabase
 import no.nav.helse.db.OppgavesorteringForDatabase
 import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.SorteringsnøkkelForDatabase
@@ -34,7 +33,6 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -259,48 +257,6 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
 
         opprettOppgave()
         assertEquals(OPPGAVE_ID, oppgaveDao.finnIdForAktivOppgave(VEDTAKSPERIODE))
-    }
-
-    @Test
-    fun `finner OppgaveFraDatabase`() {
-        val hendelseId = UUID.randomUUID()
-        val behandlingId = UUID.randomUUID()
-        nyPerson(godkjenningsbehovId = hendelseId, spleisBehandlingId = behandlingId)
-        val oppgave = oppgaveDao.finnOppgave(oppgaveId) ?: fail { "Fant ikke oppgave" }
-        assertEquals(
-            OppgaveFraDatabase(
-                id = oppgaveId,
-                egenskaper = listOf(EGENSKAP),
-                status = "AvventerSaksbehandler",
-                vedtaksperiodeId = VEDTAKSPERIODE,
-                behandlingId = behandlingId,
-                utbetalingId = UTBETALING_ID,
-                godkjenningsbehovId = hendelseId,
-                kanAvvises = true,
-            ),
-            oppgave,
-        )
-    }
-
-    @Test
-    fun `finner OppgaveFraDatabase med flere egenskaper`() {
-        val hendelseId = UUID.randomUUID()
-        val behandlingId = UUID.randomUUID()
-        nyPerson(godkjenningsbehovId = hendelseId, oppgaveEgenskaper = listOf(EGENSKAP, RISK_QA), spleisBehandlingId = behandlingId)
-        val oppgave = oppgaveDao.finnOppgave(oppgaveId) ?: fail { "Fant ikke oppgave" }
-        assertEquals(
-            OppgaveFraDatabase(
-                id = oppgaveId,
-                egenskaper = listOf(EGENSKAP, RISK_QA),
-                status = "AvventerSaksbehandler",
-                vedtaksperiodeId = VEDTAKSPERIODE,
-                behandlingId = behandlingId,
-                utbetalingId = UTBETALING_ID,
-                godkjenningsbehovId = hendelseId,
-                kanAvvises = true,
-            ),
-            oppgave,
-        )
     }
 
     @Test

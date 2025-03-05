@@ -6,10 +6,8 @@ import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 interface OppgaveRepository {
     fun lagre(oppgave: Oppgave)
 
-    fun oppdater(oppgave: Oppgave)
-
-    fun oppgave(
+    fun finn(
         id: Long,
         tilgangskontroll: Tilgangskontroll,
-    ): Oppgave
+    ): Oppgave?
 }

@@ -7,7 +7,6 @@ import no.nav.helse.db.BehandletOppgaveFraDatabaseForVisning
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.KommentarFraDatabase
 import no.nav.helse.db.OppgaveDao
-import no.nav.helse.db.OppgaveFraDatabase
 import no.nav.helse.db.OppgaveFraDatabaseForVisning
 import no.nav.helse.db.OppgavesorteringForDatabase
 import no.nav.helse.db.PaVentInfoFraDatabase
@@ -51,44 +50,6 @@ class PgOppgaveDao internal constructor(
             "fodselsnummer" to fødselsnummer,
         ).single {
             it.long("oppgaveId")
-        }
-
-    fun finnOppgave(id: Long): OppgaveFraDatabase? =
-        asSQL(
-            """
-            SELECT o.egenskaper, o.status, v.vedtaksperiode_id, o.behandling_id, o.hendelse_id_godkjenningsbehov, o.ferdigstilt_av, o.ferdigstilt_av_oid, o.utbetaling_id, s.navn, s.epost, s.ident, s.oid, o.kan_avvises
-            FROM oppgave o
-            INNER JOIN vedtak v on o.vedtak_ref = v.id
-            LEFT JOIN tildeling t on o.id = t.oppgave_id_ref
-            LEFT JOIN saksbehandler s on s.oid = t.saksbehandler_ref
-            WHERE o.id = :oppgaveId
-            ORDER BY o.id DESC LIMIT 1
-            """,
-            "oppgaveId" to id,
-        ).singleOrNull { row ->
-            val egenskaper: List<EgenskapForDatabase> =
-                row.array<String>("egenskaper").toList().map { enumValueOf(it) }
-            OppgaveFraDatabase(
-                id = id,
-                egenskaper = egenskaper,
-                status = row.string("status"),
-                vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
-                behandlingId = row.uuid("behandling_id"),
-                utbetalingId = row.uuid("utbetaling_id"),
-                godkjenningsbehovId = row.uuid("hendelse_id_godkjenningsbehov"),
-                kanAvvises = row.boolean("kan_avvises"),
-                ferdigstiltAvIdent = row.stringOrNull("ferdigstilt_av"),
-                ferdigstiltAvOid = row.uuidOrNull("ferdigstilt_av_oid"),
-                tildelt =
-                    row.uuidOrNull("oid")?.let {
-                        SaksbehandlerFraDatabase(
-                            epostadresse = row.string("epost"),
-                            oid = it,
-                            navn = row.string("navn"),
-                            ident = row.string("ident"),
-                        )
-                    },
-            )
         }
 
     override fun finnOppgaveId(fødselsnummer: String): Long? =
