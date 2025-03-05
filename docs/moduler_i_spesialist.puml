@@ -1,0 +1,59 @@
+@startuml C4_Elements
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+HIDE_STEREOTYPE()
+
+title Moduler i Spesialist
+
+UpdateBoundaryStyle($shape=EightSidedShape(), $borderStyle=BoldLine())
+UpdateElementStyle(component, $bgColor="transparent", $borderColor="black", $borderThickness="1.5")
+AddBoundaryTag(group, $shape=RoundedBoxShape(), $borderStyle=DashedLine())
+AddBoundaryTag(infrastructure, $bgColor="AliceBlue")
+AddBoundaryTag(application, $bgColor="HoneyDew")
+AddBoundaryTag(domain, $bgColor="Lavender")
+
+Component(bootstrap, "bootstrap", "", "Sammensying og oppstart av applikasjonen med implementasjoner")
+Component(e2e_tests, "e2e-tests", "", "Integrasjonstester som kjører på fullstending, lokalt miljø")
+Boundary(boundary_infrastructure, "", $tags="infrastructure") {
+  Boundary(boundary_api, "", $tags="group") {
+    Component(api, "api", "", "Mottak og håndtering av forespørsler til Spesialists API")
+    Component(api_schema, "api-schema", "", "Skjemadefinisjon av API'et, ingen oppførsel")
+  }
+  together {
+    Component(client_entra_id, "client-entra-id", "", "Klient mot Microsoft Entra ID")
+    Component(client_krr, "client-krr", "", "Klient mot KRR sine tjenester")
+    Component(client_spleis, "client-spleis", "", "Klient mot Spleis")
+  }
+  Boundary(boundary_db, "", $tags="group") {
+    Component(db, "db", "", "Oppsett av, lagring til og henting fra database")
+    Component(db_migrations, "db-migrations", "", "Oppsett av databasestruktur")
+  }
+  Component(kafka, "kafka", "", "Lytting og publisering på topics, parsing og bygging av meldinger på Kafka")
+  Boundary(boundary_application, "", $tags="application") {
+    Component(application, "application", "", "Interfaces og koordinering for behov flere lag har felles")
+    Boundary(boundary_domain, "", $tags="domain") {
+      Component(domain, "domain", "", "Modellen av domenet med forretningsregler og data")
+    }
+  }
+}
+Rel(e2e_tests, bootstrap, "")
+
+Rel(bootstrap, api, "")
+Rel(bootstrap, client_entra_id, "")
+Rel(bootstrap, client_krr, "")
+Rel(bootstrap, client_spleis, "")
+Rel(bootstrap, db, "")
+Rel(bootstrap, kafka, "")
+
+Rel(api, api_schema, "")
+Rel(db, db_migrations, "")
+
+Rel(api, application, "")
+Rel(client_entra_id, application, "")
+Rel(client_krr, application, "")
+Rel(client_spleis, application, "")
+Rel(db, application, "")
+Rel(kafka, application, "")
+
+Rel(application, domain, "")
+
+@enduml
