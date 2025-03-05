@@ -1,16 +1,13 @@
 package no.nav.helse.spesialist.db.dao
 
-import no.nav.helse.db.EgenskapForDatabase.BESLUTTER
 import no.nav.helse.db.EgenskapForDatabase.DELVIS_REFUSJON
 import no.nav.helse.db.EgenskapForDatabase.EN_ARBEIDSGIVER
 import no.nav.helse.db.EgenskapForDatabase.FLERE_ARBEIDSGIVERE
 import no.nav.helse.db.EgenskapForDatabase.FORSTEGANGSBEHANDLING
-import no.nav.helse.db.EgenskapForDatabase.FORTROLIG_ADRESSE
 import no.nav.helse.db.EgenskapForDatabase.HASTER
 import no.nav.helse.db.EgenskapForDatabase.PÅ_VENT
 import no.nav.helse.db.EgenskapForDatabase.REVURDERING
 import no.nav.helse.db.EgenskapForDatabase.RISK_QA
-import no.nav.helse.db.EgenskapForDatabase.STRENGT_FORTROLIG_ADRESSE
 import no.nav.helse.db.EgenskapForDatabase.SØKNAD
 import no.nav.helse.db.EgenskapForDatabase.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.db.EgenskapForDatabase.UTLAND
@@ -90,16 +87,17 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
         opprettPerson()
         opprettArbeidsgiver()
         opprettVedtaksperiode(spleisBehandlingId = spleisBehandlingId)
-        opprettOppgave(contextId = CONTEXT_ID)
+        opprettOppgave(contextId = CONTEXT_ID, behandlingId = spleisBehandlingId)
         assertEquals(spleisBehandlingId, oppgaveDao.finnSpleisBehandlingId(oppgaveId))
     }
 
     @Test
     fun `finn generasjonId`() {
+        val behandlingId = UUID.randomUUID()
         opprettPerson()
         opprettArbeidsgiver()
-        opprettVedtaksperiode()
-        opprettOppgave(contextId = CONTEXT_ID)
+        opprettVedtaksperiode(spleisBehandlingId = behandlingId)
+        opprettOppgave(contextId = CONTEXT_ID, behandlingId = behandlingId)
         assertDoesNotThrow {
             oppgaveDao.finnGenerasjonId(oppgaveId)
         }
@@ -122,7 +120,7 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
             tom = TOM.plusDays(10),
             periodetype = Periodetype.FORLENGELSE,
         )
-        assertThrows<IllegalArgumentException> {
+        assertThrows<IllegalStateException> {
             opprettOppgave(contextId = CONTEXT_ID, vedtaksperiodeId = vedtaksperiodeId)
         }
 
@@ -166,7 +164,11 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
         opprettArbeidsgiver()
         opprettVedtaksperiode()
         val godkjenningsbehovId = UUID.randomUUID()
-        opprettOppgave(contextId = CONTEXT_ID, egenskaper = listOf(EGENSKAP, RISK_QA, PÅ_VENT), godkjenningsbehovId = godkjenningsbehovId)
+        opprettOppgave(
+            contextId = CONTEXT_ID,
+            egenskaper = setOf(Egenskap.SØKNAD, Egenskap.RISK_QA, Egenskap.PÅ_VENT),
+            godkjenningsbehovId = godkjenningsbehovId
+        )
         assertEquals(1, oppgave().size)
         oppgave().first().assertEquals(
             LocalDate.now(),
@@ -206,7 +208,7 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
         opprettArbeidsgiver()
         opprettVedtaksperiode()
         val godkjenningsbehovId = UUID.randomUUID()
-        opprettOppgave(contextId = CONTEXT_ID, egenskaper = listOf(FORTROLIG_ADRESSE), godkjenningsbehovId = godkjenningsbehovId)
+        opprettOppgave(contextId = CONTEXT_ID, egenskaper = setOf(Egenskap.FORTROLIG_ADRESSE), godkjenningsbehovId = godkjenningsbehovId)
         assertEquals(1, oppgave().size)
         oppgave().first().assertEquals(
             LocalDate.now(),
@@ -475,7 +477,7 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
             aktørId = lagAktørId(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
             vedtaksperiodeId = UUID.randomUUID(),
-            oppgaveEgenskaper = listOf(SØKNAD, RISK_QA, FORTROLIG_ADRESSE),
+            oppgaveEgenskaper = setOf(Egenskap.SØKNAD, Egenskap.RISK_QA, Egenskap.FORTROLIG_ADRESSE),
         )
         val oppgaveId2 = OPPGAVE_ID
         nyPerson(
@@ -483,7 +485,7 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
             aktørId = lagAktørId(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
             vedtaksperiodeId = UUID.randomUUID(),
-            oppgaveEgenskaper = listOf(RISK_QA, SØKNAD),
+            oppgaveEgenskaper = setOf(Egenskap.RISK_QA, Egenskap.SØKNAD),
         )
         val oppgaveId3 = OPPGAVE_ID
         val oppgaver =
@@ -513,14 +515,14 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
             aktørId = lagAktørId(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
             vedtaksperiodeId = UUID.randomUUID(),
-            oppgaveEgenskaper = listOf(SØKNAD),
+            oppgaveEgenskaper = setOf(Egenskap.SØKNAD),
         )
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
             vedtaksperiodeId = UUID.randomUUID(),
-            oppgaveEgenskaper = listOf(RISK_QA),
+            oppgaveEgenskaper = setOf(Egenskap.RISK_QA),
         )
         val oppgaver =
             oppgaveDao.finnOppgaverForVisning(
@@ -908,21 +910,14 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
             aktørId = lagAktørId(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
             vedtaksperiodeId = UUID.randomUUID(),
-            oppgaveEgenskaper =
-                listOf(
-                    BESLUTTER,
-                ),
+            oppgaveEgenskaper = setOf(Egenskap.BESLUTTER),
         )
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
             vedtaksperiodeId = UUID.randomUUID(),
-            oppgaveEgenskaper =
-                listOf(
-                    RISK_QA,
-                    FORTROLIG_ADRESSE,
-                ),
+            oppgaveEgenskaper = setOf(Egenskap.RISK_QA, Egenskap.FORTROLIG_ADRESSE),
         )
         val oppgaver =
             oppgaveDao.finnOppgaverForVisning(
@@ -947,32 +942,21 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
             aktørId = lagAktørId(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
             vedtaksperiodeId = UUID.randomUUID(),
-            oppgaveEgenskaper =
-                listOf(
-                    BESLUTTER,
-                ),
+            oppgaveEgenskaper = setOf(Egenskap.BESLUTTER),
         )
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
             vedtaksperiodeId = UUID.randomUUID(),
-            oppgaveEgenskaper =
-                listOf(
-                    RISK_QA,
-                    FORTROLIG_ADRESSE,
-                ),
+            oppgaveEgenskaper = setOf(Egenskap.RISK_QA, Egenskap.FORTROLIG_ADRESSE),
         )
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
             vedtaksperiodeId = UUID.randomUUID(),
-            oppgaveEgenskaper =
-                listOf(
-                    UTLAND,
-                    HASTER,
-                ),
+            oppgaveEgenskaper = setOf(Egenskap.UTLAND, Egenskap.HASTER),
         )
         val oppgaver =
             oppgaveDao.finnOppgaverForVisning(
@@ -1095,11 +1079,7 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
             aktørId = lagAktørId(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
             vedtaksperiodeId = UUID.randomUUID(),
-            oppgaveEgenskaper =
-                listOf(
-                    RISK_QA,
-                    FORTROLIG_ADRESSE,
-                ),
+            oppgaveEgenskaper = setOf(Egenskap.RISK_QA, Egenskap.FORTROLIG_ADRESSE),
         )
         val oppgaveId3 = OPPGAVE_ID
         val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID())
@@ -1124,7 +1104,7 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
             aktørId = lagAktørId(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
             vedtaksperiodeId = UUID.randomUUID(),
-            oppgaveEgenskaper = listOf(PÅ_VENT),
+            oppgaveEgenskaper = setOf(Egenskap.PÅ_VENT),
         )
         val oppgaveId2 = OPPGAVE_ID
         tildelOppgave(oppgaveId2, saksbehandlerOid = saksbehandlerOid, egenskaper = listOf(SØKNAD, PÅ_VENT))
@@ -1175,10 +1155,7 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
             aktørId = lagAktørId(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
             vedtaksperiodeId = vedtaksperiodeId,
-            oppgaveEgenskaper =
-                listOf(
-                    BESLUTTER,
-                ),
+            oppgaveEgenskaper = setOf(Egenskap.BESLUTTER),
         )
         opprettSaksbehandler(saksbehandlerOid)
         opprettSaksbehandler(beslutterOid)
@@ -1201,10 +1178,7 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
             aktørId = lagAktørId(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
             vedtaksperiodeId = vedtaksperiodeId,
-            oppgaveEgenskaper =
-                listOf(
-                    STRENGT_FORTROLIG_ADRESSE,
-                ),
+            oppgaveEgenskaper = setOf(Egenskap.STRENGT_FORTROLIG_ADRESSE),
         )
         opprettSaksbehandler(saksbehandlerOid)
         opprettSaksbehandler(beslutterOid)
@@ -1229,13 +1203,13 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
             organisasjonsnummer = lagOrganisasjonsnummer(),
             vedtaksperiodeId = UUID.randomUUID(),
             oppgaveEgenskaper =
-                listOf(
-                    SØKNAD,
-                    HASTER,
-                    UTLAND,
-                    FORSTEGANGSBEHANDLING,
-                    DELVIS_REFUSJON,
-                    FLERE_ARBEIDSGIVERE,
+                setOf(
+                    Egenskap.SØKNAD,
+                    Egenskap.HASTER,
+                    Egenskap.UTLAND,
+                    Egenskap.FORSTEGANGSBEHANDLING,
+                    Egenskap.DELVIS_REFUSJON,
+                    Egenskap.FLERE_ARBEIDSGIVERE,
                 ),
         )
         val oppgaveId1 = OPPGAVE_ID
@@ -1244,33 +1218,21 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
             aktørId = lagAktørId(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
             vedtaksperiodeId = UUID.randomUUID(),
-            oppgaveEgenskaper =
-                listOf(
-                    REVURDERING,
-                    HASTER,
-                ),
+            oppgaveEgenskaper = setOf(Egenskap.REVURDERING, Egenskap.HASTER),
         )
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
             vedtaksperiodeId = UUID.randomUUID(),
-            oppgaveEgenskaper =
-                listOf(
-                    SØKNAD,
-                    UTLAND,
-                ),
+            oppgaveEgenskaper = setOf(Egenskap.SØKNAD, Egenskap.UTLAND),
         )
         nyPerson(
             fødselsnummer = lagFødselsnummer(),
             aktørId = lagAktørId(),
             organisasjonsnummer = lagOrganisasjonsnummer(),
             vedtaksperiodeId = UUID.randomUUID(),
-            oppgaveEgenskaper =
-                listOf(
-                    UTBETALING_TIL_SYKMELDT,
-                    EN_ARBEIDSGIVER,
-                ),
+            oppgaveEgenskaper = setOf(Egenskap.UTBETALING_TIL_SYKMELDT, Egenskap.EN_ARBEIDSGIVER),
         )
         val oppgaveId4 = OPPGAVE_ID
 
@@ -1334,12 +1296,12 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
             organisasjonsnummer = lagOrganisasjonsnummer(),
             vedtaksperiodeId = UUID.randomUUID(),
             oppgaveEgenskaper =
-                listOf(
-                    SØKNAD,
-                    FORSTEGANGSBEHANDLING,
-                    DELVIS_REFUSJON,
-                    FLERE_ARBEIDSGIVERE,
-                    PÅ_VENT,
+                setOf(
+                    Egenskap.SØKNAD,
+                    Egenskap.FORSTEGANGSBEHANDLING,
+                    Egenskap.DELVIS_REFUSJON,
+                    Egenskap.FLERE_ARBEIDSGIVERE,
+                    Egenskap.PÅ_VENT,
                 ),
         )
         val oppgaveId1 = OPPGAVE_ID
@@ -1349,14 +1311,14 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
             organisasjonsnummer = lagOrganisasjonsnummer(),
             vedtaksperiodeId = UUID.randomUUID(),
             oppgaveEgenskaper =
-                listOf(
-                    SØKNAD,
-                    HASTER,
-                    UTLAND,
-                    FORSTEGANGSBEHANDLING,
-                    DELVIS_REFUSJON,
-                    FLERE_ARBEIDSGIVERE,
-                    PÅ_VENT,
+                setOf(
+                    Egenskap.SØKNAD,
+                    Egenskap.HASTER,
+                    Egenskap.UTLAND,
+                    Egenskap.FORSTEGANGSBEHANDLING,
+                    Egenskap.DELVIS_REFUSJON,
+                    Egenskap.FLERE_ARBEIDSGIVERE,
+                    Egenskap.PÅ_VENT,
                 ),
         )
 
@@ -1533,7 +1495,7 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
         )
         opprettOppgave(
             vedtaksperiodeId = vedtaksperiodeId2,
-            egenskaper = listOf(SØKNAD, PÅ_VENT),
+            egenskaper = setOf(Egenskap.SØKNAD, Egenskap.PÅ_VENT),
             utbetalingId = utbetalingId2,
         )
 

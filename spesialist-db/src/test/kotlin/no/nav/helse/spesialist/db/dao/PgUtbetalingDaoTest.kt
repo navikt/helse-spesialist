@@ -1,5 +1,7 @@
 package no.nav.helse.spesialist.db.dao
 
+import no.nav.helse.modell.oppgave.Egenskap
+import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
@@ -49,14 +51,16 @@ class PgUtbetalingDaoTest : AbstractDBIntegrationTest() {
         val utbetalingId = UUID.randomUUID()
         oppgaveDao.updateOppgave(oppgaveId = OPPGAVE_ID, oppgavestatus = "Ferdigstilt", egenskaper = listOf(EGENSKAP))
         val oppgaveId = nextLong()
-        oppgaveDao.opprettOppgave(
-            id = oppgaveId,
-            godkjenningsbehovId = HENDELSE_ID,
-            egenskaper = listOf(EGENSKAP),
-            vedtaksperiodeId = VEDTAKSPERIODE,
-            behandlingId = UUID.randomUUID(),
-            utbetalingId = utbetalingId,
-            kanAvvises = true,
+        daos.oppgaveRepository.lagre(
+            Oppgave.ny(
+                id = oppgaveId,
+                hendelseId = HENDELSE_ID,
+                egenskaper = setOf(Egenskap.SØKNAD),
+                vedtaksperiodeId = VEDTAKSPERIODE,
+                behandlingId = UUID.randomUUID(),
+                utbetalingId = utbetalingId,
+                kanAvvises = true,
+            )
         )
 
         utbetalingDao.opprettUtbetalingId(

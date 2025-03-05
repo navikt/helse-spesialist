@@ -12,6 +12,8 @@ import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettArbeidsforholdDto
 import no.nav.helse.modell.KomplettInntektskildeDto
 import no.nav.helse.modell.kommando.MinimalPersonDto
+import no.nav.helse.modell.oppgave.Egenskap
+import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
@@ -234,7 +236,7 @@ abstract class AbstractDBIntegrationTest {
         contextId: UUID = UUID.randomUUID(),
         godkjenningsbehovId: UUID = UUID.randomUUID(),
         spleisBehandlingId: UUID = UUID.randomUUID(),
-        oppgaveEgenskaper: List<EgenskapForDatabase> = listOf(EGENSKAP),
+        oppgaveEgenskaper: Set<Egenskap> = setOf(Egenskap.SØKNAD),
     ) {
         opprettPerson(fødselsnummer = fødselsnummer, aktørId = aktørId)
         opprettArbeidsgiver(organisasjonsnummer = organisasjonsnummer)
@@ -506,7 +508,7 @@ abstract class AbstractDBIntegrationTest {
     protected fun opprettOppgave(
         contextId: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
-        egenskaper: List<EgenskapForDatabase> = listOf(EGENSKAP),
+        egenskaper: Set<Egenskap> = setOf(Egenskap.SØKNAD),
         kanAvvises: Boolean = true,
         utbetalingId: UUID = UTBETALING_ID,
         behandlingId: UUID = UUID.randomUUID(),
@@ -516,14 +518,16 @@ abstract class AbstractDBIntegrationTest {
         opprettCommandContext(hendelse, contextId)
         oppgaveId = nextLong()
         OPPGAVE_ID = oppgaveId
-        oppgaveDao.opprettOppgave(
-            id = oppgaveId,
-            godkjenningsbehovId = godkjenningsbehovId,
-            egenskaper = egenskaper,
-            vedtaksperiodeId = vedtaksperiodeId,
-            behandlingId = behandlingId,
-            utbetalingId = utbetalingId,
-            kanAvvises = kanAvvises,
+        sessionContext.oppgaveRepository.lagre(
+            Oppgave.ny(
+                id = oppgaveId,
+                vedtaksperiodeId = vedtaksperiodeId,
+                behandlingId = behandlingId,
+                utbetalingId = utbetalingId,
+                hendelseId = godkjenningsbehovId,
+                kanAvvises = kanAvvises,
+                egenskaper = egenskaper
+            )
         )
     }
 

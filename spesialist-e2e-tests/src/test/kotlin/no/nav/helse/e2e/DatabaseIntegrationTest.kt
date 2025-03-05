@@ -4,10 +4,11 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotliquery.sessionOf
-import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettInntektskildeDto
 import no.nav.helse.modell.kommando.TestMelding
+import no.nav.helse.modell.oppgave.Egenskap
+import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
@@ -38,7 +39,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected open val UTBETALING_ID: UUID = testperson.utbetalingId1
 
     protected open var OPPGAVE_ID = nextLong()
-    protected val EGENSKAP = EgenskapForDatabase.SØKNAD
 
     protected val ORGNUMMER =
         with(testperson) {
@@ -142,7 +142,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         utbetalingId: UUID = UTBETALING_ID,
         contextId: UUID = UUID.randomUUID(),
         spleisBehandlingId: UUID = UUID.randomUUID(),
-        oppgaveEgenskaper: List<EgenskapForDatabase> = listOf(EGENSKAP),
+        oppgaveEgenskaper: Set<Egenskap> = setOf(Egenskap.SØKNAD),
     ) {
         opprettPerson(fødselsnummer = fødselsnummer, aktørId = aktørId)
         opprettArbeidsgiver(organisasjonsnummer = organisasjonsnummer)
@@ -303,10 +303,10 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         opprettVedtakstype(vedtaksperiodeId, periodetype, inntektskilde)
     }
 
-    protected fun opprettOppgave(
+    private fun opprettOppgave(
         contextId: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
-        egenskaper: List<EgenskapForDatabase> = listOf(EGENSKAP),
+        egenskaper: Set<Egenskap> = setOf(Egenskap.SØKNAD),
         kanAvvises: Boolean = true,
         utbetalingId: UUID = UTBETALING_ID,
         behandlingId: UUID = UUID.randomUUID(),
@@ -316,14 +316,16 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         opprettCommandContext(hendelse, contextId)
         oppgaveId = nextLong()
         OPPGAVE_ID = oppgaveId
-        oppgaveDao.opprettOppgave(
-            id = oppgaveId,
-            godkjenningsbehovId = godkjenningsbehovId,
-            egenskaper = egenskaper,
-            vedtaksperiodeId = vedtaksperiodeId,
-            behandlingId = behandlingId,
-            utbetalingId = utbetalingId,
-            kanAvvises = kanAvvises,
+        sessionContext.oppgaveRepository.lagre(
+            Oppgave.ny(
+                id = oppgaveId,
+                hendelseId = godkjenningsbehovId,
+                egenskaper = egenskaper,
+                vedtaksperiodeId = vedtaksperiodeId,
+                behandlingId = behandlingId,
+                utbetalingId = utbetalingId,
+                kanAvvises = kanAvvises,
+            )
         )
     }
 

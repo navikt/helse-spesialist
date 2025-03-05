@@ -22,12 +22,8 @@ class PgOppgaveRepository private constructor(queryRunner: QueryRunner) : QueryR
     private val tildelingDao: PgTildelingDao = PgTildelingDao(queryRunner)
 
     override fun lagre(oppgave: Oppgave) {
-        if (finnesAnnenAktivOppgavePåPerson(
-                oppgave.id,
-                oppgave.vedtaksperiodeId,
-            )
-        ) {
-            error("Forventer ikke å finne aktive oppgave for personen")
+        if (finnesAnnenAktivOppgavePåPerson(oppgave.id, oppgave.vedtaksperiodeId)) {
+            error("Forventer ikke å finne annen aktiv oppgave for personen")
         }
         lagreOppgave(oppgave)
         lagreTildeling(oppgave)
