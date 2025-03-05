@@ -1,6 +1,6 @@
 # Spesialist
 
-![Bygg og deploy](https://github.com/navikt/helse-spesialist/workflows/Bygg%20og%20deploy/badge.svg)
+![Bygg og deploy](https://github.com/navikt/helse-spesialist/workflows/Spesialist/badge.svg)
 
 ## Beskrivelse
 
