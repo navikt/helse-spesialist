@@ -59,7 +59,7 @@ tbdLibs-rapidsAndRiversTest = { module = "com.github.navikt.tbd-libs:rapids-and-
 testcontainers-kafka = { module = "org.testcontainers:kafka", version.ref = "testcontainers" }
 testcontainers-postgres = { module = "org.testcontainers:postgresql", version.ref = "testcontainers" }
 
-unleash-client = "io.getunleash:unleash-client-java:10.0.2"
+unleash-client = "io.getunleash:unleash-client-java:10.1.0"
 wiremock = "org.wiremock:wiremock-jetty12:3.12.1"
 
 [bundles]
