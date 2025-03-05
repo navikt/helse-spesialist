@@ -11,8 +11,6 @@ interface UtbetalingDao {
 
     fun hentUtbetaling(utbetalingId: UUID): Utbetaling
 
-    fun utbetalingFor(utbetalingId: UUID): Utbetaling?
-
     fun nyUtbetalingStatus(
         utbetalingIdRef: Long,
         status: Utbetalingsstatus,
@@ -42,15 +40,5 @@ interface UtbetalingDao {
         utbetalingId: UUID,
     )
 
-    fun utbetalingerForVedtaksperiode(vedtaksperiodeId: UUID): List<TidligereUtbetalingerForVedtaksperiodeDto>
-
     fun erUtbetalingForkastet(utbetalingId: UUID): Boolean
-
-    fun utbetalingFor(oppgaveId: Long): Utbetaling?
-
-    data class TidligereUtbetalingerForVedtaksperiodeDto(
-        val utbetalingId: UUID,
-        val id: Int,
-        val utbetalingsstatus: Utbetalingsstatus,
-    )
 }

@@ -1,18 +1,14 @@
 package no.nav.helse.spesialist.db.dao
 
-import no.nav.helse.modell.oppgave.Egenskap
-import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import java.time.LocalDateTime
 import java.util.UUID
-import kotlin.random.Random.Default.nextLong
 
 class PgUtbetalingDaoTest : AbstractDBIntegrationTest() {
     @Test
@@ -36,53 +32,8 @@ class PgUtbetalingDaoTest : AbstractDBIntegrationTest() {
             2000,
         )
 
-        val utbetaling = utbetalingDao.utbetalingFor(utbetalingId)
+        val utbetaling = utbetalingDao.hentUtbetaling(utbetalingId)
         assertEquals(Utbetaling(utbetalingId, 2000, 2000, Utbetalingtype.UTBETALING), utbetaling)
-    }
-
-    @Test
-    fun `finner utbetaling basert på oppgaveId`() {
-        nyPerson()
-        val arbeidsgiverFagsystemId = fagsystemId()
-        val personFagsystemId = fagsystemId()
-
-        val arbeidsgiveroppdragId1 = lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId)
-        val personOppdragId1 = lagPersonoppdrag(personFagsystemId)
-        val utbetalingId = UUID.randomUUID()
-        oppgaveDao.updateOppgave(oppgaveId = OPPGAVE_ID, oppgavestatus = "Ferdigstilt", egenskaper = listOf(EGENSKAP))
-        val oppgaveId = nextLong()
-        daos.oppgaveRepository.lagre(
-            Oppgave.ny(
-                id = oppgaveId,
-                hendelseId = HENDELSE_ID,
-                egenskaper = setOf(Egenskap.SØKNAD),
-                vedtaksperiodeId = VEDTAKSPERIODE,
-                behandlingId = UUID.randomUUID(),
-                utbetalingId = utbetalingId,
-                kanAvvises = true,
-            )
-        )
-
-        utbetalingDao.opprettUtbetalingId(
-            utbetalingId,
-            FNR,
-            ORGNUMMER,
-            Utbetalingtype.UTBETALING,
-            LocalDateTime.now(),
-            arbeidsgiveroppdragId1,
-            personOppdragId1,
-            2000,
-            2000,
-        )
-
-        val utbetaling = utbetalingDao.utbetalingFor(oppgaveId)
-        assertEquals(Utbetaling(utbetalingId, 2000, 2000, Utbetalingtype.UTBETALING), utbetaling)
-    }
-
-    @Test
-    fun `finner ikke utbetaling dersom det ikke finnes noen`() {
-        val utbetaling = utbetalingDao.utbetalingFor(UUID.randomUUID())
-        assertNull(utbetaling)
     }
 
     @Test

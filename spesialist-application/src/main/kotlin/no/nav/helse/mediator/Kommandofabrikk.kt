@@ -305,11 +305,8 @@ class Kommandofabrikk(
         sessionContext: SessionContext,
     ): LøsGodkjenningsbehov {
         val godkjenningsbehov = sessionContext.meldingDao.finnGodkjenningsbehov(melding.godkjenningsbehovhendelseId)
-        val oppgaveId = melding.oppgaveId
         val sykefraværstilfelle = person.sykefraværstilfelle(godkjenningsbehov.vedtaksperiodeId())
-        val utbetaling =
-            sessionContext.utbetalingDao.utbetalingFor(oppgaveId)
-                ?: throw IllegalStateException("Forventer å finne utbetaling for oppgave med id=$oppgaveId")
+        val utbetaling = sessionContext.utbetalingDao.hentUtbetaling(godkjenningsbehov.data().utbetalingId)
         return LøsGodkjenningsbehov(
             utbetaling = utbetaling,
             sykefraværstilfelle = sykefraværstilfelle,

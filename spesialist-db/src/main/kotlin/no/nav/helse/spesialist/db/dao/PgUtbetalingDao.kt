@@ -2,7 +2,6 @@ package no.nav.helse.spesialist.db.dao
 
 import kotliquery.Session
 import no.nav.helse.db.UtbetalingDao
-import no.nav.helse.db.UtbetalingDao.TidligereUtbetalingerForVedtaksperiodeDto
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
@@ -122,7 +121,7 @@ class PgUtbetalingDao internal constructor(session: Session) : UtbetalingDao, Qu
     override fun hentUtbetaling(utbetalingId: UUID): Utbetaling =
         checkNotNull(utbetalingFor(utbetalingId)) { "Finner ikke utbetaling, utbetalingId=$utbetalingId" }
 
-    override fun utbetalingFor(utbetalingId: UUID): Utbetaling? =
+    private fun utbetalingFor(utbetalingId: UUID): Utbetaling? =
         asSQL(
             """
             SELECT arbeidsgiverbeløp, personbeløp, type FROM utbetaling_id u WHERE u.utbetaling_id = :utbetaling_id
@@ -134,40 +133,6 @@ class PgUtbetalingDao internal constructor(session: Session) : UtbetalingDao, Qu
                 it.int("arbeidsgiverbeløp"),
                 it.int("personbeløp"),
                 enumValueOf(it.string("type")),
-            )
-        }
-
-    override fun utbetalingFor(oppgaveId: Long): Utbetaling? =
-        asSQL(
-            """SELECT utbetaling_id, arbeidsgiverbeløp, personbeløp, type FROM utbetaling_id u WHERE u.utbetaling_id = (SELECT utbetaling_id FROM oppgave o WHERE o.id = :oppgave_id)"""
-                .trimIndent(),
-            "oppgave_id" to oppgaveId,
-        ).singleOrNull {
-            Utbetaling(
-                it.uuid("utbetaling_id"),
-                it.int("arbeidsgiverbeløp"),
-                it.int("personbeløp"),
-                enumValueOf(it.string("type")),
-            )
-        }
-
-    override fun utbetalingerForVedtaksperiode(vedtaksperiodeId: UUID): List<TidligereUtbetalingerForVedtaksperiodeDto> =
-        asSQL(
-            """
-            SELECT vui.utbetaling_id, u.id, u.status
-            FROM vedtaksperiode_utbetaling_id vui
-            JOIN utbetaling_id ui ON ui.utbetaling_id = vui.utbetaling_id
-            JOIN utbetaling u ON u.utbetaling_id_ref = ui.id
-            WHERE vui.vedtaksperiode_id = :vedtaksperiodeId
-            ORDER BY u.id DESC
-            LIMIT 2;
-            """.trimIndent(),
-            "vedtaksperiodeId" to vedtaksperiodeId,
-        ).list {
-            TidligereUtbetalingerForVedtaksperiodeDto(
-                id = it.int("id"),
-                utbetalingId = it.uuid("utbetaling_id"),
-                utbetalingsstatus = Utbetalingsstatus.valueOf(it.string("status")),
             )
         }
 }
