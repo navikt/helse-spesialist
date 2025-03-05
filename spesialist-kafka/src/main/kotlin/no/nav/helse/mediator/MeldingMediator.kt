@@ -290,10 +290,10 @@ class MeldingMediator(
         val meldingnavn = requireNotNull(melding::class.simpleName)
         val utgåendeMeldingerMediator = UtgåendeMeldingerMediator()
         try {
-            logg.info("Personen finnes i databasen, behandler melding $meldingnavn")
-            sikkerlogg.info("Personen finnes i databasen, behandler melding $meldingnavn")
             sessionFactory.transactionalSessionScope { sessionContext ->
                 sessionContext.personRepository.brukPersonHvisFinnes(melding.fødselsnummer()) {
+                    logg.info("Personen finnes i databasen, behandler melding $meldingnavn")
+                    sikkerlogg.info("Personen finnes i databasen, behandler melding $meldingnavn")
                     val kommandostarter =
                         kommandofabrikk.lagKommandostarter(
                             setOf(utgåendeMeldingerMediator),
