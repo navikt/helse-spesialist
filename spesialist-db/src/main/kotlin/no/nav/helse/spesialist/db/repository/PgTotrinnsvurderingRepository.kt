@@ -33,7 +33,7 @@ class PgTotrinnsvurderingRepository(session: Session) : QueryRunner by MedSessio
             insert(totrinnsvurdering).let(::TotrinnsvurderingId).let(totrinnsvurdering::tildelId)
         }
 
-        overstyringRepository.lagre(totrinnsvurdering.overstyringer)
+        overstyringRepository.lagre(totrinnsvurdering.overstyringer, totrinnsvurdering.id())
     }
 
     private fun finnAktivTotrinnsvurdering(fødselsnummer: String): Totrinnsvurdering? =
@@ -81,7 +81,7 @@ class PgTotrinnsvurderingRepository(session: Session) : QueryRunner by MedSessio
               AND utbetaling_id_ref IS NULL
             """.trimIndent(),
             "vedtaksperiodeId" to vedtaksperiodeId,
-        ).singleOrNull { it.toTotrinnsvurdering() }
+        ).singleOrNull { it.toTotrinnsvurderingDeprecated() }
 
     private fun insert(totrinnsvurdering: Totrinnsvurdering): Long =
         asSQL(
@@ -117,6 +117,21 @@ class PgTotrinnsvurderingRepository(session: Session) : QueryRunner by MedSessio
     }
 
     private fun Row.toTotrinnsvurdering(): Totrinnsvurdering =
+        Totrinnsvurdering.fraLagring(
+            id = TotrinnsvurderingId(long("id")),
+            vedtaksperiodeId = uuid("vedtaksperiode_id"),
+            erRetur = boolean("er_retur"),
+            saksbehandler = uuidOrNull("saksbehandler_oid")?.let(::SaksbehandlerOid),
+            beslutter = uuidOrNull("beslutter_oid")?.let(::SaksbehandlerOid),
+            utbetalingId = uuidOrNull("utbetaling_id"),
+            opprettet = localDateTime("opprettet"),
+            oppdatert = localDateTimeOrNull("oppdatert"),
+            ferdigstilt = uuidOrNull("utbetaling_id") != null,
+            overstyringer = overstyringRepository.finnAktive(string("fødselsnummer"), TotrinnsvurderingId(long("id"))),
+        )
+
+    @Deprecated("Ny totrinnsløype bruker totrinnsvurderingId til å finne overstyringer")
+    private fun Row.toTotrinnsvurderingDeprecated(): Totrinnsvurdering =
         Totrinnsvurdering.fraLagring(
             id = TotrinnsvurderingId(long("id")),
             vedtaksperiodeId = uuid("vedtaksperiode_id"),

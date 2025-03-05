@@ -16,6 +16,7 @@ import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinje
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinjedag
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlag
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
 import no.nav.helse.spesialist.application.OverstyringRepository
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.MedSession
@@ -26,24 +27,38 @@ import java.util.UUID
 class PgOverstyringRepository(
     session: Session,
 ) : QueryRunner by MedSession(session), OverstyringRepository {
-    override fun lagre(overstyringer: List<Overstyring>) {
+    override fun lagre(
+        overstyringer: List<Overstyring>,
+        totrinnsvurderingId: TotrinnsvurderingId?,
+    ) {
         overstyringer.forEach { overstyring ->
             if (overstyring.harFåttTildeltId()) {
                 updateOverstyring(overstyring)
             } else {
                 val id: Long =
                     when (overstyring) {
-                        is OverstyrtTidslinje -> insertTidslinjeOverstyring(overstyring)
-                        is OverstyrtInntektOgRefusjon -> insertInntektOgRefusjonOverstyring(overstyring)
-                        is OverstyrtArbeidsforhold -> insertArbeidsforholdOverstyring(overstyring)
-                        is MinimumSykdomsgrad -> insertMinimumSykdomsgradOverstyring(overstyring)
-                        is SkjønnsfastsattSykepengegrunnlag -> insertSkjønnsfastsattSykepengegrunnlag(overstyring)
+                        is OverstyrtTidslinje -> insertTidslinjeOverstyring(overstyring, totrinnsvurderingId)
+                        is OverstyrtInntektOgRefusjon -> insertInntektOgRefusjonOverstyring(overstyring, totrinnsvurderingId)
+                        is OverstyrtArbeidsforhold -> insertArbeidsforholdOverstyring(overstyring, totrinnsvurderingId)
+                        is MinimumSykdomsgrad -> insertMinimumSykdomsgradOverstyring(overstyring, totrinnsvurderingId)
+                        is SkjønnsfastsattSykepengegrunnlag -> insertSkjønnsfastsattSykepengegrunnlag(overstyring, totrinnsvurderingId)
                     }
                 overstyring.tildelId(OverstyringId(id))
             }
         }
     }
 
+    override fun finnAktive(
+        fødselsnummer: String,
+        totrinnsvurderingId: TotrinnsvurderingId,
+    ): List<Overstyring> =
+        finnTidslinjeOverstyringer(fødselsnummer, totrinnsvurderingId) +
+            finnInntektOgRefusjonOverstyringer(fødselsnummer, totrinnsvurderingId) +
+            finnArbeidsforholdOverstyringer(fødselsnummer, totrinnsvurderingId) +
+            finnMinimumSykdomsgradsOverstyringer(fødselsnummer, totrinnsvurderingId) +
+            finnSkjønnsfastsattSykepengegrunnlag(fødselsnummer, totrinnsvurderingId)
+
+    @Deprecated("Ny totrinnsløype bruker totrinnsvurderingId til å finne overstyringer")
     override fun finnAktive(fødselsnummer: String): List<Overstyring> =
         finnTidslinjeOverstyringer(fødselsnummer) +
             finnInntektOgRefusjonOverstyringer(fødselsnummer) +
@@ -51,11 +66,14 @@ class PgOverstyringRepository(
             finnMinimumSykdomsgradsOverstyringer(fødselsnummer) +
             finnSkjønnsfastsattSykepengegrunnlag(fødselsnummer)
 
-    private fun insertOverstyring(overstyring: Overstyring): Long =
+    private fun insertOverstyring(
+        overstyring: Overstyring,
+        totrinnsvurderingId: TotrinnsvurderingId?,
+    ): Long =
         asSQL(
             """
-            INSERT INTO overstyring (hendelse_ref, ekstern_hendelse_id, person_ref, saksbehandler_ref, tidspunkt, vedtaksperiode_id, ferdigstilt)
-            SELECT gen_random_uuid(), :eksternHendelseId, p.id, :saksbehandlerRef, :opprettet, :vedtaksperiodeId, :ferdigstilt
+            INSERT INTO overstyring (hendelse_ref, ekstern_hendelse_id, person_ref, saksbehandler_ref, tidspunkt, vedtaksperiode_id, ferdigstilt, totrinnsvurdering_ref)
+            SELECT gen_random_uuid(), :eksternHendelseId, p.id, :saksbehandlerRef, :opprettet, :vedtaksperiodeId, :ferdigstilt, :totrinnsvurderingId
             FROM person p
             WHERE p.fødselsnummer = :foedselsnummer
             """.trimIndent(),
@@ -65,10 +83,14 @@ class PgOverstyringRepository(
             "opprettet" to overstyring.opprettet,
             "vedtaksperiodeId" to overstyring.vedtaksperiodeId,
             "ferdigstilt" to overstyring.ferdigstilt,
+            "totrinnsvurderingId" to totrinnsvurderingId?.value,
         ).updateAndReturnGeneratedKey()
 
-    private fun insertTidslinjeOverstyring(overstyrtTidslinje: OverstyrtTidslinje): Long {
-        val overstyringRef = insertOverstyring(overstyrtTidslinje)
+    private fun insertTidslinjeOverstyring(
+        overstyrtTidslinje: OverstyrtTidslinje,
+        totrinnsvurderingId: TotrinnsvurderingId?,
+    ): Long {
+        val overstyringRef = insertOverstyring(overstyrtTidslinje, totrinnsvurderingId)
 
         val overstyringTidslinjeRef =
             asSQL(
@@ -101,8 +123,11 @@ class PgOverstyringRepository(
         return overstyringRef
     }
 
-    private fun insertArbeidsforholdOverstyring(overstyrtArbeidsforhold: OverstyrtArbeidsforhold): Long {
-        val overstyringRef = insertOverstyring(overstyrtArbeidsforhold)
+    private fun insertArbeidsforholdOverstyring(
+        overstyrtArbeidsforhold: OverstyrtArbeidsforhold,
+        totrinnsvurderingId: TotrinnsvurderingId?,
+    ): Long {
+        val overstyringRef = insertOverstyring(overstyrtArbeidsforhold, totrinnsvurderingId)
 
         overstyrtArbeidsforhold.overstyrteArbeidsforhold.forEach { arbeidsforhold ->
             asSQL(
@@ -124,8 +149,11 @@ class PgOverstyringRepository(
         return overstyringRef
     }
 
-    private fun insertInntektOgRefusjonOverstyring(overstyrtInntektOgRefusjon: OverstyrtInntektOgRefusjon): Long {
-        val overstyringRef = insertOverstyring(overstyrtInntektOgRefusjon)
+    private fun insertInntektOgRefusjonOverstyring(
+        overstyrtInntektOgRefusjon: OverstyrtInntektOgRefusjon,
+        totrinnsvurderingId: TotrinnsvurderingId?,
+    ): Long {
+        val overstyringRef = insertOverstyring(overstyrtInntektOgRefusjon, totrinnsvurderingId)
 
         overstyrtInntektOgRefusjon.arbeidsgivere.forEach { arbeidsgiver ->
             asSQL(
@@ -168,8 +196,11 @@ class PgOverstyringRepository(
         return overstyringRef
     }
 
-    private fun insertMinimumSykdomsgradOverstyring(minimumSykdomsgrad: MinimumSykdomsgrad): Long {
-        val overstyringRef = insertOverstyring(minimumSykdomsgrad)
+    private fun insertMinimumSykdomsgradOverstyring(
+        minimumSykdomsgrad: MinimumSykdomsgrad,
+        totrinnsvurderingId: TotrinnsvurderingId?,
+    ): Long {
+        val overstyringRef = insertOverstyring(minimumSykdomsgrad, totrinnsvurderingId)
 
         val overstyringMinimumSykdomsgradId =
             asSQL(
@@ -218,7 +249,10 @@ class PgOverstyringRepository(
         return overstyringRef
     }
 
-    private fun insertSkjønnsfastsattSykepengegrunnlag(skjønnsfastsattSykepengegrunnlag: SkjønnsfastsattSykepengegrunnlag): Long {
+    private fun insertSkjønnsfastsattSykepengegrunnlag(
+        skjønnsfastsattSykepengegrunnlag: SkjønnsfastsattSykepengegrunnlag,
+        totrinnsvurderingId: TotrinnsvurderingId?,
+    ): Long {
         // Den felles informasjonen ligger på alle arbeidsgiverne. Burde kanskje skilles ut i eget objekt
         val enArbeidsgiver = skjønnsfastsattSykepengegrunnlag.arbeidsgivere.first()
 
@@ -232,7 +266,7 @@ class PgOverstyringRepository(
                 insertBegrunnelse(type, tekst, skjønnsfastsattSykepengegrunnlag.saksbehandlerOid)
             }
 
-        val overstyringRef = insertOverstyring(skjønnsfastsattSykepengegrunnlag)
+        val overstyringRef = insertOverstyring(skjønnsfastsattSykepengegrunnlag, totrinnsvurderingId)
 
         val skjønnsfastsettingSykepengegrunnlagId =
             asSQL(
@@ -312,6 +346,34 @@ class PgOverstyringRepository(
         ).update()
     }
 
+    private fun finnTidslinjeOverstyringer(
+        fødselsnummer: String,
+        totrinnsvurderingId: TotrinnsvurderingId,
+    ): List<OverstyrtTidslinje> =
+        asSQL(
+            """
+            SELECT o.id,
+                   ot.id AS overstyring_tidslinje_id,
+                   o.ekstern_hendelse_id,
+                   p.fødselsnummer,
+                   p.aktør_id,
+                   a.organisasjonsnummer,
+                   o.vedtaksperiode_id,
+                   ot.begrunnelse,
+                   o.tidspunkt,
+                   o.ferdigstilt,
+                   o.saksbehandler_ref
+            FROM overstyring o
+                INNER JOIN overstyring_tidslinje ot ON ot.overstyring_ref = o.id
+                INNER JOIN person p ON p.id = o.person_ref
+                INNER JOIN arbeidsgiver a ON a.id = ot.arbeidsgiver_ref
+            WHERE p.fødselsnummer = :fodselsnummer and o.totrinnsvurdering_ref = :totrinnsvurderingId and o.ferdigstilt = false
+            """,
+            "fodselsnummer" to fødselsnummer,
+            "totrinnsvurderingId" to totrinnsvurderingId.value,
+        ).list { it.toOverstyrtTidslinje() }
+
+    @Deprecated("Ny totrinnsløype bruker totrinnsvurderingId til å finne overstyringer")
     private fun finnTidslinjeOverstyringer(fødselsnummer: String): List<OverstyrtTidslinje> =
         asSQL(
             """
@@ -335,6 +397,32 @@ class PgOverstyringRepository(
             "fodselsnummer" to fødselsnummer,
         ).list { it.toOverstyrtTidslinje() }
 
+    private fun finnInntektOgRefusjonOverstyringer(
+        fødselsnummer: String,
+        totrinnsvurderingId: TotrinnsvurderingId,
+    ): List<OverstyrtInntektOgRefusjon> =
+        asSQL(
+            """
+            SELECT DISTINCT ON (o.id)
+                o.id,
+                o.ekstern_hendelse_id,
+                p.fødselsnummer,
+                p.aktør_id,
+                o.tidspunkt,
+                o.vedtaksperiode_id,
+                o.saksbehandler_ref,
+                o.ferdigstilt,
+                oi.skjaeringstidspunkt
+            FROM overstyring o
+                INNER JOIN overstyring_inntekt oi on o.id = oi.overstyring_ref
+                INNER JOIN person p ON p.id = o.person_ref
+            WHERE p.fødselsnummer = :fodselsnummer and o.totrinnsvurdering_ref = :totrinnsvurderingId and o.ferdigstilt = false
+            """,
+            "fodselsnummer" to fødselsnummer,
+            "totrinnsvurderingId" to totrinnsvurderingId.value,
+        ).list { it.toOverstyrtInntektOgRefusjon() }
+
+    @Deprecated("Ny totrinnsløype bruker totrinnsvurderingId til å finne overstyringer")
     private fun finnInntektOgRefusjonOverstyringer(fødselsnummer: String): List<OverstyrtInntektOgRefusjon> =
         asSQL(
             """
@@ -356,6 +444,33 @@ class PgOverstyringRepository(
             "fodselsnummer" to fødselsnummer,
         ).list { it.toOverstyrtInntektOgRefusjon() }
 
+    private fun finnArbeidsforholdOverstyringer(
+        fødselsnummer: String,
+        totrinnsvurderingId: TotrinnsvurderingId,
+    ): List<OverstyrtArbeidsforhold> =
+        asSQL(
+            """
+            SELECT DISTINCT ON (o.id)
+                o.id,
+                o.ekstern_hendelse_id,
+                p.fødselsnummer,
+                o.tidspunkt,
+                p.aktør_id,
+                o.ferdigstilt,
+                o.vedtaksperiode_id,
+                o.saksbehandler_ref,
+                o.ferdigstilt,
+                oa.skjaeringstidspunkt
+            FROM overstyring o
+                INNER JOIN overstyring_arbeidsforhold oa on o.id = oa.overstyring_ref
+                INNER JOIN person p ON p.id = o.person_ref
+            WHERE p.fødselsnummer = :fodselsnummer and o.totrinnsvurdering_ref = :totrinnsvurderingId and o.ferdigstilt = false
+            """,
+            "fodselsnummer" to fødselsnummer,
+            "totrinnsvurderingId" to totrinnsvurderingId.value,
+        ).list { it.toOverstyrtArbeidsforhold() }
+
+    @Deprecated("Ny totrinnsløype bruker totrinnsvurderingId til å finne overstyringer")
     private fun finnArbeidsforholdOverstyringer(fødselsnummer: String): List<OverstyrtArbeidsforhold> =
         asSQL(
             """
@@ -378,6 +493,33 @@ class PgOverstyringRepository(
             "fodselsnummer" to fødselsnummer,
         ).list { it.toOverstyrtArbeidsforhold() }
 
+    private fun finnMinimumSykdomsgradsOverstyringer(
+        fødselsnummer: String,
+        totrinnsvurderingId: TotrinnsvurderingId,
+    ): List<MinimumSykdomsgrad> =
+        asSQL(
+            """
+            SELECT
+                o.id,
+                oms.id AS overstyring_minimum_sykdomsgrad_id,
+                ekstern_hendelse_id,
+                aktør_id,
+                fødselsnummer,
+                tidspunkt,
+                vedtaksperiode_id,
+                begrunnelse,
+                o.saksbehandler_ref,
+                o.ferdigstilt
+            FROM overstyring o
+                JOIN person p ON o.person_ref = p.id
+                JOIN overstyring_minimum_sykdomsgrad oms ON oms.overstyring_ref = o.id
+             WHERE p.fødselsnummer = :fodselsnummer and o.totrinnsvurdering_ref = :totrinnsvurderingId and o.ferdigstilt = false
+            """.trimIndent(),
+            "fodselsnummer" to fødselsnummer,
+            "totrinnsvurderingId" to totrinnsvurderingId.value,
+        ).list { it.toMinimumSykdomsgrad() }
+
+    @Deprecated("Ny totrinnsløype bruker totrinnsvurderingId til å finne overstyringer")
     private fun finnMinimumSykdomsgradsOverstyringer(fødselsnummer: String): List<MinimumSykdomsgrad> =
         asSQL(
             """
@@ -400,6 +542,42 @@ class PgOverstyringRepository(
             "fodselsnummer" to fødselsnummer,
         ).list { it.toMinimumSykdomsgrad() }
 
+    private fun finnSkjønnsfastsattSykepengegrunnlag(
+        fødselsnummer: String,
+        totrinnsvurderingId: TotrinnsvurderingId,
+    ): List<SkjønnsfastsattSykepengegrunnlag> =
+        asSQL(
+            """
+            SELECT o.id,
+                   ss.id    as overstyring_skjonn_id,
+                   ss.subsumsjon,
+                   o.ekstern_hendelse_id,
+                   p.fødselsnummer,
+                   p.aktør_id,
+                   o.tidspunkt,
+                   ss.skjaeringstidspunkt,
+                   o.vedtaksperiode_id,
+                   o.saksbehandler_ref,
+                   ss.arsak,
+                   ss.type,
+                   b2.tekst as mal,
+                   b1.tekst as fritekst,
+                   b3.tekst as konklusjon,
+                   ss.initierende_vedtaksperiode_id,
+                   o.ferdigstilt
+            FROM overstyring o
+                     INNER JOIN skjonnsfastsetting_sykepengegrunnlag ss ON o.id = ss.overstyring_ref
+                     INNER JOIN person p ON p.id = o.person_ref
+                     INNER JOIN begrunnelse b1 ON ss.begrunnelse_fritekst_ref = b1.id
+                     INNER JOIN begrunnelse b2 ON ss.begrunnelse_mal_ref = b2.id
+                     INNER JOIN begrunnelse b3 ON ss.begrunnelse_konklusjon_ref = b3.id
+            WHERE p.fødselsnummer = :fodselsnummer and o.totrinnsvurdering_ref = :totrinnsvurderingId and o.ferdigstilt = false
+            """,
+            "fodselsnummer" to fødselsnummer,
+            "totrinnsvurderingId" to totrinnsvurderingId.value,
+        ).list { it.toSkjønnsfastsattSykepengegrunnlag() }
+
+    @Deprecated("Ny totrinnsløype bruker totrinnsvurderingId til å finne overstyringer")
     private fun finnSkjønnsfastsattSykepengegrunnlag(fødselsnummer: String): List<SkjønnsfastsattSykepengegrunnlag> =
         asSQL(
             """

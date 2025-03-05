@@ -31,7 +31,7 @@ class PgTotrinnsvurderingRepositoryTest: AbstractDBIntegrationTest() {
     }
 
     @Test
-    fun `lagre totrinsvurdering`() {
+    fun `lagre totrinnsvurdering`() {
         val totrinnsvurdering = nyTotrinnsvurdering()
 
         totrinnsvurderingRepository.lagre(totrinnsvurdering, FNR)
@@ -43,7 +43,7 @@ class PgTotrinnsvurderingRepositoryTest: AbstractDBIntegrationTest() {
     }
 
     @Test
-    fun `oppdater totrinsvurdering`() {
+    fun `oppdater totrinnsvurdering`() {
         totrinnsvurderingRepository.lagre(nyTotrinnsvurdering(), FNR)
         val hentetTotrinnsvurdering = totrinnsvurderingRepository.finn(FNR)
         checkNotNull(hentetTotrinnsvurdering)
