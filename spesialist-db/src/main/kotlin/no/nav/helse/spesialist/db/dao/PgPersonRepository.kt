@@ -8,6 +8,8 @@ import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.person.PersonDto
 import no.nav.helse.modell.person.PersonRepository
 import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
+import no.nav.helse.spesialist.application.logg.logg
+import no.nav.helse.spesialist.application.logg.sikkerlogg
 
 class PgPersonRepository(
     session: Session,
@@ -21,7 +23,14 @@ class PgPersonRepository(
         fødselsnummer: String,
         personScope: Person.() -> Unit,
     ) {
-        val (person, dtoFør) = hentPerson(fødselsnummer) ?: return
+        val (person, dtoFør) =
+            hentPerson(fødselsnummer) ?: run {
+                "Behandler ikke melding for ukjent person".let { melding ->
+                    logg.info(melding)
+                    sikkerlogg.info("$melding med {}", fødselsnummer)
+                }
+                return
+            }
         personScope(person)
         val dtoEtter = person.toDto()
         if (dtoFør != dtoEtter) lagrePerson(dtoFør, dtoEtter)
