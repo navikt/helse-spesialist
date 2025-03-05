@@ -66,7 +66,7 @@ class PgTotrinnsvurderingRepositoryTest: AbstractDBIntegrationTest() {
     private fun nyOverstyring(): Overstyring =
         OverstyrtTidslinje.ny(
             vedtaksperiodeId = VEDTAKSPERIODE,
-            saksbehandlerOid = SAKSBEHANDLER_OID,
+            saksbehandlerOid = SaksbehandlerOid(SAKSBEHANDLER_OID),
             fødselsnummer = FNR,
             aktørId = AKTØR,
             organisasjonsnummer = ORGNUMMER,

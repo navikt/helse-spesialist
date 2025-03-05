@@ -22,6 +22,7 @@ import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.db.objectMapper
+import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import java.util.UUID
 
 class PgOverstyringRepository(
@@ -79,7 +80,7 @@ class PgOverstyringRepository(
             """.trimIndent(),
             "eksternHendelseId" to overstyring.eksternHendelseId,
             "foedselsnummer" to overstyring.fødselsnummer,
-            "saksbehandlerRef" to overstyring.saksbehandlerOid,
+            "saksbehandlerRef" to overstyring.saksbehandlerOid.value,
             "opprettet" to overstyring.opprettet,
             "vedtaksperiodeId" to overstyring.vedtaksperiodeId,
             "ferdigstilt" to overstyring.ferdigstilt,
@@ -326,7 +327,7 @@ class PgOverstyringRepository(
     private fun insertBegrunnelse(
         type: String,
         tekst: String,
-        saksbehandlerOid: UUID,
+        saksbehandlerOid: SaksbehandlerOid,
     ): Long =
         asSQL(
             """
@@ -335,7 +336,7 @@ class PgOverstyringRepository(
             """.trimIndent(),
             "type" to type,
             "tekst" to tekst,
-            "saksbehandlerRef" to saksbehandlerOid,
+            "saksbehandlerRef" to saksbehandlerOid.value,
         ).updateAndReturnGeneratedKey()
 
     private fun updateOverstyring(overstyring: Overstyring) {
@@ -682,7 +683,7 @@ class PgOverstyringRepository(
             vedtaksperiodeId = uuid("vedtaksperiode_id"),
             begrunnelse = string("begrunnelse"),
             opprettet = localDateTime("tidspunkt"),
-            saksbehandlerOid = uuid("saksbehandler_ref"),
+            saksbehandlerOid = SaksbehandlerOid(uuid("saksbehandler_ref")),
             ferdigstilt = boolean("ferdigstilt"),
             dager = finnOverstyrtTidslinjeDager(long("overstyring_tidslinje_id")),
             kobledeVedtaksperioder = finnKobledeVedtaksperioderForOverstyring(id),
@@ -699,7 +700,7 @@ class PgOverstyringRepository(
             opprettet = localDateTime("tidspunkt"),
             skjæringstidspunkt = localDate("skjaeringstidspunkt"),
             vedtaksperiodeId = uuid("vedtaksperiode_id"),
-            saksbehandlerOid = uuid("saksbehandler_ref"),
+            saksbehandlerOid = SaksbehandlerOid(uuid("saksbehandler_ref")),
             ferdigstilt = boolean("ferdigstilt"),
             arbeidsgivere = finnOverstyrtArbeidsgiver(long("id")),
             kobledeVedtaksperioder = finnKobledeVedtaksperioderForOverstyring(id),
@@ -716,7 +717,7 @@ class PgOverstyringRepository(
             opprettet = localDateTime("tidspunkt"),
             skjæringstidspunkt = localDate("skjaeringstidspunkt"),
             vedtaksperiodeId = uuid("vedtaksperiode_id"),
-            saksbehandlerOid = uuid("saksbehandler_ref"),
+            saksbehandlerOid = SaksbehandlerOid(uuid("saksbehandler_ref")),
             ferdigstilt = boolean("ferdigstilt"),
             overstyrteArbeidsforhold = finnArbeidsforhold(long("id")),
             kobledeVedtaksperioder = finnKobledeVedtaksperioderForOverstyring(id),
@@ -748,7 +749,7 @@ class PgOverstyringRepository(
             vedtaksperiodeId = uuid("vedtaksperiode_id"),
             arbeidsgivere = finnMinimumSykdomsgradArbeidsgiver(minimumSykdomsgradId),
             opprettet = localDateTime("tidspunkt"),
-            saksbehandlerOid = uuid("saksbehandler_ref"),
+            saksbehandlerOid = SaksbehandlerOid(uuid("saksbehandler_ref")),
             ferdigstilt = boolean("ferdigstilt"),
             kobledeVedtaksperioder = finnKobledeVedtaksperioderForOverstyring(id),
         )
@@ -770,7 +771,7 @@ class PgOverstyringRepository(
             opprettet = localDateTime("tidspunkt"),
             skjæringstidspunkt = localDate("skjaeringstidspunkt"),
             vedtaksperiodeId = uuid("vedtaksperiode_id"),
-            saksbehandlerOid = uuid("saksbehandler_ref"),
+            saksbehandlerOid = SaksbehandlerOid(uuid("saksbehandler_ref")),
             ferdigstilt = boolean("ferdigstilt"),
             arbeidsgivere = finnSkjønnsfastsattArbeidsgiver(this),
             kobledeVedtaksperioder = finnKobledeVedtaksperioderForOverstyring(id),

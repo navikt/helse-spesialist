@@ -6,6 +6,7 @@ import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.Utfall.VILKAR_OPPFYLT
+import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -14,7 +15,7 @@ import java.util.UUID
 class MinimumSykdomsgrad private constructor(
     id: OverstyringId?,
     override val eksternHendelseId: UUID,
-    override val saksbehandlerOid: UUID,
+    override val saksbehandlerOid: SaksbehandlerOid,
     override val fødselsnummer: String,
     override val aktørId: String,
     override val vedtaksperiodeId: UUID,
@@ -36,7 +37,7 @@ class MinimumSykdomsgrad private constructor(
 
     companion object {
         fun ny(
-            saksbehandlerOid: UUID,
+            saksbehandlerOid: SaksbehandlerOid,
             fødselsnummer: String,
             aktørId: String,
             vedtaksperiodeId: UUID,
@@ -65,7 +66,7 @@ class MinimumSykdomsgrad private constructor(
             eksternHendelseId: UUID,
             opprettet: LocalDateTime,
             ferdigstilt: Boolean,
-            saksbehandlerOid: UUID,
+            saksbehandlerOid: SaksbehandlerOid,
             fødselsnummer: String,
             aktørId: String,
             vedtaksperiodeId: UUID,

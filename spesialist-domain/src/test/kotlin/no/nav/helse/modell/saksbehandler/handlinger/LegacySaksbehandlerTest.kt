@@ -11,6 +11,7 @@ import no.nav.helse.modell.saksbehandler.SaksbehandlerDto
 import no.nav.helse.modell.saksbehandler.SaksbehandlerObserver
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon
+import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler.Companion.gjenopprett
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler.Companion.toDto
@@ -41,7 +42,7 @@ internal class LegacySaksbehandlerTest {
                 organisasjonsnummer = "12345",
                 dager = emptyList(),
                 begrunnelse = "begrunnelse",
-                saksbehandlerOid = saksbehandler.oid,
+                saksbehandlerOid = SaksbehandlerOid(saksbehandler.oid),
             )
         )
         assertEquals(true, observert)
@@ -66,7 +67,7 @@ internal class LegacySaksbehandlerTest {
             organisasjonsnummer = "12345",
             dager = overstyrteDager(),
             begrunnelse = "begrunnelse",
-            saksbehandlerOid = saksbehandler.oid,
+            saksbehandlerOid = SaksbehandlerOid(saksbehandler.oid),
         )
         saksbehandler.håndter(
             overstyring
@@ -166,7 +167,7 @@ internal class LegacySaksbehandlerTest {
                 skjæringstidspunkt = 1 jan 2018,
                 arbeidsgivere = emptyList(),
                 vedtaksperiodeId = UUID.randomUUID(),
-                saksbehandlerOid = saksbehandler.oid,
+                saksbehandlerOid = SaksbehandlerOid(saksbehandler.oid),
             )
         )
         assertEquals(true, observert)
@@ -190,7 +191,7 @@ internal class LegacySaksbehandlerTest {
                 skjæringstidspunkt = 1 jan 2018,
                 overstyrteArbeidsforhold = emptyList(),
                 vedtaksperiodeId = UUID.randomUUID(),
-                saksbehandlerOid = saksbehandler.oid,
+                saksbehandlerOid = SaksbehandlerOid(saksbehandler.oid),
             )
         )
         assertEquals(true, observert)
@@ -216,7 +217,7 @@ internal class LegacySaksbehandlerTest {
                 perioderVurdertOk = emptyList(),
                 perioderVurdertIkkeOk = listOf(MinimumSykdomsgradPeriode(1 jan 2018, 31 jan 2018)),
                 arbeidsgivere = listOf(MinimumSykdomsgradArbeidsgiver(organisasjonsnummer = "12345", berørtVedtaksperiodeId = UUID.randomUUID())),
-                saksbehandlerOid = saksbehandler.oid,
+                saksbehandlerOid = SaksbehandlerOid(saksbehandler.oid),
             )
         )
         assertEquals(true, observert)

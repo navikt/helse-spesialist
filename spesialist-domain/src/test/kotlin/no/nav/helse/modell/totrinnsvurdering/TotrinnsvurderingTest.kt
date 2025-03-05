@@ -86,7 +86,7 @@ internal class TotrinnsvurderingTest {
                     organisasjonsnummer = "12345",
                     dager = overstyrteDager(),
                     begrunnelse = "begrunnelse",
-                    saksbehandlerOid = UUID.randomUUID()
+                    saksbehandlerOid = SaksbehandlerOid(UUID.randomUUID())
                 ), OverstyrtTidslinje.ny(
                     vedtaksperiodeId = UUID.randomUUID(),
                     aktørId = "123",
@@ -94,7 +94,7 @@ internal class TotrinnsvurderingTest {
                     organisasjonsnummer = "12345",
                     dager = overstyrteDager(),
                     begrunnelse = "begrunnelse",
-                    saksbehandlerOid = UUID.randomUUID()
+                    saksbehandlerOid = SaksbehandlerOid(UUID.randomUUID())
                 )
             )
         )
@@ -122,7 +122,7 @@ internal class TotrinnsvurderingTest {
                     organisasjonsnummer = "12345",
                     dager = overstyrteDager(),
                     begrunnelse = "begrunnelse",
-                    saksbehandlerOid = UUID.randomUUID()
+                    saksbehandlerOid = SaksbehandlerOid(UUID.randomUUID())
                 ), OverstyrtTidslinje.ny(
                     vedtaksperiodeId = UUID.randomUUID(),
                     aktørId = "123",
@@ -130,7 +130,7 @@ internal class TotrinnsvurderingTest {
                     organisasjonsnummer = "12345",
                     dager = overstyrteDager(),
                     begrunnelse = "begrunnelse",
-                    saksbehandlerOid = UUID.randomUUID()
+                    saksbehandlerOid = SaksbehandlerOid(UUID.randomUUID())
                 ).also { it.kobleVedtaksperiode(vedtaksperiodeId) }
             )
         )
@@ -201,7 +201,7 @@ internal class TotrinnsvurderingTest {
                 organisasjonsnummer = lagOrganisasjonsnummer(),
                 dager = emptyList(),
                 begrunnelse = "begrunnelse",
-                saksbehandlerOid = nySaksbehandler().value,
+                saksbehandlerOid = nySaksbehandler(),
             )
         )
         assertEquals(1, totrinnsvurdering.overstyringer.size)

@@ -128,7 +128,7 @@ class SaksbehandlerMediator(
         saksbehandlerFraApi: SaksbehandlerFraApi,
     ) {
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
-        val modellhandling = handlingFraApi.tilModellversjon(saksbehandler.id().value)
+        val modellhandling = handlingFraApi.tilModellversjon(saksbehandler.id())
         sessionFactory.transactionalSessionScope { it.saksbehandlerRepository.lagre(saksbehandler) }
         tell(modellhandling)
         val legacySaksbehandler = saksbehandler.tilLegacySaksbehandler(saksbehandlerFraApi.grupper)
@@ -791,7 +791,7 @@ class SaksbehandlerMediator(
     private fun no.nav.helse.spesialist.domain.Saksbehandler.tilLegacySaksbehandler(saksbehandlergrupper: List<UUID>): LegacySaksbehandler =
         gjenopprett(TilgangskontrollørForApi(saksbehandlergrupper, tilgangsgrupper))
 
-    private fun HandlingFraApi.tilModellversjon(saksbehandlerOid: UUID): Handling =
+    private fun HandlingFraApi.tilModellversjon(saksbehandlerOid: SaksbehandlerOid): Handling =
         when (this) {
             is ApiArbeidsforholdOverstyringHandling -> this.tilModellversjon(saksbehandlerOid)
             is ApiInntektOgRefusjonOverstyring -> this.tilModellversjon(saksbehandlerOid)
@@ -813,7 +813,7 @@ class SaksbehandlerMediator(
             is ApiPaVentRequest.ApiEndrePaVent -> this.tilModellversjon()
         }
 
-    private fun ApiArbeidsforholdOverstyringHandling.tilModellversjon(saksbehandlerOid: UUID): OverstyrtArbeidsforhold =
+    private fun ApiArbeidsforholdOverstyringHandling.tilModellversjon(saksbehandlerOid: SaksbehandlerOid): OverstyrtArbeidsforhold =
         OverstyrtArbeidsforhold.ny(
             fødselsnummer = fodselsnummer,
             aktørId = aktorId,
@@ -835,7 +835,7 @@ class SaksbehandlerMediator(
                 },
         )
 
-    private fun ApiSkjonnsfastsettelse.tilModellversjon(saksbehandlerOid: UUID): SkjønnsfastsattSykepengegrunnlag =
+    private fun ApiSkjonnsfastsettelse.tilModellversjon(saksbehandlerOid: SaksbehandlerOid): SkjønnsfastsattSykepengegrunnlag =
         SkjønnsfastsattSykepengegrunnlag.ny(
             aktørId = aktorId,
             fødselsnummer = fodselsnummer,
@@ -867,7 +867,7 @@ class SaksbehandlerMediator(
                 },
         )
 
-    private fun ApiMinimumSykdomsgrad.tilModellversjon(saksbehandlerOid: UUID): MinimumSykdomsgrad =
+    private fun ApiMinimumSykdomsgrad.tilModellversjon(saksbehandlerOid: SaksbehandlerOid): MinimumSykdomsgrad =
         MinimumSykdomsgrad.ny(
             aktørId = aktorId,
             fødselsnummer = fodselsnummer,
@@ -897,7 +897,7 @@ class SaksbehandlerMediator(
             vedtaksperiodeId = initierendeVedtaksperiodeId,
         )
 
-    private fun ApiInntektOgRefusjonOverstyring.tilModellversjon(saksbehandlerOid: UUID): OverstyrtInntektOgRefusjon =
+    private fun ApiInntektOgRefusjonOverstyring.tilModellversjon(saksbehandlerOid: SaksbehandlerOid): OverstyrtInntektOgRefusjon =
         OverstyrtInntektOgRefusjon.ny(
             aktørId = aktorId,
             fødselsnummer = fodselsnummer,
@@ -928,7 +928,7 @@ class SaksbehandlerMediator(
                 },
         )
 
-    private fun ApiTidslinjeOverstyring.tilModellversjon(saksbehandlerOid: UUID): OverstyrtTidslinje =
+    private fun ApiTidslinjeOverstyring.tilModellversjon(saksbehandlerOid: SaksbehandlerOid): OverstyrtTidslinje =
         OverstyrtTidslinje.ny(
             vedtaksperiodeId = vedtaksperiodeId,
             aktørId = aktorId,

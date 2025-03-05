@@ -14,6 +14,7 @@ import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.db.jan
+import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -90,7 +91,7 @@ class PgOverstyringRepositoryTest : AbstractDBIntegrationTest() {
         assertEquals(AKTØR, hentetTidslinjeOverstyring.aktørId)
         assertEquals(false, hentetTidslinjeOverstyring.ferdigstilt)
         assertEquals(VEDTAKSPERIODE, hentetTidslinjeOverstyring.vedtaksperiodeId)
-        assertEquals(SAKSBEHANDLER_OID, hentetTidslinjeOverstyring.saksbehandlerOid)
+        assertEquals(SAKSBEHANDLER_OID, hentetTidslinjeOverstyring.saksbehandlerOid.value)
         assertEquals(ORGNUMMER, hentetTidslinjeOverstyring.organisasjonsnummer)
         assertEquals("begrunnelse", hentetTidslinjeOverstyring.begrunnelse)
         assertEquals(FNR, hentetTidslinjeOverstyring.fødselsnummer)
@@ -111,7 +112,7 @@ class PgOverstyringRepositoryTest : AbstractDBIntegrationTest() {
         assertEquals(AKTØR, hentetInntektOgRefusjonOverstyring.aktørId)
         assertEquals(false, hentetInntektOgRefusjonOverstyring.ferdigstilt)
         assertEquals(VEDTAKSPERIODE, hentetInntektOgRefusjonOverstyring.vedtaksperiodeId)
-        assertEquals(SAKSBEHANDLER_OID, hentetInntektOgRefusjonOverstyring.saksbehandlerOid)
+        assertEquals(SAKSBEHANDLER_OID, hentetInntektOgRefusjonOverstyring.saksbehandlerOid.value)
         assertEquals(FNR, hentetInntektOgRefusjonOverstyring.fødselsnummer)
         assertEquals(1 jan 2018, hentetInntektOgRefusjonOverstyring.skjæringstidspunkt)
         assertEquals(nyOverstyrtArbeidsgiver(), hentetInntektOgRefusjonOverstyring.arbeidsgivere.first())
@@ -131,7 +132,7 @@ class PgOverstyringRepositoryTest : AbstractDBIntegrationTest() {
         assertEquals(AKTØR, hentetArbeidsforholdOverstyring.aktørId)
         assertEquals(false, hentetArbeidsforholdOverstyring.ferdigstilt)
         assertEquals(VEDTAKSPERIODE, hentetArbeidsforholdOverstyring.vedtaksperiodeId)
-        assertEquals(SAKSBEHANDLER_OID, hentetArbeidsforholdOverstyring.saksbehandlerOid)
+        assertEquals(SAKSBEHANDLER_OID, hentetArbeidsforholdOverstyring.saksbehandlerOid.value)
         assertEquals(FNR, hentetArbeidsforholdOverstyring.fødselsnummer)
         assertEquals(nyArbeidsforhold(), hentetArbeidsforholdOverstyring.overstyrteArbeidsforhold.first())
         assertTrue(hentetArbeidsforholdOverstyring.opprettet.isBefore(LocalDateTime.now()))
@@ -150,7 +151,7 @@ class PgOverstyringRepositoryTest : AbstractDBIntegrationTest() {
         assertEquals(AKTØR, hentetMinimumSykdomsgradOverstyring.aktørId)
         assertEquals(false, hentetMinimumSykdomsgradOverstyring.ferdigstilt)
         assertEquals(VEDTAKSPERIODE, hentetMinimumSykdomsgradOverstyring.vedtaksperiodeId)
-        assertEquals(SAKSBEHANDLER_OID, hentetMinimumSykdomsgradOverstyring.saksbehandlerOid)
+        assertEquals(SAKSBEHANDLER_OID, hentetMinimumSykdomsgradOverstyring.saksbehandlerOid.value)
         assertEquals(FNR, hentetMinimumSykdomsgradOverstyring.fødselsnummer)
         assertEquals("begrunnelse", hentetMinimumSykdomsgradOverstyring.begrunnelse)
         assertEquals(nyMinimumSykdomsgradArbeidsgiver(), hentetMinimumSykdomsgradOverstyring.arbeidsgivere.first())
@@ -181,7 +182,7 @@ class PgOverstyringRepositoryTest : AbstractDBIntegrationTest() {
         assertEquals(AKTØR, hentetSkjønnsfastsattSykepengegrunnlag.aktørId)
         assertEquals(false, hentetSkjønnsfastsattSykepengegrunnlag.ferdigstilt)
         assertEquals(VEDTAKSPERIODE, hentetSkjønnsfastsattSykepengegrunnlag.vedtaksperiodeId)
-        assertEquals(SAKSBEHANDLER_OID, hentetSkjønnsfastsattSykepengegrunnlag.saksbehandlerOid)
+        assertEquals(SAKSBEHANDLER_OID, hentetSkjønnsfastsattSykepengegrunnlag.saksbehandlerOid.value)
         assertEquals(FNR, hentetSkjønnsfastsattSykepengegrunnlag.fødselsnummer)
         assertEquals(1 jan 2018, hentetSkjønnsfastsattSykepengegrunnlag.skjæringstidspunkt)
         assertEquals(nySkjønnsfastsattArbeidsgiver(), hentetSkjønnsfastsattSykepengegrunnlag.arbeidsgivere.first())
@@ -191,7 +192,7 @@ class PgOverstyringRepositoryTest : AbstractDBIntegrationTest() {
 
     private fun nyTidslinjeOverstyring(): OverstyrtTidslinje =
         OverstyrtTidslinje.ny(
-            saksbehandlerOid = SAKSBEHANDLER_OID,
+            saksbehandlerOid = SaksbehandlerOid(SAKSBEHANDLER_OID),
             fødselsnummer = FNR,
             aktørId = AKTØR,
             vedtaksperiodeId = VEDTAKSPERIODE,
@@ -202,7 +203,7 @@ class PgOverstyringRepositoryTest : AbstractDBIntegrationTest() {
 
     private fun nyArbeidsforholdOverstyring(): OverstyrtArbeidsforhold =
         OverstyrtArbeidsforhold.ny(
-            saksbehandlerOid = SAKSBEHANDLER_OID,
+            saksbehandlerOid = SaksbehandlerOid(SAKSBEHANDLER_OID),
             fødselsnummer = FNR,
             aktørId = AKTØR,
             vedtaksperiodeId = VEDTAKSPERIODE,
@@ -221,7 +222,7 @@ class PgOverstyringRepositoryTest : AbstractDBIntegrationTest() {
 
     private fun nyInntektOgRefusjonOverstyring(): OverstyrtInntektOgRefusjon =
         OverstyrtInntektOgRefusjon.ny(
-            saksbehandlerOid = SAKSBEHANDLER_OID,
+            saksbehandlerOid = SaksbehandlerOid(SAKSBEHANDLER_OID),
             fødselsnummer = FNR,
             aktørId = AKTØR,
             vedtaksperiodeId = VEDTAKSPERIODE,
@@ -251,7 +252,7 @@ class PgOverstyringRepositoryTest : AbstractDBIntegrationTest() {
 
     private fun nyMinimumSykdomsgradOverstyring(): MinimumSykdomsgrad =
         MinimumSykdomsgrad.ny(
-            saksbehandlerOid = SAKSBEHANDLER_OID,
+            saksbehandlerOid = SaksbehandlerOid(SAKSBEHANDLER_OID),
             fødselsnummer = FNR,
             aktørId = AKTØR,
             vedtaksperiodeId = VEDTAKSPERIODE,
@@ -278,7 +279,7 @@ class PgOverstyringRepositoryTest : AbstractDBIntegrationTest() {
 
     private fun nySkjønnsfastsattOverstyring(): SkjønnsfastsattSykepengegrunnlag =
         SkjønnsfastsattSykepengegrunnlag.ny(
-            saksbehandlerOid = SAKSBEHANDLER_OID,
+            saksbehandlerOid = SaksbehandlerOid(SAKSBEHANDLER_OID),
             fødselsnummer = FNR,
             aktørId = AKTØR,
             vedtaksperiodeId = VEDTAKSPERIODE,
