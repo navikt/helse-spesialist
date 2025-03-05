@@ -56,7 +56,6 @@ internal class TestMediator(
             meldingPubliserer = meldingPubliserer,
             tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
             tilgangsgrupper = tilgangsgrupper,
-            daos = daos,
             oppgaveRepository = daos.oppgaveRepository,
         )
     private val apiOppgaveService = ApiOppgaveService(

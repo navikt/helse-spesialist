@@ -7,7 +7,6 @@ import io.mockk.verify
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.AntallOppgaverFraDatabase
 import no.nav.helse.db.BehandletOppgaveFraDatabaseForVisning
-import no.nav.helse.db.Daos
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OppgaveFraDatabaseForVisning
@@ -62,7 +61,6 @@ internal class ApiOppgaveServiceTest {
         )
 
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
-    private val daos = mockk<Daos>(relaxed = true)
     private val tildelingDao = mockk<TildelingDao>(relaxed = true)
     private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
     private val opptegnelseDao = mockk<OpptegnelseDao>(relaxed = true)
@@ -99,8 +97,7 @@ internal class ApiOppgaveServiceTest {
                 meldingPubliserer = meldingPubliserer,
                 tilgangskontroll = { _, _ -> false },
                 tilgangsgrupper = SpeilTilgangsgrupper(testEnv),
-                oppgaveRepository = oppgaveRepository,
-                daos = daos
+                oppgaveRepository = oppgaveRepository
             )
         )
 

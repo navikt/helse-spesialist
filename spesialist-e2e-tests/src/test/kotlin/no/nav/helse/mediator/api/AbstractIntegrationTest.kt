@@ -33,7 +33,6 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
             meldingPubliserer = meldingPubliserer,
             tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
             tilgangsgrupper = SpeilTilgangsgrupper(testEnv),
-            daos = daos,
             oppgaveRepository = daos.oppgaveRepository,
         )
 

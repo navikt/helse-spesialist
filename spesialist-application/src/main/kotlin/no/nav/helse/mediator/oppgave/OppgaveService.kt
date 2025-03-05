@@ -2,7 +2,6 @@ package no.nav.helse.mediator.oppgave
 
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.MeldingPubliserer
-import no.nav.helse.db.Daos
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SessionContext
@@ -34,7 +33,6 @@ class OppgaveService(
     private val tilgangskontroll: Tilgangskontroll,
     private val tilgangsgrupper: Tilgangsgrupper,
     private val oppgaveRepository: OppgaveRepository,
-    private val daos: Daos,
 ) : Oppgavehåndterer, Oppgavefinner {
     private val logg = LoggerFactory.getLogger(this::class.java)
     private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
@@ -47,7 +45,6 @@ class OppgaveService(
             tilgangskontroll = tilgangskontroll,
             tilgangsgrupper = tilgangsgrupper,
             oppgaveRepository = sessionContext.oppgaveRepository,
-            daos = daos,
         )
 
     fun nyOppgave(

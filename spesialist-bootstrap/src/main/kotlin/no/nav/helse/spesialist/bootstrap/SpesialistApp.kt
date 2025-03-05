@@ -128,7 +128,6 @@ class SpesialistApp(
                 meldingPubliserer = meldingPubliserer,
                 tilgangskontroll = tilgangskontrollørForReservasjon,
                 tilgangsgrupper = tilgangsgrupper,
-                daos = daos,
                 oppgaveRepository = daos.oppgaveRepository,
             )
         apiOppgaveService =

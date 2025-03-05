@@ -5,7 +5,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.MeldingPubliserer
-import no.nav.helse.db.Daos
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.ReservasjonDao
@@ -41,7 +40,6 @@ internal class OppgaveServiceTest {
     private val EGENSKAP_SØKNAD = SØKNAD
 
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
-    private val daos = mockk<Daos>(relaxed = true)
     private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
     private val opptegnelseDao = mockk<OpptegnelseDao>(relaxed = true)
     private val oppgaveRepository = mockk<OppgaveRepository>(relaxed = true)
@@ -74,7 +72,6 @@ internal class OppgaveServiceTest {
             meldingPubliserer = meldingPubliserer,
             tilgangskontroll = { _, _ -> false },
             tilgangsgrupper = tilgangsgrupper,
-            daos = daos,
             oppgaveRepository = oppgaveRepository
         )
 
