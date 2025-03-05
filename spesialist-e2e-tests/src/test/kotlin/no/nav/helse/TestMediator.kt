@@ -29,11 +29,8 @@ import javax.sql.DataSource
 internal class TestMediator(
     testRapid: TestRapid,
     dataSource: DataSource,
+    environment: Environment,
 ) {
-    private val environment = object : Environment, Map<String, String> by emptyMap() {
-        override val erDev = false
-        override val erProd = false
-    }
     private val daos = DBDaos(dataSource)
     private val opptegnelseDao = daos.opptegnelseDao
     private val oppgaveDao = daos.oppgaveDao

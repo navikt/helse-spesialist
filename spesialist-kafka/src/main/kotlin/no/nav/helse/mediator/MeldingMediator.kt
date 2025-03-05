@@ -45,7 +45,7 @@ class MeldingMediator(
 
             return false
         }
-        if (env.erProd) return true
+        if (!env.ignorerMeldingerForUkjentePersoner) return true
         return skalBehandleMeldingIDev(jsonNode)
     }
 

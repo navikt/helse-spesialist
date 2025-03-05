@@ -4,7 +4,6 @@ import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.bootstrap.Environment
 import no.nav.helse.spesialist.db.DBDaos
 import no.nav.helse.spesialist.db.TransactionalSessionFactory
 import org.flywaydb.core.Flyway
@@ -14,10 +13,6 @@ import java.util.UUID
 import javax.sql.DataSource
 
 abstract class AbstractDatabaseTest {
-    protected val environment: Environment = object : Environment, Map<String, String> by emptyMap() {
-        override val erDev = false
-        override val erProd = false
-    }
     protected val daos = DBDaos(dataSource)
     protected val sessionFactory = TransactionalSessionFactory(dataSource)
 

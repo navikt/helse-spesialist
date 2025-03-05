@@ -15,8 +15,10 @@ import javax.sql.DataSource
 
 abstract class AbstractDatabaseTest {
     protected val environment: Environment = object : Environment, Map<String, String> by emptyMap() {
-        override val erDev = false
-        override val erProd = false
+        override val brukDummyForKRR = false
+        override val ignorerMeldingerForUkjentePersoner = false
+        override val kanBeslutteEgneSaker = false
+        override val kanGodkjenneUtenBesluttertilgang = false
     }
     protected val daos = DBDaos(dataSource)
     protected val sessionFactory = TransactionalSessionFactory(dataSource)

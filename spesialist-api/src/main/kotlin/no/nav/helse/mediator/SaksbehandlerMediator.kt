@@ -282,9 +282,9 @@ class SaksbehandlerMediator(
             eksisterendeTotrinnsvurdering(vedtaksperiodeId, fødselsnummer, totrinnsvurderingRepository)
         val feil =
             if (totrinnsvurdering?.erBeslutteroppgave == true) {
-                if (!legacySaksbehandler.harTilgangTil(listOf(Egenskap.BESLUTTER)) && !env.erDev) {
+                if (!legacySaksbehandler.harTilgangTil(listOf(Egenskap.BESLUTTER)) && !env.kanGodkjenneUtenBesluttertilgang) {
                     VedtakResultat.Feil.BeslutterFeil.TrengerBeslutterRolle()
-                } else if (totrinnsvurdering.saksbehandler?.value == legacySaksbehandler.oid && !env.erDev) {
+                } else if (totrinnsvurdering.saksbehandler?.value == legacySaksbehandler.oid && !env.kanBeslutteEgneSaker) {
                     VedtakResultat.Feil.BeslutterFeil.KanIkkeBeslutteEgenOppgave()
                 } else {
                     totrinnsvurdering.settBeslutter(SaksbehandlerOid(legacySaksbehandler.oid))

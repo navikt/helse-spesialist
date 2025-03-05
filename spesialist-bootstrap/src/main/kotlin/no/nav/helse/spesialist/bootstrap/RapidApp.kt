@@ -50,8 +50,8 @@ internal class RapidApp(env: Map<String, String>) {
         )
     val environment = EnvironmentImpl()
     private val reservasjonshenter =
-        if (environment.erDev) {
-            logger.info("Bruker nulloperasjonsversjon av reservasjonshenter siden vi er i dev")
+        if (environment.brukDummyForKRR) {
+            logger.info("Bruker nulloperasjonsversjon av reservasjonshenter")
             Reservasjonshenter { null }
         } else {
             KRRClientReservasjonshenter(
