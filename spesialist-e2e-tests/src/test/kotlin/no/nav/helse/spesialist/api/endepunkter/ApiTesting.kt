@@ -11,7 +11,6 @@ import no.nav.helse.spesialist.api.AzureConfig
 import no.nav.helse.spesialist.api.JwtStub
 import no.nav.helse.spesialist.api.azureAdAppAuthentication
 import no.nav.helse.spesialist.api.objectMapper
-import no.nav.helse.spesialist.bootstrap.EnvironmentImpl
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation as ClientContentNegotiation
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ServerContentNegotiation
 
@@ -33,7 +32,7 @@ internal class ApiTesting(
                 tokenEndpoint = "",
             )
         application {
-            azureAdAppAuthentication(azureConfig, EnvironmentImpl())
+            azureAdAppAuthentication(azureConfig)
         }
         applicationBuilder(this)
         routing {

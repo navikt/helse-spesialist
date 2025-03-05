@@ -203,7 +203,7 @@ class SpesialistApp(
     fun konfigurerKtorApp(application: Application) {
         application.apply {
             installPlugins()
-            azureAdAppAuthentication(azureConfig, env)
+            azureAdAppAuthentication(azureConfig)
             settOppGraphQLApi(
                 daos = daos,
                 sessionFactory = sessionFactory,

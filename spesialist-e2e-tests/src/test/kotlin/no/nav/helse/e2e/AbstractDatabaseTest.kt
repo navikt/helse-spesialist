@@ -15,7 +15,6 @@ import javax.sql.DataSource
 
 abstract class AbstractDatabaseTest {
     protected val environment: Environment = object : Environment, Map<String, String> by emptyMap() {
-        override val erLokal = false
         override val erDev = false
         override val erProd = false
     }

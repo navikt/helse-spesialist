@@ -31,7 +31,6 @@ internal class TestMediator(
     dataSource: DataSource,
 ) {
     private val environment = object : Environment, Map<String, String> by emptyMap() {
-        override val erLokal = false
         override val erDev = false
         override val erProd = false
     }
