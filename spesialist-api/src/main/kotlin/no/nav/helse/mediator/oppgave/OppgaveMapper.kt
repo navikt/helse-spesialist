@@ -5,7 +5,6 @@ import no.nav.helse.db.BehandletOppgaveFraDatabaseForVisning
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveFraDatabaseForVisning
 import no.nav.helse.modell.oppgave.Egenskap
-import no.nav.helse.modell.oppgave.EgenskapDto
 import no.nav.helse.spesialist.api.graphql.schema.ApiAntallArbeidsforhold
 import no.nav.helse.spesialist.api.graphql.schema.ApiAntallOppgaver
 import no.nav.helse.spesialist.api.graphql.schema.ApiBehandletOppgave
@@ -209,7 +208,7 @@ internal object OppgaveMapper {
             Egenskap.Kategori.Status -> ApiKategori.Status
         }
 
-    internal fun EgenskapForDatabase.tilModellversjon(): Egenskap =
+    private fun EgenskapForDatabase.tilModellversjon(): Egenskap =
         when (this) {
             EgenskapForDatabase.RISK_QA -> Egenskap.RISK_QA
             EgenskapForDatabase.FORTROLIG_ADRESSE -> Egenskap.FORTROLIG_ADRESSE
@@ -241,78 +240,6 @@ internal object OppgaveMapper {
             EgenskapForDatabase.MANGLER_IM -> Egenskap.MANGLER_IM
             EgenskapForDatabase.MEDLEMSKAP -> Egenskap.MEDLEMSKAP
             EgenskapForDatabase.TILKOMMEN -> Egenskap.TILKOMMEN
-        }
-
-    // Eksplisitt mapping i stedet for toString sørger for at vi ikke utilsiktet knekker et api hvis vi gjør endringer
-    // i navn på enumene
-    internal fun EgenskapDto.mapTilString(): String =
-        when (this) {
-            EgenskapDto.SØKNAD -> "SØKNAD"
-            EgenskapDto.STIKKPRØVE -> "STIKKPRØVE"
-            EgenskapDto.RISK_QA -> "RISK_QA"
-            EgenskapDto.REVURDERING -> "REVURDERING"
-            EgenskapDto.FORTROLIG_ADRESSE -> "FORTROLIG_ADRESSE"
-            EgenskapDto.STRENGT_FORTROLIG_ADRESSE -> "STRENGT_FORTROLIG_ADRESSE"
-            EgenskapDto.UTBETALING_TIL_SYKMELDT -> "UTBETALING_TIL_SYKMELDT"
-            EgenskapDto.DELVIS_REFUSJON -> "DELVIS_REFUSJON"
-            EgenskapDto.UTBETALING_TIL_ARBEIDSGIVER -> "UTBETALING_TIL_ARBEIDSGIVER"
-            EgenskapDto.INGEN_UTBETALING -> "INGEN_UTBETALING"
-            EgenskapDto.EGEN_ANSATT -> "EGEN_ANSATT"
-            EgenskapDto.EN_ARBEIDSGIVER -> "EN_ARBEIDSGIVER"
-            EgenskapDto.FLERE_ARBEIDSGIVERE -> "FLERE_ARBEIDSGIVERE"
-            EgenskapDto.UTLAND -> "UTLAND"
-            EgenskapDto.HASTER -> "HASTER"
-            EgenskapDto.BESLUTTER -> "BESLUTTER"
-            EgenskapDto.RETUR -> "RETUR"
-            EgenskapDto.VERGEMÅL -> "VERGEMÅL"
-            EgenskapDto.SPESIALSAK -> "SPESIALSAK"
-            EgenskapDto.FORLENGELSE -> "FORLENGELSE"
-            EgenskapDto.FORSTEGANGSBEHANDLING -> "FORSTEGANGSBEHANDLING"
-            EgenskapDto.INFOTRYGDFORLENGELSE -> "INFOTRYGDFORLENGELSE"
-            EgenskapDto.OVERGANG_FRA_IT -> "OVERGANG_FRA_IT"
-            EgenskapDto.SKJØNNSFASTSETTELSE -> "SKJØNNSFASTSETTELSE"
-            EgenskapDto.PÅ_VENT -> "PÅ_VENT"
-            EgenskapDto.TILBAKEDATERT -> "TILBAKEDATERT"
-            EgenskapDto.GOSYS -> "GOSYS"
-            EgenskapDto.MANGLER_IM -> "MANGLER_IM"
-            EgenskapDto.MEDLEMSKAP -> "MEDLEMSKAP"
-            EgenskapDto.TILKOMMEN -> "TILKOMMEN"
-        }
-
-    // Eksplisitt mapping i stedet for toString sørger for at vi ikke utilsiktet knekker et api hvis vi gjør endringer
-    // i navn på enumene
-    internal fun EgenskapForDatabase.toDto(): EgenskapDto =
-        when (this) {
-            EgenskapForDatabase.SØKNAD -> EgenskapDto.SØKNAD
-            EgenskapForDatabase.STIKKPRØVE -> EgenskapDto.STIKKPRØVE
-            EgenskapForDatabase.RISK_QA -> EgenskapDto.RISK_QA
-            EgenskapForDatabase.REVURDERING -> EgenskapDto.REVURDERING
-            EgenskapForDatabase.FORTROLIG_ADRESSE -> EgenskapDto.FORTROLIG_ADRESSE
-            EgenskapForDatabase.STRENGT_FORTROLIG_ADRESSE -> EgenskapDto.STRENGT_FORTROLIG_ADRESSE
-            EgenskapForDatabase.UTBETALING_TIL_SYKMELDT -> EgenskapDto.UTBETALING_TIL_SYKMELDT
-            EgenskapForDatabase.DELVIS_REFUSJON -> EgenskapDto.DELVIS_REFUSJON
-            EgenskapForDatabase.UTBETALING_TIL_ARBEIDSGIVER -> EgenskapDto.UTBETALING_TIL_ARBEIDSGIVER
-            EgenskapForDatabase.INGEN_UTBETALING -> EgenskapDto.INGEN_UTBETALING
-            EgenskapForDatabase.EGEN_ANSATT -> EgenskapDto.EGEN_ANSATT
-            EgenskapForDatabase.EN_ARBEIDSGIVER -> EgenskapDto.EN_ARBEIDSGIVER
-            EgenskapForDatabase.FLERE_ARBEIDSGIVERE -> EgenskapDto.FLERE_ARBEIDSGIVERE
-            EgenskapForDatabase.UTLAND -> EgenskapDto.UTLAND
-            EgenskapForDatabase.HASTER -> EgenskapDto.HASTER
-            EgenskapForDatabase.BESLUTTER -> EgenskapDto.BESLUTTER
-            EgenskapForDatabase.RETUR -> EgenskapDto.RETUR
-            EgenskapForDatabase.VERGEMÅL -> EgenskapDto.VERGEMÅL
-            EgenskapForDatabase.SPESIALSAK -> EgenskapDto.SPESIALSAK
-            EgenskapForDatabase.FORLENGELSE -> EgenskapDto.FORLENGELSE
-            EgenskapForDatabase.FORSTEGANGSBEHANDLING -> EgenskapDto.FORSTEGANGSBEHANDLING
-            EgenskapForDatabase.INFOTRYGDFORLENGELSE -> EgenskapDto.INFOTRYGDFORLENGELSE
-            EgenskapForDatabase.OVERGANG_FRA_IT -> EgenskapDto.OVERGANG_FRA_IT
-            EgenskapForDatabase.SKJØNNSFASTSETTELSE -> EgenskapDto.SKJØNNSFASTSETTELSE
-            EgenskapForDatabase.PÅ_VENT -> EgenskapDto.PÅ_VENT
-            EgenskapForDatabase.TILBAKEDATERT -> EgenskapDto.TILBAKEDATERT
-            EgenskapForDatabase.GOSYS -> EgenskapDto.GOSYS
-            EgenskapForDatabase.MANGLER_IM -> EgenskapDto.MANGLER_IM
-            EgenskapForDatabase.MEDLEMSKAP -> EgenskapDto.MEDLEMSKAP
-            EgenskapForDatabase.TILKOMMEN -> EgenskapDto.TILKOMMEN
         }
 
     private fun ApiOppgaveegenskap.tilDatabaseversjon() =
@@ -347,39 +274,5 @@ internal object OppgaveMapper {
             EgenskapForApi.MANGLER_IM -> EgenskapForDatabase.MANGLER_IM
             EgenskapForApi.MEDLEMSKAP -> EgenskapForDatabase.MEDLEMSKAP
             EgenskapForApi.TILKOMMEN -> EgenskapForDatabase.TILKOMMEN
-        }
-
-    internal fun EgenskapDto.tilDatabaseversjon() =
-        when (this) {
-            EgenskapDto.RISK_QA -> EgenskapForDatabase.RISK_QA
-            EgenskapDto.FORTROLIG_ADRESSE -> EgenskapForDatabase.FORTROLIG_ADRESSE
-            EgenskapDto.STRENGT_FORTROLIG_ADRESSE -> EgenskapForDatabase.STRENGT_FORTROLIG_ADRESSE
-            EgenskapDto.EGEN_ANSATT -> EgenskapForDatabase.EGEN_ANSATT
-            EgenskapDto.BESLUTTER -> EgenskapForDatabase.BESLUTTER
-            EgenskapDto.SPESIALSAK -> EgenskapForDatabase.SPESIALSAK
-            EgenskapDto.REVURDERING -> EgenskapForDatabase.REVURDERING
-            EgenskapDto.SØKNAD -> EgenskapForDatabase.SØKNAD
-            EgenskapDto.STIKKPRØVE -> EgenskapForDatabase.STIKKPRØVE
-            EgenskapDto.UTBETALING_TIL_SYKMELDT -> EgenskapForDatabase.UTBETALING_TIL_SYKMELDT
-            EgenskapDto.DELVIS_REFUSJON -> EgenskapForDatabase.DELVIS_REFUSJON
-            EgenskapDto.UTBETALING_TIL_ARBEIDSGIVER -> EgenskapForDatabase.UTBETALING_TIL_ARBEIDSGIVER
-            EgenskapDto.INGEN_UTBETALING -> EgenskapForDatabase.INGEN_UTBETALING
-            EgenskapDto.EN_ARBEIDSGIVER -> EgenskapForDatabase.EN_ARBEIDSGIVER
-            EgenskapDto.FLERE_ARBEIDSGIVERE -> EgenskapForDatabase.FLERE_ARBEIDSGIVERE
-            EgenskapDto.FORLENGELSE -> EgenskapForDatabase.FORLENGELSE
-            EgenskapDto.FORSTEGANGSBEHANDLING -> EgenskapForDatabase.FORSTEGANGSBEHANDLING
-            EgenskapDto.INFOTRYGDFORLENGELSE -> EgenskapForDatabase.INFOTRYGDFORLENGELSE
-            EgenskapDto.OVERGANG_FRA_IT -> EgenskapForDatabase.OVERGANG_FRA_IT
-            EgenskapDto.UTLAND -> EgenskapForDatabase.UTLAND
-            EgenskapDto.HASTER -> EgenskapForDatabase.HASTER
-            EgenskapDto.RETUR -> EgenskapForDatabase.RETUR
-            EgenskapDto.SKJØNNSFASTSETTELSE -> EgenskapForDatabase.SKJØNNSFASTSETTELSE
-            EgenskapDto.PÅ_VENT -> EgenskapForDatabase.PÅ_VENT
-            EgenskapDto.TILBAKEDATERT -> EgenskapForDatabase.TILBAKEDATERT
-            EgenskapDto.GOSYS -> EgenskapForDatabase.GOSYS
-            EgenskapDto.MANGLER_IM -> EgenskapForDatabase.MANGLER_IM
-            EgenskapDto.MEDLEMSKAP -> EgenskapForDatabase.MEDLEMSKAP
-            EgenskapDto.VERGEMÅL -> EgenskapForDatabase.VERGEMÅL
-            EgenskapDto.TILKOMMEN -> EgenskapForDatabase.TILKOMMEN
         }
 }
