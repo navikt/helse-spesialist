@@ -29,7 +29,7 @@ spec:
   strategy:
     rollingUpdate:
       maxSurge: 100%
-      maxUnavailable: 0
+      maxUnavailable: 50%
   replicas:
     min: 8
     max: 8
