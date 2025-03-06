@@ -802,8 +802,8 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
     @Test
     fun `henter fødselsnummeret til personen en oppgave gjelder for`() {
         val fødselsnummer = lagFødselsnummer()
-        nyOppgaveForNyPerson(fødselsnummer = fødselsnummer)
-        val funnetFødselsnummer = oppgaveDao.finnFødselsnummer(oppgaveId)
+        val oppgave = nyOppgaveForNyPerson(fødselsnummer = fødselsnummer)
+        val funnetFødselsnummer = oppgaveDao.finnFødselsnummer(oppgave.id)
         assertEquals(funnetFødselsnummer, fødselsnummer)
     }
 

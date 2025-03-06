@@ -5,23 +5,19 @@ import no.nav.helse.modell.saksbehandler.SaksbehandlerDto
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import java.util.UUID
 
 class PgPeriodehistorikkDaoTest : AbstractDBIntegrationTest() {
     @Test
     fun `lagre periodehistorikk ved hjelp av oppgaveId`() {
-        val behandlingId = UUID.randomUUID()
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettSaksbehandler()
-        opprettVedtaksperiode(spleisBehandlingId = behandlingId)
-        opprettOppgave(behandlingId = behandlingId)
+        val saksbehandler = nyLegacySaksbehandler().let {
+            SaksbehandlerDto(it.epostadresse, it.oid, it.navn, it.ident())
+        }
+        val oppgave = nyOppgaveForNyPerson()
 
-        val saksbehandler = SaksbehandlerDto(SAKSBEHANDLER_EPOST, SAKSBEHANDLER_OID, SAKSBEHANDLER_NAVN, SAKSBEHANDLER_IDENT)
         val historikkinnslag = Historikkinnslag.fjernetFraPåVentInnslag(saksbehandler)
 
-        periodehistorikkDao.lagreMedOppgaveId(historikkinnslag, oppgaveId)
-        val result = periodehistorikkApiDao.finn(UTBETALING_ID)
+        periodehistorikkDao.lagreMedOppgaveId(historikkinnslag, oppgave.id)
+        val result = periodehistorikkApiDao.finn(oppgave.utbetalingId)
 
         assertEquals(1, result.size)
     }

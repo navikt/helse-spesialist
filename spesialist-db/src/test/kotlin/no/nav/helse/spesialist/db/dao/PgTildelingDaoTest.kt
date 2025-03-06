@@ -24,9 +24,9 @@ internal class PgTildelingDaoTest : AbstractDBIntegrationTest() {
     fun `finn tildeling for oppgave`() {
         val saksbehandler = nyLegacySaksbehandler()
         val fødselsnummer = lagFødselsnummer()
-        nyOppgaveForNyPerson(fødselsnummer = fødselsnummer)
+        val oppgave = nyOppgaveForNyPerson(fødselsnummer = fødselsnummer)
             .tildelOgLagre(saksbehandler)
-        val tildeling = tildelingDao.tildelingForOppgave(this.oppgaveId)
+        val tildeling = tildelingDao.tildelingForOppgave(oppgave.id)
         assertNotNull(tildeling)
         assertEquals(saksbehandler.oid, tildeling.oid)
         assertEquals(saksbehandler.epostadresse, tildeling.epost)

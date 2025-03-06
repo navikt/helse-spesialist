@@ -14,92 +14,94 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 internal class PgPåVentDaoTest : AbstractDBIntegrationTest() {
+    private val saksbehandler = nyLegacySaksbehandler()
     @Test
     fun `lagre påvent`() {
-        nyPerson()
+        val oppgave = nyOppgaveForNyPerson()
         val frist = LocalDate.now().plusDays(21)
         val dialogId = dialogDao.lagre()
-        påVentDao.lagrePåVent(OPPGAVE_ID, SAKSBEHANDLER_OID, frist, emptyList(), null, dialogId)
-        val påVent = påvent()
+        påVentDao.lagrePåVent(oppgave.id, saksbehandler.oid, frist, emptyList(), null, dialogId)
+        val påVent = påvent(oppgave.vedtaksperiodeId)
         assertEquals(1, påVent.size)
-        påVent.first().assertEquals(VEDTAKSPERIODE, SAKSBEHANDLER_OID, frist, emptyList(), null)
+        påVent.first().assertEquals(oppgave.vedtaksperiodeId, saksbehandler.oid, frist, emptyList(), null)
     }
 
     @Test
     fun `lagre påvent med årsaker`() {
-        nyPerson()
+        val oppgave = nyOppgaveForNyPerson()
         val frist = LocalDate.now().plusDays(21)
         val dialogId = dialogDao.lagre()
         påVentDao.lagrePåVent(
-            OPPGAVE_ID,
-            SAKSBEHANDLER_OID,
+            oppgave.id,
+            saksbehandler.oid,
             frist,
             listOf(PåVentÅrsak("key1", "årsak1"), PåVentÅrsak("key2", "årsak2")),
             "Et notat",
             dialogId,
         )
-        val påVent = påvent()
+        val påVent = påvent(oppgave.vedtaksperiodeId)
         assertEquals(1, påVent.size)
-        påVent.first().assertEquals(VEDTAKSPERIODE, SAKSBEHANDLER_OID, frist, listOf("årsak1", "årsak2"), "Et notat")
+        påVent.first().assertEquals(oppgave.vedtaksperiodeId, saksbehandler.oid, frist, listOf("årsak1", "årsak2"), "Et notat")
     }
 
     @Test
     fun `lagre påvent med årsaker - oppdatere frist`() {
-        nyPerson()
+        val oppgave = nyOppgaveForNyPerson()
         val frist = LocalDate.now().plusDays(10)
         val dialogId1 = dialogDao.lagre()
         påVentDao.lagrePåVent(
-            OPPGAVE_ID,
-            SAKSBEHANDLER_OID,
+            oppgave.id,
+            saksbehandler.oid,
             frist,
             listOf(PåVentÅrsak("key1", "årsak1"), PåVentÅrsak("key2", "årsak2")),
             "Et notat",
             dialogId1,
         )
-        val påVent = påvent()
+        val påVent = påvent(oppgave.vedtaksperiodeId)
         assertEquals(1, påVent.size)
-        påVent.first().assertEquals(VEDTAKSPERIODE, SAKSBEHANDLER_OID, frist, listOf("årsak1", "årsak2"), "Et notat")
+        påVent.first().assertEquals(oppgave.vedtaksperiodeId, saksbehandler.oid, frist, listOf("årsak1", "årsak2"), "Et notat")
 
         val nyFrist = frist.plusDays(10)
         val dialogId2 = dialogDao.lagre()
         påVentDao.oppdaterPåVent(
-            OPPGAVE_ID,
-            SAKSBEHANDLER_OID,
+            oppgave.id,
+            saksbehandler.oid,
             nyFrist,
             listOf(PåVentÅrsak("key1", "årsak1")),
             "Et nytt notat",
             dialogId2,
         )
 
-        val påVentNyFrist = påvent()
+        val påVentNyFrist = påvent(oppgave.vedtaksperiodeId)
         assertEquals(1, påVentNyFrist.size)
-        påVentNyFrist.first().assertEquals(VEDTAKSPERIODE, SAKSBEHANDLER_OID, nyFrist, listOf("årsak1"), "Et nytt notat")
+        påVentNyFrist.first().assertEquals(oppgave.vedtaksperiodeId, saksbehandler.oid, nyFrist, listOf("årsak1"), "Et nytt notat")
     }
 
     @Test
     fun `slett påvent`() {
-        nyPerson()
+        val oppgave = nyOppgaveForNyPerson()
         val frist = LocalDate.now().plusDays(21)
         val dialogId = dialogDao.lagre()
-        påVentDao.lagrePåVent(oppgaveId, SAKSBEHANDLER_OID, frist, emptyList(), null, dialogId)
-        val påVent = påvent()
+        påVentDao.lagrePåVent(oppgave.id, saksbehandler.oid, frist, emptyList(), null, dialogId)
+        val påVent = påvent(oppgave.vedtaksperiodeId)
         assertEquals(1, påVent.size)
-        påVentDao.slettPåVent(oppgaveId)
-        val påVentEtterSletting = påvent()
+        påVentDao.slettPåVent(oppgave.id)
+        val påVentEtterSletting = påvent(oppgave.vedtaksperiodeId)
         assertEquals(0, påVentEtterSletting.size)
     }
 
     @Test
     fun `finnes påvent`() {
-        nyPerson()
+        val oppgave = nyOppgaveForNyPerson()
+
         val frist = LocalDate.now().plusDays(21)
         val dialogId = dialogDao.lagre()
-        påVentDao.lagrePåVent(OPPGAVE_ID, SAKSBEHANDLER_OID, frist, emptyList(), null, dialogId)
-        val erPåVent = påVentDao.erPåVent(VEDTAKSPERIODE)
+        påVentDao.lagrePåVent(oppgave.id, saksbehandler.oid, frist, emptyList(), null, dialogId)
+        val erPåVent = påVentDao.erPåVent(oppgave.vedtaksperiodeId)
         assertTrue(erPåVent)
     }
 
-    private fun påvent(vedtaksperiodeId: UUID = VEDTAKSPERIODE) =
+    private fun påvent(vedtaksperiodeId: UUID) =
         sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")
             val statement = "SELECT * FROM pa_vent WHERE vedtaksperiode_id = :vedtaksperiodeId"

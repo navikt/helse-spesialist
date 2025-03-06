@@ -62,8 +62,6 @@ abstract class AbstractDBIntegrationTest {
         ArbeidsforholdForTest(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 2), "EN TITTEL", 100)
     protected open val UTBETALING_ID: UUID = testperson.utbetalingId1
 
-    protected open var OPPGAVE_ID = nextLong()
-
     protected val ORGNUMMER =
         with(testperson) {
             1.arbeidsgiver.organisasjonsnummer
@@ -86,7 +84,7 @@ abstract class AbstractDBIntegrationTest {
     protected val ENHET = "0301"
 
     private val FOM: LocalDate = LocalDate.of(2018, 1, 1)
-    protected val TOM: LocalDate = LocalDate.of(2018, 1, 31)
+    private val TOM: LocalDate = LocalDate.of(2018, 1, 31)
     protected val PERIODE = Periode(VEDTAKSPERIODE, FOM, TOM)
 
     protected val SAKSBEHANDLER_OID: UUID = UUID.randomUUID()
@@ -134,12 +132,6 @@ abstract class AbstractDBIntegrationTest {
             resetDatabase(dataSource)
         }
     }
-
-    private var personId: Long = -1
-    internal var vedtakId: Long = -1
-        private set
-    internal var oppgaveId: Long = -1
-        private set
 
     protected val session = sessionOf(dataSource, returnGeneratedKey = true)
     private val sessionContext = DBSessionContext(session)
@@ -296,7 +288,7 @@ abstract class AbstractDBIntegrationTest {
             personDao.upsertInfotrygdutbetalinger(fødselsnummer, objectMapper.createObjectNode())
         val enhetId = ENHET.toInt()
         personDao.oppdaterEnhet(fødselsnummer, enhetId)
-        personId = personDao.finnPersonMedFødselsnummer(fødselsnummer)!!
+        personDao.finnPersonMedFødselsnummer(fødselsnummer)!!
         egenAnsattDao.lagre(fødselsnummer, false, LocalDateTime.now())
         return Persondata(
             personinfoId = personinfoId,
@@ -439,9 +431,7 @@ abstract class AbstractDBIntegrationTest {
             if (utbetalingId != null) this.nyUtbetalingForVedtaksperiode(vedtaksperiodeId, utbetalingId)
             if (forkastet) this.vedtaksperiodeForkastet(vedtaksperiodeId)
         }
-        vedtakDao.finnVedtakId(vedtaksperiodeId)?.also {
-            vedtakId = it
-        }
+        vedtakDao.finnVedtakId(vedtaksperiodeId)
         opprettVedtakstype(vedtaksperiodeId, periodetype, inntektskilde)
     }
 
@@ -498,10 +488,8 @@ abstract class AbstractDBIntegrationTest {
     ): Oppgave {
         val hendelse = testhendelse(hendelseId = godkjenningsbehovId)
         opprettCommandContext(hendelse, contextId)
-        oppgaveId = nextLong()
-        OPPGAVE_ID = oppgaveId
         val oppgave = Oppgave.ny(
-            id = oppgaveId,
+            id = nextLong(),
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
             utbetalingId = utbetalingId,
@@ -515,7 +503,7 @@ abstract class AbstractDBIntegrationTest {
 
     fun finnOppgaveIdFor(vedtaksperiodeId: UUID): Long = oppgaveDao.finnIdForAktivOppgave(vedtaksperiodeId)!!
 
-    protected fun opprettUtbetalingKobling(
+    private fun opprettUtbetalingKobling(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
     ) {

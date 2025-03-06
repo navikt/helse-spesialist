@@ -12,27 +12,24 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 internal class PgVedtakBegrunnelseDaoTest : AbstractDBIntegrationTest() {
-
+    private val saksbehandler = nyLegacySaksbehandler()
     private val dao = daos.vedtakBegrunnelseDao
 
     @Test
     fun `lagrer og finner vedtaksbegrunnelse`() {
-        val oid = UUID.randomUUID()
-        val vedtaksperiodeId = UUID.randomUUID()
-        nyPerson(vedtaksperiodeId = vedtaksperiodeId)
-        opprettSaksbehandler(oid)
+        val oppgave = nyOppgaveForNyPerson()
         dao.lagreVedtakBegrunnelse(
-            oppgaveId = OPPGAVE_ID,
+            oppgaveId = oppgave.id,
             vedtakBegrunnelse = VedtakBegrunnelseFraDatabase(
                 type = VedtakBegrunnelseTypeFraDatabase.AVSLAG,
                 tekst = "En individuell begrunelse"
             ),
-            saksbehandlerOid = oid
+            saksbehandlerOid = saksbehandler.oid,
         )
 
-        val generasjonId = finnGenerasjonId(vedtaksperiodeId)
+        val generasjonId = finnGenerasjonId(oppgave.vedtaksperiodeId)
 
-        val lagretVedtakBegrunnelse = dao.finnVedtakBegrunnelse(vedtaksperiodeId, generasjonId)
+        val lagretVedtakBegrunnelse = dao.finnVedtakBegrunnelse(oppgave.vedtaksperiodeId, generasjonId)
         assertNotNull(lagretVedtakBegrunnelse)
         with(lagretVedtakBegrunnelse!!) {
             assertEquals(Utfall.AVSLAG, utfall)
@@ -42,22 +39,19 @@ internal class PgVedtakBegrunnelseDaoTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `lagrer og finner vedtaksbegrunnelse i transaksjon`() {
-        val oid = UUID.randomUUID()
-        val vedtaksperiodeId = UUID.randomUUID()
-        nyPerson(vedtaksperiodeId = vedtaksperiodeId)
-        opprettSaksbehandler(oid)
+        val oppgave = nyOppgaveForNyPerson()
         dao.lagreVedtakBegrunnelse(
-            oppgaveId = OPPGAVE_ID,
+            oppgaveId = oppgave.id,
             vedtakBegrunnelse = VedtakBegrunnelseFraDatabase(
                 type = VedtakBegrunnelseTypeFraDatabase.AVSLAG,
                 tekst = "En individuell begrunelse"
             ),
-            saksbehandlerOid = oid
+            saksbehandlerOid = saksbehandler.oid
         )
 
-        val generasjonId = finnGenerasjonId(vedtaksperiodeId)
+        val generasjonId = finnGenerasjonId(oppgave.vedtaksperiodeId)
 
-        val lagretVedtakBegrunnelse = dao.finnVedtakBegrunnelse(vedtaksperiodeId, generasjonId)
+        val lagretVedtakBegrunnelse = dao.finnVedtakBegrunnelse(oppgave.vedtaksperiodeId, generasjonId)
         assertNotNull(lagretVedtakBegrunnelse)
         with(lagretVedtakBegrunnelse!!) {
             assertEquals(Utfall.AVSLAG, utfall)
@@ -67,20 +61,18 @@ internal class PgVedtakBegrunnelseDaoTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `lagrer og finner vedtaksbegrunnelse basert på oppgaveid`() {
-        val oid = UUID.randomUUID()
-        val vedtaksperiodeId = UUID.randomUUID()
-        nyPerson(vedtaksperiodeId = vedtaksperiodeId)
-        opprettSaksbehandler(oid)
+        val oppgave = nyOppgaveForNyPerson()
+
         dao.lagreVedtakBegrunnelse(
-            oppgaveId = OPPGAVE_ID,
+            oppgaveId = oppgave.id,
             vedtakBegrunnelse = VedtakBegrunnelseFraDatabase(
                 type = VedtakBegrunnelseTypeFraDatabase.AVSLAG,
                 tekst = "En individuell begrunelse"
             ),
-            saksbehandlerOid = oid
+            saksbehandlerOid = saksbehandler.oid
         )
 
-        val lagretVedtakBegrunnelse = dao.finnVedtakBegrunnelse(OPPGAVE_ID)
+        val lagretVedtakBegrunnelse = dao.finnVedtakBegrunnelse(oppgave.id)
         assertNotNull(lagretVedtakBegrunnelse)
         with(lagretVedtakBegrunnelse!!) {
             assertEquals(VedtakBegrunnelseTypeFraDatabase.AVSLAG, type)
@@ -90,73 +82,70 @@ internal class PgVedtakBegrunnelseDaoTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `invaliderer vedtaksbegrunnelse`() {
-        val oid = UUID.randomUUID()
-        val vedtaksperiodeId = UUID.randomUUID()
-        nyPerson(vedtaksperiodeId = vedtaksperiodeId)
-        opprettSaksbehandler(oid)
-        val generasjonId = finnGenerasjonId(vedtaksperiodeId)
+        val oppgave = nyOppgaveForNyPerson()
+
+        val generasjonId = finnGenerasjonId(oppgave.vedtaksperiodeId)
         dao.lagreVedtakBegrunnelse(
-            oppgaveId = OPPGAVE_ID,
+            oppgaveId = oppgave.id,
             vedtakBegrunnelse = VedtakBegrunnelseFraDatabase(
                 type = VedtakBegrunnelseTypeFraDatabase.AVSLAG,
                 tekst = "En individuell begrunelse"
             ),
-            saksbehandlerOid = oid
+            saksbehandlerOid = saksbehandler.oid
         )
-        dao.invaliderVedtakBegrunnelse(OPPGAVE_ID)
-        val lagretVedtakBegrunnelse = dao.finnVedtakBegrunnelse(VEDTAKSPERIODE, generasjonId)
+        dao.invaliderVedtakBegrunnelse(oppgave.id)
+        val lagretVedtakBegrunnelse = dao.finnVedtakBegrunnelse(oppgave.vedtaksperiodeId, generasjonId)
         assertNull(lagretVedtakBegrunnelse)
     }
 
     @Test
     fun `finner alle vedtaksbegrunnelser for periode`() {
-        val oid = UUID.randomUUID()
-        nyPerson()
-        opprettSaksbehandler(oid)
+        val oppgave = nyOppgaveForNyPerson()
+
         dao.lagreVedtakBegrunnelse(
-            oppgaveId = OPPGAVE_ID,
+            oppgaveId = oppgave.id,
             vedtakBegrunnelse = VedtakBegrunnelseFraDatabase(
                 type = VedtakBegrunnelseTypeFraDatabase.AVSLAG,
                 tekst = "En individuell begrunelse"
             ),
-            saksbehandlerOid = oid
+            saksbehandlerOid = saksbehandler.oid
         )
         dao.lagreVedtakBegrunnelse(
-            oppgaveId = OPPGAVE_ID,
+            oppgaveId = oppgave.id,
             vedtakBegrunnelse = VedtakBegrunnelseFraDatabase(
                 type = VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE,
                 tekst = "En individuell begrunelse delvis innvilgelse retter skrivefeil"
             ),
-            saksbehandlerOid = oid
+            saksbehandlerOid = saksbehandler.oid
         )
         dao.lagreVedtakBegrunnelse(
-            oppgaveId = OPPGAVE_ID,
+            oppgaveId = oppgave.id,
             vedtakBegrunnelse = VedtakBegrunnelseFraDatabase(
                 type = VedtakBegrunnelseTypeFraDatabase.INNVILGELSE,
                 tekst = "En individuell begrunelse innvilgelse beholder skrivefeil"
             ),
-            saksbehandlerOid = oid
+            saksbehandlerOid = saksbehandler.oid
         )
 
-        val lagredeAvslag = dao.finnAlleVedtakBegrunnelser(VEDTAKSPERIODE, UTBETALING_ID)
+        val lagredeAvslag = dao.finnAlleVedtakBegrunnelser(oppgave.vedtaksperiodeId, oppgave.utbetalingId)
 
         assertEquals(3, lagredeAvslag.size)
         with(lagredeAvslag[0]) {
             assertEquals(VedtakBegrunnelseTypeFraDatabase.INNVILGELSE, type)
             assertEquals("En individuell begrunelse innvilgelse beholder skrivefeil", begrunnelse)
-            assertEquals(SAKSBEHANDLER_IDENT, saksbehandlerIdent)
+            assertEquals(saksbehandler.ident(), saksbehandlerIdent)
             assertFalse(invalidert)
         }
         with(lagredeAvslag[1]) {
             assertEquals(VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE, type)
             assertEquals("En individuell begrunelse delvis innvilgelse retter skrivefeil", begrunnelse)
-            assertEquals(SAKSBEHANDLER_IDENT, saksbehandlerIdent)
+            assertEquals(saksbehandler.ident(), saksbehandlerIdent)
             assertFalse(invalidert)
         }
         with(lagredeAvslag[2]) {
             assertEquals(VedtakBegrunnelseTypeFraDatabase.AVSLAG, type)
             assertEquals("En individuell begrunelse", begrunnelse)
-            assertEquals(SAKSBEHANDLER_IDENT, saksbehandlerIdent)
+            assertEquals(saksbehandler.ident(), saksbehandlerIdent)
             assertFalse(invalidert)
         }
     }
