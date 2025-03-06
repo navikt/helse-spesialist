@@ -46,7 +46,7 @@ internal class PgAbonnementApiDaoTest : AbstractDBIntegrationTest() {
         val aktørId1 = lagAktørId()
         val aktørId2 = lagAktørId()
         opprettPerson(aktørId = aktørId1)
-        opprettPerson(aktørId = aktørId2, fødselsnummer = lagFødselsnummer())
+        opprettPerson(fødselsnummer = lagFødselsnummer(), aktørId = aktørId2)
 
         abonnementDao.opprettAbonnement(saksbehandlerId, aktørId1)
         assertEquals(listOf(aktørId1), finnPersonerSaksbehandlerAbonnererPå(saksbehandlerId))
@@ -60,8 +60,8 @@ internal class PgAbonnementApiDaoTest : AbstractDBIntegrationTest() {
         val aktørId1 = lagAktørId()
         val dNummer = lagFødselsnummer()
         val fødselsnummer = lagFødselsnummer()
-        opprettPerson(aktørId = aktørId1, fødselsnummer = dNummer)
-        opprettPerson(aktørId = aktørId1, fødselsnummer = fødselsnummer)
+        opprettPerson(fødselsnummer = dNummer, aktørId = aktørId1)
+        opprettPerson(fødselsnummer = fødselsnummer, aktørId = aktørId1)
 
         assertDoesNotThrow {
             abonnementDao.opprettAbonnement(saksbehandlerId, aktørId1)

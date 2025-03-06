@@ -59,7 +59,7 @@ class Oppgave private constructor(
         tilstand.tildel(this, legacySaksbehandler)
     }
 
-    internal fun forsøkAvmelding(legacySaksbehandler: LegacySaksbehandler) {
+    fun forsøkAvmelding(legacySaksbehandler: LegacySaksbehandler) {
         logg.info("Oppgave med {} forsøkes avmeldt av saksbehandler.", kv("oppgaveId", id))
         val tildelt =
             tildeltTil ?: run {

@@ -5,12 +5,9 @@ import no.nav.helse.modell.oppgave.Egenskap.PÅ_VENT
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
-import no.nav.helse.spesialist.db.lagEpostadresseFraFulltNavn
-import no.nav.helse.spesialist.db.lagSaksbehandlerident
-import no.nav.helse.spesialist.db.lagSaksbehandlernavn
-import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import java.util.UUID
 import kotlin.random.Random.Default.nextLong
@@ -22,17 +19,9 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
     private val vedtaksperiodeId = UUID.randomUUID()
     private val behandlingId = UUID.randomUUID()
     private val utbetalingId: UUID = UUID.randomUUID()
-    private val saksbehandlernavn = lagSaksbehandlernavn()
     private val godkjenningsbehovId: UUID = UUID.randomUUID()
 
-    private val legacySaksbehandler =
-        LegacySaksbehandler(
-            oid = UUID.randomUUID(),
-            epostadresse = lagEpostadresseFraFulltNavn(saksbehandlernavn),
-            navn = saksbehandlernavn,
-            ident = lagSaksbehandlerident(),
-            tilgangskontroll = { _, _ -> false },
-        )
+    private val saksbehandler = nyLegacySaksbehandler()
 
     @BeforeEach
     fun beforeEach() {
@@ -61,7 +50,6 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
 
     @Test
     fun `tildel oppgave`() {
-        opprettSaksbehandler(legacySaksbehandler.oid, legacySaksbehandler.navn, legacySaksbehandler.epostadresse, legacySaksbehandler.ident())
         val oppgave = Oppgave.ny(
             id = nextLong(),
             vedtaksperiodeId = vedtaksperiodeId,
@@ -71,12 +59,34 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
             kanAvvises = true,
             egenskaper = setOf(SØKNAD)
         )
-        oppgave.forsøkTildeling(legacySaksbehandler)
+        oppgave.forsøkTildeling(saksbehandler)
 
         repository.lagre(oppgave)
         val funnetOppgave = repository.finn(oppgave.id) { _, _ -> false }
         assertNotNull(funnetOppgave)
-        assertEquals(legacySaksbehandler, funnetOppgave.tildeltTil)
+        assertEquals(saksbehandler, funnetOppgave.tildeltTil)
+    }
+
+    @Test
+    fun `avmeld oppgave`() {
+        val oppgave = Oppgave.ny(
+            id = nextLong(),
+            vedtaksperiodeId = vedtaksperiodeId,
+            behandlingId = behandlingId,
+            utbetalingId = utbetalingId,
+            hendelseId = godkjenningsbehovId,
+            kanAvvises = true,
+            egenskaper = setOf(SØKNAD)
+        )
+        oppgave.forsøkTildeling(saksbehandler)
+        repository.lagre(oppgave)
+
+        oppgave.forsøkAvmelding(saksbehandler)
+        repository.lagre(oppgave)
+
+        val funnetOppgave = repository.finn(oppgave.id) { _, _ -> false }
+        assertNotNull(funnetOppgave)
+        assertEquals(null, funnetOppgave.tildeltTil)
     }
 
     @Test
@@ -101,7 +111,7 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
 
     @Test
     fun `endre tilstand`() {
-        opprettSaksbehandler(legacySaksbehandler.oid, legacySaksbehandler.navn, legacySaksbehandler.epostadresse, legacySaksbehandler.ident())
+        opprettSaksbehandler(saksbehandler.oid, saksbehandler.navn, saksbehandler.epostadresse, saksbehandler.ident())
         val oppgave = Oppgave.ny(
             id = nextLong(),
             vedtaksperiodeId = vedtaksperiodeId,
@@ -112,7 +122,7 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
             egenskaper = setOf(SØKNAD)
         )
         repository.lagre(oppgave)
-        oppgave.avventerSystem(legacySaksbehandler.ident(), legacySaksbehandler.oid)
+        oppgave.avventerSystem(saksbehandler.ident(), saksbehandler.oid)
         repository.lagre(oppgave)
         val funnetOppgave = repository.finn(oppgave.id) { _, _ -> false }
         assertNotNull(funnetOppgave)
@@ -121,7 +131,7 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
 
     @Test
     fun ferdigstill() {
-        opprettSaksbehandler(legacySaksbehandler.oid, legacySaksbehandler.navn, legacySaksbehandler.epostadresse, legacySaksbehandler.ident())
+        opprettSaksbehandler(saksbehandler.oid, saksbehandler.navn, saksbehandler.epostadresse, saksbehandler.ident())
         val oppgave = Oppgave.ny(
             id = nextLong(),
             vedtaksperiodeId = vedtaksperiodeId,
@@ -132,14 +142,14 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
             egenskaper = setOf(SØKNAD)
         )
         repository.lagre(oppgave)
-        oppgave.avventerSystem(legacySaksbehandler.ident(), legacySaksbehandler.oid)
+        oppgave.avventerSystem(saksbehandler.ident(), saksbehandler.oid)
         oppgave.ferdigstill()
         repository.lagre(oppgave)
         val funnetOppgave = repository.finn(oppgave.id) { _, _ -> false }
         assertNotNull(funnetOppgave)
         assertEquals(Oppgave.Ferdigstilt, funnetOppgave.tilstand)
-        assertEquals(legacySaksbehandler.ident(), funnetOppgave.ferdigstiltAvIdent)
-        assertEquals(legacySaksbehandler.oid, funnetOppgave.ferdigstiltAvOid)
+        assertEquals(saksbehandler.ident(), funnetOppgave.ferdigstiltAvIdent)
+        assertEquals(saksbehandler.oid, funnetOppgave.ferdigstiltAvOid)
     }
 
     @Test
@@ -167,4 +177,33 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
             repository.lagre(oppgave2)
         }
     }
+
+    @Test
+    fun `skal lagre ny oppgave dersom eksisterende oppgave på samme person ikke avventer saksbehandler`() {
+        val oppgave1 = Oppgave.ny(
+            id = nextLong(),
+            vedtaksperiodeId = vedtaksperiodeId,
+            behandlingId = behandlingId,
+            utbetalingId = utbetalingId,
+            hendelseId = godkjenningsbehovId,
+            kanAvvises = true,
+            egenskaper = setOf(SØKNAD)
+        )
+        oppgave1.avventerSystem(saksbehandler.ident(), saksbehandler.oid)
+        oppgave1.ferdigstill()
+        val oppgave2 = Oppgave.ny(
+            id = nextLong(),
+            vedtaksperiodeId = vedtaksperiodeId,
+            behandlingId = behandlingId,
+            utbetalingId = utbetalingId,
+            hendelseId = godkjenningsbehovId,
+            kanAvvises = true,
+            egenskaper = setOf(SØKNAD)
+        )
+        repository.lagre(oppgave1)
+        assertDoesNotThrow {
+            repository.lagre(oppgave2)
+        }
+    }
+
 }

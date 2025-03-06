@@ -3,18 +3,18 @@ package no.nav.helse.spesialist.db.dao
 import no.nav.helse.db.BehandlingsstatistikkDao
 import no.nav.helse.db.BehandlingsstatistikkDao.StatistikkPerKombinasjon.Mottakertype
 import no.nav.helse.db.EgenskapForDatabase
+import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
+import no.nav.helse.spesialist.db.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.parallel.Isolated
 import java.time.LocalDate
-import java.util.UUID
 
 @Isolated
 internal class PgBehandlingsstatistikkDaoTest : AbstractDBIntegrationTest() {
@@ -43,7 +43,7 @@ internal class PgBehandlingsstatistikkDaoTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `henter statikk for tilgjengelige oppgaver`() {
-        nyPerson()
+        nyOppgaveForNyPerson()
         val dto = behandlingsstatistikkDao.getTilgjengeligeOppgaverPerInntektOgPeriodetype()
         assertEquals(1, dto.perInntekttype[Inntektskilde.EN_ARBEIDSGIVER])
         assertEquals(0, dto.perInntekttype[Inntektskilde.FLERE_ARBEIDSGIVERE])
@@ -53,50 +53,54 @@ internal class PgBehandlingsstatistikkDaoTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `hent antall tilgjengelige oppgaver for gitt egenskap`() {
-        nyPerson()
+        nyOppgaveForNyPerson()
         val antall = behandlingsstatistikkDao.antallTilgjengeligeOppgaverFor(EgenskapForDatabase.SØKNAD)
         assertEquals(1, antall)
     }
 
     @Test
     fun `hent antall ferdigstilte oppgaver for gitt egenskap`() {
-        nyPerson()
-        oppgaveDao.updateOppgave(OPPGAVE_ID, oppgavestatus = "Ferdigstilt", egenskaper = listOf(EgenskapForDatabase.SØKNAD))
+        nyOppgaveForNyPerson(oppgaveegenskaper = setOf(Egenskap.SØKNAD))
+            .avventSystemOgLagre(nyLegacySaksbehandler())
+            .ferdigstillOgLagre()
         val antall = behandlingsstatistikkDao.antallFerdigstilteOppgaverFor(EgenskapForDatabase.SØKNAD, LocalDate.now())
         assertEquals(1, antall)
     }
 
     @Test
     fun`Får antall tilgjengelige beslutteroppgaver`() {
-        nyPerson()
-        val beslutter = UUID.randomUUID()
-        opprettSaksbehandler()
-        opprettSaksbehandler(saksbehandlerOID = beslutter)
-        oppgaveDao.updateOppgave(
-            oppgaveId = OPPGAVE_ID,
-            oppgavestatus = Oppgavestatus.AvventerSaksbehandler.toString(),
-            egenskaper = listOf(EGENSKAP, EgenskapForDatabase.BESLUTTER)
-        )
+        val fødselsnummer = lagFødselsnummer()
+        val saksbehandler = nyLegacySaksbehandler()
+        val beslutter = nyLegacySaksbehandler()
+        val oppgave = nyOppgaveForNyPerson(fødselsnummer = fødselsnummer)
+
         assertEquals(0, behandlingsstatistikkDao.getAntallTilgjengeligeBeslutteroppgaver())
-        opprettTotrinnsvurdering(saksbehandlerOid = SAKSBEHANDLER_OID, beslutterOid = beslutter)
+
+        nyTotrinnsvurdering(fødselsnummer, oppgave).sendTilBeslutterOgLagre(legacySaksbehandler = saksbehandler)
+        oppgave.sendTilBeslutterOgLagre(beslutter = beslutter)
         assertEquals(1, behandlingsstatistikkDao.getAntallTilgjengeligeBeslutteroppgaver())
-        oppgaveDao.updateOppgave(
-            oppgaveId = OPPGAVE_ID,
-            oppgavestatus = Oppgavestatus.Ferdigstilt.toString(),
-            egenskaper = listOf(EGENSKAP, EgenskapForDatabase.BESLUTTER)
-        )
+
+        oppgave
+            .avventSystemOgLagre(legacySaksbehandler = beslutter)
+            .ferdigstillOgLagre()
         assertEquals(0, behandlingsstatistikkDao.getAntallTilgjengeligeBeslutteroppgaver())
     }
 
     @Test
     fun`Får antall fullførte beslutteroppgaver`() {
-        nyPerson()
-        val beslutter = UUID.randomUUID()
-        opprettSaksbehandler()
-        opprettSaksbehandler(saksbehandlerOID = beslutter)
-        utbetalingsopplegg(1000, 0)
+        val fødselsnummer = lagFødselsnummer()
+        val saksbehandler = nyLegacySaksbehandler()
+        val beslutter = nyLegacySaksbehandler()
+        val oppgave = nyOppgaveForNyPerson()
         assertEquals(0, behandlingsstatistikkDao.getAntallFullførteBeslutteroppgaver(LocalDate.now().minusDays(1)))
-        opprettTotrinnsvurdering(saksbehandlerOid = SAKSBEHANDLER_OID, beslutterOid = beslutter, ferdigstill = true)
+
+        oppgave
+            .sendTilBeslutterOgLagre(beslutter = beslutter)
+            .ferdigstillOgLagre()
+        nyTotrinnsvurdering(fødselsnummer, oppgave)
+            .sendTilBeslutterOgLagre(legacySaksbehandler = saksbehandler)
+            .ferdigstillOgLagre(beslutter = beslutter)
+
         assertEquals(1, behandlingsstatistikkDao.getAntallFullførteBeslutteroppgaver(LocalDate.now().minusDays(1)))
     }
 
@@ -108,31 +112,20 @@ internal class PgBehandlingsstatistikkDaoTest : AbstractDBIntegrationTest() {
 
     @Test
     fun`Får antall tilgjengelige egen ansatt-oppgaver`() {
-        nyPerson()
-        opprettSaksbehandler()
-        oppgaveDao.updateOppgave(
-            oppgaveId = OPPGAVE_ID,
-            oppgavestatus = Oppgavestatus.AvventerSaksbehandler.toString(),
-            egenskaper = listOf(EGENSKAP, EgenskapForDatabase.EGEN_ANSATT)
-        )
+        val oppgave = nyOppgaveForNyPerson(oppgaveegenskaper = setOf(Egenskap.EGEN_ANSATT))
         assertEquals(1, behandlingsstatistikkDao.getAntallTilgjengeligeEgenAnsattOppgaver())
-        oppgaveDao.updateOppgave(
-            oppgaveId = OPPGAVE_ID,
-            oppgavestatus = Oppgavestatus.Ferdigstilt.toString(),
-            egenskaper = listOf(EGENSKAP, EgenskapForDatabase.EGEN_ANSATT)
-        )
+        oppgave
+            .avventSystemOgLagre(nyLegacySaksbehandler())
+            .ferdigstillOgLagre()
         assertEquals(0, behandlingsstatistikkDao.getAntallTilgjengeligeEgenAnsattOppgaver())
     }
 
     @Test
     fun`Får antall fullførte egen ansatt-oppgaver`() {
-        nyPerson()
-        opprettSaksbehandler()
-        oppgaveDao.updateOppgave(
-            oppgaveId = OPPGAVE_ID,
-            oppgavestatus = Oppgavestatus.Ferdigstilt.toString(),
-            egenskaper = listOf(EGENSKAP, EgenskapForDatabase.EGEN_ANSATT)
-        )
+        nyOppgaveForNyPerson(oppgaveegenskaper = setOf(Egenskap.EGEN_ANSATT))
+            .avventSystemOgLagre(nyLegacySaksbehandler())
+            .ferdigstillOgLagre()
+
         assertEquals(1, behandlingsstatistikkDao.getAntallManueltFullførteEgenAnsattOppgaver(LocalDate.now().minusDays(1)))
     }
 

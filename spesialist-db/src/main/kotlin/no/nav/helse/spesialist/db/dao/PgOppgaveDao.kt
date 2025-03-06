@@ -21,7 +21,6 @@ import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.db.objectMapper
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -383,27 +382,6 @@ class PgOppgaveDao internal constructor(
         ).single {
             it.string("fødselsnummer")
         }
-
-    fun updateOppgave(
-        oppgaveId: Long,
-        oppgavestatus: String,
-        ferdigstiltAv: String? = null,
-        oid: UUID? = null,
-        egenskaper: List<EgenskapForDatabase>,
-    ): Int =
-        asSQL(
-            """
-            UPDATE oppgave
-            SET ferdigstilt_av = :ferdigstiltAv, ferdigstilt_av_oid = :oid, status = :oppgavestatus::oppgavestatus, egenskaper = :egenskaper::varchar[], oppdatert = :oppdatert
-            WHERE id=:oppgaveId
-            """,
-            "ferdigstiltAv" to ferdigstiltAv,
-            "oid" to oid,
-            "oppgavestatus" to oppgavestatus,
-            "egenskaper" to egenskaper.joinToString(prefix = "{", postfix = "}"),
-            "oppdatert" to LocalDateTime.now(),
-            "oppgaveId" to oppgaveId,
-        ).update()
 
     override fun oppdaterPekerTilGodkjenningsbehov(
         godkjenningsbehovId: UUID,

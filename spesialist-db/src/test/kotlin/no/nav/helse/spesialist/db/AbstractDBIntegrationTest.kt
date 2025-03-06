@@ -7,7 +7,6 @@ import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettArbeidsforholdDto
 import no.nav.helse.modell.KomplettInntektskildeDto
@@ -39,6 +38,7 @@ import no.nav.helse.spesialist.db.dao.api.PgRisikovurderingApiDao
 import no.nav.helse.spesialist.db.dao.api.PgVarselApiRepository
 import no.nav.helse.spesialist.domain.Dialog
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
+import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 import no.nav.helse.spesialist.typer.Kjønn
 import org.flywaydb.core.Flyway
 import org.intellij.lang.annotations.Language
@@ -63,8 +63,6 @@ abstract class AbstractDBIntegrationTest {
     protected open val UTBETALING_ID: UUID = testperson.utbetalingId1
 
     protected open var OPPGAVE_ID = nextLong()
-    protected val EGENSKAP = EgenskapForDatabase.SØKNAD
-    protected val OPPGAVESTATUS = "AvventerSaksbehandler"
 
     protected val ORGNUMMER =
         with(testperson) {
@@ -265,31 +263,6 @@ abstract class AbstractDBIntegrationTest {
         commandContextDao.opprett(hendelse.id, contextId)
     }
 
-    protected fun tildelOppgave(
-        oppgaveId: Long = OPPGAVE_ID,
-        saksbehandlerOid: UUID,
-        navn: String = SAKSBEHANDLER_NAVN,
-        egenskaper: List<EgenskapForDatabase> = listOf(EgenskapForDatabase.SØKNAD),
-    ) {
-        opprettSaksbehandler(saksbehandlerOid, navn = navn, epost = SAKSBEHANDLER_EPOST, ident = SAKSBEHANDLER_IDENT)
-        oppgaveDao.updateOppgave(oppgaveId, oppgavestatus = "AvventerSaksbehandler", egenskaper = egenskaper)
-        tildelingDao.tildel(oppgaveId, saksbehandlerOid)
-    }
-
-    protected fun leggOppgavePåVent(
-        oppgaveId: Long = OPPGAVE_ID,
-        saksbehandlerOid: UUID,
-        frist: LocalDate = LocalDate.now().plusDays(1),
-        årsaker: List<PåVentÅrsak> = emptyList(),
-        tekst: String = "En notattekst",
-    ) {
-        val dialog = Dialog.Factory.ny().apply {
-            leggTilKommentar(tekst = "En kommentar", saksbehandlerident = SAKSBEHANDLER_IDENT)
-        }
-        sessionContext.dialogRepository.lagre(dialog)
-        påVentDao.lagrePåVent(oppgaveId, saksbehandlerOid, frist, årsaker, tekst, dialog.id().value)
-    }
-
     private fun opprettVedtakstype(
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
         type: Periodetype = FØRSTEGANGSBEHANDLING,
@@ -307,9 +280,18 @@ abstract class AbstractDBIntegrationTest {
         fødselsnummer: String = FNR,
         aktørId: String = AKTØR,
         adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert,
+        fornavn: String = lagFornavn(),
+        mellomnavn: String? = null,
+        etternavn: String = lagEtternavn(),
     ): Persondata {
         personDao.lagreMinimalPerson(MinimalPersonDto(fødselsnummer, aktørId))
-        val personinfoId = opprettPersoninfo(fødselsnummer, adressebeskyttelse = adressebeskyttelse)
+        val personinfoId = opprettPersoninfo(
+            fødselsnummer = fødselsnummer,
+            adressebeskyttelse = adressebeskyttelse,
+            fornavn = fornavn,
+            mellomnavn = mellomnavn,
+            etternavn = etternavn
+        )
         val infotrygdutbetalingerId =
             personDao.upsertInfotrygdutbetalinger(fødselsnummer, objectMapper.createObjectNode())
         val enhetId = ENHET.toInt()
@@ -513,82 +495,25 @@ abstract class AbstractDBIntegrationTest {
         utbetalingId: UUID = UTBETALING_ID,
         behandlingId: UUID = UUID.randomUUID(),
         godkjenningsbehovId: UUID = UUID.randomUUID(),
-    ) {
+    ): Oppgave {
         val hendelse = testhendelse(hendelseId = godkjenningsbehovId)
         opprettCommandContext(hendelse, contextId)
         oppgaveId = nextLong()
         OPPGAVE_ID = oppgaveId
-        sessionContext.oppgaveRepository.lagre(
-            Oppgave.ny(
-                id = oppgaveId,
-                vedtaksperiodeId = vedtaksperiodeId,
-                behandlingId = behandlingId,
-                utbetalingId = utbetalingId,
-                hendelseId = godkjenningsbehovId,
-                kanAvvises = kanAvvises,
-                egenskaper = egenskaper
-            )
+        val oppgave = Oppgave.ny(
+            id = oppgaveId,
+            vedtaksperiodeId = vedtaksperiodeId,
+            behandlingId = behandlingId,
+            utbetalingId = utbetalingId,
+            hendelseId = godkjenningsbehovId,
+            kanAvvises = kanAvvises,
+            egenskaper = egenskaper
         )
+        sessionContext.oppgaveRepository.lagre(oppgave)
+        return oppgave
     }
 
     fun finnOppgaveIdFor(vedtaksperiodeId: UUID): Long = oppgaveDao.finnIdForAktivOppgave(vedtaksperiodeId)!!
-
-    protected fun avventerSystem(
-        oppgaveId: Long,
-        ferdigstiltAv: String,
-        ferdigstiltAvOid: UUID,
-    ) {
-        oppgaveDao.updateOppgave(
-            oppgaveId = oppgaveId,
-            oppgavestatus = "AvventerSystem",
-            ferdigstiltAv = ferdigstiltAv,
-            oid = ferdigstiltAvOid,
-            egenskaper = listOf(EGENSKAP),
-        )
-    }
-
-    protected fun ferdigstillOppgave(
-        oppgaveId: Long,
-        ferdigstiltAv: String? = null,
-        ferdigstiltAvOid: UUID? = null,
-    ) {
-        oppgaveDao.updateOppgave(
-            oppgaveId = oppgaveId,
-            oppgavestatus = "Ferdigstilt",
-            ferdigstiltAv = ferdigstiltAv,
-            oid = ferdigstiltAvOid,
-            egenskaper = listOf(EGENSKAP),
-        )
-    }
-
-    protected fun opprettTotrinnsvurdering(
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE,
-        saksbehandlerOid: UUID? = null,
-        beslutterOid: UUID? = null,
-        erRetur: Boolean = false,
-        ferdigstill: Boolean = false,
-    ) {
-        val totrinnsvurdering = Totrinnsvurdering.ny(vedtaksperiodeId = vedtaksperiodeId)
-        val beslutter = SaksbehandlerOid(beslutterOid ?: UUID.randomUUID())
-        totrinnsvurderingRepository.lagre(totrinnsvurdering, FNR)
-        saksbehandlerOid?.let {
-            totrinnsvurdering.sendTilBeslutter(
-                oppgaveId = OPPGAVE_ID,
-                behandlendeSaksbehandler = SaksbehandlerOid(saksbehandlerOid)
-            )
-        }
-
-        if (erRetur) totrinnsvurdering.sendIRetur(
-            oppgaveId = OPPGAVE_ID,
-            beslutter = beslutter
-        )
-
-        totrinnsvurdering.settBeslutter(beslutter)
-
-        if (ferdigstill) totrinnsvurdering.ferdigstill(UTBETALING_ID)
-
-        totrinnsvurderingRepository.lagre(totrinnsvurdering, FNR)
-    }
 
     protected fun opprettUtbetalingKobling(
         vedtaksperiodeId: UUID,
@@ -602,20 +527,25 @@ abstract class AbstractDBIntegrationTest {
         beløpTilSykmeldt: Int,
         utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING,
         utbetalingId: UUID = UTBETALING_ID,
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE,
+        fødselsnummer: String = FNR,
+        organisasjonsnummer: String = ORGNUMMER,
     ) {
         val arbeidsgiveroppdragId = lagArbeidsgiveroppdrag(fagsystemId())
         val personOppdragId = lagPersonoppdrag(fagsystemId())
         val utbetaling_idId =
             lagUtbetalingId(
-                arbeidsgiveroppdragId,
-                personOppdragId,
-                utbetalingId,
+                fødselsnummer = fødselsnummer,
+                organisasjonsnummer = organisasjonsnummer,
+                arbeidsgiverOppdragId = arbeidsgiveroppdragId,
+                personOppdragId = personOppdragId,
+                utbetalingId = utbetalingId,
                 arbeidsgiverbeløp = beløpTilArbeidsgiver,
                 personbeløp = beløpTilSykmeldt,
                 utbetalingtype = utbetalingtype,
             )
         utbetalingDao.nyUtbetalingStatus(utbetaling_idId, Utbetalingsstatus.UTBETALT, LocalDateTime.now(), "{}")
-        opprettUtbetalingKobling(VEDTAKSPERIODE, utbetalingId)
+        opprettUtbetalingKobling(vedtaksperiodeId, utbetalingId)
     }
 
     protected fun lagArbeidsgiveroppdrag(
@@ -632,11 +562,13 @@ abstract class AbstractDBIntegrationTest {
         arbeidsgiverbeløp: Int = 2000,
         personbeløp: Int = 2000,
         utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING,
+        fødselsnummer: String = FNR,
+        organisasjonsnummer: String = ORGNUMMER,
     ): Long =
         utbetalingDao.opprettUtbetalingId(
             utbetalingId = utbetalingId,
-            fødselsnummer = FNR,
-            organisasjonsnummer = ORGNUMMER,
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer,
             type = utbetalingtype,
             opprettet = LocalDateTime.now(),
             arbeidsgiverFagsystemIdRef = arbeidsgiverOppdragId,
@@ -656,6 +588,155 @@ abstract class AbstractDBIntegrationTest {
             fraGrad = null,
             lovhjemmel = null,
         )
+
+    protected fun nyOppgaveForNyPerson(
+        fødselsnummer: String = lagFødselsnummer(),
+        aktørId: String = lagAktørId(),
+        adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert,
+        organisasjonsnummer: String = lagOrganisasjonsnummer(),
+        vedtaksperiodeId: UUID = UUID.randomUUID(),
+        behandlingId: UUID = UUID.randomUUID(),
+        utbetalingId: UUID = UUID.randomUUID(),
+        commandContextId: UUID = UUID.randomUUID(),
+        godkjenningsbehovId: UUID = UUID.randomUUID(),
+        fornavn: String = lagFornavn(),
+        mellomnavn: String? = null,
+        etternavn: String = lagEtternavn(),
+        oppgaveegenskaper: Set<Egenskap> = setOf(Egenskap.SØKNAD),
+    ): Oppgave {
+        opprettPerson(
+            fødselsnummer = fødselsnummer,
+            aktørId = aktørId,
+            adressebeskyttelse = adressebeskyttelse,
+            fornavn = fornavn,
+            mellomnavn = mellomnavn,
+            etternavn = etternavn,
+        )
+        opprettArbeidsgiver(organisasjonsnummer = organisasjonsnummer)
+        opprettVedtaksperiode(
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            spleisBehandlingId = behandlingId,
+            utbetalingId = utbetalingId,
+        )
+        utbetalingsopplegg(
+            fødselsnummer = fødselsnummer,
+            organisasjonsnummer = organisasjonsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetalingId = utbetalingId,
+            beløpTilSykmeldt = 1000,
+            beløpTilArbeidsgiver = 1000
+        )
+        return opprettOppgave(
+            contextId = commandContextId,
+            vedtaksperiodeId = vedtaksperiodeId,
+            utbetalingId = utbetalingId,
+            behandlingId = behandlingId,
+            godkjenningsbehovId = godkjenningsbehovId,
+            egenskaper = oppgaveegenskaper,
+        )
+    }
+
+    protected fun Oppgave.tildelOgLagre(
+        legacySaksbehandler: LegacySaksbehandler,
+    ): Oppgave {
+        opprettSaksbehandler(
+            saksbehandlerOID = legacySaksbehandler.oid,
+            navn = legacySaksbehandler.navn,
+            epost = legacySaksbehandler.epostadresse,
+            ident = legacySaksbehandler.ident()
+        )
+        this.forsøkTildeling(legacySaksbehandler)
+        sessionContext.oppgaveRepository.lagre(this)
+        return this
+    }
+
+    protected fun Oppgave.leggPåVentOgLagre(
+        legacySaksbehandler: LegacySaksbehandler,
+        frist: LocalDate = LocalDate.now().plusDays(1),
+        årsaker: List<PåVentÅrsak> = emptyList(),
+        tekst: String? = null,
+    ): Oppgave {
+        opprettSaksbehandler(
+            saksbehandlerOID = legacySaksbehandler.oid,
+            navn = legacySaksbehandler.navn,
+            epost = legacySaksbehandler.epostadresse,
+            ident = legacySaksbehandler.ident()
+        )
+        this.leggPåVent(true, legacySaksbehandler)
+        val dialog = Dialog.Factory.ny().apply {
+            leggTilKommentar(tekst = "En kommentar", saksbehandlerident = SAKSBEHANDLER_IDENT)
+        }
+        sessionContext.dialogRepository.lagre(dialog)
+        sessionContext.oppgaveRepository.lagre(this)
+        påVentDao.lagrePåVent(this.id, legacySaksbehandler.oid, frist, årsaker, tekst, dialog.id().value)
+        return this
+    }
+
+    protected fun Oppgave.invaliderOgLagre(): Oppgave {
+        this.avbryt()
+        sessionContext.oppgaveRepository.lagre(this)
+        return this
+    }
+
+    protected fun Oppgave.sendTilBeslutterOgLagre(beslutter: LegacySaksbehandler?): Oppgave {
+        this.sendTilBeslutter(beslutter)
+        sessionContext.oppgaveRepository.lagre(this)
+        return this
+    }
+
+    protected fun Oppgave.avventSystemOgLagre(legacySaksbehandler: LegacySaksbehandler): Oppgave {
+        this.avventerSystem(legacySaksbehandler.ident(), legacySaksbehandler.oid)
+        sessionContext.oppgaveRepository.lagre(this)
+        return this
+    }
+
+    protected fun Oppgave.ferdigstillOgLagre(): Oppgave {
+        this.ferdigstill()
+        sessionContext.oppgaveRepository.lagre(this)
+        return this
+    }
+
+    protected fun nyTotrinnsvurdering(fødselsnummer: String, oppgave: Oppgave): TotrinnsvurderingKontekst {
+        val totrinnsvurdering = Totrinnsvurdering.ny(oppgave.vedtaksperiodeId)
+        sessionContext.totrinnsvurderingRepository.lagre(
+            fødselsnummer = fødselsnummer,
+            totrinnsvurdering = totrinnsvurdering,
+        )
+        return TotrinnsvurderingKontekst(totrinnsvurdering, fødselsnummer, oppgave)
+    }
+
+    protected fun TotrinnsvurderingKontekst.sendTilBeslutterOgLagre(legacySaksbehandler: LegacySaksbehandler): TotrinnsvurderingKontekst {
+        totrinnsvurdering.sendTilBeslutter(oppgave.id, SaksbehandlerOid(legacySaksbehandler.oid))
+        sessionContext.totrinnsvurderingRepository.lagre(totrinnsvurdering, fødselsnummer)
+        return this
+    }
+
+    protected fun TotrinnsvurderingKontekst.ferdigstillOgLagre(beslutter: LegacySaksbehandler): TotrinnsvurderingKontekst {
+        totrinnsvurdering.settBeslutter(SaksbehandlerOid(beslutter.oid))
+        totrinnsvurdering.ferdigstill(utbetalingId = oppgave.utbetalingId)
+        sessionContext.totrinnsvurderingRepository.lagre(totrinnsvurdering, fødselsnummer)
+        return this
+    }
+
+    class TotrinnsvurderingKontekst(
+        val totrinnsvurdering: Totrinnsvurdering,
+        val fødselsnummer: String,
+        val oppgave: Oppgave,
+    )
+
+    protected fun nyLegacySaksbehandler(navn: String = lagSaksbehandlernavn()): LegacySaksbehandler {
+        val saksbehandler = LegacySaksbehandler(
+            epostadresse = lagEpostadresseFraFulltNavn(navn),
+            oid = UUID.randomUUID(),
+            navn = navn,
+            ident = lagSaksbehandlerident(),
+            tilgangskontroll = { _, _ -> false }
+        )
+        opprettSaksbehandler(saksbehandler.oid, saksbehandler.navn, saksbehandler.epostadresse, saksbehandler.ident())
+        return saksbehandler
+    }
 
     protected data class Persondata(
         val personinfoId: Long,

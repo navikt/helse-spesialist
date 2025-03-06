@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.db.dao
 
+import no.nav.helse.db.BehandletOppgaveFraDatabaseForVisning
 import no.nav.helse.db.EgenskapForDatabase.DELVIS_REFUSJON
 import no.nav.helse.db.EgenskapForDatabase.EN_ARBEIDSGIVER
 import no.nav.helse.db.EgenskapForDatabase.FLERE_ARBEIDSGIVERE
@@ -11,42 +12,44 @@ import no.nav.helse.db.EgenskapForDatabase.RISK_QA
 import no.nav.helse.db.EgenskapForDatabase.SØKNAD
 import no.nav.helse.db.EgenskapForDatabase.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.db.EgenskapForDatabase.UTLAND
+import no.nav.helse.db.OppgaveFraDatabaseForVisning
 import no.nav.helse.db.OppgavesorteringForDatabase
 import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.SorteringsnøkkelForDatabase
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.oppgave.Egenskap
+import no.nav.helse.modell.oppgave.Egenskap.BESLUTTER
+import no.nav.helse.modell.oppgave.Egenskap.FORTROLIG_ADRESSE
+import no.nav.helse.modell.oppgave.Egenskap.Kategori
+import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Oppgave
-import no.nav.helse.modell.person.Adressebeskyttelse
-import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.db.TestMelding
 import no.nav.helse.spesialist.db.lagAktørId
+import no.nav.helse.spesialist.db.lagEtternavn
+import no.nav.helse.spesialist.db.lagFornavn
 import no.nav.helse.spesialist.db.lagFødselsnummer
-import no.nav.helse.spesialist.db.lagOrganisasjonsnummer
-import org.junit.jupiter.api.Assertions.assertDoesNotThrow
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.parallel.Execution
 import org.junit.jupiter.api.parallel.ExecutionMode
 import org.junit.jupiter.api.parallel.Isolated
-import java.time.LocalDate
 import java.util.UUID
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 @Isolated
 @Execution(ExecutionMode.SAME_THREAD)
 class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
     private val CONTEXT_ID = UUID.randomUUID()
     private val TESTHENDELSE = TestMelding(HENDELSE_ID, UUID.randomUUID(), FNR)
-    private val OPPGAVETYPE = "SØKNAD"
+    private val legacySaksbehandler = nyLegacySaksbehandler()
 
-    @BeforeEach
+    @BeforeTest
     fun setupDaoTest() {
         godkjenningsbehov(TESTHENDELSE.id)
         CommandContext(CONTEXT_ID).opprett(commandContextDao, TESTHENDELSE.id)
@@ -55,483 +58,256 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `Finn neste ledige id`() {
-        val id1 = oppgaveDao.reserverNesteId()
-        val id2 = oppgaveDao.reserverNesteId()
-        assertEquals(1L, id1)
-        assertEquals(2L, id2)
-    }
-
-    @Test
-    fun `lagre oppgave`() {
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettVedtaksperiode()
-        val godkjenningsbehovId = UUID.randomUUID()
-        opprettOppgave(contextId = CONTEXT_ID, godkjenningsbehovId = godkjenningsbehovId)
-        assertEquals(1, oppgave().size)
-        oppgave().first().assertEquals(
-            LocalDate.now(),
-            listOf(OPPGAVETYPE),
-            OPPGAVESTATUS,
-            true,
-            null,
-            null,
-            vedtakId,
-            godkjenningsbehovId,
-        )
+        assertDoesNotThrow {
+            oppgaveDao.reserverNesteId()
+            oppgaveDao.reserverNesteId()
+        }
     }
 
     @Test
     fun `finn SpleisBehandlingId`() {
-        val spleisBehandlingId = UUID.randomUUID()
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettVedtaksperiode(spleisBehandlingId = spleisBehandlingId)
-        opprettOppgave(contextId = CONTEXT_ID, behandlingId = spleisBehandlingId)
-        assertEquals(spleisBehandlingId, oppgaveDao.finnSpleisBehandlingId(oppgaveId))
+        val oppgave = nyOppgaveForNyPerson()
+        assertEquals(oppgave.behandlingId, oppgaveDao.finnSpleisBehandlingId(oppgave.id))
     }
 
     @Test
     fun `finn generasjonId`() {
-        val behandlingId = UUID.randomUUID()
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettVedtaksperiode(spleisBehandlingId = behandlingId)
-        opprettOppgave(contextId = CONTEXT_ID, behandlingId = behandlingId)
+        val oppgave = nyOppgaveForNyPerson()
         assertDoesNotThrow {
-            oppgaveDao.finnGenerasjonId(oppgaveId)
+            oppgaveDao.finnGenerasjonId(oppgave.id)
         }
-    }
-
-    @Test
-    fun `skal ikke lagre ny oppgave dersom det allerede er en eksisterende oppgave på samme person med gitt status`() {
-        opprettPerson()
-        opprettArbeidsgiver()
-
-        opprettVedtaksperiode()
-        val godkjenningsbehovId = UUID.randomUUID()
-        opprettOppgave(contextId = CONTEXT_ID, godkjenningsbehovId = godkjenningsbehovId)
-        val vedtakIdPåOppgave = vedtakId
-
-        val vedtaksperiodeId = UUID.randomUUID()
-        opprettVedtaksperiode(
-            vedtaksperiodeId = vedtaksperiodeId,
-            fom = TOM.plusDays(1),
-            tom = TOM.plusDays(10),
-            periodetype = Periodetype.FORLENGELSE,
-        )
-        assertThrows<IllegalStateException> {
-            opprettOppgave(contextId = CONTEXT_ID, vedtaksperiodeId = vedtaksperiodeId)
-        }
-
-        assertEquals(1, oppgave().size)
-        oppgave().first().assertEquals(
-            LocalDate.now(),
-            listOf(OPPGAVETYPE),
-            OPPGAVESTATUS,
-            true,
-            null,
-            null,
-            vedtakIdPåOppgave,
-            godkjenningsbehovId,
-        )
-    }
-
-    @Test
-    fun `skal lagre ny oppgave dersom eksisterende oppgave på samme person ikke avventer saksbehandler`() {
-        opprettPerson()
-        opprettArbeidsgiver()
-
-        opprettVedtaksperiode()
-        opprettOppgave(contextId = CONTEXT_ID)
-        ferdigstillOppgave(oppgaveId = OPPGAVE_ID)
-        assertEquals(1, oppgave().size)
-
-        val vedtaksperiodeId2 = UUID.randomUUID()
-        opprettVedtaksperiode(
-            vedtaksperiodeId = vedtaksperiodeId2,
-            fom = TOM.plusDays(1),
-            tom = TOM.plusDays(10),
-            periodetype = Periodetype.FORLENGELSE,
-        )
-        opprettOppgave(contextId = CONTEXT_ID, vedtaksperiodeId = vedtaksperiodeId2)
-        assertEquals(1, oppgave(vedtaksperiodeId2).size)
-    }
-
-    @Test
-    fun `lagre oppgave med flere egenskaper`() {
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettVedtaksperiode()
-        val godkjenningsbehovId = UUID.randomUUID()
-        opprettOppgave(
-            contextId = CONTEXT_ID,
-            egenskaper = setOf(Egenskap.SØKNAD, Egenskap.RISK_QA, Egenskap.PÅ_VENT),
-            godkjenningsbehovId = godkjenningsbehovId
-        )
-        assertEquals(1, oppgave().size)
-        oppgave().first().assertEquals(
-            LocalDate.now(),
-            listOf(OPPGAVETYPE, "RISK_QA", "PÅ_VENT"),
-            OPPGAVESTATUS,
-            true,
-            null,
-            null,
-            vedtakId,
-            godkjenningsbehovId,
-        )
-    }
-
-    @Test
-    fun `lagre oppgave med kanAvvises lik false`() {
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettVedtaksperiode()
-        val godkjenningsbehovId = UUID.randomUUID()
-        opprettOppgave(contextId = CONTEXT_ID, kanAvvises = false, godkjenningsbehovId = godkjenningsbehovId)
-        assertEquals(1, oppgave().size)
-        oppgave().first().assertEquals(
-            LocalDate.now(),
-            listOf("SØKNAD"),
-            OPPGAVESTATUS,
-            false,
-            null,
-            null,
-            vedtakId,
-            godkjenningsbehovId,
-        )
-    }
-
-    @Test
-    fun `lagre oppgave med fortrolig adressebeskyttelse`() {
-        opprettPerson(adressebeskyttelse = Adressebeskyttelse.Fortrolig)
-        opprettArbeidsgiver()
-        opprettVedtaksperiode()
-        val godkjenningsbehovId = UUID.randomUUID()
-        opprettOppgave(contextId = CONTEXT_ID, egenskaper = setOf(Egenskap.FORTROLIG_ADRESSE), godkjenningsbehovId = godkjenningsbehovId)
-        assertEquals(1, oppgave().size)
-        oppgave().first().assertEquals(
-            LocalDate.now(),
-            listOf("FORTROLIG_ADRESSE"),
-            OPPGAVESTATUS,
-            true,
-            null,
-            null,
-            vedtakId,
-            godkjenningsbehovId,
-        )
     }
 
     @Test
     fun `finner hendelseId`() {
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettVedtaksperiode()
-        val contextId = UUID.randomUUID()
-        val hendelseId = UUID.randomUUID()
-        opprettOppgave(contextId = contextId, godkjenningsbehovId = hendelseId)
-        assertEquals(hendelseId, oppgaveDao.finnHendelseId(oppgaveId))
+        val oppgave = nyOppgaveForNyPerson()
+
+        assertEquals(oppgave.godkjenningsbehovId, oppgaveDao.finnHendelseId(oppgave.id))
     }
 
     @Test
     fun `finner oppgaveId ved hjelp av fødselsnummer`() {
-        nyPerson()
-        assertEquals(oppgaveId, oppgaveDao.finnOppgaveId(FNR))
-        nyPerson(
-            fødselsnummer = FNR.reversed(),
-            aktørId = AKTØR.reversed(),
-            organisasjonsnummer = ORGNUMMER.reversed(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        assertEquals(oppgaveId, oppgaveDao.finnOppgaveId(FNR.reversed()))
+        val fødselsnummer = lagFødselsnummer()
+        val oppgave = nyOppgaveForNyPerson(fødselsnummer = fødselsnummer)
+
+        assertEquals(oppgave.id, oppgaveDao.finnOppgaveId(fødselsnummer))
     }
 
     @Test
     fun `finner oppgaveId for ikke-avsluttet oppgave ved hjelp av vedtaksperiodeId`() {
-        nyPerson()
-        oppgaveDao.updateOppgave(oppgaveId = OPPGAVE_ID, oppgavestatus = "Ferdigstilt", egenskaper = listOf(EGENSKAP))
-        opprettOppgave()
+        val oppgave = nyOppgaveForNyPerson()
 
-        assertEquals(OPPGAVE_ID, oppgaveDao.finnIdForAktivOppgave(VEDTAKSPERIODE))
+        assertEquals(oppgave.id, oppgaveDao.finnIdForAktivOppgave(oppgave.vedtaksperiodeId))
 
-        oppgaveDao.invaliderOppgaveFor(fødselsnummer = FNR)
-        assertNull(oppgaveDao.finnIdForAktivOppgave(VEDTAKSPERIODE))
-
-        opprettOppgave()
-        assertEquals(OPPGAVE_ID, oppgaveDao.finnIdForAktivOppgave(VEDTAKSPERIODE))
+        oppgave.invaliderOgLagre()
+        assertNull(oppgaveDao.finnIdForAktivOppgave(oppgave.vedtaksperiodeId))
     }
 
     @Test
     fun `Finn oppgave for visning`() {
-        val fnr = lagFødselsnummer()
         val aktørId = lagAktørId()
-        val arbeidsgiver = lagOrganisasjonsnummer()
-        val vedtaksperiodeId = UUID.randomUUID()
-        val saksbehandlerOid = UUID.randomUUID()
-        nyPerson(
-            fødselsnummer = fnr,
+        val fornavn = lagFornavn()
+        val mellomnavn = lagEtternavn()
+        val etternavn = lagEtternavn()
+        val oppgave = nyOppgaveForNyPerson(
             aktørId = aktørId,
-            organisasjonsnummer = arbeidsgiver,
-            vedtaksperiodeId = vedtaksperiodeId,
+            fornavn = fornavn,
+            mellomnavn = mellomnavn,
+            etternavn = etternavn
         )
-        tildelOppgave(saksbehandlerOid = saksbehandlerOid)
+            .tildelOgLagre(legacySaksbehandler)
+
         val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID())
         assertEquals(1, oppgaver.size)
         val førsteOppgave = oppgaver.first()
-        assertEquals(OPPGAVE_ID, førsteOppgave.id)
+        assertEquals(oppgave.id, førsteOppgave.id)
         assertEquals(aktørId, førsteOppgave.aktørId)
-        assertEquals(setOf(EGENSKAP), førsteOppgave.egenskaper)
-        assertEquals(FORNAVN, førsteOppgave.navn.fornavn)
-        assertEquals(MELLOMNAVN, førsteOppgave.navn.mellomnavn)
-        assertEquals(ETTERNAVN, førsteOppgave.navn.etternavn)
+        assertEquals(oppgave.egenskaper.map { it.name }, førsteOppgave.egenskaper.map { it.name })
+        assertEquals(fornavn, førsteOppgave.navn.fornavn)
+        assertEquals(mellomnavn, førsteOppgave.navn.mellomnavn)
+        assertEquals(etternavn, førsteOppgave.navn.etternavn)
         assertEquals(false, førsteOppgave.påVent)
         assertEquals(
             SaksbehandlerFraDatabase(
-                SAKSBEHANDLER_EPOST,
-                saksbehandlerOid,
-                SAKSBEHANDLER_NAVN,
-                SAKSBEHANDLER_IDENT,
+                epostadresse = legacySaksbehandler.epostadresse,
+                oid = legacySaksbehandler.oid,
+                navn = legacySaksbehandler.navn,
+                ident = legacySaksbehandler.ident(),
             ),
             førsteOppgave.tildelt,
         )
-        assertEquals(vedtaksperiodeId, førsteOppgave.vedtaksperiodeId)
+        assertEquals(oppgave.vedtaksperiodeId, førsteOppgave.vedtaksperiodeId)
     }
 
     @Test
     fun `Finn oppgave som ligger på vent for visning`() {
-        val fnr = lagFødselsnummer()
         val aktørId = lagAktørId()
-        val arbeidsgiver = lagOrganisasjonsnummer()
-        val vedtaksperiodeId = UUID.randomUUID()
-        val saksbehandlerOid = UUID.randomUUID()
-        nyPerson(
-            fødselsnummer = fnr,
+        val fornavn = lagFornavn()
+        val mellomnavn = lagEtternavn()
+        val etternavn = lagEtternavn()
+        val oppgave = nyOppgaveForNyPerson(
             aktørId = aktørId,
-            organisasjonsnummer = arbeidsgiver,
-            vedtaksperiodeId = vedtaksperiodeId,
+            fornavn = fornavn,
+            mellomnavn = mellomnavn,
+            etternavn = etternavn
         )
-        tildelOppgave(saksbehandlerOid = saksbehandlerOid)
-        leggOppgavePåVent(saksbehandlerOid = saksbehandlerOid)
+            .tildelOgLagre(legacySaksbehandler)
+            .leggPåVentOgLagre(legacySaksbehandler)
+
         val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID())
         assertEquals(1, oppgaver.size)
         val førsteOppgave = oppgaver.first()
-        assertEquals(OPPGAVE_ID, førsteOppgave.id)
+        assertEquals(oppgave.id, førsteOppgave.id)
         assertEquals(aktørId, førsteOppgave.aktørId)
-        assertEquals(setOf(EGENSKAP), førsteOppgave.egenskaper)
-        assertEquals(FORNAVN, førsteOppgave.navn.fornavn)
-        assertEquals(MELLOMNAVN, førsteOppgave.navn.mellomnavn)
-        assertEquals(ETTERNAVN, førsteOppgave.navn.etternavn)
-        assertEquals(false, førsteOppgave.påVent)
+        assertEquals(oppgave.egenskaper.map { it.name }, førsteOppgave.egenskaper.map { it.name })
+        assertEquals(fornavn, førsteOppgave.navn.fornavn)
+        assertEquals(mellomnavn, førsteOppgave.navn.mellomnavn)
+        assertEquals(etternavn, førsteOppgave.navn.etternavn)
+        assertEquals(true, førsteOppgave.påVent)
         assertEquals(
             SaksbehandlerFraDatabase(
-                SAKSBEHANDLER_EPOST,
-                saksbehandlerOid,
-                SAKSBEHANDLER_NAVN,
-                SAKSBEHANDLER_IDENT,
+                epostadresse = legacySaksbehandler.epostadresse,
+                oid = legacySaksbehandler.oid,
+                navn = legacySaksbehandler.navn,
+                ident = legacySaksbehandler.ident(),
             ),
             førsteOppgave.tildelt,
         )
-        assertEquals(vedtaksperiodeId, førsteOppgave.vedtaksperiodeId)
+        assertEquals(oppgave.vedtaksperiodeId, førsteOppgave.vedtaksperiodeId)
         assertNotNull(førsteOppgave.paVentInfo)
-        assertEquals(SAKSBEHANDLER_IDENT, førsteOppgave.paVentInfo?.saksbehandler)
+        assertEquals(legacySaksbehandler.ident(), førsteOppgave.paVentInfo?.saksbehandler)
         assertEquals(1, førsteOppgave.paVentInfo?.kommentarer?.size)
     }
 
     @Test
     fun `Finner behandlet oppgave for visning`() {
-        val fnr = lagFødselsnummer()
         val aktørId = lagAktørId()
-        val arbeidsgiver = lagOrganisasjonsnummer()
-        val saksbehandlerOid = UUID.randomUUID()
-        nyPerson(fødselsnummer = fnr, aktørId = aktørId, organisasjonsnummer = arbeidsgiver)
-        tildelOppgave(saksbehandlerOid = saksbehandlerOid)
-        ferdigstillOppgave(OPPGAVE_ID, ferdigstiltAvOid = saksbehandlerOid, ferdigstiltAv = SAKSBEHANDLER_IDENT)
+        val fornavn = lagFornavn()
+        val mellomnavn = lagEtternavn()
+        val etternavn = lagEtternavn()
+        val oppgave = nyOppgaveForNyPerson(
+            aktørId = aktørId,
+            fornavn = fornavn,
+            mellomnavn = mellomnavn,
+            etternavn = etternavn
+        )
+            .tildelOgLagre(legacySaksbehandler)
+            .avventSystemOgLagre(legacySaksbehandler)
+            .ferdigstillOgLagre()
 
-        val oppgaver = oppgaveDao.finnBehandledeOppgaver(saksbehandlerOid)
+        val oppgaver = oppgaveDao.finnBehandledeOppgaver(legacySaksbehandler.oid)
         assertEquals(1, oppgaver.size)
         val førsteOppgave = oppgaver.first()
-        assertEquals(OPPGAVE_ID, førsteOppgave.id)
+        assertEquals(oppgave.id, førsteOppgave.id)
         assertEquals(aktørId, førsteOppgave.aktørId)
-        assertEquals(setOf(EGENSKAP), førsteOppgave.egenskaper)
-        assertEquals(SAKSBEHANDLER_IDENT, førsteOppgave.ferdigstiltAv)
-        assertEquals(SAKSBEHANDLER_IDENT, førsteOppgave.saksbehandler)
+        assertEquals(oppgave.egenskaper.map { it.name }, førsteOppgave.egenskaper.map { it.name })
+        assertEquals(legacySaksbehandler.ident(), førsteOppgave.ferdigstiltAv)
+        assertEquals(legacySaksbehandler.ident(), førsteOppgave.saksbehandler)
         assertNull(førsteOppgave.beslutter)
-        assertEquals(FORNAVN, førsteOppgave.navn.fornavn)
-        assertEquals(MELLOMNAVN, førsteOppgave.navn.mellomnavn)
-        assertEquals(ETTERNAVN, førsteOppgave.navn.etternavn)
+        assertEquals(fornavn, førsteOppgave.navn.fornavn)
+        assertEquals(mellomnavn, førsteOppgave.navn.mellomnavn)
+        assertEquals(etternavn, førsteOppgave.navn.etternavn)
     }
 
     @Test
     fun `Finn behandlede oppgaver for visning`() {
-        val saksbehandlerOid = UUID.randomUUID()
-        val annenSaksbehandlerOid = UUID.randomUUID()
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        tildelOppgave(saksbehandlerOid = saksbehandlerOid)
-        ferdigstillOppgave(OPPGAVE_ID, ferdigstiltAvOid = saksbehandlerOid, ferdigstiltAv = SAKSBEHANDLER_NAVN)
+        nyOppgaveForNyPerson()
+            .tildelOgLagre(legacySaksbehandler)
+            .avventSystemOgLagre(legacySaksbehandler)
+            .ferdigstillOgLagre()
 
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        tildelOppgave(saksbehandlerOid = saksbehandlerOid)
-        ferdigstillOppgave(OPPGAVE_ID, ferdigstiltAvOid = saksbehandlerOid, ferdigstiltAv = SAKSBEHANDLER_NAVN)
+        nyOppgaveForNyPerson()
+            .tildelOgLagre(legacySaksbehandler)
+            .avventSystemOgLagre(legacySaksbehandler)
+            .ferdigstillOgLagre()
 
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        tildelOppgave(saksbehandlerOid = saksbehandlerOid)
-        avventerSystem(OPPGAVE_ID, ferdigstiltAvOid = saksbehandlerOid, ferdigstiltAv = SAKSBEHANDLER_NAVN)
+        nyOppgaveForNyPerson()
+            .tildelOgLagre(legacySaksbehandler)
+            .avventSystemOgLagre(legacySaksbehandler)
+            .avventSystemOgLagre(legacySaksbehandler)
 
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        tildelOppgave(saksbehandlerOid = annenSaksbehandlerOid)
-        ferdigstillOppgave(OPPGAVE_ID, ferdigstiltAvOid = annenSaksbehandlerOid, ferdigstiltAv = "ANNEN_SAKSBEHANDLER")
+        val annenSaksbehandler = nyLegacySaksbehandler()
+        nyOppgaveForNyPerson()
+            .tildelOgLagre(annenSaksbehandler)
+            .avventSystemOgLagre(annenSaksbehandler)
+            .ferdigstillOgLagre()
 
-        val oppgaver = oppgaveDao.finnBehandledeOppgaver(saksbehandlerOid)
+        val oppgaver = oppgaveDao.finnBehandledeOppgaver(legacySaksbehandler.oid)
         assertEquals(3, oppgaver.size)
         assertEquals(3, oppgaver.first().filtrertAntall)
     }
 
     @Test
     fun `Både saksbehandler som sender til beslutter og saksbehandler som utbetaler ser oppgaven i behandlede oppgaver`() {
-        val saksbehandlerOid = UUID.randomUUID()
-        val beslutterOid = UUID.randomUUID()
-        val annenSaksbehandlerOid = UUID.randomUUID()
+        val fødselsnummer = lagFødselsnummer()
 
-        nyPerson(
-            fødselsnummer = FNR,
-            aktørId = AKTØR,
-            organisasjonsnummer = ORGNUMMER,
-            vedtaksperiodeId = VEDTAKSPERIODE,
-        )
-        utbetalingsopplegg(1000, 0)
-        opprettSaksbehandler(saksbehandlerOID = saksbehandlerOid)
-        opprettSaksbehandler(beslutterOid, ident = "BESLUTTER-IDENT")
-        opprettSaksbehandler(annenSaksbehandlerOid)
-        opprettTotrinnsvurdering(vedtaksperiodeId = VEDTAKSPERIODE, saksbehandlerOid = saksbehandlerOid, beslutterOid = beslutterOid, ferdigstill = true)
-        ferdigstillOppgave(OPPGAVE_ID, ferdigstiltAvOid = beslutterOid, ferdigstiltAv = "BESLUTTER-IDENT")
+        val saksbehandler = nyLegacySaksbehandler()
+        val annenSaksbehandler = nyLegacySaksbehandler()
+        val beslutter = nyLegacySaksbehandler()
+        val oppgave = nyOppgaveForNyPerson(fødselsnummer = fødselsnummer)
+        nyTotrinnsvurdering(fødselsnummer, oppgave)
+            .sendTilBeslutterOgLagre(saksbehandler)
+            .ferdigstillOgLagre(beslutter)
+        oppgave
+            .sendTilBeslutterOgLagre(null)
+            .avventSystemOgLagre(beslutter)
+            .ferdigstillOgLagre()
 
-        val behandletIDagForSaksbehandler = oppgaveDao.finnBehandledeOppgaver(saksbehandlerOid)
-        val behandletIDagForBeslutter = oppgaveDao.finnBehandledeOppgaver(beslutterOid)
-        val behandletIDagForAnnenSaksbehandler = oppgaveDao.finnBehandledeOppgaver(annenSaksbehandlerOid)
+        val behandletIDagForSaksbehandler = oppgaveDao.finnBehandledeOppgaver(saksbehandler.oid)
+        val behandletIDagForBeslutter = oppgaveDao.finnBehandledeOppgaver(beslutter.oid)
+        val behandletIDagForAnnenSaksbehandler = oppgaveDao.finnBehandledeOppgaver(annenSaksbehandler.oid)
 
         assertEquals(1, behandletIDagForSaksbehandler.size)
-        assertEquals("BESLUTTER-IDENT", behandletIDagForSaksbehandler.first().ferdigstiltAv)
-        assertEquals("BESLUTTER-IDENT", behandletIDagForSaksbehandler.first().beslutter)
-        assertEquals(SAKSBEHANDLER_IDENT, behandletIDagForSaksbehandler.first().saksbehandler)
+        assertEquals(beslutter.ident(), behandletIDagForSaksbehandler.first().ferdigstiltAv)
+        assertEquals(beslutter.ident(), behandletIDagForSaksbehandler.first().beslutter)
+        assertEquals(saksbehandler.ident(), behandletIDagForSaksbehandler.first().saksbehandler)
         assertEquals(1, behandletIDagForBeslutter.size)
-        assertEquals("BESLUTTER-IDENT", behandletIDagForBeslutter.first().ferdigstiltAv)
-        assertEquals("BESLUTTER-IDENT", behandletIDagForBeslutter.first().beslutter)
-        assertEquals(SAKSBEHANDLER_IDENT, behandletIDagForBeslutter.first().saksbehandler)
+        assertEquals(beslutter.ident(), behandletIDagForBeslutter.first().ferdigstiltAv)
+        assertEquals(beslutter.ident(), behandletIDagForBeslutter.first().beslutter)
+        assertEquals(saksbehandler.ident(), behandletIDagForBeslutter.first().saksbehandler)
         assertEquals(0, behandletIDagForAnnenSaksbehandler.size)
     }
 
     @Test
     fun `Finn oppgaver for visning`() {
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
+        nyOppgaveForNyPerson()
+        nyOppgaveForNyPerson()
+        nyOppgaveForNyPerson()
         val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID())
         assertEquals(3, oppgaver.size)
     }
 
     @Test
     fun `Finn oppgaver med bestemte egenskaper`() {
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-            oppgaveEgenskaper = setOf(Egenskap.SØKNAD, Egenskap.RISK_QA, Egenskap.FORTROLIG_ADRESSE),
-        )
-        val oppgaveId2 = OPPGAVE_ID
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-            oppgaveEgenskaper = setOf(Egenskap.RISK_QA, Egenskap.SØKNAD),
-        )
-        val oppgaveId3 = OPPGAVE_ID
+        nyOppgaveForNyPerson()
+        val oppgave2 = nyOppgaveForNyPerson(oppgaveegenskaper = setOf(Egenskap.SØKNAD, Egenskap.RISK_QA, FORTROLIG_ADRESSE))
+        val oppgave3 = nyOppgaveForNyPerson(oppgaveegenskaper = setOf(Egenskap.SØKNAD, Egenskap.RISK_QA))
         val oppgaver =
             oppgaveDao.finnOppgaverForVisning(
                 emptyList(),
                 UUID.randomUUID(),
                 grupperteFiltrerteEgenskaper =
                     mapOf(
-                        Egenskap.Kategori.Ukategorisert to listOf(RISK_QA),
-                        Egenskap.Kategori.Oppgavetype to listOf(SØKNAD),
+                        Kategori.Ukategorisert to listOf(RISK_QA),
+                        Kategori.Oppgavetype to listOf(SØKNAD),
                     ),
             )
         assertEquals(2, oppgaver.size)
-        assertEquals(listOf(oppgaveId3, oppgaveId2), oppgaver.map { it.id })
+        oppgaver.assertIderSamsvarerMed(oppgave3, oppgave2)
     }
 
     @Test
     fun `Finner ikke oppgaver som ikke har alle de gitte egenskapene`() {
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-            oppgaveEgenskaper = setOf(Egenskap.SØKNAD),
-        )
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-            oppgaveEgenskaper = setOf(Egenskap.RISK_QA),
-        )
+        nyOppgaveForNyPerson(oppgaveegenskaper = setOf(Egenskap.SØKNAD))
+        nyOppgaveForNyPerson(oppgaveegenskaper = setOf(Egenskap.RISK_QA))
         val oppgaver =
             oppgaveDao.finnOppgaverForVisning(
                 emptyList(),
                 UUID.randomUUID(),
                 grupperteFiltrerteEgenskaper =
                     mapOf(
-                        Egenskap.Kategori.Ukategorisert to listOf(RISK_QA),
-                        Egenskap.Kategori.Oppgavetype to listOf(SØKNAD),
+                        Kategori.Ukategorisert to listOf(RISK_QA),
+                        Kategori.Oppgavetype to listOf(SØKNAD),
                     ),
             )
         assertEquals(0, oppgaver.size)
@@ -539,118 +315,49 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `Finn oppgaver for visning med offset og limit`() {
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        val oppgaveId1 = OPPGAVE_ID
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        val oppgaveId2 = OPPGAVE_ID
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
+        nyOppgaveForNyPerson()
+        val oppgave2 = nyOppgaveForNyPerson()
+        val oppgave3 = nyOppgaveForNyPerson()
+        nyOppgaveForNyPerson()
+
         val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), 1, 2)
         assertEquals(2, oppgaver.size)
-        assertEquals(listOf(oppgaveId2, oppgaveId1), oppgaver.map { it.id })
+        oppgaver.assertIderSamsvarerMed(oppgave3, oppgave2)
     }
 
     @Test
     fun `Finn behandlede oppgaver med offset og limit`() {
-        val saksbehandlerOid = UUID.randomUUID()
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        val oppgaveId1 = OPPGAVE_ID
-        ferdigstillOppgave(oppgaveId1, ferdigstiltAvOid = saksbehandlerOid, ferdigstiltAv = SAKSBEHANDLER_NAVN)
+        nyOppgaveForNyPerson()
+            .avventSystemOgLagre(legacySaksbehandler)
+            .ferdigstillOgLagre()
+        val oppgave2 = nyOppgaveForNyPerson()
+            .avventSystemOgLagre(legacySaksbehandler)
+            .ferdigstillOgLagre()
+        val oppgave3 = nyOppgaveForNyPerson()
+            .avventSystemOgLagre(legacySaksbehandler)
+            .ferdigstillOgLagre()
 
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        val oppgaveId2 = OPPGAVE_ID
-        ferdigstillOppgave(oppgaveId2, ferdigstiltAvOid = saksbehandlerOid, ferdigstiltAv = SAKSBEHANDLER_NAVN)
-
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        val oppgaveId3 = OPPGAVE_ID
-        ferdigstillOppgave(oppgaveId3, ferdigstiltAvOid = saksbehandlerOid, ferdigstiltAv = SAKSBEHANDLER_NAVN)
-
-        val oppgaver = oppgaveDao.finnBehandledeOppgaver(saksbehandlerOid, 1, 2)
+        val oppgaver = oppgaveDao.finnBehandledeOppgaver(legacySaksbehandler.oid, 1, 2)
         assertEquals(2, oppgaver.size)
-        assertEquals(listOf(oppgaveId2, oppgaveId3), oppgaver.map { it.id })
+        oppgaver.assertIderSamsvarerMed(oppgave2, oppgave3)
     }
 
     @Test
     fun `Tar kun med oppgaver som avventer saksbehandler`() {
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        val oppgaveId1 = OPPGAVE_ID
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        val oppgaveId2 = OPPGAVE_ID
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        val oppgaveId3 = OPPGAVE_ID
-        avventerSystem(oppgaveId3, ferdigstiltAv = "navn", ferdigstiltAvOid = UUID.randomUUID())
+        val oppgave1 = nyOppgaveForNyPerson()
+        val oppgave2 = nyOppgaveForNyPerson()
+        nyOppgaveForNyPerson()
+            .avventSystemOgLagre(legacySaksbehandler)
         val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID())
         assertEquals(2, oppgaver.size)
-        assertEquals(listOf(oppgaveId2, oppgaveId1), oppgaver.map { it.id })
+        oppgaver.assertIderSamsvarerMed(oppgave1, oppgave2)
     }
 
     @Test
     fun `Sorterer oppgaver på opprettet stigende`() {
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        val oppgaveId1 = OPPGAVE_ID
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        val oppgaveId2 = OPPGAVE_ID
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        val oppgaveId3 = OPPGAVE_ID
+        val oppgave1 = nyOppgaveForNyPerson()
+        val oppgave2 = nyOppgaveForNyPerson()
+        val oppgave3 = nyOppgaveForNyPerson()
         val oppgaver =
             oppgaveDao.finnOppgaverForVisning(
                 emptyList(),
@@ -661,32 +368,14 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
                     ),
             )
         assertEquals(3, oppgaver.size)
-        assertEquals(listOf(oppgaveId1, oppgaveId2, oppgaveId3), oppgaver.map { it.id })
+        assertEquals(listOf(oppgave1.id, oppgave2.id, oppgave3.id), oppgaver.map { it.id })
     }
 
     @Test
     fun `Sorterer oppgaver på opprettet fallende`() {
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        val oppgaveId1 = OPPGAVE_ID
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        val oppgaveId2 = OPPGAVE_ID
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        val oppgaveId3 = OPPGAVE_ID
+        val oppgave1 = nyOppgaveForNyPerson()
+        val oppgave2 = nyOppgaveForNyPerson()
+        val oppgave3 = nyOppgaveForNyPerson()
         val oppgaver =
             oppgaveDao.finnOppgaverForVisning(
                 emptyList(),
@@ -697,32 +386,14 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
                     ),
             )
         assertEquals(3, oppgaver.size)
-        assertEquals(listOf(oppgaveId3, oppgaveId2, oppgaveId1), oppgaver.map { it.id })
+        assertEquals(listOf(oppgave3.id, oppgave2.id, oppgave1.id), oppgaver.map { it.id })
     }
 
     @Test
     fun `Sorterer oppgaver på opprinneligSøknadsdato stigende`() {
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        val oppgaveId1 = OPPGAVE_ID
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        val oppgaveId2 = OPPGAVE_ID
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        val oppgaveId3 = OPPGAVE_ID
+        val oppgave1 = nyOppgaveForNyPerson()
+        val oppgave2 = nyOppgaveForNyPerson()
+        val oppgave3 = nyOppgaveForNyPerson()
         val oppgaver =
             oppgaveDao.finnOppgaverForVisning(
                 emptyList(),
@@ -733,32 +404,14 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
                     ),
             )
         assertEquals(3, oppgaver.size)
-        assertEquals(listOf(oppgaveId1, oppgaveId2, oppgaveId3), oppgaver.map { it.id })
+        assertEquals(listOf(oppgave1.id, oppgave2.id, oppgave3.id), oppgaver.map { it.id })
     }
 
     @Test
     fun `Sorterer oppgaver på opprinneligSøknadsdato fallende`() {
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        val oppgaveId1 = OPPGAVE_ID
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        val oppgaveId2 = OPPGAVE_ID
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        val oppgaveId3 = OPPGAVE_ID
+        val oppgave1 = nyOppgaveForNyPerson()
+        val oppgave2 = nyOppgaveForNyPerson()
+        val oppgave3 = nyOppgaveForNyPerson()
         val oppgaver =
             oppgaveDao.finnOppgaverForVisning(
                 emptyList(),
@@ -769,34 +422,16 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
                     ),
             )
         assertEquals(3, oppgaver.size)
-        assertEquals(listOf(oppgaveId3, oppgaveId2, oppgaveId1), oppgaver.map { it.id })
+        assertEquals(listOf(oppgave3.id, oppgave2.id, oppgave1.id), oppgaver.map { it.id })
     }
 
     @Test
     fun `Sorterer oppgaver på tildeling stigende`() {
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        val oppgaveId1 = OPPGAVE_ID
-        tildelOppgave(oppgaveId1, UUID.randomUUID(), "Å")
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        val oppgaveId2 = OPPGAVE_ID
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        val oppgaveId3 = OPPGAVE_ID
-        tildelOppgave(oppgaveId3, UUID.randomUUID(), "B")
+        val oppgave1 = nyOppgaveForNyPerson()
+            .tildelOgLagre(nyLegacySaksbehandler(navn = "Beate Beatesen"))
+        val oppgave2 = nyOppgaveForNyPerson()
+        val oppgave3 = nyOppgaveForNyPerson()
+            .tildelOgLagre(nyLegacySaksbehandler(navn = "Arne Arnesen"))
         val oppgaver =
             oppgaveDao.finnOppgaverForVisning(
                 emptyList(),
@@ -807,34 +442,16 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
                     ),
             )
         assertEquals(3, oppgaver.size)
-        assertEquals(listOf(oppgaveId3, oppgaveId1, oppgaveId2), oppgaver.map { it.id })
+        assertEquals(listOf(oppgave3.id, oppgave1.id, oppgave2.id), oppgaver.map { it.id })
     }
 
     @Test
     fun `Sorterer oppgaver på tildeling fallende`() {
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        val oppgaveId1 = OPPGAVE_ID
-        tildelOppgave(oppgaveId1, UUID.randomUUID(), "A")
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        val oppgaveId2 = OPPGAVE_ID
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        val oppgaveId3 = OPPGAVE_ID
-        tildelOppgave(oppgaveId3, UUID.randomUUID(), "B")
+        val oppgave1 = nyOppgaveForNyPerson()
+            .tildelOgLagre(nyLegacySaksbehandler(navn = "Arne Arnesen"))
+        val oppgave2 = nyOppgaveForNyPerson()
+        val oppgave3 = nyOppgaveForNyPerson()
+            .tildelOgLagre(nyLegacySaksbehandler(navn = "Beate Beatesen"))
         val oppgaver =
             oppgaveDao.finnOppgaverForVisning(
                 emptyList(),
@@ -845,43 +462,20 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
                     ),
             )
         assertEquals(3, oppgaver.size)
-        assertEquals(listOf(oppgaveId3, oppgaveId1, oppgaveId2), oppgaver.map { it.id })
+        assertEquals(listOf(oppgave3.id, oppgave1.id, oppgave2.id), oppgaver.map { it.id })
     }
 
     @Test
     fun `Sorterer oppgaver på tildeling stigende først, deretter opprettet fallende`() {
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        val oppgaveId1 = OPPGAVE_ID
-        tildelOppgave(oppgaveId1, UUID.randomUUID(), "A")
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        val oppgaveId2 = OPPGAVE_ID
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        val oppgaveId3 = OPPGAVE_ID
-        val saksbehandlerOid2 = UUID.randomUUID()
-        tildelOppgave(oppgaveId3, saksbehandlerOid2, "B")
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        val oppgaveId4 = OPPGAVE_ID
-        tildelOppgave(oppgaveId4, saksbehandlerOid2, "B")
+        val legacySaksbehandler1 = nyLegacySaksbehandler(navn = "Arne Arnesen")
+        val legacySaksbehandler2 = nyLegacySaksbehandler(navn = "Beate Beatesen")
+        val oppgave1 = nyOppgaveForNyPerson()
+            .tildelOgLagre(legacySaksbehandler1)
+        val oppgave2 = nyOppgaveForNyPerson()
+        val oppgave3 = nyOppgaveForNyPerson()
+            .tildelOgLagre(legacySaksbehandler2)
+        val oppgave4 = nyOppgaveForNyPerson()
+            .tildelOgLagre(legacySaksbehandler2)
         val oppgaver =
             oppgaveDao.finnOppgaverForVisning(
                 emptyList(),
@@ -893,316 +487,157 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
                     ),
             )
         assertEquals(4, oppgaver.size)
-        assertEquals(listOf(oppgaveId1, oppgaveId4, oppgaveId3, oppgaveId2), oppgaver.map { it.id })
+        assertEquals(listOf(oppgave1.id, oppgave4.id, oppgave3.id, oppgave2.id), oppgaver.map { it.id })
     }
 
     @Test
     fun `Tar kun med oppgaver som saksbehandler har tilgang til`() {
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        val oppgaveId1 = OPPGAVE_ID
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-            oppgaveEgenskaper = setOf(Egenskap.BESLUTTER),
-        )
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-            oppgaveEgenskaper = setOf(Egenskap.RISK_QA, Egenskap.FORTROLIG_ADRESSE),
-        )
+        val oppgave1 = nyOppgaveForNyPerson()
+        nyOppgaveForNyPerson(oppgaveegenskaper = setOf(BESLUTTER))
+        nyOppgaveForNyPerson(oppgaveegenskaper = setOf(Egenskap.RISK_QA, FORTROLIG_ADRESSE))
         val oppgaver =
             oppgaveDao.finnOppgaverForVisning(
                 ekskluderEgenskaper = listOf("BESLUTTER", "RISK_QA"),
                 UUID.randomUUID(),
             )
         assertEquals(1, oppgaver.size)
-        assertEquals(listOf(oppgaveId1), oppgaver.map { it.id })
+        oppgaver.assertIderSamsvarerMed(oppgave1)
     }
 
     @Test
     fun `Ekskluderer ukategoriserte egenskaper`() {
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        val oppgaveId1 = OPPGAVE_ID
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-            oppgaveEgenskaper = setOf(Egenskap.BESLUTTER),
-        )
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-            oppgaveEgenskaper = setOf(Egenskap.RISK_QA, Egenskap.FORTROLIG_ADRESSE),
-        )
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-            oppgaveEgenskaper = setOf(Egenskap.UTLAND, Egenskap.HASTER),
-        )
+        val oppgave1 = nyOppgaveForNyPerson()
+        nyOppgaveForNyPerson(oppgaveegenskaper = setOf(BESLUTTER))
+        nyOppgaveForNyPerson(oppgaveegenskaper = setOf(Egenskap.RISK_QA, FORTROLIG_ADRESSE))
+        nyOppgaveForNyPerson(oppgaveegenskaper = setOf(Egenskap.UTLAND, Egenskap.HASTER))
         val oppgaver =
             oppgaveDao.finnOppgaverForVisning(
                 ekskluderEgenskaper = listOf("BESLUTTER", "RISK_QA") + Egenskap.alleUkategoriserteEgenskaper.map(Egenskap::toString),
                 UUID.randomUUID(),
             )
         assertEquals(1, oppgaver.size)
-        assertEquals(listOf(oppgaveId1), oppgaver.map { it.id })
+        oppgaver.assertIderSamsvarerMed(oppgave1)
     }
 
     @Test
     fun `Får kun oppgaver som er tildelt hvis tildelt er satt til true`() {
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        val oppgaveId1 = OPPGAVE_ID
-        tildelOppgave(oppgaveId1, saksbehandlerOid = UUID.randomUUID())
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
+        val oppgave1 = nyOppgaveForNyPerson()
+            .tildelOgLagre(legacySaksbehandler)
+        nyOppgaveForNyPerson()
+        nyOppgaveForNyPerson()
 
         val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), tildelt = true)
         assertEquals(1, oppgaver.size)
         assertEquals(1, oppgaver.first().filtrertAntall)
-        assertEquals(listOf(oppgaveId1), oppgaver.map { it.id })
+        oppgaver.assertIderSamsvarerMed(oppgave1)
     }
 
     @Test
     fun `Får kun oppgaver som ikke er tildelt hvis tildelt er satt til false`() {
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        val oppgaveId1 = OPPGAVE_ID
-        tildelOppgave(oppgaveId1, saksbehandlerOid = UUID.randomUUID())
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        val oppgaveId2 = OPPGAVE_ID
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        val oppgaveId3 = OPPGAVE_ID
+        nyOppgaveForNyPerson()
+            .tildelOgLagre(legacySaksbehandler)
+        val oppgave2 = nyOppgaveForNyPerson()
+        val oppgave3 = nyOppgaveForNyPerson()
 
         val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), tildelt = false)
         assertEquals(2, oppgaver.size)
         assertEquals(2, oppgaver.first().filtrertAntall)
-        assertEquals(listOf(oppgaveId3, oppgaveId2), oppgaver.map { it.id })
+        oppgaver.assertIderSamsvarerMed(oppgave2, oppgave3)
     }
 
     @Test
     fun `Får både tildelte og ikke tildelte oppgaver hvis tildelt er satt til null`() {
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        val oppgaveId1 = OPPGAVE_ID
-        tildelOppgave(oppgaveId1, saksbehandlerOid = UUID.randomUUID())
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        val oppgaveId2 = OPPGAVE_ID
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        val oppgaveId3 = OPPGAVE_ID
+        val oppgave1 = nyOppgaveForNyPerson()
+            .tildelOgLagre(legacySaksbehandler)
+        val oppgave2 = nyOppgaveForNyPerson()
+        val oppgave3 = nyOppgaveForNyPerson()
 
         val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID(), tildelt = null)
         assertEquals(3, oppgaver.size)
         assertEquals(3, oppgaver.first().filtrertAntall)
-        assertEquals(listOf(oppgaveId3, oppgaveId2, oppgaveId1), oppgaver.map { it.id })
+        oppgaver.assertIderSamsvarerMed(oppgave1, oppgave2, oppgave3)
     }
 
     @Test
     fun `Tar med alle oppgaver som saksbehandler har tilgang til`() {
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        val oppgaveId1 = OPPGAVE_ID
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        val oppgaveId2 = OPPGAVE_ID
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-            oppgaveEgenskaper = setOf(Egenskap.RISK_QA, Egenskap.FORTROLIG_ADRESSE),
-        )
-        val oppgaveId3 = OPPGAVE_ID
+        val oppgave1 = nyOppgaveForNyPerson()
+            .tildelOgLagre(legacySaksbehandler)
+        val oppgave2 = nyOppgaveForNyPerson()
+        val oppgave3 = nyOppgaveForNyPerson(oppgaveegenskaper = setOf(Egenskap.RISK_QA, FORTROLIG_ADRESSE))
         val oppgaver = oppgaveDao.finnOppgaverForVisning(emptyList(), UUID.randomUUID())
         assertEquals(3, oppgaver.size)
         assertEquals(3, oppgaver.first().filtrertAntall)
-        assertEquals(listOf(oppgaveId3, oppgaveId2, oppgaveId1), oppgaver.map { it.id })
+        oppgaver.assertIderSamsvarerMed(oppgave1, oppgave2, oppgave3)
     }
 
     @Test
     fun `Tar kun med oppgaver som er tildelt saksbehandler når dette bes om`() {
-        val saksbehandlerOid = UUID.randomUUID()
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        val oppgaveId1 = OPPGAVE_ID
-        tildelOppgave(oppgaveId1, saksbehandlerOid = saksbehandlerOid)
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-            oppgaveEgenskaper = setOf(Egenskap.PÅ_VENT),
-        )
-        val oppgaveId2 = OPPGAVE_ID
-        tildelOppgave(oppgaveId2, saksbehandlerOid = saksbehandlerOid, egenskaper = listOf(SØKNAD, PÅ_VENT))
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        val oppgaveId3 = OPPGAVE_ID
+        val oppgave1 = nyOppgaveForNyPerson()
+            .tildelOgLagre(legacySaksbehandler)
+        val oppgave2 = nyOppgaveForNyPerson()
+            .leggPåVentOgLagre(legacySaksbehandler)
+            .tildelOgLagre(legacySaksbehandler)
+        val oppgave3 = nyOppgaveForNyPerson()
 
         val oppgaverSomErTildelt =
             oppgaveDao.finnOppgaverForVisning(
                 emptyList(),
-                saksbehandlerOid = saksbehandlerOid,
+                saksbehandlerOid = legacySaksbehandler.oid,
                 egneSaker = true,
                 egneSakerPåVent = false,
             )
         val oppgaverSomErTildeltOgPåvent =
             oppgaveDao.finnOppgaverForVisning(
                 emptyList(),
-                saksbehandlerOid = saksbehandlerOid,
+                saksbehandlerOid = legacySaksbehandler.oid,
                 egneSaker = true,
                 egneSakerPåVent = true,
             )
         val alleOppgaver =
             oppgaveDao.finnOppgaverForVisning(
                 emptyList(),
-                saksbehandlerOid = saksbehandlerOid,
+                saksbehandlerOid = legacySaksbehandler.oid,
                 egneSaker = false,
                 egneSakerPåVent = false,
             )
         assertEquals(1, oppgaverSomErTildelt.size)
         assertEquals(1, oppgaverSomErTildeltOgPåvent.size)
         assertEquals(3, alleOppgaver.size)
-        assertEquals(listOf(oppgaveId1), oppgaverSomErTildelt.map { it.id })
-        assertEquals(listOf(oppgaveId2), oppgaverSomErTildeltOgPåvent.map { it.id })
-        assertEquals(setOf(oppgaveId1, oppgaveId2, oppgaveId3), alleOppgaver.map { it.id }.toSet())
+        oppgaverSomErTildelt.assertIderSamsvarerMed(oppgave1)
+        oppgaverSomErTildeltOgPåvent.assertIderSamsvarerMed(oppgave2)
+        alleOppgaver.assertIderSamsvarerMed(oppgave1, oppgave2, oppgave3)
     }
 
     @Test
     fun `Saksbehandler får ikke med oppgaver hen har sendt til beslutter selv om hen har beslutter-tilgang`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val saksbehandlerOid = UUID.randomUUID()
-        val beslutterOid = UUID.randomUUID()
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = vedtaksperiodeId,
-            oppgaveEgenskaper = setOf(Egenskap.BESLUTTER),
-        )
-        opprettSaksbehandler(saksbehandlerOid)
-        opprettSaksbehandler(beslutterOid)
-        opprettTotrinnsvurdering(
-            vedtaksperiodeId = vedtaksperiodeId,
-            saksbehandlerOid = saksbehandlerOid,
-            beslutterOid = beslutterOid
-        )
-        val oppgaver = oppgaveDao.finnOppgaverForVisning(ekskluderEgenskaper = emptyList(), saksbehandlerOid = saksbehandlerOid)
+        val fødselsnummer: String = lagFødselsnummer()
+        val beslutter = nyLegacySaksbehandler()
+        val oppgave = nyOppgaveForNyPerson(fødselsnummer = lagFødselsnummer())
+            .tildelOgLagre(legacySaksbehandler)
+            .sendTilBeslutterOgLagre(beslutter)
+
+        nyTotrinnsvurdering(fødselsnummer, oppgave)
+            .sendTilBeslutterOgLagre(legacySaksbehandler)
+
+        val oppgaver = oppgaveDao.finnOppgaverForVisning(ekskluderEgenskaper = emptyList(), saksbehandlerOid = legacySaksbehandler.oid)
         assertEquals(0, oppgaver.size)
     }
 
     @Test
     fun `Saksbehandler får ikke med oppgaver med egenskap STRENGT_FORTROLIG_ADRESSE`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val saksbehandlerOid = UUID.randomUUID()
-        val beslutterOid = UUID.randomUUID()
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = vedtaksperiodeId,
-            oppgaveEgenskaper = setOf(Egenskap.STRENGT_FORTROLIG_ADRESSE),
-        )
-        opprettSaksbehandler(saksbehandlerOid)
-        opprettSaksbehandler(beslutterOid)
-        opprettTotrinnsvurdering(
-            vedtaksperiodeId = vedtaksperiodeId,
-            saksbehandlerOid = saksbehandlerOid,
-            beslutterOid = beslutterOid
-        )
+        nyOppgaveForNyPerson(oppgaveegenskaper = setOf(STRENGT_FORTROLIG_ADRESSE))
         val oppgaver =
             oppgaveDao.finnOppgaverForVisning(
                 ekskluderEgenskaper = listOf("STRENGT_FORTROLIG_ADRESSE"),
-                saksbehandlerOid = saksbehandlerOid,
+                saksbehandlerOid = legacySaksbehandler.oid,
             )
         assertEquals(0, oppgaver.size)
     }
 
     @Test
     fun `Oppgaver blir filtrert riktig`() {
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-            oppgaveEgenskaper =
+        val oppgave1 = nyOppgaveForNyPerson(
+            oppgaveegenskaper =
                 setOf(
                     Egenskap.SØKNAD,
                     Egenskap.HASTER,
@@ -1212,41 +647,27 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
                     Egenskap.FLERE_ARBEIDSGIVERE,
                 ),
         )
-        val oppgaveId1 = OPPGAVE_ID
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-            oppgaveEgenskaper = setOf(Egenskap.REVURDERING, Egenskap.HASTER),
+        nyOppgaveForNyPerson(
+            oppgaveegenskaper = setOf(Egenskap.REVURDERING, Egenskap.HASTER),
         )
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-            oppgaveEgenskaper = setOf(Egenskap.SØKNAD, Egenskap.UTLAND),
+        nyOppgaveForNyPerson(
+            oppgaveegenskaper = setOf(Egenskap.SØKNAD, Egenskap.UTLAND),
         )
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-            oppgaveEgenskaper = setOf(Egenskap.UTBETALING_TIL_SYKMELDT, Egenskap.EN_ARBEIDSGIVER),
+        val oppgave4 = nyOppgaveForNyPerson(
+            oppgaveegenskaper = setOf(Egenskap.UTBETALING_TIL_SYKMELDT, Egenskap.EN_ARBEIDSGIVER),
         )
-        val oppgaveId4 = OPPGAVE_ID
 
         val oppgaver =
             oppgaveDao.finnOppgaverForVisning(
                 ekskluderEgenskaper = emptyList(),
                 saksbehandlerOid = UUID.randomUUID(),
-                grupperteFiltrerteEgenskaper = mapOf(Egenskap.Kategori.Oppgavetype to listOf(SØKNAD, REVURDERING)),
+                grupperteFiltrerteEgenskaper = mapOf(Kategori.Oppgavetype to listOf(SØKNAD, REVURDERING)),
             )
         val oppgaver1 =
             oppgaveDao.finnOppgaverForVisning(
                 ekskluderEgenskaper = emptyList(),
                 saksbehandlerOid = UUID.randomUUID(),
-                grupperteFiltrerteEgenskaper = mapOf(Egenskap.Kategori.Ukategorisert to listOf(HASTER, UTLAND)),
+                grupperteFiltrerteEgenskaper = mapOf(Kategori.Ukategorisert to listOf(HASTER, UTLAND)),
             )
         val oppgaver2 =
             oppgaveDao.finnOppgaverForVisning(
@@ -1254,11 +675,11 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
                 saksbehandlerOid = UUID.randomUUID(),
                 grupperteFiltrerteEgenskaper =
                     mapOf(
-                        Egenskap.Kategori.Ukategorisert to listOf(HASTER, UTLAND),
-                        Egenskap.Kategori.Oppgavetype to listOf(SØKNAD),
-                        Egenskap.Kategori.Periodetype to listOf(FORSTEGANGSBEHANDLING),
-                        Egenskap.Kategori.Mottaker to listOf(DELVIS_REFUSJON),
-                        Egenskap.Kategori.Inntektskilde to listOf(FLERE_ARBEIDSGIVERE),
+                        Kategori.Ukategorisert to listOf(HASTER, UTLAND),
+                        Kategori.Oppgavetype to listOf(SØKNAD),
+                        Kategori.Periodetype to listOf(FORSTEGANGSBEHANDLING),
+                        Kategori.Mottaker to listOf(DELVIS_REFUSJON),
+                        Kategori.Inntektskilde to listOf(FLERE_ARBEIDSGIVERE),
                     ),
             )
         val oppgaver3 =
@@ -1267,8 +688,8 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
                 saksbehandlerOid = UUID.randomUUID(),
                 grupperteFiltrerteEgenskaper =
                     mapOf(
-                        Egenskap.Kategori.Mottaker to listOf(UTBETALING_TIL_SYKMELDT),
-                        Egenskap.Kategori.Inntektskilde to listOf(EN_ARBEIDSGIVER),
+                        Kategori.Mottaker to listOf(UTBETALING_TIL_SYKMELDT),
+                        Kategori.Inntektskilde to listOf(EN_ARBEIDSGIVER),
                     ),
             )
         val oppgaver5 =
@@ -1280,22 +701,18 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
 
         assertEquals(3, oppgaver.size)
         assertEquals(1, oppgaver1.size)
-        assertEquals(oppgaveId1, oppgaver1.first().id)
+        assertEquals(oppgave1.id, oppgaver1.first().id)
         assertEquals(1, oppgaver2.size)
-        assertEquals(oppgaveId1, oppgaver2.first().id)
+        assertEquals(oppgave1.id, oppgaver2.first().id)
         assertEquals(1, oppgaver3.size)
-        assertEquals(oppgaveId4, oppgaver3.first().id)
+        assertEquals(oppgave4.id, oppgaver3.first().id)
         assertEquals(4, oppgaver5.size)
     }
 
     @Test
     fun `Grupperte filtrerte egenskaper fungerer sammen med ekskluderte egenskaper`() {
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-            oppgaveEgenskaper =
+        val oppgave1 = nyOppgaveForNyPerson(
+            oppgaveegenskaper =
                 setOf(
                     Egenskap.SØKNAD,
                     Egenskap.FORSTEGANGSBEHANDLING,
@@ -1304,13 +721,8 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
                     Egenskap.PÅ_VENT,
                 ),
         )
-        val oppgaveId1 = OPPGAVE_ID
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-            oppgaveEgenskaper =
+        nyOppgaveForNyPerson(
+            oppgaveegenskaper =
                 setOf(
                     Egenskap.SØKNAD,
                     Egenskap.HASTER,
@@ -1328,227 +740,121 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
                 saksbehandlerOid = UUID.randomUUID(),
                 grupperteFiltrerteEgenskaper =
                     mapOf(
-                        Egenskap.Kategori.Oppgavetype to listOf(SØKNAD),
-                        Egenskap.Kategori.Periodetype to listOf(FORSTEGANGSBEHANDLING),
-                        Egenskap.Kategori.Mottaker to listOf(DELVIS_REFUSJON),
-                        Egenskap.Kategori.Inntektskilde to listOf(FLERE_ARBEIDSGIVERE),
-                        Egenskap.Kategori.Status to listOf(PÅ_VENT),
+                        Kategori.Oppgavetype to listOf(SØKNAD),
+                        Kategori.Periodetype to listOf(FORSTEGANGSBEHANDLING),
+                        Kategori.Mottaker to listOf(DELVIS_REFUSJON),
+                        Kategori.Inntektskilde to listOf(FLERE_ARBEIDSGIVERE),
+                        Kategori.Status to listOf(PÅ_VENT),
                     ),
             )
 
         assertEquals(1, oppgaver.size)
-        assertEquals(oppgaveId1, oppgaver.first().id)
+        assertEquals(oppgave1.id, oppgaver.first().id)
     }
 
     @Test
     fun `finner vedtaksperiodeId`() {
-        nyPerson()
-        val actual = oppgaveDao.finnVedtaksperiodeId(oppgaveId)
-        assertEquals(VEDTAKSPERIODE, actual)
-    }
-
-    @Test
-    fun `oppdatere oppgave`() {
-        val nyStatus = "Ferdigstilt"
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettVedtaksperiode()
-        val godkjenningsbehovId = UUID.randomUUID()
-        opprettOppgave(contextId = CONTEXT_ID, godkjenningsbehovId = godkjenningsbehovId)
-        oppgaveDao.updateOppgave(oppgaveId, nyStatus, SAKSBEHANDLER_EPOST, SAKSBEHANDLER_OID, listOf(EGENSKAP, RISK_QA))
-        assertEquals(1, oppgave().size)
-        oppgave().first().assertEquals(
-            LocalDate.now(),
-            listOf(OPPGAVETYPE, "RISK_QA"),
-            nyStatus,
-            true,
-            SAKSBEHANDLER_EPOST,
-            SAKSBEHANDLER_OID,
-            vedtakId,
-            godkjenningsbehovId,
-        )
+        val oppgave = nyOppgaveForNyPerson()
+        val actual = oppgaveDao.finnVedtaksperiodeId(oppgave.id)
+        assertEquals(oppgave.vedtaksperiodeId, actual)
     }
 
     @Test
     fun `sjekker om det fins aktiv oppgave`() {
-        nyPerson()
-        oppgaveDao.updateOppgave(oppgaveId, "AvventerSaksbehandler", null, null, listOf(EGENSKAP))
-        assertTrue(oppgaveDao.venterPåSaksbehandler(oppgaveId))
+        val oppgave = nyOppgaveForNyPerson()
+        assertTrue(oppgaveDao.venterPåSaksbehandler(oppgave.id))
 
-        oppgaveDao.updateOppgave(oppgaveId, "Ferdigstilt", null, null, listOf(EGENSKAP))
-        assertFalse(oppgaveDao.venterPåSaksbehandler(oppgaveId))
+        oppgave
+            .avventSystemOgLagre(legacySaksbehandler)
+            .ferdigstillOgLagre()
+        assertFalse(oppgaveDao.venterPåSaksbehandler(oppgave.id))
     }
 
     @Test
     fun `sjekker om det fins aktiv oppgave med to oppgaver`() {
-        nyPerson()
-        oppgaveDao.updateOppgave(
-            oppgaveId = oppgaveId,
-            oppgavestatus = "Ferdigstilt",
-            egenskaper =
-                listOf(
-                    EGENSKAP,
-                ),
-        )
+        val utbetalingId = UUID.randomUUID()
+        val oppgave = nyOppgaveForNyPerson()
+            .avventSystemOgLagre(legacySaksbehandler)
+            .ferdigstillOgLagre()
 
-        opprettOppgave(vedtaksperiodeId = VEDTAKSPERIODE)
-        oppgaveDao.updateOppgave(
-            oppgaveId = oppgaveId,
-            oppgavestatus = "AvventerSaksbehandler",
-            egenskaper =
-                listOf(
-                    EGENSKAP,
-                ),
-        )
-
-        assertTrue(oppgaveDao.harGyldigOppgave(UTBETALING_ID))
+        opprettOppgave(vedtaksperiodeId = oppgave.vedtaksperiodeId, utbetalingId = utbetalingId)
+        assertTrue(oppgaveDao.harGyldigOppgave(utbetalingId))
     }
 
     @Test
     fun `sjekker at det ikke fins ferdigstilt oppgave`() {
-        nyPerson()
-        oppgaveDao.updateOppgave(
-            oppgaveId = oppgaveId,
-            oppgavestatus = "AvventerSaksbehandler",
-            egenskaper =
-                listOf(
-                    EGENSKAP,
-                ),
-        )
+        val oppgave = nyOppgaveForNyPerson()
 
-        assertFalse(oppgaveDao.harFerdigstiltOppgave(VEDTAKSPERIODE))
+        assertFalse(oppgaveDao.harFerdigstiltOppgave(oppgave.vedtaksperiodeId))
     }
 
     @Test
     fun `sjekker at det fins ferdigstilt oppgave`() {
-        nyPerson()
-        oppgaveDao.updateOppgave(oppgaveId = oppgaveId, oppgavestatus = "Ferdigstilt", egenskaper = listOf(EGENSKAP))
-        oppgaveDao.updateOppgave(oppgaveId = 2L, oppgavestatus = "AvventerSaksbehandler", egenskaper = listOf(EGENSKAP))
+        val oppgave = nyOppgaveForNyPerson()
+            .avventSystemOgLagre(legacySaksbehandler)
+            .ferdigstillOgLagre()
 
-        assertTrue(oppgaveDao.harFerdigstiltOppgave(VEDTAKSPERIODE))
+        opprettOppgave(vedtaksperiodeId = oppgave.vedtaksperiodeId)
+
+        assertTrue(oppgaveDao.harFerdigstiltOppgave(oppgave.vedtaksperiodeId))
     }
 
     @Test
     fun `henter fødselsnummeret til personen en oppgave gjelder for`() {
-        nyPerson()
-        val fødselsnummer = oppgaveDao.finnFødselsnummer(oppgaveId)
-        assertEquals(fødselsnummer, FNR)
+        val fødselsnummer = lagFødselsnummer()
+        nyOppgaveForNyPerson(fødselsnummer = fødselsnummer)
+        val funnetFødselsnummer = oppgaveDao.finnFødselsnummer(oppgaveId)
+        assertEquals(funnetFødselsnummer, fødselsnummer)
     }
 
     @Test
     fun `Finner vedtaksperiodeId med oppgaveId`() {
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettVedtaksperiode()
-        opprettOppgave(contextId = CONTEXT_ID)
+        val oppgave = nyOppgaveForNyPerson()
 
-        assertEquals(VEDTAKSPERIODE, oppgaveDao.finnVedtaksperiodeId(oppgaveId))
+        assertEquals(oppgave.vedtaksperiodeId, oppgaveDao.finnVedtaksperiodeId(oppgave.id))
     }
 
     @Test
     fun `invaliderer oppgaver`() {
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettVedtaksperiode()
-        opprettOppgave()
-        val oppgaveId1 = oppgaveId
+        val fødselsnummer1 = lagFødselsnummer()
+        val oppgave1 = nyOppgaveForNyPerson(fødselsnummer = fødselsnummer1)
+        val oppgave2 = nyOppgaveForNyPerson()
 
-        val fnr2 = lagFødselsnummer()
-        val aktørId2 = lagAktørId()
-        val organisasjonsnummer2 = lagOrganisasjonsnummer()
-        val vedtaksperiodeId2 = UUID.randomUUID()
-        opprettPerson(fødselsnummer = fnr2, aktørId2)
-        opprettArbeidsgiver(organisasjonsnummer2, "en annen bedrift")
-        opprettVedtaksperiode(
-            fødselsnummer = fnr2,
-            organisasjonsnummer = organisasjonsnummer2,
-            vedtaksperiodeId = vedtaksperiodeId2,
-        )
-        opprettOppgave(vedtaksperiodeId = vedtaksperiodeId2, utbetalingId = UUID.randomUUID())
-        val oppgaveId2 = oppgaveId
+        oppgaveDao.invaliderOppgaveFor(fødselsnummer = fødselsnummer1)
 
-        oppgaveDao.invaliderOppgaveFor(fødselsnummer = FNR)
-
-        assertOppgaveStatus(oppgaveId1, Oppgave.Invalidert)
-        assertOppgaveStatus(oppgaveId2, Oppgave.AvventerSaksbehandler)
+        assertOppgaveStatus(oppgave1.id, Oppgave.Invalidert)
+        assertOppgaveStatus(oppgave2.id, Oppgave.AvventerSaksbehandler)
     }
 
     @Test
     fun `Finner egenskaper for gitt vedtaksperiode med gitt utbetalingId`() {
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettVedtaksperiode()
-        opprettOppgave()
+        val oppgave1 = nyOppgaveForNyPerson()
+        val oppgave2 = nyOppgaveForNyPerson(oppgaveegenskaper = setOf(Egenskap.SØKNAD, Egenskap.PÅ_VENT))
 
-        val fnr2 = lagFødselsnummer()
-        val aktørId2 = lagAktørId()
-        val vedtaksperiodeId2 = UUID.randomUUID()
-        val utbetalingId2 = UUID.randomUUID()
-        opprettPerson(fødselsnummer = fnr2, aktørId2)
-        val organisasjonsnummer2 = lagOrganisasjonsnummer()
-        opprettArbeidsgiver(organisasjonsnummer2, "en annen bedrift")
-        opprettVedtaksperiode(
-            fødselsnummer = fnr2,
-            vedtaksperiodeId = vedtaksperiodeId2,
-            organisasjonsnummer = organisasjonsnummer2,
-            utbetalingId = utbetalingId2,
-        )
-        opprettOppgave(
-            vedtaksperiodeId = vedtaksperiodeId2,
-            egenskaper = setOf(Egenskap.SØKNAD, Egenskap.PÅ_VENT),
-            utbetalingId = utbetalingId2,
-        )
-
-        oppgaveDao.invaliderOppgaveFor(fødselsnummer = FNR)
-
-        val egenskaperOppgaveId1 = oppgaveDao.finnEgenskaper(VEDTAKSPERIODE, UTBETALING_ID)
-        val egenskaperOppgaveId2 = oppgaveDao.finnEgenskaper(vedtaksperiodeId2, utbetalingId2)
+        val egenskaperOppgaveId1 = oppgaveDao.finnEgenskaper(oppgave1.vedtaksperiodeId, oppgave1.utbetalingId)
+        val egenskaperOppgaveId2 = oppgaveDao.finnEgenskaper(oppgave2.vedtaksperiodeId, oppgave2.utbetalingId)
         assertEquals(setOf(SØKNAD), egenskaperOppgaveId1)
         assertEquals(setOf(SØKNAD, PÅ_VENT), egenskaperOppgaveId2)
     }
 
     @Test
     fun `Teller mine saker og mine saker på vent riktig`() {
-        val saksbehandlerOid = UUID.randomUUID()
-        opprettSaksbehandler(saksbehandlerOid)
+        val annenSaksbehandler = nyLegacySaksbehandler()
+        nyOppgaveForNyPerson()
+            .tildelOgLagre(legacySaksbehandler)
 
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        val oppgaveId1 = OPPGAVE_ID
-        tildelOppgave(oppgaveId = oppgaveId1, saksbehandlerOid = saksbehandlerOid)
+        nyOppgaveForNyPerson()
+            .tildelOgLagre(legacySaksbehandler)
 
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        val oppgaveId2 = OPPGAVE_ID
-        tildelOppgave(oppgaveId = oppgaveId2, saksbehandlerOid = saksbehandlerOid)
+        nyOppgaveForNyPerson()
+            .tildelOgLagre(legacySaksbehandler)
+            .leggPåVentOgLagre(legacySaksbehandler)
 
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        val oppgaveId3 = OPPGAVE_ID
-        tildelOppgave(oppgaveId = oppgaveId3, saksbehandlerOid = saksbehandlerOid, egenskaper = listOf(SØKNAD, PÅ_VENT))
+        nyOppgaveForNyPerson()
+            .tildelOgLagre(annenSaksbehandler)
+            .leggPåVentOgLagre(annenSaksbehandler)
 
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = UUID.randomUUID(),
-        )
-        val oppgaveId4 = OPPGAVE_ID
-        tildelOppgave(oppgaveId = oppgaveId4, saksbehandlerOid = UUID.randomUUID(), egenskaper = listOf(SØKNAD, PÅ_VENT))
-
-        val antallOppgaver = oppgaveDao.finnAntallOppgaver(saksbehandlerOid)
+        val antallOppgaver = oppgaveDao.finnAntallOppgaver(legacySaksbehandler.oid)
 
         assertEquals(2, antallOppgaver.antallMineSaker)
         assertEquals(1, antallOppgaver.antallMineSakerPåVent)
@@ -1556,18 +862,9 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `Antall mine saker og mine saker på vent er 0 hvis det ikke finnes tildeling for saksbehandler`() {
-        val saksbehandlerOid = UUID.randomUUID()
-        opprettSaksbehandler(saksbehandlerOid)
+        nyOppgaveForNyPerson()
 
-        val vedtaksperiodeId1 = UUID.randomUUID()
-        nyPerson(
-            fødselsnummer = lagFødselsnummer(),
-            aktørId = lagAktørId(),
-            organisasjonsnummer = lagOrganisasjonsnummer(),
-            vedtaksperiodeId = vedtaksperiodeId1,
-        )
-
-        val antallOppgaver = oppgaveDao.finnAntallOppgaver(saksbehandlerOid)
+        val antallOppgaver = oppgaveDao.finnAntallOppgaver(legacySaksbehandler.oid)
 
         assertEquals(0, antallOppgaver.antallMineSaker)
         assertEquals(0, antallOppgaver.antallMineSakerPåVent)
@@ -1581,56 +878,11 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
         assertEquals(forventetStatus.toString(), status)
     }
 
-    private fun oppgave(vedtaksperiodeId: UUID = VEDTAKSPERIODE) =
-        dbQuery.list(
-            """
-            SELECT o.* FROM oppgave o
-            JOIN vedtak v ON o.vedtak_ref = v.id
-            WHERE v.vedtaksperiode_id = :vedtaksperiodeId
-            ORDER BY id DESC
-            """.trimIndent(),
-            "vedtaksperiodeId" to vedtaksperiodeId,
-        ) { row ->
-            OppgaveAssertions(
-                oppdatert = row.localDate("oppdatert"),
-                egenskaper = row.array<String>("egenskaper").toList(),
-                status = row.string("status"),
-                kanAvvises = row.boolean("kan_avvises"),
-                ferdigstiltAv = row.stringOrNull("ferdigstilt_av"),
-                ferdigstiltAvOid = row.uuidOrNull("ferdigstilt_av_oid"),
-                vedtakRef = row.longOrNull("vedtak_ref"),
-                godkjenningsbehovId = row.uuid("hendelse_id_godkjenningsbehov"),
-            )
-        }
+    private fun Collection<OppgaveFraDatabaseForVisning>.assertIderSamsvarerMed(vararg oppgaver: Oppgave) {
+        assertEquals(oppgaver.map { it.id }.toSet(), map { it.id }.toSet())
+    }
 
-    private class OppgaveAssertions(
-        private val oppdatert: LocalDate,
-        private val egenskaper: List<String>,
-        private val status: String,
-        private val kanAvvises: Boolean,
-        private val ferdigstiltAv: String?,
-        private val ferdigstiltAvOid: UUID?,
-        private val vedtakRef: Long?,
-        private val godkjenningsbehovId: UUID?,
-    ) {
-        fun assertEquals(
-            forventetOppdatert: LocalDate,
-            forventetEgenskaper: List<String>,
-            forventetStatus: String,
-            forventetKanAvvises: Boolean,
-            forventetFerdigstilAv: String?,
-            forventetFerdigstilAvOid: UUID?,
-            forventetVedtakRef: Long?,
-            forventetGodkjenningsbehovId: UUID,
-        ) {
-            assertEquals(forventetOppdatert, oppdatert)
-            assertEquals(forventetEgenskaper, egenskaper)
-            assertEquals(forventetStatus, status)
-            assertEquals(forventetKanAvvises, kanAvvises)
-            assertEquals(forventetFerdigstilAv, ferdigstiltAv)
-            assertEquals(forventetFerdigstilAvOid, ferdigstiltAvOid)
-            assertEquals(forventetVedtakRef, vedtakRef)
-            assertEquals(forventetGodkjenningsbehovId, godkjenningsbehovId)
-        }
+    private fun List<BehandletOppgaveFraDatabaseForVisning>.assertIderSamsvarerMed(vararg oppgaver: Oppgave) {
+        assertEquals(oppgaver.map { it.id }.toSet(), map { it.id }.toSet())
     }
 }
