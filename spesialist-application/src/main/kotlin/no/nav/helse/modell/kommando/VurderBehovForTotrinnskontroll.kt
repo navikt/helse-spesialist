@@ -36,38 +36,68 @@ internal class VurderBehovForTotrinnskontroll(
         val vedtaksperiodeId = vedtaksperiode.vedtaksperiodeId()
         val kreverTotrinnsvurdering = sykefraværstilfelle.harMedlemskapsvarsel(vedtaksperiodeId)
         val vedtaksperiodeHarFerdigstiltOppgave = oppgaveService.harFerdigstiltOppgave(vedtaksperiodeId)
-        val overstyringer = finnOverstyringerMedType()
-        sjekkMotNyttOppslag(overstyringer, kreverTotrinnsvurdering, vedtaksperiodeHarFerdigstiltOppgave)
 
-        if ((kreverTotrinnsvurdering && !vedtaksperiodeHarFerdigstiltOppgave) || overstyringer.isNotEmpty()) {
-            logg.info("Vedtaksperioden: $vedtaksperiodeId trenger totrinnsvurdering")
-
-            val totrinnsvurdering = eksisterendeTotrinnsvurdering() ?: Totrinnsvurdering.ny(vedtaksperiodeId)
-
-            if (totrinnsvurdering.erBeslutteroppgave) {
-                totrinnsvurdering.settRetur()
-                val innslag = Historikkinnslag.totrinnsvurderingAutomatiskRetur()
-                periodehistorikkDao.lagre(innslag, vedtaksperiode.gjeldendeUnikId)
-            }
-            totrinnsvurderingRepository.lagre(totrinnsvurdering, fødselsnummer)
-
-            val behandlendeSaksbehandlerOid = totrinnsvurdering.saksbehandler?.value
-            if (behandlendeSaksbehandlerOid != null) {
-                oppgaveService.reserverOppgave(
-                    saksbehandleroid = behandlendeSaksbehandlerOid,
-                    fødselsnummer = fødselsnummer,
-                )
-            }
+        if (featureToggles.skalBenytteNyTotrinnsvurderingsløsning()) {
+            nyLøype(kreverTotrinnsvurdering, vedtaksperiodeHarFerdigstiltOppgave)
+        } else {
+            gammelLøype(kreverTotrinnsvurdering, vedtaksperiodeHarFerdigstiltOppgave)
         }
 
         return true
     }
 
-    private fun eksisterendeTotrinnsvurdering(): Totrinnsvurdering? {
-        return if (featureToggles.skalBenytteNyTotrinnsvurderingsløsning()) {
-            totrinnsvurderingRepository.finn(fødselsnummer)
-        } else {
-            totrinnsvurderingRepository.finn(vedtaksperiodeId)
+    private fun nyLøype(
+        kreverTotrinnsvurdering: Boolean,
+        vedtaksperiodeHarFerdigstiltOppgave: Boolean,
+    ) {
+        val eksisterendeTotrinnsvurdering = totrinnsvurderingRepository.finn(fødselsnummer)
+        if ((kreverTotrinnsvurdering && !vedtaksperiodeHarFerdigstiltOppgave) || eksisterendeTotrinnsvurdering != null) {
+            logg.info("Vedtaksperioden: $vedtaksperiodeId trenger totrinnsvurdering")
+
+            val totrinnsvurdering =
+                (eksisterendeTotrinnsvurdering ?: Totrinnsvurdering.ny(vedtaksperiodeId)).apply {
+                    if (erBeslutteroppgave) {
+                        settRetur()
+                        periodehistorikkDao.lagre(Historikkinnslag.totrinnsvurderingAutomatiskRetur(), vedtaksperiode.gjeldendeUnikId)
+                    }
+                }
+
+            totrinnsvurderingRepository.lagre(totrinnsvurdering, fødselsnummer)
+
+            totrinnsvurdering.saksbehandler?.value?.let {
+                oppgaveService.reserverOppgave(
+                    saksbehandleroid = it,
+                    fødselsnummer = fødselsnummer,
+                )
+            }
+        }
+    }
+
+    private fun gammelLøype(
+        kreverTotrinnsvurdering: Boolean,
+        vedtaksperiodeHarFerdigstiltOppgave: Boolean,
+    ) {
+        val overstyringer = finnOverstyringerMedType()
+        sjekkMotNyttOppslag(overstyringer, kreverTotrinnsvurdering, vedtaksperiodeHarFerdigstiltOppgave)
+        if ((kreverTotrinnsvurdering && !vedtaksperiodeHarFerdigstiltOppgave) || overstyringer.isNotEmpty()) {
+            logg.info("Vedtaksperioden: $vedtaksperiodeId trenger totrinnsvurdering")
+
+            val totrinnsvurdering =
+                (totrinnsvurderingRepository.finn(vedtaksperiodeId) ?: Totrinnsvurdering.ny(vedtaksperiodeId)).apply {
+                    if (erBeslutteroppgave) {
+                        settRetur()
+                        periodehistorikkDao.lagre(Historikkinnslag.totrinnsvurderingAutomatiskRetur(), vedtaksperiode.gjeldendeUnikId)
+                    }
+                }
+
+            totrinnsvurderingRepository.lagre(totrinnsvurdering, fødselsnummer)
+
+            totrinnsvurdering.saksbehandler?.value?.let {
+                oppgaveService.reserverOppgave(
+                    saksbehandleroid = it,
+                    fødselsnummer = fødselsnummer,
+                )
+            }
         }
     }
 

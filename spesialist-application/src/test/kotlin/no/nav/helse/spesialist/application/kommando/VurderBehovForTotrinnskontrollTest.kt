@@ -52,12 +52,10 @@ internal class VurderBehovForTotrinnskontrollTest {
             lagredeTotrinnsvurderinger.add(totrinnsvurdering)
         }
 
-        override fun finn(fødselsnummer: String): Totrinnsvurdering? {
-            return totrinnsvurderingSomSkalReturneres
-        }
+        override fun finn(fødselsnummer: String): Totrinnsvurdering? = totrinnsvurderingSomSkalReturneres
 
         @Deprecated("Skal fjernes, midlertidig i bruk for å tette et hull", ReplaceWith("finn"))
-        override fun finn(vedtaksperiodeId: UUID): Totrinnsvurdering = error("Not implemented in test")
+        override fun finn(vedtaksperiodeId: UUID): Totrinnsvurdering? = totrinnsvurderingSomSkalReturneres
     }
     private lateinit var context: CommandContext
 
@@ -97,14 +95,6 @@ internal class VurderBehovForTotrinnskontrollTest {
     @BeforeEach
     fun setUp() {
         context = CommandContext(UUID.randomUUID())
-    }
-
-    @Test
-    fun `Oppretter totrinnsvurdering dersom vedtaksperioden finnes i overstyringer_for_vedtaksperioder`() {
-        every { overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
-
-        assertTrue(command.execute(context))
-        assertEquals(1, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.size)
     }
 
     @Test
@@ -173,18 +163,18 @@ internal class VurderBehovForTotrinnskontrollTest {
     }
 
     @Test
-    fun `Oppretter totrinnsvurdering dersom oppgaven har blitt overstyrt`() {
+    fun `Tester at gammel løype oppretter totrinnsvurdering dersom oppgaven har blitt overstyrt`() {
         every { overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Dager)
 
-        assertTrue(command.execute(context))
+        assertTrue(command(nyTotrinnsløype = false).execute(context))
         assertEquals(1, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.size)
     }
 
     @Test
-    fun `Oppretter trengerTotrinnsvurdering dersom oppgaven har fått avklart skjønnsfastsatt sykepengegrunnlag`() {
+    fun `Tester at gammel løype oppretter totrinnsvurdering dersom oppgaven har fått avklart skjønnsfastsatt sykepengegrunnlag`() {
         every { overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(any()) } returns listOf(OverstyringType.Sykepengegrunnlag)
 
-        assertTrue(command.execute(context))
+        assertTrue(command(nyTotrinnsløype = false).execute(context))
         assertEquals(1, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.size)
     }
 
@@ -206,5 +196,29 @@ internal class VurderBehovForTotrinnskontrollTest {
             oppdatert = LocalDateTime.now(),
             overstyringer = emptyList(),
             ferdigstilt = false,
+        )
+
+    private fun command(nyTotrinnsløype: Boolean = true) =
+        VurderBehovForTotrinnskontroll(
+            fødselsnummer = FØDSELSNUMMER,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
+            vedtaksperiode = VEDTAKSPERIODE,
+            oppgaveService = oppgaveService,
+            overstyringDao = overstyringDao,
+            periodehistorikkDao = periodehistorikkDao,
+            totrinnsvurderingRepository = totrinnsvurderingRepository,
+            sykefraværstilfelle = sykefraværstilfelle,
+            spleisVedtaksperioder = listOf(
+                SpleisVedtaksperiode(
+                    VEDTAKSPERIODE_ID_1,
+                    UUID.randomUUID(),
+                    1 jan 2018,
+                    31 jan 2018,
+                    1 jan 2018
+                ), SpleisVedtaksperiode(VEDTAKSPERIODE_ID_2, UUID.randomUUID(), 1 feb 2018, 28 feb 2018, 1 jan 2018)
+            ),
+            featureToggles = object : FeatureToggles {
+                override fun skalBenytteNyTotrinnsvurderingsløsning(): Boolean = nyTotrinnsløype
+            }
         )
 }
