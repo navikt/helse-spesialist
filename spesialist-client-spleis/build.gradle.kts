@@ -51,7 +51,7 @@ graphql {
 }
 
 val graphqlIntrospectSchema by tasks.getting(GraphQLIntrospectSchemaTask::class) {
-    endpoint.set("https://spleis-api.intern.dev.nav.no/graphql/introspection")
+    endpoint.set("https://spleis-api.intern.dev.nav.no/graphql")
 }
 
 val copySchemaFile by tasks.registering(Copy::class) {
