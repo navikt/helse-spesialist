@@ -33,11 +33,6 @@ spec:
   replicas:
     min: 8
     max: 8
-    scalingStrategy:
-      kafka:
-        topic: tbd.rapid.v1
-        consumerGroup: tbd-spesialist-v1
-        threshold: 200
   observability:
     autoInstrumentation:
       enabled: true
