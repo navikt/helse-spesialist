@@ -27,7 +27,7 @@ class PgPersonRepository(
             hentPerson(fødselsnummer) ?: run {
                 "Behandler ikke melding for ukjent person".let { melding ->
                     logg.info(melding)
-                    sikkerlogg.info("$melding med {}", fødselsnummer)
+                    sikkerlogg.info("$melding med fødselsnummer={}", fødselsnummer)
                 }
                 return
             }
