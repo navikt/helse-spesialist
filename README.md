@@ -65,8 +65,8 @@ colima start
 
 ## Oppdatere GraphQL schema mot spleis
 
-- Kjør tasken `graphqlIntrospectSchema` i spesialist-api, enten i IntelliJ eller fra kommandolinja
-    - Fra kommandolinja: `./gradlew :spesialist-api:graphqlIntrospectSchema`
+- Kjør tasken `graphqlIntrospectSchema` i spesialist-client-spleis, enten i IntelliJ eller fra kommandolinja
+    - Fra kommandolinja: `./gradlew :spesialist-client-spleis:graphqlIntrospectSchema`
 - Gjør eventuelt endringer i hva som skal hentes fra spleis i filen `hentSnapshot.graphql`
 - Kjør tasken `graphqlGenerateClient` for å få generert klassene
 
