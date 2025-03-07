@@ -39,7 +39,6 @@ internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
     val godkjenningService =
         GodkjenningService(
             oppgaveDao = oppgaveDao,
-            overstyringDao = daos.overstyringDao,
             publiserer = MessageContextMeldingPubliserer(testRapid),
             oppgaveService = oppgaveService,
             reservasjonDao = reservasjonDao,

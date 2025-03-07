@@ -174,7 +174,6 @@ class SpesialistApp(
         godkjenningService =
             GodkjenningService(
                 oppgaveDao = daos.oppgaveDao,
-                overstyringDao = daos.overstyringDao,
                 publiserer = meldingPubliserer,
                 oppgaveService = oppgaveService,
                 reservasjonDao = daos.reservasjonDao,

@@ -4,7 +4,6 @@ import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.FeatureToggles
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.OppgaveDao
-import no.nav.helse.db.OverstyringDao
 import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SessionFactory
@@ -24,7 +23,6 @@ import java.util.UUID
 
 class GodkjenningService(
     private val oppgaveDao: OppgaveDao,
-    private val overstyringDao: OverstyringDao,
     private val publiserer: MeldingPubliserer,
     private val oppgaveService: OppgaveService,
     private val reservasjonDao: ReservasjonDao,
@@ -63,7 +61,12 @@ class GodkjenningService(
                     saksbehandlerOid = oid,
                     saksbehandlerEpost = epost,
                     godkjenttidspunkt = LocalDateTime.now(),
-                    saksbehandleroverstyringer = overstyringDao.finnAktiveOverstyringer(vedtaksperiodeId),
+                    saksbehandleroverstyringer =
+                        totrinnsvurdering?.overstyringer?.filter {
+                            it.vedtaksperiodeId == vedtaksperiodeId ||
+                                it.kobledeVedtaksperioder()
+                                    .contains(vedtaksperiodeId)
+                        }?.map { it.eksternHendelseId } ?: emptyList(),
                     saksbehandler = saksbehandler(godkjenningDTO, totrinnsvurdering, oid),
                     årsak = godkjenningDTO.årsak,
                     begrunnelser = godkjenningDTO.begrunnelser,
@@ -80,7 +83,10 @@ class GodkjenningService(
             reserverPerson(reserverPersonOid, fødselsnummer)
             oppgaveService.oppgave(godkjenningDTO.oppgavereferanse) {
                 avventerSystem(godkjenningDTO.saksbehandlerIdent, oid)
-                totrinnsvurdering?.ferdigstill(this.utbetalingId, featureToggles.skalBenytteNyTotrinnsvurderingsløsning())
+                totrinnsvurdering?.ferdigstill(
+                    this.utbetalingId,
+                    featureToggles.skalBenytteNyTotrinnsvurderingsløsning(),
+                )
 
                 if (totrinnsvurdering?.erBeslutteroppgave == true && godkjenningDTO.godkjent) {
                     val beslutter =

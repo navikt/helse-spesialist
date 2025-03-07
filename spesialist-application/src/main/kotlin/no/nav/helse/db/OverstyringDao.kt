@@ -8,6 +8,7 @@ import no.nav.helse.db.overstyring.SkjønnsfastsattSykepengegrunnlagForDatabase
 import no.nav.helse.modell.OverstyringType
 import java.util.UUID
 
+// Denne DAO'en kan slettes når ny totrinnsløype er tatt i bruk i produksjon
 interface OverstyringDao {
     fun finnOverstyringerMedTypeForVedtaksperioder(vedtaksperiodeIder: List<UUID>): List<OverstyringType>
 
