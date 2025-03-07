@@ -12,7 +12,7 @@ internal class OpprettMinimalPersonCommand(
     private val fødselsnummer: String,
     private val aktørId: String,
     private val personDao: PersonDao,
-) : Command {
+) : Command() {
     private companion object {
         private val logg = LoggerFactory.getLogger(OpprettMinimalPersonCommand::class.java)
     }

@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory
 internal class SjekkAtOppgaveFortsattErÅpenCommand(
     private val fødselsnummer: String,
     private val oppgaveDao: OppgaveDao,
-) : Command {
+) : Command() {
     private val sikkerLogger: Logger = LoggerFactory.getLogger("tjenestekall")
 
     override fun execute(context: CommandContext): Boolean {

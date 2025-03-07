@@ -215,7 +215,7 @@ internal class CommandContextTest {
     private class TestCommand(
         private val executeAction: Command.() -> Boolean = { true },
         private val resumeAction: Command.() -> Boolean = { true },
-    ) : Command {
+    ) : Command() {
         var executed = false
         var resumed = false
 

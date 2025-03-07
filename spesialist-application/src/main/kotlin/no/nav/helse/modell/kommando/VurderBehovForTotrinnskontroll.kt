@@ -26,7 +26,7 @@ internal class VurderBehovForTotrinnskontroll(
     private val sykefraværstilfelle: Sykefraværstilfelle,
     private val spleisVedtaksperioder: List<SpleisVedtaksperiode>,
     private val featureToggles: FeatureToggles,
-) : Command {
+) : Command() {
     private companion object {
         private val logg = LoggerFactory.getLogger(VurderBehovForTotrinnskontroll::class.java)
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")

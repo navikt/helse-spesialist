@@ -11,7 +11,7 @@ internal class PersisterVedtaksperiodetypeCommand(
     private val inntektskilde: Inntektskilde,
     private val vedtakDao: VedtakDao,
 ) :
-    Command {
+    Command() {
     override fun execute(context: CommandContext): Boolean {
         vedtakDao.leggTilVedtaksperiodetype(vedtaksperiodeId, vedtaksperiodetype, inntektskilde)
         return true

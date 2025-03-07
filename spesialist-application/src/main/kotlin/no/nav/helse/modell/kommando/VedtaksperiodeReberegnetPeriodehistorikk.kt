@@ -7,7 +7,7 @@ import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode
 internal class VedtaksperiodeReberegnetPeriodehistorikk(
     private val vedtaksperiode: Vedtaksperiode,
     private val periodehistorikkDao: PeriodehistorikkDao,
-) : Command {
+) : Command() {
     override fun execute(context: CommandContext): Boolean {
         val innslag = Historikkinnslag.vedtaksperiodeReberegnet()
         periodehistorikkDao.lagre(historikkinnslag = innslag, generasjonId = vedtaksperiode.gjeldendeUnikId)

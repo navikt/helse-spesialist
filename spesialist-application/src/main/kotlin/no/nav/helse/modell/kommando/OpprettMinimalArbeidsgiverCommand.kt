@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory
 internal class OpprettMinimalArbeidsgiverCommand(
     private val organisasjonsnummer: String,
     private val inntektskilderRepository: InntektskilderRepository,
-) : Command {
+) : Command() {
     private companion object {
         private val log = LoggerFactory.getLogger(OpprettMinimalArbeidsgiverCommand::class.java)
         private val sikkerLog = LoggerFactory.getLogger("tjenestekall")

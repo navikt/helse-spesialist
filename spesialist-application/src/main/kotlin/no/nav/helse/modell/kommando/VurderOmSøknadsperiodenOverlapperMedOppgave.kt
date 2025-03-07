@@ -7,7 +7,7 @@ import no.nav.helse.modell.person.vedtaksperiode.Periode
 internal class VurderOmSøknadsperiodenOverlapperMedOppgave(
     private val oppgaveDataForAutomatisering: OppgaveDataForAutomatisering,
     private val søknadsperioder: List<Periode>,
-) : Command {
+) : Command() {
     override fun execute(context: CommandContext): Boolean {
         if (!oppgaveDataForAutomatisering.periodeOverlapperMed(søknadsperioder)) return ferdigstill(context)
         return true

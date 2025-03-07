@@ -62,7 +62,7 @@ internal class OpprettSaksbehandleroppgave(
     private val vergemålDao: VergemålDao,
     private val påVentDao: PåVentDao,
     private val opptegnelseDao: OpptegnelseDao,
-) : Command {
+) : Command() {
     override fun execute(context: CommandContext): Boolean {
         val fødselsnummer = behovData.fødselsnummer
         val vedtaksperiodeId = behovData.vedtaksperiodeId

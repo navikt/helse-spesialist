@@ -107,15 +107,15 @@ class CommandHashTest {
         override val commands: List<Command> = emptyList()
     }
 
-    private class commandA : Command {
+    private class commandA : Command() {
         override fun execute(context: CommandContext): Boolean = true
     }
 
-    private class commandB: Command {
+    private class commandB: Command() {
         override fun execute(context: CommandContext): Boolean = true
     }
 
-    private class commandC: Command {
+    private class commandC: Command() {
         override fun execute(context: CommandContext): Boolean = true
     }
 }

@@ -7,7 +7,7 @@ internal class OpprettKoblingTilUtbetalingCommand(
     private val vedtaksperiodeId: UUID,
     private val utbetalingId: UUID,
     private val utbetalingDao: UtbetalingDao,
-) : Command {
+) : Command() {
     override fun execute(context: CommandContext): Boolean {
         utbetalingDao.opprettKobling(vedtaksperiodeId, utbetalingId)
         return true

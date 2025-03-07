@@ -1,19 +1,23 @@
 package no.nav.helse.modell.kommando
 
-interface Command {
-    fun execute(context: CommandContext): Boolean
+import no.nav.helse.spesialist.domain.Aktivitetslogg
 
-    fun resume(context: CommandContext) = true
+abstract class Command {
+    abstract fun execute(context: CommandContext): Boolean
 
-    fun hash(): String = name
+    open fun resume(context: CommandContext) = true
 
-    val name: String get() = this::class.java.simpleName
+    open fun hash(): String = name
+
+    open val name: String = this::class.java.simpleName
+
+    val aktivitetslogg: Aktivitetslogg by lazy { Aktivitetslogg(name) }
 }
 
 internal fun ikkesuspenderendeCommand(
     navnForLogging: String = "<navn ikke oppgitt>",
     block: () -> Unit,
-) = object : Command {
+) = object : Command() {
     override fun execute(context: CommandContext): Boolean {
         block()
         return true

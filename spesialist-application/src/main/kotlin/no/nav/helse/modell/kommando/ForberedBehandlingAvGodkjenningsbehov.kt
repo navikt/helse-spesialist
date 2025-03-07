@@ -6,7 +6,7 @@ import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 internal class ForberedBehandlingAvGodkjenningsbehov(
     private val commandData: GodkjenningsbehovData,
     private val person: Person,
-) : Command {
+) : Command() {
     override fun execute(context: CommandContext): Boolean {
         person.mottaSpleisVedtaksperioder(commandData.spleisVedtaksperioder)
         person.flyttEventuelleAvviksvarsler(commandData.vedtaksperiodeId, commandData.skjæringstidspunkt)

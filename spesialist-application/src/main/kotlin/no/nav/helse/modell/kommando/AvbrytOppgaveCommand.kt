@@ -7,7 +7,7 @@ import java.util.UUID
 internal class AvbrytOppgaveCommand(
     private val vedtaksperiodeId: UUID,
     private val oppgaveService: OppgaveService,
-) : Command {
+) : Command() {
     private companion object {
         private val log = LoggerFactory.getLogger(AvbrytOppgaveCommand::class.java)
     }

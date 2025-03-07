@@ -14,7 +14,7 @@ internal class OppdaterOppgavestatusCommand(
     private val utbetalingId: UUID,
     private val status: Utbetalingsstatus,
     private val oppgavefinner: Oppgavefinner,
-) : Command {
+) : Command() {
     override fun execute(context: CommandContext): Boolean {
         oppgavefinner.oppgave(utbetalingId) {
             when (status) {

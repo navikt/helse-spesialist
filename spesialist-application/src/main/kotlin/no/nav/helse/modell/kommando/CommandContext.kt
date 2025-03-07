@@ -7,6 +7,7 @@ import no.nav.helse.mediator.KommandokjedeEndretEvent
 import no.nav.helse.mediator.UtgåendeMeldingerObserver
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.UtgåendeHendelse
+import no.nav.helse.spesialist.domain.Aktivitetslogg
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -19,6 +20,8 @@ class CommandContext(
     private val sti: MutableList<Int> = sti.toMutableList()
     private var tidligFerdigstilt = false
     private val observers = mutableSetOf<CommandContextObserver>()
+
+    private val aktivitetslogg = Aktivitetslogg(lokasjon = this::class.java.simpleName)
 
     fun nyObserver(observer: CommandContextObserver) {
         observers.add(observer)
@@ -98,7 +101,11 @@ class CommandContext(
             )
             sti.clear()
         }
+        command.aktivitetslogg.nyForelder(this.aktivitetslogg)
         return utfør(command).also { ferdig ->
+            aktivitetslogg.meldinger().forEach {
+                println("${it.lokasjon()}: ${it.tekst}, kontekst: ${it.kontekst}")
+            }
             if (tidligFerdigstilt || ferdig) {
                 commandContextDao.ferdig(hendelseId, id).also {
                     kommandokjedetilstandEndret(KommandokjedeEndretEvent.Ferdig(command.name, id, hendelseId))

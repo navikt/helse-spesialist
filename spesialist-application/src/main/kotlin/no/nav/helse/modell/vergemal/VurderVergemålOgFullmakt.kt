@@ -17,7 +17,7 @@ internal class VurderVergemålOgFullmakt(
     private val vergemålDao: VergemålDao,
     private val vedtaksperiodeId: UUID,
     private val sykefraværstilfelle: Sykefraværstilfelle,
-) : Command {
+) : Command() {
     override fun execute(context: CommandContext) = behandle(context)
 
     override fun resume(context: CommandContext) = behandle(context)

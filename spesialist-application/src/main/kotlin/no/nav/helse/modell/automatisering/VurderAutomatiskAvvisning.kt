@@ -18,7 +18,7 @@ internal class VurderAutomatiskAvvisning(
     private val godkjenningMediator: GodkjenningMediator,
     private val utbetaling: Utbetaling,
     private val godkjenningsbehov: GodkjenningsbehovData,
-) : Command {
+) : Command() {
     override fun execute(context: CommandContext): Boolean {
         val fødselsnummer = godkjenningsbehov.fødselsnummer
         val vedtaksperiodeId = godkjenningsbehov.vedtaksperiodeId

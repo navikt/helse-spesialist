@@ -14,7 +14,7 @@ internal class AvvisVedStrengtFortroligAdressebeskyttelseCommand(
     private val godkjenningMediator: GodkjenningMediator,
     private val godkjenningsbehov: GodkjenningsbehovData,
     private val utbetaling: Utbetaling,
-) : Command {
+) : Command() {
     override fun execute(context: CommandContext): Boolean {
         val adressebeskyttelse =
             checkNotNull(personDao.finnAdressebeskyttelse(godkjenningsbehov.fødselsnummer)) {

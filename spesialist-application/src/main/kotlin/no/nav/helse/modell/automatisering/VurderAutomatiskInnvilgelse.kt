@@ -20,7 +20,7 @@ internal class VurderAutomatiskInnvilgelse(
     private val godkjenningsbehov: GodkjenningsbehovData,
     private val automatiseringDao: AutomatiseringDao,
     private val oppgaveService: OppgaveService,
-) : Command {
+) : Command() {
     private companion object {
         private val logg = LoggerFactory.getLogger(VurderAutomatiskInnvilgelse::class.java)
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
