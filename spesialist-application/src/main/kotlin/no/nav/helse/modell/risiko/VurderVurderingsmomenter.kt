@@ -21,7 +21,7 @@ internal class VurderVurderingsmomenter(
     private val sykefraværstilfelle: Sykefraværstilfelle,
     private val utbetaling: Utbetaling,
     private val spleisSykepengegrunnlangsfakta: SpleisSykepengegrunnlagsfakta,
-) : Command {
+) : Command() {
     override fun execute(context: CommandContext) = behandle(context)
 
     override fun resume(context: CommandContext) = behandle(context)

@@ -16,7 +16,7 @@ internal class ReserverPersonHvisTildeltCommand(
     private val oppgaveDao: OppgaveDao,
     private val totrinnsvurderingRepository: TotrinnsvurderingRepository,
     private val featureToggles: FeatureToggles,
-) : Command {
+) : Command() {
     private companion object {
         private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
     }

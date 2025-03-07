@@ -1,22 +1,30 @@
 package no.nav.helse.spesialist.domain
 
-class Aktivitetslogg(private val lokasjon: String, private var forelder: Aktivitetslogg? = null) {
-    private val meldinger = mutableListOf<Aktivitet>()
+import java.time.LocalDateTime
 
-    fun meldinger() = meldinger.toList()
+class Aktivitetslogg(private val lokasjon: String, private var forelder: Aktivitetslogg? = null) {
+    private val meldinger = mutableMapOf<List<String>, MutableList<Aktivitet>>()
+
+    fun aktiviteter() = meldinger.mapValues { it.value.toList() }
 
     fun info(
         tekst: String,
         vararg kontekst: Pair<String, Any>,
     ) {
         val aktivitet = Aktivitet(tekst, kontekst.toMap())
-        nyAktivitet(aktivitet)
+        nyAktivitet(listOf(lokasjon), aktivitet)
     }
 
-    private fun nyAktivitet(aktivitet: Aktivitet) {
-        aktivitet.nyttNivå(lokasjon)
-        meldinger.add(aktivitet)
-        forelder?.nyAktivitet(aktivitet)
+    private fun nyAktivitet(
+        lokasjoner: List<String>,
+        aktivitet: Aktivitet,
+    ) {
+        val forelder = this.forelder
+        if (forelder == null) {
+            meldinger.getOrPut(lokasjoner) { mutableListOf() }.add(aktivitet)
+        } else {
+            forelder.nyAktivitet(listOf(forelder.lokasjon) + lokasjoner, aktivitet)
+        }
     }
 
     fun nyForelder(forelder: Aktivitetslogg) {
@@ -25,11 +33,5 @@ class Aktivitetslogg(private val lokasjon: String, private var forelder: Aktivit
 }
 
 data class Aktivitet(val tekst: String, val kontekst: Map<String, Any>) {
-    private val lokasjon = mutableListOf<String>()
-
-    fun lokasjon() = lokasjon.toList()
-
-    fun nyttNivå(hvor: String) {
-        lokasjon.addFirst(hvor)
-    }
+    val tidspunkt = LocalDateTime.now()
 }

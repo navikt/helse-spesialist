@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory
 internal class KontrollerEgenAnsattstatus(
     private val fødselsnummer: String,
     private val egenAnsattDao: EgenAnsattDao,
-) : Command {
+) : Command() {
     private companion object {
         private val logg = LoggerFactory.getLogger(KontrollerEgenAnsattstatus::class.java)
     }

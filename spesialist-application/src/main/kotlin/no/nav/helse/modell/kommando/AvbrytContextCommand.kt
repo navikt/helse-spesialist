@@ -7,7 +7,7 @@ import java.util.UUID
 internal class AvbrytContextCommand(
     private val vedtaksperiodeId: UUID,
     private val commandContextDao: CommandContextDao,
-) : Command {
+) : Command() {
     private companion object {
         private val log = LoggerFactory.getLogger(AvbrytContextCommand::class.java)
     }

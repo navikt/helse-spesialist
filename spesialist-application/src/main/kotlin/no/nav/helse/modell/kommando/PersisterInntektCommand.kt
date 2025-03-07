@@ -11,7 +11,7 @@ internal class PersisterInntektCommand(
     private val fødselsnummer: String,
     private val skjæringstidspunkt: LocalDate,
     private val personDao: PersonDao,
-) : Command {
+) : Command() {
     override fun execute(context: CommandContext): Boolean {
         if (personDao.finnInntekter(fødselsnummer, skjæringstidspunkt) != null) return true
 

@@ -12,7 +12,7 @@ internal class VurderVidereBehandlingAvGodkjenningsbehov(
     private val utbetalingDao: UtbetalingDao,
     private val oppgaveDao: OppgaveDao,
     private val vedtakDao: VedtakDao,
-) : Command {
+) : Command() {
     private companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }

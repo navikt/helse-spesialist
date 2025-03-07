@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory
 internal class OpprettEllerOppdaterInntektskilder(
     inntektskilder: List<Inntektskilde>,
     private val inntektskilderRepository: InntektskilderRepository,
-) : Command {
+) : Command() {
     private val inntektskilderSomMåOppdateres = inntektskilder.somMåOppdateres()
 
     override fun execute(context: CommandContext): Boolean {

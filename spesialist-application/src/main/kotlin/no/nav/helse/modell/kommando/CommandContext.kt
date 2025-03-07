@@ -7,6 +7,7 @@ import no.nav.helse.mediator.KommandokjedeEndretEvent
 import no.nav.helse.mediator.UtgåendeMeldingerObserver
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.UtgåendeHendelse
+import no.nav.helse.spesialist.domain.Aktivitetslogg
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -14,6 +15,7 @@ class CommandContext(
     private val id: UUID,
     sti: List<Int> = emptyList(),
     private val hash: UUID? = null,
+    private val aktivitetslogg: Aktivitetslogg = Aktivitetslogg(lokasjon = this::class.java.simpleName),
 ) {
     private val data = mutableListOf<Any>()
     private val sti: MutableList<Int> = sti.toMutableList()
@@ -98,6 +100,7 @@ class CommandContext(
             )
             sti.clear()
         }
+        command.aktivitetslogg.nyForelder(this.aktivitetslogg)
         return utfør(command).also { ferdig ->
             if (tidligFerdigstilt || ferdig) {
                 commandContextDao.ferdig(hendelseId, id).also {

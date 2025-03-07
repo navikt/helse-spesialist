@@ -19,7 +19,7 @@ class VurderBehovForAvviksvurdering(
     private val legacyBehandling: LegacyBehandling,
     private val erInngangsvilkårVurdertISpleis: Boolean,
     private val organisasjonsnummer: String,
-) : Command {
+) : Command() {
     override fun execute(context: CommandContext): Boolean {
         if (!erInngangsvilkårVurdertISpleis) return true
         return behov(context)

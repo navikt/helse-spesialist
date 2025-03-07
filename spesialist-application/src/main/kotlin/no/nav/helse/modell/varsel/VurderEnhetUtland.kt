@@ -14,7 +14,7 @@ internal class VurderEnhetUtland(
     private val vedtaksperiodeId: UUID,
     private val personDao: PersonDao,
     private val sykefraværstilfelle: Sykefraværstilfelle,
-) : Command {
+) : Command() {
     override fun execute(context: CommandContext): Boolean {
         val tilhørerEnhetUtland = HentEnhetløsning.erEnhetUtland(personDao.finnEnhetId(fødselsnummer))
         if (tilhørerEnhetUtland) {

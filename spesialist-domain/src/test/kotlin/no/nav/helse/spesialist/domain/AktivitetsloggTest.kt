@@ -6,38 +6,48 @@ import kotlin.test.assertEquals
 class AktivitetsloggTest {
     @Test
     fun `legg til info`() {
-        val aktivitetslogg = Aktivitetslogg("Foo")
-        aktivitetslogg.info("Bar", "foo" to "bar")
+        val aktivitetslogg = Aktivitetslogg("lokasjon")
+        aktivitetslogg.info("tekst", "key" to "value")
 
-        val aktivitet = aktivitetslogg.meldinger().single()
-        assertEquals(Aktivitet("Bar", kontekst = mapOf("foo" to "bar")), aktivitet)
-        assertEquals(listOf("Foo"), aktivitet.lokasjon())
+        val aktiviteter = aktivitetslogg.aktiviteter()
+        assertEquals(1, aktiviteter.size)
+        assertEquals(mapOf(listOf("lokasjon") to listOf(Aktivitet("tekst", kontekst = mapOf("key" to "value")))), aktiviteter)
     }
 
     @Test
     fun `propager melding til forelder`() {
         val forelder = Aktivitetslogg("forelder")
         val barn = Aktivitetslogg("barn", forelder = forelder)
-        barn.info("Bar", "foo" to "bar")
+        barn.info("tekst", "key" to "value")
 
-        val aktivitet = forelder.meldinger().single()
-        assertEquals(Aktivitet("Bar", kontekst = mapOf("foo" to "bar")), aktivitet)
-        assertEquals(listOf("forelder", "barn"), aktivitet.lokasjon())
+        val aktiviteter = forelder.aktiviteter()
+        assertEquals(1, aktiviteter.size)
+        assertEquals(mapOf(listOf("forelder", "barn") to listOf(Aktivitet("tekst", kontekst = mapOf("key" to "value")))), aktiviteter)
     }
 
     @Test
-    fun `kan legge til flere meldinger`() {
+    fun `kan legge til flere aktiviteter`() {
         val forelder = Aktivitetslogg("forelder")
         val barn = Aktivitetslogg("barn", forelder = forelder)
-        barn.info("Foo", "foo" to "bar")
-        barn.info("Bar", "foo" to "bar")
+        barn.info("tekst1", "key1" to "value1")
+        barn.info("tekst2", "key2" to "value2")
 
-        val aktivitet1 = forelder.meldinger()[0]
-        val aktivitet2 = forelder.meldinger()[1]
-        assertEquals(Aktivitet("Foo", kontekst = mapOf("foo" to "bar")), aktivitet1)
-        assertEquals(Aktivitet("Bar", kontekst = mapOf("foo" to "bar")), aktivitet2)
-        assertEquals(listOf("forelder", "barn"), aktivitet1.lokasjon())
-        assertEquals(listOf("forelder", "barn"), aktivitet2.lokasjon())
+        val aktiviteter = forelder.aktiviteter()
+        assertEquals(
+            mapOf(
+                listOf("forelder", "barn") to listOf(
+                    Aktivitet(
+                        "tekst1",
+                        kontekst = mapOf("key1" to "value1")
+                    ),
+                    Aktivitet(
+                        "tekst2",
+                        kontekst = mapOf("key2" to "value2")
+                    ),
+                )
+            ),
+            aktiviteter
+        )
     }
 
     @Test
@@ -45,15 +55,33 @@ class AktivitetsloggTest {
         val forelder1 = Aktivitetslogg("forelder1")
         val forelder2 = Aktivitetslogg("forelder2")
         val barn = Aktivitetslogg("barn", forelder = forelder1)
-        barn.info("Foo", "foo" to "bar")
+        barn.info("tekst1", "key1" to "value1")
         barn.nyForelder(forelder2)
-        barn.info("Bar", "foo" to "bar")
+        barn.info("tekst2", "key2" to "value2")
 
-        val aktivitet1 = forelder1.meldinger().single()
-        val aktivitet2 = forelder2.meldinger().single()
-        assertEquals(Aktivitet("Foo", kontekst = mapOf("foo" to "bar")), aktivitet1)
-        assertEquals(Aktivitet("Bar", kontekst = mapOf("foo" to "bar")), aktivitet2)
-        assertEquals(listOf("forelder1", "barn"), aktivitet1.lokasjon())
-        assertEquals(listOf("forelder2", "barn"), aktivitet2.lokasjon())
+        val aktiviteter1 = forelder1.aktiviteter()
+        val aktiviteter2 = forelder2.aktiviteter()
+        assertEquals(
+            mapOf(
+                listOf("forelder1", "barn") to listOf(
+                    Aktivitet(
+                        "tekst1",
+                        kontekst = mapOf("key1" to "value1")
+                    ),
+                )
+            ),
+            aktiviteter1
+        )
+        assertEquals(
+            mapOf(
+                listOf("forelder2", "barn") to listOf(
+                    Aktivitet(
+                        "tekst2",
+                        kontekst = mapOf("key2" to "value2")
+                    ),
+                )
+            ),
+            aktiviteter2
+        )
     }
 }

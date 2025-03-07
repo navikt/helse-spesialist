@@ -27,7 +27,7 @@ internal class OppdaterPersonCommand(
         private val fødselsnummer: String,
         private val personDao: PersonDao,
         private val behov: Behov,
-    ) : Command {
+    ) : Command() {
         override fun execute(context: CommandContext): Boolean {
             if (erOppdatert(personDao, fødselsnummer)) return ignorer()
             return behandle(context, personDao, fødselsnummer)
@@ -38,6 +38,7 @@ internal class OppdaterPersonCommand(
         }
 
         private fun ignorer(): Boolean {
+            aktivitetslogg.info("Har ikke behov, informasjonen er ny nok", "behov" to "${behov::class.simpleName}")
             log.info("har ikke behov for ${behov::class.simpleName}, informasjonen er ny nok")
             return true
         }
@@ -112,7 +113,7 @@ internal class OppdaterPersonCommand(
             fødselsnummer: String,
         ): Boolean {
             val utbetalinger = context.get<HentInfotrygdutbetalingerløsning>() ?: return trengerMerInformasjon(context)
-            log.info("oppdaterer utbetalinger fra Infotrygd")
+            aktivitetslogg.info("Har behov for informasjon om Infotrygdperioder")
             utbetalinger.oppdater(personDao, fødselsnummer)
             return true
         }

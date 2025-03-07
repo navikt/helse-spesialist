@@ -24,7 +24,7 @@ class LøsGodkjenningsbehov(
     private val beslutter: Saksbehandlerløsning.Saksbehandler?,
     private val godkjenningMediator: GodkjenningMediator,
     private val godkjenningsbehovData: GodkjenningsbehovData,
-) : Command {
+) : Command() {
     private companion object {
         private val logg = LoggerFactory.getLogger(LøsGodkjenningsbehov::class.java)
     }

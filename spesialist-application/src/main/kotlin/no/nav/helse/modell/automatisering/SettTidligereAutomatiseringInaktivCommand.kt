@@ -9,7 +9,7 @@ internal class SettTidligereAutomatiseringInaktivCommand(
     private val vedtaksperiodeId: UUID,
     private val hendelseId: UUID,
     private val automatisering: Automatisering,
-) : Command {
+) : Command() {
     private companion object {
         private val logg = LoggerFactory.getLogger(SettTidligereAutomatiseringInaktivCommand::class.java)
     }

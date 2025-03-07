@@ -10,7 +10,7 @@ internal class OpprettEllerOppdaterArbeidsforhold(
     private val fødselsnummer: String,
     private val organisasjonsnummer: String,
     private val arbeidsforholdDao: ArbeidsforholdDao,
-) : Command {
+) : Command() {
     private companion object {
         private val log = LoggerFactory.getLogger(OpprettEllerOppdaterArbeidsforhold::class.java)
     }

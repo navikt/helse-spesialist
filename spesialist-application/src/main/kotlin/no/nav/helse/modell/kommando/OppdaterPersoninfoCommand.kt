@@ -10,7 +10,7 @@ internal class OppdaterPersoninfoCommand(
     private val fødselsnummer: String,
     private val personDao: PersonDao,
     private val force: Boolean,
-) : Command {
+) : Command() {
     private companion object {
         private val BEHOV = Behov.Personinfo
         private val logg = LoggerFactory.getLogger(OppdaterPersoninfoCommand::class.simpleName)

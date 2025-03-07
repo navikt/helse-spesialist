@@ -10,7 +10,7 @@ internal class OppdaterInfotrygdutbetalingerHardt(
     private val fødselsnummer: String,
     private val personDao: PersonDao,
     private val førsteKjenteDagFinner: () -> LocalDate,
-) : Command {
+) : Command() {
     override fun execute(context: CommandContext) = behandle(context, personDao, fødselsnummer)
 
     override fun resume(context: CommandContext) = behandle(context, personDao, fødselsnummer)

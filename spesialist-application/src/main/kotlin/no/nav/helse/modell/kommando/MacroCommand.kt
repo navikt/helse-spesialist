@@ -2,7 +2,7 @@ package no.nav.helse.modell.kommando
 
 import org.slf4j.LoggerFactory
 
-abstract class MacroCommand : Command {
+abstract class MacroCommand : Command() {
     private var currentIndex: Int = 0
     private val historikk: MutableList<Command> = mutableListOf()
     protected abstract val commands: List<Command>
@@ -15,6 +15,9 @@ abstract class MacroCommand : Command {
         historikk.clear()
         this.currentIndex = currentIndex
         for (i in 0..currentIndex) historikk.add(0, commands[i])
+        commands.forEach { command ->
+            command.aktivitetslogg.nyForelder(this.aktivitetslogg)
+        }
     }
 
     final override fun execute(context: CommandContext): Boolean {

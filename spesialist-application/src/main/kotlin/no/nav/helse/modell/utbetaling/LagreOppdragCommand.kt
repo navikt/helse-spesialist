@@ -28,7 +28,7 @@ class LagreOppdragCommand(
     private val json: String,
     private val utbetalingDao: UtbetalingDao,
     private val opptegnelseDao: OpptegnelseDao,
-) : Command {
+) : Command() {
     private companion object {
         private val log = LoggerFactory.getLogger(LagreOppdragCommand::class.java)
     }
