@@ -703,8 +703,13 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         assertEquals("EN_KOMMENTAR", melding["kommentar"]?.asText())
         assertEquals(1, melding["begrunnelser"].map { it.asText() }.size)
         assertEquals("EN_BEGRUNNELSE", melding["begrunnelser"][0].asText())
-        assertEquals("Ferie", melding["arsaker"][0]["arsak"].asText())
-        assertEquals("key01", melding["arsaker"][0]["key"].asText())
+        melding["arsaker"].let {
+            assertEquals(2, it.size())
+            it.first().let { node ->
+                assertEquals("Ferie", node["arsak"].asText())
+                assertEquals("key01", node["key"].asText())
+            }
+        }
     }
 
     @Test
