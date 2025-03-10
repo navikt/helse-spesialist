@@ -22,7 +22,9 @@ import no.nav.helse.spleis.graphql.hentsnapshot.Alder
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLArbeidsgiver
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLBeregnetPeriode
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLGenerasjon
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLInntekt
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPeriodevilkar
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPeriodisertInntekt
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUtbetaling
 import no.nav.helse.spleis.graphql.hentsnapshot.Sykepengedager
@@ -107,6 +109,18 @@ object Testdata {
                                                 skjaeringstidspunkt = 1.januar(2020),
                                                 vilkarsgrunnlagId = null,
                                                 periodetilstand = GraphQLPeriodetilstand.TILGODKJENNING,
+                                                inntekter = listOf(
+                                                    GraphQLInntekt(
+                                                        inntektskilde = organisasjonsnummer,
+                                                        periodiserteInntekter = listOf(
+                                                            GraphQLPeriodisertInntekt(
+                                                                dagligBelop = 1337.69,
+                                                                fom = 1.januar(2020),
+                                                                tom = 31.januar(2020),
+                                                            )
+                                                        )
+                                                    )
+                                                )
                                             ),
                                         ),
                                 ),

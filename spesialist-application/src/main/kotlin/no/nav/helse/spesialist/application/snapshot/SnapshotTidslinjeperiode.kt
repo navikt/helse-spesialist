@@ -54,6 +54,7 @@ data class SnapshotBeregnetPeriode(
     val periodevilkar: SnapshotPeriodevilkar,
     val utbetaling: SnapshotUtbetaling,
     val vilkarsgrunnlagId: UUID?,
+    val inntekter: List<SnapshotInntekt>,
 ) : SnapshotTidslinjeperiode
 
 data class SnapshotUkjentTidslinjeperiode(

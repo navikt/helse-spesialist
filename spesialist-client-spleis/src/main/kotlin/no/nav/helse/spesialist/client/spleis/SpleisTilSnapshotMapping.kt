@@ -11,6 +11,7 @@ import no.nav.helse.spesialist.application.snapshot.SnapshotGenerasjon
 import no.nav.helse.spesialist.application.snapshot.SnapshotGhostPeriode
 import no.nav.helse.spesialist.application.snapshot.SnapshotHendelsetype
 import no.nav.helse.spesialist.application.snapshot.SnapshotInfotrygdVilkarsgrunnlag
+import no.nav.helse.spesialist.application.snapshot.SnapshotInntekt
 import no.nav.helse.spesialist.application.snapshot.SnapshotInntektFraAOrdningen
 import no.nav.helse.spesialist.application.snapshot.SnapshotInntekterFraAOrdningen
 import no.nav.helse.spesialist.application.snapshot.SnapshotInntektskilde
@@ -76,6 +77,7 @@ import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLGenerasjon
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLGhostPeriode
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLHendelse
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLInfotrygdVilkarsgrunnlag
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLInntekt
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLInntektFraAOrdningen
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLInntekterFraAOrdningen
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLInntektsmelding
@@ -416,6 +418,20 @@ fun GraphQLBeregnetPeriode.tilSnapshotBeregnetPeriode() =
         periodevilkar = periodevilkar.tilSnapshotPeriodevilkar(),
         utbetaling = utbetaling.tilSnapshotUtbetaling(),
         vilkarsgrunnlagId = vilkarsgrunnlagId,
+        inntekter = inntekter.map { it.tilSnapshotInntekt() },
+    )
+
+fun GraphQLInntekt.tilSnapshotInntekt() =
+    SnapshotInntekt(
+        inntektskilde = inntektskilde,
+        periodiserteInntekter =
+            this@tilSnapshotInntekt.periodiserteInntekter.map {
+                SnapshotInntekt.PeriodisertInntekt(
+                    fom = it.fom,
+                    tom = it.tom,
+                    dagligBelop = it.dagligBelop,
+                )
+            },
     )
 
 fun DefaultGraphQLTidslinjeperiodeImplementation.tilSnapshotUkjentTidslinjeperiode() =

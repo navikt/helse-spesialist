@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.api.graphql
 import no.nav.helse.spesialist.api.januar
 import no.nav.helse.spesialist.api.mai
 import no.nav.helse.spesialist.api.oktober
+import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
 import no.nav.helse.spleis.graphql.enums.GraphQLHendelsetype
 import no.nav.helse.spleis.graphql.enums.GraphQLInntektskilde
 import no.nav.helse.spleis.graphql.enums.GraphQLInntektstype
@@ -17,8 +18,10 @@ import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLArbeidsgiverrefusjon
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLBeregnetPeriode
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLGenerasjon
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLHendelse
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLInntekt
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLOmregnetArsinntekt
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPeriodevilkar
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPeriodisertInntekt
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLRefusjonselement
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSoknadArbeidsledig
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSpleisVilkarsgrunnlag
@@ -102,6 +105,18 @@ object GraphQLTestdata {
                 statusEnum = GraphQLUtbetalingstatus.IKKEGODKJENT,
                 typeEnum = Utbetalingtype.UTBETALING,
             ),
+        inntekter = listOf(
+            GraphQLInntekt(
+                inntektskilde = lagOrganisasjonsnummer(),
+                periodiserteInntekter = listOf(
+                    GraphQLPeriodisertInntekt(
+                        dagligBelop = 1337.69,
+                        fom = fom,
+                        tom = tom,
+                    )
+                )
+            )
+        )
     )
 
     fun opprettUberegnetPeriode(
