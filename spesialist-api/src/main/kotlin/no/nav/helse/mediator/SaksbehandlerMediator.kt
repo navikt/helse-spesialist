@@ -88,6 +88,7 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
+import no.nav.helse.spesialist.application.logg.sikkerlogg
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
@@ -117,7 +118,6 @@ class SaksbehandlerMediator(
     private val oppgaveApiDao = daos.oppgaveApiDao
     private val opptegnelseRepository = daos.opptegnelseDao
     private val abonnementDao = daos.abonnementApiDao
-    private val reservasjonDao = daos.reservasjonDao
     private val påVentDao = daos.påVentDao
     private val periodehistorikkDao = daos.periodehistorikkDao
     private val vedtakBegrunnelseDao = daos.vedtakBegrunnelseDao
@@ -144,7 +144,16 @@ class SaksbehandlerMediator(
         ) {
             sikkerlogg.info("Utfører handling ${modellhandling.loggnavn()} på vegne av saksbehandler $saksbehandler")
             when (modellhandling) {
-                is Overstyring -> håndter(modellhandling, legacySaksbehandler)
+                is Overstyring ->
+                    overstyringUnitOfWork(
+                        overstyring = modellhandling,
+                        saksbehandlerOid = SaksbehandlerOid(legacySaksbehandler.oid()),
+                        sessionFactory = sessionFactory,
+                        featureToggles = featureToggles,
+                    ) {
+                        modellhandling.utførAv(legacySaksbehandler)
+                    }
+
                 is Oppgavehandling -> håndter(modellhandling, legacySaksbehandler)
                 is PåVent -> error("dette burde ikke skje")
                 is OpphevStans -> håndter(modellhandling, legacySaksbehandler)
@@ -450,27 +459,6 @@ class SaksbehandlerMediator(
         } catch (e: Modellfeil) {
             throw e.tilApiversjon()
         }
-    }
-
-    private fun håndter(
-        handling: Overstyring,
-        legacySaksbehandler: LegacySaksbehandler,
-    ) {
-        val fødselsnummer = handling.fødselsnummer
-        reservasjonDao.reserverPerson(legacySaksbehandler.oid(), fødselsnummer)
-        sikkerlogg.info("Reserverer person $fødselsnummer til saksbehandler $legacySaksbehandler")
-        sessionFactory.transactionalSessionScope { session ->
-            if (featureToggles.skalBenytteNyTotrinnsvurderingsløsning()) {
-                val totrinnsvurdering =
-                    session.totrinnsvurderingRepository.finn(handling.fødselsnummer)
-                        ?: Totrinnsvurdering.ny(handling.vedtaksperiodeId)
-                totrinnsvurdering.nyOverstyring(handling)
-                session.totrinnsvurderingRepository.lagre(totrinnsvurdering, fødselsnummer)
-            } else {
-                session.overstyringRepository.lagre(listOf(handling))
-            }
-        }
-        handling.utførAv(legacySaksbehandler)
     }
 
     fun opprettAbonnement(
@@ -1024,4 +1012,26 @@ class SaksbehandlerMediator(
             navn = this.navn,
             ident = this.ident,
         )
+}
+
+internal fun overstyringUnitOfWork(
+    overstyring: Overstyring,
+    saksbehandlerOid: SaksbehandlerOid,
+    sessionFactory: SessionFactory,
+    featureToggles: FeatureToggles,
+    overstyringBlock: () -> Unit,
+) = sessionFactory.transactionalSessionScope { session ->
+    val fødselsnummer = overstyring.fødselsnummer
+    sikkerlogg.info("Reserverer person $fødselsnummer til saksbehandler ${saksbehandlerOid.value}")
+    session.reservasjonDao.reserverPerson(saksbehandlerOid.value, fødselsnummer)
+    if (featureToggles.skalBenytteNyTotrinnsvurderingsløsning()) {
+        val totrinnsvurdering =
+            session.totrinnsvurderingRepository.finn(overstyring.fødselsnummer)
+                ?: Totrinnsvurdering.ny(overstyring.vedtaksperiodeId)
+        totrinnsvurdering.nyOverstyring(overstyring)
+        session.totrinnsvurderingRepository.lagre(totrinnsvurdering, fødselsnummer)
+    } else {
+        session.overstyringRepository.lagre(listOf(overstyring))
+    }
+    overstyringBlock()
 }
