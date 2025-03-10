@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
+import com.expediagroup.graphql.generator.annotations.GraphQLDescription
 import com.expediagroup.graphql.generator.annotations.GraphQLIgnore
 import com.expediagroup.graphql.generator.annotations.GraphQLName
 import java.time.LocalDate
@@ -284,6 +285,20 @@ data class ApiVarselDTO(
     )
 }
 
+@GraphQLName("Inntekt")
+data class ApiInntekt(
+    @GraphQLDescription("En id som identifiserer inntektskilden, f.eks. organisasjonsnummer")
+    val inntektskilde: String,
+    val periodiserteInntekter: List<ApiPeriodisertInntekt>,
+) {
+    @GraphQLName("PeriodisertInntekt")
+    data class ApiPeriodisertInntekt(
+        val fom: LocalDate,
+        val tom: LocalDate,
+        val dagligBelop: Double,
+    )
+}
+
 @GraphQLName("Periode")
 interface ApiPeriode {
     fun behandlingId(): UUID
@@ -373,6 +388,9 @@ interface BeregnetPeriodeSchema : ApiPeriode {
     fun vedtakBegrunnelser(): List<ApiVedtakBegrunnelse>
 
     fun annullering(): ApiAnnullering?
+
+    @GraphQLDescription("Andre inntekter, f.eks tilkommen inntekt")
+    fun inntekter(): List<ApiInntekt>
 }
 
 @GraphQLName("BeregnetPeriode")
