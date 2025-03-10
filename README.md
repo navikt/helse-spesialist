@@ -68,7 +68,7 @@ colima start
 - Kjør tasken `graphqlIntrospectSchema` i spesialist-client-spleis, enten i IntelliJ eller fra kommandolinja
     - Fra kommandolinja: `./gradlew :spesialist-client-spleis:graphqlIntrospectSchema`
 - Gjør eventuelt endringer i hva som skal hentes fra spleis i filen `hentSnapshot.graphql`
-- Kjør tasken `graphqlGenerateClient` for å få generert klassene
+- Kjør tasken `graphqlGenerateClient` for å få generert klassene, disse genereres basert på hva som er definert i `hentSnapshot.graphql`.
 
 > ℹ️ `graphqlGenerateClient` vil også kjøres som en del av et vanlig bygg, i motsetning til `graphqlIntrospectSchema`.
 

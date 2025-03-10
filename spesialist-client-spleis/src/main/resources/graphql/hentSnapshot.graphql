@@ -210,6 +210,16 @@ query HentSnapshot($fnr: String!) {
                         forbrukteSykedager
                         gjenstaendeSykedager
                         maksdato
+                        inntekter {
+                            __typename
+                            inntektskilde
+                            periodiserteInntekter {
+                                __typename
+                                dagligBelop
+                                fom
+                                tom
+                            }
+                        }
                         periodevilkar {
                             alder {
                                 alderSisteSykedag
