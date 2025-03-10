@@ -19,7 +19,6 @@ import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -53,38 +52,38 @@ internal class VurderÅpenGosysoppgaveTest {
         oppgaveService = oppgaveService,
     )
 
-    private lateinit var context: CommandContext
+    private fun commandContext(behovsamler: MutableList<Behov>? = null) =
+        CommandContext(UUID.randomUUID()).also { commandContext ->
+            behovsamler?.let { commandContext.nyObserver(observer(behovsamler)) }
+        }
 
-    private val observer =
+    private fun observer(behovsamler: MutableList<Behov>) =
         object : CommandContextObserver {
-            val behov = mutableListOf<Behov>()
-
-            override fun behov(behov: Behov, commandContextId: UUID) {
-                this.behov.add(behov)
+            override fun behov(
+                behov: Behov,
+                commandContextId: UUID,
+            ) {
+                behovsamler.add(behov)
             }
         }
 
-    @BeforeEach
-    fun setup() {
-        context = CommandContext(UUID.randomUUID())
-        context.nyObserver(observer)
-        clearMocks(åpneGosysOppgaverDao)
-    }
-
     @Test
     fun `Ber om åpne oppgaver i gosys`() {
+        val behov = mutableListOf<Behov>()
+        val context = commandContext(behov)
         assertFalse(command().execute(context))
-        assertEquals(listOf(Behov.ÅpneOppgaver(skjæringstidspunkt.minusYears(1))), observer.behov.toList())
+        assertEquals(listOf(Behov.ÅpneOppgaver(skjæringstidspunkt.minusYears(1))), behov.toList())
     }
 
     @Test
     fun `Mangler løsning ved resume`() {
-        assertFalse(command().resume(context))
+        assertFalse(command().resume(commandContext()))
         verify(exactly = 0) { åpneGosysOppgaverDao.persisterÅpneGosysOppgaver(any()) }
     }
 
     @Test
     fun `Lagrer løsning ved resume`() {
+        val context = commandContext()
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 0, false))
         assertTrue(command().resume(context))
         verify(exactly = 1) { åpneGosysOppgaverDao.persisterÅpneGosysOppgaver(any()) }
@@ -96,8 +95,10 @@ internal class VurderÅpenGosysoppgaveTest {
         behandlingAg1.inspektør {
             assertEquals(1, varsler.size)
         }
-        context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 0, false))
-        assertTrue(command().resume(context))
+        commandContext().let { commandContext ->
+            commandContext.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 0, false))
+            assertTrue(command().resume(commandContext))
+        }
         verify(exactly = 1) { åpneGosysOppgaverDao.persisterÅpneGosysOppgaver(any()) }
         behandlingAg1.inspektør {
             assertEquals(1, varsler.size)
@@ -110,6 +111,7 @@ internal class VurderÅpenGosysoppgaveTest {
     @Test
     fun `Deaktiverer ikke varsel dersom oppgave er tildelt`() {
         behandlingAg1.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), VEDTAKPERIODE_ID_AG_1))
+        val context = commandContext()
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 0, false))
         assertTrue(command(harTildeltOppgave = true).resume(context))
         behandlingAg1.inspektør {
@@ -121,14 +123,15 @@ internal class VurderÅpenGosysoppgaveTest {
 
     @Test
     fun `Lagrer varsel ved åpne oppgaver, uavhengig om eventuell oppgave er tildelt eller ikke`() {
-        lagrerVarselVedÅpneOppgaver(false)
+        lagrerVarselVedÅpneOppgaver(harTildeltOppgave = false, commandContext())
         verify(exactly = 1) { oppgaveService.leggTilGosysEgenskap(any()) }
-        setup()
-        lagrerVarselVedÅpneOppgaver(true)
+        clearMocks(åpneGosysOppgaverDao)
+        lagrerVarselVedÅpneOppgaver(harTildeltOppgave = true, commandContext())
     }
 
     @Test
     fun `Lagrer varsel ved oppslag feilet`() {
+        val context = commandContext()
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, null, true))
         assertTrue(command().resume(context))
         verify(exactly = 1) { åpneGosysOppgaverDao.persisterÅpneGosysOppgaver(any()) }
@@ -141,6 +144,7 @@ internal class VurderÅpenGosysoppgaveTest {
     @Test
     fun `Legger ikke til egenskap for gosys dersom det er andre varsler på perioden`() {
         behandlingAg1.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_4", LocalDateTime.now(), VEDTAKPERIODE_ID_AG_1))
+        val context = commandContext()
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 1, false))
         command().resume(context)
         verify(exactly = 0) { oppgaveService.leggTilGosysEgenskap(any()) }
@@ -149,12 +153,13 @@ internal class VurderÅpenGosysoppgaveTest {
     @Test
     fun `Legger ikke til egenskap for gosys dersom det er andre varsler på andre overlappende perioder`() {
         behandlingAg2.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_4", LocalDateTime.now(), VEDTAKPERIODE_ID_AG_2))
+        val context = commandContext()
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 1, false))
         command().resume(context)
         verify(exactly = 0) { oppgaveService.leggTilGosysEgenskap(any()) }
     }
 
-    private fun lagrerVarselVedÅpneOppgaver(harTildeltOppgave: Boolean) {
+    private fun lagrerVarselVedÅpneOppgaver(harTildeltOppgave: Boolean, context: CommandContext) {
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 1, false))
         assertTrue(command(harTildeltOppgave).resume(context))
         verify(exactly = 1) { åpneGosysOppgaverDao.persisterÅpneGosysOppgaver(any()) }
