@@ -240,10 +240,9 @@ class MeldingMediator(
     ) {
         val meldingnavn = requireNotNull(melding::class.simpleName)
         withMDC(
-            mutableMapOf(
-                "meldingId" to melding.id.toString(),
-                "meldingnavn" to meldingnavn,
-            ).apply {
+            buildMap {
+                put("meldingId", melding.id.toString())
+                put("meldingnavn", meldingnavn)
                 if (melding is Vedtaksperiodemelding) put("vedtaksperiodeId", melding.vedtaksperiodeId().toString())
             },
         ) {
