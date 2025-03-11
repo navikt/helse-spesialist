@@ -14,6 +14,5 @@ dependencies {
     implementation(libs.bundles.jackson)
     implementation(libs.micrometer.prometheus)
 
-    testImplementation(libs.testcontainers.postgres)
     testFixturesImplementation(libs.testcontainers.postgres)
 }
