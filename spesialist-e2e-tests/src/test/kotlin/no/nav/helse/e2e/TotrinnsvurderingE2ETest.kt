@@ -1,6 +1,5 @@
 package no.nav.helse.e2e
 
-import no.nav.helse.modell.OverstyringType
 import no.nav.helse.spesialist.api.graphql.schema.ApiLovhjemmel
 import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringArbeidsforhold
 import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
@@ -19,7 +18,7 @@ internal class TotrinnsvurderingE2ETest : AbstractE2ETest() {
             harOppdatertMetadata = true,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = UUID.randomUUID()),
         )
-        assertOverstyringer(VEDTAKSPERIODE_ID, OverstyringType.Inntekt)
+        assertOverstyringer(VEDTAKSPERIODE_ID)
         assertTotrinnsvurdering(2.oppgave(VEDTAKSPERIODE_ID))
     }
 
@@ -51,7 +50,7 @@ internal class TotrinnsvurderingE2ETest : AbstractE2ETest() {
             harOppdatertMetadata = true,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = UUID.randomUUID()),
         )
-        assertOverstyringer(VEDTAKSPERIODE_ID, OverstyringType.Arbeidsforhold)
+        assertOverstyringer(VEDTAKSPERIODE_ID)
         assertTotrinnsvurdering(2.oppgave(VEDTAKSPERIODE_ID))
     }
 
@@ -66,7 +65,7 @@ internal class TotrinnsvurderingE2ETest : AbstractE2ETest() {
             harOppdatertMetadata = true,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = UUID.randomUUID()),
         )
-        assertOverstyringer(VEDTAKSPERIODE_ID, OverstyringType.Dager)
+        assertOverstyringer(VEDTAKSPERIODE_ID)
         assertTotrinnsvurdering(2.oppgave(VEDTAKSPERIODE_ID))
     }
 }

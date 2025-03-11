@@ -1,21 +1,16 @@
 package no.nav.helse.spesialist.db.dao
 
-import no.nav.helse.db.overstyring.LovhjemmelForDatabase
-import no.nav.helse.db.overstyring.SkjønnsfastsattArbeidsgiverForDatabase
-import no.nav.helse.db.overstyring.SkjønnsfastsattSykepengegrunnlagForDatabase
-import no.nav.helse.db.overstyring.SkjønnsfastsettingstypeForDatabase
-import no.nav.helse.db.overstyring.SkjønnsfastsettingstypeForDatabase.OMREGNET_ÅRSINNTEKT
-import no.nav.helse.db.overstyring.SkjønnsfastsettingstypeForDatabase.RAPPORTERT_ÅRSINNTEKT
-import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlagDto
+import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattArbeidsgiver
+import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.modell.vedtak.SkjønnsfastsettingstypeDto
 import no.nav.helse.modell.vedtak.SkjønnsfastsettingsårsakDto
+import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.db.jan
+import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 internal class PgSykefraværstilfelleDaoTest : AbstractDBIntegrationTest() {
@@ -28,30 +23,23 @@ internal class PgSykefraværstilfelleDaoTest : AbstractDBIntegrationTest() {
         opprettSaksbehandler()
         val hendelseId = UUID.randomUUID()
         testhendelse(hendelseId)
-        val tidspunkt = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS)
-        overstyringDao.persisterSkjønnsfastsettingSykepengegrunnlag(
-            skjønnsfastsattSykepengegrunnlag =
-                skjønnsfastsattSykepengegrunnlag(
-                    opprettet = tidspunkt,
-                    fødselsnummer = FNR,
-                ),
-            saksbehandlerOid = SAKSBEHANDLER_OID,
+        overstyringRepository.lagre(
+            listOf(
+                    skjønnsfastsattSykepengegrunnlag(
+                        fødselsnummer = FNR,
+                    ),
+            )
         )
 
         val funnet = sykefraværstilfelleDao.finnSkjønnsfastsatteSykepengegrunnlag(FNR)
         assertEquals(1, funnet.size)
-        assertEquals(
-            SkjønnsfastsattSykepengegrunnlagDto(
-                SkjønnsfastsettingstypeDto.OMREGNET_ÅRSINNTEKT,
-                SkjønnsfastsettingsårsakDto.ANDRE_AVSNITT,
-                1 jan 2018,
-                "mal",
-                "fritekst",
-                "konklusjon",
-                tidspunkt,
-            ),
-            funnet.single(),
-        )
+        val skjønnsfastsattSykepengegrunnlag = funnet.single()
+        assertEquals(skjønnsfastsattSykepengegrunnlag.type, SkjønnsfastsettingstypeDto.OMREGNET_ÅRSINNTEKT)
+        assertEquals(skjønnsfastsattSykepengegrunnlag.årsak, SkjønnsfastsettingsårsakDto.ANDRE_AVSNITT)
+        assertEquals(skjønnsfastsattSykepengegrunnlag.skjæringstidspunkt, 1 jan 2018)
+        assertEquals(skjønnsfastsattSykepengegrunnlag.begrunnelseFraMal, "mal")
+        assertEquals(skjønnsfastsattSykepengegrunnlag.begrunnelseFraFritekst, "fritekst")
+        assertEquals(skjønnsfastsattSykepengegrunnlag.begrunnelseFraKonklusjon, "konklusjon")
     }
 
     @Test
@@ -65,55 +53,48 @@ internal class PgSykefraværstilfelleDaoTest : AbstractDBIntegrationTest() {
         val hendelseId2 = UUID.randomUUID()
         testhendelse(hendelseId1)
         testhendelse(hendelseId2)
-        val tidspunkt = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS)
-        overstyringDao.persisterSkjønnsfastsettingSykepengegrunnlag(
-            skjønnsfastsattSykepengegrunnlag(
-                opprettet = tidspunkt,
-                fødselsnummer = FNR,
-            ),
-            saksbehandlerOid = SAKSBEHANDLER_OID,
+        overstyringRepository.lagre(
+            listOf(
+                skjønnsfastsattSykepengegrunnlag(
+                    fødselsnummer = FNR,
+                ),
+            )
         )
-        overstyringDao.persisterSkjønnsfastsettingSykepengegrunnlag(
-            skjønnsfastsattSykepengegrunnlag(
-                fødselsnummer = person2,
-                orgnummer = arbeidsgiver2,
-                type = RAPPORTERT_ÅRSINNTEKT,
-            ),
-            saksbehandlerOid = SAKSBEHANDLER_OID,
+        overstyringRepository.lagre(
+            listOf(
+                skjønnsfastsattSykepengegrunnlag(
+                    fødselsnummer = person2,
+                    orgnummer = arbeidsgiver2,
+                    type = SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.RAPPORTERT_ÅRSINNTEKT,
+                ),
+            )
         )
 
         val funnet = sykefraværstilfelleDao.finnSkjønnsfastsatteSykepengegrunnlag(FNR)
         assertEquals(1, funnet.size)
-        assertEquals(
-            SkjønnsfastsattSykepengegrunnlagDto(
-                SkjønnsfastsettingstypeDto.OMREGNET_ÅRSINNTEKT,
-                SkjønnsfastsettingsårsakDto.ANDRE_AVSNITT,
-                1 jan 2018,
-                "mal",
-                "fritekst",
-                "konklusjon",
-                tidspunkt,
-            ),
-            funnet.single(),
-        )
+        val skjønnsfastsattSykepengegrunnlag = funnet.single()
+        assertEquals(skjønnsfastsattSykepengegrunnlag.type, SkjønnsfastsettingstypeDto.OMREGNET_ÅRSINNTEKT)
+        assertEquals(skjønnsfastsattSykepengegrunnlag.årsak, SkjønnsfastsettingsårsakDto.ANDRE_AVSNITT)
+        assertEquals(skjønnsfastsattSykepengegrunnlag.skjæringstidspunkt, 1 jan 2018)
+        assertEquals(skjønnsfastsattSykepengegrunnlag.begrunnelseFraMal, "mal")
+        assertEquals(skjønnsfastsattSykepengegrunnlag.begrunnelseFraFritekst, "fritekst")
+        assertEquals(skjønnsfastsattSykepengegrunnlag.begrunnelseFraKonklusjon, "konklusjon")
     }
 
     private fun skjønnsfastsattSykepengegrunnlag(
-        opprettet: LocalDateTime = LocalDateTime.now(),
         fødselsnummer: String = FNR,
         orgnummer: String = ORGNUMMER,
-        type: SkjønnsfastsettingstypeForDatabase = OMREGNET_ÅRSINNTEKT,
+        type: SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype = SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,
         skjæringstidspunkt: LocalDate = 1 jan 2018,
-    ): SkjønnsfastsattSykepengegrunnlagForDatabase =
-        SkjønnsfastsattSykepengegrunnlagForDatabase(
-            eksternHendelseId = UUID.randomUUID(),
+    ): SkjønnsfastsattSykepengegrunnlag =
+        SkjønnsfastsattSykepengegrunnlag.ny(
             aktørId = AKTØR,
             fødselsnummer = fødselsnummer,
             skjæringstidspunkt = skjæringstidspunkt,
             vedtaksperiodeId = VEDTAKSPERIODE,
             arbeidsgivere =
                 listOf(
-                    SkjønnsfastsattArbeidsgiverForDatabase(
+                    SkjønnsfastsattArbeidsgiver(
                         organisasjonsnummer = orgnummer,
                         årlig = 1.0,
                         fraÅrlig = 1.0,
@@ -122,12 +103,10 @@ internal class PgSykefraværstilfelleDaoTest : AbstractDBIntegrationTest() {
                         begrunnelseMal = "mal",
                         begrunnelseKonklusjon = "konklusjon",
                         begrunnelseFritekst = "fritekst",
-                        lovhjemmel = LovhjemmelForDatabase(paragraf = "paragraf", ledd = "ledd", bokstav = "bokstav"),
+                        lovhjemmel = Lovhjemmel(paragraf = "paragraf", ledd = "ledd", bokstav = "bokstav", lovverksversjon = "lovverksversjon", lovverk = "lovverk"),
                         initierendeVedtaksperiodeId = UUID.randomUUID().toString(),
                     ),
                 ),
-            opprettet = opprettet,
-            saksbehandlerOid = SAKSBEHANDLER_OID,
-            ferdigstilt = false,
+            saksbehandlerOid = SaksbehandlerOid(SAKSBEHANDLER_OID),
         )
 }

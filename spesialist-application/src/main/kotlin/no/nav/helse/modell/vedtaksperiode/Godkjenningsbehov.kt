@@ -329,7 +329,6 @@ internal class GodkjenningsbehovCommand(
                 periodehistorikkDao = periodehistorikkDao,
                 totrinnsvurderingRepository = totrinnsvurderingRepository,
                 sykefraværstilfelle = sykefraværstilfelle,
-                spleisVedtaksperioder = behovData.spleisVedtaksperioder,
                 featureToggles = featureToggles,
             ),
             VurderAutomatiskInnvilgelse(

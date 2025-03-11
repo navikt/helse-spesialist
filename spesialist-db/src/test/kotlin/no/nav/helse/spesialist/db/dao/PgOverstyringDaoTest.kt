@@ -1,20 +1,21 @@
 package no.nav.helse.spesialist.db.dao
 
-import no.nav.helse.db.overstyring.ArbeidsforholdForDatabase
-import no.nav.helse.db.overstyring.LovhjemmelForDatabase
-import no.nav.helse.db.overstyring.MinimumSykdomsgradForDatabase
-import no.nav.helse.db.overstyring.OverstyrtArbeidsforholdForDatabase
-import no.nav.helse.db.overstyring.OverstyrtArbeidsgiverForDatabase
-import no.nav.helse.db.overstyring.OverstyrtInntektOgRefusjonForDatabase
-import no.nav.helse.db.overstyring.OverstyrtTidslinjeForDatabase
-import no.nav.helse.db.overstyring.OverstyrtTidslinjedagForDatabase
-import no.nav.helse.db.overstyring.RefusjonselementForDatabase
-import no.nav.helse.db.overstyring.SkjønnsfastsattArbeidsgiverForDatabase
-import no.nav.helse.db.overstyring.SkjønnsfastsattSykepengegrunnlagForDatabase
-import no.nav.helse.db.overstyring.SkjønnsfastsettingstypeForDatabase
 import no.nav.helse.modell.InntektskildetypeDto.ORDINÆR
 import no.nav.helse.modell.KomplettInntektskildeDto
 import no.nav.helse.modell.kommando.MinimalPersonDto
+import no.nav.helse.modell.saksbehandler.handlinger.Arbeidsforhold
+import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgrad
+import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgradArbeidsgiver
+import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgradPeriode
+import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtArbeidsforhold
+import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtArbeidsgiver
+import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtInntektOgRefusjon
+import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinje
+import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinjedag
+import no.nav.helse.modell.saksbehandler.handlinger.Refusjonselement
+import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattArbeidsgiver
+import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlag
+import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.OverstyringArbeidsforholdDto
 import no.nav.helse.spesialist.api.overstyring.OverstyringDagDto
@@ -26,6 +27,7 @@ import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsettingSykepengegrunn
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.db.jan
 import no.nav.helse.spesialist.db.lagOrganisasjonsnummer
+import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.typer.Kjønn
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -41,11 +43,8 @@ internal class PgOverstyringDaoTest : AbstractDBIntegrationTest() {
     private val PERSON_FØDSELSDATO = LocalDate.of(1998, 4, 20)
     private val PERSON_KJØNN = Kjønn.Ukjent
     private val ARBEIDSGIVER_NAVN = "Skrue McDuck"
-    private val EKSTERN_HENDELSE_ID = UUID.randomUUID()
     private val DEAKTIVERT = true
     private val SKJÆRINGSTIDSPUNKT = LocalDate.of(2018, 1, 1)
-    private val OID = UUID.randomUUID()
-    private val EPOST = "saks.behandler@nav.no"
     private val BEGRUNNELSE = "BegrunnelseMal\n\nBegrunnelseFritekst"
     private val BEGRUNNELSEMAL = "BegrunnelseMal"
     private val BEGRUNNELSEFRITEKST = "BegrunnelseFritekst"
@@ -54,7 +53,7 @@ internal class PgOverstyringDaoTest : AbstractDBIntegrationTest() {
     private val ÅRSAK = "Årsak"
     private val OVERSTYRTE_DAGER =
         listOf(
-            OverstyrtTidslinjedagForDatabase(
+            OverstyrtTidslinjedag(
                 dato = LocalDate.of(2020, 1, 1),
                 type = Dagtype.Sykedag.toString(),
                 grad = 100,
@@ -63,11 +62,11 @@ internal class PgOverstyringDaoTest : AbstractDBIntegrationTest() {
                 lovhjemmel = null,
             ),
         )
-    private val OPPRETTET = LocalDate.of(2022, 6, 9).atStartOfDay()
     private val INNTEKT = 31000.0
+    val saksbehandler = nyLegacySaksbehandler()
+    val saksbehandlerOid = SaksbehandlerOid(saksbehandler.oid)
 
     private fun opprettPerson() {
-        saksbehandlerDao.opprettEllerOppdater(OID, SAKSBEHANDLER_NAVN, EPOST, SAKSBEHANDLER_IDENT)
         inntektskilderRepository.lagreInntektskilder(
             listOf(
                 KomplettInntektskildeDto(ORGNUMMER, ORDINÆR, ARBEIDSGIVER_NAVN, BRANSJER, LocalDate.now())
@@ -89,8 +88,8 @@ internal class PgOverstyringDaoTest : AbstractDBIntegrationTest() {
     @Test
     fun `Kan koble overstyringhendelse og vedtaksperiode`() {
         opprettPerson()
-        persisterOverstyringTidslinje()
-        overstyringDao.kobleOverstyringOgVedtaksperiode(listOf(VEDTAKSPERIODE), EKSTERN_HENDELSE_ID)
+        val overstyring = persisterOverstyringTidslinje()
+        overstyringDao.kobleOverstyringOgVedtaksperiode(listOf(VEDTAKSPERIODE), overstyring.eksternHendelseId)
 
         assertTrue(overstyringDao.harVedtaksperiodePågåendeOverstyring(VEDTAKSPERIODE))
         assertFalse(overstyringDao.harVedtaksperiodePågåendeOverstyring(UUID.randomUUID()))
@@ -99,9 +98,9 @@ internal class PgOverstyringDaoTest : AbstractDBIntegrationTest() {
     @Test
     fun `Finnes ekstern_hendelse_id i overstyringtabell`() {
         opprettPerson()
-        persisterOverstyringTidslinje()
+        val overstyring = persisterOverstyringTidslinje()
 
-        assertTrue(overstyringDao.finnesEksternHendelseId(EKSTERN_HENDELSE_ID))
+        assertTrue(overstyringDao.finnesEksternHendelseId(overstyring.eksternHendelseId))
         assertFalse(overstyringDao.finnesEksternHendelseId(UUID.randomUUID()))
     }
 
@@ -113,18 +112,18 @@ internal class PgOverstyringDaoTest : AbstractDBIntegrationTest() {
         persisterOverstyringMinimumSykdomsgrad()
         persisterOverstyringInntektOgRefusjon(
             listOf(
-                overstyrtArbeidsgiverForDatabase(),
+                overstyrtArbeidsgiver(),
             )
         )
         persisterOverstyringArbeidsforhold(
-            EKSTERN_HENDELSE_ID, listOf(
-                arbeidsforholdForDatabase(),
+            listOf(
+                arbeidsforhold(),
             )
         )
         persisterSkjønnsfastsettingSykepengegrunnlag()
 
 
-        val overstyringer = overstyringDao.finnOverstyringer(FNR)
+        val overstyringer = overstyringRepository.finnAktive(FNR)
 
         assertEquals(5, overstyringer.size)
     }
@@ -135,12 +134,12 @@ internal class PgOverstyringDaoTest : AbstractDBIntegrationTest() {
         val organisasjonsnummer2 = lagOrganisasjonsnummer()
         opprettArbeidsgiver(organisasjonsnummer2)
         persisterOverstyringArbeidsforhold(
-            EKSTERN_HENDELSE_ID, listOf(
-                arbeidsforholdForDatabase(),
-                arbeidsforholdForDatabase(organisasjonsnummer2),
+            listOf(
+                arbeidsforhold(),
+                arbeidsforhold(organisasjonsnummer2),
             )
         )
-        val overstyringer = overstyringDao.finnOverstyringer(FNR)
+        val overstyringer = overstyringRepository.finnAktive(FNR)
 
         assertEquals(1, overstyringer.size)
     }
@@ -152,11 +151,11 @@ internal class PgOverstyringDaoTest : AbstractDBIntegrationTest() {
         opprettArbeidsgiver(organisasjonsnummer2)
         persisterOverstyringInntektOgRefusjon(
             listOf(
-                overstyrtArbeidsgiverForDatabase(),
-                overstyrtArbeidsgiverForDatabase(organisasjonsnummer2),
+                overstyrtArbeidsgiver(),
+                overstyrtArbeidsgiver(organisasjonsnummer2),
             )
         )
-        val overstyringer = overstyringDao.finnOverstyringer(FNR)
+        val overstyringer = overstyringRepository.finnAktive(FNR)
 
         assertEquals(1, overstyringer.size)
     }
@@ -171,10 +170,9 @@ internal class PgOverstyringDaoTest : AbstractDBIntegrationTest() {
         assertEquals(BEGRUNNELSE, hentetOverstyring.begrunnelse)
         assertEquals(FNR, hentetOverstyring.fødselsnummer)
         assertEquals(ORGNUMMER, hentetOverstyring.organisasjonsnummer)
-        assertEquals(OVERSTYRTE_DAGER, hentetOverstyring.overstyrteDager.map { it.dtoToDatabase() })
-        assertEquals(SAKSBEHANDLER_NAVN, hentetOverstyring.saksbehandlerNavn)
-        assertEquals(SAKSBEHANDLER_IDENT, hentetOverstyring.saksbehandlerIdent)
-        assertEquals(OPPRETTET, hentetOverstyring.timestamp)
+        assertEquals(OVERSTYRTE_DAGER, hentetOverstyring.overstyrteDager.map { it.dtoToDomain() })
+        assertEquals(saksbehandler.navn, hentetOverstyring.saksbehandlerNavn)
+        assertEquals(saksbehandler.ident(), hentetOverstyring.saksbehandlerIdent)
         assertFalse(hentetOverstyring.ferdigstilt)
     }
 
@@ -182,8 +180,8 @@ internal class PgOverstyringDaoTest : AbstractDBIntegrationTest() {
     fun `Finner opprettede arbeidsforholdoverstyringer`() {
         opprettPerson()
         persisterOverstyringArbeidsforhold(
-            EKSTERN_HENDELSE_ID, listOf(
-                arbeidsforholdForDatabase(),
+            listOf(
+                arbeidsforhold(),
             )
         )
         val hentetOverstyring = overstyringApiDao.finnOverstyringer(FNR).single()
@@ -195,9 +193,8 @@ internal class PgOverstyringDaoTest : AbstractDBIntegrationTest() {
         assertEquals(SKJÆRINGSTIDSPUNKT, hentetOverstyring.skjæringstidspunkt)
         assertEquals(FNR, hentetOverstyring.fødselsnummer)
         assertEquals(ORGNUMMER, hentetOverstyring.organisasjonsnummer)
-        assertEquals(SAKSBEHANDLER_NAVN, hentetOverstyring.saksbehandlerNavn)
-        assertEquals(SAKSBEHANDLER_IDENT, hentetOverstyring.saksbehandlerIdent)
-        assertEquals(OPPRETTET, hentetOverstyring.timestamp)
+        assertEquals(saksbehandler.navn, hentetOverstyring.saksbehandlerNavn)
+        assertEquals(saksbehandler.ident(), hentetOverstyring.saksbehandlerIdent)
         assertFalse(hentetOverstyring.ferdigstilt)
     }
 
@@ -206,7 +203,7 @@ internal class PgOverstyringDaoTest : AbstractDBIntegrationTest() {
         opprettPerson()
         persisterOverstyringInntektOgRefusjon(
             listOf(
-                overstyrtArbeidsgiverForDatabase(),
+                overstyrtArbeidsgiver(),
             )
         )
         val hentetOverstyring = overstyringApiDao.finnOverstyringer(FNR).first()
@@ -216,11 +213,10 @@ internal class PgOverstyringDaoTest : AbstractDBIntegrationTest() {
         assertEquals(ORGNUMMER, hentetOverstyring.organisasjonsnummer)
         assertEquals(BEGRUNNELSE, hentetOverstyring.begrunnelse)
         assertEquals(FORKLARING, hentetOverstyring.forklaring)
-        assertEquals(SAKSBEHANDLER_NAVN, hentetOverstyring.saksbehandlerNavn)
-        assertEquals(SAKSBEHANDLER_IDENT, hentetOverstyring.saksbehandlerIdent)
+        assertEquals(saksbehandler.navn, hentetOverstyring.saksbehandlerNavn)
+        assertEquals(saksbehandler.ident(), hentetOverstyring.saksbehandlerIdent)
         assertEquals(INNTEKT, hentetOverstyring.månedligInntekt)
         assertEquals(SKJÆRINGSTIDSPUNKT, hentetOverstyring.skjæringstidspunkt)
-        assertEquals(OPPRETTET, hentetOverstyring.timestamp)
         assertFalse(hentetOverstyring.ferdigstilt)
         assertEquals(1, hentetOverstyring.refusjonsopplysninger?.size)
         val refusjonsopplysning = hentetOverstyring.refusjonsopplysninger?.first()
@@ -250,12 +246,11 @@ internal class PgOverstyringDaoTest : AbstractDBIntegrationTest() {
         assertEquals(BEGRUNNELSEKONKLUSJON, hentetSkjønnsfastsetting.begrunnelseKonklusjon)
         assertEquals(ÅRSAK, hentetSkjønnsfastsetting.årsak)
         assertEquals(Skjonnsfastsettingstype.OMREGNET_ARSINNTEKT.name, hentetSkjønnsfastsetting.type.name)
-        assertEquals(SAKSBEHANDLER_NAVN, hentetSkjønnsfastsetting.saksbehandlerNavn)
-        assertEquals(SAKSBEHANDLER_IDENT, hentetSkjønnsfastsetting.saksbehandlerIdent)
+        assertEquals(saksbehandler.navn, hentetSkjønnsfastsetting.saksbehandlerNavn)
+        assertEquals(saksbehandler.ident(), hentetSkjønnsfastsetting.saksbehandlerIdent)
         assertEquals(INNTEKT, hentetSkjønnsfastsetting.årlig)
         assertEquals(INNTEKT + 1, hentetSkjønnsfastsetting.fraÅrlig)
         assertEquals(SKJÆRINGSTIDSPUNKT, hentetSkjønnsfastsetting.skjæringstidspunkt)
-        assertEquals(OPPRETTET, hentetSkjønnsfastsetting.timestamp)
         assertFalse(hentetSkjønnsfastsetting.ferdigstilt)
     }
 
@@ -273,122 +268,93 @@ internal class PgOverstyringDaoTest : AbstractDBIntegrationTest() {
         assertTrue(hentetMinimumSykdomsgrad.perioderVurdertOk.isNotEmpty())
         assertTrue(hentetMinimumSykdomsgrad.perioderVurdertIkkeOk.isEmpty())
         assertEquals("en begrunnelse", hentetMinimumSykdomsgrad.begrunnelse)
-        assertEquals(SAKSBEHANDLER_NAVN, hentetMinimumSykdomsgrad.saksbehandlerNavn)
-        assertEquals(SAKSBEHANDLER_IDENT, hentetMinimumSykdomsgrad.saksbehandlerIdent)
-        assertEquals(OPPRETTET, hentetMinimumSykdomsgrad.timestamp)
+        assertEquals(saksbehandler.navn, hentetMinimumSykdomsgrad.saksbehandlerNavn)
+        assertEquals(saksbehandler.ident(), hentetMinimumSykdomsgrad.saksbehandlerIdent)
         assertFalse(hentetMinimumSykdomsgrad.ferdigstilt)
     }
 
-    @Test
-    fun `Finner hendelsesid'er for ikke ferdigstilte overstyringer for vedtaksperiode`() {
-        opprettPerson()
-        persisterOverstyringInntektOgRefusjon(
-            listOf(
-                overstyrtArbeidsgiverForDatabase(),
-            )
-        )
-        overstyringDao.kobleOverstyringOgVedtaksperiode(listOf(VEDTAKSPERIODE), EKSTERN_HENDELSE_ID)
-        val eksternHendelsesIdArbeidsforhold = UUID.randomUUID()
-        persisterOverstyringArbeidsforhold(
-            eksternHendelsesIdArbeidsforhold, listOf(
-                arbeidsforholdForDatabase(),
-            )
-        )
-        overstyringDao.kobleOverstyringOgVedtaksperiode(listOf(VEDTAKSPERIODE), eksternHendelsesIdArbeidsforhold)
-
-        val aktiveOverstyringer = overstyringDao.finnAktiveOverstyringer(VEDTAKSPERIODE)
-
-        assertEquals(EKSTERN_HENDELSE_ID, aktiveOverstyringer.first())
-        assertEquals(eksternHendelsesIdArbeidsforhold, aktiveOverstyringer.last())
-    }
-
     private fun persisterSkjønnsfastsettingSykepengegrunnlag() {
-        overstyringDao.persisterSkjønnsfastsettingSykepengegrunnlag(
-            SkjønnsfastsattSykepengegrunnlagForDatabase(
-                eksternHendelseId = EKSTERN_HENDELSE_ID,
-                aktørId = AKTØR,
-                fødselsnummer = FNR,
-                skjæringstidspunkt = 1 jan 2018,
-                opprettet = OPPRETTET,
-                vedtaksperiodeId = VEDTAKSPERIODE,
-                saksbehandlerOid = UUID.randomUUID(),
-                ferdigstilt = false,
-                arbeidsgivere =
-                    listOf(
-                        SkjønnsfastsattArbeidsgiverForDatabase(
-                            organisasjonsnummer = ORGNUMMER,
-                            årlig = INNTEKT,
-                            fraÅrlig = INNTEKT + 1,
-                            årsak = ÅRSAK,
-                            type = SkjønnsfastsettingstypeForDatabase.OMREGNET_ÅRSINNTEKT,
-                            begrunnelseMal = BEGRUNNELSEMAL,
-                            begrunnelseKonklusjon = BEGRUNNELSEKONKLUSJON,
-                            begrunnelseFritekst = BEGRUNNELSEFRITEKST,
-                            initierendeVedtaksperiodeId = VEDTAKSPERIODE.toString(),
-                            lovhjemmel = LovhjemmelForDatabase(paragraf = "paragraf"),
+        val skjønnsfastsattSykepengegrunnlag = SkjønnsfastsattSykepengegrunnlag.ny(
+            aktørId = AKTØR,
+            fødselsnummer = FNR,
+            skjæringstidspunkt = 1 jan 2018,
+            vedtaksperiodeId = VEDTAKSPERIODE,
+            saksbehandlerOid = saksbehandlerOid,
+            arbeidsgivere =
+                listOf(
+                    SkjønnsfastsattArbeidsgiver(
+                        organisasjonsnummer = ORGNUMMER,
+                        årlig = INNTEKT,
+                        fraÅrlig = INNTEKT + 1,
+                        årsak = ÅRSAK,
+                        type = SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,
+                        begrunnelseMal = BEGRUNNELSEMAL,
+                        begrunnelseKonklusjon = BEGRUNNELSEKONKLUSJON,
+                        begrunnelseFritekst = BEGRUNNELSEFRITEKST,
+                        initierendeVedtaksperiodeId = VEDTAKSPERIODE.toString(),
+                        lovhjemmel = Lovhjemmel(
+                            paragraf = "paragraf",
+                            lovverksversjon = "lovverksversjon",
+                            lovverk = "lovverk"
                         ),
                     ),
-            ),
-            OID,
+                ),
         )
+
+        overstyringRepository.lagre(listOf(skjønnsfastsattSykepengegrunnlag))
     }
 
     private fun persisterOverstyringMinimumSykdomsgrad() {
-        overstyringDao.persisterMinimumSykdomsgrad(
-            MinimumSykdomsgradForDatabase(
-                eksternHendelseId = EKSTERN_HENDELSE_ID,
-                aktørId = AKTØR,
-                fødselsnummer = FNR,
-                perioderVurdertOk = listOf(
-                    MinimumSykdomsgradForDatabase.MinimumSykdomsgradPeriodeForDatabase(
-                        fom = 1 jan 2018,
-                        tom = 31 jan 2018
-                    )
-                ),
-                perioderVurdertIkkeOk = emptyList(),
-                begrunnelse = "en begrunnelse",
-                opprettet = OPPRETTET,
-                vedtaksperiodeId = VEDTAKSPERIODE,
-                saksbehandlerOid = UUID.randomUUID(),
-                ferdigstilt = false,
-                arbeidsgivere =
-                    listOf(
-                        MinimumSykdomsgradForDatabase.MinimumSykdomsgradArbeidsgiverForDatabase(
-                            organisasjonsnummer = ORGNUMMER,
-                            berørtVedtaksperiodeId = VEDTAKSPERIODE
+        overstyringRepository.lagre(
+            listOf(
+                MinimumSykdomsgrad.ny(
+                    aktørId = AKTØR,
+                    fødselsnummer = FNR,
+                    perioderVurdertOk = listOf(
+                        MinimumSykdomsgradPeriode(
+                            fom = 1 jan 2018,
+                            tom = 31 jan 2018
                         )
                     ),
-            ),
-            OID,
+                    perioderVurdertIkkeOk = emptyList(),
+                    begrunnelse = "en begrunnelse",
+                    vedtaksperiodeId = VEDTAKSPERIODE,
+                    saksbehandlerOid = saksbehandlerOid,
+                    arbeidsgivere =
+                        listOf(
+                            MinimumSykdomsgradArbeidsgiver(
+                                organisasjonsnummer = ORGNUMMER,
+                                berørtVedtaksperiodeId = VEDTAKSPERIODE
+                            )
+                        ),
+                ),
+            )
         )
     }
 
-    private fun persisterOverstyringInntektOgRefusjon(overstyrteArbeidsgivere: List<OverstyrtArbeidsgiverForDatabase> = listOf(overstyrtArbeidsgiverForDatabase())) {
-        overstyringDao.persisterOverstyringInntektOgRefusjon(
-            OverstyrtInntektOgRefusjonForDatabase(
-                eksternHendelseId = EKSTERN_HENDELSE_ID,
-                aktørId = AKTØR,
-                fødselsnummer = FNR,
-                skjæringstidspunkt = SKJÆRINGSTIDSPUNKT,
-                opprettet = OPPRETTET,
-                vedtaksperiodeId = VEDTAKSPERIODE,
-                saksbehandlerOid = UUID.randomUUID(),
-                ferdigstilt = false,
-                arbeidsgivere =
-                    overstyrteArbeidsgivere,
-            ),
-            OID,
+    private fun persisterOverstyringInntektOgRefusjon(overstyrteArbeidsgivere: List<OverstyrtArbeidsgiver> = listOf(overstyrtArbeidsgiver())) {
+        overstyringRepository.lagre(
+            listOf(
+                OverstyrtInntektOgRefusjon.ny(
+                    aktørId = AKTØR,
+                    fødselsnummer = FNR,
+                    skjæringstidspunkt = SKJÆRINGSTIDSPUNKT,
+                    vedtaksperiodeId = VEDTAKSPERIODE,
+                    saksbehandlerOid = saksbehandlerOid,
+                    arbeidsgivere = overstyrteArbeidsgivere,
+                )
+            )
         )
     }
 
-    private fun overstyrtArbeidsgiverForDatabase(organisasjonsnummer: String = ORGNUMMER) =
-        OverstyrtArbeidsgiverForDatabase(
+    private fun overstyrtArbeidsgiver(organisasjonsnummer: String = ORGNUMMER) =
+        OverstyrtArbeidsgiver(
             organisasjonsnummer = organisasjonsnummer,
             månedligInntekt = INNTEKT,
             fraMånedligInntekt = INNTEKT + 1,
             refusjonsopplysninger =
                 listOf(
-                    RefusjonselementForDatabase(
+                    Refusjonselement(
                         fom = 1 jan 2018,
                         tom = 31 jan 2018,
                         beløp = 1000.0,
@@ -402,53 +368,45 @@ internal class PgOverstyringDaoTest : AbstractDBIntegrationTest() {
             tom = null
         )
 
-    private fun persisterOverstyringArbeidsforhold(
-        eksternHendelsesIdArbeidsforhold: UUID, overstyrteArbeidsforhold: List<ArbeidsforholdForDatabase> = listOf(arbeidsforholdForDatabase())
-    ) {
-        overstyringDao.persisterOverstyringArbeidsforhold(
-            OverstyrtArbeidsforholdForDatabase(
-                eksternHendelseId = eksternHendelsesIdArbeidsforhold,
-                fødselsnummer = FNR,
-                aktørId = AKTØR,
-                skjæringstidspunkt = SKJÆRINGSTIDSPUNKT,
-                opprettet = OPPRETTET,
-                vedtaksperiodeId = VEDTAKSPERIODE,
-                saksbehandlerOid = UUID.randomUUID(),
-                ferdigstilt = false,
-                overstyrteArbeidsforhold =
-                    overstyrteArbeidsforhold,
-            ),
-            OID,
+    private fun persisterOverstyringArbeidsforhold(overstyrteArbeidsforhold: List<Arbeidsforhold> = listOf(arbeidsforhold())) {
+        overstyringRepository.lagre(
+            listOf(
+                OverstyrtArbeidsforhold.ny(
+                    fødselsnummer = FNR,
+                    aktørId = AKTØR,
+                    skjæringstidspunkt = SKJÆRINGSTIDSPUNKT,
+                    vedtaksperiodeId = VEDTAKSPERIODE,
+                    saksbehandlerOid = saksbehandlerOid,
+                    overstyrteArbeidsforhold = overstyrteArbeidsforhold,
+                )
+            )
         )
     }
 
-    private fun arbeidsforholdForDatabase(organisasjonsnummer: String = ORGNUMMER) = ArbeidsforholdForDatabase(
+    private fun arbeidsforhold(organisasjonsnummer: String = ORGNUMMER) = Arbeidsforhold(
         organisasjonsnummer = organisasjonsnummer,
         deaktivert = DEAKTIVERT,
         begrunnelse = BEGRUNNELSE,
         forklaring = FORKLARING,
+        lovhjemmel = null
     )
 
-    private fun persisterOverstyringTidslinje() {
-        overstyringDao.persisterOverstyringTidslinje(
-            OverstyrtTidslinjeForDatabase(
-                eksternHendelseId = EKSTERN_HENDELSE_ID,
-                aktørId = AKTØR,
-                fødselsnummer = FNR,
-                organisasjonsnummer = ORGNUMMER,
-                dager = OVERSTYRTE_DAGER,
-                begrunnelse = BEGRUNNELSE,
-                opprettet = OPPRETTET,
-                vedtaksperiodeId = VEDTAKSPERIODE,
-                ferdigstilt = false,
-                saksbehandlerOid = UUID.randomUUID(),
-            ),
-            OID,
+    private fun persisterOverstyringTidslinje(): OverstyrtTidslinje {
+        val overstyrtTidslinje = OverstyrtTidslinje.ny(
+            aktørId = AKTØR,
+            fødselsnummer = FNR,
+            organisasjonsnummer = ORGNUMMER,
+            dager = OVERSTYRTE_DAGER,
+            begrunnelse = BEGRUNNELSE,
+            vedtaksperiodeId = VEDTAKSPERIODE,
+            saksbehandlerOid = saksbehandlerOid,
         )
+        overstyringRepository.lagre(listOf(overstyrtTidslinje))
+        return overstyrtTidslinje
     }
 
-    private fun OverstyringDagDto.dtoToDatabase(): OverstyrtTidslinjedagForDatabase =
-        OverstyrtTidslinjedagForDatabase(
+    private fun OverstyringDagDto.dtoToDomain(): OverstyrtTidslinjedag =
+        OverstyrtTidslinjedag(
             dato = this.dato,
             type = this.type.toString(),
             fraType = this.fraType.toString(),

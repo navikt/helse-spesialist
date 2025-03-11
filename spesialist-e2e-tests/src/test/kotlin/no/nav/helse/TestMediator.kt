@@ -22,7 +22,6 @@ import no.nav.helse.spesialist.db.DBDaos
 import no.nav.helse.spesialist.db.TransactionalSessionFactory
 import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import no.nav.helse.util.testEnv
-import java.util.UUID
 import javax.sql.DataSource
 
 internal class TestMediator(
@@ -33,7 +32,6 @@ internal class TestMediator(
     private val daos = DBDaos(dataSource)
     private val opptegnelseDao = daos.opptegnelseDao
     private val oppgaveDao = daos.oppgaveDao
-    private val overstyringDao = daos.overstyringDao
     private val notatDao = daos.notatDao
     private val dialogDao = daos.dialogDao
     private val annulleringRepository = daos.annulleringRepository
@@ -125,9 +123,6 @@ internal class TestMediator(
         )
         RiverSetup(testRapid, meldingMediator, daos.meldingDuplikatkontrollDao).setUp()
     }
-
-    internal fun overstyringstyperForVedtaksperiode(vedtaksperiodeId: UUID) =
-        overstyringDao.finnOverstyringerMedTypeForVedtaksperiode(vedtaksperiodeId)
 
     internal fun håndter(
         handling: HandlingFraApi,

@@ -21,7 +21,6 @@ import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Fullmakt
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Vergemål
-import no.nav.helse.modell.OverstyringType
 import no.nav.helse.modell.melding.OverstyrtInntektOgRefusjonEvent.OverstyrtArbeidsgiverEvent.OverstyrtRefusjonselementEvent
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.person.Adressebeskyttelse
@@ -1449,15 +1448,8 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         assertEquals(personbeløp, finnbeløp("person"))
     }
 
-    protected fun assertOverstyringer(
-        vedtaksperiodeId: UUID,
-        vararg forventedeOverstyringstyper: OverstyringType,
-    ) {
-        val utførteOverstyringstyper = testMediator.overstyringstyperForVedtaksperiode(vedtaksperiodeId)
-        assertEquals(forventedeOverstyringstyper.toSet(), utførteOverstyringstyper.toSet()) {
-            val ikkeEtterspurt = utførteOverstyringstyper.toSet() - forventedeOverstyringstyper.toSet()
-            "Følgende overstyringstyper ble utført i tillegg til de forventede: $ikkeEtterspurt\nForventede typer: ${forventedeOverstyringstyper.joinToString()}\n"
-        }
+    protected fun assertOverstyringer(vedtaksperiodeId: UUID) {
+        assertTrue(daos.overstyringDao.harVedtaksperiodePågåendeOverstyring(vedtaksperiodeId))
     }
 
     protected fun assertTotrinnsvurdering(oppgaveId: Long) {
