@@ -1,8 +1,7 @@
 package no.nav.helse.e2e
 
 import no.nav.helse.bootstrap.Environment
-import no.nav.helse.spesialist.db.bootstrap.DBModule
-import no.nav.helse.spesialist.db.testfixtures.TestDatabase
+import no.nav.helse.spesialist.db.testfixtures.DBTestFixture
 
 abstract class AbstractDatabaseTest {
     protected val environment: Environment = object : Environment, Map<String, String> by emptyMap() {
@@ -12,13 +11,7 @@ abstract class AbstractDatabaseTest {
         override val kanGodkjenneUtenBesluttertilgang = false
     }
 
-    companion object {
-        protected val dbModule = DBModule(TestDatabase.dbModuleConfiguration)
-        init {
-            dbModule.flywayMigrator.migrate()
-        }
-    }
-    protected val dataSource = dbModule.dataSource
-    protected val daos = dbModule.daos
-    protected val sessionFactory = dbModule.sessionFactory
+    protected val dataSource = DBTestFixture.module.dataSource
+    protected val daos = DBTestFixture.module.daos
+    protected val sessionFactory = DBTestFixture.module.sessionFactory
 }

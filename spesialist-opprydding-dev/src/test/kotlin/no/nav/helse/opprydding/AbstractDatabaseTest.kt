@@ -2,8 +2,7 @@ package no.nav.helse.opprydding
 
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.spesialist.db.bootstrap.DBModule
-import no.nav.helse.spesialist.db.testfixtures.TestDatabase
+import no.nav.helse.spesialist.db.testfixtures.DBTestFixture
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -11,15 +10,7 @@ import java.util.UUID
 import kotlin.random.Random
 
 internal abstract class AbstractDatabaseTest {
-    protected companion object {
-        const val FØDSELSNUMMER = "12345678910"
-
-        protected val dbModule = DBModule(TestDatabase.dbModuleConfiguration)
-        init {
-            dbModule.flywayMigrator.migrate()
-        }
-    }
-    protected val dataSource = dbModule.dataSource
+    protected val dataSource = DBTestFixture.module.dataSource
     protected val personRepository = PersonRepository(dataSource)
 
     protected fun opprettPerson(
@@ -37,6 +28,7 @@ internal abstract class AbstractDatabaseTest {
         val organisasjonsnummer = Random.nextInt(100000000, 999999999).toString()
         val utbetaling_id = UUID.randomUUID().toString()
         val avviksvurdering_unik_id = UUID.randomUUID().toString()
+
         @Language("PostgreSQL")
         val sql = """
         INSERT INTO saksbehandler(oid, navn, epost, ident)
@@ -265,11 +257,14 @@ internal abstract class AbstractDatabaseTest {
 
     @BeforeEach
     fun resetDatabase() {
-        sessionOf(dataSource).use {
-            it.run(queryOf("SELECT truncate_tables()").asExecute)
-        }
+        DBTestFixture.truncate()
+    }
+
+    protected companion object {
+        const val FØDSELSNUMMER = "12345678910"
     }
 }
+
 
 enum class Comparison(
     val label: String,

@@ -15,4 +15,5 @@ dependencies {
     implementation(libs.micrometer.prometheus)
 
     testFixturesImplementation(libs.testcontainers.postgres)
+    testFixturesImplementation(libs.kotliquery)
 }

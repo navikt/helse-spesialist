@@ -3,7 +3,6 @@ package no.nav.helse.spesialist.db
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettArbeidsforholdDto
@@ -24,7 +23,6 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.spesialist.api.overstyring.Dagtype
-import no.nav.helse.spesialist.db.bootstrap.DBModule
 import no.nav.helse.spesialist.db.dao.PgMeldingDuplikatkontrollDao
 import no.nav.helse.spesialist.db.dao.PgPersonDao
 import no.nav.helse.spesialist.db.dao.api.PgAbonnementApiDao
@@ -35,18 +33,16 @@ import no.nav.helse.spesialist.db.dao.api.PgPeriodehistorikkApiDao
 import no.nav.helse.spesialist.db.dao.api.PgPersonApiDao
 import no.nav.helse.spesialist.db.dao.api.PgRisikovurderingApiDao
 import no.nav.helse.spesialist.db.dao.api.PgVarselApiRepository
-import no.nav.helse.spesialist.db.testfixtures.TestDatabase
+import no.nav.helse.spesialist.db.testfixtures.DBTestFixture
 import no.nav.helse.spesialist.domain.Dialog
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 import no.nav.helse.spesialist.typer.Kjønn
-import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.AfterEach
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.Random
 import java.util.UUID
-import javax.sql.DataSource
 import kotlin.random.Random.Default.nextLong
 
 abstract class AbstractDBIntegrationTest {
@@ -95,21 +91,9 @@ abstract class AbstractDBIntegrationTest {
             epost = SAKSBEHANDLER_EPOST,
         )
 
-    protected companion object {
-        internal val objectMapper =
-            jacksonObjectMapper()
-                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-                .registerModule(JavaTimeModule())
-
-        protected val dbModule = DBModule(TestDatabase.dbModuleConfiguration)
-        init {
-            dbModule.flywayMigrator.migrate()
-            resetDatabase(dbModule.dataSource)
-        }
-    }
-    protected val dataSource = dbModule.dataSource
+    protected val dataSource = DBTestFixture.module.dataSource
     protected val dbQuery = DbQuery(dataSource)
-    protected val daos = dbModule.daos
+    protected val daos = DBTestFixture.module.daos
 
     protected val session = sessionOf(dataSource, returnGeneratedKey = true)
     private val sessionContext = DBSessionContext(session)
@@ -736,28 +720,10 @@ abstract class AbstractDBIntegrationTest {
         val prosent: Int,
     )
 
-}
-
-private fun resetDatabase(dataSource: DataSource) {
-    sessionOf(dataSource).use {
-        @Language("PostgreSQL")
-        val query = """
-            CREATE OR REPLACE FUNCTION truncate_tables() RETURNS void AS $$
-            DECLARE
-            truncate_statement text;
-            BEGIN
-                SELECT 'TRUNCATE ' || string_agg(format('%I.%I', schemaname, tablename), ',') || ' RESTART IDENTITY CASCADE'
-                    INTO truncate_statement
-                FROM pg_tables
-                WHERE schemaname='public'
-                AND tablename not in ('enhet', 'flyway_schema_history', 'global_snapshot_versjon');
-                UPDATE global_snapshot_versjon SET versjon = 0 WHERE id = 1;
-
-                EXECUTE truncate_statement;
-            END;
-            $$ LANGUAGE plpgsql;
-        """.trimIndent()
-        it.run(queryOf(query).asExecute)
-        it.run(queryOf("SELECT truncate_tables()").asExecute)
+    protected companion object {
+        internal val objectMapper =
+            jacksonObjectMapper()
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                .registerModule(JavaTimeModule())
     }
 }
