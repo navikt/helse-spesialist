@@ -1,108 +1,208 @@
 package no.nav.helse.opprydding
 
-import com.zaxxer.hikari.HikariConfig
-import com.zaxxer.hikari.HikariDataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import org.flywaydb.core.Flyway
+import no.nav.helse.spesialist.db.bootstrap.DBModule
+import no.nav.helse.spesialist.db.testfixtures.TestDatabase
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
-import org.testcontainers.containers.PostgreSQLContainer
 import java.util.UUID
-import javax.sql.DataSource
 import kotlin.random.Random
 
 internal abstract class AbstractDatabaseTest {
-    protected val personRepository = PersonRepository(dataSource)
-
     protected companion object {
         const val FØDSELSNUMMER = "12345678910"
 
-        private val postgres =
-            PostgreSQLContainer<Nothing>("postgres:14").apply {
-                withReuse(true)
-                withLabel("app-navn", "spesialist-opprydding")
-                start()
-
-                println("Database: jdbc:postgresql://localhost:$firstMappedPort/test startet opp, credentials: test og test")
-            }
-
-        val dataSource =
-            HikariDataSource(
-                HikariConfig().apply {
-                    jdbcUrl = postgres.jdbcUrl
-                    username = postgres.username
-                    password = postgres.password
-                    maximumPoolSize = 5
-                    connectionTimeout = 500
-                    initializationFailTimeout = 5000
-                },
-            )
-
-        private fun createTruncateFunction(dataSource: DataSource) {
-            sessionOf(dataSource).use {
-                @Language("PostgreSQL")
-                val query = """
-            CREATE OR REPLACE FUNCTION truncate_tables() RETURNS void AS $$
-            DECLARE
-            truncate_statement text;
-            BEGIN
-                SELECT 'TRUNCATE ' || string_agg(format('%I.%I', schemaname, tablename), ',') || ' RESTART IDENTITY CASCADE'
-                    INTO truncate_statement
-                FROM pg_tables
-                WHERE schemaname='public'
-                AND tablename not in ('enhet', 'flyway_schema_history', 'global_snapshot_versjon');
-                UPDATE global_snapshot_versjon SET versjon = 0 WHERE id = 1;
-
-                EXECUTE truncate_statement;
-            END;
-            $$ LANGUAGE plpgsql;
-        """
-                it.run(queryOf(query).asExecute)
-            }
-        }
-
+        protected val dbModule = DBModule(TestDatabase.dbModuleConfiguration)
         init {
-            Flyway
-                .configure()
-                .dataSource(dataSource)
-                .placeholders(
-                    mapOf("spesialist_oid" to UUID.randomUUID().toString()),
-                ).ignoreMigrationPatterns("*:missing")
-                .locations("classpath:db/migration")
-                .load()
-                .migrate()
-
-            createTruncateFunction(dataSource)
+            dbModule.flywayMigrator.migrate()
         }
     }
+    protected val dataSource = dbModule.dataSource
+    protected val personRepository = PersonRepository(dataSource)
 
     protected fun opprettPerson(
         fødselsnummer: String,
         sequenceNumber: Int = 1,
     ) {
-        Flyway
-            .configure()
-            .dataSource(dataSource)
-            .placeholders(
-                mapOf(
-                    "sequence_number" to sequenceNumber.toString(),
-                    "periodehistorikk_dialog_id" to Random.nextInt(1000, 99999).toString(),
-                    "saksbehandler_oid" to UUID.randomUUID().toString(),
-                    "hendelse_id" to UUID.randomUUID().toString(),
-                    "fødselsnummer" to fødselsnummer,
-                    "generasjon_id" to UUID.randomUUID().toString(),
-                    "vedtaksperiode_id" to UUID.randomUUID().toString(),
-                    "command_context_id" to UUID.randomUUID().toString(),
-                    "aktør_id" to fødselsnummer.reversed(),
-                    "organisasjonsnummer" to Random.nextInt(100000000, 999999999).toString(),
-                    "utbetaling_id" to UUID.randomUUID().toString(),
-                    "avviksvurdering_unik_id" to UUID.randomUUID().toString(),
-                ),
-            ).locations("classpath:db/testperson")
-            .load()
-            .migrate()
+        val sequence_number = sequenceNumber.toString()
+        val periodehistorikk_dialog_id = Random.nextInt(1000, 99999).toString()
+        val saksbehandler_oid = UUID.randomUUID().toString()
+        val hendelse_id = UUID.randomUUID().toString()
+        val generasjon_id = UUID.randomUUID().toString()
+        val vedtaksperiode_id = UUID.randomUUID().toString()
+        val command_context_id = UUID.randomUUID().toString()
+        val aktør_id = fødselsnummer.reversed()
+        val organisasjonsnummer = Random.nextInt(100000000, 999999999).toString()
+        val utbetaling_id = UUID.randomUUID().toString()
+        val avviksvurdering_unik_id = UUID.randomUUID().toString()
+        @Language("PostgreSQL")
+        val sql = """
+        INSERT INTO saksbehandler(oid, navn, epost, ident)
+        VALUES ('${saksbehandler_oid}', 'SAKSBEHANDLER SAKSBEHANDLERSEN', 'saksbehandler@nav.no', 'I123456');
+        
+        INSERT INTO hendelse(id, data, type)
+        VALUES ('${hendelse_id}', '{"fødselsnummer": "${fødselsnummer}"}'::json, 'TESTHENDELSE');
+        INSERT INTO vedtaksperiode_hendelse(hendelse_ref, vedtaksperiode_id)
+        VALUES ('${hendelse_id}', '${vedtaksperiode_id}');
+        INSERT INTO command_context(context_id, hendelse_id, opprettet, tilstand, data)
+        VALUES ('${command_context_id}', '${hendelse_id}', now(), 'SUSPENDERT', '{}'::json);
+        INSERT INTO person_info(id, fornavn, mellomnavn, etternavn, fodselsdato, kjonn, adressebeskyttelse)
+        VALUES (${sequence_number}, 'NAVN', 'MELLOMNAVN', 'NAVNESEN', '2018-01-01', 'Ukjent', 'NEI');
+        INSERT INTO person_klargjores(fødselsnummer, opprettet) VALUES (${fødselsnummer}, now());
+        INSERT INTO infotrygdutbetalinger(id, data)
+        VALUES (${sequence_number}, '{}'::json);
+        INSERT INTO person(id, fødselsnummer, aktør_id, info_ref, enhet_ref, enhet_ref_oppdatert, personinfo_oppdatert,
+                           infotrygdutbetalinger_ref, infotrygdutbetalinger_oppdatert)
+        VALUES (${sequence_number}, '${fødselsnummer}', '${aktør_id}', ${sequence_number}, 101, now(), now(), ${sequence_number},
+                now());
+        INSERT INTO arbeidsgiver_navn(id, navn, navn_oppdatert)
+        VALUES (${sequence_number}, 'ARBEIDSGIVER', '2018-01-01');
+        INSERT INTO arbeidsgiver_bransjer(id, bransjer, oppdatert)
+        VALUES (${sequence_number}, 'BRANSJE', now());
+        INSERT INTO arbeidsgiver(id, organisasjonsnummer, navn_ref, bransjer_ref)
+        VALUES (${sequence_number}, '${organisasjonsnummer}', ${sequence_number}, ${sequence_number});
+        INSERT INTO arbeidsforhold(id, person_ref, arbeidsgiver_ref, startdato, sluttdato, stillingstittel, stillingsprosent,
+                                   oppdatert)
+        VALUES (${sequence_number}, ${sequence_number}, ${sequence_number}, '2018-01-01', '2018-01-31', 'STILLING', 100, now());
+        UPDATE global_snapshot_versjon
+        SET versjon = 1 WHERE versjon <> 1; -- WHERE for å slippe varsel om "update without 'where' updates all rows at once
+        INSERT INTO snapshot(id, data, person_ref, versjon)
+        VALUES (${sequence_number}, '{}'::json, ${sequence_number}, 1);
+        INSERT INTO vedtak(id, vedtaksperiode_id, fom, tom, arbeidsgiver_ref, person_ref, forkastet)
+        VALUES (${sequence_number}, '${vedtaksperiode_id}', now(), now(), ${sequence_number}, ${sequence_number}, false);
+        INSERT INTO behandling(id, unik_id, vedtaksperiode_id, opprettet_av_hendelse, tilstand)
+        VALUES (${sequence_number}, '${generasjon_id}', '${vedtaksperiode_id}', '${hendelse_id}', 'VidereBehandlingAvklares');
+        INSERT INTO behandling_v2(vedtaksperiode_id, behandling_id, fom, tom, skjæringstidspunkt, opprettet)
+        VALUES ('${vedtaksperiode_id}', gen_random_uuid(), now(), now(), now(), now());
+        INSERT INTO opprinnelig_soknadsdato (vedtaksperiode_id, soknad_mottatt)
+        VALUES ('${vedtaksperiode_id}', now());
+        INSERT INTO selve_varsel(unik_id, kode, vedtaksperiode_id, opprettet, generasjon_ref)
+        VALUES (gen_random_uuid(), 'EN_KODE', '${vedtaksperiode_id}', now(), ${sequence_number});
+        INSERT INTO saksbehandleroppgavetype(id, type, vedtak_ref, inntektskilde)
+        VALUES (${sequence_number}, 'SØKNAD', ${sequence_number}, 'EN_ARBEIDSGIVER');
+        INSERT INTO vedtaksperiode_utbetaling_id(vedtaksperiode_id, utbetaling_id)
+        VALUES ('${vedtaksperiode_id}', '${utbetaling_id}');
+        INSERT INTO egen_ansatt(person_ref, er_egen_ansatt, opprettet)
+        VALUES (${sequence_number}, false, now());
+        INSERT INTO vergemal(person_ref, har_vergemal, har_fremtidsfullmakter, har_fullmakter, vergemål_oppdatert, fullmakt_oppdatert)
+        VALUES (${sequence_number}, false, false, false, now(), now());
+        INSERT INTO gosysoppgaver(person_ref, antall, oppslag_feilet, opprettet)
+        VALUES (${sequence_number}, 0, false, now());
+        INSERT INTO risikovurdering_2021(id, vedtaksperiode_id, kan_godkjennes_automatisk, data, opprettet)
+        VALUES (${sequence_number}, '${vedtaksperiode_id}', false, '{}'::json, now());
+        INSERT INTO unnta_fra_automatisk_godkjenning
+        VALUES (${fødselsnummer}, false, array[]::varchar[], now());
+        INSERT INTO stans_automatisering
+        VALUES (${sequence_number},${fødselsnummer}, 'STOPP_AUTOMATIKK', array[]::varchar[], now(), 'ISYFO', '{}');
+        INSERT INTO automatisering(vedtaksperiode_ref, hendelse_ref, automatisert, stikkprøve, opprettet, utbetaling_id)
+        VALUES (${sequence_number}, '${hendelse_id}', false, false, now(), '${utbetaling_id}');
+        INSERT INTO automatisering_problem(id, vedtaksperiode_ref, hendelse_ref, problem)
+        VALUES (${sequence_number}, ${sequence_number}, '${hendelse_id}', 'PROBLEM');
+        INSERT INTO oppgave(id, opprettet, oppdatert, status, vedtak_ref, ferdigstilt_av, ferdigstilt_av_oid,
+                            hendelse_id_godkjenningsbehov, utbetaling_id, kan_avvises)
+        VALUES (${sequence_number}, now(), now(), 'AvventerSystem', ${sequence_number}, null, null, '${hendelse_id}', '${utbetaling_id}', true);
+        
+        INSERT INTO tildeling(saksbehandler_ref, oppgave_id_ref)
+        VALUES ('${saksbehandler_oid}', ${sequence_number});
+        INSERT INTO reserver_person(saksbehandler_ref, person_ref, gyldig_til)
+        VALUES ('${saksbehandler_oid}', ${sequence_number}, now());
+        
+        INSERT INTO opptegnelse(person_id, sekvensnummer, payload, type)
+        VALUES (${sequence_number}, 1, '{}'::json, 'TESTTYPE');
+        INSERT INTO abonnement_for_opptegnelse(saksbehandler_id, person_id)
+        VALUES ('${saksbehandler_oid}', ${sequence_number});
+        INSERT INTO saksbehandler_opptegnelse_sekvensnummer (saksbehandler_id, siste_sekvensnummer)
+        VALUES ('${saksbehandler_oid}', 1);
+        INSERT INTO dokumenter(dokument_id, person_ref, dokument, opprettet)
+        VALUES (gen_random_uuid(), ${sequence_number}, '{}'::json, now());
+        
+        INSERT INTO dialog(id, opprettet)
+        VALUES (${sequence_number}, now());
+        INSERT INTO notat(id, tekst, opprettet, saksbehandler_oid, vedtaksperiode_id, feilregistrert, feilregistrert_tidspunkt, dialog_ref)
+        VALUES (${sequence_number}, 'TEST_TEXT', now(), '${saksbehandler_oid}', '${vedtaksperiode_id}', false, now(), ${sequence_number});
+        INSERT INTO kommentarer(tekst, feilregistrert_tidspunkt, saksbehandlerident, dialog_ref)
+        VALUES ('EN_KOMMENTAR', null, '${saksbehandler_oid}', ${sequence_number});
+        
+        INSERT INTO overstyring(id, tidspunkt, person_ref, hendelse_ref, saksbehandler_ref, vedtaksperiode_id)
+        VALUES (${sequence_number}, now(), ${sequence_number}, '${hendelse_id}',
+                '${saksbehandler_oid}', '${vedtaksperiode_id}');
+        INSERT INTO overstyring_tidslinje(id, overstyring_ref, arbeidsgiver_ref, begrunnelse)
+        VALUES (${sequence_number}, ${sequence_number}, ${sequence_number},'BEGRUNNELSE');
+        INSERT INTO overstyring_tilkommen_inntekt(id, overstyring_ref, json)
+        VALUES (${sequence_number}, ${sequence_number}, '{}');
+        INSERT INTO overstyring_dag(id, dato, dagtype, grad, overstyring_tidslinje_ref)
+        VALUES (${sequence_number}, '2018-01-01', 'TESTDAGTYPE', 100, ${sequence_number});
+        INSERT INTO overstyring_inntekt(id, overstyring_ref, manedlig_inntekt, skjaeringstidspunkt, forklaring, begrunnelse, arbeidsgiver_ref, fom, tom)
+        VALUES (${sequence_number}, ${sequence_number}, 1000, '2018-01-01', 'FORKLARING', 'BEGRUNNELSE', ${sequence_number}, '2018-01-01', null);
+        INSERT INTO overstyring_arbeidsforhold(id, overstyring_ref, forklaring, deaktivert, skjaeringstidspunkt, begrunnelse, arbeidsgiver_ref)
+        VALUES (${sequence_number}, ${sequence_number}, 'FORKLARING', false, '2018-01-01', 'BEGRUNNELSE', ${sequence_number});
+        INSERT INTO overstyring_minimum_sykdomsgrad(id, overstyring_ref, fom, tom, vurdering, begrunnelse)
+        VALUES (${sequence_number}, ${sequence_number}, '2018-01-01', '2018-01-31', true, 'En begrunnelse');
+        INSERT INTO overstyring_minimum_sykdomsgrad_periode(id, fom, tom, vurdering, overstyring_minimum_sykdomsgrad_ref)
+        VALUES (${sequence_number}, '2018-01-01', '2018-01-31', true, ${sequence_number});
+        INSERT INTO overstyring_minimum_sykdomsgrad_arbeidsgiver(id, berort_vedtaksperiode_id, arbeidsgiver_ref, overstyring_minimum_sykdomsgrad_ref)
+        VALUES (${sequence_number}, '${vedtaksperiode_id}', ${sequence_number}, ${sequence_number});
+        
+        INSERT INTO begrunnelse(id, tekst, type, saksbehandler_ref) VALUES(${sequence_number}, 'Begrunnelsefritekst', 'SKJØNNSFASTSATT_SYKEPENGEGRUNNLAG_FRITEKST', '${saksbehandler_oid}');
+        INSERT INTO begrunnelse(id, tekst, type, saksbehandler_ref) VALUES(${sequence_number} + 1000, 'En begrunnelsemal', 'SKJØNNSFASTSATT_SYKEPENGEGRUNNLAG_MAL', '${saksbehandler_oid}');
+        INSERT INTO begrunnelse(id, tekst, type, saksbehandler_ref) VALUES(${sequence_number} + 2000, 'En begrunnelsekonklusjon', 'SKJØNNSFASTSATT_SYKEPENGEGRUNNLAG_KONKLUSJON', '${saksbehandler_oid}');
+        INSERT INTO generasjon_begrunnelse_kobling(generasjon_id, begrunnelse_id) VALUES ('${generasjon_id}', ${sequence_number});
+        INSERT INTO skjonnsfastsetting_sykepengegrunnlag(id, skjaeringstidspunkt, arsak, overstyring_ref, begrunnelse_fritekst_ref, begrunnelse_mal_ref, begrunnelse_konklusjon_ref)
+        VALUES (${sequence_number}, '2018-01-01', 'ÅRSAK', ${sequence_number}, ${sequence_number}, ${sequence_number} + 1000, ${sequence_number} + 2000);
+        INSERT INTO skjonnsfastsetting_sykepengegrunnlag_arbeidsgiver(id, arlig, fra_arlig, arbeidsgiver_ref, skjonnsfastsetting_sykepengegrunnlag_ref)
+        VALUES (${sequence_number}, 1000, 1200, ${sequence_number}, ${sequence_number});
+        INSERT INTO overstyringer_for_vedtaksperioder(vedtaksperiode_id, overstyring_ref)
+        VALUES ('${vedtaksperiode_id}', ${sequence_number});
+        
+        INSERT INTO annullert_av_saksbehandler(id, annullert_tidspunkt, saksbehandler_ref)
+        VALUES (${sequence_number}, now(), '${saksbehandler_oid}');
+        INSERT INTO oppdrag(id, fagsystem_id, mottaker)
+        VALUES (${sequence_number}, 'EN_PERSON_FAGSYSTEMID', 'MOTTAKER');
+        INSERT INTO oppdrag(id, fagsystem_id, mottaker)
+        VALUES (${sequence_number} + 1000, 'EN_ARBEIDSGIVER_FAGSYSTEMID', 'MOTTAKER');
+        INSERT INTO utbetalingslinje(id, oppdrag_id, fom, tom, totalbeløp)
+        VALUES (${sequence_number}, ${sequence_number}, '2018-01-01', '2018-01-31', 1000);
+        INSERT INTO utbetalingslinje(id, oppdrag_id, fom, tom, totalbeløp)
+        VALUES (${sequence_number} + 1000, ${sequence_number} + 1000, '2018-01-01', '2018-01-31', 1000);
+        INSERT INTO utbetaling_id(id, utbetaling_id, person_ref, arbeidsgiver_ref, arbeidsgiver_fagsystem_id_ref,
+                                  person_fagsystem_id_ref, type, opprettet, personbeløp, arbeidsgiverbeløp)
+        VALUES (${sequence_number}, '${utbetaling_id}', ${sequence_number}, ${sequence_number}, ${sequence_number} + 1000,
+                ${sequence_number}, 'UTBETALING', now(), 0, 0);
+        
+        INSERT INTO utbetaling(id, status, opprettet, data, utbetaling_id_ref, annullert_av_saksbehandler_ref)
+        VALUES (${sequence_number}, 'UTBETALT', now(), '{}'::json, ${sequence_number}, ${sequence_number});
+        
+        INSERT INTO totrinnsvurdering(id, vedtaksperiode_id, er_retur, saksbehandler, beslutter, utbetaling_id_ref, opprettet, oppdatert)
+        VALUES (${sequence_number}, '${vedtaksperiode_id}', false, '${saksbehandler_oid}', '${saksbehandler_oid}', ${sequence_number}, now(), null);
+        
+        INSERT INTO dialog(id, opprettet)
+        VALUES (${periodehistorikk_dialog_id}, now());
+        INSERT INTO pa_vent(id, vedtaksperiode_id, saksbehandler_ref, frist, opprettet, dialog_ref)
+        VALUES (${sequence_number}, '${vedtaksperiode_id}', '${saksbehandler_oid}', now(), now(), ${periodehistorikk_dialog_id});
+        INSERT INTO periodehistorikk(id, type, timestamp, generasjon_id, saksbehandler_oid, dialog_ref)
+        VALUES (${sequence_number}, 'TOTRINNSVURDERING_RETUR', now(), '${generasjon_id}', '${saksbehandler_oid}',
+                ${periodehistorikk_dialog_id});
+        
+        INSERT INTO oppgave_behandling_kobling(oppgave_id, behandling_id)
+        VALUES (${sequence_number}, gen_random_uuid());
+        
+        INSERT INTO sammenligningsgrunnlag(id, fødselsnummer, skjæringstidspunkt, opprettet, sammenligningsgrunnlag)
+        VALUES (${sequence_number}, ${fødselsnummer}, '2018-01-01', now(), '{}'::json);
+        
+        INSERT INTO avviksvurdering(id, unik_id, fødselsnummer, skjæringstidspunkt, opprettet, avviksprosent, beregningsgrunnlag, sammenligningsgrunnlag_ref)
+        VALUES (${sequence_number}, '${avviksvurdering_unik_id}', ${fødselsnummer}, '2018-01-01', now(), 25.0, '{}'::json, ${sequence_number});
+        
+        INSERT INTO vilkarsgrunnlag_per_avviksvurdering(avviksvurdering_ref, vilkårsgrunnlag_id)
+        VALUES ('${avviksvurdering_unik_id}', gen_random_uuid());
+        
+        INSERT INTO begrunnelse(id, tekst, type, saksbehandler_ref) VALUES(${sequence_number} + 420, 'avslagtekst', 'AVSLAG', '${saksbehandler_oid}');
+        INSERT INTO vedtak_begrunnelse(vedtaksperiode_id, begrunnelse_ref, generasjon_ref) VALUES ('${vedtaksperiode_id}', ${sequence_number} + 420, ${sequence_number})
+        """.trimIndent()
+        sessionOf(dataSource).use { session ->
+            session.update(queryOf(sql))
+        }
     }
 
     protected fun assertTabellinnhold(

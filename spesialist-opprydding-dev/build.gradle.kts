@@ -10,9 +10,9 @@ dependencies {
 
     testImplementation(project(":spesialist-db-migrations"))
 
-    testImplementation(libs.testcontainers.postgres)
     testImplementation(libs.tbdLibs.rapidsAndRiversTest)
-    testImplementation(libs.bundles.flyway.postgres)
+
+    testImplementation(testFixtures(project(":spesialist-db")))
 }
 
 tasks {
