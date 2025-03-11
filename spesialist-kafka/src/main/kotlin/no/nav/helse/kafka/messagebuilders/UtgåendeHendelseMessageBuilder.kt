@@ -5,6 +5,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import no.nav.helse.modell.melding.AnnullertUtbetalingEvent
 import no.nav.helse.modell.melding.Godkjenningsbehovløsning
 import no.nav.helse.modell.melding.HentDokument
+import no.nav.helse.modell.melding.InntektsendringerEvent
 import no.nav.helse.modell.melding.KlargjørPersonForVisning
 import no.nav.helse.modell.melding.LagtPåVentEvent
 import no.nav.helse.modell.melding.MinimumSykdomsgradVurdertEvent
@@ -66,6 +67,7 @@ internal fun UtgåendeHendelse.eventName() =
         is OverstyrtTidslinjeEvent -> "overstyr_tidslinje"
         is SkjønnsfastsattSykepengegrunnlagEvent -> "skjønnsmessig_fastsettelse"
         is VarselEndret -> "varsel_endret"
+        is InntektsendringerEvent -> "inntektsendringer"
     }
 
 private fun UtgåendeHendelse.detaljer(): Map<String, Any> {
@@ -90,6 +92,7 @@ private fun UtgåendeHendelse.detaljer(): Map<String, Any> {
         is OverstyrtTidslinjeEvent -> this.detaljer()
         is SkjønnsfastsattSykepengegrunnlagEvent -> this.detaljer()
         is VarselEndret -> this.detaljer()
+        is InntektsendringerEvent -> this.detaljer()
     }
 }
 
@@ -402,3 +405,31 @@ private fun VarselEndret.detaljer(): Map<String, Any> =
         "forrige_status" to forrigeStatus,
         "gjeldende_status" to gjeldendeStatus,
     )
+
+private fun InntektsendringerEvent.detaljer(): Map<String, Any> {
+    return buildMap {
+        put(
+            "inntektskilder",
+            this@detaljer.inntektskildeendringer.map { inntektskildeendring ->
+                mapOf(
+                    "inntektskilde" to inntektskildeendring.organisasjonsnummer,
+                    "inntekter" to
+                        inntektskildeendring.nyeEllerEndredeInntekter.map { nyEllerEndretInntekt ->
+                            mapOf(
+                                "fom" to nyEllerEndretInntekt.fom,
+                                "tom" to nyEllerEndretInntekt.tom,
+                                "periodebeløp" to nyEllerEndretInntekt.periodebeløp,
+                            )
+                        },
+                    "nullstill" to
+                        inntektskildeendring.fjernedeInntekter.map { fjernetInntekt ->
+                            mapOf(
+                                "fom" to fjernetInntekt.fom,
+                                "tom" to fjernetInntekt.tom,
+                            )
+                        },
+                )
+            },
+        )
+    }
+}

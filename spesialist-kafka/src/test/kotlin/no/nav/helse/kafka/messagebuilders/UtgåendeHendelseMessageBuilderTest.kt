@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.melding.Godkjenningsbehovløsning
+import no.nav.helse.modell.melding.InntektsendringerEvent
 import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.melding.VedtaksperiodeAvvistAutomatisk
 import no.nav.helse.modell.melding.VedtaksperiodeAvvistManuelt
@@ -14,9 +15,12 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.kafka.objectMapper
 import no.nav.helse.spesialist.test.lagEpostadresseFraFulltNavn
 import no.nav.helse.spesialist.test.lagFødselsnummer
+import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.test.lagSaksbehandlerident
 import no.nav.helse.spesialist.test.lagSaksbehandlernavn
 import no.nav.helse.spesialist.test.lagTilfeldigSaksbehandlerepost
+import no.nav.helse.util.februar
+import no.nav.helse.util.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -294,6 +298,79 @@ class UtgåendeHendelseMessageBuilderTest {
                 "årsak" to "En årsak",
                 "begrunnelser" to listOf("En begrunnelse"),
                 "kommentar" to "En kommentar",
+            )
+        )
+    }
+
+    @Test
+    fun `Inntektsendringer-hendelse`() {
+        val arbeidsgiver1 = lagOrganisasjonsnummer()
+        val arbeidsgiver2 = lagOrganisasjonsnummer()
+        val hendelse = InntektsendringerEvent(
+            inntektskildeendringer = listOf(
+                InntektsendringerEvent.Inntektskildeendring(
+                    organisasjonsnummer = arbeidsgiver1,
+                    nyeEllerEndredeInntekter = listOf(
+                        InntektsendringerEvent.Inntektskildeendring.PeriodeMedBeløp(1.januar, 31.januar, 10000.0),
+                        InntektsendringerEvent.Inntektskildeendring.PeriodeMedBeløp(1.februar, 28.februar, 20000.0)
+                    ),
+                    fjernedeInntekter = emptyList()
+                ),
+                InntektsendringerEvent.Inntektskildeendring(
+                    organisasjonsnummer = arbeidsgiver2,
+                    nyeEllerEndredeInntekter = listOf(
+                        InntektsendringerEvent.Inntektskildeendring.PeriodeMedBeløp(1.januar, 31.januar, 15000.0),
+                    ),
+                    fjernedeInntekter = listOf(
+                        InntektsendringerEvent.Inntektskildeendring.PeriodeUtenBeløp(1.januar, 31.januar),
+                        InntektsendringerEvent.Inntektskildeendring.PeriodeUtenBeløp(1.februar, 28.februar),
+                    )
+                ),
+            ),
+        )
+
+        hendelse.somJson().assertHendelse(
+            eventName = "inntektsendringer",
+            payload = mapOf(
+                "fødselsnummer" to fødselsnummer,
+                "inntektskilder" to listOf(
+                    mapOf(
+                        "inntektskilde" to arbeidsgiver1,
+                        "inntekter" to listOf(
+                            mapOf(
+                                "fom" to "2018-01-01",
+                                "tom" to "2018-01-31",
+                                "periodebeløp" to 10000.0
+                            ),
+                            mapOf(
+                                "fom" to "2018-02-01",
+                                "tom" to "2018-02-28",
+                                "periodebeløp" to 20000.0
+                            ),
+                        ),
+                        "nullstill" to emptyList<Map<String, Any>>()
+                    ),
+                    mapOf(
+                        "inntektskilde" to arbeidsgiver2,
+                        "inntekter" to listOf(
+                            mapOf(
+                                "fom" to "2018-01-01",
+                                "tom" to "2018-01-31",
+                                "periodebeløp" to 15000.0
+                            ),
+                        ),
+                        "nullstill" to listOf(
+                            mapOf(
+                                "fom" to "2018-01-01",
+                                "tom" to "2018-01-31",
+                            ),
+                            mapOf(
+                                "fom" to "2018-02-01",
+                                "tom" to "2018-02-28",
+                            ),
+                        )
+                    ),
+                )
             )
         )
     }
