@@ -5,13 +5,14 @@ import org.testcontainers.containers.PostgreSQLContainer
 
 object TestDatabase {
     private val postgres =
-        PostgreSQLContainer<Nothing>("postgres:14").apply {
-            withReuse(true)
-            withLabel("app-navn", "spesialist-localapp")
-            start()
-
-            println("Database localapp: jdbc:postgresql://localhost:$firstMappedPort/test startet opp, credentials: test og test")
-        }
+        PostgreSQLContainer("postgres:14")
+            .withReuse(true)
+            .withLabel("app", "spesialist")
+            .withLabel("code-location", javaClass.canonicalName)
+            .apply {
+                start()
+                println("Database startet opp.\nUrl: $jdbcUrl\nBrukernavn: $username\nPassord: $password")
+            }
 
     val dbModuleConfiguration =
         DBModule.Configuration(
