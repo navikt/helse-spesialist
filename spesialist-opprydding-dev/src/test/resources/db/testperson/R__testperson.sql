@@ -89,6 +89,8 @@ VALUES (${sequence_number}, now(), ${sequence_number}, '${hendelse_id}',
         '${saksbehandler_oid}', '${vedtaksperiode_id}');
 INSERT INTO overstyring_tidslinje(id, overstyring_ref, arbeidsgiver_ref, begrunnelse)
 VALUES (${sequence_number}, ${sequence_number}, ${sequence_number},'BEGRUNNELSE');
+INSERT INTO overstyring_tilkommen_inntekt(id, overstyring_ref, json)
+VALUES (${sequence_number}, ${sequence_number}, '{}');
 INSERT INTO overstyring_dag(id, dato, dagtype, grad, overstyring_tidslinje_ref)
 VALUES (${sequence_number}, '2018-01-01', 'TESTDAGTYPE', 100, ${sequence_number});
 INSERT INTO overstyring_inntekt(id, overstyring_ref, manedlig_inntekt, skjaeringstidspunkt, forklaring, begrunnelse, arbeidsgiver_ref, fom, tom)
