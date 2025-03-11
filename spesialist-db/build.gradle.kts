@@ -1,3 +1,7 @@
+plugins {
+    `java-test-fixtures`
+}
+
 dependencies {
     api(project(":spesialist-db-migrations"))
     api(project(":spesialist-application"))
@@ -11,4 +15,5 @@ dependencies {
     implementation(libs.micrometer.prometheus)
 
     testImplementation(libs.testcontainers.postgres)
+    testFixturesImplementation(libs.testcontainers.postgres)
 }

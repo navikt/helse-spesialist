@@ -21,6 +21,7 @@ import no.nav.helse.spesialist.api.bootstrap.Gruppe
 import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
 import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.application.Snapshothenter
+import no.nav.helse.spesialist.db.testfixtures.TestDatabase
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
