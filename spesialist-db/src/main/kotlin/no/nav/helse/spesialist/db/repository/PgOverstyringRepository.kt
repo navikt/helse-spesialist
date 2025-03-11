@@ -7,6 +7,7 @@ import no.nav.helse.modell.saksbehandler.handlinger.Arbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgrad
 import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgradArbeidsgiver
 import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgradPeriode
+import no.nav.helse.modell.saksbehandler.handlinger.OverstyrTilkommenInntekt
 import no.nav.helse.modell.saksbehandler.handlinger.Overstyring
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyringId
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtArbeidsforhold
@@ -23,6 +24,7 @@ import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.db.objectMapper
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
+import java.time.LocalDate
 import java.util.UUID
 
 class PgOverstyringRepository(
@@ -43,6 +45,7 @@ class PgOverstyringRepository(
                         is OverstyrtArbeidsforhold -> insertArbeidsforholdOverstyring(overstyring, totrinnsvurderingId)
                         is MinimumSykdomsgrad -> insertMinimumSykdomsgradOverstyring(overstyring, totrinnsvurderingId)
                         is SkjønnsfastsattSykepengegrunnlag -> insertSkjønnsfastsattSykepengegrunnlag(overstyring, totrinnsvurderingId)
+                        is OverstyrTilkommenInntekt -> insertTilkommenInntekt(overstyring, totrinnsvurderingId)
                     }
                 overstyring.tildelId(OverstyringId(id))
             }
@@ -57,7 +60,8 @@ class PgOverstyringRepository(
             finnInntektOgRefusjonOverstyringer(fødselsnummer, totrinnsvurderingId) +
             finnArbeidsforholdOverstyringer(fødselsnummer, totrinnsvurderingId) +
             finnMinimumSykdomsgradsOverstyringer(fødselsnummer, totrinnsvurderingId) +
-            finnSkjønnsfastsattSykepengegrunnlag(fødselsnummer, totrinnsvurderingId)
+            finnSkjønnsfastsattSykepengegrunnlag(fødselsnummer, totrinnsvurderingId) +
+            finnTilkommenInntekt(fødselsnummer, totrinnsvurderingId)
 
     @Deprecated("Ny totrinnsløype bruker totrinnsvurderingId til å finne overstyringer")
     override fun finnAktive(fødselsnummer: String): List<Overstyring> =
@@ -65,7 +69,8 @@ class PgOverstyringRepository(
             finnInntektOgRefusjonOverstyringer(fødselsnummer) +
             finnArbeidsforholdOverstyringer(fødselsnummer) +
             finnMinimumSykdomsgradsOverstyringer(fødselsnummer) +
-            finnSkjønnsfastsattSykepengegrunnlag(fødselsnummer)
+            finnSkjønnsfastsattSykepengegrunnlag(fødselsnummer) +
+            finnTilkommenInntekt(fødselsnummer)
 
     private fun insertOverstyring(
         overstyring: Overstyring,
@@ -301,6 +306,48 @@ class PgOverstyringRepository(
                 "skjoennsfastsettingSykepengegrunnlagRef" to skjønnsfastsettingSykepengegrunnlagId,
             ).update()
         }
+
+        return overstyringRef
+    }
+
+    private fun insertTilkommenInntekt(
+        tilkommenInntekt: OverstyrTilkommenInntekt,
+        totrinnsvurderingId: TotrinnsvurderingId?,
+    ): Long {
+        val overstyringRef = insertOverstyring(tilkommenInntekt, totrinnsvurderingId)
+
+        val dbTilkommenInntekt =
+            DbTilkommenInntekt(
+                nyeEllerEndredeInntekter =
+                    tilkommenInntekt.nyEllerEndredeInntekter.map { nyEllerEndret ->
+                        DbTilkommenInntekt.DbNyEllerEndretInntekt(
+                            organisasjonsnummer = nyEllerEndret.organisasjonsnummer,
+                            perioder =
+                                nyEllerEndret.perioder.map {
+                                    DbTilkommenInntekt.DbNyEllerEndretInntekt.DbPeriodeMedBeløp(it.fom, it.tom, it.periodeBeløp)
+                                },
+                        )
+                    },
+                fjernedeInntekter =
+                    tilkommenInntekt.fjernedeInntekter.map { fjernet ->
+                        DbTilkommenInntekt.DbFjernetInntekt(
+                            organisasjonsnummer = fjernet.organisasjonsnummer,
+                            perioder =
+                                fjernet.perioder.map {
+                                    DbTilkommenInntekt.DbFjernetInntekt.DbPeriodeUtenBeløp(it.fom, it.tom)
+                                },
+                        )
+                    },
+            )
+
+        asSQL(
+            """
+                INSERT INTO overstyring_tilkommen_inntekt (overstyring_ref, json)
+                VALUES (:overstyring_ref, :json::jsonb)
+            """,
+            "overstyring_ref" to overstyringRef,
+            "json" to objectMapper.writeValueAsString(dbTilkommenInntekt),
+        ).update()
 
         return overstyringRef
     }
@@ -610,6 +657,51 @@ class PgOverstyringRepository(
             "fodselsnummer" to fødselsnummer,
         ).list { it.toSkjønnsfastsattSykepengegrunnlag() }
 
+    private fun finnTilkommenInntekt(
+        fødselsnummer: String,
+        totrinnsvurderingId: TotrinnsvurderingId,
+    ): List<OverstyrTilkommenInntekt> =
+        asSQL(
+            """
+            SELECT o.id,
+                   o.ekstern_hendelse_id,
+                   p.fødselsnummer,
+                   p.aktør_id,
+                   o.tidspunkt,
+                   o.vedtaksperiode_id,
+                   o.saksbehandler_ref,
+                   o.ferdigstilt,
+                   oti.json
+            FROM overstyring o
+                     INNER JOIN overstyring_tilkommen_inntekt oti ON o.id = oti.overstyring_ref
+                     INNER JOIN person p ON p.id = o.person_ref
+            WHERE p.fødselsnummer = :fodselsnummer and o.totrinnsvurdering_ref = :totrinnsvurderingId and o.ferdigstilt = false
+            """,
+            "fodselsnummer" to fødselsnummer,
+            "totrinnsvurderingId" to totrinnsvurderingId.value,
+        ).list { it.toTilkommenInntekt() }
+
+    @Deprecated("Ny totrinnsløype bruker totrinnsvurderingId til å finne overstyringer")
+    private fun finnTilkommenInntekt(fødselsnummer: String): List<OverstyrTilkommenInntekt> =
+        asSQL(
+            """
+            SELECT o.id,
+                   o.ekstern_hendelse_id,
+                   p.fødselsnummer,
+                   p.aktør_id,
+                   o.tidspunkt,
+                   o.vedtaksperiode_id,
+                   o.saksbehandler_ref,
+                   o.ferdigstilt,
+                   oti.json
+            FROM overstyring o
+                     INNER JOIN overstyring_tilkommen_inntekt oti ON o.id = oti.overstyring_ref
+                     INNER JOIN person p ON p.id = o.person_ref
+            WHERE p.fødselsnummer = :fodselsnummer and o.ferdigstilt = false
+            """,
+            "fodselsnummer" to fødselsnummer,
+        ).list { it.toTilkommenInntekt() }
+
     private fun finnSkjønnsfastsattArbeidsgiver(overstyringRow: Row): List<SkjønnsfastsattArbeidsgiver> =
         asSQL(
             """
@@ -778,6 +870,46 @@ class PgOverstyringRepository(
         )
     }
 
+    private fun Row.toTilkommenInntekt(): OverstyrTilkommenInntekt {
+        val dbTilkommenInntekt = objectMapper.readValue<DbTilkommenInntekt>(this.string("json"))
+        val id = OverstyringId(long("id"))
+        return OverstyrTilkommenInntekt.fraLagring(
+            id = id,
+            eksternHendelseId = uuid("ekstern_hendelse_id"),
+            fødselsnummer = string("fødselsnummer"),
+            aktørId = string("aktør_id"),
+            opprettet = localDateTime("tidspunkt"),
+            vedtaksperiodeId = uuid("vedtaksperiode_id"),
+            saksbehandlerOid = SaksbehandlerOid(uuid("saksbehandler_ref")),
+            ferdigstilt = boolean("ferdigstilt"),
+            nyeEllerEndredeInntekter =
+                dbTilkommenInntekt.nyeEllerEndredeInntekter.map { nyEllerEndret ->
+                    OverstyrTilkommenInntekt.NyEllerEndretInntekt(
+                        organisasjonsnummer = nyEllerEndret.organisasjonsnummer,
+                        perioder =
+                            nyEllerEndret.perioder.map {
+                                OverstyrTilkommenInntekt.NyEllerEndretInntekt.PeriodeMedBeløp(
+                                    fom = it.fom,
+                                    tom = it.tom,
+                                    periodeBeløp = it.periodeBeløp,
+                                )
+                            },
+                    )
+                },
+            fjernedeInntekter =
+                dbTilkommenInntekt.fjernedeInntekter.map { fjernet ->
+                    OverstyrTilkommenInntekt.FjernetInntekt(
+                        organisasjonsnummer = fjernet.organisasjonsnummer,
+                        perioder =
+                            fjernet.perioder.map {
+                                OverstyrTilkommenInntekt.FjernetInntekt.PeriodeUtenBeløp(fom = it.fom, tom = it.tom)
+                            },
+                    )
+                },
+            kobledeVedtaksperioder = finnKobledeVedtaksperioderForOverstyring(id),
+        )
+    }
+
     private fun Row.toSkjønnsfastsattArbeidsgiver(overstyringRow: Row): SkjønnsfastsattArbeidsgiver =
         SkjønnsfastsattArbeidsgiver(
             organisasjonsnummer = string("organisasjonsnummer"),
@@ -841,4 +973,17 @@ class PgOverstyringRepository(
             fraGrad = intOrNull("fra_grad"),
             lovhjemmel = null,
         )
+
+    private class DbTilkommenInntekt(
+        val nyeEllerEndredeInntekter: List<DbNyEllerEndretInntekt>,
+        val fjernedeInntekter: List<DbFjernetInntekt>,
+    ) {
+        data class DbNyEllerEndretInntekt(val organisasjonsnummer: String, val perioder: List<DbPeriodeMedBeløp>) {
+            data class DbPeriodeMedBeløp(val fom: LocalDate, val tom: LocalDate, val periodeBeløp: Double)
+        }
+
+        data class DbFjernetInntekt(val organisasjonsnummer: String, val perioder: List<DbPeriodeUtenBeløp>) {
+            data class DbPeriodeUtenBeløp(val fom: LocalDate, val tom: LocalDate)
+        }
+    }
 }
