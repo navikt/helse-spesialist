@@ -3,8 +3,6 @@ package no.nav.helse.spesialist.db
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.zaxxer.hikari.HikariConfig
-import com.zaxxer.hikari.HikariDataSource
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.modell.InntektskildetypeDto
@@ -26,6 +24,7 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.spesialist.api.overstyring.Dagtype
+import no.nav.helse.spesialist.db.bootstrap.DBModule
 import no.nav.helse.spesialist.db.dao.PgMeldingDuplikatkontrollDao
 import no.nav.helse.spesialist.db.dao.PgPersonDao
 import no.nav.helse.spesialist.db.dao.api.PgAbonnementApiDao
@@ -36,14 +35,13 @@ import no.nav.helse.spesialist.db.dao.api.PgPeriodehistorikkApiDao
 import no.nav.helse.spesialist.db.dao.api.PgPersonApiDao
 import no.nav.helse.spesialist.db.dao.api.PgRisikovurderingApiDao
 import no.nav.helse.spesialist.db.dao.api.PgVarselApiRepository
+import no.nav.helse.spesialist.db.testfixtures.TestDatabase
 import no.nav.helse.spesialist.domain.Dialog
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 import no.nav.helse.spesialist.typer.Kjønn
-import org.flywaydb.core.Flyway
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.AfterEach
-import org.testcontainers.containers.PostgreSQLContainer
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.Random
@@ -52,8 +50,6 @@ import javax.sql.DataSource
 import kotlin.random.Random.Default.nextLong
 
 abstract class AbstractDBIntegrationTest {
-    protected val dbQuery = DbQuery(dataSource)
-    protected val daos = DBDaos(dataSource)
     private val testperson = TestPerson()
     protected open val HENDELSE_ID: UUID = UUID.randomUUID()
 
@@ -105,33 +101,15 @@ abstract class AbstractDBIntegrationTest {
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
                 .registerModule(JavaTimeModule())
 
-        private val postgres = PostgreSQLContainer<Nothing>("postgres:14").apply {
-            withReuse(true)
-            withLabel("app-navn", "spesialist-db")
-            start()
-            println("Database: jdbc:postgresql://localhost:$firstMappedPort/test startet opp, credentials: test og test")
-        }
-
-        val dataSource =
-            HikariDataSource(HikariConfig().apply {
-                jdbcUrl = postgres.jdbcUrl
-                username = postgres.username
-                password = postgres.password
-                maximumPoolSize = 100
-                connectionTimeout = 1500
-                initializationFailTimeout = 5000
-            })
-
+        protected val dbModule = DBModule(TestDatabase.dbModuleConfiguration)
         init {
-            Flyway.configure()
-                .dataSource(dataSource)
-                .placeholders(mapOf("spesialist_oid" to UUID.randomUUID().toString()))
-                .load()
-                .migrate()
-
-            resetDatabase(dataSource)
+            dbModule.flywayMigrator.migrate()
+            resetDatabase(dbModule.dataSource)
         }
     }
+    protected val dataSource = dbModule.dataSource
+    protected val dbQuery = DbQuery(dataSource)
+    protected val daos = dbModule.daos
 
     protected val session = sessionOf(dataSource, returnGeneratedKey = true)
     private val sessionContext = DBSessionContext(session)
