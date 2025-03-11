@@ -3,3 +3,5 @@ extensions:
   endpoints:
     spesialist-local:
       url: http://0.0.0.0:8080/graphql
+      headers:
+        Authorization: Bearer Legg inn token fra LocalApp her
