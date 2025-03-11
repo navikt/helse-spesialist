@@ -34,9 +34,7 @@ import no.nav.helse.spesialist.api.graphql.settOppGraphQLApi
 import no.nav.helse.spesialist.api.websockets.webSocketsApi
 import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.application.Snapshothenter
-import no.nav.helse.spesialist.db.DBDaos
-import no.nav.helse.spesialist.db.DataSourceBuilder
-import no.nav.helse.spesialist.db.TransactionalSessionFactory
+import no.nav.helse.spesialist.db.bootstrap.DBModule
 import org.slf4j.LoggerFactory
 import java.lang.management.GarbageCollectorMXBean
 import java.lang.management.ManagementFactory
@@ -51,13 +49,13 @@ class SpesialistApp(
     private val reservasjonshenter: Reservasjonshenter,
     private val versjonAvKode: String,
     private val featureToggles: FeatureToggles,
+    dbModuleConfiguration: DBModule.Configuration,
 ) : RapidsConnection.StatusListener {
     private val tilgangskontrollørForReservasjon = TilgangskontrollørForReservasjon(gruppekontroll, tilgangsgrupper)
 
-    private val dataSourceBuilder = DataSourceBuilder(env)
-    private val dataSource = dataSourceBuilder.getDataSource()
-    private val daos = DBDaos(dataSource)
-    private val sessionFactory = TransactionalSessionFactory(dataSource)
+    private val dbModule = DBModule(dbModuleConfiguration)
+    private val daos = dbModule.daos
+    private val sessionFactory = dbModule.sessionFactory
 
     private lateinit var meldingMediator: MeldingMediator
     private lateinit var personhåndterer: Personhåndterer
@@ -194,7 +192,7 @@ class SpesialistApp(
     }
 
     override fun onStartup(rapidsConnection: RapidsConnection) {
-        dataSourceBuilder.migrate()
+        dbModule.flywayMigrator.migrate()
     }
 
     fun konfigurerKtorApp(application: Application) {

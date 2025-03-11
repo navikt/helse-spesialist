@@ -4,8 +4,6 @@ import com.github.navikt.tbd_libs.kafka.Config
 import com.github.navikt.tbd_libs.kafka.ConsumerProducerFactory
 import com.github.navikt.tbd_libs.rapids_and_rivers.KafkaRapid
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
-import com.zaxxer.hikari.HikariConfig
-import com.zaxxer.hikari.HikariDataSource
 import io.ktor.http.ContentType
 import io.ktor.server.application.Application
 import io.ktor.server.response.respond
@@ -27,8 +25,6 @@ import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.ProducerConfig
-import org.flywaydb.core.Flyway
-import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.kafka.ConfluentKafkaContainer
 import org.testcontainers.utility.DockerImageName
 import java.time.Instant.now
@@ -76,14 +72,15 @@ object LocalApp {
 
     private val spesialistApp =
         SpesialistApp(
-            env = EnvironmentImpl(database.envvars + mapOf("LOKAL_UTVIKLING" to "true")),
+            env = EnvironmentImpl(mapOf("LOKAL_UTVIKLING" to "true")),
             gruppekontroll = gruppekontroll,
             snapshothenter = snapshothenter,
             azureConfig = azureConfig,
             tilgangsgrupper = tilgangsgrupper,
             reservasjonshenter = reservasjonshenter,
             versjonAvKode = "versjon_1",
-            featureToggles = object : FeatureToggles {}
+            featureToggles = object : FeatureToggles {},
+            dbModuleConfiguration = TestDatabase.dbModuleConfiguration
         )
 
     private val localModule: Application.() -> Unit  = {
@@ -146,45 +143,6 @@ private val tilgangsgrupper =
 private val gruppekontroll = object : Gruppekontroll {
     override suspend fun erIGrupper(oid: UUID, gruppeIder: List<UUID>) = true
 }
-
-private val database =
-    object {
-        private val postgres =
-            PostgreSQLContainer<Nothing>("postgres:14").apply {
-                withReuse(true)
-                withLabel("app-navn", "spesialist-localapp")
-                start()
-
-                println("Database localapp: jdbc:postgresql://localhost:$firstMappedPort/test startet opp, credentials: test og test")
-            }
-
-        val envvars =
-            mapOf(
-                "DATABASE_HOST" to "localhost",
-                "DATABASE_PORT" to "${postgres.firstMappedPort}",
-                "DATABASE_DATABASE" to "test",
-                "DATABASE_USERNAME" to "test",
-                "DATABASE_PASSWORD" to "test",
-            )
-
-        protected val dataSource =
-            HikariDataSource(HikariConfig().apply {
-                jdbcUrl = postgres.jdbcUrl
-                username = postgres.username
-                password = postgres.password
-                maximumPoolSize = 5
-                connectionTimeout = 500
-                initializationFailTimeout = 5000
-            })
-
-        init {
-            Flyway.configure()
-                .dataSource(dataSource)
-                .placeholders(mapOf("spesialist_oid" to UUID.randomUUID().toString()))
-                .load()
-                .migrate()
-        }
-    }
 
 private fun Route.playground() {
     get("playground") {
