@@ -196,6 +196,8 @@ type BeregnetPeriode implements Periode {
     hendelser: [Hendelse!]!
     historikkinnslag: [Historikkinnslag!]!
     id: UUID!
+    "Andre inntekter, f.eks tilkommen inntekt"
+    inntekter: [Inntekt!]!
     inntektstype: Inntektstype!
     maksdato: LocalDate!
     notater: [Notat!]!
@@ -333,6 +335,12 @@ type Infotrygdutbetaling {
     typetekst: String!
 }
 
+type Inntekt {
+    "En id som identifiserer inntektskilden, f.eks. organisasjonsnummer"
+    inntektskilde: String!
+    periodiserteInntekter: [PeriodisertInntekt!]!
+}
+
 type InntektEndringAarsak {
     aarsak: String!
     bleKjent: LocalDate
@@ -405,7 +413,7 @@ type MinimumSykdomsgradOverstyring implements Overstyring {
 type Mutation {
     annuller(annullering: AnnulleringDataInput!): Boolean!
     endrePaVent(arsaker: [PaVentArsakInput!]!, frist: LocalDate!, notatTekst: String, oppgaveId: String!, tildeling: Boolean!): PaVent
-    fattVedtak(begrunnelse: String, oppgavereferanse: String!, utfall: VedtakUtfall!): Boolean!
+    fattVedtak(begrunnelse: String, oppgavereferanse: String!): Boolean!
     feilregistrerKommentar(id: Int!): Kommentar
     feilregistrerKommentarV2(id: Int!): Kommentar
     feilregistrerNotat(id: Int!): Notat
@@ -423,7 +431,7 @@ type Mutation {
     overstyrDager(overstyring: TidslinjeOverstyringInput!): Boolean!
     overstyrInntektOgRefusjon(overstyring: InntektOgRefusjonOverstyringInput!): Boolean!
     sendIRetur(notatTekst: String!, oppgavereferanse: String!): Boolean!
-    sendTilGodkjenningV2(oppgavereferanse: String!, vedtakBegrunnelse: String, vedtakUtfall: VedtakUtfall!): Boolean!
+    sendTilGodkjenningV2(oppgavereferanse: String!, vedtakBegrunnelse: String): Boolean!
     sendTilInfotrygd(arsak: String!, begrunnelser: [String!]!, kommentar: String, oppgavereferanse: String!): Boolean!
     settVarselstatus(definisjonIdString: String, generasjonIdString: String!, ident: String!, varselkode: String!): VarselDTO
     skjonnsfastsettSykepengegrunnlag(skjonnsfastsettelse: SkjonnsfastsettelseInput!): Boolean!
@@ -562,6 +570,12 @@ type PeriodeHistorikkElementNy implements Historikkinnslag {
 type Periodevilkar {
     alder: Alder!
     sykepengedager: Sykepengedager!
+}
+
+type PeriodisertInntekt {
+    dagligBelop: Float!
+    fom: LocalDate!
+    tom: LocalDate!
 }
 
 type Person {
