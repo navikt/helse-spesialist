@@ -135,3 +135,24 @@ data class LagtPåVentEvent(
     val saksbehandlerOid: UUID,
     val saksbehandlerIdent: String,
 ) : UtgåendeHendelse
+
+data class InntektsendringerEvent(
+    val inntektskildeendringer: List<Inntektskildeendring>,
+) : UtgåendeHendelse {
+    data class Inntektskildeendring(
+        val organisasjonsnummer: String,
+        val nyeEllerEndredeInntekter: List<PeriodeMedBeløp>,
+        val fjernedeInntekter: List<PeriodeUtenBeløp>,
+    ) {
+        data class PeriodeMedBeløp(
+            val fom: LocalDate,
+            val tom: LocalDate,
+            val periodebeløp: Double,
+        )
+
+        data class PeriodeUtenBeløp(
+            val fom: LocalDate,
+            val tom: LocalDate,
+        )
+    }
+}
