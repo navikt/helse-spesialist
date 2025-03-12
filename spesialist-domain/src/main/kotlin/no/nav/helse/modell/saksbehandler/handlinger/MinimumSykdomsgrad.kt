@@ -20,13 +20,13 @@ class MinimumSykdomsgrad private constructor(
     override val aktørId: String,
     override val vedtaksperiodeId: UUID,
     override val opprettet: LocalDateTime,
-    override var ferdigstilt: Boolean,
+    ferdigstilt: Boolean,
     kobledeVedtaksperioder: List<UUID>,
     val perioderVurdertOk: List<MinimumSykdomsgradPeriode>,
     val perioderVurdertIkkeOk: List<MinimumSykdomsgradPeriode>,
     val begrunnelse: String,
     val arbeidsgivere: List<MinimumSykdomsgradArbeidsgiver>,
-) : Overstyring(id) {
+) : Overstyring(id, ferdigstilt) {
     override val kobledeVedtaksperioder = kobledeVedtaksperioder.toMutableList()
 
     override fun utførAv(legacySaksbehandler: LegacySaksbehandler) {

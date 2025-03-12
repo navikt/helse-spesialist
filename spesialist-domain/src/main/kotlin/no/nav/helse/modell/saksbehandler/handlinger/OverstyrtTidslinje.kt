@@ -20,12 +20,12 @@ class OverstyrtTidslinje private constructor(
     override val aktørId: String,
     override val vedtaksperiodeId: UUID,
     override val opprettet: LocalDateTime,
-    override var ferdigstilt: Boolean,
+    ferdigstilt: Boolean,
     kobledeVedtaksperioder: List<UUID>,
     val organisasjonsnummer: String,
     val dager: List<OverstyrtTidslinjedag>,
     val begrunnelse: String,
-) : Overstyring(id) {
+) : Overstyring(id, ferdigstilt) {
     override val kobledeVedtaksperioder = kobledeVedtaksperioder.toMutableList()
 
     override fun utførAv(legacySaksbehandler: LegacySaksbehandler) {

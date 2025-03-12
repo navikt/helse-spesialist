@@ -20,11 +20,11 @@ class SkjønnsfastsattSykepengegrunnlag private constructor(
     override val aktørId: String,
     override val vedtaksperiodeId: UUID,
     override val opprettet: LocalDateTime,
-    override var ferdigstilt: Boolean,
+    ferdigstilt: Boolean,
     kobledeVedtaksperioder: List<UUID>,
     val skjæringstidspunkt: LocalDate,
     val arbeidsgivere: List<SkjønnsfastsattArbeidsgiver>,
-) : Overstyring(id) {
+) : Overstyring(id, ferdigstilt) {
     override val kobledeVedtaksperioder = kobledeVedtaksperioder.toMutableList()
 
     override fun utførAv(legacySaksbehandler: LegacySaksbehandler) {

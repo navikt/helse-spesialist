@@ -15,11 +15,11 @@ class OverstyrTilkommenInntekt private constructor(
     override val aktørId: String,
     override val vedtaksperiodeId: UUID,
     override val opprettet: LocalDateTime,
-    override var ferdigstilt: Boolean,
+    ferdigstilt: Boolean,
     val nyEllerEndredeInntekter: List<NyEllerEndretInntekt>,
     val fjernedeInntekter: List<FjernetInntekt>,
     kobledeVedtaksperioder: List<UUID>,
-) : Overstyring(id) {
+) : Overstyring(id, ferdigstilt) {
     override val kobledeVedtaksperioder: MutableList<UUID> = kobledeVedtaksperioder.toMutableList()
 
     override fun utførAv(legacySaksbehandler: LegacySaksbehandler) {}
