@@ -430,6 +430,7 @@ type Mutation {
     overstyrArbeidsforhold(overstyring: ArbeidsforholdOverstyringHandlingInput!): Boolean!
     overstyrDager(overstyring: TidslinjeOverstyringInput!): Boolean!
     overstyrInntektOgRefusjon(overstyring: InntektOgRefusjonOverstyringInput!): Boolean!
+    overstyrTilkommenInntekt(overstyring: TilkommenInntektOverstyringInput!): Boolean!
     sendIRetur(notatTekst: String!, oppgavereferanse: String!): Boolean!
     sendTilGodkjenningV2(oppgavereferanse: String!, vedtakBegrunnelse: String): Boolean!
     sendTilInfotrygd(arsak: String!, begrunnelser: [String!]!, kommentar: String, oppgavereferanse: String!): Boolean!
@@ -1397,6 +1398,11 @@ input FiltreringInput {
     tildelt: Boolean
 }
 
+input FjernetInntektInput {
+    organisasjonsnummer: String!
+    perioder: [PeriodeUtenBelopInput!]!
+}
+
 input InntektOgRefusjonOverstyringInput {
     aktorId: String!
     arbeidsgivere: [OverstyringArbeidsgiverInput!]!
@@ -1421,6 +1427,11 @@ input MinimumSykdomsgradInput {
     initierendeVedtaksperiodeId: UUID!
     perioderVurdertIkkeOk: [PeriodeInput!]!
     perioderVurdertOk: [PeriodeInput!]!
+}
+
+input NyEllerEndretInntektInput {
+    organisasjonsnummer: String!
+    perioder: [PeriodeMedBelopInput!]!
 }
 
 input OppgaveegenskapInput {
@@ -1479,6 +1490,16 @@ input PeriodeInput {
     tom: LocalDate!
 }
 
+input PeriodeMedBelopInput {
+    fom: LocalDate!
+    tom: LocalDate!
+}
+
+input PeriodeUtenBelopInput {
+    fom: LocalDate!
+    tom: LocalDate!
+}
+
 input SkjonnsfastsettelseArbeidsgiverInput {
     arlig: Float!
     arsak: String!
@@ -1506,5 +1527,14 @@ input TidslinjeOverstyringInput {
     dager: [OverstyringDagInput!]!
     fodselsnummer: String!
     organisasjonsnummer: String!
+    vedtaksperiodeId: UUID!
+}
+
+input TilkommenInntektOverstyringInput {
+    aktorId: String!
+    begrunnelse: String!
+    fjernet: [FjernetInntektInput!]!
+    fodselsnummer: String!
+    lagtTilEllerEndret: [NyEllerEndretInntektInput!]!
     vedtaksperiodeId: UUID!
 }

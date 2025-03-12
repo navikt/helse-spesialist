@@ -18,6 +18,7 @@ import io.ktor.server.testing.ApplicationTestBuilder
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.helse.FeatureToggles
+import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.VedtakBegrunnelseDao
 import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.behandlingsstatistikk.IBehandlingsstatistikkService
@@ -74,9 +75,11 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
     private val stansAutomatiskBehandlinghåndterer = mockk<StansAutomatiskBehandlinghåndterer>(relaxed = true)
 
     protected val spleisClient = mockk<SpleisClient>(relaxed = true)
-    protected val snapshothenter = SpleisClientSnapshothenter(spleisClient)
+    private val snapshothenter = SpleisClientSnapshothenter(spleisClient)
     private val personinfoDao = daos.personinfoDao
     private val snapshotService = SnapshotService(personinfoDao, snapshothenter)
+    private val meldingPubliserer = mockk<MeldingPubliserer>(relaxed = true)
+    private val featureToggles = object: FeatureToggles {}
 
     private val apiTesting = ApiTesting(
         jwtStub,
@@ -141,7 +144,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                     varsel = VarselMutationHandler(varselRepository = apiVarselRepository),
                     tildeling = TildelingMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
                     opptegnelse = OpptegnelseMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
-                    overstyring = OverstyringMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
+                    overstyring = OverstyringMutationHandler(saksbehandlerMediator = saksbehandlerMediator, mockk(relaxed = true), featureToggles, meldingPubliserer),
                     skjonnsfastsettelse = SkjonnsfastsettelseMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
                     minimumSykdomsgrad = MinimumSykdomsgradMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
                     totrinnsvurdering = TotrinnsvurderingMutationHandler(
@@ -156,7 +159,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                         saksbehandlerMediator = saksbehandlerMediator,
                     ),
                     paVent = PaVentMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
-                    opphevStans = OpphevStansMutationHandler(saksbehandlerMediator = saksbehandlerMediator)
+                    opphevStans = OpphevStansMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
                 ),
             )
 

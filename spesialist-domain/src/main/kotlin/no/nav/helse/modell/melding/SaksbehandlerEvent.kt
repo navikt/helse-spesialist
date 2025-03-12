@@ -144,6 +144,20 @@ data class InntektsendringerEvent(
         val nyeEllerEndredeInntekter: List<PeriodeMedBeløp>,
         val fjernedeInntekter: List<PeriodeUtenBeløp>,
     ) {
+        override fun toString(): String =
+            buildString {
+                append(organisasjonsnummer).append(": \n\t")
+                nyeEllerEndredeInntekter
+                    .takeUnless { it.isEmpty() }
+                    ?.joinTo(this, separator = "\n\t") { it.toString() }
+                    ?.append("\n")
+                if (nyeEllerEndredeInntekter.isNotEmpty() && fjernedeInntekter.isNotEmpty()) append("\n\t")
+                fjernedeInntekter
+                    .takeUnless { it.isEmpty() }
+                    ?.joinTo(this, separator = "\n\t") { it.toString() }
+                    ?.appendLine()
+            }
+
         data class PeriodeMedBeløp(
             val fom: LocalDate,
             val tom: LocalDate,
@@ -155,4 +169,6 @@ data class InntektsendringerEvent(
             val tom: LocalDate,
         )
     }
+
+    override fun toString() = inntektskildeendringer.joinToString(separator = "\n")
 }

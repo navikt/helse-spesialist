@@ -15,6 +15,7 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
 import no.nav.helse.FeatureToggles
+import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.Daos
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.mediator.SaksbehandlerMediator
@@ -67,6 +68,7 @@ fun Application.settOppGraphQLApi(
     snapshothenter: Snapshothenter,
     reservasjonshenter: Reservasjonshenter,
     tilgangsgrupper: Tilgangsgrupper,
+    meldingPubliserer: MeldingPubliserer,
     featureToggles: FeatureToggles,
 ) {
     val spesialistSchema =
@@ -82,6 +84,7 @@ fun Application.settOppGraphQLApi(
             behandlingstatistikk = behandlingstatistikk,
             dokumenthåndterer = dokumenthåndterer,
             godkjenninghåndterer = godkjenninghåndterer,
+            meldingPubliserer = meldingPubliserer,
             featureToggles = featureToggles,
         )
     val graphQLPlugin =
@@ -121,6 +124,7 @@ private fun lagSchemaMedResolversOgHandlers(
     dokumenthåndterer: Dokumenthåndterer,
     godkjenninghåndterer: Godkjenninghåndterer,
     featureToggles: FeatureToggles,
+    meldingPubliserer: MeldingPubliserer,
 ): SpesialistSchema =
     SpesialistSchema(
         queryHandlers =
@@ -178,7 +182,13 @@ private fun lagSchemaMedResolversOgHandlers(
                 varsel = VarselMutationHandler(varselRepository = daos.varselApiRepository),
                 tildeling = TildelingMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
                 opptegnelse = OpptegnelseMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
-                overstyring = OverstyringMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
+                overstyring =
+                    OverstyringMutationHandler(
+                        saksbehandlerMediator = saksbehandlerMediator,
+                        sessionFactory,
+                        featureToggles,
+                        meldingPubliserer,
+                    ),
                 skjonnsfastsettelse = SkjonnsfastsettelseMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
                 minimumSykdomsgrad = MinimumSykdomsgradMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
                 totrinnsvurdering =

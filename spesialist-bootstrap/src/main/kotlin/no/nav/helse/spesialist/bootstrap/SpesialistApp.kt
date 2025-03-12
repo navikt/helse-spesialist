@@ -5,6 +5,7 @@ import io.ktor.server.application.Application
 import io.ktor.server.routing.routing
 import no.nav.helse.FeatureToggles
 import no.nav.helse.Gruppekontroll
+import no.nav.helse.MeldingPubliserer
 import no.nav.helse.bootstrap.Environment
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.kafka.RiverSetup
@@ -57,6 +58,7 @@ class SpesialistApp(
     private val daos = dbModule.daos
     private val sessionFactory = dbModule.sessionFactory
 
+    private lateinit var meldingPubliserer: MeldingPubliserer
     private lateinit var meldingMediator: MeldingMediator
     private lateinit var personhåndterer: Personhåndterer
     private lateinit var saksbehandlerMediator: SaksbehandlerMediator
@@ -118,7 +120,7 @@ class SpesialistApp(
 
     fun start(rapidsConnection: RapidsConnection) {
         rapidsConnection.register(this)
-        val meldingPubliserer = MessageContextMeldingPubliserer(rapidsConnection)
+        meldingPubliserer = MessageContextMeldingPubliserer(rapidsConnection)
         oppgaveService =
             OppgaveService(
                 oppgaveDao = daos.oppgaveDao,
@@ -212,6 +214,7 @@ class SpesialistApp(
                 snapshothenter = snapshothenter,
                 reservasjonshenter = reservasjonshenter,
                 tilgangsgrupper = tilgangsgrupper,
+                meldingPubliserer = meldingPubliserer,
                 featureToggles = featureToggles,
             )
 

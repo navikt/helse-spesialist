@@ -1,5 +1,6 @@
 package no.nav.helse.modell.saksbehandler.handlinger
 
+import no.nav.helse.modell.melding.InntektsendringerEvent
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 import java.time.LocalDate
@@ -31,6 +32,38 @@ class OverstyrTilkommenInntekt private constructor(
 
     data class FjernetInntekt(val organisasjonsnummer: String, val perioder: List<PeriodeUtenBeløp>) {
         data class PeriodeUtenBeløp(val fom: LocalDate, val tom: LocalDate)
+    }
+
+    fun byggEvent(): InntektsendringerEvent {
+        val nyeEllerEndredePerArbeidsgiver = nyEllerEndredeInntekter.groupBy { it.organisasjonsnummer }
+        val fjernedePerArbeidsgiver = fjernedeInntekter.groupBy { it.organisasjonsnummer }
+
+        val sammenflettetPerArbeidsgiver =
+            (nyeEllerEndredePerArbeidsgiver.keys + fjernedePerArbeidsgiver.keys)
+                .associateWith { organisasjonsnummer ->
+                    (nyeEllerEndredePerArbeidsgiver[organisasjonsnummer] ?: emptyList()) to (fjernedePerArbeidsgiver[organisasjonsnummer] ?: emptyList())
+                }
+        return InntektsendringerEvent(
+            inntektskildeendringer =
+                sammenflettetPerArbeidsgiver.map { (organisasjonsnummer, value) ->
+                    val (nyeEllerEndrede, fjernede) = value
+                    InntektsendringerEvent.Inntektskildeendring(
+                        organisasjonsnummer = organisasjonsnummer,
+                        nyeEllerEndredeInntekter =
+                            nyeEllerEndrede.flatMap { nyEllerEndretInntekt ->
+                                nyEllerEndretInntekt.perioder.map {
+                                    InntektsendringerEvent.Inntektskildeendring.PeriodeMedBeløp(it.fom, it.tom, it.periodeBeløp)
+                                }
+                            },
+                        fjernedeInntekter =
+                            fjernede.flatMap { fjernetInntekt ->
+                                fjernetInntekt.perioder.map {
+                                    InntektsendringerEvent.Inntektskildeendring.PeriodeUtenBeløp(it.fom, it.tom)
+                                }
+                            },
+                    )
+                },
+        )
     }
 
     companion object {

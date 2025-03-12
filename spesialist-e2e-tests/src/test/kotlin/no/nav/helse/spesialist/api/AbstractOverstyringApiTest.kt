@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdOverstyringHandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiInntektOgRefusjonOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
+import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektOverstyring
 
 internal abstract class AbstractOverstyringApiTest : AbstractGraphQLApiTest() {
     fun overstyrTidslinje(overstyring: ApiTidslinjeOverstyring): JsonNode =
@@ -78,6 +79,54 @@ internal abstract class AbstractOverstyringApiTest : AbstractGraphQLApiTest() {
                     vedtaksperiodeId: "${overstyring.vedtaksperiodeId}"
                 })
             }
+            """,
+        )
+
+    fun overstyrTilkommenInntekt(overstyring: ApiTilkommenInntektOverstyring): JsonNode =
+        runQuery(
+            """mutation OverstyrTilkommenInntekt {
+                        overstyrTilkommenInntekt(
+                            overstyring: {
+                                fodselsnummer: "${overstyring.fodselsnummer}",
+                                aktorId: "${overstyring.aktorId}",
+                                begrunnelse: "Foobar",
+                                fjernet: ${overstyring.fjernet.map {
+                                    """
+                                        {
+                                            organisasjonsnummer: "${it.organisasjonsnummer}",
+                                            perioder: ${it.perioder.map { periode ->
+                                                """
+                                                    {
+                                                        fom: "${periode.fom}",
+                                                        tom: "${periode.tom}"
+                                                    }
+                                                """
+                                                }
+                                            }
+                                        }
+                                    """
+                                }},
+                                lagtTilEllerEndret: ${overstyring.lagtTilEllerEndret.map {
+                                    """
+                                        {
+                                            organisasjonsnummer: "${it.organisasjonsnummer}",
+                                            perioder: ${it.perioder.map { periode ->
+                                                """
+                                                    {
+                                                        fom: "${periode.fom}",
+                                                        tom: "${periode.tom}",
+                                                        periodeBelop: ${periode.periodeBelop}
+                                                    }
+                                                """
+                                                }
+                                            }
+                                        }
+                                    """
+                                }},
+                                vedtaksperiodeId: "${overstyring.vedtaksperiodeId}",
+                            }
+                        )
+                    }
             """,
         )
 }

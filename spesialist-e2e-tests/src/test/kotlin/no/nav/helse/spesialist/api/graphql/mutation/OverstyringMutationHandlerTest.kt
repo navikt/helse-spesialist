@@ -9,6 +9,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringArbeidsgiver.ApiOverstyringRefusjonselement
 import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringDag
 import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
+import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektOverstyring
 import no.nav.helse.spesialist.api.januar
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -118,5 +119,35 @@ internal class OverstyringMutationHandlerTest : AbstractOverstyringApiTest() {
                 ),
             )
         Assertions.assertTrue(body["data"]["overstyrInntektOgRefusjon"].asBoolean())
+    }
+
+    @Test
+    fun `overstyr tilkommen inntekt`() {
+        val body =
+            overstyrTilkommenInntekt(
+                ApiTilkommenInntektOverstyring(
+                    AKTØRID,
+                    FØDSELSNUMMER,
+                    vedtaksperiodeId = UUID.randomUUID(),
+                    begrunnelse = "En begrunnelse",
+                    lagtTilEllerEndret = listOf(
+                        ApiTilkommenInntektOverstyring.ApiNyEllerEndretInntekt(
+                            ORGANISASJONSNUMMER,
+                            perioder = listOf(
+                                ApiTilkommenInntektOverstyring.ApiNyEllerEndretInntekt.ApiPeriodeMedBeløp(1.januar, 31.januar, 24000.0),
+                            )
+                        )
+                    ),
+                    fjernet = listOf(
+                        ApiTilkommenInntektOverstyring.ApiFjernetInntekt(
+                            ORGANISASJONSNUMMER,
+                            perioder = listOf(
+                                ApiTilkommenInntektOverstyring.ApiFjernetInntekt.ApiPeriodeUtenBeløp(1.januar, 31.januar),
+                            )
+                        )
+                    ),
+                ),
+            )
+        Assertions.assertTrue(body["data"]["overstyrTilkommenInntekt"].asBoolean())
     }
 }

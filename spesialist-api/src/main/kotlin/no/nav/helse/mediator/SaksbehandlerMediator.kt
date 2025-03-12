@@ -148,7 +148,7 @@ class SaksbehandlerMediator(
                 is Overstyring ->
                     overstyringUnitOfWork(
                         overstyring = modellhandling,
-                        saksbehandlerOid = SaksbehandlerOid(legacySaksbehandler.oid()),
+                        saksbehandler = saksbehandlerFraApi.tilSaksbehandler(),
                         sessionFactory = sessionFactory,
                         featureToggles = featureToggles,
                     ) {
@@ -1017,14 +1017,18 @@ class SaksbehandlerMediator(
 
 internal fun overstyringUnitOfWork(
     overstyring: Overstyring,
-    saksbehandlerOid: SaksbehandlerOid,
+    saksbehandler: Saksbehandler,
     sessionFactory: SessionFactory,
     featureToggles: FeatureToggles,
     overstyringBlock: () -> Unit,
 ) = sessionFactory.transactionalSessionScope { session ->
+    sikkerlogg.info("Utfører overstyring ${overstyring.loggnavn()} på vegne av saksbehandler $saksbehandler")
+    session.saksbehandlerRepository.lagre(saksbehandler)
+
     val fødselsnummer = overstyring.fødselsnummer
-    sikkerlogg.info("Reserverer person $fødselsnummer til saksbehandler ${saksbehandlerOid.value}")
-    session.reservasjonDao.reserverPerson(saksbehandlerOid.value, fødselsnummer)
+    sikkerlogg.info("Reserverer person $fødselsnummer til saksbehandler $saksbehandler")
+    session.reservasjonDao.reserverPerson(saksbehandler.id().value, fødselsnummer)
+
     if (featureToggles.skalBenytteNyTotrinnsvurderingsløsning()) {
         val totrinnsvurdering =
             session.totrinnsvurderingRepository.finn(overstyring.fødselsnummer)
@@ -1034,5 +1038,6 @@ internal fun overstyringUnitOfWork(
     } else {
         session.overstyringRepository.lagre(listOf(overstyring))
     }
+
     overstyringBlock()
 }
