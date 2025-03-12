@@ -8,9 +8,9 @@ import no.nav.helse.db.DokumentDao
 import no.nav.helse.db.MeldingDao
 import no.nav.helse.db.MeldingDuplikatkontrollDao
 import no.nav.helse.db.PersonDao
+import no.nav.helse.db.PoisonPillDao
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.mediator.meldinger.Personmelding
-import no.nav.helse.mediator.meldinger.PoisonPills
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.SøknadSendt
@@ -29,13 +29,15 @@ class MeldingMediator(
     private val kommandofabrikk: Kommandofabrikk,
     private val dokumentDao: DokumentDao,
     private val varselRepository: VarselRepository,
-    private val poisonPills: PoisonPills,
+    private val poisonPillDao: PoisonPillDao,
     private val env: Environment,
 ) {
     private companion object {
         private val logg = LoggerFactory.getLogger(MeldingMediator::class.java)
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
+
+    private val poisonPills by lazy { poisonPillDao.poisonPills() }
 
     fun skalBehandleMelding(melding: String): Boolean {
         val jsonNode = objectMapper.readTree(melding)

@@ -9,7 +9,6 @@ import no.nav.helse.mediator.Kommandofabrikk
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.Subsumsjonsmelder
-import no.nav.helse.mediator.meldinger.PoisonPills
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Stikkprøver
@@ -118,7 +117,7 @@ internal class TestMediator(
                 varselDao = daos.varselDao,
                 definisjonDao = daos.definisjonDao
             ),
-            poisonPills = PoisonPills(emptyMap()),
+            poisonPillDao = daos.poisonPillDao,
             env = environment,
         )
         RiverSetup(testRapid, meldingMediator, daos.meldingDuplikatkontrollDao).setUp()

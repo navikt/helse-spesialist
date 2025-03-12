@@ -6,7 +6,6 @@ import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import io.mockk.mockk
 import no.nav.helse.Meldingssender
 import no.nav.helse.e2e.AbstractDatabaseTest
-import no.nav.helse.mediator.meldinger.PoisonPills
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.spesialist.db.TransactionalSessionFactory
 import no.nav.helse.spesialist.test.lagFødselsnummer
@@ -35,7 +34,7 @@ internal class MetrikkerFraMeldingMediatorTest : AbstractDatabaseTest() {
                 varselDao = daos.varselDao,
                 definisjonDao = daos.definisjonDao
             ),
-            poisonPills = PoisonPills(emptyMap()),
+            poisonPillDao = daos.poisonPillDao,
             env = environment,
         )
     }

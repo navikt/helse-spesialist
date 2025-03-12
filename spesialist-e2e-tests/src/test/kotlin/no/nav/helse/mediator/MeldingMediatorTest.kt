@@ -4,6 +4,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import io.mockk.mockk
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.db.PoisonPillDao
 import no.nav.helse.e2e.AbstractDatabaseTest
 import no.nav.helse.mediator.meldinger.PoisonPills
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode
@@ -23,6 +24,9 @@ internal class MeldingMediatorTest : AbstractDatabaseTest() {
     private val testRapid = TestRapid()
     private val kommandofabrikk = mockk<Kommandofabrikk>(relaxed = true)
     private val poisonPills: MutableMap<String, Set<String>> = mutableMapOf()
+    private val poisonPillDao = object: PoisonPillDao {
+        override fun poisonPills() = PoisonPills(poisonPills)
+    }
 
     private val meldingMediator =
         MeldingMediator(
@@ -37,7 +41,7 @@ internal class MeldingMediatorTest : AbstractDatabaseTest() {
                 varselDao = daos.varselDao,
                 definisjonDao = daos.definisjonDao
             ),
-            poisonPills = PoisonPills(poisonPills),
+            poisonPillDao = poisonPillDao,
             env = environment,
         )
 

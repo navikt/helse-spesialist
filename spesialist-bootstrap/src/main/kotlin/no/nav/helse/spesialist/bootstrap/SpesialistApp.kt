@@ -148,7 +148,7 @@ class SpesialistApp(
                         varselDao = daos.varselDao,
                         definisjonDao = daos.definisjonDao,
                     ),
-                poisonPills = daos.poisonPillDao.poisonPills(),
+                poisonPillDao = daos.poisonPillDao,
                 env = env,
             )
         personhåndterer = PersonhåndtererImpl(publiserer = meldingPubliserer)
