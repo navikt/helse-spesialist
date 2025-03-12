@@ -91,9 +91,9 @@ abstract class AbstractDBIntegrationTest {
             epost = SAKSBEHANDLER_EPOST,
         )
 
-    protected val dataSource = DBTestFixture.module.dataSource
+    protected val dataSource = DBDBTestFixture.fixture.module.dataSource
     protected val dbQuery = DbQuery(dataSource)
-    protected val daos = DBTestFixture.module.daos
+    protected val daos = DBDBTestFixture.fixture.module.daos
 
     protected val session = sessionOf(dataSource, returnGeneratedKey = true)
     private val sessionContext = DBSessionContext(session)
@@ -726,4 +726,8 @@ abstract class AbstractDBIntegrationTest {
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
                 .registerModule(JavaTimeModule())
     }
+}
+
+object DBDBTestFixture {
+    val fixture = DBTestFixture("db")
 }

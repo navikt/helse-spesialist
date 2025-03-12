@@ -10,7 +10,7 @@ import java.util.UUID
 import kotlin.random.Random
 
 internal abstract class AbstractDatabaseTest {
-    protected val dataSource = DBTestFixture.module.dataSource
+    protected val dataSource = OppryddingDevDBTestFixture.fixture.module.dataSource
     protected val personRepository = PersonRepository(dataSource)
 
     protected fun opprettPerson(
@@ -257,7 +257,7 @@ internal abstract class AbstractDatabaseTest {
 
     @BeforeEach
     fun resetDatabase() {
-        DBTestFixture.truncate()
+        OppryddingDevDBTestFixture.fixture.truncate()
     }
 
     protected companion object {
@@ -272,4 +272,8 @@ enum class Comparison(
 ) {
     EXACTLY("exactly", { a, b -> a == b }),
     AT_LEAST("at least", { a, b -> a >= b }),
+}
+
+object OppryddingDevDBTestFixture {
+    val fixture = DBTestFixture("opprydding-dev")
 }

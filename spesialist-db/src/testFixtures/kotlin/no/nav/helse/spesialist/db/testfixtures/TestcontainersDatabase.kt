@@ -3,11 +3,12 @@ package no.nav.helse.spesialist.db.testfixtures
 import no.nav.helse.spesialist.db.bootstrap.DBModule
 import org.testcontainers.containers.PostgreSQLContainer
 
-object TestDatabase {
+class TestcontainersDatabase(moduleLabel: String) {
     private val postgres =
         PostgreSQLContainer("postgres:14")
             .withReuse(true)
             .withLabel("app", "spesialist")
+            .withLabel("module", moduleLabel)
             .withLabel("code-location", javaClass.canonicalName)
             .apply {
                 start()
