@@ -2,12 +2,18 @@ package no.nav.helse.spesialist.api.graphql.mutation
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
+import no.nav.helse.spesialist.api.graphql.schema.ApiNotatType
 import no.nav.helse.spesialist.api.objectMapper
+import no.nav.helse.spesialist.api.testfixtures.mutation.feilregistrerKommentarMutation
+import no.nav.helse.spesialist.api.testfixtures.mutation.feilregistrerNotatMutation
+import no.nav.helse.spesialist.api.testfixtures.mutation.leggTilKommentarMutation
+import no.nav.helse.spesialist.api.testfixtures.mutation.leggTilNotatMutation
 import no.nav.helse.spesialist.domain.Dialog
 import no.nav.helse.spesialist.domain.DialogId
 import no.nav.helse.spesialist.domain.KommentarId
 import no.nav.helse.spesialist.domain.NotatId
 import no.nav.helse.spesialist.domain.NotatType
+import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
@@ -24,36 +30,12 @@ internal class NotatMutationHandlerTest : AbstractGraphQLApiTest() {
 
         val body =
             runQuery(
-                """
-            mutation LeggTilNotat {
-                leggTilNotat(
-                    tekst: "Dette er et notat",
-                    type: Generelt,
-                    vedtaksperiodeId: "${PERIODE.id}",
-                    saksbehandlerOid: "${SAKSBEHANDLER.oid}"
-                ) {
-                    id,
-                    dialogRef,
-                    tekst,
-                    opprettet,
-                    saksbehandlerOid,
-                    saksbehandlerNavn,
-                    saksbehandlerEpost,
-                    saksbehandlerIdent,
-                    vedtaksperiodeId,
-                    feilregistrert,
-                    feilregistrert_tidspunkt,
-                    type,
-                    kommentarer {
-                        id,
-                        tekst,
-                        opprettet,
-                        saksbehandlerident,
-                        feilregistrert_tidspunkt,
-                    }
-                }
-            }
-        """,
+                leggTilNotatMutation(
+                    tekst = "Dette er et notat",
+                    type = ApiNotatType.Generelt,
+                    vedtaksperiodeId = PERIODE.id,
+                    saksbehandlerOid = SaksbehandlerOid(SAKSBEHANDLER.oid)
+                ),
             )
 
         val notatId = body["data"]?.get("leggTilNotat")?.get("id")?.asInt()?.let(::NotatId)
@@ -119,31 +101,7 @@ internal class NotatMutationHandlerTest : AbstractGraphQLApiTest() {
 
         val body =
             runQuery(
-                """
-            mutation FeilregistrerNotat {
-                feilregistrerNotat(id: ${notatId.value}) { 
-                    id,
-                    dialogRef,
-                    tekst,
-                    opprettet,
-                    saksbehandlerOid,
-                    saksbehandlerNavn,
-                    saksbehandlerEpost,
-                    saksbehandlerIdent,
-                    vedtaksperiodeId,
-                    feilregistrert,
-                    feilregistrert_tidspunkt,
-                    type,
-                    kommentarer {
-                        id,
-                        tekst,
-                        opprettet,
-                        saksbehandlerident,
-                        feilregistrert_tidspunkt,
-                    }
-                }
-            }
-            """.trimIndent()
+                feilregistrerNotatMutation(notatId)
             )
 
         // Bekreft persistert resultat
@@ -196,17 +154,7 @@ internal class NotatMutationHandlerTest : AbstractGraphQLApiTest() {
 
         val body =
             runQuery(
-                """
-            mutation LeggTilKommentar {
-                leggTilKommentar(dialogRef: ${dialogRef.value}, tekst: "En kommentar", saksbehandlerident: "${SAKSBEHANDLER.ident}") {
-                    id,
-                    tekst,
-                    opprettet,
-                    saksbehandlerident,
-                    feilregistrert_tidspunkt,
-                }
-            }
-        """,
+                leggTilKommentarMutation(dialogRef, "En kommentar", SAKSBEHANDLER.ident)
             )
 
         val kommentarId = body["data"]?.get("leggTilKommentar")?.get("id")?.asInt()?.let(::KommentarId)
@@ -264,17 +212,7 @@ internal class NotatMutationHandlerTest : AbstractGraphQLApiTest() {
 
         val body =
             runQuery(
-                """
-            mutation FeilregistrerKommentar {
-                feilregistrerKommentar(id: ${kommentarId.value}) {
-                    id,
-                    tekst,
-                    opprettet,
-                    saksbehandlerident,
-                    feilregistrert_tidspunkt,
-                }
-            }
-        """,
+                feilregistrerKommentarMutation(kommentarId),
             )
 
         // Bekreft persistert resultat
@@ -322,3 +260,4 @@ internal class NotatMutationHandlerTest : AbstractGraphQLApiTest() {
         )
     }
 }
+
