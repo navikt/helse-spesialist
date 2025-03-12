@@ -19,9 +19,7 @@ class OverstyrTilkommenInntekt private constructor(
     val nyEllerEndredeInntekter: List<NyEllerEndretInntekt>,
     val fjernedeInntekter: List<FjernetInntekt>,
     kobledeVedtaksperioder: List<UUID>,
-) : Overstyring(id, ferdigstilt) {
-    override val kobledeVedtaksperioder: MutableList<UUID> = kobledeVedtaksperioder.toMutableList()
-
+) : Overstyring(id, ferdigstilt, kobledeVedtaksperioder) {
     override fun utførAv(legacySaksbehandler: LegacySaksbehandler) {}
 
     override fun loggnavn(): String = "overstyr_tilkommen_inntekt"

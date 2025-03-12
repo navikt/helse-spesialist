@@ -20,9 +20,7 @@ class OverstyrtArbeidsforhold private constructor(
     kobledeVedtaksperioder: List<UUID>,
     val skjæringstidspunkt: LocalDate,
     val overstyrteArbeidsforhold: List<Arbeidsforhold>,
-) : Overstyring(id, ferdigstilt) {
-    override val kobledeVedtaksperioder = kobledeVedtaksperioder.toMutableList()
-
+) : Overstyring(id, ferdigstilt, kobledeVedtaksperioder) {
     override fun utførAv(legacySaksbehandler: LegacySaksbehandler) {
         legacySaksbehandler.håndter(this)
     }

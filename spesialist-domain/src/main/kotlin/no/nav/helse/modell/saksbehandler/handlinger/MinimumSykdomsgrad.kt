@@ -26,9 +26,7 @@ class MinimumSykdomsgrad private constructor(
     val perioderVurdertIkkeOk: List<MinimumSykdomsgradPeriode>,
     val begrunnelse: String,
     val arbeidsgivere: List<MinimumSykdomsgradArbeidsgiver>,
-) : Overstyring(id, ferdigstilt) {
-    override val kobledeVedtaksperioder = kobledeVedtaksperioder.toMutableList()
-
+) : Overstyring(id, ferdigstilt, kobledeVedtaksperioder) {
     override fun utførAv(legacySaksbehandler: LegacySaksbehandler) {
         legacySaksbehandler.håndter(this)
     }

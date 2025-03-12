@@ -25,9 +25,7 @@ class OverstyrtTidslinje private constructor(
     val organisasjonsnummer: String,
     val dager: List<OverstyrtTidslinjedag>,
     val begrunnelse: String,
-) : Overstyring(id, ferdigstilt) {
-    override val kobledeVedtaksperioder = kobledeVedtaksperioder.toMutableList()
-
+) : Overstyring(id, ferdigstilt, kobledeVedtaksperioder) {
     override fun utførAv(legacySaksbehandler: LegacySaksbehandler) {
         legacySaksbehandler.håndter(this)
     }
