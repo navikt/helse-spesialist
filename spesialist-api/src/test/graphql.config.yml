@@ -1,7 +1,0 @@
-schema: 'schema_til_bruk_fra_tester.graphql'
-extensions:
-  endpoints:
-    spesialist-local:
-      url: http://0.0.0.0:8080/graphql
-      headers:
-        Authorization: Bearer Legg inn token fra LocalApp her

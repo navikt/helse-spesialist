@@ -1,3 +1,7 @@
+plugins {
+    `java-test-fixtures`
+}
+
 dependencies {
     api(project(":spesialist-api-schema"))
     api(project(":spesialist-application"))
@@ -10,4 +14,6 @@ dependencies {
     implementation(libs.micrometer.prometheus)
 
     testImplementation(libs.bundles.ktor.server.test)
+
+    testFixturesImplementation(libs.graphqlKotlin.server.ktor)
 }

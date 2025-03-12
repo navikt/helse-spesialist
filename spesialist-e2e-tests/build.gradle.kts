@@ -17,4 +17,5 @@ dependencies {
     testImplementation(libs.bundles.jackson)
 
     testImplementation(testFixtures(project(":spesialist-db")))
+    testImplementation(testFixtures(project(":spesialist-api")))
 }

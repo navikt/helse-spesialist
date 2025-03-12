@@ -1492,6 +1492,7 @@ input PeriodeInput {
 
 input PeriodeMedBelopInput {
     fom: LocalDate!
+    periodeBelop: Float!
     tom: LocalDate!
 }
 
