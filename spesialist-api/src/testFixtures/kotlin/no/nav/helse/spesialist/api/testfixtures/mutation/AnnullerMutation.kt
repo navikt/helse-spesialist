@@ -14,7 +14,7 @@ fun annullerMutation(annullering: ApiAnnulleringData): String = asGQL(
             personFagsystemId: "${annullering.personFagsystemId}",
             vedtaksperiodeId: "${annullering.vedtaksperiodeId}",
             kommentar: "${annullering.kommentar}", 
-            begrunnelser: ${annullering.begrunnelser},
+            begrunnelser: ${annullering.begrunnelser.map { """"$it"""" }},
             arsaker: ${arsaker(annullering)}
         })
     }
