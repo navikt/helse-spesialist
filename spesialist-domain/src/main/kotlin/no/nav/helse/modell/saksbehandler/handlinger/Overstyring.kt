@@ -8,9 +8,11 @@ import java.util.UUID
 @JvmInline
 value class OverstyringId(val value: Long)
 
-sealed class Overstyring(id: OverstyringId?, ferdigstilt: Boolean, kobledeVedtaksperioder: List<UUID>) : Personhandling, Entity<OverstyringId>(
-    id,
-) {
+sealed class Overstyring(
+    id: OverstyringId?,
+    ferdigstilt: Boolean,
+    kobledeVedtaksperioder: List<UUID>,
+) : Personhandling, Entity<OverstyringId>(id) {
     abstract val saksbehandlerOid: SaksbehandlerOid
     abstract val eksternHendelseId: UUID
     abstract val aktørId: String
