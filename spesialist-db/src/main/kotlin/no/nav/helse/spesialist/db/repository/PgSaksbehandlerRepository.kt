@@ -23,7 +23,7 @@ internal class PgSaksbehandlerRepository(
         ).singleOrNull { it.toSaksbehandler() }
 
     private fun Row.toSaksbehandler(): Saksbehandler =
-        Saksbehandler.Factory.fraLagring(
+        Saksbehandler(
             id = SaksbehandlerOid(UUID.fromString(string("oid"))),
             navn = string("navn"),
             epost = string("epost"),

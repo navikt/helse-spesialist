@@ -89,6 +89,7 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.application.logg.sikkerlogg
+import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
@@ -696,7 +697,7 @@ class SaksbehandlerMediator(
             return@transactionalSessionScope SendTilGodkjenningResult.Ok
         }
 
-    private fun tilLegacySaksbehandler(saksbehandler: no.nav.helse.spesialist.domain.Saksbehandler): LegacySaksbehandler =
+    private fun tilLegacySaksbehandler(saksbehandler: Saksbehandler): LegacySaksbehandler =
         saksbehandler.gjenopprett(tilgangskontroll = tilgangskontroll)
 
     private fun vurderVarsel(
@@ -768,15 +769,15 @@ class SaksbehandlerMediator(
             is FinnerIkkePåVent -> FinnerIkkeLagtPåVent(oppgaveId)
         }
 
-    private fun SaksbehandlerFraApi.tilSaksbehandler(): no.nav.helse.spesialist.domain.Saksbehandler =
-        no.nav.helse.spesialist.domain.Saksbehandler.Factory.fraLagring(
+    private fun SaksbehandlerFraApi.tilSaksbehandler(): Saksbehandler =
+        Saksbehandler(
             id = SaksbehandlerOid(oid),
             navn = navn,
             epost = epost,
             ident = ident,
         )
 
-    private fun no.nav.helse.spesialist.domain.Saksbehandler.tilLegacySaksbehandler(saksbehandlergrupper: List<UUID>): LegacySaksbehandler =
+    private fun Saksbehandler.tilLegacySaksbehandler(saksbehandlergrupper: List<UUID>): LegacySaksbehandler =
         gjenopprett(TilgangskontrollørForApi(saksbehandlergrupper, tilgangsgrupper))
 
     private fun HandlingFraApi.tilModellversjon(saksbehandlerOid: SaksbehandlerOid): Handling =
