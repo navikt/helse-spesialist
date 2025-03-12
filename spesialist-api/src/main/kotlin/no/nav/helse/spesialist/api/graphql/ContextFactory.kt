@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.api.graphql
 import com.expediagroup.graphql.generator.extensions.toGraphQLContext
 import com.expediagroup.graphql.server.ktor.KtorGraphQLContextFactory
 import graphql.GraphQLContext
+import graphql.schema.DataFetchingEnvironment
 import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.principal
 import io.ktor.server.request.ApplicationRequest
@@ -44,5 +45,7 @@ class ContextFactory(
         ).toGraphQLContext()
     }
 }
+
+fun DataFetchingEnvironment.saksbehandler(): SaksbehandlerFraApi = graphQlContext.get(SAKSBEHANDLER)
 
 private fun JWTPrincipal.getGrupper() = payload.getClaim("groups")?.asList(String::class.java)?.map(UUID::fromString) ?: emptyList()

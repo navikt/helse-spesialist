@@ -5,6 +5,7 @@ import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
+import no.nav.helse.spesialist.api.graphql.saksbehandler
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdOverstyringHandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiInntektOgRefusjonOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
@@ -36,7 +37,7 @@ class OverstyringMutationHandler(private val saksbehandlerMediator: Saksbehandle
         overstyring: ApiInntektOgRefusjonOverstyring,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> {
-        val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
+        val saksbehandler: SaksbehandlerFraApi = env.saksbehandler()
         return try {
             saksbehandlerMediator.håndter(overstyring, saksbehandler)
             DataFetcherResult.newResult<Boolean>().data(true).build()
@@ -51,7 +52,7 @@ class OverstyringMutationHandler(private val saksbehandlerMediator: Saksbehandle
         overstyring: ApiArbeidsforholdOverstyringHandling,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> {
-        val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
+        val saksbehandler: SaksbehandlerFraApi = env.saksbehandler()
         return try {
             saksbehandlerMediator.håndter(overstyring, saksbehandler)
             DataFetcherResult.newResult<Boolean>().data(true).build()
