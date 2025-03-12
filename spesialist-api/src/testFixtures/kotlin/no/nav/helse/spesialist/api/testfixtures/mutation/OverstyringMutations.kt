@@ -6,13 +6,13 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektOverstyring
 import org.intellij.lang.annotations.Language
 
-internal fun asMutation(
+internal fun asGQL(
     @Language("GraphQL") mutationString: String
 ): String = mutationString
 
 
 fun overstyrTilkommenInntektMutation(overstyring: ApiTilkommenInntektOverstyring): String =
-    asMutation(
+    asGQL(
         """mutation OverstyrTilkommenInntekt {
                 overstyrTilkommenInntekt(
                     overstyring: {
@@ -31,42 +31,50 @@ fun overstyrTilkommenInntektMutation(overstyring: ApiTilkommenInntektOverstyring
 private fun lagtTilEllerEndret(overstyring: ApiTilkommenInntektOverstyring): List<String> =
     overstyring.lagtTilEllerEndret.map {
         fun perioder(): List<String> = it.perioder.map { periode ->
-            """
+            asGQL(
+                """
                 {
                     fom: "${periode.fom}",
                     tom: "${periode.tom}",
                     periodeBelop: ${periode.periodeBelop}
                 }
             """
+            )
         }
 
-        """
+        asGQL(
+            """
             {
                 organisasjonsnummer: "${it.organisasjonsnummer}",
                 perioder: ${perioder()}
             }
         """
+        )
     }
 
 private fun fjernet(overstyring: ApiTilkommenInntektOverstyring): List<String> = overstyring.fjernet.map {
     fun perioder(): List<String> = it.perioder.map { periode ->
-        """
+        asGQL(
+            """
             {
                 fom: "${periode.fom}",
                 tom: "${periode.tom}"
             }
         """
+        )
     }
 
-    """
+    asGQL(
+        """
         {
             organisasjonsnummer: "${it.organisasjonsnummer}",
             perioder: ${perioder()}
         }
     """
+    )
 }
 
-fun overstyrInntektOgRefusjonMutation(overstyring: ApiInntektOgRefusjonOverstyring): String = asMutation(
+fun overstyrInntektOgRefusjonMutation(overstyring: ApiInntektOgRefusjonOverstyring): String = asGQL(
     """
     mutation OverstyrInntektOgRefusjon {
         overstyrInntektOgRefusjon(overstyring: {
@@ -82,26 +90,31 @@ fun overstyrInntektOgRefusjonMutation(overstyring: ApiInntektOgRefusjonOverstyri
 
 private fun arbeidsgivere(overstyring: ApiInntektOgRefusjonOverstyring): List<String> = overstyring.arbeidsgivere.map {
     fun refusjonsopplysninger(): List<String>? = it.refusjonsopplysninger?.map { opplysning ->
-        """ 
+        asGQL(
+            """ 
             {
                 belop: ${opplysning.belop},
                 fom: "${opplysning.fom}",
                 tom: ${opplysning.tom?.let { tom -> """"$tom"""" }}
             } 
         """
+        )
     }
 
     fun fraRefusjonsopplysninger(): List<String>? = it.fraRefusjonsopplysninger?.map { opplysning ->
-        """ 
+        asGQL(
+            """ 
             {
                belop: ${opplysning.belop},
                fom: "${opplysning.fom}",
                tom: ${opplysning.tom?.let { tom -> """"$tom"""" }}
             } 
         """
+        )
     }
 
-    """ 
+    asGQL(
+        """ 
         {
             forklaring: "${it.forklaring}",
             begrunnelse: "${it.begrunnelse}",
@@ -113,9 +126,10 @@ private fun arbeidsgivere(overstyring: ApiInntektOgRefusjonOverstyring): List<St
             fraRefusjonsopplysninger: ${fraRefusjonsopplysninger()}
         } 
     """
+    )
 }
 
-fun overstyrArbeidsforholdMutation(overstyring: ApiArbeidsforholdOverstyringHandling): String = asMutation(
+fun overstyrArbeidsforholdMutation(overstyring: ApiArbeidsforholdOverstyringHandling): String = asGQL(
     """
     mutation OverstyrArbeidsforhold {
         overstyrArbeidsforhold(overstyring: {
@@ -131,7 +145,8 @@ fun overstyrArbeidsforholdMutation(overstyring: ApiArbeidsforholdOverstyringHand
 
 private fun overstyrteArbeidsforhold(overstyring: ApiArbeidsforholdOverstyringHandling): List<String> =
     overstyring.overstyrteArbeidsforhold.map {
-        """ 
+        asGQL(
+            """ 
             {
                 begrunnelse: "${it.begrunnelse}",
                 deaktivert: ${it.deaktivert},
@@ -139,9 +154,10 @@ private fun overstyrteArbeidsforhold(overstyring: ApiArbeidsforholdOverstyringHa
                 orgnummer: "${it.orgnummer}",
             }
         """
+        )
     }
 
-fun overstyrTidslinjeMutation(overstyring: ApiTidslinjeOverstyring): String = asMutation(
+fun overstyrTidslinjeMutation(overstyring: ApiTidslinjeOverstyring): String = asGQL(
     """
     mutation OverstyrTidsline {
         overstyrDager(overstyring:{
@@ -157,7 +173,8 @@ fun overstyrTidslinjeMutation(overstyring: ApiTidslinjeOverstyring): String = as
 )
 
 private fun dager(overstyring: ApiTidslinjeOverstyring): List<String> = overstyring.dager.map {
-    """ 
+    asGQL(
+        """ 
         {
             dato: "${it.dato}",
             fraGrad: ${it.fraGrad},
@@ -167,4 +184,5 @@ private fun dager(overstyring: ApiTidslinjeOverstyring): List<String> = overstyr
             lovhjemmel: {bokstav: "A", ledd: "Albue", lovverk: "Norske lover", lovverksversjon: "1803", paragraf: "8-30"}
         }
     """
+    )
 }

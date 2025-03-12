@@ -1,6 +1,11 @@
 package no.nav.helse.spesialist.api.graphql.mutation
 
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
+import no.nav.helse.spesialist.api.graphql.schema.ApiAnnulleringData
+import no.nav.helse.spesialist.api.testfixtures.mutation.annullerMutation
+import no.nav.helse.spesialist.test.lagAktørId
+import no.nav.helse.spesialist.test.lagFødselsnummer
+import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.util.UUID
@@ -10,22 +15,25 @@ internal class AnnulleringMutationHandlerTest : AbstractGraphQLApiTest() {
     fun `annullering ok`() {
         val body =
             runQuery(
-                """
-            mutation Annuller {
-                annuller(annullering: {
-                    organisasjonsnummer: "et-organisasjonsnummer", 
-                    fodselsnummer: "et-fødselsnummer", 
-                    aktorId: "en-aktørid", 
-                    utbetalingId: "${UUID.randomUUID()}",
-                    arbeidsgiverFagsystemId: "EN-FAGSYSTEMID",
-                    personFagsystemId: "EN-FAGSYSTEMID",
-                    vedtaksperiodeId: "${UUID.randomUUID()}",
-                    kommentar: "En kommentar", 
-                    begrunnelser: ["Det første", "Det andre"],
-                    arsaker: [{_key: "en key", arsak: "Ferie"}]
-                })
-            }
-        """,
+                annullerMutation(
+                    ApiAnnulleringData(
+                        organisasjonsnummer = lagOrganisasjonsnummer(),
+                        fodselsnummer = lagFødselsnummer(),
+                        aktorId = lagAktørId(),
+                        utbetalingId = UUID.randomUUID(),
+                        arbeidsgiverFagsystemId = "EN-FAGSYSTEMID",
+                        personFagsystemId = "EN-FAGSYSTEMID",
+                        vedtaksperiodeId = UUID.randomUUID(),
+                        kommentar = "kommentar",
+                        begrunnelser = listOf("Det første", "Det andre"),
+                        arsaker = listOf(
+                            ApiAnnulleringData.ApiAnnulleringArsak(
+                                _key = "en key",
+                                arsak = "Ferie",
+                            )
+                        ),
+                    )
+                ),
             )
 
         assertTrue(body["data"]["annuller"].asBoolean())
@@ -35,21 +43,20 @@ internal class AnnulleringMutationHandlerTest : AbstractGraphQLApiTest() {
     fun `annullering av tomme verdier`() {
         val body =
             runQuery(
-                """
-            mutation Annuller {
-                annuller(annullering: {
-                    organisasjonsnummer: "et-organisasjonsnummer", 
-                    fodselsnummer: "et-fødselsnummer", 
-                    aktorId: "en-aktørid", 
-                    utbetalingId: "${UUID.randomUUID()}",
-                    arbeidsgiverFagsystemId: "EN-FAGSYSTEMID",
-                    personFagsystemId: "EN-FAGSYSTEMID",
-                    vedtaksperiodeId: "${UUID.randomUUID()}",
-                    begrunnelser: [],
-                    arsaker: []
-                })
-            }
-        """,
+                annullerMutation(
+                    ApiAnnulleringData(
+                        organisasjonsnummer = lagOrganisasjonsnummer(),
+                        fodselsnummer = lagFødselsnummer(),
+                        aktorId = lagAktørId(),
+                        utbetalingId = UUID.randomUUID(),
+                        arbeidsgiverFagsystemId = "EN-FAGSYSTEMID",
+                        personFagsystemId = "EN-FAGSYSTEMID",
+                        vedtaksperiodeId = UUID.randomUUID(),
+                        kommentar = "kommentar",
+                        begrunnelser = emptyList(),
+                        arsaker = emptyList()
+                    )
+                ),
             )
 
         assertTrue(body["data"]["annuller"].asBoolean())
