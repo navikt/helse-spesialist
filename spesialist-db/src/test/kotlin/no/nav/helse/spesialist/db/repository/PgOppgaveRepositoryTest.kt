@@ -206,4 +206,115 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
         }
     }
 
+    @Test
+    fun `finner tilstand på oppgave som avventer saksbehandler`() {
+        val oppgave = Oppgave.ny(
+            id = nextLong(),
+            vedtaksperiodeId = vedtaksperiodeId,
+            behandlingId = behandlingId,
+            utbetalingId = utbetalingId,
+            hendelseId = godkjenningsbehovId,
+            kanAvvises = true,
+            egenskaper = setOf(SØKNAD)
+        )
+        repository.lagre(oppgave)
+
+        val oppgaveTilstand = repository.finnSisteOppgaveTilstandForUtbetaling(utbetalingId)
+        assertEquals(Oppgave.AvventerSaksbehandler::class, oppgaveTilstand?.let { it::class })
+    }
+
+    @Test
+    fun `finner tilstand på oppgave som avventer system`() {
+        val oppgave = Oppgave.ny(
+            id = nextLong(),
+            vedtaksperiodeId = vedtaksperiodeId,
+            behandlingId = behandlingId,
+            utbetalingId = utbetalingId,
+            hendelseId = godkjenningsbehovId,
+            kanAvvises = true,
+            egenskaper = setOf(SØKNAD)
+        )
+        oppgave.avventerSystem(saksbehandler.ident(), saksbehandler.oid)
+        repository.lagre(oppgave)
+
+        val oppgaveTilstand = repository.finnSisteOppgaveTilstandForUtbetaling(utbetalingId)
+        assertEquals(Oppgave.AvventerSystem::class, oppgaveTilstand?.let { it::class })
+    }
+
+    @Test
+    fun `finner tilstand på ferdigstilt oppgave`() {
+        val oppgave = Oppgave.ny(
+            id = nextLong(),
+            vedtaksperiodeId = vedtaksperiodeId,
+            behandlingId = behandlingId,
+            utbetalingId = utbetalingId,
+            hendelseId = godkjenningsbehovId,
+            kanAvvises = true,
+            egenskaper = setOf(SØKNAD)
+        )
+        oppgave.avventerSystem(saksbehandler.ident(), saksbehandler.oid)
+        oppgave.ferdigstill()
+        repository.lagre(oppgave)
+
+        val oppgaveTilstand = repository.finnSisteOppgaveTilstandForUtbetaling(utbetalingId)
+        assertEquals(Oppgave.Ferdigstilt::class, oppgaveTilstand?.let { it::class })
+    }
+
+    @Test
+    fun `finner tilstand på invalidert oppgave`() {
+        val oppgave = Oppgave.ny(
+            id = nextLong(),
+            vedtaksperiodeId = vedtaksperiodeId,
+            behandlingId = behandlingId,
+            utbetalingId = utbetalingId,
+            hendelseId = godkjenningsbehovId,
+            kanAvvises = true,
+            egenskaper = setOf(SØKNAD)
+        )
+        oppgave.avventerSystem(saksbehandler.ident(), saksbehandler.oid)
+        oppgave.avbryt()
+        repository.lagre(oppgave)
+
+        val oppgaveTilstand = repository.finnSisteOppgaveTilstandForUtbetaling(utbetalingId)
+        assertEquals(Oppgave.Invalidert::class, oppgaveTilstand?.let { it::class })
+    }
+
+    @Test
+    fun `finner tilstand på ferdigstilt oppgave når det finnes en tidligere invalidert oppgave`() {
+        val oppgaveId = nextLong()
+        val gammelOppgave = Oppgave.ny(
+            id = oppgaveId,
+            vedtaksperiodeId = vedtaksperiodeId,
+            behandlingId = behandlingId,
+            utbetalingId = utbetalingId,
+            hendelseId = godkjenningsbehovId,
+            kanAvvises = true,
+            egenskaper = setOf(SØKNAD)
+        )
+        gammelOppgave.avventerSystem(saksbehandler.ident(), saksbehandler.oid)
+        gammelOppgave.avbryt()
+        repository.lagre(gammelOppgave)
+
+        val oppgave = Oppgave.ny(
+            id = oppgaveId+1,
+            vedtaksperiodeId = vedtaksperiodeId,
+            behandlingId = behandlingId,
+            utbetalingId = utbetalingId,
+            hendelseId = godkjenningsbehovId,
+            kanAvvises = true,
+            egenskaper = setOf(SØKNAD)
+        )
+        oppgave.avventerSystem(saksbehandler.ident(), saksbehandler.oid)
+        oppgave.ferdigstill()
+        repository.lagre(oppgave)
+
+        val oppgaveTilstand = repository.finnSisteOppgaveTilstandForUtbetaling(utbetalingId)
+        assertEquals(Oppgave.Ferdigstilt::class, oppgaveTilstand?.let { it::class })
+    }
+
+    @Test
+    fun `gir null som tilstand når det ikke finnes noen oppgave for utbetalingen`() {
+        val oppgaveTilstand = repository.finnSisteOppgaveTilstandForUtbetaling(utbetalingId)
+        assertEquals(null, oppgaveTilstand?.let { it::class })
+    }
 }

@@ -106,15 +106,6 @@ class PgOppgaveDao internal constructor(
             "oppgaveId" to oppgaveId,
         ).single { row -> row.uuid("vedtaksperiode_id") }
 
-    override fun harGyldigOppgave(utbetalingId: UUID) =
-        asSQL(
-            """
-            SELECT COUNT(1) AS oppgave_count FROM oppgave
-            WHERE utbetaling_id = :utbetalingId AND status IN('AvventerSystem'::oppgavestatus, 'AvventerSaksbehandler'::oppgavestatus, 'Ferdigstilt'::oppgavestatus)
-            """,
-            "utbetalingId" to utbetalingId,
-        ).single { it.int("oppgave_count") } > 0
-
     override fun finnHendelseId(id: Long): UUID =
         asSQL(
             "SELECT hendelse_id_godkjenningsbehov FROM oppgave WHERE id = :oppgaveId",

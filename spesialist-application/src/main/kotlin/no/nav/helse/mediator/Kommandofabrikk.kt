@@ -354,6 +354,7 @@ class Kommandofabrikk(
             påVentDao = sessionContext.påVentDao,
             overstyringDao = sessionContext.overstyringDao,
             automatiseringDao = sessionContext.automatiseringDao,
+            oppgaveRepository = sessionContext.oppgaveRepository,
             oppgaveDao = sessionContext.oppgaveDao,
             periodehistorikkDao = sessionContext.periodehistorikkDao,
             totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository,

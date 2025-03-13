@@ -17,8 +17,6 @@ interface OppgaveDao {
 
     fun finnVedtaksperiodeId(oppgaveId: Long): UUID
 
-    fun harGyldigOppgave(utbetalingId: UUID): Boolean
-
     fun finnHendelseId(id: Long): UUID
 
     fun invaliderOppgaveFor(fødselsnummer: String)

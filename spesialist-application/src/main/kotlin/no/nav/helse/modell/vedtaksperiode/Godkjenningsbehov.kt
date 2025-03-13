@@ -24,6 +24,7 @@ import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
+import no.nav.helse.mediator.oppgave.OppgaveRepository
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.InntektskildeDto.Companion.gjenopprett
 import no.nav.helse.modell.automatisering.Automatisering
@@ -215,6 +216,7 @@ internal class GodkjenningsbehovCommand(
     påVentDao: PåVentDao,
     overstyringDao: OverstyringDao,
     automatiseringDao: AutomatiseringDao,
+    oppgaveRepository: OppgaveRepository,
     oppgaveDao: OppgaveDao,
     periodehistorikkDao: PeriodehistorikkDao,
     totrinnsvurderingRepository: TotrinnsvurderingRepository,
@@ -240,6 +242,7 @@ internal class GodkjenningsbehovCommand(
             VurderVidereBehandlingAvGodkjenningsbehov(
                 commandData = behovData,
                 utbetalingDao = utbetalingDao,
+                oppgaveRepository = oppgaveRepository,
                 oppgaveDao = oppgaveDao,
                 vedtakDao = vedtakDao,
             ),

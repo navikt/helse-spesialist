@@ -771,17 +771,6 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
     }
 
     @Test
-    fun `sjekker om det fins aktiv oppgave med to oppgaver`() {
-        val utbetalingId = UUID.randomUUID()
-        val oppgave = nyOppgaveForNyPerson()
-            .avventSystemOgLagre(legacySaksbehandler)
-            .ferdigstillOgLagre()
-
-        opprettOppgave(vedtaksperiodeId = oppgave.vedtaksperiodeId, utbetalingId = utbetalingId)
-        assertTrue(oppgaveDao.harGyldigOppgave(utbetalingId))
-    }
-
-    @Test
     fun `sjekker at det ikke fins ferdigstilt oppgave`() {
         val oppgave = nyOppgaveForNyPerson()
 
