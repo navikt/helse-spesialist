@@ -1,6 +1,4 @@
-@file:Suppress("unused")
-
-package no.nav.helse.modell
+package no.nav.helse.spesialist.testhjelp
 
 import java.time.LocalDate
 

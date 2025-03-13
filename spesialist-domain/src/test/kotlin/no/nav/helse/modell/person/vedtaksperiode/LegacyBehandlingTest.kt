@@ -1,9 +1,6 @@
 package no.nav.helse.modell.person.vedtaksperiode
 
 import io.mockk.mockk
-import no.nav.helse.modell.des
-import no.nav.helse.modell.feb
-import no.nav.helse.modell.jan
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.AKTIV
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.VURDERT
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_EX_1
@@ -14,6 +11,9 @@ import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.finnSist
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.harMedlemskapsvarsel
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.harÅpenGosysOppgave
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.kreverSkjønnsfastsettelse
+import no.nav.helse.spesialist.testhjelp.des
+import no.nav.helse.spesialist.testhjelp.feb
+import no.nav.helse.spesialist.testhjelp.jan
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals

@@ -1,7 +1,7 @@
 package no.nav.helse.modell.person.vedtaksperiode
 
-import no.nav.helse.modell.jan
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
+import no.nav.helse.spesialist.testhjelp.jan
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

@@ -1,7 +1,7 @@
 package no.nav.helse.modell.person.vedtaksperiode
 
-import no.nav.helse.modell.feb
-import no.nav.helse.modell.jan
+import no.nav.helse.spesialist.testhjelp.feb
+import no.nav.helse.spesialist.testhjelp.jan
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test

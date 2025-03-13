@@ -1,6 +1,5 @@
 package no.nav.helse.modell.vedtak
 
-import no.nav.helse.modell.jan
 import no.nav.helse.modell.melding.Sykepengevedtak
 import no.nav.helse.modell.melding.Sykepengevedtak.VedtakMedSkjønnsvurdering
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Infotrygd
@@ -8,6 +7,7 @@ import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Spleis
 import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
 import no.nav.helse.modell.vilkårsprøving.Inntekt
 import no.nav.helse.modell.vilkårsprøving.Sammenligningsgrunnlag
+import no.nav.helse.spesialist.testhjelp.jan
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test

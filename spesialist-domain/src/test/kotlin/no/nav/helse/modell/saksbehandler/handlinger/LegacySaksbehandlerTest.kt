@@ -1,6 +1,5 @@
 package no.nav.helse.modell.saksbehandler.handlinger
 
-import no.nav.helse.modell.jan
 import no.nav.helse.modell.melding.LagtPåVentEvent
 import no.nav.helse.modell.melding.MinimumSykdomsgradVurdertEvent
 import no.nav.helse.modell.melding.OverstyrtArbeidsforholdEvent
@@ -15,6 +14,7 @@ import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler.Companion.gjenopprett
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler.Companion.toDto
+import no.nav.helse.spesialist.testhjelp.jan
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
