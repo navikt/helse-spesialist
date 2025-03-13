@@ -1,18 +1,6 @@
-package no.nav.helse.spesialist.api
+package no.nav.helse.mediator.oppgave
 
 import no.nav.helse.db.EgenskapForDatabase
-import no.nav.helse.db.EgenskapForDatabase.DELVIS_REFUSJON
-import no.nav.helse.db.EgenskapForDatabase.EN_ARBEIDSGIVER
-import no.nav.helse.db.EgenskapForDatabase.FLERE_ARBEIDSGIVERE
-import no.nav.helse.db.EgenskapForDatabase.FORLENGELSE
-import no.nav.helse.db.EgenskapForDatabase.FORSTEGANGSBEHANDLING
-import no.nav.helse.db.EgenskapForDatabase.INFOTRYGDFORLENGELSE
-import no.nav.helse.db.EgenskapForDatabase.INGEN_UTBETALING
-import no.nav.helse.db.EgenskapForDatabase.OVERGANG_FRA_IT
-import no.nav.helse.db.EgenskapForDatabase.REVURDERING
-import no.nav.helse.db.EgenskapForDatabase.SØKNAD
-import no.nav.helse.db.EgenskapForDatabase.UTBETALING_TIL_ARBEIDSGIVER
-import no.nav.helse.db.EgenskapForDatabase.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.db.KommentarFraDatabase
 import no.nav.helse.db.OppgaveFraDatabaseForVisning
 import no.nav.helse.db.PaVentInfoFraDatabase
@@ -28,7 +16,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveegenskap
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavetype
 import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodetype
 import no.nav.helse.spesialist.api.graphql.schema.ApiPersonnavn
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
@@ -59,7 +47,12 @@ internal class OppgaveMapperTest {
                 aktørId = aktørId,
                 vedtaksperiodeId = vedtaksperiodeId,
                 navn = PersonnavnFraDatabase(fornavn, mellomnavn, etternavn),
-                egenskaper = setOf(SØKNAD, DELVIS_REFUSJON, FORSTEGANGSBEHANDLING, EN_ARBEIDSGIVER),
+                egenskaper = setOf(
+                    EgenskapForDatabase.SØKNAD,
+                    EgenskapForDatabase.DELVIS_REFUSJON,
+                    EgenskapForDatabase.FORSTEGANGSBEHANDLING,
+                    EgenskapForDatabase.EN_ARBEIDSGIVER
+                ),
                 tildelt = saksbehandler,
                 påVent = true,
                 opprettet = opprettet,
@@ -86,20 +79,20 @@ internal class OppgaveMapperTest {
                     ),
             )
         val oppgaverTilBehandling = listOf(oppgaveFraDatabaseForVisning).tilOppgaverTilBehandling()
-        assertEquals(1, oppgaverTilBehandling.size)
+        Assertions.assertEquals(1, oppgaverTilBehandling.size)
         val oppgaveTilBehandling = oppgaverTilBehandling.single()
-        assertEquals(oppgaveId.toString(), oppgaveTilBehandling.id)
-        assertEquals(aktørId, oppgaveTilBehandling.aktorId)
-        assertEquals(vedtaksperiodeId, oppgaveTilBehandling.vedtaksperiodeId)
-        assertEquals(ApiPersonnavn("fornavn", "etternavn", "mellomnavn"), oppgaveTilBehandling.navn)
-        assertEquals(opprettet, oppgaveTilBehandling.opprettet)
-        assertEquals(opprinneligSøknadsdato, oppgaveTilBehandling.opprinneligSoknadsdato)
-        assertEquals(tidsfrist, oppgaveTilBehandling.tidsfrist)
-        assertEquals(ApiAntallArbeidsforhold.ET_ARBEIDSFORHOLD, oppgaveTilBehandling.antallArbeidsforhold)
-        assertEquals(ApiMottaker.BEGGE, oppgaveTilBehandling.mottaker)
-        assertEquals(ApiOppgavetype.SOKNAD, oppgaveTilBehandling.oppgavetype)
-        assertEquals(ApiPeriodetype.FORSTEGANGSBEHANDLING, oppgaveTilBehandling.periodetype)
-        assertEquals(
+        Assertions.assertEquals(oppgaveId.toString(), oppgaveTilBehandling.id)
+        Assertions.assertEquals(aktørId, oppgaveTilBehandling.aktorId)
+        Assertions.assertEquals(vedtaksperiodeId, oppgaveTilBehandling.vedtaksperiodeId)
+        Assertions.assertEquals(ApiPersonnavn("fornavn", "etternavn", "mellomnavn"), oppgaveTilBehandling.navn)
+        Assertions.assertEquals(opprettet, oppgaveTilBehandling.opprettet)
+        Assertions.assertEquals(opprinneligSøknadsdato, oppgaveTilBehandling.opprinneligSoknadsdato)
+        Assertions.assertEquals(tidsfrist, oppgaveTilBehandling.tidsfrist)
+        Assertions.assertEquals(ApiAntallArbeidsforhold.ET_ARBEIDSFORHOLD, oppgaveTilBehandling.antallArbeidsforhold)
+        Assertions.assertEquals(ApiMottaker.BEGGE, oppgaveTilBehandling.mottaker)
+        Assertions.assertEquals(ApiOppgavetype.SOKNAD, oppgaveTilBehandling.oppgavetype)
+        Assertions.assertEquals(ApiPeriodetype.FORSTEGANGSBEHANDLING, oppgaveTilBehandling.periodetype)
+        Assertions.assertEquals(
             setOf(
                 ApiOppgaveegenskap(ApiEgenskap.SOKNAD, ApiKategori.Oppgavetype),
                 ApiOppgaveegenskap(ApiEgenskap.FORSTEGANGSBEHANDLING, ApiKategori.Periodetype),
@@ -108,34 +101,34 @@ internal class OppgaveMapperTest {
             ),
             oppgaveTilBehandling.egenskaper.toSet(),
         )
-        assertEquals(listOf("årsak"), oppgaveTilBehandling.paVentInfo?.arsaker)
-        assertEquals("tekst", oppgaveTilBehandling.paVentInfo?.tekst)
-        assertEquals(1, oppgaveTilBehandling.paVentInfo?.dialogRef)
-        assertEquals(saksbehandler.ident, oppgaveTilBehandling.paVentInfo?.saksbehandler)
-        assertEquals(opprettet, oppgaveTilBehandling.paVentInfo?.opprettet)
-        assertEquals(tidsfrist, oppgaveTilBehandling.paVentInfo?.tidsfrist)
-        assertEquals(
+        Assertions.assertEquals(listOf("årsak"), oppgaveTilBehandling.paVentInfo?.arsaker)
+        Assertions.assertEquals("tekst", oppgaveTilBehandling.paVentInfo?.tekst)
+        Assertions.assertEquals(1, oppgaveTilBehandling.paVentInfo?.dialogRef)
+        Assertions.assertEquals(saksbehandler.ident, oppgaveTilBehandling.paVentInfo?.saksbehandler)
+        Assertions.assertEquals(opprettet, oppgaveTilBehandling.paVentInfo?.opprettet)
+        Assertions.assertEquals(tidsfrist, oppgaveTilBehandling.paVentInfo?.tidsfrist)
+        Assertions.assertEquals(
             1,
             oppgaveTilBehandling.paVentInfo
                 ?.kommentarer
                 ?.first()
                 ?.id,
         )
-        assertEquals(
+        Assertions.assertEquals(
             opprettet,
             oppgaveTilBehandling.paVentInfo
                 ?.kommentarer
                 ?.first()
                 ?.opprettet,
         )
-        assertEquals(
+        Assertions.assertEquals(
             "kommentar",
             oppgaveTilBehandling.paVentInfo
                 ?.kommentarer
                 ?.first()
                 ?.tekst,
         )
-        assertEquals(
+        Assertions.assertEquals(
             saksbehandler.ident,
             oppgaveTilBehandling.paVentInfo
                 ?.kommentarer
@@ -157,7 +150,12 @@ internal class OppgaveMapperTest {
                 aktørId = aktørId,
                 vedtaksperiodeId = vedtaksperiodeId,
                 navn = PersonnavnFraDatabase(fornavn, mellomnavn, etternavn),
-                egenskaper = setOf(egenskapSomMapperTilPeriodetype, DELVIS_REFUSJON, SØKNAD, EN_ARBEIDSGIVER),
+                egenskaper = setOf(
+                    egenskapSomMapperTilPeriodetype,
+                    EgenskapForDatabase.DELVIS_REFUSJON,
+                    EgenskapForDatabase.SØKNAD,
+                    EgenskapForDatabase.EN_ARBEIDSGIVER
+                ),
                 tildelt = saksbehandler,
                 påVent = false,
                 opprettet = opprettet,
@@ -167,9 +165,12 @@ internal class OppgaveMapperTest {
                 paVentInfo = null,
             )
         val oppgaverTilBehandling = listOf(oppgaveFraDatabaseForVisning).tilOppgaverTilBehandling()
-        assertEquals(1, oppgaverTilBehandling.size)
+        Assertions.assertEquals(1, oppgaverTilBehandling.size)
         val oppgaveTilBehandling = oppgaverTilBehandling.single()
-        assertEquals(enumValueOf<ApiPeriodetype>(egenskapSomMapperTilPeriodetype.name), oppgaveTilBehandling.periodetype)
+        Assertions.assertEquals(
+            enumValueOf<ApiPeriodetype>(egenskapSomMapperTilPeriodetype.name),
+            oppgaveTilBehandling.periodetype
+        )
     }
 
     @ParameterizedTest
@@ -187,7 +188,12 @@ internal class OppgaveMapperTest {
                 aktørId = aktørId,
                 vedtaksperiodeId = vedtaksperiodeId,
                 navn = PersonnavnFraDatabase(fornavn, mellomnavn, etternavn),
-                egenskaper = setOf(egenskapSomMapperTilPeriodetype, DELVIS_REFUSJON, SØKNAD, EN_ARBEIDSGIVER),
+                egenskaper = setOf(
+                    egenskapSomMapperTilPeriodetype,
+                    EgenskapForDatabase.DELVIS_REFUSJON,
+                    EgenskapForDatabase.SØKNAD,
+                    EgenskapForDatabase.EN_ARBEIDSGIVER
+                ),
                 tildelt = saksbehandler,
                 påVent = false,
                 opprettet = opprettet,
@@ -206,8 +212,8 @@ internal class OppgaveMapperTest {
     fun `map til oppgavetype`(egenskapSomMapperTilOppgavetype: EgenskapForDatabase) {
         val map =
             mapOf(
-                SØKNAD to ApiOppgavetype.SOKNAD,
-                REVURDERING to ApiOppgavetype.REVURDERING,
+                EgenskapForDatabase.SØKNAD to ApiOppgavetype.SOKNAD,
+                EgenskapForDatabase.REVURDERING to ApiOppgavetype.REVURDERING,
             )
         val (fornavn, mellomnavn, etternavn) = navn
         val oppgaveFraDatabaseForVisning =
@@ -219,9 +225,9 @@ internal class OppgaveMapperTest {
                 egenskaper =
                     setOf(
                         egenskapSomMapperTilOppgavetype,
-                        DELVIS_REFUSJON,
-                        FORSTEGANGSBEHANDLING,
-                        EN_ARBEIDSGIVER,
+                        EgenskapForDatabase.DELVIS_REFUSJON,
+                        EgenskapForDatabase.FORSTEGANGSBEHANDLING,
+                        EgenskapForDatabase.EN_ARBEIDSGIVER,
                     ),
                 tildelt = saksbehandler,
                 påVent = false,
@@ -232,9 +238,9 @@ internal class OppgaveMapperTest {
                 paVentInfo = null,
             )
         val oppgaverTilBehandling = listOf(oppgaveFraDatabaseForVisning).tilOppgaverTilBehandling()
-        assertEquals(1, oppgaverTilBehandling.size)
+        Assertions.assertEquals(1, oppgaverTilBehandling.size)
         val oppgaveTilBehandling = oppgaverTilBehandling.single()
-        assertEquals(map[egenskapSomMapperTilOppgavetype], oppgaveTilBehandling.oppgavetype)
+        Assertions.assertEquals(map[egenskapSomMapperTilOppgavetype], oppgaveTilBehandling.oppgavetype)
     }
 
     @ParameterizedTest
@@ -247,37 +253,37 @@ internal class OppgaveMapperTest {
             setOfNotNull(
                 if (egenskapSomIkkeMapperTilOppgavetype in
                     listOf(
-                        INFOTRYGDFORLENGELSE,
-                        FORLENGELSE,
-                        FORSTEGANGSBEHANDLING,
-                        OVERGANG_FRA_IT,
+                        EgenskapForDatabase.INFOTRYGDFORLENGELSE,
+                        EgenskapForDatabase.FORLENGELSE,
+                        EgenskapForDatabase.FORSTEGANGSBEHANDLING,
+                        EgenskapForDatabase.OVERGANG_FRA_IT,
                     )
                 ) {
                     null
                 } else {
-                    FORSTEGANGSBEHANDLING
+                    EgenskapForDatabase.FORSTEGANGSBEHANDLING
                 },
                 if (egenskapSomIkkeMapperTilOppgavetype in
                     listOf(
-                        DELVIS_REFUSJON,
-                        UTBETALING_TIL_SYKMELDT,
-                        UTBETALING_TIL_ARBEIDSGIVER,
-                        INGEN_UTBETALING,
+                        EgenskapForDatabase.DELVIS_REFUSJON,
+                        EgenskapForDatabase.UTBETALING_TIL_SYKMELDT,
+                        EgenskapForDatabase.UTBETALING_TIL_ARBEIDSGIVER,
+                        EgenskapForDatabase.INGEN_UTBETALING,
                     )
                 ) {
                     null
                 } else {
-                    DELVIS_REFUSJON
+                    EgenskapForDatabase.DELVIS_REFUSJON
                 },
                 if (egenskapSomIkkeMapperTilOppgavetype in
                     listOf(
-                        EN_ARBEIDSGIVER,
-                        FLERE_ARBEIDSGIVERE,
+                        EgenskapForDatabase.EN_ARBEIDSGIVER,
+                        EgenskapForDatabase.FLERE_ARBEIDSGIVERE,
                     )
                 ) {
                     null
                 } else {
-                    EN_ARBEIDSGIVER
+                    EgenskapForDatabase.EN_ARBEIDSGIVER
                 },
             )
         val (fornavn, mellomnavn, etternavn) = navn
@@ -306,8 +312,8 @@ internal class OppgaveMapperTest {
     fun `map til antallArbeidsforhold`(egenskapSomMapperTilAntallArbeidsforhold: EgenskapForDatabase) {
         val map =
             mapOf(
-                EN_ARBEIDSGIVER to ApiAntallArbeidsforhold.ET_ARBEIDSFORHOLD,
-                FLERE_ARBEIDSGIVERE to ApiAntallArbeidsforhold.FLERE_ARBEIDSFORHOLD,
+                EgenskapForDatabase.EN_ARBEIDSGIVER to ApiAntallArbeidsforhold.ET_ARBEIDSFORHOLD,
+                EgenskapForDatabase.FLERE_ARBEIDSGIVERE to ApiAntallArbeidsforhold.FLERE_ARBEIDSFORHOLD,
             )
         val (fornavn, mellomnavn, etternavn) = navn
         val oppgaveFraDatabaseForVisning =
@@ -319,9 +325,9 @@ internal class OppgaveMapperTest {
                 egenskaper =
                     setOf(
                         egenskapSomMapperTilAntallArbeidsforhold,
-                        DELVIS_REFUSJON,
-                        FORSTEGANGSBEHANDLING,
-                        SØKNAD,
+                        EgenskapForDatabase.DELVIS_REFUSJON,
+                        EgenskapForDatabase.FORSTEGANGSBEHANDLING,
+                        EgenskapForDatabase.SØKNAD,
                     ),
                 tildelt = saksbehandler,
                 påVent = false,
@@ -332,9 +338,12 @@ internal class OppgaveMapperTest {
                 paVentInfo = null,
             )
         val oppgaverTilBehandling = listOf(oppgaveFraDatabaseForVisning).tilOppgaverTilBehandling()
-        assertEquals(1, oppgaverTilBehandling.size)
+        Assertions.assertEquals(1, oppgaverTilBehandling.size)
         val oppgaveTilBehandling = oppgaverTilBehandling.single()
-        assertEquals(map[egenskapSomMapperTilAntallArbeidsforhold], oppgaveTilBehandling.antallArbeidsforhold)
+        Assertions.assertEquals(
+            map[egenskapSomMapperTilAntallArbeidsforhold],
+            oppgaveTilBehandling.antallArbeidsforhold
+        )
     }
 
     @ParameterizedTest
@@ -347,29 +356,32 @@ internal class OppgaveMapperTest {
             setOfNotNull(
                 if (egenskapSomIkkeMapperTilAntallArbeidsforhold in
                     listOf(
-                        INFOTRYGDFORLENGELSE,
-                        FORLENGELSE,
-                        FORSTEGANGSBEHANDLING,
-                        OVERGANG_FRA_IT,
+                        EgenskapForDatabase.INFOTRYGDFORLENGELSE,
+                        EgenskapForDatabase.FORLENGELSE,
+                        EgenskapForDatabase.FORSTEGANGSBEHANDLING,
+                        EgenskapForDatabase.OVERGANG_FRA_IT,
                     )
                 ) {
                     null
                 } else {
-                    FORSTEGANGSBEHANDLING
+                    EgenskapForDatabase.FORSTEGANGSBEHANDLING
                 },
                 if (egenskapSomIkkeMapperTilAntallArbeidsforhold in
                     listOf(
-                        DELVIS_REFUSJON,
-                        UTBETALING_TIL_SYKMELDT,
-                        UTBETALING_TIL_ARBEIDSGIVER,
-                        INGEN_UTBETALING,
+                        EgenskapForDatabase.DELVIS_REFUSJON,
+                        EgenskapForDatabase.UTBETALING_TIL_SYKMELDT,
+                        EgenskapForDatabase.UTBETALING_TIL_ARBEIDSGIVER,
+                        EgenskapForDatabase.INGEN_UTBETALING,
                     )
                 ) {
                     null
                 } else {
-                    DELVIS_REFUSJON
+                    EgenskapForDatabase.DELVIS_REFUSJON
                 },
-                if (egenskapSomIkkeMapperTilAntallArbeidsforhold in listOf(SØKNAD, REVURDERING)) null else SØKNAD,
+                if (egenskapSomIkkeMapperTilAntallArbeidsforhold in listOf(
+                        EgenskapForDatabase.SØKNAD,
+                        EgenskapForDatabase.REVURDERING
+                    )) null else EgenskapForDatabase.SØKNAD,
             )
         val (fornavn, mellomnavn, etternavn) = navn
         val oppgaveFraDatabaseForVisning =
@@ -394,10 +406,15 @@ internal class OppgaveMapperTest {
 
     @Test
     fun `map EgenskapForDatabase til OppgaveEgenskap (api)`() {
-        val egenskaperForDatabase = setOf(SØKNAD, DELVIS_REFUSJON, FORSTEGANGSBEHANDLING, EN_ARBEIDSGIVER)
+        val egenskaperForDatabase = setOf(
+            EgenskapForDatabase.SØKNAD,
+            EgenskapForDatabase.DELVIS_REFUSJON,
+            EgenskapForDatabase.FORSTEGANGSBEHANDLING,
+            EgenskapForDatabase.EN_ARBEIDSGIVER
+        )
         val oppgaveEgenskaper = egenskaperForDatabase.tilEgenskaperForVisning()
 
-        assertEquals(
+        Assertions.assertEquals(
             setOf(
                 ApiOppgaveegenskap(ApiEgenskap.SOKNAD, ApiKategori.Oppgavetype),
                 ApiOppgaveegenskap(ApiEgenskap.FORSTEGANGSBEHANDLING, ApiKategori.Periodetype),

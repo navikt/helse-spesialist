@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.api
+package no.nav.helse.mediator.dokument
 
 import io.mockk.every
 import io.mockk.mockk
@@ -6,11 +6,12 @@ import io.mockk.verify
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.DokumentDao
 import no.nav.helse.mediator.KommandokjedeEndretEvent
-import no.nav.helse.mediator.dokument.DokumentMediator
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.modell.melding.UtgåendeHendelse
-import org.junit.jupiter.api.Assertions.assertEquals
+import no.nav.helse.spesialist.api.lagFødselsnummer
+import no.nav.helse.spesialist.api.objectMapper
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
@@ -59,28 +60,28 @@ internal class DokumentMediatorTest {
     fun `Sender behov dersom dokumentet ikke finnes i databasen`() {
         every { dokumentDao.hent(any(), any()) } returns null
         mediator.håndter(FNR, DOKUMENTID, DOKUMENTTYPE)
-        assertEquals(1, meldingPubliserer.antallMeldinger)
+        Assertions.assertEquals(1, meldingPubliserer.antallMeldinger)
     }
 
     @Test
     fun `Sender nytt behov dersom dokumentet i databasen er tomt`() {
         every { dokumentDao.hent(any(), any()) } returns objectMapper.createObjectNode()
         mediator.håndter(FNR, DOKUMENTID, DOKUMENTTYPE)
-        assertEquals(1, meldingPubliserer.antallMeldinger)
+        Assertions.assertEquals(1, meldingPubliserer.antallMeldinger)
     }
 
     @Test
     fun `Sender nytt behov dersom dokumentet i databasen ikke har 404 error`() {
         every { dokumentDao.hent(any(), any()) } returns objectMapper.createObjectNode().put("error", 403)
         mediator.håndter(FNR, DOKUMENTID, DOKUMENTTYPE)
-        assertEquals(1, meldingPubliserer.antallMeldinger)
+        Assertions.assertEquals(1, meldingPubliserer.antallMeldinger)
     }
 
     @Test
     fun `Sender ikke nytt behov dersom dokumentet i databasen har 404 error`() {
         every { dokumentDao.hent(any(), any()) } returns objectMapper.createObjectNode().put("error", 404)
         mediator.håndter(FNR, DOKUMENTID, DOKUMENTTYPE)
-        assertEquals(0, meldingPubliserer.antallMeldinger)
+        Assertions.assertEquals(0, meldingPubliserer.antallMeldinger)
     }
 
     @Test
@@ -92,6 +93,6 @@ internal class DokumentMediatorTest {
             dokumentDao.hent(any(), any())
         }
 
-        assertEquals(0, meldingPubliserer.antallMeldinger)
+        Assertions.assertEquals(0, meldingPubliserer.antallMeldinger)
     }
 }

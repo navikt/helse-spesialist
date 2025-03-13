@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.api
+package no.nav.helse.modell.stoppautomatiskbehandling
 
 import io.mockk.every
 import io.mockk.mockk
@@ -8,18 +8,13 @@ import no.nav.helse.db.NotatDao
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.StansAutomatiskBehandlingFraDatabase
-import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 import no.nav.helse.modell.saksbehandler.handlinger.OpphevStans
-import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlinghåndtererImpl
-import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak
-import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.AKTIVITETSKRAV
-import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak.MEDISINSK_VILKAR
 import no.nav.helse.spesialist.domain.NotatType
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertTrue
+import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime.now
-import java.util.UUID.randomUUID
+import java.time.LocalDateTime
+import java.util.UUID
 
 class StansAutomatiskBehandlinghåndtererImplTest {
     private val stansAutomatiskBehandlingDao = mockk<StansAutomatiskBehandlingDao>(relaxed = true)
@@ -41,7 +36,7 @@ class StansAutomatiskBehandlinghåndtererImplTest {
 
     @Test
     fun `Lagrer melding og notat når stans oppheves fra speil`() {
-        val oid = randomUUID()
+        val oid = UUID.randomUUID()
         stansAutomatiskBehandlinghåndterer.håndter(
             handling = OpphevStans(FNR, "begrunnelse"),
             legacySaksbehandler =
@@ -70,14 +65,14 @@ class StansAutomatiskBehandlinghåndtererImplTest {
     fun `Kan stanses på nytt etter stans er opphevet`() {
         every { stansAutomatiskBehandlingDao.hentFor(FNR) } returns
                 meldinger(
-                    stans(MEDISINSK_VILKAR),
+                    stans(StoppknappÅrsak.MEDISINSK_VILKAR),
                     opphevStans(),
-                    stans(AKTIVITETSKRAV),
+                    stans(StoppknappÅrsak.AKTIVITETSKRAV),
                 )
         val dataTilSpeil = stansAutomatiskBehandlinghåndterer.unntattFraAutomatiskGodkjenning(FNR)
 
-        assertTrue(dataTilSpeil.erUnntatt)
-        assertEquals(listOf(AKTIVITETSKRAV.name), dataTilSpeil.arsaker)
+        Assertions.assertTrue(dataTilSpeil.erUnntatt)
+        Assertions.assertEquals(listOf(StoppknappÅrsak.AKTIVITETSKRAV.name), dataTilSpeil.arsaker)
     }
 
     private fun stans(vararg årsaker: StoppknappÅrsak) = "STOPP_AUTOMATIKK" to årsaker.toSet()
@@ -90,8 +85,8 @@ class StansAutomatiskBehandlinghåndtererImplTest {
                 FNR,
                 it.first,
                 it.second,
-                now(),
-                randomUUID().toString(),
+                LocalDateTime.now(),
+                UUID.randomUUID().toString(),
             )
         }
 }
