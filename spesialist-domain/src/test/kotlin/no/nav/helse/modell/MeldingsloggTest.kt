@@ -12,7 +12,7 @@ class MeldingsloggTest {
     fun `kan legge til og hente ut hendelser fra meldingsloggen`() {
         val logg = Meldingslogg()
         val hendelse = VedtaksperiodeGodkjentAutomatisk(
-            fødselsnummer = lagFødselsnummer(),
+            fødselsnummer = no.nav.helse.spesialist.testhjelp.lagFødselsnummer(),
             vedtaksperiodeId = UUID.randomUUID(),
             behandlingId = UUID.randomUUID(),
             periodetype = "FORLENGELSE"

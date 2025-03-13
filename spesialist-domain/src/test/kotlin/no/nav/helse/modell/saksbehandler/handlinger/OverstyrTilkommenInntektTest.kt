@@ -1,8 +1,5 @@
 package no.nav.helse.modell.saksbehandler.handlinger
 
-import no.nav.helse.modell.lagAktørId
-import no.nav.helse.modell.lagFødselsnummer
-import no.nav.helse.modell.lagOrganisasjonsnummer
 import no.nav.helse.modell.melding.InntektsendringerEvent
 import no.nav.helse.modell.melding.InntektsendringerEvent.Inntektskildeendring
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrTilkommenInntekt.FjernetInntekt
@@ -12,6 +9,9 @@ import no.nav.helse.spesialist.testhjelp.apr
 import no.nav.helse.spesialist.testhjelp.feb
 import no.nav.helse.spesialist.testhjelp.jan
 import no.nav.helse.spesialist.testhjelp.jun
+import no.nav.helse.spesialist.testhjelp.lagAktørId
+import no.nav.helse.spesialist.testhjelp.lagFødselsnummer
+import no.nav.helse.spesialist.testhjelp.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.testhjelp.mai
 import no.nav.helse.spesialist.testhjelp.mar
 import java.util.UUID
