@@ -2,7 +2,7 @@ package no.nav.helse.spesialist.db.dao.api
 
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
-import no.nav.helse.spesialist.db.jan
+import no.nav.helse.spesialist.testhjelp.jan
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull

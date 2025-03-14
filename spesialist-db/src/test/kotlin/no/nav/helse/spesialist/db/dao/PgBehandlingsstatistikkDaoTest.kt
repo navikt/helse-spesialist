@@ -8,7 +8,7 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
-import no.nav.helse.spesialist.db.lagFødselsnummer
+import no.nav.helse.spesialist.testhjelp.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -68,7 +68,7 @@ internal class PgBehandlingsstatistikkDaoTest : AbstractDBIntegrationTest() {
     }
 
     @Test
-    fun`Får antall tilgjengelige beslutteroppgaver`() {
+    fun `Får antall tilgjengelige beslutteroppgaver`() {
         val fødselsnummer = lagFødselsnummer()
         val saksbehandler = nyLegacySaksbehandler()
         val beslutter = nyLegacySaksbehandler()
@@ -87,7 +87,7 @@ internal class PgBehandlingsstatistikkDaoTest : AbstractDBIntegrationTest() {
     }
 
     @Test
-    fun`Får antall fullførte beslutteroppgaver`() {
+    fun `Får antall fullførte beslutteroppgaver`() {
         val fødselsnummer = lagFødselsnummer()
         val saksbehandler = nyLegacySaksbehandler()
         val beslutter = nyLegacySaksbehandler()

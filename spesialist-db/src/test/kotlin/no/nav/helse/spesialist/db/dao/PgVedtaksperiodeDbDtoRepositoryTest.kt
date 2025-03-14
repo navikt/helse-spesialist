@@ -4,11 +4,11 @@ import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
 import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
 import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
-import no.nav.helse.spesialist.db.feb
-import no.nav.helse.spesialist.db.jan
-import no.nav.helse.spesialist.db.lagAktørId
-import no.nav.helse.spesialist.db.lagFødselsnummer
-import no.nav.helse.spesialist.db.lagOrganisasjonsnummer
+import no.nav.helse.spesialist.testhjelp.feb
+import no.nav.helse.spesialist.testhjelp.jan
+import no.nav.helse.spesialist.testhjelp.lagAktørId
+import no.nav.helse.spesialist.testhjelp.lagFødselsnummer
+import no.nav.helse.spesialist.testhjelp.lagOrganisasjonsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.UUID

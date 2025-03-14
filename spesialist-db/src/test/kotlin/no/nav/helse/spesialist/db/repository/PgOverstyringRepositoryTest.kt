@@ -14,8 +14,8 @@ import no.nav.helse.modell.saksbehandler.handlinger.Refusjonselement
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
-import no.nav.helse.spesialist.db.jan
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
+import no.nav.helse.spesialist.testhjelp.jan
 import org.junit.jupiter.api.BeforeEach
 import java.time.LocalDate
 import java.time.LocalDateTime

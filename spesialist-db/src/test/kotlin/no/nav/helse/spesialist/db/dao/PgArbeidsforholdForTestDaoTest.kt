@@ -3,8 +3,8 @@ package no.nav.helse.spesialist.db.dao
 import no.nav.helse.modell.KomplettArbeidsforholdDto
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
-import no.nav.helse.spesialist.db.apr
-import no.nav.helse.spesialist.db.jan
+import no.nav.helse.spesialist.testhjelp.apr
+import no.nav.helse.spesialist.testhjelp.jan
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach

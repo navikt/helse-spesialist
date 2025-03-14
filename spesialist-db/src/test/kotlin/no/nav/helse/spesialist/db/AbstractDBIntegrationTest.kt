@@ -37,6 +37,15 @@ import no.nav.helse.spesialist.db.testfixtures.DBTestFixture
 import no.nav.helse.spesialist.domain.Dialog
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
+import no.nav.helse.spesialist.testhjelp.jan
+import no.nav.helse.spesialist.testhjelp.lagAktørId
+import no.nav.helse.spesialist.testhjelp.lagEpostadresseFraFulltNavn
+import no.nav.helse.spesialist.testhjelp.lagEtternavn
+import no.nav.helse.spesialist.testhjelp.lagFornavn
+import no.nav.helse.spesialist.testhjelp.lagFødselsnummer
+import no.nav.helse.spesialist.testhjelp.lagOrganisasjonsnummer
+import no.nav.helse.spesialist.testhjelp.lagSaksbehandlerident
+import no.nav.helse.spesialist.testhjelp.lagSaksbehandlernavn
 import no.nav.helse.spesialist.typer.Kjønn
 import org.junit.jupiter.api.AfterEach
 import java.time.LocalDate

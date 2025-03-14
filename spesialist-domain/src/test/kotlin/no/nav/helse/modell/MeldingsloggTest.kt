@@ -2,6 +2,7 @@ package no.nav.helse.modell
 
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.VedtaksperiodeGodkjentAutomatisk
+import no.nav.helse.spesialist.testhjelp.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.UUID
@@ -12,7 +13,7 @@ class MeldingsloggTest {
     fun `kan legge til og hente ut hendelser fra meldingsloggen`() {
         val logg = Meldingslogg()
         val hendelse = VedtaksperiodeGodkjentAutomatisk(
-            fødselsnummer = no.nav.helse.spesialist.testhjelp.lagFødselsnummer(),
+            fødselsnummer = lagFødselsnummer(),
             vedtaksperiodeId = UUID.randomUUID(),
             behandlingId = UUID.randomUUID(),
             periodetype = "FORLENGELSE"

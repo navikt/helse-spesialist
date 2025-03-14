@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.db.dao
 
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
-import no.nav.helse.spesialist.db.lagFødselsnummer
+import no.nav.helse.spesialist.testhjelp.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test

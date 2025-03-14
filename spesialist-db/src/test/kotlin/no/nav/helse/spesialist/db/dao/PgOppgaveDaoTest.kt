@@ -25,10 +25,10 @@ import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.db.TestMelding
-import no.nav.helse.spesialist.db.lagAktørId
-import no.nav.helse.spesialist.db.lagEtternavn
-import no.nav.helse.spesialist.db.lagFornavn
-import no.nav.helse.spesialist.db.lagFødselsnummer
+import no.nav.helse.spesialist.testhjelp.lagAktørId
+import no.nav.helse.spesialist.testhjelp.lagEtternavn
+import no.nav.helse.spesialist.testhjelp.lagFornavn
+import no.nav.helse.spesialist.testhjelp.lagFødselsnummer
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.parallel.Execution
 import org.junit.jupiter.api.parallel.ExecutionMode
@@ -619,7 +619,10 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
         nyTotrinnsvurdering(fødselsnummer, oppgave)
             .sendTilBeslutterOgLagre(legacySaksbehandler)
 
-        val oppgaver = oppgaveDao.finnOppgaverForVisning(ekskluderEgenskaper = emptyList(), saksbehandlerOid = legacySaksbehandler.oid)
+        val oppgaver = oppgaveDao.finnOppgaverForVisning(
+            ekskluderEgenskaper = emptyList(),
+            saksbehandlerOid = legacySaksbehandler.oid
+        )
         assertEquals(0, oppgaver.size)
     }
 

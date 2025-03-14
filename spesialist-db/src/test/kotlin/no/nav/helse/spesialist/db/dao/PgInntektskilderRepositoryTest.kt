@@ -13,10 +13,10 @@ import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.db.DBSessionContext
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.HelseDao.Companion.single
-import no.nav.helse.spesialist.db.jan
-import no.nav.helse.spesialist.db.lagFødselsnummer
-import no.nav.helse.spesialist.db.lagOrganisasjonsnavn
-import no.nav.helse.spesialist.db.lagOrganisasjonsnummer
+import no.nav.helse.spesialist.testhjelp.jan
+import no.nav.helse.spesialist.testhjelp.lagFødselsnummer
+import no.nav.helse.spesialist.testhjelp.lagOrganisasjonsnavn
+import no.nav.helse.spesialist.testhjelp.lagOrganisasjonsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -31,7 +31,10 @@ internal class PgInntektskilderRepositoryTest : AbstractDBIntegrationTest() {
     fun `når det ikke finnes arbeidsgivere i databasen får vi kun tilbake nye inntektskilder`() {
         val organisasjonsnummer1 = lagOrganisasjonsnummer()
         val organisasjonsnummer2 = lagOrganisasjonsnummer()
-        val funnet = inntektskilderRepository.finnInntektskilder(lagFødselsnummer(), listOf(organisasjonsnummer1, organisasjonsnummer2))
+        val funnet = inntektskilderRepository.finnInntektskilder(
+            lagFødselsnummer(),
+            listOf(organisasjonsnummer1, organisasjonsnummer2)
+        )
         assertEquals(2, funnet.size)
         assertTrue(funnet.all { it is NyInntektskildeDto })
     }
@@ -42,7 +45,10 @@ internal class PgInntektskilderRepositoryTest : AbstractDBIntegrationTest() {
         val navn = lagOrganisasjonsnavn()
 
         opprettArbeidsgiver(organisasjonsnummer, navn, listOf("Uteliv", "Reise"))
-        val funnet = inntektskilderRepository.finnInntektskilder(lagFødselsnummer(), listOf(organisasjonsnummer))
+        val funnet = inntektskilderRepository.finnInntektskilder(
+            lagFødselsnummer(),
+            listOf(organisasjonsnummer)
+        )
         assertEquals(1, funnet.size)
         val dto = funnet.single()
         check(dto is KomplettInntektskildeDto)
@@ -57,7 +63,10 @@ internal class PgInntektskilderRepositoryTest : AbstractDBIntegrationTest() {
         val navn = lagOrganisasjonsnavn()
 
         opprettArbeidsgiver(identifikator, navn, listOf("Uteliv", "Reise"))
-        val funnet = inntektskilderRepository.finnInntektskilder(lagFødselsnummer(), listOf(identifikator))
+        val funnet = inntektskilderRepository.finnInntektskilder(
+            lagFødselsnummer(),
+            listOf(identifikator)
+        )
         assertEquals(1, funnet.size)
         val dto = funnet.single()
         check(dto is KomplettInntektskildeDto)
@@ -72,7 +81,10 @@ internal class PgInntektskilderRepositoryTest : AbstractDBIntegrationTest() {
         val navn = lagOrganisasjonsnavn()
 
         opprettArbeidsgiver(identifikator, navn, listOf("Uteliv", "Reise"))
-        val funnet = inntektskilderRepository.finnInntektskilder(lagFødselsnummer(), listOf(identifikator))
+        val funnet = inntektskilderRepository.finnInntektskilder(
+            lagFødselsnummer(),
+            listOf(identifikator)
+        )
         assertEquals(1, funnet.size)
         val dto = funnet.single()
         check(dto is KomplettInntektskildeDto)
@@ -88,7 +100,10 @@ internal class PgInntektskilderRepositoryTest : AbstractDBIntegrationTest() {
         val navn = lagOrganisasjonsnavn()
 
         opprettArbeidsgiver(organisasjonsnummer1, navn, listOf("Uteliv", "Reise"))
-        val funnet = inntektskilderRepository.finnInntektskilder(lagFødselsnummer(), listOf(organisasjonsnummer1, organisasjonsnummer2))
+        val funnet = inntektskilderRepository.finnInntektskilder(
+            lagFødselsnummer(),
+            listOf(organisasjonsnummer1, organisasjonsnummer2)
+        )
         assertEquals(2, funnet.size)
         assertTrue(funnet[0] is KomplettInntektskildeDto)
         assertTrue(funnet[1] is NyInntektskildeDto)
@@ -144,9 +159,10 @@ internal class PgInntektskilderRepositoryTest : AbstractDBIntegrationTest() {
             )
         )
 
-        val funnet = inntektskilderRepository.finnInntektskilder(fødselsnummer, listOf(organisasjonsnummerSomSpleisKjennerTil))
+        val funnet =
+            inntektskilderRepository.finnInntektskilder(fødselsnummer, listOf(organisasjonsnummerSomSpleisKjennerTil))
         assertEquals(2, funnet.size)
-        assertTrue(funnet.all { it is NyInntektskildeDto})
+        assertTrue(funnet.all { it is NyInntektskildeDto })
     }
 
     @Test

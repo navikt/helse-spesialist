@@ -25,9 +25,9 @@ import no.nav.helse.spesialist.api.overstyring.OverstyringTidslinjeDto
 import no.nav.helse.spesialist.api.overstyring.Skjonnsfastsettingstype
 import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsettingSykepengegrunnlagDto
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
-import no.nav.helse.spesialist.db.jan
-import no.nav.helse.spesialist.db.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
+import no.nav.helse.spesialist.testhjelp.jan
+import no.nav.helse.spesialist.testhjelp.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.typer.Kjønn
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse

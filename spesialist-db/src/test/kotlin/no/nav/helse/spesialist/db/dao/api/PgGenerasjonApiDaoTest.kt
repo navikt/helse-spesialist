@@ -2,9 +2,9 @@ package no.nav.helse.spesialist.db.dao.api
 
 import no.nav.helse.db.api.VedtaksperiodeDbDto
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
-import no.nav.helse.spesialist.db.feb
-import no.nav.helse.spesialist.db.jan
-import no.nav.helse.spesialist.db.mar
+import no.nav.helse.spesialist.testhjelp.feb
+import no.nav.helse.spesialist.testhjelp.jan
+import no.nav.helse.spesialist.testhjelp.mar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
