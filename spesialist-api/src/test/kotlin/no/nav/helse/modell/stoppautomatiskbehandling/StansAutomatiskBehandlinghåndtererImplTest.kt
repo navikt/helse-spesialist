@@ -11,6 +11,7 @@ import no.nav.helse.db.StansAutomatiskBehandlingFraDatabase
 import no.nav.helse.modell.saksbehandler.handlinger.OpphevStans
 import no.nav.helse.spesialist.domain.NotatType
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
+import no.nav.helse.spesialist.testhjelp.lagFødselsnummer
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
@@ -22,10 +23,6 @@ class StansAutomatiskBehandlinghåndtererImplTest {
     private val notatDao = mockk<NotatDao>(relaxed = true)
     private val dialogDao = mockk<DialogDao>(relaxed = true)
 
-    private companion object {
-        private const val FNR = "12345678910"
-    }
-
     private val stansAutomatiskBehandlinghåndterer =
         StansAutomatiskBehandlinghåndtererImpl(
             stansAutomatiskBehandlingDao,
@@ -36,9 +33,10 @@ class StansAutomatiskBehandlinghåndtererImplTest {
 
     @Test
     fun `Lagrer melding og notat når stans oppheves fra speil`() {
+        val fødselsnummer = lagFødselsnummer()
         val oid = UUID.randomUUID()
         stansAutomatiskBehandlinghåndterer.håndter(
-            handling = OpphevStans(FNR, "begrunnelse"),
+            handling = OpphevStans(fødselsnummer, "begrunnelse"),
             legacySaksbehandler =
                 LegacySaksbehandler(
                     epostadresse = "epost",
@@ -49,7 +47,7 @@ class StansAutomatiskBehandlinghåndtererImplTest {
                 ),
         )
 
-        verify(exactly = 1) { stansAutomatiskBehandlingDao.lagreFraSpeil(fødselsnummer = FNR) }
+        verify(exactly = 1) { stansAutomatiskBehandlingDao.lagreFraSpeil(fødselsnummer = fødselsnummer) }
         verify(exactly = 1) {
             notatDao.lagreForOppgaveId(
                 oppgaveId = any(),
@@ -63,13 +61,15 @@ class StansAutomatiskBehandlinghåndtererImplTest {
 
     @Test
     fun `Kan stanses på nytt etter stans er opphevet`() {
-        every { stansAutomatiskBehandlingDao.hentFor(FNR) } returns
+        val fødselsnummer = lagFødselsnummer()
+        every { stansAutomatiskBehandlingDao.hentFor(fødselsnummer) } returns
                 meldinger(
+                    fødselsnummer,
                     stans(StoppknappÅrsak.MEDISINSK_VILKAR),
                     opphevStans(),
                     stans(StoppknappÅrsak.AKTIVITETSKRAV),
                 )
-        val dataTilSpeil = stansAutomatiskBehandlinghåndterer.unntattFraAutomatiskGodkjenning(FNR)
+        val dataTilSpeil = stansAutomatiskBehandlinghåndterer.unntattFraAutomatiskGodkjenning(fødselsnummer)
 
         Assertions.assertTrue(dataTilSpeil.erUnntatt)
         Assertions.assertEquals(listOf(StoppknappÅrsak.AKTIVITETSKRAV.name), dataTilSpeil.arsaker)
@@ -79,10 +79,10 @@ class StansAutomatiskBehandlinghåndtererImplTest {
 
     private fun opphevStans() = "NORMAL" to emptySet<StoppknappÅrsak>()
 
-    private fun meldinger(vararg statusOgÅrsaker: Pair<String, Set<StoppknappÅrsak>>) =
+    private fun meldinger(fødselsnummer: String, vararg statusOgÅrsaker: Pair<String, Set<StoppknappÅrsak>>) =
         statusOgÅrsaker.map {
             StansAutomatiskBehandlingFraDatabase(
-                FNR,
+                fødselsnummer,
                 it.first,
                 it.second,
                 LocalDateTime.now(),

@@ -16,6 +16,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveegenskap
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavetype
 import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodetype
 import no.nav.helse.spesialist.api.graphql.schema.ApiPersonnavn
+import no.nav.helse.spesialist.testhjelp.lagAktørId
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -28,7 +29,7 @@ import java.util.UUID
 internal class OppgaveMapperTest {
     private companion object {
         private const val oppgaveId = 1L
-        private const val aktørId = "1234567891011"
+        private val aktørId = lagAktørId()
         private val vedtaksperiodeId = UUID.randomUUID()
         private val saksbehandler = SaksbehandlerFraDatabase("epost", UUID.randomUUID(), "navn", "ident")
         private val opprettet = LocalDateTime.now()

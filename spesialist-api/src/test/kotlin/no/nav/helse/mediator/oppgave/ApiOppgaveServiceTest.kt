@@ -30,10 +30,10 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiMottaker
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveegenskap
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavetype
 import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodetype
-import no.nav.helse.spesialist.api.lagEpostadresseFraFulltNavn
-import no.nav.helse.spesialist.api.lagSaksbehandlerident
-import no.nav.helse.spesialist.api.lagSaksbehandlernavn
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
+import no.nav.helse.spesialist.testhjelp.lagEpostadresseFraFulltNavn
+import no.nav.helse.spesialist.testhjelp.lagSaksbehandlerident
+import no.nav.helse.spesialist.testhjelp.lagSaksbehandlernavn
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
