@@ -7,6 +7,8 @@ import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
+import no.nav.helse.spesialist.api.testfixtures.mutation.fjernTildelingMutation
+import no.nav.helse.spesialist.api.testfixtures.mutation.opprettTildelingMutation
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -20,17 +22,7 @@ internal class TildelingMutationHandlerTest : AbstractGraphQLApiTest() {
     fun `oppretter tildeling`() {
         val oppgaveId = 1L
 
-        val body = runQuery(
-            """
-                mutation OpprettTildeling {
-                    opprettTildeling(
-                        oppgaveId: "$oppgaveId",
-                    ) {
-                        navn, oid, epost
-                    }
-                }
-            """
-        )
+        val body = runQuery(opprettTildelingMutation(oppgaveId))
 
         verify(exactly = 1) { saksbehandlerMediator.håndter(TildelOppgave(oppgaveId), any()) }
 
@@ -43,17 +35,7 @@ internal class TildelingMutationHandlerTest : AbstractGraphQLApiTest() {
 
         every { saksbehandlerMediator.håndter(any<TildelOppgave>(), any()) } throws OppgaveTildeltNoenAndre(TildelingApiDto("navn", "epost", UUID.randomUUID()))
 
-        val body = runQuery(
-            """
-                mutation OpprettTildeling {
-                    opprettTildeling(
-                        oppgaveId: "$oppgaveId",
-                    ) {
-                        navn, oid, epost
-                    }
-                }
-            """
-        )
+        val body = runQuery(opprettTildelingMutation(oppgaveId))
 
         assertEquals(409, body["errors"].first()["extensions"]["code"].asInt())
     }
@@ -65,15 +47,7 @@ internal class TildelingMutationHandlerTest : AbstractGraphQLApiTest() {
         val oppgaveId = finnOppgaveIdFor(PERIODE.id)
         tildelOppgave(oppgaveId, SAKSBEHANDLER.oid)
 
-        val body = runQuery(
-            """
-                mutation FjernTildeling {
-                    fjernTildeling(
-                        oppgaveId: "$oppgaveId"
-                    )
-                }
-            """
-        )
+        val body = runQuery(fjernTildelingMutation(oppgaveId))
 
         assertTrue(body["data"]["fjernTildeling"].booleanValue())
     }
@@ -82,15 +56,7 @@ internal class TildelingMutationHandlerTest : AbstractGraphQLApiTest() {
     fun `returnerer false hvis oppgaven ikke er tildelt`() {
         val oppgaveId = 1L
         every { saksbehandlerMediator.håndter(any<AvmeldOppgave>(), any()) } throws OppgaveIkkeTildelt(oppgaveId)
-        val body = runQuery(
-            """
-                mutation FjernTildeling {
-                    fjernTildeling(
-                        oppgaveId: "$oppgaveId"
-                    )
-                }
-            """
-        )
+        val body = runQuery(fjernTildelingMutation(oppgaveId))
 
         assertFalse(body["data"]["fjernTildeling"].booleanValue())
     }
@@ -99,15 +65,7 @@ internal class TildelingMutationHandlerTest : AbstractGraphQLApiTest() {
     fun `returnerer false hvis oppgaven ikke finnes`() {
         every { saksbehandlerMediator.håndter(any<AvmeldOppgave>(), any()) } throws IllegalStateException()
 
-        val body = runQuery(
-            """
-                mutation FjernTildeling {
-                    fjernTildeling(
-                        oppgaveId: "999"
-                    )
-                }
-            """
-        )
+        val body = runQuery(fjernTildelingMutation(999))
 
         assertFalse(body["data"]["fjernTildeling"].booleanValue())
     }

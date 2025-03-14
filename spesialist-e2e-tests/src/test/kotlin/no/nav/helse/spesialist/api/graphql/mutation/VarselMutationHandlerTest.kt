@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.api.graphql.mutation
 
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
+import no.nav.helse.spesialist.api.testfixtures.mutation.settVarselstatusMutation
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -19,23 +20,7 @@ internal class VarselMutationHandlerTest : AbstractGraphQLApiTest() {
         val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId)
         nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef)
 
-        val body = runQuery(
-            """
-            mutation SettVarselstatus {
-                settVarselstatus(
-                    generasjonIdString: "$generasjonId", 
-                    definisjonIdString: "$definisjonId",
-                    varselkode: "EN_KODE", 
-                    ident: "${SAKSBEHANDLER.oid}" 
-                ) {
-                    kode
-                    vurdering {
-                        status
-                    }
-                }
-            }
-        """
-        )
+        val body = runQuery(settVarselstatusMutation(generasjonId, definisjonId, SAKSBEHANDLER.oid, """EN_KODE"""))
 
         assertEquals("VURDERT", body["data"]["settVarselstatus"]["vurdering"]["status"].asText())
     }
@@ -51,22 +36,7 @@ internal class VarselMutationHandlerTest : AbstractGraphQLApiTest() {
         val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId)
         nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef)
 
-        val body = runQuery(
-            """
-            mutation SettVarselstatus {
-                settVarselstatus(
-                    generasjonIdString: "$generasjonId", 
-                    varselkode: "EN_KODE", 
-                    ident: "${SAKSBEHANDLER.oid}" 
-                ) {
-                    kode
-                    vurdering {
-                        status
-                    }
-                }
-            }
-        """
-        )
+        val body = runQuery(settVarselstatusMutation(generasjonId = generasjonId, saksbehandlerOid = SAKSBEHANDLER.oid, varselkode = "EN_KODE"))
 
         assertTrue(body["data"]["settVarselstatus"]["vurdering"].isNull)
     }
@@ -82,23 +52,7 @@ internal class VarselMutationHandlerTest : AbstractGraphQLApiTest() {
         val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId)
         nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef, status = "GODKJENT")
 
-        val body = runQuery(
-            """
-            mutation SettVarselstatus {
-                settVarselstatus(
-                    generasjonIdString: "$generasjonId", 
-                    definisjonIdString: "$definisjonId",
-                    varselkode: "EN_KODE", 
-                    ident: "${SAKSBEHANDLER.oid}" 
-                ) {
-                    kode
-                    vurdering {
-                        status
-                    }
-                }
-            }
-        """
-        )
+        val body = runQuery(settVarselstatusMutation(generasjonId, definisjonId, SAKSBEHANDLER.oid, """EN_KODE"""))
 
         assertEquals(409, body["errors"].first()["extensions"]["code"].asInt())
     }
@@ -114,22 +68,7 @@ internal class VarselMutationHandlerTest : AbstractGraphQLApiTest() {
         val generasjonRef = nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId)
         nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef, status = "GODKJENT")
 
-        val body = runQuery(
-            """
-            mutation SettVarselstatus {
-                settVarselstatus(
-                    generasjonIdString: "$generasjonId", 
-                    varselkode: "EN_KODE", 
-                    ident: "${SAKSBEHANDLER.oid}" 
-                ) {
-                    kode
-                    vurdering {
-                        status
-                    }
-                }
-            }
-        """
-        )
+        val body = runQuery(settVarselstatusMutation(generasjonId, varselkode = "EN_KODE", saksbehandlerOid = SAKSBEHANDLER.oid))
 
         assertEquals(409, body["errors"].first()["extensions"]["code"].asInt())
     }
@@ -144,22 +83,7 @@ internal class VarselMutationHandlerTest : AbstractGraphQLApiTest() {
         val kode = "DENNE_KODEN_FINNES_FORHÅPENTLIGVIS_IKKE_I_DATABASEN"
         nyttVarsel(kode = kode, vedtaksperiodeId = vedtaksperiodeId, generasjonRef = generasjonRef)
 
-        val body = runQuery(
-            """
-            mutation SettVarselstatus {
-                settVarselstatus(
-                    generasjonIdString: "$generasjonId", 
-                    varselkode: "$kode", 
-                    ident: "${SAKSBEHANDLER.oid}" 
-                ) {
-                    kode
-                    vurdering {
-                        status
-                    }
-                }
-            }
-        """
-        )
+        val body = runQuery(settVarselstatusMutation(generasjonId, varselkode = kode, saksbehandlerOid = SAKSBEHANDLER.oid))
 
         assertEquals(500, body["errors"].first()["extensions"]["code"].asInt())
     }
@@ -172,23 +96,9 @@ internal class VarselMutationHandlerTest : AbstractGraphQLApiTest() {
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
         nyGenerasjon(generasjonId = generasjonId, vedtaksperiodeId = vedtaksperiodeId)
 
-        val body = runQuery(
-            """
-            mutation SettVarselstatus {
-                settVarselstatus(
-                    generasjonIdString: "$generasjonId", 
-                    varselkode: "EN_KODE", 
-                    ident: "${SAKSBEHANDLER.oid}" 
-                ) {
-                    kode
-                    vurdering {
-                        status
-                    }
-                }
-            }
-        """
-        )
+        val body = runQuery(settVarselstatusMutation(generasjonId = generasjonId, varselkode = "EN_KODE", saksbehandlerOid = SAKSBEHANDLER.oid))
 
         assertEquals(404, body["errors"].first()["extensions"]["code"].asInt())
     }
 }
+

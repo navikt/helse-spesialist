@@ -4,6 +4,8 @@ import io.mockk.every
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
 import no.nav.helse.spesialist.api.SendIReturResult
 import no.nav.helse.spesialist.api.SendTilGodkjenningResult
+import no.nav.helse.spesialist.api.testfixtures.mutation.sendIReturMutation
+import no.nav.helse.spesialist.api.testfixtures.mutation.sendTilbeslutterMutation
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -19,13 +21,7 @@ internal class TotrinnsvurderingMutationHandlerTest : AbstractGraphQLApiTest() {
         opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
         val oppgaveRef = finnOppgaveIdFor(PERIODE.id)
 
-        val body = runQuery(
-            """
-            mutation TotrinnsvurderingMutation {
-                sendTilGodkjenningV2(oppgavereferanse: "$oppgaveRef")
-            }
-        """
-        )
+        val body = runQuery(sendTilbeslutterMutation(oppgaveRef))
 
         assertEquals(true, body.get("data")?.get("sendTilGodkjenningV2")?.asBoolean()) {
             "Uventet respons: $body"
@@ -39,11 +35,7 @@ internal class TotrinnsvurderingMutationHandlerTest : AbstractGraphQLApiTest() {
         )
 
         val body = runQuery(
-            """
-            mutation TotrinnsvurderingMutation {
-                sendIRetur(oppgavereferanse: "1", notatTekst: "Retur")
-            }
-        """
+            sendIReturMutation(1, """Retur""")
         )
 
         assertTrue(body["data"]["sendIRetur"].asBoolean()) { body.toString() }
