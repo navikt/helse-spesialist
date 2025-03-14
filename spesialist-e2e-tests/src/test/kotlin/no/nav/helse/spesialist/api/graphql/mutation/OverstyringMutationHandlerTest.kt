@@ -1,7 +1,6 @@
 package no.nav.helse.spesialist.api.graphql.mutation
 
 import no.nav.helse.spesialist.api.AbstractOverstyringApiTest
-import no.nav.helse.spesialist.api.februar
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdOverstyringHandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiInntektOgRefusjonOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringArbeidsforhold
@@ -10,7 +9,8 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringArbeidsgiver.Api
 import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringDag
 import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektOverstyring
-import no.nav.helse.spesialist.api.januar
+import no.nav.helse.spesialist.testhjelp.feb
+import no.nav.helse.spesialist.testhjelp.jan
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.util.UUID
@@ -27,7 +27,7 @@ internal class OverstyringMutationHandlerTest : AbstractOverstyringApiTest() {
                     AKTØRID,
                     "En begrunnelse",
                     listOf(
-                        ApiOverstyringDag(10.januar, "Feriedag", "Sykedag", null, 100, null),
+                        ApiOverstyringDag(10 jan 2018, "Feriedag", "Sykedag", null, 100, null),
                     ),
                 ),
             )
@@ -45,7 +45,7 @@ internal class OverstyringMutationHandlerTest : AbstractOverstyringApiTest() {
                     AKTØRID,
                     "En begrunnelse",
                     listOf(
-                        ApiOverstyringDag(10.januar, "Arbeidsdag", "Sykedag", null, 100, null),
+                        ApiOverstyringDag(10 jan 2018, "Arbeidsdag", "Sykedag", null, 100, null),
                     ),
                 ),
             )
@@ -63,7 +63,7 @@ internal class OverstyringMutationHandlerTest : AbstractOverstyringApiTest() {
                     AKTØRID,
                     "En begrunnelse",
                     listOf(
-                        ApiOverstyringDag(10.januar, "Sykedag", "Arbeidsdag", null, 100, null),
+                        ApiOverstyringDag(10 jan 2018, "Sykedag", "Arbeidsdag", null, 100, null),
                     ),
                 ),
             )
@@ -77,9 +77,15 @@ internal class OverstyringMutationHandlerTest : AbstractOverstyringApiTest() {
                 ApiArbeidsforholdOverstyringHandling(
                     FØDSELSNUMMER,
                     AKTØRID,
-                    10.januar,
+                    10 jan 2018,
                     listOf(
-                        ApiOverstyringArbeidsforhold(ORGANISASJONSNUMMER_GHOST, true, "En begrunnelse", "En forklaring", null),
+                        ApiOverstyringArbeidsforhold(
+                            ORGANISASJONSNUMMER_GHOST,
+                            true,
+                            "En begrunnelse",
+                            "En forklaring",
+                            null
+                        ),
                     ),
                     vedtaksperiodeId = UUID.randomUUID(),
                 ),
@@ -94,19 +100,19 @@ internal class OverstyringMutationHandlerTest : AbstractOverstyringApiTest() {
                 ApiInntektOgRefusjonOverstyring(
                     AKTØRID,
                     FØDSELSNUMMER,
-                    9.januar,
+                    9 jan 2018,
                     listOf(
                         ApiOverstyringArbeidsgiver(
                             ORGANISASJONSNUMMER_GHOST,
                             24000.0,
                             25000.0,
                             listOf(
-                                ApiOverstyringRefusjonselement(10.januar, 31.januar, 24000.0),
-                                ApiOverstyringRefusjonselement(1.februar, null, 24000.0),
+                                ApiOverstyringRefusjonselement(10 jan 2018, 31 jan 2018, 24000.0),
+                                ApiOverstyringRefusjonselement(1 feb 2018, null, 24000.0),
                             ),
                             listOf(
-                                ApiOverstyringRefusjonselement(10.januar, 31.januar, 25000.0),
-                                ApiOverstyringRefusjonselement(1.februar, null, 25000.0),
+                                ApiOverstyringRefusjonselement(10 jan 2018, 31 jan 2018, 25000.0),
+                                ApiOverstyringRefusjonselement(1 feb 2018, null, 25000.0),
                             ),
                             "En begrunnelse",
                             "En forklaring",
@@ -134,7 +140,11 @@ internal class OverstyringMutationHandlerTest : AbstractOverstyringApiTest() {
                         ApiTilkommenInntektOverstyring.ApiNyEllerEndretInntekt(
                             ORGANISASJONSNUMMER,
                             perioder = listOf(
-                                ApiTilkommenInntektOverstyring.ApiNyEllerEndretInntekt.ApiPeriodeMedBeløp(1.januar, 31.januar, 24000.0),
+                                ApiTilkommenInntektOverstyring.ApiNyEllerEndretInntekt.ApiPeriodeMedBeløp(
+                                    1 jan 2018,
+                                    31 jan 2018,
+                                    24000.0
+                                ),
                             )
                         )
                     ),
@@ -142,7 +152,10 @@ internal class OverstyringMutationHandlerTest : AbstractOverstyringApiTest() {
                         ApiTilkommenInntektOverstyring.ApiFjernetInntekt(
                             ORGANISASJONSNUMMER,
                             perioder = listOf(
-                                ApiTilkommenInntektOverstyring.ApiFjernetInntekt.ApiPeriodeUtenBeløp(1.januar, 31.januar),
+                                ApiTilkommenInntektOverstyring.ApiFjernetInntekt.ApiPeriodeUtenBeløp(
+                                    1 jan 2018,
+                                    31 jan 2018
+                                ),
                             )
                         )
                     ),

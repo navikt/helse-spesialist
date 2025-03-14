@@ -1,9 +1,9 @@
 package no.nav.helse.spesialist.api.graphql
 
-import no.nav.helse.spesialist.api.januar
-import no.nav.helse.spesialist.api.mai
-import no.nav.helse.spesialist.api.oktober
-import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
+import no.nav.helse.spesialist.testhjelp.jan
+import no.nav.helse.spesialist.testhjelp.lagOrganisasjonsnummer
+import no.nav.helse.spesialist.testhjelp.mai
+import no.nav.helse.spesialist.testhjelp.okt
 import no.nav.helse.spleis.graphql.enums.GraphQLHendelsetype
 import no.nav.helse.spleis.graphql.enums.GraphQLInntektskilde
 import no.nav.helse.spleis.graphql.enums.GraphQLInntektstype
@@ -48,10 +48,10 @@ object GraphQLTestdata {
         GraphQLSoknadArbeidsledig(
             id = UUID.randomUUID().toString(),
             eksternDokumentId = eksternDokumentId.toString(),
-            fom = 11.mai(2022),
+            fom = 11 mai 2022,
             tom = 30.mai(2022),
-            rapportertDato = 10.oktober(2023).atStartOfDay(),
-            sendtNav = 10.oktober(2023).atStartOfDay(),
+            rapportertDato = (10 okt 2023).atStartOfDay(),
+            sendtNav = (10 okt 2023).atStartOfDay(),
             type = GraphQLHendelsetype.SENDTSOKNADARBEIDSLEDIG,
         )
 
@@ -139,64 +139,65 @@ object GraphQLTestdata {
         hendelser = emptyList(),
     )
 
-    fun graphQLSpleisVilkarsgrunnlag(organisasjonsnummer: String, id: UUID = UUID.randomUUID()) = GraphQLSpleisVilkarsgrunnlag(
-        id = id,
-        inntekter =
-            listOf(
-                GraphQLArbeidsgiverinntekt(
-                    arbeidsgiver = organisasjonsnummer,
-                    omregnetArsinntekt =
-                        GraphQLOmregnetArsinntekt(
-                            belop = 500_000.0,
-                            manedsbelop = 55_000.0,
-                            kilde = GraphQLInntektskilde.INNTEKTSMELDING,
-                        ),
-                    fom = 1.januar(2020),
-                    tom = null,
-                ),
-                GraphQLArbeidsgiverinntekt(
-                    arbeidsgiver = "987656789",
-                    omregnetArsinntekt =
-                        GraphQLOmregnetArsinntekt(
-                            belop = 500_000.0,
-                            manedsbelop = 55_000.0,
-                            kilde = GraphQLInntektskilde.INNTEKTSMELDING,
-                        ),
-                    fom = 1.januar(2020),
-                    tom = null,
-                ),
-            ),
-        omregnetArsinntekt = 1_000_000.0,
-        skjonnsmessigFastsattAarlig = 0.0,
-        skjaeringstidspunkt = 1.januar(2020),
-        sykepengegrunnlag = 1_000_000.0,
-        antallOpptjeningsdagerErMinst = 123,
-        grunnbelop = 100_000,
-        sykepengegrunnlagsgrense =
-            GraphQLSykepengegrunnlagsgrense(
-                grunnbelop = 100_000,
-                grense = 600_000,
-                virkningstidspunkt = 1.januar(2020),
-            ),
-        oppfyllerKravOmMedlemskap = true,
-        oppfyllerKravOmMinstelonn = true,
-        oppfyllerKravOmOpptjening = true,
-        opptjeningFra = 1.januar(2000),
-        arbeidsgiverrefusjoner =
-            listOf(
-                GraphQLArbeidsgiverrefusjon(
-                    arbeidsgiver = organisasjonsnummer,
-                    refusjonsopplysninger =
-                        listOf(
-                            GraphQLRefusjonselement(
-                                fom = 1.januar(2020),
-                                tom = null,
-                                belop = 30000.0,
-                                meldingsreferanseId = UUID.randomUUID(),
+    fun graphQLSpleisVilkarsgrunnlag(organisasjonsnummer: String, id: UUID = UUID.randomUUID()) =
+        GraphQLSpleisVilkarsgrunnlag(
+            id = id,
+            inntekter =
+                listOf(
+                    GraphQLArbeidsgiverinntekt(
+                        arbeidsgiver = organisasjonsnummer,
+                        omregnetArsinntekt =
+                            GraphQLOmregnetArsinntekt(
+                                belop = 500_000.0,
+                                manedsbelop = 55_000.0,
+                                kilde = GraphQLInntektskilde.INNTEKTSMELDING,
                             ),
-                        ),
+                        fom = 1 jan 2020,
+                        tom = null,
+                    ),
+                    GraphQLArbeidsgiverinntekt(
+                        arbeidsgiver = "987656789",
+                        omregnetArsinntekt =
+                            GraphQLOmregnetArsinntekt(
+                                belop = 500_000.0,
+                                manedsbelop = 55_000.0,
+                                kilde = GraphQLInntektskilde.INNTEKTSMELDING,
+                            ),
+                        fom = 1 jan 2020,
+                        tom = null,
+                    ),
                 ),
-            ),
-    )
+            omregnetArsinntekt = 1_000_000.0,
+            skjonnsmessigFastsattAarlig = 0.0,
+            skjaeringstidspunkt = 1 jan 2020,
+            sykepengegrunnlag = 1_000_000.0,
+            antallOpptjeningsdagerErMinst = 123,
+            grunnbelop = 100_000,
+            sykepengegrunnlagsgrense =
+                GraphQLSykepengegrunnlagsgrense(
+                    grunnbelop = 100_000,
+                    grense = 600_000,
+                    virkningstidspunkt = 1 jan 2020,
+                ),
+            oppfyllerKravOmMedlemskap = true,
+            oppfyllerKravOmMinstelonn = true,
+            oppfyllerKravOmOpptjening = true,
+            opptjeningFra = 1 jan 2000,
+            arbeidsgiverrefusjoner =
+                listOf(
+                    GraphQLArbeidsgiverrefusjon(
+                        arbeidsgiver = organisasjonsnummer,
+                        refusjonsopplysninger =
+                            listOf(
+                                GraphQLRefusjonselement(
+                                    fom = 1 jan 2020,
+                                    tom = null,
+                                    belop = 30000.0,
+                                    meldingsreferanseId = UUID.randomUUID(),
+                                ),
+                            ),
+                    ),
+                ),
+        )
 
 }

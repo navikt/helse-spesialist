@@ -53,6 +53,7 @@ import no.nav.helse.spesialist.api.snapshot.SnapshotService
 import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.client.spleis.SpleisClient
 import no.nav.helse.spesialist.client.spleis.SpleisClientSnapshothenter
+import no.nav.helse.spesialist.testhjelp.jan
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLArbeidsgiver
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import org.intellij.lang.annotations.Language
@@ -204,8 +205,8 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
     }
 
     private fun defaultArbeidsgivere(): GraphQLArbeidsgiver {
-        val periodeMedOppgave = Periode(UUID.randomUUID(), 1.januar, 25.januar)
-        val graphQLperiodeMedOppgave = opprettBeregnetPeriode(4.januar(2023), 5.januar(2023), periodeMedOppgave.id)
+        val periodeMedOppgave = Periode(UUID.randomUUID(), 1 jan 2018, 25 jan 2018)
+        val graphQLperiodeMedOppgave = opprettBeregnetPeriode(4 jan 2023, 5 jan 2023, periodeMedOppgave.id)
         val snapshotGenerasjon = opprettSnapshotGenerasjon(listOf(graphQLperiodeMedOppgave))
         val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotGenerasjon))
         return arbeidsgiver

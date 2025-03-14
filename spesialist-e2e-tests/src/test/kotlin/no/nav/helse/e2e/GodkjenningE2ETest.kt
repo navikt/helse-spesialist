@@ -13,7 +13,7 @@ import no.nav.helse.modell.person.Adressebeskyttelse.StrengtFortrolig
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSystem
-import no.nav.helse.spesialist.test.lagFødselsnummer
+import no.nav.helse.spesialist.testhjelp.lagFødselsnummer
 import no.nav.helse.util.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

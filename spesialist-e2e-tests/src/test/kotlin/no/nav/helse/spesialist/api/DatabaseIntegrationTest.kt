@@ -22,13 +22,17 @@ import no.nav.helse.spesialist.domain.DialogId
 import no.nav.helse.spesialist.domain.Notat
 import no.nav.helse.spesialist.domain.NotatType
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
-import no.nav.helse.spesialist.test.lagAktørId
-import no.nav.helse.spesialist.test.lagEtternavn
-import no.nav.helse.spesialist.test.lagFornavn
-import no.nav.helse.spesialist.test.lagFødselsnummer
-import no.nav.helse.spesialist.test.lagOrganisasjonsnavn
-import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
-import no.nav.helse.spesialist.test.lagSaksbehandlerident
+import no.nav.helse.spesialist.testhjelp.apr
+import no.nav.helse.spesialist.testhjelp.feb
+import no.nav.helse.spesialist.testhjelp.jan
+import no.nav.helse.spesialist.testhjelp.lagAktørId
+import no.nav.helse.spesialist.testhjelp.lagEtternavn
+import no.nav.helse.spesialist.testhjelp.lagFornavn
+import no.nav.helse.spesialist.testhjelp.lagFødselsnummer
+import no.nav.helse.spesialist.testhjelp.lagOrganisasjonsnavn
+import no.nav.helse.spesialist.testhjelp.lagOrganisasjonsnummer
+import no.nav.helse.spesialist.testhjelp.lagSaksbehandlerident
+import no.nav.helse.spesialist.testhjelp.mar
 import org.junit.jupiter.api.Assertions.assertEquals
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -109,7 +113,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
     protected fun opprettAvviksvurdering(
         fødselsnummer: String = FØDSELSNUMMER,
-        skjæringstidspunkt: LocalDate = 1.januar,
+        skjæringstidspunkt: LocalDate = 1 jan 2018,
         avviksvurderingId: UUID = UUID.randomUUID(),
         vilkårsgrunnlagId: UUID = UUID.randomUUID(),
         avviksprosent: Double = 25.0
@@ -121,7 +125,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                     vilkårsgrunnlagId = vilkårsgrunnlagId,
                     fødselsnummer = fødselsnummer,
                     skjæringstidspunkt = skjæringstidspunkt,
-                    opprettet = 1.januar.atStartOfDay(),
+                    opprettet = (1 jan 2018).atStartOfDay(),
                     avviksprosent = avviksprosent,
                     sammenligningsgrunnlag =
                         Sammenligningsgrunnlag(
@@ -133,11 +137,11 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                                         inntekter =
                                             listOf(
                                                 Inntekt(
-                                                    årMåned = YearMonth.from(1.januar),
+                                                    årMåned = YearMonth.from(1 jan 2018),
                                                     beløp = 2000.0,
                                                 ),
                                                 Inntekt(
-                                                    årMåned = YearMonth.from(1.februar),
+                                                    årMåned = YearMonth.from(1 feb 2018),
                                                     beløp = 2000.0,
                                                 ),
                                             ),
@@ -147,19 +151,19 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                                         inntekter =
                                             listOf(
                                                 Inntekt(
-                                                    årMåned = YearMonth.from(1.januar),
+                                                    årMåned = YearMonth.from(1 jan 2018),
                                                     beløp = 1500.0,
                                                 ),
                                                 Inntekt(
-                                                    årMåned = YearMonth.from(1.februar),
+                                                    årMåned = YearMonth.from(1 feb 2018),
                                                     beløp = 1500.0,
                                                 ),
                                                 Inntekt(
-                                                    årMåned = YearMonth.from(1.mars),
+                                                    årMåned = YearMonth.from(1 mar 2018),
                                                     beløp = 1500.0,
                                                 ),
                                                 Inntekt(
-                                                    årMåned = YearMonth.from(1.april),
+                                                    årMåned = YearMonth.from(1 apr 2018),
                                                     beløp = 1500.0,
                                                 ),
                                             ),
@@ -606,7 +610,7 @@ internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         "person_ref" to personId,
         "skjaeringstidspunkt" to skjæringstidspunkt,
         "inntekter" to objectMapper.writeValueAsString(inntekter),
-        )
+    )
 
     protected fun tildelOppgave(
         oppgaveRef: Long,

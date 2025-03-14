@@ -22,9 +22,9 @@ import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettUberegnetPerio
 import no.nav.helse.spesialist.api.graphql.schema.ApiAvslagstype
 import no.nav.helse.spesialist.api.graphql.schema.ApiHandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodehandling
-import no.nav.helse.spesialist.api.januar
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
+import no.nav.helse.spesialist.testhjelp.jan
 import no.nav.helse.spleis.graphql.enums.GraphQLPeriodetilstand
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLBeregnetPeriode
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -195,20 +195,20 @@ internal class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
     fun `Uberegnet periode tilstøtende en periode med oppgave tar med seg varsler`() {
         val personRef = opprettPerson()
         val arbeidsgiverRef = opprettArbeidsgiver()
-        val uberegnetPeriode = 2.januar(2023) til 3.januar(2023)
-        val periodeMedOppgave = 4.januar(2023) til 5.januar(2023)
-        opprettVedtaksperiode(personRef, arbeidsgiverRef, periode = periodeMedOppgave, skjæringstidspunkt = 2.januar)
-        opprettVedtak(personRef, arbeidsgiverRef, periode = uberegnetPeriode, skjæringstidspunkt = 2.januar)
+        val uberegnetPeriode = 2 jan 2023 til (3 jan 2023)
+        val periodeMedOppgave = 4 jan 2023 til (5 jan 2023)
+        opprettVedtaksperiode(personRef, arbeidsgiverRef, periode = periodeMedOppgave, skjæringstidspunkt = 2 jan 2018)
+        opprettVedtak(personRef, arbeidsgiverRef, periode = uberegnetPeriode, skjæringstidspunkt = 2 jan 2018)
         val generasjonId = UUID.randomUUID()
         val generasjonRef =
             nyGenerasjon(
                 vedtaksperiodeId = uberegnetPeriode.id,
                 generasjonId = generasjonId,
                 periode = uberegnetPeriode,
-                skjæringstidspunkt = 2.januar,
+                skjæringstidspunkt = 2 jan 2018,
             )
-        val graphQLUberegnetPeriode = opprettUberegnetPeriode(2.januar(2023), 3.januar(2023), uberegnetPeriode.id)
-        val graphQLperiodeMedOppgave = opprettBeregnetPeriode(4.januar(2023), 5.januar(2023), periodeMedOppgave.id)
+        val graphQLUberegnetPeriode = opprettUberegnetPeriode(2 jan 2023, 3 jan 2023, uberegnetPeriode.id)
+        val graphQLperiodeMedOppgave = opprettBeregnetPeriode(4 jan 2023, 5 jan 2023, periodeMedOppgave.id)
         val snapshotGenerasjon = opprettSnapshotGenerasjon(listOf(graphQLUberegnetPeriode, graphQLperiodeMedOppgave))
         val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotGenerasjon))
         mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
@@ -224,8 +224,8 @@ internal class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
     fun `Uberegnet periode som ikke er tilstøtende en periode med oppgave tar ikke med seg varsler`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val generasjonRef = nyGenerasjon(vedtaksperiodeId = vedtaksperiodeId)
-        val uberegnetPeriode = opprettUberegnetPeriode(2.januar(2023), 3.januar(2023), vedtaksperiodeId)
-        val beregnetPeriode = opprettBeregnetPeriode(5.januar(2023), 6.januar(2023), PERIODE.id)
+        val uberegnetPeriode = opprettUberegnetPeriode(2 jan 2023, 3 jan 2023, vedtaksperiodeId)
+        val beregnetPeriode = opprettBeregnetPeriode(5 jan 2023, 6 jan 2023, PERIODE.id)
         val snapshotGenerasjon = opprettSnapshotGenerasjon(listOf(beregnetPeriode, uberegnetPeriode))
         val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotGenerasjon))
         mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
@@ -244,10 +244,10 @@ internal class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         val snapshotGenerasjonId2 = UUID.randomUUID()
         val personRef = opprettPerson()
         val arbeidsgiverRef = opprettArbeidsgiver()
-        val uberegnetPeriode = 2.januar(2023) til 3.januar(2023)
-        val periodeMedOppgave = 4.januar(2023) til 5.januar(2023)
-        opprettVedtaksperiode(personRef, arbeidsgiverRef, periode = periodeMedOppgave, skjæringstidspunkt = 2.januar)
-        opprettVedtak(personRef, arbeidsgiverRef, periode = uberegnetPeriode, skjæringstidspunkt = 2.januar)
+        val uberegnetPeriode = 2 jan 2023 til (3 jan 2023)
+        val periodeMedOppgave = 4 jan 2023 til (5 jan 2023)
+        opprettVedtaksperiode(personRef, arbeidsgiverRef, periode = periodeMedOppgave, skjæringstidspunkt = 2 jan 2018)
+        opprettVedtak(personRef, arbeidsgiverRef, periode = uberegnetPeriode, skjæringstidspunkt = 2 jan 2018)
         val generasjonId1 = UUID.randomUUID()
         val generasjonId2 = UUID.randomUUID()
         val generasjonRef1 =
@@ -255,29 +255,31 @@ internal class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
                 vedtaksperiodeId = uberegnetPeriode.id,
                 generasjonId = generasjonId1,
                 periode = uberegnetPeriode,
-                skjæringstidspunkt = 2.januar,
+                skjæringstidspunkt = 2 jan 2018,
             )
         val generasjonRef2 =
             nyGenerasjon(
                 vedtaksperiodeId = uberegnetPeriode.id,
                 generasjonId = generasjonId2,
                 periode = uberegnetPeriode,
-                skjæringstidspunkt = 2.januar,
+                skjæringstidspunkt = 2 jan 2018,
             )
-        val graphQLUberegnetPeriode = opprettUberegnetPeriode(2.januar(2023), 3.januar(2023), uberegnetPeriode.id)
-        val graphQLperiodeMedOppgave = opprettBeregnetPeriode(4.januar(2023), 5.januar(2023), periodeMedOppgave.id)
+        val graphQLUberegnetPeriode = opprettUberegnetPeriode(2 jan 2023, 3 jan 2023, uberegnetPeriode.id)
+        val graphQLperiodeMedOppgave = opprettBeregnetPeriode(4 jan 2023, 5 jan 2023, periodeMedOppgave.id)
         val snapshotGenerasjon1 =
             opprettSnapshotGenerasjon(listOf(graphQLUberegnetPeriode, graphQLperiodeMedOppgave), snapshotGenerasjonId1)
         val snapshotGenerasjon2 =
             opprettSnapshotGenerasjon(listOf(graphQLUberegnetPeriode, graphQLperiodeMedOppgave), snapshotGenerasjonId2)
-        val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotGenerasjon1, snapshotGenerasjon2))
+        val arbeidsgiver =
+            opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotGenerasjon1, snapshotGenerasjon2))
         mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
         opprettVarseldefinisjon()
         nyttVarsel(vedtaksperiodeId = uberegnetPeriode.id, generasjonRef = generasjonRef1, status = "AKTIV")
         nyttVarsel(vedtaksperiodeId = uberegnetPeriode.id, generasjonRef = generasjonRef2, status = "AKTIV")
         val førsteGenerasjonAvPeriode = runPersonQuery().plukkUtPeriodeMed(uberegnetPeriode.id, snapshotGenerasjonId2)
         val sisteGenerasjonAvPeriode = runPersonQuery().plukkUtPeriodeMed(uberegnetPeriode.id, snapshotGenerasjonId1)
-        val forventedeVarsler = setOf(PersonQueryTestVarsel(generasjonId1, "EN_KODE"), PersonQueryTestVarsel(generasjonId2, "EN_KODE"))
+        val forventedeVarsler =
+            setOf(PersonQueryTestVarsel(generasjonId1, "EN_KODE"), PersonQueryTestVarsel(generasjonId2, "EN_KODE"))
 
         assertTrue(førsteGenerasjonAvPeriode.varsler.isEmpty())
         assertEquals(forventedeVarsler, sisteGenerasjonAvPeriode.varsler)
@@ -287,8 +289,8 @@ internal class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
     fun `inkluderer handlinger`() {
         val personRef = opprettPerson()
         val arbeidsgiverRef = opprettArbeidsgiver()
-        val periode1 = 1.januar(2023) til 23.januar(2023)
-        val periode2 = 24.januar(2023) til 31.januar(2023)
+        val periode1 = 1 jan 2023 til (23 jan 2023)
+        val periode2 = 24 jan 2023 til (31 jan 2023)
         val vedtakId = opprettVedtaksperiode(personRef, arbeidsgiverRef, periode = periode1)
         ferdigstillOppgave(vedtakId)
         opprettVedtaksperiode(personRef, arbeidsgiverRef, periode = periode2)
@@ -368,7 +370,7 @@ internal class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         val arbeidsgiverRef = opprettArbeidsgiver()
         val snapshotGenerasjonId1 = UUID.randomUUID()
         opprettVedtaksperiode(personRef, arbeidsgiverRef)
-        val graphQLperiodeMedOppgave = opprettBeregnetPeriode(4.januar(2023), 5.januar(2023), PERIODE.id)
+        val graphQLperiodeMedOppgave = opprettBeregnetPeriode(4 jan 2023, 5 jan 2023, PERIODE.id)
         val snapshotGenerasjon = opprettSnapshotGenerasjon(listOf(graphQLperiodeMedOppgave), snapshotGenerasjonId1)
         val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotGenerasjon))
         mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))

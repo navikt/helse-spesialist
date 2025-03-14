@@ -8,7 +8,7 @@ import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
-import no.nav.helse.spesialist.test.lagFødselsnummer
+import no.nav.helse.spesialist.testhjelp.lagFødselsnummer
 import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

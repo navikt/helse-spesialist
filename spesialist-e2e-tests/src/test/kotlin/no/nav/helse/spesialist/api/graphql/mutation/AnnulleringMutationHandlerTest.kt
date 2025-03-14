@@ -3,9 +3,9 @@ package no.nav.helse.spesialist.api.graphql.mutation
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
 import no.nav.helse.spesialist.api.graphql.schema.ApiAnnulleringData
 import no.nav.helse.spesialist.api.testfixtures.mutation.annullerMutation
-import no.nav.helse.spesialist.test.lagAktørId
-import no.nav.helse.spesialist.test.lagFødselsnummer
-import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
+import no.nav.helse.spesialist.testhjelp.lagAktørId
+import no.nav.helse.spesialist.testhjelp.lagFødselsnummer
+import no.nav.helse.spesialist.testhjelp.lagOrganisasjonsnummer
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.util.UUID

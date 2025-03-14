@@ -36,12 +36,12 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.db.DBDaos
 import no.nav.helse.spesialist.db.TransactionalSessionFactory
-import no.nav.helse.spesialist.test.lagAktørId
-import no.nav.helse.spesialist.test.lagFødselsnummer
-import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
-import no.nav.helse.spesialist.test.lagSaksbehandlerident
-import no.nav.helse.spesialist.test.lagSaksbehandlernavn
-import no.nav.helse.spesialist.test.lagTilfeldigSaksbehandlerepost
+import no.nav.helse.spesialist.testhjelp.lagAktørId
+import no.nav.helse.spesialist.testhjelp.lagFødselsnummer
+import no.nav.helse.spesialist.testhjelp.lagOrganisasjonsnummer
+import no.nav.helse.spesialist.testhjelp.lagSaksbehandlerident
+import no.nav.helse.spesialist.testhjelp.lagSaksbehandlernavn
+import no.nav.helse.spesialist.testhjelp.lagTilfeldigSaksbehandlerepost
 import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import no.nav.helse.util.februar
 import no.nav.helse.util.januar
@@ -134,7 +134,10 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
 
     @ParameterizedTest
     @CsvSource("Innvilget,INNVILGELSE", "DelvisInnvilget,DELVIS_INNVILGELSE", "Avslag,AVSLAG")
-    fun `håndter totrinnsvurdering med utfall innvilgelse basert på tags fra Spleis`(tag: String, utfall: VedtakBegrunnelseTypeFraDatabase) {
+    fun `håndter totrinnsvurdering med utfall innvilgelse basert på tags fra Spleis`(
+        tag: String,
+        utfall: VedtakBegrunnelseTypeFraDatabase
+    ) {
         val fødselsnummer = lagFødselsnummer()
         val vedtaksperiodeId = UUID.randomUUID()
         val utbetalingId = UUID.randomUUID()
@@ -743,7 +746,10 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
 
     @ParameterizedTest
     @CsvSource("Innvilget,INNVILGELSE", "DelvisInnvilget,DELVIS_INNVILGELSE", "Avslag,AVSLAG")
-    fun `fatter vedtak med utfall innvilgelse basert på tags fra Spleis`(tag: String, utfall: VedtakBegrunnelseTypeFraDatabase) {
+    fun `fatter vedtak med utfall innvilgelse basert på tags fra Spleis`(
+        tag: String,
+        utfall: VedtakBegrunnelseTypeFraDatabase
+    ) {
         val vedtaksperiodeId = UUID.randomUUID()
         val fødselsnummer = lagFødselsnummer()
         val utbetalingId = UUID.randomUUID()
