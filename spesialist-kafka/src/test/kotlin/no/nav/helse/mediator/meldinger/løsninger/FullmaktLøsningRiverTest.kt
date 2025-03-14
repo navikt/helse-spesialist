@@ -8,7 +8,7 @@ import no.nav.helse.kafka.FullmaktLøsningRiver
 import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
-import no.nav.helse.spesialist.test.lagFødselsnummer
+import no.nav.helse.spesialist.testhjelp.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -22,11 +22,13 @@ class FullmaktLøsningRiverTest {
     fun `motta melding med fullmakter`() {
         val fnr = lagFødselsnummer()
         val slot = slot<Fullmaktløsning>()
-        testRapid.sendTestMessage(Testmeldingfabrikk.lagFullmaktløsningMedFullmakt(
-            fnr,
-            fom = now(),
-            tom = null
-        ))
+        testRapid.sendTestMessage(
+            Testmeldingfabrikk.lagFullmaktløsningMedFullmakt(
+                fnr,
+                fom = now(),
+                tom = null
+            )
+        )
         verify(exactly = 1) { mediator.løsning(any(), any(), any(), capture(slot), any()) }
         assertTrue(slot.captured.harFullmakt)
     }
@@ -35,11 +37,13 @@ class FullmaktLøsningRiverTest {
     fun `motta melding med utdaterte fullmakter`() {
         val fnr = lagFødselsnummer()
         val slot = slot<Fullmaktløsning>()
-        testRapid.sendTestMessage(Testmeldingfabrikk.lagFullmaktløsningMedFullmakt(
-            fnr,
-            fom = now().minusYears(2),
-            tom = now().minusDays(1)
-        ))
+        testRapid.sendTestMessage(
+            Testmeldingfabrikk.lagFullmaktløsningMedFullmakt(
+                fnr,
+                fom = now().minusYears(2),
+                tom = now().minusDays(1)
+            )
+        )
         verify(exactly = 1) { mediator.løsning(any(), any(), any(), capture(slot), any()) }
         assertFalse(slot.captured.harFullmakt)
     }

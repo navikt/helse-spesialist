@@ -15,7 +15,7 @@ import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
-import no.nav.helse.util.januar
+import no.nav.helse.spesialist.testhjelp.jan
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -50,8 +50,8 @@ internal class SaksbehandlerløsningTest {
             utbetaling = Utbetaling(randomUUID(), arbeidsgiverbeløp, personbeløp, Utbetalingtype.UTBETALING),
             sykefraværstilfelle = Sykefraværstilfelle(
                 fødselsnummer = FNR,
-                skjæringstidspunkt = 1.januar,
-                gjeldendeBehandlinger = listOf(LegacyBehandling(randomUUID(), vedtaksperiodeId, 1.januar, 31.januar, 1.januar))
+                skjæringstidspunkt = 1 jan 2018,
+                gjeldendeBehandlinger = listOf(LegacyBehandling(randomUUID(), vedtaksperiodeId, 1 jan 2018, 31 jan 2018, 1 jan 2018))
             ),
             godkjent = godkjent,
             godkjenttidspunkt = GODKJENTTIDSPUNKT,

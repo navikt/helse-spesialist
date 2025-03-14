@@ -8,8 +8,8 @@ import no.nav.helse.kafka.KlargjørPersonForVisningRiver
 import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.person.KlargjørTilgangsrelaterteData
-import no.nav.helse.spesialist.test.lagAktørId
-import no.nav.helse.spesialist.test.lagFødselsnummer
+import no.nav.helse.spesialist.testhjelp.lagAktørId
+import no.nav.helse.spesialist.testhjelp.lagFødselsnummer
 import org.junit.jupiter.api.Test
 
 class KlargjørPersonForVisningRiverTest {

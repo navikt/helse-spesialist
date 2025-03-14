@@ -10,7 +10,7 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.kafka.objectMapper
-import no.nav.helse.util.januar
+import no.nav.helse.spesialist.testhjelp.jan
 import java.time.LocalDate
 import java.time.LocalDate.now
 import java.time.LocalDateTime
@@ -206,8 +206,8 @@ internal object Testmeldingfabrikk {
         organisasjonsnummer: String,
         vedtaksperiodeId: UUID,
         spleisBehandlingId: UUID,
-        fom: LocalDate = 1.januar,
-        tom: LocalDate = 31.januar,
+        fom: LocalDate = 1 jan 2018,
+        tom: LocalDate = 31 jan 2018,
     ) =
         nyHendelse(
             id, "behandling_opprettet", mapOf(

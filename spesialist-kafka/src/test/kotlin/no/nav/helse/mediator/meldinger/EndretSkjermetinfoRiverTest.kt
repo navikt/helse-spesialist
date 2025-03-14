@@ -7,7 +7,7 @@ import no.nav.helse.kafka.EndretSkjermetinfoRiver
 import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.person.EndretEgenAnsattStatus
-import no.nav.helse.spesialist.test.lagFødselsnummer
+import no.nav.helse.spesialist.testhjelp.lagFødselsnummer
 import org.junit.jupiter.api.Test
 import java.util.UUID
 

@@ -6,9 +6,9 @@ import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.InntektTilRisk
 import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
 import no.nav.helse.spesialist.kafka.objectMapper
-import no.nav.helse.spesialist.test.lagFødselsnummer
-import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
-import no.nav.helse.util.januar
+import no.nav.helse.spesialist.testhjelp.jan
+import no.nav.helse.spesialist.testhjelp.lagFødselsnummer
+import no.nav.helse.spesialist.testhjelp.lagOrganisasjonsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -23,8 +23,13 @@ class BehovMessageBuilderTest {
 
     @Test
     fun `Infotrygdutbetalinger-behov`() {
-        val behov = Behov.Infotrygdutbetalinger(1.januar, 31.januar).somJson()
-        behov.assertBehov("HentInfotrygdutbetalinger", mapOf("historikkFom" to 1.januar, "historikkTom" to 31.januar))
+        val behov = Behov.Infotrygdutbetalinger(1 jan 2018, 31 jan 2018).somJson()
+        behov.assertBehov(
+            "HentInfotrygdutbetalinger", mapOf(
+                "historikkFom" to (1 jan 2018),
+                "historikkTom" to (31 jan 2018)
+            )
+        )
     }
 
     @Test

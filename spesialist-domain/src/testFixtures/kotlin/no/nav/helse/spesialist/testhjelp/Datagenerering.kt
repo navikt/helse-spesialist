@@ -32,7 +32,7 @@ private val mellomnavnListe = listOf(
     "Behagelig",
     "Robust",
     "Sofistikert",
-) + List(10) { null }
+)
 
 private val etternavnListe =
     listOf("Diode", "Flom", "Damesykkel", "Undulat", "Bakgrunn", "Genser", "Fornøyelse", "Campingvogn", "Bakkeklaring")
@@ -43,8 +43,8 @@ private val organisasjonsnavnDel2 = listOf("AVDELINGEN", "SENTERET", "FORUM", "K
 fun lagOrganisasjonsnavn() = organisasjonsnavnDel1.random() + organisasjonsnavnDel2.random()
 
 fun lagSaksbehandlerident() = ('A'..'Z').random() + "${nextInt(from = 100_000, until = 999_999)}"
-fun lagSaksbehandlernavn() = "${lagFornavn()} ${lagEtternavn()}"
-fun lagEpostadresseFraFulltNavn(navn: String) = navn.split(" ").joinToString(".").lowercase() + "@nav.no"
+fun lagSaksbehandlernavn() = listOfNotNull(lagFornavn(), lagMellomnavnOrNull(), lagEtternavn()).joinToString(separator = " ")
+fun lagEpostadresseFraFulltNavn(fulltNavn: String) = fulltNavn.split(" ").joinToString(".").lowercase() + "@nav.no"
 fun lagTilfeldigSaksbehandlerepost() = lagEpostadresseFraFulltNavn(lagSaksbehandlernavn())
 
 fun fødselsdato(): LocalDate {
@@ -55,5 +55,8 @@ fun fødselsdato(): LocalDate {
 }
 
 fun lagFornavn() = fornavnListe.random()
+
+fun lagMellomnavnOrNull() = (mellomnavnListe  + List(10) { null }).shuffled().random()
+fun lagMellomnavn() = mellomnavnListe.random()
 
 fun lagEtternavn() = etternavnListe.random()

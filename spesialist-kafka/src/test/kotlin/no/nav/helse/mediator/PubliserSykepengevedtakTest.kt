@@ -20,7 +20,7 @@ import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
 import no.nav.helse.modell.vilkårsprøving.Inntekt
 import no.nav.helse.modell.vilkårsprøving.Sammenligningsgrunnlag
 import no.nav.helse.spesialist.kafka.objectMapper
-import no.nav.helse.util.januar
+import no.nav.helse.spesialist.testhjelp.jan
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -40,9 +40,9 @@ internal class PubliserSykepengevedtakTest {
         private val utbetalingId = UUID.randomUUID()
         private const val ORGANISASJONSNUMMER = "123456789"
         private const val AKTØRID = "1234567891011"
-        private val fom = 1.januar
-        private val tom = 31.januar
-        private val skjæringstidspunkt = 1.januar
+        private val fom = 1 jan 2018
+        private val tom = 31 jan 2018
+        private val skjæringstidspunkt = 1 jan 2018
         private val hendelser = listOf(UUID.randomUUID())
         private val vedtakFattetTidspunkt = LocalDateTime.now()
     }

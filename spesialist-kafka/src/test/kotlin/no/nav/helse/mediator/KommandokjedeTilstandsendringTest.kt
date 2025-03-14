@@ -5,7 +5,7 @@ import no.nav.helse.db.SessionContext
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.person.Person
-import no.nav.helse.spesialist.test.lagFødselsnummer
+import no.nav.helse.spesialist.testhjelp.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.UUID
@@ -14,7 +14,7 @@ class KommandokjedeTilstandsendringTest {
     private val mediator = UtgåendeMeldingerMediator()
     private val testRapid = TestRapid()
     private val publiserer = MessageContextMeldingPubliserer(testRapid)
-    private val testmelding = object: Personmelding {
+    private val testmelding = object : Personmelding {
         override fun behandle(person: Person, kommandostarter: Kommandostarter, sessionContext: SessionContext) {}
         override fun fødselsnummer(): String = lagFødselsnummer()
         override fun toJson(): String = "{}"

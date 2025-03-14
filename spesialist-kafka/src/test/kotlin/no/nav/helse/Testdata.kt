@@ -8,9 +8,9 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.SykepengegrunnlagsArbeidsgiver
 import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
-import no.nav.helse.spesialist.test.lagFødselsnummer
-import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
-import no.nav.helse.util.januar
+import no.nav.helse.spesialist.testhjelp.jan
+import no.nav.helse.spesialist.testhjelp.lagFødselsnummer
+import no.nav.helse.spesialist.testhjelp.lagOrganisasjonsnummer
 import java.time.LocalDate
 import java.util.UUID
 
@@ -39,15 +39,15 @@ object Testdata {
             spleisBehandlingId = spleisBehandlingId,
             vilkårsgrunnlagId = UUID.randomUUID(),
             tags = tags,
-            periodeFom = 1.januar,
-            periodeTom = 31.januar,
+            periodeFom = 1 jan 2018,
+            periodeTom = 31 jan 2018,
             periodetype = periodetype,
             førstegangsbehandling = true,
             utbetalingtype = utbetalingtype,
             kanAvvises = kanAvvises,
             inntektskilde = inntektskilde,
             orgnummereMedRelevanteArbeidsforhold = emptyList(),
-            skjæringstidspunkt = 1.januar,
+            skjæringstidspunkt = 1 jan 2018,
             spleisSykepengegrunnlagsfakta = SpleisSykepengegrunnlagsfakta(
                 arbeidsgivere = listOf(
                     SykepengegrunnlagsArbeidsgiver(
@@ -76,8 +76,8 @@ internal data class GodkjenningsbehovTestdata(
     val organisasjonsnummer: String,
     val vedtaksperiodeId: UUID,
     val utbetalingId: UUID,
-    val periodeFom: LocalDate = 1.januar,
-    val periodeTom: LocalDate = 31.januar,
+    val periodeFom: LocalDate = 1 jan 2018,
+    val periodeTom: LocalDate = 31 jan 2018,
     val skjæringstidspunkt: LocalDate = periodeFom,
     val periodetype: Periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
     val kanAvvises: Boolean = true,

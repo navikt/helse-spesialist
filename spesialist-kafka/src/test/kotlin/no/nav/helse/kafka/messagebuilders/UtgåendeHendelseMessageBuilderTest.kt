@@ -13,14 +13,14 @@ import no.nav.helse.modell.melding.VedtaksperiodeGodkjentManuelt
 import no.nav.helse.modell.utbetaling.Refusjonstype
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.kafka.objectMapper
-import no.nav.helse.spesialist.test.lagEpostadresseFraFulltNavn
-import no.nav.helse.spesialist.test.lagFødselsnummer
-import no.nav.helse.spesialist.test.lagOrganisasjonsnummer
-import no.nav.helse.spesialist.test.lagSaksbehandlerident
-import no.nav.helse.spesialist.test.lagSaksbehandlernavn
-import no.nav.helse.spesialist.test.lagTilfeldigSaksbehandlerepost
-import no.nav.helse.util.februar
-import no.nav.helse.util.januar
+import no.nav.helse.spesialist.testhjelp.feb
+import no.nav.helse.spesialist.testhjelp.jan
+import no.nav.helse.spesialist.testhjelp.lagEpostadresseFraFulltNavn
+import no.nav.helse.spesialist.testhjelp.lagFødselsnummer
+import no.nav.helse.spesialist.testhjelp.lagOrganisasjonsnummer
+import no.nav.helse.spesialist.testhjelp.lagSaksbehandlerident
+import no.nav.helse.spesialist.testhjelp.lagSaksbehandlernavn
+import no.nav.helse.spesialist.testhjelp.lagTilfeldigSaksbehandlerepost
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -311,19 +311,19 @@ class UtgåendeHendelseMessageBuilderTest {
                 InntektsendringerEvent.Inntektskildeendring(
                     organisasjonsnummer = arbeidsgiver1,
                     nyeEllerEndredeInntekter = listOf(
-                        InntektsendringerEvent.Inntektskildeendring.PeriodeMedBeløp(1.januar, 31.januar, 10000.0),
-                        InntektsendringerEvent.Inntektskildeendring.PeriodeMedBeløp(1.februar, 28.februar, 20000.0)
+                        InntektsendringerEvent.Inntektskildeendring.PeriodeMedBeløp(1 jan 2018, 31 jan 2018, 10000.0),
+                        InntektsendringerEvent.Inntektskildeendring.PeriodeMedBeløp(1 feb 2018, 28 feb 2018, 20000.0)
                     ),
                     fjernedeInntekter = emptyList()
                 ),
                 InntektsendringerEvent.Inntektskildeendring(
                     organisasjonsnummer = arbeidsgiver2,
                     nyeEllerEndredeInntekter = listOf(
-                        InntektsendringerEvent.Inntektskildeendring.PeriodeMedBeløp(1.januar, 31.januar, 15000.0),
+                        InntektsendringerEvent.Inntektskildeendring.PeriodeMedBeløp(1 jan 2018, 31 jan 2018, 15000.0),
                     ),
                     fjernedeInntekter = listOf(
-                        InntektsendringerEvent.Inntektskildeendring.PeriodeUtenBeløp(1.januar, 31.januar),
-                        InntektsendringerEvent.Inntektskildeendring.PeriodeUtenBeløp(1.februar, 28.februar),
+                        InntektsendringerEvent.Inntektskildeendring.PeriodeUtenBeløp(1 jan 2018, 31 jan 2018),
+                        InntektsendringerEvent.Inntektskildeendring.PeriodeUtenBeløp(1 feb 2018, 28 feb 2018),
                     )
                 ),
             ),
