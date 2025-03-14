@@ -14,7 +14,7 @@ import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import java.nio.charset.Charset
 
-fun Route.webSocketsApi() {
+internal fun Route.webSocketsApi() {
     val log = LoggerFactory.getLogger("WebSocketsApi")
 
     val sessions = mutableSetOf<WebSocketSession>()

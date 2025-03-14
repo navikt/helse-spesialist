@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory
 
 private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
 
-val GraphQLCallLogging =
+internal val GraphQLCallLogging =
     createRouteScopedPlugin("GraphQLCallLogging") {
         onCall { call ->
             val graphQLRequest = call.receive<GraphQLServerRequest>()
@@ -16,7 +16,7 @@ val GraphQLCallLogging =
         }
     }
 
-fun logRequest(graphQLRequest: GraphQLServerRequest) {
+private fun logRequest(graphQLRequest: GraphQLServerRequest) {
     if (graphQLRequest is GraphQLRequest) {
         graphQLRequest.operationName.also { operationName ->
             if (operationName != null) {

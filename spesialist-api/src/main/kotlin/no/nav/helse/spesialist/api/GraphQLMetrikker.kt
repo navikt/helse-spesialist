@@ -12,7 +12,7 @@ import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 
 private val registry = Metrics.globalRegistry.add(PrometheusMeterRegistry(PrometheusConfig.DEFAULT))
 
-val GraphQLMetrikker =
+internal val GraphQLMetrikker =
     createRouteScopedPlugin("GraphQLMetrikker") {
         onCallRespond { call ->
             val operationName = call.receive<JsonNode>()["operationName"]?.textValue() ?: "ukjent"

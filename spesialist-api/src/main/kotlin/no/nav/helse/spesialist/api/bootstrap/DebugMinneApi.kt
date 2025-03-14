@@ -9,7 +9,7 @@ import io.ktor.server.routing.route
 import java.lang.management.ManagementFactory
 import java.lang.management.MemoryUsage
 
-fun Route.debugMinneApi() {
+internal fun Route.debugMinneApi() {
     route("/minne") {
         get {
             val heapMemoryUsage: MemoryUsage = ManagementFactory.getMemoryMXBean().heapMemoryUsage
