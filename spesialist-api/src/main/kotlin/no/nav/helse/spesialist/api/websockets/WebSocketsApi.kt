@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.api.websockets
 import io.ktor.server.application.ApplicationStopped
 import io.ktor.server.auth.authenticate
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.application
 import io.ktor.server.routing.route
 import io.ktor.server.websocket.webSocket
 import io.ktor.websocket.Frame
@@ -18,7 +19,7 @@ fun Route.webSocketsApi() {
 
     val sessions = mutableSetOf<WebSocketSession>()
 
-    environment?.monitor?.subscribe(ApplicationStopped) {
+    application.monitor.subscribe(ApplicationStopped) {
         val sessionsToClose = sessions.filter { it.isActive }
         log.info("Closing ${sessionsToClose.size} WebSocket sessions")
         runBlocking { sessionsToClose.forEach { it.close() } }

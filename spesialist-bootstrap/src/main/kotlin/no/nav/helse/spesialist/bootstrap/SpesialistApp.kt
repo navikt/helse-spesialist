@@ -2,7 +2,6 @@ package no.nav.helse.spesialist.bootstrap
 
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.ktor.server.application.Application
-import io.ktor.server.routing.routing
 import no.nav.helse.FeatureToggles
 import no.nav.helse.Gruppekontroll
 import no.nav.helse.MeldingPubliserer
@@ -27,12 +26,8 @@ import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingh√
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.spesialist.api.AzureConfig
 import no.nav.helse.spesialist.api.Personh√•ndterer
-import no.nav.helse.spesialist.api.azureAdAppAuthentication
 import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
-import no.nav.helse.spesialist.api.bootstrap.debugMinneApi
-import no.nav.helse.spesialist.api.bootstrap.installPlugins
 import no.nav.helse.spesialist.api.graphql.settOppGraphQLApi
-import no.nav.helse.spesialist.api.websockets.webSocketsApi
 import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.helse.spesialist.db.bootstrap.DBModule
@@ -199,8 +194,6 @@ class SpesialistApp(
 
     fun konfigurerKtorApp(application: Application) {
         application.apply {
-            installPlugins()
-            azureAdAppAuthentication(azureConfig)
             settOppGraphQLApi(
                 daos = daos,
                 sessionFactory = sessionFactory,
@@ -216,12 +209,8 @@ class SpesialistApp(
                 tilgangsgrupper = tilgangsgrupper,
                 meldingPubliserer = meldingPubliserer,
                 featureToggles = featureToggles,
+                azureConfig = azureConfig,
             )
-
-            routing {
-                webSocketsApi()
-                debugMinneApi()
-            }
         }
     }
 }

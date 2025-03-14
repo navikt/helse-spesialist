@@ -20,14 +20,18 @@ import no.nav.helse.db.Daos
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
+import no.nav.helse.spesialist.api.AzureConfig
 import no.nav.helse.spesialist.api.Dokumenthåndterer
 import no.nav.helse.spesialist.api.Godkjenninghåndterer
 import no.nav.helse.spesialist.api.GraphQLCallLogging
 import no.nav.helse.spesialist.api.GraphQLMetrikker
 import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
+import no.nav.helse.spesialist.api.azureAdAppAuthentication
 import no.nav.helse.spesialist.api.behandlingsstatistikk.IBehandlingsstatistikkService
 import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
+import no.nav.helse.spesialist.api.bootstrap.debugMinneApi
+import no.nav.helse.spesialist.api.bootstrap.installPlugins
 import no.nav.helse.spesialist.api.graphql.mutation.AnnulleringMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.MinimumSykdomsgradMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.NotatMutationHandler
@@ -49,6 +53,7 @@ import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.person.PersonService
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
+import no.nav.helse.spesialist.api.websockets.webSocketsApi
 import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.application.Snapshothenter
 import org.slf4j.Logger
@@ -70,6 +75,7 @@ fun Application.settOppGraphQLApi(
     tilgangsgrupper: Tilgangsgrupper,
     meldingPubliserer: MeldingPubliserer,
     featureToggles: FeatureToggles,
+    azureConfig: AzureConfig,
 ) {
     val spesialistSchema =
         lagSchemaMedResolversOgHandlers(
@@ -87,6 +93,8 @@ fun Application.settOppGraphQLApi(
             meldingPubliserer = meldingPubliserer,
             featureToggles = featureToggles,
         )
+    installPlugins()
+    azureAdAppAuthentication(azureConfig)
     val graphQLPlugin =
         install(GraphQL) {
             server {
@@ -101,6 +109,8 @@ fun Application.settOppGraphQLApi(
             schema(spesialistSchema::setup)
         }
     routing {
+        webSocketsApi()
+        debugMinneApi()
         route("graphql") {
             authenticate("oidc") {
                 install(GraphQLMetrikker)
