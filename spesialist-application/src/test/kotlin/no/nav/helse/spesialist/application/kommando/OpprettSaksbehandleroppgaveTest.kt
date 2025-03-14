@@ -46,7 +46,7 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.modell.vedtaksperiode.Periodetype.INFOTRYGDFORLENGELSE
 import no.nav.helse.modell.vedtaksperiode.Periodetype.OVERGANG_FRA_IT
 import no.nav.helse.spesialist.application.Testdata.godkjenningsbehovData
-import no.nav.helse.spesialist.application.lagFødselsnummer
+import no.nav.helse.spesialist.testhjelp.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -120,14 +120,26 @@ internal class OpprettSaksbehandleroppgaveTest {
     fun `oppretter oppgave med egen oppgavetype for strengt fortrolig adresse`() {
         every { personDao.finnAdressebeskyttelse(FNR) } returns Adressebeskyttelse.StrengtFortrolig
         assertTrue(command.execute(context))
-        assertForventedeEgenskaper(SØKNAD, STRENGT_FORTROLIG_ADRESSE, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING)
+        assertForventedeEgenskaper(
+            SØKNAD,
+            STRENGT_FORTROLIG_ADRESSE,
+            INGEN_UTBETALING,
+            EN_ARBEIDSGIVER,
+            FORSTEGANGSBEHANDLING
+        )
     }
 
     @Test
     fun `oppretter oppgave med egen oppgavetype for strengt fortrolig adresse utland`() {
         every { personDao.finnAdressebeskyttelse(FNR) } returns Adressebeskyttelse.StrengtFortroligUtland
         assertTrue(command.execute(context))
-        assertForventedeEgenskaper(SØKNAD, STRENGT_FORTROLIG_ADRESSE, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING)
+        assertForventedeEgenskaper(
+            SØKNAD,
+            STRENGT_FORTROLIG_ADRESSE,
+            INGEN_UTBETALING,
+            EN_ARBEIDSGIVER,
+            FORSTEGANGSBEHANDLING
+        )
     }
 
     @Test
@@ -178,7 +190,13 @@ internal class OpprettSaksbehandleroppgaveTest {
     fun `oppretter oppgave med egenskap skjønnsfastsettelse dersom det finnes varsel om avvik`() {
         every { sykefraværstilfelle.kreverSkjønnsfastsettelse(VEDTAKSPERIODE_ID) } returns true
         assertTrue(command.execute(context))
-        assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, SKJØNNSFASTSETTELSE)
+        assertForventedeEgenskaper(
+            SØKNAD,
+            INGEN_UTBETALING,
+            EN_ARBEIDSGIVER,
+            FORSTEGANGSBEHANDLING,
+            SKJØNNSFASTSETTELSE
+        )
     }
 
     @Test
@@ -254,15 +272,17 @@ internal class OpprettSaksbehandleroppgaveTest {
     }
 
     private fun assertForventedeEgenskaper(vararg egenskaper: Egenskap, kanAvvises: Boolean = true) {
-        verify(exactly = 1) { oppgaveService.nyOppgave(
-            FNR,
-            VEDTAKSPERIODE_ID,
-            BEHANDLING_ID,
-            UTBETALING_ID,
-            HENDELSE_ID,
-            kanAvvises,
-            egenskaper.toSet()
-        ) }
+        verify(exactly = 1) {
+            oppgaveService.nyOppgave(
+                FNR,
+                VEDTAKSPERIODE_ID,
+                BEHANDLING_ID,
+                UTBETALING_ID,
+                HENDELSE_ID,
+                kanAvvises,
+                egenskaper.toSet()
+            )
+        }
     }
 
     private fun opprettSaksbehandlerOppgaveCommand(

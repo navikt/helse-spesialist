@@ -10,52 +10,11 @@ import no.nav.helse.modell.vedtaksperiode.SykepengegrunnlagsArbeidsgiver
 import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
 import no.nav.helse.spesialist.api.bootstrap.Gruppe
 import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
-import java.time.LocalDate
+import no.nav.helse.spesialist.testhjelp.jan
+import no.nav.helse.spesialist.testhjelp.lagAktørId
+import no.nav.helse.spesialist.testhjelp.lagFødselsnummer
+import no.nav.helse.spesialist.testhjelp.lagOrganisasjonsnummer
 import java.util.UUID
-import kotlin.random.Random.Default.nextInt
-import kotlin.random.Random.Default.nextLong
-
-fun lagFødselsnummer() = nextLong(from = 10000_00000, until = 699999_99999).toString().padStart(11, '0')
-
-fun lagAktørId() = nextLong(from = 1_000_000_000_000, until = 1_000_099_999_999).toString()
-
-fun lagOrganisasjonsnummer() = nextLong(from = 800_000_000, until = 999_999_999).toString()
-
-private val fornavnListe = listOf(
-    "Måteholden",
-    "Dypsindig",
-    "Ultrafiolett",
-    "Urettferdig",
-    "Berikende",
-    "Upresis",
-    "Stridlynt",
-    "Rund",
-    "Internasjonal"
-)
-
-private val etternavnListe =
-    listOf("Diode", "Flom", "Damesykkel", "Undulat", "Bakgrunn", "Genser", "Fornøyelse", "Campingvogn", "Bakkeklaring")
-
-private val organisasjonsnavnDel1 = listOf("NEPE", "KLOVNE", "BOBLEBAD-", "DUSTE", "SKIHOPP", "SMÅBARN", "SPANIA")
-private val organisasjonsnavnDel2 = listOf("AVDELINGEN", "SENTERET", "FORUM", "KLUBBEN", "SNEKKERIET")
-
-fun lagOrganisasjonsnavn() = organisasjonsnavnDel1.random() + organisasjonsnavnDel2.random()
-
-fun lagSaksbehandlerident() = ('A'..'Z').random() + "${nextInt(from = 100_000, until = 999_999)}"
-fun lagSaksbehandlernavn() = "${lagFornavn()} ${lagEtternavn()}"
-fun lagEpostadresseFraFulltNavn(navn: String) = navn.split(" ").joinToString(".").lowercase() + "@nav.no"
-fun lagTilfeldigSaksbehandlerepost() = lagEpostadresseFraFulltNavn(lagSaksbehandlernavn())
-
-fun fødselsdato(): LocalDate {
-    val end = LocalDate.now().minusYears(18)
-    val start = end.minusYears(100)
-    val randomDayInEpoch = nextLong(start.toEpochDay(), end.toEpochDay())
-    return LocalDate.ofEpochDay(randomDayInEpoch)
-}
-
-fun lagFornavn() = fornavnListe.random()
-
-fun lagEtternavn() = etternavnListe.random()
 
 class TestPerson {
     val fødselsnummer: String = lagFødselsnummer()
@@ -66,10 +25,10 @@ class TestPerson {
     private val vedtaksperiode1 = arbeidsgiver1.nyVedtaksperiode()
     private val vedtaksperiode2 = arbeidsgiver1.nyVedtaksperiode()
     val orgnummer: String = arbeidsgiver1.organisasjonsnummer
-    val orgnummer2: String = arbeidsgiver2.organisasjonsnummer
+    private val orgnummer2: String = arbeidsgiver2.organisasjonsnummer
     val vedtaksperiodeId1 = vedtaksperiode1.vedtaksperiodeId
-    val vedtaksperiodeId2 = vedtaksperiode2.vedtaksperiodeId
-    val utbetalingId1 = vedtaksperiode1.utbetalingId
+    private val vedtaksperiodeId2 = vedtaksperiode2.vedtaksperiodeId
+    private val utbetalingId1 = vedtaksperiode1.utbetalingId
     private val utbetalingId2 = vedtaksperiode2.utbetalingId
 
     override fun toString(): String {

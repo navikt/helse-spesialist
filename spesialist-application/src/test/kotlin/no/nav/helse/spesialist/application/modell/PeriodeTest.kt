@@ -2,8 +2,8 @@ package no.nav.helse.spesialist.application.modell
 
 import no.nav.helse.modell.person.vedtaksperiode.Periode
 import no.nav.helse.modell.person.vedtaksperiode.Periode.Companion.til
-import no.nav.helse.spesialist.application.feb
-import no.nav.helse.spesialist.application.jan
+import no.nav.helse.spesialist.testhjelp.feb
+import no.nav.helse.spesialist.testhjelp.jan
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals

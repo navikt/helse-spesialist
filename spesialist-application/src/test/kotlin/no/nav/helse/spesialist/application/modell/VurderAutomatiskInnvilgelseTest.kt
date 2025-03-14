@@ -19,8 +19,8 @@ import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.application.Testdata.godkjenningsbehovData
-import no.nav.helse.spesialist.application.jan
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
+import no.nav.helse.spesialist.testhjelp.jan
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -39,7 +39,8 @@ internal class VurderAutomatiskInnvilgelseTest {
     }
 
     private val automatisering = mockk<Automatisering>(relaxed = true)
-    private val legacyBehandling = LegacyBehandling(UUID.randomUUID(), vedtaksperiodeId, 1 jan 2018, 31 jan 2018, 1 jan 2018)
+    private val legacyBehandling =
+        LegacyBehandling(UUID.randomUUID(), vedtaksperiodeId, 1 jan 2018, 31 jan 2018, 1 jan 2018)
     private val automatiseringDao = mockk<AutomatiseringDao>(relaxed = true)
     private val command =
         VurderAutomatiskInnvilgelse(

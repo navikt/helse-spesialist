@@ -3,7 +3,7 @@ package no.nav.helse.spesialist.application.modell
 import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.spesialist.application.TestPerson
-import no.nav.helse.spesialist.application.jan
+import no.nav.helse.spesialist.testhjelp.jan
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.UUID

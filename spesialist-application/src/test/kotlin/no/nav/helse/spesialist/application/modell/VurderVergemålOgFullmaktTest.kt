@@ -12,8 +12,8 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.vergemal.VurderVergemålOgFullmakt
-import no.nav.helse.spesialist.application.jan
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
+import no.nav.helse.spesialist.testhjelp.jan
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -28,7 +28,8 @@ class VurderVergemålOgFullmaktTest {
     }
 
     private val vergemålDao = mockk<VergemålDao>(relaxed = true)
-    private val legacyBehandling = LegacyBehandling(UUID.randomUUID(), VEDTAKSPERIODE_ID, 1 jan 2018, 31 jan 2018, 1 jan 2018)
+    private val legacyBehandling =
+        LegacyBehandling(UUID.randomUUID(), VEDTAKSPERIODE_ID, 1 jan 2018, 31 jan 2018, 1 jan 2018)
     private val sykefraværstilfelle = Sykefraværstilfelle(FNR, 1 jan 2018, listOf(legacyBehandling))
 
     private val command =

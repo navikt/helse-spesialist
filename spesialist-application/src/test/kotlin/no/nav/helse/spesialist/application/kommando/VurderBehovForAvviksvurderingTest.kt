@@ -13,10 +13,10 @@ import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
 import no.nav.helse.modell.vilkårsprøving.Inntekt
 import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
 import no.nav.helse.modell.vilkårsprøving.Sammenligningsgrunnlag
-import no.nav.helse.spesialist.application.jan
-import no.nav.helse.spesialist.application.lagFødselsnummer
-import no.nav.helse.spesialist.application.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
+import no.nav.helse.spesialist.testhjelp.jan
+import no.nav.helse.spesialist.testhjelp.lagFødselsnummer
+import no.nav.helse.spesialist.testhjelp.lagOrganisasjonsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -78,7 +78,9 @@ class VurderBehovForAvviksvurderingTest {
         }
 
         override fun hentAvviksvurdering(vilkårsgrunnlagId: UUID): Avviksvurdering = error("Ikke implementert i test")
-        override fun hentAvviksvurderingFor(avviksvurderingId: UUID): Avviksvurdering? = avviksvurderingSomSkalReturneres
+        override fun hentAvviksvurderingFor(avviksvurderingId: UUID): Avviksvurdering? =
+            avviksvurderingSomSkalReturneres
+
         override fun finnAvviksvurderinger(fødselsnummer: String): List<Avviksvurdering> =
             error("Ikke implementert i test")
     }

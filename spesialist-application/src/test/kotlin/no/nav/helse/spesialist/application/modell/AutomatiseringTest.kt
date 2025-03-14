@@ -29,10 +29,10 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
-import no.nav.helse.spesialist.application.jan
-import no.nav.helse.spesialist.application.lagFødselsnummer
-import no.nav.helse.spesialist.application.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
+import no.nav.helse.spesialist.testhjelp.jan
+import no.nav.helse.spesialist.testhjelp.lagFødselsnummer
+import no.nav.helse.spesialist.testhjelp.lagOrganisasjonsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -105,7 +105,7 @@ internal class AutomatiseringTest {
             generasjonDao = generasjonDaoMock,
             egenAnsattDao = egenAnsattDao,
             totrinnsvurderingRepository = totrinnsvurderingRepository,
-            featureToggles = object: FeatureToggles {},
+            featureToggles = object : FeatureToggles {},
         )
 
     @BeforeEach
@@ -291,15 +291,24 @@ internal class AutomatiseringTest {
     }
 
     private fun assertKanIkkeAutomatiseres(resultat: Automatiseringsresultat) {
-        assertTrue(resultat is Automatiseringsresultat.KanIkkeAutomatiseres, "Expected ${Automatiseringsresultat.KanIkkeAutomatiseres::class.simpleName}, got ${resultat::class.simpleName}")
+        assertTrue(
+            resultat is Automatiseringsresultat.KanIkkeAutomatiseres,
+            "Expected ${Automatiseringsresultat.KanIkkeAutomatiseres::class.simpleName}, got ${resultat::class.simpleName}"
+        )
     }
 
     private fun assertStikkprøve(resultat: Automatiseringsresultat) {
-        assertTrue(resultat is Automatiseringsresultat.Stikkprøve, "Expected ${Automatiseringsresultat.Stikkprøve::class.simpleName}, got ${resultat::class.simpleName}")
+        assertTrue(
+            resultat is Automatiseringsresultat.Stikkprøve,
+            "Expected ${Automatiseringsresultat.Stikkprøve::class.simpleName}, got ${resultat::class.simpleName}"
+        )
     }
 
     private fun assertKanAutomatiseres(resultat: Automatiseringsresultat) {
-        assertTrue(resultat is Automatiseringsresultat.KanAutomatiseres, "Expected ${Automatiseringsresultat.KanAutomatiseres::class.simpleName}, got ${resultat::class.simpleName}")
+        assertTrue(
+            resultat is Automatiseringsresultat.KanAutomatiseres,
+            "Expected ${Automatiseringsresultat.KanAutomatiseres::class.simpleName}, got ${resultat::class.simpleName}"
+        )
     }
 
     private fun forsøkAutomatisering(
@@ -343,10 +352,21 @@ internal class AutomatiseringTest {
         varselkode: String = "RV_IM_1",
     ) = Varsel(varselId, varselkode, LocalDateTime.now(), vedtaksperiodeId)
 
-    private fun blirManuellOppgave(utbetaling: Utbetaling = enUtbetaling(), legacyBehandling: LegacyBehandling = enGenerasjon()) =
-        assertKanIkkeAutomatiseres(forsøkAutomatisering(utbetaling = utbetaling, generasjoners = listOf(legacyBehandling)))
+    private fun blirManuellOppgave(
+        utbetaling: Utbetaling = enUtbetaling(),
+        legacyBehandling: LegacyBehandling = enGenerasjon()
+    ) =
+        assertKanIkkeAutomatiseres(
+            forsøkAutomatisering(
+                utbetaling = utbetaling,
+                generasjoners = listOf(legacyBehandling)
+            )
+        )
 
-    private fun blirStikkprøve(utbetaling: Utbetaling = enUtbetaling(), periodetype: Periodetype = FØRSTEGANGSBEHANDLING) =
+    private fun blirStikkprøve(
+        utbetaling: Utbetaling = enUtbetaling(),
+        periodetype: Periodetype = FØRSTEGANGSBEHANDLING
+    ) =
         assertStikkprøve(forsøkAutomatisering(utbetaling = utbetaling, periodetype = periodetype))
 
     private fun blirManuellOppgaveMedFeil(

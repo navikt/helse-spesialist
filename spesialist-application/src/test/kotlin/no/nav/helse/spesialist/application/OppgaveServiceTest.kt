@@ -18,6 +18,10 @@ import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
+import no.nav.helse.spesialist.testhjelp.lagEpostadresseFraFulltNavn
+import no.nav.helse.spesialist.testhjelp.lagFødselsnummer
+import no.nav.helse.spesialist.testhjelp.lagSaksbehandlerident
+import no.nav.helse.spesialist.testhjelp.lagSaksbehandlernavn
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -188,7 +192,7 @@ internal class OppgaveServiceTest {
                     SAKSBEHANDLEROID,
                     SAKSBEHANDLERNAVN,
                     SAKSBEHANDLERIDENT,
-                    {_, _ -> false}
+                    { _, _ -> false }
                 )
             } else {
                 null

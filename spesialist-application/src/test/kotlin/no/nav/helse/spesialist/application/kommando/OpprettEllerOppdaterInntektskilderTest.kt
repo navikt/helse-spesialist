@@ -16,12 +16,12 @@ import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.person.HentPersoninfoløsning
 import no.nav.helse.modell.person.HentPersoninfoløsninger
-import no.nav.helse.spesialist.application.fødselsdato
-import no.nav.helse.spesialist.application.lagEtternavn
-import no.nav.helse.spesialist.application.lagFornavn
-import no.nav.helse.spesialist.application.lagFødselsnummer
-import no.nav.helse.spesialist.application.lagOrganisasjonsnavn
-import no.nav.helse.spesialist.application.lagOrganisasjonsnummer
+import no.nav.helse.spesialist.testhjelp.fødselsdato
+import no.nav.helse.spesialist.testhjelp.lagEtternavn
+import no.nav.helse.spesialist.testhjelp.lagFornavn
+import no.nav.helse.spesialist.testhjelp.lagFødselsnummer
+import no.nav.helse.spesialist.testhjelp.lagOrganisasjonsnavn
+import no.nav.helse.spesialist.testhjelp.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.typer.Kjønn
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -74,7 +74,10 @@ class OpprettEllerOppdaterInntektskilderTest {
 
         val ferdig = command.execute(context)
         assertFalse(ferdig)
-        assertEquals(listOf(Behov.Arbeidsgiverinformasjon.OrdinærArbeidsgiver(listOf(organisasjonsnummer))), observer.behov.toList())
+        assertEquals(
+            listOf(Behov.Arbeidsgiverinformasjon.OrdinærArbeidsgiver(listOf(organisasjonsnummer))),
+            observer.behov.toList()
+        )
     }
 
     @Test
@@ -88,7 +91,10 @@ class OpprettEllerOppdaterInntektskilderTest {
 
         val ferdig = command.execute(context)
         assertFalse(ferdig)
-        assertEquals(listOf(Behov.Arbeidsgiverinformasjon.Enkeltpersonforetak(listOf(organisasjonsnummer))), observer.behov.toList())
+        assertEquals(
+            listOf(Behov.Arbeidsgiverinformasjon.Enkeltpersonforetak(listOf(organisasjonsnummer))),
+            observer.behov.toList()
+        )
     }
 
     @Test
