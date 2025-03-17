@@ -37,7 +37,6 @@ fun main() {
 }
 
 object LocalApp {
-
     private val mockOAuth2Server = MockOAuth2Server().also(MockOAuth2Server::start)
     private val clientId = "en-client-id"
     private val issuerId = "LocalTestIssuer"

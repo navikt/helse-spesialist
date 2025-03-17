@@ -5,18 +5,29 @@ import io.getunleash.Unleash
 import io.getunleash.util.UnleashConfig
 import no.nav.helse.FeatureToggles
 
-class UnleashFeatureToggles(env: Map<String, String>) : FeatureToggles {
-    private val apiKey = requireNotNull(env["UNLEASH_SERVER_API_TOKEN"])
-    private val apiUrl = requireNotNull(env["UNLEASH_SERVER_API_URL"]) + "/api"
-    private val apiEnv = requireNotNull(env["UNLEASH_SERVER_API_ENV"])
+class UnleashFeatureToggles(configuration: Configuration) : FeatureToggles {
+    data class Configuration(
+        val apiKey: String,
+        val apiUrl: String,
+        val apiEnv: String,
+    ) {
+        companion object {
+            fun fraEnv(env: Map<String, String>) =
+                Configuration(
+                    apiKey = requireNotNull(env["UNLEASH_SERVER_API_TOKEN"]),
+                    apiUrl = requireNotNull(env["UNLEASH_SERVER_API_URL"]),
+                    apiEnv = requireNotNull(env["UNLEASH_SERVER_API_ENV"]),
+                )
+        }
+    }
 
     private val config: UnleashConfig =
         UnleashConfig.builder()
             .appName("spesialist")
             .instanceId("spesialist")
-            .unleashAPI(apiUrl)
-            .apiKey(apiKey)
-            .environment(apiEnv)
+            .unleashAPI(configuration.apiUrl + "/api")
+            .apiKey(configuration.apiKey)
+            .environment(configuration.apiEnv)
             .build()
 
     private val unleash: Unleash = DefaultUnleash(config)
