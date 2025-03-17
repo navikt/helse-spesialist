@@ -34,7 +34,9 @@ Det holder å kjøre kommandoen en gang, så er commithooken satt opp for fremti
 
 #### Credentials
 
-For å kunne kjøre gradle må du legge til `githubUser` og `githubPassword` i `~/.gradle/gradle.properties` filen.
+For å kunne kjøre gradle må du legge til `githubUser` og `githubPassword` i `~/.gradle/gradle.properties` filen. For å 
+få tak i `githubPassword` må du lage et [personal access token](https://github.com/settings/tokens). Lag et classic token
+med `read:packages` scope. 
 
 ```properties
 githubUser=x-access-token
