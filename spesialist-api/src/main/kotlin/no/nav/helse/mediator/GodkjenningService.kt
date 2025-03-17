@@ -105,7 +105,7 @@ class GodkjenningService(
                     periodehistorikkDao.lagreMedOppgaveId(innslag, godkjenningDTO.oppgavereferanse)
                 }
             }
-            if (totrinnsvurdering != null) session.totrinnsvurderingRepository.lagre(totrinnsvurdering, fødselsnummer)
+            if (totrinnsvurdering != null) session.totrinnsvurderingRepository.lagre(totrinnsvurdering)
         }
     }
 

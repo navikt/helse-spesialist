@@ -89,6 +89,7 @@ internal class PgBehandlingsstatistikkDaoTest : AbstractDBIntegrationTest() {
     @Test
     fun `Får antall fullførte beslutteroppgaver`() {
         val fødselsnummer = lagFødselsnummer()
+        opprettPerson(fødselsnummer)
         val saksbehandler = nyLegacySaksbehandler()
         val beslutter = nyLegacySaksbehandler()
         val oppgave = nyOppgaveForNyPerson()

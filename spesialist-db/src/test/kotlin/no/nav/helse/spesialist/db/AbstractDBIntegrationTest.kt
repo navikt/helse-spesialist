@@ -658,9 +658,8 @@ abstract class AbstractDBIntegrationTest {
     }
 
     protected fun nyTotrinnsvurdering(fødselsnummer: String, oppgave: Oppgave): TotrinnsvurderingKontekst {
-        val totrinnsvurdering = Totrinnsvurdering.ny(oppgave.vedtaksperiodeId)
+        val totrinnsvurdering = Totrinnsvurdering.ny(oppgave.vedtaksperiodeId, fødselsnummer)
         sessionContext.totrinnsvurderingRepository.lagre(
-            fødselsnummer = fødselsnummer,
             totrinnsvurdering = totrinnsvurdering,
         )
         return TotrinnsvurderingKontekst(totrinnsvurdering, fødselsnummer, oppgave)
@@ -668,14 +667,14 @@ abstract class AbstractDBIntegrationTest {
 
     protected fun TotrinnsvurderingKontekst.sendTilBeslutterOgLagre(legacySaksbehandler: LegacySaksbehandler): TotrinnsvurderingKontekst {
         totrinnsvurdering.sendTilBeslutter(oppgave.id, SaksbehandlerOid(legacySaksbehandler.oid))
-        sessionContext.totrinnsvurderingRepository.lagre(totrinnsvurdering, fødselsnummer)
+        sessionContext.totrinnsvurderingRepository.lagre(totrinnsvurdering)
         return this
     }
 
     protected fun TotrinnsvurderingKontekst.ferdigstillOgLagre(beslutter: LegacySaksbehandler): TotrinnsvurderingKontekst {
         totrinnsvurdering.settBeslutter(SaksbehandlerOid(beslutter.oid))
         totrinnsvurdering.ferdigstill(utbetalingId = oppgave.utbetalingId)
-        sessionContext.totrinnsvurderingRepository.lagre(totrinnsvurdering, fødselsnummer)
+        sessionContext.totrinnsvurderingRepository.lagre(totrinnsvurdering)
         return this
     }
 

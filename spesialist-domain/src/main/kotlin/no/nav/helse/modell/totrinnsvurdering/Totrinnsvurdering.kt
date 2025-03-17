@@ -14,6 +14,7 @@ value class TotrinnsvurderingId(val value: Long)
 
 class Totrinnsvurdering private constructor(
     id: TotrinnsvurderingId?,
+    val fødselsnummer: String,
     val vedtaksperiodeId: UUID,
     erRetur: Boolean,
     saksbehandler: SaksbehandlerOid?,
@@ -143,9 +144,13 @@ class Totrinnsvurdering private constructor(
     }
 
     companion object {
-        fun ny(vedtaksperiodeId: UUID): Totrinnsvurdering {
+        fun ny(
+            vedtaksperiodeId: UUID,
+            fødselsnummer: String,
+        ): Totrinnsvurdering {
             return Totrinnsvurdering(
                 id = null,
+                fødselsnummer = fødselsnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
                 erRetur = false,
                 saksbehandler = null,
@@ -160,6 +165,7 @@ class Totrinnsvurdering private constructor(
 
         fun fraLagring(
             id: TotrinnsvurderingId,
+            fødselsnummer: String,
             vedtaksperiodeId: UUID,
             erRetur: Boolean,
             saksbehandler: SaksbehandlerOid?,
@@ -172,6 +178,7 @@ class Totrinnsvurdering private constructor(
         ): Totrinnsvurdering {
             return Totrinnsvurdering(
                 id = id,
+                fødselsnummer = fødselsnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
                 erRetur = erRetur,
                 saksbehandler = saksbehandler,

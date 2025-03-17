@@ -298,7 +298,7 @@ class SaksbehandlerMediator(
                     VedtakResultat.Feil.BeslutterFeil.KanIkkeBeslutteEgenOppgave()
                 } else {
                     totrinnsvurdering.settBeslutter(SaksbehandlerOid(legacySaksbehandler.oid))
-                    totrinnsvurderingRepository.lagre(totrinnsvurdering, fødselsnummer)
+                    totrinnsvurderingRepository.lagre(totrinnsvurdering)
                     null
                 }
             } else {
@@ -579,7 +579,7 @@ class SaksbehandlerMediator(
 
                 apiOppgaveService.sendIRetur(oppgavereferanse, opprinneligSaksbehandler)
                 totrinnsvurdering.sendIRetur(oppgavereferanse, SaksbehandlerOid(besluttendeSaksbehandler.oid))
-                session.totrinnsvurderingRepository.lagre(totrinnsvurdering, fødselsnummer)
+                session.totrinnsvurderingRepository.lagre(totrinnsvurdering)
             }
         } catch (modellfeil: Modellfeil) {
             return SendIReturResult.Feil.KunneIkkeSendeIRetur(modellfeil.tilApiversjon())
@@ -663,7 +663,7 @@ class SaksbehandlerMediator(
                             ?.let(this::tilLegacySaksbehandler)
                     apiOppgaveService.sendTilBeslutter(oppgavereferanse, beslutter)
                     totrinnsvurdering.sendTilBeslutter(oppgavereferanse, SaksbehandlerOid(saksbehandlerFraApi.oid))
-                    session.totrinnsvurderingRepository.lagre(totrinnsvurdering, fødselsnummer)
+                    session.totrinnsvurderingRepository.lagre(totrinnsvurdering)
                 }
             } catch (modellfeil: Modellfeil) {
                 return@transactionalSessionScope SendTilGodkjenningResult.Feil.KunneIkkeSendeTilBeslutter(modellfeil.tilApiversjon())
@@ -1031,10 +1031,10 @@ internal fun overstyringUnitOfWork(
 
     if (featureToggles.skalBenytteNyTotrinnsvurderingsløsning()) {
         val totrinnsvurdering =
-            session.totrinnsvurderingRepository.finn(overstyring.fødselsnummer)
-                ?: Totrinnsvurdering.ny(overstyring.vedtaksperiodeId)
+            session.totrinnsvurderingRepository.finn(fødselsnummer)
+                ?: Totrinnsvurdering.ny(overstyring.vedtaksperiodeId, fødselsnummer)
         totrinnsvurdering.nyOverstyring(overstyring)
-        session.totrinnsvurderingRepository.lagre(totrinnsvurdering, fødselsnummer)
+        session.totrinnsvurderingRepository.lagre(totrinnsvurdering)
     } else {
         session.overstyringRepository.lagre(listOf(overstyring))
     }

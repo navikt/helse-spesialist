@@ -148,7 +148,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             utbetalingId = utbetalingId,
             spleisBehandlingId = spleisBehandlingId
         )
-        opprettTotrinnsvurdering(vedtaksperiodeId)
+        opprettTotrinnsvurdering(vedtaksperiodeId = vedtaksperiodeId, fødselsnummer = fødselsnummer)
         opprettSaksbehandler()
         val saksbehandler = SaksbehandlerFraApi(
             SAKSBEHANDLER_OID,
@@ -193,7 +193,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             utbetalingId = utbetalingId,
             spleisBehandlingId = spleisBehandlingId
         )
-        opprettTotrinnsvurdering(vedtaksperiodeId)
+        opprettTotrinnsvurdering(vedtaksperiodeId = vedtaksperiodeId, fødselsnummer = fødselsnummer)
         opprettSaksbehandler()
         val saksbehandler = SaksbehandlerFraApi(
             SAKSBEHANDLER_OID,
@@ -288,7 +288,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         opprettVedtaksperiode()
         val saksbehandler2Oid = UUID.randomUUID()
         opprettSaksbehandler(saksbehandler2Oid)
-        opprettTotrinnsvurdering(VEDTAKSPERIODE, saksbehandler2Oid)
+        opprettTotrinnsvurdering(vedtaksperiodeId = VEDTAKSPERIODE, saksbehandlerOid = saksbehandler2Oid, fødselsnummer = person.fødselsnummer)
         val saksbehandler = SaksbehandlerFraApi(
             SAKSBEHANDLER_OID,
             SAKSBEHANDLER_NAVN,
@@ -338,7 +338,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             utbetalingId = utbetalingId,
             spleisBehandlingId = spleisBehandlingId
         )
-        opprettTotrinnsvurdering(vedtaksperiodeId)
+        opprettTotrinnsvurdering(vedtaksperiodeId = vedtaksperiodeId, fødselsnummer = fødselsnummer)
         opprettSaksbehandler()
         val saksbehandler = SaksbehandlerFraApi(
             SAKSBEHANDLER_OID,
@@ -402,7 +402,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             utbetalingId = utbetalingId,
             spleisBehandlingId = spleisBehandlingId
         )
-        opprettTotrinnsvurdering(vedtaksperiodeId)
+        opprettTotrinnsvurdering(vedtaksperiodeId = vedtaksperiodeId, fødselsnummer = fødselsnummer)
         opprettSaksbehandler()
         val saksbehandler = SaksbehandlerFraApi(
             SAKSBEHANDLER_OID,
@@ -450,7 +450,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             spleisBehandlingId = spleisBehandlingId
         )
 
-        opprettTotrinnsvurdering(vedtaksperiodeId)
+        opprettTotrinnsvurdering(vedtaksperiodeId = vedtaksperiodeId, fødselsnummer = fødselsnummer)
         opprettSaksbehandler()
         val saksbehandler = SaksbehandlerFraApi(
             SAKSBEHANDLER_OID,

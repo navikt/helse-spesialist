@@ -4,10 +4,7 @@ import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import java.util.UUID
 
 interface TotrinnsvurderingRepository {
-    fun lagre(
-        totrinnsvurdering: Totrinnsvurdering,
-        fødselsnummer: String,
-    )
+    fun lagre(totrinnsvurdering: Totrinnsvurdering)
 
     fun finn(fødselsnummer: String): Totrinnsvurdering?
 

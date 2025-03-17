@@ -611,6 +611,7 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
     @Test
     fun `Saksbehandler får ikke med oppgaver hen har sendt til beslutter selv om hen har beslutter-tilgang`() {
         val fødselsnummer: String = lagFødselsnummer()
+        opprettPerson(fødselsnummer = fødselsnummer)
         val beslutter = nyLegacySaksbehandler()
         val oppgave = nyOppgaveForNyPerson(fødselsnummer = lagFødselsnummer())
             .tildelOgLagre(legacySaksbehandler)

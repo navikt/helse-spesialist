@@ -23,10 +23,7 @@ class PgTotrinnsvurderingRepository(session: Session) : QueryRunner by MedSessio
         return finnAktivTotrinnsvurdering(vedtaksperiodeId)
     }
 
-    override fun lagre(
-        totrinnsvurdering: Totrinnsvurdering,
-        fødselsnummer: String,
-    ) {
+    override fun lagre(totrinnsvurdering: Totrinnsvurdering) {
         if (totrinnsvurdering.harFåttTildeltId()) {
             update(totrinnsvurdering)
         } else {
@@ -40,17 +37,16 @@ class PgTotrinnsvurderingRepository(session: Session) : QueryRunner by MedSessio
         asSQL(
             """
             SELECT tv.id,
-                   v.vedtaksperiode_id,
+                   tv.vedtaksperiode_id,
+                   p.fødselsnummer,
                    er_retur,
                    tv.saksbehandler as saksbehandler_oid,
                    tv.beslutter as beslutter_oid,
                    ui.id as utbetaling_id,
                    tv.opprettet,
-                   tv.oppdatert,
-                   p.fødselsnummer
+                   tv.oppdatert
             FROM totrinnsvurdering tv
-                     INNER JOIN vedtak v on tv.vedtaksperiode_id = v.vedtaksperiode_id
-                     INNER JOIN person p on v.person_ref = p.id
+                     INNER JOIN person p on tv.person_ref = p.id
                      LEFT JOIN utbetaling_id ui on ui.id = tv.utbetaling_id_ref
             WHERE p.fødselsnummer = :fodselsnummer
               AND utbetaling_id_ref IS NULL
@@ -86,13 +82,16 @@ class PgTotrinnsvurderingRepository(session: Session) : QueryRunner by MedSessio
     private fun insert(totrinnsvurdering: Totrinnsvurdering): Long =
         asSQL(
             """
-            INSERT INTO totrinnsvurdering (vedtaksperiode_id, er_retur, saksbehandler, beslutter, opprettet, oppdatert)
-            VALUES (:vedtaksperiodeId, :erRetur, :saksbehandler, :beslutter, :opprettet, null)
+            INSERT INTO totrinnsvurdering (vedtaksperiode_id, er_retur, saksbehandler, beslutter, person_ref, opprettet, oppdatert)
+            SELECT :vedtaksperiodeId, :erRetur, :saksbehandler, :beslutter, p.id, :opprettet, null
+            FROM person p 
+            WHERE p.fødselsnummer = :fodselsnummer
             """.trimIndent(),
             "vedtaksperiodeId" to totrinnsvurdering.vedtaksperiodeId,
             "erRetur" to totrinnsvurdering.erRetur,
             "saksbehandler" to totrinnsvurdering.saksbehandler?.value,
             "beslutter" to totrinnsvurdering.beslutter?.value,
+            "fodselsnummer" to totrinnsvurdering.fødselsnummer,
             "opprettet" to totrinnsvurdering.opprettet,
         ).updateAndReturnGeneratedKey()
 
@@ -120,6 +119,7 @@ class PgTotrinnsvurderingRepository(session: Session) : QueryRunner by MedSessio
         Totrinnsvurdering.fraLagring(
             id = TotrinnsvurderingId(long("id")),
             vedtaksperiodeId = uuid("vedtaksperiode_id"),
+            fødselsnummer = string("fødselsnummer"),
             erRetur = boolean("er_retur"),
             saksbehandler = uuidOrNull("saksbehandler_oid")?.let(::SaksbehandlerOid),
             beslutter = uuidOrNull("beslutter_oid")?.let(::SaksbehandlerOid),
@@ -135,6 +135,7 @@ class PgTotrinnsvurderingRepository(session: Session) : QueryRunner by MedSessio
         Totrinnsvurdering.fraLagring(
             id = TotrinnsvurderingId(long("id")),
             vedtaksperiodeId = uuid("vedtaksperiode_id"),
+            fødselsnummer = string("fødselsnummer"),
             erRetur = boolean("er_retur"),
             saksbehandler = uuidOrNull("saksbehandler_oid")?.let(::SaksbehandlerOid),
             beslutter = uuidOrNull("beslutter_oid")?.let(::SaksbehandlerOid),

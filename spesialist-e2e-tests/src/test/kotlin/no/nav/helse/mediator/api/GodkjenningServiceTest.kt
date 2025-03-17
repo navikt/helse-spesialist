@@ -143,9 +143,17 @@ internal class GodkjenningServiceTest : AbstractIntegrationTest() {
     private fun opprettInitiellTotrinnsvurdering() {
         val vedtaksperiodeId = oppgaveDao.finnVedtaksperiodeId(fødselsnummer = FØDSELSNUMMER)
 
-        @Language("postgresql") val sql = "insert into totrinnsvurdering (vedtaksperiode_id) values (:vedtaksperiodeId)"
+        @Language("postgresql") val sql = """
+                insert into totrinnsvurdering (vedtaksperiode_id, person_ref) 
+                select :vedtaksperiodeId, p.id from person p where fødselsnummer = :fodselsnummer
+                """
         sessionOf(dataSource).use { session ->
-            session.run(queryOf(sql, mapOf("vedtaksperiodeId" to vedtaksperiodeId)).asUpdate)
+            session.run(
+                queryOf(
+                    sql,
+                    mapOf("vedtaksperiodeId" to vedtaksperiodeId, "fodselsnummer" to FØDSELSNUMMER)
+                ).asUpdate
+            )
         }
     }
 
@@ -157,9 +165,11 @@ internal class GodkjenningServiceTest : AbstractIntegrationTest() {
                 vedtaksperiode_id,
                 er_retur,
                 saksbehandler,
-                beslutter
+                beslutter,
+                person_ref
             )
-            values (:vedtaksperiodeId, :erRetur, :opprinneligSaksbehandler, :beslutter)
+            select :vedtaksperiodeId, :erRetur, :opprinneligSaksbehandler, :beslutter, p.id
+            from person p where fødselsnummer = :fodselsnummer
         """
         sessionOf(dataSource).use { session ->
             session.run(
@@ -169,6 +179,7 @@ internal class GodkjenningServiceTest : AbstractIntegrationTest() {
                         "erRetur" to false,
                         "opprinneligSaksbehandler" to opprinneligSaksbehandler,
                         "beslutter" to beslutter,
+                        "fodselsnummer" to FØDSELSNUMMER,
                     )
                 ).asUpdate
             )
@@ -208,7 +219,8 @@ internal class GodkjenningServiceTest : AbstractIntegrationTest() {
     }
 
     private fun assertPeriodehistorikk(utbetalingId: UUID) = sessionOf(dataSource).use { session ->
-        @Language("PostgreSQL") val query = " select * from periodehistorikk where utbetaling_id = :utbetaling_id OR generasjon_id IN (SELECT unik_id FROM behandling WHERE utbetaling_id = :utbetaling_id)"
+        @Language("PostgreSQL") val query =
+            " select * from periodehistorikk where utbetaling_id = :utbetaling_id OR generasjon_id IN (SELECT unik_id FROM behandling WHERE utbetaling_id = :utbetaling_id)"
         val type =
             session.run(queryOf(query, mapOf("utbetaling_id" to utbetalingId)).map { it.string("type") }.asSingle)
                 ?: fail("Fant ikke reservasjon")

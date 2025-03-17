@@ -226,6 +226,7 @@ internal class TotrinnsvurderingTest {
     ) = Totrinnsvurdering.fraLagring(
         id = TotrinnsvurderingId(nextLong()),
         vedtaksperiodeId = vedtaksperiodeId,
+        fødselsnummer = "1234",
         erRetur = erRetur,
         saksbehandler = saksbehandler,
         beslutter = beslutter,

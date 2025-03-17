@@ -46,7 +46,7 @@ internal class VurderBehovForTotrinnskontrollTest {
     private val totrinnsvurderingRepository = object: TotrinnsvurderingRepository {
         val lagredeTotrinnsvurderinger = mutableListOf<Totrinnsvurdering>()
         var totrinnsvurderingSomSkalReturneres: Totrinnsvurdering? = null
-        override fun lagre(totrinnsvurdering: Totrinnsvurdering, fødselsnummer: String) {
+        override fun lagre(totrinnsvurdering: Totrinnsvurdering) {
             lagredeTotrinnsvurderinger.add(totrinnsvurdering)
         }
 
@@ -177,6 +177,7 @@ internal class VurderBehovForTotrinnskontrollTest {
         Totrinnsvurdering.fraLagring(
             id = TotrinnsvurderingId(nextLong()),
             vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
+            fødselsnummer = FØDSELSNUMMER,
             erRetur = erRetur,
             saksbehandler = saksbehandler,
             beslutter = beslutter,

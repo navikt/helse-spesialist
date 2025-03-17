@@ -49,12 +49,12 @@ internal class VurderBehovForTotrinnskontroll(
         if ((kreverTotrinnsvurdering && !vedtaksperiodeHarFerdigstiltOppgave) || eksisterendeTotrinnsvurdering != null) {
             logg.info("Vedtaksperioden: $vedtaksperiodeId trenger totrinnsvurdering")
 
-            val totrinnsvurdering = (eksisterendeTotrinnsvurdering ?: Totrinnsvurdering.ny(vedtaksperiodeId))
+            val totrinnsvurdering = (eksisterendeTotrinnsvurdering ?: Totrinnsvurdering.ny(vedtaksperiodeId, fødselsnummer))
             if (totrinnsvurdering.erBeslutteroppgave) {
                 totrinnsvurdering.settRetur()
                 periodehistorikkDao.lagre(Historikkinnslag.totrinnsvurderingAutomatiskRetur(), vedtaksperiode.gjeldendeUnikId)
             }
-            totrinnsvurderingRepository.lagre(totrinnsvurdering, fødselsnummer)
+            totrinnsvurderingRepository.lagre(totrinnsvurdering)
 
             totrinnsvurdering.saksbehandler?.value?.let {
                 oppgaveService.reserverOppgave(
@@ -72,13 +72,13 @@ internal class VurderBehovForTotrinnskontroll(
         if ((kreverTotrinnsvurdering && !vedtaksperiodeHarFerdigstiltOppgave) || overstyringDao.harVedtaksperiodePågåendeOverstyring(vedtaksperiodeId)) {
             logg.info("Vedtaksperioden: $vedtaksperiodeId trenger totrinnsvurdering")
 
-            val totrinnsvurdering = totrinnsvurderingRepository.finn(vedtaksperiodeId) ?: Totrinnsvurdering.ny(vedtaksperiodeId)
+            val totrinnsvurdering = totrinnsvurderingRepository.finn(vedtaksperiodeId) ?: Totrinnsvurdering.ny(vedtaksperiodeId, fødselsnummer)
             if (totrinnsvurdering.erBeslutteroppgave) {
                 totrinnsvurdering.settRetur()
                 periodehistorikkDao.lagre(Historikkinnslag.totrinnsvurderingAutomatiskRetur(), vedtaksperiode.gjeldendeUnikId)
             }
 
-            totrinnsvurderingRepository.lagre(totrinnsvurdering, fødselsnummer)
+            totrinnsvurderingRepository.lagre(totrinnsvurdering)
 
             totrinnsvurdering.saksbehandler?.value?.let {
                 oppgaveService.reserverOppgave(

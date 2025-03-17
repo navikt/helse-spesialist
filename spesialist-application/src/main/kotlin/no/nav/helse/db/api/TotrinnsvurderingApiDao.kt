@@ -3,6 +3,7 @@ package no.nav.helse.db.api
 import java.time.LocalDateTime
 import java.util.UUID
 
+// Kan fjernes når vi tar i bruk ny totrinnsløype i prod
 interface TotrinnsvurderingApiDao {
     fun hentAktiv(vedtaksperiodeId: UUID): TotrinnsvurderingDto?
 

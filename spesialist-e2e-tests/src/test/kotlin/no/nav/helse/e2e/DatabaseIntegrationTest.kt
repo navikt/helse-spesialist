@@ -169,9 +169,10 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         saksbehandlerOid: UUID? = null,
         erRetur: Boolean = false,
         ferdigstill: Boolean = false,
+        fødselsnummer: String = FNR,
     ) {
-        val totrinnsvurdering = Totrinnsvurdering.ny(vedtaksperiodeId = vedtaksperiodeId)
-        totrinnsvurderingRepository.lagre(totrinnsvurdering, FNR)
+        val totrinnsvurdering = Totrinnsvurdering.ny(vedtaksperiodeId = vedtaksperiodeId, fødselsnummer = fødselsnummer)
+        totrinnsvurderingRepository.lagre(totrinnsvurdering)
         saksbehandlerOid?.let {
             totrinnsvurdering.sendTilBeslutter(
                 oppgaveId = OPPGAVE_ID,
@@ -186,7 +187,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
         if (ferdigstill) totrinnsvurdering.ferdigstill(UTBETALING_ID)
 
-        totrinnsvurderingRepository.lagre(totrinnsvurdering, FNR)
+        totrinnsvurderingRepository.lagre(totrinnsvurdering)
     }
 
     private fun opprettCommandContext(
