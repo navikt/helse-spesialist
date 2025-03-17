@@ -25,9 +25,7 @@ internal class RapidApp(env: Map<String, String>) {
     private val logger = LoggerFactory.getLogger(RapidApp::class.java)
     private val rapidsConnection: RapidsConnection
     private val unleashFeatureToggles =
-        UnleashFeatureToggles(
-            env = env,
-        )
+        UnleashFeatureToggles(configuration = UnleashFeatureToggles.Configuration.fraEnv(env))
     private val azureConfig =
         AzureConfig(
             clientId = env.getValue("AZURE_APP_CLIENT_ID"),
