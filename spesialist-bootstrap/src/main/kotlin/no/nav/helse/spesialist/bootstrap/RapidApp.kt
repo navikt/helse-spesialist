@@ -71,18 +71,7 @@ internal class RapidApp(env: Map<String, String>) {
             reservasjonshenter = reservasjonshenter,
             versjonAvKode = versjonAvKode(env),
             featureToggles = unleashFeatureToggles,
-            dbModuleConfiguration =
-                DBModule.Configuration(
-                    jdbcUrl =
-                        "jdbc:postgresql://" +
-                            env.getRequired("DATABASE_HOST") +
-                            ":" +
-                            env.getRequired("DATABASE_PORT") +
-                            "/" +
-                            env.getRequired("DATABASE_DATABASE"),
-                    username = env.getRequired("DATABASE_USERNAME"),
-                    password = env.getRequired("DATABASE_PASSWORD"),
-                ),
+            dbModuleConfiguration = DBModule.Configuration.fraEnv(env),
         )
 
     private fun versjonAvKode(env: Map<String, String>): String {
