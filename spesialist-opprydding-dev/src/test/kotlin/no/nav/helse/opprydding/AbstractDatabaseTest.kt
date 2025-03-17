@@ -2,7 +2,7 @@ package no.nav.helse.opprydding
 
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.spesialist.db.testfixtures.DBTestFixture
+import no.nav.helse.spesialist.db.testfixtures.ModuleIsolatedDBTestFixture
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -275,5 +275,5 @@ enum class Comparison(
 }
 
 object OppryddingDevDBTestFixture {
-    val fixture = DBTestFixture("opprydding-dev")
+    val fixture = ModuleIsolatedDBTestFixture("opprydding-dev")
 }

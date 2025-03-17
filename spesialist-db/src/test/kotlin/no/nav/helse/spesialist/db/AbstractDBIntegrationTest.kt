@@ -33,7 +33,7 @@ import no.nav.helse.spesialist.db.dao.api.PgPeriodehistorikkApiDao
 import no.nav.helse.spesialist.db.dao.api.PgPersonApiDao
 import no.nav.helse.spesialist.db.dao.api.PgRisikovurderingApiDao
 import no.nav.helse.spesialist.db.dao.api.PgVarselApiRepository
-import no.nav.helse.spesialist.db.testfixtures.DBTestFixture
+import no.nav.helse.spesialist.db.testfixtures.ModuleIsolatedDBTestFixture
 import no.nav.helse.spesialist.domain.Dialog
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
@@ -738,5 +738,5 @@ abstract class AbstractDBIntegrationTest {
 }
 
 object DBDBTestFixture {
-    val fixture = DBTestFixture("db")
+    val fixture = ModuleIsolatedDBTestFixture("db")
 }

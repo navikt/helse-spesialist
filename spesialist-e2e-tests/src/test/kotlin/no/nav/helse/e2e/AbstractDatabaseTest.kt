@@ -11,11 +11,7 @@ abstract class AbstractDatabaseTest {
         override val kanGodkjenneUtenBesluttertilgang = false
     }
 
-    protected val dataSource = E2eDBTestFixture.fixture.module.dataSource
-    protected val daos = E2eDBTestFixture.fixture.module.daos
-    protected val sessionFactory = E2eDBTestFixture.fixture.module.sessionFactory
-}
-
-object E2eDBTestFixture {
-    val fixture = DBTestFixture("e2e-tests")
+    protected val dataSource = DBTestFixture.module.dataSource
+    protected val daos = DBTestFixture.module.daos
+    protected val sessionFactory = DBTestFixture.module.sessionFactory
 }

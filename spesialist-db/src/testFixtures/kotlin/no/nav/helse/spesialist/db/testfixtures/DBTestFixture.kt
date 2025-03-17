@@ -5,8 +5,10 @@ import kotliquery.sessionOf
 import no.nav.helse.spesialist.db.bootstrap.DBModule
 import org.intellij.lang.annotations.Language
 
-class DBTestFixture(moduleLabel: String) {
-    val module = DBModule(TestcontainersDatabase(moduleLabel).dbModuleConfiguration)
+open class ModuleIsolatedDBTestFixture(moduleLabel: String) {
+    val database = TestcontainersDatabase(moduleLabel)
+
+    val module = DBModule(database.dbModuleConfiguration)
 
     init {
         module.flywayMigrator.migrate()
@@ -37,3 +39,5 @@ class DBTestFixture(moduleLabel: String) {
         }
     }
 }
+
+object DBTestFixture: ModuleIsolatedDBTestFixture("default")
