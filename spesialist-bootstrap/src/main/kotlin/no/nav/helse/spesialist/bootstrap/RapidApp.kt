@@ -5,8 +5,8 @@ import io.micrometer.core.instrument.Metrics
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.helse.bootstrap.Environment
-import no.nav.helse.modell.automatisering.PlukkTilManuell
 import no.nav.helse.modell.automatisering.Stikkprøver
+import no.nav.helse.modell.automatisering.StikkprøverImpl
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.spesialist.api.AzureConfig
 import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
@@ -19,7 +19,6 @@ import no.nav.helse.spesialist.client.spleis.SpleisClient
 import no.nav.helse.spesialist.client.spleis.SpleisClientSnapshothenter
 import no.nav.helse.spesialist.db.bootstrap.DBModule
 import org.slf4j.LoggerFactory
-import kotlin.random.Random
 
 fun main() {
     RapidApp(System.getenv())
@@ -49,47 +48,11 @@ internal class RapidApp(env: Map<String, String>) {
                     krrConfig = KRRClientReservasjonshenter.Configuration.fraEnv(env),
                     dbConfig = DBModule.Configuration.fraEnv(env),
                     unleashFeatureToggles = UnleashFeatureToggles.Configuration.fraEnv(env),
-                    versjonAvKode = versjonAvKode(env),
+                    versjonAvKode = env.getValue("NAIS_APP_IMAGE"),
                     tilgangsgrupper = SpeilTilgangsgrupper(env),
                     environment = EnvironmentImpl(env),
-                    stikkprøver =
-                        object : Stikkprøver {
-                            override fun utsFlereArbeidsgivereFørstegangsbehandling() =
-                                plukkTilManuell(env["STIKKPROEVER_UTS_FLERE_AG_FGB_DIVISOR"])
-
-                            override fun utsFlereArbeidsgivereForlengelse() =
-                                plukkTilManuell(env["STIKKPROEVER_UTS_FLERE_AG_FORLENGELSE_DIVISOR"])
-
-                            override fun utsEnArbeidsgiverFørstegangsbehandling() =
-                                plukkTilManuell(
-                                    env["STIKKPROEVER_UTS_EN_AG_FGB_DIVISOR"],
-                                )
-
-                            override fun utsEnArbeidsgiverForlengelse() = plukkTilManuell(env["STIKKPROEVER_UTS_EN_AG_FORLENGELSE_DIVISOR"])
-
-                            override fun fullRefusjonFlereArbeidsgivereFørstegangsbehandling() =
-                                plukkTilManuell(env["STIKKPROEVER_FULL_REFUSJON_FLERE_AG_FGB_DIVISOR"])
-
-                            override fun fullRefusjonFlereArbeidsgivereForlengelse() =
-                                plukkTilManuell(env["STIKKPROEVER_FULL_REFUSJON_FLERE_AG_FORLENGELSE_DIVISOR"])
-
-                            override fun fullRefusjonEnArbeidsgiver() = plukkTilManuell(env["STIKKPROEVER_FULL_REFUSJON_EN_AG_DIVISOR"])
-                        },
+                    stikkprøver = StikkprøverImpl(env),
                 )
-            }
-
-            private val plukkTilManuell: PlukkTilManuell<String> = (
-                {
-                    it?.let {
-                        val divisor = it.toInt()
-                        require(divisor > 0) { "Her er et vennlig tips: ikke prøv å dele på 0" }
-                        Random.nextInt(divisor) == 0
-                    } == true
-                }
-            )
-
-            private fun versjonAvKode(env: Map<String, String>): String {
-                return env["NAIS_APP_IMAGE"] ?: throw IllegalArgumentException("NAIS_APP_IMAGE env variable is missing")
             }
         }
     }
