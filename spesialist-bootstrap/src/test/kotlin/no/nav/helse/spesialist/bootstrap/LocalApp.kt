@@ -15,6 +15,7 @@ import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.helse.FeatureToggles
 import no.nav.helse.Gruppekontroll
+import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.rapids_rivers.RapidApplication.Builder
 import no.nav.helse.spesialist.api.AzureConfig
 import no.nav.helse.spesialist.api.bootstrap.Gruppe
@@ -80,10 +81,19 @@ object LocalApp {
             reservasjonshenter = reservasjonshenter,
             versjonAvKode = "versjon_1",
             featureToggles = object : FeatureToggles {},
-            dbModuleConfiguration = DBTestFixture.database.dbModuleConfiguration
+            dbModuleConfiguration = DBTestFixture.database.dbModuleConfiguration,
+            stikkprøver = object : Stikkprøver {
+                override fun utsFlereArbeidsgivereFørstegangsbehandling(): Boolean = false
+                override fun utsFlereArbeidsgivereForlengelse(): Boolean = false
+                override fun utsEnArbeidsgiverFørstegangsbehandling(): Boolean = false
+                override fun utsEnArbeidsgiverForlengelse(): Boolean = false
+                override fun fullRefusjonFlereArbeidsgivereFørstegangsbehandling(): Boolean = false
+                override fun fullRefusjonFlereArbeidsgivereForlengelse(): Boolean = false
+                override fun fullRefusjonEnArbeidsgiver(): Boolean = false
+            }
         )
 
-    private val localModule: Application.() -> Unit  = {
+    private val localModule: Application.() -> Unit = {
         routing {
             get("/local-token") {
                 return@get call.respond(message = token)
