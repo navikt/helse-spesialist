@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.api
+package no.nav.helse.spesialist.api.graphql.mutation
 
 import no.nav.helse.TestRunner.runQuery
 import no.nav.helse.spesialist.api.graphql.schema.ApiAnnulleringData
