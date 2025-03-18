@@ -48,13 +48,7 @@ internal class RapidApp(env: Map<String, String>) {
                         privateJwk = env.getValue("AZURE_APP_JWK"),
                     )
                 return Configuration(
-                    azureConfig =
-                        AzureConfig(
-                            clientId = env.getValue("AZURE_APP_CLIENT_ID"),
-                            issuerUrl = env.getValue("AZURE_OPENID_CONFIG_ISSUER"),
-                            jwkProviderUri = env.getValue("AZURE_OPENID_CONFIG_JWKS_URI"),
-                            tokenEndpoint = env.getValue("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
-                        ),
+                    azureConfig = AzureConfig.fraEnv(env),
                     accessTokenGenerator = accessTokenGenerator,
                     snapshothenter =
                         SpleisClientSnapshothenter(
