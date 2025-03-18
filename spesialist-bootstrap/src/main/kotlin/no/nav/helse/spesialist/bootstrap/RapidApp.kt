@@ -19,7 +19,6 @@ import no.nav.helse.spesialist.client.spleis.SpleisClient
 import no.nav.helse.spesialist.client.spleis.SpleisClientSnapshothenter
 import no.nav.helse.spesialist.db.bootstrap.DBModule
 import org.slf4j.LoggerFactory
-import java.net.URI
 import kotlin.random.Random
 
 fun main() {
@@ -30,7 +29,7 @@ internal class RapidApp(env: Map<String, String>) {
     data class Configuration(
         val azureConfig: AzureConfig,
         val accessTokenGenerator: EntraIDAccessTokenGenerator,
-        val snapshothenter: SpleisClientSnapshothenter,
+        val spleisClientConfig: SpleisClient.Configuration,
         val reservasjonshenter: Reservasjonshenter,
         val dbConfig: DBModule.Configuration,
         val unleashFeatureToggles: UnleashFeatureToggles.Configuration,
@@ -46,14 +45,7 @@ internal class RapidApp(env: Map<String, String>) {
                 return Configuration(
                     azureConfig = AzureConfig.fraEnv(env),
                     accessTokenGenerator = accessTokenGenerator,
-                    snapshothenter =
-                        SpleisClientSnapshothenter(
-                            SpleisClient(
-                                accessTokenGenerator = accessTokenGenerator,
-                                spleisUrl = URI.create(env.getValue("SPLEIS_API_URL")),
-                                spleisClientId = env.getValue("SPLEIS_CLIENT_ID"),
-                            ),
-                        ),
+                    spleisClientConfig = SpleisClient.Configuration.fraEnv(env),
                     reservasjonshenter =
                         KRRClientReservasjonshenter(
                             apiUrl = env.getValue("KONTAKT_OG_RESERVASJONSREGISTERET_API_URL"),
@@ -123,7 +115,13 @@ internal class RapidApp(env: Map<String, String>) {
         SpesialistApp(
             env = configuration.environment,
             gruppekontroll = MsGraphGruppekontroll(configuration.accessTokenGenerator),
-            snapshothenter = configuration.snapshothenter,
+            snapshothenter =
+                SpleisClientSnapshothenter(
+                    SpleisClient(
+                        accessTokenGenerator = configuration.accessTokenGenerator,
+                        configuration = configuration.spleisClientConfig,
+                    ),
+                ),
             azureConfig = configuration.azureConfig,
             tilgangsgrupper = configuration.tilgangsgrupper,
             reservasjonshenter = reservasjonshenter,
