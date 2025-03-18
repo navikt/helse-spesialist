@@ -42,11 +42,7 @@ internal class RapidApp(env: Map<String, String>) {
         companion object {
             fun fraEnv(env: Map<String, String>): Configuration {
                 val accessTokenGenerator =
-                    EntraIDAccessTokenGenerator(
-                        clientId = env.getValue("AZURE_APP_CLIENT_ID"),
-                        tokenEndpoint = env.getValue("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
-                        privateJwk = env.getValue("AZURE_APP_JWK"),
-                    )
+                    EntraIDAccessTokenGenerator(EntraIDAccessTokenGenerator.Configuration.fraEnv(env))
                 return Configuration(
                     azureConfig = AzureConfig.fraEnv(env),
                     accessTokenGenerator = accessTokenGenerator,

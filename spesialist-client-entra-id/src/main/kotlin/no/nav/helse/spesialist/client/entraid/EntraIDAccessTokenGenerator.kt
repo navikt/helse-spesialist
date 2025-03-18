@@ -31,13 +31,23 @@ import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.Date
 import java.util.UUID
-import kotlin.collections.set
 
-class EntraIDAccessTokenGenerator(
-    private val clientId: String,
-    private val tokenEndpoint: String,
-    private val privateJwk: String,
-) : AccessTokenGenerator {
+class EntraIDAccessTokenGenerator(private val configuration: Configuration) : AccessTokenGenerator {
+    data class Configuration(
+        val clientId: String,
+        val tokenEndpoint: String,
+        val privateJwk: String,
+    ) {
+        companion object {
+            fun fraEnv(env: Map<String, String>) =
+                Configuration(
+                    clientId = env.getValue("AZURE_APP_CLIENT_ID"),
+                    tokenEndpoint = env.getValue("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
+                    privateJwk = env.getValue("AZURE_APP_JWK"),
+                )
+        }
+    }
+
     private val log = LoggerFactory.getLogger(EntraIDAccessTokenGenerator::class.java)
     private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     private val httpClient = createHttpClient()
@@ -58,13 +68,13 @@ class EntraIDAccessTokenGenerator(
                         val response: TokenEndpointResponse =
                             try {
                                 val response =
-                                    httpClient.post(tokenEndpoint) {
+                                    httpClient.post(configuration.tokenEndpoint) {
                                         accept(ContentType.Application.Json)
                                         method = HttpMethod.Post
                                         setBody(
                                             FormDataContent(
                                                 Parameters.build {
-                                                    append("client_id", clientId)
+                                                    append("client_id", configuration.clientId)
                                                     append("scope", scope)
                                                     append("grant_type", "client_credentials")
                                                     append(
@@ -92,13 +102,13 @@ class EntraIDAccessTokenGenerator(
     }
 
     private fun lagAssertion(): String {
-        val privateKey = RSAKey.parse(privateJwk)
+        val privateKey = RSAKey.parse(configuration.privateJwk)
         val now = Instant.now()
         return JWT.create().apply {
             withKeyId(privateKey.keyID)
-            withSubject(clientId)
-            withIssuer(clientId)
-            withAudience(tokenEndpoint)
+            withSubject(configuration.clientId)
+            withIssuer(configuration.clientId)
+            withAudience(configuration.tokenEndpoint)
             withJWTId(UUID.randomUUID().toString())
             withIssuedAt(Date.from(now))
             withNotBefore(Date.from(now))
