@@ -1,10 +1,8 @@
 package no.nav.helse.spesialist.bootstrap
 
-import no.nav.helse.bootstrap.Environment
+import no.nav.helse.bootstrap.EnvironmentToggles
 
-class EnvironmentImpl(private val env: Map<String, String> = System.getenv()) :
-    Map<String, String> by env,
-    Environment {
+class EnvironmentTogglesImpl(env: Map<String, String>) : EnvironmentToggles {
     override val brukDummyForKRR = env.containsKey("BRUK_DUMMY_FOR_KONTAKT_OG_RESERVASJONSREGISTERET")
     override val ignorerMeldingerForUkjentePersoner = env.containsKey("IGNORER_MELDINGER_FOR_UKJENTE_PERSONER")
     override val kanBeslutteEgneSaker = env.containsKey("TILLAT_GODKJENNING_AV_EGEN_SAK")

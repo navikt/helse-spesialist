@@ -3,7 +3,7 @@ package no.nav.helse.mediator
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.FeatureToggles
 import no.nav.helse.MeldingPubliserer
-import no.nav.helse.bootstrap.Environment
+import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.db.AnnulleringRepository
 import no.nav.helse.db.Daos
 import no.nav.helse.db.OpptegnelseDao
@@ -109,7 +109,7 @@ class SaksbehandlerMediator(
     private val tilgangsgrupper: Tilgangsgrupper,
     private val stansAutomatiskBehandlinghåndterer: StansAutomatiskBehandlinghåndtererImpl,
     private val annulleringRepository: AnnulleringRepository,
-    private val env: Environment,
+    private val environmentToggles: EnvironmentToggles,
     private val featureToggles: FeatureToggles,
     private val sessionFactory: SessionFactory,
     private val tilgangskontroll: Tilgangskontroll,
@@ -292,9 +292,9 @@ class SaksbehandlerMediator(
             eksisterendeTotrinnsvurdering(vedtaksperiodeId, fødselsnummer, totrinnsvurderingRepository)
         val feil =
             if (totrinnsvurdering?.erBeslutteroppgave == true) {
-                if (!legacySaksbehandler.harTilgangTil(listOf(Egenskap.BESLUTTER)) && !env.kanGodkjenneUtenBesluttertilgang) {
+                if (!legacySaksbehandler.harTilgangTil(listOf(Egenskap.BESLUTTER)) && !environmentToggles.kanGodkjenneUtenBesluttertilgang) {
                     VedtakResultat.Feil.BeslutterFeil.TrengerBeslutterRolle()
-                } else if (totrinnsvurdering.saksbehandler?.value == legacySaksbehandler.oid && !env.kanBeslutteEgneSaker) {
+                } else if (totrinnsvurdering.saksbehandler?.value == legacySaksbehandler.oid && !environmentToggles.kanBeslutteEgneSaker) {
                     VedtakResultat.Feil.BeslutterFeil.KanIkkeBeslutteEgenOppgave()
                 } else {
                     totrinnsvurdering.settBeslutter(SaksbehandlerOid(legacySaksbehandler.oid))

@@ -5,7 +5,7 @@ import io.ktor.server.application.Application
 import no.nav.helse.FeatureToggles
 import no.nav.helse.Gruppekontroll
 import no.nav.helse.MeldingPubliserer
-import no.nav.helse.bootstrap.Environment
+import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.kafka.RiverSetup
 import no.nav.helse.mediator.BehandlingsstatistikkService
@@ -35,7 +35,7 @@ import java.lang.management.GarbageCollectorMXBean
 import java.lang.management.ManagementFactory
 
 class SpesialistApp(
-    private val env: Environment,
+    private val environmentToggles: EnvironmentToggles,
     gruppekontroll: Gruppekontroll,
     private val snapshothenter: Snapshothenter,
     private val azureConfig: AzureConfig,
@@ -116,7 +116,7 @@ class SpesialistApp(
                         definisjonDao = daos.definisjonDao,
                     ),
                 poisonPillDao = daos.poisonPillDao,
-                env = env,
+                environmentToggles = environmentToggles,
             )
         personhåndterer = PersonhåndtererImpl(publiserer = meldingPubliserer)
         RiverSetup(rapidsConnection, meldingMediator, daos.meldingDuplikatkontrollDao).setUp()
@@ -130,7 +130,7 @@ class SpesialistApp(
                 tilgangsgrupper = tilgangsgrupper,
                 stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
                 annulleringRepository = daos.annulleringRepository,
-                env = env,
+                environmentToggles = environmentToggles,
                 featureToggles = featureToggles,
                 sessionFactory = sessionFactory,
                 tilgangskontroll = tilgangskontrollørForReservasjon,

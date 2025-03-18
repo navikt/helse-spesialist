@@ -4,7 +4,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.micrometer.core.instrument.Metrics
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
-import no.nav.helse.bootstrap.Environment
+import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.automatisering.StikkprøverImpl
 import no.nav.helse.rapids_rivers.RapidApplication
@@ -34,7 +34,7 @@ internal class RapidApp(env: Map<String, String>) {
         val unleashFeatureToggles: UnleashFeatureToggles.Configuration,
         val versjonAvKode: String,
         val tilgangsgrupper: Tilgangsgrupper,
-        val environment: Environment,
+        val environmentToggles: EnvironmentToggles,
         val stikkprøver: Stikkprøver,
     ) {
         companion object {
@@ -48,7 +48,7 @@ internal class RapidApp(env: Map<String, String>) {
                     unleashFeatureToggles = UnleashFeatureToggles.Configuration.fraEnv(env),
                     versjonAvKode = env.getValue("NAIS_APP_IMAGE"),
                     tilgangsgrupper = SpeilTilgangsgrupper(env),
-                    environment = EnvironmentImpl(env),
+                    environmentToggles = EnvironmentTogglesImpl(env),
                     stikkprøver = StikkprøverImpl(env),
                 )
         }
@@ -60,7 +60,7 @@ internal class RapidApp(env: Map<String, String>) {
     private val accessTokenGenerator = EntraIDAccessTokenGenerator(configuration.accessTokenGeneratorConfig)
 
     private val reservasjonshenter =
-        if (configuration.environment.brukDummyForKRR) {
+        if (configuration.environmentToggles.brukDummyForKRR) {
             logger.info("Bruker nulloperasjonsversjon av reservasjonshenter")
             Reservasjonshenter { null }
         } else {
@@ -72,7 +72,7 @@ internal class RapidApp(env: Map<String, String>) {
 
     private val spesialistApp =
         SpesialistApp(
-            env = configuration.environment,
+            environmentToggles = configuration.environmentToggles,
             gruppekontroll = MsGraphGruppekontroll(accessTokenGenerator),
             snapshothenter =
                 SpleisClientSnapshothenter(
