@@ -64,7 +64,7 @@ object TestRunner {
         saksbehandlerFraApi: SaksbehandlerFraApi = lagSaksbehandlerFraApi(),
         given: (avhengigheter: Avhengigheter) -> Unit = {},
         @Language("GraphQL") whenever: String,
-        then: suspend (response: HttpResponse, body: JsonNode) -> Unit,
+        then: suspend (response: HttpResponse, body: JsonNode, avhengigheter: Avhengigheter) -> Unit,
     ) {
         val avhengigheter = Avhengigheter(
             daos = mockk(relaxed = true),
@@ -116,7 +116,7 @@ object TestRunner {
                 setBody(mapOf("query" to whenever))
             }
 
-            then(response, response.body())
+            then(response, response.body(), avhengigheter)
         }
     }
 

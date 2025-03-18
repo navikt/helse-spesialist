@@ -10,7 +10,7 @@ internal class OpptegnelseMutationHandlerTest {
     fun `opprett abonnement`() {
         runQuery(
             whenever = abonnerMutation("123"),
-            then = { _, body ->
+            then = { _, body, _ ->
                 assertEquals(true, body["data"]["opprettAbonnement"].asBoolean())
             }
         )

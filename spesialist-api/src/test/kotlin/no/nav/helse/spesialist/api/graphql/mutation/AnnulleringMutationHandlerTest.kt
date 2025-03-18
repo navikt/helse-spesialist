@@ -35,7 +35,7 @@ class AnnulleringMutationHandlerTest {
                     ),
                 )
             ),
-            then = {_, body ->
+            then = { _, body, _ ->
                 assertTrue(body["data"]["annuller"].asBoolean())
             }
         )
@@ -58,7 +58,7 @@ class AnnulleringMutationHandlerTest {
                     arsaker = emptyList()
                 )
             ),
-            then = { _, body ->
+            then = { _, body, _ ->
                 assertTrue(body["data"]["annuller"].asBoolean())
             }
         )

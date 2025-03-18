@@ -11,7 +11,7 @@ internal class OpphevStansMutationHandlerTest {
     fun `opphev stans`() {
         runQuery(
             whenever = opphevStansMutation(lagFødselsnummer(), "EN_BEGRUNNELSE"),
-            then = { _, body ->
+            then = { _, body, _ ->
                 assertTrue(body["data"]["opphevStans"].asBoolean())
             }
         )

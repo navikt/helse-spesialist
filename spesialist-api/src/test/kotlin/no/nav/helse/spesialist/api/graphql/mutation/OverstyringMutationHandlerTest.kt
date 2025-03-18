@@ -38,7 +38,7 @@ internal class OverstyringMutationHandlerTest {
                     ),
                 )
             ),
-            then = { _, body ->
+            then = { _, body, _ ->
                 Assertions.assertTrue(body["data"]["overstyrDager"].asBoolean())
             },
         )
@@ -59,7 +59,7 @@ internal class OverstyringMutationHandlerTest {
                     ),
                 )
             ),
-            then = { _, body ->
+            then = { _, body, _ ->
                 Assertions.assertTrue(body["data"]["overstyrDager"].asBoolean())
             },
         )
@@ -80,7 +80,7 @@ internal class OverstyringMutationHandlerTest {
                     ),
                 )
             ),
-            then = { _, body ->
+            then = { _, body, _ ->
                 Assertions.assertTrue(body["data"]["overstyrDager"].asBoolean())
             },
         )
@@ -106,7 +106,7 @@ internal class OverstyringMutationHandlerTest {
                     vedtaksperiodeId = UUID.randomUUID(),
                 )
             ),
-            then = { _, body ->
+            then = { _, body, _ ->
                 Assertions.assertTrue(body["data"]["overstyrArbeidsforhold"].asBoolean())
             },
         )
@@ -143,7 +143,7 @@ internal class OverstyringMutationHandlerTest {
                     vedtaksperiodeId = UUID.randomUUID(),
                 )
             ),
-            then = { _, body ->
+            then = { _, body, _ ->
                 Assertions.assertTrue(body["data"]["overstyrInntektOgRefusjon"].asBoolean())
             },
         )
@@ -184,7 +184,7 @@ internal class OverstyringMutationHandlerTest {
                     ),
                 )
             ),
-            then = { _, body ->
+            then = { _, body, _ ->
                 Assertions.assertTrue(body["data"]["overstyrTilkommenInntekt"].asBoolean())
             },
         )
