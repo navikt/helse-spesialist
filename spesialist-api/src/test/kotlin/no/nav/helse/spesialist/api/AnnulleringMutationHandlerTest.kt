@@ -2,32 +2,19 @@ package no.nav.helse.spesialist.api
 
 import no.nav.helse.TestRunner.runQuery
 import no.nav.helse.spesialist.api.graphql.schema.ApiAnnulleringData
-import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.testfixtures.mutation.annullerMutation
 import no.nav.helse.spesialist.testfixtures.lagAktørId
-import no.nav.helse.spesialist.testfixtures.lagEpostadresseFraFulltNavn
 import no.nav.helse.spesialist.testfixtures.lagFødselsnummer
 import no.nav.helse.spesialist.testfixtures.lagOrganisasjonsnummer
-import no.nav.helse.spesialist.testfixtures.lagSaksbehandlerident
-import no.nav.helse.spesialist.testfixtures.lagSaksbehandlernavn
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
 class AnnulleringMutationHandlerTest {
-    private val saksbehandlernavn = lagSaksbehandlernavn()
-    private val saksbehandlerFraApi = SaksbehandlerFraApi(
-        UUID.randomUUID(),
-        saksbehandlernavn,
-        lagEpostadresseFraFulltNavn(saksbehandlernavn),
-        ident = lagSaksbehandlerident(),
-        grupper = listOf(UUID.randomUUID())
-    )
 
     @Test
     fun `annullering ok`() {
         runQuery(
-            saksbehandlerFraApi = saksbehandlerFraApi,
             given = {},
             whenever = annullerMutation(
                 ApiAnnulleringData(
@@ -57,7 +44,6 @@ class AnnulleringMutationHandlerTest {
     @Test
     fun `annullering av tomme verdier`() {
         runQuery(
-            saksbehandlerFraApi = saksbehandlerFraApi,
             whenever = annullerMutation(
                 ApiAnnulleringData(
                     organisasjonsnummer = lagOrganisasjonsnummer(),

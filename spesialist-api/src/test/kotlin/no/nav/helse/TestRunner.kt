@@ -27,6 +27,7 @@ import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
 import no.nav.helse.spesialist.api.graphql.settOppGraphQLApi
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
+import no.nav.helse.spesialist.api.testfixtures.lagSaksbehandlerFraApi
 import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -60,7 +61,7 @@ object TestRunner {
     ).serialize()
 
     fun runQuery(
-        saksbehandlerFraApi: SaksbehandlerFraApi,
+        saksbehandlerFraApi: SaksbehandlerFraApi = lagSaksbehandlerFraApi(),
         given: (avhengigheter: Avhengigheter) -> Unit = {},
         @Language("GraphQL") whenever: String,
         then: suspend (response: HttpResponse, body: JsonNode) -> Unit,
