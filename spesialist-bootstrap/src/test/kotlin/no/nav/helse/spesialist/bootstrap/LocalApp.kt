@@ -73,7 +73,7 @@ object LocalApp {
 
     private val spesialistApp =
         SpesialistApp(
-            env = EnvironmentImpl(mapOf("LOKAL_UTVIKLING" to "true")),
+            environmentToggles = EnvironmentTogglesImpl(mapOf("LOKAL_UTVIKLING" to "true")),
             gruppekontroll = gruppekontroll,
             snapshothenter = snapshothenter,
             azureConfig = azureConfig,

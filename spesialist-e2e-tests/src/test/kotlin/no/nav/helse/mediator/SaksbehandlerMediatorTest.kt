@@ -103,7 +103,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             tilgangsgrupper = tilgangsgrupper,
             stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
             annulleringRepository = annulleringRepository,
-            env = environment,
+            environmentToggles = environmentToggles,
             featureToggles = featureToggles,
             sessionFactory = TransactionalSessionFactory(dataSource),
             tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,

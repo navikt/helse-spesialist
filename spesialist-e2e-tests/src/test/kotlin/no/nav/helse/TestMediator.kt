@@ -1,7 +1,7 @@
 package no.nav.helse
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
-import no.nav.helse.bootstrap.Environment
+import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.kafka.RiverSetup
 import no.nav.helse.mediator.GodkjenningMediator
@@ -26,7 +26,7 @@ import javax.sql.DataSource
 internal class TestMediator(
     testRapid: TestRapid,
     dataSource: DataSource,
-    environment: Environment,
+    environmentToggles: EnvironmentToggles,
 ) {
     private val daos = DBDaos(dataSource)
     private val opptegnelseDao = daos.opptegnelseDao
@@ -71,7 +71,7 @@ internal class TestMediator(
             tilgangsgrupper = tilgangsgrupper,
             stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
             annulleringRepository = annulleringRepository,
-            env = environment,
+            environmentToggles = environmentToggles,
             featureToggles = object : FeatureToggles {},
             sessionFactory = TransactionalSessionFactory(dataSource),
             tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
@@ -118,7 +118,7 @@ internal class TestMediator(
                 definisjonDao = daos.definisjonDao
             ),
             poisonPillDao = daos.poisonPillDao,
-            env = environment,
+            environmentToggles = environmentToggles,
         )
         RiverSetup(testRapid, meldingMediator, daos.meldingDuplikatkontrollDao).setUp()
     }

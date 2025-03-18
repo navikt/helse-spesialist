@@ -110,7 +110,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     private val meldingssender = Meldingssender(testRapid)
     protected lateinit var sisteMeldingId: UUID
     protected lateinit var sisteGodkjenningsbehovId: UUID
-    private val testMediator = TestMediator(testRapid, dataSource, environment)
+    private val testMediator = TestMediator(testRapid, dataSource, environmentToggles)
     protected val SAKSBEHANDLER_OID: UUID = UUID.randomUUID()
     protected val SAKSBEHANDLER_EPOST = "augunn.saksbehandler@nav.no"
     protected val SAKSBEHANDLER_IDENT = "S199999"

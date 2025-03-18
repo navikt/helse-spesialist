@@ -1,6 +1,6 @@
 package no.nav.helse.bootstrap
 
-interface Environment : Map<String, String> {
+interface EnvironmentToggles {
     val brukDummyForKRR: Boolean
     val ignorerMeldingerForUkjentePersoner: Boolean
     val kanBeslutteEgneSaker: Boolean
