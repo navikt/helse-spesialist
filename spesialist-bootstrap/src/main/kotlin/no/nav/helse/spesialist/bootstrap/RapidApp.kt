@@ -27,7 +27,7 @@ fun main() {
 internal class RapidApp(env: Map<String, String>) {
     data class Configuration(
         val azureConfig: AzureConfig,
-        val accessTokenGenerator: EntraIDAccessTokenGenerator,
+        val accessTokenGeneratorConfig: EntraIDAccessTokenGenerator.Configuration,
         val spleisClientConfig: SpleisClient.Configuration,
         val krrConfig: KRRClientReservasjonshenter.Configuration,
         val dbConfig: DBModule.Configuration,
@@ -38,12 +38,10 @@ internal class RapidApp(env: Map<String, String>) {
         val stikkprøver: Stikkprøver,
     ) {
         companion object {
-            fun fraEnv(env: Map<String, String>): Configuration {
-                val accessTokenGenerator =
-                    EntraIDAccessTokenGenerator(EntraIDAccessTokenGenerator.Configuration.fraEnv(env))
-                return Configuration(
+            fun fraEnv(env: Map<String, String>): Configuration =
+                Configuration(
                     azureConfig = AzureConfig.fraEnv(env),
-                    accessTokenGenerator = accessTokenGenerator,
+                    accessTokenGeneratorConfig = EntraIDAccessTokenGenerator.Configuration.fraEnv(env),
                     spleisClientConfig = SpleisClient.Configuration.fraEnv(env),
                     krrConfig = KRRClientReservasjonshenter.Configuration.fraEnv(env),
                     dbConfig = DBModule.Configuration.fraEnv(env),
@@ -53,13 +51,13 @@ internal class RapidApp(env: Map<String, String>) {
                     environment = EnvironmentImpl(env),
                     stikkprøver = StikkprøverImpl(env),
                 )
-            }
         }
     }
 
     private val logger = LoggerFactory.getLogger(RapidApp::class.java)
     private val rapidsConnection: RapidsConnection
     private val configuration = Configuration.fraEnv(env)
+    private val accessTokenGenerator = EntraIDAccessTokenGenerator(configuration.accessTokenGeneratorConfig)
 
     private val reservasjonshenter =
         if (configuration.environment.brukDummyForKRR) {
@@ -68,18 +66,18 @@ internal class RapidApp(env: Map<String, String>) {
         } else {
             KRRClientReservasjonshenter(
                 configuration = configuration.krrConfig,
-                accessTokenGenerator = configuration.accessTokenGenerator,
+                accessTokenGenerator = accessTokenGenerator,
             )
         }
 
     private val spesialistApp =
         SpesialistApp(
             env = configuration.environment,
-            gruppekontroll = MsGraphGruppekontroll(configuration.accessTokenGenerator),
+            gruppekontroll = MsGraphGruppekontroll(accessTokenGenerator),
             snapshothenter =
                 SpleisClientSnapshothenter(
                     SpleisClient(
-                        accessTokenGenerator = configuration.accessTokenGenerator,
+                        accessTokenGenerator = accessTokenGenerator,
                         configuration = configuration.spleisClientConfig,
                     ),
                 ),
