@@ -20,7 +20,6 @@ import no.nav.helse.mediator.TilgangskontrollørForReservasjon
 import no.nav.helse.mediator.dokument.DokumentMediator
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.mediator.oppgave.OppgaveService
-import no.nav.helse.modell.automatisering.PlukkTilManuell
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlinghåndtererImpl
 import no.nav.helse.modell.varsel.VarselRepository
@@ -34,7 +33,6 @@ import no.nav.helse.spesialist.db.bootstrap.DBModule
 import org.slf4j.LoggerFactory
 import java.lang.management.GarbageCollectorMXBean
 import java.lang.management.ManagementFactory
-import kotlin.random.Random
 
 class SpesialistApp(
     private val env: Environment,
@@ -45,6 +43,7 @@ class SpesialistApp(
     private val reservasjonshenter: Reservasjonshenter,
     private val versjonAvKode: String,
     private val featureToggles: FeatureToggles,
+    private val stikkprøver: Stikkprøver,
     dbModuleConfiguration: DBModule.Configuration,
 ) : RapidsConnection.StatusListener {
     private val tilgangskontrollørForReservasjon = TilgangskontrollørForReservasjon(gruppekontroll, tilgangsgrupper)
@@ -74,35 +73,6 @@ class SpesialistApp(
         )
 
     private lateinit var godkjenningService: GodkjenningService
-
-    private val plukkTilManuell: PlukkTilManuell<String> = (
-        {
-            it?.let {
-                val divisor = it.toInt()
-                require(divisor > 0) { "Her er et vennlig tips: ikke prøv å dele på 0" }
-                Random.nextInt(divisor) == 0
-            } ?: false
-        }
-    )
-
-    private val stikkprøver =
-        object : Stikkprøver {
-            override fun utsFlereArbeidsgivereFørstegangsbehandling() = plukkTilManuell(env["STIKKPROEVER_UTS_FLERE_AG_FGB_DIVISOR"])
-
-            override fun utsFlereArbeidsgivereForlengelse() = plukkTilManuell(env["STIKKPROEVER_UTS_FLERE_AG_FORLENGELSE_DIVISOR"])
-
-            override fun utsEnArbeidsgiverFørstegangsbehandling() = plukkTilManuell(env["STIKKPROEVER_UTS_EN_AG_FGB_DIVISOR"])
-
-            override fun utsEnArbeidsgiverForlengelse() = plukkTilManuell(env["STIKKPROEVER_UTS_EN_AG_FORLENGELSE_DIVISOR"])
-
-            override fun fullRefusjonFlereArbeidsgivereFørstegangsbehandling() =
-                plukkTilManuell(env["STIKKPROEVER_FULL_REFUSJON_FLERE_AG_FGB_DIVISOR"])
-
-            override fun fullRefusjonFlereArbeidsgivereForlengelse() =
-                plukkTilManuell(env["STIKKPROEVER_FULL_REFUSJON_FLERE_AG_FORLENGELSE_DIVISOR"])
-
-            override fun fullRefusjonEnArbeidsgiver() = plukkTilManuell(env["STIKKPROEVER_FULL_REFUSJON_EN_AG_DIVISOR"])
-        }
 
     private val kommandofabrikk =
         Kommandofabrikk(
