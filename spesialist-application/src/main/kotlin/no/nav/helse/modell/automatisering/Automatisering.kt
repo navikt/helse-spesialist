@@ -337,34 +337,37 @@ interface Stikkprøver {
     fun fullRefusjonFlereArbeidsgivereForlengelse(): Boolean
 
     fun fullRefusjonEnArbeidsgiver(): Boolean
-}
 
-class StikkprøverImpl(private val env: Map<String, String>) : Stikkprøver {
-    override fun utsFlereArbeidsgivereFørstegangsbehandling() = plukkTilManuell(env["STIKKPROEVER_UTS_FLERE_AG_FGB_DIVISOR"])
+    companion object {
+        fun fraEnv(env: Map<String, String>) =
+            object : Stikkprøver {
+                override fun utsFlereArbeidsgivereFørstegangsbehandling() = plukkTilManuell(env["STIKKPROEVER_UTS_FLERE_AG_FGB_DIVISOR"])
 
-    override fun utsFlereArbeidsgivereForlengelse() = plukkTilManuell(env["STIKKPROEVER_UTS_FLERE_AG_FORLENGELSE_DIVISOR"])
+                override fun utsFlereArbeidsgivereForlengelse() = plukkTilManuell(env["STIKKPROEVER_UTS_FLERE_AG_FORLENGELSE_DIVISOR"])
 
-    override fun utsEnArbeidsgiverFørstegangsbehandling() = plukkTilManuell(env["STIKKPROEVER_UTS_EN_AG_FGB_DIVISOR"])
+                override fun utsEnArbeidsgiverFørstegangsbehandling() = plukkTilManuell(env["STIKKPROEVER_UTS_EN_AG_FGB_DIVISOR"])
 
-    override fun utsEnArbeidsgiverForlengelse() = plukkTilManuell(env["STIKKPROEVER_UTS_EN_AG_FORLENGELSE_DIVISOR"])
+                override fun utsEnArbeidsgiverForlengelse() = plukkTilManuell(env["STIKKPROEVER_UTS_EN_AG_FORLENGELSE_DIVISOR"])
 
-    override fun fullRefusjonFlereArbeidsgivereFørstegangsbehandling() =
-        plukkTilManuell(env["STIKKPROEVER_FULL_REFUSJON_FLERE_AG_FGB_DIVISOR"])
+                override fun fullRefusjonFlereArbeidsgivereFørstegangsbehandling() =
+                    plukkTilManuell(env["STIKKPROEVER_FULL_REFUSJON_FLERE_AG_FGB_DIVISOR"])
 
-    override fun fullRefusjonFlereArbeidsgivereForlengelse() =
-        plukkTilManuell(env["STIKKPROEVER_FULL_REFUSJON_FLERE_AG_FORLENGELSE_DIVISOR"])
+                override fun fullRefusjonFlereArbeidsgivereForlengelse() =
+                    plukkTilManuell(env["STIKKPROEVER_FULL_REFUSJON_FLERE_AG_FORLENGELSE_DIVISOR"])
 
-    override fun fullRefusjonEnArbeidsgiver() = plukkTilManuell(env["STIKKPROEVER_FULL_REFUSJON_EN_AG_DIVISOR"])
+                override fun fullRefusjonEnArbeidsgiver() = plukkTilManuell(env["STIKKPROEVER_FULL_REFUSJON_EN_AG_DIVISOR"])
+            }
 
-    private val plukkTilManuell: PlukkTilManuell<String> = (
-        {
-            it?.let {
-                val divisor = it.toInt()
-                require(divisor > 0) { "Her er et vennlig tips: ikke prøv å dele på 0" }
-                Random.nextInt(divisor) == 0
-            } == true
-        }
-    )
+        private val plukkTilManuell: PlukkTilManuell<String> = (
+            {
+                it?.let {
+                    val divisor = it.toInt()
+                    require(divisor > 0) { "Her er et vennlig tips: ikke prøv å dele på 0" }
+                    Random.nextInt(divisor) == 0
+                } == true
+            }
+        )
+    }
 }
 
 internal interface AutomatiseringValidering {

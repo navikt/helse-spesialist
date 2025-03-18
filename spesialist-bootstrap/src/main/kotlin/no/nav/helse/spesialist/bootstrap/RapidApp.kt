@@ -6,7 +6,6 @@ import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.modell.automatisering.Stikkprøver
-import no.nav.helse.modell.automatisering.StikkprøverImpl
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.spesialist.api.AzureConfig
 import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
@@ -49,7 +48,7 @@ internal class RapidApp(env: Map<String, String>) {
                     versjonAvKode = env.getValue("NAIS_APP_IMAGE"),
                     tilgangsgrupper = SpeilTilgangsgrupper(env),
                     environmentToggles = EnvironmentTogglesImpl(env),
-                    stikkprøver = StikkprøverImpl(env),
+                    stikkprøver = Stikkprøver.fraEnv(env),
                 )
         }
     }
