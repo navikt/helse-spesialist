@@ -19,8 +19,8 @@ import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
-import no.nav.helse.spesialist.testhjelp.feb
-import no.nav.helse.spesialist.testhjelp.jan
+import no.nav.helse.spesialist.testfixtures.feb
+import no.nav.helse.spesialist.testfixtures.jan
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach

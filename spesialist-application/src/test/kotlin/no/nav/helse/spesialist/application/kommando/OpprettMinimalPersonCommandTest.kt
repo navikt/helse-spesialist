@@ -8,8 +8,8 @@ import no.nav.helse.db.PersonDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.MinimalPersonDto
 import no.nav.helse.modell.kommando.OpprettMinimalPersonCommand
-import no.nav.helse.spesialist.testhjelp.lagAktørId
-import no.nav.helse.spesialist.testhjelp.lagFødselsnummer
+import no.nav.helse.spesialist.testfixtures.lagAktørId
+import no.nav.helse.spesialist.testfixtures.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach

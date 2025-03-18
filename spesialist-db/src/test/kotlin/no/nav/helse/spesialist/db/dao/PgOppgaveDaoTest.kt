@@ -25,10 +25,10 @@ import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.db.TestMelding
-import no.nav.helse.spesialist.testhjelp.lagAktørId
-import no.nav.helse.spesialist.testhjelp.lagEtternavn
-import no.nav.helse.spesialist.testhjelp.lagFornavn
-import no.nav.helse.spesialist.testhjelp.lagFødselsnummer
+import no.nav.helse.spesialist.testfixtures.lagAktørId
+import no.nav.helse.spesialist.testfixtures.lagEtternavn
+import no.nav.helse.spesialist.testfixtures.lagFornavn
+import no.nav.helse.spesialist.testfixtures.lagFødselsnummer
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.parallel.Execution
 import org.junit.jupiter.api.parallel.ExecutionMode

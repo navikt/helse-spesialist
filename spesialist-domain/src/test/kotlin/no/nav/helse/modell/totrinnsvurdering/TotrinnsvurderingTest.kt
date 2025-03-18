@@ -8,10 +8,10 @@ import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinje
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinjedag
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
-import no.nav.helse.spesialist.testhjelp.jan
-import no.nav.helse.spesialist.testhjelp.lagAktørId
-import no.nav.helse.spesialist.testhjelp.lagFødselsnummer
-import no.nav.helse.spesialist.testhjelp.lagOrganisasjonsnummer
+import no.nav.helse.spesialist.testfixtures.jan
+import no.nav.helse.spesialist.testfixtures.lagAktørId
+import no.nav.helse.spesialist.testfixtures.lagFødselsnummer
+import no.nav.helse.spesialist.testfixtures.lagOrganisasjonsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue

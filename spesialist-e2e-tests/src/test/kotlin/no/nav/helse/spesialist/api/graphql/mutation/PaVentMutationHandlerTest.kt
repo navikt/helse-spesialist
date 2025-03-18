@@ -3,7 +3,7 @@ package no.nav.helse.spesialist.api.graphql.mutation
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
 import no.nav.helse.spesialist.api.testfixtures.mutation.fjernPåVentMutation
 import no.nav.helse.spesialist.api.testfixtures.mutation.leggPåVentMutation
-import no.nav.helse.spesialist.testhjelp.jan
+import no.nav.helse.spesialist.testfixtures.jan
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test

@@ -11,9 +11,9 @@ import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.finnSist
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.harMedlemskapsvarsel
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.harÅpenGosysOppgave
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.kreverSkjønnsfastsettelse
-import no.nav.helse.spesialist.testhjelp.des
-import no.nav.helse.spesialist.testhjelp.feb
-import no.nav.helse.spesialist.testhjelp.jan
+import no.nav.helse.spesialist.testfixtures.des
+import no.nav.helse.spesialist.testfixtures.feb
+import no.nav.helse.spesialist.testfixtures.jan
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals

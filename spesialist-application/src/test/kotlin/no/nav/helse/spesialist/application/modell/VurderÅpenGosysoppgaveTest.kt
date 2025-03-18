@@ -15,7 +15,7 @@ import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
-import no.nav.helse.spesialist.testhjelp.jan
+import no.nav.helse.spesialist.testfixtures.jan
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue

@@ -8,9 +8,9 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.SykepengegrunnlagsArbeidsgiver
 import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
-import no.nav.helse.spesialist.testhjelp.jan
-import no.nav.helse.spesialist.testhjelp.lagFødselsnummer
-import no.nav.helse.spesialist.testhjelp.lagOrganisasjonsnummer
+import no.nav.helse.spesialist.testfixtures.jan
+import no.nav.helse.spesialist.testfixtures.lagFødselsnummer
+import no.nav.helse.spesialist.testfixtures.lagOrganisasjonsnummer
 import java.time.LocalDate
 import java.util.UUID
 

@@ -8,7 +8,7 @@ import no.nav.helse.kafka.FullmaktLøsningRiver
 import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
-import no.nav.helse.spesialist.testhjelp.lagFødselsnummer
+import no.nav.helse.spesialist.testfixtures.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test

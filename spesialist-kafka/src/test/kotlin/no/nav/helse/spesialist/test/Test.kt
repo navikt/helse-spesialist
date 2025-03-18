@@ -2,12 +2,12 @@ package no.nav.helse.spesialist.test
 
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
-import no.nav.helse.spesialist.testhjelp.lagAktørId
-import no.nav.helse.spesialist.testhjelp.lagEpostadresseFraFulltNavn
-import no.nav.helse.spesialist.testhjelp.lagFødselsnummer
-import no.nav.helse.spesialist.testhjelp.lagOrganisasjonsnummer
-import no.nav.helse.spesialist.testhjelp.lagSaksbehandlerident
-import no.nav.helse.spesialist.testhjelp.lagSaksbehandlernavn
+import no.nav.helse.spesialist.testfixtures.lagAktørId
+import no.nav.helse.spesialist.testfixtures.lagEpostadresseFraFulltNavn
+import no.nav.helse.spesialist.testfixtures.lagFødselsnummer
+import no.nav.helse.spesialist.testfixtures.lagOrganisasjonsnummer
+import no.nav.helse.spesialist.testfixtures.lagSaksbehandlerident
+import no.nav.helse.spesialist.testfixtures.lagSaksbehandlernavn
 import java.util.UUID
 
 fun lagSaksbehandler(

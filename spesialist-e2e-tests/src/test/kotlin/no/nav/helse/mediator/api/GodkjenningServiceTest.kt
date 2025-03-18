@@ -4,9 +4,9 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
-import no.nav.helse.spesialist.testhjelp.lagEtternavn
-import no.nav.helse.spesialist.testhjelp.lagFornavn
-import no.nav.helse.spesialist.testhjelp.lagSaksbehandlerident
+import no.nav.helse.spesialist.testfixtures.lagEtternavn
+import no.nav.helse.spesialist.testfixtures.lagFornavn
+import no.nav.helse.spesialist.testfixtures.lagSaksbehandlerident
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue

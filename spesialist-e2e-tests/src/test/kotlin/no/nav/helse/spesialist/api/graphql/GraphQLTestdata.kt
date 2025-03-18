@@ -1,9 +1,9 @@
 package no.nav.helse.spesialist.api.graphql
 
-import no.nav.helse.spesialist.testhjelp.jan
-import no.nav.helse.spesialist.testhjelp.lagOrganisasjonsnummer
-import no.nav.helse.spesialist.testhjelp.mai
-import no.nav.helse.spesialist.testhjelp.okt
+import no.nav.helse.spesialist.testfixtures.jan
+import no.nav.helse.spesialist.testfixtures.lagOrganisasjonsnummer
+import no.nav.helse.spesialist.testfixtures.mai
+import no.nav.helse.spesialist.testfixtures.okt
 import no.nav.helse.spleis.graphql.enums.GraphQLHendelsetype
 import no.nav.helse.spleis.graphql.enums.GraphQLInntektskilde
 import no.nav.helse.spleis.graphql.enums.GraphQLInntektstype

@@ -1,12 +1,12 @@
 package no.nav.helse.spesialist.test
 
-import no.nav.helse.spesialist.testhjelp.lagAktørId
-import no.nav.helse.spesialist.testhjelp.lagEtternavn
-import no.nav.helse.spesialist.testhjelp.lagFornavn
-import no.nav.helse.spesialist.testhjelp.lagFødselsnummer
-import no.nav.helse.spesialist.testhjelp.lagMellomnavnOrNull
-import no.nav.helse.spesialist.testhjelp.lagOrganisasjonsnavn
-import no.nav.helse.spesialist.testhjelp.lagOrganisasjonsnummer
+import no.nav.helse.spesialist.testfixtures.lagAktørId
+import no.nav.helse.spesialist.testfixtures.lagEtternavn
+import no.nav.helse.spesialist.testfixtures.lagFornavn
+import no.nav.helse.spesialist.testfixtures.lagFødselsnummer
+import no.nav.helse.spesialist.testfixtures.lagMellomnavnOrNull
+import no.nav.helse.spesialist.testfixtures.lagOrganisasjonsnavn
+import no.nav.helse.spesialist.testfixtures.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.typer.Kjønn
 import java.util.UUID
 

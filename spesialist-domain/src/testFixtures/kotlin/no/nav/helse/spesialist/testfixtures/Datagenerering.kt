@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.testhjelp
+package no.nav.helse.spesialist.testfixtures
 
 import java.time.LocalDate
 import kotlin.random.Random.Default.nextInt

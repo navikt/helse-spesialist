@@ -9,8 +9,8 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringArbeidsgiver.Api
 import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringDag
 import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektOverstyring
-import no.nav.helse.spesialist.testhjelp.feb
-import no.nav.helse.spesialist.testhjelp.jan
+import no.nav.helse.spesialist.testfixtures.feb
+import no.nav.helse.spesialist.testfixtures.jan
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.util.UUID

@@ -2,7 +2,7 @@ package no.nav.helse.modell
 
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.VedtaksperiodeGodkjentAutomatisk
-import no.nav.helse.spesialist.testhjelp.lagFødselsnummer
+import no.nav.helse.spesialist.testfixtures.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.UUID

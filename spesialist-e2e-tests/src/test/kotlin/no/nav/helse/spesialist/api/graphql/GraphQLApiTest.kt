@@ -3,10 +3,10 @@ package no.nav.helse.spesialist.api.graphql
 import com.github.navikt.tbd_libs.jackson.asYearMonth
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
 import no.nav.helse.spesialist.api.objectMapper
-import no.nav.helse.spesialist.testhjelp.apr
-import no.nav.helse.spesialist.testhjelp.feb
-import no.nav.helse.spesialist.testhjelp.jan
-import no.nav.helse.spesialist.testhjelp.mar
+import no.nav.helse.spesialist.testfixtures.apr
+import no.nav.helse.spesialist.testfixtures.feb
+import no.nav.helse.spesialist.testfixtures.jan
+import no.nav.helse.spesialist.testfixtures.mar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
