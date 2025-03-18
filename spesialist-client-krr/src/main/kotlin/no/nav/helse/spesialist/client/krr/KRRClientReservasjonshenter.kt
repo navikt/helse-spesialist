@@ -38,10 +38,22 @@ private val statusEtterKallReservasjonsstatusBuilder =
         .tags(listOf(Tag.of("status", "success"), Tag.of("status", "failure")))
 
 class KRRClientReservasjonshenter(
-    private val apiUrl: String,
-    private val scope: String,
+    private val configuration: Configuration,
     private val accessTokenGenerator: AccessTokenGenerator,
 ) : Reservasjonshenter {
+    data class Configuration(
+        val apiUrl: String,
+        val scope: String,
+    ) {
+        companion object {
+            fun fraEnv(env: Map<String, String>) =
+                Configuration(
+                    apiUrl = env.getValue("KONTAKT_OG_RESERVASJONSREGISTERET_API_URL"),
+                    scope = env.getValue("KONTAKT_OG_RESERVASJONSREGISTERET_SCOPE"),
+                )
+        }
+    }
+
     private val logg: Logger = LoggerFactory.getLogger(this.javaClass)
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
     private val httpClient: HttpClient =
@@ -60,13 +72,13 @@ class KRRClientReservasjonshenter(
         val sample = Timer.start(registry)
         return try {
             logg.debug("Henter accessToken")
-            val accessToken = accessTokenGenerator.hentAccessToken(scope)
+            val accessToken = accessTokenGenerator.hentAccessToken(configuration.scope)
             val callId = UUID.randomUUID().toString()
 
-            logg.debug("Henter reservasjon fra $apiUrl/rest/v1/person, callId=$callId")
+            logg.debug("Henter reservasjon fra ${configuration.apiUrl}/rest/v1/person, callId=$callId")
             val response =
                 httpClient
-                    .get("$apiUrl/rest/v1/person") {
+                    .get("${configuration.apiUrl}/rest/v1/person") {
                         header("Authorization", "Bearer $accessToken")
                         header("Nav-Personident", fødselsnummer)
                         header("Nav-Call-Id", callId)

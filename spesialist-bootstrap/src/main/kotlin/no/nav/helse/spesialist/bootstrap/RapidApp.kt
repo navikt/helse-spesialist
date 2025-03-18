@@ -30,7 +30,7 @@ internal class RapidApp(env: Map<String, String>) {
         val azureConfig: AzureConfig,
         val accessTokenGenerator: EntraIDAccessTokenGenerator,
         val spleisClientConfig: SpleisClient.Configuration,
-        val reservasjonshenter: Reservasjonshenter,
+        val krrConfig: KRRClientReservasjonshenter.Configuration,
         val dbConfig: DBModule.Configuration,
         val unleashFeatureToggles: UnleashFeatureToggles.Configuration,
         val versjonAvKode: String,
@@ -46,12 +46,7 @@ internal class RapidApp(env: Map<String, String>) {
                     azureConfig = AzureConfig.fraEnv(env),
                     accessTokenGenerator = accessTokenGenerator,
                     spleisClientConfig = SpleisClient.Configuration.fraEnv(env),
-                    reservasjonshenter =
-                        KRRClientReservasjonshenter(
-                            apiUrl = env.getValue("KONTAKT_OG_RESERVASJONSREGISTERET_API_URL"),
-                            scope = env.getValue("KONTAKT_OG_RESERVASJONSREGISTERET_SCOPE"),
-                            accessTokenGenerator = accessTokenGenerator,
-                        ),
+                    krrConfig = KRRClientReservasjonshenter.Configuration.fraEnv(env),
                     dbConfig = DBModule.Configuration.fraEnv(env),
                     unleashFeatureToggles = UnleashFeatureToggles.Configuration.fraEnv(env),
                     versjonAvKode = versjonAvKode(env),
@@ -108,7 +103,10 @@ internal class RapidApp(env: Map<String, String>) {
             logger.info("Bruker nulloperasjonsversjon av reservasjonshenter")
             Reservasjonshenter { null }
         } else {
-            configuration.reservasjonshenter
+            KRRClientReservasjonshenter(
+                configuration = configuration.krrConfig,
+                accessTokenGenerator = configuration.accessTokenGenerator,
+            )
         }
 
     private val spesialistApp =
