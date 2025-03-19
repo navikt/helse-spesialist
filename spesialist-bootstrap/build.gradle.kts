@@ -15,6 +15,7 @@ dependencies {
     testImplementation(libs.bundles.flyway.postgres)
     testImplementation(libs.mockOauth2Server)
     testImplementation(libs.testcontainers.kafka)
+    testImplementation(libs.wiremock)
 
     testImplementation(testFixtures(project(":spesialist-db")))
 }
