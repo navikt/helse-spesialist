@@ -45,7 +45,7 @@ class SpesialistApp(
     private val featureToggles: FeatureToggles,
     private val stikkprøver: Stikkprøver,
     dbModuleConfiguration: DBModule.Configuration,
-) : RapidsConnection.StatusListener {
+) {
     private val tilgangskontrollørForReservasjon = TilgangskontrollørForReservasjon(gruppekontroll, tilgangsgrupper)
 
     private val dbModule = DBModule(dbModuleConfiguration)
@@ -84,7 +84,13 @@ class SpesialistApp(
         )
 
     fun start(rapidsConnection: RapidsConnection) {
-        rapidsConnection.register(this)
+        rapidsConnection.register(
+            object : RapidsConnection.StatusListener {
+                override fun onStartup(rapidsConnection: RapidsConnection) {
+                    dbModule.flywayMigrator.migrate()
+                }
+            },
+        )
         meldingPubliserer = MessageContextMeldingPubliserer(rapidsConnection)
         oppgaveService =
             OppgaveService(
@@ -156,10 +162,6 @@ class SpesialistApp(
     private fun loggOppstartsmelding() {
         val beans: List<GarbageCollectorMXBean> = ManagementFactory.getGarbageCollectorMXBeans()
         logg.info("Registrerte garbage collectors etter oppstart: ${beans.joinToString { it.name }}")
-    }
-
-    override fun onStartup(rapidsConnection: RapidsConnection) {
-        dbModule.flywayMigrator.migrate()
     }
 
     fun konfigurerKtorApp(application: Application) {
