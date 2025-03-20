@@ -4,7 +4,7 @@ import no.nav.helse.TestRunner.runQuery
 import no.nav.helse.spesialist.api.testfixtures.lagSaksbehandlerFraApi
 import no.nav.helse.spesialist.api.testfixtures.mutation.fjernPåVentMutation
 import no.nav.helse.spesialist.api.testfixtures.mutation.leggPåVentMutation
-import no.nav.helse.spesialist.testfixtures.jan
+import no.nav.helse.spesialist.domain.testfixtures.jan
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test

@@ -10,7 +10,7 @@ import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.vedtaksperiode.NyeVarsler
 import no.nav.helse.spesialist.kafka.objectMapper
-import no.nav.helse.spesialist.testfixtures.Testmeldingfabrikk
+import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime

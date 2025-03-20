@@ -3,8 +3,8 @@ package no.nav.helse.modell.person
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.forhindrerAutomatisering
-import no.nav.helse.spesialist.testfixtures.feb
-import no.nav.helse.spesialist.testfixtures.jan
+import no.nav.helse.spesialist.domain.testfixtures.feb
+import no.nav.helse.spesialist.domain.testfixtures.jan
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test

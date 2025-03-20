@@ -4,10 +4,10 @@ import no.nav.helse.db.api.VarselDbDto
 import no.nav.helse.db.api.VarselDbDto.Varselstatus
 import no.nav.helse.db.api.VedtaksperiodeDbDto
 import no.nav.helse.db.api.VedtaksperiodeDbDto.Companion.harAktiveVarsler
-import no.nav.helse.spesialist.testfixtures.apr
-import no.nav.helse.spesialist.testfixtures.feb
-import no.nav.helse.spesialist.testfixtures.jan
-import no.nav.helse.spesialist.testfixtures.mar
+import no.nav.helse.spesialist.domain.testfixtures.apr
+import no.nav.helse.spesialist.domain.testfixtures.feb
+import no.nav.helse.spesialist.domain.testfixtures.jan
+import no.nav.helse.spesialist.domain.testfixtures.mar
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test

@@ -9,8 +9,8 @@ import no.nav.helse.kafka.BehandlingOpprettetRiver
 import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.vedtaksperiode.BehandlingOpprettet
+import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk
 import no.nav.helse.spesialist.test.TestPerson
-import no.nav.helse.spesialist.testfixtures.Testmeldingfabrikk
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.UUID

@@ -10,10 +10,10 @@ import no.nav.helse.modell.vedtaksperiode.SykepengegrunnlagsArbeidsgiver
 import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
 import no.nav.helse.spesialist.api.bootstrap.Gruppe
 import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
-import no.nav.helse.spesialist.testfixtures.jan
-import no.nav.helse.spesialist.testfixtures.lagAktørId
-import no.nav.helse.spesialist.testfixtures.lagFødselsnummer
-import no.nav.helse.spesialist.testfixtures.lagOrganisasjonsnummer
+import no.nav.helse.spesialist.domain.testfixtures.jan
+import no.nav.helse.spesialist.domain.testfixtures.lagAktørId
+import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
+import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import java.util.UUID
 
 class TestPerson {

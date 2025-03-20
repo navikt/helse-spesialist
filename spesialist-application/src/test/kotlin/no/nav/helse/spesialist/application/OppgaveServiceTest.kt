@@ -18,10 +18,10 @@ import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
-import no.nav.helse.spesialist.testfixtures.lagEpostadresseFraFulltNavn
-import no.nav.helse.spesialist.testfixtures.lagFødselsnummer
-import no.nav.helse.spesialist.testfixtures.lagSaksbehandlerident
-import no.nav.helse.spesialist.testfixtures.lagSaksbehandlernavn
+import no.nav.helse.spesialist.domain.testfixtures.lagEpostadresseFraFulltNavn
+import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
+import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlerident
+import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlernavn
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

@@ -31,9 +31,9 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveegenskap
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavetype
 import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodetype
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
-import no.nav.helse.spesialist.testfixtures.lagEpostadresseFraFulltNavn
-import no.nav.helse.spesialist.testfixtures.lagSaksbehandlerident
-import no.nav.helse.spesialist.testfixtures.lagSaksbehandlernavn
+import no.nav.helse.spesialist.domain.testfixtures.lagEpostadresseFraFulltNavn
+import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlerident
+import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlernavn
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

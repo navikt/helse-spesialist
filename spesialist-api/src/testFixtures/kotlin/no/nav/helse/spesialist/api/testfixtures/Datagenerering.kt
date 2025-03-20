@@ -1,9 +1,9 @@
 package no.nav.helse.spesialist.api.testfixtures
 
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
-import no.nav.helse.spesialist.testfixtures.lagEpostadresseFraFulltNavn
-import no.nav.helse.spesialist.testfixtures.lagSaksbehandlerident
-import no.nav.helse.spesialist.testfixtures.lagSaksbehandlernavn
+import no.nav.helse.spesialist.domain.testfixtures.lagEpostadresseFraFulltNavn
+import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlerident
+import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlernavn
 import java.util.UUID
 
 fun lagSaksbehandlerFraApi(

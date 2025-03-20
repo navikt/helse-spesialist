@@ -20,9 +20,9 @@ import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.spesialist.application.Testdata.godkjenningsbehovData
 import no.nav.helse.spesialist.application.modell.inspektør
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
-import no.nav.helse.spesialist.testfixtures.jan
-import no.nav.helse.spesialist.testfixtures.lagSaksbehandlerident
-import no.nav.helse.spesialist.testfixtures.lagTilfeldigSaksbehandlerepost
+import no.nav.helse.spesialist.domain.testfixtures.jan
+import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlerident
+import no.nav.helse.spesialist.domain.testfixtures.lagTilfeldigSaksbehandlerepost
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach

@@ -3,7 +3,7 @@ package no.nav.helse.e2e
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.db.OpptegnelseDao
-import no.nav.helse.spesialist.testfixtures.lagFødselsnummer
+import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue

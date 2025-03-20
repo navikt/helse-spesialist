@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.testfixtures
+package no.nav.helse.spesialist.domain.testfixtures
 
 import java.time.LocalDate
 import kotlin.random.Random.Default.nextInt

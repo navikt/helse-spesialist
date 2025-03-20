@@ -6,10 +6,10 @@ import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.person.vedtaksperiode.Periode
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
-import no.nav.helse.spesialist.testfixtures.Testmeldingfabrikk
-import no.nav.helse.spesialist.testfixtures.Testmeldingfabrikk.ArbeidsgiverinformasjonJson
-import no.nav.helse.spesialist.testfixtures.Testmeldingfabrikk.VergemålJson.Fullmakt
-import no.nav.helse.spesialist.testfixtures.Testmeldingfabrikk.VergemålJson.Vergemål
+import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk
+import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk.ArbeidsgiverinformasjonJson
+import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk.VergemålJson.Fullmakt
+import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk.VergemålJson.Vergemål
 import no.nav.helse.spesialist.typer.Kjønn
 import org.junit.jupiter.api.Assertions.assertEquals
 import java.time.LocalDate

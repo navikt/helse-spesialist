@@ -2,7 +2,7 @@ package no.nav.helse.spesialist.api.graphql.mutation
 
 import no.nav.helse.TestRunner.runQuery
 import no.nav.helse.spesialist.api.testfixtures.mutation.opphevStansMutation
-import no.nav.helse.spesialist.testfixtures.lagFødselsnummer
+import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 

@@ -1,7 +1,7 @@
 package no.nav.helse.modell.person.vedtaksperiode
 
-import no.nav.helse.spesialist.testfixtures.feb
-import no.nav.helse.spesialist.testfixtures.jan
+import no.nav.helse.spesialist.domain.testfixtures.feb
+import no.nav.helse.spesialist.domain.testfixtures.jan
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test

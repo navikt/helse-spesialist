@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.testfixtures
+package no.nav.helse.spesialist.kafka.testfixtures
 
 import com.github.navikt.tbd_libs.kafka.Config
 import com.github.navikt.tbd_libs.kafka.ConsumerProducerFactory
