@@ -44,15 +44,7 @@ class KRRClientReservasjonshenter(
     data class Configuration(
         val apiUrl: String,
         val scope: String,
-    ) {
-        companion object {
-            fun fraEnv(env: Map<String, String>) =
-                Configuration(
-                    apiUrl = env.getValue("KONTAKT_OG_RESERVASJONSREGISTERET_API_URL"),
-                    scope = env.getValue("KONTAKT_OG_RESERVASJONSREGISTERET_SCOPE"),
-                )
-        }
-    }
+    )
 
     private val logg: Logger = LoggerFactory.getLogger(this.javaClass)
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")

@@ -10,16 +10,7 @@ class UnleashFeatureToggles(configuration: Configuration) : FeatureToggles {
         val apiKey: String,
         val apiUrl: String,
         val apiEnv: String,
-    ) {
-        companion object {
-            fun fraEnv(env: Map<String, String>) =
-                Configuration(
-                    apiKey = requireNotNull(env["UNLEASH_SERVER_API_TOKEN"]),
-                    apiUrl = requireNotNull(env["UNLEASH_SERVER_API_URL"]),
-                    apiEnv = requireNotNull(env["UNLEASH_SERVER_API_ENV"]),
-                )
-        }
-    }
+    )
 
     private val config: UnleashConfig =
         UnleashConfig.builder()

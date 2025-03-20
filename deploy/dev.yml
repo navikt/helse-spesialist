@@ -117,8 +117,6 @@ spec:
       value: "http://spleis-api"
     - name: BRUK_DUMMY_FOR_KONTAKT_OG_RESERVASJONSREGISTERET
       value: "true"
-    - name: TILLATT_UAUTENTISERT_INTROSPECTION
-      value: "true"
     - name: TILLAT_GODKJENNING_UTEN_BESLUTTERTILGANG
       value: "true"
     - name: TILLAT_GODKJENNING_AV_EGEN_SAK
