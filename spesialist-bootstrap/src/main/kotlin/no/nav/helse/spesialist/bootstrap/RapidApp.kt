@@ -11,9 +11,8 @@ import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.spesialist.api.ApiModule
 import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
-import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.client.entraid.ClientEntraIDModule
-import no.nav.helse.spesialist.client.krr.KRRClientReservasjonshenter
+import no.nav.helse.spesialist.client.krr.ClientKrrModule
 import no.nav.helse.spesialist.client.spleis.ClientSpleisModule
 import no.nav.helse.spesialist.db.DBModule
 import no.nav.helse.spesialist.db.FlywayMigrator
@@ -47,11 +46,11 @@ fun main() {
                         spleisClientId = env.getValue("SPLEIS_CLIENT_ID"),
                     ),
                 krrConfig =
-                    KRRClientReservasjonshenter.Configuration(
+                    ClientKrrModule.Configuration(
                         if (env.getBoolean("BRUK_DUMMY_FOR_KONTAKT_OG_RESERVASJONSREGISTERET", false)) {
                             null
                         } else {
-                            KRRClientReservasjonshenter.Configuration.Client(
+                            ClientKrrModule.Configuration.Client(
                                 apiUrl = env.getValue("KONTAKT_OG_RESERVASJONSREGISTERET_API_URL"),
                                 scope = env.getValue("KONTAKT_OG_RESERVASJONSREGISTERET_SCOPE"),
                             )
@@ -153,15 +152,12 @@ object RapidApp {
             )
         val snapshothenter = clientSpleisModule.snapshothenter
 
-        val reservasjonshenter = (
-            configuration.krrConfig.client?.let {
-                KRRClientReservasjonshenter(
-                    configuration = it,
-                    accessTokenGenerator = accessTokenGenerator,
-                )
-            }
-                ?: Reservasjonshenter { null }.also { logg.info("Bruker nulloperasjonsversjon av reservasjonshenter") }
-        )
+        val clientKrrModule =
+            ClientKrrModule(
+                configuration = configuration.krrConfig,
+                accessTokenGenerator = accessTokenGenerator,
+            )
+        val reservasjonshenter = clientKrrModule.reservasjonshenter
 
         ktorSetupCallback = {
             ApiModule(configuration.apiModuleConfiguration).setUpApi(
