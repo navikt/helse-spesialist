@@ -24,7 +24,8 @@ import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.behandlingsstatistikk.IBehandlingsstatistikkService
 import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
-import no.nav.helse.spesialist.api.graphql.settOppGraphQLApi
+import no.nav.helse.spesialist.api.graphql.kobleOppApi
+import no.nav.helse.spesialist.api.graphql.lagSchemaMedResolversOgHandlers
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.testfixtures.lagSaksbehandlerFraApi
@@ -84,22 +85,26 @@ object TestRunner {
         )
         testApplication {
             application {
-                settOppGraphQLApi(
-                    daos = avhengigheter.daos,
-                    sessionFactory = avhengigheter.sessionFactory,
-                    saksbehandlerMediator = avhengigheter.saksbehandlerMediator,
-                    apiOppgaveService = avhengigheter.apiOppgaveService,
-                    godkjenninghåndterer = avhengigheter.godkjenninghåndterer,
-                    personhåndterer = avhengigheter.personhåndterer,
-                    dokumenthåndterer = avhengigheter.dokumenthåndterer,
-                    stansAutomatiskBehandlinghåndterer = avhengigheter.stansAutomatiskBehandlinghåndterer,
-                    behandlingstatistikk = avhengigheter.behandlingstatistikk,
-                    snapshothenter = avhengigheter.snapshothenter,
-                    reservasjonshenter = avhengigheter.reservasjonshenter,
+                val spesialistSchema =
+                    lagSchemaMedResolversOgHandlers(
+                        daos = avhengigheter.daos,
+                        apiOppgaveService = avhengigheter.apiOppgaveService,
+                        saksbehandlerMediator = avhengigheter.saksbehandlerMediator,
+                        stansAutomatiskBehandlinghåndterer = avhengigheter.stansAutomatiskBehandlinghåndterer,
+                        personhåndterer = avhengigheter.personhåndterer,
+                        snapshothenter = avhengigheter.snapshothenter,
+                        reservasjonshenter = avhengigheter.reservasjonshenter,
+                        sessionFactory = avhengigheter.sessionFactory,
+                        behandlingstatistikk = avhengigheter.behandlingstatistikk,
+                        dokumenthåndterer = avhengigheter.dokumenthåndterer,
+                        godkjenninghåndterer = avhengigheter.godkjenninghåndterer,
+                        meldingPubliserer = avhengigheter.meldingPubliserer,
+                        featureToggles = avhengigheter.featureToggles,
+                    )
+                kobleOppApi(
+                    this, apiModuleConfiguration = configuration,
                     tilgangsgrupper = avhengigheter.tilgangsgrupper,
-                    meldingPubliserer = avhengigheter.meldingPubliserer,
-                    featureToggles = avhengigheter.featureToggles,
-                    apiModuleConfiguration = configuration,
+                    spesialistSchema = spesialistSchema
                 )
             }
 

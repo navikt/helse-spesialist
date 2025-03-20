@@ -60,43 +60,16 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.Duration
 
-fun Application.settOppGraphQLApi(
-    daos: Daos,
-    sessionFactory: SessionFactory,
-    saksbehandlerMediator: SaksbehandlerMediator,
-    apiOppgaveService: ApiOppgaveService,
-    godkjenninghåndterer: Godkjenninghåndterer,
-    personhåndterer: Personhåndterer,
-    dokumenthåndterer: Dokumenthåndterer,
-    stansAutomatiskBehandlinghåndterer: StansAutomatiskBehandlinghåndterer,
-    behandlingstatistikk: IBehandlingsstatistikkService,
-    snapshothenter: Snapshothenter,
-    reservasjonshenter: Reservasjonshenter,
-    tilgangsgrupper: Tilgangsgrupper,
-    meldingPubliserer: MeldingPubliserer,
-    featureToggles: FeatureToggles,
+fun kobleOppApi(
+    ktorApplication: Application,
     apiModuleConfiguration: ApiModule.Configuration,
+    tilgangsgrupper: Tilgangsgrupper,
+    spesialistSchema: SpesialistSchema,
 ) {
-    val spesialistSchema =
-        lagSchemaMedResolversOgHandlers(
-            daos = daos,
-            apiOppgaveService = apiOppgaveService,
-            saksbehandlerMediator = saksbehandlerMediator,
-            stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
-            personhåndterer = personhåndterer,
-            snapshothenter = snapshothenter,
-            reservasjonshenter = reservasjonshenter,
-            sessionFactory = sessionFactory,
-            behandlingstatistikk = behandlingstatistikk,
-            dokumenthåndterer = dokumenthåndterer,
-            godkjenninghåndterer = godkjenninghåndterer,
-            meldingPubliserer = meldingPubliserer,
-            featureToggles = featureToggles,
-        )
-    installPlugins()
-    azureAdAppAuthentication(apiModuleConfiguration)
+    ktorApplication.installPlugins()
+    ktorApplication.azureAdAppAuthentication(apiModuleConfiguration)
     val graphQLPlugin =
-        install(GraphQL) {
+        ktorApplication.install(GraphQL) {
             server {
                 requestParser = KtorGraphQLRequestParser(objectMapper)
                 contextFactory =
@@ -108,7 +81,7 @@ fun Application.settOppGraphQLApi(
             }
             schema(spesialistSchema::setup)
         }
-    routing {
+    ktorApplication.routing {
         webSocketsApi()
         debugMinneApi()
         route("graphql") {
@@ -121,7 +94,7 @@ fun Application.settOppGraphQLApi(
     }
 }
 
-private fun lagSchemaMedResolversOgHandlers(
+fun lagSchemaMedResolversOgHandlers(
     daos: Daos,
     apiOppgaveService: ApiOppgaveService,
     saksbehandlerMediator: SaksbehandlerMediator,

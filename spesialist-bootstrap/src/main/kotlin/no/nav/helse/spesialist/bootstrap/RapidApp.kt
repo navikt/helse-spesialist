@@ -139,10 +139,9 @@ object RapidApp {
                 gruppekontroll = clientEntraIdModule.gruppekontroll,
             )
 
-        kafkaModule.kobleOppRivers()
-
-        ktorSetupCallback = { ktorApplication ->
-            ApiModule(configuration.api).setUpApi(
+        val apiModule =
+            ApiModule(
+                configuration = configuration.api,
                 daos = dbModule.daos,
                 tilgangsgrupper = configuration.tilgangsgrupper,
                 meldingPubliserer = kafkaModule.meldingPubliserer,
@@ -153,6 +152,12 @@ object RapidApp {
                 featureToggles = clientUnleashModule.featureToggles,
                 snapshothenter = clientSpleisModule.snapshothenter,
                 reservasjonshenter = clientKrrModule.reservasjonshenter,
+            )
+
+        kafkaModule.kobleOppRivers()
+
+        ktorSetupCallback = { ktorApplication ->
+            apiModule.setUpApi(
                 application = ktorApplication,
             )
         }

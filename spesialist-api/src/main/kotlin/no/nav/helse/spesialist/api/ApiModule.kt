@@ -17,11 +17,24 @@ import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlinghåndtererImpl
 import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
-import no.nav.helse.spesialist.api.graphql.settOppGraphQLApi
+import no.nav.helse.spesialist.api.graphql.kobleOppApi
+import no.nav.helse.spesialist.api.graphql.lagSchemaMedResolversOgHandlers
 import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.application.Snapshothenter
 
-class ApiModule(private val configuration: Configuration) {
+class ApiModule(
+    private val configuration: Configuration,
+    private val tilgangsgrupper: Tilgangsgrupper,
+    daos: Daos,
+    meldingPubliserer: MeldingPubliserer,
+    gruppekontroll: Gruppekontroll,
+    sessionFactory: SessionFactory,
+    versjonAvKode: String,
+    environmentToggles: EnvironmentToggles,
+    featureToggles: FeatureToggles,
+    snapshothenter: Snapshothenter,
+    reservasjonshenter: Reservasjonshenter,
+) {
     data class Configuration(
         val clientId: String,
         val issuerUrl: String,
@@ -29,48 +42,36 @@ class ApiModule(private val configuration: Configuration) {
         val tokenEndpoint: String,
     )
 
-    fun setUpApi(
-        daos: Daos,
-        tilgangsgrupper: Tilgangsgrupper,
-        meldingPubliserer: MeldingPubliserer,
-        gruppekontroll: Gruppekontroll,
-        application: Application,
-        sessionFactory: SessionFactory,
-        versjonAvKode: String,
-        environmentToggles: EnvironmentToggles,
-        featureToggles: FeatureToggles,
-        snapshothenter: Snapshothenter,
-        reservasjonshenter: Reservasjonshenter,
-    ) {
-        val apiOppgaveService =
-            ApiOppgaveService(
-                oppgaveDao = daos.oppgaveDao,
-                tilgangsgrupper = tilgangsgrupper,
-                oppgaveService =
-                    OppgaveService(
-                        oppgaveDao = daos.oppgaveDao,
-                        reservasjonDao = daos.reservasjonDao,
-                        meldingPubliserer = meldingPubliserer,
-                        tilgangskontroll =
-                            TilgangskontrollørForReservasjon(
-                                gruppekontroll,
-                                tilgangsgrupper,
-                            ),
-                        tilgangsgrupper = tilgangsgrupper,
-                        oppgaveRepository = daos.oppgaveRepository,
-                    ),
-            )
-        val stansAutomatiskBehandlinghåndterer =
-            StansAutomatiskBehandlinghåndtererImpl(
-                daos.stansAutomatiskBehandlingDao,
-                daos.oppgaveDao,
-                daos.notatDao,
-                daos.dialogDao,
-            )
+    private val apiOppgaveService =
+        ApiOppgaveService(
+            oppgaveDao = daos.oppgaveDao,
+            tilgangsgrupper = tilgangsgrupper,
+            oppgaveService =
+                OppgaveService(
+                    oppgaveDao = daos.oppgaveDao,
+                    reservasjonDao = daos.reservasjonDao,
+                    meldingPubliserer = meldingPubliserer,
+                    tilgangskontroll =
+                        TilgangskontrollørForReservasjon(
+                            gruppekontroll,
+                            tilgangsgrupper,
+                        ),
+                    tilgangsgrupper = tilgangsgrupper,
+                    oppgaveRepository = daos.oppgaveRepository,
+                ),
+        )
+    private val stansAutomatiskBehandlinghåndterer =
+        StansAutomatiskBehandlinghåndtererImpl(
+            daos.stansAutomatiskBehandlingDao,
+            daos.oppgaveDao,
+            daos.notatDao,
+            daos.dialogDao,
+        )
 
-        application.settOppGraphQLApi(
+    private val spesialistSchema =
+        lagSchemaMedResolversOgHandlers(
             daos = daos,
-            sessionFactory = sessionFactory,
+            apiOppgaveService = apiOppgaveService,
             saksbehandlerMediator =
                 SaksbehandlerMediator(
                     daos = daos,
@@ -102,7 +103,13 @@ class ApiModule(private val configuration: Configuration) {
                             tilgangsgrupper,
                         ),
                 ),
-            apiOppgaveService = apiOppgaveService,
+            stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
+            personhåndterer = PersonhåndtererImpl(publiserer = meldingPubliserer),
+            snapshothenter = snapshothenter,
+            reservasjonshenter = reservasjonshenter,
+            sessionFactory = sessionFactory,
+            behandlingstatistikk = BehandlingsstatistikkService(behandlingsstatistikkDao = daos.behandlingsstatistikkDao),
+            dokumenthåndterer = DokumentMediator(daos.dokumentDao, meldingPubliserer),
             godkjenninghåndterer =
                 GodkjenningService(
                     oppgaveDao = daos.oppgaveDao,
@@ -125,16 +132,16 @@ class ApiModule(private val configuration: Configuration) {
                     sessionFactory = sessionFactory,
                     featureToggles = featureToggles,
                 ),
-            personhåndterer = PersonhåndtererImpl(publiserer = meldingPubliserer),
-            dokumenthåndterer = DokumentMediator(daos.dokumentDao, meldingPubliserer),
-            stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
-            behandlingstatistikk = BehandlingsstatistikkService(behandlingsstatistikkDao = daos.behandlingsstatistikkDao),
-            snapshothenter = snapshothenter,
-            reservasjonshenter = reservasjonshenter,
-            tilgangsgrupper = tilgangsgrupper,
             meldingPubliserer = meldingPubliserer,
             featureToggles = featureToggles,
+        )
+
+    fun setUpApi(application: Application) {
+        kobleOppApi(
+            ktorApplication = application,
             apiModuleConfiguration = configuration,
+            tilgangsgrupper = tilgangsgrupper,
+            spesialistSchema = spesialistSchema,
         )
     }
 }
