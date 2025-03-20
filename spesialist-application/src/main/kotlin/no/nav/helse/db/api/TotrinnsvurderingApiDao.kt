@@ -1,5 +1,6 @@
 package no.nav.helse.db.api
 
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -9,10 +10,10 @@ interface TotrinnsvurderingApiDao {
 
     data class TotrinnsvurderingDto(
         val vedtaksperiodeId: UUID,
-        val erRetur: Boolean,
         val saksbehandler: UUID?,
         val beslutter: UUID?,
         val utbetalingIdRef: Long?,
+        val tilstand: TotrinnsvurderingTilstand,
         val opprettet: LocalDateTime,
         val oppdatert: LocalDateTime?,
     )

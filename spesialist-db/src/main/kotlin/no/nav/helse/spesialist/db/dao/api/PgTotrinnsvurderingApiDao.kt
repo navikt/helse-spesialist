@@ -22,10 +22,10 @@ class PgTotrinnsvurderingApiDao internal constructor(dataSource: DataSource) :
         private fun tilTotrinnsvurdering(row: Row) =
             TotrinnsvurderingApiDao.TotrinnsvurderingDto(
                 vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
-                erRetur = row.boolean("er_retur"),
                 saksbehandler = row.uuidOrNull("saksbehandler"),
                 beslutter = row.uuidOrNull("beslutter"),
                 utbetalingIdRef = row.longOrNull("utbetaling_id_ref"),
+                tilstand = enumValueOf(row.string("tilstand")),
                 opprettet = row.localDateTime("opprettet"),
                 oppdatert = row.localDateTimeOrNull("oppdatert"),
             )

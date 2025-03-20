@@ -381,10 +381,10 @@ data class ApiBeregnetPeriodeResolver(
         } else {
             return totrinnsvurderingApiDao.hentAktiv(vedtaksperiodeId())?.let {
                 ApiTotrinnsvurdering(
-                    erRetur = it.erRetur,
+                    erRetur = it.tilstand == AVVENTER_SAKSBEHANDLER && it.saksbehandler != null,
                     saksbehandler = it.saksbehandler,
                     beslutter = it.beslutter,
-                    erBeslutteroppgave = !it.erRetur && it.saksbehandler != null,
+                    erBeslutteroppgave = it.tilstand == AVVENTER_BESLUTTER,
                 )
             }
         }
