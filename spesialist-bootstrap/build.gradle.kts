@@ -20,6 +20,7 @@ dependencies {
     testImplementation(testFixtures(project(":spesialist-db")))
     testImplementation(testFixtures(project(":spesialist-api")))
     testImplementation(testFixtures(project(":spesialist-client-entra-id")))
+    testImplementation(testFixtures(project(":spesialist-client-krr")))
 }
 
 tasks {
