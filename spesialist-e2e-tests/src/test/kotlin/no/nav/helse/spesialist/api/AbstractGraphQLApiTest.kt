@@ -59,7 +59,7 @@ import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import org.intellij.lang.annotations.Language
 import java.util.UUID
 
-internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
+abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
     protected val kode7Saksbehandlergruppe: UUID = UUID.randomUUID()
     protected val skjermedePersonerGruppeId: UUID = UUID.randomUUID()
     private val beslutterGruppeId: UUID = UUID.randomUUID()
@@ -213,7 +213,7 @@ internal abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
     }
 
     companion object {
-        internal val jwtStub = JwtStub()
+        val jwtStub = JwtStub()
         private val requiredGroup: UUID = UUID.randomUUID()
         private const val clientId = "client_id"
         private const val issuer = "https://jwt-provider-domain"

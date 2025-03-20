@@ -34,7 +34,7 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-internal class OverstyringE2ETest : AbstractE2ETest() {
+class OverstyringE2ETest : AbstractE2ETest() {
     @Test
     fun `saksbehandler overstyrer sykdomstidslinje`() {
         vedtaksløsningenMottarNySøknad()

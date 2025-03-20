@@ -3,7 +3,7 @@ package no.nav.helse.e2e
 import org.junit.jupiter.api.Test
 
 
-internal class SøknadSendtOgVedtaksperiodeOpprettetTest : AbstractE2ETest() {
+class SøknadSendtOgVedtaksperiodeOpprettetTest : AbstractE2ETest() {
 
     @Test
     fun `Oppretter minimal person og arbeidsgiver ved mottatt søknad og minimal vedtaksperiode ved vedtaksperiode opprettet`() {

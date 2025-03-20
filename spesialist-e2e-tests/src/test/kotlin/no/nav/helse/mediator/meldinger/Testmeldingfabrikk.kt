@@ -18,7 +18,7 @@ import java.time.YearMonth
 import java.util.UUID
 import kotlin.random.Random.Default.nextLong
 
-internal object Testmeldingfabrikk {
+object Testmeldingfabrikk {
     private const val OSLO = "0301"
 
     fun lagVedtaksperiodeNyUtbetaling(

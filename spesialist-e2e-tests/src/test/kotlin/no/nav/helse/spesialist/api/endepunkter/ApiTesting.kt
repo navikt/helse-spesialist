@@ -13,7 +13,7 @@ import no.nav.helse.spesialist.api.objectMapper
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation as ClientContentNegotiation
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation as ServerContentNegotiation
 
-internal class ApiTesting(
+class ApiTesting(
     private val jwtStub: JwtStub = JwtStub(),
     private val applicationBuilder: ApplicationTestBuilder.() -> Unit,
     private val routeBuilder: Route.() -> Unit,
@@ -40,7 +40,7 @@ internal class ApiTesting(
             }
         }
 
-    internal fun <T> spesialistApi(block: suspend ApplicationTestBuilder.(HttpClient) -> T): T {
+    fun <T> spesialistApi(block: suspend ApplicationTestBuilder.(HttpClient) -> T): T {
         var response: T? = null
         testApplication {
             setUpApplication()

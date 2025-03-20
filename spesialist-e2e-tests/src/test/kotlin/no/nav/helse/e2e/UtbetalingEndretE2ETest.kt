@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-internal class UtbetalingEndretE2ETest : AbstractE2ETest() {
+class UtbetalingEndretE2ETest : AbstractE2ETest() {
     @Test
     fun `Lagrer personbeløp og arbeidsgiverbeløp ved innlesing av utbetaling_endret`() {
         vedtaksløsningenMottarNySøknad()

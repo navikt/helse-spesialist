@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-internal class FattVedtakE2ETest: AbstractE2ETest() {
+class FattVedtakE2ETest: AbstractE2ETest() {
 
     @Test
     fun `Fatt vedtak for periode der SP er fastsatt etter hovedregel`() {

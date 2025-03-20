@@ -15,7 +15,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class DokumentQueryHandlerTest : AbstractGraphQLApiTest() {
+class DokumentQueryHandlerTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `Får 400 dersom man gjør oppslag uten dokumentId`() {

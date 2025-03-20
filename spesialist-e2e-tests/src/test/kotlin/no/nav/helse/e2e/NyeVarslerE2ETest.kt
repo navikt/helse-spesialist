@@ -3,7 +3,7 @@ package no.nav.helse.e2e
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-internal class NyeVarslerE2ETest : AbstractE2ETest() {
+class NyeVarslerE2ETest : AbstractE2ETest() {
 
     @Test
     fun `lagrer varsler når vi mottar ny aktivitet i aktivitetsloggen`() {

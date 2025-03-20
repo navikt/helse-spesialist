@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class TotrinnsvurderingMutationHandlerTest : AbstractGraphQLApiTest() {
+class TotrinnsvurderingMutationHandlerTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `send oppgave til godkjenning med V2`() {

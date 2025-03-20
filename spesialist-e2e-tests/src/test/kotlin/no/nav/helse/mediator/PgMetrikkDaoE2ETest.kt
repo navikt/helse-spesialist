@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class PgMetrikkDaoE2ETest : AbstractE2ETest() {
+class PgMetrikkDaoE2ETest : AbstractE2ETest() {
     private val session = sessionOf(dataSource)
     private val dao = DBSessionContext(session).metrikkDao
 

@@ -62,7 +62,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.random.Random
 
-internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
+class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     private val tilgangsgrupper = SpeilTilgangsgrupper(testEnv)
     private val testRapid = TestRapid()
     private val meldingPubliserer: MeldingPubliserer = MessageContextMeldingPubliserer(testRapid)
@@ -130,7 +130,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     ): SaksbehandlerFraApi = SaksbehandlerFraApi(oid, navn, epost, ident, grupper)
 
     @BeforeEach
-    internal fun beforeEach() {
+    fun beforeEach() {
         testRapid.reset()
     }
 

@@ -25,7 +25,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavetype as OppgavetypeForApi
 
-internal class OppgaverQueryHandlerTest : AbstractGraphQLApiTest() {
+class OppgaverQueryHandlerTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `oppgaver query uten parametere returnerer oppgave`() {

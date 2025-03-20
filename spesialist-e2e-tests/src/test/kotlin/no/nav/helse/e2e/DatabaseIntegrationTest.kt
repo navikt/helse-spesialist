@@ -72,16 +72,16 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected val PERIODE = Periode(UUID.randomUUID(), LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 31))
 
     protected companion object {
-        internal val objectMapper =
+        val objectMapper =
             jacksonObjectMapper()
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
                 .registerModule(JavaTimeModule())
     }
 
     private var personId: Long = -1
-    internal var vedtakId: Long = -1
+    var vedtakId: Long = -1
         private set
-    internal var oppgaveId: Long = -1
+    var oppgaveId: Long = -1
         private set
 
     protected val session = sessionOf(dataSource, returnGeneratedKey = true)
@@ -90,25 +90,25 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     @AfterEach
     fun tearDown() = session.close()
 
-    internal val personDao = sessionContext.personDao
-    internal val oppgaveDao = daos.oppgaveDao
-    internal val periodehistorikkApiDao = daos.periodehistorikkApiDao
-    internal val vedtakDao = daos.vedtakDao
-    internal val commandContextDao = daos.commandContextDao
-    internal val saksbehandlerDao = daos.saksbehandlerDao
-    internal val reservasjonDao = sessionContext.reservasjonDao
-    internal val meldingDao = daos.meldingDao
-    internal val egenAnsattDao = sessionContext.egenAnsattDao
-    internal val påVentDao = sessionContext.påVentDao
-    internal val stansAutomatiskBehandlingDao = sessionContext.stansAutomatiskBehandlingDao
-    internal val notatDao = daos.notatDao
-    internal val dialogDao = daos.dialogDao
-    internal val annulleringRepository = daos.annulleringRepository
+    val personDao = sessionContext.personDao
+    val oppgaveDao = daos.oppgaveDao
+    val periodehistorikkApiDao = daos.periodehistorikkApiDao
+    val vedtakDao = daos.vedtakDao
+    val commandContextDao = daos.commandContextDao
+    val saksbehandlerDao = daos.saksbehandlerDao
+    val reservasjonDao = sessionContext.reservasjonDao
+    val meldingDao = daos.meldingDao
+    val egenAnsattDao = sessionContext.egenAnsattDao
+    val påVentDao = sessionContext.påVentDao
+    val stansAutomatiskBehandlingDao = sessionContext.stansAutomatiskBehandlingDao
+    val notatDao = daos.notatDao
+    val dialogDao = daos.dialogDao
+    val annulleringRepository = daos.annulleringRepository
     private val pgPersonRepository = sessionContext.personRepository
     private val inntektskilderRepository = sessionContext.inntektskilderRepository
     private val totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository
 
-    internal fun testhendelse(
+    fun testhendelse(
         hendelseId: UUID = HENDELSE_ID,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
         fødselsnummer: String = FNR,

@@ -3,7 +3,7 @@ package no.nav.helse.mediator.meldinger
 import no.nav.helse.objectMapper
 import org.intellij.lang.annotations.Language
 
-internal class Risikofunn(
+class Risikofunn(
     private val kategori: List<String>,
     private val beskrivelse: String
 ) {
@@ -16,7 +16,7 @@ internal class Risikofunn(
     }
     """.trimIndent()
 
-    internal companion object {
-        internal fun Iterable<Risikofunn>.tilJson() = objectMapper.readTree("${map { it.tilJson() }}")
+    companion object {
+        fun Iterable<Risikofunn>.tilJson() = objectMapper.readTree("${map { it.tilJson() }}")
     }
 }

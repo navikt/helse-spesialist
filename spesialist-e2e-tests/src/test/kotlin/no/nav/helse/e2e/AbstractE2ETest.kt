@@ -62,7 +62,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
+abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val testperson = TestPerson().also { println("Bruker testdata: $it") }
     protected val dbQuery = DbQuery(dataSource)
 
@@ -101,12 +101,12 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 ),
             )
     private val avviksvurderingTestdata = AvviksvurderingTestdata()
-    internal lateinit var utbetalingId: UUID
+    lateinit var utbetalingId: UUID
         private set
-    internal val spleisClient = mockk<SpleisClient>()
-    internal val snapshothenter = SpleisClientSnapshothenter(spleisClient)
+    val spleisClient = mockk<SpleisClient>()
+    val snapshothenter = SpleisClientSnapshothenter(spleisClient)
     private val testRapid = TestRapid()
-    internal val inspektør get() = testRapid.inspektør
+    val inspektør get() = testRapid.inspektør
     private val meldingssender = Meldingssender(testRapid)
     protected lateinit var sisteMeldingId: UUID
     protected lateinit var sisteGodkjenningsbehovId: UUID
@@ -126,7 +126,7 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
     private val enhetsnummerOslo = "0301"
 
     @BeforeEach
-    internal fun resetTestSetup() {
+    fun resetTestSetup() {
         resetTestRapid()
         lagVarseldefinisjoner()
         opprettSaksbehandler()
@@ -1468,12 +1468,12 @@ internal abstract class AbstractE2ETest : AbstractDatabaseTest() {
         }
     }
 
-    internal fun erFerdigstilt(godkjenningsbehovId: UUID) = dbQuery.single(
+    fun erFerdigstilt(godkjenningsbehovId: UUID) = dbQuery.single(
         "SELECT tilstand FROM command_context WHERE hendelse_id = :godkjenningsbehovId ORDER by id DESC LIMIT 1",
         "godkjenningsbehovId" to godkjenningsbehovId,
     ) { it.string("tilstand") } == "FERDIG"
 
-    internal fun commandContextId(godkjenningsbehovId: UUID) = dbQuery.single(
+    fun commandContextId(godkjenningsbehovId: UUID) = dbQuery.single(
         "SELECT context_id FROM command_context WHERE hendelse_id = :godkjenningsbehovId ORDER by id DESC LIMIT 1",
         "godkjenningsbehovId" to godkjenningsbehovId,
     ) { it.uuid("context_id") }

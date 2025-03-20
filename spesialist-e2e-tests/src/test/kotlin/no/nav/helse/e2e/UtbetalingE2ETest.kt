@@ -9,7 +9,7 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus.OVERFØRT
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 
-internal class UtbetalingE2ETest : AbstractE2ETest() {
+class UtbetalingE2ETest : AbstractE2ETest() {
 
     @Test
     fun `utbetaling endret`() {

@@ -39,7 +39,7 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
 
-internal abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
+abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected val dbQuery = DbQuery(dataSource)
     private val NAVN = Navn(lagFornavn(), lagFornavn(), lagEtternavn())
     private val ENHET = Enhet(101, "Halden")

@@ -7,7 +7,7 @@ import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.Invalidert
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-internal class OppgaveE2ETest : AbstractE2ETest() {
+class OppgaveE2ETest : AbstractE2ETest() {
     @Test
     fun `invaliderer oppgave når utbetalingen har blitt forkastet`() {
         vedtaksløsningenMottarNySøknad()

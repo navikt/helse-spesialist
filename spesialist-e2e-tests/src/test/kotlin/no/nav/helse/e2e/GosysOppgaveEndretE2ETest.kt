@@ -3,7 +3,7 @@ package no.nav.helse.e2e
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import org.junit.jupiter.api.Test
 
-internal class GosysOppgaveEndretE2ETest : AbstractE2ETest() {
+class GosysOppgaveEndretE2ETest : AbstractE2ETest() {
     @Test
     fun `ber om informasjon om åpne oppgaver ved aktiv oppgave i Speil`() {
         vedtaksløsningenMottarNySøknad()

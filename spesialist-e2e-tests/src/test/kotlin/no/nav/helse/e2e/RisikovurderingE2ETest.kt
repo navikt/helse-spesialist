@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class RisikovurderingE2ETest : AbstractE2ETest() {
+class RisikovurderingE2ETest : AbstractE2ETest() {
 
     @Test
     fun `oppretter oppgave av type RISK_QA`() {

@@ -11,13 +11,13 @@ import java.security.SecureRandom
 import java.security.interfaces.RSAPrivateKey
 import java.security.interfaces.RSAPublicKey
 
-internal class JwtStub {
+class JwtStub {
     private val keyPair = KeyPairGenerator.getInstance("RSA").apply {
         initialize(2048, SecureRandom())
     }.generateKeyPair()
     private val jwkAlgorithm = Algorithm.RSA256(keyPair.public as RSAPublicKey, keyPair.private as RSAPrivateKey)
 
-    internal fun getJwkProviderMock(): JwkProvider {
+    fun getJwkProviderMock(): JwkProvider {
         val jwk = mockk<Jwk>().apply {
             every { algorithm } returns jwkAlgorithm.name
             every { publicKey } returns keyPair.public
@@ -27,7 +27,7 @@ internal class JwtStub {
         }
     }
 
-    internal fun getToken(
+    fun getToken(
         groups: Collection<String>,
         oid: String,
         epostadresse: String,

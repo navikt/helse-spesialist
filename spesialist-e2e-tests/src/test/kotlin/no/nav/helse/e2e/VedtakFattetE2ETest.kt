@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import java.util.UUID
 
-internal class VedtakFattetE2ETest : AbstractE2ETest() {
+class VedtakFattetE2ETest : AbstractE2ETest() {
     @Test
     fun `vedtak fattet medfører låsing av vedtaksperiode-generasjon`() {
         vedtaksløsningenMottarNySøknad()

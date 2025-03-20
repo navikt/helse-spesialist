@@ -3,7 +3,7 @@ package no.nav.helse.e2e
 import no.nav.helse.modell.person.Adressebeskyttelse
 import org.junit.jupiter.api.Test
 
-internal class AdressebeskyttelseEndretE2ETest : AbstractE2ETest() {
+class AdressebeskyttelseEndretE2ETest : AbstractE2ETest() {
     @Test
     fun `oppdaterer adressebeskyttelse på en person vi kjenner til fra før`() {
         vedtaksløsningenMottarNySøknad()
