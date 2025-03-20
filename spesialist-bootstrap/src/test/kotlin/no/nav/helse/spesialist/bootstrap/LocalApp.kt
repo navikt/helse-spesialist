@@ -10,12 +10,13 @@ import java.util.UUID
 fun main() {
     RapidApp.start(
         configuration = Configuration(
-            apiModuleConfiguration = ApiTestFixture.apiModuleConfiguration,
-            accessTokenGeneratorConfig = ClientEntraIDTestFixture.entraIDAccessTokenGeneratorConfiguration,
-            spleisClientConfig = ClientSpleisTestFixture.moduleConfiguration,
-            krrConfig = ClientKRRTestFixture.moduleConfiguration,
-            dbConfig = DBTestFixture.database.dbModuleConfiguration,
-            unleashFeatureToggles = UnleashTestFixture.moduleConfiguration,
+            api = ApiTestFixture.apiModuleConfiguration,
+            clientEntraID = ClientEntraIDTestFixture.entraIDAccessTokenGeneratorConfiguration,
+            clientKrr = ClientKRRTestFixture.moduleConfiguration,
+            clientSpleis = ClientSpleisTestFixture.moduleConfiguration,
+            clientUnleash = UnleashTestFixture.moduleConfiguration,
+            db = DBTestFixture.database.dbModuleConfiguration,
+            kafka = KafkaTestFixture.moduleConfiguration,
             versjonAvKode = "versjon_1",
             tilgangsgrupper = object : Tilgangsgrupper {
                 override val kode7GruppeId: UUID = UUID.randomUUID()
@@ -32,7 +33,6 @@ fun main() {
                     }
                 }
             },
-            kafkaModuleConfiguration = KafkaTestFixture.moduleConfiguration,
             environmentToggles = object : EnvironmentToggles {
                 override val kanBeslutteEgneSaker = false
                 override val kanGodkjenneUtenBesluttertilgang = false

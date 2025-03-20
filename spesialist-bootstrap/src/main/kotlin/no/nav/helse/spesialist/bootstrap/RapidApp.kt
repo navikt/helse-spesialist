@@ -25,25 +25,20 @@ fun main() {
     RapidApp.start(
         configuration =
             Configuration(
-                apiModuleConfiguration =
+                api =
                     ApiModule.Configuration(
                         clientId = env.getValue("AZURE_APP_CLIENT_ID"),
                         issuerUrl = env.getValue("AZURE_OPENID_CONFIG_ISSUER"),
                         jwkProviderUri = env.getValue("AZURE_OPENID_CONFIG_JWKS_URI"),
                         tokenEndpoint = env.getValue("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
                     ),
-                accessTokenGeneratorConfig =
+                clientEntraID =
                     ClientEntraIDModule.Configuration(
                         clientId = env.getValue("AZURE_APP_CLIENT_ID"),
                         tokenEndpoint = env.getValue("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
                         privateJwk = env.getValue("AZURE_APP_JWK"),
                     ),
-                spleisClientConfig =
-                    ClientSpleisModule.Configuration(
-                        spleisUrl = URI.create(env.getValue("SPLEIS_API_URL")),
-                        spleisClientId = env.getValue("SPLEIS_CLIENT_ID"),
-                    ),
-                krrConfig =
+                clientKrr =
                     ClientKrrModule.Configuration(
                         if (env.getBoolean("BRUK_DUMMY_FOR_KONTAKT_OG_RESERVASJONSREGISTERET", false)) {
                             null
@@ -54,7 +49,18 @@ fun main() {
                             )
                         },
                     ),
-                dbConfig =
+                clientSpleis =
+                    ClientSpleisModule.Configuration(
+                        spleisUrl = URI.create(env.getValue("SPLEIS_API_URL")),
+                        spleisClientId = env.getValue("SPLEIS_CLIENT_ID"),
+                    ),
+                clientUnleash =
+                    ClientUnleashModule.Configuration(
+                        apiKey = env.getValue("UNLEASH_SERVER_API_TOKEN"),
+                        apiUrl = env.getValue("UNLEASH_SERVER_API_URL"),
+                        apiEnv = env.getValue("UNLEASH_SERVER_API_ENV"),
+                    ),
+                db =
                     DBModule.Configuration(
                         jdbcUrl =
                             "jdbc:postgresql://" +
@@ -66,16 +72,10 @@ fun main() {
                         username = env.getValue("DATABASE_USERNAME"),
                         password = env.getValue("DATABASE_PASSWORD"),
                     ),
-                kafkaModuleConfiguration =
+                kafka =
                     KafkaModule.Configuration(
                         versjonAvKode = versjonAvKode,
                         ignorerMeldingerForUkjentePersoner = env.getBoolean("IGNORER_MELDINGER_FOR_UKJENTE_PERSONER", false),
-                    ),
-                unleashFeatureToggles =
-                    ClientUnleashModule.Configuration(
-                        apiKey = env.getValue("UNLEASH_SERVER_API_TOKEN"),
-                        apiUrl = env.getValue("UNLEASH_SERVER_API_URL"),
-                        apiEnv = env.getValue("UNLEASH_SERVER_API_ENV"),
                     ),
                 versjonAvKode = versjonAvKode,
                 tilgangsgrupper = SpeilTilgangsgrupper(env),
@@ -108,22 +108,22 @@ object RapidApp {
         configuration: Configuration,
         rapidsConnection: RapidsConnection,
     ) {
-        val dbModule = DBModule(configuration.dbConfig)
+        val dbModule = DBModule(configuration.db)
         val daos: Daos = dbModule.daos
         val sessionFactory: SessionFactory = dbModule.sessionFactory
         val flywayMigrator: FlywayMigrator = dbModule.flywayMigrator
 
-        val clientEntraIdModule = ClientEntraIDModule(configuration.accessTokenGeneratorConfig)
+        val clientEntraIdModule = ClientEntraIDModule(configuration.clientEntraID)
         val accessTokenGenerator = clientEntraIdModule.accessTokenGenerator
         val gruppekontroll = clientEntraIdModule.gruppekontroll
 
-        val clientUnleashModule = ClientUnleashModule(configuration.unleashFeatureToggles)
+        val clientUnleashModule = ClientUnleashModule(configuration.clientUnleash)
         val featureToggles = clientUnleashModule.featureToggles
 
         val versjonAvKode = configuration.versjonAvKode
         val kafkaModule =
             KafkaModule(
-                configuration = configuration.kafkaModuleConfiguration,
+                configuration = configuration.kafka,
                 rapidsConnection = rapidsConnection,
             )
 
@@ -140,20 +140,20 @@ object RapidApp {
 
         val clientSpleisModule =
             ClientSpleisModule(
-                configuration = configuration.spleisClientConfig,
+                configuration = configuration.clientSpleis,
                 accessTokenGenerator = accessTokenGenerator,
             )
         val snapshothenter = clientSpleisModule.snapshothenter
 
         val clientKrrModule =
             ClientKrrModule(
-                configuration = configuration.krrConfig,
+                configuration = configuration.clientKrr,
                 accessTokenGenerator = accessTokenGenerator,
             )
         val reservasjonshenter = clientKrrModule.reservasjonshenter
 
         ktorSetupCallback = {
-            ApiModule(configuration.apiModuleConfiguration).setUpApi(
+            ApiModule(configuration.api).setUpApi(
                 daos = daos,
                 tilgangsgrupper = configuration.tilgangsgrupper,
                 meldingPubliserer = meldingPubliserer,

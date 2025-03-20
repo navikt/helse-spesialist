@@ -11,13 +11,13 @@ import no.nav.helse.spesialist.db.DBModule
 import no.nav.helse.spesialist.kafka.KafkaModule
 
 data class Configuration(
-    val apiModuleConfiguration: ApiModule.Configuration,
-    val accessTokenGeneratorConfig: ClientEntraIDModule.Configuration,
-    val spleisClientConfig: ClientSpleisModule.Configuration,
-    val krrConfig: ClientKrrModule.Configuration,
-    val dbConfig: DBModule.Configuration,
-    val kafkaModuleConfiguration: KafkaModule.Configuration,
-    val unleashFeatureToggles: ClientUnleashModule.Configuration,
+    val api: ApiModule.Configuration,
+    val clientEntraID: ClientEntraIDModule.Configuration,
+    val clientKrr: ClientKrrModule.Configuration,
+    val clientSpleis: ClientSpleisModule.Configuration,
+    val clientUnleash: ClientUnleashModule.Configuration,
+    val db: DBModule.Configuration,
+    val kafka: KafkaModule.Configuration,
     val versjonAvKode: String,
     val tilgangsgrupper: Tilgangsgrupper,
     val environmentToggles: EnvironmentToggles,
