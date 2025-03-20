@@ -292,7 +292,7 @@ internal class DokumentQueryHandlerTest : AbstractGraphQLApiTest() {
                     naerRelasjon,
                     innsenderFulltNavn,
                     innsenderTelefon,
-                    inntektEndringAarsak {
+                    inntektEndringAarsaker {
                         aarsak, perioder { 
                             fom, tom
                         }, gjelderFra, bleKjent                    
@@ -330,10 +330,13 @@ internal class DokumentQueryHandlerTest : AbstractGraphQLApiTest() {
         assertNullNode(dokument["naerRelasjon"])
         assertEquals("MUSKULØS VALS", dokument["innsenderFulltNavn"].asText())
         assertEquals("12345678", dokument["innsenderTelefon"].asText())
-        assertEquals("Tariffendring", dokument["inntektEndringAarsak"]["aarsak"].asText())
-        assertNullNode(dokument["inntektEndringAarsak"]["perioder"])
-        assertEquals("2023-08-08", dokument["inntektEndringAarsak"]["gjelderFra"].asText())
-        assertEquals("2023-09-12", dokument["inntektEndringAarsak"]["bleKjent"].asText())
+        val inntektEndringAarsaker = dokument["inntektEndringAarsaker"]
+        assertEquals(1, inntektEndringAarsaker.size())
+        val årsak = inntektEndringAarsaker.first()
+        assertEquals("Tariffendring", årsak["aarsak"].asText())
+        assertNullNode(årsak["perioder"])
+        assertEquals("2023-08-08", årsak["gjelderFra"].asText())
+        assertEquals("2023-09-12", årsak["bleKjent"].asText())
     }
 
     private fun assertNullNode(node: JsonNode) = assertEquals(NullNode::class, node::class) { "Expected node to be null, but it was: $node"}
@@ -1759,12 +1762,14 @@ internal class DokumentQueryHandlerTest : AbstractGraphQLApiTest() {
         "navn": "NAV_NO",
         "versjon": "1.0"
       },
-      "inntektEndringAarsak": {
-        "aarsak": "Tariffendring",
-        "perioder":null,
-        "gjelderFra":"2023-08-08",
-        "bleKjent":"2023-09-12"
-      }
+      "inntektEndringAarsaker": [
+        {
+          "aarsak": "Tariffendring",
+          "perioder":null,
+          "gjelderFra":"2023-08-08",
+          "bleKjent":"2023-09-12"
+        }
+      ]
     }
     """.trimIndent()
 }

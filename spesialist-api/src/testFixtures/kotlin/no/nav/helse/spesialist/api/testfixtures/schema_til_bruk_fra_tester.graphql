@@ -253,6 +253,7 @@ type DokumentInntektsmelding {
     innsenderFulltNavn: String
     innsenderTelefon: String
     inntektEndringAarsak: InntektEndringAarsak
+    inntektEndringAarsaker: [InntektEndringAarsak!]
     naerRelasjon: Boolean
     opphoerAvNaturalytelser: [OpphoerAvNaturalytelse!]
     refusjon: Refusjon

@@ -111,6 +111,7 @@ data class ApiDokumentInntektsmelding(
     val innsenderFulltNavn: String?,
     val innsenderTelefon: String?,
     val inntektEndringAarsak: ApiInntektEndringAarsak? = null,
+    val inntektEndringAarsaker: List<ApiInntektEndringAarsak>?,
     val avsenderSystem: ApiAvsenderSystem? = null,
 )
 
