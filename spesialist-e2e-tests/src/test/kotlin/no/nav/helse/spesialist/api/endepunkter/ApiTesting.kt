@@ -7,7 +7,6 @@ import io.ktor.server.auth.authenticate
 import io.ktor.server.routing.Route
 import io.ktor.server.testing.ApplicationTestBuilder
 import io.ktor.server.testing.testApplication
-import no.nav.helse.spesialist.api.AzureConfig
 import no.nav.helse.spesialist.api.JwtStub
 import no.nav.helse.spesialist.api.azureAdAppAuthentication
 import no.nav.helse.spesialist.api.objectMapper
@@ -24,15 +23,8 @@ internal class ApiTesting(
 
     private fun ApplicationTestBuilder.setUpApplication() {
         install(ServerContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
-        val azureConfig =
-            AzureConfig(
-                clientId = clientId,
-                issuerlUrl = issuer,
-                jwkProvider = jwtStub.getJwkProviderMock(),
-                tokenEndpoint = "",
-            )
         application {
-            azureAdAppAuthentication(azureConfig)
+            azureAdAppAuthentication(jwtStub.getJwkProviderMock(), issuer, clientId)
         }
         applicationBuilder(this)
         routing {

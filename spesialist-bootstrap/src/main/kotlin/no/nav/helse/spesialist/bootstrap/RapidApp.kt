@@ -26,7 +26,7 @@ import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlinghåndtererImpl
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.rapids_rivers.RapidApplication
-import no.nav.helse.spesialist.api.AzureConfig
+import no.nav.helse.spesialist.api.ApiModule
 import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
 import no.nav.helse.spesialist.api.graphql.settOppGraphQLApi
 import no.nav.helse.spesialist.application.Reservasjonshenter
@@ -46,8 +46,8 @@ fun main() {
     RapidApp.start(
         configuration =
             Configuration(
-                azureConfig =
-                    AzureConfig(
+                apiModuleConfiguration =
+                    ApiModule.Configuration(
                         clientId = env.getValue("AZURE_APP_CLIENT_ID"),
                         issuerUrl = env.getValue("AZURE_OPENID_CONFIG_ISSUER"),
                         jwkProviderUri = env.getValue("AZURE_OPENID_CONFIG_JWKS_URI"),
@@ -252,7 +252,7 @@ object RapidApp {
                 tilgangsgrupper = configuration.tilgangsgrupper,
                 meldingPubliserer = meldingPubliserer,
                 featureToggles = featureToggles,
-                azureConfig = configuration.azureConfig,
+                apiModuleConfiguration = configuration.apiModuleConfiguration,
             )
         }
 

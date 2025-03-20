@@ -6,7 +6,7 @@ import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
-import no.nav.helse.spesialist.api.AzureConfig
+import no.nav.helse.spesialist.api.ApiModule
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import java.util.UUID
 
@@ -30,7 +30,7 @@ object ApiTestFixture {
             println(it)
         }
 
-    val azureConfig = AzureConfig(
+    val apiModuleConfiguration = ApiModule.Configuration(
         clientId = CLIENT_ID,
         issuerUrl = mockOAuth2Server.issuerUrl(ISSUER_ID).toString(),
         jwkProviderUri = mockOAuth2Server.jwksUrl(ISSUER_ID).toString(),

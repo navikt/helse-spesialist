@@ -20,7 +20,7 @@ import no.nav.helse.db.Daos
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
-import no.nav.helse.spesialist.api.AzureConfig
+import no.nav.helse.spesialist.api.ApiModule
 import no.nav.helse.spesialist.api.Dokumenthåndterer
 import no.nav.helse.spesialist.api.Godkjenninghåndterer
 import no.nav.helse.spesialist.api.GraphQLCallLogging
@@ -75,7 +75,7 @@ fun Application.settOppGraphQLApi(
     tilgangsgrupper: Tilgangsgrupper,
     meldingPubliserer: MeldingPubliserer,
     featureToggles: FeatureToggles,
-    azureConfig: AzureConfig,
+    apiModuleConfiguration: ApiModule.Configuration,
 ) {
     val spesialistSchema =
         lagSchemaMedResolversOgHandlers(
@@ -94,7 +94,7 @@ fun Application.settOppGraphQLApi(
             featureToggles = featureToggles,
         )
     installPlugins()
-    azureAdAppAuthentication(azureConfig)
+    azureAdAppAuthentication(apiModuleConfiguration)
     val graphQLPlugin =
         install(GraphQL) {
             server {

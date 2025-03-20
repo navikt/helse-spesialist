@@ -10,7 +10,7 @@ import java.util.UUID
 fun main() {
     RapidApp.start(
         configuration = Configuration(
-            azureConfig = ApiTestFixture.azureConfig,
+            apiModuleConfiguration = ApiTestFixture.apiModuleConfiguration,
             accessTokenGeneratorConfig = ClientEntraIDTestFixture.entraIDAccessTokenGeneratorConfiguration,
             spleisClientConfig = ClientSpleisTestFixture.moduleConfiguration,
             krrConfig = ClientKRRTestFixture.moduleConfiguration,

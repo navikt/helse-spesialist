@@ -17,7 +17,7 @@ import no.nav.helse.db.Daos
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
-import no.nav.helse.spesialist.api.AzureConfig
+import no.nav.helse.spesialist.api.ApiModule
 import no.nav.helse.spesialist.api.Dokumenthåndterer
 import no.nav.helse.spesialist.api.Godkjenninghåndterer
 import no.nav.helse.spesialist.api.Personhåndterer
@@ -40,7 +40,7 @@ object TestRunner {
     private val issuerId = "EntraID"
     private val clientId = "spesialist-dev"
 
-    private val azureConfig = AzureConfig(
+    private val configuration = ApiModule.Configuration(
         clientId = clientId,
         issuerUrl = mockOAuth2Server.issuerUrl(issuerId).toString(),
         jwkProviderUri = mockOAuth2Server.jwksUrl(issuerId).toString(),
@@ -99,7 +99,7 @@ object TestRunner {
                     tilgangsgrupper = avhengigheter.tilgangsgrupper,
                     meldingPubliserer = avhengigheter.meldingPubliserer,
                     featureToggles = avhengigheter.featureToggles,
-                    azureConfig = azureConfig,
+                    apiModuleConfiguration = configuration,
                 )
             }
 
