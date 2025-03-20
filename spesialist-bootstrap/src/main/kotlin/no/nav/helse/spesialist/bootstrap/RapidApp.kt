@@ -22,9 +22,12 @@ import no.nav.helse.mediator.TilgangskontrollørForReservasjon
 import no.nav.helse.mediator.dokument.DokumentMediator
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.mediator.oppgave.OppgaveService
+import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlinghåndtererImpl
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.rapids_rivers.RapidApplication
+import no.nav.helse.spesialist.api.AzureConfig
+import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
 import no.nav.helse.spesialist.api.graphql.settOppGraphQLApi
 import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.client.entraid.EntraIDAccessTokenGenerator
@@ -36,13 +39,62 @@ import no.nav.helse.spesialist.db.FlywayMigrator
 import no.nav.helse.spesialist.db.bootstrap.DBModule
 import org.slf4j.LoggerFactory
 import java.lang.management.ManagementFactory
+import java.net.URI
 
 fun main() {
+    val env = System.getenv()
     RapidApp.start(
-        configuration = Configuration.fraEnv(System.getenv()),
+        configuration =
+            Configuration(
+                azureConfig =
+                    AzureConfig(
+                        clientId = env.getValue("AZURE_APP_CLIENT_ID"),
+                        issuerUrl = env.getValue("AZURE_OPENID_CONFIG_ISSUER"),
+                        jwkProviderUri = env.getValue("AZURE_OPENID_CONFIG_JWKS_URI"),
+                        tokenEndpoint = env.getValue("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
+                    ),
+                accessTokenGeneratorConfig =
+                    EntraIDAccessTokenGenerator.Configuration(
+                        clientId = env.getValue("AZURE_APP_CLIENT_ID"),
+                        tokenEndpoint = env.getValue("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
+                        privateJwk = env.getValue("AZURE_APP_JWK"),
+                    ),
+                spleisClientConfig =
+                    SpleisClient.Configuration(
+                        spleisUrl = URI.create(env.getValue("SPLEIS_API_URL")),
+                        spleisClientId = env.getValue("SPLEIS_CLIENT_ID"),
+                    ),
+                krrConfig =
+                    KRRClientReservasjonshenter.Configuration(
+                        apiUrl = env.getValue("KONTAKT_OG_RESERVASJONSREGISTERET_API_URL"),
+                        scope = env.getValue("KONTAKT_OG_RESERVASJONSREGISTERET_SCOPE"),
+                    ),
+                dbConfig =
+                    DBModule.Configuration(
+                        jdbcUrl =
+                            "jdbc:postgresql://" +
+                                env.getValue("DATABASE_HOST") +
+                                ":" +
+                                env.getValue("DATABASE_PORT") +
+                                "/" +
+                                env.getValue("DATABASE_DATABASE"),
+                        username = env.getValue("DATABASE_USERNAME"),
+                        password = env.getValue("DATABASE_PASSWORD"),
+                    ),
+                unleashFeatureToggles =
+                    UnleashFeatureToggles.Configuration(
+                        apiKey = env.getValue("UNLEASH_SERVER_API_TOKEN"),
+                        apiUrl = env.getValue("UNLEASH_SERVER_API_URL"),
+                        apiEnv = env.getValue("UNLEASH_SERVER_API_ENV"),
+                    ),
+                versjonAvKode = env.getValue("NAIS_APP_IMAGE"),
+                tilgangsgrupper = SpeilTilgangsgrupper(env),
+                environmentToggles = EnvironmentTogglesImpl(env),
+                stikkprøver = Stikkprøver.fraEnv(env),
+            ),
         rapidsConnection =
             RapidApplication.create(
-                env = System.getenv(),
+                env = env,
                 meterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT).also(Metrics.globalRegistry::add),
                 builder = {
                     withKtorModule {
@@ -97,7 +149,12 @@ object RapidApp {
                     Kommandofabrikk(
                         oppgaveService = { oppgaveService },
                         godkjenningMediator = GodkjenningMediator(daos.opptegnelseDao),
-                        subsumsjonsmelderProvider = { Subsumsjonsmelder(configuration.versjonAvKode, meldingPubliserer) },
+                        subsumsjonsmelderProvider = {
+                            Subsumsjonsmelder(
+                                configuration.versjonAvKode,
+                                meldingPubliserer,
+                            )
+                        },
                         stikkprøver = configuration.stikkprøver,
                         featureToggles = featureToggles,
                     ),

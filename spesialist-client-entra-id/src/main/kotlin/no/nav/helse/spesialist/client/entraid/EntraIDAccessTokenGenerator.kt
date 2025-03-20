@@ -37,16 +37,7 @@ class EntraIDAccessTokenGenerator(private val configuration: Configuration) : Ac
         val clientId: String,
         val tokenEndpoint: String,
         val privateJwk: String,
-    ) {
-        companion object {
-            fun fraEnv(env: Map<String, String>) =
-                Configuration(
-                    clientId = env.getValue("AZURE_APP_CLIENT_ID"),
-                    tokenEndpoint = env.getValue("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
-                    privateJwk = env.getValue("AZURE_APP_JWK"),
-                )
-        }
-    }
+    )
 
     private val log = LoggerFactory.getLogger(EntraIDAccessTokenGenerator::class.java)
     private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")

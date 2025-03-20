@@ -37,15 +37,7 @@ class SpleisClient(
     data class Configuration(
         val spleisUrl: URI,
         val spleisClientId: String,
-    ) {
-        companion object {
-            fun fraEnv(env: Map<String, String>) =
-                Configuration(
-                    spleisUrl = URI.create(env.getValue("SPL_CLIENT_URL")),
-                    spleisClientId = env.getValue("SPL_CLIENT_ID"),
-                )
-        }
-    }
+    )
 
     private val serializer: GraphQLClientSerializer =
         GraphQLClientJacksonSerializer(
