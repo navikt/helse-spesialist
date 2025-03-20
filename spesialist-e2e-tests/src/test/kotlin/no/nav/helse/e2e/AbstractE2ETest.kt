@@ -84,7 +84,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         get() =
             GodkjenningsbehovTestdata(
                 fødselsnummer = FØDSELSNUMMER,
-                aktørId = AKTØR,
+                aktørId = testperson.aktørId,
                 organisasjonsnummer = ORGNR,
                 vedtaksperiodeId = VEDTAKSPERIODE_ID,
                 utbetalingId = UTBETALING_ID,
@@ -113,7 +113,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     private val testMediator = TestMediator(testRapid, dataSource, environmentToggles)
     protected val SAKSBEHANDLER_OID: UUID = UUID.randomUUID()
     protected val SAKSBEHANDLER_EPOST = "augunn.saksbehandler@nav.no"
-    protected val SAKSBEHANDLER_IDENT = "S199999"
+    protected val SAKSBEHANDLER_IDENT = "Z999999"
     protected val SAKSBEHANDLER_NAVN = "Augunn Saksbehandler"
     private val saksbehandler =
         SaksbehandlerFraApi(
@@ -345,7 +345,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun vedtaksløsningenMottarNySøknad(
-        aktørId: String = AKTØR,
+        aktørId: String = testperson.aktørId,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
     ) {
@@ -355,7 +355,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun spleisOppretterNyBehandling(
-        aktørId: String = AKTØR,
+        aktørId: String = testperson.aktørId,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
@@ -380,7 +380,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun håndterVedtaksperiodeEndret(
-        aktørId: String = AKTØR,
+        aktørId: String = testperson.aktørId,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
@@ -406,7 +406,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun håndterVedtaksperiodeReberegnet(
-        aktørId: String = AKTØR,
+        aktørId: String = testperson.aktørId,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
@@ -427,7 +427,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun håndterVedtaksperiodeForkastet(
-        aktørId: String = AKTØR,
+        aktørId: String = testperson.aktørId,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
@@ -443,7 +443,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun håndterVedtaksperiodeNyUtbetaling(
-        aktørId: String = AKTØR,
+        aktørId: String = testperson.aktørId,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
@@ -462,7 +462,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun håndterAktivitetsloggNyAktivitet(
-        aktørId: String = AKTØR,
+        aktørId: String = testperson.aktørId,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
@@ -511,7 +511,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun håndterUtbetalingOpprettet(
-        aktørId: String = AKTØR,
+        aktørId: String = testperson.aktørId,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
         utbetalingtype: String = "UTBETALING",
@@ -533,7 +533,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun håndterUtbetalingErstattet(
-        aktørId: String = AKTØR,
+        aktørId: String = testperson.aktørId,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
         utbetalingtype: String = "UTBETALING",
@@ -555,7 +555,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun håndterUtbetalingEndret(
-        aktørId: String = AKTØR,
+        aktørId: String = testperson.aktørId,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
         utbetalingtype: String = "UTBETALING",
@@ -583,7 +583,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun håndterUtbetalingForkastet(
-        aktørId: String = AKTØR,
+        aktørId: String = testperson.aktørId,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
         forrigeStatus: Utbetalingsstatus = NY,
@@ -600,7 +600,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun håndterUtbetalingUtbetalt(
-        aktørId: String = AKTØR,
+        aktørId: String = testperson.aktørId,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
     ) {
@@ -723,7 +723,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun håndterPersoninfoløsning(
-        aktørId: String = AKTØR,
+        aktørId: String = testperson.aktørId,
         fødselsnummer: String = FØDSELSNUMMER,
         adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert,
     ) {
@@ -737,7 +737,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun håndterPersoninfoløsningUtenValidering(
-        aktørId: String = AKTØR,
+        aktørId: String = testperson.aktørId,
         fødselsnummer: String = FØDSELSNUMMER,
         adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert,
     ) {
@@ -750,7 +750,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun håndterEnhetløsning(
-        aktørId: String = AKTØR,
+        aktørId: String = testperson.aktørId,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
@@ -762,7 +762,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun håndterInfotrygdutbetalingerløsning(
-        aktørId: String = AKTØR,
+        aktørId: String = testperson.aktørId,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
@@ -778,7 +778,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun håndterArbeidsgiverinformasjonløsning(
-        aktørId: String = AKTØR,
+        aktørId: String = testperson.aktørId,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
@@ -808,7 +808,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun håndterArbeidsforholdløsning(
-        aktørId: String = AKTØR,
+        aktørId: String = testperson.aktørId,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
@@ -819,7 +819,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun håndterEgenansattløsning(
-        aktørId: String = AKTØR,
+        aktørId: String = testperson.aktørId,
         fødselsnummer: String = FØDSELSNUMMER,
         erEgenAnsatt: Boolean = false,
     ) {
@@ -828,7 +828,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun håndterVergemålOgFullmaktløsning(
-        aktørId: String = AKTØR,
+        aktørId: String = testperson.aktørId,
         fødselsnummer: String = FØDSELSNUMMER,
         vergemål: List<Vergemål> = emptyList(),
         fremtidsfullmakter: List<Vergemål> = emptyList(),
@@ -846,7 +846,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun håndterInntektløsning(
-        aktørId: String = AKTØR,
+        aktørId: String = testperson.aktørId,
         fødselsnummer: String = FØDSELSNUMMER,
     ) {
         assertEtterspurteBehov("InntekterForSykepengegrunnlag")
@@ -854,7 +854,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun håndterÅpneOppgaverløsning(
-        aktørId: String = AKTØR,
+        aktørId: String = testperson.aktørId,
         fødselsnummer: String = FØDSELSNUMMER,
         antallÅpneOppgaverIGosys: Int = 0,
         oppslagFeilet: Boolean = false,
@@ -865,7 +865,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun håndterRisikovurderingløsning(
-        aktørId: String = AKTØR,
+        aktørId: String = testperson.aktørId,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
@@ -948,7 +948,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun håndterAvsluttetMedVedtak(
-        aktørId: String = AKTØR,
+        aktørId: String = testperson.aktørId,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
@@ -978,7 +978,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun håndterAvsluttetUtenVedtak(
-        aktørId: String = AKTØR,
+        aktørId: String = testperson.aktørId,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
@@ -1001,7 +1001,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun håndterAdressebeskyttelseEndret(
-        aktørId: String = AKTØR,
+        aktørId: String = testperson.aktørId,
         fødselsnummer: String = FØDSELSNUMMER,
         harOppdatertMetadata: Boolean = true,
     ) {
@@ -1010,7 +1010,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun håndterOppdaterPersondata(
-        aktørId: String = AKTØR,
+        aktørId: String = testperson.aktørId,
         fødselsnummer: String = FØDSELSNUMMER,
     ) {
         sisteMeldingId = meldingssender.sendOppdaterPersondata(aktørId, fødselsnummer)
@@ -1018,7 +1018,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun håndterSkalKlargjøresForVisning(
-        aktørId: String = AKTØR,
+        aktørId: String = testperson.aktørId,
         fødselsnummer: String = FØDSELSNUMMER,
     ) {
         sisteMeldingId = meldingssender.sendKlargjørPersonForVisning(aktørId, fødselsnummer)
@@ -1026,7 +1026,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun håndterSkjønnsfastsattSykepengegrunnlag(
-        aktørId: String = AKTØR,
+        aktørId: String = testperson.aktørId,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
@@ -1048,7 +1048,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun håndterOverstyrTidslinje(
-        aktørId: String = AKTØR,
+        aktørId: String = testperson.aktørId,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
@@ -1080,7 +1080,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun håndterOverstyrInntektOgRefusjon(
-        aktørId: String = AKTØR,
+        aktørId: String = testperson.aktørId,
         fødselsnummer: String = FØDSELSNUMMER,
         skjæringstidspunkt: LocalDate = 1.januar(1970),
         vedtaksperiodeId: UUID = UUID.randomUUID(),
@@ -1114,7 +1114,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun håndterOverstyrArbeidsforhold(
-        aktørId: String = AKTØR,
+        aktørId: String = testperson.aktørId,
         fødselsnummer: String = FØDSELSNUMMER,
         organisasjonsnummer: String = ORGNR,
         skjæringstidspunkt: LocalDate = 1.januar,
