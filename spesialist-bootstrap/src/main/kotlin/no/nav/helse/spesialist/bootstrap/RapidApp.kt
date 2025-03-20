@@ -17,7 +17,6 @@ import no.nav.helse.spesialist.client.spleis.ClientSpleisModule
 import no.nav.helse.spesialist.db.DBModule
 import no.nav.helse.spesialist.db.FlywayMigrator
 import no.nav.helse.spesialist.kafka.KafkaModule
-import org.slf4j.LoggerFactory
 import java.net.URI
 
 fun main() {
@@ -179,5 +178,3 @@ object RapidApp {
         rapidsConnection.start()
     }
 }
-
-private val logg = LoggerFactory.getLogger("SpesialistApp")
