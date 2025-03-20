@@ -165,7 +165,7 @@ object RapidApp {
         rapidsConnection.register(
             object : RapidsConnection.StatusListener {
                 override fun onStartup(rapidsConnection: RapidsConnection) {
-                    dbModule.flywayMigrator.migrate()
+                    dbModule.migrate()
                 }
             },
         )

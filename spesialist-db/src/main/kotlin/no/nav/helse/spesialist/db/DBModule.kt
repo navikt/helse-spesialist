@@ -10,5 +10,9 @@ class DBModule(configuration: Configuration) {
     val dataSource = DataSourceBuilder(configuration).build()
     val daos = DBDaos(dataSource)
     val sessionFactory = TransactionalSessionFactory(dataSource)
-    val flywayMigrator = FlywayMigrator(configuration)
+    private val flywayMigrator = FlywayMigrator(configuration)
+
+    fun migrate() {
+        flywayMigrator.migrate()
+    }
 }

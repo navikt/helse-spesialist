@@ -11,7 +11,7 @@ open class ModuleIsolatedDBTestFixture(moduleLabel: String) {
     val module = DBModule(database.dbModuleConfiguration)
 
     init {
-        module.flywayMigrator.migrate()
+        module.migrate()
         truncate()
     }
 
