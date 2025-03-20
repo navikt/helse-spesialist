@@ -7,7 +7,7 @@ import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
 import no.nav.helse.spesialist.client.entraid.EntraIDAccessTokenGenerator
 import no.nav.helse.spesialist.client.krr.KRRClientReservasjonshenter
 import no.nav.helse.spesialist.client.spleis.SpleisClient
-import no.nav.helse.spesialist.db.bootstrap.DBModule
+import no.nav.helse.spesialist.db.DBModule
 
 data class Configuration(
     val azureConfig: AzureConfig,

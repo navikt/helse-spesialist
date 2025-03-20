@@ -1,6 +1,6 @@
 package no.nav.helse.spesialist.db.testfixtures
 
-import no.nav.helse.spesialist.db.bootstrap.DBModule
+import no.nav.helse.spesialist.db.DBModule
 import org.testcontainers.containers.PostgreSQLContainer
 
 class TestcontainersDatabase(moduleLabel: String) {

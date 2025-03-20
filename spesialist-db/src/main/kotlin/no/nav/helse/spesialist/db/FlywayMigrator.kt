@@ -2,7 +2,6 @@ package no.nav.helse.spesialist.db
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import no.nav.helse.spesialist.db.bootstrap.DBModule
 import org.flywaydb.core.Flyway
 import java.time.Duration
 

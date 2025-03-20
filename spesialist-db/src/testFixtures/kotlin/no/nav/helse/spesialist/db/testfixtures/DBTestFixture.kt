@@ -2,7 +2,7 @@ package no.nav.helse.spesialist.db.testfixtures
 
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.spesialist.db.bootstrap.DBModule
+import no.nav.helse.spesialist.db.DBModule
 import org.intellij.lang.annotations.Language
 
 open class ModuleIsolatedDBTestFixture(moduleLabel: String) {

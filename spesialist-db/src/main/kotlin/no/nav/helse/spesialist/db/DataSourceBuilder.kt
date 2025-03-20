@@ -6,7 +6,6 @@ import io.micrometer.core.instrument.Clock
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import io.prometheus.metrics.model.registry.PrometheusRegistry
-import no.nav.helse.spesialist.db.bootstrap.DBModule
 import java.time.Duration
 import javax.sql.DataSource
 

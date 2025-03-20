@@ -35,8 +35,8 @@ import no.nav.helse.spesialist.client.entraid.MsGraphGruppekontroll
 import no.nav.helse.spesialist.client.krr.KRRClientReservasjonshenter
 import no.nav.helse.spesialist.client.spleis.SpleisClient
 import no.nav.helse.spesialist.client.spleis.SpleisClientSnapshothenter
+import no.nav.helse.spesialist.db.DBModule
 import no.nav.helse.spesialist.db.FlywayMigrator
-import no.nav.helse.spesialist.db.bootstrap.DBModule
 import org.slf4j.LoggerFactory
 import java.lang.management.ManagementFactory
 import java.net.URI
