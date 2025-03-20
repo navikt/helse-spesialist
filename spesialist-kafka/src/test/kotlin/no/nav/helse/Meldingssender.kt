@@ -2,17 +2,14 @@ package no.nav.helse
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.helse.TestRapidHelpers.siste
-import no.nav.helse.mediator.meldinger.Risikofunn
-import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
-import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.ArbeidsgiverinformasjonJson
-import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Fullmakt
-import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Vergemål
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.person.vedtaksperiode.Periode
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_UTBETALT
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus.NY
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
+import no.nav.helse.spesialist.testfixtures.Testmeldingfabrikk
+import no.nav.helse.spesialist.testfixtures.Testmeldingfabrikk.ArbeidsgiverinformasjonJson
+import no.nav.helse.spesialist.testfixtures.Testmeldingfabrikk.VergemålJson.Fullmakt
+import no.nav.helse.spesialist.testfixtures.Testmeldingfabrikk.VergemålJson.Vergemål
 import no.nav.helse.spesialist.typer.Kjønn
 import org.junit.jupiter.api.Assertions.assertEquals
 import java.time.LocalDate
@@ -42,9 +39,9 @@ internal class Meldingssender(private val testRapid: TestRapid) {
         fødselsnummer: String,
         organisasjonsnummer: String,
         vedtaksperiodeId: UUID,
-        forrigeTilstand: String = "FORRIGE_TILSTAND",
-        gjeldendeTilstand: String = "GJELDENDE_TILSTAND",
-        forårsaketAvId: UUID = UUID.randomUUID(),
+        forrigeTilstand: String,
+        gjeldendeTilstand: String,
+        forårsaketAvId: UUID,
     ): UUID = newUUID.also { id ->
         testRapid.sendTestMessage(
             Testmeldingfabrikk.lagVedtaksperiodeEndret(
@@ -107,7 +104,7 @@ internal class Meldingssender(private val testRapid: TestRapid) {
         fødselsnummer: String,
         organisasjonsnummer: String,
         vedtaksperiodeId: UUID,
-        varselkoder: List<String> = emptyList(),
+        varselkoder: List<String>,
     ): UUID =
         newUUID.also { id ->
             testRapid.sendTestMessage(
@@ -195,11 +192,11 @@ internal class Meldingssender(private val testRapid: TestRapid) {
         fødselsnummer: String,
         organisasjonsnummer: String,
         utbetalingId: UUID,
-        type: String = "UTBETALING",
-        forrigeStatus: Utbetalingsstatus = NY,
-        gjeldendeStatus: Utbetalingsstatus = IKKE_UTBETALT,
-        arbeidsgiverbeløp: Int = 20000,
-        personbeløp: Int = 0,
+        type: String,
+        forrigeStatus: Utbetalingsstatus,
+        gjeldendeStatus: Utbetalingsstatus,
+        arbeidsgiverbeløp: Int,
+        personbeløp: Int,
         opprettet: LocalDateTime,
     ): UUID = newUUID.also { id ->
         testRapid.sendTestMessage(
@@ -342,7 +339,7 @@ internal class Meldingssender(private val testRapid: TestRapid) {
         fødselsnummer: String,
         organisasjonsnummer: String,
         vedtaksperiodeId: UUID,
-        arbeidsgiverinformasjonJson: List<ArbeidsgiverinformasjonJson>? = null,
+        arbeidsgiverinformasjonJson: List<ArbeidsgiverinformasjonJson>?,
     ): UUID =
         newUUID.also { id ->
             val behov = testRapid.inspektør.siste("behov")
@@ -480,9 +477,9 @@ internal class Meldingssender(private val testRapid: TestRapid) {
     fun sendVergemålOgFullmaktløsning(
         aktørId: String,
         fødselsnummer: String,
-        vergemål: List<Vergemål> = emptyList(),
-        fremtidsfullmakter: List<Vergemål> = emptyList(),
-        fullmakter: List<Fullmakt> = emptyList(),
+        vergemål: List<Vergemål>,
+        fremtidsfullmakter: List<Vergemål>,
+        fullmakter: List<Fullmakt>,
     ): UUID = newUUID.also { id ->
         val behov = testRapid.inspektør.siste("behov")
         assertEquals(listOf("Vergemål", "Fullmakt"), behov["@behov"].map { it.asText() })
@@ -554,8 +551,8 @@ internal class Meldingssender(private val testRapid: TestRapid) {
         fødselsnummer: String,
         organisasjonsnummer: String,
         vedtaksperiodeId: UUID,
-        kanGodkjennesAutomatisk: Boolean = true,
-        funn: List<Risikofunn> = emptyList(),
+        kanGodkjennesAutomatisk: Boolean,
+        funn: List<Testmeldingfabrikk.Risikofunn>,
     ): UUID = newUUID.also { id ->
         val behov = testRapid.inspektør.siste("behov")
         assertEquals("Risikovurdering", behov["@behov"].map { it.asText() }.single())
@@ -582,8 +579,8 @@ internal class Meldingssender(private val testRapid: TestRapid) {
         oppgaveId: Long,
         godkjenningsbehovId: UUID,
         godkjent: Boolean,
-        kommentar: String? = null,
-        begrunnelser: List<String> = emptyList(),
+        kommentar: String?,
+        begrunnelser: List<String>,
     ): UUID {
         return newUUID.also { id ->
             testRapid.sendTestMessage(
@@ -630,7 +627,7 @@ internal class Meldingssender(private val testRapid: TestRapid) {
         tom: LocalDate,
         skjæringstidspunkt: LocalDate,
         fastsattType: String,
-        settInnAvviksvurderingFraSpleis: Boolean = true,
+        settInnAvviksvurderingFraSpleis: Boolean,
     ): UUID = newUUID.also { id ->
         testRapid.sendTestMessage(
             Testmeldingfabrikk.lagAvsluttetMedVedtak(

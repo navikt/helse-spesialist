@@ -6,6 +6,7 @@ import io.mockk.verify
 import no.nav.helse.kafka.AdressebeskyttelseEndretRiver
 import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
+import no.nav.helse.spesialist.testfixtures.Testmeldingfabrikk
 import org.junit.jupiter.api.Test
 import java.util.UUID
 

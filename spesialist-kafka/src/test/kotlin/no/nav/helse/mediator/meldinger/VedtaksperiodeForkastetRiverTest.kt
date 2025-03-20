@@ -7,6 +7,7 @@ import no.nav.helse.kafka.VedtaksperiodeForkastetRiver
 import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
+import no.nav.helse.spesialist.testfixtures.Testmeldingfabrikk
 import no.nav.helse.spesialist.testfixtures.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

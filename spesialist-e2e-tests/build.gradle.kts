@@ -18,5 +18,6 @@ dependencies {
 
     testImplementation(testFixtures(project(":spesialist-db")))
     testImplementation(testFixtures(project(":spesialist-api")))
+    testImplementation(testFixtures(project(":spesialist-kafka")))
     testImplementation(testFixtures(project(":spesialist-domain")))
 }

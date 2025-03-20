@@ -1,8 +1,7 @@
-package no.nav.helse.mediator.meldinger
+package no.nav.helse.spesialist.testfixtures
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
-import no.nav.helse.mediator.meldinger.Risikofunn.Companion.tilJson
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.person.vedtaksperiode.Periode
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
@@ -10,7 +9,8 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.kafka.objectMapper
-import no.nav.helse.spesialist.testfixtures.jan
+import no.nav.helse.spesialist.testfixtures.Testmeldingfabrikk.Risikofunn.Companion.tilJson
+import org.intellij.lang.annotations.Language
 import java.time.LocalDate
 import java.time.LocalDate.now
 import java.time.LocalDateTime
@@ -18,7 +18,7 @@ import java.time.YearMonth
 import java.util.UUID
 import kotlin.random.Random.Default.nextLong
 
-internal object Testmeldingfabrikk {
+object Testmeldingfabrikk {
     private const val OSLO = "0301"
 
     fun lagVedtaksperiodeNyUtbetaling(
@@ -1203,6 +1203,23 @@ internal object Testmeldingfabrikk {
             midlertidigForMindreaarig,
             forvaltningUtenforVergemaal,
             stadfestetFremtidsfullmakt
+        }
+    }
+    class Risikofunn(
+        private val kategori: List<String>,
+        private val beskrivelse: String
+    ) {
+
+        @Language("JSON")
+        private fun tilJson() = """
+    {
+        "kategori": ${kategori.map { "\"$it\"" }},
+        "beskrivelse": "$beskrivelse"
+    }
+    """.trimIndent()
+
+        companion object {
+            fun Iterable<Risikofunn>.tilJson(): JsonNode = objectMapper.readTree("${map { it.tilJson() }}")
         }
     }
 }

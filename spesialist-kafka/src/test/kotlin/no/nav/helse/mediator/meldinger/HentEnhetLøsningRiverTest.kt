@@ -7,6 +7,7 @@ import no.nav.helse.kafka.HentEnhetLøsningRiver
 import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.person.HentEnhetløsning
+import no.nav.helse.spesialist.testfixtures.Testmeldingfabrikk
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.UUID

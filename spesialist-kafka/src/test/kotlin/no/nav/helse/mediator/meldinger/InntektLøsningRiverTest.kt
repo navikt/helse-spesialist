@@ -8,6 +8,7 @@ import no.nav.helse.kafka.InntektLøsningRiver
 import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.spesialist.test.TestPerson
+import no.nav.helse.spesialist.testfixtures.Testmeldingfabrikk
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
