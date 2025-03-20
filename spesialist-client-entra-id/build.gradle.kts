@@ -1,3 +1,7 @@
+plugins {
+    `java-test-fixtures`
+}
+
 dependencies {
     api(project(":spesialist-application"))
 
@@ -7,4 +11,6 @@ dependencies {
     // TODO: Trenger vi kanskje bare én av disse?
     implementation(libs.nimbus.joseJwt)
     implementation(libs.auth0.jwt)
+
+    testFixturesImplementation(libs.wiremock)
 }

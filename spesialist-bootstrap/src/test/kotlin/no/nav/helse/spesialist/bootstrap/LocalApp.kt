@@ -5,6 +5,7 @@ import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.spesialist.api.bootstrap.Gruppe
 import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
 import no.nav.helse.spesialist.api.testfixtures.ApiModuleIntegrationTestFixture
+import no.nav.helse.spesialist.client.entraid.testfixtures.ClientEntraIDModuleIntegrationTestFixture
 import no.nav.helse.spesialist.db.testfixtures.DBTestFixture
 import java.util.UUID
 
