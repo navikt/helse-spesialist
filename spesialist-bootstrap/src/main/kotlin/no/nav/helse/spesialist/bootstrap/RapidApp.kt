@@ -5,19 +5,9 @@ import io.ktor.server.application.Application
 import io.micrometer.core.instrument.Metrics
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
-import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.Daos
 import no.nav.helse.db.SessionFactory
-import no.nav.helse.kafka.MessageContextMeldingPubliserer
-import no.nav.helse.kafka.RiverSetup
-import no.nav.helse.mediator.GodkjenningMediator
-import no.nav.helse.mediator.Kommandofabrikk
-import no.nav.helse.mediator.MeldingMediator
-import no.nav.helse.mediator.Subsumsjonsmelder
-import no.nav.helse.mediator.TilgangskontrollørForReservasjon
-import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Stikkprøver
-import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.spesialist.api.ApiModule
 import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
@@ -29,6 +19,7 @@ import no.nav.helse.spesialist.client.spleis.SpleisClient
 import no.nav.helse.spesialist.client.spleis.SpleisClientSnapshothenter
 import no.nav.helse.spesialist.db.DBModule
 import no.nav.helse.spesialist.db.FlywayMigrator
+import no.nav.helse.spesialist.kafka.KafkaModule
 import org.slf4j.LoggerFactory
 import java.lang.management.ManagementFactory
 import java.net.URI
@@ -125,55 +116,24 @@ object RapidApp {
 
         val featureToggles = UnleashFeatureToggles(configuration = configuration.unleashFeatureToggles)
 
-        val meldingPubliserer: MeldingPubliserer = MessageContextMeldingPubliserer(rapidsConnection)
+        val versjonAvKode = configuration.versjonAvKode
+        val kafkaModule =
+            KafkaModule(
+                configuration = KafkaModule.Configuration(versjonAvKode = versjonAvKode),
+                rapidsConnection = rapidsConnection,
+            )
 
-        RiverSetup(
-            rapidsConnection,
-            MeldingMediator(
-                sessionFactory = sessionFactory,
-                personDao = daos.personDao,
-                commandContextDao = daos.commandContextDao,
-                meldingDao = daos.meldingDao,
-                meldingDuplikatkontrollDao = daos.meldingDuplikatkontrollDao,
-                kommandofabrikk =
-                    Kommandofabrikk(
-                        oppgaveService = {
-                            OppgaveService(
-                                oppgaveDao = daos.oppgaveDao,
-                                reservasjonDao = daos.reservasjonDao,
-                                meldingPubliserer = meldingPubliserer,
-                                tilgangskontroll =
-                                    TilgangskontrollørForReservasjon(
-                                        MsGraphGruppekontroll(
-                                            accessTokenGenerator,
-                                        ),
-                                        configuration.tilgangsgrupper,
-                                    ),
-                                tilgangsgrupper = configuration.tilgangsgrupper,
-                                oppgaveRepository = daos.oppgaveRepository,
-                            )
-                        },
-                        godkjenningMediator = GodkjenningMediator(daos.opptegnelseDao),
-                        subsumsjonsmelderProvider = {
-                            Subsumsjonsmelder(
-                                configuration.versjonAvKode,
-                                meldingPubliserer,
-                            )
-                        },
-                        stikkprøver = configuration.stikkprøver,
-                        featureToggles = featureToggles,
-                    ),
-                dokumentDao = daos.dokumentDao,
-                varselRepository =
-                    VarselRepository(
-                        varselDao = daos.varselDao,
-                        definisjonDao = daos.definisjonDao,
-                    ),
-                poisonPillDao = daos.poisonPillDao,
-                environmentToggles = configuration.environmentToggles,
-            ),
-            daos.meldingDuplikatkontrollDao,
-        ).setUp()
+        val meldingPubliserer = kafkaModule.meldingPubliserer
+
+        kafkaModule.setUpKafka(
+            sessionFactory = sessionFactory,
+            daos = daos,
+            tilgangsgrupper = configuration.tilgangsgrupper,
+            stikkprøver = configuration.stikkprøver,
+            environmentToggles = configuration.environmentToggles,
+            featureToggles = featureToggles,
+            gruppekontroll = MsGraphGruppekontroll(accessTokenGenerator),
+        )
 
         logg.info(
             "Registrerte garbage collectors etter oppstart: ${
@@ -206,7 +166,7 @@ object RapidApp {
                 meldingPubliserer = meldingPubliserer,
                 gruppekontroll = MsGraphGruppekontroll(accessTokenGenerator),
                 sessionFactory = sessionFactory,
-                versjonAvKode = configuration.versjonAvKode,
+                versjonAvKode = versjonAvKode,
                 environmentToggles = configuration.environmentToggles,
                 featureToggles = featureToggles,
                 snapshothenter = snapshothenter,
