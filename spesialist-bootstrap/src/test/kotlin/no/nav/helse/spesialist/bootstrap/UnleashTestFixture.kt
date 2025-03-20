@@ -7,7 +7,7 @@ object UnleashTestFixture {
     private val wireMockServer: WireMockServer = WireMockServer(WireMockConfiguration.options().dynamicPort()).also(
         WireMockServer::start)
 
-    val moduleConfiguration = UnleashFeatureToggles.Configuration(
+    val moduleConfiguration = ClientUnleashModule.Configuration(
         apiKey = "123abc",
         apiUrl = wireMockServer.baseUrl(),
         apiEnv = "local-app"

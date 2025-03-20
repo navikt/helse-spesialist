@@ -17,7 +17,7 @@ data class Configuration(
     val krrConfig: ClientKrrModule.Configuration,
     val dbConfig: DBModule.Configuration,
     val kafkaModuleConfiguration: KafkaModule.Configuration,
-    val unleashFeatureToggles: UnleashFeatureToggles.Configuration,
+    val unleashFeatureToggles: ClientUnleashModule.Configuration,
     val versjonAvKode: String,
     val tilgangsgrupper: Tilgangsgrupper,
     val environmentToggles: EnvironmentToggles,

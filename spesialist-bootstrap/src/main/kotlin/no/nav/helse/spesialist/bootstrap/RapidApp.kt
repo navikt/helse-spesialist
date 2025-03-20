@@ -72,7 +72,7 @@ fun main() {
                         ignorerMeldingerForUkjentePersoner = env.getBoolean("IGNORER_MELDINGER_FOR_UKJENTE_PERSONER", false),
                     ),
                 unleashFeatureToggles =
-                    UnleashFeatureToggles.Configuration(
+                    ClientUnleashModule.Configuration(
                         apiKey = env.getValue("UNLEASH_SERVER_API_TOKEN"),
                         apiUrl = env.getValue("UNLEASH_SERVER_API_URL"),
                         apiEnv = env.getValue("UNLEASH_SERVER_API_ENV"),
@@ -117,7 +117,8 @@ object RapidApp {
         val accessTokenGenerator = clientEntraIdModule.accessTokenGenerator
         val gruppekontroll = clientEntraIdModule.gruppekontroll
 
-        val featureToggles = UnleashFeatureToggles(configuration = configuration.unleashFeatureToggles)
+        val clientUnleashModule = ClientUnleashModule(configuration.unleashFeatureToggles)
+        val featureToggles = clientUnleashModule.featureToggles
 
         val versjonAvKode = configuration.versjonAvKode
         val kafkaModule =
