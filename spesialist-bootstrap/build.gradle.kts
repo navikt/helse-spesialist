@@ -3,6 +3,7 @@ dependencies {
     api(project(":spesialist-client-entra-id"))
     api(project(":spesialist-client-krr"))
     api(project(":spesialist-client-spleis"))
+    api(project(":spesialist-client-unleash"))
     api(project(":spesialist-db"))
     api(project(":spesialist-kafka"))
 
@@ -22,6 +23,7 @@ dependencies {
     testImplementation(testFixtures(project(":spesialist-client-entra-id")))
     testImplementation(testFixtures(project(":spesialist-client-krr")))
     testImplementation(testFixtures(project(":spesialist-client-spleis")))
+    testImplementation(testFixtures(project(":spesialist-client-unleash")))
     testImplementation(testFixtures(project(":spesialist-kafka")))
 }
 

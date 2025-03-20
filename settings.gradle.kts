@@ -7,6 +7,7 @@ include(
     "spesialist-client-entra-id",
     "spesialist-client-krr",
     "spesialist-client-spleis",
+    "spesialist-client-unleash",
     "spesialist-db-migrations",
     "spesialist-db",
     "spesialist-kafka",

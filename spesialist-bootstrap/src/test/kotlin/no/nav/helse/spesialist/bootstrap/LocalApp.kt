@@ -8,6 +8,7 @@ import no.nav.helse.spesialist.api.testfixtures.ApiModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.spleis.testfixtures.ClientEntraIDModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.spleis.testfixtures.ClientKRRModuleIntegationTestFixture
 import no.nav.helse.spesialist.client.spleis.testfixtures.ClientSpleisModuleIntegrationTestFixture
+import no.nav.helse.spesialist.client.unleash.testfixtures.ClientUnleashModuleIntegrationTestFixture
 import no.nav.helse.spesialist.db.testfixtures.DBTestFixture
 import no.nav.helse.spesialist.testfixtures.KafkaModuleIntegrationTestFixture
 import java.util.UUID

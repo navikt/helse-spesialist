@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.bootstrap
+package no.nav.helse.spesialist.client.unleash
 
 import io.getunleash.DefaultUnleash
 import io.getunleash.Unleash
