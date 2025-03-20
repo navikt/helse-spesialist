@@ -25,7 +25,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.util.UUID
 
-internal class TilgangsstyringE2ETest : AbstractE2ETest() {
+class TilgangsstyringE2ETest : AbstractE2ETest() {
     @Test
     fun `Gir 409 når bare søknad er mottatt`() {
         settOppDefaultDataOgTilganger()

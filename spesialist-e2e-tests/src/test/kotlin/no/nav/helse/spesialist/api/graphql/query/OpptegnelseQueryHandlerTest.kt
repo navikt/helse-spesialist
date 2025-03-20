@@ -11,7 +11,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiOpptegnelsetype.UTBETALING_
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class OpptegnelseQueryHandlerTest: AbstractGraphQLApiTest() {
+class OpptegnelseQueryHandlerTest: AbstractGraphQLApiTest() {
 
     @Test
     fun `hent opptegnelser uten sekvensId`() {

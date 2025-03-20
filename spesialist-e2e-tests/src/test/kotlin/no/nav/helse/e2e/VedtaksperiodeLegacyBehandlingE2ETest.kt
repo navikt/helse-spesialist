@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-internal class VedtaksperiodeLegacyBehandlingE2ETest : AbstractE2ETest() {
+class VedtaksperiodeLegacyBehandlingE2ETest : AbstractE2ETest() {
     @Test
     fun `Oppretter første generasjon når vedtaksperioden blir opprettet`() {
         vedtaksløsningenMottarNySøknad()

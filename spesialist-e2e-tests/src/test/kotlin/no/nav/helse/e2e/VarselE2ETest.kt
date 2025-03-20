@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-internal class VarselE2ETest : AbstractE2ETest() {
+class VarselE2ETest : AbstractE2ETest() {
     @Test
     fun `ingen varsel`() {
         vedtaksløsningenMottarNySøknad()

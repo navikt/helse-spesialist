@@ -6,7 +6,7 @@ import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-internal class TotrinnsvurderingE2ETest : AbstractE2ETest() {
+class TotrinnsvurderingE2ETest : AbstractE2ETest() {
     @Test
     fun `sak blir trukket til totrinnsvurdering ved overstyring av inntekt og refusjon`() {
         vedtaksløsningenMottarNySøknad()

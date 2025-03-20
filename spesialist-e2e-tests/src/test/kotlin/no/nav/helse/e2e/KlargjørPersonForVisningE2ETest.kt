@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
-internal class KlargjørPersonForVisningE2ETest : AbstractE2ETest() {
+class KlargjørPersonForVisningE2ETest : AbstractE2ETest() {
 
     @Test
     fun `Henter personinfo når person skal klargjøres for visning`() {

@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.UUID
 
-internal class GodkjenningE2ETest : AbstractE2ETest() {
+class GodkjenningE2ETest : AbstractE2ETest() {
     private companion object {
         private const val ENHET_UTLAND = "0393"
     }

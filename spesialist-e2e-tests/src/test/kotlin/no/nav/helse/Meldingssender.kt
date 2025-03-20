@@ -19,7 +19,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class Meldingssender(private val testRapid: TestRapid) {
+class Meldingssender(private val testRapid: TestRapid) {
     private val newUUID get() = UUID.randomUUID()
 
     fun sendSøknadSendt(

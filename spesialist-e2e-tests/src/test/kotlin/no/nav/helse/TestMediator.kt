@@ -23,7 +23,7 @@ import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import no.nav.helse.util.testEnv
 import javax.sql.DataSource
 
-internal class TestMediator(
+class TestMediator(
     testRapid: TestRapid,
     dataSource: DataSource,
     environmentToggles: EnvironmentToggles,
@@ -123,7 +123,7 @@ internal class TestMediator(
         RiverSetup(meldingMediator, daos.meldingDuplikatkontrollDao).registrerRivers(testRapid)
     }
 
-    internal fun håndter(
+    fun håndter(
         handling: HandlingFraApi,
         saksbehandlerFraApi: SaksbehandlerFraApi,
     ) {

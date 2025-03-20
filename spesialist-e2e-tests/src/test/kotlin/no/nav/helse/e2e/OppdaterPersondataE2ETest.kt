@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-internal class OppdaterPersondataE2ETest : AbstractE2ETest() {
+class OppdaterPersondataE2ETest : AbstractE2ETest() {
 
     @Test
     fun `Oppdaterer Infotrygd-utbetalinger`() {

@@ -6,7 +6,7 @@ import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.person.Person
 import java.util.UUID
 
-internal class TestMelding(
+class TestMelding(
     override val id: UUID,
     private val vedtaksperiodeId: UUID,
     private val fnr: String,

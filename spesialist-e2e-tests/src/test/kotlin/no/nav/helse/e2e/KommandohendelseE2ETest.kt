@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-internal class KommandohendelseE2ETest : AbstractE2ETest() {
+class KommandohendelseE2ETest : AbstractE2ETest() {
 
     @Test
     fun `lagrer melding som starter en command context`() {

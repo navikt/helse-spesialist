@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 
 // Snakk med Christian før du lager flere subklasser av denne. Det er mulig vi ønsker å lage (eller allerede har laget?)
 // et annet opplegg for å teste samspillet mellom API og selve/mediator/modell
-internal abstract class AbstractIntegrationTest : AbstractE2ETest() {
+abstract class AbstractIntegrationTest : AbstractE2ETest() {
     protected val testRapid = __ikke_bruk_denne
     private val meldingPubliserer: MeldingPubliserer = MessageContextMeldingPubliserer(testRapid)
     protected val oppgaveDao = daos.oppgaveDao

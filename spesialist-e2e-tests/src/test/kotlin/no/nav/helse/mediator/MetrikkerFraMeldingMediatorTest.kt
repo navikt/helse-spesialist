@@ -12,7 +12,7 @@ import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 
-internal class MetrikkerFraMeldingMediatorTest : AbstractDatabaseTest() {
+class MetrikkerFraMeldingMediatorTest : AbstractDatabaseTest() {
     private val fødselsnummer = lagFødselsnummer()
 
     private val testRapid = TestRapid()

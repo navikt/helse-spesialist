@@ -3,7 +3,7 @@ package no.nav.helse.e2e
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
 import org.junit.jupiter.api.Test
 
-internal class AutomatiseringE2ETest : AbstractE2ETest() {
+class AutomatiseringE2ETest : AbstractE2ETest() {
     @Test
     fun `fatter automatisk vedtak`() {
         vedtaksløsningenMottarNySøknad()

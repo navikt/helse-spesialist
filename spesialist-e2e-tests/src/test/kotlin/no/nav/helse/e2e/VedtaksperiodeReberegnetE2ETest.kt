@@ -8,7 +8,7 @@ import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 
-internal class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
+class VedtaksperiodeReberegnetE2ETest : AbstractE2ETest() {
     @Test
     fun `avbryter saksbehandling før oppgave er opprettet til saksbehandling`() {
         vedtaksløsningenMottarNySøknad()

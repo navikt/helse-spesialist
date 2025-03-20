@@ -17,7 +17,7 @@ import org.junit.jupiter.api.assertThrows
 import org.opentest4j.AssertionFailedError
 import java.util.UUID
 
-internal class TilbakedateringBehandletE2ETest : AbstractE2ETest() {
+class TilbakedateringBehandletE2ETest : AbstractE2ETest() {
     @Test
     fun `fatter automatisk vedtak dersom åpen oppgave får inn godkjent tilbakedatering`() {
         vedtaksløsningenMottarNySøknad()

@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test
 import java.time.YearMonth
 import java.util.UUID
 
-internal class GraphQLApiTest : AbstractGraphQLApiTest() {
+class GraphQLApiTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `henter refusjonsopplysninger`() {

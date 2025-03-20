@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-internal class GodkjenningServiceTest : AbstractIntegrationTest() {
+class GodkjenningServiceTest : AbstractIntegrationTest() {
 
     @Test
     fun `oppgave avventer system når saksbehandlerløsning legges på rapid`() {

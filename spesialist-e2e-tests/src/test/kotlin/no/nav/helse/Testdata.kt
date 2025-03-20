@@ -185,7 +185,7 @@ object Testdata {
         )
     }
 
-    internal fun skjønnsvurdering() = ApiSkjonnsfastsettelse.ApiSkjonnsfastsettelseArbeidsgiver(
+    fun skjønnsvurdering() = ApiSkjonnsfastsettelse.ApiSkjonnsfastsettelseArbeidsgiver(
         organisasjonsnummer = testperson.orgnummer,
         arlig = 1.0,
         fraArlig = 1.0,
@@ -206,7 +206,7 @@ object Testdata {
 
 }
 
-internal data class GodkjenningsbehovTestdata(
+data class GodkjenningsbehovTestdata(
     val aktørId: String,
     val fødselsnummer: String,
     val organisasjonsnummer: String,
@@ -229,7 +229,7 @@ internal data class GodkjenningsbehovTestdata(
     ),
 )
 
-internal data class AvviksvurderingTestdata(
+data class AvviksvurderingTestdata(
     val avviksprosent: Double = 10.0,
     val sammenligningsgrunnlag: Double = 650_000.0,
     val skjæringstidspunkt: LocalDate = 1.januar,

@@ -4,7 +4,7 @@ import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-internal class RevurderingE2ETest : AbstractE2ETest() {
+class RevurderingE2ETest : AbstractE2ETest() {
     @Test
     fun `revurdering ved saksbehandlet oppgave`() {
         vedtaksløsningenMottarNySøknad()

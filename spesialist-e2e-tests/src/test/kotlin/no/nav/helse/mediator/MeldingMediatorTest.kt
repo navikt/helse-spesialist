@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class MeldingMediatorTest : AbstractDatabaseTest() {
+class MeldingMediatorTest : AbstractDatabaseTest() {
     private val testRapid = TestRapid()
     private val kommandofabrikk = mockk<Kommandofabrikk>(relaxed = true)
     private val poisonPills: MutableMap<String, Set<String>> = mutableMapOf()
@@ -46,7 +46,7 @@ internal class MeldingMediatorTest : AbstractDatabaseTest() {
         )
 
     @BeforeEach
-    internal fun resetTestSetup() {
+    fun resetTestSetup() {
         testRapid.reset()
         lagVarseldefinisjoner()
     }

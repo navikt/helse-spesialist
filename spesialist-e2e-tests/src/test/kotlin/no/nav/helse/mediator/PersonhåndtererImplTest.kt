@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-internal class PersonhåndtererImplTest : AbstractDatabaseTest() {
+class PersonhåndtererImplTest : AbstractDatabaseTest() {
     private val testRapid = TestRapid()
 
     private val personhåndterer =
@@ -18,7 +18,7 @@ internal class PersonhåndtererImplTest : AbstractDatabaseTest() {
         )
 
     @BeforeEach
-    internal fun resetTestSetup() {
+    fun resetTestSetup() {
         testRapid.reset()
     }
 
