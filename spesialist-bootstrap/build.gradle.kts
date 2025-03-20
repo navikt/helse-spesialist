@@ -18,6 +18,7 @@ dependencies {
     testImplementation(libs.wiremock)
 
     testImplementation(testFixtures(project(":spesialist-db")))
+    testImplementation(testFixtures(project(":spesialist-api")))
 }
 
 tasks {

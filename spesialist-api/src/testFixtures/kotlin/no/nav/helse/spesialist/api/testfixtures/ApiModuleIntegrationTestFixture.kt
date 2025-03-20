@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.bootstrap
+package no.nav.helse.spesialist.api.testfixtures
 
 import io.ktor.http.ContentType
 import io.ktor.server.application.Application

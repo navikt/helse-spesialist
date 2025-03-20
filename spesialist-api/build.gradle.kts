@@ -20,5 +20,7 @@ dependencies {
     testImplementation(libs.mockOauth2Server)
 
     testFixturesImplementation(libs.graphqlKotlin.server.ktor)
+    testFixturesImplementation(libs.bundles.ktor.server)
+    testFixturesImplementation(libs.mockOauth2Server)
     testFixturesImplementation(testFixtures(project(":spesialist-domain")))
 }
