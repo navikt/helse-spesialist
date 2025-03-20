@@ -8,6 +8,7 @@ import no.nav.helse.modell.periodehistorikk.Historikkinnslag
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_BESLUTTER
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -49,10 +50,14 @@ internal class VurderBehovForTotrinnskontroll(
         if ((kreverTotrinnsvurdering && !vedtaksperiodeHarFerdigstiltOppgave) || eksisterendeTotrinnsvurdering != null) {
             logg.info("Vedtaksperioden: $vedtaksperiodeId trenger totrinnsvurdering")
 
-            val totrinnsvurdering = (eksisterendeTotrinnsvurdering ?: Totrinnsvurdering.ny(vedtaksperiodeId, fødselsnummer))
-            if (totrinnsvurdering.erBeslutteroppgave) {
-                totrinnsvurdering.settRetur()
-                periodehistorikkDao.lagre(Historikkinnslag.totrinnsvurderingAutomatiskRetur(), vedtaksperiode.gjeldendeUnikId)
+            val totrinnsvurdering =
+                (eksisterendeTotrinnsvurdering ?: Totrinnsvurdering.ny(vedtaksperiodeId, fødselsnummer))
+            if (totrinnsvurdering.tilstand == AVVENTER_BESLUTTER) {
+                totrinnsvurdering.settAvventerSaksbehandler()
+                periodehistorikkDao.lagre(
+                    Historikkinnslag.totrinnsvurderingAutomatiskRetur(),
+                    vedtaksperiode.gjeldendeUnikId,
+                )
             }
             totrinnsvurderingRepository.lagre(totrinnsvurdering)
 
@@ -69,13 +74,24 @@ internal class VurderBehovForTotrinnskontroll(
         kreverTotrinnsvurdering: Boolean,
         vedtaksperiodeHarFerdigstiltOppgave: Boolean,
     ) {
-        if ((kreverTotrinnsvurdering && !vedtaksperiodeHarFerdigstiltOppgave) || overstyringDao.harVedtaksperiodePågåendeOverstyring(vedtaksperiodeId)) {
+        if ((kreverTotrinnsvurdering && !vedtaksperiodeHarFerdigstiltOppgave) ||
+            overstyringDao.harVedtaksperiodePågåendeOverstyring(
+                vedtaksperiodeId,
+            )
+        ) {
             logg.info("Vedtaksperioden: $vedtaksperiodeId trenger totrinnsvurdering")
 
-            val totrinnsvurdering = totrinnsvurderingRepository.finn(vedtaksperiodeId) ?: Totrinnsvurdering.ny(vedtaksperiodeId, fødselsnummer)
-            if (totrinnsvurdering.erBeslutteroppgave) {
-                totrinnsvurdering.settRetur()
-                periodehistorikkDao.lagre(Historikkinnslag.totrinnsvurderingAutomatiskRetur(), vedtaksperiode.gjeldendeUnikId)
+            val totrinnsvurdering =
+                totrinnsvurderingRepository.finn(vedtaksperiodeId) ?: Totrinnsvurdering.ny(
+                    vedtaksperiodeId,
+                    fødselsnummer,
+                )
+            if (totrinnsvurdering.tilstand == AVVENTER_BESLUTTER) {
+                totrinnsvurdering.settAvventerSaksbehandler()
+                periodehistorikkDao.lagre(
+                    Historikkinnslag.totrinnsvurderingAutomatiskRetur(),
+                    vedtaksperiode.gjeldendeUnikId,
+                )
             }
 
             totrinnsvurderingRepository.lagre(totrinnsvurdering)

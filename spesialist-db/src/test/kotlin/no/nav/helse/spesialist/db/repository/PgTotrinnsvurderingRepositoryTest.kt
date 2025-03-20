@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.db.repository
 import no.nav.helse.modell.saksbehandler.handlinger.Overstyring
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinje
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_SAKSBEHANDLER
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -13,7 +14,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 
-class PgTotrinnsvurderingRepositoryTest: AbstractDBIntegrationTest() {
+class PgTotrinnsvurderingRepositoryTest : AbstractDBIntegrationTest() {
 
     @BeforeEach
     fun setup() {
@@ -49,14 +50,14 @@ class PgTotrinnsvurderingRepositoryTest: AbstractDBIntegrationTest() {
         checkNotNull(hentetTotrinnsvurdering)
         hentetTotrinnsvurdering.nyOverstyring(nyOverstyring())
         hentetTotrinnsvurdering.settBeslutter(SaksbehandlerOid(SAKSBEHANDLER_OID))
-        hentetTotrinnsvurdering.settRetur()
+        hentetTotrinnsvurdering.settAvventerSaksbehandler()
         totrinnsvurderingRepository.lagre(hentetTotrinnsvurdering)
         val oppdatertTotrinnsvurdering = totrinnsvurderingRepository.finn(FNR)
         checkNotNull(oppdatertTotrinnsvurdering)
 
         assertEquals(1, oppdatertTotrinnsvurdering.overstyringer.size)
         assertNotNull(oppdatertTotrinnsvurdering.beslutter)
-        assertTrue(oppdatertTotrinnsvurdering.erRetur)
+        assertEquals(AVVENTER_SAKSBEHANDLER, oppdatertTotrinnsvurdering.tilstand)
         assertNotNull(oppdatertTotrinnsvurdering.oppdatert)
     }
 

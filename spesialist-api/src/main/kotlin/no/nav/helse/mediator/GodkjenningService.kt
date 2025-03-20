@@ -12,6 +12,7 @@ import no.nav.helse.modell.melding.Saksbehandlerløsning
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDto
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.GODKJENT
 import no.nav.helse.spesialist.api.Godkjenninghåndterer
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import no.nav.helse.spesialist.domain.Saksbehandler
@@ -88,7 +89,7 @@ class GodkjenningService(
                     featureToggles.skalBenytteNyTotrinnsvurderingsløsning(),
                 )
 
-                if (totrinnsvurdering?.erBeslutteroppgave == true && godkjenningDTO.godkjent) {
+                if (totrinnsvurdering?.tilstand == GODKJENT && godkjenningDTO.godkjent) {
                     val beslutter =
                         totrinnsvurdering.beslutter?.let { saksbehandlerId ->
                             session.saksbehandlerRepository.finn(saksbehandlerId)?.let { saksbehandler ->

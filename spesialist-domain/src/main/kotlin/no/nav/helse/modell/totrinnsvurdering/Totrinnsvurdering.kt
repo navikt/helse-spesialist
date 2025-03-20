@@ -4,10 +4,19 @@ import no.nav.helse.modell.OppgaveAlleredeSendtBeslutter
 import no.nav.helse.modell.OppgaveAlleredeSendtIRetur
 import no.nav.helse.modell.OppgaveKreverVurderingAvToSaksbehandlere
 import no.nav.helse.modell.saksbehandler.handlinger.Overstyring
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_BESLUTTER
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_SAKSBEHANDLER
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.GODKJENT
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.ddd.AggregateRoot
 import java.time.LocalDateTime
 import java.util.UUID
+
+enum class TotrinnsvurderingTilstand {
+    AVVENTER_SAKSBEHANDLER,
+    AVVENTER_BESLUTTER,
+    GODKJENT,
+}
 
 @JvmInline
 value class TotrinnsvurderingId(val value: Long)
@@ -16,21 +25,17 @@ class Totrinnsvurdering private constructor(
     id: TotrinnsvurderingId?,
     val fødselsnummer: String,
     val vedtaksperiodeId: UUID,
-    erRetur: Boolean,
     saksbehandler: SaksbehandlerOid?,
     beslutter: SaksbehandlerOid?,
     utbetalingId: UUID?,
     val opprettet: LocalDateTime,
     oppdatert: LocalDateTime?,
     overstyringer: List<Overstyring> = emptyList(),
-    ferdigstilt: Boolean = false,
+    tilstand: TotrinnsvurderingTilstand,
 ) : AggregateRoot<TotrinnsvurderingId>(id) {
     private val _overstyringer: MutableList<Overstyring> = overstyringer.toMutableList()
     val overstyringer: List<Overstyring>
         get() = _overstyringer
-
-    var erRetur: Boolean = erRetur
-        private set
 
     var saksbehandler: SaksbehandlerOid? = saksbehandler
         private set
@@ -44,27 +49,18 @@ class Totrinnsvurdering private constructor(
     var oppdatert: LocalDateTime? = oppdatert
         private set
 
-    var ferdigstilt: Boolean = ferdigstilt
+    var tilstand: TotrinnsvurderingTilstand = tilstand
         private set
 
-    val erBeslutteroppgave: Boolean get() = !erRetur && saksbehandler != null
-
-    fun settRetur() =
+    fun settAvventerSaksbehandler() =
         oppdatering {
-            erRetur = true
+            tilstand = AVVENTER_SAKSBEHANDLER
         }
 
     fun settBeslutter(beslutter: SaksbehandlerOid) =
         oppdatering {
             this.beslutter = beslutter
         }
-
-    fun settSaksbehandler(saksbehandlerOid: SaksbehandlerOid) {
-        check(saksbehandler == null) { "Forsøker å overskrive satt saskbehandler" }
-        oppdatering {
-            this.saksbehandler = saksbehandlerOid
-        }
-    }
 
     fun nyOverstyring(overstyring: Overstyring) =
         oppdatering {
@@ -75,22 +71,22 @@ class Totrinnsvurdering private constructor(
         oppgaveId: Long,
         behandlendeSaksbehandler: SaksbehandlerOid,
     ) = oppdatering {
-        if (erBeslutteroppgave) throw OppgaveAlleredeSendtBeslutter(oppgaveId)
+        if (tilstand == AVVENTER_BESLUTTER) throw OppgaveAlleredeSendtBeslutter(oppgaveId)
         if (behandlendeSaksbehandler == beslutter) throw OppgaveKreverVurderingAvToSaksbehandlere(oppgaveId)
 
         saksbehandler = behandlendeSaksbehandler
-        if (erRetur) erRetur = false
+        tilstand = AVVENTER_BESLUTTER
     }
 
     fun sendIRetur(
         oppgaveId: Long,
         beslutter: SaksbehandlerOid,
     ) = oppdatering {
-        if (!erBeslutteroppgave) throw OppgaveAlleredeSendtIRetur(oppgaveId)
+        if (tilstand != AVVENTER_BESLUTTER) throw OppgaveAlleredeSendtIRetur(oppgaveId)
         if (beslutter == saksbehandler) throw OppgaveKreverVurderingAvToSaksbehandlere(oppgaveId)
 
         this.beslutter = beslutter
-        erRetur = true
+        tilstand = AVVENTER_SAKSBEHANDLER
     }
 
     fun ferdigstill(
@@ -98,7 +94,7 @@ class Totrinnsvurdering private constructor(
         skalBenytteNyTotrinnsvurderingsløsning: Boolean = false,
     ) = oppdatering {
         this.utbetalingId = utbetalingId
-        this.ferdigstilt = true
+        tilstand = GODKJENT
         if (!skalBenytteNyTotrinnsvurderingsløsning) {
             this._overstyringer
                 .filter {
@@ -123,7 +119,7 @@ class Totrinnsvurdering private constructor(
         return this === other || (
             other is Totrinnsvurdering &&
                 vedtaksperiodeId == other.vedtaksperiodeId &&
-                erRetur == other.erRetur &&
+                tilstand == other.tilstand &&
                 saksbehandler == other.saksbehandler &&
                 beslutter == other.beslutter &&
                 utbetalingId == other.utbetalingId &&
@@ -134,7 +130,7 @@ class Totrinnsvurdering private constructor(
 
     override fun hashCode(): Int {
         var result = vedtaksperiodeId.hashCode()
-        result = 31 * result + erRetur.hashCode()
+        result = 31 * result + tilstand.hashCode()
         result = 31 * result + (saksbehandler?.hashCode() ?: 0)
         result = 31 * result + (beslutter?.hashCode() ?: 0)
         result = 31 * result + (utbetalingId?.hashCode() ?: 0)
@@ -152,14 +148,13 @@ class Totrinnsvurdering private constructor(
                 id = null,
                 fødselsnummer = fødselsnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
-                erRetur = false,
                 saksbehandler = null,
                 beslutter = null,
                 utbetalingId = null,
                 opprettet = LocalDateTime.now(),
                 oppdatert = null,
                 overstyringer = emptyList(),
-                ferdigstilt = false,
+                tilstand = AVVENTER_SAKSBEHANDLER,
             )
         }
 
@@ -167,27 +162,25 @@ class Totrinnsvurdering private constructor(
             id: TotrinnsvurderingId,
             fødselsnummer: String,
             vedtaksperiodeId: UUID,
-            erRetur: Boolean,
             saksbehandler: SaksbehandlerOid?,
             beslutter: SaksbehandlerOid?,
             utbetalingId: UUID?,
             opprettet: LocalDateTime,
             oppdatert: LocalDateTime?,
             overstyringer: List<Overstyring>,
-            ferdigstilt: Boolean,
+            tilstand: TotrinnsvurderingTilstand,
         ): Totrinnsvurdering {
             return Totrinnsvurdering(
                 id = id,
                 fødselsnummer = fødselsnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
-                erRetur = erRetur,
                 saksbehandler = saksbehandler,
                 beslutter = beslutter,
                 utbetalingId = utbetalingId,
                 opprettet = opprettet,
                 oppdatert = oppdatert,
                 overstyringer = overstyringer,
-                ferdigstilt = ferdigstilt,
+                tilstand = tilstand,
             )
         }
     }

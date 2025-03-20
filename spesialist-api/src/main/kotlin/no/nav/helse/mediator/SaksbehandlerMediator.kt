@@ -59,6 +59,7 @@ import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlinghåndtererImpl
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_BESLUTTER
 import no.nav.helse.modell.vedtak.Utfall
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import no.nav.helse.spesialist.api.SendIReturResult
@@ -291,7 +292,7 @@ class SaksbehandlerMediator(
         val totrinnsvurdering =
             eksisterendeTotrinnsvurdering(vedtaksperiodeId, fødselsnummer, totrinnsvurderingRepository)
         val feil =
-            if (totrinnsvurdering?.erBeslutteroppgave == true) {
+            if (totrinnsvurdering?.tilstand == AVVENTER_BESLUTTER) {
                 if (!legacySaksbehandler.harTilgangTil(listOf(Egenskap.BESLUTTER)) && !env.kanGodkjenneUtenBesluttertilgang) {
                     VedtakResultat.Feil.BeslutterFeil.TrengerBeslutterRolle()
                 } else if (totrinnsvurdering.saksbehandler?.value == legacySaksbehandler.oid && !env.kanBeslutteEgneSaker) {

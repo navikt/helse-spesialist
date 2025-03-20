@@ -20,6 +20,7 @@ import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.person.HentEnhetløsning.Companion.erEnhetUtland
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.GODKJENT
 import no.nav.helse.modell.utbetaling.Refusjonstype
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
@@ -258,7 +259,7 @@ internal class Automatisering(
         val antallÅpneGosysoppgaver = åpneGosysOppgaverDao.antallÅpneOppgaver(fødselsnummer)
         val harPågåendeOverstyring =
             if (featureToggles.skalBenytteNyTotrinnsvurderingsløsning()) {
-                totrinnsvurderingRepository.finn(fødselsnummer)?.ferdigstilt == false
+                totrinnsvurderingRepository.finn(fødselsnummer)?.tilstand != GODKJENT
             } else {
                 overstyringDao.harVedtaksperiodePågåendeOverstyring(vedtaksperiodeId)
             }

@@ -11,6 +11,8 @@ import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlinghåndtererImpl
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_BESLUTTER
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_SAKSBEHANDLER
 import no.nav.helse.spesialist.api.SendIReturResult
 import no.nav.helse.spesialist.api.SendTilGodkjenningResult
 import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
@@ -177,7 +179,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         }
         checkNotNull(totrinnsvurdering)
         assertEquals(saksbehandler.oid, totrinnsvurdering.saksbehandler?.value)
-        assertTrue(totrinnsvurdering.erBeslutteroppgave)
+        assertEquals(AVVENTER_BESLUTTER, totrinnsvurdering.tilstand)
         assertVedtakBegrunnelse(expectedUtfall = utfall, expectedBegrunnelse = "Begrunnelse")
     }
 
@@ -228,7 +230,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         }
         checkNotNull(totrinnsvurdering)
         assertEquals(saksbehandler.oid, totrinnsvurdering.saksbehandler?.value)
-        assertTrue(totrinnsvurdering.erBeslutteroppgave)
+        assertEquals(AVVENTER_BESLUTTER, totrinnsvurdering.tilstand)
     }
 
     @Test
@@ -274,7 +276,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         }
         checkNotNull(totrinnsvurdering)
         assertTrue(totrinnsvurdering.overstyringer.single().opprettet.isAfter(LocalDateTime.now().minusSeconds(5)))
-        assertFalse(totrinnsvurdering.erBeslutteroppgave)
+        assertEquals(AVVENTER_SAKSBEHANDLER, totrinnsvurdering.tilstand)
     }
 
     @Test
@@ -323,7 +325,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         checkNotNull(totrinnsvurdering)
         assertEquals(saksbehandler2Oid, totrinnsvurdering.saksbehandler?.value)
         assertTrue(totrinnsvurdering.overstyringer.single().opprettet.isAfter(LocalDateTime.now().minusSeconds(5)))
-        assertTrue(totrinnsvurdering.erBeslutteroppgave)
+        assertEquals(AVVENTER_BESLUTTER, totrinnsvurdering.tilstand)
     }
 
     @Test
@@ -387,7 +389,7 @@ internal class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         checkNotNull(totrinnsvurdering)
         assertEquals(saksbehandler.oid, totrinnsvurdering.saksbehandler?.value)
         assertEquals(beslutter.oid, totrinnsvurdering.beslutter?.value)
-        assertTrue(totrinnsvurdering.erRetur)
+        assertEquals(AVVENTER_SAKSBEHANDLER, totrinnsvurdering.tilstand)
     }
 
     @Test

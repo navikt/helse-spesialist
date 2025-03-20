@@ -39,17 +39,17 @@ class PgTotrinnsvurderingRepository(session: Session) : QueryRunner by MedSessio
             SELECT tv.id,
                    tv.vedtaksperiode_id,
                    p.fødselsnummer,
-                   er_retur,
                    tv.saksbehandler as saksbehandler_oid,
                    tv.beslutter as beslutter_oid,
                    ui.id as utbetaling_id,
+                   tv.tilstand,
                    tv.opprettet,
                    tv.oppdatert
             FROM totrinnsvurdering tv
                      INNER JOIN person p on tv.person_ref = p.id
                      LEFT JOIN utbetaling_id ui on ui.id = tv.utbetaling_id_ref
             WHERE p.fødselsnummer = :fodselsnummer
-              AND utbetaling_id_ref IS NULL
+              AND tv.tilstand != 'GODKJENT'
             """.trimIndent(),
             "fodselsnummer" to fødselsnummer,
         ).singleOrNull { it.toTotrinnsvurdering() }
@@ -61,10 +61,10 @@ class PgTotrinnsvurderingRepository(session: Session) : QueryRunner by MedSessio
             SELECT DISTINCT ON (tv.id)
                    v.vedtaksperiode_id,
                    tv.id,
-                   er_retur,
                    tv.saksbehandler as saksbehandler_oid,
                    tv.beslutter as beslutter_oid,
                    ui.id as utbetaling_id,
+                   tv.tilstand,
                    tv.opprettet,
                    tv.oppdatert,
                    p.fødselsnummer
@@ -74,7 +74,7 @@ class PgTotrinnsvurderingRepository(session: Session) : QueryRunner by MedSessio
                      INNER JOIN oppgave o on v.id = o.vedtak_ref
                      LEFT JOIN utbetaling_id ui on ui.id = tv.utbetaling_id_ref
             WHERE v.vedtaksperiode_id = :vedtaksperiodeId
-              AND utbetaling_id_ref IS NULL
+              AND tv.tilstand != 'GODKJENT'
             """.trimIndent(),
             "vedtaksperiodeId" to vedtaksperiodeId,
         ).singleOrNull { it.toTotrinnsvurderingDeprecated() }
@@ -82,16 +82,16 @@ class PgTotrinnsvurderingRepository(session: Session) : QueryRunner by MedSessio
     private fun insert(totrinnsvurdering: Totrinnsvurdering): Long =
         asSQL(
             """
-            INSERT INTO totrinnsvurdering (vedtaksperiode_id, er_retur, saksbehandler, beslutter, person_ref, opprettet, oppdatert)
-            SELECT :vedtaksperiodeId, :erRetur, :saksbehandler, :beslutter, p.id, :opprettet, null
+            INSERT INTO totrinnsvurdering (vedtaksperiode_id, saksbehandler, beslutter, person_ref, tilstand, opprettet, oppdatert)
+            SELECT :vedtaksperiodeId, :saksbehandler, :beslutter, p.id, CAST(:tilstand AS totrinnsvurdering_tilstand), :opprettet, null
             FROM person p 
             WHERE p.fødselsnummer = :fodselsnummer
             """.trimIndent(),
             "vedtaksperiodeId" to totrinnsvurdering.vedtaksperiodeId,
-            "erRetur" to totrinnsvurdering.erRetur,
             "saksbehandler" to totrinnsvurdering.saksbehandler?.value,
             "beslutter" to totrinnsvurdering.beslutter?.value,
             "fodselsnummer" to totrinnsvurdering.fødselsnummer,
+            "tilstand" to totrinnsvurdering.tilstand.name,
             "opprettet" to totrinnsvurdering.opprettet,
         ).updateAndReturnGeneratedKey()
 
@@ -99,18 +99,18 @@ class PgTotrinnsvurderingRepository(session: Session) : QueryRunner by MedSessio
         asSQL(
             """
             UPDATE totrinnsvurdering 
-            SET er_retur            = :erRetur,
-                saksbehandler       = :saksbehandler,
+            SET saksbehandler       = :saksbehandler,
                 beslutter           = :beslutter,
                 utbetaling_id_ref   = (SELECT id from utbetaling_id ui WHERE ui.utbetaling_id = :utbetalingId),
+                tilstand            = CAST(:tilstand AS totrinnsvurdering_tilstand),
                 oppdatert           = :oppdatert
             WHERE id = :id
             """.trimIndent(),
             "id" to totrinnsvurdering.id().value,
-            "erRetur" to totrinnsvurdering.erRetur,
             "saksbehandler" to totrinnsvurdering.saksbehandler?.value,
             "beslutter" to totrinnsvurdering.beslutter?.value,
             "utbetalingId" to totrinnsvurdering.utbetalingId,
+            "tilstand" to totrinnsvurdering.tilstand.name,
             "oppdatert" to totrinnsvurdering.oppdatert,
         ).update()
     }
@@ -120,13 +120,12 @@ class PgTotrinnsvurderingRepository(session: Session) : QueryRunner by MedSessio
             id = TotrinnsvurderingId(long("id")),
             vedtaksperiodeId = uuid("vedtaksperiode_id"),
             fødselsnummer = string("fødselsnummer"),
-            erRetur = boolean("er_retur"),
             saksbehandler = uuidOrNull("saksbehandler_oid")?.let(::SaksbehandlerOid),
             beslutter = uuidOrNull("beslutter_oid")?.let(::SaksbehandlerOid),
             utbetalingId = uuidOrNull("utbetaling_id"),
             opprettet = localDateTime("opprettet"),
             oppdatert = localDateTimeOrNull("oppdatert"),
-            ferdigstilt = uuidOrNull("utbetaling_id") != null,
+            tilstand = enumValueOf(string("tilstand")),
             overstyringer = overstyringRepository.finnAktive(string("fødselsnummer"), TotrinnsvurderingId(long("id"))),
         )
 
@@ -136,13 +135,12 @@ class PgTotrinnsvurderingRepository(session: Session) : QueryRunner by MedSessio
             id = TotrinnsvurderingId(long("id")),
             vedtaksperiodeId = uuid("vedtaksperiode_id"),
             fødselsnummer = string("fødselsnummer"),
-            erRetur = boolean("er_retur"),
             saksbehandler = uuidOrNull("saksbehandler_oid")?.let(::SaksbehandlerOid),
             beslutter = uuidOrNull("beslutter_oid")?.let(::SaksbehandlerOid),
             utbetalingId = uuidOrNull("utbetaling_id"),
             opprettet = localDateTime("opprettet"),
             oppdatert = localDateTimeOrNull("oppdatert"),
-            ferdigstilt = uuidOrNull("utbetaling_id") != null,
+            tilstand = enumValueOf(string("tilstand")),
             overstyringer = overstyringRepository.finnAktive(string("fødselsnummer")),
         )
 }

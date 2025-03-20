@@ -16,6 +16,9 @@ import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_BESLUTTER
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_SAKSBEHANDLER
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
@@ -125,19 +128,22 @@ internal class VurderBehovForTotrinnskontrollTest {
     }
 
     @Test
-    fun `Hvis totrinnsvurdering har beslutter skal totrinnsvurderingen markeres som retur`() {
+    fun `Hvis totrinnsvurdering har beslutter skal tilstanden til totrinnsvurderingen settes tilbake til AVVENTER_SAKSBEHANDLER`() {
         val saksbehandler = lagSaksbehandlerOid()
         val beslutter = lagSaksbehandlerOid()
 
         every { overstyringDao.harVedtaksperiodePågåendeOverstyring(any()) } returns true
-        totrinnsvurderingRepository.totrinnsvurderingSomSkalReturneres = lagTotrinnsvurdering(false, saksbehandler, beslutter)
+        totrinnsvurderingRepository.totrinnsvurderingSomSkalReturneres = lagTotrinnsvurdering(
+            saksbehandler = saksbehandler,
+            beslutter = beslutter
+        )
 
         assertTrue(command.execute(context))
 
         assertEquals(1, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.size)
         verify(exactly = 1) { oppgaveService.reserverOppgave(saksbehandler.value, FØDSELSNUMMER) }
 
-        assertEquals(true, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.single().erRetur)
+        assertEquals(AVVENTER_SAKSBEHANDLER, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.single().tilstand)
 
         verify(exactly = 1) {
             periodehistorikkDao.lagre(historikkinnslag = any<TotrinnsvurderingAutomatiskRetur>(), any())
@@ -170,7 +176,7 @@ internal class VurderBehovForTotrinnskontrollTest {
     private fun lagSaksbehandlerOid(oid: UUID = UUID.randomUUID()) = SaksbehandlerOid(oid)
 
     private fun lagTotrinnsvurdering(
-        erRetur: Boolean = false,
+        tilstand: TotrinnsvurderingTilstand = AVVENTER_BESLUTTER,
         saksbehandler: SaksbehandlerOid = lagSaksbehandlerOid(),
         beslutter: SaksbehandlerOid = lagSaksbehandlerOid()
     ) =
@@ -178,14 +184,13 @@ internal class VurderBehovForTotrinnskontrollTest {
             id = TotrinnsvurderingId(nextLong()),
             vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
             fødselsnummer = FØDSELSNUMMER,
-            erRetur = erRetur,
             saksbehandler = saksbehandler,
             beslutter = beslutter,
             utbetalingId = null,
             opprettet = LocalDateTime.now(),
             oppdatert = LocalDateTime.now(),
             overstyringer = emptyList(),
-            ferdigstilt = false,
+            tilstand = tilstand,
         )
 
     private fun command(nyTotrinnsløype: Boolean = true) =

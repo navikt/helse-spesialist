@@ -4,6 +4,7 @@ import no.nav.helse.FeatureToggles
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.TildelingDao
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_BESLUTTER
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -31,7 +32,7 @@ internal class ReserverPersonHvisTildeltCommand(
                 totrinnsvurderingRepository.finn(vedtaksperiodeId)
             }
         val saksbehandlerOid: UUID =
-            if (totrinnsvurdering?.erBeslutteroppgave == true) {
+            if (totrinnsvurdering?.tilstand == AVVENTER_BESLUTTER) {
                 totrinnsvurdering.saksbehandler?.value ?: tildeltSaksbehandler.oid
             } else {
                 tildeltSaksbehandler.oid

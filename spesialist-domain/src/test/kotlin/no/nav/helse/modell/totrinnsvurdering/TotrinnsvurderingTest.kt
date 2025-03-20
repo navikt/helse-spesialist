@@ -6,6 +6,9 @@ import no.nav.helse.modell.OppgaveKreverVurderingAvToSaksbehandlere
 import no.nav.helse.modell.saksbehandler.handlinger.Overstyring
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinje
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinjedag
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_BESLUTTER
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_SAKSBEHANDLER
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.GODKJENT
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.testfixtures.jan
@@ -13,7 +16,6 @@ import no.nav.helse.spesialist.testfixtures.lagAktørId
 import no.nav.helse.spesialist.testfixtures.lagFødselsnummer
 import no.nav.helse.spesialist.testfixtures.lagOrganisasjonsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -31,7 +33,7 @@ internal class TotrinnsvurderingTest {
 
         assertEquals(behandlendeSaksbehandler, totrinnsvurdering.saksbehandler)
         assertEquals(null, totrinnsvurdering.beslutter)
-        assertEquals(false, totrinnsvurdering.erRetur)
+        assertEquals(AVVENTER_BESLUTTER, totrinnsvurdering.tilstand)
         assertEquals(null, totrinnsvurdering.utbetalingId)
     }
 
@@ -45,7 +47,7 @@ internal class TotrinnsvurderingTest {
 
         assertEquals(behandlendeSaksbehandler, totrinnsvurdering.saksbehandler)
         assertEquals(besluttendeSaksbehandler, totrinnsvurdering.beslutter)
-        assertEquals(true, totrinnsvurdering.erRetur)
+        assertEquals(AVVENTER_SAKSBEHANDLER, totrinnsvurdering.tilstand)
         assertEquals(null, totrinnsvurdering.utbetalingId)
     }
 
@@ -59,7 +61,7 @@ internal class TotrinnsvurderingTest {
         totrinnsvurdering.sendTilBeslutter(1L, behandlendeSaksbehandler)
         assertEquals(behandlendeSaksbehandler, totrinnsvurdering.saksbehandler)
         assertEquals(besluttendeSaksbehandler, totrinnsvurdering.beslutter)
-        assertEquals(false, totrinnsvurdering.erRetur)
+        assertEquals(AVVENTER_BESLUTTER, totrinnsvurdering.tilstand)
         assertEquals(null, totrinnsvurdering.utbetalingId)
     }
 
@@ -71,7 +73,7 @@ internal class TotrinnsvurderingTest {
         val utbetalingId = UUID.randomUUID()
         totrinnsvurdering.ferdigstill(utbetalingId, false)
         assertEquals(behandlendeSaksbehandler, totrinnsvurdering.saksbehandler)
-        assertEquals(false, totrinnsvurdering.erRetur)
+        assertEquals(GODKJENT, totrinnsvurdering.tilstand)
         assertEquals(utbetalingId, totrinnsvurdering.utbetalingId)
     }
 
@@ -103,7 +105,7 @@ internal class TotrinnsvurderingTest {
         val utbetalingId = UUID.randomUUID()
         totrinnsvurdering.ferdigstill(utbetalingId, true)
         assertEquals(behandlendeSaksbehandler, totrinnsvurdering.saksbehandler)
-        assertEquals(false, totrinnsvurdering.erRetur)
+        assertEquals(GODKJENT, totrinnsvurdering.tilstand)
         totrinnsvurdering.overstyringer.forEach {
             assertTrue(it.ferdigstilt)
         }
@@ -139,7 +141,7 @@ internal class TotrinnsvurderingTest {
         val utbetalingId = UUID.randomUUID()
         totrinnsvurdering.ferdigstill(utbetalingId)
         assertEquals(behandlendeSaksbehandler, totrinnsvurdering.saksbehandler)
-        assertEquals(false, totrinnsvurdering.erRetur)
+        assertEquals(GODKJENT, totrinnsvurdering.tilstand)
         totrinnsvurdering.overstyringer.forEach {
             assertTrue(it.ferdigstilt)
         }
@@ -208,9 +210,9 @@ internal class TotrinnsvurderingTest {
     }
 
     @Test
-    fun `ferdigstilt er default false`() {
+    fun `tilstand er default AVVENTER_SAKSBEHANDLER`() {
         val totrinnsvurdering = nyTotrinnsvurdering()
-        assertFalse(totrinnsvurdering.ferdigstilt)
+        assertEquals(AVVENTER_SAKSBEHANDLER, totrinnsvurdering.tilstand)
     }
 
     private fun nySaksbehandler(
@@ -219,7 +221,7 @@ internal class TotrinnsvurderingTest {
 
     private fun nyTotrinnsvurdering(
         vedtaksperiodeId: UUID = UUID.randomUUID(),
-        erRetur: Boolean = false,
+        tilstand: TotrinnsvurderingTilstand = AVVENTER_SAKSBEHANDLER,
         saksbehandler: SaksbehandlerOid? = null,
         beslutter: SaksbehandlerOid? = null,
         overstyringer: List<Overstyring> = emptyList()
@@ -227,14 +229,13 @@ internal class TotrinnsvurderingTest {
         id = TotrinnsvurderingId(nextLong()),
         vedtaksperiodeId = vedtaksperiodeId,
         fødselsnummer = "1234",
-        erRetur = erRetur,
         saksbehandler = saksbehandler,
         beslutter = beslutter,
         utbetalingId = null,
         opprettet = LocalDateTime.now(),
         oppdatert = LocalDateTime.now(),
         overstyringer = overstyringer,
-        ferdigstilt = false,
+        tilstand = tilstand,
     )
 
     private fun overstyrteDager(): List<OverstyrtTidslinjedag> = listOf(

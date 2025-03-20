@@ -18,6 +18,8 @@ import no.nav.helse.db.api.TotrinnsvurderingApiDao
 import no.nav.helse.db.api.VarselApiRepository
 import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_BESLUTTER
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.mapping.tilApiDag
 import no.nav.helse.spesialist.api.graphql.mapping.tilApiHendelse
 import no.nav.helse.spesialist.api.graphql.mapping.tilApiInntektstype
@@ -369,10 +371,10 @@ data class ApiBeregnetPeriodeResolver(
             return sessionFactory.transactionalSessionScope { sessionContext ->
                 sessionContext.totrinnsvurderingRepository.finn(fødselsnummer)?.let {
                     ApiTotrinnsvurdering(
-                        erRetur = it.erRetur,
+                        erRetur = it.tilstand == AVVENTER_SAKSBEHANDLER && it.saksbehandler != null,
                         saksbehandler = it.saksbehandler?.value,
                         beslutter = it.beslutter?.value,
-                        erBeslutteroppgave = !it.erRetur && it.saksbehandler != null,
+                        erBeslutteroppgave = it.tilstand == AVVENTER_BESLUTTER,
                     )
                 }
             }

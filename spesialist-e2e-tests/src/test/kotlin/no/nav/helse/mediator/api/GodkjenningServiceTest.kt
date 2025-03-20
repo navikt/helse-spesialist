@@ -2,6 +2,8 @@ package no.nav.helse.mediator.api
 
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_BESLUTTER
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_SAKSBEHANDLER
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import no.nav.helse.spesialist.testfixtures.lagEtternavn
@@ -144,14 +146,14 @@ internal class GodkjenningServiceTest : AbstractIntegrationTest() {
         val vedtaksperiodeId = oppgaveDao.finnVedtaksperiodeId(fødselsnummer = FØDSELSNUMMER)
 
         @Language("postgresql") val sql = """
-                insert into totrinnsvurdering (vedtaksperiode_id, person_ref) 
-                select :vedtaksperiodeId, p.id from person p where fødselsnummer = :fodselsnummer
+                insert into totrinnsvurdering (vedtaksperiode_id, person_ref, tilstand) 
+                select :vedtaksperiodeId, p.id, CAST(:tilstand as totrinnsvurdering_tilstand) from person p where fødselsnummer = :fodselsnummer
                 """
         sessionOf(dataSource).use { session ->
             session.run(
                 queryOf(
                     sql,
-                    mapOf("vedtaksperiodeId" to vedtaksperiodeId, "fodselsnummer" to FØDSELSNUMMER)
+                    mapOf("vedtaksperiodeId" to vedtaksperiodeId, "fodselsnummer" to FØDSELSNUMMER, "tilstand" to AVVENTER_SAKSBEHANDLER.name)
                 ).asUpdate
             )
         }
@@ -163,12 +165,12 @@ internal class GodkjenningServiceTest : AbstractIntegrationTest() {
         @Language("postgresql") val sql = """
             insert into totrinnsvurdering (
                 vedtaksperiode_id,
-                er_retur,
                 saksbehandler,
                 beslutter,
+                tilstand,
                 person_ref
             )
-            select :vedtaksperiodeId, :erRetur, :opprinneligSaksbehandler, :beslutter, p.id
+            select :vedtaksperiodeId, :opprinneligSaksbehandler, :beslutter, CAST(:tilstand as totrinnsvurdering_tilstand), p.id
             from person p where fødselsnummer = :fodselsnummer
         """
         sessionOf(dataSource).use { session ->
@@ -176,9 +178,9 @@ internal class GodkjenningServiceTest : AbstractIntegrationTest() {
                 queryOf(
                     sql, mapOf(
                         "vedtaksperiodeId" to vedtaksperiodeId,
-                        "erRetur" to false,
                         "opprinneligSaksbehandler" to opprinneligSaksbehandler,
                         "beslutter" to beslutter,
+                        "tilstand" to AVVENTER_BESLUTTER.name,
                         "fodselsnummer" to FØDSELSNUMMER,
                     )
                 ).asUpdate
