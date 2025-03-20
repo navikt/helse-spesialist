@@ -7,16 +7,7 @@ dependencies {
     api(project(":spesialist-db"))
     api(project(":spesialist-kafka"))
 
-    implementation(libs.unleash.client)
-    implementation(libs.bundles.logback)
     implementation(libs.rapidsAndRivers)
-    implementation(libs.micrometer.prometheus)
-
-    testImplementation(libs.hikari)
-    testImplementation(libs.bundles.flyway.postgres)
-    testImplementation(libs.mockOauth2Server)
-    testImplementation(libs.testcontainers.kafka)
-    testImplementation(libs.wiremock)
 
     testImplementation(testFixtures(project(":spesialist-db")))
     testImplementation(testFixtures(project(":spesialist-api")))
