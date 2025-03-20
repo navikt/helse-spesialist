@@ -12,8 +12,7 @@ import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.spesialist.api.ApiModule
 import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
 import no.nav.helse.spesialist.application.Reservasjonshenter
-import no.nav.helse.spesialist.client.entraid.EntraIDAccessTokenGenerator
-import no.nav.helse.spesialist.client.entraid.MsGraphGruppekontroll
+import no.nav.helse.spesialist.client.entraid.ClientEntraIDModule
 import no.nav.helse.spesialist.client.krr.KRRClientReservasjonshenter
 import no.nav.helse.spesialist.client.spleis.ClientSpleisModule
 import no.nav.helse.spesialist.db.DBModule
@@ -37,7 +36,7 @@ fun main() {
                         tokenEndpoint = env.getValue("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
                     ),
                 accessTokenGeneratorConfig =
-                    EntraIDAccessTokenGenerator.Configuration(
+                    ClientEntraIDModule.Configuration(
                         clientId = env.getValue("AZURE_APP_CLIENT_ID"),
                         tokenEndpoint = env.getValue("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
                         privateJwk = env.getValue("AZURE_APP_JWK"),
@@ -117,7 +116,9 @@ object RapidApp {
         val sessionFactory: SessionFactory = dbModule.sessionFactory
         val flywayMigrator: FlywayMigrator = dbModule.flywayMigrator
 
-        val accessTokenGenerator = EntraIDAccessTokenGenerator(configuration.accessTokenGeneratorConfig)
+        val clientEntraIdModule = ClientEntraIDModule(configuration.accessTokenGeneratorConfig)
+        val accessTokenGenerator = clientEntraIdModule.accessTokenGenerator
+        val gruppekontroll = clientEntraIdModule.gruppekontroll
 
         val featureToggles = UnleashFeatureToggles(configuration = configuration.unleashFeatureToggles)
 
@@ -136,7 +137,7 @@ object RapidApp {
             tilgangsgrupper = configuration.tilgangsgrupper,
             stikkprøver = configuration.stikkprøver,
             featureToggles = featureToggles,
-            gruppekontroll = MsGraphGruppekontroll(accessTokenGenerator),
+            gruppekontroll = gruppekontroll,
         )
 
         logg.info(
@@ -167,7 +168,7 @@ object RapidApp {
                 daos = daos,
                 tilgangsgrupper = configuration.tilgangsgrupper,
                 meldingPubliserer = meldingPubliserer,
-                gruppekontroll = MsGraphGruppekontroll(accessTokenGenerator),
+                gruppekontroll = gruppekontroll,
                 sessionFactory = sessionFactory,
                 versjonAvKode = versjonAvKode,
                 environmentToggles = configuration.environmentToggles,

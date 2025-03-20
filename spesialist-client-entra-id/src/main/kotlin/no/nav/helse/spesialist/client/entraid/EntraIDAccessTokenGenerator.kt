@@ -32,13 +32,11 @@ import java.time.temporal.ChronoUnit
 import java.util.Date
 import java.util.UUID
 
-class EntraIDAccessTokenGenerator(private val configuration: Configuration) : AccessTokenGenerator {
-    data class Configuration(
-        val clientId: String,
-        val tokenEndpoint: String,
-        val privateJwk: String,
-    )
-
+class EntraIDAccessTokenGenerator(
+    private val clientId: String,
+    private val tokenEndpoint: String,
+    private val privateJwk: String,
+) : AccessTokenGenerator {
     private val log = LoggerFactory.getLogger(EntraIDAccessTokenGenerator::class.java)
     private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     private val httpClient = createHttpClient()
@@ -59,13 +57,13 @@ class EntraIDAccessTokenGenerator(private val configuration: Configuration) : Ac
                         val response: TokenEndpointResponse =
                             try {
                                 val response =
-                                    httpClient.post(configuration.tokenEndpoint) {
+                                    httpClient.post(tokenEndpoint) {
                                         accept(ContentType.Application.Json)
                                         method = HttpMethod.Post
                                         setBody(
                                             FormDataContent(
                                                 Parameters.build {
-                                                    append("client_id", configuration.clientId)
+                                                    append("client_id", clientId)
                                                     append("scope", scope)
                                                     append("grant_type", "client_credentials")
                                                     append(
@@ -93,13 +91,13 @@ class EntraIDAccessTokenGenerator(private val configuration: Configuration) : Ac
     }
 
     private fun lagAssertion(): String {
-        val privateKey = RSAKey.parse(configuration.privateJwk)
+        val privateKey = RSAKey.parse(privateJwk)
         val now = Instant.now()
         return JWT.create().apply {
             withKeyId(privateKey.keyID)
-            withSubject(configuration.clientId)
-            withIssuer(configuration.clientId)
-            withAudience(configuration.tokenEndpoint)
+            withSubject(clientId)
+            withIssuer(clientId)
+            withAudience(tokenEndpoint)
             withJWTId(UUID.randomUUID().toString())
             withIssuedAt(Date.from(now))
             withNotBefore(Date.from(now))
