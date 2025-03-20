@@ -32,13 +32,9 @@ import java.util.UUID
 
 class SpleisClient(
     private val accessTokenGenerator: AccessTokenGenerator,
-    private val configuration: Configuration,
+    private val spleisUrl: URI,
+    private val spleisClientId: String,
 ) {
-    data class Configuration(
-        val spleisUrl: URI,
-        val spleisClientId: String,
-    )
-
     private val serializer: GraphQLClientSerializer =
         GraphQLClientJacksonSerializer(
             jacksonObjectMapper()
@@ -101,12 +97,12 @@ class SpleisClient(
         }
 
     private suspend fun <T : Any> execute(request: GraphQLClientRequest<T>): GraphQLClientResponse<T> {
-        val accessToken = accessTokenGenerator.hentAccessToken(configuration.spleisClientId)
+        val accessToken = accessTokenGenerator.hentAccessToken(spleisClientId)
         val callId = UUID.randomUUID().toString()
 
         val response =
             httpClient
-                .post(configuration.spleisUrl.resolve("/graphql").toURL()) {
+                .post(spleisUrl.resolve("/graphql").toURL()) {
                     header("Authorization", "Bearer $accessToken")
                     header("callId", callId)
                     contentType(ContentType.Application.Json)

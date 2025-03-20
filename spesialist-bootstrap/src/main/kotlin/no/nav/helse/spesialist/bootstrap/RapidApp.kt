@@ -15,8 +15,7 @@ import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.client.entraid.EntraIDAccessTokenGenerator
 import no.nav.helse.spesialist.client.entraid.MsGraphGruppekontroll
 import no.nav.helse.spesialist.client.krr.KRRClientReservasjonshenter
-import no.nav.helse.spesialist.client.spleis.SpleisClient
-import no.nav.helse.spesialist.client.spleis.SpleisClientSnapshothenter
+import no.nav.helse.spesialist.client.spleis.ClientSpleisModule
 import no.nav.helse.spesialist.db.DBModule
 import no.nav.helse.spesialist.db.FlywayMigrator
 import no.nav.helse.spesialist.kafka.KafkaModule
@@ -44,7 +43,7 @@ fun main() {
                         privateJwk = env.getValue("AZURE_APP_JWK"),
                     ),
                 spleisClientConfig =
-                    SpleisClient.Configuration(
+                    ClientSpleisModule.Configuration(
                         spleisUrl = URI.create(env.getValue("SPLEIS_API_URL")),
                         spleisClientId = env.getValue("SPLEIS_CLIENT_ID"),
                     ),
@@ -146,13 +145,12 @@ object RapidApp {
             }",
         )
 
-        val snapshothenter =
-            SpleisClientSnapshothenter(
-                SpleisClient(
-                    accessTokenGenerator = accessTokenGenerator,
-                    configuration = configuration.spleisClientConfig,
-                ),
+        val clientSpleisModule =
+            ClientSpleisModule(
+                configuration = configuration.spleisClientConfig,
+                accessTokenGenerator = accessTokenGenerator,
             )
+        val snapshothenter = clientSpleisModule.snapshothenter
 
         val reservasjonshenter = (
             configuration.krrConfig.client?.let {
