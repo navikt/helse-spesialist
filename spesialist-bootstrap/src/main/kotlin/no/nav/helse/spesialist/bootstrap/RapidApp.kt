@@ -103,7 +103,7 @@ private fun Map<String, String>.getBoolean(
 ): Boolean = this[key]?.toBoolean() ?: defaultValue
 
 object RapidApp {
-    lateinit var ktorSetupCallback: Application.() -> Unit
+    lateinit var ktorSetupCallback: (Application) -> Unit
 
     fun start(
         configuration: Configuration,
@@ -141,7 +141,7 @@ object RapidApp {
             gruppekontroll = clientEntraIdModule.gruppekontroll,
         )
 
-        ktorSetupCallback = {
+        ktorSetupCallback = { ktorApplication ->
             ApiModule(configuration.api).setUpApi(
                 daos = dbModule.daos,
                 tilgangsgrupper = configuration.tilgangsgrupper,
@@ -153,7 +153,7 @@ object RapidApp {
                 featureToggles = clientUnleashModule.featureToggles,
                 snapshothenter = clientSpleisModule.snapshothenter,
                 reservasjonshenter = clientKrrModule.reservasjonshenter,
-                application = this,
+                application = ktorApplication,
             )
         }
 
