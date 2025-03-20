@@ -5,8 +5,6 @@ import io.ktor.server.application.Application
 import io.micrometer.core.instrument.Metrics
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
-import no.nav.helse.db.Daos
-import no.nav.helse.db.SessionFactory
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.spesialist.api.ApiModule
@@ -15,7 +13,6 @@ import no.nav.helse.spesialist.client.entraid.ClientEntraIDModule
 import no.nav.helse.spesialist.client.krr.ClientKrrModule
 import no.nav.helse.spesialist.client.spleis.ClientSpleisModule
 import no.nav.helse.spesialist.db.DBModule
-import no.nav.helse.spesialist.db.FlywayMigrator
 import no.nav.helse.spesialist.kafka.KafkaModule
 import java.net.URI
 
@@ -75,7 +72,11 @@ fun main() {
                 kafka =
                     KafkaModule.Configuration(
                         versjonAvKode = versjonAvKode,
-                        ignorerMeldingerForUkjentePersoner = env.getBoolean("IGNORER_MELDINGER_FOR_UKJENTE_PERSONER", false),
+                        ignorerMeldingerForUkjentePersoner =
+                            env.getBoolean(
+                                "IGNORER_MELDINGER_FOR_UKJENTE_PERSONER",
+                                false,
+                            ),
                     ),
                 versjonAvKode = versjonAvKode,
                 tilgangsgrupper = SpeilTilgangsgrupper(env),
@@ -108,62 +109,50 @@ object RapidApp {
         configuration: Configuration,
         rapidsConnection: RapidsConnection,
     ) {
-        val dbModule = DBModule(configuration.db)
-        val daos: Daos = dbModule.daos
-        val sessionFactory: SessionFactory = dbModule.sessionFactory
-        val flywayMigrator: FlywayMigrator = dbModule.flywayMigrator
-
         val clientEntraIdModule = ClientEntraIDModule(configuration.clientEntraID)
-        val accessTokenGenerator = clientEntraIdModule.accessTokenGenerator
-        val gruppekontroll = clientEntraIdModule.gruppekontroll
+
+        val clientKrrModule =
+            ClientKrrModule(
+                configuration = configuration.clientKrr,
+                accessTokenGenerator = clientEntraIdModule.accessTokenGenerator,
+            )
+
+        val clientSpleisModule =
+            ClientSpleisModule(
+                configuration = configuration.clientSpleis,
+                accessTokenGenerator = clientEntraIdModule.accessTokenGenerator,
+            )
 
         val clientUnleashModule = ClientUnleashModule(configuration.clientUnleash)
-        val featureToggles = clientUnleashModule.featureToggles
 
-        val versjonAvKode = configuration.versjonAvKode
+        val dbModule = DBModule(configuration.db)
+
         val kafkaModule =
             KafkaModule(
                 configuration = configuration.kafka,
                 rapidsConnection = rapidsConnection,
             )
-
-        val meldingPubliserer = kafkaModule.meldingPubliserer
-
         kafkaModule.setUpKafka(
-            sessionFactory = sessionFactory,
-            daos = daos,
+            sessionFactory = dbModule.sessionFactory,
+            daos = dbModule.daos,
             tilgangsgrupper = configuration.tilgangsgrupper,
             stikkprøver = configuration.stikkprøver,
-            featureToggles = featureToggles,
-            gruppekontroll = gruppekontroll,
+            featureToggles = clientUnleashModule.featureToggles,
+            gruppekontroll = clientEntraIdModule.gruppekontroll,
         )
-
-        val clientSpleisModule =
-            ClientSpleisModule(
-                configuration = configuration.clientSpleis,
-                accessTokenGenerator = accessTokenGenerator,
-            )
-        val snapshothenter = clientSpleisModule.snapshothenter
-
-        val clientKrrModule =
-            ClientKrrModule(
-                configuration = configuration.clientKrr,
-                accessTokenGenerator = accessTokenGenerator,
-            )
-        val reservasjonshenter = clientKrrModule.reservasjonshenter
 
         ktorSetupCallback = {
             ApiModule(configuration.api).setUpApi(
-                daos = daos,
+                daos = dbModule.daos,
                 tilgangsgrupper = configuration.tilgangsgrupper,
-                meldingPubliserer = meldingPubliserer,
-                gruppekontroll = gruppekontroll,
-                sessionFactory = sessionFactory,
-                versjonAvKode = versjonAvKode,
+                meldingPubliserer = kafkaModule.meldingPubliserer,
+                gruppekontroll = clientEntraIdModule.gruppekontroll,
+                sessionFactory = dbModule.sessionFactory,
+                versjonAvKode = configuration.versjonAvKode,
                 environmentToggles = configuration.environmentToggles,
-                featureToggles = featureToggles,
-                snapshothenter = snapshothenter,
-                reservasjonshenter = reservasjonshenter,
+                featureToggles = clientUnleashModule.featureToggles,
+                snapshothenter = clientSpleisModule.snapshothenter,
+                reservasjonshenter = clientKrrModule.reservasjonshenter,
                 application = this,
             )
         }
@@ -171,7 +160,7 @@ object RapidApp {
         rapidsConnection.register(
             object : RapidsConnection.StatusListener {
                 override fun onStartup(rapidsConnection: RapidsConnection) {
-                    flywayMigrator.migrate()
+                    dbModule.flywayMigrator.migrate()
                 }
             },
         )
