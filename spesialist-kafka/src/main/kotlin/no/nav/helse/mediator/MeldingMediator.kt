@@ -2,7 +2,6 @@ package no.nav.helse.mediator
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.MeldingPubliserer
-import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.db.CommandContextDao
 import no.nav.helse.db.DokumentDao
 import no.nav.helse.db.MeldingDao
@@ -30,7 +29,7 @@ class MeldingMediator(
     private val dokumentDao: DokumentDao,
     private val varselRepository: VarselRepository,
     private val poisonPillDao: PoisonPillDao,
-    private val environmentToggles: EnvironmentToggles,
+    private val ignorerMeldingerForUkjentePersoner: Boolean,
 ) {
     private companion object {
         private val logg = LoggerFactory.getLogger(MeldingMediator::class.java)
@@ -47,8 +46,11 @@ class MeldingMediator(
 
             return false
         }
-        if (!environmentToggles.ignorerMeldingerForUkjentePersoner) return true
-        return skalBehandleMeldingIDev(jsonNode)
+        return if (ignorerMeldingerForUkjentePersoner) {
+            skalBehandleMeldingIDev(jsonNode)
+        } else {
+            true
+        }
     }
 
     private fun skalBehandleMeldingIDev(jsonNode: JsonNode): Boolean {

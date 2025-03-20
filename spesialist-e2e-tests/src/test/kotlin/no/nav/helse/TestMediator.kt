@@ -118,7 +118,7 @@ internal class TestMediator(
                 definisjonDao = daos.definisjonDao
             ),
             poisonPillDao = daos.poisonPillDao,
-            environmentToggles = environmentToggles,
+            ignorerMeldingerForUkjentePersoner = false
         )
         RiverSetup(testRapid, meldingMediator, daos.meldingDuplikatkontrollDao).setUp()
     }

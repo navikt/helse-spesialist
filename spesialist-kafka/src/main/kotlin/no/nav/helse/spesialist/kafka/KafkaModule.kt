@@ -4,7 +4,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import no.nav.helse.FeatureToggles
 import no.nav.helse.Gruppekontroll
 import no.nav.helse.MeldingPubliserer
-import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.db.Daos
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
@@ -22,6 +21,7 @@ import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
 class KafkaModule(private val configuration: Configuration, private val rapidsConnection: RapidsConnection) {
     data class Configuration(
         val versjonAvKode: String,
+        val ignorerMeldingerForUkjentePersoner: Boolean,
     )
 
     val meldingPubliserer: MeldingPubliserer = MessageContextMeldingPubliserer(rapidsConnection)
@@ -32,7 +32,6 @@ class KafkaModule(private val configuration: Configuration, private val rapidsCo
         tilgangsgrupper: Tilgangsgrupper,
         stikkprøver: Stikkprøver,
         featureToggles: FeatureToggles,
-        environmentToggles: EnvironmentToggles,
         gruppekontroll: Gruppekontroll,
     ) {
         RiverSetup(
@@ -76,7 +75,7 @@ class KafkaModule(private val configuration: Configuration, private val rapidsCo
                         definisjonDao = daos.definisjonDao,
                     ),
                 poisonPillDao = daos.poisonPillDao,
-                environmentToggles = environmentToggles,
+                ignorerMeldingerForUkjentePersoner = configuration.ignorerMeldingerForUkjentePersoner,
             ),
             daos.meldingDuplikatkontrollDao,
         ).setUp()

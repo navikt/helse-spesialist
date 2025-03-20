@@ -8,6 +8,7 @@ import io.ktor.server.application.Application
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.helse.rapids_rivers.RapidApplication
+import no.nav.helse.spesialist.kafka.KafkaModule
 import org.apache.kafka.clients.CommonClientConfigs
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.ProducerConfig
@@ -65,4 +66,9 @@ object KafkaTestFixture {
             putAll(connectionProperties)
         }
     }
+
+    val moduleConfiguration = KafkaModule.Configuration(
+        versjonAvKode = "versjon_1",
+        ignorerMeldingerForUkjentePersoner = false,
+    )
 }

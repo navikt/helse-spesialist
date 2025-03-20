@@ -8,6 +8,7 @@ import no.nav.helse.spesialist.client.entraid.EntraIDAccessTokenGenerator
 import no.nav.helse.spesialist.client.krr.KRRClientReservasjonshenter
 import no.nav.helse.spesialist.client.spleis.SpleisClient
 import no.nav.helse.spesialist.db.DBModule
+import no.nav.helse.spesialist.kafka.KafkaModule
 
 data class Configuration(
     val apiModuleConfiguration: ApiModule.Configuration,
@@ -15,6 +16,7 @@ data class Configuration(
     val spleisClientConfig: SpleisClient.Configuration,
     val krrConfig: KRRClientReservasjonshenter.Configuration,
     val dbConfig: DBModule.Configuration,
+    val kafkaModuleConfiguration: KafkaModule.Configuration,
     val unleashFeatureToggles: UnleashFeatureToggles.Configuration,
     val versjonAvKode: String,
     val tilgangsgrupper: Tilgangsgrupper,

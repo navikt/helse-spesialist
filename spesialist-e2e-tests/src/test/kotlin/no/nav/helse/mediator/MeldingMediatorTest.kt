@@ -42,7 +42,7 @@ internal class MeldingMediatorTest : AbstractDatabaseTest() {
                 definisjonDao = daos.definisjonDao
             ),
             poisonPillDao = poisonPillDao,
-            environmentToggles = environmentToggles,
+            ignorerMeldingerForUkjentePersoner = false
         )
 
     @BeforeEach

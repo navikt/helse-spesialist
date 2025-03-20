@@ -26,6 +26,7 @@ import java.net.URI
 
 fun main() {
     val env = System.getenv()
+    val versjonAvKode = env.getValue("NAIS_APP_IMAGE")
     RapidApp.start(
         configuration =
             Configuration(
@@ -70,13 +71,18 @@ fun main() {
                         username = env.getValue("DATABASE_USERNAME"),
                         password = env.getValue("DATABASE_PASSWORD"),
                     ),
+                kafkaModuleConfiguration =
+                    KafkaModule.Configuration(
+                        versjonAvKode = versjonAvKode,
+                        ignorerMeldingerForUkjentePersoner = env.getBoolean("IGNORER_MELDINGER_FOR_UKJENTE_PERSONER", false),
+                    ),
                 unleashFeatureToggles =
                     UnleashFeatureToggles.Configuration(
                         apiKey = env.getValue("UNLEASH_SERVER_API_TOKEN"),
                         apiUrl = env.getValue("UNLEASH_SERVER_API_URL"),
                         apiEnv = env.getValue("UNLEASH_SERVER_API_ENV"),
                     ),
-                versjonAvKode = env.getValue("NAIS_APP_IMAGE"),
+                versjonAvKode = versjonAvKode,
                 tilgangsgrupper = SpeilTilgangsgrupper(env),
                 environmentToggles = EnvironmentTogglesImpl(env),
                 stikkprøver = Stikkprøver.fraEnv(env),
@@ -119,7 +125,7 @@ object RapidApp {
         val versjonAvKode = configuration.versjonAvKode
         val kafkaModule =
             KafkaModule(
-                configuration = KafkaModule.Configuration(versjonAvKode = versjonAvKode),
+                configuration = configuration.kafkaModuleConfiguration,
                 rapidsConnection = rapidsConnection,
             )
 
@@ -130,7 +136,6 @@ object RapidApp {
             daos = daos,
             tilgangsgrupper = configuration.tilgangsgrupper,
             stikkprøver = configuration.stikkprøver,
-            environmentToggles = configuration.environmentToggles,
             featureToggles = featureToggles,
             gruppekontroll = MsGraphGruppekontroll(accessTokenGenerator),
         )

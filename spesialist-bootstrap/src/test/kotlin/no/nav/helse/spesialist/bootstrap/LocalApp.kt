@@ -32,8 +32,8 @@ fun main() {
                     }
                 }
             },
+            kafkaModuleConfiguration = KafkaTestFixture.moduleConfiguration,
             environmentToggles = object : EnvironmentToggles {
-                override val ignorerMeldingerForUkjentePersoner = false
                 override val kanBeslutteEgneSaker = false
                 override val kanGodkjenneUtenBesluttertilgang = false
             },
