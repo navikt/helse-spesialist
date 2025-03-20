@@ -41,7 +41,7 @@ object ApiTestFixture {
         with (application) {
             routing {
                 get("/local-token") {
-                    return@get call.respond<String>(message = ApiTestFixture.token)
+                    return@get call.respond<String>(message = token)
                 }
                 get("playground") {
                     call.respondText(buildPlaygroundHtml(), ContentType.Text.Html)

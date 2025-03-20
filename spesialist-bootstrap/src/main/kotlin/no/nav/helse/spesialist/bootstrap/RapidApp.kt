@@ -10,25 +10,17 @@ import no.nav.helse.db.Daos
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.kafka.RiverSetup
-import no.nav.helse.mediator.BehandlingsstatistikkService
 import no.nav.helse.mediator.GodkjenningMediator
-import no.nav.helse.mediator.GodkjenningService
 import no.nav.helse.mediator.Kommandofabrikk
 import no.nav.helse.mediator.MeldingMediator
-import no.nav.helse.mediator.PersonhåndtererImpl
-import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.mediator.TilgangskontrollørForReservasjon
-import no.nav.helse.mediator.dokument.DokumentMediator
-import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Stikkprøver
-import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlinghåndtererImpl
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.spesialist.api.ApiModule
 import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
-import no.nav.helse.spesialist.api.graphql.settOppGraphQLApi
 import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.client.entraid.EntraIDAccessTokenGenerator
 import no.nav.helse.spesialist.client.entraid.MsGraphGruppekontroll
@@ -133,20 +125,7 @@ object RapidApp {
 
         val featureToggles = UnleashFeatureToggles(configuration = configuration.unleashFeatureToggles)
 
-        val tilgangskontrollørForReservasjon =
-            TilgangskontrollørForReservasjon(MsGraphGruppekontroll(accessTokenGenerator), configuration.tilgangsgrupper)
-
         val meldingPubliserer: MeldingPubliserer = MessageContextMeldingPubliserer(rapidsConnection)
-
-        val oppgaveService =
-            OppgaveService(
-                oppgaveDao = daos.oppgaveDao,
-                reservasjonDao = daos.reservasjonDao,
-                meldingPubliserer = meldingPubliserer,
-                tilgangskontroll = tilgangskontrollørForReservasjon,
-                tilgangsgrupper = configuration.tilgangsgrupper,
-                oppgaveRepository = daos.oppgaveRepository,
-            )
 
         RiverSetup(
             rapidsConnection,
@@ -158,7 +137,22 @@ object RapidApp {
                 meldingDuplikatkontrollDao = daos.meldingDuplikatkontrollDao,
                 kommandofabrikk =
                     Kommandofabrikk(
-                        oppgaveService = { oppgaveService },
+                        oppgaveService = {
+                            OppgaveService(
+                                oppgaveDao = daos.oppgaveDao,
+                                reservasjonDao = daos.reservasjonDao,
+                                meldingPubliserer = meldingPubliserer,
+                                tilgangskontroll =
+                                    TilgangskontrollørForReservasjon(
+                                        MsGraphGruppekontroll(
+                                            accessTokenGenerator,
+                                        ),
+                                        configuration.tilgangsgrupper,
+                                    ),
+                                tilgangsgrupper = configuration.tilgangsgrupper,
+                                oppgaveRepository = daos.oppgaveRepository,
+                            )
+                        },
                         godkjenningMediator = GodkjenningMediator(daos.opptegnelseDao),
                         subsumsjonsmelderProvider = {
                             Subsumsjonsmelder(
@@ -187,72 +181,37 @@ object RapidApp {
             }",
         )
 
+        val snapshothenter =
+            SpleisClientSnapshothenter(
+                SpleisClient(
+                    accessTokenGenerator = accessTokenGenerator,
+                    configuration = configuration.spleisClientConfig,
+                ),
+            )
+
+        val reservasjonshenter = (
+            configuration.krrConfig.client?.let {
+                KRRClientReservasjonshenter(
+                    configuration = it,
+                    accessTokenGenerator = accessTokenGenerator,
+                )
+            }
+                ?: Reservasjonshenter { null }.also { logg.info("Bruker nulloperasjonsversjon av reservasjonshenter") }
+        )
+
         ktorSetupCallback = {
-            val apiOppgaveService =
-                ApiOppgaveService(
-                    oppgaveDao = daos.oppgaveDao,
-                    tilgangsgrupper = configuration.tilgangsgrupper,
-                    oppgaveService = oppgaveService,
-                )
-            val stansAutomatiskBehandlinghåndterer =
-                StansAutomatiskBehandlinghåndtererImpl(
-                    daos.stansAutomatiskBehandlingDao,
-                    daos.oppgaveDao,
-                    daos.notatDao,
-                    daos.dialogDao,
-                )
-            settOppGraphQLApi(
+            ApiModule(configuration.apiModuleConfiguration).setUpApi(
                 daos = daos,
-                sessionFactory = sessionFactory,
-                saksbehandlerMediator =
-                    SaksbehandlerMediator(
-                        daos = daos,
-                        versjonAvKode = configuration.versjonAvKode,
-                        meldingPubliserer = meldingPubliserer,
-                        oppgaveService = oppgaveService,
-                        apiOppgaveService = apiOppgaveService,
-                        tilgangsgrupper = configuration.tilgangsgrupper,
-                        stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
-                        annulleringRepository = daos.annulleringRepository,
-                        environmentToggles = configuration.environmentToggles,
-                        featureToggles = featureToggles,
-                        sessionFactory = sessionFactory,
-                        tilgangskontroll = tilgangskontrollørForReservasjon,
-                    ),
-                apiOppgaveService = apiOppgaveService,
-                godkjenninghåndterer =
-                    GodkjenningService(
-                        oppgaveDao = daos.oppgaveDao,
-                        publiserer = meldingPubliserer,
-                        oppgaveService = oppgaveService,
-                        reservasjonDao = daos.reservasjonDao,
-                        periodehistorikkDao = daos.periodehistorikkDao,
-                        sessionFactory = sessionFactory,
-                        featureToggles = featureToggles,
-                    ),
-                personhåndterer = PersonhåndtererImpl(publiserer = meldingPubliserer),
-                dokumenthåndterer = DokumentMediator(daos.dokumentDao, meldingPubliserer),
-                stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
-                behandlingstatistikk = BehandlingsstatistikkService(behandlingsstatistikkDao = daos.behandlingsstatistikkDao),
-                snapshothenter =
-                    SpleisClientSnapshothenter(
-                        SpleisClient(
-                            accessTokenGenerator = accessTokenGenerator,
-                            configuration = configuration.spleisClientConfig,
-                        ),
-                    ),
-                reservasjonshenter =
-                    configuration.krrConfig.client?.let {
-                        KRRClientReservasjonshenter(
-                            configuration = it,
-                            accessTokenGenerator = accessTokenGenerator,
-                        )
-                    }
-                        ?: Reservasjonshenter { null }.also { logg.info("Bruker nulloperasjonsversjon av reservasjonshenter") },
                 tilgangsgrupper = configuration.tilgangsgrupper,
                 meldingPubliserer = meldingPubliserer,
+                gruppekontroll = MsGraphGruppekontroll(accessTokenGenerator),
+                sessionFactory = sessionFactory,
+                versjonAvKode = configuration.versjonAvKode,
+                environmentToggles = configuration.environmentToggles,
                 featureToggles = featureToggles,
-                apiModuleConfiguration = configuration.apiModuleConfiguration,
+                snapshothenter = snapshothenter,
+                reservasjonshenter = reservasjonshenter,
+                application = this,
             )
         }
 
