@@ -18,7 +18,6 @@ import no.nav.helse.spesialist.db.DBModule
 import no.nav.helse.spesialist.db.FlywayMigrator
 import no.nav.helse.spesialist.kafka.KafkaModule
 import org.slf4j.LoggerFactory
-import java.lang.management.ManagementFactory
 import java.net.URI
 
 fun main() {
@@ -137,12 +136,6 @@ object RapidApp {
             stikkprøver = configuration.stikkprøver,
             featureToggles = featureToggles,
             gruppekontroll = gruppekontroll,
-        )
-
-        logg.info(
-            "Registrerte garbage collectors etter oppstart: ${
-                ManagementFactory.getGarbageCollectorMXBeans().joinToString { it.name }
-            }",
         )
 
         val clientSpleisModule =
