@@ -5,7 +5,6 @@ import no.nav.helse.spesialist.db.testfixtures.DBTestFixture
 
 abstract class AbstractDatabaseTest {
     protected val environmentToggles: EnvironmentToggles = object : EnvironmentToggles, Map<String, String> by emptyMap() {
-        override val brukDummyForKRR = false
         override val ignorerMeldingerForUkjentePersoner = false
         override val kanBeslutteEgneSaker = false
         override val kanGodkjenneUtenBesluttertilgang = false

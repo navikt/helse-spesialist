@@ -33,7 +33,6 @@ fun main() {
                 }
             },
             environmentToggles = object : EnvironmentToggles {
-                override val brukDummyForKRR = false
                 override val ignorerMeldingerForUkjentePersoner = false
                 override val kanBeslutteEgneSaker = false
                 override val kanGodkjenneUtenBesluttertilgang = false
