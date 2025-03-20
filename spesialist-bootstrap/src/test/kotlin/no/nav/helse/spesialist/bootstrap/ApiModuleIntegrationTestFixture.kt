@@ -10,7 +10,7 @@ import no.nav.helse.spesialist.api.ApiModule
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import java.util.UUID
 
-object ApiTestFixture {
+object ApiModuleIntegrationTestFixture {
     private val mockOAuth2Server = MockOAuth2Server().also(MockOAuth2Server::start)
     private const val CLIENT_ID = "en-client-id"
     private const val ISSUER_ID = "LocalTestIssuer"

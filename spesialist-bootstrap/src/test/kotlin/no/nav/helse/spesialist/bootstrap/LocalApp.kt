@@ -10,13 +10,13 @@ import java.util.UUID
 fun main() {
     RapidApp.start(
         configuration = Configuration(
-            api = ApiTestFixture.apiModuleConfiguration,
-            clientEntraID = ClientEntraIDTestFixture.entraIDAccessTokenGeneratorConfiguration,
-            clientKrr = ClientKRRTestFixture.moduleConfiguration,
-            clientSpleis = ClientSpleisTestFixture.moduleConfiguration,
-            clientUnleash = UnleashTestFixture.moduleConfiguration,
+            api = ApiModuleIntegrationTestFixture.apiModuleConfiguration,
+            clientEntraID = ClientEntraIDModuleIntegrationTestFixture.entraIDAccessTokenGeneratorConfiguration,
+            clientKrr = ClientKRRModuleIntegationTestFixture.moduleConfiguration,
+            clientSpleis = ClientSpleisModuleIntegrationTestFixture.moduleConfiguration,
+            clientUnleash = ClientUnleashModuleIntegrationTestFixture.moduleConfiguration,
             db = DBTestFixture.database.dbModuleConfiguration,
-            kafka = KafkaTestFixture.moduleConfiguration,
+            kafka = KafkaModuleIntegrationTestFixture.moduleConfiguration,
             versjonAvKode = "versjon_1",
             tilgangsgrupper = object : Tilgangsgrupper {
                 override val kode7GruppeId: UUID = UUID.randomUUID()
@@ -47,9 +47,9 @@ fun main() {
                 override fun fullRefusjonEnArbeidsgiver(): Boolean = false
             },
         ),
-        rapidsConnection = KafkaTestFixture.createRapidApplication { ktorApplication ->
+        rapidsConnection = KafkaModuleIntegrationTestFixture.createRapidApplication { ktorApplication ->
             RapidApp.ktorSetupCallback(ktorApplication)
-            ApiTestFixture.addAdditionalRoutings(ktorApplication)
+            ApiModuleIntegrationTestFixture.addAdditionalRoutings(ktorApplication)
         },
     )
 }

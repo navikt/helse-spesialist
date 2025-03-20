@@ -2,15 +2,15 @@ package no.nav.helse.spesialist.bootstrap
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import no.nav.helse.spesialist.client.spleis.ClientSpleisModule
-import java.net.URI
+import no.nav.helse.spesialist.client.entraid.ClientEntraIDModule
 
-object ClientSpleisTestFixture {
+object ClientEntraIDModuleIntegrationTestFixture {
     private val wireMockServer: WireMockServer = WireMockServer(WireMockConfiguration.options().dynamicPort()).also(
         WireMockServer::start)
 
-    val moduleConfiguration = ClientSpleisModule.Configuration(
-        spleisUrl = URI.create(wireMockServer.baseUrl()),
-        spleisClientId = "local-app",
+    val entraIDAccessTokenGeneratorConfiguration = ClientEntraIDModule.Configuration(
+        clientId = "123abc",
+        tokenEndpoint = wireMockServer.baseUrl(),
+        privateJwk = "",
     )
 }

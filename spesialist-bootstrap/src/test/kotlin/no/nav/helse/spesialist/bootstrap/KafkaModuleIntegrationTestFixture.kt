@@ -17,7 +17,7 @@ import org.testcontainers.utility.DockerImageName
 import java.time.Instant
 import java.util.Properties
 
-object KafkaTestFixture {
+object KafkaModuleIntegrationTestFixture {
     private val kafka = ConfluentKafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.7.1")).apply {
         withReuse(true)
         start()
