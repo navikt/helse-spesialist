@@ -18,7 +18,16 @@ import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
 
-class KafkaModule(private val configuration: Configuration, private val rapidsConnection: RapidsConnection) {
+class KafkaModule(
+    configuration: Configuration,
+    private val rapidsConnection: RapidsConnection,
+    sessionFactory: SessionFactory,
+    daos: Daos,
+    tilgangsgrupper: Tilgangsgrupper,
+    stikkprøver: Stikkprøver,
+    featureToggles: FeatureToggles,
+    gruppekontroll: Gruppekontroll,
+) {
     data class Configuration(
         val versjonAvKode: String,
         val ignorerMeldingerForUkjentePersoner: Boolean,
@@ -26,16 +35,8 @@ class KafkaModule(private val configuration: Configuration, private val rapidsCo
 
     val meldingPubliserer: MeldingPubliserer = MessageContextMeldingPubliserer(rapidsConnection)
 
-    fun setUpKafka(
-        sessionFactory: SessionFactory,
-        daos: Daos,
-        tilgangsgrupper: Tilgangsgrupper,
-        stikkprøver: Stikkprøver,
-        featureToggles: FeatureToggles,
-        gruppekontroll: Gruppekontroll,
-    ) {
+    private val riverSetup =
         RiverSetup(
-            rapidsConnection,
             MeldingMediator(
                 sessionFactory = sessionFactory,
                 personDao = daos.personDao,
@@ -78,6 +79,9 @@ class KafkaModule(private val configuration: Configuration, private val rapidsCo
                 ignorerMeldingerForUkjentePersoner = configuration.ignorerMeldingerForUkjentePersoner,
             ),
             daos.meldingDuplikatkontrollDao,
-        ).setUp()
+        )
+
+    fun kobleOppRivers() {
+        riverSetup.registrerRivers(rapidsConnection)
     }
 }

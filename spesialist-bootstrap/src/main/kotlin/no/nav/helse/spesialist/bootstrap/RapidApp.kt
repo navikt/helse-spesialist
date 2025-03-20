@@ -131,15 +131,15 @@ object RapidApp {
             KafkaModule(
                 configuration = configuration.kafka,
                 rapidsConnection = rapidsConnection,
+                sessionFactory = dbModule.sessionFactory,
+                daos = dbModule.daos,
+                tilgangsgrupper = configuration.tilgangsgrupper,
+                stikkprøver = configuration.stikkprøver,
+                featureToggles = clientUnleashModule.featureToggles,
+                gruppekontroll = clientEntraIdModule.gruppekontroll,
             )
-        kafkaModule.setUpKafka(
-            sessionFactory = dbModule.sessionFactory,
-            daos = dbModule.daos,
-            tilgangsgrupper = configuration.tilgangsgrupper,
-            stikkprøver = configuration.stikkprøver,
-            featureToggles = clientUnleashModule.featureToggles,
-            gruppekontroll = clientEntraIdModule.gruppekontroll,
-        )
+
+        kafkaModule.kobleOppRivers()
 
         ktorSetupCallback = { ktorApplication ->
             ApiModule(configuration.api).setUpApi(

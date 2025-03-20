@@ -120,7 +120,7 @@ internal class TestMediator(
             poisonPillDao = daos.poisonPillDao,
             ignorerMeldingerForUkjentePersoner = false
         )
-        RiverSetup(testRapid, meldingMediator, daos.meldingDuplikatkontrollDao).setUp()
+        RiverSetup(meldingMediator, daos.meldingDuplikatkontrollDao).registrerRivers(testRapid)
     }
 
     internal fun håndter(

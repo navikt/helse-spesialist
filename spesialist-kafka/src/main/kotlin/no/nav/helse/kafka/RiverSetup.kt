@@ -10,26 +10,17 @@ import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.db.MeldingDuplikatkontrollDao
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.registrerTidsbrukForDuplikatsjekk
-import org.slf4j.LoggerFactory
+import no.nav.helse.spesialist.application.logg.logg
 import java.util.UUID
 import kotlin.time.DurationUnit
 import kotlin.time.measureTimedValue
 
 class RiverSetup(
-    private val rapidsConnection: RapidsConnection,
     private val mediator: MeldingMediator,
     private val meldingDuplikatkontrollDao: MeldingDuplikatkontrollDao,
 ) {
-    fun setUp() {
-        val delegatedRapid =
-            DelegatedRapid(
-                rapidsConnection = rapidsConnection,
-                beforeRiversAction = mediator::nullstillTilstand,
-                skalBehandleMelding = mediator::skalBehandleMelding,
-                afterRiversAction = mediator::fortsett,
-                errorAction = mediator::errorHandler,
-            )
-        sequenceOf(
+    private val rivers =
+        listOf(
             GodkjenningsbehovRiver(mediator),
             SøknadSendtRiver(mediator),
             SøknadSendtArbeidsledigRiver(mediator),
@@ -68,51 +59,60 @@ class RiverSetup(
             KommandokjedePåminnelseRiver(mediator),
             StansAutomatiskBehandlingRiver(mediator),
             AvviksvurderingLøsningRiver(mediator),
-        ).forEach { river ->
-            River(delegatedRapid)
-                .precondition(river.preconditions())
-                .validate(river.validations())
-                .register(duplikatsjekkendeRiver(river))
-                .onSuccess { packet, _, _, _ ->
-                    logg.debug(
-                        "${river.name()} leste melding id=${packet.id}, event_name=${packet.eventName()}. En annen/tidligere river har allerede/også behandlet meldingen:${mediator.meldingenHarBlittBehandletAvEnRiver}",
-                    )
-                    mediator.meldingenHarBlittBehandletAvEnRiver = true
-                }
-        }
-    }
+        ).map { DuplikatsjekkendeRiver(it, meldingDuplikatkontrollDao) }
 
-    private fun duplikatsjekkendeRiver(river: River.PacketListener) =
-        object : River.PacketListener by river {
-            override fun onPacket(
-                packet: JsonMessage,
-                context: MessageContext,
-                metadata: MessageMetadata,
-                meterRegistry: MeterRegistry,
-            ) {
-                val id = packet.id.toUUID()
-                if (erDuplikat(id)) {
-                    logg.info("Ignorerer melding {} pga duplikatkontroll", id)
-                    return
-                }
-                river.onPacket(packet, context, metadata, meterRegistry)
+    fun registrerRivers(rapidsConnection: RapidsConnection) {
+        val delegatedRapid =
+            DelegatedRapid(
+                rapidsConnection = rapidsConnection,
+                beforeRiversAction = mediator::nullstillTilstand,
+                skalBehandleMelding = mediator::skalBehandleMelding,
+                afterRiversAction = mediator::fortsett,
+                errorAction = mediator::errorHandler,
+            )
+        rivers
+            .forEach { river ->
+                River(delegatedRapid)
+                    .precondition(river.preconditions())
+                    .validate(river.validations())
+                    .register(river)
+                    .onSuccess { packet, _, _, _ ->
+                        val eventName =
+                            packet.run {
+                                interestedIn("@event_name")
+                                get("@event_name").textValue() ?: "ukjent"
+                            }
+                        logg.debug(
+                            "${river.name()} leste melding id=${packet.id}, event_name=$eventName. En annen/tidligere river har allerede/også behandlet meldingen:${mediator.meldingenHarBlittBehandletAvEnRiver}",
+                        )
+                        mediator.meldingenHarBlittBehandletAvEnRiver = true
+                    }
             }
+    }
+}
+
+class DuplikatsjekkendeRiver(
+    private val river: SpesialistRiver,
+    private val meldingDuplikatkontrollDao: MeldingDuplikatkontrollDao,
+) : SpesialistRiver by river {
+    override fun onPacket(
+        packet: JsonMessage,
+        context: MessageContext,
+        metadata: MessageMetadata,
+        meterRegistry: MeterRegistry,
+    ) {
+        val id = packet.id.toUUID()
+        if (erDuplikat(id)) {
+            logg.info("Ignorerer melding {} pga duplikatkontroll", id)
+            return
         }
+        river.onPacket(packet, context, metadata, meterRegistry)
+    }
 
     private fun erDuplikat(id: UUID): Boolean {
         val (erDuplikat, tid) = measureTimedValue { meldingDuplikatkontrollDao.erBehandlet(id) }
         logg.info("Det tok ${tid.inWholeMilliseconds} ms å gjøre duplikatsjekk mot databasen")
         registrerTidsbrukForDuplikatsjekk(erDuplikat, tid.toDouble(DurationUnit.MILLISECONDS))
         return erDuplikat
-    }
-
-    private fun JsonMessage.eventName() =
-        run {
-            interestedIn("@event_name")
-            get("@event_name").textValue() ?: "ukjent"
-        }
-
-    private companion object {
-        private val logg = LoggerFactory.getLogger(RiverSetup::class.java)
     }
 }
