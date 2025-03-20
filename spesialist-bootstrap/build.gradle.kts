@@ -21,6 +21,7 @@ dependencies {
     testImplementation(testFixtures(project(":spesialist-api")))
     testImplementation(testFixtures(project(":spesialist-client-entra-id")))
     testImplementation(testFixtures(project(":spesialist-client-krr")))
+    testImplementation(testFixtures(project(":spesialist-client-spleis")))
 }
 
 tasks {

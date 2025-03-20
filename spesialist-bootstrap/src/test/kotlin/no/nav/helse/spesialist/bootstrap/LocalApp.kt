@@ -5,8 +5,9 @@ import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.spesialist.api.bootstrap.Gruppe
 import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
 import no.nav.helse.spesialist.api.testfixtures.ApiModuleIntegrationTestFixture
-import no.nav.helse.spesialist.client.krr.testfixtures.ClientEntraIDModuleIntegrationTestFixture
-import no.nav.helse.spesialist.client.krr.testfixtures.ClientKRRModuleIntegationTestFixture
+import no.nav.helse.spesialist.client.spleis.testfixtures.ClientEntraIDModuleIntegrationTestFixture
+import no.nav.helse.spesialist.client.spleis.testfixtures.ClientKRRModuleIntegationTestFixture
+import no.nav.helse.spesialist.client.spleis.testfixtures.ClientSpleisModuleIntegrationTestFixture
 import no.nav.helse.spesialist.db.testfixtures.DBTestFixture
 import java.util.UUID
 

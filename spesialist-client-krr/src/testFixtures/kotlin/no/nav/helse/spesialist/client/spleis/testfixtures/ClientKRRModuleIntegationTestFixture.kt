@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.client.krr.testfixtures
+package no.nav.helse.spesialist.client.spleis.testfixtures
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration

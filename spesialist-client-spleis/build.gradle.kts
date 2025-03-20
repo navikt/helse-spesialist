@@ -3,6 +3,7 @@ import com.expediagroup.graphql.plugin.gradle.tasks.GraphQLIntrospectSchemaTask
 
 plugins {
     alias(libs.plugins.graphql)
+    `java-test-fixtures`
 }
 
 dependencies {
@@ -12,6 +13,8 @@ dependencies {
     implementation(libs.bundles.ktor.client)
     implementation(libs.bundles.jackson)
     implementation(libs.bundles.logback)
+
+    testFixturesImplementation(libs.wiremock)
 }
 
 val graphqlDir = "${project.projectDir}/src/main/resources/graphql"
