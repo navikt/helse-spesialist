@@ -66,8 +66,14 @@ fun main() {
                     ),
                 krrConfig =
                     KRRClientReservasjonshenter.Configuration(
-                        apiUrl = env.getValue("KONTAKT_OG_RESERVASJONSREGISTERET_API_URL"),
-                        scope = env.getValue("KONTAKT_OG_RESERVASJONSREGISTERET_SCOPE"),
+                        if (env.getBoolean("BRUK_DUMMY_FOR_KONTAKT_OG_RESERVASJONSREGISTERET", false)) {
+                            null
+                        } else {
+                            KRRClientReservasjonshenter.Configuration.Client(
+                                apiUrl = env.getValue("KONTAKT_OG_RESERVASJONSREGISTERET_API_URL"),
+                                scope = env.getValue("KONTAKT_OG_RESERVASJONSREGISTERET_SCOPE"),
+                            )
+                        },
                     ),
                 dbConfig =
                     DBModule.Configuration(
@@ -105,6 +111,11 @@ fun main() {
             ),
     )
 }
+
+private fun Map<String, String>.getBoolean(
+    key: String,
+    defaultValue: Boolean,
+): Boolean = this[key]?.toBoolean() ?: defaultValue
 
 object RapidApp {
     lateinit var ktorSetupCallback: Application.() -> Unit
@@ -231,15 +242,13 @@ object RapidApp {
                         ),
                     ),
                 reservasjonshenter =
-                    if (configuration.environmentToggles.brukDummyForKRR) {
-                        logg.info("Bruker nulloperasjonsversjon av reservasjonshenter")
-                        Reservasjonshenter { null }
-                    } else {
+                    configuration.krrConfig.client?.let {
                         KRRClientReservasjonshenter(
-                            configuration = configuration.krrConfig,
+                            configuration = it,
                             accessTokenGenerator = accessTokenGenerator,
                         )
-                    },
+                    }
+                        ?: Reservasjonshenter { null }.also { logg.info("Bruker nulloperasjonsversjon av reservasjonshenter") },
                 tilgangsgrupper = configuration.tilgangsgrupper,
                 meldingPubliserer = meldingPubliserer,
                 featureToggles = featureToggles,

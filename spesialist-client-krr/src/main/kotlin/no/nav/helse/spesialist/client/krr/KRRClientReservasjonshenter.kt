@@ -38,13 +38,17 @@ private val statusEtterKallReservasjonsstatusBuilder =
         .tags(listOf(Tag.of("status", "success"), Tag.of("status", "failure")))
 
 class KRRClientReservasjonshenter(
-    private val configuration: Configuration,
+    private val configuration: Configuration.Client,
     private val accessTokenGenerator: AccessTokenGenerator,
 ) : Reservasjonshenter {
     data class Configuration(
-        val apiUrl: String,
-        val scope: String,
-    )
+        val client: Client?,
+    ) {
+        data class Client(
+            val apiUrl: String,
+            val scope: String,
+        )
+    }
 
     private val logg: Logger = LoggerFactory.getLogger(this.javaClass)
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")

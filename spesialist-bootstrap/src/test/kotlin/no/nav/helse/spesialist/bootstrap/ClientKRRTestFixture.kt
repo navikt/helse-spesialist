@@ -6,10 +6,13 @@ import no.nav.helse.spesialist.client.krr.KRRClientReservasjonshenter
 
 object ClientKRRTestFixture {
     private val wireMockServer: WireMockServer = WireMockServer(WireMockConfiguration.options().dynamicPort()).also(
-        WireMockServer::start)
+        WireMockServer::start
+    )
 
     val moduleConfiguration = KRRClientReservasjonshenter.Configuration(
-        apiUrl = wireMockServer.baseUrl(),
-        scope = "local-app",
+        KRRClientReservasjonshenter.Configuration.Client(
+            apiUrl = wireMockServer.baseUrl(),
+            scope = "local-app",
+        )
     )
 }
