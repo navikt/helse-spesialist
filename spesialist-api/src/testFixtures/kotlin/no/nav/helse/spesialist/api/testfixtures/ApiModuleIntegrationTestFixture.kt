@@ -7,6 +7,7 @@ import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
 import no.nav.helse.spesialist.api.ApiModule
+import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import java.util.UUID
 
@@ -30,6 +31,19 @@ object ApiModuleIntegrationTestFixture {
             println(it)
         }
 
+    fun token(saksbehandlerFraApi: SaksbehandlerFraApi): String = mockOAuth2Server.issueToken(
+        issuerId = ISSUER_ID,
+        audience = CLIENT_ID,
+        subject = saksbehandlerFraApi.oid.toString(),
+        claims = mapOf(
+            "NAVident" to saksbehandlerFraApi.ident,
+            "preferred_username" to saksbehandlerFraApi.epost,
+            "oid" to saksbehandlerFraApi.oid.toString(),
+            "name" to saksbehandlerFraApi.navn,
+            "groups" to saksbehandlerFraApi.grupper.map { it.toString() }.toTypedArray()
+        )
+    ).serialize()
+
     val apiModuleConfiguration = ApiModule.Configuration(
         clientId = CLIENT_ID,
         issuerUrl = mockOAuth2Server.issuerUrl(ISSUER_ID).toString(),
@@ -38,7 +52,7 @@ object ApiModuleIntegrationTestFixture {
     )
 
     fun addAdditionalRoutings(application: Application) {
-        with (application) {
+        with(application) {
             routing {
                 get("/local-token") {
                     return@get call.respond<String>(message = token)
