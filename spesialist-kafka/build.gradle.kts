@@ -13,6 +13,7 @@ dependencies {
     testImplementation(testFixtures(project(":spesialist-domain")))
 
     testFixturesImplementation(testFixtures(project(":spesialist-domain")))
+    testFixturesImplementation(libs.tbdLibs.rapidsAndRiversTest)
     testFixturesImplementation(libs.rapidsAndRivers)
     testFixturesImplementation(libs.jackson.kotlin)
     testFixturesImplementation(libs.testcontainers.kafka)

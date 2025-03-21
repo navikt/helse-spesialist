@@ -104,12 +104,14 @@ private fun Map<String, String>.getBoolean(
 ): Boolean = this[key]?.toBoolean() ?: defaultValue
 
 object RapidApp {
+    class Modules(val dbModule: DBModule)
+
     lateinit var ktorSetupCallback: (Application) -> Unit
 
     fun start(
         configuration: Configuration,
         rapidsConnection: RapidsConnection,
-    ) {
+    ): Modules {
         val clientEntraIdModule = ClientEntraIDModule(configuration.clientEntraID)
 
         val clientKrrModule =
@@ -172,5 +174,6 @@ object RapidApp {
         )
 
         rapidsConnection.start()
+        return Modules(dbModule)
     }
 }
