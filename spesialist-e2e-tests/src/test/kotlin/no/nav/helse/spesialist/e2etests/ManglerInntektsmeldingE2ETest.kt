@@ -21,7 +21,6 @@ class ManglerInntektsmeldingE2ETest : AbstractE2EIntegrationTest() {
         sendUtbetalingEndret()
         sendVedtaksperiodeEndret()
         sendGodkjenningsbehov(spleisBehandlingId = spleisBehandlingId)
-        sendAvviksvurderingløsning()
         sendPersoninfoløsning()
         sendEnhetløsning()
         sendInfotrygdutbetalingerløsning()
