@@ -788,7 +788,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         if (erKompositt) {
             assertEtterspurteBehov("Arbeidsgiverinformasjon", "HentPersoninfoV2")
             sisteMeldingId =
-                meldingssender.sendArbeidsgiverinformasjonKompositt(
+                meldingssender.sendArbeidsgiverinformasjonløsningKompositt(
                     aktørId,
                     fødselsnummer,
                     organisasjonsnummer,

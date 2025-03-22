@@ -398,7 +398,7 @@ class Meldingssender(private val testRapid: TestRapid) {
             )
         }
 
-    fun sendArbeidsgiverinformasjonKompositt(
+    fun sendArbeidsgiverinformasjonløsningKompositt(
         aktørId: String,
         fødselsnummer: String,
         organisasjonsnummer: String,

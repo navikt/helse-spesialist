@@ -15,7 +15,6 @@ import no.nav.helse.Meldingssender
 import no.nav.helse.TestRapidHelpers.behov
 import no.nav.helse.TestRapidHelpers.sisteBehov
 import no.nav.helse.bootstrap.EnvironmentToggles
-import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.person.Adressebeskyttelse
@@ -144,7 +143,11 @@ abstract class AbstractE2EIntegrationTest {
     }
 
     protected fun sendInntektløsning() {
-        meldingssender.sendInntektløsning(testPerson.aktørId, testPerson.fødselsnummer, testPerson.orgnummer)
+        meldingssender.sendInntektløsning(
+            aktørId = testPerson.aktørId,
+            fødselsnummer = testPerson.fødselsnummer,
+            orgnr = testPerson.orgnummer
+        )
     }
 
     protected fun sendRisikovurderingløsning() {
@@ -159,11 +162,15 @@ abstract class AbstractE2EIntegrationTest {
     }
 
     protected fun sendÅpneGosysOppgaverløsning() {
-        meldingssender.sendÅpneGosysOppgaverløsning(testPerson.aktørId, testPerson.fødselsnummer, 0, false)
+        meldingssender.sendÅpneGosysOppgaverløsning(
+            aktørId = testPerson.aktørId,
+            fødselsnummer = testPerson.fødselsnummer,
+            antall = 0,
+            oppslagFeilet = false
+        )
     }
 
-    protected fun sendVergemålOgFullmaktløsning(
-    ) {
+    protected fun sendVergemålOgFullmaktløsning() {
         meldingssender.sendVergemålOgFullmaktløsning(
             aktørId = testPerson.aktørId,
             fødselsnummer = testPerson.fødselsnummer,
@@ -175,72 +182,70 @@ abstract class AbstractE2EIntegrationTest {
 
     protected fun sendEgenAnsattløsning() {
         meldingssender.sendEgenAnsattløsning(
-            testPerson.aktørId,
-            testPerson.fødselsnummer,
-            false
+            aktørId = testPerson.aktørId,
+            fødselsnummer = testPerson.fødselsnummer,
+            erEgenAnsatt = false
         )
     }
 
     protected fun sendPersoninfoløsning() {
         meldingssender.sendPersoninfoløsning(
-            testPerson.aktørId,
-            testPerson.fødselsnummer,
-            Adressebeskyttelse.Ugradert,
+            aktørId = testPerson.aktørId,
+            fødselsnummer = testPerson.fødselsnummer,
+            adressebeskyttelse = Adressebeskyttelse.Ugradert,
         )
     }
 
     protected fun sendEnhetløsning() {
         meldingssender.sendEnhetløsning(
-            testPerson.aktørId,
-            testPerson.fødselsnummer,
-            testPerson.orgnummer,
-            testPerson.vedtaksperiodeId1,
-            "0301"
+            aktørId = testPerson.aktørId,
+            fødselsnummer = testPerson.fødselsnummer,
+            organisasjonsnummer = testPerson.orgnummer,
+            vedtaksperiodeId = testPerson.vedtaksperiodeId1,
+            enhet = "0301"
         )
     }
 
     protected fun sendInfotrygdutbetalingerløsning() {
         meldingssender.sendInfotrygdutbetalingerløsning(
-            testPerson.aktørId,
-            testPerson.fødselsnummer,
-            testPerson.orgnummer,
-            testPerson.vedtaksperiodeId1,
+            aktørId = testPerson.aktørId,
+            fødselsnummer = testPerson.fødselsnummer,
+            organisasjonsnummer = testPerson.orgnummer,
+            vedtaksperiodeId = testPerson.vedtaksperiodeId1,
         )
     }
 
-    protected fun håndterArbeidsgiverinformasjonløsning() {
+    protected fun sendArbeidsgiverinformasjonløsning() {
         val erKompositt = testRapid.inspektør.sisteBehov("Arbeidsgiverinformasjon", "HentPersoninfoV2") != null
         if (erKompositt) {
-            assertEtterspurteBehov("Arbeidsgiverinformasjon", "HentPersoninfoV2")
-            meldingssender.sendArbeidsgiverinformasjonKompositt(
-                testPerson.aktørId,
-                testPerson.aktørId,
-                testPerson.orgnummer,
-                testPerson.vedtaksperiodeId1,
+            meldingssender.sendArbeidsgiverinformasjonløsningKompositt(
+                aktørId = testPerson.aktørId,
+                fødselsnummer = testPerson.aktørId,
+                organisasjonsnummer = testPerson.orgnummer,
+                vedtaksperiodeId = testPerson.vedtaksperiodeId1,
             )
-            return
+        } else {
+            meldingssender.sendArbeidsgiverinformasjonløsning(
+                aktørId = testPerson.aktørId,
+                fødselsnummer = testPerson.aktørId,
+                organisasjonsnummer = testPerson.orgnummer,
+                vedtaksperiodeId = testPerson.vedtaksperiodeId1,
+                arbeidsgiverinformasjonJson = null,
+            )
         }
-        meldingssender.sendArbeidsgiverinformasjonløsning(
-            testPerson.aktørId,
-            testPerson.aktørId,
-            testPerson.orgnummer,
-            testPerson.vedtaksperiodeId1,
-            null as List<Testmeldingfabrikk.ArbeidsgiverinformasjonJson>?,
-        )
     }
 
     protected fun sendArbeidsforholdløsning(
     ) {
         meldingssender.sendArbeidsforholdløsning(
-            testPerson.aktørId,
-            testPerson.fødselsnummer,
-            testPerson.orgnummer,
-            testPerson.vedtaksperiodeId1
+            aktørId = testPerson.aktørId,
+            fødselsnummer = testPerson.fødselsnummer,
+            organisasjonsnummer = testPerson.orgnummer,
+            vedtaksperiodeId = testPerson.vedtaksperiodeId1
         )
     }
 
-    protected fun håndterAvviksvurderingløsning() {
-        assertEtterspurteBehov("Avviksvurdering")
+    protected fun sendAvviksvurderingløsning() {
         meldingssender.sendAvviksvurderingløsning(
             fødselsnummer = testPerson.fødselsnummer,
             organisasjonsnummer = testPerson.orgnummer,
@@ -272,7 +277,7 @@ abstract class AbstractE2EIntegrationTest {
             )
         )
 
-    protected fun håndterVedtaksperiodeEndret() {
+    protected fun sendVedtaksperiodeEndret() {
         meldingssender.sendVedtaksperiodeEndret(
             aktørId = testPerson.aktørId,
             fødselsnummer = testPerson.fødselsnummer,
@@ -284,7 +289,7 @@ abstract class AbstractE2EIntegrationTest {
         )
     }
 
-    protected fun håndterVedtaksperiodeNyUtbetaling() {
+    protected fun sendVedtaksperiodeNyUtbetaling() {
         meldingssender.sendVedtaksperiodeNyUtbetaling(
             aktørId = testPerson.aktørId,
             fødselsnummer = testPerson.fødselsnummer,
@@ -292,15 +297,9 @@ abstract class AbstractE2EIntegrationTest {
             vedtaksperiodeId = testPerson.vedtaksperiodeId1,
             utbetalingId = testPerson.utbetalingId1,
         )
-        assertIngenEtterspurteBehov()
     }
 
-    protected fun håndterUtbetalingOpprettet() {
-        håndterUtbetalingEndret()
-        assertIngenEtterspurteBehov()
-    }
-
-    private fun håndterUtbetalingEndret() {
+    protected fun sendUtbetalingEndret() {
         meldingssender.sendUtbetalingEndret(
             aktørId = testPerson.aktørId,
             fødselsnummer = testPerson.fødselsnummer,
@@ -315,12 +314,7 @@ abstract class AbstractE2EIntegrationTest {
         )
     }
 
-    protected fun håndterAktivitetsloggNyAktivitet(
-        varselkoder: List<String> = emptyList(),
-    ) {
-        varselkoder.forEach {
-            lagVarseldefinisjon(it)
-        }
+    protected fun sendAktivitetsloggNyAktivitet(varselkoder: List<String>) {
         meldingssender.sendAktivitetsloggNyAktivitet(
             aktørId = testPerson.aktørId,
             fødselsnummer = testPerson.fødselsnummer,
@@ -328,7 +322,29 @@ abstract class AbstractE2EIntegrationTest {
             vedtaksperiodeId = testPerson.vedtaksperiodeId1,
             varselkoder = varselkoder,
         )
-        assertIngenEtterspurteBehov()
+    }
+
+    protected fun opprettVarseldefinisjoner(varselkoder: List<String>) {
+        varselkoder.forEach {
+            lagVarseldefinisjon(it)
+        }
+    }
+
+    private fun lagVarseldefinisjon(varselkode: String) {
+        dbQuery.update(
+            """
+            INSERT INTO api_varseldefinisjon (unik_id, kode, tittel, forklaring, handling, avviklet, opprettet)
+            VALUES (:unikId, :varselkode, :tittel, :forklaring, :handling, :avviklet, :opprettet)
+            ON CONFLICT (unik_id) DO NOTHING
+            """.trimIndent(),
+            "unikId" to UUID.nameUUIDFromBytes(varselkode.toByteArray()),
+            "varselkode" to varselkode,
+            "tittel" to "En tittel for varselkode=$varselkode",
+            "forklaring" to "En forklaring for varselkode=$varselkode",
+            "handling" to "En handling for varselkode=$varselkode",
+            "avviklet" to false,
+            "opprettet" to LocalDateTime.now(),
+        )
     }
 
     protected fun assertIngenEtterspurteBehov() {
@@ -346,9 +362,13 @@ abstract class AbstractE2EIntegrationTest {
     protected fun assertHarOppgaveegenskap(
         vararg forventedeEgenskaper: Egenskap,
     ) {
-        val egenskaper = hentOppgaveegenskaper(
-            modules.dbModule.daos.oppgaveDao.finnOppgaveId(testPerson.fødselsnummer) ?: error("Finner ikke oppgave")
-        )
+        val oppgaveId =
+            modules.dbModule.daos.oppgaveDao.finnOppgaveId(testPerson.fødselsnummer)
+                ?: error("Fant ikke oppgave for personen")
+        val oppgave = modules.dbModule.sessionFactory.transactionalSessionScope { session ->
+            session.oppgaveRepository.finn(oppgaveId) { _, _ -> true }
+        } ?: error("Fant ikke oppgaven basert på ID")
+        val egenskaper = oppgave.egenskaper
         assertTrue(egenskaper.containsAll(forventedeEgenskaper.toList())) { "Forventet å finne ${forventedeEgenskaper.toSet()} i $egenskaper" }
     }
 
@@ -369,29 +389,5 @@ abstract class AbstractE2EIntegrationTest {
 
     protected fun assertVedtaksperiodeEksisterer(vedtaksperiodeId: UUID) {
         assertNotNull(modules.dbModule.daos.vedtakDao.finnVedtaksperiode(vedtaksperiodeId))
-    }
-
-    private fun hentOppgaveegenskaper(oppgaveId: Long): Set<Egenskap> =
-        modules.dbModule.sessionFactory.transactionalSessionScope { session -> session.oppgaveRepository.finn(oppgaveId) { _, _ -> true } }?.egenskaper
-            ?: error("Fant ikke oppgave")
-
-    private fun erRevurdering(vedtaksperiodeId: UUID) =
-        modules.dbModule.daos.generasjonDao.finnGenerasjoner(vedtaksperiodeId)
-
-    private fun lagVarseldefinisjon(varselkode: String) {
-        dbQuery.update(
-            """
-            INSERT INTO api_varseldefinisjon (unik_id, kode, tittel, forklaring, handling, avviklet, opprettet)
-            VALUES (:unikId, :varselkode, :tittel, :forklaring, :handling, :avviklet, :opprettet)
-            ON CONFLICT (unik_id) DO NOTHING
-            """.trimIndent(),
-            "unikId" to UUID.nameUUIDFromBytes(varselkode.toByteArray()),
-            "varselkode" to varselkode,
-            "tittel" to "En tittel for varselkode=$varselkode",
-            "forklaring" to "En forklaring for varselkode=$varselkode",
-            "handling" to "En handling for varselkode=$varselkode",
-            "avviklet" to false,
-            "opprettet" to LocalDateTime.now(),
-        )
     }
 }
