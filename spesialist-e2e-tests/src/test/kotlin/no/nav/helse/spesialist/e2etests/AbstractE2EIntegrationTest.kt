@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.e2etests
 
+import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.accept
 import io.ktor.client.request.bearerAuth
@@ -9,10 +10,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.testing.testApplication
-import no.nav.helse.AvviksvurderingTestdata
 import no.nav.helse.GodkjenningsbehovTestdata
-import no.nav.helse.Meldingssender
-import no.nav.helse.TestRapidHelpers.sisteBehov
 import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.oppgave.Egenskap
@@ -48,11 +46,12 @@ import kotlin.test.assertNotNull
 
 abstract class AbstractE2EIntegrationTest {
     private val kafkaModuleTestFixture = KafkaModuleTestRapidTestFixture()
-    private val testRapid = kafkaModuleTestFixture.testRapid
+    private val testRapid = SimulatingTestRapid().also { rapid ->
+        AvviksvurderingbehovRiver().registerOn(rapid)
+    }
 
-    private val meldingssender = Meldingssender(kafkaModuleTestFixture.testRapid)
+    private val meldingssender = SimulatingTestRapidMeldingssender(testRapid)
 
-    private val avviksvurderingTestdata = AvviksvurderingTestdata()
     protected val testPerson = TestPerson()
 
     private val modules = RapidApp.start(
@@ -215,7 +214,15 @@ abstract class AbstractE2EIntegrationTest {
     }
 
     protected fun sendArbeidsgiverinformasjonløsning() {
-        val erKompositt = testRapid.inspektør.sisteBehov("Arbeidsgiverinformasjon", "HentPersoninfoV2") != null
+        val erKompositt = testRapid.messageLog.last { it.path("@event_name").asText() == "behov" }
+            .takeIf {
+                it.path("@behov").map(JsonNode::asText).containsAll(
+                    arrayOf(
+                        "Arbeidsgiverinformasjon",
+                        "HentPersoninfoV2"
+                    ).toList()
+                ) && !it.hasNonNull("@løsning")
+            } != null
         if (erKompositt) {
             meldingssender.sendArbeidsgiverinformasjonløsningKompositt(
                 aktørId = testPerson.aktørId,
@@ -241,16 +248,6 @@ abstract class AbstractE2EIntegrationTest {
             fødselsnummer = testPerson.fødselsnummer,
             organisasjonsnummer = testPerson.orgnummer,
             vedtaksperiodeId = testPerson.vedtaksperiodeId1
-        )
-    }
-
-    protected fun sendAvviksvurderingløsning() {
-        meldingssender.sendAvviksvurderingløsning(
-            fødselsnummer = testPerson.fødselsnummer,
-            organisasjonsnummer = testPerson.orgnummer,
-            sammenligningsgrunnlagTotalbeløp = avviksvurderingTestdata.sammenligningsgrunnlag,
-            avviksprosent = avviksvurderingTestdata.avviksprosent,
-            avviksvurderingId = avviksvurderingTestdata.avviksvurderingId
         )
     }
 
