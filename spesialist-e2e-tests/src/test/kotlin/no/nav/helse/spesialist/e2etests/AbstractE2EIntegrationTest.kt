@@ -12,7 +12,6 @@ import io.ktor.server.testing.testApplication
 import no.nav.helse.AvviksvurderingTestdata
 import no.nav.helse.GodkjenningsbehovTestdata
 import no.nav.helse.Meldingssender
-import no.nav.helse.TestRapidHelpers.behov
 import no.nav.helse.TestRapidHelpers.sisteBehov
 import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.modell.automatisering.Stikkprøver
@@ -345,18 +344,6 @@ abstract class AbstractE2EIntegrationTest {
             "avviklet" to false,
             "opprettet" to LocalDateTime.now(),
         )
-    }
-
-    protected fun assertIngenEtterspurteBehov() {
-        assertEquals(emptyList<String>(), testRapid.inspektør.behov())
-    }
-
-    private fun assertEtterspurteBehov(vararg behov: String) {
-        val etterspurteBehov = testRapid.inspektør.behov()
-        assertEquals(behov.toList(), etterspurteBehov) {
-            val ikkeEtterspurt = behov.toSet() - etterspurteBehov.toSet()
-            "Forventet at følgende behov skulle være etterspurt: $ikkeEtterspurt\nFaktisk etterspurte behov: $etterspurteBehov\n"
-        }
     }
 
     protected fun assertHarOppgaveegenskap(
