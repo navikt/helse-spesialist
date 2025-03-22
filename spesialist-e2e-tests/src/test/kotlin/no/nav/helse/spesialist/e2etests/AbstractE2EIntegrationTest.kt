@@ -10,6 +10,7 @@ import io.ktor.http.contentType
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.testing.testApplication
 import no.nav.helse.AvviksvurderingTestdata
+import no.nav.helse.GodkjenningsbehovTestdata
 import no.nav.helse.Meldingssender
 import no.nav.helse.TestRapidHelpers.behov
 import no.nav.helse.TestRapidHelpers.sisteBehov
@@ -18,9 +19,11 @@ import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.person.Adressebeskyttelse
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_UTBETALT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.NY
+import no.nav.helse.modell.vedtaksperiode.Inntektsopplysningkilde
+import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
+import no.nav.helse.modell.vedtaksperiode.SykepengegrunnlagsArbeidsgiver
 import no.nav.helse.spesialist.api.bootstrap.Gruppe
 import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
 import no.nav.helse.spesialist.api.objectMapper
@@ -35,13 +38,12 @@ import no.nav.helse.spesialist.client.spleis.testfixtures.ClientSpleisModuleInte
 import no.nav.helse.spesialist.client.unleash.testfixtures.ClientUnleashModuleIntegrationTestFixture
 import no.nav.helse.spesialist.db.DbQuery
 import no.nav.helse.spesialist.db.testfixtures.DBTestFixture
+import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.kafka.testfixtures.KafkaModuleTestRapidTestFixture
 import no.nav.helse.spesialist.test.TestPerson
-import no.nav.helse.util.januar
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.test.assertNotNull
@@ -53,7 +55,7 @@ abstract class AbstractE2EIntegrationTest {
     private val meldingssender = Meldingssender(kafkaModuleTestFixture.testRapid)
 
     private val avviksvurderingTestdata = AvviksvurderingTestdata()
-    private val testPerson = TestPerson()
+    protected val testPerson = TestPerson()
 
     private val modules = RapidApp.start(
         configuration = Configuration(
@@ -121,49 +123,31 @@ abstract class AbstractE2EIntegrationTest {
         }
     }
 
-    protected fun vedtaksløsningenMottarNySøknad(testperson: TestPerson) {
+    protected fun sendSøknadSendt() {
         meldingssender.sendSøknadSendt(
-            aktørId = testperson.aktørId,
-            fødselsnummer = testperson.fødselsnummer,
-            organisasjonsnummer = testperson.orgnummer
+            aktørId = testPerson.aktørId,
+            fødselsnummer = testPerson.fødselsnummer,
+            organisasjonsnummer = testPerson.orgnummer
         )
-        assertIngenEtterspurteBehov()
-        assertPersonEksisterer(testperson)
     }
 
-    protected fun spleisOppretterNyBehandling(
-        testPerson: TestPerson,
-        fom: LocalDate = 1.januar,
-        tom: LocalDate = 31.januar,
-        spleisBehandlingId: UUID = UUID.randomUUID(),
-    ) {
+    protected fun sendBehandlingOpprettet(spleisBehandlingId: UUID) {
         meldingssender.sendBehandlingOpprettet(
             aktørId = testPerson.aktørId,
             fødselsnummer = testPerson.fødselsnummer,
             organisasjonsnummer = testPerson.orgnummer,
             vedtaksperiodeId = testPerson.vedtaksperiodeId1,
-            fom = fom,
-            tom = tom,
+            fom = 1 jan 2018,
+            tom = 31 jan 2018,
             spleisBehandlingId = spleisBehandlingId,
         )
-        assertIngenEtterspurteBehov()
-        assertArbeidsgiverEksisterer(testPerson.orgnummer)
-        assertVedtaksperiodeEksisterer(testPerson.vedtaksperiodeId1)
     }
 
-    protected fun spesialistBehandlerGodkjenningsbehovFremTilOppgave(regelverksvarsler: List<String>) {
-        spesialistBehandlerGodkjenningsbehovFremTilRisikovurdering(regelverksvarsler = regelverksvarsler)
-        håndterRisikovurderingløsning()
-        håndterInntektløsning()
-    }
-
-    protected fun håndterInntektløsning() {
-        assertEtterspurteBehov("InntekterForSykepengegrunnlag")
+    protected fun sendInntektløsning() {
         meldingssender.sendInntektløsning(testPerson.aktørId, testPerson.fødselsnummer, testPerson.orgnummer)
     }
 
-    protected fun håndterRisikovurderingløsning() {
-        assertEtterspurteBehov("Risikovurdering")
+    protected fun sendRisikovurderingløsning() {
         meldingssender.sendRisikovurderingløsning(
             aktørId = testPerson.aktørId,
             fødselsnummer = testPerson.fødselsnummer,
@@ -174,28 +158,12 @@ abstract class AbstractE2EIntegrationTest {
         )
     }
 
-    private fun spesialistBehandlerGodkjenningsbehovFremTilRisikovurdering(
-        regelverksvarsler: List<String>,
-    ) {
-        spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver(regelverksvarsler = regelverksvarsler)
-        håndterÅpneOppgaverløsning()
-    }
-
-    protected fun håndterÅpneOppgaverløsning() {
-        assertEtterspurteBehov("ÅpneOppgaver")
+    protected fun sendÅpneGosysOppgaverløsning() {
         meldingssender.sendÅpneGosysOppgaverløsning(testPerson.aktørId, testPerson.fødselsnummer, 0, false)
     }
 
-    protected fun spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver(regelverksvarsler: List<String>) {
-        spesialistBehandlerGodkjenningsbehovFremTilVergemål(
-            regelverksvarsler = regelverksvarsler,
-        )
-        håndterVergemålOgFullmaktløsning()
-    }
-
-    protected fun håndterVergemålOgFullmaktløsning(
+    protected fun sendVergemålOgFullmaktløsning(
     ) {
-        assertEtterspurteBehov("Vergemål", "Fullmakt")
         meldingssender.sendVergemålOgFullmaktløsning(
             aktørId = testPerson.aktørId,
             fødselsnummer = testPerson.fødselsnummer,
@@ -205,16 +173,7 @@ abstract class AbstractE2EIntegrationTest {
         )
     }
 
-    protected fun spesialistBehandlerGodkjenningsbehovFremTilVergemål(
-        regelverksvarsler: List<String>
-    ) {
-        spesialistBehandlerGodkjenningsbehovFremTilEgenAnsatt(regelverksvarsler = regelverksvarsler)
-
-        håndterEgenansattløsning(fødselsnummer = testPerson.fødselsnummer)
-    }
-
-    protected fun håndterEgenansattløsning() {
-        assertEtterspurteBehov("EgenAnsatt")
+    protected fun sendEgenAnsattløsning() {
         meldingssender.sendEgenAnsattløsning(
             testPerson.aktørId,
             testPerson.fødselsnummer,
@@ -222,21 +181,7 @@ abstract class AbstractE2EIntegrationTest {
         )
     }
 
-    protected fun spesialistBehandlerGodkjenningsbehovFremTilEgenAnsatt(
-        regelverksvarsler: List<String> = emptyList(),
-    ) {
-        if (regelverksvarsler.isNotEmpty()) håndterAktivitetsloggNyAktivitet(varselkoder = regelverksvarsler)
-        håndterGodkjenningsbehov()
-
-        håndterPersoninfoløsning()
-        håndterEnhetløsning()
-        håndterInfotrygdutbetalingerløsning()
-        håndterArbeidsgiverinformasjonløsning()
-        håndterArbeidsforholdløsning()
-    }
-
-    protected fun håndterPersoninfoløsning() {
-        assertEtterspurteBehov("HentPersoninfoV2")
+    protected fun sendPersoninfoløsning() {
         meldingssender.sendPersoninfoløsning(
             testPerson.aktørId,
             testPerson.fødselsnummer,
@@ -244,8 +189,7 @@ abstract class AbstractE2EIntegrationTest {
         )
     }
 
-    protected fun håndterEnhetløsning() {
-        assertEtterspurteBehov("HentEnhet")
+    protected fun sendEnhetløsning() {
         meldingssender.sendEnhetløsning(
             testPerson.aktørId,
             testPerson.fødselsnummer,
@@ -255,17 +199,12 @@ abstract class AbstractE2EIntegrationTest {
         )
     }
 
-    protected fun håndterInfotrygdutbetalingerløsning() {
-        val aktørId: String = testPerson.aktørId
-        val fødselsnummer: String = testPerson.fødselsnummer
-        val organisasjonsnummer: String = testPerson.orgnummer
-        val vedtaksperiodeId: UUID = testPerson.vedtaksperiodeId1
-        assertEtterspurteBehov("HentInfotrygdutbetalinger")
+    protected fun sendInfotrygdutbetalingerløsning() {
         meldingssender.sendInfotrygdutbetalingerløsning(
-            aktørId,
-            fødselsnummer,
-            organisasjonsnummer,
-            vedtaksperiodeId,
+            testPerson.aktørId,
+            testPerson.fødselsnummer,
+            testPerson.orgnummer,
+            testPerson.vedtaksperiodeId1,
         )
     }
 
@@ -281,7 +220,6 @@ abstract class AbstractE2EIntegrationTest {
             )
             return
         }
-        assertEtterspurteBehov("Arbeidsgiverinformasjon")
         meldingssender.sendArbeidsgiverinformasjonløsning(
             testPerson.aktørId,
             testPerson.aktørId,
@@ -291,9 +229,8 @@ abstract class AbstractE2EIntegrationTest {
         )
     }
 
-    protected fun håndterArbeidsforholdløsning(
+    protected fun sendArbeidsforholdløsning(
     ) {
-        assertEtterspurteBehov("Arbeidsforhold")
         meldingssender.sendArbeidsforholdløsning(
             testPerson.aktørId,
             testPerson.fødselsnummer,
@@ -302,15 +239,7 @@ abstract class AbstractE2EIntegrationTest {
         )
     }
 
-    protected fun håndterGodkjenningsbehov() {
-        håndterGodkjenningsbehovUtenValidering()
-
-        håndterAvviksvurderingløsning()
-
-        assertEtterspurteBehov("HentPersoninfoV2")
-    }
-
-    private fun håndterAvviksvurderingløsning() {
+    protected fun håndterAvviksvurderingløsning() {
         assertEtterspurteBehov("Avviksvurdering")
         meldingssender.sendAvviksvurderingløsning(
             fødselsnummer = testPerson.fødselsnummer,
@@ -321,22 +250,38 @@ abstract class AbstractE2EIntegrationTest {
         )
     }
 
-    protected fun håndterGodkjenningsbehovUtenValidering() {
-        val erRevurdering = erRevurdering(testPerson.vedtaksperiodeId1)
-        håndterVedtaksperiodeNyUtbetaling()
-        håndterUtbetalingOpprettet(
-            fødselsnummer = testPerson.fødselsnummer,
-            utbetalingtype = if (erRevurdering) "REVURDERING" else "UTBETALING",
-            utbetalingId = testPerson.utbetalingId1,
-            arbeidsgiverbeløp = 20000,
-            personbeløp = 0,
+    protected fun sendGodkjenningsbehov(spleisBehandlingId: UUID) =
+        meldingssender.sendGodkjenningsbehov(
+            GodkjenningsbehovTestdata(
+                fødselsnummer = testPerson.fødselsnummer,
+                aktørId = testPerson.aktørId,
+                organisasjonsnummer = testPerson.orgnummer,
+                vedtaksperiodeId = testPerson.vedtaksperiodeId1,
+                utbetalingId = testPerson.utbetalingId1,
+                spleisBehandlingId = spleisBehandlingId,
+                spleisSykepengegrunnlagsfakta = SpleisSykepengegrunnlagsfakta(
+                    arbeidsgivere = listOf(
+                        SykepengegrunnlagsArbeidsgiver(
+                            arbeidsgiver = testPerson.orgnummer,
+                            omregnetÅrsinntekt = 123456.7,
+                            inntektskilde = Inntektsopplysningkilde.Arbeidsgiver,
+                            skjønnsfastsatt = null,
+                        )
+                    )
+                ),
+            )
         )
-        håndterVedtaksperiodeEndret(
+
+    protected fun håndterVedtaksperiodeEndret() {
+        meldingssender.sendVedtaksperiodeEndret(
+            aktørId = testPerson.aktørId,
             fødselsnummer = testPerson.fødselsnummer,
-            vedtaksperiodeId = testPerson.vedtaksperiodeId1
+            organisasjonsnummer = testPerson.orgnummer,
+            vedtaksperiodeId = testPerson.vedtaksperiodeId1,
+            forrigeTilstand = "AVVENTER_SIMULERING",
+            gjeldendeTilstand = "AVVENTER_GODKJENNING",
+            forårsaketAvId = UUID.randomUUID(),
         )
-        sisteMeldingId = sendGodkjenningsbehov(testPerson)
-        sisteGodkjenningsbehovId = sisteMeldingId
     }
 
     protected fun håndterVedtaksperiodeNyUtbetaling() {
@@ -350,52 +295,24 @@ abstract class AbstractE2EIntegrationTest {
         assertIngenEtterspurteBehov()
     }
 
-    protected fun håndterUtbetalingOpprettet(
-    ) {
-        val aktørId: String = testPerson.aktørId
-        val fødselsnummer: String = testPerson.fødselsnummer
-        val organisasjonsnummer: String = testPerson.orgnummer
-        val utbetalingtype: String = "UTBETALING"
-        val arbeidsgiverbeløp: Int = 20000
-        val personbeløp: Int = 0
-        val utbetalingId: UUID = testPerson.utbetalingId1
-        håndterUtbetalingEndret(
-            aktørId,
-            fødselsnummer,
-            organisasjonsnummer,
-            utbetalingtype,
-            arbeidsgiverbeløp,
-            personbeløp,
-            utbetalingId = utbetalingId,
-        )
+    protected fun håndterUtbetalingOpprettet() {
+        håndterUtbetalingEndret()
         assertIngenEtterspurteBehov()
     }
 
-    protected fun håndterUtbetalingEndret(
-    ) {
-        val aktørId: String = testperson.aktørId
-        val fødselsnummer: String = FØDSELSNUMMER
-        val organisasjonsnummer: String = ORGNR
-        val utbetalingtype: String = "UTBETALING"
-        val arbeidsgiverbeløp: Int = 20000
-        val personbeløp: Int = 0
-        val forrigeStatus: Utbetalingsstatus = NY
-        val gjeldendeStatus: Utbetalingsstatus = IKKE_UTBETALT
-        val opprettet: LocalDateTime = LocalDateTime.now()
-        val utbetalingId: UUID = utbetalingId
-        sisteMeldingId =
-            meldingssender.sendUtbetalingEndret(
-                aktørId = aktørId,
-                fødselsnummer = fødselsnummer,
-                organisasjonsnummer = organisasjonsnummer,
-                utbetalingId = this.utbetalingId,
-                type = utbetalingtype,
-                arbeidsgiverbeløp = arbeidsgiverbeløp,
-                personbeløp = personbeløp,
-                forrigeStatus = forrigeStatus,
-                gjeldendeStatus = gjeldendeStatus,
-                opprettet = opprettet,
-            )
+    private fun håndterUtbetalingEndret() {
+        meldingssender.sendUtbetalingEndret(
+            aktørId = testPerson.aktørId,
+            fødselsnummer = testPerson.fødselsnummer,
+            organisasjonsnummer = testPerson.orgnummer,
+            utbetalingId = testPerson.utbetalingId1,
+            type = "UTBETALING",
+            arbeidsgiverbeløp = 20000,
+            personbeløp = 0,
+            forrigeStatus = NY,
+            gjeldendeStatus = IKKE_UTBETALT,
+            opprettet = LocalDateTime.now(),
+        )
     }
 
     protected fun håndterAktivitetsloggNyAktivitet(
@@ -435,7 +352,7 @@ abstract class AbstractE2EIntegrationTest {
         assertTrue(egenskaper.containsAll(forventedeEgenskaper.toList())) { "Forventet å finne ${forventedeEgenskaper.toSet()} i $egenskaper" }
     }
 
-    protected fun assertPersonEksisterer(testPerson: TestPerson) {
+    protected fun assertPersonEksisterer() {
         val minimalPerson = modules.dbModule.daos.personDao.finnMinimalPerson(testPerson.fødselsnummer)
         assertNotNull(minimalPerson)
         assertEquals(testPerson.fødselsnummer, minimalPerson.fødselsnummer)
