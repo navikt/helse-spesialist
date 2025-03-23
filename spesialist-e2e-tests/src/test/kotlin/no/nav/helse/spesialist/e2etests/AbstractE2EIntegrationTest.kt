@@ -44,6 +44,7 @@ abstract class AbstractE2EIntegrationTest {
         HentPersoninfoV2behovRiver(testPerson).registerOn(rapid)
         HentEnhetbehovRiver(testPerson).registerOn(rapid)
         HentInfotrygdutbetalingerbehovRiver(testPerson).registerOn(rapid)
+        ArbeidsgiverinformasjonbehovRiver(testPerson).registerOn(rapid)
     }
 
     private val meldingssender = SimulatingTestRapidMeldingssender(testRapid)
@@ -210,14 +211,6 @@ abstract class AbstractE2EIntegrationTest {
                 fødselsnummer = testPerson.aktørId,
                 organisasjonsnummer = testPerson.orgnummer,
                 vedtaksperiodeId = testPerson.vedtaksperiodeId1,
-            )
-        } else {
-            meldingssender.sendArbeidsgiverinformasjonløsning(
-                aktørId = testPerson.aktørId,
-                fødselsnummer = testPerson.aktørId,
-                organisasjonsnummer = testPerson.orgnummer,
-                vedtaksperiodeId = testPerson.vedtaksperiodeId1,
-                arbeidsgiverinformasjonJson = null,
             )
         }
     }
