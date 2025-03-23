@@ -14,7 +14,6 @@ import io.ktor.server.testing.testApplication
 import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.oppgave.Egenskap
-import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.bootstrap.Gruppe
 import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
 import no.nav.helse.spesialist.api.objectMapper
@@ -39,13 +38,13 @@ import java.util.UUID
 
 abstract class AbstractE2EIntegrationTest {
     private val kafkaModuleTestFixture = KafkaModuleTestRapidTestFixture()
+    private val testPerson = TestPerson()
     private val testRapid = SimulatingTestRapid().also { rapid ->
         AvviksvurderingbehovRiver().registerOn(rapid)
+        HentPersoninfoV2behovRiver(testPerson).registerOn(rapid)
     }
 
     private val meldingssender = SimulatingTestRapidMeldingssender(testRapid)
-
-    private val testPerson = TestPerson()
 
     private val modules = RapidApp.start(
         configuration = Configuration(
@@ -190,14 +189,6 @@ abstract class AbstractE2EIntegrationTest {
             aktørId = testPerson.aktørId,
             fødselsnummer = testPerson.fødselsnummer,
             erEgenAnsatt = false
-        )
-    }
-
-    protected fun sendPersoninfoløsning() {
-        meldingssender.sendPersoninfoløsning(
-            aktørId = testPerson.aktørId,
-            fødselsnummer = testPerson.fødselsnummer,
-            adressebeskyttelse = Adressebeskyttelse.Ugradert,
         )
     }
 

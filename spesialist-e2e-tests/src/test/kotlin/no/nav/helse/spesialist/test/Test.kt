@@ -3,15 +3,18 @@ package no.nav.helse.spesialist.test
 import no.nav.helse.spesialist.domain.testfixtures.lagAktørId
 import no.nav.helse.spesialist.domain.testfixtures.lagEtternavn
 import no.nav.helse.spesialist.domain.testfixtures.lagFornavn
-import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.lagMellomnavnOrNull
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnavn
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.typer.Kjønn
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.UUID
+import kotlin.random.Random
 
 class TestPerson {
-    val fødselsnummer: String = lagFødselsnummer()
+    val fødselsdato: LocalDate = LocalDate.now().minusYears(18).minusDays(Random.nextLong(until = 365 * 100))
+    val fødselsnummer: String = fødselsdato.format(DateTimeFormatter.ofPattern("ddMMyy00000"))
     val aktørId: String = lagAktørId()
     val fornavn: String = lagFornavn()
     val mellomnavn: String? = lagMellomnavnOrNull()
