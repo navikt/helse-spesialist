@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.e2etests
+package no.nav.helse.spesialist.e2etests.mockrivers
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -9,6 +9,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.spesialist.application.logg.logg
+import no.nav.helse.spesialist.e2etests.SimulatingTestRapid
 
 abstract class AbstractMockRiver : River.PacketListener {
     abstract fun precondition(jsonMessage: JsonMessage)

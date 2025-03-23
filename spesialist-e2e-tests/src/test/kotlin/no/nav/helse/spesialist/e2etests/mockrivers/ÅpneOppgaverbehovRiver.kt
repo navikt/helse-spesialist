@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.e2etests
+package no.nav.helse.spesialist.e2etests.mockrivers
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
@@ -6,9 +6,9 @@ import no.nav.helse.spesialist.test.TestPerson
 import java.time.LocalDateTime
 import java.util.UUID
 
-class EgenAnsattbehovRiver(private val testPerson: TestPerson) : AbstractMockRiver() {
+class ÅpneOppgaverbehovRiver(private val testPerson: TestPerson) : AbstractMockRiver() {
     override fun precondition(jsonMessage: JsonMessage) {
-        jsonMessage.requireAll("@behov", listOf("EgenAnsatt"))
+        jsonMessage.requireAll("@behov", listOf("ÅpneOppgaver"))
         jsonMessage.forbid("@løsning")
     }
 
@@ -21,11 +21,14 @@ class EgenAnsattbehovRiver(private val testPerson: TestPerson) : AbstractMockRiv
                 "aktørId" to testPerson.aktørId,
                 "fødselsnummer" to testPerson.fødselsnummer,
                 "@final" to true,
-                "@behov" to listOf("EgenAnsatt"),
+                "@behov" to listOf("ÅpneOppgaver"),
                 "contextId" to json["contextId"].asText(),
                 "hendelseId" to json["hendelseId"].asText(),
                 "@løsning" to mapOf(
-                    "EgenAnsatt" to false
+                    "ÅpneOppgaver" to mapOf(
+                        "antall" to 0,
+                        "oppslagFeilet" to false
+                    )
                 )
             )
         ).toJson()

@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.e2etests
+package no.nav.helse.spesialist.e2etests.mockrivers
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
@@ -6,9 +6,9 @@ import no.nav.helse.spesialist.test.TestPerson
 import java.time.LocalDateTime
 import java.util.UUID
 
-class HentEnhetbehovRiver(private val testPerson: TestPerson) : AbstractMockRiver() {
+class VergemålOgFullmaktbehovRiver(private val testPerson: TestPerson) : AbstractMockRiver() {
     override fun precondition(jsonMessage: JsonMessage) {
-        jsonMessage.requireAll("@behov", listOf("HentEnhet"))
+        jsonMessage.requireAll("@behov", listOf("Vergemål", "Fullmakt"))
         jsonMessage.forbid("@løsning")
     }
 
@@ -19,15 +19,18 @@ class HentEnhetbehovRiver(private val testPerson: TestPerson) : AbstractMockRive
                 "@id" to UUID.randomUUID(),
                 "@opprettet" to LocalDateTime.now(),
                 "@final" to true,
-                "@behov" to listOf("HentEnhet"),
+                "@behov" to listOf("Vergemål", "Fullmakt"),
                 "hendelseId" to json["hendelseId"].asText(),
                 "contextId" to json["contextId"].asText(),
-                "vedtaksperiodeId" to testPerson.vedtaksperiodeId1,
                 "fødselsnummer" to testPerson.fødselsnummer,
                 "aktørId" to testPerson.aktørId,
-                "orgnummer" to testPerson.orgnummer,
                 "@løsning" to mapOf(
-                    "HentEnhet" to "0301"
+                    "Vergemål" to mapOf(
+                        "vergemål" to emptyList<Any>(),
+                        "fremtidsfullmakter" to emptyList(),
+                        "fullmakter" to emptyList(),
+                    ),
+                    "Fullmakt" to emptyList<Any>()
                 )
             )
         ).toJson()
