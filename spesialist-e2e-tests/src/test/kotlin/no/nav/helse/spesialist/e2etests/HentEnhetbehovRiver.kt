@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.e2etests
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import no.nav.helse.spesialist.test.TestPerson
 import java.time.LocalDateTime
@@ -11,13 +12,7 @@ class HentEnhetbehovRiver(private val testPerson: TestPerson) : AbstractMockRive
         jsonMessage.forbid("@løsning")
     }
 
-    override val validateKeys = setOf(
-        "fødselsnummer",
-        "hendelseId",
-        "contextId",
-    )
-
-    override fun responseFor(packet: JsonMessage) =
+    override fun responseFor(json: JsonNode) =
         JsonMessage.newMessage(
             mapOf(
                 "@event_name" to "behov",
@@ -25,8 +20,8 @@ class HentEnhetbehovRiver(private val testPerson: TestPerson) : AbstractMockRive
                 "@opprettet" to LocalDateTime.now(),
                 "@final" to true,
                 "@behov" to listOf("HentEnhet"),
-                "hendelseId" to packet["hendelseId"].asText(),
-                "contextId" to packet["contextId"].asText(),
+                "hendelseId" to json["hendelseId"].asText(),
+                "contextId" to json["contextId"].asText(),
                 "vedtaksperiodeId" to testPerson.vedtaksperiodeId1,
                 "fødselsnummer" to testPerson.fødselsnummer,
                 "aktørId" to testPerson.aktørId,

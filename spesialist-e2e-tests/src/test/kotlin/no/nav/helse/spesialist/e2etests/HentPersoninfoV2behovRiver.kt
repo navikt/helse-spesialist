@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.e2etests
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import no.nav.helse.spesialist.test.TestPerson
 import no.nav.helse.spesialist.typer.Kjønn
@@ -12,22 +13,16 @@ class HentPersoninfoV2behovRiver(private val testPerson: TestPerson) : AbstractM
         jsonMessage.forbid("@løsning")
     }
 
-    override val validateKeys = setOf(
-        "fødselsnummer",
-        "hendelseId",
-        "contextId",
-    )
-
-    override fun responseFor(packet: JsonMessage) = JsonMessage.newMessage(
+    override fun responseFor(json: JsonNode) = JsonMessage.newMessage(
         mapOf(
             "@event_name" to "behov",
             "@id" to UUID.randomUUID(),
             "@opprettet" to LocalDateTime.now(),
             "@final" to true,
             "@behov" to listOf("HentPersoninfoV2"),
-            "hendelseId" to packet["hendelseId"].asText(),
-            "contextId" to packet["contextId"].asText(),
-            "fødselsnummer" to packet["fødselsnummer"].asText(),
+            "hendelseId" to json["hendelseId"].asText(),
+            "contextId" to json["contextId"].asText(),
+            "fødselsnummer" to json["fødselsnummer"].asText(),
             "aktørId" to testPerson.aktørId,
             "@løsning" to mapOf(
                 "HentPersoninfoV2" to mapOf(

@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.e2etests
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import no.nav.helse.spesialist.test.TestPerson
 import java.time.LocalDateTime
@@ -11,30 +12,22 @@ class HentInfotrygdutbetalingerbehovRiver(private val testPerson: TestPerson) : 
         jsonMessage.forbid("@løsning")
     }
 
-    override val validateKeys = setOf(
-        "fødselsnummer",
-        "hendelseId",
-        "contextId",
-        "HentInfotrygdutbetalinger.historikkFom",
-        "HentInfotrygdutbetalinger.historikkTom",
-    )
-
-    override fun responseFor(packet: JsonMessage) = JsonMessage.newMessage(
+    override fun responseFor(json: JsonNode) = JsonMessage.newMessage(
         mapOf(
             "@event_name" to "behov",
             "@id" to UUID.randomUUID(),
             "@opprettet" to LocalDateTime.now(),
             "@final" to true,
             "@behov" to listOf("HentInfotrygdutbetalinger"),
-            "hendelseId" to packet["hendelseId"].asText(),
-            "contextId" to packet["contextId"].asText(),
+            "hendelseId" to json["hendelseId"].asText(),
+            "contextId" to json["contextId"].asText(),
             "vedtaksperiodeId" to testPerson.vedtaksperiodeId1,
             "fødselsnummer" to testPerson.fødselsnummer,
             "aktørId" to testPerson.aktørId,
             "orgnummer" to testPerson.orgnummer,
             "HentInfotrygdutbetalinger" to mapOf(
-                "historikkFom" to packet["HentInfotrygdutbetalinger.historikkFom"].asText(),
-                "historikkTom" to packet["HentInfotrygdutbetalinger.historikkTom"].asText()
+                "historikkFom" to json["HentInfotrygdutbetalinger"]["historikkFom"].asText(),
+                "historikkTom" to json["HentInfotrygdutbetalinger"]["historikkTom"].asText()
             ),
             "@løsning" to mapOf(
                 "HentInfotrygdutbetalinger" to listOf(

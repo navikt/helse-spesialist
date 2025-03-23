@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.e2etests
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -11,23 +12,16 @@ class AvviksvurderingbehovRiver : AbstractMockRiver() {
         jsonMessage.forbid("@løsning")
     }
 
-    override val validateKeys = setOf(
-        "fødselsnummer",
-        "Avviksvurdering.organisasjonsnummer",
-        "hendelseId",
-        "contextId",
-    )
-
-    override fun responseFor(packet: JsonMessage) = JsonMessage.newMessage(
+    override fun responseFor(json: JsonNode) = JsonMessage.newMessage(
         mapOf(
             "@event_name" to "behov",
             "@id" to UUID.randomUUID(),
             "@opprettet" to LocalDateTime.now(),
             "@final" to true,
             "@behov" to listOf("Avviksvurdering"),
-            "hendelseId" to "${UUID.fromString(packet["hendelseId"].asText())}",
-            "contextId" to "${UUID.fromString(packet["contextId"].asText())}",
-            "fødselsnummer" to packet["fødselsnummer"].asText(),
+            "hendelseId" to json["hendelseId"].asText(),
+            "contextId" to json["contextId"].asText(),
+            "fødselsnummer" to json["fødselsnummer"].asText(),
             "@løsning" to mapOf(
                 "Avviksvurdering" to mapOf(
                     "avviksvurderingId" to UUID.randomUUID(),
@@ -39,8 +33,8 @@ class AvviksvurderingbehovRiver : AbstractMockRiver() {
                     "beregningsgrunnlag" to mapOf(
                         "totalbeløp" to 600000.0,
                         "omregnedeÅrsinntekter" to listOf(
-                            mapOf<String, Any>(
-                                "arbeidsgiverreferanse" to packet["Avviksvurdering.organisasjonsnummer"].asText(),
+                            mapOf(
+                                "arbeidsgiverreferanse" to json["Avviksvurdering"]["organisasjonsnummer"].asText(),
                                 "beløp" to 600000.0
                             )
                         )
@@ -49,7 +43,7 @@ class AvviksvurderingbehovRiver : AbstractMockRiver() {
                         "totalbeløp" to 650_000.0,
                         "innrapporterteInntekter" to listOf(
                             mapOf(
-                                "arbeidsgiverreferanse" to packet["Avviksvurdering.organisasjonsnummer"].asText(),
+                                "arbeidsgiverreferanse" to json["Avviksvurdering"]["organisasjonsnummer"].asText(),
                                 "inntekter" to listOf(
                                     mapOf<String, Any>(
                                         "årMåned" to YearMonth.now(),
