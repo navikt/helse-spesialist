@@ -27,18 +27,18 @@ import no.nav.helse.spesialist.client.spleis.testfixtures.ClientSpleisModuleInte
 import no.nav.helse.spesialist.client.unleash.testfixtures.ClientUnleashModuleIntegrationTestFixture
 import no.nav.helse.spesialist.db.testfixtures.DBTestFixture
 import no.nav.helse.spesialist.domain.testfixtures.jan
-import no.nav.helse.spesialist.e2etests.mockrivers.ArbeidsforholdbehovRiver
-import no.nav.helse.spesialist.e2etests.mockrivers.ArbeidsgiverinformasjonOgHentPersoninfoV2behovRiver
-import no.nav.helse.spesialist.e2etests.mockrivers.ArbeidsgiverinformasjonbehovRiver
-import no.nav.helse.spesialist.e2etests.mockrivers.AvviksvurderingbehovRiver
-import no.nav.helse.spesialist.e2etests.mockrivers.EgenAnsattbehovRiver
-import no.nav.helse.spesialist.e2etests.mockrivers.HentEnhetbehovRiver
-import no.nav.helse.spesialist.e2etests.mockrivers.HentInfotrygdutbetalingerbehovRiver
-import no.nav.helse.spesialist.e2etests.mockrivers.HentPersoninfoV2behovRiver
-import no.nav.helse.spesialist.e2etests.mockrivers.InntekterForSykepengegrunnlagbehovRiver
-import no.nav.helse.spesialist.e2etests.mockrivers.RisikovurderingbehovRiver
-import no.nav.helse.spesialist.e2etests.mockrivers.VergemålOgFullmaktbehovRiver
-import no.nav.helse.spesialist.e2etests.mockrivers.ÅpneOppgaverbehovRiver
+import no.nav.helse.spesialist.e2etests.mockrivers.ArbeidsforholdBehovMockRiver
+import no.nav.helse.spesialist.e2etests.mockrivers.ArbeidsgiverinformasjonBehovMockRiver
+import no.nav.helse.spesialist.e2etests.mockrivers.ArbeidsgiverinformasjonOgHentPersoninfoV2BehovMockRiver
+import no.nav.helse.spesialist.e2etests.mockrivers.AvviksvurderingBehovMockRiver
+import no.nav.helse.spesialist.e2etests.mockrivers.EgenAnsattBehovMockRiver
+import no.nav.helse.spesialist.e2etests.mockrivers.HentEnhetBehovMockRiver
+import no.nav.helse.spesialist.e2etests.mockrivers.HentInfotrygdutbetalingerBehovMockRiver
+import no.nav.helse.spesialist.e2etests.mockrivers.HentPersoninfoV2BehovMockRiver
+import no.nav.helse.spesialist.e2etests.mockrivers.InntekterForSykepengegrunnlagBehovMockRiver
+import no.nav.helse.spesialist.e2etests.mockrivers.RisikovurderingBehovMockRiver
+import no.nav.helse.spesialist.e2etests.mockrivers.VergemålOgFullmaktBehovMockRiver
+import no.nav.helse.spesialist.e2etests.mockrivers.ÅpneOppgaverBehovMockRiver
 import no.nav.helse.spesialist.kafka.testfixtures.KafkaModuleTestRapidTestFixture
 import no.nav.helse.spesialist.test.TestPerson
 import org.intellij.lang.annotations.Language
@@ -52,19 +52,19 @@ abstract class AbstractE2EIntegrationTest {
     private val testPerson = TestPerson()
     private val testRapid = SimulatingTestRapid().also { rapid ->
         sequenceOf(
-            AvviksvurderingbehovRiver(),
-            HentPersoninfoV2behovRiver(testPerson),
-            HentEnhetbehovRiver(testPerson),
-            HentInfotrygdutbetalingerbehovRiver(testPerson),
-            ArbeidsgiverinformasjonbehovRiver(testPerson),
-            ArbeidsgiverinformasjonOgHentPersoninfoV2behovRiver(testPerson),
-            ArbeidsforholdbehovRiver(testPerson),
-            VergemålOgFullmaktbehovRiver(testPerson),
-            ÅpneOppgaverbehovRiver(testPerson),
-            RisikovurderingbehovRiver(testPerson),
-            InntekterForSykepengegrunnlagbehovRiver(testPerson),
+            AvviksvurderingBehovMockRiver(),
+            HentPersoninfoV2BehovMockRiver(testPerson),
+            HentEnhetBehovMockRiver(),
+            HentInfotrygdutbetalingerBehovMockRiver(testPerson),
+            EgenAnsattBehovMockRiver(),
+            ArbeidsgiverinformasjonBehovMockRiver(),
+            ArbeidsgiverinformasjonOgHentPersoninfoV2BehovMockRiver(testPerson),
+            ArbeidsforholdBehovMockRiver(),
+            VergemålOgFullmaktBehovMockRiver(),
+            ÅpneOppgaverBehovMockRiver(),
+            RisikovurderingBehovMockRiver(),
+            InntekterForSykepengegrunnlagBehovMockRiver(testPerson),
         ).forEach { it.registerOn(rapid) }
-        EgenAnsattbehovRiver().registerOn(rapid)
     }
 
     private val modules = RapidApp.start(
