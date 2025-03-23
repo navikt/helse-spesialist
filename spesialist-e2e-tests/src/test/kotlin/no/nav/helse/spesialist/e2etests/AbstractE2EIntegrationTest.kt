@@ -48,7 +48,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 abstract class AbstractE2EIntegrationTest {
-    private val kafkaModuleTestFixture = KafkaModuleTestRapidTestFixture()
     private val testPerson = TestPerson()
     private val testRapid = LoopbackTestRapid().also { rapid ->
         sequenceOf(
@@ -75,7 +74,7 @@ abstract class AbstractE2EIntegrationTest {
             clientSpleis = ClientSpleisModuleIntegrationTestFixture.moduleConfiguration,
             clientUnleash = ClientUnleashModuleIntegrationTestFixture.moduleConfiguration,
             db = DBTestFixture.database.dbModuleConfiguration,
-            kafka = kafkaModuleTestFixture.moduleConfiguration,
+            kafka = KafkaModuleTestRapidTestFixture.moduleConfiguration,
             versjonAvKode = "versjon_1",
             tilgangsgrupper = object : Tilgangsgrupper {
                 override val kode7GruppeId: UUID = UUID.randomUUID()
