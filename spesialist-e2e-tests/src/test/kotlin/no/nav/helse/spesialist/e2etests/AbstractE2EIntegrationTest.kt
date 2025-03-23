@@ -39,12 +39,14 @@ abstract class AbstractE2EIntegrationTest {
     private val kafkaModuleTestFixture = KafkaModuleTestRapidTestFixture()
     private val testPerson = TestPerson()
     private val testRapid = SimulatingTestRapid().also { rapid ->
-        AvviksvurderingbehovRiver().registerOn(rapid)
-        HentPersoninfoV2behovRiver(testPerson).registerOn(rapid)
-        HentEnhetbehovRiver(testPerson).registerOn(rapid)
-        HentInfotrygdutbetalingerbehovRiver(testPerson).registerOn(rapid)
-        ArbeidsgiverinformasjonbehovRiver(testPerson).registerOn(rapid)
-        ArbeidsgiverinformasjonOgHentPersoninfoV2behovRiver(testPerson).registerOn(rapid)
+        sequenceOf(
+            AvviksvurderingbehovRiver(),
+            HentPersoninfoV2behovRiver(testPerson),
+            HentEnhetbehovRiver(testPerson),
+            HentInfotrygdutbetalingerbehovRiver(testPerson),
+            ArbeidsgiverinformasjonbehovRiver(testPerson),
+            ArbeidsgiverinformasjonOgHentPersoninfoV2behovRiver(testPerson),
+        ).forEach { it.registerOn(rapid) }
     }
 
     private val meldingssender = SimulatingTestRapidMeldingssender(testRapid)
