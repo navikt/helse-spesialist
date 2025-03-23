@@ -15,30 +15,6 @@ import java.util.UUID
 class SimulatingTestRapidMeldingssender(private val rapid: SimulatingTestRapid) {
     private val newUUID get() = UUID.randomUUID()
 
-    fun sendInfotrygdutbetalingerløsning(
-        aktørId: String,
-        fødselsnummer: String,
-        organisasjonsnummer: String,
-        vedtaksperiodeId: UUID,
-    ): UUID = newUUID.also { id ->
-        val behov = rapid.messageLog.filter { it.path("@event_name").asText() == "behov" }.last()
-        assertEquals("HentInfotrygdutbetalinger", behov["@behov"].map { it.asText() }.single())
-        val contextId = UUID.fromString(behov["contextId"].asText())
-        val hendelseId = UUID.fromString(behov["hendelseId"].asText())
-
-        rapid.publish(
-            Testmeldingfabrikk.lagInfotrygdutbetalingerløsning(
-                aktørId = aktørId,
-                fødselsnummer = fødselsnummer,
-                organisasjonsnummer = organisasjonsnummer,
-                vedtaksperiodeId = vedtaksperiodeId,
-                id = id,
-                hendelseId = hendelseId,
-                contextId = contextId
-            )
-        )
-    }
-
     fun sendArbeidsgiverinformasjonløsning(
         aktørId: String,
         fødselsnummer: String,

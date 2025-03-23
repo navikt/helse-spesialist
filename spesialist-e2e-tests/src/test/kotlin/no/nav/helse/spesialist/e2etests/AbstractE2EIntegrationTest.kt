@@ -43,6 +43,7 @@ abstract class AbstractE2EIntegrationTest {
         AvviksvurderingbehovRiver().registerOn(rapid)
         HentPersoninfoV2behovRiver(testPerson).registerOn(rapid)
         HentEnhetbehovRiver(testPerson).registerOn(rapid)
+        HentInfotrygdutbetalingerbehovRiver(testPerson).registerOn(rapid)
     }
 
     private val meldingssender = SimulatingTestRapidMeldingssender(testRapid)
@@ -190,15 +191,6 @@ abstract class AbstractE2EIntegrationTest {
             aktørId = testPerson.aktørId,
             fødselsnummer = testPerson.fødselsnummer,
             erEgenAnsatt = false
-        )
-    }
-
-    protected fun sendInfotrygdutbetalingerløsning() {
-        meldingssender.sendInfotrygdutbetalingerløsning(
-            aktørId = testPerson.aktørId,
-            fødselsnummer = testPerson.fødselsnummer,
-            organisasjonsnummer = testPerson.orgnummer,
-            vedtaksperiodeId = testPerson.vedtaksperiodeId1,
         )
     }
 
