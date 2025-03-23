@@ -55,7 +55,7 @@ abstract class AbstractE2EIntegrationTest {
             AvviksvurderingBehovMockRiver(),
             HentPersoninfoV2BehovMockRiver(testPerson),
             HentEnhetBehovMockRiver(),
-            HentInfotrygdutbetalingerBehovMockRiver(testPerson),
+            HentInfotrygdutbetalingerBehovMockRiver(testPerson.orgnummer),
             EgenAnsattBehovMockRiver(),
             ArbeidsgiverinformasjonBehovMockRiver(),
             ArbeidsgiverinformasjonOgHentPersoninfoV2BehovMockRiver(testPerson),
@@ -63,7 +63,7 @@ abstract class AbstractE2EIntegrationTest {
             VergemålOgFullmaktBehovMockRiver(),
             ÅpneOppgaverBehovMockRiver(),
             RisikovurderingBehovMockRiver(),
-            InntekterForSykepengegrunnlagBehovMockRiver(testPerson),
+            InntekterForSykepengegrunnlagBehovMockRiver(testPerson.orgnummer),
         ).forEach { it.registerOn(rapid) }
     }
 
