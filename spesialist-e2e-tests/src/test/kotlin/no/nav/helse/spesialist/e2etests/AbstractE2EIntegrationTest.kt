@@ -59,12 +59,12 @@ abstract class AbstractE2EIntegrationTest {
             ArbeidsgiverinformasjonbehovRiver(testPerson),
             ArbeidsgiverinformasjonOgHentPersoninfoV2behovRiver(testPerson),
             ArbeidsforholdbehovRiver(testPerson),
-            EgenAnsattbehovRiver(testPerson),
             VergemålOgFullmaktbehovRiver(testPerson),
             ÅpneOppgaverbehovRiver(testPerson),
             RisikovurderingbehovRiver(testPerson),
             InntekterForSykepengegrunnlagbehovRiver(testPerson),
         ).forEach { it.registerOn(rapid) }
+        EgenAnsattbehovRiver().registerOn(rapid)
     }
 
     private val modules = RapidApp.start(
