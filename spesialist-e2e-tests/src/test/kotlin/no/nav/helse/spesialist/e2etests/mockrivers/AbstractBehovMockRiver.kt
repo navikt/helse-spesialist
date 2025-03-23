@@ -13,7 +13,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.spesialist.application.logg.logg
-import no.nav.helse.spesialist.e2etests.SimulatingTestRapid
+import no.nav.helse.spesialist.e2etests.LoopbackTestRapid
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -24,7 +24,7 @@ abstract class AbstractBehovMockRiver(private vararg val behov: String) : River.
     protected val objectMapper: ObjectMapper = jacksonObjectMapper().registerModule(JavaTimeModule())
         .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-    fun registerOn(rapid: SimulatingTestRapid) {
+    fun registerOn(rapid: LoopbackTestRapid) {
         River(rapid)
             .precondition(::precondition)
             .register(this)

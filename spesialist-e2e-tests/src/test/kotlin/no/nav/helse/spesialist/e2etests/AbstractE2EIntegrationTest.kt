@@ -50,7 +50,7 @@ import java.util.UUID
 abstract class AbstractE2EIntegrationTest {
     private val kafkaModuleTestFixture = KafkaModuleTestRapidTestFixture()
     private val testPerson = TestPerson()
-    private val testRapid = SimulatingTestRapid().also { rapid ->
+    private val testRapid = LoopbackTestRapid().also { rapid ->
         sequenceOf(
             AvviksvurderingBehovMockRiver(),
             HentPersoninfoV2BehovMockRiver(testPerson),
