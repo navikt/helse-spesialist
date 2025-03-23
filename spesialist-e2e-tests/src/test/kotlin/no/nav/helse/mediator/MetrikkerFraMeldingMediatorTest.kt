@@ -5,14 +5,14 @@ import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import io.mockk.mockk
 import no.nav.helse.Meldingssender
-import no.nav.helse.e2e.AbstractE2ETest
+import no.nav.helse.e2e.AbstractDatabaseTest
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.spesialist.db.TransactionalSessionFactory
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 
-class MetrikkerFraMeldingMediatorTest : AbstractE2ETest() {
+class MetrikkerFraMeldingMediatorTest : AbstractDatabaseTest() {
     private val fødselsnummer = lagFødselsnummer()
 
     private val testRapid = TestRapid()

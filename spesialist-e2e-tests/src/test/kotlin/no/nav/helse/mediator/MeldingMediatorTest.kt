@@ -1,10 +1,11 @@
 package no.nav.helse.mediator
 
+import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import io.mockk.mockk
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.db.PoisonPillDao
-import no.nav.helse.e2e.AbstractE2ETest
+import no.nav.helse.e2e.AbstractDatabaseTest
 import no.nav.helse.mediator.meldinger.PoisonPills
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode
 import no.nav.helse.modell.varsel.VarselRepository
@@ -14,11 +15,13 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.UUID
 
-class MeldingMediatorTest : AbstractE2ETest() {
+class MeldingMediatorTest : AbstractDatabaseTest() {
+    private val testRapid = TestRapid()
     private val kommandofabrikk = mockk<Kommandofabrikk>(relaxed = true)
     private val poisonPills: MutableMap<String, Set<String>> = mutableMapOf()
     private val poisonPillDao = object: PoisonPillDao {
@@ -41,6 +44,12 @@ class MeldingMediatorTest : AbstractE2ETest() {
             poisonPillDao = poisonPillDao,
             ignorerMeldingerForUkjentePersoner = false
         )
+
+    @BeforeEach
+    fun resetTestSetup() {
+        testRapid.reset()
+        lagVarseldefinisjoner()
+    }
 
     @Test
     fun `lagre varseldefinisjon`() {

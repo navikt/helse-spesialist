@@ -109,7 +109,15 @@ class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
         )
 
+    private val AKTØR_ID = lagAktørId()
+    private val FØDSELSNUMMER = lagFødselsnummer()
+    private val ORGANISASJONSNUMMER = lagOrganisasjonsnummer()
     private val ORGANISASJONSNUMMER_GHOST = lagOrganisasjonsnummer()
+
+    override val SAKSBEHANDLER_OID: UUID = UUID.randomUUID()
+    override val SAKSBEHANDLER_NAVN = "ET_NAVN"
+    override val SAKSBEHANDLER_IDENT = "EN_IDENT"
+    override val SAKSBEHANDLER_EPOST = "epost@nav.no"
 
     private val saksbehandler = saksbehandler()
 
@@ -244,7 +252,7 @@ class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         )
         val overstyring =
             ApiTidslinjeOverstyring(
-                vedtaksperiodeId = VEDTAKSPERIODE_ID,
+                vedtaksperiodeId = VEDTAKSPERIODE,
                 organisasjonsnummer = person { 2.ag },
                 fodselsnummer = person.fødselsnummer,
                 aktorId = person.aktørId,
@@ -264,7 +272,7 @@ class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
 
         mediator.håndter(overstyring, saksbehandler)
         val totrinnsvurdering = sessionFactory.transactionalSessionScope { session ->
-            session.totrinnsvurderingRepository.finn(VEDTAKSPERIODE_ID)
+            session.totrinnsvurderingRepository.finn(VEDTAKSPERIODE)
         }
         checkNotNull(totrinnsvurdering)
         assertTrue(totrinnsvurdering.overstyringer.single().opprettet.isAfter(LocalDateTime.now().minusSeconds(5)))
@@ -282,11 +290,7 @@ class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         opprettVedtaksperiode()
         val saksbehandler2Oid = UUID.randomUUID()
         opprettSaksbehandler(saksbehandler2Oid)
-        opprettTotrinnsvurdering(
-            vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            saksbehandlerOid = saksbehandler2Oid,
-            fødselsnummer = person.fødselsnummer
-        )
+        opprettTotrinnsvurdering(vedtaksperiodeId = VEDTAKSPERIODE, saksbehandlerOid = saksbehandler2Oid, fødselsnummer = person.fødselsnummer)
         val saksbehandler = SaksbehandlerFraApi(
             SAKSBEHANDLER_OID,
             SAKSBEHANDLER_NAVN,
@@ -296,7 +300,7 @@ class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         )
         val overstyring =
             ApiTidslinjeOverstyring(
-                vedtaksperiodeId = VEDTAKSPERIODE_ID,
+                vedtaksperiodeId = VEDTAKSPERIODE,
                 organisasjonsnummer = person { 2.ag },
                 fodselsnummer = person.fødselsnummer,
                 aktorId = person.aktørId,
@@ -316,7 +320,7 @@ class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
 
         mediator.håndter(overstyring, saksbehandler)
         val totrinnsvurdering = sessionFactory.transactionalSessionScope { session ->
-            session.totrinnsvurderingRepository.finn(VEDTAKSPERIODE_ID)
+            session.totrinnsvurderingRepository.finn(VEDTAKSPERIODE)
         }
         checkNotNull(totrinnsvurdering)
         assertEquals(saksbehandler2Oid, totrinnsvurdering.saksbehandler?.value)
@@ -699,7 +703,7 @@ class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         assertEquals(SAKSBEHANDLER_NAVN, melding["saksbehandler"]["navn"].asText())
         assertEquals(SAKSBEHANDLER_IDENT, melding["saksbehandler"]["ident"].asText())
 
-        assertEquals(VEDTAKSPERIODE_ID, melding["vedtaksperiodeId"].asUUID())
+        assertEquals(VEDTAKSPERIODE, melding["vedtaksperiodeId"].asUUID())
         assertEquals(UTBETALING_ID, melding["utbetalingId"].asUUID())
         assertEquals("EN_KOMMENTAR", melding["kommentar"]?.asText())
         assertEquals(1, melding["begrunnelser"].map { it.asText() }.size)
@@ -726,7 +730,7 @@ class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         assertEquals(SAKSBEHANDLER_NAVN, melding["saksbehandler"]["navn"].asText())
         assertEquals(SAKSBEHANDLER_IDENT, melding["saksbehandler"]["ident"].asText())
 
-        assertEquals(VEDTAKSPERIODE_ID, melding["vedtaksperiodeId"].asUUID())
+        assertEquals(VEDTAKSPERIODE, melding["vedtaksperiodeId"].asUUID())
         assertEquals(UTBETALING_ID, melding["utbetalingId"].asUUID())
         assertEquals(null, melding["kommentar"]?.asText())
         assertEquals(0, melding["begrunnelser"].map { it.asText() }.size)
@@ -888,11 +892,11 @@ class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
 
     @Test
     fun `håndterer overstyring av arbeidsforhold`() {
-        nyPerson(fødselsnummer = FØDSELSNUMMER, aktørId = AKTØR, organisasjonsnummer = ORGNR)
+        nyPerson(fødselsnummer = FØDSELSNUMMER, aktørId = AKTØR_ID, organisasjonsnummer = ORGANISASJONSNUMMER)
         val overstyring =
             ApiArbeidsforholdOverstyringHandling(
                 fodselsnummer = FØDSELSNUMMER,
-                aktorId = AKTØR,
+                aktorId = AKTØR_ID,
                 skjaringstidspunkt = 1.januar,
                 vedtaksperiodeId = UUID.randomUUID(),
                 overstyrteArbeidsforhold =
@@ -912,7 +916,7 @@ class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
 
         assertNotNull(hendelse["@id"].asText())
         assertEquals(FØDSELSNUMMER, hendelse["fødselsnummer"].asText())
-        assertEquals(AKTØR, hendelse["aktørId"].asText())
+        assertEquals(AKTØR_ID, hendelse["aktørId"].asText())
         assertEquals(SAKSBEHANDLER_OID, hendelse["saksbehandlerOid"].asText().let { UUID.fromString(it) })
         assertEquals(SAKSBEHANDLER_NAVN, hendelse["saksbehandlerNavn"].asText())
         assertEquals(SAKSBEHANDLER_IDENT, hendelse["saksbehandlerIdent"].asText())
@@ -928,35 +932,27 @@ class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
 
     @Test
     fun `håndterer overstyring av inntekt og refusjon`() {
-        nyPerson(fødselsnummer = FØDSELSNUMMER, aktørId = AKTØR, organisasjonsnummer = ORGNR)
+        nyPerson(fødselsnummer = FØDSELSNUMMER, aktørId = AKTØR_ID, organisasjonsnummer = ORGANISASJONSNUMMER)
         val overstyring =
             ApiInntektOgRefusjonOverstyring(
                 fodselsnummer = FØDSELSNUMMER,
-                aktorId = AKTØR,
+                aktorId = AKTØR_ID,
                 skjaringstidspunkt = 1.januar,
                 vedtaksperiodeId = UUID.randomUUID(),
                 arbeidsgivere =
                     listOf(
                         ApiOverstyringArbeidsgiver(
-                            organisasjonsnummer = ORGNR,
+                            organisasjonsnummer = ORGANISASJONSNUMMER,
                             manedligInntekt = 25000.0,
                             fraManedligInntekt = 25001.0,
                             refusjonsopplysninger =
                                 listOf(
-                                    ApiOverstyringArbeidsgiver.ApiOverstyringRefusjonselement(
-                                        1.januar,
-                                        31.januar,
-                                        25000.0
-                                    ),
+                                    ApiOverstyringArbeidsgiver.ApiOverstyringRefusjonselement(1.januar, 31.januar, 25000.0),
                                     ApiOverstyringArbeidsgiver.ApiOverstyringRefusjonselement(1.februar, null, 24000.0),
                                 ),
                             fraRefusjonsopplysninger =
                                 listOf(
-                                    ApiOverstyringArbeidsgiver.ApiOverstyringRefusjonselement(
-                                        1.januar,
-                                        31.januar,
-                                        24000.0
-                                    ),
+                                    ApiOverstyringArbeidsgiver.ApiOverstyringRefusjonselement(1.januar, 31.januar, 24000.0),
                                     ApiOverstyringArbeidsgiver.ApiOverstyringRefusjonselement(1.februar, null, 23000.0),
                                 ),
                             lovhjemmel = ApiLovhjemmel("8-28", "3", null, "folketrygdloven", "1970-01-01"),
@@ -971,20 +967,12 @@ class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
                             fraManedligInntekt = 25001.0,
                             refusjonsopplysninger =
                                 listOf(
-                                    ApiOverstyringArbeidsgiver.ApiOverstyringRefusjonselement(
-                                        1.januar,
-                                        31.januar,
-                                        21000.0
-                                    ),
+                                    ApiOverstyringArbeidsgiver.ApiOverstyringRefusjonselement(1.januar, 31.januar, 21000.0),
                                     ApiOverstyringArbeidsgiver.ApiOverstyringRefusjonselement(1.februar, null, 22000.0),
                                 ),
                             fraRefusjonsopplysninger =
                                 listOf(
-                                    ApiOverstyringArbeidsgiver.ApiOverstyringRefusjonselement(
-                                        1.januar,
-                                        31.januar,
-                                        22000.0
-                                    ),
+                                    ApiOverstyringArbeidsgiver.ApiOverstyringRefusjonselement(1.januar, 31.januar, 22000.0),
                                     ApiOverstyringArbeidsgiver.ApiOverstyringRefusjonselement(1.februar, null, 23000.0),
                                 ),
                             lovhjemmel = ApiLovhjemmel("8-28", "3", null, "folketrygdloven", "1970-01-01"),
@@ -1002,14 +990,14 @@ class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
 
         assertNotNull(hendelse["@id"].asText())
         assertEquals(FØDSELSNUMMER, hendelse["fødselsnummer"].asText())
-        assertEquals(AKTØR, hendelse["aktørId"].asText())
+        assertEquals(AKTØR_ID, hendelse["aktørId"].asText())
         assertEquals(SAKSBEHANDLER_OID, hendelse["saksbehandlerOid"].asText().let { UUID.fromString(it) })
         assertEquals(SAKSBEHANDLER_NAVN, hendelse["saksbehandlerNavn"].asText())
         assertEquals(SAKSBEHANDLER_IDENT, hendelse["saksbehandlerIdent"].asText())
         assertEquals(SAKSBEHANDLER_EPOST, hendelse["saksbehandlerEpost"].asText())
         assertEquals(1.januar, hendelse["skjæringstidspunkt"].asLocalDate())
         hendelse["arbeidsgivere"].first().let {
-            assertEquals(ORGNR, it["organisasjonsnummer"].asText())
+            assertEquals(ORGANISASJONSNUMMER, it["organisasjonsnummer"].asText())
             assertEquals("En begrunnelse", it["begrunnelse"].asText())
             assertEquals("En forklaring", it["forklaring"].asText())
             assertEquals(25000.0, it["månedligInntekt"].asDouble())
@@ -1034,16 +1022,16 @@ class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
 
     @Test
     fun `håndterer skjønnsfastsetting av sykepengegrunnlag`() {
-        nyPerson(fødselsnummer = FØDSELSNUMMER, aktørId = AKTØR, organisasjonsnummer = ORGNR)
+        nyPerson(fødselsnummer = FØDSELSNUMMER, aktørId = AKTØR_ID, organisasjonsnummer = ORGANISASJONSNUMMER)
         val skjønnsfastsetting =
             ApiSkjonnsfastsettelse(
                 fodselsnummer = FØDSELSNUMMER,
-                aktorId = AKTØR,
+                aktorId = AKTØR_ID,
                 skjaringstidspunkt = 1.januar,
                 arbeidsgivere =
                     listOf(
                         ApiSkjonnsfastsettelse.ApiSkjonnsfastsettelseArbeidsgiver(
-                            organisasjonsnummer = ORGNR,
+                            organisasjonsnummer = ORGANISASJONSNUMMER,
                             arlig = 25000.0,
                             fraArlig = 25001.0,
                             lovhjemmel = ApiLovhjemmel("8-28", "3", null, "folketrygdloven", "1970-01-01"),
@@ -1076,14 +1064,14 @@ class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
 
         assertNotNull(hendelse["@id"].asText())
         assertEquals(FØDSELSNUMMER, hendelse["fødselsnummer"].asText())
-        assertEquals(AKTØR, hendelse["aktørId"].asText())
+        assertEquals(AKTØR_ID, hendelse["aktørId"].asText())
         assertEquals(SAKSBEHANDLER_OID, hendelse["saksbehandlerOid"].asText().let { UUID.fromString(it) })
         assertEquals(SAKSBEHANDLER_NAVN, hendelse["saksbehandlerNavn"].asText())
         assertEquals(SAKSBEHANDLER_IDENT, hendelse["saksbehandlerIdent"].asText())
         assertEquals(SAKSBEHANDLER_EPOST, hendelse["saksbehandlerEpost"].asText())
         assertEquals(1.januar, hendelse["skjæringstidspunkt"].asLocalDate())
         hendelse["arbeidsgivere"].first().let {
-            assertEquals(ORGNR, it["organisasjonsnummer"].asText())
+            assertEquals(ORGANISASJONSNUMMER, it["organisasjonsnummer"].asText())
             assertEquals("En begrunnelsemal", it["begrunnelseMal"].asText())
             assertEquals("begrunnelsefritekst", it["begrunnelseFritekst"].asText())
             assertEquals("begrunnelseKonklusjon", it["begrunnelseKonklusjon"].asText())
@@ -1104,11 +1092,11 @@ class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
 
     @Test
     fun `håndterer vurdering av minimum sykdomsgrad`() {
-        nyPerson(fødselsnummer = FØDSELSNUMMER, organisasjonsnummer = ORGNR, aktørId = AKTØR)
+        nyPerson(fødselsnummer = FØDSELSNUMMER, organisasjonsnummer = ORGANISASJONSNUMMER, aktørId = AKTØR_ID)
         val minimumSykdomsgrad =
             ApiMinimumSykdomsgrad(
                 fodselsnummer = FØDSELSNUMMER,
-                aktorId = AKTØR,
+                aktorId = AKTØR_ID,
                 perioderVurdertOk = listOf(
                     ApiMinimumSykdomsgrad.ApiPeriode(
                         fom = 1.januar,
@@ -1128,7 +1116,7 @@ class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
                 arbeidsgivere =
                     listOf(
                         ApiMinimumSykdomsgrad.ApiArbeidsgiver(
-                            organisasjonsnummer = ORGNR,
+                            organisasjonsnummer = ORGANISASJONSNUMMER,
                             berortVedtaksperiodeId = PERIODE.id,
                         ),
                     ),
@@ -1141,7 +1129,7 @@ class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
 
         assertNotNull(hendelse["@id"].asText())
         assertEquals(FØDSELSNUMMER, hendelse["fødselsnummer"].asText())
-        assertEquals(AKTØR, hendelse["aktørId"].asText())
+        assertEquals(AKTØR_ID, hendelse["aktørId"].asText())
         assertEquals(SAKSBEHANDLER_OID, hendelse["saksbehandlerOid"].asText().let { UUID.fromString(it) })
         assertEquals(SAKSBEHANDLER_NAVN, hendelse["saksbehandlerNavn"].asText())
         assertEquals(SAKSBEHANDLER_IDENT, hendelse["saksbehandlerIdent"].asText())
@@ -1163,8 +1151,8 @@ class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     @Test
     fun `opphev stans`() {
         nyPerson()
-        mediator.håndter(ApiOpphevStans(FØDSELSNUMMER, "EN_ÅRSAK"), saksbehandler)
-        assertStansOpphevet(FØDSELSNUMMER)
+        mediator.håndter(ApiOpphevStans(FNR, "EN_ÅRSAK"), saksbehandler)
+        assertStansOpphevet(FNR)
     }
 
     private fun assertStansOpphevet(fødselsnummer: String) {
@@ -1189,10 +1177,10 @@ class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         arsaker: List<ApiAnnulleringArsak> =
             listOf(ApiAnnulleringArsak(_key = "key01", arsak = "Ferie"), ApiAnnulleringArsak(_key = "key02", arsak = "Perm")),
     ) = ApiAnnulleringData(
-        aktorId = AKTØR,
+        aktorId = AKTØR_ID,
         fodselsnummer = FØDSELSNUMMER,
-        organisasjonsnummer = ORGNR,
-        vedtaksperiodeId = VEDTAKSPERIODE_ID,
+        organisasjonsnummer = ORGANISASJONSNUMMER,
+        vedtaksperiodeId = VEDTAKSPERIODE,
         utbetalingId = UTBETALING_ID,
         arbeidsgiverFagsystemId = "EN-FAGSYSTEMID${Random.nextInt(1000)}",
         personFagsystemId = "EN-FAGSYSTEMID${Random.nextInt(1000)}",

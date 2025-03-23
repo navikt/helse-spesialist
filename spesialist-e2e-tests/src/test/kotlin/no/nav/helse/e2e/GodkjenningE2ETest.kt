@@ -299,7 +299,7 @@ class GodkjenningE2ETest : AbstractE2ETest() {
                     utbetalingId = revurdertUtbetaling,
                     kanAvvises = kanAvvises,
                     fødselsnummer = FØDSELSNUMMER,
-                    aktørId = testperson.aktørId,
+                    aktørId = AKTØR,
                     organisasjonsnummer = ORGNR,
                     spleisBehandlingId = spleisBehandlingId,
                 ),
@@ -329,7 +329,7 @@ class GodkjenningE2ETest : AbstractE2ETest() {
             kanGodkjennesAutomatisk = true,
             godkjenningsbehovTestdata = GodkjenningsbehovTestdata(
                 fødselsnummer = FØDSELSNUMMER,
-                aktørId = testperson.aktørId,
+                aktørId = AKTØR,
                 organisasjonsnummer = ORGNR,
                 vedtaksperiodeId = vedtaksperiodeId1,
                 utbetalingId = UTBETALING_ID,
@@ -362,7 +362,7 @@ class GodkjenningE2ETest : AbstractE2ETest() {
             kanGodkjennesAutomatisk = true,
             godkjenningsbehovTestdata = GodkjenningsbehovTestdata(
                 fødselsnummer = FØDSELSNUMMER,
-                aktørId = testperson.aktørId,
+                aktørId = AKTØR,
                 organisasjonsnummer = ORGNR,
                 vedtaksperiodeId = vedtaksperiodeId1,
                 utbetalingId = UTBETALING_ID,

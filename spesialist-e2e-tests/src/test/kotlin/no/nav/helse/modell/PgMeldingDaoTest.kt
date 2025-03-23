@@ -30,30 +30,29 @@ class PgMeldingDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `finn siste igangsatte overstyring om den er korrigert søknad`() {
-        val fødselsnummer = FØDSELSNUMMER
-        val overstyringIgangsatt = mockOverstyringIgangsatt(fødselsnummer, listOf(VEDTAKSPERIODE_ID), "KORRIGERT_SØKNAD")
+        val fødselsnummer = FNR
+        val overstyringIgangsatt = mockOverstyringIgangsatt(fødselsnummer, listOf(VEDTAKSPERIODE), "KORRIGERT_SØKNAD")
 
-        val overstyringIgangsattForAnnenVedtaksperiode =
-            mockOverstyringIgangsatt(fødselsnummer, listOf(VEDTAKSPERIODE_ID), "SYKDOMSTIDSLINJE")
+        val overstyringIgangsattForAnnenVedtaksperiode = mockOverstyringIgangsatt(fødselsnummer, listOf(VEDTAKSPERIODE), "SYKDOMSTIDSLINJE")
 
         meldingDao.lagre(overstyringIgangsatt)
         meldingDao.lagre(overstyringIgangsattForAnnenVedtaksperiode)
-        assertNull(meldingDao.sisteOverstyringIgangsattOmKorrigertSøknad(fødselsnummer, VEDTAKSPERIODE_ID))
+        assertNull(meldingDao.sisteOverstyringIgangsattOmKorrigertSøknad(fødselsnummer, VEDTAKSPERIODE))
 
-        meldingDao.lagre(mockOverstyringIgangsatt(fødselsnummer, listOf(VEDTAKSPERIODE_ID), "KORRIGERT_SØKNAD"))
-        assertNotNull(meldingDao.sisteOverstyringIgangsattOmKorrigertSøknad(fødselsnummer, VEDTAKSPERIODE_ID))
+        meldingDao.lagre(mockOverstyringIgangsatt(fødselsnummer, listOf(VEDTAKSPERIODE), "KORRIGERT_SØKNAD"))
+        assertNotNull(meldingDao.sisteOverstyringIgangsattOmKorrigertSøknad(fødselsnummer, VEDTAKSPERIODE))
     }
 
     @Test
     fun `finn antall korrigerte søknader`() {
-        meldingDao.opprettAutomatiseringKorrigertSøknad(VEDTAKSPERIODE_ID, UUID.randomUUID())
-        val actual = meldingDao.finnAntallAutomatisertKorrigertSøknad(VEDTAKSPERIODE_ID)
+        meldingDao.opprettAutomatiseringKorrigertSøknad(VEDTAKSPERIODE, UUID.randomUUID())
+        val actual = meldingDao.finnAntallAutomatisertKorrigertSøknad(VEDTAKSPERIODE)
         assertEquals(1, actual)
     }
 
     @Test
     fun `finn ut om automatisering av korrigert søknad allerede er håndtert`() {
-        meldingDao.opprettAutomatiseringKorrigertSøknad(VEDTAKSPERIODE_ID, HENDELSE_ID)
+        meldingDao.opprettAutomatiseringKorrigertSøknad(VEDTAKSPERIODE, HENDELSE_ID)
         val håndtert = meldingDao.erKorrigertSøknadAutomatiskBehandlet(HENDELSE_ID)
         assertTrue(håndtert)
     }
@@ -63,7 +62,7 @@ class PgMeldingDaoTest : DatabaseIntegrationTest() {
         meldingDao.lagre(godkjenningsbehov)
         val actual = meldingDao.finn(HENDELSE_ID)
             ?: fail { "Forventet å finne en hendelse med id $HENDELSE_ID" }
-        assertEquals(FØDSELSNUMMER, actual.fødselsnummer())
+        assertEquals(FNR, actual.fødselsnummer())
     }
 
     @Test
@@ -71,7 +70,7 @@ class PgMeldingDaoTest : DatabaseIntegrationTest() {
         meldingDao.lagre(saksbehandlerløsning)
         val actual = meldingDao.finn(HENDELSE_ID)
             ?: fail { "Forventet å finne en hendelse med id $HENDELSE_ID" }
-        assertEquals(FØDSELSNUMMER, actual.fødselsnummer())
+        assertEquals(FNR, actual.fødselsnummer())
     }
 
     @Test
@@ -81,7 +80,7 @@ class PgMeldingDaoTest : DatabaseIntegrationTest() {
         opprettVedtaksperiode()
 
         meldingDao.lagre(godkjenningsbehov)
-        assertEquals(VEDTAKSPERIODE_ID, finnKobling())
+        assertEquals(VEDTAKSPERIODE, finnKobling())
     }
 
     private fun mockOverstyringIgangsatt(fødselsnummer: String, berørtePeriodeIder: List<UUID>, årsak: String): OverstyringIgangsatt {
@@ -106,21 +105,17 @@ class PgMeldingDaoTest : DatabaseIntegrationTest() {
     private fun mockGodkjenningsbehov(): Godkjenningsbehov {
         return mockk<Godkjenningsbehov>(relaxed = true) {
             every { id } returns HENDELSE_ID
-            every { fødselsnummer() } returns this@PgMeldingDaoTest.FØDSELSNUMMER
-            every { vedtaksperiodeId() } returns this@PgMeldingDaoTest.VEDTAKSPERIODE_ID
-            every { toJson() } returns lagGodkjenningsbehov(
-                AKTØR,
-                this@PgMeldingDaoTest.FØDSELSNUMMER,
-                this@PgMeldingDaoTest.VEDTAKSPERIODE_ID
-            )
+            every { fødselsnummer() } returns FNR
+            every { vedtaksperiodeId() } returns VEDTAKSPERIODE
+            every { toJson() } returns lagGodkjenningsbehov(AKTØR, FNR, VEDTAKSPERIODE)
         }
     }
 
     private fun mockSaksbehandlerløsning(): Saksbehandlerløsning {
         return mockk<Saksbehandlerløsning>(relaxed = true) {
             every { id } returns HENDELSE_ID
-            every { fødselsnummer() } returns this@PgMeldingDaoTest.FØDSELSNUMMER
-            every { toJson() } returns lagSaksbehandlerløsning(this@PgMeldingDaoTest.FØDSELSNUMMER)
+            every { fødselsnummer() } returns FNR
+            every { toJson() } returns lagSaksbehandlerløsning(FNR)
         }
     }
 

@@ -1,20 +1,20 @@
-package no.nav.helse.spesialist.e2etests
+package no.nav.helse.spesialist.test
 
 import no.nav.helse.spesialist.domain.testfixtures.lagAktørId
 import no.nav.helse.spesialist.domain.testfixtures.lagEtternavn
 import no.nav.helse.spesialist.domain.testfixtures.lagFornavn
+import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.lagMellomnavnOrNull
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnavn
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.typer.Kjønn
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import java.util.UUID
 import kotlin.random.Random
 
 class TestPerson {
-    val fødselsdato: LocalDate = LocalDate.now().minusYears(18).minusDays(Random.nextLong(until = 365 * 100))
-    val fødselsnummer: String = fødselsdato.format(DateTimeFormatter.ofPattern("ddMMyy00000"))
+    val fødselsnummer: String = lagFødselsnummer()
+    val fødselsdato: LocalDate = LocalDate.now().minusYears(18).minusDays(Random.nextLong(until = 365 * 82))
     val aktørId: String = lagAktørId()
     val fornavn: String = lagFornavn()
     val mellomnavn: String? = lagMellomnavnOrNull()
@@ -42,32 +42,32 @@ class TestPerson {
     fun nyArbeidsgiver() = TestArbeidsgiver(fødselsnummer, aktørId).also {
         arbeidsgivere[arbeidsgivere.size] = it
     }
+}
 
-    class TestArbeidsgiver(
-        val fødselsnummer: String,
-        val aktørId: String,
-    ) {
-        private val vedtaksperioder = mutableMapOf<Int, TestVedtaksperiode>()
-        val organisasjonsnummer = lagOrganisasjonsnummer()
-        val organisasjonsnavn = lagOrganisasjonsnavn()
+class TestArbeidsgiver(
+    val fødselsnummer: String,
+    val aktørId: String,
+) {
+    private val vedtaksperioder = mutableMapOf<Int, TestVedtaksperiode>()
+    val organisasjonsnummer = lagOrganisasjonsnummer()
+    val organisasjonsnavn = lagOrganisasjonsnavn()
 
-        fun nyVedtaksperiode() = TestVedtaksperiode(fødselsnummer, aktørId, organisasjonsnummer).also {
-            vedtaksperioder[vedtaksperioder.size] = it
-        }
-
-        val Int.vedtaksperiode
-            get() = vedtaksperioder[this] ?: throw IllegalArgumentException(
-                "Vedtaksperiode med index $this for arbeidsgiver $organisasjonsnummer finnes ikke",
-            )
+    fun nyVedtaksperiode() = TestVedtaksperiode(fødselsnummer, aktørId, organisasjonsnummer).also {
+        vedtaksperioder[vedtaksperioder.size] = it
     }
 
-    class TestVedtaksperiode(
-        val fødselsnummer: String,
-        val aktørId: String,
-        val organisasjonsnummer: String,
-    ) {
-        val vedtaksperiodeId: UUID = UUID.randomUUID()
-        val spleisBehandlingId: UUID = UUID.randomUUID()
-        val utbetalingId: UUID = UUID.randomUUID()
-    }
+    val Int.vedtaksperiode
+        get() = vedtaksperioder[this] ?: throw IllegalArgumentException(
+            "Vedtaksperiode med index $this for arbeidsgiver $organisasjonsnummer finnes ikke",
+        )
+}
+
+class TestVedtaksperiode(
+    val fødselsnummer: String,
+    val aktørId: String,
+    val organisasjonsnummer: String,
+) {
+    val vedtaksperiodeId: UUID = UUID.randomUUID()
+    val spleisBehandlingId: UUID = UUID.randomUUID()
+    val utbetalingId: UUID = UUID.randomUUID()
 }

@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.e2etests.mockrivers
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.spesialist.e2etests.TestPerson
+import no.nav.helse.spesialist.test.TestPerson
 import no.nav.helse.spesialist.typer.Kjønn
 
 class ArbeidsgiverinformasjonOgHentPersoninfoV2BehovMockRiver(private val testPerson: TestPerson) :

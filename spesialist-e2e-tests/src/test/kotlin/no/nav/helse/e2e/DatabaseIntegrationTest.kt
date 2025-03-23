@@ -17,7 +17,9 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.db.DBSessionContext
+import no.nav.helse.spesialist.db.DbQuery
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
+import no.nav.helse.spesialist.test.TestPerson
 import no.nav.helse.spesialist.typer.Kjønn
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -27,11 +29,21 @@ import java.util.Random
 import java.util.UUID
 import kotlin.random.Random.Default.nextLong
 
-abstract class DatabaseIntegrationTest : AbstractE2ETest() {
+abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
+    protected val dbQuery = DbQuery(dataSource)
+    private val testperson = TestPerson()
     protected open val HENDELSE_ID: UUID = UUID.randomUUID()
+
+    protected val VEDTAKSPERIODE: UUID = testperson.vedtaksperiodeId1
+
+    protected open val UTBETALING_ID: UUID = testperson.utbetalingId1
 
     protected open var OPPGAVE_ID = nextLong()
 
+    protected val ORGNUMMER =
+        with(testperson) {
+            1.arbeidsgiver.organisasjonsnummer
+        }
     protected val ORGNAVN =
         with(testperson) {
             1.arbeidsgiver.organisasjonsnavn
@@ -39,6 +51,8 @@ abstract class DatabaseIntegrationTest : AbstractE2ETest() {
 
     protected val BRANSJER = listOf("EN BRANSJE")
 
+    protected val FNR = testperson.fødselsnummer
+    protected val AKTØR = testperson.aktørId
     protected val FORNAVN = testperson.fornavn
     protected val MELLOMNAVN = testperson.mellomnavn
     protected val ETTERNAVN = testperson.etternavn
@@ -49,6 +63,11 @@ abstract class DatabaseIntegrationTest : AbstractE2ETest() {
     private val FOM: LocalDate = LocalDate.of(2018, 1, 1)
 
     protected val TOM: LocalDate = LocalDate.of(2018, 1, 31)
+
+    protected open val SAKSBEHANDLER_OID: UUID = UUID.randomUUID()
+    protected open val SAKSBEHANDLER_EPOST = "sara.saksbehandler@nav.no"
+    protected open val SAKSBEHANDLER_NAVN = "Sara Saksbehandler"
+    protected open val SAKSBEHANDLER_IDENT = "Z999999"
 
     protected val PERIODE = Periode(UUID.randomUUID(), LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 31))
 
@@ -91,8 +110,8 @@ abstract class DatabaseIntegrationTest : AbstractE2ETest() {
 
     fun testhendelse(
         hendelseId: UUID = HENDELSE_ID,
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
-        fødselsnummer: String = FØDSELSNUMMER,
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE,
+        fødselsnummer: String = FNR,
         type: String = "GODKJENNING",
         json: String = "{}",
     ) = TestMelding(hendelseId, vedtaksperiodeId, fødselsnummer).also {
@@ -101,7 +120,7 @@ abstract class DatabaseIntegrationTest : AbstractE2ETest() {
 
     private fun lagreHendelse(
         hendelseId: UUID,
-        fødselsnummer: String = FØDSELSNUMMER,
+        fødselsnummer: String = FNR,
         type: String,
         json: String = """{"fødselsnummer": "$fødselsnummer"}""",
     ) {
@@ -116,10 +135,10 @@ abstract class DatabaseIntegrationTest : AbstractE2ETest() {
     protected fun nyPerson(
         periodetype: Periodetype = FØRSTEGANGSBEHANDLING,
         inntektskilde: Inntektskilde = EN_ARBEIDSGIVER,
-        fødselsnummer: String = FØDSELSNUMMER,
-        aktørId: String = testperson.aktørId,
-        organisasjonsnummer: String = ORGNR,
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        fødselsnummer: String = FNR,
+        aktørId: String = AKTØR,
+        organisasjonsnummer: String = ORGNUMMER,
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE,
         utbetalingId: UUID = UTBETALING_ID,
         contextId: UUID = UUID.randomUUID(),
         spleisBehandlingId: UUID = UUID.randomUUID(),
@@ -146,11 +165,11 @@ abstract class DatabaseIntegrationTest : AbstractE2ETest() {
     }
 
     protected fun opprettTotrinnsvurdering(
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE,
         saksbehandlerOid: UUID? = null,
         erRetur: Boolean = false,
         ferdigstill: Boolean = false,
-        fødselsnummer: String = FØDSELSNUMMER,
+        fødselsnummer: String = FNR,
     ) {
         val totrinnsvurdering = Totrinnsvurdering.ny(vedtaksperiodeId = vedtaksperiodeId, fødselsnummer = fødselsnummer)
         totrinnsvurderingRepository.lagre(totrinnsvurdering)
@@ -179,7 +198,7 @@ abstract class DatabaseIntegrationTest : AbstractE2ETest() {
     }
 
     private fun opprettVedtakstype(
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE,
         type: Periodetype = FØRSTEGANGSBEHANDLING,
         inntektskilde: Inntektskilde = EN_ARBEIDSGIVER,
     ) {
@@ -187,8 +206,8 @@ abstract class DatabaseIntegrationTest : AbstractE2ETest() {
     }
 
     protected fun opprettPerson(
-        fødselsnummer: String = FØDSELSNUMMER,
-        aktørId: String = testperson.aktørId,
+        fødselsnummer: String = FNR,
+        aktørId: String = AKTØR,
         adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert,
     ): Persondata {
         val personinfoId =
@@ -237,7 +256,7 @@ abstract class DatabaseIntegrationTest : AbstractE2ETest() {
     }
 
     protected fun opprettArbeidsgiver(
-        organisasjonsnummer: String = ORGNR,
+        organisasjonsnummer: String = ORGNUMMER,
         navn: String = ORGNAVN,
         bransjer: List<String> = BRANSJER,
     ) {
@@ -255,9 +274,9 @@ abstract class DatabaseIntegrationTest : AbstractE2ETest() {
     }
 
     protected fun opprettVedtaksperiode(
-        fødselsnummer: String = FØDSELSNUMMER,
-        organisasjonsnummer: String = ORGNR,
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        fødselsnummer: String = FNR,
+        organisasjonsnummer: String = ORGNUMMER,
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE,
         fom: LocalDate = FOM,
         tom: LocalDate = TOM,
         periodetype: Periodetype = FØRSTEGANGSBEHANDLING,
@@ -287,7 +306,7 @@ abstract class DatabaseIntegrationTest : AbstractE2ETest() {
 
     private fun opprettOppgave(
         contextId: UUID = UUID.randomUUID(),
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE_ID,
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE,
         egenskaper: Set<Egenskap> = setOf(Egenskap.SØKNAD),
         kanAvvises: Boolean = true,
         utbetalingId: UUID = UTBETALING_ID,

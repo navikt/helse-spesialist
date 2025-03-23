@@ -2,19 +2,25 @@ package no.nav.helse.mediator
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.helse.TestRapidHelpers.meldinger
-import no.nav.helse.e2e.AbstractE2ETest
+import no.nav.helse.e2e.AbstractDatabaseTest
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-class PersonhåndtererImplTest : AbstractE2ETest() {
+class PersonhåndtererImplTest : AbstractDatabaseTest() {
     private val testRapid = TestRapid()
 
     private val personhåndterer =
         PersonhåndtererImpl(
             publiserer = MessageContextMeldingPubliserer(testRapid),
         )
+
+    @BeforeEach
+    fun resetTestSetup() {
+        testRapid.reset()
+    }
 
     @Test
     fun `oppdater persondata`() {
