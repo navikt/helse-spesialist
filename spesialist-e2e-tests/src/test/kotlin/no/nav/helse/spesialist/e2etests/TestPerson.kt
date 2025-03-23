@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.test
+package no.nav.helse.spesialist.e2etests
 
 import no.nav.helse.spesialist.domain.testfixtures.lagAktørId
 import no.nav.helse.spesialist.domain.testfixtures.lagEtternavn
@@ -42,32 +42,32 @@ class TestPerson {
     fun nyArbeidsgiver() = TestArbeidsgiver(fødselsnummer, aktørId).also {
         arbeidsgivere[arbeidsgivere.size] = it
     }
-}
 
-class TestArbeidsgiver(
-    val fødselsnummer: String,
-    val aktørId: String,
-) {
-    private val vedtaksperioder = mutableMapOf<Int, TestVedtaksperiode>()
-    val organisasjonsnummer = lagOrganisasjonsnummer()
-    val organisasjonsnavn = lagOrganisasjonsnavn()
+    class TestArbeidsgiver(
+        val fødselsnummer: String,
+        val aktørId: String,
+    ) {
+        private val vedtaksperioder = mutableMapOf<Int, TestVedtaksperiode>()
+        val organisasjonsnummer = lagOrganisasjonsnummer()
+        val organisasjonsnavn = lagOrganisasjonsnavn()
 
-    fun nyVedtaksperiode() = TestVedtaksperiode(fødselsnummer, aktørId, organisasjonsnummer).also {
-        vedtaksperioder[vedtaksperioder.size] = it
+        fun nyVedtaksperiode() = TestVedtaksperiode(fødselsnummer, aktørId, organisasjonsnummer).also {
+            vedtaksperioder[vedtaksperioder.size] = it
+        }
+
+        val Int.vedtaksperiode
+            get() = vedtaksperioder[this] ?: throw IllegalArgumentException(
+                "Vedtaksperiode med index $this for arbeidsgiver $organisasjonsnummer finnes ikke",
+            )
     }
 
-    val Int.vedtaksperiode
-        get() = vedtaksperioder[this] ?: throw IllegalArgumentException(
-            "Vedtaksperiode med index $this for arbeidsgiver $organisasjonsnummer finnes ikke",
-        )
-}
-
-class TestVedtaksperiode(
-    val fødselsnummer: String,
-    val aktørId: String,
-    val organisasjonsnummer: String,
-) {
-    val vedtaksperiodeId: UUID = UUID.randomUUID()
-    val spleisBehandlingId: UUID = UUID.randomUUID()
-    val utbetalingId: UUID = UUID.randomUUID()
+    class TestVedtaksperiode(
+        val fødselsnummer: String,
+        val aktørId: String,
+        val organisasjonsnummer: String,
+    ) {
+        val vedtaksperiodeId: UUID = UUID.randomUUID()
+        val spleisBehandlingId: UUID = UUID.randomUUID()
+        val utbetalingId: UUID = UUID.randomUUID()
+    }
 }

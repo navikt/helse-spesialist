@@ -51,7 +51,7 @@ import no.nav.helse.spesialist.client.spleis.SpleisClient
 import no.nav.helse.spesialist.client.spleis.SpleisClientSnapshothenter
 import no.nav.helse.spesialist.db.DbQuery
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
-import no.nav.helse.spesialist.test.TestPerson
+import no.nav.helse.spesialist.e2etests.TestPerson
 import no.nav.helse.util.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull

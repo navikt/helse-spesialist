@@ -40,7 +40,6 @@ import no.nav.helse.spesialist.e2etests.mockrivers.RisikovurderingBehovMockRiver
 import no.nav.helse.spesialist.e2etests.mockrivers.VergemålOgFullmaktBehovMockRiver
 import no.nav.helse.spesialist.e2etests.mockrivers.ÅpneOppgaverBehovMockRiver
 import no.nav.helse.spesialist.kafka.testfixtures.KafkaModuleTestRapidTestFixture
-import no.nav.helse.spesialist.test.TestPerson
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertTrue
 import java.time.LocalDate
