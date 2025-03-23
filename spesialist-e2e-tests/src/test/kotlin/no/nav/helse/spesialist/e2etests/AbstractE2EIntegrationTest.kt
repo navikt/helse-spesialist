@@ -49,6 +49,7 @@ abstract class AbstractE2EIntegrationTest {
             ArbeidsforholdbehovRiver(testPerson),
             EgenAnsattbehovRiver(testPerson),
             VergemålOgFullmaktbehovRiver(testPerson),
+            ÅpneOppgaverbehovRiver(testPerson),
         ).forEach { it.registerOn(rapid) }
     }
 
@@ -170,15 +171,6 @@ abstract class AbstractE2EIntegrationTest {
             vedtaksperiodeId = testPerson.vedtaksperiodeId1,
             kanGodkjennesAutomatisk = false,
             funn = emptyList(),
-        )
-    }
-
-    protected fun sendÅpneGosysOppgaverløsning() {
-        meldingssender.sendÅpneGosysOppgaverløsning(
-            aktørId = testPerson.aktørId,
-            fødselsnummer = testPerson.fødselsnummer,
-            antall = 0,
-            oppslagFeilet = false
         )
     }
 

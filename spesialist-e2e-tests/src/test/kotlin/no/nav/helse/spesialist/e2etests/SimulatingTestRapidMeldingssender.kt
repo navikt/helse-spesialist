@@ -30,30 +30,6 @@ class SimulatingTestRapidMeldingssender(private val rapid: SimulatingTestRapid) 
         )
     }
 
-    fun sendÅpneGosysOppgaverløsning(
-        aktørId: String,
-        fødselsnummer: String,
-        antall: Int,
-        oppslagFeilet: Boolean,
-    ): UUID = newUUID.also { id ->
-        val behov = rapid.messageLog.filter { it.path("@event_name").asText() == "behov" }.last()
-        assertEquals("ÅpneOppgaver", behov["@behov"].map { it.asText() }.single())
-        val contextId = UUID.fromString(behov["contextId"].asText())
-        val hendelseId = UUID.fromString(behov["hendelseId"].asText())
-
-        rapid.publish(
-            Testmeldingfabrikk.lagÅpneGosysOppgaverløsning(
-                aktørId = aktørId,
-                fødselsnummer = fødselsnummer,
-                antall = antall,
-                oppslagFeilet = oppslagFeilet,
-                id = id,
-                hendelseId = hendelseId,
-                contextId = contextId
-            )
-        )
-    }
-
     fun sendRisikovurderingløsning(
         aktørId: String,
         fødselsnummer: String,
