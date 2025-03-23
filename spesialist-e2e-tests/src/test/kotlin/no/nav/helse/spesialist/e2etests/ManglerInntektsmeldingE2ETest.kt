@@ -13,7 +13,7 @@ class ManglerInntektsmeldingE2ETest : AbstractE2EIntegrationTest() {
         // When:
         simulerPublisertSendtSøknadNavMelding()
         val spleisBehandlingId = UUID.randomUUID()
-        simulerPublisertBehandlingOpprettetMelding(spleisBehandlingId)
+        simulerPublisertBehandlingOpprettetMelding(spleisBehandlingId = spleisBehandlingId)
         simulerPublisertAktivitetsloggNyAktivitetMelding(listOf("RV_IV_10"))
         simulerPublisertVedtaksperiodeNyUtbetalingMelding()
         simulerPublisertUtbetalingEndretMelding()
