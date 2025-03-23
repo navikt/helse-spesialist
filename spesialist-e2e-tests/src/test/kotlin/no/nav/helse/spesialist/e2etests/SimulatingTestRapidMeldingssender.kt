@@ -2,39 +2,11 @@ package no.nav.helse.spesialist.e2etests
 
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
-import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Fullmakt
-import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Vergemål
 import org.junit.jupiter.api.Assertions.assertEquals
 import java.util.UUID
 
 class SimulatingTestRapidMeldingssender(private val rapid: SimulatingTestRapid) {
     private val newUUID get() = UUID.randomUUID()
-
-    fun sendVergemålOgFullmaktløsning(
-        aktørId: String,
-        fødselsnummer: String,
-        vergemål: List<Vergemål> = emptyList(),
-        fremtidsfullmakter: List<Vergemål> = emptyList(),
-        fullmakter: List<Fullmakt> = emptyList(),
-    ): UUID = newUUID.also { id ->
-        val behov = rapid.messageLog.filter { it.path("@event_name").asText() == "behov" }.last()
-        assertEquals(listOf("Vergemål", "Fullmakt"), behov["@behov"].map { it.asText() })
-        val contextId = UUID.fromString(behov["contextId"].asText())
-        val hendelseId = UUID.fromString(behov["hendelseId"].asText())
-
-        val payload = Testmeldingfabrikk.VergemålJson(vergemål, fremtidsfullmakter, fullmakter)
-
-        rapid.publish(
-            Testmeldingfabrikk.lagVergemålOgFullmaktKomposittLøsning(
-                aktørId = aktørId,
-                fødselsnummer = fødselsnummer,
-                vergemål = payload,
-                id = id,
-                hendelseId = hendelseId,
-                contextId = contextId
-            )
-        )
-    }
 
     fun sendInntektløsning(
         aktørId: String,

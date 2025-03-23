@@ -48,6 +48,7 @@ abstract class AbstractE2EIntegrationTest {
             ArbeidsgiverinformasjonOgHentPersoninfoV2behovRiver(testPerson),
             ArbeidsforholdbehovRiver(testPerson),
             EgenAnsattbehovRiver(testPerson),
+            VergemålOgFullmaktbehovRiver(testPerson),
         ).forEach { it.registerOn(rapid) }
     }
 
@@ -178,16 +179,6 @@ abstract class AbstractE2EIntegrationTest {
             fødselsnummer = testPerson.fødselsnummer,
             antall = 0,
             oppslagFeilet = false
-        )
-    }
-
-    protected fun sendVergemålOgFullmaktløsning() {
-        meldingssender.sendVergemålOgFullmaktløsning(
-            aktørId = testPerson.aktørId,
-            fødselsnummer = testPerson.fødselsnummer,
-            vergemål = emptyList(),
-            fremtidsfullmakter = emptyList(),
-            fullmakter = emptyList(),
         )
     }
 

@@ -20,7 +20,6 @@ class ManglerInntektsmeldingE2ETest : AbstractE2EIntegrationTest() {
         simulerPublisertVedtaksperiodeEndretMelding()
         simulerPublisertGodkjenningsbehovMelding(spleisBehandlingId = spleisBehandlingId)
 
-        sendVergemålOgFullmaktløsning()
         sendÅpneGosysOppgaverløsning()
         sendRisikovurderingløsning()
         sendInntektløsning()
