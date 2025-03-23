@@ -51,10 +51,9 @@ abstract class AbstractE2EIntegrationTest {
             VergemålOgFullmaktbehovRiver(testPerson),
             ÅpneOppgaverbehovRiver(testPerson),
             RisikovurderingbehovRiver(testPerson),
+            InntekterForSykepengegrunnlagbehovRiver(testPerson),
         ).forEach { it.registerOn(rapid) }
     }
-
-    private val meldingssender = SimulatingTestRapidMeldingssender(testRapid)
 
     private val modules = RapidApp.start(
         configuration = Configuration(
@@ -153,14 +152,6 @@ abstract class AbstractE2EIntegrationTest {
                     "tom" to (31 jan 2018)
                 )
             ).toJson()
-        )
-    }
-
-    protected fun sendInntektløsning() {
-        meldingssender.sendInntektløsning(
-            aktørId = testPerson.aktørId,
-            fødselsnummer = testPerson.fødselsnummer,
-            orgnr = testPerson.orgnummer
         )
     }
 
