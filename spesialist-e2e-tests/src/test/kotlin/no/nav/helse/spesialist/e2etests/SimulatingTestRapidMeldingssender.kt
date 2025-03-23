@@ -10,28 +10,6 @@ import java.util.UUID
 class SimulatingTestRapidMeldingssender(private val rapid: SimulatingTestRapid) {
     private val newUUID get() = UUID.randomUUID()
 
-    fun sendEgenAnsattløsning(
-        aktørId: String,
-        fødselsnummer: String,
-        erEgenAnsatt: Boolean,
-    ): UUID = newUUID.also { id ->
-        val behov = rapid.messageLog.filter { it.path("@event_name").asText() == "behov" }.last()
-        assertEquals("EgenAnsatt", behov["@behov"].map { it.asText() }.single())
-        val contextId = UUID.fromString(behov["contextId"].asText())
-        val hendelseId = UUID.fromString(behov["hendelseId"].asText())
-
-        rapid.publish(
-            Testmeldingfabrikk.lagEgenAnsattløsning(
-                aktørId = aktørId,
-                fødselsnummer = fødselsnummer,
-                erEgenAnsatt = erEgenAnsatt,
-                id = id,
-                hendelseId = hendelseId,
-                contextId = contextId,
-            )
-        )
-    }
-
     fun sendVergemålOgFullmaktløsning(
         aktørId: String,
         fødselsnummer: String,

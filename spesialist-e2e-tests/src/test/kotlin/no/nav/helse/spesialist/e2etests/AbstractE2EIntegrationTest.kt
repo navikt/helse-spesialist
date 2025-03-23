@@ -47,6 +47,7 @@ abstract class AbstractE2EIntegrationTest {
             ArbeidsgiverinformasjonbehovRiver(testPerson),
             ArbeidsgiverinformasjonOgHentPersoninfoV2behovRiver(testPerson),
             ArbeidsforholdbehovRiver(testPerson),
+            EgenAnsattbehovRiver(testPerson),
         ).forEach { it.registerOn(rapid) }
     }
 
@@ -187,14 +188,6 @@ abstract class AbstractE2EIntegrationTest {
             vergemål = emptyList(),
             fremtidsfullmakter = emptyList(),
             fullmakter = emptyList(),
-        )
-    }
-
-    protected fun sendEgenAnsattløsning() {
-        meldingssender.sendEgenAnsattløsning(
-            aktørId = testPerson.aktørId,
-            fødselsnummer = testPerson.fødselsnummer,
-            erEgenAnsatt = false
         )
     }
 
