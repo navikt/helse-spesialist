@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.e2etests
 
-import no.nav.helse.GodkjenningsbehovTestdata
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.ArbeidsgiverinformasjonJson
@@ -8,173 +7,13 @@ import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Fullmakt
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Vergemål
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.person.Adressebeskyttelse
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_UTBETALT
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus.NY
 import no.nav.helse.spesialist.typer.Kjønn
 import org.junit.jupiter.api.Assertions.assertEquals
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.UUID
 
 class SimulatingTestRapidMeldingssender(private val rapid: SimulatingTestRapid) {
     private val newUUID get() = UUID.randomUUID()
-
-    fun sendSøknadSendt(
-        aktørId: String,
-        fødselsnummer: String,
-        organisasjonsnummer: String,
-    ): UUID = newUUID.also { id ->
-        rapid.publish(
-            Testmeldingfabrikk.lagSøknadSendt(
-                organisasjonsnummer = organisasjonsnummer,
-                aktørId = aktørId,
-                fødselsnummer = fødselsnummer,
-                id,
-            )
-        )
-    }
-
-    fun sendVedtaksperiodeEndret(
-        aktørId: String,
-        fødselsnummer: String,
-        organisasjonsnummer: String,
-        vedtaksperiodeId: UUID,
-        forrigeTilstand: String = "FORRIGE_TILSTAND",
-        gjeldendeTilstand: String = "GJELDENDE_TILSTAND",
-        forårsaketAvId: UUID = UUID.randomUUID(),
-    ): UUID = newUUID.also { id ->
-        rapid.publish(
-            Testmeldingfabrikk.lagVedtaksperiodeEndret(
-                id = id,
-                aktørId = aktørId,
-                fødselsnummer = fødselsnummer,
-                organisasjonsnummer = organisasjonsnummer,
-                vedtaksperiodeId = vedtaksperiodeId,
-                forrigeTilstand = forrigeTilstand,
-                gjeldendeTilstand = gjeldendeTilstand,
-                forårsaketAvId = forårsaketAvId,
-            )
-        )
-    }
-
-    fun sendBehandlingOpprettet(
-        aktørId: String,
-        fødselsnummer: String,
-        organisasjonsnummer: String,
-        vedtaksperiodeId: UUID,
-        fom: LocalDate,
-        tom: LocalDate,
-        spleisBehandlingId: UUID,
-    ): UUID = newUUID.also { id ->
-        rapid.publish(
-            Testmeldingfabrikk.lagBehandlingOpprettet(
-                id = id,
-                aktørId = aktørId,
-                fødselsnummer = fødselsnummer,
-                organisasjonsnummer = organisasjonsnummer,
-                vedtaksperiodeId = vedtaksperiodeId,
-                fom = fom,
-                tom = tom,
-                spleisBehandlingId = spleisBehandlingId
-            )
-        )
-    }
-
-    fun sendVedtaksperiodeNyUtbetaling(
-        aktørId: String,
-        fødselsnummer: String,
-        organisasjonsnummer: String,
-        vedtaksperiodeId: UUID,
-        utbetalingId: UUID,
-    ): UUID = newUUID.also { id ->
-        rapid.publish(
-            Testmeldingfabrikk.lagVedtaksperiodeNyUtbetaling(
-                id = id,
-                aktørId = aktørId,
-                fødselsnummer = fødselsnummer,
-                organisasjonsnummer = organisasjonsnummer,
-                vedtaksperiodeId = vedtaksperiodeId,
-                utbetalingId = utbetalingId
-            )
-        )
-    }
-
-    fun sendAktivitetsloggNyAktivitet(
-        aktørId: String,
-        fødselsnummer: String,
-        organisasjonsnummer: String,
-        vedtaksperiodeId: UUID,
-        varselkoder: List<String> = emptyList(),
-    ): UUID =
-        newUUID.also { id ->
-            rapid.publish(
-                Testmeldingfabrikk.lagAktivitetsloggNyAktivitet(
-                    id,
-                    aktørId,
-                    fødselsnummer,
-                    organisasjonsnummer,
-                    vedtaksperiodeId,
-                    varselkoder
-                )
-            )
-        }
-
-    fun sendUtbetalingEndret(
-        aktørId: String,
-        fødselsnummer: String,
-        organisasjonsnummer: String,
-        utbetalingId: UUID,
-        type: String = "UTBETALING",
-        forrigeStatus: Utbetalingsstatus = NY,
-        gjeldendeStatus: Utbetalingsstatus = IKKE_UTBETALT,
-        arbeidsgiverbeløp: Int = 20000,
-        personbeløp: Int = 0,
-        opprettet: LocalDateTime,
-    ): UUID = newUUID.also { id ->
-        rapid.publish(
-            Testmeldingfabrikk.lagUtbetalingEndret(
-                aktørId = aktørId,
-                fødselsnummer = fødselsnummer,
-                organisasjonsnummer = organisasjonsnummer,
-                utbetalingId = utbetalingId,
-                forrigeStatus = forrigeStatus,
-                gjeldendeStatus = gjeldendeStatus,
-                type = type,
-                arbeidsgiverbeløp = arbeidsgiverbeløp,
-                personbeløp = personbeløp,
-                opprettet = opprettet,
-                id = id,
-            )
-        )
-    }
-
-    fun sendGodkjenningsbehov(
-        godkjenningsbehovTestdata: GodkjenningsbehovTestdata,
-    ): UUID = newUUID.also { id ->
-        rapid.publish(
-            Testmeldingfabrikk.lagGodkjenningsbehov(
-                aktørId = godkjenningsbehovTestdata.aktørId,
-                fødselsnummer = godkjenningsbehovTestdata.fødselsnummer,
-                vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId,
-                utbetalingId = godkjenningsbehovTestdata.utbetalingId,
-                organisasjonsnummer = godkjenningsbehovTestdata.organisasjonsnummer,
-                periodeFom = godkjenningsbehovTestdata.periodeFom,
-                periodeTom = godkjenningsbehovTestdata.periodeTom,
-                skjæringstidspunkt = godkjenningsbehovTestdata.skjæringstidspunkt,
-                periodetype = godkjenningsbehovTestdata.periodetype,
-                førstegangsbehandling = godkjenningsbehovTestdata.førstegangsbehandling,
-                utbetalingtype = godkjenningsbehovTestdata.utbetalingtype,
-                inntektskilde = godkjenningsbehovTestdata.inntektskilde,
-                orgnummereMedRelevanteArbeidsforhold = godkjenningsbehovTestdata.orgnummereMedRelevanteArbeidsforhold,
-                kanAvvises = godkjenningsbehovTestdata.kanAvvises,
-                id = id,
-                vilkårsgrunnlagId = godkjenningsbehovTestdata.vilkårsgrunnlagId,
-                spleisBehandlingId = godkjenningsbehovTestdata.spleisBehandlingId,
-                tags = godkjenningsbehovTestdata.tags
-            )
-        )
-    }
 
     fun sendPersoninfoløsning(
         aktørId: String,

@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.e2etests
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.accept
 import io.ktor.client.request.bearerAuth
@@ -10,16 +11,10 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.testing.testApplication
-import no.nav.helse.GodkjenningsbehovTestdata
 import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.person.Adressebeskyttelse
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_UTBETALT
-import no.nav.helse.modell.utbetaling.Utbetalingsstatus.NY
-import no.nav.helse.modell.vedtaksperiode.Inntektsopplysningkilde
-import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
-import no.nav.helse.modell.vedtaksperiode.SykepengegrunnlagsArbeidsgiver
 import no.nav.helse.spesialist.api.bootstrap.Gruppe
 import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
 import no.nav.helse.spesialist.api.objectMapper
@@ -32,17 +27,15 @@ import no.nav.helse.spesialist.client.entraid.testfixtures.ClientEntraIDModuleIn
 import no.nav.helse.spesialist.client.krr.testfixtures.ClientKRRModuleIntegationTestFixture
 import no.nav.helse.spesialist.client.spleis.testfixtures.ClientSpleisModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.unleash.testfixtures.ClientUnleashModuleIntegrationTestFixture
-import no.nav.helse.spesialist.db.DbQuery
 import no.nav.helse.spesialist.db.testfixtures.DBTestFixture
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.kafka.testfixtures.KafkaModuleTestRapidTestFixture
 import no.nav.helse.spesialist.test.TestPerson
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import kotlin.test.assertNotNull
 
 abstract class AbstractE2EIntegrationTest {
     private val kafkaModuleTestFixture = KafkaModuleTestRapidTestFixture()
@@ -52,7 +45,7 @@ abstract class AbstractE2EIntegrationTest {
 
     private val meldingssender = SimulatingTestRapidMeldingssender(testRapid)
 
-    protected val testPerson = TestPerson()
+    private val testPerson = TestPerson()
 
     private val modules = RapidApp.start(
         configuration = Configuration(
@@ -96,8 +89,6 @@ abstract class AbstractE2EIntegrationTest {
         rapidsConnection = testRapid,
     )
 
-    private val dbQuery = DbQuery(modules.dbModule.dataSource)
-
     fun callGraphQL(
         @Language("GraphQL") query: String,
         saksbehandlerFraApi: SaksbehandlerFraApi = lagSaksbehandlerFraApi()
@@ -120,23 +111,39 @@ abstract class AbstractE2EIntegrationTest {
         }
     }
 
-    protected fun sendSøknadSendt() {
-        meldingssender.sendSøknadSendt(
-            aktørId = testPerson.aktørId,
-            fødselsnummer = testPerson.fødselsnummer,
-            organisasjonsnummer = testPerson.orgnummer
+    protected fun simulerPublisertSendtSøknadNavMelding() {
+        testRapid.publish(
+            JsonMessage.newMessage(
+                mapOf(
+                    "@event_name" to "sendt_søknad_nav",
+                    "@id" to UUID.randomUUID(),
+                    "@opprettet" to LocalDateTime.now(),
+                    "fnr" to testPerson.fødselsnummer,
+                    "aktorId" to testPerson.aktørId,
+                    "arbeidsgiver" to mapOf(
+                        "orgnummer" to testPerson.orgnummer
+                    )
+                )
+            ).toJson()
         )
     }
 
-    protected fun sendBehandlingOpprettet(spleisBehandlingId: UUID) {
-        meldingssender.sendBehandlingOpprettet(
-            aktørId = testPerson.aktørId,
-            fødselsnummer = testPerson.fødselsnummer,
-            organisasjonsnummer = testPerson.orgnummer,
-            vedtaksperiodeId = testPerson.vedtaksperiodeId1,
-            fom = 1 jan 2018,
-            tom = 31 jan 2018,
-            spleisBehandlingId = spleisBehandlingId,
+    protected fun simulerPublisertBehandlingOpprettetMelding(spleisBehandlingId: UUID) {
+        testRapid.publish(
+            JsonMessage.newMessage(
+                mapOf(
+                    "@event_name" to "behandling_opprettet",
+                    "@id" to UUID.randomUUID(),
+                    "@opprettet" to LocalDateTime.now(),
+                    "vedtaksperiodeId" to testPerson.vedtaksperiodeId1,
+                    "behandlingId" to spleisBehandlingId,
+                    "fødselsnummer" to testPerson.fødselsnummer,
+                    "aktørId" to testPerson.aktørId,
+                    "organisasjonsnummer" to testPerson.orgnummer,
+                    "fom" to (1 jan 2018),
+                    "tom" to (31 jan 2018)
+                )
+            ).toJson()
         )
     }
 
@@ -241,8 +248,7 @@ abstract class AbstractE2EIntegrationTest {
         }
     }
 
-    protected fun sendArbeidsforholdløsning(
-    ) {
+    protected fun sendArbeidsforholdløsning() {
         meldingssender.sendArbeidsforholdløsning(
             aktørId = testPerson.aktørId,
             fødselsnummer = testPerson.fødselsnummer,
@@ -251,101 +257,216 @@ abstract class AbstractE2EIntegrationTest {
         )
     }
 
-    protected fun sendGodkjenningsbehov(spleisBehandlingId: UUID) =
-        meldingssender.sendGodkjenningsbehov(
-            GodkjenningsbehovTestdata(
-                fødselsnummer = testPerson.fødselsnummer,
-                aktørId = testPerson.aktørId,
-                organisasjonsnummer = testPerson.orgnummer,
-                vedtaksperiodeId = testPerson.vedtaksperiodeId1,
-                utbetalingId = testPerson.utbetalingId1,
-                spleisBehandlingId = spleisBehandlingId,
-                spleisSykepengegrunnlagsfakta = SpleisSykepengegrunnlagsfakta(
-                    arbeidsgivere = listOf(
-                        SykepengegrunnlagsArbeidsgiver(
-                            arbeidsgiver = testPerson.orgnummer,
-                            omregnetÅrsinntekt = 123456.7,
-                            inntektskilde = Inntektsopplysningkilde.Arbeidsgiver,
-                            skjønnsfastsatt = null,
+    protected fun simulerPublisertGodkjenningsbehovMelding(spleisBehandlingId: UUID) {
+        testRapid.publish(
+            JsonMessage.newMessage(
+                mapOf(
+                    "@event_name" to "behov",
+                    "@id" to UUID.randomUUID(),
+                    "@opprettet" to LocalDateTime.now(),
+                    "@behov" to listOf("Godkjenning"),
+                    "aktørId" to testPerson.aktørId,
+                    "fødselsnummer" to testPerson.fødselsnummer,
+                    "organisasjonsnummer" to testPerson.orgnummer,
+                    "vedtaksperiodeId" to testPerson.vedtaksperiodeId1,
+                    "utbetalingId" to testPerson.utbetalingId1,
+                    "Godkjenning" to mapOf(
+                        "periodeFom" to (1 jan 2018),
+                        "periodeTom" to (31 jan 2018),
+                        "skjæringstidspunkt" to (1 jan 2018),
+                        "periodetype" to "FØRSTEGANGSBEHANDLING",
+                        "førstegangsbehandling" to true,
+                        "utbetalingtype" to "UTBETALING",
+                        "inntektskilde" to "EN_ARBEIDSGIVER",
+                        "orgnummereMedRelevanteArbeidsforhold" to emptyList<String>(),
+                        "kanAvvises" to true,
+                        "vilkårsgrunnlagId" to UUID.randomUUID(),
+                        "behandlingId" to spleisBehandlingId,
+                        "tags" to emptyList<String>(),
+                        "perioderMedSammeSkjæringstidspunkt" to listOf(
+                            mapOf(
+                                "fom" to (1 jan 2018),
+                                "tom" to (31 jan 2018),
+                                "vedtaksperiodeId" to testPerson.vedtaksperiodeId1,
+                                "behandlingId" to spleisBehandlingId
+                            )
+                        ),
+                        "sykepengegrunnlagsfakta" to mapOf(
+                            "fastsatt" to "EtterHovedregel",
+                            "arbeidsgivere" to listOf(
+                                mapOf(
+                                    "arbeidsgiver" to testPerson.orgnummer,
+                                    "omregnetÅrsinntekt" to 123456.7,
+                                    "inntektskilde" to "Arbeidsgiver",
+                                )
+                            )
+                        ),
+                        "omregnedeÅrsinntekter" to listOf(
+                            mapOf(
+                                "organisasjonsnummer" to testPerson.orgnummer,
+                                "beløp" to 123456.7,
+                            )
+                        ),
+                    ),
+                )
+            ).toJson()
+        )
+    }
+
+    protected fun simulerPublisertVedtaksperiodeEndretMelding() {
+        testRapid.publish(
+            JsonMessage.newMessage(
+                mapOf(
+                    "@event_name" to "vedtaksperiode_endret",
+                    "@id" to UUID.randomUUID(),
+                    "@opprettet" to LocalDateTime.now(),
+                    "vedtaksperiodeId" to testPerson.vedtaksperiodeId1,
+                    "fødselsnummer" to testPerson.fødselsnummer,
+                    "aktørId" to testPerson.aktørId,
+                    "organisasjonsnummer" to testPerson.orgnummer,
+                    "gjeldendeTilstand" to "AVVENTER_GODKJENNING",
+                    "forrigeTilstand" to "AVVENTER_SIMULERING",
+                    "@forårsaket_av" to mapOf(
+                        "id" to UUID.randomUUID()
+                    ),
+                    "fom" to (1 jan 2018),
+                    "tom" to (31 jan 2018)
+                )
+            ).toJson()
+        )
+    }
+
+    protected fun simulerPublisertVedtaksperiodeNyUtbetalingMelding() {
+        testRapid.publish(
+            JsonMessage.newMessage(
+                mapOf(
+                    "@event_name" to "vedtaksperiode_ny_utbetaling",
+                    "@id" to UUID.randomUUID(),
+                    "@opprettet" to LocalDateTime.now(),
+                    "vedtaksperiodeId" to testPerson.vedtaksperiodeId1,
+                    "utbetalingId" to testPerson.utbetalingId1,
+                    "fødselsnummer" to testPerson.fødselsnummer,
+                    "aktørId" to testPerson.aktørId,
+                    "organisasjonsnummer" to testPerson.orgnummer,
+                )
+            ).toJson()
+        )
+    }
+
+    protected fun simulerPublisertUtbetalingEndretMelding() {
+        testRapid.publish(
+            JsonMessage.newMessage(
+                mapOf(
+                    "@event_name" to "utbetaling_endret",
+                    "@id" to UUID.randomUUID(),
+                    "@opprettet" to LocalDateTime.now(),
+                    "utbetalingId" to testPerson.utbetalingId1,
+                    "aktørId" to testPerson.aktørId,
+                    "fødselsnummer" to testPerson.fødselsnummer,
+                    "organisasjonsnummer" to testPerson.orgnummer,
+                    "type" to "UTBETALING",
+                    "forrigeStatus" to "NY",
+                    "gjeldendeStatus" to "IKKE_UTBETALT",
+                    "@opprettet" to LocalDateTime.now(),
+                    "arbeidsgiverOppdrag" to mapOf(
+                        "mottaker" to testPerson.orgnummer,
+                        "fagområde" to "SPREF",
+                        "fagsystemId" to "LWCBIQLHLJISGREBICOHAU",
+                        "nettoBeløp" to 20000,
+                        "linjer" to listOf(
+                            mapOf(
+                                "fom" to LocalDate.now(),
+                                "tom" to LocalDate.now(),
+                                "totalbeløp" to 2000
+                            ),
+                            mapOf(
+                                "fom" to LocalDate.now(),
+                                "tom" to LocalDate.now(),
+                                "totalbeløp" to 2000
+                            )
                         )
+                    ),
+                    "personOppdrag" to mapOf(
+                        "mottaker" to testPerson.fødselsnummer,
+                        "fagområde" to "SP",
+                        "fagsystemId" to "ASJKLD90283JKLHAS3JKLF",
+                        "nettoBeløp" to 0,
+                        "linjer" to listOf(
+                            mapOf(
+                                "fom" to LocalDate.now(),
+                                "tom" to LocalDate.now(),
+                                "totalbeløp" to 2000
+                            ),
+                            mapOf(
+                                "fom" to LocalDate.now(),
+                                "tom" to LocalDate.now(),
+                                "totalbeløp" to 2000
+                            )
+                        )
+
                     )
-                ),
-            )
-        )
-
-    protected fun sendVedtaksperiodeEndret() {
-        meldingssender.sendVedtaksperiodeEndret(
-            aktørId = testPerson.aktørId,
-            fødselsnummer = testPerson.fødselsnummer,
-            organisasjonsnummer = testPerson.orgnummer,
-            vedtaksperiodeId = testPerson.vedtaksperiodeId1,
-            forrigeTilstand = "AVVENTER_SIMULERING",
-            gjeldendeTilstand = "AVVENTER_GODKJENNING",
-            forårsaketAvId = UUID.randomUUID(),
+                )
+            ).toJson()
         )
     }
 
-    protected fun sendVedtaksperiodeNyUtbetaling() {
-        meldingssender.sendVedtaksperiodeNyUtbetaling(
-            aktørId = testPerson.aktørId,
-            fødselsnummer = testPerson.fødselsnummer,
-            organisasjonsnummer = testPerson.orgnummer,
-            vedtaksperiodeId = testPerson.vedtaksperiodeId1,
-            utbetalingId = testPerson.utbetalingId1,
+    protected fun simulerPublisertAktivitetsloggNyAktivitetMelding(varselkoder: List<String>) {
+        testRapid.publish(
+            JsonMessage.newMessage(
+                mapOf(
+                    "@event_name" to "aktivitetslogg_ny_aktivitet",
+                    "@id" to UUID.randomUUID(),
+                    "@opprettet" to LocalDateTime.now(),
+                    "aktørId" to testPerson.aktørId,
+                    "fødselsnummer" to testPerson.fødselsnummer,
+                    "aktiviteter" to varselkoder.map { varselkode ->
+                        mapOf(
+                            "id" to UUID.randomUUID(),
+                            "melding" to "en melding",
+                            "nivå" to "VARSEL",
+                            "varselkode" to varselkode,
+                            "tidsstempel" to LocalDateTime.now(),
+                            "kontekster" to listOf(
+                                mapOf(
+                                    "konteksttype" to "Person",
+                                    "kontekstmap" to mapOf(
+                                        "fødselsnummer" to testPerson.fødselsnummer,
+                                        "aktørId" to testPerson.aktørId
+                                    )
+                                ),
+                                mapOf(
+                                    "konteksttype" to "Arbeidsgiver",
+                                    "kontekstmap" to mapOf(
+                                        "organisasjonsnummer" to testPerson.orgnummer
+                                    )
+                                ),
+                                mapOf(
+                                    "konteksttype" to "Vedtaksperiode",
+                                    "kontekstmap" to mapOf(
+                                        "vedtaksperiodeId" to testPerson.vedtaksperiodeId1
+                                    )
+                                )
+                            )
+                        )
+                    }
+                )
+            ).toJson()
         )
     }
 
-    protected fun sendUtbetalingEndret() {
-        meldingssender.sendUtbetalingEndret(
-            aktørId = testPerson.aktørId,
-            fødselsnummer = testPerson.fødselsnummer,
-            organisasjonsnummer = testPerson.orgnummer,
-            utbetalingId = testPerson.utbetalingId1,
-            type = "UTBETALING",
-            arbeidsgiverbeløp = 20000,
-            personbeløp = 0,
-            forrigeStatus = NY,
-            gjeldendeStatus = IKKE_UTBETALT,
+    protected fun lagreVarseldefinisjon(varselkode: String) {
+        modules.dbModule.daos.definisjonDao.lagreDefinisjon(
+            unikId = UUID.nameUUIDFromBytes(varselkode.toByteArray()),
+            kode = varselkode,
+            tittel = "En tittel for varselkode=$varselkode",
+            forklaring = "En forklaring for varselkode=$varselkode",
+            handling = "En handling for varselkode=$varselkode",
+            avviklet = false,
             opprettet = LocalDateTime.now(),
         )
     }
 
-    protected fun sendAktivitetsloggNyAktivitet(varselkoder: List<String>) {
-        meldingssender.sendAktivitetsloggNyAktivitet(
-            aktørId = testPerson.aktørId,
-            fødselsnummer = testPerson.fødselsnummer,
-            organisasjonsnummer = testPerson.orgnummer,
-            vedtaksperiodeId = testPerson.vedtaksperiodeId1,
-            varselkoder = varselkoder,
-        )
-    }
-
-    protected fun opprettVarseldefinisjoner(varselkoder: List<String>) {
-        varselkoder.forEach {
-            lagVarseldefinisjon(it)
-        }
-    }
-
-    private fun lagVarseldefinisjon(varselkode: String) {
-        dbQuery.update(
-            """
-            INSERT INTO api_varseldefinisjon (unik_id, kode, tittel, forklaring, handling, avviklet, opprettet)
-            VALUES (:unikId, :varselkode, :tittel, :forklaring, :handling, :avviklet, :opprettet)
-            ON CONFLICT (unik_id) DO NOTHING
-            """.trimIndent(),
-            "unikId" to UUID.nameUUIDFromBytes(varselkode.toByteArray()),
-            "varselkode" to varselkode,
-            "tittel" to "En tittel for varselkode=$varselkode",
-            "forklaring" to "En forklaring for varselkode=$varselkode",
-            "handling" to "En handling for varselkode=$varselkode",
-            "avviklet" to false,
-            "opprettet" to LocalDateTime.now(),
-        )
-    }
-
-    protected fun assertHarOppgaveegenskap(
-        vararg forventedeEgenskaper: Egenskap,
-    ) {
+    protected fun assertHarOppgaveegenskap(vararg forventedeEgenskaper: Egenskap) {
         val oppgaveId =
             modules.dbModule.daos.oppgaveDao.finnOppgaveId(testPerson.fødselsnummer)
                 ?: error("Fant ikke oppgave for personen")
@@ -354,24 +475,5 @@ abstract class AbstractE2EIntegrationTest {
         } ?: error("Fant ikke oppgaven basert på ID")
         val egenskaper = oppgave.egenskaper
         assertTrue(egenskaper.containsAll(forventedeEgenskaper.toList())) { "Forventet å finne ${forventedeEgenskaper.toSet()} i $egenskaper" }
-    }
-
-    protected fun assertPersonEksisterer() {
-        val minimalPerson = modules.dbModule.daos.personDao.finnMinimalPerson(testPerson.fødselsnummer)
-        assertNotNull(minimalPerson)
-        assertEquals(testPerson.fødselsnummer, minimalPerson.fødselsnummer)
-        assertEquals(testPerson.aktørId, minimalPerson.aktørId)
-    }
-
-    protected fun assertArbeidsgiverEksisterer(organisasjonsnummer: String) {
-        val arbeidsgiverEksisterer = dbQuery.single(
-            "SELECT EXISTS(select 1 FROM arbeidsgiver WHERE organisasjonsnummer = :organisasjonsnummer)",
-            "organisasjonsnummer" to organisasjonsnummer,
-        ) { row -> row.boolean(1) }
-        assertTrue(arbeidsgiverEksisterer)
-    }
-
-    protected fun assertVedtaksperiodeEksisterer(vedtaksperiodeId: UUID) {
-        assertNotNull(modules.dbModule.daos.vedtakDao.finnVedtaksperiode(vedtaksperiodeId))
     }
 }

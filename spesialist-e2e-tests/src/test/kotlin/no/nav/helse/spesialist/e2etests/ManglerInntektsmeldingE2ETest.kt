@@ -7,20 +7,19 @@ import java.util.UUID
 class ManglerInntektsmeldingE2ETest : AbstractE2EIntegrationTest() {
     @Test
     fun `legger til egenskap på oppgaven når varsel RV_IV_10 er til stede`() {
-        sendSøknadSendt()
-        assertPersonEksisterer()
-        val spleisBehandlingId = UUID.randomUUID()
-        sendBehandlingOpprettet(spleisBehandlingId)
-        assertArbeidsgiverEksisterer(testPerson.orgnummer)
-        assertVedtaksperiodeEksisterer(testPerson.vedtaksperiodeId1)
+        // Given:
+        lagreVarseldefinisjon("RV_IV_10")
 
-        val varselkoder = listOf("RV_IV_10")
-        opprettVarseldefinisjoner(varselkoder)
-        sendAktivitetsloggNyAktivitet(varselkoder)
-        sendVedtaksperiodeNyUtbetaling()
-        sendUtbetalingEndret()
-        sendVedtaksperiodeEndret()
-        sendGodkjenningsbehov(spleisBehandlingId = spleisBehandlingId)
+        // When:
+        simulerPublisertSendtSøknadNavMelding()
+        val spleisBehandlingId = UUID.randomUUID()
+        simulerPublisertBehandlingOpprettetMelding(spleisBehandlingId)
+        simulerPublisertAktivitetsloggNyAktivitetMelding(listOf("RV_IV_10"))
+        simulerPublisertVedtaksperiodeNyUtbetalingMelding()
+        simulerPublisertUtbetalingEndretMelding()
+        simulerPublisertVedtaksperiodeEndretMelding()
+        simulerPublisertGodkjenningsbehovMelding(spleisBehandlingId = spleisBehandlingId)
+
         sendPersoninfoløsning()
         sendEnhetløsning()
         sendInfotrygdutbetalingerløsning()
