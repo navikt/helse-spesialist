@@ -2,103 +2,15 @@ package no.nav.helse.spesialist.e2etests
 
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
-import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.ArbeidsgiverinformasjonJson
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Fullmakt
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Vergemål
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
-import no.nav.helse.modell.person.Adressebeskyttelse
-import no.nav.helse.spesialist.typer.Kjønn
 import org.junit.jupiter.api.Assertions.assertEquals
 import java.time.LocalDate
 import java.util.UUID
 
 class SimulatingTestRapidMeldingssender(private val rapid: SimulatingTestRapid) {
     private val newUUID get() = UUID.randomUUID()
-
-    fun sendArbeidsgiverinformasjonløsning(
-        aktørId: String,
-        fødselsnummer: String,
-        organisasjonsnummer: String,
-        vedtaksperiodeId: UUID,
-        arbeidsgiverinformasjonJson: List<ArbeidsgiverinformasjonJson>? = null,
-    ): UUID =
-        newUUID.also { id ->
-            val behov = rapid.messageLog.filter { it.path("@event_name").asText() == "behov" }.last()
-            assertEquals("Arbeidsgiverinformasjon", behov["@behov"].map { it.asText() }.single())
-            val contextId = UUID.fromString(behov["contextId"].asText())
-            val hendelseId = UUID.fromString(behov["hendelseId"].asText())
-
-            val arbeidsgivere =
-                arbeidsgiverinformasjonJson ?: behov["Arbeidsgiverinformasjon"]["organisasjonsnummer"].map {
-                    ArbeidsgiverinformasjonJson(
-                        it.asText(),
-                        "Navn for ${it.asText()}",
-                        listOf("Bransje for ${it.asText()}")
-                    )
-                }
-
-            rapid.publish(
-                Testmeldingfabrikk.lagArbeidsgiverinformasjonløsning(
-                    aktørId = aktørId,
-                    fødselsnummer = fødselsnummer,
-                    organisasjonsnummer = organisasjonsnummer,
-                    vedtaksperiodeId = vedtaksperiodeId,
-                    ekstraArbeidsgivere = arbeidsgivere,
-                    id = id,
-                    hendelseId = hendelseId,
-                    contextId = contextId
-                )
-            )
-        }
-
-    fun sendArbeidsgiverinformasjonløsningKompositt(
-        aktørId: String,
-        fødselsnummer: String,
-        organisasjonsnummer: String,
-        vedtaksperiodeId: UUID,
-    ): UUID =
-        newUUID.also { id ->
-            val behov = rapid.messageLog.filter { it.path("@event_name").asText() == "behov" }.last()
-            assertEquals(
-                setOf("Arbeidsgiverinformasjon", "HentPersoninfoV2"),
-                behov["@behov"].map { it.asText() }.toSet()
-            )
-            val contextId = UUID.fromString(behov["contextId"].asText())
-            val hendelseId = UUID.fromString(behov["hendelseId"].asText())
-
-            val organisasjoner = behov["Arbeidsgiverinformasjon"]["organisasjonsnummer"].map {
-                ArbeidsgiverinformasjonJson(
-                    it.asText(),
-                    "Navn for ${it.asText()}",
-                    listOf("Bransje for ${it.asText()}")
-                )
-            }
-
-            val personer: List<Map<String, Any>> = behov["HentPersoninfoV2"]["ident"].map {
-                mapOf(
-                    "ident" to it.asText(),
-                    "fornavn" to it.asText(),
-                    "etternavn" to it.asText(),
-                    "fødselsdato" to LocalDate.now(),
-                    "kjønn" to Kjønn.Ukjent.name,
-                    "adressebeskyttelse" to Adressebeskyttelse.Ugradert.name,
-                )
-            }
-
-            rapid.publish(
-                Testmeldingfabrikk.lagArbeidsgiverinformasjonKomposittLøsning(
-                    aktørId = aktørId,
-                    fødselsnummer = fødselsnummer,
-                    organisasjonsnummer = organisasjonsnummer,
-                    vedtaksperiodeId = vedtaksperiodeId,
-                    organisasjoner = organisasjoner,
-                    personer = personer,
-                    hendelseId = hendelseId,
-                    contextId = contextId,
-                    id = id,
-                )
-            )
-        }
 
     fun sendArbeidsforholdløsning(
         aktørId: String,

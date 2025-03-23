@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.e2etests
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.accept
@@ -45,6 +44,7 @@ abstract class AbstractE2EIntegrationTest {
         HentEnhetbehovRiver(testPerson).registerOn(rapid)
         HentInfotrygdutbetalingerbehovRiver(testPerson).registerOn(rapid)
         ArbeidsgiverinformasjonbehovRiver(testPerson).registerOn(rapid)
+        ArbeidsgiverinformasjonOgHentPersoninfoV2behovRiver(testPerson).registerOn(rapid)
     }
 
     private val meldingssender = SimulatingTestRapidMeldingssender(testRapid)
@@ -193,26 +193,6 @@ abstract class AbstractE2EIntegrationTest {
             fødselsnummer = testPerson.fødselsnummer,
             erEgenAnsatt = false
         )
-    }
-
-    protected fun sendArbeidsgiverinformasjonløsning() {
-        val erKompositt = testRapid.messageLog.last { it.path("@event_name").asText() == "behov" }
-            .takeIf {
-                it.path("@behov").map(JsonNode::asText).containsAll(
-                    arrayOf(
-                        "Arbeidsgiverinformasjon",
-                        "HentPersoninfoV2"
-                    ).toList()
-                ) && !it.hasNonNull("@løsning")
-            } != null
-        if (erKompositt) {
-            meldingssender.sendArbeidsgiverinformasjonløsningKompositt(
-                aktørId = testPerson.aktørId,
-                fødselsnummer = testPerson.aktørId,
-                organisasjonsnummer = testPerson.orgnummer,
-                vedtaksperiodeId = testPerson.vedtaksperiodeId1,
-            )
-        }
     }
 
     protected fun sendArbeidsforholdløsning() {
