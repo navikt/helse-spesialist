@@ -46,6 +46,7 @@ abstract class AbstractE2EIntegrationTest {
             HentInfotrygdutbetalingerbehovRiver(testPerson),
             ArbeidsgiverinformasjonbehovRiver(testPerson),
             ArbeidsgiverinformasjonOgHentPersoninfoV2behovRiver(testPerson),
+            ArbeidsforholdbehovRiver(testPerson),
         ).forEach { it.registerOn(rapid) }
     }
 
@@ -194,15 +195,6 @@ abstract class AbstractE2EIntegrationTest {
             aktørId = testPerson.aktørId,
             fødselsnummer = testPerson.fødselsnummer,
             erEgenAnsatt = false
-        )
-    }
-
-    protected fun sendArbeidsforholdløsning() {
-        meldingssender.sendArbeidsforholdløsning(
-            aktørId = testPerson.aktørId,
-            fødselsnummer = testPerson.fødselsnummer,
-            organisasjonsnummer = testPerson.orgnummer,
-            vedtaksperiodeId = testPerson.vedtaksperiodeId1
         )
     }
 

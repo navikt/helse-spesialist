@@ -4,46 +4,11 @@ import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Fullmakt
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Vergemål
-import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import org.junit.jupiter.api.Assertions.assertEquals
-import java.time.LocalDate
 import java.util.UUID
 
 class SimulatingTestRapidMeldingssender(private val rapid: SimulatingTestRapid) {
     private val newUUID get() = UUID.randomUUID()
-
-    fun sendArbeidsforholdløsning(
-        aktørId: String,
-        fødselsnummer: String,
-        organisasjonsnummer: String,
-        vedtaksperiodeId: UUID,
-        løsning: List<Arbeidsforholdløsning.Løsning> = listOf(
-            Arbeidsforholdløsning.Løsning(
-                stillingstittel = "en-stillingstittel",
-                stillingsprosent = 100,
-                startdato = LocalDate.now(),
-                sluttdato = null
-            )
-        ),
-    ): UUID = newUUID.also { id ->
-        val behov = rapid.messageLog.filter { it.path("@event_name").asText() == "behov" }.last()
-        assertEquals("Arbeidsforhold", behov["@behov"].map { it.asText() }.single())
-        val contextId = UUID.fromString(behov["contextId"].asText())
-        val hendelseId = UUID.fromString(behov["hendelseId"].asText())
-
-        rapid.publish(
-            Testmeldingfabrikk.lagArbeidsforholdløsning(
-                aktørId = aktørId,
-                fødselsnummer = fødselsnummer,
-                organisasjonsnummer = organisasjonsnummer,
-                vedtaksperiodeId = vedtaksperiodeId,
-                løsning = løsning,
-                id = id,
-                hendelseId = hendelseId,
-                contextId = contextId
-            )
-        )
-    }
 
     fun sendEgenAnsattløsning(
         aktørId: String,
