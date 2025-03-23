@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.e2etests
 
-import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
 import org.junit.jupiter.api.Assertions.assertEquals
 import java.util.UUID
@@ -23,34 +22,6 @@ class SimulatingTestRapidMeldingssender(private val rapid: SimulatingTestRapid) 
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
                 orgnummer = orgnr,
-                id = id,
-                hendelseId = hendelseId,
-                contextId = contextId,
-            )
-        )
-    }
-
-    fun sendRisikovurderingløsning(
-        aktørId: String,
-        fødselsnummer: String,
-        organisasjonsnummer: String,
-        vedtaksperiodeId: UUID,
-        kanGodkjennesAutomatisk: Boolean = true,
-        funn: List<Risikofunn> = emptyList(),
-    ): UUID = newUUID.also { id ->
-        val behov = rapid.messageLog.filter { it.path("@event_name").asText() == "behov" }.last()
-        assertEquals("Risikovurdering", behov["@behov"].map { it.asText() }.single())
-        val contextId = UUID.fromString(behov["contextId"].asText())
-        val hendelseId = UUID.fromString(behov["hendelseId"].asText())
-
-        rapid.publish(
-            Testmeldingfabrikk.lagRisikovurderingløsning(
-                aktørId = aktørId,
-                fødselsnummer = fødselsnummer,
-                organisasjonsnummer = organisasjonsnummer,
-                vedtaksperiodeId = vedtaksperiodeId,
-                kanGodkjennesAutomatisk = kanGodkjennesAutomatisk,
-                funn = funn,
                 id = id,
                 hendelseId = hendelseId,
                 contextId = contextId,

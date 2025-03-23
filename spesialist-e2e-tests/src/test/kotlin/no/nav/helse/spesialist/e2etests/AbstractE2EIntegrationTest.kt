@@ -50,6 +50,7 @@ abstract class AbstractE2EIntegrationTest {
             EgenAnsattbehovRiver(testPerson),
             VergemålOgFullmaktbehovRiver(testPerson),
             ÅpneOppgaverbehovRiver(testPerson),
+            RisikovurderingbehovRiver(testPerson),
         ).forEach { it.registerOn(rapid) }
     }
 
@@ -160,17 +161,6 @@ abstract class AbstractE2EIntegrationTest {
             aktørId = testPerson.aktørId,
             fødselsnummer = testPerson.fødselsnummer,
             orgnr = testPerson.orgnummer
-        )
-    }
-
-    protected fun sendRisikovurderingløsning() {
-        meldingssender.sendRisikovurderingløsning(
-            aktørId = testPerson.aktørId,
-            fødselsnummer = testPerson.fødselsnummer,
-            organisasjonsnummer = testPerson.orgnummer,
-            vedtaksperiodeId = testPerson.vedtaksperiodeId1,
-            kanGodkjennesAutomatisk = false,
-            funn = emptyList(),
         )
     }
 
