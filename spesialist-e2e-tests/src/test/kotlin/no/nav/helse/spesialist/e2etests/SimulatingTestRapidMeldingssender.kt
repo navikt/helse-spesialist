@@ -15,54 +15,6 @@ import java.util.UUID
 class SimulatingTestRapidMeldingssender(private val rapid: SimulatingTestRapid) {
     private val newUUID get() = UUID.randomUUID()
 
-    fun sendPersoninfoløsning(
-        aktørId: String,
-        fødselsnummer: String,
-        adressebeskyttelse: Adressebeskyttelse,
-    ): UUID = newUUID.also { id ->
-        val behov = rapid.messageLog.last { it.path("@event_name").asText() == "behov" }
-        assertEquals("HentPersoninfoV2", behov["@behov"].map { it.asText() }.single())
-        val contextId = UUID.fromString(behov["contextId"].asText())
-        val hendelseId = UUID.fromString(behov["hendelseId"].asText())
-
-        rapid.publish(
-            Testmeldingfabrikk.lagPersoninfoløsning(
-                aktørId = aktørId,
-                fødselsnummer = fødselsnummer,
-                id = id,
-                hendelseId = hendelseId,
-                contextId = contextId,
-                adressebeskyttelse = adressebeskyttelse.name
-            )
-        )
-    }
-
-    fun sendEnhetløsning(
-        aktørId: String,
-        fødselsnummer: String,
-        organisasjonsnummer: String,
-        vedtaksperiodeId: UUID,
-        enhet: String,
-    ): UUID = newUUID.also { id ->
-        val behov = rapid.messageLog.filter { it.path("@event_name").asText() == "behov" }.last()
-        assertEquals("HentEnhet", behov["@behov"].map { it.asText() }.single())
-        val contextId = UUID.fromString(behov["contextId"].asText())
-        val hendelseId = UUID.fromString(behov["hendelseId"].asText())
-
-        rapid.publish(
-            Testmeldingfabrikk.lagEnhetløsning(
-                aktørId = aktørId,
-                fødselsnummer = fødselsnummer,
-                organisasjonsnummer = organisasjonsnummer,
-                vedtaksperiodeId = vedtaksperiodeId,
-                id = id,
-                hendelseId = hendelseId,
-                contextId = contextId,
-                enhet = enhet
-            )
-        )
-    }
-
     fun sendInfotrygdutbetalingerløsning(
         aktørId: String,
         fødselsnummer: String,
