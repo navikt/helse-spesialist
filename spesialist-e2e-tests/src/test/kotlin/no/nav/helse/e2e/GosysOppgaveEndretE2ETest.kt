@@ -14,16 +14,6 @@ class GosysOppgaveEndretE2ETest : AbstractE2ETest() {
     }
 
     @Test
-    fun `Legg til varsel ved åpne oppgaver i Gosys`() {
-        vedtaksløsningenMottarNySøknad()
-        spleisOppretterNyBehandling()
-        spesialistBehandlerGodkjenningsbehovFremTilOppgave()
-        håndterGosysOppgaveEndret()
-        håndterÅpneOppgaverløsning(antallÅpneOppgaverIGosys = 1)
-        assertVarsel(VEDTAKSPERIODE_ID, "SB_EX_1")
-    }
-
-    @Test
     fun `ber ikke om informasjon dersom det ikke finnes aktiv oppgave i Speil`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()

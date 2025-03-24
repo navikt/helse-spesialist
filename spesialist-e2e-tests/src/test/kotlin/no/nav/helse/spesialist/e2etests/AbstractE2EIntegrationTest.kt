@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.e2etests
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
+import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.accept
 import io.ktor.client.request.bearerAuth
@@ -15,6 +16,7 @@ import kotliquery.sessionOf
 import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.oppgave.Egenskap
+import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.spesialist.api.bootstrap.Gruppe
 import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
 import no.nav.helse.spesialist.api.objectMapper
@@ -45,6 +47,8 @@ import no.nav.helse.spesialist.e2etests.behovløserstubs.ÅpneOppgaverBehovLøse
 import no.nav.helse.spesialist.kafka.testfixtures.KafkaModuleTestRapidTestFixture
 import no.nav.helse.spesialist.test.TestPerson
 import org.intellij.lang.annotations.Language
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -346,7 +350,10 @@ abstract class AbstractE2EIntegrationTest {
         )
     }
 
-    protected fun simulerPublisertAktivitetsloggNyAktivitetMelding(varselkoder: List<String>, vedtaksperiodeId: UUID = this.vedtaksperiodeId) {
+    protected fun simulerPublisertAktivitetsloggNyAktivitetMelding(
+        varselkoder: List<String>,
+        vedtaksperiodeId: UUID = this.vedtaksperiodeId
+    ) {
         testRapid.publish(
             JsonMessage.newMessage(
                 mapOf(
@@ -403,14 +410,18 @@ abstract class AbstractE2EIntegrationTest {
     }
 
     protected fun assertHarOppgaveegenskap(vararg forventedeEgenskaper: Egenskap) {
+        val oppgave = finnOppgave()
+        val egenskaper = oppgave.egenskaper
+        assertTrue(egenskaper.containsAll(forventedeEgenskaper.toList())) { "Forventet å finne ${forventedeEgenskaper.toSet()} i $egenskaper" }
+    }
+
+    private fun finnOppgave(): Oppgave {
         val oppgaveId =
-            modules.dbModule.daos.oppgaveDao.finnOppgaveId(testPerson.fødselsnummer)
-                ?: error("Fant ikke oppgave for personen")
+            modules.dbModule.daos.oppgaveDao.finnOppgaveIdUansettStatus(testPerson.fødselsnummer)
         val oppgave = modules.dbModule.sessionFactory.transactionalSessionScope { session ->
             session.oppgaveRepository.finn(oppgaveId) { _, _ -> true }
         } ?: error("Fant ikke oppgaven basert på ID")
-        val egenskaper = oppgave.egenskaper
-        assertTrue(egenskaper.containsAll(forventedeEgenskaper.toList())) { "Forventet å finne ${forventedeEgenskaper.toSet()} i $egenskaper" }
+        return oppgave
     }
 
     data class Varsel(
@@ -425,4 +436,57 @@ abstract class AbstractE2EIntegrationTest {
             val paramMap = mapOf("vedtaksperiode_id" to vedtaksperiodeId)
             session.list(queryOf(query, paramMap)) { Varsel(it.string("kode"), it.string("status")) }.toSet()
         }
+
+    protected fun assertOppgaveForPersonInvalidert() {
+        assertEquals(Oppgave.Invalidert::class.java, finnOppgave().tilstand::class.java)
+    }
+
+    protected fun assertGodkjenningsbehovBesvart(
+        godkjent: Boolean,
+        automatiskBehandlet: Boolean,
+        vararg årsakerTilAvvist: String,
+    ) {
+        val løsning = testRapid.meldingslogg
+            .mapNotNull { it["@løsning"] }
+            .mapNotNull { it["Godkjenning"] }
+            .last()
+
+        assertTrue(løsning["godkjent"].isBoolean)
+        assertEquals(godkjent, løsning["godkjent"].booleanValue())
+        assertEquals(automatiskBehandlet, løsning["automatiskBehandling"].booleanValue())
+        assertNotNull(løsning["godkjenttidspunkt"].asLocalDateTime())
+        if (årsakerTilAvvist.isNotEmpty()) {
+            val begrunnelser = løsning["begrunnelser"].map { it.asText() }
+            assertEquals(begrunnelser, begrunnelser.distinct())
+            assertEquals(årsakerTilAvvist.toSet(), begrunnelser.toSet())
+        }
+    }
+
+    protected fun simulerFremTilOgMedGodkjenningsbehov() {
+        val spleisBehandlingId = simulerFremTilOgMedNyUtbetaling()
+        simulerFraNyUtbetalingTilOgMedGodkjenningsbehov(spleisBehandlingId)
+    }
+
+    protected fun simulerFremTilOgMedNyUtbetaling(vedtaksperiodeId: UUID = this.vedtaksperiodeId): UUID {
+        simulerPublisertSendtSøknadNavMelding()
+        val spleisBehandlingId = UUID.randomUUID()
+        simulerPublisertBehandlingOpprettetMelding(
+            spleisBehandlingId = spleisBehandlingId,
+            vedtaksperiodeId = vedtaksperiodeId
+        )
+        simulerPublisertVedtaksperiodeNyUtbetalingMelding(vedtaksperiodeId = vedtaksperiodeId)
+        return spleisBehandlingId
+    }
+
+    protected fun simulerFraNyUtbetalingTilOgMedGodkjenningsbehov(
+        spleisBehandlingId: UUID,
+        vedtaksperiodeId: UUID = this.vedtaksperiodeId
+    ) {
+        simulerPublisertUtbetalingEndretMelding()
+        simulerPublisertVedtaksperiodeEndretMelding(vedtaksperiodeId = vedtaksperiodeId)
+        simulerPublisertGodkjenningsbehovMelding(
+            spleisBehandlingId = spleisBehandlingId,
+            vedtaksperiodeId = vedtaksperiodeId
+        )
+    }
 }

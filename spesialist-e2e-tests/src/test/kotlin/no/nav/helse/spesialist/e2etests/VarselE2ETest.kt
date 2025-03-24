@@ -207,32 +207,4 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         assertEquals(setOf(Varsel("EN_KODE", AKTIV.name)), hentVarselkoder(vedtaksperiodeId1))
         assertEquals(setOf(Varsel("EN_ANNEN_KODE", AKTIV.name)), hentVarselkoder(vedtaksperiodeId2))
     }
-
-    private fun simulerFremTilOgMedGodkjenningsbehov() {
-        val spleisBehandlingId = simulerFremTilOgMedNyUtbetaling()
-        simulerFraNyUtbetalingTilOgMedGodkjenningsbehov(spleisBehandlingId)
-    }
-
-    private fun simulerFremTilOgMedNyUtbetaling(vedtaksperiodeId: UUID = this.vedtaksperiodeId): UUID {
-        simulerPublisertSendtSøknadNavMelding()
-        val spleisBehandlingId = UUID.randomUUID()
-        simulerPublisertBehandlingOpprettetMelding(
-            spleisBehandlingId = spleisBehandlingId,
-            vedtaksperiodeId = vedtaksperiodeId
-        )
-        simulerPublisertVedtaksperiodeNyUtbetalingMelding(vedtaksperiodeId = vedtaksperiodeId)
-        return spleisBehandlingId
-    }
-
-    private fun simulerFraNyUtbetalingTilOgMedGodkjenningsbehov(
-        spleisBehandlingId: UUID,
-        vedtaksperiodeId: UUID = this.vedtaksperiodeId
-    ) {
-        simulerPublisertUtbetalingEndretMelding()
-        simulerPublisertVedtaksperiodeEndretMelding(vedtaksperiodeId = vedtaksperiodeId)
-        simulerPublisertGodkjenningsbehovMelding(
-            spleisBehandlingId = spleisBehandlingId,
-            vedtaksperiodeId = vedtaksperiodeId
-        )
-    }
 }

@@ -2,11 +2,7 @@ package no.nav.helse.spesialist.e2etests.behovløserstubs
 
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.databind.node.ArrayNode
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
@@ -15,6 +11,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.e2etests.LoopbackTestRapid
+import no.nav.helse.spesialist.e2etests.objectMapper
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -22,9 +19,6 @@ class BehovLøserStub(val rapidsConnection: RapidsConnection, vararg løsere: Ab
     private val løserPerBehov = løsere.associateBy(AbstractBehovLøser::behov)
     private val behovViKanLøse = løserPerBehov.keys
     private val behovliste = mutableListOf<JsonNode>()
-
-    private val objectMapper: ObjectMapper = jacksonObjectMapper().registerModule(JavaTimeModule())
-        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
     fun registerOn(rapid: LoopbackTestRapid) {
         River(rapid)
