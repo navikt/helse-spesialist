@@ -16,15 +16,6 @@ import java.util.UUID
 class VarselE2ETest : AbstractE2ETest() {
 
     @Test
-    fun `varsel dersom kall til gosys feilet`() {
-        vedtaksløsningenMottarNySøknad()
-        spleisOppretterNyBehandling()
-        spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver()
-        håndterÅpneOppgaverløsning(antallÅpneOppgaverIGosys = 0, oppslagFeilet = true)
-        assertVarsel(SB_EX_3, VEDTAKSPERIODE_ID, AKTIV)
-    }
-
-    @Test
     fun `fjern varsel dersom kall til gosys ikke feiler lenger`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()

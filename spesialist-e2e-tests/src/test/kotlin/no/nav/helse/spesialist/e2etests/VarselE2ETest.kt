@@ -4,6 +4,7 @@ import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.AKTIV
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.INAKTIV
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_EX_1
+import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_EX_3
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_RV_1
 import org.junit.jupiter.api.Test
 import java.util.UUID
@@ -71,6 +72,18 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
 
         // Then:
         assertEquals(setOf(Varsel(SB_EX_1.name, INAKTIV.name)), hentVarselkoder())
+    }
+
+    @Test
+    fun `varsel dersom kall til gosys feilet`() {
+        // Given:
+        åpneOppgaverBehovLøser.oppslagFeilet = true
+
+        // When:
+        simulerFremTilOgMedGodkjenningsbehov()
+
+        // Then:
+        assertEquals(setOf(Varsel(SB_EX_3.name, AKTIV.name)), hentVarselkoder())
     }
 
     private fun simulerFremTilOgMedGodkjenningsbehov() {
