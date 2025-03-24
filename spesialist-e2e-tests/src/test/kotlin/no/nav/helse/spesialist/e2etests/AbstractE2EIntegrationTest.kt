@@ -229,6 +229,19 @@ abstract class AbstractE2EIntegrationTest {
         )
     }
 
+    protected fun simulerPublisertGosysOppgaveEndretMelding() {
+        testRapid.publish(
+            JsonMessage.newMessage(
+                mapOf(
+                    "@event_name" to "gosys_oppgave_endret",
+                    "@id" to UUID.randomUUID(),
+                    "@opprettet" to LocalDateTime.now(),
+                    "fødselsnummer" to testPerson.fødselsnummer
+                )
+            ).toJson()
+        )
+    }
+
     protected fun simulerPublisertVedtaksperiodeEndretMelding() {
         testRapid.publish(
             JsonMessage.newMessage(

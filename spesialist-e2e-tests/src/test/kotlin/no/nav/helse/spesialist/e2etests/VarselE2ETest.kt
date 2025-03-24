@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.e2etests
 
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.AKTIV
+import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.INAKTIV
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_EX_1
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_RV_1
 import org.junit.jupiter.api.Test
@@ -56,6 +57,20 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
 
         // Then:
         assertEquals(setOf(Varsel(SB_EX_1.name, AKTIV.name)), hentVarselkoder())
+    }
+
+    @Test
+    fun `fjern varsel om gosys-oppgave dersom det ikke finnes gosys-oppgave lenger`() {
+        // Given:
+        åpneOppgaverBehovLøser.antall = 1
+
+        // When:
+        simulerFremTilOgMedGodkjenningsbehov()
+        åpneOppgaverBehovLøser.antall = 0
+        simulerPublisertGosysOppgaveEndretMelding()
+
+        // Then:
+        assertEquals(setOf(Varsel(SB_EX_1.name, INAKTIV.name)), hentVarselkoder())
     }
 
     private fun simulerFremTilOgMedGodkjenningsbehov() {

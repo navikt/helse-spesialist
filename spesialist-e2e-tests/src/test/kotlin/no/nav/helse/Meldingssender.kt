@@ -145,8 +145,8 @@ class Meldingssender(private val testRapid: TestRapid) {
     ): UUID = newUUID.also { id ->
         testRapid.sendTestMessage(
             Testmeldingfabrikk.lagGosysOppgaveEndret(
-                fødselsnummer = fødselsnummer,
-                id = id,
+                    fødselsnummer = fødselsnummer,
+                    id = id,
             )
         )
     }
