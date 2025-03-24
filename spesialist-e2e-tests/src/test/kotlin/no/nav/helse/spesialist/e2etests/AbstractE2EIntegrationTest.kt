@@ -10,6 +10,8 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.testing.testApplication
+import kotliquery.queryOf
+import kotliquery.sessionOf
 import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.oppgave.Egenskap
@@ -386,4 +388,14 @@ abstract class AbstractE2EIntegrationTest {
         val egenskaper = oppgave.egenskaper
         assertTrue(egenskaper.containsAll(forventedeEgenskaper.toList())) { "Forventet å finne ${forventedeEgenskaper.toSet()} i $egenskaper" }
     }
+
+    protected fun hentVarselkoder(): Set<String> =
+        sessionOf(modules.dbModule.dataSource).use { session ->
+            session.list(
+                queryOf(
+                    "SELECT kode FROM selve_varsel WHERE vedtaksperiode_id = :vedtaksperiode_id",
+                    mapOf("vedtaksperiode_id" to testPerson.vedtaksperiodeId1)
+                )
+            ) { it.string(1) }.toSet()
+        }
 }

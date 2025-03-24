@@ -9,7 +9,6 @@ import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.INAKTIV
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_EX_1
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_EX_3
-import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_IK_1
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_RV_1
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -17,17 +16,6 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 class VarselE2ETest : AbstractE2ETest() {
-    @Test
-    fun `ingen varsel`() {
-        vedtaksløsningenMottarNySøknad()
-        spleisOppretterNyBehandling()
-        spesialistBehandlerGodkjenningsbehovFremTilOppgave(kanGodkjennesAutomatisk = true)
-        assertIngenVarsel(SB_IK_1, VEDTAKSPERIODE_ID)
-        assertIngenVarsel(SB_RV_1, VEDTAKSPERIODE_ID)
-        assertIngenVarsel(SB_EX_1, VEDTAKSPERIODE_ID)
-        assertIngenVarsel(SB_EX_3, VEDTAKSPERIODE_ID)
-    }
-
     @Test
     fun `varsel om faresignaler ved risikovurdering`() {
         vedtaksløsningenMottarNySøknad()
