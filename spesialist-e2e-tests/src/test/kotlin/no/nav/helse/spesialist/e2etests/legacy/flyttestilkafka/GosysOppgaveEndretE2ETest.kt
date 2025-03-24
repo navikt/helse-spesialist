@@ -1,5 +1,6 @@
-package no.nav.helse.e2e
+package no.nav.helse.spesialist.e2etests.legacy.flyttestilkafka
 
+import no.nav.helse.e2e.AbstractE2ETest
 import org.junit.jupiter.api.Test
 
 class GosysOppgaveEndretE2ETest : AbstractE2ETest() {
