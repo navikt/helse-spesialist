@@ -15,20 +15,6 @@ import java.util.UUID
 class VarselE2ETest : AbstractE2ETest() {
 
     @Test
-    fun `legger til varsel om gosys-oppgave når vi får beskjed om at gosys har fått oppgaver`() {
-        vedtaksløsningenMottarNySøknad()
-        spleisOppretterNyBehandling()
-        spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver()
-        håndterÅpneOppgaverløsning(antallÅpneOppgaverIGosys = 0)
-        håndterRisikovurderingløsning(kanGodkjennesAutomatisk = false)
-        håndterInntektløsning()
-        håndterGosysOppgaveEndret()
-        håndterÅpneOppgaverløsning(antallÅpneOppgaverIGosys = 1)
-        assertVarsel(SB_EX_1, VEDTAKSPERIODE_ID, AKTIV)
-        assertIngenVarsel(SB_EX_3, VEDTAKSPERIODE_ID)
-    }
-
-    @Test
     fun `legger til varsel om manglende gosys-info`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()

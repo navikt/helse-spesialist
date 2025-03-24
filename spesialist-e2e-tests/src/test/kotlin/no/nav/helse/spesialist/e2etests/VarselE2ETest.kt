@@ -100,6 +100,21 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         assertEquals(setOf(Varsel(SB_EX_3.name, INAKTIV.name)), hentVarselkoder())
     }
 
+    @Test
+    fun `legger til varsel om gosys-oppgave når vi får beskjed om at gosys har fått oppgaver`() {
+        // Given:
+        åpneOppgaverBehovLøser.antall = 0
+        risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
+
+        // When:
+        simulerFremTilOgMedGodkjenningsbehov()
+        åpneOppgaverBehovLøser.antall = 1
+        simulerPublisertGosysOppgaveEndretMelding()
+
+        // Then:
+        assertEquals(setOf(Varsel(SB_EX_1.name, AKTIV.name), Varsel(SB_RV_1.name, AKTIV.name)), hentVarselkoder())
+    }
+
     private fun simulerFremTilOgMedGodkjenningsbehov() {
         simulerPublisertSendtSøknadNavMelding()
         val spleisBehandlingId = UUID.randomUUID()
