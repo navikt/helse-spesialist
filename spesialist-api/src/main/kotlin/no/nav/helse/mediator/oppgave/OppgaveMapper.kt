@@ -8,6 +8,7 @@ import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.spesialist.api.graphql.schema.ApiAntallArbeidsforhold
 import no.nav.helse.spesialist.api.graphql.schema.ApiAntallOppgaver
 import no.nav.helse.spesialist.api.graphql.schema.ApiBehandletOppgave
+import no.nav.helse.spesialist.api.graphql.schema.ApiEgenskap
 import no.nav.helse.spesialist.api.graphql.schema.ApiKategori
 import no.nav.helse.spesialist.api.graphql.schema.ApiKommentar
 import no.nav.helse.spesialist.api.graphql.schema.ApiMottaker
@@ -18,7 +19,6 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiPaVentInfo
 import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodetype
 import no.nav.helse.spesialist.api.graphql.schema.ApiPersonnavn
 import no.nav.helse.spesialist.api.graphql.schema.ApiTildeling
-import no.nav.helse.spesialist.api.graphql.schema.ApiEgenskap as EgenskapForApi
 
 internal object OppgaveMapper {
     internal fun List<OppgaveFraDatabaseForVisning>.tilOppgaverTilBehandling() =
@@ -164,38 +164,38 @@ internal object OppgaveMapper {
             ApiKategori.Status -> Egenskap.Kategori.Status
         }
 
-    private fun Egenskap.tilApiversjon(): EgenskapForApi =
+    private fun Egenskap.tilApiversjon(): ApiEgenskap =
         when (this) {
-            Egenskap.RISK_QA -> EgenskapForApi.RISK_QA
-            Egenskap.FORTROLIG_ADRESSE -> EgenskapForApi.FORTROLIG_ADRESSE
-            Egenskap.STRENGT_FORTROLIG_ADRESSE -> EgenskapForApi.STRENGT_FORTROLIG_ADRESSE
-            Egenskap.EGEN_ANSATT -> EgenskapForApi.EGEN_ANSATT
-            Egenskap.BESLUTTER -> EgenskapForApi.BESLUTTER
-            Egenskap.SPESIALSAK -> EgenskapForApi.SPESIALSAK
-            Egenskap.REVURDERING -> EgenskapForApi.REVURDERING
-            Egenskap.SØKNAD -> EgenskapForApi.SOKNAD
-            Egenskap.STIKKPRØVE -> EgenskapForApi.STIKKPROVE
-            Egenskap.UTBETALING_TIL_SYKMELDT -> EgenskapForApi.UTBETALING_TIL_SYKMELDT
-            Egenskap.DELVIS_REFUSJON -> EgenskapForApi.DELVIS_REFUSJON
-            Egenskap.UTBETALING_TIL_ARBEIDSGIVER -> EgenskapForApi.UTBETALING_TIL_ARBEIDSGIVER
-            Egenskap.INGEN_UTBETALING -> EgenskapForApi.INGEN_UTBETALING
-            Egenskap.HASTER -> EgenskapForApi.HASTER
-            Egenskap.RETUR -> EgenskapForApi.RETUR
-            Egenskap.VERGEMÅL -> EgenskapForApi.VERGEMAL
-            Egenskap.EN_ARBEIDSGIVER -> EgenskapForApi.EN_ARBEIDSGIVER
-            Egenskap.FLERE_ARBEIDSGIVERE -> EgenskapForApi.FLERE_ARBEIDSGIVERE
-            Egenskap.UTLAND -> EgenskapForApi.UTLAND
-            Egenskap.FORLENGELSE -> EgenskapForApi.FORLENGELSE
-            Egenskap.FORSTEGANGSBEHANDLING -> EgenskapForApi.FORSTEGANGSBEHANDLING
-            Egenskap.INFOTRYGDFORLENGELSE -> EgenskapForApi.INFOTRYGDFORLENGELSE
-            Egenskap.OVERGANG_FRA_IT -> EgenskapForApi.OVERGANG_FRA_IT
-            Egenskap.SKJØNNSFASTSETTELSE -> EgenskapForApi.SKJONNSFASTSETTELSE
-            Egenskap.PÅ_VENT -> EgenskapForApi.PA_VENT
-            Egenskap.TILBAKEDATERT -> EgenskapForApi.TILBAKEDATERT
-            Egenskap.GOSYS -> EgenskapForApi.GOSYS
-            Egenskap.MANGLER_IM -> EgenskapForApi.MANGLER_IM
-            Egenskap.MEDLEMSKAP -> EgenskapForApi.MEDLEMSKAP
-            Egenskap.TILKOMMEN -> EgenskapForApi.TILKOMMEN
+            Egenskap.RISK_QA -> ApiEgenskap.RISK_QA
+            Egenskap.FORTROLIG_ADRESSE -> ApiEgenskap.FORTROLIG_ADRESSE
+            Egenskap.STRENGT_FORTROLIG_ADRESSE -> ApiEgenskap.STRENGT_FORTROLIG_ADRESSE
+            Egenskap.EGEN_ANSATT -> ApiEgenskap.EGEN_ANSATT
+            Egenskap.BESLUTTER -> ApiEgenskap.BESLUTTER
+            Egenskap.SPESIALSAK -> ApiEgenskap.SPESIALSAK
+            Egenskap.REVURDERING -> ApiEgenskap.REVURDERING
+            Egenskap.SØKNAD -> ApiEgenskap.SOKNAD
+            Egenskap.STIKKPRØVE -> ApiEgenskap.STIKKPROVE
+            Egenskap.UTBETALING_TIL_SYKMELDT -> ApiEgenskap.UTBETALING_TIL_SYKMELDT
+            Egenskap.DELVIS_REFUSJON -> ApiEgenskap.DELVIS_REFUSJON
+            Egenskap.UTBETALING_TIL_ARBEIDSGIVER -> ApiEgenskap.UTBETALING_TIL_ARBEIDSGIVER
+            Egenskap.INGEN_UTBETALING -> ApiEgenskap.INGEN_UTBETALING
+            Egenskap.HASTER -> ApiEgenskap.HASTER
+            Egenskap.RETUR -> ApiEgenskap.RETUR
+            Egenskap.VERGEMÅL -> ApiEgenskap.VERGEMAL
+            Egenskap.EN_ARBEIDSGIVER -> ApiEgenskap.EN_ARBEIDSGIVER
+            Egenskap.FLERE_ARBEIDSGIVERE -> ApiEgenskap.FLERE_ARBEIDSGIVERE
+            Egenskap.UTLAND -> ApiEgenskap.UTLAND
+            Egenskap.FORLENGELSE -> ApiEgenskap.FORLENGELSE
+            Egenskap.FORSTEGANGSBEHANDLING -> ApiEgenskap.FORSTEGANGSBEHANDLING
+            Egenskap.INFOTRYGDFORLENGELSE -> ApiEgenskap.INFOTRYGDFORLENGELSE
+            Egenskap.OVERGANG_FRA_IT -> ApiEgenskap.OVERGANG_FRA_IT
+            Egenskap.SKJØNNSFASTSETTELSE -> ApiEgenskap.SKJONNSFASTSETTELSE
+            Egenskap.PÅ_VENT -> ApiEgenskap.PA_VENT
+            Egenskap.TILBAKEDATERT -> ApiEgenskap.TILBAKEDATERT
+            Egenskap.GOSYS -> ApiEgenskap.GOSYS
+            Egenskap.MANGLER_IM -> ApiEgenskap.MANGLER_IM
+            Egenskap.MEDLEMSKAP -> ApiEgenskap.MEDLEMSKAP
+            Egenskap.TILKOMMEN -> ApiEgenskap.TILKOMMEN
         }
 
     private fun Egenskap.Kategori.tilApiversjon(): ApiKategori =
@@ -244,35 +244,35 @@ internal object OppgaveMapper {
 
     private fun ApiOppgaveegenskap.tilDatabaseversjon() =
         when (this.egenskap) {
-            EgenskapForApi.RISK_QA -> EgenskapForDatabase.RISK_QA
-            EgenskapForApi.FORTROLIG_ADRESSE -> EgenskapForDatabase.FORTROLIG_ADRESSE
-            EgenskapForApi.STRENGT_FORTROLIG_ADRESSE -> EgenskapForDatabase.STRENGT_FORTROLIG_ADRESSE
-            EgenskapForApi.EGEN_ANSATT -> EgenskapForDatabase.EGEN_ANSATT
-            EgenskapForApi.BESLUTTER -> EgenskapForDatabase.BESLUTTER
-            EgenskapForApi.SPESIALSAK -> EgenskapForDatabase.SPESIALSAK
-            EgenskapForApi.REVURDERING -> EgenskapForDatabase.REVURDERING
-            EgenskapForApi.SOKNAD -> EgenskapForDatabase.SØKNAD
-            EgenskapForApi.STIKKPROVE -> EgenskapForDatabase.STIKKPRØVE
-            EgenskapForApi.UTBETALING_TIL_SYKMELDT -> EgenskapForDatabase.UTBETALING_TIL_SYKMELDT
-            EgenskapForApi.DELVIS_REFUSJON -> EgenskapForDatabase.DELVIS_REFUSJON
-            EgenskapForApi.UTBETALING_TIL_ARBEIDSGIVER -> EgenskapForDatabase.UTBETALING_TIL_ARBEIDSGIVER
-            EgenskapForApi.INGEN_UTBETALING -> EgenskapForDatabase.INGEN_UTBETALING
-            EgenskapForApi.EN_ARBEIDSGIVER -> EgenskapForDatabase.EN_ARBEIDSGIVER
-            EgenskapForApi.FLERE_ARBEIDSGIVERE -> EgenskapForDatabase.FLERE_ARBEIDSGIVERE
-            EgenskapForApi.FORLENGELSE -> EgenskapForDatabase.FORLENGELSE
-            EgenskapForApi.FORSTEGANGSBEHANDLING -> EgenskapForDatabase.FORSTEGANGSBEHANDLING
-            EgenskapForApi.INFOTRYGDFORLENGELSE -> EgenskapForDatabase.INFOTRYGDFORLENGELSE
-            EgenskapForApi.OVERGANG_FRA_IT -> EgenskapForDatabase.OVERGANG_FRA_IT
-            EgenskapForApi.UTLAND -> EgenskapForDatabase.UTLAND
-            EgenskapForApi.HASTER -> EgenskapForDatabase.HASTER
-            EgenskapForApi.RETUR -> EgenskapForDatabase.RETUR
-            EgenskapForApi.VERGEMAL -> EgenskapForDatabase.VERGEMÅL
-            EgenskapForApi.SKJONNSFASTSETTELSE -> EgenskapForDatabase.SKJØNNSFASTSETTELSE
-            EgenskapForApi.PA_VENT -> EgenskapForDatabase.PÅ_VENT
-            EgenskapForApi.TILBAKEDATERT -> EgenskapForDatabase.TILBAKEDATERT
-            EgenskapForApi.GOSYS -> EgenskapForDatabase.GOSYS
-            EgenskapForApi.MANGLER_IM -> EgenskapForDatabase.MANGLER_IM
-            EgenskapForApi.MEDLEMSKAP -> EgenskapForDatabase.MEDLEMSKAP
-            EgenskapForApi.TILKOMMEN -> EgenskapForDatabase.TILKOMMEN
+            ApiEgenskap.RISK_QA -> EgenskapForDatabase.RISK_QA
+            ApiEgenskap.FORTROLIG_ADRESSE -> EgenskapForDatabase.FORTROLIG_ADRESSE
+            ApiEgenskap.STRENGT_FORTROLIG_ADRESSE -> EgenskapForDatabase.STRENGT_FORTROLIG_ADRESSE
+            ApiEgenskap.EGEN_ANSATT -> EgenskapForDatabase.EGEN_ANSATT
+            ApiEgenskap.BESLUTTER -> EgenskapForDatabase.BESLUTTER
+            ApiEgenskap.SPESIALSAK -> EgenskapForDatabase.SPESIALSAK
+            ApiEgenskap.REVURDERING -> EgenskapForDatabase.REVURDERING
+            ApiEgenskap.SOKNAD -> EgenskapForDatabase.SØKNAD
+            ApiEgenskap.STIKKPROVE -> EgenskapForDatabase.STIKKPRØVE
+            ApiEgenskap.UTBETALING_TIL_SYKMELDT -> EgenskapForDatabase.UTBETALING_TIL_SYKMELDT
+            ApiEgenskap.DELVIS_REFUSJON -> EgenskapForDatabase.DELVIS_REFUSJON
+            ApiEgenskap.UTBETALING_TIL_ARBEIDSGIVER -> EgenskapForDatabase.UTBETALING_TIL_ARBEIDSGIVER
+            ApiEgenskap.INGEN_UTBETALING -> EgenskapForDatabase.INGEN_UTBETALING
+            ApiEgenskap.EN_ARBEIDSGIVER -> EgenskapForDatabase.EN_ARBEIDSGIVER
+            ApiEgenskap.FLERE_ARBEIDSGIVERE -> EgenskapForDatabase.FLERE_ARBEIDSGIVERE
+            ApiEgenskap.FORLENGELSE -> EgenskapForDatabase.FORLENGELSE
+            ApiEgenskap.FORSTEGANGSBEHANDLING -> EgenskapForDatabase.FORSTEGANGSBEHANDLING
+            ApiEgenskap.INFOTRYGDFORLENGELSE -> EgenskapForDatabase.INFOTRYGDFORLENGELSE
+            ApiEgenskap.OVERGANG_FRA_IT -> EgenskapForDatabase.OVERGANG_FRA_IT
+            ApiEgenskap.UTLAND -> EgenskapForDatabase.UTLAND
+            ApiEgenskap.HASTER -> EgenskapForDatabase.HASTER
+            ApiEgenskap.RETUR -> EgenskapForDatabase.RETUR
+            ApiEgenskap.VERGEMAL -> EgenskapForDatabase.VERGEMÅL
+            ApiEgenskap.SKJONNSFASTSETTELSE -> EgenskapForDatabase.SKJØNNSFASTSETTELSE
+            ApiEgenskap.PA_VENT -> EgenskapForDatabase.PÅ_VENT
+            ApiEgenskap.TILBAKEDATERT -> EgenskapForDatabase.TILBAKEDATERT
+            ApiEgenskap.GOSYS -> EgenskapForDatabase.GOSYS
+            ApiEgenskap.MANGLER_IM -> EgenskapForDatabase.MANGLER_IM
+            ApiEgenskap.MEDLEMSKAP -> EgenskapForDatabase.MEDLEMSKAP
+            ApiEgenskap.TILKOMMEN -> EgenskapForDatabase.TILKOMMEN
         }
 }
