@@ -92,7 +92,6 @@ internal class DokumentMediatorTest {
         verify(exactly = 1) {
             dokumentDao.hent(any(), any())
         }
-
         Assertions.assertEquals(0, meldingPubliserer.antallMeldinger)
     }
 }

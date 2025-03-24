@@ -20,43 +20,32 @@ class DokumentMediator(
         dokumentId: UUID,
         dokumentType: String,
     ): JsonNode {
-        return dokumentDao.hent(fødselsnummer, dokumentId).let { dokument ->
-            val erTom = dokument?.size() == 0
-            val error = dokument?.path("error")?.takeUnless { it.isMissingNode || it.isNull }?.asInt()
-            if (dokument == null || erTom || (error != null && error != 404)) {
-                sendHentDokument(fødselsnummer, dokumentId, dokumentType)
+        val dokument = dokumentDao.hent(fødselsnummer, dokumentId)
 
-                val response =
-                    runBlocking {
-                        delay(100)
-                        hentDokument(fødselsnummer, dokumentId, retries)
-                    }
-                response
-            } else {
-                dokument
-            }
+        if (dokument == null || dokument.isEmpty || dokument.harFeil()) {
+            sendHentDokument(fødselsnummer, dokumentId, dokumentType)
+            return hentDokumentMedRetry(fødselsnummer, dokumentId, retries)
         }
+        return dokument
     }
 
-    private fun hentDokument(
+    private fun JsonNode.harFeil(): Boolean {
+        val errorNode = this.get("error") ?: return false
+        return errorNode.asInt() != 404
+    }
+
+    private fun hentDokumentMedRetry(
         fødselsnummer: String,
         dokumentId: UUID,
         retries: Int,
-    ): JsonNode {
-        if (retries == 0) return objectMapper.createObjectNode().put("error", 408)
-
-        val response =
-            runBlocking {
-                val dokument = dokumentDao.hent(fødselsnummer, dokumentId)
-                if (dokument == null) {
-                    delay(100)
-                    hentDokument(fødselsnummer, dokumentId, retries - 1)
-                } else {
-                    dokument
-                }
+    ): JsonNode =
+        runBlocking {
+            repeat(retries) {
+                delay(100)
+                dokumentDao.hent(fødselsnummer, dokumentId)?.let { return@runBlocking it }
             }
-        return response
-    }
+            objectMapper.createObjectNode().put("error", 408) // Timeout error
+        }
 
     private fun sendHentDokument(
         fødselsnummer: String,
