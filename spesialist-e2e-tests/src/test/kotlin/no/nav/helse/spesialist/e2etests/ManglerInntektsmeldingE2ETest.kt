@@ -2,7 +2,6 @@ package no.nav.helse.spesialist.e2etests
 
 import no.nav.helse.modell.oppgave.Egenskap
 import org.junit.jupiter.api.Test
-import java.util.UUID
 
 class ManglerInntektsmeldingE2ETest : AbstractE2EIntegrationTest() {
     @Test
@@ -11,14 +10,9 @@ class ManglerInntektsmeldingE2ETest : AbstractE2EIntegrationTest() {
         lagreVarseldefinisjon("RV_IV_10")
 
         // When:
-        simulerPublisertSendtSøknadNavMelding()
-        val spleisBehandlingId = UUID.randomUUID()
-        simulerPublisertBehandlingOpprettetMelding(spleisBehandlingId = spleisBehandlingId)
+        val spleisBehandlingId = simulerFremTilOgMedNyUtbetaling()
         simulerPublisertAktivitetsloggNyAktivitetMelding(listOf("RV_IV_10"))
-        simulerPublisertVedtaksperiodeNyUtbetalingMelding()
-        simulerPublisertUtbetalingEndretMelding()
-        simulerPublisertVedtaksperiodeEndretMelding()
-        simulerPublisertGodkjenningsbehovMelding(spleisBehandlingId = spleisBehandlingId)
+        simulerFraNyUtbetalingTilOgMedGodkjenningsbehov(spleisBehandlingId)
 
         // Then:
         assertHarOppgaveegenskap(Egenskap.MANGLER_IM)
