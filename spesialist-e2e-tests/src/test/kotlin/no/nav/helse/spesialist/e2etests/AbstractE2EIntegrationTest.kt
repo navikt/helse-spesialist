@@ -52,6 +52,7 @@ import java.util.UUID
 
 abstract class AbstractE2EIntegrationTest {
     private val testPerson = TestPerson()
+    protected val vedtaksperiodeId = UUID.randomUUID()
     protected val risikovurderingBehovLøser = RisikovurderingBehovLøser()
     protected val åpneOppgaverBehovLøser = ÅpneOppgaverBehovLøser()
     private val testRapid = LoopbackTestRapid()
@@ -154,14 +155,17 @@ abstract class AbstractE2EIntegrationTest {
         )
     }
 
-    protected fun simulerPublisertBehandlingOpprettetMelding(spleisBehandlingId: UUID) {
+    protected fun simulerPublisertBehandlingOpprettetMelding(
+        spleisBehandlingId: UUID,
+        vedtaksperiodeId: UUID = this.vedtaksperiodeId
+    ) {
         testRapid.publish(
             JsonMessage.newMessage(
                 mapOf(
                     "@event_name" to "behandling_opprettet",
                     "@id" to UUID.randomUUID(),
                     "@opprettet" to LocalDateTime.now(),
-                    "vedtaksperiodeId" to testPerson.vedtaksperiodeId1,
+                    "vedtaksperiodeId" to vedtaksperiodeId,
                     "behandlingId" to spleisBehandlingId,
                     "fødselsnummer" to testPerson.fødselsnummer,
                     "aktørId" to testPerson.aktørId,
@@ -173,7 +177,10 @@ abstract class AbstractE2EIntegrationTest {
         )
     }
 
-    protected fun simulerPublisertGodkjenningsbehovMelding(spleisBehandlingId: UUID) {
+    protected fun simulerPublisertGodkjenningsbehovMelding(
+        spleisBehandlingId: UUID,
+        vedtaksperiodeId: UUID = this.vedtaksperiodeId
+    ) {
         testRapid.publish(
             JsonMessage.newMessage(
                 mapOf(
@@ -184,7 +191,7 @@ abstract class AbstractE2EIntegrationTest {
                     "aktørId" to testPerson.aktørId,
                     "fødselsnummer" to testPerson.fødselsnummer,
                     "organisasjonsnummer" to testPerson.orgnummer,
-                    "vedtaksperiodeId" to testPerson.vedtaksperiodeId1,
+                    "vedtaksperiodeId" to vedtaksperiodeId,
                     "utbetalingId" to testPerson.utbetalingId1,
                     "Godkjenning" to mapOf(
                         "periodeFom" to (1 jan 2018),
@@ -203,7 +210,7 @@ abstract class AbstractE2EIntegrationTest {
                             mapOf(
                                 "fom" to (1 jan 2018),
                                 "tom" to (31 jan 2018),
-                                "vedtaksperiodeId" to testPerson.vedtaksperiodeId1,
+                                "vedtaksperiodeId" to vedtaksperiodeId,
                                 "behandlingId" to spleisBehandlingId
                             )
                         ),
@@ -242,14 +249,14 @@ abstract class AbstractE2EIntegrationTest {
         )
     }
 
-    protected fun simulerPublisertVedtaksperiodeEndretMelding() {
+    protected fun simulerPublisertVedtaksperiodeEndretMelding(vedtaksperiodeId: UUID = this.vedtaksperiodeId) {
         testRapid.publish(
             JsonMessage.newMessage(
                 mapOf(
                     "@event_name" to "vedtaksperiode_endret",
                     "@id" to UUID.randomUUID(),
                     "@opprettet" to LocalDateTime.now(),
-                    "vedtaksperiodeId" to testPerson.vedtaksperiodeId1,
+                    "vedtaksperiodeId" to vedtaksperiodeId,
                     "fødselsnummer" to testPerson.fødselsnummer,
                     "aktørId" to testPerson.aktørId,
                     "organisasjonsnummer" to testPerson.orgnummer,
@@ -265,14 +272,14 @@ abstract class AbstractE2EIntegrationTest {
         )
     }
 
-    protected fun simulerPublisertVedtaksperiodeNyUtbetalingMelding() {
+    protected fun simulerPublisertVedtaksperiodeNyUtbetalingMelding(vedtaksperiodeId: UUID = this.vedtaksperiodeId) {
         testRapid.publish(
             JsonMessage.newMessage(
                 mapOf(
                     "@event_name" to "vedtaksperiode_ny_utbetaling",
                     "@id" to UUID.randomUUID(),
                     "@opprettet" to LocalDateTime.now(),
-                    "vedtaksperiodeId" to testPerson.vedtaksperiodeId1,
+                    "vedtaksperiodeId" to vedtaksperiodeId,
                     "utbetalingId" to testPerson.utbetalingId1,
                     "fødselsnummer" to testPerson.fødselsnummer,
                     "aktørId" to testPerson.aktørId,
@@ -339,7 +346,7 @@ abstract class AbstractE2EIntegrationTest {
         )
     }
 
-    protected fun simulerPublisertAktivitetsloggNyAktivitetMelding(varselkoder: List<String>) {
+    protected fun simulerPublisertAktivitetsloggNyAktivitetMelding(varselkoder: List<String>, vedtaksperiodeId: UUID = this.vedtaksperiodeId) {
         testRapid.publish(
             JsonMessage.newMessage(
                 mapOf(
@@ -372,7 +379,7 @@ abstract class AbstractE2EIntegrationTest {
                                 mapOf(
                                     "konteksttype" to "Vedtaksperiode",
                                     "kontekstmap" to mapOf(
-                                        "vedtaksperiodeId" to testPerson.vedtaksperiodeId1
+                                        "vedtaksperiodeId" to vedtaksperiodeId
                                     )
                                 )
                             )
@@ -411,11 +418,11 @@ abstract class AbstractE2EIntegrationTest {
         val status: String,
     )
 
-    protected fun hentVarselkoder(): Set<Varsel> =
+    protected fun hentVarselkoder(vedtaksperiodeId: UUID = this.vedtaksperiodeId): Set<Varsel> =
         sessionOf(modules.dbModule.dataSource).use { session ->
             @Language("PostgreSQL")
             val query = "SELECT kode, status FROM selve_varsel WHERE vedtaksperiode_id = :vedtaksperiode_id"
-            val paramMap = mapOf("vedtaksperiode_id" to testPerson.vedtaksperiodeId1)
+            val paramMap = mapOf("vedtaksperiode_id" to vedtaksperiodeId)
             session.list(queryOf(query, paramMap)) { Varsel(it.string("kode"), it.string("status")) }.toSet()
         }
 }

@@ -129,13 +129,110 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         assertEquals(setOf(Varsel(SB_EX_3.name, AKTIV.name), Varsel(SB_RV_1.name, AKTIV.name)), hentVarselkoder())
     }
 
+    @Test
+    fun `lagrer varsler når vi mottar ny aktivitet i aktivitetsloggen`() {
+        // Given:
+        lagreVarseldefinisjon("EN_KODE")
+
+        // When:
+        val spleisBehandlingId = simulerFremTilOgMedNyUtbetaling()
+        simulerPublisertAktivitetsloggNyAktivitetMelding(listOf("EN_KODE"))
+        simulerFraNyUtbetalingTilOgMedGodkjenningsbehov(spleisBehandlingId)
+
+        // Then:
+        assertEquals(setOf(Varsel("EN_KODE", AKTIV.name)), hentVarselkoder())
+    }
+
+    @Test
+    fun `lagrer varsler når vi mottar flere ny aktivitet i aktivitetsloggen`() {
+        // Given:
+        lagreVarseldefinisjon("EN_KODE")
+        lagreVarseldefinisjon("EN_ANNEN_KODE")
+
+        // When:
+        val spleisBehandlingId = simulerFremTilOgMedNyUtbetaling()
+        simulerPublisertAktivitetsloggNyAktivitetMelding(listOf("EN_KODE"))
+        simulerPublisertAktivitetsloggNyAktivitetMelding(listOf("EN_ANNEN_KODE"))
+        simulerFraNyUtbetalingTilOgMedGodkjenningsbehov(spleisBehandlingId)
+
+        // Then:
+        assertEquals(setOf(Varsel("EN_KODE", AKTIV.name), Varsel("EN_ANNEN_KODE", AKTIV.name)), hentVarselkoder())
+    }
+
+    @Test
+    fun `lagrer flere varsler når vi mottar flere nye aktiviteter i samme aktivitetslogg`() {
+        // Given:
+        lagreVarseldefinisjon("EN_KODE")
+        lagreVarseldefinisjon("EN_ANNEN_KODE")
+
+        // When:
+        val spleisBehandlingId = simulerFremTilOgMedNyUtbetaling()
+        simulerPublisertAktivitetsloggNyAktivitetMelding(listOf("EN_KODE", "EN_ANNEN_KODE"))
+        simulerFraNyUtbetalingTilOgMedGodkjenningsbehov(spleisBehandlingId)
+
+        // Then:
+        assertEquals(setOf(Varsel("EN_KODE", AKTIV.name), Varsel("EN_ANNEN_KODE", AKTIV.name)), hentVarselkoder())
+    }
+
+    @Test
+    fun `gammelt avviksvarsel erstattes av nytt avviksvarsel`() {
+        // Given:
+        lagreVarseldefinisjon("EN_KODE")
+
+        // When:
+        val spleisBehandlingId = simulerFremTilOgMedNyUtbetaling()
+        simulerPublisertAktivitetsloggNyAktivitetMelding(listOf("EN_KODE"))
+        simulerPublisertAktivitetsloggNyAktivitetMelding(listOf("EN_KODE"))
+        simulerFraNyUtbetalingTilOgMedGodkjenningsbehov(spleisBehandlingId)
+
+        // Then:
+        assertEquals(setOf(Varsel("EN_KODE", AKTIV.name)), hentVarselkoder())
+    }
+
+    @Test
+    fun `varsler for ulike vedtaksperioder går ikke i beina på hverandre`() {
+        // Given:
+        lagreVarseldefinisjon("EN_KODE")
+        lagreVarseldefinisjon("EN_ANNEN_KODE")
+        val vedtaksperiodeId1 = UUID.randomUUID()
+        val vedtaksperiodeId2 = UUID.randomUUID()
+
+        // When:
+        simulerFremTilOgMedNyUtbetaling(vedtaksperiodeId = vedtaksperiodeId1)
+        simulerFremTilOgMedNyUtbetaling(vedtaksperiodeId = vedtaksperiodeId2)
+        simulerPublisertAktivitetsloggNyAktivitetMelding(listOf("EN_KODE"), vedtaksperiodeId1)
+        simulerPublisertAktivitetsloggNyAktivitetMelding(listOf("EN_ANNEN_KODE"), vedtaksperiodeId2)
+
+        // Then:
+        assertEquals(setOf(Varsel("EN_KODE", AKTIV.name)), hentVarselkoder(vedtaksperiodeId1))
+        assertEquals(setOf(Varsel("EN_ANNEN_KODE", AKTIV.name)), hentVarselkoder(vedtaksperiodeId2))
+    }
+
     private fun simulerFremTilOgMedGodkjenningsbehov() {
+        val spleisBehandlingId = simulerFremTilOgMedNyUtbetaling()
+        simulerFraNyUtbetalingTilOgMedGodkjenningsbehov(spleisBehandlingId)
+    }
+
+    private fun simulerFremTilOgMedNyUtbetaling(vedtaksperiodeId: UUID = this.vedtaksperiodeId): UUID {
         simulerPublisertSendtSøknadNavMelding()
         val spleisBehandlingId = UUID.randomUUID()
-        simulerPublisertBehandlingOpprettetMelding(spleisBehandlingId = spleisBehandlingId)
-        simulerPublisertVedtaksperiodeNyUtbetalingMelding()
+        simulerPublisertBehandlingOpprettetMelding(
+            spleisBehandlingId = spleisBehandlingId,
+            vedtaksperiodeId = vedtaksperiodeId
+        )
+        simulerPublisertVedtaksperiodeNyUtbetalingMelding(vedtaksperiodeId = vedtaksperiodeId)
+        return spleisBehandlingId
+    }
+
+    private fun simulerFraNyUtbetalingTilOgMedGodkjenningsbehov(
+        spleisBehandlingId: UUID,
+        vedtaksperiodeId: UUID = this.vedtaksperiodeId
+    ) {
         simulerPublisertUtbetalingEndretMelding()
-        simulerPublisertVedtaksperiodeEndretMelding()
-        simulerPublisertGodkjenningsbehovMelding(spleisBehandlingId = spleisBehandlingId)
+        simulerPublisertVedtaksperiodeEndretMelding(vedtaksperiodeId = vedtaksperiodeId)
+        simulerPublisertGodkjenningsbehovMelding(
+            spleisBehandlingId = spleisBehandlingId,
+            vedtaksperiodeId = vedtaksperiodeId
+        )
     }
 }
