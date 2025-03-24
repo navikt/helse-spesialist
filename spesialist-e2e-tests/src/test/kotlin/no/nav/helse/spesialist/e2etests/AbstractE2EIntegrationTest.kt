@@ -31,8 +31,9 @@ import no.nav.helse.spesialist.e2etests.behovløserstubs.ArbeidsforholdBehovLøs
 import no.nav.helse.spesialist.e2etests.behovløserstubs.ArbeidsgiverinformasjonBehovLøserStub
 import no.nav.helse.spesialist.e2etests.behovløserstubs.ArbeidsgiverinformasjonOgHentPersoninfoV2BehovLøserStub
 import no.nav.helse.spesialist.e2etests.behovløserstubs.AvviksvurderingBehovLøserStub
+import no.nav.helse.spesialist.e2etests.behovløserstubs.BehovLøserStub
 import no.nav.helse.spesialist.e2etests.behovløserstubs.EgenAnsattBehovLøserStub
-import no.nav.helse.spesialist.e2etests.behovløserstubs.HentEnhetBehovLøserStub
+import no.nav.helse.spesialist.e2etests.behovløserstubs.HentEnhetBehovLøser
 import no.nav.helse.spesialist.e2etests.behovløserstubs.HentInfotrygdutbetalingerBehovLøserStub
 import no.nav.helse.spesialist.e2etests.behovløserstubs.HentPersoninfoV2BehovLøserStub
 import no.nav.helse.spesialist.e2etests.behovløserstubs.InntekterForSykepengegrunnlagBehovLøserStub
@@ -53,7 +54,6 @@ abstract class AbstractE2EIntegrationTest {
         sequenceOf(
             AvviksvurderingBehovLøserStub(),
             HentPersoninfoV2BehovLøserStub(testPerson),
-            HentEnhetBehovLøserStub(),
             HentInfotrygdutbetalingerBehovLøserStub(testPerson.orgnummer),
             EgenAnsattBehovLøserStub(),
             ArbeidsgiverinformasjonBehovLøserStub(),
@@ -64,6 +64,9 @@ abstract class AbstractE2EIntegrationTest {
             RisikovurderingBehovLøserStub(),
             InntekterForSykepengegrunnlagBehovLøserStub(testPerson.orgnummer),
         ).forEach { it.registerOn(rapid) }
+        BehovLøserStub(
+            listOf(HentEnhetBehovLøser())
+        ).registerOn(rapid)
     }
 
     private val modules = RapidApp.start(
