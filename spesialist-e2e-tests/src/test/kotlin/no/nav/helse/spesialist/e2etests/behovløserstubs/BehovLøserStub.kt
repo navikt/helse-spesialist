@@ -17,8 +17,8 @@ import no.nav.helse.spesialist.e2etests.LoopbackTestRapid
 import java.time.LocalDateTime
 import java.util.UUID
 
-class BehovLøserStub(private val løsere: List<AbstractBehovLøser>) : River.PacketListener {
-    private val løserPerBehov = løsere.associateBy { it.behov }
+class BehovLøserStub(vararg løsere: AbstractBehovLøser) : River.PacketListener {
+    private val løserPerBehov = løsere.associateBy(AbstractBehovLøser::behov)
     private val behovViKanLøse = løserPerBehov.keys
 
     private val objectMapper: ObjectMapper = jacksonObjectMapper().registerModule(JavaTimeModule())
@@ -81,7 +81,7 @@ class BehovLøserStub(private val løsere: List<AbstractBehovLøser>) : River.Pa
                 "behov" to jsonNode["@behov"]
             ),
             "@løsning" to behovliste.associateWith { behov ->
-                løsere.find { it.behov == behov }?.løsning(jsonNode[behov])
+                løserPerBehov[behov]?.løsning(jsonNode[behov])
                     ?: error("Skulle ikke kommet hit! Har ikke løser for behov: $behov")
             },
             "@final" to true,

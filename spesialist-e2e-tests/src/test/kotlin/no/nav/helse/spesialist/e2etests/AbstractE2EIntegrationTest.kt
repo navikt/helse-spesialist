@@ -27,19 +27,19 @@ import no.nav.helse.spesialist.client.spleis.testfixtures.ClientSpleisModuleInte
 import no.nav.helse.spesialist.client.unleash.testfixtures.ClientUnleashModuleIntegrationTestFixture
 import no.nav.helse.spesialist.db.testfixtures.DBTestFixture
 import no.nav.helse.spesialist.domain.testfixtures.jan
-import no.nav.helse.spesialist.e2etests.behovløserstubs.ArbeidsforholdBehovLøserStub
-import no.nav.helse.spesialist.e2etests.behovløserstubs.ArbeidsgiverinformasjonBehovLøserStub
-import no.nav.helse.spesialist.e2etests.behovløserstubs.ArbeidsgiverinformasjonOgHentPersoninfoV2BehovLøserStub
-import no.nav.helse.spesialist.e2etests.behovløserstubs.AvviksvurderingBehovLøserStub
+import no.nav.helse.spesialist.e2etests.behovløserstubs.ArbeidsforholdBehovLøser
+import no.nav.helse.spesialist.e2etests.behovløserstubs.ArbeidsgiverinformasjonBehovLøser
+import no.nav.helse.spesialist.e2etests.behovløserstubs.AvviksvurderingBehovLøser
 import no.nav.helse.spesialist.e2etests.behovløserstubs.BehovLøserStub
-import no.nav.helse.spesialist.e2etests.behovløserstubs.EgenAnsattBehovLøserStub
+import no.nav.helse.spesialist.e2etests.behovløserstubs.EgenAnsattBehovLøser
+import no.nav.helse.spesialist.e2etests.behovløserstubs.FullmaktBehovLøser
 import no.nav.helse.spesialist.e2etests.behovløserstubs.HentEnhetBehovLøser
-import no.nav.helse.spesialist.e2etests.behovløserstubs.HentInfotrygdutbetalingerBehovLøserStub
-import no.nav.helse.spesialist.e2etests.behovløserstubs.HentPersoninfoV2BehovLøserStub
-import no.nav.helse.spesialist.e2etests.behovløserstubs.InntekterForSykepengegrunnlagBehovLøserStub
-import no.nav.helse.spesialist.e2etests.behovløserstubs.RisikovurderingBehovLøserStub
-import no.nav.helse.spesialist.e2etests.behovløserstubs.VergemålOgFullmaktBehovLøserStub
-import no.nav.helse.spesialist.e2etests.behovløserstubs.ÅpneOppgaverBehovLøserStub
+import no.nav.helse.spesialist.e2etests.behovløserstubs.HentInfotrygdutbetalingerBehovLøser
+import no.nav.helse.spesialist.e2etests.behovløserstubs.HentPersoninfoV2BehovLøser
+import no.nav.helse.spesialist.e2etests.behovløserstubs.InntekterForSykepengegrunnlagBehovLøser
+import no.nav.helse.spesialist.e2etests.behovløserstubs.RisikovurderingBehovLøser
+import no.nav.helse.spesialist.e2etests.behovløserstubs.VergemålBehovLøser
+import no.nav.helse.spesialist.e2etests.behovløserstubs.ÅpneOppgaverBehovLøser
 import no.nav.helse.spesialist.kafka.testfixtures.KafkaModuleTestRapidTestFixture
 import no.nav.helse.spesialist.test.TestPerson
 import org.intellij.lang.annotations.Language
@@ -51,21 +51,19 @@ import java.util.UUID
 abstract class AbstractE2EIntegrationTest {
     private val testPerson = TestPerson()
     private val testRapid = LoopbackTestRapid().also { rapid ->
-        sequenceOf(
-            AvviksvurderingBehovLøserStub(),
-            HentPersoninfoV2BehovLøserStub(testPerson),
-            HentInfotrygdutbetalingerBehovLøserStub(testPerson.orgnummer),
-            EgenAnsattBehovLøserStub(),
-            ArbeidsgiverinformasjonBehovLøserStub(),
-            ArbeidsgiverinformasjonOgHentPersoninfoV2BehovLøserStub(testPerson),
-            ArbeidsforholdBehovLøserStub(),
-            VergemålOgFullmaktBehovLøserStub(),
-            ÅpneOppgaverBehovLøserStub(),
-            RisikovurderingBehovLøserStub(),
-            InntekterForSykepengegrunnlagBehovLøserStub(testPerson.orgnummer),
-        ).forEach { it.registerOn(rapid) }
         BehovLøserStub(
-            listOf(HentEnhetBehovLøser())
+            ArbeidsforholdBehovLøser(),
+            ArbeidsgiverinformasjonBehovLøser(),
+            AvviksvurderingBehovLøser(),
+            EgenAnsattBehovLøser(),
+            HentEnhetBehovLøser(),
+            HentInfotrygdutbetalingerBehovLøser(testPerson.orgnummer),
+            HentPersoninfoV2BehovLøser(testPerson),
+            InntekterForSykepengegrunnlagBehovLøser(testPerson.orgnummer),
+            RisikovurderingBehovLøser(),
+            FullmaktBehovLøser(),
+            VergemålBehovLøser(),
+            ÅpneOppgaverBehovLøser(),
         ).registerOn(rapid)
     }
 
