@@ -2,30 +2,18 @@ package no.nav.helse.e2e
 
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.AKTIV
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.INAKTIV
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_EX_1
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_EX_3
-import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_RV_1
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
 class VarselE2ETest : AbstractE2ETest() {
-    @Test
-    fun `varsel om faresignaler ved risikovurdering`() {
-        vedtaksløsningenMottarNySøknad()
-        spleisOppretterNyBehandling()
-        spesialistBehandlerGodkjenningsbehovFremTilOppgave(
-            risikofunn = listOf(Risikofunn(listOf("EN_KATEGORI"), "EN_BESKRIVELSE")),
-            kanGodkjennesAutomatisk = false
-        )
-        assertVarsel(SB_RV_1, VEDTAKSPERIODE_ID, AKTIV)
-    }
 
     @Test
     fun `ingen varsler dersom ingen åpne oppgaver eller oppslagsfeil`() {

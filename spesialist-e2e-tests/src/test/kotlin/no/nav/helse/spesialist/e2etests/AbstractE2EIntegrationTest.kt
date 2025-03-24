@@ -52,6 +52,7 @@ import java.util.UUID
 
 abstract class AbstractE2EIntegrationTest {
     private val testPerson = TestPerson()
+    protected val risikovurderingBehovLøser = RisikovurderingBehovLøser()
     private val testRapid = LoopbackTestRapid().also { rapid ->
         BehovLøserStub(
             ArbeidsforholdBehovLøser(),
@@ -62,7 +63,7 @@ abstract class AbstractE2EIntegrationTest {
             HentInfotrygdutbetalingerBehovLøser(testPerson.orgnummer),
             HentPersoninfoV2BehovLøser(testPerson),
             InntekterForSykepengegrunnlagBehovLøser(testPerson.orgnummer),
-            RisikovurderingBehovLøser(),
+            risikovurderingBehovLøser,
             FullmaktBehovLøser(),
             VergemålBehovLøser(),
             ÅpneOppgaverBehovLøser(),
@@ -389,13 +390,16 @@ abstract class AbstractE2EIntegrationTest {
         assertTrue(egenskaper.containsAll(forventedeEgenskaper.toList())) { "Forventet å finne ${forventedeEgenskaper.toSet()} i $egenskaper" }
     }
 
-    protected fun hentVarselkoder(): Set<String> =
+    data class Varsel(
+        val kode: String,
+        val status: String,
+    )
+
+    protected fun hentVarselkoder(): Set<Varsel> =
         sessionOf(modules.dbModule.dataSource).use { session ->
-            session.list(
-                queryOf(
-                    "SELECT kode FROM selve_varsel WHERE vedtaksperiode_id = :vedtaksperiode_id",
-                    mapOf("vedtaksperiode_id" to testPerson.vedtaksperiodeId1)
-                )
-            ) { it.string(1) }.toSet()
+            @Language("PostgreSQL")
+            val query = "SELECT kode, status FROM selve_varsel WHERE vedtaksperiode_id = :vedtaksperiode_id"
+            val paramMap = mapOf("vedtaksperiode_id" to testPerson.vedtaksperiodeId1)
+            session.list(queryOf(query, paramMap)) { Varsel(it.string("kode"), it.string("status")) }.toSet()
         }
 }
