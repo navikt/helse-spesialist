@@ -115,6 +115,20 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         assertEquals(setOf(Varsel(SB_EX_1.name, AKTIV.name), Varsel(SB_RV_1.name, AKTIV.name)), hentVarselkoder())
     }
 
+    @Test
+    fun `legger til varsel dersom oppslag feiler når vi har fått beskjed om at gosys har endret seg`() {
+        // Given:
+        risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
+
+        // When:
+        simulerFremTilOgMedGodkjenningsbehov()
+        åpneOppgaverBehovLøser.oppslagFeilet = true
+        simulerPublisertGosysOppgaveEndretMelding()
+
+        // Then:
+        assertEquals(setOf(Varsel(SB_EX_3.name, AKTIV.name), Varsel(SB_RV_1.name, AKTIV.name)), hentVarselkoder())
+    }
+
     private fun simulerFremTilOgMedGodkjenningsbehov() {
         simulerPublisertSendtSøknadNavMelding()
         val spleisBehandlingId = UUID.randomUUID()
