@@ -1,10 +1,10 @@
-package no.nav.helse.spesialist.e2etests.mockrivers
+package no.nav.helse.spesialist.e2etests.behovløserstubs
 
 import com.fasterxml.jackson.databind.JsonNode
 import java.time.YearMonth
 
-class InntekterForSykepengegrunnlagBehovMockRiver(private val organisasjonsnummer: String) :
-    AbstractBehovMockRiver("InntekterForSykepengegrunnlag") {
+class InntekterForSykepengegrunnlagBehovLøserStub(private val organisasjonsnummer: String) :
+    AbstractBehovLøserStub("InntekterForSykepengegrunnlag") {
     override fun løsning(json: JsonNode): Map<String, Any?> = mapOf(
         "InntekterForSykepengegrunnlag" to listOf(
             mapOf(

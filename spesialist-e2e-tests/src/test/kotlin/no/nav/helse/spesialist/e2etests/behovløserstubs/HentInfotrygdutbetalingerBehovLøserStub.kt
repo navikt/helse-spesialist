@@ -1,9 +1,9 @@
-package no.nav.helse.spesialist.e2etests.mockrivers
+package no.nav.helse.spesialist.e2etests.behovløserstubs
 
 import com.fasterxml.jackson.databind.JsonNode
 
-class HentInfotrygdutbetalingerBehovMockRiver(private val organisasjonsnummer: String) :
-    AbstractBehovMockRiver("HentInfotrygdutbetalinger") {
+class HentInfotrygdutbetalingerBehovLøserStub(private val organisasjonsnummer: String) :
+    AbstractBehovLøserStub("HentInfotrygdutbetalinger") {
     override fun løsning(json: JsonNode): Map<String, Any?> = mapOf(
         "HentInfotrygdutbetalinger" to listOf(
             mapOf(

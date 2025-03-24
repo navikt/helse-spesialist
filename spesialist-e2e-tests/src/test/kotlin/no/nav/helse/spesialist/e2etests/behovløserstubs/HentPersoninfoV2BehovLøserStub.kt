@@ -1,10 +1,10 @@
-package no.nav.helse.spesialist.e2etests.mockrivers
+package no.nav.helse.spesialist.e2etests.behovløserstubs
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.spesialist.test.TestPerson
 import no.nav.helse.spesialist.typer.Kjønn
 
-class HentPersoninfoV2BehovMockRiver(private val testPerson: TestPerson) : AbstractBehovMockRiver("HentPersoninfoV2") {
+class HentPersoninfoV2BehovLøserStub(private val testPerson: TestPerson) : AbstractBehovLøserStub("HentPersoninfoV2") {
     override fun løsning(json: JsonNode): Map<String, Any?> = mapOf(
         "HentPersoninfoV2" to mapOf(
             "fornavn" to testPerson.fornavn,

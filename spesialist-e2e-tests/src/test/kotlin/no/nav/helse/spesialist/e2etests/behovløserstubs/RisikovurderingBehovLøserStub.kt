@@ -1,8 +1,8 @@
-package no.nav.helse.spesialist.e2etests.mockrivers
+package no.nav.helse.spesialist.e2etests.behovløserstubs
 
 import com.fasterxml.jackson.databind.JsonNode
 
-class RisikovurderingBehovMockRiver : AbstractBehovMockRiver("Risikovurdering") {
+class RisikovurderingBehovLøserStub : AbstractBehovLøserStub("Risikovurdering") {
     override fun løsning(json: JsonNode): Map<String, Any?> = mapOf(
         "Risikovurdering" to mapOf(
             "kanGodkjennesAutomatisk" to false,

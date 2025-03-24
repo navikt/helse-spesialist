@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.e2etests.mockrivers
+package no.nav.helse.spesialist.e2etests.behovløserstubs
 
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.JsonNode
@@ -18,7 +18,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 
-abstract class AbstractBehovMockRiver(private vararg val behov: String) : River.PacketListener {
+abstract class AbstractBehovLøserStub(private vararg val behov: String) : River.PacketListener {
     abstract fun løsning(json: JsonNode): Map<String, Any?>
 
     protected val objectMapper: ObjectMapper = jacksonObjectMapper().registerModule(JavaTimeModule())

@@ -27,18 +27,18 @@ import no.nav.helse.spesialist.client.spleis.testfixtures.ClientSpleisModuleInte
 import no.nav.helse.spesialist.client.unleash.testfixtures.ClientUnleashModuleIntegrationTestFixture
 import no.nav.helse.spesialist.db.testfixtures.DBTestFixture
 import no.nav.helse.spesialist.domain.testfixtures.jan
-import no.nav.helse.spesialist.e2etests.mockrivers.ArbeidsforholdBehovMockRiver
-import no.nav.helse.spesialist.e2etests.mockrivers.ArbeidsgiverinformasjonBehovMockRiver
-import no.nav.helse.spesialist.e2etests.mockrivers.ArbeidsgiverinformasjonOgHentPersoninfoV2BehovMockRiver
-import no.nav.helse.spesialist.e2etests.mockrivers.AvviksvurderingBehovMockRiver
-import no.nav.helse.spesialist.e2etests.mockrivers.EgenAnsattBehovMockRiver
-import no.nav.helse.spesialist.e2etests.mockrivers.HentEnhetBehovMockRiver
-import no.nav.helse.spesialist.e2etests.mockrivers.HentInfotrygdutbetalingerBehovMockRiver
-import no.nav.helse.spesialist.e2etests.mockrivers.HentPersoninfoV2BehovMockRiver
-import no.nav.helse.spesialist.e2etests.mockrivers.InntekterForSykepengegrunnlagBehovMockRiver
-import no.nav.helse.spesialist.e2etests.mockrivers.RisikovurderingBehovMockRiver
-import no.nav.helse.spesialist.e2etests.mockrivers.VergemålOgFullmaktBehovMockRiver
-import no.nav.helse.spesialist.e2etests.mockrivers.ÅpneOppgaverBehovMockRiver
+import no.nav.helse.spesialist.e2etests.behovløserstubs.ArbeidsforholdBehovLøserStub
+import no.nav.helse.spesialist.e2etests.behovløserstubs.ArbeidsgiverinformasjonBehovLøserStub
+import no.nav.helse.spesialist.e2etests.behovløserstubs.ArbeidsgiverinformasjonOgHentPersoninfoV2BehovLøserStub
+import no.nav.helse.spesialist.e2etests.behovløserstubs.AvviksvurderingBehovLøserStub
+import no.nav.helse.spesialist.e2etests.behovløserstubs.EgenAnsattBehovLøserStub
+import no.nav.helse.spesialist.e2etests.behovløserstubs.HentEnhetBehovLøserStub
+import no.nav.helse.spesialist.e2etests.behovløserstubs.HentInfotrygdutbetalingerBehovLøserStub
+import no.nav.helse.spesialist.e2etests.behovløserstubs.HentPersoninfoV2BehovLøserStub
+import no.nav.helse.spesialist.e2etests.behovløserstubs.InntekterForSykepengegrunnlagBehovLøserStub
+import no.nav.helse.spesialist.e2etests.behovløserstubs.RisikovurderingBehovLøserStub
+import no.nav.helse.spesialist.e2etests.behovløserstubs.VergemålOgFullmaktBehovLøserStub
+import no.nav.helse.spesialist.e2etests.behovløserstubs.ÅpneOppgaverBehovLøserStub
 import no.nav.helse.spesialist.kafka.testfixtures.KafkaModuleTestRapidTestFixture
 import no.nav.helse.spesialist.test.TestPerson
 import org.intellij.lang.annotations.Language
@@ -51,18 +51,18 @@ abstract class AbstractE2EIntegrationTest {
     private val testPerson = TestPerson()
     private val testRapid = LoopbackTestRapid().also { rapid ->
         sequenceOf(
-            AvviksvurderingBehovMockRiver(),
-            HentPersoninfoV2BehovMockRiver(testPerson),
-            HentEnhetBehovMockRiver(),
-            HentInfotrygdutbetalingerBehovMockRiver(testPerson.orgnummer),
-            EgenAnsattBehovMockRiver(),
-            ArbeidsgiverinformasjonBehovMockRiver(),
-            ArbeidsgiverinformasjonOgHentPersoninfoV2BehovMockRiver(testPerson),
-            ArbeidsforholdBehovMockRiver(),
-            VergemålOgFullmaktBehovMockRiver(),
-            ÅpneOppgaverBehovMockRiver(),
-            RisikovurderingBehovMockRiver(),
-            InntekterForSykepengegrunnlagBehovMockRiver(testPerson.orgnummer),
+            AvviksvurderingBehovLøserStub(),
+            HentPersoninfoV2BehovLøserStub(testPerson),
+            HentEnhetBehovLøserStub(),
+            HentInfotrygdutbetalingerBehovLøserStub(testPerson.orgnummer),
+            EgenAnsattBehovLøserStub(),
+            ArbeidsgiverinformasjonBehovLøserStub(),
+            ArbeidsgiverinformasjonOgHentPersoninfoV2BehovLøserStub(testPerson),
+            ArbeidsforholdBehovLøserStub(),
+            VergemålOgFullmaktBehovLøserStub(),
+            ÅpneOppgaverBehovLøserStub(),
+            RisikovurderingBehovLøserStub(),
+            InntekterForSykepengegrunnlagBehovLøserStub(testPerson.orgnummer),
         ).forEach { it.registerOn(rapid) }
     }
 

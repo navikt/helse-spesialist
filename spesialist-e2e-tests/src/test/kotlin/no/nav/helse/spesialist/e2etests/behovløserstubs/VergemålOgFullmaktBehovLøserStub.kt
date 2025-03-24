@@ -1,8 +1,8 @@
-package no.nav.helse.spesialist.e2etests.mockrivers
+package no.nav.helse.spesialist.e2etests.behovløserstubs
 
 import com.fasterxml.jackson.databind.JsonNode
 
-class VergemålOgFullmaktBehovMockRiver : AbstractBehovMockRiver("Vergemål", "Fullmakt") {
+class VergemålOgFullmaktBehovLøserStub : AbstractBehovLøserStub("Vergemål", "Fullmakt") {
     override fun løsning(json: JsonNode): Map<String, Any?> = mapOf(
         "Vergemål" to mapOf(
             "vergemål" to emptyList<Any>(),
