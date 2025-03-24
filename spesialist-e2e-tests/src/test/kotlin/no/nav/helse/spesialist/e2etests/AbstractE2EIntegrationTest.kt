@@ -53,6 +53,7 @@ import java.util.UUID
 abstract class AbstractE2EIntegrationTest {
     private val testPerson = TestPerson()
     protected val risikovurderingBehovLøser = RisikovurderingBehovLøser()
+    protected val åpneOppgaverBehovLøser = ÅpneOppgaverBehovLøser()
     private val testRapid = LoopbackTestRapid().also { rapid ->
         BehovLøserStub(
             ArbeidsforholdBehovLøser(),
@@ -66,7 +67,7 @@ abstract class AbstractE2EIntegrationTest {
             risikovurderingBehovLøser,
             FullmaktBehovLøser(),
             VergemålBehovLøser(),
-            ÅpneOppgaverBehovLøser(),
+            åpneOppgaverBehovLøser,
         ).registerOn(rapid)
     }
 

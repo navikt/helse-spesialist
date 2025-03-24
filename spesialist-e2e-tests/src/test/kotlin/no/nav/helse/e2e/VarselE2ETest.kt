@@ -16,26 +16,6 @@ import java.util.UUID
 class VarselE2ETest : AbstractE2ETest() {
 
     @Test
-    fun `ingen varsler dersom ingen åpne oppgaver eller oppslagsfeil`() {
-        vedtaksløsningenMottarNySøknad()
-        spleisOppretterNyBehandling()
-        spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver()
-        håndterÅpneOppgaverløsning()
-        assertIngenVarsel(SB_EX_3, VEDTAKSPERIODE_ID)
-        assertIngenVarsel(SB_EX_1, VEDTAKSPERIODE_ID)
-    }
-
-    @Test
-    fun `lager varsel ved åpne gosys-oppgaver`() {
-        vedtaksløsningenMottarNySøknad()
-        spleisOppretterNyBehandling()
-        spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver()
-        håndterÅpneOppgaverløsning(antallÅpneOppgaverIGosys = 1)
-        assertVarsel(SB_EX_1, VEDTAKSPERIODE_ID, AKTIV)
-        assertIngenVarsel(SB_EX_3, VEDTAKSPERIODE_ID)
-    }
-
-    @Test
     fun `lager ikke duplikatvarsel ved åpne gosys-oppgaver`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
