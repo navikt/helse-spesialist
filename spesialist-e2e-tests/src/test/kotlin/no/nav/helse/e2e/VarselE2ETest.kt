@@ -16,19 +16,6 @@ import java.util.UUID
 class VarselE2ETest : AbstractE2ETest() {
 
     @Test
-    fun `lager ikke duplikatvarsel ved åpne gosys-oppgaver`() {
-        vedtaksløsningenMottarNySøknad()
-        spleisOppretterNyBehandling()
-        spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver()
-        håndterÅpneOppgaverløsning(antallÅpneOppgaverIGosys = 1)
-        håndterRisikovurderingløsning()
-        håndterInntektløsning()
-        håndterGosysOppgaveEndret()
-        håndterÅpneOppgaverløsning(antallÅpneOppgaverIGosys = 1)
-        assertVarsel(SB_EX_1, VEDTAKSPERIODE_ID, AKTIV)
-    }
-
-    @Test
     fun `fjern varsel om gosys-oppgave dersom det ikke finnes gosys-oppgave lenger`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()

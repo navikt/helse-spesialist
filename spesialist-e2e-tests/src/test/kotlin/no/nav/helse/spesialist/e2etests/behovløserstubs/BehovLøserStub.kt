@@ -11,15 +11,17 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.e2etests.LoopbackTestRapid
 import java.time.LocalDateTime
 import java.util.UUID
 
-class BehovLøserStub(vararg løsere: AbstractBehovLøser) : River.PacketListener {
+class BehovLøserStub(val rapidsConnection: RapidsConnection, vararg løsere: AbstractBehovLøser) : River.PacketListener {
     private val løserPerBehov = løsere.associateBy(AbstractBehovLøser::behov)
     private val behovViKanLøse = løserPerBehov.keys
+    private val behovliste = mutableListOf<JsonNode>()
 
     private val objectMapper: ObjectMapper = jacksonObjectMapper().registerModule(JavaTimeModule())
         .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
@@ -46,10 +48,17 @@ class BehovLøserStub(vararg løsere: AbstractBehovLøser) : River.PacketListene
         meterRegistry: MeterRegistry
     ) {
         val jsonNode = objectMapper.readTree(packet.toJson())
+        behovliste.add(jsonNode)
+        besvarMelding(jsonNode, context)
+    }
 
+    private fun besvarMelding(
+        jsonNode: JsonNode,
+        context: MessageContext
+    ) {
         val innkommendeMeldingMap: Map<String, Any?> =
             objectMapper.readValue(
-                packet.toJson(),
+                objectMapper.writeValueAsString(jsonNode),
                 object : TypeReference<Map<String, Any?>>() {}
             )
         val svarmelding = objectMapper.writeValueAsString(
@@ -57,6 +66,12 @@ class BehovLøserStub(vararg løsere: AbstractBehovLøser) : River.PacketListene
         )
         logg.info("${this.javaClass.simpleName} publiserer simulert svarmelding fra ekstern tjeneste: $svarmelding")
         context.publish(svarmelding)
+    }
+
+    fun besvarIgjen(behov: String) {
+        val sisteBehov = behovliste.findLast { behov in it["@behov"].map { it.asText() } }
+            ?: error("Fant ikke behov $behov i behovliste")
+        besvarMelding(sisteBehov, rapidsConnection)
     }
 
     private fun modifikasjoner(jsonNode: JsonNode): Map<String, Any> {

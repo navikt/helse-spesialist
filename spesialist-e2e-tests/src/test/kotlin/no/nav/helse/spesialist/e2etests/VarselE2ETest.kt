@@ -45,6 +45,19 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         assertEquals(setOf(Varsel(SB_EX_1.name, AKTIV.name)), hentVarselkoder())
     }
 
+    @Test
+    fun `lager ikke duplikatvarsel ved flere svar på samme behov for åpne gosys-oppgaver`() {
+        // Given:
+        åpneOppgaverBehovLøser.antall = 1
+
+        // When:
+        simulerFremTilOgMedGodkjenningsbehov()
+        behovLøserStub.besvarIgjen("ÅpneOppgaver")
+
+        // Then:
+        assertEquals(setOf(Varsel(SB_EX_1.name, AKTIV.name)), hentVarselkoder())
+    }
+
     private fun simulerFremTilOgMedGodkjenningsbehov() {
         simulerPublisertSendtSøknadNavMelding()
         val spleisBehandlingId = UUID.randomUUID()

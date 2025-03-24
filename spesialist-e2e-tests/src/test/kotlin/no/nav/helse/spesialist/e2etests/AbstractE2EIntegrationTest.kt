@@ -54,21 +54,23 @@ abstract class AbstractE2EIntegrationTest {
     private val testPerson = TestPerson()
     protected val risikovurderingBehovLøser = RisikovurderingBehovLøser()
     protected val åpneOppgaverBehovLøser = ÅpneOppgaverBehovLøser()
-    private val testRapid = LoopbackTestRapid().also { rapid ->
-        BehovLøserStub(
-            ArbeidsforholdBehovLøser(),
-            ArbeidsgiverinformasjonBehovLøser(),
-            AvviksvurderingBehovLøser(),
-            EgenAnsattBehovLøser(),
-            HentEnhetBehovLøser(),
-            HentInfotrygdutbetalingerBehovLøser(testPerson.orgnummer),
-            HentPersoninfoV2BehovLøser(testPerson),
-            InntekterForSykepengegrunnlagBehovLøser(testPerson.orgnummer),
-            risikovurderingBehovLøser,
-            FullmaktBehovLøser(),
-            VergemålBehovLøser(),
-            åpneOppgaverBehovLøser,
-        ).registerOn(rapid)
+    private val testRapid = LoopbackTestRapid()
+    protected val behovLøserStub = BehovLøserStub(
+        testRapid,
+        ArbeidsforholdBehovLøser(),
+        ArbeidsgiverinformasjonBehovLøser(),
+        AvviksvurderingBehovLøser(),
+        EgenAnsattBehovLøser(),
+        HentEnhetBehovLøser(),
+        HentInfotrygdutbetalingerBehovLøser(testPerson.orgnummer),
+        HentPersoninfoV2BehovLøser(testPerson),
+        InntekterForSykepengegrunnlagBehovLøser(testPerson.orgnummer),
+        risikovurderingBehovLøser,
+        FullmaktBehovLøser(),
+        VergemålBehovLøser(),
+        åpneOppgaverBehovLøser,
+    ).also {
+        it.registerOn(testRapid)
     }
 
     private val modules = RapidApp.start(
