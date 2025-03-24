@@ -86,6 +86,20 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         assertEquals(setOf(Varsel(SB_EX_3.name, AKTIV.name)), hentVarselkoder())
     }
 
+    @Test
+    fun `fjern varsel dersom kall til gosys ikke feiler lenger`() {
+        // Given:
+        åpneOppgaverBehovLøser.oppslagFeilet = true
+
+        // When:
+        simulerFremTilOgMedGodkjenningsbehov()
+        åpneOppgaverBehovLøser.oppslagFeilet = false
+        simulerPublisertGosysOppgaveEndretMelding()
+
+        // Then:
+        assertEquals(setOf(Varsel(SB_EX_3.name, INAKTIV.name)), hentVarselkoder())
+    }
+
     private fun simulerFremTilOgMedGodkjenningsbehov() {
         simulerPublisertSendtSøknadNavMelding()
         val spleisBehandlingId = UUID.randomUUID()

@@ -4,7 +4,6 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.AKTIV
-import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.INAKTIV
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_EX_1
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_EX_3
@@ -14,19 +13,6 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 class VarselE2ETest : AbstractE2ETest() {
-
-    @Test
-    fun `fjern varsel dersom kall til gosys ikke feiler lenger`() {
-        vedtaksløsningenMottarNySøknad()
-        spleisOppretterNyBehandling()
-        spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver()
-        håndterÅpneOppgaverløsning(antallÅpneOppgaverIGosys = 0, oppslagFeilet = true)
-        håndterRisikovurderingløsning()
-        håndterInntektløsning()
-        håndterGosysOppgaveEndret()
-        håndterÅpneOppgaverløsning(antallÅpneOppgaverIGosys = 0)
-        assertVarsel(SB_EX_3, VEDTAKSPERIODE_ID, INAKTIV)
-    }
 
     @Test
     fun `legger til varsel om gosys-oppgave når vi får beskjed om at gosys har fått oppgaver`() {
