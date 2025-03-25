@@ -24,17 +24,14 @@ class Inntektsperiode private constructor(
 
     fun nyFordeling(fordeling: Fordeling): Inntektsendringer {
         _fordelinger.addLast(fordeling)
+        val forrigeFordeling = fordelinger.lastOrNull() ?: return inntektsendringerForFørsteFordeling(fordeling)
 
-        val nyeEllerEndredeInntekter =
-            fordeling.dager.fold(emptyList<Inntektsendringer.PeriodeMedBeløp>()) { acc, dag ->
-                val sistePeriodeMedBeløp = acc.lastOrNull()
+        return fordeling.diff(organisasjonsnummer, forrigeFordeling)
+    }
 
-                if (sistePeriodeMedBeløp != null && sistePeriodeMedBeløp.hengerSammenMed(dag)) {
-                    acc.dropLast(1) + sistePeriodeMedBeløp.copy(tom = dag.dato)
-                } else {
-                    acc + Inntektsendringer.PeriodeMedBeløp(dag.dato, dag.dato, dag.beløp)
-                }
-            }
+    private fun inntektsendringerForFørsteFordeling(fordeling: Fordeling): Inntektsendringer {
+        val nyeEllerEndredeInntekter = fordeling.dagerTilPerioderMedBeløp()
+
         return Inntektsendringer(
             organisasjonsnummer = organisasjonsnummer,
             nyeEllerEndredeInntekter = nyeEllerEndredeInntekter,
@@ -66,6 +63,46 @@ data class Fordeling private constructor(
     val opprettet: LocalDateTime,
     val dager: List<InntektsDag>,
 ) {
+    fun diff(
+        organisasjonsnummer: String,
+        forrigeFordeling: Fordeling,
+    ): Inntektsendringer {
+        val forrigeDagerMap = forrigeFordeling.dager.associateBy { it.dato }
+        val nyeDagerMap = this.dager.associateBy { it.dato }
+
+        val lagtTilEllerEndret = mutableListOf<InntektsDag>()
+        val fjernet = mutableListOf<InntektsDag>()
+
+        forrigeDagerMap.forEach { (dato, dag) ->
+            when (nyeDagerMap[dato]) {
+                null -> fjernet.add(dag)
+                dag -> {}
+                else -> lagtTilEllerEndret.add(dag)
+            }
+        }
+
+        nyeDagerMap.forEach { (dato, dag) ->
+            if (dato !in forrigeDagerMap) {
+                lagtTilEllerEndret.add(dag)
+            }
+        }
+        return Inntektsendringer(organisasjonsnummer, lagtTilEllerEndret.tilPerioderMedBeløp(), emptyList())
+    }
+
+    private fun List<InntektsDag>.tilPerioderMedBeløp(): List<Inntektsendringer.PeriodeMedBeløp> {
+        return fold(emptyList<Inntektsendringer.PeriodeMedBeløp>()) { acc, dag ->
+            val sistePeriodeMedBeløp = acc.lastOrNull()
+
+            if (sistePeriodeMedBeløp != null && sistePeriodeMedBeløp.hengerSammenMed(dag)) {
+                acc.dropLast(1) + sistePeriodeMedBeløp.copy(tom = dag.dato)
+            } else {
+                acc + Inntektsendringer.PeriodeMedBeløp(dag.dato, dag.dato, dag.beløp)
+            }
+        }
+    }
+
+    fun dagerTilPerioderMedBeløp() = dager.tilPerioderMedBeløp()
+
     companion object {
         fun ny(dager: List<InntektsDag>) =
             Fordeling(
