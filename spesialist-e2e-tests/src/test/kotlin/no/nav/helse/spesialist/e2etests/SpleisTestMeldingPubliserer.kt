@@ -261,7 +261,7 @@ class SpleisTestMeldingPubliserer(
         )
     }
 
-    fun håndterUtbetalingUtbetalt() {
+    fun simulerPublisertUtbetalingEndretTilUtbetaltMelding() {
         rapidsConnection.publish(
             JsonMessage.newMessage(
                 mapOf(
@@ -318,7 +318,7 @@ class SpleisTestMeldingPubliserer(
         )
     }
 
-    fun håndterAvsluttetMedVedtak() {
+    fun simulerPublisertAvsluttetMedVedtakMelding() {
         rapidsConnection.publish(
             JsonMessage.newMessage(
                 mapOf(

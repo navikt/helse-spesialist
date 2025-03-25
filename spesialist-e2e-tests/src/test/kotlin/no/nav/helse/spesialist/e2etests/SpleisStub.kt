@@ -50,13 +50,13 @@ class SpleisStub(
     fun håndterUtbetalingUtbetalt(vedtaksperiodeId: UUID) {
         val spleisTestMeldingPubliserer = meldingsendere[vedtaksperiodeId]
             ?: error("Fant ikke spleisTestMeldingPubliserer for vedtaksperiodeId: $vedtaksperiodeId")
-        spleisTestMeldingPubliserer.håndterUtbetalingUtbetalt()
+        spleisTestMeldingPubliserer.simulerPublisertUtbetalingEndretTilUtbetaltMelding()
     }
 
     fun håndterAvsluttetMedVedtak(vedtaksperiodeId: UUID) {
         val spleisTestMeldingPubliserer = meldingsendere[vedtaksperiodeId]
             ?: error("Fant ikke spleisTestMeldingPubliserer for vedtaksperiodeId: $vedtaksperiodeId")
-        spleisTestMeldingPubliserer.håndterAvsluttetMedVedtak()
+        spleisTestMeldingPubliserer.simulerPublisertAvsluttetMedVedtakMelding()
     }
 
     fun simulerPublisertGosysOppgaveEndretMelding(vedtaksperiodeId: UUID) {

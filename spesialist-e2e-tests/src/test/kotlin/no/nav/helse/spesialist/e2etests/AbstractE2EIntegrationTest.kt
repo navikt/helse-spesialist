@@ -170,14 +170,6 @@ abstract class AbstractE2EIntegrationTest {
         spleisStub.simulerPublisertAktivitetsloggNyAktivitetMelding(varselkoder, vedtaksperiodeId)
     }
 
-    protected fun håndterUtbetalingUtbetalt(vedtaksperiodeId: UUID = this.vedtaksperiodeId) {
-        spleisStub.håndterUtbetalingUtbetalt(vedtaksperiodeId)
-    }
-
-    protected fun håndterAvsluttetMedVedtak(vedtaksperiodeId: UUID = this.vedtaksperiodeId) {
-        spleisStub.håndterAvsluttetMedVedtak(vedtaksperiodeId)
-    }
-
     protected fun simulerPublisertGosysOppgaveEndretMelding(vedtaksperiodeId: UUID = this.vedtaksperiodeId) {
         spleisStub.simulerPublisertGosysOppgaveEndretMelding(vedtaksperiodeId)
     }
