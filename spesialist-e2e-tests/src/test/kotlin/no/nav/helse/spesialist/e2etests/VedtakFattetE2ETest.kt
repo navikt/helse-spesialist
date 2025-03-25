@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test
 class VedtakFattetE2ETest : AbstractE2EIntegrationTest() {
     @Test
     fun `vedtak fattet medfører låsing av vedtaksperiode-generasjon`() {
+        // Given:
         risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
         simulerFremTilOgMedGodkjenningsbehov()
 
@@ -14,6 +15,8 @@ class VedtakFattetE2ETest : AbstractE2EIntegrationTest() {
                 "oppgavereferanse" to finnOppgaveId().toString(),
             )
         )
+
+        // When:
         callGraphQL(
             operationName = "SettVarselStatus",
             variables = mapOf(
@@ -31,6 +34,7 @@ class VedtakFattetE2ETest : AbstractE2EIntegrationTest() {
             )
         )
 
+        // Then:
         assertBehandlingTilstand("VedtakFattet")
     }
 }
