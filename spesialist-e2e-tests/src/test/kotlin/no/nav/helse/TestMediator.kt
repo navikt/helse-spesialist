@@ -19,7 +19,6 @@ import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
 import no.nav.helse.spesialist.db.DBDaos
 import no.nav.helse.spesialist.db.TransactionalSessionFactory
-import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import no.nav.helse.util.testEnv
 import javax.sql.DataSource
 
@@ -51,7 +50,7 @@ class TestMediator(
             oppgaveDao = daos.oppgaveDao,
             reservasjonDao = daos.reservasjonDao,
             meldingPubliserer = meldingPubliserer,
-            tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
+            tilgangskontroll = { _, _ -> false },
             tilgangsgrupper = tilgangsgrupper,
             oppgaveRepository = daos.oppgaveRepository,
         )
@@ -74,7 +73,7 @@ class TestMediator(
             environmentToggles = environmentToggles,
             featureToggles = object : FeatureToggles {},
             sessionFactory = TransactionalSessionFactory(dataSource),
-            tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
+            tilgangskontroll = { _, _ -> false },
         )
 
     private val stikkprøver =

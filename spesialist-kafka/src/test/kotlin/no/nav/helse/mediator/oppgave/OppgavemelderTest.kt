@@ -9,7 +9,6 @@ import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
-import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.UUID
@@ -77,7 +76,7 @@ class OppgavemelderTest {
         oid = UUID.randomUUID(),
         navn = "En Saksbehandler",
         ident = "S123456",
-        tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang
+        tilgangskontroll = { _, _ -> false }
     )
 
     private fun nyOppgave() = Oppgave.ny(

@@ -44,7 +44,6 @@ import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlerident
 import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlernavn
 import no.nav.helse.spesialist.domain.testfixtures.lagTilfeldigSaksbehandlerepost
-import no.nav.helse.util.TilgangskontrollForTestHarIkkeTilgang
 import no.nav.helse.util.februar
 import no.nav.helse.util.januar
 import no.nav.helse.util.testEnv
@@ -78,7 +77,7 @@ class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             oppgaveDao = oppgaveDao,
             reservasjonDao = reservasjonDao,
             meldingPubliserer = meldingPubliserer,
-            tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
+            tilgangskontroll = { _, _ -> false },
             tilgangsgrupper = tilgangsgrupper,
             oppgaveRepository = daos.oppgaveRepository,
         )
@@ -106,7 +105,7 @@ class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             environmentToggles = environmentToggles,
             featureToggles = featureToggles,
             sessionFactory = TransactionalSessionFactory(dataSource),
-            tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
+            tilgangskontroll = { _, _ -> false },
         )
 
     private val AKTØR_ID = lagAktørId()
