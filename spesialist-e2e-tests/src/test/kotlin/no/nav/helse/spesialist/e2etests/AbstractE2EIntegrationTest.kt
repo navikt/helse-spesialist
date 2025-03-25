@@ -253,4 +253,35 @@ abstract class AbstractE2EIntegrationTest {
         }
         assertEquals(expectedTilstand, actualTilstand)
     }
+
+    protected fun saksbehandlerGodkjennerRisikovurderingVarsel() {
+        callGraphQL(
+            operationName = "SettVarselStatus",
+            variables = mapOf(
+                "generasjonIdString" to finnGenerasjonId(),
+                "varselkode" to "SB_RV_1",
+                "ident" to saksbehandler.ident,
+                "definisjonIdString" to "77970f04-c4c5-4b9f-8795-bb5e4749344c", // id fra api varseldefinisjon
+            )
+        )
+    }
+
+    protected fun saksbehandlerTildelerSegSaken() {
+        callGraphQL(
+            operationName = "Tildeling",
+            variables = mapOf(
+                "oppgavereferanse" to finnOppgaveId().toString(),
+            )
+        )
+    }
+
+    protected fun saksbehandlerFatterVedtak() {
+        callGraphQL(
+            operationName = "FattVedtak",
+            variables = mapOf(
+                "oppgavereferanse" to finnOppgaveId().toString(),
+                "begrunnelse" to "Fattet vedtak",
+            )
+        )
+    }
 }

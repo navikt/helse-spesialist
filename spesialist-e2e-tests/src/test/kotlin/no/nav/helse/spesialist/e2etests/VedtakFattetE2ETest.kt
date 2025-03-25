@@ -8,31 +8,11 @@ class VedtakFattetE2ETest : AbstractE2EIntegrationTest() {
         // Given:
         risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
         simulerFremTilOgMedGodkjenningsbehov()
-
-        callGraphQL(
-            operationName = "Tildeling",
-            variables = mapOf(
-                "oppgavereferanse" to finnOppgaveId().toString(),
-            )
-        )
+        saksbehandlerTildelerSegSaken()
 
         // When:
-        callGraphQL(
-            operationName = "SettVarselStatus",
-            variables = mapOf(
-                "generasjonIdString" to finnGenerasjonId(),
-                "varselkode" to "SB_RV_1",
-                "ident" to saksbehandler.ident,
-                "definisjonIdString" to "77970f04-c4c5-4b9f-8795-bb5e4749344c", // id fra api varseldefinisjon
-            )
-        )
-        callGraphQL(
-            operationName = "FattVedtak",
-            variables = mapOf(
-                "oppgavereferanse" to finnOppgaveId().toString(),
-                "begrunnelse" to "Fattet vedtak",
-            )
-        )
+        saksbehandlerGodkjennerRisikovurderingVarsel()
+        saksbehandlerFatterVedtak()
 
         // Then:
         assertBehandlingTilstand("VedtakFattet")
