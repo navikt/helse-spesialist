@@ -77,7 +77,10 @@ abstract class AbstractE2EIntegrationTest {
     ).also {
         it.registerOn(testRapid)
     }
-    protected val spleisStub = SpleisStub(testPerson, testRapid)
+    protected val spleisStub = SpleisStub(
+        testPerson = testPerson,
+        rapidsConnection = testRapid
+    ).also { it.registerOn(testRapid) }
 
     private val modules = RapidApp.start(
         configuration = Configuration(

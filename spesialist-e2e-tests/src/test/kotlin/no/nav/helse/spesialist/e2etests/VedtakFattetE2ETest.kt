@@ -31,8 +31,6 @@ class VedtakFattetE2ETest : AbstractE2EIntegrationTest() {
             )
         )
 
-        håndterUtbetalingUtbetalt()
-        håndterAvsluttetMedVedtak()
         assertBehandlingTilstand("VedtakFattet")
     }
 }
