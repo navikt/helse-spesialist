@@ -27,7 +27,7 @@ open class ModuleIsolatedDBTestFixture(moduleLabel: String) {
                     INTO truncate_statement
                 FROM pg_tables
                 WHERE schemaname='public'
-                AND tablename not in ('enhet', 'flyway_schema_history', 'global_snapshot_versjon');
+                AND tablename not in ('enhet', 'flyway_schema_history', 'global_snapshot_versjon', 'api_varseldefinisjon');
                 UPDATE global_snapshot_versjon SET versjon = 0 WHERE id = 1;
 
                 EXECUTE truncate_statement;

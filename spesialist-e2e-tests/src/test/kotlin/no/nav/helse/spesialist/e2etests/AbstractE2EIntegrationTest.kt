@@ -1,12 +1,14 @@
 package no.nav.helse.spesialist.e2etests
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
+import io.ktor.client.plugins.api.ClientPluginInstance
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiationConfig
 import io.ktor.client.request.accept
 import io.ktor.client.request.bearerAuth
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
-import io.ktor.http.ContentType
+import io.ktor.http.ContentType.Application
 import io.ktor.http.contentType
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.testing.testApplication
@@ -19,7 +21,6 @@ import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.spesialist.api.bootstrap.Gruppe
 import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
 import no.nav.helse.spesialist.api.objectMapper
-import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.testfixtures.ApiModuleIntegrationTestFixture
 import no.nav.helse.spesialist.api.testfixtures.lagSaksbehandlerFraApi
 import no.nav.helse.spesialist.bootstrap.Configuration
@@ -54,6 +55,7 @@ import java.util.UUID
 
 abstract class AbstractE2EIntegrationTest {
     private val testPerson = TestPerson()
+    protected val saksbehandler = lagSaksbehandlerFraApi()
     protected val vedtaksperiodeId = UUID.randomUUID()
     protected val risikovurderingBehovLøser = RisikovurderingBehovLøser()
     protected val åpneOppgaverBehovLøser = ÅpneOppgaverBehovLøser()
@@ -119,24 +121,29 @@ abstract class AbstractE2EIntegrationTest {
         rapidsConnection = testRapid,
     )
 
-    fun callGraphQL(
-        @Language("GraphQL") query: String,
-        saksbehandlerFraApi: SaksbehandlerFraApi = lagSaksbehandlerFraApi()
-    ) {
+    protected fun callGraphQL(operationName: String, variables: Map<String, Any>) {
         testApplication {
             application {
                 RapidApp.ktorSetupCallback(this)
             }
 
             createClient {
-                this.install(ContentNegotiation) {
-                    register(ContentType.Application.Json, JacksonConverter(objectMapper))
+                install<ContentNegotiationConfig, ClientPluginInstance<ContentNegotiationConfig>>(
+                    ContentNegotiation
+                ) {
+                    register(Application.Json, JacksonConverter(objectMapper))
                 }
             }.post("/graphql") {
-                contentType(ContentType.Application.Json)
-                accept(ContentType.Application.Json)
-                bearerAuth(ApiModuleIntegrationTestFixture.token(saksbehandlerFraApi))
-                setBody(mapOf("query" to query))
+                contentType(Application.Json)
+                accept(Application.Json)
+                bearerAuth(ApiModuleIntegrationTestFixture.token(saksbehandler))
+                setBody(
+                    mapOf(
+                        "query" to (this::class.java.getResourceAsStream("/graphql/$operationName.graphql")
+                            ?.use { it.reader().readText() }
+                            ?: error("Fant ikke $operationName.graphql")),
+                        "operationName" to operationName,
+                        "variables" to variables))
             }
         }
     }
@@ -191,13 +198,16 @@ abstract class AbstractE2EIntegrationTest {
     }
 
     private fun finnOppgave(): Oppgave {
-        val oppgaveId =
-            modules.dbModule.daos.oppgaveDao.finnOppgaveIdUansettStatus(testPerson.fødselsnummer)
         val oppgave = modules.dbModule.sessionFactory.transactionalSessionScope { session ->
-            session.oppgaveRepository.finn(oppgaveId) { _, _ -> true }
+            session.oppgaveRepository.finn(finnOppgaveId()) { _, _ -> true }
         } ?: error("Fant ikke oppgaven basert på ID")
         return oppgave
     }
+
+    protected fun finnOppgaveId() =
+        modules.dbModule.daos.oppgaveDao.finnOppgaveIdUansettStatus(testPerson.fødselsnummer)
+
+    protected fun finnGenerasjonId() = modules.dbModule.daos.oppgaveDao.finnGenerasjonId(finnOppgaveId())
 
     data class Varsel(
         val kode: String,

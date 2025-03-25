@@ -7,8 +7,30 @@ class VedtakFattetE2ETest : AbstractE2EIntegrationTest() {
     fun `vedtak fattet medfører låsing av vedtaksperiode-generasjon`() {
         risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
         simulerFremTilOgMedGodkjenningsbehov()
-        // Saksbehandler vurderer varsel
-        // Saksbehandler trykker fatt vedtak-knappen
+
+        callGraphQL(
+            operationName = "Tildeling",
+            variables = mapOf(
+                "oppgavereferanse" to finnOppgaveId().toString(),
+            )
+        )
+        callGraphQL(
+            operationName = "SettVarselStatus",
+            variables = mapOf(
+                "generasjonIdString" to finnGenerasjonId(),
+                "varselkode" to "SB_RV_1",
+                "ident" to saksbehandler.ident,
+                "definisjonIdString" to "77970f04-c4c5-4b9f-8795-bb5e4749344c", // id fra api varseldefinisjon
+            )
+        )
+        callGraphQL(
+            operationName = "FattVedtak",
+            variables = mapOf(
+                "oppgavereferanse" to finnOppgaveId().toString(),
+                "begrunnelse" to "Fattet vedtak",
+            )
+        )
+
         håndterUtbetalingUtbetalt()
         håndterAvsluttetMedVedtak()
         assertBehandlingTilstand("VedtakFattet")

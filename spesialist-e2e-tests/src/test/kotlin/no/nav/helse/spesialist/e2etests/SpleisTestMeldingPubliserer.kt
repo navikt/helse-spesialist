@@ -76,7 +76,7 @@ class SpleisTestMeldingPubliserer(
                         "kanAvvises" to true,
                         "vilkårsgrunnlagId" to UUID.randomUUID(),
                         "behandlingId" to spleisBehandlingId,
-                        "tags" to emptyList<String>(),
+                        "tags" to listOf("Innvilget"),
                         "perioderMedSammeSkjæringstidspunkt" to listOf(
                             mapOf(
                                 "fom" to (1 jan 2018),

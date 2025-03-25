@@ -1,0 +1,7 @@
+mutation Tildeling($oppgavereferanse: String!) {
+    opprettTildeling(
+        oppgaveId: $oppgavereferanse
+    ) {
+        navn
+    }
+}

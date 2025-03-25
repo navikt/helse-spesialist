@@ -1,0 +1,22 @@
+mutation SettVarselStatus($generasjonIdString: String!, $ident: String!, $varselkode: String!, $definisjonIdString: String) {
+    settVarselstatus(
+        generasjonIdString: $generasjonIdString
+        ident: $ident
+        varselkode: $varselkode
+        definisjonIdString: $definisjonIdString
+    ) {
+        forklaring
+        definisjonId
+        generasjonId
+        handling
+        kode
+        tittel
+        __typename
+        vurdering {
+            ident
+            status
+            tidsstempel
+            __typename
+        }
+    }
+}
