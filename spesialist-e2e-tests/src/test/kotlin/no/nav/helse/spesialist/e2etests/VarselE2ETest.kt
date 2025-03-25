@@ -135,9 +135,9 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         lagreVarseldefinisjon("EN_KODE")
 
         // When:
-        val spleisBehandlingId = simulerFremTilOgMedNyUtbetaling()
+        simulerFremTilOgMedNyUtbetaling()
         simulerPublisertAktivitetsloggNyAktivitetMelding(listOf("EN_KODE"))
-        simulerFraNyUtbetalingTilOgMedGodkjenningsbehov(spleisBehandlingId)
+        simulerFraNyUtbetalingTilOgMedGodkjenningsbehov()
 
         // Then:
         assertEquals(setOf(Varsel("EN_KODE", AKTIV.name)), hentVarselkoder())
@@ -150,10 +150,10 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         lagreVarseldefinisjon("EN_ANNEN_KODE")
 
         // When:
-        val spleisBehandlingId = simulerFremTilOgMedNyUtbetaling()
+        simulerFremTilOgMedNyUtbetaling()
         simulerPublisertAktivitetsloggNyAktivitetMelding(listOf("EN_KODE"))
         simulerPublisertAktivitetsloggNyAktivitetMelding(listOf("EN_ANNEN_KODE"))
-        simulerFraNyUtbetalingTilOgMedGodkjenningsbehov(spleisBehandlingId)
+        simulerFraNyUtbetalingTilOgMedGodkjenningsbehov()
 
         // Then:
         assertEquals(setOf(Varsel("EN_KODE", AKTIV.name), Varsel("EN_ANNEN_KODE", AKTIV.name)), hentVarselkoder())
@@ -166,9 +166,9 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         lagreVarseldefinisjon("EN_ANNEN_KODE")
 
         // When:
-        val spleisBehandlingId = simulerFremTilOgMedNyUtbetaling()
+        simulerFremTilOgMedNyUtbetaling()
         simulerPublisertAktivitetsloggNyAktivitetMelding(listOf("EN_KODE", "EN_ANNEN_KODE"))
-        simulerFraNyUtbetalingTilOgMedGodkjenningsbehov(spleisBehandlingId)
+        simulerFraNyUtbetalingTilOgMedGodkjenningsbehov()
 
         // Then:
         assertEquals(setOf(Varsel("EN_KODE", AKTIV.name), Varsel("EN_ANNEN_KODE", AKTIV.name)), hentVarselkoder())
@@ -180,10 +180,10 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         lagreVarseldefinisjon("EN_KODE")
 
         // When:
-        val spleisBehandlingId = simulerFremTilOgMedNyUtbetaling()
+        simulerFremTilOgMedNyUtbetaling()
         simulerPublisertAktivitetsloggNyAktivitetMelding(listOf("EN_KODE"))
         simulerPublisertAktivitetsloggNyAktivitetMelding(listOf("EN_KODE"))
-        simulerFraNyUtbetalingTilOgMedGodkjenningsbehov(spleisBehandlingId)
+        simulerFraNyUtbetalingTilOgMedGodkjenningsbehov()
 
         // Then:
         assertEquals(setOf(Varsel("EN_KODE", AKTIV.name)), hentVarselkoder())

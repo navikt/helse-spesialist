@@ -10,9 +10,9 @@ class ManglerInntektsmeldingE2ETest : AbstractE2EIntegrationTest() {
         lagreVarseldefinisjon("RV_IV_10")
 
         // When:
-        val spleisBehandlingId = simulerFremTilOgMedNyUtbetaling()
+        simulerFremTilOgMedNyUtbetaling()
         simulerPublisertAktivitetsloggNyAktivitetMelding(listOf("RV_IV_10"))
-        simulerFraNyUtbetalingTilOgMedGodkjenningsbehov(spleisBehandlingId)
+        simulerFraNyUtbetalingTilOgMedGodkjenningsbehov()
 
         // Then:
         assertHarOppgaveegenskap(Egenskap.MANGLER_IM)

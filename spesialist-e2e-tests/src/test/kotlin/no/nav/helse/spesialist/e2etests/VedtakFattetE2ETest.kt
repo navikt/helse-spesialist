@@ -6,11 +6,11 @@ class VedtakFattetE2ETest : AbstractE2EIntegrationTest() {
     @Test
     fun `vedtak fattet medfører låsing av vedtaksperiode-generasjon`() {
         risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
-        val spleisBehandlingId = simulerFremTilOgMedGodkjenningsbehov()
+        simulerFremTilOgMedGodkjenningsbehov()
         // Saksbehandler vurderer varsel
         // Saksbehandler trykker fatt vedtak-knappen
         håndterUtbetalingUtbetalt()
-        håndterAvsluttetMedVedtak(spleisBehandlingId = spleisBehandlingId)
+        håndterAvsluttetMedVedtak()
         assertBehandlingTilstand("VedtakFattet")
     }
 }
