@@ -11,21 +11,19 @@ class InntektsperiodeTest {
     @Test
     fun `kan lage ny inntektsperiode`() {
         val organisasjonsnummer = lagOrganisasjonsnummer()
-        val fordeling = Fordeling.ny(
-            dager = listOf(
-                InntektsDag(dato = 1 jan 2018, beløp = 10000.0),
-                InntektsDag(dato = 2 jan 2018, beløp = 10000.0),
-                InntektsDag(dato = 15 jan 2018, beløp = 10000.0),
-                InntektsDag(dato = 31 jan 2018, beløp = 10000.0),
-
-            )
-        )
         val inntektsperiode = Inntektsperiode.ny(
             fødselsnummer = lagFødselsnummer(),
             organisasjonsnummer = organisasjonsnummer,
             fom = 1 jan 2018,
             tom = 31 jan 2018,
-            periodebeløp = 40000.0,
+        )
+        val fordeling = Inntektsfordeling.ny(
+            dager = listOf(
+                Inntektsdag(dato = 1 jan 2018, beløp = 10000.0),
+                Inntektsdag(dato = 2 jan 2018, beløp = 10000.0),
+                Inntektsdag(dato = 15 jan 2018, beløp = 10000.0),
+                Inntektsdag(dato = 31 jan 2018, beløp = 10000.0),
+            )
         )
         val inntektsendringer = inntektsperiode.nyFordeling(fordeling)
         assertEquals(organisasjonsnummer, inntektsendringer.organisasjonsnummer)
@@ -37,5 +35,4 @@ class InntektsperiodeTest {
         assertEquals(fordeling, inntektsperiode.fordelinger[0])
         assertEquals(0, inntektsendringer.fjernedeInntekter.size)
     }
-
 }
