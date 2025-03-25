@@ -32,6 +32,7 @@ class Totrinnsvurdering private constructor(
     oppdatert: LocalDateTime?,
     overstyringer: List<Overstyring> = emptyList(),
     tilstand: TotrinnsvurderingTilstand,
+    vedtaksperiodeForkastet: Boolean,
 ) : AggregateRoot<TotrinnsvurderingId>(id) {
     private val _overstyringer: MutableList<Overstyring> = overstyringer.toMutableList()
     val overstyringer: List<Overstyring>
@@ -50,6 +51,9 @@ class Totrinnsvurdering private constructor(
         private set
 
     var tilstand: TotrinnsvurderingTilstand = tilstand
+        private set
+
+    var vedtaksperiodeForkastet: Boolean = vedtaksperiodeForkastet
         private set
 
     fun settAvventerSaksbehandler() =
@@ -109,6 +113,11 @@ class Totrinnsvurdering private constructor(
             .forEach { it.ferdigstill() }
     }
 
+    fun vedtaksperiodeForkastet(vedtaksperiodeId: UUID) =
+        oppdatering {
+            if (this.vedtaksperiodeId == vedtaksperiodeId) vedtaksperiodeForkastet = true
+        }
+
     private fun <T> oppdatering(block: () -> T): T {
         return block().also {
             oppdatert = LocalDateTime.now()
@@ -155,6 +164,7 @@ class Totrinnsvurdering private constructor(
                 oppdatert = null,
                 overstyringer = emptyList(),
                 tilstand = AVVENTER_SAKSBEHANDLER,
+                vedtaksperiodeForkastet = false,
             )
         }
 
@@ -169,6 +179,7 @@ class Totrinnsvurdering private constructor(
             oppdatert: LocalDateTime?,
             overstyringer: List<Overstyring>,
             tilstand: TotrinnsvurderingTilstand,
+            vedtaksperiodeForkastet: Boolean,
         ): Totrinnsvurdering {
             return Totrinnsvurdering(
                 id = id,
@@ -181,6 +192,7 @@ class Totrinnsvurdering private constructor(
                 oppdatert = oppdatert,
                 overstyringer = overstyringer,
                 tilstand = tilstand,
+                vedtaksperiodeForkastet = vedtaksperiodeForkastet,
             )
         }
     }

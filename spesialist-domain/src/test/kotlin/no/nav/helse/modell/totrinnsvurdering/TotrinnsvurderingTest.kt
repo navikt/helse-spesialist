@@ -215,6 +215,14 @@ internal class TotrinnsvurderingTest {
         assertEquals(AVVENTER_SAKSBEHANDLER, totrinnsvurdering.tilstand)
     }
 
+    @Test
+    fun `kan sette vedtaksperiodeForkastet til true`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val totrinnsvurdering = nyTotrinnsvurdering(vedtaksperiodeId = vedtaksperiodeId)
+        totrinnsvurdering.vedtaksperiodeForkastet(vedtaksperiodeId = vedtaksperiodeId)
+        assertTrue(totrinnsvurdering.vedtaksperiodeForkastet)
+    }
+
     private fun nySaksbehandler(
         oid: UUID = UUID.randomUUID()
     ) = SaksbehandlerOid(oid)
@@ -236,6 +244,7 @@ internal class TotrinnsvurderingTest {
         oppdatert = LocalDateTime.now(),
         overstyringer = overstyringer,
         tilstand = tilstand,
+        vedtaksperiodeForkastet = false,
     )
 
     private fun overstyrteDager(): List<OverstyrtTidslinjedag> = listOf(

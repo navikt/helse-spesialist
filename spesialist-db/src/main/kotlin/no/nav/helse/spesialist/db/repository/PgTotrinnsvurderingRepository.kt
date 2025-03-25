@@ -43,6 +43,7 @@ class PgTotrinnsvurderingRepository(session: Session) : QueryRunner by MedSessio
                    tv.beslutter as beslutter_oid,
                    ui.id as utbetaling_id,
                    tv.tilstand,
+                   tv.vedtaksperiode_forkastet,
                    tv.opprettet,
                    tv.oppdatert
             FROM totrinnsvurdering tv
@@ -50,6 +51,7 @@ class PgTotrinnsvurderingRepository(session: Session) : QueryRunner by MedSessio
                      LEFT JOIN utbetaling_id ui on ui.id = tv.utbetaling_id_ref
             WHERE p.fødselsnummer = :fodselsnummer
               AND tv.tilstand != 'GODKJENT'
+              AND tv.vedtaksperiode_forkastet = false
             """.trimIndent(),
             "fodselsnummer" to fødselsnummer,
         ).singleOrNull { it.toTotrinnsvurdering() }
@@ -65,6 +67,7 @@ class PgTotrinnsvurderingRepository(session: Session) : QueryRunner by MedSessio
                    tv.beslutter as beslutter_oid,
                    ui.id as utbetaling_id,
                    tv.tilstand,
+                   tv.vedtaksperiode_forkastet,
                    tv.opprettet,
                    tv.oppdatert,
                    p.fødselsnummer
@@ -75,6 +78,7 @@ class PgTotrinnsvurderingRepository(session: Session) : QueryRunner by MedSessio
                      LEFT JOIN utbetaling_id ui on ui.id = tv.utbetaling_id_ref
             WHERE v.vedtaksperiode_id = :vedtaksperiodeId
               AND tv.tilstand != 'GODKJENT'
+              AND tv.vedtaksperiode_forkastet = false
             """.trimIndent(),
             "vedtaksperiodeId" to vedtaksperiodeId,
         ).singleOrNull { it.toTotrinnsvurderingDeprecated() }
@@ -103,6 +107,7 @@ class PgTotrinnsvurderingRepository(session: Session) : QueryRunner by MedSessio
                 beslutter           = :beslutter,
                 utbetaling_id_ref   = (SELECT id from utbetaling_id ui WHERE ui.utbetaling_id = :utbetalingId),
                 tilstand            = CAST(:tilstand AS totrinnsvurdering_tilstand),
+                vedtaksperiode_forkastet = :vedtaksperiodeForkastet,
                 oppdatert           = :oppdatert
             WHERE id = :id
             """.trimIndent(),
@@ -111,6 +116,7 @@ class PgTotrinnsvurderingRepository(session: Session) : QueryRunner by MedSessio
             "beslutter" to totrinnsvurdering.beslutter?.value,
             "utbetalingId" to totrinnsvurdering.utbetalingId,
             "tilstand" to totrinnsvurdering.tilstand.name,
+            "vedtaksperiodeForkastet" to totrinnsvurdering.vedtaksperiodeForkastet,
             "oppdatert" to totrinnsvurdering.oppdatert,
         ).update()
     }
@@ -126,6 +132,7 @@ class PgTotrinnsvurderingRepository(session: Session) : QueryRunner by MedSessio
             opprettet = localDateTime("opprettet"),
             oppdatert = localDateTimeOrNull("oppdatert"),
             tilstand = enumValueOf(string("tilstand")),
+            vedtaksperiodeForkastet = boolean("vedtaksperiode_forkastet"),
             overstyringer = overstyringRepository.finnAktive(string("fødselsnummer"), TotrinnsvurderingId(long("id"))),
         )
 
@@ -141,6 +148,7 @@ class PgTotrinnsvurderingRepository(session: Session) : QueryRunner by MedSessio
             opprettet = localDateTime("opprettet"),
             oppdatert = localDateTimeOrNull("oppdatert"),
             tilstand = enumValueOf(string("tilstand")),
+            vedtaksperiodeForkastet = boolean("vedtaksperiode_forkastet"),
             overstyringer = overstyringRepository.finnAktive(string("fødselsnummer")),
         )
 }

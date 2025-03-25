@@ -191,6 +191,7 @@ internal class VurderBehovForTotrinnskontrollTest {
             oppdatert = LocalDateTime.now(),
             overstyringer = emptyList(),
             tilstand = tilstand,
+            vedtaksperiodeForkastet = false,
         )
 
     private fun command(nyTotrinnsløype: Boolean = true) =
