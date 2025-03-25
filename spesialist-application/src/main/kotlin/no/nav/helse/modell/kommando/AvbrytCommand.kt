@@ -31,12 +31,6 @@ internal class AvbrytCommand(
                 featureToggles = featureToggles,
             ),
             AvbrytOppgaveCommand(vedtaksperiodeId = vedtaksperiodeId, oppgaveService = oppgaveService),
-            AvbrytTotrinnsvurderingCommand(
-                vedtaksperiodeId = vedtaksperiodeId,
-                fødselsnummer = fødselsnummer,
-                totrinnsvurderingRepository = totrinnsvurderingRepository,
-                featureToggles = featureToggles,
-            ),
             AvbrytContextCommand(vedtaksperiodeId = vedtaksperiodeId, commandContextDao = commandContextDao),
         )
 }
