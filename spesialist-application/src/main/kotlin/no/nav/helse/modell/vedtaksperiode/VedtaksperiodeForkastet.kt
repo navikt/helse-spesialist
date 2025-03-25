@@ -11,6 +11,7 @@ import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.kommando.AvbrytCommand
+import no.nav.helse.modell.kommando.AvbrytTotrinnsvurderingCommand
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.person.Person
@@ -68,6 +69,12 @@ class VedtaksperiodeForkastetCommand(
                 reservasjonDao = reservasjonDao,
                 tildelingDao = tildelingDao,
                 oppgaveDao = oppgaveDao,
+                totrinnsvurderingRepository = totrinnsvurderingRepository,
+                featureToggles = featureToggles,
+            ),
+            AvbrytTotrinnsvurderingCommand(
+                vedtaksperiodeId = vedtaksperiodeId,
+                fødselsnummer = fødselsnummer,
                 totrinnsvurderingRepository = totrinnsvurderingRepository,
                 featureToggles = featureToggles,
             ),
