@@ -10,6 +10,8 @@ data class Periode(
         require(fom <= tom) { "Fom kan ikke være etter tom" }
     }
 
+    fun datoer(): List<LocalDate> = fom.datesUntil(tom.plusDays(1)).toList()
+
     fun overlapperMed(other: Periode) = this.overlapper(other) || other.overlapper(this)
 
     private fun overlapper(other: Periode) = other.fom in fom..tom || other.tom in fom..tom

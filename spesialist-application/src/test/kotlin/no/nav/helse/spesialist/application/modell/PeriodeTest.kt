@@ -4,11 +4,11 @@ import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.Periode.Companion.til
 import no.nav.helse.spesialist.domain.testfixtures.feb
 import no.nav.helse.spesialist.domain.testfixtures.jan
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 internal class PeriodeTest {
 
@@ -59,5 +59,11 @@ internal class PeriodeTest {
         assertFalse(periode2.overlapperMed(periode3))
         assertFalse(periode3.overlapperMed(periode1))
         assertFalse(periode3.overlapperMed(periode2))
+    }
+
+    @Test
+    fun dager() {
+        val periode = Periode(1 jan 2018, 5 jan 2018)
+        assertEquals(listOf(1 jan 2018, 2 jan 2018, 3 jan 2018, 4 jan 2018, 5 jan 2018), periode.datoer())
     }
 }

@@ -15,26 +15,29 @@ class Inntektsperiode private constructor(
     val opprettet: LocalDateTime,
     val fom: LocalDate,
     val tom: LocalDate,
-    val periodebeløp: Double,
-    fordelinger: List<Fordeling>,
+    fordelinger: List<Inntektsfordeling>,
 ) : Entity<InntektsperiodeId>(id) {
-    private val _fordelinger: MutableList<Fordeling> = fordelinger.toMutableList()
+    private val _fordelinger: MutableList<Inntektsfordeling> = fordelinger.toMutableList()
 
-    val fordelinger: List<Fordeling> get() = _fordelinger
+    val fordelinger: List<Inntektsfordeling> get() = _fordelinger
 
-    fun nyFordeling(fordeling: Fordeling): Inntektsendringer {
+    fun nyFordeling(fordeling: Inntektsfordeling): Inntektsendringer {
+        val forrigeFordeling = fordelinger.lastOrNull()
         _fordelinger.addLast(fordeling)
-        val forrigeFordeling = fordelinger.lastOrNull() ?: return inntektsendringerForFørsteFordeling(fordeling)
+        if (forrigeFordeling == null) return inntektsendringerForFørsteFordeling(fordeling)
 
-        return fordeling.diff(organisasjonsnummer, forrigeFordeling)
-    }
-
-    private fun inntektsendringerForFørsteFordeling(fordeling: Fordeling): Inntektsendringer {
-        val nyeEllerEndredeInntekter = fordeling.dagerTilPerioderMedBeløp()
-
+        val differanse = fordeling diff forrigeFordeling
         return Inntektsendringer(
             organisasjonsnummer = organisasjonsnummer,
-            nyeEllerEndredeInntekter = nyeEllerEndredeInntekter,
+            nyeEllerEndredeInntekter = differanse.nyeEllerEndredeInntekter,
+            fjernedeInntekter = differanse.fjernedeInntekter,
+        )
+    }
+
+    private fun inntektsendringerForFørsteFordeling(fordeling: Inntektsfordeling): Inntektsendringer {
+        return Inntektsendringer(
+            organisasjonsnummer = organisasjonsnummer,
+            nyeEllerEndredeInntekter = fordeling.dagerTilPerioderMedBeløp(),
             fjernedeInntekter = emptyList(),
         )
     }
@@ -45,7 +48,6 @@ class Inntektsperiode private constructor(
             organisasjonsnummer: String,
             fom: LocalDate,
             tom: LocalDate,
-            periodebeløp: Double,
         ) = Inntektsperiode(
             id = InntektsperiodeId(UUID.randomUUID()),
             fødselsnummer = fødselsnummer,
@@ -53,85 +55,7 @@ class Inntektsperiode private constructor(
             opprettet = LocalDateTime.now(),
             fom = fom,
             tom = tom,
-            periodebeløp = periodebeløp,
             fordelinger = emptyList(),
         )
     }
-}
-
-data class Fordeling private constructor(
-    val opprettet: LocalDateTime,
-    val dager: List<InntektsDag>,
-) {
-    fun diff(
-        organisasjonsnummer: String,
-        forrigeFordeling: Fordeling,
-    ): Inntektsendringer {
-        val forrigeDagerMap = forrigeFordeling.dager.associateBy { it.dato }
-        val nyeDagerMap = this.dager.associateBy { it.dato }
-
-        val lagtTilEllerEndret = mutableListOf<InntektsDag>()
-        val fjernet = mutableListOf<InntektsDag>()
-
-        forrigeDagerMap.forEach { (dato, dag) ->
-            when (nyeDagerMap[dato]) {
-                null -> fjernet.add(dag)
-                dag -> {}
-                else -> lagtTilEllerEndret.add(dag)
-            }
-        }
-
-        nyeDagerMap.forEach { (dato, dag) ->
-            if (dato !in forrigeDagerMap) {
-                lagtTilEllerEndret.add(dag)
-            }
-        }
-        return Inntektsendringer(organisasjonsnummer, lagtTilEllerEndret.tilPerioderMedBeløp(), emptyList())
-    }
-
-    private fun List<InntektsDag>.tilPerioderMedBeløp(): List<Inntektsendringer.PeriodeMedBeløp> {
-        return fold(emptyList<Inntektsendringer.PeriodeMedBeløp>()) { acc, dag ->
-            val sistePeriodeMedBeløp = acc.lastOrNull()
-
-            if (sistePeriodeMedBeløp != null && sistePeriodeMedBeløp.hengerSammenMed(dag)) {
-                acc.dropLast(1) + sistePeriodeMedBeløp.copy(tom = dag.dato)
-            } else {
-                acc + Inntektsendringer.PeriodeMedBeløp(dag.dato, dag.dato, dag.beløp)
-            }
-        }
-    }
-
-    fun dagerTilPerioderMedBeløp() = dager.tilPerioderMedBeløp()
-
-    companion object {
-        fun ny(dager: List<InntektsDag>) =
-            Fordeling(
-                opprettet = LocalDateTime.now(),
-                dager = dager,
-            )
-    }
-}
-
-data class InntektsDag(
-    val dato: LocalDate,
-    val beløp: Double,
-)
-
-data class Inntektsendringer(
-    val organisasjonsnummer: String,
-    val nyeEllerEndredeInntekter: List<PeriodeMedBeløp>,
-    val fjernedeInntekter: List<PeriodeUtenBeløp>,
-) {
-    data class PeriodeMedBeløp(
-        val fom: LocalDate,
-        val tom: LocalDate,
-        val dagbeløp: Double,
-    ) {
-        fun hengerSammenMed(dag: InntektsDag) = tom.plusDays(1) == dag.dato && dagbeløp == dag.beløp
-    }
-
-    data class PeriodeUtenBeløp(
-        val fom: LocalDate,
-        val tom: LocalDate,
-    )
 }
