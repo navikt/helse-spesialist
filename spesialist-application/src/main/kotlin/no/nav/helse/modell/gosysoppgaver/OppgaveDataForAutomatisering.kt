@@ -1,8 +1,8 @@
 package no.nav.helse.modell.gosysoppgaver
 
-import no.nav.helse.modell.person.vedtaksperiode.Periode
-import no.nav.helse.modell.person.vedtaksperiode.Periode.Companion.til
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.spesialist.domain.Periode
+import no.nav.helse.spesialist.domain.Periode.Companion.til
 import java.time.LocalDate
 import java.util.UUID
 

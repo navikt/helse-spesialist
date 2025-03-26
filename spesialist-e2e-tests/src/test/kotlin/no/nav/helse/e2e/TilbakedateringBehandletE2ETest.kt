@@ -4,9 +4,9 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.TestRapidHelpers.oppgaveId
 import no.nav.helse.modell.oppgave.Egenskap
-import no.nav.helse.modell.person.vedtaksperiode.Periode
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
+import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.util.februar
 import no.nav.helse.util.januar
 import org.intellij.lang.annotations.Language

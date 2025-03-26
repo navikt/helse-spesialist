@@ -2,6 +2,7 @@ package no.nav.helse.modell.person.vedtaksperiode
 
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
+import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.finnBehandlingForSpleisBehandling
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.logg

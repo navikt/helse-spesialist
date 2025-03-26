@@ -4,12 +4,12 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import no.nav.helse.mediator.meldinger.Risikofunn.Companion.tilJson
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
-import no.nav.helse.modell.person.vedtaksperiode.Periode
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.objectMapper
+import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.util.januar
 import java.time.LocalDate
 import java.time.LocalDate.now
@@ -82,8 +82,8 @@ object Testmeldingfabrikk {
                 "sykmeldingId" to "${UUID.randomUUID()}",
                 "perioder" to perioder.map {
                     mapOf(
-                        "fom" to it.fom(),
-                        "tom" to it.tom()
+                        "fom" to it.fom,
+                        "tom" to it.tom
                     )
                 }
             )

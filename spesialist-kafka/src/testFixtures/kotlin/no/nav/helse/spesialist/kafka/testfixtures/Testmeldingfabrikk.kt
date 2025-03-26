@@ -3,11 +3,11 @@ package no.nav.helse.spesialist.kafka.testfixtures
 import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
-import no.nav.helse.modell.person.vedtaksperiode.Periode
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.kafka.objectMapper
 import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk.Risikofunn.Companion.tilJson
@@ -83,8 +83,8 @@ object Testmeldingfabrikk {
                 "sykmeldingId" to "${UUID.randomUUID()}",
                 "perioder" to perioder.map {
                     mapOf(
-                        "fom" to it.fom(),
-                        "tom" to it.tom()
+                        "fom" to it.fom,
+                        "tom" to it.tom
                     )
                 }
             )

@@ -2,7 +2,7 @@ package no.nav.helse.modell.kommando
 
 import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
-import no.nav.helse.modell.person.vedtaksperiode.Periode
+import no.nav.helse.spesialist.domain.Periode
 
 internal class VurderOmSøknadsperiodenOverlapperMedOppgave(
     private val oppgaveDataForAutomatisering: OppgaveDataForAutomatisering,

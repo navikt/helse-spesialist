@@ -3,7 +3,6 @@ package no.nav.helse.spesialist.domain.legacy
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
-import no.nav.helse.modell.person.vedtaksperiode.Periode
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
@@ -19,6 +18,7 @@ import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderVars
 import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
 import no.nav.helse.modell.vedtak.VedtakBegrunnelse
+import no.nav.helse.spesialist.domain.Periode
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -74,9 +74,9 @@ class LegacyBehandling private constructor(
 
     internal fun hasterÅBehandle() = varsler.inneholderVarselOmNegativtBeløp()
 
-    internal fun fom() = periode.fom()
+    internal fun fom() = periode.fom
 
-    internal fun tom() = periode.tom()
+    internal fun tom() = periode.tom
 
     fun toDto(): BehandlingDto =
         BehandlingDto(
@@ -85,15 +85,15 @@ class LegacyBehandling private constructor(
             utbetalingId = utbetalingId,
             spleisBehandlingId = spleisBehandlingId,
             skjæringstidspunkt = skjæringstidspunkt,
-            fom = periode.fom(),
-            tom = periode.tom(),
+            fom = periode.fom,
+            tom = periode.tom,
             tilstand = tilstand.toDto(),
             tags = tags,
             vedtakBegrunnelse = vedtakBegrunnelse,
             varsler = varsler.map(Varsel::toDto),
         )
 
-    internal fun tilhører(dato: LocalDate): Boolean = periode.tom() <= dato
+    internal fun tilhører(dato: LocalDate): Boolean = periode.tom <= dato
 
     internal fun nySpleisBehandling(spleisBehandling: SpleisBehandling) = nyBehandling(spleisBehandling)
 
@@ -505,18 +505,18 @@ class LegacyBehandling private constructor(
         internal fun List<LegacyBehandling>.forhindrerAutomatisering(legacyBehandling: LegacyBehandling): Boolean =
             this
                 .filter {
-                    it.tilhører(legacyBehandling.periode.tom())
+                    it.tilhører(legacyBehandling.periode.tom)
                 }.any { it.forhindrerAutomatisering() }
 
         internal fun List<LegacyBehandling>.harKunGosysvarsel(legacyBehandling: LegacyBehandling): Boolean =
             this
                 .filter {
-                    it.tilhører(legacyBehandling.periode.tom())
+                    it.tilhører(legacyBehandling.periode.tom)
                 }.filter { it.varsler.isNotEmpty() }
                 .all { it.harKunGosysvarsel() }
 
         internal fun List<LegacyBehandling>.harVarselOmManglendeInntektsmelding(legacyBehandling: LegacyBehandling): Boolean =
-            filter { it.tilhører(legacyBehandling.periode.tom()) }
+            filter { it.tilhører(legacyBehandling.periode.tom) }
                 .filter { it.varsler.isNotEmpty() }
                 .any { it.harVarselOmManglendeInntektsmelding() }
 
@@ -571,8 +571,8 @@ class LegacyBehandling private constructor(
 
         private fun List<LegacyBehandling>.overlapperMedEllerTidligereEnn(vedtaksperiodeId: UUID): List<LegacyBehandling> {
             val gjeldende = find { it.vedtaksperiodeId == vedtaksperiodeId } ?: return emptyList()
-            return sortedByDescending { it.periode.tom() }
-                .filter { it.periode.fom() <= gjeldende.periode.tom() }
+            return sortedByDescending { it.periode.tom }
+                .filter { it.periode.fom <= gjeldende.periode.tom }
         }
     }
 }

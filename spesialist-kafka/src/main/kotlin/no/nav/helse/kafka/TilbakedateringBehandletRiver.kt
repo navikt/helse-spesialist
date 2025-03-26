@@ -9,7 +9,7 @@ import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.kommando.TilbakedateringBehandlet
-import no.nav.helse.modell.person.vedtaksperiode.Periode
+import no.nav.helse.spesialist.domain.Periode
 
 // I skrivende stund er det kun meldinger der tilbakedateringen er godkjent som
 // kommer til Spesialist, dvs. sendes på rapiden. Andre meldinger filtreres ut i sparkel-appen
