@@ -16,6 +16,7 @@ dependencies {
     testImplementation(testFixtures(project(":spesialist-client-spleis")))
     testImplementation(testFixtures(project(":spesialist-client-unleash")))
     testImplementation(testFixtures(project(":spesialist-kafka")))
+    testImplementation(libs.mockOauth2Server)
 }
 
 tasks {

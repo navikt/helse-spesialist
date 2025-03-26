@@ -15,6 +15,7 @@ dependencies {
     testImplementation(libs.bundles.ktor.client)
 
     testImplementation(libs.bundles.jackson)
+    testImplementation(libs.mockOauth2Server)
 
     testImplementation(testFixtures(project(":spesialist-db")))
     testImplementation(testFixtures(project(":spesialist-api")))

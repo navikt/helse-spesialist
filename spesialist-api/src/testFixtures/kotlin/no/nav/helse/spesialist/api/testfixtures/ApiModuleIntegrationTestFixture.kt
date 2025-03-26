@@ -11,10 +11,9 @@ import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import java.util.UUID
 
-object ApiModuleIntegrationTestFixture {
-    private val mockOAuth2Server = MockOAuth2Server().also(MockOAuth2Server::start)
-    private const val CLIENT_ID = "en-client-id"
-    private const val ISSUER_ID = "LocalTestIssuer"
+class ApiModuleIntegrationTestFixture(
+    private val mockOAuth2Server: MockOAuth2Server = MockOAuth2Server().also(MockOAuth2Server::start)
+) {
     val token: String =
         mockOAuth2Server.issueToken(
             issuerId = ISSUER_ID,
@@ -70,4 +69,9 @@ object ApiModuleIntegrationTestFixture {
         ?.replace("\${graphQLEndpoint}", "graphql")
         ?.replace("\${subscriptionsEndpoint}", "subscriptions")
         ?: throw IllegalStateException("graphql-playground.html cannot be found in the classpath")
+
+    companion object {
+        private const val CLIENT_ID = "en-client-id"
+        private const val ISSUER_ID = "LocalTestIssuer"
+    }
 }
