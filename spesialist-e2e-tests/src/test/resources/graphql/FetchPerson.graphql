@@ -1,0 +1,651 @@
+query FetchPerson($fnr: String, $aktorId: String) {
+    person(fnr: $fnr, aktorId: $aktorId) {
+        ...person
+        __typename
+    }
+}
+
+fragment vilkarsgrunnlag on Vilkarsgrunnlag {
+    id
+    sykepengegrunnlag
+    skjaeringstidspunkt
+    omregnetArsinntekt
+    inntekter {
+        sammenligningsgrunnlag {
+            belop
+            inntektFraAOrdningen {
+                maned
+                sum
+                __typename
+            }
+            __typename
+        }
+        omregnetArsinntekt {
+            inntektFraAOrdningen {
+                maned
+                sum
+                __typename
+            }
+            belop
+            manedsbelop
+            kilde
+            __typename
+        }
+        skjonnsmessigFastsatt {
+            inntektFraAOrdningen {
+                maned
+                sum
+                __typename
+            }
+            belop
+            manedsbelop
+            kilde
+            __typename
+        }
+        arbeidsgiver
+        deaktivert
+        fom
+        tom
+        __typename
+    }
+    arbeidsgiverrefusjoner {
+        arbeidsgiver
+        refusjonsopplysninger {
+            fom
+            tom
+            belop
+            meldingsreferanseId
+            __typename
+        }
+        __typename
+    }
+    vilkarsgrunnlagtype
+    ... on VilkarsgrunnlagSpleis {
+        sammenligningsgrunnlag
+        skjonnsmessigFastsattAarlig
+        oppfyllerKravOmMinstelonn
+        oppfyllerKravOmMedlemskap
+        oppfyllerKravOmOpptjening
+        antallOpptjeningsdagerErMinst
+        grunnbelop
+        avviksprosent
+        opptjeningFra
+        sykepengegrunnlagsgrense {
+            grunnbelop
+            grense
+            virkningstidspunkt
+            __typename
+        }
+        __typename
+    }
+    __typename
+}
+
+fragment ghostPeriode on GhostPeriode {
+    id
+    deaktivert
+    vilkarsgrunnlagId
+    skjaeringstidspunkt
+    fom
+    tom
+    organisasjonsnummer
+    __typename
+}
+
+fragment nyttInntektsforholdPeriode on NyttInntektsforholdPeriode {
+    id
+    fom
+    tom
+    organisasjonsnummer
+    skjaeringstidspunkt
+    dagligBelop
+    manedligBelop
+    __typename
+}
+
+fragment kommentar on Kommentar {
+    id
+    tekst
+    opprettet
+    saksbehandlerident
+    feilregistrert_tidspunkt
+    __typename
+}
+
+fragment notat on Notat {
+    id
+    dialogRef
+    tekst
+    opprettet
+    saksbehandlerOid
+    saksbehandlerNavn
+    saksbehandlerEpost
+    saksbehandlerIdent
+    vedtaksperiodeId
+    feilregistrert
+    type
+    kommentarer {
+        ...kommentar
+        __typename
+    }
+    __typename
+}
+
+fragment periode on Periode {
+    behandlingId
+    fom
+    tom
+    erForkastet
+    inntektstype
+    opprettet
+    periodetype
+    tidslinje {
+        dato
+        grad
+        kilde {
+            id
+            type
+            __typename
+        }
+        sykdomsdagtype
+        utbetalingsdagtype
+        utbetalingsinfo {
+            arbeidsgiverbelop
+            inntekt
+            personbelop
+            refusjonsbelop
+            totalGrad
+            utbetaling
+            __typename
+        }
+        begrunnelser
+        __typename
+    }
+    vedtaksperiodeId
+    periodetilstand
+    skjaeringstidspunkt
+    varsler {
+        generasjonId
+        definisjonId
+        opprettet
+        kode
+        tittel
+        forklaring
+        handling
+        vurdering {
+            ident
+            status
+            tidsstempel
+            __typename
+        }
+        __typename
+    }
+    hendelser {
+        id
+        type
+        ... on Inntektsmelding {
+            beregnetInntekt
+            mottattDato
+            eksternDokumentId
+            __typename
+        }
+        ... on Sykmelding {
+            fom
+            tom
+            rapportertDato
+            __typename
+        }
+        ... on SoknadNav {
+            fom
+            tom
+            rapportertDato
+            sendtNav
+            eksternDokumentId
+            __typename
+        }
+        ... on SoknadArbeidsgiver {
+            fom
+            tom
+            rapportertDato
+            sendtArbeidsgiver
+            eksternDokumentId
+            __typename
+        }
+        ... on SoknadArbeidsledig {
+            fom
+            tom
+            rapportertDato
+            sendtNav
+            eksternDokumentId
+            __typename
+        }
+        ... on SoknadFrilans {
+            fom
+            tom
+            rapportertDato
+            sendtNav
+            eksternDokumentId
+            __typename
+        }
+        ... on InntektHentetFraAOrdningen {
+            mottattDato
+            __typename
+        }
+        __typename
+    }
+    __typename
+}
+
+fragment uberegnetPeriode on UberegnetPeriode {
+    id
+    notater {
+        ...notat
+        __typename
+    }
+    ...periode
+    __typename
+}
+
+fragment simulering on Simulering {
+    fagsystemId
+    totalbelop
+    tidsstempel
+    utbetalingslinjer {
+        fom
+        tom
+        dagsats
+        grad
+        __typename
+    }
+    perioder {
+        fom
+        tom
+        utbetalinger {
+            mottakerId
+            mottakerNavn
+            forfall
+            feilkonto
+            detaljer {
+                fom
+                tom
+                utbetalingstype
+                uforegrad
+                typeSats
+                tilbakeforing
+                sats
+                refunderesOrgNr
+                konto
+                klassekode
+                antallSats
+                belop
+                klassekodebeskrivelse
+                __typename
+            }
+            __typename
+        }
+        __typename
+    }
+    __typename
+}
+
+fragment beregnetPeriode on BeregnetPeriode {
+    id
+    beregningId
+    forbrukteSykedager
+    gjenstaendeSykedager
+    vedtaksperiodeId
+    handlinger {
+        type
+        tillatt
+        begrunnelse
+        __typename
+    }
+    notater {
+        ...notat
+        __typename
+    }
+    historikkinnslag {
+        id
+        type
+        timestamp
+        saksbehandlerIdent
+        dialogRef
+        ... on LagtPaVent {
+            frist
+            arsaker
+            notattekst
+            kommentarer {
+                ...kommentar
+                __typename
+            }
+            __typename
+        }
+        ... on EndrePaVent {
+            frist
+            arsaker
+            notattekst
+            kommentarer {
+                ...kommentar
+                __typename
+            }
+            __typename
+        }
+        ... on TotrinnsvurderingRetur {
+            notattekst
+            kommentarer {
+                ...kommentar
+                __typename
+            }
+            __typename
+        }
+        __typename
+    }
+    maksdato
+    periodevilkar {
+        alder {
+            alderSisteSykedag
+            oppfylt
+            __typename
+        }
+        sykepengedager {
+            forbrukteSykedager
+            gjenstaendeSykedager
+            maksdato
+            oppfylt
+            skjaeringstidspunkt
+            __typename
+        }
+        __typename
+    }
+    risikovurdering {
+        funn {
+            beskrivelse
+            kategori
+            __typename
+        }
+        kontrollertOk {
+            beskrivelse
+            kategori
+            __typename
+        }
+        __typename
+    }
+    utbetaling {
+        id
+        arbeidsgiverFagsystemId
+        arbeidsgiverNettoBelop
+        personFagsystemId
+        personNettoBelop
+        status
+        type
+        vurdering {
+            automatisk
+            godkjent
+            ident
+            tidsstempel
+            __typename
+        }
+        arbeidsgiversimulering {
+            ...simulering
+            __typename
+        }
+        personsimulering {
+            ...simulering
+            __typename
+        }
+        __typename
+    }
+    vilkarsgrunnlagId
+    oppgave {
+        id
+        __typename
+    }
+    paVent {
+        frist
+        oid
+        __typename
+    }
+    totrinnsvurdering {
+        erBeslutteroppgave
+        erRetur
+        saksbehandler
+        beslutter
+        __typename
+    }
+    egenskaper {
+        egenskap
+        kategori
+        __typename
+    }
+    avslag {
+        type
+        begrunnelse
+        opprettet
+        saksbehandlerIdent
+        invalidert
+        __typename
+    }
+    vedtakBegrunnelser {
+        utfall
+        begrunnelse
+        opprettet
+        saksbehandlerIdent
+        __typename
+    }
+    annullering {
+        saksbehandlerIdent
+        arbeidsgiverFagsystemId
+        personFagsystemId
+        tidspunkt
+        arsaker
+        begrunnelse
+        __typename
+    }
+    ...periode
+    __typename
+}
+
+fragment overstyring on Overstyring {
+    hendelseId
+    saksbehandler {
+        ident
+        navn
+        __typename
+    }
+    timestamp
+    ferdigstilt
+    vedtaksperiodeId
+    __typename
+    ... on Dagoverstyring {
+        begrunnelse
+        dager {
+            grad
+            fraGrad
+            dato
+            type
+            fraType
+            __typename
+        }
+        __typename
+    }
+    ... on Inntektoverstyring {
+        inntekt {
+            skjaeringstidspunkt
+            forklaring
+            begrunnelse
+            manedligInntekt
+            fraManedligInntekt
+            refusjonsopplysninger {
+                fom
+                tom
+                belop
+                __typename
+            }
+            fraRefusjonsopplysninger {
+                fom
+                tom
+                belop
+                __typename
+            }
+            __typename
+        }
+        __typename
+    }
+    ... on Arbeidsforholdoverstyring {
+        begrunnelse
+        deaktivert
+        skjaeringstidspunkt
+        forklaring
+        __typename
+    }
+    ... on Sykepengegrunnlagskjonnsfastsetting {
+        skjonnsfastsatt {
+            arsak
+            type
+            begrunnelse
+            begrunnelseMal
+            begrunnelseFritekst
+            begrunnelseKonklusjon
+            arlig
+            fraArlig
+            skjaeringstidspunkt
+            __typename
+        }
+        __typename
+    }
+    ... on MinimumSykdomsgradOverstyring {
+        minimumSykdomsgrad {
+            perioderVurdertOk {
+                fom
+                tom
+                __typename
+            }
+            perioderVurdertIkkeOk {
+                fom
+                tom
+                __typename
+            }
+            begrunnelse
+            initierendeVedtaksperiodeId
+            __typename
+        }
+        __typename
+    }
+}
+
+fragment arbeidsgiver on Arbeidsgiver {
+    bransjer
+    navn
+    organisasjonsnummer
+    arbeidsforhold {
+        sluttdato
+        startdato
+        stillingsprosent
+        stillingstittel
+        __typename
+    }
+    ghostPerioder {
+        ...ghostPeriode
+        __typename
+    }
+    nyeInntektsforholdPerioder {
+        ...nyttInntektsforholdPeriode
+        __typename
+    }
+    generasjoner {
+        id
+        perioder {
+            ... on UberegnetPeriode {
+                ...uberegnetPeriode
+                __typename
+            }
+            ... on BeregnetPeriode {
+                ...beregnetPeriode
+                __typename
+            }
+            __typename
+        }
+        __typename
+    }
+    overstyringer {
+        ...overstyring
+        __typename
+    }
+    inntekterFraAordningen {
+        skjaeringstidspunkt
+        inntekter {
+            maned
+            sum
+            __typename
+        }
+        __typename
+    }
+    __typename
+}
+
+fragment tilleggsinfoForInntektskilde on TilleggsinfoForInntektskilde {
+    orgnummer
+    navn
+    __typename
+}
+
+fragment person on Person {
+    fodselsnummer
+    dodsdato
+    enhet {
+        id
+        navn
+        __typename
+    }
+    infotrygdutbetalinger {
+        organisasjonsnummer
+        dagsats
+        fom
+        tom
+        grad
+        typetekst
+        __typename
+    }
+    personinfo {
+        fornavn
+        mellomnavn
+        etternavn
+        adressebeskyttelse
+        fodselsdato
+        kjonn
+        fullmakt
+        reservasjon {
+            kanVarsles
+            reservert
+            __typename
+        }
+        unntattFraAutomatisering {
+            erUnntatt
+            arsaker
+            tidspunkt
+            __typename
+        }
+        __typename
+    }
+    tildeling {
+        navn
+        epost
+        oid
+        __typename
+    }
+    versjon
+    vilkarsgrunnlag {
+        ...vilkarsgrunnlag
+        __typename
+    }
+    aktorId
+    arbeidsgivere {
+        ...arbeidsgiver
+        __typename
+    }
+    tilleggsinfoForInntektskilder {
+        ...tilleggsinfoForInntektskilde
+        __typename
+    }
+    __typename
+}
