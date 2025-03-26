@@ -1,5 +1,7 @@
 package no.nav.helse.spesialist.domain.inntektsperiode
 
+import no.nav.helse.spesialist.domain.Periode
+import no.nav.helse.spesialist.domain.inntektsperiode.Inntektsendringer.PeriodeMedBeløp
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
@@ -14,22 +16,25 @@ class InntektsperiodeTest {
         val inntektsperiode = Inntektsperiode.ny(
             fødselsnummer = lagFødselsnummer(),
             organisasjonsnummer = organisasjonsnummer,
-            fom = 1 jan 2018,
-            tom = 31 jan 2018,
         )
         val fordeling = Inntektsfordeling.ny(
-            dager = listOf(
-                Inntektsdag(dato = 1 jan 2018, beløp = 10000.0),
-                Inntektsdag(dato = 2 jan 2018, beløp = 10000.0),
-                Inntektsdag(dato = 15 jan 2018, beløp = 10000.0),
-                Inntektsdag(dato = 31 jan 2018, beløp = 10000.0),
-            )
+            periodebeløp = 40000.0,
+            dager = listOf(1 jan 2018, 2 jan 2018, 15 jan 2018, 31 jan 2018)
         )
         val inntektsendringer = inntektsperiode.nyFordeling(fordeling)
         assertEquals(organisasjonsnummer, inntektsendringer.organisasjonsnummer)
-        assertEquals(Inntektsendringer.PeriodeMedBeløp(1 jan 2018, 2 jan 2018, 10000.0), inntektsendringer.nyeEllerEndredeInntekter[0])
-        assertEquals(Inntektsendringer.PeriodeMedBeløp(15 jan 2018, 15 jan 2018, 10000.0), inntektsendringer.nyeEllerEndredeInntekter[1])
-        assertEquals(Inntektsendringer.PeriodeMedBeløp(31 jan 2018, 31 jan 2018, 10000.0), inntektsendringer.nyeEllerEndredeInntekter[2])
+        assertEquals(
+            expected = PeriodeMedBeløp(Periode(1 jan 2018, 2 jan 2018), 10000.0),
+            actual = inntektsendringer.nyeEllerEndredeInntekter[0]
+        )
+        assertEquals(
+            expected = PeriodeMedBeløp(Periode(15 jan 2018, 15 jan 2018), 10000.0),
+            actual = inntektsendringer.nyeEllerEndredeInntekter[1]
+        )
+        assertEquals(
+            expected = PeriodeMedBeløp(Periode(31 jan 2018, 31 jan 2018), 10000.0),
+            actual = inntektsendringer.nyeEllerEndredeInntekter[2]
+        )
         assertEquals(3, inntektsendringer.nyeEllerEndredeInntekter.size)
         assertEquals(1, inntektsperiode.fordelinger.size)
         assertEquals(fordeling, inntektsperiode.fordelinger[0])

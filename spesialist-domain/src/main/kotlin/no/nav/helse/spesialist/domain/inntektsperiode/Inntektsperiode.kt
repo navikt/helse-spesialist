@@ -1,7 +1,6 @@
 package no.nav.helse.spesialist.domain.inntektsperiode
 
 import no.nav.helse.spesialist.domain.ddd.Entity
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -13,8 +12,6 @@ class Inntektsperiode private constructor(
     val fødselsnummer: String,
     val organisasjonsnummer: String,
     val opprettet: LocalDateTime,
-    val fom: LocalDate,
-    val tom: LocalDate,
     fordelinger: List<Inntektsfordeling>,
 ) : Entity<InntektsperiodeId>(id) {
     private val _fordelinger: MutableList<Inntektsfordeling> = fordelinger.toMutableList()
@@ -46,15 +43,11 @@ class Inntektsperiode private constructor(
         fun ny(
             fødselsnummer: String,
             organisasjonsnummer: String,
-            fom: LocalDate,
-            tom: LocalDate,
         ) = Inntektsperiode(
             id = InntektsperiodeId(UUID.randomUUID()),
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             opprettet = LocalDateTime.now(),
-            fom = fom,
-            tom = tom,
             fordelinger = emptyList(),
         )
     }
