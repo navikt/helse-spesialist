@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test
 
 class VedtakFattetE2ETest : AbstractE2EIntegrationTest() {
     @Test
-    fun `vedtak fattet medfører låsing av vedtaksperiode-generasjon`() {
+    fun `når saksbehandler fatter vedtak får behandlingen tilstand VedtakFattet`() {
         // Given:
         risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
         simulerFremTilOgMedGodkjenningsbehov()
