@@ -12,10 +12,8 @@ import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.kommando.AvbrytCommand
-import no.nav.helse.modell.kommando.AvbrytOppgaveCommand
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
-import no.nav.helse.modell.kommando.ReserverPersonHvisTildeltCommand
 import no.nav.helse.modell.kommando.VedtaksperiodeReberegnetPeriodehistorikk
 import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode
@@ -69,18 +67,6 @@ internal class VedtaksperiodeReberegnetCommand(
             VedtaksperiodeReberegnetPeriodehistorikk(
                 vedtaksperiode = vedtaksperiode,
                 periodehistorikkDao = periodehistorikkDao,
-            ),
-            ReserverPersonHvisTildeltCommand(
-                fødselsnummer = fødselsnummer,
-                reservasjonDao = reservasjonDao,
-                tildelingDao = tildelingDao,
-                oppgaveDao = oppgaveDao,
-                totrinnsvurderingRepository = totrinnsvurderingRepository,
-                featureToggles = featureToggles,
-            ),
-            AvbrytOppgaveCommand(
-                vedtaksperiodeId = vedtaksperiode.vedtaksperiodeId(),
-                oppgaveService = oppgaveService,
             ),
             AvbrytCommand(
                 fødselsnummer = fødselsnummer,
