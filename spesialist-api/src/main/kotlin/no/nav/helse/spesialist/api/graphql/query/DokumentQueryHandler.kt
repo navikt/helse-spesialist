@@ -174,20 +174,6 @@ class DokumentQueryHandler(
             naerRelasjon = getIfNotNull("naerRelasjon")?.asBoolean(),
             innsenderFulltNavn = getIfNotNull("innsenderFulltNavn")?.asText(),
             innsenderTelefon = getIfNotNull("innsenderTelefon")?.asText(),
-            inntektEndringAarsak =
-                getIfNotNull("inntektEndringAarsak")?.let { endringAarsak ->
-                    ApiInntektEndringAarsak(
-                        endringAarsak.get("aarsak").asText(),
-                        endringAarsak.getIfNotNull("perioder")?.map { periode ->
-                            ApiIMPeriode(
-                                fom = periode.getIfNotNull("fom")?.asLocalDate(),
-                                tom = periode.getIfNotNull("tom")?.asLocalDate(),
-                            )
-                        },
-                        endringAarsak.getIfNotNull("gjelderFra")?.asLocalDate(),
-                        endringAarsak.getIfNotNull("bleKjent")?.asLocalDate(),
-                    )
-                },
             inntektEndringAarsaker =
                 getIfNotNull("inntektEndringAarsaker")?.let { endringAarsaker ->
                     endringAarsaker.map { endringAarsak ->
