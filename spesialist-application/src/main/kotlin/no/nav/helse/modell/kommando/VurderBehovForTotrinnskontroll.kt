@@ -50,12 +50,11 @@ internal class VurderBehovForTotrinnskontroll(
         vedtaksperiodeHarFerdigstiltOppgave: Boolean,
     ) {
         val overstyringer: List<Overstyring> = overstyringRepository.finnAktive(fødselsnummer)
-        val eksisterendeTotrinnsvurdering = totrinnsvurderingRepository.finn(fødselsnummer)
-        if ((kreverTotrinnsvurdering && !vedtaksperiodeHarFerdigstiltOppgave) || eksisterendeTotrinnsvurdering != null) {
+        if ((kreverTotrinnsvurdering && !vedtaksperiodeHarFerdigstiltOppgave) || overstyringer.isNotEmpty()) {
             logg.info("Vedtaksperioden: $vedtaksperiodeId trenger totrinnsvurdering")
 
             val totrinnsvurdering =
-                (eksisterendeTotrinnsvurdering ?: Totrinnsvurdering.ny(vedtaksperiodeId, fødselsnummer))
+                totrinnsvurderingRepository.finn(fødselsnummer) ?: Totrinnsvurdering.ny(vedtaksperiodeId, fødselsnummer)
             if (totrinnsvurdering.tilstand == AVVENTER_BESLUTTER) {
                 totrinnsvurdering.settAvventerSaksbehandler()
                 periodehistorikkDao.lagre(

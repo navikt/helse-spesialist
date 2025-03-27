@@ -14,6 +14,8 @@ import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode
+import no.nav.helse.modell.saksbehandler.handlinger.Overstyring
+import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinje
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand
@@ -50,12 +52,25 @@ internal class VurderBehovForTotrinnskontrollTest {
             )
         )
         private val FØDSELSNUMMER = "fnr"
+        private val AKTØR = "fnr"
     }
 
     private val oppgaveService = mockk<OppgaveService>(relaxed = true)
     private val overstyringDao = mockk<OverstyringDao>(relaxed = true)
     private val periodehistorikkDao = mockk<PeriodehistorikkDao>(relaxed = true)
-    private val overstyringRepository = mockk<OverstyringRepository>(relaxed = true)
+    private val overstyringRepository = object : OverstyringRepository {
+        var overstyringerSomSkalReturneres: Overstyring? = null
+        override fun lagre(overstyringer: List<Overstyring>, totrinnsvurderingId: TotrinnsvurderingId?) =
+            error("Not implemented for test")
+
+        override fun finnAktive(fødselsnummer: String, totrinnsvurderingId: TotrinnsvurderingId): List<Overstyring> =
+            error("Not implemented for test")
+
+        override fun finnAktive(fødselsnummer: String): List<Overstyring> {
+            return overstyringerSomSkalReturneres?.let { listOf(it) } ?: emptyList()
+        }
+
+    }
     private val totrinnsvurderingRepository = object : TotrinnsvurderingRepository {
         val lagredeTotrinnsvurderinger = mutableListOf<Totrinnsvurdering>()
         var totrinnsvurderingSomSkalReturneres: Totrinnsvurdering? = null
@@ -132,7 +147,7 @@ internal class VurderBehovForTotrinnskontrollTest {
     fun `Hvis totrinnsvurdering har saksbehander skal oppgaven reserveres`() {
         val saksbehandler = lagSaksbehandlerOid(UUID.randomUUID())
 
-        every { overstyringDao.harVedtaksperiodePågåendeOverstyring(any()) } returns true
+        overstyringRepository.overstyringerSomSkalReturneres = lagOverstyring(saksbehandlerOid = saksbehandler)
         totrinnsvurderingRepository.totrinnsvurderingSomSkalReturneres =
             lagTotrinnsvurdering(saksbehandler = saksbehandler)
 
@@ -147,7 +162,7 @@ internal class VurderBehovForTotrinnskontrollTest {
         val saksbehandler = lagSaksbehandlerOid()
         val beslutter = lagSaksbehandlerOid()
 
-        every { overstyringDao.harVedtaksperiodePågåendeOverstyring(any()) } returns true
+        overstyringRepository.overstyringerSomSkalReturneres = lagOverstyring(saksbehandlerOid = saksbehandler)
         totrinnsvurderingRepository.totrinnsvurderingSomSkalReturneres = lagTotrinnsvurdering(
             saksbehandler = saksbehandler,
             beslutter = beslutter
@@ -189,6 +204,17 @@ internal class VurderBehovForTotrinnskontrollTest {
     }
 
     private fun lagSaksbehandlerOid(oid: UUID = UUID.randomUUID()) = SaksbehandlerOid(oid)
+
+    private fun lagOverstyring(saksbehandlerOid: SaksbehandlerOid = lagSaksbehandlerOid()) =
+        OverstyrtTidslinje.ny(
+            saksbehandlerOid = saksbehandlerOid,
+            fødselsnummer = FØDSELSNUMMER,
+            aktørId = AKTØR,
+            vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
+            organisasjonsnummer = "123456789",
+            dager = emptyList(),
+            begrunnelse = "begrunnelse",
+        )
 
     private fun lagTotrinnsvurdering(
         tilstand: TotrinnsvurderingTilstand = AVVENTER_BESLUTTER,
