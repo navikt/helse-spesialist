@@ -19,6 +19,7 @@ import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_BESLUTTER
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_SAKSBEHANDLER
+import no.nav.helse.spesialist.application.OverstyringRepository
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
@@ -54,6 +55,7 @@ internal class VurderBehovForTotrinnskontrollTest {
     private val oppgaveService = mockk<OppgaveService>(relaxed = true)
     private val overstyringDao = mockk<OverstyringDao>(relaxed = true)
     private val periodehistorikkDao = mockk<PeriodehistorikkDao>(relaxed = true)
+    private val overstyringRepository = mockk<OverstyringRepository>(relaxed = true)
     private val totrinnsvurderingRepository = object : TotrinnsvurderingRepository {
         val lagredeTotrinnsvurderinger = mutableListOf<Totrinnsvurdering>()
         var totrinnsvurderingSomSkalReturneres: Totrinnsvurdering? = null
@@ -89,6 +91,7 @@ internal class VurderBehovForTotrinnskontrollTest {
             overstyringDao = overstyringDao,
             periodehistorikkDao = periodehistorikkDao,
             totrinnsvurderingRepository = totrinnsvurderingRepository,
+            overstyringRepository = overstyringRepository,
             sykefraværstilfelle = sykefraværstilfelle,
             featureToggles = object : FeatureToggles {
                 override fun skalBenytteNyTotrinnsvurderingsløsning(): Boolean = true
@@ -215,6 +218,7 @@ internal class VurderBehovForTotrinnskontrollTest {
             overstyringDao = overstyringDao,
             periodehistorikkDao = periodehistorikkDao,
             totrinnsvurderingRepository = totrinnsvurderingRepository,
+            overstyringRepository = overstyringRepository,
             sykefraværstilfelle = sykefraværstilfelle,
             featureToggles = object : FeatureToggles {
                 override fun skalBenytteNyTotrinnsvurderingsløsning(): Boolean = nyTotrinnsløype

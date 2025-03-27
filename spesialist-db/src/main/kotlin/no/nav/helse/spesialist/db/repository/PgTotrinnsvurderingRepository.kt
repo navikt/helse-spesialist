@@ -52,9 +52,10 @@ class PgTotrinnsvurderingRepository(session: Session) : QueryRunner by MedSessio
             WHERE p.fødselsnummer = :fodselsnummer
               AND tv.tilstand != 'GODKJENT'
               AND tv.vedtaksperiode_forkastet = false
+              order by opprettet desc limit 1
             """.trimIndent(),
             "fodselsnummer" to fødselsnummer,
-        ).singleOrNull { it.toTotrinnsvurdering() }
+        ).singleOrNull { it.toTotrinnsvurderingDeprecated() }
 
     @Deprecated("Skal fjernes, midlertidig i bruk for å tette et hull")
     private fun finnAktivTotrinnsvurdering(vedtaksperiodeId: UUID): Totrinnsvurdering? =

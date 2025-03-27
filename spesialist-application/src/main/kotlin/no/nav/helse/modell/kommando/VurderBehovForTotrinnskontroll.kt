@@ -7,8 +7,10 @@ import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode
+import no.nav.helse.modell.saksbehandler.handlinger.Overstyring
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_BESLUTTER
+import no.nav.helse.spesialist.application.OverstyringRepository
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -21,6 +23,7 @@ internal class VurderBehovForTotrinnskontroll(
     private val overstyringDao: OverstyringDao,
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val totrinnsvurderingRepository: TotrinnsvurderingRepository,
+    private val overstyringRepository: OverstyringRepository,
     private val sykefraværstilfelle: Sykefraværstilfelle,
     private val featureToggles: FeatureToggles,
 ) : Command {
@@ -46,6 +49,7 @@ internal class VurderBehovForTotrinnskontroll(
         kreverTotrinnsvurdering: Boolean,
         vedtaksperiodeHarFerdigstiltOppgave: Boolean,
     ) {
+        val overstyringer: List<Overstyring> = overstyringRepository.finnAktive(fødselsnummer)
         val eksisterendeTotrinnsvurdering = totrinnsvurderingRepository.finn(fødselsnummer)
         if ((kreverTotrinnsvurdering && !vedtaksperiodeHarFerdigstiltOppgave) || eksisterendeTotrinnsvurdering != null) {
             logg.info("Vedtaksperioden: $vedtaksperiodeId trenger totrinnsvurdering")
@@ -58,6 +62,11 @@ internal class VurderBehovForTotrinnskontroll(
                     Historikkinnslag.totrinnsvurderingAutomatiskRetur(),
                     vedtaksperiode.gjeldendeUnikId,
                 )
+            }
+            overstyringer.forEach { overstyring ->
+                if (overstyring !in totrinnsvurdering.overstyringer) {
+                    totrinnsvurdering.nyOverstyring(overstyring)
+                }
             }
             totrinnsvurderingRepository.lagre(totrinnsvurdering)
 
