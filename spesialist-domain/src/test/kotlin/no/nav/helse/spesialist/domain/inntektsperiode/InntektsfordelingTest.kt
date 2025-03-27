@@ -18,7 +18,8 @@ class InntektsfordelingTest {
         assertEquals(0, differanse.fjernedeInntekter.size)
         assertEquals(1, differanse.nyeEllerEndredeInntekter.size)
         assertEquals(
-            expected = PeriodeMedBeløp(2 jan 2018 til 2 jan 2018, 1000.0), actual = differanse.nyeEllerEndredeInntekter[0]
+            expected = PeriodeMedBeløp(2 jan 2018 til 2 jan 2018, 1000.0),
+            actual = differanse.nyeEllerEndredeInntekter[0]
         )
     }
 
@@ -30,7 +31,8 @@ class InntektsfordelingTest {
         assertEquals(0, differanse.fjernedeInntekter.size)
         assertEquals(1, differanse.nyeEllerEndredeInntekter.size)
         assertEquals(
-            expected = PeriodeMedBeløp(1 jan 2018 til 2 jan 2018, 1500.0), actual = differanse.nyeEllerEndredeInntekter[0]
+            expected = PeriodeMedBeløp(1 jan 2018 til 2 jan 2018, 1500.0),
+            actual = differanse.nyeEllerEndredeInntekter[0]
         )
     }
 
@@ -42,7 +44,8 @@ class InntektsfordelingTest {
         assertEquals(0, differanse.fjernedeInntekter.size)
         assertEquals(1, differanse.nyeEllerEndredeInntekter.size)
         assertEquals(
-            expected = PeriodeMedBeløp(2 jan 2018 til 3 jan 2018, 1000.0), actual = differanse.nyeEllerEndredeInntekter[0]
+            expected = PeriodeMedBeløp(2 jan 2018 til 3 jan 2018, 1000.0),
+            actual = differanse.nyeEllerEndredeInntekter[0]
         )
     }
 
@@ -128,13 +131,16 @@ class InntektsfordelingTest {
     }
 
     private infix fun Double.fordeltPå(perioder: List<Periode>): Inntektsfordeling {
-        return Inntektsfordeling.ny(
+        return Inntektsfordeling(
+            dager = perioder.flatMap { it.datoer() },
             periodebeløp = this,
-            dager = perioder.flatMap { it.datoer() }
         )
     }
 
-    private val ingenFordeling = Inntektsfordeling.ny(0.0, emptyList())
+    private val ingenFordeling = Inntektsfordeling(
+        dager = emptyList(),
+        periodebeløp = 0.0,
+    )
 
     private infix fun Double.fordeltPå(periode: Periode): Inntektsfordeling = this.fordeltPå(listOf(periode))
     private infix fun Double.fordeltPå(dato: LocalDate): Inntektsfordeling = this.fordeltPå(listOf(dato til dato))

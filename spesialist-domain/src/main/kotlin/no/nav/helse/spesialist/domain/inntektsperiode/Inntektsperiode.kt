@@ -12,18 +12,19 @@ class Inntektsperiode private constructor(
     val fødselsnummer: String,
     val organisasjonsnummer: String,
     val opprettet: LocalDateTime,
-    fordelinger: List<Inntektsfordeling>,
+    endringer: List<Inntektsperiodeendring>,
 ) : Entity<InntektsperiodeId>(id) {
-    private val _fordelinger: MutableList<Inntektsfordeling> = fordelinger.toMutableList()
+    private val _endringer: MutableList<Inntektsperiodeendring> = endringer.toMutableList()
 
-    val fordelinger: List<Inntektsfordeling> get() = _fordelinger
+    val endringer: List<Inntektsperiodeendring> get() = _endringer
 
-    fun nyFordeling(fordeling: Inntektsfordeling): Inntektsendringer {
-        val forrigeFordeling = fordelinger.lastOrNull()
-        _fordelinger.addLast(fordeling)
-        if (forrigeFordeling == null) return inntektsendringerForFørsteFordeling(fordeling)
+    fun endring(inntektsperiodeendring: Inntektsperiodeendring): Inntektsendringer {
+        val forrigeFordeling = endringer.lastOrNull()?.fordeling
+        val nyFordeling = inntektsperiodeendring.fordeling
+        _endringer.addLast(inntektsperiodeendring)
+        if (forrigeFordeling == null) return inntektsendringerForFørsteFordeling(nyFordeling)
 
-        val differanse = fordeling diff forrigeFordeling
+        val differanse = nyFordeling diff forrigeFordeling
         return Inntektsendringer(
             organisasjonsnummer = organisasjonsnummer,
             nyeEllerEndredeInntekter = differanse.nyeEllerEndredeInntekter,
@@ -48,7 +49,7 @@ class Inntektsperiode private constructor(
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
             opprettet = LocalDateTime.now(),
-            fordelinger = emptyList(),
+            endringer = emptyList(),
         )
     }
 }
