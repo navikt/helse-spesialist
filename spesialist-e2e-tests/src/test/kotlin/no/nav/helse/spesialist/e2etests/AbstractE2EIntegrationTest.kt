@@ -1,9 +1,7 @@
 package no.nav.helse.spesialist.e2etests
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
-import io.ktor.client.plugins.api.ClientPluginInstance
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiationConfig
 import io.ktor.client.request.accept
 import io.ktor.client.request.bearerAuth
 import io.ktor.client.request.post
@@ -82,7 +80,8 @@ abstract class AbstractE2EIntegrationTest {
         rapidsConnection = testRapid
     ).also { it.registerOn(testRapid) }
 
-    private val modules = RapidApp.start(
+    private val rapidApp = RapidApp()
+    private val modules = rapidApp.start(
         configuration = Configuration(
             api = ApiModuleIntegrationTestFixture.apiModuleConfiguration,
             clientEntraID = ClientEntraIDModuleIntegrationTestFixture.entraIDAccessTokenGeneratorConfiguration,
@@ -127,13 +126,11 @@ abstract class AbstractE2EIntegrationTest {
     protected fun callGraphQL(operationName: String, variables: Map<String, Any>) {
         testApplication {
             application {
-                RapidApp.ktorSetupCallback(this)
+                rapidApp.ktorSetupCallback(this)
             }
 
             createClient {
-                install<ContentNegotiationConfig, ClientPluginInstance<ContentNegotiationConfig>>(
-                    ContentNegotiation
-                ) {
+                install(ContentNegotiation) {
                     register(Application.Json, JacksonConverter(objectMapper))
                 }
             }.post("/graphql") {

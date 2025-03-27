@@ -14,7 +14,8 @@ import no.nav.helse.spesialist.kafka.testfixtures.KafkaModuleIntegrationTestFixt
 import java.util.UUID
 
 fun main() {
-    RapidApp.start(
+    val rapidApp = RapidApp()
+    rapidApp.start(
         configuration = Configuration(
             api = ApiModuleIntegrationTestFixture.apiModuleConfiguration,
             clientEntraID = ClientEntraIDModuleIntegrationTestFixture.entraIDAccessTokenGeneratorConfiguration,
@@ -54,7 +55,7 @@ fun main() {
             },
         ),
         rapidsConnection = KafkaModuleIntegrationTestFixture.createRapidApplication { ktorApplication ->
-            RapidApp.ktorSetupCallback(ktorApplication)
+            rapidApp.ktorSetupCallback(ktorApplication)
             ApiModuleIntegrationTestFixture.addAdditionalRoutings(ktorApplication)
         },
     )

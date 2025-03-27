@@ -20,7 +20,8 @@ import java.net.URI
 fun main() {
     val env = System.getenv()
     val versjonAvKode = env.getValue("NAIS_APP_IMAGE")
-    RapidApp.start(
+    val rapidApp = RapidApp()
+    rapidApp.start(
         configuration =
             Configuration(
                 api =
@@ -91,7 +92,7 @@ fun main() {
                 builder = {
                     withKtorModule {
                         // Deferret fordi det er sirkulær avhengighet mellom RapidApplication og Ktor-oppsettet...
-                        RapidApp.ktorSetupCallback(this)
+                        rapidApp.ktorSetupCallback(this)
                     }
                 },
             ),
@@ -103,7 +104,7 @@ private fun Map<String, String>.getBoolean(
     defaultValue: Boolean,
 ): Boolean = this[key]?.toBoolean() ?: defaultValue
 
-object RapidApp {
+class RapidApp {
     class Modules(val dbModule: DBModule)
 
     lateinit var ktorSetupCallback: (Application) -> Unit
