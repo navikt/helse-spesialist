@@ -9,19 +9,17 @@ import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.test.TestPerson
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 
-class SpleisStub(
-    private val testPerson: TestPerson,
-    private val rapidsConnection: RapidsConnection,
-) : River.PacketListener {
-    private val meldingsendere = mutableMapOf<UUID, SpleisTestMeldingPubliserer>()
+class SpleisStub(private val rapidsConnection: RapidsConnection) : River.PacketListener {
+    private val meldingsendere = ConcurrentHashMap<UUID, SpleisTestMeldingPubliserer>()
 
-    fun simulerFremTilOgMedGodkjenningsbehov(vedtaksperiodeId: UUID) {
-        simulerFremTilOgMedNyUtbetaling(vedtaksperiodeId)
+    fun simulerFremTilOgMedGodkjenningsbehov(testPerson: TestPerson, vedtaksperiodeId: UUID) {
+        simulerFremTilOgMedNyUtbetaling(testPerson, vedtaksperiodeId)
         simulerFraNyUtbetalingTilOgMedGodkjenningsbehov(vedtaksperiodeId)
     }
 
-    fun simulerFremTilOgMedNyUtbetaling(vedtaksperiodeId: UUID) {
+    fun simulerFremTilOgMedNyUtbetaling(testPerson: TestPerson, vedtaksperiodeId: UUID) {
         val spleisTestMeldingPubliserer = SpleisTestMeldingPubliserer(
             testPerson = testPerson,
             rapidsConnection = rapidsConnection,

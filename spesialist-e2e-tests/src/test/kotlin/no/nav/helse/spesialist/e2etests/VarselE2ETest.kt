@@ -54,7 +54,7 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
 
         // When:
         simulerFremTilOgMedGodkjenningsbehov()
-        behovLøserStub.besvarIgjen("ÅpneOppgaver")
+        besvarBehovIgjen("ÅpneOppgaver")
 
         // Then:
         assertEquals(setOf(Varsel(SB_EX_1.name, AKTIV.name)), hentVarselkoder())

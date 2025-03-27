@@ -29,18 +29,8 @@ import no.nav.helse.spesialist.client.spleis.testfixtures.ClientSpleisModuleInte
 import no.nav.helse.spesialist.client.unleash.testfixtures.ClientUnleashModuleIntegrationTestFixture
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.testfixtures.DBTestFixture
-import no.nav.helse.spesialist.e2etests.behovløserstubs.ArbeidsforholdBehovLøser
-import no.nav.helse.spesialist.e2etests.behovløserstubs.ArbeidsgiverinformasjonBehovLøser
-import no.nav.helse.spesialist.e2etests.behovløserstubs.AvviksvurderingBehovLøser
 import no.nav.helse.spesialist.e2etests.behovløserstubs.BehovLøserStub
-import no.nav.helse.spesialist.e2etests.behovløserstubs.EgenAnsattBehovLøser
-import no.nav.helse.spesialist.e2etests.behovløserstubs.FullmaktBehovLøser
-import no.nav.helse.spesialist.e2etests.behovløserstubs.HentEnhetBehovLøser
-import no.nav.helse.spesialist.e2etests.behovløserstubs.HentInfotrygdutbetalingerBehovLøser
-import no.nav.helse.spesialist.e2etests.behovløserstubs.HentPersoninfoV2BehovLøser
-import no.nav.helse.spesialist.e2etests.behovløserstubs.InntekterForSykepengegrunnlagBehovLøser
 import no.nav.helse.spesialist.e2etests.behovløserstubs.RisikovurderingBehovLøser
-import no.nav.helse.spesialist.e2etests.behovløserstubs.VergemålBehovLøser
 import no.nav.helse.spesialist.e2etests.behovløserstubs.ÅpneOppgaverBehovLøser
 import no.nav.helse.spesialist.kafka.testfixtures.KafkaModuleTestRapidTestFixture
 import no.nav.helse.spesialist.test.TestPerson
@@ -55,73 +45,66 @@ abstract class AbstractE2EIntegrationTest {
     private val testPerson = TestPerson()
     protected val saksbehandler = lagSaksbehandlerFraApi()
     protected val vedtaksperiodeId = UUID.randomUUID()
-    protected val risikovurderingBehovLøser = RisikovurderingBehovLøser()
-    protected val åpneOppgaverBehovLøser = ÅpneOppgaverBehovLøser()
-    private val testRapid = LoopbackTestRapid()
-    protected val behovLøserStub = BehovLøserStub(
-        testRapid,
-        ArbeidsforholdBehovLøser(),
-        ArbeidsgiverinformasjonBehovLøser(),
-        AvviksvurderingBehovLøser(),
-        EgenAnsattBehovLøser(),
-        HentEnhetBehovLøser(),
-        HentInfotrygdutbetalingerBehovLøser(testPerson.orgnummer),
-        HentPersoninfoV2BehovLøser(testPerson),
-        InntekterForSykepengegrunnlagBehovLøser(testPerson.orgnummer),
-        risikovurderingBehovLøser,
-        FullmaktBehovLøser(),
-        VergemålBehovLøser(),
-        åpneOppgaverBehovLøser,
-    ).also {
-        it.registerOn(testRapid)
-    }
-    protected val spleisStub = SpleisStub(
-        testPerson = testPerson,
-        rapidsConnection = testRapid
-    ).also { it.registerOn(testRapid) }
 
-    private val rapidApp = RapidApp()
-    private val modules = rapidApp.start(
-        configuration = Configuration(
-            api = ApiModuleIntegrationTestFixture.apiModuleConfiguration,
-            clientEntraID = ClientEntraIDModuleIntegrationTestFixture.entraIDAccessTokenGeneratorConfiguration,
-            clientKrr = ClientKRRModuleIntegationTestFixture.moduleConfiguration,
-            clientSpleis = ClientSpleisModuleIntegrationTestFixture.moduleConfiguration,
-            clientUnleash = ClientUnleashModuleIntegrationTestFixture.moduleConfiguration,
-            db = DBTestFixture.database.dbModuleConfiguration,
-            kafka = KafkaModuleTestRapidTestFixture.moduleConfiguration,
-            versjonAvKode = "versjon_1",
-            tilgangsgrupper = object : Tilgangsgrupper {
-                override val kode7GruppeId: UUID = UUID.randomUUID()
-                override val beslutterGruppeId: UUID = UUID.randomUUID()
-                override val skjermedePersonerGruppeId: UUID = UUID.randomUUID()
-                override val stikkprøveGruppeId: UUID = UUID.randomUUID()
+    companion object {
+        private val testRapid = LoopbackTestRapid()
+        private val behovLøserStub = BehovLøserStub(testRapid).also { it.registerOn(testRapid) }
+        private val spleisStub = SpleisStub(testRapid).also { it.registerOn(testRapid) }
+        private val rapidApp = RapidApp()
+        private val modules = rapidApp.start(
+            configuration = Configuration(
+                api = ApiModuleIntegrationTestFixture.apiModuleConfiguration,
+                clientEntraID = ClientEntraIDModuleIntegrationTestFixture.entraIDAccessTokenGeneratorConfiguration,
+                clientKrr = ClientKRRModuleIntegationTestFixture.moduleConfiguration,
+                clientSpleis = ClientSpleisModuleIntegrationTestFixture.moduleConfiguration,
+                clientUnleash = ClientUnleashModuleIntegrationTestFixture.moduleConfiguration,
+                db = DBTestFixture.database.dbModuleConfiguration,
+                kafka = KafkaModuleTestRapidTestFixture.moduleConfiguration,
+                versjonAvKode = "versjon_1",
+                tilgangsgrupper = object : Tilgangsgrupper {
+                    override val kode7GruppeId: UUID = UUID.randomUUID()
+                    override val beslutterGruppeId: UUID = UUID.randomUUID()
+                    override val skjermedePersonerGruppeId: UUID = UUID.randomUUID()
+                    override val stikkprøveGruppeId: UUID = UUID.randomUUID()
 
-                override fun gruppeId(gruppe: Gruppe): UUID {
-                    return when (gruppe) {
-                        Gruppe.KODE7 -> kode7GruppeId
-                        Gruppe.BESLUTTER -> beslutterGruppeId
-                        Gruppe.SKJERMEDE -> skjermedePersonerGruppeId
-                        Gruppe.STIKKPRØVE -> stikkprøveGruppeId
+                    override fun gruppeId(gruppe: Gruppe): UUID {
+                        return when (gruppe) {
+                            Gruppe.KODE7 -> kode7GruppeId
+                            Gruppe.BESLUTTER -> beslutterGruppeId
+                            Gruppe.SKJERMEDE -> skjermedePersonerGruppeId
+                            Gruppe.STIKKPRØVE -> stikkprøveGruppeId
+                        }
                     }
-                }
-            },
-            environmentToggles = object : EnvironmentToggles {
-                override val kanBeslutteEgneSaker = false
-                override val kanGodkjenneUtenBesluttertilgang = false
-            },
-            stikkprøver = object : Stikkprøver {
-                override fun utsFlereArbeidsgivereFørstegangsbehandling(): Boolean = false
-                override fun utsFlereArbeidsgivereForlengelse(): Boolean = false
-                override fun utsEnArbeidsgiverFørstegangsbehandling(): Boolean = false
-                override fun utsEnArbeidsgiverForlengelse(): Boolean = false
-                override fun fullRefusjonFlereArbeidsgivereFørstegangsbehandling(): Boolean = false
-                override fun fullRefusjonFlereArbeidsgivereForlengelse(): Boolean = false
-                override fun fullRefusjonEnArbeidsgiver(): Boolean = false
-            },
-        ),
-        rapidsConnection = testRapid,
-    )
+                },
+                environmentToggles = object : EnvironmentToggles {
+                    override val kanBeslutteEgneSaker = false
+                    override val kanGodkjenneUtenBesluttertilgang = false
+                },
+                stikkprøver = object : Stikkprøver {
+                    override fun utsFlereArbeidsgivereFørstegangsbehandling(): Boolean = false
+                    override fun utsFlereArbeidsgivereForlengelse(): Boolean = false
+                    override fun utsEnArbeidsgiverFørstegangsbehandling(): Boolean = false
+                    override fun utsEnArbeidsgiverForlengelse(): Boolean = false
+                    override fun fullRefusjonFlereArbeidsgivereFørstegangsbehandling(): Boolean = false
+                    override fun fullRefusjonFlereArbeidsgivereForlengelse(): Boolean = false
+                    override fun fullRefusjonEnArbeidsgiver(): Boolean = false
+                },
+            ),
+            rapidsConnection = testRapid,
+        )
+    }
+
+    init {
+        behovLøserStub.init(testPerson)
+    }
+
+    protected val risikovurderingBehovLøser =
+        behovLøserStub.finnLøser<RisikovurderingBehovLøser>(testPerson.fødselsnummer)
+    protected val åpneOppgaverBehovLøser = behovLøserStub.finnLøser<ÅpneOppgaverBehovLøser>(testPerson.fødselsnummer)
+
+    protected fun besvarBehovIgjen(behov: String) {
+        behovLøserStub.besvarIgjen(testPerson.fødselsnummer, behov)
+    }
 
     protected fun callGraphQL(operationName: String, variables: Map<String, Any>) {
         testApplication {
@@ -149,11 +132,11 @@ abstract class AbstractE2EIntegrationTest {
     }
 
     protected fun simulerFremTilOgMedGodkjenningsbehov() {
-        spleisStub.simulerFremTilOgMedGodkjenningsbehov(vedtaksperiodeId)
+        spleisStub.simulerFremTilOgMedGodkjenningsbehov(testPerson, vedtaksperiodeId)
     }
 
     protected fun simulerFremTilOgMedNyUtbetaling(vedtaksperiodeId: UUID = this.vedtaksperiodeId) {
-        spleisStub.simulerFremTilOgMedNyUtbetaling(vedtaksperiodeId)
+        spleisStub.simulerFremTilOgMedNyUtbetaling(testPerson, vedtaksperiodeId)
     }
 
     protected fun simulerFraNyUtbetalingTilOgMedGodkjenningsbehov(vedtaksperiodeId: UUID = this.vedtaksperiodeId) {
