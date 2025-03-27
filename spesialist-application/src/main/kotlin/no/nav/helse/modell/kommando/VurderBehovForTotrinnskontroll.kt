@@ -96,6 +96,8 @@ internal class VurderBehovForTotrinnskontroll(
 
             totrinnsvurderingRepository.lagre(totrinnsvurdering)
 
+            overstyringDao.kobleOverstyringerMedTotrinnsvurdering(totrinnsvurdering.id(), vedtaksperiodeId)
+
             totrinnsvurdering.saksbehandler?.value?.let {
                 oppgaveService.reserverOppgave(
                     saksbehandleroid = it,

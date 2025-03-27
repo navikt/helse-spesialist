@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.db.dao
 
 import kotliquery.Session
 import no.nav.helse.db.OverstyringDao
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.MedSession
@@ -53,4 +54,23 @@ class PgOverstyringDao private constructor(queryRunner: QueryRunner) : Overstyri
             """.trimIndent(),
             "eksternHendelseId" to eksternHendelseId,
         ).singleOrNull { true } ?: false
+
+    override fun kobleOverstyringerMedTotrinnsvurdering(
+        totrinnsvurderingId: TotrinnsvurderingId,
+        vedtaksperiodeId: UUID,
+    ) {
+        asSQL(
+            """
+            UPDATE overstyring o
+            SET totrinnsvurdering_ref = :totrinnsvurderingId
+            FROM overstyringer_for_vedtaksperioder ofv
+            WHERE ofv.vedtaksperiode_id = :vedtaksperiodeId
+              AND o.id = ofv.overstyring_ref
+              AND o.ferdigstilt = false
+              AND o.totrinnsvurdering_ref is null
+            """.trimIndent(),
+            "vedtaksperiodeId" to vedtaksperiodeId,
+            "totrinnsvurderingId" to totrinnsvurderingId.value,
+        ).update()
+    }
 }

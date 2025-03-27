@@ -39,17 +39,28 @@ internal class VurderBehovForTotrinnskontrollTest {
     private companion object {
         private val VEDTAKSPERIODE_ID_2 = UUID.randomUUID()
         private val VEDTAKSPERIODE_ID_1 = UUID.randomUUID()
-        private val VEDTAKSPERIODE = Vedtaksperiode.nyVedtaksperiode(SpleisBehandling("987654321", VEDTAKSPERIODE_ID_2, UUID.randomUUID(), LocalDate.now(), LocalDate.now()))
+        private val VEDTAKSPERIODE = Vedtaksperiode.nyVedtaksperiode(
+            SpleisBehandling(
+                "987654321",
+                VEDTAKSPERIODE_ID_2,
+                UUID.randomUUID(),
+                LocalDate.now(),
+                LocalDate.now()
+            )
+        )
         private val FØDSELSNUMMER = "fnr"
     }
 
     private val oppgaveService = mockk<OppgaveService>(relaxed = true)
     private val overstyringDao = mockk<OverstyringDao>(relaxed = true)
     private val periodehistorikkDao = mockk<PeriodehistorikkDao>(relaxed = true)
-    private val totrinnsvurderingRepository = object: TotrinnsvurderingRepository {
+    private val totrinnsvurderingRepository = object : TotrinnsvurderingRepository {
         val lagredeTotrinnsvurderinger = mutableListOf<Totrinnsvurdering>()
         var totrinnsvurderingSomSkalReturneres: Totrinnsvurdering? = null
         override fun lagre(totrinnsvurdering: Totrinnsvurdering) {
+            if (!totrinnsvurdering.harFåttTildeltId()) {
+                totrinnsvurdering.tildelId(TotrinnsvurderingId(nextLong()))
+            }
             lagredeTotrinnsvurderinger.add(totrinnsvurdering)
         }
 
@@ -119,7 +130,8 @@ internal class VurderBehovForTotrinnskontrollTest {
         val saksbehandler = lagSaksbehandlerOid(UUID.randomUUID())
 
         every { overstyringDao.harVedtaksperiodePågåendeOverstyring(any()) } returns true
-        totrinnsvurderingRepository.totrinnsvurderingSomSkalReturneres = lagTotrinnsvurdering(saksbehandler = saksbehandler)
+        totrinnsvurderingRepository.totrinnsvurderingSomSkalReturneres =
+            lagTotrinnsvurdering(saksbehandler = saksbehandler)
 
         assertTrue(command.execute(context))
 

@@ -15,6 +15,7 @@ import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinjedag
 import no.nav.helse.modell.saksbehandler.handlinger.Refusjonselement
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlag
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.OverstyringArbeidsforholdDto
@@ -27,6 +28,8 @@ import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsettingSykepengegrunn
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.testfixtures.jan
+import no.nav.helse.spesialist.domain.testfixtures.lagAktørId
+import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.typer.Kjønn
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -273,6 +276,40 @@ internal class PgOverstyringDaoTest : AbstractDBIntegrationTest() {
         assertFalse(hentetMinimumSykdomsgrad.ferdigstilt)
     }
 
+    @Test
+    fun `Kobler overtsyring med totrinns i gammel løype`() {
+        val vedtaksperiodeId = UUID.randomUUID()
+        val fødselsnummer = lagFødselsnummer()
+        val aktørId = lagAktørId()
+        val organisasjonsnummer = lagOrganisasjonsnummer()
+        val oppgave = nyOppgaveForNyPerson(
+            fødselsnummer = fødselsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            aktørId = aktørId,
+            organisasjonsnummer = organisasjonsnummer
+        )
+        val totrinnsvurderingKontekst = nyTotrinnsvurdering(fødselsnummer, oppgave)
+        val overstyring = persisterOverstyringMinimumSykdomsgrad(
+            fødselsnummer = fødselsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            aktørId = aktørId,
+            organisasjonsnummer = organisasjonsnummer,
+        )
+        overstyringDao.kobleOverstyringOgVedtaksperiode(listOf(oppgave.vedtaksperiodeId), overstyring.eksternHendelseId)
+        val totrinnsvurderingId = totrinnsvurderingKontekst.totrinnsvurdering.id()
+        overstyringDao.kobleOverstyringerMedTotrinnsvurdering(totrinnsvurderingId, vedtaksperiodeId)
+
+        assertOverstyringErKobletTilTotrinnsvurdering(totrinnsvurderingId)
+    }
+
+    private fun assertOverstyringErKobletTilTotrinnsvurdering(totrinnsvurderingId: TotrinnsvurderingId) {
+        assertEquals(
+            1, dbQuery.singleOrNull(
+                "select 1 from overstyring where totrinnsvurdering_ref = :totrinnsvurderingId",
+                "totrinnsvurderingId" to totrinnsvurderingId.value
+            ) { it.int(1) } ?: 0)
+    }
+
     private fun persisterSkjønnsfastsettingSykepengegrunnlag() {
         val skjønnsfastsattSykepengegrunnlag = SkjønnsfastsattSykepengegrunnlag.ny(
             aktørId = AKTØR,
@@ -304,35 +341,46 @@ internal class PgOverstyringDaoTest : AbstractDBIntegrationTest() {
         overstyringRepository.lagre(listOf(skjønnsfastsattSykepengegrunnlag))
     }
 
-    private fun persisterOverstyringMinimumSykdomsgrad() {
+    private fun persisterOverstyringMinimumSykdomsgrad(
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE,
+        fødselsnummer: String = FNR,
+        organisasjonsnummer: String = ORGNUMMER,
+        aktørId: String = AKTØR,
+    ): MinimumSykdomsgrad {
+        val overstyring = MinimumSykdomsgrad.ny(
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            perioderVurdertOk = listOf(
+                MinimumSykdomsgradPeriode(
+                    fom = 1 jan 2018,
+                    tom = 31 jan 2018
+                )
+            ),
+            perioderVurdertIkkeOk = emptyList(),
+            begrunnelse = "en begrunnelse",
+            vedtaksperiodeId = vedtaksperiodeId,
+            saksbehandlerOid = saksbehandlerOid,
+            arbeidsgivere =
+                listOf(
+                    MinimumSykdomsgradArbeidsgiver(
+                        organisasjonsnummer = organisasjonsnummer,
+                        berørtVedtaksperiodeId = vedtaksperiodeId
+                    )
+                ),
+        )
         overstyringRepository.lagre(
             listOf(
-                MinimumSykdomsgrad.ny(
-                    aktørId = AKTØR,
-                    fødselsnummer = FNR,
-                    perioderVurdertOk = listOf(
-                        MinimumSykdomsgradPeriode(
-                            fom = 1 jan 2018,
-                            tom = 31 jan 2018
-                        )
-                    ),
-                    perioderVurdertIkkeOk = emptyList(),
-                    begrunnelse = "en begrunnelse",
-                    vedtaksperiodeId = VEDTAKSPERIODE,
-                    saksbehandlerOid = saksbehandlerOid,
-                    arbeidsgivere =
-                        listOf(
-                            MinimumSykdomsgradArbeidsgiver(
-                                organisasjonsnummer = ORGNUMMER,
-                                berørtVedtaksperiodeId = VEDTAKSPERIODE
-                            )
-                        ),
-                ),
+                overstyring,
             )
         )
+        return overstyring
     }
 
-    private fun persisterOverstyringInntektOgRefusjon(overstyrteArbeidsgivere: List<OverstyrtArbeidsgiver> = listOf(overstyrtArbeidsgiver())) {
+    private fun persisterOverstyringInntektOgRefusjon(
+        overstyrteArbeidsgivere: List<OverstyrtArbeidsgiver> = listOf(
+            overstyrtArbeidsgiver()
+        )
+    ) {
         overstyringRepository.lagre(
             listOf(
                 OverstyrtInntektOgRefusjon.ny(
@@ -368,7 +416,11 @@ internal class PgOverstyringDaoTest : AbstractDBIntegrationTest() {
             tom = null
         )
 
-    private fun persisterOverstyringArbeidsforhold(overstyrteArbeidsforhold: List<Arbeidsforhold> = listOf(arbeidsforhold())) {
+    private fun persisterOverstyringArbeidsforhold(
+        overstyrteArbeidsforhold: List<Arbeidsforhold> = listOf(
+            arbeidsforhold()
+        )
+    ) {
         overstyringRepository.lagre(
             listOf(
                 OverstyrtArbeidsforhold.ny(
