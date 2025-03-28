@@ -260,7 +260,7 @@ internal class Automatisering(
         val antallÅpneGosysoppgaver = åpneGosysOppgaverDao.antallÅpneOppgaver(fødselsnummer)
         val harPågåendeOverstyring =
             if (featureToggles.skalBenytteNyTotrinnsvurderingsløsning()) {
-                totrinnsvurderingRepository.finn(fødselsnummer)?.tilstand != GODKJENT
+                totrinnsvurderingRepository.finn(fødselsnummer)?.let { it.tilstand != GODKJENT } ?: false
             } else {
                 overstyringDao.harVedtaksperiodePågåendeOverstyring(vedtaksperiodeId)
             }
