@@ -83,9 +83,13 @@ class RiverSetup(
                                 get("@event_name").textValue() ?: "ukjent"
                             }
                         logg.debug(
-                            "${river.name()} leste melding id=${packet.id}, event_name=$eventName. En annen/tidligere river har allerede/også behandlet meldingen:${mediator.meldingenHarBlittBehandletAvEnRiver}",
+                            "{} leste melding id={}, event_name={}. En annen/tidligere river har allerede/også behandlet meldingen:{}",
+                            river.name(),
+                            packet.id,
+                            eventName,
+                            mediator.meldingenHarBlittBehandletAvEnRiver,
                         )
-                        mediator.meldingenHarBlittBehandletAvEnRiver = true
+                        mediator.meldingenHarBlittBehandletAvEnRiver.set(true)
                     }
             }
     }

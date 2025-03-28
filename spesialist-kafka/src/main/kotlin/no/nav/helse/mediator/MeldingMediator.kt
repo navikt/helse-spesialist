@@ -77,8 +77,8 @@ class MeldingMediator(
         return harPerson
     }
 
-    private var løsninger: Løsninger? = null
-    var meldingenHarBlittBehandletAvEnRiver = false
+    private var løsninger: ThreadLocal<Løsninger?> = ThreadLocal.withInitial { null }
+    var meldingenHarBlittBehandletAvEnRiver: ThreadLocal<Boolean> = ThreadLocal.withInitial { false }
 
     // samler opp løsninger
     fun løsning(
@@ -139,8 +139,8 @@ class MeldingMediator(
     fun slettGamleDokumenter(): Int = dokumentDao.slettGamleDokumenter()
 
     fun nullstillTilstand() {
-        løsninger = null
-        meldingenHarBlittBehandletAvEnRiver = false
+        løsninger.set(null)
+        meldingenHarBlittBehandletAvEnRiver.set(false)
     }
 
     private fun løsninger(
@@ -148,14 +148,14 @@ class MeldingMediator(
         meldingId: UUID,
         contextId: UUID,
     ): Løsninger? {
-        return løsninger ?: run {
+        return løsninger.get() ?: run {
             val commandContext =
                 commandContextDao.finnSuspendert(contextId) ?: run {
                     logg.info("Ignorerer melding fordi kommandokonteksten ikke er suspendert")
                     return null
                 }
             val melding = finnMelding(meldingId) ?: return null
-            Løsninger(kontekstbasertPubliserer, melding, contextId, commandContext).also { løsninger = it }
+            Løsninger(kontekstbasertPubliserer, melding, contextId, commandContext).also { løsninger.set(it) }
         }
     }
 
@@ -183,8 +183,8 @@ class MeldingMediator(
     // fortsetter en command (resume) med oppsamlet løsninger
     fun fortsett(message: String) {
         val jsonNode = objectMapper.readTree(message)
-        løsninger?.fortsett(this, jsonNode)
-        if (meldingenHarBlittBehandletAvEnRiver) {
+        løsninger.get()?.fortsett(this, jsonNode)
+        if (meldingenHarBlittBehandletAvEnRiver.get()) {
             jsonNode["@id"]?.asUUID()?.let { id ->
                 val type =
                     when (val eventName = jsonNode["@event_name"]?.asText()) {
