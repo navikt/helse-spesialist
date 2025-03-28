@@ -1,24 +1,29 @@
 package no.nav.helse.spesialist.e2etests
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.apache.Apache
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.accept
 import io.ktor.client.request.bearerAuth
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
-import io.ktor.http.ContentType.Application
+import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.serialization.jackson.JacksonConverter
-import io.ktor.server.testing.testApplication
+import io.micrometer.prometheusmetrics.PrometheusConfig
+import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
+import kotlinx.coroutines.runBlocking
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
+import no.nav.helse.rapids_rivers.NaisEndpoints
+import no.nav.helse.rapids_rivers.ktorApplication
 import no.nav.helse.spesialist.api.bootstrap.Gruppe
 import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
-import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.testfixtures.ApiModuleIntegrationTestFixture
 import no.nav.helse.spesialist.api.testfixtures.lagSaksbehandlerFraApi
 import no.nav.helse.spesialist.bootstrap.Configuration
@@ -40,6 +45,7 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import java.time.LocalDateTime
 import java.util.UUID
+import kotlin.random.Random
 
 abstract class AbstractE2EIntegrationTest {
     private val testPerson = TestPerson()
@@ -92,10 +98,35 @@ abstract class AbstractE2EIntegrationTest {
             ),
             rapidsConnection = testRapid,
         )
+        val port = Random.nextInt(10000, 20000)
+        private val ktorApp = ktorApplication(
+            meterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT),
+            naisEndpoints = NaisEndpoints.Default,
+            port = port,
+            aliveCheck = { true },
+            readyCheck = { true },
+            preStopHook = { },
+            cioConfiguration = { },
+            modules = listOf {
+                rapidApp.ktorSetupCallback(this)
+            }
+        )
+        private val httpClient: HttpClient =
+            HttpClient(Apache) {
+                install(ContentNegotiation) {
+                    register(ContentType.Application.Json, JacksonConverter())
+                }
+                engine {
+                    socketTimeout = 5_000
+                    connectTimeout = 5_000
+                    connectionRequestTimeout = 5_000
+                }
+            }
     }
 
     init {
         behovLøserStub.init(testPerson)
+        ktorApp.start()
     }
 
     protected val risikovurderingBehovLøser =
@@ -107,18 +138,10 @@ abstract class AbstractE2EIntegrationTest {
     }
 
     protected fun callGraphQL(operationName: String, variables: Map<String, Any>) {
-        testApplication {
-            application {
-                rapidApp.ktorSetupCallback(this)
-            }
-
-            createClient {
-                install(ContentNegotiation) {
-                    register(Application.Json, JacksonConverter(objectMapper))
-                }
-            }.post("/graphql") {
-                contentType(Application.Json)
-                accept(Application.Json)
+        runBlocking {
+            httpClient.post("http://localhost:$port/graphql") {
+                contentType(ContentType.Application.Json)
+                accept(ContentType.Application.Json)
                 bearerAuth(ApiModuleIntegrationTestFixture.token(saksbehandler))
                 setBody(
                     mapOf(
