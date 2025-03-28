@@ -49,13 +49,7 @@ internal class AvsluttetMedVedtakRiverTest {
               ],
               "skjæringstidspunkt": "2018-01-01",
               "sykepengegrunnlag": 700000.0,
-              "grunnlagForSykepengegrunnlag": 700000.0,
-              "grunnlagForSykepengegrunnlagPerArbeidsgiver": {
-                "987654321": 700000.0
-              },
               "sykepengegrunnlagsfakta": $fakta,
-              "begrensning": "ER_6G_BEGRENSET",
-              "inntekt": 60000.0,
               "vedtakFattetTidspunkt": "2018-02-01T00:00:00.000",
               "utbetalingId": "${UUID.randomUUID()}",
               "@id": "${UUID.randomUUID()}",

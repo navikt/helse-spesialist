@@ -20,10 +20,6 @@ sealed interface Sykepengevedtak : UtgåendeHendelse {
     val skjæringstidspunkt: LocalDate
     val hendelser: List<UUID>
     val sykepengegrunnlag: Double
-    val grunnlagForSykepengegrunnlag: Double
-    val grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Double>
-    val begrensning: String
-    val inntekt: Double
     val vedtakFattetTidspunkt: LocalDateTime
     val tags: Set<String>
 
@@ -45,10 +41,6 @@ sealed interface Sykepengevedtak : UtgåendeHendelse {
         override val skjæringstidspunkt: LocalDate,
         override val hendelser: List<UUID>,
         override val sykepengegrunnlag: Double,
-        override val grunnlagForSykepengegrunnlag: Double,
-        override val grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Double>,
-        override val begrensning: String,
-        override val inntekt: Double,
         override val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta.Spleis.EtterHovedregel,
         override val vedtakFattetTidspunkt: LocalDateTime,
         override val tags: Set<String>,
@@ -69,10 +61,6 @@ sealed interface Sykepengevedtak : UtgåendeHendelse {
         override val skjæringstidspunkt: LocalDate,
         override val hendelser: List<UUID>,
         override val sykepengegrunnlag: Double,
-        override val grunnlagForSykepengegrunnlag: Double,
-        override val grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Double>,
-        override val begrensning: String,
-        override val inntekt: Double,
         override val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta.Spleis.EtterSkjønn,
         val skjønnsfastsettingopplysninger: Skjønnsfastsettingopplysninger,
         override val vedtakFattetTidspunkt: LocalDateTime,
@@ -102,10 +90,6 @@ sealed interface Sykepengevedtak : UtgåendeHendelse {
         override val skjæringstidspunkt: LocalDate,
         override val hendelser: List<UUID>,
         override val sykepengegrunnlag: Double,
-        override val grunnlagForSykepengegrunnlag: Double,
-        override val grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Double>,
-        override val begrensning: String,
-        override val inntekt: Double,
         val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta.Infotrygd,
         override val vedtakFattetTidspunkt: LocalDateTime,
         override val tags: Set<String>,

@@ -1,7 +1,5 @@
 package no.nav.helse.kafka
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.treeToValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
@@ -28,12 +26,8 @@ class AvsluttetMedVedtakRiver(
             it.requireKey("@id", "fødselsnummer", "vedtaksperiodeId", "organisasjonsnummer")
             it.requireKey("fom", "tom", "skjæringstidspunkt")
             it.requireArray("hendelser")
-            it.requireKey(
-                "sykepengegrunnlag",
-                "grunnlagForSykepengegrunnlag",
-                "grunnlagForSykepengegrunnlagPerArbeidsgiver",
-            )
-            it.requireKey("begrensning", "inntekt", "vedtakFattetTidspunkt")
+            it.requireKey("sykepengegrunnlag")
+            it.requireKey("vedtakFattetTidspunkt")
             it.requireKey("utbetalingId", "behandlingId")
 
             it.requireAny(
@@ -79,13 +73,6 @@ class AvsluttetMedVedtakRiver(
                     spleisBehandlingId = packet["behandlingId"].asUUID(),
                     hendelser = packet["hendelser"].map { it.asUUID() },
                     sykepengegrunnlag = packet["sykepengegrunnlag"].asDouble(),
-                    grunnlagForSykepengegrunnlag = packet["grunnlagForSykepengegrunnlag"].asDouble(),
-                    grunnlagForSykepengegrunnlagPerArbeidsgiver =
-                        jacksonObjectMapper().treeToValue<Map<String, Double>>(
-                            packet["grunnlagForSykepengegrunnlagPerArbeidsgiver"],
-                        ),
-                    begrensning = packet["begrensning"].asText(),
-                    inntekt = packet["inntekt"].asDouble(),
                     sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(packet, faktatype(packet)),
                     json = packet.toJson(),
                 ),
