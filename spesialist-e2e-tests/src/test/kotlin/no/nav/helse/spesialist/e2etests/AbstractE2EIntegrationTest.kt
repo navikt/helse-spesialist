@@ -39,6 +39,7 @@ import no.nav.helse.spesialist.e2etests.behovløserstubs.RisikovurderingBehovLø
 import no.nav.helse.spesialist.e2etests.behovløserstubs.ÅpneOppgaverBehovLøser
 import no.nav.helse.spesialist.kafka.testfixtures.KafkaModuleTestRapidTestFixture
 import no.nav.helse.spesialist.test.TestPerson
+import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -57,10 +58,12 @@ abstract class AbstractE2EIntegrationTest {
         private val behovLøserStub = BehovLøserStub(testRapid).also { it.registerOn(testRapid) }
         private val spleisStub = SpleisStub(testRapid).also { it.registerOn(testRapid) }
         private val rapidApp = RapidApp()
+        private val mockOAuth2Server = MockOAuth2Server().also { it.start() }
+        private val apiModuleIntegrationTestFixture = ApiModuleIntegrationTestFixture(mockOAuth2Server)
         private val modules = rapidApp.start(
             configuration = Configuration(
-                api = ApiModuleIntegrationTestFixture.apiModuleConfiguration,
-                clientEntraID = ClientEntraIDModuleIntegrationTestFixture.entraIDAccessTokenGeneratorConfiguration,
+                api = apiModuleIntegrationTestFixture.apiModuleConfiguration,
+                clientEntraID = ClientEntraIDModuleIntegrationTestFixture(mockOAuth2Server).entraIDAccessTokenGeneratorConfiguration,
                 clientKrr = ClientKRRModuleIntegationTestFixture.moduleConfiguration,
                 clientSpleis = ClientSpleisModuleIntegrationTestFixture.moduleConfiguration,
                 clientUnleash = ClientUnleashModuleIntegrationTestFixture.moduleConfiguration,
@@ -142,7 +145,7 @@ abstract class AbstractE2EIntegrationTest {
             httpClient.post("http://localhost:$port/graphql") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
-                bearerAuth(ApiModuleIntegrationTestFixture.token(saksbehandler))
+                bearerAuth(apiModuleIntegrationTestFixture.token(saksbehandler))
                 setBody(
                     mapOf(
                         "query" to (this::class.java.getResourceAsStream("/graphql/$operationName.graphql")

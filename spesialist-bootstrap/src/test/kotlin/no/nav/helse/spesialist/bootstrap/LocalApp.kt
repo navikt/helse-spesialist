@@ -11,14 +11,17 @@ import no.nav.helse.spesialist.client.spleis.testfixtures.ClientSpleisModuleInte
 import no.nav.helse.spesialist.client.unleash.testfixtures.ClientUnleashModuleIntegrationTestFixture
 import no.nav.helse.spesialist.db.testfixtures.DBTestFixture
 import no.nav.helse.spesialist.kafka.testfixtures.KafkaModuleIntegrationTestFixture
+import no.nav.security.mock.oauth2.MockOAuth2Server
 import java.util.UUID
 
 fun main() {
     val rapidApp = RapidApp()
+    val mockOAuth2Server = MockOAuth2Server().also { it.start() }
+    val apiModuleIntegrationTestFixture = ApiModuleIntegrationTestFixture(mockOAuth2Server)
     rapidApp.start(
         configuration = Configuration(
-            api = ApiModuleIntegrationTestFixture.apiModuleConfiguration,
-            clientEntraID = ClientEntraIDModuleIntegrationTestFixture.entraIDAccessTokenGeneratorConfiguration,
+            api = apiModuleIntegrationTestFixture.apiModuleConfiguration,
+            clientEntraID = ClientEntraIDModuleIntegrationTestFixture(mockOAuth2Server).entraIDAccessTokenGeneratorConfiguration,
             clientKrr = ClientKRRModuleIntegationTestFixture.moduleConfiguration,
             clientSpleis = ClientSpleisModuleIntegrationTestFixture.moduleConfiguration,
             clientUnleash = ClientUnleashModuleIntegrationTestFixture.moduleConfiguration,
@@ -56,7 +59,7 @@ fun main() {
         ),
         rapidsConnection = KafkaModuleIntegrationTestFixture.createRapidApplication { ktorApplication ->
             rapidApp.ktorSetupCallback(ktorApplication)
-            ApiModuleIntegrationTestFixture.addAdditionalRoutings(ktorApplication)
+            apiModuleIntegrationTestFixture.addAdditionalRoutings(ktorApplication)
         },
     )
 }
