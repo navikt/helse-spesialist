@@ -20,6 +20,4 @@ class UnleashFeatureToggles(
             .build()
 
     private val unleash: Unleash = DefaultUnleash(config)
-
-    override fun skalBenytteNyTotrinnsvurderingsløsning(): Boolean = unleash.isEnabled("skal-benytte-ny-totrinnsvurderingslosning")
 }

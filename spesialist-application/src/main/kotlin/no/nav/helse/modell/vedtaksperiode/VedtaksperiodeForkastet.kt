@@ -1,9 +1,7 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.FeatureToggles
 import no.nav.helse.db.CommandContextDao
-import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SessionContext
 import no.nav.helse.db.TildelingDao
@@ -55,9 +53,7 @@ class VedtaksperiodeForkastetCommand(
     oppgaveService: OppgaveService,
     reservasjonDao: ReservasjonDao,
     tildelingDao: TildelingDao,
-    oppgaveDao: OppgaveDao,
     totrinnsvurderingRepository: TotrinnsvurderingRepository,
-    featureToggles: FeatureToggles,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
@@ -68,15 +64,12 @@ class VedtaksperiodeForkastetCommand(
                 oppgaveService = oppgaveService,
                 reservasjonDao = reservasjonDao,
                 tildelingDao = tildelingDao,
-                oppgaveDao = oppgaveDao,
                 totrinnsvurderingRepository = totrinnsvurderingRepository,
-                featureToggles = featureToggles,
             ),
             AvbrytTotrinnsvurderingCommand(
                 vedtaksperiodeId = vedtaksperiodeId,
                 fødselsnummer = fødselsnummer,
                 totrinnsvurderingRepository = totrinnsvurderingRepository,
-                featureToggles = featureToggles,
             ),
         )
 }

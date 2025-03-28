@@ -93,25 +93,12 @@ class Totrinnsvurdering private constructor(
         tilstand = AVVENTER_SAKSBEHANDLER
     }
 
-    fun ferdigstill(
-        utbetalingId: UUID,
-        skalBenytteNyTotrinnsvurderingsløsning: Boolean = false,
-    ) = oppdatering {
-        this.utbetalingId = utbetalingId
-        tilstand = GODKJENT
-        if (!skalBenytteNyTotrinnsvurderingsløsning) {
-            this._overstyringer
-                .filter {
-                    it.vedtaksperiodeId == vedtaksperiodeId ||
-                        it.kobledeVedtaksperioder()
-                            .contains(vedtaksperiodeId)
-                }
-                .forEach { it.ferdigstill() }
-            return@oppdatering
+    fun ferdigstill(utbetalingId: UUID) =
+        oppdatering {
+            this.utbetalingId = utbetalingId
+            tilstand = GODKJENT
+            this._overstyringer.forEach { it.ferdigstill() }
         }
-        this._overstyringer
-            .forEach { it.ferdigstill() }
-    }
 
     fun vedtaksperiodeForkastet(vedtaksperiodeId: UUID) =
         oppdatering {

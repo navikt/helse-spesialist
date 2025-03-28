@@ -3,7 +3,6 @@ package no.nav.helse.mediator.meldinger
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.FeatureToggles
 import no.nav.helse.db.CommandContextDao
 import no.nav.helse.db.PersonDao
 import no.nav.helse.mediator.oppgave.OppgaveService
@@ -34,9 +33,7 @@ internal class VedtaksperiodeForkastetCommandTest {
             oppgaveService = oppgaveService,
             reservasjonDao = mockk(relaxed = true),
             tildelingDao = mockk(relaxed = true),
-            oppgaveDao = mockk(relaxed = true),
             totrinnsvurderingRepository = mockk(relaxed = true),
-            featureToggles = object : FeatureToggles {},
         )
 
     @Test

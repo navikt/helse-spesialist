@@ -64,7 +64,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected val arbeidsgiverApiDao = daos.arbeidsgiverApiDao
     protected val risikovurderingApiDao = daos.risikovurderingApiDao
     protected val notatDao = daos.notatApiDao
-    protected val totrinnsvurderingApiDao = daos.totrinnsvurderingApiDao
     protected val påVentApiDao = daos.påVentApiDao
     protected val personApiDao = daos.personApiDao
     protected val tildelingApiDao = daos.tildelingApiDao

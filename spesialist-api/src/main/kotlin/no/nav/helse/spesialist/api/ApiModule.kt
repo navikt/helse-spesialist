@@ -95,7 +95,6 @@ class ApiModule(
                     stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
                     annulleringRepository = daos.annulleringRepository,
                     environmentToggles = environmentToggles,
-                    featureToggles = featureToggles,
                     sessionFactory = sessionFactory,
                     tilgangskontroll =
                         TilgangskontrollørForReservasjon(
@@ -130,7 +129,6 @@ class ApiModule(
                     reservasjonDao = daos.reservasjonDao,
                     periodehistorikkDao = daos.periodehistorikkDao,
                     sessionFactory = sessionFactory,
-                    featureToggles = featureToggles,
                 ),
             meldingPubliserer = meldingPubliserer,
             featureToggles = featureToggles,

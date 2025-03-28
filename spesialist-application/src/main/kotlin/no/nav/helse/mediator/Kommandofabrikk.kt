@@ -22,7 +22,6 @@ import no.nav.helse.modell.kommando.OverstyringIgangsattCommand
 import no.nav.helse.modell.kommando.TilbakedateringBehandlet
 import no.nav.helse.modell.kommando.TilbakedateringGodkjentCommand
 import no.nav.helse.modell.kommando.ikkesuspenderendeCommand
-import no.nav.helse.modell.overstyring.OverstyringIgangsatt
 import no.nav.helse.modell.person.EndretEgenAnsattStatus
 import no.nav.helse.modell.person.EndretEgenAnsattStatusCommand
 import no.nav.helse.modell.person.KlargjørTilgangsrelaterteDataCommand
@@ -172,9 +171,7 @@ class Kommandofabrikk(
             oppgaveService = transaksjonellOppgaveService(sessionContext),
             reservasjonDao = sessionContext.reservasjonDao,
             tildelingDao = sessionContext.tildelingDao,
-            oppgaveDao = sessionContext.oppgaveDao,
             totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository,
-            featureToggles = featureToggles,
         )
 
     internal fun vedtaksperiodeNyUtbetaling(
@@ -234,16 +231,7 @@ class Kommandofabrikk(
             opptegnelseDao = sessionContext.opptegnelseDao,
         )
 
-    internal fun overstyringIgangsatt(
-        melding: OverstyringIgangsatt,
-        sessionContext: SessionContext,
-    ): OverstyringIgangsattCommand =
-        OverstyringIgangsattCommand(
-            berørteVedtaksperiodeIder = melding.berørteVedtaksperiodeIder,
-            kilde = melding.kilde,
-            overstyringDao = sessionContext.overstyringDao,
-            featureToggles = featureToggles,
-        )
+    internal fun overstyringIgangsatt(): OverstyringIgangsattCommand = OverstyringIgangsattCommand()
 
     internal fun utbetalingEndret(
         hendelse: UtbetalingEndret,
@@ -263,12 +251,10 @@ class Kommandofabrikk(
             utbetalingDao = sessionContext.utbetalingDao,
             opptegnelseDao = sessionContext.opptegnelseDao,
             reservasjonDao = sessionContext.reservasjonDao,
-            oppgaveDao = sessionContext.oppgaveDao,
             tildelingDao = sessionContext.tildelingDao,
             oppgaveService = transaksjonellOppgaveService(sessionContext),
             totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository,
             json = hendelse.toJson(),
-            featureToggles = featureToggles,
         )
 
     internal fun vedtaksperiodeForkastet(
@@ -283,9 +269,7 @@ class Kommandofabrikk(
             oppgaveService = transaksjonellOppgaveService(sessionContext),
             reservasjonDao = sessionContext.reservasjonDao,
             tildelingDao = sessionContext.tildelingDao,
-            oppgaveDao = sessionContext.oppgaveDao,
             totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository,
-            featureToggles = featureToggles,
         )
 
     internal fun stansAutomatiskBehandling(
@@ -352,7 +336,6 @@ class Kommandofabrikk(
             åpneGosysOppgaverDao = sessionContext.åpneGosysOppgaverDao,
             risikovurderingDao = sessionContext.risikovurderingDao,
             påVentDao = sessionContext.påVentDao,
-            overstyringDao = sessionContext.overstyringDao,
             automatiseringDao = sessionContext.automatiseringDao,
             oppgaveRepository = sessionContext.oppgaveRepository,
             oppgaveDao = sessionContext.oppgaveDao,
@@ -364,7 +347,6 @@ class Kommandofabrikk(
             oppgaveService = transaksjonellOppgaveService(sessionContext),
             godkjenningMediator = GodkjenningMediator(sessionContext.opptegnelseDao),
             person = person,
-            featureToggles = featureToggles,
         )
     }
 
@@ -419,7 +401,6 @@ class Kommandofabrikk(
             sessionContext,
             subsumsjonsmelderProvider,
             stikkprøver,
-            featureToggles,
         )
 
     private fun iverksett(

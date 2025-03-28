@@ -71,7 +71,7 @@ internal class TotrinnsvurderingTest {
         val behandlendeSaksbehandler = nySaksbehandler()
         totrinnsvurdering.sendTilBeslutter(1L, behandlendeSaksbehandler)
         val utbetalingId = UUID.randomUUID()
-        totrinnsvurdering.ferdigstill(utbetalingId, false)
+        totrinnsvurdering.ferdigstill(utbetalingId)
         assertEquals(behandlendeSaksbehandler, totrinnsvurdering.saksbehandler)
         assertEquals(GODKJENT, totrinnsvurdering.tilstand)
         assertEquals(utbetalingId, totrinnsvurdering.utbetalingId)
@@ -103,7 +103,7 @@ internal class TotrinnsvurderingTest {
         val behandlendeSaksbehandler = nySaksbehandler()
         totrinnsvurdering.sendTilBeslutter(1L, behandlendeSaksbehandler)
         val utbetalingId = UUID.randomUUID()
-        totrinnsvurdering.ferdigstill(utbetalingId, true)
+        totrinnsvurdering.ferdigstill(utbetalingId)
         assertEquals(behandlendeSaksbehandler, totrinnsvurdering.saksbehandler)
         assertEquals(GODKJENT, totrinnsvurdering.tilstand)
         totrinnsvurdering.overstyringer.forEach {

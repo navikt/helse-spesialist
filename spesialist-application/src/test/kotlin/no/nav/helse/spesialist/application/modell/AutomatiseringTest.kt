@@ -2,12 +2,10 @@ package no.nav.helse.spesialist.application.modell
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.helse.FeatureToggles
 import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.GenerasjonDao
 import no.nav.helse.db.MeldingDao
-import no.nav.helse.db.OverstyringDao
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.RisikovurderingDao
 import no.nav.helse.db.VedtakDao
@@ -21,6 +19,7 @@ import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.risiko.Risikovurdering
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
+import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.utbetaling.Utbetalingtype.REVURDERING
@@ -60,14 +59,13 @@ internal class AutomatiseringTest {
         }
     private val åpneGosysOppgaverDaoMock = mockk<ÅpneGosysOppgaverDao>(relaxed = true)
     private val egenAnsattDao = mockk<EgenAnsattDao>(relaxed = true)
-    private val totrinnsvurderingRepository = mockk<TotrinnsvurderingRepository>(relaxed = true)
+    private val totrinnsvurderingRepositoryMock = mockk<TotrinnsvurderingRepository>(relaxed = true)
     private val personDaoMock =
         mockk<PersonDao>(relaxed = true) {
             every { finnAdressebeskyttelse(any()) } returns Adressebeskyttelse.Ugradert
         }
     private val automatiseringDaoMock = mockk<AutomatiseringDao>(relaxed = true)
     private val vergemålDaoMock = mockk<VergemålDao>(relaxed = true)
-    private val overstyringDaoMock = mockk<OverstyringDao>(relaxed = true)
     private val meldingDaoMock = mockk<MeldingDao>(relaxed = true)
     private val generasjonDaoMock = mockk<GenerasjonDao>(relaxed = true)
     private var stikkprøveFullRefusjonEnArbeidsgiver = false
@@ -99,13 +97,11 @@ internal class AutomatiseringTest {
             vergemålDao = vergemålDaoMock,
             personDao = personDaoMock,
             vedtakDao = vedtakDaoMock,
-            overstyringDao = overstyringDaoMock,
             stikkprøver = stikkprøver,
             meldingDao = meldingDaoMock,
             generasjonDao = generasjonDaoMock,
             egenAnsattDao = egenAnsattDao,
-            totrinnsvurderingRepository = totrinnsvurderingRepository,
-            featureToggles = object : FeatureToggles {},
+            totrinnsvurderingRepository = totrinnsvurderingRepositoryMock,
         )
 
     @BeforeEach
@@ -113,7 +109,7 @@ internal class AutomatiseringTest {
         every { risikovurderingDaoMock.hentRisikovurdering(vedtaksperiodeId) } returns Risikovurdering.restore(true)
         every { vedtakDaoMock.finnInntektskilde(vedtaksperiodeId) } returns Inntektskilde.EN_ARBEIDSGIVER
         every { åpneGosysOppgaverDaoMock.antallÅpneOppgaver(any()) } returns 0
-        every { overstyringDaoMock.harVedtaksperiodePågåendeOverstyring(any()) } returns false
+        every { totrinnsvurderingRepositoryMock.finn(any()) } returns null
         every { meldingDaoMock.sisteOverstyringIgangsattOmKorrigertSøknad(fødselsnummer, vedtaksperiodeId) } returns
                 MeldingDao.OverstyringIgangsattKorrigertSøknad(
                     meldingId = hendelseId.toString(),
@@ -159,7 +155,8 @@ internal class AutomatiseringTest {
 
     @Test
     fun `vedtaksperiode som mottok første søknad for mer enn 6 måneder er ikke automatiserbar`() {
-        every { generasjonDaoMock.førsteGenerasjonVedtakFattetTidspunkt(vedtaksperiodeId) } returns LocalDateTime.now().minusMonths(6)
+        every { generasjonDaoMock.førsteGenerasjonVedtakFattetTidspunkt(vedtaksperiodeId) } returns LocalDateTime.now()
+            .minusMonths(6)
         blirManuellOppgaveMedFeil(problems = listOf("Mer enn 6 måneder siden vedtak på første mottatt søknad"))
     }
 
@@ -278,7 +275,10 @@ internal class AutomatiseringTest {
 
     @Test
     fun `periode med pågående overstyring skal ikke automatisk godkjennes`() {
-        every { overstyringDaoMock.harVedtaksperiodePågåendeOverstyring(any()) } returns true
+        every { totrinnsvurderingRepositoryMock.finn(any()) } returns Totrinnsvurdering.ny(
+            vedtaksperiodeId,
+            fødselsnummer
+        )
         blirManuellOppgave()
     }
 
@@ -286,7 +286,10 @@ internal class AutomatiseringTest {
     fun `nullrevurdering grunnet saksbehandleroverstyring skal ikke automatisk godkjennes`() {
         val utbetaling = enUtbetaling(arbeidsgiverbeløp = 0, personbeløp = 0, type = REVURDERING)
         blirAutomatiskBehandlet(utbetaling)
-        every { overstyringDaoMock.harVedtaksperiodePågåendeOverstyring(any()) } returns true
+        every { totrinnsvurderingRepositoryMock.finn(any()) } returns Totrinnsvurdering.ny(
+            vedtaksperiodeId,
+            fødselsnummer
+        )
         blirManuellOppgave()
     }
 

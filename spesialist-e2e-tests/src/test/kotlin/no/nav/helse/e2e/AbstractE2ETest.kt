@@ -254,7 +254,10 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
             avviksvurderingTestdata = avviksvurderingTestdata,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata,
         )
-        håndterVergemålOgFullmaktløsning(fødselsnummer = godkjenningsbehovTestdata.fødselsnummer, fullmakter = fullmakter)
+        håndterVergemålOgFullmaktløsning(
+            fødselsnummer = godkjenningsbehovTestdata.fødselsnummer,
+            fullmakter = fullmakter
+        )
     }
 
     protected fun spesialistBehandlerGodkjenningsbehovFremTilEgenAnsatt(
@@ -266,7 +269,10 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         avviksvurderingTestdata: AvviksvurderingTestdata = this.avviksvurderingTestdata,
         godkjenningsbehovTestdata: GodkjenningsbehovTestdata = this.godkjenningsbehovTestdata,
     ) {
-        if (regelverksvarsler.isNotEmpty()) håndterAktivitetsloggNyAktivitet(fødselsnummer = godkjenningsbehovTestdata.fødselsnummer, varselkoder = regelverksvarsler)
+        if (regelverksvarsler.isNotEmpty()) håndterAktivitetsloggNyAktivitet(
+            fødselsnummer = godkjenningsbehovTestdata.fødselsnummer,
+            varselkoder = regelverksvarsler
+        )
         håndterGodkjenningsbehov(
             harOppdatertMetainfo = harOppdatertMetadata,
             arbeidsgiverbeløp = arbeidsgiverbeløp,
@@ -277,13 +283,23 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
         if (!harOppdatertMetadata) {
             håndterPersoninfoløsning(fødselsnummer = godkjenningsbehovTestdata.fødselsnummer)
-            håndterEnhetløsning(fødselsnummer = godkjenningsbehovTestdata.fødselsnummer, vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId, enhet = enhet)
-            håndterInfotrygdutbetalingerløsning(fødselsnummer = godkjenningsbehovTestdata.fødselsnummer, vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId)
+            håndterEnhetløsning(
+                fødselsnummer = godkjenningsbehovTestdata.fødselsnummer,
+                vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId,
+                enhet = enhet
+            )
+            håndterInfotrygdutbetalingerløsning(
+                fødselsnummer = godkjenningsbehovTestdata.fødselsnummer,
+                vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId
+            )
             håndterArbeidsgiverinformasjonløsning(
                 fødselsnummer = godkjenningsbehovTestdata.fødselsnummer,
                 vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId,
             )
-            håndterArbeidsforholdløsning(fødselsnummer = godkjenningsbehovTestdata.fødselsnummer, vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId)
+            håndterArbeidsforholdløsning(
+                fødselsnummer = godkjenningsbehovTestdata.fødselsnummer,
+                vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId
+            )
         }
     }
 
@@ -663,7 +679,10 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
             arbeidsgiverbeløp = arbeidsgiverbeløp,
             personbeløp = personbeløp,
         )
-        håndterVedtaksperiodeEndret(fødselsnummer = godkjenningsbehovTestdata.fødselsnummer, vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId)
+        håndterVedtaksperiodeEndret(
+            fødselsnummer = godkjenningsbehovTestdata.fødselsnummer,
+            vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId
+        )
         sisteMeldingId = sendGodkjenningsbehov(godkjenningsbehovTestdata)
         sisteGodkjenningsbehovId = sisteMeldingId
     }
@@ -1033,7 +1052,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         skjæringstidspunkt: LocalDate = 1.januar,
         arbeidsgivere: List<ApiSkjonnsfastsettelse.ApiSkjonnsfastsettelseArbeidsgiver> = listOf(Testdata.skjønnsvurdering()),
     ) {
-        håndterOverstyring(aktørId, fødselsnummer, organisasjonsnummer, "skjønnsmessig_fastsettelse") {
+        håndterOverstyring(aktørId, fødselsnummer, organisasjonsnummer) {
             val handling =
                 ApiSkjonnsfastsettelse(
                     aktorId = aktørId,
@@ -1064,7 +1083,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 ),
             ),
     ) {
-        håndterOverstyring(aktørId, fødselsnummer, organisasjonsnummer, "overstyr_tidslinje") {
+        håndterOverstyring(aktørId, fødselsnummer, organisasjonsnummer) {
             val handling =
                 ApiTidslinjeOverstyring(
                     vedtaksperiodeId,
@@ -1100,7 +1119,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 ),
             ),
     ) {
-        håndterOverstyring(aktørId, fødselsnummer, ORGNR, "overstyr_inntekt_og_refusjon") {
+        håndterOverstyring(aktørId, fødselsnummer, ORGNR) {
             val handling =
                 ApiInntektOgRefusjonOverstyring(
                     aktørId,
@@ -1130,7 +1149,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 ),
             ),
     ) {
-        håndterOverstyring(aktørId, fødselsnummer, organisasjonsnummer, "overstyr_arbeidsforhold") {
+        håndterOverstyring(aktørId, fødselsnummer, organisasjonsnummer) {
             val handling =
                 ApiArbeidsforholdOverstyringHandling(
                     fodselsnummer = fødselsnummer,
@@ -1147,33 +1166,11 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         aktørId: String,
         fødselsnummer: String,
         organisasjonsnummer: String,
-        overstyringHendelse: String,
         overstyringBlock: () -> Unit,
     ) {
         overstyringBlock()
-        val sisteOverstyring = testRapid.inspektør.hendelser(overstyringHendelse).last()
-        val hendelseId = UUID.fromString(sisteOverstyring["@id"].asText())
-        håndterOverstyringIgangsatt(fødselsnummer, hendelseId)
         håndterVedtaksperiodeReberegnet(aktørId, fødselsnummer, organisasjonsnummer)
         håndterUtbetalingErstattet(aktørId, fødselsnummer, organisasjonsnummer, utbetalingId = UUID.randomUUID())
-    }
-
-    private fun håndterOverstyringIgangsatt(
-        fødselsnummer: String,
-        kildeId: UUID,
-    ) {
-        sisteMeldingId =
-            meldingssender.sendOverstyringIgangsatt(
-                fødselsnummer = fødselsnummer,
-                orgnummer = ORGNR,
-                berørtePerioder =
-                    listOf(
-                        mapOf(
-                            "vedtaksperiodeId" to "${testperson.vedtaksperiodeId1}",
-                        ),
-                    ),
-                kilde = kildeId,
-            )
     }
 
     private fun erRevurdering(vedtaksperiodeId: UUID) = dbQuery.singleOrNull(
@@ -1448,8 +1445,11 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         assertEquals(personbeløp, finnbeløp("person"))
     }
 
-    protected fun assertOverstyringer(vedtaksperiodeId: UUID) {
-        assertTrue(daos.overstyringDao.harVedtaksperiodePågåendeOverstyring(vedtaksperiodeId))
+    protected fun assertOverstyringer(fødselsnummer: String) {
+        val overstyringer = sessionFactory.transactionalSessionScope { session ->
+            session.overstyringRepository.finnAktive(fødselsnummer = fødselsnummer)
+        }
+        assertTrue(overstyringer.isNotEmpty())
     }
 
     protected fun assertTotrinnsvurdering(oppgaveId: Long) {

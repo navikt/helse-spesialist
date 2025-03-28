@@ -3,7 +3,6 @@ package no.nav.helse.spesialist.api.graphql.mutation
 import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
-import no.nav.helse.FeatureToggles
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.mediator.SaksbehandlerMediator
@@ -23,7 +22,6 @@ import org.slf4j.LoggerFactory
 class OverstyringMutationHandler(
     private val saksbehandlerMediator: SaksbehandlerMediator,
     private val sessionFactory: SessionFactory,
-    private val featureToggles: FeatureToggles,
     private val meldingPubliserer: MeldingPubliserer,
 ) : OverstyringMutationSchema {
     private companion object {
@@ -85,7 +83,6 @@ class OverstyringMutationHandler(
             overstyring = overstyring,
             saksbehandler = saksbehandler,
             sessionFactory = sessionFactory,
-            featureToggles = featureToggles,
         ) {
             meldingPubliserer.publiser(
                 fødselsnummer = overstyring.fødselsnummer,
@@ -120,7 +117,11 @@ class OverstyringMutationHandler(
                     OverstyrTilkommenInntekt.NyEllerEndretInntekt(
                         lagtTilEllerEndret.organisasjonsnummer,
                         lagtTilEllerEndret.perioder.map {
-                            OverstyrTilkommenInntekt.NyEllerEndretInntekt.PeriodeMedBeløp(it.fom, it.tom, it.periodeBelop)
+                            OverstyrTilkommenInntekt.NyEllerEndretInntekt.PeriodeMedBeløp(
+                                it.fom,
+                                it.tom,
+                                it.periodeBelop,
+                            )
                         },
                     )
                 },
@@ -128,7 +129,12 @@ class OverstyringMutationHandler(
                 this.fjernet.map { fjernet ->
                     OverstyrTilkommenInntekt.FjernetInntekt(
                         fjernet.organisasjonsnummer,
-                        fjernet.perioder.map { OverstyrTilkommenInntekt.FjernetInntekt.PeriodeUtenBeløp(it.fom, it.tom) },
+                        fjernet.perioder.map {
+                            OverstyrTilkommenInntekt.FjernetInntekt.PeriodeUtenBeløp(
+                                it.fom,
+                                it.tom,
+                            )
+                        },
                     )
                 },
         )

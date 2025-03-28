@@ -22,7 +22,6 @@ interface SessionContext {
     val notatDao: NotatDao
     val oppgaveDao: OppgaveDao
     val opptegnelseDao: OpptegnelseDao
-    val overstyringDao: OverstyringDao
     val periodehistorikkDao: PeriodehistorikkDao
     val personDao: PersonDao
     val påVentDao: PåVentDao

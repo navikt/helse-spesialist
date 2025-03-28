@@ -172,7 +172,6 @@ class TilgangsstyringE2ETest : AbstractE2ETest() {
                     oppgaveApiDao = daos.oppgaveApiDao,
                     periodehistorikkApiDao = daos.periodehistorikkApiDao,
                     notatDao = daos.notatApiDao,
-                    totrinnsvurderingApiDao = daos.totrinnsvurderingApiDao,
                     påVentApiDao = daos.påVentApiDao,
                     apiOppgaveService = mockk(relaxed = true),
                     saksbehandlerMediator = mockk(relaxed = true),

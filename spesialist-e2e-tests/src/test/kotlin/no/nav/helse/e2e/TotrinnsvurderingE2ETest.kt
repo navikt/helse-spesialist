@@ -12,13 +12,14 @@ class TotrinnsvurderingE2ETest : AbstractE2ETest() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave()
-        håndterOverstyrInntektOgRefusjon()
+        håndterOverstyrInntektOgRefusjon(vedtaksperiodeId = VEDTAKSPERIODE_ID)
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             harRisikovurdering = true,
             harOppdatertMetadata = true,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = UUID.randomUUID()),
         )
-        assertOverstyringer(VEDTAKSPERIODE_ID)
+
+        assertOverstyringer(FØDSELSNUMMER)
         assertTotrinnsvurdering(2.oppgave(VEDTAKSPERIODE_ID))
     }
 
@@ -34,6 +35,7 @@ class TotrinnsvurderingE2ETest : AbstractE2ETest() {
                 ),
         )
         håndterOverstyrArbeidsforhold(
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
             overstyrteArbeidsforhold =
                 listOf(
                     ApiOverstyringArbeidsforhold(
@@ -50,7 +52,8 @@ class TotrinnsvurderingE2ETest : AbstractE2ETest() {
             harOppdatertMetadata = true,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = UUID.randomUUID()),
         )
-        assertOverstyringer(VEDTAKSPERIODE_ID)
+
+        assertOverstyringer(FØDSELSNUMMER)
         assertTotrinnsvurdering(2.oppgave(VEDTAKSPERIODE_ID))
     }
 
@@ -59,13 +62,14 @@ class TotrinnsvurderingE2ETest : AbstractE2ETest() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave()
-        håndterOverstyrTidslinje()
+        håndterOverstyrTidslinje(vedtaksperiodeId = VEDTAKSPERIODE_ID)
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             harRisikovurdering = true,
             harOppdatertMetadata = true,
             godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = UUID.randomUUID()),
         )
-        assertOverstyringer(VEDTAKSPERIODE_ID)
+
+        assertOverstyringer(FØDSELSNUMMER)
         assertTotrinnsvurdering(2.oppgave(VEDTAKSPERIODE_ID))
     }
 }

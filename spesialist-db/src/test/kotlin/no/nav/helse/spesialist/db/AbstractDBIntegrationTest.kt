@@ -123,7 +123,6 @@ abstract class AbstractDBIntegrationTest {
     internal val commandContextDao = daos.commandContextDao
     internal val tildelingDao = daos.tildelingDao
     internal val saksbehandlerDao = daos.saksbehandlerDao
-    internal val overstyringDao = sessionContext.overstyringDao
     internal val overstyringApiDao = PgOverstyringApiDao(dataSource)
     internal val reservasjonDao = sessionContext.reservasjonDao
     internal val meldingDuplikatkontrollDao = PgMeldingDuplikatkontrollDao(dataSource)

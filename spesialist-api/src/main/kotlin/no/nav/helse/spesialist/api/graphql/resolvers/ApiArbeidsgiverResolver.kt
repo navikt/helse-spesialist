@@ -8,7 +8,6 @@ import no.nav.helse.db.api.NotatApiDao
 import no.nav.helse.db.api.OppgaveApiDao
 import no.nav.helse.db.api.PeriodehistorikkApiDao
 import no.nav.helse.db.api.PåVentApiDao
-import no.nav.helse.db.api.TotrinnsvurderingApiDao
 import no.nav.helse.db.api.VarselApiRepository
 import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
@@ -44,7 +43,6 @@ class ApiArbeidsgiverResolver(
     private val oppgaveApiDao: OppgaveApiDao,
     private val periodehistorikkApiDao: PeriodehistorikkApiDao,
     private val notatDao: NotatApiDao,
-    private val totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
     private val påVentApiDao: PåVentApiDao,
     private val overstyringer: List<ApiOverstyring>,
     private val vedtakBegrunnelseDao: VedtakBegrunnelseDao,
@@ -76,7 +74,11 @@ class ApiArbeidsgiverResolver(
                                         ApiUberegnetPeriodeResolver(
                                             varselRepository = varselRepository,
                                             periode = it,
-                                            skalViseAktiveVarsler = index == 0 && perioderSomSkalViseAktiveVarsler.contains(it.vedtaksperiodeId),
+                                            skalViseAktiveVarsler =
+                                                index == 0 &&
+                                                    perioderSomSkalViseAktiveVarsler.contains(
+                                                        it.vedtaksperiodeId,
+                                                    ),
                                             notatDao = notatDao,
                                             index = index,
                                         ),
@@ -96,7 +98,6 @@ class ApiArbeidsgiverResolver(
                                             oppgaveApiDao = oppgaveApiDao,
                                             periodehistorikkApiDao = periodehistorikkApiDao,
                                             notatDao = notatDao,
-                                            totrinnsvurderingApiDao = totrinnsvurderingApiDao,
                                             påVentApiDao = påVentApiDao,
                                             erSisteGenerasjon = index == 0,
                                             index = index,

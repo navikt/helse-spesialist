@@ -3,8 +3,6 @@ package no.nav.helse.spesialist.application.kommando
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.FeatureToggles
-import no.nav.helse.db.OverstyringDao
 import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.kommando.CommandContext
@@ -56,7 +54,6 @@ internal class VurderBehovForTotrinnskontrollTest {
     }
 
     private val oppgaveService = mockk<OppgaveService>(relaxed = true)
-    private val overstyringDao = mockk<OverstyringDao>(relaxed = true)
     private val periodehistorikkDao = mockk<PeriodehistorikkDao>(relaxed = true)
     private val overstyringRepository = object : OverstyringRepository {
         var overstyringerSomSkalReturneres: Overstyring? = null
@@ -66,6 +63,7 @@ internal class VurderBehovForTotrinnskontrollTest {
         override fun finnAktive(fødselsnummer: String, totrinnsvurderingId: TotrinnsvurderingId): List<Overstyring> =
             error("Not implemented for test")
 
+        @Deprecated("Den andre skal tas i bruk på et eller annet tidspunkt")
         override fun finnAktive(fødselsnummer: String): List<Overstyring> {
             return overstyringerSomSkalReturneres?.let { listOf(it) } ?: emptyList()
         }
@@ -82,9 +80,6 @@ internal class VurderBehovForTotrinnskontrollTest {
         }
 
         override fun finn(fødselsnummer: String): Totrinnsvurdering? = totrinnsvurderingSomSkalReturneres
-
-        @Deprecated("Skal fjernes, midlertidig i bruk for å tette et hull", ReplaceWith("finn"))
-        override fun finn(vedtaksperiodeId: UUID): Totrinnsvurdering? = totrinnsvurderingSomSkalReturneres
     }
     private lateinit var context: CommandContext
 
@@ -100,17 +95,12 @@ internal class VurderBehovForTotrinnskontrollTest {
     private val command =
         VurderBehovForTotrinnskontroll(
             fødselsnummer = FØDSELSNUMMER,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
             vedtaksperiode = VEDTAKSPERIODE,
             oppgaveService = oppgaveService,
-            overstyringDao = overstyringDao,
             periodehistorikkDao = periodehistorikkDao,
             totrinnsvurderingRepository = totrinnsvurderingRepository,
             overstyringRepository = overstyringRepository,
             sykefraværstilfelle = sykefraværstilfelle,
-            featureToggles = object : FeatureToggles {
-                override fun skalBenytteNyTotrinnsvurderingsløsning(): Boolean = true
-            }
         )
 
     @BeforeEach
@@ -188,18 +178,12 @@ internal class VurderBehovForTotrinnskontrollTest {
     }
 
     @Test
-    fun `Tester at gammel løype oppretter totrinnsvurdering dersom oppgaven har blitt overstyrt`() {
-        every { overstyringDao.harVedtaksperiodePågåendeOverstyring(any()) } returns true
+    fun `Oppretter totrinnsvurdering dersom oppgaven har blitt overstyrt og det ikke finnes totrinns fra før`() {
+        val saksbehandler = lagSaksbehandlerOid(UUID.randomUUID())
 
-        assertTrue(command(nyTotrinnsløype = false).execute(context))
-        assertEquals(1, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.size)
-    }
+        overstyringRepository.overstyringerSomSkalReturneres = lagOverstyring(saksbehandlerOid = saksbehandler)
 
-    @Test
-    fun `Tester at gammel løype oppretter totrinnsvurdering dersom oppgaven har fått avklart skjønnsfastsatt sykepengegrunnlag`() {
-        every { overstyringDao.harVedtaksperiodePågåendeOverstyring(any()) } returns true
-
-        assertTrue(command(nyTotrinnsløype = false).execute(context))
+        assertTrue(command().execute(context))
         assertEquals(1, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.size)
     }
 
@@ -235,19 +219,14 @@ internal class VurderBehovForTotrinnskontrollTest {
             vedtaksperiodeForkastet = false,
         )
 
-    private fun command(nyTotrinnsløype: Boolean = true) =
+    private fun command() =
         VurderBehovForTotrinnskontroll(
             fødselsnummer = FØDSELSNUMMER,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
             vedtaksperiode = VEDTAKSPERIODE,
             oppgaveService = oppgaveService,
-            overstyringDao = overstyringDao,
             periodehistorikkDao = periodehistorikkDao,
             totrinnsvurderingRepository = totrinnsvurderingRepository,
             overstyringRepository = overstyringRepository,
             sykefraværstilfelle = sykefraværstilfelle,
-            featureToggles = object : FeatureToggles {
-                override fun skalBenytteNyTotrinnsvurderingsløsning(): Boolean = nyTotrinnsløype
-            }
         )
 }

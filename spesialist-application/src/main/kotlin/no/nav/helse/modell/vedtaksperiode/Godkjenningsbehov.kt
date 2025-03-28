@@ -1,7 +1,6 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.FeatureToggles
 import no.nav.helse.db.ArbeidsforholdDao
 import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.AvviksvurderingRepository
@@ -10,7 +9,6 @@ import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.InntektskilderRepository
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OpptegnelseDao
-import no.nav.helse.db.OverstyringDao
 import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.PåVentDao
@@ -153,7 +151,9 @@ class Godkjenningsbehov(
                     spleisBehandlingId = periodeNode["behandlingId"].asUUID(),
                     fom = periodeNode["fom"].asText().let(LocalDate::parse),
                     tom = periodeNode["tom"].asText().let(LocalDate::parse),
-                    skjæringstidspunkt = jsonNode.path("Godkjenning").path("skjæringstidspunkt").asText().let(LocalDate::parse),
+                    skjæringstidspunkt =
+                        jsonNode.path("Godkjenning").path("skjæringstidspunkt").asText()
+                            .let(LocalDate::parse),
                 )
             },
         utbetalingId = UUID.fromString(jsonNode.path("utbetalingId").asText()),
@@ -187,7 +187,9 @@ class Godkjenningsbehov(
                         )
                     } ?: emptyList(),
             ),
-        erInngangsvilkårVurdertISpleis = jsonNode.path("Godkjenning").get("sykepengegrunnlagsfakta").get("fastsatt").asText() != "IInfotrygd",
+        erInngangsvilkårVurdertISpleis =
+            jsonNode.path("Godkjenning").get("sykepengegrunnlagsfakta").get("fastsatt")
+                .asText() != "IInfotrygd",
         omregnedeÅrsinntekter =
             jsonNode.path("Godkjenning").get("omregnedeÅrsinntekter").map {
                 OmregnetÅrsinntekt(
@@ -215,7 +217,6 @@ internal class GodkjenningsbehovCommand(
     åpneGosysOppgaverDao: ÅpneGosysOppgaverDao,
     risikovurderingDao: RisikovurderingDao,
     påVentDao: PåVentDao,
-    overstyringDao: OverstyringDao,
     automatiseringDao: AutomatiseringDao,
     oppgaveRepository: OppgaveRepository,
     oppgaveDao: OppgaveDao,
@@ -227,7 +228,6 @@ internal class GodkjenningsbehovCommand(
     oppgaveService: OppgaveService,
     godkjenningMediator: GodkjenningMediator,
     person: Person,
-    featureToggles: FeatureToggles,
 ) : MacroCommand() {
     private val sykefraværstilfelle = person.sykefraværstilfelle(behovData.vedtaksperiodeId)
     private val inntektskilder =
@@ -262,7 +262,9 @@ internal class GodkjenningsbehovCommand(
                 avviksvurderingRepository = avviksvurderingRepository,
                 omregnedeÅrsinntekter = behovData.omregnedeÅrsinntekter,
                 vilkårsgrunnlagId = behovData.vilkårsgrunnlagId,
-                legacyBehandling = person.vedtaksperiode(behovData.vedtaksperiodeId).finnBehandling(behovData.spleisBehandlingId),
+                legacyBehandling =
+                    person.vedtaksperiode(behovData.vedtaksperiodeId)
+                        .finnBehandling(behovData.spleisBehandlingId),
                 erInngangsvilkårVurdertISpleis = behovData.erInngangsvilkårVurdertISpleis,
                 organisasjonsnummer = behovData.organisasjonsnummer,
             ),
@@ -327,15 +329,12 @@ internal class GodkjenningsbehovCommand(
             ),
             VurderBehovForTotrinnskontroll(
                 fødselsnummer = behovData.fødselsnummer,
-                vedtaksperiodeId = behovData.vedtaksperiodeId,
                 vedtaksperiode = person.vedtaksperiode(behovData.vedtaksperiodeId),
                 oppgaveService = oppgaveService,
-                overstyringDao = overstyringDao,
                 periodehistorikkDao = periodehistorikkDao,
                 totrinnsvurderingRepository = totrinnsvurderingRepository,
                 overstyringRepository = overstyringRepository,
                 sykefraværstilfelle = sykefraværstilfelle,
-                featureToggles = featureToggles,
             ),
             VurderAutomatiskInnvilgelse(
                 automatisering = automatisering,

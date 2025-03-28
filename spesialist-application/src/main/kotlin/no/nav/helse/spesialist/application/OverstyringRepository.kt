@@ -14,6 +14,6 @@ interface OverstyringRepository {
         totrinnsvurderingId: TotrinnsvurderingId,
     ): List<Overstyring>
 
-    @Deprecated("Ny totrinnsløype bruker totrinnsvurderingId til å finne overstyringer")
+    @Deprecated("Den andre skal tas i bruk på et eller annet tidspunkt")
     fun finnAktive(fødselsnummer: String): List<Overstyring>
 }

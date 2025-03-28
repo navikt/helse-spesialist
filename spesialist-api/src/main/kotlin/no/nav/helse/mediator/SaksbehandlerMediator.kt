@@ -1,7 +1,6 @@
 package no.nav.helse.mediator
 
 import net.logstash.logback.argument.StructuredArguments
-import no.nav.helse.FeatureToggles
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.db.AnnulleringRepository
@@ -111,7 +110,6 @@ class SaksbehandlerMediator(
     private val stansAutomatiskBehandlinghåndterer: StansAutomatiskBehandlinghåndtererImpl,
     private val annulleringRepository: AnnulleringRepository,
     private val environmentToggles: EnvironmentToggles,
-    private val featureToggles: FeatureToggles,
     private val sessionFactory: SessionFactory,
     private val tilgangskontroll: Tilgangskontroll,
 ) {
@@ -151,7 +149,6 @@ class SaksbehandlerMediator(
                         overstyring = modellhandling,
                         saksbehandler = saksbehandlerFraApi.tilSaksbehandler(),
                         sessionFactory = sessionFactory,
-                        featureToggles = featureToggles,
                     ) {
                         modellhandling.utførAv(legacySaksbehandler)
                     }
@@ -176,14 +173,12 @@ class SaksbehandlerMediator(
             val legacySaksbehandler =
                 saksbehandlerFraApi.tilSaksbehandler().tilLegacySaksbehandler(saksbehandlerFraApi.grupper)
             val spleisBehandlingId = apiOppgaveService.spleisBehandlingId(oppgavereferanse)
-            val vedtaksperiodeId = oppgaveService.finnVedtaksperiodeId(oppgavereferanse)
             val fødselsnummer = oppgaveApiDao.finnFødselsnummer(oppgavereferanse)
             if (!apiOppgaveService.venterPåSaksbehandler(oppgavereferanse)) {
                 VedtakResultat.Feil.IkkeÅpenOppgave()
             } else {
                 håndterTotrinnsvurderingBeslutning(
                     fødselsnummer = fødselsnummer,
-                    vedtaksperiodeId = vedtaksperiodeId,
                     legacySaksbehandler = legacySaksbehandler,
                     totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository,
                 ) ?: håndterGodkjenning(oppgavereferanse, fødselsnummer, spleisBehandlingId, legacySaksbehandler).also {
@@ -215,31 +210,17 @@ class SaksbehandlerMediator(
             val legacySaksbehandler =
                 saksbehandlerFraApi.tilSaksbehandler().tilLegacySaksbehandler(saksbehandlerFraApi.grupper)
             val spleisBehandlingId = apiOppgaveService.spleisBehandlingId(oppgavereferanse)
-            val vedtaksperiodeId = oppgaveService.finnVedtaksperiodeId(oppgavereferanse)
             val fødselsnummer = oppgaveApiDao.finnFødselsnummer(oppgavereferanse)
             if (!apiOppgaveService.venterPåSaksbehandler(oppgavereferanse)) {
                 VedtakResultat.Feil.IkkeÅpenOppgave()
             } else {
                 håndterTotrinnsvurderingBeslutning(
                     fødselsnummer = fødselsnummer,
-                    vedtaksperiodeId = vedtaksperiodeId,
                     legacySaksbehandler = legacySaksbehandler,
                     totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository,
                 ) ?: håndterAvvisning(oppgavereferanse, fødselsnummer, spleisBehandlingId, legacySaksbehandler)
             }
         }
-
-    private fun eksisterendeTotrinnsvurdering(
-        vedtaksperiodeId: UUID,
-        fødselsnummer: String,
-        totrinnsvurderingRepository: TotrinnsvurderingRepository,
-    ): Totrinnsvurdering? {
-        return if (featureToggles.skalBenytteNyTotrinnsvurderingsløsning()) {
-            totrinnsvurderingRepository.finn(fødselsnummer)
-        } else {
-            totrinnsvurderingRepository.finn(vedtaksperiodeId)
-        }
-    }
 
     private fun håndterAvvisning(
         oppgavereferanse: Long,
@@ -285,12 +266,10 @@ class SaksbehandlerMediator(
 
     private fun håndterTotrinnsvurderingBeslutning(
         fødselsnummer: String,
-        vedtaksperiodeId: UUID,
         legacySaksbehandler: LegacySaksbehandler,
         totrinnsvurderingRepository: TotrinnsvurderingRepository,
     ): VedtakResultat.Feil.BeslutterFeil? {
-        val totrinnsvurdering =
-            eksisterendeTotrinnsvurdering(vedtaksperiodeId, fødselsnummer, totrinnsvurderingRepository)
+        val totrinnsvurdering = totrinnsvurderingRepository.finn(fødselsnummer)
         val feil =
             if (totrinnsvurdering?.tilstand == AVVENTER_BESLUTTER) {
                 if (!legacySaksbehandler.harTilgangTil(listOf(Egenskap.BESLUTTER)) && !environmentToggles.kanGodkjenneUtenBesluttertilgang) {
@@ -559,14 +538,8 @@ class SaksbehandlerMediator(
 
         try {
             sessionFactory.transactionalSessionScope { session ->
-                val vedtaksperiodeId = oppgaveService.finnVedtaksperiodeId(oppgavereferanse)
                 val fødselsnummer = oppgaveService.finnFødselsnummer(oppgavereferanse)
-                val totrinnsvurdering =
-                    if (featureToggles.skalBenytteNyTotrinnsvurderingsløsning()) {
-                        session.totrinnsvurderingRepository.finn(fødselsnummer)
-                    } else {
-                        session.totrinnsvurderingRepository.finn(vedtaksperiodeId)
-                    }
+                val totrinnsvurdering = session.totrinnsvurderingRepository.finn(fødselsnummer)
                 checkNotNull(totrinnsvurdering) {
                     "Forventer at det eksisterer en aktiv totrinnsvurdering når oppgave sendes i retur"
                 }
@@ -646,15 +619,8 @@ class SaksbehandlerMediator(
 
             try {
                 sessionFactory.transactionalSessionScope { session ->
-                    val vedtaksperiodeId = oppgaveService.finnVedtaksperiodeId(oppgavereferanse)
                     val fødselsnummer = oppgaveService.finnFødselsnummer(oppgavereferanse)
-                    val totrinnsvurdering =
-                        if (featureToggles.skalBenytteNyTotrinnsvurderingsløsning()) {
-                            session.totrinnsvurderingRepository.finn(fødselsnummer)
-                        } else {
-                            session.totrinnsvurderingRepository.finn(vedtaksperiodeId)
-                        }
-
+                    val totrinnsvurdering = session.totrinnsvurderingRepository.finn(fødselsnummer)
                     checkNotNull(totrinnsvurdering) {
                         "Forventer at det eksisterer en aktiv totrinnsvurdering når oppgave sendes til beslutter"
                     }
@@ -690,7 +656,9 @@ class SaksbehandlerMediator(
                 val innslag = Historikkinnslag.avventerTotrinnsvurdering(saksbehandlerFraApi.toDto())
                 periodehistorikkDao.lagreMedOppgaveId(innslag, oppgavereferanse)
             } catch (e: Exception) {
-                return@transactionalSessionScope SendTilGodkjenningResult.Feil.UventetFeilVedOpprettingAvPeriodehistorikk(e)
+                return@transactionalSessionScope SendTilGodkjenningResult.Feil.UventetFeilVedOpprettingAvPeriodehistorikk(
+                    e,
+                )
             }
 
             log.info("OppgaveId $oppgavereferanse sendt til godkjenning")
@@ -763,9 +731,7 @@ class SaksbehandlerMediator(
 
             is ManglerTilgang -> IkkeTilgang(oid, oppgaveId)
 
-            is AlleredeAnnullert ->
-                no.nav.helse.spesialist.api.feilhåndtering
-                    .AlleredeAnnullert(handling.toDto().vedtaksperiodeId)
+            is AlleredeAnnullert -> no.nav.helse.spesialist.api.feilhåndtering.AlleredeAnnullert(handling.toDto().vedtaksperiodeId)
 
             is FinnerIkkePåVent -> FinnerIkkeLagtPåVent(oppgaveId)
         }
@@ -991,12 +957,10 @@ class SaksbehandlerMediator(
         FjernPåVentUtenHistorikkinnslag(oppgaveId)
 
     private fun TildelOppgave.tilModellversjon(): no.nav.helse.modell.saksbehandler.handlinger.TildelOppgave =
-        no.nav.helse.modell.saksbehandler.handlinger
-            .TildelOppgave(this.oppgaveId)
+        no.nav.helse.modell.saksbehandler.handlinger.TildelOppgave(this.oppgaveId)
 
     private fun AvmeldOppgave.tilModellversjon(): no.nav.helse.modell.saksbehandler.handlinger.AvmeldOppgave =
-        no.nav.helse.modell.saksbehandler.handlinger
-            .AvmeldOppgave(this.oppgaveId)
+        no.nav.helse.modell.saksbehandler.handlinger.AvmeldOppgave(this.oppgaveId)
 
     private fun ApiOpphevStans.tilModellversjon(): OpphevStans = OpphevStans(this.fødselsnummer, this.begrunnelse)
 
@@ -1020,7 +984,6 @@ internal fun overstyringUnitOfWork(
     overstyring: Overstyring,
     saksbehandler: Saksbehandler,
     sessionFactory: SessionFactory,
-    featureToggles: FeatureToggles,
     overstyringBlock: () -> Unit,
 ) = sessionFactory.transactionalSessionScope { session ->
     sikkerlogg.info("Utfører overstyring ${overstyring.loggnavn()} på vegne av saksbehandler $saksbehandler")
@@ -1030,15 +993,13 @@ internal fun overstyringUnitOfWork(
     sikkerlogg.info("Reserverer person $fødselsnummer til saksbehandler $saksbehandler")
     session.reservasjonDao.reserverPerson(saksbehandler.id().value, fødselsnummer)
 
-    if (featureToggles.skalBenytteNyTotrinnsvurderingsløsning()) {
-        val totrinnsvurdering =
-            session.totrinnsvurderingRepository.finn(fødselsnummer)
-                ?: Totrinnsvurdering.ny(overstyring.vedtaksperiodeId, fødselsnummer)
-        totrinnsvurdering.nyOverstyring(overstyring)
-        session.totrinnsvurderingRepository.lagre(totrinnsvurdering)
-    } else {
-        session.overstyringRepository.lagre(listOf(overstyring))
-    }
+    val totrinnsvurdering =
+        session.totrinnsvurderingRepository.finn(fødselsnummer) ?: Totrinnsvurdering.ny(
+            overstyring.vedtaksperiodeId,
+            fødselsnummer,
+        )
+    totrinnsvurdering.nyOverstyring(overstyring)
+    session.totrinnsvurderingRepository.lagre(totrinnsvurdering)
 
     overstyringBlock()
 }

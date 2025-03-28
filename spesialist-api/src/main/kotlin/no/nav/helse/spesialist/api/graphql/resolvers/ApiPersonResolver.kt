@@ -12,7 +12,6 @@ import no.nav.helse.db.api.PeriodehistorikkApiDao
 import no.nav.helse.db.api.PersonApiDao
 import no.nav.helse.db.api.PåVentApiDao
 import no.nav.helse.db.api.TildelingApiDao
-import no.nav.helse.db.api.TotrinnsvurderingApiDao
 import no.nav.helse.db.api.VarselApiRepository
 import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
@@ -63,7 +62,6 @@ data class ApiPersonResolver(
     private val oppgaveApiDao: OppgaveApiDao,
     private val periodehistorikkApiDao: PeriodehistorikkApiDao,
     private val notatDao: NotatApiDao,
-    private val totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
     private val påVentApiDao: PåVentApiDao,
     private val apiOppgaveService: ApiOppgaveService,
     private val saksbehandlerMediator: SaksbehandlerMediator,
@@ -133,7 +131,6 @@ data class ApiPersonResolver(
                         oppgaveApiDao = oppgaveApiDao,
                         periodehistorikkApiDao = periodehistorikkApiDao,
                         notatDao = notatDao,
-                        totrinnsvurderingApiDao = totrinnsvurderingApiDao,
                         påVentApiDao = påVentApiDao,
                         overstyringer =
                             overstyringer

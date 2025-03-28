@@ -14,7 +14,6 @@ import no.nav.helse.db.api.NotatApiDao
 import no.nav.helse.db.api.OppgaveApiDao
 import no.nav.helse.db.api.PeriodehistorikkApiDao
 import no.nav.helse.db.api.PåVentApiDao
-import no.nav.helse.db.api.TotrinnsvurderingApiDao
 import no.nav.helse.db.api.VarselApiRepository
 import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
@@ -93,7 +92,6 @@ data class ApiBeregnetPeriodeResolver(
     private val oppgaveApiDao: OppgaveApiDao,
     private val periodehistorikkApiDao: PeriodehistorikkApiDao,
     private val notatDao: NotatApiDao,
-    private val totrinnsvurderingApiDao: TotrinnsvurderingApiDao,
     private val påVentApiDao: PåVentApiDao,
     private val erSisteGenerasjon: Boolean,
     private val index: Int,
@@ -366,24 +364,13 @@ data class ApiBeregnetPeriodeResolver(
     override fun oppgave() = oppgaveDto?.let { oppgaveDto -> ApiOppgaveForPeriodevisning(id = oppgaveDto.id) }
 
     override fun totrinnsvurdering(): ApiTotrinnsvurdering? {
-        if (featureToggles.skalBenytteNyTotrinnsvurderingsløsning()) {
-            if (oppgaveDto == null) return null
-            return sessionFactory.transactionalSessionScope { sessionContext ->
-                sessionContext.totrinnsvurderingRepository.finn(fødselsnummer)?.let {
-                    ApiTotrinnsvurdering(
-                        erRetur = it.tilstand == AVVENTER_SAKSBEHANDLER && it.saksbehandler != null,
-                        saksbehandler = it.saksbehandler?.value,
-                        beslutter = it.beslutter?.value,
-                        erBeslutteroppgave = it.tilstand == AVVENTER_BESLUTTER,
-                    )
-                }
-            }
-        } else {
-            return totrinnsvurderingApiDao.hentAktiv(vedtaksperiodeId())?.let {
+        if (oppgaveDto == null) return null
+        return sessionFactory.transactionalSessionScope { sessionContext ->
+            sessionContext.totrinnsvurderingRepository.finn(fødselsnummer)?.let {
                 ApiTotrinnsvurdering(
                     erRetur = it.tilstand == AVVENTER_SAKSBEHANDLER && it.saksbehandler != null,
-                    saksbehandler = it.saksbehandler,
-                    beslutter = it.beslutter,
+                    saksbehandler = it.saksbehandler?.value,
+                    beslutter = it.beslutter?.value,
                     erBeslutteroppgave = it.tilstand == AVVENTER_BESLUTTER,
                 )
             }

@@ -2,7 +2,6 @@ package no.nav.helse.mediator
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
-import no.nav.helse.FeatureToggles
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.TestRapidHelpers.hendelser
 import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
@@ -86,12 +85,7 @@ class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         tilgangsgrupper = tilgangsgrupper,
         oppgaveService = oppgaveService
     )
-    private val featureToggles = object : FeatureToggles {
-        var skalBenytteNyTotrinnsløype: Boolean = false
-        override fun skalBenytteNyTotrinnsvurderingsløsning(): Boolean {
-            return skalBenytteNyTotrinnsløype
-        }
-    }
+
     private val mediator =
         SaksbehandlerMediator(
             daos = DBDaos(dataSource),
@@ -103,7 +97,6 @@ class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
             stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
             annulleringRepository = annulleringRepository,
             environmentToggles = environmentToggles,
-            featureToggles = featureToggles,
             sessionFactory = TransactionalSessionFactory(dataSource),
             tilgangskontroll = { _, _ -> false },
         )
@@ -174,7 +167,7 @@ class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
 
         assertEquals(SendTilGodkjenningResult.Ok, result)
         val totrinnsvurdering = sessionFactory.transactionalSessionScope { session ->
-            session.totrinnsvurderingRepository.finn(vedtaksperiodeId)
+            session.totrinnsvurderingRepository.finn(fødselsnummer)
         }
         checkNotNull(totrinnsvurdering)
         assertEquals(saksbehandler.oid, totrinnsvurdering.saksbehandler?.value)
@@ -225,7 +218,7 @@ class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
 
         assertEquals(SendTilGodkjenningResult.Ok, result)
         val totrinnsvurdering = sessionFactory.transactionalSessionScope { session ->
-            session.totrinnsvurderingRepository.finn(vedtaksperiodeId)
+            session.totrinnsvurderingRepository.finn(fødselsnummer)
         }
         checkNotNull(totrinnsvurdering)
         assertEquals(saksbehandler.oid, totrinnsvurdering.saksbehandler?.value)
@@ -234,7 +227,6 @@ class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
 
     @Test
     fun `ny overstyring uten eksisterende totrinnsvurdering lager totrinnsvurdering`() {
-        featureToggles.skalBenytteNyTotrinnsløype = true
         val person =
             person {
                 arbeidsgivere = arbeidsgivere(2)
@@ -271,7 +263,7 @@ class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
 
         mediator.håndter(overstyring, saksbehandler)
         val totrinnsvurdering = sessionFactory.transactionalSessionScope { session ->
-            session.totrinnsvurderingRepository.finn(VEDTAKSPERIODE)
+            session.totrinnsvurderingRepository.finn(person.fødselsnummer)
         }
         checkNotNull(totrinnsvurdering)
         assertTrue(totrinnsvurdering.overstyringer.single().opprettet.isAfter(LocalDateTime.now().minusSeconds(5)))
@@ -289,7 +281,11 @@ class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         opprettVedtaksperiode()
         val saksbehandler2Oid = UUID.randomUUID()
         opprettSaksbehandler(saksbehandler2Oid)
-        opprettTotrinnsvurdering(vedtaksperiodeId = VEDTAKSPERIODE, saksbehandlerOid = saksbehandler2Oid, fødselsnummer = person.fødselsnummer)
+        opprettTotrinnsvurdering(
+            vedtaksperiodeId = VEDTAKSPERIODE,
+            saksbehandlerOid = saksbehandler2Oid,
+            fødselsnummer = person.fødselsnummer
+        )
         val saksbehandler = SaksbehandlerFraApi(
             SAKSBEHANDLER_OID,
             SAKSBEHANDLER_NAVN,
@@ -319,7 +315,7 @@ class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
 
         mediator.håndter(overstyring, saksbehandler)
         val totrinnsvurdering = sessionFactory.transactionalSessionScope { session ->
-            session.totrinnsvurderingRepository.finn(VEDTAKSPERIODE)
+            session.totrinnsvurderingRepository.finn(person.fødselsnummer)
         }
         checkNotNull(totrinnsvurdering)
         assertEquals(saksbehandler2Oid, totrinnsvurdering.saksbehandler?.value)
@@ -383,7 +379,7 @@ class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         assertEquals(SendIReturResult.Ok, resultRetur)
 
         val totrinnsvurdering = sessionFactory.transactionalSessionScope { session ->
-            session.totrinnsvurderingRepository.finn(vedtaksperiodeId)
+            session.totrinnsvurderingRepository.finn(fødselsnummer)
         }
         checkNotNull(totrinnsvurdering)
         assertEquals(saksbehandler.oid, totrinnsvurdering.saksbehandler?.value)
@@ -946,12 +942,20 @@ class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
                             fraManedligInntekt = 25001.0,
                             refusjonsopplysninger =
                                 listOf(
-                                    ApiOverstyringArbeidsgiver.ApiOverstyringRefusjonselement(1.januar, 31.januar, 25000.0),
+                                    ApiOverstyringArbeidsgiver.ApiOverstyringRefusjonselement(
+                                        1.januar,
+                                        31.januar,
+                                        25000.0
+                                    ),
                                     ApiOverstyringArbeidsgiver.ApiOverstyringRefusjonselement(1.februar, null, 24000.0),
                                 ),
                             fraRefusjonsopplysninger =
                                 listOf(
-                                    ApiOverstyringArbeidsgiver.ApiOverstyringRefusjonselement(1.januar, 31.januar, 24000.0),
+                                    ApiOverstyringArbeidsgiver.ApiOverstyringRefusjonselement(
+                                        1.januar,
+                                        31.januar,
+                                        24000.0
+                                    ),
                                     ApiOverstyringArbeidsgiver.ApiOverstyringRefusjonselement(1.februar, null, 23000.0),
                                 ),
                             lovhjemmel = ApiLovhjemmel("8-28", "3", null, "folketrygdloven", "1970-01-01"),
@@ -966,12 +970,20 @@ class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
                             fraManedligInntekt = 25001.0,
                             refusjonsopplysninger =
                                 listOf(
-                                    ApiOverstyringArbeidsgiver.ApiOverstyringRefusjonselement(1.januar, 31.januar, 21000.0),
+                                    ApiOverstyringArbeidsgiver.ApiOverstyringRefusjonselement(
+                                        1.januar,
+                                        31.januar,
+                                        21000.0
+                                    ),
                                     ApiOverstyringArbeidsgiver.ApiOverstyringRefusjonselement(1.februar, null, 22000.0),
                                 ),
                             fraRefusjonsopplysninger =
                                 listOf(
-                                    ApiOverstyringArbeidsgiver.ApiOverstyringRefusjonselement(1.januar, 31.januar, 22000.0),
+                                    ApiOverstyringArbeidsgiver.ApiOverstyringRefusjonselement(
+                                        1.januar,
+                                        31.januar,
+                                        22000.0
+                                    ),
                                     ApiOverstyringArbeidsgiver.ApiOverstyringRefusjonselement(1.februar, null, 23000.0),
                                 ),
                             lovhjemmel = ApiLovhjemmel("8-28", "3", null, "folketrygdloven", "1970-01-01"),
@@ -1174,7 +1186,10 @@ class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         begrunnelser: List<String> = listOf("EN_BEGRUNNELSE"),
         kommentar: String? = "EN_KOMMENTAR",
         arsaker: List<ApiAnnulleringArsak> =
-            listOf(ApiAnnulleringArsak(_key = "key01", arsak = "Ferie"), ApiAnnulleringArsak(_key = "key02", arsak = "Perm")),
+            listOf(
+                ApiAnnulleringArsak(_key = "key01", arsak = "Ferie"),
+                ApiAnnulleringArsak(_key = "key02", arsak = "Perm")
+            ),
     ) = ApiAnnulleringData(
         aktorId = AKTØR_ID,
         fodselsnummer = FØDSELSNUMMER,

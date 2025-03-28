@@ -13,7 +13,6 @@ import no.nav.helse.db.api.PersoninfoDao
 import no.nav.helse.db.api.PåVentApiDao
 import no.nav.helse.db.api.RisikovurderingApiDao
 import no.nav.helse.db.api.TildelingApiDao
-import no.nav.helse.db.api.TotrinnsvurderingApiDao
 import no.nav.helse.db.api.VarselApiRepository
 import no.nav.helse.db.api.VergemålApiDao
 import no.nav.helse.mediator.oppgave.OppgaveRepository
@@ -32,7 +31,6 @@ interface Daos {
     val notatDao: NotatDao
     val oppgaveDao: OppgaveDao
     val opptegnelseDao: OpptegnelseDao
-    val overstyringDao: OverstyringDao
     val periodehistorikkDao: PeriodehistorikkDao
     val personDao: PersonDao
     val poisonPillDao: PoisonPillDao
@@ -58,7 +56,6 @@ interface Daos {
     val risikovurderingApiDao: RisikovurderingApiDao
     val personinfoDao: PersoninfoDao
     val tildelingApiDao: TildelingApiDao
-    val totrinnsvurderingApiDao: TotrinnsvurderingApiDao
     val varselApiRepository: VarselApiRepository
     val vergemålApiDao: VergemålApiDao
     val oppgaveRepository: OppgaveRepository

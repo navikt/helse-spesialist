@@ -15,7 +15,6 @@ import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinjedag
 import no.nav.helse.modell.saksbehandler.handlinger.Refusjonselement
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlag
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.api.overstyring.OverstyringArbeidsforholdDto
@@ -28,8 +27,6 @@ import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsettingSykepengegrunn
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.testfixtures.jan
-import no.nav.helse.spesialist.domain.testfixtures.lagAktørId
-import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.typer.Kjønn
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -86,25 +83,6 @@ internal class PgOverstyringDaoTest : AbstractDBIntegrationTest() {
             ADRESSEBESKYTTELSE,
         )
         personDao.upsertInfotrygdutbetalinger(FNR, objectMapper.createObjectNode())
-    }
-
-    @Test
-    fun `Kan koble overstyringhendelse og vedtaksperiode`() {
-        opprettPerson()
-        val overstyring = persisterOverstyringTidslinje()
-        overstyringDao.kobleOverstyringOgVedtaksperiode(listOf(VEDTAKSPERIODE), overstyring.eksternHendelseId)
-
-        assertTrue(overstyringDao.harVedtaksperiodePågåendeOverstyring(VEDTAKSPERIODE))
-        assertFalse(overstyringDao.harVedtaksperiodePågåendeOverstyring(UUID.randomUUID()))
-    }
-
-    @Test
-    fun `Finnes ekstern_hendelse_id i overstyringtabell`() {
-        opprettPerson()
-        val overstyring = persisterOverstyringTidslinje()
-
-        assertTrue(overstyringDao.finnesEksternHendelseId(overstyring.eksternHendelseId))
-        assertFalse(overstyringDao.finnesEksternHendelseId(UUID.randomUUID()))
     }
 
     @Test
@@ -274,40 +252,6 @@ internal class PgOverstyringDaoTest : AbstractDBIntegrationTest() {
         assertEquals(saksbehandler.navn, hentetMinimumSykdomsgrad.saksbehandlerNavn)
         assertEquals(saksbehandler.ident(), hentetMinimumSykdomsgrad.saksbehandlerIdent)
         assertFalse(hentetMinimumSykdomsgrad.ferdigstilt)
-    }
-
-    @Test
-    fun `Kobler overtsyring med totrinns i gammel løype`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val fødselsnummer = lagFødselsnummer()
-        val aktørId = lagAktørId()
-        val organisasjonsnummer = lagOrganisasjonsnummer()
-        val oppgave = nyOppgaveForNyPerson(
-            fødselsnummer = fødselsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            aktørId = aktørId,
-            organisasjonsnummer = organisasjonsnummer
-        )
-        val totrinnsvurderingKontekst = nyTotrinnsvurdering(fødselsnummer, oppgave)
-        val overstyring = persisterOverstyringMinimumSykdomsgrad(
-            fødselsnummer = fødselsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            aktørId = aktørId,
-            organisasjonsnummer = organisasjonsnummer,
-        )
-        overstyringDao.kobleOverstyringOgVedtaksperiode(listOf(oppgave.vedtaksperiodeId), overstyring.eksternHendelseId)
-        val totrinnsvurderingId = totrinnsvurderingKontekst.totrinnsvurdering.id()
-        overstyringDao.kobleOverstyringerMedTotrinnsvurdering(totrinnsvurderingId, vedtaksperiodeId)
-
-        assertOverstyringErKobletTilTotrinnsvurdering(totrinnsvurderingId)
-    }
-
-    private fun assertOverstyringErKobletTilTotrinnsvurdering(totrinnsvurderingId: TotrinnsvurderingId) {
-        assertEquals(
-            1, dbQuery.singleOrNull(
-                "select 1 from overstyring where totrinnsvurdering_ref = :totrinnsvurderingId",
-                "totrinnsvurderingId" to totrinnsvurderingId.value
-            ) { it.int(1) } ?: 0)
     }
 
     private fun persisterSkjønnsfastsettingSykepengegrunnlag() {

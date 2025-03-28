@@ -1,7 +1,5 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.FeatureToggles
-import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_BESLUTTER
@@ -14,9 +12,7 @@ internal class ReserverPersonHvisTildeltCommand(
     private val fødselsnummer: String,
     private val reservasjonDao: ReservasjonDao,
     private val tildelingDao: TildelingDao,
-    private val oppgaveDao: OppgaveDao,
     private val totrinnsvurderingRepository: TotrinnsvurderingRepository,
-    private val featureToggles: FeatureToggles,
 ) : Command {
     private companion object {
         private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
@@ -24,13 +20,7 @@ internal class ReserverPersonHvisTildeltCommand(
 
     override fun execute(context: CommandContext): Boolean {
         val tildeltSaksbehandler = tildelingDao.tildelingForPerson(fødselsnummer) ?: return true
-        val vedtaksperiodeId = oppgaveDao.finnVedtaksperiodeId(fødselsnummer)
-        val totrinnsvurdering =
-            if (featureToggles.skalBenytteNyTotrinnsvurderingsløsning()) {
-                totrinnsvurderingRepository.finn(fødselsnummer)
-            } else {
-                totrinnsvurderingRepository.finn(vedtaksperiodeId)
-            }
+        val totrinnsvurdering = totrinnsvurderingRepository.finn(fødselsnummer)
         val saksbehandlerOid: UUID =
             if (totrinnsvurdering?.tilstand == AVVENTER_BESLUTTER) {
                 totrinnsvurdering.saksbehandler?.value ?: tildeltSaksbehandler.oid

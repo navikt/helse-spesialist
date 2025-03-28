@@ -1,7 +1,6 @@
 package no.nav.helse.mediator
 
 import net.logstash.logback.argument.StructuredArguments
-import no.nav.helse.FeatureToggles
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.PeriodehistorikkDao
@@ -12,7 +11,6 @@ import no.nav.helse.modell.melding.Saksbehandlerløsning
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDto
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.GODKJENT
 import no.nav.helse.spesialist.api.Godkjenninghåndterer
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
 import no.nav.helse.spesialist.domain.Saksbehandler
@@ -29,7 +27,6 @@ class GodkjenningService(
     private val reservasjonDao: ReservasjonDao,
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val sessionFactory: SessionFactory,
-    private val featureToggles: FeatureToggles,
 ) : Godkjenninghåndterer {
     private companion object {
         private val logg = LoggerFactory.getLogger(GodkjenningService::class.java)
@@ -45,13 +42,7 @@ class GodkjenningService(
         val vedtaksperiodeId = oppgaveDao.finnVedtaksperiodeId(godkjenningDTO.oppgavereferanse)
 
         sessionFactory.transactionalSessionScope { session ->
-            val totrinnsvurdering =
-                if (featureToggles.skalBenytteNyTotrinnsvurderingsløsning()) {
-                    session.totrinnsvurderingRepository.finn(fødselsnummer)
-                } else {
-                    session.totrinnsvurderingRepository.finn(vedtaksperiodeId)
-                }
-
+            val totrinnsvurdering = session.totrinnsvurderingRepository.finn(fødselsnummer)
             val reserverPersonOid: UUID = totrinnsvurdering?.saksbehandler?.value ?: oid
             val saksbehandlerløsning =
                 Saksbehandlerløsning(
@@ -84,12 +75,12 @@ class GodkjenningService(
             reserverPerson(reserverPersonOid, fødselsnummer)
             oppgaveService.oppgave(godkjenningDTO.oppgavereferanse) {
                 avventerSystem(godkjenningDTO.saksbehandlerIdent, oid)
-                totrinnsvurdering?.ferdigstill(
-                    this.utbetalingId,
-                    featureToggles.skalBenytteNyTotrinnsvurderingsløsning(),
-                )
 
-                if (totrinnsvurdering?.tilstand == GODKJENT && godkjenningDTO.godkjent) {
+                if (totrinnsvurdering == null) return@oppgave
+
+                totrinnsvurdering.ferdigstill(this.utbetalingId)
+
+                if (godkjenningDTO.godkjent) {
                     val beslutter =
                         totrinnsvurdering.beslutter?.let { saksbehandlerId ->
                             session.saksbehandlerRepository.finn(saksbehandlerId)?.let { saksbehandler ->
@@ -105,8 +96,9 @@ class GodkjenningService(
                     val innslag = Historikkinnslag.totrinnsvurderingFerdigbehandletInnslag(beslutter)
                     periodehistorikkDao.lagreMedOppgaveId(innslag, godkjenningDTO.oppgavereferanse)
                 }
+
+                session.totrinnsvurderingRepository.lagre(totrinnsvurdering)
             }
-            if (totrinnsvurdering != null) session.totrinnsvurderingRepository.lagre(totrinnsvurdering)
         }
     }
 

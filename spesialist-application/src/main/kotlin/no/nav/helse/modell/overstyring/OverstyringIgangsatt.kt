@@ -27,7 +27,7 @@ class OverstyringIgangsatt(
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
     ) {
-        kommandostarter { overstyringIgangsatt(this@OverstyringIgangsatt, sessionContext) }
+        kommandostarter { overstyringIgangsatt() }
     }
 
     override fun fødselsnummer() = fødselsnummer

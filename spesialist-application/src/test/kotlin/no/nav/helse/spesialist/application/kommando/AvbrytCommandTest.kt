@@ -2,7 +2,6 @@ package no.nav.helse.spesialist.application.kommando
 
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.FeatureToggles
 import no.nav.helse.db.CommandContextDao
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.kommando.AvbrytCommand
@@ -22,9 +21,7 @@ internal class AvbrytCommandTest {
             oppgaveService = mockk<OppgaveService>(relaxed = true),
             reservasjonDao = mockk(relaxed = true),
             tildelingDao = mockk(relaxed = true),
-            oppgaveDao = mockk(relaxed = true),
             totrinnsvurderingRepository = mockk(relaxed = true),
-            featureToggles = object : FeatureToggles {}
         )
     }
 

@@ -127,7 +127,6 @@ fun lagSchemaMedResolversOgHandlers(
                                 oppgaveApiDao = daos.oppgaveApiDao,
                                 periodehistorikkApiDao = daos.periodehistorikkApiDao,
                                 notatDao = daos.notatApiDao,
-                                totrinnsvurderingApiDao = daos.totrinnsvurderingApiDao,
                                 påVentApiDao = daos.påVentApiDao,
                                 apiOppgaveService = apiOppgaveService,
                                 saksbehandlerMediator = saksbehandlerMediator,
@@ -168,9 +167,8 @@ fun lagSchemaMedResolversOgHandlers(
                 overstyring =
                     OverstyringMutationHandler(
                         saksbehandlerMediator = saksbehandlerMediator,
-                        sessionFactory,
-                        featureToggles,
-                        meldingPubliserer,
+                        sessionFactory = sessionFactory,
+                        meldingPubliserer = meldingPubliserer,
                     ),
                 skjonnsfastsettelse = SkjonnsfastsettelseMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
                 minimumSykdomsgrad = MinimumSykdomsgradMutationHandler(saksbehandlerMediator = saksbehandlerMediator),

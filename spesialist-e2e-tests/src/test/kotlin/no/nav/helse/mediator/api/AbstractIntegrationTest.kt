@@ -1,7 +1,6 @@
 package no.nav.helse.mediator.api
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
-import no.nav.helse.FeatureToggles
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.TestRapidHelpers.oppgaveId
 import no.nav.helse.TestRapidHelpers.siste
@@ -43,7 +42,6 @@ abstract class AbstractIntegrationTest : AbstractE2ETest() {
             reservasjonDao = reservasjonDao,
             periodehistorikkDao = periodehistorikkDao,
             sessionFactory = sessionFactory,
-            featureToggles = object: FeatureToggles{}
         )
 
     protected fun sisteOppgaveId() = testRapid.inspektør.oppgaveId()

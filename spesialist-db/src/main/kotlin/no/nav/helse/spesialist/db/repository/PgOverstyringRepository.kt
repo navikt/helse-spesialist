@@ -63,7 +63,7 @@ class PgOverstyringRepository(
             finnSkjønnsfastsattSykepengegrunnlag(fødselsnummer, totrinnsvurderingId) +
             finnTilkommenInntekt(fødselsnummer, totrinnsvurderingId)
 
-    @Deprecated("Ny totrinnsløype bruker totrinnsvurderingId til å finne overstyringer")
+    @Deprecated("Den andre skal tas i bruk på et eller annet tidspunkt")
     override fun finnAktive(fødselsnummer: String): List<Overstyring> =
         finnTidslinjeOverstyringer(fødselsnummer) +
             finnInntektOgRefusjonOverstyringer(fødselsnummer) +
@@ -421,7 +421,7 @@ class PgOverstyringRepository(
             "totrinnsvurderingId" to totrinnsvurderingId.value,
         ).list { it.toOverstyrtTidslinje() }
 
-    @Deprecated("Ny totrinnsløype bruker totrinnsvurderingId til å finne overstyringer")
+    @Deprecated("Den andre skal tas i bruk på et eller annet tidspunkt")
     private fun finnTidslinjeOverstyringer(fødselsnummer: String): List<OverstyrtTidslinje> =
         asSQL(
             """
@@ -470,7 +470,7 @@ class PgOverstyringRepository(
             "totrinnsvurderingId" to totrinnsvurderingId.value,
         ).list { it.toOverstyrtInntektOgRefusjon() }
 
-    @Deprecated("Ny totrinnsløype bruker totrinnsvurderingId til å finne overstyringer")
+    @Deprecated("Den andre skal tas i bruk på et eller annet tidspunkt")
     private fun finnInntektOgRefusjonOverstyringer(fødselsnummer: String): List<OverstyrtInntektOgRefusjon> =
         asSQL(
             """
@@ -518,7 +518,7 @@ class PgOverstyringRepository(
             "totrinnsvurderingId" to totrinnsvurderingId.value,
         ).list { it.toOverstyrtArbeidsforhold() }
 
-    @Deprecated("Ny totrinnsløype bruker totrinnsvurderingId til å finne overstyringer")
+    @Deprecated("Den andre skal tas i bruk på et eller annet tidspunkt")
     private fun finnArbeidsforholdOverstyringer(fødselsnummer: String): List<OverstyrtArbeidsforhold> =
         asSQL(
             """
@@ -567,7 +567,7 @@ class PgOverstyringRepository(
             "totrinnsvurderingId" to totrinnsvurderingId.value,
         ).list { it.toMinimumSykdomsgrad() }
 
-    @Deprecated("Ny totrinnsløype bruker totrinnsvurderingId til å finne overstyringer")
+    @Deprecated("Den andre skal tas i bruk på et eller annet tidspunkt")
     private fun finnMinimumSykdomsgradsOverstyringer(fødselsnummer: String): List<MinimumSykdomsgrad> =
         asSQL(
             """
@@ -625,7 +625,7 @@ class PgOverstyringRepository(
             "totrinnsvurderingId" to totrinnsvurderingId.value,
         ).list { it.toSkjønnsfastsattSykepengegrunnlag() }
 
-    @Deprecated("Ny totrinnsløype bruker totrinnsvurderingId til å finne overstyringer")
+    @Deprecated("Den andre skal tas i bruk på et eller annet tidspunkt")
     private fun finnSkjønnsfastsattSykepengegrunnlag(fødselsnummer: String): List<SkjønnsfastsattSykepengegrunnlag> =
         asSQL(
             """
@@ -681,7 +681,7 @@ class PgOverstyringRepository(
             "totrinnsvurderingId" to totrinnsvurderingId.value,
         ).list { it.toTilkommenInntekt() }
 
-    @Deprecated("Ny totrinnsløype bruker totrinnsvurderingId til å finne overstyringer")
+    @Deprecated("Den andre skal tas i bruk på et eller annet tidspunkt")
     private fun finnTilkommenInntekt(fødselsnummer: String): List<OverstyrTilkommenInntekt> =
         asSQL(
             """

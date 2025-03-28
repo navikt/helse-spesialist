@@ -71,7 +71,6 @@ class TestMediator(
             stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
             annulleringRepository = annulleringRepository,
             environmentToggles = environmentToggles,
-            featureToggles = object : FeatureToggles {},
             sessionFactory = TransactionalSessionFactory(dataSource),
             tilgangskontroll = { _, _ -> false },
         )

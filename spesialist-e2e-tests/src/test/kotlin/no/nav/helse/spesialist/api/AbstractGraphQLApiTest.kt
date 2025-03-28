@@ -80,7 +80,7 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
     private val personinfoDao = daos.personinfoDao
     private val snapshotService = SnapshotService(personinfoDao, snapshothenter)
     private val meldingPubliserer = mockk<MeldingPubliserer>(relaxed = true)
-    private val featureToggles = object: FeatureToggles {}
+    private val featureToggles = object : FeatureToggles {}
 
     private val apiTesting = ApiTesting(
         jwtStub,
@@ -112,7 +112,6 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                                 oppgaveApiDao = oppgaveApiDao,
                                 periodehistorikkApiDao = periodehistorikkApiDao,
                                 notatDao = notatDao,
-                                totrinnsvurderingApiDao = totrinnsvurderingApiDao,
                                 påVentApiDao = påVentApiDao,
                                 apiOppgaveService = apiOppgaveService,
                                 saksbehandlerMediator = saksbehandlerMediator,
@@ -122,7 +121,7 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                                 reservasjonshenter = reservasjonshenter,
                                 sessionFactory = sessionFactory,
                                 vedtakBegrunnelseDao = vedtakBegrunnelseDao,
-                                featureToggles = object: FeatureToggles {},
+                                featureToggles = featureToggles,
                             ),
                     ),
                     oppgaver = OppgaverQueryHandler(
@@ -145,7 +144,11 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                     varsel = VarselMutationHandler(varselRepository = apiVarselRepository),
                     tildeling = TildelingMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
                     opptegnelse = OpptegnelseMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
-                    overstyring = OverstyringMutationHandler(saksbehandlerMediator = saksbehandlerMediator, mockk(relaxed = true), featureToggles, meldingPubliserer),
+                    overstyring = OverstyringMutationHandler(
+                        saksbehandlerMediator = saksbehandlerMediator,
+                        mockk(relaxed = true),
+                        meldingPubliserer
+                    ),
                     skjonnsfastsettelse = SkjonnsfastsettelseMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
                     minimumSykdomsgrad = MinimumSykdomsgradMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
                     totrinnsvurdering = TotrinnsvurderingMutationHandler(

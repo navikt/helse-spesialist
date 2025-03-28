@@ -1,13 +1,11 @@
 package no.nav.helse.modell.automatisering
 
 import no.nav.helse.AutomatiseringStansetSjekker
-import no.nav.helse.FeatureToggles
 import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.GenerasjonDao
 import no.nav.helse.db.MeldingDao
 import no.nav.helse.db.MeldingDao.OverstyringIgangsattKorrigertSøknad
-import no.nav.helse.db.OverstyringDao
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.RisikovurderingDao
 import no.nav.helse.db.SessionContext
@@ -41,20 +39,17 @@ internal class Automatisering(
     private val vergemålDao: VergemålDao,
     private val personDao: PersonDao,
     private val vedtakDao: VedtakDao,
-    private val overstyringDao: OverstyringDao,
     private val stikkprøver: Stikkprøver,
     private val meldingDao: MeldingDao,
     private val generasjonDao: GenerasjonDao,
     private val egenAnsattDao: EgenAnsattDao,
     private val totrinnsvurderingRepository: TotrinnsvurderingRepository,
-    private val featureToggles: FeatureToggles,
 ) {
     object Factory {
         fun automatisering(
             sessionContext: SessionContext,
             subsumsjonsmelderProvider: () -> Subsumsjonsmelder,
             stikkprøver: Stikkprøver,
-            featureToggles: FeatureToggles,
         ): Automatisering {
             return Automatisering(
                 risikovurderingDao = sessionContext.risikovurderingDao,
@@ -68,13 +63,11 @@ internal class Automatisering(
                 vergemålDao = sessionContext.vergemålDao,
                 personDao = sessionContext.personDao,
                 vedtakDao = sessionContext.vedtakDao,
-                overstyringDao = sessionContext.overstyringDao,
                 stikkprøver = stikkprøver,
                 meldingDao = sessionContext.meldingDao,
                 generasjonDao = sessionContext.generasjonDao,
                 egenAnsattDao = sessionContext.egenAnsattDao,
                 totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository,
-                featureToggles = featureToggles,
             )
         }
     }
@@ -258,12 +251,8 @@ internal class Automatisering(
         val harVergemål = vergemålDao.harVergemål(fødselsnummer) ?: false
         val tilhørerUtlandsenhet = erEnhetUtland(personDao.finnEnhetId(fødselsnummer))
         val antallÅpneGosysoppgaver = åpneGosysOppgaverDao.antallÅpneOppgaver(fødselsnummer)
-        val harPågåendeOverstyring =
-            if (featureToggles.skalBenytteNyTotrinnsvurderingsløsning()) {
-                totrinnsvurderingRepository.finn(fødselsnummer)?.let { it.tilstand != GODKJENT } ?: false
-            } else {
-                overstyringDao.harVedtaksperiodePågåendeOverstyring(vedtaksperiodeId)
-            }
+        val harKravOmTotrinnsvurdering =
+            totrinnsvurderingRepository.finn(fødselsnummer)?.let { it.tilstand != GODKJENT } ?: false
         val harUtbetalingTilSykmeldt = utbetaling.harEndringIUtbetalingTilSykmeldt()
 
         val skalStoppesPgaUTS = harUtbetalingTilSykmeldt && periodetype !in listOf(FORLENGELSE, FØRSTEGANGSBEHANDLING)
@@ -279,7 +268,7 @@ internal class Automatisering(
             validering("Bruker tilhører utlandsenhet") { !tilhørerUtlandsenhet },
             validering("Utbetaling til sykmeldt") { !skalStoppesPgaUTS },
             AutomatiserRevurderinger(utbetaling, fødselsnummer, vedtaksperiodeId),
-            validering("Vedtaksperioden har en pågående overstyring") { !harPågåendeOverstyring },
+            validering("Vedtaksperioden har et krav om totrinnsvurdering") { !harKravOmTotrinnsvurdering },
         )
     }
 
