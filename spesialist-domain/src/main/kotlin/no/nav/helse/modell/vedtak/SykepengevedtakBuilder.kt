@@ -19,10 +19,6 @@ class SykepengevedtakBuilder {
     private lateinit var skjæringstidspunkt: LocalDate
     private lateinit var hendelser: List<UUID>
     private var sykepengegrunnlag by Delegates.notNull<Double>()
-    private var grunnlagForSykepengegrunnlag by Delegates.notNull<Double>()
-    private lateinit var grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Double>
-    private lateinit var begrensning: String
-    private var inntekt by Delegates.notNull<Double>()
     private lateinit var vedtakFattetTidspunkt: LocalDateTime
     private lateinit var utbetalingId: UUID
     private lateinit var sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta
@@ -53,18 +49,6 @@ class SykepengevedtakBuilder {
     fun hendelser(hendelser: List<UUID>) = apply { this.hendelser = hendelser }
 
     fun sykepengegrunnlag(sykepengegrunnlag: Double) = apply { this.sykepengegrunnlag = sykepengegrunnlag }
-
-    fun grunnlagForSykepengegrunnlag(grunnlagForSykepengegrunnlag: Double) =
-        apply {
-            this.grunnlagForSykepengegrunnlag = grunnlagForSykepengegrunnlag
-        }
-
-    fun grunnlagForSykepengegrunnlagPerArbeidsgiver(grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Double>) =
-        apply { this.grunnlagForSykepengegrunnlagPerArbeidsgiver = grunnlagForSykepengegrunnlagPerArbeidsgiver }
-
-    fun begrensning(begrensning: String) = apply { this.begrensning = begrensning }
-
-    fun inntekt(inntekt: Double) = apply { this.inntekt = inntekt }
 
     fun vedtakFattetTidspunkt(vedtakFattetTidspunkt: LocalDateTime) = apply { this.vedtakFattetTidspunkt = vedtakFattetTidspunkt }
 
@@ -174,10 +158,6 @@ class SykepengevedtakBuilder {
             skjæringstidspunkt = skjæringstidspunkt,
             hendelser = hendelser,
             sykepengegrunnlag = sykepengegrunnlag,
-            grunnlagForSykepengegrunnlag = grunnlagForSykepengegrunnlag,
-            grunnlagForSykepengegrunnlagPerArbeidsgiver = grunnlagForSykepengegrunnlagPerArbeidsgiver,
-            begrensning = begrensning,
-            inntekt = inntekt,
             sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
             tags = tags,
@@ -210,10 +190,6 @@ class SykepengevedtakBuilder {
             skjæringstidspunkt = skjæringstidspunkt,
             hendelser = hendelser,
             sykepengegrunnlag = sykepengegrunnlag,
-            grunnlagForSykepengegrunnlag = grunnlagForSykepengegrunnlag,
-            grunnlagForSykepengegrunnlagPerArbeidsgiver = grunnlagForSykepengegrunnlagPerArbeidsgiver,
-            begrensning = begrensning,
-            inntekt = inntekt,
             sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
             skjønnsfastsettingopplysninger = skjønnsfastsettingopplysninger,
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
@@ -240,10 +216,6 @@ class SykepengevedtakBuilder {
             skjæringstidspunkt = skjæringstidspunkt,
             hendelser = hendelser,
             sykepengegrunnlag = sykepengegrunnlag,
-            grunnlagForSykepengegrunnlag = grunnlagForSykepengegrunnlag,
-            grunnlagForSykepengegrunnlagPerArbeidsgiver = grunnlagForSykepengegrunnlagPerArbeidsgiver,
-            begrensning = begrensning,
-            inntekt = inntekt,
             sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
             tags = tags,

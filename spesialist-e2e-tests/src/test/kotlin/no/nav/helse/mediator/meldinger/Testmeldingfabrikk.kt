@@ -1077,10 +1077,6 @@ object Testmeldingfabrikk {
             "tom" to tom,
             "skjæringstidspunkt" to skjæringstidspunkt,
             "sykepengegrunnlag" to 600000.0,
-            "grunnlagForSykepengegrunnlag" to 600000.0,
-            "grunnlagForSykepengegrunnlagPerArbeidsgiver" to emptyMap<String, Double>(),
-            "begrensning" to "VET_IKKE",
-            "inntekt" to 600000.0,
             "vedtakFattetTidspunkt" to LocalDateTime.now(),
             "hendelser" to emptyList<String>()
         ).apply {

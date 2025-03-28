@@ -17,10 +17,6 @@ class AvsluttetMedVedtakMessage(
     private val spleisBehandlingId: UUID,
     private val hendelser: List<UUID>,
     private val sykepengegrunnlag: Double,
-    private val grunnlagForSykepengegrunnlag: Double,
-    private val grunnlagForSykepengegrunnlagPerArbeidsgiver: Map<String, Double>,
-    private val begrensning: String,
-    private val inntekt: Double,
     private val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta,
     private val json: String,
 ) : Vedtaksperiodemelding {
@@ -41,10 +37,6 @@ class AvsluttetMedVedtakMessage(
             spleisBehandlingId = spleisBehandlingId,
             hendelser = hendelser,
             sykepengegrunnlag = sykepengegrunnlag,
-            grunnlagForSykepengegrunnlag = grunnlagForSykepengegrunnlag,
-            grunnlagForSykepengegrunnlagPerArbeidsgiver = grunnlagForSykepengegrunnlagPerArbeidsgiver,
-            begrensning = begrensning,
-            inntekt = inntekt,
             sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
         )

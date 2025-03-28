@@ -77,10 +77,6 @@ internal class PubliserSykepengevedtakTest {
                 skjæringstidspunkt = skjæringstidspunkt,
                 hendelser = hendelser,
                 sykepengegrunnlag = 10000.0,
-                grunnlagForSykepengegrunnlag = 10000.0,
-                grunnlagForSykepengegrunnlagPerArbeidsgiver = mapOf(ORGANISASJONSNUMMER to 10000.0),
-                begrensning = "VURDERT_I_INFOTRYGD",
-                inntekt = 10000.0,
                 sykepengegrunnlagsfakta =
                     Sykepengegrunnlagsfakta.Infotrygd(
                         omregnetÅrsinntekt = 10000.0,
@@ -107,13 +103,6 @@ internal class PubliserSykepengevedtakTest {
         assertEquals(skjæringstidspunkt, event["skjæringstidspunkt"].asLocalDate())
         assertEquals(hendelser, event["hendelser"].map { UUID.fromString(it.asText()) })
         assertEquals(10000.0, event["sykepengegrunnlag"].asDouble())
-        assertEquals(10000.0, event["grunnlagForSykepengegrunnlag"].asDouble())
-        assertEquals(
-            mapOf(ORGANISASJONSNUMMER to 10000.0),
-            objectMapper.convertValue(event["grunnlagForSykepengegrunnlagPerArbeidsgiver"]),
-        )
-        assertEquals("VURDERT_I_INFOTRYGD", event["begrensning"].asText())
-        assertEquals(10000.0, event["inntekt"].asDouble())
         assertEquals(vedtakFattetTidspunkt, event["vedtakFattetTidspunkt"].asLocalDateTime())
         assertEquals(utbetalingId.toString(), event["utbetalingId"].asText())
         assertEquals("IInfotrygd", event["sykepengegrunnlagsfakta"]["fastsatt"].asText())
@@ -138,10 +127,6 @@ internal class PubliserSykepengevedtakTest {
                 skjæringstidspunkt = skjæringstidspunkt,
                 hendelser = hendelser,
                 sykepengegrunnlag = 10000.0,
-                grunnlagForSykepengegrunnlag = 10000.0,
-                grunnlagForSykepengegrunnlagPerArbeidsgiver = mapOf(ORGANISASJONSNUMMER to 10000.0),
-                begrensning = "ER_IKKE_6G_BEGRENSET",
-                inntekt = 10000.0,
                 sykepengegrunnlagsfakta =
                     Sykepengegrunnlagsfakta.Spleis.EtterHovedregel(
                         omregnetÅrsinntekt = 10000.0,
@@ -179,13 +164,6 @@ internal class PubliserSykepengevedtakTest {
         assertEquals(skjæringstidspunkt, event["skjæringstidspunkt"].asLocalDate())
         assertEquals(hendelser, event["hendelser"].map { UUID.fromString(it.asText()) })
         assertEquals(10000.0, event["sykepengegrunnlag"].asDouble())
-        assertEquals(10000.0, event["grunnlagForSykepengegrunnlag"].asDouble())
-        assertEquals(
-            mapOf(ORGANISASJONSNUMMER to 10000.0),
-            objectMapper.convertValue(event["grunnlagForSykepengegrunnlagPerArbeidsgiver"]),
-        )
-        assertEquals("ER_IKKE_6G_BEGRENSET", event["begrensning"].asText())
-        assertEquals(10000.0, event["inntekt"].asDouble())
         assertEquals(vedtakFattetTidspunkt, event["vedtakFattetTidspunkt"].asLocalDateTime())
         assertEquals(utbetalingId.toString(), event["utbetalingId"].asText())
         assertEquals("EtterHovedregel", event["sykepengegrunnlagsfakta"]["fastsatt"].asText())
@@ -224,10 +202,6 @@ internal class PubliserSykepengevedtakTest {
                 skjæringstidspunkt = skjæringstidspunkt,
                 hendelser = hendelser,
                 sykepengegrunnlag = 10000.0,
-                grunnlagForSykepengegrunnlag = 10000.0,
-                grunnlagForSykepengegrunnlagPerArbeidsgiver = mapOf(ORGANISASJONSNUMMER to 10000.0),
-                begrensning = "ER_IKKE_6G_BEGRENSET",
-                inntekt = 10000.0,
                 sykepengegrunnlagsfakta =
                     Sykepengegrunnlagsfakta.Spleis.EtterHovedregel(
                         omregnetÅrsinntekt = 10000.0,
@@ -268,13 +242,6 @@ internal class PubliserSykepengevedtakTest {
         assertEquals(skjæringstidspunkt, event["skjæringstidspunkt"].asLocalDate())
         assertEquals(hendelser, event["hendelser"].map { UUID.fromString(it.asText()) })
         assertEquals(10000.0, event["sykepengegrunnlag"].asDouble())
-        assertEquals(10000.0, event["grunnlagForSykepengegrunnlag"].asDouble())
-        assertEquals(
-            mapOf(ORGANISASJONSNUMMER to 10000.0),
-            objectMapper.convertValue(event["grunnlagForSykepengegrunnlagPerArbeidsgiver"]),
-        )
-        assertEquals("ER_IKKE_6G_BEGRENSET", event["begrensning"].asText())
-        assertEquals(10000.0, event["inntekt"].asDouble())
         assertEquals(vedtakFattetTidspunkt, event["vedtakFattetTidspunkt"].asLocalDateTime())
         assertEquals(utbetalingId.toString(), event["utbetalingId"].asText())
         assertEquals("EtterHovedregel", event["sykepengegrunnlagsfakta"]["fastsatt"].asText())
@@ -320,10 +287,6 @@ internal class PubliserSykepengevedtakTest {
                 skjæringstidspunkt = skjæringstidspunkt,
                 hendelser = hendelser,
                 sykepengegrunnlag = 10000.0,
-                grunnlagForSykepengegrunnlag = 10000.0,
-                grunnlagForSykepengegrunnlagPerArbeidsgiver = mapOf(ORGANISASJONSNUMMER to 10000.0),
-                begrensning = "ER_IKKE_6G_BEGRENSET",
-                inntekt = 10000.0,
                 sykepengegrunnlagsfakta =
                     Sykepengegrunnlagsfakta.Spleis.EtterSkjønn(
                         omregnetÅrsinntekt = 10000.0,
@@ -371,13 +334,6 @@ internal class PubliserSykepengevedtakTest {
         assertEquals(skjæringstidspunkt, event["skjæringstidspunkt"].asLocalDate())
         assertEquals(hendelser, event["hendelser"].map { UUID.fromString(it.asText()) })
         assertEquals(10000.0, event["sykepengegrunnlag"].asDouble())
-        assertEquals(10000.0, event["grunnlagForSykepengegrunnlag"].asDouble())
-        assertEquals(
-            mapOf(ORGANISASJONSNUMMER to 10000.0),
-            objectMapper.convertValue(event["grunnlagForSykepengegrunnlagPerArbeidsgiver"]),
-        )
-        assertEquals("ER_IKKE_6G_BEGRENSET", event["begrensning"].asText())
-        assertEquals(10000.0, event["inntekt"].asDouble())
         assertEquals(vedtakFattetTidspunkt, event["vedtakFattetTidspunkt"].asLocalDateTime())
         assertEquals(utbetalingId.toString(), event["utbetalingId"].asText())
         assertEquals("EtterSkjønn", event["sykepengegrunnlagsfakta"]["fastsatt"].asText())
@@ -441,10 +397,6 @@ internal class PubliserSykepengevedtakTest {
                 skjæringstidspunkt = skjæringstidspunkt,
                 hendelser = hendelser,
                 sykepengegrunnlag = 10000.0,
-                grunnlagForSykepengegrunnlag = 10000.0,
-                grunnlagForSykepengegrunnlagPerArbeidsgiver = mapOf(ORGANISASJONSNUMMER to 10000.0),
-                begrensning = "ER_IKKE_6G_BEGRENSET",
-                inntekt = 10000.0,
                 sykepengegrunnlagsfakta =
                     Sykepengegrunnlagsfakta.Spleis.EtterSkjønn(
                         omregnetÅrsinntekt = 10000.0,
@@ -492,13 +444,6 @@ internal class PubliserSykepengevedtakTest {
         assertEquals(skjæringstidspunkt, event["skjæringstidspunkt"].asLocalDate())
         assertEquals(hendelser, event["hendelser"].map { UUID.fromString(it.asText()) })
         assertEquals(10000.0, event["sykepengegrunnlag"].asDouble())
-        assertEquals(10000.0, event["grunnlagForSykepengegrunnlag"].asDouble())
-        assertEquals(
-            mapOf(ORGANISASJONSNUMMER to 10000.0),
-            objectMapper.convertValue(event["grunnlagForSykepengegrunnlagPerArbeidsgiver"]),
-        )
-        assertEquals("ER_IKKE_6G_BEGRENSET", event["begrensning"].asText())
-        assertEquals(10000.0, event["inntekt"].asDouble())
         assertEquals(vedtakFattetTidspunkt, event["vedtakFattetTidspunkt"].asLocalDateTime())
         assertEquals(utbetalingId.toString(), event["utbetalingId"].asText())
         assertEquals("EtterSkjønn", event["sykepengegrunnlagsfakta"]["fastsatt"].asText())
