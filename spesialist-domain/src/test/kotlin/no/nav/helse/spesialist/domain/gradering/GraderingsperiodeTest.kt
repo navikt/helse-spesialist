@@ -1,20 +1,20 @@
-package no.nav.helse.spesialist.domain.inntektsperiode
+package no.nav.helse.spesialist.domain.gradering
 
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.Periode.Companion.til
-import no.nav.helse.spesialist.domain.inntektsperiode.Inntektsendringer.PeriodeMedBeløp
+import no.nav.helse.spesialist.domain.gradering.Inntektsendringer.PeriodeMedBeløp
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import java.time.LocalDate
 import java.time.Month
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class InntektsfordelingTest {
+class GraderingsperiodeTest {
     @Test
     fun `lagt til en dag`() {
         val gammelFordeling = 1000.0 fordeltPå (1 jan 2018)
         val nyFordeling = 2000.0 fordeltPå (1 jan 2018 til 2 jan 2018)
-        val differanse = nyFordeling diff gammelFordeling
+        val differanse = nyFordeling differanseFra gammelFordeling
         assertEquals(0, differanse.fjernedeInntekter.size)
         assertEquals(1, differanse.nyeEllerEndredeInntekter.size)
         assertEquals(
@@ -27,7 +27,7 @@ class InntektsfordelingTest {
     fun `lagt til en dag og endret beløp`() {
         val gammelFordeling = 1000.0 fordeltPå (1 jan 2018)
         val nyFordeling = 3000.0 fordeltPå (1 jan 2018 til 2 jan 2018)
-        val differanse = nyFordeling diff gammelFordeling
+        val differanse = nyFordeling differanseFra gammelFordeling
         assertEquals(0, differanse.fjernedeInntekter.size)
         assertEquals(1, differanse.nyeEllerEndredeInntekter.size)
         assertEquals(
@@ -40,7 +40,7 @@ class InntektsfordelingTest {
     fun `lagt til to dager`() {
         val gammelFordeling = 1000.0 fordeltPå (1 jan 2018)
         val nyFordeling = 3000.0 fordeltPå (1 jan 2018 til 3 jan 2018)
-        val differanse = nyFordeling diff gammelFordeling
+        val differanse = nyFordeling differanseFra gammelFordeling
         assertEquals(0, differanse.fjernedeInntekter.size)
         assertEquals(1, differanse.nyeEllerEndredeInntekter.size)
         assertEquals(
@@ -53,7 +53,7 @@ class InntektsfordelingTest {
     fun `fjernet to dager`() {
         val gammelFordeling = 3000.0 fordeltPå (1 jan 2018 til 3 jan 2018)
         val nyFordeling = 1000.0 fordeltPå (1 jan 2018)
-        val differanse = nyFordeling diff gammelFordeling
+        val differanse = nyFordeling differanseFra gammelFordeling
         assertEquals(1, differanse.fjernedeInntekter.size)
         assertEquals(0, differanse.nyeEllerEndredeInntekter.size)
         assertEquals(
@@ -69,7 +69,7 @@ class InntektsfordelingTest {
             7 jan 2018 til 11 jan 2018
         )
         val nyFordeling = ingenFordeling
-        val differanse = nyFordeling diff gammelFordeling
+        val differanse = nyFordeling differanseFra gammelFordeling
         assertEquals(2, differanse.fjernedeInntekter.size)
         assertEquals(0, differanse.nyeEllerEndredeInntekter.size)
         assertEquals(
@@ -85,7 +85,7 @@ class InntektsfordelingTest {
     fun `legg til alle dager`() {
         val gammelFordeling = ingenFordeling
         val nyFordeling = 31000.0 fordeltPå (1 jan 2018 til 31 jan 2018)
-        val differanse = nyFordeling diff gammelFordeling
+        val differanse = nyFordeling differanseFra gammelFordeling
         assertEquals(0, differanse.fjernedeInntekter.size)
         assertEquals(1, differanse.nyeEllerEndredeInntekter.size)
         assertEquals(
@@ -108,7 +108,7 @@ class InntektsfordelingTest {
             9 jan 2018 til 10 jan 2018,
             13 jan 2018 til 14 jan 2018
         )
-        val differanse = nyFordeling diff gammelFordeling
+        val differanse = nyFordeling differanseFra gammelFordeling
         assertEquals(3, differanse.fjernedeInntekter.size)
         assertEquals(4, differanse.nyeEllerEndredeInntekter.size)
         assertEquals(
@@ -130,20 +130,24 @@ class InntektsfordelingTest {
         )
     }
 
-    private infix fun Double.fordeltPå(perioder: List<Periode>): Inntektsfordeling {
-        return Inntektsfordeling(
+    private infix fun Double.fordeltPå(perioder: List<Periode>): Graderingsperiode {
+        return Graderingsperiode.ny(
+            fom = perioder.first().fom,
+            tom = perioder.last().tom,
             dager = perioder.flatMap { it.datoer() },
             periodebeløp = this,
         )
     }
 
-    private val ingenFordeling = Inntektsfordeling(
+    private val ingenFordeling = Graderingsperiode.ny(
+        fom = 1 jan 2018,
+        tom = 31 jan 2018,
         dager = emptyList(),
         periodebeløp = 0.0,
     )
 
-    private infix fun Double.fordeltPå(periode: Periode): Inntektsfordeling = this.fordeltPå(listOf(periode))
-    private infix fun Double.fordeltPå(dato: LocalDate): Inntektsfordeling = this.fordeltPå(listOf(dato til dato))
+    private infix fun Double.fordeltPå(periode: Periode): Graderingsperiode = this.fordeltPå(listOf(periode))
+    private infix fun Double.fordeltPå(dato: LocalDate): Graderingsperiode = this.fordeltPå(listOf(dato til dato))
 
     private infix fun LocalDate.til(other: Int) = PeriodBuilder(this, other)
 

@@ -12,7 +12,7 @@ data class Periode(
 
     fun datoer(): List<LocalDate> = fom.datesUntil(tom.plusDays(1)).toList()
 
-    fun overlapperMed(other: Periode) = this.overlapper(other) || other.overlapper(this)
+    infix fun overlapperMed(other: Periode) = this.overlapper(other) || other.overlapper(this)
 
     fun forlengesAv(dato: LocalDate): Boolean = tom.plusDays(1) == dato
 

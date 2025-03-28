@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.domain.inntektsperiode
+package no.nav.helse.spesialist.domain.gradering
 
 import no.nav.helse.spesialist.domain.Periode
 
