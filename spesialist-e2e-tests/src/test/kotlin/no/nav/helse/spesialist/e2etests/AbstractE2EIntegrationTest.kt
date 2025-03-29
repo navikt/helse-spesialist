@@ -56,7 +56,7 @@ abstract class AbstractE2EIntegrationTest {
     companion object {
         private val testRapid = LoopbackTestRapid()
         private val behovLøserStub = BehovLøserStub(testRapid).also { it.registerOn(testRapid) }
-        private val spleisStub = SpleisStub(testRapid).also { it.registerOn(testRapid) }
+        private val spleisStub = SpleisStub(testRapid, ClientSpleisModuleIntegrationTestFixture.wireMockServer).also { it.registerOn(testRapid) }
         private val rapidApp = RapidApp()
         private val mockOAuth2Server = MockOAuth2Server().also { it.start() }
         private val apiModuleIntegrationTestFixture = ApiModuleIntegrationTestFixture(mockOAuth2Server)
@@ -261,6 +261,12 @@ abstract class AbstractE2EIntegrationTest {
     }
 
     protected fun saksbehandlerGodkjennerRisikovurderingVarsel() {
+        callGraphQL(
+            operationName = "FetchPerson",
+            variables = mapOf(
+                "aktorId" to testPerson.aktørId,
+            )
+        )
         callGraphQL(
             operationName = "SettVarselStatus",
             variables = mapOf(

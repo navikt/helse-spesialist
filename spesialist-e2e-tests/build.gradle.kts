@@ -16,6 +16,7 @@ dependencies {
 
     testImplementation(libs.bundles.jackson)
     testImplementation(libs.mockOauth2Server)
+    testImplementation(libs.wiremock)
 
     testImplementation(testFixtures(project(":spesialist-db")))
     testImplementation(testFixtures(project(":spesialist-api")))
