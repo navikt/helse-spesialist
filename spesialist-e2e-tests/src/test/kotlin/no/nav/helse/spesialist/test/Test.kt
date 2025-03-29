@@ -21,7 +21,7 @@ class TestPerson {
     val etternavn: String = lagEtternavn()
     val kjønn = Kjønn.entries.toTypedArray().random()
     private val arbeidsgivere = mutableMapOf<Int, TestArbeidsgiver>()
-    private val arbeidsgiver1 = nyArbeidsgiver()
+    val arbeidsgiver1 = nyArbeidsgiver()
     private val arbeidsgiver2 = nyArbeidsgiver()
     private val vedtaksperiode1 = arbeidsgiver1.nyVedtaksperiode()
     private val vedtaksperiode2 = arbeidsgiver1.nyVedtaksperiode()

@@ -8,6 +8,7 @@ import io.ktor.client.request.accept
 import io.ktor.client.request.bearerAuth
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.serialization.jackson.JacksonConverter
@@ -56,7 +57,9 @@ abstract class AbstractE2EIntegrationTest {
     companion object {
         private val testRapid = LoopbackTestRapid()
         private val behovLøserStub = BehovLøserStub(testRapid).also { it.registerOn(testRapid) }
-        private val spleisStub = SpleisStub(testRapid).also { it.registerOn(testRapid) }
+        private val spleisStub = SpleisStub(testRapid, ClientSpleisModuleIntegrationTestFixture.wireMockServer).also {
+            it.registerOn(testRapid)
+        }
         private val rapidApp = RapidApp()
         private val mockOAuth2Server = MockOAuth2Server().also { it.start() }
         private val apiModuleIntegrationTestFixture = ApiModuleIntegrationTestFixture(mockOAuth2Server)
@@ -129,6 +132,7 @@ abstract class AbstractE2EIntegrationTest {
 
     init {
         behovLøserStub.init(testPerson)
+        spleisStub.init(testPerson, vedtaksperiodeId)
         ktorApp.start()
     }
 
@@ -140,21 +144,19 @@ abstract class AbstractE2EIntegrationTest {
         behovLøserStub.besvarIgjen(testPerson.fødselsnummer, behov)
     }
 
-    protected fun callGraphQL(operationName: String, variables: Map<String, Any>) {
-        runBlocking {
-            httpClient.post("http://localhost:$port/graphql") {
-                contentType(ContentType.Application.Json)
-                accept(ContentType.Application.Json)
-                bearerAuth(apiModuleIntegrationTestFixture.token(saksbehandler))
-                setBody(
-                    mapOf(
-                        "query" to (this::class.java.getResourceAsStream("/graphql/$operationName.graphql")
-                            ?.use { it.reader().readText() }
-                            ?: error("Fant ikke $operationName.graphql")),
-                        "operationName" to operationName,
-                        "variables" to variables))
-            }
-        }
+    protected fun callGraphQL(operationName: String, variables: Map<String, Any>) = runBlocking {
+        httpClient.post("http://localhost:$port/graphql") {
+            contentType(ContentType.Application.Json)
+            accept(ContentType.Application.Json)
+            bearerAuth(apiModuleIntegrationTestFixture.token(saksbehandler))
+            setBody(
+                mapOf(
+                    "query" to (this::class.java.getResourceAsStream("/graphql/$operationName.graphql")
+                        ?.use { it.reader().readText() }
+                        ?: error("Fant ikke $operationName.graphql")),
+                    "operationName" to operationName,
+                    "variables" to variables))
+        }.bodyAsText()
     }
 
     protected fun simulerFremTilOgMedGodkjenningsbehov() {
@@ -261,6 +263,13 @@ abstract class AbstractE2EIntegrationTest {
     }
 
     protected fun saksbehandlerGodkjennerRisikovurderingVarsel() {
+        val response = callGraphQL(
+            operationName = "FetchPerson",
+            variables = mapOf(
+                "aktorId" to testPerson.aktørId,
+            )
+        )
+        println(response)
         callGraphQL(
             operationName = "SettVarselStatus",
             variables = mapOf(

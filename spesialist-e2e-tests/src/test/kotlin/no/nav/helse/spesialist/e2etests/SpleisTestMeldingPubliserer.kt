@@ -9,7 +9,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 class SpleisTestMeldingPubliserer(
-    private val testPerson: TestPerson,
+    val testPerson: TestPerson,
     private val vedtaksperiodeId: UUID,
     private val rapidsConnection: RapidsConnection
 ) {

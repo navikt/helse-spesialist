@@ -1,0 +1,645 @@
+{
+  "data": {
+    "person": {
+      "aktorId": "2789848683986",
+      "fodselsnummer": "27457222276",
+      "arbeidsgivere": [
+        {
+          "organisasjonsnummer": "947064649",
+          "generasjoner": [
+            {
+              "id": "0fa4aa13-9d25-4de5-92c1-4713f913330f",
+              "perioder": [
+                {
+                  "__typename": "GraphQLBeregnetPeriode",
+                  "behandlingId": "3cfb325d-f2de-47cd-a7ff-101c32a09ffc",
+                  "kilde": "af4656ef-fb9b-4c9d-b575-64242b851c5b",
+                  "fom": "2024-12-01",
+                  "tom": "2024-12-31",
+                  "tidslinje": [
+                    {
+                      "dato": "2024-12-01",
+                      "sykdomsdagtype": "SykHelgedag",
+                      "utbetalingsdagtype": "ArbeidsgiverperiodeDag",
+                      "kilde": {
+                        "id": "af4656ef-fb9b-4c9d-b575-64242b851c5b",
+                        "type": "Soknad"
+                      },
+                      "grad": 100.0,
+                      "utbetalingsinfo": null,
+                      "begrunnelser": null
+                    },
+                    {
+                      "dato": "2024-12-02",
+                      "sykdomsdagtype": "Sykedag",
+                      "utbetalingsdagtype": "ArbeidsgiverperiodeDag",
+                      "kilde": {
+                        "id": "af4656ef-fb9b-4c9d-b575-64242b851c5b",
+                        "type": "Soknad"
+                      },
+                      "grad": 100.0,
+                      "utbetalingsinfo": null,
+                      "begrunnelser": null
+                    },
+                    {
+                      "dato": "2024-12-03",
+                      "sykdomsdagtype": "Sykedag",
+                      "utbetalingsdagtype": "ArbeidsgiverperiodeDag",
+                      "kilde": {
+                        "id": "af4656ef-fb9b-4c9d-b575-64242b851c5b",
+                        "type": "Soknad"
+                      },
+                      "grad": 100.0,
+                      "utbetalingsinfo": null,
+                      "begrunnelser": null
+                    },
+                    {
+                      "dato": "2024-12-04",
+                      "sykdomsdagtype": "Sykedag",
+                      "utbetalingsdagtype": "ArbeidsgiverperiodeDag",
+                      "kilde": {
+                        "id": "af4656ef-fb9b-4c9d-b575-64242b851c5b",
+                        "type": "Soknad"
+                      },
+                      "grad": 100.0,
+                      "utbetalingsinfo": null,
+                      "begrunnelser": null
+                    },
+                    {
+                      "dato": "2024-12-05",
+                      "sykdomsdagtype": "Sykedag",
+                      "utbetalingsdagtype": "ArbeidsgiverperiodeDag",
+                      "kilde": {
+                        "id": "af4656ef-fb9b-4c9d-b575-64242b851c5b",
+                        "type": "Soknad"
+                      },
+                      "grad": 100.0,
+                      "utbetalingsinfo": null,
+                      "begrunnelser": null
+                    },
+                    {
+                      "dato": "2024-12-06",
+                      "sykdomsdagtype": "Sykedag",
+                      "utbetalingsdagtype": "ArbeidsgiverperiodeDag",
+                      "kilde": {
+                        "id": "af4656ef-fb9b-4c9d-b575-64242b851c5b",
+                        "type": "Soknad"
+                      },
+                      "grad": 100.0,
+                      "utbetalingsinfo": null,
+                      "begrunnelser": null
+                    },
+                    {
+                      "dato": "2024-12-07",
+                      "sykdomsdagtype": "SykHelgedag",
+                      "utbetalingsdagtype": "ArbeidsgiverperiodeDag",
+                      "kilde": {
+                        "id": "af4656ef-fb9b-4c9d-b575-64242b851c5b",
+                        "type": "Soknad"
+                      },
+                      "grad": 100.0,
+                      "utbetalingsinfo": null,
+                      "begrunnelser": null
+                    },
+                    {
+                      "dato": "2024-12-08",
+                      "sykdomsdagtype": "SykHelgedag",
+                      "utbetalingsdagtype": "ArbeidsgiverperiodeDag",
+                      "kilde": {
+                        "id": "af4656ef-fb9b-4c9d-b575-64242b851c5b",
+                        "type": "Soknad"
+                      },
+                      "grad": 100.0,
+                      "utbetalingsinfo": null,
+                      "begrunnelser": null
+                    },
+                    {
+                      "dato": "2024-12-09",
+                      "sykdomsdagtype": "Sykedag",
+                      "utbetalingsdagtype": "ArbeidsgiverperiodeDag",
+                      "kilde": {
+                        "id": "af4656ef-fb9b-4c9d-b575-64242b851c5b",
+                        "type": "Soknad"
+                      },
+                      "grad": 100.0,
+                      "utbetalingsinfo": null,
+                      "begrunnelser": null
+                    },
+                    {
+                      "dato": "2024-12-10",
+                      "sykdomsdagtype": "Sykedag",
+                      "utbetalingsdagtype": "ArbeidsgiverperiodeDag",
+                      "kilde": {
+                        "id": "af4656ef-fb9b-4c9d-b575-64242b851c5b",
+                        "type": "Soknad"
+                      },
+                      "grad": 100.0,
+                      "utbetalingsinfo": null,
+                      "begrunnelser": null
+                    },
+                    {
+                      "dato": "2024-12-11",
+                      "sykdomsdagtype": "Sykedag",
+                      "utbetalingsdagtype": "ArbeidsgiverperiodeDag",
+                      "kilde": {
+                        "id": "af4656ef-fb9b-4c9d-b575-64242b851c5b",
+                        "type": "Soknad"
+                      },
+                      "grad": 100.0,
+                      "utbetalingsinfo": null,
+                      "begrunnelser": null
+                    },
+                    {
+                      "dato": "2024-12-12",
+                      "sykdomsdagtype": "Sykedag",
+                      "utbetalingsdagtype": "ArbeidsgiverperiodeDag",
+                      "kilde": {
+                        "id": "af4656ef-fb9b-4c9d-b575-64242b851c5b",
+                        "type": "Soknad"
+                      },
+                      "grad": 100.0,
+                      "utbetalingsinfo": null,
+                      "begrunnelser": null
+                    },
+                    {
+                      "dato": "2024-12-13",
+                      "sykdomsdagtype": "Sykedag",
+                      "utbetalingsdagtype": "ArbeidsgiverperiodeDag",
+                      "kilde": {
+                        "id": "af4656ef-fb9b-4c9d-b575-64242b851c5b",
+                        "type": "Soknad"
+                      },
+                      "grad": 100.0,
+                      "utbetalingsinfo": null,
+                      "begrunnelser": null
+                    },
+                    {
+                      "dato": "2024-12-14",
+                      "sykdomsdagtype": "SykHelgedag",
+                      "utbetalingsdagtype": "ArbeidsgiverperiodeDag",
+                      "kilde": {
+                        "id": "af4656ef-fb9b-4c9d-b575-64242b851c5b",
+                        "type": "Soknad"
+                      },
+                      "grad": 100.0,
+                      "utbetalingsinfo": null,
+                      "begrunnelser": null
+                    },
+                    {
+                      "dato": "2024-12-15",
+                      "sykdomsdagtype": "SykHelgedag",
+                      "utbetalingsdagtype": "ArbeidsgiverperiodeDag",
+                      "kilde": {
+                        "id": "af4656ef-fb9b-4c9d-b575-64242b851c5b",
+                        "type": "Soknad"
+                      },
+                      "grad": 100.0,
+                      "utbetalingsinfo": null,
+                      "begrunnelser": null
+                    },
+                    {
+                      "dato": "2024-12-16",
+                      "sykdomsdagtype": "Sykedag",
+                      "utbetalingsdagtype": "ArbeidsgiverperiodeDag",
+                      "kilde": {
+                        "id": "af4656ef-fb9b-4c9d-b575-64242b851c5b",
+                        "type": "Soknad"
+                      },
+                      "grad": 100.0,
+                      "utbetalingsinfo": null,
+                      "begrunnelser": null
+                    },
+                    {
+                      "dato": "2024-12-17",
+                      "sykdomsdagtype": "Sykedag",
+                      "utbetalingsdagtype": "NavDag",
+                      "kilde": {
+                        "id": "af4656ef-fb9b-4c9d-b575-64242b851c5b",
+                        "type": "Soknad"
+                      },
+                      "grad": 100.0,
+                      "utbetalingsinfo": {
+                        "inntekt": null,
+                        "utbetaling": 692,
+                        "personbelop": 0,
+                        "arbeidsgiverbelop": 692,
+                        "refusjonsbelop": null,
+                        "totalGrad": 100.0
+                      },
+                      "begrunnelser": null
+                    },
+                    {
+                      "dato": "2024-12-18",
+                      "sykdomsdagtype": "Sykedag",
+                      "utbetalingsdagtype": "NavDag",
+                      "kilde": {
+                        "id": "af4656ef-fb9b-4c9d-b575-64242b851c5b",
+                        "type": "Soknad"
+                      },
+                      "grad": 100.0,
+                      "utbetalingsinfo": {
+                        "inntekt": null,
+                        "utbetaling": 692,
+                        "personbelop": 0,
+                        "arbeidsgiverbelop": 692,
+                        "refusjonsbelop": null,
+                        "totalGrad": 100.0
+                      },
+                      "begrunnelser": null
+                    },
+                    {
+                      "dato": "2024-12-19",
+                      "sykdomsdagtype": "Sykedag",
+                      "utbetalingsdagtype": "NavDag",
+                      "kilde": {
+                        "id": "af4656ef-fb9b-4c9d-b575-64242b851c5b",
+                        "type": "Soknad"
+                      },
+                      "grad": 100.0,
+                      "utbetalingsinfo": {
+                        "inntekt": null,
+                        "utbetaling": 692,
+                        "personbelop": 0,
+                        "arbeidsgiverbelop": 692,
+                        "refusjonsbelop": null,
+                        "totalGrad": 100.0
+                      },
+                      "begrunnelser": null
+                    },
+                    {
+                      "dato": "2024-12-20",
+                      "sykdomsdagtype": "Sykedag",
+                      "utbetalingsdagtype": "NavDag",
+                      "kilde": {
+                        "id": "af4656ef-fb9b-4c9d-b575-64242b851c5b",
+                        "type": "Soknad"
+                      },
+                      "grad": 100.0,
+                      "utbetalingsinfo": {
+                        "inntekt": null,
+                        "utbetaling": 692,
+                        "personbelop": 0,
+                        "arbeidsgiverbelop": 692,
+                        "refusjonsbelop": null,
+                        "totalGrad": 100.0
+                      },
+                      "begrunnelser": null
+                    },
+                    {
+                      "dato": "2024-12-21",
+                      "sykdomsdagtype": "SykHelgedag",
+                      "utbetalingsdagtype": "NavHelgDag",
+                      "kilde": {
+                        "id": "af4656ef-fb9b-4c9d-b575-64242b851c5b",
+                        "type": "Soknad"
+                      },
+                      "grad": 100.0,
+                      "utbetalingsinfo": null,
+                      "begrunnelser": null
+                    },
+                    {
+                      "dato": "2024-12-22",
+                      "sykdomsdagtype": "SykHelgedag",
+                      "utbetalingsdagtype": "NavHelgDag",
+                      "kilde": {
+                        "id": "af4656ef-fb9b-4c9d-b575-64242b851c5b",
+                        "type": "Soknad"
+                      },
+                      "grad": 100.0,
+                      "utbetalingsinfo": null,
+                      "begrunnelser": null
+                    },
+                    {
+                      "dato": "2024-12-23",
+                      "sykdomsdagtype": "Sykedag",
+                      "utbetalingsdagtype": "NavDag",
+                      "kilde": {
+                        "id": "af4656ef-fb9b-4c9d-b575-64242b851c5b",
+                        "type": "Soknad"
+                      },
+                      "grad": 100.0,
+                      "utbetalingsinfo": {
+                        "inntekt": null,
+                        "utbetaling": 692,
+                        "personbelop": 0,
+                        "arbeidsgiverbelop": 692,
+                        "refusjonsbelop": null,
+                        "totalGrad": 100.0
+                      },
+                      "begrunnelser": null
+                    },
+                    {
+                      "dato": "2024-12-24",
+                      "sykdomsdagtype": "Sykedag",
+                      "utbetalingsdagtype": "NavDag",
+                      "kilde": {
+                        "id": "af4656ef-fb9b-4c9d-b575-64242b851c5b",
+                        "type": "Soknad"
+                      },
+                      "grad": 100.0,
+                      "utbetalingsinfo": {
+                        "inntekt": null,
+                        "utbetaling": 692,
+                        "personbelop": 0,
+                        "arbeidsgiverbelop": 692,
+                        "refusjonsbelop": null,
+                        "totalGrad": 100.0
+                      },
+                      "begrunnelser": null
+                    },
+                    {
+                      "dato": "2024-12-25",
+                      "sykdomsdagtype": "Sykedag",
+                      "utbetalingsdagtype": "NavDag",
+                      "kilde": {
+                        "id": "af4656ef-fb9b-4c9d-b575-64242b851c5b",
+                        "type": "Soknad"
+                      },
+                      "grad": 100.0,
+                      "utbetalingsinfo": {
+                        "inntekt": null,
+                        "utbetaling": 692,
+                        "personbelop": 0,
+                        "arbeidsgiverbelop": 692,
+                        "refusjonsbelop": null,
+                        "totalGrad": 100.0
+                      },
+                      "begrunnelser": null
+                    },
+                    {
+                      "dato": "2024-12-26",
+                      "sykdomsdagtype": "Sykedag",
+                      "utbetalingsdagtype": "NavDag",
+                      "kilde": {
+                        "id": "af4656ef-fb9b-4c9d-b575-64242b851c5b",
+                        "type": "Soknad"
+                      },
+                      "grad": 100.0,
+                      "utbetalingsinfo": {
+                        "inntekt": null,
+                        "utbetaling": 692,
+                        "personbelop": 0,
+                        "arbeidsgiverbelop": 692,
+                        "refusjonsbelop": null,
+                        "totalGrad": 100.0
+                      },
+                      "begrunnelser": null
+                    },
+                    {
+                      "dato": "2024-12-27",
+                      "sykdomsdagtype": "Sykedag",
+                      "utbetalingsdagtype": "NavDag",
+                      "kilde": {
+                        "id": "af4656ef-fb9b-4c9d-b575-64242b851c5b",
+                        "type": "Soknad"
+                      },
+                      "grad": 100.0,
+                      "utbetalingsinfo": {
+                        "inntekt": null,
+                        "utbetaling": 692,
+                        "personbelop": 0,
+                        "arbeidsgiverbelop": 692,
+                        "refusjonsbelop": null,
+                        "totalGrad": 100.0
+                      },
+                      "begrunnelser": null
+                    },
+                    {
+                      "dato": "2024-12-28",
+                      "sykdomsdagtype": "SykHelgedag",
+                      "utbetalingsdagtype": "NavHelgDag",
+                      "kilde": {
+                        "id": "af4656ef-fb9b-4c9d-b575-64242b851c5b",
+                        "type": "Soknad"
+                      },
+                      "grad": 100.0,
+                      "utbetalingsinfo": null,
+                      "begrunnelser": null
+                    },
+                    {
+                      "dato": "2024-12-29",
+                      "sykdomsdagtype": "SykHelgedag",
+                      "utbetalingsdagtype": "NavHelgDag",
+                      "kilde": {
+                        "id": "af4656ef-fb9b-4c9d-b575-64242b851c5b",
+                        "type": "Soknad"
+                      },
+                      "grad": 100.0,
+                      "utbetalingsinfo": null,
+                      "begrunnelser": null
+                    },
+                    {
+                      "dato": "2024-12-30",
+                      "sykdomsdagtype": "Sykedag",
+                      "utbetalingsdagtype": "NavDag",
+                      "kilde": {
+                        "id": "af4656ef-fb9b-4c9d-b575-64242b851c5b",
+                        "type": "Soknad"
+                      },
+                      "grad": 100.0,
+                      "utbetalingsinfo": {
+                        "inntekt": null,
+                        "utbetaling": 692,
+                        "personbelop": 0,
+                        "arbeidsgiverbelop": 692,
+                        "refusjonsbelop": null,
+                        "totalGrad": 100.0
+                      },
+                      "begrunnelser": null
+                    },
+                    {
+                      "dato": "2024-12-31",
+                      "sykdomsdagtype": "Sykedag",
+                      "utbetalingsdagtype": "NavDag",
+                      "kilde": {
+                        "id": "af4656ef-fb9b-4c9d-b575-64242b851c5b",
+                        "type": "Soknad"
+                      },
+                      "grad": 100.0,
+                      "utbetalingsinfo": {
+                        "inntekt": null,
+                        "utbetaling": 692,
+                        "personbelop": 0,
+                        "arbeidsgiverbelop": 692,
+                        "refusjonsbelop": null,
+                        "totalGrad": 100.0
+                      },
+                      "begrunnelser": null
+                    }
+                  ],
+                  "periodetype": "Forstegangsbehandling",
+                  "inntektstype": "EnArbeidsgiver",
+                  "erForkastet": false,
+                  "opprettet": "2025-03-28T14:19:13.942271831",
+                  "vedtaksperiodeId": "7a48bbaa-3f8b-484d-ae41-07398a259607",
+                  "periodetilstand": "TilGodkjenning",
+                  "skjaeringstidspunkt": "2024-12-01",
+                  "hendelser": [
+                    {
+                      "__typename": "GraphQLSoknadNav",
+                      "id": "af4656ef-fb9b-4c9d-b575-64242b851c5b",
+                      "eksternDokumentId": "5ff50d4f-4fb1-44ed-8dde-9cac6a1c19be",
+                      "fom": "2024-12-01",
+                      "tom": "2024-12-31",
+                      "rapportertDato": "2025-01-01T00:00:00",
+                      "sendtNav": "2025-01-01T00:00:00",
+                      "type": "SendtSoknadNav"
+                    },
+                    {
+                      "__typename": "GraphQLInntektsmelding",
+                      "id": "b9d11351-4b71-4c44-9708-b43fe1d6453f",
+                      "eksternDokumentId": "8dc8586a-958e-404c-b8f1-6285d229c407",
+                      "mottattDato": "2024-12-01T00:00:00",
+                      "beregnetInntekt": 15000.0,
+                      "type": "Inntektsmelding"
+                    }
+                  ],
+                  "beregningId": "2cbde6d4-e816-4bff-89e7-f88be30665f0",
+                  "gjenstaendeSykedager": 237,
+                  "forbrukteSykedager": 11,
+                  "maksdato": "2025-11-27",
+                  "utbetaling": {
+                    "id": "2cbde6d4-e816-4bff-89e7-f88be30665f0",
+                    "typeEnum": "UTBETALING",
+                    "statusEnum": "Ubetalt",
+                    "arbeidsgiverNettoBelop": 7612,
+                    "personNettoBelop": 0,
+                    "arbeidsgiverFagsystemId": "VQRYGJ42CBCMNKYVSMAWPDCK2M",
+                    "personFagsystemId": "OQ6DK2G7DJAL7BFMV5ZE4WUAG4",
+                    "arbeidsgiveroppdrag": {
+                      "fagsystemId": "VQRYGJ42CBCMNKYVSMAWPDCK2M",
+                      "tidsstempel": "2025-03-28T14:19:15.837468276",
+                      "simulering": {
+                        "totalbelop": 7612,
+                        "perioder": [
+                          {
+                            "fom": "2024-12-17",
+                            "tom": "2024-12-31",
+                            "utbetalinger": [
+                              {
+                                "utbetalesTilId": "947064649",
+                                "utbetalesTilNavn": "SJOKKERENDE ELEKTRIKER",
+                                "forfall": "2025-03-28",
+                                "feilkonto": false,
+                                "detaljer": [
+                                  {
+                                    "faktiskFom": "2024-12-17",
+                                    "faktiskTom": "2024-12-31",
+                                    "konto": "2338020",
+                                    "belop": 7612,
+                                    "tilbakeforing": false,
+                                    "sats": 692.0,
+                                    "typeSats": "DAG",
+                                    "antallSats": 11,
+                                    "uforegrad": 100,
+                                    "klassekode": "SPREFAG-IOP",
+                                    "klassekodeBeskrivelse": "Sykepenger, Refusjon arbeidsgiver",
+                                    "utbetalingstype": "YTEL",
+                                    "refunderesOrgNr": "947064649"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      "utbetalingslinjer": []
+                    },
+                    "personoppdrag": {
+                      "fagsystemId": "OQ6DK2G7DJAL7BFMV5ZE4WUAG4",
+                      "tidsstempel": "2025-03-28T14:19:15.837484965",
+                      "simulering": null,
+                      "utbetalingslinjer": []
+                    },
+                    "vurdering": null
+                  },
+                  "periodevilkar": {
+                    "sykepengedager": {
+                      "skjaeringstidspunkt": "2024-12-01",
+                      "maksdato": "2025-11-27",
+                      "forbrukteSykedager": 11,
+                      "gjenstaendeSykedager": 237,
+                      "oppfylt": true
+                    },
+                    "alder": {
+                      "alderSisteSykedag": 52,
+                      "oppfylt": true
+                    }
+                  },
+                  "vilkarsgrunnlagId": "ff2a1a33-ee74-4ac9-9f7b-c5005cec57ee",
+                  "inntekter": [
+                    {
+                      "inntektskilde": "947064649",
+                      "periodiserteInntekter": [
+                        {
+                          "fom": "2024-12-01",
+                          "tom": "2024-12-31",
+                          "dagligBelop": 692.3076923076923
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "kildeTilGenerasjon": "af4656ef-fb9b-4c9d-b575-64242b851c5b"
+            }
+          ],
+          "ghostPerioder": [],
+          "nyeInntektsforholdPerioder": []
+        }
+      ],
+      "dodsdato": null,
+      "versjon": 54,
+      "vilkarsgrunnlag": [
+        {
+          "__typename": "GraphQLSpleisVilkarsgrunnlag",
+          "id": "ff2a1a33-ee74-4ac9-9f7b-c5005cec57ee",
+          "skjaeringstidspunkt": "2024-12-01",
+          "omregnetArsinntekt": 180000.0,
+          "sykepengegrunnlag": 180000.0,
+          "inntekter": [
+            {
+              "arbeidsgiver": "947064649",
+              "omregnetArsinntekt": {
+                "kilde": "Inntektsmelding",
+                "belop": 180000.0,
+                "manedsbelop": 15000.0,
+                "inntekterFraAOrdningen": null
+              },
+              "skjonnsmessigFastsatt": null,
+              "skjonnsmessigFastsattAarlig": null,
+              "fom": "2024-12-01",
+              "tom": null,
+              "deaktivert": false
+            }
+          ],
+          "arbeidsgiverrefusjoner": [
+            {
+              "arbeidsgiver": "947064649",
+              "refusjonsopplysninger": [
+                {
+                  "fom": "2024-12-01",
+                  "tom": null,
+                  "belop": 15000.0,
+                  "meldingsreferanseId": "b9d11351-4b71-4c44-9708-b43fe1d6453f"
+                }
+              ]
+            }
+          ],
+          "grunnbelop": 124028,
+          "sykepengegrunnlagsgrense": {
+            "grunnbelop": 124028,
+            "grense": 744168,
+            "virkningstidspunkt": "2024-05-01"
+          },
+          "antallOpptjeningsdagerErMinst": 7919,
+          "opptjeningFra": "2003-03-28",
+          "oppfyllerKravOmMinstelonn": true,
+          "oppfyllerKravOmOpptjening": true,
+          "oppfyllerKravOmMedlemskap": true,
+          "skjonnsmessigFastsattAarlig": null
+        }
+      ]
+    }
+  }
+}
