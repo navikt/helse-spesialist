@@ -145,7 +145,7 @@ abstract class AbstractE2EIntegrationTest {
         behovLøserStub.besvarIgjen(testPerson.fødselsnummer, behov)
     }
 
-    protected fun callGraphQL(operationName: String, variables: Map<String, Any>) = runBlocking {
+    private fun callGraphQL(operationName: String, variables: Map<String, Any>) = runBlocking {
         httpClient.post("http://localhost:$port/graphql") {
             contentType(ContentType.Application.Json)
             accept(ContentType.Application.Json)
@@ -211,7 +211,7 @@ abstract class AbstractE2EIntegrationTest {
         return oppgave
     }
 
-    protected fun finnOppgaveId() =
+    private fun finnOppgaveId() =
         modules.dbModule.daos.oppgaveDao.finnOppgaveIdUansettStatus(testPerson.fødselsnummer)
 
     data class Varsel(
