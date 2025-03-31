@@ -105,18 +105,20 @@ abstract class AbstractE2EIntegrationTest {
             rapidsConnection = testRapid,
         )
         val port = Random.nextInt(10000, 20000)
-        private val ktorApp = ktorApplication(
-            meterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT),
-            naisEndpoints = NaisEndpoints.Default,
-            port = port,
-            aliveCheck = { true },
-            readyCheck = { true },
-            preStopHook = { },
-            cioConfiguration = { },
-            modules = listOf {
-                rapidApp.ktorSetupCallback(this)
-            }
-        )
+        init {
+            ktorApplication(
+                meterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT),
+                naisEndpoints = NaisEndpoints.Default,
+                port = port,
+                aliveCheck = { true },
+                readyCheck = { true },
+                preStopHook = { },
+                cioConfiguration = { },
+                modules = listOf {
+                    rapidApp.ktorSetupCallback(this)
+                }
+            ).also { it.start() }
+        }
         private val httpClient: HttpClient =
             HttpClient(Apache) {
                 install(ContentNegotiation) {
@@ -133,7 +135,6 @@ abstract class AbstractE2EIntegrationTest {
     init {
         behovLøserStub.init(testPerson)
         spleisStub.init(testPerson, vedtaksperiodeId)
-        ktorApp.start()
     }
 
     protected val risikovurderingBehovLøser =
