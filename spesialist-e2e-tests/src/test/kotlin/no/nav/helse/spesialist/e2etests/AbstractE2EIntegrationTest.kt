@@ -214,8 +214,6 @@ abstract class AbstractE2EIntegrationTest {
     protected fun finnOppgaveId() =
         modules.dbModule.daos.oppgaveDao.finnOppgaveIdUansettStatus(testPerson.fødselsnummer)
 
-    protected fun finnGenerasjonId() = modules.dbModule.daos.oppgaveDao.finnGenerasjonId(finnOppgaveId())
-
     data class Varsel(
         val kode: String,
         val status: String,
