@@ -117,6 +117,11 @@ class SpleisClient(
                     )
                 }
         val responseBody = response.body<String>()
+
+        if (System.getenv("LOG_SPLEIS_RESPONSE") == "true") {
+            sikkerlogg.info("Logger svar fra HentSnapshot i dev for å kunne bruke den i test: $responseBody")
+        }
+
         if (!response.status.isSuccess()) {
             logg.error("Fikk HTTP ${response.status.value} i svar fra Spleis. Se sikkerlogg for mer info.")
             sikkerlogg.error("Fikk HTTP ${response.status.value}-svar fra Spleis: $responseBody")
