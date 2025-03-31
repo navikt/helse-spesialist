@@ -10,15 +10,15 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 class LoopbackTestRapid : RapidsConnection() {
     private val meterRegistry: MeterRegistry = SimpleMeterRegistry()
     private val messageMetadata = MessageMetadata("test.message", -1, -1, null, emptyMap())
-    val meldingslogg = mutableListOf<JsonNode>()
+    val meldingslogg: ThreadLocal<MutableList<JsonNode>> = ThreadLocal.withInitial { mutableListOf<JsonNode>() }
 
     override fun publish(message: String) {
-        meldingslogg.add(objectMapper.readTree(message))
+        meldingslogg.get().add(objectMapper.readTree(message))
         notifyMessage(message, this, messageMetadata, meterRegistry)
     }
 
     override fun publish(key: String, message: String) {
-        meldingslogg.add(objectMapper.readTree(message))
+        meldingslogg.get().add(objectMapper.readTree(message))
         notifyMessage(message, KeyMessageContext(this, key), messageMetadata, meterRegistry)
     }
 

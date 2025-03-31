@@ -238,7 +238,7 @@ abstract class AbstractE2EIntegrationTest {
         automatiskBehandlet: Boolean,
         vararg årsakerTilAvvist: String,
     ) {
-        val løsning = testRapid.meldingslogg
+        val løsning = testRapid.meldingslogg.get()
             .mapNotNull { it["@løsning"] }
             .mapNotNull { it["Godkjenning"] }
             .last()
