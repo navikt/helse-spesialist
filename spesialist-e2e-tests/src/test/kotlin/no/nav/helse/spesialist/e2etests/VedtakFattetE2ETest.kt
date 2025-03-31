@@ -11,7 +11,7 @@ class VedtakFattetE2ETest : AbstractE2EIntegrationTest() {
         saksbehandlerTildelerSegSaken()
 
         // When:
-        saksbehandlerGodkjennerRisikovurderingVarsel()
+        saksbehandlerGodkjennerAlleVarsler()
         saksbehandlerFatterVedtak()
 
         // Then:

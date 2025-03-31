@@ -157,7 +157,7 @@ abstract class AbstractE2EIntegrationTest {
                         ?: error("Fant ikke $operationName.graphql")),
                     "operationName" to operationName,
                     "variables" to variables))
-        }.bodyAsText()
+        }.bodyAsText().let(objectMapper::readTree)
     }
 
     protected fun simulerFremTilOgMedGodkjenningsbehov() {
@@ -266,23 +266,30 @@ abstract class AbstractE2EIntegrationTest {
         assertEquals(expectedTilstand, actualTilstand)
     }
 
-    protected fun saksbehandlerGodkjennerRisikovurderingVarsel() {
-        val response = callGraphQL(
+    protected fun saksbehandlerGodkjennerAlleVarsler() {
+        val fetchPersonResponse = callGraphQL(
             operationName = "FetchPerson",
             variables = mapOf(
                 "aktorId" to testPerson.aktørId,
             )
         )
-        println(response)
-        callGraphQL(
-            operationName = "SettVarselStatus",
-            variables = mapOf(
-                "generasjonIdString" to finnGenerasjonId(),
-                "varselkode" to "SB_RV_1",
-                "ident" to saksbehandler.ident,
-                "definisjonIdString" to "77970f04-c4c5-4b9f-8795-bb5e4749344c", // id fra api varseldefinisjon
+        fetchPersonResponse["data"]["person"]["arbeidsgivere"].flatMap { arbeidsgiver ->
+            arbeidsgiver["generasjoner"].flatMap { generasjon ->
+                generasjon["perioder"].flatMap { periode ->
+                    periode["varsler"]
+                }
+            }
+        }.forEach { varsel ->
+            callGraphQL(
+                operationName = "SettVarselStatus",
+                variables = mapOf(
+                    "generasjonIdString" to varsel["generasjonId"].asText(),
+                    "varselkode" to varsel["kode"].asText(),
+                    "ident" to saksbehandler.ident,
+                    "definisjonIdString" to varsel["definisjonId"].asText(),
+                )
             )
-        )
+        }
     }
 
     protected fun saksbehandlerTildelerSegSaken() {
