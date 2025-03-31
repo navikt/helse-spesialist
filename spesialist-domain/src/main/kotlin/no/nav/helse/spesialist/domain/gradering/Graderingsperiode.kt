@@ -20,26 +20,26 @@ data class Graderingsperiode(
 ) {
     private val dagbeløp get() = periodebeløp.divide(graderteDager.size.toBigDecimal(), RoundingMode.HALF_UP)
 
-    internal infix fun differanseFra(forrigeGradering: Graderingsperiode): Graderingsdifferanse {
+    internal infix fun differanseFra(forrigeGraderingsperiode: Graderingsperiode): Graderingsdifferanse {
         val lagtTilEllerEndret = mutableListOf<LocalDate>()
         val fjernet = mutableListOf<LocalDate>()
 
         if (graderteDager.isEmpty()) {
             return Graderingsdifferanse(
                 nyeEllerEndredeInntekter = emptyList(),
-                fjernedeInntekter = forrigeGradering.graderteDager.tilPerioder(),
+                fjernedeInntekter = forrigeGraderingsperiode.graderteDager.tilPerioder(),
             )
         }
 
-        forrigeGradering.graderteDager.forEach { dato ->
+        forrigeGraderingsperiode.graderteDager.forEach { dato ->
             when {
                 dato !in graderteDager -> fjernet.add(dato)
-                dagbeløp != forrigeGradering.dagbeløp -> lagtTilEllerEndret.add(dato)
+                dagbeløp != forrigeGraderingsperiode.dagbeløp -> lagtTilEllerEndret.add(dato)
             }
         }
 
         graderteDager.forEach { dato ->
-            if (dato !in forrigeGradering.graderteDager) lagtTilEllerEndret.add(dato)
+            if (dato !in forrigeGraderingsperiode.graderteDager) lagtTilEllerEndret.add(dato)
         }
 
         return Graderingsdifferanse(
