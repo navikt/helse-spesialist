@@ -53,7 +53,6 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.VurderEnhetUtland
 import no.nav.helse.modell.vergemal.VurderVergemålOgFullmakt
 import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
-import no.nav.helse.spesialist.application.OverstyringRepository
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import java.time.LocalDate
 import java.util.UUID
@@ -222,7 +221,6 @@ internal class GodkjenningsbehovCommand(
     oppgaveDao: OppgaveDao,
     periodehistorikkDao: PeriodehistorikkDao,
     totrinnsvurderingRepository: TotrinnsvurderingRepository,
-    overstyringRepository: OverstyringRepository,
     avviksvurderingRepository: AvviksvurderingRepository,
     opptegnelseDao: OpptegnelseDao,
     oppgaveService: OppgaveService,
@@ -333,7 +331,6 @@ internal class GodkjenningsbehovCommand(
                 oppgaveService = oppgaveService,
                 periodehistorikkDao = periodehistorikkDao,
                 totrinnsvurderingRepository = totrinnsvurderingRepository,
-                overstyringRepository = overstyringRepository,
                 sykefraværstilfelle = sykefraværstilfelle,
             ),
             VurderAutomatiskInnvilgelse(

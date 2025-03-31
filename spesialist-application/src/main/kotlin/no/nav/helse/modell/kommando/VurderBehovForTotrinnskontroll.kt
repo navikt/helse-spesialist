@@ -5,10 +5,8 @@ import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode
-import no.nav.helse.modell.saksbehandler.handlinger.Overstyring
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_BESLUTTER
-import no.nav.helse.spesialist.application.OverstyringRepository
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import org.slf4j.LoggerFactory
 
@@ -18,7 +16,6 @@ internal class VurderBehovForTotrinnskontroll(
     private val oppgaveService: OppgaveService,
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val totrinnsvurderingRepository: TotrinnsvurderingRepository,
-    private val overstyringRepository: OverstyringRepository,
     private val sykefraværstilfelle: Sykefraværstilfelle,
 ) : Command {
     private companion object {
@@ -30,8 +27,9 @@ internal class VurderBehovForTotrinnskontroll(
         val kreverTotrinnsvurdering = sykefraværstilfelle.harMedlemskapsvarsel(vedtaksperiodeId)
         val vedtaksperiodeHarFerdigstiltOppgave = oppgaveService.harFerdigstiltOppgave(vedtaksperiodeId)
 
-        val overstyringer: List<Overstyring> = overstyringRepository.finnAktive(fødselsnummer)
-        if ((kreverTotrinnsvurdering && !vedtaksperiodeHarFerdigstiltOppgave) || overstyringer.isNotEmpty()) {
+        val eksisterendeTotrinnsvurdering = totrinnsvurderingRepository.finn(fødselsnummer)
+
+        if ((kreverTotrinnsvurdering && !vedtaksperiodeHarFerdigstiltOppgave) || eksisterendeTotrinnsvurdering != null) {
             logg.info("Vedtaksperioden: $vedtaksperiodeId trenger totrinnsvurdering")
 
             val totrinnsvurdering =
@@ -43,11 +41,7 @@ internal class VurderBehovForTotrinnskontroll(
                     vedtaksperiode.gjeldendeUnikId,
                 )
             }
-            overstyringer.forEach { overstyring ->
-                if (overstyring !in totrinnsvurdering.overstyringer) {
-                    totrinnsvurdering.nyOverstyring(overstyring)
-                }
-            }
+
             totrinnsvurderingRepository.lagre(totrinnsvurdering)
 
             totrinnsvurdering.saksbehandler?.value?.let {

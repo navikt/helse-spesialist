@@ -54,6 +54,7 @@ class Kommandofabrikk(
     private val godkjenningMediator: GodkjenningMediator,
     private val subsumsjonsmelderProvider: () -> Subsumsjonsmelder,
     private val stikkprøver: Stikkprøver,
+    @Suppress("unused")
     private val featureToggles: FeatureToggles,
 ) {
     private companion object {
@@ -341,7 +342,6 @@ class Kommandofabrikk(
             oppgaveDao = sessionContext.oppgaveDao,
             periodehistorikkDao = sessionContext.periodehistorikkDao,
             totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository,
-            overstyringRepository = sessionContext.overstyringRepository,
             avviksvurderingRepository = sessionContext.avviksvurderingRepository,
             opptegnelseDao = sessionContext.opptegnelseDao,
             oppgaveService = transaksjonellOppgaveService(sessionContext),
