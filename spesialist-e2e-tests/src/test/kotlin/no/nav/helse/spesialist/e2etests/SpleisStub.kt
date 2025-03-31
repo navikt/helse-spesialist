@@ -102,7 +102,9 @@ class SpleisStub(
         }
 
         wireMockServer.stubFor(
-            post("/graphql").willReturn(okJson(data.toPrettyString()))
+            post("/graphql")
+                .withRequestBody(matchingJsonPath("\$.variables[?(@.fnr == '${testPerson.fødselsnummer}')]"))
+                .willReturn(okJson(data.toPrettyString()))
         )
     }
 
