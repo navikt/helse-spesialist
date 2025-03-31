@@ -33,7 +33,7 @@ internal class VurderBehovForTotrinnskontroll(
             logg.info("Vedtaksperioden: $vedtaksperiodeId trenger totrinnsvurdering")
 
             val totrinnsvurdering =
-                totrinnsvurderingRepository.finn(fødselsnummer) ?: Totrinnsvurdering.ny(vedtaksperiodeId, fødselsnummer)
+                eksisterendeTotrinnsvurdering ?: Totrinnsvurdering.ny(vedtaksperiodeId, fødselsnummer)
             if (totrinnsvurdering.tilstand == AVVENTER_BESLUTTER) {
                 totrinnsvurdering.settAvventerSaksbehandler()
                 periodehistorikkDao.lagre(
