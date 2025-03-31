@@ -415,7 +415,8 @@ class PgOverstyringRepository(
                 INNER JOIN overstyring_tidslinje ot ON ot.overstyring_ref = o.id
                 INNER JOIN person p ON p.id = o.person_ref
                 INNER JOIN arbeidsgiver a ON a.id = ot.arbeidsgiver_ref
-            WHERE p.fødselsnummer = :fodselsnummer and o.totrinnsvurdering_ref = :totrinnsvurderingId and o.ferdigstilt = false
+                INNER JOIN vedtak v on o.vedtaksperiode_id = v.vedtaksperiode_id
+            WHERE p.fødselsnummer = :fodselsnummer and o.totrinnsvurdering_ref = :totrinnsvurderingId and o.ferdigstilt = false and v.forkastet = false;
             """,
             "fodselsnummer" to fødselsnummer,
             "totrinnsvurderingId" to totrinnsvurderingId.value,
@@ -440,7 +441,8 @@ class PgOverstyringRepository(
                 INNER JOIN overstyring_tidslinje ot ON ot.overstyring_ref = o.id
                 INNER JOIN person p ON p.id = o.person_ref
                 INNER JOIN arbeidsgiver a ON a.id = ot.arbeidsgiver_ref
-            WHERE p.fødselsnummer = :fodselsnummer and o.ferdigstilt = false
+                INNER JOIN vedtak v on o.vedtaksperiode_id = v.vedtaksperiode_id
+            WHERE p.fødselsnummer = :fodselsnummer and o.ferdigstilt = false and v.forkastet = false;
             """,
             "fodselsnummer" to fødselsnummer,
         ).list { it.toOverstyrtTidslinje() }
@@ -464,7 +466,8 @@ class PgOverstyringRepository(
             FROM overstyring o
                 INNER JOIN overstyring_inntekt oi on o.id = oi.overstyring_ref
                 INNER JOIN person p ON p.id = o.person_ref
-            WHERE p.fødselsnummer = :fodselsnummer and o.totrinnsvurdering_ref = :totrinnsvurderingId and o.ferdigstilt = false
+                INNER JOIN vedtak v on o.vedtaksperiode_id = v.vedtaksperiode_id
+            WHERE p.fødselsnummer = :fodselsnummer and o.totrinnsvurdering_ref = :totrinnsvurderingId and o.ferdigstilt = false and v.forkastet = false;
             """,
             "fodselsnummer" to fødselsnummer,
             "totrinnsvurderingId" to totrinnsvurderingId.value,
@@ -487,7 +490,8 @@ class PgOverstyringRepository(
             FROM overstyring o
                 INNER JOIN overstyring_inntekt oi on o.id = oi.overstyring_ref
                 INNER JOIN person p ON p.id = o.person_ref
-            WHERE p.fødselsnummer = :fodselsnummer and o.ferdigstilt = false
+                INNER JOIN vedtak v on o.vedtaksperiode_id = v.vedtaksperiode_id
+            WHERE p.fødselsnummer = :fodselsnummer and o.ferdigstilt = false and v.forkastet = false;
             """,
             "fodselsnummer" to fødselsnummer,
         ).list { it.toOverstyrtInntektOgRefusjon() }
@@ -512,7 +516,8 @@ class PgOverstyringRepository(
             FROM overstyring o
                 INNER JOIN overstyring_arbeidsforhold oa on o.id = oa.overstyring_ref
                 INNER JOIN person p ON p.id = o.person_ref
-            WHERE p.fødselsnummer = :fodselsnummer and o.totrinnsvurdering_ref = :totrinnsvurderingId and o.ferdigstilt = false
+                INNER JOIN vedtak v on o.vedtaksperiode_id = v.vedtaksperiode_id
+            WHERE p.fødselsnummer = :fodselsnummer and o.totrinnsvurdering_ref = :totrinnsvurderingId and o.ferdigstilt = false and v.forkastet = false;
             """,
             "fodselsnummer" to fødselsnummer,
             "totrinnsvurderingId" to totrinnsvurderingId.value,
@@ -536,7 +541,8 @@ class PgOverstyringRepository(
             FROM overstyring o
                 INNER JOIN overstyring_arbeidsforhold oa on o.id = oa.overstyring_ref
                 INNER JOIN person p ON p.id = o.person_ref
-            WHERE p.fødselsnummer = :fodselsnummer and o.ferdigstilt = false
+                INNER JOIN vedtak v on o.vedtaksperiode_id = v.vedtaksperiode_id
+            WHERE p.fødselsnummer = :fodselsnummer and o.ferdigstilt = false and v.forkastet = false;
             """,
             "fodselsnummer" to fødselsnummer,
         ).list { it.toOverstyrtArbeidsforhold() }
@@ -554,14 +560,15 @@ class PgOverstyringRepository(
                 aktør_id,
                 fødselsnummer,
                 tidspunkt,
-                vedtaksperiode_id,
+                o.vedtaksperiode_id,
                 begrunnelse,
                 o.saksbehandler_ref,
                 o.ferdigstilt
             FROM overstyring o
                 JOIN person p ON o.person_ref = p.id
                 JOIN overstyring_minimum_sykdomsgrad oms ON oms.overstyring_ref = o.id
-             WHERE p.fødselsnummer = :fodselsnummer and o.totrinnsvurdering_ref = :totrinnsvurderingId and o.ferdigstilt = false
+                INNER JOIN vedtak v on o.vedtaksperiode_id = v.vedtaksperiode_id
+             WHERE p.fødselsnummer = :fodselsnummer and o.totrinnsvurdering_ref = :totrinnsvurderingId and o.ferdigstilt = false and v.forkastet = false;
             """.trimIndent(),
             "fodselsnummer" to fødselsnummer,
             "totrinnsvurderingId" to totrinnsvurderingId.value,
@@ -578,14 +585,15 @@ class PgOverstyringRepository(
                 aktør_id,
                 fødselsnummer,
                 tidspunkt,
-                vedtaksperiode_id,
+                o.vedtaksperiode_id,
                 begrunnelse,
                 o.saksbehandler_ref,
                 o.ferdigstilt
             FROM overstyring o
                 JOIN person p ON o.person_ref = p.id
                 JOIN overstyring_minimum_sykdomsgrad oms ON oms.overstyring_ref = o.id
-             WHERE p.fødselsnummer = :fodselsnummer and o.ferdigstilt = false
+                INNER JOIN vedtak v on o.vedtaksperiode_id = v.vedtaksperiode_id
+             WHERE p.fødselsnummer = :fodselsnummer and o.ferdigstilt = false and v.forkastet = false;
             """.trimIndent(),
             "fodselsnummer" to fødselsnummer,
         ).list { it.toMinimumSykdomsgrad() }
@@ -619,7 +627,8 @@ class PgOverstyringRepository(
                      INNER JOIN begrunnelse b1 ON ss.begrunnelse_fritekst_ref = b1.id
                      INNER JOIN begrunnelse b2 ON ss.begrunnelse_mal_ref = b2.id
                      INNER JOIN begrunnelse b3 ON ss.begrunnelse_konklusjon_ref = b3.id
-            WHERE p.fødselsnummer = :fodselsnummer and o.totrinnsvurdering_ref = :totrinnsvurderingId and o.ferdigstilt = false
+                     INNER JOIN vedtak v on o.vedtaksperiode_id = v.vedtaksperiode_id
+            WHERE p.fødselsnummer = :fodselsnummer and o.totrinnsvurdering_ref = :totrinnsvurderingId and o.ferdigstilt = false and v.forkastet = false;
             """,
             "fodselsnummer" to fødselsnummer,
             "totrinnsvurderingId" to totrinnsvurderingId.value,
@@ -652,7 +661,8 @@ class PgOverstyringRepository(
                      INNER JOIN begrunnelse b1 ON ss.begrunnelse_fritekst_ref = b1.id
                      INNER JOIN begrunnelse b2 ON ss.begrunnelse_mal_ref = b2.id
                      INNER JOIN begrunnelse b3 ON ss.begrunnelse_konklusjon_ref = b3.id
-            WHERE p.fødselsnummer = :fodselsnummer and o.ferdigstilt = false
+                     INNER JOIN vedtak v on o.vedtaksperiode_id = v.vedtaksperiode_id
+            WHERE p.fødselsnummer = :fodselsnummer and o.ferdigstilt = false and v.forkastet = false;
             """,
             "fodselsnummer" to fødselsnummer,
         ).list { it.toSkjønnsfastsattSykepengegrunnlag() }
@@ -675,7 +685,8 @@ class PgOverstyringRepository(
             FROM overstyring o
                      INNER JOIN overstyring_tilkommen_inntekt oti ON o.id = oti.overstyring_ref
                      INNER JOIN person p ON p.id = o.person_ref
-            WHERE p.fødselsnummer = :fodselsnummer and o.totrinnsvurdering_ref = :totrinnsvurderingId and o.ferdigstilt = false
+                     INNER JOIN vedtak v on o.vedtaksperiode_id = v.vedtaksperiode_id
+            WHERE p.fødselsnummer = :fodselsnummer and o.totrinnsvurdering_ref = :totrinnsvurderingId and o.ferdigstilt = false and v.forkastet = false;
             """,
             "fodselsnummer" to fødselsnummer,
             "totrinnsvurderingId" to totrinnsvurderingId.value,
@@ -697,7 +708,8 @@ class PgOverstyringRepository(
             FROM overstyring o
                      INNER JOIN overstyring_tilkommen_inntekt oti ON o.id = oti.overstyring_ref
                      INNER JOIN person p ON p.id = o.person_ref
-            WHERE p.fødselsnummer = :fodselsnummer and o.ferdigstilt = false
+                     INNER JOIN vedtak v on o.vedtaksperiode_id = v.vedtaksperiode_id
+            WHERE p.fødselsnummer = :fodselsnummer and o.ferdigstilt = false and v.forkastet = false;
             """,
             "fodselsnummer" to fødselsnummer,
         ).list { it.toTilkommenInntekt() }

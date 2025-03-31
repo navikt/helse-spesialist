@@ -35,6 +35,7 @@ class PgOverstyringRepositoryTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `Kan lagre overstyringer`() {
+        opprettVedtaksperiode()
         val tidslinjeOverstyring = nyTidslinjeOverstyring()
         val inntektOgRefusjonOverstyring = nyInntektOgRefusjonOverstyring()
         val arbeidsforholdOverstyring = nyArbeidsforholdOverstyring()
@@ -58,6 +59,7 @@ class PgOverstyringRepositoryTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `Kan ferdigstille overstyringer`() {
+        opprettVedtaksperiode()
         val tidslinjeOverstyring = nyTidslinjeOverstyring()
         val inntektOgRefusjonOverstyring = nyInntektOgRefusjonOverstyring()
         val arbeidsforholdOverstyring = nyArbeidsforholdOverstyring()
@@ -85,6 +87,7 @@ class PgOverstyringRepositoryTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `TidslinjeOverstyring lagres riktig`() {
+        opprettVedtaksperiode()
         val tidslinjeOverstyring = nyTidslinjeOverstyring()
         overstyringRepository.lagre(listOf(tidslinjeOverstyring))
         val overstyringer = overstyringRepository.finnAktive(FNR)
@@ -106,6 +109,7 @@ class PgOverstyringRepositoryTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `InntektOgRefusjonOverstyring lagres riktig`() {
+        opprettVedtaksperiode()
         val inntektOgRefusjonOverstyring = nyInntektOgRefusjonOverstyring()
         overstyringRepository.lagre(listOf(inntektOgRefusjonOverstyring))
         val overstyringer = overstyringRepository.finnAktive(FNR)
@@ -126,6 +130,7 @@ class PgOverstyringRepositoryTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `ArbeidsforholdOverstyring lagres riktig`() {
+        opprettVedtaksperiode()
         val arbeidsforholdOverstyring = nyArbeidsforholdOverstyring()
         overstyringRepository.lagre(listOf(arbeidsforholdOverstyring))
         val overstyringer = overstyringRepository.finnAktive(FNR)
@@ -145,6 +150,7 @@ class PgOverstyringRepositoryTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `MinimumSykdomsgradOverstyring lagres riktig`() {
+        opprettVedtaksperiode()
         val minimumSykdomsgradOverstyring = nyMinimumSykdomsgradOverstyring()
         overstyringRepository.lagre(listOf(minimumSykdomsgradOverstyring))
         val overstyringer = overstyringRepository.finnAktive(FNR)
@@ -173,6 +179,7 @@ class PgOverstyringRepositoryTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `SkjønnsfastsattSykepengegrunnlag lagres riktig`() {
+        opprettVedtaksperiode()
         val skjønnsfastsattSykepengegrunnlag = nySkjønnsfastsattOverstyring()
         overstyringRepository.lagre(listOf(skjønnsfastsattSykepengegrunnlag))
         val overstyringer = overstyringRepository.finnAktive(FNR)
@@ -194,6 +201,7 @@ class PgOverstyringRepositoryTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `OverstyrTilkommenInntekt lagres riktig`() {
+        opprettVedtaksperiode()
         val overstyrTilkommenInntekt = nyTilkommenInntektOverstyring()
         overstyringRepository.lagre(listOf(overstyrTilkommenInntekt))
         val overstyringer = overstyringRepository.finnAktive(FNR)

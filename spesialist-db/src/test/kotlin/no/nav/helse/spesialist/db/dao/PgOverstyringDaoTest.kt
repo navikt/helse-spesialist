@@ -88,6 +88,7 @@ internal class PgOverstyringDaoTest : AbstractDBIntegrationTest() {
     @Test
     fun `Finner opprettede overstyringer for fødselsnummer`() {
         opprettPerson()
+        opprettVedtaksperiode()
 
         persisterOverstyringTidslinje()
         persisterOverstyringMinimumSykdomsgrad()
@@ -112,6 +113,8 @@ internal class PgOverstyringDaoTest : AbstractDBIntegrationTest() {
     @Test
     fun `Får tilbake én overstyring når det er gjort flere endringer i en overstyring av arbeidsforhold`() {
         opprettPerson()
+        opprettVedtaksperiode()
+
         val organisasjonsnummer2 = lagOrganisasjonsnummer()
         opprettArbeidsgiver(organisasjonsnummer2)
         persisterOverstyringArbeidsforhold(
@@ -128,6 +131,8 @@ internal class PgOverstyringDaoTest : AbstractDBIntegrationTest() {
     @Test
     fun `Får tilbake én overstyring når det er gjort flere endringer i en overstyring av inntekt og refusjon`() {
         opprettPerson()
+        opprettVedtaksperiode()
+
         val organisasjonsnummer2 = lagOrganisasjonsnummer()
         opprettArbeidsgiver(organisasjonsnummer2)
         persisterOverstyringInntektOgRefusjon(
