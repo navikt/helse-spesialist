@@ -168,6 +168,9 @@ abstract class AbstractE2EIntegrationTest {
         spleisStub.simulerFremTilOgMedNyUtbetaling(testPerson, vedtaksperiodeId)
     }
 
+    protected fun settOppNyVedtaksperiodeISpleis(): UUID =
+        UUID.randomUUID().also { spleisStub.init(testPerson, it) }
+
     protected fun simulerFraNyUtbetalingTilOgMedGodkjenningsbehov(vedtaksperiodeId: UUID = this.vedtaksperiodeId) {
         spleisStub.simulerFraNyUtbetalingTilOgMedGodkjenningsbehov(vedtaksperiodeId)
     }

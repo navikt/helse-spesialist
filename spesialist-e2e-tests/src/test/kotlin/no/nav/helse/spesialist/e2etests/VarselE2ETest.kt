@@ -7,7 +7,6 @@ import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_EX_1
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_EX_3
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_RV_1
 import org.junit.jupiter.api.Test
-import java.util.UUID
 import kotlin.test.assertEquals
 
 class VarselE2ETest : AbstractE2EIntegrationTest() {
@@ -194,8 +193,8 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         // Given:
         lagreVarseldefinisjon("EN_KODE")
         lagreVarseldefinisjon("EN_ANNEN_KODE")
-        val vedtaksperiodeId1 = UUID.randomUUID()
-        val vedtaksperiodeId2 = UUID.randomUUID()
+        val vedtaksperiodeId1 = settOppNyVedtaksperiodeISpleis()
+        val vedtaksperiodeId2 = settOppNyVedtaksperiodeISpleis()
 
         // When:
         simulerFremTilOgMedNyUtbetaling(vedtaksperiodeId = vedtaksperiodeId1)
