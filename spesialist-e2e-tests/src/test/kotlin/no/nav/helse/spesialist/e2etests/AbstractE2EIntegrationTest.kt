@@ -1,26 +1,12 @@
 package no.nav.helse.spesialist.e2etests
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.apache.Apache
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.request.accept
-import io.ktor.client.request.bearerAuth
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
-import io.ktor.client.statement.bodyAsText
-import io.ktor.http.ContentType
-import io.ktor.http.contentType
-import io.ktor.serialization.jackson.JacksonConverter
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
-import kotlinx.coroutines.runBlocking
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.modell.automatisering.Stikkprøver
-import no.nav.helse.modell.oppgave.Egenskap
-import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.rapids_rivers.NaisEndpoints
 import no.nav.helse.rapids_rivers.ktorApplication
 import no.nav.helse.spesialist.api.bootstrap.Gruppe
@@ -105,6 +91,7 @@ abstract class AbstractE2EIntegrationTest {
             rapidsConnection = testRapid,
         )
         val port = Random.nextInt(10000, 20000)
+
         init {
             ktorApplication(
                 meterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT),
@@ -119,17 +106,6 @@ abstract class AbstractE2EIntegrationTest {
                 }
             ).also { it.start() }
         }
-        private val httpClient: HttpClient =
-            HttpClient(Apache) {
-                install(ContentNegotiation) {
-                    register(ContentType.Application.Json, JacksonConverter())
-                }
-                engine {
-                    socketTimeout = 5_000
-                    connectTimeout = 5_000
-                    connectionRequestTimeout = 5_000
-                }
-            }
     }
 
     init {
@@ -143,21 +119,6 @@ abstract class AbstractE2EIntegrationTest {
 
     protected fun besvarBehovIgjen(behov: String) {
         behovLøserStub.besvarIgjen(testPerson.fødselsnummer, behov)
-    }
-
-    private fun callGraphQL(operationName: String, variables: Map<String, Any>) = runBlocking {
-        httpClient.post("http://localhost:$port/graphql") {
-            contentType(ContentType.Application.Json)
-            accept(ContentType.Application.Json)
-            bearerAuth(apiModuleIntegrationTestFixture.token(saksbehandler))
-            setBody(
-                mapOf(
-                    "query" to (this::class.java.getResourceAsStream("/graphql/$operationName.graphql")
-                        ?.use { it.reader().readText() }
-                        ?: error("Fant ikke $operationName.graphql")),
-                    "operationName" to operationName,
-                    "variables" to variables))
-        }.bodyAsText().let(objectMapper::readTree)
     }
 
     protected fun simulerFremTilOgMedGodkjenningsbehov() {
@@ -198,22 +159,6 @@ abstract class AbstractE2EIntegrationTest {
         )
     }
 
-    protected fun assertHarOppgaveegenskap(vararg forventedeEgenskaper: Egenskap) {
-        val oppgave = finnOppgave()
-        val egenskaper = oppgave.egenskaper
-        assertTrue(egenskaper.containsAll(forventedeEgenskaper.toList())) { "Forventet å finne ${forventedeEgenskaper.toSet()} i $egenskaper" }
-    }
-
-    private fun finnOppgave(): Oppgave {
-        val oppgave = modules.dbModule.sessionFactory.transactionalSessionScope { session ->
-            session.oppgaveRepository.finn(finnOppgaveId()) { _, _ -> true }
-        } ?: error("Fant ikke oppgaven basert på ID")
-        return oppgave
-    }
-
-    private fun finnOppgaveId() =
-        modules.dbModule.daos.oppgaveDao.finnOppgaveIdUansettStatus(testPerson.fødselsnummer)
-
     data class Varsel(
         val kode: String,
         val status: String,
@@ -226,10 +171,6 @@ abstract class AbstractE2EIntegrationTest {
             val paramMap = mapOf("vedtaksperiode_id" to vedtaksperiodeId)
             session.list(queryOf(query, paramMap)) { Varsel(it.string("kode"), it.string("status")) }.toSet()
         }
-
-    protected fun assertOppgaveForPersonInvalidert() {
-        assertEquals(Oppgave.Invalidert::class.java, finnOppgave().tilstand::class.java)
-    }
 
     protected fun assertGodkjenningsbehovBesvart(
         godkjent: Boolean,
@@ -264,47 +205,12 @@ abstract class AbstractE2EIntegrationTest {
         assertEquals(expectedTilstand, actualTilstand)
     }
 
-    protected fun saksbehandlerGodkjennerAlleVarsler() {
-        val fetchPersonResponse = callGraphQL(
-            operationName = "FetchPerson",
-            variables = mapOf(
-                "aktorId" to testPerson.aktørId,
-            )
-        )
-        fetchPersonResponse["data"]["person"]["arbeidsgivere"].flatMap { arbeidsgiver ->
-            arbeidsgiver["generasjoner"].flatMap { generasjon ->
-                generasjon["perioder"].flatMap { periode ->
-                    periode["varsler"]
-                }
-            }
-        }.forEach { varsel ->
-            callGraphQL(
-                operationName = "SettVarselStatus",
-                variables = mapOf(
-                    "generasjonIdString" to varsel["generasjonId"].asText(),
-                    "varselkode" to varsel["kode"].asText(),
-                    "ident" to saksbehandler.ident,
-                    "definisjonIdString" to varsel["definisjonId"].asText(),
-                )
-            )
-        }
-    }
-
-    protected fun saksbehandlerTildelerSegSaken() {
-        callGraphQL(
-            operationName = "Tildeling",
-            variables = mapOf(
-                "oppgavereferanse" to finnOppgaveId().toString(),
-            )
-        )
-    }
-
-    protected fun saksbehandlerFatterVedtak() {
-        callGraphQL(
-            operationName = "FattVedtak",
-            variables = mapOf(
-                "oppgavereferanse" to finnOppgaveId().toString(),
-                "begrunnelse" to "Fattet vedtak",
+    protected fun medPersonISpeil(block: SpeilPersonContext.() -> Unit) {
+        block(
+            SpeilPersonContext(
+                aktørId = testPerson.aktørId,
+                saksbehandlerIdent = saksbehandler.ident,
+                bearerAuthToken = apiModuleIntegrationTestFixture.token(saksbehandler)
             )
         )
     }

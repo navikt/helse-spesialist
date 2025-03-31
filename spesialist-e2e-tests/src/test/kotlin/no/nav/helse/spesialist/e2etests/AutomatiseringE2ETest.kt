@@ -14,7 +14,9 @@ class AutomatiseringE2ETest : AbstractE2EIntegrationTest() {
         simulerPublisertGosysOppgaveEndretMelding()
 
         // Then:
-        assertOppgaveForPersonInvalidert()
+        medPersonISpeil {
+            assertPeriodeHarIkkeOppgave()
+        }
         assertGodkjenningsbehovBesvart(godkjent = true, automatiskBehandlet = true)
     }
 }

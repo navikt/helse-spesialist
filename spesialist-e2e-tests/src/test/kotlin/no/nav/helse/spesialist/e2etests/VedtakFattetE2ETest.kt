@@ -8,11 +8,13 @@ class VedtakFattetE2ETest : AbstractE2EIntegrationTest() {
         // Given:
         risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
         simulerFremTilOgMedGodkjenningsbehov()
-        saksbehandlerTildelerSegSaken()
 
         // When:
-        saksbehandlerGodkjennerAlleVarsler()
-        saksbehandlerFatterVedtak()
+        medPersonISpeil {
+            saksbehandlerTildelerSegSaken() // Må til for å "opprette" saksbehandler
+            saksbehandlerGodkjennerAlleVarsler()
+            saksbehandlerFatterVedtak()
+        }
 
         // Then:
         assertBehandlingTilstand("VedtakFattet")

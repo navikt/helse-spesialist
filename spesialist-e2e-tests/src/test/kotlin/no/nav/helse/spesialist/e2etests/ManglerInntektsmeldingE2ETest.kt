@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.e2etests
 
-import no.nav.helse.modell.oppgave.Egenskap
 import org.junit.jupiter.api.Test
 
 class ManglerInntektsmeldingE2ETest : AbstractE2EIntegrationTest() {
@@ -15,6 +14,8 @@ class ManglerInntektsmeldingE2ETest : AbstractE2EIntegrationTest() {
         simulerFraNyUtbetalingTilOgMedGodkjenningsbehov()
 
         // Then:
-        assertHarOppgaveegenskap(Egenskap.MANGLER_IM)
+        medPersonISpeil {
+            assertHarOppgaveegenskap("MANGLER_IM")
+        }
     }
 }
