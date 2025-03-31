@@ -22,7 +22,7 @@ class GraderingsperioderTest {
             periodebeløp = 10000.0
         )
         graderingsperioder.leggTilGraderingsperiode(graderingsperiode)
-        val events = graderingsperioder.hendelser()
+        val events = graderingsperioder.konsumerDomenehendelser()
         assertEquals(1, events.size)
         assertEquals(1, events[0].graderingsdifferanse.nyeEllerEndredeInntekter.size)
         assertEquals(0, events[0].graderingsdifferanse.fjernedeInntekter.size)
@@ -54,7 +54,7 @@ class GraderingsperioderTest {
             periodebeløp = 10000.0
         )
         graderingsperioder.leggTilGraderingsperiode(graderingsperiodeV1)
-        graderingsperioder.hendelser() // flush
+        graderingsperioder.konsumerDomenehendelser() // flush
 
         // when
         val graderingsperiodeV2 = Graderingsperiode.ny(
@@ -64,7 +64,7 @@ class GraderingsperioderTest {
             periodebeløp = 10000.0
         )
         graderingsperioder.endreGraderingsperiode(gammel = graderingsperiodeV1, ny = graderingsperiodeV2)
-        val hendelser = graderingsperioder.hendelser()
+        val hendelser = graderingsperioder.konsumerDomenehendelser()
 
         // then
         assertEquals(1, hendelser.size)
@@ -114,12 +114,12 @@ class GraderingsperioderTest {
 
         // when
         graderingsperioder.leggTilGraderingsperiode(graderingsperiode)
-        graderingsperioder.hendelser() // flush
+        graderingsperioder.konsumerDomenehendelser() // flush
 
         graderingsperioder.fjernGraderingsperiode(graderingsperiode)
 
         // then
-        val hendelser = graderingsperioder.hendelser()
+        val hendelser = graderingsperioder.konsumerDomenehendelser()
         assertEquals(1, hendelser.size)
         assertEquals(0, hendelser[0].graderingsdifferanse.nyeEllerEndredeInntekter.size)
         assertEquals(1, hendelser[0].graderingsdifferanse.fjernedeInntekter.size)
@@ -145,14 +145,14 @@ class GraderingsperioderTest {
         val vilBliLagtTil = 10000.0 fordeltPå (6 jan 2018 til 10 jan 2018)
         val vilBliEndret = 10000.0 fordeltPå (11 jan 2018 til 15 jan 2018)
         graderingsperioder.perioder(vilBliFjernet, vilBliEndret)
-        graderingsperioder.hendelser() // flush
+        graderingsperioder.konsumerDomenehendelser() // flush
 
         // when
         graderingsperioder.fjernGraderingsperiode(vilBliFjernet)
         graderingsperioder.leggTilGraderingsperiode(vilBliLagtTil)
         graderingsperioder.endreGraderingsperiode(vilBliEndret, vilBliEndret.copy(periodebeløp = 15000.0.toBigDecimal()))
 
-        val hendelser = graderingsperioder.hendelser()
+        val hendelser = graderingsperioder.konsumerDomenehendelser()
         // then
         assertEquals(3, hendelser.size)
         assertEquals(1, hendelser[0].graderingsdifferanse.fjernedeInntekter.size)

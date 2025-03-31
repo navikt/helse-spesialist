@@ -17,9 +17,9 @@ class Graderingsperioder private constructor(
     private val _gjeldendeGraderingsperioder: MutableList<Graderingsperiode> = gjeldendeGraderingsperioder.toMutableList()
     private val gjeldendeGraderingsperioder: List<Graderingsperiode> get() = _gjeldendeGraderingsperioder.toList()
 
-    private val domenehendelser = mutableListOf<GraderingEndretEvent>()
+    private val hendelser = mutableListOf<GraderingEndretEvent>()
 
-    fun hendelser(): List<GraderingEndretEvent> = domenehendelser.toList().also { domenehendelser.clear() }
+    fun konsumerDomenehendelser(): List<GraderingEndretEvent> = hendelser.toList().also { hendelser.clear() }
 
     fun endreGraderingsperiode(
         gammel: Graderingsperiode,
@@ -30,12 +30,12 @@ class Graderingsperioder private constructor(
         kopi.forsøkÅLeggeTilPeriode(ny)
         _gjeldendeGraderingsperioder.erstattMed(kopi)
 
-        domenehendelser.add(GraderingEndretEvent(ny differanseFra gammel))
+        hendelser.add(GraderingEndretEvent(ny differanseFra gammel))
     }
 
     fun leggTilGraderingsperiode(graderingsperiode: Graderingsperiode) {
         _gjeldendeGraderingsperioder.forsøkÅLeggeTilPeriode(graderingsperiode)
-        domenehendelser.add(
+        hendelser.add(
             GraderingEndretEvent(
                 graderingsdifferanse =
                     Graderingsdifferanse(
@@ -48,7 +48,7 @@ class Graderingsperioder private constructor(
 
     fun fjernGraderingsperiode(graderingsperiode: Graderingsperiode) {
         _gjeldendeGraderingsperioder.forsøkÅFjernePeriode(graderingsperiode)
-        domenehendelser.add(
+        hendelser.add(
             GraderingEndretEvent(
                 graderingsdifferanse =
                     Graderingsdifferanse(
