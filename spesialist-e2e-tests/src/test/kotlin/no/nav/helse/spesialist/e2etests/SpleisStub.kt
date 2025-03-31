@@ -9,6 +9,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.client.WireMock.matchingJsonPath
 import com.github.tomakehurst.wiremock.client.WireMock.okJson
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import io.micrometer.core.instrument.MeterRegistry
@@ -24,10 +25,12 @@ class SpleisStub(
     private val meldingsendere = ConcurrentHashMap<UUID, SpleisTestMeldingPubliserer>()
 
     fun init(testPerson: TestPerson, vedtaksperiodeId: UUID) {
+        val vilkårsgrunnlagId = UUID.randomUUID()
         val spleisTestMeldingPubliserer = SpleisTestMeldingPubliserer(
             testPerson = testPerson,
             rapidsConnection = rapidsConnection,
             vedtaksperiodeId = vedtaksperiodeId,
+            vilkårsgrunnlagId = vilkårsgrunnlagId
         )
         meldingsendere[vedtaksperiodeId] = spleisTestMeldingPubliserer
 
@@ -58,6 +61,26 @@ class SpleisStub(
             pointer = "/data/person/arbeidsgivere/0/generasjoner/0/perioder/0/vedtaksperiodeId",
             verdi = vedtaksperiodeId.toString()
         )
+        sequenceOf(
+            "/data/person/vilkarsgrunnlag/0/id",
+            "/data/person/arbeidsgivere/0/generasjoner/0/perioder/0/vilkarsgrunnlagId"
+        ).forEach {
+            settVerdi(
+                jsonNode = data,
+                pointer = it,
+                verdi = meldingssender.vilkårsgrunnlagId.toString()
+            )
+        }
+        sequenceOf(
+            "/data/person/arbeidsgivere/0/generasjoner/0/perioder/0/beregningId",
+            "/data/person/arbeidsgivere/0/generasjoner/0/perioder/0/utbetaling/id"
+        ).forEach {
+            settVerdi(
+                jsonNode = data,
+                pointer = it,
+                verdi = testPerson.utbetalingId1.toString()
+            )
+        }
         settVerdi(
             jsonNode = data,
             pointer = "/data/person/arbeidsgivere/0/generasjoner/0/perioder/0/behandlingId",

@@ -11,6 +11,7 @@ import java.util.UUID
 class SpleisTestMeldingPubliserer(
     val testPerson: TestPerson,
     private val vedtaksperiodeId: UUID,
+    val vilkårsgrunnlagId: UUID,
     private val rapidsConnection: RapidsConnection
 ) {
     val spleisBehandlingId: UUID = UUID.randomUUID()
@@ -74,7 +75,7 @@ class SpleisTestMeldingPubliserer(
                         "inntektskilde" to "EN_ARBEIDSGIVER",
                         "orgnummereMedRelevanteArbeidsforhold" to emptyList<String>(),
                         "kanAvvises" to true,
-                        "vilkårsgrunnlagId" to UUID.randomUUID(),
+                        "vilkårsgrunnlagId" to vilkårsgrunnlagId.toString(),
                         "behandlingId" to spleisBehandlingId,
                         "tags" to listOf("Innvilget"),
                         "perioderMedSammeSkjæringstidspunkt" to listOf(
