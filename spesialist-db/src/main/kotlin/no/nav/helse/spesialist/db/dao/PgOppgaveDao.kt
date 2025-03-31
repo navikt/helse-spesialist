@@ -236,7 +236,7 @@ class PgOppgaveDao internal constructor(
             INNER JOIN person_info pi ON p.info_ref = pi.id
             INNER JOIN opprinnelig_soknadsdato os ON os.vedtaksperiode_id = v.vedtaksperiode_id
             LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
-            LEFT JOIN totrinnsvurdering ttv ON (ttv.vedtaksperiode_id = v.vedtaksperiode_id AND ttv.utbetaling_id_ref IS NULL)
+            LEFT JOIN totrinnsvurdering ttv ON (ttv.person_ref = v.person_ref AND ttv.tilstand != 'GODKJENT')
             LEFT JOIN saksbehandler s ON t.saksbehandler_ref = s.oid
             LEFT JOIN pa_vent pv ON v.vedtaksperiode_id = pv.vedtaksperiode_id
             LEFT JOIN saksbehandler sb ON pv.saksbehandler_ref = sb.oid
