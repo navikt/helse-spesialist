@@ -5,7 +5,7 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.spesialist.api.testfixtures.lagSaksbehandlerFraApi
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
-import no.nav.helse.spesialist.e2etests.VårMeldingsbygger.byggUtbetalingEndret
+import no.nav.helse.spesialist.e2etests.Meldingsbygger.byggUtbetalingEndret
 import no.nav.helse.spesialist.e2etests.behovløserstubs.AbstractBehovLøser
 import no.nav.helse.spesialist.e2etests.behovløserstubs.RisikovurderingBehovLøser
 import no.nav.helse.spesialist.e2etests.behovløserstubs.ÅpneOppgaverBehovLøser
@@ -49,7 +49,7 @@ abstract class AbstractE2EIntegrationTest {
     }
 
     protected fun personSenderSøknad() {
-        testRapid.publish(VårMeldingsbygger.byggSendSøknadNav(testContext.person, testContext.arbeidsgiver))
+        testRapid.publish(Meldingsbygger.byggSendSøknadNav(testContext.person, testContext.arbeidsgiver))
     }
 
     protected fun spleisForberederBehandling(
@@ -71,11 +71,11 @@ abstract class AbstractE2EIntegrationTest {
     }
 
     protected fun detPubliseresEnGosysOppgaveEndretMelding() {
-        testRapid.publish(VårMeldingsbygger.byggGosysOppgaveEndret(testContext.person))
+        testRapid.publish(Meldingsbygger.byggGosysOppgaveEndret(testContext.person))
     }
 
     protected fun varseldefinisjonOpprettes(varselkode: String) {
-        testRapid.publish(VårMeldingsbygger.byggVarselkodeNyDefinisjon(varselkode))
+        testRapid.publish(Meldingsbygger.byggVarselkodeNyDefinisjon(varselkode))
     }
 
     data class Varsel(
@@ -147,7 +147,7 @@ abstract class AbstractE2EIntegrationTest {
         arbeidsgiver: Arbeidsgiver
     ) {
         vedtaksperiode.spleisBehandlingId = UUID.randomUUID()
-        testRapid.publish(VårMeldingsbygger.byggBehandlingOpprettet(vedtaksperiode, person, arbeidsgiver))
+        testRapid.publish(Meldingsbygger.byggBehandlingOpprettet(vedtaksperiode, person, arbeidsgiver))
     }
 
     private fun spleisOppretterNyUtbetaling(
@@ -156,7 +156,7 @@ abstract class AbstractE2EIntegrationTest {
         arbeidsgiver: Arbeidsgiver
     ) {
         vedtaksperiode.utbetalingId = UUID.randomUUID()
-        testRapid.publish(VårMeldingsbygger.byggVedtaksperiodeNyUtbetaling(vedtaksperiode, person, arbeidsgiver))
+        testRapid.publish(Meldingsbygger.byggVedtaksperiodeNyUtbetaling(vedtaksperiode, person, arbeidsgiver))
     }
 
     private fun utbetalingEndres(
@@ -177,7 +177,7 @@ abstract class AbstractE2EIntegrationTest {
 
     protected fun spleisSenderGodkjenningsbehov(vedtaksperiode: Vedtaksperiode) {
         testRapid.publish(
-            VårMeldingsbygger.byggGodkjenningsbehov(
+            Meldingsbygger.byggGodkjenningsbehov(
                 person = testContext.person,
                 arbeidsgiver = testContext.arbeidsgiver,
                 vedtaksperiode = vedtaksperiode

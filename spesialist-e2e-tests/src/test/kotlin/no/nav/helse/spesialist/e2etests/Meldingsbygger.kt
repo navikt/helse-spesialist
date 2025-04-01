@@ -9,7 +9,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-object VårMeldingsbygger {
+object Meldingsbygger {
     fun byggSendSøknadNav(person: Person, arbeidsgiver: Arbeidsgiver) =
         JsonMessage.newMessage(
             mapOf(
