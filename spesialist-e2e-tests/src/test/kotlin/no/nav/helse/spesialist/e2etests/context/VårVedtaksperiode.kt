@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.e2etests
+package no.nav.helse.spesialist.e2etests.context
 
 import java.util.UUID
 

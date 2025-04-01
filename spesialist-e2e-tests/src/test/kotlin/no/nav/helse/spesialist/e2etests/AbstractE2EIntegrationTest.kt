@@ -9,6 +9,10 @@ import no.nav.helse.spesialist.e2etests.VårMeldingsbygger.byggUtbetalingEndret
 import no.nav.helse.spesialist.e2etests.behovløserstubs.AbstractBehovLøser
 import no.nav.helse.spesialist.e2etests.behovløserstubs.RisikovurderingBehovLøser
 import no.nav.helse.spesialist.e2etests.behovløserstubs.ÅpneOppgaverBehovLøser
+import no.nav.helse.spesialist.e2etests.context.TestContext
+import no.nav.helse.spesialist.e2etests.context.VårArbeidsgiver
+import no.nav.helse.spesialist.e2etests.context.VårTestPerson
+import no.nav.helse.spesialist.e2etests.context.VårVedtaksperiode
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull

@@ -11,8 +11,8 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.e2etests.LoopbackTestRapid
-import no.nav.helse.spesialist.e2etests.VårArbeidsgiver
-import no.nav.helse.spesialist.e2etests.VårTestPerson
+import no.nav.helse.spesialist.e2etests.context.VårArbeidsgiver
+import no.nav.helse.spesialist.e2etests.context.VårTestPerson
 import no.nav.helse.spesialist.e2etests.objectMapper
 import java.time.LocalDateTime
 import java.util.UUID

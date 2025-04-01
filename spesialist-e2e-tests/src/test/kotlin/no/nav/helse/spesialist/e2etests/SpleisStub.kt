@@ -14,6 +14,10 @@ import com.github.tomakehurst.wiremock.client.WireMock.okJson
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.spesialist.application.logg.logg
+import no.nav.helse.spesialist.e2etests.context.TestContext
+import no.nav.helse.spesialist.e2etests.context.VårArbeidsgiver
+import no.nav.helse.spesialist.e2etests.context.VårTestPerson
+import no.nav.helse.spesialist.e2etests.context.VårVedtaksperiode
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 

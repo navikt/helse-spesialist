@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.e2etests.behovløserstubs
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.spesialist.e2etests.VårTestPerson
+import no.nav.helse.spesialist.e2etests.context.VårTestPerson
 import no.nav.helse.spesialist.typer.Kjønn
 
 class HentPersoninfoV2BehovLøser(private val person: VårTestPerson) : AbstractBehovLøser("HentPersoninfoV2") {

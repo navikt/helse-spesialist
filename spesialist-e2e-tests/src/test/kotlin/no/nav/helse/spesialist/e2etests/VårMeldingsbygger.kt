@@ -2,6 +2,9 @@ package no.nav.helse.spesialist.e2etests
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import no.nav.helse.spesialist.domain.testfixtures.jan
+import no.nav.helse.spesialist.e2etests.context.VårArbeidsgiver
+import no.nav.helse.spesialist.e2etests.context.VårTestPerson
+import no.nav.helse.spesialist.e2etests.context.VårVedtaksperiode
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID

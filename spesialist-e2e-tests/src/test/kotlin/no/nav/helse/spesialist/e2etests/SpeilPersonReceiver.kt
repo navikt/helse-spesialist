@@ -13,6 +13,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.serialization.jackson.JacksonConverter
 import kotlinx.coroutines.runBlocking
+import no.nav.helse.spesialist.e2etests.context.VårVedtaksperiode
 import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.test.assertEquals
 

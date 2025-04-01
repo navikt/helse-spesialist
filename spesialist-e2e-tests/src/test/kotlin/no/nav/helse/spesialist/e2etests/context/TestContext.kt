@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.e2etests
+package no.nav.helse.spesialist.e2etests.context
 
 data class TestContext(
     val person: VårTestPerson = VårTestPerson(),
