@@ -2,12 +2,8 @@ package no.nav.helse.spesialist.e2etests
 
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.AKTIV
-import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.INAKTIV
-import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_EX_1
-import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_EX_3
-import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_RV_1
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
 
 class VarselE2ETest : AbstractE2EIntegrationTest() {
     @Test
@@ -18,7 +14,7 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         simulerFremTilOgMedGodkjenningsbehov()
 
         // Then:
-        assertEquals(emptySet(), hentVarselkoder())
+        assertVarselkoder(emptySet())
     }
 
     @Test
@@ -31,7 +27,7 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         simulerFremTilOgMedGodkjenningsbehov()
 
         // Then:
-        assertEquals(setOf(Varsel(SB_RV_1.name, AKTIV.name)), hentVarselkoder())
+        assertVarselkoder(setOf("SB_RV_1"))
     }
 
     @Test
@@ -43,7 +39,7 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         simulerFremTilOgMedGodkjenningsbehov()
 
         // Then:
-        assertEquals(setOf(Varsel(SB_EX_1.name, AKTIV.name)), hentVarselkoder())
+        assertVarselkoder(setOf("SB_EX_1"))
     }
 
     @Test
@@ -56,7 +52,7 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         besvarBehovIgjen("ÅpneOppgaver")
 
         // Then:
-        assertEquals(setOf(Varsel(SB_EX_1.name, AKTIV.name)), hentVarselkoder())
+        assertVarselkoder(setOf("SB_EX_1"))
     }
 
     @Test
@@ -70,7 +66,7 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         simulerPublisertGosysOppgaveEndretMelding()
 
         // Then:
-        assertEquals(setOf(Varsel(SB_EX_1.name, INAKTIV.name)), hentVarselkoder())
+        assertVarselkoder(emptySet())
     }
 
     @Test
@@ -82,7 +78,7 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         simulerFremTilOgMedGodkjenningsbehov()
 
         // Then:
-        assertEquals(setOf(Varsel(SB_EX_3.name, AKTIV.name)), hentVarselkoder())
+        assertVarselkoder(setOf("SB_EX_3"))
     }
 
     @Test
@@ -96,7 +92,7 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         simulerPublisertGosysOppgaveEndretMelding()
 
         // Then:
-        assertEquals(setOf(Varsel(SB_EX_3.name, INAKTIV.name)), hentVarselkoder())
+        assertVarselkoder(emptySet())
     }
 
     @Test
@@ -111,7 +107,7 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         simulerPublisertGosysOppgaveEndretMelding()
 
         // Then:
-        assertEquals(setOf(Varsel(SB_EX_1.name, AKTIV.name), Varsel(SB_RV_1.name, AKTIV.name)), hentVarselkoder())
+        assertVarselkoder(setOf("SB_EX_1", "SB_RV_1"))
     }
 
     @Test
@@ -125,7 +121,7 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         simulerPublisertGosysOppgaveEndretMelding()
 
         // Then:
-        assertEquals(setOf(Varsel(SB_EX_3.name, AKTIV.name), Varsel(SB_RV_1.name, AKTIV.name)), hentVarselkoder())
+        assertVarselkoder(setOf("SB_EX_3", "SB_RV_1"))
     }
 
     @Test
@@ -139,7 +135,7 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         simulerFraNyUtbetalingTilOgMedGodkjenningsbehov()
 
         // Then:
-        assertEquals(setOf(Varsel("EN_KODE", AKTIV.name)), hentVarselkoder())
+        assertVarselkoder(setOf("EN_KODE"))
     }
 
     @Test
@@ -155,7 +151,7 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         simulerFraNyUtbetalingTilOgMedGodkjenningsbehov()
 
         // Then:
-        assertEquals(setOf(Varsel("EN_KODE", AKTIV.name), Varsel("EN_ANNEN_KODE", AKTIV.name)), hentVarselkoder())
+        assertVarselkoder(setOf("EN_KODE", "EN_ANNEN_KODE"))
     }
 
     @Test
@@ -170,7 +166,7 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         simulerFraNyUtbetalingTilOgMedGodkjenningsbehov()
 
         // Then:
-        assertEquals(setOf(Varsel("EN_KODE", AKTIV.name), Varsel("EN_ANNEN_KODE", AKTIV.name)), hentVarselkoder())
+        assertVarselkoder(setOf("EN_KODE", "EN_ANNEN_KODE"))
     }
 
     @Test
@@ -185,7 +181,7 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         simulerFraNyUtbetalingTilOgMedGodkjenningsbehov()
 
         // Then:
-        assertEquals(setOf(Varsel("EN_KODE", AKTIV.name)), hentVarselkoder())
+        assertVarselkoder(setOf("EN_KODE"))
     }
 
     @Test
@@ -205,5 +201,9 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         // Then:
         assertEquals(setOf(Varsel("EN_KODE", AKTIV.name)), hentVarselkoder(vedtaksperiodeId1))
         assertEquals(setOf(Varsel("EN_ANNEN_KODE", AKTIV.name)), hentVarselkoder(vedtaksperiodeId2))
+    }
+
+    private fun assertVarselkoder(expected: Set<String>) {
+        medPersonISpeil { assertVarselkoder(expected, vedtaksperiodeId) }
     }
 }

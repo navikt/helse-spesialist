@@ -14,6 +14,8 @@ import io.ktor.http.contentType
 import io.ktor.serialization.jackson.JacksonConverter
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertTrue
+import java.util.UUID
+import kotlin.test.assertEquals
 
 class SpeilPersonContext(
     aktørId: String,
@@ -72,6 +74,20 @@ class SpeilPersonContext(
             "Forventet at oppgave var null for perioden, men den var: " +
                     person["arbeidsgivere"][0]["generasjoner"][0]["perioder"][0]["oppgave"].toPrettyString()
         }
+    }
+
+    fun assertVarselkoder(
+        expected: Set<String>,
+        vedtaksperiodeId: UUID
+    ) {
+        val vedtaksperiode = person["arbeidsgivere"].flatMap { arbeidsgiver ->
+            arbeidsgiver["generasjoner"].flatMap { generasjon ->
+                generasjon["perioder"]
+            }
+        }.find { it["vedtaksperiodeId"].asText() == vedtaksperiodeId.toString() }
+            ?: error("Fant ikke periode med vedtaksperiodeId $vedtaksperiodeId i FetchPerson-svaret")
+
+        assertEquals(expected, vedtaksperiode["varsler"].map { it["kode"].asText() }.toSet())
     }
 
     private fun fetchPerson(aktørId: String): JsonNode {
