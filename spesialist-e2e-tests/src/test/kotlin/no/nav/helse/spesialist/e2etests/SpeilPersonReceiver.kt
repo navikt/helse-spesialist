@@ -16,7 +16,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.test.assertEquals
 
-class SpeilPersonContext(
+class SpeilPersonReceiver(
     aktørId: String,
     private val saksbehandlerIdent: String,
     private val bearerAuthToken: String

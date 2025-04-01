@@ -137,15 +137,13 @@ abstract class AbstractE2EIntegrationTest {
 
     protected fun andreVedtaksperiode() = testContext.vedtaksperioder[1]
 
-    protected fun medPersonISpeil(block: SpeilPersonContext.() -> Unit) {
+    protected fun medPersonISpeil(block: SpeilPersonReceiver.() -> Unit) {
         spleisStub.stubSnapshotForPerson(testContext)
-        block(
-            SpeilPersonContext(
-                aktørId = testContext.person.aktørId,
-                saksbehandlerIdent = saksbehandler.ident,
-                bearerAuthToken = E2ETestApplikasjon.apiModuleIntegrationTestFixture.token(saksbehandler)
-            )
-        )
+        SpeilPersonReceiver(
+            aktørId = testContext.person.aktørId,
+            saksbehandlerIdent = saksbehandler.ident,
+            bearerAuthToken = E2ETestApplikasjon.apiModuleIntegrationTestFixture.token(saksbehandler)
+        ).block()
     }
 
     private fun spleisOppretterBehandling(
