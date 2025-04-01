@@ -63,7 +63,7 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         // When:
         simulerFremTilOgMedGodkjenningsbehov()
         åpneOppgaverBehovLøser.antall = 0
-        simulerPublisertGosysOppgaveEndretMelding()
+        detPubliseresEnGosysOppgaveEndretMelding()
 
         // Then:
         assertVarselkoder(emptySet())
@@ -89,7 +89,7 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         // When:
         simulerFremTilOgMedGodkjenningsbehov()
         åpneOppgaverBehovLøser.oppslagFeilet = false
-        simulerPublisertGosysOppgaveEndretMelding()
+        detPubliseresEnGosysOppgaveEndretMelding()
 
         // Then:
         assertVarselkoder(emptySet())
@@ -104,7 +104,7 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         // When:
         simulerFremTilOgMedGodkjenningsbehov()
         åpneOppgaverBehovLøser.antall = 1
-        simulerPublisertGosysOppgaveEndretMelding()
+        detPubliseresEnGosysOppgaveEndretMelding()
 
         // Then:
         assertVarselkoder(setOf("SB_EX_1", "SB_RV_1"))
@@ -118,7 +118,7 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         // When:
         simulerFremTilOgMedGodkjenningsbehov()
         åpneOppgaverBehovLøser.oppslagFeilet = true
-        simulerPublisertGosysOppgaveEndretMelding()
+        detPubliseresEnGosysOppgaveEndretMelding()
 
         // Then:
         assertVarselkoder(setOf("SB_EX_3", "SB_RV_1"))
@@ -130,9 +130,7 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         lagreVarseldefinisjon("EN_KODE")
 
         // When:
-        simulerFremTilOgMedNyUtbetaling()
-        simulerPublisertAktivitetsloggNyAktivitetMelding(listOf("EN_KODE"))
-        simulerFraNyUtbetalingTilOgMedGodkjenningsbehov()
+        spleisSetterOppMedVarselkodeMelding("EN_KODE")
 
         // Then:
         assertVarselkoder(setOf("EN_KODE"))
@@ -145,10 +143,12 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         lagreVarseldefinisjon("EN_ANNEN_KODE")
 
         // When:
-        simulerFremTilOgMedNyUtbetaling()
-        simulerPublisertAktivitetsloggNyAktivitetMelding(listOf("EN_KODE"))
-        simulerPublisertAktivitetsloggNyAktivitetMelding(listOf("EN_ANNEN_KODE"))
-        simulerFraNyUtbetalingTilOgMedGodkjenningsbehov()
+        spleisSetterOppMedVarselkodeMeldinger(
+            listOf(
+                listOf("EN_KODE"),
+                listOf("EN_ANNEN_KODE")
+            )
+        )
 
         // Then:
         assertVarselkoder(setOf("EN_KODE", "EN_ANNEN_KODE"))
@@ -161,9 +161,7 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         lagreVarseldefinisjon("EN_ANNEN_KODE")
 
         // When:
-        simulerFremTilOgMedNyUtbetaling()
-        simulerPublisertAktivitetsloggNyAktivitetMelding(listOf("EN_KODE", "EN_ANNEN_KODE"))
-        simulerFraNyUtbetalingTilOgMedGodkjenningsbehov()
+        spleisSetterOppMedVarselkodeMelding("EN_KODE", "EN_ANNEN_KODE")
 
         // Then:
         assertVarselkoder(setOf("EN_KODE", "EN_ANNEN_KODE"))
@@ -175,10 +173,12 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         lagreVarseldefinisjon("EN_KODE")
 
         // When:
-        simulerFremTilOgMedNyUtbetaling()
-        simulerPublisertAktivitetsloggNyAktivitetMelding(listOf("EN_KODE"))
-        simulerPublisertAktivitetsloggNyAktivitetMelding(listOf("EN_KODE"))
-        simulerFraNyUtbetalingTilOgMedGodkjenningsbehov()
+        spleisSetterOppMedVarselkodeMeldinger(
+            listOf(
+                listOf("EN_KODE"),
+                listOf("EN_KODE")
+            )
+        )
 
         // Then:
         assertVarselkoder(setOf("EN_KODE"))
@@ -189,21 +189,20 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         // Given:
         lagreVarseldefinisjon("EN_KODE")
         lagreVarseldefinisjon("EN_ANNEN_KODE")
-        val vedtaksperiodeId1 = settOppNyVedtaksperiodeISpleis()
-        val vedtaksperiodeId2 = settOppNyVedtaksperiodeISpleis()
+        leggTilVedtaksperiode()
 
         // When:
-        simulerFremTilOgMedNyUtbetaling(vedtaksperiodeId = vedtaksperiodeId1)
-        simulerFremTilOgMedNyUtbetaling(vedtaksperiodeId = vedtaksperiodeId2)
-        simulerPublisertAktivitetsloggNyAktivitetMelding(listOf("EN_KODE"), vedtaksperiodeId1)
-        simulerPublisertAktivitetsloggNyAktivitetMelding(listOf("EN_ANNEN_KODE"), vedtaksperiodeId2)
+        personSenderSøknad()
+        spleisForberederBehandling(førsteVedtaksperiode(), listOf(listOf("EN_KODE")))
+        spleisForberederBehandling(andreVedtaksperiode(), listOf(listOf("EN_ANNEN_KODE")))
+        spleisSenderGodkjenningsbehov(førsteVedtaksperiode())
 
         // Then:
-        assertEquals(setOf(Varsel("EN_KODE", AKTIV.name)), hentVarselkoder(vedtaksperiodeId1))
-        assertEquals(setOf(Varsel("EN_ANNEN_KODE", AKTIV.name)), hentVarselkoder(vedtaksperiodeId2))
+        assertEquals(setOf(Varsel("EN_KODE", AKTIV.name)), hentVarselkoder(førsteVedtaksperiode()))
+        assertEquals(setOf(Varsel("EN_ANNEN_KODE", AKTIV.name)), hentVarselkoder(andreVedtaksperiode()))
     }
 
     private fun assertVarselkoder(expected: Set<String>) {
-        medPersonISpeil { assertVarselkoder(expected, vedtaksperiodeId) }
+        medPersonISpeil { assertVarselkoder(expected, førsteVedtaksperiode()) }
     }
 }

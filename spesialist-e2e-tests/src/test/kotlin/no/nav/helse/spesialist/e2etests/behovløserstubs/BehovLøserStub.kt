@@ -11,13 +11,14 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.e2etests.LoopbackTestRapid
+import no.nav.helse.spesialist.e2etests.VårArbeidsgiver
+import no.nav.helse.spesialist.e2etests.VårTestPerson
 import no.nav.helse.spesialist.e2etests.objectMapper
-import no.nav.helse.spesialist.test.TestPerson
 import java.time.LocalDateTime
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
-class BehovLøserStub(val rapidsConnection: RapidsConnection) : River.PacketListener {
+class BehovLøserStub(private val rapidsConnection: RapidsConnection) : River.PacketListener {
     private val løsereForFødselsnummer = ConcurrentHashMap<String, List<AbstractBehovLøser>>()
     private fun løserPerBehov(fødselsnummer: String) =
         løsereForFødselsnummer(fødselsnummer).associateBy(AbstractBehovLøser::behov)
@@ -26,16 +27,16 @@ class BehovLøserStub(val rapidsConnection: RapidsConnection) : River.PacketList
     private fun behovliste(fødselsnummer: String) =
         behovlisteForFødselsnummer.computeIfAbsent(fødselsnummer) { mutableListOf() }
 
-    fun init(testPerson: TestPerson) {
-        løsereForFødselsnummer[testPerson.fødselsnummer] = listOf(
+    fun init(person: VårTestPerson, arbeidsgiver: VårArbeidsgiver) {
+        løsereForFødselsnummer[person.fødselsnummer] = listOf(
             ArbeidsforholdBehovLøser(),
             ArbeidsgiverinformasjonBehovLøser(),
             AvviksvurderingBehovLøser(),
             EgenAnsattBehovLøser(),
             HentEnhetBehovLøser(),
-            HentInfotrygdutbetalingerBehovLøser(testPerson.orgnummer),
-            HentPersoninfoV2BehovLøser(testPerson),
-            InntekterForSykepengegrunnlagBehovLøser(testPerson.orgnummer),
+            HentInfotrygdutbetalingerBehovLøser(arbeidsgiver.organisasjonsnummer),
+            HentPersoninfoV2BehovLøser(person),
+            InntekterForSykepengegrunnlagBehovLøser(arbeidsgiver.organisasjonsnummer),
             RisikovurderingBehovLøser(),
             FullmaktBehovLøser(),
             VergemålBehovLøser(),

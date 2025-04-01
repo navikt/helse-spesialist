@@ -11,7 +11,7 @@ class AutomatiseringE2ETest : AbstractE2EIntegrationTest() {
         // When:
         simulerFremTilOgMedGodkjenningsbehov()
         åpneOppgaverBehovLøser.antall = 0
-        simulerPublisertGosysOppgaveEndretMelding()
+        detPubliseresEnGosysOppgaveEndretMelding()
 
         // Then:
         medPersonISpeil {

@@ -9,9 +9,7 @@ class ManglerInntektsmeldingE2ETest : AbstractE2EIntegrationTest() {
         lagreVarseldefinisjon("RV_IV_10")
 
         // When:
-        simulerFremTilOgMedNyUtbetaling()
-        simulerPublisertAktivitetsloggNyAktivitetMelding(listOf("RV_IV_10"))
-        simulerFraNyUtbetalingTilOgMedGodkjenningsbehov()
+        spleisSetterOppMedVarselkodeMelding("RV_IV_10")
 
         // Then:
         medPersonISpeil {

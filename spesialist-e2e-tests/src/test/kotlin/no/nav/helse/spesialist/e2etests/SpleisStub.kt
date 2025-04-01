@@ -14,7 +14,6 @@ import com.github.tomakehurst.wiremock.client.WireMock.okJson
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.spesialist.application.logg.logg
-import no.nav.helse.spesialist.test.TestPerson
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
@@ -22,70 +21,20 @@ class SpleisStub(
     private val rapidsConnection: RapidsConnection,
     private val wireMockServer: WireMockServer
 ) : River.PacketListener {
-    private val meldingsendere = ConcurrentHashMap<UUID, SpleisTestMeldingPubliserer>()
+    private val contextsForFødselsnummer = ConcurrentHashMap<String, TestContext>()
 
-    fun init(testPerson: TestPerson, vedtaksperiodeId: UUID) {
-        val vilkårsgrunnlagId = UUID.randomUUID()
-        val spleisTestMeldingPubliserer = SpleisTestMeldingPubliserer(
-            testPerson = testPerson,
-            rapidsConnection = rapidsConnection,
-            vedtaksperiodeId = vedtaksperiodeId,
-            vilkårsgrunnlagId = vilkårsgrunnlagId
-        )
-        meldingsendere[vedtaksperiodeId] = spleisTestMeldingPubliserer
-
-        stubSnapshotForPerson(vedtaksperiodeId)
+    fun init(context: TestContext) {
+        contextsForFødselsnummer[context.person.fødselsnummer] = context
     }
 
-    fun simulerFremTilOgMedGodkjenningsbehov(testPerson: TestPerson, vedtaksperiodeId: UUID) {
-        simulerFremTilOgMedNyUtbetaling(testPerson, vedtaksperiodeId)
-        simulerFraNyUtbetalingTilOgMedGodkjenningsbehov(vedtaksperiodeId)
-    }
-
-    fun stubSnapshotForPerson(vedtaksperiodeId: UUID) {
+    fun stubSnapshotForPerson(personContext: TestContext) {
         val data = javaClass.getResourceAsStream("/hentSnapshot.json").use(objectMapper::readTree)
 
-        val meldingssender = meldingsendere[vedtaksperiodeId]
-            ?: error("Fant ikke meldingssender for vedtaksperiodeId: $vedtaksperiodeId")
-        val testPerson = meldingssender.testPerson
+        val person = personContext.person
 
-        settVerdi(data, "/data/person/aktorId", testPerson.aktørId)
-        settVerdi(data, "/data/person/fodselsnummer", testPerson.fødselsnummer)
-        settVerdi(
-            jsonNode = data,
-            pointer = "/data/person/arbeidsgivere/0/generasjoner/0/perioder/0/utbetaling/arbeidsgiveroppdrag/simulering/perioder/0/utbetalinger/0/utbetalesTilNavn",
-            verdi = testPerson.arbeidsgiver1.organisasjonsnavn
-        )
-        settVerdi(
-            jsonNode = data,
-            pointer = "/data/person/arbeidsgivere/0/generasjoner/0/perioder/0/vedtaksperiodeId",
-            verdi = vedtaksperiodeId.toString()
-        )
-        sequenceOf(
-            "/data/person/vilkarsgrunnlag/0/id",
-            "/data/person/arbeidsgivere/0/generasjoner/0/perioder/0/vilkarsgrunnlagId"
-        ).forEach {
-            settVerdi(
-                jsonNode = data,
-                pointer = it,
-                verdi = meldingssender.vilkårsgrunnlagId.toString()
-            )
-        }
-        sequenceOf(
-            "/data/person/arbeidsgivere/0/generasjoner/0/perioder/0/beregningId",
-            "/data/person/arbeidsgivere/0/generasjoner/0/perioder/0/utbetaling/id"
-        ).forEach {
-            settVerdi(
-                jsonNode = data,
-                pointer = it,
-                verdi = testPerson.utbetalingId1.toString()
-            )
-        }
-        settVerdi(
-            jsonNode = data,
-            pointer = "/data/person/arbeidsgivere/0/generasjoner/0/perioder/0/behandlingId",
-            verdi = meldingssender.spleisBehandlingId.toString()
-        )
+        settVerdi(data, "/data/person/aktorId", person.aktørId)
+        settVerdi(data, "/data/person/fodselsnummer", person.fødselsnummer)
+
         sequenceOf(
             "/data/person/arbeidsgivere/0/organisasjonsnummer",
             "/data/person/arbeidsgivere/0/generasjoner/0/perioder/0/utbetaling/arbeidsgiveroppdrag/simulering/perioder/0/utbetalinger/0/utbetalesTilId",
@@ -97,13 +46,50 @@ class SpleisStub(
             settVerdi(
                 jsonNode = data,
                 pointer = it,
-                verdi = testPerson.arbeidsgiver1.organisasjonsnummer,
+                verdi = personContext.arbeidsgiver.organisasjonsnummer,
+            )
+        }
+        settVerdi(
+            jsonNode = data,
+            pointer = "/data/person/arbeidsgivere/0/generasjoner/0/perioder/0/utbetaling/arbeidsgiveroppdrag/simulering/perioder/0/utbetalinger/0/utbetalesTilNavn",
+            verdi = personContext.arbeidsgiver.navn
+        )
+
+        val vedtaksperiode = personContext.vedtaksperioder.first()
+        settVerdi(
+            jsonNode = data,
+            pointer = "/data/person/arbeidsgivere/0/generasjoner/0/perioder/0/behandlingId",
+            verdi = vedtaksperiode.spleisBehandlingId.toString()
+        )
+        settVerdi(
+            jsonNode = data,
+            pointer = "/data/person/arbeidsgivere/0/generasjoner/0/perioder/0/vedtaksperiodeId",
+            verdi = vedtaksperiode.vedtaksperiodeId.toString()
+        )
+        sequenceOf(
+            "/data/person/vilkarsgrunnlag/0/id",
+            "/data/person/arbeidsgivere/0/generasjoner/0/perioder/0/vilkarsgrunnlagId"
+        ).forEach {
+            settVerdi(
+                jsonNode = data,
+                pointer = it,
+                verdi = vedtaksperiode.vilkårsgrunnlagId.toString()
+            )
+        }
+        sequenceOf(
+            "/data/person/arbeidsgivere/0/generasjoner/0/perioder/0/beregningId",
+            "/data/person/arbeidsgivere/0/generasjoner/0/perioder/0/utbetaling/id"
+        ).forEach {
+            settVerdi(
+                jsonNode = data,
+                pointer = it,
+                verdi = vedtaksperiode.utbetalingId.toString()
             )
         }
 
         wireMockServer.stubFor(
             post("/graphql")
-                .withRequestBody(matchingJsonPath("\$.variables[?(@.fnr == '${testPerson.fødselsnummer}')]"))
+                .withRequestBody(matchingJsonPath("\$.variables[?(@.fnr == '${person.fødselsnummer}')]"))
                 .willReturn(okJson(data.toPrettyString()))
         )
     }
@@ -117,47 +103,6 @@ class SpleisStub(
                 (it as ObjectNode).put(jsonPointer.last().matchingProperty, verdi)
             }
         }
-    }
-
-
-    fun simulerFremTilOgMedNyUtbetaling(testPerson: TestPerson, vedtaksperiodeId: UUID) {
-        val spleisTestMeldingPubliserer = meldingsendere[vedtaksperiodeId]
-            ?: error("Fant ikke spleisTestMeldingPubliserer for vedtaksperiodeId: $vedtaksperiodeId")
-        spleisTestMeldingPubliserer.simulerPublisertSendtSøknadNavMelding()
-        spleisTestMeldingPubliserer.simulerPublisertBehandlingOpprettetMelding()
-        spleisTestMeldingPubliserer.simulerPublisertVedtaksperiodeNyUtbetalingMelding()
-    }
-
-    fun simulerFraNyUtbetalingTilOgMedGodkjenningsbehov(vedtaksperiodeId: UUID) {
-        val spleisTestMeldingPubliserer = meldingsendere[vedtaksperiodeId]
-            ?: error("Fant ikke spleisTestMeldingPubliserer for vedtaksperiodeId: $vedtaksperiodeId")
-        spleisTestMeldingPubliserer.simulerPublisertUtbetalingEndretMelding()
-        spleisTestMeldingPubliserer.simulerPublisertVedtaksperiodeEndretMelding()
-        spleisTestMeldingPubliserer.simulerPublisertGodkjenningsbehovMelding()
-    }
-
-    fun simulerPublisertAktivitetsloggNyAktivitetMelding(varselkoder: List<String>, vedtaksperiodeId: UUID) {
-        val spleisTestMeldingPubliserer = meldingsendere[vedtaksperiodeId]
-            ?: error("Fant ikke spleisTestMeldingPubliserer for vedtaksperiodeId: $vedtaksperiodeId")
-        spleisTestMeldingPubliserer.simulerPublisertAktivitetsloggNyAktivitetMelding(varselkoder)
-    }
-
-    fun håndterUtbetalingUtbetalt(vedtaksperiodeId: UUID) {
-        val spleisTestMeldingPubliserer = meldingsendere[vedtaksperiodeId]
-            ?: error("Fant ikke spleisTestMeldingPubliserer for vedtaksperiodeId: $vedtaksperiodeId")
-        spleisTestMeldingPubliserer.simulerPublisertUtbetalingEndretTilUtbetaltMelding()
-    }
-
-    fun håndterAvsluttetMedVedtak(vedtaksperiodeId: UUID) {
-        val spleisTestMeldingPubliserer = meldingsendere[vedtaksperiodeId]
-            ?: error("Fant ikke spleisTestMeldingPubliserer for vedtaksperiodeId: $vedtaksperiodeId")
-        spleisTestMeldingPubliserer.simulerPublisertAvsluttetMedVedtakMelding()
-    }
-
-    fun simulerPublisertGosysOppgaveEndretMelding(vedtaksperiodeId: UUID) {
-        val spleisTestMeldingPubliserer = meldingsendere[vedtaksperiodeId]
-            ?: error("Fant ikke spleisTestMeldingPubliserer for vedtaksperiodeId: $vedtaksperiodeId")
-        spleisTestMeldingPubliserer.simulerPublisertGosysOppgaveEndretMelding()
     }
 
     fun registerOn(rapidsConnection: RapidsConnection) {
@@ -178,13 +123,41 @@ class SpleisStub(
         meterRegistry: MeterRegistry
     ) {
         val jsonNode = objectMapper.readTree(packet.toJson())
-        val vedtaksperiodeId = UUID.fromString(jsonNode["vedtaksperiodeId"].asText())
         val godkjent = jsonNode["@løsning"]["Godkjenning"]["godkjent"].asBoolean()
         if (godkjent) {
-            håndterUtbetalingUtbetalt(vedtaksperiodeId)
-            håndterAvsluttetMedVedtak(vedtaksperiodeId)
+            val fødselsnummer = jsonNode["fødselsnummer"].asText()
+            val testContext = contextsForFødselsnummer[fødselsnummer] ?: error("Ikke initialisert med context for person $fødselsnummer")
+            val vedtaksperiodeId = UUID.fromString(jsonNode["vedtaksperiodeId"].asText())
+            val vedtaksperiode = testContext.vedtaksperioder.find { it.vedtaksperiodeId == vedtaksperiodeId }
+                ?: error("Fant ikke igjen vedtaksperiode $vedtaksperiodeId i context for person $fødselsnummer")
+            utbetalingSkjer(vedtaksperiode, testContext.person, testContext.arbeidsgiver)
+            spleisAvslutterPerioden(vedtaksperiode, testContext.person, testContext.arbeidsgiver)
         } else {
             logg.warn("Mottok godkjent = false i løsning på Godkjenning, håndterer ikke dette per nå")
         }
+    }
+
+    private fun utbetalingSkjer(
+        vedtaksperiode: VårVedtaksperiode,
+        person: VårTestPerson,
+        arbeidsgiver: VårArbeidsgiver
+    ) {
+        rapidsConnection.publish(
+            VårMeldingsbygger.byggUtbetalingEndret(
+                vedtaksperiode = vedtaksperiode,
+                person = person,
+                arbeidsgiver = arbeidsgiver,
+                forrigeStatus = "SENDT",
+                gjeldendeStatus = "UTBETALT"
+            )
+        )
+    }
+
+    private fun spleisAvslutterPerioden(
+        vedtaksperiode: VårVedtaksperiode,
+        person: VårTestPerson,
+        arbeidsgiver: VårArbeidsgiver
+    ) {
+        rapidsConnection.publish(VårMeldingsbygger.byggAvsluttetMedVedtak(person, arbeidsgiver, vedtaksperiode))
     }
 }

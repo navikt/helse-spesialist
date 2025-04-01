@@ -14,7 +14,6 @@ import io.ktor.http.contentType
 import io.ktor.serialization.jackson.JacksonConverter
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Assertions.assertTrue
-import java.util.UUID
 import kotlin.test.assertEquals
 
 class SpeilPersonContext(
@@ -76,16 +75,13 @@ class SpeilPersonContext(
         }
     }
 
-    fun assertVarselkoder(
-        expected: Set<String>,
-        vedtaksperiodeId: UUID
-    ) {
+    fun assertVarselkoder(expected: Set<String>, vedtaksperiode: VårVedtaksperiode) {
         val vedtaksperiode = person["arbeidsgivere"].flatMap { arbeidsgiver ->
             arbeidsgiver["generasjoner"].flatMap { generasjon ->
                 generasjon["perioder"]
             }
-        }.find { it["vedtaksperiodeId"].asText() == vedtaksperiodeId.toString() }
-            ?: error("Fant ikke periode med vedtaksperiodeId $vedtaksperiodeId i FetchPerson-svaret")
+        }.find { it["vedtaksperiodeId"].asText() == vedtaksperiode.vedtaksperiodeId.toString() }
+            ?: error("Fant ikke periode med vedtaksperiodeId ${vedtaksperiode.vedtaksperiodeId} i FetchPerson-svaret")
 
         assertEquals(expected, vedtaksperiode["varsler"].map { it["kode"].asText() }.toSet())
     }
@@ -105,7 +101,7 @@ class SpeilPersonContext(
         person["arbeidsgivere"][0]["generasjoner"][0]["perioder"][0]["oppgave"]["id"].asText()
 
     private fun callGraphQL(operationName: String, variables: Map<String, Any>) = runBlocking {
-        httpClient.post("http://localhost:${AbstractE2EIntegrationTest.port}/graphql") {
+        httpClient.post("http://localhost:${E2ETestApplikasjon.port}/graphql") {
             contentType(ContentType.Application.Json)
             accept(ContentType.Application.Json)
             bearerAuth(bearerAuthToken)

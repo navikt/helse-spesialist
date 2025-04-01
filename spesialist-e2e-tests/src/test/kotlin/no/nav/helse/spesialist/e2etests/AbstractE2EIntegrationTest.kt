@@ -1,154 +1,102 @@
 package no.nav.helse.spesialist.e2etests
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
-import io.micrometer.prometheusmetrics.PrometheusConfig
-import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.bootstrap.EnvironmentToggles
-import no.nav.helse.modell.automatisering.Stikkprøver
-import no.nav.helse.rapids_rivers.NaisEndpoints
-import no.nav.helse.rapids_rivers.ktorApplication
-import no.nav.helse.spesialist.api.bootstrap.Gruppe
-import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
-import no.nav.helse.spesialist.api.testfixtures.ApiModuleIntegrationTestFixture
 import no.nav.helse.spesialist.api.testfixtures.lagSaksbehandlerFraApi
-import no.nav.helse.spesialist.bootstrap.Configuration
-import no.nav.helse.spesialist.bootstrap.RapidApp
-import no.nav.helse.spesialist.client.entraid.testfixtures.ClientEntraIDModuleIntegrationTestFixture
-import no.nav.helse.spesialist.client.krr.testfixtures.ClientKRRModuleIntegationTestFixture
-import no.nav.helse.spesialist.client.spleis.testfixtures.ClientSpleisModuleIntegrationTestFixture
-import no.nav.helse.spesialist.client.unleash.testfixtures.ClientUnleashModuleIntegrationTestFixture
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
-import no.nav.helse.spesialist.db.testfixtures.DBTestFixture
-import no.nav.helse.spesialist.e2etests.behovløserstubs.BehovLøserStub
+import no.nav.helse.spesialist.e2etests.VårMeldingsbygger.byggUtbetalingEndret
+import no.nav.helse.spesialist.e2etests.behovløserstubs.AbstractBehovLøser
 import no.nav.helse.spesialist.e2etests.behovløserstubs.RisikovurderingBehovLøser
 import no.nav.helse.spesialist.e2etests.behovløserstubs.ÅpneOppgaverBehovLøser
-import no.nav.helse.spesialist.kafka.testfixtures.KafkaModuleTestRapidTestFixture
-import no.nav.helse.spesialist.test.TestPerson
-import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import java.time.LocalDateTime
 import java.util.UUID
-import kotlin.random.Random
 
 abstract class AbstractE2EIntegrationTest {
-    private val testPerson = TestPerson()
+    private val testContext: TestContext = TestContext()
     protected val saksbehandler = lagSaksbehandlerFraApi()
-    protected val vedtaksperiodeId = UUID.randomUUID()
 
-    companion object {
-        private val testRapid = LoopbackTestRapid()
-        private val behovLøserStub = BehovLøserStub(testRapid).also { it.registerOn(testRapid) }
-        private val spleisStub = SpleisStub(testRapid, ClientSpleisModuleIntegrationTestFixture.wireMockServer).also {
-            it.registerOn(testRapid)
-        }
-        private val rapidApp = RapidApp()
-        private val mockOAuth2Server = MockOAuth2Server().also { it.start() }
-        private val apiModuleIntegrationTestFixture = ApiModuleIntegrationTestFixture(mockOAuth2Server)
-        private val modules = rapidApp.start(
-            configuration = Configuration(
-                api = apiModuleIntegrationTestFixture.apiModuleConfiguration,
-                clientEntraID = ClientEntraIDModuleIntegrationTestFixture(mockOAuth2Server).entraIDAccessTokenGeneratorConfiguration,
-                clientKrr = ClientKRRModuleIntegationTestFixture.moduleConfiguration,
-                clientSpleis = ClientSpleisModuleIntegrationTestFixture.moduleConfiguration,
-                clientUnleash = ClientUnleashModuleIntegrationTestFixture.moduleConfiguration,
-                db = DBTestFixture.database.dbModuleConfiguration,
-                kafka = KafkaModuleTestRapidTestFixture.moduleConfiguration,
-                versjonAvKode = "versjon_1",
-                tilgangsgrupper = object : Tilgangsgrupper {
-                    override val kode7GruppeId: UUID = UUID.randomUUID()
-                    override val beslutterGruppeId: UUID = UUID.randomUUID()
-                    override val skjermedePersonerGruppeId: UUID = UUID.randomUUID()
-                    override val stikkprøveGruppeId: UUID = UUID.randomUUID()
-
-                    override fun gruppeId(gruppe: Gruppe): UUID {
-                        return when (gruppe) {
-                            Gruppe.KODE7 -> kode7GruppeId
-                            Gruppe.BESLUTTER -> beslutterGruppeId
-                            Gruppe.SKJERMEDE -> skjermedePersonerGruppeId
-                            Gruppe.STIKKPRØVE -> stikkprøveGruppeId
-                        }
-                    }
-                },
-                environmentToggles = object : EnvironmentToggles {
-                    override val kanBeslutteEgneSaker = false
-                    override val kanGodkjenneUtenBesluttertilgang = false
-                },
-                stikkprøver = object : Stikkprøver {
-                    override fun utsFlereArbeidsgivereFørstegangsbehandling(): Boolean = false
-                    override fun utsFlereArbeidsgivereForlengelse(): Boolean = false
-                    override fun utsEnArbeidsgiverFørstegangsbehandling(): Boolean = false
-                    override fun utsEnArbeidsgiverForlengelse(): Boolean = false
-                    override fun fullRefusjonFlereArbeidsgivereFørstegangsbehandling(): Boolean = false
-                    override fun fullRefusjonFlereArbeidsgivereForlengelse(): Boolean = false
-                    override fun fullRefusjonEnArbeidsgiver(): Boolean = false
-                },
-            ),
-            rapidsConnection = testRapid,
-        )
-        val port = Random.nextInt(10000, 20000)
-
-        init {
-            ktorApplication(
-                meterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT),
-                naisEndpoints = NaisEndpoints.Default,
-                port = port,
-                aliveCheck = { true },
-                readyCheck = { true },
-                preStopHook = { },
-                cioConfiguration = { },
-                modules = listOf {
-                    rapidApp.ktorSetupCallback(this)
-                }
-            ).also { it.start() }
-        }
+    private val behovLøserStub = E2ETestApplikasjon.behovLøserStub.also {
+        it.init(person = testContext.person, arbeidsgiver = testContext.arbeidsgiver)
     }
-
-    init {
-        behovLøserStub.init(testPerson)
-        spleisStub.init(testPerson, vedtaksperiodeId)
+    private val spleisStub = E2ETestApplikasjon.spleisStub.also {
+        it.init(testContext)
     }
+    private val testRapid = E2ETestApplikasjon.testRapid
 
-    protected val risikovurderingBehovLøser =
-        behovLøserStub.finnLøser<RisikovurderingBehovLøser>(testPerson.fødselsnummer)
-    protected val åpneOppgaverBehovLøser = behovLøserStub.finnLøser<ÅpneOppgaverBehovLøser>(testPerson.fødselsnummer)
+    protected val risikovurderingBehovLøser = finnLøserForDenneTesten<RisikovurderingBehovLøser>()
+    protected val åpneOppgaverBehovLøser = finnLøserForDenneTesten<ÅpneOppgaverBehovLøser>()
+
+    private inline fun <reified T : AbstractBehovLøser> finnLøserForDenneTesten() =
+        behovLøserStub.finnLøser<T>(testContext.person.fødselsnummer)
 
     protected fun besvarBehovIgjen(behov: String) {
-        behovLøserStub.besvarIgjen(testPerson.fødselsnummer, behov)
+        behovLøserStub.besvarIgjen(testContext.person.fødselsnummer, behov)
+    }
+
+    protected fun personSenderSøknad() {
+        testRapid.publish(VårMeldingsbygger.byggSendSøknadNav(testContext.person, testContext.arbeidsgiver))
     }
 
     protected fun simulerFremTilOgMedGodkjenningsbehov() {
-        spleisStub.simulerFremTilOgMedGodkjenningsbehov(testPerson, vedtaksperiodeId)
+        spleisSetterOppMedVarselkodeMelding()
     }
 
-    protected fun simulerFremTilOgMedNyUtbetaling(vedtaksperiodeId: UUID = this.vedtaksperiodeId) {
-        spleisStub.simulerFremTilOgMedNyUtbetaling(testPerson, vedtaksperiodeId)
-    }
-
-    protected fun settOppNyVedtaksperiodeISpleis(): UUID =
-        UUID.randomUUID().also { spleisStub.init(testPerson, it) }
-
-    protected fun simulerFraNyUtbetalingTilOgMedGodkjenningsbehov(vedtaksperiodeId: UUID = this.vedtaksperiodeId) {
-        spleisStub.simulerFraNyUtbetalingTilOgMedGodkjenningsbehov(vedtaksperiodeId)
-    }
-
-    protected fun simulerPublisertAktivitetsloggNyAktivitetMelding(
-        varselkoder: List<String>,
-        vedtaksperiodeId: UUID = this.vedtaksperiodeId
+    protected fun spleisSetterOppMedVarselkodeMelding(
+        vararg varselkoder: String,
+        vedtaksperiode: VårVedtaksperiode = førsteVedtaksperiode(),
     ) {
-        spleisStub.simulerPublisertAktivitetsloggNyAktivitetMelding(varselkoder, vedtaksperiodeId)
+        spleisSetterOppMedVarselkodeMeldinger(listOf(varselkoder.toList()), vedtaksperiode)
     }
 
-    protected fun simulerPublisertGosysOppgaveEndretMelding(vedtaksperiodeId: UUID = this.vedtaksperiodeId) {
-        spleisStub.simulerPublisertGosysOppgaveEndretMelding(vedtaksperiodeId)
+    protected fun spleisSetterOppMedVarselkodeMeldinger(
+        varselkodeMeldinger: List<List<String>>,
+        vedtaksperiode: VårVedtaksperiode = førsteVedtaksperiode()
+    ) {
+        personSenderSøknad()
+        spleisForberederBehandling(vedtaksperiode, varselkodeMeldinger)
+        spleisSenderGodkjenningsbehov(vedtaksperiode)
+    }
+
+    protected fun spleisForberederBehandling(
+        vedtaksperiode: VårVedtaksperiode,
+        varselkodeMeldinger: List<List<String>>
+    ) {
+        spleisOppretterBehandling(
+            vedtaksperiode = vedtaksperiode,
+            person = testContext.person,
+            arbeidsgiver = testContext.arbeidsgiver
+        )
+        spleisOppretterNyUtbetaling(
+            vedtaksperiode = vedtaksperiode,
+            person = testContext.person,
+            arbeidsgiver = testContext.arbeidsgiver
+        )
+        varselkodeMeldinger.forEach { varselkoder ->
+            if (varselkoder.isNotEmpty()) {
+                testRapid.publish(
+                    VårMeldingsbygger.byggAktivitetsloggNyAktivitetMedVarsler(
+                        varselkoder = varselkoder,
+                        person = testContext.person,
+                        arbeidsgiver = testContext.arbeidsgiver,
+                        vedtaksperiode = vedtaksperiode
+                    )
+                )
+            }
+        }
+        utbetalingEndres(vedtaksperiode, testContext.person, testContext.arbeidsgiver)
+    }
+
+    protected fun detPubliseresEnGosysOppgaveEndretMelding() {
+        testRapid.publish(VårMeldingsbygger.byggGosysOppgaveEndret(testContext.person))
     }
 
     protected fun lagreVarseldefinisjon(varselkode: String) {
-        modules.dbModule.daos.definisjonDao.lagreDefinisjon(
+        E2ETestApplikasjon.dbModule.daos.definisjonDao.lagreDefinisjon(
             unikId = UUID.nameUUIDFromBytes(varselkode.toByteArray()),
             kode = varselkode,
             tittel = "En tittel for varselkode=$varselkode",
@@ -164,11 +112,11 @@ abstract class AbstractE2EIntegrationTest {
         val status: String,
     )
 
-    protected fun hentVarselkoder(vedtaksperiodeId: UUID = this.vedtaksperiodeId): Set<Varsel> =
-        sessionOf(modules.dbModule.dataSource).use { session ->
+    protected fun hentVarselkoder(vedtaksperiode: VårVedtaksperiode): Set<Varsel> =
+        sessionOf(E2ETestApplikasjon.dbModule.dataSource).use { session ->
             @Language("PostgreSQL")
             val query = "SELECT kode, status FROM selve_varsel WHERE vedtaksperiode_id = :vedtaksperiode_id"
-            val paramMap = mapOf("vedtaksperiode_id" to vedtaksperiodeId)
+            val paramMap = mapOf("vedtaksperiode_id" to vedtaksperiode.vedtaksperiodeId)
             session.list(queryOf(query, paramMap)) { Varsel(it.string("kode"), it.string("status")) }.toSet()
         }
 
@@ -194,24 +142,78 @@ abstract class AbstractE2EIntegrationTest {
     }
 
     protected fun assertBehandlingTilstand(expectedTilstand: String) {
-        val actualTilstand = sessionOf(modules.dbModule.dataSource, strict = true).use { session ->
+        val actualTilstand = sessionOf(E2ETestApplikasjon.dbModule.dataSource, strict = true).use { session ->
             session.run(
                 asSQL(
                     "SELECT tilstand FROM behandling WHERE vedtaksperiode_id = :vedtaksperiode_id",
-                    "vedtaksperiode_id" to vedtaksperiodeId,
+                    "vedtaksperiode_id" to førsteVedtaksperiode().vedtaksperiodeId,
                 ).map { it.string("tilstand") }.asSingle
             )
         }
         assertEquals(expectedTilstand, actualTilstand)
     }
 
+    protected fun leggTilVedtaksperiode() {
+        testContext.leggTilVedtaksperiode()
+    }
+
+    protected fun førsteVedtaksperiode() = testContext.vedtaksperioder.first()
+
+    protected fun andreVedtaksperiode() = testContext.vedtaksperioder[1]
+
     protected fun medPersonISpeil(block: SpeilPersonContext.() -> Unit) {
+        spleisStub.stubSnapshotForPerson(testContext)
         block(
             SpeilPersonContext(
-                aktørId = testPerson.aktørId,
+                aktørId = testContext.person.aktørId,
                 saksbehandlerIdent = saksbehandler.ident,
-                bearerAuthToken = apiModuleIntegrationTestFixture.token(saksbehandler)
+                bearerAuthToken = E2ETestApplikasjon.apiModuleIntegrationTestFixture.token(saksbehandler)
             )
         )
     }
+
+    private fun spleisOppretterBehandling(
+        vedtaksperiode: VårVedtaksperiode,
+        person: VårTestPerson,
+        arbeidsgiver: VårArbeidsgiver
+    ) {
+        vedtaksperiode.spleisBehandlingId = UUID.randomUUID()
+        testRapid.publish(VårMeldingsbygger.byggBehandlingOpprettet(vedtaksperiode, person, arbeidsgiver))
+    }
+
+    private fun spleisOppretterNyUtbetaling(
+        vedtaksperiode: VårVedtaksperiode,
+        person: VårTestPerson,
+        arbeidsgiver: VårArbeidsgiver
+    ) {
+        vedtaksperiode.utbetalingId = UUID.randomUUID()
+        testRapid.publish(VårMeldingsbygger.byggVedtaksperiodeNyUtbetaling(vedtaksperiode, person, arbeidsgiver))
+    }
+
+    private fun utbetalingEndres(
+        vedtaksperiode: VårVedtaksperiode,
+        person: VårTestPerson,
+        arbeidsgiver: VårArbeidsgiver
+    ) {
+        testRapid.publish(
+            byggUtbetalingEndret(
+                vedtaksperiode = vedtaksperiode,
+                person = person,
+                arbeidsgiver = arbeidsgiver,
+                forrigeStatus = "NY",
+                gjeldendeStatus = "IKKE_UTBETALT"
+            )
+        )
+    }
+
+    protected fun spleisSenderGodkjenningsbehov(vedtaksperiode: VårVedtaksperiode) {
+        testRapid.publish(
+            VårMeldingsbygger.byggGodkjenningsbehov(
+                person = testContext.person,
+                arbeidsgiver = testContext.arbeidsgiver,
+                vedtaksperiode = vedtaksperiode
+            )
+        )
+    }
+
 }
