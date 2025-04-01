@@ -11,7 +11,7 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         // Given:
 
         // When:
-        simulerFremTilOgMedGodkjenningsbehov()
+        søknadOgGodkjenningbehovKommerInn()
 
         // Then:
         assertVarselkoder(emptySet())
@@ -24,7 +24,7 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         risikovurderingBehovLøser.funn = listOf(Risikofunn(listOf("EN_KATEGORI"), "EN_BESKRIVELSE"))
 
         // When:
-        simulerFremTilOgMedGodkjenningsbehov()
+        søknadOgGodkjenningbehovKommerInn()
 
         // Then:
         assertVarselkoder(setOf("SB_RV_1"))
@@ -36,7 +36,7 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         åpneOppgaverBehovLøser.antall = 1
 
         // When:
-        simulerFremTilOgMedGodkjenningsbehov()
+        søknadOgGodkjenningbehovKommerInn()
 
         // Then:
         assertVarselkoder(setOf("SB_EX_1"))
@@ -48,7 +48,7 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         åpneOppgaverBehovLøser.antall = 1
 
         // When:
-        simulerFremTilOgMedGodkjenningsbehov()
+        søknadOgGodkjenningbehovKommerInn()
         besvarBehovIgjen("ÅpneOppgaver")
 
         // Then:
@@ -61,7 +61,7 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         åpneOppgaverBehovLøser.antall = 1
 
         // When:
-        simulerFremTilOgMedGodkjenningsbehov()
+        søknadOgGodkjenningbehovKommerInn()
         åpneOppgaverBehovLøser.antall = 0
         detPubliseresEnGosysOppgaveEndretMelding()
 
@@ -75,7 +75,7 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         åpneOppgaverBehovLøser.oppslagFeilet = true
 
         // When:
-        simulerFremTilOgMedGodkjenningsbehov()
+        søknadOgGodkjenningbehovKommerInn()
 
         // Then:
         assertVarselkoder(setOf("SB_EX_3"))
@@ -87,7 +87,7 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         åpneOppgaverBehovLøser.oppslagFeilet = true
 
         // When:
-        simulerFremTilOgMedGodkjenningsbehov()
+        søknadOgGodkjenningbehovKommerInn()
         åpneOppgaverBehovLøser.oppslagFeilet = false
         detPubliseresEnGosysOppgaveEndretMelding()
 
@@ -102,7 +102,7 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
 
         // When:
-        simulerFremTilOgMedGodkjenningsbehov()
+        søknadOgGodkjenningbehovKommerInn()
         åpneOppgaverBehovLøser.antall = 1
         detPubliseresEnGosysOppgaveEndretMelding()
 
@@ -116,7 +116,7 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
 
         // When:
-        simulerFremTilOgMedGodkjenningsbehov()
+        søknadOgGodkjenningbehovKommerInn()
         åpneOppgaverBehovLøser.oppslagFeilet = true
         detPubliseresEnGosysOppgaveEndretMelding()
 
@@ -130,7 +130,11 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         lagreVarseldefinisjon("EN_KODE")
 
         // When:
-        spleisSetterOppMedVarselkodeMelding("EN_KODE")
+        søknadOgGodkjenningbehovKommerInn(
+            tilleggsmeldinger = {
+                aktivitetsloggNyAktivitet(varselkoder = listOf("EN_KODE"))
+            }
+        )
 
         // Then:
         assertVarselkoder(setOf("EN_KODE"))
@@ -143,11 +147,11 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         lagreVarseldefinisjon("EN_ANNEN_KODE")
 
         // When:
-        spleisSetterOppMedVarselkodeMeldinger(
-            listOf(
-                listOf("EN_KODE"),
-                listOf("EN_ANNEN_KODE")
-            )
+        søknadOgGodkjenningbehovKommerInn(
+            tilleggsmeldinger = {
+                aktivitetsloggNyAktivitet(varselkoder = listOf("EN_KODE"))
+                aktivitetsloggNyAktivitet(varselkoder = listOf("EN_ANNEN_KODE"))
+            },
         )
 
         // Then:
@@ -161,7 +165,11 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         lagreVarseldefinisjon("EN_ANNEN_KODE")
 
         // When:
-        spleisSetterOppMedVarselkodeMelding("EN_KODE", "EN_ANNEN_KODE")
+        søknadOgGodkjenningbehovKommerInn(
+            tilleggsmeldinger = {
+                aktivitetsloggNyAktivitet(varselkoder = listOf("EN_KODE", "EN_ANNEN_KODE"))
+            }
+        )
 
         // Then:
         assertVarselkoder(setOf("EN_KODE", "EN_ANNEN_KODE"))
@@ -173,11 +181,11 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         lagreVarseldefinisjon("EN_KODE")
 
         // When:
-        spleisSetterOppMedVarselkodeMeldinger(
-            listOf(
-                listOf("EN_KODE"),
-                listOf("EN_KODE")
-            )
+        søknadOgGodkjenningbehovKommerInn(
+            tilleggsmeldinger = {
+                aktivitetsloggNyAktivitet(varselkoder = listOf("EN_KODE"))
+                aktivitetsloggNyAktivitet(varselkoder = listOf("EN_KODE"))
+            }
         )
 
         // Then:
@@ -193,8 +201,18 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
 
         // When:
         personSenderSøknad()
-        spleisForberederBehandling(førsteVedtaksperiode(), listOf(listOf("EN_KODE")))
-        spleisForberederBehandling(andreVedtaksperiode(), listOf(listOf("EN_ANNEN_KODE")))
+        spleisForberederBehandling(
+            vedtaksperiode = førsteVedtaksperiode(),
+            tilleggsmeldinger = {
+                aktivitetsloggNyAktivitet(varselkoder = listOf("EN_KODE"))
+            }
+        )
+        spleisForberederBehandling(
+            vedtaksperiode = andreVedtaksperiode(),
+            tilleggsmeldinger = {
+                aktivitetsloggNyAktivitet(varselkoder = listOf("EN_ANNEN_KODE"))
+            }
+        )
         spleisSenderGodkjenningsbehov(førsteVedtaksperiode())
 
         // Then:

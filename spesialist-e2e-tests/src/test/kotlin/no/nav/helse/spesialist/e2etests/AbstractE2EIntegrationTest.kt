@@ -38,33 +38,20 @@ abstract class AbstractE2EIntegrationTest {
         behovLøserStub.besvarIgjen(testContext.person.fødselsnummer, behov)
     }
 
+    protected fun søknadOgGodkjenningbehovKommerInn(tilleggsmeldinger: TilleggsmeldingReceiver.() -> Unit = {}) {
+        personSenderSøknad()
+        val vedtaksperiode = førsteVedtaksperiode()
+        spleisForberederBehandling(vedtaksperiode, tilleggsmeldinger)
+        spleisSenderGodkjenningsbehov(vedtaksperiode)
+    }
+
     protected fun personSenderSøknad() {
         testRapid.publish(VårMeldingsbygger.byggSendSøknadNav(testContext.person, testContext.arbeidsgiver))
     }
 
-    protected fun simulerFremTilOgMedGodkjenningsbehov() {
-        spleisSetterOppMedVarselkodeMelding()
-    }
-
-    protected fun spleisSetterOppMedVarselkodeMelding(
-        vararg varselkoder: String,
-        vedtaksperiode: VårVedtaksperiode = førsteVedtaksperiode(),
-    ) {
-        spleisSetterOppMedVarselkodeMeldinger(listOf(varselkoder.toList()), vedtaksperiode)
-    }
-
-    protected fun spleisSetterOppMedVarselkodeMeldinger(
-        varselkodeMeldinger: List<List<String>>,
-        vedtaksperiode: VårVedtaksperiode = førsteVedtaksperiode()
-    ) {
-        personSenderSøknad()
-        spleisForberederBehandling(vedtaksperiode, varselkodeMeldinger)
-        spleisSenderGodkjenningsbehov(vedtaksperiode)
-    }
-
     protected fun spleisForberederBehandling(
         vedtaksperiode: VårVedtaksperiode,
-        varselkodeMeldinger: List<List<String>>
+        tilleggsmeldinger: TilleggsmeldingReceiver.() -> Unit
     ) {
         spleisOppretterBehandling(
             vedtaksperiode = vedtaksperiode,
@@ -76,18 +63,7 @@ abstract class AbstractE2EIntegrationTest {
             person = testContext.person,
             arbeidsgiver = testContext.arbeidsgiver
         )
-        varselkodeMeldinger.forEach { varselkoder ->
-            if (varselkoder.isNotEmpty()) {
-                testRapid.publish(
-                    VårMeldingsbygger.byggAktivitetsloggNyAktivitetMedVarsler(
-                        varselkoder = varselkoder,
-                        person = testContext.person,
-                        arbeidsgiver = testContext.arbeidsgiver,
-                        vedtaksperiode = vedtaksperiode
-                    )
-                )
-            }
-        }
+        TilleggsmeldingReceiver(testRapid, testContext, vedtaksperiode).tilleggsmeldinger()
         utbetalingEndres(vedtaksperiode, testContext.person, testContext.arbeidsgiver)
     }
 

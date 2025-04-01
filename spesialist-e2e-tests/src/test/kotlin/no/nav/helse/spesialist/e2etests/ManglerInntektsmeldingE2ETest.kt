@@ -9,7 +9,11 @@ class ManglerInntektsmeldingE2ETest : AbstractE2EIntegrationTest() {
         lagreVarseldefinisjon("RV_IV_10")
 
         // When:
-        spleisSetterOppMedVarselkodeMelding("RV_IV_10")
+        søknadOgGodkjenningbehovKommerInn(
+            tilleggsmeldinger = {
+                aktivitetsloggNyAktivitet(varselkoder = listOf("RV_IV_10"))
+            }
+        )
 
         // Then:
         medPersonISpeil {

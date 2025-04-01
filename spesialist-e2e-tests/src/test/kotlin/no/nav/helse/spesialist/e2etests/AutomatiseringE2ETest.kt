@@ -9,7 +9,7 @@ class AutomatiseringE2ETest : AbstractE2EIntegrationTest() {
         åpneOppgaverBehovLøser.antall = 1
 
         // When:
-        simulerFremTilOgMedGodkjenningsbehov()
+        søknadOgGodkjenningbehovKommerInn()
         åpneOppgaverBehovLøser.antall = 0
         detPubliseresEnGosysOppgaveEndretMelding()
 

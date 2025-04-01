@@ -7,7 +7,7 @@ class VedtakFattetE2ETest : AbstractE2EIntegrationTest() {
     fun `når saksbehandler fatter vedtak får behandlingen tilstand VedtakFattet`() {
         // Given:
         risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
-        simulerFremTilOgMedGodkjenningsbehov()
+        søknadOgGodkjenningbehovKommerInn()
 
         // When:
         medPersonISpeil {
