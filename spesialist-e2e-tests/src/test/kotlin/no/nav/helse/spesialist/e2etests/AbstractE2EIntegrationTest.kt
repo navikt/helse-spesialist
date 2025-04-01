@@ -1,7 +1,6 @@
 package no.nav.helse.spesialist.e2etests
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
-import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.spesialist.api.testfixtures.lagSaksbehandlerFraApi
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
@@ -13,7 +12,6 @@ import no.nav.helse.spesialist.e2etests.context.Arbeidsgiver
 import no.nav.helse.spesialist.e2etests.context.Person
 import no.nav.helse.spesialist.e2etests.context.TestContext
 import no.nav.helse.spesialist.e2etests.context.Vedtaksperiode
-import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -77,19 +75,6 @@ abstract class AbstractE2EIntegrationTest {
     protected fun varseldefinisjonOpprettes(varselkode: String) {
         testRapid.publish(Meldingsbygger.byggVarselkodeNyDefinisjon(varselkode))
     }
-
-    data class Varsel(
-        val kode: String,
-        val status: String,
-    )
-
-    protected fun hentVarselkoder(vedtaksperiode: Vedtaksperiode): List<Varsel> =
-        sessionOf(E2ETestApplikasjon.dbModule.dataSource).use { session ->
-            @Language("PostgreSQL")
-            val query = "SELECT kode, status FROM selve_varsel WHERE vedtaksperiode_id = :vedtaksperiode_id"
-            val paramMap = mapOf("vedtaksperiode_id" to vedtaksperiode.vedtaksperiodeId)
-            session.list(queryOf(query, paramMap)) { Varsel(it.string("kode"), it.string("status")) }
-        }
 
     protected fun assertGodkjenningsbehovBesvart(
         godkjent: Boolean,
@@ -180,6 +165,7 @@ abstract class AbstractE2EIntegrationTest {
             Meldingsbygger.byggGodkjenningsbehov(
                 person = testContext.person,
                 arbeidsgiver = testContext.arbeidsgiver,
+                vilkårsgrunnlagId = testContext.vilkårsgrunnlagId,
                 vedtaksperiode = vedtaksperiode
             )
         )

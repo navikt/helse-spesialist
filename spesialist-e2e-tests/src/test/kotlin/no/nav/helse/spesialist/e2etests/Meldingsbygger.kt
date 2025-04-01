@@ -63,6 +63,7 @@ object Meldingsbygger {
     fun byggGodkjenningsbehov(
         person: Person,
         arbeidsgiver: Arbeidsgiver,
+        vilkårsgrunnlagId: UUID,
         vedtaksperiode: Vedtaksperiode
     ): String {
         val meldingsnavn = "Godkjenningsbehov"
@@ -87,7 +88,7 @@ object Meldingsbygger {
                     "inntektskilde" to "EN_ARBEIDSGIVER",
                     "orgnummereMedRelevanteArbeidsforhold" to emptyList<String>(),
                     "kanAvvises" to true,
-                    "vilkårsgrunnlagId" to vedtaksperiode.vilkårsgrunnlagId,
+                    "vilkårsgrunnlagId" to vilkårsgrunnlagId,
                     "behandlingId" to vedtaksperiode.spleisBehandlingIdForÅByggeMelding(meldingsnavn),
                     "tags" to listOf("Innvilget"),
                     "perioderMedSammeSkjæringstidspunkt" to listOf(

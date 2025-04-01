@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.e2etests
 
 import com.fasterxml.jackson.core.JsonPointer
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
@@ -31,64 +32,82 @@ class SpleisStub(
         contextsForFødselsnummer[context.person.fødselsnummer] = context
     }
 
-    fun stubSnapshotForPerson(personContext: TestContext) {
+    fun stubSnapshotForPerson(context: TestContext) {
         val data = javaClass.getResourceAsStream("/hentSnapshot.json").use(objectMapper::readTree)
 
-        val person = personContext.person
+        val person = context.person
 
         settVerdi(data, "/data/person/aktorId", person.aktørId)
         settVerdi(data, "/data/person/fodselsnummer", person.fødselsnummer)
 
         sequenceOf(
             "/data/person/arbeidsgivere/0/organisasjonsnummer",
-            "/data/person/arbeidsgivere/0/generasjoner/0/perioder/0/utbetaling/arbeidsgiveroppdrag/simulering/perioder/0/utbetalinger/0/utbetalesTilId",
-            "/data/person/arbeidsgivere/0/generasjoner/0/perioder/0/utbetaling/arbeidsgiveroppdrag/simulering/perioder/0/utbetalinger/0/detaljer/0/refunderesOrgNr",
-            "/data/person/arbeidsgivere/0/generasjoner/0/perioder/0/inntekter/0/inntektskilde",
             "/data/person/vilkarsgrunnlag/0/inntekter/0/arbeidsgiver",
             "/data/person/vilkarsgrunnlag/0/arbeidsgiverrefusjoner/0/arbeidsgiver",
         ).forEach {
             settVerdi(
                 jsonNode = data,
                 pointer = it,
-                verdi = personContext.arbeidsgiver.organisasjonsnummer,
+                verdi = context.arbeidsgiver.organisasjonsnummer,
             )
         }
+
         settVerdi(
             jsonNode = data,
-            pointer = "/data/person/arbeidsgivere/0/generasjoner/0/perioder/0/utbetaling/arbeidsgiveroppdrag/simulering/perioder/0/utbetalinger/0/utbetalesTilNavn",
-            verdi = personContext.arbeidsgiver.navn
+            pointer = "/data/person/vilkarsgrunnlag/0/id",
+            verdi = context.vilkårsgrunnlagId.toString()
         )
 
-        val vedtaksperiode = personContext.vedtaksperioder.first()
-        settVerdi(
-            jsonNode = data,
-            pointer = "/data/person/arbeidsgivere/0/generasjoner/0/perioder/0/behandlingId",
-            verdi = vedtaksperiode.spleisBehandlingId.toString()
-        )
-        settVerdi(
-            jsonNode = data,
-            pointer = "/data/person/arbeidsgivere/0/generasjoner/0/perioder/0/vedtaksperiodeId",
-            verdi = vedtaksperiode.vedtaksperiodeId.toString()
-        )
-        sequenceOf(
-            "/data/person/vilkarsgrunnlag/0/id",
-            "/data/person/arbeidsgivere/0/generasjoner/0/perioder/0/vilkarsgrunnlagId"
-        ).forEach {
+        context.vedtaksperioder.forEachIndexed { index, vedtaksperiode ->
+            if (index > 0) {
+                // Opprett kopi av periodeelementer
+                val perioder =
+                    data.at(JsonPointer.compile("/data/person/arbeidsgivere/0/generasjoner/0/perioder")) as ArrayNode
+                perioder.add(perioder[0].deepCopy<JsonNode>())
+            }
+
+            sequenceOf(
+                "/data/person/arbeidsgivere/0/generasjoner/0/perioder/$index/utbetaling/arbeidsgiveroppdrag/simulering/perioder/0/utbetalinger/0/utbetalesTilId",
+                "/data/person/arbeidsgivere/0/generasjoner/0/perioder/$index/utbetaling/arbeidsgiveroppdrag/simulering/perioder/0/utbetalinger/0/detaljer/0/refunderesOrgNr",
+                "/data/person/arbeidsgivere/0/generasjoner/0/perioder/$index/inntekter/0/inntektskilde",
+            ).forEach {
+                settVerdi(
+                    jsonNode = data,
+                    pointer = it,
+                    verdi = context.arbeidsgiver.organisasjonsnummer,
+                )
+            }
             settVerdi(
                 jsonNode = data,
-                pointer = it,
-                verdi = vedtaksperiode.vilkårsgrunnlagId.toString()
+                pointer = "/data/person/arbeidsgivere/0/generasjoner/0/perioder/$index/utbetaling/arbeidsgiveroppdrag/simulering/perioder/0/utbetalinger/0/utbetalesTilNavn",
+                verdi = context.arbeidsgiver.navn
             )
-        }
-        sequenceOf(
-            "/data/person/arbeidsgivere/0/generasjoner/0/perioder/0/beregningId",
-            "/data/person/arbeidsgivere/0/generasjoner/0/perioder/0/utbetaling/id"
-        ).forEach {
+
             settVerdi(
                 jsonNode = data,
-                pointer = it,
-                verdi = vedtaksperiode.utbetalingId.toString()
+                pointer = "/data/person/arbeidsgivere/0/generasjoner/0/perioder/$index/behandlingId",
+                verdi = vedtaksperiode.spleisBehandlingId.toString()
             )
+            settVerdi(
+                jsonNode = data,
+                pointer = "/data/person/arbeidsgivere/0/generasjoner/0/perioder/$index/vedtaksperiodeId",
+                verdi = vedtaksperiode.vedtaksperiodeId.toString()
+            )
+            settVerdi(
+                jsonNode = data,
+                pointer = "/data/person/arbeidsgivere/0/generasjoner/0/perioder/$index/vilkarsgrunnlagId",
+                verdi = context.vilkårsgrunnlagId.toString()
+            )
+            sequenceOf(
+                "/data/person/arbeidsgivere/0/generasjoner/0/perioder/$index/beregningId",
+                "/data/person/arbeidsgivere/0/generasjoner/0/perioder/$index/utbetaling/id"
+            ).forEach {
+                settVerdi(
+                    jsonNode = data,
+                    pointer = it,
+                    verdi = vedtaksperiode.utbetalingId.toString()
+                )
+            }
         }
 
         wireMockServer.stubFor(
@@ -130,7 +149,8 @@ class SpleisStub(
         val godkjent = jsonNode["@løsning"]["Godkjenning"]["godkjent"].asBoolean()
         if (godkjent) {
             val fødselsnummer = jsonNode["fødselsnummer"].asText()
-            val testContext = contextsForFødselsnummer[fødselsnummer] ?: error("Ikke initialisert med context for person $fødselsnummer")
+            val testContext = contextsForFødselsnummer[fødselsnummer]
+                ?: error("Ikke initialisert med context for person $fødselsnummer")
             val vedtaksperiodeId = UUID.fromString(jsonNode["vedtaksperiodeId"].asText())
             val vedtaksperiode = testContext.vedtaksperioder.find { it.vedtaksperiodeId == vedtaksperiodeId }
                 ?: error("Fant ikke igjen vedtaksperiode $vedtaksperiodeId i context for person $fødselsnummer")

@@ -1,9 +1,7 @@
 package no.nav.helse.spesialist.e2etests.tests
 
 import no.nav.helse.mediator.meldinger.Risikofunn
-import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.AKTIV
 import no.nav.helse.spesialist.e2etests.AbstractE2EIntegrationTest
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class VarselE2ETest : AbstractE2EIntegrationTest() {
@@ -217,8 +215,10 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         spleisSenderGodkjenningsbehov(førsteVedtaksperiode())
 
         // Then:
-        assertEquals(listOf(Varsel("EN_KODE", AKTIV.name)).sortedBy { it.kode }, hentVarselkoder(førsteVedtaksperiode()).sortedBy { it.kode })
-        assertEquals(listOf(Varsel("EN_ANNEN_KODE", AKTIV.name)).sortedBy { it.kode }, hentVarselkoder(andreVedtaksperiode()).sortedBy { it.kode })
+        medPersonISpeil {
+            assertVarselkoder(listOf("EN_KODE"), førsteVedtaksperiode())
+            assertVarselkoder(listOf("EN_ANNEN_KODE"), andreVedtaksperiode())
+        }
     }
 
     private fun assertVarselkoder(expected: List<String>) {

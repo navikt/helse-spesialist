@@ -4,7 +4,6 @@ import java.util.UUID
 
 data class Vedtaksperiode(
     val vedtaksperiodeId: UUID = UUID.randomUUID(),
-    val vilkårsgrunnlagId: UUID = UUID.randomUUID(),
     var spleisBehandlingId: UUID? = null,
     var utbetalingId: UUID? = null,
 ) {
