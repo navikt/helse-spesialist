@@ -15,7 +15,7 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         søknadOgGodkjenningbehovKommerInn()
 
         // Then:
-        assertVarselkoder(emptySet())
+        assertVarselkoder(emptyList())
     }
 
     @Test
@@ -28,7 +28,7 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         søknadOgGodkjenningbehovKommerInn()
 
         // Then:
-        assertVarselkoder(setOf("SB_RV_1"))
+        assertVarselkoder(listOf("SB_RV_1"))
     }
 
     @Test
@@ -40,7 +40,7 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         søknadOgGodkjenningbehovKommerInn()
 
         // Then:
-        assertVarselkoder(setOf("SB_EX_1"))
+        assertVarselkoder(listOf("SB_EX_1"))
     }
 
     @Test
@@ -53,7 +53,7 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         besvarBehovIgjen("ÅpneOppgaver")
 
         // Then:
-        assertVarselkoder(setOf("SB_EX_1"))
+        assertVarselkoder(listOf("SB_EX_1"))
     }
 
     @Test
@@ -67,7 +67,7 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         detPubliseresEnGosysOppgaveEndretMelding()
 
         // Then:
-        assertVarselkoder(emptySet())
+        assertVarselkoder(emptyList())
     }
 
     @Test
@@ -79,7 +79,7 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         søknadOgGodkjenningbehovKommerInn()
 
         // Then:
-        assertVarselkoder(setOf("SB_EX_3"))
+        assertVarselkoder(listOf("SB_EX_3"))
     }
 
     @Test
@@ -93,7 +93,7 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         detPubliseresEnGosysOppgaveEndretMelding()
 
         // Then:
-        assertVarselkoder(emptySet())
+        assertVarselkoder(emptyList())
     }
 
     @Test
@@ -108,7 +108,7 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         detPubliseresEnGosysOppgaveEndretMelding()
 
         // Then:
-        assertVarselkoder(setOf("SB_EX_1", "SB_RV_1"))
+        assertVarselkoder(listOf("SB_EX_1", "SB_RV_1"))
     }
 
     @Test
@@ -122,7 +122,7 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         detPubliseresEnGosysOppgaveEndretMelding()
 
         // Then:
-        assertVarselkoder(setOf("SB_EX_3", "SB_RV_1"))
+        assertVarselkoder(listOf("SB_EX_3", "SB_RV_1"))
     }
 
     @Test
@@ -138,7 +138,7 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         )
 
         // Then:
-        assertVarselkoder(setOf("EN_KODE"))
+        assertVarselkoder(listOf("EN_KODE"))
     }
 
     @Test
@@ -156,7 +156,7 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         )
 
         // Then:
-        assertVarselkoder(setOf("EN_KODE", "EN_ANNEN_KODE"))
+        assertVarselkoder(listOf("EN_KODE", "EN_ANNEN_KODE"))
     }
 
     @Test
@@ -173,7 +173,7 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         )
 
         // Then:
-        assertVarselkoder(setOf("EN_KODE", "EN_ANNEN_KODE"))
+        assertVarselkoder(listOf("EN_KODE", "EN_ANNEN_KODE"))
     }
 
     @Test
@@ -190,7 +190,7 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         )
 
         // Then:
-        assertVarselkoder(setOf("EN_KODE"))
+        assertVarselkoder(listOf("EN_KODE"))
     }
 
     @Test
@@ -217,11 +217,11 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
         spleisSenderGodkjenningsbehov(førsteVedtaksperiode())
 
         // Then:
-        assertEquals(setOf(Varsel("EN_KODE", AKTIV.name)), hentVarselkoder(førsteVedtaksperiode()))
-        assertEquals(setOf(Varsel("EN_ANNEN_KODE", AKTIV.name)), hentVarselkoder(andreVedtaksperiode()))
+        assertEquals(listOf(Varsel("EN_KODE", AKTIV.name)).sortedBy { it.kode }, hentVarselkoder(førsteVedtaksperiode()).sortedBy { it.kode })
+        assertEquals(listOf(Varsel("EN_ANNEN_KODE", AKTIV.name)).sortedBy { it.kode }, hentVarselkoder(andreVedtaksperiode()).sortedBy { it.kode })
     }
 
-    private fun assertVarselkoder(expected: Set<String>) {
+    private fun assertVarselkoder(expected: List<String>) {
         medPersonISpeil { assertVarselkoder(expected, førsteVedtaksperiode()) }
     }
 }

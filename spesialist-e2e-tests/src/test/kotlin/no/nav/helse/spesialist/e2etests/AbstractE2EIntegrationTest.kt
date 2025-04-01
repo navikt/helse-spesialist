@@ -92,12 +92,12 @@ abstract class AbstractE2EIntegrationTest {
         val status: String,
     )
 
-    protected fun hentVarselkoder(vedtaksperiode: Vedtaksperiode): Set<Varsel> =
+    protected fun hentVarselkoder(vedtaksperiode: Vedtaksperiode): List<Varsel> =
         sessionOf(E2ETestApplikasjon.dbModule.dataSource).use { session ->
             @Language("PostgreSQL")
             val query = "SELECT kode, status FROM selve_varsel WHERE vedtaksperiode_id = :vedtaksperiode_id"
             val paramMap = mapOf("vedtaksperiode_id" to vedtaksperiode.vedtaksperiodeId)
-            session.list(queryOf(query, paramMap)) { Varsel(it.string("kode"), it.string("status")) }.toSet()
+            session.list(queryOf(query, paramMap)) { Varsel(it.string("kode"), it.string("status")) }
         }
 
     protected fun assertGodkjenningsbehovBesvart(
