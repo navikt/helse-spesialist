@@ -7,7 +7,7 @@ class ManglerInntektsmeldingE2ETest : AbstractE2EIntegrationTest() {
     @Test
     fun `legger til egenskap på oppgaven når varsel RV_IV_10 er til stede`() {
         // Given:
-        lagreVarseldefinisjon("RV_IV_10")
+        varseldefinisjonOpprettes("RV_IV_10")
 
         // When:
         søknadOgGodkjenningbehovKommerInn(

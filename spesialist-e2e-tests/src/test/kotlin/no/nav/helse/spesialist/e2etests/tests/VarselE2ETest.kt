@@ -128,7 +128,7 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
     @Test
     fun `lagrer varsler når vi mottar ny aktivitet i aktivitetsloggen`() {
         // Given:
-        lagreVarseldefinisjon("EN_KODE")
+        varseldefinisjonOpprettes("EN_KODE")
 
         // When:
         søknadOgGodkjenningbehovKommerInn(
@@ -144,8 +144,8 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
     @Test
     fun `lagrer varsler når vi mottar flere ny aktivitet i aktivitetsloggen`() {
         // Given:
-        lagreVarseldefinisjon("EN_KODE")
-        lagreVarseldefinisjon("EN_ANNEN_KODE")
+        varseldefinisjonOpprettes("EN_KODE")
+        varseldefinisjonOpprettes("EN_ANNEN_KODE")
 
         // When:
         søknadOgGodkjenningbehovKommerInn(
@@ -162,8 +162,8 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
     @Test
     fun `lagrer flere varsler når vi mottar flere nye aktiviteter i samme aktivitetslogg`() {
         // Given:
-        lagreVarseldefinisjon("EN_KODE")
-        lagreVarseldefinisjon("EN_ANNEN_KODE")
+        varseldefinisjonOpprettes("EN_KODE")
+        varseldefinisjonOpprettes("EN_ANNEN_KODE")
 
         // When:
         søknadOgGodkjenningbehovKommerInn(
@@ -179,7 +179,7 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
     @Test
     fun `gammelt avviksvarsel erstattes av nytt avviksvarsel`() {
         // Given:
-        lagreVarseldefinisjon("EN_KODE")
+        varseldefinisjonOpprettes("EN_KODE")
 
         // When:
         søknadOgGodkjenningbehovKommerInn(
@@ -196,8 +196,8 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
     @Test
     fun `varsler for ulike vedtaksperioder går ikke i beina på hverandre`() {
         // Given:
-        lagreVarseldefinisjon("EN_KODE")
-        lagreVarseldefinisjon("EN_ANNEN_KODE")
+        varseldefinisjonOpprettes("EN_KODE")
+        varseldefinisjonOpprettes("EN_ANNEN_KODE")
         leggTilVedtaksperiode()
 
         // When:

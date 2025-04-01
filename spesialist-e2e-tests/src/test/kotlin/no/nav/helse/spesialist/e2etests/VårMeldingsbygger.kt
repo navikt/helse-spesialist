@@ -269,4 +269,23 @@ object VårMeldingsbygger {
             ),
         )
     ).toJson()
+
+    fun byggVarselkodeNyDefinisjon(varselkode: String) =
+        JsonMessage.newMessage(
+            mapOf(
+                "@event_name" to "varselkode_ny_definisjon",
+                "@id" to UUID.randomUUID(),
+                "@opprettet" to LocalDateTime.now(),
+                "varselkode" to varselkode,
+                "gjeldende_definisjon" to mapOf(
+                    "id" to UUID.randomUUID(),
+                    "kode" to varselkode,
+                    "tittel" to "En tittel for varselkode=$varselkode",
+                    "forklaring" to "En forklaring for varselkode=$varselkode",
+                    "handling" to "En handling for varselkode=$varselkode",
+                    "avviklet" to false,
+                    "opprettet" to LocalDateTime.now()
+                )
+            )
+        ).toJson()
 }

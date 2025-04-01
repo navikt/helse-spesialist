@@ -17,7 +17,6 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
-import java.time.LocalDateTime
 import java.util.UUID
 
 abstract class AbstractE2EIntegrationTest {
@@ -75,16 +74,8 @@ abstract class AbstractE2EIntegrationTest {
         testRapid.publish(VårMeldingsbygger.byggGosysOppgaveEndret(testContext.person))
     }
 
-    protected fun lagreVarseldefinisjon(varselkode: String) {
-        E2ETestApplikasjon.dbModule.daos.definisjonDao.lagreDefinisjon(
-            unikId = UUID.nameUUIDFromBytes(varselkode.toByteArray()),
-            kode = varselkode,
-            tittel = "En tittel for varselkode=$varselkode",
-            forklaring = "En forklaring for varselkode=$varselkode",
-            handling = "En handling for varselkode=$varselkode",
-            avviklet = false,
-            opprettet = LocalDateTime.now(),
-        )
+    protected fun varseldefinisjonOpprettes(varselkode: String) {
+        testRapid.publish(VårMeldingsbygger.byggVarselkodeNyDefinisjon(varselkode))
     }
 
     data class Varsel(
