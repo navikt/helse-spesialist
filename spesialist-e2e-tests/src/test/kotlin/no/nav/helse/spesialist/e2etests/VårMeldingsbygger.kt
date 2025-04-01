@@ -76,7 +76,7 @@ object VårMeldingsbygger {
                 "fødselsnummer" to person.fødselsnummer,
                 "organisasjonsnummer" to arbeidsgiver.organisasjonsnummer,
                 "vedtaksperiodeId" to vedtaksperiode.vedtaksperiodeId,
-                "utbetalingId" to vedtaksperiode.utbetalingIdForÅByggeMelding("$meldingsnavn"),
+                "utbetalingId" to vedtaksperiode.utbetalingIdForÅByggeMelding(meldingsnavn),
                 "Godkjenning" to mapOf(
                     "periodeFom" to (1 jan 2018),
                     "periodeTom" to (31 jan 2018),

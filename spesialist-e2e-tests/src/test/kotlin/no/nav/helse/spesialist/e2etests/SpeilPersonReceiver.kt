@@ -77,14 +77,14 @@ class SpeilPersonReceiver(
     }
 
     fun assertVarselkoder(expected: List<String>, vedtaksperiode: Vedtaksperiode) {
-        val vedtaksperiode = person["arbeidsgivere"].flatMap { arbeidsgiver ->
+        val vedtaksperiodeFraFetchPerson = person["arbeidsgivere"].flatMap { arbeidsgiver ->
             arbeidsgiver["generasjoner"].flatMap { generasjon ->
                 generasjon["perioder"]
             }
         }.find { it["vedtaksperiodeId"].asText() == vedtaksperiode.vedtaksperiodeId.toString() }
             ?: error("Fant ikke periode med vedtaksperiodeId ${vedtaksperiode.vedtaksperiodeId} i FetchPerson-svaret")
 
-        assertEquals(expected.sorted(), vedtaksperiode["varsler"].map { it["kode"].asText() }.sorted())
+        assertEquals(expected.sorted(), vedtaksperiodeFraFetchPerson["varsler"].map { it["kode"].asText() }.sorted())
     }
 
     private fun fetchPerson(aktørId: String): JsonNode {
