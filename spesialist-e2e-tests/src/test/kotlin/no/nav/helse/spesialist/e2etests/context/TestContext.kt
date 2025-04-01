@@ -1,11 +1,11 @@
 package no.nav.helse.spesialist.e2etests.context
 
 data class TestContext(
-    val person: VårTestPerson = VårTestPerson(),
-    val arbeidsgiver: VårArbeidsgiver = VårArbeidsgiver(),
-    val vedtaksperioder: MutableList<VårVedtaksperiode> = mutableListOf(VårVedtaksperiode())
+    val person: Person = Person(),
+    val arbeidsgiver: Arbeidsgiver = Arbeidsgiver(),
+    val vedtaksperioder: MutableList<Vedtaksperiode> = mutableListOf(Vedtaksperiode())
 ) {
     fun leggTilVedtaksperiode() {
-        vedtaksperioder.add(VårVedtaksperiode())
+        vedtaksperioder.add(Vedtaksperiode())
     }
 }

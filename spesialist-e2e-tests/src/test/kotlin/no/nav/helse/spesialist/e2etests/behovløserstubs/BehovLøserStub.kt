@@ -11,8 +11,8 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.e2etests.LoopbackTestRapid
-import no.nav.helse.spesialist.e2etests.context.VårArbeidsgiver
-import no.nav.helse.spesialist.e2etests.context.VårTestPerson
+import no.nav.helse.spesialist.e2etests.context.Arbeidsgiver
+import no.nav.helse.spesialist.e2etests.context.Person
 import no.nav.helse.spesialist.e2etests.objectMapper
 import java.time.LocalDateTime
 import java.util.UUID
@@ -27,7 +27,7 @@ class BehovLøserStub(private val rapidsConnection: RapidsConnection) : River.Pa
     private fun behovliste(fødselsnummer: String) =
         behovlisteForFødselsnummer.computeIfAbsent(fødselsnummer) { mutableListOf() }
 
-    fun init(person: VårTestPerson, arbeidsgiver: VårArbeidsgiver) {
+    fun init(person: Person, arbeidsgiver: Arbeidsgiver) {
         løsereForFødselsnummer[person.fødselsnummer] = listOf(
             ArbeidsforholdBehovLøser(),
             ArbeidsgiverinformasjonBehovLøser(),

@@ -9,7 +9,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import kotlin.random.Random
 
-data class VårTestPerson(
+data class Person(
     val fødselsdato: LocalDate = LocalDate.now().minusYears(18).minusDays(Random.nextLong(until = 365 * 82)),
     val fødselsnummer: String = fødselsdato.format(DateTimeFormatter.ofPattern("ddMMyy00000")),
     val aktørId: String = lagAktørId(),

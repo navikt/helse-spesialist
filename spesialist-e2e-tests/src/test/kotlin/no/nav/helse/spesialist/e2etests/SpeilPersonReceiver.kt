@@ -13,7 +13,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.serialization.jackson.JacksonConverter
 import kotlinx.coroutines.runBlocking
-import no.nav.helse.spesialist.e2etests.context.VårVedtaksperiode
+import no.nav.helse.spesialist.e2etests.context.Vedtaksperiode
 import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.test.assertEquals
 
@@ -76,7 +76,7 @@ class SpeilPersonReceiver(
         }
     }
 
-    fun assertVarselkoder(expected: Set<String>, vedtaksperiode: VårVedtaksperiode) {
+    fun assertVarselkoder(expected: Set<String>, vedtaksperiode: Vedtaksperiode) {
         val vedtaksperiode = person["arbeidsgivere"].flatMap { arbeidsgiver ->
             arbeidsgiver["generasjoner"].flatMap { generasjon ->
                 generasjon["perioder"]

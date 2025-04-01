@@ -2,15 +2,15 @@ package no.nav.helse.spesialist.e2etests
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import no.nav.helse.spesialist.domain.testfixtures.jan
-import no.nav.helse.spesialist.e2etests.context.VårArbeidsgiver
-import no.nav.helse.spesialist.e2etests.context.VårTestPerson
-import no.nav.helse.spesialist.e2etests.context.VårVedtaksperiode
+import no.nav.helse.spesialist.e2etests.context.Arbeidsgiver
+import no.nav.helse.spesialist.e2etests.context.Person
+import no.nav.helse.spesialist.e2etests.context.Vedtaksperiode
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
 object VårMeldingsbygger {
-    fun byggSendSøknadNav(person: VårTestPerson, arbeidsgiver: VårArbeidsgiver) =
+    fun byggSendSøknadNav(person: Person, arbeidsgiver: Arbeidsgiver) =
         JsonMessage.newMessage(
             mapOf(
                 "@event_name" to "sendt_søknad_nav",
@@ -25,9 +25,9 @@ object VårMeldingsbygger {
         ).toJson()
 
     fun byggBehandlingOpprettet(
-        vedtaksperiode: VårVedtaksperiode,
-        person: VårTestPerson,
-        arbeidsgiver: VårArbeidsgiver
+        vedtaksperiode: Vedtaksperiode,
+        person: Person,
+        arbeidsgiver: Arbeidsgiver
     ) = JsonMessage.newMessage(
         mapOf(
             "@event_name" to "behandling_opprettet",
@@ -44,9 +44,9 @@ object VårMeldingsbygger {
     ).toJson()
 
     fun byggVedtaksperiodeNyUtbetaling(
-        vedtaksperiode: VårVedtaksperiode,
-        person: VårTestPerson,
-        arbeidsgiver: VårArbeidsgiver
+        vedtaksperiode: Vedtaksperiode,
+        person: Person,
+        arbeidsgiver: Arbeidsgiver
     ) = JsonMessage.newMessage(
         mapOf(
             "@event_name" to "vedtaksperiode_ny_utbetaling",
@@ -61,9 +61,9 @@ object VårMeldingsbygger {
     ).toJson()
 
     fun byggGodkjenningsbehov(
-        person: VårTestPerson,
-        arbeidsgiver: VårArbeidsgiver,
-        vedtaksperiode: VårVedtaksperiode
+        person: Person,
+        arbeidsgiver: Arbeidsgiver,
+        vedtaksperiode: Vedtaksperiode
     ): String {
         val meldingsnavn = "Godkjenningsbehov"
         return JsonMessage.newMessage(
@@ -119,7 +119,7 @@ object VårMeldingsbygger {
         ).toJson()
     }
 
-    fun byggGosysOppgaveEndret(person: VårTestPerson) =
+    fun byggGosysOppgaveEndret(person: Person) =
         JsonMessage.newMessage(
             mapOf(
                 "@event_name" to "gosys_oppgave_endret",
@@ -131,9 +131,9 @@ object VårMeldingsbygger {
 
     fun byggAktivitetsloggNyAktivitetMedVarsler(
         varselkoder: List<String>,
-        person: VårTestPerson,
-        arbeidsgiver: VårArbeidsgiver,
-        vedtaksperiode: VårVedtaksperiode
+        person: Person,
+        arbeidsgiver: Arbeidsgiver,
+        vedtaksperiode: Vedtaksperiode
     ) = JsonMessage.newMessage(
         mapOf(
             "@event_name" to "aktivitetslogg_ny_aktivitet",
@@ -175,9 +175,9 @@ object VårMeldingsbygger {
     ).toJson()
 
     fun byggUtbetalingEndret(
-        vedtaksperiode: VårVedtaksperiode,
-        person: VårTestPerson,
-        arbeidsgiver: VårArbeidsgiver,
+        vedtaksperiode: Vedtaksperiode,
+        person: Person,
+        arbeidsgiver: Arbeidsgiver,
         forrigeStatus: String,
         gjeldendeStatus: String
     ) = JsonMessage.newMessage(
@@ -234,9 +234,9 @@ object VårMeldingsbygger {
     ).toJson()
 
     fun byggAvsluttetMedVedtak(
-        person: VårTestPerson,
-        arbeidsgiver: VårArbeidsgiver,
-        vedtaksperiode: VårVedtaksperiode
+        person: Person,
+        arbeidsgiver: Arbeidsgiver,
+        vedtaksperiode: Vedtaksperiode
     ) = JsonMessage.newMessage(
         mapOf(
             "@event_name" to "avsluttet_med_vedtak",

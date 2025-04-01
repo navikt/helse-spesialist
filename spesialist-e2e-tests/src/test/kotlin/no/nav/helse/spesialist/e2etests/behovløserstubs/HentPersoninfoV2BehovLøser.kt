@@ -1,10 +1,10 @@
 package no.nav.helse.spesialist.e2etests.behovløserstubs
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.spesialist.e2etests.context.VårTestPerson
+import no.nav.helse.spesialist.e2etests.context.Person
 import no.nav.helse.spesialist.typer.Kjønn
 
-class HentPersoninfoV2BehovLøser(private val person: VårTestPerson) : AbstractBehovLøser("HentPersoninfoV2") {
+class HentPersoninfoV2BehovLøser(private val person: Person) : AbstractBehovLøser("HentPersoninfoV2") {
     override fun løsning(behovJson: JsonNode) = mapOf(
         "fornavn" to person.fornavn,
         "mellomnavn" to person.mellomnavn,

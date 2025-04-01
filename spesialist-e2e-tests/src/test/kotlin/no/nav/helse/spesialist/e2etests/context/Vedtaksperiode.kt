@@ -2,7 +2,7 @@ package no.nav.helse.spesialist.e2etests.context
 
 import java.util.UUID
 
-data class VårVedtaksperiode(
+data class Vedtaksperiode(
     val vedtaksperiodeId: UUID = UUID.randomUUID(),
     val vilkårsgrunnlagId: UUID = UUID.randomUUID(),
     var spleisBehandlingId: UUID? = null,

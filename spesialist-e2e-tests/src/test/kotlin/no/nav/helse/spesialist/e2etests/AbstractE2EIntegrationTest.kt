@@ -9,10 +9,10 @@ import no.nav.helse.spesialist.e2etests.VårMeldingsbygger.byggUtbetalingEndret
 import no.nav.helse.spesialist.e2etests.behovløserstubs.AbstractBehovLøser
 import no.nav.helse.spesialist.e2etests.behovløserstubs.RisikovurderingBehovLøser
 import no.nav.helse.spesialist.e2etests.behovløserstubs.ÅpneOppgaverBehovLøser
+import no.nav.helse.spesialist.e2etests.context.Arbeidsgiver
+import no.nav.helse.spesialist.e2etests.context.Person
 import no.nav.helse.spesialist.e2etests.context.TestContext
-import no.nav.helse.spesialist.e2etests.context.VårArbeidsgiver
-import no.nav.helse.spesialist.e2etests.context.VårTestPerson
-import no.nav.helse.spesialist.e2etests.context.VårVedtaksperiode
+import no.nav.helse.spesialist.e2etests.context.Vedtaksperiode
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -54,7 +54,7 @@ abstract class AbstractE2EIntegrationTest {
     }
 
     protected fun spleisForberederBehandling(
-        vedtaksperiode: VårVedtaksperiode,
+        vedtaksperiode: Vedtaksperiode,
         tilleggsmeldinger: TilleggsmeldingReceiver.() -> Unit
     ) {
         spleisOppretterBehandling(
@@ -92,7 +92,7 @@ abstract class AbstractE2EIntegrationTest {
         val status: String,
     )
 
-    protected fun hentVarselkoder(vedtaksperiode: VårVedtaksperiode): Set<Varsel> =
+    protected fun hentVarselkoder(vedtaksperiode: Vedtaksperiode): Set<Varsel> =
         sessionOf(E2ETestApplikasjon.dbModule.dataSource).use { session ->
             @Language("PostgreSQL")
             val query = "SELECT kode, status FROM selve_varsel WHERE vedtaksperiode_id = :vedtaksperiode_id"
@@ -151,27 +151,27 @@ abstract class AbstractE2EIntegrationTest {
     }
 
     private fun spleisOppretterBehandling(
-        vedtaksperiode: VårVedtaksperiode,
-        person: VårTestPerson,
-        arbeidsgiver: VårArbeidsgiver
+        vedtaksperiode: Vedtaksperiode,
+        person: Person,
+        arbeidsgiver: Arbeidsgiver
     ) {
         vedtaksperiode.spleisBehandlingId = UUID.randomUUID()
         testRapid.publish(VårMeldingsbygger.byggBehandlingOpprettet(vedtaksperiode, person, arbeidsgiver))
     }
 
     private fun spleisOppretterNyUtbetaling(
-        vedtaksperiode: VårVedtaksperiode,
-        person: VårTestPerson,
-        arbeidsgiver: VårArbeidsgiver
+        vedtaksperiode: Vedtaksperiode,
+        person: Person,
+        arbeidsgiver: Arbeidsgiver
     ) {
         vedtaksperiode.utbetalingId = UUID.randomUUID()
         testRapid.publish(VårMeldingsbygger.byggVedtaksperiodeNyUtbetaling(vedtaksperiode, person, arbeidsgiver))
     }
 
     private fun utbetalingEndres(
-        vedtaksperiode: VårVedtaksperiode,
-        person: VårTestPerson,
-        arbeidsgiver: VårArbeidsgiver
+        vedtaksperiode: Vedtaksperiode,
+        person: Person,
+        arbeidsgiver: Arbeidsgiver
     ) {
         testRapid.publish(
             byggUtbetalingEndret(
@@ -184,7 +184,7 @@ abstract class AbstractE2EIntegrationTest {
         )
     }
 
-    protected fun spleisSenderGodkjenningsbehov(vedtaksperiode: VårVedtaksperiode) {
+    protected fun spleisSenderGodkjenningsbehov(vedtaksperiode: Vedtaksperiode) {
         testRapid.publish(
             VårMeldingsbygger.byggGodkjenningsbehov(
                 person = testContext.person,

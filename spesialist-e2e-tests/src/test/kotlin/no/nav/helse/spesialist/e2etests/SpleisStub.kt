@@ -14,10 +14,10 @@ import com.github.tomakehurst.wiremock.client.WireMock.okJson
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.spesialist.application.logg.logg
+import no.nav.helse.spesialist.e2etests.context.Arbeidsgiver
+import no.nav.helse.spesialist.e2etests.context.Person
 import no.nav.helse.spesialist.e2etests.context.TestContext
-import no.nav.helse.spesialist.e2etests.context.VårArbeidsgiver
-import no.nav.helse.spesialist.e2etests.context.VårTestPerson
-import no.nav.helse.spesialist.e2etests.context.VårVedtaksperiode
+import no.nav.helse.spesialist.e2etests.context.Vedtaksperiode
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
@@ -142,9 +142,9 @@ class SpleisStub(
     }
 
     private fun utbetalingSkjer(
-        vedtaksperiode: VårVedtaksperiode,
-        person: VårTestPerson,
-        arbeidsgiver: VårArbeidsgiver
+        vedtaksperiode: Vedtaksperiode,
+        person: Person,
+        arbeidsgiver: Arbeidsgiver
     ) {
         rapidsConnection.publish(
             VårMeldingsbygger.byggUtbetalingEndret(
@@ -158,9 +158,9 @@ class SpleisStub(
     }
 
     private fun spleisAvslutterPerioden(
-        vedtaksperiode: VårVedtaksperiode,
-        person: VårTestPerson,
-        arbeidsgiver: VårArbeidsgiver
+        vedtaksperiode: Vedtaksperiode,
+        person: Person,
+        arbeidsgiver: Arbeidsgiver
     ) {
         rapidsConnection.publish(VårMeldingsbygger.byggAvsluttetMedVedtak(person, arbeidsgiver, vedtaksperiode))
     }
