@@ -49,7 +49,7 @@ class PgTotrinnsvurderingRepository(session: Session) : QueryRunner by MedSessio
               order by opprettet desc limit 1
             """.trimIndent(),
             "fodselsnummer" to fødselsnummer,
-        ).singleOrNull { it.toTotrinnsvurderingDeprecated() }
+        ).singleOrNull { it.toTotrinnsvurdering() }
 
     private fun insert(totrinnsvurdering: Totrinnsvurdering): Long =
         asSQL(
@@ -101,22 +101,6 @@ class PgTotrinnsvurderingRepository(session: Session) : QueryRunner by MedSessio
             oppdatert = localDateTimeOrNull("oppdatert"),
             tilstand = enumValueOf(string("tilstand")),
             vedtaksperiodeForkastet = boolean("vedtaksperiode_forkastet"),
-            overstyringer = overstyringRepository.finnAktive(string("fødselsnummer"), TotrinnsvurderingId(long("id"))),
-        )
-
-    @Deprecated("Den andre skal tas i bruk på et eller annet tidspunkt")
-    private fun Row.toTotrinnsvurderingDeprecated(): Totrinnsvurdering =
-        Totrinnsvurdering.fraLagring(
-            id = TotrinnsvurderingId(long("id")),
-            vedtaksperiodeId = uuid("vedtaksperiode_id"),
-            fødselsnummer = string("fødselsnummer"),
-            saksbehandler = uuidOrNull("saksbehandler_oid")?.let(::SaksbehandlerOid),
-            beslutter = uuidOrNull("beslutter_oid")?.let(::SaksbehandlerOid),
-            utbetalingId = uuidOrNull("utbetaling_id"),
-            opprettet = localDateTime("opprettet"),
-            oppdatert = localDateTimeOrNull("oppdatert"),
-            tilstand = enumValueOf(string("tilstand")),
-            vedtaksperiodeForkastet = boolean("vedtaksperiode_forkastet"),
-            overstyringer = overstyringRepository.finnAktive(string("fødselsnummer")),
+            overstyringer = overstyringRepository.finnAktive(TotrinnsvurderingId(long("id"))),
         )
 }

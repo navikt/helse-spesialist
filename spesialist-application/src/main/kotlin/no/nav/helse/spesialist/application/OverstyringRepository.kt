@@ -6,14 +6,8 @@ import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
 interface OverstyringRepository {
     fun lagre(
         overstyringer: List<Overstyring>,
-        totrinnsvurderingId: TotrinnsvurderingId? = null,
+        totrinnsvurderingId: TotrinnsvurderingId,
     )
 
-    fun finnAktive(
-        fødselsnummer: String,
-        totrinnsvurderingId: TotrinnsvurderingId,
-    ): List<Overstyring>
-
-    @Deprecated("Den andre skal tas i bruk på et eller annet tidspunkt")
-    fun finnAktive(fødselsnummer: String): List<Overstyring>
+    fun finnAktive(totrinnsvurderingId: TotrinnsvurderingId): List<Overstyring>
 }

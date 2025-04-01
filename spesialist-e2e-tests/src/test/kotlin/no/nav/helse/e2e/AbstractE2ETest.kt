@@ -25,6 +25,7 @@ import no.nav.helse.modell.melding.OverstyrtInntektOgRefusjonEvent.OverstyrtArbe
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.FORKASTET
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_UTBETALT
@@ -1446,8 +1447,15 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun assertOverstyringer(fødselsnummer: String) {
+        val totrinnsvurderingId = dbQuery.single(
+            """
+            select tv.id from totrinnsvurdering tv 
+                inner join person p on p.id = tv.person_ref 
+            where p.fødselsnummer = :fodselsnummer""".trimMargin(),
+            "fodselsnummer" to fødselsnummer
+        ) { TotrinnsvurderingId(it.long("id")) }
         val overstyringer = sessionFactory.transactionalSessionScope { session ->
-            session.overstyringRepository.finnAktive(fødselsnummer = fødselsnummer)
+            session.overstyringRepository.finnAktive(totrinnsvurderingId)
         }
         assertTrue(overstyringer.isNotEmpty())
     }

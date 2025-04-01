@@ -16,6 +16,7 @@ import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinjedag
 import no.nav.helse.modell.saksbehandler.handlinger.PåVentÅrsak
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
@@ -654,6 +655,12 @@ abstract class AbstractDBIntegrationTest {
         this.ferdigstill()
         sessionContext.oppgaveRepository.lagre(this)
         return this
+    }
+
+    protected fun opprettTotrinnsvurdering(vedtaksperiodeId: UUID = VEDTAKSPERIODE, fødselsnummer: String = FNR): TotrinnsvurderingId {
+        val totrinnsvurdering = Totrinnsvurdering.ny(vedtaksperiodeId = vedtaksperiodeId, fødselsnummer = fødselsnummer)
+        totrinnsvurderingRepository.lagre(totrinnsvurdering)
+        return totrinnsvurdering.id()
     }
 
     protected fun nyTotrinnsvurdering(fødselsnummer: String, oppgave: Oppgave): TotrinnsvurderingKontekst {

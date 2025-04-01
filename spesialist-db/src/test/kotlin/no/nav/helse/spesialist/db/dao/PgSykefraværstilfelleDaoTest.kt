@@ -21,6 +21,7 @@ internal class PgSykefraværstilfelleDaoTest : AbstractDBIntegrationTest() {
     fun `Finner skjønnsfastsatt sykepengegrunnlag`() {
         nyPerson()
         opprettSaksbehandler()
+        val totrinnsvurderingId = opprettTotrinnsvurdering()
         val hendelseId = UUID.randomUUID()
         testhendelse(hendelseId)
         overstyringRepository.lagre(
@@ -28,7 +29,8 @@ internal class PgSykefraværstilfelleDaoTest : AbstractDBIntegrationTest() {
                     skjønnsfastsattSykepengegrunnlag(
                         fødselsnummer = FNR,
                     ),
-            )
+            ),
+            totrinnsvurderingId
         )
 
         val funnet = sykefraværstilfelleDao.finnSkjønnsfastsatteSykepengegrunnlag(FNR)
@@ -49,6 +51,11 @@ internal class PgSykefraværstilfelleDaoTest : AbstractDBIntegrationTest() {
         val arbeidsgiver2 = "999999999"
         nyPerson(fødselsnummer = person2, organisasjonsnummer = arbeidsgiver2, vedtaksperiodeId = UUID.randomUUID())
         opprettSaksbehandler()
+        val totrinnsvurderingId1 = opprettTotrinnsvurdering()
+        val totrinnsvurderingId2 = opprettTotrinnsvurdering(
+            vedtaksperiodeId = UUID.randomUUID(),
+            fødselsnummer = person2
+        )
         val hendelseId1 = UUID.randomUUID()
         val hendelseId2 = UUID.randomUUID()
         testhendelse(hendelseId1)
@@ -58,7 +65,8 @@ internal class PgSykefraværstilfelleDaoTest : AbstractDBIntegrationTest() {
                 skjønnsfastsattSykepengegrunnlag(
                     fødselsnummer = FNR,
                 ),
-            )
+            ),
+            totrinnsvurderingId1
         )
         overstyringRepository.lagre(
             listOf(
@@ -67,7 +75,8 @@ internal class PgSykefraværstilfelleDaoTest : AbstractDBIntegrationTest() {
                     orgnummer = arbeidsgiver2,
                     type = SkjønnsfastsattArbeidsgiver.Skjønnsfastsettingstype.RAPPORTERT_ÅRSINNTEKT,
                 ),
-            )
+            ),
+            totrinnsvurderingId2
         )
 
         val funnet = sykefraværstilfelleDao.finnSkjønnsfastsatteSykepengegrunnlag(FNR)

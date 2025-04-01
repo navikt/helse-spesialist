@@ -13,9 +13,11 @@ import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinje
 import no.nav.helse.modell.saksbehandler.handlinger.Refusjonselement
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlag
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.testfixtures.jan
+import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import org.junit.jupiter.api.BeforeEach
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -31,11 +33,13 @@ class PgOverstyringRepositoryTest : AbstractDBIntegrationTest() {
         opprettPerson()
         opprettSaksbehandler()
         opprettArbeidsgiver()
+        opprettVedtaksperiode()
     }
 
     @Test
     fun `Kan lagre overstyringer`() {
-        opprettVedtaksperiode()
+        val totrinnsvurderingId = opprettTotrinnsvurdering()
+
         val tidslinjeOverstyring = nyTidslinjeOverstyring()
         val inntektOgRefusjonOverstyring = nyInntektOgRefusjonOverstyring()
         val arbeidsforholdOverstyring = nyArbeidsforholdOverstyring()
@@ -51,15 +55,17 @@ class PgOverstyringRepositoryTest : AbstractDBIntegrationTest() {
                 minimumSykdomsgradOverstyring,
                 skjønnsfastsattOverstyring,
                 tilkommenInntektOverstyring
-            )
+            ),
+            totrinnsvurderingId,
         )
-        val overstyringer = overstyringRepository.finnAktive(FNR)
+        val overstyringer = overstyringRepository.finnAktive(totrinnsvurderingId)
         assertEquals(6, overstyringer.size)
     }
 
     @Test
     fun `Kan ferdigstille overstyringer`() {
-        opprettVedtaksperiode()
+        val totrinnsvurderingId = opprettTotrinnsvurdering()
+
         val tidslinjeOverstyring = nyTidslinjeOverstyring()
         val inntektOgRefusjonOverstyring = nyInntektOgRefusjonOverstyring()
         val arbeidsforholdOverstyring = nyArbeidsforholdOverstyring()
@@ -73,24 +79,26 @@ class PgOverstyringRepositoryTest : AbstractDBIntegrationTest() {
                 arbeidsforholdOverstyring,
                 minimumSykdomsgradOverstyring,
                 skjønnsfastsattOverstyring
-            )
+            ),
+            totrinnsvurderingId
         )
-        val overstyringer = overstyringRepository.finnAktive(FNR)
+        val overstyringer = overstyringRepository.finnAktive(totrinnsvurderingId)
         overstyringer.forEach { overstyring ->
             overstyring.ferdigstill()
         }
-        overstyringRepository.lagre(overstyringer)
-        val ferdigstilteOverstyringer = finnFerdigstilteOverstyringer(FNR)
+        overstyringRepository.lagre(overstyringer, totrinnsvurderingId)
+        val ferdigstilteOverstyringer = finnFerdigstilteOverstyringer(totrinnsvurderingId)
 
         assertEquals(5, ferdigstilteOverstyringer.size)
     }
 
     @Test
     fun `TidslinjeOverstyring lagres riktig`() {
-        opprettVedtaksperiode()
+        val totrinnsvurderingId = opprettTotrinnsvurdering()
+
         val tidslinjeOverstyring = nyTidslinjeOverstyring()
-        overstyringRepository.lagre(listOf(tidslinjeOverstyring))
-        val overstyringer = overstyringRepository.finnAktive(FNR)
+        overstyringRepository.lagre(listOf(tidslinjeOverstyring), totrinnsvurderingId)
+        val overstyringer = overstyringRepository.finnAktive(totrinnsvurderingId)
         val hentetTidslinjeOverstyring = overstyringer.first()
 
         assertEquals(1, overstyringer.size)
@@ -109,10 +117,11 @@ class PgOverstyringRepositoryTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `InntektOgRefusjonOverstyring lagres riktig`() {
-        opprettVedtaksperiode()
+        val totrinnsvurderingId = opprettTotrinnsvurdering()
+
         val inntektOgRefusjonOverstyring = nyInntektOgRefusjonOverstyring()
-        overstyringRepository.lagre(listOf(inntektOgRefusjonOverstyring))
-        val overstyringer = overstyringRepository.finnAktive(FNR)
+        overstyringRepository.lagre(listOf(inntektOgRefusjonOverstyring), totrinnsvurderingId)
+        val overstyringer = overstyringRepository.finnAktive(totrinnsvurderingId)
         val hentetInntektOgRefusjonOverstyring = overstyringer.first()
 
         assertEquals(1, overstyringer.size)
@@ -130,10 +139,11 @@ class PgOverstyringRepositoryTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `ArbeidsforholdOverstyring lagres riktig`() {
-        opprettVedtaksperiode()
+        val totrinnsvurderingId = opprettTotrinnsvurdering()
+
         val arbeidsforholdOverstyring = nyArbeidsforholdOverstyring()
-        overstyringRepository.lagre(listOf(arbeidsforholdOverstyring))
-        val overstyringer = overstyringRepository.finnAktive(FNR)
+        overstyringRepository.lagre(listOf(arbeidsforholdOverstyring), totrinnsvurderingId)
+        val overstyringer = overstyringRepository.finnAktive(totrinnsvurderingId)
         val hentetArbeidsforholdOverstyring = overstyringer.first()
 
         assertEquals(1, overstyringer.size)
@@ -150,10 +160,11 @@ class PgOverstyringRepositoryTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `MinimumSykdomsgradOverstyring lagres riktig`() {
-        opprettVedtaksperiode()
+        val totrinnsvurderingId = opprettTotrinnsvurdering()
+
         val minimumSykdomsgradOverstyring = nyMinimumSykdomsgradOverstyring()
-        overstyringRepository.lagre(listOf(minimumSykdomsgradOverstyring))
-        val overstyringer = overstyringRepository.finnAktive(FNR)
+        overstyringRepository.lagre(listOf(minimumSykdomsgradOverstyring), totrinnsvurderingId)
+        val overstyringer = overstyringRepository.finnAktive(totrinnsvurderingId)
         val hentetMinimumSykdomsgradOverstyring = overstyringer.first()
 
         assertEquals(1, overstyringer.size)
@@ -179,10 +190,11 @@ class PgOverstyringRepositoryTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `SkjønnsfastsattSykepengegrunnlag lagres riktig`() {
-        opprettVedtaksperiode()
+        val totrinnsvurderingId = opprettTotrinnsvurdering()
+
         val skjønnsfastsattSykepengegrunnlag = nySkjønnsfastsattOverstyring()
-        overstyringRepository.lagre(listOf(skjønnsfastsattSykepengegrunnlag))
-        val overstyringer = overstyringRepository.finnAktive(FNR)
+        overstyringRepository.lagre(listOf(skjønnsfastsattSykepengegrunnlag), totrinnsvurderingId)
+        val overstyringer = overstyringRepository.finnAktive(totrinnsvurderingId)
         val hentetSkjønnsfastsattSykepengegrunnlag = overstyringer.first()
 
         assertEquals(1, overstyringer.size)
@@ -201,10 +213,11 @@ class PgOverstyringRepositoryTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `OverstyrTilkommenInntekt lagres riktig`() {
-        opprettVedtaksperiode()
+        val totrinnsvurderingId = opprettTotrinnsvurdering()
+
         val overstyrTilkommenInntekt = nyTilkommenInntektOverstyring()
-        overstyringRepository.lagre(listOf(overstyrTilkommenInntekt))
-        val overstyringer = overstyringRepository.finnAktive(FNR)
+        overstyringRepository.lagre(listOf(overstyrTilkommenInntekt), totrinnsvurderingId)
+        val overstyringer = overstyringRepository.finnAktive(totrinnsvurderingId)
         val hentetOverstyrTilkommenInntekt = overstyringer.first()
 
         assertEquals(1, overstyringer.size)
@@ -213,12 +226,49 @@ class PgOverstyringRepositoryTest : AbstractDBIntegrationTest() {
         assertEquals(overstyrTilkommenInntekt.aktørId, hentetOverstyrTilkommenInntekt.aktørId)
         assertEquals(overstyrTilkommenInntekt.ferdigstilt, hentetOverstyrTilkommenInntekt.ferdigstilt)
         assertEquals(overstyrTilkommenInntekt.vedtaksperiodeId, hentetOverstyrTilkommenInntekt.vedtaksperiodeId)
-        assertEquals(overstyrTilkommenInntekt.saksbehandlerOid.value, hentetOverstyrTilkommenInntekt.saksbehandlerOid.value)
+        assertEquals(
+            overstyrTilkommenInntekt.saksbehandlerOid.value,
+            hentetOverstyrTilkommenInntekt.saksbehandlerOid.value
+        )
         assertEquals(overstyrTilkommenInntekt.eksternHendelseId, hentetOverstyrTilkommenInntekt.eksternHendelseId)
-        assertEquals(overstyrTilkommenInntekt.opprettet.withNano(0), hentetOverstyrTilkommenInntekt.opprettet.withNano(0))
+        assertEquals(
+            overstyrTilkommenInntekt.opprettet.withNano(0),
+            hentetOverstyrTilkommenInntekt.opprettet.withNano(0)
+        )
         assertEquals(overstyrTilkommenInntekt.fødselsnummer, hentetOverstyrTilkommenInntekt.fødselsnummer)
         assertEquals(overstyrTilkommenInntekt.fjernedeInntekter, hentetOverstyrTilkommenInntekt.fjernedeInntekter)
-        assertEquals(overstyrTilkommenInntekt.nyEllerEndredeInntekter, hentetOverstyrTilkommenInntekt.nyEllerEndredeInntekter)
+        assertEquals(
+            overstyrTilkommenInntekt.nyEllerEndredeInntekter,
+            hentetOverstyrTilkommenInntekt.nyEllerEndredeInntekter
+        )
+    }
+
+    @Test
+    fun `Får tilbake én overstyring når det er gjort flere endringer i en overstyring av arbeidsforhold`() {
+        val totrinnsvurderingId = opprettTotrinnsvurdering()
+        val orgnummer2 = lagOrganisasjonsnummer()
+        opprettArbeidsgiver(orgnummer2)
+
+        val arbeidsforholdOverstyring =
+            nyArbeidsforholdOverstyring(listOf(nyArbeidsforhold(), nyArbeidsforhold(orgnummer2)))
+        overstyringRepository.lagre(listOf(arbeidsforholdOverstyring), totrinnsvurderingId)
+        val overstyringer = overstyringRepository.finnAktive(totrinnsvurderingId)
+
+        assertEquals(1, overstyringer.size)
+    }
+
+    @Test
+    fun `Får tilbake én overstyring når det er gjort flere endringer i en overstyring av inntekt og refusjon`() {
+        val totrinnsvurderingId = opprettTotrinnsvurdering()
+        val orgnummer2 = lagOrganisasjonsnummer()
+        opprettArbeidsgiver(orgnummer2)
+
+        val inntektOgRefusjonOverstyring =
+            nyInntektOgRefusjonOverstyring(listOf(nyOverstyrtArbeidsgiver(), nyOverstyrtArbeidsgiver(orgnummer2)))
+        overstyringRepository.lagre(listOf(inntektOgRefusjonOverstyring), totrinnsvurderingId)
+        val overstyringer = overstyringRepository.finnAktive(totrinnsvurderingId)
+
+        assertEquals(1, overstyringer.size)
     }
 
     private fun nyTidslinjeOverstyring(): OverstyrtTidslinje =
@@ -232,38 +282,42 @@ class PgOverstyringRepositoryTest : AbstractDBIntegrationTest() {
             dager = listOf(nyOverstyrtTidslinjedag()),
         )
 
-    private fun nyArbeidsforholdOverstyring(): OverstyrtArbeidsforhold =
+    private fun nyArbeidsforholdOverstyring(overstyrteArbeidsforhold: List<Arbeidsforhold> = listOf(nyArbeidsforhold())): OverstyrtArbeidsforhold =
         OverstyrtArbeidsforhold.ny(
             saksbehandlerOid = SaksbehandlerOid(SAKSBEHANDLER_OID),
             fødselsnummer = FNR,
             aktørId = AKTØR,
             vedtaksperiodeId = VEDTAKSPERIODE,
             skjæringstidspunkt = 1 jan 2018,
-            overstyrteArbeidsforhold = listOf(nyArbeidsforhold())
+            overstyrteArbeidsforhold = overstyrteArbeidsforhold
         )
 
-    private fun nyArbeidsforhold(): Arbeidsforhold =
+    private fun nyArbeidsforhold(orgnummer: String = ORGNUMMER): Arbeidsforhold =
         Arbeidsforhold(
-            organisasjonsnummer = ORGNUMMER,
+            organisasjonsnummer = orgnummer,
             deaktivert = true,
             begrunnelse = "begrunnelse",
             forklaring = "forklaring",
             lovhjemmel = null,
         )
 
-    private fun nyInntektOgRefusjonOverstyring(): OverstyrtInntektOgRefusjon =
+    private fun nyInntektOgRefusjonOverstyring(
+        overstyrtArbeidsgiver: List<OverstyrtArbeidsgiver> = listOf(
+            nyOverstyrtArbeidsgiver()
+        )
+    ): OverstyrtInntektOgRefusjon =
         OverstyrtInntektOgRefusjon.ny(
             saksbehandlerOid = SaksbehandlerOid(SAKSBEHANDLER_OID),
             fødselsnummer = FNR,
             aktørId = AKTØR,
             vedtaksperiodeId = VEDTAKSPERIODE,
             skjæringstidspunkt = 1 jan 2018,
-            arbeidsgivere = listOf(nyOverstyrtArbeidsgiver()),
+            arbeidsgivere = overstyrtArbeidsgiver,
         )
 
-    private fun nyOverstyrtArbeidsgiver(): OverstyrtArbeidsgiver =
+    private fun nyOverstyrtArbeidsgiver(orgnummer: String = ORGNUMMER): OverstyrtArbeidsgiver =
         OverstyrtArbeidsgiver(
-            organisasjonsnummer = ORGNUMMER,
+            organisasjonsnummer = orgnummer,
             månedligInntekt = 1001.0,
             fraMånedligInntekt = 1000.0,
             fraRefusjonsopplysninger = null,
@@ -317,6 +371,7 @@ class PgOverstyringRepositoryTest : AbstractDBIntegrationTest() {
             skjæringstidspunkt = 1 jan 2018,
             arbeidsgivere = listOf(nySkjønnsfastsattArbeidsgiver()),
         )
+
     private fun nyTilkommenInntektOverstyring(): OverstyrTilkommenInntekt =
         OverstyrTilkommenInntekt.ny(
             saksbehandlerOid = SaksbehandlerOid(SAKSBEHANDLER_OID),
@@ -357,14 +412,12 @@ class PgOverstyringRepositoryTest : AbstractDBIntegrationTest() {
             )
         )
 
-    private fun finnFerdigstilteOverstyringer(fødselsnummer: String): List<OverstyringId> =
+    private fun finnFerdigstilteOverstyringer(totrinnsvurderingId: TotrinnsvurderingId): List<OverstyringId> =
         dbQuery.list(
             """
-                select o.id from overstyring o 
-                    inner join person p on o.person_ref = p.id
-                where p.fødselsnummer = :fodselsnummer and ferdigstilt = true
+                select id from overstyring 
+                where totrinnsvurdering_ref = :totrinnsvurderingId and ferdigstilt = true
             """.trimMargin(),
-            "fodselsnummer" to fødselsnummer,
+            "totrinnsvurderingId" to totrinnsvurderingId.value,
         ) { OverstyringId(it.long("id")) }
-
 }
