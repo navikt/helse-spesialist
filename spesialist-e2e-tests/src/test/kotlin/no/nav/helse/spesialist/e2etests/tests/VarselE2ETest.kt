@@ -1,7 +1,8 @@
-package no.nav.helse.spesialist.e2etests
+package no.nav.helse.spesialist.e2etests.tests
 
 import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.AKTIV
+import no.nav.helse.spesialist.e2etests.AbstractE2EIntegrationTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
