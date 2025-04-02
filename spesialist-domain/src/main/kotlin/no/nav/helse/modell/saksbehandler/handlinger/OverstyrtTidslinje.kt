@@ -21,11 +21,10 @@ class OverstyrtTidslinje private constructor(
     override val vedtaksperiodeId: UUID,
     override val opprettet: LocalDateTime,
     ferdigstilt: Boolean,
-    kobledeVedtaksperioder: List<UUID>,
     val organisasjonsnummer: String,
     val dager: List<OverstyrtTidslinjedag>,
     val begrunnelse: String,
-) : Overstyring(id, ferdigstilt, kobledeVedtaksperioder) {
+) : Overstyring(id, ferdigstilt) {
     override fun utførAv(legacySaksbehandler: LegacySaksbehandler) {
         legacySaksbehandler.håndter(this)
     }
@@ -53,7 +52,6 @@ class OverstyrtTidslinje private constructor(
             organisasjonsnummer = organisasjonsnummer,
             dager = dager,
             begrunnelse = begrunnelse,
-            kobledeVedtaksperioder = emptyList(),
         )
 
         fun fraLagring(
@@ -68,7 +66,6 @@ class OverstyrtTidslinje private constructor(
             organisasjonsnummer: String,
             dager: List<OverstyrtTidslinjedag>,
             begrunnelse: String,
-            kobledeVedtaksperioder: List<UUID>,
         ) = OverstyrtTidslinje(
             id = id,
             eksternHendelseId = eksternHendelseId,
@@ -81,7 +78,6 @@ class OverstyrtTidslinje private constructor(
             organisasjonsnummer = organisasjonsnummer,
             dager = dager,
             begrunnelse = begrunnelse,
-            kobledeVedtaksperioder = kobledeVedtaksperioder,
         )
     }
 

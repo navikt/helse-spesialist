@@ -21,12 +21,11 @@ class MinimumSykdomsgrad private constructor(
     override val vedtaksperiodeId: UUID,
     override val opprettet: LocalDateTime,
     ferdigstilt: Boolean,
-    kobledeVedtaksperioder: List<UUID>,
     val perioderVurdertOk: List<MinimumSykdomsgradPeriode>,
     val perioderVurdertIkkeOk: List<MinimumSykdomsgradPeriode>,
     val begrunnelse: String,
     val arbeidsgivere: List<MinimumSykdomsgradArbeidsgiver>,
-) : Overstyring(id, ferdigstilt, kobledeVedtaksperioder) {
+) : Overstyring(id, ferdigstilt) {
     override fun utførAv(legacySaksbehandler: LegacySaksbehandler) {
         legacySaksbehandler.håndter(this)
     }
@@ -56,7 +55,6 @@ class MinimumSykdomsgrad private constructor(
             perioderVurdertIkkeOk = perioderVurdertIkkeOk,
             begrunnelse = begrunnelse,
             arbeidsgivere = arbeidsgivere,
-            kobledeVedtaksperioder = emptyList(),
         )
 
         fun fraLagring(
@@ -72,7 +70,6 @@ class MinimumSykdomsgrad private constructor(
             perioderVurdertIkkeOk: List<MinimumSykdomsgradPeriode>,
             begrunnelse: String,
             arbeidsgivere: List<MinimumSykdomsgradArbeidsgiver>,
-            kobledeVedtaksperioder: List<UUID>,
         ) = MinimumSykdomsgrad(
             id = id,
             eksternHendelseId = eksternHendelseId,
@@ -86,7 +83,6 @@ class MinimumSykdomsgrad private constructor(
             perioderVurdertIkkeOk = perioderVurdertIkkeOk,
             begrunnelse = begrunnelse,
             arbeidsgivere = arbeidsgivere,
-            kobledeVedtaksperioder = kobledeVedtaksperioder,
         )
     }
 

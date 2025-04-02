@@ -157,7 +157,6 @@ internal class PersonRepository(
     }
 
     private fun TransactionalSession.slettOverstyring(personRef: Int) {
-        slettOverstyringerForVedtaksperioder(personRef)
         slettOverstyrtDag(personRef)
         slettOverstyringInntekt(personRef)
         slettOverstyringArbeidsforhold(personRef)
@@ -170,12 +169,6 @@ internal class PersonRepository(
         slettOverstyringMinimumSykdomsgrad(personRef)
         @Language("PostgreSQL")
         val query = "DELETE FROM overstyring WHERE person_ref = ?"
-        run(queryOf(query, personRef).asExecute)
-    }
-
-    private fun TransactionalSession.slettOverstyringerForVedtaksperioder(personRef: Int) {
-        @Language("PostgreSQL")
-        val query = "DELETE FROM overstyringer_for_vedtaksperioder WHERE overstyring_ref IN (SELECT id FROM overstyring WHERE person_ref = ?)"
         run(queryOf(query, personRef).asExecute)
     }
 

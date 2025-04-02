@@ -145,8 +145,6 @@ internal abstract class AbstractDatabaseTest {
         VALUES (${sequence_number}, '2018-01-01', 'ÅRSAK', ${sequence_number}, ${sequence_number}, ${sequence_number} + 1000, ${sequence_number} + 2000);
         INSERT INTO skjonnsfastsetting_sykepengegrunnlag_arbeidsgiver(id, arlig, fra_arlig, arbeidsgiver_ref, skjonnsfastsetting_sykepengegrunnlag_ref)
         VALUES (${sequence_number}, 1000, 1200, ${sequence_number}, ${sequence_number});
-        INSERT INTO overstyringer_for_vedtaksperioder(vedtaksperiode_id, overstyring_ref)
-        VALUES ('${vedtaksperiode_id}', ${sequence_number});
         
         INSERT INTO annullert_av_saksbehandler(id, annullert_tidspunkt, saksbehandler_ref)
         VALUES (${sequence_number}, now(), '${saksbehandler_oid}');

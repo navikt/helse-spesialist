@@ -17,10 +17,9 @@ class OverstyrtInntektOgRefusjon private constructor(
     override val vedtaksperiodeId: UUID,
     override val opprettet: LocalDateTime,
     ferdigstilt: Boolean,
-    kobledeVedtaksperioder: List<UUID>,
     val skjæringstidspunkt: LocalDate,
     val arbeidsgivere: List<OverstyrtArbeidsgiver>,
-) : Overstyring(id, ferdigstilt, kobledeVedtaksperioder) {
+) : Overstyring(id, ferdigstilt) {
     override fun utførAv(legacySaksbehandler: LegacySaksbehandler) {
         legacySaksbehandler.håndter(this)
     }
@@ -46,7 +45,6 @@ class OverstyrtInntektOgRefusjon private constructor(
             vedtaksperiodeId = vedtaksperiodeId,
             skjæringstidspunkt = skjæringstidspunkt,
             arbeidsgivere = arbeidsgivere,
-            kobledeVedtaksperioder = emptyList(),
         )
 
         fun fraLagring(
@@ -60,7 +58,6 @@ class OverstyrtInntektOgRefusjon private constructor(
             vedtaksperiodeId: UUID,
             skjæringstidspunkt: LocalDate,
             arbeidsgivere: List<OverstyrtArbeidsgiver>,
-            kobledeVedtaksperioder: List<UUID>,
         ) = OverstyrtInntektOgRefusjon(
             id = id,
             eksternHendelseId = eksternHendelseId,
@@ -72,7 +69,6 @@ class OverstyrtInntektOgRefusjon private constructor(
             vedtaksperiodeId = vedtaksperiodeId,
             skjæringstidspunkt = skjæringstidspunkt,
             arbeidsgivere = arbeidsgivere,
-            kobledeVedtaksperioder = kobledeVedtaksperioder,
         )
     }
 

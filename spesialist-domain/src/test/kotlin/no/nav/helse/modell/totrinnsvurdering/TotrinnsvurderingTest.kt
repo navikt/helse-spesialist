@@ -133,7 +133,7 @@ internal class TotrinnsvurderingTest {
                     dager = overstyrteDager(),
                     begrunnelse = "begrunnelse",
                     saksbehandlerOid = SaksbehandlerOid(UUID.randomUUID())
-                ).also { it.kobleVedtaksperiode(vedtaksperiodeId) }
+                )
             )
         )
         val behandlendeSaksbehandler = nySaksbehandler()

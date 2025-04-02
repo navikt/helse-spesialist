@@ -18,8 +18,7 @@ class OverstyrTilkommenInntekt private constructor(
     ferdigstilt: Boolean,
     val nyEllerEndredeInntekter: List<NyEllerEndretInntekt>,
     val fjernedeInntekter: List<FjernetInntekt>,
-    kobledeVedtaksperioder: List<UUID>,
-) : Overstyring(id, ferdigstilt, kobledeVedtaksperioder) {
+) : Overstyring(id, ferdigstilt) {
     override fun utførAv(legacySaksbehandler: LegacySaksbehandler) {}
 
     override fun loggnavn(): String = "overstyr_tilkommen_inntekt"
@@ -84,7 +83,6 @@ class OverstyrTilkommenInntekt private constructor(
                 ferdigstilt = false,
                 nyEllerEndredeInntekter = nyEllerEndredeInntekter,
                 fjernedeInntekter = fjernedeInntekter,
-                kobledeVedtaksperioder = emptyList(),
             )
         }
 
@@ -99,7 +97,6 @@ class OverstyrTilkommenInntekt private constructor(
             nyeEllerEndredeInntekter: List<NyEllerEndretInntekt>,
             fjernedeInntekter: List<FjernetInntekt>,
             ferdigstilt: Boolean,
-            kobledeVedtaksperioder: List<UUID>,
         ): OverstyrTilkommenInntekt {
             return OverstyrTilkommenInntekt(
                 id = id,
@@ -112,7 +109,6 @@ class OverstyrTilkommenInntekt private constructor(
                 ferdigstilt = ferdigstilt,
                 nyEllerEndredeInntekter = nyeEllerEndredeInntekter,
                 fjernedeInntekter = fjernedeInntekter,
-                kobledeVedtaksperioder = kobledeVedtaksperioder.toMutableList(),
             )
         }
     }

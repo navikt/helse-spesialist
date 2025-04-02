@@ -21,10 +21,9 @@ class SkjønnsfastsattSykepengegrunnlag private constructor(
     override val vedtaksperiodeId: UUID,
     override val opprettet: LocalDateTime,
     ferdigstilt: Boolean,
-    kobledeVedtaksperioder: List<UUID>,
     val skjæringstidspunkt: LocalDate,
     val arbeidsgivere: List<SkjønnsfastsattArbeidsgiver>,
-) : Overstyring(id, ferdigstilt, kobledeVedtaksperioder) {
+) : Overstyring(id, ferdigstilt) {
     override fun utførAv(legacySaksbehandler: LegacySaksbehandler) {
         legacySaksbehandler.håndter(this)
     }
@@ -50,7 +49,6 @@ class SkjønnsfastsattSykepengegrunnlag private constructor(
             vedtaksperiodeId = vedtaksperiodeId,
             skjæringstidspunkt = skjæringstidspunkt,
             arbeidsgivere = arbeidsgivere,
-            kobledeVedtaksperioder = emptyList(),
         )
 
         fun fraLagring(
@@ -64,7 +62,6 @@ class SkjønnsfastsattSykepengegrunnlag private constructor(
             vedtaksperiodeId: UUID,
             skjæringstidspunkt: LocalDate,
             arbeidsgivere: List<SkjønnsfastsattArbeidsgiver>,
-            kobledeVedtaksperioder: List<UUID>,
         ) = SkjønnsfastsattSykepengegrunnlag(
             id = id,
             eksternHendelseId = eksternHendelseId,
@@ -76,7 +73,6 @@ class SkjønnsfastsattSykepengegrunnlag private constructor(
             vedtaksperiodeId = vedtaksperiodeId,
             skjæringstidspunkt = skjæringstidspunkt,
             arbeidsgivere = arbeidsgivere,
-            kobledeVedtaksperioder = kobledeVedtaksperioder,
         )
     }
 

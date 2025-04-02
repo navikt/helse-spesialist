@@ -603,7 +603,6 @@ class PgOverstyringRepository(
             saksbehandlerOid = SaksbehandlerOid(uuid("saksbehandler_ref")),
             ferdigstilt = boolean("ferdigstilt"),
             dager = finnOverstyrtTidslinjeDager(long("overstyring_tidslinje_id")),
-            kobledeVedtaksperioder = finnKobledeVedtaksperioderForOverstyring(id),
         )
     }
 
@@ -620,7 +619,6 @@ class PgOverstyringRepository(
             saksbehandlerOid = SaksbehandlerOid(uuid("saksbehandler_ref")),
             ferdigstilt = boolean("ferdigstilt"),
             arbeidsgivere = finnOverstyrtArbeidsgiver(long("id")),
-            kobledeVedtaksperioder = finnKobledeVedtaksperioderForOverstyring(id),
         )
     }
 
@@ -637,7 +635,6 @@ class PgOverstyringRepository(
             saksbehandlerOid = SaksbehandlerOid(uuid("saksbehandler_ref")),
             ferdigstilt = boolean("ferdigstilt"),
             overstyrteArbeidsforhold = finnArbeidsforhold(long("id")),
-            kobledeVedtaksperioder = finnKobledeVedtaksperioderForOverstyring(id),
         )
     }
 
@@ -668,15 +665,8 @@ class PgOverstyringRepository(
             opprettet = localDateTime("tidspunkt"),
             saksbehandlerOid = SaksbehandlerOid(uuid("saksbehandler_ref")),
             ferdigstilt = boolean("ferdigstilt"),
-            kobledeVedtaksperioder = finnKobledeVedtaksperioderForOverstyring(id),
         )
     }
-
-    private fun finnKobledeVedtaksperioderForOverstyring(overstyringRef: OverstyringId): List<UUID> =
-        asSQL(
-            "SELECT vedtaksperiode_id FROM overstyringer_for_vedtaksperioder WHERE overstyring_ref = :overstyringRef",
-            "overstyringRef" to overstyringRef.value,
-        ).list { row -> row.uuid("vedtaksperiode_id") }
 
     private fun Row.toSkjønnsfastsattSykepengegrunnlag(): SkjønnsfastsattSykepengegrunnlag {
         val id = OverstyringId(long("id"))
@@ -691,7 +681,6 @@ class PgOverstyringRepository(
             saksbehandlerOid = SaksbehandlerOid(uuid("saksbehandler_ref")),
             ferdigstilt = boolean("ferdigstilt"),
             arbeidsgivere = finnSkjønnsfastsattArbeidsgiver(this),
-            kobledeVedtaksperioder = finnKobledeVedtaksperioderForOverstyring(id),
         )
     }
 
@@ -731,7 +720,6 @@ class PgOverstyringRepository(
                             },
                     )
                 },
-            kobledeVedtaksperioder = finnKobledeVedtaksperioderForOverstyring(id),
         )
     }
 

@@ -55,9 +55,7 @@ class GodkjenningService(
                     godkjenttidspunkt = LocalDateTime.now(),
                     saksbehandleroverstyringer =
                         totrinnsvurdering?.overstyringer?.filter {
-                            it.vedtaksperiodeId == vedtaksperiodeId ||
-                                it.kobledeVedtaksperioder()
-                                    .contains(vedtaksperiodeId)
+                            it.vedtaksperiodeId == vedtaksperiodeId
                         }?.map { it.eksternHendelseId } ?: emptyList(),
                     saksbehandler = saksbehandler(godkjenningDTO, totrinnsvurdering, oid),
                     årsak = godkjenningDTO.årsak,
