@@ -158,7 +158,7 @@ internal class OverstyringMutationHandlerTest {
                     lagAktørId(),
                     lagFødselsnummer(),
                     vedtaksperiodeId = UUID.randomUUID(),
-                    begrunnelse = "En begrunnelse",
+                    notatTilBeslutter = "En begrunnelse",
                     lagtTilEllerEndret = listOf(
                         ApiTilkommenInntektOverstyring.ApiNyEllerEndretInntekt(
                             organisasjonsnummer,
