@@ -5,7 +5,7 @@ import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.GenerasjonDao
 import no.nav.helse.db.MeldingDao
-import no.nav.helse.db.MeldingDao.OverstyringIgangsattKorrigertSøknad
+import no.nav.helse.db.MeldingDao.BehandlingOpprettetKorrigertSøknad
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.RisikovurderingDao
 import no.nav.helse.db.SessionContext
@@ -125,12 +125,12 @@ internal class Automatisering(
         egenAnsattDao.erEgenAnsatt(fødselsnummer) == true ||
             personDao.finnAdressebeskyttelse(fødselsnummer) != Adressebeskyttelse.Ugradert
 
-    private fun finnSisteOverstyringIgangsattHvisSkyldesKorrigertSøknad(
+    private fun finnSisteBehandlingOpprettetSomSkyldesKorrigertSøknad(
         fødselsnummer: String,
         vedtaksperiodeId: UUID,
-    ): OverstyringIgangsattKorrigertSøknad? =
+    ): BehandlingOpprettetKorrigertSøknad? =
         generasjonDao.førsteGenerasjonVedtakFattetTidspunkt(vedtaksperiodeId)?.let {
-            meldingDao.sisteOverstyringIgangsattOmKorrigertSøknad(fødselsnummer, vedtaksperiodeId)
+            meldingDao.sisteBehandlingOpprettetOmKorrigertSøknad(fødselsnummer, vedtaksperiodeId)
         }
 
     private sealed interface AutomatiserKorrigertSøknadResultat {
@@ -147,54 +147,39 @@ internal class Automatisering(
         fødselsnummer: String,
         vedtaksperiodeId: UUID,
     ): AutomatiserKorrigertSøknadResultat {
-        val overstyringIgangsattKorrigertSøknad =
-            finnSisteOverstyringIgangsattHvisSkyldesKorrigertSøknad(fødselsnummer, vedtaksperiodeId)
+        val behandlingOpprettetKorrigertSøknad =
+            finnSisteBehandlingOpprettetSomSkyldesKorrigertSøknad(fødselsnummer, vedtaksperiodeId)
                 ?: return AutomatiserKorrigertSøknadResultat.SkyldesIkkeKorrigertSøknad
 
-        return kanKorrigertSøknadAutomatiseres(vedtaksperiodeId, overstyringIgangsattKorrigertSøknad)
+        return kanKorrigertSøknadAutomatiseres(behandlingOpprettetKorrigertSøknad)
     }
 
     private fun kanKorrigertSøknadAutomatiseres(
-        vedtaksperiodeId: UUID,
-        overstyringIgangsattKorrigertSøknad: OverstyringIgangsattKorrigertSøknad,
+        behandlingOpprettetKorrigertSøknad: BehandlingOpprettetKorrigertSøknad,
     ): AutomatiserKorrigertSøknadResultat {
-        val hendelseId = UUID.fromString(overstyringIgangsattKorrigertSøknad.meldingId)
+        val hendelseId = behandlingOpprettetKorrigertSøknad.meldingId
+        val vedtaksperiodeId = behandlingOpprettetKorrigertSøknad.vedtaksperiodeId
+
         if (meldingDao.erKorrigertSøknadAutomatiskBehandlet(hendelseId)) return SkyldesKorrigertSøknad.KanAutomatiseres
 
-        val orgnummer = vedtakDao.finnOrganisasjonsnummer(vedtaksperiodeId)
-        val vedtaksperiodeIdKorrigertSøknad =
-            overstyringIgangsattKorrigertSøknad.let { overstyring ->
-                overstyring.berørtePerioder.find {
-                    it.orgnummer == orgnummer &&
-                        overstyringIgangsattKorrigertSøknad.periodeForEndringFom.isEqual(
-                            it.periodeFom,
-                        )
-                }?.vedtaksperiodeId
-            }
+        val merEnn6MånederSidenVedtakPåFørsteMottattSøknad =
+            generasjonDao.førsteGenerasjonVedtakFattetTidspunkt(vedtaksperiodeId)
+                ?.isBefore(LocalDateTime.now().minusMonths(6))
+                ?: true
+        val antallKorrigeringer = meldingDao.finnAntallAutomatisertKorrigertSøknad(vedtaksperiodeId)
+        meldingDao.opprettAutomatiseringKorrigertSøknad(vedtaksperiodeId, hendelseId)
 
-        vedtaksperiodeIdKorrigertSøknad?.let {
-            val merEnn6MånederSidenVedtakPåFørsteMottattSøknad =
-                generasjonDao.førsteGenerasjonVedtakFattetTidspunkt(it)
-                    ?.isBefore(LocalDateTime.now().minusMonths(6))
-                    ?: true
-            val antallKorrigeringer = meldingDao.finnAntallAutomatisertKorrigertSøknad(it)
-            meldingDao.opprettAutomatiseringKorrigertSøknad(it, hendelseId)
-
-            if (merEnn6MånederSidenVedtakPåFørsteMottattSøknad) {
-                return SkyldesKorrigertSøknad.KanIkkeAutomatiseres(
-                    "Mer enn 6 måneder siden vedtak på første mottatt søknad",
-                )
-            }
-            if (antallKorrigeringer >= 2) {
-                return SkyldesKorrigertSøknad.KanIkkeAutomatiseres(
-                    "Antall automatisk godkjente korrigerte søknader er større eller lik 2",
-                )
-            }
-
-            return SkyldesKorrigertSøknad.KanAutomatiseres
+        if (merEnn6MånederSidenVedtakPåFørsteMottattSøknad) {
+            return SkyldesKorrigertSøknad.KanIkkeAutomatiseres(
+                "Mer enn 6 måneder siden vedtak på første mottatt søknad",
+            )
+        }
+        if (antallKorrigeringer >= 2) {
+            return SkyldesKorrigertSøknad.KanIkkeAutomatiseres(
+                "Antall automatisk godkjente korrigerte søknader er større eller lik 2",
+            )
         }
 
-        // Hvis vi ikke finner vedtaksperiodeIdKorrigertSøknad, så er det fordi vi vedtaksperioden som er korrigert er AUU som vi ikke trenger å telle
         return SkyldesKorrigertSøknad.KanAutomatiseres
     }
 

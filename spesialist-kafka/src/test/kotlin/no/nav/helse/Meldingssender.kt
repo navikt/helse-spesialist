@@ -701,30 +701,4 @@ internal class Meldingssender(private val testRapid: TestRapid) {
                 Testmeldingfabrikk.lagKlargjørPersonForVisning(aktørId, fødselsnummer, id)
             )
         }
-
-    fun sendOverstyringIgangsatt(
-        fødselsnummer: String,
-        orgnummer: String,
-        berørtePerioder: List<Map<String, String>> = listOf(
-            mapOf(
-                "vedtaksperiodeId" to "${UUID.randomUUID()}",
-                "skjæringstidspunkt" to "2022-01-01",
-                "periodeFom" to "2022-01-01",
-                "periodeTom" to "2022-01-31",
-                "orgnummer" to orgnummer,
-                "typeEndring" to "REVURDERING"
-            )
-        ),
-        kilde: UUID = UUID.randomUUID(),
-    ): UUID = newUUID.also { id ->
-        testRapid.sendTestMessage(
-            Testmeldingfabrikk.lagOverstyringIgangsatt(
-                fødselsnummer = fødselsnummer,
-                berørtePerioder = berørtePerioder,
-                kilde = kilde,
-                id = id,
-            )
-        )
-    }
-
 }

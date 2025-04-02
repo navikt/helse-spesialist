@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.db.dao
 
 import kotliquery.Session
 import no.nav.helse.db.MeldingDao
+import no.nav.helse.db.MeldingDao.BehandlingOpprettetKorrigertSøknad
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
@@ -46,7 +47,6 @@ import no.nav.helse.spesialist.db.dao.PgMeldingDao.Meldingtype.VEDTAKSPERIODE_FO
 import no.nav.helse.spesialist.db.dao.PgMeldingDao.Meldingtype.VEDTAKSPERIODE_NY_UTBETALING
 import no.nav.helse.spesialist.db.dao.PgMeldingDao.Meldingtype.VEDTAKSPERIODE_REBEREGNET
 import no.nav.helse.spesialist.db.objectMapper
-import java.time.LocalDate
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -104,38 +104,32 @@ class PgMeldingDao private constructor(queryRunner: QueryRunner) : MeldingDao, Q
         ).update()
     }
 
-    override fun sisteOverstyringIgangsattOmKorrigertSøknad(
+    override fun sisteBehandlingOpprettetOmKorrigertSøknad(
         fødselsnummer: String,
         vedtaksperiodeId: UUID,
-    ): MeldingDao.OverstyringIgangsattKorrigertSøknad? =
+    ): BehandlingOpprettetKorrigertSøknad? =
         asSQL(
             """
-            SELECT h.data
-            FROM hendelse h, json_array_elements(h.data -> 'berørtePerioder') AS bp
-            WHERE data->>'fødselsnummer' = :fodselsnummer
-            AND h.type='OVERSTYRING_IGANGSATT'
-            AND bp ->> 'vedtaksperiodeId' = :vedtaksperiodeId
-            ORDER BY h.data ->> '@opprettet' DESC
-            LIMIT 1
-            """,
+            select h.data
+            from hendelse h
+            where type = 'BEHANDLING_OPPRETTET'
+              and data->>'vedtaksperiodeId' = :vedtaksperiodeId
+              and data->>'fødselsnummer' = :fodselsnummer
+              and data->>'type' = 'Revurdering'
+              and data->'kilde'->>'avsender' = 'SYKMELDT'
+              and data->'@forårsaket_av'->>'event_name' = 'sendt_søknad_nav'
+            order by h.data ->> '@opprettet' desc
+            limit 1
+            """.trimIndent(),
             "fodselsnummer" to fødselsnummer,
             "vedtaksperiodeId" to vedtaksperiodeId.toString(),
         ).singleOrNull { row ->
             row.stringOrNull("data")?.let {
                 val data = objectMapper.readTree(it)
-                if (data["årsak"].asText() != "KORRIGERT_SØKNAD") return@let null
 
-                MeldingDao.OverstyringIgangsattKorrigertSøknad(
-                    periodeForEndringFom = data["periodeForEndringFom"].asText().let(LocalDate::parse),
-                    meldingId = data["@id"].asText(),
-                    berørtePerioder =
-                        data["berørtePerioder"].map { berørtPeriode ->
-                            MeldingDao.BerørtPeriode(
-                                vedtaksperiodeId = UUID.fromString(berørtPeriode["vedtaksperiodeId"].asText()),
-                                periodeFom = berørtPeriode["periodeFom"].asText().let(LocalDate::parse),
-                                orgnummer = berørtPeriode["orgnummer"].asText(),
-                            )
-                        },
+                BehandlingOpprettetKorrigertSøknad(
+                    meldingId = UUID.fromString(data["@id"].asText()),
+                    vedtaksperiodeId = UUID.fromString(data["vedtaksperiodeId"].asText()),
                 )
             }
         }

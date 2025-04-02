@@ -6,6 +6,7 @@ import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.GenerasjonDao
 import no.nav.helse.db.MeldingDao
+import no.nav.helse.db.MeldingDao.BehandlingOpprettetKorrigertSøknad
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.RisikovurderingDao
 import no.nav.helse.db.VedtakDao
@@ -46,7 +47,6 @@ internal class AutomatiseringTest {
     private val vedtaksperiodeId = UUID.randomUUID()
     private val utbetalingId = UUID.randomUUID()
     private val hendelseId = UUID.randomUUID()
-    private val periodeFom = LocalDate.now()
 
     private val vedtakDaoMock = mockk<VedtakDao>()
     private val risikovurderingDaoMock =
@@ -110,18 +110,10 @@ internal class AutomatiseringTest {
         every { vedtakDaoMock.finnInntektskilde(vedtaksperiodeId) } returns Inntektskilde.EN_ARBEIDSGIVER
         every { åpneGosysOppgaverDaoMock.antallÅpneOppgaver(any()) } returns 0
         every { totrinnsvurderingRepositoryMock.finn(any()) } returns null
-        every { meldingDaoMock.sisteOverstyringIgangsattOmKorrigertSøknad(fødselsnummer, vedtaksperiodeId) } returns
-                MeldingDao.OverstyringIgangsattKorrigertSøknad(
-                    meldingId = hendelseId.toString(),
-                    periodeForEndringFom = periodeFom,
-                    berørtePerioder =
-                        listOf(
-                            MeldingDao.BerørtPeriode(
-                                vedtaksperiodeId = vedtaksperiodeId,
-                                orgnummer = orgnummer,
-                                periodeFom = periodeFom,
-                            ),
-                        ),
+        every { meldingDaoMock.sisteBehandlingOpprettetOmKorrigertSøknad(fødselsnummer, vedtaksperiodeId) } returns
+                BehandlingOpprettetKorrigertSøknad(
+                    meldingId = hendelseId,
+                    vedtaksperiodeId = vedtaksperiodeId
                 )
         every { vedtakDaoMock.finnOrganisasjonsnummer(vedtaksperiodeId) } returns orgnummer
         every { meldingDaoMock.finnAntallAutomatisertKorrigertSøknad(vedtaksperiodeId) } returns 1
