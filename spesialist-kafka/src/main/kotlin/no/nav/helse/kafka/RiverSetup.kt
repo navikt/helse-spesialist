@@ -33,7 +33,6 @@ class RiverSetup(
             ArbeidsforholdLøsningRiver(mediator),
             VedtaksperiodeForkastetRiver(mediator),
             AdressebeskyttelseEndretRiver(mediator),
-            OverstyringIgangsattRiver(mediator),
             EgenAnsattLøsningRiver(mediator),
             VergemålLøsningRiver(mediator),
             FullmaktLøsningRiver(mediator),

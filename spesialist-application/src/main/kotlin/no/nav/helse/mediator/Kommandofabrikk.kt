@@ -18,7 +18,6 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.LøsGodkjenningsbehov
 import no.nav.helse.modell.kommando.OpprettMinimalArbeidsgiverCommand
 import no.nav.helse.modell.kommando.OpprettMinimalPersonCommand
-import no.nav.helse.modell.kommando.OverstyringIgangsattCommand
 import no.nav.helse.modell.kommando.TilbakedateringBehandlet
 import no.nav.helse.modell.kommando.TilbakedateringGodkjentCommand
 import no.nav.helse.modell.kommando.ikkesuspenderendeCommand
@@ -231,8 +230,6 @@ class Kommandofabrikk(
             egenAnsattDao = sessionContext.egenAnsattDao,
             opptegnelseDao = sessionContext.opptegnelseDao,
         )
-
-    internal fun overstyringIgangsatt(): OverstyringIgangsattCommand = OverstyringIgangsattCommand()
 
     internal fun utbetalingEndret(
         hendelse: UtbetalingEndret,

@@ -10,7 +10,6 @@ import no.nav.helse.mediator.meldinger.hendelser.AvsluttetMedVedtakMessage
 import no.nav.helse.mediator.meldinger.hendelser.AvsluttetUtenVedtakMessage
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
 import no.nav.helse.modell.kommando.TilbakedateringBehandlet
-import no.nav.helse.modell.overstyring.OverstyringIgangsatt
 import no.nav.helse.modell.person.EndretEgenAnsattStatus
 import no.nav.helse.modell.person.KlargjørTilgangsrelaterteData
 import no.nav.helse.modell.person.OppdaterPersondata
@@ -39,7 +38,6 @@ import no.nav.helse.spesialist.db.dao.PgMeldingDao.Meldingtype.GOSYS_OPPGAVE_END
 import no.nav.helse.spesialist.db.dao.PgMeldingDao.Meldingtype.KLARGJØR_TILGANGSRELATERTE_DATA
 import no.nav.helse.spesialist.db.dao.PgMeldingDao.Meldingtype.NYE_VARSLER
 import no.nav.helse.spesialist.db.dao.PgMeldingDao.Meldingtype.OPPDATER_PERSONSNAPSHOT
-import no.nav.helse.spesialist.db.dao.PgMeldingDao.Meldingtype.OVERSTYRING_IGANGSATT
 import no.nav.helse.spesialist.db.dao.PgMeldingDao.Meldingtype.SAKSBEHANDLERLØSNING
 import no.nav.helse.spesialist.db.dao.PgMeldingDao.Meldingtype.SØKNAD_SENDT
 import no.nav.helse.spesialist.db.dao.PgMeldingDao.Meldingtype.UTBETALING_ENDRET
@@ -171,7 +169,6 @@ class PgMeldingDao private constructor(queryRunner: QueryRunner) : MeldingDao, Q
             GOSYS_OPPGAVE_ENDRET -> GosysOppgaveEndret(jsonNode)
             VEDTAKSPERIODE_FORKASTET -> VedtaksperiodeForkastet(jsonNode)
             GODKJENT_TILBAKEDATERT_SYKMELDING -> TilbakedateringBehandlet(jsonNode)
-            OVERSTYRING_IGANGSATT -> OverstyringIgangsatt(jsonNode)
             SAKSBEHANDLERLØSNING -> Saksbehandlerløsning(jsonNode)
             UTBETALING_ENDRET -> UtbetalingEndret(jsonNode)
             VEDTAKSPERIODE_REBEREGNET -> VedtaksperiodeReberegnet(jsonNode)
@@ -191,7 +188,6 @@ class PgMeldingDao private constructor(queryRunner: QueryRunner) : MeldingDao, Q
             is AdressebeskyttelseEndret -> ADRESSEBESKYTTELSE_ENDRET
             is VedtaksperiodeForkastet -> VEDTAKSPERIODE_FORKASTET
             is Godkjenningsbehov -> GODKJENNING
-            is OverstyringIgangsatt -> OVERSTYRING_IGANGSATT
             is Saksbehandlerløsning -> SAKSBEHANDLERLØSNING
             is OppdaterPersondata -> OPPDATER_PERSONSNAPSHOT
             is UtbetalingEndret -> UTBETALING_ENDRET
@@ -219,7 +215,6 @@ class PgMeldingDao private constructor(queryRunner: QueryRunner) : MeldingDao, Q
         UTBETALING_ENDRET,
         VEDTAKSPERIODE_REBEREGNET,
         BEHANDLING_OPPRETTET,
-        OVERSTYRING_IGANGSATT,
         GOSYS_OPPGAVE_ENDRET,
         ENDRET_EGEN_ANSATT_STATUS,
         NYE_VARSLER,
