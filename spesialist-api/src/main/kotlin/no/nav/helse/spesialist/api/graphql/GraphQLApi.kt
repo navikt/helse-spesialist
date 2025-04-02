@@ -42,6 +42,7 @@ import no.nav.helse.spesialist.api.graphql.mutation.PaVentMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.PersonMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.SkjonnsfastsettelseMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.TildelingMutationHandler
+import no.nav.helse.spesialist.api.graphql.mutation.TilkommenInntektMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.VarselMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutationHandler
@@ -188,6 +189,11 @@ fun lagSchemaMedResolversOgHandlers(
                     ),
                 paVent = PaVentMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
                 opphevStans = OpphevStansMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
+                tilkommenInntekt =
+                    TilkommenInntektMutationHandler(
+                        sessionFactory = sessionFactory,
+                        meldingPubliserer = meldingPubliserer,
+                    ),
             ),
     )
 

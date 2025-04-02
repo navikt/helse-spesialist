@@ -8,11 +8,9 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringArbeidsgiver.ApiOverstyringRefusjonselement
 import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringDag
 import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
-import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektOverstyring
 import no.nav.helse.spesialist.api.testfixtures.mutation.overstyrArbeidsforholdMutation
 import no.nav.helse.spesialist.api.testfixtures.mutation.overstyrInntektOgRefusjonMutation
 import no.nav.helse.spesialist.api.testfixtures.mutation.overstyrTidslinjeMutation
-import no.nav.helse.spesialist.api.testfixtures.mutation.overstyrTilkommenInntektMutation
 import no.nav.helse.spesialist.domain.testfixtures.feb
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagAktørId
@@ -145,47 +143,6 @@ internal class OverstyringMutationHandlerTest {
             ),
             then = { _, body, _ ->
                 Assertions.assertTrue(body["data"]["overstyrInntektOgRefusjon"].asBoolean())
-            },
-        )
-    }
-
-    @Test
-    fun `overstyr tilkommen inntekt`() {
-        val organisasjonsnummer = lagOrganisasjonsnummer()
-        runQuery(
-            whenever = overstyrTilkommenInntektMutation(
-                ApiTilkommenInntektOverstyring(
-                    lagAktørId(),
-                    lagFødselsnummer(),
-                    vedtaksperiodeId = UUID.randomUUID(),
-                    begrunnelse = "En begrunnelse",
-                    lagtTilEllerEndret = listOf(
-                        ApiTilkommenInntektOverstyring.ApiNyEllerEndretInntekt(
-                            organisasjonsnummer,
-                            perioder = listOf(
-                                ApiTilkommenInntektOverstyring.ApiNyEllerEndretInntekt.ApiPeriodeMedBeløp(
-                                    1 jan 2018,
-                                    31 jan 2018,
-                                    24000.0
-                                ),
-                            )
-                        )
-                    ),
-                    fjernet = listOf(
-                        ApiTilkommenInntektOverstyring.ApiFjernetInntekt(
-                            organisasjonsnummer,
-                            perioder = listOf(
-                                ApiTilkommenInntektOverstyring.ApiFjernetInntekt.ApiPeriodeUtenBeløp(
-                                    1 jan 2018,
-                                    31 jan 2018
-                                ),
-                            )
-                        )
-                    ),
-                )
-            ),
-            then = { _, body, _ ->
-                Assertions.assertTrue(body["data"]["overstyrTilkommenInntekt"].asBoolean())
             },
         )
     }

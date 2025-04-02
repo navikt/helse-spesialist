@@ -72,25 +72,3 @@ data class ApiOverstyringDag(
     val fraGrad: Int?,
     val lovhjemmel: ApiLovhjemmel?,
 )
-
-@GraphQLName("TilkommenInntektOverstyring")
-data class ApiTilkommenInntektOverstyring(
-    val fodselsnummer: String,
-    val aktorId: String,
-    val vedtaksperiodeId: UUID,
-    val begrunnelse: String,
-    val lagtTilEllerEndret: List<ApiNyEllerEndretInntekt>,
-    val fjernet: List<ApiFjernetInntekt>,
-) {
-    @GraphQLName("NyEllerEndretInntekt")
-    data class ApiNyEllerEndretInntekt(val organisasjonsnummer: String, val perioder: List<ApiPeriodeMedBeløp>) {
-        @GraphQLName("PeriodeMedBelop")
-        data class ApiPeriodeMedBeløp(val fom: LocalDate, val tom: LocalDate, val periodeBelop: Double)
-    }
-
-    @GraphQLName("FjernetInntekt")
-    data class ApiFjernetInntekt(val organisasjonsnummer: String, val perioder: List<ApiPeriodeUtenBeløp>) {
-        @GraphQLName("PeriodeUtenBelop")
-        data class ApiPeriodeUtenBeløp(val fom: LocalDate, val tom: LocalDate)
-    }
-}

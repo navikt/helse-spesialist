@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -307,23 +308,23 @@ class UtgåendeHendelseMessageBuilderTest {
         val arbeidsgiver1 = lagOrganisasjonsnummer()
         val arbeidsgiver2 = lagOrganisasjonsnummer()
         val hendelse = InntektsendringerEvent(
-            inntektskildeendringer = listOf(
-                InntektsendringerEvent.Inntektskildeendring(
-                    organisasjonsnummer = arbeidsgiver1,
-                    nyeEllerEndredeInntekter = listOf(
-                        InntektsendringerEvent.Inntektskildeendring.PeriodeMedBeløp(1 jan 2018, 31 jan 2018, 10000.0),
-                        InntektsendringerEvent.Inntektskildeendring.PeriodeMedBeløp(1 feb 2018, 28 feb 2018, 20000.0)
+            inntektskilder = listOf(
+                InntektsendringerEvent.Inntektskilde(
+                    inntektskilde = arbeidsgiver1,
+                    inntekter = listOf(
+                        InntektsendringerEvent.Inntektskilde.Inntekt(1 jan 2018, 31 jan 2018, BigDecimal("1000.0")),
+                        InntektsendringerEvent.Inntektskilde.Inntekt(1 feb 2018, 28 feb 2018, BigDecimal("2000.0"))
                     ),
-                    fjernedeInntekter = emptyList()
+                    nullstill = emptyList()
                 ),
-                InntektsendringerEvent.Inntektskildeendring(
-                    organisasjonsnummer = arbeidsgiver2,
-                    nyeEllerEndredeInntekter = listOf(
-                        InntektsendringerEvent.Inntektskildeendring.PeriodeMedBeløp(1 jan 2018, 31 jan 2018, 15000.0),
+                InntektsendringerEvent.Inntektskilde(
+                    inntektskilde = arbeidsgiver2,
+                    inntekter = listOf(
+                        InntektsendringerEvent.Inntektskilde.Inntekt(1 jan 2018, 31 jan 2018, BigDecimal("1500.0")),
                     ),
-                    fjernedeInntekter = listOf(
-                        InntektsendringerEvent.Inntektskildeendring.PeriodeUtenBeløp(1 jan 2018, 31 jan 2018),
-                        InntektsendringerEvent.Inntektskildeendring.PeriodeUtenBeløp(1 feb 2018, 28 feb 2018),
+                    nullstill = listOf(
+                        InntektsendringerEvent.Inntektskilde.Nullstilling(1 jan 2018, 31 jan 2018),
+                        InntektsendringerEvent.Inntektskilde.Nullstilling(1 feb 2018, 28 feb 2018),
                     )
                 ),
             ),
@@ -340,12 +341,12 @@ class UtgåendeHendelseMessageBuilderTest {
                             mapOf(
                                 "fom" to "2018-01-01",
                                 "tom" to "2018-01-31",
-                                "periodebeløp" to 10000.0
+                                "dagsbeløp" to 1000.0
                             ),
                             mapOf(
                                 "fom" to "2018-02-01",
                                 "tom" to "2018-02-28",
-                                "periodebeløp" to 20000.0
+                                "dagsbeløp" to 2000.0
                             ),
                         ),
                         "nullstill" to emptyList<Map<String, Any>>()
@@ -356,7 +357,7 @@ class UtgåendeHendelseMessageBuilderTest {
                             mapOf(
                                 "fom" to "2018-01-01",
                                 "tom" to "2018-01-31",
-                                "periodebeløp" to 15000.0
+                                "dagsbeløp" to 1500.0
                             ),
                         ),
                         "nullstill" to listOf(
