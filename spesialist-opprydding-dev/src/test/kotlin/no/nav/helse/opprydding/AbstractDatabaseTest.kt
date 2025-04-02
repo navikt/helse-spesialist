@@ -223,6 +223,7 @@ internal abstract class AbstractDatabaseTest {
                 "risikovurdering",
                 "risikovurdering_arbeidsuforhetvurdering",
                 "risikovurdering_faresignal",
+                "overstyringer_for_vedtaksperioder"
             ),
         )
         tabeller.forEach { tabellnavn ->
