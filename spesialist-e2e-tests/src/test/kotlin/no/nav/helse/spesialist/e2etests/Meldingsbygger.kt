@@ -289,4 +289,15 @@ object Meldingsbygger {
                 )
             )
         ).toJson()
+
+    fun byggAdressebeskyttelseEndret(person: Person) =
+        JsonMessage.newMessage(
+            mapOf(
+                "@event_name" to "adressebeskyttelse_endret",
+                "@id" to UUID.randomUUID(),
+                "@opprettet" to LocalDateTime.now(),
+                "fødselsnummer" to person.fødselsnummer,
+                "aktørId" to person.aktørId
+            )
+        ).toJson()
 }

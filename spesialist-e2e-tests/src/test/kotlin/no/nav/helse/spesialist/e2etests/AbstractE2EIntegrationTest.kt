@@ -6,6 +6,7 @@ import no.nav.helse.spesialist.api.testfixtures.lagSaksbehandlerFraApi
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.e2etests.Meldingsbygger.byggUtbetalingEndret
 import no.nav.helse.spesialist.e2etests.behovløserstubs.AbstractBehovLøser
+import no.nav.helse.spesialist.e2etests.behovløserstubs.HentPersoninfoV2BehovLøser
 import no.nav.helse.spesialist.e2etests.behovløserstubs.RisikovurderingBehovLøser
 import no.nav.helse.spesialist.e2etests.behovløserstubs.ÅpneOppgaverBehovLøser
 import no.nav.helse.spesialist.e2etests.context.Arbeidsgiver
@@ -19,7 +20,21 @@ import java.util.UUID
 
 abstract class AbstractE2EIntegrationTest {
     private val testContext: TestContext = TestContext()
-    protected val saksbehandler = lagSaksbehandlerFraApi()
+    private var saksbehandler = lagSaksbehandlerFraApi()
+
+    enum class Tilgangstype {
+        KODE7
+    }
+
+    protected fun saksbehandlerHarTilgang(tilgangstype: Tilgangstype) {
+        saksbehandler = saksbehandler.copy(
+            grupper = saksbehandler.grupper.plus(
+                when (tilgangstype) {
+                    Tilgangstype.KODE7 -> E2ETestApplikasjon.TilgangsgrupperForTest.kode7GruppeId
+                }
+            )
+        )
+    }
 
     private val behovLøserStub = E2ETestApplikasjon.behovLøserStub.also {
         it.init(person = testContext.person, arbeidsgiver = testContext.arbeidsgiver)
@@ -29,6 +44,7 @@ abstract class AbstractE2EIntegrationTest {
     }
     private val testRapid = E2ETestApplikasjon.testRapid
 
+    protected val hentPersoninfoV2BehovLøser = finnLøserForDenneTesten<HentPersoninfoV2BehovLøser>()
     protected val risikovurderingBehovLøser = finnLøserForDenneTesten<RisikovurderingBehovLøser>()
     protected val åpneOppgaverBehovLøser = finnLøserForDenneTesten<ÅpneOppgaverBehovLøser>()
 
@@ -70,6 +86,10 @@ abstract class AbstractE2EIntegrationTest {
 
     protected fun detPubliseresEnGosysOppgaveEndretMelding() {
         testRapid.publish(Meldingsbygger.byggGosysOppgaveEndret(testContext.person))
+    }
+
+    protected fun detPubliseresEnAdressebeskyttelseEndretMelding() {
+        testRapid.publish(Meldingsbygger.byggAdressebeskyttelseEndret(testContext.person))
     }
 
     protected fun varseldefinisjonOpprettes(varselkode: String) {

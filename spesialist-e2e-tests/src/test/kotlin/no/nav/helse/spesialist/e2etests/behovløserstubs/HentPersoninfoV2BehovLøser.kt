@@ -5,6 +5,8 @@ import no.nav.helse.spesialist.e2etests.context.Person
 import no.nav.helse.spesialist.typer.Kjønn
 
 class HentPersoninfoV2BehovLøser(private val person: Person) : AbstractBehovLøser("HentPersoninfoV2") {
+    var adressebeskyttelse = "Ugradert"
+
     override fun løsning(behovJson: JsonNode) = mapOf(
         "fornavn" to person.fornavn,
         "mellomnavn" to person.mellomnavn,
@@ -15,6 +17,6 @@ class HentPersoninfoV2BehovLøser(private val person: Person) : AbstractBehovLø
             Kjønn.Kvinne -> "Kvinne"
             Kjønn.Ukjent -> "Ukjent"
         },
-        "adressebeskyttelse" to "Ugradert"
+        "adressebeskyttelse" to adressebeskyttelse
     )
 }

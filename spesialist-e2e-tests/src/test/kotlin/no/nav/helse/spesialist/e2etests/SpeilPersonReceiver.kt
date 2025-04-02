@@ -87,6 +87,10 @@ class SpeilPersonReceiver(
         assertEquals(expected.sorted(), vedtaksperiodeFraFetchPerson["varsler"].map { it["kode"].asText() }.sorted())
     }
 
+    fun assertAdressebeskyttelse(expected: String) {
+        assertEquals(expected, person["personinfo"]["adressebeskyttelse"].asText())
+    }
+
     private fun fetchPerson(aktørId: String): JsonNode {
         val fetchPersonResponse = callGraphQL(
             operationName = "FetchPerson",
@@ -94,7 +98,7 @@ class SpeilPersonReceiver(
                 "aktorId" to aktørId,
             )
         )
-        return fetchPersonResponse["data"]["person"]
+        return fetchPersonResponse["data"]["person"].takeUnless { it.isNull }
             ?: error("Fikk ikke data.person i respons fra FetchPerson. Responsen var: ${fetchPersonResponse.toPrettyString()}")
     }
 

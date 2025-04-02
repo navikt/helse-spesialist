@@ -1,35 +1,14 @@
-package no.nav.helse.e2e
+package no.nav.helse.spesialist.e2etests.legacy.flyttestilkafka
 
+import no.nav.helse.e2e.AbstractE2ETest
 import no.nav.helse.modell.person.Adressebeskyttelse
 import org.junit.jupiter.api.Test
 
 class AdressebeskyttelseEndretE2ETest : AbstractE2ETest() {
     @Test
-    fun `oppdaterer adressebeskyttelse på en person vi kjenner til fra før`() {
-        vedtaksløsningenMottarNySøknad()
-        spleisOppretterNyBehandling()
-        håndterAdressebeskyttelseEndret()
-        assertSisteEtterspurteBehov("HentPersoninfoV2")
-
-        assertAdressebeskyttelse(adressebeskyttelse = null)
-        håndterPersoninfoløsning(adressebeskyttelse = Adressebeskyttelse.Fortrolig)
-        assertAdressebeskyttelse(adressebeskyttelse = Adressebeskyttelse.Fortrolig)
-    }
-
-    @Test
     fun `oppdaterer ikke adressebeskyttelse dersom vi ikke kjenner til fødselsnummer`() {
         håndterAdressebeskyttelseEndret()
         assertIngenEtterspurteBehov()
-    }
-
-    @Test
-    fun `Etterspør personinfo uten å sjekke ferskhet når adressebeskyttelse har blitt endret`() {
-        vedtaksløsningenMottarNySøknad()
-        spleisOppretterNyBehandling()
-
-        // Etterspør personinfo selv om det nettopp er gjort
-        håndterAdressebeskyttelseEndret()
-        assertSisteEtterspurteBehov("HentPersoninfoV2")
     }
 
     @Test
