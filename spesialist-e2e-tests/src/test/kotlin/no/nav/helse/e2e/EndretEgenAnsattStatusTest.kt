@@ -1,12 +1,8 @@
 package no.nav.helse.e2e
 
-import no.nav.helse.TestRapidHelpers.oppgaveId
-import no.nav.helse.modell.oppgave.Egenskap
-import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import org.junit.jupiter.api.Test
 
 class EndretEgenAnsattStatusTest : AbstractE2ETest() {
-
     @Test
     fun `Ignorerer hendelsen for ukjente personer`() {
         håndterEndretSkjermetinfo(skjermet = true)
@@ -32,34 +28,5 @@ class EndretEgenAnsattStatusTest : AbstractE2ETest() {
 
         håndterEndretSkjermetinfo(skjermet = true)
         assertSkjermet(FØDSELSNUMMER, true)
-    }
-
-    @Test
-    fun `Legger til egenskap på oppgave når person får status egen ansatt`() {
-        vedtaksløsningenMottarNySøknad()
-        spleisOppretterNyBehandling()
-        spesialistBehandlerGodkjenningsbehovFremTilOppgave()
-
-        val oppgaveId = inspektør.oppgaveId()
-        assertHarIkkeOppgaveegenskap(oppgaveId, Egenskap.EGEN_ANSATT)
-
-        håndterEndretSkjermetinfo(skjermet = true)
-        assertHarOppgaveegenskap(oppgaveId, Egenskap.EGEN_ANSATT)
-        assertSaksbehandleroppgave(oppgavestatus = Oppgavestatus.AvventerSaksbehandler)
-    }
-
-    @Test
-    fun `Fjerner egenskap egen ansatt hvis personen ikke lenger har status egen ansatt`() {
-        vedtaksløsningenMottarNySøknad()
-        spleisOppretterNyBehandling()
-        spesialistBehandlerGodkjenningsbehovFremTilOppgave()
-        håndterEndretSkjermetinfo(skjermet = true)
-
-        val oppgaveId = inspektør.oppgaveId()
-        assertHarOppgaveegenskap(oppgaveId, Egenskap.EGEN_ANSATT)
-
-        håndterEndretSkjermetinfo(skjermet = false)
-
-        assertHarIkkeOppgaveegenskap(oppgaveId, Egenskap.EGEN_ANSATT)
     }
 }

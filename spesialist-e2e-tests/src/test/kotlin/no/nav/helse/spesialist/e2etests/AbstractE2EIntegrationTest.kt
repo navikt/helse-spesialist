@@ -23,7 +23,8 @@ abstract class AbstractE2EIntegrationTest {
     private var saksbehandler = lagSaksbehandlerFraApi()
 
     enum class Tilgangstype {
-        KODE7
+        KODE7,
+        SKJERMEDE
     }
 
     protected fun saksbehandlerHarTilgang(tilgangstype: Tilgangstype) {
@@ -31,6 +32,7 @@ abstract class AbstractE2EIntegrationTest {
             grupper = saksbehandler.grupper.plus(
                 when (tilgangstype) {
                     Tilgangstype.KODE7 -> E2ETestApplikasjon.TilgangsgrupperForTest.kode7GruppeId
+                    Tilgangstype.SKJERMEDE -> E2ETestApplikasjon.TilgangsgrupperForTest.skjermedePersonerGruppeId
                 }
             )
         )
@@ -189,6 +191,10 @@ abstract class AbstractE2EIntegrationTest {
                 vedtaksperiode = vedtaksperiode
             )
         )
+    }
+
+    protected fun skjermetInfoEndres(skjermet: Boolean) {
+        testRapid.publish(Meldingsbygger.byggEndretSkjermetinfo(testContext.person, skjermet))
     }
 
 }

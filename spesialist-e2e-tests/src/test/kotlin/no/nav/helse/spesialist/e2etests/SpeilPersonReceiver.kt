@@ -69,6 +69,12 @@ class SpeilPersonReceiver(
         assertTrue(egenskaper.containsAll(forventedeEgenskaper.toSet())) { "Forventet å finne ${forventedeEgenskaper.toSet()} i $egenskaper" }
     }
 
+    fun assertHarIkkeOppgaveegenskap(vararg egenskaperSomSkalMangle: String) {
+        val egenskaper =
+            person["arbeidsgivere"][0]["generasjoner"][0]["perioder"][0]["egenskaper"].map { it["egenskap"].asText() }
+        assertTrue(egenskaper.none { it in egenskaperSomSkalMangle.toSet() }) { "Forventet å ikke finne ${egenskaperSomSkalMangle.toSet()} i $egenskaper" }
+    }
+
     fun assertPeriodeHarIkkeOppgave() {
         assertTrue(person["arbeidsgivere"][0]["generasjoner"][0]["perioder"][0]["oppgave"].isNull) {
             "Forventet at oppgave var null for perioden, men den var: " +

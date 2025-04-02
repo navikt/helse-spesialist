@@ -300,4 +300,15 @@ object Meldingsbygger {
                 "aktørId" to person.aktørId
             )
         ).toJson()
+
+    fun byggEndretSkjermetinfo(person: Person, skjermet: Boolean) =
+        JsonMessage.newMessage(
+            mapOf(
+                "@event_name" to "endret_skjermetinfo",
+                "@id" to UUID.randomUUID(),
+                "@opprettet" to LocalDateTime.now(),
+                "fødselsnummer" to person.fødselsnummer,
+                "skjermet" to skjermet,
+            )
+        ).toJson()
 }
