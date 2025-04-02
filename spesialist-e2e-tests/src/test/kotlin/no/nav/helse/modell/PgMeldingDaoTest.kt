@@ -6,8 +6,8 @@ import io.mockk.mockk
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.e2e.DatabaseIntegrationTest
-import no.nav.helse.modell.overstyring.OverstyringIgangsatt
 import no.nav.helse.modell.utbetaling.Utbetalingtype
+import no.nav.helse.modell.vedtaksperiode.BehandlingOpprettet
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -29,23 +29,24 @@ class PgMeldingDaoTest : DatabaseIntegrationTest() {
     private val saksbehandlerløsning: Saksbehandlerløsning = mockSaksbehandlerløsning()
 
     @Test
-    fun `finn siste igangsatte overstyring om den er korrigert søknad`() {
-        val fødselsnummer = FNR
-        val overstyringIgangsatt = mockOverstyringIgangsatt(fødselsnummer, listOf(VEDTAKSPERIODE), "KORRIGERT_SØKNAD")
+    fun `finn siste behandling opprettet om det er korrigert søknad`() {
+        val annenVedtaksperiode = UUID.randomUUID()
+        val behandlingOpprettetKorrigertSøknad = mockBehandlingOpprettet(FNR, VEDTAKSPERIODE, "Revurdering")
 
-        val overstyringIgangsattForAnnenVedtaksperiode = mockOverstyringIgangsatt(fødselsnummer, listOf(VEDTAKSPERIODE), "SYKDOMSTIDSLINJE")
+        val behandlingOpprettetSøknadAnnenPeriode =
+            mockBehandlingOpprettet(FNR, annenVedtaksperiode, "Søknad")
 
-        meldingDao.lagre(overstyringIgangsatt)
-        meldingDao.lagre(overstyringIgangsattForAnnenVedtaksperiode)
-        assertNull(meldingDao.sisteOverstyringIgangsattOmKorrigertSøknad(fødselsnummer, VEDTAKSPERIODE))
+        meldingDao.lagre(behandlingOpprettetKorrigertSøknad)
+        meldingDao.lagre(behandlingOpprettetSøknadAnnenPeriode)
 
-        meldingDao.lagre(mockOverstyringIgangsatt(fødselsnummer, listOf(VEDTAKSPERIODE), "KORRIGERT_SØKNAD"))
-        assertNotNull(meldingDao.sisteOverstyringIgangsattOmKorrigertSøknad(fødselsnummer, VEDTAKSPERIODE))
+        assertNull(meldingDao.sisteBehandlingOpprettetOmKorrigertSøknad(FNR, annenVedtaksperiode))
+        assertNotNull(meldingDao.sisteBehandlingOpprettetOmKorrigertSøknad(FNR, VEDTAKSPERIODE))
     }
 
     @Test
     fun `finn antall korrigerte søknader`() {
         meldingDao.opprettAutomatiseringKorrigertSøknad(VEDTAKSPERIODE, UUID.randomUUID())
+        meldingDao.opprettAutomatiseringKorrigertSøknad(UUID.randomUUID(), UUID.randomUUID())
         val actual = meldingDao.finnAntallAutomatisertKorrigertSøknad(VEDTAKSPERIODE)
         assertEquals(1, actual)
     }
@@ -83,23 +84,18 @@ class PgMeldingDaoTest : DatabaseIntegrationTest() {
         assertEquals(VEDTAKSPERIODE, finnKobling())
     }
 
-    private fun mockOverstyringIgangsatt(fødselsnummer: String, berørtePeriodeIder: List<UUID>, årsak: String): OverstyringIgangsatt {
-        return mockk<OverstyringIgangsatt>(relaxed = true) {
-            every { id } returns UUID.randomUUID()
-            every { fødselsnummer() } returns fødselsnummer
-            every { berørteVedtaksperiodeIder } returns berørtePeriodeIder
-            every { toJson() } returns lagOverstyringIgangsatt(
-                fødselsnummer = fødselsnummer,
-                berørtePerioder = berørtePeriodeIder.map {
-                    mapOf(
-                        "vedtaksperiodeId" to "$it",
-                        "periodeFom" to "2022-01-01",
-                        "orgnummer" to "orgnr",
-                    )
-                },
-                årsak = årsak,
-            )
-        }
+    private fun mockBehandlingOpprettet(
+        fødselsnummer: String,
+        vedtaksperiodeId: UUID,
+        type: String,
+    ): BehandlingOpprettet = mockk<BehandlingOpprettet>(relaxed = true) {
+        every { id } returns UUID.randomUUID()
+        every { fødselsnummer() } returns fødselsnummer
+        every { toJson() } returns lagBehandlingOpprettet(
+            fødselsnummer = fødselsnummer,
+            vedtaksperiodeId = vedtaksperiodeId,
+            type = type,
+        )
     }
 
     private fun mockGodkjenningsbehov(): Godkjenningsbehov {
@@ -226,33 +222,26 @@ class PgMeldingDaoTest : DatabaseIntegrationTest() {
             )
         )
 
-
-    private fun lagOverstyringIgangsatt(
+    private fun lagBehandlingOpprettet(
         fødselsnummer: String,
-        berørtePerioder: List<Map<String, String>> = listOf(
-            mapOf(
-                "vedtaksperiodeId" to "${UUID.randomUUID()}",
-                "skjæringstidspunkt" to "2022-01-01",
-                "periodeFom" to "2022-01-01",
-                "periodeTom" to "2022-01-31",
-                "orgnummer" to "orgnr",
-                "typeEndring" to "REVURDERING"
-            )
-        ),
-        årsak: String = "KORRIGERT_SØKNAD",
-        fom: LocalDate = now(),
-        kilde: UUID = UUID.randomUUID(),
+        vedtaksperiodeId: UUID,
         id: UUID = UUID.randomUUID(),
-    ) =
-        nyHendelse(
-            id, "overstyring_igangsatt", mapOf(
-                "fødselsnummer" to fødselsnummer,
-                "årsak" to årsak, // Denne leses rett fra hendelse-tabellen i HendelseDao, ikke via riveren
-                "berørtePerioder" to berørtePerioder,
-                "kilde" to "$kilde",
-                "periodeForEndringFom" to "$fom",
+        avsender: String = "SYKMELDT",
+        forårsaketAv: String = "sendt_søknad_nav",
+        type: String = "Søknad",
+    ) = nyHendelse(
+        id, "behandling_opprettet", mapOf(
+            "vedtaksperiodeId" to vedtaksperiodeId,
+            "fødselsnummer" to fødselsnummer,
+            "type" to type, // Denne leses rett fra hendelse-tabellen i MeldingDao, ikke via riveren
+            "kilde" to mapOf(
+                "avsender" to avsender // Denne leses rett fra hendelse-tabellen i MeldingDao, ikke via riveren
+            ),
+            "@forårsaket_av" to mapOf(
+                "event_name" to forårsaketAv // Denne leses rett fra hendelse-tabellen i MeldingDao, ikke via riveren
             )
         )
+    )
 
     private fun nyHendelse(id: UUID, navn: String, hendelse: Map<String, Any>) =
         JsonMessage.newMessage(nyHendelse(id, navn) + hendelse).toJson()

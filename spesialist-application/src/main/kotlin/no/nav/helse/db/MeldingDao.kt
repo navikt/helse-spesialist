@@ -2,7 +2,6 @@ package no.nav.helse.db
 
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
-import java.time.LocalDate
 import java.util.UUID
 
 interface MeldingDao {
@@ -12,10 +11,10 @@ interface MeldingDao {
 
     fun lagre(melding: Personmelding)
 
-    fun sisteOverstyringIgangsattOmKorrigertSøknad(
+    fun sisteBehandlingOpprettetOmKorrigertSøknad(
         fødselsnummer: String,
         vedtaksperiodeId: UUID,
-    ): OverstyringIgangsattKorrigertSøknad?
+    ): BehandlingOpprettetKorrigertSøknad?
 
     fun erKorrigertSøknadAutomatiskBehandlet(meldingId: UUID): Boolean
 
@@ -26,15 +25,8 @@ interface MeldingDao {
         meldingId: UUID,
     )
 
-    data class OverstyringIgangsattKorrigertSøknad(
-        val periodeForEndringFom: LocalDate,
-        val meldingId: String,
-        val berørtePerioder: List<BerørtPeriode>,
-    )
-
-    data class BerørtPeriode(
+    data class BehandlingOpprettetKorrigertSøknad(
+        val meldingId: UUID,
         val vedtaksperiodeId: UUID,
-        val periodeFom: LocalDate,
-        val orgnummer: String,
     )
 }

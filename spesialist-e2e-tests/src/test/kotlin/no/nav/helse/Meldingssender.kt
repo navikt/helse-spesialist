@@ -145,8 +145,8 @@ class Meldingssender(private val testRapid: TestRapid) {
     ): UUID = newUUID.also { id ->
         testRapid.sendTestMessage(
             Testmeldingfabrikk.lagGosysOppgaveEndret(
-                    fødselsnummer = fødselsnummer,
-                    id = id,
+                fødselsnummer = fødselsnummer,
+                id = id,
             )
         )
     }
@@ -269,7 +269,7 @@ class Meldingssender(private val testRapid: TestRapid) {
         fødselsnummer: String,
         organisasjonsnummer: String,
         avviksprosent: Double,
-        sammenligningsgrunnlagTotalbeløp:  Double,
+        sammenligningsgrunnlagTotalbeløp: Double,
         avviksvurderingId: UUID,
     ): UUID = newUUID.also { id ->
         val behov = testRapid.inspektør.siste("behov")
@@ -290,6 +290,7 @@ class Meldingssender(private val testRapid: TestRapid) {
             )
         )
     }
+
     fun sendPersoninfoløsning(
         aktørId: String,
         fødselsnummer: String,
@@ -710,30 +711,4 @@ class Meldingssender(private val testRapid: TestRapid) {
                 Testmeldingfabrikk.lagKlargjørPersonForVisning(aktørId, fødselsnummer, id)
             )
         }
-
-    fun sendOverstyringIgangsatt(
-        fødselsnummer: String,
-        orgnummer: String,
-        berørtePerioder: List<Map<String, String>> = listOf(
-            mapOf(
-                "vedtaksperiodeId" to "${UUID.randomUUID()}",
-                "skjæringstidspunkt" to "2022-01-01",
-                "periodeFom" to "2022-01-01",
-                "periodeTom" to "2022-01-31",
-                "orgnummer" to orgnummer,
-                "typeEndring" to "REVURDERING"
-            )
-        ),
-        kilde: UUID = UUID.randomUUID(),
-    ): UUID = newUUID.also { id ->
-        testRapid.sendTestMessage(
-            Testmeldingfabrikk.lagOverstyringIgangsatt(
-                fødselsnummer = fødselsnummer,
-                berørtePerioder = berørtePerioder,
-                kilde = kilde,
-                id = id,
-            )
-        )
-    }
-
 }

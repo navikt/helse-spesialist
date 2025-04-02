@@ -625,33 +625,6 @@ object Testmeldingfabrikk {
             )
         )
 
-    fun lagOverstyringIgangsatt(
-        fødselsnummer: String,
-        berørtePerioder: List<Map<String, String>> = listOf(
-            mapOf(
-                "vedtaksperiodeId" to "${UUID.randomUUID()}",
-                "skjæringstidspunkt" to "2022-01-01",
-                "periodeFom" to "2022-01-01",
-                "periodeTom" to "2022-01-31",
-                "orgnummer" to "orgnr",
-                "typeEndring" to "REVURDERING"
-            )
-        ),
-        årsak: String = "KORRIGERT_SØKNAD",
-        fom: LocalDate = now(),
-        kilde: UUID = UUID.randomUUID(),
-        id: UUID = UUID.randomUUID(),
-    ) =
-        nyHendelse(
-            id, "overstyring_igangsatt", mapOf(
-                "fødselsnummer" to fødselsnummer,
-                "årsak" to årsak, // Denne leses rett fra hendelse-tabellen i HendelseDao, ikke via riveren
-                "berørtePerioder" to berørtePerioder,
-                "kilde" to "$kilde",
-                "periodeForEndringFom" to "$fom",
-            )
-        )
-
     fun lagHentDokumentLøsning(
         fødselsnummer: String,
         dokumentId: UUID,
@@ -956,7 +929,7 @@ object Testmeldingfabrikk {
                     orgnummer = orgnummer,
                 )
             ),
-        ): String {
+    ): String {
         return nyHendelse(
             id, "nye_varsler",
             mapOf(
@@ -1202,6 +1175,7 @@ object Testmeldingfabrikk {
             stadfestetFremtidsfullmakt
         }
     }
+
     class Risikofunn(
         private val kategori: List<String>,
         private val beskrivelse: String
