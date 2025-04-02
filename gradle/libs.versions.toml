@@ -3,7 +3,7 @@ flyway = "11.5.0"
 graphqlKotlin = "8.4.0"
 jackson = "2.18.3"
 ktor = "3.1.2"
-tbdLibs = "2025.03.27-18.30-c228796d"
+tbdLibs = "2025.04.02-15.56-d34332c4"
 testcontainers = "1.20.6"
 
 [libraries]
