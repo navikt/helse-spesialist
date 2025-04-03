@@ -1,8 +1,6 @@
 package no.nav.helse.modell
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
-import io.mockk.every
-import io.mockk.mockk
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.e2e.DatabaseIntegrationTest
@@ -12,6 +10,7 @@ import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
+import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -24,17 +23,13 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 class PgMeldingDaoTest : DatabaseIntegrationTest() {
-    private val godkjenningsbehov: Godkjenningsbehov = mockGodkjenningsbehov()
-
-    private val saksbehandlerløsning: Saksbehandlerløsning = mockSaksbehandlerløsning()
 
     @Test
     fun `finn siste behandling opprettet om det er korrigert søknad`() {
         val annenVedtaksperiode = UUID.randomUUID()
-        val behandlingOpprettetKorrigertSøknad = mockBehandlingOpprettet(FNR, VEDTAKSPERIODE, "Revurdering")
 
-        val behandlingOpprettetSøknadAnnenPeriode =
-            mockBehandlingOpprettet(FNR, annenVedtaksperiode, "Søknad")
+        val behandlingOpprettetKorrigertSøknad = lagBehandlingOpprettet(FNR, VEDTAKSPERIODE, type = "Revurdering")
+        val behandlingOpprettetSøknadAnnenPeriode = lagBehandlingOpprettet(FNR, annenVedtaksperiode, type = "Søknad")
 
         meldingDao.lagre(behandlingOpprettetKorrigertSøknad)
         meldingDao.lagre(behandlingOpprettetSøknadAnnenPeriode)
@@ -60,17 +55,15 @@ class PgMeldingDaoTest : DatabaseIntegrationTest() {
 
     @Test
     fun `lagrer og finner hendelser`() {
-        meldingDao.lagre(godkjenningsbehov)
-        val actual = meldingDao.finn(HENDELSE_ID)
-            ?: fail { "Forventet å finne en hendelse med id $HENDELSE_ID" }
+        meldingDao.lagre(lagGodkjenningsbehov(HENDELSE_ID, AKTØR, FNR, VEDTAKSPERIODE))
+        val actual = meldingDao.finn(HENDELSE_ID) ?: fail { "Forventet å finne en hendelse med id $HENDELSE_ID" }
         assertEquals(FNR, actual.fødselsnummer())
     }
 
     @Test
     fun `lagrer og finner saksbehandlerløsning`() {
-        meldingDao.lagre(saksbehandlerløsning)
-        val actual = meldingDao.finn(HENDELSE_ID)
-            ?: fail { "Forventet å finne en hendelse med id $HENDELSE_ID" }
+        meldingDao.lagre(lagSaksbehandlerløsning(FNR, HENDELSE_ID))
+        val actual = meldingDao.finn(HENDELSE_ID) ?: fail { "Forventet å finne en hendelse med id $HENDELSE_ID" }
         assertEquals(FNR, actual.fødselsnummer())
     }
 
@@ -80,39 +73,8 @@ class PgMeldingDaoTest : DatabaseIntegrationTest() {
         opprettArbeidsgiver()
         opprettVedtaksperiode()
 
-        meldingDao.lagre(godkjenningsbehov)
+        meldingDao.lagre(lagGodkjenningsbehov(HENDELSE_ID, AKTØR, FNR, VEDTAKSPERIODE))
         assertEquals(VEDTAKSPERIODE, finnKobling())
-    }
-
-    private fun mockBehandlingOpprettet(
-        fødselsnummer: String,
-        vedtaksperiodeId: UUID,
-        type: String,
-    ): BehandlingOpprettet = mockk<BehandlingOpprettet>(relaxed = true) {
-        every { id } returns UUID.randomUUID()
-        every { fødselsnummer() } returns fødselsnummer
-        every { toJson() } returns lagBehandlingOpprettet(
-            fødselsnummer = fødselsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            type = type,
-        )
-    }
-
-    private fun mockGodkjenningsbehov(): Godkjenningsbehov {
-        return mockk<Godkjenningsbehov>(relaxed = true) {
-            every { id } returns HENDELSE_ID
-            every { fødselsnummer() } returns FNR
-            every { vedtaksperiodeId() } returns VEDTAKSPERIODE
-            every { toJson() } returns lagGodkjenningsbehov(AKTØR, FNR, VEDTAKSPERIODE)
-        }
-    }
-
-    private fun mockSaksbehandlerløsning(): Saksbehandlerløsning {
-        return mockk<Saksbehandlerløsning>(relaxed = true) {
-            every { id } returns HENDELSE_ID
-            every { fødselsnummer() } returns FNR
-            every { toJson() } returns lagSaksbehandlerløsning(FNR)
-        }
     }
 
     private fun finnKobling(hendelseId: UUID = HENDELSE_ID) = sessionOf(dataSource).use { session ->
@@ -124,6 +86,7 @@ class PgMeldingDaoTest : DatabaseIntegrationTest() {
     }
 
     private fun lagGodkjenningsbehov(
+        hendelseId: UUID,
         aktørId: String,
         fødselsnummer: String,
         vedtaksperiodeId: UUID = UUID.randomUUID(),
@@ -138,7 +101,6 @@ class PgMeldingDaoTest : DatabaseIntegrationTest() {
         inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
         orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList(),
         kanAvvises: Boolean = true,
-        id: UUID = UUID.randomUUID(),
         vilkårsgrunnlagId: UUID = UUID.randomUUID(),
         spleisBehandlingId: UUID = UUID.randomUUID(),
         tags: List<String> = emptyList(),
@@ -146,7 +108,7 @@ class PgMeldingDaoTest : DatabaseIntegrationTest() {
         skjønnsfastsatt: Double? = null,
     ) =
         nyHendelse(
-            id, "behov",
+            hendelseId, "behov",
             mapOf(
                 "@behov" to listOf("Godkjenning"),
                 "aktørId" to aktørId,
@@ -197,13 +159,14 @@ class PgMeldingDaoTest : DatabaseIntegrationTest() {
                     ),
                 ),
             )
-        )
+        ).let(::Godkjenningsbehov)
 
     private fun lagSaksbehandlerløsning(
-        fødselsnummer: String
+        fødselsnummer: String,
+        hendelseId: UUID,
     ) =
         nyHendelse(
-            UUID.randomUUID(), "saksbehandler_løsning",
+            hendelseId, "saksbehandler_løsning",
             mapOf(
                 "fødselsnummer" to fødselsnummer,
                 "oppgaveId" to 3333333,
@@ -220,7 +183,7 @@ class PgMeldingDaoTest : DatabaseIntegrationTest() {
                     "epostadresse" to "en.saksbehandler@nav.no"
                 )
             )
-        )
+        ).let(::Saksbehandlerløsning)
 
     private fun lagBehandlingOpprettet(
         fødselsnummer: String,
@@ -231,8 +194,12 @@ class PgMeldingDaoTest : DatabaseIntegrationTest() {
         type: String = "Søknad",
     ) = nyHendelse(
         id, "behandling_opprettet", mapOf(
+            "organisasjonsnummer" to lagOrganisasjonsnummer(),
             "vedtaksperiodeId" to vedtaksperiodeId,
+            "behandlingId" to UUID.randomUUID(),
             "fødselsnummer" to fødselsnummer,
+            "fom" to now().minusDays(20),
+            "tom" to now(),
             "type" to type, // Denne leses rett fra hendelse-tabellen i MeldingDao, ikke via riveren
             "kilde" to mapOf(
                 "avsender" to avsender // Denne leses rett fra hendelse-tabellen i MeldingDao, ikke via riveren
@@ -241,10 +208,10 @@ class PgMeldingDaoTest : DatabaseIntegrationTest() {
                 "event_name" to forårsaketAv // Denne leses rett fra hendelse-tabellen i MeldingDao, ikke via riveren
             )
         )
-    )
+    ).let(::BehandlingOpprettet)
 
     private fun nyHendelse(id: UUID, navn: String, hendelse: Map<String, Any>) =
-        JsonMessage.newMessage(nyHendelse(id, navn) + hendelse).toJson()
+        JsonMessage.newMessage(nyHendelse(id, navn) + hendelse).toJson().let(objectMapper::readTree)
 
     private fun nyHendelse(id: UUID, navn: String) = mutableMapOf(
         "@event_name" to navn,
