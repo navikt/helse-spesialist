@@ -65,7 +65,10 @@ abstract class AbstractE2EIntegrationTest {
     }
 
     protected fun personSenderSøknad() {
-        testRapid.publish(Meldingsbygger.byggSendSøknadNav(testContext.person, testContext.arbeidsgiver))
+        testRapid.publish(
+            testContext.person.fødselsnummer,
+            Meldingsbygger.byggSendSøknadNav(testContext.person, testContext.arbeidsgiver)
+        )
     }
 
     protected fun spleisForberederBehandling(
@@ -87,15 +90,24 @@ abstract class AbstractE2EIntegrationTest {
     }
 
     protected fun detPubliseresEnGosysOppgaveEndretMelding() {
-        testRapid.publish(Meldingsbygger.byggGosysOppgaveEndret(testContext.person))
+        testRapid.publish(
+            testContext.person.fødselsnummer,
+            Meldingsbygger.byggGosysOppgaveEndret(testContext.person)
+        )
     }
 
     protected fun detPubliseresEnAdressebeskyttelseEndretMelding() {
-        testRapid.publish(Meldingsbygger.byggAdressebeskyttelseEndret(testContext.person))
+        testRapid.publish(
+            testContext.person.fødselsnummer,
+            Meldingsbygger.byggAdressebeskyttelseEndret(testContext.person)
+        )
     }
 
     protected fun varseldefinisjonOpprettes(varselkode: String) {
-        testRapid.publish(Meldingsbygger.byggVarselkodeNyDefinisjon(varselkode))
+        testRapid.publish(
+            testContext.person.fødselsnummer,
+            Meldingsbygger.byggVarselkodeNyDefinisjon(varselkode)
+        )
     }
 
     protected fun assertGodkjenningsbehovBesvart(
@@ -103,7 +115,7 @@ abstract class AbstractE2EIntegrationTest {
         automatiskBehandlet: Boolean,
         vararg årsakerTilAvvist: String,
     ) {
-        val løsning = testRapid.meldingslogg.get()
+        val løsning = testRapid.meldingslogg(testContext.person.fødselsnummer)
             .mapNotNull { it["@løsning"] }
             .mapNotNull { it["Godkjenning"] }
             .last()
@@ -117,6 +129,16 @@ abstract class AbstractE2EIntegrationTest {
             assertEquals(begrunnelser, begrunnelser.distinct())
             assertEquals(årsakerTilAvvist.toSet(), begrunnelser.toSet())
         }
+    }
+
+    protected fun assertVedtakFattetEtterHovedregel() {
+        val vedtakFattet = testRapid.meldingslogg(testContext.person.fødselsnummer)
+            .find { it["@event_name"].asText() == "vedtak_fattet" }
+            ?: error("Forventet å finne vedtak_fattet i meldingslogg")
+
+        assertEquals(1, vedtakFattet["begrunnelser"].size())
+        assertEquals("Innvilgelse", vedtakFattet["begrunnelser"][0]["type"].asText())
+        assertEquals("EtterHovedregel", vedtakFattet["sykepengegrunnlagsfakta"]["fastsatt"].asText())
     }
 
     protected fun assertBehandlingTilstand(expectedTilstand: String) {
@@ -154,7 +176,10 @@ abstract class AbstractE2EIntegrationTest {
         arbeidsgiver: Arbeidsgiver
     ) {
         vedtaksperiode.spleisBehandlingId = UUID.randomUUID()
-        testRapid.publish(Meldingsbygger.byggBehandlingOpprettet(vedtaksperiode, person, arbeidsgiver))
+        testRapid.publish(
+            person.fødselsnummer,
+            Meldingsbygger.byggBehandlingOpprettet(vedtaksperiode, person, arbeidsgiver)
+        )
     }
 
     private fun spleisOppretterNyUtbetaling(
@@ -163,7 +188,10 @@ abstract class AbstractE2EIntegrationTest {
         arbeidsgiver: Arbeidsgiver
     ) {
         vedtaksperiode.utbetalingId = UUID.randomUUID()
-        testRapid.publish(Meldingsbygger.byggVedtaksperiodeNyUtbetaling(vedtaksperiode, person, arbeidsgiver))
+        testRapid.publish(
+            person.fødselsnummer,
+            Meldingsbygger.byggVedtaksperiodeNyUtbetaling(vedtaksperiode, person, arbeidsgiver)
+        )
     }
 
     private fun utbetalingEndres(
@@ -172,6 +200,7 @@ abstract class AbstractE2EIntegrationTest {
         arbeidsgiver: Arbeidsgiver
     ) {
         testRapid.publish(
+            person.fødselsnummer,
             byggUtbetalingEndret(
                 vedtaksperiode = vedtaksperiode,
                 person = person,
@@ -184,6 +213,7 @@ abstract class AbstractE2EIntegrationTest {
 
     protected fun spleisSenderGodkjenningsbehov(vedtaksperiode: Vedtaksperiode) {
         testRapid.publish(
+            testContext.person.fødselsnummer,
             Meldingsbygger.byggGodkjenningsbehov(
                 person = testContext.person,
                 arbeidsgiver = testContext.arbeidsgiver,
@@ -194,7 +224,10 @@ abstract class AbstractE2EIntegrationTest {
     }
 
     protected fun skjermetInfoEndres(skjermet: Boolean) {
-        testRapid.publish(Meldingsbygger.byggEndretSkjermetinfo(testContext.person, skjermet))
+        testRapid.publish(
+            testContext.person.fødselsnummer,
+            Meldingsbygger.byggEndretSkjermetinfo(testContext.person, skjermet)
+        )
     }
 
 }

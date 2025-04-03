@@ -167,6 +167,7 @@ class SpleisStub(
         arbeidsgiver: Arbeidsgiver
     ) {
         rapidsConnection.publish(
+            person.fødselsnummer,
             Meldingsbygger.byggUtbetalingEndret(
                 vedtaksperiode = vedtaksperiode,
                 person = person,
@@ -182,6 +183,8 @@ class SpleisStub(
         person: Person,
         arbeidsgiver: Arbeidsgiver
     ) {
-        rapidsConnection.publish(Meldingsbygger.byggAvsluttetMedVedtak(person, arbeidsgiver, vedtaksperiode))
+        rapidsConnection.publish(
+            person.fødselsnummer,
+            Meldingsbygger.byggAvsluttetMedVedtak(person, arbeidsgiver, vedtaksperiode))
     }
 }
