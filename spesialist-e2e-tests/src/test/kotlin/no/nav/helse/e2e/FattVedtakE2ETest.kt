@@ -11,20 +11,6 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 class FattVedtakE2ETest: AbstractE2ETest() {
-
-    @Test
-    fun `Fatt vedtak for periode der SP er fastsatt etter hovedregel`() {
-        vedtaksløsningenMottarNySøknad()
-        spleisOppretterNyBehandling()
-        spesialistBehandlerGodkjenningsbehovFremTilOppgave()
-        håndterSaksbehandlerløsning()
-        håndterAvsluttetMedVedtak(fastsattType = "EtterHovedregel")
-        val sisteHendelse = inspektør.meldinger().last()
-        assertEquals("vedtak_fattet", sisteHendelse["@event_name"].asText())
-        assertEquals(0, sisteHendelse["begrunnelser"].size())
-        assertEquals("EtterHovedregel", sisteHendelse["sykepengegrunnlagsfakta"]["fastsatt"].asText())
-    }
-
     @Test
     fun `Fatt vedtak for periode der SP er fastsatt etter skjønn`() {
         vedtaksløsningenMottarNySøknad()

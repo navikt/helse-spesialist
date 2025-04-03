@@ -6,19 +6,22 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry
+import java.util.concurrent.ConcurrentHashMap
 
 class LoopbackTestRapid : RapidsConnection() {
     private val meterRegistry: MeterRegistry = SimpleMeterRegistry()
     private val messageMetadata = MessageMetadata("test.message", -1, -1, null, emptyMap())
-    val meldingslogg: ThreadLocal<MutableList<JsonNode>> = ThreadLocal.withInitial { mutableListOf<JsonNode>() }
+    private val meldingsloggForFødselsnummer = ConcurrentHashMap<String, MutableList<JsonNode>>()
+
+    fun meldingslogg(fødselsnummer: String) = meldingsloggForFødselsnummer[fødselsnummer] ?: emptyList()
 
     override fun publish(message: String) {
-        meldingslogg.get().add(objectMapper.readTree(message))
-        notifyMessage(message, this, messageMetadata, meterRegistry)
+        error("Ikke implementert, bruk publish med fødselsnummer for å kunne kjøre med flere tråder.")
     }
 
     override fun publish(key: String, message: String) {
-        meldingslogg.get().add(objectMapper.readTree(message))
+        meldingsloggForFødselsnummer.computeIfAbsent(key) { mutableListOf<JsonNode>() }
+            .add(objectMapper.readTree(message))
         notifyMessage(message, KeyMessageContext(this, key), messageMetadata, meterRegistry)
     }
 

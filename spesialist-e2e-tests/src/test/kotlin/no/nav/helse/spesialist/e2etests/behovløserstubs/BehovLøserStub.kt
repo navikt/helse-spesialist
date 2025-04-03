@@ -72,6 +72,7 @@ class BehovLøserStub(private val rapidsConnection: RapidsConnection) : River.Pa
         val fødselsnummer = jsonNode["fødselsnummer"].asText()
         behovliste(fødselsnummer).add(jsonNode)
         besvarMelding(
+            fødselsnummer = fødselsnummer,
             jsonNode = jsonNode,
             løserPerBehov = løserPerBehov(fødselsnummer = fødselsnummer),
             context = context
@@ -79,6 +80,7 @@ class BehovLøserStub(private val rapidsConnection: RapidsConnection) : River.Pa
     }
 
     private fun besvarMelding(
+        fødselsnummer: String,
         jsonNode: JsonNode,
         løserPerBehov: Map<String, AbstractBehovLøser>,
         context: MessageContext
@@ -95,13 +97,14 @@ class BehovLøserStub(private val rapidsConnection: RapidsConnection) : River.Pa
             )
         )
         logg.info("${this.javaClass.simpleName} publiserer simulert svarmelding fra ekstern tjeneste: $svarmelding")
-        context.publish(svarmelding)
+        context.publish(fødselsnummer, svarmelding)
     }
 
     fun besvarIgjen(fødselsnummer: String, behov: String) {
         val sisteBehov = behovliste(fødselsnummer).findLast { behov in it["@behov"].map { it.asText() } }
             ?: error("Fant ikke behov $behov i behovliste")
         besvarMelding(
+            fødselsnummer = fødselsnummer,
             jsonNode = sisteBehov,
             løserPerBehov = løserPerBehov(fødselsnummer = sisteBehov["fødselsnummer"].asText()),
             context = rapidsConnection

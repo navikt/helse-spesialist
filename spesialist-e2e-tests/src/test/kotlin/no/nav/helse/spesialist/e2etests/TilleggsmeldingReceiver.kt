@@ -11,6 +11,7 @@ class TilleggsmeldingReceiver(
 ) {
     fun aktivitetsloggNyAktivitet(varselkoder: List<String>) {
         rapidsConnection.publish(
+            testContext.person.fødselsnummer,
             Meldingsbygger.byggAktivitetsloggNyAktivitetMedVarsler(
                 varselkoder = varselkoder,
                 person = testContext.person,
