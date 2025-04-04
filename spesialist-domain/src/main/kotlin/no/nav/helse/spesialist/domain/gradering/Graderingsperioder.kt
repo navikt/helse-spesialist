@@ -2,7 +2,7 @@ package no.nav.helse.spesialist.domain.gradering
 
 import no.nav.helse.spesialist.domain.Periode.Companion.tilPerioder
 import no.nav.helse.spesialist.domain.ddd.AggregateRoot
-import no.nav.helse.spesialist.domain.gradering.Graderingsperiode.Companion.overlapperMed
+import no.nav.helse.spesialist.domain.gradering.TilkommenInntekt.Companion.overlapperMed
 
 class GraderingsperioderId(val fødselsnummer: String, val organisasjonsnummer: String)
 
@@ -12,18 +12,18 @@ class GraderingEndretEvent(
 
 class Graderingsperioder private constructor(
     id: GraderingsperioderId,
-    gjeldendeGraderingsperioder: List<Graderingsperiode>,
+    gjeldendeGraderingsperioder: List<TilkommenInntekt>,
 ) : AggregateRoot<GraderingsperioderId>(id) {
-    private val _gjeldendeGraderingsperioder: MutableList<Graderingsperiode> = gjeldendeGraderingsperioder.toMutableList()
-    private val gjeldendeGraderingsperioder: List<Graderingsperiode> get() = _gjeldendeGraderingsperioder.toList()
+    private val _gjeldendeGraderingsperioder: MutableList<TilkommenInntekt> = gjeldendeGraderingsperioder.toMutableList()
+    private val gjeldendeGraderingsperioder: List<TilkommenInntekt> get() = _gjeldendeGraderingsperioder.toList()
 
     private val hendelser = mutableListOf<GraderingEndretEvent>()
 
     fun konsumerDomenehendelser(): List<GraderingEndretEvent> = hendelser.toList().also { hendelser.clear() }
 
     fun endreGraderingsperiode(
-        gammel: Graderingsperiode,
-        ny: Graderingsperiode,
+        gammel: TilkommenInntekt,
+        ny: TilkommenInntekt,
     ) {
         val kopi = _gjeldendeGraderingsperioder.toMutableList()
         kopi.forsøkÅFjernePeriode(gammel)
@@ -33,27 +33,27 @@ class Graderingsperioder private constructor(
         hendelser.add(GraderingEndretEvent(ny differanseFra gammel))
     }
 
-    fun leggTilGraderingsperiode(graderingsperiode: Graderingsperiode) {
-        _gjeldendeGraderingsperioder.forsøkÅLeggeTilPeriode(graderingsperiode)
+    fun leggTilGraderingsperiode(tilkommenInntekt: TilkommenInntekt) {
+        _gjeldendeGraderingsperioder.forsøkÅLeggeTilPeriode(tilkommenInntekt)
         hendelser.add(
             GraderingEndretEvent(
                 graderingsdifferanse =
                     Graderingsdifferanse(
-                        nyeEllerEndredeInntekter = graderingsperiode.dagerTilPerioderMedBeløp(),
+                        nyeEllerEndredeInntekter = tilkommenInntekt.dagerTilPerioderMedBeløp(),
                         fjernedeInntekter = emptyList(),
                     ),
             ),
         )
     }
 
-    fun fjernGraderingsperiode(graderingsperiode: Graderingsperiode) {
-        _gjeldendeGraderingsperioder.forsøkÅFjernePeriode(graderingsperiode)
+    fun fjernGraderingsperiode(tilkommenInntekt: TilkommenInntekt) {
+        _gjeldendeGraderingsperioder.forsøkÅFjernePeriode(tilkommenInntekt)
         hendelser.add(
             GraderingEndretEvent(
                 graderingsdifferanse =
                     Graderingsdifferanse(
                         nyeEllerEndredeInntekter = emptyList(),
-                        fjernedeInntekter = graderingsperiode.graderteDager.tilPerioder(),
+                        fjernedeInntekter = tilkommenInntekt.dager.tilPerioder(),
                     ),
             ),
         )
@@ -68,18 +68,18 @@ class Graderingsperioder private constructor(
             gjeldendeGraderingsperioder = emptyList(),
         )
 
-        private fun MutableList<Graderingsperiode>.erstattMed(ny: List<Graderingsperiode>) {
+        private fun MutableList<TilkommenInntekt>.erstattMed(ny: List<TilkommenInntekt>) {
             this.clear()
             this.addAll(ny)
         }
 
-        private fun MutableList<Graderingsperiode>.forsøkÅLeggeTilPeriode(graderingsperiode: Graderingsperiode) {
-            if (this overlapperMed graderingsperiode) error("Kan ikke overlappe med andre graderingsperioder for dette arbeidsforholdet")
-            add(graderingsperiode)
+        private fun MutableList<TilkommenInntekt>.forsøkÅLeggeTilPeriode(tilkommenInntekt: TilkommenInntekt) {
+            if (this overlapperMed tilkommenInntekt) error("Kan ikke overlappe med andre graderingsperioder for dette arbeidsforholdet")
+            add(tilkommenInntekt)
         }
 
-        private fun MutableList<Graderingsperiode>.forsøkÅFjernePeriode(graderingsperiode: Graderingsperiode) {
-            if (!remove(graderingsperiode)) error("Graderingsperioden finnes ikke")
+        private fun MutableList<TilkommenInntekt>.forsøkÅFjernePeriode(tilkommenInntekt: TilkommenInntekt) {
+            if (!remove(tilkommenInntekt)) error("Graderingsperioden finnes ikke")
         }
     }
 }

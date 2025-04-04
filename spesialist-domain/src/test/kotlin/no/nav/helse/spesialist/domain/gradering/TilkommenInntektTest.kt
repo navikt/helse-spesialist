@@ -9,7 +9,7 @@ import java.time.Month
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class GraderingsperiodeTest {
+class TilkommenInntektTest {
     @Test
     fun `lagt til en dag`() {
         val gammelFordeling = 1000.0 fordeltPå (1 jan 2018)
@@ -130,8 +130,8 @@ class GraderingsperiodeTest {
         )
     }
 
-    private infix fun Double.fordeltPå(perioder: List<Periode>): Graderingsperiode {
-        return Graderingsperiode.ny(
+    private infix fun Double.fordeltPå(perioder: List<Periode>): TilkommenInntekt {
+        return TilkommenInntekt.ny(
             fom = perioder.first().fom,
             tom = perioder.last().tom,
             dager = perioder.flatMap { it.datoer() },
@@ -139,15 +139,15 @@ class GraderingsperiodeTest {
         )
     }
 
-    private val ingenFordeling = Graderingsperiode.ny(
+    private val ingenFordeling = TilkommenInntekt.ny(
         fom = 1 jan 2018,
         tom = 31 jan 2018,
         dager = emptyList(),
         periodebeløp = 0.0,
     )
 
-    private infix fun Double.fordeltPå(periode: Periode): Graderingsperiode = this.fordeltPå(listOf(periode))
-    private infix fun Double.fordeltPå(dato: LocalDate): Graderingsperiode = this.fordeltPå(listOf(dato til dato))
+    private infix fun Double.fordeltPå(periode: Periode): TilkommenInntekt = this.fordeltPå(listOf(periode))
+    private infix fun Double.fordeltPå(dato: LocalDate): TilkommenInntekt = this.fordeltPå(listOf(dato til dato))
 
     private infix fun LocalDate.til(other: Int) = PeriodBuilder(this, other)
 

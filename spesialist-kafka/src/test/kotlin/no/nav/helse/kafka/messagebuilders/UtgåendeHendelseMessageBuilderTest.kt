@@ -307,23 +307,23 @@ class UtgåendeHendelseMessageBuilderTest {
         val arbeidsgiver1 = lagOrganisasjonsnummer()
         val arbeidsgiver2 = lagOrganisasjonsnummer()
         val hendelse = InntektsendringerEvent(
-            inntektskildeendringer = listOf(
-                InntektsendringerEvent.Inntektskildeendring(
-                    organisasjonsnummer = arbeidsgiver1,
-                    nyeEllerEndredeInntekter = listOf(
-                        InntektsendringerEvent.Inntektskildeendring.PeriodeMedBeløp(1 jan 2018, 31 jan 2018, 10000.0),
-                        InntektsendringerEvent.Inntektskildeendring.PeriodeMedBeløp(1 feb 2018, 28 feb 2018, 20000.0)
+            inntektskilder = listOf(
+                InntektsendringerEvent.Inntektskilde(
+                    inntektskilde = arbeidsgiver1,
+                    inntekter = listOf(
+                        InntektsendringerEvent.Inntektskilde.Inntekt(1 jan 2018, 31 jan 2018, 10000.0),
+                        InntektsendringerEvent.Inntektskilde.Inntekt(1 feb 2018, 28 feb 2018, 20000.0)
                     ),
-                    fjernedeInntekter = emptyList()
+                    nullstill = emptyList()
                 ),
-                InntektsendringerEvent.Inntektskildeendring(
-                    organisasjonsnummer = arbeidsgiver2,
-                    nyeEllerEndredeInntekter = listOf(
-                        InntektsendringerEvent.Inntektskildeendring.PeriodeMedBeløp(1 jan 2018, 31 jan 2018, 15000.0),
+                InntektsendringerEvent.Inntektskilde(
+                    inntektskilde = arbeidsgiver2,
+                    inntekter = listOf(
+                        InntektsendringerEvent.Inntektskilde.Inntekt(1 jan 2018, 31 jan 2018, 15000.0),
                     ),
-                    fjernedeInntekter = listOf(
-                        InntektsendringerEvent.Inntektskildeendring.PeriodeUtenBeløp(1 jan 2018, 31 jan 2018),
-                        InntektsendringerEvent.Inntektskildeendring.PeriodeUtenBeløp(1 feb 2018, 28 feb 2018),
+                    nullstill = listOf(
+                        InntektsendringerEvent.Inntektskilde.Nullstilling(1 jan 2018, 31 jan 2018),
+                        InntektsendringerEvent.Inntektskilde.Nullstilling(1 feb 2018, 28 feb 2018),
                     )
                 ),
             ),

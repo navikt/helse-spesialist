@@ -410,22 +410,22 @@ private fun InntektsendringerEvent.detaljer(): Map<String, Any> {
     return buildMap {
         put(
             "inntektskilder",
-            this@detaljer.inntektskildeendringer.map { inntektskildeendring ->
+            this@detaljer.inntektskilder.map { inntektskilde ->
                 mapOf(
-                    "inntektskilde" to inntektskildeendring.organisasjonsnummer,
+                    "inntektskilde" to inntektskilde.inntektskilde,
                     "inntekter" to
-                        inntektskildeendring.nyeEllerEndredeInntekter.map { nyEllerEndretInntekt ->
+                        inntektskilde.inntekter.map { inntekt ->
                             mapOf(
-                                "fom" to nyEllerEndretInntekt.fom,
-                                "tom" to nyEllerEndretInntekt.tom,
-                                "periodebeløp" to nyEllerEndretInntekt.periodebeløp,
+                                "fom" to inntekt.fom,
+                                "tom" to inntekt.tom,
+                                "dagsbeløp" to inntekt.dagsbeløp,
                             )
                         },
                     "nullstill" to
-                        inntektskildeendring.fjernedeInntekter.map { fjernetInntekt ->
+                        inntektskilde.nullstill.map { nullstill ->
                             mapOf(
-                                "fom" to fjernetInntekt.fom,
-                                "tom" to fjernetInntekt.tom,
+                                "fom" to nullstill.fom,
+                                "tom" to nullstill.tom,
                             )
                         },
                 )
