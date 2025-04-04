@@ -15,13 +15,13 @@ class GraderingsperioderTest {
     @Test
     fun `legg til ny graderingsperiode`() {
         val graderingsperioder = Graderingsperioder.ny(lagFødselsnummer(), lagOrganisasjonsnummer())
-        val graderingsperiode = Graderingsperiode.ny(
+        val tilkommenInntekt = TilkommenInntekt.ny(
             fom = 1 jan 2018,
             tom = 2 jan 2018,
             dager = listOf(1 jan 2018, 2 jan 2018),
             periodebeløp = 10000.0
         )
-        graderingsperioder.leggTilGraderingsperiode(graderingsperiode)
+        graderingsperioder.leggTilGraderingsperiode(tilkommenInntekt)
         val events = graderingsperioder.konsumerDomenehendelser()
         assertEquals(1, events.size)
         assertEquals(1, events[0].graderingsdifferanse.nyeEllerEndredeInntekter.size)
@@ -31,15 +31,15 @@ class GraderingsperioderTest {
     @Test
     fun `kan ikke legge til periode som overlapper med annen periode`() {
         val graderingsperioder = Graderingsperioder.ny(lagFødselsnummer(), lagOrganisasjonsnummer())
-        val graderingsperiode = Graderingsperiode.ny(
+        val tilkommenInntekt = TilkommenInntekt.ny(
             fom = 1 jan 2018,
             tom = 2 jan 2018,
             dager = listOf(1 jan 2018, 2 jan 2018),
             periodebeløp = 10000.0
         )
-        graderingsperioder.leggTilGraderingsperiode(graderingsperiode)
+        graderingsperioder.leggTilGraderingsperiode(tilkommenInntekt)
         assertThrows<IllegalStateException> {
-            graderingsperioder.leggTilGraderingsperiode(graderingsperiode)
+            graderingsperioder.leggTilGraderingsperiode(tilkommenInntekt)
         }
     }
 
@@ -47,23 +47,23 @@ class GraderingsperioderTest {
     fun `kan endre graderingsperiode`() {
         // given
         val graderingsperioder = Graderingsperioder.ny(lagFødselsnummer(), lagOrganisasjonsnummer())
-        val graderingsperiodeV1 = Graderingsperiode.ny(
+        val tilkommenInntektV1 = TilkommenInntekt.ny(
             fom = 1 jan 2018,
             tom = 2 jan 2018,
             dager = listOf(1 jan 2018, 2 jan 2018),
             periodebeløp = 10000.0
         )
-        graderingsperioder.leggTilGraderingsperiode(graderingsperiodeV1)
+        graderingsperioder.leggTilGraderingsperiode(tilkommenInntektV1)
         graderingsperioder.konsumerDomenehendelser() // flush
 
         // when
-        val graderingsperiodeV2 = Graderingsperiode.ny(
+        val tilkommenInntektV2 = TilkommenInntekt.ny(
             fom = 1 jan 2018,
             tom = 3 jan 2018,
             dager = listOf(1 jan 2018, 2 jan 2018, 3 jan 2018),
             periodebeløp = 10000.0
         )
-        graderingsperioder.endreGraderingsperiode(gammel = graderingsperiodeV1, ny = graderingsperiodeV2)
+        graderingsperioder.endreGraderingsperiode(gammel = tilkommenInntektV1, ny = tilkommenInntektV2)
         val hendelser = graderingsperioder.konsumerDomenehendelser()
 
         // then
@@ -165,12 +165,12 @@ class GraderingsperioderTest {
         assertEquals(0, hendelser[2].graderingsdifferanse.fjernedeInntekter.size)
     }
 
-    private fun Graderingsperioder.perioder(vararg graderingsperiode: Graderingsperiode) {
-        graderingsperiode.forEach { this.leggTilGraderingsperiode(it) }
+    private fun Graderingsperioder.perioder(vararg tilkommenInntekt: TilkommenInntekt) {
+        tilkommenInntekt.forEach { this.leggTilGraderingsperiode(it) }
     }
 
-    private infix fun Double.fordeltPå(periode: Periode): Graderingsperiode {
-        return Graderingsperiode.ny(
+    private infix fun Double.fordeltPå(periode: Periode): TilkommenInntekt {
+        return TilkommenInntekt.ny(
             fom = periode.fom,
             tom = periode.tom,
             dager = periode.datoer(),

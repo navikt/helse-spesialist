@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.api.graphql.schema
 
 import com.expediagroup.graphql.generator.annotations.GraphQLName
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.UUID
 
@@ -75,10 +76,9 @@ data class ApiOverstyringDag(
 
 @GraphQLName("TilkommenInntektOverstyring")
 data class ApiTilkommenInntektOverstyring(
-    val fodselsnummer: String,
     val organisasjonsnummer: String,
     val fom: LocalDate,
     val tom: LocalDate,
-    val inntektForPeriode: Double,
-    val dager: List<LocalDate>,
+    val periodebelop: BigDecimal,
+    val dager: Set<LocalDate>,
 )

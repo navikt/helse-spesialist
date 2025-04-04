@@ -3,6 +3,7 @@ package no.nav.helse.modell.melding
 import no.nav.helse.modell.saksbehandler.handlinger.AnnulleringArsak
 import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgradPeriode
 import no.nav.helse.modell.saksbehandler.handlinger.PåVentÅrsak
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.UUID
 
@@ -137,38 +138,38 @@ data class LagtPåVentEvent(
 ) : UtgåendeHendelse
 
 data class InntektsendringerEvent(
-    val inntektskildeendringer: List<Inntektskildeendring>,
+    val inntektskilder: List<Inntektskilde>,
 ) : UtgåendeHendelse {
-    data class Inntektskildeendring(
-        val organisasjonsnummer: String,
-        val nyeEllerEndredeInntekter: List<PeriodeMedBeløp>,
-        val fjernedeInntekter: List<PeriodeUtenBeløp>,
+    data class Inntektskilde(
+        val inntektskilde: String,
+        val inntekter: List<Inntekt>,
+        val nullstill: List<Nullstilling>,
     ) {
         override fun toString(): String =
             buildString {
-                append(organisasjonsnummer).append(": \n\t")
-                nyeEllerEndredeInntekter
+                append(inntektskilde).append(": \n\t")
+                inntekter
                     .takeUnless { it.isEmpty() }
                     ?.joinTo(this, separator = "\n\t") { it.toString() }
                     ?.append("\n")
-                if (nyeEllerEndredeInntekter.isNotEmpty() && fjernedeInntekter.isNotEmpty()) append("\n\t")
-                fjernedeInntekter
+                if (inntekter.isNotEmpty() && nullstill.isNotEmpty()) append("\n\t")
+                nullstill
                     .takeUnless { it.isEmpty() }
                     ?.joinTo(this, separator = "\n\t") { it.toString() }
                     ?.appendLine()
             }
 
-        data class PeriodeMedBeløp(
+        data class Inntekt(
             val fom: LocalDate,
             val tom: LocalDate,
-            val periodebeløp: Double,
+            val dagsbeløp: BigDecimal,
         )
 
-        data class PeriodeUtenBeløp(
+        data class Nullstilling(
             val fom: LocalDate,
             val tom: LocalDate,
         )
     }
 
-    override fun toString() = inntektskildeendringer.joinToString(separator = "\n")
+    override fun toString() = inntektskilder.joinToString(separator = "\n")
 }

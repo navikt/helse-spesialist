@@ -41,21 +41,21 @@ class OverstyrTilkommenInntekt private constructor(
                     (nyeEllerEndredePerArbeidsgiver[organisasjonsnummer] ?: emptyList()) to (fjernedePerArbeidsgiver[organisasjonsnummer] ?: emptyList())
                 }
         return InntektsendringerEvent(
-            inntektskildeendringer =
+            inntektskilder =
                 sammenflettetPerArbeidsgiver.map { (organisasjonsnummer, value) ->
                     val (nyeEllerEndrede, fjernede) = value
-                    InntektsendringerEvent.Inntektskildeendring(
-                        organisasjonsnummer = organisasjonsnummer,
-                        nyeEllerEndredeInntekter =
+                    InntektsendringerEvent.Inntektskilde(
+                        inntektskilde = organisasjonsnummer,
+                        inntekter =
                             nyeEllerEndrede.flatMap { nyEllerEndretInntekt ->
                                 nyEllerEndretInntekt.perioder.map {
-                                    InntektsendringerEvent.Inntektskildeendring.PeriodeMedBeløp(it.fom, it.tom, it.periodeBeløp)
+                                    InntektsendringerEvent.Inntektskilde.Inntekt(it.fom, it.tom, it.periodeBeløp)
                                 }
                             },
-                        fjernedeInntekter =
+                        nullstill =
                             fjernede.flatMap { fjernetInntekt ->
                                 fjernetInntekt.perioder.map {
-                                    InntektsendringerEvent.Inntektskildeendring.PeriodeUtenBeløp(it.fom, it.tom)
+                                    InntektsendringerEvent.Inntektskilde.Nullstilling(it.fom, it.tom)
                                 }
                             },
                     )
