@@ -10,7 +10,7 @@ import javax.sql.DataSource
 
 class PgVarselApiRepository internal constructor(dataSource: DataSource) : VarselApiRepository {
     private val varselDao = PgVarselApiDao(dataSource)
-    private val generasjonDao = PgGenerasjonApiDao(dataSource)
+    private val behandlingDao = PgBehandlingApiDao(dataSource)
 
     override fun finnVarslerSomIkkeErInaktiveFor(
         vedtaksperiodeId: UUID,
@@ -86,10 +86,10 @@ class PgVarselApiRepository internal constructor(dataSource: DataSource) : Varse
     }
 
     private fun sammenhengendePerioder(oppgaveId: Long): Set<VedtaksperiodeDbDto> {
-        val vedtakMedOppgave = generasjonDao.gjeldendeGenerasjonFor(oppgaveId)
-        val alleVedtakForPersonen = generasjonDao.gjeldendeGenerasjonerForPerson(oppgaveId)
-        val sammenhengendePerioder = alleVedtakForPersonen.tidligereEnnOgSammenhengende(vedtakMedOppgave)
-        return setOf(vedtakMedOppgave) + sammenhengendePerioder
+        val vedtaksperiodeMedOppgave = behandlingDao.gjeldendeBehandlingFor(oppgaveId)
+        val alleVedtaksperioderForPersonen = behandlingDao.gjeldendeBehandlingerForPerson(oppgaveId)
+        val sammenhengendePerioder = alleVedtaksperioderForPersonen.tidligereEnnOgSammenhengende(vedtaksperiodeMedOppgave)
+        return sammenhengendePerioder + vedtaksperiodeMedOppgave
     }
 
     private fun Set<VedtaksperiodeDbDto>.tidligereEnnOgSammenhengende(periode: VedtaksperiodeDbDto): Set<VedtaksperiodeDbDto> {

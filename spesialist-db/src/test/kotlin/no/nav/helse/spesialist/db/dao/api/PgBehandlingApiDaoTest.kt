@@ -11,24 +11,24 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.UUID
 
-internal class PgGenerasjonApiDaoTest: AbstractDBIntegrationTest() {
+internal class PgBehandlingApiDaoTest: AbstractDBIntegrationTest() {
 
-    private val generasjonDao = PgGenerasjonApiDao(dataSource)
+    private val behandlingDao = PgBehandlingApiDao(dataSource)
 
     @Test
-    fun `Finner generasjon med oppgave`() {
+    fun `Finner periode med oppgave`() {
         opprettPerson()
         opprettArbeidsgiver()
         opprettVedtaksperiode()
         opprettOppgave()
-        val vedtaksperiodeMedOppgave = generasjonDao.gjeldendeGenerasjonFor(finnOppgaveIdFor(PERIODE.id))
+        val vedtaksperiodeMedOppgave = behandlingDao.gjeldendeBehandlingFor(finnOppgaveIdFor(PERIODE.id))
         val forventetVedtaksperiode = VedtaksperiodeDbDto(PERIODE.id, PERIODE.fom, PERIODE.tom, PERIODE.fom, emptySet())
 
         assertEquals(forventetVedtaksperiode, vedtaksperiodeMedOppgave)
     }
 
     @Test
-    fun `Finner generasjon med oppgave basert på siste generasjon`() {
+    fun `Finner periode med oppgave basert på siste behandling`() {
         opprettPerson()
         opprettArbeidsgiver()
         opprettVedtaksperiode()
@@ -40,7 +40,7 @@ internal class PgGenerasjonApiDaoTest: AbstractDBIntegrationTest() {
         oppdaterSkjæringstidspunkt(spleisBehandlingId, nyFom)
         opprettOppgave()
 
-        val vedtaksperiodeMedOppgave = generasjonDao.gjeldendeGenerasjonFor(finnOppgaveIdFor(PERIODE.id))
+        val vedtaksperiodeMedOppgave = behandlingDao.gjeldendeBehandlingFor(finnOppgaveIdFor(PERIODE.id))
         val forventetVedtaksperiode = VedtaksperiodeDbDto(PERIODE.id, nyFom, nyTom, nyFom, emptySet())
         val ikkeForventetVedtaksperiode = VedtaksperiodeDbDto(PERIODE.id, PERIODE.fom, PERIODE.tom, PERIODE.fom, emptySet())
 
@@ -49,14 +49,14 @@ internal class PgGenerasjonApiDaoTest: AbstractDBIntegrationTest() {
     }
 
     @Test
-    fun `Finner alle gjeldende generasjoner for person gitt en oppgaveId`() {
+    fun `Finner alle gjeldende behandlinger for person gitt en oppgaveId`() {
         opprettPerson()
         opprettArbeidsgiver()
         opprettVedtaksperiode()
         val periode2 = Periode(UUID.randomUUID(), LocalDate.now(), LocalDate.now())
         opprettVedtaksperiode(vedtaksperiodeId = periode2.id, fom = periode2.fom, tom = periode2.tom)
         opprettOppgave()
-        val alleVedtaksperioderForPerson = generasjonDao.gjeldendeGenerasjonerForPerson(finnOppgaveIdFor(PERIODE.id))
+        val alleVedtaksperioderForPerson = behandlingDao.gjeldendeBehandlingerForPerson(finnOppgaveIdFor(PERIODE.id))
         val forventetVedtaksperiode1 = VedtaksperiodeDbDto(PERIODE.id, PERIODE.fom, PERIODE.tom, PERIODE.fom, emptySet())
         val forventetVedtaksperiode2 = VedtaksperiodeDbDto(periode2.id, periode2.fom, periode2.tom, periode2.fom, emptySet())
 
@@ -64,7 +64,7 @@ internal class PgGenerasjonApiDaoTest: AbstractDBIntegrationTest() {
     }
 
     @Test
-    fun `Hent ut alle generasjon for person gitt en oppgaveId basert på siste generasjon`() {
+    fun `Henter alle behandlinger for person basert på siste behandling, gitt en oppgaveId`() {
         opprettPerson()
         opprettArbeidsgiver()
 
@@ -87,7 +87,7 @@ internal class PgGenerasjonApiDaoTest: AbstractDBIntegrationTest() {
         opprettVedtaksperiode(vedtaksperiodeId = periode3.id, fom = periode3.fom, tom =periode3.tom)
         opprettOppgave(vedtaksperiodeId = v3)
 
-        val alleVedtaksperioderForPerson = generasjonDao.gjeldendeGenerasjonerForPerson(finnOppgaveIdFor(periode3.id))
+        val alleVedtaksperioderForPerson = behandlingDao.gjeldendeBehandlingerForPerson(finnOppgaveIdFor(periode3.id))
 
         assertEquals(3, alleVedtaksperioderForPerson.size)
         val forventetVedtaksperiode1 = VedtaksperiodeDbDto(v1, 1 feb 2018, 28 feb 2018, 1 feb 2018, emptySet())
@@ -98,7 +98,7 @@ internal class PgGenerasjonApiDaoTest: AbstractDBIntegrationTest() {
     }
 
     @Test
-    fun `Finner ikke generasjoner for perioder som er forkastet`() {
+    fun `Finner ikke behandlinger for forkastede perioder`() {
         opprettPerson()
         opprettArbeidsgiver()
         opprettVedtaksperiode()
@@ -106,21 +106,21 @@ internal class PgGenerasjonApiDaoTest: AbstractDBIntegrationTest() {
         val periode2 = Periode(UUID.randomUUID(), LocalDate.now(), LocalDate.now())
         opprettVedtaksperiode(vedtaksperiodeId = periode2.id, fom = periode2.fom, tom = periode2.tom, forkastet = true)
 
-        val alleVedtaksperioderForPerson = generasjonDao.gjeldendeGenerasjonerForPerson(finnOppgaveIdFor(PERIODE.id))
+        val alleVedtaksperioderForPerson = behandlingDao.gjeldendeBehandlingerForPerson(finnOppgaveIdFor(PERIODE.id))
         val forventetVedtaksperiode = VedtaksperiodeDbDto(PERIODE.id, PERIODE.fom, PERIODE.tom, PERIODE.fom, emptySet())
 
         assertEquals(setOf(forventetVedtaksperiode), alleVedtaksperioderForPerson)
     }
 
     @Test
-    fun `Finner ikke generasjoner for perioder som er forkastet - med varselGetter`() {
+    fun `Finner ikke behandlinger for forkastede perioder - med varselSupplier`() {
         opprettPerson()
         opprettArbeidsgiver()
         opprettVedtaksperiode()
         opprettOppgave()
         val periode2 = Periode(UUID.randomUUID(), LocalDate.now(), LocalDate.now())
         opprettVedtaksperiode(vedtaksperiodeId = periode2.id, fom = periode2.fom, tom = periode2.tom, forkastet = true)
-        val alleVedtaksperioderForPerson = generasjonDao.gjeldendeGenerasjonerForPerson(finnOppgaveIdFor(PERIODE.id)) { emptySet() }
+        val alleVedtaksperioderForPerson = behandlingDao.gjeldendeBehandlingerForPerson(finnOppgaveIdFor(PERIODE.id)) { emptySet() }
         val forventetVedtaksperiode = VedtaksperiodeDbDto(PERIODE.id, PERIODE.fom, PERIODE.tom, PERIODE.fom, emptySet())
 
         assertEquals(setOf(forventetVedtaksperiode), alleVedtaksperioderForPerson)

@@ -9,8 +9,8 @@ import no.nav.helse.spesialist.db.QueryRunner
 import java.util.UUID
 import javax.sql.DataSource
 
-class PgGenerasjonApiDao internal constructor(dataSource: DataSource) : QueryRunner by MedDataSource(dataSource) {
-    fun gjeldendeGenerasjonFor(oppgaveId: Long): VedtaksperiodeDbDto =
+class PgBehandlingApiDao internal constructor(dataSource: DataSource) : QueryRunner by MedDataSource(dataSource) {
+    fun gjeldendeBehandlingFor(oppgaveId: Long): VedtaksperiodeDbDto =
         asSQL(
             """
             SELECT b.vedtaksperiode_id, b.fom, b.tom, b.skjæringstidspunkt
@@ -23,7 +23,7 @@ class PgGenerasjonApiDao internal constructor(dataSource: DataSource) : QueryRun
             "oppgave_id" to oppgaveId,
         ).single { it.tilVedtaksperiode() }
 
-    fun gjeldendeGenerasjonerForPerson(oppgaveId: Long): Set<VedtaksperiodeDbDto> =
+    fun gjeldendeBehandlingerForPerson(oppgaveId: Long): Set<VedtaksperiodeDbDto> =
         asSQL(
             """
             SELECT DISTINCT ON (b.vedtaksperiode_id) b.vedtaksperiode_id, b.fom, b.tom, b.skjæringstidspunkt 
@@ -38,9 +38,9 @@ class PgGenerasjonApiDao internal constructor(dataSource: DataSource) : QueryRun
             "oppgave_id" to oppgaveId,
         ).list { it.tilVedtaksperiode() }.toSet()
 
-    fun gjeldendeGenerasjonFor(
+    fun gjeldendeBehandlingFor(
         oppgaveId: Long,
-        varselGetter: (generasjonId: UUID) -> Set<VarselDbDto>,
+        varselSupplier: (generasjonId: UUID) -> Set<VarselDbDto>,
     ): VedtaksperiodeDbDto =
         asSQL(
             """
@@ -52,11 +52,11 @@ class PgGenerasjonApiDao internal constructor(dataSource: DataSource) : QueryRun
             ORDER BY b.id DESC LIMIT 1;
             """.trimIndent(),
             "oppgave_id" to oppgaveId,
-        ).single { it.tilVedtaksperiode(varselGetter) }
+        ).single { it.tilVedtaksperiode(varselSupplier) }
 
-    fun gjeldendeGenerasjonerForPerson(
+    fun gjeldendeBehandlingerForPerson(
         oppgaveId: Long,
-        varselGetter: (generasjonId: UUID) -> Set<VarselDbDto>,
+        varselSupplier: (generasjonId: UUID) -> Set<VarselDbDto>,
     ): Set<VedtaksperiodeDbDto> =
         asSQL(
             """
@@ -70,12 +70,10 @@ class PgGenerasjonApiDao internal constructor(dataSource: DataSource) : QueryRun
             ORDER BY b.vedtaksperiode_id, b.id DESC;
             """.trimIndent(),
             "oppgave_id" to oppgaveId,
-        ).list { it.tilVedtaksperiode(varselGetter) }.toSet()
+        ).list { it.tilVedtaksperiode(varselSupplier) }.toSet()
 
-    private fun Row.tilVedtaksperiode(varselGetter: (generasjonId: UUID) -> Set<VarselDbDto>) =
-        tilVedtaksperiode(
-            varselGetter(uuid("unik_id")),
-        )
+    private fun Row.tilVedtaksperiode(varselSupplier: (generasjonId: UUID) -> Set<VarselDbDto>) =
+        tilVedtaksperiode(varselSupplier(uuid("unik_id")))
 
     private fun Row.tilVedtaksperiode(varsler: Set<VarselDbDto> = emptySet()) =
         VedtaksperiodeDbDto(
