@@ -13,7 +13,7 @@ class PgBehandlingApiDao internal constructor(dataSource: DataSource) : QueryRun
     fun gjeldendeBehandlingFor(oppgaveId: Long): VedtaksperiodeDbDto =
         asSQL(
             """
-            SELECT b.vedtaksperiode_id, b.fom, b.tom, b.skjæringstidspunkt
+            SELECT b.vedtaksperiode_id, b.fom, b.tom, b.skjæringstidspunkt, b.tags
             FROM vedtak v 
             INNER JOIN behandling b on v.vedtaksperiode_id = b.vedtaksperiode_id
             JOIN oppgave o ON v.id = o.vedtak_ref
@@ -26,7 +26,7 @@ class PgBehandlingApiDao internal constructor(dataSource: DataSource) : QueryRun
     fun gjeldendeBehandlingerForPerson(oppgaveId: Long): Set<VedtaksperiodeDbDto> =
         asSQL(
             """
-            SELECT DISTINCT ON (b.vedtaksperiode_id) b.vedtaksperiode_id, b.fom, b.tom, b.skjæringstidspunkt 
+            SELECT DISTINCT ON (b.vedtaksperiode_id) b.vedtaksperiode_id, b.fom, b.tom, b.skjæringstidspunkt, b.tags 
             FROM vedtak v
             INNER JOIN behandling b on v.vedtaksperiode_id = b.vedtaksperiode_id
             WHERE person_ref = 
@@ -44,7 +44,7 @@ class PgBehandlingApiDao internal constructor(dataSource: DataSource) : QueryRun
     ): VedtaksperiodeDbDto =
         asSQL(
             """
-            SELECT b.vedtaksperiode_id, b.unik_id, b.fom, b.tom, b.skjæringstidspunkt
+            SELECT b.vedtaksperiode_id, b.unik_id, b.fom, b.tom, b.skjæringstidspunkt, b.tags
             FROM vedtak v 
             INNER JOIN behandling b on v.vedtaksperiode_id = b.vedtaksperiode_id
             JOIN oppgave o ON v.id = o.vedtak_ref
@@ -60,7 +60,7 @@ class PgBehandlingApiDao internal constructor(dataSource: DataSource) : QueryRun
     ): Set<VedtaksperiodeDbDto> =
         asSQL(
             """
-            SELECT DISTINCT ON (b.vedtaksperiode_id) b.vedtaksperiode_id, b.unik_id, b.fom, b.tom, b.skjæringstidspunkt 
+            SELECT DISTINCT ON (b.vedtaksperiode_id) b.vedtaksperiode_id, b.unik_id, b.fom, b.tom, b.skjæringstidspunkt, b.tags 
             FROM vedtak v
             INNER JOIN behandling b on v.vedtaksperiode_id = b.vedtaksperiode_id
             WHERE person_ref = 
@@ -81,6 +81,7 @@ class PgBehandlingApiDao internal constructor(dataSource: DataSource) : QueryRun
             localDate("fom"),
             localDate("tom"),
             localDate("skjæringstidspunkt"),
+            array<String>("tags").toSet(),
             varsler,
         )
 }

@@ -9,6 +9,7 @@ data class VedtaksperiodeDbDto(
     val fom: LocalDate,
     val tom: LocalDate,
     val skjæringstidspunkt: LocalDate,
+    val tags: Set<String>,
     val varsler: Set<VarselDbDto>,
 ) {
     fun vedtaksperiodeId() = this.vedtaksperiodeId
@@ -29,9 +30,20 @@ data class VedtaksperiodeDbDto(
         return harAktiveVarsler
     }
 
+    private fun overlapperMedInfotrygd(): Boolean {
+        if (tags.none { it == "OverlapperMedInfotrygd" }) return false
+
+        logg.info("Vedtaksperiode med fom=$fom, tom=$tom har tag 'OverlapperMedInfotrygd'")
+        return true
+    }
+
     companion object {
         fun Set<VedtaksperiodeDbDto>.harAktiveVarsler(): Boolean {
             return any { it.harAktiveVarsler() }
+        }
+
+        fun Set<VedtaksperiodeDbDto>.harTagOverlapperMedInfotrygd(): Boolean {
+            return any { it.overlapperMedInfotrygd() }
         }
 
         fun Set<VedtaksperiodeDbDto>.godkjennVarsler(

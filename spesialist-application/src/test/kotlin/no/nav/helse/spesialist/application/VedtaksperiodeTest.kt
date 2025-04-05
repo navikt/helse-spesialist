@@ -93,7 +93,7 @@ internal class VedtaksperiodeTest {
     }
 
     private fun opprettApiGenerasjon(fom: LocalDate, tom: LocalDate, skjæringstidspunkt: LocalDate, varsler: List<VarselDbDto> = emptyList()): VedtaksperiodeDbDto {
-        return VedtaksperiodeDbDto(UUID.randomUUID(), fom, tom, skjæringstidspunkt, varsler.toSet())
+        return VedtaksperiodeDbDto(UUID.randomUUID(), fom, tom, skjæringstidspunkt, emptySet(),  varsler.toSet())
     }
 
     private fun opprettVarsel(status: Varselstatus) = VarselDbDto(

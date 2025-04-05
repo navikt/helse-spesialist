@@ -9,6 +9,7 @@ import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.Godkjenninghåndterer
 import no.nav.helse.spesialist.api.feilhåndtering.IkkeÅpenOppgave
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
+import no.nav.helse.spesialist.api.feilhåndtering.OverlapperMedInfotrygd
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.schema.ApiAvslagstype
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
@@ -55,9 +56,11 @@ class VedtakMutationHandler(
             }
 
             is VedtakResultat.Feil -> {
-                logg.warn("Kunne ikke innvilge vedtak: ${resultat.melding}")
-                newResult<Boolean>().error(vedtakGraphQLError(resultat.melding, resultat.code, resultat.exception))
-                    .data(false).build()
+                logg.warn("Kan ikke gjennomføre fatting av vedtak, årsak: ${resultat.melding}")
+                newResult<Boolean>()
+                    .error(vedtakGraphQLError(resultat.melding, resultat.code, resultat.exception))
+                    .data(false)
+                    .build()
             }
         }
     }
@@ -108,6 +111,12 @@ class VedtakMutationHandler(
                 melding = "Oppgaven er ikke åpen.",
                 code = 500,
                 exception = IkkeÅpenOppgave("Oppgaven er ikke åpen.", 500),
+            )
+
+            class OverlapperMedInfotrygd(saksbehandlerIdent: String) : Feil(
+                melding = "Det er overlappende utbetaling i Infotrygd.",
+                code = 409,
+                exception = OverlapperMedInfotrygd(saksbehandlerIdent, 409),
             )
 
             class HarAktiveVarsler(oppgavereferanse: Long) : Feil(

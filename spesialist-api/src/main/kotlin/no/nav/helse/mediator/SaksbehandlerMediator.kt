@@ -14,6 +14,7 @@ import no.nav.helse.db.api.VarselDbDto
 import no.nav.helse.db.api.VedtaksperiodeDbDto.Companion.avvisVarsler
 import no.nav.helse.db.api.VedtaksperiodeDbDto.Companion.godkjennVarsler
 import no.nav.helse.db.api.VedtaksperiodeDbDto.Companion.harAktiveVarsler
+import no.nav.helse.db.api.VedtaksperiodeDbDto.Companion.harTagOverlapperMedInfotrygd
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.mediator.overstyring.Saksbehandlingsmelder
@@ -248,11 +249,8 @@ class SaksbehandlerMediator(
     ): VedtakResultat {
         val perioderTilBehandling = behandlingRepository.perioderTilBehandling(oppgavereferanse)
         return when {
-            perioderTilBehandling.harAktiveVarsler() -> {
-                VedtakResultat.Feil.HarAktiveVarsler(
-                    oppgavereferanse,
-                )
-            }
+            perioderTilBehandling.harAktiveVarsler() -> VedtakResultat.Feil.HarAktiveVarsler(oppgavereferanse)
+            perioderTilBehandling.harTagOverlapperMedInfotrygd() -> VedtakResultat.Feil.OverlapperMedInfotrygd(legacySaksbehandler.ident())
             else -> {
                 perioderTilBehandling.godkjennVarsler(
                     fødselsnummer = fødselsnummer,

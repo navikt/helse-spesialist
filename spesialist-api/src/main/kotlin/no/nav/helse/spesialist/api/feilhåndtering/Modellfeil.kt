@@ -160,3 +160,21 @@ class IkkeÅpenOppgave(private val saksbehandlerIdent: String, private val oppga
         )
     }
 }
+
+class OverlapperMedInfotrygd(private val saksbehandlerIdent: String, private val oppgaveId: Long) : Modellfeil() {
+    override val eksternKontekst: Map<String, Any> = emptyMap()
+    override val httpkode = HttpStatusCode.Conflict
+    override val feilkode: String = "overlappende_utbetaling_i_infotrygd"
+
+    override fun logger() {
+        logg.info(
+            "Behandler ikke fatting av vedtak for oppgaveId={}, på grunn av overlappende utbetaling i Infotrygd",
+            oppgaveId,
+        )
+        sikkerLogg.info(
+            "Saksbehandler med ident={} forsøkte å fatte vedtak for opppgaveId={}, men det er overlappende utbetaling i Infotrygd",
+            saksbehandlerIdent,
+            oppgaveId,
+        )
+    }
+}

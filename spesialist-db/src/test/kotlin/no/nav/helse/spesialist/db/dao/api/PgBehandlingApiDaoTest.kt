@@ -22,7 +22,7 @@ internal class PgBehandlingApiDaoTest: AbstractDBIntegrationTest() {
         opprettVedtaksperiode()
         opprettOppgave()
         val vedtaksperiodeMedOppgave = behandlingDao.gjeldendeBehandlingFor(finnOppgaveIdFor(PERIODE.id))
-        val forventetVedtaksperiode = VedtaksperiodeDbDto(PERIODE.id, PERIODE.fom, PERIODE.tom, PERIODE.fom, emptySet())
+        val forventetVedtaksperiode = VedtaksperiodeDbDto(PERIODE.id, PERIODE.fom, PERIODE.tom, PERIODE.fom, emptySet(), emptySet())
 
         assertEquals(forventetVedtaksperiode, vedtaksperiodeMedOppgave)
     }
@@ -41,8 +41,8 @@ internal class PgBehandlingApiDaoTest: AbstractDBIntegrationTest() {
         opprettOppgave()
 
         val vedtaksperiodeMedOppgave = behandlingDao.gjeldendeBehandlingFor(finnOppgaveIdFor(PERIODE.id))
-        val forventetVedtaksperiode = VedtaksperiodeDbDto(PERIODE.id, nyFom, nyTom, nyFom, emptySet())
-        val ikkeForventetVedtaksperiode = VedtaksperiodeDbDto(PERIODE.id, PERIODE.fom, PERIODE.tom, PERIODE.fom, emptySet())
+        val forventetVedtaksperiode = VedtaksperiodeDbDto(PERIODE.id, nyFom, nyTom, nyFom, emptySet(), emptySet())
+        val ikkeForventetVedtaksperiode = VedtaksperiodeDbDto(PERIODE.id, PERIODE.fom, PERIODE.tom, PERIODE.fom, emptySet(), emptySet())
 
         assertEquals(forventetVedtaksperiode, vedtaksperiodeMedOppgave)
         assertNotEquals(ikkeForventetVedtaksperiode, vedtaksperiodeMedOppgave)
@@ -57,8 +57,8 @@ internal class PgBehandlingApiDaoTest: AbstractDBIntegrationTest() {
         opprettVedtaksperiode(vedtaksperiodeId = periode2.id, fom = periode2.fom, tom = periode2.tom)
         opprettOppgave()
         val alleVedtaksperioderForPerson = behandlingDao.gjeldendeBehandlingerForPerson(finnOppgaveIdFor(PERIODE.id))
-        val forventetVedtaksperiode1 = VedtaksperiodeDbDto(PERIODE.id, PERIODE.fom, PERIODE.tom, PERIODE.fom, emptySet())
-        val forventetVedtaksperiode2 = VedtaksperiodeDbDto(periode2.id, periode2.fom, periode2.tom, periode2.fom, emptySet())
+        val forventetVedtaksperiode1 = VedtaksperiodeDbDto(PERIODE.id, PERIODE.fom, PERIODE.tom, PERIODE.fom, emptySet(), emptySet())
+        val forventetVedtaksperiode2 = VedtaksperiodeDbDto(periode2.id, periode2.fom, periode2.tom, periode2.fom, emptySet(), emptySet())
 
         assertEquals(setOf(forventetVedtaksperiode1, forventetVedtaksperiode2), alleVedtaksperioderForPerson)
     }
@@ -90,9 +90,9 @@ internal class PgBehandlingApiDaoTest: AbstractDBIntegrationTest() {
         val alleVedtaksperioderForPerson = behandlingDao.gjeldendeBehandlingerForPerson(finnOppgaveIdFor(periode3.id))
 
         assertEquals(3, alleVedtaksperioderForPerson.size)
-        val forventetVedtaksperiode1 = VedtaksperiodeDbDto(v1, 1 feb 2018, 28 feb 2018, 1 feb 2018, emptySet())
-        val forventetVedtaksperiode2 = VedtaksperiodeDbDto(v2, 1 mar 2018, 31 mar 2018, 1 mar 2018, emptySet())
-        val forventetVedtaksperiode3 = VedtaksperiodeDbDto(v3, periode3.fom, periode3.tom, periode3.fom, emptySet())
+        val forventetVedtaksperiode1 = VedtaksperiodeDbDto(v1, 1 feb 2018, 28 feb 2018, 1 feb 2018, emptySet(), emptySet())
+        val forventetVedtaksperiode2 = VedtaksperiodeDbDto(v2, 1 mar 2018, 31 mar 2018, 1 mar 2018, emptySet(), emptySet())
+        val forventetVedtaksperiode3 = VedtaksperiodeDbDto(v3, periode3.fom, periode3.tom, periode3.fom, emptySet(), emptySet())
 
         assertEquals(setOf(forventetVedtaksperiode1, forventetVedtaksperiode2, forventetVedtaksperiode3), alleVedtaksperioderForPerson)
     }
@@ -107,7 +107,7 @@ internal class PgBehandlingApiDaoTest: AbstractDBIntegrationTest() {
         opprettVedtaksperiode(vedtaksperiodeId = periode2.id, fom = periode2.fom, tom = periode2.tom, forkastet = true)
 
         val alleVedtaksperioderForPerson = behandlingDao.gjeldendeBehandlingerForPerson(finnOppgaveIdFor(PERIODE.id))
-        val forventetVedtaksperiode = VedtaksperiodeDbDto(PERIODE.id, PERIODE.fom, PERIODE.tom, PERIODE.fom, emptySet())
+        val forventetVedtaksperiode = VedtaksperiodeDbDto(PERIODE.id, PERIODE.fom, PERIODE.tom, PERIODE.fom, emptySet(), emptySet())
 
         assertEquals(setOf(forventetVedtaksperiode), alleVedtaksperioderForPerson)
     }
@@ -121,7 +121,7 @@ internal class PgBehandlingApiDaoTest: AbstractDBIntegrationTest() {
         val periode2 = Periode(UUID.randomUUID(), LocalDate.now(), LocalDate.now())
         opprettVedtaksperiode(vedtaksperiodeId = periode2.id, fom = periode2.fom, tom = periode2.tom, forkastet = true)
         val alleVedtaksperioderForPerson = behandlingDao.gjeldendeBehandlingerForPerson(finnOppgaveIdFor(PERIODE.id)) { emptySet() }
-        val forventetVedtaksperiode = VedtaksperiodeDbDto(PERIODE.id, PERIODE.fom, PERIODE.tom, PERIODE.fom, emptySet())
+        val forventetVedtaksperiode = VedtaksperiodeDbDto(PERIODE.id, PERIODE.fom, PERIODE.tom, PERIODE.fom, emptySet(), emptySet())
 
         assertEquals(setOf(forventetVedtaksperiode), alleVedtaksperioderForPerson)
     }
