@@ -247,20 +247,23 @@ class SaksbehandlerMediator(
         legacySaksbehandler: LegacySaksbehandler,
     ): VedtakResultat {
         val perioderTilBehandling = behandlingRepository.perioderTilBehandling(oppgavereferanse)
-        return if (perioderTilBehandling.harAktiveVarsler()) {
-            VedtakResultat.Feil.HarAktiveVarsler(
-                oppgavereferanse,
-            )
-        } else {
-            perioderTilBehandling.godkjennVarsler(
-                fødselsnummer = fødselsnummer,
-                behandlingId = spleisBehandlingId,
-                ident = legacySaksbehandler.ident(),
-                godkjenner = this::vurderVarsel,
-            )
+        return when {
+            perioderTilBehandling.harAktiveVarsler() -> {
+                VedtakResultat.Feil.HarAktiveVarsler(
+                    oppgavereferanse,
+                )
+            }
+            else -> {
+                perioderTilBehandling.godkjennVarsler(
+                    fødselsnummer = fødselsnummer,
+                    behandlingId = spleisBehandlingId,
+                    ident = legacySaksbehandler.ident(),
+                    godkjenner = this::vurderVarsel,
+                )
 
-            påVentDao.slettPåVent(oppgavereferanse)
-            VedtakResultat.Ok(spleisBehandlingId)
+                påVentDao.slettPåVent(oppgavereferanse)
+                VedtakResultat.Ok(spleisBehandlingId)
+            }
         }
     }
 
