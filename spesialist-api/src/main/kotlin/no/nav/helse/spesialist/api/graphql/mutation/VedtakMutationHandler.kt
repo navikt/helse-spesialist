@@ -30,7 +30,7 @@ class VedtakMutationHandler(
         begrunnelse: String?,
     ): DataFetcherResult<Boolean> {
         val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
-        logg.info("Fatter vedtak for oppgave $oppgavereferanse")
+        logg.info("Behandler kall for fatting av vedtak for oppgave $oppgavereferanse")
 
         val resultat =
             saksbehandlerMediator.vedtak(
