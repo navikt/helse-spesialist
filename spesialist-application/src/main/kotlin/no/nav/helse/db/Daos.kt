@@ -2,8 +2,8 @@ package no.nav.helse.db
 
 import no.nav.helse.db.api.AbonnementApiDao
 import no.nav.helse.db.api.ArbeidsgiverApiDao
+import no.nav.helse.db.api.BehandlingApiRepository
 import no.nav.helse.db.api.EgenAnsattApiDao
-import no.nav.helse.db.api.GenerasjonApiRepository
 import no.nav.helse.db.api.NotatApiDao
 import no.nav.helse.db.api.OppgaveApiDao
 import no.nav.helse.db.api.OverstyringApiDao
@@ -46,7 +46,7 @@ interface Daos {
     val abonnementApiDao: AbonnementApiDao
     val arbeidsgiverApiDao: ArbeidsgiverApiDao
     val egenAnsattApiDao: EgenAnsattApiDao
-    val generasjonApiRepository: GenerasjonApiRepository
+    val behandlingApiRepository: BehandlingApiRepository
     val notatApiDao: NotatApiDao
     val oppgaveApiDao: OppgaveApiDao
     val overstyringApiDao: OverstyringApiDao

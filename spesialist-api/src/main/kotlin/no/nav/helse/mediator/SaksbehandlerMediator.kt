@@ -113,7 +113,7 @@ class SaksbehandlerMediator(
     private val sessionFactory: SessionFactory,
     private val tilgangskontroll: Tilgangskontroll,
 ) {
-    private val generasjonRepository = daos.generasjonApiRepository
+    private val behandlingRepository = daos.behandlingApiRepository
     private val varselRepository = daos.varselApiRepository
     private val oppgaveApiDao = daos.oppgaveApiDao
     private val opptegnelseRepository = daos.opptegnelseDao
@@ -228,7 +228,7 @@ class SaksbehandlerMediator(
         spleisBehandlingId: UUID,
         legacySaksbehandler: LegacySaksbehandler,
     ): VedtakResultat.Ok {
-        val periodeTilGodkjenning = generasjonRepository.periodeTilGodkjenning(oppgavereferanse)
+        val periodeTilGodkjenning = behandlingRepository.periodeTilGodkjenning(oppgavereferanse)
         periodeTilGodkjenning.avvisVarsler(
             fødselsnummer = fødselsnummer,
             behandlingId = spleisBehandlingId,
@@ -246,7 +246,7 @@ class SaksbehandlerMediator(
         spleisBehandlingId: UUID,
         legacySaksbehandler: LegacySaksbehandler,
     ): VedtakResultat {
-        val perioderTilBehandling = generasjonRepository.perioderTilBehandling(oppgavereferanse)
+        val perioderTilBehandling = behandlingRepository.perioderTilBehandling(oppgavereferanse)
         return if (perioderTilBehandling.harAktiveVarsler()) {
             VedtakResultat.Feil.HarAktiveVarsler(
                 oppgavereferanse,
@@ -593,7 +593,7 @@ class SaksbehandlerMediator(
     ): SendTilGodkjenningResult =
         sessionFactory.transactionalSessionScope { sessionContext ->
             try {
-                val perioderTilBehandling = generasjonRepository.perioderTilBehandling(oppgavereferanse)
+                val perioderTilBehandling = behandlingRepository.perioderTilBehandling(oppgavereferanse)
                 if (perioderTilBehandling.harAktiveVarsler()) {
                     return@transactionalSessionScope SendTilGodkjenningResult.Feil.ManglerVurderingAvVarsler(
                         ManglerVurderingAvVarsler(

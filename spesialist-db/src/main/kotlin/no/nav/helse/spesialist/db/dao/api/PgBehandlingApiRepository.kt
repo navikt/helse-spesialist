@@ -1,10 +1,10 @@
 package no.nav.helse.spesialist.db.dao.api
 
-import no.nav.helse.db.api.GenerasjonApiRepository
+import no.nav.helse.db.api.BehandlingApiRepository
 import no.nav.helse.db.api.VedtaksperiodeDbDto
 import javax.sql.DataSource
 
-class PgGenerasjonApiRepository internal constructor(dataSource: DataSource) : GenerasjonApiRepository {
+class PgBehandlingApiRepository internal constructor(dataSource: DataSource) : BehandlingApiRepository {
     private val varselDao = PgVarselApiDao(dataSource)
     private val behandlingDao = PgBehandlingApiDao(dataSource)
 
