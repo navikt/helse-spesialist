@@ -165,7 +165,6 @@ internal class VurderBehovForTotrinnskontrollTest {
     ) =
         Totrinnsvurdering.fraLagring(
             id = TotrinnsvurderingId(nextLong()),
-            vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
             fødselsnummer = FØDSELSNUMMER,
             saksbehandler = saksbehandler,
             beslutter = beslutter,

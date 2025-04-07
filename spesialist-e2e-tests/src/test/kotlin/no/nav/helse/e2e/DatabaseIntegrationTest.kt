@@ -165,13 +165,12 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     }
 
     protected fun opprettTotrinnsvurdering(
-        vedtaksperiodeId: UUID = VEDTAKSPERIODE,
         saksbehandlerOid: UUID? = null,
         erRetur: Boolean = false,
         ferdigstill: Boolean = false,
         fødselsnummer: String = FNR,
     ) {
-        val totrinnsvurdering = Totrinnsvurdering.ny(vedtaksperiodeId = vedtaksperiodeId, fødselsnummer = fødselsnummer)
+        val totrinnsvurdering = Totrinnsvurdering.ny(fødselsnummer = fødselsnummer)
         totrinnsvurderingRepository.lagre(totrinnsvurdering)
         saksbehandlerOid?.let {
             totrinnsvurdering.sendTilBeslutter(

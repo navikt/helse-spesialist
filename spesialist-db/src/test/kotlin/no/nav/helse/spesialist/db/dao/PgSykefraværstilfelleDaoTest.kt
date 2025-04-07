@@ -26,9 +26,9 @@ internal class PgSykefraværstilfelleDaoTest : AbstractDBIntegrationTest() {
         testhendelse(hendelseId)
         overstyringRepository.lagre(
             listOf(
-                    skjønnsfastsattSykepengegrunnlag(
-                        fødselsnummer = FNR,
-                    ),
+                skjønnsfastsattSykepengegrunnlag(
+                    fødselsnummer = FNR,
+                ),
             ),
             totrinnsvurderingId
         )
@@ -52,10 +52,7 @@ internal class PgSykefraværstilfelleDaoTest : AbstractDBIntegrationTest() {
         nyPerson(fødselsnummer = person2, organisasjonsnummer = arbeidsgiver2, vedtaksperiodeId = UUID.randomUUID())
         opprettSaksbehandler()
         val totrinnsvurderingId1 = opprettTotrinnsvurdering()
-        val totrinnsvurderingId2 = opprettTotrinnsvurdering(
-            vedtaksperiodeId = UUID.randomUUID(),
-            fødselsnummer = person2
-        )
+        val totrinnsvurderingId2 = opprettTotrinnsvurdering(fødselsnummer = person2)
         val hendelseId1 = UUID.randomUUID()
         val hendelseId2 = UUID.randomUUID()
         testhendelse(hendelseId1)
@@ -112,7 +109,13 @@ internal class PgSykefraværstilfelleDaoTest : AbstractDBIntegrationTest() {
                         begrunnelseMal = "mal",
                         begrunnelseKonklusjon = "konklusjon",
                         begrunnelseFritekst = "fritekst",
-                        lovhjemmel = Lovhjemmel(paragraf = "paragraf", ledd = "ledd", bokstav = "bokstav", lovverksversjon = "lovverksversjon", lovverk = "lovverk"),
+                        lovhjemmel = Lovhjemmel(
+                            paragraf = "paragraf",
+                            ledd = "ledd",
+                            bokstav = "bokstav",
+                            lovverksversjon = "lovverksversjon",
+                            lovverk = "lovverk"
+                        ),
                         initierendeVedtaksperiodeId = UUID.randomUUID().toString(),
                     ),
                 ),

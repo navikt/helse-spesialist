@@ -31,7 +31,6 @@ class PgTotrinnsvurderingRepository(session: Session) : QueryRunner by MedSessio
         asSQL(
             """
             SELECT tv.id,
-                   tv.vedtaksperiode_id,
                    p.fødselsnummer,
                    tv.saksbehandler as saksbehandler_oid,
                    tv.beslutter as beslutter_oid,
@@ -59,7 +58,6 @@ class PgTotrinnsvurderingRepository(session: Session) : QueryRunner by MedSessio
             FROM person p 
             WHERE p.fødselsnummer = :fodselsnummer
             """.trimIndent(),
-            "vedtaksperiodeId" to totrinnsvurdering.vedtaksperiodeId,
             "saksbehandler" to totrinnsvurdering.saksbehandler?.value,
             "beslutter" to totrinnsvurdering.beslutter?.value,
             "fodselsnummer" to totrinnsvurdering.fødselsnummer,
@@ -92,7 +90,6 @@ class PgTotrinnsvurderingRepository(session: Session) : QueryRunner by MedSessio
     private fun Row.toTotrinnsvurdering(): Totrinnsvurdering =
         Totrinnsvurdering.fraLagring(
             id = TotrinnsvurderingId(long("id")),
-            vedtaksperiodeId = uuid("vedtaksperiode_id"),
             fødselsnummer = string("fødselsnummer"),
             saksbehandler = uuidOrNull("saksbehandler_oid")?.let(::SaksbehandlerOid),
             beslutter = uuidOrNull("beslutter_oid")?.let(::SaksbehandlerOid),

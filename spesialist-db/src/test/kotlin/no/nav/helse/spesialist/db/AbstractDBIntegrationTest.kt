@@ -657,14 +657,14 @@ abstract class AbstractDBIntegrationTest {
         return this
     }
 
-    protected fun opprettTotrinnsvurdering(vedtaksperiodeId: UUID = VEDTAKSPERIODE, fødselsnummer: String = FNR): TotrinnsvurderingId {
-        val totrinnsvurdering = Totrinnsvurdering.ny(vedtaksperiodeId = vedtaksperiodeId, fødselsnummer = fødselsnummer)
+    protected fun opprettTotrinnsvurdering(fødselsnummer: String = FNR): TotrinnsvurderingId {
+        val totrinnsvurdering = Totrinnsvurdering.ny(fødselsnummer = fødselsnummer)
         totrinnsvurderingRepository.lagre(totrinnsvurdering)
         return totrinnsvurdering.id()
     }
 
     protected fun nyTotrinnsvurdering(fødselsnummer: String, oppgave: Oppgave): TotrinnsvurderingKontekst {
-        val totrinnsvurdering = Totrinnsvurdering.ny(oppgave.vedtaksperiodeId, fødselsnummer)
+        val totrinnsvurdering = Totrinnsvurdering.ny(fødselsnummer)
         sessionContext.totrinnsvurderingRepository.lagre(
             totrinnsvurdering = totrinnsvurdering,
         )

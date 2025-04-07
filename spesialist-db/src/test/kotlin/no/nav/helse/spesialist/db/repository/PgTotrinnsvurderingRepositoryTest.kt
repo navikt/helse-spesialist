@@ -66,15 +66,14 @@ class PgTotrinnsvurderingRepositoryTest : AbstractDBIntegrationTest() {
         totrinnsvurderingRepository.lagre(nyTotrinnsvurdering())
         val hentetTotrinnsvurdering = totrinnsvurderingRepository.finn(FNR)
         checkNotNull(hentetTotrinnsvurdering)
-        hentetTotrinnsvurdering.vedtaksperiodeForkastet(vedtaksperiodeId = VEDTAKSPERIODE)
+        hentetTotrinnsvurdering.vedtaksperiodeForkastet()
         totrinnsvurderingRepository.lagre(hentetTotrinnsvurdering)
         val oppdatertTotrinnsvurdering = totrinnsvurderingRepository.finn(FNR)
 
         assertNull(oppdatertTotrinnsvurdering)
     }
 
-    private fun nyTotrinnsvurdering(): Totrinnsvurdering =
-        Totrinnsvurdering.ny(vedtaksperiodeId = VEDTAKSPERIODE, fødselsnummer = FNR)
+    private fun nyTotrinnsvurdering(): Totrinnsvurdering = Totrinnsvurdering.ny(fødselsnummer = FNR)
 
     private fun nyOverstyring(): Overstyring =
         OverstyrtTidslinje.ny(

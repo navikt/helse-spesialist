@@ -549,7 +549,7 @@ internal class PersonRepository(
 
     private fun TransactionalSession.slettTotrinnsvurdering(personRef: Int) {
         @Language("PostgreSQL")
-        val query = "DELETE FROM totrinnsvurdering WHERE vedtaksperiode_id IN (SELECT vedtaksperiode_id FROM vedtak WHERE person_ref = ?)"
+        val query = "DELETE FROM totrinnsvurdering WHERE person_ref = ?"
         run(queryOf(query, personRef).asExecute)
     }
 }

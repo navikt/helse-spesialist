@@ -995,10 +995,7 @@ internal fun overstyringUnitOfWork(
     session.reservasjonDao.reserverPerson(saksbehandler.id().value, fødselsnummer)
 
     val totrinnsvurdering =
-        session.totrinnsvurderingRepository.finn(fødselsnummer) ?: Totrinnsvurdering.ny(
-            overstyring.vedtaksperiodeId,
-            fødselsnummer,
-        )
+        session.totrinnsvurderingRepository.finn(fødselsnummer) ?: Totrinnsvurdering.ny(fødselsnummer)
     totrinnsvurdering.nyOverstyring(overstyring)
     session.totrinnsvurderingRepository.lagre(totrinnsvurdering)
 

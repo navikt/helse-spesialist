@@ -2,10 +2,8 @@ package no.nav.helse.modell.kommando
 
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import org.slf4j.LoggerFactory
-import java.util.UUID
 
 internal class AvbrytTotrinnsvurderingCommand(
-    private val vedtaksperiodeId: UUID,
     private val fødselsnummer: String,
     private val totrinnsvurderingRepository: TotrinnsvurderingRepository,
 ) : Command {
@@ -18,7 +16,7 @@ internal class AvbrytTotrinnsvurderingCommand(
 
         val totrinnsvurdering = totrinnsvurderingRepository.finn(fødselsnummer) ?: return true
 
-        totrinnsvurdering.vedtaksperiodeForkastet(vedtaksperiodeId)
+        totrinnsvurdering.vedtaksperiodeForkastet()
         totrinnsvurderingRepository.lagre(totrinnsvurdering)
         return true
     }

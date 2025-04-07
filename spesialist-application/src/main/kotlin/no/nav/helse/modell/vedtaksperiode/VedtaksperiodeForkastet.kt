@@ -67,7 +67,6 @@ class VedtaksperiodeForkastetCommand(
                 totrinnsvurderingRepository = totrinnsvurderingRepository,
             ),
             AvbrytTotrinnsvurderingCommand(
-                vedtaksperiodeId = vedtaksperiodeId,
                 fødselsnummer = fødselsnummer,
                 totrinnsvurderingRepository = totrinnsvurderingRepository,
             ),

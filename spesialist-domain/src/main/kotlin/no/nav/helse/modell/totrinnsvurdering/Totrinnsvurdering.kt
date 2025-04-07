@@ -24,7 +24,6 @@ value class TotrinnsvurderingId(val value: Long)
 class Totrinnsvurdering private constructor(
     id: TotrinnsvurderingId?,
     val fødselsnummer: String,
-    val vedtaksperiodeId: UUID,
     saksbehandler: SaksbehandlerOid?,
     beslutter: SaksbehandlerOid?,
     utbetalingId: UUID?,
@@ -100,9 +99,9 @@ class Totrinnsvurdering private constructor(
             this._overstyringer.forEach { it.ferdigstill() }
         }
 
-    fun vedtaksperiodeForkastet(vedtaksperiodeId: UUID) =
+    fun vedtaksperiodeForkastet() =
         oppdatering {
-            if (this.vedtaksperiodeId == vedtaksperiodeId) vedtaksperiodeForkastet = true
+            vedtaksperiodeForkastet = true
         }
 
     private fun <T> oppdatering(block: () -> T): T {
@@ -114,7 +113,6 @@ class Totrinnsvurdering private constructor(
     override fun equals(other: Any?): Boolean {
         return this === other || (
             other is Totrinnsvurdering &&
-                vedtaksperiodeId == other.vedtaksperiodeId &&
                 tilstand == other.tilstand &&
                 saksbehandler == other.saksbehandler &&
                 beslutter == other.beslutter &&
@@ -125,8 +123,7 @@ class Totrinnsvurdering private constructor(
     }
 
     override fun hashCode(): Int {
-        var result = vedtaksperiodeId.hashCode()
-        result = 31 * result + tilstand.hashCode()
+        var result = tilstand.hashCode()
         result = 31 * result + (saksbehandler?.hashCode() ?: 0)
         result = 31 * result + (beslutter?.hashCode() ?: 0)
         result = 31 * result + (utbetalingId?.hashCode() ?: 0)
@@ -136,14 +133,10 @@ class Totrinnsvurdering private constructor(
     }
 
     companion object {
-        fun ny(
-            vedtaksperiodeId: UUID,
-            fødselsnummer: String,
-        ): Totrinnsvurdering {
+        fun ny(fødselsnummer: String): Totrinnsvurdering {
             return Totrinnsvurdering(
                 id = null,
                 fødselsnummer = fødselsnummer,
-                vedtaksperiodeId = vedtaksperiodeId,
                 saksbehandler = null,
                 beslutter = null,
                 utbetalingId = null,
@@ -158,7 +151,6 @@ class Totrinnsvurdering private constructor(
         fun fraLagring(
             id: TotrinnsvurderingId,
             fødselsnummer: String,
-            vedtaksperiodeId: UUID,
             saksbehandler: SaksbehandlerOid?,
             beslutter: SaksbehandlerOid?,
             utbetalingId: UUID?,
@@ -171,7 +163,6 @@ class Totrinnsvurdering private constructor(
             return Totrinnsvurdering(
                 id = id,
                 fødselsnummer = fødselsnummer,
-                vedtaksperiodeId = vedtaksperiodeId,
                 saksbehandler = saksbehandler,
                 beslutter = beslutter,
                 utbetalingId = utbetalingId,

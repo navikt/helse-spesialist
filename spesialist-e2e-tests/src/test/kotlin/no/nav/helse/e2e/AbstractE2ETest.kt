@@ -1463,8 +1463,8 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected fun assertTotrinnsvurdering(oppgaveId: Long) {
         val erToTrinnsvurdering = dbQuery.singleOrNull(
             """
-            SELECT 1 FROM totrinnsvurdering
-            INNER JOIN vedtak v on totrinnsvurdering.vedtaksperiode_id = v.vedtaksperiode_id
+            SELECT 1 FROM totrinnsvurdering tv
+            INNER JOIN vedtak v on tv.person_ref = v.person_ref
             INNER JOIN oppgave o on v.id = o.vedtak_ref
             WHERE o.id = :oppgaveId
             AND utbetaling_id_ref IS NULL

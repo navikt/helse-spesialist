@@ -268,7 +268,6 @@ internal class AutomatiseringTest {
     @Test
     fun `periode med pågående overstyring skal ikke automatisk godkjennes`() {
         every { totrinnsvurderingRepositoryMock.finn(any()) } returns Totrinnsvurdering.ny(
-            vedtaksperiodeId,
             fødselsnummer
         )
         blirManuellOppgave()
@@ -279,7 +278,6 @@ internal class AutomatiseringTest {
         val utbetaling = enUtbetaling(arbeidsgiverbeløp = 0, personbeløp = 0, type = REVURDERING)
         blirAutomatiskBehandlet(utbetaling)
         every { totrinnsvurderingRepositoryMock.finn(any()) } returns Totrinnsvurdering.ny(
-            vedtaksperiodeId,
             fødselsnummer
         )
         blirManuellOppgave()

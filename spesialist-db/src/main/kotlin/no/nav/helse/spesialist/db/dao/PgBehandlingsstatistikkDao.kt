@@ -18,9 +18,8 @@ class PgBehandlingsstatistikkDao internal constructor(dataSource: DataSource) :
             asSQL(
                 """
             SELECT count(1)
-            FROM totrinnsvurdering t
-            INNER JOIN vedtak v ON v.vedtaksperiode_id = t.vedtaksperiode_id
-            INNER JOIN oppgave o ON v.id = o.vedtak_ref
+            FROM oppgave o
+            INNER JOIN vedtak v ON o.vedtak_ref = v.id
             WHERE o.status='AvventerSaksbehandler'::oppgavestatus
               AND v.forkastet = false 
               AND o.egenskaper @> ARRAY['BESLUTTER']::VARCHAR[]

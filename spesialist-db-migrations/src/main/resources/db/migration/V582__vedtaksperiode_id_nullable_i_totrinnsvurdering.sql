@@ -1,0 +1,1 @@
+alter table totrinnsvurdering alter column vedtaksperiode_id drop not null;

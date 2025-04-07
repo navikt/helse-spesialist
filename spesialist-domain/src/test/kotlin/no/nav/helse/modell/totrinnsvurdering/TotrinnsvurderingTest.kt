@@ -80,7 +80,7 @@ internal class TotrinnsvurderingTest {
     @Test
     fun `ferdigstiller alle overstyringer for person`() {
         val totrinnsvurdering = nyTotrinnsvurdering(
-            vedtaksperiodeId = UUID.randomUUID(), overstyringer = listOf(
+            overstyringer = listOf(
                 OverstyrtTidslinje.ny(
                     vedtaksperiodeId = UUID.randomUUID(),
                     aktørId = "123",
@@ -116,7 +116,7 @@ internal class TotrinnsvurderingTest {
     fun `ferdigstill ferdigstiller også overstyringer`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val totrinnsvurdering = nyTotrinnsvurdering(
-            vedtaksperiodeId = vedtaksperiodeId, overstyringer = listOf(
+            overstyringer = listOf(
                 OverstyrtTidslinje.ny(
                     vedtaksperiodeId = vedtaksperiodeId,
                     aktørId = "123",
@@ -217,9 +217,8 @@ internal class TotrinnsvurderingTest {
 
     @Test
     fun `kan sette vedtaksperiodeForkastet til true`() {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val totrinnsvurdering = nyTotrinnsvurdering(vedtaksperiodeId = vedtaksperiodeId)
-        totrinnsvurdering.vedtaksperiodeForkastet(vedtaksperiodeId = vedtaksperiodeId)
+        val totrinnsvurdering = nyTotrinnsvurdering()
+        totrinnsvurdering.vedtaksperiodeForkastet()
         assertTrue(totrinnsvurdering.vedtaksperiodeForkastet)
     }
 
@@ -228,14 +227,12 @@ internal class TotrinnsvurderingTest {
     ) = SaksbehandlerOid(oid)
 
     private fun nyTotrinnsvurdering(
-        vedtaksperiodeId: UUID = UUID.randomUUID(),
         tilstand: TotrinnsvurderingTilstand = AVVENTER_SAKSBEHANDLER,
         saksbehandler: SaksbehandlerOid? = null,
         beslutter: SaksbehandlerOid? = null,
         overstyringer: List<Overstyring> = emptyList()
     ) = Totrinnsvurdering.fraLagring(
         id = TotrinnsvurderingId(nextLong()),
-        vedtaksperiodeId = vedtaksperiodeId,
         fødselsnummer = "1234",
         saksbehandler = saksbehandler,
         beslutter = beslutter,
