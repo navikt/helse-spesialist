@@ -9,7 +9,7 @@ class AvviksvurderingBehovLøser : AbstractBehovLøser("Avviksvurdering") {
     override fun løsning(behovJson: JsonNode) = mapOf(
         "avviksvurderingId" to UUID.randomUUID(),
         "utfall" to "NyVurderingForetatt",
-        "avviksprosent" to 10.0,
+        "avviksprosent" to AVVIKSPROSENT,
         "harAkseptabeltAvvik" to true,
         "maksimaltTillattAvvik" to 25.0,
         "opprettet" to LocalDateTime.now(),
@@ -23,18 +23,23 @@ class AvviksvurderingBehovLøser : AbstractBehovLøser("Avviksvurdering") {
             )
         ),
         "sammenligningsgrunnlag" to mapOf(
-            "totalbeløp" to 650_000.0,
+            "totalbeløp" to SAMMENLIGNINGSGRUNNLAG_TOTALBELØP,
             "innrapporterteInntekter" to listOf(
                 mapOf(
                     "arbeidsgiverreferanse" to behovJson["organisasjonsnummer"].asText(),
                     "inntekter" to listOf(
                         mapOf<String, Any>(
                             "årMåned" to YearMonth.now(),
-                            "beløp" to 650_000.0
+                            "beløp" to SAMMENLIGNINGSGRUNNLAG_TOTALBELØP
                         )
                     )
                 )
             )
         ),
     )
+
+    companion object {
+        const val AVVIKSPROSENT = 10.0
+        const val SAMMENLIGNINGSGRUNNLAG_TOTALBELØP = 650_000.0
+    }
 }

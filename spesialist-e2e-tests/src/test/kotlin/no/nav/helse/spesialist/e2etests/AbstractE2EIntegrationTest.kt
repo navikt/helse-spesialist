@@ -6,6 +6,7 @@ import no.nav.helse.spesialist.api.testfixtures.lagSaksbehandlerFraApi
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.e2etests.Meldingsbygger.byggUtbetalingEndret
 import no.nav.helse.spesialist.e2etests.behovløserstubs.AbstractBehovLøser
+import no.nav.helse.spesialist.e2etests.behovløserstubs.AvviksvurderingBehovLøser
 import no.nav.helse.spesialist.e2etests.behovløserstubs.HentPersoninfoV2BehovLøser
 import no.nav.helse.spesialist.e2etests.behovløserstubs.RisikovurderingBehovLøser
 import no.nav.helse.spesialist.e2etests.behovløserstubs.ÅpneOppgaverBehovLøser
@@ -154,6 +155,15 @@ abstract class AbstractE2EIntegrationTest {
             )
         }
         assertEquals(expectedTilstand, actualTilstand)
+    }
+
+    protected fun assertSykepengegrunnlagfakta() {
+        val vedtakFattet = testRapid.meldingslogg(testContext.person.fødselsnummer)
+            .find { it["@event_name"].asText() == "vedtak_fattet" }
+            ?: error("Forventet å finne vedtak_fattet i meldingslogg")
+
+        assertEquals(AvviksvurderingBehovLøser.AVVIKSPROSENT, vedtakFattet["sykepengegrunnlagsfakta"]["avviksprosent"].asDouble())
+        assertEquals(AvviksvurderingBehovLøser.SAMMENLIGNINGSGRUNNLAG_TOTALBELØP, vedtakFattet["sykepengegrunnlagsfakta"]["innrapportertÅrsinntekt"].asDouble())
     }
 
     protected fun leggTilVedtaksperiode() {

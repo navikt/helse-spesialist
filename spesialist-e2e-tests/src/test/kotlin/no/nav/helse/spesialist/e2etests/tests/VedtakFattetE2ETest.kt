@@ -20,6 +20,7 @@ class VedtakFattetE2ETest : AbstractE2EIntegrationTest() {
         // Then:
         assertBehandlingTilstand("VedtakFattet")
         assertVedtakFattetEtterHovedregel()
+        assertSykepengegrunnlagfakta()
     }
 
     @Test

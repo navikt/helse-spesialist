@@ -1,16 +1,14 @@
 package no.nav.helse.e2e
 
-import no.nav.helse.AvviksvurderingTestdata
 import no.nav.helse.GodkjenningsbehovTestdata
 import no.nav.helse.TestRapidHelpers.meldinger
 import no.nav.helse.Testdata.skjønnsvurdering
-import no.nav.helse.util.januar
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-class FattVedtakE2ETest: AbstractE2ETest() {
+class FattVedtakE2ETest : AbstractE2ETest() {
     /*
     Denne testen er litt wonky, fordi den tester et case som i virkelighetens verden involverer en spouting fra oss
     utviklere. Testriggen støtter ikke å sende inn et frittstående godkjenningsbehov (tilsvarende når spleis har blitt
@@ -66,33 +64,6 @@ class FattVedtakE2ETest: AbstractE2ETest() {
     }
 
     @Test
-    fun `Finn sykepengegrunnlagdata i databasen`() {
-        val sammenligningsgrunnlag = 420_000.0
-        val avviksprosent = 42.0
-        vedtaksløsningenMottarNySøknad()
-        spleisOppretterNyBehandling()
-        spesialistBehandlerGodkjenningsbehovFremTilOppgave(
-            avviksvurderingTestdata = AvviksvurderingTestdata(
-                avviksprosent = avviksprosent,
-                sammenligningsgrunnlag = sammenligningsgrunnlag,
-                skjæringstidspunkt = 1.januar,
-            )
-        )
-        håndterSaksbehandlerløsning()
-        håndterAvsluttetMedVedtak(
-            fastsattType = "EtterHovedregel",
-            settInnAvviksvurderingFraSpleis = false
-        )
-
-        val sisteHendelse = inspektør.meldinger().last()
-        assertEquals("vedtak_fattet", sisteHendelse["@event_name"].asText())
-        val sykepengegrunnlagsfakta = sisteHendelse["sykepengegrunnlagsfakta"]
-        assertEquals("EtterHovedregel", sykepengegrunnlagsfakta["fastsatt"].asText())
-        assertEquals(avviksprosent, sykepengegrunnlagsfakta["avviksprosent"].asDouble())
-        assertEquals(sammenligningsgrunnlag, sykepengegrunnlagsfakta["innrapportertÅrsinntekt"].asDouble())
-    }
-
-    @Test
     fun `behandlingsinformasjon fra godkjenningsbehovet skal sendes på vedtak_fattet`() {
         val spleisBehandlingId = UUID.randomUUID()
         val tagsFraGodkjenningsbehovet = listOf(
@@ -126,7 +97,7 @@ class FattVedtakE2ETest: AbstractE2ETest() {
         val forventet = (tagsFraGodkjenningsbehovet - tagsSomSkalISykepengegrunnlagsfakta).toSet()
         assertEquals(forventet, sisteHendelse["tags"].map { it.asText() }.toSet())
         val sykepengegrunnlagsfakta = sisteHendelse["sykepengegrunnlagsfakta"]
-        assertEquals(tagsSomSkalISykepengegrunnlagsfakta, sykepengegrunnlagsfakta["tags"].map { it.asText() } )
+        assertEquals(tagsSomSkalISykepengegrunnlagsfakta, sykepengegrunnlagsfakta["tags"].map { it.asText() })
     }
 
     @Test
