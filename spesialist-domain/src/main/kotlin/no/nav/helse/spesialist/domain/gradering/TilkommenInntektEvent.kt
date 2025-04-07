@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.domain.gradering
 
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import java.math.BigDecimal
@@ -12,6 +13,7 @@ sealed interface TilkommenInntektEvent {
     val tidspunkt: Instant
     val utførtAvSaksbehandlerOid: SaksbehandlerOid
     val notatTilBeslutter: String
+    val totrinnsvurderingId: TotrinnsvurderingId
 
     data class Endringer(
         val organisasjonsnummer: Endring<String>?,
@@ -27,6 +29,7 @@ data class TilkommenInntektOpprettetEvent(
     override val tidspunkt: Instant,
     override val utførtAvSaksbehandlerOid: SaksbehandlerOid,
     override val notatTilBeslutter: String,
+    override val totrinnsvurderingId: TotrinnsvurderingId,
     val organisasjonsnummer: String,
     val periode: Periode,
     val periodebeløp: BigDecimal,
@@ -39,6 +42,7 @@ data class TilkommenInntektEndretEvent(
     override val tidspunkt: Instant,
     override val utførtAvSaksbehandlerOid: SaksbehandlerOid,
     override val notatTilBeslutter: String,
+    override val totrinnsvurderingId: TotrinnsvurderingId,
     val endringer: TilkommenInntektEvent.Endringer,
 ) : TilkommenInntektEvent
 
@@ -48,6 +52,7 @@ data class TilkommenInntektFjernetEvent(
     override val tidspunkt: Instant,
     override val utførtAvSaksbehandlerOid: SaksbehandlerOid,
     override val notatTilBeslutter: String,
+    override val totrinnsvurderingId: TotrinnsvurderingId,
 ) : TilkommenInntektEvent
 
 data class TilkommenInntektGjenopprettetEvent(
@@ -56,6 +61,7 @@ data class TilkommenInntektGjenopprettetEvent(
     override val tidspunkt: Instant,
     override val utførtAvSaksbehandlerOid: SaksbehandlerOid,
     override val notatTilBeslutter: String,
+    override val totrinnsvurderingId: TotrinnsvurderingId,
     val endringer: TilkommenInntektEvent.Endringer,
 ) : TilkommenInntektEvent
 

@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.domain.gradering
 
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.ddd.AggregateRoot
@@ -24,10 +25,11 @@ data class TilkommenInntektId(val fødselsnummer: String, val uuid: UUID) {
 class TilkommenInntekt private constructor(
     opprettetEvent: TilkommenInntektOpprettetEvent,
 ) : AggregateRoot<TilkommenInntektId>(opprettetEvent.tilkommenInntektId) {
-    private val events: MutableList<TilkommenInntektEvent> = mutableListOf(opprettetEvent)
+    private val _events: MutableList<TilkommenInntektEvent> = mutableListOf(opprettetEvent)
+    val events: List<TilkommenInntektEvent> get() = _events
 
-    fun alleEvents(): List<TilkommenInntektEvent> = events
-
+    var totrinnsvurderingId: TotrinnsvurderingId = opprettetEvent.totrinnsvurderingId
+        private set
     var organisasjonsnummer: String = opprettetEvent.organisasjonsnummer
         private set
     var periode: Periode = opprettetEvent.periode
@@ -51,6 +53,7 @@ class TilkommenInntekt private constructor(
         dager: Set<LocalDate>,
         saksbehandlerOid: SaksbehandlerOid,
         notatTilBeslutter: String,
+        totrinnsvurderingId: TotrinnsvurderingId,
     ) {
         apply(
             TilkommenInntektEndretEvent(
@@ -59,6 +62,7 @@ class TilkommenInntekt private constructor(
                 tidspunkt = Instant.now(),
                 utførtAvSaksbehandlerOid = saksbehandlerOid,
                 notatTilBeslutter = notatTilBeslutter,
+                totrinnsvurderingId = totrinnsvurderingId,
                 endringer =
                     TilkommenInntektEvent.Endringer(
                         organisasjonsnummer = muligEndring(fra = this.organisasjonsnummer, til = organisasjonsnummer),
@@ -73,6 +77,7 @@ class TilkommenInntekt private constructor(
     fun fjern(
         saksbehandlerOid: SaksbehandlerOid,
         notatTilBeslutter: String,
+        totrinnsvurderingId: TotrinnsvurderingId,
     ) {
         apply(
             TilkommenInntektFjernetEvent(
@@ -81,6 +86,7 @@ class TilkommenInntekt private constructor(
                 tidspunkt = Instant.now(),
                 utførtAvSaksbehandlerOid = saksbehandlerOid,
                 notatTilBeslutter = notatTilBeslutter,
+                totrinnsvurderingId = totrinnsvurderingId,
             ),
         )
     }
@@ -93,6 +99,7 @@ class TilkommenInntekt private constructor(
         dager: Set<LocalDate>,
         saksbehandlerOid: SaksbehandlerOid,
         notatTilBeslutter: String,
+        totrinnsvurderingId: TotrinnsvurderingId,
     ) {
         apply(
             TilkommenInntektGjenopprettetEvent(
@@ -101,6 +108,7 @@ class TilkommenInntekt private constructor(
                 tidspunkt = Instant.now(),
                 utførtAvSaksbehandlerOid = saksbehandlerOid,
                 notatTilBeslutter = notatTilBeslutter,
+                totrinnsvurderingId = totrinnsvurderingId,
                 endringer =
                     TilkommenInntektEvent.Endringer(
                         organisasjonsnummer = muligEndring(fra = this.organisasjonsnummer, til = organisasjonsnummer),
@@ -141,8 +149,9 @@ class TilkommenInntekt private constructor(
 
     private fun håndterEvent(event: TilkommenInntektEvent) {
         if (event.sekvensNummer != this.versjon + 1) error("Fikk events ute av rekkefølge: $versjon -> ${event.sekvensNummer}")
+        this.totrinnsvurderingId = event.totrinnsvurderingId
         this.versjon = event.sekvensNummer
-        this.events.add(event)
+        this._events.add(event)
     }
 
     private fun håndterEndringer(endringer: TilkommenInntektEvent.Endringer) {
@@ -170,6 +179,7 @@ class TilkommenInntekt private constructor(
             fødselsnummer: String,
             saksbehandlerOid: SaksbehandlerOid,
             notatTilBeslutter: String,
+            totrinnsvurderingId: TotrinnsvurderingId,
             organisasjonsnummer: String,
             fom: LocalDate,
             tom: LocalDate,
@@ -182,6 +192,7 @@ class TilkommenInntekt private constructor(
                 tidspunkt = Instant.now(),
                 utførtAvSaksbehandlerOid = saksbehandlerOid,
                 notatTilBeslutter = notatTilBeslutter,
+                totrinnsvurderingId = totrinnsvurderingId,
                 organisasjonsnummer = organisasjonsnummer,
                 periode = Periode(fom, tom),
                 periodebeløp = periodebeløp,

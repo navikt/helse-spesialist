@@ -1,6 +1,6 @@
 package no.nav.helse.spesialist.domain
 
-import no.nav.helse.spesialist.domain.Periode.Companion.til
+import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
 import no.nav.helse.spesialist.domain.Periode.Companion.tilPerioder
 import no.nav.helse.spesialist.domain.testfixtures.feb
 import no.nav.helse.spesialist.domain.testfixtures.jan
@@ -21,31 +21,31 @@ internal class PeriodeTest {
 
     @Test
     fun til() {
-        assertEquals(Periode(1 jan 2018, 2 jan 2018), 1 jan 2018 til (2 jan 2018))
+        assertEquals(Periode(1 jan 2018, 2 jan 2018), 1 jan 2018 tilOgMed (2 jan 2018))
     }
 
     @Test
     fun `overlapper delvis`() {
         val periode1 = Periode(1 jan 2018, 31 jan 2018)
         val periode2 = Periode(15 jan 2018, 15 feb 2018)
-        assertTrue(periode1.overlapperMed(periode2))
-        assertTrue(periode2.overlapperMed(periode1))
+        assertTrue(periode1.overlapper(periode2))
+        assertTrue(periode2.overlapper(periode1))
     }
 
     @Test
     fun `overlapper helt`() {
         val periode1 = Periode(1 jan 2018, 31 jan 2018)
         val periode2 = Periode(2 jan 2018, 2 jan 2018)
-        assertTrue(periode1.overlapperMed(periode2))
-        assertTrue(periode2.overlapperMed(periode1))
+        assertTrue(periode1.overlapper(periode2))
+        assertTrue(periode2.overlapper(periode1))
     }
 
     @Test
     fun `overlapper nøyaktig`() {
         val periode1 = Periode(1 jan 2018, 31 jan 2018)
         val periode2 = Periode(1 jan 2018, 31 jan 2018)
-        assertTrue(periode1.overlapperMed(periode2))
-        assertTrue(periode2.overlapperMed(periode1))
+        assertTrue(periode1.overlapper(periode2))
+        assertTrue(periode2.overlapper(periode1))
     }
 
     @Test
@@ -53,12 +53,12 @@ internal class PeriodeTest {
         val periode1 = Periode(2 jan 2018, 31 jan 2018)
         val periode2 = Periode(2 feb 2018, 2 feb 2018)
         val periode3 = Periode(1 jan 2018, 1 jan 2018)
-        assertFalse(periode1.overlapperMed(periode2))
-        assertFalse(periode1.overlapperMed(periode3))
-        assertFalse(periode2.overlapperMed(periode1))
-        assertFalse(periode2.overlapperMed(periode3))
-        assertFalse(periode3.overlapperMed(periode1))
-        assertFalse(periode3.overlapperMed(periode2))
+        assertFalse(periode1.overlapper(periode2))
+        assertFalse(periode1.overlapper(periode3))
+        assertFalse(periode2.overlapper(periode1))
+        assertFalse(periode2.overlapper(periode3))
+        assertFalse(periode3.overlapper(periode1))
+        assertFalse(periode3.overlapper(periode2))
     }
 
     @Test
@@ -70,10 +70,10 @@ internal class PeriodeTest {
     @Test
     fun `forlenges av`() {
         val periode = Periode(2 jan 2018, 5 jan 2018)
-        assertTrue(periode.forlengesAv(6 jan 2018))
-        assertFalse(periode.forlengesAv(7 jan 2018))
-        assertFalse(periode.forlengesAv(5 jan 2018))
-        assertFalse(periode.forlengesAv(1 jan 2018))
+        assertTrue(periode.etterfølgesAv(6 jan 2018))
+        assertFalse(periode.etterfølgesAv(7 jan 2018))
+        assertFalse(periode.etterfølgesAv(5 jan 2018))
+        assertFalse(periode.etterfølgesAv(1 jan 2018))
     }
 
     @Test

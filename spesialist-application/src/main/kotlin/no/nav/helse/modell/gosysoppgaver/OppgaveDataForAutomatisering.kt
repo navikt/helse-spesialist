@@ -2,7 +2,7 @@ package no.nav.helse.modell.gosysoppgaver
 
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.domain.Periode
-import no.nav.helse.spesialist.domain.Periode.Companion.til
+import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
 import java.time.LocalDate
 import java.util.UUID
 
@@ -17,7 +17,7 @@ data class OppgaveDataForAutomatisering(
     val godkjenningsbehovJson: String,
     val periodetype: Periodetype,
 ) {
-    private val periode = periodeFom til periodeTom
+    private val periode = periodeFom tilOgMed periodeTom
 
-    fun periodeOverlapperMed(perioder: List<Periode>): Boolean = perioder.any { periode.overlapperMed(it) }
+    fun periodeOverlapperMed(perioder: List<Periode>): Boolean = perioder.any { periode.overlapper(it) }
 }

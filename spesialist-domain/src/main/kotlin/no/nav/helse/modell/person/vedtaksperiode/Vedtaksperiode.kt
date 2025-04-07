@@ -38,7 +38,7 @@ class Vedtaksperiode private constructor(
     internal fun erForkastet() = forkastet
 
     internal fun behandleTilbakedateringGodkjent(perioder: List<Periode>) {
-        if (forkastet || perioder.none { it.overlapperMed(Periode(fom, tom)) }) return
+        if (forkastet || perioder.none { it.overlapper(Periode(fom, tom)) }) return
         deaktiverVarselMedKode("RV_SØ_3")
     }
 

@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.domain.gradering
 
 import no.nav.helse.spesialist.domain.Periode
-import no.nav.helse.spesialist.domain.Periode.Companion.til
+import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
 import no.nav.helse.spesialist.domain.gradering.Inntektsendringer.PeriodeMedBeløp
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import java.time.LocalDate
@@ -147,11 +147,11 @@ class TilkommenInntektTest {
     )
 
     private infix fun Double.fordeltPå(periode: Periode): TilkommenInntekt = this.fordeltPå(listOf(periode))
-    private infix fun Double.fordeltPå(dato: LocalDate): TilkommenInntekt = this.fordeltPå(listOf(dato til dato))
+    private infix fun Double.fordeltPå(dato: LocalDate): TilkommenInntekt = this.fordeltPå(listOf(dato tilOgMed dato))
 
     private infix fun LocalDate.til(other: Int) = PeriodBuilder(this, other)
 
     class PeriodBuilder(private val fom: LocalDate, private val int: Int) {
-        infix fun jan(target: Int): Periode = fom til LocalDate.of(target, Month.JANUARY, int)
+        infix fun jan(target: Int): Periode = fom tilOgMed LocalDate.of(target, Month.JANUARY, int)
     }
 }

@@ -1,36 +1,38 @@
 package no.nav.helse.spesialist.domain
 
+import no.nav.helse.spesialist.domain.ddd.ValueObject
 import java.time.LocalDate
 
 data class Periode(
     val fom: LocalDate,
     val tom: LocalDate,
-) {
+) : ValueObject {
     init {
         require(fom <= tom) { "Fom kan ikke være etter tom" }
     }
 
     fun datoer(): List<LocalDate> = fom.datesUntil(tom.plusDays(1)).toList()
 
-    infix fun overlapperMed(other: Periode) = this.overlapper(other) || other.overlapper(this)
+    infix fun overlapper(other: Periode) = fom <= other.tom && tom >= other.fom
 
-    fun forlengesAv(dato: LocalDate): Boolean = tom.plusDays(1) == dato
+    infix fun erInnenfor(other: Periode) = fom >= other.fom && tom <= other.tom
 
-    private fun overlapper(other: Periode) = other.fom in fom..tom || other.tom in fom..tom
+    fun etterfølgesAv(dato: LocalDate): Boolean = tom.plusDays(1) == dato
 
-    override fun toString(): String = "Periode(fom=$fom, tom=$tom)"
+    operator fun ClosedRange<LocalDate>.contains(closedRange: ClosedRange<LocalDate>): Boolean =
+        start <= closedRange.start && endInclusive >= closedRange.endInclusive
 
     companion object {
-        infix fun LocalDate.til(other: LocalDate) = Periode(this, other)
+        infix fun LocalDate.tilOgMed(other: LocalDate) = Periode(this, other)
 
-        internal fun List<LocalDate>.tilPerioder(): List<Periode> =
-            fold(emptyList()) { acc, dato ->
-                val sistePeriode = acc.lastOrNull()
+        fun Collection<LocalDate>.tilPerioder(): List<Periode> =
+            sorted().fold(emptyList()) { acc, dato ->
+                val forrigePeriode = acc.lastOrNull()
 
-                if (sistePeriode != null && sistePeriode.forlengesAv(dato)) {
-                    acc.dropLast(1) + sistePeriode.copy(tom = dato)
+                if (forrigePeriode != null && forrigePeriode.etterfølgesAv(dato)) {
+                    acc.dropLast(1) + forrigePeriode.copy(tom = dato)
                 } else {
-                    acc + (dato til dato)
+                    acc + (dato tilOgMed dato)
                 }
             }
     }
