@@ -86,7 +86,7 @@ class RiverSetup(
                             river.name(),
                             packet.id,
                             eventName,
-                            mediator.meldingenHarBlittBehandletAvEnRiver,
+                            mediator.meldingenHarBlittBehandletAvEnRiver.get(),
                         )
                         mediator.meldingenHarBlittBehandletAvEnRiver.set(true)
                     }
