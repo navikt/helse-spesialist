@@ -60,6 +60,21 @@ object Meldingsbygger {
         )
     ).toJson()
 
+    fun byggVedtaksperiodeEndret(
+        vedtaksperiode: Vedtaksperiode,
+        person: Person,
+    ) = JsonMessage.newMessage(
+        mapOf(
+            "@event_name" to "vedtaksperiode_endret",
+            "@id" to UUID.randomUUID(),
+            "@opprettet" to LocalDateTime.now(),
+            "vedtaksperiodeId" to vedtaksperiode.vedtaksperiodeId,
+            "fødselsnummer" to person.fødselsnummer,
+            "forrigeTilstand" to "AVVENTER_GODKJENNING",
+            "gjeldendeTilstand" to "AVVENTER_BLOKKERENDE_PERIODE",
+        )
+    ).toJson()
+
     fun byggGodkjenningsbehov(
         person: Person,
         arbeidsgiver: Arbeidsgiver,

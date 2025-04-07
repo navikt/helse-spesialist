@@ -21,6 +21,9 @@ import java.util.UUID
 abstract class AbstractE2EIntegrationTest {
     private val testContext: TestContext = TestContext()
     private var saksbehandler = lagSaksbehandlerFraApi()
+    private var beslutter = lagSaksbehandlerFraApi(
+        grupper = listOf(E2ETestApplikasjon.TilgangsgrupperForTest.beslutterGruppeId)
+    )
 
     enum class Tilgangstype {
         KODE7,
@@ -164,9 +167,18 @@ abstract class AbstractE2EIntegrationTest {
     protected fun medPersonISpeil(block: SpeilPersonReceiver.() -> Unit) {
         spleisStub.stubSnapshotForPerson(testContext)
         SpeilPersonReceiver(
-            aktørId = testContext.person.aktørId,
+            testContext = testContext,
             saksbehandlerIdent = saksbehandler.ident,
             bearerAuthToken = E2ETestApplikasjon.apiModuleIntegrationTestFixture.token(saksbehandler)
+        ).block()
+    }
+
+    protected fun beslutterMedPersonISpeil(block: SpeilPersonReceiver.() -> Unit) {
+        spleisStub.stubSnapshotForPerson(testContext)
+        SpeilPersonReceiver(
+            testContext = testContext,
+            saksbehandlerIdent = beslutter.ident,
+            bearerAuthToken = E2ETestApplikasjon.apiModuleIntegrationTestFixture.token(beslutter)
         ).block()
     }
 

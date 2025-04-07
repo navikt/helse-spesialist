@@ -1,0 +1,3 @@
+mutation SkjonnsfastsettelseMutation($skjonnsfastsettelse: SkjonnsfastsettelseInput!) {
+    skjonnsfastsettSykepengegrunnlag(skjonnsfastsettelse: $skjonnsfastsettelse)
+}

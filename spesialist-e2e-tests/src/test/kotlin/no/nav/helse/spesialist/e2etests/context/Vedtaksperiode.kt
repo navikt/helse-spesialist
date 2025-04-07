@@ -14,4 +14,6 @@ data class Vedtaksperiode(
     fun utbetalingIdForÅByggeMelding(meldingsnavn: String): UUID =
         utbetalingId
             ?: error("Feil i testoppsett: Forsøkte å lage en $meldingsnavn-melding før utbetalingId var satt")
+
+    fun nyUtbetaling() { utbetalingId = UUID.randomUUID() }
 }

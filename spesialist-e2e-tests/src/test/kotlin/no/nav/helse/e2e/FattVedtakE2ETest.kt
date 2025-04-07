@@ -11,29 +11,6 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 class FattVedtakE2ETest: AbstractE2ETest() {
-    @Test
-    fun `Fatt vedtak for periode der SP er fastsatt etter skjønn`() {
-        vedtaksløsningenMottarNySøknad()
-        spleisOppretterNyBehandling()
-        spesialistBehandlerGodkjenningsbehovFremTilOppgave()
-        håndterSkjønnsfastsattSykepengegrunnlag()
-        spesialistBehandlerGodkjenningsbehovFremTilOppgave(
-            harRisikovurdering = true,
-            harOppdatertMetadata = true,
-            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = UUID.randomUUID())
-        )
-        håndterSaksbehandlerløsning()
-
-        håndterAvsluttetMedVedtak(fastsattType = "EtterSkjønn")
-        val sisteHendelse = inspektør.meldinger().last()
-        assertEquals("vedtak_fattet", sisteHendelse["@event_name"].asText())
-        assertEquals(3, sisteHendelse["begrunnelser"].size())
-        assertEquals("SkjønnsfastsattSykepengegrunnlagMal", sisteHendelse["begrunnelser"][0]["type"].asText())
-        assertEquals("SkjønnsfastsattSykepengegrunnlagFritekst", sisteHendelse["begrunnelser"][1]["type"].asText())
-        assertEquals("SkjønnsfastsattSykepengegrunnlagKonklusjon", sisteHendelse["begrunnelser"][2]["type"].asText())
-        assertEquals("EtterSkjønn", sisteHendelse["sykepengegrunnlagsfakta"]["fastsatt"].asText())
-    }
-
     /*
     Denne testen er litt wonky, fordi den tester et case som i virkelighetens verden involverer en spouting fra oss
     utviklere. Testriggen støtter ikke å sende inn et frittstående godkjenningsbehov (tilsvarende når spleis har blitt

@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.e2etests
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.github.navikt.tbd_libs.jackson.isMissingOrNull
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.apache.Apache
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -13,16 +14,17 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.serialization.jackson.JacksonConverter
 import kotlinx.coroutines.runBlocking
+import no.nav.helse.spesialist.e2etests.context.TestContext
 import no.nav.helse.spesialist.e2etests.context.Vedtaksperiode
 import org.junit.jupiter.api.Assertions.assertTrue
 import kotlin.test.assertEquals
 
 class SpeilPersonReceiver(
-    aktørId: String,
+    private val testContext: TestContext,
     private val saksbehandlerIdent: String,
     private val bearerAuthToken: String
 ) {
-    private val person: JsonNode = fetchPerson(aktørId)
+    private val person: JsonNode = fetchPerson(testContext.person.aktørId)
 
     fun saksbehandlerGodkjennerAlleVarsler() {
         person["arbeidsgivere"].flatMap { arbeidsgiver ->
@@ -61,6 +63,56 @@ class SpeilPersonReceiver(
                 "begrunnelse" to "Fattet vedtak",
             )
         )
+    }
+
+    fun saksbehandlerSkjønnsfastsetter830TredjeAvsnitt() {
+        callGraphQL(
+            operationName = "SkjonnsfastsettelseMutation",
+            variables = mapOf(
+                "skjonnsfastsettelse" to mapOf(
+                    "aktorId" to testContext.person.aktørId,
+                    "fodselsnummer" to testContext.person.fødselsnummer,
+                    "skjaringstidspunkt" to "2023-11-01",
+                    "vedtaksperiodeId" to testContext.vedtaksperioder.first().vedtaksperiodeId,
+                    "arbeidsgivere" to listOf(
+                        mapOf(
+                            "arlig" to 450000,
+                            "arsak" to "Skjønnsfastsettelse ved mangelfull eller uriktig rapportering (§ 8-30 tredje avsnitt)",
+                            "lovhjemmel" to mapOf(
+                                "ledd" to "3",
+                                "paragraf" to "8-30",
+                                "lovverk" to "folketrygdloven",
+                                "lovverksversjon" to "2019-01-01"
+                            ),
+                            "begrunnelseFritekst" to "skjønnsfastsetter tredje avsnitt",
+                            "begrunnelseKonklusjon" to "Vi har fastsatt sykepengegrunnlaget ditt til 450 000,00 kroner.",
+                            "begrunnelseMal" to "Inntekten som arbeidsgiver har rapportert til Skatteetaten er mangelfull eller uriktig. Vi har derfor skjønnsfastsatt sykepengegrunnlaget ditt. Se folketrygdloven § 8-30 tredje avsnitt.\n\nMålet med den skjønnsmessige vurderingen er å komme frem til inntekten du ville hatt om du ikke hadde blitt syk.",
+                            "fraArlig" to 480000,
+                            "initierendeVedtaksperiodeId" to testContext.vedtaksperioder.first().vedtaksperiodeId,
+                            "organisasjonsnummer" to testContext.arbeidsgiver.organisasjonsnummer,
+                            "type" to "ANNET"
+                        )
+                    )
+                )
+            )
+        ).also {
+            if (it["data"].isMissingOrNull()) {
+                error("Forventer at mutation ikke feiler, fikk: $it")
+            }
+        }
+    }
+
+    fun saksbehandlerSenderTilGodkjenning() {
+        callGraphQL(
+            "SendTilGodkjenningV2", mapOf(
+                "oppgavereferanse" to getOppgaveId(),
+                "vedtakBegrunnelse" to "Sender til godkjenning"
+            )
+        ).also {
+            if (it["data"].isMissingOrNull()) {
+                error("Forventer at mutation ikke feiler, fikk: $it")
+            }
+        }
     }
 
     fun assertHarOppgaveegenskap(vararg forventedeEgenskaper: String) {
