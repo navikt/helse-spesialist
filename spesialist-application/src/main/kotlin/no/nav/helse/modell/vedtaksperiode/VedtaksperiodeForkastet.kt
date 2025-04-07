@@ -39,7 +39,7 @@ class VedtaksperiodeForkastet(
         sessionContext: SessionContext,
     ) {
         person.vedtaksperiodeForkastet(vedtaksperiodeId)
-        kommandostarter { vedtaksperiodeForkastet(this@VedtaksperiodeForkastet, sessionContext) }
+        kommandostarter { vedtaksperiodeForkastet(this@VedtaksperiodeForkastet, person.forkastedeVedtaksperiodeIder(), sessionContext) }
     }
 
     override fun toJson() = json
@@ -49,6 +49,7 @@ class VedtaksperiodeForkastetCommand(
     val fødselsnummer: String,
     val vedtaksperiodeId: UUID,
     val id: UUID,
+    val alleForkastedeVedtaksperiodeIder: List<UUID>,
     commandContextDao: CommandContextDao,
     oppgaveService: OppgaveService,
     reservasjonDao: ReservasjonDao,
@@ -68,6 +69,7 @@ class VedtaksperiodeForkastetCommand(
             ),
             AvbrytTotrinnsvurderingCommand(
                 fødselsnummer = fødselsnummer,
+                alleForkastedeVedtaksperiodeIder = alleForkastedeVedtaksperiodeIder,
                 totrinnsvurderingRepository = totrinnsvurderingRepository,
             ),
         )

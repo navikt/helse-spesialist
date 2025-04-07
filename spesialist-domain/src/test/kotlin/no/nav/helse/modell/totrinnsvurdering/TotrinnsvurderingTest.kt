@@ -217,14 +217,25 @@ internal class TotrinnsvurderingTest {
 
     @Test
     fun `kan sette vedtaksperiodeForkastet til true`() {
-        val totrinnsvurdering = nyTotrinnsvurdering()
-        totrinnsvurdering.vedtaksperiodeForkastet()
+        val vedtaksperiodeId = UUID.randomUUID()
+        val totrinnsvurdering = nyTotrinnsvurdering(overstyringer = listOf(nyOverstyring(vedtaksperiodeId)))
+        totrinnsvurdering.vedtaksperiodeForkastet(listOf(vedtaksperiodeId))
         assertTrue(totrinnsvurdering.vedtaksperiodeForkastet)
     }
 
     private fun nySaksbehandler(
         oid: UUID = UUID.randomUUID()
     ) = SaksbehandlerOid(oid)
+
+    private fun nyOverstyring(vedtaksperiodeId: UUID = UUID.randomUUID()) = OverstyrtTidslinje.ny(
+        vedtaksperiodeId = vedtaksperiodeId,
+        aktørId = "123",
+        fødselsnummer = "1234",
+        organisasjonsnummer = "12345",
+        dager = overstyrteDager(),
+        begrunnelse = "begrunnelse",
+        saksbehandlerOid = SaksbehandlerOid(UUID.randomUUID())
+    )
 
     private fun nyTotrinnsvurdering(
         tilstand: TotrinnsvurderingTilstand = AVVENTER_SAKSBEHANDLER,

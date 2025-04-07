@@ -29,6 +29,7 @@ internal class VedtaksperiodeForkastetCommandTest {
             fødselsnummer = FNR,
             vedtaksperiodeId = VEDTAKSPERIODE,
             id = HENDELSE,
+            alleForkastedeVedtaksperiodeIder = emptyList(),
             commandContextDao = commandContextDao,
             oppgaveService = oppgaveService,
             reservasjonDao = mockk(relaxed = true),

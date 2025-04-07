@@ -1476,6 +1476,21 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         }
     }
 
+    protected fun assertTotrinnsvurderingForkastet(fødselsnummer: String) {
+        val totrinnsvurderingForkastet = dbQuery.singleOrNull(
+            """
+            SELECT 1 FROM totrinnsvurdering tv
+            INNER JOIN person p on p.id = tv.person_ref
+            WHERE p.fødselsnummer = :fodselsnummer
+            AND tv.vedtaksperiode_forkastet = true
+            """.trimIndent(),
+            "fodselsnummer" to fødselsnummer,
+        ) { it.boolean(1) } ?: throw IllegalStateException("Finner ikke totrinns markert som forkastet for fødselsnummer=$fødselsnummer")
+        assertTrue(totrinnsvurderingForkastet) {
+            "Forventer at totrinnsvurdering er markert som forkastet"
+        }
+    }
+
     fun erFerdigstilt(godkjenningsbehovId: UUID) = dbQuery.single(
         "SELECT tilstand FROM command_context WHERE hendelse_id = :godkjenningsbehovId ORDER by id DESC LIMIT 1",
         "godkjenningsbehovId" to godkjenningsbehovId,

@@ -99,9 +99,15 @@ class Totrinnsvurdering private constructor(
             this._overstyringer.forEach { it.ferdigstill() }
         }
 
-    fun vedtaksperiodeForkastet() =
+    fun vedtaksperiodeForkastet(alleForkastedeVedtaksperiodeIder: List<UUID>) =
         oppdatering {
-            vedtaksperiodeForkastet = true
+            // Må ta inn forkastede vedtaksperioder fordi endringene i vedtaksperiode ikke lagres til databasen
+            // før man kommer ut av brukPersonHvisFinnes scopet, så totrinnsvurderingen som hentes i
+            // AvbrytTotrinnsvurderingCommand får med seg overstyringer som er knyttet til vedtaksperioder som nettopp
+            // kan ha blitt forkastet.
+            if (_overstyringer.all { it.vedtaksperiodeId in alleForkastedeVedtaksperiodeIder }) {
+                vedtaksperiodeForkastet = true
+            }
         }
 
     private fun <T> oppdatering(block: () -> T): T {

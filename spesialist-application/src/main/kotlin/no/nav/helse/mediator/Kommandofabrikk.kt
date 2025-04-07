@@ -257,12 +257,14 @@ class Kommandofabrikk(
 
     internal fun vedtaksperiodeForkastet(
         hendelse: VedtaksperiodeForkastet,
+        alleForkastedeVedtaksperiodeIder: List<UUID>,
         sessionContext: SessionContext,
     ): VedtaksperiodeForkastetCommand =
         VedtaksperiodeForkastetCommand(
             fødselsnummer = hendelse.fødselsnummer(),
             vedtaksperiodeId = hendelse.vedtaksperiodeId(),
             id = hendelse.id,
+            alleForkastedeVedtaksperiodeIder = alleForkastedeVedtaksperiodeIder,
             commandContextDao = sessionContext.commandContextDao,
             oppgaveService = transaksjonellOppgaveService(sessionContext),
             reservasjonDao = sessionContext.reservasjonDao,

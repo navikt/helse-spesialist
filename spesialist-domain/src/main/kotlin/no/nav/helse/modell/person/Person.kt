@@ -45,6 +45,11 @@ class Person private constructor(
 
     fun utgåendeMeldinger() = meldingslogg.hendelser()
 
+    fun forkastedeVedtaksperiodeIder() =
+        vedtaksperioder.filter {
+            it.erForkastet()
+        }.map { it.vedtaksperiodeId() }
+
     fun flyttEventuelleAvviksvarsler(
         vedtaksperiodeId: UUID,
         skjæringstidspunkt: LocalDate,
