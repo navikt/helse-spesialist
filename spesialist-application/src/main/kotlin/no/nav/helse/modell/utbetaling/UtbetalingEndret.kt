@@ -51,6 +51,7 @@ class UtbetalingEndret(
         person: Person,
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
+        syncPersonTilDatabase: () -> Unit,
     ) {
         if (gjeldendeStatus == Utbetalingsstatus.FORKASTET) person.utbetalingForkastet(utbetalingId)
         this.kommandostarter { utbetalingEndret(this@UtbetalingEndret, sessionContext) }

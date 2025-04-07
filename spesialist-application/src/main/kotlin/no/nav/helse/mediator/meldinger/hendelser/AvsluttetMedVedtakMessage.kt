@@ -28,6 +28,7 @@ class AvsluttetMedVedtakMessage(
         person: Person,
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
+        syncPersonTilDatabase: () -> Unit,
     ) = person.avsluttetMedVedtak(avsluttetMedVedtak)
 
     override fun toJson(): String = json

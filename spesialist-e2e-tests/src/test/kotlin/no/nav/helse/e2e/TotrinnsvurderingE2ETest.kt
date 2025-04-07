@@ -72,4 +72,20 @@ class TotrinnsvurderingE2ETest : AbstractE2ETest() {
         assertOverstyringer(FØDSELSNUMMER)
         assertTotrinnsvurdering(2.oppgave(VEDTAKSPERIODE_ID))
     }
+
+    @Test
+    fun `Totrinns får vedtaksperiodeForkastet satt til true hvis vedtaksperiodene overstyringene er knyttet til blir forkastet`() {
+        vedtaksløsningenMottarNySøknad()
+        spleisOppretterNyBehandling()
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave()
+        håndterOverstyrTidslinje(vedtaksperiodeId = VEDTAKSPERIODE_ID)
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(
+            harRisikovurdering = true,
+            harOppdatertMetadata = true,
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = UUID.randomUUID()),
+        )
+        håndterVedtaksperiodeForkastet(vedtaksperiodeId = VEDTAKSPERIODE_ID)
+
+        assertTotrinnsvurderingForkastet(FØDSELSNUMMER)
+    }
 }

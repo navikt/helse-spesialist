@@ -18,7 +18,8 @@ internal class TestMelding(
     override fun behandle(
         person: Person,
         kommandostarter: Kommandostarter,
-        sessionContext: SessionContext
+        sessionContext: SessionContext,
+        syncPersonTilDatabase: () -> Unit
     ) {
     }
 

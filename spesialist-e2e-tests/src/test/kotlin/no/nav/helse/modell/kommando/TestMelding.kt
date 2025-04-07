@@ -19,6 +19,7 @@ class TestMelding(
         person: Person,
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
+        syncPersonTilDatabase: () -> Unit,
     ) {
     }
 

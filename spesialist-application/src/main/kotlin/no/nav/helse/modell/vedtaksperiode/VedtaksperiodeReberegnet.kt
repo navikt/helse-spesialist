@@ -41,6 +41,7 @@ class VedtaksperiodeReberegnet(
         person: Person,
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
+        syncPersonTilDatabase: () -> Unit,
     ) {
         val vedtaksperiode = person.vedtaksperiodeOrNull(vedtaksperiodeId)
         checkNotNull(vedtaksperiode)

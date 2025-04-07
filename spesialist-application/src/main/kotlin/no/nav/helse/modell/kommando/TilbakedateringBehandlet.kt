@@ -42,6 +42,7 @@ class TilbakedateringBehandlet(
         person: Person,
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
+        syncPersonTilDatabase: () -> Unit,
     ) {
         person.behandleTilbakedateringBehandlet(perioder)
         kommandostarter {

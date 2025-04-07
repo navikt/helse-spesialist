@@ -31,6 +31,7 @@ class NyeVarsler(
         person: Person,
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
+        syncPersonTilDatabase: () -> Unit,
     ) = person.nyeVarsler(varsler)
 
     private companion object {

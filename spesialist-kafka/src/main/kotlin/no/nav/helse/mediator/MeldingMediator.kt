@@ -294,7 +294,7 @@ class MeldingMediator(
         val utgåendeMeldingerMediator = UtgåendeMeldingerMediator()
         try {
             sessionFactory.transactionalSessionScope { sessionContext ->
-                sessionContext.personRepository.brukPersonHvisFinnes(melding.fødselsnummer()) {
+                sessionContext.personRepository.brukPersonHvisFinnes(melding.fødselsnummer()) { syncPersonTilDatabase ->
                     logg.info("Personen finnes i databasen, behandler melding $meldingnavn")
                     sikkerlogg.info("Personen finnes i databasen, behandler melding $meldingnavn")
                     val kommandostarter =
@@ -303,7 +303,7 @@ class MeldingMediator(
                             commandContext(sessionContext.commandContextDao),
                             sessionContext,
                         )
-                    melding.behandle(this, kommandostarter, sessionContext)
+                    melding.behandle(this, kommandostarter, sessionContext, syncPersonTilDatabase)
                     utgåendeMeldinger().forEach(utgåendeMeldingerMediator::hendelse)
                 }
             }

@@ -27,6 +27,7 @@ class SøknadSendt(
         person: Person,
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
+        syncPersonTilDatabase: () -> Unit,
     ) {
         // Ikke i bruk, SøknadSendt har egen sti inn da det muligens ikke finnes noen person enda
         // På sikt ønsker vi kanskje å opprette personen dersom den ikke finnes enda, og da kan denne tas i bruk

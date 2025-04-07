@@ -108,6 +108,7 @@ class Godkjenningsbehov(
         person: Person,
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
+        syncPersonTilDatabase: () -> Unit,
     ) {
         kommandostarter { godkjenningsbehov(data(), person, sessionContext) }
     }

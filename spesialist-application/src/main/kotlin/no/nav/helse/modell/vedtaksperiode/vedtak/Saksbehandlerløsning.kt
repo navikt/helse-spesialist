@@ -69,6 +69,7 @@ class Saksbehandlerløsning(
         person: Person,
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
+        syncPersonTilDatabase: () -> Unit,
     ) = kommandostarter { løsGodkjenningsbehov(this@Saksbehandlerløsning, person, sessionContext) }
 
     override fun fødselsnummer() = fødselsnummer

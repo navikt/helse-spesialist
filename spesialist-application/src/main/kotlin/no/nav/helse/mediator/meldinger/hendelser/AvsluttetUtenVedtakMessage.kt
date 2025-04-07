@@ -40,5 +40,6 @@ class AvsluttetUtenVedtakMessage(
         person: Person,
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
+        syncPersonTilDatabase: () -> Unit,
     ) = person.avsluttetUtenVedtak(avsluttetUtenVedtak)
 }

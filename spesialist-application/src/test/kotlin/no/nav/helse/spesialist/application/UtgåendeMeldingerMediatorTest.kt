@@ -94,6 +94,7 @@ internal class UtgåendeMeldingerMediatorTest {
             person: Person,
             kommandostarter: Kommandostarter,
             sessionContext: SessionContext,
+            syncPersonTilDatabase: () -> Unit,
         ) {
         }
 

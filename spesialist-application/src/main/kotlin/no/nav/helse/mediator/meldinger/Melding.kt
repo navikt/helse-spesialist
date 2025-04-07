@@ -16,6 +16,7 @@ interface Personmelding : Melding {
         person: Person,
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
+        syncPersonTilDatabase: () -> Unit,
     )
 
     fun fødselsnummer(): String

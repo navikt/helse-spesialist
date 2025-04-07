@@ -29,6 +29,7 @@ class OppdaterPersondata(
         person: Person,
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
+        syncPersonTilDatabase: () -> Unit,
     ) {
         kommandostarter { oppdaterPersondata(this@OppdaterPersondata, sessionContext) }
     }

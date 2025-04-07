@@ -37,8 +37,10 @@ class VedtaksperiodeForkastet(
         person: Person,
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
+        syncPersonTilDatabase: () -> Unit,
     ) {
         person.vedtaksperiodeForkastet(vedtaksperiodeId)
+        syncPersonTilDatabase()
         kommandostarter { vedtaksperiodeForkastet(this@VedtaksperiodeForkastet, sessionContext) }
     }
 

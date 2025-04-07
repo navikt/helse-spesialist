@@ -52,6 +52,7 @@ internal class PubliserSykepengevedtakTest {
             person: Person,
             kommandostarter: Kommandostarter,
             sessionContext: SessionContext,
+            syncPersonTilDatabase: () -> Unit,
         ) {}
 
         override fun fødselsnummer(): String = FØDSELSNUMMER

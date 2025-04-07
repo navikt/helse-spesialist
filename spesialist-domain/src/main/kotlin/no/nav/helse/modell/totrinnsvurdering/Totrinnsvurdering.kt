@@ -101,7 +101,11 @@ class Totrinnsvurdering private constructor(
 
     fun vedtaksperiodeForkastet() =
         oppdatering {
-            vedtaksperiodeForkastet = true
+            if (_overstyringer.isEmpty()) {
+                // Teit navn nå som totrinns ikke har vedtaksperiodeId, men dette betyr at alle vedtaksperiodene
+                // overstyringene var knyttet til har blitt forkastet.
+                vedtaksperiodeForkastet = true
+            }
         }
 
     private fun <T> oppdatering(block: () -> T): T {

@@ -31,6 +31,7 @@ class EndretEgenAnsattStatus(
         person: Person,
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
+        syncPersonTilDatabase: () -> Unit,
     ) {
         kommandostarter { endretEgenAnsattStatus(this@EndretEgenAnsattStatus, sessionContext) }
     }

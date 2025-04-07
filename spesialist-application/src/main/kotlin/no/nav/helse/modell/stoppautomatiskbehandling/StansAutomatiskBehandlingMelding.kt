@@ -21,6 +21,7 @@ class StansAutomatiskBehandlingMelding(
         person: Person,
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
+        syncPersonTilDatabase: () -> Unit,
     ) {
         kommandostarter { stansAutomatiskBehandling(this@StansAutomatiskBehandlingMelding, sessionContext) }
     }

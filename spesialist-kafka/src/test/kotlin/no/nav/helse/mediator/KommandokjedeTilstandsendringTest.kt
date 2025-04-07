@@ -15,7 +15,12 @@ class KommandokjedeTilstandsendringTest {
     private val testRapid = TestRapid()
     private val publiserer = MessageContextMeldingPubliserer(testRapid)
     private val testmelding = object : Personmelding {
-        override fun behandle(person: Person, kommandostarter: Kommandostarter, sessionContext: SessionContext) {}
+        override fun behandle(
+            person: Person,
+            kommandostarter: Kommandostarter,
+            sessionContext: SessionContext,
+            syncPersonTilDatabase: () -> Unit
+        ) {}
         override fun fødselsnummer(): String = lagFødselsnummer()
         override fun toJson(): String = "{}"
         override val id: UUID = UUID.randomUUID()

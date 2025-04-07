@@ -21,7 +21,7 @@ class PgPersonRepository(
 
     override fun brukPersonHvisFinnes(
         fødselsnummer: String,
-        personScope: Person.() -> Unit,
+        personScope: Person.(() -> Unit) -> Unit,
     ) {
         val (person, dtoFør) =
             hentPerson(fødselsnummer) ?: run {
@@ -31,7 +31,10 @@ class PgPersonRepository(
                 }
                 return
             }
-        personScope(person)
+        personScope(person) {
+            val dtoEtter = person.toDto()
+            if (dtoFør != dtoEtter) lagrePerson(dtoFør, dtoEtter)
+        }
         val dtoEtter = person.toDto()
         if (dtoFør != dtoEtter) lagrePerson(dtoFør, dtoEtter)
     }
@@ -68,7 +71,7 @@ class PgPersonRepository(
                 ) to it
             }
 
-    private fun lagrePerson(
+    override fun lagrePerson(
         dtoFør: PersonDto,
         dtoEtter: PersonDto,
     ) {

@@ -31,6 +31,7 @@ class KlargjørTilgangsrelaterteData(
         person: Person,
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
+        syncPersonTilDatabase: () -> Unit,
     ) {
         kommandostarter { klargjørTilgangsrelaterteData(this@KlargjørTilgangsrelaterteData, sessionContext) }
     }

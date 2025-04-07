@@ -36,6 +36,7 @@ class GosysOppgaveEndret(
         person: Person,
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
+        syncPersonTilDatabase: () -> Unit,
     ) {
         kommandostarter {
             val oppgaveDataForAutomatisering =

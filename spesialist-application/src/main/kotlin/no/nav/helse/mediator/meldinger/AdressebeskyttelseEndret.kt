@@ -35,6 +35,7 @@ class AdressebeskyttelseEndret(
         person: Person,
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
+        syncPersonTilDatabase: () -> Unit,
     ) {
         kommandostarter {
             adressebeskyttelseEndret(
