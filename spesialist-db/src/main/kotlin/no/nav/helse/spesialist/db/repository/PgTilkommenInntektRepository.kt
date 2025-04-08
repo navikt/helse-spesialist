@@ -33,7 +33,6 @@ class PgTilkommenInntektRepository(
             "fødselsnummer" to fødselsnummer,
         ).list { it.toTilkommenInntektEvent() }
             .groupBy { it.metadata.tilkommenInntektId }
-            .entries
             .map { (_, events) -> events.sortedBy { it.metadata.sekvensnummer }.let(TilkommenInntekt::fraLagring) }
 
     override fun finn(id: TilkommenInntektId): TilkommenInntekt? {
