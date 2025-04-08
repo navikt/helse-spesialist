@@ -24,7 +24,9 @@ internal class VurderBehovForTotrinnskontroll(
 
     override fun execute(context: CommandContext): Boolean {
         val vedtaksperiodeId = vedtaksperiode.vedtaksperiodeId()
-        val kreverTotrinnsvurdering = sykefraværstilfelle.harMedlemskapsvarsel(vedtaksperiodeId)
+        val kreverTotrinnsvurdering =
+            sykefraværstilfelle.harMedlemskapsvarsel(vedtaksperiodeId) ||
+                sykefraværstilfelle.manglerInntektsmelding(vedtaksperiodeId)
         val vedtaksperiodeHarFerdigstiltOppgave = oppgaveService.harFerdigstiltOppgave(vedtaksperiodeId)
 
         val eksisterendeTotrinnsvurdering = totrinnsvurderingRepository.finn(fødselsnummer)

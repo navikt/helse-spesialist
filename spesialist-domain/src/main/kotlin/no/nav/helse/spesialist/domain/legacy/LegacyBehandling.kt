@@ -520,6 +520,9 @@ class LegacyBehandling private constructor(
                 .filter { it.varsler.isNotEmpty() }
                 .any { it.harVarselOmManglendeInntektsmelding() }
 
+        internal fun List<LegacyBehandling>.harVarselOmManglendeInntektsmelding(vedtaksperiodeId: UUID): Boolean =
+            finnBehandlingForVedtaksperiode(vedtaksperiodeId)?.harVarselOmManglendeInntektsmelding() == true
+
         internal fun List<LegacyBehandling>.harMedlemskapsvarsel(vedtaksperiodeId: UUID): Boolean =
             overlapperMedEllerTidligereEnn(vedtaksperiodeId).any {
                 it.harMedlemskapsvarsel()

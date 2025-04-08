@@ -71,6 +71,11 @@ class Sykefraværstilfelle(
 
     fun harMedlemskapsvarsel(vedtaksperiodeId: UUID): Boolean = gjeldendeBehandlinger.harMedlemskapsvarsel(vedtaksperiodeId)
 
+    fun manglerInntektsmelding(vedtaksperiodeId: UUID): Boolean =
+        gjeldendeBehandlinger.harVarselOmManglendeInntektsmelding(
+            vedtaksperiodeId,
+        )
+
     fun kreverSkjønnsfastsettelse(vedtaksperiodeId: UUID): Boolean = gjeldendeBehandlinger.kreverSkjønnsfastsettelse(vedtaksperiodeId)
 
     fun erTilbakedatert(vedtaksperiodeId: UUID): Boolean = gjeldendeBehandlinger.erTilbakedatert(vedtaksperiodeId)

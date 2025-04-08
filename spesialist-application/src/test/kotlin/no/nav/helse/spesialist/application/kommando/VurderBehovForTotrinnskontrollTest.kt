@@ -100,6 +100,17 @@ internal class VurderBehovForTotrinnskontrollTest {
         assertEquals(1, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.size)
     }
 
+    @Test
+    fun `Oppretter totrinssvurdering dersom vedtaksperioden har varsel for manglende inntektsmelding, og ikke har hatt oppgave som har vært ferdigstilt før`() {
+        sykefraværstilfelle.håndter(
+            Varsel(UUID.randomUUID(), "RV_IV_10", LocalDateTime.now(), VEDTAKSPERIODE_ID_2),
+        )
+        every { oppgaveService.harFerdigstiltOppgave(VEDTAKSPERIODE_ID_2) } returns false
+
+        assertTrue(command.execute(context))
+        assertEquals(1, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.size)
+    }
+
     @ParameterizedTest
     @EnumSource(value = Varsel.Status::class, names = ["AKTIV"], mode = EnumSource.Mode.EXCLUDE)
     fun `Oppretter ikke totrinnssvurdering dersom tidligere vedtaksperiode har varsel for lovvalg og medlemskap og er utbetalt`(
@@ -107,6 +118,20 @@ internal class VurderBehovForTotrinnskontrollTest {
     ) {
         sykefraværstilfelle.håndter(
             Varsel(UUID.randomUUID(), "RV_MV_1", LocalDateTime.now(), VEDTAKSPERIODE_ID_1, status),
+        )
+        every { oppgaveService.harFerdigstiltOppgave(VEDTAKSPERIODE_ID_2) } returns false
+
+        assertTrue(command.execute(context))
+        assertEquals(0, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.size)
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = Varsel.Status::class, names = ["AKTIV"], mode = EnumSource.Mode.EXCLUDE)
+    fun `Oppretter ikke totrinnssvurdering dersom tidligere vedtaksperiode har varsel for manglende inntektsmelding og er utbetalt`(
+        status: Varsel.Status,
+    ) {
+        sykefraværstilfelle.håndter(
+            Varsel(UUID.randomUUID(), "RV_IV_10", LocalDateTime.now(), VEDTAKSPERIODE_ID_1, status),
         )
         every { oppgaveService.harFerdigstiltOppgave(VEDTAKSPERIODE_ID_2) } returns false
 
@@ -155,6 +180,8 @@ internal class VurderBehovForTotrinnskontrollTest {
 
         assertEquals(0, totrinnsvurderingRepository.lagredeTotrinnsvurderinger.size)
     }
+
+
 
     private fun lagSaksbehandlerOid(oid: UUID = UUID.randomUUID()) = SaksbehandlerOid(oid)
 
