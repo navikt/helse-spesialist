@@ -59,7 +59,9 @@ import no.nav.helse.spesialist.domain.gradering.TilkommenInntektEvent
 import no.nav.helse.spesialist.domain.gradering.TilkommenInntektFjernetEvent
 import no.nav.helse.spesialist.domain.gradering.TilkommenInntektGjenopprettetEvent
 import no.nav.helse.spesialist.domain.gradering.TilkommenInntektOpprettetEvent
+import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.ZoneId
 import java.util.UUID
 
 data class ApiPersonResolver(
@@ -191,14 +193,14 @@ data class ApiPersonResolver(
                                 fom = it.periode.fom,
                                 tom = it.periode.tom,
                                 periodeBeløp = it.periodebeløp,
-                                dager = it.dager,
+                                dager = it.dager.toList(),
                                 fjernet = it.fjernet,
                                 events =
                                     it.events.map { event ->
                                         val metadata =
                                             ApiTilkommenInntektEvent.Metadata(
                                                 sekvensnummer = event.metadata.sekvensnummer,
-                                                tidspunkt = event.metadata.tidspunkt,
+                                                tidspunkt = event.metadata.tidspunkt.atZone(ZoneId.of("Europe/Oslo")).toLocalDateTime(),
                                                 utførtAvSaksbehandlerIdent = event.metadata.utførtAvSaksbehandlerIdent,
                                                 notatTilBeslutter = event.metadata.notatTilBeslutter,
                                             )
@@ -210,7 +212,7 @@ data class ApiPersonResolver(
                                                     fom = event.periode.fom,
                                                     tom = event.periode.tom,
                                                     periodebeløp = event.periodebeløp,
-                                                    dager = event.dager,
+                                                    dager = event.dager.toList(),
                                                 )
 
                                             is TilkommenInntektEndretEvent ->
@@ -243,11 +245,23 @@ data class ApiPersonResolver(
             fom = fom?.tilApiEndring(),
             tom = tom?.tilApiEndring(),
             periodebeløp = periodebeløp?.tilApiEndring(),
-            dager = dager?.tilApiEndring(),
+            dager =
+                dager?.let {
+                    ApiTilkommenInntektEvent.Endringer.ListLocalDateEndring(
+                        fra = it.fra.toList(),
+                        til = it.til.toList(),
+                    )
+                },
         )
 
-    private fun <T> Endring<T>.tilApiEndring(): ApiTilkommenInntektEvent.Endringer.Endring<T> =
-        ApiTilkommenInntektEvent.Endringer.Endring(fra = fra, til = til)
+    private fun Endring<String>.tilApiEndring(): ApiTilkommenInntektEvent.Endringer.StringEndring =
+        ApiTilkommenInntektEvent.Endringer.StringEndring(fra = fra, til = til)
+
+    private fun Endring<LocalDate>.tilApiEndring(): ApiTilkommenInntektEvent.Endringer.LocalDateEndring =
+        ApiTilkommenInntektEvent.Endringer.LocalDateEndring(fra = fra, til = til)
+
+    private fun Endring<BigDecimal>.tilApiEndring(): ApiTilkommenInntektEvent.Endringer.BigDecimalEndring =
+        ApiTilkommenInntektEvent.Endringer.BigDecimalEndring(fra = fra, til = til)
 
     private fun List<SnapshotGhostPeriode>.tilGhostPerioder(organisasjonsnummer: String): List<ApiGhostPeriode> =
         map {

@@ -8,6 +8,7 @@ import graphql.language.Value
 import graphql.schema.Coercing
 import graphql.schema.GraphQLScalarType
 import graphql.schema.GraphQLType
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -24,6 +25,7 @@ val schemaGeneratorHooks =
         override fun willGenerateGraphQLType(type: KType): GraphQLType? =
             when (type.classifier as? KClass<*>) {
                 UUID::class -> graphQLUUID
+                BigDecimal::class -> graphQLBigDecimal
                 LocalDateTime::class -> graphQLLocalDateTime
                 LocalDate::class -> graphQLLocalDate
                 YearMonth::class -> graphQLYearMonth
@@ -59,6 +61,13 @@ private val graphQLUUID: GraphQLScalarType =
         .coercing(UuidCoercing)
         .build()
 
+private val graphQLBigDecimal: GraphQLScalarType =
+    GraphQLScalarType.newScalar()
+        .name(BigDecimal::class.simpleName)
+        .description(BigDecimal::class.toString())
+        .coercing(BigDecimalCoercing)
+        .build()
+
 private object UuidCoercing : Coercing<UUID, String> {
     override fun serialize(
         dataFetcherResult: Any,
@@ -82,6 +91,31 @@ private object UuidCoercing : Coercing<UUID, String> {
         graphQLContext: GraphQLContext,
         locale: Locale,
     ): UUID = UUID.fromString(serialize(input, graphQLContext, locale))
+}
+
+private object BigDecimalCoercing : Coercing<BigDecimal, String> {
+    override fun serialize(
+        dataFetcherResult: Any,
+        graphQLContext: GraphQLContext,
+        locale: Locale,
+    ): String =
+        when (dataFetcherResult) {
+            is StringValue -> dataFetcherResult.value
+            else -> dataFetcherResult.toString()
+        }
+
+    override fun parseValue(
+        input: Any,
+        graphQLContext: GraphQLContext,
+        locale: Locale,
+    ): BigDecimal = BigDecimal(serialize(input, graphQLContext, locale))
+
+    override fun parseLiteral(
+        input: Value<*>,
+        variables: CoercedVariables,
+        graphQLContext: GraphQLContext,
+        locale: Locale,
+    ): BigDecimal = BigDecimal(serialize(input, graphQLContext, locale))
 }
 
 private object LocalDateTimeCoercing : Coercing<LocalDateTime, String> {

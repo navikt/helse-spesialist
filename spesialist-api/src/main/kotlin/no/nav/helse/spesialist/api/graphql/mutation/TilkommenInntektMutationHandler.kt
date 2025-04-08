@@ -9,7 +9,7 @@ import no.nav.helse.modell.melding.InntektsendringerEvent
 import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
-import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektOverstyring
+import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektRequest
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.application.TilkommenInntektRepository
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
@@ -27,10 +27,10 @@ class TilkommenInntektMutationHandler(
 ) : TilkommenInntektMutationSchema {
     override fun leggTilTilkommenInntekt(
         fodselsnummer: String,
-        verdier: ApiTilkommenInntektOverstyring,
+        verdier: ApiTilkommenInntektRequest,
         notatTilBeslutter: String,
         env: DataFetchingEnvironment,
-    ): DataFetcherResult<Unit> {
+    ): DataFetcherResult<Boolean> {
         sessionFactory.transactionalSessionScope { session ->
             val periode = Periode(fom = verdier.fom, tom = verdier.tom)
             verifiserAtErInnenforEtSykefraværstilfelle(
@@ -63,7 +63,7 @@ class TilkommenInntektMutationHandler(
                     fom = verdier.fom,
                     tom = verdier.tom,
                     periodebeløp = verdier.periodebelop,
-                    dager = verdier.dager,
+                    dager = verdier.dager.toSet(),
                 )
             session.tilkommenInntektRepository.lagre(tilkommenInntekt)
 
@@ -91,7 +91,7 @@ class TilkommenInntektMutationHandler(
             )
         }
 
-        return DataFetcherResult.newResult<Unit>().build()
+        return DataFetcherResult.newResult<Boolean>().data(true).build()
     }
 
     private fun finnEllerOpprettTotrinnsvurdering(
@@ -104,10 +104,10 @@ class TilkommenInntektMutationHandler(
     override fun endreTilkommenInntekt(
         fodselsnummer: String,
         uuid: UUID,
-        endretTil: ApiTilkommenInntektOverstyring,
+        endretTil: ApiTilkommenInntektRequest,
         notatTilBeslutter: String,
         env: DataFetchingEnvironment,
-    ): DataFetcherResult<Unit> {
+    ): DataFetcherResult<Boolean> {
         sessionFactory.transactionalSessionScope { session ->
             val vedtaksperiodeRepository: VedtaksperiodeRepository = session.vedtaksperiodeRepository
             val tilkommenInntektRepository: TilkommenInntektRepository = session.tilkommenInntektRepository
@@ -140,7 +140,7 @@ class TilkommenInntektMutationHandler(
                 fom = endretTil.fom,
                 tom = endretTil.tom,
                 periodebeløp = endretTil.periodebelop,
-                dager = endretTil.dager,
+                dager = endretTil.dager.toSet(),
                 saksbehandlerIdent = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER).ident,
                 notatTilBeslutter = notatTilBeslutter,
                 totrinnsvurderingId =
@@ -173,7 +173,7 @@ class TilkommenInntektMutationHandler(
             }
         }
 
-        return DataFetcherResult.newResult<Unit>().build()
+        return DataFetcherResult.newResult<Boolean>().data(true).build()
     }
 
     override fun fjernTilkommenInntekt(
@@ -181,7 +181,7 @@ class TilkommenInntektMutationHandler(
         uuid: UUID,
         notatTilBeslutter: String,
         env: DataFetchingEnvironment,
-    ): DataFetcherResult<Unit> {
+    ): DataFetcherResult<Boolean> {
         sessionFactory.transactionalSessionScope { session ->
             val tilkommenInntektRepository: TilkommenInntektRepository = session.tilkommenInntektRepository
             val totrinnsvurderingRepository: TotrinnsvurderingRepository = session.totrinnsvurderingRepository
@@ -218,7 +218,7 @@ class TilkommenInntektMutationHandler(
             )
         }
 
-        return DataFetcherResult.newResult<Unit>().build()
+        return DataFetcherResult.newResult<Boolean>().data(true).build()
     }
 
     private fun byggInntektsendringerEvent(

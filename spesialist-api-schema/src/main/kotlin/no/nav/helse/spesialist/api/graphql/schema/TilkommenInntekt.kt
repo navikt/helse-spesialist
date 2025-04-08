@@ -2,8 +2,8 @@ package no.nav.helse.spesialist.api.graphql.schema
 
 import com.expediagroup.graphql.generator.annotations.GraphQLName
 import java.math.BigDecimal
-import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @GraphQLName("TilkommenInntektskilde")
 data class ApiTilkommenInntektskilde(
@@ -17,9 +17,18 @@ data class ApiTilkommenInntekt(
     val fom: LocalDate,
     val tom: LocalDate,
     val periodeBeløp: BigDecimal,
-    val dager: Set<LocalDate>,
+    val dager: List<LocalDate>,
     val fjernet: Boolean,
     val events: List<ApiTilkommenInntektEvent>,
+)
+
+@GraphQLName("TilkommenInntektRequest")
+data class ApiTilkommenInntektRequest(
+    val organisasjonsnummer: String,
+    val fom: LocalDate,
+    val tom: LocalDate,
+    val periodebelop: BigDecimal,
+    val dager: List<LocalDate>,
 )
 
 @GraphQLName("TilkommenInntektEvent")
@@ -28,19 +37,25 @@ sealed interface ApiTilkommenInntektEvent {
 
     data class Metadata(
         val sekvensnummer: Int,
-        val tidspunkt: Instant,
+        val tidspunkt: LocalDateTime,
         val utførtAvSaksbehandlerIdent: String,
         val notatTilBeslutter: String,
     )
 
     data class Endringer(
-        val organisasjonsnummer: Endring<String>?,
-        val fom: Endring<LocalDate>?,
-        val tom: Endring<LocalDate>?,
-        val periodebeløp: Endring<BigDecimal>?,
-        val dager: Endring<Set<LocalDate>>?,
+        val organisasjonsnummer: StringEndring?,
+        val fom: LocalDateEndring?,
+        val tom: LocalDateEndring?,
+        val periodebeløp: BigDecimalEndring?,
+        val dager: ListLocalDateEndring?,
     ) {
-        data class Endring<T>(val fra: T, val til: T)
+        data class LocalDateEndring(val fra: LocalDate, val til: LocalDate)
+
+        data class BigDecimalEndring(val fra: BigDecimal, val til: BigDecimal)
+
+        data class StringEndring(val fra: String, val til: String)
+
+        data class ListLocalDateEndring(val fra: List<LocalDate>, val til: List<LocalDate>)
     }
 }
 
@@ -51,7 +66,7 @@ data class ApiTilkommenInntektOpprettetEvent(
     val fom: LocalDate,
     val tom: LocalDate,
     val periodebeløp: BigDecimal,
-    val dager: Set<LocalDate>,
+    val dager: List<LocalDate>,
 ) : ApiTilkommenInntektEvent
 
 @GraphQLName("TilkommenInntektEndretEvent")

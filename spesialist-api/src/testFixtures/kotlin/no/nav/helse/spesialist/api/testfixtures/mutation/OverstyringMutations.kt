@@ -3,76 +3,11 @@ package no.nav.helse.spesialist.api.testfixtures.mutation
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdOverstyringHandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiInntektOgRefusjonOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
-import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektOverstyring
 import org.intellij.lang.annotations.Language
 
 internal fun asGQL(
     @Language("GraphQL") mutationString: String
 ): String = mutationString
-
-
-fun overstyrTilkommenInntektMutation(overstyring: ApiTilkommenInntektOverstyring): String =
-    asGQL(
-        """mutation OverstyrTilkommenInntekt {
-                overstyrTilkommenInntekt(
-                    overstyring: {
-                        fodselsnummer: "${overstyring.fodselsnummer}",
-                        aktorId: "${overstyring.aktorId}",
-                        begrunnelse: "Foobar",
-                        fjernet: ${fjernet(overstyring)},
-                        lagtTilEllerEndret: ${lagtTilEllerEndret(overstyring)},
-                        vedtaksperiodeId: "${overstyring.vedtaksperiodeId}",
-                    }
-                )
-            }
-        """
-    )
-
-private fun lagtTilEllerEndret(overstyring: ApiTilkommenInntektOverstyring): List<String> =
-    overstyring.lagtTilEllerEndret.map {
-        fun perioder(): List<String> = it.perioder.map { periode ->
-            asGQL(
-                """
-                {
-                    fom: "${periode.fom}",
-                    tom: "${periode.tom}",
-                    periodeBelop: ${periode.periodeBelop}
-                }
-            """
-            )
-        }
-
-        asGQL(
-            """
-            {
-                organisasjonsnummer: "${it.organisasjonsnummer}",
-                perioder: ${perioder()}
-            }
-        """
-        )
-    }
-
-private fun fjernet(overstyring: ApiTilkommenInntektOverstyring): List<String> = overstyring.fjernet.map {
-    fun perioder(): List<String> = it.perioder.map { periode ->
-        asGQL(
-            """
-            {
-                fom: "${periode.fom}",
-                tom: "${periode.tom}"
-            }
-        """
-        )
-    }
-
-    asGQL(
-        """
-        {
-            organisasjonsnummer: "${it.organisasjonsnummer}",
-            perioder: ${perioder()}
-        }
-    """
-    )
-}
 
 fun overstyrInntektOgRefusjonMutation(overstyring: ApiInntektOgRefusjonOverstyring): String = asGQL(
     """
