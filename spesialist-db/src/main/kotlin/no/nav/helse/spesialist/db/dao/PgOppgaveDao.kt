@@ -261,7 +261,7 @@ class PgOppgaveDao internal constructor(
                         WHEN :tildelt = false THEN t.oppgave_id_ref IS NULL
                         ELSE true
                     END
-            ORDER BY $orderBy NULLS LAST
+            ORDER BY $orderBy
             OFFSET :offset
             LIMIT :limit
             """,
@@ -500,9 +500,13 @@ class PgOppgaveDao internal constructor(
 
     private fun OppgavesorteringForDatabase.nøkkelTilKolonne() =
         when (this.nøkkel) {
-            SorteringsnøkkelForDatabase.TILDELT_TIL -> "navn"
-            SorteringsnøkkelForDatabase.OPPRETTET -> "opprettet"
-            SorteringsnøkkelForDatabase.TIDSFRIST -> "frist"
-            SorteringsnøkkelForDatabase.SØKNAD_MOTTATT -> "opprinnelig_soknadsdato"
-        } + if (this.stigende) " ASC" else " DESC"
+            SorteringsnøkkelForDatabase.TILDELT_TIL -> "navn".direction(this.stigende).nullsLast()
+            SorteringsnøkkelForDatabase.OPPRETTET -> "opprettet".direction(this.stigende)
+            SorteringsnøkkelForDatabase.TIDSFRIST -> "frist".direction(this.stigende).nullsLast()
+            SorteringsnøkkelForDatabase.SØKNAD_MOTTATT -> "opprinnelig_soknadsdato".direction(this.stigende)
+        }
+
+    private fun String.direction(stigende: Boolean) = if (stigende) "$this ASC" else "$this DESC"
+
+    private fun String.nullsLast() = "$this NULLS LAST"
 }

@@ -4,20 +4,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-data class OppgaveFraDatabase(
-    val id: Long,
-    val egenskaper: List<EgenskapForDatabase>,
-    val status: String,
-    val vedtaksperiodeId: UUID,
-    val behandlingId: UUID,
-    val utbetalingId: UUID,
-    val godkjenningsbehovId: UUID,
-    val kanAvvises: Boolean,
-    val ferdigstiltAvIdent: String? = null,
-    val ferdigstiltAvOid: UUID? = null,
-    val tildelt: SaksbehandlerFraDatabase? = null,
-)
-
 data class OppgaveFraDatabaseForVisning(
     val id: Long,
     val aktørId: String,
