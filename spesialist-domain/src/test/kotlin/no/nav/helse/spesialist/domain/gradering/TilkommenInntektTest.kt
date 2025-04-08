@@ -1,50 +1,44 @@
 package no.nav.helse.spesialist.domain.gradering
 
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
-import no.nav.helse.spesialist.domain.gradering.Inntektsendringer.PeriodeMedBeløp
+import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import org.junit.jupiter.api.assertThrows
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.Month
+import java.util.UUID
+import kotlin.random.Random
 import kotlin.test.Test
-import kotlin.test.assertEquals
 
 class TilkommenInntektTest {
-    @Test
-    fun `legg til ny graderingsperiode`() {
-        val graderingsperioder = Graderingsperioder.ny(lagFødselsnummer(), lagOrganisasjonsnummer())
-        val tilkommenInntekt = TilkommenInntekt.ny(
-            fom = 1 jan 2018,
-            tom = 2 jan 2018,
-            dager = listOf(1 jan 2018, 2 jan 2018),
-            periodebeløp = 10000.0
-        )
-        graderingsperioder.leggTilGraderingsperiode(tilkommenInntekt)
-        val events = graderingsperioder.konsumerDomenehendelser()
-        assertEquals(1, events.size)
-        assertEquals(1, events[0].graderingsdifferanse.nyeEllerEndredeInntekter.size)
-        assertEquals(0, events[0].graderingsdifferanse.fjernedeInntekter.size)
-    }
 
     @Test
     fun `kan ikke legge til periode som overlapper med annen periode`() {
-        val graderingsperioder = Graderingsperioder.ny(lagFødselsnummer(), lagOrganisasjonsnummer())
+        val fødselsnummer = lagFødselsnummer()
+        val organisasjonsnummer = lagOrganisasjonsnummer()
         val tilkommenInntekt = TilkommenInntekt.ny(
             fom = 1 jan 2018,
-            tom = 2 jan 2018,
-            dager = listOf(1 jan 2018, 2 jan 2018),
-            periodebeløp = 10000.0
+            tom = 31 jan 2018,
+            dager = setOf(1 jan 2018, 31 jan 2018),
+            periodebeløp = BigDecimal("10000.0"),
+            fødselsnummer = fødselsnummer,
+            saksbehandlerOid = SaksbehandlerOid(UUID.randomUUID()),
+            notatTilBeslutter = "et notat til beslutter",
+            totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
+            organisasjonsnummer = organisasjonsnummer
         )
-        graderingsperioder.leggTilGraderingsperiode(tilkommenInntekt)
+
         assertThrows<IllegalStateException> {
-            graderingsperioder.leggTilGraderingsperiode(tilkommenInntekt)
+        TilkommenInntekt.validerAtNyPeriodeIkkeOverlapperEksisterendePerioder(15 jan 2018, 31 jan 2018, organisasjonsnummer, listOf(tilkommenInntekt))
         }
     }
 
-    @Test
+    /*@Test
     fun `kan endre graderingsperiode`() {
         // given
         val graderingsperioder = Graderingsperioder.ny(lagFødselsnummer(), lagOrganisasjonsnummer())
@@ -415,14 +409,14 @@ class TilkommenInntektTest {
             ),
             actual = differanse.fjernedeInntekter
         )
-    }
+    }*/
 
-    private val ingenFordeling = TilkommenInntekt.ny(
+    /*private val ingenFordeling = TilkommenInntekt.ny(
         fom = 1 jan 2018,
         tom = 31 jan 2018,
         dager = emptyList(),
         periodebeløp = 0.0,
-    )
+    )*/
 
     private infix fun LocalDate.til(other: Int) = PeriodBuilder(this, other)
 

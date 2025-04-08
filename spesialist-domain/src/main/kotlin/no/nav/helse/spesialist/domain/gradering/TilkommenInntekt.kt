@@ -229,6 +229,26 @@ class TilkommenInntekt private constructor(
             ),
         )
 
+        fun validerAtNyPeriodeIkkeOverlapperEksisterendePerioder(
+            fom: LocalDate,
+            tom: LocalDate,
+            organisasjonsnummer: String,
+            alleTilkomneInntekterForFødselsnummer: List<TilkommenInntekt>,
+        ) {
+            val alleTilkomneInntekterForInntektskilde =
+                alleTilkomneInntekterForFødselsnummer.filter { it.organisasjonsnummer == organisasjonsnummer }
+            if (alleTilkomneInntekterForInntektskilde.any {
+                    it.periode overlapper
+                        Periode(
+                            fom = fom,
+                            tom = tom,
+                        )
+                }
+            ) {
+                error("Kan ikke legge til tilkommen inntekt som overlapper med en annen tilkommen inntekt for samme inntektskilde")
+            }
+        }
+
         fun fraLagring(events: List<TilkommenInntektEvent>): TilkommenInntekt =
             TilkommenInntekt(events.first() as TilkommenInntektOpprettetEvent)
                 .also { tilkommenInntekt -> events.drop(1).forEach(tilkommenInntekt::apply) }

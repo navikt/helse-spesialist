@@ -39,13 +39,16 @@ class TilkommenInntektMutationHandler(
                 fødselsnummer = fodselsnummer,
                 vedtaksperiodeRepository = session.vedtaksperiodeRepository,
             )
-            val alleTilkomneInntekterForInntektskilde =
+            val alleTilkomneInntekterForFødselsnummer =
                 session.tilkommenInntektRepository.finnAlleForFødselsnummer(
                     fødselsnummer = fodselsnummer,
-                ).filter { it.organisasjonsnummer == verdier.organisasjonsnummer }
-            if (alleTilkomneInntekterForInntektskilde.any { it.periode overlapper periode }) {
-                error("Kan ikke legge til tilkommen inntekt som overlapper med en annen tilkommen inntekt for samme inntektskilde")
-            }
+                )
+            TilkommenInntekt.validerAtNyPeriodeIkkeOverlapperEksisterendePerioder(
+                fom = verdier.fom,
+                tom = verdier.tom,
+                organisasjonsnummer = verdier.organisasjonsnummer,
+                alleTilkomneInntekterForFødselsnummer = alleTilkomneInntekterForFødselsnummer,
+            )
 
             val tilkommenInntekt =
                 TilkommenInntekt.ny(
