@@ -176,6 +176,78 @@ class TilkommenInntektMutationHandler(
         return DataFetcherResult.newResult<Boolean>().data(true).build()
     }
 
+    override fun gjenopprettTilkommenInntekt(
+        fodselsnummer: String,
+        uuid: UUID,
+        endretTil: ApiTilkommenInntektRequest,
+        notatTilBeslutter: String,
+        env: DataFetchingEnvironment,
+    ): DataFetcherResult<Boolean> {
+        sessionFactory.transactionalSessionScope { session ->
+            val vedtaksperiodeRepository: VedtaksperiodeRepository = session.vedtaksperiodeRepository
+            val tilkommenInntektRepository: TilkommenInntektRepository = session.tilkommenInntektRepository
+            val totrinnsvurderingRepository: TotrinnsvurderingRepository = session.totrinnsvurderingRepository
+            val endretTilPeriode = Periode(fom = endretTil.fom, tom = endretTil.tom)
+            val tilkommenInntekt =
+                tilkommenInntektRepository.finn(TilkommenInntektId.fra(fodselsnummer, uuid))
+                    ?: error("Fant ikke tilkommen inntekt med fødselsnummer $fodselsnummer og uuid $uuid")
+
+            verifiserAtErInnenforEtSykefraværstilfelle(
+                periode = endretTilPeriode,
+                fødselsnummer = fodselsnummer,
+                vedtaksperiodeRepository = vedtaksperiodeRepository,
+            )
+            val andreTilkomneInntekterForOrganisasjonsnummer =
+                tilkommenInntektRepository.finnAlleForFødselsnummer(
+                    fødselsnummer = fodselsnummer,
+                )
+                    .filter { it.organisasjonsnummer == endretTil.organisasjonsnummer }.minus(tilkommenInntekt)
+            if (andreTilkomneInntekterForOrganisasjonsnummer.any { endretTilPeriode overlapper it.periode }) {
+                error("Kan ikke legge til tilkommen inntekt som overlapper med en annen tilkommen inntekt")
+            }
+
+            tilkommenInntekt.gjenopprett(
+                organisasjonsnummer = endretTil.organisasjonsnummer,
+                fom = endretTil.fom,
+                tom = endretTil.tom,
+                periodebeløp = endretTil.periodebelop,
+                dager = endretTil.dager.toSet(),
+                saksbehandlerIdent = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER).ident,
+                notatTilBeslutter = notatTilBeslutter,
+                totrinnsvurderingId =
+                    finnEllerOpprettTotrinnsvurdering(
+                        fodselsnummer,
+                        totrinnsvurderingRepository,
+                    ).id(),
+            )
+
+            meldingPubliserer.publiser(
+                fødselsnummer = tilkommenInntekt.id().fødselsnummer,
+                hendelse =
+                    InntektsendringerEvent(
+                        inntektskilder =
+                            listOf(
+                                InntektsendringerEvent.Inntektskilde(
+                                    inntektskilde = tilkommenInntekt.organisasjonsnummer,
+                                    inntekter =
+                                        tilkommenInntekt.dager.sorted().map { dag ->
+                                            InntektsendringerEvent.Inntektskilde.Inntekt(
+                                                fom = dag,
+                                                tom = dag,
+                                                dagsbeløp = tilkommenInntekt.dagbeløp(),
+                                            )
+                                        },
+                                    nullstill = emptyList(),
+                                ),
+                            ),
+                    ),
+                årsak = "tilkommen inntekt gjenopprettet",
+            )
+        }
+
+        return DataFetcherResult.newResult<Boolean>().data(true).build()
+    }
+
     override fun fjernTilkommenInntekt(
         fodselsnummer: String,
         uuid: UUID,

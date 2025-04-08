@@ -117,6 +117,67 @@ class TilkommenInntektTest {
     }
 
     @Test
+    fun `kan gjenoprette tilkommen inntekt`() {
+        //given
+        val fødselsnummer = lagFødselsnummer()
+        val organisasjonsnummer = lagOrganisasjonsnummer()
+        val tilkommenInntekt = TilkommenInntekt.ny(
+            fom = 1 jan 2018,
+            tom = 31 jan 2018,
+            dager = setOf(1 jan 2018, 31 jan 2018),
+            periodebeløp = BigDecimal("10000"),
+            fødselsnummer = fødselsnummer,
+            saksbehandlerIdent = lagSaksbehandlerident(),
+            notatTilBeslutter = "et notat til beslutter",
+            totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
+            organisasjonsnummer = organisasjonsnummer
+        )
+
+        tilkommenInntekt.fjern(lagSaksbehandlerident(), "fjern", TotrinnsvurderingId(Random.nextLong()))
+
+        //when
+        val endretOrganisasjonsnummer = lagOrganisasjonsnummer()
+        val saksbehandlerIdent = lagSaksbehandlerident()
+        tilkommenInntekt.gjenopprett(
+            organisasjonsnummer = endretOrganisasjonsnummer,
+            fom = 3 jan 2018,
+            tom = 20 jan 2018,
+            periodebeløp = BigDecimal("100"),
+            dager = emptySet(),
+            saksbehandlerIdent = saksbehandlerIdent,
+            notatTilBeslutter = "nytt notat",
+            totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong())
+        )
+
+        //then
+        assertEquals(3, tilkommenInntekt.events.size)
+        assertEquals(TilkommenInntektGjenopprettetEvent::class, tilkommenInntekt.events.last()::class)
+        val gjenopprettetEvent = tilkommenInntekt.events.last() as TilkommenInntektGjenopprettetEvent
+        assertEquals(organisasjonsnummer, gjenopprettetEvent.endringer.organisasjonsnummer?.fra)
+        assertEquals(endretOrganisasjonsnummer, gjenopprettetEvent.endringer.organisasjonsnummer?.til)
+        assertEquals(1 jan 2018, gjenopprettetEvent.endringer.fom?.fra)
+        assertEquals(3 jan 2018, gjenopprettetEvent.endringer.fom?.til)
+        assertEquals(31 jan 2018, gjenopprettetEvent.endringer.tom?.fra)
+        assertEquals(20 jan 2018, gjenopprettetEvent.endringer.tom?.til)
+        assertEquals(setOf(1 jan 2018, 31 jan 2018), gjenopprettetEvent.endringer.dager?.fra)
+        assertEquals(emptySet(), gjenopprettetEvent.endringer.dager?.til)
+        assertEquals(BigDecimal("10000"), gjenopprettetEvent.endringer.periodebeløp?.fra)
+        assertEquals(BigDecimal("100"), gjenopprettetEvent.endringer.periodebeløp?.til)
+
+        assertEquals("nytt notat", gjenopprettetEvent.metadata.notatTilBeslutter)
+        assertEquals(saksbehandlerIdent, gjenopprettetEvent.metadata.utførtAvSaksbehandlerIdent)
+        assertEquals(3, gjenopprettetEvent.metadata.sekvensnummer)
+
+        assertEquals(endretOrganisasjonsnummer, tilkommenInntekt.organisasjonsnummer)
+        assertEquals(3 jan 2018, tilkommenInntekt.periode.fom)
+        assertEquals(20 jan 2018, tilkommenInntekt.periode.tom)
+        assertEquals(emptySet(), tilkommenInntekt.dager)
+        assertEquals(BigDecimal("100"), tilkommenInntekt.periodebeløp)
+        assertFalse(tilkommenInntekt.fjernet)
+
+    }
+
+    @Test
     fun `kan ikke legge til periode som overlapper med annen periode`() {
         val fødselsnummer = lagFødselsnummer()
         val organisasjonsnummer = lagOrganisasjonsnummer()
