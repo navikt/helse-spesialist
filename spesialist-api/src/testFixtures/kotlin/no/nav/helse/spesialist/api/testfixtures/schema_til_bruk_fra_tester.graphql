@@ -46,6 +46,10 @@ interface Periode {
     vedtaksperiodeId: UUID!
 }
 
+interface TilkommenInntektEvent {
+    metadata: Metadata!
+}
+
 interface Vilkarsgrunnlag {
     arbeidsgiverrefusjoner: [Arbeidsgiverrefusjon!]!
     id: UUID!
@@ -276,6 +280,13 @@ type EndringIRefusjon {
     endringsdato: LocalDate
 }
 
+type Endringer {
+    dager: ListLocalDateEndring
+    fom: LocalDateEndring
+    organisasjonsnummer: StringEndring
+    tom: LocalDateEndring
+}
+
 type Enhet {
     id: String!
     navn: String!
@@ -401,6 +412,22 @@ type LagtPaVent implements Historikkinnslag {
     type: PeriodehistorikkType!
 }
 
+type ListLocalDateEndring {
+    fra: [LocalDate!]!
+    til: [LocalDate!]!
+}
+
+type LocalDateEndring {
+    fra: LocalDate!
+    til: LocalDate!
+}
+
+type Metadata {
+    notatTilBeslutter: String!
+    sekvensnummer: Int!
+    tidspunkt: LocalDateTime!
+}
+
 type MinimumSykdomsgradOverstyring implements Overstyring {
     ferdigstilt: Boolean!
     hendelseId: UUID!
@@ -413,15 +440,19 @@ type MinimumSykdomsgradOverstyring implements Overstyring {
 type Mutation {
     annuller(annullering: AnnulleringDataInput!): Boolean!
     endrePaVent(arsaker: [PaVentArsakInput!]!, frist: LocalDate!, notatTekst: String, oppgaveId: String!, tildeling: Boolean!): PaVent
+    endreTilkommenInntekt(endretTil: TilkommenInntektRequestInput!, fodselsnummer: String!, notatTilBeslutter: String!, uuid: UUID!): Boolean!
     fattVedtak(begrunnelse: String, oppgavereferanse: String!): Boolean!
     feilregistrerKommentar(id: Int!): Kommentar
     feilregistrerKommentarV2(id: Int!): Kommentar
     feilregistrerNotat(id: Int!): Notat
     fjernPaVent(oppgaveId: String!): Boolean
     fjernTildeling(oppgaveId: String!): Boolean!
+    fjernTilkommenInntekt(fodselsnummer: String!, notatTilBeslutter: String!, uuid: UUID!): Boolean!
+    gjenopprettTilkommenInntekt(endretTil: TilkommenInntektRequestInput!, fodselsnummer: String!, notatTilBeslutter: String!, uuid: UUID!): Boolean!
     leggPaVent(arsaker: [PaVentArsakInput!], frist: LocalDate!, notatTekst: String, oppgaveId: String!, tildeling: Boolean!): PaVent
     leggTilKommentar(dialogRef: Int!, saksbehandlerident: String!, tekst: String!): Kommentar
     leggTilNotat(saksbehandlerOid: String!, tekst: String!, type: NotatType!, vedtaksperiodeId: String!): Notat
+    leggTilTilkommenInntekt(fodselsnummer: String!, notatTilBeslutter: String!, verdier: TilkommenInntektRequestInput!): Boolean!
     minimumSykdomsgrad(minimumSykdomsgrad: MinimumSykdomsgradInput!): Boolean!
     oppdaterPerson(fodselsnummer: String!): Boolean!
     opphevStans(begrunnelse: String!, fodselsnummer: String!): Boolean!
@@ -430,7 +461,6 @@ type Mutation {
     overstyrArbeidsforhold(overstyring: ArbeidsforholdOverstyringHandlingInput!): Boolean!
     overstyrDager(overstyring: TidslinjeOverstyringInput!): Boolean!
     overstyrInntektOgRefusjon(overstyring: InntektOgRefusjonOverstyringInput!): Boolean!
-    overstyrTilkommenInntekt(overstyring: TilkommenInntektOverstyringInput!): Boolean!
     sendIRetur(notatTekst: String!, oppgavereferanse: String!): Boolean!
     sendTilGodkjenningV2(oppgavereferanse: String!, vedtakBegrunnelse: String): Boolean!
     sendTilInfotrygd(arsak: String!, begrunnelser: [String!]!, kommentar: String, oppgavereferanse: String!): Boolean!
@@ -588,6 +618,7 @@ type Person {
     infotrygdutbetalinger: [Infotrygdutbetaling!]
     personinfo: Personinfo!
     tildeling: Tildeling
+    tilkomneInntektskilder: [TilkommenInntektskilde!]!
     tilleggsinfoForInntektskilder: [TilleggsinfoForInntektskilde!]!
     versjon: Int!
     vilkarsgrunnlag: [Vilkarsgrunnlag!]!
@@ -795,6 +826,11 @@ type Sporsmal {
     undertekst: String
 }
 
+type StringEndring {
+    fra: String!
+    til: String!
+}
+
 type Svar {
     verdi: String
 }
@@ -834,6 +870,42 @@ type Tildeling {
     epost: String!
     navn: String!
     oid: UUID!
+}
+
+type TilkommenInntekt {
+    dager: [LocalDate!]!
+    events: [TilkommenInntektEvent!]!
+    fjernet: Boolean!
+    fom: LocalDate!
+    tom: LocalDate!
+}
+
+type TilkommenInntektEndretEvent implements TilkommenInntektEvent {
+    endringer: Endringer!
+    metadata: Metadata!
+}
+
+type TilkommenInntektFjernetEvent implements TilkommenInntektEvent {
+    metadata: Metadata!
+}
+
+type TilkommenInntektGjenopprettetEvent implements TilkommenInntektEvent {
+    endringer: Endringer!
+    metadata: Metadata!
+}
+
+type TilkommenInntektOpprettetEvent implements TilkommenInntektEvent {
+    dager: [LocalDate!]!
+    fom: LocalDate!
+    metadata: Metadata!
+    organisasjonsnummer: String!
+    tom: LocalDate!
+}
+
+type TilkommenInntektskilde {
+    inntekter: [TilkommenInntekt!]!
+    organisasjonsnavn: String!
+    organisasjonsnummer: String!
 }
 
 type TilleggsinfoForInntektskilde {
@@ -1347,6 +1419,9 @@ enum Visningskriterium {
     UKJENT
 }
 
+"class java.math.BigDecimal"
+scalar BigDecimal
+
 "class java.time.LocalDate"
 scalar LocalDate
 
@@ -1399,11 +1474,6 @@ input FiltreringInput {
     tildelt: Boolean
 }
 
-input FjernetInntektInput {
-    organisasjonsnummer: String!
-    perioder: [PeriodeUtenBelopInput!]!
-}
-
 input InntektOgRefusjonOverstyringInput {
     aktorId: String!
     arbeidsgivere: [OverstyringArbeidsgiverInput!]!
@@ -1428,11 +1498,6 @@ input MinimumSykdomsgradInput {
     initierendeVedtaksperiodeId: UUID!
     perioderVurdertIkkeOk: [PeriodeInput!]!
     perioderVurdertOk: [PeriodeInput!]!
-}
-
-input NyEllerEndretInntektInput {
-    organisasjonsnummer: String!
-    perioder: [PeriodeMedBelopInput!]!
 }
 
 input OppgaveegenskapInput {
@@ -1491,17 +1556,6 @@ input PeriodeInput {
     tom: LocalDate!
 }
 
-input PeriodeMedBelopInput {
-    fom: LocalDate!
-    periodeBelop: Float!
-    tom: LocalDate!
-}
-
-input PeriodeUtenBelopInput {
-    fom: LocalDate!
-    tom: LocalDate!
-}
-
 input SkjonnsfastsettelseArbeidsgiverInput {
     arlig: Float!
     arsak: String!
@@ -1532,11 +1586,10 @@ input TidslinjeOverstyringInput {
     vedtaksperiodeId: UUID!
 }
 
-input TilkommenInntektOverstyringInput {
-    aktorId: String!
-    begrunnelse: String!
-    fjernet: [FjernetInntektInput!]!
-    fodselsnummer: String!
-    lagtTilEllerEndret: [NyEllerEndretInntektInput!]!
-    vedtaksperiodeId: UUID!
+input TilkommenInntektRequestInput {
+    dager: [LocalDate!]!
+    fom: LocalDate!
+    organisasjonsnummer: String!
+    periodebelop: BigDecimal!
+    tom: LocalDate!
 }
