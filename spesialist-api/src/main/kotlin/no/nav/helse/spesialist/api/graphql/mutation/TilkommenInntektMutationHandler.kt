@@ -15,7 +15,6 @@ import no.nav.helse.spesialist.application.TilkommenInntektRepository
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.Periode.Companion.tilPerioder
-import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.gradering.TilkommenInntekt
 import no.nav.helse.spesialist.domain.gradering.TilkommenInntektId
 import java.math.BigDecimal
@@ -53,7 +52,7 @@ class TilkommenInntektMutationHandler(
             val tilkommenInntekt =
                 TilkommenInntekt.ny(
                     fødselsnummer = fodselsnummer,
-                    saksbehandlerOid = SaksbehandlerOid(env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER).oid),
+                    saksbehandlerIdent = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER).ident,
                     notatTilBeslutter = notatTilBeslutter,
                     totrinnsvurderingId =
                         finnEllerOpprettTotrinnsvurdering(
@@ -142,7 +141,7 @@ class TilkommenInntektMutationHandler(
                 tom = endretTil.tom,
                 periodebeløp = endretTil.periodebelop,
                 dager = endretTil.dager,
-                saksbehandlerOid = SaksbehandlerOid(env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER).oid),
+                saksbehandlerIdent = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER).ident,
                 notatTilBeslutter = notatTilBeslutter,
                 totrinnsvurderingId = finnEllerOpprettTotrinnsvurdering(fodselsnummer, totrinnsvurderingRepository).id(),
             )

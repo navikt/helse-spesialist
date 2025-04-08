@@ -2,7 +2,6 @@ package no.nav.helse.spesialist.domain.gradering
 
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
 import no.nav.helse.spesialist.domain.Periode
-import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.ddd.AggregateRoot
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -51,7 +50,7 @@ class TilkommenInntekt private constructor(
         tom: LocalDate,
         periodebeløp: BigDecimal,
         dager: Set<LocalDate>,
-        saksbehandlerOid: SaksbehandlerOid,
+        saksbehandlerIdent: String,
         notatTilBeslutter: String,
         totrinnsvurderingId: TotrinnsvurderingId,
     ) {
@@ -61,7 +60,7 @@ class TilkommenInntekt private constructor(
                     tilkommenInntektId = id(),
                     sekvensnummer = versjon + 1,
                     tidspunkt = Instant.now(),
-                    utførtAvSaksbehandlerOid = saksbehandlerOid,
+                    utførtAvSaksbehandlerIdent = saksbehandlerIdent,
                     notatTilBeslutter = notatTilBeslutter,
                     totrinnsvurderingId = totrinnsvurderingId,
                 ),
@@ -78,7 +77,7 @@ class TilkommenInntekt private constructor(
     }
 
     fun fjern(
-        saksbehandlerOid: SaksbehandlerOid,
+        saksbehandlerIdent: String,
         notatTilBeslutter: String,
         totrinnsvurderingId: TotrinnsvurderingId,
     ) {
@@ -88,7 +87,7 @@ class TilkommenInntekt private constructor(
                     tilkommenInntektId = id(),
                     sekvensnummer = versjon + 1,
                     tidspunkt = Instant.now(),
-                    utførtAvSaksbehandlerOid = saksbehandlerOid,
+                    utførtAvSaksbehandlerIdent = saksbehandlerIdent,
                     notatTilBeslutter = notatTilBeslutter,
                     totrinnsvurderingId = totrinnsvurderingId,
                 ),
@@ -102,7 +101,7 @@ class TilkommenInntekt private constructor(
         tom: LocalDate,
         periodebeløp: BigDecimal,
         dager: Set<LocalDate>,
-        saksbehandlerOid: SaksbehandlerOid,
+        saksbehandlerIdent: String,
         notatTilBeslutter: String,
         totrinnsvurderingId: TotrinnsvurderingId,
     ) {
@@ -112,7 +111,7 @@ class TilkommenInntekt private constructor(
                     tilkommenInntektId = id(),
                     sekvensnummer = versjon + 1,
                     tidspunkt = Instant.now(),
-                    utførtAvSaksbehandlerOid = saksbehandlerOid,
+                    utførtAvSaksbehandlerIdent = saksbehandlerIdent,
                     notatTilBeslutter = notatTilBeslutter,
                     totrinnsvurderingId = totrinnsvurderingId,
                 ),
@@ -204,7 +203,7 @@ class TilkommenInntekt private constructor(
     companion object {
         fun ny(
             fødselsnummer: String,
-            saksbehandlerOid: SaksbehandlerOid,
+            saksbehandlerIdent: String,
             notatTilBeslutter: String,
             totrinnsvurderingId: TotrinnsvurderingId,
             organisasjonsnummer: String,
@@ -218,7 +217,7 @@ class TilkommenInntekt private constructor(
                     tilkommenInntektId = TilkommenInntektId.ny(fødselsnummer),
                     sekvensnummer = 1,
                     tidspunkt = Instant.now(),
-                    utførtAvSaksbehandlerOid = saksbehandlerOid,
+                    utførtAvSaksbehandlerIdent = saksbehandlerIdent,
                     notatTilBeslutter = notatTilBeslutter,
                     totrinnsvurderingId = totrinnsvurderingId,
                 ),

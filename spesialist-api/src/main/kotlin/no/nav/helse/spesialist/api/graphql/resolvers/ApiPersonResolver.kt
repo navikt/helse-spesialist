@@ -199,12 +199,7 @@ data class ApiPersonResolver(
                                             ApiTilkommenInntektEvent.Metadata(
                                                 sekvensnummer = event.metadata.sekvensnummer,
                                                 tidspunkt = event.metadata.tidspunkt,
-                                                utførtAvSaksbehandlerIdent =
-                                                    event.metadata.utførtAvSaksbehandlerOid.let { saksbehandlerOid ->
-                                                        sessionFactory.transactionalSessionScope {
-                                                            sessionContext.saksbehandlerRepository.finn(saksbehandlerOid)?.ident
-                                                        } ?: error("Finner ikke saksbehandler ident for $saksbehandlerOid")
-                                                    },
+                                                utførtAvSaksbehandlerIdent = event.metadata.utførtAvSaksbehandlerIdent,
                                                 notatTilBeslutter = event.metadata.notatTilBeslutter,
                                             )
                                         when (event) {

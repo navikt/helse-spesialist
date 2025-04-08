@@ -9,7 +9,6 @@ import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.db.objectMapper
 import no.nav.helse.spesialist.domain.Periode
-import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.gradering.Endring
 import no.nav.helse.spesialist.domain.gradering.TilkommenInntekt
 import no.nav.helse.spesialist.domain.gradering.TilkommenInntektEndretEvent
@@ -59,7 +58,7 @@ class PgTilkommenInntektRepository(
                   uuid,
                   sekvensnummer,
                   tidspunkt,
-                  utførtAvSaksbehandlerOid,
+                  utførtAvSaksbehandlerIdent,
                   notatTilBeslutter,
                   totrinnsvurderingId,
                   type,
@@ -70,7 +69,7 @@ class PgTilkommenInntektRepository(
                   :uuid,
                   :sekvensnummer,
                   :tidspunkt,
-                  :utførtAvSaksbehandlerOid,
+                  :utførtAvSaksbehandlerIdent,
                   :notatTilBeslutter,
                   :totrinnsvurderingId,
                   :type,
@@ -81,7 +80,7 @@ class PgTilkommenInntektRepository(
                 "uuid" to event.metadata.tilkommenInntektId.uuid,
                 "sekvensnummer" to event.metadata.sekvensnummer,
                 "tidspunkt" to event.metadata.tidspunkt,
-                "utførtAvSaksbehandlerOid" to event.metadata.utførtAvSaksbehandlerOid,
+                "utførtAvSaksbehandlerIdent" to event.metadata.utførtAvSaksbehandlerIdent,
                 "notatTilBeslutter" to event.metadata.notatTilBeslutter,
                 "totrinnsvurderingId" to event.metadata.totrinnsvurderingId.value,
                 "type" to
@@ -148,7 +147,7 @@ class PgTilkommenInntektRepository(
                     ),
                 sekvensnummer = int("sekvensnummer"),
                 tidspunkt = instant("tidspunkt"),
-                utførtAvSaksbehandlerOid = SaksbehandlerOid(uuid("utførtAvSaksbehandlerOid")),
+                utførtAvSaksbehandlerIdent = string("utførtAvSaksbehandlerIdent"),
                 notatTilBeslutter = string("notatTilBeslutter"),
                 totrinnsvurderingId = TotrinnsvurderingId(long("totrinnsvurderingId")),
             )

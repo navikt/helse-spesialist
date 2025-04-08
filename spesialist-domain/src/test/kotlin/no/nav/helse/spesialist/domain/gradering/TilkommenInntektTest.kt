@@ -3,15 +3,14 @@ package no.nav.helse.spesialist.domain.gradering
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
-import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
+import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlerident
 import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.Month
-import java.util.UUID
 import kotlin.random.Random
 import kotlin.test.Test
 
@@ -27,7 +26,7 @@ class TilkommenInntektTest {
             dager = setOf(1 jan 2018, 31 jan 2018),
             periodebeløp = BigDecimal("10000.0"),
             fødselsnummer = fødselsnummer,
-            saksbehandlerOid = SaksbehandlerOid(UUID.randomUUID()),
+            saksbehandlerIdent = lagSaksbehandlerident(),
             notatTilBeslutter = "et notat til beslutter",
             totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong()),
             organisasjonsnummer = organisasjonsnummer

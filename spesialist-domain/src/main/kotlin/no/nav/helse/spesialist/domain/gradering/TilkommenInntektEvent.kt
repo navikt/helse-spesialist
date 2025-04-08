@@ -2,7 +2,6 @@ package no.nav.helse.spesialist.domain.gradering
 
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
 import no.nav.helse.spesialist.domain.Periode
-import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.gradering.TilkommenInntektEvent.Metadata
 import java.math.BigDecimal
 import java.time.Instant
@@ -15,7 +14,7 @@ sealed interface TilkommenInntektEvent {
         val tilkommenInntektId: TilkommenInntektId,
         val sekvensnummer: Int,
         val tidspunkt: Instant,
-        val utførtAvSaksbehandlerOid: SaksbehandlerOid,
+        val utførtAvSaksbehandlerIdent: String,
         val notatTilBeslutter: String,
         val totrinnsvurderingId: TotrinnsvurderingId,
     )
