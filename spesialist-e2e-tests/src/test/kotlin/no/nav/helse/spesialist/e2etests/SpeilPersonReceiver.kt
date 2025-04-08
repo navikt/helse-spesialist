@@ -14,6 +14,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.serialization.jackson.JacksonConverter
 import kotlinx.coroutines.runBlocking
+import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.e2etests.context.TestContext
 import no.nav.helse.spesialist.e2etests.context.Vedtaksperiode
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -61,6 +62,25 @@ class SpeilPersonReceiver(
             variables = mapOf(
                 "oppgavereferanse" to getOppgaveId(),
                 "begrunnelse" to "Fattet vedtak",
+            )
+        )
+    }
+
+    fun saksbehandlerLeggerTilTilkommenInntekt() {
+        callGraphQL(
+            operationName = "LeggTilTilkommenInntekt",
+            variables = mapOf(
+                "fodselsnummer" to testContext.person.fødselsnummer,
+                "verdier" to mapOf(
+                    "organisasjonsnummer" to lagOrganisasjonsnummer(),
+                    "fom" to "2018-01-02",
+                    "tom" to "2018-01-31",
+                   "periodebelop" to "2000",
+                    "dager" to listOf("2018-01-02")
+                            //testContext.vedtaksperioder.first().fom.plusDays(1)
+                        //.datesUntil(testContext.vedtaksperioder.first().tom.plusDays(1)).map { it.toString() }.toList(),
+                ),
+                "notatTilBeslutter" to "notat"
             )
         )
     }

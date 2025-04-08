@@ -38,8 +38,8 @@ object Meldingsbygger {
             "fødselsnummer" to person.fødselsnummer,
             "aktørId" to person.aktørId,
             "organisasjonsnummer" to arbeidsgiver.organisasjonsnummer,
-            "fom" to (1 jan 2018),
-            "tom" to (31 jan 2018)
+            "fom" to vedtaksperiode.fom,
+            "tom" to vedtaksperiode.tom,
         )
     ).toJson()
 
@@ -94,9 +94,9 @@ object Meldingsbygger {
                 "vedtaksperiodeId" to vedtaksperiode.vedtaksperiodeId,
                 "utbetalingId" to vedtaksperiode.utbetalingIdForÅByggeMelding(meldingsnavn),
                 "Godkjenning" to mapOf(
-                    "periodeFom" to (1 jan 2018),
-                    "periodeTom" to (31 jan 2018),
-                    "skjæringstidspunkt" to (1 jan 2018),
+                    "periodeFom" to vedtaksperiode.fom,
+                    "periodeTom" to vedtaksperiode.tom,
+                    "skjæringstidspunkt" to vedtaksperiode.fom,
                     "periodetype" to "FØRSTEGANGSBEHANDLING",
                     "førstegangsbehandling" to true,
                     "utbetalingtype" to "UTBETALING",
@@ -108,8 +108,8 @@ object Meldingsbygger {
                     "tags" to listOf("Innvilget"),
                     "perioderMedSammeSkjæringstidspunkt" to listOf(
                         mapOf(
-                            "fom" to (1 jan 2018),
-                            "tom" to (31 jan 2018),
+                            "fom" to vedtaksperiode.fom,
+                            "tom" to vedtaksperiode.tom,
                             "vedtaksperiodeId" to vedtaksperiode.vedtaksperiodeId,
                             "behandlingId" to vedtaksperiode.spleisBehandlingIdForÅByggeMelding(meldingsnavn)
                         )

@@ -1,0 +1,7 @@
+mutation LeggTilTilkommenInntekt($fodselsnummer: String!, $verdier: TilkommenInntektRequestInput!, $notatTilBeslutter: String!) {
+    leggTilTilkommenInntekt(
+        fodselsnummer: $fodselsnummer,
+        verdier: $verdier,
+        notatTilBeslutter: $notatTilBeslutter
+    )
+}
