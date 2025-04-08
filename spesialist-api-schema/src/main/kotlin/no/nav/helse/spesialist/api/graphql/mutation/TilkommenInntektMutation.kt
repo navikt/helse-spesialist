@@ -21,6 +21,13 @@ interface TilkommenInntektMutationSchema : Mutation {
         notatTilBeslutter: String,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Unit>
+
+    fun fjernTilkommenInntekt(
+        fodselsnummer: String,
+        uuid: UUID,
+        notatTilBeslutter: String,
+        env: DataFetchingEnvironment,
+    ): DataFetcherResult<Unit>
 }
 
 class TilkommenInntektMutation(private val handler: TilkommenInntektMutationSchema) : TilkommenInntektMutationSchema by handler

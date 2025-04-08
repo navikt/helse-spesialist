@@ -143,7 +143,11 @@ class TilkommenInntektMutationHandler(
                 dager = endretTil.dager,
                 saksbehandlerIdent = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER).ident,
                 notatTilBeslutter = notatTilBeslutter,
-                totrinnsvurderingId = finnEllerOpprettTotrinnsvurdering(fodselsnummer, totrinnsvurderingRepository).id(),
+                totrinnsvurderingId =
+                    finnEllerOpprettTotrinnsvurdering(
+                        fodselsnummer,
+                        totrinnsvurderingRepository,
+                    ).id(),
             )
 
             val dagerEtter = tilkommenInntekt.dager
@@ -167,6 +171,51 @@ class TilkommenInntektMutationHandler(
                     årsak = "tilkommen inntekt endret",
                 )
             }
+        }
+
+        return DataFetcherResult.newResult<Unit>().build()
+    }
+
+    override fun fjernTilkommenInntekt(
+        fodselsnummer: String,
+        uuid: UUID,
+        notatTilBeslutter: String,
+        env: DataFetchingEnvironment,
+    ): DataFetcherResult<Unit> {
+        sessionFactory.transactionalSessionScope { session ->
+            val tilkommenInntektRepository: TilkommenInntektRepository = session.tilkommenInntektRepository
+            val totrinnsvurderingRepository: TotrinnsvurderingRepository = session.totrinnsvurderingRepository
+            val tilkommenInntekt =
+                tilkommenInntektRepository.finn(TilkommenInntektId.fra(fodselsnummer, uuid))
+                    ?: error("Fant ikke tilkommen inntekt med fødselsnummer $fodselsnummer og uuid $uuid")
+
+            tilkommenInntekt.fjern(
+                saksbehandlerIdent = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER).ident,
+                notatTilBeslutter = notatTilBeslutter,
+                totrinnsvurderingId =
+                    finnEllerOpprettTotrinnsvurdering(
+                        fodselsnummer,
+                        totrinnsvurderingRepository,
+                    ).id(),
+            )
+
+            val event =
+                InntektsendringerEvent(
+                    inntektskilder =
+                        listOf(
+                            InntektsendringerEvent.Inntektskilde(
+                                inntektskilde = tilkommenInntekt.organisasjonsnummer,
+                                inntekter = emptyList(),
+                                nullstill = tilkommenInntekt.dager.tilNullstillinger(),
+                            ),
+                        ),
+                )
+
+            meldingPubliserer.publiser(
+                fødselsnummer = tilkommenInntekt.id().fødselsnummer,
+                hendelse = event,
+                årsak = "tilkommen inntekt fjernet",
+            )
         }
 
         return DataFetcherResult.newResult<Unit>().build()
