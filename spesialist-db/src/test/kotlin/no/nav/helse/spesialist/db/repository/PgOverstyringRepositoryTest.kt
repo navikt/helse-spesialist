@@ -4,7 +4,6 @@ import no.nav.helse.modell.saksbehandler.handlinger.Arbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgrad
 import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgradArbeidsgiver
 import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgradPeriode
-import no.nav.helse.modell.saksbehandler.handlinger.OverstyrTilkommenInntekt
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyringId
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtArbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtArbeidsgiver

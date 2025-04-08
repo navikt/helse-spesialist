@@ -189,7 +189,11 @@ fun lagSchemaMedResolversOgHandlers(
                     ),
                 paVent = PaVentMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
                 opphevStans = OpphevStansMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
-                tilkommenInntekt = TilkommenInntektMutationHandler(),
+                tilkommenInntekt =
+                    TilkommenInntektMutationHandler(
+                        sessionFactory = sessionFactory,
+                        meldingPubliserer = meldingPubliserer,
+                    ),
             ),
     )
 

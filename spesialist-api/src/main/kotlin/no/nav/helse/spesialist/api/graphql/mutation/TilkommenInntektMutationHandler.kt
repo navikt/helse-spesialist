@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.api.graphql.mutation
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import no.nav.helse.MeldingPubliserer
+import no.nav.helse.db.SessionFactory
 import no.nav.helse.db.VedtaksperiodeRepository
 import no.nav.helse.modell.melding.InntektsendringerEvent
 import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
@@ -22,13 +23,8 @@ import java.time.LocalDate
 import java.util.UUID
 
 class TilkommenInntektMutationHandler(
-    private val vedtaksperiodeRepository: VedtaksperiodeRepository,
-    private val tilkommenInntektRepository: TilkommenInntektRepository,
+    private val sessionFactory: SessionFactory,
     private val meldingPubliserer: MeldingPubliserer,
-    private val totrinnsvurderingRepository: TotrinnsvurderingRepository,
-    // tidligste fom må være skjæringstidspunkt +1 (fiksa se under)
-    // perioden må være innenfor vedtaksperiodene (fiksa se under)
-    // kan ikke legge inn perioder som overlapper med eksisterende perioder, selvom de er fjernet (fiksa se under)
 ) : TilkommenInntektMutationSchema {
     override fun leggTilTilkommenInntekt(
         fodselsnummer: String,
@@ -36,66 +32,72 @@ class TilkommenInntektMutationHandler(
         notatTilBeslutter: String,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Unit> {
-        val periode = Periode(fom = verdier.fom, tom = verdier.tom)
-        verifiserAtErInnenforEtSykefraværstilfelle(
-            periode = periode,
-            fødselsnummer = fodselsnummer,
-        )
-        val alleTilkomneInntekterForInntektskilde =
-            tilkommenInntektRepository.finnAlleForFødselsnummerOgOrganisasjonsnummer(
+        sessionFactory.transactionalSessionScope { session ->
+            val periode = Periode(fom = verdier.fom, tom = verdier.tom)
+            verifiserAtErInnenforEtSykefraværstilfelle(
+                periode = periode,
                 fødselsnummer = fodselsnummer,
-                organisasjonsnummer = verdier.organisasjonsnummer,
+                vedtaksperiodeRepository = session.vedtaksperiodeRepository,
             )
-        if (alleTilkomneInntekterForInntektskilde.any { it.periode overlapper periode }) {
-            error("Kan ikke legge til tilkommen inntekt som overlapper med en annen tilkommen inntekt for samme inntektskilde")
-        }
+            val alleTilkomneInntekterForInntektskilde =
+                session.tilkommenInntektRepository.finnAlleForFødselsnummer(
+                    fødselsnummer = fodselsnummer,
+                ).filter { it.organisasjonsnummer == verdier.organisasjonsnummer }
+            if (alleTilkomneInntekterForInntektskilde.any { it.periode overlapper periode }) {
+                error("Kan ikke legge til tilkommen inntekt som overlapper med en annen tilkommen inntekt for samme inntektskilde")
+            }
 
-        val tilkommenInntekt =
-            TilkommenInntekt.ny(
-                fødselsnummer = fodselsnummer,
-                saksbehandlerOid = SaksbehandlerOid(env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER).oid),
-                notatTilBeslutter = notatTilBeslutter,
-                totrinnsvurderingId = finnEllerOpprettTotrinnsvurdering(fodselsnummer).id(),
-                organisasjonsnummer = verdier.organisasjonsnummer,
-                fom = verdier.fom,
-                tom = verdier.tom,
-                periodebeløp = verdier.periodebelop,
-                dager = verdier.dager,
-            )
-        tilkommenInntektRepository.lagre(tilkommenInntekt)
+            val tilkommenInntekt =
+                TilkommenInntekt.ny(
+                    fødselsnummer = fodselsnummer,
+                    saksbehandlerOid = SaksbehandlerOid(env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER).oid),
+                    notatTilBeslutter = notatTilBeslutter,
+                    totrinnsvurderingId =
+                        finnEllerOpprettTotrinnsvurdering(
+                            fodselsnummer,
+                            session.totrinnsvurderingRepository,
+                        ).id(),
+                    organisasjonsnummer = verdier.organisasjonsnummer,
+                    fom = verdier.fom,
+                    tom = verdier.tom,
+                    periodebeløp = verdier.periodebelop,
+                    dager = verdier.dager,
+                )
+            session.tilkommenInntektRepository.lagre(tilkommenInntekt)
 
-        meldingPubliserer.publiser(
-            fødselsnummer = tilkommenInntekt.id().fødselsnummer,
-            hendelse =
-                InntektsendringerEvent(
-                    inntektskilder =
-                        listOf(
-                            InntektsendringerEvent.Inntektskilde(
-                                inntektskilde = tilkommenInntekt.organisasjonsnummer,
-                                inntekter =
-                                    tilkommenInntekt.dager.sorted().map { dag ->
-                                        InntektsendringerEvent.Inntektskilde.Inntekt(
-                                            fom = dag,
-                                            tom = dag,
-                                            dagsbeløp = tilkommenInntekt.dagbeløp(),
-                                        )
-                                    },
-                                nullstill = emptyList(),
+            meldingPubliserer.publiser(
+                fødselsnummer = tilkommenInntekt.id().fødselsnummer,
+                hendelse =
+                    InntektsendringerEvent(
+                        inntektskilder =
+                            listOf(
+                                InntektsendringerEvent.Inntektskilde(
+                                    inntektskilde = tilkommenInntekt.organisasjonsnummer,
+                                    inntekter =
+                                        tilkommenInntekt.dager.sorted().map { dag ->
+                                            InntektsendringerEvent.Inntektskilde.Inntekt(
+                                                fom = dag,
+                                                tom = dag,
+                                                dagsbeløp = tilkommenInntekt.dagbeløp(),
+                                            )
+                                        },
+                                    nullstill = emptyList(),
+                                ),
                             ),
-                        ),
-                ),
-            årsak = "tilkommen inntekt lagt til",
-        )
+                    ),
+                årsak = "tilkommen inntekt lagt til",
+            )
+        }
 
         return DataFetcherResult.newResult<Unit>().build()
     }
 
-    private fun finnEllerOpprettTotrinnsvurdering(fodselsnummer: String): Totrinnsvurdering =
+    private fun finnEllerOpprettTotrinnsvurdering(
+        fodselsnummer: String,
+        totrinnsvurderingRepository: TotrinnsvurderingRepository,
+    ): Totrinnsvurdering =
         totrinnsvurderingRepository.finn(fodselsnummer)
-            ?: Totrinnsvurdering.ny(
-                vedtaksperiodeId = UUID.randomUUID(), // TODO FIXME NOPE
-                fødselsnummer = fodselsnummer,
-            ).also(totrinnsvurderingRepository::lagre)
+            ?: Totrinnsvurdering.ny(fødselsnummer = fodselsnummer).also(totrinnsvurderingRepository::lagre)
 
     override fun endreTilkommenInntekt(
         fodselsnummer: String,
@@ -104,57 +106,65 @@ class TilkommenInntektMutationHandler(
         notatTilBeslutter: String,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Unit> {
-        val endretTilPeriode = Periode(fom = endretTil.fom, tom = endretTil.tom)
-        val tilkommenInntekt = tilkommenInntektRepository.finn(TilkommenInntektId.fra(fodselsnummer, uuid))
+        sessionFactory.transactionalSessionScope { session ->
+            val vedtaksperiodeRepository: VedtaksperiodeRepository = session.vedtaksperiodeRepository
+            val tilkommenInntektRepository: TilkommenInntektRepository = session.tilkommenInntektRepository
+            val totrinnsvurderingRepository: TotrinnsvurderingRepository = session.totrinnsvurderingRepository
+            val endretTilPeriode = Periode(fom = endretTil.fom, tom = endretTil.tom)
+            val tilkommenInntekt =
+                tilkommenInntektRepository.finn(TilkommenInntektId.fra(fodselsnummer, uuid))
+                    ?: error("Fant ikke tilkommen inntekt med fødselsnummer $fodselsnummer og uuid $uuid")
 
-        verifiserAtErInnenforEtSykefraværstilfelle(
-            periode = endretTilPeriode,
-            fødselsnummer = fodselsnummer,
-        )
-        val andreTilkomneInntekterForOrganisasjonsnummer =
-            tilkommenInntektRepository.finnAlleForFødselsnummerOgOrganisasjonsnummer(
+            verifiserAtErInnenforEtSykefraværstilfelle(
+                periode = endretTilPeriode,
                 fødselsnummer = fodselsnummer,
+                vedtaksperiodeRepository = vedtaksperiodeRepository,
+            )
+            val andreTilkomneInntekterForOrganisasjonsnummer =
+                tilkommenInntektRepository.finnAlleForFødselsnummer(
+                    fødselsnummer = fodselsnummer,
+                )
+                    .filter { it.organisasjonsnummer == endretTil.organisasjonsnummer }.minus(tilkommenInntekt)
+            if (andreTilkomneInntekterForOrganisasjonsnummer.any { endretTilPeriode overlapper it.periode }) {
+                error("Kan ikke legge til tilkommen inntekt som overlapper med en annen tilkommen inntekt")
+            }
+
+            val dagerFør: Set<LocalDate> = tilkommenInntekt.dager
+            val dagsbeløpFør: BigDecimal = tilkommenInntekt.dagbeløp()
+            val arbeidsgiverFør: String = tilkommenInntekt.organisasjonsnummer
+
+            tilkommenInntekt.endreTil(
                 organisasjonsnummer = endretTil.organisasjonsnummer,
-            ).minus(tilkommenInntekt)
-        if (andreTilkomneInntekterForOrganisasjonsnummer.any { endretTilPeriode overlapper it.periode }) {
-            error("Kan ikke legge til tilkommen inntekt som overlapper med en annen tilkommen inntekt")
-        }
-
-        val dagerFør: Set<LocalDate> = tilkommenInntekt.dager
-        val dagsbeløpFør: BigDecimal = tilkommenInntekt.dagbeløp()
-        val arbeidsgiverFør: String = tilkommenInntekt.organisasjonsnummer
-
-        tilkommenInntekt.endreTil(
-            organisasjonsnummer = endretTil.organisasjonsnummer,
-            fom = endretTil.fom,
-            tom = endretTil.tom,
-            periodebeløp = endretTil.periodebelop,
-            dager = endretTil.dager,
-            saksbehandlerOid = SaksbehandlerOid(env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER).oid),
-            notatTilBeslutter = notatTilBeslutter,
-            totrinnsvurderingId = finnEllerOpprettTotrinnsvurdering(fodselsnummer).id(),
-        )
-
-        val dagerEtter = tilkommenInntekt.dager
-        val dagsbeløpEtter = tilkommenInntekt.dagbeløp()
-        val arbeidsgiverEtter = tilkommenInntekt.organisasjonsnummer
-
-        val event =
-            byggInntektsendringerEvent(
-                arbeidsgiverFør = arbeidsgiverFør,
-                arbeidsgiverEtter = arbeidsgiverEtter,
-                dagerFør = dagerFør,
-                dagerEtter = dagerEtter,
-                dagsbeløpFør = dagsbeløpFør,
-                dagsbeløpEtter = dagsbeløpEtter,
+                fom = endretTil.fom,
+                tom = endretTil.tom,
+                periodebeløp = endretTil.periodebelop,
+                dager = endretTil.dager,
+                saksbehandlerOid = SaksbehandlerOid(env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER).oid),
+                notatTilBeslutter = notatTilBeslutter,
+                totrinnsvurderingId = finnEllerOpprettTotrinnsvurdering(fodselsnummer, totrinnsvurderingRepository).id(),
             )
 
-        event?.let {
-            meldingPubliserer.publiser(
-                fødselsnummer = tilkommenInntekt.id().fødselsnummer,
-                hendelse = it,
-                årsak = "tilkommen inntekt endret",
-            )
+            val dagerEtter = tilkommenInntekt.dager
+            val dagsbeløpEtter = tilkommenInntekt.dagbeløp()
+            val arbeidsgiverEtter = tilkommenInntekt.organisasjonsnummer
+
+            val event =
+                byggInntektsendringerEvent(
+                    arbeidsgiverFør = arbeidsgiverFør,
+                    arbeidsgiverEtter = arbeidsgiverEtter,
+                    dagerFør = dagerFør,
+                    dagerEtter = dagerEtter,
+                    dagsbeløpFør = dagsbeløpFør,
+                    dagsbeløpEtter = dagsbeløpEtter,
+                )
+
+            event?.let {
+                meldingPubliserer.publiser(
+                    fødselsnummer = tilkommenInntekt.id().fødselsnummer,
+                    hendelse = it,
+                    årsak = "tilkommen inntekt endret",
+                )
+            }
         }
 
         return DataFetcherResult.newResult<Unit>().build()
@@ -230,9 +240,10 @@ class TilkommenInntektMutationHandler(
     private fun verifiserAtErInnenforEtSykefraværstilfelle(
         periode: Periode,
         fødselsnummer: String,
+        vedtaksperiodeRepository: VedtaksperiodeRepository,
     ) {
         val sykefraværstilfellePerioder =
-            finnSykefraværstillfellerSomPerioder(fødselsnummer)
+            finnSykefraværstillfellerSomPerioder(fødselsnummer, vedtaksperiodeRepository)
                 .map { it.utenFørsteDag() }
                 .filterNot { it.datoer().isEmpty() }
 
@@ -241,11 +252,13 @@ class TilkommenInntektMutationHandler(
         }
     }
 
-    private fun finnSykefraværstillfellerSomPerioder(fødselsnummer: String) =
-        vedtaksperiodeRepository.finnVedtaksperioder(fødselsnummer)
-            .map { it.behandlinger.last() }
-            .groupBy(BehandlingDto::skjæringstidspunkt, BehandlingDto::tom)
-            .map { (skjæringstidspunkt, listeAvTom) -> Periode(fom = skjæringstidspunkt, tom = listeAvTom.max()) }
+    private fun finnSykefraværstillfellerSomPerioder(
+        fødselsnummer: String,
+        vedtaksperiodeRepository: VedtaksperiodeRepository,
+    ) = vedtaksperiodeRepository.finnVedtaksperioder(fødselsnummer)
+        .map { it.behandlinger.last() }
+        .groupBy(BehandlingDto::skjæringstidspunkt, BehandlingDto::tom)
+        .map { (skjæringstidspunkt, listeAvTom) -> Periode(fom = skjæringstidspunkt, tom = listeAvTom.max()) }
 }
 
 private fun Periode.utenFørsteDag() = copy(fom = fom.plusDays(1))

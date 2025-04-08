@@ -9,6 +9,7 @@ import no.nav.helse.spesialist.application.DialogRepository
 import no.nav.helse.spesialist.application.NotatRepository
 import no.nav.helse.spesialist.application.OverstyringRepository
 import no.nav.helse.spesialist.application.SaksbehandlerRepository
+import no.nav.helse.spesialist.application.TilkommenInntektRepository
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.db.dao.PgArbeidsforholdDao
 import no.nav.helse.spesialist.db.dao.PgArbeidsgiverDao
@@ -45,6 +46,7 @@ import no.nav.helse.spesialist.db.repository.PgNotatRepository
 import no.nav.helse.spesialist.db.repository.PgOppgaveRepository
 import no.nav.helse.spesialist.db.repository.PgOverstyringRepository
 import no.nav.helse.spesialist.db.repository.PgSaksbehandlerRepository
+import no.nav.helse.spesialist.db.repository.PgTilkommenInntektRepository
 import no.nav.helse.spesialist.db.repository.PgTotrinnsvurderingRepository
 
 class DBSessionContext(session: Session) : SessionContext {
@@ -86,4 +88,5 @@ class DBSessionContext(session: Session) : SessionContext {
     override val avviksvurderingRepository: AvviksvurderingRepository = PgAvviksvurderingRepository(session)
     override val oppgaveRepository: OppgaveRepository = PgOppgaveRepository(session)
     override val behandlingRepository: BehandlingRepository = PgBehandlingRepository(session)
+    override val tilkommenInntektRepository: TilkommenInntektRepository = PgTilkommenInntektRepository(session)
 }

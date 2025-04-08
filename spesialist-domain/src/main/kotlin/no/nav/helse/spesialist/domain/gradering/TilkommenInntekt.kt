@@ -24,11 +24,11 @@ data class TilkommenInntektId(val fødselsnummer: String, val uuid: UUID) {
 
 class TilkommenInntekt private constructor(
     opprettetEvent: TilkommenInntektOpprettetEvent,
-) : AggregateRoot<TilkommenInntektId>(opprettetEvent.tilkommenInntektId) {
+) : AggregateRoot<TilkommenInntektId>(opprettetEvent.metadata.tilkommenInntektId) {
     private val _events: MutableList<TilkommenInntektEvent> = mutableListOf(opprettetEvent)
     val events: List<TilkommenInntektEvent> get() = _events
 
-    var totrinnsvurderingId: TotrinnsvurderingId = opprettetEvent.totrinnsvurderingId
+    var totrinnsvurderingId: TotrinnsvurderingId = opprettetEvent.metadata.totrinnsvurderingId
         private set
     var organisasjonsnummer: String = opprettetEvent.organisasjonsnummer
         private set
@@ -40,7 +40,7 @@ class TilkommenInntekt private constructor(
         private set
     var fjernet: Boolean = false
         private set
-    var versjon: Int = opprettetEvent.sekvensNummer
+    var versjon: Int = opprettetEvent.metadata.sekvensnummer
         private set
 
     fun dagbeløp(): BigDecimal = periodebeløp.setScale(4).divide(dager.size.toBigDecimal(), RoundingMode.HALF_UP)
@@ -57,16 +57,19 @@ class TilkommenInntekt private constructor(
     ) {
         apply(
             TilkommenInntektEndretEvent(
-                tilkommenInntektId = id(),
-                sekvensNummer = versjon + 1,
-                tidspunkt = Instant.now(),
-                utførtAvSaksbehandlerOid = saksbehandlerOid,
-                notatTilBeslutter = notatTilBeslutter,
-                totrinnsvurderingId = totrinnsvurderingId,
+                TilkommenInntektEvent.Metadata(
+                    tilkommenInntektId = id(),
+                    sekvensnummer = versjon + 1,
+                    tidspunkt = Instant.now(),
+                    utførtAvSaksbehandlerOid = saksbehandlerOid,
+                    notatTilBeslutter = notatTilBeslutter,
+                    totrinnsvurderingId = totrinnsvurderingId,
+                ),
                 endringer =
                     TilkommenInntektEvent.Endringer(
                         organisasjonsnummer = muligEndring(fra = this.organisasjonsnummer, til = organisasjonsnummer),
-                        periode = muligEndring(fra = periode, til = Periode(fom = fom, tom = tom)),
+                        fom = muligEndring(fra = periode.fom, til = fom),
+                        tom = muligEndring(fra = periode.tom, til = tom),
                         periodebeløp = muligEndring(fra = this.periodebeløp, til = periodebeløp),
                         dager = muligEndring(fra = this.dager, til = dager),
                     ),
@@ -81,12 +84,14 @@ class TilkommenInntekt private constructor(
     ) {
         apply(
             TilkommenInntektFjernetEvent(
-                tilkommenInntektId = id(),
-                sekvensNummer = versjon + 1,
-                tidspunkt = Instant.now(),
-                utførtAvSaksbehandlerOid = saksbehandlerOid,
-                notatTilBeslutter = notatTilBeslutter,
-                totrinnsvurderingId = totrinnsvurderingId,
+                TilkommenInntektEvent.Metadata(
+                    tilkommenInntektId = id(),
+                    sekvensnummer = versjon + 1,
+                    tidspunkt = Instant.now(),
+                    utførtAvSaksbehandlerOid = saksbehandlerOid,
+                    notatTilBeslutter = notatTilBeslutter,
+                    totrinnsvurderingId = totrinnsvurderingId,
+                ),
             ),
         )
     }
@@ -103,16 +108,19 @@ class TilkommenInntekt private constructor(
     ) {
         apply(
             TilkommenInntektGjenopprettetEvent(
-                tilkommenInntektId = id(),
-                sekvensNummer = versjon + 1,
-                tidspunkt = Instant.now(),
-                utførtAvSaksbehandlerOid = saksbehandlerOid,
-                notatTilBeslutter = notatTilBeslutter,
-                totrinnsvurderingId = totrinnsvurderingId,
+                TilkommenInntektEvent.Metadata(
+                    tilkommenInntektId = id(),
+                    sekvensnummer = versjon + 1,
+                    tidspunkt = Instant.now(),
+                    utførtAvSaksbehandlerOid = saksbehandlerOid,
+                    notatTilBeslutter = notatTilBeslutter,
+                    totrinnsvurderingId = totrinnsvurderingId,
+                ),
                 endringer =
                     TilkommenInntektEvent.Endringer(
                         organisasjonsnummer = muligEndring(fra = this.organisasjonsnummer, til = organisasjonsnummer),
-                        periode = muligEndring(fra = periode, til = Periode(fom = fom, tom = tom)),
+                        fom = muligEndring(fra = periode.fom, til = fom),
+                        tom = muligEndring(fra = periode.tom, til = tom),
                         periodebeløp = muligEndring(fra = this.periodebeløp, til = periodebeløp),
                         dager = muligEndring(fra = this.dager, til = dager),
                     ),
@@ -148,15 +156,20 @@ class TilkommenInntekt private constructor(
     }
 
     private fun håndterEvent(event: TilkommenInntektEvent) {
-        if (event.sekvensNummer != this.versjon + 1) error("Fikk events ute av rekkefølge: $versjon -> ${event.sekvensNummer}")
-        this.totrinnsvurderingId = event.totrinnsvurderingId
-        this.versjon = event.sekvensNummer
+        if (event.metadata.sekvensnummer != this.versjon + 1) {
+            error(
+                "Fikk events ute av rekkefølge: $versjon -> ${event.metadata.sekvensnummer}",
+            )
+        }
+        this.totrinnsvurderingId = event.metadata.totrinnsvurderingId
+        this.versjon = event.metadata.sekvensnummer
         this._events.add(event)
     }
 
     private fun håndterEndringer(endringer: TilkommenInntektEvent.Endringer) {
         håndterEndring(endringer.organisasjonsnummer, this::organisasjonsnummer)
-        håndterEndring(endringer.periode, this::periode)
+        håndterEndring(endringer.fom, periode.fom) { periode = periode.copy(fom = it) }
+        håndterEndring(endringer.tom, periode.tom) { periode = periode.copy(tom = it) }
         håndterEndring(endringer.periodebeløp, this::periodebeløp)
         håndterEndring(endringer.dager, this::dager)
     }
@@ -174,6 +187,20 @@ class TilkommenInntekt private constructor(
         }
     }
 
+    private fun <T> håndterEndring(
+        endring: Endring<T>?,
+        currentValue: T,
+        updater: (T) -> Unit,
+    ) {
+        if (endring != null) {
+            if (endring.fra != currentValue) {
+                error("Fikk event med endring med feil fra-verdi!")
+            } else {
+                updater(endring.til)
+            }
+        }
+    }
+
     companion object {
         fun ny(
             fødselsnummer: String,
@@ -187,12 +214,14 @@ class TilkommenInntekt private constructor(
             dager: Set<LocalDate>,
         ) = TilkommenInntekt(
             TilkommenInntektOpprettetEvent(
-                tilkommenInntektId = TilkommenInntektId.ny(fødselsnummer),
-                sekvensNummer = 1,
-                tidspunkt = Instant.now(),
-                utførtAvSaksbehandlerOid = saksbehandlerOid,
-                notatTilBeslutter = notatTilBeslutter,
-                totrinnsvurderingId = totrinnsvurderingId,
+                TilkommenInntektEvent.Metadata(
+                    tilkommenInntektId = TilkommenInntektId.ny(fødselsnummer),
+                    sekvensnummer = 1,
+                    tidspunkt = Instant.now(),
+                    utførtAvSaksbehandlerOid = saksbehandlerOid,
+                    notatTilBeslutter = notatTilBeslutter,
+                    totrinnsvurderingId = totrinnsvurderingId,
+                ),
                 organisasjonsnummer = organisasjonsnummer,
                 periode = Periode(fom, tom),
                 periodebeløp = periodebeløp,

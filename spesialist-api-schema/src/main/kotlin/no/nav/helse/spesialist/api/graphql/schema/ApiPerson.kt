@@ -3,7 +3,6 @@ package no.nav.helse.spesialist.api.graphql.schema
 import com.expediagroup.graphql.generator.annotations.GraphQLIgnore
 import com.expediagroup.graphql.generator.annotations.GraphQLName
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -110,20 +109,6 @@ interface PersonSchema {
 
     fun tilkomneInntektskilder(): List<ApiTilkommenInntektskilde>
 }
-
-data class ApiTilkommenInntektskilde(
-    val organisasjonsnummer: String,
-    val organisasjonsnavn: String,
-    val inntekter: ApiTilkommenInntekt,
-    // ...
-)
-
-data class ApiTilkommenInntekt(
-    val fom: LocalDate,
-    val tom: LocalDate,
-    val periodeBeløp: BigDecimal,
-    // ...
-)
 
 @GraphQLName("Person")
 class ApiPerson(private val resolver: PersonSchema) : PersonSchema by resolver

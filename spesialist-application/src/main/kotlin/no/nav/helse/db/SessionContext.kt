@@ -6,6 +6,7 @@ import no.nav.helse.spesialist.application.DialogRepository
 import no.nav.helse.spesialist.application.NotatRepository
 import no.nav.helse.spesialist.application.OverstyringRepository
 import no.nav.helse.spesialist.application.SaksbehandlerRepository
+import no.nav.helse.spesialist.application.TilkommenInntektRepository
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 
 interface SessionContext {
@@ -46,4 +47,5 @@ interface SessionContext {
     val avviksvurderingRepository: AvviksvurderingRepository
     val oppgaveRepository: OppgaveRepository
     val behandlingRepository: BehandlingRepository
+    val tilkommenInntektRepository: TilkommenInntektRepository
 }
