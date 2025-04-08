@@ -146,40 +146,17 @@ class SpleisStub(
         meterRegistry: MeterRegistry
     ) {
         val jsonNode = objectMapper.readTree(packet.toJson())
-        val fødselsnummer = jsonNode["fødselsnummer"].asText()
-        val testContext = contextsForFødselsnummer[fødselsnummer]
-            ?: error("Ikke initialisert med context for person $fødselsnummer")
-        val vedtaksperiodeId = UUID.fromString(jsonNode["vedtaksperiodeId"].asText())
-        val vedtaksperiode = testContext.vedtaksperioder.find { it.vedtaksperiodeId == vedtaksperiodeId }
-            ?: error("Fant ikke igjen vedtaksperiode $vedtaksperiodeId i context for person $fødselsnummer")
         if (jsonNode["@løsning"]["Godkjenning"]["godkjent"].asBoolean()) {
+            val fødselsnummer = jsonNode["fødselsnummer"].asText()
+            val testContext = contextsForFødselsnummer[fødselsnummer]
+                ?: error("Ikke initialisert med context for person $fødselsnummer")
+            val vedtaksperiodeId = UUID.fromString(jsonNode["vedtaksperiodeId"].asText())
+            val vedtaksperiode = testContext.vedtaksperioder.find { it.vedtaksperiodeId == vedtaksperiodeId }
+                ?: error("Fant ikke igjen vedtaksperiode $vedtaksperiodeId i context for person $fødselsnummer")
             utbetalingSkjer(vedtaksperiode, testContext.person, testContext.arbeidsgiver)
             spleisAvslutterPerioden(vedtaksperiode, testContext.person, testContext.arbeidsgiver)
         } else {
             logg.warn("Mottok godkjent = false i løsning på Godkjenning, håndterer ikke dette per nå")
-        }
-        if (jsonNode["@event_name"].asText() == "skjønnsmessig_fastsettelse") {
-            utbetalingForkastet(vedtaksperiode, testContext.person, testContext.arbeidsgiver)
-            vedtaksperodeEndret(vedtaksperiode, testContext.person)
-            opprettUtbetaling(vedtaksperiode, testContext.person, testContext.arbeidsgiver)
-            rapidsConnection.publish(
-                testContext.person.fødselsnummer,
-                Meldingsbygger.byggAktivitetsloggNyAktivitetMedVarsler(
-                    emptyList(),
-                    testContext.person,
-                    testContext.arbeidsgiver,
-                    vedtaksperiode
-                )
-            )
-            rapidsConnection.publish(
-                testContext.person.fødselsnummer,
-                Meldingsbygger.byggGodkjenningsbehov(
-                    person = testContext.person,
-                    arbeidsgiver = testContext.arbeidsgiver,
-                    vilkårsgrunnlagId = testContext.vilkårsgrunnlagId,
-                    vedtaksperiode = vedtaksperiode
-                )
-            )
         }
     }
 
@@ -196,63 +173,6 @@ class SpleisStub(
                 arbeidsgiver = arbeidsgiver,
                 forrigeStatus = "SENDT",
                 gjeldendeStatus = "UTBETALT"
-            )
-        )
-    }
-
-    private fun utbetalingForkastet(
-        vedtaksperiode: Vedtaksperiode,
-        person: Person,
-        arbeidsgiver: Arbeidsgiver
-    ) {
-        rapidsConnection.publish(
-            person.fødselsnummer,
-            Meldingsbygger.byggUtbetalingEndret(
-                vedtaksperiode = vedtaksperiode,
-                person = person,
-                arbeidsgiver = arbeidsgiver,
-                forrigeStatus = "IKKE_UTBETALT",
-                gjeldendeStatus = "FORKASTET"
-            )
-        )
-    }
-
-    private fun opprettUtbetaling(
-        vedtaksperiode: Vedtaksperiode,
-        person: Person,
-        arbeidsgiver: Arbeidsgiver
-    ) {
-        vedtaksperiode.nyUtbetaling()
-        rapidsConnection.publish(
-            person.fødselsnummer,
-            Meldingsbygger.byggUtbetalingEndret(
-                vedtaksperiode = vedtaksperiode,
-                person = person,
-                arbeidsgiver = arbeidsgiver,
-                forrigeStatus = "NY",
-                gjeldendeStatus = "IKKE_UTBETALT",
-            )
-        )
-
-        rapidsConnection.publish(
-            person.fødselsnummer,
-            Meldingsbygger.byggVedtaksperiodeNyUtbetaling(
-                vedtaksperiode = vedtaksperiode,
-                person = person,
-                arbeidsgiver = arbeidsgiver,
-            )
-        )
-    }
-
-    private fun vedtaksperodeEndret(
-        vedtaksperiode: Vedtaksperiode,
-        person: Person,
-    ) {
-        rapidsConnection.publish(
-            person.fødselsnummer,
-            Meldingsbygger.byggVedtaksperiodeEndret(
-                vedtaksperiode = vedtaksperiode,
-                person = person,
             )
         )
     }
