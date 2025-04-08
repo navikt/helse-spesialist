@@ -427,18 +427,19 @@ class PgOppgaveDao internal constructor(
                          INNER JOIN utbetaling_id ui ON ui.id = utbetaling_id_ref
                          INNER JOIN saksbehandler beslutter on tv.beslutter = beslutter.oid
                          INNER JOIN saksbehandler saksbehandler on tv.saksbehandler = saksbehandler.oid
-                         WHERE (saksbehandler = :oid OR beslutter = :oid) AND tv.oppdatert::date = :fom::date
+                         WHERE (saksbehandler = :oid OR beslutter = :oid) AND (tv.oppdatert::date >= :fom::date AND tv.oppdatert::date <= :fom::date)
                          LIMIT 1
                      ) ttv ON ttv.utbetaling_id = o.utbetaling_id
             WHERE (ttv.utbetaling_id IS NOT NULL OR o.ferdigstilt_av_oid = :oid)
                 AND (o.status in ('Ferdigstilt', 'AvventerSystem'))
-                AND o.oppdatert::date = :fom::date
+                AND (o.oppdatert::date >= :fom::date AND o.oppdatert::date <= :fom::date)
             ORDER BY o.oppdatert
             OFFSET :offset
             LIMIT :limit;
             """,
             "oid" to behandletAvOid,
             "fom" to LocalDate.now(),
+            "tom" to LocalDate.now(),
             "offset" to offset,
             "limit" to limit,
         ).list { row ->
