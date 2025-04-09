@@ -614,6 +614,7 @@ type Personnavn {
 type Query {
     antallOppgaver: AntallOppgaver!
     behandledeOppgaverFeed(limit: Int!, offset: Int!): BehandledeOppgaver!
+    behandledeOppgaverFeedV2(fom: LocalDate!, limit: Int!, offset: Int!, tom: LocalDate!): BehandledeOppgaver!
     behandlingsstatistikk: Behandlingsstatistikk!
     hentInntektsmelding(dokumentId: String!, fnr: String!): DokumentInntektsmelding
     hentSoknad(dokumentId: String!, fnr: String!): Soknad

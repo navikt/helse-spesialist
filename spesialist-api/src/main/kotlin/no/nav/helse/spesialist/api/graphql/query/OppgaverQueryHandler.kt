@@ -12,6 +12,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavesortering
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import kotlin.time.measureTimedValue
 
 class OppgaverQueryHandler(private val apiOppgaveService: ApiOppgaveService) : OppgaverQuerySchema {
@@ -28,6 +29,26 @@ class OppgaverQueryHandler(private val apiOppgaveService: ApiOppgaveService) : O
                 saksbehandlerFraApi = saksbehandler,
                 offset = offset,
                 limit = limit,
+            )
+
+        return DataFetcherResult.newResult<ApiBehandledeOppgaver>().data(behandledeOppgaver).build()
+    }
+
+    override suspend fun behandledeOppgaverFeedV2(
+        offset: Int,
+        limit: Int,
+        fom: LocalDate,
+        tom: LocalDate,
+        env: DataFetchingEnvironment,
+    ): DataFetcherResult<ApiBehandledeOppgaver> {
+        val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
+        val behandledeOppgaver =
+            apiOppgaveService.behandledeOppgaver(
+                saksbehandlerFraApi = saksbehandler,
+                offset = offset,
+                limit = limit,
+                fom = fom,
+                tom = tom,
             )
 
         return DataFetcherResult.newResult<ApiBehandledeOppgaver>().data(behandledeOppgaver).build()

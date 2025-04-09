@@ -8,11 +8,20 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiBehandledeOppgaver
 import no.nav.helse.spesialist.api.graphql.schema.ApiFiltrering
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaverTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavesortering
+import java.time.LocalDate
 
 interface OppgaverQuerySchema : Query {
     suspend fun behandledeOppgaverFeed(
         offset: Int,
         limit: Int,
+        env: DataFetchingEnvironment,
+    ): DataFetcherResult<ApiBehandledeOppgaver>
+
+    suspend fun behandledeOppgaverFeedV2(
+        offset: Int,
+        limit: Int,
+        fom: LocalDate,
+        tom: LocalDate,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<ApiBehandledeOppgaver>
 
