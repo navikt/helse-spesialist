@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.application
 
-import no.nav.helse.spesialist.domain.gradering.TilkommenInntekt
-import no.nav.helse.spesialist.domain.gradering.TilkommenInntektId
+import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntekt
+import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektId
 
 interface TilkommenInntektRepository {
     fun finnAlleForFødselsnummer(fødselsnummer: String): List<TilkommenInntekt>

@@ -15,8 +15,8 @@ import no.nav.helse.spesialist.application.TilkommenInntektRepository
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.Periode.Companion.tilPerioder
-import no.nav.helse.spesialist.domain.gradering.TilkommenInntekt
-import no.nav.helse.spesialist.domain.gradering.TilkommenInntektId
+import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntekt
+import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektId
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.UUID

@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.domain.gradering
+package no.nav.helse.spesialist.domain.tilkommeninntekt
 
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
 import no.nav.helse.spesialist.domain.testfixtures.jan
