@@ -405,6 +405,8 @@ class PgOppgaveDao internal constructor(
         behandletAvOid: UUID,
         offset: Int,
         limit: Int,
+        fom: LocalDate,
+        tom: LocalDate,
     ): List<BehandletOppgaveFraDatabaseForVisning> =
         asSQL(
             """
@@ -438,8 +440,8 @@ class PgOppgaveDao internal constructor(
             LIMIT :limit;
             """,
             "oid" to behandletAvOid,
-            "fom" to LocalDate.now(),
-            "tom" to LocalDate.now(),
+            "fom" to fom,
+            "tom" to tom,
             "offset" to offset,
             "limit" to limit,
         ).list { row ->

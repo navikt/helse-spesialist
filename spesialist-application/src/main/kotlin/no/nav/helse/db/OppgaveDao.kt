@@ -2,6 +2,7 @@ package no.nav.helse.db
 
 import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.oppgave.Egenskap
+import java.time.LocalDate
 import java.util.UUID
 
 interface OppgaveDao {
@@ -47,6 +48,8 @@ interface OppgaveDao {
         behandletAvOid: UUID,
         offset: Int = 0,
         limit: Int = Int.MAX_VALUE,
+        fom: LocalDate = LocalDate.now(),
+        tom: LocalDate = LocalDate.now(),
     ): List<BehandletOppgaveFraDatabaseForVisning>
 
     fun finnEgenskaper(
