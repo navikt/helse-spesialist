@@ -1,15 +1,17 @@
-create table tilkommen_inntekt
+create table tilkommen_inntekt_events
 (
-    pk                         bigserial primary key,
-    tilkommenInntektId         uuid      not null,
-    fødselsnummer              varchar   not null,
-    sekvensnummer              int       not null,
-    tidspunkt                  timestamp not null,
-    utførtAvSaksbehandlerIdent varchar   not null,
-    notatTilBeslutter          varchar   not null,
-    totrinnsvurderingId        bigint    not null,
-    type                       varchar   not null,
-    json                       varchar   null,
+    pk                            bigserial primary key,
+    tilkommen_inntekt_id          uuid      not null,
+    sekvensnummer                 int       not null,
+    type                          varchar   not null,
+    tidspunkt                     timestamp not null,
+    utført_av_saksbehandler_ident varchar   not null,
+    notat_til_beslutter           varchar   not null,
 
-    constraint unique_event_id unique (tilkommenInntektId, sekvensnummer)
+    fødselsnummer                 varchar   not null,
+    totrinnsvurdering_id          bigint    not null,
+
+    data_json                     varchar   null,
+
+    constraint unique_event_id unique (tilkommen_inntekt_id, sekvensnummer)
 );
