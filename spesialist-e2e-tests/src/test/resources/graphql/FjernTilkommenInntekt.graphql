@@ -1,0 +1,11 @@
+mutation FjernTilkommenInntekt(
+    $fodselsnummer: String!,
+    $uuid: UUID!,
+    $notatTilBeslutter: String!
+) {
+    fjernTilkommenInntekt(
+        fodselsnummer: $fodselsnummer
+        uuid: $uuid
+        notatTilBeslutter: $notatTilBeslutter
+    )
+}
