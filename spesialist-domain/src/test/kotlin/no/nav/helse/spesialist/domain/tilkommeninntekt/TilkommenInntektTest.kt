@@ -98,8 +98,8 @@ class TilkommenInntektTest {
         assertEquals(3 jan 2018, endretEvent.endringer.fom?.til)
         assertEquals(31 jan 2018, endretEvent.endringer.tom?.fra)
         assertEquals(20 jan 2018, endretEvent.endringer.tom?.til)
-        assertEquals(setOf(1 jan 2018, 31 jan 2018), endretEvent.endringer.dager?.fra)
-        assertEquals(emptySet(), endretEvent.endringer.dager?.til)
+        assertEquals(sortedSetOf(1 jan 2018, 31 jan 2018), endretEvent.endringer.dager?.fra)
+        assertEquals(sortedSetOf(), endretEvent.endringer.dager?.til)
         assertEquals(BigDecimal("10000"), endretEvent.endringer.periodebeløp?.fra)
         assertEquals(BigDecimal("100"), endretEvent.endringer.periodebeløp?.til)
 
@@ -159,8 +159,8 @@ class TilkommenInntektTest {
         assertEquals(3 jan 2018, gjenopprettetEvent.endringer.fom?.til)
         assertEquals(31 jan 2018, gjenopprettetEvent.endringer.tom?.fra)
         assertEquals(20 jan 2018, gjenopprettetEvent.endringer.tom?.til)
-        assertEquals(setOf(1 jan 2018, 31 jan 2018), gjenopprettetEvent.endringer.dager?.fra)
-        assertEquals(emptySet(), gjenopprettetEvent.endringer.dager?.til)
+        assertEquals(sortedSetOf(1 jan 2018, 31 jan 2018), gjenopprettetEvent.endringer.dager?.fra)
+        assertEquals(sortedSetOf(), gjenopprettetEvent.endringer.dager?.til)
         assertEquals(BigDecimal("10000"), gjenopprettetEvent.endringer.periodebeløp?.fra)
         assertEquals(BigDecimal("100"), gjenopprettetEvent.endringer.periodebeløp?.til)
 
