@@ -256,19 +256,26 @@ class SpeilPersonReceiver(
     private fun getOppgaveId(): String =
         person["arbeidsgivere"][0]["generasjoner"][0]["perioder"][0]["oppgave"]["id"].asText()
 
-    private fun callGraphQL(operationName: String, variables: Map<String, Any>) = runBlocking {
-        httpClient.post("http://localhost:${E2ETestApplikasjon.port}/graphql") {
-            contentType(ContentType.Application.Json)
-            accept(ContentType.Application.Json)
-            bearerAuth(bearerAuthToken)
-            setBody(
-                mapOf(
-                    "query" to (this::class.java.getResourceAsStream("/graphql/$operationName.graphql")
-                        ?.use { it.reader().readText() }
-                        ?: error("Fant ikke $operationName.graphql")),
-                    "operationName" to operationName,
-                    "variables" to variables))
-        }.bodyAsText().let(objectMapper::readTree)
+    private fun callGraphQL(operationName: String, variables: Map<String, Any>): JsonNode {
+        val (status, bodyAsText) = runBlocking {
+            httpClient.post("http://localhost:${E2ETestApplikasjon.port}/graphql") {
+                contentType(ContentType.Application.Json)
+                accept(ContentType.Application.Json)
+                bearerAuth(bearerAuthToken)
+                setBody(
+                    mapOf(
+                        "query" to (this::class.java.getResourceAsStream("/graphql/$operationName.graphql")
+                            ?.use { it.reader().readText() }
+                            ?: error("Fant ikke $operationName.graphql")),
+                        "operationName" to operationName,
+                        "variables" to variables))
+            }.let { it.status to it.bodyAsText() }
+        }
+        logg.info("Respons fra GraphQL: $bodyAsText")
+        assertTrue(status.isSuccess()) { "Fikk HTTP-feilkode ${status.value} fra GraphQL" }
+        return objectMapper.readTree(bodyAsText).also {
+            assertNull(it["errors"]) { "Fikk feil i GraphQL-response" }
+        }
     }
 
     companion object {
