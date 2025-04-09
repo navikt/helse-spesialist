@@ -32,6 +32,7 @@ import no.nav.helse.spesialist.api.behandlingsstatistikk.IBehandlingsstatistikkS
 import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
 import no.nav.helse.spesialist.api.bootstrap.debugMinneApi
 import no.nav.helse.spesialist.api.bootstrap.installPlugins
+import no.nav.helse.spesialist.api.feilhåndtering.SpesialistDataFetcherExceptionHandler
 import no.nav.helse.spesialist.api.graphql.mutation.AnnulleringMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.MinimumSykdomsgradMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.NotatMutationHandler
@@ -71,6 +72,9 @@ fun kobleOppApi(
     ktorApplication.azureAdAppAuthentication(apiModuleConfiguration)
     val graphQLPlugin =
         ktorApplication.install(GraphQL) {
+            engine {
+                exceptionHandler = SpesialistDataFetcherExceptionHandler()
+            }
             server {
                 requestParser = KtorGraphQLRequestParser(objectMapper)
                 contextFactory =
