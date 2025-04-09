@@ -18,6 +18,7 @@ import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.e2etests.context.TestContext
 import no.nav.helse.spesialist.e2etests.context.Vedtaksperiode
 import org.junit.jupiter.api.Assertions.assertTrue
+import java.time.LocalDate
 import kotlin.test.assertEquals
 
 class SpeilPersonReceiver(
@@ -67,18 +68,19 @@ class SpeilPersonReceiver(
     }
 
     fun saksbehandlerLeggerTilTilkommenInntekt() {
+        val vedtaksperiode = testContext.vedtaksperioder.first()
         callGraphQL(
             operationName = "LeggTilTilkommenInntekt",
             variables = mapOf(
                 "fodselsnummer" to testContext.person.fødselsnummer,
                 "verdier" to mapOf(
                     "organisasjonsnummer" to lagOrganisasjonsnummer(),
-                    "fom" to "2018-01-02",
-                    "tom" to "2018-01-31",
-                   "periodebelop" to "2000",
-                    "dager" to listOf("2018-01-02")
-                            //testContext.vedtaksperioder.first().fom.plusDays(1)
-                        //.datesUntil(testContext.vedtaksperioder.first().tom.plusDays(1)).map { it.toString() }.toList(),
+                    "fom" to vedtaksperiode.fom.plusDays(1).toString(),
+                    "tom" to vedtaksperiode.tom.toString(),
+                    "periodebelop" to "2000",
+                    "dager" to vedtaksperiode.fom.plusDays(1)
+                        .datesUntil(vedtaksperiode.tom.plusDays(1))
+                        .map(LocalDate::toString).toList(),
                 ),
                 "notatTilBeslutter" to "notat"
             )
