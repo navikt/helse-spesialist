@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.e2etests.tests
 
-import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.spesialist.e2etests.AbstractE2EIntegrationTest
 import org.junit.jupiter.api.Test
 
@@ -20,7 +19,12 @@ class VarselE2ETest : AbstractE2EIntegrationTest() {
     fun `varsel om faresignaler ved risikovurdering`() {
         // Given:
         risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
-        risikovurderingBehovLøser.funn = listOf(Risikofunn(listOf("EN_KATEGORI"), "EN_BESKRIVELSE"))
+        risikovurderingBehovLøser.funn = listOf(
+            mapOf(
+                "kategori" to listOf("EN_KATEGORI"),
+                "beskrivelse" to "EN_BESKRIVELSE",
+            )
+        )
 
         // When:
         søknadOgGodkjenningbehovKommerInn()
