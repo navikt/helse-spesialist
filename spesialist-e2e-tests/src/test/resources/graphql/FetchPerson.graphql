@@ -651,6 +651,7 @@ fragment person on Person {
         organisasjonsnummer
         organisasjonsnavn
         inntekter {
+            tilkommenInntektId
             fom
             tom
             periodebelop
@@ -669,6 +670,30 @@ fragment person on Person {
                     tom
                     periodebelop
                     dager
+                }
+                ... on TilkommenInntektEndretEvent {
+                    endringer {
+                        organisasjonsnummer {
+                            fra
+                            til
+                        }
+                        fom {
+                            fra
+                            til
+                        }
+                        tom {
+                            fra
+                            til
+                        }
+                        periodebelop {
+                            fra
+                            til
+                        }
+                        dager {
+                            fra
+                            til
+                        }
+                    }
                 }
                 __typename
             }

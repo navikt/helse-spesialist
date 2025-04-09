@@ -6,6 +6,7 @@ import no.nav.helse.spesialist.domain.gradering.TilkommenInntektEvent.Metadata
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
+import java.util.SortedSet
 
 sealed interface TilkommenInntektEvent {
     val metadata: Metadata
@@ -24,7 +25,7 @@ sealed interface TilkommenInntektEvent {
         val fom: Endring<LocalDate>?,
         val tom: Endring<LocalDate>?,
         val periodebeløp: Endring<BigDecimal>?,
-        val dager: Endring<Set<LocalDate>>?,
+        val dager: Endring<SortedSet<LocalDate>>?,
     )
 }
 
@@ -33,7 +34,7 @@ data class TilkommenInntektOpprettetEvent(
     val organisasjonsnummer: String,
     val periode: Periode,
     val periodebeløp: BigDecimal,
-    val dager: Set<LocalDate>,
+    val dager: SortedSet<LocalDate>,
 ) : TilkommenInntektEvent
 
 data class TilkommenInntektEndretEvent(

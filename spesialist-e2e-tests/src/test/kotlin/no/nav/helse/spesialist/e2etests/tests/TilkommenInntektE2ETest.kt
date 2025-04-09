@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.e2etests.tests
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.github.navikt.tbd_libs.jackson.asUUID
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.e2etests.AbstractE2EIntegrationTest
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -20,9 +21,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         val vedtaksperiode = førsteVedtaksperiode()
         val fom = vedtaksperiode.fom.plusDays(1)
         val tom = vedtaksperiode.tom
-        val dager = fom
-            .datesUntil(tom.plusDays(1))
-            .toList()
+        val dager = fom.datesUntil(tom.plusDays(1)).toList()
         val periodebeløp = BigDecimal("2000")
         val notatTilBeslutter = "notat"
         risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
@@ -42,61 +41,131 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
 
         // Then:
         medPersonISpeil {
-            assertTilkomneInntektskilder(
-                tilkomneInntektskilder = person["tilkomneInntektskilder"],
+            val tilkomneInntektskilder = person["tilkomneInntektskilder"]
+            assertEquals(1, tilkomneInntektskilder.size())
+            assertTilkommenInntektskilde(
+                tilkommenInntektskilde = tilkomneInntektskilder[0],
                 expectedOrganisasjonsnummer = organisasjonsnummer,
                 expectedFom = fom,
                 expectedTom = tom,
                 expectedPeriodebeløp = periodebeløp,
                 expectedDager = dager,
-                expectedFjernet = false,
+                expectedFjernet = false
+            )
+            val events = tilkomneInntektskilder[0]["inntekter"][0]["events"]
+            assertEquals(1, events.size())
+            assertTilkommenInntektOpprettetEvent(
+                event = events[0],
                 expectedSaksbehandlerIdent = saksbehandlerIdent(),
-                expectedNotatTilBeslutter = notatTilBeslutter
+                expectedNotatTilBeslutter = notatTilBeslutter,
+                expectedOrganisasjonsnummer = organisasjonsnummer,
+                expectedFom = fom,
+                expectedTom = tom,
+                expectedPeriodebeløp = periodebeløp,
+                expectedDager = dager
             )
         }
     }
 
-    private fun assertTilkomneInntektskilder(
-        tilkomneInntektskilder: JsonNode,
+    @Test
+    fun `saksbehandler endrer tilkommen inntekt`() {
+        // Given:
+        val vedtaksperiode = førsteVedtaksperiode()
+        risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
+        søknadOgGodkjenningbehovKommerInn()
+        val opprinneligOrganisasjonsnummer = lagOrganisasjonsnummer()
+        val opprinneligFom = vedtaksperiode.fom.plusDays(1)
+        val opprinneligTom = vedtaksperiode.tom
+        val opprinneligPeriodebeløp = BigDecimal("2000")
+        val opprinneligeDager = opprinneligFom.datesUntil(opprinneligTom.plusDays(1)).toList()
+        medPersonISpeil {
+            saksbehandlerLeggerTilTilkommenInntekt(
+                organisasjonsnummer = opprinneligOrganisasjonsnummer,
+                fom = opprinneligFom,
+                tom = opprinneligTom,
+                periodebeløp = opprinneligPeriodebeløp,
+                dager = opprinneligeDager,
+                notatTilBeslutter = "notat"
+            )
+        }
+
+        // When:
+        val endringOrganisasjonsnummer = lagOrganisasjonsnummer()
+        val endringFom = opprinneligFom.plusDays(1)
+        val endringTom = opprinneligTom.minusDays(1)
+        val endringPeriodebeløp = BigDecimal("1337")
+        val endringDager = endringFom.datesUntil(endringTom.plusDays(1))
+            .filter { it.toEpochDay() % 2 == 0L }.toList()
+        val endringNotatTilBeslutterFor = "endring i gang"
+        medPersonISpeil {
+            saksbehandlerEndrerTilkommenInntekt(
+                uuid = person["tilkomneInntektskilder"][0]["inntekter"][0]["tilkommenInntektId"].asUUID(),
+                organisasjonsnummer = endringOrganisasjonsnummer,
+                fom = endringFom,
+                tom = endringTom,
+                periodebeløp = endringPeriodebeløp,
+                dager = endringDager,
+                notatTilBeslutter = endringNotatTilBeslutterFor
+            )
+        }
+
+        // Then:
+        medPersonISpeil {
+            val tilkomneInntektskilder = person["tilkomneInntektskilder"]
+            assertEquals(1, tilkomneInntektskilder.size())
+            assertTilkommenInntektskilde(
+                tilkommenInntektskilde = tilkomneInntektskilder[0],
+                expectedOrganisasjonsnummer = endringOrganisasjonsnummer,
+                expectedFom = endringFom,
+                expectedTom = endringTom,
+                expectedPeriodebeløp = endringPeriodebeløp,
+                expectedDager = endringDager,
+                expectedFjernet = false
+            )
+            val events = tilkomneInntektskilder[0]["inntekter"][0]["events"]
+            assertEquals(2, events.size())
+            assertTilkommenInntektEndretEvent(
+                event = events[1],
+                expectedSekvensnummer = 2,
+                expectedSaksbehandlerIdent = saksbehandlerIdent(),
+                expectedNotatTilBeslutter = endringNotatTilBeslutterFor,
+                expectedOrganisasjonsnummerFra = opprinneligOrganisasjonsnummer,
+                expectedOrganisasjonsnummerTil = endringOrganisasjonsnummer,
+                expectedFomFra = opprinneligFom,
+                expectedFomTil = endringFom,
+                expectedTomFra = opprinneligTom,
+                expectedTomTil = endringTom,
+                expectedPeriodebeløpFra = opprinneligPeriodebeløp,
+                expectedPeriodebeløpTil = endringPeriodebeløp,
+                expectedDagerFra = opprinneligeDager,
+                expectedDagerTil = endringDager
+            )
+        }
+    }
+
+    private fun assertTilkommenInntektskilde(
+        tilkommenInntektskilde: JsonNode,
         expectedOrganisasjonsnummer: String,
         expectedFom: LocalDate,
         expectedTom: LocalDate,
         expectedPeriodebeløp: BigDecimal,
         expectedDager: List<LocalDate>,
-        expectedFjernet: Boolean,
-        expectedSaksbehandlerIdent: String,
-        expectedNotatTilBeslutter: String
+        expectedFjernet: Boolean
     ) {
-        assertEquals(1, tilkomneInntektskilder.size())
-        tilkomneInntektskilder[0].let { tilkommenInntektskilde ->
-            assertEquals(expectedOrganisasjonsnummer, tilkommenInntektskilde["organisasjonsnummer"].asText())
-            // TODO: Assert faktisk organisasjonsnavn når det hentes ordentlig
-            assertEquals(expectedOrganisasjonsnummer, tilkommenInntektskilde["organisasjonsnavn"].asText())
-            tilkommenInntektskilde["inntekter"].let { inntekter ->
-                assertEquals(1, inntekter.size())
-                inntekter[0].let { inntekt ->
-                    assertInntekt(
-                        inntekt = inntekt,
-                        expectedFom = expectedFom,
-                        expectedTom = expectedTom,
-                        expectedPeriodebeløp = expectedPeriodebeløp,
-                        expectedDager = expectedDager,
-                        expectedFjernet = expectedFjernet
-                    )
-                    inntekt["events"].let { events ->
-                        assertEquals(1, events.size())
-                        assertTilkommenInntektOpprettetEvent(
-                            event = events[0],
-                            expectedSaksbehandlerIdent = expectedSaksbehandlerIdent,
-                            expectedNotatTilBeslutter = expectedNotatTilBeslutter,
-                            expectedOrganisasjonsnummer = expectedOrganisasjonsnummer,
-                            expectedFom = expectedFom,
-                            expectedTom = expectedTom,
-                            expectedPeriodebeløp = expectedPeriodebeløp,
-                            expectedDager = expectedDager
-                        )
-                    }
-                }
+        assertEquals(expectedOrganisasjonsnummer, tilkommenInntektskilde["organisasjonsnummer"].asText())
+        // TODO: Assert faktisk organisasjonsnavn når det hentes ordentlig
+        assertEquals(expectedOrganisasjonsnummer, tilkommenInntektskilde["organisasjonsnavn"].asText())
+        tilkommenInntektskilde["inntekter"].let { inntekter ->
+            assertEquals(1, inntekter.size())
+            inntekter[0].let { inntekt ->
+                assertInntekt(
+                    inntekt = inntekt,
+                    expectedFom = expectedFom,
+                    expectedTom = expectedTom,
+                    expectedPeriodebeløp = expectedPeriodebeløp,
+                    expectedDager = expectedDager,
+                    expectedFjernet = expectedFjernet
+                )
             }
         }
     }
@@ -140,6 +209,43 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         assertEquals(expectedPeriodebeløp.toString(), event["periodebelop"].asText())
         assertEquals(expectedDager.size, event["dager"].size())
         assertEquals(expectedDager.map(LocalDate::toString), event["dager"].map(JsonNode::asText))
+    }
+
+    private fun assertTilkommenInntektEndretEvent(
+        event: JsonNode,
+        expectedSekvensnummer: Int,
+        expectedSaksbehandlerIdent: String,
+        expectedNotatTilBeslutter: String,
+        expectedOrganisasjonsnummerFra: String,
+        expectedOrganisasjonsnummerTil: String,
+        expectedFomFra: LocalDate,
+        expectedFomTil: LocalDate,
+        expectedTomFra: LocalDate,
+        expectedTomTil: LocalDate,
+        expectedPeriodebeløpFra: BigDecimal,
+        expectedPeriodebeløpTil: BigDecimal,
+        expectedDagerFra: List<LocalDate>,
+        expectedDagerTil: List<LocalDate>,
+    ) {
+        assertTilkommenInntektEventMetadata(
+            metadata = event["metadata"],
+            expectedSekvensnummer = expectedSekvensnummer,
+            expectedSaksbehandlerIdent = expectedSaksbehandlerIdent,
+            expectedNotatTilBeslutter = expectedNotatTilBeslutter
+        )
+        val endringer = event["endringer"]
+        assertEquals(expectedOrganisasjonsnummerFra, endringer["organisasjonsnummer"]["fra"].asText())
+        assertEquals(expectedOrganisasjonsnummerTil, endringer["organisasjonsnummer"]["til"].asText())
+        assertEquals(expectedFomFra.toString(), endringer["fom"]["fra"].asText())
+        assertEquals(expectedFomTil.toString(), endringer["fom"]["til"].asText())
+        assertEquals(expectedTomFra.toString(), endringer["tom"]["fra"].asText())
+        assertEquals(expectedTomTil.toString(), endringer["tom"]["til"].asText())
+        assertEquals(expectedPeriodebeløpFra.toString(), endringer["periodebelop"]["fra"].asText())
+        assertEquals(expectedPeriodebeløpTil.toString(), endringer["periodebelop"]["til"].asText())
+        assertEquals(expectedDagerFra.size, endringer["dager"]["fra"].size())
+        assertEquals(expectedDagerTil.size, endringer["dager"]["til"].size())
+        assertEquals(expectedDagerFra.map(LocalDate::toString), endringer["dager"]["fra"].map(JsonNode::asText))
+        assertEquals(expectedDagerTil.map(LocalDate::toString), endringer["dager"]["til"].map(JsonNode::asText))
     }
 
     private fun assertTilkommenInntektEventMetadata(

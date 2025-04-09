@@ -1,0 +1,13 @@
+mutation EndreTilkommenInntekt(
+    $fodselsnummer: String!,
+    $uuid: UUID!,
+    $endretTil: TilkommenInntektRequestInput!,
+    $notatTilBeslutter: String!
+) {
+    endreTilkommenInntekt(
+        fodselsnummer: $fodselsnummer
+        uuid: $uuid
+        endretTil: $endretTil
+        notatTilBeslutter: $notatTilBeslutter
+    )
+}

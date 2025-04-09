@@ -4,6 +4,7 @@ import com.expediagroup.graphql.generator.annotations.GraphQLName
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.UUID
 
 @GraphQLName("TilkommenInntektskilde")
 data class ApiTilkommenInntektskilde(
@@ -14,6 +15,7 @@ data class ApiTilkommenInntektskilde(
 
 @GraphQLName("TilkommenInntekt")
 data class ApiTilkommenInntekt(
+    val tilkommenInntektId: UUID,
     val fom: LocalDate,
     val tom: LocalDate,
     val periodebelop: BigDecimal,

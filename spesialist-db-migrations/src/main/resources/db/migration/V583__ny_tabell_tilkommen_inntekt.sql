@@ -1,6 +1,7 @@
 create table tilkommen_inntekt
 (
-    uuid                       uuid primary key,
+    pk                         bigserial primary key,
+    tilkommenInntektId         uuid      not null,
     fødselsnummer              varchar   not null,
     sekvensnummer              int       not null,
     tidspunkt                  timestamp not null,
@@ -8,5 +9,7 @@ create table tilkommen_inntekt
     notatTilBeslutter          varchar   not null,
     totrinnsvurderingId        bigint    not null,
     type                       varchar   not null,
-    json                       varchar   null
+    json                       varchar   null,
+
+    constraint unique_event_id unique (tilkommenInntektId, sekvensnummer)
 );

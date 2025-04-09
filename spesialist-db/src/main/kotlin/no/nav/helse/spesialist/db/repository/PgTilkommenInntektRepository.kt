@@ -19,6 +19,7 @@ import no.nav.helse.spesialist.domain.gradering.TilkommenInntektId
 import no.nav.helse.spesialist.domain.gradering.TilkommenInntektOpprettetEvent
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.util.SortedSet
 
 class PgTilkommenInntektRepository(
     session: Session,
@@ -40,22 +41,31 @@ class PgTilkommenInntektRepository(
                 """
                 SELECT * FROM tilkommen_inntekt
                 WHERE fødselsnummer = :fodselsnummer
-                AND uuid = :uuid
+                AND tilkommenInntektId = :tilkommenInntektId
                 ORDER BY sekvensnummer
                 """.trimIndent(),
                 "fodselsnummer" to id.fødselsnummer,
-                "uuid" to id.uuid,
+                "tilkommenInntektId" to id.uuid,
             ).list { it.toTilkommenInntektEvent() }
         return events.takeUnless { it.isEmpty() }?.let(TilkommenInntekt::fraLagring)
     }
 
     override fun lagre(tilkommenInntekt: TilkommenInntekt) {
-        tilkommenInntekt.events.forEach { event ->
+        val sistePersisterteSekvensnummer =
+            asSQL(
+                """SELECT MAX(sekvensnummer) FROM tilkommen_inntekt WHERE fødselsnummer = :fodselsnummer""",
+                "fodselsnummer" to tilkommenInntekt.id().fødselsnummer,
+            ).singleOrNull { it.intOrNull(1) }
+        if (sistePersisterteSekvensnummer != null) {
+            tilkommenInntekt.events.filter { it.metadata.sekvensnummer > sistePersisterteSekvensnummer }
+        } else {
+            tilkommenInntekt.events
+        }.forEach { event ->
             asSQL(
                 """
                 INSERT INTO tilkommen_inntekt (
                   fødselsnummer,
-                  uuid,
+                  tilkommenInntektId,
                   sekvensnummer,
                   tidspunkt,
                   utførtAvSaksbehandlerIdent,
@@ -66,7 +76,7 @@ class PgTilkommenInntektRepository(
                 )                        
                 VALUES (
                   :fodselsnummer,
-                  :uuid,
+                  :tilkommenInntektId,
                   :sekvensnummer,
                   :tidspunkt,
                   :utfortAvSaksbehandlerIdent,
@@ -77,7 +87,7 @@ class PgTilkommenInntektRepository(
                 )
                 """.trimIndent(),
                 "fodselsnummer" to event.metadata.tilkommenInntektId.fødselsnummer,
-                "uuid" to event.metadata.tilkommenInntektId.uuid,
+                "tilkommenInntektId" to event.metadata.tilkommenInntektId.uuid,
                 "sekvensnummer" to event.metadata.sekvensnummer,
                 "tidspunkt" to event.metadata.tidspunkt,
                 "utfortAvSaksbehandlerIdent" to event.metadata.utførtAvSaksbehandlerIdent,
@@ -120,13 +130,12 @@ class PgTilkommenInntektRepository(
                             GjenopprettetEventData(
                                 endringer =
                                     event.endringer.let { endring ->
-                                        val organisasjonsnummer = endring.organisasjonsnummer
                                         Endringer(
-                                            organisasjonsnummer = organisasjonsnummer.tilJsonEndring(),
-                                            fom = endring.fom?.let { Endringer.Endring(it.fra, it.til) },
-                                            tom = endring.tom?.let { Endringer.Endring(it.fra, it.til) },
-                                            periodebeløp = endring.periodebeløp?.let { Endringer.Endring(it.fra, it.til) },
-                                            dager = endring.dager?.let { Endringer.Endring(it.fra, it.til) },
+                                            organisasjonsnummer = endring.organisasjonsnummer.tilJsonEndring(),
+                                            fom = endring.fom.tilJsonEndring(),
+                                            tom = endring.tom.tilJsonEndring(),
+                                            periodebeløp = endring.periodebeløp.tilJsonEndring(),
+                                            dager = endring.dager.tilJsonEndring(),
                                         )
                                     },
                             )
@@ -143,7 +152,7 @@ class PgTilkommenInntektRepository(
                 tilkommenInntektId =
                     TilkommenInntektId(
                         fødselsnummer = string("fødselsnummer"),
-                        uuid = uuid("uuid"),
+                        uuid = uuid("tilkommenInntektId"),
                     ),
                 sekvensnummer = int("sekvensnummer"),
                 tidspunkt = instant("tidspunkt"),
@@ -213,7 +222,7 @@ class PgTilkommenInntektRepository(
         val fom: LocalDate,
         val tom: LocalDate,
         val periodebeløp: BigDecimal,
-        val dager: Set<LocalDate>,
+        val dager: SortedSet<LocalDate>,
     ) : EventData
 
     data class EndretEventData(
@@ -231,7 +240,7 @@ class PgTilkommenInntektRepository(
         val fom: Endring<LocalDate>?,
         val tom: Endring<LocalDate>?,
         val periodebeløp: Endring<BigDecimal>?,
-        val dager: Endring<Set<LocalDate>>?,
+        val dager: Endring<SortedSet<LocalDate>>?,
     ) {
         data class Endring<T>(val fra: T, val til: T)
     }
