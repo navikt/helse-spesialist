@@ -192,8 +192,8 @@ data class ApiPersonResolver(
                             ApiTilkommenInntekt(
                                 fom = it.periode.fom,
                                 tom = it.periode.tom,
-                                periodeBeløp = it.periodebeløp,
-                                dager = it.dager.toList(),
+                                periodebelop = it.periodebeløp,
+                                dager = it.dager.sorted(),
                                 fjernet = it.fjernet,
                                 events =
                                     it.events.map { event ->
@@ -201,7 +201,7 @@ data class ApiPersonResolver(
                                             ApiTilkommenInntektEvent.Metadata(
                                                 sekvensnummer = event.metadata.sekvensnummer,
                                                 tidspunkt = event.metadata.tidspunkt.atZone(ZoneId.of("Europe/Oslo")).toLocalDateTime(),
-                                                utførtAvSaksbehandlerIdent = event.metadata.utførtAvSaksbehandlerIdent,
+                                                utfortAvSaksbehandlerIdent = event.metadata.utførtAvSaksbehandlerIdent,
                                                 notatTilBeslutter = event.metadata.notatTilBeslutter,
                                             )
                                         when (event) {
@@ -211,8 +211,8 @@ data class ApiPersonResolver(
                                                     organisasjonsnummer = event.organisasjonsnummer,
                                                     fom = event.periode.fom,
                                                     tom = event.periode.tom,
-                                                    periodebeløp = event.periodebeløp,
-                                                    dager = event.dager.toList(),
+                                                    periodebelop = event.periodebeløp,
+                                                    dager = event.dager.sorted(),
                                                 )
 
                                             is TilkommenInntektEndretEvent ->
@@ -244,7 +244,7 @@ data class ApiPersonResolver(
             organisasjonsnummer = organisasjonsnummer?.tilApiEndring(),
             fom = fom?.tilApiEndring(),
             tom = tom?.tilApiEndring(),
-            periodebeløp = periodebeløp?.tilApiEndring(),
+            periodebelop = periodebeløp?.tilApiEndring(),
             dager =
                 dager?.let {
                     ApiTilkommenInntektEvent.Endringer.ListLocalDateEndring(

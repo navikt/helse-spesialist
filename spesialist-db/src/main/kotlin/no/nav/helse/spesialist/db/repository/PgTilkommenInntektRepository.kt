@@ -104,13 +104,13 @@ class PgTilkommenInntektRepository(
                         is TilkommenInntektEndretEvent ->
                             EndretEventData(
                                 endringer =
-                                    event.endringer.let {
+                                    event.endringer.let { endring ->
                                         Endringer(
-                                            organisasjonsnummer = it.organisasjonsnummer.tilJsonEndring(),
-                                            fom = it.fom.tilJsonEndring(),
-                                            tom = it.tom.tilJsonEndring(),
-                                            periodebeløp = it.periodebeløp.tilJsonEndring(),
-                                            dager = it.dager.tilJsonEndring(),
+                                            organisasjonsnummer = endring.organisasjonsnummer.tilJsonEndring(),
+                                            fom = endring.fom.tilJsonEndring(),
+                                            tom = endring.tom.tilJsonEndring(),
+                                            periodebeløp = endring.periodebeløp.tilJsonEndring(),
+                                            dager = endring.dager.tilJsonEndring(),
                                         )
                                     },
                             )
@@ -119,18 +119,18 @@ class PgTilkommenInntektRepository(
                         is TilkommenInntektGjenopprettetEvent ->
                             GjenopprettetEventData(
                                 endringer =
-                                    event.endringer.let {
-                                        val organisasjonsnummer = it.organisasjonsnummer
+                                    event.endringer.let { endring ->
+                                        val organisasjonsnummer = endring.organisasjonsnummer
                                         Endringer(
                                             organisasjonsnummer = organisasjonsnummer.tilJsonEndring(),
-                                            fom = it.fom?.let { Endringer.Endring(it.fra, it.til) },
-                                            tom = it.tom?.let { Endringer.Endring(it.fra, it.til) },
-                                            periodebeløp = it.periodebeløp?.let { Endringer.Endring(it.fra, it.til) },
-                                            dager = it.dager?.let { Endringer.Endring(it.fra, it.til) },
+                                            fom = endring.fom?.let { Endringer.Endring(it.fra, it.til) },
+                                            tom = endring.tom?.let { Endringer.Endring(it.fra, it.til) },
+                                            periodebeløp = endring.periodebeløp?.let { Endringer.Endring(it.fra, it.til) },
+                                            dager = endring.dager?.let { Endringer.Endring(it.fra, it.til) },
                                         )
                                     },
                             )
-                    }?.let { objectMapper.writeValueAsString(event) },
+                    }?.let(objectMapper::writeValueAsString),
             ).update()
         }
     }
