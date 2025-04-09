@@ -19,6 +19,7 @@ import no.nav.helse.spesialist.e2etests.context.Vedtaksperiode
 import org.junit.jupiter.api.Assertions.assertTrue
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.util.UUID
 import kotlin.test.assertEquals
 
 class SpeilPersonReceiver(
@@ -80,6 +81,32 @@ class SpeilPersonReceiver(
             variables = mapOf(
                 "fodselsnummer" to testContext.person.fødselsnummer,
                 "verdier" to mapOf(
+                    "organisasjonsnummer" to organisasjonsnummer,
+                    "fom" to fom.toString(),
+                    "tom" to tom.toString(),
+                    "periodebelop" to periodebeløp.toString(),
+                    "dager" to dager.map(LocalDate::toString),
+                ),
+                "notatTilBeslutter" to notatTilBeslutter
+            )
+        )
+    }
+
+    fun saksbehandlerEndrerTilkommenInntekt(
+        uuid: UUID,
+        organisasjonsnummer: String,
+        fom: LocalDate,
+        tom: LocalDate,
+        periodebeløp: BigDecimal,
+        dager: Collection<LocalDate>,
+        notatTilBeslutter: String
+    ) {
+        callGraphQL(
+            operationName = "EndreTilkommenInntekt",
+            variables = mapOf(
+                "fodselsnummer" to testContext.person.fødselsnummer,
+                "uuid" to uuid.toString(),
+                "endretTil" to mapOf(
                     "organisasjonsnummer" to organisasjonsnummer,
                     "fom" to fom.toString(),
                     "tom" to tom.toString(),

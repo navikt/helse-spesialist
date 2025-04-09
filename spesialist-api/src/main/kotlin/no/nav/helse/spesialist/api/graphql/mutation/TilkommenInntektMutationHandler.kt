@@ -149,6 +149,7 @@ class TilkommenInntektMutationHandler(
                         totrinnsvurderingRepository,
                     ).id(),
             )
+            session.tilkommenInntektRepository.lagre(tilkommenInntekt)
 
             val dagerEtter = tilkommenInntekt.dager
             val dagsbeløpEtter = tilkommenInntekt.dagbeløp()
@@ -220,6 +221,7 @@ class TilkommenInntektMutationHandler(
                         totrinnsvurderingRepository,
                     ).id(),
             )
+            session.tilkommenInntektRepository.lagre(tilkommenInntekt)
 
             meldingPubliserer.publiser(
                 fødselsnummer = tilkommenInntekt.id().fødselsnummer,
@@ -270,6 +272,7 @@ class TilkommenInntektMutationHandler(
                         totrinnsvurderingRepository,
                     ).id(),
             )
+            session.tilkommenInntektRepository.lagre(tilkommenInntekt)
 
             val event =
                 InntektsendringerEvent(

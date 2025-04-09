@@ -7,6 +7,7 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.Instant
 import java.time.LocalDate
+import java.util.SortedSet
 import java.util.UUID
 import kotlin.reflect.KMutableProperty0
 
@@ -35,7 +36,7 @@ class TilkommenInntekt private constructor(
         private set
     var periodebeløp: BigDecimal = opprettetEvent.periodebeløp
         private set
-    var dager: Set<LocalDate> = opprettetEvent.dager
+    var dager: SortedSet<LocalDate> = opprettetEvent.dager
         private set
     var fjernet: Boolean = false
         private set
@@ -70,7 +71,7 @@ class TilkommenInntekt private constructor(
                         fom = muligEndring(fra = periode.fom, til = fom),
                         tom = muligEndring(fra = periode.tom, til = tom),
                         periodebeløp = muligEndring(fra = this.periodebeløp, til = periodebeløp),
-                        dager = muligEndring(fra = this.dager, til = dager),
+                        dager = muligEndring(fra = this.dager, til = dager.toSortedSet()),
                     ),
             ),
         )
@@ -121,7 +122,7 @@ class TilkommenInntekt private constructor(
                         fom = muligEndring(fra = periode.fom, til = fom),
                         tom = muligEndring(fra = periode.tom, til = tom),
                         periodebeløp = muligEndring(fra = this.periodebeløp, til = periodebeløp),
-                        dager = muligEndring(fra = this.dager, til = dager),
+                        dager = muligEndring(fra = this.dager, til = dager.toSortedSet()),
                     ),
             ),
         )
@@ -224,7 +225,7 @@ class TilkommenInntekt private constructor(
                 organisasjonsnummer = organisasjonsnummer,
                 periode = Periode(fom, tom),
                 periodebeløp = periodebeløp,
-                dager = dager,
+                dager = dager.toSortedSet(),
             ),
         )
 
