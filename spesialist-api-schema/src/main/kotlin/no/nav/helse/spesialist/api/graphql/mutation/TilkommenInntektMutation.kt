@@ -15,24 +15,21 @@ interface TilkommenInntektMutationSchema : Mutation {
     ): DataFetcherResult<Boolean>
 
     fun endreTilkommenInntekt(
-        fodselsnummer: String,
-        uuid: UUID,
+        tilkommenInntektId: UUID,
         endretTil: ApiTilkommenInntektRequest,
         notatTilBeslutter: String,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean>
 
     fun gjenopprettTilkommenInntekt(
-        fodselsnummer: String,
-        uuid: UUID,
+        tilkommenInntektId: UUID,
         endretTil: ApiTilkommenInntektRequest,
         notatTilBeslutter: String,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean>
 
     fun fjernTilkommenInntekt(
-        fodselsnummer: String,
-        uuid: UUID,
+        tilkommenInntektId: UUID,
         notatTilBeslutter: String,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean>

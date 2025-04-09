@@ -1,12 +1,10 @@
 mutation EndreTilkommenInntekt(
-    $fodselsnummer: String!,
-    $uuid: UUID!,
+    $tilkommenInntektId: UUID!,
     $endretTil: TilkommenInntektRequestInput!,
     $notatTilBeslutter: String!
 ) {
     endreTilkommenInntekt(
-        fodselsnummer: $fodselsnummer
-        uuid: $uuid
+        tilkommenInntektId: $tilkommenInntektId
         endretTil: $endretTil
         notatTilBeslutter: $notatTilBeslutter
     )

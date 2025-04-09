@@ -12,11 +12,14 @@ import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import io.ktor.http.isSuccess
 import io.ktor.serialization.jackson.JacksonConverter
 import kotlinx.coroutines.runBlocking
+import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.e2etests.context.TestContext
 import no.nav.helse.spesialist.e2etests.context.Vedtaksperiode
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.assertNull
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.UUID
@@ -93,7 +96,7 @@ class SpeilPersonReceiver(
     }
 
     fun saksbehandlerEndrerTilkommenInntekt(
-        uuid: UUID,
+        tilkommenInntektId: UUID,
         organisasjonsnummer: String,
         fom: LocalDate,
         tom: LocalDate,
@@ -104,8 +107,7 @@ class SpeilPersonReceiver(
         callGraphQL(
             operationName = "EndreTilkommenInntekt",
             variables = mapOf(
-                "fodselsnummer" to testContext.person.fødselsnummer,
-                "uuid" to uuid.toString(),
+                "tilkommenInntektId" to tilkommenInntektId.toString(),
                 "endretTil" to mapOf(
                     "organisasjonsnummer" to organisasjonsnummer,
                     "fom" to fom.toString(),
@@ -119,21 +121,20 @@ class SpeilPersonReceiver(
     }
 
     fun saksbehandlerFjernerTilkommenInntekt(
-        uuid: UUID,
+        tilkommenInntektId: UUID,
         notatTilBeslutter: String
     ) {
         callGraphQL(
             operationName = "FjernTilkommenInntekt",
             variables = mapOf(
-                "fodselsnummer" to testContext.person.fødselsnummer,
-                "uuid" to uuid.toString(),
+                "tilkommenInntektId" to tilkommenInntektId.toString(),
                 "notatTilBeslutter" to notatTilBeslutter
             )
         )
     }
 
     fun saksbehandlerGjenoppretterTilkommenInntekt(
-        uuid: UUID,
+        tilkommenInntektId: UUID,
         organisasjonsnummer: String,
         fom: LocalDate,
         tom: LocalDate,
@@ -144,8 +145,7 @@ class SpeilPersonReceiver(
         callGraphQL(
             operationName = "GjenopprettTilkommenInntekt",
             variables = mapOf(
-                "fodselsnummer" to testContext.person.fødselsnummer,
-                "uuid" to uuid.toString(),
+                "tilkommenInntektId" to tilkommenInntektId.toString(),
                 "endretTil" to mapOf(
                     "organisasjonsnummer" to organisasjonsnummer,
                     "fom" to fom.toString(),

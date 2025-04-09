@@ -40,12 +40,10 @@ class PgTilkommenInntektRepository(
             asSQL(
                 """
                 SELECT * FROM tilkommen_inntekt_events
-                WHERE fødselsnummer = :fodselsnummer
-                AND tilkommen_inntekt_id = :tilkommen_inntekt_id
+                WHERE tilkommen_inntekt_id = :tilkommen_inntekt_id
                 ORDER BY sekvensnummer
                 """.trimIndent(),
-                "fodselsnummer" to id.fødselsnummer,
-                "tilkommen_inntekt_id" to id.uuid,
+                "tilkommen_inntekt_id" to id.value,
             ).list { it.toTilkommenInntektEvent() }
         return events.takeUnless { it.isEmpty() }?.let(TilkommenInntekt::fraLagring)
     }
@@ -54,7 +52,7 @@ class PgTilkommenInntektRepository(
         val sistePersisterteSekvensnummer =
             asSQL(
                 """SELECT MAX(sekvensnummer) FROM tilkommen_inntekt_events WHERE fødselsnummer = :fodselsnummer""",
-                "fodselsnummer" to tilkommenInntekt.id().fødselsnummer,
+                "fodselsnummer" to tilkommenInntekt.fødselsnummer,
             ).singleOrNull { it.intOrNull(1) }
         if (sistePersisterteSekvensnummer != null) {
             tilkommenInntekt.events.filter { it.metadata.sekvensnummer > sistePersisterteSekvensnummer }
@@ -86,8 +84,8 @@ class PgTilkommenInntektRepository(
                   :data_json
                 )
                 """.trimIndent(),
-                "fodselsnummer" to event.metadata.tilkommenInntektId.fødselsnummer,
-                "tilkommen_inntekt_id" to event.metadata.tilkommenInntektId.uuid,
+                "fodselsnummer" to tilkommenInntekt.fødselsnummer,
+                "tilkommen_inntekt_id" to event.metadata.tilkommenInntektId.value,
                 "sekvensnummer" to event.metadata.sekvensnummer,
                 "tidspunkt" to event.metadata.tidspunkt,
                 "utfort_av_saksbehandler_ident" to event.metadata.utførtAvSaksbehandlerIdent,
@@ -149,11 +147,7 @@ class PgTilkommenInntektRepository(
     private fun Row.toTilkommenInntektEvent(): TilkommenInntektEvent {
         val metadata =
             TilkommenInntektEvent.Metadata(
-                tilkommenInntektId =
-                    TilkommenInntektId(
-                        fødselsnummer = string("fødselsnummer"),
-                        uuid = uuid("tilkommen_inntekt_id"),
-                    ),
+                tilkommenInntektId = TilkommenInntektId(uuid("tilkommen_inntekt_id")),
                 sekvensnummer = int("sekvensnummer"),
                 tidspunkt = instant("tidspunkt"),
                 utførtAvSaksbehandlerIdent = string("utført_av_saksbehandler_ident"),
@@ -166,6 +160,7 @@ class PgTilkommenInntektRepository(
                 val data = objectMapper.readValue(string("data_json"), OpprettetEventData::class.java)
                 TilkommenInntektOpprettetEvent(
                     metadata = metadata,
+                    fødselsnummer = string("fødselsnummer"),
                     organisasjonsnummer = data.organisasjonsnummer,
                     periode =
                         Periode(

@@ -1,11 +1,9 @@
 mutation FjernTilkommenInntekt(
-    $fodselsnummer: String!,
-    $uuid: UUID!,
+    $tilkommenInntektId: UUID!,
     $notatTilBeslutter: String!
 ) {
     fjernTilkommenInntekt(
-        fodselsnummer: $fodselsnummer
-        uuid: $uuid
+        tilkommenInntektId: $tilkommenInntektId
         notatTilBeslutter: $notatTilBeslutter
     )
 }
