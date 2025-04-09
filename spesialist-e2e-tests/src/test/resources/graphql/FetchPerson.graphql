@@ -695,6 +695,30 @@ fragment person on Person {
                         }
                     }
                 }
+                ... on TilkommenInntektGjenopprettetEvent {
+                    endringer {
+                        organisasjonsnummer {
+                            fra
+                            til
+                        }
+                        fom {
+                            fra
+                            til
+                        }
+                        tom {
+                            fra
+                            til
+                        }
+                        periodebelop {
+                            fra
+                            til
+                        }
+                        dager {
+                            fra
+                            til
+                        }
+                    }
+                }
                 __typename
             }
             __typename

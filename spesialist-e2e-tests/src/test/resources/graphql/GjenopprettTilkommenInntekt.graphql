@@ -1,0 +1,13 @@
+mutation GjenopprettTilkommenInntekt(
+    $fodselsnummer: String!,
+    $uuid: UUID!,
+    $endretTil: TilkommenInntektRequestInput!,
+    $notatTilBeslutter: String!
+) {
+    gjenopprettTilkommenInntekt(
+        fodselsnummer: $fodselsnummer
+        uuid: $uuid
+        endretTil: $endretTil
+        notatTilBeslutter: $notatTilBeslutter
+    )
+}

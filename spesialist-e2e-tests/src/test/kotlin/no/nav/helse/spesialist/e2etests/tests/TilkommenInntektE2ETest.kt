@@ -198,6 +198,88 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         }
     }
 
+    @Test
+    fun `saksbehandler gjenoppretter tilkommen inntekt`() {
+        // Given:
+        val vedtaksperiode = førsteVedtaksperiode()
+        risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
+        søknadOgGodkjenningbehovKommerInn()
+        val opprinneligOrganisasjonsnummer = lagOrganisasjonsnummer()
+        val opprinneligFom = vedtaksperiode.fom.plusDays(1)
+        val opprinneligTom = vedtaksperiode.tom
+        val opprinneligPeriodebeløp = BigDecimal("2000")
+        val opprinneligeDager = opprinneligFom.datesUntil(opprinneligTom.plusDays(1)).toList()
+        medPersonISpeil {
+            saksbehandlerLeggerTilTilkommenInntekt(
+                organisasjonsnummer = opprinneligOrganisasjonsnummer,
+                fom = opprinneligFom,
+                tom = opprinneligTom,
+                periodebeløp = opprinneligPeriodebeløp,
+                dager = opprinneligeDager,
+                notatTilBeslutter = "notat"
+            )
+        }
+        medPersonISpeil {
+            saksbehandlerFjernerTilkommenInntekt(
+                uuid = person["tilkomneInntektskilder"][0]["inntekter"][0]["tilkommenInntektId"].asUUID(),
+                notatTilBeslutter = "fjerner inntekten"
+            )
+        }
+
+        // When:
+        val gjenopprettingOrganisasjonsnummer = lagOrganisasjonsnummer()
+        val gjenopprettingFom = opprinneligFom.plusDays(1)
+        val gjenopprettingTom = opprinneligTom.minusDays(1)
+        val gjenopprettingPeriodebeløp = BigDecimal("1337")
+        val gjenopprettingDager = gjenopprettingFom.datesUntil(gjenopprettingTom.plusDays(1))
+            .filter { it.toEpochDay() % 2 == 0L }.toList()
+        val gjenopprettingNotatTilBeslutter = "gjenoppretter etter feilaktig fjerning"
+        medPersonISpeil {
+            saksbehandlerGjenoppretterTilkommenInntekt(
+                uuid = person["tilkomneInntektskilder"][0]["inntekter"][0]["tilkommenInntektId"].asUUID(),
+                organisasjonsnummer = gjenopprettingOrganisasjonsnummer,
+                fom = gjenopprettingFom,
+                tom = gjenopprettingTom,
+                periodebeløp = gjenopprettingPeriodebeløp,
+                dager = gjenopprettingDager,
+                notatTilBeslutter = gjenopprettingNotatTilBeslutter
+            )
+        }
+
+        // Then:
+        medPersonISpeil {
+            val tilkomneInntektskilder = person["tilkomneInntektskilder"]
+            assertEquals(1, tilkomneInntektskilder.size())
+            assertTilkommenInntektskilde(
+                tilkommenInntektskilde = tilkomneInntektskilder[0],
+                expectedOrganisasjonsnummer = gjenopprettingOrganisasjonsnummer,
+                expectedFom = gjenopprettingFom,
+                expectedTom = gjenopprettingTom,
+                expectedPeriodebeløp = gjenopprettingPeriodebeløp,
+                expectedDager = gjenopprettingDager,
+                expectedFjernet = false
+            )
+            val events = tilkomneInntektskilder[0]["inntekter"][0]["events"]
+            assertEquals(3, events.size())
+            assertTilkommenInntektGjenopprettetEvent(
+                event = events[2],
+                expectedSekvensnummer = 3,
+                expectedSaksbehandlerIdent = saksbehandlerIdent(),
+                expectedNotatTilBeslutter = gjenopprettingNotatTilBeslutter,
+                expectedOrganisasjonsnummerFra = opprinneligOrganisasjonsnummer,
+                expectedOrganisasjonsnummerTil = gjenopprettingOrganisasjonsnummer,
+                expectedFomFra = opprinneligFom,
+                expectedFomTil = gjenopprettingFom,
+                expectedTomFra = opprinneligTom,
+                expectedTomTil = gjenopprettingTom,
+                expectedPeriodebeløpFra = opprinneligPeriodebeløp,
+                expectedPeriodebeløpTil = gjenopprettingPeriodebeløp,
+                expectedDagerFra = opprinneligeDager,
+                expectedDagerTil = gjenopprettingDager
+            )
+        }
+    }
+
     private fun assertTilkommenInntektskilde(
         tilkommenInntektskilde: JsonNode,
         expectedOrganisasjonsnummer: String,
@@ -317,6 +399,44 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
             expectedSaksbehandlerIdent = expectedSaksbehandlerIdent,
             expectedNotatTilBeslutter = expectedNotatTilBeslutter
         )
+    }
+
+    private fun assertTilkommenInntektGjenopprettetEvent(
+        event: JsonNode,
+        expectedSekvensnummer: Int,
+        expectedSaksbehandlerIdent: String,
+        expectedNotatTilBeslutter: String,
+        expectedOrganisasjonsnummerFra: String,
+        expectedOrganisasjonsnummerTil: String,
+        expectedFomFra: LocalDate,
+        expectedFomTil: LocalDate,
+        expectedTomFra: LocalDate,
+        expectedTomTil: LocalDate,
+        expectedPeriodebeløpFra: BigDecimal,
+        expectedPeriodebeløpTil: BigDecimal,
+        expectedDagerFra: List<LocalDate>,
+        expectedDagerTil: List<LocalDate>,
+    ) {
+        assertEquals("TilkommenInntektGjenopprettetEvent", event["__typename"].asText())
+        assertTilkommenInntektEventMetadata(
+            metadata = event["metadata"],
+            expectedSekvensnummer = expectedSekvensnummer,
+            expectedSaksbehandlerIdent = expectedSaksbehandlerIdent,
+            expectedNotatTilBeslutter = expectedNotatTilBeslutter
+        )
+        val endringer = event["endringer"]
+        assertEquals(expectedOrganisasjonsnummerFra, endringer["organisasjonsnummer"]["fra"].asText())
+        assertEquals(expectedOrganisasjonsnummerTil, endringer["organisasjonsnummer"]["til"].asText())
+        assertEquals(expectedFomFra.toString(), endringer["fom"]["fra"].asText())
+        assertEquals(expectedFomTil.toString(), endringer["fom"]["til"].asText())
+        assertEquals(expectedTomFra.toString(), endringer["tom"]["fra"].asText())
+        assertEquals(expectedTomTil.toString(), endringer["tom"]["til"].asText())
+        assertEquals(expectedPeriodebeløpFra.toString(), endringer["periodebelop"]["fra"].asText())
+        assertEquals(expectedPeriodebeløpTil.toString(), endringer["periodebelop"]["til"].asText())
+        assertEquals(expectedDagerFra.size, endringer["dager"]["fra"].size())
+        assertEquals(expectedDagerTil.size, endringer["dager"]["til"].size())
+        assertEquals(expectedDagerFra.map(LocalDate::toString), endringer["dager"]["fra"].map(JsonNode::asText))
+        assertEquals(expectedDagerTil.map(LocalDate::toString), endringer["dager"]["til"].map(JsonNode::asText))
     }
 
     private fun assertTilkommenInntektEventMetadata(
