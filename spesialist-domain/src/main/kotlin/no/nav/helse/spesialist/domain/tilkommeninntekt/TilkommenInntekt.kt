@@ -11,16 +11,8 @@ import java.util.SortedSet
 import java.util.UUID
 import kotlin.reflect.KMutableProperty0
 
-data class TilkommenInntektId(val fødselsnummer: String, val uuid: UUID) {
-    companion object {
-        fun ny(fødselsnummer: String): TilkommenInntektId = fra(fødselsnummer, UUID.randomUUID())
-
-        fun fra(
-            fødselsnummer: String,
-            uuid: UUID,
-        ): TilkommenInntektId = TilkommenInntektId(fødselsnummer, uuid)
-    }
-}
+@JvmInline
+value class TilkommenInntektId(val value: UUID)
 
 class TilkommenInntekt private constructor(
     opprettetEvent: TilkommenInntektOpprettetEvent,
@@ -28,6 +20,7 @@ class TilkommenInntekt private constructor(
     private val _events: MutableList<TilkommenInntektEvent> = mutableListOf(opprettetEvent)
     val events: List<TilkommenInntektEvent> get() = _events
 
+    val fødselsnummer: String = opprettetEvent.fødselsnummer
     var totrinnsvurderingId: TotrinnsvurderingId = opprettetEvent.metadata.totrinnsvurderingId
         private set
     var organisasjonsnummer: String = opprettetEvent.organisasjonsnummer
@@ -215,13 +208,14 @@ class TilkommenInntekt private constructor(
         ) = TilkommenInntekt(
             TilkommenInntektOpprettetEvent(
                 TilkommenInntektEvent.Metadata(
-                    tilkommenInntektId = TilkommenInntektId.ny(fødselsnummer),
+                    tilkommenInntektId = TilkommenInntektId(UUID.randomUUID()),
                     sekvensnummer = 1,
                     tidspunkt = Instant.now(),
                     utførtAvSaksbehandlerIdent = saksbehandlerIdent,
                     notatTilBeslutter = notatTilBeslutter,
                     totrinnsvurderingId = totrinnsvurderingId,
                 ),
+                fødselsnummer = fødselsnummer,
                 organisasjonsnummer = organisasjonsnummer,
                 periode = Periode(fom, tom),
                 periodebeløp = periodebeløp,

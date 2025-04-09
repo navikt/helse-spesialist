@@ -190,7 +190,7 @@ data class ApiPersonResolver(
                     inntekter =
                         inntekter.map {
                             ApiTilkommenInntekt(
-                                tilkommenInntektId = it.id().uuid,
+                                tilkommenInntektId = it.id().value,
                                 fom = it.periode.fom,
                                 tom = it.periode.tom,
                                 periodebelop = it.periodebeløp,

@@ -31,6 +31,7 @@ sealed interface TilkommenInntektEvent {
 
 data class TilkommenInntektOpprettetEvent(
     override val metadata: Metadata,
+    val fødselsnummer: String,
     val organisasjonsnummer: String,
     val periode: Periode,
     val periodebeløp: BigDecimal,

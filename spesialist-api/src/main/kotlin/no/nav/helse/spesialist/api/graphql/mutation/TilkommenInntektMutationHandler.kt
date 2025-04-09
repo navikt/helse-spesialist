@@ -39,9 +39,7 @@ class TilkommenInntektMutationHandler(
                 vedtaksperiodeRepository = session.vedtaksperiodeRepository,
             )
             val alleTilkomneInntekterForFødselsnummer =
-                session.tilkommenInntektRepository.finnAlleForFødselsnummer(
-                    fødselsnummer = fodselsnummer,
-                )
+                session.tilkommenInntektRepository.finnAlleForFødselsnummer(fødselsnummer = fodselsnummer)
             TilkommenInntekt.validerAtNyPeriodeIkkeOverlapperEksisterendePerioder(
                 fom = verdier.fom,
                 tom = verdier.tom,
@@ -56,8 +54,8 @@ class TilkommenInntektMutationHandler(
                     notatTilBeslutter = notatTilBeslutter,
                     totrinnsvurderingId =
                         finnEllerOpprettTotrinnsvurdering(
-                            fodselsnummer,
-                            session.totrinnsvurderingRepository,
+                            fodselsnummer = fodselsnummer,
+                            totrinnsvurderingRepository = session.totrinnsvurderingRepository,
                         ).id(),
                     organisasjonsnummer = verdier.organisasjonsnummer,
                     fom = verdier.fom,
@@ -68,7 +66,7 @@ class TilkommenInntektMutationHandler(
             session.tilkommenInntektRepository.lagre(tilkommenInntekt)
 
             meldingPubliserer.publiser(
-                fødselsnummer = tilkommenInntekt.id().fødselsnummer,
+                fødselsnummer = tilkommenInntekt.fødselsnummer,
                 hendelse =
                     InntektsendringerEvent(
                         inntektskilder =
@@ -102,8 +100,7 @@ class TilkommenInntektMutationHandler(
             ?: Totrinnsvurdering.ny(fødselsnummer = fodselsnummer).also(totrinnsvurderingRepository::lagre)
 
     override fun endreTilkommenInntekt(
-        fodselsnummer: String,
-        uuid: UUID,
+        tilkommenInntektId: UUID,
         endretTil: ApiTilkommenInntektRequest,
         notatTilBeslutter: String,
         env: DataFetchingEnvironment,
@@ -114,18 +111,16 @@ class TilkommenInntektMutationHandler(
             val totrinnsvurderingRepository: TotrinnsvurderingRepository = session.totrinnsvurderingRepository
             val endretTilPeriode = Periode(fom = endretTil.fom, tom = endretTil.tom)
             val tilkommenInntekt =
-                tilkommenInntektRepository.finn(TilkommenInntektId.fra(fodselsnummer, uuid))
-                    ?: error("Fant ikke tilkommen inntekt med fødselsnummer $fodselsnummer og uuid $uuid")
+                tilkommenInntektRepository.finn(TilkommenInntektId(tilkommenInntektId))
+                    ?: error("Fant ikke tilkommen inntekt med tilkommentInntektId $tilkommenInntektId")
 
             verifiserAtErInnenforEtSykefraværstilfelle(
                 periode = endretTilPeriode,
-                fødselsnummer = fodselsnummer,
+                fødselsnummer = tilkommenInntekt.fødselsnummer,
                 vedtaksperiodeRepository = vedtaksperiodeRepository,
             )
             val andreTilkomneInntekterForOrganisasjonsnummer =
-                tilkommenInntektRepository.finnAlleForFødselsnummer(
-                    fødselsnummer = fodselsnummer,
-                )
+                tilkommenInntektRepository.finnAlleForFødselsnummer(fødselsnummer = tilkommenInntekt.fødselsnummer)
                     .filter { it.organisasjonsnummer == endretTil.organisasjonsnummer }.minus(tilkommenInntekt)
             if (andreTilkomneInntekterForOrganisasjonsnummer.any { endretTilPeriode overlapper it.periode }) {
                 error("Kan ikke legge til tilkommen inntekt som overlapper med en annen tilkommen inntekt")
@@ -145,8 +140,8 @@ class TilkommenInntektMutationHandler(
                 notatTilBeslutter = notatTilBeslutter,
                 totrinnsvurderingId =
                     finnEllerOpprettTotrinnsvurdering(
-                        fodselsnummer,
-                        totrinnsvurderingRepository,
+                        fodselsnummer = tilkommenInntekt.fødselsnummer,
+                        totrinnsvurderingRepository = totrinnsvurderingRepository,
                     ).id(),
             )
             session.tilkommenInntektRepository.lagre(tilkommenInntekt)
@@ -167,7 +162,7 @@ class TilkommenInntektMutationHandler(
 
             event?.let {
                 meldingPubliserer.publiser(
-                    fødselsnummer = tilkommenInntekt.id().fødselsnummer,
+                    fødselsnummer = tilkommenInntekt.fødselsnummer,
                     hendelse = it,
                     årsak = "tilkommen inntekt endret",
                 )
@@ -178,8 +173,7 @@ class TilkommenInntektMutationHandler(
     }
 
     override fun gjenopprettTilkommenInntekt(
-        fodselsnummer: String,
-        uuid: UUID,
+        tilkommenInntektId: UUID,
         endretTil: ApiTilkommenInntektRequest,
         notatTilBeslutter: String,
         env: DataFetchingEnvironment,
@@ -190,18 +184,16 @@ class TilkommenInntektMutationHandler(
             val totrinnsvurderingRepository: TotrinnsvurderingRepository = session.totrinnsvurderingRepository
             val endretTilPeriode = Periode(fom = endretTil.fom, tom = endretTil.tom)
             val tilkommenInntekt =
-                tilkommenInntektRepository.finn(TilkommenInntektId.fra(fodselsnummer, uuid))
-                    ?: error("Fant ikke tilkommen inntekt med fødselsnummer $fodselsnummer og uuid $uuid")
+                tilkommenInntektRepository.finn(TilkommenInntektId(tilkommenInntektId))
+                    ?: error("Fant ikke tilkommen inntekt med tilkommenInntektId $tilkommenInntektId")
 
             verifiserAtErInnenforEtSykefraværstilfelle(
                 periode = endretTilPeriode,
-                fødselsnummer = fodselsnummer,
+                fødselsnummer = tilkommenInntekt.fødselsnummer,
                 vedtaksperiodeRepository = vedtaksperiodeRepository,
             )
             val andreTilkomneInntekterForOrganisasjonsnummer =
-                tilkommenInntektRepository.finnAlleForFødselsnummer(
-                    fødselsnummer = fodselsnummer,
-                )
+                tilkommenInntektRepository.finnAlleForFødselsnummer(fødselsnummer = tilkommenInntekt.fødselsnummer)
                     .filter { it.organisasjonsnummer == endretTil.organisasjonsnummer }.minus(tilkommenInntekt)
             if (andreTilkomneInntekterForOrganisasjonsnummer.any { endretTilPeriode overlapper it.periode }) {
                 error("Kan ikke legge til tilkommen inntekt som overlapper med en annen tilkommen inntekt")
@@ -217,14 +209,14 @@ class TilkommenInntektMutationHandler(
                 notatTilBeslutter = notatTilBeslutter,
                 totrinnsvurderingId =
                     finnEllerOpprettTotrinnsvurdering(
-                        fodselsnummer,
-                        totrinnsvurderingRepository,
+                        fodselsnummer = tilkommenInntekt.fødselsnummer,
+                        totrinnsvurderingRepository = totrinnsvurderingRepository,
                     ).id(),
             )
             session.tilkommenInntektRepository.lagre(tilkommenInntekt)
 
             meldingPubliserer.publiser(
-                fødselsnummer = tilkommenInntekt.id().fødselsnummer,
+                fødselsnummer = tilkommenInntekt.fødselsnummer,
                 hendelse =
                     InntektsendringerEvent(
                         inntektskilder =
@@ -251,8 +243,7 @@ class TilkommenInntektMutationHandler(
     }
 
     override fun fjernTilkommenInntekt(
-        fodselsnummer: String,
-        uuid: UUID,
+        tilkommenInntektId: UUID,
         notatTilBeslutter: String,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> {
@@ -260,16 +251,16 @@ class TilkommenInntektMutationHandler(
             val tilkommenInntektRepository: TilkommenInntektRepository = session.tilkommenInntektRepository
             val totrinnsvurderingRepository: TotrinnsvurderingRepository = session.totrinnsvurderingRepository
             val tilkommenInntekt =
-                tilkommenInntektRepository.finn(TilkommenInntektId.fra(fodselsnummer, uuid))
-                    ?: error("Fant ikke tilkommen inntekt med fødselsnummer $fodselsnummer og uuid $uuid")
+                tilkommenInntektRepository.finn(TilkommenInntektId(tilkommenInntektId))
+                    ?: error("Fant ikke tilkommen inntekt med tilkommenInntektId $tilkommenInntektId")
 
             tilkommenInntekt.fjern(
                 saksbehandlerIdent = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER).ident,
                 notatTilBeslutter = notatTilBeslutter,
                 totrinnsvurderingId =
                     finnEllerOpprettTotrinnsvurdering(
-                        fodselsnummer,
-                        totrinnsvurderingRepository,
+                        fodselsnummer = tilkommenInntekt.fødselsnummer,
+                        totrinnsvurderingRepository = totrinnsvurderingRepository,
                     ).id(),
             )
             session.tilkommenInntektRepository.lagre(tilkommenInntekt)
@@ -287,7 +278,7 @@ class TilkommenInntektMutationHandler(
                 )
 
             meldingPubliserer.publiser(
-                fødselsnummer = tilkommenInntekt.id().fødselsnummer,
+                fødselsnummer = tilkommenInntekt.fødselsnummer,
                 hendelse = event,
                 årsak = "tilkommen inntekt fjernet",
             )

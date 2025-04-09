@@ -110,7 +110,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         val endringNotatTilBeslutter = "endring i gang"
         medPersonISpeil {
             saksbehandlerEndrerTilkommenInntekt(
-                uuid = person["tilkomneInntektskilder"][0]["inntekter"][0]["tilkommenInntektId"].asUUID(),
+                tilkommenInntektId = person["tilkomneInntektskilder"][0]["inntekter"][0]["tilkommenInntektId"].asUUID(),
                 organisasjonsnummer = endringOrganisasjonsnummer,
                 fom = endringFom,
                 tom = endringTom,
@@ -186,7 +186,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         val fjerningNotatTilBeslutter = "fjerner inntekten"
         medPersonISpeil {
             saksbehandlerFjernerTilkommenInntekt(
-                uuid = person["tilkomneInntektskilder"][0]["inntekter"][0]["tilkommenInntektId"].asUUID(),
+                tilkommenInntektId = person["tilkomneInntektskilder"][0]["inntekter"][0]["tilkommenInntektId"].asUUID(),
                 notatTilBeslutter = fjerningNotatTilBeslutter
             )
         }
@@ -240,7 +240,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         }
         medPersonISpeil {
             saksbehandlerFjernerTilkommenInntekt(
-                uuid = person["tilkomneInntektskilder"][0]["inntekter"][0]["tilkommenInntektId"].asUUID(),
+                tilkommenInntektId = person["tilkomneInntektskilder"][0]["inntekter"][0]["tilkommenInntektId"].asUUID(),
                 notatTilBeslutter = "fjerner inntekten"
             )
         }
@@ -255,7 +255,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         val gjenopprettingNotatTilBeslutter = "gjenoppretter etter feilaktig fjerning"
         medPersonISpeil {
             saksbehandlerGjenoppretterTilkommenInntekt(
-                uuid = person["tilkomneInntektskilder"][0]["inntekter"][0]["tilkommenInntektId"].asUUID(),
+                tilkommenInntektId = person["tilkomneInntektskilder"][0]["inntekter"][0]["tilkommenInntektId"].asUUID(),
                 organisasjonsnummer = gjenopprettingOrganisasjonsnummer,
                 fom = gjenopprettingFom,
                 tom = gjenopprettingTom,
@@ -328,7 +328,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         medPersonISpeil {
             tilkommenInntektId = person["tilkomneInntektskilder"][0]["inntekter"][0]["tilkommenInntektId"].asUUID()
             saksbehandlerEndrerTilkommenInntekt(
-                uuid = tilkommenInntektId,
+                tilkommenInntektId = tilkommenInntektId,
                 organisasjonsnummer = lagOrganisasjonsnummer(),
                 fom = 3 jan 2021,
                 tom = 30 jan 2021,
@@ -338,7 +338,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 notatTilBeslutter = "endring nummer 1"
             )
             saksbehandlerEndrerTilkommenInntekt(
-                uuid = tilkommenInntektId,
+                tilkommenInntektId = tilkommenInntektId,
                 organisasjonsnummer = lagOrganisasjonsnummer(),
                 fom = 4 jan 2021,
                 tom = 29 jan 2021,
@@ -348,11 +348,11 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 notatTilBeslutter = "endring nummer 2"
             )
             saksbehandlerFjernerTilkommenInntekt(
-                uuid = tilkommenInntektId,
+                tilkommenInntektId = tilkommenInntektId,
                 notatTilBeslutter = "fjerning"
             )
             saksbehandlerGjenoppretterTilkommenInntekt(
-                uuid = tilkommenInntektId,
+                tilkommenInntektId = tilkommenInntektId,
                 organisasjonsnummer = lagOrganisasjonsnummer(),
                 fom = 5 jan 2021,
                 tom = 28 jan 2021,
@@ -361,7 +361,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 notatTilBeslutter = "gjenoppretter etter feilaktig fjerning"
             )
             saksbehandlerEndrerTilkommenInntekt(
-                uuid = tilkommenInntektId,
+                tilkommenInntektId = tilkommenInntektId,
                 organisasjonsnummer = "987654321",
                 fom = 14 jan 2021,
                 tom = 21 jan 2021,
