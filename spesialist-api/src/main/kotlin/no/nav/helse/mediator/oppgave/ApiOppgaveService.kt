@@ -21,6 +21,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavesortering
 import no.nav.helse.spesialist.api.graphql.schema.ApiSorteringsnokkel
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
+import java.time.LocalDate
 import java.util.UUID
 
 class ApiOppgaveService(
@@ -90,6 +91,8 @@ class ApiOppgaveService(
         saksbehandlerFraApi: SaksbehandlerFraApi,
         offset: Int,
         limit: Int,
+        fom: LocalDate = LocalDate.now(),
+        tom: LocalDate = LocalDate.now(),
     ): ApiBehandledeOppgaver {
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
         val behandledeOppgaver =
@@ -97,6 +100,8 @@ class ApiOppgaveService(
                 behandletAvOid = saksbehandler.oid(),
                 offset = offset,
                 limit = limit,
+                fom = fom,
+                tom = tom,
             )
         return ApiBehandledeOppgaver(
             oppgaver = behandledeOppgaver.tilBehandledeOppgaver(),
