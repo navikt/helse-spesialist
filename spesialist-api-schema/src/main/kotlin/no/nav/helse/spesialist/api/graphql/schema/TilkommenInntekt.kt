@@ -16,7 +16,7 @@ data class ApiTilkommenInntektskilde(
 data class ApiTilkommenInntekt(
     val fom: LocalDate,
     val tom: LocalDate,
-    val periodeBeløp: BigDecimal,
+    val periodebelop: BigDecimal,
     val dager: List<LocalDate>,
     val fjernet: Boolean,
     val events: List<ApiTilkommenInntektEvent>,
@@ -38,7 +38,7 @@ sealed interface ApiTilkommenInntektEvent {
     data class Metadata(
         val sekvensnummer: Int,
         val tidspunkt: LocalDateTime,
-        val utførtAvSaksbehandlerIdent: String,
+        val utfortAvSaksbehandlerIdent: String,
         val notatTilBeslutter: String,
     )
 
@@ -46,7 +46,7 @@ sealed interface ApiTilkommenInntektEvent {
         val organisasjonsnummer: StringEndring?,
         val fom: LocalDateEndring?,
         val tom: LocalDateEndring?,
-        val periodebeløp: BigDecimalEndring?,
+        val periodebelop: BigDecimalEndring?,
         val dager: ListLocalDateEndring?,
     ) {
         data class LocalDateEndring(val fra: LocalDate, val til: LocalDate)
@@ -65,7 +65,7 @@ data class ApiTilkommenInntektOpprettetEvent(
     val organisasjonsnummer: String,
     val fom: LocalDate,
     val tom: LocalDate,
-    val periodebeløp: BigDecimal,
+    val periodebelop: BigDecimal,
     val dager: List<LocalDate>,
 ) : ApiTilkommenInntektEvent
 

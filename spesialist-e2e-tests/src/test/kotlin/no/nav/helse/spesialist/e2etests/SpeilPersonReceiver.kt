@@ -14,10 +14,10 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.serialization.jackson.JacksonConverter
 import kotlinx.coroutines.runBlocking
-import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.e2etests.context.TestContext
 import no.nav.helse.spesialist.e2etests.context.Vedtaksperiode
 import org.junit.jupiter.api.Assertions.assertTrue
+import java.math.BigDecimal
 import java.time.LocalDate
 import kotlin.test.assertEquals
 
@@ -26,7 +26,7 @@ class SpeilPersonReceiver(
     private val saksbehandlerIdent: String,
     private val bearerAuthToken: String
 ) {
-    private val person: JsonNode = fetchPerson(testContext.person.aktørId)
+    val person: JsonNode = fetchPerson(testContext.person.aktørId)
 
     fun saksbehandlerGodkjennerAlleVarsler() {
         person["arbeidsgivere"].flatMap { arbeidsgiver ->
@@ -67,22 +67,26 @@ class SpeilPersonReceiver(
         )
     }
 
-    fun saksbehandlerLeggerTilTilkommenInntekt() {
-        val vedtaksperiode = testContext.vedtaksperioder.first()
+    fun saksbehandlerLeggerTilTilkommenInntekt(
+        organisasjonsnummer: String,
+        fom: LocalDate,
+        tom: LocalDate,
+        periodebeløp: BigDecimal,
+        dager: Collection<LocalDate>,
+        notatTilBeslutter: String
+    ) {
         callGraphQL(
             operationName = "LeggTilTilkommenInntekt",
             variables = mapOf(
                 "fodselsnummer" to testContext.person.fødselsnummer,
                 "verdier" to mapOf(
-                    "organisasjonsnummer" to lagOrganisasjonsnummer(),
-                    "fom" to vedtaksperiode.fom.plusDays(1).toString(),
-                    "tom" to vedtaksperiode.tom.toString(),
-                    "periodebelop" to "2000",
-                    "dager" to vedtaksperiode.fom.plusDays(1)
-                        .datesUntil(vedtaksperiode.tom.plusDays(1))
-                        .map(LocalDate::toString).toList(),
+                    "organisasjonsnummer" to organisasjonsnummer,
+                    "fom" to fom.toString(),
+                    "tom" to tom.toString(),
+                    "periodebelop" to periodebeløp.toString(),
+                    "dager" to dager.map(LocalDate::toString),
                 ),
-                "notatTilBeslutter" to "notat"
+                "notatTilBeslutter" to notatTilBeslutter
             )
         )
     }

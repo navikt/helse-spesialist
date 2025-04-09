@@ -647,5 +647,34 @@ fragment person on Person {
         ...tilleggsinfoForInntektskilde
         __typename
     }
+    tilkomneInntektskilder {
+        organisasjonsnummer
+        organisasjonsnavn
+        inntekter {
+            fom
+            tom
+            periodebelop
+            dager
+            fjernet
+            events {
+                metadata {
+                    sekvensnummer
+                    tidspunkt
+                    utfortAvSaksbehandlerIdent
+                    notatTilBeslutter
+                }
+                ... on TilkommenInntektOpprettetEvent {
+                    organisasjonsnummer
+                    fom
+                    tom
+                    periodebelop
+                    dager
+                }
+                __typename
+            }
+            __typename
+        }
+        __typename
+    }
     __typename
 }

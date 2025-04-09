@@ -174,6 +174,8 @@ abstract class AbstractE2EIntegrationTest {
 
     protected fun andreVedtaksperiode() = testContext.vedtaksperioder[1]
 
+    protected fun saksbehandlerIdent() = saksbehandler.ident
+
     protected fun medPersonISpeil(block: SpeilPersonReceiver.() -> Unit) {
         spleisStub.stubSnapshotForPerson(testContext)
         SpeilPersonReceiver(
@@ -251,5 +253,4 @@ abstract class AbstractE2EIntegrationTest {
             Meldingsbygger.byggEndretSkjermetinfo(testContext.person, skjermet)
         )
     }
-
 }
