@@ -118,6 +118,20 @@ class SpeilPersonReceiver(
         )
     }
 
+    fun saksbehandlerFjernerTilkommenInntekt(
+        uuid: UUID,
+        notatTilBeslutter: String
+    ) {
+        callGraphQL(
+            operationName = "FjernTilkommenInntekt",
+            variables = mapOf(
+                "fodselsnummer" to testContext.person.fødselsnummer,
+                "uuid" to uuid.toString(),
+                "notatTilBeslutter" to notatTilBeslutter
+            )
+        )
+    }
+
     fun saksbehandlerSkjønnsfastsetter830TredjeAvsnitt() {
         callGraphQL(
             operationName = "SkjonnsfastsettelseMutation",
