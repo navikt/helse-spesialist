@@ -430,7 +430,6 @@ class PgOppgaveDao internal constructor(
                          INNER JOIN saksbehandler beslutter on tv.beslutter = beslutter.oid
                          INNER JOIN saksbehandler saksbehandler on tv.saksbehandler = saksbehandler.oid
                          WHERE (saksbehandler = :oid OR beslutter = :oid) AND (tv.oppdatert::date >= :fom::date AND tv.oppdatert::date <= :tom::date)
-                         LIMIT 1
                      ) ttv ON ttv.utbetaling_id = o.utbetaling_id
             WHERE (ttv.utbetaling_id IS NOT NULL OR o.ferdigstilt_av_oid = :oid)
                 AND (o.status in ('Ferdigstilt', 'AvventerSystem'))
