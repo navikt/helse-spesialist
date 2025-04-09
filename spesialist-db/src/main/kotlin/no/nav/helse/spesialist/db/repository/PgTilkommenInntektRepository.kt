@@ -27,7 +27,7 @@ class PgTilkommenInntektRepository(
     override fun finnAlleForFødselsnummer(fødselsnummer: String): List<TilkommenInntekt> =
         asSQL(
             """
-            SELECT * FROM tilkommen_inntekt
+            SELECT * FROM tilkommen_inntekt_events
             WHERE fødselsnummer = :fodselsnummer
             """.trimIndent(),
             "fodselsnummer" to fødselsnummer,
@@ -39,13 +39,13 @@ class PgTilkommenInntektRepository(
         val events =
             asSQL(
                 """
-                SELECT * FROM tilkommen_inntekt
+                SELECT * FROM tilkommen_inntekt_events
                 WHERE fødselsnummer = :fodselsnummer
-                AND tilkommenInntektId = :tilkommenInntektId
+                AND tilkommen_inntekt_id = :tilkommen_inntekt_id
                 ORDER BY sekvensnummer
                 """.trimIndent(),
                 "fodselsnummer" to id.fødselsnummer,
-                "tilkommenInntektId" to id.uuid,
+                "tilkommen_inntekt_id" to id.uuid,
             ).list { it.toTilkommenInntektEvent() }
         return events.takeUnless { it.isEmpty() }?.let(TilkommenInntekt::fraLagring)
     }
@@ -53,7 +53,7 @@ class PgTilkommenInntektRepository(
     override fun lagre(tilkommenInntekt: TilkommenInntekt) {
         val sistePersisterteSekvensnummer =
             asSQL(
-                """SELECT MAX(sekvensnummer) FROM tilkommen_inntekt WHERE fødselsnummer = :fodselsnummer""",
+                """SELECT MAX(sekvensnummer) FROM tilkommen_inntekt_events WHERE fødselsnummer = :fodselsnummer""",
                 "fodselsnummer" to tilkommenInntekt.id().fødselsnummer,
             ).singleOrNull { it.intOrNull(1) }
         if (sistePersisterteSekvensnummer != null) {
@@ -63,36 +63,36 @@ class PgTilkommenInntektRepository(
         }.forEach { event ->
             asSQL(
                 """
-                INSERT INTO tilkommen_inntekt (
+                INSERT INTO tilkommen_inntekt_events (
                   fødselsnummer,
-                  tilkommenInntektId,
+                  tilkommen_inntekt_id,
                   sekvensnummer,
                   tidspunkt,
-                  utførtAvSaksbehandlerIdent,
-                  notatTilBeslutter,
-                  totrinnsvurderingId,
+                  utført_av_saksbehandler_ident,
+                  notat_til_beslutter,
+                  totrinnsvurdering_id,
                   type,
-                  json
+                  data_json
                 )                        
                 VALUES (
                   :fodselsnummer,
-                  :tilkommenInntektId,
+                  :tilkommen_inntekt_id,
                   :sekvensnummer,
                   :tidspunkt,
-                  :utfortAvSaksbehandlerIdent,
-                  :notatTilBeslutter,
-                  :totrinnsvurderingId,
+                  :utfort_av_saksbehandler_ident,
+                  :notat_til_beslutter,
+                  :totrinnsvurdering_id,
                   :type,
-                  :json
+                  :data_json
                 )
                 """.trimIndent(),
                 "fodselsnummer" to event.metadata.tilkommenInntektId.fødselsnummer,
-                "tilkommenInntektId" to event.metadata.tilkommenInntektId.uuid,
+                "tilkommen_inntekt_id" to event.metadata.tilkommenInntektId.uuid,
                 "sekvensnummer" to event.metadata.sekvensnummer,
                 "tidspunkt" to event.metadata.tidspunkt,
-                "utfortAvSaksbehandlerIdent" to event.metadata.utførtAvSaksbehandlerIdent,
-                "notatTilBeslutter" to event.metadata.notatTilBeslutter,
-                "totrinnsvurderingId" to event.metadata.totrinnsvurderingId.value,
+                "utfort_av_saksbehandler_ident" to event.metadata.utførtAvSaksbehandlerIdent,
+                "notat_til_beslutter" to event.metadata.notatTilBeslutter,
+                "totrinnsvurdering_id" to event.metadata.totrinnsvurderingId.value,
                 "type" to
                     when (event) {
                         is TilkommenInntektOpprettetEvent -> EventType.OPPRETTET
@@ -100,7 +100,7 @@ class PgTilkommenInntektRepository(
                         is TilkommenInntektFjernetEvent -> EventType.FJERNET
                         is TilkommenInntektGjenopprettetEvent -> EventType.GJENOPPRETTET
                     }.name,
-                "json" to
+                "data_json" to
                     when (event) {
                         is TilkommenInntektOpprettetEvent ->
                             OpprettetEventData(
@@ -152,18 +152,18 @@ class PgTilkommenInntektRepository(
                 tilkommenInntektId =
                     TilkommenInntektId(
                         fødselsnummer = string("fødselsnummer"),
-                        uuid = uuid("tilkommenInntektId"),
+                        uuid = uuid("tilkommen_inntekt_id"),
                     ),
                 sekvensnummer = int("sekvensnummer"),
                 tidspunkt = instant("tidspunkt"),
-                utførtAvSaksbehandlerIdent = string("utførtAvSaksbehandlerIdent"),
-                notatTilBeslutter = string("notatTilBeslutter"),
-                totrinnsvurderingId = TotrinnsvurderingId(long("totrinnsvurderingId")),
+                utførtAvSaksbehandlerIdent = string("utført_av_saksbehandler_ident"),
+                notatTilBeslutter = string("notat_til_beslutter"),
+                totrinnsvurderingId = TotrinnsvurderingId(long("totrinnsvurdering_id")),
             )
 
         return when (enumValueOf<EventType>(string("type"))) {
             EventType.OPPRETTET -> {
-                val data = objectMapper.readValue(string("json"), OpprettetEventData::class.java)
+                val data = objectMapper.readValue(string("data_json"), OpprettetEventData::class.java)
                 TilkommenInntektOpprettetEvent(
                     metadata = metadata,
                     organisasjonsnummer = data.organisasjonsnummer,
@@ -178,7 +178,7 @@ class PgTilkommenInntektRepository(
             }
 
             EventType.ENDRET -> {
-                val data = objectMapper.readValue(string("json"), EndretEventData::class.java)
+                val data = objectMapper.readValue(string("data_json"), EndretEventData::class.java)
                 TilkommenInntektEndretEvent(
                     metadata = metadata,
                     endringer = data.endringer.tilDomainEndringer(),
@@ -190,7 +190,7 @@ class PgTilkommenInntektRepository(
             }
 
             EventType.GJENOPPRETTET -> {
-                val data = objectMapper.readValue(string("json"), GjenopprettetEventData::class.java)
+                val data = objectMapper.readValue(string("data_json"), GjenopprettetEventData::class.java)
                 TilkommenInntektGjenopprettetEvent(
                     metadata = metadata,
                     endringer = data.endringer.tilDomainEndringer(),
