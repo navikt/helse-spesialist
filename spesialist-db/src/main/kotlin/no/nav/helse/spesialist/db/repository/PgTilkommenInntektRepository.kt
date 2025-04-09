@@ -27,9 +27,9 @@ class PgTilkommenInntektRepository(
         asSQL(
             """
             SELECT * FROM tilkommen_inntekt
-            WHERE fødselsnummer = :fødselsnummer
+            WHERE fødselsnummer = :fodselsnummer
             """.trimIndent(),
-            "fødselsnummer" to fødselsnummer,
+            "fodselsnummer" to fødselsnummer,
         ).list { it.toTilkommenInntektEvent() }
             .groupBy { it.metadata.tilkommenInntektId }
             .map { (_, events) -> events.sortedBy { it.metadata.sekvensnummer }.let(TilkommenInntekt::fraLagring) }
@@ -39,11 +39,11 @@ class PgTilkommenInntektRepository(
             asSQL(
                 """
                 SELECT * FROM tilkommen_inntekt
-                WHERE fødselsnummer = :fødselsnummer
+                WHERE fødselsnummer = :fodselsnummer
                 AND uuid = :uuid
                 ORDER BY sekvensnummer
                 """.trimIndent(),
-                "fødselsnummer" to id.fødselsnummer,
+                "fodselsnummer" to id.fødselsnummer,
                 "uuid" to id.uuid,
             ).list { it.toTilkommenInntektEvent() }
         return events.takeUnless { it.isEmpty() }?.let(TilkommenInntekt::fraLagring)
@@ -65,22 +65,22 @@ class PgTilkommenInntektRepository(
                   json
                 )                        
                 VALUES (
-                  :fødselsnummer,
+                  :fodselsnummer,
                   :uuid,
                   :sekvensnummer,
                   :tidspunkt,
-                  :utførtAvSaksbehandlerIdent,
+                  :utfortAvSaksbehandlerIdent,
                   :notatTilBeslutter,
                   :totrinnsvurderingId,
                   :type,
                   :json
                 )
                 """.trimIndent(),
-                "fødselsnummer" to event.metadata.tilkommenInntektId.fødselsnummer,
+                "fodselsnummer" to event.metadata.tilkommenInntektId.fødselsnummer,
                 "uuid" to event.metadata.tilkommenInntektId.uuid,
                 "sekvensnummer" to event.metadata.sekvensnummer,
                 "tidspunkt" to event.metadata.tidspunkt,
-                "utførtAvSaksbehandlerIdent" to event.metadata.utførtAvSaksbehandlerIdent,
+                "utfortAvSaksbehandlerIdent" to event.metadata.utførtAvSaksbehandlerIdent,
                 "notatTilBeslutter" to event.metadata.notatTilBeslutter,
                 "totrinnsvurderingId" to event.metadata.totrinnsvurderingId.value,
                 "type" to
