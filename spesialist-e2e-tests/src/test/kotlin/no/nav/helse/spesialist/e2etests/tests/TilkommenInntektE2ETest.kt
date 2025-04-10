@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.e2etests.tests
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.jackson.asUUID
+import no.nav.helse.spesialist.domain.Periode.Companion.tilPerioder
 import no.nav.helse.spesialist.domain.testfixtures.feb
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
@@ -80,7 +81,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         assertInntektsendringerInntektskilde(
             inntektskilde = inntektsendringerMelding["inntektskilder"][0],
             expectedOrganisasjonsnummer = organisasjonsnummer,
-            expectedInntekter = listOf(Triple("2022-01-02", "2022-01-31", 37.037)),
+            expectedInntekter = listOf(Triple(fom.toString(), tom.toString(), 37.037)),
             expectedNullstillinger = emptyList()
         )
     }
@@ -165,6 +166,21 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 expectedDagerTil = endringDager
             )
         }
+        val inntektsendringerMelding = meldinger().last { it["@event_name"].asText() == "inntektsendringer" }
+        assertEquals(fødselsnummer(), inntektsendringerMelding["fødselsnummer"].asText())
+        assertEquals(2, inntektsendringerMelding["inntektskilder"].size())
+        assertInntektsendringerInntektskilde(
+            inntektskilde = inntektsendringerMelding["inntektskilder"][0],
+            expectedOrganisasjonsnummer = opprinneligOrganisasjonsnummer,
+            expectedInntekter = emptyList(),
+            expectedNullstillinger = listOf(Pair(opprinneligFom.toString(), opprinneligTom.toString())),
+        )
+        assertInntektsendringerInntektskilde(
+            inntektskilde = inntektsendringerMelding["inntektskilder"][1],
+            expectedOrganisasjonsnummer = endringOrganisasjonsnummer,
+            expectedInntekter = endringDager.tilPerioder().map { Triple(it.fom.toString(), it.tom.toString(), 158.73) },
+            expectedNullstillinger = emptyList()
+        )
     }
 
     @Test
@@ -222,6 +238,15 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 )
             )
         }
+        val inntektsendringerMelding = meldinger().last { it["@event_name"].asText() == "inntektsendringer" }
+        assertEquals(fødselsnummer(), inntektsendringerMelding["fødselsnummer"].asText())
+        assertEquals(1, inntektsendringerMelding["inntektskilder"].size())
+        assertInntektsendringerInntektskilde(
+            inntektskilde = inntektsendringerMelding["inntektskilder"][0],
+            expectedOrganisasjonsnummer = opprinneligOrganisasjonsnummer,
+            expectedInntekter = emptyList(),
+            expectedNullstillinger = listOf(Pair(opprinneligFom.toString(), opprinneligTom.toString())),
+        )
     }
 
     @Test
@@ -311,6 +336,15 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 expectedDagerTil = gjenopprettingDager
             )
         }
+        val inntektsendringerMelding = meldinger().last { it["@event_name"].asText() == "inntektsendringer" }
+        assertEquals(fødselsnummer(), inntektsendringerMelding["fødselsnummer"].asText())
+        assertEquals(1, inntektsendringerMelding["inntektskilder"].size())
+        assertInntektsendringerInntektskilde(
+            inntektskilde = inntektsendringerMelding["inntektskilder"][0],
+            expectedOrganisasjonsnummer = gjenopprettingOrganisasjonsnummer,
+            expectedInntekter = gjenopprettingDager.tilPerioder().map { Triple(it.fom.toString(), it.tom.toString(), 158.73) },
+            expectedNullstillinger = emptyList(),
+        )
     }
 
     @Test
@@ -324,6 +358,15 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         søknadOgGodkjenningbehovKommerInn()
 
         // When:
+        val nestSisteEndretOrganisasjonsnummer = lagOrganisasjonsnummer()
+        val nestSisteFom = 5 jan 2021
+        val nestSisteTom = 28 jan 2021
+
+        val sisteEndretOrganisasjonesnummer = lagOrganisasjonsnummer()
+        val sisteFom = 14 jan 2021
+        val sisteTom = 21 jan 2021
+        val sisteDager = listOf(17 jan 2021, 19 jan 2021)
+
         medPersonISpeil {
             saksbehandlerLeggerTilTilkommenInntekt(
                 organisasjonsnummer = lagOrganisasjonsnummer(),
@@ -363,20 +406,20 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
             )
             saksbehandlerGjenoppretterTilkommenInntekt(
                 tilkommenInntektId = tilkommenInntektId,
-                organisasjonsnummer = lagOrganisasjonsnummer(),
-                fom = 5 jan 2021,
-                tom = 28 jan 2021,
+                organisasjonsnummer = nestSisteEndretOrganisasjonsnummer,
+                fom = nestSisteFom,
+                tom = nestSisteTom,
                 periodebeløp = BigDecimal("4444.44"),
-                dager = (5 jan 2021).datesUntil(29 jan 2021).toList(),
+                dager = nestSisteFom.datesUntil(nestSisteTom.plusDays(1)).toList(),
                 notatTilBeslutter = "gjenoppretter etter feilaktig fjerning"
             )
             saksbehandlerEndrerTilkommenInntekt(
                 tilkommenInntektId = tilkommenInntektId,
-                organisasjonsnummer = "987654321",
-                fom = 14 jan 2021,
-                tom = 21 jan 2021,
+                organisasjonsnummer = sisteEndretOrganisasjonesnummer,
+                fom = sisteFom,
+                tom = sisteTom,
                 periodebeløp = BigDecimal("5555.55"),
-                dager = listOf(17 jan 2021, 19 jan 2021),
+                dager = sisteDager,
                 notatTilBeslutter = "endring nummer 3"
             )
         }
@@ -387,7 +430,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
             assertEquals(1, tilkomneInntektskilder.size())
             assertApiInntektskilde(
                 tilkommenInntektskilde = tilkomneInntektskilder[0],
-                expectedOrganisasjonsnummer = "987654321",
+                expectedOrganisasjonsnummer = sisteEndretOrganisasjonesnummer,
                 expectedFom = 14 jan 2021,
                 expectedTom = 21 jan 2021,
                 expectedPeriodebeløp = BigDecimal("5555.55"),
@@ -406,6 +449,21 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 )
             )
         }
+        val inntektsendringerMelding = meldinger().last { it["@event_name"].asText() == "inntektsendringer" }
+        assertEquals(fødselsnummer(), inntektsendringerMelding["fødselsnummer"].asText())
+        assertEquals(2, inntektsendringerMelding["inntektskilder"].size())
+        assertInntektsendringerInntektskilde(
+            inntektskilde = inntektsendringerMelding["inntektskilder"][0],
+            expectedOrganisasjonsnummer = nestSisteEndretOrganisasjonsnummer,
+            expectedInntekter = emptyList(),
+            expectedNullstillinger = listOf(Pair(nestSisteFom.toString(), nestSisteTom.toString())),
+        )
+        assertInntektsendringerInntektskilde(
+            inntektskilde = inntektsendringerMelding["inntektskilder"][1],
+            expectedOrganisasjonsnummer = sisteEndretOrganisasjonesnummer,
+            expectedInntekter = sisteDager.tilPerioder().map { Triple(it.fom.toString(), it.tom.toString(), 2777.775) },
+            expectedNullstillinger = emptyList()
+        )
     }
 
     private fun assertApiInntektskilde(
