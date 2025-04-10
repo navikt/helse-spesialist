@@ -74,10 +74,10 @@ class TilkommenInntektMutationHandler(
                                 InntektsendringerEvent.Inntektskilde(
                                     inntektskilde = tilkommenInntekt.organisasjonsnummer,
                                     inntekter =
-                                        tilkommenInntekt.dager.sorted().map { dag ->
+                                        tilkommenInntekt.dager.sorted().tilPerioder().map { periode ->
                                             InntektsendringerEvent.Inntektskilde.Inntekt(
-                                                fom = dag,
-                                                tom = dag,
+                                                fom = periode.fom,
+                                                tom = periode.tom,
                                                 dagsbeløp = tilkommenInntekt.dagbeløp(),
                                             )
                                         },
@@ -224,10 +224,10 @@ class TilkommenInntektMutationHandler(
                                 InntektsendringerEvent.Inntektskilde(
                                     inntektskilde = tilkommenInntekt.organisasjonsnummer,
                                     inntekter =
-                                        tilkommenInntekt.dager.sorted().map { dag ->
+                                        tilkommenInntekt.dager.sorted().tilPerioder().map { periode ->
                                             InntektsendringerEvent.Inntektskilde.Inntekt(
-                                                fom = dag,
-                                                tom = dag,
+                                                fom = periode.fom,
+                                                tom = periode.tom,
                                                 dagsbeløp = tilkommenInntekt.dagbeløp(),
                                             )
                                         },
