@@ -73,6 +73,16 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
             assertEquals(dager.size, opprettetEvent["dager"].size())
             assertEquals(dager.map(LocalDate::toString), opprettetEvent["dager"].map(JsonNode::asText))
         }
+
+        val inntektsendringerMelding = meldinger().last { it["@event_name"].asText() == "inntektsendringer" }
+        assertEquals(fødselsnummer(), inntektsendringerMelding["fødselsnummer"].asText())
+        assertEquals(1, inntektsendringerMelding["inntektskilder"].size())
+        assertInntektsendringerInntektskilde(
+            inntektskilde = inntektsendringerMelding["inntektskilder"][0],
+            expectedOrganisasjonsnummer = organisasjonsnummer,
+            expectedInntekter = listOf(Triple("2022-01-02", "2022-01-31", 37.037)),
+            expectedNullstillinger = emptyList()
+        )
     }
 
     @Test
@@ -503,6 +513,36 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         }
         assertEquals(saksbehandlerIdent(), metadata["utfortAvSaksbehandlerIdent"].asText())
         assertEquals(expectedNotatTilBeslutter, metadata["notatTilBeslutter"].asText())
+    }
+
+    private fun assertInntektsendringerInntektskilde(
+        inntektskilde: JsonNode,
+        expectedOrganisasjonsnummer: String,
+        expectedInntekter: List<Triple<String, String, Double>>,
+        expectedNullstillinger: List<Pair<String, String>>
+    ) {
+        assertEquals(expectedOrganisasjonsnummer, inntektskilde["inntektskilde"].asText())
+        assertInntektsendringerInntekter(expectedInntekter, inntektskilde["inntekter"])
+        assertInntektsendringerNullstillinger(expectedNullstillinger, inntektskilde["nullstill"])
+    }
+
+    private fun assertInntektsendringerInntekter(expectedInntekter: List<Triple<String, String, Double>>, inntekter: JsonNode) {
+        assertEquals(expectedInntekter.size, inntekter.size())
+        expectedInntekter.forEachIndexed { index, (fom, tom, dagsbeløp) ->
+            val inntekt = inntekter[index]
+            assertEquals(fom, inntekt["fom"].asText())
+            assertEquals(tom, inntekt["tom"].asText())
+            assertEquals(dagsbeløp, inntekt["dagsbeløp"].asDouble())
+        }
+    }
+
+    private fun assertInntektsendringerNullstillinger(expectedNullstillinger: List<Pair<String, String>>, nullstillinger: JsonNode) {
+        assertEquals(expectedNullstillinger.size, nullstillinger.size())
+        expectedNullstillinger.forEachIndexed { index, (fom, tom) ->
+            val nullstilling = nullstillinger[index]
+            assertEquals(fom, nullstilling["fom"].asText())
+            assertEquals(tom, nullstilling["tom"].asText())
+        }
     }
 
     private fun LocalDateTime.somInstantIOslo(): Instant =

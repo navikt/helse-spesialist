@@ -61,6 +61,10 @@ abstract class AbstractE2EIntegrationTest {
         behovLøserStub.besvarIgjen(testContext.person.fødselsnummer, behov)
     }
 
+    protected fun fødselsnummer() = testContext.person.fødselsnummer
+
+    protected fun meldinger() = testRapid.meldingslogg(testContext.person.fødselsnummer)
+
     protected fun søknadOgGodkjenningbehovKommerInn(tilleggsmeldinger: TilleggsmeldingReceiver.() -> Unit = {}) {
         personSenderSøknad()
         val vedtaksperiode = førsteVedtaksperiode()
@@ -162,8 +166,14 @@ abstract class AbstractE2EIntegrationTest {
             .find { it["@event_name"].asText() == "vedtak_fattet" }
             ?: error("Forventet å finne vedtak_fattet i meldingslogg")
 
-        assertEquals(AvviksvurderingBehovLøser.AVVIKSPROSENT, vedtakFattet["sykepengegrunnlagsfakta"]["avviksprosent"].asDouble())
-        assertEquals(AvviksvurderingBehovLøser.SAMMENLIGNINGSGRUNNLAG_TOTALBELØP, vedtakFattet["sykepengegrunnlagsfakta"]["innrapportertÅrsinntekt"].asDouble())
+        assertEquals(
+            AvviksvurderingBehovLøser.AVVIKSPROSENT,
+            vedtakFattet["sykepengegrunnlagsfakta"]["avviksprosent"].asDouble()
+        )
+        assertEquals(
+            AvviksvurderingBehovLøser.SAMMENLIGNINGSGRUNNLAG_TOTALBELØP,
+            vedtakFattet["sykepengegrunnlagsfakta"]["innrapportertÅrsinntekt"].asDouble()
+        )
     }
 
     protected fun leggTilVedtaksperiode() {
