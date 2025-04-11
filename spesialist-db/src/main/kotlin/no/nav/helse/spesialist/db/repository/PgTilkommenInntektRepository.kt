@@ -102,7 +102,11 @@ class PgTilkommenInntektRepository(
                     when (event) {
                         is TilkommenInntektOpprettetEvent ->
                             OpprettetEventData(
-                                organisasjonsnummer = event.organisasjonsnummer,
+                                inntektskildeIdentifikator =
+                                    InntektskildeIdentifikator(
+                                        verdi = event.organisasjonsnummer,
+                                        type = InntektskildeIdentifikator.Type.ORGANISASJONSNUMMER,
+                                    ),
                                 fom = event.periode.fom,
                                 tom = event.periode.tom,
                                 periodebeløp = event.periodebeløp,
@@ -111,36 +115,39 @@ class PgTilkommenInntektRepository(
 
                         is TilkommenInntektEndretEvent ->
                             EndretEventData(
-                                endringer =
-                                    event.endringer.let { endring ->
-                                        Endringer(
-                                            organisasjonsnummer = endring.organisasjonsnummer.tilJsonEndring(),
-                                            fom = endring.fom.tilJsonEndring(),
-                                            tom = endring.tom.tilJsonEndring(),
-                                            periodebeløp = endring.periodebeløp.tilJsonEndring(),
-                                            dager = endring.dager.tilJsonEndring(),
-                                        )
-                                    },
+                                endringer = event.endringer.tilJsonEndringer(),
                             )
 
                         is TilkommenInntektFjernetEvent -> null
                         is TilkommenInntektGjenopprettetEvent ->
                             GjenopprettetEventData(
-                                endringer =
-                                    event.endringer.let { endring ->
-                                        Endringer(
-                                            organisasjonsnummer = endring.organisasjonsnummer.tilJsonEndring(),
-                                            fom = endring.fom.tilJsonEndring(),
-                                            tom = endring.tom.tilJsonEndring(),
-                                            periodebeløp = endring.periodebeløp.tilJsonEndring(),
-                                            dager = endring.dager.tilJsonEndring(),
-                                        )
-                                    },
+                                endringer = event.endringer.tilJsonEndringer(),
                             )
                     }?.let(objectMapper::writeValueAsString),
             ).update()
         }
     }
+
+    private fun TilkommenInntektEvent.Endringer.tilJsonEndringer() =
+        Endringer(
+            inntektskildeIdentifikator =
+                organisasjonsnummer?.let {
+                    Endringer.Endring(
+                        InntektskildeIdentifikator(
+                            verdi = it.fra,
+                            type = InntektskildeIdentifikator.Type.ORGANISASJONSNUMMER,
+                        ),
+                        InntektskildeIdentifikator(
+                            verdi = it.til,
+                            type = InntektskildeIdentifikator.Type.ORGANISASJONSNUMMER,
+                        ),
+                    )
+                },
+            fom = fom.tilJsonEndring(),
+            tom = tom.tilJsonEndring(),
+            periodebeløp = periodebeløp.tilJsonEndring(),
+            dager = dager.tilJsonEndring(),
+        )
 
     private fun <T> Endring<T>?.tilJsonEndring(): Endringer.Endring<T>? = this?.let { Endringer.Endring(it.fra, it.til) }
 
@@ -161,7 +168,8 @@ class PgTilkommenInntektRepository(
                 TilkommenInntektOpprettetEvent(
                     metadata = metadata,
                     fødselsnummer = string("fødselsnummer"),
-                    organisasjonsnummer = data.organisasjonsnummer,
+                    // Det finnes bare identifikatorer som er organisasjonsnummer per nå
+                    organisasjonsnummer = data.inntektskildeIdentifikator.verdi,
                     periode =
                         Periode(
                             fom = data.fom,
@@ -196,7 +204,11 @@ class PgTilkommenInntektRepository(
 
     private fun Endringer.tilDomainEndringer(): TilkommenInntektEvent.Endringer =
         TilkommenInntektEvent.Endringer(
-            organisasjonsnummer = organisasjonsnummer.tilDomainEndring(),
+            // Det finnes bare identifikatorer som er organisasjonsnummer per nå
+            organisasjonsnummer =
+                inntektskildeIdentifikator?.let {
+                    Endring(fra = it.fra.verdi, til = it.til.verdi)
+                },
             fom = fom.tilDomainEndring(),
             tom = tom.tilDomainEndring(),
             periodebeløp = periodebeløp.tilDomainEndring(),
@@ -213,7 +225,7 @@ class PgTilkommenInntektRepository(
     }
 
     data class OpprettetEventData(
-        val organisasjonsnummer: String,
+        val inntektskildeIdentifikator: InntektskildeIdentifikator,
         val fom: LocalDate,
         val tom: LocalDate,
         val periodebeløp: BigDecimal,
@@ -231,12 +243,21 @@ class PgTilkommenInntektRepository(
     interface EventData
 
     data class Endringer(
-        val organisasjonsnummer: Endring<String>?,
+        val inntektskildeIdentifikator: Endring<InntektskildeIdentifikator>?,
         val fom: Endring<LocalDate>?,
         val tom: Endring<LocalDate>?,
         val periodebeløp: Endring<BigDecimal>?,
         val dager: Endring<SortedSet<LocalDate>>?,
     ) {
         data class Endring<T>(val fra: T, val til: T)
+    }
+
+    data class InntektskildeIdentifikator(
+        val verdi: String,
+        val type: Type,
+    ) {
+        enum class Type {
+            ORGANISASJONSNUMMER,
+        }
     }
 }
