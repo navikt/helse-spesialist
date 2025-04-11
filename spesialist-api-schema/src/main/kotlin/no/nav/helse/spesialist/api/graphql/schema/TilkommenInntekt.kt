@@ -9,7 +9,6 @@ import java.util.UUID
 @GraphQLName("TilkommenInntektskilde")
 data class ApiTilkommenInntektskilde(
     val organisasjonsnummer: String,
-    val organisasjonsnavn: String,
     val inntekter: List<ApiTilkommenInntekt>,
 )
 

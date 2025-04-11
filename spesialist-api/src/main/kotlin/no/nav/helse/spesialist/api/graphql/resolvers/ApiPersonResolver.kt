@@ -186,7 +186,6 @@ data class ApiPersonResolver(
             tilkomneInntekter.groupBy { it.organisasjonsnummer }.map { (organisasjonsnummer, inntekter) ->
                 ApiTilkommenInntektskilde(
                     organisasjonsnummer = organisasjonsnummer,
-                    organisasjonsnavn = organisasjonsnummer,
                     inntekter =
                         inntekter.map {
                             ApiTilkommenInntekt(
