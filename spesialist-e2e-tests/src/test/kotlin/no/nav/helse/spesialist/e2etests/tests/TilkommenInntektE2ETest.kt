@@ -476,8 +476,6 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         expectedFjernet: Boolean
     ) {
         assertEquals(expectedOrganisasjonsnummer, tilkommenInntektskilde["organisasjonsnummer"].asText())
-        // TODO: Assert faktisk organisasjonsnavn når det hentes ordentlig
-        assertEquals(expectedOrganisasjonsnummer, tilkommenInntektskilde["organisasjonsnavn"].asText())
         tilkommenInntektskilde["inntekter"].let { inntekter ->
             assertEquals(1, inntekter.size())
             inntekter[0].let { inntekt ->

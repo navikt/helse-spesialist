@@ -649,7 +649,6 @@ fragment person on Person {
     }
     tilkomneInntektskilder {
         organisasjonsnummer
-        organisasjonsnavn
         inntekter {
             tilkommenInntektId
             fom
