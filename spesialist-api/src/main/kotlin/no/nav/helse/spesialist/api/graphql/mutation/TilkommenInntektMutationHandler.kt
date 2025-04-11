@@ -9,7 +9,7 @@ import no.nav.helse.modell.melding.InntektsendringerEvent
 import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
-import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektRequest
+import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektInput
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.application.TilkommenInntektRepository
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
@@ -27,7 +27,7 @@ class TilkommenInntektMutationHandler(
 ) : TilkommenInntektMutationSchema {
     override fun leggTilTilkommenInntekt(
         fodselsnummer: String,
-        verdier: ApiTilkommenInntektRequest,
+        verdier: ApiTilkommenInntektInput,
         notatTilBeslutter: String,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> {
@@ -101,7 +101,7 @@ class TilkommenInntektMutationHandler(
 
     override fun endreTilkommenInntekt(
         tilkommenInntektId: UUID,
-        endretTil: ApiTilkommenInntektRequest,
+        endretTil: ApiTilkommenInntektInput,
         notatTilBeslutter: String,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> {
@@ -174,7 +174,7 @@ class TilkommenInntektMutationHandler(
 
     override fun gjenopprettTilkommenInntekt(
         tilkommenInntektId: UUID,
-        endretTil: ApiTilkommenInntektRequest,
+        endretTil: ApiTilkommenInntektInput,
         notatTilBeslutter: String,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> {

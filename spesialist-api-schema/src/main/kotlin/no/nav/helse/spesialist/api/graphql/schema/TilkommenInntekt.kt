@@ -23,8 +23,8 @@ data class ApiTilkommenInntekt(
     val events: List<ApiTilkommenInntektEvent>,
 )
 
-@GraphQLName("TilkommenInntektRequest")
-data class ApiTilkommenInntektRequest(
+@GraphQLName("TilkommenInntekt")
+data class ApiTilkommenInntektInput(
     val organisasjonsnummer: String,
     val fom: LocalDate,
     val tom: LocalDate,
