@@ -37,6 +37,7 @@ data class ApiTilkommenInntektRequest(
 sealed interface ApiTilkommenInntektEvent {
     val metadata: Metadata
 
+    @GraphQLName("TilkommenInntektEventMetadata")
     data class Metadata(
         val sekvensnummer: Int,
         val tidspunkt: LocalDateTime,
@@ -44,6 +45,7 @@ sealed interface ApiTilkommenInntektEvent {
         val notatTilBeslutter: String,
     )
 
+    @GraphQLName("TilkommenInntektEventEndringer")
     data class Endringer(
         val organisasjonsnummer: StringEndring?,
         val fom: LocalDateEndring?,
@@ -51,12 +53,16 @@ sealed interface ApiTilkommenInntektEvent {
         val periodebelop: BigDecimalEndring?,
         val dager: ListLocalDateEndring?,
     ) {
+        @GraphQLName("TilkommenInntektEventLocalDateEndring")
         data class LocalDateEndring(val fra: LocalDate, val til: LocalDate)
 
+        @GraphQLName("TilkommenInntektEventBigDecimalEndring")
         data class BigDecimalEndring(val fra: BigDecimal, val til: BigDecimal)
 
+        @GraphQLName("TilkommenInntektEventStringEndring")
         data class StringEndring(val fra: String, val til: String)
 
+        @GraphQLName("TilkommenInntektEventListLocalDateEndring")
         data class ListLocalDateEndring(val fra: List<LocalDate>, val til: List<LocalDate>)
     }
 }
