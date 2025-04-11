@@ -20,6 +20,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdoverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.schema.ApiDagoverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiDagtype
+import no.nav.helse.spesialist.api.graphql.schema.ApiDatoPeriode
 import no.nav.helse.spesialist.api.graphql.schema.ApiEnhet
 import no.nav.helse.spesialist.api.graphql.schema.ApiGhostPeriode
 import no.nav.helse.spesialist.api.graphql.schema.ApiInfotrygdutbetaling
@@ -190,8 +191,11 @@ data class ApiPersonResolver(
                         inntekter.map {
                             ApiTilkommenInntekt(
                                 tilkommenInntektId = it.id().value,
-                                fom = it.periode.fom,
-                                tom = it.periode.tom,
+                                periode =
+                                    ApiDatoPeriode(
+                                        fom = it.periode.fom,
+                                        tom = it.periode.tom,
+                                    ),
                                 periodebelop = it.periodebeløp,
                                 dager = it.dager.sorted(),
                                 fjernet = it.fjernet,
@@ -209,8 +213,11 @@ data class ApiPersonResolver(
                                                 ApiTilkommenInntektOpprettetEvent(
                                                     metadata = metadata,
                                                     organisasjonsnummer = event.organisasjonsnummer,
-                                                    fom = event.periode.fom,
-                                                    tom = event.periode.tom,
+                                                    periode =
+                                                        ApiDatoPeriode(
+                                                            fom = event.periode.fom,
+                                                            tom = event.periode.tom,
+                                                        ),
                                                     periodebelop = event.periodebeløp,
                                                     dager = event.dager.sorted(),
                                                 )
@@ -242,8 +249,13 @@ data class ApiPersonResolver(
     private fun TilkommenInntektEvent.Endringer.toApiEndringer() =
         ApiTilkommenInntektEvent.Endringer(
             organisasjonsnummer = organisasjonsnummer?.tilApiEndring(),
-            fom = fom?.tilApiEndring(),
-            tom = tom?.tilApiEndring(),
+            periode =
+                periode?.let {
+                    ApiTilkommenInntektEvent.Endringer.DatoPeriodeEndring(
+                        fra = ApiDatoPeriode(fom = it.fra.fom, tom = it.fra.tom),
+                        til = ApiDatoPeriode(fom = it.til.fom, tom = it.til.tom),
+                    )
+                },
             periodebelop = periodebeløp?.tilApiEndring(),
             dager =
                 dager?.let {
@@ -256,9 +268,6 @@ data class ApiPersonResolver(
 
     private fun Endring<String>.tilApiEndring(): ApiTilkommenInntektEvent.Endringer.StringEndring =
         ApiTilkommenInntektEvent.Endringer.StringEndring(fra = fra, til = til)
-
-    private fun Endring<LocalDate>.tilApiEndring(): ApiTilkommenInntektEvent.Endringer.LocalDateEndring =
-        ApiTilkommenInntektEvent.Endringer.LocalDateEndring(fra = fra, til = til)
 
     private fun Endring<BigDecimal>.tilApiEndring(): ApiTilkommenInntektEvent.Endringer.BigDecimalEndring =
         ApiTilkommenInntektEvent.Endringer.BigDecimalEndring(fra = fra, til = til)

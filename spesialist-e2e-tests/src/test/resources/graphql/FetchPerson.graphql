@@ -651,8 +651,10 @@ fragment person on Person {
         organisasjonsnummer
         inntekter {
             tilkommenInntektId
-            fom
-            tom
+            periode {
+                fom
+                tom
+            }
             periodebelop
             dager
             fjernet
@@ -665,8 +667,10 @@ fragment person on Person {
                 }
                 ... on TilkommenInntektOpprettetEvent {
                     organisasjonsnummer
-                    fom
-                    tom
+                    periode {
+                        fom
+                        tom
+                    }
                     periodebelop
                     dager
                 }
@@ -676,13 +680,15 @@ fragment person on Person {
                             fra
                             til
                         }
-                        fom {
-                            fra
-                            til
-                        }
-                        tom {
-                            fra
-                            til
+                        periode {
+                            fra {
+                                fom
+                                tom
+                            }
+                            til {
+                                fom
+                                tom
+                            }
                         }
                         periodebelop {
                             fra
@@ -700,13 +706,15 @@ fragment person on Person {
                             fra
                             til
                         }
-                        fom {
-                            fra
-                            til
-                        }
-                        tom {
-                            fra
-                            til
+                        periode {
+                            fra {
+                                fom
+                                tom
+                            }
+                            til {
+                                fom
+                                tom
+                            }
                         }
                         periodebelop {
                             fra

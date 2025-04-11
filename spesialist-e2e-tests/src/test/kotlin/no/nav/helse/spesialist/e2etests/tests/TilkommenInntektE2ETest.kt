@@ -68,8 +68,8 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
             )
             val opprettetEvent = events.last()
             assertEquals(organisasjonsnummer, opprettetEvent["organisasjonsnummer"].asText())
-            assertEquals(fom.toString(), opprettetEvent["fom"].asText())
-            assertEquals(tom.toString(), opprettetEvent["tom"].asText())
+            assertEquals(fom.toString(), opprettetEvent["periode"]["fom"].asText())
+            assertEquals(tom.toString(), opprettetEvent["periode"]["tom"].asText())
             assertEquals(periodebeløp.toString(), opprettetEvent["periodebelop"].asText())
             assertEquals(dager.size, opprettetEvent["dager"].size())
             assertEquals(dager.map(LocalDate::toString), opprettetEvent["dager"].map(JsonNode::asText))
@@ -156,10 +156,10 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 endringer = events.last()["endringer"],
                 expectedOrganisasjonsnummerFra = opprinneligOrganisasjonsnummer,
                 expectedOrganisasjonsnummerTil = endringOrganisasjonsnummer,
-                expectedFomFra = opprinneligFom,
-                expectedFomTil = endringFom,
-                expectedTomFra = opprinneligTom,
-                expectedTomTil = endringTom,
+                expectedFraFom = opprinneligFom,
+                expectedFraTom = opprinneligTom,
+                expectedTilFom = endringFom,
+                expectedTilTom = endringTom,
                 expectedPeriodebeløpFra = opprinneligPeriodebeløp,
                 expectedPeriodebeløpTil = endringPeriodebeløp,
                 expectedDagerFra = opprinneligeDager,
@@ -326,10 +326,10 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 endringer = events[2]["endringer"],
                 expectedOrganisasjonsnummerFra = opprinneligOrganisasjonsnummer,
                 expectedOrganisasjonsnummerTil = gjenopprettingOrganisasjonsnummer,
-                expectedFomFra = opprinneligFom,
-                expectedFomTil = gjenopprettingFom,
-                expectedTomFra = opprinneligTom,
-                expectedTomTil = gjenopprettingTom,
+                expectedFraFom = opprinneligFom,
+                expectedFraTom = opprinneligTom,
+                expectedTilFom = gjenopprettingFom,
+                expectedTilTom = gjenopprettingTom,
                 expectedPeriodebeløpFra = opprinneligPeriodebeløp,
                 expectedPeriodebeløpTil = gjenopprettingPeriodebeløp,
                 expectedDagerFra = opprinneligeDager,
@@ -499,8 +499,8 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         expectedDager: List<LocalDate>,
         expectedFjernet: Boolean
     ) {
-        assertEquals(expectedFom.toString(), inntekt["fom"].asText())
-        assertEquals(expectedTom.toString(), inntekt["tom"].asText())
+        assertEquals(expectedFom.toString(), inntekt["periode"]["fom"].asText())
+        assertEquals(expectedTom.toString(), inntekt["periode"]["tom"].asText())
         assertEquals(expectedPeriodebeløp.toString(), inntekt["periodebelop"].asText())
         assertEquals(expectedDager.size, inntekt["dager"].size())
         assertEquals(expectedDager.map(LocalDate::toString), inntekt["dager"].map(JsonNode::asText))
@@ -511,10 +511,10 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         endringer: JsonNode,
         expectedOrganisasjonsnummerFra: String,
         expectedOrganisasjonsnummerTil: String,
-        expectedFomFra: LocalDate,
-        expectedFomTil: LocalDate,
-        expectedTomFra: LocalDate,
-        expectedTomTil: LocalDate,
+        expectedFraFom: LocalDate,
+        expectedFraTom: LocalDate,
+        expectedTilFom: LocalDate,
+        expectedTilTom: LocalDate,
         expectedPeriodebeløpFra: BigDecimal,
         expectedPeriodebeløpTil: BigDecimal,
         expectedDagerFra: List<LocalDate>,
@@ -522,10 +522,10 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
     ) {
         assertEquals(expectedOrganisasjonsnummerFra, endringer["organisasjonsnummer"]["fra"].asText())
         assertEquals(expectedOrganisasjonsnummerTil, endringer["organisasjonsnummer"]["til"].asText())
-        assertEquals(expectedFomFra.toString(), endringer["fom"]["fra"].asText())
-        assertEquals(expectedFomTil.toString(), endringer["fom"]["til"].asText())
-        assertEquals(expectedTomFra.toString(), endringer["tom"]["fra"].asText())
-        assertEquals(expectedTomTil.toString(), endringer["tom"]["til"].asText())
+        assertEquals(expectedFraFom.toString(), endringer["periode"]["fra"]["fom"].asText())
+        assertEquals(expectedFraTom.toString(), endringer["periode"]["fra"]["tom"].asText())
+        assertEquals(expectedTilFom.toString(), endringer["periode"]["til"]["fom"].asText())
+        assertEquals(expectedTilTom.toString(), endringer["periode"]["til"]["tom"].asText())
         assertEquals(expectedPeriodebeløpFra.toString(), endringer["periodebelop"]["fra"].asText())
         assertEquals(expectedPeriodebeløpTil.toString(), endringer["periodebelop"]["til"].asText())
         assertEquals(expectedDagerFra.size, endringer["dager"]["fra"].size())

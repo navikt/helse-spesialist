@@ -85,8 +85,10 @@ class SpeilPersonReceiver(
                 "fodselsnummer" to testContext.person.fødselsnummer,
                 "verdier" to mapOf(
                     "organisasjonsnummer" to organisasjonsnummer,
-                    "fom" to fom.toString(),
-                    "tom" to tom.toString(),
+                    "periode" to mapOf(
+                        "fom" to fom.toString(),
+                        "tom" to tom.toString(),
+                    ),
                     "periodebelop" to periodebeløp.toString(),
                     "dager" to dager.map(LocalDate::toString),
                 ),
@@ -110,8 +112,10 @@ class SpeilPersonReceiver(
                 "tilkommenInntektId" to tilkommenInntektId.toString(),
                 "endretTil" to mapOf(
                     "organisasjonsnummer" to organisasjonsnummer,
-                    "fom" to fom.toString(),
-                    "tom" to tom.toString(),
+                    "periode" to mapOf(
+                        "fom" to fom.toString(),
+                        "tom" to tom.toString(),
+                    ),
                     "periodebelop" to periodebeløp.toString(),
                     "dager" to dager.map(LocalDate::toString),
                 ),
@@ -148,8 +152,10 @@ class SpeilPersonReceiver(
                 "tilkommenInntektId" to tilkommenInntektId.toString(),
                 "endretTil" to mapOf(
                     "organisasjonsnummer" to organisasjonsnummer,
-                    "fom" to fom.toString(),
-                    "tom" to tom.toString(),
+                    "periode" to mapOf(
+                        "fom" to fom.toString(),
+                        "tom" to tom.toString(),
+                    ),
                     "periodebelop" to periodebeløp.toString(),
                     "dager" to dager.map(LocalDate::toString),
                 ),

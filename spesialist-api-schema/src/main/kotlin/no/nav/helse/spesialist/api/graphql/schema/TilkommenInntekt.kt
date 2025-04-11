@@ -15,8 +15,7 @@ data class ApiTilkommenInntektskilde(
 @GraphQLName("TilkommenInntekt")
 data class ApiTilkommenInntekt(
     val tilkommenInntektId: UUID,
-    val fom: LocalDate,
-    val tom: LocalDate,
+    val periode: ApiDatoPeriode,
     val periodebelop: BigDecimal,
     val dager: List<LocalDate>,
     val fjernet: Boolean,
@@ -26,8 +25,7 @@ data class ApiTilkommenInntekt(
 @GraphQLName("TilkommenInntekt")
 data class ApiTilkommenInntektInput(
     val organisasjonsnummer: String,
-    val fom: LocalDate,
-    val tom: LocalDate,
+    val periode: ApiDatoPeriode,
     val periodebelop: BigDecimal,
     val dager: List<LocalDate>,
 )
@@ -47,13 +45,12 @@ sealed interface ApiTilkommenInntektEvent {
     @GraphQLName("TilkommenInntektEventEndringer")
     data class Endringer(
         val organisasjonsnummer: StringEndring?,
-        val fom: LocalDateEndring?,
-        val tom: LocalDateEndring?,
+        val periode: DatoPeriodeEndring?,
         val periodebelop: BigDecimalEndring?,
         val dager: ListLocalDateEndring?,
     ) {
-        @GraphQLName("TilkommenInntektEventLocalDateEndring")
-        data class LocalDateEndring(val fra: LocalDate, val til: LocalDate)
+        @GraphQLName("TilkommenInntektEventDatoPeriodeEndring")
+        data class DatoPeriodeEndring(val fra: ApiDatoPeriode, val til: ApiDatoPeriode)
 
         @GraphQLName("TilkommenInntektEventBigDecimalEndring")
         data class BigDecimalEndring(val fra: BigDecimal, val til: BigDecimal)
@@ -70,8 +67,7 @@ sealed interface ApiTilkommenInntektEvent {
 data class ApiTilkommenInntektOpprettetEvent(
     override val metadata: ApiTilkommenInntektEvent.Metadata,
     val organisasjonsnummer: String,
-    val fom: LocalDate,
-    val tom: LocalDate,
+    val periode: ApiDatoPeriode,
     val periodebelop: BigDecimal,
     val dager: List<LocalDate>,
 ) : ApiTilkommenInntektEvent

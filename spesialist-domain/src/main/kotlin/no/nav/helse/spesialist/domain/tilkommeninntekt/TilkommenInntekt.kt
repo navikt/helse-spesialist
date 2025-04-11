@@ -40,8 +40,7 @@ class TilkommenInntekt private constructor(
 
     fun endreTil(
         organisasjonsnummer: String,
-        fom: LocalDate,
-        tom: LocalDate,
+        periode: Periode,
         periodebeløp: BigDecimal,
         dager: Set<LocalDate>,
         saksbehandlerIdent: String,
@@ -61,8 +60,7 @@ class TilkommenInntekt private constructor(
                 endringer =
                     TilkommenInntektEvent.Endringer(
                         organisasjonsnummer = muligEndring(fra = this.organisasjonsnummer, til = organisasjonsnummer),
-                        fom = muligEndring(fra = periode.fom, til = fom),
-                        tom = muligEndring(fra = periode.tom, til = tom),
+                        periode = muligEndring(fra = this.periode, til = periode),
                         periodebeløp = muligEndring(fra = this.periodebeløp, til = periodebeløp),
                         dager = muligEndring(fra = this.dager, til = dager.toSortedSet()),
                     ),
@@ -91,8 +89,7 @@ class TilkommenInntekt private constructor(
 
     fun gjenopprett(
         organisasjonsnummer: String,
-        fom: LocalDate,
-        tom: LocalDate,
+        periode: Periode,
         periodebeløp: BigDecimal,
         dager: Set<LocalDate>,
         saksbehandlerIdent: String,
@@ -112,8 +109,7 @@ class TilkommenInntekt private constructor(
                 endringer =
                     TilkommenInntektEvent.Endringer(
                         organisasjonsnummer = muligEndring(fra = this.organisasjonsnummer, til = organisasjonsnummer),
-                        fom = muligEndring(fra = periode.fom, til = fom),
-                        tom = muligEndring(fra = periode.tom, til = tom),
+                        periode = muligEndring(fra = this.periode, til = periode),
                         periodebeløp = muligEndring(fra = this.periodebeløp, til = periodebeløp),
                         dager = muligEndring(fra = this.dager, til = dager.toSortedSet()),
                     ),
@@ -161,8 +157,7 @@ class TilkommenInntekt private constructor(
 
     private fun håndterEndringer(endringer: TilkommenInntektEvent.Endringer) {
         håndterEndring(endringer.organisasjonsnummer, this::organisasjonsnummer)
-        håndterEndring(endringer.fom, periode.fom) { periode = periode.copy(fom = it) }
-        håndterEndring(endringer.tom, periode.tom) { periode = periode.copy(tom = it) }
+        håndterEndring(endringer.periode, this::periode)
         håndterEndring(endringer.periodebeløp, this::periodebeløp)
         håndterEndring(endringer.dager, this::dager)
     }
@@ -180,20 +175,6 @@ class TilkommenInntekt private constructor(
         }
     }
 
-    private fun <T> håndterEndring(
-        endring: Endring<T>?,
-        currentValue: T,
-        updater: (T) -> Unit,
-    ) {
-        if (endring != null) {
-            if (endring.fra != currentValue) {
-                error("Fikk event med endring med feil fra-verdi!")
-            } else {
-                updater(endring.til)
-            }
-        }
-    }
-
     companion object {
         fun ny(
             fødselsnummer: String,
@@ -201,8 +182,7 @@ class TilkommenInntekt private constructor(
             notatTilBeslutter: String,
             totrinnsvurderingId: TotrinnsvurderingId,
             organisasjonsnummer: String,
-            fom: LocalDate,
-            tom: LocalDate,
+            periode: Periode,
             periodebeløp: BigDecimal,
             dager: Set<LocalDate>,
         ) = TilkommenInntekt(
@@ -217,26 +197,21 @@ class TilkommenInntekt private constructor(
                 ),
                 fødselsnummer = fødselsnummer,
                 organisasjonsnummer = organisasjonsnummer,
-                periode = Periode(fom, tom),
+                periode = periode,
                 periodebeløp = periodebeløp,
                 dager = dager.toSortedSet(),
             ),
         )
 
         fun validerAtNyPeriodeIkkeOverlapperEksisterendePerioder(
-            fom: LocalDate,
-            tom: LocalDate,
+            periode: Periode,
             organisasjonsnummer: String,
             alleTilkomneInntekterForFødselsnummer: List<TilkommenInntekt>,
         ) {
             val alleTilkomneInntekterForInntektskilde =
                 alleTilkomneInntekterForFødselsnummer.filter { it.organisasjonsnummer == organisasjonsnummer }
             if (alleTilkomneInntekterForInntektskilde.any {
-                    it.periode overlapper
-                        Periode(
-                            fom = fom,
-                            tom = tom,
-                        )
+                    it.periode overlapper periode
                 }
             ) {
                 error("Kan ikke legge til tilkommen inntekt som overlapper med en annen tilkommen inntekt for samme inntektskilde")

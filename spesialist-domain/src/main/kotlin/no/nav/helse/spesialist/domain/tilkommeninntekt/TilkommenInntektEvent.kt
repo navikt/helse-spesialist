@@ -22,8 +22,7 @@ sealed interface TilkommenInntektEvent {
 
     data class Endringer(
         val organisasjonsnummer: Endring<String>?,
-        val fom: Endring<LocalDate>?,
-        val tom: Endring<LocalDate>?,
+        val periode: Endring<Periode>?,
         val periodebeløp: Endring<BigDecimal>?,
         val dager: Endring<SortedSet<LocalDate>>?,
     )

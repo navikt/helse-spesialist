@@ -1,6 +1,6 @@
 mutation LeggTilTilkommenInntekt(
     $fodselsnummer: String!,
-    $verdier: TilkommenInntektRequestInput!,
+    $verdier: TilkommenInntektInput!,
     $notatTilBeslutter: String!
 ) {
     leggTilTilkommenInntekt(

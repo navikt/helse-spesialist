@@ -1,6 +1,6 @@
 mutation EndreTilkommenInntekt(
     $tilkommenInntektId: UUID!,
-    $endretTil: TilkommenInntektRequestInput!,
+    $endretTil: TilkommenInntektInput!,
     $notatTilBeslutter: String!
 ) {
     endreTilkommenInntekt(

@@ -14,6 +14,7 @@ import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.application.TilkommenInntektRepository
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.domain.Periode
+import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
 import no.nav.helse.spesialist.domain.Periode.Companion.tilPerioder
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntekt
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektId
@@ -32,7 +33,7 @@ class TilkommenInntektMutationHandler(
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> {
         sessionFactory.transactionalSessionScope { session ->
-            val periode = Periode(fom = verdier.fom, tom = verdier.tom)
+            val periode = verdier.periode.fom tilOgMed verdier.periode.tom
             verifiserAtErInnenforEtSykefraværstilfelle(
                 periode = periode,
                 fødselsnummer = fodselsnummer,
@@ -41,8 +42,7 @@ class TilkommenInntektMutationHandler(
             val alleTilkomneInntekterForFødselsnummer =
                 session.tilkommenInntektRepository.finnAlleForFødselsnummer(fødselsnummer = fodselsnummer)
             TilkommenInntekt.validerAtNyPeriodeIkkeOverlapperEksisterendePerioder(
-                fom = verdier.fom,
-                tom = verdier.tom,
+                periode = periode,
                 organisasjonsnummer = verdier.organisasjonsnummer,
                 alleTilkomneInntekterForFødselsnummer = alleTilkomneInntekterForFødselsnummer,
             )
@@ -58,8 +58,7 @@ class TilkommenInntektMutationHandler(
                             totrinnsvurderingRepository = session.totrinnsvurderingRepository,
                         ).id(),
                     organisasjonsnummer = verdier.organisasjonsnummer,
-                    fom = verdier.fom,
-                    tom = verdier.tom,
+                    periode = periode,
                     periodebeløp = verdier.periodebelop,
                     dager = verdier.dager.toSet(),
                 )
@@ -109,7 +108,7 @@ class TilkommenInntektMutationHandler(
             val vedtaksperiodeRepository: VedtaksperiodeRepository = session.vedtaksperiodeRepository
             val tilkommenInntektRepository: TilkommenInntektRepository = session.tilkommenInntektRepository
             val totrinnsvurderingRepository: TotrinnsvurderingRepository = session.totrinnsvurderingRepository
-            val endretTilPeriode = Periode(fom = endretTil.fom, tom = endretTil.tom)
+            val endretTilPeriode = endretTil.periode.fom tilOgMed endretTil.periode.tom
             val tilkommenInntekt =
                 tilkommenInntektRepository.finn(TilkommenInntektId(tilkommenInntektId))
                     ?: error("Fant ikke tilkommen inntekt med tilkommentInntektId $tilkommenInntektId")
@@ -132,8 +131,7 @@ class TilkommenInntektMutationHandler(
 
             tilkommenInntekt.endreTil(
                 organisasjonsnummer = endretTil.organisasjonsnummer,
-                fom = endretTil.fom,
-                tom = endretTil.tom,
+                periode = endretTil.periode.fom tilOgMed endretTil.periode.tom,
                 periodebeløp = endretTil.periodebelop,
                 dager = endretTil.dager.toSet(),
                 saksbehandlerIdent = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER).ident,
@@ -182,7 +180,7 @@ class TilkommenInntektMutationHandler(
             val vedtaksperiodeRepository: VedtaksperiodeRepository = session.vedtaksperiodeRepository
             val tilkommenInntektRepository: TilkommenInntektRepository = session.tilkommenInntektRepository
             val totrinnsvurderingRepository: TotrinnsvurderingRepository = session.totrinnsvurderingRepository
-            val endretTilPeriode = Periode(fom = endretTil.fom, tom = endretTil.tom)
+            val endretTilPeriode = endretTil.periode.fom tilOgMed endretTil.periode.tom
             val tilkommenInntekt =
                 tilkommenInntektRepository.finn(TilkommenInntektId(tilkommenInntektId))
                     ?: error("Fant ikke tilkommen inntekt med tilkommenInntektId $tilkommenInntektId")
@@ -201,8 +199,7 @@ class TilkommenInntektMutationHandler(
 
             tilkommenInntekt.gjenopprett(
                 organisasjonsnummer = endretTil.organisasjonsnummer,
-                fom = endretTil.fom,
-                tom = endretTil.tom,
+                periode = endretTilPeriode,
                 periodebeløp = endretTil.periodebelop,
                 dager = endretTil.dager.toSet(),
                 saksbehandlerIdent = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER).ident,

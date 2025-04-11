@@ -8,7 +8,6 @@ import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.db.objectMapper
-import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.tilkommeninntekt.Endring
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntekt
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektEndretEvent
@@ -107,8 +106,7 @@ class PgTilkommenInntektRepository(
                                         verdi = event.organisasjonsnummer,
                                         type = InntektskildeIdentifikator.Type.ORGANISASJONSNUMMER,
                                     ),
-                                fom = event.periode.fom,
-                                tom = event.periode.tom,
+                                periode = event.periode.tilJsonPeriode(),
                                 periodebeløp = event.periodebeløp,
                                 dager = event.dager,
                             )
@@ -143,13 +141,20 @@ class PgTilkommenInntektRepository(
                         ),
                     )
                 },
-            fom = fom.tilJsonEndring(),
-            tom = tom.tilJsonEndring(),
+            periode =
+                periode?.let {
+                    Endringer.Endring(
+                        fra = it.fra.tilJsonPeriode(),
+                        til = it.til.tilJsonPeriode(),
+                    )
+                },
             periodebeløp = periodebeløp.tilJsonEndring(),
             dager = dager.tilJsonEndring(),
         )
 
     private fun <T> Endring<T>?.tilJsonEndring(): Endringer.Endring<T>? = this?.let { Endringer.Endring(it.fra, it.til) }
+
+    private fun no.nav.helse.spesialist.domain.Periode.tilJsonPeriode(): Periode = Periode(fom = fom, tom = tom)
 
     private fun Row.toTilkommenInntektEvent(): TilkommenInntektEvent {
         val metadata =
@@ -170,11 +175,7 @@ class PgTilkommenInntektRepository(
                     fødselsnummer = string("fødselsnummer"),
                     // Det finnes bare identifikatorer som er organisasjonsnummer per nå
                     organisasjonsnummer = data.inntektskildeIdentifikator.verdi,
-                    periode =
-                        Periode(
-                            fom = data.fom,
-                            tom = data.tom,
-                        ),
+                    periode = data.periode.tilDomainPeriode(),
                     periodebeløp = data.periodebeløp,
                     dager = data.dager,
                 )
@@ -209,13 +210,15 @@ class PgTilkommenInntektRepository(
                 inntektskildeIdentifikator?.let {
                     Endring(fra = it.fra.verdi, til = it.til.verdi)
                 },
-            fom = fom.tilDomainEndring(),
-            tom = tom.tilDomainEndring(),
+            periode = periode?.let { Endring(fra = it.fra.tilDomainPeriode(), til = it.til.tilDomainPeriode()) },
             periodebeløp = periodebeløp.tilDomainEndring(),
             dager = dager.tilDomainEndring(),
         )
 
     private fun <T> Endringer.Endring<T>?.tilDomainEndring(): Endring<T>? = this?.let { Endring(fra = it.fra, til = it.til) }
+
+    private fun Periode.tilDomainPeriode(): no.nav.helse.spesialist.domain.Periode =
+        no.nav.helse.spesialist.domain.Periode(fom = fom, tom = tom)
 
     enum class EventType {
         OPPRETTET,
@@ -226,8 +229,7 @@ class PgTilkommenInntektRepository(
 
     data class OpprettetEventData(
         val inntektskildeIdentifikator: InntektskildeIdentifikator,
-        val fom: LocalDate,
-        val tom: LocalDate,
+        val periode: Periode,
         val periodebeløp: BigDecimal,
         val dager: SortedSet<LocalDate>,
     ) : EventData
@@ -244,8 +246,7 @@ class PgTilkommenInntektRepository(
 
     data class Endringer(
         val inntektskildeIdentifikator: Endring<InntektskildeIdentifikator>?,
-        val fom: Endring<LocalDate>?,
-        val tom: Endring<LocalDate>?,
+        val periode: Endring<Periode>?,
         val periodebeløp: Endring<BigDecimal>?,
         val dager: Endring<SortedSet<LocalDate>>?,
     ) {
@@ -260,4 +261,9 @@ class PgTilkommenInntektRepository(
             ORGANISASJONSNUMMER,
         }
     }
+
+    data class Periode(
+        val fom: LocalDate,
+        val tom: LocalDate,
+    )
 }

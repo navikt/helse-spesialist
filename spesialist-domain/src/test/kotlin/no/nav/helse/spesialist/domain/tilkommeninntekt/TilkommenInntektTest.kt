@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.domain.tilkommeninntekt
 
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
+import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
@@ -24,8 +25,7 @@ class TilkommenInntektTest {
 
         //when
         val tilkommenInntekt = TilkommenInntekt.ny(
-            fom = 1 jan 2018,
-            tom = 31 jan 2018,
+            periode = (1 jan 2018) tilOgMed (31 jan 2018),
             dager = setOf(1 jan 2018, 31 jan 2018),
             periodebeløp = BigDecimal("10000"),
             fødselsnummer = fødselsnummer,
@@ -63,8 +63,7 @@ class TilkommenInntektTest {
         val fødselsnummer = lagFødselsnummer()
         val organisasjonsnummer = lagOrganisasjonsnummer()
         val tilkommenInntekt = TilkommenInntekt.ny(
-            fom = 1 jan 2018,
-            tom = 31 jan 2018,
+            periode = (1 jan 2018) tilOgMed (31 jan 2018),
             dager = setOf(1 jan 2018, 31 jan 2018),
             periodebeløp = BigDecimal("10000"),
             fødselsnummer = fødselsnummer,
@@ -79,8 +78,7 @@ class TilkommenInntektTest {
         val saksbehandlerIdent = lagSaksbehandlerident()
         tilkommenInntekt.endreTil(
             organisasjonsnummer = endretOrganisasjonsnummer,
-            fom = 3 jan 2018,
-            tom = 20 jan 2018,
+            periode = (3 jan 2018) tilOgMed (20 jan 2018),
             periodebeløp = BigDecimal("100"),
             dager = emptySet(),
             saksbehandlerIdent = saksbehandlerIdent,
@@ -94,10 +92,8 @@ class TilkommenInntektTest {
         val endretEvent = tilkommenInntekt.events.last() as TilkommenInntektEndretEvent
         assertEquals(organisasjonsnummer, endretEvent.endringer.organisasjonsnummer?.fra)
         assertEquals(endretOrganisasjonsnummer, endretEvent.endringer.organisasjonsnummer?.til)
-        assertEquals(1 jan 2018, endretEvent.endringer.fom?.fra)
-        assertEquals(3 jan 2018, endretEvent.endringer.fom?.til)
-        assertEquals(31 jan 2018, endretEvent.endringer.tom?.fra)
-        assertEquals(20 jan 2018, endretEvent.endringer.tom?.til)
+        assertEquals((1 jan 2018) tilOgMed (31 jan 2018), endretEvent.endringer.periode?.fra)
+        assertEquals((3 jan 2018) tilOgMed (20 jan 2018), endretEvent.endringer.periode?.til)
         assertEquals(sortedSetOf(1 jan 2018, 31 jan 2018), endretEvent.endringer.dager?.fra)
         assertEquals(sortedSetOf(), endretEvent.endringer.dager?.til)
         assertEquals(BigDecimal("10000"), endretEvent.endringer.periodebeløp?.fra)
@@ -122,8 +118,7 @@ class TilkommenInntektTest {
         val fødselsnummer = lagFødselsnummer()
         val organisasjonsnummer = lagOrganisasjonsnummer()
         val tilkommenInntekt = TilkommenInntekt.ny(
-            fom = 1 jan 2018,
-            tom = 31 jan 2018,
+            periode = (1 jan 2018) tilOgMed (31 jan 2018),
             dager = setOf(1 jan 2018, 31 jan 2018),
             periodebeløp = BigDecimal("10000"),
             fødselsnummer = fødselsnummer,
@@ -140,8 +135,7 @@ class TilkommenInntektTest {
         val saksbehandlerIdent = lagSaksbehandlerident()
         tilkommenInntekt.gjenopprett(
             organisasjonsnummer = endretOrganisasjonsnummer,
-            fom = 3 jan 2018,
-            tom = 20 jan 2018,
+            periode = (3 jan 2018) tilOgMed (20 jan 2018),
             periodebeløp = BigDecimal("100"),
             dager = emptySet(),
             saksbehandlerIdent = saksbehandlerIdent,
@@ -155,10 +149,8 @@ class TilkommenInntektTest {
         val gjenopprettetEvent = tilkommenInntekt.events.last() as TilkommenInntektGjenopprettetEvent
         assertEquals(organisasjonsnummer, gjenopprettetEvent.endringer.organisasjonsnummer?.fra)
         assertEquals(endretOrganisasjonsnummer, gjenopprettetEvent.endringer.organisasjonsnummer?.til)
-        assertEquals(1 jan 2018, gjenopprettetEvent.endringer.fom?.fra)
-        assertEquals(3 jan 2018, gjenopprettetEvent.endringer.fom?.til)
-        assertEquals(31 jan 2018, gjenopprettetEvent.endringer.tom?.fra)
-        assertEquals(20 jan 2018, gjenopprettetEvent.endringer.tom?.til)
+        assertEquals((1 jan 2018) tilOgMed (31 jan 2018), gjenopprettetEvent.endringer.periode?.fra)
+        assertEquals((3 jan 2018) tilOgMed (20 jan 2018), gjenopprettetEvent.endringer.periode?.til)
         assertEquals(sortedSetOf(1 jan 2018, 31 jan 2018), gjenopprettetEvent.endringer.dager?.fra)
         assertEquals(sortedSetOf(), gjenopprettetEvent.endringer.dager?.til)
         assertEquals(BigDecimal("10000"), gjenopprettetEvent.endringer.periodebeløp?.fra)
@@ -182,8 +174,7 @@ class TilkommenInntektTest {
         val fødselsnummer = lagFødselsnummer()
         val organisasjonsnummer = lagOrganisasjonsnummer()
         val tilkommenInntekt = TilkommenInntekt.ny(
-            fom = 1 jan 2018,
-            tom = 31 jan 2018,
+            periode = (1 jan 2018) tilOgMed (31 jan 2018),
             dager = setOf(1 jan 2018, 31 jan 2018),
             periodebeløp = BigDecimal("10000.0"),
             fødselsnummer = fødselsnummer,
@@ -194,7 +185,11 @@ class TilkommenInntektTest {
         )
 
         assertThrows<IllegalStateException> {
-        TilkommenInntekt.validerAtNyPeriodeIkkeOverlapperEksisterendePerioder(15 jan 2018, 31 jan 2018, organisasjonsnummer, listOf(tilkommenInntekt))
+            TilkommenInntekt.validerAtNyPeriodeIkkeOverlapperEksisterendePerioder(
+                periode = (15 jan 2018) tilOgMed (31 jan 2018),
+                organisasjonsnummer = organisasjonsnummer,
+                alleTilkomneInntekterForFødselsnummer = listOf(tilkommenInntekt)
+            )
         }
     }
 
@@ -204,8 +199,7 @@ class TilkommenInntektTest {
         val fødselsnummer = lagFødselsnummer()
         val organisasjonsnummer = lagOrganisasjonsnummer()
         val tilkommenInntekt = TilkommenInntekt.ny(
-            fom = 1 jan 2018,
-            tom = 31 jan 2018,
+            periode = (1 jan 2018) tilOgMed (31 jan 2018),
             dager = setOf(1 jan 2018, 31 jan 2018),
             periodebeløp = BigDecimal("10000"),
             fødselsnummer = fødselsnummer,
