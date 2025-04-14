@@ -291,9 +291,9 @@ class SpeilPersonReceiver(
                     register(ContentType.Application.Json, JacksonConverter())
                 }
                 engine {
-                    socketTimeout = 5_000
-                    connectTimeout = 5_000
-                    connectionRequestTimeout = 5_000
+                    socketTimeout = 0
+                    connectTimeout = 1_000
+                    connectionRequestTimeout = 1_000
                 }
             }
     }
