@@ -55,10 +55,10 @@ class MessageContextMeldingPubliserer(private val context: MessageContext) : Mel
     ) {
         val message = JsonMessage.newMessage(event.eventName, event.detaljer()).toJson()
         logg.info(
-            "Publiserer CommandContext tilstandendring i forbindelse med $hendelseNavn, ny tilstand: ${event::class.simpleName}",
+            "Publiserer melding om tilstandsendring for kommandokjede startet av $hendelseNavn, ny tilstand: ${event::class.simpleName}",
         )
         sikkerlogg.info(
-            "Publiserer CommandContext tilstandendring i forbindelse med $hendelseNavn, ny tilstand: $${event::class.simpleName}\n{}",
+            "Publiserer melding om tilstandsendring for kommandokjede startet av $hendelseNavn, ny tilstand: ${event::class.simpleName}\n{}",
             message,
         )
         context.publish(fødselsnummer, message)
