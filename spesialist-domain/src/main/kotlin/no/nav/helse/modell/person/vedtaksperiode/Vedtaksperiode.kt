@@ -39,6 +39,9 @@ class Vedtaksperiode private constructor(
 
     internal fun behandleTilbakedateringGodkjent(perioder: List<Periode>) {
         if (forkastet || perioder.none { it.overlapper(Periode(fom, tom)) }) return
+        logg.info(
+            "Godkjent tilbakedatert sykmelding overlapper med vedtaksperiode med fom=$fom, tom=$tom - perioder i sykmeldingen: $perioder",
+        )
         deaktiverVarselMedKode("RV_SØ_3")
     }
 
