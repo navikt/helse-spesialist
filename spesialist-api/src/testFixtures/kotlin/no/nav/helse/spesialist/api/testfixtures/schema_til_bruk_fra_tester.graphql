@@ -810,6 +810,16 @@ type Sporsmal {
     undertekst: String
 }
 
+type StansAutomatiskBehandlingSaksbehandler implements Historikkinnslag {
+    dialogRef: Int
+    id: Int!
+    kommentarer: [Kommentar!]!
+    notattekst: String
+    saksbehandlerIdent: String
+    timestamp: LocalDateTime!
+    type: PeriodehistorikkType!
+}
+
 type Svar {
     verdi: String
 }

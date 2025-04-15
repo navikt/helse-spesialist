@@ -57,6 +57,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiSimuleringsdetaljer
 import no.nav.helse.spesialist.api.graphql.schema.ApiSimuleringslinje
 import no.nav.helse.spesialist.api.graphql.schema.ApiSimuleringsperiode
 import no.nav.helse.spesialist.api.graphql.schema.ApiSimuleringsutbetaling
+import no.nav.helse.spesialist.api.graphql.schema.ApiStansAutomatiskBehandlingSaksbehandler
 import no.nav.helse.spesialist.api.graphql.schema.ApiSykepengedager
 import no.nav.helse.spesialist.api.graphql.schema.ApiTotrinnsvurdering
 import no.nav.helse.spesialist.api.graphql.schema.ApiTotrinnsvurderingRetur
@@ -153,7 +154,7 @@ data class ApiBeregnetPeriodeResolver(
         return Triple(påVentÅrsaker, frist, notattekst)
     }
 
-    private fun mapTotrinnsvurderingReturJson(json: String): String? {
+    private fun mapNotattekstJson(json: String): String? {
         val node = objectMapper.readTree(json)
         val notattekst = node["notattekst"]?.takeUnless { it.isMissingOrNull() }?.asText()
         return notattekst
@@ -222,7 +223,7 @@ data class ApiBeregnetPeriodeResolver(
                         )
 
                     PeriodehistorikkType.TOTRINNSVURDERING_RETUR -> {
-                        val notattekst = mapTotrinnsvurderingReturJson(json = it.json)
+                        val notattekst = mapNotattekstJson(json = it.json)
                         ApiTotrinnsvurderingRetur(
                             id = it.id,
                             type = it.type.tilApiPeriodehistorikkType(),
@@ -242,6 +243,28 @@ data class ApiBeregnetPeriodeResolver(
                                         )
                                     }
                                 } ?: emptyList(),
+                        )
+                    }
+
+                    PeriodehistorikkType.STANS_AUTOMATISK_BEHANDLING_SAKSBEHANDLER -> {
+                        val notattekst = mapNotattekstJson(json = it.json)
+                        ApiStansAutomatiskBehandlingSaksbehandler(
+                            id = it.id,
+                            type = it.type.tilApiPeriodehistorikkType(),
+                            saksbehandlerIdent = it.saksbehandlerIdent,
+                            timestamp = it.timestamp,
+                            dialogRef = it.dialogRef,
+                            notattekst = notattekst,
+                            kommentarer =
+                                notatDao.finnKommentarer(it.dialogRef!!.toLong()).map { kommentar ->
+                                    ApiKommentar(
+                                        id = kommentar.id,
+                                        tekst = kommentar.tekst,
+                                        opprettet = kommentar.opprettet,
+                                        saksbehandlerident = kommentar.saksbehandlerident,
+                                        feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
+                                    )
+                                },
                         )
                     }
 

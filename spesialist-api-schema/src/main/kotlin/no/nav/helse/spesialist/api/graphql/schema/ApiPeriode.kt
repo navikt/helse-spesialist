@@ -245,6 +245,17 @@ data class ApiTotrinnsvurderingRetur(
     val kommentarer: List<ApiKommentar>,
 ) : ApiHistorikkinnslag
 
+@GraphQLName("StansAutomatiskBehandlingSaksbehandler")
+data class ApiStansAutomatiskBehandlingSaksbehandler(
+    override val id: Int,
+    override val type: ApiPeriodehistorikkType,
+    override val timestamp: LocalDateTime,
+    override val saksbehandlerIdent: String?,
+    override val dialogRef: Int?,
+    val notattekst: String?,
+    val kommentarer: List<ApiKommentar>,
+) : ApiHistorikkinnslag
+
 @GraphQLName("PeriodeHistorikkElementNy")
 data class ApiPeriodeHistorikkElementNy(
     override val id: Int,
