@@ -70,6 +70,8 @@ fun PeriodehistorikkType.tilApiPeriodehistorikkType() =
         PeriodehistorikkType.ENDRE_PA_VENT -> ApiPeriodehistorikkType.ENDRE_PA_VENT
         PeriodehistorikkType.FJERN_FRA_PA_VENT -> ApiPeriodehistorikkType.FJERN_FRA_PA_VENT
         PeriodehistorikkType.STANS_AUTOMATISK_BEHANDLING -> ApiPeriodehistorikkType.STANS_AUTOMATISK_BEHANDLING
+        PeriodehistorikkType.STANS_AUTOMATISK_BEHANDLING_SAKSBEHANDLER -> ApiPeriodehistorikkType.STANS_AUTOMATISK_BEHANDLING_SAKSBEHANDLER
+        PeriodehistorikkType.OPPHEV_STANS_AUTOMATISK_BEHANDLING_SAKSBEHANDLER -> ApiPeriodehistorikkType.OPPHEV_STANS_AUTOMATISK_BEHANDLING_SAKSBEHANDLER
     }
 
 fun Reservasjonshenter.ReservasjonDto.toApiReservasjon(): ApiReservasjon =

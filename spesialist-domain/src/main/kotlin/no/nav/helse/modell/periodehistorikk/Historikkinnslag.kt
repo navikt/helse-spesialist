@@ -2,6 +2,7 @@ package no.nav.helse.modell.periodehistorikk
 
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDto
 import no.nav.helse.modell.saksbehandler.handlinger.PåVentÅrsak
+import no.nav.helse.spesialist.domain.DialogId
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -73,6 +74,24 @@ sealed interface Historikkinnslag {
             TotrinnsvurderingAutomatiskRetur(tidspunkt = LocalDateTime.now())
 
         fun automatiskBehandlingStanset(): AutomatiskBehandlingStanset = AutomatiskBehandlingStanset(tidspunkt = LocalDateTime.now())
+
+        fun automatiskBehandlingStansetAvSaksbehandler(
+            saksbehandler: SaksbehandlerDto,
+            begrunnelse: String,
+            dialogId: DialogId,
+        ): AutomatiskBehandlingStansetAvSaksbehandler =
+            AutomatiskBehandlingStansetAvSaksbehandler(
+                tidspunkt = LocalDateTime.now(),
+                saksbehandler = saksbehandler,
+                dialogRef = dialogId.value,
+                notattekst = begrunnelse,
+            )
+
+        fun opphevStansAvSaksbehandler(saksbehandler: SaksbehandlerDto): OpphevStansAvSaksbehandler =
+            OpphevStansAvSaksbehandler(
+                tidspunkt = LocalDateTime.now(),
+                saksbehandler = saksbehandler,
+            )
 
         fun vedtaksperiodeReberegnet(): VedtaksperiodeReberegnet = VedtaksperiodeReberegnet(tidspunkt = LocalDateTime.now())
     }
@@ -155,6 +174,25 @@ data class AutomatiskBehandlingStanset(
 ) : Historikkinnslag {
     override val dialogRef: Long? = null
     override val saksbehandler: SaksbehandlerDto? = null
+}
+
+data class AutomatiskBehandlingStansetAvSaksbehandler(
+    override val tidspunkt: LocalDateTime,
+    override val saksbehandler: SaksbehandlerDto,
+    override val dialogRef: Long,
+    val notattekst: String,
+) : Historikkinnslag {
+    override fun detaljer(): Map<String, Any?> =
+        mapOf(
+            "notattekst" to notattekst,
+        )
+}
+
+data class OpphevStansAvSaksbehandler(
+    override val tidspunkt: LocalDateTime,
+    override val saksbehandler: SaksbehandlerDto,
+) : Historikkinnslag {
+    override val dialogRef: Long? = null
 }
 
 data class VedtaksperiodeReberegnet(

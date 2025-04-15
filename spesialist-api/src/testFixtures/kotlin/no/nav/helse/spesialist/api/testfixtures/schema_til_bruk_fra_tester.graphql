@@ -438,6 +438,7 @@ type Mutation {
     minimumSykdomsgrad(minimumSykdomsgrad: MinimumSykdomsgradInput!): Boolean!
     oppdaterPerson(fodselsnummer: String!): Boolean!
     opphevStans(begrunnelse: String!, fodselsnummer: String!): Boolean!
+    opphevStansAutomatiskBehandling(fodselsnummer: String!): Boolean!
     opprettAbonnement(personidentifikator: String!): Boolean!
     opprettTildeling(oppgaveId: String!): Tildeling
     overstyrArbeidsforhold(overstyring: ArbeidsforholdOverstyringHandlingInput!): Boolean!
@@ -448,6 +449,7 @@ type Mutation {
     sendTilInfotrygd(arsak: String!, begrunnelser: [String!]!, kommentar: String, oppgavereferanse: String!): Boolean!
     settVarselstatus(definisjonIdString: String, generasjonIdString: String!, ident: String!, varselkode: String!): VarselDTO
     skjonnsfastsettSykepengegrunnlag(skjonnsfastsettelse: SkjonnsfastsettelseInput!): Boolean!
+    stansAutomatiskBehandling(begrunnelse: String!, fodselsnummer: String!): Boolean!
 }
 
 type Notat {
@@ -1251,7 +1253,9 @@ enum PeriodehistorikkType {
     ENDRE_PA_VENT
     FJERN_FRA_PA_VENT
     LEGG_PA_VENT
+    OPPHEV_STANS_AUTOMATISK_BEHANDLING_SAKSBEHANDLER
     STANS_AUTOMATISK_BEHANDLING
+    STANS_AUTOMATISK_BEHANDLING_SAKSBEHANDLER
     TOTRINNSVURDERING_ATTESTERT
     TOTRINNSVURDERING_RETUR
     TOTRINNSVURDERING_TIL_GODKJENNING

@@ -3,11 +3,13 @@ package no.nav.helse.spesialist.db.dao
 import kotliquery.Session
 import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.modell.periodehistorikk.AutomatiskBehandlingStanset
+import no.nav.helse.modell.periodehistorikk.AutomatiskBehandlingStansetAvSaksbehandler
 import no.nav.helse.modell.periodehistorikk.AvventerTotrinnsvurdering
 import no.nav.helse.modell.periodehistorikk.EndrePåVent
 import no.nav.helse.modell.periodehistorikk.FjernetFraPåVent
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
 import no.nav.helse.modell.periodehistorikk.LagtPåVent
+import no.nav.helse.modell.periodehistorikk.OpphevStansAvSaksbehandler
 import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingAutomatiskRetur
 import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingFerdigbehandlet
 import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingRetur
@@ -63,5 +65,7 @@ class PgPeriodehistorikkDao private constructor(
             is AutomatiskBehandlingStanset -> "STANS_AUTOMATISK_BEHANDLING" // TODO: Mangler å migrere typen i databasen
             is VedtaksperiodeReberegnet -> "VEDTAKSPERIODE_REBEREGNET" // TODO: Mangler å migrere typen i databasen
             is EndrePåVent -> "ENDRE_PA_VENT" // TODO: Mangler å migrere typen i databsen??
+            is AutomatiskBehandlingStansetAvSaksbehandler -> "STANS_AUTOMATISK_BEHANDLING_SAKSBEHANDLER" // TODO: Mangler å migrere typen i databsen??
+            is OpphevStansAvSaksbehandler -> "OPPHEV_STANS_AUTOMATISK_BEHANDLING_SAKSBEHANDLER" // TODO: Mangler å migrere typen i databsen??
         }
 }
