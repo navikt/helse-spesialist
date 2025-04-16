@@ -53,6 +53,7 @@ class DokumentQueryHandlerTest : AbstractGraphQLApiTest() {
         )["errors"].first()
 
         assertEquals(403, dokument["extensions"]["code"].asInt())
+        assertEquals("person", dokument["extensions"]["field"].asText())
     }
 
     @Test

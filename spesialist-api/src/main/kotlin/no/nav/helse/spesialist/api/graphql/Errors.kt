@@ -2,30 +2,35 @@ package no.nav.helse.spesialist.api.graphql
 
 import graphql.GraphQLError
 import graphql.GraphqlErrorException
+import graphql.GraphqlErrorException.newErrorException
 import graphql.execution.DataFetcherResult
 import graphql.execution.DataFetcherResult.newResult
 import no.nav.helse.spesialist.application.logg.sikkerlogg
 
-internal fun forbiddenError(fødselsnummer: String): GraphQLError =
-    GraphqlErrorException.newErrorException()
-        .message("Har ikke tilgang til person med fødselsnummer $fødselsnummer")
-        .extensions(mapOf("code" to 403, "field" to "person"))
-        .build()
+internal fun forbiddenError(fødselsnummer: String): GraphqlErrorException =
+    graphqlErrorException(
+        403,
+        "Har ikke tilgang til person med fødselsnummer $fødselsnummer",
+        "field" to "person",
+    )
 
-internal fun notFoundError(identifikator: String? = null): GraphQLError =
-    GraphqlErrorException.newErrorException()
-        .message("Finner ikke data for person med identifikator $identifikator")
-        .extensions(mapOf("code" to 404, "field" to "person"))
-        .build()
+internal fun notFoundError(identifikator: String? = null): GraphqlErrorException =
+    graphqlErrorException(
+        404,
+        "Finner ikke data for person med identifikator $identifikator",
+        "field" to "person",
+    )
 
 internal fun personNotReadyError(
     fødselsnummer: String,
     aktørId: String,
-): GraphQLError =
-    GraphqlErrorException.newErrorException()
-        .message("Person med fødselsnummer $fødselsnummer er ikke klar for visning ennå")
-        .extensions(mapOf("code" to 409, "field" to "person", "persondata_hentes_for" to aktørId))
-        .build()
+): GraphqlErrorException =
+    graphqlErrorException(
+        409,
+        "Person med fødselsnummer $fødselsnummer er ikke klar for visning ennå",
+        "field" to "person",
+        "persondata_hentes_for" to aktørId,
+    )
 
 internal fun <T> notFound(message: String) = dataFetcherError<T>(404, message)
 
@@ -36,14 +41,16 @@ internal fun <T> internalServerError(message: String) = dataFetcherError<T>(500,
 private fun <T> dataFetcherError(
     httpCode: Int,
     message: String,
-): DataFetcherResult<T> =
-    newResult<T>()
-        .error(
-            GraphqlErrorException.newErrorException()
-                .message(message)
-                .extensions(mapOf("code" to httpCode))
-                .build(),
-        ).build()
-        .also {
-            sikkerlogg.error("Returnerer $httpCode-feil for GraphQL-operasjon: $message")
-        }
+    vararg extensions: Pair<String, Any>,
+): DataFetcherResult<T> {
+    sikkerlogg.error("Returnerer $httpCode-feil for GraphQL-operasjon: $message")
+    return byggFeilrespons(graphqlErrorException(httpCode, message, *extensions))
+}
+
+private fun graphqlErrorException(
+    httpCode: Int,
+    message: String,
+    vararg extensions: Pair<String, Any>,
+): GraphqlErrorException = newErrorException().message(message).extensions(mapOf("code" to httpCode, *extensions)).build()
+
+internal fun <T> byggFeilrespons(error: GraphQLError) = newResult<T>().error(error).build()

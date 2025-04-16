@@ -5,7 +5,6 @@ import com.github.navikt.tbd_libs.jackson.asLocalDate
 import com.github.navikt.tbd_libs.jackson.asLocalDateOrNull
 import com.github.navikt.tbd_libs.jackson.asLocalDateTimeOrNull
 import com.github.navikt.tbd_libs.jackson.isMissingOrNull
-import graphql.GraphQLError
 import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
@@ -13,6 +12,8 @@ import no.nav.helse.db.api.EgenAnsattApiDao
 import no.nav.helse.db.api.PersonApiDao
 import no.nav.helse.spesialist.api.Dokumenthåndterer
 import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGER
+import no.nav.helse.spesialist.api.graphql.byggFeilrespons
+import no.nav.helse.spesialist.api.graphql.byggRespons
 import no.nav.helse.spesialist.api.graphql.forbiddenError
 import no.nav.helse.spesialist.api.graphql.query.DokumentQueryHandler.GraphQLErrorFactory.getEmptyRequestError
 import no.nav.helse.spesialist.api.graphql.query.DokumentQueryHandler.GraphQLErrorFactory.getEmptyResultTimeoutError
@@ -52,7 +53,7 @@ class DokumentQueryHandler(
         env: DataFetchingEnvironment,
     ): DataFetcherResult<ApiSoknad?> {
         if (isForbidden(fnr, env)) {
-            return byggFeilrespons(getForbiddenError(fnr))
+            return byggFeilrespons(forbiddenError(fnr))
         } else if (dokumentId.isEmpty()) {
             return byggFeilrespons(getEmptyRequestError())
         }
@@ -73,7 +74,7 @@ class DokumentQueryHandler(
         env: DataFetchingEnvironment,
     ): DataFetcherResult<ApiDokumentInntektsmelding?> {
         if (isForbidden(fnr, env)) {
-            return byggFeilrespons(getForbiddenError(fnr))
+            return byggFeilrespons(forbiddenError(fnr))
         } else if (dokumentId.isEmpty()) {
             return byggFeilrespons(getEmptyRequestError())
         }
@@ -88,10 +89,6 @@ class DokumentQueryHandler(
             else -> byggRespons(jsonNode.tilInntektsmelding())
         }
     }
-
-    private fun <T> byggRespons(data: T) = DataFetcherResult.newResult<T>().data(data).build()
-
-    private fun <T> byggFeilrespons(error: GraphQLError) = DataFetcherResult.newResult<T>().error(error).build()
 
     private object GraphQLErrorFactory {
         fun getEmptyRequestError() = byggGraphqlError("Requesten mangler dokument-id.", "code" to 400)
@@ -371,8 +368,6 @@ class DokumentQueryHandler(
         fnr: String,
         env: DataFetchingEnvironment,
     ): Boolean = manglerTilgang(egenAnsattApiDao, personApiDao, fnr, env.graphQlContext.get(TILGANGER))
-
-    private fun getForbiddenError(fødselsnummer: String): GraphQLError = forbiddenError(fødselsnummer)
 }
 
 private fun JsonNode.getIfNotNull(key: String) = get(key).takeUnless { it.isMissingOrNull() }
