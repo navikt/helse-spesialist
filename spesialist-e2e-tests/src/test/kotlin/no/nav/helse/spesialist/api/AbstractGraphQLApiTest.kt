@@ -151,9 +151,7 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                     tildeling = TildelingMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
                     opptegnelse = OpptegnelseMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
                     overstyring = OverstyringMutationHandler(
-                        saksbehandlerMediator = saksbehandlerMediator,
-                        mockk(relaxed = true),
-                        meldingPubliserer
+                        saksbehandlerMediator = saksbehandlerMediator
                     ),
                     skjonnsfastsettelse = SkjonnsfastsettelseMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
                     minimumSykdomsgrad = MinimumSykdomsgradMutationHandler(saksbehandlerMediator = saksbehandlerMediator),

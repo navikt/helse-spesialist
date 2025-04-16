@@ -174,8 +174,6 @@ fun lagSchemaMedResolversOgHandlers(
                 overstyring =
                     OverstyringMutationHandler(
                         saksbehandlerMediator = saksbehandlerMediator,
-                        sessionFactory = sessionFactory,
-                        meldingPubliserer = meldingPubliserer,
                     ),
                 skjonnsfastsettelse = SkjonnsfastsettelseMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
                 minimumSykdomsgrad = MinimumSykdomsgradMutationHandler(saksbehandlerMediator = saksbehandlerMediator),

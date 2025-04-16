@@ -2,8 +2,6 @@ package no.nav.helse.spesialist.api.graphql.mutation
 
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
-import no.nav.helse.MeldingPubliserer
-import no.nav.helse.db.SessionFactory
 import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.graphql.byggFeilrespons
 import no.nav.helse.spesialist.api.graphql.byggRespons
@@ -13,15 +11,11 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdOverstyringHa
 import no.nav.helse.spesialist.api.graphql.schema.ApiInntektOgRefusjonOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
-import no.nav.helse.spesialist.domain.Saksbehandler
-import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 class OverstyringMutationHandler(
     private val saksbehandlerMediator: SaksbehandlerMediator,
-    private val sessionFactory: SessionFactory,
-    private val meldingPubliserer: MeldingPubliserer,
 ) : OverstyringMutationSchema {
     private companion object {
         private val logg: Logger = LoggerFactory.getLogger(OverstyringMutationHandler::class.java)
@@ -71,14 +65,6 @@ class OverstyringMutationHandler(
             lagFeilrespons(feilmelding)
         }
     }
-
-    private fun SaksbehandlerFraApi.toDomain() =
-        Saksbehandler(
-            id = SaksbehandlerOid(value = this.oid),
-            navn = navn,
-            epost = epost,
-            ident = ident,
-        )
 
     private fun lagFeilrespons(feilmelding: String): DataFetcherResult<Boolean> = byggFeilrespons(graphqlErrorException(500, feilmelding))
 }
