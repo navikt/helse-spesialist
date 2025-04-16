@@ -1,17 +1,17 @@
 package no.nav.helse.spesialist.api.graphql.mutation
 
 import graphql.GraphQLError
-import graphql.GraphqlErrorException.newErrorException
 import graphql.execution.DataFetcherResult
-import graphql.execution.DataFetcherResult.newResult
 import graphql.schema.DataFetchingEnvironment
-import io.ktor.http.HttpStatusCode
 import io.ktor.util.logging.error
 import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.feilhåndtering.FinnerIkkeLagtPåVent
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
+import no.nav.helse.spesialist.api.graphql.byggFeilrespons
+import no.nav.helse.spesialist.api.graphql.byggRespons
+import no.nav.helse.spesialist.api.graphql.graphqlErrorException
 import no.nav.helse.spesialist.api.graphql.schema.ApiPaVent
 import no.nav.helse.spesialist.api.graphql.schema.ApiPaVentRequest
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
@@ -47,16 +47,16 @@ class PaVentMutationHandler(
                 ),
                 saksbehandler,
             )
-            newResult<ApiPaVent?>().data(ApiPaVent(frist = frist, oid = saksbehandler.oid)).build()
+            byggRespons(ApiPaVent(frist = frist, oid = saksbehandler.oid))
         } catch (e: OppgaveIkkeTildelt) {
-            newResult<ApiPaVent?>().error(graphqlErrorException("Oppgave ikke tildelt", e.httpkode)).build()
+            byggFeilrespons(graphqlErrorException(e.httpkode.value, "Oppgave ikke tildelt"))
         } catch (e: OppgaveTildeltNoenAndre) {
-            newResult<ApiPaVent?>().error(
-                graphqlErrorException("Oppgave tildelt noen andre", e.httpkode, "tildeling" to e.tildeling),
-            ).build()
-        } catch (e: RuntimeException) {
+            byggFeilrespons(
+                graphqlErrorException(e.httpkode.value, "Oppgave tildelt noen andre", "tildeling" to e.tildeling),
+            )
+        } catch (e: Exception) {
             sikkerlogg.error(e)
-            newResult<ApiPaVent?>().error(getUpdateError(oppgaveId)).build()
+            byggFeilrespons(getUpdateError(oppgaveId))
         }
     }
 
@@ -67,13 +67,13 @@ class PaVentMutationHandler(
         val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
         return try {
             saksbehandlerMediator.påVent(ApiPaVentRequest.ApiFjernPaVent(oppgaveId.toLong()), saksbehandler)
-            newResult<Boolean?>().data(true).build()
+            byggRespons(true)
         } catch (e: OppgaveIkkeTildelt) {
             e.logger()
-            newResult<Boolean>().data(false).build()
+            byggRespons(false)
         } catch (e: OppgaveTildeltNoenAndre) {
             e.logger()
-            newResult<Boolean>().data(false).build()
+            byggRespons(false)
         }
     }
 
@@ -98,28 +98,19 @@ class PaVentMutationHandler(
                 ),
                 saksbehandler,
             )
-            newResult<ApiPaVent?>().data(ApiPaVent(frist = frist, oid = saksbehandler.oid)).build()
+            byggRespons(ApiPaVent(frist = frist, oid = saksbehandler.oid))
         } catch (e: FinnerIkkeLagtPåVent) {
             e.logger()
-            newResult<ApiPaVent>().error(getUpdateError(oppgaveId)).build()
-        } catch (e: RuntimeException) {
+            byggFeilrespons(getUpdateError(oppgaveId))
+        } catch (e: Exception) {
             sikkerlogg.error(e)
-            newResult<ApiPaVent?>().error(getUpdateError(oppgaveId)).build()
+            byggFeilrespons(getUpdateError(oppgaveId))
         }
     }
 
     private fun getUpdateError(oppgaveId: String): GraphQLError {
         val message = "Kunne ikke tildele oppgave med oppgaveId=$oppgaveId"
         sikkerlogg.error(message)
-        return graphqlErrorException(message, HttpStatusCode.InternalServerError)
+        return graphqlErrorException(500, message)
     }
-
-    private fun graphqlErrorException(
-        message: String,
-        statusCode: HttpStatusCode,
-        vararg additionalExtensions: Pair<String, Any>,
-    ) = newErrorException()
-        .message(message)
-        .extensions(mapOf("code" to statusCode.value, *additionalExtensions))
-        .build()
 }
