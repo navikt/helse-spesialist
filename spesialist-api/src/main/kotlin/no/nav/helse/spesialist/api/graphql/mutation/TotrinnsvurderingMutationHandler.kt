@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.graphql.mutation
 
-import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import io.ktor.http.HttpStatusCode
@@ -8,6 +7,9 @@ import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.SendIReturResult
 import no.nav.helse.spesialist.api.SendTilGodkjenningResult
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
+import no.nav.helse.spesialist.api.graphql.byggFeilrespons
+import no.nav.helse.spesialist.api.graphql.byggRespons
+import no.nav.helse.spesialist.api.graphql.graphqlErrorException
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 
 class TotrinnsvurderingMutationHandler(
@@ -78,8 +80,7 @@ class TotrinnsvurderingMutationHandler(
                     HttpStatusCode.InternalServerError,
                 )
 
-            SendTilGodkjenningResult.Ok ->
-                DataFetcherResult.newResult<Boolean>().data(true).build()
+            SendTilGodkjenningResult.Ok -> byggRespons(true)
         }
     }
 
@@ -116,22 +117,12 @@ class TotrinnsvurderingMutationHandler(
                     result.modellfeil.httpkode,
                 )
 
-            SendIReturResult.Ok -> DataFetcherResult.newResult<Boolean>().data(true).build()
+            SendIReturResult.Ok -> byggRespons(true)
         }
     }
 
     private fun byggErrorRespons(
         message: String,
         statusCode: HttpStatusCode,
-    ): DataFetcherResult<Boolean> =
-        DataFetcherResult
-            .newResult<Boolean>()
-            .error(
-                GraphqlErrorException
-                    .newErrorException()
-                    .message(message)
-                    .extensions(mapOf("code" to statusCode.value))
-                    .build(),
-            ).data(false)
-            .build()
+    ): DataFetcherResult<Boolean> = byggFeilrespons(graphqlErrorException(statusCode.value, message))
 }
