@@ -1,15 +1,14 @@
 package no.nav.helse.spesialist.api.graphql.mutation
 
 import graphql.GraphQLError
-import graphql.GraphqlErrorException.newErrorException
 import graphql.execution.DataFetcherResult
 import graphql.execution.DataFetcherResult.newResult
 import graphql.schema.DataFetchingEnvironment
-import io.ktor.http.HttpStatusCode
 import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
+import no.nav.helse.spesialist.api.graphql.graphqlErrorException
 import no.nav.helse.spesialist.api.graphql.schema.ApiTildeling
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
@@ -59,16 +58,9 @@ class TildelingMutationHandler(
     private fun getUpdateError(oppgaveId: String): GraphQLError {
         val message = "Kunne ikke tildele oppgave med oppgaveId=$oppgaveId"
         sikkerlogg.error(message)
-        return newErrorException()
-            .message(message)
-            .extensions(mapOf("code" to HttpStatusCode.InternalServerError.value))
-            .build()
+        return graphqlErrorException(500, message)
     }
 
-    private fun alleredeTildeltError(error: OppgaveTildeltNoenAndre): GraphQLError {
-        return newErrorException()
-            .message("Oppgave allerede tildelt")
-            .extensions(mapOf("code" to error.httpkode.value, "tildeling" to error.tildeling))
-            .build()
-    }
+    private fun alleredeTildeltError(error: OppgaveTildeltNoenAndre) =
+        graphqlErrorException(error.httpkode.value, "Oppgave allerede tildelt", "tildeling" to error.tildeling)
 }

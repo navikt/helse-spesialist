@@ -1,11 +1,11 @@
 package no.nav.helse.spesialist.api.graphql.mutation
 
-import graphql.GraphQLError
-import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
+import no.nav.helse.spesialist.api.graphql.byggFeilrespons
+import no.nav.helse.spesialist.api.graphql.graphqlErrorException
 import no.nav.helse.spesialist.api.graphql.schema.ApiMinimumSykdomsgrad
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import org.slf4j.Logger
@@ -23,30 +23,17 @@ class MinimumSykdomsgradMutationHandler(private val saksbehandlerMediator: Saksb
     ): DataFetcherResult<Boolean> {
         val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
         if (minimumSykdomsgrad.perioderVurdertOk.isEmpty() && minimumSykdomsgrad.perioderVurdertIkkeOk.isEmpty()) {
-            return lagErrorRespons(manglerVurdertePerioderError())
+            return byggFeilrespons(graphqlErrorException(400, "Mangler vurderte perioder"))
         }
 
         return try {
             saksbehandlerMediator.håndter(minimumSykdomsgrad, saksbehandler)
             DataFetcherResult.newResult<Boolean>().data(true).build()
         } catch (e: Exception) {
-            val kunneIkkeVurdereMinimumSykdomsgradError = kunneIkkeVurdereMinimumSykdomsgradError()
+            val kunneIkkeVurdereMinimumSykdomsgradError =
+                graphqlErrorException(500, "Kunne ikke vurdere minimum sykdomsgrad")
             logg.error(kunneIkkeVurdereMinimumSykdomsgradError.message, e)
-            lagErrorRespons(kunneIkkeVurdereMinimumSykdomsgradError)
+            byggFeilrespons(kunneIkkeVurdereMinimumSykdomsgradError)
         }
     }
-
-    private fun manglerVurdertePerioderError(): GraphQLError =
-        GraphqlErrorException.newErrorException().message("Mangler vurderte perioder")
-            .extensions(mapOf("code" to 400)).build()
-
-    private fun kunneIkkeVurdereMinimumSykdomsgradError(): GraphQLError =
-        GraphqlErrorException.newErrorException().message("Kunne ikke vurdere minimum sykdomsgrad")
-            .extensions(mapOf("code" to 500)).build()
-
-    private fun lagErrorRespons(error: GraphQLError): DataFetcherResult<Boolean> =
-        DataFetcherResult.newResult<Boolean>()
-            .error(error)
-            .data(false)
-            .build()
 }

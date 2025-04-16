@@ -47,7 +47,7 @@ private fun <T> dataFetcherError(
     return byggFeilrespons(graphqlErrorException(httpCode, message, *extensions))
 }
 
-private fun graphqlErrorException(
+internal fun graphqlErrorException(
     httpCode: Int,
     message: String,
     vararg extensions: Pair<String, Any>,
