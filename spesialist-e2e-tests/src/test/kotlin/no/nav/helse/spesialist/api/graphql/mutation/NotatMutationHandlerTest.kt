@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
+import java.util.UUID.randomUUID
 import kotlin.test.assertNotNull
 
 class NotatMutationHandlerTest : AbstractGraphQLApiTest() {
@@ -250,6 +251,23 @@ class NotatMutationHandlerTest : AbstractGraphQLApiTest() {
                         """.trimIndent(),
             actualJsonNode = body
         )
+    }
+
+    @Test
+    fun `leggTilNotat har feilhåndtering`() {
+        opprettSaksbehandler()
+
+        val body =
+            runQuery(
+                leggTilNotatMutation(
+                    tekst = "Dette er et notat for en ikke-eksisterende vedtaksperiodeId",
+                    type = ApiNotatType.Generelt,
+                    vedtaksperiodeId = randomUUID(),
+                    saksbehandlerOid = SaksbehandlerOid(SAKSBEHANDLER.oid)
+                ),
+            )
+
+        assertEquals(500, body["errors"][0]["extensions"]["code"].asInt())
     }
 
     private fun assertEquals(expectedJsonString: String, actualJsonNode: JsonNode) {

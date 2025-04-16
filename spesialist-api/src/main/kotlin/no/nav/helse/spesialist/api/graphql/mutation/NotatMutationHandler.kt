@@ -1,10 +1,11 @@
 package no.nav.helse.spesialist.api.graphql.mutation
 
-import graphql.GraphQLError
-import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
 import no.nav.helse.db.SessionContext
 import no.nav.helse.db.SessionFactory
+import no.nav.helse.spesialist.api.graphql.byggFeilrespons
+import no.nav.helse.spesialist.api.graphql.byggRespons
+import no.nav.helse.spesialist.api.graphql.graphqlErrorException
 import no.nav.helse.spesialist.api.graphql.schema.ApiKommentar
 import no.nav.helse.spesialist.api.graphql.schema.ApiNotat
 import no.nav.helse.spesialist.api.graphql.schema.ApiNotatType
@@ -115,21 +116,13 @@ class NotatMutationHandler(
     ): DataFetcherResult<T> =
         try {
             sessionFactory.transactionalSessionScope { session ->
-                transactionalBlock(session).tilDataFetcherResult()
+                transactionalBlock(session).let(::byggRespons)
             }
         } catch (exception: Exception) {
             val feilmelding = feilmeldingSupplier()
             logger.error(feilmelding, exception)
-            GraphqlErrorException
-                .newErrorException()
-                .message(feilmelding)
-                .extensions(mapOf("code" to 500))
-                .build().tilDataFetcherResult()
+            byggFeilrespons(graphqlErrorException(500, feilmelding))
         }
-
-    private fun <T> T.tilDataFetcherResult(): DataFetcherResult<T> = DataFetcherResult.newResult<T>().data(this).build()
-
-    private fun <T> GraphQLError.tilDataFetcherResult(): DataFetcherResult<T> = DataFetcherResult.newResult<T>().error(this).build()
 
     private fun Notat.utfyllTilApiNotat(session: SessionContext) =
         tilApiNotat(
