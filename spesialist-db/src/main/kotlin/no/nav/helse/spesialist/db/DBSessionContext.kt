@@ -33,6 +33,7 @@ import no.nav.helse.spesialist.db.dao.PgReservasjonDao
 import no.nav.helse.spesialist.db.dao.PgRisikovurderingDao
 import no.nav.helse.spesialist.db.dao.PgSaksbehandlerDao
 import no.nav.helse.spesialist.db.dao.PgStansAutomatiskBehandlingDao
+import no.nav.helse.spesialist.db.dao.PgStansAutomatiskBehandlingSaksbehandlerDao
 import no.nav.helse.spesialist.db.dao.PgSykefraværstilfelleDao
 import no.nav.helse.spesialist.db.dao.PgTildelingDao
 import no.nav.helse.spesialist.db.dao.PgUtbetalingDao
@@ -79,6 +80,7 @@ class DBSessionContext(session: Session) : SessionContext {
     override val vedtaksperiodeRepository = PgVedtaksperiodeRepository(generasjonDao, vedtakDao)
     override val personRepository =
         PgPersonRepository(session, vedtaksperiodeRepository, sykefraværstilfelleDao, personDao)
+    override val stansAutomatiskBehandlingSaksbehandlerDao = PgStansAutomatiskBehandlingSaksbehandlerDao(session)
 
     override val overstyringRepository: OverstyringRepository = PgOverstyringRepository(session)
     override val totrinnsvurderingRepository: TotrinnsvurderingRepository = PgTotrinnsvurderingRepository(session)

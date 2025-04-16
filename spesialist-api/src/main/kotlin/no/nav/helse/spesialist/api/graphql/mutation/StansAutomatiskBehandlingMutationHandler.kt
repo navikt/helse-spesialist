@@ -21,7 +21,7 @@ class StansAutomatiskBehandlingMutationHandler(private val sessionFactory: Sessi
         val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(ContextValues.SAKSBEHANDLER)
         sessionFactory.transactionalSessionScope { session ->
             session.lagrePeriodehistorikkForStans(fodselsnummer, saksbehandler, begrunnelse)
-            // TODO lagre et innslag i en ny tabell (?) man kan hente ut fra når person hentes og i VurderAutomatiskInnvilgelse
+            session.stansAutomatiskBehandlingSaksbehandlerDao.lagreStans(fodselsnummer)
         }
         return DataFetcherResult.newResult<Boolean>().data(true).build()
     }
@@ -33,7 +33,7 @@ class StansAutomatiskBehandlingMutationHandler(private val sessionFactory: Sessi
         val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(ContextValues.SAKSBEHANDLER)
         sessionFactory.transactionalSessionScope { session ->
             session.lagrePeriodehistorikkForOpphevStans(fodselsnummer, saksbehandler)
-            // TODO marker innslaget som ble laget av mutation over som slettet i db
+            session.stansAutomatiskBehandlingSaksbehandlerDao.opphevStans(fodselsnummer)
         }
         return DataFetcherResult.newResult<Boolean>().data(true).build()
     }

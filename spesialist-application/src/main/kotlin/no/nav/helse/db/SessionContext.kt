@@ -38,6 +38,7 @@ interface SessionContext {
     val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao
     val vedtaksperiodeRepository: VedtaksperiodeRepository
     val personRepository: PersonRepository
+    val stansAutomatiskBehandlingSaksbehandlerDao: StansAutomatiskBehandlingSaksbehandlerDao
 
     val totrinnsvurderingRepository: TotrinnsvurderingRepository
     val overstyringRepository: OverstyringRepository

@@ -19,6 +19,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.helse.FeatureToggles
 import no.nav.helse.MeldingPubliserer
+import no.nav.helse.db.StansAutomatiskBehandlingSaksbehandlerDao
 import no.nav.helse.db.VedtakBegrunnelseDao
 import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.behandlingsstatistikk.IBehandlingsstatistikkService
@@ -71,6 +72,8 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
     private val behandlingsstatistikkMediator = mockk<IBehandlingsstatistikkService>(relaxed = true)
     protected val saksbehandlerMediator = mockk<SaksbehandlerMediator>(relaxed = true)
     protected val vedtakBegrunnelseDao = mockk<VedtakBegrunnelseDao>(relaxed = true)
+    protected val stansAutomatiskBehandlingSaksbehandlerDao =
+        mockk<StansAutomatiskBehandlingSaksbehandlerDao>(relaxed = true)
     private val godkjenninghåndterer = mockk<Godkjenninghåndterer>(relaxed = true)
     private val personhåndterer = mockk<Personhåndterer>(relaxed = true)
     protected val dokumenthåndterer = mockk<Dokumenthåndterer>(relaxed = true)
@@ -123,6 +126,7 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                                 reservasjonshenter = reservasjonshenter,
                                 sessionFactory = sessionFactory,
                                 vedtakBegrunnelseDao = vedtakBegrunnelseDao,
+                                stansAutomatiskBehandlingSaksbehandlerDao = stansAutomatiskBehandlingSaksbehandlerDao,
                                 featureToggles = featureToggles,
                             ),
                     ),

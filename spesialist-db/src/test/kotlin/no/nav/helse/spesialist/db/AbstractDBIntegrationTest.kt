@@ -145,6 +145,7 @@ abstract class AbstractDBIntegrationTest {
     internal val inntektskilderRepository = sessionContext.inntektskilderRepository
     internal val overstyringRepository = sessionContext.overstyringRepository
     internal val totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository
+    internal val stansAutomatiskBehandlingSaksbehandlerDao = sessionContext.stansAutomatiskBehandlingSaksbehandlerDao
 
     internal fun testhendelse(
         hendelseId: UUID = HENDELSE_ID,

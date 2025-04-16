@@ -276,6 +276,7 @@ internal class PersonRepository(
         slettRisikovurdering(personRef)
         slettUnntaFraAutomatisering(fødselsnummer)
         slettStansAutomatisering(fødselsnummer)
+        slettStansAutomatiskBehandlingSaksbehandler(fødselsnummer)
         slettAutomatiseringProblem(personRef)
         slettSaksbehandleroppgavetype(personRef)
         slettVedtaksperiodegenerasjoner(personRef)
@@ -428,6 +429,12 @@ internal class PersonRepository(
     private fun TransactionalSession.slettStansAutomatisering(fødselsnummer: String) {
         @Language("PostgreSQL")
         val query = "DELETE FROM stans_automatisering WHERE fødselsnummer = ?"
+        run(queryOf(query, fødselsnummer).asExecute)
+    }
+
+    private fun TransactionalSession.slettStansAutomatiskBehandlingSaksbehandler(fødselsnummer: String) {
+        @Language("PostgreSQL")
+        val query = "DELETE FROM stans_automatisk_behandling_saksbehandler WHERE fødselsnummer = ?"
         run(queryOf(query, fødselsnummer).asExecute)
     }
 

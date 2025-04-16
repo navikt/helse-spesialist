@@ -42,6 +42,7 @@ interface Daos {
     val varselDao: VarselDao
     val vedtakDao: VedtakDao
     val vedtakBegrunnelseDao: VedtakBegrunnelseDao
+    val stansAutomatiskBehandlingSaksbehandlerDao: StansAutomatiskBehandlingSaksbehandlerDao
 
     val abonnementApiDao: AbonnementApiDao
     val arbeidsgiverApiDao: ArbeidsgiverApiDao

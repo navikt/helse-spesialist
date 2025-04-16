@@ -7,6 +7,7 @@ import kotlinx.coroutines.async
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.FeatureToggles
 import no.nav.helse.db.SessionFactory
+import no.nav.helse.db.StansAutomatiskBehandlingSaksbehandlerDao
 import no.nav.helse.db.VedtakBegrunnelseDao
 import no.nav.helse.db.api.ArbeidsgiverApiDao
 import no.nav.helse.db.api.EgenAnsattApiDao
@@ -69,6 +70,7 @@ class PersonService(
     private val reservasjonshenter: Reservasjonshenter,
     private val sessionFactory: SessionFactory,
     private val vedtakBegrunnelseDao: VedtakBegrunnelseDao,
+    private val stansAutomatiskBehandlingSaksbehandlerDao: StansAutomatiskBehandlingSaksbehandlerDao,
     private val featureToggles: FeatureToggles,
 ) : PersonoppslagService {
     private companion object {
@@ -135,6 +137,8 @@ class PersonService(
                                 unntattFraAutomatisering =
                                     stansAutomatiskBehandlinghåndterer.unntattFraAutomatiskGodkjenning(fødselsnummer),
                                 fullmakt = vergemålApiDao.harFullmakt(fødselsnummer),
+                                automatiskBehandlingStansetAvSaksbehandler =
+                                    stansAutomatiskBehandlingSaksbehandlerDao.erStanset(fødselsnummer),
                             ),
                         personApiDao = personApiDao,
                         tildelingApiDao = tildelingApiDao,

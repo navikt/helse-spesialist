@@ -30,4 +30,5 @@ data class ApiPersoninfo(
     val fullmakt: Boolean? = null,
     val reservasjon: ApiReservasjon? = null,
     val unntattFraAutomatisering: ApiUnntattFraAutomatiskGodkjenning? = null,
+    val automatiskBehandlingStansetAvSaksbehandler: Boolean? = null,
 )

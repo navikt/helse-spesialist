@@ -21,6 +21,7 @@ import no.nav.helse.spesialist.db.dao.PgPåVentDao
 import no.nav.helse.spesialist.db.dao.PgReservasjonDao
 import no.nav.helse.spesialist.db.dao.PgSaksbehandlerDao
 import no.nav.helse.spesialist.db.dao.PgStansAutomatiskBehandlingDao
+import no.nav.helse.spesialist.db.dao.PgStansAutomatiskBehandlingSaksbehandlerDao
 import no.nav.helse.spesialist.db.dao.PgTildelingDao
 import no.nav.helse.spesialist.db.dao.PgVarselDao
 import no.nav.helse.spesialist.db.dao.PgVedtakBegrunnelseDao
@@ -68,6 +69,7 @@ class DBDaos(dataSource: DataSource) : Daos {
     override val varselDao = PgVarselDao(dataSource)
     override val vedtakDao = PgVedtakDao(dataSource)
     override val vedtakBegrunnelseDao = PgVedtakBegrunnelseDao(dataSource)
+    override val stansAutomatiskBehandlingSaksbehandlerDao = PgStansAutomatiskBehandlingSaksbehandlerDao(dataSource)
 
     override val abonnementApiDao = PgAbonnementApiDao(dataSource)
     override val arbeidsgiverApiDao = PgArbeidsgiverApiDao(dataSource)

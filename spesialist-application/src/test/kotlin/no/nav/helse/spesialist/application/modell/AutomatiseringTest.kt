@@ -9,6 +9,7 @@ import no.nav.helse.db.MeldingDao
 import no.nav.helse.db.MeldingDao.BehandlingOpprettetKorrigertSøknad
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.RisikovurderingDao
+import no.nav.helse.db.StansAutomatiskBehandlingSaksbehandlerDao
 import no.nav.helse.db.VedtakDao
 import no.nav.helse.db.VergemålDao
 import no.nav.helse.db.ÅpneGosysOppgaverDao
@@ -60,6 +61,7 @@ internal class AutomatiseringTest {
     private val åpneGosysOppgaverDaoMock = mockk<ÅpneGosysOppgaverDao>(relaxed = true)
     private val egenAnsattDao = mockk<EgenAnsattDao>(relaxed = true)
     private val totrinnsvurderingRepositoryMock = mockk<TotrinnsvurderingRepository>(relaxed = true)
+    private val stansAutomatiskBehandlingSaksbehandlerDaoMock = mockk<StansAutomatiskBehandlingSaksbehandlerDao>(relaxed = true)
     private val personDaoMock =
         mockk<PersonDao>(relaxed = true) {
             every { finnAdressebeskyttelse(any()) } returns Adressebeskyttelse.Ugradert
@@ -102,6 +104,7 @@ internal class AutomatiseringTest {
             generasjonDao = generasjonDaoMock,
             egenAnsattDao = egenAnsattDao,
             totrinnsvurderingRepository = totrinnsvurderingRepositoryMock,
+            stansAutomatiskBehandlingSaksbehandlerDao = stansAutomatiskBehandlingSaksbehandlerDaoMock,
         )
 
     @BeforeEach
@@ -280,6 +283,18 @@ internal class AutomatiseringTest {
         every { totrinnsvurderingRepositoryMock.finn(any()) } returns Totrinnsvurdering.ny(
             fødselsnummer
         )
+        blirManuellOppgave()
+    }
+
+    @Test
+    fun `veileder har stanset automatisk behandling`() {
+        every { stansAutomatiskBehandlingMediatorMock.sjekkOmAutomatiseringErStanset(any(), any(), any()) } returns true
+        blirManuellOppgave()
+    }
+
+    @Test
+    fun `saksbehandler har stanset automatisk behandling`() {
+        every { stansAutomatiskBehandlingSaksbehandlerDaoMock.erStanset(any()) } returns true
         blirManuellOppgave()
     }
 

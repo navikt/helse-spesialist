@@ -340,6 +340,7 @@ class OverstyringE2ETest : AbstractE2ETest() {
                     reservasjonshenter = mockk(relaxed = true),
                     sessionFactory = sessionFactory,
                     vedtakBegrunnelseDao = daos.vedtakBegrunnelseDao,
+                    stansAutomatiskBehandlingSaksbehandlerDao = daos.stansAutomatiskBehandlingSaksbehandlerDao,
                     featureToggles = object: FeatureToggles {},
                 ),
             ),

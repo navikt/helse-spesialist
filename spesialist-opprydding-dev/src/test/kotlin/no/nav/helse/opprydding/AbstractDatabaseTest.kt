@@ -88,6 +88,8 @@ internal abstract class AbstractDatabaseTest {
         VALUES (${fødselsnummer}, false, array[]::varchar[], now());
         INSERT INTO stans_automatisering
         VALUES (${sequence_number},${fødselsnummer}, 'STOPP_AUTOMATIKK', array[]::varchar[], now(), 'ISYFO', '{}');
+        INSERT INTO stans_automatisk_behandling_saksbehandler
+        VALUES (${fødselsnummer}, now());
         INSERT INTO automatisering(vedtaksperiode_ref, hendelse_ref, automatisert, stikkprøve, opprettet, utbetaling_id)
         VALUES (${sequence_number}, '${hendelse_id}', false, false, now(), '${utbetaling_id}');
         INSERT INTO automatisering_problem(id, vedtaksperiode_ref, hendelse_ref, problem)

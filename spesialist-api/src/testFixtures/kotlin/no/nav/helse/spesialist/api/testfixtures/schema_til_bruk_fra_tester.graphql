@@ -610,6 +610,7 @@ type Person {
 
 type Personinfo {
     adressebeskyttelse: Adressebeskyttelse!
+    automatiskBehandlingStansetAvSaksbehandler: Boolean
     etternavn: String!
     fodselsdato: LocalDate!
     fornavn: String!

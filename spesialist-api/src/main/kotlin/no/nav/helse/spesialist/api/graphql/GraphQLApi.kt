@@ -142,6 +142,7 @@ fun lagSchemaMedResolversOgHandlers(
                                 reservasjonshenter = reservasjonshenter,
                                 sessionFactory = sessionFactory,
                                 vedtakBegrunnelseDao = daos.vedtakBegrunnelseDao,
+                                stansAutomatiskBehandlingSaksbehandlerDao = daos.stansAutomatiskBehandlingSaksbehandlerDao,
                                 featureToggles = featureToggles,
                             ),
                     ),

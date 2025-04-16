@@ -9,6 +9,7 @@ import no.nav.helse.db.MeldingDao.BehandlingOpprettetKorrigertSøknad
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.RisikovurderingDao
 import no.nav.helse.db.SessionContext
+import no.nav.helse.db.StansAutomatiskBehandlingSaksbehandlerDao
 import no.nav.helse.db.VedtakDao
 import no.nav.helse.db.VergemålDao
 import no.nav.helse.db.ÅpneGosysOppgaverDao
@@ -44,6 +45,7 @@ internal class Automatisering(
     private val generasjonDao: GenerasjonDao,
     private val egenAnsattDao: EgenAnsattDao,
     private val totrinnsvurderingRepository: TotrinnsvurderingRepository,
+    private val stansAutomatiskBehandlingSaksbehandlerDao: StansAutomatiskBehandlingSaksbehandlerDao,
 ) {
     object Factory {
         fun automatisering(
@@ -68,6 +70,7 @@ internal class Automatisering(
                 generasjonDao = sessionContext.generasjonDao,
                 egenAnsattDao = sessionContext.egenAnsattDao,
                 totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository,
+                stansAutomatiskBehandlingSaksbehandlerDao = sessionContext.stansAutomatiskBehandlingSaksbehandlerDao,
             )
         }
     }
@@ -232,6 +235,7 @@ internal class Automatisering(
                 vedtaksperiodeId,
                 organisasjonsnummer,
             )
+        val automatiseringStansetAvSaksbehandler = stansAutomatiskBehandlingSaksbehandlerDao.erStanset(fødselsnummer)
         val forhindrerAutomatisering = sykefraværstilfelle.forhindrerAutomatisering(vedtaksperiodeId)
         val harVergemål = vergemålDao.harVergemål(fødselsnummer) ?: false
         val tilhørerUtlandsenhet = erEnhetUtland(personDao.finnEnhetId(fødselsnummer))
@@ -244,6 +248,7 @@ internal class Automatisering(
 
         return valider(
             risikovurdering,
+            validering("Automatisering stanset av saksbehandler") { !automatiseringStansetAvSaksbehandler },
             validering("Unntatt fra automatisk godkjenning") { !unntattFraAutomatisering },
             validering("Har varsler") { !forhindrerAutomatisering },
             validering("Det finnes åpne oppgaver på sykepenger i Gosys") {
