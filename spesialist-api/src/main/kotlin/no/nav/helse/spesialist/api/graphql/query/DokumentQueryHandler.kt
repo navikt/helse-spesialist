@@ -5,7 +5,6 @@ import com.github.navikt.tbd_libs.jackson.asLocalDate
 import com.github.navikt.tbd_libs.jackson.asLocalDateOrNull
 import com.github.navikt.tbd_libs.jackson.asLocalDateTimeOrNull
 import com.github.navikt.tbd_libs.jackson.isMissingOrNull
-import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import no.nav.helse.db.api.EgenAnsattApiDao
@@ -15,6 +14,7 @@ import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGER
 import no.nav.helse.spesialist.api.graphql.byggFeilrespons
 import no.nav.helse.spesialist.api.graphql.byggRespons
 import no.nav.helse.spesialist.api.graphql.forbiddenError
+import no.nav.helse.spesialist.api.graphql.graphqlErrorException
 import no.nav.helse.spesialist.api.graphql.query.DokumentQueryHandler.GraphQLErrorFactory.getEmptyRequestError
 import no.nav.helse.spesialist.api.graphql.query.DokumentQueryHandler.GraphQLErrorFactory.getEmptyResultTimeoutError
 import no.nav.helse.spesialist.api.graphql.query.DokumentQueryHandler.GraphQLErrorFactory.getExpectationFailedError
@@ -91,25 +91,18 @@ class DokumentQueryHandler(
     }
 
     private object GraphQLErrorFactory {
-        fun getEmptyRequestError() = byggGraphqlError("Requesten mangler dokument-id.", "code" to 400)
+        fun getEmptyRequestError() = graphqlErrorException(400, "Requesten mangler dokument-id.")
 
         fun getEmptyResultTimeoutError() =
-            byggGraphqlError(
+            graphqlErrorException(
+                408,
                 "Det tar litt lengre tid enn forventet å hente dokumentet, vennligst prøv igjen.",
-                "code" to 408,
             )
 
-        fun getExpectationFailedError() = byggGraphqlError("Noe gikk galt, vennligst prøv igjen.", "code" to 417)
+        fun getExpectationFailedError() = graphqlErrorException(417, "Noe gikk galt, vennligst prøv igjen.")
 
         fun getNotFoundErrorEkstern() =
-            byggGraphqlError("Speil har ikke tilgang til denne inntektsmeldingen, den må åpnes i Gosys.", "code" to 404)
-
-        fun byggGraphqlError(
-            melding: String,
-            vararg extensions: Pair<String, Any>,
-        ): GraphqlErrorException =
-            GraphqlErrorException.newErrorException().message(melding)
-                .extensions(mapOf(*extensions)).build()
+            graphqlErrorException(404, "Speil har ikke tilgang til denne inntektsmeldingen, den må åpnes i Gosys.")
     }
 
     private fun JsonNode.tilInntektsmelding(): ApiDokumentInntektsmelding {
