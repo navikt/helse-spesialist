@@ -24,7 +24,7 @@ class OverstyringMutationHandler(
     override fun overstyrDager(
         overstyring: ApiTidslinjeOverstyring,
         env: DataFetchingEnvironment,
-    ): DataFetcherResult<Boolean> {
+    ): DataFetcherResult<Boolean?> {
         val saksbehandler = env.saksbehandler()
         return try {
             saksbehandlerMediator.håndter(overstyring, saksbehandler)
@@ -39,7 +39,7 @@ class OverstyringMutationHandler(
     override fun overstyrInntektOgRefusjon(
         overstyring: ApiInntektOgRefusjonOverstyring,
         env: DataFetchingEnvironment,
-    ): DataFetcherResult<Boolean> {
+    ): DataFetcherResult<Boolean?> {
         val saksbehandler: SaksbehandlerFraApi = env.saksbehandler()
         return try {
             saksbehandlerMediator.håndter(overstyring, saksbehandler)
@@ -54,7 +54,7 @@ class OverstyringMutationHandler(
     override fun overstyrArbeidsforhold(
         overstyring: ApiArbeidsforholdOverstyringHandling,
         env: DataFetchingEnvironment,
-    ): DataFetcherResult<Boolean> {
+    ): DataFetcherResult<Boolean?> {
         val saksbehandler: SaksbehandlerFraApi = env.saksbehandler()
         return try {
             saksbehandlerMediator.håndter(overstyring, saksbehandler)
@@ -66,5 +66,5 @@ class OverstyringMutationHandler(
         }
     }
 
-    private fun lagFeilrespons(feilmelding: String): DataFetcherResult<Boolean> = byggFeilrespons(graphqlErrorException(500, feilmelding))
+    private fun lagFeilrespons(feilmelding: String): DataFetcherResult<Boolean?> = byggFeilrespons(graphqlErrorException(500, feilmelding))
 }

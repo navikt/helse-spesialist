@@ -21,7 +21,7 @@ class MinimumSykdomsgradMutationHandler(private val saksbehandlerMediator: Saksb
     override fun minimumSykdomsgrad(
         minimumSykdomsgrad: ApiMinimumSykdomsgrad,
         env: DataFetchingEnvironment,
-    ): DataFetcherResult<Boolean> {
+    ): DataFetcherResult<Boolean?> {
         val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
         if (minimumSykdomsgrad.perioderVurdertOk.isEmpty() && minimumSykdomsgrad.perioderVurdertIkkeOk.isEmpty()) {
             return byggFeilrespons(graphqlErrorException(400, "Mangler vurderte perioder"))

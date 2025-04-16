@@ -19,7 +19,7 @@ class TotrinnsvurderingMutationHandler(
         oppgavereferanse: String,
         vedtakBegrunnelse: String?,
         env: DataFetchingEnvironment,
-    ): DataFetcherResult<Boolean> {
+    ): DataFetcherResult<Boolean?> {
         val behandlendeSaksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
 
         return when (
@@ -88,7 +88,7 @@ class TotrinnsvurderingMutationHandler(
         oppgavereferanse: String,
         notatTekst: String,
         env: DataFetchingEnvironment,
-    ): DataFetcherResult<Boolean> {
+    ): DataFetcherResult<Boolean?> {
         val besluttendeSaksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
 
         return when (
@@ -124,5 +124,5 @@ class TotrinnsvurderingMutationHandler(
     private fun byggErrorRespons(
         message: String,
         statusCode: HttpStatusCode,
-    ): DataFetcherResult<Boolean> = byggFeilrespons(graphqlErrorException(statusCode.value, message))
+    ): DataFetcherResult<Boolean?> = byggFeilrespons(graphqlErrorException(statusCode.value, message))
 }

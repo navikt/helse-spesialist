@@ -9,13 +9,13 @@ interface TotrinnsvurderingMutationSchema : Mutation {
         oppgavereferanse: String,
         vedtakBegrunnelse: String? = null,
         env: DataFetchingEnvironment,
-    ): DataFetcherResult<Boolean>
+    ): DataFetcherResult<Boolean?>
 
     fun sendIRetur(
         oppgavereferanse: String,
         notatTekst: String,
         env: DataFetchingEnvironment,
-    ): DataFetcherResult<Boolean>
+    ): DataFetcherResult<Boolean?>
 }
 
 class TotrinnsvurderingMutation(private val handler: TotrinnsvurderingMutationSchema) :

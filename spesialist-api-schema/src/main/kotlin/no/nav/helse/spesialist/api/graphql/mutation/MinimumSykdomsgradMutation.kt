@@ -9,7 +9,7 @@ interface MinimumSykdomsgradMutationSchema : Mutation {
     fun minimumSykdomsgrad(
         minimumSykdomsgrad: ApiMinimumSykdomsgrad,
         env: DataFetchingEnvironment,
-    ): DataFetcherResult<Boolean>
+    ): DataFetcherResult<Boolean?>
 }
 
 class MinimumSykdomsgradMutation(private val handler: MinimumSykdomsgradMutationSchema) :

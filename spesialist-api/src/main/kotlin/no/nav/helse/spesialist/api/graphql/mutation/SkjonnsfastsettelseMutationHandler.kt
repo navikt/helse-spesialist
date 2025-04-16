@@ -16,7 +16,7 @@ class SkjonnsfastsettelseMutationHandler(private val saksbehandlerMediator: Saks
     override fun skjonnsfastsettSykepengegrunnlag(
         skjonnsfastsettelse: ApiSkjonnsfastsettelse,
         env: DataFetchingEnvironment,
-    ): DataFetcherResult<Boolean> {
+    ): DataFetcherResult<Boolean?> {
         val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
         return try {
             saksbehandlerMediator.håndter(skjonnsfastsettelse, saksbehandler)

@@ -11,17 +11,17 @@ interface OverstyringMutationSchema : Mutation {
     fun overstyrDager(
         overstyring: ApiTidslinjeOverstyring,
         env: DataFetchingEnvironment,
-    ): DataFetcherResult<Boolean>
+    ): DataFetcherResult<Boolean?>
 
     fun overstyrInntektOgRefusjon(
         overstyring: ApiInntektOgRefusjonOverstyring,
         env: DataFetchingEnvironment,
-    ): DataFetcherResult<Boolean>
+    ): DataFetcherResult<Boolean?>
 
     fun overstyrArbeidsforhold(
         overstyring: ApiArbeidsforholdOverstyringHandling,
         env: DataFetchingEnvironment,
-    ): DataFetcherResult<Boolean>
+    ): DataFetcherResult<Boolean?>
 }
 
 class OverstyringMutation(private val handler: OverstyringMutationSchema) : OverstyringMutationSchema by handler

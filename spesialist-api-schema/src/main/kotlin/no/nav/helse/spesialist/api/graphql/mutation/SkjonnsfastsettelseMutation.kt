@@ -9,7 +9,7 @@ interface SkjonnsfastsettelseMutationSchema : Mutation {
     fun skjonnsfastsettSykepengegrunnlag(
         skjonnsfastsettelse: ApiSkjonnsfastsettelse,
         env: DataFetchingEnvironment,
-    ): DataFetcherResult<Boolean>
+    ): DataFetcherResult<Boolean?>
 }
 
 class SkjonnsfastsettelseMutation(private val handler: SkjonnsfastsettelseMutationSchema) :
