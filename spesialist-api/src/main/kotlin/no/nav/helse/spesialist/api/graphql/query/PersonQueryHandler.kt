@@ -2,14 +2,15 @@ package no.nav.helse.spesialist.api.graphql.query
 
 import graphql.GraphQLContext
 import graphql.GraphQLError
-import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.auditLogTeller
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGER
+import no.nav.helse.spesialist.api.graphql.byggFeilrespons
 import no.nav.helse.spesialist.api.graphql.forbiddenError
+import no.nav.helse.spesialist.api.graphql.graphqlErrorException
 import no.nav.helse.spesialist.api.graphql.notFoundError
 import no.nav.helse.spesialist.api.graphql.personNotReadyError
 import no.nav.helse.spesialist.api.graphql.query.Inputvalidering.UgyldigInput
@@ -79,7 +80,7 @@ class PersonQueryHandler(
                 is Inputvalidering.Ok -> validering.fødselsnummer
                 is UgyldigInput -> {
                     validering.auditlogg(env)
-                    return validering.graphqlError.tilGraphqlResult()
+                    return byggFeilrespons(validering.graphqlError)
                 }
             }
         sikkerLogg.info("Personoppslag på fnr=$fødselsnummer")
@@ -133,7 +134,7 @@ class PersonQueryHandler(
                 is FetchPersonResult.Feil.KlarteIkkeHente -> getSnapshotFetchError()
             }
 
-        return graphqlError.tilGraphqlResult()
+        return byggFeilrespons(graphqlError)
     }
 
     private fun Set<String>.harFlereFødselsnumre() = this.size > 1
@@ -174,11 +175,6 @@ class PersonQueryHandler(
         return Inputvalidering.Ok(fødselsnumre.single())
     }
 
-    private fun GraphQLError.tilGraphqlResult(): DataFetcherResult<ApiPerson?> =
-        DataFetcherResult.newResult<ApiPerson?>().error(
-            this,
-        ).build()
-
     private fun loggNotFoundForAktørId(
         aktorId: String,
         env: DataFetchingEnvironment,
@@ -196,30 +192,17 @@ class PersonQueryHandler(
     }
 
     private fun getFlereFødselsnumreError(fødselsnumre: Set<String>): GraphQLError =
-        GraphqlErrorException
-            .newErrorException()
-            .message("Mer enn ett fødselsnummer for personen")
-            .extensions(
-                mapOf(
-                    "code" to 500,
-                    "feilkode" to "HarFlereFodselsnumre",
-                    "fodselsnumre" to fødselsnumre,
-                ),
-            ).build()
+        graphqlErrorException(
+            500,
+            "Mer enn ett fødselsnummer for personen",
+            "feilkode" to "HarFlereFodselsnumre",
+            "fodselsnumre" to fødselsnumre,
+        )
 
     private fun getSnapshotFetchError(): GraphQLError =
-        GraphqlErrorException
-            .newErrorException()
-            .message("Feil ved henting av snapshot for person")
-            .extensions(mapOf("code" to 501, "field" to "person"))
-            .build()
+        graphqlErrorException(501, "Feil ved henting av snapshot for person", "field" to "person")
 
-    private fun getBadRequestError(melding: String): GraphQLError =
-        GraphqlErrorException
-            .newErrorException()
-            .message(melding)
-            .extensions(mapOf("code" to 400))
-            .build()
+    private fun getBadRequestError(melding: String): GraphQLError = graphqlErrorException(400, melding)
 
     private fun auditLog(
         graphQLContext: GraphQLContext,
