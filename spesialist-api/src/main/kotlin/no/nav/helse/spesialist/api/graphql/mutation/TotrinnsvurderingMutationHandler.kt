@@ -32,7 +32,7 @@ class TotrinnsvurderingMutationHandler(
         ) {
             is SendTilGodkjenningResult.Feil.KunneIkkeFinnePerioderTilBehandling -> {
                 byggErrorRespons(
-                    "Kunne ikke håndtere totrinnsvurdering, ukjennt feil",
+                    "Kunne ikke håndtere totrinnsvurdering, ukjent feil",
                     HttpStatusCode.InternalServerError,
                 )
             }
