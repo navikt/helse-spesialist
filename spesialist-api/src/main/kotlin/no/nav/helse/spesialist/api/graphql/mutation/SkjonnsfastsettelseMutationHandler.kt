@@ -1,22 +1,18 @@
 package no.nav.helse.spesialist.api.graphql.mutation
 
-import graphql.GraphQLError
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
+import no.nav.helse.spesialist.api.graphql.byggFeilrespons
+import no.nav.helse.spesialist.api.graphql.byggRespons
 import no.nav.helse.spesialist.api.graphql.graphqlErrorException
 import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import no.nav.helse.spesialist.application.logg.logg
 
 class SkjonnsfastsettelseMutationHandler(private val saksbehandlerMediator: SaksbehandlerMediator) :
     SkjonnsfastsettelseMutationSchema {
-    private companion object {
-        private val logg: Logger = LoggerFactory.getLogger(SkjonnsfastsettelseMutationHandler::class.java)
-    }
-
     override fun skjonnsfastsettSykepengegrunnlag(
         skjonnsfastsettelse: ApiSkjonnsfastsettelse,
         env: DataFetchingEnvironment,
@@ -24,17 +20,11 @@ class SkjonnsfastsettelseMutationHandler(private val saksbehandlerMediator: Saks
         val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
         return try {
             saksbehandlerMediator.håndter(skjonnsfastsettelse, saksbehandler)
-            DataFetcherResult.newResult<Boolean>().data(true).build()
+            byggRespons(true)
         } catch (e: Exception) {
-            val kunneIkkeSkjønnsfastsetteSykepengegrunnlagError = kunneIkkeSkjønnsfastsetteSykepengegrunnlagError()
-            logg.error(kunneIkkeSkjønnsfastsetteSykepengegrunnlagError.message, e)
-            DataFetcherResult.newResult<Boolean>()
-                .error(kunneIkkeSkjønnsfastsetteSykepengegrunnlagError)
-                .data(false)
-                .build()
+            val feilmelding = "Kunne ikke skjønnsfastsette sykepengegrunnlag"
+            logg.error(feilmelding, e)
+            byggFeilrespons(graphqlErrorException(500, feilmelding))
         }
     }
-
-    private fun kunneIkkeSkjønnsfastsetteSykepengegrunnlagError(): GraphQLError =
-        graphqlErrorException(500, "Kunne ikke skjønnsfastsette sykepengegrunnlag")
 }
