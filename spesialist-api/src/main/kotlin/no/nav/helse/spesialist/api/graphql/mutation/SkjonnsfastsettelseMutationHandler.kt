@@ -1,11 +1,11 @@
 package no.nav.helse.spesialist.api.graphql.mutation
 
 import graphql.GraphQLError
-import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
+import no.nav.helse.spesialist.api.graphql.graphqlErrorException
 import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import org.slf4j.Logger
@@ -36,6 +36,5 @@ class SkjonnsfastsettelseMutationHandler(private val saksbehandlerMediator: Saks
     }
 
     private fun kunneIkkeSkjønnsfastsetteSykepengegrunnlagError(): GraphQLError =
-        GraphqlErrorException.newErrorException().message("Kunne ikke skjønnsfastsette sykepengegrunnlag")
-            .extensions(mapOf("code" to 500)).build()
+        graphqlErrorException(500, "Kunne ikke skjønnsfastsette sykepengegrunnlag")
 }

@@ -1,11 +1,13 @@
 package no.nav.helse.spesialist.api.graphql.mutation
 
-import graphql.GraphqlErrorException
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.mediator.SaksbehandlerMediator
+import no.nav.helse.spesialist.api.graphql.byggFeilrespons
+import no.nav.helse.spesialist.api.graphql.byggRespons
+import no.nav.helse.spesialist.api.graphql.graphqlErrorException
 import no.nav.helse.spesialist.api.graphql.saksbehandler
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdOverstyringHandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiInntektOgRefusjonOverstyring
@@ -32,7 +34,7 @@ class OverstyringMutationHandler(
         val saksbehandler = env.saksbehandler()
         return try {
             saksbehandlerMediator.håndter(overstyring, saksbehandler)
-            DataFetcherResult.newResult<Boolean>().data(true).build()
+            byggRespons(true)
         } catch (e: Exception) {
             val feilmelding = "Kunne ikke overstyre dager"
             logg.error(feilmelding, e)
@@ -47,7 +49,7 @@ class OverstyringMutationHandler(
         val saksbehandler: SaksbehandlerFraApi = env.saksbehandler()
         return try {
             saksbehandlerMediator.håndter(overstyring, saksbehandler)
-            DataFetcherResult.newResult<Boolean>().data(true).build()
+            byggRespons(true)
         } catch (e: Exception) {
             val feilmelding = "Kunne ikke overstyre inntekt og refusjon"
             logg.error(feilmelding, e)
@@ -62,7 +64,7 @@ class OverstyringMutationHandler(
         val saksbehandler: SaksbehandlerFraApi = env.saksbehandler()
         return try {
             saksbehandlerMediator.håndter(overstyring, saksbehandler)
-            DataFetcherResult.newResult<Boolean>().data(true).build()
+            byggRespons(true)
         } catch (e: Exception) {
             val feilmelding = "Kunne ikke overstyre arbeidsforhold"
             logg.error(feilmelding, e)
@@ -78,8 +80,5 @@ class OverstyringMutationHandler(
             ident = ident,
         )
 
-    private fun lagFeilrespons(feilmelding: String): DataFetcherResult<Boolean> =
-        DataFetcherResult.newResult<Boolean>().error(
-            GraphqlErrorException.newErrorException().message(feilmelding).extensions(mapOf("code" to 500)).build(),
-        ).data(false).build()
+    private fun lagFeilrespons(feilmelding: String): DataFetcherResult<Boolean> = byggFeilrespons(graphqlErrorException(500, feilmelding))
 }

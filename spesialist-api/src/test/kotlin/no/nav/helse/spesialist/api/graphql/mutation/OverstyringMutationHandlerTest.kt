@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.api.graphql.mutation
 
+import io.mockk.every
 import no.nav.helse.TestRunner.runQuery
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdOverstyringHandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiInntektOgRefusjonOverstyring
@@ -18,6 +19,7 @@ import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import java.io.IOException
 import java.util.UUID
 
 internal class OverstyringMutationHandlerTest {
@@ -143,6 +145,30 @@ internal class OverstyringMutationHandlerTest {
             ),
             then = { _, body, _ ->
                 Assertions.assertTrue(body["data"]["overstyrInntektOgRefusjon"].asBoolean())
+            },
+        )
+    }
+
+    @Test
+    fun `mutation handler har feilhåndtering`() {
+        runQuery(
+            given = {
+                every {
+                    it.saksbehandlerMediator.håndter(any(), any())
+                } throws IOException("noe galt skjedde liksom mot databasen")
+            },
+            whenever = overstyrTidslinjeMutation(
+                ApiTidslinjeOverstyring(
+                    UUID.randomUUID(),
+                    lagOrganisasjonsnummer(),
+                    lagFødselsnummer(),
+                    lagAktørId(),
+                    "En begrunnelse",
+                    emptyList(),
+                )
+            ),
+            then = { _, body, _ ->
+                Assertions.assertEquals(500, body["errors"][0]["extensions"]["code"].asInt())
             },
         )
     }
