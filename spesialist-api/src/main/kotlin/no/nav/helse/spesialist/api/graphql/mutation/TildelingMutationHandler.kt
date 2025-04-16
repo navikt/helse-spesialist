@@ -2,12 +2,13 @@ package no.nav.helse.spesialist.api.graphql.mutation
 
 import graphql.GraphQLError
 import graphql.execution.DataFetcherResult
-import graphql.execution.DataFetcherResult.newResult
 import graphql.schema.DataFetchingEnvironment
 import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
+import no.nav.helse.spesialist.api.graphql.byggFeilrespons
+import no.nav.helse.spesialist.api.graphql.byggRespons
 import no.nav.helse.spesialist.api.graphql.graphqlErrorException
 import no.nav.helse.spesialist.api.graphql.schema.ApiTildeling
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
@@ -30,13 +31,11 @@ class TildelingMutationHandler(
         val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
         return try {
             saksbehandlerMediator.håndter(TildelOppgave(oppgaveId.toLong()), saksbehandler)
-            newResult<ApiTildeling?>().data(
-                ApiTildeling(saksbehandler.navn, saksbehandler.epost, saksbehandler.oid),
-            ).build()
+            byggRespons(ApiTildeling(saksbehandler.navn, saksbehandler.epost, saksbehandler.oid))
         } catch (e: OppgaveTildeltNoenAndre) {
-            newResult<ApiTildeling?>().error(alleredeTildeltError(e)).build()
+            byggFeilrespons(alleredeTildeltError(e))
         } catch (e: RuntimeException) {
-            newResult<ApiTildeling?>().error(getUpdateError(oppgaveId)).build()
+            byggFeilrespons(getUpdateError(oppgaveId))
         }
     }
 
@@ -47,11 +46,11 @@ class TildelingMutationHandler(
         val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
         return try {
             saksbehandlerMediator.håndter(AvmeldOppgave(oppgaveId.toLong()), saksbehandler)
-            newResult<Boolean>().data(true).build()
+            byggRespons(true)
         } catch (e: OppgaveIkkeTildelt) {
-            newResult<Boolean>().data(false).build()
+            byggRespons(false)
         } catch (e: RuntimeException) {
-            newResult<Boolean>().data(false).build()
+            byggRespons(false)
         }
     }
 

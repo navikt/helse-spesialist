@@ -4,6 +4,7 @@ import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.graphql.ContextValues
+import no.nav.helse.spesialist.api.graphql.byggRespons
 import no.nav.helse.spesialist.api.graphql.schema.ApiAnnulleringData
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 
@@ -18,6 +19,6 @@ class AnnulleringMutationHandler(
 
         saksbehandlerMediator.håndter(annullering, saksbehandler)
 
-        return DataFetcherResult.newResult<Boolean>().data(true).build()
+        return byggRespons(true)
     }
 }

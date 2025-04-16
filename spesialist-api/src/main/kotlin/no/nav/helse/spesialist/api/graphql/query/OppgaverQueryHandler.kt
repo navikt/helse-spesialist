@@ -4,6 +4,7 @@ import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
+import no.nav.helse.spesialist.api.graphql.byggRespons
 import no.nav.helse.spesialist.api.graphql.schema.ApiAntallOppgaver
 import no.nav.helse.spesialist.api.graphql.schema.ApiBehandledeOppgaver
 import no.nav.helse.spesialist.api.graphql.schema.ApiFiltrering
@@ -31,7 +32,7 @@ class OppgaverQueryHandler(private val apiOppgaveService: ApiOppgaveService) : O
                 limit = limit,
             )
 
-        return DataFetcherResult.newResult<ApiBehandledeOppgaver>().data(behandledeOppgaver).build()
+        return byggRespons(behandledeOppgaver)
     }
 
     override suspend fun behandledeOppgaverFeedV2(
@@ -51,7 +52,7 @@ class OppgaverQueryHandler(private val apiOppgaveService: ApiOppgaveService) : O
                 tom = tom,
             )
 
-        return DataFetcherResult.newResult<ApiBehandledeOppgaver>().data(behandledeOppgaver).build()
+        return byggRespons(behandledeOppgaver)
     }
 
     override suspend fun oppgaveFeed(
@@ -79,7 +80,7 @@ class OppgaverQueryHandler(private val apiOppgaveService: ApiOppgaveService) : O
             sikkerLogg.info("Det tok over $grense ms å hente oppgaver med disse filtrene: $filtrering")
         }
 
-        return DataFetcherResult.newResult<ApiOppgaverTilBehandling>().data(oppgaver).build()
+        return byggRespons(oppgaver)
     }
 
     override suspend fun antallOppgaver(env: DataFetchingEnvironment): DataFetcherResult<ApiAntallOppgaver> {
@@ -93,6 +94,6 @@ class OppgaverQueryHandler(private val apiOppgaveService: ApiOppgaveService) : O
             }
         sikkerLogg.debug("Query antallOppgaver er ferdig etter ${tid.inWholeMilliseconds} ms")
 
-        return DataFetcherResult.newResult<ApiAntallOppgaver>().data(antallOppgaver).build()
+        return byggRespons(antallOppgaver)
     }
 }

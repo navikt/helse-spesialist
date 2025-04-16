@@ -8,6 +8,7 @@ import no.nav.helse.db.SessionFactory
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDto
 import no.nav.helse.spesialist.api.graphql.ContextValues
+import no.nav.helse.spesialist.api.graphql.byggRespons
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.domain.Dialog
 
@@ -23,7 +24,7 @@ class StansAutomatiskBehandlingMutationHandler(private val sessionFactory: Sessi
             session.lagrePeriodehistorikkForStans(fodselsnummer, saksbehandler, begrunnelse)
             session.stansAutomatiskBehandlingSaksbehandlerDao.lagreStans(fodselsnummer)
         }
-        return DataFetcherResult.newResult<Boolean>().data(true).build()
+        return byggRespons(true)
     }
 
     override fun opphevStansAutomatiskBehandling(
@@ -35,7 +36,7 @@ class StansAutomatiskBehandlingMutationHandler(private val sessionFactory: Sessi
             session.lagrePeriodehistorikkForOpphevStans(fodselsnummer, saksbehandler)
             session.stansAutomatiskBehandlingSaksbehandlerDao.opphevStans(fodselsnummer)
         }
-        return DataFetcherResult.newResult<Boolean>().data(true).build()
+        return byggRespons(true)
     }
 
     private fun SessionContext.lagrePeriodehistorikkForStans(

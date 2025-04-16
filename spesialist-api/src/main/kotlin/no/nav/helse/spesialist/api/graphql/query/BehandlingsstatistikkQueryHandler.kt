@@ -4,6 +4,7 @@ import graphql.execution.DataFetcherResult
 import no.nav.helse.spesialist.api.behandlingsstatistikk.BehandlingsstatistikkResponse
 import no.nav.helse.spesialist.api.behandlingsstatistikk.IBehandlingsstatistikkService
 import no.nav.helse.spesialist.api.behandlingsstatistikk.Statistikk
+import no.nav.helse.spesialist.api.graphql.byggRespons
 import no.nav.helse.spesialist.api.graphql.schema.ApiAntall
 import no.nav.helse.spesialist.api.graphql.schema.ApiBehandlingsstatistikk
 
@@ -13,7 +14,7 @@ class BehandlingsstatistikkQueryHandler(private val behandlingsstatistikkMediato
     override fun behandlingsstatistikk(): DataFetcherResult<ApiBehandlingsstatistikk> =
         behandlingsstatistikkMediator.getBehandlingsstatistikk()
             .tilApiBehandlingsstatistikk()
-            .tilDataFetcherResult()
+            .let(::byggRespons)
 
     private fun BehandlingsstatistikkResponse.tilApiBehandlingsstatistikk() =
         ApiBehandlingsstatistikk(
@@ -41,6 +42,4 @@ class BehandlingsstatistikkQueryHandler(private val behandlingsstatistikkMediato
             manuelt = manuelt,
             tilgjengelig = tilgjengelig,
         )
-
-    private inline fun <reified T> T.tilDataFetcherResult(): DataFetcherResult<T> = DataFetcherResult.newResult<T>().data(this).build()
 }

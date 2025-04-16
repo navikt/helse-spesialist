@@ -1,8 +1,8 @@
 package no.nav.helse.spesialist.api.graphql.mutation
 
 import graphql.execution.DataFetcherResult
-import graphql.execution.DataFetcherResult.newResult
 import no.nav.helse.db.api.VarselApiRepository
+import no.nav.helse.spesialist.api.graphql.byggRespons
 import no.nav.helse.spesialist.api.graphql.conflict
 import no.nav.helse.spesialist.api.graphql.internalServerError
 import no.nav.helse.spesialist.api.graphql.mapping.toVarselDto
@@ -42,7 +42,7 @@ class VarselMutationHandler(private val varselRepository: VarselApiRepository) :
                         ident = ident,
                     )
             }
-        }?.toVarselDto()?.let { newResult<ApiVarselDTO>().data(it).build() }
+        }?.toVarselDto()?.let(::byggRespons)
             ?: internalServerError("Kunne ikke oppdatere varsel med varselkode=$varselkode, generasjonId=$generasjonId")
     }
 }

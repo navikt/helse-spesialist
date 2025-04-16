@@ -9,6 +9,7 @@ import no.nav.helse.spesialist.api.auditLogTeller
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGER
 import no.nav.helse.spesialist.api.graphql.byggFeilrespons
+import no.nav.helse.spesialist.api.graphql.byggRespons
 import no.nav.helse.spesialist.api.graphql.forbiddenError
 import no.nav.helse.spesialist.api.graphql.graphqlErrorException
 import no.nav.helse.spesialist.api.graphql.notFoundError
@@ -95,7 +96,7 @@ class PersonQueryHandler(
 
             is FetchPersonResult.Ok -> {
                 auditLog(env.graphQlContext, fødselsnummer, true, null)
-                DataFetcherResult.newResult<ApiPerson?>().data(result.person).build()
+                byggRespons(result.person)
             }
         }
     }

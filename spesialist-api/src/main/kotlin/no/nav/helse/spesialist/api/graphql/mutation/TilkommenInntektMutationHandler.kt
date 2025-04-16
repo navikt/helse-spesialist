@@ -9,6 +9,7 @@ import no.nav.helse.modell.melding.InntektsendringerEvent
 import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
+import no.nav.helse.spesialist.api.graphql.byggRespons
 import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektInput
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.application.TilkommenInntektRepository
@@ -88,7 +89,7 @@ class TilkommenInntektMutationHandler(
             )
         }
 
-        return DataFetcherResult.newResult<Boolean>().data(true).build()
+        return byggRespons(true)
     }
 
     private fun finnEllerOpprettTotrinnsvurdering(
@@ -167,7 +168,7 @@ class TilkommenInntektMutationHandler(
             }
         }
 
-        return DataFetcherResult.newResult<Boolean>().data(true).build()
+        return byggRespons(true)
     }
 
     override fun gjenopprettTilkommenInntekt(
@@ -236,7 +237,7 @@ class TilkommenInntektMutationHandler(
             )
         }
 
-        return DataFetcherResult.newResult<Boolean>().data(true).build()
+        return byggRespons(true)
     }
 
     override fun fjernTilkommenInntekt(
@@ -281,7 +282,7 @@ class TilkommenInntektMutationHandler(
             )
         }
 
-        return DataFetcherResult.newResult<Boolean>().data(true).build()
+        return byggRespons(true)
     }
 
     private fun byggInntektsendringerEvent(

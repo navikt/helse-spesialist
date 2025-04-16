@@ -4,6 +4,7 @@ import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
+import no.nav.helse.spesialist.api.graphql.byggRespons
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 
 class OpptegnelseMutationHandler(
@@ -15,6 +16,6 @@ class OpptegnelseMutationHandler(
     ): DataFetcherResult<Boolean> {
         val saksbehandler = environment.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
         saksbehandlerMediator.opprettAbonnement(saksbehandler, personidentifikator)
-        return DataFetcherResult.newResult<Boolean>().data(true).build()
+        return byggRespons(true)
     }
 }

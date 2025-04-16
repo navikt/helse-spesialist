@@ -11,6 +11,7 @@ import no.nav.helse.spesialist.api.feilhåndtering.IkkeÅpenOppgave
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.feilhåndtering.OverlapperMedInfotrygd
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
+import no.nav.helse.spesialist.api.graphql.byggRespons
 import no.nav.helse.spesialist.api.graphql.schema.ApiAvslagstype
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
@@ -52,7 +53,7 @@ class VedtakMutationHandler(
                         avslag = null,
                     )
                 godkjenninghåndterer.håndter(dto, saksbehandler.epost, saksbehandler.oid)
-                newResult<Boolean>().data(true).build()
+                byggRespons(true)
             }
 
             is VedtakResultat.Feil -> {
@@ -92,7 +93,7 @@ class VedtakMutationHandler(
                         kommentar = kommentar,
                     )
                 godkjenninghåndterer.håndter(godkjenning, saksbehandler.epost, saksbehandler.oid)
-                newResult<Boolean>().data(true).build()
+                byggRespons(true)
             }
 
             is VedtakResultat.Feil -> {
