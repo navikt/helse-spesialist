@@ -1,13 +1,13 @@
 package no.nav.helse.spesialist.client.krr
 
-import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
-import com.github.tomakehurst.wiremock.client.WireMock.get
 import com.github.tomakehurst.wiremock.client.WireMock.okJson
+import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spesialist.application.Reservasjonshenter.ReservasjonDto
+import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.RegisterExtension
@@ -24,41 +24,42 @@ class KRRClientReservasjonshenterTest {
     @Test
     fun `tåler svar med ekstra felter`() {
         test(
-            givenResponse = okJson("""{ "something-else": "?", "kanVarsles": false, "x": "YZ", "reservert": true }"""),
-            expectedReservasjon = ReservasjonDto(kanVarsles = false, reservert = true)
+            responseContent = """{ "something-else": "?", "kanVarsles": false, "x": "YZ", "reservert": true }""",
+            expectedReservasjon = ReservasjonDto(kanVarsles = false, reservert = true),
         )
     }
 
     @Test
     fun `mapper svar som forventet`() {
         test(
-            givenResponse = okJson("""{ "kanVarsles": false, "reservert": true }"""),
-            expectedReservasjon = ReservasjonDto(kanVarsles = false, reservert = true)
+            responseContent = """{ "kanVarsles": false, "reservert": true }""",
+            expectedReservasjon = ReservasjonDto(kanVarsles = false, reservert = true),
         )
     }
 
     @Test
     fun `gir null om ett felt mangler`() {
         test(
-            givenResponse = okJson("""{ "reservert": true }"""),
-            expectedReservasjon = null
+            responseContent = """{ "reservert": true }""",
+            expectedReservasjon = null,
         )
     }
 
     @Test
     fun `gir null om ett felt har feil type`() {
         test(
-            givenResponse = okJson("""{ "kanVarsles": "false", "reservert": true }"""),
-            expectedReservasjon = null
+            responseContent = """{ "kanVarsles": "false", "reservert": true }""",
+            expectedReservasjon = null,
         )
     }
 
     private fun test(
-        givenResponse: ResponseDefinitionBuilder,
-        expectedReservasjon: ReservasjonDto?
+        @Language("json") responseContent: String,
+        expectedReservasjon: ReservasjonDto?,
+        personident: String = "12345678910",
     ) {
         // Given:
-        wireMock.stubFor(get("/rest/v1/person").willReturn(givenResponse))
+        wireMock.stubFor(post("/rest/v1/personer").willReturn(okResponse(personident, responseContent)))
         val client = KRRClientReservasjonshenter(
             ClientKrrModule.Configuration.Client(apiUrl = wireMock.runtimeInfo.httpBaseUrl, scope = "scoap"),
             accessTokenGenerator = object : AccessTokenGenerator {
@@ -68,10 +69,12 @@ class KRRClientReservasjonshenterTest {
 
         // When:
         val actualReservasjon: ReservasjonDto? = runBlocking {
-            client.hentForPerson("12345678910")
+            client.hentForPerson(personident)
         }
 
         // Then:
         assertEquals(expectedReservasjon, actualReservasjon)
     }
+
+    private fun okResponse(personident: String, contents: String) = okJson(""" { "personer": { "$personident": $contents } } """)
 }

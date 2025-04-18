@@ -1,14 +1,17 @@
 package no.nav.helse.spesialist.client.krr
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.github.navikt.tbd_libs.jackson.isMissingOrNull
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.apache.Apache
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.accept
-import io.ktor.client.request.get
 import io.ktor.client.request.header
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
+import io.ktor.http.contentType
 import io.ktor.serialization.jackson.JacksonConverter
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
@@ -65,21 +68,18 @@ class KRRClientReservasjonshenter(
             logg.debug("Henter reservasjon fra ${configuration.apiUrl}/rest/v1/person, callId=$callId")
             val response =
                 httpClient
-                    .get("${configuration.apiUrl}/rest/v1/person") {
+                    .post("${configuration.apiUrl}/rest/v1/personer") {
                         header("Authorization", "Bearer $accessToken")
-                        header("Nav-Personident", fødselsnummer)
                         header("Nav-Call-Id", callId)
                         accept(ContentType.Application.Json)
+                        contentType(ContentType.Application.Json)
+                        setBody(""" { "personidenter": [ "$fødselsnummer" ] } """)
                     }.body<JsonNode>()
 
             statusEtterKallReservasjonsstatusBuilder
                 .withRegistry(registry)
                 .withTag("status", "success")
-
-            ReservasjonDto(
-                kanVarsles = response.getBoolean("kanVarsles"),
-                reservert = response.getBoolean("reservert"),
-            )
+            parseResponse(response, fødselsnummer)
         } catch (e: Exception) {
             statusEtterKallReservasjonsstatusBuilder
                 .withRegistry(registry)
@@ -92,8 +92,31 @@ class KRRClientReservasjonshenter(
         }
     }
 
+    private fun parseResponse(
+        response: JsonNode,
+        fødselsnummer: String,
+    ): ReservasjonDto? {
+        val feil = response["feil"]
+        return if (!feil.isMissingOrNull()) {
+            logg.warn("Feil fra Kontakt- og reservasjonsregisteret")
+            sikkerLogg.warn("Feil fra Kontakt- og reservasjonsregisteret: {}", feil)
+            null
+        } else {
+            response["personer"][fødselsnummer].let {
+                ReservasjonDto(
+                    kanVarsles = it.getBoolean("kanVarsles"),
+                    reservert = it.getBoolean("reservert"),
+                )
+            }
+        }
+    }
+
     private fun JsonNode.getBoolean(fieldName: String) =
-        this[fieldName].let { fieldNode ->
-            fieldNode.takeIf(JsonNode::isBoolean)?.asBoolean() ?: error("Fikk ugyldig boolean-verdi: $fieldNode")
+        get(fieldName).let { fieldNode ->
+            if (fieldNode.isBoolean) {
+                fieldNode.booleanValue()
+            } else {
+                error("Fikk ugyldig boolean-verdi: $fieldNode")
+            }
         }
 }
