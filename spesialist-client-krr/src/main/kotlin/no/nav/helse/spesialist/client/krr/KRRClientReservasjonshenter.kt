@@ -1,7 +1,6 @@
 package no.nav.helse.spesialist.client.krr
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.github.navikt.tbd_libs.jackson.isMissingOrNull
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.apache.Apache
@@ -97,7 +96,7 @@ class KRRClientReservasjonshenter(
         fødselsnummer: String,
     ): ReservasjonDto? {
         val feil = response["feil"]
-        return if (!feil.isMissingOrNull()) {
+        return if (!feil.isEmpty) {
             logg.warn("Feil fra Kontakt- og reservasjonsregisteret")
             sikkerLogg.warn("Feil fra Kontakt- og reservasjonsregisteret: {}", feil)
             null
@@ -112,11 +111,7 @@ class KRRClientReservasjonshenter(
     }
 
     private fun JsonNode.getBoolean(fieldName: String) =
-        get(fieldName).let { fieldNode ->
-            if (fieldNode.isBoolean) {
-                fieldNode.booleanValue()
-            } else {
-                error("Fikk ugyldig boolean-verdi: $fieldNode")
-            }
+        this[fieldName].let { fieldNode ->
+            fieldNode.takeIf(JsonNode::isBoolean)?.asBoolean() ?: error("Fikk ugyldig boolean-verdi: $fieldNode")
         }
 }

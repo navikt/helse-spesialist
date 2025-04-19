@@ -76,5 +76,5 @@ class KRRClientReservasjonshenterTest {
         assertEquals(expectedReservasjon, actualReservasjon)
     }
 
-    private fun okResponse(personident: String, contents: String) = okJson(""" { "personer": { "$personident": $contents } } """)
+    private fun okResponse(personident: String, contents: String) = okJson(""" { "personer": { "$personident": $contents }, "feil": {} } """)
 }
