@@ -175,7 +175,7 @@ class SpeilPersonReceiver(
                 "skjonnsfastsettelse" to mapOf(
                     "aktorId" to testContext.person.aktørId,
                     "fodselsnummer" to testContext.person.fødselsnummer,
-                    "skjaringstidspunkt" to "2023-11-01",
+                    "skjaringstidspunkt" to testContext.vedtaksperioder.first().skjæringstidspunkt.toString(),
                     "vedtaksperiodeId" to testContext.vedtaksperioder.first().vedtaksperiodeId,
                     "arbeidsgivere" to listOf(
                         mapOf(

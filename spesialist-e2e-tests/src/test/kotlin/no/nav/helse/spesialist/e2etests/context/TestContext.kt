@@ -6,9 +6,9 @@ data class TestContext(
     val person: Person = Person(),
     val arbeidsgiver: Arbeidsgiver = Arbeidsgiver(),
     val vilkårsgrunnlagId: UUID = UUID.randomUUID(),
-    val vedtaksperioder: MutableList<Vedtaksperiode> = mutableListOf(Vedtaksperiode()),
+    val vedtaksperioder: MutableList<Vedtaksperiode> = mutableListOf(Vedtaksperiode(arbeidsgiver = arbeidsgiver)),
 ) {
     fun leggTilVedtaksperiode() {
-        vedtaksperioder.add(Vedtaksperiode())
+        vedtaksperioder.add(Vedtaksperiode(arbeidsgiver = arbeidsgiver))
     }
 }

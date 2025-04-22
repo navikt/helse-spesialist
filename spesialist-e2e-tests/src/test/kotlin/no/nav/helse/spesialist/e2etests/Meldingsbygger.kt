@@ -4,6 +4,8 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.e2etests.context.Arbeidsgiver
 import no.nav.helse.spesialist.e2etests.context.Person
+import no.nav.helse.spesialist.e2etests.context.Sykepengegrunnlagsfakta
+import no.nav.helse.spesialist.e2etests.context.Sykepengegrunnlagsfakta.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.spesialist.e2etests.context.Vedtaksperiode
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -63,6 +65,8 @@ object Meldingsbygger {
     fun byggVedtaksperiodeEndret(
         vedtaksperiode: Vedtaksperiode,
         person: Person,
+        forrigeTilstand: String,
+        gjeldendeTilstand: String,
     ) = JsonMessage.newMessage(
         mapOf(
             "@event_name" to "vedtaksperiode_endret",
@@ -70,8 +74,8 @@ object Meldingsbygger {
             "@opprettet" to LocalDateTime.now(),
             "vedtaksperiodeId" to vedtaksperiode.vedtaksperiodeId,
             "fødselsnummer" to person.fødselsnummer,
-            "forrigeTilstand" to "AVVENTER_GODKJENNING",
-            "gjeldendeTilstand" to "AVVENTER_BLOKKERENDE_PERIODE",
+            "forrigeTilstand" to forrigeTilstand,
+            "gjeldendeTilstand" to gjeldendeTilstand,
         )
     ).toJson()
 
@@ -79,7 +83,16 @@ object Meldingsbygger {
         person: Person,
         arbeidsgiver: Arbeidsgiver,
         vilkårsgrunnlagId: UUID,
-        vedtaksperiode: Vedtaksperiode
+        vedtaksperiode: Vedtaksperiode,
+        sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta = Sykepengegrunnlagsfakta(
+            fastsatt = Sykepengegrunnlagsfakta.FastsattType.EtterHovedregel,
+            arbeidsgivere = listOf(
+                Sykepengegrunnlagsfakta.Arbeidsgiver(
+                    organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
+                    omregnetÅrsinntekt = 123456.7
+                )
+            )
+        )
     ): String {
         val meldingsnavn = "Godkjenningsbehov"
         return JsonMessage.newMessage(
@@ -115,14 +128,15 @@ object Meldingsbygger {
                         )
                     ),
                     "sykepengegrunnlagsfakta" to mapOf(
-                        "fastsatt" to "EtterHovedregel",
-                        "arbeidsgivere" to listOf(
-                            mapOf(
-                                "arbeidsgiver" to arbeidsgiver.organisasjonsnummer,
-                                "omregnetÅrsinntekt" to 123456.7,
-                                "inntektskilde" to "Arbeidsgiver",
-                            )
-                        )
+                        "fastsatt" to sykepengegrunnlagsfakta.fastsatt,
+                        "arbeidsgivere" to sykepengegrunnlagsfakta.arbeidsgivere.map {
+                            buildMap {
+                                put("arbeidsgiver", it.organisasjonsnummer)
+                                put("omregnetÅrsinntekt", it.omregnetÅrsinntekt)
+                                put("inntektskilde", it.inntektskilde)
+                                if (it is SkjønnsfastsattArbeidsgiver) put ("skjønnsfastsatt", it.skjønnsfastsatt)
+                            }
+                        }
                     ),
                     "omregnedeÅrsinntekter" to listOf(
                         mapOf(
@@ -270,19 +284,25 @@ object Meldingsbygger {
             "vedtakFattetTidspunkt" to LocalDateTime.now(),
             "hendelser" to emptyList<String>(),
             "utbetalingId" to vedtaksperiode.utbetalingIdForÅByggeMelding("avsluttet_med_vedtak"),
-            "sykepengegrunnlagsfakta" to mapOf(
-                "fastsatt" to "EtterHovedregel",
-                "omregnetÅrsinntekt" to 600000.0,
-                "6G" to 6 * 118620.0,
-                "arbeidsgivere" to listOf(
-                    mapOf(
-                        "arbeidsgiver" to arbeidsgiver.organisasjonsnummer,
-                        "omregnetÅrsinntekt" to 600000.00,
+            "sykepengegrunnlagsfakta" to buildMap {
+                put("fastsatt", vedtaksperiode.sykepengegrunnlagsfakta.fastsatt.toString())
+                put("omregnetÅrsinntekt", 600000.0)
+                put("6G", 6 * 118620.0)
+                if (vedtaksperiode.sykepengegrunnlagsfakta.fastsatt == Sykepengegrunnlagsfakta.FastsattType.EtterSkjønn)
+                    put(
+                        "skjønnsfastsatt",
+                        vedtaksperiode.sykepengegrunnlagsfakta.arbeidsgivere.sumOf { it.omregnetÅrsinntekt }
                     )
-                ),
-                "innrapportertÅrsinntekt" to 600000.0,
-                "avviksprosent" to 0,
-            ),
+                put("arbeidsgivere", vedtaksperiode.sykepengegrunnlagsfakta.arbeidsgivere.map {
+                    buildMap<String, Any> {
+                        put("arbeidsgiver", it.organisasjonsnummer)
+                        put("omregnetÅrsinntekt", it.omregnetÅrsinntekt)
+                        if (it is SkjønnsfastsattArbeidsgiver) put("skjønnsfastsatt", it.skjønnsfastsatt)
+                    }
+                })
+                put("innrapportertÅrsinntekt", 600000.0)
+                put("avviksprosent", 0)
+            },
         )
     ).toJson()
 

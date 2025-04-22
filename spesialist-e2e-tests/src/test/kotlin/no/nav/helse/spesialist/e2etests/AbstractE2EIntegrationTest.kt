@@ -149,6 +149,19 @@ abstract class AbstractE2EIntegrationTest {
         assertEquals("EtterHovedregel", vedtakFattet["sykepengegrunnlagsfakta"]["fastsatt"].asText())
     }
 
+    protected fun assertVedtakFattetEtterSkjønn() {
+        val vedtakFattet = testRapid.meldingslogg(testContext.person.fødselsnummer)
+            .find { it["@event_name"].asText() == "vedtak_fattet" }
+            ?: error("Forventet å finne vedtak_fattet i meldingslogg")
+
+        assertEquals(4, vedtakFattet["begrunnelser"].size())
+        assertEquals("SkjønnsfastsattSykepengegrunnlagMal", vedtakFattet["begrunnelser"][0]["type"].asText())
+        assertEquals("SkjønnsfastsattSykepengegrunnlagFritekst", vedtakFattet["begrunnelser"][1]["type"].asText())
+        assertEquals("SkjønnsfastsattSykepengegrunnlagKonklusjon", vedtakFattet["begrunnelser"][2]["type"].asText())
+        assertEquals("Innvilgelse", vedtakFattet["begrunnelser"][3]["type"].asText())
+        assertEquals("EtterSkjønn", vedtakFattet["sykepengegrunnlagsfakta"]["fastsatt"].asText())
+    }
+
     protected fun assertBehandlingTilstand(expectedTilstand: String) {
         val actualTilstand = sessionOf(E2ETestApplikasjon.dbModule.dataSource, strict = true).use { session ->
             session.run(
