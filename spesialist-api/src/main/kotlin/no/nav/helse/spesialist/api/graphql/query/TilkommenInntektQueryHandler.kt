@@ -33,7 +33,7 @@ class TilkommenInntektQueryHandler(
     override suspend fun tilkomneInntektskilder(
         aktorId: String,
         env: DataFetchingEnvironment,
-    ): DataFetcherResult<List<ApiTilkommenInntektskilde>?> {
+    ): DataFetcherResult<List<ApiTilkommenInntektskilde>> {
         val tilganger = env.graphQlContext.get<SaksbehandlerTilganger>(TILGANGER)
         val fødselsnumre = daos.personApiDao.finnFødselsnumre(aktorId).toSet()
         fødselsnumre.forEach { fødselsnummer ->
