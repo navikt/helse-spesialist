@@ -7,5 +7,7 @@ mutation LeggTilTilkommenInntekt(
         fodselsnummer: $fodselsnummer,
         verdier: $verdier,
         notatTilBeslutter: $notatTilBeslutter
-    )
+    ) {
+        tilkommenInntektId
+    }
 }

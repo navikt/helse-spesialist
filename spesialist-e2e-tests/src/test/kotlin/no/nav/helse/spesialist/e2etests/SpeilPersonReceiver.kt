@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.e2etests
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.github.navikt.tbd_libs.jackson.asUUID
 import com.github.navikt.tbd_libs.jackson.isMissingOrNull
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.apache.Apache
@@ -78,7 +79,7 @@ class SpeilPersonReceiver(
         periodebeløp: BigDecimal,
         dager: Collection<LocalDate>,
         notatTilBeslutter: String
-    ) {
+    ): UUID =
         callGraphQL(
             operationName = "LeggTilTilkommenInntekt",
             variables = mapOf(
@@ -94,8 +95,11 @@ class SpeilPersonReceiver(
                 ),
                 "notatTilBeslutter" to notatTilBeslutter
             )
-        )
-    }
+        ).also {
+            if (it["data"].isMissingOrNull()) {
+                error("Forventer at mutation ikke feiler, fikk: $it")
+            }
+        }["data"]["leggTilTilkommenInntekt"]["tilkommenInntektId"].asUUID()
 
     fun saksbehandlerEndrerTilkommenInntekt(
         tilkommenInntektId: UUID,

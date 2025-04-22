@@ -12,7 +12,7 @@ interface TilkommenInntektMutationSchema : Mutation {
         verdier: ApiTilkommenInntektInput,
         notatTilBeslutter: String,
         env: DataFetchingEnvironment,
-    ): DataFetcherResult<Boolean>
+    ): DataFetcherResult<LeggTilTilkommenInntektResponse>
 
     fun endreTilkommenInntekt(
         tilkommenInntektId: UUID,
@@ -34,5 +34,7 @@ interface TilkommenInntektMutationSchema : Mutation {
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean>
 }
+
+data class LeggTilTilkommenInntektResponse(val tilkommenInntektId: UUID)
 
 class TilkommenInntektMutation(private val handler: TilkommenInntektMutationSchema) : TilkommenInntektMutationSchema by handler

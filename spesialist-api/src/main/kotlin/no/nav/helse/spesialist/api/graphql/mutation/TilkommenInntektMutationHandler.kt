@@ -32,7 +32,7 @@ class TilkommenInntektMutationHandler(
         verdier: ApiTilkommenInntektInput,
         notatTilBeslutter: String,
         env: DataFetchingEnvironment,
-    ): DataFetcherResult<Boolean> {
+    ): DataFetcherResult<LeggTilTilkommenInntektResponse> =
         sessionFactory.transactionalSessionScope { session ->
             val periode = verdier.periode.fom tilOgMed verdier.periode.tom
             verifiserAtErInnenforEtSykefraværstilfelle(
@@ -87,10 +87,9 @@ class TilkommenInntektMutationHandler(
                     ),
                 årsak = "tilkommen inntekt lagt til",
             )
-        }
 
-        return byggRespons(true)
-    }
+            byggRespons(LeggTilTilkommenInntektResponse(tilkommenInntekt.id().value))
+        }
 
     private fun finnEllerOpprettTotrinnsvurdering(
         fodselsnummer: String,

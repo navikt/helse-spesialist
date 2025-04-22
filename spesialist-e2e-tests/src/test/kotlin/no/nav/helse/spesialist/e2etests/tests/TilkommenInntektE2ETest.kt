@@ -1,7 +1,6 @@
 package no.nav.helse.spesialist.e2etests.tests
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.github.navikt.tbd_libs.jackson.asUUID
 import no.nav.helse.spesialist.domain.Periode.Companion.tilPerioder
 import no.nav.helse.spesialist.domain.testfixtures.feb
 import no.nav.helse.spesialist.domain.testfixtures.jan
@@ -108,7 +107,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         søknadOgGodkjenningbehovKommerInn()
 
         medPersonISpeil {
-            saksbehandlerLeggerTilTilkommenInntekt(
+            val tilkommenInntektId = saksbehandlerLeggerTilTilkommenInntekt(
                 organisasjonsnummer = opprinneligOrganisasjonsnummer,
                 fom = opprinneligFom,
                 tom = opprinneligTom,
@@ -119,7 +118,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
 
             // When:
             saksbehandlerEndrerTilkommenInntekt(
-                tilkommenInntektId = hentTilkomneInntektskilder()[0]["inntekter"][0]["tilkommenInntektId"].asUUID(),
+                tilkommenInntektId = tilkommenInntektId,
                 organisasjonsnummer = endringOrganisasjonsnummer,
                 fom = endringFom,
                 tom = endringTom,
@@ -194,7 +193,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         val opprinneligPeriodebeløp = BigDecimal("1111.11")
         val opprinneligeDager = (2 jan 2021).datesUntil(1 feb 2021).toList()
         medPersonISpeil {
-            saksbehandlerLeggerTilTilkommenInntekt(
+            val tilkommenInntektId = saksbehandlerLeggerTilTilkommenInntekt(
                 organisasjonsnummer = opprinneligOrganisasjonsnummer,
                 fom = opprinneligFom,
                 tom = opprinneligTom,
@@ -206,7 +205,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
             // When:
             val fjerningNotatTilBeslutter = "fjerner inntekten"
             saksbehandlerFjernerTilkommenInntekt(
-                tilkommenInntektId = hentTilkomneInntektskilder()[0]["inntekter"][0]["tilkommenInntektId"].asUUID(),
+                tilkommenInntektId = tilkommenInntektId,
                 notatTilBeslutter = fjerningNotatTilBeslutter
             )
 
@@ -266,7 +265,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         søknadOgGodkjenningbehovKommerInn()
 
         medPersonISpeil {
-            saksbehandlerLeggerTilTilkommenInntekt(
+            val tilkommenInntektId = saksbehandlerLeggerTilTilkommenInntekt(
                 organisasjonsnummer = opprinneligOrganisasjonsnummer,
                 fom = opprinneligFom,
                 tom = opprinneligTom,
@@ -274,7 +273,6 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 dager = opprinneligeDager,
                 notatTilBeslutter = "notat"
             )
-            val tilkommenInntektId = hentTilkomneInntektskilder()[0]["inntekter"][0]["tilkommenInntektId"].asUUID()
 
             saksbehandlerFjernerTilkommenInntekt(
                 tilkommenInntektId = tilkommenInntektId,
@@ -360,7 +358,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         val sisteDager = listOf(17 jan 2021, 19 jan 2021)
 
         medPersonISpeil {
-            saksbehandlerLeggerTilTilkommenInntekt(
+            val tilkommenInntektId = saksbehandlerLeggerTilTilkommenInntekt(
                 organisasjonsnummer = lagOrganisasjonsnummer(),
                 fom = 2 jan 2021,
                 tom = 31 jan 2021,
@@ -368,7 +366,6 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 dager = (2 jan 2021).datesUntil(1 feb 2021).toList(),
                 notatTilBeslutter = "legger til tilkommen inntekt her"
             )
-            val tilkommenInntektId = hentTilkomneInntektskilder()[0]["inntekter"][0]["tilkommenInntektId"].asUUID()
 
             saksbehandlerEndrerTilkommenInntekt(
                 tilkommenInntektId = tilkommenInntektId,

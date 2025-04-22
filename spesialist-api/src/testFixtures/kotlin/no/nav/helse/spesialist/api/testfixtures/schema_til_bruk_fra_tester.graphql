@@ -410,6 +410,10 @@ type LagtPaVent implements Historikkinnslag {
     type: PeriodehistorikkType!
 }
 
+type LeggTilTilkommenInntektResponse {
+    tilkommenInntektId: UUID!
+}
+
 type MinimumSykdomsgradOverstyring implements Overstyring {
     ferdigstilt: Boolean!
     hendelseId: UUID!
@@ -434,7 +438,7 @@ type Mutation {
     leggPaVent(arsaker: [PaVentArsakInput!], frist: LocalDate!, notatTekst: String, oppgaveId: String!, tildeling: Boolean!): PaVent
     leggTilKommentar(dialogRef: Int!, saksbehandlerident: String!, tekst: String!): Kommentar
     leggTilNotat(saksbehandlerOid: String!, tekst: String!, type: NotatType!, vedtaksperiodeId: String!): Notat
-    leggTilTilkommenInntekt(fodselsnummer: String!, notatTilBeslutter: String!, verdier: TilkommenInntektInput!): Boolean!
+    leggTilTilkommenInntekt(fodselsnummer: String!, notatTilBeslutter: String!, verdier: TilkommenInntektInput!): LeggTilTilkommenInntektResponse!
     minimumSykdomsgrad(minimumSykdomsgrad: MinimumSykdomsgradInput!): Boolean
     oppdaterPerson(fodselsnummer: String!): Boolean!
     opphevStans(begrunnelse: String!, fodselsnummer: String!): Boolean!
@@ -636,7 +640,7 @@ type Query {
     oppgaveFeed(filtrering: FiltreringInput!, limit: Int!, offset: Int!, sortering: [OppgavesorteringInput!]!): OppgaverTilBehandling!
     opptegnelser(sekvensId: Int): [Opptegnelse!]!
     person(aktorId: String, fnr: String): Person
-    tilkomneInntektskilder(aktorId: String!): [TilkommenInntektskilde!]
+    tilkomneInntektskilder(aktorId: String!): [TilkommenInntektskilde!]!
 }
 
 type Refusjon {
