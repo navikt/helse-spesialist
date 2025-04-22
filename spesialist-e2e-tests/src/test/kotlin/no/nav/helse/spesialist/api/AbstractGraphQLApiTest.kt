@@ -50,6 +50,7 @@ import no.nav.helse.spesialist.api.graphql.query.DokumentQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.OppgaverQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.OpptegnelseQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
+import no.nav.helse.spesialist.api.graphql.query.TilkommenInntektQueryHandler
 import no.nav.helse.spesialist.api.graphql.queryHandler
 import no.nav.helse.spesialist.api.person.PersonService
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
@@ -144,6 +145,10 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                         egenAnsattApiDao = egenAnsattApiDao,
                         dokumenthåndterer = dokumenthåndterer,
                     ),
+                    tilkommenInntekt = TilkommenInntektQueryHandler(
+                        sessionFactory = sessionFactory,
+                        daos = daos
+                    )
                 ),
                 mutationHandlers = SpesialistSchema.MutationHandlers(
                     notat = NotatMutationHandler(sessionFactory = sessionFactory),

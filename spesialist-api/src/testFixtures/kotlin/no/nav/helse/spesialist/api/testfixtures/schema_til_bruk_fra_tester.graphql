@@ -435,20 +435,20 @@ type Mutation {
     leggTilKommentar(dialogRef: Int!, saksbehandlerident: String!, tekst: String!): Kommentar
     leggTilNotat(saksbehandlerOid: String!, tekst: String!, type: NotatType!, vedtaksperiodeId: String!): Notat
     leggTilTilkommenInntekt(fodselsnummer: String!, notatTilBeslutter: String!, verdier: TilkommenInntektInput!): Boolean!
-    minimumSykdomsgrad(minimumSykdomsgrad: MinimumSykdomsgradInput!): Boolean!
+    minimumSykdomsgrad(minimumSykdomsgrad: MinimumSykdomsgradInput!): Boolean
     oppdaterPerson(fodselsnummer: String!): Boolean!
     opphevStans(begrunnelse: String!, fodselsnummer: String!): Boolean!
     opphevStansAutomatiskBehandling(fodselsnummer: String!): Boolean!
     opprettAbonnement(personidentifikator: String!): Boolean!
     opprettTildeling(oppgaveId: String!): Tildeling
-    overstyrArbeidsforhold(overstyring: ArbeidsforholdOverstyringHandlingInput!): Boolean!
-    overstyrDager(overstyring: TidslinjeOverstyringInput!): Boolean!
-    overstyrInntektOgRefusjon(overstyring: InntektOgRefusjonOverstyringInput!): Boolean!
-    sendIRetur(notatTekst: String!, oppgavereferanse: String!): Boolean!
-    sendTilGodkjenningV2(oppgavereferanse: String!, vedtakBegrunnelse: String): Boolean!
+    overstyrArbeidsforhold(overstyring: ArbeidsforholdOverstyringHandlingInput!): Boolean
+    overstyrDager(overstyring: TidslinjeOverstyringInput!): Boolean
+    overstyrInntektOgRefusjon(overstyring: InntektOgRefusjonOverstyringInput!): Boolean
+    sendIRetur(notatTekst: String!, oppgavereferanse: String!): Boolean
+    sendTilGodkjenningV2(oppgavereferanse: String!, vedtakBegrunnelse: String): Boolean
     sendTilInfotrygd(arsak: String!, begrunnelser: [String!]!, kommentar: String, oppgavereferanse: String!): Boolean!
     settVarselstatus(definisjonIdString: String, generasjonIdString: String!, ident: String!, varselkode: String!): VarselDTO
-    skjonnsfastsettSykepengegrunnlag(skjonnsfastsettelse: SkjonnsfastsettelseInput!): Boolean!
+    skjonnsfastsettSykepengegrunnlag(skjonnsfastsettelse: SkjonnsfastsettelseInput!): Boolean
     stansAutomatiskBehandling(begrunnelse: String!, fodselsnummer: String!): Boolean!
 }
 
@@ -602,7 +602,6 @@ type Person {
     infotrygdutbetalinger: [Infotrygdutbetaling!]
     personinfo: Personinfo!
     tildeling: Tildeling
-    tilkomneInntektskilder: [TilkommenInntektskilde!]!
     tilleggsinfoForInntektskilder: [TilleggsinfoForInntektskilde!]!
     versjon: Int!
     vilkarsgrunnlag: [Vilkarsgrunnlag!]!
@@ -637,6 +636,7 @@ type Query {
     oppgaveFeed(filtrering: FiltreringInput!, limit: Int!, offset: Int!, sortering: [OppgavesorteringInput!]!): OppgaverTilBehandling!
     opptegnelser(sekvensId: Int): [Opptegnelse!]!
     person(aktorId: String, fnr: String): Person
+    tilkomneInntektskilder(aktorId: String!): [TilkommenInntektskilde!]
 }
 
 type Refusjon {

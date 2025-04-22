@@ -20,7 +20,6 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdoverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.schema.ApiDagoverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiDagtype
-import no.nav.helse.spesialist.api.graphql.schema.ApiDatoPeriode
 import no.nav.helse.spesialist.api.graphql.schema.ApiEnhet
 import no.nav.helse.spesialist.api.graphql.schema.ApiGhostPeriode
 import no.nav.helse.spesialist.api.graphql.schema.ApiInfotrygdutbetaling
@@ -32,13 +31,6 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiSaksbehandler
 import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettingstype
 import no.nav.helse.spesialist.api.graphql.schema.ApiSykepengegrunnlagskjonnsfastsetting
 import no.nav.helse.spesialist.api.graphql.schema.ApiTildeling
-import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntekt
-import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektEndretEvent
-import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektEvent
-import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektFjernetEvent
-import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektGjenopprettetEvent
-import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektOpprettetEvent
-import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektskilde
 import no.nav.helse.spesialist.api.graphql.schema.ApiTilleggsinfoForInntektskilde
 import no.nav.helse.spesialist.api.graphql.schema.ApiVilkårsgrunnlag
 import no.nav.helse.spesialist.api.graphql.schema.PersonSchema
@@ -54,15 +46,7 @@ import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDto
 import no.nav.helse.spesialist.application.snapshot.SnapshotGhostPeriode
 import no.nav.helse.spesialist.application.snapshot.SnapshotNyttInntektsforholdPeriode
 import no.nav.helse.spesialist.application.snapshot.SnapshotPerson
-import no.nav.helse.spesialist.domain.tilkommeninntekt.Endring
-import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektEndretEvent
-import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektEvent
-import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektFjernetEvent
-import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektGjenopprettetEvent
-import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektOpprettetEvent
-import java.math.BigDecimal
 import java.time.LocalDate
-import java.time.ZoneId
 import java.util.UUID
 
 data class ApiPersonResolver(
@@ -179,98 +163,6 @@ data class ApiPersonResolver(
             snapshot.vilkarsgrunnlag.map { it.tilVilkarsgrunnlag(sessionContext.avviksvurderingRepository) }
         }
     }
-
-    override fun tilkomneInntektskilder(): List<ApiTilkommenInntektskilde> =
-        sessionFactory.transactionalSessionScope { sessionContext ->
-            val tilkomneInntekter =
-                sessionContext.tilkommenInntektRepository.finnAlleForFødselsnummer(snapshot.fodselsnummer)
-            tilkomneInntekter.groupBy { it.organisasjonsnummer }.map { (organisasjonsnummer, inntekter) ->
-                ApiTilkommenInntektskilde(
-                    organisasjonsnummer = organisasjonsnummer,
-                    inntekter =
-                        inntekter.map {
-                            ApiTilkommenInntekt(
-                                tilkommenInntektId = it.id().value,
-                                periode =
-                                    ApiDatoPeriode(
-                                        fom = it.periode.fom,
-                                        tom = it.periode.tom,
-                                    ),
-                                periodebelop = it.periodebeløp,
-                                dager = it.dager.sorted(),
-                                fjernet = it.fjernet,
-                                events =
-                                    it.events.map { event ->
-                                        val metadata =
-                                            ApiTilkommenInntektEvent.Metadata(
-                                                sekvensnummer = event.metadata.sekvensnummer,
-                                                tidspunkt = event.metadata.tidspunkt.atZone(ZoneId.of("Europe/Oslo")).toLocalDateTime(),
-                                                utfortAvSaksbehandlerIdent = event.metadata.utførtAvSaksbehandlerIdent,
-                                                notatTilBeslutter = event.metadata.notatTilBeslutter,
-                                            )
-                                        when (event) {
-                                            is TilkommenInntektOpprettetEvent ->
-                                                ApiTilkommenInntektOpprettetEvent(
-                                                    metadata = metadata,
-                                                    organisasjonsnummer = event.organisasjonsnummer,
-                                                    periode =
-                                                        ApiDatoPeriode(
-                                                            fom = event.periode.fom,
-                                                            tom = event.periode.tom,
-                                                        ),
-                                                    periodebelop = event.periodebeløp,
-                                                    dager = event.dager.sorted(),
-                                                )
-
-                                            is TilkommenInntektEndretEvent ->
-                                                ApiTilkommenInntektEndretEvent(
-                                                    metadata = metadata,
-                                                    endringer = event.endringer.toApiEndringer(),
-                                                )
-
-                                            is TilkommenInntektFjernetEvent ->
-                                                ApiTilkommenInntektFjernetEvent(
-                                                    metadata = metadata,
-                                                )
-
-                                            is TilkommenInntektGjenopprettetEvent ->
-                                                ApiTilkommenInntektGjenopprettetEvent(
-                                                    metadata = metadata,
-                                                    endringer = event.endringer.toApiEndringer(),
-                                                )
-                                        }
-                                    },
-                            )
-                        },
-                )
-            }
-        }
-
-    private fun TilkommenInntektEvent.Endringer.toApiEndringer() =
-        ApiTilkommenInntektEvent.Endringer(
-            organisasjonsnummer = organisasjonsnummer?.tilApiEndring(),
-            periode =
-                periode?.let {
-                    ApiTilkommenInntektEvent.Endringer.DatoPeriodeEndring(
-                        fra = ApiDatoPeriode(fom = it.fra.fom, tom = it.fra.tom),
-                        til = ApiDatoPeriode(fom = it.til.fom, tom = it.til.tom),
-                    )
-                },
-            periodebelop = periodebeløp?.tilApiEndring(),
-            dager =
-                dager?.let {
-                    ApiTilkommenInntektEvent.Endringer.ListLocalDateEndring(
-                        fra = it.fra.toList(),
-                        til = it.til.toList(),
-                    )
-                },
-        )
-
-    private fun Endring<String>.tilApiEndring(): ApiTilkommenInntektEvent.Endringer.StringEndring =
-        ApiTilkommenInntektEvent.Endringer.StringEndring(fra = fra, til = til)
-
-    private fun Endring<BigDecimal>.tilApiEndring(): ApiTilkommenInntektEvent.Endringer.BigDecimalEndring =
-        ApiTilkommenInntektEvent.Endringer.BigDecimalEndring(fra = fra, til = til)
 
     private fun List<SnapshotGhostPeriode>.tilGhostPerioder(organisasjonsnummer: String): List<ApiGhostPeriode> =
         map {

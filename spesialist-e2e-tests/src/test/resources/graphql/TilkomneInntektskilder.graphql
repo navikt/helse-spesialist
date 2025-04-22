@@ -1,0 +1,87 @@
+query TilkomneInntektskilder($aktorId: String!) {
+    tilkomneInntektskilder(aktorId: $aktorId) {
+        organisasjonsnummer
+        inntekter {
+            tilkommenInntektId
+            periode {
+                fom
+                tom
+            }
+            periodebelop
+            dager
+            fjernet
+            events {
+                metadata {
+                    sekvensnummer
+                    tidspunkt
+                    utfortAvSaksbehandlerIdent
+                    notatTilBeslutter
+                }
+                ... on TilkommenInntektOpprettetEvent {
+                    organisasjonsnummer
+                    periode {
+                        fom
+                        tom
+                    }
+                    periodebelop
+                    dager
+                }
+                ... on TilkommenInntektEndretEvent {
+                    endringer {
+                        organisasjonsnummer {
+                            fra
+                            til
+                        }
+                        periode {
+                            fra {
+                                fom
+                                tom
+                            }
+                            til {
+                                fom
+                                tom
+                            }
+                        }
+                        periodebelop {
+                            fra
+                            til
+                        }
+                        dager {
+                            fra
+                            til
+                        }
+                    }
+                }
+                ... on TilkommenInntektGjenopprettetEvent {
+                    endringer {
+                        organisasjonsnummer {
+                            fra
+                            til
+                        }
+                        periode {
+                            fra {
+                                fom
+                                tom
+                            }
+                            til {
+                                fom
+                                tom
+                            }
+                        }
+                        periodebelop {
+                            fra
+                            til
+                        }
+                        dager {
+                            fra
+                            til
+                        }
+                    }
+                }
+                __typename
+            }
+            __typename
+        }
+        __typename
+    }
+}

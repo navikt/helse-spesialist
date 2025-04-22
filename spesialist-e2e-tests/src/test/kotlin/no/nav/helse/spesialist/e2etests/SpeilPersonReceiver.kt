@@ -248,6 +248,17 @@ class SpeilPersonReceiver(
         assertEquals(expected, person["personinfo"]["adressebeskyttelse"].asText())
     }
 
+    fun hentTilkomneInntektskilder(): JsonNode {
+        val tilkomneInntektskilderResponse = callGraphQL(
+            operationName = "TilkomneInntektskilder",
+            variables = mapOf(
+                "aktorId" to testContext.person.aktørId,
+            )
+        )
+        return tilkomneInntektskilderResponse["data"]["tilkomneInntektskilder"].takeUnless { it.isNull }
+            ?: error("Fikk ikke data.tilkomneInntektskilder i respons fra FetchPerson. Responsen var: ${tilkomneInntektskilderResponse.toPrettyString()}")
+    }
+
     private fun fetchPerson(aktørId: String): JsonNode {
         val fetchPersonResponse = callGraphQL(
             operationName = "FetchPerson",

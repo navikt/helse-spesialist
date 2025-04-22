@@ -106,8 +106,6 @@ interface PersonSchema {
     fun infotrygdutbetalinger(): List<ApiInfotrygdutbetaling>?
 
     fun vilkarsgrunnlag(): List<ApiVilkårsgrunnlag>
-
-    fun tilkomneInntektskilder(): List<ApiTilkommenInntektskilde>
 }
 
 @GraphQLName("Person")

@@ -14,7 +14,6 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
-import java.util.UUID
 import kotlin.test.assertEquals
 
 class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
@@ -44,11 +43,9 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 dager = dager,
                 notatTilBeslutter = notatTilBeslutter
             )
-        }
 
-        // Then:
-        medPersonISpeil {
-            val tilkomneInntektskilder = person["tilkomneInntektskilder"]
+            // Then:
+            val tilkomneInntektskilder = hentTilkomneInntektskilder()
             assertEquals(1, tilkomneInntektskilder.size())
             assertApiInntektskilde(
                 tilkommenInntektskilde = tilkomneInntektskilder[0],
@@ -89,17 +86,27 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
     @Test
     fun `saksbehandler endrer tilkommen inntekt`() {
         // Given:
+        val opprinneligOrganisasjonsnummer = lagOrganisasjonsnummer()
+        val opprinneligFom = 2 jan 2021
+        val opprinneligTom = 31 jan 2021
+        val opprinneligPeriodebeløp = BigDecimal("1111.11")
+        val opprinneligeDager = (2 jan 2021).datesUntil(1 feb 2021).toList()
+
+        val endringOrganisasjonsnummer = lagOrganisasjonsnummer()
+        val endringFom = 3 jan 2021
+        val endringTom = 30 jan 2021
+        val endringPeriodebeløp = BigDecimal("2222.22")
+        val endringDager = (3 jan 2021).datesUntil(31 jan 2021)
+            .filter { it.toEpochDay() % 2 == 0L }.toList()
+        val endringNotatTilBeslutter = "endring i gang"
+
         førsteVedtaksperiode().apply {
             fom = 1 jan 2021
             tom = 31 jan 2021
         }
         risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
         søknadOgGodkjenningbehovKommerInn()
-        val opprinneligOrganisasjonsnummer = lagOrganisasjonsnummer()
-        val opprinneligFom = 2 jan 2021
-        val opprinneligTom = 31 jan 2021
-        val opprinneligPeriodebeløp = BigDecimal("1111.11")
-        val opprinneligeDager = (2 jan 2021).datesUntil(1 feb 2021).toList()
+
         medPersonISpeil {
             saksbehandlerLeggerTilTilkommenInntekt(
                 organisasjonsnummer = opprinneligOrganisasjonsnummer,
@@ -109,19 +116,10 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 dager = opprinneligeDager,
                 notatTilBeslutter = "notat"
             )
-        }
 
-        // When:
-        val endringOrganisasjonsnummer = lagOrganisasjonsnummer()
-        val endringFom = 3 jan 2021
-        val endringTom = 30 jan 2021
-        val endringPeriodebeløp = BigDecimal("2222.22")
-        val endringDager = (3 jan 2021).datesUntil(31 jan 2021)
-            .filter { it.toEpochDay() % 2 == 0L }.toList()
-        val endringNotatTilBeslutter = "endring i gang"
-        medPersonISpeil {
+            // When:
             saksbehandlerEndrerTilkommenInntekt(
-                tilkommenInntektId = person["tilkomneInntektskilder"][0]["inntekter"][0]["tilkommenInntektId"].asUUID(),
+                tilkommenInntektId = hentTilkomneInntektskilder()[0]["inntekter"][0]["tilkommenInntektId"].asUUID(),
                 organisasjonsnummer = endringOrganisasjonsnummer,
                 fom = endringFom,
                 tom = endringTom,
@@ -129,11 +127,9 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 dager = endringDager,
                 notatTilBeslutter = endringNotatTilBeslutter
             )
-        }
 
-        // Then:
-        medPersonISpeil {
-            val tilkomneInntektskilder = person["tilkomneInntektskilder"]
+            // Then:
+            val tilkomneInntektskilder = hentTilkomneInntektskilder()
             assertEquals(1, tilkomneInntektskilder.size())
             assertApiInntektskilde(
                 tilkommenInntektskilde = tilkomneInntektskilder[0],
@@ -206,20 +202,16 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 dager = opprinneligeDager,
                 notatTilBeslutter = "notat"
             )
-        }
 
-        // When:
-        val fjerningNotatTilBeslutter = "fjerner inntekten"
-        medPersonISpeil {
+            // When:
+            val fjerningNotatTilBeslutter = "fjerner inntekten"
             saksbehandlerFjernerTilkommenInntekt(
-                tilkommenInntektId = person["tilkomneInntektskilder"][0]["inntekter"][0]["tilkommenInntektId"].asUUID(),
+                tilkommenInntektId = hentTilkomneInntektskilder()[0]["inntekter"][0]["tilkommenInntektId"].asUUID(),
                 notatTilBeslutter = fjerningNotatTilBeslutter
             )
-        }
 
-        // Then:
-        medPersonISpeil {
-            val tilkomneInntektskilder = person["tilkomneInntektskilder"]
+            // Then:
+            val tilkomneInntektskilder = hentTilkomneInntektskilder()
             assertEquals(1, tilkomneInntektskilder.size())
             assertApiInntektskilde(
                 tilkommenInntektskilde = tilkomneInntektskilder[0],
@@ -252,17 +244,27 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
     @Test
     fun `saksbehandler gjenoppretter tilkommen inntekt`() {
         // Given:
+        val opprinneligOrganisasjonsnummer = lagOrganisasjonsnummer()
+        val opprinneligFom = 2 jan 2021
+        val opprinneligTom = 31 jan 2021
+        val opprinneligPeriodebeløp = BigDecimal("1111.11")
+        val opprinneligeDager = (2 jan 2021).datesUntil(1 feb 2021).toList()
+
+        val gjenopprettingOrganisasjonsnummer = lagOrganisasjonsnummer()
+        val gjenopprettingFom = 3 jan 2021
+        val gjenopprettingTom = 30 jan 2021
+        val gjenopprettingPeriodebeløp = BigDecimal("2222.22")
+        val gjenopprettingDager = (3 jan 2021).datesUntil(31 jan 2021)
+            .filter { it.toEpochDay() % 2 == 0L }.toList()
+        val gjenopprettingNotatTilBeslutter = "gjenoppretter etter feilaktig fjerning"
+
         førsteVedtaksperiode().apply {
             fom = 1 jan 2021
             tom = 31 jan 2021
         }
         risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
         søknadOgGodkjenningbehovKommerInn()
-        val opprinneligOrganisasjonsnummer = lagOrganisasjonsnummer()
-        val opprinneligFom = 2 jan 2021
-        val opprinneligTom = 31 jan 2021
-        val opprinneligPeriodebeløp = BigDecimal("1111.11")
-        val opprinneligeDager = (2 jan 2021).datesUntil(1 feb 2021).toList()
+
         medPersonISpeil {
             saksbehandlerLeggerTilTilkommenInntekt(
                 organisasjonsnummer = opprinneligOrganisasjonsnummer,
@@ -272,25 +274,16 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 dager = opprinneligeDager,
                 notatTilBeslutter = "notat"
             )
-        }
-        medPersonISpeil {
+            val tilkommenInntektId = hentTilkomneInntektskilder()[0]["inntekter"][0]["tilkommenInntektId"].asUUID()
+
             saksbehandlerFjernerTilkommenInntekt(
-                tilkommenInntektId = person["tilkomneInntektskilder"][0]["inntekter"][0]["tilkommenInntektId"].asUUID(),
+                tilkommenInntektId = tilkommenInntektId,
                 notatTilBeslutter = "fjerner inntekten"
             )
-        }
 
-        // When:
-        val gjenopprettingOrganisasjonsnummer = lagOrganisasjonsnummer()
-        val gjenopprettingFom = 3 jan 2021
-        val gjenopprettingTom = 30 jan 2021
-        val gjenopprettingPeriodebeløp = BigDecimal("2222.22")
-        val gjenopprettingDager = (3 jan 2021).datesUntil(31 jan 2021)
-            .filter { it.toEpochDay() % 2 == 0L }.toList()
-        val gjenopprettingNotatTilBeslutter = "gjenoppretter etter feilaktig fjerning"
-        medPersonISpeil {
+            // When:
             saksbehandlerGjenoppretterTilkommenInntekt(
-                tilkommenInntektId = person["tilkomneInntektskilder"][0]["inntekter"][0]["tilkommenInntektId"].asUUID(),
+                tilkommenInntektId = tilkommenInntektId,
                 organisasjonsnummer = gjenopprettingOrganisasjonsnummer,
                 fom = gjenopprettingFom,
                 tom = gjenopprettingTom,
@@ -298,11 +291,9 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 dager = gjenopprettingDager,
                 notatTilBeslutter = gjenopprettingNotatTilBeslutter
             )
-        }
 
-        // Then:
-        medPersonISpeil {
-            val tilkomneInntektskilder = person["tilkomneInntektskilder"]
+            // Then:
+            val tilkomneInntektskilder = hentTilkomneInntektskilder()
             assertEquals(1, tilkomneInntektskilder.size())
             assertApiInntektskilde(
                 tilkommenInntektskilde = tilkomneInntektskilder[0],
@@ -342,7 +333,8 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         assertInntektsendringerInntektskilde(
             inntektskilde = inntektsendringerMelding["inntektskilder"][0],
             expectedOrganisasjonsnummer = gjenopprettingOrganisasjonsnummer,
-            expectedInntekter = gjenopprettingDager.tilPerioder().map { Triple(it.fom.toString(), it.tom.toString(), 158.73) },
+            expectedInntekter = gjenopprettingDager.tilPerioder()
+                .map { Triple(it.fom.toString(), it.tom.toString(), 158.73) },
             expectedNullstillinger = emptyList(),
         )
     }
@@ -376,10 +368,8 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 dager = (2 jan 2021).datesUntil(1 feb 2021).toList(),
                 notatTilBeslutter = "legger til tilkommen inntekt her"
             )
-        }
-        lateinit var tilkommenInntektId: UUID
-        medPersonISpeil {
-            tilkommenInntektId = person["tilkomneInntektskilder"][0]["inntekter"][0]["tilkommenInntektId"].asUUID()
+            val tilkommenInntektId = hentTilkomneInntektskilder()[0]["inntekter"][0]["tilkommenInntektId"].asUUID()
+
             saksbehandlerEndrerTilkommenInntekt(
                 tilkommenInntektId = tilkommenInntektId,
                 organisasjonsnummer = lagOrganisasjonsnummer(),
@@ -422,11 +412,9 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 dager = sisteDager,
                 notatTilBeslutter = "endring nummer 3"
             )
-        }
 
-        // Then:
-        medPersonISpeil {
-            val tilkomneInntektskilder = person["tilkomneInntektskilder"]
+            // Then:
+            val tilkomneInntektskilder = hentTilkomneInntektskilder()
             assertEquals(1, tilkomneInntektskilder.size())
             assertApiInntektskilde(
                 tilkommenInntektskilde = tilkomneInntektskilder[0],
@@ -582,7 +570,10 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         assertInntektsendringerNullstillinger(expectedNullstillinger, inntektskilde["nullstill"])
     }
 
-    private fun assertInntektsendringerInntekter(expectedInntekter: List<Triple<String, String, Double>>, inntekter: JsonNode) {
+    private fun assertInntektsendringerInntekter(
+        expectedInntekter: List<Triple<String, String, Double>>,
+        inntekter: JsonNode
+    ) {
         assertEquals(expectedInntekter.size, inntekter.size())
         expectedInntekter.forEachIndexed { index, (fom, tom, dagsbeløp) ->
             val inntekt = inntekter[index]
@@ -592,7 +583,10 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         }
     }
 
-    private fun assertInntektsendringerNullstillinger(expectedNullstillinger: List<Pair<String, String>>, nullstillinger: JsonNode) {
+    private fun assertInntektsendringerNullstillinger(
+        expectedNullstillinger: List<Pair<String, String>>,
+        nullstillinger: JsonNode
+    ) {
         assertEquals(expectedNullstillinger.size, nullstillinger.size())
         expectedNullstillinger.forEachIndexed { index, (fom, tom) ->
             val nullstilling = nullstillinger[index]
