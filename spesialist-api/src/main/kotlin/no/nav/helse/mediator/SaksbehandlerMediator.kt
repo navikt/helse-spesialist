@@ -145,14 +145,14 @@ class SaksbehandlerMediator(
         ) {
             sikkerlogg.info("Utfører handling ${modellhandling.loggnavn()} på vegne av saksbehandler $saksbehandler")
             when (modellhandling) {
-                is Overstyring ->
+                is Overstyring -> {
                     overstyringUnitOfWork(
                         overstyring = modellhandling,
                         saksbehandler = saksbehandlerFraApi.tilSaksbehandler(),
                         sessionFactory = sessionFactory,
-                    ) {
-                        modellhandling.utførAv(legacySaksbehandler)
-                    }
+                    )
+                    modellhandling.utførAv(legacySaksbehandler)
+                }
 
                 is Oppgavehandling -> håndter(modellhandling, legacySaksbehandler)
                 is PåVent -> error("dette burde ikke skje")
@@ -981,23 +981,22 @@ class SaksbehandlerMediator(
         )
 }
 
-internal fun overstyringUnitOfWork(
+private fun overstyringUnitOfWork(
     overstyring: Overstyring,
     saksbehandler: Saksbehandler,
     sessionFactory: SessionFactory,
-    overstyringBlock: () -> Unit,
-) = sessionFactory.transactionalSessionScope { session ->
-    sikkerlogg.info("Utfører overstyring ${overstyring.loggnavn()} på vegne av saksbehandler $saksbehandler")
-    session.saksbehandlerRepository.lagre(saksbehandler)
+) {
+    sessionFactory.transactionalSessionScope { session ->
+        sikkerlogg.info("Utfører overstyring ${overstyring.loggnavn()} på vegne av saksbehandler $saksbehandler")
+        session.saksbehandlerRepository.lagre(saksbehandler)
 
-    val fødselsnummer = overstyring.fødselsnummer
-    sikkerlogg.info("Reserverer person $fødselsnummer til saksbehandler $saksbehandler")
-    session.reservasjonDao.reserverPerson(saksbehandler.id().value, fødselsnummer)
+        val fødselsnummer = overstyring.fødselsnummer
+        sikkerlogg.info("Reserverer person $fødselsnummer til saksbehandler $saksbehandler")
+        session.reservasjonDao.reserverPerson(saksbehandler.id().value, fødselsnummer)
 
-    val totrinnsvurdering =
-        session.totrinnsvurderingRepository.finn(fødselsnummer) ?: Totrinnsvurdering.ny(fødselsnummer)
-    totrinnsvurdering.nyOverstyring(overstyring)
-    session.totrinnsvurderingRepository.lagre(totrinnsvurdering)
-
-    overstyringBlock()
+        val totrinnsvurdering =
+            session.totrinnsvurderingRepository.finn(fødselsnummer) ?: Totrinnsvurdering.ny(fødselsnummer)
+        totrinnsvurdering.nyOverstyring(overstyring)
+        session.totrinnsvurderingRepository.lagre(totrinnsvurdering)
+    }
 }
