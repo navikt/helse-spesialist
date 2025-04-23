@@ -9,6 +9,7 @@ on:
       - 'spesialist-opprydding-dev/**'
       - 'spesialist-felles/**'
       - 'build.gradle.kts'
+      - 'gradle/libs.versions.toml'
       - '.github/workflows/spesialist-opprydding-dev.yml'
       - 'deploy/dev-opprydding.yml'
       - 'deploy/dev-db-policy.yml'

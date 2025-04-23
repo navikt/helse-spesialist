@@ -9,6 +9,7 @@ on:
       - 'spesialist-sidegig/**'
       - 'spesialist-db-migrations/**'
       - 'build.gradle.kts'
+      - 'gradle/libs.versions.toml'
       - '.github/workflows/spesialist-sidegig.yml'
       - 'deploy/prod-sidegig.yml'
       - 'deploy/prod-db-policy.yml'
