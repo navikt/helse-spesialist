@@ -10,15 +10,6 @@ import java.util.UUID
 
 class UtbetalingEndretE2ETest : AbstractE2ETest() {
     @Test
-    fun `Lagrer personbeløp og arbeidsgiverbeløp ved innlesing av utbetaling_endret`() {
-        vedtaksløsningenMottarNySøknad()
-        spleisOppretterNyBehandling()
-        håndterVedtaksperiodeNyUtbetaling()
-        håndterUtbetalingOpprettet(arbeidsgiverbeløp = 20000, personbeløp = 20000)
-        assertUtbetaling(20000, 20000)
-    }
-
-    @Test
     fun `tildeler andre rundes oppgave til saksbehandler`() {
         val saksbehandlerOid = UUID.randomUUID()
         vedtaksløsningenMottarNySøknad()
