@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.e2etests
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import kotliquery.sessionOf
+import no.nav.helse.mediator.asUUID
 import no.nav.helse.spesialist.api.testfixtures.lagSaksbehandlerFraApi
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.e2etests.Meldingsbygger.byggUtbetalingEndret
@@ -97,6 +98,10 @@ abstract class AbstractE2EIntegrationTest {
         utbetalingEndres(vedtaksperiode, testContext.person, testContext.arbeidsgiver)
     }
 
+    protected fun spleisReberegnerAutomatisk(vedtaksperiode: Vedtaksperiode) {
+        spleisStub.spleisReberegnerPerioden(testContext, vedtaksperiode)
+    }
+
     protected fun detPubliseresEnGosysOppgaveEndretMelding() {
         testRapid.publish(
             testContext.person.fødselsnummer,
@@ -160,6 +165,13 @@ abstract class AbstractE2EIntegrationTest {
         assertEquals("SkjønnsfastsattSykepengegrunnlagKonklusjon", vedtakFattet["begrunnelser"][2]["type"].asText())
         assertEquals("Innvilgelse", vedtakFattet["begrunnelser"][3]["type"].asText())
         assertEquals("EtterSkjønn", vedtakFattet["sykepengegrunnlagsfakta"]["fastsatt"].asText())
+    }
+
+    protected fun assertOppgaveTildeltSaksbehandler() {
+        val oppgaveEvent = testRapid.meldingslogg(testContext.person.fødselsnummer)
+            .findLast { it["@event_name"].asText() in listOf("oppgave_oppdatert", "oppgave_opprettet") }
+            ?: error("Forventet å finne oppgave_opprettet/oppdatert i meldingslogg")
+        assertEquals(saksbehandler.oid, oppgaveEvent["saksbehandler"].asUUID())
     }
 
     protected fun assertBehandlingTilstand(expectedTilstand: String) {

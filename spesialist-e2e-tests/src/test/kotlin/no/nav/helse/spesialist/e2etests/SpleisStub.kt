@@ -135,6 +135,63 @@ class SpleisStub(
         OverstyringRiver(rapidsConnection)
     }
 
+    internal fun spleisReberegnerPerioden(
+        testContext: TestContext,
+        vedtaksperiode: Vedtaksperiode
+    ) {
+        spleisReberegnerPerioden(testContext.person, vedtaksperiode)
+        spleisForkasterGammelUtbetaling(testContext.person, testContext.arbeidsgiver, vedtaksperiode)
+        spleisLagerNyUtbetalingForVedtaksperiode(testContext.person, testContext.arbeidsgiver, vedtaksperiode)
+    }
+
+    private fun spleisReberegnerPerioden(person: Person, vedtaksperiode: Vedtaksperiode) {
+        val melding = Meldingsbygger.byggVedtaksperiodeEndret(
+            vedtaksperiode = vedtaksperiode,
+            person = person,
+            forrigeTilstand = "AVVENTER_GODKJENNING",
+            gjeldendeTilstand = "AVVENTER_BLOKKERENDE_PERIODE"
+        )
+        rapidsConnection.publish(person.fødselsnummer, melding)
+    }
+
+    private fun spleisForkasterGammelUtbetaling(
+        person: Person,
+        arbeidsgiver: Arbeidsgiver,
+        vedtaksperiode: Vedtaksperiode
+    ) {
+        val melding = Meldingsbygger.byggUtbetalingEndret(
+            vedtaksperiode = vedtaksperiode,
+            person = person,
+            arbeidsgiver = arbeidsgiver,
+            forrigeStatus = "IKKE_UTBETALT",
+            gjeldendeStatus = "FORKASTET"
+        )
+        vedtaksperiode.utbetalingId = null
+        rapidsConnection.publish(person.fødselsnummer, melding)
+    }
+
+    private fun spleisLagerNyUtbetalingForVedtaksperiode(
+        person: Person,
+        arbeidsgiver: Arbeidsgiver,
+        vedtaksperiode: Vedtaksperiode
+    ) {
+        vedtaksperiode.nyUtbetaling()
+        val utbetalingEndret = Meldingsbygger.byggUtbetalingEndret(
+            vedtaksperiode = vedtaksperiode,
+            person = person,
+            arbeidsgiver = arbeidsgiver,
+            forrigeStatus = "NY",
+            gjeldendeStatus = "IKKE_UTBETALT",
+        )
+        val vedtaksperiodeNyUtbetaling = Meldingsbygger.byggVedtaksperiodeNyUtbetaling(
+            vedtaksperiode = vedtaksperiode,
+            person = person,
+            arbeidsgiver = arbeidsgiver,
+        )
+        rapidsConnection.publish(person.fødselsnummer, utbetalingEndret)
+        rapidsConnection.publish(person.fødselsnummer, vedtaksperiodeNyUtbetaling)
+    }
+
     private inner class GodkjenningsbehovløsningRiver(rapidsConnection: RapidsConnection) : River.PacketListener {
         init {
             River(rapidsConnection)
@@ -218,7 +275,7 @@ class SpleisStub(
             val vedtaksperiode = testContext.vedtaksperioder
                 .find { it.skjæringstidspunkt == skjæringstidspunkt }
                 ?: error("Fant ikke vedtaksperiode med skjæringstidspunkt $skjæringstidspunkt i context for person $fødselsnummer")
-            spleisRespondererPåOverstyring(testContext, vedtaksperiode)
+            spleisReberegnerPerioden(testContext, vedtaksperiode)
             spleisSenderGodkjenningsbehovMedSkjønnsfastsattSykepengegrunnlag(
                 person = testContext.person,
                 arbeidsgiver = testContext.arbeidsgiver,
@@ -230,63 +287,6 @@ class SpleisStub(
 
         private fun precondition(jsonMessage: JsonMessage) {
             jsonMessage.requireValue("@event_name", "skjønnsmessig_fastsettelse")
-        }
-
-        private fun spleisRespondererPåOverstyring(
-            testContext: TestContext,
-            vedtaksperiode: Vedtaksperiode
-        ) {
-            spleisReberegnerPerioden(testContext.person, vedtaksperiode)
-            spleisForkasterGammelUtbetaling(testContext.person, testContext.arbeidsgiver, vedtaksperiode)
-            spleisLagerNyUtbetalingForVedtaksperiode(testContext.person, testContext.arbeidsgiver, vedtaksperiode)
-        }
-
-        private fun spleisReberegnerPerioden(person: Person, vedtaksperiode: Vedtaksperiode) {
-            val melding = Meldingsbygger.byggVedtaksperiodeEndret(
-                vedtaksperiode = vedtaksperiode,
-                person = person,
-                forrigeTilstand = "AVVENTER_GODKJENNING",
-                gjeldendeTilstand = "AVVENTER_BLOKKERENDE_PERIODE"
-            )
-            rapidsConnection.publish(person.fødselsnummer, melding)
-        }
-
-        private fun spleisForkasterGammelUtbetaling(
-            person: Person,
-            arbeidsgiver: Arbeidsgiver,
-            vedtaksperiode: Vedtaksperiode
-        ) {
-            val melding = Meldingsbygger.byggUtbetalingEndret(
-                vedtaksperiode = vedtaksperiode,
-                person = person,
-                arbeidsgiver = arbeidsgiver,
-                forrigeStatus = "IKKE_UTBETALT",
-                gjeldendeStatus = "FORKASTET"
-            )
-            vedtaksperiode.utbetalingId = null
-            rapidsConnection.publish(person.fødselsnummer, melding)
-        }
-
-        private fun spleisLagerNyUtbetalingForVedtaksperiode(
-            person: Person,
-            arbeidsgiver: Arbeidsgiver,
-            vedtaksperiode: Vedtaksperiode
-        ) {
-            vedtaksperiode.nyUtbetaling()
-            val utbetalingEndret = Meldingsbygger.byggUtbetalingEndret(
-                vedtaksperiode = vedtaksperiode,
-                person = person,
-                arbeidsgiver = arbeidsgiver,
-                forrigeStatus = "NY",
-                gjeldendeStatus = "IKKE_UTBETALT",
-            )
-            val vedtaksperiodeNyUtbetaling = Meldingsbygger.byggVedtaksperiodeNyUtbetaling(
-                vedtaksperiode = vedtaksperiode,
-                person = person,
-                arbeidsgiver = arbeidsgiver,
-            )
-            rapidsConnection.publish(person.fødselsnummer, utbetalingEndret)
-            rapidsConnection.publish(person.fødselsnummer, vedtaksperiodeNyUtbetaling)
         }
 
         private fun spleisSenderGodkjenningsbehovMedSkjønnsfastsattSykepengegrunnlag(
