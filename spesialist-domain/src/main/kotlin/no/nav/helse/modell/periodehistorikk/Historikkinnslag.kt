@@ -87,10 +87,16 @@ sealed interface Historikkinnslag {
                 notattekst = begrunnelse,
             )
 
-        fun opphevStansAvSaksbehandler(saksbehandler: SaksbehandlerDto): OpphevStansAvSaksbehandler =
+        fun opphevStansAvSaksbehandler(
+            saksbehandler: SaksbehandlerDto,
+            begrunnelse: String,
+            dialogId: DialogId,
+        ): OpphevStansAvSaksbehandler =
             OpphevStansAvSaksbehandler(
                 tidspunkt = LocalDateTime.now(),
                 saksbehandler = saksbehandler,
+                dialogRef = dialogId.value,
+                notattekst = begrunnelse,
             )
 
         fun vedtaksperiodeReberegnet(): VedtaksperiodeReberegnet = VedtaksperiodeReberegnet(tidspunkt = LocalDateTime.now())
@@ -191,8 +197,13 @@ data class AutomatiskBehandlingStansetAvSaksbehandler(
 data class OpphevStansAvSaksbehandler(
     override val tidspunkt: LocalDateTime,
     override val saksbehandler: SaksbehandlerDto,
+    override val dialogRef: Long,
+    val notattekst: String,
 ) : Historikkinnslag {
-    override val dialogRef: Long? = null
+    override fun detaljer(): Map<String, Any?> =
+        mapOf(
+            "notattekst" to notattekst,
+        )
 }
 
 data class VedtaksperiodeReberegnet(

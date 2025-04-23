@@ -14,6 +14,7 @@ interface StansAutomatiskBehandlingMutationSchema : Mutation {
     fun opphevStansAutomatiskBehandling(
         env: DataFetchingEnvironment,
         fodselsnummer: String,
+        begrunnelse: String,
     ): DataFetcherResult<Boolean>
 }
 

@@ -45,6 +45,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiLagtPaVent
 import no.nav.helse.spesialist.api.graphql.schema.ApiNotat
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveForPeriodevisning
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveegenskap
+import no.nav.helse.spesialist.api.graphql.schema.ApiOpphevStansAutomatiskBehandlingSaksbehandler
 import no.nav.helse.spesialist.api.graphql.schema.ApiPaVent
 import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodeHistorikkElementNy
 import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodehandling
@@ -249,6 +250,28 @@ data class ApiBeregnetPeriodeResolver(
                     PeriodehistorikkType.STANS_AUTOMATISK_BEHANDLING_SAKSBEHANDLER -> {
                         val notattekst = mapNotattekstJson(json = it.json)
                         ApiStansAutomatiskBehandlingSaksbehandler(
+                            id = it.id,
+                            type = it.type.tilApiPeriodehistorikkType(),
+                            saksbehandlerIdent = it.saksbehandlerIdent,
+                            timestamp = it.timestamp,
+                            dialogRef = it.dialogRef,
+                            notattekst = notattekst,
+                            kommentarer =
+                                notatDao.finnKommentarer(it.dialogRef!!.toLong()).map { kommentar ->
+                                    ApiKommentar(
+                                        id = kommentar.id,
+                                        tekst = kommentar.tekst,
+                                        opprettet = kommentar.opprettet,
+                                        saksbehandlerident = kommentar.saksbehandlerident,
+                                        feilregistrert_tidspunkt = kommentar.feilregistrertTidspunkt,
+                                    )
+                                },
+                        )
+                    }
+
+                    PeriodehistorikkType.OPPHEV_STANS_AUTOMATISK_BEHANDLING_SAKSBEHANDLER -> {
+                        val notattekst = mapNotattekstJson(json = it.json)
+                        ApiOpphevStansAutomatiskBehandlingSaksbehandler(
                             id = it.id,
                             type = it.type.tilApiPeriodehistorikkType(),
                             saksbehandlerIdent = it.saksbehandlerIdent,

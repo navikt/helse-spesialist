@@ -30,10 +30,11 @@ class StansAutomatiskBehandlingMutationHandler(private val sessionFactory: Sessi
     override fun opphevStansAutomatiskBehandling(
         env: DataFetchingEnvironment,
         fodselsnummer: String,
+        begrunnelse: String,
     ): DataFetcherResult<Boolean> {
         val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(ContextValues.SAKSBEHANDLER)
         sessionFactory.transactionalSessionScope { session ->
-            session.lagrePeriodehistorikkForOpphevStans(fodselsnummer, saksbehandler)
+            session.lagrePeriodehistorikkForOpphevStans(fodselsnummer, saksbehandler, begrunnelse)
             session.stansAutomatiskBehandlingSaksbehandlerDao.opphevStans(fodselsnummer)
         }
         return byggRespons(true)
@@ -60,9 +61,18 @@ class StansAutomatiskBehandlingMutationHandler(private val sessionFactory: Sessi
     private fun SessionContext.lagrePeriodehistorikkForOpphevStans(
         fødselsnummer: String,
         saksbehandler: SaksbehandlerFraApi,
+        begrunnelse: String,
     ) {
         val oppgaveId = this.oppgaveDao.oppgaveId(fødselsnummer)
-        val innslag = Historikkinnslag.opphevStansAvSaksbehandler(saksbehandler = saksbehandler.toDto())
+        val dialog = Dialog.Factory.ny()
+        this.dialogRepository.lagre(dialog)
+
+        val innslag =
+            Historikkinnslag.opphevStansAvSaksbehandler(
+                saksbehandler = saksbehandler.toDto(),
+                dialogId = dialog.id(),
+                begrunnelse = begrunnelse,
+            )
         this.periodehistorikkDao.lagreMedOppgaveId(innslag, oppgaveId)
     }
 

@@ -442,7 +442,7 @@ type Mutation {
     minimumSykdomsgrad(minimumSykdomsgrad: MinimumSykdomsgradInput!): Boolean
     oppdaterPerson(fodselsnummer: String!): Boolean!
     opphevStans(begrunnelse: String!, fodselsnummer: String!): Boolean!
-    opphevStansAutomatiskBehandling(fodselsnummer: String!): Boolean!
+    opphevStansAutomatiskBehandling(begrunnelse: String!, fodselsnummer: String!): Boolean!
     opprettAbonnement(personidentifikator: String!): Boolean!
     opprettTildeling(oppgaveId: String!): Tildeling
     overstyrArbeidsforhold(overstyring: ArbeidsforholdOverstyringHandlingInput!): Boolean
@@ -518,6 +518,16 @@ type Oppgaveegenskap {
 type OppgaverTilBehandling {
     oppgaver: [OppgaveTilBehandling!]!
     totaltAntallOppgaver: Int!
+}
+
+type OpphevStansAutomatiskBehandlingSaksbehandler implements Historikkinnslag {
+    dialogRef: Int
+    id: Int!
+    kommentarer: [Kommentar!]!
+    notattekst: String
+    saksbehandlerIdent: String
+    timestamp: LocalDateTime!
+    type: PeriodehistorikkType!
 }
 
 type OpphoerAvNaturalytelse {
