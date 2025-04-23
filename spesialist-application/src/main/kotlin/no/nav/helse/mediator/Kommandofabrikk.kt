@@ -248,10 +248,7 @@ class Kommandofabrikk(
             personbeløp = hendelse.personbeløp,
             utbetalingDao = sessionContext.utbetalingDao,
             opptegnelseDao = sessionContext.opptegnelseDao,
-            reservasjonDao = sessionContext.reservasjonDao,
-            tildelingDao = sessionContext.tildelingDao,
             oppgaveService = transaksjonellOppgaveService(sessionContext),
-            totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository,
             json = hendelse.toJson(),
         )
 

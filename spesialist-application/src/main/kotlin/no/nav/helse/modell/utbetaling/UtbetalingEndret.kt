@@ -2,19 +2,15 @@ package no.nav.helse.modell.utbetaling
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.db.OpptegnelseDao
-import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SessionContext
-import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.UtbetalingDao
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
-import no.nav.helse.modell.kommando.ReserverPersonHvisTildeltCommand
 import no.nav.helse.modell.oppgave.OppdaterOppgavestatusCommand
 import no.nav.helse.modell.person.Person
-import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -84,10 +80,7 @@ internal class UtbetalingEndretCommand(
     personbeløp: Int,
     utbetalingDao: UtbetalingDao,
     opptegnelseDao: OpptegnelseDao,
-    reservasjonDao: ReservasjonDao,
-    tildelingDao: TildelingDao,
     oppgaveService: OppgaveService,
-    totrinnsvurderingRepository: TotrinnsvurderingRepository,
     json: String,
 ) : MacroCommand() {
     override val commands: List<Command> =
@@ -106,12 +99,6 @@ internal class UtbetalingEndretCommand(
                 json = json,
                 utbetalingDao = utbetalingDao,
                 opptegnelseDao = opptegnelseDao,
-            ),
-            ReserverPersonHvisTildeltCommand(
-                fødselsnummer = fødselsnummer,
-                reservasjonDao = reservasjonDao,
-                tildelingDao = tildelingDao,
-                totrinnsvurderingRepository = totrinnsvurderingRepository,
             ),
             OppdaterOppgavestatusCommand(utbetalingId, gjeldendeStatus, oppgaveService),
         )
