@@ -2,6 +2,10 @@ package no.nav.helse.kafka.messagebuilders
 
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
+import io.github.optimumcode.json.schema.JsonSchema
+import io.github.optimumcode.json.schema.ValidationError
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.melding.Godkjenningsbehovløsning
 import no.nav.helse.modell.melding.InntektsendringerEvent
@@ -24,7 +28,9 @@ import no.nav.helse.spesialist.kafka.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.io.InputStreamReader
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.UUID
@@ -305,6 +311,7 @@ class UtgåendeHendelseMessageBuilderTest {
 
     @Test
     fun `Inntektsendringer-hendelse`() {
+        // Given:
         val arbeidsgiver1 = lagOrganisasjonsnummer()
         val arbeidsgiver2 = lagOrganisasjonsnummer()
         val hendelse = InntektsendringerEvent(
@@ -330,7 +337,11 @@ class UtgåendeHendelseMessageBuilderTest {
             ),
         )
 
-        hendelse.somJson().assertHendelse(
+        // When:
+        val json = hendelse.somJson()
+
+        // Then:
+        json.assertHendelse(
             eventName = "inntektsendringer",
             payload = mapOf(
                 "fødselsnummer" to fødselsnummer,
@@ -374,6 +385,7 @@ class UtgåendeHendelseMessageBuilderTest {
                 )
             )
         )
+        assertValidByJsonSchema(json, "/inntektsendringer.schema.json")
     }
 
     private fun String.assertHendelse(eventName: String, payload: Map<String, Any>) {
@@ -389,7 +401,25 @@ class UtgåendeHendelseMessageBuilderTest {
         assertEquals(objectMapper.valueToTree(forventedeStandardfelter + payload), jsonNode)
     }
 
-    private fun String.assertGodkjenningsBehovløsning(payload: Map<String, Any>, `opprinnelig@id`: UUID, `opprinnelig@opprettet`: LocalDateTime) {
+    private fun assertValidByJsonSchema(json: String, schemaResourceName: String) {
+        val schemaJson = javaClass.getResourceAsStream(schemaResourceName)!!.use { inputStream ->
+            inputStream.reader().use(InputStreamReader::readText)
+        }
+        println("Validerer $json")
+        val errors = mutableListOf<ValidationError>()
+        val valid =
+            JsonSchema.fromDefinition(schemaJson).validate(Json.decodeFromString<JsonElement>(json), errors::add)
+        assertEquals(0, errors.size) {
+            "Valideringsfeil:\n" + errors.joinToString("\n") { "${it.objectPath} - ${it.message} (${it.schemaPath} i skjemaet)" }
+        }
+        assertTrue(valid)
+    }
+
+    private fun String.assertGodkjenningsBehovløsning(
+        payload: Map<String, Any>,
+        `opprinnelig@id`: UUID,
+        `opprinnelig@opprettet`: LocalDateTime
+    ) {
         val jsonNode = objectMapper.readTree(this) as ObjectNode
         val løsningNode = objectMapper.readTree(this).get("@løsning")
         assertNotNull(løsningNode)

@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:nav:tbd:meldinger:inntektsendringer",
+  "title": "inntektsendringer",
+  "description": "Endring i inntekt forårsaket av tilkommen inntekt lagt inn av saksbehandler",
+  "type": "object",
+  "properties": {
+    "@event_name": {
+      "type": "string",
+      "const": "inntektsendringer"
+    },
+    "fødselsnummer": {
+      "description": "Fødselsnummer til sykmeldt",
+      "type": "string",
+      "pattern": "^[0-9]{11}$"
+    },
+    "inntektskilder": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "inntektskilde": {
+            "description": "Organisasjonsnummer for inntektskilden",
+            "type": "string",
+            "pattern": "^[89][0-9]{8}$"
+          },
+          "nullstill": {
+            "description": "En liste av tidligere innmeldte perioder som ikke lenger skal regnes med i det hele tatt",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "fom": {
+                  "description": "Dato fra og med",
+                  "type": "string"
+                },
+                "tom": {
+                  "description": "Dato til og med",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "fom",
+                "tom"
+              ]
+            }
+          },
+          "inntekter": {
+            "description": "En liste av nye og endrede inntektsperioder",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "fom": {
+                  "description": "Dato fra og med",
+                  "type": "string"
+                },
+                "tom": {
+                  "description": "Dato til og med",
+                  "type": "string"
+                },
+                "periodebeløp": {
+                  "type": "number"
+                },
+                "dagsbeløp": {
+                  "type": "number"
+                },
+                "månedsbeløp": {
+                  "type": "number"
+                },
+                "årsbeløp": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "fom",
+                "tom"
+              ],
+              "minProperties": 3,
+              "maxProperties": 3
+            }
+          }
+        },
+        "required": [
+          "inntektskilde",
+          "nullstill",
+          "inntekter"
+        ]
+      }
+    },
+    "@id": {
+      "type": "string"
+    },
+    "@opprettet": {
+      "type": "string"
+    },
+    "system_read_count": {
+      "type": "integer"
+    },
+    "system_participating_services": {
+      "type": "array"
+    }
+  },
+  "required": [
+    "@event_name",
+    "fødselsnummer",
+    "inntektskilder",
+    "@id",
+    "@opprettet",
+    "system_read_count",
+    "system_participating_services"
+  ],
+  "additionalProperties": false
+}
