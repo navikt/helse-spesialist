@@ -345,7 +345,7 @@ class UtgåendeHendelseMessageBuilderTest {
             eventName = "inntektsendringer",
             payload = mapOf(
                 "fødselsnummer" to fødselsnummer,
-                "inntektskilder" to listOf(
+                "inntektsendringer" to listOf(
                     mapOf(
                         "inntektskilde" to arbeidsgiver1,
                         "inntekter" to listOf(

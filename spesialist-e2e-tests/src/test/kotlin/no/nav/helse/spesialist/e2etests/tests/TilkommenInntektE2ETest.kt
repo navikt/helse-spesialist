@@ -73,9 +73,9 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
 
         val inntektsendringerMelding = meldinger().last { it["@event_name"].asText() == "inntektsendringer" }
         assertEquals(fødselsnummer(), inntektsendringerMelding["fødselsnummer"].asText())
-        assertEquals(1, inntektsendringerMelding["inntektskilder"].size())
+        assertEquals(1, inntektsendringerMelding["inntektsendringer"].size())
         assertInntektsendringerInntektskilde(
-            inntektskilde = inntektsendringerMelding["inntektskilder"][0],
+            inntektskilde = inntektsendringerMelding["inntektsendringer"][0],
             expectedOrganisasjonsnummer = organisasjonsnummer,
             expectedInntekter = listOf(Triple(fom.toString(), tom.toString(), 37.037)),
             expectedNullstillinger = emptyList()
@@ -163,15 +163,15 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         }
         val inntektsendringerMelding = meldinger().last { it["@event_name"].asText() == "inntektsendringer" }
         assertEquals(fødselsnummer(), inntektsendringerMelding["fødselsnummer"].asText())
-        assertEquals(2, inntektsendringerMelding["inntektskilder"].size())
+        assertEquals(2, inntektsendringerMelding["inntektsendringer"].size())
         assertInntektsendringerInntektskilde(
-            inntektskilde = inntektsendringerMelding["inntektskilder"][0],
+            inntektskilde = inntektsendringerMelding["inntektsendringer"][0],
             expectedOrganisasjonsnummer = opprinneligOrganisasjonsnummer,
             expectedInntekter = emptyList(),
             expectedNullstillinger = listOf(Pair(opprinneligFom.toString(), opprinneligTom.toString())),
         )
         assertInntektsendringerInntektskilde(
-            inntektskilde = inntektsendringerMelding["inntektskilder"][1],
+            inntektskilde = inntektsendringerMelding["inntektsendringer"][1],
             expectedOrganisasjonsnummer = endringOrganisasjonsnummer,
             expectedInntekter = endringDager.tilPerioder().map { Triple(it.fom.toString(), it.tom.toString(), 158.73) },
             expectedNullstillinger = emptyList()
@@ -231,9 +231,9 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         }
         val inntektsendringerMelding = meldinger().last { it["@event_name"].asText() == "inntektsendringer" }
         assertEquals(fødselsnummer(), inntektsendringerMelding["fødselsnummer"].asText())
-        assertEquals(1, inntektsendringerMelding["inntektskilder"].size())
+        assertEquals(1, inntektsendringerMelding["inntektsendringer"].size())
         assertInntektsendringerInntektskilde(
-            inntektskilde = inntektsendringerMelding["inntektskilder"][0],
+            inntektskilde = inntektsendringerMelding["inntektsendringer"][0],
             expectedOrganisasjonsnummer = opprinneligOrganisasjonsnummer,
             expectedInntekter = emptyList(),
             expectedNullstillinger = listOf(Pair(opprinneligFom.toString(), opprinneligTom.toString())),
@@ -327,9 +327,9 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         }
         val inntektsendringerMelding = meldinger().last { it["@event_name"].asText() == "inntektsendringer" }
         assertEquals(fødselsnummer(), inntektsendringerMelding["fødselsnummer"].asText())
-        assertEquals(1, inntektsendringerMelding["inntektskilder"].size())
+        assertEquals(1, inntektsendringerMelding["inntektsendringer"].size())
         assertInntektsendringerInntektskilde(
-            inntektskilde = inntektsendringerMelding["inntektskilder"][0],
+            inntektskilde = inntektsendringerMelding["inntektsendringer"][0],
             expectedOrganisasjonsnummer = gjenopprettingOrganisasjonsnummer,
             expectedInntekter = gjenopprettingDager.tilPerioder()
                 .map { Triple(it.fom.toString(), it.tom.toString(), 158.73) },
@@ -436,15 +436,15 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         }
         val inntektsendringerMelding = meldinger().last { it["@event_name"].asText() == "inntektsendringer" }
         assertEquals(fødselsnummer(), inntektsendringerMelding["fødselsnummer"].asText())
-        assertEquals(2, inntektsendringerMelding["inntektskilder"].size())
+        assertEquals(2, inntektsendringerMelding["inntektsendringer"].size())
         assertInntektsendringerInntektskilde(
-            inntektskilde = inntektsendringerMelding["inntektskilder"][0],
+            inntektskilde = inntektsendringerMelding["inntektsendringer"][0],
             expectedOrganisasjonsnummer = nestSisteEndretOrganisasjonsnummer,
             expectedInntekter = emptyList(),
             expectedNullstillinger = listOf(Pair(nestSisteFom.toString(), nestSisteTom.toString())),
         )
         assertInntektsendringerInntektskilde(
-            inntektskilde = inntektsendringerMelding["inntektskilder"][1],
+            inntektskilde = inntektsendringerMelding["inntektsendringer"][1],
             expectedOrganisasjonsnummer = sisteEndretOrganisasjonesnummer,
             expectedInntekter = sisteDager.tilPerioder().map { Triple(it.fom.toString(), it.tom.toString(), 2777.775) },
             expectedNullstillinger = emptyList()

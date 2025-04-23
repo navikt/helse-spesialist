@@ -409,7 +409,7 @@ private fun VarselEndret.detaljer(): Map<String, Any> =
 private fun InntektsendringerEvent.detaljer(): Map<String, Any> {
     return buildMap {
         put(
-            "inntektskilder",
+            "inntektsendringer",
             this@detaljer.inntektskilder.map { inntektskilde ->
                 mapOf(
                     "inntektskilde" to inntektskilde.inntektskilde,
