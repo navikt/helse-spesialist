@@ -131,7 +131,6 @@ internal class PubliserSykepengevedtakTest {
                     Sykepengegrunnlagsfakta.Spleis.EtterHovedregel(
                         omregnetÅrsinntekt = 10000.0,
                         seksG = 711720.0,
-                        tags = mutableSetOf(),
                         arbeidsgivere =
                             listOf(
                                 Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
@@ -206,7 +205,6 @@ internal class PubliserSykepengevedtakTest {
                     Sykepengegrunnlagsfakta.Spleis.EtterHovedregel(
                         omregnetÅrsinntekt = 10000.0,
                         seksG = 711720.0,
-                        tags = mutableSetOf(),
                         arbeidsgivere =
                             listOf(
                                 Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
@@ -291,7 +289,6 @@ internal class PubliserSykepengevedtakTest {
                     Sykepengegrunnlagsfakta.Spleis.EtterSkjønn(
                         omregnetÅrsinntekt = 10000.0,
                         seksG = 711720.0,
-                        tags = mutableSetOf(),
                         arbeidsgivere =
                             listOf(
                                 Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterSkjønn(
@@ -401,7 +398,6 @@ internal class PubliserSykepengevedtakTest {
                     Sykepengegrunnlagsfakta.Spleis.EtterSkjønn(
                         omregnetÅrsinntekt = 10000.0,
                         seksG = 711720.0,
-                        tags = mutableSetOf(),
                         arbeidsgivere =
                         listOf(
                             Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterSkjønn(

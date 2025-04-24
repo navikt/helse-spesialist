@@ -105,7 +105,6 @@ class AvsluttetMedVedtakRiver(
                     omregnetÅrsinntekt = packet["sykepengegrunnlagsfakta.omregnetÅrsinntekt"].asDouble(),
                     seksG = packet["sykepengegrunnlagsfakta.6G"].asDouble(),
                     skjønnsfastsatt = packet["sykepengegrunnlagsfakta.skjønnsfastsatt"].asDouble(),
-                    tags = mutableSetOf(),
                     arbeidsgivere =
                         packet["sykepengegrunnlagsfakta.arbeidsgivere"].map { arbeidsgiver ->
                             val organisasjonsnummer = arbeidsgiver["arbeidsgiver"].asText()
@@ -121,7 +120,6 @@ class AvsluttetMedVedtakRiver(
                 Sykepengegrunnlagsfakta.Spleis.EtterHovedregel(
                     omregnetÅrsinntekt = packet["sykepengegrunnlagsfakta.omregnetÅrsinntekt"].asDouble(),
                     seksG = packet["sykepengegrunnlagsfakta.6G"].asDouble(),
-                    tags = mutableSetOf(),
                     arbeidsgivere =
                         packet["sykepengegrunnlagsfakta.arbeidsgivere"].map { arbeidsgiver ->
                             val organisasjonsnummer = arbeidsgiver["arbeidsgiver"].asText()

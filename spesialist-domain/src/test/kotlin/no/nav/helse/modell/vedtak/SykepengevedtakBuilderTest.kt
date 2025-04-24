@@ -15,6 +15,7 @@ import org.junit.jupiter.api.assertThrows
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
+import kotlin.test.assertIs
 
 class SykepengevedtakBuilderTest {
     private companion object {
@@ -82,6 +83,33 @@ class SykepengevedtakBuilderTest {
             utkast,
         )
     }
+    @Test
+    fun `taggen 6GBegrenset er en sykepengegrunnlagsfakta-tag`() {
+        val utkast = SykepengevedtakBuilder()
+            .fødselsnummer(fødselsnummer)
+            .aktørId(aktørId)
+            .organisasjonsnummer(organisasjonsnummer)
+            .vedtaksperiodeId(vedtaksperiodeId)
+            .spleisBehandlingId(spleisBehandlingId)
+            .utbetalingId(utbetalingId)
+            .fom(fom)
+            .tom(tom)
+            .skjæringstidspunkt(skjæringstidspunkt)
+            .hendelser(hendelser)
+            .sykepengegrunnlag(sykepengegrunnlag)
+            .vedtakFattetTidspunkt(vedtakFattetTidspunkt)
+            .tags(listOf("IngenNyArbeidsgiverperiode", "6GBegrenset"))
+            .sykepengegrunnlagsfakta(sykepengegrunnlagsfakta<Spleis.EtterHovedregel>())
+            .vedtakBegrunnelse(VedtakBegrunnelse(Utfall.INNVILGELSE, null))
+            .avviksprosent(avviksprosent)
+            .sammenligningsgrunnlag(sammenligningsgrunnlag(innrapportertÅrsinntekt, organisasjonsnummer))
+            .build()
+
+        assertIs<Sykepengevedtak.Vedtak>(utkast)
+
+        assertEquals(utkast.tags, setOf("IngenNyArbeidsgiverperiode"))
+        assertEquals(utkast.sykepengegrunnlagsfakta.tags, listOf("6GBegrenset"))
+    }
 
     @Test
     fun `Bygg vanlig vedtak - sykepengegrunnlag fastsatt skjønn`() {
@@ -116,7 +144,7 @@ class SykepengevedtakBuilderTest {
             .vedtakBegrunnelse(VedtakBegrunnelse(Utfall.INNVILGELSE, null))
             .build()
 
-        assertTrue(utkast is VedtakMedSkjønnsvurdering)
+        assertIs<VedtakMedSkjønnsvurdering>(utkast)
         assertEquals(
             VedtakMedSkjønnsvurdering(
                 fødselsnummer = fødselsnummer,
@@ -173,7 +201,7 @@ class SykepengevedtakBuilderTest {
             .tags(listOf("IngenNyArbeidsgiverperiode"))
             .build()
 
-        assertTrue(utkast is Sykepengevedtak.Vedtak)
+        assertIs<Sykepengevedtak.Vedtak>(utkast)
         assertEquals(
             Sykepengevedtak.Vedtak(
                 fødselsnummer = fødselsnummer,
@@ -236,7 +264,7 @@ class SykepengevedtakBuilderTest {
             .tags(listOf("IngenNyArbeidsgiverperiode"))
             .build()
 
-        assertTrue(utkast is VedtakMedSkjønnsvurdering)
+        assertIs<VedtakMedSkjønnsvurdering>(utkast)
         assertEquals(
             VedtakMedSkjønnsvurdering(
                 fødselsnummer = fødselsnummer,
@@ -291,7 +319,7 @@ class SykepengevedtakBuilderTest {
             .vedtakBegrunnelse(VedtakBegrunnelse(Utfall.INNVILGELSE, null))
             .build()
 
-        assertTrue(utkast is Sykepengevedtak.VedtakMedOpphavIInfotrygd)
+        assertIs<Sykepengevedtak.VedtakMedOpphavIInfotrygd>(utkast)
         assertEquals(
             Sykepengevedtak.VedtakMedOpphavIInfotrygd(
                 fødselsnummer = fødselsnummer,
@@ -365,7 +393,7 @@ class SykepengevedtakBuilderTest {
             .vedtakBegrunnelse(VedtakBegrunnelse(Utfall.INNVILGELSE, null))
             .build()
 
-        assertTrue(utkast is Sykepengevedtak.Vedtak)
+        assertIs<Sykepengevedtak.Vedtak>(utkast)
         assertEquals(
             Sykepengevedtak.Vedtak(
                 fødselsnummer = fødselsnummer,
@@ -418,7 +446,6 @@ class SykepengevedtakBuilderTest {
                     omregnetÅrsinntekt = omregnetÅrsinntekt,
                     seksG = seksG2023,
                     skjønnsfastsatt = 650000.0,
-                    tags = mutableSetOf(),
                     arbeidsgivere =
                     listOf(
                         Spleis.Arbeidsgiver.EtterSkjønn(organisasjonsnummer, 300000.0, 325000.0),
@@ -430,7 +457,6 @@ class SykepengevedtakBuilderTest {
                 Spleis.EtterHovedregel(
                     omregnetÅrsinntekt = omregnetÅrsinntekt,
                     seksG = seksG2023,
-                    tags = mutableSetOf(),
                     arbeidsgivere =
                     listOf(
                         Spleis.Arbeidsgiver.EtterHovedregel(organisasjonsnummer, 300000.0),

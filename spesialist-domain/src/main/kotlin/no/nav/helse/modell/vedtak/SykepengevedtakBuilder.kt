@@ -28,7 +28,6 @@ class SykepengevedtakBuilder {
     private var avviksprosent by Delegates.notNull<Double>()
     private lateinit var sammenligningsgrunnlag: Sammenligningsgrunnlag
     private val tags: MutableSet<String> = mutableSetOf()
-    private val tagsForSykepengegrunnlagsfakta: MutableSet<String> = mutableSetOf()
 
     fun fødselsnummer(fødselsnummer: String) = apply { this.fødselsnummer = fødselsnummer }
 
@@ -56,7 +55,7 @@ class SykepengevedtakBuilder {
 
     fun sykepengegrunnlagsfakta(sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta) =
         apply {
-            this.sykepengegrunnlagsfakta = sykepengegrunnlagsfakta.medtags(tagsForSykepengegrunnlagsfakta)
+            this.sykepengegrunnlagsfakta = sykepengegrunnlagsfakta
         }
 
     fun skjønnsfastsattSykepengegrunnlag(skjønnsfastsattSykepengegrunnlag: SkjønnsfastsattSykepengegrunnlag) =
@@ -82,14 +81,7 @@ class SykepengevedtakBuilder {
 
     fun tags(tags: List<String>) =
         apply {
-            this.tags.addAll(tags.filterNot { TAGS_SOM_SKAL_LIGGE_I_SYKEPENGEGRUNNLAGSFAKTA.contains(it) })
-            this.tagsForSykepengegrunnlagsfakta.addAll(
-                tags.filter {
-                    TAGS_SOM_SKAL_LIGGE_I_SYKEPENGEGRUNNLAGSFAKTA.contains(
-                        it,
-                    )
-                },
-            )
+            this.tags.addAll(tags)
         }
 
     fun skjønnsfastsettingData(
@@ -120,6 +112,8 @@ class SykepengevedtakBuilder {
         return when (val sykepengegrunnlagsfakta = this.sykepengegrunnlagsfakta) {
             is Sykepengegrunnlagsfakta.Infotrygd -> buildVedtakMedOpphavIInfotrygd(utbetalingId, sykepengegrunnlagsfakta)
             is Sykepengegrunnlagsfakta.Spleis -> {
+                val (tagsForSykepengegrunnlagsfakta, tagsForPeriode) = tags.partition { it in TAGS_SOM_SKAL_LIGGE_I_SYKEPENGEGRUNNLAGSFAKTA }
+                sykepengegrunnlagsfakta.leggTilTags(tagsForSykepengegrunnlagsfakta.toSet())
                 when (sykepengegrunnlagsfakta) {
                     is Sykepengegrunnlagsfakta.Spleis.EtterHovedregel ->
                         buildVedtakEtterHovedregel(
@@ -127,6 +121,7 @@ class SykepengevedtakBuilder {
                             sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
                             avviksprosent = avviksprosent,
                             sammenligningsgrunnlag = sammenligningsgrunnlag,
+                            tagsForPeriode = tagsForPeriode,
                         )
                     is Sykepengegrunnlagsfakta.Spleis.EtterSkjønn ->
                         buildVedtakEtterSkjønn(
@@ -134,6 +129,7 @@ class SykepengevedtakBuilder {
                             sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
                             avviksprosent = avviksprosent,
                             sammenligningsgrunnlag = sammenligningsgrunnlag,
+                            tagsForPeriode = tagsForPeriode,
                         )
                 }
             }
@@ -145,6 +141,7 @@ class SykepengevedtakBuilder {
         sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta.Spleis.EtterHovedregel,
         avviksprosent: Double,
         sammenligningsgrunnlag: Sammenligningsgrunnlag,
+        tagsForPeriode: List<String>,
     ): Sykepengevedtak.Vedtak {
         return Sykepengevedtak.Vedtak(
             fødselsnummer = fødselsnummer,
@@ -160,7 +157,7 @@ class SykepengevedtakBuilder {
             sykepengegrunnlag = sykepengegrunnlag,
             sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
-            tags = tags,
+            tags = tagsForPeriode.toSet(),
             vedtakBegrunnelse = vedtakBegrunnelse,
             avviksprosent = avviksprosent,
             sammenligningsgrunnlag = sammenligningsgrunnlag,
@@ -172,6 +169,7 @@ class SykepengevedtakBuilder {
         sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta.Spleis.EtterSkjønn,
         avviksprosent: Double,
         sammenligningsgrunnlag: Sammenligningsgrunnlag,
+        tagsForPeriode: List<String>,
     ): VedtakMedSkjønnsvurdering {
         val skjønnsfastsettingopplysninger =
             checkNotNull(skjønnsfastsettingopplysninger) {
@@ -193,7 +191,7 @@ class SykepengevedtakBuilder {
             sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
             skjønnsfastsettingopplysninger = skjønnsfastsettingopplysninger,
             vedtakFattetTidspunkt = vedtakFattetTidspunkt,
-            tags = tags,
+            tags = tagsForPeriode.toSet(),
             vedtakBegrunnelse = vedtakBegrunnelse,
             avviksprosent = avviksprosent,
             sammenligningsgrunnlag = sammenligningsgrunnlag,
