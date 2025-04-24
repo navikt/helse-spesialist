@@ -50,8 +50,8 @@ class PgTilkommenInntektRepository(
     override fun lagre(tilkommenInntekt: TilkommenInntekt) {
         val sistePersisterteSekvensnummer =
             asSQL(
-                """SELECT MAX(sekvensnummer) FROM tilkommen_inntekt_events WHERE fødselsnummer = :fodselsnummer""",
-                "fodselsnummer" to tilkommenInntekt.fødselsnummer,
+                """SELECT MAX(sekvensnummer) FROM tilkommen_inntekt_events WHERE tilkommen_inntekt_id = :tilkommen_inntekt_id""",
+                "tilkommen_inntekt_id" to tilkommenInntekt.id().value,
             ).singleOrNull { it.intOrNull(1) }
         if (sistePersisterteSekvensnummer != null) {
             tilkommenInntekt.events.filter { it.metadata.sekvensnummer > sistePersisterteSekvensnummer }

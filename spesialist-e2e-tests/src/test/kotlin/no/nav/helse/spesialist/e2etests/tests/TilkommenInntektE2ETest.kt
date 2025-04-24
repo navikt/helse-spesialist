@@ -451,6 +451,107 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         )
     }
 
+    @Test
+    fun `to tilkomne inntekter går ikke i beina på hverandre`() {
+        // Given:
+        førsteVedtaksperiode().apply {
+            fom = 1 jan 2021
+            tom = 31 jan 2021
+        }
+        risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
+        søknadOgGodkjenningbehovKommerInn()
+
+        // When:
+        val organisasjonsnummer = lagOrganisasjonsnummer()
+        medPersonISpeil {
+            val tilkommenInntektId1 = saksbehandlerLeggerTilTilkommenInntekt(
+                organisasjonsnummer = organisasjonsnummer,
+                fom = 2 jan 2021,
+                tom = 15 jan 2021,
+                periodebeløp = BigDecimal("1111.11"),
+                dager = (2 jan 2021).datesUntil(16 jan 2021).toList(),
+                notatTilBeslutter = "legger til første tilkommen inntekt her"
+            )
+
+            saksbehandlerEndrerTilkommenInntekt(
+                tilkommenInntektId = tilkommenInntektId1,
+                organisasjonsnummer = organisasjonsnummer,
+                fom = 2 jan 2021,
+                tom = 15 jan 2021,
+                periodebeløp = BigDecimal("2222.22"),
+                dager = (2 jan 2021).datesUntil(16 jan 2021).toList(),
+                notatTilBeslutter = "endret periodebeløp på første tilkomne inntekt"
+            )
+
+            val tilkommenInntektId2 = saksbehandlerLeggerTilTilkommenInntekt(
+                organisasjonsnummer = organisasjonsnummer,
+                fom = 16 jan 2021,
+                tom = 31 jan 2021,
+                periodebeløp = BigDecimal("1111.11"),
+                dager = (16 jan 2021).datesUntil(1 feb 2021).toList(),
+                notatTilBeslutter = "legger til enda en tilkommen inntekt her"
+            )
+
+            saksbehandlerFjernerTilkommenInntekt(
+                tilkommenInntektId = tilkommenInntektId1,
+                notatTilBeslutter = "fjerner første tilkommen inntekt"
+            )
+
+            saksbehandlerEndrerTilkommenInntekt(
+                tilkommenInntektId = tilkommenInntektId2,
+                organisasjonsnummer = organisasjonsnummer,
+                fom = 16 jan 2021,
+                tom = 31 jan 2021,
+                periodebeløp = BigDecimal("2222.22"),
+                dager = (16 jan 2021).datesUntil(1 feb 2021).toList(),
+                notatTilBeslutter = "endret periodebeløp på andre tilkomne inntekt"
+            )
+
+            // Then:
+            val tilkomneInntektskilder = hentTilkomneInntektskilder()
+            assertEquals(1, tilkomneInntektskilder.size())
+            val tilkommenInntektskilde = tilkomneInntektskilder[0]
+            assertEquals(
+                expected = organisasjonsnummer,
+                actual = tilkommenInntektskilde["organisasjonsnummer"].asText()
+            )
+            tilkommenInntektskilde["inntekter"].let { inntekter ->
+                assertEquals(2, inntekter.size())
+                assertApiInntekt(
+                    inntekt = inntekter[0],
+                    expectedFom = 2 jan 2021,
+                    expectedTom = 15 jan 2021,
+                    expectedPeriodebeløp = BigDecimal("2222.22"),
+                    expectedDager = (2 jan 2021).datesUntil(16 jan 2021).toList(),
+                    expectedFjernet = true
+                )
+                assertEventTypenamesAndMetadata(
+                    events = inntekter[0]["events"],
+                    expectedTypenameNotatTilBeslutterPairs = listOf(
+                        "TilkommenInntektOpprettetEvent" to "legger til første tilkommen inntekt her",
+                        "TilkommenInntektEndretEvent" to "endret periodebeløp på første tilkomne inntekt",
+                        "TilkommenInntektFjernetEvent" to "fjerner første tilkommen inntekt",
+                    )
+                )
+                assertApiInntekt(
+                    inntekt = inntekter[1],
+                    expectedFom = 16 jan 2021,
+                    expectedTom = 31 jan 2021,
+                    expectedPeriodebeløp = BigDecimal("2222.22"),
+                    expectedDager = (16 jan 2021).datesUntil(1 feb 2021).toList(),
+                    expectedFjernet = false
+                )
+                assertEventTypenamesAndMetadata(
+                    events = inntekter[1]["events"],
+                    expectedTypenameNotatTilBeslutterPairs = listOf(
+                        "TilkommenInntektOpprettetEvent" to "legger til enda en tilkommen inntekt her",
+                        "TilkommenInntektEndretEvent" to "endret periodebeløp på andre tilkomne inntekt",
+                    )
+                )
+            }
+        }
+    }
+
     private fun assertApiInntektskilde(
         tilkommenInntektskilde: JsonNode,
         expectedOrganisasjonsnummer: String,
@@ -463,16 +564,14 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         assertEquals(expectedOrganisasjonsnummer, tilkommenInntektskilde["organisasjonsnummer"].asText())
         tilkommenInntektskilde["inntekter"].let { inntekter ->
             assertEquals(1, inntekter.size())
-            inntekter[0].let { inntekt ->
-                assertApiInntekt(
-                    inntekt = inntekt,
-                    expectedFom = expectedFom,
-                    expectedTom = expectedTom,
-                    expectedPeriodebeløp = expectedPeriodebeløp,
-                    expectedDager = expectedDager,
-                    expectedFjernet = expectedFjernet
-                )
-            }
+            assertApiInntekt(
+                inntekt = inntekter[0],
+                expectedFom = expectedFom,
+                expectedTom = expectedTom,
+                expectedPeriodebeløp = expectedPeriodebeløp,
+                expectedDager = expectedDager,
+                expectedFjernet = expectedFjernet
+            )
         }
     }
 
