@@ -84,8 +84,6 @@ internal abstract class AbstractDatabaseTest {
         VALUES (${sequence_number}, 0, false, now());
         INSERT INTO risikovurdering_2021(id, vedtaksperiode_id, kan_godkjennes_automatisk, data, opprettet)
         VALUES (${sequence_number}, '${vedtaksperiode_id}', false, '{}'::json, now());
-        INSERT INTO unnta_fra_automatisk_godkjenning
-        VALUES (${fødselsnummer}, false, array[]::varchar[], now());
         INSERT INTO stans_automatisering
         VALUES (${sequence_number},${fødselsnummer}, 'STOPP_AUTOMATIKK', array[]::varchar[], now(), 'ISYFO', '{}');
         INSERT INTO stans_automatisk_behandling_saksbehandler

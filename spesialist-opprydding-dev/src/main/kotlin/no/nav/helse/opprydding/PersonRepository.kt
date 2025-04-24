@@ -274,7 +274,6 @@ internal class PersonRepository(
         slettVarsler(personRef)
         slettAutomatisering(personRef)
         slettRisikovurdering(personRef)
-        slettUnntaFraAutomatisering(fødselsnummer)
         slettStansAutomatisering(fødselsnummer)
         slettStansAutomatiskBehandlingSaksbehandler(fødselsnummer)
         slettAutomatiseringProblem(personRef)
@@ -418,12 +417,6 @@ internal class PersonRepository(
         @Language("PostgreSQL")
         val query = "DELETE FROM risikovurdering_2021 WHERE vedtaksperiode_id IN (SELECT vedtaksperiode_id FROM vedtak WHERE person_ref = ?)"
         run(queryOf(query, personRef).asExecute)
-    }
-
-    private fun TransactionalSession.slettUnntaFraAutomatisering(fødselsnummer: String) {
-        @Language("PostgreSQL")
-        val query = "DELETE FROM unnta_fra_automatisk_godkjenning WHERE fødselsnummer = :fodselsnummer"
-        run(queryOf(query, mapOf("fodselsnummer" to fødselsnummer)).asUpdate)
     }
 
     private fun TransactionalSession.slettStansAutomatisering(fødselsnummer: String) {
