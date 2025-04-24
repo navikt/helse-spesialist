@@ -17,6 +17,8 @@ data class Periode(
 
     infix fun erInnenfor(other: Periode) = fom >= other.fom && tom <= other.tom
 
+    infix fun erInnenforEnAv(perioder: List<Periode>) = perioder.any { this erInnenfor it }
+
     fun etterfølgesAv(dato: LocalDate): Boolean = tom.plusDays(1) == dato
 
     operator fun ClosedRange<LocalDate>.contains(closedRange: ClosedRange<LocalDate>): Boolean =
