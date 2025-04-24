@@ -23,5 +23,6 @@ sealed interface SpesialistRiver : River.PacketListener {
     ) {
         logg.error("Melding passerte ikke validering i river {}. Se sikkerlogg for mer informasjon", this::class.simpleName)
         sikkerlogg.error("Meldingen passerte ikke validering i river {}. {}", this::class.simpleName, problems.toExtendedReport())
+        error("Melding passerte ikke validering i river ${this::class.simpleName}, ${problems.toExtendedReport()}")
     }
 }

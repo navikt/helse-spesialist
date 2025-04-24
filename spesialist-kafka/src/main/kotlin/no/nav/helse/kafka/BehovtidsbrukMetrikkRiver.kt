@@ -21,6 +21,7 @@ class BehovtidsbrukMetrikkRiver : SpesialistRiver {
         return River.PacketValidation {
             it.requireValue("@event_name", "behov")
             it.requireValue("@final", true)
+            it.requireKey("@løsning")
         }
     }
 

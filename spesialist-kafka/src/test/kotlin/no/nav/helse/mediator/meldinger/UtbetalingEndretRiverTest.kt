@@ -9,6 +9,7 @@ import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -25,7 +26,9 @@ internal class UtbetalingEndretRiverTest {
 
     @Test
     fun `Feiler dersom vi ikke forstår utbetaling-status`() {
-        testRapid.sendTestMessage(event("Noe rart med sukker på"))
+        assertThrows<IllegalStateException> {
+            testRapid.sendTestMessage(event("Noe rart med sukker på"))
+        }
         verify(exactly = 0) { mediator.mottaMelding(any(), any()) }
     }
 
