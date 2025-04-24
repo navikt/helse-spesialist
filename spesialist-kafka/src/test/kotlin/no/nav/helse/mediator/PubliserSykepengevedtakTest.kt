@@ -14,6 +14,8 @@ import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.vedtak.Skjønnsfastsettingstype
 import no.nav.helse.modell.vedtak.Skjønnsfastsettingsårsak
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta
+import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Arbeidsgiver
+import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Saksbehandler
 import no.nav.helse.modell.vedtak.Utfall
 import no.nav.helse.modell.vedtak.VedtakBegrunnelse
 import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
@@ -137,7 +139,7 @@ internal class PubliserSykepengevedtakTest {
                                 Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
                                     organisasjonsnummer = ORGANISASJONSNUMMER,
                                     omregnetÅrsinntekt = 10000.0,
-                                    inntektskilde = "Arbeidsgiver"
+                                    inntektskilde = Arbeidsgiver
                                 ),
                             ),
                     ),
@@ -213,7 +215,7 @@ internal class PubliserSykepengevedtakTest {
                                 Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
                                     organisasjonsnummer = ORGANISASJONSNUMMER,
                                     omregnetÅrsinntekt = 10000.0,
-                                    inntektskilde = "Arbeidsgiver"
+                                    inntektskilde = Arbeidsgiver
                                 ),
                             ),
                     ),
@@ -299,7 +301,7 @@ internal class PubliserSykepengevedtakTest {
                                     organisasjonsnummer = ORGANISASJONSNUMMER,
                                     omregnetÅrsinntekt = 10000.0,
                                     skjønnsfastsatt = 13000.0,
-                                    inntektskilde = "Arbeidsgiver"
+                                    inntektskilde = Saksbehandler
                                 ),
                             ),
                         skjønnsfastsatt = 13000.0,
@@ -409,7 +411,7 @@ internal class PubliserSykepengevedtakTest {
                                 organisasjonsnummer = ORGANISASJONSNUMMER,
                                 omregnetÅrsinntekt = 10000.0,
                                 skjønnsfastsatt = 13000.0,
-                                inntektskilde = "Arbeidsgiver"
+                                inntektskilde = Saksbehandler
                             ),
                         ),
                         skjønnsfastsatt = 13000.0,

@@ -32,20 +32,26 @@ sealed interface Sykepengegrunnlagsfakta {
         sealed interface Arbeidsgiver {
             val organisasjonsnummer: String
             val omregnetÅrsinntekt: Double
-            val inntektskilde: String
+            val inntektskilde: Inntektskilde
 
             data class EtterSkjønn(
                 override val organisasjonsnummer: String,
                 override val omregnetÅrsinntekt: Double,
-                override val inntektskilde: String,
+                override val inntektskilde: Inntektskilde,
                 val skjønnsfastsatt: Double,
             ) : Arbeidsgiver
 
             data class EtterHovedregel(
                 override val organisasjonsnummer: String,
                 override val omregnetÅrsinntekt: Double,
-                override val inntektskilde: String,
+                override val inntektskilde: Inntektskilde,
             ) : Arbeidsgiver
+
+            enum class Inntektskilde {
+                Arbeidsgiver,
+                AOrdningen,
+                Saksbehandler,
+            }
         }
     }
 }

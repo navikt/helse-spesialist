@@ -1,5 +1,6 @@
 package no.nav.helse.kafka
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
@@ -121,7 +122,7 @@ class AvsluttetMedVedtakRiver(
                                 organisasjonsnummer = organisasjonsnummer,
                                 omregnetÅrsinntekt = arbeidsgiver["omregnetÅrsinntekt"].asDouble(),
                                 skjønnsfastsatt = arbeidsgiver["skjønnsfastsatt"].asDouble(),
-                                inntektskilde = arbeidsgiver["inntektskilde"].asText(),
+                                inntektskilde = inntektskilde(arbeidsgiver["inntektskilde"]),
                             )
                         },
                 )
@@ -137,12 +138,21 @@ class AvsluttetMedVedtakRiver(
                             Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
                                 organisasjonsnummer = organisasjonsnummer,
                                 omregnetÅrsinntekt = arbeidsgiver["omregnetÅrsinntekt"].asDouble(),
-                                inntektskilde = arbeidsgiver["inntektskilde"].asText(),
+                                inntektskilde = inntektskilde(arbeidsgiver["inntektskilde"]),
                             )
                         },
                 )
 
             else -> error("Her vet vi ikke hva som har skjedd. Feil i kompilatoren?")
+        }
+    }
+
+    private fun inntektskilde(inntektskildeNode: JsonNode): Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde {
+        return when (val inntektskildeString = inntektskildeNode.asText()) {
+            "Arbeidsgiver" -> Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Arbeidsgiver
+            "AOrdningen" -> Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.AOrdningen
+            "Saksbehandler" -> Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Saksbehandler
+            else -> error("$inntektskildeString er ikke en gyldig inntektskilde")
         }
     }
 }

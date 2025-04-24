@@ -10,10 +10,7 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
-import no.nav.helse.modell.vedtaksperiode.Inntektsopplysningkilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
-import no.nav.helse.modell.vedtaksperiode.SykepengegrunnlagsArbeidsgiver
 import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
 import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -81,18 +78,6 @@ internal class GodkjenningsbehovRiverTest {
                     assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, it.periodetype)
                     assertEquals(Utbetalingtype.UTBETALING, it.utbetalingtype)
                     assertEquals(
-                        SpleisSykepengegrunnlagsfakta(
-                            arbeidsgivere = listOf(
-                                SykepengegrunnlagsArbeidsgiver(
-                                    arbeidsgiver = ORGNR,
-                                    omregnetÅrsinntekt = 600000.0,
-                                    inntektskilde = Inntektsopplysningkilde.Arbeidsgiver,
-                                    skjønnsfastsatt = null,
-                                )
-                            )
-                        ), it.spleisSykepengegrunnlagsfakta
-                    )
-                    assertEquals(
                         Sykepengegrunnlagsfakta.Spleis.EtterHovedregel(
                             omregnetÅrsinntekt = 600000.0,
                             seksG = 6 * 118620.0,
@@ -100,7 +85,7 @@ internal class GodkjenningsbehovRiverTest {
                                 Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
                                     ORGNR,
                                     omregnetÅrsinntekt = 600000.0,
-                                    inntektskilde = "Arbeidsgiver"
+                                    inntektskilde = Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Arbeidsgiver
                                 )
                             ),
                             sykepengegrunnlag = 600000.0
@@ -168,18 +153,6 @@ internal class GodkjenningsbehovRiverTest {
                     assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, it.periodetype)
                     assertEquals(Utbetalingtype.UTBETALING, it.utbetalingtype)
                     assertEquals(
-                        SpleisSykepengegrunnlagsfakta(
-                            arbeidsgivere = listOf(
-                                SykepengegrunnlagsArbeidsgiver(
-                                    arbeidsgiver = ORGNR,
-                                    omregnetÅrsinntekt = 500000.0,
-                                    inntektskilde = Inntektsopplysningkilde.Saksbehandler,
-                                    skjønnsfastsatt = 600000.0,
-                                )
-                            )
-                        ), it.spleisSykepengegrunnlagsfakta
-                    )
-                    assertEquals(
                         Sykepengegrunnlagsfakta.Spleis.EtterSkjønn(
                             omregnetÅrsinntekt = 500000.0,
                             seksG = 6 * 118620.0,
@@ -187,7 +160,7 @@ internal class GodkjenningsbehovRiverTest {
                                 Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterSkjønn(
                                     ORGNR,
                                     omregnetÅrsinntekt = 500000.0,
-                                    inntektskilde = "Saksbehandler",
+                                    inntektskilde = Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Saksbehandler,
                                     skjønnsfastsatt = 600000.0
                                 )
                             ),
@@ -242,10 +215,6 @@ internal class GodkjenningsbehovRiverTest {
                     assertEquals(true, it.førstegangsbehandling)
                     assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, it.periodetype)
                     assertEquals(Utbetalingtype.UTBETALING, it.utbetalingtype)
-                    assertEquals(
-                        SpleisSykepengegrunnlagsfakta(arbeidsgivere = emptyList()),
-                        it.spleisSykepengegrunnlagsfakta
-                    )
                     assertEquals(Sykepengegrunnlagsfakta.Infotrygd(omregnetÅrsinntekt = 500000.0), it.sykepengegrunnlagsfakta)
                 },
                 kontekstbasertPubliserer = any()

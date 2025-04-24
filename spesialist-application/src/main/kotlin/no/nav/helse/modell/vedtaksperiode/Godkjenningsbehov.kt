@@ -59,23 +59,6 @@ import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import java.time.LocalDate
 import java.util.UUID
 
-data class SpleisSykepengegrunnlagsfakta(
-    val arbeidsgivere: List<SykepengegrunnlagsArbeidsgiver>,
-)
-
-data class SykepengegrunnlagsArbeidsgiver(
-    val arbeidsgiver: String,
-    val omregnetÅrsinntekt: Double,
-    val inntektskilde: Inntektsopplysningkilde,
-    val skjønnsfastsatt: Double?,
-)
-
-enum class Inntektsopplysningkilde {
-    Arbeidsgiver,
-    AOrdningen,
-    Saksbehandler,
-}
-
 class Godkjenningsbehov(
     override val id: UUID,
     private val fødselsnummer: String,
@@ -96,8 +79,6 @@ class Godkjenningsbehov(
     val orgnummereMedRelevanteArbeidsforhold: List<String>,
     val skjæringstidspunkt: LocalDate,
     val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta,
-    val spleisSykepengegrunnlagsfakta: SpleisSykepengegrunnlagsfakta,
-    val erInngangsvilkårVurdertISpleis: Boolean,
     val omregnedeÅrsinntekter: List<OmregnetÅrsinntekt>,
     private val json: String,
 ) : Vedtaksperiodemelding {
@@ -133,10 +114,9 @@ class Godkjenningsbehov(
             utbetalingtype = utbetalingtype,
             kanAvvises = kanAvvises,
             inntektskilde = inntektskilde,
-            spleisSykepengegrunnlagsfakta = spleisSykepengegrunnlagsfakta,
+            sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
             orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
             skjæringstidspunkt = skjæringstidspunkt,
-            erInngangsvilkårVurdertISpleis = erInngangsvilkårVurdertISpleis,
             omregnedeÅrsinntekter = omregnedeÅrsinntekter,
             json = json,
         )
@@ -177,22 +157,6 @@ class Godkjenningsbehov(
                 ?.map { it.asText() } ?: emptyList(),
         skjæringstidspunkt = LocalDate.parse(jsonNode.path("Godkjenning").path("skjæringstidspunkt").asText()),
         sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(jsonNode, faktatype = faktatype(jsonNode)),
-        spleisSykepengegrunnlagsfakta =
-            SpleisSykepengegrunnlagsfakta(
-                arbeidsgivere =
-                    jsonNode.path("Godkjenning").get("sykepengegrunnlagsfakta")?.get("arbeidsgivere")?.mapNotNull {
-                        if (it.get("inntektskilde") == null) return@mapNotNull null
-                        SykepengegrunnlagsArbeidsgiver(
-                            arbeidsgiver = it["arbeidsgiver"].asText(),
-                            omregnetÅrsinntekt = it["omregnetÅrsinntekt"].asDouble(),
-                            inntektskilde = Inntektsopplysningkilde.valueOf(it["inntektskilde"].asText()),
-                            skjønnsfastsatt = it["skjønnsfastsatt"]?.asDouble(),
-                        )
-                    } ?: emptyList(),
-            ),
-        erInngangsvilkårVurdertISpleis =
-            jsonNode.path("Godkjenning").get("sykepengegrunnlagsfakta").get("fastsatt")
-                .asText() != "IInfotrygd",
         omregnedeÅrsinntekter =
             jsonNode.path("Godkjenning").get("omregnedeÅrsinntekter").map {
                 OmregnetÅrsinntekt(
@@ -242,7 +206,7 @@ class Godkjenningsbehov(
                                     organisasjonsnummer = organisasjonsnummer,
                                     omregnetÅrsinntekt = arbeidsgiver["omregnetÅrsinntekt"].asDouble(),
                                     skjønnsfastsatt = arbeidsgiver["skjønnsfastsatt"].asDouble(),
-                                    inntektskilde = arbeidsgiver["inntektskilde"].asText(),
+                                    inntektskilde = inntektskilde(arbeidsgiver["inntektskilde"]),
                                 )
                             },
                     )
@@ -264,12 +228,21 @@ class Godkjenningsbehov(
                                 Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
                                     organisasjonsnummer = organisasjonsnummer,
                                     omregnetÅrsinntekt = arbeidsgiver["omregnetÅrsinntekt"].asDouble(),
-                                    inntektskilde = arbeidsgiver["inntektskilde"].asText(),
+                                    inntektskilde = inntektskilde(arbeidsgiver["inntektskilde"]),
                                 )
                             },
                     )
 
                 else -> error("Her vet vi ikke hva som har skjedd. Feil i kompilatoren?")
+            }
+        }
+
+        private fun inntektskilde(inntektskildeNode: JsonNode): Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde {
+            return when (val inntektskildeString = inntektskildeNode.asText()) {
+                "Arbeidsgiver" -> Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Arbeidsgiver
+                "AOrdningen" -> Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.AOrdningen
+                "Saksbehandler" -> Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Saksbehandler
+                else -> error("$inntektskildeString er ikke en gyldig inntektskilde")
             }
         }
     }
@@ -391,7 +364,7 @@ internal class GodkjenningsbehovCommand(
                 førstegangsbehandling = behovData.førstegangsbehandling,
                 sykefraværstilfelle = sykefraværstilfelle,
                 utbetaling = utbetaling,
-                spleisSykepengegrunnlangsfakta = behovData.spleisSykepengegrunnlagsfakta,
+                sykepengegrunnlagsfakta = behovData.sykepengegrunnlagsfakta,
             ),
             VurderAutomatiskAvvisning(
                 personDao = personDao,

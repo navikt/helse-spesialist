@@ -9,7 +9,7 @@ import no.nav.helse.modell.melding.InntektTilRisk
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_RV_1
 import no.nav.helse.modell.utbetaling.Utbetaling
-import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
+import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -20,7 +20,7 @@ internal class VurderVurderingsmomenter(
     private val førstegangsbehandling: Boolean,
     private val sykefraværstilfelle: Sykefraværstilfelle,
     private val utbetaling: Utbetaling,
-    private val spleisSykepengegrunnlangsfakta: SpleisSykepengegrunnlagsfakta,
+    private val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta,
 ) : Command {
     override fun execute(context: CommandContext) = behandle(context)
 
@@ -39,12 +39,16 @@ internal class VurderVurderingsmomenter(
                     førstegangsbehandling = førstegangsbehandling,
                     kunRefusjon = !utbetaling.harEndringIUtbetalingTilSykmeldt(),
                     inntekt =
-                        spleisSykepengegrunnlangsfakta.arbeidsgivere.find { it.arbeidsgiver == organisasjonsnummer }?.let {
-                                sykepengegrunnlagsArbeidsgiver ->
-                            InntektTilRisk(
-                                omregnetÅrsinntekt = sykepengegrunnlagsArbeidsgiver.omregnetÅrsinntekt,
-                                inntektskilde = sykepengegrunnlagsArbeidsgiver.inntektskilde.name,
-                            )
+                        when (sykepengegrunnlagsfakta) {
+                            is Sykepengegrunnlagsfakta.Infotrygd -> null
+                            is Sykepengegrunnlagsfakta.Spleis ->
+                                sykepengegrunnlagsfakta.arbeidsgivere.find { it.organisasjonsnummer == organisasjonsnummer }?.let {
+                                        sykepengegrunnlagsArbeidsgiver ->
+                                    InntektTilRisk(
+                                        omregnetÅrsinntekt = sykepengegrunnlagsArbeidsgiver.omregnetÅrsinntekt,
+                                        inntektskilde = sykepengegrunnlagsArbeidsgiver.inntektskilde.name,
+                                    )
+                                }
                         },
                 ),
             )

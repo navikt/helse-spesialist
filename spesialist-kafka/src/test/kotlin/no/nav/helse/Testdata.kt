@@ -1,12 +1,10 @@
 package no.nav.helse
 
 import no.nav.helse.modell.utbetaling.Utbetalingtype.UTBETALING
+import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
-import no.nav.helse.modell.vedtaksperiode.Inntektsopplysningkilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
-import no.nav.helse.modell.vedtaksperiode.SykepengegrunnlagsArbeidsgiver
 import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
@@ -48,21 +46,22 @@ object Testdata {
             inntektskilde = inntektskilde,
             orgnummereMedRelevanteArbeidsforhold = emptyList(),
             skjæringstidspunkt = 1 jan 2018,
-            spleisSykepengegrunnlagsfakta = SpleisSykepengegrunnlagsfakta(
-                arbeidsgivere = listOf(
-                    SykepengegrunnlagsArbeidsgiver(
-                        arbeidsgiver = organisasjonsnummer,
-                        omregnetÅrsinntekt = 123456.7,
-                        inntektskilde = Inntektsopplysningkilde.Arbeidsgiver,
-                        skjønnsfastsatt = null
-                    )
-                )
-            ),
-            erInngangsvilkårVurdertISpleis = true,
             omregnedeÅrsinntekter = listOf(
                 OmregnetÅrsinntekt(
                     arbeidsgiverreferanse = organisasjonsnummer,
                     beløp = 123456.7,
+                )
+            ),
+            sykepengegrunnlagsfakta = Sykepengegrunnlagsfakta.Spleis.EtterHovedregel(
+                omregnetÅrsinntekt = 123456.7,
+                seksG = 6 * 118620.0,
+                sykepengegrunnlag = 123456.7,
+                arbeidsgivere = listOf(
+                    Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
+                        organisasjonsnummer = organisasjonsnummer,
+                        omregnetÅrsinntekt = 123456.7,
+                        inntektskilde = Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Arbeidsgiver
+                    )
                 )
             ),
             json = json,
@@ -88,7 +87,4 @@ internal data class GodkjenningsbehovTestdata(
     val vilkårsgrunnlagId: UUID = UUID.randomUUID(),
     val spleisBehandlingId: UUID = UUID.randomUUID(),
     val tags: List<String> = emptyList(),
-    val spleisSykepengegrunnlagsfakta: SpleisSykepengegrunnlagsfakta = SpleisSykepengegrunnlagsfakta(
-        arbeidsgivere = emptyList()
-    ),
 )

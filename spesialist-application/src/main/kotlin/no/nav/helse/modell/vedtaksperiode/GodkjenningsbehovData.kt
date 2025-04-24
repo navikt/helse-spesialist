@@ -9,6 +9,7 @@ import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.utbetaling.Refusjonstype
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
+import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
 import java.time.LocalDate
@@ -34,12 +35,12 @@ data class GodkjenningsbehovData(
     val inntektskilde: Inntektskilde,
     val orgnummereMedRelevanteArbeidsforhold: List<String>,
     val skjæringstidspunkt: LocalDate,
-    val spleisSykepengegrunnlagsfakta: SpleisSykepengegrunnlagsfakta,
-    val erInngangsvilkårVurdertISpleis: Boolean,
+    val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta,
     val omregnedeÅrsinntekter: List<OmregnetÅrsinntekt>,
     private val json: String,
 ) {
     private lateinit var løsning: Løsning
+    val erInngangsvilkårVurdertISpleis: Boolean = sykepengegrunnlagsfakta is Sykepengegrunnlagsfakta.Spleis
 
     fun medLøsning() =
         Godkjenningsbehovløsning(

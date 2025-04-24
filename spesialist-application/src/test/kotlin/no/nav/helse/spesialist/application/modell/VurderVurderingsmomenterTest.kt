@@ -15,9 +15,7 @@ import no.nav.helse.modell.melding.InntektTilRisk
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.risiko.VurderVurderingsmomenter
 import no.nav.helse.modell.utbetaling.Utbetaling
-import no.nav.helse.modell.vedtaksperiode.Inntektsopplysningkilde
-import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
-import no.nav.helse.modell.vedtaksperiode.SykepengegrunnlagsArbeidsgiver
+import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta
 import no.nav.helse.spesialist.application.TestPerson
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import no.nav.helse.spesialist.domain.testfixtures.jan
@@ -221,15 +219,17 @@ internal class VurderVurderingsmomenterTest {
         førstegangsbehandling = førstegangsbehandling,
         sykefraværstilfelle = sykefraværstilfelle,
         utbetaling = utbetalingMock,
-        spleisSykepengegrunnlangsfakta = SpleisSykepengegrunnlagsfakta(
-            listOf(
-                SykepengegrunnlagsArbeidsgiver(
+        sykepengegrunnlagsfakta = Sykepengegrunnlagsfakta.Spleis.EtterHovedregel(
+            arbeidsgivere = listOf(
+                Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
                     omregnetÅrsinntekt = 123456.7,
-                    arbeidsgiver = testperson.orgnummer,
-                    inntektskilde = Inntektsopplysningkilde.Arbeidsgiver,
-                    skjønnsfastsatt = null
+                    organisasjonsnummer = testperson.orgnummer,
+                    inntektskilde = Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Arbeidsgiver,
                 )
             ),
+            omregnetÅrsinntekt = 123456.7,
+            seksG = 6 * 118620.0,
+            sykepengegrunnlag = 123456.7
         )
     )
 

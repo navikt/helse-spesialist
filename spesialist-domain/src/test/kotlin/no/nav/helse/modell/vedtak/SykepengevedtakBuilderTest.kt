@@ -4,6 +4,7 @@ import no.nav.helse.modell.melding.Sykepengevedtak
 import no.nav.helse.modell.melding.Sykepengevedtak.VedtakMedSkjønnsvurdering
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Infotrygd
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Spleis
+import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Arbeidsgiver
 import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
 import no.nav.helse.modell.vilkårsprøving.Inntekt
 import no.nav.helse.modell.vilkårsprøving.Sammenligningsgrunnlag
@@ -448,8 +449,8 @@ class SykepengevedtakBuilderTest {
                     skjønnsfastsatt = 650000.0,
                     arbeidsgivere =
                     listOf(
-                        Spleis.Arbeidsgiver.EtterSkjønn(organisasjonsnummer, 300000.0, "Arbeidsgiver", 325000.0, ),
-                        Spleis.Arbeidsgiver.EtterSkjønn("987654321", 300000.0, "Arbeidsgiver", 325000.0, ),
+                        Spleis.Arbeidsgiver.EtterSkjønn(organisasjonsnummer, 300000.0, Arbeidsgiver, 325000.0, ),
+                        Spleis.Arbeidsgiver.EtterSkjønn("987654321", 300000.0, Arbeidsgiver, 325000.0, ),
                     ),
                 )
 
@@ -460,8 +461,8 @@ class SykepengevedtakBuilderTest {
                     sykepengegrunnlag = 600000.0,
                     arbeidsgivere =
                     listOf(
-                        Spleis.Arbeidsgiver.EtterHovedregel(organisasjonsnummer, 300000.0, "Arbeidsgiver"),
-                        Spleis.Arbeidsgiver.EtterHovedregel("987654321", 300000.0, "Arbeidsgiver"),
+                        Spleis.Arbeidsgiver.EtterHovedregel(organisasjonsnummer, 300000.0, Arbeidsgiver),
+                        Spleis.Arbeidsgiver.EtterHovedregel("987654321", 300000.0, Arbeidsgiver),
                     ),
                 )
 

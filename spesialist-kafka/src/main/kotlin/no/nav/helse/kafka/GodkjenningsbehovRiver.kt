@@ -17,10 +17,7 @@ import no.nav.helse.modell.vedtak.Faktatype
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
-import no.nav.helse.modell.vedtaksperiode.Inntektsopplysningkilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
-import no.nav.helse.modell.vedtaksperiode.SykepengegrunnlagsArbeidsgiver
 import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
 import java.time.LocalDate
 
@@ -128,8 +125,6 @@ class GodkjenningsbehovRiver(
                         .takeUnless(JsonNode::isMissingOrNull)
                         ?.map { it.asText() } ?: emptyList(),
                 skjæringstidspunkt = LocalDate.parse(packet["Godkjenning.skjæringstidspunkt"].asText()),
-                spleisSykepengegrunnlagsfakta = spleisSykepengegrunnlagsfakta(packet),
-                erInngangsvilkårVurdertISpleis = packet["Godkjenning.sykepengegrunnlagsfakta.fastsatt"].asText() != "IInfotrygd",
                 sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(packet, faktatype(packet)),
                 omregnedeÅrsinntekter =
                     packet["Godkjenning.omregnedeÅrsinntekter"].map {
@@ -152,26 +147,6 @@ class GodkjenningsbehovRiver(
                 fom = periodeNode["fom"].asLocalDate(),
                 tom = periodeNode["tom"].asLocalDate(),
                 skjæringstidspunkt = packet["Godkjenning.skjæringstidspunkt"].asLocalDate(),
-            )
-        }
-    }
-
-    private fun spleisSykepengegrunnlagsfakta(packet: JsonMessage): SpleisSykepengegrunnlagsfakta {
-        when (packet["Godkjenning.sykepengegrunnlagsfakta.fastsatt"].asText()) {
-            "IInfotrygd" -> return SpleisSykepengegrunnlagsfakta(
-                arbeidsgivere = emptyList(),
-            )
-
-            else -> return SpleisSykepengegrunnlagsfakta(
-                arbeidsgivere =
-                    packet["Godkjenning.sykepengegrunnlagsfakta.arbeidsgivere"].map {
-                        SykepengegrunnlagsArbeidsgiver(
-                            arbeidsgiver = it["arbeidsgiver"].asText(),
-                            omregnetÅrsinntekt = it["omregnetÅrsinntekt"].asDouble(),
-                            inntektskilde = Inntektsopplysningkilde.valueOf(it["inntektskilde"].asText()),
-                            skjønnsfastsatt = it["skjønnsfastsatt"]?.asDouble(),
-                        )
-                    },
             )
         }
     }
@@ -208,7 +183,7 @@ class GodkjenningsbehovRiver(
                                 organisasjonsnummer = organisasjonsnummer,
                                 omregnetÅrsinntekt = arbeidsgiver["omregnetÅrsinntekt"].asDouble(),
                                 skjønnsfastsatt = arbeidsgiver["skjønnsfastsatt"].asDouble(),
-                                inntektskilde = arbeidsgiver["inntektskilde"].asText(),
+                                inntektskilde = inntektskilde(arbeidsgiver["inntektskilde"]),
                             )
                         },
                 )
@@ -224,12 +199,21 @@ class GodkjenningsbehovRiver(
                             Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
                                 organisasjonsnummer = organisasjonsnummer,
                                 omregnetÅrsinntekt = arbeidsgiver["omregnetÅrsinntekt"].asDouble(),
-                                inntektskilde = arbeidsgiver["inntektskilde"].asText(),
+                                inntektskilde = inntektskilde(arbeidsgiver["inntektskilde"]),
                             )
                         },
                 )
 
             else -> error("Her vet vi ikke hva som har skjedd. Feil i kompilatoren?")
+        }
+    }
+
+    private fun inntektskilde(inntektskildeNode: JsonNode): Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde {
+        return when (val inntektskildeString = inntektskildeNode.asText()) {
+            "Arbeidsgiver" -> Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Arbeidsgiver
+            "AOrdningen" -> Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.AOrdningen
+            "Saksbehandler" -> Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Saksbehandler
+            else -> error("$inntektskildeString er ikke en gyldig inntektskilde")
         }
     }
 }

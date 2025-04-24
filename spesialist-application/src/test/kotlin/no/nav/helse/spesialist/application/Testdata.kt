@@ -1,12 +1,11 @@
 package no.nav.helse.spesialist.application
 
 import no.nav.helse.modell.utbetaling.Utbetalingtype
+import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta
+import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Arbeidsgiver
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
-import no.nav.helse.modell.vedtaksperiode.Inntektsopplysningkilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.modell.vedtaksperiode.SpleisSykepengegrunnlagsfakta
-import no.nav.helse.modell.vedtaksperiode.SykepengegrunnlagsArbeidsgiver
 import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
 import no.nav.helse.spesialist.api.bootstrap.Gruppe
 import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
@@ -77,7 +76,7 @@ object Testdata {
         utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING,
         kanAvvises: Boolean = true,
         inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
-        inntektsopplysningkilde: Inntektsopplysningkilde = Inntektsopplysningkilde.Arbeidsgiver,
+        inntektsopplysningkilde: Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde = Arbeidsgiver,
         json: String = "{}",
     ): GodkjenningsbehovData {
         return GodkjenningsbehovData(
@@ -99,17 +98,18 @@ object Testdata {
             inntektskilde = inntektskilde,
             orgnummereMedRelevanteArbeidsforhold = emptyList(),
             skjæringstidspunkt = 1 jan 2018,
-            spleisSykepengegrunnlagsfakta = SpleisSykepengegrunnlagsfakta(
+            sykepengegrunnlagsfakta = Sykepengegrunnlagsfakta.Spleis.EtterHovedregel(
+                omregnetÅrsinntekt = 123456.7,
+                seksG = 6 * 118620.0,
                 arbeidsgivere = listOf(
-                    SykepengegrunnlagsArbeidsgiver(
-                        arbeidsgiver = organisasjonsnummer,
+                    Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
+                        organisasjonsnummer = organisasjonsnummer,
                         omregnetÅrsinntekt = 123456.7,
-                        inntektskilde = inntektsopplysningkilde,
-                        skjønnsfastsatt = null
+                        inntektskilde = inntektsopplysningkilde
                     )
-                )
+                ),
+                sykepengegrunnlag = 123456.7
             ),
-            erInngangsvilkårVurdertISpleis = true,
             omregnedeÅrsinntekter = listOf(
                 OmregnetÅrsinntekt(
                     arbeidsgiverreferanse = organisasjonsnummer,
