@@ -405,7 +405,6 @@ class UtgåendeHendelseMessageBuilderTest {
         val schemaJson = javaClass.getResourceAsStream(schemaResourceName)!!.use { inputStream ->
             inputStream.reader().use(InputStreamReader::readText)
         }
-        println("Validerer $json")
         val errors = mutableListOf<ValidationError>()
         val valid =
             JsonSchema.fromDefinition(schemaJson).validate(Json.decodeFromString<JsonElement>(json), errors::add)
