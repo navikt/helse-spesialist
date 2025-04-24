@@ -13,6 +13,8 @@ import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.utbetaling.Utbetalingtype.Companion.values
+import no.nav.helse.modell.vedtak.Faktatype
+import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Inntektsopplysningkilde
@@ -53,27 +55,6 @@ class GodkjenningsbehovRiver(
                 "Godkjenning.behandlingId",
                 "Godkjenning.tags",
             )
-            it.requireAny(
-                "Godkjenning.sykepengegrunnlagsfakta.fastsatt",
-                listOf("EtterHovedregel", "IInfotrygd", "EtterSkjønn"),
-            )
-            it.require("Godkjenning.sykepengegrunnlagsfakta.fastsatt") { fastsattNode ->
-                when (fastsattNode.asText()) {
-                    "EtterHovedregel" -> {
-                        it.requireArray("Godkjenning.sykepengegrunnlagsfakta.arbeidsgivere") {
-                            requireKey("arbeidsgiver", "omregnetÅrsinntekt", "inntektskilde")
-                        }
-                    }
-
-                    "EtterSkjønn" -> {
-                        it.requireArray("Godkjenning.sykepengegrunnlagsfakta.arbeidsgivere") {
-                            requireKey("arbeidsgiver", "omregnetÅrsinntekt", "inntektskilde", "skjønnsfastsatt")
-                        }
-                    }
-
-                    else -> {}
-                }
-            }
             it.requireArray("Godkjenning.perioderMedSammeSkjæringstidspunkt") {
                 requireKey("vedtaksperiodeId", "behandlingId", "fom", "tom")
             }
@@ -81,6 +62,40 @@ class GodkjenningsbehovRiver(
             it.interestedIn("Godkjenning.orgnummereMedRelevanteArbeidsforhold")
             it.requireArray("Godkjenning.omregnedeÅrsinntekter") {
                 requireKey("organisasjonsnummer", "beløp")
+            }
+            it.requireAny(
+                "Godkjenning.sykepengegrunnlagsfakta.fastsatt",
+                listOf("EtterHovedregel", "IInfotrygd", "EtterSkjønn"),
+            )
+            it.requireKey("Godkjenning.sykepengegrunnlagsfakta.omregnetÅrsinntektTotalt")
+            it.require("Godkjenning.sykepengegrunnlagsfakta.fastsatt") { fastsattNode ->
+                when (fastsattNode.asText()) {
+                    "EtterHovedregel" -> {
+                        it.requireKey(
+                            "Godkjenning.sykepengegrunnlagsfakta.6G",
+                            "Godkjenning.sykepengegrunnlagsfakta.arbeidsgivere",
+                            "Godkjenning.sykepengegrunnlagsfakta.sykepengegrunnlag",
+                        )
+
+                        it.requireArray("Godkjenning.sykepengegrunnlagsfakta.arbeidsgivere") {
+                            requireKey("arbeidsgiver", "omregnetÅrsinntekt", "inntektskilde")
+                        }
+                    }
+
+                    "EtterSkjønn" -> {
+                        it.requireKey(
+                            "Godkjenning.sykepengegrunnlagsfakta.6G",
+                            "Godkjenning.sykepengegrunnlagsfakta.arbeidsgivere",
+                            "Godkjenning.sykepengegrunnlagsfakta.skjønnsfastsatt",
+                        )
+
+                        it.requireArray("Godkjenning.sykepengegrunnlagsfakta.arbeidsgivere") {
+                            requireKey("arbeidsgiver", "omregnetÅrsinntekt", "skjønnsfastsatt", "inntektskilde")
+                        }
+                    }
+
+                    else -> {}
+                }
             }
         }
 
@@ -115,6 +130,7 @@ class GodkjenningsbehovRiver(
                 skjæringstidspunkt = LocalDate.parse(packet["Godkjenning.skjæringstidspunkt"].asText()),
                 spleisSykepengegrunnlagsfakta = spleisSykepengegrunnlagsfakta(packet),
                 erInngangsvilkårVurdertISpleis = packet["Godkjenning.sykepengegrunnlagsfakta.fastsatt"].asText() != "IInfotrygd",
+                sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(packet, faktatype(packet)),
                 omregnedeÅrsinntekter =
                     packet["Godkjenning.omregnedeÅrsinntekter"].map {
                         OmregnetÅrsinntekt(
@@ -157,6 +173,63 @@ class GodkjenningsbehovRiver(
                         )
                     },
             )
+        }
+    }
+
+    private fun faktatype(packet: JsonMessage): Faktatype {
+        return when (val fastsattString = packet["Godkjenning.sykepengegrunnlagsfakta.fastsatt"].asText()) {
+            "EtterSkjønn" -> Faktatype.ETTER_SKJØNN
+            "EtterHovedregel" -> Faktatype.ETTER_HOVEDREGEL
+            "IInfotrygd" -> Faktatype.I_INFOTRYGD
+            else -> throw IllegalArgumentException("FastsattType $fastsattString er ikke støttet")
+        }
+    }
+
+    private fun sykepengegrunnlagsfakta(
+        packet: JsonMessage,
+        faktatype: Faktatype,
+    ): Sykepengegrunnlagsfakta {
+        if (faktatype == Faktatype.I_INFOTRYGD) {
+            return Sykepengegrunnlagsfakta.Infotrygd(
+                omregnetÅrsinntekt = packet["Godkjenning.sykepengegrunnlagsfakta.omregnetÅrsinntektTotalt"].asDouble(),
+            )
+        }
+
+        return when (faktatype) {
+            Faktatype.ETTER_SKJØNN ->
+                Sykepengegrunnlagsfakta.Spleis.EtterSkjønn(
+                    omregnetÅrsinntekt = packet["Godkjenning.sykepengegrunnlagsfakta.omregnetÅrsinntektTotalt"].asDouble(),
+                    seksG = packet["Godkjenning.sykepengegrunnlagsfakta.6G"].asDouble(),
+                    skjønnsfastsatt = packet["Godkjenning.sykepengegrunnlagsfakta.skjønnsfastsatt"].asDouble(),
+                    arbeidsgivere =
+                        packet["Godkjenning.sykepengegrunnlagsfakta.arbeidsgivere"].map { arbeidsgiver ->
+                            val organisasjonsnummer = arbeidsgiver["arbeidsgiver"].asText()
+                            Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterSkjønn(
+                                organisasjonsnummer = organisasjonsnummer,
+                                omregnetÅrsinntekt = arbeidsgiver["omregnetÅrsinntekt"].asDouble(),
+                                skjønnsfastsatt = arbeidsgiver["skjønnsfastsatt"].asDouble(),
+                                inntektskilde = arbeidsgiver["inntektskilde"].asText(),
+                            )
+                        },
+                )
+
+            Faktatype.ETTER_HOVEDREGEL ->
+                Sykepengegrunnlagsfakta.Spleis.EtterHovedregel(
+                    omregnetÅrsinntekt = packet["Godkjenning.sykepengegrunnlagsfakta.omregnetÅrsinntektTotalt"].asDouble(),
+                    seksG = packet["Godkjenning.sykepengegrunnlagsfakta.6G"].asDouble(),
+                    sykepengegrunnlag = packet["Godkjenning.sykepengegrunnlagsfakta.sykepengegrunnlag"].asDouble(),
+                    arbeidsgivere =
+                        packet["Godkjenning.sykepengegrunnlagsfakta.arbeidsgivere"].map { arbeidsgiver ->
+                            val organisasjonsnummer = arbeidsgiver["arbeidsgiver"].asText()
+                            Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
+                                organisasjonsnummer = organisasjonsnummer,
+                                omregnetÅrsinntekt = arbeidsgiver["omregnetÅrsinntekt"].asDouble(),
+                                inntektskilde = arbeidsgiver["inntektskilde"].asText(),
+                            )
+                        },
+                )
+
+            else -> error("Her vet vi ikke hva som har skjedd. Feil i kompilatoren?")
         }
     }
 }

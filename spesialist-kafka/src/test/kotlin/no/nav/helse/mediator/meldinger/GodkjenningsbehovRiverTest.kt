@@ -7,6 +7,7 @@ import no.nav.helse.kafka.GodkjenningsbehovRiver
 import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.utbetaling.Utbetalingtype
+import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Inntektsopplysningkilde
@@ -92,6 +93,21 @@ internal class GodkjenningsbehovRiverTest {
                         ), it.spleisSykepengegrunnlagsfakta
                     )
                     assertEquals(
+                        Sykepengegrunnlagsfakta.Spleis.EtterHovedregel(
+                            omregnetÅrsinntekt = 600000.0,
+                            seksG = 6 * 118620.0,
+                            arbeidsgivere = listOf(
+                                Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
+                                    ORGNR,
+                                    omregnetÅrsinntekt = 600000.0,
+                                    inntektskilde = "Arbeidsgiver"
+                                )
+                            ),
+                            sykepengegrunnlag = 600000.0
+                        ),
+                        it.sykepengegrunnlagsfakta
+                    )
+                    assertEquals(
                         listOf(OmregnetÅrsinntekt(arbeidsgiverreferanse = ORGNR, beløp = 123456.7)), it.omregnedeÅrsinntekter
                     )
                 },
@@ -163,6 +179,22 @@ internal class GodkjenningsbehovRiverTest {
                             )
                         ), it.spleisSykepengegrunnlagsfakta
                     )
+                    assertEquals(
+                        Sykepengegrunnlagsfakta.Spleis.EtterSkjønn(
+                            omregnetÅrsinntekt = 500000.0,
+                            seksG = 6 * 118620.0,
+                            arbeidsgivere = listOf(
+                                Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterSkjønn(
+                                    ORGNR,
+                                    omregnetÅrsinntekt = 500000.0,
+                                    inntektskilde = "Saksbehandler",
+                                    skjønnsfastsatt = 600000.0
+                                )
+                            ),
+                            skjønnsfastsatt = 600000.0
+                        ),
+                        it.sykepengegrunnlagsfakta
+                    )
                 },
                 kontekstbasertPubliserer = any()
             )
@@ -214,6 +246,7 @@ internal class GodkjenningsbehovRiverTest {
                         SpleisSykepengegrunnlagsfakta(arbeidsgivere = emptyList()),
                         it.spleisSykepengegrunnlagsfakta
                     )
+                    assertEquals(Sykepengegrunnlagsfakta.Infotrygd(omregnetÅrsinntekt = 500000.0), it.sykepengegrunnlagsfakta)
                 },
                 kontekstbasertPubliserer = any()
             )
