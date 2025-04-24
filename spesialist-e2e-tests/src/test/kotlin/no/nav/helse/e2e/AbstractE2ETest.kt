@@ -183,13 +183,13 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         håndterRisikovurderingløsning(vedtaksperiodeId = vedtaksperiodeId)
         håndterUtbetalingUtbetalt()
         håndterAvsluttetMedVedtak(
-            fom = fom,
-            tom = tom,
-            skjæringstidspunkt = skjæringstidspunkt,
             vedtaksperiodeId = vedtaksperiodeId,
             spleisBehandlingId =
                 behandlinger[vedtaksperiodeId]?.last()
                     ?: throw IllegalArgumentException("Det finnes ingen behandlinger for vedtaksperiodeId=$vedtaksperiodeId"),
+            fom = fom,
+            tom = tom,
+            skjæringstidspunkt = skjæringstidspunkt,
         )
     }
 
@@ -974,7 +974,6 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         fom: LocalDate = 1.januar,
         tom: LocalDate = 31.januar,
         skjæringstidspunkt: LocalDate = fom,
-        settInnAvviksvurderingFraSpleis: Boolean = true,
     ) {
         val utbetalingId = if (this::utbetalingId.isInitialized) this.utbetalingId else null
         if (utbetalingId != null) håndterUtbetalingUtbetalt(aktørId, fødselsnummer, organisasjonsnummer)
@@ -990,7 +989,6 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 tom = tom,
                 skjæringstidspunkt = skjæringstidspunkt,
                 fastsattType = fastsattType,
-                settInnAvviksvurderingFraSpleis = settInnAvviksvurderingFraSpleis,
             )
     }
 

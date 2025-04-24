@@ -66,7 +66,7 @@ object Testmeldingfabrikk {
 
     fun lagGosysOppgaveEndret(
         fødselsnummer: String,
-        id: UUID,
+        id: UUID = UUID.randomUUID(),
     ): String =
         nyHendelse(id, "gosys_oppgave_endret", mapOf("fødselsnummer" to fødselsnummer))
 
@@ -146,8 +146,8 @@ object Testmeldingfabrikk {
     )
 
     fun lagAdressebeskyttelseEndret(
-        aktørId: Any,
-        fødselsnummer: Any,
+        aktørId: String,
+        fødselsnummer: String,
         id: UUID = UUID.randomUUID(),
     ) = nyHendelse(
         id, "adressebeskyttelse_endret", mapOf(
@@ -257,8 +257,15 @@ object Testmeldingfabrikk {
         vilkårsgrunnlagId: UUID = UUID.randomUUID(),
         spleisBehandlingId: UUID = UUID.randomUUID(),
         tags: List<String> = emptyList(),
-        fastsatt: String = "EtterHovedregel",
-        skjønnsfastsatt: Double? = null,
+        perioderMedSammeSkjæringstidspunkt: List<Map<String, Any>> = listOf(
+            mapOf(
+                "fom" to periodeFom,
+                "tom" to periodeTom,
+                "vedtaksperiodeId" to vedtaksperiodeId,
+                "behandlingId" to spleisBehandlingId
+            )
+        ),
+        sykepengegrunnlagsfakta: Map<String, Any> = fastsattEtterHovedregel(organisasjonsnummer)
     ) =
         nyHendelse(
             id, "behov",
@@ -282,28 +289,8 @@ object Testmeldingfabrikk {
                     "vilkårsgrunnlagId" to vilkårsgrunnlagId,
                     "behandlingId" to spleisBehandlingId,
                     "tags" to tags,
-                    "perioderMedSammeSkjæringstidspunkt" to listOf(
-                        mapOf(
-                            "fom" to "$periodeFom",
-                            "tom" to "$periodeTom",
-                            "vedtaksperiodeId" to "$vedtaksperiodeId",
-                            "behandlingId" to "$spleisBehandlingId"
-                        )
-                    ),
-                    "sykepengegrunnlagsfakta" to mapOf(
-                        "fastsatt" to fastsatt,
-                        "arbeidsgivere" to listOf(
-                            mutableMapOf(
-                                "arbeidsgiver" to organisasjonsnummer,
-                                "omregnetÅrsinntekt" to 123456.7,
-                                "inntektskilde" to "Arbeidsgiver",
-                            ).apply {
-                                if (skjønnsfastsatt != null) {
-                                    put("skjønnsfastsatt", skjønnsfastsatt)
-                                }
-                            }
-                        )
-                    ),
+                    "perioderMedSammeSkjæringstidspunkt" to perioderMedSammeSkjæringstidspunkt,
+                    "sykepengegrunnlagsfakta" to sykepengegrunnlagsfakta,
                     "omregnedeÅrsinntekter" to listOf(
                         mapOf(
                             "organisasjonsnummer" to organisasjonsnummer,
@@ -1068,9 +1055,8 @@ object Testmeldingfabrikk {
         fom: LocalDate,
         tom: LocalDate,
         skjæringstidspunkt: LocalDate,
-        fastsattType: String,
+        sykepengegrunnlagsfakta: Map<String, Any> = fastsattEtterHovedregel(organisasjonsnummer),
         id: UUID,
-        settInnAvviksvurderingFraSpleis: Boolean = true,
     ): String = nyHendelse(
         id, "avsluttet_med_vedtak", mutableMapOf(
             "aktørId" to aktørId,
@@ -1087,12 +1073,6 @@ object Testmeldingfabrikk {
         ).apply {
             compute("utbetalingId") { _, _ -> utbetalingId }
             if (utbetalingId != null) {
-                val sykepengegrunnlagsfakta = when (fastsattType) {
-                    "EtterSkjønn" -> fastsattEtterSkjønn(organisasjonsnummer, settInnAvviksvurderingFraSpleis)
-                    "EtterHovedregel" -> fastsattEtterHovedregel(organisasjonsnummer, settInnAvviksvurderingFraSpleis)
-                    "IInfotrygd" -> fastsattIInfotrygd()
-                    else -> throw IllegalArgumentException("$fastsattType er ikke en gyldig fastsatt-type")
-                }
                 put("sykepengegrunnlagsfakta", sykepengegrunnlagsfakta)
             }
         }
@@ -1123,60 +1103,69 @@ object Testmeldingfabrikk {
         )
     )
 
-    private fun fastsattEtterSkjønn(
+    fun fastsattEtterSkjønn(
         organisasjonsnummer: String,
         settInnAvviksvurderingFraSpleis: Boolean = true,
+        omregnetÅrsinntektTotalt: Double = 500000.0,
+        skjønnsfastsatt: Double = 600000.0,
+        innrapportertÅrsinntekt: Double = 600000.0,
+        avviksprosent: Double = 16.67,
+        arbeidsgivere: List<Map<String, Any>> = listOf(
+            mapOf(
+                "arbeidsgiver" to organisasjonsnummer,
+                "omregnetÅrsinntekt" to 500000.00,
+                "skjønnsfastsatt" to 600000.00,
+                "inntektskilde" to "Saksbehandler"
+            )
+        ),
     ): Map<String, Any> {
         return mutableMapOf(
             "fastsatt" to "EtterSkjønn",
-            "omregnetÅrsinntektTotalt" to 500000.0,
-            "skjønnsfastsatt" to 600000.0,
+            "omregnetÅrsinntektTotalt" to omregnetÅrsinntektTotalt,
+            "skjønnsfastsatt" to skjønnsfastsatt,
             "6G" to 6 * 118620.0,
-            "arbeidsgivere" to listOf(
-                mapOf(
-                    "arbeidsgiver" to organisasjonsnummer,
-                    "omregnetÅrsinntekt" to 500000.00,
-                    "skjønnsfastsatt" to 600000.00,
-                    "inntektskilde" to "Saksbehandler"
-                )
-            )
+            "arbeidsgivere" to arbeidsgivere
         ).apply {
             if (settInnAvviksvurderingFraSpleis) {
-                this["innrapportertÅrsinntekt"] = 600000.0
-                this["avviksprosent"] = 16.67
+                this["innrapportertÅrsinntekt"] = innrapportertÅrsinntekt
+                this["avviksprosent"] = avviksprosent
             }
         }
-
     }
 
-    private fun fastsattEtterHovedregel(
+    fun fastsattEtterHovedregel(
         organisasjonsnummer: String,
-        settInnAvviksvurderingFraSpleis: Boolean = true
+        settInnAvviksvurderingFraSpleis: Boolean = true,
+        omregnetÅrsinntektTotalt: Double = 600000.0,
+        sykepengegrunnlag: Double = 600000.0,
+        innrapportertÅrsinntekt: Double = 600000.0,
+        avviksprosent: Double = 0.0,
+        arbeidsgivere: List<Map<String, Any>> = listOf(
+            mapOf(
+                "arbeidsgiver" to organisasjonsnummer,
+                "omregnetÅrsinntekt" to 600000.00,
+                "inntektskilde" to "Arbeidsgiver"
+            )
+        )
     ): Map<String, Any> {
         return mutableMapOf(
             "fastsatt" to "EtterHovedregel",
-            "omregnetÅrsinntektTotalt" to 600000.0,
-            "sykepengegrunnlag" to 600000.0,
+            "omregnetÅrsinntektTotalt" to omregnetÅrsinntektTotalt,
+            "sykepengegrunnlag" to sykepengegrunnlag,
             "6G" to 6 * 118620.0,
-            "arbeidsgivere" to listOf(
-                mapOf(
-                    "arbeidsgiver" to organisasjonsnummer,
-                    "omregnetÅrsinntekt" to 600000.00,
-                    "inntektskilde" to "Arbeidsgiver"
-                )
-            )
+            "arbeidsgivere" to arbeidsgivere
         ).apply {
             if (settInnAvviksvurderingFraSpleis) {
-                this["innrapportertÅrsinntekt"] = 600000.0
-                this["avviksprosent"] = 0
+                this["innrapportertÅrsinntekt"] = innrapportertÅrsinntekt
+                this["avviksprosent"] = avviksprosent
             }
         }
     }
 
-    private fun fastsattIInfotrygd(): Map<String, Any> {
+    fun fastsattIInfotrygd(omregnetÅrsinntektTotalt: Double = 500000.0): Map<String, Any> {
         return mapOf(
             "fastsatt" to "IInfotrygd",
-            "omregnetÅrsinntektTotalt" to 500000.0,
+            "omregnetÅrsinntektTotalt" to omregnetÅrsinntektTotalt,
         )
     }
 

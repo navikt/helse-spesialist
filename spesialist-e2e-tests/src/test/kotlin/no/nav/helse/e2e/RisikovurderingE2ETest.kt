@@ -47,7 +47,7 @@ class RisikovurderingE2ETest : AbstractE2ETest() {
         spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         assertInnholdIBehov(behov = "Risikovurdering") { jsonNode ->
             assertEquals("Arbeidsgiver", jsonNode["Risikovurdering"]["inntekt"]["inntektskilde"].asText())
-            assertEquals(123456.7, jsonNode["Risikovurdering"]["inntekt"]["omregnetÅrsinntekt"].asDouble())
+            assertEquals(600000.0, jsonNode["Risikovurdering"]["inntekt"]["omregnetÅrsinntekt"].asDouble())
         }
     }
 }

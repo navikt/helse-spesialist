@@ -84,7 +84,7 @@ internal class GodkjenningsbehovRiverTest {
                             arbeidsgivere = listOf(
                                 SykepengegrunnlagsArbeidsgiver(
                                     arbeidsgiver = ORGNR,
-                                    omregnetÅrsinntekt = 123456.7,
+                                    omregnetÅrsinntekt = 600000.0,
                                     inntektskilde = Inntektsopplysningkilde.Arbeidsgiver,
                                     skjønnsfastsatt = null,
                                 )
@@ -104,7 +104,6 @@ internal class GodkjenningsbehovRiverTest {
     fun `leser Godkjenningbehov fastsatt etter skjønn`() {
         val relevanteArbeidsforhold = listOf(ORGNR)
         val vilkårsgrunnlagId = UUID.randomUUID()
-        val skjønnsfastsatt = 1000.0
         testRapid.sendTestMessage(
             Testmeldingfabrikk.lagGodkjenningsbehov(
                 aktørId = AKTØR,
@@ -123,8 +122,17 @@ internal class GodkjenningsbehovRiverTest {
                 kanAvvises = true,
                 id = HENDELSE,
                 vilkårsgrunnlagId = vilkårsgrunnlagId,
-                fastsatt = "EtterSkjønn",
-                skjønnsfastsatt = skjønnsfastsatt,
+                sykepengegrunnlagsfakta = Testmeldingfabrikk.fastsattEtterSkjønn(
+                    organisasjonsnummer = ORGNR,
+                    arbeidsgivere = listOf(
+                        mapOf(
+                            "arbeidsgiver" to ORGNR,
+                            "omregnetÅrsinntekt" to 500000.00,
+                            "skjønnsfastsatt" to 600000.00,
+                            "inntektskilde" to "Saksbehandler"
+                        )
+                    )
+                ),
             )
         )
         verify(exactly = 1) {
@@ -148,9 +156,9 @@ internal class GodkjenningsbehovRiverTest {
                             arbeidsgivere = listOf(
                                 SykepengegrunnlagsArbeidsgiver(
                                     arbeidsgiver = ORGNR,
-                                    omregnetÅrsinntekt = 123456.7,
-                                    inntektskilde = Inntektsopplysningkilde.Arbeidsgiver,
-                                    skjønnsfastsatt = skjønnsfastsatt,
+                                    omregnetÅrsinntekt = 500000.0,
+                                    inntektskilde = Inntektsopplysningkilde.Saksbehandler,
+                                    skjønnsfastsatt = 600000.0,
                                 )
                             )
                         ), it.spleisSykepengegrunnlagsfakta
@@ -183,7 +191,7 @@ internal class GodkjenningsbehovRiverTest {
                 kanAvvises = true,
                 id = HENDELSE,
                 vilkårsgrunnlagId = vilkårsgrunnlagId,
-                fastsatt = "IInfotrygd"
+                sykepengegrunnlagsfakta = Testmeldingfabrikk.fastsattIInfotrygd(),
             )
         )
         verify(exactly = 1) {

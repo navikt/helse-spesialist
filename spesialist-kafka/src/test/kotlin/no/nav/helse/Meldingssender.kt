@@ -10,6 +10,7 @@ import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk
 import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk.ArbeidsgiverinformasjonJson
 import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk.VergemålJson.Fullmakt
 import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk.VergemålJson.Vergemål
+import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk.fastsattEtterHovedregel
 import no.nav.helse.spesialist.typer.Kjønn
 import org.junit.jupiter.api.Assertions.assertEquals
 import java.time.LocalDate
@@ -626,8 +627,6 @@ internal class Meldingssender(private val testRapid: TestRapid) {
         fom: LocalDate,
         tom: LocalDate,
         skjæringstidspunkt: LocalDate,
-        fastsattType: String,
-        settInnAvviksvurderingFraSpleis: Boolean,
     ): UUID = newUUID.also { id ->
         testRapid.sendTestMessage(
             Testmeldingfabrikk.lagAvsluttetMedVedtak(
@@ -640,9 +639,8 @@ internal class Meldingssender(private val testRapid: TestRapid) {
                 fom = fom,
                 tom = tom,
                 skjæringstidspunkt = skjæringstidspunkt,
-                fastsattType = fastsattType,
                 id = id,
-                settInnAvviksvurderingFraSpleis = settInnAvviksvurderingFraSpleis
+                sykepengegrunnlagsfakta = fastsattEtterHovedregel(organisasjonsnummer),
             )
         )
     }
