@@ -16,6 +16,7 @@ import no.nav.helse.db.SorteringsnøkkelForDatabase
 import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
+import no.nav.helse.spesialist.db.HelseDao.Companion.somDbArray
 import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
@@ -200,16 +201,12 @@ class PgOppgaveDao internal constructor(
         egneSakerPåVent: Boolean,
         egneSaker: Boolean,
         tildelt: Boolean?,
-        grupperteFiltrerteEgenskaper: Map<Egenskap.Kategori, List<EgenskapForDatabase>>?,
+        grupperteFiltrerteEgenskaper: Map<Egenskap.Kategori, List<EgenskapForDatabase>>,
     ): List<OppgaveFraDatabaseForVisning> {
         val orderBy = if (sortering.isNotEmpty()) sortering.joinToString { it.nøkkelTilKolonne() } else "opprettet DESC"
-        val egenskaperSomSkalEkskluderes = ekskluderEgenskaper.joinToString { "'$it'" }
-        val ukategoriserteEgenskaper = grupperteFiltrerteEgenskaper?.tilSqlString(Egenskap.Kategori.Ukategorisert)
-        val oppgavetypeEgenskaper = grupperteFiltrerteEgenskaper?.tilSqlString(Egenskap.Kategori.Oppgavetype)
-        val periodetypeEgenskaper = grupperteFiltrerteEgenskaper?.tilSqlString(Egenskap.Kategori.Periodetype)
-        val mottakerEgenskaper = grupperteFiltrerteEgenskaper?.tilSqlString(Egenskap.Kategori.Mottaker)
-        val antallArbeidsforholdEgenskaper = grupperteFiltrerteEgenskaper?.tilSqlString(Egenskap.Kategori.Inntektskilde)
-        val statusEgenskaper = grupperteFiltrerteEgenskaper?.tilSqlString(Egenskap.Kategori.Status)
+        val ukategoriserteEgenskaper = grupperteFiltrerteEgenskaper[Egenskap.Kategori.Ukategorisert]
+        val kategoriserteEgenskaper =
+            grupperteFiltrerteEgenskaper.filterNot { it.key == Egenskap.Kategori.Ukategorisert }.flatMap { it.value }
 
         return asSQL(
             """
@@ -241,14 +238,10 @@ class PgOppgaveDao internal constructor(
             LEFT JOIN pa_vent pv ON v.vedtaksperiode_id = pv.vedtaksperiode_id
             LEFT JOIN saksbehandler sb ON pv.saksbehandler_ref = sb.oid
             WHERE o.status = 'AvventerSaksbehandler'
-                AND (:ingen_ukategoriserte_egenskaper OR egenskaper @> ARRAY[$ukategoriserteEgenskaper]::varchar[]) -- egenskaper saksbehandler har filtrert på
-                AND (:ingen_oppgavetype_egenskaper OR egenskaper && ARRAY[$oppgavetypeEgenskaper]::varchar[]) -- egenskaper saksbehandler har filtrert på
-                AND (:ingen_periodetype_egenskaper OR egenskaper && ARRAY[$periodetypeEgenskaper]::varchar[]) -- egenskaper saksbehandler har filtrert på
-                AND (:ingen_mottakertype_egenskaper OR egenskaper && ARRAY[$mottakerEgenskaper]::varchar[]) -- egenskaper saksbehandler har filtrert på
-                AND (:ingen_antallarbeidsforholdtype_egenskaper OR egenskaper && ARRAY[$antallArbeidsforholdEgenskaper]::varchar[]) -- egenskaper saksbehandler har filtrert på
-                AND (:ingen_statustype_egenskaper OR egenskaper && ARRAY[$statusEgenskaper]::varchar[]) -- egenskaper saksbehandler har filtrert på
-                AND NOT (egenskaper && ARRAY[$egenskaperSomSkalEkskluderes]::varchar[]) -- egenskaper saksbehandler ikke har tilgang til
-                AND NOT (egenskaper && ARRAY['BESLUTTER']::varchar[] AND ttv.saksbehandler = :oid) -- hvis oppgaven er sendt til beslutter og saksbehandler var den som sendte
+                AND (:ukategoriserte_egenskaper = '{}' OR egenskaper @> :ukategoriserte_egenskaper::varchar[]) -- ukategoriserte egenskaper, inkluder oppgaver som inneholder alle saksbehandler har valgt
+                AND (:kategoriserte_egenskaper = '{}' OR egenskaper && :kategoriserte_egenskaper::varchar[]) -- kategoriserte egenskaper, inkluder oppgaver som har minst en av de valgte egenskapene
+                AND NOT (egenskaper && :egenskaper_som_skal_ekskluderes::varchar[]) -- egenskaper saksbehandler ikke har tilgang til
+                AND NOT ('BESLUTTER' = ANY(egenskaper) AND ttv.saksbehandler = :oid) -- hvis oppgaven er sendt til beslutter og saksbehandler var den som sendte
                 AND
                     CASE
                         WHEN :egne_saker_pa_vent THEN t.saksbehandler_ref = :oid AND ('PÅ_VENT' = ANY(o.egenskaper))
@@ -271,12 +264,9 @@ class PgOppgaveDao internal constructor(
             "egne_saker_pa_vent" to egneSakerPåVent,
             "egne_saker" to egneSaker,
             "tildelt" to tildelt,
-            "ingen_ukategoriserte_egenskaper" to (ukategoriserteEgenskaper == null),
-            "ingen_oppgavetype_egenskaper" to (oppgavetypeEgenskaper == null),
-            "ingen_periodetype_egenskaper" to (periodetypeEgenskaper == null),
-            "ingen_mottakertype_egenskaper" to (mottakerEgenskaper == null),
-            "ingen_antallarbeidsforholdtype_egenskaper" to (antallArbeidsforholdEgenskaper == null),
-            "ingen_statustype_egenskaper" to (statusEgenskaper == null),
+            "ukategoriserte_egenskaper" to ukategoriserteEgenskaper.somDbArray(),
+            "kategoriserte_egenskaper" to kategoriserteEgenskaper.somDbArray(),
+            "egenskaper_som_skal_ekskluderes" to ekskluderEgenskaper.somDbArray(),
         ).list { row ->
             val egenskaper =
                 row.array<String>("egenskaper").map { enumValueOf<EgenskapForDatabase>(it) }.toSet()
@@ -339,15 +329,12 @@ class PgOppgaveDao internal constructor(
             saksbehandlerident = it.string("saksbehandlerident"),
         )
 
-    private fun Map<Egenskap.Kategori, List<EgenskapForDatabase>>.tilSqlString(kategori: Egenskap.Kategori) =
-        get(kategori)?.joinToString { "'${it.name}'" }
-
     override fun finnAntallOppgaver(saksbehandlerOid: UUID): AntallOppgaverFraDatabase =
         asSQL(
             """
             SELECT
-                count(*) FILTER ( WHERE NOT o.egenskaper @> ARRAY['PÅ_VENT']::varchar[] ) AS antall_mine_saker,
-                count(*) FILTER ( WHERE o.egenskaper @> ARRAY['PÅ_VENT']::varchar[] ) AS antall_mine_saker_på_vent
+                count(*) FILTER ( WHERE NOT 'PÅ_VENT' = ANY (o.egenskaper) ) AS antall_mine_saker,
+                count(*) FILTER ( WHERE 'PÅ_VENT' = ANY (o.egenskaper) ) AS antall_mine_saker_på_vent
             from oppgave o
                 LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
             WHERE o.status = 'AvventerSaksbehandler'

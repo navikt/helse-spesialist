@@ -6,6 +6,7 @@ import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
+import no.nav.helse.spesialist.db.HelseDao.Companion.somDbArray
 import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
@@ -101,7 +102,7 @@ class PgOppgaveRepository private constructor(queryRunner: QueryRunner) : QueryR
             "behandling_id" to oppgave.behandlingId,
             "godkjenningsbehov_id" to oppgave.godkjenningsbehovId,
             "utbetaling_id" to oppgave.utbetalingId,
-            "egenskaper" to oppgave.egenskaper.joinToString(prefix = "{", postfix = "}") { it.toDb() },
+            "egenskaper" to oppgave.egenskaper.somDbArray { it.toDb() },
             "kan_avvises" to oppgave.kanAvvises,
         ).update()
     }

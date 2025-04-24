@@ -4,6 +4,7 @@ import kotliquery.Session
 import no.nav.helse.db.PåVentDao
 import no.nav.helse.modell.saksbehandler.handlinger.PåVentÅrsak
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
+import no.nav.helse.spesialist.db.HelseDao.Companion.somDbArray
 import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
@@ -113,6 +114,4 @@ class PgPåVentDao private constructor(
             "arsaker" to årsaker.somDbArray { it.årsak },
         ).update()
     }
-
-    private fun <T> Iterable<T>.somDbArray(transform: (T) -> String) = joinToString(prefix = "{", postfix = "}", transform = transform)
 }

@@ -22,7 +22,7 @@ class PgBehandlingsstatistikkDao internal constructor(dataSource: DataSource) :
             INNER JOIN vedtak v ON o.vedtak_ref = v.id
             WHERE o.status='AvventerSaksbehandler'::oppgavestatus
               AND v.forkastet = false 
-              AND o.egenskaper @> ARRAY['BESLUTTER']::VARCHAR[]
+              AND 'BESLUTTER' = ANY (o.egenskaper)
         """,
             ).single { it.int("count") } ?: 0
 
@@ -34,7 +34,7 @@ class PgBehandlingsstatistikkDao internal constructor(dataSource: DataSource) :
             INNER JOIN vedtak v ON o.vedtak_ref = v.id
             WHERE o.status='AvventerSaksbehandler'::oppgavestatus
               AND v.forkastet = false 
-              AND o.egenskaper @> ARRAY['EGEN_ANSATT']::VARCHAR[]
+              AND 'EGEN_ANSATT' = ANY (o.egenskaper)
         """,
             ).single { it.int("count") } ?: 0
 
@@ -45,7 +45,7 @@ class PgBehandlingsstatistikkDao internal constructor(dataSource: DataSource) :
                 FROM oppgave
                 WHERE status='Ferdigstilt'::oppgavestatus
                   AND oppdatert >= :fom
-                  AND egenskaper @> ARRAY['EGEN_ANSATT']::VARCHAR[]
+                  AND 'EGEN_ANSATT' = ANY (egenskaper)
                 """.trimIndent(),
                 "fom" to fom,
             ).single { it.int("count") } ?: 0
@@ -152,7 +152,7 @@ class PgBehandlingsstatistikkDao internal constructor(dataSource: DataSource) :
                 """
                 SELECT count(distinct o.id) FROM oppgave o 
                 WHERE o.status = 'AvventerSaksbehandler'
-                AND o.egenskaper @> ARRAY[:egenskap]::varchar[]
+                AND :egenskap = ANY (o.egenskaper)
                 """.trimIndent(),
                 "egenskap" to egenskap.name,
             ).single { it.int(1) } ?: 0
@@ -167,7 +167,7 @@ class PgBehandlingsstatistikkDao internal constructor(dataSource: DataSource) :
                 SELECT count(distinct o.id) FROM oppgave o 
                 WHERE o.status = 'Ferdigstilt'
                 AND o.oppdatert >= :fom
-                AND o.egenskaper @> ARRAY[:egenskap]::varchar[]
+                AND :egenskap = ANY (o.egenskaper)
                 """.trimIndent(),
                 "egenskap" to egenskap.name,
                 "fom" to fom,

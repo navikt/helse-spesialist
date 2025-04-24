@@ -25,7 +25,7 @@ interface QueryRunner {
 
     fun createArrayOf(
         typeName: String,
-        map: List<String>,
+        map: Collection<Any>,
     ): Array
 }
 
@@ -50,7 +50,7 @@ class MedSession(private val session: Session) : QueryRunner {
 
     override fun createArrayOf(
         typeName: String,
-        map: List<String>,
+        map: Collection<Any>,
     ) = session.createArrayOf(typeName, map)
 }
 
@@ -78,7 +78,7 @@ class MedDataSource(private val dataSource: DataSource) : QueryRunner {
 
     override fun createArrayOf(
         typeName: String,
-        map: List<String>,
+        map: Collection<Any>,
     ): Array {
         throw UnsupportedOperationException("Dette har vi ikke støtte for...")
     }

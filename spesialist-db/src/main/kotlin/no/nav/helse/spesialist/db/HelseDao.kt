@@ -15,6 +15,20 @@ abstract class HelseDao(private val dataSource: DataSource) {
             vararg params: Pair<String, Any?>,
         ) = queryOf(sql, params.toMap())
 
+        /**
+         * Lager en string som kan gjøres om til et array ved å caste den til varchar[] i spørringer.
+         *
+         * For eksempel:
+         * ```
+         * i parameterene:
+         *   "identer" to personidenter.somDbArray()
+         * i spørringen:
+         *   :identer::varchar[]
+         * ```
+         */
+        fun <T> Iterable<T>?.somDbArray(transform: (T) -> CharSequence = { it.toString() }) =
+            this?.joinToString(prefix = "{", postfix = "}", transform = transform) ?: "{}"
+
         fun insert(
             @Language("SQL") sql: String,
             params: Map<String, Any?>,

@@ -7,6 +7,7 @@ import no.nav.helse.modell.person.vedtaksperiode.VarselDto
 import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQLWithQuestionMarks
+import no.nav.helse.spesialist.db.HelseDao.Companion.somDbArray
 import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
@@ -69,7 +70,7 @@ class PgGenerasjonDao private constructor(private val queryRunner: QueryRunner) 
             "tom" to behandlingDto.tom,
             "skjaeringstidspunkt" to behandlingDto.skjæringstidspunkt,
             "tilstand" to behandlingDto.tilstand.name,
-            "tags" to behandlingDto.tags.joinToString(prefix = "{", postfix = "}"),
+            "tags" to behandlingDto.tags.somDbArray(),
         ).update()
     }
 

@@ -39,7 +39,7 @@ interface OppgaveDao {
         egneSakerPåVent: Boolean = false,
         egneSaker: Boolean = false,
         tildelt: Boolean? = null,
-        grupperteFiltrerteEgenskaper: Map<Egenskap.Kategori, List<EgenskapForDatabase>>? = emptyMap(),
+        grupperteFiltrerteEgenskaper: Map<Egenskap.Kategori, List<EgenskapForDatabase>> = emptyMap(),
     ): List<OppgaveFraDatabaseForVisning>
 
     fun finnAntallOppgaver(saksbehandlerOid: UUID): AntallOppgaverFraDatabase

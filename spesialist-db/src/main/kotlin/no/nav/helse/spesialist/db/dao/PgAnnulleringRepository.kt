@@ -4,6 +4,7 @@ import no.nav.helse.db.AnnulleringRepository
 import no.nav.helse.modell.Annullering
 import no.nav.helse.modell.saksbehandler.handlinger.AnnulleringDto
 import no.nav.helse.spesialist.db.DbQuery
+import no.nav.helse.spesialist.db.HelseDao.Companion.somDbArray
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 import java.util.UUID
 import javax.sql.DataSource
@@ -71,6 +72,4 @@ class PgAnnulleringRepository internal constructor(dataSource: DataSource) : Ann
     override fun finnAnnullering(annulleringDto: AnnulleringDto): Annullering? {
         return finnAnnullering(annulleringDto.arbeidsgiverFagsystemId, annulleringDto.personFagsystemId)
     }
-
-    private fun <T> Iterable<T>.somDbArray(transform: (T) -> String) = joinToString(prefix = "{", postfix = "}", transform = transform)
 }
