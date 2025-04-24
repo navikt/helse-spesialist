@@ -17,10 +17,6 @@ import no.nav.helse.TestRapidHelpers.siste
 import no.nav.helse.TestRapidHelpers.sisteBehov
 import no.nav.helse.Testdata
 import no.nav.helse.Testdata.snapshot
-import no.nav.helse.mediator.meldinger.Risikofunn
-import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
-import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Fullmakt
-import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Vergemål
 import no.nav.helse.modell.melding.OverstyrtInntektOgRefusjonEvent.OverstyrtArbeidsgiverEvent.OverstyrtRefusjonselementEvent
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.person.Adressebeskyttelse
@@ -52,6 +48,7 @@ import no.nav.helse.spesialist.client.spleis.SpleisClientSnapshothenter
 import no.nav.helse.spesialist.db.DbQuery
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
+import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk
 import no.nav.helse.spesialist.test.TestPerson
 import no.nav.helse.util.januar
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -198,8 +195,8 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     protected fun spesialistInnvilgerManuelt(
         regelverksvarsler: List<String> = emptyList(),
-        fullmakter: List<Fullmakt> = emptyList(),
-        risikofunn: List<Risikofunn> = emptyList(),
+        fullmakter: List<Testmeldingfabrikk.VergemålJson.Fullmakt> = emptyList(),
+        risikofunn: List<Testmeldingfabrikk.Risikofunn> = emptyList(),
         harOppdatertMetadata: Boolean = false,
         godkjenningsbehovTestdata: GodkjenningsbehovTestdata = this.godkjenningsbehovTestdata,
     ) {
@@ -238,7 +235,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     protected fun spesialistBehandlerGodkjenningsbehovFremTilÅpneOppgaver(
         regelverksvarsler: List<String> = emptyList(),
-        fullmakter: List<Fullmakt> = emptyList(),
+        fullmakter: List<Testmeldingfabrikk.VergemålJson.Fullmakt> = emptyList(),
         harOppdatertMetadata: Boolean = false,
         enhet: String = enhetsnummerOslo,
         arbeidsgiverbeløp: Int = 20000,
@@ -307,8 +304,8 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected fun spesialistBehandlerGodkjenningsbehovFremTilOppgave(
         enhet: String = enhetsnummerOslo,
         regelverksvarsler: List<String> = emptyList(),
-        fullmakter: List<Fullmakt> = emptyList(),
-        risikofunn: List<Risikofunn> = emptyList(),
+        fullmakter: List<Testmeldingfabrikk.VergemålJson.Fullmakt> = emptyList(),
+        risikofunn: List<Testmeldingfabrikk.Risikofunn> = emptyList(),
         harRisikovurdering: Boolean = false,
         harOppdatertMetadata: Boolean = false,
         kanGodkjennesAutomatisk: Boolean = false,
@@ -341,7 +338,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     private fun spesialistBehandlerGodkjenningsbehovFremTilRisikovurdering(
         enhet: String = enhetsnummerOslo,
         regelverksvarsler: List<String> = emptyList(),
-        fullmakter: List<Fullmakt> = emptyList(),
+        fullmakter: List<Testmeldingfabrikk.VergemålJson.Fullmakt> = emptyList(),
         harOppdatertMetadata: Boolean = false,
         arbeidsgiverbeløp: Int = 20000,
         personbeløp: Int = 0,
@@ -850,9 +847,9 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected fun håndterVergemålOgFullmaktløsning(
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
-        vergemål: List<Vergemål> = emptyList(),
-        fremtidsfullmakter: List<Vergemål> = emptyList(),
-        fullmakter: List<Fullmakt> = emptyList(),
+        vergemål: List<Testmeldingfabrikk.VergemålJson.Vergemål> = emptyList(),
+        fremtidsfullmakter: List<Testmeldingfabrikk.VergemålJson.Vergemål> = emptyList(),
+        fullmakter: List<Testmeldingfabrikk.VergemålJson.Fullmakt> = emptyList(),
     ) {
         assertEtterspurteBehov("Vergemål", "Fullmakt")
         sisteMeldingId =
@@ -890,7 +887,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         organisasjonsnummer: String = ORGNR,
         vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
         kanGodkjennesAutomatisk: Boolean = true,
-        risikofunn: List<Risikofunn> = emptyList(),
+        risikofunn: List<Testmeldingfabrikk.Risikofunn> = emptyList(),
     ) {
         assertEtterspurteBehov("Risikovurdering")
         sisteMeldingId =

@@ -1,9 +1,9 @@
 package no.nav.helse.e2e
 
 import no.nav.helse.TestRapidHelpers.oppgaveId
-import no.nav.helse.mediator.meldinger.Risikofunn
 import no.nav.helse.modell.oppgave.Egenskap.RISK_QA
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
+import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk.Risikofunn
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test

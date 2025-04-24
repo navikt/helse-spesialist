@@ -2,17 +2,16 @@ package no.nav.helse
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.helse.TestRapidHelpers.siste
-import no.nav.helse.mediator.meldinger.Risikofunn
-import no.nav.helse.mediator.meldinger.Testmeldingfabrikk
-import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.ArbeidsgiverinformasjonJson
-import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Fullmakt
-import no.nav.helse.mediator.meldinger.Testmeldingfabrikk.VergemålJson.Vergemål
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_UTBETALT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.NY
 import no.nav.helse.spesialist.domain.Periode
+import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk
+import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk.ArbeidsgiverinformasjonJson
+import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk.VergemålJson.Fullmakt
+import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk.VergemålJson.Vergemål
 import no.nav.helse.spesialist.typer.Kjønn
 import org.junit.jupiter.api.Assertions.assertEquals
 import java.time.LocalDate
@@ -581,7 +580,7 @@ class Meldingssender(private val testRapid: TestRapid) {
         organisasjonsnummer: String,
         vedtaksperiodeId: UUID,
         kanGodkjennesAutomatisk: Boolean = true,
-        funn: List<Risikofunn> = emptyList(),
+        funn: List<Testmeldingfabrikk.Risikofunn> = emptyList(),
     ): UUID = newUUID.also { id ->
         val behov = testRapid.inspektør.siste("behov")
         assertEquals("Risikovurdering", behov["@behov"].map { it.asText() }.single())
