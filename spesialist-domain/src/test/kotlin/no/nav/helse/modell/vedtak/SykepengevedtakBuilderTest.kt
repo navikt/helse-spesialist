@@ -448,8 +448,8 @@ class SykepengevedtakBuilderTest {
                     skjønnsfastsatt = 650000.0,
                     arbeidsgivere =
                     listOf(
-                        Spleis.Arbeidsgiver.EtterSkjønn(organisasjonsnummer, 300000.0, 325000.0),
-                        Spleis.Arbeidsgiver.EtterSkjønn("987654321", 300000.0, 325000.0),
+                        Spleis.Arbeidsgiver.EtterSkjønn(organisasjonsnummer, 300000.0, "Arbeidsgiver", 325000.0, ),
+                        Spleis.Arbeidsgiver.EtterSkjønn("987654321", 300000.0, "Arbeidsgiver", 325000.0, ),
                     ),
                 )
 
@@ -457,10 +457,11 @@ class SykepengevedtakBuilderTest {
                 Spleis.EtterHovedregel(
                     omregnetÅrsinntekt = omregnetÅrsinntekt,
                     seksG = seksG2023,
+                    sykepengegrunnlag = 600000.0,
                     arbeidsgivere =
                     listOf(
-                        Spleis.Arbeidsgiver.EtterHovedregel(organisasjonsnummer, 300000.0),
-                        Spleis.Arbeidsgiver.EtterHovedregel("987654321", 300000.0),
+                        Spleis.Arbeidsgiver.EtterHovedregel(organisasjonsnummer, 300000.0, "Arbeidsgiver"),
+                        Spleis.Arbeidsgiver.EtterHovedregel("987654321", 300000.0, "Arbeidsgiver"),
                     ),
                 )
 

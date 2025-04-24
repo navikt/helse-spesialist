@@ -18,29 +18,33 @@ sealed interface Sykepengegrunnlagsfakta {
         data class EtterSkjønn(
             override val omregnetÅrsinntekt: Double,
             override val seksG: Double,
-            val skjønnsfastsatt: Double,
             override val arbeidsgivere: List<Arbeidsgiver.EtterSkjønn>,
+            val skjønnsfastsatt: Double,
         ) : Spleis()
 
         data class EtterHovedregel(
             override val omregnetÅrsinntekt: Double,
             override val seksG: Double,
             override val arbeidsgivere: List<Arbeidsgiver.EtterHovedregel>,
+            val sykepengegrunnlag: Double,
         ) : Spleis()
 
         sealed interface Arbeidsgiver {
             val organisasjonsnummer: String
             val omregnetÅrsinntekt: Double
+            val inntektskilde: String
 
             data class EtterSkjønn(
                 override val organisasjonsnummer: String,
                 override val omregnetÅrsinntekt: Double,
+                override val inntektskilde: String,
                 val skjønnsfastsatt: Double,
             ) : Arbeidsgiver
 
             data class EtterHovedregel(
                 override val organisasjonsnummer: String,
                 override val omregnetÅrsinntekt: Double,
+                override val inntektskilde: String,
             ) : Arbeidsgiver
         }
     }

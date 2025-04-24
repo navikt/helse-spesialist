@@ -66,7 +66,7 @@ internal class AvsluttetMedVedtakRiverTest {
         """
         {
             "fastsatt": "EtterSkjønn",
-            "omregnetÅrsinntekt": 800000.00,
+            "omregnetÅrsinntektTotalt": 800000.00,
             "innrapportertÅrsinntekt": 755555.00,
             "skjønnsfastsatt": 777000.00,
             "avviksprosent": 26.38,
@@ -78,7 +78,8 @@ internal class AvsluttetMedVedtakRiverTest {
               {
                 "arbeidsgiver": "987654321",
                 "omregnetÅrsinntekt": 800000.00,
-                "skjønnsfastsatt": 777000.00
+                "skjønnsfastsatt": 777000.00,
+                "inntektskilde": "Arbeidsgiver"
               }
             ]
           }
@@ -89,8 +90,9 @@ internal class AvsluttetMedVedtakRiverTest {
         """
         {
             "fastsatt": "EtterHovedregel",
-            "omregnetÅrsinntekt": 800000.00,
+            "omregnetÅrsinntektTotalt": 800000.00,
             "innrapportertÅrsinntekt": 755555.00,
+            "sykepengegrunnlag": 777000.00,
             "avviksprosent": 26.38,
             "6G": 711720,
             "tags": [
@@ -99,7 +101,8 @@ internal class AvsluttetMedVedtakRiverTest {
             "arbeidsgivere": [
               {
                 "arbeidsgiver": "987654321",
-                "omregnetÅrsinntekt": 800000.00
+                "omregnetÅrsinntekt": 800000.00,
+                "inntektskilde": "Arbeidsgiver"
               }
             ]
           }
@@ -110,7 +113,7 @@ internal class AvsluttetMedVedtakRiverTest {
         """
         {
             "fastsatt": "IInfotrygd",
-            "omregnetÅrsinntekt": 800000.00
+            "omregnetÅrsinntektTotalt": 800000.00
           }
         """.trimIndent()
 }

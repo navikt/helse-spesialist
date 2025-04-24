@@ -34,14 +34,19 @@ class AvsluttetMedVedtakRiver(
                 "sykepengegrunnlagsfakta.fastsatt",
                 listOf("EtterHovedregel", "IInfotrygd", "EtterSkjønn"),
             )
-            it.requireKey("sykepengegrunnlagsfakta.omregnetÅrsinntekt")
+            it.requireKey("sykepengegrunnlagsfakta.omregnetÅrsinntektTotalt")
             it.require("sykepengegrunnlagsfakta.fastsatt") { fastsattNode ->
                 when (fastsattNode.asText()) {
                     "EtterHovedregel" -> {
                         it.requireKey(
                             "sykepengegrunnlagsfakta.6G",
                             "sykepengegrunnlagsfakta.arbeidsgivere",
+                            "sykepengegrunnlagsfakta.sykepengegrunnlag",
                         )
+
+                        it.requireArray("sykepengegrunnlagsfakta.arbeidsgivere") {
+                            requireKey("arbeidsgiver", "omregnetÅrsinntekt", "inntektskilde")
+                        }
                     }
 
                     "EtterSkjønn" -> {
@@ -50,6 +55,10 @@ class AvsluttetMedVedtakRiver(
                             "sykepengegrunnlagsfakta.arbeidsgivere",
                             "sykepengegrunnlagsfakta.skjønnsfastsatt",
                         )
+
+                        it.requireArray("sykepengegrunnlagsfakta.arbeidsgivere") {
+                            requireKey("arbeidsgiver", "omregnetÅrsinntekt", "skjønnsfastsatt", "inntektskilde")
+                        }
                     }
 
                     else -> {}
@@ -95,14 +104,14 @@ class AvsluttetMedVedtakRiver(
     ): Sykepengegrunnlagsfakta {
         if (faktatype == Faktatype.I_INFOTRYGD) {
             return Sykepengegrunnlagsfakta.Infotrygd(
-                omregnetÅrsinntekt = packet["sykepengegrunnlagsfakta.omregnetÅrsinntekt"].asDouble(),
+                omregnetÅrsinntekt = packet["sykepengegrunnlagsfakta.omregnetÅrsinntektTotalt"].asDouble(),
             )
         }
 
         return when (faktatype) {
             Faktatype.ETTER_SKJØNN ->
                 Sykepengegrunnlagsfakta.Spleis.EtterSkjønn(
-                    omregnetÅrsinntekt = packet["sykepengegrunnlagsfakta.omregnetÅrsinntekt"].asDouble(),
+                    omregnetÅrsinntekt = packet["sykepengegrunnlagsfakta.omregnetÅrsinntektTotalt"].asDouble(),
                     seksG = packet["sykepengegrunnlagsfakta.6G"].asDouble(),
                     skjønnsfastsatt = packet["sykepengegrunnlagsfakta.skjønnsfastsatt"].asDouble(),
                     arbeidsgivere =
@@ -112,20 +121,23 @@ class AvsluttetMedVedtakRiver(
                                 organisasjonsnummer = organisasjonsnummer,
                                 omregnetÅrsinntekt = arbeidsgiver["omregnetÅrsinntekt"].asDouble(),
                                 skjønnsfastsatt = arbeidsgiver["skjønnsfastsatt"].asDouble(),
+                                inntektskilde = arbeidsgiver["inntektskilde"].asText(),
                             )
                         },
                 )
 
             Faktatype.ETTER_HOVEDREGEL ->
                 Sykepengegrunnlagsfakta.Spleis.EtterHovedregel(
-                    omregnetÅrsinntekt = packet["sykepengegrunnlagsfakta.omregnetÅrsinntekt"].asDouble(),
+                    omregnetÅrsinntekt = packet["sykepengegrunnlagsfakta.omregnetÅrsinntektTotalt"].asDouble(),
                     seksG = packet["sykepengegrunnlagsfakta.6G"].asDouble(),
+                    sykepengegrunnlag = packet["sykepengegrunnlagsfakta.sykepengegrunnlag"].asDouble(),
                     arbeidsgivere =
                         packet["sykepengegrunnlagsfakta.arbeidsgivere"].map { arbeidsgiver ->
                             val organisasjonsnummer = arbeidsgiver["arbeidsgiver"].asText()
                             Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
                                 organisasjonsnummer = organisasjonsnummer,
                                 omregnetÅrsinntekt = arbeidsgiver["omregnetÅrsinntekt"].asDouble(),
+                                inntektskilde = arbeidsgiver["inntektskilde"].asText(),
                             )
                         },
                 )

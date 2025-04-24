@@ -1110,14 +1110,15 @@ object Testmeldingfabrikk {
     ): Map<String, Any> {
         return mutableMapOf(
             "fastsatt" to "EtterSkjønn",
-            "omregnetÅrsinntekt" to 500000.0,
+            "omregnetÅrsinntektTotalt" to 500000.0,
             "skjønnsfastsatt" to 600000.0,
             "6G" to 6 * 118620.0,
             "arbeidsgivere" to listOf(
                 mapOf(
                     "arbeidsgiver" to organisasjonsnummer,
                     "omregnetÅrsinntekt" to 500000.00,
-                    "skjønnsfastsatt" to 600000.00
+                    "skjønnsfastsatt" to 600000.00,
+                    "inntektskilde" to "Saksbehandler"
                 )
             )
         ).apply {
@@ -1135,12 +1136,14 @@ object Testmeldingfabrikk {
     ): Map<String, Any> {
         return mutableMapOf(
             "fastsatt" to "EtterHovedregel",
-            "omregnetÅrsinntekt" to 600000.0,
+            "omregnetÅrsinntektTotalt" to 600000.0,
+            "sykepengegrunnlag" to 600000.0,
             "6G" to 6 * 118620.0,
             "arbeidsgivere" to listOf(
                 mapOf(
                     "arbeidsgiver" to organisasjonsnummer,
                     "omregnetÅrsinntekt" to 600000.00,
+                    "inntektskilde" to "Arbeidsgiver"
                 )
             )
         ).apply {
@@ -1154,7 +1157,7 @@ object Testmeldingfabrikk {
     private fun fastsattIInfotrygd(): Map<String, Any> {
         return mapOf(
             "fastsatt" to "IInfotrygd",
-            "omregnetÅrsinntekt" to 500000.0,
+            "omregnetÅrsinntektTotalt" to 500000.0,
         )
     }
 

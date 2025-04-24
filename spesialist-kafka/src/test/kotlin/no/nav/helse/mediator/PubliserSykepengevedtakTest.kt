@@ -131,11 +131,13 @@ internal class PubliserSykepengevedtakTest {
                     Sykepengegrunnlagsfakta.Spleis.EtterHovedregel(
                         omregnetÅrsinntekt = 10000.0,
                         seksG = 711720.0,
+                        sykepengegrunnlag = 10000.0,
                         arbeidsgivere =
                             listOf(
                                 Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
                                     organisasjonsnummer = ORGANISASJONSNUMMER,
                                     omregnetÅrsinntekt = 10000.0,
+                                    inntektskilde = "Arbeidsgiver"
                                 ),
                             ),
                     ),
@@ -204,12 +206,14 @@ internal class PubliserSykepengevedtakTest {
                 sykepengegrunnlagsfakta =
                     Sykepengegrunnlagsfakta.Spleis.EtterHovedregel(
                         omregnetÅrsinntekt = 10000.0,
+                        sykepengegrunnlag = 10000.0,
                         seksG = 711720.0,
                         arbeidsgivere =
                             listOf(
                                 Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
                                     organisasjonsnummer = ORGANISASJONSNUMMER,
                                     omregnetÅrsinntekt = 10000.0,
+                                    inntektskilde = "Arbeidsgiver"
                                 ),
                             ),
                     ),
@@ -295,6 +299,7 @@ internal class PubliserSykepengevedtakTest {
                                     organisasjonsnummer = ORGANISASJONSNUMMER,
                                     omregnetÅrsinntekt = 10000.0,
                                     skjønnsfastsatt = 13000.0,
+                                    inntektskilde = "Arbeidsgiver"
                                 ),
                             ),
                         skjønnsfastsatt = 13000.0,
@@ -404,6 +409,7 @@ internal class PubliserSykepengevedtakTest {
                                 organisasjonsnummer = ORGANISASJONSNUMMER,
                                 omregnetÅrsinntekt = 10000.0,
                                 skjønnsfastsatt = 13000.0,
+                                inntektskilde = "Arbeidsgiver"
                             ),
                         ),
                         skjønnsfastsatt = 13000.0,

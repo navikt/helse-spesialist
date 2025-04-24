@@ -286,17 +286,18 @@ object Meldingsbygger {
             "utbetalingId" to vedtaksperiode.utbetalingIdForÅByggeMelding("avsluttet_med_vedtak"),
             "sykepengegrunnlagsfakta" to buildMap {
                 put("fastsatt", vedtaksperiode.sykepengegrunnlagsfakta.fastsatt.toString())
-                put("omregnetÅrsinntekt", 600000.0)
+                put("omregnetÅrsinntektTotalt", 600000.0)
                 put("6G", 6 * 118620.0)
-                if (vedtaksperiode.sykepengegrunnlagsfakta.fastsatt == Sykepengegrunnlagsfakta.FastsattType.EtterSkjønn)
-                    put(
-                        "skjønnsfastsatt",
-                        vedtaksperiode.sykepengegrunnlagsfakta.arbeidsgivere.sumOf { it.omregnetÅrsinntekt }
-                    )
+                val sykepengegrunnlagKey = when (vedtaksperiode.sykepengegrunnlagsfakta.fastsatt) {
+                    Sykepengegrunnlagsfakta.FastsattType.EtterHovedregel -> "sykepengegrunnlag"
+                    Sykepengegrunnlagsfakta.FastsattType.EtterSkjønn -> "skjønnsfastsatt"
+                }
+                put(sykepengegrunnlagKey, vedtaksperiode.sykepengegrunnlagsfakta.arbeidsgivere.sumOf { it.omregnetÅrsinntekt })
                 put("arbeidsgivere", vedtaksperiode.sykepengegrunnlagsfakta.arbeidsgivere.map {
                     buildMap<String, Any> {
                         put("arbeidsgiver", it.organisasjonsnummer)
                         put("omregnetÅrsinntekt", it.omregnetÅrsinntekt)
+                        put("inntektskilde", it.inntektskilde)
                         if (it is SkjønnsfastsattArbeidsgiver) put("skjønnsfastsatt", it.skjønnsfastsatt)
                     }
                 })
