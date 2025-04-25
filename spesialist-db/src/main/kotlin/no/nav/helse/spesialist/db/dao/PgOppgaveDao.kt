@@ -205,8 +205,11 @@ class PgOppgaveDao internal constructor(
     ): List<OppgaveFraDatabaseForVisning> {
         val orderBy = if (sortering.isNotEmpty()) sortering.joinToString { it.nøkkelTilKolonne() } else "opprettet DESC"
         val ukategoriserteEgenskaper = grupperteFiltrerteEgenskaper[Egenskap.Kategori.Ukategorisert]
-        val kategoriserteEgenskaper =
-            grupperteFiltrerteEgenskaper.filterNot { it.key == Egenskap.Kategori.Ukategorisert }.flatMap { it.value }
+        val oppgavetypeegenskaper = grupperteFiltrerteEgenskaper[Egenskap.Kategori.Oppgavetype]
+        val periodetypeegenskaper = grupperteFiltrerteEgenskaper[Egenskap.Kategori.Periodetype]
+        val mottakeregenskaper = grupperteFiltrerteEgenskaper[Egenskap.Kategori.Mottaker]
+        val antallArbeidsforholdEgenskaper = grupperteFiltrerteEgenskaper[Egenskap.Kategori.Inntektskilde]
+        val statusegenskaper = grupperteFiltrerteEgenskaper[Egenskap.Kategori.Status]
 
         return asSQL(
             """
@@ -239,7 +242,11 @@ class PgOppgaveDao internal constructor(
             LEFT JOIN saksbehandler sb ON pv.saksbehandler_ref = sb.oid
             WHERE o.status = 'AvventerSaksbehandler'
                 AND (:ukategoriserte_egenskaper = '{}' OR egenskaper @> :ukategoriserte_egenskaper::varchar[]) -- ukategoriserte egenskaper, inkluder oppgaver som inneholder alle saksbehandler har valgt
-                AND (:kategoriserte_egenskaper = '{}' OR egenskaper && :kategoriserte_egenskaper::varchar[]) -- kategoriserte egenskaper, inkluder oppgaver som har minst en av de valgte egenskapene
+                AND (:oppgavetypeegenskaper = '{}' OR egenskaper && :oppgavetypeegenskaper::varchar[]) -- inkluder alle oppgaver som har minst en av de valgte oppgavetype
+                AND (:periodetypeegenskaper = '{}' OR egenskaper && :periodetypeegenskaper::varchar[]) -- inkluder alle oppgaver som har minst en av de valgte periodetypene
+                AND (:mottakeregenskaper = '{}' OR egenskaper && :mottakeregenskaper::varchar[]) -- inkluder alle oppgaver som har minst en av de valgte mottakertypene
+                AND (:antall_arbeidsforhold_egenskaper = '{}' OR egenskaper && :antall_arbeidsforhold_egenskaper::varchar[]) -- inkluder alle oppgaver som har minst en av de valgte
+                AND (:statusegenskaper = '{}' OR egenskaper && :statusegenskaper::varchar[]) -- inkluder alle oppgaver som har minst en av de valgte statusene
                 AND NOT (egenskaper && :egenskaper_som_skal_ekskluderes::varchar[]) -- egenskaper saksbehandler ikke har tilgang til
                 AND NOT ('BESLUTTER' = ANY(egenskaper) AND ttv.saksbehandler = :oid) -- hvis oppgaven er sendt til beslutter og saksbehandler var den som sendte
                 AND
@@ -265,7 +272,11 @@ class PgOppgaveDao internal constructor(
             "egne_saker" to egneSaker,
             "tildelt" to tildelt,
             "ukategoriserte_egenskaper" to ukategoriserteEgenskaper.somDbArray(),
-            "kategoriserte_egenskaper" to kategoriserteEgenskaper.somDbArray(),
+            "oppgavetypeegenskaper" to oppgavetypeegenskaper.somDbArray(),
+            "periodetypeegenskaper" to periodetypeegenskaper.somDbArray(),
+            "mottakeregenskaper" to mottakeregenskaper.somDbArray(),
+            "antall_arbeidsforhold_egenskaper" to antallArbeidsforholdEgenskaper.somDbArray(),
+            "statusegenskaper" to statusegenskaper.somDbArray(),
             "egenskaper_som_skal_ekskluderes" to ekskluderEgenskaper.somDbArray(),
         ).list { row ->
             val egenskaper =

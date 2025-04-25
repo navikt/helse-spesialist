@@ -652,6 +652,17 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
                 ),
         )
         nyOppgaveForNyPerson(
+            oppgaveegenskaper =
+                setOf(
+                    Egenskap.REVURDERING,
+                    Egenskap.HASTER,
+                    Egenskap.UTLAND,
+                    Egenskap.FORSTEGANGSBEHANDLING,
+                    Egenskap.DELVIS_REFUSJON,
+                    Egenskap.FLERE_ARBEIDSGIVERE,
+                ),
+        )
+        nyOppgaveForNyPerson(
             oppgaveegenskaper = setOf(Egenskap.REVURDERING, Egenskap.HASTER),
         )
         nyOppgaveForNyPerson(
@@ -661,56 +672,70 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
             oppgaveegenskaper = setOf(Egenskap.UTBETALING_TIL_SYKMELDT, Egenskap.EN_ARBEIDSGIVER),
         )
 
-        val oppgaver =
-            oppgaveDao.finnOppgaverForVisning(
-                ekskluderEgenskaper = emptyList(),
-                saksbehandlerOid = UUID.randomUUID(),
-                grupperteFiltrerteEgenskaper = mapOf(Kategori.Oppgavetype to listOf(SØKNAD, REVURDERING)),
-            )
-        val oppgaver1 =
-            oppgaveDao.finnOppgaverForVisning(
-                ekskluderEgenskaper = emptyList(),
-                saksbehandlerOid = UUID.randomUUID(),
-                grupperteFiltrerteEgenskaper = mapOf(Kategori.Ukategorisert to listOf(HASTER, UTLAND)),
-            )
-        val oppgaver2 =
-            oppgaveDao.finnOppgaverForVisning(
-                ekskluderEgenskaper = emptyList(),
-                saksbehandlerOid = UUID.randomUUID(),
-                grupperteFiltrerteEgenskaper =
-                    mapOf(
-                        Kategori.Ukategorisert to listOf(HASTER, UTLAND),
-                        Kategori.Oppgavetype to listOf(SØKNAD),
-                        Kategori.Periodetype to listOf(FORSTEGANGSBEHANDLING),
-                        Kategori.Mottaker to listOf(DELVIS_REFUSJON),
-                        Kategori.Inntektskilde to listOf(FLERE_ARBEIDSGIVERE),
-                    ),
-            )
-        val oppgaver3 =
-            oppgaveDao.finnOppgaverForVisning(
-                ekskluderEgenskaper = emptyList(),
-                saksbehandlerOid = UUID.randomUUID(),
-                grupperteFiltrerteEgenskaper =
-                    mapOf(
-                        Kategori.Mottaker to listOf(UTBETALING_TIL_SYKMELDT),
-                        Kategori.Inntektskilde to listOf(EN_ARBEIDSGIVER),
-                    ),
-            )
-        val oppgaver5 =
-            oppgaveDao.finnOppgaverForVisning(
-                ekskluderEgenskaper = emptyList(),
-                saksbehandlerOid = UUID.randomUUID(),
-                grupperteFiltrerteEgenskaper = emptyMap(),
-            )
+        oppgaveDao.finnOppgaverForVisning(
+            ekskluderEgenskaper = emptyList(),
+            saksbehandlerOid = UUID.randomUUID(),
+            grupperteFiltrerteEgenskaper = mapOf(Kategori.Oppgavetype to listOf(SØKNAD, REVURDERING)),
+        ).let {
+            assertEquals(4, it.size)
+        }
 
-        assertEquals(3, oppgaver.size)
-        assertEquals(1, oppgaver1.size)
-        assertEquals(oppgave1.id, oppgaver1.first().id)
-        assertEquals(1, oppgaver2.size)
-        assertEquals(oppgave1.id, oppgaver2.first().id)
-        assertEquals(1, oppgaver3.size)
-        assertEquals(oppgave4.id, oppgaver3.first().id)
-        assertEquals(4, oppgaver5.size)
+        oppgaveDao.finnOppgaverForVisning(
+            ekskluderEgenskaper = emptyList(),
+            saksbehandlerOid = UUID.randomUUID(),
+            grupperteFiltrerteEgenskaper = mapOf(
+                Kategori.Oppgavetype to listOf(SØKNAD, REVURDERING),
+                Kategori.Mottaker to listOf(FLERE_ARBEIDSGIVERE)
+            ),
+        ).let {
+            assertEquals(2, it.size)
+        }
+
+        oppgaveDao.finnOppgaverForVisning(
+            ekskluderEgenskaper = emptyList(),
+            saksbehandlerOid = UUID.randomUUID(),
+            grupperteFiltrerteEgenskaper = mapOf(Kategori.Ukategorisert to listOf(HASTER, UTLAND)),
+        ).let {
+            assertEquals(2, it.size)
+            assertTrue(it.any { it.id == oppgave1.id })
+        }
+
+        oppgaveDao.finnOppgaverForVisning(
+            ekskluderEgenskaper = emptyList(),
+            saksbehandlerOid = UUID.randomUUID(),
+            grupperteFiltrerteEgenskaper =
+                mapOf(
+                    Kategori.Ukategorisert to listOf(HASTER, UTLAND),
+                    Kategori.Oppgavetype to listOf(SØKNAD),
+                    Kategori.Periodetype to listOf(FORSTEGANGSBEHANDLING),
+                    Kategori.Mottaker to listOf(DELVIS_REFUSJON),
+                    Kategori.Inntektskilde to listOf(FLERE_ARBEIDSGIVERE),
+                ),
+        ).let {
+            assertEquals(1, it.size)
+            assertEquals(oppgave1.id, it.first().id)
+        }
+
+        oppgaveDao.finnOppgaverForVisning(
+            ekskluderEgenskaper = emptyList(),
+            saksbehandlerOid = UUID.randomUUID(),
+            grupperteFiltrerteEgenskaper =
+                mapOf(
+                    Kategori.Mottaker to listOf(UTBETALING_TIL_SYKMELDT),
+                    Kategori.Inntektskilde to listOf(EN_ARBEIDSGIVER),
+                ),
+        ).let {
+            assertEquals(1, it.size)
+            assertEquals(oppgave4.id, it.first().id)
+        }
+
+        oppgaveDao.finnOppgaverForVisning(
+            ekskluderEgenskaper = emptyList(),
+            saksbehandlerOid = UUID.randomUUID(),
+            grupperteFiltrerteEgenskaper = emptyMap(),
+        ).let {
+            assertEquals(5, it.size)
+        }
     }
 
     @Test
