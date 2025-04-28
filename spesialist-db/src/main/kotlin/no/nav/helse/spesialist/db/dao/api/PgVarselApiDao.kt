@@ -214,7 +214,7 @@ class PgVarselApiDao internal constructor(dataSource: DataSource) : HelseDao(dat
     }
 
     private fun Query.listKomplett() =
-        list { row -> sjekkForDefinisjonOgMapVerdier(row) }
+        list { row -> sjekkForDefinisjonOgMapVerdier(row) }.filterNot { it.status == VarselDbDto.Varselstatus.AVVIKLET }
             .filter { it.varseldefinisjon != null }
             .toSet()
 

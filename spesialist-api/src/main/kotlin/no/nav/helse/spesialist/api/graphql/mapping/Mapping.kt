@@ -9,6 +9,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiVarselDTO
 import no.nav.helse.spesialist.api.graphql.schema.ApiVarselDTO.ApiVarselvurderingDTO
 import no.nav.helse.spesialist.api.graphql.schema.ApiVarselstatus
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
+import no.nav.helse.spesialist.api.varsel.Varselstatus
 import no.nav.helse.spesialist.application.Reservasjonshenter
 
 fun VarselDbDto.toVarselDto(): ApiVarselDTO {
@@ -31,11 +32,12 @@ fun VarselDbDto.toVarselDto(): ApiVarselDTO {
                         ApiVarselstatus.valueOf(
                             status.let { status ->
                                 when (status) {
-                                    VarselDbDto.Varselstatus.INAKTIV -> no.nav.helse.spesialist.api.varsel.Varselstatus.INAKTIV
-                                    VarselDbDto.Varselstatus.AKTIV -> no.nav.helse.spesialist.api.varsel.Varselstatus.AKTIV
-                                    VarselDbDto.Varselstatus.VURDERT -> no.nav.helse.spesialist.api.varsel.Varselstatus.VURDERT
-                                    VarselDbDto.Varselstatus.GODKJENT -> no.nav.helse.spesialist.api.varsel.Varselstatus.GODKJENT
-                                    VarselDbDto.Varselstatus.AVVIST -> no.nav.helse.spesialist.api.varsel.Varselstatus.AVVIST
+                                    VarselDbDto.Varselstatus.INAKTIV -> Varselstatus.INAKTIV
+                                    VarselDbDto.Varselstatus.AKTIV -> Varselstatus.AKTIV
+                                    VarselDbDto.Varselstatus.VURDERT -> Varselstatus.VURDERT
+                                    VarselDbDto.Varselstatus.GODKJENT -> Varselstatus.GODKJENT
+                                    VarselDbDto.Varselstatus.AVVIST -> Varselstatus.AVVIST
+                                    VarselDbDto.Varselstatus.AVVIKLET -> error("Varsler med status avviklet skal ikke sendes til speil")
                                 }
                             }.name,
                         ),

@@ -15,6 +15,7 @@ data class VarselDbDto(
     enum class Varselstatus {
         INAKTIV,
         AKTIV,
+        AVVIKLET,
 
         // Varsler er 'VURDERT' når saksbehandler har trykket på avkrysningsboksen i Speil
         VURDERT,
