@@ -62,7 +62,8 @@ class TilkommenInntektQueryHandler(
         sessionContext: SessionContext,
     ): List<ApiTilkommenInntektskilde> =
         sessionContext.tilkommenInntektRepository.finnAlleForFødselsnummer(fødselsnummer)
-            .groupBy { it.organisasjonsnummer }.map { (organisasjonsnummer, inntekter) ->
+            .groupBy { it.organisasjonsnummer }
+            .map { (organisasjonsnummer, inntekter) ->
                 ApiTilkommenInntektskilde(
                     organisasjonsnummer = organisasjonsnummer,
                     inntekter =
@@ -121,9 +122,10 @@ class TilkommenInntektQueryHandler(
                                         }
                                     },
                             )
-                        },
+                        }.sortedBy { it.periode.fom },
                 )
             }
+            .sortedBy { it.organisasjonsnummer }
 
     private fun TilkommenInntektEvent.Endringer.toApiEndringer() =
         ApiTilkommenInntektEvent.Endringer(
