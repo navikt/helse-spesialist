@@ -25,7 +25,6 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiGhostPeriode
 import no.nav.helse.spesialist.api.graphql.schema.ApiInfotrygdutbetaling
 import no.nav.helse.spesialist.api.graphql.schema.ApiInntektoverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiMinimumSykdomsgradOverstyring
-import no.nav.helse.spesialist.api.graphql.schema.ApiNyttInntektsforholdPeriode
 import no.nav.helse.spesialist.api.graphql.schema.ApiPersoninfo
 import no.nav.helse.spesialist.api.graphql.schema.ApiSaksbehandler
 import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettingstype
@@ -44,7 +43,6 @@ import no.nav.helse.spesialist.api.overstyring.Skjonnsfastsettingstype
 import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsettingSykepengegrunnlagDto
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDto
 import no.nav.helse.spesialist.application.snapshot.SnapshotGhostPeriode
-import no.nav.helse.spesialist.application.snapshot.SnapshotNyttInntektsforholdPeriode
 import no.nav.helse.spesialist.application.snapshot.SnapshotPerson
 import java.time.LocalDate
 import java.util.UUID
@@ -120,7 +118,6 @@ data class ApiPersonResolver(
                         navn = arbeidsgiverApiDao.finnNavn(arbeidsgiver.organisasjonsnummer) ?: "navn er utilgjengelig",
                         bransjer = arbeidsgiverApiDao.finnBransjer(arbeidsgiver.organisasjonsnummer),
                         ghostPerioder = arbeidsgiver.ghostPerioder.tilGhostPerioder(arbeidsgiver.organisasjonsnummer),
-                        nyeInntektsforholdPerioder = arbeidsgiver.nyeInntektsforholdPerioder.tilNyeInntektsforholdPerioder(),
                         fødselsnummer = snapshot.fodselsnummer,
                         generasjoner = arbeidsgiver.generasjoner,
                         apiOppgaveService = apiOppgaveService,
@@ -173,19 +170,6 @@ data class ApiPersonResolver(
                 vilkarsgrunnlagId = it.vilkarsgrunnlagId,
                 deaktivert = it.deaktivert,
                 organisasjonsnummer = organisasjonsnummer,
-            )
-        }
-
-    private fun List<SnapshotNyttInntektsforholdPeriode>.tilNyeInntektsforholdPerioder(): List<ApiNyttInntektsforholdPeriode> =
-        map {
-            ApiNyttInntektsforholdPeriode(
-                id = it.id,
-                fom = it.fom,
-                tom = it.tom,
-                organisasjonsnummer = it.organisasjonsnummer,
-                skjaeringstidspunkt = it.skjaeringstidspunkt,
-                dagligBelop = it.dagligBelop,
-                manedligBelop = it.manedligBelop,
             )
         }
 }

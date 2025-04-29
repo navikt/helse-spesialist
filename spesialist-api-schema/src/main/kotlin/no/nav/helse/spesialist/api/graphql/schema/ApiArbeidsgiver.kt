@@ -157,17 +157,6 @@ data class ApiGhostPeriode(
     val id = UUID.nameUUIDFromBytes(fom.toString().toByteArray() + organisasjonsnummer.toByteArray()).toString()
 }
 
-@GraphQLName("NyttInntektsforholdPeriode")
-data class ApiNyttInntektsforholdPeriode(
-    val id: UUID,
-    val fom: LocalDate,
-    val tom: LocalDate,
-    val organisasjonsnummer: String,
-    val skjaeringstidspunkt: LocalDate,
-    val dagligBelop: Double,
-    val manedligBelop: Double,
-)
-
 @GraphQLIgnore
 interface ArbeidsgiverSchema {
     fun organisasjonsnummer(): String
@@ -177,8 +166,6 @@ interface ArbeidsgiverSchema {
     fun bransjer(): List<String>
 
     fun ghostPerioder(): List<ApiGhostPeriode>
-
-    fun nyeInntektsforholdPerioder(): List<ApiNyttInntektsforholdPeriode>
 
     fun generasjoner(): List<ApiGenerasjon>
 

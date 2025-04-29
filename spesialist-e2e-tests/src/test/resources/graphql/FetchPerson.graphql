@@ -92,17 +92,6 @@ fragment ghostPeriode on GhostPeriode {
     __typename
 }
 
-fragment nyttInntektsforholdPeriode on NyttInntektsforholdPeriode {
-    id
-    fom
-    tom
-    organisasjonsnummer
-    skjaeringstidspunkt
-    dagligBelop
-    manedligBelop
-    __typename
-}
-
 fragment kommentar on Kommentar {
     id
     tekst
@@ -546,10 +535,6 @@ fragment arbeidsgiver on Arbeidsgiver {
     }
     ghostPerioder {
         ...ghostPeriode
-        __typename
-    }
-    nyeInntektsforholdPerioder {
-        ...nyttInntektsforholdPeriode
         __typename
     }
     generasjoner {

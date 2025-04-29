@@ -17,7 +17,6 @@ import no.nav.helse.spesialist.application.snapshot.SnapshotInntekterFraAOrdning
 import no.nav.helse.spesialist.application.snapshot.SnapshotInntektskilde
 import no.nav.helse.spesialist.application.snapshot.SnapshotInntektsmelding
 import no.nav.helse.spesialist.application.snapshot.SnapshotInntektstype
-import no.nav.helse.spesialist.application.snapshot.SnapshotNyttInntektsforholdPeriode
 import no.nav.helse.spesialist.application.snapshot.SnapshotOmregnetArsinntekt
 import no.nav.helse.spesialist.application.snapshot.SnapshotOppdrag
 import no.nav.helse.spesialist.application.snapshot.SnapshotPeriodetilstand
@@ -81,7 +80,6 @@ import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLInntekt
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLInntektFraAOrdningen
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLInntekterFraAOrdningen
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLInntektsmelding
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLNyttInntektsforholdPeriode
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLOmregnetArsinntekt
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLOppdrag
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPeriodevilkar
@@ -120,7 +118,6 @@ fun GraphQLArbeidsgiver.tilSnapshotArbeidsgiver() =
     SnapshotArbeidsgiver(
         organisasjonsnummer = organisasjonsnummer,
         ghostPerioder = ghostPerioder.map { it.tilSnapshotGhostPeriode() },
-        nyeInntektsforholdPerioder = nyeInntektsforholdPerioder.map { it.tilSnapshotNyttInntektsforholdPeriode() },
         generasjoner = generasjoner.map { it.tilSnapshotGenerasjon() },
     )
 
@@ -253,17 +250,6 @@ fun GraphQLInntekterFraAOrdningen.tilSnapshotInntekterFraAOrdningen() =
     SnapshotInntekterFraAOrdningen(
         maned = maned,
         sum = sum,
-    )
-
-fun GraphQLNyttInntektsforholdPeriode.tilSnapshotNyttInntektsforholdPeriode() =
-    SnapshotNyttInntektsforholdPeriode(
-        id = id,
-        fom = fom,
-        tom = tom,
-        organisasjonsnummer = organisasjonsnummer,
-        skjaeringstidspunkt = skjaeringstidspunkt,
-        dagligBelop = dagligBelop,
-        manedligBelop = manedligBelop,
     )
 
 fun GraphQLOmregnetArsinntekt.tilSnapshotOmregnetArsinntekt() =

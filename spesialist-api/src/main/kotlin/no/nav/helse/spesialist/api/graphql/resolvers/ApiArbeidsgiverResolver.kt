@@ -17,7 +17,6 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiBeregnetPeriode
 import no.nav.helse.spesialist.api.graphql.schema.ApiGenerasjon
 import no.nav.helse.spesialist.api.graphql.schema.ApiGhostPeriode
 import no.nav.helse.spesialist.api.graphql.schema.ApiInntektFraAOrdningen
-import no.nav.helse.spesialist.api.graphql.schema.ApiNyttInntektsforholdPeriode
 import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiUberegnetPeriode
 import no.nav.helse.spesialist.api.graphql.schema.ArbeidsgiverSchema
@@ -32,7 +31,6 @@ class ApiArbeidsgiverResolver(
     private val navn: String,
     private val bransjer: List<String>,
     private val ghostPerioder: List<ApiGhostPeriode>,
-    private val nyeInntektsforholdPerioder: List<ApiNyttInntektsforholdPeriode>,
     private val fødselsnummer: String,
     private val generasjoner: List<SnapshotGenerasjon>,
     private val apiOppgaveService: ApiOppgaveService,
@@ -56,8 +54,6 @@ class ApiArbeidsgiverResolver(
     override fun bransjer(): List<String> = bransjer
 
     override fun ghostPerioder(): List<ApiGhostPeriode> = ghostPerioder
-
-    override fun nyeInntektsforholdPerioder(): List<ApiNyttInntektsforholdPeriode> = nyeInntektsforholdPerioder
 
     override fun generasjoner(): List<ApiGenerasjon> =
         generasjoner.mapIndexed { index, generasjon ->
