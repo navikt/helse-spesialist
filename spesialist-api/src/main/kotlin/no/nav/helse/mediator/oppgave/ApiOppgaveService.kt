@@ -56,11 +56,13 @@ class ApiOppgaveService(
         val egenskaperSomSkalEkskluderes =
             egenskaperSaksbehandlerIkkeHarTilgangTil + ekskluderteEgenskaper + if (filtrering.ingenUkategoriserteEgenskaper) alleUkategoriserteEgenskaper else emptyList()
 
-        val grupperteFiltrerteEgenskaper =
-            filtrering.egenskaper
-                .groupBy { it.kategori }
-                .map { it.key.tilDatabaseversjon() to it.value.tilDatabaseversjon() }
-                .toMap()
+        val filtreringer =
+            OppgaveDao.Filtreringer(
+                filtrering.egenskaper
+                    .groupBy { it.kategori }
+                    .map { it.key.tilDatabaseversjon() to it.value.tilDatabaseversjon() }
+                    .toMap(),
+            )
 
         val oppgaver =
             oppgaveDao
@@ -73,7 +75,7 @@ class ApiOppgaveService(
                     egneSakerPåVent = filtrering.egneSakerPaVent,
                     egneSaker = filtrering.egneSaker,
                     tildelt = filtrering.tildelt,
-                    grupperteFiltrerteEgenskaper = grupperteFiltrerteEgenskaper,
+                    filtreringer = filtreringer,
                 )
         return ApiOppgaverTilBehandling(
             oppgaver = oppgaver.tilOppgaverTilBehandling(),

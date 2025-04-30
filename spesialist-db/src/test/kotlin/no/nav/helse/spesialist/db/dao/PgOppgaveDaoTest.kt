@@ -12,6 +12,7 @@ import no.nav.helse.db.EgenskapForDatabase.RISK_QA
 import no.nav.helse.db.EgenskapForDatabase.SØKNAD
 import no.nav.helse.db.EgenskapForDatabase.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.db.EgenskapForDatabase.UTLAND
+import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OppgaveFraDatabaseForVisning
 import no.nav.helse.db.OppgavesorteringForDatabase
 import no.nav.helse.db.SaksbehandlerFraDatabase
@@ -280,17 +281,19 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
     @Test
     fun `Finn oppgaver med bestemte egenskaper`() {
         nyOppgaveForNyPerson()
-        val oppgave2 = nyOppgaveForNyPerson(oppgaveegenskaper = setOf(Egenskap.SØKNAD, Egenskap.RISK_QA, FORTROLIG_ADRESSE))
+        val oppgave2 =
+            nyOppgaveForNyPerson(oppgaveegenskaper = setOf(Egenskap.SØKNAD, Egenskap.RISK_QA, FORTROLIG_ADRESSE))
         val oppgave3 = nyOppgaveForNyPerson(oppgaveegenskaper = setOf(Egenskap.SØKNAD, Egenskap.RISK_QA))
         val oppgaver =
             oppgaveDao.finnOppgaverForVisning(
                 emptyList(),
                 UUID.randomUUID(),
-                grupperteFiltrerteEgenskaper =
+                filtreringer = OppgaveDao.Filtreringer(
                     mapOf(
                         Kategori.Ukategorisert to listOf(RISK_QA),
                         Kategori.Oppgavetype to listOf(SØKNAD),
-                    ),
+                    )
+                ),
             )
         assertEquals(2, oppgaver.size)
         oppgaver.assertIderSamsvarerMed(oppgave3, oppgave2)
@@ -304,11 +307,12 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
             oppgaveDao.finnOppgaverForVisning(
                 emptyList(),
                 UUID.randomUUID(),
-                grupperteFiltrerteEgenskaper =
+                filtreringer = OppgaveDao.Filtreringer(
                     mapOf(
                         Kategori.Ukategorisert to listOf(RISK_QA),
                         Kategori.Oppgavetype to listOf(SØKNAD),
-                    ),
+                    )
+                ),
             )
         assertEquals(0, oppgaver.size)
     }
@@ -512,7 +516,9 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
         nyOppgaveForNyPerson(oppgaveegenskaper = setOf(Egenskap.UTLAND, Egenskap.HASTER))
         val oppgaver =
             oppgaveDao.finnOppgaverForVisning(
-                ekskluderEgenskaper = listOf("BESLUTTER", "RISK_QA") + Egenskap.alleUkategoriserteEgenskaper.map(Egenskap::toString),
+                ekskluderEgenskaper = listOf("BESLUTTER", "RISK_QA") + Egenskap.alleUkategoriserteEgenskaper.map(
+                    Egenskap::toString
+                ),
                 UUID.randomUUID(),
             )
         assertEquals(1, oppgaver.size)
@@ -675,7 +681,9 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
         oppgaveDao.finnOppgaverForVisning(
             ekskluderEgenskaper = emptyList(),
             saksbehandlerOid = UUID.randomUUID(),
-            grupperteFiltrerteEgenskaper = mapOf(Kategori.Oppgavetype to listOf(SØKNAD, REVURDERING)),
+            filtreringer = OppgaveDao.Filtreringer(
+                mapOf(Kategori.Oppgavetype to listOf(SØKNAD, REVURDERING))
+            ),
         ).let {
             assertEquals(4, it.size)
         }
@@ -683,9 +691,11 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
         oppgaveDao.finnOppgaverForVisning(
             ekskluderEgenskaper = emptyList(),
             saksbehandlerOid = UUID.randomUUID(),
-            grupperteFiltrerteEgenskaper = mapOf(
-                Kategori.Oppgavetype to listOf(SØKNAD, REVURDERING),
-                Kategori.Mottaker to listOf(FLERE_ARBEIDSGIVERE)
+            filtreringer = OppgaveDao.Filtreringer(
+                mapOf(
+                    Kategori.Oppgavetype to listOf(SØKNAD, REVURDERING),
+                    Kategori.Mottaker to listOf(FLERE_ARBEIDSGIVERE),
+                )
             ),
         ).let {
             assertEquals(2, it.size)
@@ -694,7 +704,9 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
         oppgaveDao.finnOppgaverForVisning(
             ekskluderEgenskaper = emptyList(),
             saksbehandlerOid = UUID.randomUUID(),
-            grupperteFiltrerteEgenskaper = mapOf(Kategori.Ukategorisert to listOf(HASTER, UTLAND)),
+            filtreringer = OppgaveDao.Filtreringer(
+                mapOf(Kategori.Ukategorisert to listOf(HASTER, UTLAND))
+            ),
         ).let {
             assertEquals(2, it.size)
             assertTrue(it.any { it.id == oppgave1.id })
@@ -703,14 +715,15 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
         oppgaveDao.finnOppgaverForVisning(
             ekskluderEgenskaper = emptyList(),
             saksbehandlerOid = UUID.randomUUID(),
-            grupperteFiltrerteEgenskaper =
+            filtreringer = OppgaveDao.Filtreringer(
                 mapOf(
                     Kategori.Ukategorisert to listOf(HASTER, UTLAND),
                     Kategori.Oppgavetype to listOf(SØKNAD),
                     Kategori.Periodetype to listOf(FORSTEGANGSBEHANDLING),
                     Kategori.Mottaker to listOf(DELVIS_REFUSJON),
                     Kategori.Inntektskilde to listOf(FLERE_ARBEIDSGIVERE),
-                ),
+                )
+            ),
         ).let {
             assertEquals(1, it.size)
             assertEquals(oppgave1.id, it.first().id)
@@ -719,11 +732,12 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
         oppgaveDao.finnOppgaverForVisning(
             ekskluderEgenskaper = emptyList(),
             saksbehandlerOid = UUID.randomUUID(),
-            grupperteFiltrerteEgenskaper =
+            filtreringer = OppgaveDao.Filtreringer(
                 mapOf(
                     Kategori.Mottaker to listOf(UTBETALING_TIL_SYKMELDT),
                     Kategori.Inntektskilde to listOf(EN_ARBEIDSGIVER),
-                ),
+                )
+            ),
         ).let {
             assertEquals(1, it.size)
             assertEquals(oppgave4.id, it.first().id)
@@ -732,7 +746,7 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
         oppgaveDao.finnOppgaverForVisning(
             ekskluderEgenskaper = emptyList(),
             saksbehandlerOid = UUID.randomUUID(),
-            grupperteFiltrerteEgenskaper = emptyMap(),
+            filtreringer = OppgaveDao.Filtreringer(emptyMap()),
         ).let {
             assertEquals(5, it.size)
         }
@@ -767,14 +781,15 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
             oppgaveDao.finnOppgaverForVisning(
                 ekskluderEgenskaper = Egenskap.alleUkategoriserteEgenskaper.map(Egenskap::toString),
                 saksbehandlerOid = UUID.randomUUID(),
-                grupperteFiltrerteEgenskaper =
+                filtreringer = OppgaveDao.Filtreringer(
                     mapOf(
                         Kategori.Oppgavetype to listOf(SØKNAD),
                         Kategori.Periodetype to listOf(FORSTEGANGSBEHANDLING),
                         Kategori.Mottaker to listOf(DELVIS_REFUSJON),
                         Kategori.Inntektskilde to listOf(FLERE_ARBEIDSGIVERE),
                         Kategori.Status to listOf(PÅ_VENT),
-                    ),
+                    )
+                ),
             )
 
         assertEquals(1, oppgaver.size)

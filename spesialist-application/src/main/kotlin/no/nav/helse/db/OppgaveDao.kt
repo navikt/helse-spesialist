@@ -39,7 +39,7 @@ interface OppgaveDao {
         egneSakerPåVent: Boolean = false,
         egneSaker: Boolean = false,
         tildelt: Boolean? = null,
-        grupperteFiltrerteEgenskaper: Map<Egenskap.Kategori, List<EgenskapForDatabase>> = emptyMap(),
+        filtreringer: Filtreringer = Filtreringer(emptyMap()),
     ): List<OppgaveFraDatabaseForVisning>
 
     fun finnAntallOppgaver(saksbehandlerOid: UUID): AntallOppgaverFraDatabase
@@ -67,4 +67,13 @@ interface OppgaveDao {
         godkjenningsbehovId: UUID,
         utbetalingId: UUID,
     )
+
+    data class Filtreringer(private val grupperteFiltrerteEgenskaper: Map<Egenskap.Kategori, List<EgenskapForDatabase>>) {
+        val ukategoriserteEgenskaper = grupperteFiltrerteEgenskaper[Egenskap.Kategori.Ukategorisert]
+        val oppgavetypeegenskaper = grupperteFiltrerteEgenskaper[Egenskap.Kategori.Oppgavetype]
+        val periodetypeegenskaper = grupperteFiltrerteEgenskaper[Egenskap.Kategori.Periodetype]
+        val mottakeregenskaper = grupperteFiltrerteEgenskaper[Egenskap.Kategori.Mottaker]
+        val antallArbeidsforholdEgenskaper = grupperteFiltrerteEgenskaper[Egenskap.Kategori.Inntektskilde]
+        val statusegenskaper = grupperteFiltrerteEgenskaper[Egenskap.Kategori.Status]
+    }
 }

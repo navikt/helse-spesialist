@@ -14,7 +14,6 @@ import no.nav.helse.db.PersonnavnFraDatabase
 import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.SorteringsnøkkelForDatabase
 import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
-import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.HelseDao.Companion.somDbArray
 import no.nav.helse.spesialist.db.MedDataSource
@@ -201,15 +200,9 @@ class PgOppgaveDao internal constructor(
         egneSakerPåVent: Boolean,
         egneSaker: Boolean,
         tildelt: Boolean?,
-        grupperteFiltrerteEgenskaper: Map<Egenskap.Kategori, List<EgenskapForDatabase>>,
+        filtreringer: OppgaveDao.Filtreringer,
     ): List<OppgaveFraDatabaseForVisning> {
         val orderBy = if (sortering.isNotEmpty()) sortering.joinToString { it.nøkkelTilKolonne() } else "opprettet DESC"
-        val ukategoriserteEgenskaper = grupperteFiltrerteEgenskaper[Egenskap.Kategori.Ukategorisert]
-        val oppgavetypeegenskaper = grupperteFiltrerteEgenskaper[Egenskap.Kategori.Oppgavetype]
-        val periodetypeegenskaper = grupperteFiltrerteEgenskaper[Egenskap.Kategori.Periodetype]
-        val mottakeregenskaper = grupperteFiltrerteEgenskaper[Egenskap.Kategori.Mottaker]
-        val antallArbeidsforholdEgenskaper = grupperteFiltrerteEgenskaper[Egenskap.Kategori.Inntektskilde]
-        val statusegenskaper = grupperteFiltrerteEgenskaper[Egenskap.Kategori.Status]
 
         return asSQL(
             """
@@ -271,12 +264,12 @@ class PgOppgaveDao internal constructor(
             "egne_saker_pa_vent" to egneSakerPåVent,
             "egne_saker" to egneSaker,
             "tildelt" to tildelt,
-            "ukategoriserte_egenskaper" to ukategoriserteEgenskaper.somDbArray(),
-            "oppgavetypeegenskaper" to oppgavetypeegenskaper.somDbArray(),
-            "periodetypeegenskaper" to periodetypeegenskaper.somDbArray(),
-            "mottakeregenskaper" to mottakeregenskaper.somDbArray(),
-            "antall_arbeidsforhold_egenskaper" to antallArbeidsforholdEgenskaper.somDbArray(),
-            "statusegenskaper" to statusegenskaper.somDbArray(),
+            "ukategoriserte_egenskaper" to filtreringer.ukategoriserteEgenskaper.somDbArray(),
+            "oppgavetypeegenskaper" to filtreringer.oppgavetypeegenskaper.somDbArray(),
+            "periodetypeegenskaper" to filtreringer.periodetypeegenskaper.somDbArray(),
+            "mottakeregenskaper" to filtreringer.mottakeregenskaper.somDbArray(),
+            "antall_arbeidsforhold_egenskaper" to filtreringer.antallArbeidsforholdEgenskaper.somDbArray(),
+            "statusegenskaper" to filtreringer.statusegenskaper.somDbArray(),
             "egenskaper_som_skal_ekskluderes" to ekskluderEgenskaper.somDbArray(),
         ).list { row ->
             val egenskaper =
