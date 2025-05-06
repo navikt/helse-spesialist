@@ -111,7 +111,6 @@ type Arbeidsgiver {
     ghostPerioder: [GhostPeriode!]!
     inntekterFraAordningen: [ArbeidsgiverInntekterFraAOrdningen!]!
     navn: String!
-    nyeInntektsforholdPerioder: [NyttInntektsforholdPeriode!]!
     organisasjonsnummer: String!
     overstyringer: [Overstyring!]!
 }
@@ -472,16 +471,6 @@ type Notat {
     vedtaksperiodeId: UUID!
 }
 
-type NyttInntektsforholdPeriode {
-    dagligBelop: Float!
-    fom: LocalDate!
-    id: UUID!
-    manedligBelop: Float!
-    organisasjonsnummer: String!
-    skjaeringstidspunkt: LocalDate!
-    tom: LocalDate!
-}
-
 type OmregnetArsinntekt {
     belop: Float!
     inntektFraAOrdningen: [InntektFraAOrdningen!]
@@ -651,6 +640,7 @@ type Query {
     opptegnelser(sekvensId: Int): [Opptegnelse!]!
     person(aktorId: String, fnr: String): Person
     tilkomneInntektskilder(aktorId: String!): [TilkommenInntektskilde!]!
+    tilkomneInntektskilderV2(fodselsnummer: String!): [TilkommenInntektskilde!]!
 }
 
 type Refusjon {

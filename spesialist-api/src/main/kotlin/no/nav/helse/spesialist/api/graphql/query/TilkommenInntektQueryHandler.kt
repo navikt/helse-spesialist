@@ -36,6 +36,21 @@ class TilkommenInntektQueryHandler(
     ): DataFetcherResult<List<ApiTilkommenInntektskilde>> {
         val tilganger = env.graphQlContext.get<SaksbehandlerTilganger>(TILGANGER)
         val fødselsnumre = daos.personApiDao.finnFødselsnumre(aktorId).toSet()
+        return tilkomneInntekterForFødselsnummer(fødselsnumre, tilganger)
+    }
+
+    override suspend fun tilkomneInntektskilderV2(
+        fodselsnummer: String,
+        env: DataFetchingEnvironment,
+    ): DataFetcherResult<List<ApiTilkommenInntektskilde>> {
+        val tilganger = env.graphQlContext.get<SaksbehandlerTilganger>(TILGANGER)
+        return tilkomneInntekterForFødselsnummer(setOf(fodselsnummer), tilganger)
+    }
+
+    private fun tilkomneInntekterForFødselsnummer(
+        fødselsnumre: Set<String>,
+        tilganger: SaksbehandlerTilganger,
+    ): DataFetcherResult<List<ApiTilkommenInntektskilde>> {
         fødselsnumre.forEach { fødselsnummer ->
             if (manglerTilgang(
                     egenAnsattApiDao = daos.egenAnsattApiDao,

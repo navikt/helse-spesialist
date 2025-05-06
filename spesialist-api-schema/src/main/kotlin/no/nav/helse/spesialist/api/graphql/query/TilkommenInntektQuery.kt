@@ -10,6 +10,11 @@ interface TilkommenInntektQuerySchema : Query {
         aktorId: String,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<List<ApiTilkommenInntektskilde>>
+
+    suspend fun tilkomneInntektskilderV2(
+        fodselsnummer: String,
+        env: DataFetchingEnvironment,
+    ): DataFetcherResult<List<ApiTilkommenInntektskilde>>
 }
 
 class TilkommenInntektQuery(private val handler: TilkommenInntektQuerySchema) : TilkommenInntektQuerySchema by handler
