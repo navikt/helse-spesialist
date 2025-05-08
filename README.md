@@ -82,8 +82,8 @@ bedre liv. Da gjør du følgende:
 
 - Kjør opp [LocalApp.kt](spesialist-bootstrap/src/test/kotlin/no/nav/helse/spesialist/bootstrap/LocalApp.kt) sin main-metode, det starter en
   lokal GraphQL-server.
-- Finn filen [graphql.config.yml](spesialist-api/src/test/graphql.config.yml) og kjør `spesialist-local`, som vil
-  oppdatere [schema_til_bruk_fra_tester.grapqhl](spesialist-api/src/test/schema_til_bruk_fra_tester.graphql).
+- Finn filen [graphql.config.yml](spesialist-api/src/testFixtures/kotlin/no/nav/helse/spesialist/api/testfixtures/graphql.config.yml) og kjør `spesialist-local`, som vil
+  oppdatere [schema_til_bruk_fra_tester.grapqhl](spesialist-api/src/testFixtures/kotlin/no/nav/helse/spesialist/api/testfixtures/schema_til_bruk_fra_tester.graphql).
 - Eller trykk på oppdater-ikonet i `schema_til_bruk_fra_tester.grapqhl`, ser ut til å gjøre det samme.
 - Commit endringene i `schema_til_bruk_fra_tester.graphql`.
 
