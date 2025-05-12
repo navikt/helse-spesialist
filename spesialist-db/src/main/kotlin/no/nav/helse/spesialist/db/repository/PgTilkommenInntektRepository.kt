@@ -68,7 +68,6 @@ class PgTilkommenInntektRepository(
                     organisasjonsnummer = data.inntektskildeIdentifikator.verdi,
                     periode = data.periode.tilPeriode(),
                     periodebeløp = data.periodebeløp,
-                    dager = TilkommenInntekt.tilDager(data.periode.tilPeriode(), data.ekskluderteUkedager),
                     ekskluderteUkedager = data.ekskluderteUkedager,
                 )
             }
@@ -119,7 +118,6 @@ class PgTilkommenInntektRepository(
                         til = it.til,
                     )
                 },
-            dager = null,
             ekskluderteUkedager =
                 ekskluderteUkedager?.let {
                     Endring(

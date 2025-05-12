@@ -14,8 +14,6 @@ import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntekt
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektId
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektPeriodeValidator
-import java.math.BigDecimal
-import java.time.LocalDate
 import java.util.UUID
 
 class TilkommenInntektMutationHandler(
@@ -84,9 +82,9 @@ class TilkommenInntektMutationHandler(
                 vedtaksperioder = session.vedtaksperiodeRepository.finnVedtaksperioder(tilkommenInntekt.fødselsnummer),
             )
 
-            val arbeidsgiverFør: String = tilkommenInntekt.organisasjonsnummer
-            val dagerFør: Set<LocalDate> = tilkommenInntekt.dager
-            val dagsbeløpFør: BigDecimal = tilkommenInntekt.dagbeløp()
+            val arbeidsgiverFør = tilkommenInntekt.organisasjonsnummer
+            val dagerFør = tilkommenInntekt.dagerTilGradering()
+            val dagsbeløpFør = tilkommenInntekt.dagbeløp()
 
             tilkommenInntekt.endreTil(
                 organisasjonsnummer = endretTil.organisasjonsnummer,
@@ -104,7 +102,7 @@ class TilkommenInntektMutationHandler(
             session.tilkommenInntektRepository.lagre(tilkommenInntekt)
 
             val arbeidsgiverEtter = tilkommenInntekt.organisasjonsnummer
-            val dagerEtter = tilkommenInntekt.dager
+            val dagerEtter = tilkommenInntekt.dagerTilGradering()
             val dagsbeløpEtter = tilkommenInntekt.dagbeløp()
 
             val event =

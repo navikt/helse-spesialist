@@ -37,10 +37,17 @@ class TilkommenInntekt private constructor(
     var versjon: Int = opprettetEvent.metadata.sekvensnummer
         private set
 
-    val dager: SortedSet<LocalDate>
-        get() = tilDager(periode, ekskluderteUkedager)
+    fun dagerTilGradering(): SortedSet<LocalDate> =
+        periode.datoer()
+            .filterNot { it.erHelg() }
+            .filterNot { it in ekskluderteUkedager }
+            .toSortedSet()
 
-    fun dagbeløp(): BigDecimal = periodebeløp.setScale(4).divide(dager.size.toBigDecimal(), RoundingMode.HALF_UP)
+    fun dagbeløp(): BigDecimal =
+        periodebeløp.setScale(4).divide(
+            dagerTilGradering().size.toBigDecimal(),
+            RoundingMode.HALF_UP,
+        )
 
     fun endreTil(
         organisasjonsnummer: String,
@@ -66,8 +73,11 @@ class TilkommenInntekt private constructor(
                         organisasjonsnummer = muligEndring(fra = this.organisasjonsnummer, til = organisasjonsnummer),
                         periode = muligEndring(fra = this.periode, til = periode),
                         periodebeløp = muligEndring(fra = this.periodebeløp, til = periodebeløp),
-                        dager = muligEndring(fra = this.dager, til = tilDager(periode, ekskluderteUkedager).toSortedSet()),
-                        ekskluderteUkedager = muligEndring(fra = this.ekskluderteUkedager, til = ekskluderteUkedager.toSortedSet()),
+                        ekskluderteUkedager =
+                            muligEndring(
+                                fra = this.ekskluderteUkedager,
+                                til = ekskluderteUkedager.toSortedSet(),
+                            ),
                     ),
             ),
         )
@@ -116,8 +126,11 @@ class TilkommenInntekt private constructor(
                         organisasjonsnummer = muligEndring(fra = this.organisasjonsnummer, til = organisasjonsnummer),
                         periode = muligEndring(fra = this.periode, til = periode),
                         periodebeløp = muligEndring(fra = this.periodebeløp, til = periodebeløp),
-                        dager = muligEndring(fra = this.dager, til = tilDager(periode, ekskluderteUkedager).toSortedSet()),
-                        ekskluderteUkedager = muligEndring(fra = this.ekskluderteUkedager, til = ekskluderteUkedager.toSortedSet()),
+                        ekskluderteUkedager =
+                            muligEndring(
+                                fra = this.ekskluderteUkedager,
+                                til = ekskluderteUkedager.toSortedSet(),
+                            ),
                     ),
             ),
         )
@@ -205,7 +218,6 @@ class TilkommenInntekt private constructor(
                 organisasjonsnummer = organisasjonsnummer,
                 periode = periode,
                 periodebeløp = periodebeløp,
-                dager = tilDager(periode, ekskluderteUkedager),
                 ekskluderteUkedager = ekskluderteUkedager.toSortedSet(),
             ),
         )
@@ -214,12 +226,8 @@ class TilkommenInntekt private constructor(
             TilkommenInntekt(events.first() as TilkommenInntektOpprettetEvent)
                 .also { tilkommenInntekt -> events.drop(1).forEach(tilkommenInntekt::apply) }
 
-        fun tilDager(
-            periode: Periode,
-            ekskluderteUkedager: Set<LocalDate>,
-        ) = periode.datoer()
-            .filterNot { it.dayOfWeek in setOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY) }
-            .minus(ekskluderteUkedager)
-            .toSortedSet()
+        private val helgedager = setOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY)
+
+        private fun LocalDate.erHelg() = dayOfWeek in helgedager
     }
 }

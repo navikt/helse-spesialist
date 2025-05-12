@@ -17,7 +17,6 @@ data class ApiTilkommenInntekt(
     val tilkommenInntektId: UUID,
     val periode: ApiDatoPeriode,
     val periodebelop: BigDecimal,
-    val dager: List<LocalDate>,
     val ekskluderteUkedager: List<LocalDate>,
     val fjernet: Boolean,
     val events: List<ApiTilkommenInntektEvent>,
@@ -48,7 +47,6 @@ sealed interface ApiTilkommenInntektEvent {
         val organisasjonsnummer: StringEndring?,
         val periode: DatoPeriodeEndring?,
         val periodebelop: BigDecimalEndring?,
-        val dager: ListLocalDateEndring?,
         val ekskluderteUkedager: ListLocalDateEndring?,
     ) {
         @GraphQLName("TilkommenInntektEventDatoPeriodeEndring")
@@ -71,7 +69,6 @@ data class ApiTilkommenInntektOpprettetEvent(
     val organisasjonsnummer: String,
     val periode: ApiDatoPeriode,
     val periodebelop: BigDecimal,
-    val dager: List<LocalDate>,
     val ekskluderteUkedager: List<LocalDate>,
 ) : ApiTilkommenInntektEvent
 

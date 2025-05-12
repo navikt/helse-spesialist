@@ -24,7 +24,6 @@ sealed interface TilkommenInntektEvent {
         val organisasjonsnummer: Endring<String>?,
         val periode: Endring<Periode>?,
         val periodebeløp: Endring<BigDecimal>?,
-        val dager: Endring<SortedSet<LocalDate>>?,
         val ekskluderteUkedager: Endring<SortedSet<LocalDate>>?,
     )
 }
@@ -35,7 +34,6 @@ data class TilkommenInntektOpprettetEvent(
     val organisasjonsnummer: String,
     val periode: Periode,
     val periodebeløp: BigDecimal,
-    val dager: SortedSet<LocalDate>,
     val ekskluderteUkedager: SortedSet<LocalDate>,
 ) : TilkommenInntektEvent
 

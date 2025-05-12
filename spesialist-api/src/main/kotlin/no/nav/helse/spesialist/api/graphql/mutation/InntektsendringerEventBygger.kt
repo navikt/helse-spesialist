@@ -5,6 +5,7 @@ import no.nav.helse.spesialist.domain.Periode.Companion.tilPerioder
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntekt
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.util.SortedSet
 
 object InntektsendringerEventBygger {
     fun forNy(tilkommenInntekt: TilkommenInntekt): InntektsendringerEvent =
@@ -14,7 +15,7 @@ object InntektsendringerEventBygger {
                     InntektsendringerEvent.Inntektskilde(
                         inntektskilde = tilkommenInntekt.organisasjonsnummer,
                         inntekter =
-                            tilkommenInntekt.dager.tilInntekter(
+                            tilkommenInntekt.dagerTilGradering().tilInntekter(
                                 dagsbeløp = tilkommenInntekt.dagbeløp(),
                             ),
                         nullstill = emptyList(),
@@ -25,8 +26,8 @@ object InntektsendringerEventBygger {
     fun forEndring(
         arbeidsgiverFør: String,
         arbeidsgiverEtter: String,
-        dagerFør: Set<LocalDate>,
-        dagerEtter: Set<LocalDate>,
+        dagerFør: SortedSet<LocalDate>,
+        dagerEtter: SortedSet<LocalDate>,
         dagsbeløpFør: BigDecimal,
         dagsbeløpEtter: BigDecimal,
     ): InntektsendringerEvent? =
@@ -53,7 +54,7 @@ object InntektsendringerEventBygger {
                         InntektsendringerEvent.Inntektskilde(
                             inntektskilde = arbeidsgiverEtter,
                             inntekter = dagerEtter.tilInntekter(dagsbeløpEtter),
-                            nullstill = dagerFør.minus(dagerEtter).tilNullstillinger(),
+                            nullstill = dagerFør.minus(dagerEtter).toSortedSet().tilNullstillinger(),
                         ),
                     ),
             )
@@ -63,8 +64,8 @@ object InntektsendringerEventBygger {
                     listOf(
                         InntektsendringerEvent.Inntektskilde(
                             inntektskilde = arbeidsgiverEtter,
-                            inntekter = dagerEtter.minus(dagerFør).tilInntekter(dagsbeløpEtter),
-                            nullstill = dagerFør.minus(dagerEtter).tilNullstillinger(),
+                            inntekter = dagerEtter.minus(dagerFør).toSortedSet().tilInntekter(dagsbeløpEtter),
+                            nullstill = dagerFør.minus(dagerEtter).toSortedSet().tilNullstillinger(),
                         ),
                     ),
             )
@@ -79,13 +80,13 @@ object InntektsendringerEventBygger {
                     InntektsendringerEvent.Inntektskilde(
                         inntektskilde = tilkommenInntekt.organisasjonsnummer,
                         inntekter = emptyList(),
-                        nullstill = tilkommenInntekt.dager.tilNullstillinger(),
+                        nullstill = tilkommenInntekt.dagerTilGradering().tilNullstillinger(),
                     ),
                 ),
         )
 
-    private fun Set<LocalDate>.tilInntekter(dagsbeløp: BigDecimal) =
-        sorted().tilPerioder().map { periode ->
+    private fun SortedSet<LocalDate>.tilInntekter(dagsbeløp: BigDecimal) =
+        tilPerioder().map { periode ->
             InntektsendringerEvent.Inntektskilde.Inntekt(
                 fom = periode.fom,
                 tom = periode.tom,
@@ -93,7 +94,7 @@ object InntektsendringerEventBygger {
             )
         }
 
-    private fun Set<LocalDate>.tilNullstillinger() =
+    private fun SortedSet<LocalDate>.tilNullstillinger() =
         tilPerioder().map { periode ->
             InntektsendringerEvent.Inntektskilde.Nullstilling(
                 fom = periode.fom,
