@@ -131,6 +131,13 @@ internal class AutomatiseringTest {
     }
 
     @Test
+    fun `tvinger automatisering hvis vedtaksperiodeId ligger i force_automatisering tabellen`() {
+        every { automatiseringDaoMock.skalTvingeAutomatisering(vedtaksperiodeId) } returns true
+        every { risikovurderingDaoMock.hentRisikovurdering(vedtaksperiodeId) } returns null
+        blirAutomatiskBehandlet()
+    }
+
+    @Test
     fun `vedtaksperiode som oppfyller krav blir automatisk godkjent og lagret`() {
         blirAutomatiskBehandlet(enUtbetaling())
     }

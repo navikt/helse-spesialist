@@ -11,6 +11,17 @@ import no.nav.helse.spesialist.db.HelseDao.Companion.update
 import java.util.UUID
 
 class PgAutomatiseringDao internal constructor(val session: Session) : AutomatiseringDao {
+    override fun skalTvingeAutomatisering(vedtaksperiodeId: UUID): Boolean =
+        asSQL(
+            """
+            select 1 from force_automatisering
+            WHERE vedtaksperiode_id = :vedtaksperiodeId
+            """.trimIndent(),
+            "vedtaksperiodeId" to vedtaksperiodeId,
+        ).single(session) {
+            it.boolean(1)
+        } ?: false
+
     override fun settAutomatiseringInaktiv(
         vedtaksperiodeId: UUID,
         hendelseId: UUID,

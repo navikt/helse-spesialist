@@ -96,6 +96,11 @@ internal class Automatisering(
         sykefraværstilfelle: Sykefraværstilfelle,
         organisasjonsnummer: String,
     ): Automatiseringsresultat {
+        if (automatiseringDao.skalTvingeAutomatisering(vedtaksperiodeId)) {
+            logger.info("Tvinger automatisering for vedtaksperiode $vedtaksperiodeId")
+            return Automatiseringsresultat.KanAutomatiseres
+        }
+
         val problemer =
             vurder(fødselsnummer, vedtaksperiodeId, utbetaling, periodetype, sykefraværstilfelle, organisasjonsnummer)
         val erUTS = utbetaling.harEndringIUtbetalingTilSykmeldt()

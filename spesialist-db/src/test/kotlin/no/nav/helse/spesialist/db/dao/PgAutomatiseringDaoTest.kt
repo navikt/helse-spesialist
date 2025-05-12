@@ -89,10 +89,13 @@ internal class PgAutomatiseringDaoTest : AbstractDBIntegrationTest() {
 
         val actualException = assertThrows(
             Exception::class.java,
-            {  automatiseringDao.automatisert(VEDTAKSPERIODE, HENDELSE_ID, UTBETALING_ID) },
+            { automatiseringDao.automatisert(VEDTAKSPERIODE, HENDELSE_ID, UTBETALING_ID) },
             "Testfeil"
         )
-        assertEquals("Det kan bare finnes 1 aktiv automatisering. Klarer ikke opprette ny automatisering for vedtaksperiodeId $VEDTAKSPERIODE og hendelseId $HENDELSE_ID.", actualException.message)
+        assertEquals(
+            "Det kan bare finnes 1 aktiv automatisering. Klarer ikke opprette ny automatisering for vedtaksperiodeId $VEDTAKSPERIODE og hendelseId $HENDELSE_ID.",
+            actualException.message
+        )
 
         val automatiseringSvar = requireNotNull(automatiseringDao.hentAktivAutomatisering(VEDTAKSPERIODE, HENDELSE_ID))
 
@@ -106,6 +109,7 @@ internal class PgAutomatiseringDaoTest : AbstractDBIntegrationTest() {
     fun `ikke stikkprøve hvis manglende innslag i tabell`() {
         assertFalse(automatiseringDao.plukketUtTilStikkprøve(VEDTAKSPERIODE, HENDELSE_ID))
     }
+
     @Test
     fun `ikke stikkprøve hvis automatisert`() {
         automatiseringDao.automatisert(VEDTAKSPERIODE, HENDELSE_ID, UTBETALING_ID)
@@ -146,6 +150,12 @@ internal class PgAutomatiseringDaoTest : AbstractDBIntegrationTest() {
         assertEquals(0, problemerEtterInaktivering.size)
     }
 
+    @Test
+    fun `kan tvinge auomatisering`() {
+        insertForceAutomatisering(VEDTAKSPERIODE)
+        assertTrue(automatiseringDao.skalTvingeAutomatisering(VEDTAKSPERIODE))
+    }
+
     private fun insertAutomatisering(
         automatisert: Boolean,
         stikkprøve: Boolean,
@@ -181,4 +191,21 @@ internal class PgAutomatiseringDaoTest : AbstractDBIntegrationTest() {
             }
         }
     }
+
+    private fun insertForceAutomatisering(vedtaksperiodeId: UUID) {
+        sessionOf(dataSource).use { session ->
+            session.transaction { transactionalSession ->
+                transactionalSession.run(
+                    queryOf(
+                        """
+                            INSERT INTO force_automatisering (vedtaksperiode_id)
+                            VALUES (?)
+                        """,
+                        vedtaksperiodeId,
+                    ).asUpdate
+                )
+            }
+        }
+    }
+
 }

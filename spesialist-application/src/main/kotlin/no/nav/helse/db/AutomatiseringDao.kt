@@ -48,6 +48,8 @@ interface AutomatiseringDao {
     ): List<String>
 
     fun finnVedtaksperiode(vedtaksperiodeId: UUID): Long?
+
+    fun skalTvingeAutomatisering(vedtaksperiodeId: UUID): Boolean
 }
 
 data class AutomatiseringDto(
