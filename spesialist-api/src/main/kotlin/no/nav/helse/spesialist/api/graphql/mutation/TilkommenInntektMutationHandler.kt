@@ -50,7 +50,7 @@ class TilkommenInntektMutationHandler(
                     organisasjonsnummer = verdier.organisasjonsnummer,
                     periode = periode,
                     periodebeløp = verdier.periodebelop,
-                    dager = verdier.dager.toSet(),
+                    ekskluderteUkedager = verdier.ekskluderteUkedager.toSet(),
                 )
             session.tilkommenInntektRepository.lagre(tilkommenInntekt)
 
@@ -92,7 +92,7 @@ class TilkommenInntektMutationHandler(
                 organisasjonsnummer = endretTil.organisasjonsnummer,
                 periode = endretTil.periode.fom tilOgMed endretTil.periode.tom,
                 periodebeløp = endretTil.periodebelop,
-                dager = endretTil.dager.toSet(),
+                ekskluderteUkedager = endretTil.ekskluderteUkedager.toSet(),
                 saksbehandlerIdent = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER).ident,
                 notatTilBeslutter = notatTilBeslutter,
                 totrinnsvurderingId =
@@ -185,7 +185,7 @@ class TilkommenInntektMutationHandler(
                 organisasjonsnummer = endretTil.organisasjonsnummer,
                 periode = endretTilPeriode,
                 periodebeløp = endretTil.periodebelop,
-                dager = endretTil.dager.toSet(),
+                ekskluderteUkedager = endretTil.ekskluderteUkedager.toSet(),
                 saksbehandlerIdent = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER).ident,
                 notatTilBeslutter = notatTilBeslutter,
                 totrinnsvurderingId =

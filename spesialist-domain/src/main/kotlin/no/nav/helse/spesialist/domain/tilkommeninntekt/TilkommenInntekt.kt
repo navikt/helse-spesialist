@@ -5,6 +5,7 @@ import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.ddd.AggregateRoot
 import java.math.BigDecimal
 import java.math.RoundingMode
+import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDate
 import java.util.SortedSet
@@ -29,12 +30,15 @@ class TilkommenInntekt private constructor(
         private set
     var periodebeløp: BigDecimal = opprettetEvent.periodebeløp
         private set
-    var dager: SortedSet<LocalDate> = opprettetEvent.dager
+    var ekskluderteUkedager: SortedSet<LocalDate> = opprettetEvent.ekskluderteUkedager
         private set
     var fjernet: Boolean = false
         private set
     var versjon: Int = opprettetEvent.metadata.sekvensnummer
         private set
+
+    val dager: SortedSet<LocalDate>
+        get() = tilDager(periode, ekskluderteUkedager)
 
     fun dagbeløp(): BigDecimal = periodebeløp.setScale(4).divide(dager.size.toBigDecimal(), RoundingMode.HALF_UP)
 
@@ -42,7 +46,7 @@ class TilkommenInntekt private constructor(
         organisasjonsnummer: String,
         periode: Periode,
         periodebeløp: BigDecimal,
-        dager: Set<LocalDate>,
+        ekskluderteUkedager: Set<LocalDate>,
         saksbehandlerIdent: String,
         notatTilBeslutter: String,
         totrinnsvurderingId: TotrinnsvurderingId,
@@ -62,7 +66,8 @@ class TilkommenInntekt private constructor(
                         organisasjonsnummer = muligEndring(fra = this.organisasjonsnummer, til = organisasjonsnummer),
                         periode = muligEndring(fra = this.periode, til = periode),
                         periodebeløp = muligEndring(fra = this.periodebeløp, til = periodebeløp),
-                        dager = muligEndring(fra = this.dager, til = dager.toSortedSet()),
+                        dager = muligEndring(fra = this.dager, til = tilDager(periode, ekskluderteUkedager).toSortedSet()),
+                        ekskluderteUkedager = muligEndring(fra = this.ekskluderteUkedager, til = ekskluderteUkedager.toSortedSet()),
                     ),
             ),
         )
@@ -91,7 +96,7 @@ class TilkommenInntekt private constructor(
         organisasjonsnummer: String,
         periode: Periode,
         periodebeløp: BigDecimal,
-        dager: Set<LocalDate>,
+        ekskluderteUkedager: Set<LocalDate>,
         saksbehandlerIdent: String,
         notatTilBeslutter: String,
         totrinnsvurderingId: TotrinnsvurderingId,
@@ -111,7 +116,8 @@ class TilkommenInntekt private constructor(
                         organisasjonsnummer = muligEndring(fra = this.organisasjonsnummer, til = organisasjonsnummer),
                         periode = muligEndring(fra = this.periode, til = periode),
                         periodebeløp = muligEndring(fra = this.periodebeløp, til = periodebeløp),
-                        dager = muligEndring(fra = this.dager, til = dager.toSortedSet()),
+                        dager = muligEndring(fra = this.dager, til = tilDager(periode, ekskluderteUkedager).toSortedSet()),
+                        ekskluderteUkedager = muligEndring(fra = this.ekskluderteUkedager, til = ekskluderteUkedager.toSortedSet()),
                     ),
             ),
         )
@@ -159,7 +165,7 @@ class TilkommenInntekt private constructor(
         håndterEndring(endringer.organisasjonsnummer, this::organisasjonsnummer)
         håndterEndring(endringer.periode, this::periode)
         håndterEndring(endringer.periodebeløp, this::periodebeløp)
-        håndterEndring(endringer.dager, this::dager)
+        håndterEndring(endringer.ekskluderteUkedager, this::ekskluderteUkedager)
     }
 
     private fun <T> håndterEndring(
@@ -184,7 +190,7 @@ class TilkommenInntekt private constructor(
             organisasjonsnummer: String,
             periode: Periode,
             periodebeløp: BigDecimal,
-            dager: Set<LocalDate>,
+            ekskluderteUkedager: Set<LocalDate>,
         ) = TilkommenInntekt(
             TilkommenInntektOpprettetEvent(
                 TilkommenInntektEvent.Metadata(
@@ -199,12 +205,21 @@ class TilkommenInntekt private constructor(
                 organisasjonsnummer = organisasjonsnummer,
                 periode = periode,
                 periodebeløp = periodebeløp,
-                dager = dager.toSortedSet(),
+                dager = tilDager(periode, ekskluderteUkedager),
+                ekskluderteUkedager = ekskluderteUkedager.toSortedSet(),
             ),
         )
 
         fun fraLagring(events: List<TilkommenInntektEvent>): TilkommenInntekt =
             TilkommenInntekt(events.first() as TilkommenInntektOpprettetEvent)
                 .also { tilkommenInntekt -> events.drop(1).forEach(tilkommenInntekt::apply) }
+
+        fun tilDager(
+            periode: Periode,
+            ekskluderteUkedager: Set<LocalDate>,
+        ) = periode.datoer()
+            .filterNot { it.dayOfWeek in setOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY) }
+            .minus(ekskluderteUkedager)
+            .toSortedSet()
     }
 }

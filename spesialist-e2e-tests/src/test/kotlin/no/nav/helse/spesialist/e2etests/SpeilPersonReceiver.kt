@@ -77,7 +77,7 @@ class SpeilPersonReceiver(
         fom: LocalDate,
         tom: LocalDate,
         periodebeløp: BigDecimal,
-        dager: Collection<LocalDate>,
+        ekskluderteUkedager: Collection<LocalDate>,
         notatTilBeslutter: String
     ): UUID =
         callGraphQL(
@@ -91,7 +91,7 @@ class SpeilPersonReceiver(
                         "tom" to tom.toString(),
                     ),
                     "periodebelop" to periodebeløp.toString(),
-                    "dager" to dager.map(LocalDate::toString),
+                    "ekskluderteUkedager" to ekskluderteUkedager.map(LocalDate::toString),
                 ),
                 "notatTilBeslutter" to notatTilBeslutter
             )
@@ -107,7 +107,7 @@ class SpeilPersonReceiver(
         fom: LocalDate,
         tom: LocalDate,
         periodebeløp: BigDecimal,
-        dager: Collection<LocalDate>,
+        ekskluderteUkedager: Collection<LocalDate>,
         notatTilBeslutter: String
     ) {
         callGraphQL(
@@ -121,7 +121,7 @@ class SpeilPersonReceiver(
                         "tom" to tom.toString(),
                     ),
                     "periodebelop" to periodebeløp.toString(),
-                    "dager" to dager.map(LocalDate::toString),
+                    "ekskluderteUkedager" to ekskluderteUkedager.map(LocalDate::toString),
                 ),
                 "notatTilBeslutter" to notatTilBeslutter
             )
@@ -147,7 +147,7 @@ class SpeilPersonReceiver(
         fom: LocalDate,
         tom: LocalDate,
         periodebeløp: BigDecimal,
-        dager: Collection<LocalDate>,
+        ekskluderteUkedager: Collection<LocalDate>,
         notatTilBeslutter: String
     ) {
         callGraphQL(
@@ -161,7 +161,7 @@ class SpeilPersonReceiver(
                         "tom" to tom.toString(),
                     ),
                     "periodebelop" to periodebeløp.toString(),
-                    "dager" to dager.map(LocalDate::toString),
+                    "ekskluderteUkedager" to ekskluderteUkedager.map(LocalDate::toString),
                 ),
                 "notatTilBeslutter" to notatTilBeslutter
             )

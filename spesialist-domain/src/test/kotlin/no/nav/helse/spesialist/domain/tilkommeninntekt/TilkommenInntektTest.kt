@@ -25,7 +25,7 @@ class TilkommenInntektTest {
         //when
         val tilkommenInntekt = TilkommenInntekt.ny(
             periode = (1 jan 2018) tilOgMed (31 jan 2018),
-            dager = setOf(1 jan 2018, 31 jan 2018),
+            ekskluderteUkedager = setOf(1 jan 2018, 31 jan 2018),
             periodebeløp = BigDecimal("10000"),
             fødselsnummer = fødselsnummer,
             saksbehandlerIdent = saksbehandlerIdent,
@@ -41,7 +41,7 @@ class TilkommenInntektTest {
         assertEquals(organisasjonsnummer, opprettetEvent.organisasjonsnummer)
         assertEquals(1 jan 2018, opprettetEvent.periode.fom)
         assertEquals(31 jan 2018, opprettetEvent.periode.tom)
-        assertEquals(setOf(1 jan 2018, 31 jan 2018), opprettetEvent.dager)
+        assertEquals(setOf(1 jan 2018, 31 jan 2018), opprettetEvent.ekskluderteUkedager)
         assertEquals(BigDecimal("10000"), opprettetEvent.periodebeløp)
 
         assertEquals("et notat til beslutter", opprettetEvent.metadata.notatTilBeslutter)
@@ -51,7 +51,7 @@ class TilkommenInntektTest {
         assertEquals(organisasjonsnummer, tilkommenInntekt.organisasjonsnummer)
         assertEquals(1 jan 2018, tilkommenInntekt.periode.fom)
         assertEquals(31 jan 2018, tilkommenInntekt.periode.tom)
-        assertEquals(setOf(1 jan 2018, 31 jan 2018), tilkommenInntekt.dager)
+        assertEquals(setOf(1 jan 2018, 31 jan 2018), tilkommenInntekt.ekskluderteUkedager)
         assertEquals(BigDecimal("10000"), tilkommenInntekt.periodebeløp)
         assertFalse(tilkommenInntekt.fjernet)
     }
@@ -63,7 +63,7 @@ class TilkommenInntektTest {
         val organisasjonsnummer = lagOrganisasjonsnummer()
         val tilkommenInntekt = TilkommenInntekt.ny(
             periode = (1 jan 2018) tilOgMed (31 jan 2018),
-            dager = setOf(1 jan 2018, 31 jan 2018),
+            ekskluderteUkedager = setOf(1 jan 2018, 31 jan 2018),
             periodebeløp = BigDecimal("10000"),
             fødselsnummer = fødselsnummer,
             saksbehandlerIdent = lagSaksbehandlerident(),
@@ -79,7 +79,7 @@ class TilkommenInntektTest {
             organisasjonsnummer = endretOrganisasjonsnummer,
             periode = (3 jan 2018) tilOgMed (20 jan 2018),
             periodebeløp = BigDecimal("100"),
-            dager = emptySet(),
+            ekskluderteUkedager = emptySet(),
             saksbehandlerIdent = saksbehandlerIdent,
             notatTilBeslutter = "nytt notat",
             totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong())
@@ -93,8 +93,8 @@ class TilkommenInntektTest {
         assertEquals(endretOrganisasjonsnummer, endretEvent.endringer.organisasjonsnummer?.til)
         assertEquals((1 jan 2018) tilOgMed (31 jan 2018), endretEvent.endringer.periode?.fra)
         assertEquals((3 jan 2018) tilOgMed (20 jan 2018), endretEvent.endringer.periode?.til)
-        assertEquals(sortedSetOf(1 jan 2018, 31 jan 2018), endretEvent.endringer.dager?.fra)
-        assertEquals(sortedSetOf(), endretEvent.endringer.dager?.til)
+        assertEquals(sortedSetOf(1 jan 2018, 31 jan 2018), endretEvent.endringer.ekskluderteUkedager?.fra)
+        assertEquals(sortedSetOf(), endretEvent.endringer.ekskluderteUkedager?.til)
         assertEquals(BigDecimal("10000"), endretEvent.endringer.periodebeløp?.fra)
         assertEquals(BigDecimal("100"), endretEvent.endringer.periodebeløp?.til)
 
@@ -105,7 +105,7 @@ class TilkommenInntektTest {
         assertEquals(endretOrganisasjonsnummer, tilkommenInntekt.organisasjonsnummer)
         assertEquals(3 jan 2018, tilkommenInntekt.periode.fom)
         assertEquals(20 jan 2018, tilkommenInntekt.periode.tom)
-        assertEquals(emptySet(), tilkommenInntekt.dager)
+        assertEquals(emptySet(), tilkommenInntekt.ekskluderteUkedager)
         assertEquals(BigDecimal("100"), tilkommenInntekt.periodebeløp)
         assertFalse(tilkommenInntekt.fjernet)
 
@@ -118,7 +118,7 @@ class TilkommenInntektTest {
         val organisasjonsnummer = lagOrganisasjonsnummer()
         val tilkommenInntekt = TilkommenInntekt.ny(
             periode = (1 jan 2018) tilOgMed (31 jan 2018),
-            dager = setOf(1 jan 2018, 31 jan 2018),
+            ekskluderteUkedager = setOf(1 jan 2018, 31 jan 2018),
             periodebeløp = BigDecimal("10000"),
             fødselsnummer = fødselsnummer,
             saksbehandlerIdent = lagSaksbehandlerident(),
@@ -136,7 +136,7 @@ class TilkommenInntektTest {
             organisasjonsnummer = endretOrganisasjonsnummer,
             periode = (3 jan 2018) tilOgMed (20 jan 2018),
             periodebeløp = BigDecimal("100"),
-            dager = emptySet(),
+            ekskluderteUkedager = emptySet(),
             saksbehandlerIdent = saksbehandlerIdent,
             notatTilBeslutter = "nytt notat",
             totrinnsvurderingId = TotrinnsvurderingId(Random.nextLong())
@@ -150,8 +150,8 @@ class TilkommenInntektTest {
         assertEquals(endretOrganisasjonsnummer, gjenopprettetEvent.endringer.organisasjonsnummer?.til)
         assertEquals((1 jan 2018) tilOgMed (31 jan 2018), gjenopprettetEvent.endringer.periode?.fra)
         assertEquals((3 jan 2018) tilOgMed (20 jan 2018), gjenopprettetEvent.endringer.periode?.til)
-        assertEquals(sortedSetOf(1 jan 2018, 31 jan 2018), gjenopprettetEvent.endringer.dager?.fra)
-        assertEquals(sortedSetOf(), gjenopprettetEvent.endringer.dager?.til)
+        assertEquals(sortedSetOf(1 jan 2018, 31 jan 2018), gjenopprettetEvent.endringer.ekskluderteUkedager?.fra)
+        assertEquals(sortedSetOf(), gjenopprettetEvent.endringer.ekskluderteUkedager?.til)
         assertEquals(BigDecimal("10000"), gjenopprettetEvent.endringer.periodebeløp?.fra)
         assertEquals(BigDecimal("100"), gjenopprettetEvent.endringer.periodebeløp?.til)
 
@@ -162,7 +162,7 @@ class TilkommenInntektTest {
         assertEquals(endretOrganisasjonsnummer, tilkommenInntekt.organisasjonsnummer)
         assertEquals(3 jan 2018, tilkommenInntekt.periode.fom)
         assertEquals(20 jan 2018, tilkommenInntekt.periode.tom)
-        assertEquals(emptySet(), tilkommenInntekt.dager)
+        assertEquals(emptySet(), tilkommenInntekt.ekskluderteUkedager)
         assertEquals(BigDecimal("100"), tilkommenInntekt.periodebeløp)
         assertFalse(tilkommenInntekt.fjernet)
 
@@ -175,7 +175,7 @@ class TilkommenInntektTest {
         val organisasjonsnummer = lagOrganisasjonsnummer()
         val tilkommenInntekt = TilkommenInntekt.ny(
             periode = (1 jan 2018) tilOgMed (31 jan 2018),
-            dager = setOf(1 jan 2018, 31 jan 2018),
+            ekskluderteUkedager = setOf(1 jan 2018, 31 jan 2018),
             periodebeløp = BigDecimal("10000"),
             fødselsnummer = fødselsnummer,
             saksbehandlerIdent = lagSaksbehandlerident(),
@@ -200,7 +200,7 @@ class TilkommenInntektTest {
         assertEquals(organisasjonsnummer, tilkommenInntekt.organisasjonsnummer)
         assertEquals(1 jan 2018, tilkommenInntekt.periode.fom)
         assertEquals(31 jan 2018, tilkommenInntekt.periode.tom)
-        assertEquals(setOf(1 jan 2018, 31 jan 2018), tilkommenInntekt.dager)
+        assertEquals(setOf(1 jan 2018, 31 jan 2018), tilkommenInntekt.ekskluderteUkedager)
         assertEquals(BigDecimal("10000"), tilkommenInntekt.periodebeløp)
         assertTrue(tilkommenInntekt.fjernet)
     }

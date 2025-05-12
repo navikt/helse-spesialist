@@ -68,7 +68,8 @@ class PgTilkommenInntektRepository(
                     organisasjonsnummer = data.inntektskildeIdentifikator.verdi,
                     periode = data.periode.tilPeriode(),
                     periodebeløp = data.periodebeløp,
-                    dager = data.dager,
+                    dager = TilkommenInntekt.tilDager(data.periode.tilPeriode(), data.ekskluderteUkedager),
+                    ekskluderteUkedager = data.ekskluderteUkedager,
                 )
             }
 
@@ -118,8 +119,9 @@ class PgTilkommenInntektRepository(
                         til = it.til,
                     )
                 },
-            dager =
-                dager?.let {
+            dager = null,
+            ekskluderteUkedager =
+                ekskluderteUkedager?.let {
                     Endring(
                         fra = it.fra,
                         til = it.til,
@@ -203,7 +205,7 @@ class PgTilkommenInntektRepository(
                         ),
                     periode = periode.tilDBPeriode(),
                     periodebeløp = periodebeløp,
-                    dager = dager,
+                    ekskluderteUkedager = ekskluderteUkedager,
                 )
             }
 
@@ -250,8 +252,8 @@ class PgTilkommenInntektRepository(
                         til = it.til,
                     )
                 },
-            dager =
-                dager?.let {
+            ekskluderteUkedager =
+                ekskluderteUkedager?.let {
                     DBEndringer.DBEndring(
                         fra = it.fra,
                         til = it.til,
@@ -273,7 +275,7 @@ private data class DBOpprettetEventData(
     val inntektskildeIdentifikator: DBInntektskildeIdentifikator,
     val periode: DBPeriode,
     val periodebeløp: BigDecimal,
-    val dager: SortedSet<LocalDate>,
+    val ekskluderteUkedager: SortedSet<LocalDate>,
 ) : DBEventData
 
 private data class DBEndretEventData(
@@ -290,7 +292,7 @@ private data class DBEndringer(
     val inntektskildeIdentifikator: DBEndring<DBInntektskildeIdentifikator>?,
     val periode: DBEndring<DBPeriode>?,
     val periodebeløp: DBEndring<BigDecimal>?,
-    val dager: DBEndring<SortedSet<LocalDate>>?,
+    val ekskluderteUkedager: DBEndring<SortedSet<LocalDate>>?,
 ) {
     data class DBEndring<T>(val fra: T, val til: T)
 }

@@ -92,6 +92,7 @@ class TilkommenInntektQueryHandler(
                                     ),
                                 periodebelop = it.periodebeløp,
                                 dager = it.dager.sorted(),
+                                ekskluderteUkedager = it.ekskluderteUkedager.sorted(),
                                 fjernet = it.fjernet,
                                 events =
                                     it.events.map { event ->
@@ -116,6 +117,7 @@ class TilkommenInntektQueryHandler(
                                                         ),
                                                     periodebelop = event.periodebeløp,
                                                     dager = event.dager.sorted(),
+                                                    ekskluderteUkedager = event.ekskluderteUkedager.sorted(),
                                                 )
 
                                             is TilkommenInntektEndretEvent ->
@@ -155,6 +157,13 @@ class TilkommenInntektQueryHandler(
             periodebelop = periodebeløp?.tilApiEndring(),
             dager =
                 dager?.let {
+                    ApiTilkommenInntektEvent.Endringer.ListLocalDateEndring(
+                        fra = it.fra.toList(),
+                        til = it.til.toList(),
+                    )
+                },
+            ekskluderteUkedager =
+                ekskluderteUkedager?.let {
                     ApiTilkommenInntektEvent.Endringer.ListLocalDateEndring(
                         fra = it.fra.toList(),
                         til = it.til.toList(),

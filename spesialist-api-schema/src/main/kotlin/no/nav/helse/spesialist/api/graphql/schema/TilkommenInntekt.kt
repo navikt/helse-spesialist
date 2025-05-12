@@ -18,6 +18,7 @@ data class ApiTilkommenInntekt(
     val periode: ApiDatoPeriode,
     val periodebelop: BigDecimal,
     val dager: List<LocalDate>,
+    val ekskluderteUkedager: List<LocalDate>,
     val fjernet: Boolean,
     val events: List<ApiTilkommenInntektEvent>,
 )
@@ -27,7 +28,7 @@ data class ApiTilkommenInntektInput(
     val organisasjonsnummer: String,
     val periode: ApiDatoPeriode,
     val periodebelop: BigDecimal,
-    val dager: List<LocalDate>,
+    val ekskluderteUkedager: List<LocalDate>,
 )
 
 @GraphQLName("TilkommenInntektEvent")
@@ -48,6 +49,7 @@ sealed interface ApiTilkommenInntektEvent {
         val periode: DatoPeriodeEndring?,
         val periodebelop: BigDecimalEndring?,
         val dager: ListLocalDateEndring?,
+        val ekskluderteUkedager: ListLocalDateEndring?,
     ) {
         @GraphQLName("TilkommenInntektEventDatoPeriodeEndring")
         data class DatoPeriodeEndring(val fra: ApiDatoPeriode, val til: ApiDatoPeriode)
@@ -70,6 +72,7 @@ data class ApiTilkommenInntektOpprettetEvent(
     val periode: ApiDatoPeriode,
     val periodebelop: BigDecimal,
     val dager: List<LocalDate>,
+    val ekskluderteUkedager: List<LocalDate>,
 ) : ApiTilkommenInntektEvent
 
 @GraphQLName("TilkommenInntektEndretEvent")

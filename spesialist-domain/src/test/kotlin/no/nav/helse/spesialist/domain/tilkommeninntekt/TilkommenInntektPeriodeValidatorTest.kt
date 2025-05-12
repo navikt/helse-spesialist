@@ -18,7 +18,7 @@ class TilkommenInntektPeriodeValidatorTest {
         val organisasjonsnummer = lagOrganisasjonsnummer()
         val tilkommenInntekt = TilkommenInntekt.ny(
             periode = (1 jan 2018) tilOgMed (31 jan 2018),
-            dager = setOf(1 jan 2018, 31 jan 2018),
+            ekskluderteUkedager = setOf(1 jan 2018, 31 jan 2018),
             periodebeløp = BigDecimal("10000.0"),
             fødselsnummer = fødselsnummer,
             saksbehandlerIdent = lagSaksbehandlerident(),

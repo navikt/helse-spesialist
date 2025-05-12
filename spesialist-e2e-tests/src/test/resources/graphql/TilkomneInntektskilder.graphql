@@ -8,7 +8,7 @@ query TilkomneInntektskilder($aktorId: String!) {
                 tom
             }
             periodebelop
-            dager
+            ekskluderteUkedager
             fjernet
             events {
                 metadata {
@@ -24,7 +24,7 @@ query TilkomneInntektskilder($aktorId: String!) {
                         tom
                     }
                     periodebelop
-                    dager
+                    ekskluderteUkedager
                 }
                 ... on TilkommenInntektEndretEvent {
                     endringer {
@@ -46,7 +46,7 @@ query TilkomneInntektskilder($aktorId: String!) {
                             fra
                             til
                         }
-                        dager {
+                        ekskluderteUkedager {
                             fra
                             til
                         }
@@ -72,7 +72,7 @@ query TilkomneInntektskilder($aktorId: String!) {
                             fra
                             til
                         }
-                        dager {
+                        ekskluderteUkedager {
                             fra
                             til
                         }

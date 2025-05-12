@@ -1,8 +1,6 @@
 package no.nav.helse.spesialist.e2etests.tests
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.spesialist.domain.Periode.Companion.tilPerioder
-import no.nav.helse.spesialist.domain.testfixtures.feb
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.e2etests.AbstractE2EIntegrationTest
@@ -26,7 +24,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         val organisasjonsnummer = lagOrganisasjonsnummer()
         val fom = 2 jan 2021
         val tom = 31 jan 2021
-        val dager = (2 jan 2021).datesUntil(1 feb 2021).toList()
+        val ekskluderteUkedager = listOf(12 jan 2021, 21 jan 2021, 25 jan 2021)
         val periodebeløp = BigDecimal("1111.11")
         val notatTilBeslutter = "notat"
         risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
@@ -39,7 +37,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 fom = fom,
                 tom = tom,
                 periodebeløp = periodebeløp,
-                dager = dager,
+                ekskluderteUkedager = ekskluderteUkedager,
                 notatTilBeslutter = notatTilBeslutter
             )
 
@@ -52,7 +50,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 expectedFom = fom,
                 expectedTom = tom,
                 expectedPeriodebeløp = periodebeløp,
-                expectedDager = dager,
+                expectedEkskluderteUkedager = ekskluderteUkedager,
                 expectedFjernet = false
             )
             val events = tilkomneInntektskilder[0]["inntekter"][0]["events"]
@@ -67,8 +65,11 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
             assertEquals(fom.toString(), opprettetEvent["periode"]["fom"].asText())
             assertEquals(tom.toString(), opprettetEvent["periode"]["tom"].asText())
             assertEquals(periodebeløp.toString(), opprettetEvent["periodebelop"].asText())
-            assertEquals(dager.size, opprettetEvent["dager"].size())
-            assertEquals(dager.map(LocalDate::toString), opprettetEvent["dager"].map(JsonNode::asText))
+            assertEquals(ekskluderteUkedager.size, opprettetEvent["ekskluderteUkedager"].size())
+            assertEquals(
+                ekskluderteUkedager.map(LocalDate::toString),
+                opprettetEvent["ekskluderteUkedager"].map(JsonNode::asText)
+            )
         }
 
         val inntektsendringerMelding = meldinger().last { it["@event_name"].asText() == "inntektsendringer" }
@@ -77,7 +78,14 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         assertInntektsendringerInntektskilde(
             inntektskilde = inntektsendringerMelding["inntektsendringer"][0],
             expectedOrganisasjonsnummer = organisasjonsnummer,
-            expectedInntekter = listOf(Triple(fom.toString(), tom.toString(), 37.037)),
+            expectedInntekter = listOf(
+                Triple("2021-01-04", "2021-01-08", 65.3594),
+                Triple("2021-01-11", "2021-01-11", 65.3594),
+                Triple("2021-01-13", "2021-01-15", 65.3594),
+                Triple("2021-01-18", "2021-01-20", 65.3594),
+                Triple("2021-01-22", "2021-01-22", 65.3594),
+                Triple("2021-01-26", "2021-01-29", 65.3594)
+            ),
             expectedNullstillinger = emptyList()
         )
     }
@@ -89,14 +97,13 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         val opprinneligFom = 2 jan 2021
         val opprinneligTom = 31 jan 2021
         val opprinneligPeriodebeløp = BigDecimal("1111.11")
-        val opprinneligeDager = (2 jan 2021).datesUntil(1 feb 2021).toList()
+        val opprinneligeEkskluderteUkedager = listOf(12 jan 2021, 21 jan 2021, 25 jan 2021)
 
         val endringOrganisasjonsnummer = lagOrganisasjonsnummer()
         val endringFom = 3 jan 2021
         val endringTom = 30 jan 2021
         val endringPeriodebeløp = BigDecimal("2222.22")
-        val endringDager = (3 jan 2021).datesUntil(31 jan 2021)
-            .filter { it.toEpochDay() % 2 == 0L }.toList()
+        val endringEkskluderteUkedager = listOf(12 jan 2021, 21 jan 2021, 26 jan 2021)
         val endringNotatTilBeslutter = "endring i gang"
 
         førsteVedtaksperiode().apply {
@@ -112,7 +119,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 fom = opprinneligFom,
                 tom = opprinneligTom,
                 periodebeløp = opprinneligPeriodebeløp,
-                dager = opprinneligeDager,
+                ekskluderteUkedager = opprinneligeEkskluderteUkedager,
                 notatTilBeslutter = "notat"
             )
 
@@ -123,7 +130,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 fom = endringFom,
                 tom = endringTom,
                 periodebeløp = endringPeriodebeløp,
-                dager = endringDager,
+                ekskluderteUkedager = endringEkskluderteUkedager,
                 notatTilBeslutter = endringNotatTilBeslutter
             )
 
@@ -136,7 +143,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 expectedFom = endringFom,
                 expectedTom = endringTom,
                 expectedPeriodebeløp = endringPeriodebeløp,
-                expectedDager = endringDager,
+                expectedEkskluderteUkedager = endringEkskluderteUkedager,
                 expectedFjernet = false
             )
             val events = tilkomneInntektskilder[0]["inntekter"][0]["events"]
@@ -157,8 +164,8 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 expectedTilTom = endringTom,
                 expectedPeriodebeløpFra = opprinneligPeriodebeløp,
                 expectedPeriodebeløpTil = endringPeriodebeløp,
-                expectedDagerFra = opprinneligeDager,
-                expectedDagerTil = endringDager
+                expectedEkskluderteUkedagerFra = opprinneligeEkskluderteUkedager,
+                expectedEkskluderteUkedagerTil = endringEkskluderteUkedager
             )
         }
         val inntektsendringerMelding = meldinger().last { it["@event_name"].asText() == "inntektsendringer" }
@@ -168,12 +175,27 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
             inntektskilde = inntektsendringerMelding["inntektsendringer"][0],
             expectedOrganisasjonsnummer = opprinneligOrganisasjonsnummer,
             expectedInntekter = emptyList(),
-            expectedNullstillinger = listOf(Pair(opprinneligFom.toString(), opprinneligTom.toString())),
+            expectedNullstillinger = listOf(
+                Pair("2021-01-04", "2021-01-08"),
+                Pair("2021-01-11", "2021-01-11"),
+                Pair("2021-01-13", "2021-01-15"),
+                Pair("2021-01-18", "2021-01-20"),
+                Pair("2021-01-22", "2021-01-22"),
+                Pair("2021-01-26", "2021-01-29")
+            )
         )
         assertInntektsendringerInntektskilde(
             inntektskilde = inntektsendringerMelding["inntektsendringer"][1],
             expectedOrganisasjonsnummer = endringOrganisasjonsnummer,
-            expectedInntekter = endringDager.tilPerioder().map { Triple(it.fom.toString(), it.tom.toString(), 158.73) },
+            expectedInntekter = listOf(
+                Triple("2021-01-04", "2021-01-08", 130.7188),
+                Triple("2021-01-11", "2021-01-11", 130.7188),
+                Triple("2021-01-13", "2021-01-15", 130.7188),
+                Triple("2021-01-18", "2021-01-20", 130.7188),
+                Triple("2021-01-22", "2021-01-22", 130.7188),
+                Triple("2021-01-25", "2021-01-25", 130.7188),
+                Triple("2021-01-27", "2021-01-29", 130.7188)
+            ),
             expectedNullstillinger = emptyList()
         )
     }
@@ -191,14 +213,14 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         val opprinneligFom = 2 jan 2021
         val opprinneligTom = 31 jan 2021
         val opprinneligPeriodebeløp = BigDecimal("1111.11")
-        val opprinneligeDager = (2 jan 2021).datesUntil(1 feb 2021).toList()
+        val opprinneligeEkskluderteUkedager = listOf(12 jan 2021, 21 jan 2021, 25 jan 2021)
         medPersonISpeil {
             val tilkommenInntektId = saksbehandlerLeggerTilTilkommenInntekt(
                 organisasjonsnummer = opprinneligOrganisasjonsnummer,
                 fom = opprinneligFom,
                 tom = opprinneligTom,
                 periodebeløp = opprinneligPeriodebeløp,
-                dager = opprinneligeDager,
+                ekskluderteUkedager = opprinneligeEkskluderteUkedager,
                 notatTilBeslutter = "notat"
             )
 
@@ -218,7 +240,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 expectedFom = opprinneligFom,
                 expectedTom = opprinneligTom,
                 expectedPeriodebeløp = opprinneligPeriodebeløp,
-                expectedDager = opprinneligeDager,
+                expectedEkskluderteUkedager = opprinneligeEkskluderteUkedager,
                 expectedFjernet = true
             )
             assertEventTypenamesAndMetadata(
@@ -236,7 +258,14 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
             inntektskilde = inntektsendringerMelding["inntektsendringer"][0],
             expectedOrganisasjonsnummer = opprinneligOrganisasjonsnummer,
             expectedInntekter = emptyList(),
-            expectedNullstillinger = listOf(Pair(opprinneligFom.toString(), opprinneligTom.toString())),
+            expectedNullstillinger = listOf(
+                Pair("2021-01-04", "2021-01-08"),
+                Pair("2021-01-11", "2021-01-11"),
+                Pair("2021-01-13", "2021-01-15"),
+                Pair("2021-01-18", "2021-01-20"),
+                Pair("2021-01-22", "2021-01-22"),
+                Pair("2021-01-26", "2021-01-29")
+            ),
         )
     }
 
@@ -247,14 +276,13 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         val opprinneligFom = 2 jan 2021
         val opprinneligTom = 31 jan 2021
         val opprinneligPeriodebeløp = BigDecimal("1111.11")
-        val opprinneligeDager = (2 jan 2021).datesUntil(1 feb 2021).toList()
+        val opprinneligeEkskluderteUkedager = listOf(12 jan 2021, 21 jan 2021, 25 jan 2021)
 
         val gjenopprettingOrganisasjonsnummer = lagOrganisasjonsnummer()
         val gjenopprettingFom = 3 jan 2021
         val gjenopprettingTom = 30 jan 2021
         val gjenopprettingPeriodebeløp = BigDecimal("2222.22")
-        val gjenopprettingDager = (3 jan 2021).datesUntil(31 jan 2021)
-            .filter { it.toEpochDay() % 2 == 0L }.toList()
+        val gjenopprettingEkskluderteUkedager = listOf(12 jan 2021, 21 jan 2021, 26 jan 2021)
         val gjenopprettingNotatTilBeslutter = "gjenoppretter etter feilaktig fjerning"
 
         førsteVedtaksperiode().apply {
@@ -270,7 +298,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 fom = opprinneligFom,
                 tom = opprinneligTom,
                 periodebeløp = opprinneligPeriodebeløp,
-                dager = opprinneligeDager,
+                ekskluderteUkedager = opprinneligeEkskluderteUkedager,
                 notatTilBeslutter = "notat"
             )
 
@@ -286,7 +314,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 fom = gjenopprettingFom,
                 tom = gjenopprettingTom,
                 periodebeløp = gjenopprettingPeriodebeløp,
-                dager = gjenopprettingDager,
+                ekskluderteUkedager = gjenopprettingEkskluderteUkedager,
                 notatTilBeslutter = gjenopprettingNotatTilBeslutter
             )
 
@@ -299,7 +327,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 expectedFom = gjenopprettingFom,
                 expectedTom = gjenopprettingTom,
                 expectedPeriodebeløp = gjenopprettingPeriodebeløp,
-                expectedDager = gjenopprettingDager,
+                expectedEkskluderteUkedager = gjenopprettingEkskluderteUkedager,
                 expectedFjernet = false
             )
             val events = tilkomneInntektskilder[0]["inntekter"][0]["events"]
@@ -321,8 +349,8 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 expectedTilTom = gjenopprettingTom,
                 expectedPeriodebeløpFra = opprinneligPeriodebeløp,
                 expectedPeriodebeløpTil = gjenopprettingPeriodebeløp,
-                expectedDagerFra = opprinneligeDager,
-                expectedDagerTil = gjenopprettingDager
+                expectedEkskluderteUkedagerFra = opprinneligeEkskluderteUkedager,
+                expectedEkskluderteUkedagerTil = gjenopprettingEkskluderteUkedager
             )
         }
         val inntektsendringerMelding = meldinger().last { it["@event_name"].asText() == "inntektsendringer" }
@@ -331,8 +359,15 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         assertInntektsendringerInntektskilde(
             inntektskilde = inntektsendringerMelding["inntektsendringer"][0],
             expectedOrganisasjonsnummer = gjenopprettingOrganisasjonsnummer,
-            expectedInntekter = gjenopprettingDager.tilPerioder()
-                .map { Triple(it.fom.toString(), it.tom.toString(), 158.73) },
+            expectedInntekter = listOf(
+                Triple("2021-01-04", "2021-01-08", 130.7188),
+                Triple("2021-01-11", "2021-01-11", 130.7188),
+                Triple("2021-01-13", "2021-01-15", 130.7188),
+                Triple("2021-01-18", "2021-01-20", 130.7188),
+                Triple("2021-01-22", "2021-01-22", 130.7188),
+                Triple("2021-01-25", "2021-01-25", 130.7188),
+                Triple("2021-01-27", "2021-01-29", 130.7188)
+            ),
             expectedNullstillinger = emptyList(),
         )
     }
@@ -355,7 +390,6 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         val sisteEndretOrganisasjonesnummer = lagOrganisasjonsnummer()
         val sisteFom = 14 jan 2021
         val sisteTom = 21 jan 2021
-        val sisteDager = listOf(17 jan 2021, 19 jan 2021)
 
         medPersonISpeil {
             val tilkommenInntektId = saksbehandlerLeggerTilTilkommenInntekt(
@@ -363,7 +397,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 fom = 2 jan 2021,
                 tom = 31 jan 2021,
                 periodebeløp = BigDecimal("1111.11"),
-                dager = (2 jan 2021).datesUntil(1 feb 2021).toList(),
+                ekskluderteUkedager = listOf(12 jan 2021, 21 jan 2021, 25 jan 2021),
                 notatTilBeslutter = "legger til tilkommen inntekt her"
             )
 
@@ -373,8 +407,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 fom = 3 jan 2021,
                 tom = 30 jan 2021,
                 periodebeløp = BigDecimal("2222.22"),
-                dager = (3 jan 2021).datesUntil(31 jan 2021).toList()
-                    .filter { it.toEpochDay() % 2 == 0L },
+                ekskluderteUkedager = listOf(12 jan 2021, 21 jan 2021, 26 jan 2021),
                 notatTilBeslutter = "endring nummer 1"
             )
             saksbehandlerEndrerTilkommenInntekt(
@@ -383,8 +416,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 fom = 4 jan 2021,
                 tom = 29 jan 2021,
                 periodebeløp = BigDecimal("3333.33"),
-                dager = (4 jan 2021).datesUntil(30 jan 2021).toList()
-                    .filter { it.toEpochDay() % 2 == 1L },
+                ekskluderteUkedager = listOf(11 jan 2021),
                 notatTilBeslutter = "endring nummer 2"
             )
             saksbehandlerFjernerTilkommenInntekt(
@@ -397,7 +429,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 fom = nestSisteFom,
                 tom = nestSisteTom,
                 periodebeløp = BigDecimal("4444.44"),
-                dager = nestSisteFom.datesUntil(nestSisteTom.plusDays(1)).toList(),
+                ekskluderteUkedager = listOf(6 jan 2021, 13 jan 2021, 20 jan 2021, 27 jan 2021),
                 notatTilBeslutter = "gjenoppretter etter feilaktig fjerning"
             )
             saksbehandlerEndrerTilkommenInntekt(
@@ -406,7 +438,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 fom = sisteFom,
                 tom = sisteTom,
                 periodebeløp = BigDecimal("5555.55"),
-                dager = sisteDager,
+                ekskluderteUkedager = listOf(15 jan 2021, 19 jan 2021),
                 notatTilBeslutter = "endring nummer 3"
             )
 
@@ -419,7 +451,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 expectedFom = 14 jan 2021,
                 expectedTom = 21 jan 2021,
                 expectedPeriodebeløp = BigDecimal("5555.55"),
-                expectedDager = listOf(17 jan 2021, 19 jan 2021),
+                expectedEkskluderteUkedager = listOf(15 jan 2021, 19 jan 2021),
                 expectedFjernet = false
             )
             assertEventTypenamesAndMetadata(
@@ -441,12 +473,25 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
             inntektskilde = inntektsendringerMelding["inntektsendringer"][0],
             expectedOrganisasjonsnummer = nestSisteEndretOrganisasjonsnummer,
             expectedInntekter = emptyList(),
-            expectedNullstillinger = listOf(Pair(nestSisteFom.toString(), nestSisteTom.toString())),
+            expectedNullstillinger = listOf(
+                Pair("2021-01-05", "2021-01-05"),
+                Pair("2021-01-07", "2021-01-08"),
+                Pair("2021-01-11", "2021-01-12"),
+                Pair("2021-01-14", "2021-01-15"),
+                Pair("2021-01-18", "2021-01-19"),
+                Pair("2021-01-21", "2021-01-22"),
+                Pair("2021-01-25", "2021-01-26"),
+                Pair("2021-01-28", "2021-01-28"),
+            ),
         )
         assertInntektsendringerInntektskilde(
             inntektskilde = inntektsendringerMelding["inntektsendringer"][1],
             expectedOrganisasjonsnummer = sisteEndretOrganisasjonesnummer,
-            expectedInntekter = sisteDager.tilPerioder().map { Triple(it.fom.toString(), it.tom.toString(), 2777.775) },
+            expectedInntekter = listOf(
+                Triple("2021-01-14", "2021-01-14", 1388.8875),
+                Triple("2021-01-18", "2021-01-18", 1388.8875),
+                Triple("2021-01-20", "2021-01-21", 1388.8875),
+            ),
             expectedNullstillinger = emptyList()
         )
     }
@@ -469,7 +514,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 fom = 2 jan 2021,
                 tom = 15 jan 2021,
                 periodebeløp = BigDecimal("1111.11"),
-                dager = (2 jan 2021).datesUntil(16 jan 2021).toList(),
+                ekskluderteUkedager = listOf(7 jan 2021, 8 jan 2021),
                 notatTilBeslutter = "legger til første tilkommen inntekt her"
             )
 
@@ -479,7 +524,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 fom = 2 jan 2021,
                 tom = 15 jan 2021,
                 periodebeløp = BigDecimal("2222.22"),
-                dager = (2 jan 2021).datesUntil(16 jan 2021).toList(),
+                ekskluderteUkedager = listOf(7 jan 2021, 8 jan 2021),
                 notatTilBeslutter = "endret periodebeløp på første tilkomne inntekt"
             )
 
@@ -488,7 +533,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 fom = 16 jan 2021,
                 tom = 31 jan 2021,
                 periodebeløp = BigDecimal("1111.11"),
-                dager = (16 jan 2021).datesUntil(1 feb 2021).toList(),
+                ekskluderteUkedager = listOf(18 jan 2021, 19 jan 2021, 20 jan 2021, 21 jan 2021),
                 notatTilBeslutter = "legger til enda en tilkommen inntekt her"
             )
 
@@ -503,7 +548,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 fom = 16 jan 2021,
                 tom = 31 jan 2021,
                 periodebeløp = BigDecimal("2222.22"),
-                dager = (16 jan 2021).datesUntil(1 feb 2021).toList(),
+                ekskluderteUkedager = listOf(18 jan 2021, 19 jan 2021, 20 jan 2021, 21 jan 2021),
                 notatTilBeslutter = "endret periodebeløp på andre tilkomne inntekt"
             )
 
@@ -522,7 +567,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                     expectedFom = 2 jan 2021,
                     expectedTom = 15 jan 2021,
                     expectedPeriodebeløp = BigDecimal("2222.22"),
-                    expectedDager = (2 jan 2021).datesUntil(16 jan 2021).toList(),
+                    expectedEkskluderteUkedager = listOf(7 jan 2021, 8 jan 2021),
                     expectedFjernet = true
                 )
                 assertEventTypenamesAndMetadata(
@@ -538,7 +583,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                     expectedFom = 16 jan 2021,
                     expectedTom = 31 jan 2021,
                     expectedPeriodebeløp = BigDecimal("2222.22"),
-                    expectedDager = (16 jan 2021).datesUntil(1 feb 2021).toList(),
+                    expectedEkskluderteUkedager = listOf(18 jan 2021, 19 jan 2021, 20 jan 2021, 21 jan 2021),
                     expectedFjernet = false
                 )
                 assertEventTypenamesAndMetadata(
@@ -558,7 +603,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         expectedFom: LocalDate,
         expectedTom: LocalDate,
         expectedPeriodebeløp: BigDecimal,
-        expectedDager: List<LocalDate>,
+        expectedEkskluderteUkedager: List<LocalDate>,
         expectedFjernet: Boolean
     ) {
         assertEquals(expectedOrganisasjonsnummer, tilkommenInntektskilde["organisasjonsnummer"].asText())
@@ -569,7 +614,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 expectedFom = expectedFom,
                 expectedTom = expectedTom,
                 expectedPeriodebeløp = expectedPeriodebeløp,
-                expectedDager = expectedDager,
+                expectedEkskluderteUkedager = expectedEkskluderteUkedager,
                 expectedFjernet = expectedFjernet
             )
         }
@@ -580,14 +625,17 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         expectedFom: LocalDate,
         expectedTom: LocalDate,
         expectedPeriodebeløp: BigDecimal,
-        expectedDager: List<LocalDate>,
+        expectedEkskluderteUkedager: List<LocalDate>,
         expectedFjernet: Boolean
     ) {
         assertEquals(expectedFom.toString(), inntekt["periode"]["fom"].asText())
         assertEquals(expectedTom.toString(), inntekt["periode"]["tom"].asText())
         assertEquals(expectedPeriodebeløp.toString(), inntekt["periodebelop"].asText())
-        assertEquals(expectedDager.size, inntekt["dager"].size())
-        assertEquals(expectedDager.map(LocalDate::toString), inntekt["dager"].map(JsonNode::asText))
+        assertEquals(expectedEkskluderteUkedager.size, inntekt["ekskluderteUkedager"].size())
+        assertEquals(
+            expectedEkskluderteUkedager.map(LocalDate::toString),
+            inntekt["ekskluderteUkedager"].map(JsonNode::asText)
+        )
         assertEquals(expectedFjernet, inntekt["fjernet"].asBoolean())
     }
 
@@ -601,8 +649,8 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         expectedTilTom: LocalDate,
         expectedPeriodebeløpFra: BigDecimal,
         expectedPeriodebeløpTil: BigDecimal,
-        expectedDagerFra: List<LocalDate>,
-        expectedDagerTil: List<LocalDate>
+        expectedEkskluderteUkedagerFra: List<LocalDate>,
+        expectedEkskluderteUkedagerTil: List<LocalDate>
     ) {
         assertEquals(expectedOrganisasjonsnummerFra, endringer["organisasjonsnummer"]["fra"].asText())
         assertEquals(expectedOrganisasjonsnummerTil, endringer["organisasjonsnummer"]["til"].asText())
@@ -612,10 +660,16 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         assertEquals(expectedTilTom.toString(), endringer["periode"]["til"]["tom"].asText())
         assertEquals(expectedPeriodebeløpFra.toString(), endringer["periodebelop"]["fra"].asText())
         assertEquals(expectedPeriodebeløpTil.toString(), endringer["periodebelop"]["til"].asText())
-        assertEquals(expectedDagerFra.size, endringer["dager"]["fra"].size())
-        assertEquals(expectedDagerTil.size, endringer["dager"]["til"].size())
-        assertEquals(expectedDagerFra.map(LocalDate::toString), endringer["dager"]["fra"].map(JsonNode::asText))
-        assertEquals(expectedDagerTil.map(LocalDate::toString), endringer["dager"]["til"].map(JsonNode::asText))
+        assertEquals(expectedEkskluderteUkedagerFra.size, endringer["ekskluderteUkedager"]["fra"].size())
+        assertEquals(expectedEkskluderteUkedagerTil.size, endringer["ekskluderteUkedager"]["til"].size())
+        assertEquals(
+            expectedEkskluderteUkedagerFra.map(LocalDate::toString),
+            endringer["ekskluderteUkedager"]["fra"].map(JsonNode::asText)
+        )
+        assertEquals(
+            expectedEkskluderteUkedagerTil.map(LocalDate::toString),
+            endringer["ekskluderteUkedager"]["til"].map(JsonNode::asText)
+        )
     }
 
     private fun assertEventTypenamesAndMetadata(
