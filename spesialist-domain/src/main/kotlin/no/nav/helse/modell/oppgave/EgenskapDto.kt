@@ -31,6 +31,7 @@ enum class EgenskapDto {
     MEDLEMSKAP,
     VERGEMÅL,
     TILKOMMEN,
+    GRUNNBELØPSREGULERING
     ;
 
     internal companion object {
@@ -66,6 +67,7 @@ enum class EgenskapDto {
                 Egenskap.MEDLEMSKAP -> MEDLEMSKAP
                 Egenskap.VERGEMÅL -> VERGEMÅL
                 Egenskap.TILKOMMEN -> TILKOMMEN
+                Egenskap.GRUNNBELØPSREGULERING -> GRUNNBELØPSREGULERING
             }
         }
 
@@ -101,6 +103,7 @@ enum class EgenskapDto {
                 MEDLEMSKAP -> Egenskap.MEDLEMSKAP
                 VERGEMÅL -> Egenskap.VERGEMÅL
                 TILKOMMEN -> Egenskap.TILKOMMEN
+                GRUNNBELØPSREGULERING -> Egenskap.GRUNNBELØPSREGULERING
             }
     }
 }

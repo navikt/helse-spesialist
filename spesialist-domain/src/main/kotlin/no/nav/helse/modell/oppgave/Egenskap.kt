@@ -42,6 +42,7 @@ enum class Egenskap(
     MEDLEMSKAP,
     VERGEMÅL,
     TILKOMMEN,
+    GRUNNBELØPSREGULERING
     ;
 
     enum class Kategori {

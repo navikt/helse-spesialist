@@ -243,6 +243,7 @@ class PgOppgaveRepository private constructor(queryRunner: QueryRunner) : QueryR
             Egenskap.MEDLEMSKAP -> "MEDLEMSKAP"
             Egenskap.VERGEMÅL -> "VERGEMÅL"
             Egenskap.TILKOMMEN -> "TILKOMMEN"
+            Egenskap.GRUNNBELØPSREGULERING -> "GRUNNBELØPSREGULERING"
         }
 
     private fun String.fromDb() =
@@ -277,6 +278,7 @@ class PgOppgaveRepository private constructor(queryRunner: QueryRunner) : QueryR
             "MEDLEMSKAP" -> Egenskap.MEDLEMSKAP
             "VERGEMÅL" -> Egenskap.VERGEMÅL
             "TILKOMMEN" -> Egenskap.TILKOMMEN
+            "GRUNNBELØPSREGULERING" -> Egenskap.GRUNNBELØPSREGULERING
             else -> error("Ukjent oppgaveegenskap")
         }
 }

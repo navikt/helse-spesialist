@@ -196,6 +196,7 @@ internal object OppgaveMapper {
             Egenskap.MANGLER_IM -> ApiEgenskap.MANGLER_IM
             Egenskap.MEDLEMSKAP -> ApiEgenskap.MEDLEMSKAP
             Egenskap.TILKOMMEN -> ApiEgenskap.TILKOMMEN
+            Egenskap.GRUNNBELØPSREGULERING -> ApiEgenskap.GRUNNBELOPSREGULERING
         }
 
     private fun Egenskap.Kategori.tilApiversjon(): ApiKategori =
@@ -240,6 +241,7 @@ internal object OppgaveMapper {
             EgenskapForDatabase.MANGLER_IM -> Egenskap.MANGLER_IM
             EgenskapForDatabase.MEDLEMSKAP -> Egenskap.MEDLEMSKAP
             EgenskapForDatabase.TILKOMMEN -> Egenskap.TILKOMMEN
+            EgenskapForDatabase.GRUNNBELØPSREGULERING -> Egenskap.GRUNNBELØPSREGULERING
         }
 
     private fun ApiOppgaveegenskap.tilDatabaseversjon() =
@@ -274,5 +276,6 @@ internal object OppgaveMapper {
             ApiEgenskap.MANGLER_IM -> EgenskapForDatabase.MANGLER_IM
             ApiEgenskap.MEDLEMSKAP -> EgenskapForDatabase.MEDLEMSKAP
             ApiEgenskap.TILKOMMEN -> EgenskapForDatabase.TILKOMMEN
+            ApiEgenskap.GRUNNBELOPSREGULERING -> EgenskapForDatabase.GRUNNBELØPSREGULERING
         }
 }

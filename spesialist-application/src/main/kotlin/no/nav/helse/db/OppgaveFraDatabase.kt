@@ -96,4 +96,5 @@ enum class EgenskapForDatabase {
     MANGLER_IM,
     MEDLEMSKAP,
     TILKOMMEN,
+    GRUNNBELØPSREGULERING
 }

@@ -32,6 +32,7 @@ import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Egenskap.TILBAKEDATERT
 import no.nav.helse.modell.oppgave.Egenskap.TILKOMMEN
+import no.nav.helse.modell.oppgave.Egenskap.GRUNNBELØPSREGULERING
 import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_ARBEIDSGIVER
 import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.modell.oppgave.Egenskap.UTLAND
@@ -270,6 +271,40 @@ internal class OpprettSaksbehandleroppgaveTest {
         assertTrue(opprettSaksbehandlerOppgaveCommand(tags = listOf("TilkommenInntekt")).execute(context))
         assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, TILKOMMEN)
     }
+
+    @Test
+    fun `oppretter oppgave med egenskapen grunnbeløpsregulering`() {
+        assertTrue(
+            opprettSaksbehandlerOppgaveCommand(
+                utbetalingtype = Utbetalingtype.REVURDERING,
+                tags = listOf("Grunnbeløpsregulering")
+            ).execute(context)
+        )
+        assertForventedeEgenskaper(
+            REVURDERING,
+            INGEN_UTBETALING,
+            EN_ARBEIDSGIVER,
+            FORSTEGANGSBEHANDLING,
+            GRUNNBELØPSREGULERING
+        )
+    }
+
+    @Test
+    fun `legger ikke til egenskapen grunnbeløpsregulering ved oppgavetype søknad`() {
+        assertTrue(
+            opprettSaksbehandlerOppgaveCommand(
+                utbetalingtype = Utbetalingtype.UTBETALING,
+                tags = listOf("Grunnbeløpsregulering")
+            ).execute(context)
+        )
+        assertForventedeEgenskaper(
+            SØKNAD,
+            INGEN_UTBETALING,
+            EN_ARBEIDSGIVER,
+            FORSTEGANGSBEHANDLING
+        )
+    }
+
 
     private fun assertForventedeEgenskaper(vararg egenskaper: Egenskap, kanAvvises: Boolean = true) {
         verify(exactly = 1) {
