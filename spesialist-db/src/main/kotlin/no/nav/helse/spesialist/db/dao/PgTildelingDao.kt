@@ -45,8 +45,8 @@ class PgTildelingDao internal constructor(queryRunner: QueryRunner) : TildelingD
             JOIN oppgave o on v.id = o.vedtak_ref
             JOIN tildeling t on o.id = t.oppgave_id_ref
             JOIN saksbehandler s on t.saksbehandler_ref = s.oid
-            WHERE fødselsnummer = :foedselsnummer AND o.status = 'AvventerSaksbehandler'
-            ORDER BY o.opprettet DESC;
+            WHERE fødselsnummer = :foedselsnummer
+            ORDER BY o.opprettet DESC LIMIT 1;
             """.trimIndent(),
             "foedselsnummer" to fødselsnummer,
         ).singleOrNull {
