@@ -38,7 +38,6 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiFjernetFraPaVent
 import no.nav.helse.spesialist.api.graphql.schema.ApiHandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiHendelse
 import no.nav.helse.spesialist.api.graphql.schema.ApiHistorikkinnslag
-import no.nav.helse.spesialist.api.graphql.schema.ApiInntekt
 import no.nav.helse.spesialist.api.graphql.schema.ApiInntektstype
 import no.nav.helse.spesialist.api.graphql.schema.ApiKommentar
 import no.nav.helse.spesialist.api.graphql.schema.ApiLagtPaVent
@@ -493,21 +492,6 @@ data class ApiBeregnetPeriodeResolver(
             }
         } else {
             null
-        }
-
-    override fun inntekter(): List<ApiInntekt> =
-        periode.inntekter.map { inntekt ->
-            ApiInntekt(
-                inntektskilde = inntekt.inntektskilde,
-                periodiserteInntekter =
-                    inntekt.periodiserteInntekter.map { periodisertInntekt ->
-                        ApiInntekt.ApiPeriodisertInntekt(
-                            fom = periodisertInntekt.fom,
-                            tom = periodisertInntekt.tom,
-                            dagligBelop = periodisertInntekt.dagligBelop,
-                        )
-                    },
-            )
         }
 }
 

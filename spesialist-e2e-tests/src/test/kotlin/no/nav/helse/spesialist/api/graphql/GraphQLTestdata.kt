@@ -1,7 +1,6 @@
 package no.nav.helse.spesialist.api.graphql
 
 import no.nav.helse.spesialist.domain.testfixtures.jan
-import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.domain.testfixtures.mai
 import no.nav.helse.spesialist.domain.testfixtures.okt
 import no.nav.helse.spleis.graphql.enums.GraphQLHendelsetype
@@ -18,10 +17,8 @@ import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLArbeidsgiverrefusjon
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLBeregnetPeriode
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLGenerasjon
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLHendelse
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLInntekt
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLOmregnetArsinntekt
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPeriodevilkar
-import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPeriodisertInntekt
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLRefusjonselement
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSoknadArbeidsledig
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLSpleisVilkarsgrunnlag
@@ -40,7 +37,6 @@ object GraphQLTestdata {
         GraphQLArbeidsgiver(
             organisasjonsnummer = organisasjonsnummer,
             ghostPerioder = emptyList(),
-            nyeInntektsforholdPerioder = emptyList(),
             generasjoner = generasjoner,
         )
 
@@ -104,19 +100,7 @@ object GraphQLTestdata {
                 personNettoBelop = 0,
                 statusEnum = GraphQLUtbetalingstatus.IKKEGODKJENT,
                 typeEnum = Utbetalingtype.UTBETALING,
-            ),
-        inntekter = listOf(
-            GraphQLInntekt(
-                inntektskilde = lagOrganisasjonsnummer(),
-                periodiserteInntekter = listOf(
-                    GraphQLPeriodisertInntekt(
-                        dagligBelop = 1337.69,
-                        fom = fom,
-                        tom = tom,
-                    )
-                )
             )
-        )
     )
 
     fun opprettUberegnetPeriode(

@@ -84,15 +84,6 @@ query HentSnapshot($fnr: String!) {
                 vilkarsgrunnlagId
                 deaktivert
             }
-            nyeInntektsforholdPerioder {
-                id
-                fom
-                tom
-                organisasjonsnummer
-                skjaeringstidspunkt
-                dagligBelop
-                manedligBelop
-            }
             generasjoner {
                 id
                 perioder {
@@ -210,16 +201,6 @@ query HentSnapshot($fnr: String!) {
                         forbrukteSykedager
                         gjenstaendeSykedager
                         maksdato
-                        inntekter {
-                            __typename
-                            inntektskilde
-                            periodiserteInntekter {
-                                __typename
-                                dagligBelop
-                                fom
-                                tom
-                            }
-                        }
                         periodevilkar {
                             alder {
                                 alderSisteSykedag
