@@ -158,12 +158,6 @@ data class ApiKommentar(
     val feilregistrert_tidspunkt: LocalDateTime?,
 )
 
-@GraphQLName("Notater")
-data class ApiNotater(
-    val id: UUID,
-    val notater: List<ApiNotat>,
-)
-
 @GraphQLName("Notat")
 data class ApiNotat(
     val id: Int,
