@@ -54,3 +54,7 @@ spec:
       value: "europe-north1"
     - name: DATABASE_INSTANCE
       value: "spesialist"
+  observability:
+    logging:
+      destinations:
+        - id: elastic
