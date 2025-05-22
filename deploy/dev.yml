@@ -39,8 +39,8 @@ spec:
       runtime: java
     logging:
       destinations:
-        - id: loki
         - id: elastic
+        - id: loki
   prometheus:
     enabled: true
     path: /metrics
