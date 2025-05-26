@@ -19,6 +19,7 @@ data class ApiTilkommenInntekt(
     val periodebelop: BigDecimal,
     val ekskluderteUkedager: List<LocalDate>,
     val fjernet: Boolean,
+    val erDelAvAktivTotrinnsvurdering: Boolean,
     val events: List<ApiTilkommenInntektEvent>,
 )
 

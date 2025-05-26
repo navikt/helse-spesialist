@@ -10,6 +10,7 @@ query TilkomneInntektskilder($aktorId: String!) {
             periodebelop
             ekskluderteUkedager
             fjernet
+            erDelAvAktivTotrinnsvurdering
             events {
                 metadata {
                     sekvensnummer

@@ -568,7 +568,8 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                     expectedTom = 15 jan 2021,
                     expectedPeriodebeløp = BigDecimal("2222.22"),
                     expectedEkskluderteUkedager = listOf(7 jan 2021, 8 jan 2021),
-                    expectedFjernet = true
+                    expectedFjernet = true,
+                    expectedErDelAvAktivTotrinnsvurdering = true
                 )
                 assertEventTypenamesAndMetadata(
                     events = inntekter[0]["events"],
@@ -584,7 +585,8 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                     expectedTom = 31 jan 2021,
                     expectedPeriodebeløp = BigDecimal("2222.22"),
                     expectedEkskluderteUkedager = listOf(18 jan 2021, 19 jan 2021, 20 jan 2021, 21 jan 2021),
-                    expectedFjernet = false
+                    expectedFjernet = false,
+                    expectedErDelAvAktivTotrinnsvurdering = true
                 )
                 assertEventTypenamesAndMetadata(
                     events = inntekter[1]["events"],
@@ -615,7 +617,8 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 expectedTom = expectedTom,
                 expectedPeriodebeløp = expectedPeriodebeløp,
                 expectedEkskluderteUkedager = expectedEkskluderteUkedager,
-                expectedFjernet = expectedFjernet
+                expectedFjernet = expectedFjernet,
+                expectedErDelAvAktivTotrinnsvurdering = true
             )
         }
     }
@@ -626,7 +629,8 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         expectedTom: LocalDate,
         expectedPeriodebeløp: BigDecimal,
         expectedEkskluderteUkedager: List<LocalDate>,
-        expectedFjernet: Boolean
+        expectedFjernet: Boolean,
+        expectedErDelAvAktivTotrinnsvurdering: Boolean
     ) {
         assertEquals(expectedFom.toString(), inntekt["periode"]["fom"].asText())
         assertEquals(expectedTom.toString(), inntekt["periode"]["tom"].asText())
@@ -637,6 +641,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
             inntekt["ekskluderteUkedager"].map(JsonNode::asText)
         )
         assertEquals(expectedFjernet, inntekt["fjernet"].asBoolean())
+        assertEquals(expectedErDelAvAktivTotrinnsvurdering, inntekt["erDelAvAktivTotrinnsvurdering"].asBoolean())
     }
 
     private fun assertEventEndringer(

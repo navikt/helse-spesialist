@@ -10,31 +10,39 @@ import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 
-class PgTotrinnsvurderingRepository(session: Session) : QueryRunner by MedSession(session), TotrinnsvurderingRepository {
+class PgTotrinnsvurderingRepository(session: Session) :
+    QueryRunner by MedSession(session),
+    TotrinnsvurderingRepository {
     private val overstyringRepository = PgOverstyringRepository(session)
 
-    override fun finn(fødselsnummer: String): Totrinnsvurdering? {
-        return finnAktivTotrinnsvurdering(fødselsnummer)
-    }
-
-    override fun lagre(totrinnsvurdering: Totrinnsvurdering) {
-        if (totrinnsvurdering.harFåttTildeltId()) {
-            update(totrinnsvurdering)
-        } else {
-            insert(totrinnsvurdering).let(::TotrinnsvurderingId).let(totrinnsvurdering::tildelId)
-        }
-
-        overstyringRepository.lagre(totrinnsvurdering.overstyringer, totrinnsvurdering.id())
-    }
-
-    private fun finnAktivTotrinnsvurdering(fødselsnummer: String): Totrinnsvurdering? =
+    override fun finn(id: TotrinnsvurderingId): Totrinnsvurdering? =
         asSQL(
             """
             SELECT tv.id,
                    p.fødselsnummer,
                    tv.saksbehandler as saksbehandler_oid,
                    tv.beslutter as beslutter_oid,
-                   ui.id as utbetaling_id,
+                   ui.utbetaling_id,
+                   tv.tilstand,
+                   tv.vedtaksperiode_forkastet,
+                   tv.opprettet,
+                   tv.oppdatert
+            FROM totrinnsvurdering tv
+                     INNER JOIN person p on tv.person_ref = p.id
+                     LEFT JOIN utbetaling_id ui on ui.id = tv.utbetaling_id_ref
+            WHERE tv.id = :id
+            """.trimIndent(),
+            "id" to id.value,
+        ).singleOrNull { it.toTotrinnsvurdering() }
+
+    override fun finn(fødselsnummer: String): Totrinnsvurdering? =
+        asSQL(
+            """
+            SELECT tv.id,
+                   p.fødselsnummer,
+                   tv.saksbehandler as saksbehandler_oid,
+                   tv.beslutter as beslutter_oid,
+                   ui.utbetaling_id,
                    tv.tilstand,
                    tv.vedtaksperiode_forkastet,
                    tv.opprettet,
@@ -49,6 +57,16 @@ class PgTotrinnsvurderingRepository(session: Session) : QueryRunner by MedSessio
             """.trimIndent(),
             "fodselsnummer" to fødselsnummer,
         ).singleOrNull { it.toTotrinnsvurdering() }
+
+    override fun lagre(totrinnsvurdering: Totrinnsvurdering) {
+        if (totrinnsvurdering.harFåttTildeltId()) {
+            update(totrinnsvurdering)
+        } else {
+            insert(totrinnsvurdering).let(::TotrinnsvurderingId).let(totrinnsvurdering::tildelId)
+        }
+
+        overstyringRepository.lagre(totrinnsvurdering.overstyringer, totrinnsvurdering.id())
+    }
 
     private fun insert(totrinnsvurdering: Totrinnsvurdering): Long =
         asSQL(

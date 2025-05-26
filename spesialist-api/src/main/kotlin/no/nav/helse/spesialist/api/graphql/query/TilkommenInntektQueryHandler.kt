@@ -5,6 +5,7 @@ import graphql.schema.DataFetchingEnvironment
 import no.nav.helse.db.Daos
 import no.nav.helse.db.SessionContext
 import no.nav.helse.db.SessionFactory
+import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGER
 import no.nav.helse.spesialist.api.graphql.schema.ApiDatoPeriode
@@ -82,19 +83,25 @@ class TilkommenInntektQueryHandler(
                 ApiTilkommenInntektskilde(
                     organisasjonsnummer = organisasjonsnummer,
                     inntekter =
-                        inntekter.map {
+                        inntekter.map { tilkommenInntekt ->
                             ApiTilkommenInntekt(
-                                tilkommenInntektId = it.id().value,
+                                tilkommenInntektId = tilkommenInntekt.id().value,
                                 periode =
                                     ApiDatoPeriode(
-                                        fom = it.periode.fom,
-                                        tom = it.periode.tom,
+                                        fom = tilkommenInntekt.periode.fom,
+                                        tom = tilkommenInntekt.periode.tom,
                                     ),
-                                periodebelop = it.periodebeløp,
-                                ekskluderteUkedager = it.ekskluderteUkedager.sorted(),
-                                fjernet = it.fjernet,
+                                periodebelop = tilkommenInntekt.periodebeløp,
+                                ekskluderteUkedager = tilkommenInntekt.ekskluderteUkedager.sorted(),
+                                fjernet = tilkommenInntekt.fjernet,
+                                erDelAvAktivTotrinnsvurdering =
+                                    sessionFactory.transactionalSessionScope {
+                                        it.totrinnsvurderingRepository.finn(
+                                            id = tilkommenInntekt.totrinnsvurderingId,
+                                        )?.tilstand != TotrinnsvurderingTilstand.GODKJENT
+                                    },
                                 events =
-                                    it.events.map { event ->
+                                    tilkommenInntekt.events.map { event ->
                                         val metadata =
                                             ApiTilkommenInntektEvent.Metadata(
                                                 sekvensnummer = event.metadata.sekvensnummer,

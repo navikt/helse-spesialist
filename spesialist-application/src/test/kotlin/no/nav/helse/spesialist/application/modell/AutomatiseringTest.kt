@@ -112,7 +112,7 @@ internal class AutomatiseringTest {
         every { risikovurderingDaoMock.hentRisikovurdering(vedtaksperiodeId) } returns Risikovurdering.restore(true)
         every { vedtakDaoMock.finnInntektskilde(vedtaksperiodeId) } returns Inntektskilde.EN_ARBEIDSGIVER
         every { åpneGosysOppgaverDaoMock.antallÅpneOppgaver(any()) } returns 0
-        every { totrinnsvurderingRepositoryMock.finn(any()) } returns null
+        every { totrinnsvurderingRepositoryMock.finn(fødselsnummer = any()) } returns null
         every { meldingDaoMock.sisteBehandlingOpprettetOmKorrigertSøknad(fødselsnummer, vedtaksperiodeId) } returns
                 BehandlingOpprettetKorrigertSøknad(
                     meldingId = hendelseId,
@@ -277,7 +277,7 @@ internal class AutomatiseringTest {
 
     @Test
     fun `periode med pågående overstyring skal ikke automatisk godkjennes`() {
-        every { totrinnsvurderingRepositoryMock.finn(any()) } returns Totrinnsvurdering.ny(
+        every { totrinnsvurderingRepositoryMock.finn(fødselsnummer = any()) } returns Totrinnsvurdering.ny(
             fødselsnummer
         )
         blirManuellOppgave()
@@ -287,7 +287,7 @@ internal class AutomatiseringTest {
     fun `nullrevurdering grunnet saksbehandleroverstyring skal ikke automatisk godkjennes`() {
         val utbetaling = enUtbetaling(arbeidsgiverbeløp = 0, personbeløp = 0, type = REVURDERING)
         blirAutomatiskBehandlet(utbetaling)
-        every { totrinnsvurderingRepositoryMock.finn(any()) } returns Totrinnsvurdering.ny(
+        every { totrinnsvurderingRepositoryMock.finn(fødselsnummer = any()) } returns Totrinnsvurdering.ny(
             fødselsnummer
         )
         blirManuellOppgave()
