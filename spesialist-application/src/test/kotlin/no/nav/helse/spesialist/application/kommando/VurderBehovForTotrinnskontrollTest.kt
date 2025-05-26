@@ -63,7 +63,7 @@ internal class VurderBehovForTotrinnskontrollTest {
 
         override fun finn(id: TotrinnsvurderingId): Totrinnsvurdering? = totrinnsvurderingSomSkalReturneres
 
-        override fun finn(fødselsnummer: String): Totrinnsvurdering? = totrinnsvurderingSomSkalReturneres
+        override fun finnAktivForPerson(fødselsnummer: String): Totrinnsvurdering? = totrinnsvurderingSomSkalReturneres
     }
     private lateinit var context: CommandContext
 

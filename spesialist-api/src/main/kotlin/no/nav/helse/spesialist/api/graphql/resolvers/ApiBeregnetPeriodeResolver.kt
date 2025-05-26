@@ -411,7 +411,7 @@ data class ApiBeregnetPeriodeResolver(
     override fun totrinnsvurdering(): ApiTotrinnsvurdering? {
         if (oppgaveDto == null) return null
         return sessionFactory.transactionalSessionScope { sessionContext ->
-            sessionContext.totrinnsvurderingRepository.finn(fødselsnummer)?.let {
+            sessionContext.totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)?.let {
                 ApiTotrinnsvurdering(
                     erRetur = it.tilstand == AVVENTER_SAKSBEHANDLER && it.saksbehandler != null,
                     saksbehandler = it.saksbehandler?.value,

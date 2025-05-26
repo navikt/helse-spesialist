@@ -246,7 +246,7 @@ internal class Automatisering(
         val tilhørerUtlandsenhet = erEnhetUtland(personDao.finnEnhetId(fødselsnummer))
         val antallÅpneGosysoppgaver = åpneGosysOppgaverDao.antallÅpneOppgaver(fødselsnummer)
         val harKravOmTotrinnsvurdering =
-            totrinnsvurderingRepository.finn(fødselsnummer)?.let { it.tilstand != GODKJENT } ?: false
+            totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)?.let { it.tilstand != GODKJENT } ?: false
         val harUtbetalingTilSykmeldt = utbetaling.harEndringIUtbetalingTilSykmeldt()
 
         val skalStoppesPgaUTS = harUtbetalingTilSykmeldt && periodetype !in listOf(FORLENGELSE, FØRSTEGANGSBEHANDLING)

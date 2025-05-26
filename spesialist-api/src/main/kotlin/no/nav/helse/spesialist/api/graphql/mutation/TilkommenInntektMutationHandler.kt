@@ -208,6 +208,6 @@ class TilkommenInntektMutationHandler(
         fodselsnummer: String,
         totrinnsvurderingRepository: TotrinnsvurderingRepository,
     ): Totrinnsvurdering =
-        totrinnsvurderingRepository.finn(fodselsnummer)
+        totrinnsvurderingRepository.finnAktivForPerson(fodselsnummer)
             ?: Totrinnsvurdering.ny(fødselsnummer = fodselsnummer).also(totrinnsvurderingRepository::lagre)
 }

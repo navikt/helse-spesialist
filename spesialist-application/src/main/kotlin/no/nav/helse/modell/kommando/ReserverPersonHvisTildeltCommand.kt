@@ -20,7 +20,7 @@ internal class ReserverPersonHvisTildeltCommand(
 
     override fun execute(context: CommandContext): Boolean {
         val tildeltSaksbehandler = tildelingDao.tildelingForPerson(fødselsnummer) ?: return true
-        val totrinnsvurdering = totrinnsvurderingRepository.finn(fødselsnummer)
+        val totrinnsvurdering = totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)
         val saksbehandlerOid: UUID =
             if (totrinnsvurdering?.tilstand == AVVENTER_BESLUTTER) {
                 totrinnsvurdering.saksbehandler?.value ?: tildeltSaksbehandler.oid

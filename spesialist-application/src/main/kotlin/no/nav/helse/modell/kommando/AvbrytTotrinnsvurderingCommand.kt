@@ -16,7 +16,7 @@ internal class AvbrytTotrinnsvurderingCommand(
     override fun execute(context: CommandContext): Boolean {
         sikkerlogg.info("setter vedtaksperiode_forkastet i totrinnsvurdering for fødselsnummer=$fødselsnummer")
 
-        val totrinnsvurdering = totrinnsvurderingRepository.finn(fødselsnummer) ?: return true
+        val totrinnsvurdering = totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer) ?: return true
 
         totrinnsvurdering.vedtaksperiodeForkastet(alleForkastedeVedtaksperiodeIder)
         totrinnsvurderingRepository.lagre(totrinnsvurdering)

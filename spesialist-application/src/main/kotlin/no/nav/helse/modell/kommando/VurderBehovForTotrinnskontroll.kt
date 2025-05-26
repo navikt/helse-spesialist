@@ -29,7 +29,7 @@ internal class VurderBehovForTotrinnskontroll(
                 sykefraværstilfelle.manglerInntektsmelding(vedtaksperiodeId)
         val vedtaksperiodeHarFerdigstiltOppgave = oppgaveService.harFerdigstiltOppgave(vedtaksperiodeId)
 
-        val eksisterendeTotrinnsvurdering = totrinnsvurderingRepository.finn(fødselsnummer)
+        val eksisterendeTotrinnsvurdering = totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)
 
         if ((kreverTotrinnsvurdering && !vedtaksperiodeHarFerdigstiltOppgave) || eksisterendeTotrinnsvurdering != null) {
             logg.info("Vedtaksperioden: $vedtaksperiodeId trenger totrinnsvurdering")

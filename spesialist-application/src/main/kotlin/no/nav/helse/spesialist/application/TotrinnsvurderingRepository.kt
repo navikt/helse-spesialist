@@ -8,5 +8,5 @@ interface TotrinnsvurderingRepository {
 
     fun finn(id: TotrinnsvurderingId): Totrinnsvurdering?
 
-    fun finn(fødselsnummer: String): Totrinnsvurdering?
+    fun finnAktivForPerson(fødselsnummer: String): Totrinnsvurdering?
 }

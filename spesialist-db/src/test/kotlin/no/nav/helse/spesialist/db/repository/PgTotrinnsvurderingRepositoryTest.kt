@@ -26,7 +26,7 @@ class PgTotrinnsvurderingRepositoryTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `hvis det ikke finnes totrinnsvurdering, returnerer null`() {
-        val totrinnsvurdering = totrinnsvurderingRepository.finn(FNR)
+        val totrinnsvurdering = totrinnsvurderingRepository.finnAktivForPerson(FNR)
 
         assertNull(totrinnsvurdering)
     }
@@ -38,7 +38,7 @@ class PgTotrinnsvurderingRepositoryTest : AbstractDBIntegrationTest() {
         totrinnsvurderingRepository.lagre(totrinnsvurdering)
         assertTrue(totrinnsvurdering.harFåttTildeltId())
 
-        val hentetTotrinnsvurdering = totrinnsvurderingRepository.finn(FNR)
+        val hentetTotrinnsvurdering = totrinnsvurderingRepository.finnAktivForPerson(FNR)
 
         assertEquals(totrinnsvurdering, hentetTotrinnsvurdering)
     }
@@ -46,13 +46,13 @@ class PgTotrinnsvurderingRepositoryTest : AbstractDBIntegrationTest() {
     @Test
     fun `oppdater totrinnsvurdering`() {
         totrinnsvurderingRepository.lagre(nyTotrinnsvurdering())
-        val hentetTotrinnsvurdering = totrinnsvurderingRepository.finn(FNR)
+        val hentetTotrinnsvurdering = totrinnsvurderingRepository.finnAktivForPerson(FNR)
         checkNotNull(hentetTotrinnsvurdering)
         hentetTotrinnsvurdering.nyOverstyring(nyOverstyring())
         hentetTotrinnsvurdering.settBeslutter(SaksbehandlerOid(SAKSBEHANDLER_OID))
         hentetTotrinnsvurdering.settAvventerSaksbehandler()
         totrinnsvurderingRepository.lagre(hentetTotrinnsvurdering)
-        val oppdatertTotrinnsvurdering = totrinnsvurderingRepository.finn(FNR)
+        val oppdatertTotrinnsvurdering = totrinnsvurderingRepository.finnAktivForPerson(FNR)
         checkNotNull(oppdatertTotrinnsvurdering)
 
         assertEquals(1, oppdatertTotrinnsvurdering.overstyringer.size)
@@ -66,11 +66,11 @@ class PgTotrinnsvurderingRepositoryTest : AbstractDBIntegrationTest() {
         val totrinnsvurdering = nyTotrinnsvurdering()
         totrinnsvurdering.nyOverstyring(nyOverstyring())
         totrinnsvurderingRepository.lagre(totrinnsvurdering)
-        val hentetTotrinnsvurdering = totrinnsvurderingRepository.finn(FNR)
+        val hentetTotrinnsvurdering = totrinnsvurderingRepository.finnAktivForPerson(FNR)
         checkNotNull(hentetTotrinnsvurdering)
         hentetTotrinnsvurdering.vedtaksperiodeForkastet(listOf(VEDTAKSPERIODE))
         totrinnsvurderingRepository.lagre(hentetTotrinnsvurdering)
-        val oppdatertTotrinnsvurdering = totrinnsvurderingRepository.finn(FNR)
+        val oppdatertTotrinnsvurdering = totrinnsvurderingRepository.finnAktivForPerson(FNR)
 
         assertNull(oppdatertTotrinnsvurdering)
     }

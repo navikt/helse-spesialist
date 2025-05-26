@@ -270,7 +270,7 @@ class SaksbehandlerMediator(
         legacySaksbehandler: LegacySaksbehandler,
         totrinnsvurderingRepository: TotrinnsvurderingRepository,
     ): VedtakResultat.Feil.BeslutterFeil? {
-        val totrinnsvurdering = totrinnsvurderingRepository.finn(fødselsnummer)
+        val totrinnsvurdering = totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)
         val feil =
             if (totrinnsvurdering?.tilstand == AVVENTER_BESLUTTER) {
                 if (!legacySaksbehandler.harTilgangTil(listOf(Egenskap.BESLUTTER)) && !environmentToggles.kanGodkjenneUtenBesluttertilgang) {
@@ -540,7 +540,7 @@ class SaksbehandlerMediator(
         try {
             sessionFactory.transactionalSessionScope { session ->
                 val fødselsnummer = oppgaveService.finnFødselsnummer(oppgavereferanse)
-                val totrinnsvurdering = session.totrinnsvurderingRepository.finn(fødselsnummer)
+                val totrinnsvurdering = session.totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)
                 checkNotNull(totrinnsvurdering) {
                     "Forventer at det eksisterer en aktiv totrinnsvurdering når oppgave sendes i retur"
                 }
@@ -621,7 +621,7 @@ class SaksbehandlerMediator(
             try {
                 sessionFactory.transactionalSessionScope { session ->
                     val fødselsnummer = oppgaveService.finnFødselsnummer(oppgavereferanse)
-                    val totrinnsvurdering = session.totrinnsvurderingRepository.finn(fødselsnummer)
+                    val totrinnsvurdering = session.totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)
                     checkNotNull(totrinnsvurdering) {
                         "Forventer at det eksisterer en aktiv totrinnsvurdering når oppgave sendes til beslutter"
                     }
@@ -997,7 +997,7 @@ private fun overstyringUnitOfWork(
         session.reservasjonDao.reserverPerson(saksbehandler.id().value, fødselsnummer)
 
         val totrinnsvurdering =
-            session.totrinnsvurderingRepository.finn(fødselsnummer) ?: Totrinnsvurdering.ny(fødselsnummer)
+            session.totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer) ?: Totrinnsvurdering.ny(fødselsnummer)
         totrinnsvurdering.nyOverstyring(overstyring)
         session.totrinnsvurderingRepository.lagre(totrinnsvurdering)
     }

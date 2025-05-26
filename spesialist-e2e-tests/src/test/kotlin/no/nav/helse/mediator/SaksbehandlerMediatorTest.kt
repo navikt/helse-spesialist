@@ -167,7 +167,7 @@ class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
 
         assertEquals(SendTilGodkjenningResult.Ok, result)
         val totrinnsvurdering = sessionFactory.transactionalSessionScope { session ->
-            session.totrinnsvurderingRepository.finn(fødselsnummer)
+            session.totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)
         }
         checkNotNull(totrinnsvurdering)
         assertEquals(saksbehandler.oid, totrinnsvurdering.saksbehandler?.value)
@@ -218,7 +218,7 @@ class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
 
         assertEquals(SendTilGodkjenningResult.Ok, result)
         val totrinnsvurdering = sessionFactory.transactionalSessionScope { session ->
-            session.totrinnsvurderingRepository.finn(fødselsnummer)
+            session.totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)
         }
         checkNotNull(totrinnsvurdering)
         assertEquals(saksbehandler.oid, totrinnsvurdering.saksbehandler?.value)
@@ -263,7 +263,7 @@ class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
 
         mediator.håndter(overstyring, saksbehandler)
         val totrinnsvurdering = sessionFactory.transactionalSessionScope { session ->
-            session.totrinnsvurderingRepository.finn(person.fødselsnummer)
+            session.totrinnsvurderingRepository.finnAktivForPerson(person.fødselsnummer)
         }
         checkNotNull(totrinnsvurdering)
         assertTrue(totrinnsvurdering.overstyringer.single().opprettet.isAfter(LocalDateTime.now().minusSeconds(5)))
@@ -314,7 +314,7 @@ class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
 
         mediator.håndter(overstyring, saksbehandler)
         val totrinnsvurdering = sessionFactory.transactionalSessionScope { session ->
-            session.totrinnsvurderingRepository.finn(person.fødselsnummer)
+            session.totrinnsvurderingRepository.finnAktivForPerson(person.fødselsnummer)
         }
         checkNotNull(totrinnsvurdering)
         assertEquals(saksbehandler2Oid, totrinnsvurdering.saksbehandler?.value)
@@ -378,7 +378,7 @@ class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         assertEquals(SendIReturResult.Ok, resultRetur)
 
         val totrinnsvurdering = sessionFactory.transactionalSessionScope { session ->
-            session.totrinnsvurderingRepository.finn(fødselsnummer)
+            session.totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)
         }
         checkNotNull(totrinnsvurdering)
         assertEquals(saksbehandler.oid, totrinnsvurdering.saksbehandler?.value)
