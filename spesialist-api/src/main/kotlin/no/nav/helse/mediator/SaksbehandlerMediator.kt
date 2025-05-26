@@ -634,8 +634,10 @@ class SaksbehandlerMediator(
                     session.totrinnsvurderingRepository.lagre(totrinnsvurdering)
                 }
             } catch (modellfeil: Modellfeil) {
+                sikkerlogg.error("Feil ved sending til beslutter", modellfeil)
                 return@transactionalSessionScope SendTilGodkjenningResult.Feil.KunneIkkeSendeTilBeslutter(modellfeil.tilApiversjon())
             } catch (e: Exception) {
+                sikkerlogg.error("Feil ved sending til beslutter", e)
                 return@transactionalSessionScope SendTilGodkjenningResult.Feil.UventetFeilVedSendigTilBeslutter(e)
             }
 
