@@ -199,8 +199,6 @@ type BeregnetPeriode implements Periode {
     hendelser: [Hendelse!]!
     historikkinnslag: [Historikkinnslag!]!
     id: UUID!
-    "Andre inntekter, f.eks tilkommen inntekt"
-    inntekter: [Inntekt!]!
     inntektstype: Inntektstype!
     maksdato: LocalDate!
     notater: [Notat!]!
@@ -341,12 +339,6 @@ type Infotrygdutbetaling {
     organisasjonsnummer: String!
     tom: String!
     typetekst: String!
-}
-
-type Inntekt {
-    "En id som identifiserer inntektskilden, f.eks. organisasjonsnummer"
-    inntektskilde: String!
-    periodiserteInntekter: [PeriodisertInntekt!]!
 }
 
 type InntektEndringAarsak {
@@ -588,12 +580,6 @@ type PeriodeHistorikkElementNy implements Historikkinnslag {
 type Periodevilkar {
     alder: Alder!
     sykepengedager: Sykepengedager!
-}
-
-type PeriodisertInntekt {
-    dagligBelop: Float!
-    fom: LocalDate!
-    tom: LocalDate!
 }
 
 type Person {
@@ -867,7 +853,8 @@ type Tildeling {
 }
 
 type TilkommenInntekt {
-    dager: [LocalDate!]!
+    ekskluderteUkedager: [LocalDate!]!
+    erDelAvAktivTotrinnsvurdering: Boolean!
     events: [TilkommenInntektEvent!]!
     fjernet: Boolean!
     periode: DatoPeriode!
@@ -891,7 +878,7 @@ type TilkommenInntektEventDatoPeriodeEndring {
 }
 
 type TilkommenInntektEventEndringer {
-    dager: TilkommenInntektEventListLocalDateEndring
+    ekskluderteUkedager: TilkommenInntektEventListLocalDateEndring
     organisasjonsnummer: TilkommenInntektEventStringEndring
     periode: TilkommenInntektEventDatoPeriodeEndring
     periodebelop: TilkommenInntektEventBigDecimalEndring
@@ -924,7 +911,7 @@ type TilkommenInntektGjenopprettetEvent implements TilkommenInntektEvent {
 }
 
 type TilkommenInntektOpprettetEvent implements TilkommenInntektEvent {
-    dager: [LocalDate!]!
+    ekskluderteUkedager: [LocalDate!]!
     metadata: TilkommenInntektEventMetadata!
     organisasjonsnummer: String!
     periode: DatoPeriode!
@@ -1127,6 +1114,7 @@ enum Egenskap {
     FORSTEGANGSBEHANDLING
     FORTROLIG_ADRESSE
     GOSYS
+    GRUNNBELOPSREGULERING
     HASTER
     INFOTRYGDFORLENGELSE
     INGEN_UTBETALING
@@ -1622,7 +1610,7 @@ input TidslinjeOverstyringInput {
 }
 
 input TilkommenInntektInput {
-    dager: [LocalDate!]!
+    ekskluderteUkedager: [LocalDate!]!
     organisasjonsnummer: String!
     periode: DatoPeriodeInput!
     periodebelop: BigDecimal!
