@@ -37,48 +37,50 @@ class KafkaModule(
 
     private val riverSetup =
         RiverSetup(
-            MeldingMediator(
-                sessionFactory = sessionFactory,
-                personDao = daos.personDao,
-                commandContextDao = daos.commandContextDao,
-                meldingDao = daos.meldingDao,
-                meldingDuplikatkontrollDao = daos.meldingDuplikatkontrollDao,
-                kommandofabrikk =
-                    Kommandofabrikk(
-                        oppgaveService = {
-                            OppgaveService(
-                                oppgaveDao = daos.oppgaveDao,
-                                reservasjonDao = daos.reservasjonDao,
-                                meldingPubliserer = meldingPubliserer,
-                                tilgangskontroll =
-                                    TilgangskontrollørForReservasjon(
-                                        gruppekontroll,
-                                        tilgangsgrupper,
-                                    ),
-                                tilgangsgrupper = tilgangsgrupper,
-                                oppgaveRepository = daos.oppgaveRepository,
-                            )
-                        },
-                        godkjenningMediator = GodkjenningMediator(daos.opptegnelseDao),
-                        subsumsjonsmelderProvider = {
-                            Subsumsjonsmelder(
-                                configuration.versjonAvKode,
-                                meldingPubliserer,
-                            )
-                        },
-                        stikkprøver = stikkprøver,
-                        featureToggles = featureToggles,
-                    ),
-                dokumentDao = daos.dokumentDao,
-                varselRepository =
-                    VarselRepository(
-                        varselDao = daos.varselDao,
-                        definisjonDao = daos.definisjonDao,
-                    ),
-                poisonPillDao = daos.poisonPillDao,
-                ignorerMeldingerForUkjentePersoner = configuration.ignorerMeldingerForUkjentePersoner,
-            ),
-            daos.meldingDuplikatkontrollDao,
+            mediator =
+                MeldingMediator(
+                    sessionFactory = sessionFactory,
+                    personDao = daos.personDao,
+                    commandContextDao = daos.commandContextDao,
+                    meldingDao = daos.meldingDao,
+                    meldingDuplikatkontrollDao = daos.meldingDuplikatkontrollDao,
+                    kommandofabrikk =
+                        Kommandofabrikk(
+                            oppgaveService = {
+                                OppgaveService(
+                                    oppgaveDao = daos.oppgaveDao,
+                                    reservasjonDao = daos.reservasjonDao,
+                                    meldingPubliserer = meldingPubliserer,
+                                    tilgangskontroll =
+                                        TilgangskontrollørForReservasjon(
+                                            gruppekontroll,
+                                            tilgangsgrupper,
+                                        ),
+                                    tilgangsgrupper = tilgangsgrupper,
+                                    oppgaveRepository = daos.oppgaveRepository,
+                                )
+                            },
+                            godkjenningMediator = GodkjenningMediator(daos.opptegnelseDao),
+                            subsumsjonsmelderProvider = {
+                                Subsumsjonsmelder(
+                                    configuration.versjonAvKode,
+                                    meldingPubliserer,
+                                )
+                            },
+                            stikkprøver = stikkprøver,
+                            featureToggles = featureToggles,
+                        ),
+                    dokumentDao = daos.dokumentDao,
+                    varselRepository =
+                        VarselRepository(
+                            varselDao = daos.varselDao,
+                            definisjonDao = daos.definisjonDao,
+                        ),
+                    poisonPillDao = daos.poisonPillDao,
+                    ignorerMeldingerForUkjentePersoner = configuration.ignorerMeldingerForUkjentePersoner,
+                ),
+            meldingDuplikatkontrollDao = daos.meldingDuplikatkontrollDao,
+            featureToggles = featureToggles,
         )
 
     fun kobleOppRivers() {

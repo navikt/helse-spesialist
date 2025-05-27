@@ -20,4 +20,8 @@ class UnleashFeatureToggles(
             .build()
 
     private val unleash: Unleash = DefaultUnleash(config)
+
+    override fun skalBehandleSelvstendig(): Boolean {
+        return unleash.isEnabled("skal-behandle-selvstendig")
+    }
 }

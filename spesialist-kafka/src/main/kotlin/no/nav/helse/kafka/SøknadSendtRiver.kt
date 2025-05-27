@@ -6,6 +6,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import io.micrometer.core.instrument.MeterRegistry
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.helse.FeatureToggles
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.person.SøknadSendt
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory
 
 class SøknadSendtRiver(
     private val mediator: MeldingMediator,
+    private val featureToggles: FeatureToggles,
 ) : SpesialistRiver {
     private val logg = LoggerFactory.getLogger(this::class.java)
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
@@ -22,7 +24,7 @@ class SøknadSendtRiver(
         return River.PacketValidation {
             it.requireAny(
                 "@event_name",
-                listOf("sendt_søknad_arbeidsgiver", "sendt_søknad_nav", "sendt_søknad_arbeidsledig"),
+                listOf("sendt_søknad_arbeidsgiver", "sendt_søknad_nav", "sendt_søknad_arbeidsledig", "sendt_søknad_selvstendig"),
             )
         }
     }
@@ -38,6 +40,14 @@ class SøknadSendtRiver(
         metadata: MessageMetadata,
         meterRegistry: MeterRegistry,
     ) {
+        if (packet["@event_name"].asText() == "sendt_søknad_selvstendig" && !featureToggles.skalBehandleSelvstendig()) {
+            logg.info(
+                "Mottok, men behandler ikke {} med {}",
+                keyValue("hendelse", packet["@event_name"].asText()),
+                keyValue("hendelseId", packet["@id"].asUUID()),
+            )
+            return
+        }
         logg.info(
             "Mottok {} med {}",
             keyValue("hendelse", packet["@event_name"].asText()),
