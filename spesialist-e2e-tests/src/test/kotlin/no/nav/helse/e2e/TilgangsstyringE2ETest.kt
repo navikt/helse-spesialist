@@ -177,7 +177,7 @@ class TilgangsstyringE2ETest : AbstractE2ETest() {
                     saksbehandlerMediator = mockk(relaxed = true),
                     stansAutomatiskBehandlinghåndterer = mockk(relaxed = true),
                     personhåndterer = object : Personhåndterer {
-                        override fun oppdaterSnapshot(fødselsnummer: String) {}
+                        override fun oppdaterPersondata(fødselsnummer: String) {}
                         override fun klargjørPersonForVisning(fødselsnummer: String) {}
                     },
                     snapshotService = SnapshotService(daos.personinfoDao, snapshothenter),

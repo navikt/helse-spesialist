@@ -8,7 +8,7 @@ class PersonMutationHandler(
     private val personhåndterer: Personhåndterer,
 ) : PersonMutationSchema {
     override fun oppdaterPerson(fodselsnummer: String): DataFetcherResult<Boolean> {
-        personhåndterer.oppdaterSnapshot(fodselsnummer)
+        personhåndterer.oppdaterPersondata(fodselsnummer)
         return byggRespons(true)
     }
 }

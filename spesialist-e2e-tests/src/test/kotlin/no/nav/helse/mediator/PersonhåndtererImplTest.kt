@@ -25,7 +25,7 @@ class PersonhåndtererImplTest : AbstractDatabaseTest() {
     @Test
     fun `oppdater persondata`() {
         val fødselsnummer = lagFødselsnummer()
-        personhåndterer.oppdaterSnapshot(fødselsnummer)
+        personhåndterer.oppdaterPersondata(fødselsnummer)
         val sisteMelding = testRapid.inspektør.meldinger().last()
         assertEquals("oppdater_persondata", sisteMelding["@event_name"].asText())
         assertEquals(fødselsnummer, sisteMelding["fødselsnummer"].asText())
