@@ -42,8 +42,8 @@ class VedtaksperiodeReberegnet(
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
     ) {
-        val vedtaksperiode = person.vedtaksperiodeOrNull(vedtaksperiodeId)
-        checkNotNull(vedtaksperiode)
+        val vedtaksperiode =
+            checkNotNull(person.vedtaksperiodeOrNull(vedtaksperiodeId)) { "Fant ikke vedtaksperiode med id: $vedtaksperiodeId" }
         kommandostarter { vedtaksperiodeReberegnet(this@VedtaksperiodeReberegnet, vedtaksperiode, sessionContext) }
     }
 }
