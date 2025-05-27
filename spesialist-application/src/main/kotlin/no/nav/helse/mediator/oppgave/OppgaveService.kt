@@ -5,6 +5,7 @@ import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SessionContext
+import no.nav.helse.modell.ManglerTilgang
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.Oppgave.Companion.ny
@@ -227,7 +228,16 @@ class OppgaveService(
                 ident = saksbehandlerFraDatabase.ident,
                 tilgangskontroll = tilgangskontroll,
             )
-        oppgave.forsøkTildelingVedReservasjon(legacySaksbehandler)
+
+        try {
+            oppgave.forsøkTildelingVedReservasjon(legacySaksbehandler)
+        } catch (manglerTilgang: ManglerTilgang) {
+            logg.info("Saksbehandler har ikke (lenger) tilgang til egenskapene i denne oppgaven, tildeler ikke tross reservasjon")
+            sikkerlogg.info(
+                "Saksbehandler har ikke (lenger) tilgang til egenskapene i denne oppgaven, tildeler ikke tross reservasjon",
+                manglerTilgang,
+            )
+        }
     }
 
     fun harFerdigstiltOppgave(vedtaksperiodeId: UUID) = oppgaveDao.harFerdigstiltOppgave(vedtaksperiodeId)
