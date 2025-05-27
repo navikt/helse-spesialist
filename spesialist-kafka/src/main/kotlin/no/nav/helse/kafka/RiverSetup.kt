@@ -23,7 +23,6 @@ class RiverSetup(
         listOf(
             GodkjenningsbehovRiver(mediator),
             SøknadSendtRiver(mediator),
-            SøknadSendtArbeidsledigRiver(mediator),
             PersoninfoløsningRiver(mediator),
             FlerePersoninfoRiver(mediator),
             HentEnhetLøsningRiver(mediator),

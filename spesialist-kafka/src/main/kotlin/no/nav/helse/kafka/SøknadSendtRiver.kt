@@ -20,7 +20,10 @@ class SøknadSendtRiver(
 
     override fun preconditions(): River.PacketValidation {
         return River.PacketValidation {
-            it.requireAny("@event_name", listOf("sendt_søknad_arbeidsgiver", "sendt_søknad_nav"))
+            it.requireAny(
+                "@event_name",
+                listOf("sendt_søknad_arbeidsgiver", "sendt_søknad_nav", "sendt_søknad_arbeidsledig"),
+            )
         }
     }
 
@@ -36,11 +39,13 @@ class SøknadSendtRiver(
         meterRegistry: MeterRegistry,
     ) {
         logg.info(
-            "Mottok SøknadSendt med {}",
+            "Mottok {} med {}",
+            keyValue("hendelse", packet["@event_name"].asText()),
             keyValue("hendelseId", packet["@id"].asUUID()),
         )
         sikkerLogg.info(
-            "Mottok SøknadSendt med {}, {}",
+            "Mottok {} med {}, {}",
+            keyValue("hendelse", packet["@event_name"].asText()),
             keyValue("hendelseId", packet["@id"].asUUID()),
             keyValue("hendelse", packet.toJson()),
         )
