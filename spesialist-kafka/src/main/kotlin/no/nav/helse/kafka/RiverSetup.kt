@@ -55,7 +55,7 @@ class RiverSetup(
             AvsluttetMedVedtakRiver(mediator),
             AvsluttetUtenVedtakRiver(mediator),
             MidnattRiver(mediator),
-            BehandlingOpprettetRiver(mediator),
+            BehandlingOpprettetRiver(mediator, featureToggles),
             KommandokjedePåminnelseRiver(mediator),
             StansAutomatiskBehandlingRiver(mediator),
             AvviksvurderingLøsningRiver(mediator),

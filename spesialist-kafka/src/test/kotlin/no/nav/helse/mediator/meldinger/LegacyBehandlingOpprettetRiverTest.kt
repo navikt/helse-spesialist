@@ -5,6 +5,7 @@ import io.mockk.called
 import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.helse.FeatureToggles
 import no.nav.helse.kafka.BehandlingOpprettetRiver
 import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
@@ -18,7 +19,7 @@ import java.util.UUID
 internal class LegacyBehandlingOpprettetRiverTest {
 
     private val mediator = mockk<MeldingMediator>(relaxed = true)
-    private val rapid = TestRapid().medRivers(BehandlingOpprettetRiver(mediator))
+    private val rapid = TestRapid().medRivers(BehandlingOpprettetRiver(mediator, object : FeatureToggles {}))
     private val testperson = TestPerson()
 
     @BeforeEach
