@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.application.kommando
 
+import no.nav.helse.FeatureToggles
 import no.nav.helse.db.AvviksvurderingRepository
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.modell.kommando.CommandContext
@@ -94,16 +95,7 @@ class VurderBehovForAvviksvurderingTest {
 
     @Test
     fun `Ikke send ut behov dersom inngangsvilkårene ikke er vurdert i Spleis`() {
-        val command = VurderBehovForAvviksvurdering(
-            fødselsnummer,
-            skjæringstidspunkt,
-            repository,
-            omregnedeÅrsinntekter,
-            vilkårsgrunnlagId,
-            legacyBehandling,
-            false,
-            organisasjonsnummer
-        )
+        val command = vurderBehovForAvviksvurderingCommand(false)
         val context = CommandContext(UUID.randomUUID())
         context.nyObserver(observer)
         assertTrue(command.execute(context))
@@ -112,16 +104,7 @@ class VurderBehovForAvviksvurderingTest {
 
     @Test
     fun `Send ut behov dersom inngangsvilkårene er vurdert i Spleis`() {
-        val command = VurderBehovForAvviksvurdering(
-            fødselsnummer,
-            skjæringstidspunkt,
-            repository,
-            omregnedeÅrsinntekter,
-            vilkårsgrunnlagId,
-            legacyBehandling,
-            true,
-            organisasjonsnummer
-        )
+        val command = vurderBehovForAvviksvurderingCommand(true)
         val context = CommandContext(UUID.randomUUID())
         context.nyObserver(observer)
         assertFalse(command.execute(context))
@@ -137,16 +120,7 @@ class VurderBehovForAvviksvurderingTest {
 
     @Test
     fun `lagrer ned ny avviksvurdering ved løsning med ny vurdering`() {
-        val command = VurderBehovForAvviksvurdering(
-            fødselsnummer,
-            skjæringstidspunkt,
-            repository,
-            omregnedeÅrsinntekter,
-            vilkårsgrunnlagId,
-            legacyBehandling,
-            true,
-            organisasjonsnummer
-        )
+        val command = vurderBehovForAvviksvurderingCommand(true)
         val context = CommandContext(UUID.randomUUID())
         context.add(
             AvviksvurderingBehovLøsning(
@@ -178,16 +152,7 @@ class VurderBehovForAvviksvurderingTest {
 
     @Test
     fun `legg til varsel RV_IV_2 dersom avviket er mer enn akseptabelt avvik`() {
-        val command = VurderBehovForAvviksvurdering(
-            fødselsnummer,
-            skjæringstidspunkt,
-            repository,
-            omregnedeÅrsinntekter,
-            vilkårsgrunnlagId,
-            legacyBehandling,
-            true,
-            organisasjonsnummer
-        )
+        val command = vurderBehovForAvviksvurderingCommand(true)
         val context = CommandContext(UUID.randomUUID())
         context.add(
             AvviksvurderingBehovLøsning(
@@ -206,16 +171,7 @@ class VurderBehovForAvviksvurderingTest {
 
     @Test
     fun `ikke legg til varsel RV_IV_2 dersom avviket er innenfor akseptabelt avvik`() {
-        val command = VurderBehovForAvviksvurdering(
-            fødselsnummer,
-            skjæringstidspunkt,
-            repository,
-            omregnedeÅrsinntekter,
-            vilkårsgrunnlagId,
-            legacyBehandling,
-            true,
-            organisasjonsnummer
-        )
+        val command = vurderBehovForAvviksvurderingCommand(true)
         val context = CommandContext(UUID.randomUUID())
         context.add(
             AvviksvurderingBehovLøsning(
@@ -234,16 +190,7 @@ class VurderBehovForAvviksvurderingTest {
 
     @Test
     fun `lagrer kun ned kobling ved løsning med avviksvurdering som finnes fra før av`() {
-        val command = VurderBehovForAvviksvurdering(
-            fødselsnummer,
-            skjæringstidspunkt,
-            repository,
-            omregnedeÅrsinntekter,
-            vilkårsgrunnlagId,
-            legacyBehandling,
-            true,
-            organisasjonsnummer
-        )
+        val command = vurderBehovForAvviksvurderingCommand(true)
         repository.avviksvurderingSomSkalReturneres = enAvviksvurdering(avviksvurderingId = avviksvurderingId)
         val context = CommandContext(UUID.randomUUID())
         context.add(enAvviksvurderingBehovløsning(avviksvurderingId = avviksvurderingId))
@@ -255,16 +202,7 @@ class VurderBehovForAvviksvurderingTest {
 
     @Test
     fun `lager ikke varsel om avvik dersom det ikke har blitt foretatt en ny vurdering`() {
-        val command = VurderBehovForAvviksvurdering(
-            fødselsnummer,
-            skjæringstidspunkt,
-            repository,
-            omregnedeÅrsinntekter,
-            vilkårsgrunnlagId,
-            legacyBehandling,
-            true,
-            organisasjonsnummer
-        )
+        val command = vurderBehovForAvviksvurderingCommand(true)
         val context = CommandContext(UUID.randomUUID())
         repository.avviksvurderingSomSkalReturneres = enAvviksvurdering(avviksvurderingId = avviksvurderingId)
         context.add(enAvviksvurderingBehovløsning(avviksvurderingId = avviksvurderingId))
@@ -296,4 +234,16 @@ class VurderBehovForAvviksvurderingTest {
             beregningsgrunnlag = beregningsgrunnlag
         )
     }
+
+    private fun vurderBehovForAvviksvurderingCommand(erInngangsvilkårVurdertISpleis: Boolean) = VurderBehovForAvviksvurdering(
+        fødselsnummer = fødselsnummer,
+        skjæringstidspunkt = skjæringstidspunkt,
+        avviksvurderingRepository = repository,
+        omregnedeÅrsinntekter = omregnedeÅrsinntekter,
+        vilkårsgrunnlagId = vilkårsgrunnlagId,
+        legacyBehandling = legacyBehandling,
+        erInngangsvilkårVurdertISpleis = erInngangsvilkårVurdertISpleis,
+        organisasjonsnummer = organisasjonsnummer,
+        featureToggles = object : FeatureToggles {}
+    )
 }
