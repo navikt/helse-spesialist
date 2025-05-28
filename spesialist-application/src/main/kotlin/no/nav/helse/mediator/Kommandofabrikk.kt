@@ -145,12 +145,12 @@ class Kommandofabrikk(
 
             if (oppgaveDataForAutomatisering == null) {
                 sikkerlogg.info("Fant ikke oppgavedata for {} og {}", fødselsnummer, oppgaveId)
-                return null
+                null
             } else {
                 sikkerlogg.info(
                     "Har aktiv saksbehandleroppgave og oppgavedata for fnr $fødselsnummer og vedtaksperiodeId ${oppgaveDataForAutomatisering.vedtaksperiodeId}",
                 )
-                return oppgaveDataForAutomatisering
+                oppgaveDataForAutomatisering
             }
         } ?: kotlin.run {
             sikkerlogg.info("Ingen åpne oppgaver i Speil for {}", fødselsnummer)
