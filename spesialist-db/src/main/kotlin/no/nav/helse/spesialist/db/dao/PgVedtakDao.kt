@@ -29,7 +29,7 @@ class PgVedtakDao private constructor(queryRunner: QueryRunner) : VedtakDao, Que
             "vedtaksperiode_id" to vedtaksperiodeId,
         ).singleOrNull {
             VedtaksperiodeDto(
-                organisasjonsnummer = it.long("organisasjonsnummer").toString(),
+                organisasjonsnummer = it.string("organisasjonsnummer"),
                 vedtaksperiodeId = it.uuid("vedtaksperiode_id"),
                 forkastet = it.boolean("forkastet"),
                 behandlinger = emptyList(),
