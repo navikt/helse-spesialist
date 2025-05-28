@@ -55,8 +55,7 @@ enum class ApiEgenskap {
     GOSYS,
     MANGLER_IM,
     MEDLEMSKAP,
-    TILKOMMEN,
-    GRUNNBELOPSREGULERING
+    GRUNNBELOPSREGULERING,
 }
 
 @GraphQLName("Kategori")

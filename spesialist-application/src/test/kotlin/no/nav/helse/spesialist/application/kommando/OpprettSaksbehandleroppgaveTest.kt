@@ -21,6 +21,7 @@ import no.nav.helse.modell.oppgave.Egenskap.EN_ARBEIDSGIVER
 import no.nav.helse.modell.oppgave.Egenskap.FLERE_ARBEIDSGIVERE
 import no.nav.helse.modell.oppgave.Egenskap.FORSTEGANGSBEHANDLING
 import no.nav.helse.modell.oppgave.Egenskap.FORTROLIG_ADRESSE
+import no.nav.helse.modell.oppgave.Egenskap.GRUNNBELØPSREGULERING
 import no.nav.helse.modell.oppgave.Egenskap.HASTER
 import no.nav.helse.modell.oppgave.Egenskap.INGEN_UTBETALING
 import no.nav.helse.modell.oppgave.Egenskap.PÅ_VENT
@@ -31,8 +32,6 @@ import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Egenskap.TILBAKEDATERT
-import no.nav.helse.modell.oppgave.Egenskap.TILKOMMEN
-import no.nav.helse.modell.oppgave.Egenskap.GRUNNBELØPSREGULERING
 import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_ARBEIDSGIVER
 import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.modell.oppgave.Egenskap.UTLAND
@@ -264,12 +263,6 @@ internal class OpprettSaksbehandleroppgaveTest {
     fun `legger til oppgave med kanAvvises lik false`() {
         assertTrue(opprettSaksbehandlerOppgaveCommand(kanAvvises = false).execute(context))
         assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, kanAvvises = false)
-    }
-
-    @Test
-    fun `oppretter oppgave med tilkommen inntekt`() {
-        assertTrue(opprettSaksbehandlerOppgaveCommand(tags = listOf("TilkommenInntekt")).execute(context))
-        assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, TILKOMMEN)
     }
 
     @Test

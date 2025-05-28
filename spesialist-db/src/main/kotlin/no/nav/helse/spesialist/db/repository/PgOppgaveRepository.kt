@@ -166,7 +166,7 @@ class PgOppgaveRepository private constructor(queryRunner: QueryRunner) : QueryR
             """,
             "oppgaveId" to id,
         ).singleOrNull { row ->
-            val egenskaper = row.array<String>("egenskaper").map { it.fromDb() }.toSet()
+            val egenskaper = row.array<String>("egenskaper").mapNotNull { it.fromDb() }.toSet()
             Oppgave.fraLagring(
                 id = id,
                 egenskaper = egenskaper,
@@ -242,11 +242,10 @@ class PgOppgaveRepository private constructor(queryRunner: QueryRunner) : QueryR
             Egenskap.MANGLER_IM -> "MANGLER_IM"
             Egenskap.MEDLEMSKAP -> "MEDLEMSKAP"
             Egenskap.VERGEMÅL -> "VERGEMÅL"
-            Egenskap.TILKOMMEN -> "TILKOMMEN"
             Egenskap.GRUNNBELØPSREGULERING -> "GRUNNBELØPSREGULERING"
         }
 
-    private fun String.fromDb() =
+    private fun String.fromDb(): Egenskap? =
         when (this) {
             "RISK_QA" -> Egenskap.RISK_QA
             "FORTROLIG_ADRESSE" -> Egenskap.FORTROLIG_ADRESSE
@@ -277,8 +276,9 @@ class PgOppgaveRepository private constructor(queryRunner: QueryRunner) : QueryR
             "MANGLER_IM" -> Egenskap.MANGLER_IM
             "MEDLEMSKAP" -> Egenskap.MEDLEMSKAP
             "VERGEMÅL" -> Egenskap.VERGEMÅL
-            "TILKOMMEN" -> Egenskap.TILKOMMEN
             "GRUNNBELØPSREGULERING" -> Egenskap.GRUNNBELØPSREGULERING
+            // Gammel egenskap fra tidligere iterasjon av tilkommen inntekt, skal overses
+            "TILKOMMEN" -> null
             else -> error("Ukjent oppgaveegenskap")
         }
 }

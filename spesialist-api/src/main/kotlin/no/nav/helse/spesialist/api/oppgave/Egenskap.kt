@@ -29,5 +29,4 @@ enum class Egenskap {
     TILBAKEDATERT,
     MEDLEMSKAP,
     GOSYS,
-    TILKOMMEN,
 }

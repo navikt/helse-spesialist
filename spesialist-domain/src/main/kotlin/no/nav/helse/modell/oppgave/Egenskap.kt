@@ -41,8 +41,7 @@ enum class Egenskap(
     MANGLER_IM,
     MEDLEMSKAP,
     VERGEMÅL,
-    TILKOMMEN,
-    GRUNNBELØPSREGULERING
+    GRUNNBELØPSREGULERING,
     ;
 
     enum class Kategori {

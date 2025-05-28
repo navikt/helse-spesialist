@@ -298,7 +298,6 @@ private fun Oppgave.toDetaljer(): Map<String, Any> =
                     Egenskap.GOSYS -> "GOSYS"
                     Egenskap.MANGLER_IM -> "MANGLER_IM"
                     Egenskap.MEDLEMSKAP -> "MEDLEMSKAP"
-                    Egenskap.TILKOMMEN -> "TILKOMMEN"
                     Egenskap.GRUNNBELØPSREGULERING -> "GRUNNBELØPSREGULERING"
                 }
             },

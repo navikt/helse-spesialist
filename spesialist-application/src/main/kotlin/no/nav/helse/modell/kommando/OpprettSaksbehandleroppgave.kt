@@ -17,6 +17,7 @@ import no.nav.helse.modell.oppgave.Egenskap.FORLENGELSE
 import no.nav.helse.modell.oppgave.Egenskap.FORSTEGANGSBEHANDLING
 import no.nav.helse.modell.oppgave.Egenskap.FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Egenskap.GOSYS
+import no.nav.helse.modell.oppgave.Egenskap.GRUNNBELØPSREGULERING
 import no.nav.helse.modell.oppgave.Egenskap.HASTER
 import no.nav.helse.modell.oppgave.Egenskap.INFOTRYGDFORLENGELSE
 import no.nav.helse.modell.oppgave.Egenskap.INGEN_UTBETALING
@@ -31,8 +32,6 @@ import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Egenskap.TILBAKEDATERT
-import no.nav.helse.modell.oppgave.Egenskap.TILKOMMEN
-import no.nav.helse.modell.oppgave.Egenskap.GRUNNBELØPSREGULERING
 import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_ARBEIDSGIVER
 import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.modell.oppgave.Egenskap.UTLAND
@@ -92,7 +91,6 @@ internal class OpprettSaksbehandleroppgave(
                 manglerIM(vedtaksperiodeId)
                 medlemskap(vedtaksperiodeId)
                 haster(vedtaksperiodeId)
-                tilkommenInntekt(behovData.tags)
                 grunnbeløpsregulering(behovData.tags, utbetalingtype)
             }
 
@@ -206,11 +204,10 @@ internal class OpprettSaksbehandleroppgave(
         if (sykefraværstilfelle.harVarselOmManglendeInntektsmelding(vedtaksperiodeId)) add(MANGLER_IM)
     }
 
-    private fun MutableSet<Egenskap>.tilkommenInntekt(tags: List<String>) {
-        if (tags.contains("TilkommenInntekt")) add(TILKOMMEN)
-    }
-
-    private fun MutableSet<Egenskap>.grunnbeløpsregulering(tags: List<String>, utbetalingtype: Utbetalingtype) {
+    private fun MutableSet<Egenskap>.grunnbeløpsregulering(
+        tags: List<String>,
+        utbetalingtype: Utbetalingtype,
+    ) {
         if (tags.contains("Grunnbeløpsregulering") and (utbetalingtype == Utbetalingtype.REVURDERING)) add(GRUNNBELØPSREGULERING)
     }
 

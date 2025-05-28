@@ -30,8 +30,7 @@ enum class EgenskapDto {
     MANGLER_IM,
     MEDLEMSKAP,
     VERGEMÅL,
-    TILKOMMEN,
-    GRUNNBELØPSREGULERING
+    GRUNNBELØPSREGULERING,
     ;
 
     internal companion object {
@@ -66,7 +65,6 @@ enum class EgenskapDto {
                 Egenskap.MANGLER_IM -> MANGLER_IM
                 Egenskap.MEDLEMSKAP -> MEDLEMSKAP
                 Egenskap.VERGEMÅL -> VERGEMÅL
-                Egenskap.TILKOMMEN -> TILKOMMEN
                 Egenskap.GRUNNBELØPSREGULERING -> GRUNNBELØPSREGULERING
             }
         }
@@ -102,7 +100,6 @@ enum class EgenskapDto {
                 MANGLER_IM -> Egenskap.MANGLER_IM
                 MEDLEMSKAP -> Egenskap.MEDLEMSKAP
                 VERGEMÅL -> Egenskap.VERGEMÅL
-                TILKOMMEN -> Egenskap.TILKOMMEN
                 GRUNNBELØPSREGULERING -> Egenskap.GRUNNBELØPSREGULERING
             }
     }

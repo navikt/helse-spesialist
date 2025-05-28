@@ -110,7 +110,7 @@ internal object OppgaveMapper {
             )
         }
 
-    private fun Set<EgenskapForDatabase>.tilModellversjoner(): List<Egenskap> = this.map { it.tilModellversjon() }
+    private fun Set<EgenskapForDatabase>.tilModellversjoner(): List<Egenskap> = this.mapNotNull { it.tilModellversjon() }
 
     private fun List<Egenskap>.periodetype(): ApiPeriodetype {
         val egenskap = single { egenskap -> egenskap.kategori == Egenskap.Kategori.Periodetype }
@@ -195,7 +195,6 @@ internal object OppgaveMapper {
             Egenskap.GOSYS -> ApiEgenskap.GOSYS
             Egenskap.MANGLER_IM -> ApiEgenskap.MANGLER_IM
             Egenskap.MEDLEMSKAP -> ApiEgenskap.MEDLEMSKAP
-            Egenskap.TILKOMMEN -> ApiEgenskap.TILKOMMEN
             Egenskap.GRUNNBELØPSREGULERING -> ApiEgenskap.GRUNNBELOPSREGULERING
         }
 
@@ -209,7 +208,7 @@ internal object OppgaveMapper {
             Egenskap.Kategori.Status -> ApiKategori.Status
         }
 
-    private fun EgenskapForDatabase.tilModellversjon(): Egenskap =
+    private fun EgenskapForDatabase.tilModellversjon(): Egenskap? =
         when (this) {
             EgenskapForDatabase.RISK_QA -> Egenskap.RISK_QA
             EgenskapForDatabase.FORTROLIG_ADRESSE -> Egenskap.FORTROLIG_ADRESSE
@@ -240,8 +239,9 @@ internal object OppgaveMapper {
             EgenskapForDatabase.GOSYS -> Egenskap.GOSYS
             EgenskapForDatabase.MANGLER_IM -> Egenskap.MANGLER_IM
             EgenskapForDatabase.MEDLEMSKAP -> Egenskap.MEDLEMSKAP
-            EgenskapForDatabase.TILKOMMEN -> Egenskap.TILKOMMEN
             EgenskapForDatabase.GRUNNBELØPSREGULERING -> Egenskap.GRUNNBELØPSREGULERING
+            // Gammel egenskap fra tidligere iterasjon av tilkommen inntekt, skal overses
+            EgenskapForDatabase.TILKOMMEN -> null
         }
 
     private fun ApiOppgaveegenskap.tilDatabaseversjon() =
@@ -275,7 +275,6 @@ internal object OppgaveMapper {
             ApiEgenskap.GOSYS -> EgenskapForDatabase.GOSYS
             ApiEgenskap.MANGLER_IM -> EgenskapForDatabase.MANGLER_IM
             ApiEgenskap.MEDLEMSKAP -> EgenskapForDatabase.MEDLEMSKAP
-            ApiEgenskap.TILKOMMEN -> EgenskapForDatabase.TILKOMMEN
             ApiEgenskap.GRUNNBELOPSREGULERING -> EgenskapForDatabase.GRUNNBELØPSREGULERING
         }
 }

@@ -95,6 +95,8 @@ enum class EgenskapForDatabase {
     GOSYS,
     MANGLER_IM,
     MEDLEMSKAP,
+
+    /** Gammel egenskap fra tidligere iterasjon av tilkommen inntekt, skal overses */
     TILKOMMEN,
-    GRUNNBELØPSREGULERING
+    GRUNNBELØPSREGULERING,
 }
