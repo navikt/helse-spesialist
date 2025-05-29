@@ -48,7 +48,7 @@ allprojects {
             implementation("org.apache.commons:commons-compress:1.27.1") {
                 because("org.testcontainers:postgresql:1.19.7 -> 1.24.0 har en sårbarhet")
             }
-            implementation("com.google.protobuf:protobuf-java:4.31.0") {
+            implementation("com.google.protobuf:protobuf-java:4.31.1") {
                 because("com.expediagroup:graphql-kotlin-ktor-server:8.3.0 -> 4.27.1 har en sårbarhet")
             }
         }
