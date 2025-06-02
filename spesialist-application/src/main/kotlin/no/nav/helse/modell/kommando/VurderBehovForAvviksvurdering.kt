@@ -6,8 +6,6 @@ import no.nav.helse.modell.person.vedtaksperiode.Varselkode.RV_IV_2
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.modell.vilkårsprøving.AvviksvurderingBehovLøsning
 import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
-import no.nav.helse.spesialist.application.logg.logg
-import no.nav.helse.spesialist.application.logg.sikkerlogg
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import java.time.LocalDate
 import java.util.UUID
@@ -25,7 +23,6 @@ class VurderBehovForAvviksvurdering(
     override fun execute(context: CommandContext): Boolean {
         if (!erInngangsvilkårVurdertISpleis) return true
         if ("SELVSTENDIG" in organisasjonsnummer) {
-            logg.info("Gjør ikke avviksvurdering for selvstendig næringsdrivende")
             return true
         }
         return behov(context)
@@ -56,9 +53,6 @@ class VurderBehovForAvviksvurdering(
     }
 
     private fun behov(context: CommandContext): Boolean {
-        sikkerlogg.info(
-            "Sender behov for avviksvurdering for $fødselsnummer, skjæringstidspunkt: $skjæringstidspunkt, organisasjonsnummer: $organisasjonsnummer",
-        )
         context.behov(
             Behov.Avviksvurdering(
                 omregnedeÅrsinntekter,
