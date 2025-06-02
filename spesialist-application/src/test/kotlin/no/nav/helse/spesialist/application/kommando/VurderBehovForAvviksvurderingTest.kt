@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.application.kommando
 
-import no.nav.helse.FeatureToggles
 import no.nav.helse.db.AvviksvurderingRepository
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.modell.kommando.CommandContext
@@ -235,15 +234,15 @@ class VurderBehovForAvviksvurderingTest {
         )
     }
 
-    private fun vurderBehovForAvviksvurderingCommand(erInngangsvilkårVurdertISpleis: Boolean) = VurderBehovForAvviksvurdering(
-        fødselsnummer = fødselsnummer,
-        skjæringstidspunkt = skjæringstidspunkt,
-        avviksvurderingRepository = repository,
-        omregnedeÅrsinntekter = omregnedeÅrsinntekter,
-        vilkårsgrunnlagId = vilkårsgrunnlagId,
-        legacyBehandling = legacyBehandling,
-        erInngangsvilkårVurdertISpleis = erInngangsvilkårVurdertISpleis,
-        organisasjonsnummer = organisasjonsnummer,
-        featureToggles = object : FeatureToggles {}
-    )
+    private fun vurderBehovForAvviksvurderingCommand(erInngangsvilkårVurdertISpleis: Boolean) =
+        VurderBehovForAvviksvurdering(
+            fødselsnummer = fødselsnummer,
+            skjæringstidspunkt = skjæringstidspunkt,
+            avviksvurderingRepository = repository,
+            omregnedeÅrsinntekter = omregnedeÅrsinntekter,
+            vilkårsgrunnlagId = vilkårsgrunnlagId,
+            legacyBehandling = legacyBehandling,
+            erInngangsvilkårVurdertISpleis = erInngangsvilkårVurdertISpleis,
+            organisasjonsnummer = organisasjonsnummer,
+        )
 }

@@ -1,7 +1,6 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.FeatureToggles
 import no.nav.helse.db.ArbeidsforholdDao
 import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.AvviksvurderingRepository
@@ -275,7 +274,6 @@ internal class GodkjenningsbehovCommand(
     oppgaveService: OppgaveService,
     godkjenningMediator: GodkjenningMediator,
     person: Person,
-    featureToggles: FeatureToggles,
 ) : MacroCommand() {
     private val sykefraværstilfelle = person.sykefraværstilfelle(behovData.vedtaksperiodeId)
     private val inntektskilder =
@@ -315,7 +313,6 @@ internal class GodkjenningsbehovCommand(
                         .finnBehandling(behovData.spleisBehandlingId),
                 erInngangsvilkårVurdertISpleis = behovData.erInngangsvilkårVurdertISpleis,
                 organisasjonsnummer = behovData.organisasjonsnummer,
-                featureToggles = featureToggles,
             ),
             PersisterVedtaksperiodetypeCommand(
                 vedtaksperiodeId = behovData.vedtaksperiodeId,

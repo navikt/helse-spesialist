@@ -346,7 +346,6 @@ class Kommandofabrikk(
             oppgaveService = transaksjonellOppgaveService(sessionContext),
             godkjenningMediator = GodkjenningMediator(sessionContext.opptegnelseDao),
             person = person,
-            featureToggles = featureToggles,
         )
     }
 

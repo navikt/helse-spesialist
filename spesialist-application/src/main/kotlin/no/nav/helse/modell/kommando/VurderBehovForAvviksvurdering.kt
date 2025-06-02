@@ -1,6 +1,5 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.FeatureToggles
 import no.nav.helse.db.AvviksvurderingRepository
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode.RV_IV_2
@@ -21,11 +20,10 @@ class VurderBehovForAvviksvurdering(
     private val legacyBehandling: LegacyBehandling,
     private val erInngangsvilkårVurdertISpleis: Boolean,
     private val organisasjonsnummer: String,
-    private val featureToggles: FeatureToggles,
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
         if (!erInngangsvilkårVurdertISpleis) return true
-        if (featureToggles.skalBehandleSelvstendig() && organisasjonsnummer === "SELVSTENDIG") {
+        if (organisasjonsnummer === "SELVSTENDIG") {
             logg.debug("Gjør ikke avviksvurdering for selvstendig næringsdrivende")
             return true
         }
@@ -33,6 +31,10 @@ class VurderBehovForAvviksvurdering(
     }
 
     override fun resume(context: CommandContext): Boolean {
+        if (organisasjonsnummer === "SELVSTENDIG") {
+            logg.debug("Resumer ikke avviksvurdering for selvstendig næringsdrivende")
+            return true
+        }
         val løsning = context.get<AvviksvurderingBehovLøsning>() ?: return behov(context)
         val eksisterendeAvviksvurdering = avviksvurderingRepository.hentAvviksvurderingFor(løsning.avviksvurderingId)
 
