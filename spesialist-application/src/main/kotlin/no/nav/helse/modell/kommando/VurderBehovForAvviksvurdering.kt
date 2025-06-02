@@ -7,6 +7,7 @@ import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.modell.vilkårsprøving.AvviksvurderingBehovLøsning
 import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
 import no.nav.helse.spesialist.application.logg.logg
+import no.nav.helse.spesialist.application.logg.sikkerlogg
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import java.time.LocalDate
 import java.util.UUID
@@ -22,6 +23,9 @@ class VurderBehovForAvviksvurdering(
     private val organisasjonsnummer: String,
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
+        sikkerlogg.info(
+            "Vurderer behov for avviksvurdering for $fødselsnummer, skjæringstidspunkt: $skjæringstidspunkt, organisasjonsnummer: $organisasjonsnummer",
+        )
         if (!erInngangsvilkårVurdertISpleis) return true
         if (organisasjonsnummer === "SELVSTENDIG") {
             logg.info("Gjør ikke avviksvurdering for selvstendig næringsdrivende")
