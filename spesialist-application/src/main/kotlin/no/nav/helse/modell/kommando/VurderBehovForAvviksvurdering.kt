@@ -7,6 +7,7 @@ import no.nav.helse.modell.person.vedtaksperiode.Varselkode.RV_IV_2
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.modell.vilkårsprøving.AvviksvurderingBehovLøsning
 import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
+import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import java.time.LocalDate
 import java.util.UUID
@@ -24,7 +25,10 @@ class VurderBehovForAvviksvurdering(
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
         if (!erInngangsvilkårVurdertISpleis) return true
-        if (featureToggles.skalBehandleSelvstendig() && organisasjonsnummer === "SELVSTENDIG") return true
+        if (featureToggles.skalBehandleSelvstendig() && organisasjonsnummer === "SELVSTENDIG") {
+            logg.debug("Gjør ikke avviksvurdering for selvstendig næringsdrivende")
+            return true
+        }
         return behov(context)
     }
 
