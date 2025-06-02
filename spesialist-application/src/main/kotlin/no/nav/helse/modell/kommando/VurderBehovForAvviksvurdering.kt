@@ -23,9 +23,6 @@ class VurderBehovForAvviksvurdering(
     private val organisasjonsnummer: String,
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
-        sikkerlogg.info(
-            "Vurderer behov for avviksvurdering for $fødselsnummer, skjæringstidspunkt: $skjæringstidspunkt, organisasjonsnummer: $organisasjonsnummer",
-        )
         if (!erInngangsvilkårVurdertISpleis) return true
         if (organisasjonsnummer === "SELVSTENDIG") {
             logg.info("Gjør ikke avviksvurdering for selvstendig næringsdrivende")
@@ -63,6 +60,9 @@ class VurderBehovForAvviksvurdering(
     }
 
     private fun behov(context: CommandContext): Boolean {
+        sikkerlogg.info(
+            "Sender behov for avviksvurdering for $fødselsnummer, skjæringstidspunkt: $skjæringstidspunkt, organisasjonsnummer: $organisasjonsnummer",
+        )
         context.behov(
             Behov.Avviksvurdering(
                 omregnedeÅrsinntekter,
