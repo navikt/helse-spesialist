@@ -27,7 +27,6 @@ import java.time.YearMonth
 import java.util.UUID
 
 class VurderBehovForAvviksvurderingTest {
-
     private val fødselsnummer = lagFødselsnummer()
     private val organisasjonsnummer = lagOrganisasjonsnummer()
     private val vilkårsgrunnlagId = UUID.randomUUID()
@@ -94,7 +93,16 @@ class VurderBehovForAvviksvurderingTest {
 
     @Test
     fun `Ikke send ut behov dersom inngangsvilkårene ikke er vurdert i Spleis`() {
-        val command = vurderBehovForAvviksvurderingCommand(false)
+        val command = vurderBehovForAvviksvurderingCommand(erInngangsvilkårVurdertISpleis = false)
+        val context = CommandContext(UUID.randomUUID())
+        context.nyObserver(observer)
+        assertTrue(command.execute(context))
+        assertEquals(0, observer.behov.size)
+    }
+
+    @Test
+    fun `Ikke send ut behov dersom person er selvstendig næringsdrivende`() {
+        val command = vurderBehovForAvviksvurderingCommand(organisasjonsnummer = "SELVSTENDIG")
         val context = CommandContext(UUID.randomUUID())
         context.nyObserver(observer)
         assertTrue(command.execute(context))
@@ -103,7 +111,7 @@ class VurderBehovForAvviksvurderingTest {
 
     @Test
     fun `Send ut behov dersom inngangsvilkårene er vurdert i Spleis`() {
-        val command = vurderBehovForAvviksvurderingCommand(true)
+        val command = vurderBehovForAvviksvurderingCommand()
         val context = CommandContext(UUID.randomUUID())
         context.nyObserver(observer)
         assertFalse(command.execute(context))
@@ -119,7 +127,7 @@ class VurderBehovForAvviksvurderingTest {
 
     @Test
     fun `lagrer ned ny avviksvurdering ved løsning med ny vurdering`() {
-        val command = vurderBehovForAvviksvurderingCommand(true)
+        val command = vurderBehovForAvviksvurderingCommand()
         val context = CommandContext(UUID.randomUUID())
         context.add(
             AvviksvurderingBehovLøsning(
@@ -151,7 +159,7 @@ class VurderBehovForAvviksvurderingTest {
 
     @Test
     fun `legg til varsel RV_IV_2 dersom avviket er mer enn akseptabelt avvik`() {
-        val command = vurderBehovForAvviksvurderingCommand(true)
+        val command = vurderBehovForAvviksvurderingCommand()
         val context = CommandContext(UUID.randomUUID())
         context.add(
             AvviksvurderingBehovLøsning(
@@ -170,7 +178,7 @@ class VurderBehovForAvviksvurderingTest {
 
     @Test
     fun `ikke legg til varsel RV_IV_2 dersom avviket er innenfor akseptabelt avvik`() {
-        val command = vurderBehovForAvviksvurderingCommand(true)
+        val command = vurderBehovForAvviksvurderingCommand()
         val context = CommandContext(UUID.randomUUID())
         context.add(
             AvviksvurderingBehovLøsning(
@@ -189,7 +197,7 @@ class VurderBehovForAvviksvurderingTest {
 
     @Test
     fun `lagrer kun ned kobling ved løsning med avviksvurdering som finnes fra før av`() {
-        val command = vurderBehovForAvviksvurderingCommand(true)
+        val command = vurderBehovForAvviksvurderingCommand()
         repository.avviksvurderingSomSkalReturneres = enAvviksvurdering(avviksvurderingId = avviksvurderingId)
         val context = CommandContext(UUID.randomUUID())
         context.add(enAvviksvurderingBehovløsning(avviksvurderingId = avviksvurderingId))
@@ -201,7 +209,7 @@ class VurderBehovForAvviksvurderingTest {
 
     @Test
     fun `lager ikke varsel om avvik dersom det ikke har blitt foretatt en ny vurdering`() {
-        val command = vurderBehovForAvviksvurderingCommand(true)
+        val command = vurderBehovForAvviksvurderingCommand()
         val context = CommandContext(UUID.randomUUID())
         repository.avviksvurderingSomSkalReturneres = enAvviksvurdering(avviksvurderingId = avviksvurderingId)
         context.add(enAvviksvurderingBehovløsning(avviksvurderingId = avviksvurderingId))
@@ -234,7 +242,10 @@ class VurderBehovForAvviksvurderingTest {
         )
     }
 
-    private fun vurderBehovForAvviksvurderingCommand(erInngangsvilkårVurdertISpleis: Boolean) =
+    private fun vurderBehovForAvviksvurderingCommand(
+        erInngangsvilkårVurdertISpleis: Boolean = true,
+        organisasjonsnummer: String = this.organisasjonsnummer
+    ) =
         VurderBehovForAvviksvurdering(
             fødselsnummer = fødselsnummer,
             skjæringstidspunkt = skjæringstidspunkt,
