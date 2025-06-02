@@ -24,7 +24,7 @@ class VurderBehovForAvviksvurdering(
     override fun execute(context: CommandContext): Boolean {
         if (!erInngangsvilkårVurdertISpleis) return true
         if (organisasjonsnummer === "SELVSTENDIG") {
-            logg.debug("Gjør ikke avviksvurdering for selvstendig næringsdrivende")
+            logg.info("Gjør ikke avviksvurdering for selvstendig næringsdrivende")
             return true
         }
         return behov(context)
@@ -32,7 +32,7 @@ class VurderBehovForAvviksvurdering(
 
     override fun resume(context: CommandContext): Boolean {
         if (organisasjonsnummer === "SELVSTENDIG") {
-            logg.debug("Resumer ikke avviksvurdering for selvstendig næringsdrivende")
+            logg.info("Resumer ikke avviksvurdering for selvstendig næringsdrivende")
             return true
         }
         val løsning = context.get<AvviksvurderingBehovLøsning>() ?: return behov(context)
