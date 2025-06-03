@@ -700,8 +700,8 @@ class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         assertEquals(VEDTAKSPERIODE, melding["vedtaksperiodeId"].asUUID())
         assertEquals(UTBETALING_ID, melding["utbetalingId"].asUUID())
         assertEquals("EN_KOMMENTAR", melding["kommentar"]?.asText())
-        assertEquals(1, melding["begrunnelser"].map { it.asText() }.size)
-        assertEquals("EN_BEGRUNNELSE", melding["begrunnelser"][0].asText())
+        assertEquals(2, melding["begrunnelser"].map { it.asText() }.size)
+        assertEquals(listOf("Ferie", "Perm"), melding["begrunnelser"].map { it.asText() })
         melding["arsaker"].let {
             assertEquals(2, it.size())
             it.first().let { node ->
@@ -713,7 +713,7 @@ class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
 
     @Test
     fun `håndterer annullering uten kommentar, begrunnelser eller årsak`() {
-        mediator.håndter(annullering(emptyList(), null, emptyList()), saksbehandler)
+        mediator.håndter(annullering(kommentar = null, arsaker = emptyList()), saksbehandler)
 
         val melding = testRapid.inspektør.message(0)
 
@@ -733,7 +733,7 @@ class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
 
     @Test
     fun `godtar ikke å annullere samme utbetaling mer enn 1 gang`() {
-        val annullering = annullering(emptyList(), null)
+        val annullering = annullering(kommentar = null)
         mediator.håndter(annullering, saksbehandler)
         assertThrows<no.nav.helse.spesialist.api.feilhåndtering.AlleredeAnnullert> {
             mediator.håndter(annullering, saksbehandler)
@@ -1182,7 +1182,6 @@ class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
     }
 
     private fun annullering(
-        begrunnelser: List<String> = listOf("EN_BEGRUNNELSE"),
         kommentar: String? = "EN_KOMMENTAR",
         arsaker: List<ApiAnnulleringArsak> =
             listOf(
@@ -1197,7 +1196,6 @@ class SaksbehandlerMediatorTest : DatabaseIntegrationTest() {
         utbetalingId = UTBETALING_ID,
         arbeidsgiverFagsystemId = "EN-FAGSYSTEMID${Random.nextInt(1000)}",
         personFagsystemId = "EN-FAGSYSTEMID${Random.nextInt(1000)}",
-        begrunnelser = begrunnelser,
         arsaker = arsaker,
         kommentar = kommentar,
     )

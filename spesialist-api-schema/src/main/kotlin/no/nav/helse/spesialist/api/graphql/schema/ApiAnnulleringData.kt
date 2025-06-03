@@ -13,7 +13,7 @@ data class ApiAnnulleringData(
     val utbetalingId: UUID,
     val arbeidsgiverFagsystemId: String,
     val personFagsystemId: String,
-    val begrunnelser: List<String>,
+    val begrunnelser: List<String>? = null,
     val arsaker: List<ApiAnnulleringArsak>,
     val kommentar: String?,
 ) : HandlingFraApi {

@@ -6,15 +6,14 @@ fun annullerMutation(annullering: ApiAnnulleringData): String = asGQL(
     """
     mutation Annuller {
         annuller(annullering: {
-            organisasjonsnummer: "${annullering.organisasjonsnummer}", 
-            fodselsnummer: "${annullering.fodselsnummer}", 
-            aktorId: "${annullering.aktorId}", 
+            organisasjonsnummer: "${annullering.organisasjonsnummer}",
+            fodselsnummer: "${annullering.fodselsnummer}",
+            aktorId: "${annullering.aktorId}",
             utbetalingId: "${annullering.utbetalingId}",
             arbeidsgiverFagsystemId: "${annullering.arbeidsgiverFagsystemId}",
             personFagsystemId: "${annullering.personFagsystemId}",
             vedtaksperiodeId: "${annullering.vedtaksperiodeId}",
-            kommentar: "${annullering.kommentar}", 
-            begrunnelser: ${annullering.begrunnelser.map { """"$it"""" }},
+            kommentar: "${annullering.kommentar}",
             arsaker: ${arsaker(annullering)}
         })
     }

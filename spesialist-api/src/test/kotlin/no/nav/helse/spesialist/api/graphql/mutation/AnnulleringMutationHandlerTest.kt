@@ -26,11 +26,14 @@ class AnnulleringMutationHandlerTest {
                     personFagsystemId = "EN-FAGSYSTEMID",
                     vedtaksperiodeId = UUID.randomUUID(),
                     kommentar = "kommentar",
-                    begrunnelser = listOf("Det første", "Det andre"),
                     arsaker = listOf(
                         ApiAnnulleringData.ApiAnnulleringArsak(
                             _key = "en key",
                             arsak = "Ferie",
+                        ),
+                        ApiAnnulleringData.ApiAnnulleringArsak(
+                            _key = "en annen key",
+                            arsak = "Ekstra ferie",
                         )
                     ),
                 )
@@ -54,7 +57,6 @@ class AnnulleringMutationHandlerTest {
                     personFagsystemId = "EN-FAGSYSTEMID",
                     vedtaksperiodeId = UUID.randomUUID(),
                     kommentar = "kommentar",
-                    begrunnelser = emptyList(),
                     arsaker = emptyList()
                 )
             ),

@@ -926,7 +926,7 @@ class SaksbehandlerMediator(
             utbetalingId = this.utbetalingId,
             arbeidsgiverFagsystemId = this.arbeidsgiverFagsystemId,
             personFagsystemId = this.personFagsystemId,
-            begrunnelser = this.begrunnelser,
+            begrunnelser = this.arsaker.map { arsak -> arsak.arsak },
             arsaker = this.arsaker.map { arsak -> AnnulleringArsak(key = arsak._key, arsak = arsak.arsak) },
             kommentar = this.kommentar,
         )
