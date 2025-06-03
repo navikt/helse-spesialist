@@ -1,5 +1,5 @@
 # Bygg noen artefakter vi trenger senere
-FROM alpine:3.21 AS build
+FROM alpine:3.22 AS build
 
 # GCP profiling agent
 RUN mkdir -p /opt/cprof && \
