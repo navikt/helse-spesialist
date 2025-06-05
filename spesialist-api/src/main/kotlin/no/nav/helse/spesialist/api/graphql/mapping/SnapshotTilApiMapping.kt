@@ -5,12 +5,18 @@ import no.nav.helse.db.api.NotatApiDao
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.spesialist.api.Toggle
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsgiverinntekt
+import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsgiverinntektInfotrygd
+import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsgiverinntektSpleis
+import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsgiverinntektSpleisAvventerAvviksvurdering
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsgiverrefusjon
+import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsgiverrefusjonV2
+import no.nav.helse.spesialist.api.graphql.schema.ApiArsinntekt
 import no.nav.helse.spesialist.api.graphql.schema.ApiBegrunnelse
 import no.nav.helse.spesialist.api.graphql.schema.ApiDag
 import no.nav.helse.spesialist.api.graphql.schema.ApiHendelse
 import no.nav.helse.spesialist.api.graphql.schema.ApiHendelsetype
 import no.nav.helse.spesialist.api.graphql.schema.ApiInntektFraAOrdningen
+import no.nav.helse.spesialist.api.graphql.schema.ApiInntektFraAOrdningenV2
 import no.nav.helse.spesialist.api.graphql.schema.ApiInntektHentetFraAOrdningen
 import no.nav.helse.spesialist.api.graphql.schema.ApiInntektskilde
 import no.nav.helse.spesialist.api.graphql.schema.ApiInntektsmelding
@@ -23,7 +29,9 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiOmregnetArsinntekt
 import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodetilstand
 import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodetype
 import no.nav.helse.spesialist.api.graphql.schema.ApiRefusjonselement
+import no.nav.helse.spesialist.api.graphql.schema.ApiRefusjonselementV2
 import no.nav.helse.spesialist.api.graphql.schema.ApiSammenligningsgrunnlag
+import no.nav.helse.spesialist.api.graphql.schema.ApiSammenligningsgrunnlagV2
 import no.nav.helse.spesialist.api.graphql.schema.ApiSoknadArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.schema.ApiSoknadArbeidsledig
 import no.nav.helse.spesialist.api.graphql.schema.ApiSoknadFrilans
@@ -35,9 +43,16 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiSykmelding
 import no.nav.helse.spesialist.api.graphql.schema.ApiUtbetalingsdagtype
 import no.nav.helse.spesialist.api.graphql.schema.ApiUtbetalingsinfo
 import no.nav.helse.spesialist.api.graphql.schema.ApiVilkårsgrunnlag
+import no.nav.helse.spesialist.api.graphql.schema.ApiVilkårsgrunnlagArbeidstakerInfotrygd
+import no.nav.helse.spesialist.api.graphql.schema.ApiVilkårsgrunnlagArbeidstakerSpleis
+import no.nav.helse.spesialist.api.graphql.schema.ApiVilkårsgrunnlagAvviksvurdering
 import no.nav.helse.spesialist.api.graphql.schema.ApiVilkårsgrunnlagInfotrygd
+import no.nav.helse.spesialist.api.graphql.schema.ApiVilkårsgrunnlagKrav
+import no.nav.helse.spesialist.api.graphql.schema.ApiVilkårsgrunnlagKravAlltidVurdert
 import no.nav.helse.spesialist.api.graphql.schema.ApiVilkårsgrunnlagSpleis
+import no.nav.helse.spesialist.api.graphql.schema.ApiVilkårsgrunnlagV2
 import no.nav.helse.spesialist.api.graphql.schema.ApiVilkårsgrunnlagtype
+import no.nav.helse.spesialist.application.snapshot.SnapshotArbeidsgiverinntekt
 import no.nav.helse.spesialist.application.snapshot.SnapshotArbeidsgiverrefusjon
 import no.nav.helse.spesialist.application.snapshot.SnapshotBegrunnelse
 import no.nav.helse.spesialist.application.snapshot.SnapshotDag
@@ -65,9 +80,11 @@ import no.nav.helse.spesialist.application.snapshot.SnapshotSykdomsdagtype
 import no.nav.helse.spesialist.application.snapshot.SnapshotSykepengegrunnlagsgrense
 import no.nav.helse.spesialist.application.snapshot.SnapshotSykmelding
 import no.nav.helse.spesialist.application.snapshot.SnapshotTidslinjeperiode
+import no.nav.helse.spesialist.application.snapshot.SnapshotUkjentVilkarsgrunnlag
 import no.nav.helse.spesialist.application.snapshot.SnapshotUtbetalingsdagType
 import no.nav.helse.spesialist.application.snapshot.SnapshotUtbetalingsinfo
 import no.nav.helse.spesialist.application.snapshot.SnapshotVilkarsgrunnlag
+import java.math.BigDecimal
 import java.util.UUID
 
 fun SnapshotDag.tilApiDag() =
@@ -252,6 +269,22 @@ fun SnapshotOmregnetArsinntekt.tilApiOmregnetArsinntekt() =
         manedsbelop = manedsbelop,
     )
 
+fun SnapshotOmregnetArsinntekt.tilApiArsinntekt() =
+    ApiArsinntekt(
+        belop = BigDecimal(belop),
+        inntektFraAOrdningen = inntekterFraAOrdningen?.map { it.tilApiInntektFraAOrdningenV2() },
+        kilde = kilde.tilApiInntektskilde(),
+        manedsbelop = BigDecimal(manedsbelop),
+    )
+
+fun SnapshotSkjonnsmessigFastsatt.tilApiArsinntekt() =
+    ApiArsinntekt(
+        belop = BigDecimal(belop),
+        inntektFraAOrdningen = null,
+        kilde = ApiInntektskilde.SKJONNSMESSIG_FASTSATT,
+        manedsbelop = BigDecimal(manedsbelop),
+    )
+
 fun SnapshotSkjonnsmessigFastsatt.tilApiOmregnetArsinntekt() =
     ApiOmregnetArsinntekt(
         belop = belop,
@@ -264,6 +297,12 @@ private fun SnapshotInntekterFraAOrdningen.tilApiInntektFraAOrdningen() =
     ApiInntektFraAOrdningen(
         maned = maned,
         sum = sum,
+    )
+
+private fun SnapshotInntekterFraAOrdningen.tilApiInntektFraAOrdningenV2() =
+    ApiInntektFraAOrdningenV2(
+        maned = maned,
+        sum = BigDecimal(sum),
     )
 
 private fun SnapshotInntektskilde.tilApiInntektskilde() =
@@ -282,11 +321,25 @@ fun SnapshotArbeidsgiverrefusjon.tilApiArbeidsgiverrefusjon() =
         refusjonsopplysninger = refusjonsopplysninger.map { it.tilApiRefusjonselement() },
     )
 
+fun SnapshotArbeidsgiverrefusjon.tilApiArbeidsgiverrefusjonV2() =
+    ApiArbeidsgiverrefusjonV2(
+        arbeidsgiver = arbeidsgiver,
+        refusjonsopplysninger = refusjonsopplysninger.map { it.tilApiRefusjonselementV2() },
+    )
+
 private fun SnapshotRefusjonselement.tilApiRefusjonselement() =
     ApiRefusjonselement(
         fom = fom,
         tom = tom,
         belop = belop,
+        meldingsreferanseId = meldingsreferanseId,
+    )
+
+private fun SnapshotRefusjonselement.tilApiRefusjonselementV2() =
+    ApiRefusjonselementV2(
+        fom = fom,
+        tom = tom,
+        belop = BigDecimal(belop),
         meldingsreferanseId = meldingsreferanseId,
     )
 
@@ -358,6 +411,121 @@ fun SnapshotInntektstype.tilApiInntektstype() =
         SnapshotInntektstype.ENARBEIDSGIVER -> ApiInntektstype.ENARBEIDSGIVER
         SnapshotInntektstype.FLEREARBEIDSGIVERE -> ApiInntektstype.FLEREARBEIDSGIVERE
         else -> throw Exception("Ukjent inntektstype $this")
+    }
+
+fun SnapshotVilkarsgrunnlag.tilVilkarsgrunnlagV2(avviksvurderingRepository: AvviksvurderingRepository): ApiVilkårsgrunnlagV2 {
+    return when (this) {
+        is SnapshotInfotrygdVilkarsgrunnlag ->
+            ApiVilkårsgrunnlagArbeidstakerInfotrygd(
+                id = id,
+                skjaeringstidspunkt = skjaeringstidspunkt,
+                sykepengegrunnlag = BigDecimal(sykepengegrunnlag),
+                inntekter =
+                    inntekter.map {
+                        ApiArbeidsgiverinntektInfotrygd(
+                            arbeidsgiver = it.arbeidsgiver,
+                            omregnetArsinntekt = it.omregnetArsinntekt.tilApiArsinntekt(),
+                            deaktivert = it.deaktivert,
+                        )
+                    },
+                arbeidsgiverrefusjoner = arbeidsgiverrefusjoner.map { it.tilApiArbeidsgiverrefusjonV2() },
+                omregnetArsinntekt = BigDecimal(omregnetArsinntekt),
+            )
+
+        is SnapshotSpleisVilkarsgrunnlag -> {
+            val avviksvurdering = avviksvurderingRepository.hentAvviksvurdering(id)
+
+            return ApiVilkårsgrunnlagArbeidstakerSpleis(
+                id = id,
+                skjaeringstidspunkt = skjaeringstidspunkt,
+                sykepengegrunnlag = BigDecimal(sykepengegrunnlag),
+                inntekter =
+                    if (avviksvurdering == null) {
+                        inntekter.map {
+                            ApiArbeidsgiverinntektSpleisAvventerAvviksvurdering(
+                                arbeidsgiver = it.arbeidsgiver,
+                                omregnetArsinntekt = it.omregnetArsinntekt.tilApiArsinntekt(),
+                                deaktivert = it.deaktivert,
+                                fom = it.fom,
+                                tom = it.tom,
+                            )
+                        }
+                    } else {
+                        tilInntekter(inntekter, avviksvurdering)
+                    },
+                arbeidsgiverrefusjoner = arbeidsgiverrefusjoner.map { it.tilApiArbeidsgiverrefusjonV2() },
+                avviksvurdering =
+                    avviksvurdering?.let {
+                        ApiVilkårsgrunnlagAvviksvurdering(
+                            avviksprosent = BigDecimal(it.avviksprosent),
+                            omregnetArsinntekt = BigDecimal(it.beregningsgrunnlag.totalbeløp),
+                            sammenligningsgrunnlag = BigDecimal(it.sammenligningsgrunnlag.totalbeløp),
+                        )
+                    },
+                kravOmMedlemskap = oppfyllerKravOmMedlemskap.tilApiVilkårsgrunnlagKrav(),
+                kravOmMinstelonn = oppfyllerKravOmMinstelonn.tilApiVilkårsgrunnlagKravAlltidVurdert(),
+                kravOmOpptjening = oppfyllerKravOmOpptjening.tilApiVilkårsgrunnlagKravAlltidVurdert(),
+                skjonnsmessigFastsattAarlig = skjonnsmessigFastsattAarlig?.let { BigDecimal(it) },
+                grunnbelop = grunnbelop,
+                sykepengegrunnlagsgrense = sykepengegrunnlagsgrense.tilSykepengegrunnlaggrense(),
+                antallOpptjeningsdagerErMinst = antallOpptjeningsdagerErMinst,
+                opptjeningFra = opptjeningFra,
+            )
+        }
+        is SnapshotUkjentVilkarsgrunnlag -> throw Exception("Ukjent vilkårsgrunnlag ${this.javaClass.name}")
+    }
+}
+
+private fun tilInntekter(
+    inntekter: List<SnapshotArbeidsgiverinntekt>,
+    avviksvurdering: Avviksvurdering,
+): List<ApiArbeidsgiverinntektSpleis> {
+    val arbeidsgivereMedInntekter =
+        (
+            avviksvurdering.sammenligningsgrunnlag.innrapporterteInntekter.map { it.arbeidsgiverreferanse } +
+                inntekter.map { it.arbeidsgiver }
+        ).toSet()
+
+    return arbeidsgivereMedInntekter.map { arbeidsgiverreferanse ->
+        val inntektFraSpleis =
+            inntekter.singleOrNull { inntektFraSpleis -> inntektFraSpleis.arbeidsgiver == arbeidsgiverreferanse }
+        val sammenligningsgrunnlagInntekt =
+            avviksvurdering.sammenligningsgrunnlag.innrapporterteInntekter.singleOrNull { it.arbeidsgiverreferanse == arbeidsgiverreferanse }
+        ApiArbeidsgiverinntektSpleis(
+            arbeidsgiver = arbeidsgiverreferanse,
+            omregnetArsinntekt = inntektFraSpleis?.omregnetArsinntekt?.tilApiArsinntekt(),
+            sammenligningsgrunnlag =
+                sammenligningsgrunnlagInntekt?.let {
+                    ApiSammenligningsgrunnlagV2(
+                        belop = sammenligningsgrunnlagInntekt.inntekter.map { BigDecimal(it.beløp) }.sumOf { it },
+                        inntektFraAOrdningen =
+                            sammenligningsgrunnlagInntekt.inntekter.map { inntekt ->
+                                ApiInntektFraAOrdningenV2(
+                                    maned = inntekt.årMåned,
+                                    sum = BigDecimal(inntekt.beløp),
+                                )
+                            },
+                    )
+                },
+            skjonnsmessigFastsatt = inntektFraSpleis?.skjonnsmessigFastsatt?.tilApiArsinntekt(),
+            deaktivert = inntektFraSpleis?.deaktivert,
+            fom = inntektFraSpleis?.fom,
+            tom = inntektFraSpleis?.tom,
+        )
+    }
+}
+
+private fun Boolean?.tilApiVilkårsgrunnlagKrav(): ApiVilkårsgrunnlagKrav =
+    when (this) {
+        true -> ApiVilkårsgrunnlagKrav.OPPFYLT
+        false -> ApiVilkårsgrunnlagKrav.IKKE_OPPFYLT
+        null -> ApiVilkårsgrunnlagKrav.IKKE_VURDERT
+    }
+
+private fun Boolean.tilApiVilkårsgrunnlagKravAlltidVurdert(): ApiVilkårsgrunnlagKravAlltidVurdert =
+    when (this) {
+        true -> ApiVilkårsgrunnlagKravAlltidVurdert.OPPFYLT
+        false -> ApiVilkårsgrunnlagKravAlltidVurdert.IKKE_OPPFYLT
     }
 
 fun SnapshotVilkarsgrunnlag.tilVilkarsgrunnlag(avviksvurderingRepository: AvviksvurderingRepository): ApiVilkårsgrunnlag {

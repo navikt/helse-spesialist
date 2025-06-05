@@ -6,14 +6,14 @@ import java.time.LocalDate
 import java.time.Year
 import java.util.UUID
 
-@GraphQLName("VilkårsgrunnlagV2")
+@GraphQLName("VilkarsgrunnlagV2")
 sealed interface ApiVilkårsgrunnlagV2 {
     val id: UUID
     val skjaeringstidspunkt: LocalDate
     val sykepengegrunnlag: BigDecimal
 }
 
-@GraphQLName("VilkårsgrunnlagArbeidstaker")
+@GraphQLName("VilkarsgrunnlagArbeidstaker")
 sealed interface ApiVilkårsgrunnlagArbeidstaker : ApiVilkårsgrunnlagV2 {
     override val id: UUID
     override val skjaeringstidspunkt: LocalDate
@@ -22,7 +22,7 @@ sealed interface ApiVilkårsgrunnlagArbeidstaker : ApiVilkårsgrunnlagV2 {
     val arbeidsgiverrefusjoner: List<ApiArbeidsgiverrefusjonV2>
 }
 
-@GraphQLName("VilkårsgrunnlagArbeidstakerInfotrygd")
+@GraphQLName("VilkarsgrunnlagArbeidstakerInfotrygd")
 data class ApiVilkårsgrunnlagArbeidstakerInfotrygd(
     override val id: UUID,
     override val skjaeringstidspunkt: LocalDate,
@@ -32,15 +32,17 @@ data class ApiVilkårsgrunnlagArbeidstakerInfotrygd(
     val omregnetArsinntekt: BigDecimal,
 ) : ApiVilkårsgrunnlagArbeidstaker
 
-@GraphQLName("VilkårsgrunnlagArbeidstakerSpleis")
+@GraphQLName("VilkarsgrunnlagArbeidstakerSpleis")
 data class ApiVilkårsgrunnlagArbeidstakerSpleis(
     override val id: UUID,
     override val skjaeringstidspunkt: LocalDate,
     override val sykepengegrunnlag: BigDecimal,
-    override val inntekter: List<ApiArbeidsgiverinntektSpleis>,
+    override val inntekter: List<ApiArbeidsgiverinntektV2>,
     override val arbeidsgiverrefusjoner: List<ApiArbeidsgiverrefusjonV2>,
     val avviksvurdering: ApiVilkårsgrunnlagAvviksvurdering?,
-    val oppfylteKrav: Set<ApiVilkårsgrunnlagKrav>,
+    val kravOmMedlemskap: ApiVilkårsgrunnlagKrav,
+    val kravOmMinstelonn: ApiVilkårsgrunnlagKravAlltidVurdert,
+    val kravOmOpptjening: ApiVilkårsgrunnlagKravAlltidVurdert,
     val skjonnsmessigFastsattAarlig: BigDecimal?,
     val grunnbelop: Int,
     val sykepengegrunnlagsgrense: ApiSykepengegrunnlagsgrense,
@@ -48,7 +50,7 @@ data class ApiVilkårsgrunnlagArbeidstakerSpleis(
     val opptjeningFra: LocalDate,
 ) : ApiVilkårsgrunnlagArbeidstaker
 
-@GraphQLName("VilkårsgrunnlagSelvstendig")
+@GraphQLName("VilkarsgrunnlagSelvstendig")
 data class ApiVilkårsgrunnlagSelvstendig(
     override val id: UUID,
     override val skjaeringstidspunkt: LocalDate,
@@ -57,7 +59,7 @@ data class ApiVilkårsgrunnlagSelvstendig(
     val grunnbelop: Int,
 ) : ApiVilkårsgrunnlagV2
 
-@GraphQLName("VilkårsgrunnlagAvviksvurdering")
+@GraphQLName("VilkarsgrunnlagAvviksvurdering")
 data class ApiVilkårsgrunnlagAvviksvurdering(
     val avviksprosent: BigDecimal,
     val omregnetArsinntekt: BigDecimal,
@@ -70,9 +72,15 @@ data class ApiPensjonsgivendeInntekt(
     val sum: BigDecimal,
 )
 
-@GraphQLName("VilkårsgrunnlagKrav")
+@GraphQLName("VilkarsgrunnlagKravAlltidVurdert")
+enum class ApiVilkårsgrunnlagKravAlltidVurdert {
+    OPPFYLT,
+    IKKE_OPPFYLT,
+}
+
+@GraphQLName("VilkarsgrunnlagKrav")
 enum class ApiVilkårsgrunnlagKrav {
-    MINSTELONN,
-    MEDLEMSKAP,
-    OPPTJENING,
+    OPPFYLT,
+    IKKE_OPPFYLT,
+    IKKE_VURDERT,
 }

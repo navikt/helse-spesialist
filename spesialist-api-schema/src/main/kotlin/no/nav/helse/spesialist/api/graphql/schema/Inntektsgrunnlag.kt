@@ -19,6 +19,15 @@ data class ApiArbeidsgiverinntektInfotrygd(
     override val deaktivert: Boolean?,
 ) : ApiArbeidsgiverinntektV2
 
+@GraphQLName("ArbeidsgiverinntektSpleisAvventerAvviksvurdering")
+data class ApiArbeidsgiverinntektSpleisAvventerAvviksvurdering(
+    override val arbeidsgiver: String,
+    override val omregnetArsinntekt: ApiArsinntekt?,
+    override val deaktivert: Boolean?,
+    val fom: LocalDate,
+    val tom: LocalDate?,
+) : ApiArbeidsgiverinntektV2
+
 @GraphQLName("ArbeidsgiverinntektSpleis")
 data class ApiArbeidsgiverinntektSpleis(
     override val arbeidsgiver: String,

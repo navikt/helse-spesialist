@@ -11,6 +11,7 @@ import graphql.schema.GraphQLType
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.Year
 import java.time.YearMonth
 import java.util.Locale
 import java.util.UUID
@@ -29,6 +30,7 @@ val schemaGeneratorHooks =
                 LocalDateTime::class -> graphQLLocalDateTime
                 LocalDate::class -> graphQLLocalDate
                 YearMonth::class -> graphQLYearMonth
+                Year::class -> graphQLYear
                 else -> null
             }
     }
@@ -52,6 +54,13 @@ private val graphQLYearMonth: GraphQLScalarType =
         .name(YearMonth::class.simpleName)
         .description(YearMonth::class.toString())
         .coercing(YearMonthCoercing)
+        .build()
+
+private val graphQLYear: GraphQLScalarType =
+    GraphQLScalarType.newScalar()
+        .name(Year::class.simpleName)
+        .description(Year::class.toString())
+        .coercing(YearCoercing)
         .build()
 
 private val graphQLUUID: GraphQLScalarType =
@@ -194,5 +203,32 @@ private object YearMonthCoercing : Coercing<YearMonth, String> {
         locale: Locale,
     ): YearMonth {
         return YearMonth.parse(serialize(input, graphQLContext, locale))
+    }
+}
+
+private object YearCoercing : Coercing<Year, String> {
+    override fun serialize(
+        dataFetcherResult: Any,
+        graphQLContext: GraphQLContext,
+        locale: Locale,
+    ): String =
+        when (dataFetcherResult) {
+            is StringValue -> dataFetcherResult.value
+            else -> dataFetcherResult.toString()
+        }
+
+    override fun parseValue(
+        input: Any,
+        graphQLContext: GraphQLContext,
+        locale: Locale,
+    ): Year = Year.parse(serialize(input, graphQLContext, locale))
+
+    override fun parseLiteral(
+        input: Value<*>,
+        variables: CoercedVariables,
+        graphQLContext: GraphQLContext,
+        locale: Locale,
+    ): Year {
+        return Year.parse(serialize(input, graphQLContext, locale))
     }
 }
