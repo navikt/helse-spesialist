@@ -18,7 +18,7 @@ sealed interface ApiVilkårsgrunnlagArbeidstaker : ApiVilkårsgrunnlagV2 {
     override val id: UUID
     override val skjaeringstidspunkt: LocalDate
     override val sykepengegrunnlag: BigDecimal
-    val inntekter: List<ApiArbeidsgiverinntektV2>
+    val inntekter: List<ApiArbeidstakerinntektV2>
     val arbeidsgiverrefusjoner: List<ApiArbeidsgiverrefusjonV2>
 }
 
@@ -27,7 +27,7 @@ data class ApiVilkårsgrunnlagArbeidstakerInfotrygd(
     override val id: UUID,
     override val skjaeringstidspunkt: LocalDate,
     override val sykepengegrunnlag: BigDecimal,
-    override val inntekter: List<ApiArbeidsgiverinntektInfotrygd>,
+    override val inntekter: List<ApiArbeidstakerinntektInfotrygd>,
     override val arbeidsgiverrefusjoner: List<ApiArbeidsgiverrefusjonV2>,
     val omregnetArsinntekt: BigDecimal,
 ) : ApiVilkårsgrunnlagArbeidstaker
@@ -37,7 +37,7 @@ data class ApiVilkårsgrunnlagArbeidstakerSpleis(
     override val id: UUID,
     override val skjaeringstidspunkt: LocalDate,
     override val sykepengegrunnlag: BigDecimal,
-    override val inntekter: List<ApiArbeidsgiverinntektV2>,
+    override val inntekter: List<ApiArbeidstakerinntektV2>,
     override val arbeidsgiverrefusjoner: List<ApiArbeidsgiverrefusjonV2>,
     val avviksvurdering: ApiVilkårsgrunnlagAvviksvurdering?,
     val kravOmMedlemskap: ApiVilkårsgrunnlagKrav,

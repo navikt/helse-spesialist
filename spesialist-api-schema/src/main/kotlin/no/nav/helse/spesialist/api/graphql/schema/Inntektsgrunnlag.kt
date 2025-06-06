@@ -5,31 +5,31 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
-@GraphQLName("ArbeidsgiverinntektV2")
-sealed interface ApiArbeidsgiverinntektV2 {
+@GraphQLName("ArbeidstakerinntektV2")
+sealed interface ApiArbeidstakerinntektV2 {
     val arbeidsgiver: String
     val omregnetArsinntekt: ApiArsinntekt?
     val deaktivert: Boolean?
 }
 
-@GraphQLName("ArbeidsgiverinntektInfotrygd")
-data class ApiArbeidsgiverinntektInfotrygd(
+@GraphQLName("ArbeidstakerinntektInfotrygd")
+data class ApiArbeidstakerinntektInfotrygd(
     override val arbeidsgiver: String,
     override val omregnetArsinntekt: ApiArsinntekt?,
     override val deaktivert: Boolean?,
-) : ApiArbeidsgiverinntektV2
+) : ApiArbeidstakerinntektV2
 
-@GraphQLName("ArbeidsgiverinntektSpleisAvventerAvviksvurdering")
-data class ApiArbeidsgiverinntektSpleisAvventerAvviksvurdering(
+@GraphQLName("ArbeidstakerinntektSpleisAvventerAvviksvurdering")
+data class ApiArbeidstakerinntektSpleisAvventerAvviksvurdering(
     override val arbeidsgiver: String,
     override val omregnetArsinntekt: ApiArsinntekt?,
     override val deaktivert: Boolean?,
     val fom: LocalDate,
     val tom: LocalDate?,
-) : ApiArbeidsgiverinntektV2
+) : ApiArbeidstakerinntektV2
 
-@GraphQLName("ArbeidsgiverinntektSpleis")
-data class ApiArbeidsgiverinntektSpleis(
+@GraphQLName("ArbeidstakerinntektSpleis")
+data class ApiArbeidstakerinntektSpleis(
     override val arbeidsgiver: String,
     override val omregnetArsinntekt: ApiArsinntekt?,
     override val deaktivert: Boolean?,
@@ -37,7 +37,7 @@ data class ApiArbeidsgiverinntektSpleis(
     val skjonnsmessigFastsatt: ApiArsinntekt?,
     val fom: LocalDate?,
     val tom: LocalDate?,
-) : ApiArbeidsgiverinntektV2
+) : ApiArbeidstakerinntektV2
 
 @GraphQLName("SammenligningsgrunnlagV2")
 data class ApiSammenligningsgrunnlagV2(

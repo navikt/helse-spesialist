@@ -5,11 +5,11 @@ import no.nav.helse.db.api.NotatApiDao
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.spesialist.api.Toggle
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsgiverinntekt
-import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsgiverinntektInfotrygd
-import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsgiverinntektSpleis
-import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsgiverinntektSpleisAvventerAvviksvurdering
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsgiverrefusjon
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsgiverrefusjonV2
+import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidstakerinntektInfotrygd
+import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidstakerinntektSpleis
+import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidstakerinntektSpleisAvventerAvviksvurdering
 import no.nav.helse.spesialist.api.graphql.schema.ApiArsinntekt
 import no.nav.helse.spesialist.api.graphql.schema.ApiBegrunnelse
 import no.nav.helse.spesialist.api.graphql.schema.ApiDag
@@ -422,7 +422,7 @@ fun SnapshotVilkarsgrunnlag.tilVilkarsgrunnlagV2(avviksvurderingRepository: Avvi
                 sykepengegrunnlag = BigDecimal(sykepengegrunnlag),
                 inntekter =
                     inntekter.map {
-                        ApiArbeidsgiverinntektInfotrygd(
+                        ApiArbeidstakerinntektInfotrygd(
                             arbeidsgiver = it.arbeidsgiver,
                             omregnetArsinntekt = it.omregnetArsinntekt.tilApiArsinntekt(),
                             deaktivert = it.deaktivert,
@@ -442,7 +442,7 @@ fun SnapshotVilkarsgrunnlag.tilVilkarsgrunnlagV2(avviksvurderingRepository: Avvi
                 inntekter =
                     if (avviksvurdering == null) {
                         inntekter.map {
-                            ApiArbeidsgiverinntektSpleisAvventerAvviksvurdering(
+                            ApiArbeidstakerinntektSpleisAvventerAvviksvurdering(
                                 arbeidsgiver = it.arbeidsgiver,
                                 omregnetArsinntekt = it.omregnetArsinntekt.tilApiArsinntekt(),
                                 deaktivert = it.deaktivert,
@@ -479,7 +479,7 @@ fun SnapshotVilkarsgrunnlag.tilVilkarsgrunnlagV2(avviksvurderingRepository: Avvi
 private fun tilInntekter(
     inntekter: List<SnapshotArbeidsgiverinntekt>,
     avviksvurdering: Avviksvurdering,
-): List<ApiArbeidsgiverinntektSpleis> {
+): List<ApiArbeidstakerinntektSpleis> {
     val arbeidsgivereMedInntekter =
         (
             avviksvurdering.sammenligningsgrunnlag.innrapporterteInntekter.map { it.arbeidsgiverreferanse } +
@@ -491,7 +491,7 @@ private fun tilInntekter(
             inntekter.singleOrNull { inntektFraSpleis -> inntektFraSpleis.arbeidsgiver == arbeidsgiverreferanse }
         val sammenligningsgrunnlagInntekt =
             avviksvurdering.sammenligningsgrunnlag.innrapporterteInntekter.singleOrNull { it.arbeidsgiverreferanse == arbeidsgiverreferanse }
-        ApiArbeidsgiverinntektSpleis(
+        ApiArbeidstakerinntektSpleis(
             arbeidsgiver = arbeidsgiverreferanse,
             omregnetArsinntekt = inntektFraSpleis?.omregnetArsinntekt?.tilApiArsinntekt(),
             sammenligningsgrunnlag =
