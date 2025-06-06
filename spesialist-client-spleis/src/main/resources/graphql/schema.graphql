@@ -43,6 +43,7 @@ interface GraphQLTidslinjeperiode {
   inntektstype: GraphQLInntektstype!
   kilde: UUID!
   opprettet: LocalDateTime!
+  pensjonsgivendeInntekter: [GraphQLPensjonsgivendeInntekt!]!
   periodetilstand: GraphQLPeriodetilstand!
   periodetype: GraphQLPeriodetype!
   skjaeringstidspunkt: LocalDate!
@@ -69,6 +70,7 @@ type GraphQLArbeidsgiver {
   generasjoner: [GraphQLGenerasjon!]!
   ghostPerioder: [GraphQLGhostPeriode!]!
   id: UUID!
+  nyeInntektsforholdPerioder: [GraphQLNyttInntektsforholdPeriode!]!
   organisasjonsnummer: String!
 }
 
@@ -95,10 +97,12 @@ type GraphQLBeregnetPeriode implements GraphQLTidslinjeperiode {
   forbrukteSykedager: Int
   gjenstaendeSykedager: Int
   hendelser: [GraphQLHendelse!]!
+  inntekter: [GraphQLInntekt!]!
   inntektstype: GraphQLInntektstype!
   kilde: UUID!
   maksdato: LocalDate!
   opprettet: LocalDateTime!
+  pensjonsgivendeInntekter: [GraphQLPensjonsgivendeInntekt!]!
   periodetilstand: GraphQLPeriodetilstand!
   periodetype: GraphQLPeriodetype!
   periodevilkar: GraphQLPeriodevilkar!
@@ -145,6 +149,11 @@ type GraphQLInfotrygdVilkarsgrunnlag implements GraphQLVilkarsgrunnlag {
   sykepengegrunnlag: Float!
 }
 
+type GraphQLInntekt {
+  inntektskilde: String!
+  periodiserteInntekter: [GraphQLPeriodisertInntekt!]!
+}
+
 type GraphQLInntektFraAOrdningen implements GraphQLHendelse {
   eksternDokumentId: String!
   id: String!
@@ -189,9 +198,20 @@ type GraphQLOppdrag {
   utbetalingslinjer: [GraphQLUtbetalingslinje!]!
 }
 
+type GraphQLPensjonsgivendeInntekt {
+  arligBelop: Float!
+  inntektsar: Int!
+}
+
 type GraphQLPeriodevilkar {
   alder: Alder!
   sykepengedager: Sykepengedager!
+}
+
+type GraphQLPeriodisertInntekt {
+  dagligBelop: Float!
+  fom: LocalDate!
+  tom: LocalDate!
 }
 
 type GraphQLPerson {
@@ -303,6 +323,7 @@ type GraphQLSoknadSelvstendig implements GraphQLHendelse {
 type GraphQLSpleisVilkarsgrunnlag implements GraphQLVilkarsgrunnlag {
   antallOpptjeningsdagerErMinst: Int!
   arbeidsgiverrefusjoner: [GraphQLArbeidsgiverrefusjon!]!
+  beregningsgrunnlag: Float!
   grunnbelop: Int!
   id: UUID!
   inntekter: [GraphQLArbeidsgiverinntekt!]!
@@ -345,6 +366,7 @@ type GraphQLUberegnetPeriode implements GraphQLTidslinjeperiode {
   inntektstype: GraphQLInntektstype!
   kilde: UUID!
   opprettet: LocalDateTime!
+  pensjonsgivendeInntekter: [GraphQLPensjonsgivendeInntekt!]!
   periodetilstand: GraphQLPeriodetilstand!
   periodetype: GraphQLPeriodetype!
   skjaeringstidspunkt: LocalDate!
