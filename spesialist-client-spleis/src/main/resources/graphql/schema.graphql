@@ -97,7 +97,6 @@ type GraphQLBeregnetPeriode implements GraphQLTidslinjeperiode {
   forbrukteSykedager: Int
   gjenstaendeSykedager: Int
   hendelser: [GraphQLHendelse!]!
-  inntekter: [GraphQLInntekt!]!
   inntektstype: GraphQLInntektstype!
   kilde: UUID!
   maksdato: LocalDate!
@@ -147,11 +146,6 @@ type GraphQLInfotrygdVilkarsgrunnlag implements GraphQLVilkarsgrunnlag {
   omregnetArsinntekt: Float!
   skjaeringstidspunkt: LocalDate!
   sykepengegrunnlag: Float!
-}
-
-type GraphQLInntekt {
-  inntektskilde: String!
-  periodiserteInntekter: [GraphQLPeriodisertInntekt!]!
 }
 
 type GraphQLInntektFraAOrdningen implements GraphQLHendelse {
@@ -206,12 +200,6 @@ type GraphQLPensjonsgivendeInntekt {
 type GraphQLPeriodevilkar {
   alder: Alder!
   sykepengedager: Sykepengedager!
-}
-
-type GraphQLPeriodisertInntekt {
-  dagligBelop: Float!
-  fom: LocalDate!
-  tom: LocalDate!
 }
 
 type GraphQLPerson {
