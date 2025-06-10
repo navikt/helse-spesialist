@@ -123,6 +123,7 @@ class SpleisClient(
         }
 
         val graphQLResponse = serializer.deserialize(responseBody, request.responseType())
+        if ("02458241409" in responseBody) sikkerlogg.error("Spleis: $responseBody")
 
         if (graphQLResponse.data == null && graphQLResponse.errors == null) {
             logg.error("GraphQL-svar fra Spleis manglet både data og feil. Se sikkerlogg for mer info.")
