@@ -100,7 +100,8 @@ object GraphQLTestdata {
                 personNettoBelop = 0,
                 statusEnum = GraphQLUtbetalingstatus.IKKEGODKJENT,
                 typeEnum = Utbetalingtype.UTBETALING,
-            )
+            ),
+        pensjonsgivendeInntekter = emptyList(),
     )
 
     fun opprettUberegnetPeriode(

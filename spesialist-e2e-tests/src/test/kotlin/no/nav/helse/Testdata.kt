@@ -98,7 +98,8 @@ object Testdata {
                                                     ),
                                                 skjaeringstidspunkt = 1.januar(2020),
                                                 vilkarsgrunnlagId = null,
-                                                periodetilstand = GraphQLPeriodetilstand.TILGODKJENNING
+                                                periodetilstand = GraphQLPeriodetilstand.TILGODKJENNING,
+                                                pensjonsgivendeInntekter = emptyList(),
                                             ),
                                         ),
                                 ),
