@@ -51,6 +51,9 @@ allprojects {
             implementation("com.google.protobuf:protobuf-java:4.31.1") {
                 because("com.expediagroup:graphql-kotlin-ktor-server:8.3.0 -> 4.27.1 har en sårbarhet")
             }
+            implementation("io.micrometer:micrometer-registry-prometheus:1.15.1") {
+                because("com.github.navikt:rapids-and-rivers avhenger av micrometer-registry-prometheus:1.14.5")
+            }
         }
 
         testImplementation(platform("org.junit:junit-bom:5.13.1"))
