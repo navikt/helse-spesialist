@@ -183,6 +183,7 @@ object GraphQLTestdata {
                             ),
                     ),
                 ),
+            beregningsgrunnlag = 25.0
         )
 
 }

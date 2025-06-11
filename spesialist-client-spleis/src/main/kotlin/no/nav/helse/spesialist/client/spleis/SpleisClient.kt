@@ -38,7 +38,8 @@ class SpleisClient(
     private val serializer: GraphQLClientSerializer =
         GraphQLClientJacksonSerializer(
             jacksonObjectMapper()
-                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES),
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .enable(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES),
         )
 
     private val httpClient =

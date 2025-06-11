@@ -105,6 +105,7 @@ import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLUtbetalingslinje
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLVilkarsgrunnlag
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLVurdering
 import no.nav.helse.spleis.graphql.hentsnapshot.Sykepengedager
+import java.math.BigDecimal
 
 fun Alder.tilSnapshotAlder() =
     SnapshotAlder(
@@ -500,6 +501,7 @@ fun GraphQLSpleisVilkarsgrunnlag.tilSnapshotSpleisVilkarsgrunnlag() =
         oppfyllerKravOmMinstelonn = oppfyllerKravOmMinstelonn,
         oppfyllerKravOmOpptjening = oppfyllerKravOmOpptjening,
         opptjeningFra = opptjeningFra,
+        beregingsgrunnlag = BigDecimal.valueOf(beregningsgrunnlag),
     )
 
 fun DefaultGraphQLVilkarsgrunnlagImplementation.tilSnapshotUkjentVilkarsgrunnlag() =

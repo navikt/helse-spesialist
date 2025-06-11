@@ -638,7 +638,8 @@
           "oppfyllerKravOmMinstelonn": true,
           "oppfyllerKravOmOpptjening": true,
           "oppfyllerKravOmMedlemskap": true,
-          "skjonnsmessigFastsattAarlig": null
+          "skjonnsmessigFastsattAarlig": null,
+          "beregningsgrunnlag": 25.0
         }
       ]
     }

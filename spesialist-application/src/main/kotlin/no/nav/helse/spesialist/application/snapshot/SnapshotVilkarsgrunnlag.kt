@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.application.snapshot
 
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.UUID
 
@@ -36,6 +37,7 @@ data class SnapshotSpleisVilkarsgrunnlag(
     val oppfyllerKravOmMinstelonn: Boolean,
     val oppfyllerKravOmOpptjening: Boolean,
     val opptjeningFra: LocalDate,
+    val beregingsgrunnlag: BigDecimal,
 ) : SnapshotVilkarsgrunnlag
 
 data class SnapshotUkjentVilkarsgrunnlag(
