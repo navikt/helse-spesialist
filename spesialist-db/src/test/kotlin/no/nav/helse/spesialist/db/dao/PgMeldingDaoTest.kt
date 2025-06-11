@@ -1,19 +1,19 @@
-package no.nav.helse.modell
+package no.nav.helse.spesialist.db.dao
 
-import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.modell.InntektskildetypeDto
+import no.nav.helse.modell.KomplettInntektskildeDto
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.BehandlingOpprettet
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
-import no.nav.helse.modell.vedtaksperiode.Inntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.db.DbQuery
+import no.nav.helse.spesialist.db.objectMapper
 import no.nav.helse.spesialist.db.testfixtures.DBTestFixture
 import no.nav.helse.spesialist.domain.testfixtures.lagAktørId
 import no.nav.helse.spesialist.domain.testfixtures.lagEtternavn
@@ -22,7 +22,6 @@ import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.lagMellomnavnOrNull
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnavn
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
-import no.nav.helse.spesialist.e2etests.objectMapper
 import no.nav.helse.spesialist.typer.Kjønn
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -31,7 +30,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.fail
 import java.time.LocalDate
-import java.time.LocalDate.now
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -127,13 +125,13 @@ class PgMeldingDaoTest {
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         utbetalingId: UUID = UUID.randomUUID(),
         organisasjonsnummer: String = "orgnr",
-        periodeFom: LocalDate = now(),
-        periodeTom: LocalDate = now(),
-        skjæringstidspunkt: LocalDate = now(),
-        periodetype: Periodetype = FØRSTEGANGSBEHANDLING,
+        periodeFom: LocalDate = LocalDate.now(),
+        periodeTom: LocalDate = LocalDate.now(),
+        skjæringstidspunkt: LocalDate = LocalDate.now(),
+        periodetype: Periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
         førstegangsbehandling: Boolean = true,
         utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING,
-        inntektskilde: Inntektskilde = EN_ARBEIDSGIVER,
+        inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
         orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList(),
         kanAvvises: Boolean = true,
         vilkårsgrunnlagId: UUID = UUID.randomUUID(),
@@ -233,8 +231,8 @@ class PgMeldingDaoTest {
             "vedtaksperiodeId" to vedtaksperiodeId,
             "behandlingId" to UUID.randomUUID(),
             "fødselsnummer" to fødselsnummer,
-            "fom" to now().minusDays(20),
-            "tom" to now(),
+            "fom" to LocalDate.now().minusDays(20),
+            "tom" to LocalDate.now(),
             "type" to type, // Denne leses rett fra hendelse-tabellen i MeldingDao, ikke via riveren
             "kilde" to mapOf(
                 "avsender" to avsender // Denne leses rett fra hendelse-tabellen i MeldingDao, ikke via riveren
@@ -246,7 +244,7 @@ class PgMeldingDaoTest {
     ).let(::BehandlingOpprettet)
 
     private fun nyHendelse(id: UUID, navn: String, hendelse: Map<String, Any>) =
-        JsonMessage.newMessage(nyHendelse(id, navn) + hendelse).toJson().let(objectMapper::readTree)
+        objectMapper.readTree(objectMapper.writeValueAsString(nyHendelse(id, navn) + hendelse))
 
     private fun nyHendelse(id: UUID, navn: String) = mutableMapOf(
         "@event_name" to navn,
@@ -314,7 +312,7 @@ class PgMeldingDaoTest {
                         type = InntektskildetypeDto.ORDINÆR,
                         navn = navn,
                         bransjer = bransjer,
-                        sistOppdatert = now(),
+                        sistOppdatert = LocalDate.now(),
                     ),
                 ),
             )
@@ -327,8 +325,8 @@ class PgMeldingDaoTest {
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
         fom: LocalDate = FOM,
         tom: LocalDate = TOM,
-        periodetype: Periodetype = FØRSTEGANGSBEHANDLING,
-        inntektskilde: Inntektskilde = EN_ARBEIDSGIVER,
+        periodetype: Periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
+        inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
         utbetalingId: UUID? = UTBETALING_ID,
         forkastet: Boolean = false,
         spleisBehandlingId: UUID = UUID.randomUUID(),
@@ -356,8 +354,8 @@ class PgMeldingDaoTest {
 
     private fun opprettVedtakstype(
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
-        type: Periodetype = FØRSTEGANGSBEHANDLING,
-        inntektskilde: Inntektskilde = EN_ARBEIDSGIVER,
+        type: Periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
+        inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
     ) {
         daos.vedtakDao.leggTilVedtaksperiodetype(vedtaksperiodeId, type, inntektskilde)
     }
