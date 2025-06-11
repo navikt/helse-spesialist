@@ -3,14 +3,27 @@ package no.nav.helse.modell
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.e2e.DatabaseIntegrationTest
+import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.BehandlingOpprettet
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
+import no.nav.helse.modell.vedtaksperiode.Inntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
+import no.nav.helse.spesialist.api.person.Adressebeskyttelse
+import no.nav.helse.spesialist.db.DbQuery
+import no.nav.helse.spesialist.db.testfixtures.DBTestFixture
+import no.nav.helse.spesialist.domain.testfixtures.lagAktørId
+import no.nav.helse.spesialist.domain.testfixtures.lagEtternavn
+import no.nav.helse.spesialist.domain.testfixtures.lagFornavn
+import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
+import no.nav.helse.spesialist.domain.testfixtures.lagMellomnavnOrNull
+import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnavn
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
+import no.nav.helse.spesialist.e2etests.objectMapper
+import no.nav.helse.spesialist.typer.Kjønn
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -22,7 +35,29 @@ import java.time.LocalDate.now
 import java.time.LocalDateTime
 import java.util.UUID
 
-class PgMeldingDaoTest : DatabaseIntegrationTest() {
+class PgMeldingDaoTest {
+    private val daos = DBTestFixture.module.daos
+    private val sessionFactory = DBTestFixture.module.sessionFactory
+    private val dbQuery = DbQuery(DBTestFixture.module.dataSource)
+    private val meldingDao = daos.meldingDao
+    private val FNR = lagFødselsnummer()
+    private val VEDTAKSPERIODE = UUID.randomUUID()
+    private val HENDELSE_ID = UUID.randomUUID()
+    private val AKTØR = lagAktørId()
+    private val FORNAVN = lagFornavn()
+    private val MELLOMNAVN = lagMellomnavnOrNull()
+    private val ETTERNAVN = lagEtternavn()
+    private val KJØNN = Kjønn.entries.toTypedArray<Kjønn>().random<Kjønn>()
+    private val FØDSELSDATO = LocalDate.EPOCH
+    private val ENHET = "0301"
+    private var personId = -1L
+    private var vedtakId = -1L
+    private val ORGNUMMER = lagOrganisasjonsnummer()
+    private val ORGNAVN = lagOrganisasjonsnavn()
+    private val BRANSJER = listOf("EN BRANSJE")
+    private val FOM = LocalDate.of(2018, 1, 1)
+    private val TOM = LocalDate.of(2018, 1, 31)
+    private val UTBETALING_ID = UUID.randomUUID()
 
     @Test
     fun `finn siste behandling opprettet om det er korrigert søknad`() {
@@ -77,7 +112,7 @@ class PgMeldingDaoTest : DatabaseIntegrationTest() {
         assertEquals(VEDTAKSPERIODE, finnKobling())
     }
 
-    private fun finnKobling(hendelseId: UUID = HENDELSE_ID) = sessionOf(dataSource).use { session ->
+    private fun finnKobling(hendelseId: UUID = HENDELSE_ID) = sessionOf(DBTestFixture.module.dataSource).use { session ->
         session.run(
             queryOf(
                 "SELECT vedtaksperiode_id FROM vedtaksperiode_hendelse WHERE hendelse_ref = ?", hendelseId
@@ -95,10 +130,10 @@ class PgMeldingDaoTest : DatabaseIntegrationTest() {
         periodeFom: LocalDate = now(),
         periodeTom: LocalDate = now(),
         skjæringstidspunkt: LocalDate = now(),
-        periodetype: Periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
+        periodetype: Periodetype = FØRSTEGANGSBEHANDLING,
         førstegangsbehandling: Boolean = true,
         utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING,
-        inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
+        inntektskilde: Inntektskilde = EN_ARBEIDSGIVER,
         orgnummereMedRelevanteArbeidsforhold: List<String> = emptyList(),
         kanAvvises: Boolean = true,
         vilkårsgrunnlagId: UUID = UUID.randomUUID(),
@@ -218,4 +253,112 @@ class PgMeldingDaoTest : DatabaseIntegrationTest() {
         "@id" to id,
         "@opprettet" to LocalDateTime.now()
     )
+
+    private fun opprettPerson(
+        fødselsnummer: String = FNR,
+        aktørId: String = AKTØR,
+        adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert,
+    ): Persondata {
+        val personinfoId =
+            insertPersoninfo(FORNAVN, MELLOMNAVN, ETTERNAVN, FØDSELSDATO, KJØNN, adressebeskyttelse)
+        val infotrygdutbetalingerId =
+            daos.personDao.upsertInfotrygdutbetalinger(fødselsnummer, objectMapper.createObjectNode())
+        val enhetId = ENHET.toInt()
+        personId = daos.personDao.insertPerson(fødselsnummer, aktørId, personinfoId, enhetId, infotrygdutbetalingerId)
+        daos.egenAnsattDao.lagre(fødselsnummer, false, LocalDateTime.now())
+        return Persondata(
+            personId = personId,
+            personinfoId = personinfoId,
+            enhetId = enhetId,
+            infotrygdutbetalingerId = infotrygdutbetalingerId,
+        )
+    }
+
+    private data class Persondata(
+        val personId: Long,
+        val personinfoId: Long,
+        val enhetId: Int,
+        val infotrygdutbetalingerId: Long,
+    )
+
+    private fun insertPersoninfo(
+        fornavn: String,
+        mellomnavn: String?,
+        etternavn: String,
+        fødselsdato: LocalDate,
+        kjønn: Kjønn,
+        adressebeskyttelse: Adressebeskyttelse,
+    ) = dbQuery.updateAndReturnGeneratedKey(
+        """
+        INSERT INTO person_info (fornavn, mellomnavn, etternavn, fodselsdato, kjonn, adressebeskyttelse)
+        VALUES (:fornavn, :mellomnavn, :etternavn, :foedselsdato, CAST(:kjoenn as person_kjonn), :adressebeskyttelse);
+        """.trimIndent(),
+        "fornavn" to fornavn,
+        "mellomnavn" to mellomnavn,
+        "etternavn" to etternavn,
+        "foedselsdato" to fødselsdato,
+        "kjoenn" to kjønn.name,
+        "adressebeskyttelse" to adressebeskyttelse.name,
+    ).let(::requireNotNull)
+
+    private fun opprettArbeidsgiver(
+        organisasjonsnummer: String = ORGNUMMER,
+        navn: String = ORGNAVN,
+        bransjer: List<String> = BRANSJER,
+    ) {
+        sessionFactory.transactionalSessionScope {
+            it.inntektskilderRepository.lagreInntektskilder(
+                listOf(
+                    KomplettInntektskildeDto(
+                        identifikator = organisasjonsnummer,
+                        type = InntektskildetypeDto.ORDINÆR,
+                        navn = navn,
+                        bransjer = bransjer,
+                        sistOppdatert = now(),
+                    ),
+                ),
+            )
+        }
+    }
+
+    private fun opprettVedtaksperiode(
+        fødselsnummer: String = FNR,
+        organisasjonsnummer: String = ORGNUMMER,
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE,
+        fom: LocalDate = FOM,
+        tom: LocalDate = TOM,
+        periodetype: Periodetype = FØRSTEGANGSBEHANDLING,
+        inntektskilde: Inntektskilde = EN_ARBEIDSGIVER,
+        utbetalingId: UUID? = UTBETALING_ID,
+        forkastet: Boolean = false,
+        spleisBehandlingId: UUID = UUID.randomUUID(),
+    ) {
+        sessionFactory.transactionalSessionScope {
+            it.personRepository.brukPersonHvisFinnes(fødselsnummer) {
+                this.nySpleisBehandling(
+                    SpleisBehandling(
+                        organisasjonsnummer,
+                        vedtaksperiodeId,
+                        spleisBehandlingId,
+                        fom,
+                        tom
+                    )
+                )
+                if (utbetalingId != null) this.nyUtbetalingForVedtaksperiode(vedtaksperiodeId, utbetalingId)
+                if (forkastet) this.vedtaksperiodeForkastet(vedtaksperiodeId)
+            }
+        }
+        daos.vedtakDao.finnVedtakId(vedtaksperiodeId)?.also {
+            vedtakId = it
+        }
+        opprettVedtakstype(vedtaksperiodeId, periodetype, inntektskilde)
+    }
+
+    private fun opprettVedtakstype(
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE,
+        type: Periodetype = FØRSTEGANGSBEHANDLING,
+        inntektskilde: Inntektskilde = EN_ARBEIDSGIVER,
+    ) {
+        daos.vedtakDao.leggTilVedtaksperiodetype(vedtaksperiodeId, type, inntektskilde)
+    }
 }
