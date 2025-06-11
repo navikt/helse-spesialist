@@ -1,8 +1,11 @@
 package no.nav.helse.kafka
 
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.FailedMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.OutgoingMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
+import com.github.navikt.tbd_libs.rapids_and_rivers_api.SentMessage
 import io.micrometer.core.instrument.MeterRegistry
 
 internal class DelegatedRapid(
@@ -46,6 +49,8 @@ internal class DelegatedRapid(
     ) {
         rapidsConnection.publish(key, message)
     }
+
+    override fun publish(messages: List<OutgoingMessage>): Pair<List<SentMessage>, List<FailedMessage>> = rapidsConnection.publish(messages)
 
     override fun start() = throw IllegalStateException()
 

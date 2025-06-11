@@ -3,7 +3,7 @@ flyway = "11.9.1"
 graphqlKotlin = "8.4.0"
 jackson = "2.19.0"
 ktor = "3.1.3"
-tbdLibs = "2025.04.04-09.18-7cc3badf"
+tbdLibs = "2025.05.27-07.38-d5cd9804"
 testcontainers = "1.21.1"
 
 [libraries]
@@ -50,7 +50,7 @@ mockOauth2Server = "no.nav.security:mock-oauth2-server:2.2.1"
 nimbus-joseJwt = "com.nimbusds:nimbus-jose-jwt:10.3"
 postgresJdbcDriver = "org.postgresql:postgresql:42.7.7"
 postgresSocketFactory = "com.google.cloud.sql:postgres-socket-factory:1.25.1"
-rapidsAndRivers = "com.github.navikt:rapids-and-rivers:2025033014191743337188.2f9d6b08d096"
+rapidsAndRivers = "com.github.navikt:rapids-and-rivers:2025052710421748335372.f1f10183296b"
 slf4jApi = "org.slf4j:slf4j-api:2.0.17"
 
 tbdLibs-jackson = { module = "com.github.navikt.tbd-libs:jackson", version.ref = "tbdLibs" }
