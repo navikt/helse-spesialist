@@ -1,0 +1,7 @@
+schema: '../../../../spesialist-api/src/testFixtures/kotlin/no/nav/helse/spesialist/api/testfixtures/schema_til_bruk_fra_tester.graphql'
+extensions:
+  endpoints:
+    spesialist-local:
+      url: http://0.0.0.0:8080/graphql
+      headers:
+        Authorization: Bearer <Token>
