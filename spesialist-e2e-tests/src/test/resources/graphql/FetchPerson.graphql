@@ -5,11 +5,10 @@ query FetchPerson($fnr: String, $aktorId: String) {
     }
 }
 
-fragment vilkarsgrunnlag on Vilkarsgrunnlag {
+fragment vilkarsgrunnlagV2 on VilkarsgrunnlagV2 {
     id
     sykepengegrunnlag
     skjaeringstidspunkt
-    omregnetArsinntekt
     inntekter {
         sammenligningsgrunnlag {
             belop
@@ -59,16 +58,19 @@ fragment vilkarsgrunnlag on Vilkarsgrunnlag {
         }
         __typename
     }
-    vilkarsgrunnlagtype
-    ... on VilkarsgrunnlagSpleis {
-        sammenligningsgrunnlag
+    ... on VilkarsgrunnlagSpleisV2 {
         skjonnsmessigFastsattAarlig
+        vurderingAvKravOmMedlemskap
         oppfyllerKravOmMinstelonn
-        oppfyllerKravOmMedlemskap
         oppfyllerKravOmOpptjening
+        beregningsgrunnlag
+        avviksvurdering {
+            avviksprosent
+            sammenligningsgrunnlag
+            beregningsgrunnlag
+        }
         antallOpptjeningsdagerErMinst
         grunnbelop
-        avviksprosent
         opptjeningFra
         sykepengegrunnlagsgrense {
             grunnbelop
@@ -619,8 +621,8 @@ fragment person on Person {
         __typename
     }
     versjon
-    vilkarsgrunnlag {
-        ...vilkarsgrunnlag
+    vilkarsgrunnlagV2 {
+        ...vilkarsgrunnlagV2
         __typename
     }
     aktorId

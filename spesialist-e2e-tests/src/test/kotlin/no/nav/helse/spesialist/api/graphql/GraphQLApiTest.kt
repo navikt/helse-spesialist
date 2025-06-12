@@ -2,13 +2,11 @@ package no.nav.helse.spesialist.api.graphql
 
 import com.github.navikt.tbd_libs.jackson.asYearMonth
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
-import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.domain.testfixtures.apr
 import no.nav.helse.spesialist.domain.testfixtures.feb
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.mar
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
@@ -27,8 +25,8 @@ class GraphQLApiTest : AbstractGraphQLApiTest() {
             """
             {
                 person(fnr:"$FØDSELSNUMMER") {
-                    vilkarsgrunnlag {
-                        ... on VilkarsgrunnlagSpleis {
+                    vilkarsgrunnlagV2 {
+                        ... on VilkarsgrunnlagSpleisV2 {
                           arbeidsgiverrefusjoner {
                             arbeidsgiver
                             refusjonsopplysninger {
@@ -45,7 +43,7 @@ class GraphQLApiTest : AbstractGraphQLApiTest() {
         """
         )
         val refusjonsopplysning =
-            body["data"]["person"]["vilkarsgrunnlag"].first()["arbeidsgiverrefusjoner"].first()
+            body["data"]["person"]["vilkarsgrunnlagV2"].first()["arbeidsgiverrefusjoner"].first()
                 .get("refusjonsopplysninger").first()
         assertEquals("2020-01-01", refusjonsopplysning["fom"].asText())
         assertTrue(refusjonsopplysning["tom"].isNull)
@@ -64,8 +62,8 @@ class GraphQLApiTest : AbstractGraphQLApiTest() {
             """
             {
                 person(fnr:"$FØDSELSNUMMER") {
-                    vilkarsgrunnlag {
-                        ... on VilkarsgrunnlagSpleis {
+                    vilkarsgrunnlagV2 {
+                        ... on VilkarsgrunnlagSpleisV2 {
                           inntekter {
                             arbeidsgiver
                             sammenligningsgrunnlag {
@@ -76,9 +74,11 @@ class GraphQLApiTest : AbstractGraphQLApiTest() {
                                 belop
                             }
                         }
-                        avviksprosent
-                        sammenligningsgrunnlag
-                        omregnetArsinntekt
+                        avviksvurdering {
+                            avviksprosent
+                            sammenligningsgrunnlag
+                            beregningsgrunnlag
+                        }
                     }
                 }
                 }
@@ -86,10 +86,10 @@ class GraphQLApiTest : AbstractGraphQLApiTest() {
         """
         )
 
-        val vilkårsgrunnlag = body["data"]["person"]["vilkarsgrunnlag"].first()
-        assertEquals(10000.0, vilkårsgrunnlag["omregnetArsinntekt"].asDouble())
-        assertEquals(10000.0, vilkårsgrunnlag["sammenligningsgrunnlag"].asDouble())
-        assertEquals(26.0, vilkårsgrunnlag["avviksprosent"].asDouble())
+        val vilkårsgrunnlag = body["data"]["person"]["vilkarsgrunnlagV2"].first()
+        assertEquals("10000", vilkårsgrunnlag["avviksvurdering"]["beregningsgrunnlag"].asText())
+        assertEquals("10000", vilkårsgrunnlag["avviksvurdering"]["sammenligningsgrunnlag"].asText())
+        assertEquals("26", vilkårsgrunnlag["avviksvurdering"]["avviksprosent"].asText())
         assertEquals(2, vilkårsgrunnlag["inntekter"].size())
 
         val sammenligningsgrunnlag1 = vilkårsgrunnlag["inntekter"][0]["sammenligningsgrunnlag"]
@@ -132,9 +132,9 @@ class GraphQLApiTest : AbstractGraphQLApiTest() {
             """
             {
                 person(fnr:"$FØDSELSNUMMER") {
-                    vilkarsgrunnlag {
+                    vilkarsgrunnlagV2 {
                         skjaeringstidspunkt
-                         ... on VilkarsgrunnlagSpleis {
+                         ... on VilkarsgrunnlagSpleisV2 {
                             sykepengegrunnlagsgrense {
                                 grunnbelop,
                                 grense,
@@ -147,52 +147,10 @@ class GraphQLApiTest : AbstractGraphQLApiTest() {
         """
         )
         val sykepengegrunnlagsgrense =
-            body["data"]["person"]["vilkarsgrunnlag"].first()["sykepengegrunnlagsgrense"]
+            body["data"]["person"]["vilkarsgrunnlagV2"].first()["sykepengegrunnlagsgrense"]
 
         assertEquals(100_000, sykepengegrunnlagsgrense["grunnbelop"].asInt())
         assertEquals(600_000, sykepengegrunnlagsgrense["grense"].asInt())
         assertEquals("2020-01-01", sykepengegrunnlagsgrense["virkningstidspunkt"].asText())
     }
-
-    @Test
-    fun `Infinity avviksprosent gir error`() = ugyldigAvvikprosent(Double.POSITIVE_INFINITY)
-
-    @Test
-    fun `Nan avviksprosent gir error`() = ugyldigAvvikprosent(Double.NaN)
-
-    private fun ugyldigAvvikprosent(avviksprosent: Double) {
-        val vilkårsgrunnlagId = UUID.randomUUID()
-        mockSnapshot(vilkårsgrunnlagId = vilkårsgrunnlagId)
-        opprettAvviksvurdering(avviksprosent = avviksprosent, vilkårsgrunnlagId = vilkårsgrunnlagId)
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
-
-        val body = runQuery(
-            """
-            {
-                person(fnr:"$FØDSELSNUMMER") {
-                    vilkarsgrunnlag {
-                        skjaeringstidspunkt
-                        ... on VilkarsgrunnlagSpleis {
-                            avviksprosent
-                        }
-                    }
-                }
-            }
-        """
-        )
-        val grunnlag = body["data"]["person"]["vilkarsgrunnlag"].first()
-        val forventetError = objectMapper.readTree(
-            """
-            {
-                "message": "Can't serialize value (/person/vilkarsgrunnlag[0]/avviksprosent) : Expected a value that can be converted to type 'Float' but it was a 'Double'",
-                "path": ["person", "vilkarsgrunnlag", 0, "avviksprosent"]
-            }
-        """
-        )
-
-        assertEquals(forventetError, body["errors"].first())
-        assertNotNull(grunnlag)
-        assertTrue(grunnlag["avviksprosent"].isNull)
-    }
-
 }

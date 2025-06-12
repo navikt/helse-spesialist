@@ -2,7 +2,6 @@ package no.nav.helse.spesialist.api.graphql.mapping
 
 import no.nav.helse.db.AvviksvurderingRepository
 import no.nav.helse.db.api.NotatApiDao
-import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.spesialist.api.Toggle
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsgiverinntekt
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsgiverrefusjon
@@ -34,15 +33,11 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiSykepengegrunnlagsgrense
 import no.nav.helse.spesialist.api.graphql.schema.ApiSykmelding
 import no.nav.helse.spesialist.api.graphql.schema.ApiUtbetalingsdagtype
 import no.nav.helse.spesialist.api.graphql.schema.ApiUtbetalingsinfo
-import no.nav.helse.spesialist.api.graphql.schema.ApiVilkårsgrunnlag
 import no.nav.helse.spesialist.api.graphql.schema.ApiVilkårsgrunnlagAvviksvurdering
-import no.nav.helse.spesialist.api.graphql.schema.ApiVilkårsgrunnlagInfotrygd
 import no.nav.helse.spesialist.api.graphql.schema.ApiVilkårsgrunnlagInfotrygdV2
-import no.nav.helse.spesialist.api.graphql.schema.ApiVilkårsgrunnlagSpleis
 import no.nav.helse.spesialist.api.graphql.schema.ApiVilkårsgrunnlagSpleisV2
 import no.nav.helse.spesialist.api.graphql.schema.ApiVilkårsgrunnlagV2
 import no.nav.helse.spesialist.api.graphql.schema.ApiVilkårsgrunnlagVurdering
-import no.nav.helse.spesialist.api.graphql.schema.ApiVilkårsgrunnlagtype
 import no.nav.helse.spesialist.application.snapshot.SnapshotArbeidsgiverrefusjon
 import no.nav.helse.spesialist.application.snapshot.SnapshotBegrunnelse
 import no.nav.helse.spesialist.application.snapshot.SnapshotDag
@@ -440,91 +435,6 @@ fun SnapshotVilkarsgrunnlag.tilVilkarsgrunnlagV2(avviksvurderingRepository: Avvi
         is SnapshotInfotrygdVilkarsgrunnlag ->
             ApiVilkårsgrunnlagInfotrygdV2(
                 id = id,
-                inntekter =
-                    inntekter.map {
-                        ApiArbeidsgiverinntekt(
-                            arbeidsgiver = it.arbeidsgiver,
-                            omregnetArsinntekt = it.omregnetArsinntekt.tilApiOmregnetArsinntekt(),
-                            sammenligningsgrunnlag = null,
-                            skjonnsmessigFastsatt = null,
-                            deaktivert = it.deaktivert,
-                        )
-                    },
-                arbeidsgiverrefusjoner = arbeidsgiverrefusjoner.map { it.tilApiArbeidsgiverrefusjon() },
-                omregnetArsinntekt = omregnetArsinntekt,
-                skjaeringstidspunkt = skjaeringstidspunkt,
-                sykepengegrunnlag = sykepengegrunnlag,
-            )
-
-        else -> throw Exception("Ukjent vilkårsgrunnlag ${this.javaClass.name}")
-    }
-}
-
-fun SnapshotVilkarsgrunnlag.tilVilkarsgrunnlag(avviksvurderingRepository: AvviksvurderingRepository): ApiVilkårsgrunnlag {
-    return when (this) {
-        is SnapshotSpleisVilkarsgrunnlag -> {
-            val avviksvurdering: Avviksvurdering =
-                checkNotNull(avviksvurderingRepository.hentAvviksvurdering(id)) { "Fant ikke avviksvurdering for vilkårsgrunnlagId $id" }
-            val orgnrs =
-                (
-                    avviksvurdering.sammenligningsgrunnlag.innrapporterteInntekter.map {
-                        it.arbeidsgiverreferanse
-                    } + inntekter.map { it.arbeidsgiver }
-                ).toSet()
-            val inntekter =
-                orgnrs.map { arbeidsgiverreferanse ->
-                    val inntektFraSpleis =
-                        inntekter.singleOrNull { inntektFraSpleis -> inntektFraSpleis.arbeidsgiver == arbeidsgiverreferanse }
-                    val sammenligningsgrunnlagInntekt =
-                        avviksvurdering.sammenligningsgrunnlag.innrapporterteInntekter.singleOrNull { it.arbeidsgiverreferanse == arbeidsgiverreferanse }
-                    ApiArbeidsgiverinntekt(
-                        arbeidsgiver = arbeidsgiverreferanse,
-                        omregnetArsinntekt = inntektFraSpleis?.omregnetArsinntekt?.tilApiOmregnetArsinntekt(),
-                        sammenligningsgrunnlag =
-                            sammenligningsgrunnlagInntekt?.let {
-                                ApiSammenligningsgrunnlag(
-                                    belop = sammenligningsgrunnlagInntekt.inntekter.sumOf { it.beløp },
-                                    inntektFraAOrdningen =
-                                        sammenligningsgrunnlagInntekt.inntekter.map { inntekt ->
-                                            ApiInntektFraAOrdningen(
-                                                maned = inntekt.årMåned,
-                                                sum = inntekt.beløp,
-                                            )
-                                        },
-                                )
-                            },
-                        skjonnsmessigFastsatt = inntektFraSpleis?.skjonnsmessigFastsatt?.tilApiOmregnetArsinntekt(),
-                        deaktivert = inntektFraSpleis?.deaktivert,
-                        fom = inntektFraSpleis?.fom,
-                        tom = inntektFraSpleis?.tom,
-                    )
-                }
-
-            ApiVilkårsgrunnlagSpleis(
-                inntekter = inntekter,
-                omregnetArsinntekt = avviksvurdering.beregningsgrunnlag.totalbeløp,
-                sammenligningsgrunnlag = avviksvurdering.sammenligningsgrunnlag.totalbeløp,
-                avviksprosent = avviksvurdering.avviksprosent,
-                vilkarsgrunnlagtype = ApiVilkårsgrunnlagtype.SPLEIS,
-                id = id,
-                arbeidsgiverrefusjoner = arbeidsgiverrefusjoner.map { it.tilApiArbeidsgiverrefusjon() },
-                skjonnsmessigFastsattAarlig = skjonnsmessigFastsattAarlig,
-                skjaeringstidspunkt = skjaeringstidspunkt,
-                sykepengegrunnlag = sykepengegrunnlag,
-                antallOpptjeningsdagerErMinst = antallOpptjeningsdagerErMinst,
-                grunnbelop = grunnbelop,
-                sykepengegrunnlagsgrense = sykepengegrunnlagsgrense.tilSykepengegrunnlaggrense(),
-                oppfyllerKravOmMedlemskap = oppfyllerKravOmMedlemskap,
-                oppfyllerKravOmMinstelonn = oppfyllerKravOmMinstelonn,
-                oppfyllerKravOmOpptjening = oppfyllerKravOmOpptjening,
-                opptjeningFra = opptjeningFra,
-            )
-        }
-
-        is SnapshotInfotrygdVilkarsgrunnlag ->
-            ApiVilkårsgrunnlagInfotrygd(
-                id = id,
-                vilkarsgrunnlagtype = ApiVilkårsgrunnlagtype.INFOTRYGD,
                 inntekter =
                     inntekter.map {
                         ApiArbeidsgiverinntekt(

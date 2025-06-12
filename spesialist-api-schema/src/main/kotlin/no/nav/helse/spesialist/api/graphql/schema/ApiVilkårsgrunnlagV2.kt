@@ -56,3 +56,10 @@ enum class ApiVilkårsgrunnlagVurdering {
     IKKE_OPPFYLT,
     IKKE_VURDERT,
 }
+
+@GraphQLName("Sykepengegrunnlagsgrense")
+data class ApiSykepengegrunnlagsgrense(
+    val grunnbelop: Int,
+    val grense: Int,
+    val virkningstidspunkt: LocalDate,
+)

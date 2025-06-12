@@ -50,14 +50,12 @@ interface TilkommenInntektEvent {
     metadata: TilkommenInntektEventMetadata!
 }
 
-interface Vilkarsgrunnlag {
+interface VilkarsgrunnlagV2 {
     arbeidsgiverrefusjoner: [Arbeidsgiverrefusjon!]!
     id: UUID!
     inntekter: [Arbeidsgiverinntekt!]!
-    omregnetArsinntekt: Float!
     skjaeringstidspunkt: LocalDate!
     sykepengegrunnlag: Float!
-    vilkarsgrunnlagtype: Vilkarsgrunnlagtype!
 }
 
 type Alder {
@@ -593,7 +591,7 @@ type Person {
     tildeling: Tildeling
     tilleggsinfoForInntektskilder: [TilleggsinfoForInntektskilde!]!
     versjon: Int!
-    vilkarsgrunnlag: [Vilkarsgrunnlag!]!
+    vilkarsgrunnlagV2: [VilkarsgrunnlagV2!]!
 }
 
 type Personinfo {
@@ -1015,34 +1013,37 @@ type VedtakBegrunnelse {
     utfall: VedtakUtfall!
 }
 
-type VilkarsgrunnlagInfotrygd implements Vilkarsgrunnlag {
+type VilkarsgrunnlagAvviksvurdering {
+    avviksprosent: BigDecimal!
+    beregningsgrunnlag: BigDecimal!
+    sammenligningsgrunnlag: BigDecimal!
+}
+
+type VilkarsgrunnlagInfotrygdV2 implements VilkarsgrunnlagV2 {
     arbeidsgiverrefusjoner: [Arbeidsgiverrefusjon!]!
     id: UUID!
     inntekter: [Arbeidsgiverinntekt!]!
     omregnetArsinntekt: Float!
     skjaeringstidspunkt: LocalDate!
     sykepengegrunnlag: Float!
-    vilkarsgrunnlagtype: Vilkarsgrunnlagtype!
 }
 
-type VilkarsgrunnlagSpleis implements Vilkarsgrunnlag {
+type VilkarsgrunnlagSpleisV2 implements VilkarsgrunnlagV2 {
     antallOpptjeningsdagerErMinst: Int!
     arbeidsgiverrefusjoner: [Arbeidsgiverrefusjon!]!
-    avviksprosent: Float
+    avviksvurdering: VilkarsgrunnlagAvviksvurdering
+    beregningsgrunnlag: BigDecimal!
     grunnbelop: Int!
     id: UUID!
     inntekter: [Arbeidsgiverinntekt!]!
-    omregnetArsinntekt: Float!
-    oppfyllerKravOmMedlemskap: Boolean
     oppfyllerKravOmMinstelonn: Boolean!
     oppfyllerKravOmOpptjening: Boolean!
     opptjeningFra: LocalDate!
-    sammenligningsgrunnlag: Float
     skjaeringstidspunkt: LocalDate!
     skjonnsmessigFastsattAarlig: Float
     sykepengegrunnlag: Float!
     sykepengegrunnlagsgrense: Sykepengegrunnlagsgrense!
-    vilkarsgrunnlagtype: Vilkarsgrunnlagtype!
+    vurderingAvKravOmMedlemskap: VilkarsgrunnlagVurdering!
 }
 
 type Vurdering {
@@ -1423,10 +1424,10 @@ enum VedtakUtfall {
     INNVILGELSE
 }
 
-enum Vilkarsgrunnlagtype {
-    INFOTRYGD
-    SPLEIS
-    UKJENT
+enum VilkarsgrunnlagVurdering {
+    IKKE_OPPFYLT
+    IKKE_VURDERT
+    OPPFYLT
 }
 
 enum Visningskriterium {

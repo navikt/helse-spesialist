@@ -15,7 +15,6 @@ import no.nav.helse.db.api.TildelingApiDao
 import no.nav.helse.db.api.VarselApiRepository
 import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
-import no.nav.helse.spesialist.api.graphql.mapping.tilVilkarsgrunnlag
 import no.nav.helse.spesialist.api.graphql.mapping.tilVilkarsgrunnlagV2
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdoverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsgiver
@@ -32,7 +31,6 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettingstype
 import no.nav.helse.spesialist.api.graphql.schema.ApiSykepengegrunnlagskjonnsfastsetting
 import no.nav.helse.spesialist.api.graphql.schema.ApiTildeling
 import no.nav.helse.spesialist.api.graphql.schema.ApiTilleggsinfoForInntektskilde
-import no.nav.helse.spesialist.api.graphql.schema.ApiVilkårsgrunnlag
 import no.nav.helse.spesialist.api.graphql.schema.ApiVilkårsgrunnlagV2
 import no.nav.helse.spesialist.api.graphql.schema.PersonSchema
 import no.nav.helse.spesialist.api.objectMapper
@@ -156,12 +154,6 @@ data class ApiPersonResolver(
         personApiDao
             .finnInfotrygdutbetalinger(snapshot.fodselsnummer)
             ?.let { objectMapper.readValue(it) }
-
-    override fun vilkarsgrunnlag(): List<ApiVilkårsgrunnlag> {
-        return sessionFactory.transactionalSessionScope { sessionContext ->
-            snapshot.vilkarsgrunnlag.map { it.tilVilkarsgrunnlag(sessionContext.avviksvurderingRepository) }
-        }
-    }
 
     override fun vilkarsgrunnlagV2(): List<ApiVilkårsgrunnlagV2> {
         return sessionFactory.transactionalSessionScope { sessionContext ->

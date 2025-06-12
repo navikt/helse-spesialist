@@ -105,8 +105,6 @@ interface PersonSchema {
 
     fun infotrygdutbetalinger(): List<ApiInfotrygdutbetaling>?
 
-    fun vilkarsgrunnlag(): List<ApiVilkårsgrunnlag>
-
     fun vilkarsgrunnlagV2(): List<ApiVilkårsgrunnlagV2>
 }
 
