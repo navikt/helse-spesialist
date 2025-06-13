@@ -16,7 +16,20 @@
                   "kilde": "af4656ef-fb9b-4c9d-b575-64242b851c5b",
                   "fom": "2024-12-01",
                   "tom": "2024-12-31",
-                  "pensjonsgivendeInntekter": [],
+                  "pensjonsgivendeInntekter": [
+                    {
+                      "arligBelop": 120230.0,
+                      "inntektsar": 2023
+                    },
+                    {
+                      "arligBelop": 220220.0,
+                      "inntektsar": 2022
+                    },
+                    {
+                      "arligBelop": 320210.0,
+                      "inntektsar": 2021
+                    }
+                  ],
                   "tidslinje": [
                     {
                       "dato": "2024-12-01",

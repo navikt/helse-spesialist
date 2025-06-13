@@ -203,6 +203,7 @@ type BeregnetPeriode implements Periode {
     oppgave: OppgaveForPeriodevisning
     opprettet: LocalDateTime!
     paVent: PaVent
+    pensjonsgivendeInntekter: [PensjonsgivendeInntekt!]!
     periodetilstand: Periodetilstand!
     periodetype: Periodetype!
     periodevilkar: Periodevilkar!
@@ -565,6 +566,11 @@ type PaVentInfo {
     saksbehandler: String!
     tekst: String
     tidsfrist: LocalDate!
+}
+
+type PensjonsgivendeInntekt {
+    arligBelop: BigDecimal!
+    inntektsar: Int!
 }
 
 type PeriodeHistorikkElementNy implements Historikkinnslag {

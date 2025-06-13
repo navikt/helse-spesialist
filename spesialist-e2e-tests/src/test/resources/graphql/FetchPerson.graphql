@@ -432,6 +432,10 @@ fragment beregnetPeriode on BeregnetPeriode {
         begrunnelse
         __typename
     }
+    pensjonsgivendeInntekter {
+        arligBelop
+        inntektsar
+    }
     ...periode
     __typename
 }
