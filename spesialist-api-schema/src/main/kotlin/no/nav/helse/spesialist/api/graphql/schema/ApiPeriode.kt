@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.api.graphql.schema
 
 import com.expediagroup.graphql.generator.annotations.GraphQLIgnore
 import com.expediagroup.graphql.generator.annotations.GraphQLName
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -389,6 +390,8 @@ interface BeregnetPeriodeSchema : ApiPeriode {
     fun vedtakBegrunnelser(): List<ApiVedtakBegrunnelse>
 
     fun annullering(): ApiAnnullering?
+
+    fun pensjonsgivendeInntekter(): List<ApiPensjonsgivendeInntekt>
 }
 
 @GraphQLName("BeregnetPeriode")
@@ -421,4 +424,10 @@ data class ApiSykepengedager(
     val maksdato: LocalDate,
     val oppfylt: Boolean,
     val skjaeringstidspunkt: LocalDate,
+)
+
+@GraphQLName("PensjonsgivendeInntekt")
+data class ApiPensjonsgivendeInntekt(
+    val arligBelop: BigDecimal,
+    val inntektsar: Int,
 )

@@ -18,6 +18,7 @@ import no.nav.helse.spesialist.application.snapshot.SnapshotInntektsmelding
 import no.nav.helse.spesialist.application.snapshot.SnapshotInntektstype
 import no.nav.helse.spesialist.application.snapshot.SnapshotOmregnetArsinntekt
 import no.nav.helse.spesialist.application.snapshot.SnapshotOppdrag
+import no.nav.helse.spesialist.application.snapshot.SnapshotPensjonsgivendeInntekt
 import no.nav.helse.spesialist.application.snapshot.SnapshotPeriodetilstand
 import no.nav.helse.spesialist.application.snapshot.SnapshotPeriodetype
 import no.nav.helse.spesialist.application.snapshot.SnapshotPeriodevilkar
@@ -80,6 +81,7 @@ import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLInntekterFraAOrdningen
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLInntektsmelding
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLOmregnetArsinntekt
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLOppdrag
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPensjonsgivendeInntekt
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPeriodevilkar
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLPerson
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLRefusjonselement
@@ -403,6 +405,7 @@ fun GraphQLBeregnetPeriode.tilSnapshotBeregnetPeriode() =
         periodevilkar = periodevilkar.tilSnapshotPeriodevilkar(),
         utbetaling = utbetaling.tilSnapshotUtbetaling(),
         vilkarsgrunnlagId = vilkarsgrunnlagId,
+        pensjonsgivendeInntekter = pensjonsgivendeInntekter.map { it.tilSnapshotPensjonsgivendeInntekt() },
     )
 
 fun DefaultGraphQLTidslinjeperiodeImplementation.tilSnapshotUkjentTidslinjeperiode() =
@@ -520,6 +523,12 @@ fun GraphQLVurdering.tilSnapshotVurdering() =
         godkjent = godkjent,
         ident = ident,
         tidsstempel = tidsstempel,
+    )
+
+fun GraphQLPensjonsgivendeInntekt.tilSnapshotPensjonsgivendeInntekt(): SnapshotPensjonsgivendeInntekt =
+    SnapshotPensjonsgivendeInntekt(
+        arligBelop = BigDecimal.valueOf(arligBelop),
+        inntektsar = inntektsar,
     )
 
 fun GraphQLBegrunnelse.tilSnapshotBegrunnelse() =

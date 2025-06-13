@@ -46,6 +46,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveForPeriodevisning
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveegenskap
 import no.nav.helse.spesialist.api.graphql.schema.ApiOpphevStansAutomatiskBehandlingSaksbehandler
 import no.nav.helse.spesialist.api.graphql.schema.ApiPaVent
+import no.nav.helse.spesialist.api.graphql.schema.ApiPensjonsgivendeInntekt
 import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodeHistorikkElementNy
 import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodehandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodetilstand
@@ -492,6 +493,14 @@ data class ApiBeregnetPeriodeResolver(
             }
         } else {
             null
+        }
+
+    override fun pensjonsgivendeInntekter(): List<ApiPensjonsgivendeInntekt> =
+        periode.pensjonsgivendeInntekter.map {
+            ApiPensjonsgivendeInntekt(
+                arligBelop = it.arligBelop,
+                inntektsar = it.inntektsar,
+            )
         }
 }
 
