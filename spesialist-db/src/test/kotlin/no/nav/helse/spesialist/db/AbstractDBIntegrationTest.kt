@@ -27,7 +27,6 @@ import no.nav.helse.spesialist.db.dao.PgPersonDao
 import no.nav.helse.spesialist.db.dao.api.PgAbonnementApiDao
 import no.nav.helse.spesialist.db.dao.api.PgArbeidsgiverApiDao
 import no.nav.helse.spesialist.db.dao.api.PgOppgaveApiDao
-import no.nav.helse.spesialist.db.dao.api.PgOverstyringApiDao
 import no.nav.helse.spesialist.db.dao.api.PgPeriodehistorikkApiDao
 import no.nav.helse.spesialist.db.dao.api.PgPersonApiDao
 import no.nav.helse.spesialist.db.dao.api.PgRisikovurderingApiDao
@@ -122,7 +121,6 @@ abstract class AbstractDBIntegrationTest {
     internal val commandContextDao = daos.commandContextDao
     internal val tildelingDao = daos.tildelingDao
     internal val saksbehandlerDao = daos.saksbehandlerDao
-    internal val overstyringApiDao = PgOverstyringApiDao(dataSource)
     internal val reservasjonDao = sessionContext.reservasjonDao
     internal val meldingDuplikatkontrollDao = PgMeldingDuplikatkontrollDao(dataSource)
     internal val risikovurderingDao = sessionContext.risikovurderingDao
@@ -703,13 +701,7 @@ abstract class AbstractDBIntegrationTest {
         val id: UUID,
         val fom: LocalDate,
         val tom: LocalDate,
-    ) {
-
-        companion object {
-            infix fun LocalDate.til(tom: LocalDate) =
-                Periode(UUID.randomUUID(), this, tom)
-        }
-    }
+    )
 
     protected data class Saksbehandler(
         val oid: UUID,

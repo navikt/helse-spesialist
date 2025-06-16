@@ -17,7 +17,6 @@ import no.nav.helse.TestRapidHelpers.siste
 import no.nav.helse.TestRapidHelpers.sisteBehov
 import no.nav.helse.Testdata
 import no.nav.helse.Testdata.snapshot
-import no.nav.helse.modell.melding.OverstyrtInntektOgRefusjonEvent.OverstyrtArbeidsgiverEvent.OverstyrtRefusjonselementEvent
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode
@@ -33,7 +32,6 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiInntektOgRefusjonOverstyrin
 import no.nav.helse.spesialist.api.graphql.schema.ApiLovhjemmel
 import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringArbeidsforhold
 import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringArbeidsgiver
-import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringArbeidsgiver.ApiOverstyringRefusjonselement
 import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringDag
 import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse
 import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
@@ -66,13 +64,8 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         with(testperson) {
             1.arbeidsgiver.organisasjonsnummer
         }
-    val ORGNR2 =
-        with(testperson) {
-            2.arbeidsgiver.organisasjonsnummer
-        }
     val AKTØR = testperson.aktørId
     val VEDTAKSPERIODE_ID = testperson.vedtaksperiodeId1
-    val VEDTAKSPERIODE_ID_2 = testperson.vedtaksperiodeId2
     val UTBETALING_ID = testperson.utbetalingId1
     private val behandlinger = mutableMapOf<UUID, MutableList<UUID>>()
     protected val godkjenningsbehovTestdata
@@ -178,25 +171,6 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
             tom = tom,
             skjæringstidspunkt = skjæringstidspunkt,
         )
-    }
-
-    protected fun spesialistInnvilgerManuelt(
-        regelverksvarsler: List<String> = emptyList(),
-        fullmakter: List<Testmeldingfabrikk.VergemålJson.Fullmakt> = emptyList(),
-        risikofunn: List<Testmeldingfabrikk.Risikofunn> = emptyList(),
-        harOppdatertMetadata: Boolean = false,
-        godkjenningsbehovTestdata: GodkjenningsbehovTestdata = this.godkjenningsbehovTestdata,
-    ) {
-        spesialistBehandlerGodkjenningsbehovFremTilOppgave(
-            regelverksvarsler = regelverksvarsler,
-            fullmakter = fullmakter,
-            risikofunn = risikofunn,
-            harOppdatertMetadata = harOppdatertMetadata,
-            godkjenningsbehovTestdata = godkjenningsbehovTestdata,
-        )
-        håndterSaksbehandlerløsning(vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId)
-        håndterUtbetalingUtbetalt()
-        håndterAvsluttetMedVedtak()
     }
 
     protected fun spesialistBehandlerGodkjenningsbehovFremTilVergemål(
@@ -613,36 +587,6 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
             gjeldendeStatus = UTBETALT,
             utbetalingId = this.utbetalingId,
         )
-        assertIngenEtterspurteBehov()
-    }
-
-    protected fun håndterUtbetalingAnnullert(
-        fødselsnummer: String = FØDSELSNUMMER,
-        saksbehandler_epost: String,
-    ) {
-        fun fagsystemidFor(utbetalingId: UUID, tilArbeidsgiver: Boolean): String {
-            val fagsystemidtype = if (tilArbeidsgiver) "arbeidsgiver" else "person"
-            val fagsystemId = dbQuery.singleOrNull(
-                """
-                SELECT fagsystem_id FROM utbetaling_id ui
-                INNER JOIN oppdrag o ON o.id = ui.${fagsystemidtype}_fagsystem_id_ref
-                WHERE ui.utbetaling_id = :utbetalingId
-                """.trimIndent(),
-                "utbetalingId" to utbetalingId,
-            ) { it.string("fagsystem_id") }
-            return requireNotNull(fagsystemId) {
-                "Forventet å finne med ${fagsystemidtype}FagsystemId for utbetalingId=$utbetalingId"
-            }
-        }
-
-        sisteMeldingId =
-            meldingssender.sendUtbetalingAnnullert(
-                fødselsnummer = fødselsnummer,
-                utbetalingId = utbetalingId,
-                epost = saksbehandler_epost,
-                arbeidsgiverFagsystemId = fagsystemidFor(utbetalingId, tilArbeidsgiver = true),
-                personFagsystemId = fagsystemidFor(utbetalingId, tilArbeidsgiver = false),
-            )
         assertIngenEtterspurteBehov()
     }
 
@@ -1290,21 +1234,6 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         assertEquals(forventetAntall, antall)
     }
 
-    protected fun assertGodkjentVarsel(
-        vedtaksperiodeId: UUID,
-        varselkode: String,
-    ) {
-        val antall = dbQuery.single(
-            """
-            SELECT COUNT(1) FROM selve_varsel
-            WHERE vedtaksperiode_id = :vedtaksperiodeId AND kode = :varselkode AND status = 'GODKJENT'
-            """.trimIndent(),
-            "vedtaksperiodeId" to vedtaksperiodeId,
-            "varselkode" to varselkode,
-        ) { it.int(1) }
-        assertEquals(1, antall)
-    }
-
     protected fun assertVarsel(
         vedtaksperiodeId: UUID,
         varselkode: String,
@@ -1339,10 +1268,6 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         assertEquals(1, forkastedeVedtak(vedtaksperiodeId))
     }
 
-    protected fun assertVedtaksperiodeEksistererIkke(vedtaksperiodeId: UUID) {
-        assertEquals(0, vedtak(vedtaksperiodeId))
-    }
-
     protected fun assertPersonEksisterer(
         fødselsnummer: String,
         aktørId: String,
@@ -1370,13 +1295,6 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected fun assertUtgåendeMelding(hendelse: String) {
         val meldinger = testRapid.inspektør.hendelser(hendelse, sisteMeldingId)
         assertEquals(1, meldinger.size) {
-            "Utgående meldinger: ${meldinger.joinToString { it.path("@event_name").asText() }}"
-        }
-    }
-
-    private fun assertIngenUtgåendeMeldinger() {
-        val meldinger = testRapid.inspektør.hendelser(sisteMeldingId)
-        assertEquals(0, meldinger.size) {
             "Utgående meldinger: ${meldinger.joinToString { it.path("@event_name").asText() }}"
         }
     }
@@ -1418,14 +1336,6 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected fun assertSisteEtterspurteBehov(behov: String) {
         val sisteEtterspurteBehov = testRapid.inspektør.behov().last()
         assertEquals(sisteEtterspurteBehov, behov)
-    }
-
-    protected fun assertUtbetaling(
-        arbeidsgiverbeløp: Int,
-        personbeløp: Int,
-    ) {
-        assertEquals(arbeidsgiverbeløp, finnbeløp("arbeidsgiver"))
-        assertEquals(personbeløp, finnbeløp("person"))
     }
 
     protected fun assertOverstyringer(fødselsnummer: String) {
@@ -1483,12 +1393,6 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         "godkjenningsbehovId" to godkjenningsbehovId,
     ) { it.uuid("context_id") }
 
-    private fun finnbeløp(type: String): Int? {
-        return dbQuery.singleOrNull(
-            "SELECT ${type}beløp FROM utbetaling_id WHERE utbetaling_id = :utbetalingId", "utbetalingId" to utbetalingId
-        ) { it.intOrNull("${type}beløp") }
-    }
-
     protected fun person(
         fødselsnummer: String,
         aktørId: String,
@@ -1512,15 +1416,6 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         "SELECT COUNT(*) FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId AND forkastet = TRUE",
         "vedtaksperiodeId" to vedtaksperiodeId,
     ) { it.int(1) }
-
-    private fun List<ApiOverstyringRefusjonselement>.byggRefusjonselementEvent() =
-        this.map {
-            OverstyrtRefusjonselementEvent(
-                fom = it.fom,
-                tom = it.tom,
-                beløp = it.belop,
-            )
-        }
 
     private fun lagVarseldefinisjoner() {
         Varselkode.entries.forEach { varselkode ->
