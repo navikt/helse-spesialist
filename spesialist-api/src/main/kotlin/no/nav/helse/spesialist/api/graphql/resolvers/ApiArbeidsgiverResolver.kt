@@ -24,6 +24,7 @@ import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDto
 import no.nav.helse.spesialist.application.snapshot.SnapshotBeregnetPeriode
 import no.nav.helse.spesialist.application.snapshot.SnapshotGenerasjon
 import no.nav.helse.spesialist.application.snapshot.SnapshotUberegnetPeriode
+import no.nav.helse.spesialist.domain.Arbeidsgiver
 import java.util.UUID
 
 class ApiArbeidsgiverResolver(
@@ -112,14 +113,18 @@ class ApiArbeidsgiverResolver(
     override fun overstyringer(): List<ApiOverstyring> = overstyringer
 
     override fun arbeidsforhold(): List<ApiArbeidsforhold> =
-        arbeidsgiverApiDao.finnArbeidsforhold(fødselsnummer, organisasjonsnummer).map {
-            ApiArbeidsforhold(
-                stillingstittel = it.stillingstittel,
-                stillingsprosent = it.stillingsprosent,
-                startdato = it.startdato,
-                sluttdato = it.sluttdato,
-            )
-        }
+        sessionFactory.transactionalSessionScope {
+            it.arbeidsgiverRepository.finnForIdentifikator(Arbeidsgiver.Identifikator.fraString(organisasjonsnummer))
+        }?.let { arbeidsgiver ->
+            arbeidsgiverApiDao.finnArbeidsforhold(fødselsnummer, organisasjonsnummer, arbeidsgiver.id()).map {
+                ApiArbeidsforhold(
+                    stillingstittel = it.stillingstittel,
+                    stillingsprosent = it.stillingsprosent,
+                    startdato = it.startdato,
+                    sluttdato = it.sluttdato,
+                )
+            }
+        }.orEmpty()
 
     @Suppress("unused")
     override fun inntekterFraAordningen(): List<ApiArbeidsgiverInntekterFraAOrdningen> =

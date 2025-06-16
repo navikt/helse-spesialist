@@ -1404,7 +1404,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     private fun assertEtterspurteBehov(vararg behov: String) {
         val etterspurteBehov = testRapid.inspektør.behov(sisteMeldingId)
         val forårsaketAvId = inspektør.siste("behov")["@forårsaket_av"]["id"].asText()
-        assertEquals(behov.toList(), etterspurteBehov) {
+        assertEquals(behov.toList().sorted(), etterspurteBehov.sorted()) {
             val ikkeEtterspurt = behov.toSet() - etterspurteBehov.toSet()
             "Forventet at følgende behov skulle være etterspurt: $ikkeEtterspurt\nFaktisk etterspurte behov: $etterspurteBehov\n"
         }

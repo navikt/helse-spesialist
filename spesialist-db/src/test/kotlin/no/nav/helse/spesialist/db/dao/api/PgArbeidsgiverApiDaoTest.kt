@@ -9,36 +9,18 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 internal class PgArbeidsgiverApiDaoTest : AbstractDBIntegrationTest() {
-
-    @Test
-    fun `finner bransjer`() {
-        val bransjer = listOf("bransje 1", "bransje 2")
-        opprettArbeidsgiver(bransjer = bransjer)
-        assertEquals(bransjer, arbeidsgiverApiDao.finnBransjer(ORGNUMMER))
-    }
-
-    @Test
-    fun `finner bransjer når det ikke er noen bransjer`() {
-        opprettArbeidsgiver(bransjer = emptyList())
-        arbeidsgiverApiDao.finnBransjer(ORGNUMMER).let {
-            assertTrue(it.isEmpty()) { "Forventet at $it skulle være tom liste" }
-        }
-    }
-
-    @Test
-    fun `finner navn`() {
-        opprettArbeidsgiver()
-        assertEquals(ORGNAVN, arbeidsgiverApiDao.finnNavn(ORGNUMMER))
-    }
-
     @Test
     fun `finner arbeidsforhold`() {
         opprettPerson()
-        opprettArbeidsgiver()
+        val arbeidsgiverId = opprettArbeidsgiver()
         opprettVedtaksperiode()
         opprettArbeidsforhold()
 
-        val arbeidsforhold = arbeidsgiverApiDao.finnArbeidsforhold(FNR, ORGNUMMER)
+        val arbeidsforhold = arbeidsgiverApiDao.finnArbeidsforhold(
+            fødselsnummer = FNR,
+            organisasjonsnummer = ORGNUMMER,
+            arbeidsgiverRef = arbeidsgiverId
+        )
 
         assertEquals(1, arbeidsforhold.size)
         assertEquals(ARBEIDSFORHOLD.start, arbeidsforhold.first().startdato)

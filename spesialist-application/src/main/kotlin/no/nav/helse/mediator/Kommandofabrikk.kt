@@ -67,7 +67,7 @@ class Kommandofabrikk(
         organisasjonsnummer: String,
         sessionContext: SessionContext,
     ): OpprettMinimalArbeidsgiverCommand {
-        return OpprettMinimalArbeidsgiverCommand(organisasjonsnummer, sessionContext.inntektskilderRepository)
+        return OpprettMinimalArbeidsgiverCommand(organisasjonsnummer, sessionContext.arbeidsgiverRepository)
     }
 
     internal fun endretEgenAnsattStatus(
@@ -328,7 +328,7 @@ class Kommandofabrikk(
             vedtakDao = sessionContext.vedtakDao,
             commandContextDao = sessionContext.commandContextDao,
             personDao = sessionContext.personDao,
-            inntektskilderRepository = sessionContext.inntektskilderRepository,
+            arbeidsgiverRepository = sessionContext.arbeidsgiverRepository,
             arbeidsforholdDao = sessionContext.arbeidsforholdDao,
             egenAnsattDao = sessionContext.egenAnsattDao,
             utbetalingDao = sessionContext.utbetalingDao,

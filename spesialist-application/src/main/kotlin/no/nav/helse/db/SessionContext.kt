@@ -2,6 +2,7 @@ package no.nav.helse.db
 
 import no.nav.helse.mediator.oppgave.OppgaveRepository
 import no.nav.helse.modell.person.PersonRepository
+import no.nav.helse.spesialist.application.ArbeidsgiverRepository
 import no.nav.helse.spesialist.application.DialogRepository
 import no.nav.helse.spesialist.application.NotatRepository
 import no.nav.helse.spesialist.application.OverstyringRepository
@@ -11,13 +12,11 @@ import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 
 interface SessionContext {
     val arbeidsforholdDao: ArbeidsforholdDao
-    val arbeidsgiverDao: ArbeidsgiverDao
     val automatiseringDao: AutomatiseringDao
     val commandContextDao: CommandContextDao
     val dialogDao: DialogDao
     val egenAnsattDao: EgenAnsattDao
     val generasjonDao: GenerasjonDao
-    val inntektskilderRepository: InntektskilderRepository
     val meldingDao: MeldingDao
     val metrikkDao: MetrikkDao
     val notatDao: NotatDao
@@ -49,4 +48,5 @@ interface SessionContext {
     val oppgaveRepository: OppgaveRepository
     val behandlingRepository: BehandlingRepository
     val tilkommenInntektRepository: TilkommenInntektRepository
+    val arbeidsgiverRepository: ArbeidsgiverRepository
 }

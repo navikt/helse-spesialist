@@ -5,6 +5,7 @@ import no.nav.helse.db.AvviksvurderingRepository
 import no.nav.helse.db.BehandlingRepository
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.oppgave.OppgaveRepository
+import no.nav.helse.spesialist.application.ArbeidsgiverRepository
 import no.nav.helse.spesialist.application.DialogRepository
 import no.nav.helse.spesialist.application.NotatRepository
 import no.nav.helse.spesialist.application.OverstyringRepository
@@ -12,14 +13,12 @@ import no.nav.helse.spesialist.application.SaksbehandlerRepository
 import no.nav.helse.spesialist.application.TilkommenInntektRepository
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.db.dao.PgArbeidsforholdDao
-import no.nav.helse.spesialist.db.dao.PgArbeidsgiverDao
 import no.nav.helse.spesialist.db.dao.PgAutomatiseringDao
 import no.nav.helse.spesialist.db.dao.PgAvviksvurderingRepository
 import no.nav.helse.spesialist.db.dao.PgCommandContextDao
 import no.nav.helse.spesialist.db.dao.PgDialogDao
 import no.nav.helse.spesialist.db.dao.PgEgenAnsattDao
 import no.nav.helse.spesialist.db.dao.PgGenerasjonDao
-import no.nav.helse.spesialist.db.dao.PgInntektskilderRepository
 import no.nav.helse.spesialist.db.dao.PgMeldingDao
 import no.nav.helse.spesialist.db.dao.PgMetrikkDao
 import no.nav.helse.spesialist.db.dao.PgNotatDao
@@ -41,6 +40,7 @@ import no.nav.helse.spesialist.db.dao.PgVedtakDao
 import no.nav.helse.spesialist.db.dao.PgVedtaksperiodeRepository
 import no.nav.helse.spesialist.db.dao.PgVergemålDao
 import no.nav.helse.spesialist.db.dao.PgÅpneGosysOppgaverDao
+import no.nav.helse.spesialist.db.repository.PgArbeidsgiverRepository
 import no.nav.helse.spesialist.db.repository.PgBehandlingRepository
 import no.nav.helse.spesialist.db.repository.PgDialogRepository
 import no.nav.helse.spesialist.db.repository.PgNotatRepository
@@ -52,13 +52,11 @@ import no.nav.helse.spesialist.db.repository.PgTotrinnsvurderingRepository
 
 class DBSessionContext(session: Session) : SessionContext {
     override val arbeidsforholdDao = PgArbeidsforholdDao(session)
-    override val arbeidsgiverDao = PgArbeidsgiverDao(session)
     override val automatiseringDao = PgAutomatiseringDao(session)
     override val commandContextDao = PgCommandContextDao(session)
     override val dialogDao = PgDialogDao(session)
     override val egenAnsattDao = PgEgenAnsattDao(session)
     override val generasjonDao = PgGenerasjonDao(session)
-    override val inntektskilderRepository = PgInntektskilderRepository(session, arbeidsgiverDao)
     override val meldingDao = PgMeldingDao(session)
     override val metrikkDao = PgMetrikkDao(session)
     override val notatDao = PgNotatDao(session)
@@ -91,4 +89,5 @@ class DBSessionContext(session: Session) : SessionContext {
     override val oppgaveRepository: OppgaveRepository = PgOppgaveRepository(session)
     override val behandlingRepository: BehandlingRepository = PgBehandlingRepository(session)
     override val tilkommenInntektRepository: TilkommenInntektRepository = PgTilkommenInntektRepository(session)
+    override val arbeidsgiverRepository: ArbeidsgiverRepository = PgArbeidsgiverRepository(session)
 }

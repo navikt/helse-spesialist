@@ -10,45 +10,23 @@ import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.db.objectMapper
+import no.nav.helse.spesialist.domain.ArbeidsgiverId
 import javax.sql.DataSource
 
 class PgArbeidsgiverApiDao internal constructor(dataSource: DataSource) :
     QueryRunner by MedDataSource(dataSource),
     ArbeidsgiverApiDao {
-        override fun finnBransjer(organisasjonsnummer: String) =
-            asSQL(
-                """
-                SELECT ab.bransjer FROM arbeidsgiver a
-                LEFT JOIN arbeidsgiver_bransjer ab on a.bransjer_ref = ab.id
-                WHERE a.organisasjonsnummer = :organisasjonsnummer;
-                """.trimIndent(),
-                "organisasjonsnummer" to organisasjonsnummer,
-            ).singleOrNull { row ->
-                row.stringOrNull("bransjer")
-                    ?.let { objectMapper.readValue<List<String>>(it) }
-                    ?.filter { it.isNotBlank() }
-            } ?: emptyList()
-
-        override fun finnNavn(organisasjonsnummer: String) =
-            asSQL(
-                """
-                SELECT an.navn FROM arbeidsgiver a
-                JOIN arbeidsgiver_navn an ON a.navn_ref = an.id
-                WHERE a.organisasjonsnummer=:organisasjonsnummer;
-                """.trimIndent(),
-                "organisasjonsnummer" to organisasjonsnummer,
-            ).singleOrNull { row -> row.string("navn") }
-
         override fun finnArbeidsforhold(
             fødselsnummer: String,
             organisasjonsnummer: String,
+            arbeidsgiverRef: ArbeidsgiverId,
         ) = asSQL(
             """
             SELECT startdato, sluttdato, stillingstittel, stillingsprosent FROM arbeidsforhold
-            WHERE arbeidsgiver_ref = (SELECT id FROM arbeidsgiver WHERE organisasjonsnummer = :organisasjonsnummer)
+            WHERE arbeidsgiver_ref = :arbeidsgiver_ref
             AND person_ref = (SELECT id FROM person WHERE fødselsnummer = :fodselsnummer);
             """.trimIndent(),
-            "organisasjonsnummer" to organisasjonsnummer,
+            "arbeidsgiver_ref" to arbeidsgiverRef.value,
             "fodselsnummer" to fødselsnummer,
         ).list { tilArbeidsforholdApiDto(organisasjonsnummer, it) }
 

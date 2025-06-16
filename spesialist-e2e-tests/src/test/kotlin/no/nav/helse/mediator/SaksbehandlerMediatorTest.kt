@@ -14,8 +14,6 @@ import no.nav.helse.e2e.AbstractDatabaseTest
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.mediator.oppgave.OppgaveService
-import no.nav.helse.modell.InntektskildetypeDto
-import no.nav.helse.modell.KomplettInntektskildeDto
 import no.nav.helse.modell.kommando.TestMelding
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
@@ -57,6 +55,7 @@ import no.nav.helse.spesialist.db.DBDaos
 import no.nav.helse.spesialist.db.DBSessionContext
 import no.nav.helse.spesialist.db.DbQuery
 import no.nav.helse.spesialist.db.TransactionalSessionFactory
+import no.nav.helse.spesialist.domain.Arbeidsgiver
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.testfixtures.lagAktørId
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
@@ -104,8 +103,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         with(testperson) {
             1.arbeidsgiver.organisasjonsnavn
         }
-
-    private val BRANSJER = listOf("EN BRANSJE")
 
     private val FNR = testperson.fødselsnummer
     private val AKTØR = testperson.aktørId
@@ -301,18 +298,11 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
     private fun opprettArbeidsgiver(
         organisasjonsnummer: String = ORGNUMMER,
         navn: String = ORGNAVN,
-        bransjer: List<String> = BRANSJER,
     ) {
-        sessionContext.inntektskilderRepository.lagreInntektskilder(
-            listOf(
-                KomplettInntektskildeDto(
-                    identifikator = organisasjonsnummer,
-                    type = InntektskildetypeDto.ORDINÆR,
-                    navn = navn,
-                    bransjer = bransjer,
-                    sistOppdatert = LocalDate.now(),
-                ),
-            ),
+        sessionContext.arbeidsgiverRepository.lagre(
+            Arbeidsgiver.Factory.ny(
+                identifikator = Arbeidsgiver.Identifikator.fraString(organisasjonsnummer),
+            ).apply { oppdaterMedNavn(navn) }
         )
     }
 

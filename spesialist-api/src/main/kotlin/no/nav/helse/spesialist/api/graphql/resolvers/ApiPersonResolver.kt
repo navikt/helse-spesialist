@@ -44,6 +44,7 @@ import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsettingSykepengegrunn
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDto
 import no.nav.helse.spesialist.application.snapshot.SnapshotGhostPeriode
 import no.nav.helse.spesialist.application.snapshot.SnapshotPerson
+import no.nav.helse.spesialist.domain.Arbeidsgiver
 import java.time.LocalDate
 import java.util.UUID
 
@@ -99,10 +100,10 @@ data class ApiPersonResolver(
                     innrapportertInntekt.arbeidsgiverreferanse
                 } ?: emptyList()
             ) + vilkårsgrunnlag.inntekter.map { inntekt -> inntekt.arbeidsgiver }
-        }.toSet().map { orgnr ->
+        }.toSet().map { organisasjonsnummer ->
             ApiTilleggsinfoForInntektskilde(
-                orgnummer = orgnr,
-                navn = arbeidsgiverApiDao.finnNavn(orgnr) ?: "navn er utilgjengelig",
+                orgnummer = organisasjonsnummer,
+                navn = finnNavnForOrganisasjonsnummer(organisasjonsnummer),
             )
         }
     }
@@ -115,8 +116,8 @@ data class ApiPersonResolver(
                 resolver =
                     ApiArbeidsgiverResolver(
                         organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
-                        navn = arbeidsgiverApiDao.finnNavn(arbeidsgiver.organisasjonsnummer) ?: "navn er utilgjengelig",
-                        bransjer = arbeidsgiverApiDao.finnBransjer(arbeidsgiver.organisasjonsnummer),
+                        navn = finnNavnForOrganisasjonsnummer(arbeidsgiver.organisasjonsnummer),
+                        bransjer = emptyList(),
                         ghostPerioder = arbeidsgiver.ghostPerioder.tilGhostPerioder(arbeidsgiver.organisasjonsnummer),
                         fødselsnummer = snapshot.fodselsnummer,
                         generasjoner = arbeidsgiver.generasjoner,
@@ -148,6 +149,12 @@ data class ApiPersonResolver(
             )
         }
     }
+
+    private fun finnNavnForOrganisasjonsnummer(organisasjonsnummer: String): String =
+        sessionFactory.transactionalSessionScope {
+            it.arbeidsgiverRepository.finnForIdentifikator(Arbeidsgiver.Identifikator.fraString(organisasjonsnummer))?.navn?.navn
+                ?: "navn er utilgjengelig"
+        }
 
     @Suppress("unused")
     override fun infotrygdutbetalinger(): List<ApiInfotrygdutbetaling>? =

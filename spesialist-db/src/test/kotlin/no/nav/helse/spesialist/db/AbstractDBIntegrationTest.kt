@@ -4,9 +4,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotliquery.sessionOf
-import no.nav.helse.modell.InntektskildetypeDto
 import no.nav.helse.modell.KomplettArbeidsforholdDto
-import no.nav.helse.modell.KomplettInntektskildeDto
 import no.nav.helse.modell.kommando.MinimalPersonDto
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
@@ -35,6 +33,8 @@ import no.nav.helse.spesialist.db.dao.api.PgPersonApiDao
 import no.nav.helse.spesialist.db.dao.api.PgRisikovurderingApiDao
 import no.nav.helse.spesialist.db.dao.api.PgVarselApiRepository
 import no.nav.helse.spesialist.db.testfixtures.ModuleIsolatedDBTestFixture
+import no.nav.helse.spesialist.domain.Arbeidsgiver
+import no.nav.helse.spesialist.domain.ArbeidsgiverId
 import no.nav.helse.spesialist.domain.Dialog
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
@@ -73,8 +73,6 @@ abstract class AbstractDBIntegrationTest {
             1.arbeidsgiver.organisasjonsnavn
         }
 
-    protected val BRANSJER = listOf("EN BRANSJE")
-
     protected val FNR = testperson.fødselsnummer
     protected val AKTØR = testperson.aktørId
     protected val FORNAVN = testperson.fornavn
@@ -106,7 +104,7 @@ abstract class AbstractDBIntegrationTest {
     protected val daos = DBDBTestFixture.fixture.module.daos
 
     protected val session = sessionOf(dataSource, returnGeneratedKey = true)
-    private val sessionContext = DBSessionContext(session)
+    protected val sessionContext = DBSessionContext(session)
 
     @AfterEach
     fun tearDown() = session.close()
@@ -142,7 +140,6 @@ abstract class AbstractDBIntegrationTest {
     internal val dialogDao = daos.dialogDao
     internal val annulleringRepository = daos.annulleringRepository
     private val pgPersonRepository = sessionContext.personRepository
-    internal val inntektskilderRepository = sessionContext.inntektskilderRepository
     internal val overstyringRepository = sessionContext.overstyringRepository
     internal val totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository
     internal val stansAutomatiskBehandlingSaksbehandlerDao = sessionContext.stansAutomatiskBehandlingSaksbehandlerDao
@@ -314,19 +311,12 @@ abstract class AbstractDBIntegrationTest {
     protected fun opprettArbeidsgiver(
         organisasjonsnummer: String = ORGNUMMER,
         navn: String = ORGNAVN,
-        bransjer: List<String> = BRANSJER,
-    ) {
-        inntektskilderRepository.lagreInntektskilder(
-            listOf(
-                KomplettInntektskildeDto(
-                    identifikator = organisasjonsnummer,
-                    type = InntektskildetypeDto.ORDINÆR,
-                    navn = navn,
-                    bransjer = bransjer,
-                    sistOppdatert = LocalDate.now(),
-                ),
-            ),
-        )
+    ): ArbeidsgiverId {
+        val arbeidsgiver = Arbeidsgiver.Factory.ny(
+            identifikator = Arbeidsgiver.Identifikator.fraString(organisasjonsnummer),
+        ).apply { oppdaterMedNavn(navn) }
+        sessionContext.arbeidsgiverRepository.lagre(arbeidsgiver)
+        return arbeidsgiver.id()
     }
 
     protected fun opprettArbeidsforhold(

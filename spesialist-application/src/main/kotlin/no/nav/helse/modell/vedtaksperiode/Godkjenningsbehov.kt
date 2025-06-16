@@ -6,7 +6,6 @@ import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.AvviksvurderingRepository
 import no.nav.helse.db.CommandContextDao
 import no.nav.helse.db.EgenAnsattDao
-import no.nav.helse.db.InntektskilderRepository
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PeriodehistorikkDao
@@ -24,7 +23,6 @@ import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.mediator.oppgave.OppgaveRepository
 import no.nav.helse.mediator.oppgave.OppgaveService
-import no.nav.helse.modell.InntektskildeDto.Companion.gjenopprett
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.automatisering.VurderAutomatiskAvvisning
 import no.nav.helse.modell.automatisering.VurderAutomatiskInnvilgelse
@@ -55,6 +53,7 @@ import no.nav.helse.modell.vedtak.Faktatype
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta
 import no.nav.helse.modell.vergemal.VurderVergemålOgFullmakt
 import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
+import no.nav.helse.spesialist.application.ArbeidsgiverRepository
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import java.time.LocalDate
 import java.util.UUID
@@ -256,7 +255,7 @@ internal class GodkjenningsbehovCommand(
     vedtakDao: VedtakDao,
     commandContextDao: CommandContextDao,
     personDao: PersonDao,
-    inntektskilderRepository: InntektskilderRepository,
+    arbeidsgiverRepository: ArbeidsgiverRepository,
     arbeidsforholdDao: ArbeidsforholdDao,
     egenAnsattDao: EgenAnsattDao,
     utbetalingDao: UtbetalingDao,
@@ -276,11 +275,6 @@ internal class GodkjenningsbehovCommand(
     person: Person,
 ) : MacroCommand() {
     private val sykefraværstilfelle = person.sykefraværstilfelle(behovData.vedtaksperiodeId)
-    private val inntektskilder =
-        inntektskilderRepository.finnInntektskilder(
-            fødselsnummer = behovData.fødselsnummer,
-            andreOrganisasjonsnumre = behovData.orgnummereMedRelevanteArbeidsforhold + behovData.organisasjonsnummer,
-        ).gjenopprett()
     override val commands: List<Command> =
         listOf(
             ForberedBehandlingAvGodkjenningsbehov(
@@ -330,8 +324,9 @@ internal class GodkjenningsbehovCommand(
                 organisasjonsnummer = behovData.organisasjonsnummer,
                 førsteKjenteDagFinner = førsteKjenteDagFinner,
                 personDao = personDao,
-                inntektskilder = inntektskilder,
-                inntektskilderRepository = inntektskilderRepository,
+                arbeidsgiverIdentifikatorer = (behovData.orgnummereMedRelevanteArbeidsforhold + behovData.organisasjonsnummer).toSet(),
+                arbeidsgiverRepository = arbeidsgiverRepository,
+                avviksvurderingRepository = avviksvurderingRepository,
                 arbeidsforholdDao = arbeidsforholdDao,
             ),
             KontrollerEgenAnsattstatus(
@@ -417,8 +412,9 @@ private class ForberedVisningCommand(
     organisasjonsnummer: String,
     førsteKjenteDagFinner: () -> LocalDate,
     personDao: PersonDao,
-    inntektskilder: List<no.nav.helse.modell.Inntektskilde>,
-    inntektskilderRepository: InntektskilderRepository,
+    arbeidsgiverIdentifikatorer: Set<String>,
+    arbeidsgiverRepository: ArbeidsgiverRepository,
+    avviksvurderingRepository: AvviksvurderingRepository,
     arbeidsforholdDao: ArbeidsforholdDao,
 ) : MacroCommand() {
     override val commands: List<Command> =
@@ -429,8 +425,10 @@ private class ForberedVisningCommand(
                 personDao = personDao,
             ),
             OpprettEllerOppdaterInntektskilder(
-                inntektskilder = inntektskilder,
-                inntektskilderRepository = inntektskilderRepository,
+                fødselsnummer = fødselsnummer,
+                identifikatorer = arbeidsgiverIdentifikatorer,
+                arbeidsgiverRepository = arbeidsgiverRepository,
+                avviksvurderingRepository = avviksvurderingRepository,
             ),
             OpprettEllerOppdaterArbeidsforhold(
                 fødselsnummer = fødselsnummer,

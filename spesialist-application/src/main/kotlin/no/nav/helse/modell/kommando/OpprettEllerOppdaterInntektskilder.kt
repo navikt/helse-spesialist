@@ -1,84 +1,126 @@
 package no.nav.helse.modell.kommando
 
-import no.nav.helse.db.InntektskilderRepository
-import no.nav.helse.modell.Inntektskilde
-import no.nav.helse.modell.Inntektskildetype
-import no.nav.helse.modell.KomplettInntektskilde
+import no.nav.helse.db.AvviksvurderingRepository
 import no.nav.helse.modell.arbeidsgiver.Arbeidsgiverinformasjonløsning
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.HentPersoninfoløsninger
-import org.slf4j.LoggerFactory
+import no.nav.helse.spesialist.application.ArbeidsgiverRepository
+import no.nav.helse.spesialist.application.logg.sikkerlogg
+import no.nav.helse.spesialist.domain.Arbeidsgiver
+import java.time.LocalDate
 
 internal class OpprettEllerOppdaterInntektskilder(
-    inntektskilder: List<Inntektskilde>,
-    private val inntektskilderRepository: InntektskilderRepository,
+    fødselsnummer: String,
+    identifikatorer: Set<String>,
+    private val arbeidsgiverRepository: ArbeidsgiverRepository,
+    private val avviksvurderingRepository: AvviksvurderingRepository,
 ) : Command {
-    private val inntektskilderSomMåOppdateres = inntektskilder.somMåOppdateres()
+    private val arbeidsgivereSomMåOppdateres =
+        arbeidsgivereSomMåOppdateres(
+            fødselsnummer = fødselsnummer,
+            identifikatorer = identifikatorer.map { Arbeidsgiver.Identifikator.fraString(it) }.toSet(),
+        )
+
+    private fun arbeidsgivereSomMåOppdateres(
+        fødselsnummer: String,
+        identifikatorer: Set<Arbeidsgiver.Identifikator>,
+    ): List<Arbeidsgiver> {
+        val alleIdentifikatorer =
+            (identifikatorer + organisasjonsnumreFraSammenligningsgrunnlag(fødselsnummer = fødselsnummer)).distinct()
+        val eksisterendeArbeidsgivere =
+            arbeidsgiverRepository.finnAlleForIdentifikatorer(
+                alleIdentifikatorer.toSet(),
+            )
+        val manglendeArbeidsgivere =
+            alleIdentifikatorer.minus(eksisterendeArbeidsgivere.map(Arbeidsgiver::identifikator))
+        val nyeArbeidsgivere = manglendeArbeidsgivere.map { Arbeidsgiver.Factory.ny(identifikator = it) }
+        return (eksisterendeArbeidsgivere + nyeArbeidsgivere).filter(::måOppdateres)
+    }
+
+    private fun organisasjonsnumreFraSammenligningsgrunnlag(fødselsnummer: String): List<Arbeidsgiver.Identifikator> =
+        avviksvurderingRepository
+            .finnAvviksvurderinger(fødselsnummer)
+            .flatMap { it.sammenligningsgrunnlag.innrapporterteInntekter }
+            .map {
+                if (it.arbeidsgiverreferanse.length == 9) {
+                    Arbeidsgiver.Identifikator.Organisasjonsnummer(it.arbeidsgiverreferanse)
+                } else {
+                    Arbeidsgiver.Identifikator.Fødselsnummer(it.arbeidsgiverreferanse)
+                }
+            }
 
     override fun execute(context: CommandContext): Boolean {
-        if (inntektskilderSomMåOppdateres.isEmpty()) return true
-        sendBehov(context, inntektskilderSomMåOppdateres)
+        if (arbeidsgivereSomMåOppdateres.isEmpty()) return true
+        sendBehov(context, arbeidsgivereSomMåOppdateres)
         return false
     }
 
     override fun resume(context: CommandContext): Boolean {
-        val (inntektskilderSomFortsattMåOppdateres, inntektskilderSomSkalLagres) =
-            inntektskilderSomMåOppdateres
-                .supplerMedLøsninger(context)
-                .partition { it.måOppdateres() }
+        arbeidsgivereSomMåOppdateres.oppdaterMedNavnFraLøsninger(context)
 
-        sikkerlogg.info("Lagrer oppdaterte inntektskilder: ${inntektskilderSomSkalLagres.prettyPrint()}")
-        inntektskilderSomSkalLagres.lagreOppdaterteInntektskilder()
+        val (arbeidsgivereSomFortsattMåOppdateres, arbeidsgivereSomSkalLagres) =
+            arbeidsgivereSomMåOppdateres.partition(::måOppdateres)
 
-        if (inntektskilderSomFortsattMåOppdateres.isEmpty()) return true
-        sikkerlogg.info("Trenger fortsatt oppdatert info for inntektskilder: ${inntektskilderSomFortsattMåOppdateres.prettyPrint()}")
-        sendBehov(context, inntektskilderSomFortsattMåOppdateres)
+        sikkerlogg.info("Lagrer oppdaterte arbeidsgivere: ${arbeidsgivereSomSkalLagres.prettyPrint()}")
+        arbeidsgivereSomSkalLagres.forEach { arbeidsgiverRepository.lagre(it) }
+
+        if (arbeidsgivereSomFortsattMåOppdateres.isEmpty()) return true
+        sikkerlogg.info("Trenger fortsatt oppdatert info for arbeidsgivere: ${arbeidsgivereSomFortsattMåOppdateres.prettyPrint()}")
+        sendBehov(context, arbeidsgivereSomFortsattMåOppdateres)
         return false
+    }
+
+    private fun List<Arbeidsgiver>.oppdaterMedNavnFraLøsninger(context: CommandContext) {
+        val arbeidsgiverinformasjonløsning = context.get<Arbeidsgiverinformasjonløsning>()
+        val personinfoløsninger = context.get<HentPersoninfoløsninger>()
+        forEach { arbeidsgiver ->
+            val identifikator = arbeidsgiver.identifikator
+            val navnFraLøsning =
+                when (identifikator) {
+                    is Arbeidsgiver.Identifikator.Fødselsnummer -> {
+                        personinfoløsninger?.relevantLøsning(identifikator.fødselsnummer)?.navn()
+                    }
+
+                    is Arbeidsgiver.Identifikator.Organisasjonsnummer -> {
+                        arbeidsgiverinformasjonløsning?.relevantLøsning(identifikator.organisasjonsnummer)?.navn
+                    }
+                }
+            if (navnFraLøsning != null) {
+                arbeidsgiver.oppdaterMedNavn(navnFraLøsning)
+            }
+        }
     }
 
     private fun sendBehov(
         context: CommandContext,
-        inntektskilder: List<Inntektskilde>,
+        arbeidsgivere: List<Arbeidsgiver>,
     ) {
-        inntektskilder
-            .lagBehov()
-            .forEach {
-                context.behov(it)
-            }
-    }
+        val enkeltpersonforetakBehov =
+            arbeidsgivere
+                .map(Arbeidsgiver::identifikator)
+                .filterIsInstance<Arbeidsgiver.Identifikator.Fødselsnummer>()
+                .map(Arbeidsgiver.Identifikator.Fødselsnummer::fødselsnummer)
+                .takeUnless { it.isEmpty() }
+                ?.let(Behov.Arbeidsgiverinformasjon::Enkeltpersonforetak)
 
-    private fun List<Inntektskilde>.somMåOppdateres() = filter { it.måOppdateres() }
+        if (enkeltpersonforetakBehov != null) {
+            context.behov(enkeltpersonforetakBehov)
+        }
 
-    private fun List<Inntektskilde>.lagreOppdaterteInntektskilder() {
-        val inntektskilderSomSkalLagres =
-            this
-                .filterIsInstance<KomplettInntektskilde>()
-                .map { it.toDto() }
-        inntektskilderRepository.lagreInntektskilder(inntektskilderSomSkalLagres)
-    }
+        val ordinærArbeidsgiverBehov =
+            arbeidsgivere
+                .map(Arbeidsgiver::identifikator)
+                .filterIsInstance<Arbeidsgiver.Identifikator.Organisasjonsnummer>()
+                .map(Arbeidsgiver.Identifikator.Organisasjonsnummer::organisasjonsnummer)
+                .takeUnless { it.isEmpty() }
+                ?.let { Behov.Arbeidsgiverinformasjon.OrdinærArbeidsgiver(it) }
 
-    private fun List<Inntektskilde>.supplerMedLøsninger(context: CommandContext): List<Inntektskilde> {
-        val arbeidsgiverinformasjonløsning = context.get<Arbeidsgiverinformasjonløsning>()
-        val personinfoløsninger = context.get<HentPersoninfoløsninger>()
-        return this.map {
-            it.mottaLøsninger(arbeidsgiverinformasjonløsning, personinfoløsninger)
+        if (ordinærArbeidsgiverBehov != null) {
+            context.behov(ordinærArbeidsgiverBehov)
         }
     }
 
-    private fun List<Inntektskilde>.lagBehov(): List<Behov> {
-        return this
-            .groupBy(keySelector = { it.type }, valueTransform = { it.identifikator })
-            .map { (inntektskildetype, inntektskilder) ->
-                when (inntektskildetype) {
-                    Inntektskildetype.ORDINÆR -> Behov.Arbeidsgiverinformasjon.OrdinærArbeidsgiver(inntektskilder)
-                    Inntektskildetype.ENKELTPERSONFORETAK -> Behov.Arbeidsgiverinformasjon.Enkeltpersonforetak(inntektskilder)
-                }
-            }
-    }
+    private fun måOppdateres(arbeidsgiver: Arbeidsgiver) = arbeidsgiver.navnIkkeOppdatertSiden(LocalDate.now().minusDays(14))
 
-    companion object {
-        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
-    }
+    private fun Collection<Arbeidsgiver>.prettyPrint() = joinToString { "${it.identifikator} (${it.navn?.navn})" }
 }
-
-private fun Collection<Inntektskilde>.prettyPrint() = joinToString { "${it.identifikator} (${it.type})" }
