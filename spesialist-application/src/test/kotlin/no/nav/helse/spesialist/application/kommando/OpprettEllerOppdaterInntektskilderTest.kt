@@ -167,6 +167,22 @@ class OpprettEllerOppdaterInntektskilderTest {
     }
 
     @Test
+    fun `suspenderer ikke og ber ikke om behov om inntektskilde er SELVSTENDIG`() {
+        val organisasjonsnummer = Arbeidsgiver.Identifikator.Organisasjonsnummer("SELVSTENDIG")
+        val command =
+            OpprettEllerOppdaterInntektskilder(
+                fødselsnummer = lagFødselsnummer(),
+                identifikatorer = setOf(organisasjonsnummer.organisasjonsnummer),
+                arbeidsgiverRepository = arbeidsgiverRepository,
+                avviksvurderingRepository = avviksvurderingRepository,
+            )
+
+        val ferdig = command.execute(context)
+        assertTrue(ferdig)
+        assertTrue(observer.behov.isEmpty())
+    }
+
+    @Test
     fun `suspenderer og ber om behov ved en kombinasjon av ulike ORDINÆRE inntektskilder`() {
         val organisasjonsnummer1 = lagOrganisasjonsnummerIdentifikator()
         lagreOppdatertArbeidsgiver(organisasjonsnummer1)

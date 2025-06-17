@@ -26,16 +26,25 @@ internal class OpprettEllerOppdaterInntektskilder(
         identifikatorer: Set<Arbeidsgiver.Identifikator>,
     ): List<Arbeidsgiver> {
         val alleIdentifikatorer =
-            (identifikatorer + organisasjonsnumreFraSammenligningsgrunnlag(fødselsnummer = fødselsnummer)).distinct()
+            identifikatorer
+                .filterNot(::erSelvstendig)
+                .plus(organisasjonsnumreFraSammenligningsgrunnlag(fødselsnummer = fødselsnummer))
+                .distinct()
+
         val eksisterendeArbeidsgivere =
-            arbeidsgiverRepository.finnAlleForIdentifikatorer(
-                alleIdentifikatorer.toSet(),
-            )
+            arbeidsgiverRepository.finnAlleForIdentifikatorer(alleIdentifikatorer.toSet())
+
         val manglendeArbeidsgivere =
-            alleIdentifikatorer.minus(eksisterendeArbeidsgivere.map(Arbeidsgiver::identifikator))
+            alleIdentifikatorer.minus(eksisterendeArbeidsgivere.map(Arbeidsgiver::identifikator).toSet())
         val nyeArbeidsgivere = manglendeArbeidsgivere.map { Arbeidsgiver.Factory.ny(identifikator = it) }
         return (eksisterendeArbeidsgivere + nyeArbeidsgivere).filter(::måOppdateres)
     }
+
+    private fun erSelvstendig(it: Arbeidsgiver.Identifikator) =
+        when (it) {
+            is Arbeidsgiver.Identifikator.Fødselsnummer -> it.fødselsnummer
+            is Arbeidsgiver.Identifikator.Organisasjonsnummer -> it.organisasjonsnummer
+        } == SELVSTENDIG
 
     private fun organisasjonsnumreFraSammenligningsgrunnlag(fødselsnummer: String): List<Arbeidsgiver.Identifikator> =
         avviksvurderingRepository
@@ -74,9 +83,8 @@ internal class OpprettEllerOppdaterInntektskilder(
         val arbeidsgiverinformasjonløsning = context.get<Arbeidsgiverinformasjonløsning>()
         val personinfoløsninger = context.get<HentPersoninfoløsninger>()
         forEach { arbeidsgiver ->
-            val identifikator = arbeidsgiver.identifikator
             val navnFraLøsning =
-                when (identifikator) {
+                when (val identifikator = arbeidsgiver.identifikator) {
                     is Arbeidsgiver.Identifikator.Fødselsnummer -> {
                         personinfoløsninger?.relevantLøsning(identifikator.fødselsnummer)?.navn()
                     }
@@ -123,4 +131,8 @@ internal class OpprettEllerOppdaterInntektskilder(
     private fun måOppdateres(arbeidsgiver: Arbeidsgiver) = arbeidsgiver.navnIkkeOppdatertSiden(LocalDate.now().minusDays(14))
 
     private fun Collection<Arbeidsgiver>.prettyPrint() = joinToString { "${it.identifikator} (${it.navn?.navn})" }
+
+    companion object {
+        private const val SELVSTENDIG = "SELVSTENDIG"
+    }
 }
