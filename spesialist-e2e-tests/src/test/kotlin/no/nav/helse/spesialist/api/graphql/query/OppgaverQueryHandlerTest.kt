@@ -18,6 +18,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavesortering
 import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodetype
 import no.nav.helse.spesialist.api.graphql.schema.ApiPersonnavn
 import no.nav.helse.spesialist.api.graphql.schema.ApiSorteringsnokkel
+import no.nav.helse.util.juni
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -136,9 +137,9 @@ class OppgaverQueryHandlerTest : AbstractGraphQLApiTest() {
     }
 
     @Test
-    fun `behandledeOppgaverFeed uten parametere returnerer oppgave`() {
+    fun `behandledeOppgaverFeed med offset 0 returnerer oppgave`() {
         every {
-            apiOppgaveService.behandledeOppgaver(any(), any(), any())
+            apiOppgaveService.behandledeOppgaver(any(), any(), any(), any(), any())
         } returns ApiBehandledeOppgaver(oppgaver = listOf(behandletOppgave()), totaltAntallOppgaver = 1)
 
         val body =
@@ -147,19 +148,21 @@ class OppgaverQueryHandlerTest : AbstractGraphQLApiTest() {
                 behandledeOppgaverFeed(
                     offset: 0,
                     limit: 14,
+                    fom: "2025-06-01"
+                    tom: "2025-06-02"
                 ) { oppgaver { id } }
             }""",
             )
         val antallOppgaver = body["data"]["behandledeOppgaverFeed"].size()
 
-        verify(exactly = 1) { apiOppgaveService.behandledeOppgaver(any(), 0, 14) }
+        verify(exactly = 1) { apiOppgaveService.behandledeOppgaver(any(), 0, 14, 1.juni(2025), 2.juni(2025)) }
         assertEquals(1, antallOppgaver)
     }
 
     @Test
-    fun `behandledeOppgaverFeed med parametere returnerer oppgave`() {
+    fun `behandledeOppgaverFeed med offset 14 returnerer oppgave`() {
         every {
-            apiOppgaveService.behandledeOppgaver(any(), any(), any())
+            apiOppgaveService.behandledeOppgaver(any(), any(), any(), any(), any())
         } returns ApiBehandledeOppgaver(oppgaver = listOf(behandletOppgave()), totaltAntallOppgaver = 1)
 
         val body =
@@ -168,6 +171,8 @@ class OppgaverQueryHandlerTest : AbstractGraphQLApiTest() {
                 behandledeOppgaverFeed(
                     offset: 14, 
                     limit: 14,
+                    fom: "2025-06-10",
+                    tom: "2025-06-13"
                 )  { oppgaver { id } }
         }""",
             )
@@ -178,6 +183,8 @@ class OppgaverQueryHandlerTest : AbstractGraphQLApiTest() {
                 saksbehandlerFraApi = any(),
                 offset = 14,
                 limit = 14,
+                fom = 10.juni(2025),
+                tom = 13.juni(2025)
             )
         }
         assertEquals(1, antallOppgaver)

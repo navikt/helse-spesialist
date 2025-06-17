@@ -22,22 +22,6 @@ class OppgaverQueryHandler(private val apiOppgaveService: ApiOppgaveService) : O
     override suspend fun behandledeOppgaverFeed(
         offset: Int,
         limit: Int,
-        env: DataFetchingEnvironment,
-    ): DataFetcherResult<ApiBehandledeOppgaver> {
-        val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
-        val behandledeOppgaver =
-            apiOppgaveService.behandledeOppgaver(
-                saksbehandlerFraApi = saksbehandler,
-                offset = offset,
-                limit = limit,
-            )
-
-        return byggRespons(behandledeOppgaver)
-    }
-
-    override suspend fun behandledeOppgaverFeedV2(
-        offset: Int,
-        limit: Int,
         fom: LocalDate,
         tom: LocalDate,
         env: DataFetchingEnvironment,

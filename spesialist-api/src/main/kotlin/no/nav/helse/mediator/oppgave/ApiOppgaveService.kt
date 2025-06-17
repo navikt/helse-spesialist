@@ -91,8 +91,8 @@ class ApiOppgaveService(
         saksbehandlerFraApi: SaksbehandlerFraApi,
         offset: Int,
         limit: Int,
-        fom: LocalDate = LocalDate.now(),
-        tom: LocalDate = LocalDate.now(),
+        fom: LocalDate,
+        tom: LocalDate,
     ): ApiBehandledeOppgaver {
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
         val behandledeOppgaver =

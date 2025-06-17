@@ -145,7 +145,7 @@ internal class ApiOppgaveServiceTest {
                     behandletOppgaveFraDatabaseForVisning(filtrertAntall = 2),
                     behandletOppgaveFraDatabaseForVisning(filtrertAntall = 2),
                 )
-        val oppgaver = apiOppgaveService.behandledeOppgaver(saksbehandlerFraApi(), 0, Int.Companion.MAX_VALUE)
+        val oppgaver = apiOppgaveService.behandledeOppgaver(saksbehandlerFraApi(), 0, Int.MAX_VALUE, LocalDate.now(), LocalDate.now())
         Assertions.assertEquals(2, oppgaver.oppgaver.size)
     }
 
@@ -223,7 +223,7 @@ internal class ApiOppgaveServiceTest {
                     ),
                 )
         val saksbehandler = saksbehandlerFraApi()
-        val oppgaver = apiOppgaveService.behandledeOppgaver(saksbehandler, 0, Int.Companion.MAX_VALUE)
+        val oppgaver = apiOppgaveService.behandledeOppgaver(saksbehandler, 0, Int.MAX_VALUE, LocalDate.now(), LocalDate.now())
         Assertions.assertEquals(1, oppgaver.oppgaver.size)
         val oppgave = oppgaver.oppgaver.single()
         Assertions.assertEquals("1", oppgave.id)
