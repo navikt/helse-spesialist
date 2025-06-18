@@ -20,7 +20,7 @@ class PgRisikovurderingDao internal constructor(session: Session) : Risikovurder
             """.trimIndent(),
             "vedtaksperiodeId" to vedtaksperiodeId,
         ).singleOrNull { it.boolean("kan_godkjennes_automatisk") }
-            ?.let(Risikovurdering.Companion::restore)
+            ?.let(Risikovurdering::restore)
 
     override fun måTilManuell(vedtaksperiodeId: UUID) =
         asSQL(

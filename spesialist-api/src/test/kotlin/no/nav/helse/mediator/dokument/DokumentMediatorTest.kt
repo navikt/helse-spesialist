@@ -11,7 +11,7 @@ import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
@@ -60,28 +60,28 @@ internal class DokumentMediatorTest {
     fun `Sender behov dersom dokumentet ikke finnes i databasen`() {
         every { dokumentDao.hent(any(), any()) } returns null
         mediator.håndter(FNR, DOKUMENTID, DOKUMENTTYPE)
-        Assertions.assertEquals(1, meldingPubliserer.antallMeldinger)
+        assertEquals(1, meldingPubliserer.antallMeldinger)
     }
 
     @Test
     fun `Sender nytt behov dersom dokumentet i databasen er tomt`() {
         every { dokumentDao.hent(any(), any()) } returns objectMapper.createObjectNode()
         mediator.håndter(FNR, DOKUMENTID, DOKUMENTTYPE)
-        Assertions.assertEquals(1, meldingPubliserer.antallMeldinger)
+        assertEquals(1, meldingPubliserer.antallMeldinger)
     }
 
     @Test
     fun `Sender nytt behov dersom dokumentet i databasen ikke har 404 error`() {
         every { dokumentDao.hent(any(), any()) } returns objectMapper.createObjectNode().put("error", 403)
         mediator.håndter(FNR, DOKUMENTID, DOKUMENTTYPE)
-        Assertions.assertEquals(1, meldingPubliserer.antallMeldinger)
+        assertEquals(1, meldingPubliserer.antallMeldinger)
     }
 
     @Test
     fun `Sender ikke nytt behov dersom dokumentet i databasen har 404 error`() {
         every { dokumentDao.hent(any(), any()) } returns objectMapper.createObjectNode().put("error", 404)
         mediator.håndter(FNR, DOKUMENTID, DOKUMENTTYPE)
-        Assertions.assertEquals(0, meldingPubliserer.antallMeldinger)
+        assertEquals(0, meldingPubliserer.antallMeldinger)
     }
 
     @Test
@@ -92,6 +92,6 @@ internal class DokumentMediatorTest {
         verify(exactly = 1) {
             dokumentDao.hent(any(), any())
         }
-        Assertions.assertEquals(0, meldingPubliserer.antallMeldinger)
+        assertEquals(0, meldingPubliserer.antallMeldinger)
     }
 }

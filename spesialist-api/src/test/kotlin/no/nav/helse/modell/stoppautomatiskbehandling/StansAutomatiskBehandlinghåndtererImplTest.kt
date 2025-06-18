@@ -12,7 +12,8 @@ import no.nav.helse.modell.saksbehandler.handlinger.OpphevStans
 import no.nav.helse.spesialist.domain.NotatType
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.UUID
@@ -71,8 +72,8 @@ class StansAutomatiskBehandlinghåndtererImplTest {
                 )
         val dataTilSpeil = stansAutomatiskBehandlinghåndterer.unntattFraAutomatiskGodkjenning(fødselsnummer)
 
-        Assertions.assertTrue(dataTilSpeil.erUnntatt)
-        Assertions.assertEquals(listOf(StoppknappÅrsak.AKTIVITETSKRAV.name), dataTilSpeil.arsaker)
+        assertTrue(dataTilSpeil.erUnntatt)
+        assertEquals(listOf(StoppknappÅrsak.AKTIVITETSKRAV.name), dataTilSpeil.arsaker)
     }
 
     private fun stans(vararg årsaker: StoppknappÅrsak) = "STOPP_AUTOMATIKK" to årsaker.toSet()

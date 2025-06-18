@@ -34,7 +34,7 @@ import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.domain.testfixtures.lagEpostadresseFraFulltNavn
 import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlerident
 import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlernavn
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertNull
@@ -121,10 +121,10 @@ internal class ApiOppgaveServiceTest {
                 )
         val oppgaver = apiOppgaveService.oppgaver(
             saksbehandlerFraApi(), 0,
-            Int.Companion.MAX_VALUE, emptyList(),
+            Int.MAX_VALUE, emptyList(),
             ApiFiltrering()
         )
-        Assertions.assertEquals(2, oppgaver.oppgaver.size)
+        assertEquals(2, oppgaver.oppgaver.size)
     }
 
     @Test
@@ -134,8 +134,8 @@ internal class ApiOppgaveServiceTest {
             antallMineSakerPåVent = 1
         )
         val antallOppgaver = apiOppgaveService.antallOppgaver(saksbehandlerFraApi())
-        Assertions.assertEquals(2, antallOppgaver.antallMineSaker)
-        Assertions.assertEquals(1, antallOppgaver.antallMineSakerPaVent)
+        assertEquals(2, antallOppgaver.antallMineSaker)
+        assertEquals(1, antallOppgaver.antallMineSakerPaVent)
     }
 
     @Test
@@ -146,18 +146,18 @@ internal class ApiOppgaveServiceTest {
                     behandletOppgaveFraDatabaseForVisning(filtrertAntall = 2),
                 )
         val oppgaver = apiOppgaveService.behandledeOppgaver(saksbehandlerFraApi(), 0, Int.MAX_VALUE, LocalDate.now(), LocalDate.now())
-        Assertions.assertEquals(2, oppgaver.oppgaver.size)
+        assertEquals(2, oppgaver.oppgaver.size)
     }
 
     @Test
     fun `Hent kun oppgaver til visning som saksbehandler har tilgang til`() {
-        apiOppgaveService.oppgaver(saksbehandlerFraApi(), 0, Int.Companion.MAX_VALUE, emptyList(), ApiFiltrering())
+        apiOppgaveService.oppgaver(saksbehandlerFraApi(), 0, Int.MAX_VALUE, emptyList(), ApiFiltrering())
         verify(exactly = 1) {
             oppgaveDao.finnOppgaverForVisning(
-                ekskluderEgenskaper = Egenskap.Companion.alleTilgangsstyrteEgenskaper.map { it.name },
+                ekskluderEgenskaper = Egenskap.alleTilgangsstyrteEgenskaper.map { it.name },
                 SAKSBEHANDLEROID,
                 0,
-                Int.Companion.MAX_VALUE,
+                Int.MAX_VALUE,
             )
         }
     }
@@ -167,17 +167,17 @@ internal class ApiOppgaveServiceTest {
         apiOppgaveService.oppgaver(
             saksbehandlerFraApi = saksbehandlerFraApi(),
             offset = 0,
-            limit = Int.Companion.MAX_VALUE,
+            limit = Int.MAX_VALUE,
             sortering = emptyList(),
             filtrering = ApiFiltrering(ingenUkategoriserteEgenskaper = true)
         )
         verify(exactly = 1) {
             oppgaveDao.finnOppgaverForVisning(
                 ekskluderEgenskaper =
-                    Egenskap.Companion.alleTilgangsstyrteEgenskaper.map { it.name } + Egenskap.Companion.alleUkategoriserteEgenskaper.map { it.name },
+                    Egenskap.alleTilgangsstyrteEgenskaper.map { it.name } + Egenskap.alleUkategoriserteEgenskaper.map { it.name },
                 SAKSBEHANDLEROID,
                 0,
-                Int.Companion.MAX_VALUE,
+                Int.MAX_VALUE,
             )
         }
     }
@@ -187,7 +187,7 @@ internal class ApiOppgaveServiceTest {
         apiOppgaveService.oppgaver(
             saksbehandlerFraApi(),
             0,
-            Int.Companion.MAX_VALUE,
+            Int.MAX_VALUE,
             emptyList(),
             ApiFiltrering(
                 ekskluderteEgenskaper =
@@ -201,10 +201,10 @@ internal class ApiOppgaveServiceTest {
         )
         verify(exactly = 1) {
             oppgaveDao.finnOppgaverForVisning(
-                ekskluderEgenskaper = Egenskap.Companion.alleTilgangsstyrteEgenskaper.map { it.name } + Egenskap.PÅ_VENT.name,
+                ekskluderEgenskaper = Egenskap.alleTilgangsstyrteEgenskaper.map { it.name } + Egenskap.PÅ_VENT.name,
                 SAKSBEHANDLEROID,
                 0,
-                Int.Companion.MAX_VALUE,
+                Int.MAX_VALUE,
             )
         }
     }
@@ -224,20 +224,20 @@ internal class ApiOppgaveServiceTest {
                 )
         val saksbehandler = saksbehandlerFraApi()
         val oppgaver = apiOppgaveService.behandledeOppgaver(saksbehandler, 0, Int.MAX_VALUE, LocalDate.now(), LocalDate.now())
-        Assertions.assertEquals(1, oppgaver.oppgaver.size)
+        assertEquals(1, oppgaver.oppgaver.size)
         val oppgave = oppgaver.oppgaver.single()
-        Assertions.assertEquals("1", oppgave.id)
-        Assertions.assertEquals("1234567891011", oppgave.aktorId)
-        Assertions.assertEquals("fornavn", oppgave.personnavn.fornavn)
-        Assertions.assertEquals("mellomnavn", oppgave.personnavn.mellomnavn)
-        Assertions.assertEquals("etternavn", oppgave.personnavn.etternavn)
-        Assertions.assertEquals("EN-SAKSBEHANDLER-IDENT", oppgave.ferdigstiltAv)
+        assertEquals("1", oppgave.id)
+        assertEquals("1234567891011", oppgave.aktorId)
+        assertEquals("fornavn", oppgave.personnavn.fornavn)
+        assertEquals("mellomnavn", oppgave.personnavn.mellomnavn)
+        assertEquals("etternavn", oppgave.personnavn.etternavn)
+        assertEquals("EN-SAKSBEHANDLER-IDENT", oppgave.ferdigstiltAv)
         assertNull(oppgave.beslutter)
-        Assertions.assertEquals("EN-SAKSBEHANDLER-IDENT", oppgave.saksbehandler)
-        Assertions.assertEquals(ferdigstiltTidspunkt, oppgave.ferdigstiltTidspunkt)
-        Assertions.assertEquals(ApiOppgavetype.SOKNAD, oppgave.oppgavetype)
-        Assertions.assertEquals(ApiPeriodetype.FORSTEGANGSBEHANDLING, oppgave.periodetype)
-        Assertions.assertEquals(ApiAntallArbeidsforhold.ET_ARBEIDSFORHOLD, oppgave.antallArbeidsforhold)
+        assertEquals("EN-SAKSBEHANDLER-IDENT", oppgave.saksbehandler)
+        assertEquals(ferdigstiltTidspunkt, oppgave.ferdigstiltTidspunkt)
+        assertEquals(ApiOppgavetype.SOKNAD, oppgave.oppgavetype)
+        assertEquals(ApiPeriodetype.FORSTEGANGSBEHANDLING, oppgave.periodetype)
+        assertEquals(ApiAntallArbeidsforhold.ET_ARBEIDSFORHOLD, oppgave.antallArbeidsforhold)
     }
 
     @Test
@@ -270,23 +270,23 @@ internal class ApiOppgaveServiceTest {
         })
         val oppgaver = apiOppgaveService.oppgaver(
             saksbehandler, 0,
-            Int.Companion.MAX_VALUE, emptyList(),
+            Int.MAX_VALUE, emptyList(),
             ApiFiltrering()
         )
-        Assertions.assertEquals(1, oppgaver.oppgaver.size)
+        assertEquals(1, oppgaver.oppgaver.size)
         val oppgave = oppgaver.oppgaver.single()
-        Assertions.assertEquals("1", oppgave.id)
-        Assertions.assertEquals(opprettet, oppgave.opprettet)
-        Assertions.assertEquals(opprinneligSøknadsdato, oppgave.opprinneligSoknadsdato)
-        Assertions.assertEquals(vedtaksperiodeId, oppgave.vedtaksperiodeId)
-        Assertions.assertEquals("fornavn", oppgave.navn.fornavn)
-        Assertions.assertEquals("mellomnavn", oppgave.navn.mellomnavn)
-        Assertions.assertEquals("etternavn", oppgave.navn.etternavn)
-        Assertions.assertEquals("1234567891011", oppgave.aktorId)
-        Assertions.assertEquals(SAKSBEHANDLERNAVN, oppgave.tildeling?.navn)
-        Assertions.assertEquals(SAKSBEHANDLEREPOST, oppgave.tildeling?.epost)
-        Assertions.assertEquals(SAKSBEHANDLEROID, oppgave.tildeling?.oid)
-        Assertions.assertEquals(EGENSKAPER.size, oppgave.egenskaper.size)
+        assertEquals("1", oppgave.id)
+        assertEquals(opprettet, oppgave.opprettet)
+        assertEquals(opprinneligSøknadsdato, oppgave.opprinneligSoknadsdato)
+        assertEquals(vedtaksperiodeId, oppgave.vedtaksperiodeId)
+        assertEquals("fornavn", oppgave.navn.fornavn)
+        assertEquals("mellomnavn", oppgave.navn.mellomnavn)
+        assertEquals("etternavn", oppgave.navn.etternavn)
+        assertEquals("1234567891011", oppgave.aktorId)
+        assertEquals(SAKSBEHANDLERNAVN, oppgave.tildeling?.navn)
+        assertEquals(SAKSBEHANDLEREPOST, oppgave.tildeling?.epost)
+        assertEquals(SAKSBEHANDLEROID, oppgave.tildeling?.oid)
+        assertEquals(EGENSKAPER.size, oppgave.egenskaper.size)
     }
 
     @ParameterizedTest
@@ -328,11 +328,11 @@ internal class ApiOppgaveServiceTest {
         })
         val oppgaver = apiOppgaveService.oppgaver(
             saksbehandler, 0,
-            Int.Companion.MAX_VALUE, emptyList(),
+            Int.MAX_VALUE, emptyList(),
             ApiFiltrering()
         )
         val oppgave = oppgaver.oppgaver.single()
-        Assertions.assertEquals(egenskap.oppgavetype(), oppgave.oppgavetype)
+        assertEquals(egenskap.oppgavetype(), oppgave.oppgavetype)
     }
 
     @ParameterizedTest
@@ -377,11 +377,11 @@ internal class ApiOppgaveServiceTest {
         })
         val oppgaver = apiOppgaveService.oppgaver(
             saksbehandler, 0,
-            Int.Companion.MAX_VALUE, emptyList(),
+            Int.MAX_VALUE, emptyList(),
             ApiFiltrering()
         )
         val oppgave = oppgaver.oppgaver.single()
-        Assertions.assertEquals(egenskap.periodetype(), oppgave.periodetype)
+        assertEquals(egenskap.periodetype(), oppgave.periodetype)
     }
 
     @ParameterizedTest
@@ -426,11 +426,11 @@ internal class ApiOppgaveServiceTest {
         })
         val oppgaver = apiOppgaveService.oppgaver(
             saksbehandler, 0,
-            Int.Companion.MAX_VALUE, emptyList(),
+            Int.MAX_VALUE, emptyList(),
             ApiFiltrering()
         )
         val oppgave = oppgaver.oppgaver.single()
-        Assertions.assertEquals(egenskap.mottaker(), oppgave.mottaker)
+        assertEquals(egenskap.mottaker(), oppgave.mottaker)
     }
 
     @ParameterizedTest
@@ -472,11 +472,11 @@ internal class ApiOppgaveServiceTest {
         })
         val oppgaver = apiOppgaveService.oppgaver(
             saksbehandler, 0,
-            Int.Companion.MAX_VALUE, emptyList(),
+            Int.MAX_VALUE, emptyList(),
             ApiFiltrering()
         )
         val oppgave = oppgaver.oppgaver.single()
-        Assertions.assertEquals(egenskap.antallArbeidsforhold(), oppgave.antallArbeidsforhold)
+        assertEquals(egenskap.antallArbeidsforhold(), oppgave.antallArbeidsforhold)
     }
 
     private fun behandletOppgaveFraDatabaseForVisning(
