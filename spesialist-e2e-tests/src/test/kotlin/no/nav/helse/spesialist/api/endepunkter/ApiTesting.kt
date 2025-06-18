@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.endepunkter
 
-import io.ktor.client.HttpClient
 import io.ktor.http.ContentType
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.auth.authenticate
@@ -40,11 +39,12 @@ class ApiTesting(
             }
         }
 
-    fun <T> spesialistApi(block: suspend ApplicationTestBuilder.(HttpClient) -> T): T {
+    fun <T> spesialistApi(block: suspend ApplicationTestBuilder.() -> T): T {
         var response: T? = null
         testApplication {
             setUpApplication()
-            response = block(httpClient())
+            client = httpClient()
+            response = block()
         }
         return response!!
     }

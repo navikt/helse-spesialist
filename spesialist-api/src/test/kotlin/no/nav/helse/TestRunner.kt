@@ -109,7 +109,8 @@ object TestRunner {
             }
 
             given(avhengigheter)
-            val client = createClient {
+
+            client = createClient {
                 install(ContentNegotiation) {
                     register(ContentType.Application.Json, JacksonConverter(objectMapper))
                 }

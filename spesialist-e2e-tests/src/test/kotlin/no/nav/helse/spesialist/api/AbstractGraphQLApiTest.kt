@@ -260,7 +260,7 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
         @Language("GraphQL") query: String,
         group: UUID? = null,
     ): JsonNode =
-        apiTesting.spesialistApi { client ->
+        apiTesting.spesialistApi {
             client.post("/graphql") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
