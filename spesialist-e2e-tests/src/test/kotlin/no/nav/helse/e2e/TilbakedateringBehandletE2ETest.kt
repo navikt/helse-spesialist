@@ -10,7 +10,7 @@ import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.util.februar
 import no.nav.helse.util.januar
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
@@ -142,6 +142,6 @@ class TilbakedateringBehandletE2ETest : AbstractE2ETest() {
                     ),
                 )
             }
-        Assertions.assertEquals(1, antallVarsler)
+        assertEquals(1, antallVarsler)
     }
 }

@@ -17,7 +17,8 @@ import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagAktørId
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.io.IOException
 import java.util.UUID
@@ -39,7 +40,7 @@ internal class OverstyringMutationHandlerTest {
                 )
             ),
             then = { _, body, _ ->
-                Assertions.assertTrue(body["data"]["overstyrDager"].asBoolean())
+                assertTrue(body["data"]["overstyrDager"].asBoolean())
             },
         )
     }
@@ -60,7 +61,7 @@ internal class OverstyringMutationHandlerTest {
                 )
             ),
             then = { _, body, _ ->
-                Assertions.assertTrue(body["data"]["overstyrDager"].asBoolean())
+                assertTrue(body["data"]["overstyrDager"].asBoolean())
             },
         )
     }
@@ -81,7 +82,7 @@ internal class OverstyringMutationHandlerTest {
                 )
             ),
             then = { _, body, _ ->
-                Assertions.assertTrue(body["data"]["overstyrDager"].asBoolean())
+                assertTrue(body["data"]["overstyrDager"].asBoolean())
             },
         )
     }
@@ -107,7 +108,7 @@ internal class OverstyringMutationHandlerTest {
                 )
             ),
             then = { _, body, _ ->
-                Assertions.assertTrue(body["data"]["overstyrArbeidsforhold"].asBoolean())
+                assertTrue(body["data"]["overstyrArbeidsforhold"].asBoolean())
             },
         )
     }
@@ -144,7 +145,7 @@ internal class OverstyringMutationHandlerTest {
                 )
             ),
             then = { _, body, _ ->
-                Assertions.assertTrue(body["data"]["overstyrInntektOgRefusjon"].asBoolean())
+                assertTrue(body["data"]["overstyrInntektOgRefusjon"].asBoolean())
             },
         )
     }
@@ -168,7 +169,7 @@ internal class OverstyringMutationHandlerTest {
                 )
             ),
             then = { _, body, _ ->
-                Assertions.assertEquals(500, body["errors"][0]["extensions"]["code"].asInt())
+                assertEquals(500, body["errors"][0]["extensions"]["code"].asInt())
             },
         )
     }

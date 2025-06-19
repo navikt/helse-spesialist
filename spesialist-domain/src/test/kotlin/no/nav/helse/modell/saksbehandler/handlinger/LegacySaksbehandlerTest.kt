@@ -15,8 +15,8 @@ import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler.Companion.gjenopprett
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler.Companion.toDto
 import no.nav.helse.spesialist.domain.testfixtures.jan
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.UUID
@@ -269,16 +269,16 @@ internal class LegacySaksbehandlerTest {
         val oid = UUID.randomUUID()
         val saksbehandler1 = saksbehandler(epost = "epost1@nav.no", oid = oid)
         val saksbehandler2 = saksbehandler(epost = "epost2@nav.no", oid = oid)
-        Assertions.assertNotEquals(saksbehandler1, saksbehandler2)
-        Assertions.assertNotEquals(saksbehandler1.hashCode(), saksbehandler2.hashCode())
+        assertNotEquals(saksbehandler1, saksbehandler2)
+        assertNotEquals(saksbehandler1.hashCode(), saksbehandler2.hashCode())
     }
 
     @Test
     fun `not equals - oid`() {
         val saksbehandler1 = saksbehandler()
         val saksbehandler2 = saksbehandler()
-        Assertions.assertNotEquals(saksbehandler1, saksbehandler2)
-        Assertions.assertNotEquals(saksbehandler1.hashCode(), saksbehandler2.hashCode())
+        assertNotEquals(saksbehandler1, saksbehandler2)
+        assertNotEquals(saksbehandler1.hashCode(), saksbehandler2.hashCode())
     }
 
     @Test
@@ -286,8 +286,8 @@ internal class LegacySaksbehandlerTest {
         val oid = UUID.randomUUID()
         val saksbehandler1 = saksbehandler(navn = "navn 1", oid = oid)
         val saksbehandler2 = saksbehandler(navn = "navn 2", oid = oid)
-        Assertions.assertNotEquals(saksbehandler1, saksbehandler2)
-        Assertions.assertNotEquals(saksbehandler1.hashCode(), saksbehandler2.hashCode())
+        assertNotEquals(saksbehandler1, saksbehandler2)
+        assertNotEquals(saksbehandler1.hashCode(), saksbehandler2.hashCode())
     }
 
     @Test
@@ -295,8 +295,8 @@ internal class LegacySaksbehandlerTest {
         val oid = UUID.randomUUID()
         val saksbehandler1 = saksbehandler(ident = "X999999", oid = oid)
         val saksbehandler2 = saksbehandler(ident = "Y999999", oid = oid)
-        Assertions.assertNotEquals(saksbehandler1, saksbehandler2)
-        Assertions.assertNotEquals(saksbehandler1.hashCode(), saksbehandler2.hashCode())
+        assertNotEquals(saksbehandler1, saksbehandler2)
+        assertNotEquals(saksbehandler1.hashCode(), saksbehandler2.hashCode())
     }
 
     @Test
