@@ -475,20 +475,17 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
     protected fun opprettArbeidsgiver(
         organisasjonsnummer: String = ORGANISASJONSNUMMER,
-        bransjer: List<String> = emptyList(),
     ): Long {
-        val bransjeId = opprettBransjer(bransjer)
         val navnId = opprettArbeidsgivernavn()
 
         return requireNotNull(
             dbQuery.updateAndReturnGeneratedKey(
                 """
-                INSERT INTO arbeidsgiver (organisasjonsnummer, navn_ref, bransjer_ref)
-                VALUES (:organisasjonsnummer, :navnId, :bransjeId) ON CONFLICT DO NOTHING
+                INSERT INTO arbeidsgiver (organisasjonsnummer, navn_ref)
+                VALUES (:organisasjonsnummer, :navnId) ON CONFLICT DO NOTHING
                 """.trimIndent(),
                 "organisasjonsnummer" to organisasjonsnummer,
                 "navnId" to navnId,
-                "bransjeId" to bransjeId,
             )
         )
     }
@@ -530,11 +527,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         "tittel" to ARBEIDSFORHOLD.tittel,
         "prosent" to ARBEIDSFORHOLD.prosent,
         "oppdatert" to LocalDateTime.now(),
-    )
-
-    private fun opprettBransjer(bransjer: List<String>) = dbQuery.updateAndReturnGeneratedKey(
-        "INSERT INTO arbeidsgiver_bransjer (bransjer) VALUES (:bransjer::json)",
-        "bransjer" to objectMapper.writeValueAsString(bransjer),
     )
 
     private fun opprettArbeidsgivernavn() = dbQuery.updateAndReturnGeneratedKey(

@@ -6,8 +6,7 @@ class ArbeidsgiverinformasjonBehovLøser : AbstractBehovLøser("Arbeidsgiverinfo
     override fun løsning(behovJson: JsonNode) = behovJson["organisasjonsnummer"].map {
         mapOf(
             "orgnummer" to it.asText(),
-            "navn" to "Navn for ${it.asText()}",
-            "bransjer" to listOf("Bransje for ${it.asText()}")
+            "navn" to "Navn for ${it.asText()}"
         )
     }
 }

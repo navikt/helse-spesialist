@@ -1189,12 +1189,10 @@ object Testmeldingfabrikk {
     data class ArbeidsgiverinformasjonJson(
         private val orgnummer: String,
         private val navn: String,
-        private val bransjer: List<String>,
     ) {
         fun toBody() = mapOf(
             "orgnummer" to orgnummer,
             "navn" to navn,
-            "bransjer" to bransjer
         )
     }
 

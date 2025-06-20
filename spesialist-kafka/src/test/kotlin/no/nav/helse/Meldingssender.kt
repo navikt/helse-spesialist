@@ -352,8 +352,7 @@ internal class Meldingssender(private val testRapid: TestRapid) {
                 arbeidsgiverinformasjonJson ?: behov["Arbeidsgiverinformasjon"]["organisasjonsnummer"].map {
                     ArbeidsgiverinformasjonJson(
                         it.asText(),
-                        "Navn for ${it.asText()}",
-                        listOf("Bransje for ${it.asText()}")
+                        "Navn for ${it.asText()}"
                     )
                 }
 
@@ -389,8 +388,7 @@ internal class Meldingssender(private val testRapid: TestRapid) {
             val organisasjoner = behov["Arbeidsgiverinformasjon"]["organisasjonsnummer"].map {
                 ArbeidsgiverinformasjonJson(
                     it.asText(),
-                    "Navn for ${it.asText()}",
-                    listOf("Bransje for ${it.asText()}")
+                    "Navn for ${it.asText()}"
                 )
             }
 

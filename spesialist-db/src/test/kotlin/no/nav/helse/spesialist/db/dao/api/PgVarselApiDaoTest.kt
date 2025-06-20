@@ -551,8 +551,7 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
                     aktørId = lagAktørId()
                 ),
                 arbeidsgiverId = opprettArbeidsgiver(
-                    organisasjonsnummer = lagOrganisasjonsnummer(),
-                    bransjer = emptyList()
+                    organisasjonsnummer = lagOrganisasjonsnummer()
                 ),
                 utbetalingId = utbetalingId,
                 vedtaksperiodeId = dto.id,
@@ -825,24 +824,15 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
     )
 
     private fun opprettArbeidsgiver(
-        organisasjonsnummer: String,
-        bransjer: List<String>
+        organisasjonsnummer: String
     ): Long = requireNotNull(
         dbQuery.updateAndReturnGeneratedKey(
             """
-                INSERT INTO arbeidsgiver (organisasjonsnummer, navn_ref, bransjer_ref)
-                VALUES (:organisasjonsnummer, :navnId, :bransjeId) ON CONFLICT DO NOTHING
+                INSERT INTO arbeidsgiver (organisasjonsnummer, navn_ref)
+                VALUES (:organisasjonsnummer, :navnId) ON CONFLICT DO NOTHING
                 """.trimIndent(),
             "organisasjonsnummer" to organisasjonsnummer,
             "navnId" to opprettArbeidsgivernavn(),
-            "bransjeId" to opprettBransjer(bransjer),
-        )
-    )
-
-    private fun opprettBransjer(bransjer: List<String>): Long = requireNotNull(
-        dbQuery.updateAndReturnGeneratedKey(
-            "INSERT INTO arbeidsgiver_bransjer (bransjer) VALUES (:bransjer::json)",
-            "bransjer" to objectMapper.writeValueAsString(bransjer),
         )
     )
 

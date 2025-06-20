@@ -45,7 +45,6 @@ class ArbeidsgiverinformasjonLøsningRiver(
                         Arbeidsgiverinformasjonløsning.ArbeidsgiverDto(
                             orgnummer = arbeidsgiver.path("orgnummer").asText(),
                             navn = arbeidsgiver.path("navn").asText(),
-                            bransjer = arbeidsgiver.path("bransjer").map { it.asText() },
                         )
                     },
                 ),

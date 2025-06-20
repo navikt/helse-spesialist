@@ -505,7 +505,6 @@ class OpprettEllerOppdaterInntektskilderTest {
                 Arbeidsgiverinformasjonløsning.ArbeidsgiverDto(
                     orgnummer = orgnummer,
                     navn = navn,
-                    bransjer = emptyList()
                 ),
             )
         )

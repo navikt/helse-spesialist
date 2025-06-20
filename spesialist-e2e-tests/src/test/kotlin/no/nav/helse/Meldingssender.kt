@@ -383,7 +383,6 @@ class Meldingssender(private val testRapid: TestRapid) {
                     ArbeidsgiverinformasjonJson(
                         it.asText(),
                         "Navn for ${it.asText()}",
-                        listOf("Bransje for ${it.asText()}")
                     )
                 }
 
@@ -420,7 +419,6 @@ class Meldingssender(private val testRapid: TestRapid) {
                 ArbeidsgiverinformasjonJson(
                     it.asText(),
                     "Navn for ${it.asText()}",
-                    listOf("Bransje for ${it.asText()}")
                 )
             }
 

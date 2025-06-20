@@ -6,6 +6,5 @@ class Arbeidsgiverinformasjonløsning(private val arbeidsgivere: List<Arbeidsgiv
     data class ArbeidsgiverDto(
         val orgnummer: String,
         val navn: String,
-        val bransjer: List<String>,
     )
 }
