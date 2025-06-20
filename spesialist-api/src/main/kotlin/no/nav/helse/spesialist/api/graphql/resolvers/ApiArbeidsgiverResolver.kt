@@ -30,7 +30,6 @@ import java.util.UUID
 class ApiArbeidsgiverResolver(
     private val organisasjonsnummer: String,
     private val navn: String,
-    private val bransjer: List<String>,
     private val ghostPerioder: List<ApiGhostPeriode>,
     private val fødselsnummer: String,
     private val generasjoner: List<SnapshotGenerasjon>,
@@ -51,8 +50,6 @@ class ApiArbeidsgiverResolver(
     override fun organisasjonsnummer(): String = organisasjonsnummer
 
     override fun navn(): String = navn
-
-    override fun bransjer(): List<String> = bransjer
 
     override fun ghostPerioder(): List<ApiGhostPeriode> = ghostPerioder
 

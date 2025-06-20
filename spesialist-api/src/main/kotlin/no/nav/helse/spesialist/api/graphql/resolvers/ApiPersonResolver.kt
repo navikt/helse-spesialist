@@ -117,7 +117,6 @@ data class ApiPersonResolver(
                     ApiArbeidsgiverResolver(
                         organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
                         navn = finnNavnForOrganisasjonsnummer(arbeidsgiver.organisasjonsnummer),
-                        bransjer = emptyList(),
                         ghostPerioder = arbeidsgiver.ghostPerioder.tilGhostPerioder(arbeidsgiver.organisasjonsnummer),
                         fødselsnummer = snapshot.fodselsnummer,
                         generasjoner = arbeidsgiver.generasjoner,

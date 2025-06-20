@@ -529,7 +529,6 @@ fragment overstyring on Overstyring {
 }
 
 fragment arbeidsgiver on Arbeidsgiver {
-    bransjer
     navn
     organisasjonsnummer
     arbeidsforhold {

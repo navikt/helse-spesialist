@@ -104,7 +104,6 @@ type Arbeidsforholdoverstyring implements Overstyring {
 
 type Arbeidsgiver {
     arbeidsforhold: [Arbeidsforhold!]!
-    bransjer: [String!]!
     generasjoner: [Generasjon!]!
     ghostPerioder: [GhostPeriode!]!
     inntekterFraAordningen: [ArbeidsgiverInntekterFraAOrdningen!]!

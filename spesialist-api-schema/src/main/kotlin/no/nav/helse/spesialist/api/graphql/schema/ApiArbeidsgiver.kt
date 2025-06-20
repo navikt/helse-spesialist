@@ -163,8 +163,6 @@ interface ArbeidsgiverSchema {
 
     fun navn(): String
 
-    fun bransjer(): List<String>
-
     fun ghostPerioder(): List<ApiGhostPeriode>
 
     fun generasjoner(): List<ApiGenerasjon>
