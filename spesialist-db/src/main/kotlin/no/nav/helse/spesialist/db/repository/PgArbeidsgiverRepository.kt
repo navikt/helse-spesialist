@@ -23,20 +23,20 @@ internal class PgArbeidsgiverRepository(
     override fun finn(id: ArbeidsgiverId): Arbeidsgiver? =
         asSQL(
             """
-                    SELECT ag.id, ag.organisasjonsnummer, an.navn, an.navn_oppdatert FROM arbeidsgiver ag
-                    LEFT JOIN arbeidsgiver_navn an on an.id = ag.navn_ref
-                    WHERE ag.id IN (:id)
-                """,
+            SELECT ag.id, ag.organisasjonsnummer, an.navn, an.navn_oppdatert FROM arbeidsgiver ag
+            LEFT JOIN arbeidsgiver_navn an on an.id = ag.navn_ref
+            WHERE ag.id IN (:id)
+            """.trimIndent(),
             "id" to id.value,
         ).singleOrNull { it.toArbeidsgiver() }
 
     override fun finnForIdentifikator(identifikator: Arbeidsgiver.Identifikator): Arbeidsgiver? =
         asSQL(
             """
-                    SELECT ag.id, ag.organisasjonsnummer, an.navn, an.navn_oppdatert FROM arbeidsgiver ag
-                    LEFT JOIN arbeidsgiver_navn an on an.id = ag.navn_ref
-                    WHERE ag.organisasjonsnummer IN (:organisasjonsnummer)
-                """,
+            SELECT ag.id, ag.organisasjonsnummer, an.navn, an.navn_oppdatert FROM arbeidsgiver ag
+            LEFT JOIN arbeidsgiver_navn an on an.id = ag.navn_ref
+            WHERE ag.organisasjonsnummer IN (:organisasjonsnummer)
+            """.trimIndent(),
             "organisasjonsnummer" to identifikator.tilDbOrganisasjonsnummer(),
         ).singleOrNull { it.toArbeidsgiver() }
 
@@ -46,10 +46,10 @@ internal class PgArbeidsgiverRepository(
         } else {
             asSQL(
                 """
-                    SELECT ag.id, ag.organisasjonsnummer, an.navn, an.navn_oppdatert FROM arbeidsgiver ag
-                    LEFT JOIN arbeidsgiver_navn an on an.id = ag.navn_ref
-                    WHERE ag.organisasjonsnummer = ANY (:organisasjonsnumre)
-                """,
+                SELECT ag.id, ag.organisasjonsnummer, an.navn, an.navn_oppdatert FROM arbeidsgiver ag
+                LEFT JOIN arbeidsgiver_navn an on an.id = ag.navn_ref
+                WHERE ag.organisasjonsnummer = ANY (:organisasjonsnumre)
+                """.trimIndent(),
                 "organisasjonsnumre" to identifikatorer.map { it.tilDbOrganisasjonsnummer() }.toTypedArray(),
             ).list { it.toArbeidsgiver() }
         }
@@ -60,9 +60,14 @@ internal class PgArbeidsgiverRepository(
                 insertArbeidsgiverNavn(navn)
             }
         return asSQL(
-            "INSERT INTO arbeidsgiver (organisasjonsnummer, navn_ref) VALUES (:organisasjonsnummer, :navn_ref)",
+            """
+            INSERT INTO arbeidsgiver (organisasjonsnummer, navn_ref, navn, navn_sist_oppdatert_dato) 
+            VALUES (:organisasjonsnummer, :navn_ref, :navn, :navn_sist_oppdatert_dato)
+            """.trimIndent(),
             "organisasjonsnummer" to arbeidsgiver.identifikator.tilDbOrganisasjonsnummer(),
             "navn_ref" to arbeidsgiverNavnId,
+            "navn" to arbeidsgiver.navn?.navn,
+            "navn_sist_oppdatert_dato" to arbeidsgiver.navn?.sistOppdatertDato,
         ).updateAndReturnGeneratedKey().toInt()
     }
 
@@ -81,10 +86,16 @@ internal class PgArbeidsgiverRepository(
             }
 
         asSQL(
-            "UPDATE arbeidsgiver SET organisasjonsnummer = :organisasjonsnummer, navn_ref = :navn_ref WHERE id = :id",
+            """
+            UPDATE arbeidsgiver 
+            SET organisasjonsnummer = :organisasjonsnummer, navn_ref = :navn_ref, navn = :navn, navn_sist_oppdatert_dato = :navn_sist_oppdatert_dato 
+            WHERE id = :id
+            """.trimIndent(),
             "organisasjonsnummer" to arbeidsgiver.identifikator.tilDbOrganisasjonsnummer(),
             "navn_ref" to arbeidsgiverNavnId,
             "id" to arbeidsgiver.id().value,
+            "navn" to arbeidsgiver.navn?.navn,
+            "navn_sist_oppdatert_dato" to arbeidsgiver.navn?.sistOppdatertDato,
         ).update()
 
         if (eksisterendeArbeidsgiverNavnId != null && arbeidsgiverNavnId == null) {
