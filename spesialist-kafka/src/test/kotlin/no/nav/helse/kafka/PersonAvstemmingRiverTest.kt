@@ -1,30 +1,22 @@
 package no.nav.helse.kafka
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
-import no.nav.helse.db.BehandlingRepository
+import io.mockk.mockk
+import io.mockk.verify
 import no.nav.helse.medRivers
-import no.nav.helse.spesialist.domain.Behandling
-import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.mediator.MeldingMediator
 import org.intellij.lang.annotations.Language
 import kotlin.test.Test
-import kotlin.test.assertEquals
 
 class PersonAvstemmingRiverTest {
-    private val behandlingRepositoryStub = object : BehandlingRepository {
-        var antallGangerKalt = 0
-        override fun finn(id: SpleisBehandlingId): Behandling? {
-            antallGangerKalt += 1
-            return null
-        }
-    }
-
+    val mediator = mockk<MeldingMediator>(relaxed = true)
     private val testRapid =
-        TestRapid().medRivers(PersonAvstemmingRiver(behandlingRepositoryStub))
+        TestRapid().medRivers(PersonAvstemmingRiver(mediator))
 
     @Test
     fun `Leser inn person_avstemt event`() {
         testRapid.sendTestMessage(personAvstemt())
-        assertEquals(2, behandlingRepositoryStub.antallGangerKalt)
+        verify(exactly = 1) { mediator.finnBehandlingerFor("12345678910") }
     }
 
     @Language("JSON")

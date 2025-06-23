@@ -80,10 +80,6 @@ class KafkaModule(
                     ignorerMeldingerForUkjentePersoner = configuration.ignorerMeldingerForUkjentePersoner,
                 ),
             meldingDuplikatkontrollDao = daos.meldingDuplikatkontrollDao,
-            behandlingRepository =
-                sessionFactory.transactionalSessionScope { sessionContext ->
-                    sessionContext.behandlingRepository
-                },
             featureToggles = featureToggles,
         )
 

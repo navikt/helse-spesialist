@@ -5,4 +5,6 @@ import no.nav.helse.spesialist.domain.SpleisBehandlingId
 
 interface BehandlingRepository {
     fun finn(id: SpleisBehandlingId): Behandling?
+
+    fun finnAlle(fødselsnummer: String): List<Behandling>
 }

@@ -7,7 +7,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import io.micrometer.core.instrument.MeterRegistry
 import net.logstash.logback.argument.StructuredArguments.kv
-import no.nav.helse.db.BehandlingRepository
+import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.sikkerlogg
@@ -16,7 +16,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 class PersonAvstemmingRiver(
-    private val behandlingRepository: BehandlingRepository,
+    private val mediator: MeldingMediator,
 ) : SpesialistRiver {
     override fun preconditions(): River.PacketValidation {
         return River.PacketValidation {
@@ -38,6 +38,9 @@ class PersonAvstemmingRiver(
         val hendelseId = packet["@id"].asUUID()
         logg.info("Mottok person_avstemt, {}", kv("hendelseId", hendelseId))
 
+        val fødselsnummer = packet["fødselsnummer"].asText()
+        val behandlinger = mediator.finnBehandlingerFor(fødselsnummer)
+
         packet["arbeidsgivere"].flatMap { arbeidsgiverNode ->
             val arbeidsgiver = arbeidsgiverNode["organisasjonsnummer"].asText()
             arbeidsgiverNode["vedtaksperioder"].flatMap { vedtaksperiode ->
@@ -50,11 +53,10 @@ class PersonAvstemmingRiver(
                 }
             }
         }.forEach { behandling ->
-            val vårBehandling = behandlingRepository.finn(SpleisBehandlingId(behandling.id))
-            if (vårBehandling == null) {
+            if (behandlinger.none { it.id == SpleisBehandlingId(behandling.id) }) {
                 logg.warn("Fant ikke behandling med id: ${behandling.id} ved avstemming, se sikkerlogg for detaljer")
                 sikkerlogg.warn(
-                    "Fant ikke behandling med id: ${behandling.id} ved avstemming av person med fødselsnummer: ${packet["fødselsnummer"].asText()}",
+                    "Fant ikke behandling med id: ${behandling.id} ved avstemming av person med fødselsnummer: $fødselsnummer",
                 )
             }
         }
