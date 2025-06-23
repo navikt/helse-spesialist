@@ -17,6 +17,7 @@ import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
 import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.db.DbQuery
+import no.nav.helse.spesialist.domain.Arbeidsgiver
 import no.nav.helse.spesialist.domain.Dialog
 import no.nav.helse.spesialist.domain.DialogId
 import no.nav.helse.spesialist.domain.Notat
@@ -475,26 +476,15 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
     protected fun opprettArbeidsgiver(
         organisasjonsnummer: String = ORGANISASJONSNUMMER,
-    ): Long {
-        val navnId = opprettArbeidsgivernavn()
-
-        return requireNotNull(
-            dbQuery.updateAndReturnGeneratedKey(
-                """
-                INSERT INTO arbeidsgiver (organisasjonsnummer, navn_ref)
-                VALUES (:organisasjonsnummer, :navnId) ON CONFLICT DO NOTHING
-                """.trimIndent(),
-                "organisasjonsnummer" to organisasjonsnummer,
-                "navnId" to navnId,
-            )
-        )
-    }
-
-    private fun finnArbeidsgiverId(): Int = requireNotNull(
-        dbQuery.single(
-            "SELECT id FROM arbeidsgiver WHERE organisasjonsnummer = :organisasjonsnummer",
-            "organisasjonsnummer" to ORGANISASJONSNUMMER
-        ) { it.int("id") })
+    ): Long =
+        Arbeidsgiver.Factory.ny(identifikator = Arbeidsgiver.Identifikator.fraString(organisasjonsnummer))
+            .also { it.oppdaterMedNavn(navn = ARBEIDSGIVER_NAVN) }
+            .also { arbeidsgiver ->
+                sessionFactory.transactionalSessionScope {
+                    it.arbeidsgiverRepository.lagre(arbeidsgiver)
+                }
+            }
+            .id().value.toLong()
 
     protected fun opprettSaksbehandler(
         oid: UUID = SAKSBEHANDLER.oid,
@@ -527,10 +517,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         "tittel" to ARBEIDSFORHOLD.tittel,
         "prosent" to ARBEIDSFORHOLD.prosent,
         "oppdatert" to LocalDateTime.now(),
-    )
-
-    private fun opprettArbeidsgivernavn() = dbQuery.updateAndReturnGeneratedKey(
-        "INSERT INTO arbeidsgiver_navn (navn) VALUES (:arbeidsgivernavn)", "arbeidsgivernavn" to ARBEIDSGIVER_NAVN
     )
 
     private fun opprettInfotrygdutbetalinger() = dbQuery.updateAndReturnGeneratedKey(

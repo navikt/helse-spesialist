@@ -10,6 +10,8 @@ import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
 import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
+import no.nav.helse.spesialist.domain.Arbeidsgiver
+import no.nav.helse.spesialist.domain.ArbeidsgiverId
 import no.nav.helse.spesialist.domain.testfixtures.feb
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagAktørId
@@ -595,7 +597,7 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
 
     private fun opprettVedtaksperiode(
         personId: Long,
-        arbeidsgiverId: Long,
+        arbeidsgiverId: ArbeidsgiverId,
         utbetalingId: UUID,
         vedtaksperiodeId: UUID,
         fom: LocalDate,
@@ -654,7 +656,7 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
 
     private fun opprettVedtak(
         personId: Long,
-        arbeidsgiverId: Long,
+        arbeidsgiverId: ArbeidsgiverId,
         vedtaksperiodeId: UUID,
         fom: LocalDate,
         tom: LocalDate,
@@ -676,7 +678,7 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
             "id" to vedtaksperiodeId,
             "fom" to fom,
             "tom" to tom,
-            "arbeidsgiverId" to arbeidsgiverId,
+            "arbeidsgiverId" to arbeidsgiverId.value,
             "personId" to personId,
             "forkastet" to forkastet,
         )!!
@@ -823,25 +825,11 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
         "er_egen_ansatt" to erEgenAnsatt,
     )
 
-    private fun opprettArbeidsgiver(
-        organisasjonsnummer: String
-    ): Long = requireNotNull(
-        dbQuery.updateAndReturnGeneratedKey(
-            """
-                INSERT INTO arbeidsgiver (organisasjonsnummer, navn_ref)
-                VALUES (:organisasjonsnummer, :navnId) ON CONFLICT DO NOTHING
-                """.trimIndent(),
-            "organisasjonsnummer" to organisasjonsnummer,
-            "navnId" to opprettArbeidsgivernavn(),
-        )
-    )
-
-    private fun opprettArbeidsgivernavn(): Long = requireNotNull(
-        dbQuery.updateAndReturnGeneratedKey(
-            "INSERT INTO arbeidsgiver_navn (navn) VALUES (:arbeidsgivernavn)",
-            "arbeidsgivernavn" to lagOrganisasjonsnavn()
-        )
-    )
+    private fun opprettArbeidsgiver(organisasjonsnummer: String): ArbeidsgiverId =
+        Arbeidsgiver.Factory.ny(identifikator = Arbeidsgiver.Identifikator.fraString(organisasjonsnummer))
+            .also { it.oppdaterMedNavn(navn = lagOrganisasjonsnavn()) }
+            .also(sessionContext.arbeidsgiverRepository::lagre)
+            .id()
 
     private fun insertInfotrygdutbetalinger(): Long = requireNotNull(
         dbQuery.updateAndReturnGeneratedKey(

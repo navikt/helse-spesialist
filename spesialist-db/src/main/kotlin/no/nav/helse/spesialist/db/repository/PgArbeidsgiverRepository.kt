@@ -22,21 +22,13 @@ internal class PgArbeidsgiverRepository(
 
     override fun finn(id: ArbeidsgiverId): Arbeidsgiver? =
         asSQL(
-            """
-            SELECT ag.id, ag.organisasjonsnummer, an.navn, an.navn_oppdatert FROM arbeidsgiver ag
-            LEFT JOIN arbeidsgiver_navn an on an.id = ag.navn_ref
-            WHERE ag.id IN (:id)
-            """.trimIndent(),
+            "SELECT * FROM arbeidsgiver WHERE id = :id",
             "id" to id.value,
         ).singleOrNull { it.toArbeidsgiver() }
 
     override fun finnForIdentifikator(identifikator: Arbeidsgiver.Identifikator): Arbeidsgiver? =
         asSQL(
-            """
-            SELECT ag.id, ag.organisasjonsnummer, an.navn, an.navn_oppdatert FROM arbeidsgiver ag
-            LEFT JOIN arbeidsgiver_navn an on an.id = ag.navn_ref
-            WHERE ag.organisasjonsnummer IN (:organisasjonsnummer)
-            """.trimIndent(),
+            "SELECT * FROM arbeidsgiver WHERE organisasjonsnummer = :organisasjonsnummer",
             "organisasjonsnummer" to identifikator.tilDbOrganisasjonsnummer(),
         ).singleOrNull { it.toArbeidsgiver() }
 
@@ -45,103 +37,49 @@ internal class PgArbeidsgiverRepository(
             emptyList()
         } else {
             asSQL(
-                """
-                SELECT ag.id, ag.organisasjonsnummer, an.navn, an.navn_oppdatert FROM arbeidsgiver ag
-                LEFT JOIN arbeidsgiver_navn an on an.id = ag.navn_ref
-                WHERE ag.organisasjonsnummer = ANY (:organisasjonsnumre)
-                """.trimIndent(),
+                "SELECT * FROM arbeidsgiver WHERE organisasjonsnummer = ANY (:organisasjonsnumre)",
                 "organisasjonsnumre" to identifikatorer.map { it.tilDbOrganisasjonsnummer() }.toTypedArray(),
             ).list { it.toArbeidsgiver() }
         }
 
     private fun insertArbeidsgiver(arbeidsgiver: Arbeidsgiver): Int {
-        val arbeidsgiverNavnId =
-            arbeidsgiver.navn?.let { navn ->
-                insertArbeidsgiverNavn(navn)
-            }
         return asSQL(
             """
-            INSERT INTO arbeidsgiver (organisasjonsnummer, navn_ref, navn, navn_sist_oppdatert_dato) 
-            VALUES (:organisasjonsnummer, :navn_ref, :navn, :navn_sist_oppdatert_dato)
+            INSERT INTO arbeidsgiver (organisasjonsnummer, navn, navn_sist_oppdatert_dato) 
+            VALUES (:organisasjonsnummer, :navn, :navn_sist_oppdatert_dato)
             """.trimIndent(),
             "organisasjonsnummer" to arbeidsgiver.identifikator.tilDbOrganisasjonsnummer(),
-            "navn_ref" to arbeidsgiverNavnId,
             "navn" to arbeidsgiver.navn?.navn,
             "navn_sist_oppdatert_dato" to arbeidsgiver.navn?.sistOppdatertDato,
         ).updateAndReturnGeneratedKey().toInt()
     }
 
     private fun updateArbeidsgiver(arbeidsgiver: Arbeidsgiver) {
-        val eksisterendeArbeidsgiverNavnId =
-            asSQL(
-                "SELECT navn_ref FROM arbeidsgiver WHERE id = :id",
-                "id" to arbeidsgiver.id().value,
-            ).singleOrNull { it.intOrNull("navn_ref") }
-
-        val arbeidsgiverNavnId =
-            arbeidsgiver.navn?.let { navn ->
-                eksisterendeArbeidsgiverNavnId
-                    ?.also { updateArbeidsgiverNavn(navn, eksisterendeArbeidsgiverNavnId) }
-                    ?: insertArbeidsgiverNavn(navn)
-            }
-
         asSQL(
             """
             UPDATE arbeidsgiver 
-            SET organisasjonsnummer = :organisasjonsnummer, navn_ref = :navn_ref, navn = :navn, navn_sist_oppdatert_dato = :navn_sist_oppdatert_dato 
+            SET organisasjonsnummer = :organisasjonsnummer, navn = :navn, navn_sist_oppdatert_dato = :navn_sist_oppdatert_dato 
             WHERE id = :id
             """.trimIndent(),
             "organisasjonsnummer" to arbeidsgiver.identifikator.tilDbOrganisasjonsnummer(),
-            "navn_ref" to arbeidsgiverNavnId,
             "id" to arbeidsgiver.id().value,
             "navn" to arbeidsgiver.navn?.navn,
             "navn_sist_oppdatert_dato" to arbeidsgiver.navn?.sistOppdatertDato,
         ).update()
-
-        if (eksisterendeArbeidsgiverNavnId != null && arbeidsgiverNavnId == null) {
-            deleteArbeidsgiverNavn(eksisterendeArbeidsgiverNavnId)
-        }
     }
 
-    private fun Row.toArbeidsgiver(): Arbeidsgiver {
-        return Arbeidsgiver.Factory.fraLagring(
+    private fun Row.toArbeidsgiver(): Arbeidsgiver =
+        Arbeidsgiver.Factory.fraLagring(
             id = ArbeidsgiverId(int("id")),
             identifikator = fraDbOrganisasjonsnummer(string("organisasjonsnummer")),
             navn =
                 stringOrNull("navn")?.let { navn ->
                     Arbeidsgiver.Navn(
                         navn = navn,
-                        sistOppdatertDato = localDate("navn_oppdatert"),
+                        sistOppdatertDato = localDate("navn_sist_oppdatert_dato"),
                     )
                 },
         )
-    }
-
-    private fun insertArbeidsgiverNavn(navn: Arbeidsgiver.Navn): Int =
-        asSQL(
-            "INSERT INTO arbeidsgiver_navn (navn, navn_oppdatert) VALUES (:navn, :navn_oppdatert)",
-            "navn" to navn.navn,
-            "navn_oppdatert" to navn.sistOppdatertDato,
-        ).updateAndReturnGeneratedKey().toInt()
-
-    private fun updateArbeidsgiverNavn(
-        navn: Arbeidsgiver.Navn,
-        arbeidsgiverNavnId: Int,
-    ) {
-        asSQL(
-            "UPDATE arbeidsgiver_navn SET navn = :navn, navn_oppdatert = :navn_oppdatert WHERE id = :id",
-            "navn" to navn.navn,
-            "navn_oppdatert" to navn.sistOppdatertDato,
-            "id" to arbeidsgiverNavnId,
-        ).update()
-    }
-
-    private fun deleteArbeidsgiverNavn(arbeidsgiverNavnId: Int) {
-        asSQL(
-            "DELETE FROM arbeidsgiver_navn WHERE id = :id",
-            "id" to arbeidsgiverNavnId,
-        ).update()
-    }
 
     private fun Arbeidsgiver.Identifikator.tilDbOrganisasjonsnummer(): String =
         when (this) {

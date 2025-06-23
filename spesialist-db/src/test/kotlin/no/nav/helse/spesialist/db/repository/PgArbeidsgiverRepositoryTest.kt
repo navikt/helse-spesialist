@@ -78,7 +78,7 @@ class PgArbeidsgiverRepositoryTest : AbstractDBIntegrationTest() {
     }
 
     @Test
-    fun `kan lagre og hente opp arbeidsgiver med basert på identifikator`() {
+    fun `kan lagre og hente opp arbeidsgiver basert på identifikator`() {
         // Given:
         val identifikator = Arbeidsgiver.Identifikator.Organisasjonsnummer(
             organisasjonsnummer = lagOrganisasjonsnummer()
@@ -99,7 +99,7 @@ class PgArbeidsgiverRepositoryTest : AbstractDBIntegrationTest() {
     }
 
     @Test
-    fun `kan lagre og hente opp arbeidsgiver med basert på identifikator i liste`() {
+    fun `kan lagre og hente opp arbeidsgiver basert på identifikator i liste`() {
         // Given:
         val identifikator = Arbeidsgiver.Identifikator.Organisasjonsnummer(
             organisasjonsnummer = lagOrganisasjonsnummer()
