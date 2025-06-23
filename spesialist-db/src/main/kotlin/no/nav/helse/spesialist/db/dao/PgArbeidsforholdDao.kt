@@ -46,15 +46,16 @@ class PgArbeidsforholdDao internal constructor(
     private fun insertArbeidsforhold(arbeidsforholdDto: KomplettArbeidsforholdDto) {
         asSQL(
             """
-            INSERT INTO arbeidsforhold (person_ref, arbeidsgiver_ref, startdato, sluttdato, stillingstittel, stillingsprosent, oppdatert)
+            INSERT INTO arbeidsforhold (person_ref, arbeidsgiver_ref, arbeidsgiver_identifikator, startdato, sluttdato, stillingstittel, stillingsprosent, oppdatert)
             VALUES (
                 (SELECT id FROM person WHERE fødselsnummer = :fodselsnummer),
                 (SELECT id FROM arbeidsgiver WHERE organisasjonsnummer = :organisasjonsnummer),
-                :startdato, :sluttdato, :stillingstittel, :stillingsprosent, :oppdatert
+                :arbeidsgiver_identifikator, :startdato, :sluttdato, :stillingstittel, :stillingsprosent, :oppdatert
             );
             """.trimIndent(),
             "fodselsnummer" to arbeidsforholdDto.fødselsnummer,
             "organisasjonsnummer" to arbeidsforholdDto.organisasjonsnummer,
+            "arbeidsgiver_identifikator" to arbeidsforholdDto.organisasjonsnummer,
             "startdato" to arbeidsforholdDto.startdato,
             "sluttdato" to arbeidsforholdDto.sluttdato,
             "stillingstittel" to arbeidsforholdDto.stillingstittel,

@@ -45,10 +45,11 @@ internal class PgArbeidsgiverRepository(
     private fun insertArbeidsgiver(arbeidsgiver: Arbeidsgiver): Int {
         return asSQL(
             """
-            INSERT INTO arbeidsgiver (organisasjonsnummer, navn, navn_sist_oppdatert_dato) 
-            VALUES (:organisasjonsnummer, :navn, :navn_sist_oppdatert_dato)
+            INSERT INTO arbeidsgiver (organisasjonsnummer, identifikator, navn, navn_sist_oppdatert_dato) 
+            VALUES (:organisasjonsnummer, :identifikator, :navn, :navn_sist_oppdatert_dato)
             """.trimIndent(),
             "organisasjonsnummer" to arbeidsgiver.identifikator.tilDbOrganisasjonsnummer(),
+            "identifikator" to arbeidsgiver.identifikator.tilDbOrganisasjonsnummer(),
             "navn" to arbeidsgiver.navn?.navn,
             "navn_sist_oppdatert_dato" to arbeidsgiver.navn?.sistOppdatertDato,
         ).updateAndReturnGeneratedKey().toInt()
@@ -58,10 +59,11 @@ internal class PgArbeidsgiverRepository(
         asSQL(
             """
             UPDATE arbeidsgiver 
-            SET organisasjonsnummer = :organisasjonsnummer, navn = :navn, navn_sist_oppdatert_dato = :navn_sist_oppdatert_dato 
+            SET organisasjonsnummer = :organisasjonsnummer, identifikator = :identifikator, navn = :navn, navn_sist_oppdatert_dato = :navn_sist_oppdatert_dato 
             WHERE id = :id
             """.trimIndent(),
             "organisasjonsnummer" to arbeidsgiver.identifikator.tilDbOrganisasjonsnummer(),
+            "identifikator" to arbeidsgiver.identifikator.tilDbOrganisasjonsnummer(),
             "id" to arbeidsgiver.id().value,
             "navn" to arbeidsgiver.navn?.navn,
             "navn_sist_oppdatert_dato" to arbeidsgiver.navn?.sistOppdatertDato,

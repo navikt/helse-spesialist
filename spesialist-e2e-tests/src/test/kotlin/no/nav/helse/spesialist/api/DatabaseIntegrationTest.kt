@@ -200,13 +200,14 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         opprettOpprinneligSøknadsdato(periode)
         return dbQuery.updateAndReturnGeneratedKey(
             """
-            INSERT INTO vedtak (vedtaksperiode_id, fom, tom, arbeidsgiver_ref, person_ref, forkastet)
-            VALUES (:id, :fom, :tom, :arbeidsgiverId, :personId, :forkastet)
+            INSERT INTO vedtak (vedtaksperiode_id, fom, tom, arbeidsgiver_ref, arbeidsgiver_identifikator, person_ref, forkastet)
+            VALUES (:id, :fom, :tom, :arbeidsgiverId, :arbeidsgiver_identifikator, :personId, :forkastet)
             """.trimMargin(),
             "id" to periode.id,
             "fom" to periode.fom,
             "tom" to periode.tom,
             "arbeidsgiverId" to arbeidsgiverId,
+            "arbeidsgiver_identifikator" to ORGANISASJONSNUMMER,
             "personId" to personId,
             "forkastet" to forkastet,
         )!!
@@ -501,23 +502,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         )
         return oid
     }
-
-    protected fun opprettArbeidsforhold(
-        personId: Long,
-        arbeidsgiverId: Long,
-    ) = dbQuery.updateAndReturnGeneratedKey(
-        """
-        INSERT INTO arbeidsforhold (person_ref, arbeidsgiver_ref, startdato, sluttdato, stillingstittel, stillingsprosent, oppdatert)
-        VALUES (:personId, :arbeidsgiverId, :startdato, :sluttdato, :tittel, :prosent, :oppdatert)
-        """.trimIndent(),
-        "personId" to personId,
-        "arbeidsgiverId" to arbeidsgiverId,
-        "startdato" to ARBEIDSFORHOLD.start,
-        "sluttdato" to ARBEIDSFORHOLD.slutt,
-        "tittel" to ARBEIDSFORHOLD.tittel,
-        "prosent" to ARBEIDSFORHOLD.prosent,
-        "oppdatert" to LocalDateTime.now(),
-    )
 
     private fun opprettInfotrygdutbetalinger() = dbQuery.updateAndReturnGeneratedKey(
         "INSERT INTO infotrygdutbetalinger (data) VALUES ('[]')"
