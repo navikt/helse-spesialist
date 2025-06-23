@@ -203,7 +203,6 @@ internal abstract class AbstractDatabaseTest {
                 "global_snapshot_versjon",
                 "saksbehandler",
                 "arbeidsgiver",
-                "arbeidsgiver_navn",
                 "api_varseldefinisjon",
                 "saksbehandler_opptegnelse_sekvensnummer",
                 "inntekt",
