@@ -1,6 +1,7 @@
 package no.nav.helse
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
+import io.mockk.mockk
 import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.kafka.RiverSetup
@@ -121,7 +122,8 @@ class TestMediator(
         RiverSetup(
             mediator = meldingMediator,
             meldingDuplikatkontrollDao = daos.meldingDuplikatkontrollDao,
-            featureToggles = object : FeatureToggles {}
+            featureToggles = object : FeatureToggles {},
+            behandlingRepository = mockk(relaxed = true),
         ).registrerRivers(testRapid)
     }
 

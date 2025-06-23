@@ -8,6 +8,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.FeatureToggles
+import no.nav.helse.db.BehandlingRepository
 import no.nav.helse.db.MeldingDuplikatkontrollDao
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.registrerTidsbrukForDuplikatsjekk
@@ -19,6 +20,7 @@ import kotlin.time.measureTimedValue
 class RiverSetup(
     private val mediator: MeldingMediator,
     private val meldingDuplikatkontrollDao: MeldingDuplikatkontrollDao,
+    behandlingRepository: BehandlingRepository,
     featureToggles: FeatureToggles,
 ) {
     private val rivers =
@@ -59,6 +61,7 @@ class RiverSetup(
             KommandokjedePåminnelseRiver(mediator),
             StansAutomatiskBehandlingRiver(mediator),
             AvviksvurderingLøsningRiver(mediator),
+            PersonAvstemmingRiver(behandlingRepository),
         ).map { DuplikatsjekkendeRiver(it, meldingDuplikatkontrollDao) }
 
     fun registrerRivers(rapidsConnection: RapidsConnection) {
