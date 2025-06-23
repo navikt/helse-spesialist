@@ -1,0 +1,4 @@
+UPDATE overstyring_minimum_sykdomsgrad_arbeidsgiver
+SET arbeidsgiver_identifikator = arbeidsgiver.organisasjonsnummer
+FROM arbeidsgiver
+WHERE overstyring_minimum_sykdomsgrad_arbeidsgiver.arbeidsgiver_ref = arbeidsgiver.id;

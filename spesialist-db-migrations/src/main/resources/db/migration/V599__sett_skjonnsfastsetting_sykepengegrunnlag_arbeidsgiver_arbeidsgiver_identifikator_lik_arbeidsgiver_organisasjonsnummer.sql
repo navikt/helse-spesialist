@@ -1,0 +1,4 @@
+UPDATE skjonnsfastsetting_sykepengegrunnlag_arbeidsgiver
+SET arbeidsgiver_identifikator = arbeidsgiver.organisasjonsnummer
+FROM arbeidsgiver
+WHERE skjonnsfastsetting_sykepengegrunnlag_arbeidsgiver.arbeidsgiver_ref = arbeidsgiver.id;
