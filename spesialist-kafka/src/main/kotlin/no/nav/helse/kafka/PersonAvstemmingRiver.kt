@@ -10,8 +10,7 @@ import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.spesialist.application.logg.logg
-import no.nav.helse.spesialist.application.logg.sikkerlogg
-import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.Behandling
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -41,28 +40,36 @@ class PersonAvstemmingRiver(
         val fødselsnummer = packet["fødselsnummer"].asText()
         val behandlinger = mediator.finnBehandlingerFor(fødselsnummer)
 
-        packet["arbeidsgivere"].flatMap { arbeidsgiverNode ->
-            val arbeidsgiver = arbeidsgiverNode["organisasjonsnummer"].asText()
-            arbeidsgiverNode["vedtaksperioder"].flatMap { vedtaksperiode ->
-                vedtaksperiode["behandlinger"].map { behandlingNode ->
-                    AvstemtBehandling(
+        val vedtaksperioderFraSpleis =
+            packet["arbeidsgivere"].flatMap { arbeidsgiverNode ->
+                val arbeidsgiver = arbeidsgiverNode["organisasjonsnummer"].asText()
+                arbeidsgiverNode["vedtaksperioder"].map { vedtaksperiode ->
+                    AvstemtVedtaksperiode(
                         arbeidsgiver = arbeidsgiver,
-                        id = behandlingNode["behandlingId"].asUUID(),
-                        opprettet = behandlingNode["behandlingOpprettet"].asLocalDateTime(),
+                        id = vedtaksperiode["id"].asUUID(),
+                        opprettet = vedtaksperiode["opprettet"].asLocalDateTime(),
                     )
                 }
             }
-        }.forEach { behandling ->
-            if (behandlinger.none { it.id == SpleisBehandlingId(behandling.id) }) {
-                logg.warn("Fant ikke behandling med id: ${behandling.id} ved avstemming, se sikkerlogg for detaljer")
-                sikkerlogg.warn(
-                    "Fant ikke behandling med id: ${behandling.id} ved avstemming av person med fødselsnummer: $fødselsnummer",
-                )
-            }
-        }
+
+        logg.info(
+            "I spleis har personen ${vedtaksperioderFraSpleis.pretty()}, i spesialist sin database ligger det ${behandlinger.pretty()}",
+        )
     }
 
-    private data class AvstemtBehandling(
+    private fun List<AvstemtVedtaksperiode>.pretty() =
+        when (val antall = size) {
+            1 -> "1 vedtaksperiode"
+            else -> "$antall vedtaksperioder"
+        }
+
+    private fun List<Behandling>.pretty() =
+        when (val antall = size) {
+            1 -> "1 behandling"
+            else -> "$antall behandlinger"
+        }
+
+    private data class AvstemtVedtaksperiode(
         val arbeidsgiver: String,
         val id: UUID,
         val opprettet: LocalDateTime,

@@ -254,4 +254,15 @@ object Meldingsbygger {
             skjermet = skjermet,
             id = UUID.randomUUID(),
         )
+
+    fun byggPersonAvstemt(
+        vedtaksperiode: Vedtaksperiode,
+        arbeidsgiver: Arbeidsgiver,
+        person: Person,
+    ) = Testmeldingfabrikk.lagPersonAvstemt(
+        fødselsnummer = person.fødselsnummer,
+        organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
+        vedtaksperiodeId = vedtaksperiode.vedtaksperiodeId,
+        id = UUID.randomUUID(),
+    )
 }

@@ -288,4 +288,11 @@ abstract class AbstractE2EIntegrationTest {
             Meldingsbygger.byggEndretSkjermetinfo(testContext.person, skjermet)
         )
     }
+
+    protected fun avstemming() {
+        testRapid.publish(
+            testContext.person.fødselsnummer,
+            Meldingsbygger.byggPersonAvstemt(førsteVedtaksperiode(), testContext.arbeidsgiver, testContext.person)
+        )
+    }
 }

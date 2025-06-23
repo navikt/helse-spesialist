@@ -1103,6 +1103,58 @@ object Testmeldingfabrikk {
         )
     )
 
+    fun lagPersonAvstemt(
+        fødselsnummer: String,
+        organisasjonsnummer: String,
+        vedtaksperiodeId: UUID,
+        id: UUID,
+        utbetalingId: UUID = UUID.randomUUID()
+    ): String = nyHendelse(
+        id, "person_avstemt", mutableMapOf(
+            "fødselsnummer" to fødselsnummer,
+            "arbeidsgivere" to listOf(
+                mapOf(
+                    "organisasjonsnummer" to organisasjonsnummer,
+                    "vedtaksperioder" to listOf(
+                        mapOf(
+                            "id" to vedtaksperiodeId,
+                            "tilstand" to "AVVENTER_GODKJENNING",
+                            "opprettet" to "2025-03-14T14:22:05.788122774",
+                            "oppdatert" to "2025-05-07T10:42:42.843098859",
+                            "fom" to "2024-11-30",
+                            "tom" to "2024-12-31",
+                            "skjæringstidspunkt" to "2024-11-30",
+                            "utbetalinger" to listOf(
+                                "$utbetalingId"
+                            )
+                        )
+                    ),
+                    "forkastedeVedtaksperioder" to emptyList<Map<String, Any>>(),
+                    "utbetalinger" to listOf(
+                        mapOf(
+                            "id" to "${UUID.randomUUID()}",
+                            "type" to "UTBETALING",
+                            "status" to "FORKASTET",
+                            "opprettet" to "2025-03-27T11:36:06.638937254",
+                            "oppdatert" to "2025-05-07T10:42:37.144750828",
+                            "avsluttet" to null,
+                            "vurdering" to null
+                        ),
+                        mapOf(
+                            "id" to "$utbetalingId",
+                            "type" to "UTBETALING",
+                            "status" to "IKKE_UTBETALT",
+                            "opprettet" to "2025-05-07T10:42:42.8308062",
+                            "oppdatert" to "2025-05-07T10:42:42.83135389",
+                            "avsluttet" to null,
+                            "vurdering" to null
+                        )
+                    )
+                )
+            ),
+        )
+    )
+
     fun fastsattEtterSkjønn(
         organisasjonsnummer: String,
         settInnAvviksvurderingFraSpleis: Boolean = true,
