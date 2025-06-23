@@ -1,0 +1,4 @@
+UPDATE overstyring_arbeidsforhold
+SET arbeidsgiver_identifikator = arbeidsgiver.organisasjonsnummer
+FROM arbeidsgiver
+WHERE overstyring_arbeidsforhold.arbeidsgiver_ref = arbeidsgiver.id;
