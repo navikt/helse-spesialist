@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.db.dao
 
 import no.nav.helse.db.BehandletOppgaveFraDatabaseForVisning
+import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.EgenskapForDatabase.DELVIS_REFUSJON
 import no.nav.helse.db.EgenskapForDatabase.EN_ARBEIDSGIVER
 import no.nav.helse.db.EgenskapForDatabase.FLERE_ARBEIDSGIVERE
@@ -294,6 +295,24 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
             )
         assertEquals(2, oppgaver.size)
         oppgaver.assertIderSamsvarerMed(oppgave3, oppgave2)
+    }
+
+    @Test
+    fun `Finn oppgaver med bestemte egenskaper -- selvstendig`() {
+        nyOppgaveForNyPerson()
+        val oppgave2 = nyOppgaveForNyPerson(organisasjonsnummer = "SELVSTENDIG", oppgaveegenskaper = setOf(Egenskap.SØKNAD, Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE))
+        val oppgaver =
+            oppgaveDao.finnOppgaverForVisning(
+                emptyList(),
+                UUID.randomUUID(),
+                grupperteFiltrerteEgenskaper =
+                    mapOf(
+                        Kategori.Inntektsforhold to listOf(EgenskapForDatabase.SELVSTENDIG_NÆRINGSDRIVENDE),
+                        Kategori.Oppgavetype to listOf(SØKNAD),
+                    ),
+            )
+        assertEquals(1, oppgaver.size)
+        oppgaver.assertIderSamsvarerMed(oppgave2)
     }
 
     @Test

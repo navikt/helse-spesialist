@@ -209,6 +209,7 @@ class PgOppgaveDao internal constructor(
         val periodetypeegenskaper = grupperteFiltrerteEgenskaper[Egenskap.Kategori.Periodetype]
         val mottakeregenskaper = grupperteFiltrerteEgenskaper[Egenskap.Kategori.Mottaker]
         val antallArbeidsforholdEgenskaper = grupperteFiltrerteEgenskaper[Egenskap.Kategori.Inntektskilde]
+        val inntektsforholdegenskaper = grupperteFiltrerteEgenskaper[Egenskap.Kategori.Inntektsforhold]
         val statusegenskaper = grupperteFiltrerteEgenskaper[Egenskap.Kategori.Status]
 
         return asSQL(
@@ -245,6 +246,7 @@ class PgOppgaveDao internal constructor(
                 AND (:oppgavetypeegenskaper = '{}' OR egenskaper && :oppgavetypeegenskaper::varchar[]) -- inkluder alle oppgaver som har minst en av de valgte oppgavetype
                 AND (:periodetypeegenskaper = '{}' OR egenskaper && :periodetypeegenskaper::varchar[]) -- inkluder alle oppgaver som har minst en av de valgte periodetypene
                 AND (:mottakeregenskaper = '{}' OR egenskaper && :mottakeregenskaper::varchar[]) -- inkluder alle oppgaver som har minst en av de valgte mottakertypene
+                AND (:inntektsforholdegenskaper = '{}' OR egenskaper && :inntektsforholdegenskaper::varchar[]) -- inkluder alle oppgaver som har minst en av de valgte inntektsforholdtypene
                 AND (:antall_arbeidsforhold_egenskaper = '{}' OR egenskaper && :antall_arbeidsforhold_egenskaper::varchar[]) -- inkluder alle oppgaver som har minst en av de valgte
                 AND (:statusegenskaper = '{}' OR egenskaper && :statusegenskaper::varchar[]) -- inkluder alle oppgaver som har minst en av de valgte statusene
                 AND NOT (egenskaper && :egenskaper_som_skal_ekskluderes::varchar[]) -- egenskaper saksbehandler ikke har tilgang til
@@ -275,6 +277,7 @@ class PgOppgaveDao internal constructor(
             "oppgavetypeegenskaper" to oppgavetypeegenskaper.somDbArray(),
             "periodetypeegenskaper" to periodetypeegenskaper.somDbArray(),
             "mottakeregenskaper" to mottakeregenskaper.somDbArray(),
+            "inntektsforholdegenskaper" to inntektsforholdegenskaper.somDbArray(),
             "antall_arbeidsforhold_egenskaper" to antallArbeidsforholdEgenskaper.somDbArray(),
             "statusegenskaper" to statusegenskaper.somDbArray(),
             "egenskaper_som_skal_ekskluderes" to ekskluderEgenskaper.somDbArray(),

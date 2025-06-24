@@ -99,4 +99,6 @@ enum class EgenskapForDatabase {
     /** Gammel egenskap fra tidligere iterasjon av tilkommen inntekt, skal overses */
     TILKOMMEN,
     GRUNNBELØPSREGULERING,
+    SELVSTENDIG_NÆRINGSDRIVENDE,
+    ARBEIDSTAKER,
 }

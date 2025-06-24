@@ -9,6 +9,7 @@ import no.nav.helse.db.VergemålDao
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Automatisering
 import no.nav.helse.modell.oppgave.Egenskap
+import no.nav.helse.modell.oppgave.Egenskap.ARBEIDSTAKER
 import no.nav.helse.modell.oppgave.Egenskap.DELVIS_REFUSJON
 import no.nav.helse.modell.oppgave.Egenskap.EGEN_ANSATT
 import no.nav.helse.modell.oppgave.Egenskap.EN_ARBEIDSGIVER
@@ -27,6 +28,7 @@ import no.nav.helse.modell.oppgave.Egenskap.OVERGANG_FRA_IT
 import no.nav.helse.modell.oppgave.Egenskap.PÅ_VENT
 import no.nav.helse.modell.oppgave.Egenskap.REVURDERING
 import no.nav.helse.modell.oppgave.Egenskap.RISK_QA
+import no.nav.helse.modell.oppgave.Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE
 import no.nav.helse.modell.oppgave.Egenskap.SKJØNNSFASTSETTELSE
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
@@ -83,6 +85,7 @@ internal class OpprettSaksbehandleroppgave(
                 enhetUtland(fødselsnummer)
                 mottaker()
                 inntektskilde(inntektskilde)
+                inntektsforhold(behovData.organisasjonsnummer)
                 periodetype(periodetype)
                 påVent(vedtaksperiodeId)
                 skjønnsfastsettelse(vedtaksperiodeId)
@@ -169,6 +172,10 @@ internal class OpprettSaksbehandleroppgave(
             Inntektskilde.EN_ARBEIDSGIVER -> add(EN_ARBEIDSGIVER)
             Inntektskilde.FLERE_ARBEIDSGIVERE -> add(FLERE_ARBEIDSGIVERE)
         }
+    }
+
+    private fun MutableSet<Egenskap>.inntektsforhold(organisasjonsnummer: String) {
+        if (organisasjonsnummer == "SELVSTENDIG") add(SELVSTENDIG_NÆRINGSDRIVENDE) else add(ARBEIDSTAKER)
     }
 
     private fun MutableSet<Egenskap>.periodetype(periodetype: Periodetype) {

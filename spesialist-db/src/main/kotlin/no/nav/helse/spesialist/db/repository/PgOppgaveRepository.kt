@@ -243,6 +243,8 @@ class PgOppgaveRepository private constructor(queryRunner: QueryRunner) : QueryR
             Egenskap.MEDLEMSKAP -> "MEDLEMSKAP"
             Egenskap.VERGEMÅL -> "VERGEMÅL"
             Egenskap.GRUNNBELØPSREGULERING -> "GRUNNBELØPSREGULERING"
+            Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE -> "SELVSTENDIG_NÆRINGSDRIVENDE"
+            Egenskap.ARBEIDSTAKER -> "ARBEIDSTAKER"
         }
 
     private fun String.fromDb(): Egenskap? =
@@ -277,6 +279,8 @@ class PgOppgaveRepository private constructor(queryRunner: QueryRunner) : QueryR
             "MEDLEMSKAP" -> Egenskap.MEDLEMSKAP
             "VERGEMÅL" -> Egenskap.VERGEMÅL
             "GRUNNBELØPSREGULERING" -> Egenskap.GRUNNBELØPSREGULERING
+            "SELVSTENDIG_NÆRINGSDRIVENDE" -> Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE
+            "ARBEIDSTAKER" -> Egenskap.ARBEIDSTAKER
             // Gammel egenskap fra tidligere iterasjon av tilkommen inntekt, skal overses
             "TILKOMMEN" -> null
             else -> error("Ukjent oppgaveegenskap")

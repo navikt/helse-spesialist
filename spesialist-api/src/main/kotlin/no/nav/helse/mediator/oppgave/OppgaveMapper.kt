@@ -158,6 +158,7 @@ internal object OppgaveMapper {
         when (this) {
             ApiKategori.Mottaker -> Egenskap.Kategori.Mottaker
             ApiKategori.Inntektskilde -> Egenskap.Kategori.Inntektskilde
+            ApiKategori.Inntektsforhold -> Egenskap.Kategori.Inntektsforhold
             ApiKategori.Oppgavetype -> Egenskap.Kategori.Oppgavetype
             ApiKategori.Ukategorisert -> Egenskap.Kategori.Ukategorisert
             ApiKategori.Periodetype -> Egenskap.Kategori.Periodetype
@@ -196,12 +197,15 @@ internal object OppgaveMapper {
             Egenskap.MANGLER_IM -> ApiEgenskap.MANGLER_IM
             Egenskap.MEDLEMSKAP -> ApiEgenskap.MEDLEMSKAP
             Egenskap.GRUNNBELØPSREGULERING -> ApiEgenskap.GRUNNBELOPSREGULERING
+            Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE -> ApiEgenskap.SELVSTENDIG_NAERINGSDRIVENDE
+            Egenskap.ARBEIDSTAKER -> ApiEgenskap.ARBEIDSTAKER
         }
 
     private fun Egenskap.Kategori.tilApiversjon(): ApiKategori =
         when (this) {
             Egenskap.Kategori.Mottaker -> ApiKategori.Mottaker
             Egenskap.Kategori.Inntektskilde -> ApiKategori.Inntektskilde
+            Egenskap.Kategori.Inntektsforhold -> ApiKategori.Inntektsforhold
             Egenskap.Kategori.Oppgavetype -> ApiKategori.Oppgavetype
             Egenskap.Kategori.Ukategorisert -> ApiKategori.Ukategorisert
             Egenskap.Kategori.Periodetype -> ApiKategori.Periodetype
@@ -240,6 +244,8 @@ internal object OppgaveMapper {
             EgenskapForDatabase.MANGLER_IM -> Egenskap.MANGLER_IM
             EgenskapForDatabase.MEDLEMSKAP -> Egenskap.MEDLEMSKAP
             EgenskapForDatabase.GRUNNBELØPSREGULERING -> Egenskap.GRUNNBELØPSREGULERING
+            EgenskapForDatabase.SELVSTENDIG_NÆRINGSDRIVENDE -> Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE
+            EgenskapForDatabase.ARBEIDSTAKER -> Egenskap.ARBEIDSTAKER
             // Gammel egenskap fra tidligere iterasjon av tilkommen inntekt, skal overses
             EgenskapForDatabase.TILKOMMEN -> null
         }
@@ -276,5 +282,7 @@ internal object OppgaveMapper {
             ApiEgenskap.MANGLER_IM -> EgenskapForDatabase.MANGLER_IM
             ApiEgenskap.MEDLEMSKAP -> EgenskapForDatabase.MEDLEMSKAP
             ApiEgenskap.GRUNNBELOPSREGULERING -> EgenskapForDatabase.GRUNNBELØPSREGULERING
+            ApiEgenskap.SELVSTENDIG_NAERINGSDRIVENDE -> EgenskapForDatabase.SELVSTENDIG_NÆRINGSDRIVENDE
+            ApiEgenskap.ARBEIDSTAKER -> EgenskapForDatabase.ARBEIDSTAKER
         }
 }
