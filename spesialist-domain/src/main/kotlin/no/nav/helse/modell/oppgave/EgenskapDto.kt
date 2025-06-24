@@ -31,8 +31,6 @@ enum class EgenskapDto {
     MEDLEMSKAP,
     VERGEMÅL,
     GRUNNBELØPSREGULERING,
-    SELVSTENDIG_NÆRINGSDRIVENDE,
-    ARBEIDSTAKER,
     ;
 
     internal companion object {
@@ -68,8 +66,6 @@ enum class EgenskapDto {
                 Egenskap.MEDLEMSKAP -> MEDLEMSKAP
                 Egenskap.VERGEMÅL -> VERGEMÅL
                 Egenskap.GRUNNBELØPSREGULERING -> GRUNNBELØPSREGULERING
-                Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE -> SELVSTENDIG_NÆRINGSDRIVENDE
-                Egenskap.ARBEIDSTAKER -> ARBEIDSTAKER
             }
         }
 
@@ -105,8 +101,6 @@ enum class EgenskapDto {
                 MEDLEMSKAP -> Egenskap.MEDLEMSKAP
                 VERGEMÅL -> Egenskap.VERGEMÅL
                 GRUNNBELØPSREGULERING -> Egenskap.GRUNNBELØPSREGULERING
-                SELVSTENDIG_NÆRINGSDRIVENDE -> Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE
-                ARBEIDSTAKER -> Egenskap.ARBEIDSTAKER
             }
     }
 }

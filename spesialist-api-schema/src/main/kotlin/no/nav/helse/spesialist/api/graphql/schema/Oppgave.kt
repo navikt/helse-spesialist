@@ -56,15 +56,12 @@ enum class ApiEgenskap {
     MANGLER_IM,
     MEDLEMSKAP,
     GRUNNBELOPSREGULERING,
-    SELVSTENDIG_NAERINGSDRIVENDE,
-    ARBEIDSTAKER,
 }
 
 @GraphQLName("Kategori")
 enum class ApiKategori {
     Mottaker,
     Inntektskilde,
-    Inntektsforhold,
     Oppgavetype,
     Ukategorisert,
     Periodetype,
