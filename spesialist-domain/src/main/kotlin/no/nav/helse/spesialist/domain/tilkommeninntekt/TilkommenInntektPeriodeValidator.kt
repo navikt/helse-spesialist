@@ -40,7 +40,7 @@ object TilkommenInntektPeriodeValidator {
     ) {
         val sykefraværstilfellePerioder =
             vedtaksperioder.tilSykefraværstillfellePerioder()
-                .map { it.utenFørsteDag() }
+                // .map { it.utenFørsteDag() }
                 .filterNot { it.datoer().isEmpty() }
 
         if (!(periode erInnenforEnAv sykefraværstilfellePerioder)) {
