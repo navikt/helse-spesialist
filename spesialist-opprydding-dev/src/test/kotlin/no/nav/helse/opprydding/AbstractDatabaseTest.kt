@@ -51,15 +51,14 @@ internal abstract class AbstractDatabaseTest {
                 now());
         INSERT INTO arbeidsgiver(id, organisasjonsnummer, identifikator, navn, navn_sist_oppdatert_dato)
         VALUES (${sequence_number}, '${organisasjonsnummer}', '${organisasjonsnummer}', 'ARBEIDSGIVER', '2018-01-01');
-        INSERT INTO arbeidsforhold(id, person_ref, arbeidsgiver_ref, arbeidsgiver_identifikator, startdato, sluttdato, stillingstittel, stillingsprosent,
-                                   oppdatert)
-        VALUES (${sequence_number}, ${sequence_number}, ${sequence_number}, '${organisasjonsnummer}', '2018-01-01', '2018-01-31', 'STILLING', 100, now());
+        INSERT INTO arbeidsforhold(id, person_ref, arbeidsgiver_identifikator, startdato, sluttdato, stillingstittel, stillingsprosent, oppdatert)
+        VALUES (${sequence_number}, ${sequence_number}, '${organisasjonsnummer}', '2018-01-01', '2018-01-31', 'STILLING', 100, now());
         UPDATE global_snapshot_versjon
         SET versjon = 1 WHERE versjon <> 1; -- WHERE for å slippe varsel om "update without 'where' updates all rows at once
         INSERT INTO snapshot(id, data, person_ref, versjon)
         VALUES (${sequence_number}, '{}'::json, ${sequence_number}, 1);
-        INSERT INTO vedtak(id, vedtaksperiode_id, fom, tom, arbeidsgiver_ref, arbeidsgiver_identifikator, person_ref, forkastet)
-        VALUES (${sequence_number}, '${vedtaksperiode_id}', now(), now(), ${sequence_number}, '${organisasjonsnummer}', ${sequence_number}, false);
+        INSERT INTO vedtak(id, vedtaksperiode_id, fom, tom, arbeidsgiver_identifikator, person_ref, forkastet)
+        VALUES (${sequence_number}, '${vedtaksperiode_id}', now(), now(), '${organisasjonsnummer}', ${sequence_number}, false);
         INSERT INTO behandling(id, unik_id, vedtaksperiode_id, opprettet_av_hendelse, tilstand)
         VALUES (${sequence_number}, '${generasjon_id}', '${vedtaksperiode_id}', '${hendelse_id}', 'VidereBehandlingAvklares');
         INSERT INTO behandling_v2(vedtaksperiode_id, behandling_id, fom, tom, skjæringstidspunkt, opprettet)
@@ -116,22 +115,22 @@ internal abstract class AbstractDatabaseTest {
         INSERT INTO overstyring(id, tidspunkt, person_ref, hendelse_ref, saksbehandler_ref, vedtaksperiode_id)
         VALUES (${sequence_number}, now(), ${sequence_number}, '${hendelse_id}',
                 '${saksbehandler_oid}', '${vedtaksperiode_id}');
-        INSERT INTO overstyring_tidslinje(id, overstyring_ref, arbeidsgiver_identifikator, arbeidsgiver_ref, begrunnelse)
-        VALUES (${sequence_number}, ${sequence_number}, '${organisasjonsnummer}', ${sequence_number},'BEGRUNNELSE');
+        INSERT INTO overstyring_tidslinje(id, overstyring_ref, arbeidsgiver_identifikator, begrunnelse)
+        VALUES (${sequence_number}, ${sequence_number}, '${organisasjonsnummer}', 'BEGRUNNELSE');
         INSERT INTO overstyring_tilkommen_inntekt(id, overstyring_ref, json)
         VALUES (${sequence_number}, ${sequence_number}, '{}');
         INSERT INTO overstyring_dag(id, dato, dagtype, grad, overstyring_tidslinje_ref)
         VALUES (${sequence_number}, '2018-01-01', 'TESTDAGTYPE', 100, ${sequence_number});
-        INSERT INTO overstyring_inntekt(id, overstyring_ref, manedlig_inntekt, skjaeringstidspunkt, forklaring, begrunnelse, arbeidsgiver_ref, arbeidsgiver_identifikator, fom, tom)
-        VALUES (${sequence_number}, ${sequence_number}, 1000, '2018-01-01', 'FORKLARING', 'BEGRUNNELSE', ${sequence_number}, '${organisasjonsnummer}', '2018-01-01', null);
-        INSERT INTO overstyring_arbeidsforhold(id, overstyring_ref, forklaring, deaktivert, skjaeringstidspunkt, begrunnelse, arbeidsgiver_ref, arbeidsgiver_identifikator)
-        VALUES (${sequence_number}, ${sequence_number}, 'FORKLARING', false, '2018-01-01', 'BEGRUNNELSE', ${sequence_number}, '${organisasjonsnummer}');
+        INSERT INTO overstyring_inntekt(id, overstyring_ref, manedlig_inntekt, skjaeringstidspunkt, forklaring, begrunnelse, arbeidsgiver_identifikator, fom, tom)
+        VALUES (${sequence_number}, ${sequence_number}, 1000, '2018-01-01', 'FORKLARING', 'BEGRUNNELSE', '${organisasjonsnummer}', '2018-01-01', null);
+        INSERT INTO overstyring_arbeidsforhold(id, overstyring_ref, forklaring, deaktivert, skjaeringstidspunkt, begrunnelse, arbeidsgiver_identifikator)
+        VALUES (${sequence_number}, ${sequence_number}, 'FORKLARING', false, '2018-01-01', 'BEGRUNNELSE', '${organisasjonsnummer}');
         INSERT INTO overstyring_minimum_sykdomsgrad(id, overstyring_ref, fom, tom, vurdering, begrunnelse)
         VALUES (${sequence_number}, ${sequence_number}, '2018-01-01', '2018-01-31', true, 'En begrunnelse');
         INSERT INTO overstyring_minimum_sykdomsgrad_periode(id, fom, tom, vurdering, overstyring_minimum_sykdomsgrad_ref)
         VALUES (${sequence_number}, '2018-01-01', '2018-01-31', true, ${sequence_number});
-        INSERT INTO overstyring_minimum_sykdomsgrad_arbeidsgiver(id, berort_vedtaksperiode_id, arbeidsgiver_ref, arbeidsgiver_identifikator, overstyring_minimum_sykdomsgrad_ref)
-        VALUES (${sequence_number}, '${vedtaksperiode_id}', ${sequence_number}, '${organisasjonsnummer}', ${sequence_number});
+        INSERT INTO overstyring_minimum_sykdomsgrad_arbeidsgiver(id, berort_vedtaksperiode_id, arbeidsgiver_identifikator, overstyring_minimum_sykdomsgrad_ref)
+        VALUES (${sequence_number}, '${vedtaksperiode_id}', '${organisasjonsnummer}', ${sequence_number});
         
         INSERT INTO begrunnelse(id, tekst, type, saksbehandler_ref) VALUES(${sequence_number}, 'Begrunnelsefritekst', 'SKJØNNSFASTSATT_SYKEPENGEGRUNNLAG_FRITEKST', '${saksbehandler_oid}');
         INSERT INTO begrunnelse(id, tekst, type, saksbehandler_ref) VALUES(${sequence_number} + 1000, 'En begrunnelsemal', 'SKJØNNSFASTSATT_SYKEPENGEGRUNNLAG_MAL', '${saksbehandler_oid}');
@@ -139,8 +138,8 @@ internal abstract class AbstractDatabaseTest {
         INSERT INTO generasjon_begrunnelse_kobling(generasjon_id, begrunnelse_id) VALUES ('${generasjon_id}', ${sequence_number});
         INSERT INTO skjonnsfastsetting_sykepengegrunnlag(id, skjaeringstidspunkt, arsak, overstyring_ref, begrunnelse_fritekst_ref, begrunnelse_mal_ref, begrunnelse_konklusjon_ref)
         VALUES (${sequence_number}, '2018-01-01', 'ÅRSAK', ${sequence_number}, ${sequence_number}, ${sequence_number} + 1000, ${sequence_number} + 2000);
-        INSERT INTO skjonnsfastsetting_sykepengegrunnlag_arbeidsgiver(id, arlig, fra_arlig, arbeidsgiver_ref, arbeidsgiver_identifikator, skjonnsfastsetting_sykepengegrunnlag_ref)
-        VALUES (${sequence_number}, 1000, 1200, ${sequence_number}, '${organisasjonsnummer}', ${sequence_number});
+        INSERT INTO skjonnsfastsetting_sykepengegrunnlag_arbeidsgiver(id, arlig, fra_arlig, arbeidsgiver_identifikator, skjonnsfastsetting_sykepengegrunnlag_ref)
+        VALUES (${sequence_number}, 1000, 1200, '${organisasjonsnummer}', ${sequence_number});
         
         INSERT INTO annullert_av_saksbehandler(id, annullert_tidspunkt, saksbehandler_ref)
         VALUES (${sequence_number}, now(), '${saksbehandler_oid}');
@@ -152,9 +151,9 @@ internal abstract class AbstractDatabaseTest {
         VALUES (${sequence_number}, ${sequence_number}, '2018-01-01', '2018-01-31', 1000);
         INSERT INTO utbetalingslinje(id, oppdrag_id, fom, tom, totalbeløp)
         VALUES (${sequence_number} + 1000, ${sequence_number} + 1000, '2018-01-01', '2018-01-31', 1000);
-        INSERT INTO utbetaling_id(id, utbetaling_id, person_ref, arbeidsgiver_ref, arbeidsgiver_identifikator, arbeidsgiver_fagsystem_id_ref,
+        INSERT INTO utbetaling_id(id, utbetaling_id, person_ref, arbeidsgiver_identifikator, arbeidsgiver_fagsystem_id_ref,
                                   person_fagsystem_id_ref, type, opprettet, personbeløp, arbeidsgiverbeløp)
-        VALUES (${sequence_number}, '${utbetaling_id}', ${sequence_number}, ${sequence_number}, '${organisasjonsnummer}', ${sequence_number} + 1000,
+        VALUES (${sequence_number}, '${utbetaling_id}', ${sequence_number}, '${organisasjonsnummer}', ${sequence_number} + 1000,
                 ${sequence_number}, 'UTBETALING', now(), 0, 0);
         
         INSERT INTO utbetaling(id, status, opprettet, data, utbetaling_id_ref, annullert_av_saksbehandler_ref)

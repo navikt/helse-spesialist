@@ -516,7 +516,7 @@ abstract class AbstractDBIntegrationTest {
         utbetalingDao.opprettUtbetalingId(
             utbetalingId = utbetalingId,
             fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
+            arbeidsgiverIdentifikator = organisasjonsnummer,
             type = utbetalingtype,
             opprettet = LocalDateTime.now(),
             arbeidsgiverFagsystemIdRef = arbeidsgiverOppdragId,

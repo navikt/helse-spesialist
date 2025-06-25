@@ -78,13 +78,12 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
     protected fun opprettVedtaksperiode(
         personId: Long,
-        arbeidsgiverId: Long,
         utbetalingId: UUID = UUID.randomUUID(),
         periode: Periode = PERIODE,
         skjæringstidspunkt: LocalDate = periode.fom,
         forkastet: Boolean = false,
         kanAvvises: Boolean = true,
-    ) = opprettVedtak(personId, arbeidsgiverId, periode, skjæringstidspunkt, forkastet).also {
+    ) = opprettVedtak(personId, periode, skjæringstidspunkt, forkastet).also {
         klargjørVedtak(
             it,
             utbetalingId,
@@ -191,7 +190,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
     protected fun opprettVedtak(
         personId: Long,
-        arbeidsgiverId: Long,
         periode: Periode = PERIODE,
         skjæringstidspunkt: LocalDate = periode.fom,
         forkastet: Boolean = false,
@@ -200,13 +198,12 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         opprettOpprinneligSøknadsdato(periode)
         return dbQuery.updateAndReturnGeneratedKey(
             """
-            INSERT INTO vedtak (vedtaksperiode_id, fom, tom, arbeidsgiver_ref, arbeidsgiver_identifikator, person_ref, forkastet)
-            VALUES (:id, :fom, :tom, :arbeidsgiverId, :arbeidsgiver_identifikator, :personId, :forkastet)
+            INSERT INTO vedtak (vedtaksperiode_id, fom, tom, arbeidsgiver_identifikator, person_ref, forkastet)
+            VALUES (:id, :fom, :tom, :arbeidsgiver_identifikator, :personId, :forkastet)
             """.trimMargin(),
             "id" to periode.id,
             "fom" to periode.fom,
             "tom" to periode.tom,
-            "arbeidsgiverId" to arbeidsgiverId,
             "arbeidsgiver_identifikator" to ORGANISASJONSNUMMER,
             "personId" to personId,
             "forkastet" to forkastet,

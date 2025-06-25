@@ -53,7 +53,7 @@ class PgUtbetalingDao internal constructor(session: Session) : UtbetalingDao, Qu
     override fun opprettUtbetalingId(
         utbetalingId: UUID,
         fødselsnummer: String,
-        organisasjonsnummer: String,
+        arbeidsgiverIdentifikator: String,
         type: Utbetalingtype,
         opprettet: LocalDateTime,
         arbeidsgiverFagsystemIdRef: Long,
@@ -64,11 +64,10 @@ class PgUtbetalingDao internal constructor(session: Session) : UtbetalingDao, Qu
         asSQL(
             """
             INSERT INTO utbetaling_id (
-                utbetaling_id, person_ref, arbeidsgiver_ref, arbeidsgiver_identifikator, type, opprettet, arbeidsgiver_fagsystem_id_ref, person_fagsystem_id_ref, arbeidsgiverbeløp, personbeløp
+                utbetaling_id, person_ref, arbeidsgiver_identifikator, type, opprettet, arbeidsgiver_fagsystem_id_ref, person_fagsystem_id_ref, arbeidsgiverbeløp, personbeløp
             ) VALUES (
                 :utbetalingId,
                 (SELECT id FROM person WHERE fødselsnummer = :fodselsnummer),
-                (SELECT id FROM arbeidsgiver WHERE organisasjonsnummer = :organisasjonsnummer),
                 :arbeidsgiver_identifikator,
                 CAST(:type as utbetaling_type),
                 :opprettet,
@@ -82,8 +81,7 @@ class PgUtbetalingDao internal constructor(session: Session) : UtbetalingDao, Qu
                 .trimIndent(),
             "utbetalingId" to utbetalingId,
             "fodselsnummer" to fødselsnummer,
-            "organisasjonsnummer" to organisasjonsnummer,
-            "arbeidsgiver_identifikator" to organisasjonsnummer,
+            "arbeidsgiver_identifikator" to arbeidsgiverIdentifikator,
             "type" to type.toString(),
             "opprettet" to opprettet,
             "arbeidsgiverFagsystemIdRef" to arbeidsgiverFagsystemIdRef,

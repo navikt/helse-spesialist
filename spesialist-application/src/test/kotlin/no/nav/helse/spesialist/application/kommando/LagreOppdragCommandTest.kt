@@ -34,7 +34,7 @@ class LagreOppdragCommandTest {
         verify(exactly = 1) { utbetalingDao.opprettUtbetalingId(
             utbetalingId = any(),
             fødselsnummer = any(),
-            organisasjonsnummer = any(),
+            arbeidsgiverIdentifikator = any(),
             type = any(),
             opprettet = any(),
             arbeidsgiverFagsystemIdRef = any(),

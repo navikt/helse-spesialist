@@ -27,7 +27,7 @@ class NotatMutationHandlerTest : AbstractGraphQLApiTest() {
     @Test
     fun `leggTilNotat fungerer som forventet`() {
         opprettSaksbehandler()
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        opprettVedtaksperiode(opprettPerson())
 
         val body =
             runQuery(
@@ -96,7 +96,7 @@ class NotatMutationHandlerTest : AbstractGraphQLApiTest() {
     @Test
     fun `feilregistrererNotat fungerer som forventet`() {
         opprettSaksbehandler()
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        opprettVedtaksperiode(opprettPerson())
         val dialogRef = opprettDialog()
         val notatId = opprettNotat(dialogRef = dialogRef)
 

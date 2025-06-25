@@ -26,7 +26,7 @@ interface UtbetalingDao {
     fun opprettUtbetalingId(
         utbetalingId: UUID,
         fødselsnummer: String,
-        organisasjonsnummer: String,
+        arbeidsgiverIdentifikator: String,
         type: Utbetalingtype,
         opprettet: LocalDateTime,
         arbeidsgiverFagsystemIdRef: Long,

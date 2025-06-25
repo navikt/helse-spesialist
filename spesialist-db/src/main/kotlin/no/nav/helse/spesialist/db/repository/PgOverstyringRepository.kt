@@ -85,13 +85,10 @@ class PgOverstyringRepository(
         val overstyringTidslinjeRef =
             asSQL(
                 """
-                INSERT INTO overstyring_tidslinje (overstyring_ref, arbeidsgiver_ref, arbeidsgiver_identifikator, begrunnelse)
-                SELECT :overstyringRef, ag.id, :arbeidsgiver_identifikator, :begrunnelse
-                FROM arbeidsgiver ag
-                WHERE ag.organisasjonsnummer = :organisasjonsnummer
+                INSERT INTO overstyring_tidslinje (overstyring_ref, arbeidsgiver_identifikator, begrunnelse)
+                VALUES (:overstyringRef, :arbeidsgiver_identifikator, :begrunnelse)
                 """.trimIndent(),
                 "overstyringRef" to overstyringRef,
-                "organisasjonsnummer" to overstyrtTidslinje.organisasjonsnummer,
                 "arbeidsgiver_identifikator" to overstyrtTidslinje.organisasjonsnummer,
                 "begrunnelse" to overstyrtTidslinje.begrunnelse,
             ).updateAndReturnGeneratedKey()
@@ -123,17 +120,14 @@ class PgOverstyringRepository(
         overstyrtArbeidsforhold.overstyrteArbeidsforhold.forEach { arbeidsforhold ->
             asSQL(
                 """
-                INSERT INTO overstyring_arbeidsforhold (forklaring, deaktivert, skjaeringstidspunkt, overstyring_ref, begrunnelse, arbeidsgiver_ref, arbeidsgiver_identifikator)
-                SELECT :forklaring, :deaktivert, :skjaeringstidspunkt, :overstyringRef, :begrunnelse, ag.id, :arbeidsgiver_identifikator
-                FROM arbeidsgiver ag
-                WHERE ag.organisasjonsnummer = :organisasjonsnummer
+                INSERT INTO overstyring_arbeidsforhold (forklaring, deaktivert, skjaeringstidspunkt, overstyring_ref, begrunnelse, arbeidsgiver_identifikator)
+                VALUES (:forklaring, :deaktivert, :skjaeringstidspunkt, :overstyringRef, :begrunnelse, :arbeidsgiver_identifikator)
                 """.trimIndent(),
                 "forklaring" to arbeidsforhold.forklaring,
                 "deaktivert" to arbeidsforhold.deaktivert,
                 "skjaeringstidspunkt" to overstyrtArbeidsforhold.skjæringstidspunkt,
                 "overstyringRef" to overstyringRef,
                 "begrunnelse" to arbeidsforhold.begrunnelse,
-                "organisasjonsnummer" to arbeidsforhold.organisasjonsnummer,
                 "arbeidsgiver_identifikator" to arbeidsforhold.organisasjonsnummer,
             ).update()
         }
@@ -150,10 +144,8 @@ class PgOverstyringRepository(
         overstyrtInntektOgRefusjon.arbeidsgivere.forEach { arbeidsgiver ->
             asSQL(
                 """
-                INSERT INTO overstyring_inntekt (forklaring, manedlig_inntekt, fra_manedlig_inntekt, skjaeringstidspunkt, overstyring_ref, refusjonsopplysninger, fra_refusjonsopplysninger, begrunnelse, arbeidsgiver_ref, arbeidsgiver_identifikator, subsumsjon, fom, tom)
-                SELECT :forklaring, :maanedligInntekt, :fraMaanedligInntekt, :skjaeringstidspunkt, :overstyringRef, :refusjonsopplysninger::json, :fraRefusjonsopplysninger::json, :begrunnelse, ag.id, :arbeidsgiver_identifikator, :subsumsjon::json, :fom, :tom
-                FROM arbeidsgiver ag
-                WHERE ag.organisasjonsnummer = :organisasjonsnummer
+                INSERT INTO overstyring_inntekt (forklaring, manedlig_inntekt, fra_manedlig_inntekt, skjaeringstidspunkt, overstyring_ref, refusjonsopplysninger, fra_refusjonsopplysninger, begrunnelse, arbeidsgiver_identifikator, subsumsjon, fom, tom)
+                VALUES (:forklaring, :maanedligInntekt, :fraMaanedligInntekt, :skjaeringstidspunkt, :overstyringRef, :refusjonsopplysninger::json, :fraRefusjonsopplysninger::json, :begrunnelse, :arbeidsgiver_identifikator, :subsumsjon::json, :fom, :tom)
                 """.trimIndent(),
                 "forklaring" to arbeidsgiver.forklaring,
                 "maanedligInntekt" to arbeidsgiver.månedligInntekt,
@@ -173,7 +165,6 @@ class PgOverstyringRepository(
                         )
                     },
                 "begrunnelse" to arbeidsgiver.begrunnelse,
-                "organisasjonsnummer" to arbeidsgiver.organisasjonsnummer,
                 "arbeidsgiver_identifikator" to arbeidsgiver.organisasjonsnummer,
                 "subsumsjon" to
                     arbeidsgiver.lovhjemmel?.let {
@@ -228,14 +219,11 @@ class PgOverstyringRepository(
         minimumSykdomsgrad.arbeidsgivere.forEach { arbeidsgiver ->
             asSQL(
                 """
-                INSERT INTO overstyring_minimum_sykdomsgrad_arbeidsgiver (berort_vedtaksperiode_id, arbeidsgiver_ref, arbeidsgiver_identifikator, overstyring_minimum_sykdomsgrad_ref)
-                SELECT :beroertVedtaksperiodeId, ag.id, :arbeidsgiver_identifikator, :overstyringMinimumSykdomsgradRef
-                FROM arbeidsgiver ag
-                WHERE ag.organisasjonsnummer = :organisasjonsnummer
+                INSERT INTO overstyring_minimum_sykdomsgrad_arbeidsgiver (berort_vedtaksperiode_id, arbeidsgiver_identifikator, overstyring_minimum_sykdomsgrad_ref)
+                VALUES (:beroertVedtaksperiodeId, :arbeidsgiver_identifikator, :overstyringMinimumSykdomsgradRef)
                 """.trimIndent(),
                 "beroertVedtaksperiodeId" to arbeidsgiver.berørtVedtaksperiodeId,
                 "overstyringMinimumSykdomsgradRef" to overstyringMinimumSykdomsgradId,
-                "organisasjonsnummer" to arbeidsgiver.organisasjonsnummer,
                 "arbeidsgiver_identifikator" to arbeidsgiver.organisasjonsnummer,
             ).update()
         }
@@ -283,14 +271,11 @@ class PgOverstyringRepository(
         skjønnsfastsattSykepengegrunnlag.arbeidsgivere.forEach { arbeidsgiver ->
             asSQL(
                 """
-                INSERT INTO skjonnsfastsetting_sykepengegrunnlag_arbeidsgiver (arlig, fra_arlig, arbeidsgiver_ref, arbeidsgiver_identifikator, skjonnsfastsetting_sykepengegrunnlag_ref)
-                SELECT :aarlig, :fraAarlig, ag.id, :arbeidsgiver_identifikator, :skjoennsfastsettingSykepengegrunnlagRef
-                FROM arbeidsgiver ag
-                WHERE ag.organisasjonsnummer = :organisasjonsnummer
+                INSERT INTO skjonnsfastsetting_sykepengegrunnlag_arbeidsgiver (arlig, fra_arlig, arbeidsgiver_identifikator, skjonnsfastsetting_sykepengegrunnlag_ref)
+                VALUES (:aarlig, :fraAarlig, :arbeidsgiver_identifikator, :skjoennsfastsettingSykepengegrunnlagRef)
                 """.trimIndent(),
                 "aarlig" to arbeidsgiver.årlig,
                 "fraAarlig" to arbeidsgiver.fraÅrlig,
-                "organisasjonsnummer" to arbeidsgiver.organisasjonsnummer,
                 "arbeidsgiver_identifikator" to arbeidsgiver.organisasjonsnummer,
                 "skjoennsfastsettingSykepengegrunnlagRef" to skjønnsfastsettingSykepengegrunnlagId,
             ).update()

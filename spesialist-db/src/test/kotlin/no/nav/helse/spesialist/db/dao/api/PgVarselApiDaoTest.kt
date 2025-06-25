@@ -548,13 +548,11 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
             skjæringstidspunkt = skjæringstidspunkt
         ).also { dto ->
             val organisasjonsnummer = lagOrganisasjonsnummer()
+            opprettArbeidsgiver(organisasjonsnummer)
             opprettVedtaksperiode(
                 personId = opprettPerson(
                     fødselsnummer = lagFødselsnummer(),
                     aktørId = lagAktørId()
-                ),
-                arbeidsgiverId = opprettArbeidsgiver(
-                    organisasjonsnummer = organisasjonsnummer
                 ),
                 arbeidsgiverIdentifikator = organisasjonsnummer,
                 utbetalingId = utbetalingId,
@@ -599,7 +597,6 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
 
     private fun opprettVedtaksperiode(
         personId: Long,
-        arbeidsgiverId: ArbeidsgiverId,
         arbeidsgiverIdentifikator: String,
         utbetalingId: UUID,
         vedtaksperiodeId: UUID,
@@ -610,7 +607,6 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
         kanAvvises: Boolean
     ): Long = opprettVedtak(
         personId = personId,
-        arbeidsgiverId = arbeidsgiverId,
         arbeidsgiverIdentifikator = arbeidsgiverIdentifikator,
         vedtaksperiodeId = vedtaksperiodeId,
         fom = fom,
@@ -660,7 +656,6 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
 
     private fun opprettVedtak(
         personId: Long,
-        arbeidsgiverId: ArbeidsgiverId,
         arbeidsgiverIdentifikator: String,
         vedtaksperiodeId: UUID,
         fom: LocalDate,
@@ -677,13 +672,12 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
         insertOpprinneligSoknadsdato(vedtaksperiodeId = vedtaksperiodeId)
         return dbQuery.updateAndReturnGeneratedKey(
             """
-                INSERT INTO vedtak (vedtaksperiode_id, fom, tom, arbeidsgiver_ref, arbeidsgiver_identifikator, person_ref, forkastet)
-                VALUES (:id, :fom, :tom, :arbeidsgiverId, :arbeidsgiver_identifikator, :personId, :forkastet)
+                INSERT INTO vedtak (vedtaksperiode_id, fom, tom, arbeidsgiver_identifikator, person_ref, forkastet)
+                VALUES (:id, :fom, :tom, :arbeidsgiver_identifikator, :personId, :forkastet)
                 """.trimMargin(),
             "id" to vedtaksperiodeId,
             "fom" to fom,
             "tom" to tom,
-            "arbeidsgiverId" to arbeidsgiverId.value,
             "arbeidsgiver_identifikator" to arbeidsgiverIdentifikator,
             "personId" to personId,
             "forkastet" to forkastet,

@@ -18,7 +18,7 @@ class TotrinnsvurderingMutationHandlerTest : AbstractGraphQLApiTest() {
             SendTilGodkjenningResult.Ok
         )
         opprettSaksbehandler()
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        opprettVedtaksperiode(opprettPerson())
         val oppgaveRef = finnOppgaveIdFor(PERIODE.id)
 
         val body = runQuery(sendTilbeslutterMutation(oppgaveRef))

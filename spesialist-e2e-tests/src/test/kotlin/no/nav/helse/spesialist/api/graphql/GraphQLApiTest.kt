@@ -18,7 +18,7 @@ class GraphQLApiTest : AbstractGraphQLApiTest() {
     fun `henter refusjonsopplysninger`() {
         val vilkårsgrunnlagId = UUID.randomUUID()
         mockSnapshot(vilkårsgrunnlagId = vilkårsgrunnlagId)
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        opprettVedtaksperiode(opprettPerson())
         opprettAvviksvurdering(vilkårsgrunnlagId = vilkårsgrunnlagId)
 
         val body = runQuery(
@@ -56,7 +56,7 @@ class GraphQLApiTest : AbstractGraphQLApiTest() {
         val vilkårsgrunnlagId = UUID.randomUUID()
         mockSnapshot(vilkårsgrunnlagId = vilkårsgrunnlagId)
         opprettAvviksvurdering(avviksprosent = 26.0, vilkårsgrunnlagId = vilkårsgrunnlagId)
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        opprettVedtaksperiode(opprettPerson())
 
         val body = runQuery(
             """
@@ -126,7 +126,7 @@ class GraphQLApiTest : AbstractGraphQLApiTest() {
         val vilkårsgrunnlagId = UUID.randomUUID()
         mockSnapshot(vilkårsgrunnlagId = vilkårsgrunnlagId)
         opprettAvviksvurdering(avviksprosent = 0.0, vilkårsgrunnlagId = vilkårsgrunnlagId)
-        opprettVedtaksperiode(opprettPerson(), opprettArbeidsgiver())
+        opprettVedtaksperiode(opprettPerson())
 
         val body = runQuery(
             """
