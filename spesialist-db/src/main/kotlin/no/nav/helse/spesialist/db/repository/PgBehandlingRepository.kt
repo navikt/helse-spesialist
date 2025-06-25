@@ -25,22 +25,4 @@ class PgBehandlingRepository(session: Session) : QueryRunner by MedSession(sessi
                 )
             }
     }
-
-    override fun finnAlle(fødselsnummer: String): List<Behandling> {
-        return asSQL(
-            """
-            SELECT spleis_behandling_id, tags
-            FROM behandling b 
-            INNER JOIN vedtak v on b.vedtaksperiode_id = v.vedtaksperiode_id
-            INNER JOIN person p on v.person_ref = p.id
-            WHERE p.fødselsnummer = :fodselsnummer
-        """,
-            "fodselsnummer" to fødselsnummer,
-        ).list { row ->
-            Behandling.fraLagring(
-                id = SpleisBehandlingId(row.uuid("spleis_behandling_id")),
-                tags = row.array<String>("tags").toSet(),
-            )
-        }
-    }
 }

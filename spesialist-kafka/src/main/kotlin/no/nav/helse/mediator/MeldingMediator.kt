@@ -13,9 +13,9 @@ import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.SøknadSendt
+import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.varsel.Varseldefinisjon
-import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.kafka.objectMapper
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -137,12 +137,9 @@ class MeldingMediator(
         dokumentDao.lagre(fødselsnummer, dokumentId, dokument)
     }
 
-    fun finnBehandlingerFor(fødselsnummer: String): List<Behandling> =
-        sessionFactory.transactionalSessionScope { sessionContext ->
-            sessionContext.behandlingRepository.finnAlle(
-                fødselsnummer = fødselsnummer,
-            )
-        }
+    fun finnBehandlingerFor(fødselsnummer: String): List<BehandlingDto> =
+        personDao.finnPerson(fødselsnummer)?.vedtaksperioder?.flatMap { it.behandlinger }
+            ?: emptyList()
 
     fun slettGamleDokumenter(): Int = dokumentDao.slettGamleDokumenter()
 
@@ -284,7 +281,7 @@ class MeldingMediator(
     }
 
     // Denne kalles når vi behandler en melding som starter en kommandokjede, eller den er i hvert fall ikke inne i
-    // bildet når vi gjenopptar kommandokjeder
+// bildet når vi gjenopptar kommandokjeder
     private fun behandleMelding(
         melding: Personmelding,
         kontekstbasertPubliserer: MeldingPubliserer,

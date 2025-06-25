@@ -2,7 +2,6 @@ package no.nav.helse.kafka
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
-import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import io.micrometer.core.instrument.MeterRegistry
@@ -11,9 +10,6 @@ import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.sikkerlogg
-import no.nav.helse.spesialist.domain.SpleisBehandlingId
-import java.time.LocalDateTime
-import java.util.UUID
 
 class PersonAvstemmingRiver(
     private val mediator: MeldingMediator,
@@ -39,32 +35,35 @@ class PersonAvstemmingRiver(
         logg.info("Mottok person_avstemt, {}", kv("hendelseId", hendelseId))
 
         val fødselsnummer = packet["fødselsnummer"].asText()
-        val behandlinger = mediator.finnBehandlingerFor(fødselsnummer)
+        val spesialistBehandlinger = mediator.finnBehandlingerFor(fødselsnummer)
 
-        packet["arbeidsgivere"].flatMap { arbeidsgiverNode ->
-            val arbeidsgiver = arbeidsgiverNode["organisasjonsnummer"].asText()
-            arbeidsgiverNode["vedtaksperioder"].flatMap { vedtaksperiode ->
-                vedtaksperiode["behandlinger"].map { behandlingNode ->
-                    AvstemtBehandling(
-                        arbeidsgiver = arbeidsgiver,
-                        id = behandlingNode["behandlingId"].asUUID(),
-                        opprettet = behandlingNode["behandlingOpprettet"].asLocalDateTime(),
-                    )
+        val spleisBehandlinger =
+            packet["arbeidsgivere"].flatMap { arbeidsgiverNode ->
+                arbeidsgiverNode["vedtaksperioder"].flatMap { vedtaksperiode ->
+                    vedtaksperiode["behandlinger"].map { behandlingNode ->
+                        behandlingNode["behandlingId"].asUUID()
+                    }
                 }
             }
-        }.forEach { behandling ->
-            if (behandlinger.none { it.id == SpleisBehandlingId(behandling.id) }) {
-                logg.warn("Fant ikke behandling med id: ${behandling.id} ved avstemming, se sikkerlogg for detaljer")
-                sikkerlogg.warn(
-                    "Fant ikke behandling med id: ${behandling.id} ved avstemming av person med fødselsnummer: $fødselsnummer",
-                )
-            }
+
+        val spesialistBehandlingerMedSpleisBehandlingId =
+            spesialistBehandlinger.filter { it.spleisBehandlingId != null }
+
+        val antallBehandlingerISpleis = spleisBehandlinger.size
+        val antallBehandlingerISpesialist = spesialistBehandlinger.size
+        val antallSpesialstBehandlingerMedSpleisBehandlingId = spesialistBehandlingerMedSpleisBehandlingId.size
+        val antallSpleisBehandlingerSomOgsåFinnesISpesialist =
+            spesialistBehandlingerMedSpleisBehandlingId.filter { spleisBehandlinger.contains(it.spleisBehandlingId) }.size
+
+        if (antallBehandlingerISpesialist != antallBehandlingerISpleis) {
+            val melding =
+                "Antall behandlinger i Spleis ($antallBehandlingerISpleis) samsvarer ikke med antall behandlinger i Spesialist ($antallBehandlingerISpesialist). $antallSpesialstBehandlingerMedSpleisBehandlingId av $antallBehandlingerISpesialist behandlinger har spleis behandling id, av disse finnes $antallSpleisBehandlingerSomOgsåFinnesISpesialist i Spleis."
+            logg.warn(
+                melding,
+            )
+            sikkerlogg.warn(
+                "$melding, for person med fødselsnummer $fødselsnummer",
+            )
         }
     }
-
-    private data class AvstemtBehandling(
-        val arbeidsgiver: String,
-        val id: UUID,
-        val opprettet: LocalDateTime,
-    )
 }
