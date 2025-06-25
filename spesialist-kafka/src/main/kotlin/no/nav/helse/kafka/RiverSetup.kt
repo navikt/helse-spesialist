@@ -59,7 +59,7 @@ class RiverSetup(
             KommandokjedePåminnelseRiver(mediator),
             StansAutomatiskBehandlingRiver(mediator),
             AvviksvurderingLøsningRiver(mediator),
-            // PersonAvstemmingRiver(mediator),
+            PersonAvstemmingRiver(mediator),
         ).map { DuplikatsjekkendeRiver(it, meldingDuplikatkontrollDao) }
 
     fun registrerRivers(rapidsConnection: RapidsConnection) {

@@ -64,6 +64,10 @@ class PersonAvstemmingRiver(
             sikkerlogg.warn(
                 "$melding, for person med fødselsnummer $fødselsnummer",
             )
+        } else {
+            logg.debug(
+                "Antall behandlinger i Spleis ($antallBehandlingerISpleis) samsvarer med antall behandlinger i Spesialist ($antallBehandlingerISpesialist). $antallSpesialstBehandlingerMedSpleisBehandlingId av $antallBehandlingerISpesialist behandlinger har spleis behandling id, av disse finnes $antallSpleisBehandlingerSomOgsåFinnesISpesialist i Spleis.",
+            )
         }
     }
 }
