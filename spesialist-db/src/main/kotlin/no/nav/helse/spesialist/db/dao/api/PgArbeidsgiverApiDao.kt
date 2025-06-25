@@ -10,7 +10,6 @@ import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.db.objectMapper
-import no.nav.helse.spesialist.domain.ArbeidsgiverId
 import javax.sql.DataSource
 
 class PgArbeidsgiverApiDao internal constructor(dataSource: DataSource) :
@@ -18,17 +17,16 @@ class PgArbeidsgiverApiDao internal constructor(dataSource: DataSource) :
     ArbeidsgiverApiDao {
         override fun finnArbeidsforhold(
             fødselsnummer: String,
-            organisasjonsnummer: String,
-            arbeidsgiverRef: ArbeidsgiverId,
+            arbeidsgiverIdentifikator: String,
         ) = asSQL(
             """
             SELECT startdato, sluttdato, stillingstittel, stillingsprosent FROM arbeidsforhold
-            WHERE arbeidsgiver_ref = :arbeidsgiver_ref
+            WHERE arbeidsgiver_identifikator = :arbeidsgiver_identifikator
             AND person_ref = (SELECT id FROM person WHERE fødselsnummer = :fodselsnummer);
             """.trimIndent(),
-            "arbeidsgiver_ref" to arbeidsgiverRef.value,
+            "arbeidsgiver_identifikator" to arbeidsgiverIdentifikator,
             "fodselsnummer" to fødselsnummer,
-        ).list { tilArbeidsforholdApiDto(organisasjonsnummer, it) }
+        ).list { tilArbeidsforholdApiDto(arbeidsgiverIdentifikator, it) }
 
         override fun finnArbeidsgiverInntekterFraAordningen(
             fødselsnummer: String,

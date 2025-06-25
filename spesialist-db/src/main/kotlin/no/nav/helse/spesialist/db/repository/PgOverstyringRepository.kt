@@ -349,7 +349,7 @@ class PgOverstyringRepository(
                    o.ekstern_hendelse_id,
                    p.fødselsnummer,
                    p.aktør_id,
-                   a.organisasjonsnummer,
+                   ot.arbeidsgiver_identifikator,
                    o.vedtaksperiode_id,
                    ot.begrunnelse,
                    o.tidspunkt,
@@ -358,7 +358,6 @@ class PgOverstyringRepository(
             FROM overstyring o
                 INNER JOIN overstyring_tidslinje ot ON ot.overstyring_ref = o.id
                 INNER JOIN person p ON p.id = o.person_ref
-                INNER JOIN arbeidsgiver a ON a.id = ot.arbeidsgiver_ref
                 INNER JOIN vedtak v on o.vedtaksperiode_id = v.vedtaksperiode_id
             WHERE o.totrinnsvurdering_ref = :totrinnsvurderingId and o.ferdigstilt = false and v.forkastet = false;
             """,
@@ -468,8 +467,8 @@ class PgOverstyringRepository(
     private fun finnSkjønnsfastsattArbeidsgiver(overstyringRow: Row): List<SkjønnsfastsattArbeidsgiver> =
         asSQL(
             """
-                SELECT arlig, fra_arlig, organisasjonsnummer FROM skjonnsfastsetting_sykepengegrunnlag_arbeidsgiver ssa
-                    JOIN arbeidsgiver a ON a.id = ssa.arbeidsgiver_ref
+                SELECT arlig, fra_arlig, arbeidsgiver_identifikator 
+                FROM skjonnsfastsetting_sykepengegrunnlag_arbeidsgiver
                 WHERE skjonnsfastsetting_sykepengegrunnlag_ref = :id
                 """,
             "id" to overstyringRow.long("overstyring_skjonn_id"),
@@ -478,10 +477,9 @@ class PgOverstyringRepository(
     private fun finnMinimumSykdomsgradArbeidsgiver(id: Long): List<MinimumSykdomsgradArbeidsgiver> =
         asSQL(
             """
-            SELECT berort_vedtaksperiode_id, organisasjonsnummer
-            FROM overstyring_minimum_sykdomsgrad_arbeidsgiver omsa
-                 JOIN arbeidsgiver a ON omsa.arbeidsgiver_ref = a.id
-            WHERE omsa.id = :id
+            SELECT berort_vedtaksperiode_id, arbeidsgiver_identifikator
+            FROM overstyring_minimum_sykdomsgrad_arbeidsgiver
+            WHERE id = :id
             """,
             "id" to id,
         ).list { it.toMinimumSykdomsgradArbeidsgiver() }
@@ -499,7 +497,7 @@ class PgOverstyringRepository(
     private fun finnOverstyrtArbeidsgiver(id: Long): List<OverstyrtArbeidsgiver> =
         asSQL(
             """
-            SELECT organisasjonsnummer,
+            SELECT arbeidsgiver_identifikator,
                    manedlig_inntekt,
                    fra_manedlig_inntekt,
                    begrunnelse,
@@ -509,8 +507,7 @@ class PgOverstyringRepository(
                    refusjonsopplysninger,
                    fra_refusjonsopplysninger,
                    subsumsjon
-            FROM overstyring_inntekt oi
-                     JOIN arbeidsgiver a ON oi.arbeidsgiver_ref = a.id
+            FROM overstyring_inntekt
             WHERE overstyring_ref = :id
             """.trimIndent(),
             "id" to id,
@@ -519,9 +516,8 @@ class PgOverstyringRepository(
     private fun finnArbeidsforhold(id: Long): List<Arbeidsforhold> =
         asSQL(
             """
-            SELECT organisasjonsnummer, deaktivert, begrunnelse, forklaring
-            FROM overstyring_arbeidsforhold oa
-                JOIN arbeidsgiver a ON oa.arbeidsgiver_ref = a.id
+            SELECT arbeidsgiver_identifikator, deaktivert, begrunnelse, forklaring
+            FROM overstyring_arbeidsforhold
             WHERE overstyring_ref = :id
             """,
             "id" to id,
@@ -534,7 +530,7 @@ class PgOverstyringRepository(
             eksternHendelseId = uuid("ekstern_hendelse_id"),
             fødselsnummer = string("fødselsnummer"),
             aktørId = string("aktør_id"),
-            organisasjonsnummer = string("organisasjonsnummer"),
+            organisasjonsnummer = string("arbeidsgiver_identifikator"),
             vedtaksperiodeId = uuid("vedtaksperiode_id"),
             begrunnelse = string("begrunnelse"),
             opprettet = localDateTime("tidspunkt"),
@@ -624,7 +620,7 @@ class PgOverstyringRepository(
 
     private fun Row.toSkjønnsfastsattArbeidsgiver(overstyringRow: Row): SkjønnsfastsattArbeidsgiver =
         SkjønnsfastsattArbeidsgiver(
-            organisasjonsnummer = string("organisasjonsnummer"),
+            organisasjonsnummer = string("arbeidsgiver_identifikator"),
             årlig = double("arlig"),
             fraÅrlig = double("fra_arlig"),
             årsak = overstyringRow.string("arsak"),
@@ -645,13 +641,13 @@ class PgOverstyringRepository(
 
     private fun Row.toMinimumSykdomsgradArbeidsgiver(): MinimumSykdomsgradArbeidsgiver =
         MinimumSykdomsgradArbeidsgiver(
-            organisasjonsnummer = string("organisasjonsnummer"),
+            organisasjonsnummer = string("arbeidsgiver_identifikator"),
             berørtVedtaksperiodeId = uuid("berort_vedtaksperiode_id"),
         )
 
     private fun Row.toOverstyrtArbeidsgiver(): OverstyrtArbeidsgiver =
         OverstyrtArbeidsgiver(
-            organisasjonsnummer = string("organisasjonsnummer"),
+            organisasjonsnummer = string("arbeidsgiver_identifikator"),
             månedligInntekt = double("manedlig_inntekt"),
             fraMånedligInntekt = double("fra_manedlig_inntekt"),
             begrunnelse = string("begrunnelse"),
@@ -669,7 +665,7 @@ class PgOverstyringRepository(
 
     private fun Row.toArbeidsforhold(): Arbeidsforhold =
         Arbeidsforhold(
-            organisasjonsnummer = string("organisasjonsnummer"),
+            organisasjonsnummer = string("arbeidsgiver_identifikator"),
             deaktivert = boolean("deaktivert"),
             begrunnelse = string("begrunnelse"),
             forklaring = string("forklaring"),

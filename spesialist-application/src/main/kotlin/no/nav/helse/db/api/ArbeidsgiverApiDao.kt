@@ -1,14 +1,12 @@
 package no.nav.helse.db.api
 
 import no.nav.helse.spesialist.api.arbeidsgiver.ArbeidsforholdApiDto
-import no.nav.helse.spesialist.domain.ArbeidsgiverId
 import java.time.YearMonth
 
 interface ArbeidsgiverApiDao {
     fun finnArbeidsforhold(
         fødselsnummer: String,
-        organisasjonsnummer: String,
-        arbeidsgiverRef: ArbeidsgiverId,
+        arbeidsgiverIdentifikator: String,
     ): List<ArbeidsforholdApiDto>
 
     fun finnArbeidsgiverInntekterFraAordningen(

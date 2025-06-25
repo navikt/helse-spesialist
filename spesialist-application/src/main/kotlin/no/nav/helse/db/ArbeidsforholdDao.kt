@@ -5,7 +5,7 @@ import no.nav.helse.modell.KomplettArbeidsforholdDto
 interface ArbeidsforholdDao {
     fun findArbeidsforhold(
         fødselsnummer: String,
-        organisasjonsnummer: String,
+        arbeidsgiverIdentifikator: String,
     ): List<KomplettArbeidsforholdDto>
 
     fun upsertArbeidsforhold(

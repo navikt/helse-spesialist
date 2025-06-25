@@ -30,11 +30,11 @@ class OpprettEllerOppdaterArbeidsforholdTest {
         val arbeidsforholdSomHarBlittOppdatert = mutableListOf<KomplettArbeidsforholdDto>()
         val eksisterendeArbeidsforhold = mutableListOf<KomplettArbeidsforholdDto>()
 
-        override fun findArbeidsforhold(fødselsnummer: String, organisasjonsnummer: String):
+        override fun findArbeidsforhold(fødselsnummer: String, arbeidsgiverIdentifikator: String):
                 List<KomplettArbeidsforholdDto> {
             return eksisterendeArbeidsforhold.filter {
                 it.fødselsnummer.equals(fødselsnummer) &&
-                        it.organisasjonsnummer.equals(organisasjonsnummer)
+                        it.organisasjonsnummer.equals(arbeidsgiverIdentifikator)
             }
         }
 

@@ -12,14 +12,13 @@ internal class PgArbeidsgiverApiDaoTest : AbstractDBIntegrationTest() {
     @Test
     fun `finner arbeidsforhold`() {
         opprettPerson()
-        val arbeidsgiverId = opprettArbeidsgiver()
+        opprettArbeidsgiver()
         opprettVedtaksperiode()
         opprettArbeidsforhold()
 
         val arbeidsforhold = arbeidsgiverApiDao.finnArbeidsforhold(
             fødselsnummer = FNR,
-            organisasjonsnummer = ORGNUMMER,
-            arbeidsgiverRef = arbeidsgiverId
+            arbeidsgiverIdentifikator = ORGNUMMER
         )
 
         assertEquals(1, arbeidsforhold.size)

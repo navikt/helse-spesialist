@@ -21,7 +21,7 @@ class PgVedtakDao private constructor(queryRunner: QueryRunner) : VedtakDao, Que
             """
             SELECT 
                 vedtaksperiode_id,
-                (SELECT organisasjonsnummer FROM arbeidsgiver WHERE id = arbeidsgiver_ref),
+                arbeidsgiver_identifikator,
                 forkastet
             FROM vedtak
             WHERE vedtaksperiode_id = :vedtaksperiode_id
@@ -29,7 +29,7 @@ class PgVedtakDao private constructor(queryRunner: QueryRunner) : VedtakDao, Que
             "vedtaksperiode_id" to vedtaksperiodeId,
         ).singleOrNull {
             VedtaksperiodeDto(
-                organisasjonsnummer = it.string("organisasjonsnummer"),
+                organisasjonsnummer = it.string("arbeidsgiver_identifikator"),
                 vedtaksperiodeId = it.uuid("vedtaksperiode_id"),
                 forkastet = it.boolean("forkastet"),
                 behandlinger = emptyList(),
@@ -119,14 +119,13 @@ class PgVedtakDao private constructor(queryRunner: QueryRunner) : VedtakDao, Que
     override fun finnOrganisasjonsnummer(vedtaksperiodeId: UUID): String? {
         return asSQL(
             """
-            SELECT organisasjonsnummer FROM arbeidsgiver a
-            INNER JOIN vedtak v ON a.id = v.arbeidsgiver_ref
-            WHERE v.vedtaksperiode_id = :vedtaksperiodeId
+            SELECT arbeidsgiver_identifikator FROM vedtak
+            WHERE vedtaksperiode_id = :vedtaksperiodeId
             """,
             "vedtaksperiodeId" to vedtaksperiodeId,
         )
             .singleOrNull {
-                it.long("organisasjonsnummer").toString()
+                it.string("arbeidsgiver_identifikator")
             }
     }
 

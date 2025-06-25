@@ -12,20 +12,20 @@ class PgArbeidsforholdDao internal constructor(
 ) : ArbeidsforholdDao {
     override fun findArbeidsforhold(
         fødselsnummer: String,
-        organisasjonsnummer: String,
+        arbeidsgiverIdentifikator: String,
     ) = asSQL(
         """
         SELECT startdato, sluttdato, stillingstittel, stillingsprosent, oppdatert
         FROM arbeidsforhold
         WHERE person_ref = (SELECT id FROM person WHERE fødselsnummer = :fodselsnummer)
-          AND arbeidsgiver_ref = (SELECT id FROM arbeidsgiver WHERE organisasjonsnummer = :organisasjonsnummer);
+          AND arbeidsgiver_identifikator = :arbeidsgiver_identifikator;
         """.trimIndent(),
         "fodselsnummer" to fødselsnummer,
-        "organisasjonsnummer" to organisasjonsnummer,
+        "arbeidsgiver_identifikator" to arbeidsgiverIdentifikator,
     ).list(session) { row ->
         KomplettArbeidsforholdDto(
             fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
+            organisasjonsnummer = arbeidsgiverIdentifikator,
             startdato = row.localDate("startdato"),
             sluttdato = row.localDateOrNull("sluttdato"),
             stillingsprosent = row.int("stillingsprosent"),
@@ -66,16 +66,16 @@ class PgArbeidsforholdDao internal constructor(
 
     private fun slettArbeidsforhold(
         fødselsnummer: String,
-        organisasjonsnummer: String,
+        arbeidsgiverIdentifikator: String,
     ) {
         asSQL(
             """
             DELETE FROM arbeidsforhold
             WHERE person_ref = (SELECT id FROM person WHERE fødselsnummer = :fodselsnummer)
-            AND arbeidsgiver_ref = (SELECT id FROM arbeidsgiver WHERE organisasjonsnummer = :organisasjonsnummer);
+            AND arbeidsgiver_identifikator = :arbeidsgiver_identifikator;
             """.trimIndent(),
             "fodselsnummer" to fødselsnummer,
-            "organisasjonsnummer" to organisasjonsnummer,
+            "arbeidsgiver_identifikator" to arbeidsgiverIdentifikator,
         ).update(session)
     }
 }
