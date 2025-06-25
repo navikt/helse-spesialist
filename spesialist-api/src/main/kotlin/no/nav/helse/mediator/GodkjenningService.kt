@@ -71,7 +71,7 @@ class GodkjenningService(
             publiserer.publiser(fødselsnummer, saksbehandlerløsning, "saksbehandlergodkjenning")
 
             reserverPerson(reserverPersonOid, fødselsnummer)
-            oppgaveService.oppgave(godkjenningDTO.oppgavereferanse) {
+            oppgaveService.nyOppgaveService(session).oppgave(godkjenningDTO.oppgavereferanse) {
                 avventerSystem(godkjenningDTO.saksbehandlerIdent, oid)
 
                 if (totrinnsvurdering == null) return@oppgave

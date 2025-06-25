@@ -38,7 +38,7 @@ class OppgaveService(
     private val logg = LoggerFactory.getLogger(this::class.java)
     private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
-    internal fun nyOppgaveService(sessionContext: SessionContext): OppgaveService =
+    fun nyOppgaveService(sessionContext: SessionContext): OppgaveService =
         OppgaveService(
             oppgaveDao = sessionContext.oppgaveDao,
             reservasjonDao = sessionContext.reservasjonDao,
