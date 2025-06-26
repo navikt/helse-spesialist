@@ -7,9 +7,8 @@ import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import io.prometheus.metrics.model.registry.PrometheusRegistry
 import java.time.Duration
-import javax.sql.DataSource
 
-class DataSourceBuilder(configuration: DBModule.Configuration) {
+internal class DataSourceBuilder(configuration: DBModule.Configuration) {
     private val hikariConfig =
         HikariConfig().apply {
             jdbcUrl = configuration.jdbcUrl
@@ -30,5 +29,5 @@ class DataSourceBuilder(configuration: DBModule.Configuration) {
                 )
         }
 
-    fun build(): DataSource = HikariDataSource(hikariConfig)
+    fun build(): HikariDataSource = HikariDataSource(hikariConfig)
 }

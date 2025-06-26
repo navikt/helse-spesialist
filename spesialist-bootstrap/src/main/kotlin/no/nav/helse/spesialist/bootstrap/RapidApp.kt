@@ -174,7 +174,14 @@ class RapidApp {
             },
         )
 
+        val modules = Modules(dbModule)
+        Runtime.getRuntime().addShutdownHook(
+            Thread {
+                modules.dbModule.shutdown()
+            },
+        )
+
         rapidsConnection.start()
-        return Modules(dbModule)
+        return modules
     }
 }

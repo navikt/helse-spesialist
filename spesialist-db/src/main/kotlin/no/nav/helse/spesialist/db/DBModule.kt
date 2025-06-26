@@ -1,5 +1,9 @@
 package no.nav.helse.spesialist.db
 
+import com.zaxxer.hikari.HikariDataSource
+import no.nav.helse.spesialist.application.logg.logg
+import javax.sql.DataSource
+
 class DBModule(configuration: Configuration) {
     data class Configuration(
         val jdbcUrl: String,
@@ -7,12 +11,19 @@ class DBModule(configuration: Configuration) {
         val password: String,
     )
 
-    val dataSource = DataSourceBuilder(configuration).build()
+    private val _dataSource: HikariDataSource = DataSourceBuilder(configuration).build()
+    val dataSource: DataSource = _dataSource
     val daos = DBDaos(dataSource)
     val sessionFactory = TransactionalSessionFactory(dataSource)
     private val flywayMigrator = FlywayMigrator(configuration)
 
     fun migrate() {
         flywayMigrator.migrate()
+    }
+
+    fun shutdown() {
+        logg.info("Forsøker å lukke datasource...")
+        _dataSource.close()
+        logg.info("Lukket datasource")
     }
 }
