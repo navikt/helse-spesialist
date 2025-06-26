@@ -11,7 +11,7 @@ import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
 import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.Arbeidsgiver
-import no.nav.helse.spesialist.domain.ArbeidsgiverId
+import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
 import no.nav.helse.spesialist.domain.testfixtures.feb
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagAktørId
@@ -825,11 +825,11 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
         "er_egen_ansatt" to erEgenAnsatt,
     )
 
-    private fun opprettArbeidsgiver(organisasjonsnummer: String): ArbeidsgiverId =
-        Arbeidsgiver.Factory.ny(identifikator = Arbeidsgiver.Identifikator.fraString(organisasjonsnummer))
+    private fun opprettArbeidsgiver(organisasjonsnummer: String) {
+        Arbeidsgiver.Factory.ny(identifikator = ArbeidsgiverIdentifikator.fraString(organisasjonsnummer))
             .also { it.oppdaterMedNavn(navn = lagOrganisasjonsnavn()) }
             .also(sessionContext.arbeidsgiverRepository::lagre)
-            .id()
+    }
 
     private fun insertInfotrygdutbetalinger(): Long = requireNotNull(
         dbQuery.updateAndReturnGeneratedKey(

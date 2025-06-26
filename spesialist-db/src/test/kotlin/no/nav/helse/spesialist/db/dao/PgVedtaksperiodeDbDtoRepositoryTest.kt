@@ -28,7 +28,7 @@ class PgVedtaksperiodeDbDtoRepositoryTest: AbstractDBIntegrationTest() {
         val vedtaksperiodeId2 = UUID.randomUUID()
 
         opprettPerson(fødselsnummer = person1, lagAktørId())
-        opprettArbeidsgiver(organisasjonsnummer = organisasjonsnummer1)
+        opprettArbeidsgiver(identifikator = organisasjonsnummer1)
 
         val vedtaksperioder = listOf(
             VedtaksperiodeDto(

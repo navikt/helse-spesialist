@@ -44,7 +44,7 @@ import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsettingSykepengegrunn
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDto
 import no.nav.helse.spesialist.application.snapshot.SnapshotGhostPeriode
 import no.nav.helse.spesialist.application.snapshot.SnapshotPerson
-import no.nav.helse.spesialist.domain.Arbeidsgiver
+import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
 import java.time.LocalDate
 import java.util.UUID
 
@@ -151,7 +151,7 @@ data class ApiPersonResolver(
 
     private fun finnNavnForOrganisasjonsnummer(organisasjonsnummer: String): String =
         sessionFactory.transactionalSessionScope {
-            it.arbeidsgiverRepository.finnForIdentifikator(Arbeidsgiver.Identifikator.fraString(organisasjonsnummer))?.navn?.navn
+            it.arbeidsgiverRepository.finn(ArbeidsgiverIdentifikator.fraString(organisasjonsnummer))?.navn?.navn
                 ?: "navn er utilgjengelig"
         }
 

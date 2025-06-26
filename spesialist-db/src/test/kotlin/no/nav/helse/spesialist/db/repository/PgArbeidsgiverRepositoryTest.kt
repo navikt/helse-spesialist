@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.db.repository
 
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.Arbeidsgiver
+import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnavn
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
@@ -17,7 +18,7 @@ class PgArbeidsgiverRepositoryTest : AbstractDBIntegrationTest() {
     @Test
     fun `kan lagre og hente opp arbeidsgiver uten navn`() {
         // Given:
-        val identifikator = Arbeidsgiver.Identifikator.Organisasjonsnummer(
+        val identifikator = ArbeidsgiverIdentifikator.Organisasjonsnummer(
             organisasjonsnummer = lagOrganisasjonsnummer()
         )
         val arbeidsgiver = Arbeidsgiver.Factory.ny(identifikator = identifikator)
@@ -28,14 +29,14 @@ class PgArbeidsgiverRepositoryTest : AbstractDBIntegrationTest() {
 
         // Then:
         assertNotNull(actualArbeidsgiver)
-        assertEquals(identifikator, actualArbeidsgiver!!.identifikator)
+        assertEquals(identifikator, actualArbeidsgiver!!.id())
         assertNull(actualArbeidsgiver.navn)
     }
 
     @Test
     fun `kan lagre og hente opp arbeidsgiver med navn`() {
         // Given:
-        val identifikator = Arbeidsgiver.Identifikator.Organisasjonsnummer(
+        val identifikator = ArbeidsgiverIdentifikator.Organisasjonsnummer(
             organisasjonsnummer = lagOrganisasjonsnummer()
         )
         val organisasjonsnavn = lagOrganisasjonsnavn()
@@ -48,7 +49,7 @@ class PgArbeidsgiverRepositoryTest : AbstractDBIntegrationTest() {
 
         // Then:
         assertNotNull(actualArbeidsgiver)
-        assertEquals(identifikator, actualArbeidsgiver!!.identifikator)
+        assertEquals(identifikator, actualArbeidsgiver!!.id())
         assertEquals(organisasjonsnavn, actualArbeidsgiver.navn?.navn)
         assertEquals(LocalDate.now(), actualArbeidsgiver.navn?.sistOppdatertDato)
     }
@@ -56,12 +57,12 @@ class PgArbeidsgiverRepositoryTest : AbstractDBIntegrationTest() {
     @Test
     fun `kan lagre arbeidsgiver uten navn, oppdatere med navn, og hente opp`() {
         // Given:
-        val identifikator = Arbeidsgiver.Identifikator.Organisasjonsnummer(
+        val identifikator = ArbeidsgiverIdentifikator.Organisasjonsnummer(
             organisasjonsnummer = lagOrganisasjonsnummer()
         )
         val arbeidsgiver = Arbeidsgiver.Factory.ny(identifikator = identifikator)
         arbeidsgiverRepository.lagre(arbeidsgiver)
-        val lagretArbeidsgiver = arbeidsgiverRepository.finnForIdentifikator(identifikator)
+        val lagretArbeidsgiver = arbeidsgiverRepository.finn(identifikator)
         assertNotNull(lagretArbeidsgiver)
         val organisasjonsnavn = lagOrganisasjonsnavn()
 
@@ -72,7 +73,7 @@ class PgArbeidsgiverRepositoryTest : AbstractDBIntegrationTest() {
 
         // Then:
         assertNotNull(actualArbeidsgiver)
-        assertEquals(identifikator, actualArbeidsgiver!!.identifikator)
+        assertEquals(identifikator, actualArbeidsgiver!!.id())
         assertEquals(organisasjonsnavn, actualArbeidsgiver.navn?.navn)
         assertEquals(LocalDate.now(), actualArbeidsgiver.navn?.sistOppdatertDato)
     }
@@ -80,7 +81,7 @@ class PgArbeidsgiverRepositoryTest : AbstractDBIntegrationTest() {
     @Test
     fun `kan lagre og hente opp arbeidsgiver basert på identifikator`() {
         // Given:
-        val identifikator = Arbeidsgiver.Identifikator.Organisasjonsnummer(
+        val identifikator = ArbeidsgiverIdentifikator.Organisasjonsnummer(
             organisasjonsnummer = lagOrganisasjonsnummer()
         )
         val organisasjonsnavn = lagOrganisasjonsnavn()
@@ -89,11 +90,11 @@ class PgArbeidsgiverRepositoryTest : AbstractDBIntegrationTest() {
 
         // When:
         arbeidsgiverRepository.lagre(arbeidsgiver)
-        val actualArbeidsgiver = arbeidsgiverRepository.finnForIdentifikator(identifikator)
+        val actualArbeidsgiver = arbeidsgiverRepository.finn(identifikator)
 
         // Then:
         assertNotNull(actualArbeidsgiver)
-        assertEquals(identifikator, actualArbeidsgiver!!.identifikator)
+        assertEquals(identifikator, actualArbeidsgiver!!.id())
         assertEquals(organisasjonsnavn, actualArbeidsgiver.navn?.navn)
         assertEquals(LocalDate.now(), actualArbeidsgiver.navn?.sistOppdatertDato)
     }
@@ -101,7 +102,7 @@ class PgArbeidsgiverRepositoryTest : AbstractDBIntegrationTest() {
     @Test
     fun `kan lagre og hente opp arbeidsgiver basert på identifikator i liste`() {
         // Given:
-        val identifikator = Arbeidsgiver.Identifikator.Organisasjonsnummer(
+        val identifikator = ArbeidsgiverIdentifikator.Organisasjonsnummer(
             organisasjonsnummer = lagOrganisasjonsnummer()
         )
         val organisasjonsnavn = lagOrganisasjonsnavn()
@@ -110,12 +111,12 @@ class PgArbeidsgiverRepositoryTest : AbstractDBIntegrationTest() {
 
         // When:
         arbeidsgiverRepository.lagre(arbeidsgiver)
-        val actualArbeidsgivere = arbeidsgiverRepository.finnAlleForIdentifikatorer(setOf(identifikator))
+        val actualArbeidsgivere = arbeidsgiverRepository.finnAlle(setOf(identifikator))
 
         // Then:
         assertEquals(1, actualArbeidsgivere.size)
         val actualArbeidsgiver = actualArbeidsgivere.first()
-        assertEquals(identifikator, actualArbeidsgiver.identifikator)
+        assertEquals(identifikator, actualArbeidsgiver.id())
         assertEquals(organisasjonsnavn, actualArbeidsgiver.navn?.navn)
         assertEquals(LocalDate.now(), actualArbeidsgiver.navn?.sistOppdatertDato)
     }
@@ -123,7 +124,7 @@ class PgArbeidsgiverRepositoryTest : AbstractDBIntegrationTest() {
     @Test
     fun `når arbeidsgiver har fødselsnummer som id og starter med tallet 0 får vi riktig fødselsnummer ut igjen`() {
         // Given:
-        val identifikator = Arbeidsgiver.Identifikator.Fødselsnummer(
+        val identifikator = ArbeidsgiverIdentifikator.Fødselsnummer(
             fødselsnummer = lagFødselsnummer().replaceFirstChar { "0" }
         )
         val arbeidsgiver = Arbeidsgiver.Factory.ny(identifikator = identifikator)
@@ -134,13 +135,13 @@ class PgArbeidsgiverRepositoryTest : AbstractDBIntegrationTest() {
         // Then:
         val actualArbeidsgiver = arbeidsgiverRepository.finn(arbeidsgiver.id())
         assertNotNull(actualArbeidsgiver)
-        assertEquals(identifikator, actualArbeidsgiver!!.identifikator)
+        assertEquals(identifikator, actualArbeidsgiver!!.id())
     }
 
     @Test
     fun `når arbeidsgiver har fødselsnummer som id og starter med annet siffer enn 0 får vi riktig fødselsnummer ut igjen`() {
         // Given:
-        val identifikator = Arbeidsgiver.Identifikator.Fødselsnummer(
+        val identifikator = ArbeidsgiverIdentifikator.Fødselsnummer(
             fødselsnummer = lagFødselsnummer().replaceFirstChar { "1" }
         )
         val arbeidsgiver = Arbeidsgiver.Factory.ny(identifikator = identifikator)
@@ -151,6 +152,6 @@ class PgArbeidsgiverRepositoryTest : AbstractDBIntegrationTest() {
         // Then:
         val actualArbeidsgiver = arbeidsgiverRepository.finn(arbeidsgiver.id())
         assertNotNull(actualArbeidsgiver)
-        assertEquals(identifikator, actualArbeidsgiver!!.identifikator)
+        assertEquals(identifikator, actualArbeidsgiver!!.id())
     }
 }

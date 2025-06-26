@@ -53,7 +53,7 @@ internal class PgLegacyBehandlingDaoTest : AbstractDBIntegrationTest() {
         val vedtaksperiodeId2 = UUID.randomUUID()
 
         opprettPerson(fødselsnummer = person1, lagAktørId())
-        opprettArbeidsgiver(organisasjonsnummer = organisasjonsnummer1)
+        opprettArbeidsgiver(identifikator = organisasjonsnummer1)
         opprettVedtaksperiode(
             fødselsnummer = person1,
             organisasjonsnummer = organisasjonsnummer1,
@@ -61,7 +61,7 @@ internal class PgLegacyBehandlingDaoTest : AbstractDBIntegrationTest() {
         )
 
         opprettPerson(fødselsnummer = person2, lagAktørId())
-        opprettArbeidsgiver(organisasjonsnummer = organisasjonsnummer2)
+        opprettArbeidsgiver(identifikator = organisasjonsnummer2)
         opprettVedtaksperiode(
             fødselsnummer = person2,
             organisasjonsnummer = organisasjonsnummer2,

@@ -56,6 +56,7 @@ import no.nav.helse.spesialist.db.DBSessionContext
 import no.nav.helse.spesialist.db.DbQuery
 import no.nav.helse.spesialist.db.TransactionalSessionFactory
 import no.nav.helse.spesialist.domain.Arbeidsgiver
+import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.testfixtures.lagAktørId
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
@@ -301,7 +302,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
     ) {
         sessionContext.arbeidsgiverRepository.lagre(
             Arbeidsgiver.Factory.ny(
-                identifikator = Arbeidsgiver.Identifikator.fraString(organisasjonsnummer),
+                identifikator = ArbeidsgiverIdentifikator.fraString(organisasjonsnummer),
             ).apply { oppdaterMedNavn(navn) }
         )
     }

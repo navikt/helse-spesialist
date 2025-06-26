@@ -7,73 +7,63 @@ import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.domain.Arbeidsgiver
-import no.nav.helse.spesialist.domain.ArbeidsgiverId
+import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
 
 internal class PgArbeidsgiverRepository(
     private val session: Session,
 ) : QueryRunner by MedSession(session), ArbeidsgiverRepository {
     override fun lagre(arbeidsgiver: Arbeidsgiver) {
-        if (!arbeidsgiver.harFåttTildeltId()) {
-            insertArbeidsgiver(arbeidsgiver).let(::ArbeidsgiverId).let(arbeidsgiver::tildelId)
+        if (finn(arbeidsgiver.id()) == null) {
+            insertArbeidsgiver(arbeidsgiver)
         } else {
             updateArbeidsgiver(arbeidsgiver)
         }
     }
 
-    override fun finn(id: ArbeidsgiverId): Arbeidsgiver? =
+    override fun finn(id: ArbeidsgiverIdentifikator): Arbeidsgiver? =
         asSQL(
-            "SELECT * FROM arbeidsgiver WHERE id = :id",
-            "id" to id.value,
+            "SELECT * FROM arbeidsgiver WHERE identifikator = :identifikator",
+            "identifikator" to id.tilDbIdentifikator(),
         ).singleOrNull { it.toArbeidsgiver() }
 
-    override fun finnForIdentifikator(identifikator: Arbeidsgiver.Identifikator): Arbeidsgiver? =
-        asSQL(
-            "SELECT * FROM arbeidsgiver WHERE organisasjonsnummer = :organisasjonsnummer",
-            "organisasjonsnummer" to identifikator.tilDbOrganisasjonsnummer(),
-        ).singleOrNull { it.toArbeidsgiver() }
-
-    override fun finnAlleForIdentifikatorer(identifikatorer: Set<Arbeidsgiver.Identifikator>): List<Arbeidsgiver> =
-        if (identifikatorer.isEmpty()) {
+    override fun finnAlle(ider: Set<ArbeidsgiverIdentifikator>): List<Arbeidsgiver> =
+        if (ider.isEmpty()) {
             emptyList()
         } else {
             asSQL(
-                "SELECT * FROM arbeidsgiver WHERE organisasjonsnummer = ANY (:organisasjonsnumre)",
-                "organisasjonsnumre" to identifikatorer.map { it.tilDbOrganisasjonsnummer() }.toTypedArray(),
+                "SELECT * FROM arbeidsgiver WHERE identifikator = ANY (:identifikatorer)",
+                "identifikatorer" to ider.map { it.tilDbIdentifikator() }.toTypedArray(),
             ).list { it.toArbeidsgiver() }
         }
 
-    private fun insertArbeidsgiver(arbeidsgiver: Arbeidsgiver): Int {
-        return asSQL(
+    private fun insertArbeidsgiver(arbeidsgiver: Arbeidsgiver) =
+        asSQL(
             """
             INSERT INTO arbeidsgiver (organisasjonsnummer, identifikator, navn, navn_sist_oppdatert_dato) 
             VALUES (:organisasjonsnummer, :identifikator, :navn, :navn_sist_oppdatert_dato)
             """.trimIndent(),
-            "organisasjonsnummer" to arbeidsgiver.identifikator.tilDbOrganisasjonsnummer(),
-            "identifikator" to arbeidsgiver.identifikator.tilDbOrganisasjonsnummer(),
+            "organisasjonsnummer" to arbeidsgiver.id().tilDbIdentifikator(),
+            "identifikator" to arbeidsgiver.id().tilDbIdentifikator(),
             "navn" to arbeidsgiver.navn?.navn,
             "navn_sist_oppdatert_dato" to arbeidsgiver.navn?.sistOppdatertDato,
         ).updateAndReturnGeneratedKey().toInt()
-    }
 
     private fun updateArbeidsgiver(arbeidsgiver: Arbeidsgiver) {
         asSQL(
             """
             UPDATE arbeidsgiver 
-            SET organisasjonsnummer = :organisasjonsnummer, identifikator = :identifikator, navn = :navn, navn_sist_oppdatert_dato = :navn_sist_oppdatert_dato 
-            WHERE id = :id
+            SET navn = :navn, navn_sist_oppdatert_dato = :navn_sist_oppdatert_dato 
+            WHERE identifikator = :identifikator
             """.trimIndent(),
-            "organisasjonsnummer" to arbeidsgiver.identifikator.tilDbOrganisasjonsnummer(),
-            "identifikator" to arbeidsgiver.identifikator.tilDbOrganisasjonsnummer(),
-            "id" to arbeidsgiver.id().value,
             "navn" to arbeidsgiver.navn?.navn,
             "navn_sist_oppdatert_dato" to arbeidsgiver.navn?.sistOppdatertDato,
+            "identifikator" to arbeidsgiver.id().tilDbIdentifikator(),
         ).update()
     }
 
     private fun Row.toArbeidsgiver(): Arbeidsgiver =
         Arbeidsgiver.Factory.fraLagring(
-            id = ArbeidsgiverId(int("id")),
-            identifikator = fraDbOrganisasjonsnummer(string("organisasjonsnummer")),
+            id = fraDbIdentifikator(string("identifikator")),
             navn =
                 stringOrNull("navn")?.let { navn ->
                     Arbeidsgiver.Navn(
@@ -83,16 +73,16 @@ internal class PgArbeidsgiverRepository(
                 },
         )
 
-    private fun Arbeidsgiver.Identifikator.tilDbOrganisasjonsnummer(): String =
+    private fun ArbeidsgiverIdentifikator.tilDbIdentifikator(): String =
         when (this) {
-            is Arbeidsgiver.Identifikator.Organisasjonsnummer -> this.organisasjonsnummer
-            is Arbeidsgiver.Identifikator.Fødselsnummer -> this.fødselsnummer
+            is ArbeidsgiverIdentifikator.Organisasjonsnummer -> this.organisasjonsnummer
+            is ArbeidsgiverIdentifikator.Fødselsnummer -> this.fødselsnummer
         }
 
-    private fun fraDbOrganisasjonsnummer(organisasjonsnummer: String): Arbeidsgiver.Identifikator =
-        if (organisasjonsnummer.length == 9) {
-            Arbeidsgiver.Identifikator.Organisasjonsnummer(organisasjonsnummer)
+    private fun fraDbIdentifikator(identifikator: String): ArbeidsgiverIdentifikator =
+        if (identifikator.length == 9) {
+            ArbeidsgiverIdentifikator.Organisasjonsnummer(identifikator)
         } else {
-            Arbeidsgiver.Identifikator.Fødselsnummer(organisasjonsnummer)
+            ArbeidsgiverIdentifikator.Fødselsnummer(identifikator)
         }
 }

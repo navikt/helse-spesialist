@@ -4,14 +4,25 @@ import no.nav.helse.spesialist.domain.ddd.AggregateRoot
 import no.nav.helse.spesialist.domain.ddd.ValueObject
 import java.time.LocalDate
 
-@JvmInline
-value class ArbeidsgiverId(val value: Int)
+sealed interface ArbeidsgiverIdentifikator : ValueObject {
+    data class Fødselsnummer(val fødselsnummer: String) : ArbeidsgiverIdentifikator
+
+    data class Organisasjonsnummer(val organisasjonsnummer: String) : ArbeidsgiverIdentifikator
+
+    companion object {
+        fun fraString(string: String): ArbeidsgiverIdentifikator =
+            if (string.length == 9) {
+                Organisasjonsnummer(string)
+            } else {
+                Fødselsnummer(string)
+            }
+    }
+}
 
 class Arbeidsgiver private constructor(
-    id: ArbeidsgiverId?,
-    val identifikator: Identifikator,
+    id: ArbeidsgiverIdentifikator,
     navn: Navn?,
-) : AggregateRoot<ArbeidsgiverId>(id) {
+) : AggregateRoot<ArbeidsgiverIdentifikator>(id) {
     var navn: Navn? = navn
         private set
 
@@ -26,20 +37,17 @@ class Arbeidsgiver private constructor(
     }
 
     object Factory {
-        fun ny(identifikator: Identifikator) =
+        fun ny(identifikator: ArbeidsgiverIdentifikator) =
             Arbeidsgiver(
-                id = null,
-                identifikator = identifikator,
+                id = identifikator,
                 navn = null,
             )
 
         fun fraLagring(
-            id: ArbeidsgiverId,
-            identifikator: Identifikator,
+            id: ArbeidsgiverIdentifikator,
             navn: Navn?,
         ) = Arbeidsgiver(
             id = id,
-            identifikator = identifikator,
             navn = navn,
         )
     }
@@ -49,20 +57,5 @@ class Arbeidsgiver private constructor(
         val sistOppdatertDato: LocalDate,
     ) : ValueObject {
         fun ikkeOppdatertSiden(dato: LocalDate) = sistOppdatertDato.isBefore(dato)
-    }
-
-    sealed interface Identifikator : ValueObject {
-        data class Fødselsnummer(val fødselsnummer: String) : Identifikator
-
-        data class Organisasjonsnummer(val organisasjonsnummer: String) : Identifikator
-
-        companion object {
-            fun fraString(string: String): Identifikator =
-                if (string.length == 9) {
-                    Organisasjonsnummer(string)
-                } else {
-                    Fødselsnummer(string)
-                }
-        }
     }
 }

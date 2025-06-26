@@ -4,6 +4,7 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.OpprettMinimalArbeidsgiverCommand
 import no.nav.helse.spesialist.application.InMemoryArbeidsgiverRepository
 import no.nav.helse.spesialist.domain.Arbeidsgiver
+import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -30,8 +31,8 @@ internal class OpprettMinimalArbeidsgiverCommandTest {
         assertTrue(completed)
         assertEquals(1, arbeidsgiverRepository.alle().size)
         assertEquals(
-            Arbeidsgiver.Identifikator.Organisasjonsnummer(organisasjonsnummer),
-            arbeidsgiverRepository.alle().single().identifikator,
+            ArbeidsgiverIdentifikator.Organisasjonsnummer(organisasjonsnummer),
+            arbeidsgiverRepository.alle().single().id()
         )
         assertEquals(
             null,
@@ -45,7 +46,7 @@ internal class OpprettMinimalArbeidsgiverCommandTest {
         val organisasjonsnummer = lagOrganisasjonsnummer()
         arbeidsgiverRepository.lagre(
             Arbeidsgiver.Factory.ny(
-                identifikator = Arbeidsgiver.Identifikator.Organisasjonsnummer(
+                identifikator = ArbeidsgiverIdentifikator.Organisasjonsnummer(
                     organisasjonsnummer
                 )
             )

@@ -15,7 +15,7 @@ import no.nav.helse.modell.vilkårsprøving.Sammenligningsgrunnlag
 import no.nav.helse.spesialist.application.InMemoryArbeidsgiverRepository
 import no.nav.helse.spesialist.application.InMemoryAvviksvurderingRepository
 import no.nav.helse.spesialist.domain.Arbeidsgiver
-import no.nav.helse.spesialist.domain.ArbeidsgiverId
+import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
 import no.nav.helse.spesialist.domain.testfixtures.fødselsdato
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagEtternavn
@@ -32,7 +32,6 @@ import org.junit.jupiter.api.assertNotNull
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import kotlin.random.Random
 
 class OpprettEllerOppdaterInntektskilderTest {
     private val arbeidsgiverRepository = InMemoryArbeidsgiverRepository()
@@ -168,7 +167,7 @@ class OpprettEllerOppdaterInntektskilderTest {
 
     @Test
     fun `suspenderer ikke og ber ikke om behov om inntektskilde er SELVSTENDIG`() {
-        val organisasjonsnummer = Arbeidsgiver.Identifikator.Organisasjonsnummer("SELVSTENDIG")
+        val organisasjonsnummer = ArbeidsgiverIdentifikator.Organisasjonsnummer("SELVSTENDIG")
         val command =
             OpprettEllerOppdaterInntektskilder(
                 fødselsnummer = lagFødselsnummer(),
@@ -372,11 +371,11 @@ class OpprettEllerOppdaterInntektskilderTest {
         val ferdig = command.resume(context)
         assertTrue(ferdig)
         assertEquals(2, arbeidsgiverRepository.alle().size)
-        arbeidsgiverRepository.finnForIdentifikator(organisasjonsnummer).assertArbeidsgiver(
+        arbeidsgiverRepository.finn(organisasjonsnummer).assertArbeidsgiver(
             forventetIdentifikator = organisasjonsnummer,
             forventetNavn = arbeidsgivernavn
         )
-        arbeidsgiverRepository.finnForIdentifikator(fødselsnummer).assertArbeidsgiver(
+        arbeidsgiverRepository.finn(fødselsnummer).assertArbeidsgiver(
             forventetIdentifikator = fødselsnummer,
             forventetNavn = "$fornavn $etternavn"
         )
@@ -412,7 +411,7 @@ class OpprettEllerOppdaterInntektskilderTest {
         assertFalse(ferdig)
 
         assertEquals(2, arbeidsgiverRepository.alle().size)
-        arbeidsgiverRepository.finnForIdentifikator(organisasjonsnummer).assertArbeidsgiver(
+        arbeidsgiverRepository.finn(organisasjonsnummer).assertArbeidsgiver(
             forventetIdentifikator = organisasjonsnummer,
             forventetNavn = arbeidsgivernavn
         )
@@ -529,33 +528,32 @@ class OpprettEllerOppdaterInntektskilderTest {
         )
 
     private fun Arbeidsgiver?.assertArbeidsgiver(
-        forventetIdentifikator: Arbeidsgiver.Identifikator,
+        forventetIdentifikator: ArbeidsgiverIdentifikator,
         forventetNavn: String,
     ) {
         assertNotNull(this)
-        assertEquals(forventetIdentifikator, this.identifikator)
+        assertEquals(forventetIdentifikator, this.id())
         assertEquals(forventetNavn, this.navn?.navn)
     }
 
-    private fun lagreOppdatertArbeidsgiver(identifikator: Arbeidsgiver.Identifikator) {
+    private fun lagreOppdatertArbeidsgiver(identifikator: ArbeidsgiverIdentifikator) {
         lagreArbeidsgiver(
             identifikator = identifikator,
             navnSistOppdatertDato = LocalDate.now()
         )
     }
 
-    private fun lagreUtdatertArbeidsgiver(identifikator: Arbeidsgiver.Identifikator) {
+    private fun lagreUtdatertArbeidsgiver(identifikator: ArbeidsgiverIdentifikator) {
         lagreArbeidsgiver(
             identifikator = identifikator,
             navnSistOppdatertDato = LocalDate.now().minusDays(15L)
         )
     }
 
-    private fun lagreArbeidsgiver(identifikator: Arbeidsgiver.Identifikator, navnSistOppdatertDato: LocalDate) {
+    private fun lagreArbeidsgiver(identifikator: ArbeidsgiverIdentifikator, navnSistOppdatertDato: LocalDate) {
         arbeidsgiverRepository.lagre(
             Arbeidsgiver.Factory.fraLagring(
-                id = ArbeidsgiverId(Random.nextInt()),
-                identifikator = identifikator,
+                id = identifikator,
                 navn = Arbeidsgiver.Navn(
                     navn = "et navn",
                     sistOppdatertDato = navnSistOppdatertDato,
@@ -565,8 +563,8 @@ class OpprettEllerOppdaterInntektskilderTest {
     }
 
     private fun lagFødselsnummerIdentifikator() =
-        Arbeidsgiver.Identifikator.Fødselsnummer(lagFødselsnummer())
+        ArbeidsgiverIdentifikator.Fødselsnummer(lagFødselsnummer())
 
     private fun lagOrganisasjonsnummerIdentifikator() =
-        Arbeidsgiver.Identifikator.Organisasjonsnummer(lagOrganisasjonsnummer())
+        ArbeidsgiverIdentifikator.Organisasjonsnummer(lagOrganisasjonsnummer())
 }

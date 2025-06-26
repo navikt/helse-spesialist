@@ -195,7 +195,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
     @Test
     fun `Uberegnet periode tilstøtende en periode med oppgave tar med seg varsler`() {
         val personRef = opprettPerson()
-        val arbeidsgiverRef = opprettArbeidsgiver()
+        opprettArbeidsgiver()
         val uberegnetPeriode = 2 jan 2023 til (3 jan 2023)
         val periodeMedOppgave = 4 jan 2023 til (5 jan 2023)
         opprettVedtaksperiode(personRef, periode = periodeMedOppgave, skjæringstidspunkt = 2 jan 2018)
@@ -289,7 +289,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
     @Test
     fun `inkluderer handlinger`() {
         val personRef = opprettPerson()
-        val arbeidsgiverRef = opprettArbeidsgiver()
+        opprettArbeidsgiver()
         val periode1 = 1 jan 2023 til (23 jan 2023)
         val periode2 = 24 jan 2023 til (31 jan 2023)
         val vedtakId = opprettVedtaksperiode(personRef, periode = periode1)
@@ -318,7 +318,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
     @Test
     fun `utbetaling av risk-oppgave tillatt for alle`() {
         val personRef = opprettPerson()
-        val arbeidsgiverRef = opprettArbeidsgiver()
+        opprettArbeidsgiver()
         opprettVedtaksperiode(personRef)
         val (id, fom, tom) = PERIODE
         val graphQLperiodeMedOppgave = opprettBeregnetPeriode(fom, tom, id)
@@ -336,7 +336,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
     @Test
     fun `periode med hendelse`() {
         val personRef = opprettPerson()
-        val arbeidsgiverRef = opprettArbeidsgiver()
+        opprettArbeidsgiver()
         opprettVedtaksperiode(personRef)
         val (id, fom, tom) = PERIODE
         val eksternDokumentId = UUID.randomUUID()
@@ -368,7 +368,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
                 )
 
         val personRef = opprettPerson()
-        val arbeidsgiverRef = opprettArbeidsgiver()
+        opprettArbeidsgiver()
         val snapshotGenerasjonId1 = UUID.randomUUID()
         opprettVedtaksperiode(personRef)
         val graphQLperiodeMedOppgave = opprettBeregnetPeriode(4 jan 2023, 5 jan 2023, PERIODE.id)

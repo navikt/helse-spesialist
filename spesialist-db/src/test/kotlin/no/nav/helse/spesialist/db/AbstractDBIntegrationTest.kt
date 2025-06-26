@@ -33,7 +33,7 @@ import no.nav.helse.spesialist.db.dao.api.PgRisikovurderingApiDao
 import no.nav.helse.spesialist.db.dao.api.PgVarselApiRepository
 import no.nav.helse.spesialist.db.testfixtures.ModuleIsolatedDBTestFixture
 import no.nav.helse.spesialist.domain.Arbeidsgiver
-import no.nav.helse.spesialist.domain.ArbeidsgiverId
+import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
 import no.nav.helse.spesialist.domain.Dialog
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
@@ -196,7 +196,7 @@ abstract class AbstractDBIntegrationTest {
         oppgaveEgenskaper: Set<Egenskap> = setOf(Egenskap.SØKNAD),
     ) {
         opprettPerson(fødselsnummer = fødselsnummer, aktørId = aktørId)
-        opprettArbeidsgiver(organisasjonsnummer = organisasjonsnummer)
+        opprettArbeidsgiver(identifikator = organisasjonsnummer)
         opprettVedtaksperiode(
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
@@ -307,14 +307,12 @@ abstract class AbstractDBIntegrationTest {
     }
 
     protected fun opprettArbeidsgiver(
-        organisasjonsnummer: String = ORGNUMMER,
+        identifikator: String = ORGNUMMER,
         navn: String = ORGNAVN,
-    ): ArbeidsgiverId {
-        val arbeidsgiver = Arbeidsgiver.Factory.ny(
-            identifikator = Arbeidsgiver.Identifikator.fraString(organisasjonsnummer),
-        ).apply { oppdaterMedNavn(navn) }
-        sessionContext.arbeidsgiverRepository.lagre(arbeidsgiver)
-        return arbeidsgiver.id()
+    ) {
+        Arbeidsgiver.Factory.ny(identifikator = ArbeidsgiverIdentifikator.fraString(identifikator))
+            .apply { oppdaterMedNavn(navn) }
+            .also(sessionContext.arbeidsgiverRepository::lagre)
     }
 
     protected fun opprettArbeidsforhold(
@@ -560,7 +558,7 @@ abstract class AbstractDBIntegrationTest {
             mellomnavn = mellomnavn,
             etternavn = etternavn,
         )
-        opprettArbeidsgiver(organisasjonsnummer = organisasjonsnummer)
+        opprettArbeidsgiver(identifikator = organisasjonsnummer)
         opprettVedtaksperiode(
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,

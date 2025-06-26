@@ -1,14 +1,12 @@
 package no.nav.helse.spesialist.application
 
 import no.nav.helse.spesialist.domain.Arbeidsgiver
-import no.nav.helse.spesialist.domain.ArbeidsgiverId
+import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
 
 interface ArbeidsgiverRepository {
     fun lagre(arbeidsgiver: Arbeidsgiver)
 
-    fun finn(id: ArbeidsgiverId): Arbeidsgiver?
+    fun finn(id: ArbeidsgiverIdentifikator): Arbeidsgiver?
 
-    fun finnForIdentifikator(identifikator: Arbeidsgiver.Identifikator): Arbeidsgiver?
-
-    fun finnAlleForIdentifikatorer(identifikatorer: Set<Arbeidsgiver.Identifikator>): List<Arbeidsgiver>
+    fun finnAlle(ider: Set<ArbeidsgiverIdentifikator>): List<Arbeidsgiver>
 }

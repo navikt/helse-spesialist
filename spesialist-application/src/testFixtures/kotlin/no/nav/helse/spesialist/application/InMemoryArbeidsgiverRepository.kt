@@ -1,28 +1,20 @@
 package no.nav.helse.spesialist.application
 
 import no.nav.helse.spesialist.domain.Arbeidsgiver
-import no.nav.helse.spesialist.domain.ArbeidsgiverId
-import kotlin.random.Random
+import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
 
 class InMemoryArbeidsgiverRepository : ArbeidsgiverRepository {
-    private val arbeidsgivere = mutableMapOf<ArbeidsgiverId, Arbeidsgiver>()
+    private val arbeidsgivere = mutableMapOf<ArbeidsgiverIdentifikator, Arbeidsgiver>()
 
     override fun lagre(arbeidsgiver: Arbeidsgiver) {
-        val id = if (arbeidsgiver.harFåttTildeltId()) {
-            arbeidsgiver.id()
-        } else {
-            ArbeidsgiverId(Random.nextInt()).also(arbeidsgiver::tildelId)
-        }
-        arbeidsgivere[id] = arbeidsgiver
+        arbeidsgivere[arbeidsgiver.id()] = arbeidsgiver
     }
 
-    override fun finn(id: ArbeidsgiverId) = arbeidsgivere[id]
+    override fun finn(id: ArbeidsgiverIdentifikator) =
+        arbeidsgivere[id]
 
-    override fun finnForIdentifikator(identifikator: Arbeidsgiver.Identifikator) =
-        arbeidsgivere.values.find { it.identifikator == identifikator }
-
-    override fun finnAlleForIdentifikatorer(identifikatorer: Set<Arbeidsgiver.Identifikator>) =
-        arbeidsgivere.values.filter { it.identifikator in identifikatorer }
+    override fun finnAlle(ider: Set<ArbeidsgiverIdentifikator>) =
+        ider.mapNotNull { arbeidsgivere[it] }
 
     fun alle() = arbeidsgivere.values.toList()
 }

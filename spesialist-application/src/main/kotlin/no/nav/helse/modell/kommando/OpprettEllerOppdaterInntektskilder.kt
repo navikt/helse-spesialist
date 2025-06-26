@@ -7,6 +7,7 @@ import no.nav.helse.modell.person.HentPersoninfoløsninger
 import no.nav.helse.spesialist.application.ArbeidsgiverRepository
 import no.nav.helse.spesialist.application.logg.sikkerlogg
 import no.nav.helse.spesialist.domain.Arbeidsgiver
+import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
 import java.time.LocalDate
 
 internal class OpprettEllerOppdaterInntektskilder(
@@ -18,12 +19,12 @@ internal class OpprettEllerOppdaterInntektskilder(
     private val arbeidsgivereSomMåOppdateres =
         arbeidsgivereSomMåOppdateres(
             fødselsnummer = fødselsnummer,
-            identifikatorer = identifikatorer.map { Arbeidsgiver.Identifikator.fraString(it) }.toSet(),
+            identifikatorer = identifikatorer.map { ArbeidsgiverIdentifikator.fraString(it) }.toSet(),
         )
 
     private fun arbeidsgivereSomMåOppdateres(
         fødselsnummer: String,
-        identifikatorer: Set<Arbeidsgiver.Identifikator>,
+        identifikatorer: Set<ArbeidsgiverIdentifikator>,
     ): List<Arbeidsgiver> {
         val alleIdentifikatorer =
             identifikatorer
@@ -32,29 +33,29 @@ internal class OpprettEllerOppdaterInntektskilder(
                 .distinct()
 
         val eksisterendeArbeidsgivere =
-            arbeidsgiverRepository.finnAlleForIdentifikatorer(alleIdentifikatorer.toSet())
+            arbeidsgiverRepository.finnAlle(alleIdentifikatorer.toSet())
 
         val manglendeArbeidsgivere =
-            alleIdentifikatorer.minus(eksisterendeArbeidsgivere.map(Arbeidsgiver::identifikator).toSet())
+            alleIdentifikatorer.minus(eksisterendeArbeidsgivere.map(Arbeidsgiver::id).toSet())
         val nyeArbeidsgivere = manglendeArbeidsgivere.map { Arbeidsgiver.Factory.ny(identifikator = it) }
         return (eksisterendeArbeidsgivere + nyeArbeidsgivere).filter(::måOppdateres)
     }
 
-    private fun erSelvstendig(it: Arbeidsgiver.Identifikator) =
+    private fun erSelvstendig(it: ArbeidsgiverIdentifikator) =
         when (it) {
-            is Arbeidsgiver.Identifikator.Fødselsnummer -> it.fødselsnummer
-            is Arbeidsgiver.Identifikator.Organisasjonsnummer -> it.organisasjonsnummer
+            is ArbeidsgiverIdentifikator.Fødselsnummer -> it.fødselsnummer
+            is ArbeidsgiverIdentifikator.Organisasjonsnummer -> it.organisasjonsnummer
         } == SELVSTENDIG
 
-    private fun organisasjonsnumreFraSammenligningsgrunnlag(fødselsnummer: String): List<Arbeidsgiver.Identifikator> =
+    private fun organisasjonsnumreFraSammenligningsgrunnlag(fødselsnummer: String): List<ArbeidsgiverIdentifikator> =
         avviksvurderingRepository
             .finnAvviksvurderinger(fødselsnummer)
             .flatMap { it.sammenligningsgrunnlag.innrapporterteInntekter }
             .map {
                 if (it.arbeidsgiverreferanse.length == 9) {
-                    Arbeidsgiver.Identifikator.Organisasjonsnummer(it.arbeidsgiverreferanse)
+                    ArbeidsgiverIdentifikator.Organisasjonsnummer(it.arbeidsgiverreferanse)
                 } else {
-                    Arbeidsgiver.Identifikator.Fødselsnummer(it.arbeidsgiverreferanse)
+                    ArbeidsgiverIdentifikator.Fødselsnummer(it.arbeidsgiverreferanse)
                 }
             }
 
@@ -84,12 +85,12 @@ internal class OpprettEllerOppdaterInntektskilder(
         val personinfoløsninger = context.get<HentPersoninfoløsninger>()
         forEach { arbeidsgiver ->
             val navnFraLøsning =
-                when (val identifikator = arbeidsgiver.identifikator) {
-                    is Arbeidsgiver.Identifikator.Fødselsnummer -> {
+                when (val identifikator = arbeidsgiver.id()) {
+                    is ArbeidsgiverIdentifikator.Fødselsnummer -> {
                         personinfoløsninger?.relevantLøsning(identifikator.fødselsnummer)?.navn()
                     }
 
-                    is Arbeidsgiver.Identifikator.Organisasjonsnummer -> {
+                    is ArbeidsgiverIdentifikator.Organisasjonsnummer -> {
                         arbeidsgiverinformasjonløsning?.relevantLøsning(identifikator.organisasjonsnummer)?.navn
                     }
                 }
@@ -105,9 +106,9 @@ internal class OpprettEllerOppdaterInntektskilder(
     ) {
         val enkeltpersonforetakBehov =
             arbeidsgivere
-                .map(Arbeidsgiver::identifikator)
-                .filterIsInstance<Arbeidsgiver.Identifikator.Fødselsnummer>()
-                .map(Arbeidsgiver.Identifikator.Fødselsnummer::fødselsnummer)
+                .map(Arbeidsgiver::id)
+                .filterIsInstance<ArbeidsgiverIdentifikator.Fødselsnummer>()
+                .map(ArbeidsgiverIdentifikator.Fødselsnummer::fødselsnummer)
                 .takeUnless { it.isEmpty() }
                 ?.let(Behov.Arbeidsgiverinformasjon::Enkeltpersonforetak)
 
@@ -117,9 +118,9 @@ internal class OpprettEllerOppdaterInntektskilder(
 
         val ordinærArbeidsgiverBehov =
             arbeidsgivere
-                .map(Arbeidsgiver::identifikator)
-                .filterIsInstance<Arbeidsgiver.Identifikator.Organisasjonsnummer>()
-                .map(Arbeidsgiver.Identifikator.Organisasjonsnummer::organisasjonsnummer)
+                .map(Arbeidsgiver::id)
+                .filterIsInstance<ArbeidsgiverIdentifikator.Organisasjonsnummer>()
+                .map(ArbeidsgiverIdentifikator.Organisasjonsnummer::organisasjonsnummer)
                 .takeUnless { it.isEmpty() }
                 ?.let { Behov.Arbeidsgiverinformasjon.OrdinærArbeidsgiver(it) }
 
@@ -130,7 +131,7 @@ internal class OpprettEllerOppdaterInntektskilder(
 
     private fun måOppdateres(arbeidsgiver: Arbeidsgiver) = arbeidsgiver.navnIkkeOppdatertSiden(LocalDate.now().minusDays(14))
 
-    private fun Collection<Arbeidsgiver>.prettyPrint() = joinToString { "${it.identifikator} (${it.navn?.navn})" }
+    private fun Collection<Arbeidsgiver>.prettyPrint() = joinToString { "${it.id()} (${it.navn?.navn})" }
 
     companion object {
         private const val SELVSTENDIG = "SELVSTENDIG"
