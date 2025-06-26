@@ -1,0 +1,16 @@
+ALTER TABLE arbeidsforhold
+    DROP COLUMN arbeidsgiver_ref;
+ALTER TABLE overstyring_arbeidsforhold
+    DROP COLUMN arbeidsgiver_ref;
+ALTER TABLE overstyring_inntekt
+    DROP COLUMN arbeidsgiver_ref;
+ALTER TABLE overstyring_minimum_sykdomsgrad_arbeidsgiver
+    DROP COLUMN arbeidsgiver_ref;
+ALTER TABLE overstyring_tidslinje
+    DROP COLUMN arbeidsgiver_ref;
+ALTER TABLE skjonnsfastsetting_sykepengegrunnlag_arbeidsgiver
+    DROP COLUMN arbeidsgiver_ref;
+ALTER TABLE utbetaling_id
+    DROP COLUMN arbeidsgiver_ref;
+ALTER TABLE vedtak
+    DROP COLUMN arbeidsgiver_ref;
