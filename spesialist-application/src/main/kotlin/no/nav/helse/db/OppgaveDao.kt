@@ -67,6 +67,4 @@ interface OppgaveDao {
         godkjenningsbehovId: UUID,
         utbetalingId: UUID,
     )
-
-    fun leggTilEgenskapArbeidstakerPåOppgave(): Int
 }

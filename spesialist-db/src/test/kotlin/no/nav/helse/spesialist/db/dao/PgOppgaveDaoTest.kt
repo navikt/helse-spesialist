@@ -2,7 +2,6 @@ package no.nav.helse.spesialist.db.dao
 
 import no.nav.helse.db.BehandletOppgaveFraDatabaseForVisning
 import no.nav.helse.db.EgenskapForDatabase
-import no.nav.helse.db.EgenskapForDatabase.ARBEIDSTAKER
 import no.nav.helse.db.EgenskapForDatabase.DELVIS_REFUSJON
 import no.nav.helse.db.EgenskapForDatabase.EN_ARBEIDSGIVER
 import no.nav.helse.db.EgenskapForDatabase.FLERE_ARBEIDSGIVERE
@@ -425,33 +424,6 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
             )
         assertEquals(3, oppgaver.size)
         assertEquals(listOf(oppgave3.id, oppgave2.id, oppgave1.id), oppgaver.map { it.id })
-    }
-
-    @Test
-    fun `Legger til egenskap arbeidstaker på alle oppgaver`() {
-        val oppgave = nyOppgaveForNyPerson()
-
-        val funnetOppgaver = oppgaveDao.finnOppgaverForVisning(ekskluderEgenskaper = emptyList(),
-            saksbehandlerOid = UUID.randomUUID(),
-            grupperteFiltrerteEgenskaper =
-                mapOf(
-                    Kategori.Inntektsforhold to listOf(ARBEIDSTAKER),
-                ),
-        )
-        assertTrue(funnetOppgaver.isEmpty())
-
-        oppgaveDao.leggTilEgenskapArbeidstakerPåOppgave()
-        val funnetOppgaver2 = oppgaveDao.finnOppgaverForVisning(ekskluderEgenskaper = emptyList(),
-            saksbehandlerOid = UUID.randomUUID(),
-            grupperteFiltrerteEgenskaper =
-                mapOf(
-                    Kategori.Inntektsforhold to listOf(ARBEIDSTAKER),
-                ),
-        )
-        assertEquals(1, funnetOppgaver2.size)
-        val førsteOppgave = funnetOppgaver2.first()
-        assertEquals(oppgave.id, førsteOppgave.id)
-        assertTrue(førsteOppgave.egenskaper.contains(ARBEIDSTAKER))
     }
 
     @Test

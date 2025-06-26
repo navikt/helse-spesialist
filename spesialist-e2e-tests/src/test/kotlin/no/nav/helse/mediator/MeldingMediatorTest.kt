@@ -42,8 +42,7 @@ class MeldingMediatorTest : AbstractDatabaseTest() {
                 definisjonDao = daos.definisjonDao
             ),
             poisonPillDao = poisonPillDao,
-            ignorerMeldingerForUkjentePersoner = false,
-            oppgaveDao = daos.oppgaveDao,
+            ignorerMeldingerForUkjentePersoner = false
         )
 
     @BeforeEach

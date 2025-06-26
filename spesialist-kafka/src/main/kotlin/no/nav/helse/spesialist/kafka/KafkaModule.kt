@@ -78,7 +78,6 @@ class KafkaModule(
                         ),
                     poisonPillDao = daos.poisonPillDao,
                     ignorerMeldingerForUkjentePersoner = configuration.ignorerMeldingerForUkjentePersoner,
-                    oppgaveDao = daos.oppgaveDao,
                 ),
             meldingDuplikatkontrollDao = daos.meldingDuplikatkontrollDao,
             featureToggles = featureToggles,

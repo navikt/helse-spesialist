@@ -501,22 +501,6 @@ class PgOppgaveDao internal constructor(
             it.long("id")
         }
 
-    override fun leggTilEgenskapArbeidstakerPåOppgave(): Int =
-        asSQL(
-            """
-            WITH rader_uten_egenskap_arbeidstaker AS (
-                SELECT id, egenskaper
-                FROM oppgave
-                WHERE NOT ('ARBEIDSTAKER' = ANY (egenskaper))
-                LIMIT 10000
-            )
-            update oppgave o
-            set egenskaper = array_append(arbeidstabell.egenskaper, 'ARBEIDSTAKER')
-            from rader_uten_egenskap_arbeidstaker arbeidstabell
-            where o.id = arbeidstabell.id;
-            """.trimIndent(),
-        ).update()
-
     private fun OppgavesorteringForDatabase.nøkkelTilKolonne() =
         when (this.nøkkel) {
             SorteringsnøkkelForDatabase.TILDELT_TIL -> "navn".direction(this.stigende).nullsLast()
