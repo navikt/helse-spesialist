@@ -116,7 +116,8 @@ class TestMediator(
                 definisjonDao = daos.definisjonDao
             ),
             poisonPillDao = daos.poisonPillDao,
-            ignorerMeldingerForUkjentePersoner = false
+            ignorerMeldingerForUkjentePersoner = false,
+            oppgaveDao = daos.oppgaveDao,
         )
         RiverSetup(
             mediator = meldingMediator,

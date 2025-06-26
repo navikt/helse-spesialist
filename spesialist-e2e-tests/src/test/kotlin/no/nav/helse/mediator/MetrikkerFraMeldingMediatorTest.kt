@@ -36,6 +36,7 @@ class MetrikkerFraMeldingMediatorTest : AbstractDatabaseTest() {
             ),
             poisonPillDao = daos.poisonPillDao,
             ignorerMeldingerForUkjentePersoner = false,
+            oppgaveDao = daos.oppgaveDao,
         )
     }
 

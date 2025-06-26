@@ -210,6 +210,7 @@ class PgOppgaveDao internal constructor(
         val mottakeregenskaper = grupperteFiltrerteEgenskaper[Egenskap.Kategori.Mottaker]
         val antallArbeidsforholdEgenskaper = grupperteFiltrerteEgenskaper[Egenskap.Kategori.Inntektskilde]
         val statusegenskaper = grupperteFiltrerteEgenskaper[Egenskap.Kategori.Status]
+        val inntektsforhold = grupperteFiltrerteEgenskaper[Egenskap.Kategori.Inntektsforhold]
 
         return asSQL(
             """
@@ -247,6 +248,7 @@ class PgOppgaveDao internal constructor(
                 AND (:mottakeregenskaper = '{}' OR egenskaper && :mottakeregenskaper::varchar[]) -- inkluder alle oppgaver som har minst en av de valgte mottakertypene
                 AND (:antall_arbeidsforhold_egenskaper = '{}' OR egenskaper && :antall_arbeidsforhold_egenskaper::varchar[]) -- inkluder alle oppgaver som har minst en av de valgte
                 AND (:statusegenskaper = '{}' OR egenskaper && :statusegenskaper::varchar[]) -- inkluder alle oppgaver som har minst en av de valgte statusene
+                AND (:inntektsforhold = '{}' OR egenskaper && :inntektsforhold::varchar[]) -- inkluder alle oppgaver som har minst en av de valgte inntektsforhold
                 AND NOT (egenskaper && :egenskaper_som_skal_ekskluderes::varchar[]) -- egenskaper saksbehandler ikke har tilgang til
                 AND NOT ('BESLUTTER' = ANY(egenskaper) AND ttv.saksbehandler = :oid) -- hvis oppgaven er sendt til beslutter og saksbehandler var den som sendte
                 AND
@@ -277,6 +279,7 @@ class PgOppgaveDao internal constructor(
             "mottakeregenskaper" to mottakeregenskaper.somDbArray(),
             "antall_arbeidsforhold_egenskaper" to antallArbeidsforholdEgenskaper.somDbArray(),
             "statusegenskaper" to statusegenskaper.somDbArray(),
+            "inntektsforhold" to inntektsforhold.somDbArray(),
             "egenskaper_som_skal_ekskluderes" to ekskluderEgenskaper.somDbArray(),
         ).list { row ->
             val egenskaper =
@@ -497,6 +500,22 @@ class PgOppgaveDao internal constructor(
         ).singleOrNull {
             it.long("id")
         }
+
+    override fun leggTilEgenskapArbeidstakerPåOppgave(): Int =
+        asSQL(
+            """
+            WITH rader_uten_egenskap_arbeidstaker AS (
+                SELECT id, egenskaper
+                FROM oppgave
+                WHERE NOT ('ARBEIDSTAKER' = ANY (egenskaper))
+                LIMIT 10000
+            )
+            update oppgave o
+            set egenskaper = array_append(arbeidstabell.egenskaper, 'ARBEIDSTAKER')
+            from rader_uten_egenskap_arbeidstaker arbeidstabell
+            where o.id = arbeidstabell.id;
+            """.trimIndent(),
+        ).update()
 
     private fun OppgavesorteringForDatabase.nøkkelTilKolonne() =
         when (this.nøkkel) {

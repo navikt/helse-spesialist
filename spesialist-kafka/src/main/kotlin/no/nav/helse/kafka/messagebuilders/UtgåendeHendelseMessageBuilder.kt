@@ -299,6 +299,8 @@ private fun Oppgave.toDetaljer(): Map<String, Any> =
                     Egenskap.MANGLER_IM -> "MANGLER_IM"
                     Egenskap.MEDLEMSKAP -> "MEDLEMSKAP"
                     Egenskap.GRUNNBELØPSREGULERING -> "GRUNNBELØPSREGULERING"
+                    Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE -> "SELVSTENDIG_NÆRINGSDRIVENDE"
+                    Egenskap.ARBEIDSTAKER -> "ARBEIDSTAKER"
                 }
             },
         "behandlingId" to behandlingId,

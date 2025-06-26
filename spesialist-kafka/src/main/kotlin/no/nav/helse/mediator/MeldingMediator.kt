@@ -6,6 +6,7 @@ import no.nav.helse.db.CommandContextDao
 import no.nav.helse.db.DokumentDao
 import no.nav.helse.db.MeldingDao
 import no.nav.helse.db.MeldingDuplikatkontrollDao
+import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.PoisonPillDao
 import no.nav.helse.db.SessionFactory
@@ -25,6 +26,7 @@ class MeldingMediator(
     private val personDao: PersonDao,
     private val commandContextDao: CommandContextDao,
     private val meldingDao: MeldingDao,
+    private val oppgaveDao: OppgaveDao,
     private val meldingDuplikatkontrollDao: MeldingDuplikatkontrollDao,
     private val kommandofabrikk: Kommandofabrikk,
     private val dokumentDao: DokumentDao,
@@ -142,6 +144,8 @@ class MeldingMediator(
             ?: emptyList()
 
     fun slettGamleDokumenter(): Int = dokumentDao.slettGamleDokumenter()
+
+    fun leggTilEgenskapArbeidstakerPåOppgave(): Int = oppgaveDao.leggTilEgenskapArbeidstakerPåOppgave()
 
     fun nullstillTilstand() {
         løsninger.set(null)
