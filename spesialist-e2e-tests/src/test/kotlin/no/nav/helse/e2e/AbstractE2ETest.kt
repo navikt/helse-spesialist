@@ -41,6 +41,7 @@ import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.client.spleis.SpleisClient
 import no.nav.helse.spesialist.client.spleis.SpleisClientSnapshothenter
 import no.nav.helse.spesialist.db.DbQuery
+import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk
@@ -623,8 +624,17 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         avviksvurderingTestdata: AvviksvurderingTestdata = this.avviksvurderingTestdata,
         godkjenningsbehovTestdata: GodkjenningsbehovTestdata = this.godkjenningsbehovTestdata,
     ) {
-        val alleArbeidsforhold =
-            dbQuery.list("SELECT a.organisasjonsnummer FROM arbeidsgiver a") { it.string("organisasjonsnummer") }
+        val alleArbeidsforhold = dbQuery.list("SELECT identifikator FROM arbeidsgiver") {
+            it.string("identifikator")
+        }
+        val arbeidsgivereSomSkalLagres = godkjenningsbehovTestdata.orgnummereMedRelevanteArbeidsforhold.toSet()
+        val lagredeArbeidsgivere = sessionFactory.transactionalSessionScope {
+            it.arbeidsgiverRepository.finnAlle(
+                arbeidsgivereSomSkalLagres
+                    .map(ArbeidsgiverIdentifikator::fraString)
+                    .toSet()
+            )
+        }
         håndterGodkjenningsbehovUtenValidering(
             arbeidsgiverbeløp = arbeidsgiverbeløp,
             personbeløp = personbeløp,
@@ -641,9 +651,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
         when {
             !harOppdatertMetainfo -> assertEtterspurteBehov("HentPersoninfoV2")
-            !godkjenningsbehovTestdata.orgnummereMedRelevanteArbeidsforhold.all {
-                it in alleArbeidsforhold
-            } -> assertEtterspurteBehov("Arbeidsgiverinformasjon")
+            arbeidsgivereSomSkalLagres.size != lagredeArbeidsgivere.size -> assertEtterspurteBehov("Arbeidsgiverinformasjon")
 
             else -> assertEtterspurteBehov("Vergemål", "Fullmakt")
         }
@@ -1286,10 +1294,10 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun assertArbeidsgiverEksisterer(organisasjonsnummer: String) {
-        assertEquals(
-            1,
-            arbeidsgiver(organisasjonsnummer),
-        ) { "Arbeidsgiver med organisasjonsnummer=$organisasjonsnummer finnes ikke i databasen" }
+        val arbeidsgiver = sessionFactory.transactionalSessionScope {
+            it.arbeidsgiverRepository.finn(ArbeidsgiverIdentifikator.fraString(organisasjonsnummer))
+        }
+        assertNotNull(arbeidsgiver) { "Arbeidsgiver med organisasjonsnummer=$organisasjonsnummer finnes ikke i databasen" }
     }
 
     protected fun assertUtgåendeMelding(hendelse: String) {
@@ -1377,7 +1385,8 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
             AND tv.vedtaksperiode_forkastet = true
             """.trimIndent(),
             "fodselsnummer" to fødselsnummer,
-        ) { it.boolean(1) } ?: throw IllegalStateException("Finner ikke totrinns markert som forkastet for fødselsnummer=$fødselsnummer")
+        ) { it.boolean(1) }
+            ?: throw IllegalStateException("Finner ikke totrinns markert som forkastet for fødselsnummer=$fødselsnummer")
         assertTrue(totrinnsvurderingForkastet) {
             "Forventer at totrinnsvurdering er markert som forkastet"
         }
@@ -1401,11 +1410,6 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         "foedselsnummer" to fødselsnummer,
         "aktoerId" to aktørId,
     ) { it.int(1) }
-
-    protected fun arbeidsgiver(organisasjonsnummer: String) = dbQuery.single(
-        "SELECT COUNT(*) FROM arbeidsgiver WHERE organisasjonsnummer = :organisasjonsnummer",
-        "organisasjonsnummer" to organisasjonsnummer,
-    ) { row -> row.int(1) }
 
     private fun vedtak(vedtaksperiodeId: UUID) = dbQuery.single(
         "SELECT COUNT(*) FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId",

@@ -39,10 +39,9 @@ internal class PgArbeidsgiverRepository(
     private fun insertArbeidsgiver(arbeidsgiver: Arbeidsgiver) =
         asSQL(
             """
-            INSERT INTO arbeidsgiver (organisasjonsnummer, identifikator, navn, navn_sist_oppdatert_dato) 
-            VALUES (:organisasjonsnummer, :identifikator, :navn, :navn_sist_oppdatert_dato)
+            INSERT INTO arbeidsgiver (identifikator, navn, navn_sist_oppdatert_dato) 
+            VALUES (:identifikator, :navn, :navn_sist_oppdatert_dato)
             """.trimIndent(),
-            "organisasjonsnummer" to arbeidsgiver.id().tilDbIdentifikator(),
             "identifikator" to arbeidsgiver.id().tilDbIdentifikator(),
             "navn" to arbeidsgiver.navn?.navn,
             "navn_sist_oppdatert_dato" to arbeidsgiver.navn?.sistOppdatertDato,
