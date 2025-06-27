@@ -826,9 +826,10 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
     )
 
     private fun opprettArbeidsgiver(organisasjonsnummer: String) {
-        Arbeidsgiver.Factory.ny(identifikator = ArbeidsgiverIdentifikator.fraString(organisasjonsnummer))
-            .also { it.oppdaterMedNavn(navn = lagOrganisasjonsnavn()) }
-            .also(sessionContext.arbeidsgiverRepository::lagre)
+        Arbeidsgiver.Factory.ny(
+            id = ArbeidsgiverIdentifikator.fraString(organisasjonsnummer),
+            navnString = lagOrganisasjonsnavn()
+        ).also(sessionContext.arbeidsgiverRepository::lagre)
     }
 
     private fun insertInfotrygdutbetalinger(): Long = requireNotNull(

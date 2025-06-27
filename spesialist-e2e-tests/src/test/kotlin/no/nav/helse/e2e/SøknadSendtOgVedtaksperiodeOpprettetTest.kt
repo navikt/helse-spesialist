@@ -6,13 +6,12 @@ import org.junit.jupiter.api.Test
 class SøknadSendtOgVedtaksperiodeOpprettetTest : AbstractE2ETest() {
 
     @Test
-    fun `Oppretter minimal person og arbeidsgiver ved mottatt søknad og minimal vedtaksperiode ved vedtaksperiode opprettet`() {
+    fun `Oppretter minimal person ved mottatt søknad og minimal vedtaksperiode ved vedtaksperiode opprettet`() {
         assertPersonEksistererIkke(FØDSELSNUMMER, AKTØR)
 
         vedtaksløsningenMottarNySøknad(AKTØR, FØDSELSNUMMER, ORGNR)
         assertPersonEksisterer(FØDSELSNUMMER, AKTØR)
         spleisOppretterNyBehandling(AKTØR, FØDSELSNUMMER, ORGNR)
-        assertArbeidsgiverEksisterer(ORGNR)
         vedtaksløsningenMottarNySøknad(AKTØR, FØDSELSNUMMER, ORGNR)
         spleisOppretterNyBehandling(
             aktørId = AKTØR,
@@ -24,6 +23,5 @@ class SøknadSendtOgVedtaksperiodeOpprettetTest : AbstractE2ETest() {
 
         vedtaksløsningenMottarNySøknad(AKTØR, FØDSELSNUMMER, ORGNR)
         assertPersonEksisterer(FØDSELSNUMMER, AKTØR)
-        assertArbeidsgiverEksisterer(ORGNR)
     }
 }

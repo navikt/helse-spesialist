@@ -22,7 +22,7 @@ internal class PgArbeidsgiverRepository(
 
     override fun finn(id: ArbeidsgiverIdentifikator): Arbeidsgiver? =
         asSQL(
-            "SELECT * FROM arbeidsgiver WHERE identifikator = :identifikator",
+            "SELECT * FROM arbeidsgiver WHERE identifikator = :identifikator AND navn IS NOT NULL",
             "identifikator" to id.tilDbIdentifikator(),
         ).singleOrNull { it.toArbeidsgiver() }
 
@@ -31,7 +31,7 @@ internal class PgArbeidsgiverRepository(
             emptyList()
         } else {
             asSQL(
-                "SELECT * FROM arbeidsgiver WHERE identifikator = ANY (:identifikatorer)",
+                "SELECT * FROM arbeidsgiver WHERE identifikator = ANY (:identifikatorer) AND navn IS NOT NULL",
                 "identifikatorer" to ider.map { it.tilDbIdentifikator() }.toTypedArray(),
             ).list { it.toArbeidsgiver() }
         }
@@ -43,8 +43,8 @@ internal class PgArbeidsgiverRepository(
             VALUES (:identifikator, :navn, :navn_sist_oppdatert_dato)
             """.trimIndent(),
             "identifikator" to arbeidsgiver.id().tilDbIdentifikator(),
-            "navn" to arbeidsgiver.navn?.navn,
-            "navn_sist_oppdatert_dato" to arbeidsgiver.navn?.sistOppdatertDato,
+            "navn" to arbeidsgiver.navn.navn,
+            "navn_sist_oppdatert_dato" to arbeidsgiver.navn.sistOppdatertDato,
         ).updateAndReturnGeneratedKey().toInt()
 
     private fun updateArbeidsgiver(arbeidsgiver: Arbeidsgiver) {
@@ -54,8 +54,8 @@ internal class PgArbeidsgiverRepository(
             SET navn = :navn, navn_sist_oppdatert_dato = :navn_sist_oppdatert_dato 
             WHERE identifikator = :identifikator
             """.trimIndent(),
-            "navn" to arbeidsgiver.navn?.navn,
-            "navn_sist_oppdatert_dato" to arbeidsgiver.navn?.sistOppdatertDato,
+            "navn" to arbeidsgiver.navn.navn,
+            "navn_sist_oppdatert_dato" to arbeidsgiver.navn.sistOppdatertDato,
             "identifikator" to arbeidsgiver.id().tilDbIdentifikator(),
         ).update()
     }
@@ -64,12 +64,10 @@ internal class PgArbeidsgiverRepository(
         Arbeidsgiver.Factory.fraLagring(
             id = fraDbIdentifikator(string("identifikator")),
             navn =
-                stringOrNull("navn")?.let { navn ->
-                    Arbeidsgiver.Navn(
-                        navn = navn,
-                        sistOppdatertDato = localDate("navn_sist_oppdatert_dato"),
-                    )
-                },
+                Arbeidsgiver.Navn(
+                    navn = string("navn"),
+                    sistOppdatertDato = localDate("navn_sist_oppdatert_dato"),
+                ),
         )
 
     private fun ArbeidsgiverIdentifikator.tilDbIdentifikator(): String =

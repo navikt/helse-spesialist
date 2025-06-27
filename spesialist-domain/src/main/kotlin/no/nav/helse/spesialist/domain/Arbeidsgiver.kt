@@ -21,12 +21,10 @@ sealed interface ArbeidsgiverIdentifikator : ValueObject {
 
 class Arbeidsgiver private constructor(
     id: ArbeidsgiverIdentifikator,
-    navn: Navn?,
+    navn: Navn,
 ) : AggregateRoot<ArbeidsgiverIdentifikator>(id) {
-    var navn: Navn? = navn
+    var navn: Navn = navn
         private set
-
-    fun navnIkkeOppdatertSiden(dato: LocalDate) = navn?.ikkeOppdatertSiden(dato) ?: true
 
     fun oppdaterMedNavn(navn: String) {
         this.navn =
@@ -37,15 +35,21 @@ class Arbeidsgiver private constructor(
     }
 
     object Factory {
-        fun ny(identifikator: ArbeidsgiverIdentifikator) =
-            Arbeidsgiver(
-                id = identifikator,
-                navn = null,
-            )
+        fun ny(
+            id: ArbeidsgiverIdentifikator,
+            navnString: String,
+        ) = Arbeidsgiver(
+            id = id,
+            navn =
+                Navn(
+                    navn = navnString,
+                    sistOppdatertDato = LocalDate.now(),
+                ),
+        )
 
         fun fraLagring(
             id: ArbeidsgiverIdentifikator,
-            navn: Navn?,
+            navn: Navn,
         ) = Arbeidsgiver(
             id = id,
             navn = navn,

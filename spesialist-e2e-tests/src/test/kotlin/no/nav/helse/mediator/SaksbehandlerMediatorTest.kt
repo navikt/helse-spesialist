@@ -302,8 +302,9 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
     ) {
         sessionContext.arbeidsgiverRepository.lagre(
             Arbeidsgiver.Factory.ny(
-                identifikator = ArbeidsgiverIdentifikator.fraString(organisasjonsnummer),
-            ).apply { oppdaterMedNavn(navn) }
+                id = ArbeidsgiverIdentifikator.fraString(organisasjonsnummer),
+                navnString = navn
+            )
         )
     }
 

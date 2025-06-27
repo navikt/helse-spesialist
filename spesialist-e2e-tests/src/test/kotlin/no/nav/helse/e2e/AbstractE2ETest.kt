@@ -351,7 +351,6 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 spleisBehandlingId = spleisBehandlingId,
             )
         assertIngenEtterspurteBehov()
-        assertArbeidsgiverEksisterer(organisasjonsnummer)
         assertVedtaksperiodeEksisterer(vedtaksperiodeId)
     }
 
@@ -624,9 +623,6 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         avviksvurderingTestdata: AvviksvurderingTestdata = this.avviksvurderingTestdata,
         godkjenningsbehovTestdata: GodkjenningsbehovTestdata = this.godkjenningsbehovTestdata,
     ) {
-        val alleArbeidsforhold = dbQuery.list("SELECT identifikator FROM arbeidsgiver") {
-            it.string("identifikator")
-        }
         val arbeidsgivereSomSkalLagres = godkjenningsbehovTestdata.orgnummereMedRelevanteArbeidsforhold.toSet()
         val lagredeArbeidsgivere = sessionFactory.transactionalSessionScope {
             it.arbeidsgiverRepository.finnAlle(

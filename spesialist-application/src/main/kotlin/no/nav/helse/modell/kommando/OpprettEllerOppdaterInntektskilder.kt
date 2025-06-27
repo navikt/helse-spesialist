@@ -16,29 +16,20 @@ internal class OpprettEllerOppdaterInntektskilder(
     private val arbeidsgiverRepository: ArbeidsgiverRepository,
     private val avviksvurderingRepository: AvviksvurderingRepository,
 ) : Command {
-    private val arbeidsgivereSomMåOppdateres =
-        arbeidsgivereSomMåOppdateres(
-            fødselsnummer = fødselsnummer,
-            identifikatorer = identifikatorer.map { ArbeidsgiverIdentifikator.fraString(it) }.toSet(),
+    private val alleIdentifikatorer =
+        identifikatorer
+            .map(ArbeidsgiverIdentifikator::fraString)
+            .filterNot(::erSelvstendig)
+            .plus(organisasjonsnumreFraSammenligningsgrunnlag(fødselsnummer = fødselsnummer))
+            .distinct()
+
+    fun finnNyeOgUtdaterteArbeidsgivere(): Pair<Set<ArbeidsgiverIdentifikator>, List<Arbeidsgiver>> {
+        val eksisterendeArbeidsgivere = arbeidsgiverRepository.finnAlle(alleIdentifikatorer.toSet())
+
+        return Pair(
+            alleIdentifikatorer.minus(eksisterendeArbeidsgivere.map(Arbeidsgiver::id).toSet()).toSet(),
+            eksisterendeArbeidsgivere.filter(::måOppdateres),
         )
-
-    private fun arbeidsgivereSomMåOppdateres(
-        fødselsnummer: String,
-        identifikatorer: Set<ArbeidsgiverIdentifikator>,
-    ): List<Arbeidsgiver> {
-        val alleIdentifikatorer =
-            identifikatorer
-                .filterNot(::erSelvstendig)
-                .plus(organisasjonsnumreFraSammenligningsgrunnlag(fødselsnummer = fødselsnummer))
-                .distinct()
-
-        val eksisterendeArbeidsgivere =
-            arbeidsgiverRepository.finnAlle(alleIdentifikatorer.toSet())
-
-        val manglendeArbeidsgivere =
-            alleIdentifikatorer.minus(eksisterendeArbeidsgivere.map(Arbeidsgiver::id).toSet())
-        val nyeArbeidsgivere = manglendeArbeidsgivere.map { Arbeidsgiver.Factory.ny(identifikator = it) }
-        return (eksisterendeArbeidsgivere + nyeArbeidsgivere).filter(::måOppdateres)
     }
 
     private fun erSelvstendig(it: ArbeidsgiverIdentifikator) =
@@ -60,53 +51,67 @@ internal class OpprettEllerOppdaterInntektskilder(
             }
 
     override fun execute(context: CommandContext): Boolean {
-        if (arbeidsgivereSomMåOppdateres.isEmpty()) return true
-        sendBehov(context, arbeidsgivereSomMåOppdateres)
+        val (nyeArbeidsgivere, utdaterteArbeidsgivere) = finnNyeOgUtdaterteArbeidsgivere()
+        if (nyeArbeidsgivere.isEmpty() && utdaterteArbeidsgivere.isEmpty()) return true
+        sikkerlogg.info("Trenger navn på nye arbeidsgivere: ${nyeArbeidsgivere.joinToString()}")
+        sikkerlogg.info("Trenger oppdatert navn på kjente arbeidsgivere: ${utdaterteArbeidsgivere.joinToString()}")
+        sendBehov(context, nyeArbeidsgivere + utdaterteArbeidsgivere.map(Arbeidsgiver::id))
         return false
     }
 
     override fun resume(context: CommandContext): Boolean {
-        arbeidsgivereSomMåOppdateres.oppdaterMedNavnFraLøsninger(context)
+        val (nyeArbeidsgivere, utdaterteArbeidsgivere) = finnNyeOgUtdaterteArbeidsgivere()
 
-        val (arbeidsgivereSomFortsattMåOppdateres, arbeidsgivereSomSkalLagres) =
-            arbeidsgivereSomMåOppdateres.partition(::måOppdateres)
-
-        sikkerlogg.info("Lagrer oppdaterte arbeidsgivere: ${arbeidsgivereSomSkalLagres.prettyPrint()}")
-        arbeidsgivereSomSkalLagres.forEach { arbeidsgiverRepository.lagre(it) }
-
-        if (arbeidsgivereSomFortsattMåOppdateres.isEmpty()) return true
-        sikkerlogg.info("Trenger fortsatt oppdatert info for arbeidsgivere: ${arbeidsgivereSomFortsattMåOppdateres.prettyPrint()}")
-        sendBehov(context, arbeidsgivereSomFortsattMåOppdateres)
-        return false
-    }
-
-    private fun List<Arbeidsgiver>.oppdaterMedNavnFraLøsninger(context: CommandContext) {
-        val arbeidsgiverinformasjonløsning = context.get<Arbeidsgiverinformasjonløsning>()
-        val personinfoløsninger = context.get<HentPersoninfoløsninger>()
-        forEach { arbeidsgiver ->
-            val navnFraLøsning =
-                when (val identifikator = arbeidsgiver.id()) {
-                    is ArbeidsgiverIdentifikator.Fødselsnummer -> {
-                        personinfoløsninger?.relevantLøsning(identifikator.fødselsnummer)?.navn()
-                    }
-
-                    is ArbeidsgiverIdentifikator.Organisasjonsnummer -> {
-                        arbeidsgiverinformasjonløsning?.relevantLøsning(identifikator.organisasjonsnummer)?.navn
-                    }
-                }
+        nyeArbeidsgivere.forEach { identifikator ->
+            val navnFraLøsning = finnNavnILøsninger(identifikator, context)
             if (navnFraLøsning != null) {
-                arbeidsgiver.oppdaterMedNavn(navnFraLøsning)
+                val arbeidsgiver =
+                    Arbeidsgiver.Factory.ny(
+                        id = identifikator,
+                        navnString = navnFraLøsning,
+                    )
+                sikkerlogg.info("Lagrer ny arbeidsgiver: $arbeidsgiver")
+                arbeidsgiverRepository.lagre(arbeidsgiver)
             }
         }
+
+        utdaterteArbeidsgivere.forEach { arbeidsgiver ->
+            val identifikator = arbeidsgiver.id()
+            val navnFraLøsning = finnNavnILøsninger(identifikator, context)
+            if (navnFraLøsning != null) {
+                arbeidsgiver.oppdaterMedNavn(navnFraLøsning)
+                sikkerlogg.info("Lagrer oppdatert arbeidsgiver: $arbeidsgiver")
+                arbeidsgiverRepository.lagre(arbeidsgiver)
+            }
+        }
+
+        return execute(context)
     }
+
+    private fun finnNavnILøsninger(
+        identifikator: ArbeidsgiverIdentifikator,
+        context: CommandContext,
+    ): String? =
+        when (identifikator) {
+            is ArbeidsgiverIdentifikator.Fødselsnummer -> {
+                context.get<HentPersoninfoløsninger>()
+                    ?.relevantLøsning(identifikator.fødselsnummer)
+                    ?.navn()
+            }
+
+            is ArbeidsgiverIdentifikator.Organisasjonsnummer -> {
+                context.get<Arbeidsgiverinformasjonløsning>()
+                    ?.relevantLøsning(identifikator.organisasjonsnummer)
+                    ?.navn
+            }
+        }
 
     private fun sendBehov(
         context: CommandContext,
-        arbeidsgivere: List<Arbeidsgiver>,
+        arbeidsgiverIdentifikatorer: Set<ArbeidsgiverIdentifikator>,
     ) {
         val enkeltpersonforetakBehov =
-            arbeidsgivere
-                .map(Arbeidsgiver::id)
+            arbeidsgiverIdentifikatorer
                 .filterIsInstance<ArbeidsgiverIdentifikator.Fødselsnummer>()
                 .map(ArbeidsgiverIdentifikator.Fødselsnummer::fødselsnummer)
                 .takeUnless { it.isEmpty() }
@@ -117,8 +122,7 @@ internal class OpprettEllerOppdaterInntektskilder(
         }
 
         val ordinærArbeidsgiverBehov =
-            arbeidsgivere
-                .map(Arbeidsgiver::id)
+            arbeidsgiverIdentifikatorer
                 .filterIsInstance<ArbeidsgiverIdentifikator.Organisasjonsnummer>()
                 .map(ArbeidsgiverIdentifikator.Organisasjonsnummer::organisasjonsnummer)
                 .takeUnless { it.isEmpty() }
@@ -129,9 +133,7 @@ internal class OpprettEllerOppdaterInntektskilder(
         }
     }
 
-    private fun måOppdateres(arbeidsgiver: Arbeidsgiver) = arbeidsgiver.navnIkkeOppdatertSiden(LocalDate.now().minusDays(14))
-
-    private fun Collection<Arbeidsgiver>.prettyPrint() = joinToString { "${it.id()} (${it.navn?.navn})" }
+    private fun måOppdateres(arbeidsgiver: Arbeidsgiver) = arbeidsgiver.navn.ikkeOppdatertSiden(LocalDate.now().minusDays(14))
 
     companion object {
         private const val SELVSTENDIG = "SELVSTENDIG"

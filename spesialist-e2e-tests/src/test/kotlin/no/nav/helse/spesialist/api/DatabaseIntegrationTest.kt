@@ -474,11 +474,12 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     )
 
     protected fun opprettArbeidsgiver() {
-        sessionFactory.transactionalSessionScope { sesison ->
-            sesison.arbeidsgiverRepository.lagre(
+        sessionFactory.transactionalSessionScope { session ->
+            session.arbeidsgiverRepository.lagre(
                 Arbeidsgiver.Factory.ny(
-                    identifikator = ArbeidsgiverIdentifikator.fraString(ORGANISASJONSNUMMER)
-                ).apply { oppdaterMedNavn(navn = ARBEIDSGIVER_NAVN) }
+                    id = ArbeidsgiverIdentifikator.fraString(ORGANISASJONSNUMMER),
+                    navnString = ARBEIDSGIVER_NAVN,
+                )
             )
         }
     }

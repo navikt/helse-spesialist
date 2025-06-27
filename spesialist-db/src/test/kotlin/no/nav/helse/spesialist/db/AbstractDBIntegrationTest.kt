@@ -310,9 +310,10 @@ abstract class AbstractDBIntegrationTest {
         identifikator: String = ORGNUMMER,
         navn: String = ORGNAVN,
     ) {
-        Arbeidsgiver.Factory.ny(identifikator = ArbeidsgiverIdentifikator.fraString(identifikator))
-            .apply { oppdaterMedNavn(navn) }
-            .also(sessionContext.arbeidsgiverRepository::lagre)
+        Arbeidsgiver.Factory.ny(
+            id = ArbeidsgiverIdentifikator.fraString(identifikator),
+            navnString = navn
+        ).also(sessionContext.arbeidsgiverRepository::lagre)
     }
 
     protected fun opprettArbeidsforhold(

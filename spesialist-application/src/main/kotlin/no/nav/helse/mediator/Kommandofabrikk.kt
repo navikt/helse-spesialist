@@ -16,7 +16,6 @@ import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.LøsGodkjenningsbehov
-import no.nav.helse.modell.kommando.OpprettMinimalArbeidsgiverCommand
 import no.nav.helse.modell.kommando.OpprettMinimalPersonCommand
 import no.nav.helse.modell.kommando.TilbakedateringBehandlet
 import no.nav.helse.modell.kommando.TilbakedateringGodkjentCommand
@@ -62,13 +61,6 @@ class Kommandofabrikk(
     }
 
     private val oppgaveService: OppgaveService by lazy { oppgaveService() }
-
-    internal fun opprettArbeidsgiver(
-        organisasjonsnummer: String,
-        sessionContext: SessionContext,
-    ): OpprettMinimalArbeidsgiverCommand {
-        return OpprettMinimalArbeidsgiverCommand(organisasjonsnummer, sessionContext.arbeidsgiverRepository)
-    }
 
     internal fun endretEgenAnsattStatus(
         melding: EndretEgenAnsattStatus,

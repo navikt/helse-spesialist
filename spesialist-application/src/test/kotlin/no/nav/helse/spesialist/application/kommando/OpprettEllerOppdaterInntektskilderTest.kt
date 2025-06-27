@@ -533,7 +533,7 @@ class OpprettEllerOppdaterInntektskilderTest {
     ) {
         assertNotNull(this)
         assertEquals(forventetIdentifikator, this.id())
-        assertEquals(forventetNavn, this.navn?.navn)
+        assertEquals(forventetNavn, this.navn.navn)
     }
 
     private fun lagreOppdatertArbeidsgiver(identifikator: ArbeidsgiverIdentifikator) {
