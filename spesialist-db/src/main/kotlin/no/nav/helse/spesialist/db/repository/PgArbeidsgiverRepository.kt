@@ -36,7 +36,7 @@ internal class PgArbeidsgiverRepository(
             ).list { it.toArbeidsgiver() }
         }
 
-    private fun insertArbeidsgiver(arbeidsgiver: Arbeidsgiver) =
+    private fun insertArbeidsgiver(arbeidsgiver: Arbeidsgiver) {
         asSQL(
             """
             INSERT INTO arbeidsgiver (identifikator, navn, navn_sist_oppdatert_dato) 
@@ -45,7 +45,8 @@ internal class PgArbeidsgiverRepository(
             "identifikator" to arbeidsgiver.id().tilDbIdentifikator(),
             "navn" to arbeidsgiver.navn.navn,
             "navn_sist_oppdatert_dato" to arbeidsgiver.navn.sistOppdatertDato,
-        ).updateAndReturnGeneratedKey().toInt()
+        ).update()
+    }
 
     private fun updateArbeidsgiver(arbeidsgiver: Arbeidsgiver) {
         asSQL(
