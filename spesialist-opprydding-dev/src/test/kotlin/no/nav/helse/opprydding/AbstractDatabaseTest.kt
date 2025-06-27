@@ -49,8 +49,8 @@ internal abstract class AbstractDatabaseTest {
                            infotrygdutbetalinger_ref, infotrygdutbetalinger_oppdatert)
         VALUES (${sequence_number}, '${fødselsnummer}', '${aktør_id}', ${sequence_number}, 101, now(), now(), ${sequence_number},
                 now());
-        INSERT INTO arbeidsgiver(id, organisasjonsnummer, identifikator, navn, navn_sist_oppdatert_dato)
-        VALUES (${sequence_number}, '${organisasjonsnummer}', '${organisasjonsnummer}', 'ARBEIDSGIVER', '2018-01-01');
+        INSERT INTO arbeidsgiver(identifikator, navn, navn_sist_oppdatert_dato)
+        VALUES ('${organisasjonsnummer}', 'ARBEIDSGIVER', '2018-01-01');
         INSERT INTO arbeidsforhold(id, person_ref, arbeidsgiver_identifikator, startdato, sluttdato, stillingstittel, stillingsprosent, oppdatert)
         VALUES (${sequence_number}, ${sequence_number}, '${organisasjonsnummer}', '2018-01-01', '2018-01-31', 'STILLING', 100, now());
         UPDATE global_snapshot_versjon
