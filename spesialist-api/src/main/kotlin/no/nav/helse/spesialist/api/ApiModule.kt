@@ -42,24 +42,27 @@ class ApiModule(
         val tokenEndpoint: String,
     )
 
+    val oppgaveService =
+        OppgaveService(
+            oppgaveDao = daos.oppgaveDao,
+            reservasjonDao = daos.reservasjonDao,
+            meldingPubliserer = meldingPubliserer,
+            tilgangskontroll =
+                TilgangskontrollørForReservasjon(
+                    gruppekontroll,
+                    tilgangsgrupper,
+                ),
+            tilgangsgrupper = tilgangsgrupper,
+            oppgaveRepository = daos.oppgaveRepository,
+        )
+
     private val apiOppgaveService =
         ApiOppgaveService(
             oppgaveDao = daos.oppgaveDao,
             tilgangsgrupper = tilgangsgrupper,
-            oppgaveService =
-                OppgaveService(
-                    oppgaveDao = daos.oppgaveDao,
-                    reservasjonDao = daos.reservasjonDao,
-                    meldingPubliserer = meldingPubliserer,
-                    tilgangskontroll =
-                        TilgangskontrollørForReservasjon(
-                            gruppekontroll,
-                            tilgangsgrupper,
-                        ),
-                    tilgangsgrupper = tilgangsgrupper,
-                    oppgaveRepository = daos.oppgaveRepository,
-                ),
+            oppgaveService = oppgaveService,
         )
+
     private val stansAutomatiskBehandlinghåndterer =
         StansAutomatiskBehandlinghåndtererImpl(
             daos.stansAutomatiskBehandlingDao,
@@ -77,19 +80,7 @@ class ApiModule(
                     daos = daos,
                     versjonAvKode = versjonAvKode,
                     meldingPubliserer = meldingPubliserer,
-                    oppgaveService =
-                        OppgaveService(
-                            oppgaveDao = daos.oppgaveDao,
-                            reservasjonDao = daos.reservasjonDao,
-                            meldingPubliserer = meldingPubliserer,
-                            tilgangskontroll =
-                                TilgangskontrollørForReservasjon(
-                                    gruppekontroll,
-                                    tilgangsgrupper,
-                                ),
-                            tilgangsgrupper = tilgangsgrupper,
-                            oppgaveRepository = daos.oppgaveRepository,
-                        ),
+                    oppgaveService = oppgaveService,
                     apiOppgaveService = apiOppgaveService,
                     tilgangsgrupper = tilgangsgrupper,
                     stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
@@ -113,19 +104,7 @@ class ApiModule(
                 GodkjenningService(
                     oppgaveDao = daos.oppgaveDao,
                     publiserer = meldingPubliserer,
-                    oppgaveService =
-                        OppgaveService(
-                            oppgaveDao = daos.oppgaveDao,
-                            reservasjonDao = daos.reservasjonDao,
-                            meldingPubliserer = meldingPubliserer,
-                            tilgangskontroll =
-                                TilgangskontrollørForReservasjon(
-                                    gruppekontroll,
-                                    tilgangsgrupper,
-                                ),
-                            tilgangsgrupper = tilgangsgrupper,
-                            oppgaveRepository = daos.oppgaveRepository,
-                        ),
+                    oppgaveService = oppgaveService,
                     reservasjonDao = daos.reservasjonDao,
                     periodehistorikkDao = daos.periodehistorikkDao,
                     sessionFactory = sessionFactory,
