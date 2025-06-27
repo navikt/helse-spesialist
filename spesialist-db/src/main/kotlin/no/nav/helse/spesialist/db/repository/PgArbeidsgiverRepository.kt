@@ -13,11 +13,17 @@ internal class PgArbeidsgiverRepository(
     private val session: Session,
 ) : QueryRunner by MedSession(session), ArbeidsgiverRepository {
     override fun lagre(arbeidsgiver: Arbeidsgiver) {
-        if (finn(arbeidsgiver.id()) == null) {
-            insertArbeidsgiver(arbeidsgiver)
-        } else {
-            updateArbeidsgiver(arbeidsgiver)
-        }
+        asSQL(
+            """
+            INSERT INTO arbeidsgiver (identifikator, navn, navn_sist_oppdatert_dato) 
+            VALUES (:identifikator, :navn, :navn_sist_oppdatert_dato)
+            ON CONFLICT (identifikator) DO UPDATE
+            SET navn = excluded.navn, navn_sist_oppdatert_dato = excluded.navn_sist_oppdatert_dato
+            """.trimIndent(),
+            "identifikator" to arbeidsgiver.id().tilDbIdentifikator(),
+            "navn" to arbeidsgiver.navn.navn,
+            "navn_sist_oppdatert_dato" to arbeidsgiver.navn.sistOppdatertDato,
+        ).update()
     }
 
     override fun finn(id: ArbeidsgiverIdentifikator): Arbeidsgiver? =
@@ -35,31 +41,6 @@ internal class PgArbeidsgiverRepository(
                 "identifikatorer" to ider.map { it.tilDbIdentifikator() }.toTypedArray(),
             ).list { it.toArbeidsgiver() }
         }
-
-    private fun insertArbeidsgiver(arbeidsgiver: Arbeidsgiver) {
-        asSQL(
-            """
-            INSERT INTO arbeidsgiver (identifikator, navn, navn_sist_oppdatert_dato) 
-            VALUES (:identifikator, :navn, :navn_sist_oppdatert_dato)
-            """.trimIndent(),
-            "identifikator" to arbeidsgiver.id().tilDbIdentifikator(),
-            "navn" to arbeidsgiver.navn.navn,
-            "navn_sist_oppdatert_dato" to arbeidsgiver.navn.sistOppdatertDato,
-        ).update()
-    }
-
-    private fun updateArbeidsgiver(arbeidsgiver: Arbeidsgiver) {
-        asSQL(
-            """
-            UPDATE arbeidsgiver 
-            SET navn = :navn, navn_sist_oppdatert_dato = :navn_sist_oppdatert_dato 
-            WHERE identifikator = :identifikator
-            """.trimIndent(),
-            "navn" to arbeidsgiver.navn.navn,
-            "navn_sist_oppdatert_dato" to arbeidsgiver.navn.sistOppdatertDato,
-            "identifikator" to arbeidsgiver.id().tilDbIdentifikator(),
-        ).update()
-    }
 
     private fun Row.toArbeidsgiver(): Arbeidsgiver =
         Arbeidsgiver.Factory.fraLagring(
