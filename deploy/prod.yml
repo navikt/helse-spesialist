@@ -100,7 +100,7 @@ spec:
           - name: pgaudit.log
             value: 'write'
           - name: work_mem
-            value: '16MB'
+            value: '16384'
         databases:
           - name: spesialist
             envVarPrefix: DATABASE
