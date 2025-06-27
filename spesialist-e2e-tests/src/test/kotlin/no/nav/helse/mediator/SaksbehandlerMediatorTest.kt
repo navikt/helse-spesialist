@@ -82,6 +82,7 @@ import org.junit.jupiter.params.provider.CsvSource
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
+import kotlin.math.absoluteValue
 import kotlin.random.Random
 import kotlin.random.Random.Default.nextLong
 
@@ -93,8 +94,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
     private val VEDTAKSPERIODE: UUID = testperson.vedtaksperiodeId1
 
     private val UTBETALING_ID: UUID = testperson.utbetalingId1
-
-    private var OPPGAVE_ID = nextLong()
 
     private val ORGNUMMER =
         with(testperson) {
@@ -133,10 +132,8 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
     }
 
     private var personId: Long = -1
-    var vedtakId: Long = -1
-        private set
-    var oppgaveId: Long = -1
-        private set
+    private var vedtakId: Long = -1
+    private var oppgaveId = nextLong().absoluteValue
 
     private val session = sessionOf(dataSource, returnGeneratedKey = true)
     private val sessionContext = DBSessionContext(session)
@@ -144,7 +141,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
     @AfterEach
     fun tearDown() = session.close()
 
-    fun testhendelse(
+    private fun testhendelse(
         hendelseId: UUID = HENDELSE_ID,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
         fødselsnummer: String = FNR,
@@ -210,13 +207,13 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         sessionContext.totrinnsvurderingRepository.lagre(totrinnsvurdering)
         saksbehandlerOid?.let {
             totrinnsvurdering.sendTilBeslutter(
-                oppgaveId = OPPGAVE_ID,
+                oppgaveId = oppgaveId,
                 behandlendeSaksbehandler = SaksbehandlerOid(saksbehandlerOid)
             )
         }
 
         if (erRetur) totrinnsvurdering.sendIRetur(
-            oppgaveId = OPPGAVE_ID,
+            oppgaveId = oppgaveId,
             beslutter = SaksbehandlerOid(UUID.randomUUID())
         )
 
@@ -350,8 +347,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
     ) {
         val hendelse = testhendelse(hendelseId = godkjenningsbehovId)
         opprettCommandContext(hendelse, contextId)
-        oppgaveId = nextLong()
-        OPPGAVE_ID = oppgaveId
         sessionContext.oppgaveRepository.lagre(
             Oppgave.ny(
                 id = oppgaveId,
@@ -513,8 +508,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             }
         }
 
-        val result =
-            mediator.håndterTotrinnsvurdering(oppgaveId, saksbehandler, "Begrunnelse")
+        val result = mediator.håndterTotrinnsvurdering(oppgaveId, saksbehandler, "Begrunnelse")
 
         assertEquals(SendTilGodkjenningResult.Ok, result)
         val totrinnsvurdering = sessionFactory.transactionalSessionScope { session ->
@@ -826,7 +820,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
     @Test
     fun `forsøk tildeling av oppgave`() {
         nyPerson()
-        val oppgaveId = OPPGAVE_ID
         mediator.håndter(TildelOppgave(oppgaveId), saksbehandler)
         val melding = testRapid.inspektør.hendelser().last()
         assertEquals("oppgave_oppdatert", melding)
@@ -836,7 +829,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
     fun `legg på vent forårsaker publisering av hendelse`() {
         val spleisBehandlingId = UUID.randomUUID()
         nyPerson(spleisBehandlingId = spleisBehandlingId)
-        val oppgaveId = OPPGAVE_ID
         val frist = LocalDate.now()
         val skalTildeles = true
         mediator.påVent(
@@ -867,7 +859,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
     fun `endring av påVent forårsaker publisering av hendelse`() {
         val spleisBehandlingId = UUID.randomUUID()
         nyPerson(spleisBehandlingId = spleisBehandlingId)
-        val oppgaveId = OPPGAVE_ID
         val frist = LocalDate.now()
         val skalTildeles = true
         mediator.påVent(
@@ -913,7 +904,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
     @Test
     fun `forsøk tildeling av oppgave når den allerede er tildelt`() {
         nyPerson()
-        val oppgaveId = OPPGAVE_ID
         mediator.håndter(TildelOppgave(oppgaveId), saksbehandler)
         testRapid.reset()
         assertThrows<OppgaveTildeltNoenAndre> {
@@ -925,7 +915,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
     @Test
     fun `forsøk avmelding av oppgave`() {
         nyPerson()
-        val oppgaveId = OPPGAVE_ID
         mediator.håndter(TildelOppgave(oppgaveId), saksbehandler)
         testRapid.reset()
         mediator.håndter(AvmeldOppgave(oppgaveId), saksbehandler)
@@ -936,7 +925,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
     @Test
     fun `forsøk avmelding av oppgave når den ikke er tildelt`() {
         nyPerson()
-        val oppgaveId = OPPGAVE_ID
         assertThrows<OppgaveIkkeTildelt> {
             mediator.håndter(AvmeldOppgave(oppgaveId), saksbehandler(UUID.randomUUID()))
         }
@@ -946,7 +934,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
     @Test
     fun `legg på vent`() {
         nyPerson()
-        val oppgaveId = OPPGAVE_ID
         mediator.påVent(
             ApiPaVentRequest.ApiLeggPaVent(
                 oppgaveId,
@@ -970,7 +957,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
     @Test
     fun `endre på vent`() {
         nyPerson()
-        val oppgaveId = OPPGAVE_ID
         mediator.påVent(
             ApiPaVentRequest.ApiLeggPaVent(
                 oppgaveId,
@@ -1012,7 +998,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
     @Test
     fun `fjern på vent`() {
         nyPerson()
-        val oppgaveId = OPPGAVE_ID
         mediator.påVent(
             ApiPaVentRequest.ApiLeggPaVent(
                 oppgaveId,
