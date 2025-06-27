@@ -51,18 +51,24 @@ internal class OpprettEllerOppdaterInntektskilder(
             }
 
     override fun execute(context: CommandContext): Boolean {
-        val (nyeArbeidsgivere, utdaterteArbeidsgivere) = finnNyeOgUtdaterteArbeidsgivere()
-        if (nyeArbeidsgivere.isEmpty() && utdaterteArbeidsgivere.isEmpty()) return true
-        sikkerlogg.info("Trenger navn på nye arbeidsgivere: ${nyeArbeidsgivere.joinToString()}")
-        sikkerlogg.info("Trenger oppdatert navn på kjente arbeidsgivere: ${utdaterteArbeidsgivere.joinToString()}")
-        sendBehov(context, nyeArbeidsgivere + utdaterteArbeidsgivere.map(Arbeidsgiver::id))
+        val (nyeArbeidsgiverIdentifikatorer, utdaterteArbeidsgivere) = finnNyeOgUtdaterteArbeidsgivere()
+        if (nyeArbeidsgiverIdentifikatorer.isEmpty() && utdaterteArbeidsgivere.isEmpty()) return true
+        if (nyeArbeidsgiverIdentifikatorer.isNotEmpty()) {
+            sikkerlogg.info("Trenger navn på nye arbeidsgivere: ${nyeArbeidsgiverIdentifikatorer.joinToString()}")
+        }
+        if (utdaterteArbeidsgivere.isNotEmpty()) {
+            sikkerlogg.info("Trenger oppdatert navn på kjente arbeidsgivere: ${utdaterteArbeidsgivere.joinToString { it.toLogString() }}")
+        }
+        sendBehov(context, nyeArbeidsgiverIdentifikatorer + utdaterteArbeidsgivere.map(Arbeidsgiver::id))
         return false
     }
 
-    override fun resume(context: CommandContext): Boolean {
-        val (nyeArbeidsgivere, utdaterteArbeidsgivere) = finnNyeOgUtdaterteArbeidsgivere()
+    private fun Arbeidsgiver.toLogString(): String = "${id()}, $navn"
 
-        nyeArbeidsgivere.forEach { identifikator ->
+    override fun resume(context: CommandContext): Boolean {
+        val (nyeArbeidsgiverIdentifikatorer, utdaterteArbeidsgivere) = finnNyeOgUtdaterteArbeidsgivere()
+
+        nyeArbeidsgiverIdentifikatorer.forEach { identifikator ->
             val navnFraLøsning = finnNavnILøsninger(identifikator, context)
             if (navnFraLøsning != null) {
                 val arbeidsgiver =
@@ -70,7 +76,7 @@ internal class OpprettEllerOppdaterInntektskilder(
                         id = identifikator,
                         navnString = navnFraLøsning,
                     )
-                sikkerlogg.info("Lagrer ny arbeidsgiver: $arbeidsgiver")
+                sikkerlogg.info("Lagrer ny arbeidsgiver: ${arbeidsgiver.toLogString()}")
                 arbeidsgiverRepository.lagre(arbeidsgiver)
             }
         }
@@ -80,7 +86,7 @@ internal class OpprettEllerOppdaterInntektskilder(
             val navnFraLøsning = finnNavnILøsninger(identifikator, context)
             if (navnFraLøsning != null) {
                 arbeidsgiver.oppdaterMedNavn(navnFraLøsning)
-                sikkerlogg.info("Lagrer oppdatert arbeidsgiver: $arbeidsgiver")
+                sikkerlogg.info("Lagrer oppdatert arbeidsgiver: ${arbeidsgiver.toLogString()}")
                 arbeidsgiverRepository.lagre(arbeidsgiver)
             }
         }
