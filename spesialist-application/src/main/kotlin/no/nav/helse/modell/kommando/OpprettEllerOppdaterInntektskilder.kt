@@ -18,8 +18,8 @@ internal class OpprettEllerOppdaterInntektskilder(
 ) : Command {
     private val alleIdentifikatorer =
         identifikatorer
+            .filterNot { it == SELVSTENDIG }
             .map(ArbeidsgiverIdentifikator::fraString)
-            .filterNot(::erSelvstendig)
             .plus(organisasjonsnumreFraSammenligningsgrunnlag(fødselsnummer = fødselsnummer))
             .distinct()
 
@@ -31,12 +31,6 @@ internal class OpprettEllerOppdaterInntektskilder(
             eksisterendeArbeidsgivere.filter(::måOppdateres),
         )
     }
-
-    private fun erSelvstendig(it: ArbeidsgiverIdentifikator) =
-        when (it) {
-            is ArbeidsgiverIdentifikator.Fødselsnummer -> it.fødselsnummer
-            is ArbeidsgiverIdentifikator.Organisasjonsnummer -> it.organisasjonsnummer
-        } == SELVSTENDIG
 
     private fun organisasjonsnumreFraSammenligningsgrunnlag(fødselsnummer: String): List<ArbeidsgiverIdentifikator> =
         avviksvurderingRepository
