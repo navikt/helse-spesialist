@@ -22,7 +22,7 @@ internal class PgArbeidsgiverRepository(
 
     override fun finn(id: ArbeidsgiverIdentifikator): Arbeidsgiver? =
         asSQL(
-            "SELECT * FROM arbeidsgiver WHERE identifikator = :identifikator AND navn IS NOT NULL",
+            "SELECT * FROM arbeidsgiver WHERE identifikator = :identifikator",
             "identifikator" to id.tilDbIdentifikator(),
         ).singleOrNull { it.toArbeidsgiver() }
 
@@ -31,7 +31,7 @@ internal class PgArbeidsgiverRepository(
             emptyList()
         } else {
             asSQL(
-                "SELECT * FROM arbeidsgiver WHERE identifikator = ANY (:identifikatorer) AND navn IS NOT NULL",
+                "SELECT * FROM arbeidsgiver WHERE identifikator = ANY (:identifikatorer)",
                 "identifikatorer" to ider.map { it.tilDbIdentifikator() }.toTypedArray(),
             ).list { it.toArbeidsgiver() }
         }
