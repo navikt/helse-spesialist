@@ -4,6 +4,7 @@ import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OppgavesorteringForDatabase
 import no.nav.helse.db.SorteringsnøkkelForDatabase
+import no.nav.helse.db.api.OppgaveApiDao
 import no.nav.helse.mediator.TilgangskontrollørForApi
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilApiversjon
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilBehandledeOppgaver
@@ -28,6 +29,7 @@ class ApiOppgaveService(
     private val oppgaveDao: OppgaveDao,
     private val tilgangsgrupper: Tilgangsgrupper,
     private val oppgaveService: OppgaveService,
+    private val oppgaveApiDao: OppgaveApiDao,
 ) {
     fun oppgaver(
         saksbehandlerFraApi: SaksbehandlerFraApi,
@@ -63,7 +65,7 @@ class ApiOppgaveService(
                 .toMap()
 
         val oppgaver =
-            oppgaveDao
+            oppgaveApiDao
                 .finnOppgaverForVisning(
                     ekskluderEgenskaper = egenskaperSomSkalEkskluderes,
                     saksbehandlerOid = saksbehandler.oid(),

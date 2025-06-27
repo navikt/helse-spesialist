@@ -15,6 +15,7 @@ import no.nav.helse.db.PersonnavnFraDatabase
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.TildelingDao
+import no.nav.helse.db.api.OppgaveApiDao
 import no.nav.helse.mediator.KommandokjedeEndretEvent
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.SubsumsjonEvent
@@ -63,6 +64,7 @@ internal class ApiOppgaveServiceTest {
         )
 
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
+    private val oppgaveApiDao = mockk<OppgaveApiDao>(relaxed = true)
     private val tildelingDao = mockk<TildelingDao>(relaxed = true)
     private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
     private val opptegnelseDao = mockk<OpptegnelseDao>(relaxed = true)
@@ -101,7 +103,8 @@ internal class ApiOppgaveServiceTest {
                 tilgangskontroll = { _, _ -> false },
                 tilgangsgrupper = SpeilTilgangsgrupper(testEnv),
                 oppgaveRepository = oppgaveRepository
-            )
+            ),
+            oppgaveApiDao = oppgaveApiDao
         )
 
     private fun saksbehandlerFraApi(tilganger: List<UUID> = emptyList()) =
@@ -109,12 +112,12 @@ internal class ApiOppgaveServiceTest {
 
     @BeforeEach
     fun setup() {
-        clearMocks(oppgaveDao, tildelingDao, opptegnelseDao)
+        clearMocks(oppgaveDao, oppgaveApiDao, tildelingDao, opptegnelseDao)
     }
 
     @Test
     fun `Hent oppgaver til visning`() {
-        every { oppgaveDao.finnOppgaverForVisning(any(), any()) } returns
+        every { oppgaveApiDao.finnOppgaverForVisning(any(), any()) } returns
                 listOf(
                     oppgaveFraDatabaseForVisning(filtrertAntall = 2),
                     oppgaveFraDatabaseForVisning(filtrertAntall = 2),
@@ -153,7 +156,7 @@ internal class ApiOppgaveServiceTest {
     fun `Hent kun oppgaver til visning som saksbehandler har tilgang til`() {
         apiOppgaveService.oppgaver(saksbehandlerFraApi(), 0, Int.MAX_VALUE, emptyList(), ApiFiltrering())
         verify(exactly = 1) {
-            oppgaveDao.finnOppgaverForVisning(
+            oppgaveApiDao.finnOppgaverForVisning(
                 ekskluderEgenskaper = Egenskap.alleTilgangsstyrteEgenskaper.map { it.name },
                 SAKSBEHANDLEROID,
                 0,
@@ -172,7 +175,7 @@ internal class ApiOppgaveServiceTest {
             filtrering = ApiFiltrering(ingenUkategoriserteEgenskaper = true)
         )
         verify(exactly = 1) {
-            oppgaveDao.finnOppgaverForVisning(
+            oppgaveApiDao.finnOppgaverForVisning(
                 ekskluderEgenskaper =
                     Egenskap.alleTilgangsstyrteEgenskaper.map { it.name } + Egenskap.alleUkategoriserteEgenskaper.map { it.name },
                 SAKSBEHANDLEROID,
@@ -200,7 +203,7 @@ internal class ApiOppgaveServiceTest {
             ),
         )
         verify(exactly = 1) {
-            oppgaveDao.finnOppgaverForVisning(
+            oppgaveApiDao.finnOppgaverForVisning(
                 ekskluderEgenskaper = Egenskap.alleTilgangsstyrteEgenskaper.map { it.name } + Egenskap.PÅ_VENT.name,
                 SAKSBEHANDLEROID,
                 0,
@@ -245,7 +248,7 @@ internal class ApiOppgaveServiceTest {
         val opprettet = LocalDateTime.now()
         val vedtaksperiodeId = UUID.randomUUID()
         val opprinneligSøknadsdato = LocalDateTime.now()
-        every { oppgaveDao.finnOppgaverForVisning(any(), any()) } returns
+        every { oppgaveApiDao.finnOppgaverForVisning(any(), any()) } returns
                 listOf(
                     oppgaveFraDatabaseForVisning(
                         oppgaveId = 1L,
@@ -302,7 +305,7 @@ internal class ApiOppgaveServiceTest {
                 EgenskapForDatabase.EN_ARBEIDSGIVER,
                 EgenskapForDatabase.FORSTEGANGSBEHANDLING,
             )
-        every { oppgaveDao.finnOppgaverForVisning(any(), any()) } returns
+        every { oppgaveApiDao.finnOppgaverForVisning(any(), any()) } returns
                 listOf(
                     oppgaveFraDatabaseForVisning(
                         oppgaveId = 1L,
@@ -351,7 +354,7 @@ internal class ApiOppgaveServiceTest {
                 EgenskapForDatabase.EN_ARBEIDSGIVER,
                 EgenskapForDatabase.SØKNAD
             )
-        every { oppgaveDao.finnOppgaverForVisning(any(), any()) } returns
+        every { oppgaveApiDao.finnOppgaverForVisning(any(), any()) } returns
                 listOf(
                     oppgaveFraDatabaseForVisning(
                         oppgaveId = 1L,
@@ -400,7 +403,7 @@ internal class ApiOppgaveServiceTest {
                 EgenskapForDatabase.EN_ARBEIDSGIVER,
                 EgenskapForDatabase.SØKNAD
             )
-        every { oppgaveDao.finnOppgaverForVisning(any(), any()) } returns
+        every { oppgaveApiDao.finnOppgaverForVisning(any(), any()) } returns
                 listOf(
                     oppgaveFraDatabaseForVisning(
                         oppgaveId = 1L,
@@ -446,7 +449,7 @@ internal class ApiOppgaveServiceTest {
                 EgenskapForDatabase.UTBETALING_TIL_SYKMELDT,
                 EgenskapForDatabase.SØKNAD,
             )
-        every { oppgaveDao.finnOppgaverForVisning(ekskluderEgenskaper = any(), saksbehandlerOid = any()) } returns
+        every { oppgaveApiDao.finnOppgaverForVisning(ekskluderEgenskaper = any(), saksbehandlerOid = any()) } returns
                 listOf(
                     oppgaveFraDatabaseForVisning(
                         oppgaveId = 1L,

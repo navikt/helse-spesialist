@@ -1,7 +1,6 @@
 package no.nav.helse.db
 
 import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
-import no.nav.helse.modell.oppgave.Egenskap
 import java.time.LocalDate
 import java.util.UUID
 
@@ -29,18 +28,6 @@ interface OppgaveDao {
     fun finnSpleisBehandlingId(oppgaveId: Long): UUID
 
     fun oppgaveDataForAutomatisering(oppgaveId: Long): OppgaveDataForAutomatisering?
-
-    fun finnOppgaverForVisning(
-        ekskluderEgenskaper: List<String>,
-        saksbehandlerOid: UUID,
-        offset: Int = 0,
-        limit: Int = Int.MAX_VALUE,
-        sortering: List<OppgavesorteringForDatabase> = emptyList(),
-        egneSakerPåVent: Boolean = false,
-        egneSaker: Boolean = false,
-        tildelt: Boolean? = null,
-        grupperteFiltrerteEgenskaper: Map<Egenskap.Kategori, List<EgenskapForDatabase>> = emptyMap(),
-    ): List<OppgaveFraDatabaseForVisning>
 
     fun finnAntallOppgaver(saksbehandlerOid: UUID): AntallOppgaverFraDatabase
 

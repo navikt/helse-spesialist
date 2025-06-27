@@ -59,6 +59,7 @@ class ApiModule(
     private val apiOppgaveService =
         ApiOppgaveService(
             oppgaveDao = daos.oppgaveDao,
+            oppgaveApiDao = daos.oppgaveApiDao,
             tilgangsgrupper = tilgangsgrupper,
             oppgaveService = oppgaveService,
         )
