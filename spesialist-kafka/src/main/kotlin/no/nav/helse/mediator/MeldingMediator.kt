@@ -13,7 +13,7 @@ import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.SøknadSendt
-import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
+import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.spesialist.kafka.objectMapper
@@ -137,9 +137,15 @@ class MeldingMediator(
         dokumentDao.lagre(fødselsnummer, dokumentId, dokument)
     }
 
-    fun finnBehandlingerFor(fødselsnummer: String): List<BehandlingDto> =
-        personDao.finnPerson(fødselsnummer)?.vedtaksperioder?.flatMap { it.behandlinger }
-            ?: emptyList()
+    fun finnBehandlingerFor(fødselsnummer: String): List<Vedtaksperiode.BehandlingData> {
+        var behandlinger: List<Vedtaksperiode.BehandlingData> = emptyList()
+        sessionFactory.transactionalSessionScope { sessionContext ->
+            sessionContext.personRepository.brukPersonHvisFinnes(fødselsnummer) {
+                behandlinger = behandlinger()
+            }
+        }
+        return behandlinger
+    }
 
     fun slettGamleDokumenter(): Int = dokumentDao.slettGamleDokumenter()
 

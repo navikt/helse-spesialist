@@ -27,6 +27,8 @@ class Vedtaksperiode private constructor(
 
     fun organisasjonsnummer() = organisasjonsnummer
 
+    fun behandlinger() = behandlinger.map { BehandlingData(it.vedtaksperiodeId(), it.spleisBehandlingId()) }
+
     internal fun toDto(): VedtaksperiodeDto =
         VedtaksperiodeDto(
             organisasjonsnummer = organisasjonsnummer,
@@ -201,4 +203,6 @@ class Vedtaksperiode private constructor(
                 vedtakBegrunnelse = vedtakBegrunnelse,
             )
     }
+
+    data class BehandlingData(val vedtaksperiodeId: UUID, val spleisBehandlingId: UUID?)
 }

@@ -99,6 +99,8 @@ class Person private constructor(
             .avsluttetUtenVedtak()
     }
 
+    fun behandlinger() = vedtaksperioder.flatMap { it.behandlinger() }
+
     private fun SykepengevedtakBuilder.leggTilAvviksvurderinger(legacyBehandling: LegacyBehandling) {
         avviksvurderinger.finnRiktigAvviksvurdering(legacyBehandling.skjæringstidspunkt())?.let {
             sammenligningsgrunnlag(it.sammenligningsgrunnlag)
