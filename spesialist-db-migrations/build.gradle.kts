@@ -1,4 +1,5 @@
 dependencies {
+    implementation(libs.postgresSocketFactory)
     implementation(libs.bundles.flyway.postgres)
     implementation(libs.postgresJdbcDriver)
     implementation(libs.hikari)
