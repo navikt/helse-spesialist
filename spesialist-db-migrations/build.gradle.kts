@@ -5,20 +5,25 @@ dependencies {
 }
 
 tasks {
-    val copyDeps by registering(Sync::class) {
-        from(configurations.runtimeClasspath)
-        into("build/libs")
-    }
-    named<Jar>("jar") {
-        dependsOn(copyDeps)
-        archiveBaseName.set("app")
-
-        manifest {
-            attributes["Main-Class"] = "no.nav.helse.spesialist.db.migrations.AppKt"
-            attributes["Class-Path"] =
-                configurations.runtimeClasspath.get().joinToString(separator = " ") {
-                    it.name
-                }
+    val fatJar =
+        register<Jar>("fatJar") {
+            dependsOn.addAll(
+                listOf(
+                    "compileJava",
+                    "compileKotlin",
+                    "processResources",
+                ),
+            )
+            archiveClassifier.set("standalone") // Naming the jar
+            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+            manifest { attributes(mapOf("Main-Class" to "no.nav.helse.spesialist.db.migrations.AppKt")) }
+            val sourcesMain = sourceSets.main.get()
+            val contents =
+                configurations.runtimeClasspath.get()
+                    .map { if (it.isDirectory) it else zipTree(it) } + sourcesMain.output
+            from(contents)
         }
+    build {
+        dependsOn(fatJar) // Trigger fat jar creation during build
     }
 }

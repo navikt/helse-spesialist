@@ -6,4 +6,4 @@ ENV JDK_JAVA_OPTIONS='-XX:MaxRAMPercentage=90'
 WORKDIR /app
 
 COPY spesialist-db-migrations/build/libs/*.jar .
-CMD ["app.jar"]
+CMD ["spesialist-db-migrations-standalone.jar"]
