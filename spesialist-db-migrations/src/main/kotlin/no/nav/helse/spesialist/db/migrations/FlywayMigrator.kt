@@ -25,6 +25,7 @@ class FlywayMigrator(
             Flyway.configure()
                 .dataSource(dataSource)
                 .lockRetryCount(-1)
+                .validateMigrationNaming(true)
                 .load()
                 .migrate()
         }
