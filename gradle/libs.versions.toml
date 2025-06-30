@@ -4,7 +4,7 @@ graphqlKotlin = "8.4.0"
 jackson = "2.19.1"
 ktor = "3.2.0"
 tbdLibs = "2025.06.20-13.05-40af2647"
-testcontainers = "1.21.2"
+testcontainers = "1.21.3"
 
 [libraries]
 auth0-jwt = "com.auth0:java-jwt:4.5.0"
