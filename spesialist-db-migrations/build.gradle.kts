@@ -7,6 +7,7 @@ dependencies {
     implementation(libs.bundles.flyway.postgres)
     implementation(libs.postgresJdbcDriver)
     implementation(libs.hikari)
+    implementation(libs.bundles.logback)
 }
 
 tasks.shadowJar {
