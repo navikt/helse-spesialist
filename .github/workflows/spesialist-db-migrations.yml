@@ -7,6 +7,7 @@ on:
     paths:
       - 'Dockerfile-db-migrations'
       - 'spesialist-db-migrations/**'
+      - '.github/workflows/spesialist-db-migrations.yml'
       - 'deploy/dev-db-migrations.yml'
       - 'deploy/prod-db-migrations.yml'
       - '.dockerignore'
