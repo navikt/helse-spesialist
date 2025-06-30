@@ -106,6 +106,7 @@ spec:
             envVarPrefix: DATABASE
             users:
               - name: bigquery_connection_user
+              - name: spesialist-db-migrations
               - name: spesialist-sidegig
   envFrom:
     - secret: spesialist-unleash-api-token
