@@ -51,22 +51,28 @@ class PgPersonRepository(
         return tilLagring
     }
 
-    private fun hentPerson(fødselsnummer: String): Pair<Person, PersonDto>? =
-        finnPerson(fødselsnummer)
-            ?.copy(vedtaksperioder = vedtaksperiodeRepository.finnVedtaksperioder(fødselsnummer))
-            ?.copy(
-                skjønnsfastsatteSykepengegrunnlag = sykefraværstilfelleDao.finnSkjønnsfastsatteSykepengegrunnlag(fødselsnummer),
-            )?.copy(
+    private fun hentPerson(fødselsnummer: String): Pair<Person, PersonDto>? {
+        val minimalPerson = personDao.finnMinimalPerson(fødselsnummer) ?: return null
+
+        val personDto =
+            PersonDto(
+                aktørId = minimalPerson.aktørId,
+                fødselsnummer = minimalPerson.fødselsnummer,
+                vedtaksperioder = vedtaksperiodeRepository.finnVedtaksperioder(fødselsnummer),
+                skjønnsfastsatteSykepengegrunnlag =
+                    sykefraværstilfelleDao.finnSkjønnsfastsatteSykepengegrunnlag(
+                        fødselsnummer,
+                    ),
                 avviksvurderinger = avviksvurderingRepository.finnAvviksvurderinger(fødselsnummer),
-            )?.let {
-                Person.gjenopprett(
-                    aktørId = it.aktørId,
-                    fødselsnummer = it.fødselsnummer,
-                    vedtaksperioder = it.vedtaksperioder,
-                    skjønnsfastsattSykepengegrunnlag = it.skjønnsfastsatteSykepengegrunnlag,
-                    avviksvurderinger = it.avviksvurderinger,
-                ) to it
-            }
+            )
+        return Person.gjenopprett(
+            aktørId = personDto.aktørId,
+            fødselsnummer = personDto.fødselsnummer,
+            vedtaksperioder = personDto.vedtaksperioder,
+            skjønnsfastsattSykepengegrunnlag = personDto.skjønnsfastsatteSykepengegrunnlag,
+            avviksvurderinger = personDto.avviksvurderinger,
+        ) to personDto
+    }
 
     private fun lagrePerson(
         dtoFør: PersonDto,
@@ -75,6 +81,4 @@ class PgPersonRepository(
         val vedtaksperioderSomSkalLagres = finnEndredeVedtaksperioder(dtoFør, dtoEtter)
         vedtaksperiodeRepository.lagreVedtaksperioder(dtoEtter.fødselsnummer, vedtaksperioderSomSkalLagres)
     }
-
-    private fun finnPerson(fødselsnummer: String): PersonDto? = personDao.finnPerson(fødselsnummer)
 }

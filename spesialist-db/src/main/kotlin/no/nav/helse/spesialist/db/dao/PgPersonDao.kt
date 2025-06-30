@@ -7,7 +7,6 @@ import no.nav.helse.db.PersonDao
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.modell.kommando.MinimalPersonDto
 import no.nav.helse.modell.person.Adressebeskyttelse
-import no.nav.helse.modell.person.PersonDto
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.MedSession
@@ -25,10 +24,13 @@ class PgPersonDao internal constructor(
     internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
     override fun finnMinimalPerson(fødselsnummer: String): MinimalPersonDto? =
-        finnPerson(fødselsnummer)?.let {
+        asSQL(
+            "SELECT aktør_id, fødselsnummer FROM person WHERE fødselsnummer = :foedselsnummer",
+            "foedselsnummer" to fødselsnummer,
+        ).singleOrNull<MinimalPersonDto> { row ->
             MinimalPersonDto(
-                fødselsnummer = it.fødselsnummer,
-                aktørId = it.aktørId,
+                aktørId = row.string("aktør_id"),
+                fødselsnummer = row.string("fødselsnummer"),
             )
         }
 
@@ -43,20 +45,6 @@ class PgPersonDao internal constructor(
     override fun personKlargjort(fødselsnummer: String) {
         asSQL("DELETE FROM person_klargjores WHERE fødselsnummer = :foedselsnummer", "foedselsnummer" to fødselsnummer).update()
     }
-
-    override fun finnPerson(fødselsnummer: String) =
-        asSQL(
-            "SELECT aktør_id, fødselsnummer FROM person WHERE fødselsnummer = :foedselsnummer",
-            "foedselsnummer" to fødselsnummer,
-        ).singleOrNull { row ->
-            PersonDto(
-                aktørId = row.string("aktør_id"),
-                fødselsnummer = row.string("fødselsnummer"),
-                vedtaksperioder = emptyList(),
-                avviksvurderinger = emptyList(),
-                skjønnsfastsatteSykepengegrunnlag = emptyList(),
-            )
-        }
 
     override fun finnPersonMedFødselsnummer(fødselsnummer: String): Long? =
         asSQL(
