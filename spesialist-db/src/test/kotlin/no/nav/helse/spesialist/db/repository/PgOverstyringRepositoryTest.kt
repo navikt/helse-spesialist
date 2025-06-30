@@ -9,6 +9,7 @@ import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtArbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtArbeidsgiver
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtInntektOgRefusjon
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinje
+import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinjedag
 import no.nav.helse.modell.saksbehandler.handlinger.Refusjonselement
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlag
@@ -96,9 +97,9 @@ class PgOverstyringRepositoryTest : AbstractDBIntegrationTest() {
         val tidslinjeOverstyring = nyTidslinjeOverstyring()
         overstyringRepository.lagre(listOf(tidslinjeOverstyring), totrinnsvurderingId)
         val overstyringer = overstyringRepository.finnAktive(totrinnsvurderingId)
-        val hentetTidslinjeOverstyring = overstyringer.first()
 
         assertEquals(1, overstyringer.size)
+        val hentetTidslinjeOverstyring = overstyringer.first()
         assertIs<OverstyrtTidslinje>(hentetTidslinjeOverstyring)
         assertEquals(AKTØR, hentetTidslinjeOverstyring.aktørId)
         assertEquals(false, hentetTidslinjeOverstyring.ferdigstilt)
@@ -107,7 +108,11 @@ class PgOverstyringRepositoryTest : AbstractDBIntegrationTest() {
         assertEquals(ORGNUMMER, hentetTidslinjeOverstyring.organisasjonsnummer)
         assertEquals("begrunnelse", hentetTidslinjeOverstyring.begrunnelse)
         assertEquals(FNR, hentetTidslinjeOverstyring.fødselsnummer)
-        assertEquals(nyOverstyrtTidslinjedag(), hentetTidslinjeOverstyring.dager.first())
+        assertEqualsUnordered(
+            expected = listOf(nyOverstyrtTidslinjedag()),
+            actual = hentetTidslinjeOverstyring.dager,
+            uniqueness = OverstyrtTidslinjedag::dato
+        )
         assertTrue(hentetTidslinjeOverstyring.opprettet.isBefore(LocalDateTime.now()))
         assertTrue(hentetTidslinjeOverstyring.harFåttTildeltId())
     }
@@ -119,9 +124,9 @@ class PgOverstyringRepositoryTest : AbstractDBIntegrationTest() {
         val inntektOgRefusjonOverstyring = nyInntektOgRefusjonOverstyring()
         overstyringRepository.lagre(listOf(inntektOgRefusjonOverstyring), totrinnsvurderingId)
         val overstyringer = overstyringRepository.finnAktive(totrinnsvurderingId)
-        val hentetInntektOgRefusjonOverstyring = overstyringer.first()
 
         assertEquals(1, overstyringer.size)
+        val hentetInntektOgRefusjonOverstyring = overstyringer.first()
         assertIs<OverstyrtInntektOgRefusjon>(hentetInntektOgRefusjonOverstyring)
         assertEquals(AKTØR, hentetInntektOgRefusjonOverstyring.aktørId)
         assertEquals(false, hentetInntektOgRefusjonOverstyring.ferdigstilt)
@@ -129,7 +134,12 @@ class PgOverstyringRepositoryTest : AbstractDBIntegrationTest() {
         assertEquals(SAKSBEHANDLER_OID, hentetInntektOgRefusjonOverstyring.saksbehandlerOid.value)
         assertEquals(FNR, hentetInntektOgRefusjonOverstyring.fødselsnummer)
         assertEquals(1 jan 2018, hentetInntektOgRefusjonOverstyring.skjæringstidspunkt)
-        assertEquals(nyOverstyrtArbeidsgiver(), hentetInntektOgRefusjonOverstyring.arbeidsgivere.first())
+        assertEqualsUnordered(
+            expected = listOf(nyOverstyrtArbeidsgiver()),
+            actual = hentetInntektOgRefusjonOverstyring.arbeidsgivere,
+            uniqueness = OverstyrtArbeidsgiver::organisasjonsnummer
+        )
+
         assertTrue(hentetInntektOgRefusjonOverstyring.opprettet.isBefore(LocalDateTime.now()))
         assertTrue(hentetInntektOgRefusjonOverstyring.harFåttTildeltId())
     }
@@ -141,16 +151,20 @@ class PgOverstyringRepositoryTest : AbstractDBIntegrationTest() {
         val arbeidsforholdOverstyring = nyArbeidsforholdOverstyring()
         overstyringRepository.lagre(listOf(arbeidsforholdOverstyring), totrinnsvurderingId)
         val overstyringer = overstyringRepository.finnAktive(totrinnsvurderingId)
-        val hentetArbeidsforholdOverstyring = overstyringer.first()
 
         assertEquals(1, overstyringer.size)
+        val hentetArbeidsforholdOverstyring = overstyringer.first()
         assertIs<OverstyrtArbeidsforhold>(hentetArbeidsforholdOverstyring)
         assertEquals(AKTØR, hentetArbeidsforholdOverstyring.aktørId)
         assertEquals(false, hentetArbeidsforholdOverstyring.ferdigstilt)
         assertEquals(VEDTAKSPERIODE, hentetArbeidsforholdOverstyring.vedtaksperiodeId)
         assertEquals(SAKSBEHANDLER_OID, hentetArbeidsforholdOverstyring.saksbehandlerOid.value)
         assertEquals(FNR, hentetArbeidsforholdOverstyring.fødselsnummer)
-        assertEquals(nyArbeidsforhold(), hentetArbeidsforholdOverstyring.overstyrteArbeidsforhold.first())
+        assertEqualsUnordered(
+            expected = listOf(nyArbeidsforhold()),
+            actual = hentetArbeidsforholdOverstyring.overstyrteArbeidsforhold,
+            uniqueness = Arbeidsforhold::organisasjonsnummer
+        )
         assertTrue(hentetArbeidsforholdOverstyring.opprettet.isBefore(LocalDateTime.now()))
         assertTrue(hentetArbeidsforholdOverstyring.harFåttTildeltId())
     }
@@ -162,9 +176,9 @@ class PgOverstyringRepositoryTest : AbstractDBIntegrationTest() {
         val minimumSykdomsgradOverstyring = nyMinimumSykdomsgradOverstyring()
         overstyringRepository.lagre(listOf(minimumSykdomsgradOverstyring), totrinnsvurderingId)
         val overstyringer = overstyringRepository.finnAktive(totrinnsvurderingId)
-        val hentetMinimumSykdomsgradOverstyring = overstyringer.first()
 
         assertEquals(1, overstyringer.size)
+        val hentetMinimumSykdomsgradOverstyring = overstyringer.first()
         assertIs<MinimumSykdomsgrad>(hentetMinimumSykdomsgradOverstyring)
         assertEquals(AKTØR, hentetMinimumSykdomsgradOverstyring.aktørId)
         assertEquals(false, hentetMinimumSykdomsgradOverstyring.ferdigstilt)
@@ -172,14 +186,21 @@ class PgOverstyringRepositoryTest : AbstractDBIntegrationTest() {
         assertEquals(SAKSBEHANDLER_OID, hentetMinimumSykdomsgradOverstyring.saksbehandlerOid.value)
         assertEquals(FNR, hentetMinimumSykdomsgradOverstyring.fødselsnummer)
         assertEquals("begrunnelse", hentetMinimumSykdomsgradOverstyring.begrunnelse)
-        assertEquals(nyMinimumSykdomsgradArbeidsgiver(), hentetMinimumSykdomsgradOverstyring.arbeidsgivere.first())
-        assertEquals(
-            nyMinimumSykdomsgradPeriode(fom = 1 jan 2018, tom = 15 jan 2018),
-            hentetMinimumSykdomsgradOverstyring.perioderVurdertOk.first()
+        assertEqualsUnordered(
+            expected = listOf(nyMinimumSykdomsgradArbeidsgiver()),
+            actual = hentetMinimumSykdomsgradOverstyring.arbeidsgivere,
+            uniqueness = MinimumSykdomsgradArbeidsgiver::organisasjonsnummer
         )
-        assertEquals(
-            nyMinimumSykdomsgradPeriode(fom = 16 jan 2018, tom = 31 jan 2018),
-            hentetMinimumSykdomsgradOverstyring.perioderVurdertIkkeOk.first()
+        assertEqualsUnordered(
+            expected = listOf(nyMinimumSykdomsgradPeriode(fom = 1 jan 2018, tom = 15 jan 2018)),
+            actual = hentetMinimumSykdomsgradOverstyring.perioderVurdertOk,
+            uniqueness = MinimumSykdomsgradPeriode::fom
+        )
+
+        assertEqualsUnordered(
+            expected = listOf(nyMinimumSykdomsgradPeriode(fom = 16 jan 2018, tom = 31 jan 2018)),
+            actual = hentetMinimumSykdomsgradOverstyring.perioderVurdertIkkeOk,
+            uniqueness = MinimumSykdomsgradPeriode::fom
         )
         assertTrue(hentetMinimumSykdomsgradOverstyring.opprettet.isBefore(LocalDateTime.now()))
         assertTrue(hentetMinimumSykdomsgradOverstyring.harFåttTildeltId())
@@ -192,9 +213,9 @@ class PgOverstyringRepositoryTest : AbstractDBIntegrationTest() {
         val skjønnsfastsattSykepengegrunnlag = nySkjønnsfastsattOverstyring()
         overstyringRepository.lagre(listOf(skjønnsfastsattSykepengegrunnlag), totrinnsvurderingId)
         val overstyringer = overstyringRepository.finnAktive(totrinnsvurderingId)
-        val hentetSkjønnsfastsattSykepengegrunnlag = overstyringer.first()
 
         assertEquals(1, overstyringer.size)
+        val hentetSkjønnsfastsattSykepengegrunnlag = overstyringer.first()
         assertIs<SkjønnsfastsattSykepengegrunnlag>(hentetSkjønnsfastsattSykepengegrunnlag)
 
         assertEquals(AKTØR, hentetSkjønnsfastsattSykepengegrunnlag.aktørId)
@@ -203,7 +224,12 @@ class PgOverstyringRepositoryTest : AbstractDBIntegrationTest() {
         assertEquals(SAKSBEHANDLER_OID, hentetSkjønnsfastsattSykepengegrunnlag.saksbehandlerOid.value)
         assertEquals(FNR, hentetSkjønnsfastsattSykepengegrunnlag.fødselsnummer)
         assertEquals(1 jan 2018, hentetSkjønnsfastsattSykepengegrunnlag.skjæringstidspunkt)
-        assertEquals(nySkjønnsfastsattArbeidsgiver(), hentetSkjønnsfastsattSykepengegrunnlag.arbeidsgivere.first())
+        assertEqualsUnordered(
+            expected = listOf(nySkjønnsfastsattArbeidsgiver()),
+            actual = hentetSkjønnsfastsattSykepengegrunnlag.arbeidsgivere,
+            uniqueness = SkjønnsfastsattArbeidsgiver::organisasjonsnummer
+        )
+
         assertTrue(hentetSkjønnsfastsattSykepengegrunnlag.opprettet.isBefore(LocalDateTime.now()))
         assertTrue(hentetSkjønnsfastsattSykepengegrunnlag.harFåttTildeltId())
     }
@@ -359,4 +385,8 @@ class PgOverstyringRepositoryTest : AbstractDBIntegrationTest() {
             """.trimMargin(),
             "totrinnsvurderingId" to totrinnsvurderingId.value,
         ) { OverstyringId(it.long("id")) }
+
+    private fun <T, R : Comparable<R>> assertEqualsUnordered(expected: List<T>, actual: List<T>, uniqueness: (T) -> R) {
+        assertEquals(expected.sortedBy(uniqueness), actual.sortedBy(uniqueness))
+    }
 }
