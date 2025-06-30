@@ -15,11 +15,6 @@ class DBModule(configuration: Configuration) {
     val dataSource: DataSource = _dataSource
     val daos = DBDaos(dataSource)
     val sessionFactory = TransactionalSessionFactory(dataSource)
-    private val flywayMigrator = FlywayMigrator(configuration)
-
-    fun migrate() {
-        flywayMigrator.migrate()
-    }
 
     fun shutdown() {
         logg.info("Forsøker å lukke datasource...")

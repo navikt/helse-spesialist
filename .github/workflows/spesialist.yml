@@ -6,6 +6,7 @@ on:
             - 'Dockerfile-db-migrations'
             - 'Dockerfile-opprydding-dev'
             - 'Dockerfile-sidegig'
+            - 'spesialist-db-migrations/**'
             - 'spesialist-opprydding-dev/**'
             - 'spesialist-sidegig/**'
             - '.github/workflows/spesialist-db-migrations.yml'
