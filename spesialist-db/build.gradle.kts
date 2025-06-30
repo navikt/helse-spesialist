@@ -7,6 +7,7 @@ dependencies {
     api(project(":spesialist-application"))
 
     implementation(libs.kotliquery)
+    implementation(libs.bundles.flyway.postgres)
     implementation(libs.postgresJdbcDriver)
     implementation(libs.hikari)
 

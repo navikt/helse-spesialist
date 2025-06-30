@@ -166,6 +166,14 @@ class RapidApp {
             )
         }
 
+        rapidsConnection.register(
+            object : RapidsConnection.StatusListener {
+                override fun onStartup(rapidsConnection: RapidsConnection) {
+                    dbModule.migrate()
+                }
+            },
+        )
+
         val modules = Modules(dbModule)
         Runtime.getRuntime().addShutdownHook(
             Thread {
