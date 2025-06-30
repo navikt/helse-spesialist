@@ -57,16 +57,12 @@ class PersonAvstemmingRiver(
 
         if (antallBehandlingerISpesialist != antallBehandlingerISpleis) {
             val melding =
-                "Antall behandlinger i Spleis ($antallBehandlingerISpleis) samsvarer ikke med antall behandlinger i Spesialist ($antallBehandlingerISpesialist). $antallSpesialstBehandlingerMedSpleisBehandlingId av $antallBehandlingerISpesialist behandlinger har spleis behandling id, av disse finnes $antallSpleisBehandlingerSomOgsåFinnesISpesialist i Spleis."
+                "Antall behandlinger i Spleis ($antallBehandlingerISpleis) samsvarer ikke med antall behandlinger i Spesialist ($antallBehandlingerISpesialist). $antallSpesialstBehandlingerMedSpleisBehandlingId av $antallBehandlingerISpesialist behandlinger har spleis behandling id, av disse finnes $antallSpleisBehandlingerSomOgsåFinnesISpesialist i Spleis"
             logg.warn(
                 melding,
             )
             sikkerlogg.warn(
                 "$melding, for person med fødselsnummer $fødselsnummer",
-            )
-        } else {
-            logg.debug(
-                "Antall behandlinger i Spleis ($antallBehandlingerISpleis) samsvarer med antall behandlinger i Spesialist ($antallBehandlingerISpesialist). $antallSpesialstBehandlingerMedSpleisBehandlingId av $antallBehandlingerISpesialist behandlinger har spleis behandling id, av disse finnes $antallSpleisBehandlingerSomOgsåFinnesISpesialist i Spleis.",
             )
         }
     }
