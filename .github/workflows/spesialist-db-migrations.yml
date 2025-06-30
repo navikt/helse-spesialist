@@ -5,9 +5,11 @@ on:
     branches:
       - main
     paths:
+      - 'Dockerfile-db-migrations'
       - 'spesialist-db-migrations/**'
       - 'deploy/dev-db-migrations.yml'
       - 'deploy/prod-db-migrations.yml'
+      - '.dockerignore'
 
 permissions:
   contents: read
