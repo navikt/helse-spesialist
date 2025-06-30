@@ -7,7 +7,6 @@ on:
     paths:
       - 'Dockerfile-opprydding-dev'
       - 'spesialist-opprydding-dev/**'
-      - 'spesialist-felles/**'
       - 'build.gradle.kts'
       - 'gradle/libs.versions.toml'
       - '.github/workflows/spesialist-opprydding-dev.yml'

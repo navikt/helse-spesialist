@@ -7,7 +7,6 @@ on:
     paths:
       - 'Dockerfile-sidegig'
       - 'spesialist-sidegig/**'
-      - 'spesialist-db-migrations/**'
       - 'build.gradle.kts'
       - 'gradle/libs.versions.toml'
       - '.github/workflows/spesialist-sidegig.yml'

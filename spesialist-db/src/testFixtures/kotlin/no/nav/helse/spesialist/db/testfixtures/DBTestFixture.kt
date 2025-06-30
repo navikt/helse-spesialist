@@ -3,15 +3,21 @@ package no.nav.helse.spesialist.db.testfixtures
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.spesialist.db.DBModule
+import no.nav.helse.spesialist.db.migrations.FlywayMigrator
 import org.intellij.lang.annotations.Language
 
 open class ModuleIsolatedDBTestFixture(moduleLabel: String) {
     val database = TestcontainersDatabase(moduleLabel)
 
     val module = DBModule(database.dbModuleConfiguration)
+    private val flywayMigrator = FlywayMigrator(
+        jdbcUrl = database.dbModuleConfiguration.jdbcUrl,
+        username = database.dbModuleConfiguration.username,
+        password = database.dbModuleConfiguration.password
+    )
 
     init {
-        module.migrate()
+        flywayMigrator.migrate()
         truncate()
     }
 

@@ -1,0 +1,35 @@
+name: Spesialist-DB-migrations
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'spesialist-db-migrations/**'
+      - 'deploy/dev-db-migrations.yml'
+      - 'deploy/prod-db-migrations.yml'
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  build:
+    uses: navikt/helse-spesialist/.github/workflows/build-image.yml@main
+    with:
+      gradle_command: :spesialist-db-migrations:build
+      dockerfile: Dockerfile-db-migrations
+      image_suffix: db-migrations
+    secrets: inherit
+
+  deployDev:
+    name: deploy to dev
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: nais/deploy/actions/deploy@v2
+        env:
+          CLUSTER: dev-gcp
+          RESOURCE: deploy/dev-db-migrations.yml
+          IMAGE: ${{ needs.build.outputs.image }}

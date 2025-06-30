@@ -3,17 +3,22 @@ name: Spesialist
 on:
     push:
         paths-ignore:
+            - 'Dockerfile-db-migrations'
             - 'Dockerfile-opprydding-dev'
             - 'Dockerfile-sidegig'
+            - 'spesialist-db-migrations/**'
             - 'spesialist-opprydding-dev/**'
             - 'spesialist-sidegig/**'
+            - '.github/workflows/spesialist-db-migrations.yml'
             - '.github/workflows/spesialist-opprydding-dev.yml'
             - '.github/workflows/spesialist-sidegig.yml'
             - '.github/workflows/deploy_specific_commit_to_dev.yml'
             - '.github/workflows/alerts.yml'
             - '.github/workflows/codeql.yml'
             - '.github/workflows/pr.yml'
+            - 'deploy/dev-db-migrations.yml'
             - 'deploy/dev-opprydding.yml'
+            - 'deploy/prod-db-migrations.yml'
             - 'deploy/prod-sidegig.yml'
             - 'deploy/alerts/**'
         branches:
