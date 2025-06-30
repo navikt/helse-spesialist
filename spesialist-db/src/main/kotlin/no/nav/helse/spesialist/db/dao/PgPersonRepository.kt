@@ -23,7 +23,7 @@ class PgPersonRepository(
         fødselsnummer: String,
         personScope: Person.() -> Unit,
     ) {
-        val (person, dtoFør) =
+        val person =
             hentPerson(fødselsnummer) ?: run {
                 "Behandler ikke melding for ukjent person".let { melding ->
                     logg.info(melding)
@@ -31,6 +31,7 @@ class PgPersonRepository(
                 }
                 return
             }
+        val dtoFør = person.toDto()
         personScope(person)
         val dtoEtter = person.toDto()
         if (dtoFør != dtoEtter) lagrePerson(dtoFør, dtoEtter)
@@ -51,27 +52,19 @@ class PgPersonRepository(
         return tilLagring
     }
 
-    private fun hentPerson(fødselsnummer: String): Pair<Person, PersonDto>? {
+    private fun hentPerson(fødselsnummer: String): Person? {
         val minimalPerson = personDao.finnMinimalPerson(fødselsnummer) ?: return null
 
-        val personDto =
-            PersonDto(
-                aktørId = minimalPerson.aktørId,
-                fødselsnummer = minimalPerson.fødselsnummer,
-                vedtaksperioder = vedtaksperiodeRepository.finnVedtaksperioder(fødselsnummer),
-                skjønnsfastsatteSykepengegrunnlag =
-                    sykefraværstilfelleDao.finnSkjønnsfastsatteSykepengegrunnlag(
-                        fødselsnummer,
-                    ),
-                avviksvurderinger = avviksvurderingRepository.finnAvviksvurderinger(fødselsnummer),
-            )
         return Person.gjenopprett(
-            aktørId = personDto.aktørId,
-            fødselsnummer = personDto.fødselsnummer,
-            vedtaksperioder = personDto.vedtaksperioder,
-            skjønnsfastsattSykepengegrunnlag = personDto.skjønnsfastsatteSykepengegrunnlag,
-            avviksvurderinger = personDto.avviksvurderinger,
-        ) to personDto
+            aktørId = minimalPerson.aktørId,
+            fødselsnummer = minimalPerson.fødselsnummer,
+            vedtaksperioder = vedtaksperiodeRepository.finnVedtaksperioder(fødselsnummer),
+            skjønnsfastsattSykepengegrunnlag =
+                sykefraværstilfelleDao.finnSkjønnsfastsatteSykepengegrunnlag(
+                    fødselsnummer,
+                ),
+            avviksvurderinger = avviksvurderingRepository.finnAvviksvurderinger(fødselsnummer),
+        )
     }
 
     private fun lagrePerson(
