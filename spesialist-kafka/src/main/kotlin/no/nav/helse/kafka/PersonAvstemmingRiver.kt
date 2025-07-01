@@ -10,6 +10,7 @@ import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.sikkerlogg
+import java.util.UUID
 
 class PersonAvstemmingRiver(
     private val mediator: MeldingMediator,
@@ -20,10 +21,9 @@ class PersonAvstemmingRiver(
         }
     }
 
-    override fun validations() =
-        River.PacketValidation {
-            it.requireKey("@id", "fødselsnummer", "arbeidsgivere")
-        }
+    override fun validations() = River.PacketValidation {
+        it.requireKey("@id", "fødselsnummer", "arbeidsgivere")
+    }
 
     override fun onPacket(
         packet: JsonMessage,
@@ -37,14 +37,7 @@ class PersonAvstemmingRiver(
         val fødselsnummer = packet["fødselsnummer"].asText()
         val spesialistBehandlinger = mediator.finnBehandlingerFor(fødselsnummer)
 
-        val spleisBehandlinger =
-            packet["arbeidsgivere"].flatMap { arbeidsgiverNode ->
-                arbeidsgiverNode["vedtaksperioder"].flatMap { vedtaksperiode ->
-                    vedtaksperiode["behandlinger"].map { behandlingNode ->
-                        behandlingNode["behandlingId"].asUUID()
-                    }
-                }
-            }
+        val spleisBehandlinger = pakkUtBehandlinger(packet)
 
         val spesialistBehandlingerMedSpleisBehandlingId =
             spesialistBehandlinger.filter { it.spleisBehandlingId != null }
@@ -66,4 +59,17 @@ class PersonAvstemmingRiver(
             )
         }
     }
+
+    private fun pakkUtBehandlinger(packet: JsonMessage): List<UUID> =
+        packet["arbeidsgivere"].flatMap { arbeidsgiverNode ->
+            arbeidsgiverNode["vedtaksperioder"].flatMap { vedtaksperiode ->
+                vedtaksperiode["behandlinger"].map { behandlingNode ->
+                    behandlingNode["behandlingId"].asUUID()
+                }
+            } + arbeidsgiverNode["forkastedeVedtaksperioder"].flatMap { vedtaksperiode ->
+                vedtaksperiode["behandlinger"].map { behandlingNode ->
+                    behandlingNode["behandlingId"].asUUID()
+                }
+            }
+        }
 }

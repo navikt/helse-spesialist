@@ -51,7 +51,25 @@ class PersonAvstemmingRiverTest {
                             ]
                         }
                     ],
-                    "forkastedeVedtaksperioder": [],
+                    "forkastedeVedtaksperioder": [
+                        {
+                            "id": "84eb578a-a959-44b7-a424-123456789012",
+                            "tilstand": "AVVENTER_GODKJENNING",
+                            "opprettet": "2025-03-14T14:22:05.788122774",
+                            "oppdatert": "2025-05-07T10:42:42.843098859",
+                            "fom": "2024-11-30",
+                            "tom": "2024-12-31",
+                            "skjæringstidspunkt": "2024-11-30",
+                            "utbetalinger": [
+                                "2c533d1f-1ffd-4b27-89f4-6024d95236a2"
+                            ],
+                            "behandlinger": [
+                                {
+                                    "behandlingId": "2c888d1f-1ffd-4b27-89f4-123456789012",
+                                    "behandlingOpprettet": "2025-06-07T10:42:42.8308062"
+                                }
+                            ]
+                        }],
                     "utbetalinger": [
                         {
                             "id": "a157dc31-0561-45c2-af47-acbee6755417",
