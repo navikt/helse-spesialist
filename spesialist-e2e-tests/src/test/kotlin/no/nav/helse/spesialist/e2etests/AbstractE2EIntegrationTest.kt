@@ -8,6 +8,7 @@ import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.e2etests.Meldingsbygger.byggUtbetalingEndret
 import no.nav.helse.spesialist.e2etests.behovløserstubs.AbstractBehovLøser
 import no.nav.helse.spesialist.e2etests.behovløserstubs.AvviksvurderingBehovLøser
+import no.nav.helse.spesialist.e2etests.behovløserstubs.HentInfotrygdutbetalingerBehovLøser
 import no.nav.helse.spesialist.e2etests.behovløserstubs.HentPersoninfoV2BehovLøser
 import no.nav.helse.spesialist.e2etests.behovløserstubs.RisikovurderingBehovLøser
 import no.nav.helse.spesialist.e2etests.behovløserstubs.ÅpneOppgaverBehovLøser
@@ -54,6 +55,7 @@ abstract class AbstractE2EIntegrationTest {
     protected val hentPersoninfoV2BehovLøser = finnLøserForDenneTesten<HentPersoninfoV2BehovLøser>()
     protected val risikovurderingBehovLøser = finnLøserForDenneTesten<RisikovurderingBehovLøser>()
     protected val åpneOppgaverBehovLøser = finnLøserForDenneTesten<ÅpneOppgaverBehovLøser>()
+    protected val hentInfotrygdutbetalingerBehovLøser = finnLøserForDenneTesten<HentInfotrygdutbetalingerBehovLøser>()
 
     private inline fun <reified T : AbstractBehovLøser> finnLøserForDenneTesten() =
         behovLøserStub.finnLøser<T>(testContext.person.fødselsnummer)
@@ -63,6 +65,8 @@ abstract class AbstractE2EIntegrationTest {
     }
 
     protected fun fødselsnummer() = testContext.person.fødselsnummer
+
+    protected fun organisasjonsnummer() = testContext.arbeidsgiver.organisasjonsnummer
 
     protected fun meldinger() = testRapid.meldingslogg(testContext.person.fødselsnummer)
 

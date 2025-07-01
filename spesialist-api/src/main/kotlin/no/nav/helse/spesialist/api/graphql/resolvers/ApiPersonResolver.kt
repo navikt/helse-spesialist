@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.graphql.resolvers
 
-import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.helse.FeatureToggles
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.db.VedtakBegrunnelseDao
@@ -159,7 +158,20 @@ data class ApiPersonResolver(
     override fun infotrygdutbetalinger(): List<ApiInfotrygdutbetaling>? =
         personApiDao
             .finnInfotrygdutbetalinger(snapshot.fodselsnummer)
-            ?.let { objectMapper.readValue(it) }
+            ?.let { jsonString ->
+                objectMapper.readTree(jsonString)
+                    .filterNot { it["typetekst"].asText().lowercase() == "sanksjon" }
+                    .map {
+                        ApiInfotrygdutbetaling(
+                            fom = it["fom"].asText(),
+                            tom = it["tom"].asText(),
+                            grad = it["grad"].asText(),
+                            dagsats = it["dagsats"].asDouble(),
+                            typetekst = it["typetekst"].asText(),
+                            organisasjonsnummer = it["organisasjonsnummer"].asText(),
+                        )
+                    }
+            }
 
     override fun vilkarsgrunnlagV2(): List<ApiVilkårsgrunnlagV2> {
         return sessionFactory.transactionalSessionScope { sessionContext ->
