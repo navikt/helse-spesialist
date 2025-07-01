@@ -14,7 +14,6 @@ import no.nav.helse.db.api.VarselDbDto
 import no.nav.helse.db.api.VedtaksperiodeDbDto.Companion.avvisVarsler
 import no.nav.helse.db.api.VedtaksperiodeDbDto.Companion.godkjennVarsler
 import no.nav.helse.db.api.VedtaksperiodeDbDto.Companion.harAktiveVarsler
-import no.nav.helse.db.api.VedtaksperiodeDbDto.Companion.harTagOverlapperMedInfotrygd
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.mediator.overstyring.Saksbehandlingsmelder
@@ -248,9 +247,12 @@ class SaksbehandlerMediator(
         legacySaksbehandler: LegacySaksbehandler,
     ): VedtakResultat {
         val perioderTilBehandling = behandlingRepository.perioderTilBehandling(oppgavereferanse)
+        val periodeTilGodkjenning = behandlingRepository.periodeTilGodkjenning(oppgavereferanse)
         return when {
             perioderTilBehandling.harAktiveVarsler() -> VedtakResultat.Feil.HarAktiveVarsler(oppgavereferanse)
-            perioderTilBehandling.harTagOverlapperMedInfotrygd() -> VedtakResultat.Feil.OverlapperMedInfotrygd(legacySaksbehandler.ident())
+            periodeTilGodkjenning.overlapperMedInfotrygd() ->
+                VedtakResultat.Feil.OverlapperMedInfotrygd(legacySaksbehandler.ident())
+
             else -> {
                 perioderTilBehandling.godkjennVarsler(
                     fødselsnummer = fødselsnummer,
@@ -643,7 +645,7 @@ class SaksbehandlerMediator(
 
             try {
                 påVent(ApiPaVentRequest.ApiFjernPaVentUtenHistorikkinnslag(oppgavereferanse), saksbehandlerFraApi)
-            } catch (modellfeil: no.nav.helse.spesialist.api.feilhåndtering.Modellfeil) {
+            } catch (modellfeil: ApiModellfeil) {
                 return@transactionalSessionScope SendTilGodkjenningResult.Feil.KunneIkkeFjerneFraPåVent(modellfeil)
             } catch (e: Exception) {
                 return@transactionalSessionScope SendTilGodkjenningResult.Feil.UventetFeilVedFjernFraPåVent(e)
@@ -702,7 +704,7 @@ class SaksbehandlerMediator(
         private val log = LoggerFactory.getLogger(SaksbehandlerMediator::class.java.simpleName)
     }
 
-    private fun Modellfeil.tilApiversjon(): no.nav.helse.spesialist.api.feilhåndtering.Modellfeil =
+    private fun Modellfeil.tilApiversjon(): ApiModellfeil =
         when (this) {
             is no.nav.helse.modell.OppgaveIkkeTildelt -> OppgaveIkkeTildelt(oppgaveId)
             is OppgaveTildeltNoenAndre -> {

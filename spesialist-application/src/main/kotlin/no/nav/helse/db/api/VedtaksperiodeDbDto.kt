@@ -30,7 +30,7 @@ data class VedtaksperiodeDbDto(
         return harAktiveVarsler
     }
 
-    private fun overlapperMedInfotrygd(): Boolean {
+    fun overlapperMedInfotrygd(): Boolean {
         if (tags.none { it == "OverlapperMedInfotrygd" }) return false
 
         logg.info("Vedtaksperiode med fom=$fom, tom=$tom har tag 'OverlapperMedInfotrygd'")
@@ -40,10 +40,6 @@ data class VedtaksperiodeDbDto(
     companion object {
         fun Set<VedtaksperiodeDbDto>.harAktiveVarsler(): Boolean {
             return any { it.harAktiveVarsler() }
-        }
-
-        fun Set<VedtaksperiodeDbDto>.harTagOverlapperMedInfotrygd(): Boolean {
-            return any { it.overlapperMedInfotrygd() }
         }
 
         fun Set<VedtaksperiodeDbDto>.godkjennVarsler(
