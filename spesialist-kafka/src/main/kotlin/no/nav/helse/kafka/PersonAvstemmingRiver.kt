@@ -2,6 +2,7 @@ package no.nav.helse.kafka
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
+import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import io.micrometer.core.instrument.MeterRegistry
@@ -10,6 +11,8 @@ import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.sikkerlogg
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 class PersonAvstemmingRiver(
@@ -37,39 +40,31 @@ class PersonAvstemmingRiver(
         val fødselsnummer = packet["fødselsnummer"].asText()
         val spesialistBehandlinger = mediator.finnBehandlingerFor(fødselsnummer)
 
-        val spleisBehandlinger = pakkUtBehandlinger(packet)
+        val spleisBehandlinger = pakkUtBehandlinger(packet).filter { it.behandlingOpprettet.isAfter(LocalDate.of(2024, 5, 1).atStartOfDay()) }.map{ it.behandlingId}
+        val felles = spleisBehandlinger.intersect(spesialistBehandlinger.mapNotNull { it.spleisBehandlingId })
 
-        val spesialistBehandlingerMedSpleisBehandlingId =
-            spesialistBehandlinger.filter { it.spleisBehandlingId != null }
-
+        val antallBehandlingerISpesialist = felles.size
         val antallBehandlingerISpleis = spleisBehandlinger.size
-        val antallBehandlingerISpesialist = spesialistBehandlinger.size
-        val antallSpesialstBehandlingerMedSpleisBehandlingId = spesialistBehandlingerMedSpleisBehandlingId.size
-        val antallSpleisBehandlingerSomOgsåFinnesISpesialist =
-            spesialistBehandlingerMedSpleisBehandlingId.filter { spleisBehandlinger.contains(it.spleisBehandlingId) }.size
 
         if (antallBehandlingerISpesialist != antallBehandlingerISpleis) {
-            val melding =
-                "Antall behandlinger i Spleis ($antallBehandlingerISpleis) samsvarer ikke med antall behandlinger i Spesialist ($antallBehandlingerISpesialist). $antallSpesialstBehandlingerMedSpleisBehandlingId av $antallBehandlingerISpesialist behandlinger har spleis behandling id, av disse finnes $antallSpleisBehandlingerSomOgsåFinnesISpesialist i Spleis"
-            logg.warn(
-                melding,
-            )
-            sikkerlogg.warn(
-                "$melding, for person med fødselsnummer $fødselsnummer",
-            )
+            val melding = "Antall behandlinger i Spleis ($antallBehandlingerISpleis) samsvarer ikke med antall behandlinger i Spesialist ($antallBehandlingerISpesialist)"
+            logg.warn(melding)
+            sikkerlogg.warn("$melding for person med fødselsnummer $fødselsnummer")
         }
     }
 
-    private fun pakkUtBehandlinger(packet: JsonMessage): List<UUID> =
+    private fun pakkUtBehandlinger(packet: JsonMessage): List<SpleisBehandling> =
         packet["arbeidsgivere"].flatMap { arbeidsgiverNode ->
             arbeidsgiverNode["vedtaksperioder"].flatMap { vedtaksperiode ->
                 vedtaksperiode["behandlinger"].map { behandlingNode ->
-                    behandlingNode["behandlingId"].asUUID()
+
+                    SpleisBehandling(behandlingNode["behandlingId"].asUUID(), behandlingNode["behandlingOpprettet"].asLocalDateTime())
                 }
             } + arbeidsgiverNode["forkastedeVedtaksperioder"].flatMap { vedtaksperiode ->
                 vedtaksperiode["behandlinger"].map { behandlingNode ->
-                    behandlingNode["behandlingId"].asUUID()
+                    SpleisBehandling(behandlingNode["behandlingId"].asUUID(), behandlingNode["behandlingOpprettet"].asLocalDateTime())
                 }
             }
         }
+    data class SpleisBehandling(val behandlingId: UUID, val behandlingOpprettet: LocalDateTime)
 }
