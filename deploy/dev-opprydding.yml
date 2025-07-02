@@ -51,11 +51,16 @@ spec:
     - name: KAFKA_RESET_POLICY
       value: latest
     - name: DATABASE_REGION
-      value: "europe-north1"
+      value: europe-north1
     - name: DATABASE_INSTANCE
-      value: "spesialist"
+      value: spesialist
   observability:
     logging:
       destinations:
         - id: elastic
         - id: loki
+  accessPolicy:
+    outbound:
+      rules:
+        - application: logging
+          namespace: nais-system

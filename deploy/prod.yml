@@ -77,6 +77,8 @@ spec:
         - application: digdir-krr-proxy
           namespace: team-rocket
           cluster: prod-gcp
+        - application: logging
+          namespace: nais-system
       external:
         - host: tbd-unleash-api.nav.cloud.nais.io
   gcp:
