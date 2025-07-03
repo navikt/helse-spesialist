@@ -1,0 +1,27 @@
+package no.nav.helse.spesialist.e2etests.tests
+
+import no.nav.helse.spesialist.e2etests.AbstractE2EIntegrationTest
+import org.junit.jupiter.api.Test
+
+class GodkjenningsbehovE2ETest : AbstractE2EIntegrationTest() {
+
+    @Test
+    fun `kan fortsatt fatte vedtak ved godkjenningsbehov med endret skjæringstidspunkt`() {
+        risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
+        søknadOgGodkjenningbehovKommerInn()
+
+        val vedtaksperiode = førsteVedtaksperiode()
+        vedtaksperiode.fom = vedtaksperiode.fom.minusDays(1)
+        vedtaksperiode.skjæringstidspunkt = vedtaksperiode.fom
+
+        spleisSenderGodkjenningsbehov(vedtaksperiode)
+
+        medPersonISpeil {
+            saksbehandlerTildelerSegSaken() // Må til for å "opprette" saksbehandler
+            saksbehandlerGodkjennerAlleVarsler()
+            saksbehandlerFatterVedtak()
+        }
+
+        assertBehandlingTilstand("VedtakFattet")
+    }
+}

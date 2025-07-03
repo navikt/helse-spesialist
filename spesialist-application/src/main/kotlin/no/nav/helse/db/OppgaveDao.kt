@@ -22,6 +22,8 @@ interface OppgaveDao {
 
     fun invaliderOppgaveFor(fødselsnummer: String)
 
+    fun invaliderOppgave(oppgaveId: Long)
+
     fun reserverNesteId(): Long
 
     fun venterPåSaksbehandler(oppgaveId: Long): Boolean

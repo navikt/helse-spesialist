@@ -37,16 +37,21 @@ class PgOppgaveRepository private constructor(queryRunner: QueryRunner) : QueryR
         return finnOppgave(id, tilgangskontroll)
     }
 
-    override fun finnSisteOppgaveTilstandForUtbetaling(utbetalingId: UUID): Oppgave.Tilstand? =
+    override fun finnSisteOppgaveForUtbetaling(utbetalingId: UUID): OppgaveRepository.OppgaveTilstandStatusOgGodkjenningsbehov? =
         asSQL(
             """
-            SELECT status FROM oppgave
+            SELECT id, status, hendelse_id_godkjenningsbehov, utbetaling_id FROM oppgave
             WHERE utbetaling_id = :utbetaling_id
             ORDER BY id DESC LIMIT 1
         """,
             "utbetaling_id" to utbetalingId,
         ).singleOrNull { row ->
-            tilstand(row.string("status"))
+            OppgaveRepository.OppgaveTilstandStatusOgGodkjenningsbehov(
+                id = row.long("id"),
+                tilstand = tilstand(row.string("status")),
+                godkjenningsbehovId = row.uuid("hendelse_id_godkjenningsbehov"),
+                utbetalingId = row.uuid("utbetaling_id"),
+            )
         }
 
     private fun lagreOppgave(oppgave: Oppgave) {

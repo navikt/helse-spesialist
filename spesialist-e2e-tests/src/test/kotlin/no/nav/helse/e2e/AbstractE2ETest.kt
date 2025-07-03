@@ -68,6 +68,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     val AKTØR = testperson.aktørId
     val VEDTAKSPERIODE_ID = testperson.vedtaksperiodeId1
     val UTBETALING_ID = testperson.utbetalingId1
+    private val vilkårsgrunnlagId = UUID.randomUUID()
     private val behandlinger = mutableMapOf<UUID, MutableList<UUID>>()
     protected val godkjenningsbehovTestdata
         get() =
@@ -78,6 +79,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 vedtaksperiodeId = VEDTAKSPERIODE_ID,
                 utbetalingId = UTBETALING_ID,
                 spleisBehandlingId = behandlinger.getValue(VEDTAKSPERIODE_ID).last(),
+                vilkårsgrunnlagId = vilkårsgrunnlagId,
             )
     private val avviksvurderingTestdata = AvviksvurderingTestdata()
     lateinit var utbetalingId: UUID

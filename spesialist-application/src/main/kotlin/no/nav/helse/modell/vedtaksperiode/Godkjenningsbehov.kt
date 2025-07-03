@@ -6,6 +6,7 @@ import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.AvviksvurderingRepository
 import no.nav.helse.db.CommandContextDao
 import no.nav.helse.db.EgenAnsattDao
+import no.nav.helse.db.MeldingDao
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PeriodehistorikkDao
@@ -253,6 +254,7 @@ internal class GodkjenningsbehovCommand(
     førsteKjenteDagFinner: () -> LocalDate,
     automatisering: Automatisering,
     vedtakDao: VedtakDao,
+    meldingDao: MeldingDao,
     commandContextDao: CommandContextDao,
     personDao: PersonDao,
     arbeidsgiverRepository: ArbeidsgiverRepository,
@@ -287,6 +289,7 @@ internal class GodkjenningsbehovCommand(
                 oppgaveRepository = oppgaveRepository,
                 oppgaveDao = oppgaveDao,
                 vedtakDao = vedtakDao,
+                meldingDao = meldingDao,
             ),
             OpprettKoblingTilHendelseCommand(
                 commandData = behovData,

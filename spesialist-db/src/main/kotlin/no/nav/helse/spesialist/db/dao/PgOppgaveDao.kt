@@ -131,6 +131,13 @@ class PgOppgaveDao internal constructor(
         ).update()
     }
 
+    override fun invaliderOppgave(oppgaveId: Long) {
+        asSQL(
+            "UPDATE oppgave SET status = 'Invalidert' WHERE id = :id",
+            "id" to oppgaveId,
+        ).update()
+    }
+
     override fun reserverNesteId(): Long =
         asSQL(
             """

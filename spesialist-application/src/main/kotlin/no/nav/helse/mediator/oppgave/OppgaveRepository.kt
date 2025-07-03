@@ -14,5 +14,12 @@ interface OppgaveRepository {
 
     /* TODO: Helst bør vi bruke finn(), men Oppgave er ikke et aggregat ennå,
         og metoden trenger derfor eksterne avhengigheter vi ikke vil ha (Tilgangskontroll) */
-    fun finnSisteOppgaveTilstandForUtbetaling(utbetalingId: UUID): Oppgave.Tilstand?
+    fun finnSisteOppgaveForUtbetaling(utbetalingId: UUID): OppgaveTilstandStatusOgGodkjenningsbehov?
+
+    data class OppgaveTilstandStatusOgGodkjenningsbehov(
+        val id: Long,
+        val tilstand: Oppgave.Tilstand,
+        val godkjenningsbehovId: UUID,
+        val utbetalingId: UUID,
+    )
 }

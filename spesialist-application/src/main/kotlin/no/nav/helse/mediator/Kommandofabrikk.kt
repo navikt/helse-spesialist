@@ -318,6 +318,7 @@ class Kommandofabrikk(
             førsteKjenteDagFinner = førsteKjenteDagFinner,
             automatisering = transaksjonellAutomatisering(sessionContext),
             vedtakDao = sessionContext.vedtakDao,
+            meldingDao = sessionContext.meldingDao,
             commandContextDao = sessionContext.commandContextDao,
             personDao = sessionContext.personDao,
             arbeidsgiverRepository = sessionContext.arbeidsgiverRepository,

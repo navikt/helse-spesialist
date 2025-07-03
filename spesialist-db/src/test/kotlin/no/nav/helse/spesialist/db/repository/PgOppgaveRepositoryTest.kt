@@ -219,7 +219,7 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
         )
         repository.lagre(oppgave)
 
-        val oppgaveTilstand = repository.finnSisteOppgaveTilstandForUtbetaling(utbetalingId)
+        val oppgaveTilstand = repository.finnSisteOppgaveForUtbetaling(utbetalingId)?.tilstand
         assertEquals(Oppgave.AvventerSaksbehandler::class, oppgaveTilstand?.let { it::class })
     }
 
@@ -237,7 +237,7 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
         oppgave.avventerSystem(saksbehandler.ident(), saksbehandler.oid)
         repository.lagre(oppgave)
 
-        val oppgaveTilstand = repository.finnSisteOppgaveTilstandForUtbetaling(utbetalingId)
+        val oppgaveTilstand = repository.finnSisteOppgaveForUtbetaling(utbetalingId)?.tilstand
         assertEquals(Oppgave.AvventerSystem::class, oppgaveTilstand?.let { it::class })
     }
 
@@ -256,7 +256,7 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
         oppgave.ferdigstill()
         repository.lagre(oppgave)
 
-        val oppgaveTilstand = repository.finnSisteOppgaveTilstandForUtbetaling(utbetalingId)
+        val oppgaveTilstand = repository.finnSisteOppgaveForUtbetaling(utbetalingId)?.tilstand
         assertEquals(Oppgave.Ferdigstilt::class, oppgaveTilstand?.let { it::class })
     }
 
@@ -275,7 +275,7 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
         oppgave.avbryt()
         repository.lagre(oppgave)
 
-        val oppgaveTilstand = repository.finnSisteOppgaveTilstandForUtbetaling(utbetalingId)
+        val oppgaveTilstand = repository.finnSisteOppgaveForUtbetaling(utbetalingId)?.tilstand
         assertEquals(Oppgave.Invalidert::class, oppgaveTilstand?.let { it::class })
     }
 
@@ -308,13 +308,13 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
         oppgave.ferdigstill()
         repository.lagre(oppgave)
 
-        val oppgaveTilstand = repository.finnSisteOppgaveTilstandForUtbetaling(utbetalingId)
+        val oppgaveTilstand = repository.finnSisteOppgaveForUtbetaling(utbetalingId)?.tilstand
         assertEquals(Oppgave.Ferdigstilt::class, oppgaveTilstand?.let { it::class })
     }
 
     @Test
     fun `gir null som tilstand når det ikke finnes noen oppgave for utbetalingen`() {
-        val oppgaveTilstand = repository.finnSisteOppgaveTilstandForUtbetaling(utbetalingId)
+        val oppgaveTilstand = repository.finnSisteOppgaveForUtbetaling(utbetalingId)
         assertEquals(null, oppgaveTilstand?.let { it::class })
     }
 }
