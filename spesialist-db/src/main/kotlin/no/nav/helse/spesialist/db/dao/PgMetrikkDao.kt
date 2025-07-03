@@ -38,10 +38,10 @@ class PgMetrikkDao internal constructor(private val session: Session) : MetrikkD
         val gikkTilManuell =
             asSQL(
                 """
-                select distinct 1
-                from oppgave o
+                select 1 from oppgave o
                 join command_context cc on o.hendelse_id_godkjenningsbehov = cc.hendelse_id
                 where cc.context_id = :contextId
+                limit 1
                 """,
                 "contextId" to contextId,
             ).single(session) { true } ?: false
