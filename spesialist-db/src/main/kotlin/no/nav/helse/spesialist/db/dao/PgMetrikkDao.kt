@@ -26,10 +26,10 @@ class PgMetrikkDao internal constructor(private val session: Session) : MetrikkD
         val bleAutomatiskGodkjent =
             asSQL(
                 """
-            select distinct automatisert from automatisering
-            join command_context cc on automatisering.hendelse_ref = cc.hendelse_id
-            where context_id =  :contextId
-            """,
+                select distinct automatisert from automatisering
+                join command_context cc on automatisering.hendelse_ref = cc.hendelse_id
+                where context_id =  :contextId
+                """,
                 "contextId" to contextId,
             ).single(session) { row -> row.boolean("automatisert") } ?: false
 
@@ -38,11 +38,11 @@ class PgMetrikkDao internal constructor(private val session: Session) : MetrikkD
         val gikkTilManuell =
             asSQL(
                 """
-            select distinct 1
-            from oppgave o
-            join command_context cc on o.hendelse_id_godkjenningsbehov = cc.hendelse_id
-            where cc.context_id = :contextId
-            """,
+                select distinct 1
+                from oppgave o
+                join command_context cc on o.hendelse_id_godkjenningsbehov = cc.hendelse_id
+                where cc.context_id = :contextId
+                """,
                 "contextId" to contextId,
             ).single(session) { true } ?: false
 
