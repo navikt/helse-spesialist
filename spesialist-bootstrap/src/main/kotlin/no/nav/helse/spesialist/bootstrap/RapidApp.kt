@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.bootstrap
 
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.ktor.server.application.Application
+import io.ktor.server.application.ApplicationStopped
 import io.micrometer.core.instrument.Metrics
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
@@ -160,10 +161,14 @@ class RapidApp {
 
         kafkaModule.kobleOppRivers()
 
+        val modules = Modules(dbModule)
         ktorSetupCallback = { ktorApplication ->
             apiModule.setUpApi(
                 application = ktorApplication,
             )
+            ktorApplication.monitor.subscribe(ApplicationStopped) {
+                modules.dbModule.shutdown()
+            }
         }
 
         rapidsConnection.register(
@@ -171,13 +176,6 @@ class RapidApp {
                 override fun onStartup(rapidsConnection: RapidsConnection) {
                     dbModule.migrate()
                 }
-            },
-        )
-
-        val modules = Modules(dbModule)
-        Runtime.getRuntime().addShutdownHook(
-            Thread {
-                modules.dbModule.shutdown()
             },
         )
 
