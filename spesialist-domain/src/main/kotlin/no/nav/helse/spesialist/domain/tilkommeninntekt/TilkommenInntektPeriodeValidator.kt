@@ -11,10 +11,9 @@ object TilkommenInntektPeriodeValidator {
         andreTilkomneInntekter: List<TilkommenInntekt>,
         vedtaksperioder: List<VedtaksperiodeDto>,
     ) {
-        verifiserAtErInnenforEtSykefraværstilfelle(
-            periode = periode,
-            vedtaksperioder = vedtaksperioder,
-        )
+        if (!erInnenforEtSykefraværstilfelle(periode = periode, vedtaksperioder = vedtaksperioder)) {
+            error("Kan ikke legge til tilkommen inntekt som går utenfor et sykefraværstilfelle")
+        }
         validerAtNyPeriodeIkkeOverlapperEksisterendePerioder(
             periode = periode,
             organisasjonsnummer = organisasjonsnummer,
@@ -34,25 +33,13 @@ object TilkommenInntektPeriodeValidator {
         }
     }
 
-    fun verifiserAtErInnenforEtSykefraværstilfelle(
+    fun erInnenforEtSykefraværstilfelle(
         periode: Periode,
         vedtaksperioder: List<VedtaksperiodeDto>,
-    ) {
-        val sykefraværstilfellePerioder =
-            vedtaksperioder.tilSykefraværstillfellePerioder()
-                // .map { it.utenFørsteDag() }
-                .filterNot { it.datoer().isEmpty() }
+    ) = periode erInnenforEnAv vedtaksperioder.tilSykefraværstillfellePerioder().filterNot { it.datoer().isEmpty() }
 
-        if (!(periode erInnenforEnAv sykefraværstilfellePerioder)) {
-            error("Kan ikke legge til tilkommen inntekt som går utenfor et sykefraværstilfelle")
-        }
-    }
-
-    private fun List<VedtaksperiodeDto>.tilSykefraværstillfellePerioder(): List<Periode> {
-        return map { it.behandlinger.last() }
+    private fun List<VedtaksperiodeDto>.tilSykefraværstillfellePerioder(): List<Periode> =
+        map { it.behandlinger.last() }
             .groupBy(BehandlingDto::skjæringstidspunkt, BehandlingDto::tom)
             .map { (skjæringstidspunkt, listeAvTom) -> Periode(fom = skjæringstidspunkt, tom = listeAvTom.max()) }
-    }
-
-    private fun Periode.utenFørsteDag() = copy(fom = fom.plusDays(1))
 }

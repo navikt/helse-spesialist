@@ -5,13 +5,17 @@ import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
 import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
 import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
+import no.nav.helse.spesialist.domain.testfixtures.des
+import no.nav.helse.spesialist.domain.testfixtures.feb
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlerident
-import org.junit.jupiter.api.assertDoesNotThrow
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.util.UUID
 import kotlin.random.Random
 import kotlin.test.Test
@@ -40,34 +44,79 @@ class TilkommenInntektPeriodeValidatorTest {
             )
         }
     }
+
     @Test
-    fun `kan midlertidig legge til periode som har samme dato som skjæringstidspunkt`() {
+    fun `periode som spenner hele fom og tom er innenfor sykefraværstilfellet`() {
+        // Given:
+        val periode = 1 jan 2018 tilOgMed (31 jan 2018)
+        val vedtaksperioder = listOf(lagVedtaksperiode(fom = 1 jan 2018, tom = 31 jan 2018))
 
-        assertDoesNotThrow {
-            val vedtaksperiodeId = UUID.randomUUID()
-            TilkommenInntektPeriodeValidator.verifiserAtErInnenforEtSykefraværstilfelle(
-                periode = (1 jan 2018) tilOgMed (31 jan 2018),
-                vedtaksperioder =  listOf(VedtaksperiodeDto(
-                    lagOrganisasjonsnummer(),
-                    vedtaksperiodeId,
-                    false,
-                    listOf(BehandlingDto(
-                        UUID.randomUUID(),
-                        vedtaksperiodeId,
-                        UUID.randomUUID(),
-                        UUID.randomUUID(),
-                        1 jan 2018,
-                        1 jan 2018,
-                        31 jan 2018,
-                        TilstandDto.KlarTilBehandling,
-                        emptyList(),
-                        null,
-                        emptyList()
+        // When:
+        val erInnenfor = TilkommenInntektPeriodeValidator.erInnenforEtSykefraværstilfelle(
+            periode = periode,
+            vedtaksperioder = vedtaksperioder
+        )
 
-                    ))
-                ))
-            )
-        }
+        // Then:
+        assertTrue(erInnenfor)
     }
 
+    @Test
+    fun `periode som begynner før fom er ikke innenfor sykefraværstilfellet`() {
+        // Given:
+        val periode = 31 des 2017 tilOgMed (31 jan 2018)
+        val vedtaksperioder = listOf(lagVedtaksperiode(fom = 1 jan 2018, tom = 31 jan 2018))
+
+        // When:
+        val erInnenfor = TilkommenInntektPeriodeValidator.erInnenforEtSykefraværstilfelle(
+            periode = periode,
+            vedtaksperioder = vedtaksperioder
+        )
+
+        // Then:
+        assertFalse(erInnenfor)
+    }
+
+    @Test
+    fun `periode som slutter etter tom er ikke innenfor sykefraværstilfellet`() {
+        // Given:
+        val periode = 1 jan 2018 tilOgMed (1 feb 2018)
+        val vedtaksperioder = listOf(lagVedtaksperiode(fom = 1 jan 2018, tom = 31 jan 2018))
+
+        // When:
+        val erInnenfor = TilkommenInntektPeriodeValidator.erInnenforEtSykefraværstilfelle(
+            periode = periode,
+            vedtaksperioder = vedtaksperioder
+        )
+
+        // Then:
+        assertFalse(erInnenfor)
+    }
+
+    private fun lagVedtaksperiode(
+        fom: LocalDate,
+        tom: LocalDate
+    ): VedtaksperiodeDto {
+        val vedtaksperiodeId = UUID.randomUUID()
+        return VedtaksperiodeDto(
+            organisasjonsnummer = lagOrganisasjonsnummer(),
+            vedtaksperiodeId = vedtaksperiodeId,
+            forkastet = false,
+            behandlinger = listOf(
+                BehandlingDto(
+                    id = UUID.randomUUID(),
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    utbetalingId = UUID.randomUUID(),
+                    spleisBehandlingId = UUID.randomUUID(),
+                    skjæringstidspunkt = fom,
+                    fom = fom,
+                    tom = tom,
+                    tilstand = TilstandDto.KlarTilBehandling,
+                    tags = emptyList(),
+                    vedtakBegrunnelse = null,
+                    varsler = emptyList()
+                )
+            )
+        )
+    }
 }
