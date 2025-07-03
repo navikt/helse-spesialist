@@ -57,11 +57,6 @@ class PersonAvstemmingRiver(
         packet["arbeidsgivere"].flatMap { arbeidsgiverNode ->
             arbeidsgiverNode["vedtaksperioder"].flatMap { vedtaksperiode ->
                 vedtaksperiode["behandlinger"].map { behandlingNode ->
-
-                    SpleisBehandling(behandlingNode["behandlingId"].asUUID(), behandlingNode["behandlingOpprettet"].asLocalDateTime())
-                }
-            } + arbeidsgiverNode["forkastedeVedtaksperioder"].flatMap { vedtaksperiode ->
-                vedtaksperiode["behandlinger"].map { behandlingNode ->
                     SpleisBehandling(behandlingNode["behandlingId"].asUUID(), behandlingNode["behandlingOpprettet"].asLocalDateTime())
                 }
             }
