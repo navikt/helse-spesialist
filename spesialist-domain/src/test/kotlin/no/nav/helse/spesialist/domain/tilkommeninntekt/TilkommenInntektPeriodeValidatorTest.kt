@@ -93,9 +93,26 @@ class TilkommenInntektPeriodeValidatorTest {
         assertFalse(erInnenfor)
     }
 
+    @Test
+    fun `periode som begynner før skjæringstidspunkt er ikke innenfor sykefraværstilfellet`() {
+        // Given:
+        val periode = (14 jan 2018) tilOgMed (31 jan 2018)
+        val vedtaksperioder = listOf(lagVedtaksperiode(fom = 1 jan 2018, skjæringstidspunkt = 15 jan 2018, tom = 31 jan 2018))
+
+        // When:
+        val erInnenfor = TilkommenInntektPeriodeValidator.erInnenforEtSykefraværstilfelle(
+            periode = periode,
+            vedtaksperioder = vedtaksperioder
+        )
+
+        // Then:
+        assertFalse(erInnenfor)
+    }
+
     private fun lagVedtaksperiode(
         fom: LocalDate,
-        tom: LocalDate
+        tom: LocalDate,
+        skjæringstidspunkt: LocalDate = fom
     ): VedtaksperiodeDto {
         val vedtaksperiodeId = UUID.randomUUID()
         return VedtaksperiodeDto(
@@ -108,7 +125,7 @@ class TilkommenInntektPeriodeValidatorTest {
                     vedtaksperiodeId = vedtaksperiodeId,
                     utbetalingId = UUID.randomUUID(),
                     spleisBehandlingId = UUID.randomUUID(),
-                    skjæringstidspunkt = fom,
+                    skjæringstidspunkt = skjæringstidspunkt,
                     fom = fom,
                     tom = tom,
                     tilstand = TilstandDto.KlarTilBehandling,
