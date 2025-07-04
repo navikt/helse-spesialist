@@ -1,6 +1,6 @@
 [versions]
 flyway = "11.10.1"
-graphqlKotlin = "8.4.0"
+graphqlKotlin = "8.8.1"
 jackson = "2.19.1"
 ktor = "3.2.1"
 tbdLibs = "2025.06.20-13.05-40af2647"
