@@ -48,6 +48,11 @@ allprojects {
             implementation("org.apache.kafka:kafka-clients:[3.9.1,)") {
                 because("Apache Kafka Client Arbitrary File Read and Server Side Request Forgery Vulnerability i versjon >= 3.1.0, < 3.9.1")
             }
+            implementation("org.eclipse.jetty.http2:jetty-http2-common:12.0.17") {
+                because(
+                    "Eclipse Jetty HTTP/2 client can force the server to allocate a humongous byte buffer that may lead to OoM and subsequently the JVM to exit i versjon >= 12.0.0, <= 12.0.16",
+                )
+            }
         }
 
         testImplementation(platform("org.junit:junit-bom:5.13.2"))
