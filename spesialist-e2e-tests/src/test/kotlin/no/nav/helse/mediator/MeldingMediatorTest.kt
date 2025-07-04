@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.Duration
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -24,8 +25,8 @@ class MeldingMediatorTest : AbstractDatabaseTest() {
     private val testRapid = TestRapid()
     private val kommandofabrikk = mockk<Kommandofabrikk>(relaxed = true)
     private val poisonPills: MutableMap<String, Set<String>> = mutableMapOf()
-    private val poisonPillDao = object: PoisonPillDao {
-        override fun poisonPills() = PoisonPills(poisonPills)
+    private val poisonPillDao = object : PoisonPillDao {
+        override fun poisonPills() = PoisonPills(poisonPills.toMap())
     }
 
     private val meldingMediator =
@@ -42,7 +43,8 @@ class MeldingMediatorTest : AbstractDatabaseTest() {
                 definisjonDao = daos.definisjonDao
             ),
             poisonPillDao = poisonPillDao,
-            ignorerMeldingerForUkjentePersoner = false
+            ignorerMeldingerForUkjentePersoner = false,
+            poisonPillTimeToLive = Duration.ofMillis(50),
         )
 
     @BeforeEach
@@ -64,6 +66,15 @@ class MeldingMediatorTest : AbstractDatabaseTest() {
         poisonPills["@id"] = setOf("ekkel id")
         assertFalse(meldingMediator.skalBehandleMelding(""" { "@id": "ekkel id" } """))
         assertTrue(meldingMediator.skalBehandleMelding(""" { "@id": "fin id" } """))
+    }
+
+    @Test
+    fun `leser nye poison pills etter at cachen går ut`() {
+        assertTrue(meldingMediator.skalBehandleMelding(""" { "@id": "ekkel id" } """))
+        poisonPills["@id"] = setOf("ekkel id")
+        assertTrue(meldingMediator.skalBehandleMelding(""" { "@id": "ekkel id" } """))
+        Thread.sleep(60)
+        assertFalse(meldingMediator.skalBehandleMelding(""" { "@id": "ekkel id" } """))
     }
 
     private fun assertVarseldefinisjon(id: UUID) {

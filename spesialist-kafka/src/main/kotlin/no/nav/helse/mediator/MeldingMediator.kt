@@ -1,6 +1,9 @@
 package no.nav.helse.mediator
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.github.benmanes.caffeine.cache.CacheLoader
+import com.github.benmanes.caffeine.cache.Caffeine
+import com.github.benmanes.caffeine.cache.LoadingCache
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.CommandContextDao
 import no.nav.helse.db.DokumentDao
@@ -10,6 +13,7 @@ import no.nav.helse.db.PersonDao
 import no.nav.helse.db.PoisonPillDao
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.mediator.meldinger.Personmelding
+import no.nav.helse.mediator.meldinger.PoisonPills
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.SøknadSendt
@@ -18,6 +22,7 @@ import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.spesialist.kafka.objectMapper
 import org.slf4j.LoggerFactory
+import java.time.Duration
 import java.util.UUID
 
 class MeldingMediator(
@@ -31,17 +36,21 @@ class MeldingMediator(
     private val varselRepository: VarselRepository,
     private val poisonPillDao: PoisonPillDao,
     private val ignorerMeldingerForUkjentePersoner: Boolean,
+    poisonPillTimeToLive: Duration = Duration.ofMinutes(1),
 ) {
     private companion object {
         private val logg = LoggerFactory.getLogger(MeldingMediator::class.java)
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
 
-    private val poisonPills by lazy { poisonPillDao.poisonPills() }
+    private val poisonPillsCache: LoadingCache<Unit, PoisonPills> =
+        Caffeine.newBuilder()
+            .refreshAfterWrite(poisonPillTimeToLive)
+            .build(CacheLoader { _ -> poisonPillDao.poisonPills() })
 
     fun skalBehandleMelding(melding: String): Boolean {
         val jsonNode = objectMapper.readTree(melding)
-        if (poisonPills.erPoisonPill(jsonNode)) {
+        if (poisonPillsCache.get(Unit).erPoisonPill(jsonNode)) {
             logg.info("Hopper over melding med @id={}", jsonNode["@id"].asText())
             sikkerlogg.info("Hopper over melding med @id={}, json=\n{}", jsonNode["@id"].asText(), jsonNode)
 
