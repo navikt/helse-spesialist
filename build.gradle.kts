@@ -78,13 +78,13 @@ subprojects {
                 exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
             }
         }
-        register<Wrapper>("wrapper") {
-            gradleVersion = "8.13"
-        }
     }
 }
 
 tasks {
+    wrapper {
+        gradleVersion = "8.14.3"
+    }
     jar {
         enabled = false
     }

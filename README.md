@@ -103,9 +103,9 @@ bedre liv. Da gjør du følgende:
 ## Oppgradering av gradle wrapper
 
 - Finn nyeste versjon av gradle her: https://gradle.org/releases/
-- Kjør `./gradlew wrapper --gradle-version $gradleVersjon` to ganger,
-  ref. [dokumentasjonen til Gradle](https://docs.gradle.org/current/userguide/gradle_wrapper.html#sec:upgrading_wrapper).
-- Oppdater gradle-versjon i build.gradle.kts-filen: `gradleVersion = "$gradleVersjon"`
+- Oppdater versjonsnummeret i wrapper-tasken i build.gradle.kts
+- Kjør `./gradlew wrapper` to ganger, ref. [dokumentasjonen til Gradle](https://docs.gradle.org/current/userguide/gradle_wrapper.html#sec:upgrading_wrapper).
+  - For eksempel kan du jo kjøre `./gradlew wrapper && ./gradlew wrapper`?
 
 ## Spesialist-opprydding-dev
 
