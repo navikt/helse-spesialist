@@ -24,9 +24,10 @@ class PersonAvstemmingRiver(
         }
     }
 
-    override fun validations() = River.PacketValidation {
-        it.requireKey("@id", "fødselsnummer", "arbeidsgivere")
-    }
+    override fun validations() =
+        River.PacketValidation {
+            it.requireKey("@id", "fødselsnummer", "arbeidsgivere")
+        }
 
     override fun onPacket(
         packet: JsonMessage,
@@ -40,7 +41,10 @@ class PersonAvstemmingRiver(
         val fødselsnummer = packet["fødselsnummer"].asText()
         val spesialistBehandlinger = mediator.finnBehandlingerFor(fødselsnummer)
 
-        val spleisBehandlinger = pakkUtBehandlinger(packet).filter { it.behandlingOpprettet.isAfter(LocalDate.of(2024, 5, 1).atStartOfDay()) }.map{ it.behandlingId}
+        val spleisBehandlinger =
+            pakkUtBehandlinger(packet).filter {
+                it.behandlingOpprettet.isAfter(LocalDate.of(2024, 5, 1).atStartOfDay())
+            }.map { it.behandlingId }
         val felles = spleisBehandlinger.intersect(spesialistBehandlinger.mapNotNull { it.spleisBehandlingId })
 
         val antallBehandlingerISpesialist = felles.size
@@ -61,5 +65,6 @@ class PersonAvstemmingRiver(
                 }
             }
         }
+
     data class SpleisBehandling(val behandlingId: UUID, val behandlingOpprettet: LocalDateTime)
 }
