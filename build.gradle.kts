@@ -36,15 +36,6 @@ allprojects {
 
     dependencies {
         constraints {
-            implementation("net.minidev:json-smart:[2.5.2,)") {
-                because("Sårbarhet CVE-2024-57699")
-            }
-            implementation("commons-io:commons-io:[2.14.0,)") {
-                because("Sårbarhet CVE-2024-47554")
-            }
-            implementation("io.netty:netty-codec-http:4.2.2.Final") {
-                because("sårbarhet i >= 4.1.91.Final, <= 4.1.117.Final")
-            }
             implementation("org.apache.commons:commons-compress:1.27.1") {
                 because("org.testcontainers:postgresql:1.19.7 -> 1.24.0 har en sårbarhet")
             }
