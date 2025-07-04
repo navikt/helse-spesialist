@@ -54,6 +54,9 @@ allprojects {
             implementation("io.micrometer:micrometer-registry-prometheus:1.15.1") {
                 because("com.github.navikt:rapids-and-rivers avhenger av micrometer-registry-prometheus:1.14.5")
             }
+            implementation("org.apache.kafka:kafka-clients:3.9.1") {
+                because("Apache Kafka Client Arbitrary File Read and Server Side Request Forgery Vulnerability i versjon >= 3.1.0, < 3.9.1")
+            }
         }
 
         testImplementation(platform("org.junit:junit-bom:5.13.2"))
