@@ -17,25 +17,25 @@ class PgBehandlingsstatistikkDao internal constructor(dataSource: DataSource) :
         override fun getAntallTilgjengeligeBeslutteroppgaver() =
             asSQL(
                 """
-            SELECT count(1)
-            FROM oppgave o
-            INNER JOIN vedtak v ON o.vedtak_ref = v.id
-            WHERE o.status='AvventerSaksbehandler'::oppgavestatus
-              AND v.forkastet = false 
-              AND 'BESLUTTER' = ANY (o.egenskaper)
-        """,
+                SELECT count(1)
+                FROM oppgave o
+                INNER JOIN vedtak v ON o.vedtak_ref = v.id
+                WHERE o.status='AvventerSaksbehandler'::oppgavestatus
+                  AND v.forkastet = false 
+                  AND 'BESLUTTER' = ANY (o.egenskaper)
+                """.trimIndent(),
             ).single { it.int("count") } ?: 0
 
         override fun getAntallTilgjengeligeEgenAnsattOppgaver() =
             asSQL(
                 """
-            SELECT count(1)
-            FROM oppgave o
-            INNER JOIN vedtak v ON o.vedtak_ref = v.id
-            WHERE o.status='AvventerSaksbehandler'::oppgavestatus
-              AND v.forkastet = false 
-              AND 'EGEN_ANSATT' = ANY (o.egenskaper)
-        """,
+                SELECT count(1)
+                FROM oppgave o
+                INNER JOIN vedtak v ON o.vedtak_ref = v.id
+                WHERE o.status='AvventerSaksbehandler'::oppgavestatus
+                  AND v.forkastet = false 
+                  AND 'EGEN_ANSATT' = ANY (o.egenskaper)
+                """.trimIndent(),
             ).single { it.int("count") } ?: 0
 
         override fun getAntallManueltFullførteEgenAnsattOppgaver(fom: LocalDate) =
@@ -101,12 +101,12 @@ class PgBehandlingsstatistikkDao internal constructor(dataSource: DataSource) :
             val rader =
                 asSQL(
                     """
-            SELECT s.type, s.inntektskilde, count(distinct o.id)
-            FROM oppgave o
-                     INNER JOIN saksbehandleroppgavetype s on o.vedtak_ref = s.vedtak_ref
-            WHERE o.status = 'AvventerSaksbehandler'
-            GROUP BY s.type, s.inntektskilde;
-        """,
+                    SELECT s.type, s.inntektskilde, count(distinct o.id)
+                    FROM oppgave o
+                    INNER JOIN saksbehandleroppgavetype s on o.vedtak_ref = s.vedtak_ref
+                    WHERE o.status = 'AvventerSaksbehandler'
+                    GROUP BY s.type, s.inntektskilde;
+                    """.trimIndent(),
                 )
                     .list {
                         AntallPerKombinasjonRad(
@@ -127,7 +127,7 @@ class PgBehandlingsstatistikkDao internal constructor(dataSource: DataSource) :
                     """
                     SELECT s.type, s.inntektskilde, count(distinct o.id)
                     FROM oppgave o
-                             INNER JOIN saksbehandleroppgavetype s on o.vedtak_ref = s.vedtak_ref
+                    INNER JOIN saksbehandleroppgavetype s on o.vedtak_ref = s.vedtak_ref
                     WHERE o.status = 'Ferdigstilt'
                       AND o.oppdatert >= :fom
                     GROUP BY s.type, s.inntektskilde;
