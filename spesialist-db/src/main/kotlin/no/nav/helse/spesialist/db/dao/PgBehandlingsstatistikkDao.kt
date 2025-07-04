@@ -225,13 +225,10 @@ class PgBehandlingsstatistikkDao internal constructor(dataSource: DataSource) :
         override fun getAntallAvvisninger(fom: LocalDate) =
             asSQL(
                 """
-                SELECT count(*) as avvisninger
+                SELECT count(*) AS avvisninger
                 FROM vedtak v
-                WHERE id IN (
-                    SELECT vedtak_ref
-                    FROM oppgave
-                    WHERE status = 'Ferdigstilt' AND oppdatert::DATE = :fom)
-                AND forkastet = True;
+                JOIN oppgave o ON v.id = o.vedtak_ref
+                WHERE status = 'Ferdigstilt' AND oppdatert >= :fom AND forkastet;
                 """.trimIndent(),
                 "fom" to fom,
             ).single { it.int("avvisninger") } ?: 0
