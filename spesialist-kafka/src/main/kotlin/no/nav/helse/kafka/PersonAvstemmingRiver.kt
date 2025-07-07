@@ -13,7 +13,7 @@ import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.sikkerlogg
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 class PersonAvstemmingRiver(
     private val mediator: MeldingMediator,
@@ -50,7 +50,11 @@ class PersonAvstemmingRiver(
         val antallBehandlingerISpesialist = felles.size
         val antallBehandlingerISpleis = spleisBehandlinger.size
 
-        if (antallBehandlingerISpesialist != antallBehandlingerISpleis) {
+        if (antallBehandlingerISpesialist == antallBehandlingerISpleis) {
+            val melding = "Antall behandlinger i Spleis ($antallBehandlingerISpleis) samsvarer med antall behandlinger i Spesialist ($antallBehandlingerISpesialist)"
+            logg.info(melding)
+            sikkerlogg.info("$melding for person med fødselsnummer $fødselsnummer")
+        } else {
             val melding = "Antall behandlinger i Spleis ($antallBehandlingerISpleis) samsvarer ikke med antall behandlinger i Spesialist ($antallBehandlingerISpesialist)"
             logg.warn(melding)
             sikkerlogg.warn("$melding for person med fødselsnummer $fødselsnummer")
