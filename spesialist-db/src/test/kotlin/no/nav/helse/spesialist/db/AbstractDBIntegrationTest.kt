@@ -678,13 +678,13 @@ abstract class AbstractDBIntegrationTest {
         val oppgave: Oppgave,
     )
 
-    protected fun nyLegacySaksbehandler(navn: String = lagSaksbehandlernavn()): LegacySaksbehandler {
+    protected fun nyLegacySaksbehandler(navn: String = lagSaksbehandlernavn(), tilgangkontroll: (UUID, Collection<Egenskap>) -> Boolean = { _, _ -> false }): LegacySaksbehandler {
         val saksbehandler = LegacySaksbehandler(
             epostadresse = lagEpostadresseFraFulltNavn(navn),
             oid = UUID.randomUUID(),
             navn = navn,
             ident = lagSaksbehandlerident(),
-            tilgangskontroll = { _, _ -> false }
+            tilgangskontroll = tilgangkontroll
         )
         opprettSaksbehandler(saksbehandler.oid, saksbehandler.navn, saksbehandler.epostadresse, saksbehandler.ident())
         return saksbehandler

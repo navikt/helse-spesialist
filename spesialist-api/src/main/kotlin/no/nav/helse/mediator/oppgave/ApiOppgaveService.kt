@@ -18,6 +18,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiFiltrering
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveegenskap
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaverTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavesortering
+import no.nav.helse.spesialist.api.graphql.schema.ApiSaksbehandlerMedOid
 import no.nav.helse.spesialist.api.graphql.schema.ApiSorteringsnokkel
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
@@ -74,6 +75,33 @@ class ApiOppgaveService(
                     egneSaker = filtrering.egneSaker,
                     tildelt = filtrering.tildelt,
                     grupperteFiltrerteEgenskaper = grupperteFiltrerteEgenskaper,
+                )
+        return ApiOppgaverTilBehandling(
+            oppgaver = oppgaver.tilOppgaverTilBehandling(),
+            totaltAntallOppgaver = if (oppgaver.isEmpty()) 0 else oppgaver.first().filtrertAntall,
+        )
+    }
+
+    fun tildelteOppgaver(
+        innloggetSaksbehandlerMedOid: SaksbehandlerFraApi,
+        oppslåttSaksbehandlerMedOid: ApiSaksbehandlerMedOid,
+        offset: Int,
+        limit: Int,
+    ): ApiOppgaverTilBehandling {
+        val saksbehandler = innloggetSaksbehandlerMedOid.tilSaksbehandler()
+        val egenskaperSaksbehandlerIkkeHarTilgangTil =
+            Egenskap
+                .alleTilgangsstyrteEgenskaper
+                .filterNot { saksbehandler.harTilgangTil(listOf(it)) }
+                .map(Egenskap::toString)
+
+        val oppgaver =
+            oppgaveDao
+                .finnTildelteOppgaver(
+                    saksbehandlerOid = oppslåttSaksbehandlerMedOid.oid,
+                    ekskluderEgenskaper = egenskaperSaksbehandlerIkkeHarTilgangTil,
+                    offset = offset,
+                    limit = limit,
                 )
         return ApiOppgaverTilBehandling(
             oppgaver = oppgaver.tilOppgaverTilBehandling(),

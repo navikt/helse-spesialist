@@ -30,6 +30,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiMottaker
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveegenskap
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavetype
 import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodetype
+import no.nav.helse.spesialist.api.graphql.schema.ApiSaksbehandlerMedOid
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.domain.testfixtures.lagEpostadresseFraFulltNavn
 import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlerident
@@ -128,6 +129,26 @@ internal class ApiOppgaveServiceTest {
     }
 
     @Test
+    fun `Hent tildelte oppgaver for en gitt saksbehandler`() {
+        every { oppgaveDao.finnTildelteOppgaver(any(), any()) } returns
+                listOf(
+                    oppgaveFraDatabaseForVisning(filtrertAntall = 2),
+                    oppgaveFraDatabaseForVisning(filtrertAntall = 2),
+                )
+        val oppgaver = apiOppgaveService.tildelteOppgaver(
+            saksbehandlerFraApi(),
+            ApiSaksbehandlerMedOid(
+                oid = UUID.randomUUID(),
+                navn = "Navn Navnesen",
+                ident = "L815493"
+            ),
+            0,
+            Int.MAX_VALUE,
+        )
+        assertEquals(2, oppgaver.oppgaver.size)
+    }
+
+    @Test
     fun `Hent antall mine saker og mine saker på vent til visning`() {
         every { oppgaveDao.finnAntallOppgaver(any()) } returns AntallOppgaverFraDatabase(
             antallMineSaker = 2,
@@ -145,7 +166,13 @@ internal class ApiOppgaveServiceTest {
                     behandletOppgaveFraDatabaseForVisning(filtrertAntall = 2),
                     behandletOppgaveFraDatabaseForVisning(filtrertAntall = 2),
                 )
-        val oppgaver = apiOppgaveService.behandledeOppgaver(saksbehandlerFraApi(), 0, Int.MAX_VALUE, LocalDate.now(), LocalDate.now())
+        val oppgaver = apiOppgaveService.behandledeOppgaver(
+            saksbehandlerFraApi(),
+            0,
+            Int.MAX_VALUE,
+            LocalDate.now(),
+            LocalDate.now()
+        )
         assertEquals(2, oppgaver.oppgaver.size)
     }
 
@@ -223,7 +250,8 @@ internal class ApiOppgaveServiceTest {
                     ),
                 )
         val saksbehandler = saksbehandlerFraApi()
-        val oppgaver = apiOppgaveService.behandledeOppgaver(saksbehandler, 0, Int.MAX_VALUE, LocalDate.now(), LocalDate.now())
+        val oppgaver =
+            apiOppgaveService.behandledeOppgaver(saksbehandler, 0, Int.MAX_VALUE, LocalDate.now(), LocalDate.now())
         assertEquals(1, oppgaver.oppgaver.size)
         val oppgave = oppgaver.oppgaver.single()
         assertEquals("1", oppgave.id)

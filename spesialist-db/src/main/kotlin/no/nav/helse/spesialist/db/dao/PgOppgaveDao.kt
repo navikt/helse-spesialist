@@ -332,6 +332,91 @@ class PgOppgaveDao internal constructor(
         }
     }
 
+    override fun finnTildelteOppgaver(
+        saksbehandlerOid: UUID,
+        ekskluderEgenskaper: List<String>,
+        offset: Int,
+        limit: Int,
+    ): List<OppgaveFraDatabaseForVisning> {
+        return asSQL(
+            """
+            SELECT
+                o.id as oppgave_id,
+                p.aktør_id,
+                v.vedtaksperiode_id,
+                pi.fornavn, pi.mellomnavn, pi.etternavn,
+                o.egenskaper,
+                s.oid, s.ident, s.epost, s.navn,
+                o.opprettet,
+                os.soknad_mottatt AS opprinnelig_soknadsdato,
+                o.kan_avvises,
+                pv.frist,
+                pv.opprettet AS på_vent_opprettet,
+                pv.årsaker,
+                pv.notattekst,
+                sb.ident AS på_vent_saksbehandler,
+                pv.dialog_ref,
+                count(1) OVER() AS filtered_count
+            FROM oppgave o
+            INNER JOIN vedtak v ON o.vedtak_ref = v.id
+            INNER JOIN person p ON v.person_ref = p.id
+            INNER JOIN person_info pi ON p.info_ref = pi.id
+            INNER JOIN opprinnelig_soknadsdato os ON os.vedtaksperiode_id = v.vedtaksperiode_id
+            LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
+            LEFT JOIN pa_vent pv ON v.vedtaksperiode_id = pv.vedtaksperiode_id
+            LEFT JOIN saksbehandler s ON t.saksbehandler_ref = s.oid
+            LEFT JOIN saksbehandler sb ON pv.saksbehandler_ref = sb.oid
+            WHERE o.status = 'AvventerSaksbehandler'
+                AND t.saksbehandler_ref = :saksbehandler_oid
+                AND NOT (egenskaper && :egenskaper_som_skal_ekskluderes::varchar[]) -- egenskaper saksbehandler ikke har tilgang til
+            """.trimIndent(),
+            "saksbehandler_oid" to saksbehandlerOid,
+            "egenskaper_som_skal_ekskluderes" to ekskluderEgenskaper.somDbArray(),
+        )
+            .list { row ->
+                val egenskaper =
+                    row.array<String>("egenskaper").map { enumValueOf<EgenskapForDatabase>(it) }.toSet()
+                OppgaveFraDatabaseForVisning(
+                    id = row.long("oppgave_id"),
+                    aktørId = row.string("aktør_id"),
+                    vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
+                    navn =
+                        PersonnavnFraDatabase(
+                            row.string("fornavn"),
+                            row.stringOrNull("mellomnavn"),
+                            row.string("etternavn"),
+                        ),
+                    egenskaper = egenskaper,
+                    tildelt =
+                        row.uuidOrNull("oid")?.let {
+                            SaksbehandlerFraDatabase(
+                                epostadresse = row.string("epost"),
+                                it,
+                                row.string("navn"),
+                                row.string("ident"),
+                            )
+                        },
+                    påVent = egenskaper.contains(EgenskapForDatabase.PÅ_VENT),
+                    opprettet = row.localDateTime("opprettet"),
+                    opprinneligSøknadsdato = row.localDateTime("opprinnelig_soknadsdato"),
+                    tidsfrist = row.localDateOrNull("frist"),
+                    filtrertAntall = row.int("filtered_count"),
+                    paVentInfo =
+                        row.localDateTimeOrNull("på_vent_opprettet")?.let {
+                            PaVentInfoFraDatabase(
+                                årsaker = row.array<String>("årsaker").toList(),
+                                tekst = row.stringOrNull("notattekst"),
+                                dialogRef = row.long("dialog_ref"),
+                                saksbehandler = row.string("på_vent_saksbehandler"),
+                                opprettet = it,
+                                tidsfrist = row.localDate("frist"),
+                                kommentarer = finnKommentarerMedDialogRef(row.long("dialog_ref").toInt()),
+                            )
+                        },
+                )
+            }
+    }
+
     private fun finnKommentarerMedDialogRef(dialogRef: Int): List<KommentarFraDatabase> =
         asSQL(
             """

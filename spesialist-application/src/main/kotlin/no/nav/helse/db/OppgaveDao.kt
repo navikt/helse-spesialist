@@ -44,6 +44,13 @@ interface OppgaveDao {
         grupperteFiltrerteEgenskaper: Map<Egenskap.Kategori, List<EgenskapForDatabase>> = emptyMap(),
     ): List<OppgaveFraDatabaseForVisning>
 
+    fun finnTildelteOppgaver(
+        saksbehandlerOid: UUID,
+        ekskluderEgenskaper: List<String>,
+        offset: Int = 0,
+        limit: Int = Int.MAX_VALUE,
+    ): List<OppgaveFraDatabaseForVisning>
+
     fun finnAntallOppgaver(saksbehandlerOid: UUID): AntallOppgaverFraDatabase
 
     fun finnBehandledeOppgaver(

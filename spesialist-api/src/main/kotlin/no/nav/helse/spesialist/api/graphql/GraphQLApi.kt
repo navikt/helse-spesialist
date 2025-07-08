@@ -53,6 +53,7 @@ import no.nav.helse.spesialist.api.graphql.query.DokumentQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.OppgaverQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.OpptegnelseQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
+import no.nav.helse.spesialist.api.graphql.query.TildelteOppgaverQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.TilkommenInntektQueryHandler
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.person.PersonService
@@ -149,6 +150,10 @@ fun lagSchemaMedResolversOgHandlers(
                     ),
                 oppgaver =
                     OppgaverQueryHandler(
+                        apiOppgaveService = apiOppgaveService,
+                    ),
+                tildelteOppgaver =
+                    TildelteOppgaverQueryHandler(
                         apiOppgaveService = apiOppgaveService,
                     ),
                 behandlingsstatistikk =

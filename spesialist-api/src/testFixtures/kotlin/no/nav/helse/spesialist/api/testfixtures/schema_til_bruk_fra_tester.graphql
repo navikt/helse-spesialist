@@ -627,6 +627,7 @@ type Query {
     oppgaveFeed(filtrering: FiltreringInput!, limit: Int!, offset: Int!, sortering: [OppgavesorteringInput!]!): OppgaverTilBehandling!
     opptegnelser(sekvensId: Int): [Opptegnelse!]!
     person(aktorId: String, fnr: String): Person
+    tildelteOppgaverFeed(limit: Int!, offset: Int!, oppslattSaksbehandler: SaksbehandlerMedOidInput!): OppgaverTilBehandling!
     tilkomneInntektskilder(aktorId: String!): [TilkommenInntektskilde!]!
     tilkomneInntektskilderV2(fodselsnummer: String!): [TilkommenInntektskilde!]!
 }
@@ -1110,6 +1111,7 @@ enum Dagtype {
 }
 
 enum Egenskap {
+    ARBEIDSTAKER
     BESLUTTER
     DELVIS_REFUSJON
     EGEN_ANSATT
@@ -1130,6 +1132,7 @@ enum Egenskap {
     RETUR
     REVURDERING
     RISK_QA
+    SELVSTENDIG_NAERINGSDRIVENDE
     SKJONNSFASTSETTELSE
     SOKNAD
     SPESIALSAK
@@ -1169,6 +1172,7 @@ enum Inntektstype {
 }
 
 enum Kategori {
+    Inntektsforhold
     Inntektskilde
     Mottaker
     Oppgavetype
@@ -1580,6 +1584,12 @@ input PaVentArsakInput {
 input PeriodeInput {
     fom: LocalDate!
     tom: LocalDate!
+}
+
+input SaksbehandlerMedOidInput {
+    ident: String!
+    navn: String!
+    oid: UUID!
 }
 
 input SkjonnsfastsettelseArbeidsgiverInput {

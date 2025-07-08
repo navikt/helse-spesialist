@@ -24,6 +24,7 @@ import no.nav.helse.modell.oppgave.Egenskap.FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Egenskap.Kategori
 import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Oppgave
+import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.db.TestMelding
 import no.nav.helse.spesialist.domain.testfixtures.lagAktørId
@@ -801,6 +802,40 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
     }
 
     @Test
+    fun `Hent alle tildelte oppgaver for en saksbehandler`() {
+        val saksbehandler = nyLegacySaksbehandler()
+        nyOppgaveForNyPerson().tildelOgLagre(saksbehandler)
+        nyOppgaveForNyPerson().tildelOgLagre(saksbehandler)
+        nyOppgaveForNyPerson()
+        val oppgaver = oppgaveDao.finnTildelteOppgaver(saksbehandler.oid(), emptyList(), 0, 2)
+        assertEquals(2, oppgaver.size)
+    }
+
+    @Test
+    fun `Henter ingen oppgaver hvis saksbehandler ikke har noen tildelte oppgaver`() {
+        val saksbehandler = nyLegacySaksbehandler()
+        nyOppgaveForNyPerson()
+        nyOppgaveForNyPerson()
+        nyOppgaveForNyPerson()
+        val oppgaver = oppgaveDao.finnTildelteOppgaver(saksbehandler.oid(), emptyList(), 0, 2)
+        assertEquals(0, oppgaver.size)
+    }
+
+    @Test
+    fun `Henter kun oppgaver saksbehandler har tilgang til å se`() {
+        val saksbehandler = nyLegacySaksbehandler(tilgangkontroll = {_,_ -> true})
+        val fortroligOppgave = nyOppgaveForNyPerson(
+            adressebeskyttelse = Adressebeskyttelse.StrengtFortrolig,
+            oppgaveegenskaper = setOf(STRENGT_FORTROLIG_ADRESSE)
+        ).tildelOgLagre(saksbehandler)
+        nyOppgaveForNyPerson().tildelOgLagre(saksbehandler)
+        nyOppgaveForNyPerson().tildelOgLagre(saksbehandler)
+        val oppgaver = oppgaveDao.finnTildelteOppgaver(saksbehandler.oid(), listOf(STRENGT_FORTROLIG_ADRESSE.toString()), 0, 2)
+        assertEquals(2, oppgaver.size)
+        oppgaver.assertIderIkkeOverlapperMed(fortroligOppgave)
+    }
+
+    @Test
     fun `finner vedtaksperiodeId`() {
         val oppgave = nyOppgaveForNyPerson()
         val actual = oppgaveDao.finnVedtaksperiodeId(oppgave.id)
@@ -917,6 +952,10 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
 
     private fun Collection<OppgaveFraDatabaseForVisning>.assertIderSamsvarerMed(vararg oppgaver: Oppgave) {
         assertEquals(oppgaver.map { it.id }.toSet(), map { it.id }.toSet())
+    }
+
+    private fun Collection<OppgaveFraDatabaseForVisning>.assertIderIkkeOverlapperMed(vararg oppgaver: Oppgave) {
+        assertTrue { map { it.id }.toSet().intersect(oppgaver.map { it.id }.toSet()).isEmpty() }
     }
 
     private fun List<BehandletOppgaveFraDatabaseForVisning>.assertIderSamsvarerMed(vararg oppgaver: Oppgave) {
