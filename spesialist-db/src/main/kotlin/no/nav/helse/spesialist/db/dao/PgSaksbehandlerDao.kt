@@ -35,6 +35,22 @@ class PgSaksbehandlerDao private constructor(
             )
         }
 
+    override fun hentAlleAktiveSisteTreMnder(): List<Saksbehandler> =
+        asSQL(
+            """
+            SELECT *
+            FROM saksbehandler
+            WHERE siste_handling_utført_tidspunkt > CURRENT_DATE - INTERVAL '3 months'
+            """.trimIndent(),
+        ).list {
+            Saksbehandler(
+                id = SaksbehandlerOid(it.uuid("oid")),
+                navn = it.string("navn"),
+                epost = it.string("epost"),
+                ident = it.string("ident"),
+            )
+        }
+
     override fun opprettEllerOppdater(
         oid: UUID,
         navn: String,

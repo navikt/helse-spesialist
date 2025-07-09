@@ -47,6 +47,7 @@ import no.nav.helse.spesialist.api.graphql.mutation.VarselMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutationHandler
 import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.DokumentQueryHandler
+import no.nav.helse.spesialist.api.graphql.query.HentSaksbehandlereQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.OppgaverQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.OpptegnelseQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
@@ -153,6 +154,9 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                     tilkommenInntekt = TilkommenInntektQueryHandler(
                         sessionFactory = sessionFactory,
                         daos = daos
+                    ),
+                    hentSaksbehandlere = HentSaksbehandlereQueryHandler(
+                        saksbehandlerDao = saksbehandlerDao,
                     )
                 ),
                 mutationHandlers = SpesialistSchema.MutationHandlers(
