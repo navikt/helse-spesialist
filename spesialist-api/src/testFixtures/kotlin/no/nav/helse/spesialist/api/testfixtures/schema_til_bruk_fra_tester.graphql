@@ -627,7 +627,7 @@ type Query {
     oppgaveFeed(filtrering: FiltreringInput!, limit: Int!, offset: Int!, sortering: [OppgavesorteringInput!]!): OppgaverTilBehandling!
     opptegnelser(sekvensId: Int): [Opptegnelse!]!
     person(aktorId: String, fnr: String): Person
-    tildelteOppgaverFeed(limit: Int!, offset: Int!, oppslattSaksbehandler: SaksbehandlerMedOidInput!): OppgaverTilBehandling!
+    tildelteOppgaverFeed(limit: Int!, offset: Int!, oppslattSaksbehandler: SaksbehandlerInput!): OppgaverTilBehandling!
     tilkomneInntektskilder(aktorId: String!): [TilkommenInntektskilde!]!
     tilkomneInntektskilderV2(fodselsnummer: String!): [TilkommenInntektskilde!]!
 }
@@ -1586,10 +1586,9 @@ input PeriodeInput {
     tom: LocalDate!
 }
 
-input SaksbehandlerMedOidInput {
-    ident: String!
+input SaksbehandlerInput {
+    ident: String
     navn: String!
-    oid: UUID!
 }
 
 input SkjonnsfastsettelseArbeidsgiverInput {

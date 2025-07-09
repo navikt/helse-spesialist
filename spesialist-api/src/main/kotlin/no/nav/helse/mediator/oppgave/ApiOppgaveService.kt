@@ -18,9 +18,9 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiFiltrering
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveegenskap
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaverTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavesortering
-import no.nav.helse.spesialist.api.graphql.schema.ApiSaksbehandlerMedOid
 import no.nav.helse.spesialist.api.graphql.schema.ApiSorteringsnokkel
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
+import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 import java.time.LocalDate
 import java.util.UUID
@@ -83,12 +83,12 @@ class ApiOppgaveService(
     }
 
     fun tildelteOppgaver(
-        innloggetSaksbehandlerMedOid: SaksbehandlerFraApi,
-        oppslåttSaksbehandlerMedOid: ApiSaksbehandlerMedOid,
+        innloggetSaksbehandler: SaksbehandlerFraApi,
+        oppslåttSaksbehandler: Saksbehandler,
         offset: Int,
         limit: Int,
     ): ApiOppgaverTilBehandling {
-        val saksbehandler = innloggetSaksbehandlerMedOid.tilSaksbehandler()
+        val saksbehandler = innloggetSaksbehandler.tilSaksbehandler()
         val egenskaperSaksbehandlerIkkeHarTilgangTil =
             Egenskap
                 .alleTilgangsstyrteEgenskaper
@@ -98,7 +98,7 @@ class ApiOppgaveService(
         val oppgaver =
             oppgaveDao
                 .finnTildelteOppgaver(
-                    saksbehandlerOid = oppslåttSaksbehandlerMedOid.oid,
+                    saksbehandlerOid = oppslåttSaksbehandler.id().value,
                     ekskluderEgenskaper = egenskaperSaksbehandlerIkkeHarTilgangTil,
                     offset = offset,
                     limit = limit,

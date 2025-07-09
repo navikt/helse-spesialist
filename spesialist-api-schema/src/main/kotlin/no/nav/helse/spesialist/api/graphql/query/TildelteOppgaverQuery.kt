@@ -4,13 +4,13 @@ import com.expediagroup.graphql.server.operations.Query
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaverTilBehandling
-import no.nav.helse.spesialist.api.graphql.schema.ApiSaksbehandlerMedOid
+import no.nav.helse.spesialist.api.graphql.schema.ApiSaksbehandler
 
 interface TildelteOppgaverQuerySchema : Query {
     suspend fun tildelteOppgaverFeed(
         offset: Int,
         limit: Int,
-        oppslattSaksbehandler: ApiSaksbehandlerMedOid,
+        oppslattSaksbehandler: ApiSaksbehandler,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<ApiOppgaverTilBehandling>
 }

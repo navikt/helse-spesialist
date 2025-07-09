@@ -2,33 +2,42 @@ package no.nav.helse.spesialist.api.graphql.query
 
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
+import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.byggRespons
+import no.nav.helse.spesialist.api.graphql.notFound
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaverTilBehandling
-import no.nav.helse.spesialist.api.graphql.schema.ApiSaksbehandlerMedOid
+import no.nav.helse.spesialist.api.graphql.schema.ApiSaksbehandler
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.application.logg.sikkerlogg
 import kotlin.time.measureTimedValue
 
 class TildelteOppgaverQueryHandler(
     private val apiOppgaveService: ApiOppgaveService,
+    private val saksbehandlerDao: SaksbehandlerDao,
 ) : TildelteOppgaverQuerySchema {
     override suspend fun tildelteOppgaverFeed(
         offset: Int,
         limit: Int,
-        oppslattSaksbehandler: ApiSaksbehandlerMedOid,
+        oppslattSaksbehandler: ApiSaksbehandler,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<ApiOppgaverTilBehandling> {
         val innloggetSaksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
-        sikkerlogg.debug(
-            "${innloggetSaksbehandler.navn} (${innloggetSaksbehandler.ident}) søker opp tildelte oppgaver for ${oppslattSaksbehandler.navn} (${oppslattSaksbehandler.ident})",
+
+        val oppslåttSaksbehandler =
+            oppslattSaksbehandler.ident
+                ?.let { saksbehandlerDao.hent(it) ?: return notFound("Finner ikke saksbehandler.") }
+                ?: return notFound("Saksbehandler mangler ident.")
+
+        sikkerlogg.info(
+            "${innloggetSaksbehandler.navn} (${innloggetSaksbehandler.ident}) søker opp tildelte oppgaver for ${oppslåttSaksbehandler.navn} (${oppslåttSaksbehandler.ident})",
         )
         val (oppgaver, tid) =
             measureTimedValue {
                 apiOppgaveService.tildelteOppgaver(
-                    innloggetSaksbehandlerMedOid = innloggetSaksbehandler,
-                    oppslåttSaksbehandlerMedOid = oppslattSaksbehandler,
+                    innloggetSaksbehandler = innloggetSaksbehandler,
+                    oppslåttSaksbehandler = oppslåttSaksbehandler,
                     offset = offset,
                     limit = limit,
                 )

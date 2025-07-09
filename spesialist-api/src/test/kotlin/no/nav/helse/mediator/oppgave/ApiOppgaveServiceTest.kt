@@ -30,8 +30,9 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiMottaker
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveegenskap
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavetype
 import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodetype
-import no.nav.helse.spesialist.api.graphql.schema.ApiSaksbehandlerMedOid
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
+import no.nav.helse.spesialist.domain.Saksbehandler
+import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.testfixtures.lagEpostadresseFraFulltNavn
 import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlerident
 import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlernavn
@@ -137,10 +138,11 @@ internal class ApiOppgaveServiceTest {
                 )
         val oppgaver = apiOppgaveService.tildelteOppgaver(
             saksbehandlerFraApi(),
-            ApiSaksbehandlerMedOid(
-                oid = UUID.randomUUID(),
+            Saksbehandler(
+                id = SaksbehandlerOid(UUID.randomUUID()),
                 navn = "Navn Navnesen",
-                ident = "L815493"
+                ident = "L815493",
+                epost = "navn@navnesen.no"
             ),
             0,
             Int.MAX_VALUE,

@@ -9,7 +9,9 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaverTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodetype
 import no.nav.helse.spesialist.api.graphql.schema.ApiPersonnavn
+import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -20,6 +22,12 @@ class TildelteOppgaverQueryHandlerTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `tildelteOppgaver query uten parametere returnerer oppgave`() {
+        every { saksbehandlerDao.hent("N815493") } returns no.nav.helse.spesialist.domain.Saksbehandler(
+            id = SaksbehandlerOid(UUID.randomUUID()),
+            navn = "Ola Nordmann",
+            ident = "N815493",
+            epost = "ola@nordmann.no"
+        )
         every {
             apiOppgaveService.tildelteOppgaver(any(), any(), any(), any())
         } returns ApiOppgaverTilBehandling(oppgaver = listOf(oppgaveTilBehandling()), totaltAntallOppgaver = 1)
@@ -31,9 +39,8 @@ class TildelteOppgaverQueryHandlerTest : AbstractGraphQLApiTest() {
                     offset: 0,
                     limit: 14,
                     oppslattSaksbehandler:  {
-                        oid: "fe72c646-42b7-4d1d-b0f5-48bdd6c499bf",
-                        navn: "Ola Nordmann",
                         ident: "N815493",
+                        navn: "Ola Nordmann"
                     }
                 ) { oppgaver { id } }
             }
@@ -43,6 +50,56 @@ class TildelteOppgaverQueryHandlerTest : AbstractGraphQLApiTest() {
 
         verify(exactly = 1) { apiOppgaveService.tildelteOppgaver(any(), any(), 0, 14) }
         assertEquals(1, antallOppgaver)
+    }
+
+    @Test
+    fun `tildelteOppgaver query med manglende saksbehandler-ident gir 404`() {
+        val body = runQuery(
+            """
+            {
+                tildelteOppgaverFeed(
+                    offset: 0,
+                    limit: 14,
+                    oppslattSaksbehandler:  {
+                        ident: null,
+                        navn: "Ola Nordmann"
+                    }
+                ) { oppgaver { id } }
+            }
+            """.trimIndent(),
+        )
+        val error = body["errors"].first()
+
+        verify(exactly = 0) { saksbehandlerDao.hent(any()) }
+        verify(exactly = 0) { apiOppgaveService.tildelteOppgaver(any(), any(), any(),  any()) }
+
+        assertTrue(error["message"].asText().contains("Saksbehandler mangler ident"))
+        assertEquals(404, error["extensions"]["code"].asInt())
+    }
+
+    @Test
+    fun `tildelteOppgaver query med ukjent saksbehandler-ident gir 404`() {
+        every { saksbehandlerDao.hent(any()) } returns null
+        val body = runQuery(
+            """
+            {
+                tildelteOppgaverFeed(
+                    offset: 0,
+                    limit: 14,
+                    oppslattSaksbehandler:  {
+                        ident: "E123456",
+                        navn: "Ola Nordmann"
+                    }
+                ) { oppgaver { id } }
+            }
+            """.trimIndent(),
+        )
+        val error = body["errors"].first()
+
+        verify(exactly = 0) { apiOppgaveService.tildelteOppgaver(any(), any(), any(),  any()) }
+
+        assertTrue(error["message"].asText().contains("Finner ikke saksbehandler"))
+        assertEquals(404, error["extensions"]["code"].asInt())
     }
 
     private fun oppgaveTilBehandling() =

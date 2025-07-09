@@ -137,6 +137,7 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                     ),
                     tildelteOppgaver = TildelteOppgaverQueryHandler(
                         apiOppgaveService = apiOppgaveService,
+                        saksbehandlerDao = saksbehandlerDao,
                     ),
                     behandlingsstatistikk = BehandlingsstatistikkQueryHandler(
                         behandlingsstatistikkMediator = behandlingsstatistikkMediator,

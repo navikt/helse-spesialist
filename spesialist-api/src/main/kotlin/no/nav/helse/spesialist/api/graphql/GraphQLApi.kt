@@ -155,6 +155,7 @@ fun lagSchemaMedResolversOgHandlers(
                 tildelteOppgaver =
                     TildelteOppgaverQueryHandler(
                         apiOppgaveService = apiOppgaveService,
+                        saksbehandlerDao = daos.saksbehandlerDao,
                     ),
                 behandlingsstatistikk =
                     BehandlingsstatistikkQueryHandler(
