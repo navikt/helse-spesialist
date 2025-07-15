@@ -2,6 +2,8 @@ package no.nav.helse.modell.kommando
 
 import no.nav.helse.db.MeldingDao
 import no.nav.helse.db.OppgaveDao
+import no.nav.helse.db.ReservasjonDao
+import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.UtbetalingDao
 import no.nav.helse.db.VedtakDao
 import no.nav.helse.mediator.oppgave.OppgaveRepository
@@ -10,13 +12,17 @@ import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.spesialist.application.logg.logg
+import no.nav.helse.spesialist.application.logg.sikkerlogg
 import java.util.UUID
 
 internal class VurderVidereBehandlingAvGodkjenningsbehov(
+    private val fødselsnummer: String,
     private val commandData: GodkjenningsbehovData,
     private val utbetalingDao: UtbetalingDao,
     private val oppgaveRepository: OppgaveRepository,
     private val oppgaveDao: OppgaveDao,
+    private val tildelingDao: TildelingDao,
+    private val reservasjonDao: ReservasjonDao,
     private val vedtakDao: VedtakDao,
     private val meldingDao: MeldingDao,
 ) : Command {
@@ -62,6 +68,11 @@ internal class VurderVidereBehandlingAvGodkjenningsbehov(
         }
 
         return if (harEndringerIGodkjenningsbehov) {
+            val tildeltSaksbehandler = tildelingDao.tildelingForPerson(fødselsnummer)
+            if (tildeltSaksbehandler != null) {
+                reservasjonDao.reserverPerson(tildeltSaksbehandler.oid, fødselsnummer)
+                sikkerlogg.info("Oppretter reservasjon for $fødselsnummer til ${tildeltSaksbehandler.oid} pga eksisterende tildeling")
+            }
             logg.info("Invaliderer oppgave med oppgaveId=${oppgave.id} pga endringer i godkjenningsbehovet")
             oppgaveDao.invaliderOppgave(oppgave.id)
             true

@@ -12,8 +12,10 @@ import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.PåVentDao
+import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.RisikovurderingDao
 import no.nav.helse.db.SessionContext
+import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.UtbetalingDao
 import no.nav.helse.db.VedtakDao
 import no.nav.helse.db.VergemålDao
@@ -272,6 +274,8 @@ internal class GodkjenningsbehovCommand(
     totrinnsvurderingRepository: TotrinnsvurderingRepository,
     avviksvurderingRepository: AvviksvurderingRepository,
     opptegnelseDao: OpptegnelseDao,
+    tildelingDao: TildelingDao,
+    reservasjonDao: ReservasjonDao,
     oppgaveService: OppgaveService,
     godkjenningMediator: GodkjenningMediator,
     person: Person,
@@ -290,6 +294,9 @@ internal class GodkjenningsbehovCommand(
                 oppgaveDao = oppgaveDao,
                 vedtakDao = vedtakDao,
                 meldingDao = meldingDao,
+                fødselsnummer = behovData.fødselsnummer,
+                tildelingDao = tildelingDao,
+                reservasjonDao = reservasjonDao,
             ),
             OpprettKoblingTilHendelseCommand(
                 commandData = behovData,

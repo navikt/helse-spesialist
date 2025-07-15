@@ -24,4 +24,29 @@ class GodkjenningsbehovE2ETest : AbstractE2EIntegrationTest() {
 
         assertBehandlingTilstand("VedtakFattet")
     }
+
+    @Test
+    fun `saksbehandler beholder tildeling ved endret godkjenningsbehov`() {
+        risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
+        søknadOgGodkjenningbehovKommerInn()
+
+        medPersonISpeil {
+            saksbehandlerTildelerSegSaken() // Må til for å "opprette" saksbehandler
+        }
+
+        val vedtaksperiode = førsteVedtaksperiode()
+        vedtaksperiode.fom = vedtaksperiode.fom.minusDays(1)
+        vedtaksperiode.skjæringstidspunkt = vedtaksperiode.fom
+
+        spleisSenderGodkjenningsbehov(vedtaksperiode)
+
+        medPersonISpeil {
+            saksbehandlerGodkjennerAlleVarsler()
+            saksbehandlerFatterVedtak()
+        }
+
+        assertOppgaveTildeltSaksbehandler()
+        assertBehandlingTilstand("VedtakFattet")
+    }
+
 }
