@@ -392,6 +392,8 @@ interface BeregnetPeriodeSchema : ApiPeriode {
     fun annullering(): ApiAnnullering?
 
     fun pensjonsgivendeInntekter(): List<ApiPensjonsgivendeInntekt>
+
+    fun annulleringskandidater(): List<ApiAnnulleringskandidat>
 }
 
 @GraphQLName("BeregnetPeriode")
@@ -430,4 +432,12 @@ data class ApiSykepengedager(
 data class ApiPensjonsgivendeInntekt(
     val arligBelop: BigDecimal,
     val inntektsar: Int,
+)
+
+@GraphQLName("Annulleringskandidat")
+data class ApiAnnulleringskandidat(
+    val fom: LocalDate,
+    val organisasjonsnummer: String,
+    val tom: LocalDate,
+    val vedtaksperiodeId: UUID,
 )

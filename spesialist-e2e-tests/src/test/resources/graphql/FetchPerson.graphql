@@ -436,6 +436,12 @@ fragment beregnetPeriode on BeregnetPeriode {
         arligBelop
         inntektsar
     }
+    annulleringskandidater {
+        fom
+        organisasjonsnummer
+        tom
+        vedtaksperiodeId
+    }
     ...periode
     __typename
 }

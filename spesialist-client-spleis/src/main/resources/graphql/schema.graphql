@@ -66,11 +66,17 @@ type Alder {
   oppfylt: Boolean!
 }
 
+type GraphQLAnnulleringskandidat {
+  fom: LocalDate!
+  organisasjonsnummer: String!
+  tom: LocalDate!
+  vedtaksperiodeId: UUID!
+}
+
 type GraphQLArbeidsgiver {
   generasjoner: [GraphQLGenerasjon!]!
   ghostPerioder: [GraphQLGhostPeriode!]!
   id: UUID!
-  nyeInntektsforholdPerioder: [GraphQLNyttInntektsforholdPeriode!]!
   organisasjonsnummer: String!
 }
 
@@ -90,6 +96,7 @@ type GraphQLArbeidsgiverrefusjon {
 }
 
 type GraphQLBeregnetPeriode implements GraphQLTidslinjeperiode {
+  annulleringskandidater: [GraphQLAnnulleringskandidat!]!
   behandlingId: UUID!
   beregningId: UUID!
   erForkastet: Boolean!
@@ -166,16 +173,6 @@ type GraphQLInntektsmelding implements GraphQLHendelse {
   id: String!
   mottattDato: LocalDateTime!
   type: GraphQLHendelsetype!
-}
-
-type GraphQLNyttInntektsforholdPeriode {
-  dagligBelop: Float!
-  fom: LocalDate!
-  id: UUID!
-  manedligBelop: Float!
-  organisasjonsnummer: String!
-  skjaeringstidspunkt: LocalDate!
-  tom: LocalDate!
 }
 
 type GraphQLOmregnetArsinntekt {

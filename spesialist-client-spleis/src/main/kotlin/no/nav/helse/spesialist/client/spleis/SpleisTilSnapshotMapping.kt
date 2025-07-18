@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.client.spleis
 
 import no.nav.helse.spesialist.application.snapshot.SnapshotAlder
+import no.nav.helse.spesialist.application.snapshot.SnapshotAnnulleringskandidat
 import no.nav.helse.spesialist.application.snapshot.SnapshotArbeidsgiver
 import no.nav.helse.spesialist.application.snapshot.SnapshotArbeidsgiverinntekt
 import no.nav.helse.spesialist.application.snapshot.SnapshotArbeidsgiverrefusjon
@@ -67,6 +68,7 @@ import no.nav.helse.spleis.graphql.hentsnapshot.Alder
 import no.nav.helse.spleis.graphql.hentsnapshot.DefaultGraphQLHendelseImplementation
 import no.nav.helse.spleis.graphql.hentsnapshot.DefaultGraphQLTidslinjeperiodeImplementation
 import no.nav.helse.spleis.graphql.hentsnapshot.DefaultGraphQLVilkarsgrunnlagImplementation
+import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLAnnulleringskandidat
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLArbeidsgiver
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLArbeidsgiverinntekt
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLArbeidsgiverrefusjon
@@ -406,6 +408,7 @@ fun GraphQLBeregnetPeriode.tilSnapshotBeregnetPeriode() =
         utbetaling = utbetaling.tilSnapshotUtbetaling(),
         vilkarsgrunnlagId = vilkarsgrunnlagId,
         pensjonsgivendeInntekter = pensjonsgivendeInntekter.map { it.tilSnapshotPensjonsgivendeInntekt() },
+        annulleringskandidater = annulleringskandidater.map { it.tilSnapshotAnnulleringskandidat() },
     )
 
 fun DefaultGraphQLTidslinjeperiodeImplementation.tilSnapshotUkjentTidslinjeperiode() =
@@ -529,6 +532,14 @@ fun GraphQLPensjonsgivendeInntekt.tilSnapshotPensjonsgivendeInntekt(): SnapshotP
     SnapshotPensjonsgivendeInntekt(
         arligBelop = BigDecimal.valueOf(arligBelop),
         inntektsar = inntektsar,
+    )
+
+fun GraphQLAnnulleringskandidat.tilSnapshotAnnulleringskandidat(): SnapshotAnnulleringskandidat =
+    SnapshotAnnulleringskandidat(
+        fom = fom,
+        organisasjonsnummer = organisasjonsnummer,
+        tom = tom,
+        vedtaksperiodeId = vedtaksperiodeId,
     )
 
 fun GraphQLBegrunnelse.tilSnapshotBegrunnelse() =

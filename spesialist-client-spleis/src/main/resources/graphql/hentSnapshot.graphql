@@ -205,6 +205,12 @@ query HentSnapshot($fnr: String!) {
                             arligBelop
                             inntektsar
                         }
+                        annulleringskandidater {
+                            fom
+                            organisasjonsnummer
+                            tom
+                            vedtaksperiodeId
+                        }
                         periodevilkar {
                             alder {
                                 alderSisteSykedag

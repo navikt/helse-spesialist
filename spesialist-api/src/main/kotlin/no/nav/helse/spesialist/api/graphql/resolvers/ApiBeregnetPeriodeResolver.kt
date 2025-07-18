@@ -29,6 +29,7 @@ import no.nav.helse.spesialist.api.graphql.mapping.tilApiPeriodetype
 import no.nav.helse.spesialist.api.graphql.mapping.toVarselDto
 import no.nav.helse.spesialist.api.graphql.schema.ApiAlder
 import no.nav.helse.spesialist.api.graphql.schema.ApiAnnullering
+import no.nav.helse.spesialist.api.graphql.schema.ApiAnnulleringskandidat
 import no.nav.helse.spesialist.api.graphql.schema.ApiAvslag
 import no.nav.helse.spesialist.api.graphql.schema.ApiAvslagstype
 import no.nav.helse.spesialist.api.graphql.schema.ApiDag
@@ -500,6 +501,16 @@ data class ApiBeregnetPeriodeResolver(
             ApiPensjonsgivendeInntekt(
                 arligBelop = it.arligBelop,
                 inntektsar = it.inntektsar,
+            )
+        }
+
+    override fun annulleringskandidater(): List<ApiAnnulleringskandidat> =
+        periode.annulleringskandidater.map {
+            ApiAnnulleringskandidat(
+                fom = it.fom,
+                organisasjonsnummer = it.organisasjonsnummer,
+                tom = it.tom,
+                vedtaksperiodeId = it.vedtaksperiodeId,
             )
         }
 }

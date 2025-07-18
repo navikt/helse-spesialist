@@ -102,6 +102,7 @@ object GraphQLTestdata {
                 typeEnum = Utbetalingtype.UTBETALING,
             ),
         pensjonsgivendeInntekter = emptyList(),
+        annulleringskandidater = emptyList(),
     )
 
     fun opprettUberegnetPeriode(

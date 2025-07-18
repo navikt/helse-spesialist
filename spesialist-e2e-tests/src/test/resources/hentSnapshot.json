@@ -12,6 +12,7 @@
               "perioder": [
                 {
                   "__typename": "GraphQLBeregnetPeriode",
+                  "annulleringskandidater": [],
                   "behandlingId": "3cfb325d-f2de-47cd-a7ff-101c32a09ffc",
                   "kilde": "af4656ef-fb9b-4c9d-b575-64242b851c5b",
                   "fom": "2024-12-01",

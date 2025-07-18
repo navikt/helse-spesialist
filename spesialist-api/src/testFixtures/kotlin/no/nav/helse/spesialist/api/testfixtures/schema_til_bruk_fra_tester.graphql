@@ -72,6 +72,13 @@ type Annullering {
     tidspunkt: LocalDateTime!
 }
 
+type Annulleringskandidat {
+    fom: LocalDate!
+    organisasjonsnummer: String!
+    tom: LocalDate!
+    vedtaksperiodeId: UUID!
+}
+
 type Antall {
     automatisk: Int!
     manuelt: Int!
@@ -184,6 +191,7 @@ type Behandlingsstatistikk {
 
 type BeregnetPeriode implements Periode {
     annullering: Annullering
+    annulleringskandidater: [Annulleringskandidat!]!
     avslag: [Avslag!]!
     behandlingId: UUID!
     beregningId: UUID!

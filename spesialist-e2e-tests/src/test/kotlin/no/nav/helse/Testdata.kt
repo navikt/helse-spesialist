@@ -100,6 +100,7 @@ object Testdata {
                                                 vilkarsgrunnlagId = null,
                                                 periodetilstand = GraphQLPeriodetilstand.TILGODKJENNING,
                                                 pensjonsgivendeInntekter = emptyList(),
+                                                annulleringskandidater = emptyList(),
                                             ),
                                         ),
                                 ),
