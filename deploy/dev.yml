@@ -88,7 +88,7 @@ spec:
           kind: Project
         role: roles/cloudprofiler.agent
     sqlInstances:
-      - type: POSTGRES_15
+      - type: POSTGRES_16
         diskAutoresize: true
         tier: db-custom-1-3840
         flags:
