@@ -313,7 +313,7 @@ fun SnapshotPeriodetilstand.tilApiPeriodetilstand(erSisteGenerasjon: Boolean) =
                 ApiPeriodetilstand.UtbetaltVenterPaEnAnnenPeriode
             }
         }
-
+        SnapshotPeriodetilstand.AVVENTERANNULLERING -> ApiPeriodetilstand.AvventerAnnullering
         SnapshotPeriodetilstand.AVVENTERINNTEKTSOPPLYSNINGER -> ApiPeriodetilstand.AvventerInntektsopplysninger
         SnapshotPeriodetilstand.TILSKJONNSFASTSETTELSE -> ApiPeriodetilstand.TilSkjonnsfastsettelse
         else -> ApiPeriodetilstand.Ukjent

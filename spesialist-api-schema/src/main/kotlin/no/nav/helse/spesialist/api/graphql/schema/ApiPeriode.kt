@@ -35,6 +35,7 @@ enum class ApiPeriodetilstand {
     VenterPaEnAnnenPeriode,
     UtbetaltVenterPaEnAnnenPeriode,
     TilSkjonnsfastsettelse,
+    AvventerAnnullering,
     AvventerInntektsopplysninger,
     Ukjent,
 }

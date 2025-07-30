@@ -458,6 +458,7 @@ enum GraphQLInntektstype {
 enum GraphQLPeriodetilstand {
   AnnulleringFeilet
   Annullert
+  AvventerAnnullering
   AvventerInntektsopplysninger
   ForberederGodkjenning
   IngenUtbetaling

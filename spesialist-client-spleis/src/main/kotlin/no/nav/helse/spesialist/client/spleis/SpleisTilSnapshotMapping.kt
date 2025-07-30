@@ -593,6 +593,7 @@ fun GraphQLPeriodetilstand.tilSnapshotPeriodetilstand() =
     when (this) {
         GraphQLPeriodetilstand.ANNULLERINGFEILET -> SnapshotPeriodetilstand.ANNULLERINGFEILET
         GraphQLPeriodetilstand.ANNULLERT -> SnapshotPeriodetilstand.ANNULLERT
+        GraphQLPeriodetilstand.AVVENTERANNULLERING -> SnapshotPeriodetilstand.AVVENTERANNULLERING
         GraphQLPeriodetilstand.AVVENTERINNTEKTSOPPLYSNINGER -> SnapshotPeriodetilstand.AVVENTERINNTEKTSOPPLYSNINGER
         GraphQLPeriodetilstand.FORBEREDERGODKJENNING -> SnapshotPeriodetilstand.FORBEREDERGODKJENNING
         GraphQLPeriodetilstand.INGENUTBETALING -> SnapshotPeriodetilstand.INGENUTBETALING

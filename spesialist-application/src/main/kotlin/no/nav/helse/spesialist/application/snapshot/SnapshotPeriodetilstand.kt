@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.application.snapshot
 enum class SnapshotPeriodetilstand {
     ANNULLERINGFEILET,
     ANNULLERT,
+    AVVENTERANNULLERING,
     AVVENTERINNTEKTSOPPLYSNINGER,
     FORBEREDERGODKJENNING,
     INGENUTBETALING,
