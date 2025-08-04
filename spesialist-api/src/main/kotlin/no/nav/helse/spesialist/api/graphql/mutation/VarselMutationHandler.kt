@@ -10,7 +10,9 @@ import no.nav.helse.spesialist.api.graphql.notFound
 import no.nav.helse.spesialist.api.graphql.schema.ApiVarselDTO
 import java.util.UUID
 
-class VarselMutationHandler(private val varselRepository: VarselApiRepository) : VarselMutationSchema {
+class VarselMutationHandler(
+    private val varselRepository: VarselApiRepository,
+) : VarselMutationSchema {
     override fun settVarselstatus(
         generasjonIdString: String,
         varselkode: String,

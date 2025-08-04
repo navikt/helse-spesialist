@@ -12,11 +12,10 @@ import no.nav.helse.modell.person.KlargjørTilgangsrelaterteData
 class KlargjørPersonForVisningRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
-    override fun preconditions(): River.PacketValidation {
-        return River.PacketValidation {
+    override fun preconditions(): River.PacketValidation =
+        River.PacketValidation {
             it.requireValue("@event_name", "klargjør_person_for_visning")
         }
-    }
 
     override fun validations() =
         River.PacketValidation {

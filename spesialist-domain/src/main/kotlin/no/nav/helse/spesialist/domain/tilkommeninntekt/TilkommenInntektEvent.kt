@@ -51,4 +51,7 @@ data class TilkommenInntektGjenopprettetEvent(
     val endringer: TilkommenInntektEvent.Endringer,
 ) : TilkommenInntektEvent
 
-data class Endring<T>(val fra: T, val til: T)
+data class Endring<T>(
+    val fra: T,
+    val til: T,
+)

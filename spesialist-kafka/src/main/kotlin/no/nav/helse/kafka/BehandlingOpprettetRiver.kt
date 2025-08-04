@@ -16,11 +16,10 @@ class BehandlingOpprettetRiver(
     private val mediator: MeldingMediator,
     private val featureToggles: FeatureToggles,
 ) : SpesialistRiver {
-    override fun preconditions(): River.PacketValidation {
-        return River.PacketValidation {
+    override fun preconditions(): River.PacketValidation =
+        River.PacketValidation {
             it.requireValue("@event_name", "behandling_opprettet")
         }
-    }
 
     override fun validations() =
         River.PacketValidation {

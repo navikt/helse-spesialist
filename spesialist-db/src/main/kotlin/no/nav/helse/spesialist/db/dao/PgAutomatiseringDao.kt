@@ -10,7 +10,9 @@ import no.nav.helse.spesialist.db.HelseDao.Companion.single
 import no.nav.helse.spesialist.db.HelseDao.Companion.update
 import java.util.UUID
 
-class PgAutomatiseringDao internal constructor(val session: Session) : AutomatiseringDao {
+class PgAutomatiseringDao internal constructor(
+    val session: Session,
+) : AutomatiseringDao {
     override fun skalTvingeAutomatisering(vedtaksperiodeId: UUID): Boolean =
         asSQL(
             """
@@ -70,7 +72,8 @@ class PgAutomatiseringDao internal constructor(val session: Session) : Automatis
         AND hendelse_ref = :hendelseId
         AND (inaktiv_fra IS NULL OR inaktiv_fra > now())
         """.trimIndent(),
-        "vedtaksperiodeId" to vedtaksperiodeId, "hendelseId" to hendelseId,
+        "vedtaksperiodeId" to vedtaksperiodeId,
+        "hendelseId" to hendelseId,
     ).single(session) { it.boolean(1) } ?: false
 
     override fun automatisert(

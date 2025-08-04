@@ -12,7 +12,9 @@ private val regex = "^$VARSELKODEFORMAT$".toRegex()
 // EX = Eksterne systemer
 // IK = Inngangskriterier
 
-enum class Varselkode(private val varseltekst: String) {
+enum class Varselkode(
+    private val varseltekst: String,
+) {
     SB_BO_1("Beslutteroppgave: Lovvalg og medlemskap"), // Avviklet
     SB_BO_2("Beslutteroppgave: Overstyring av utbetalingsdager"), // Avviklet
     SB_BO_3("Beslutteroppgave: Overstyring av inntekt"), // Avviklet
@@ -41,9 +43,7 @@ enum class Varselkode(private val varseltekst: String) {
         require(this.name.matches(regex)) { "Ugyldig varselkode-format: ${this.name}" }
     }
 
-    fun nyttVarsel(vedtaksperiodeId: UUID): Varsel {
-        return Varsel(UUID.randomUUID(), this.name, LocalDateTime.now(), vedtaksperiodeId)
-    }
+    fun nyttVarsel(vedtaksperiodeId: UUID): Varsel = Varsel(UUID.randomUUID(), this.name, LocalDateTime.now(), vedtaksperiodeId)
 
     override fun toString() = "${this.name}: $varseltekst"
 }

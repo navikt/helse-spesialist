@@ -44,7 +44,8 @@ class MeldingMediator(
     }
 
     private val poisonPillsCache: LoadingCache<Unit, PoisonPills> =
-        Caffeine.newBuilder()
+        Caffeine
+            .newBuilder()
             .refreshAfterWrite(poisonPillTimeToLive)
             .build(CacheLoader { _ -> poisonPillDao.poisonPills() })
 

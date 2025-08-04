@@ -10,8 +10,9 @@ import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 
-class PgTotrinnsvurderingRepository(session: Session) :
-    QueryRunner by MedSession(session),
+class PgTotrinnsvurderingRepository(
+    session: Session,
+) : QueryRunner by MedSession(session),
     TotrinnsvurderingRepository {
     private val overstyringRepository = PgOverstyringRepository(session)
 

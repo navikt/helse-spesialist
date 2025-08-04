@@ -361,12 +361,14 @@ fun SnapshotInntektstype.tilApiInntektstype() =
         else -> throw Exception("Ukjent inntektstype $this")
     }
 
-fun SnapshotVilkarsgrunnlag.tilVilkarsgrunnlagV2(avviksvurderingRepository: AvviksvurderingRepository): ApiVilkårsgrunnlagV2 {
-    return when (this) {
+fun SnapshotVilkarsgrunnlag.tilVilkarsgrunnlagV2(avviksvurderingRepository: AvviksvurderingRepository): ApiVilkårsgrunnlagV2 =
+    when (this) {
         is SnapshotSpleisVilkarsgrunnlag -> {
             val avviksvurdering = avviksvurderingRepository.hentAvviksvurdering(id)
             val orgnrs =
-                avviksvurdering?.sammenligningsgrunnlag?.innrapporterteInntekter
+                avviksvurdering
+                    ?.sammenligningsgrunnlag
+                    ?.innrapporterteInntekter
                     .orEmpty()
                     .map { it.arbeidsgiverreferanse }
                     .plus(inntekter.map { it.arbeidsgiver })
@@ -453,7 +455,6 @@ fun SnapshotVilkarsgrunnlag.tilVilkarsgrunnlagV2(avviksvurderingRepository: Avvi
 
         else -> throw Exception("Ukjent vilkårsgrunnlag ${this.javaClass.name}")
     }
-}
 
 internal fun SnapshotSykepengegrunnlagsgrense.tilSykepengegrunnlaggrense() =
     ApiSykepengegrunnlagsgrense(

@@ -42,8 +42,7 @@ internal class VurderVurderingsmomenter(
                         when (sykepengegrunnlagsfakta) {
                             is Sykepengegrunnlagsfakta.Infotrygd -> null
                             is Sykepengegrunnlagsfakta.Spleis ->
-                                sykepengegrunnlagsfakta.arbeidsgivere.find { it.organisasjonsnummer == organisasjonsnummer }?.let {
-                                        sykepengegrunnlagsArbeidsgiver ->
+                                sykepengegrunnlagsfakta.arbeidsgivere.find { it.organisasjonsnummer == organisasjonsnummer }?.let { sykepengegrunnlagsArbeidsgiver ->
                                     InntektTilRisk(
                                         omregnetÅrsinntekt = sykepengegrunnlagsArbeidsgiver.omregnetÅrsinntekt,
                                         inntektskilde = sykepengegrunnlagsArbeidsgiver.inntektskilde.name,

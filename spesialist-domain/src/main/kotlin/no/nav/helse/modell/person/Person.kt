@@ -46,9 +46,10 @@ class Person private constructor(
     fun utgåendeMeldinger() = meldingslogg.hendelser()
 
     fun forkastedeVedtaksperiodeIder() =
-        vedtaksperioder.filter {
-            it.erForkastet()
-        }.map { it.vedtaksperiodeId() }
+        vedtaksperioder
+            .filter {
+                it.erForkastet()
+            }.map { it.vedtaksperiodeId() }
 
     fun flyttEventuelleAvviksvarsler(
         vedtaksperiodeId: UUID,
@@ -115,7 +116,8 @@ class Person private constructor(
     }
 
     fun vedtaksperiodeForkastet(vedtaksperiodeId: UUID) {
-        vedtaksperioder.find { it.vedtaksperiodeId() == vedtaksperiodeId }
+        vedtaksperioder
+            .find { it.vedtaksperiodeId() == vedtaksperiodeId }
             ?.vedtaksperiodeForkastet()
     }
 
@@ -136,10 +138,9 @@ class Person private constructor(
         return checkNotNull(vedtaksperiode)
     }
 
-    private fun vedtaksperiodeForBehandling(spleisBehandlingId: UUID): Vedtaksperiode {
-        return vedtaksperioder.finnBehandling(spleisBehandlingId)
+    private fun vedtaksperiodeForBehandling(spleisBehandlingId: UUID): Vedtaksperiode =
+        vedtaksperioder.finnBehandling(spleisBehandlingId)
             ?: throw IllegalStateException("Behandling med spleisBehandlingId=$spleisBehandlingId finnes ikke")
-    }
 
     fun sykefraværstilfelle(vedtaksperiodeId: UUID): Sykefraværstilfelle {
         val skjæringstidspunkt =
@@ -187,8 +188,8 @@ class Person private constructor(
             vedtaksperioder: List<VedtaksperiodeDto>,
             skjønnsfastsattSykepengegrunnlag: List<SkjønnsfastsattSykepengegrunnlagDto>,
             avviksvurderinger: List<Avviksvurdering>,
-        ): Person {
-            return Person(
+        ): Person =
+            Person(
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
                 vedtaksperioder =
@@ -216,6 +217,5 @@ class Person private constructor(
                             )
                         },
             )
-        }
     }
 }

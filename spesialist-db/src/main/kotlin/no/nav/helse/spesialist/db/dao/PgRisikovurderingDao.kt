@@ -11,7 +11,10 @@ import no.nav.helse.spesialist.db.objectMapper
 import java.time.LocalDateTime
 import java.util.UUID
 
-class PgRisikovurderingDao internal constructor(session: Session) : RisikovurderingDao, QueryRunner by MedSession(session) {
+class PgRisikovurderingDao internal constructor(
+    session: Session,
+) : RisikovurderingDao,
+    QueryRunner by MedSession(session) {
     override fun hentRisikovurdering(vedtaksperiodeId: UUID) =
         asSQL(
             """

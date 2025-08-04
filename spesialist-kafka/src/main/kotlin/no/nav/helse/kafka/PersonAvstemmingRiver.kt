@@ -13,16 +13,15 @@ import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.sikkerlogg
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 class PersonAvstemmingRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
-    override fun preconditions(): River.PacketValidation {
-        return River.PacketValidation {
+    override fun preconditions(): River.PacketValidation =
+        River.PacketValidation {
             it.requireValue("@event_name", "person_avstemt")
         }
-    }
 
     override fun validations() =
         River.PacketValidation {
@@ -42,9 +41,10 @@ class PersonAvstemmingRiver(
         val spesialistBehandlinger = mediator.finnBehandlingerFor(fødselsnummer)
 
         val spleisBehandlinger =
-            pakkUtBehandlinger(packet).filter {
-                it.behandlingOpprettet.isAfter(LocalDate.of(2024, 5, 1).atStartOfDay())
-            }.map { it.behandlingId }
+            pakkUtBehandlinger(packet)
+                .filter {
+                    it.behandlingOpprettet.isAfter(LocalDate.of(2024, 5, 1).atStartOfDay())
+                }.map { it.behandlingId }
         val felles = spleisBehandlinger.intersect(spesialistBehandlinger.mapNotNull { it.spleisBehandlingId })
 
         val antallBehandlingerISpesialist = felles.size
@@ -70,5 +70,8 @@ class PersonAvstemmingRiver(
             }
         }
 
-    data class SpleisBehandling(val behandlingId: UUID, val behandlingOpprettet: LocalDateTime)
+    data class SpleisBehandling(
+        val behandlingId: UUID,
+        val behandlingOpprettet: LocalDateTime,
+    )
 }

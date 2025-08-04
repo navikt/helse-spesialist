@@ -12,11 +12,10 @@ import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
 class GosysOppgaveEndretRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
-    override fun preconditions(): River.PacketValidation {
-        return River.PacketValidation {
+    override fun preconditions(): River.PacketValidation =
+        River.PacketValidation {
             it.requireValue("@event_name", "gosys_oppgave_endret")
         }
-    }
 
     override fun validations() =
         River.PacketValidation {

@@ -31,19 +31,16 @@ abstract class MacroCommand : Command {
         return run(context, commands.subList(currentIndex, commands.size))
     }
 
-    final override fun hash(): String {
-        return name + commands.joinToString { it.hash() }
-    }
+    final override fun hash(): String = name + commands.joinToString { it.hash() }
 
     private fun run(
         context: CommandContext,
         commands: List<Command>,
-    ): Boolean {
-        return CommandContext.run(context, commands) {
+    ): Boolean =
+        CommandContext.run(context, commands) {
             historikk.add(0, it)
             runCommand(context, it, Command::execute)
         }
-    }
 
     private fun runCommand(
         context: CommandContext,

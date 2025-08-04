@@ -3,7 +3,9 @@ package no.nav.helse.modell.vedtak
 sealed interface Sykepengegrunnlagsfakta {
     val omregnetÅrsinntekt: Double
 
-    data class Infotrygd(override val omregnetÅrsinntekt: Double) : Sykepengegrunnlagsfakta
+    data class Infotrygd(
+        override val omregnetÅrsinntekt: Double,
+    ) : Sykepengegrunnlagsfakta
 
     sealed class Spleis : Sykepengegrunnlagsfakta {
         abstract val seksG: Double

@@ -12,11 +12,10 @@ import no.nav.helse.mediator.meldinger.hendelser.AvsluttetUtenVedtakMessage
 class AvsluttetUtenVedtakRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
-    override fun preconditions(): River.PacketValidation {
-        return River.PacketValidation {
+    override fun preconditions(): River.PacketValidation =
+        River.PacketValidation {
             it.requireValue("@event_name", "avsluttet_uten_vedtak")
         }
-    }
 
     override fun validations() =
         River.PacketValidation {

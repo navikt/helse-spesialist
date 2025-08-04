@@ -156,8 +156,8 @@ private fun List<Map<String, Any>>.supplerMedIndividuellBegrunnelse(
 private fun List<Map<String, Any>>.supplerMedSkjønnsfastsettingsbegrunnelse(
     skjønnsfastsettingopplysninger: Sykepengevedtak.VedtakMedSkjønnsvurdering.Skjønnsfastsettingopplysninger,
     sykepengevedtak: Sykepengevedtak,
-): List<Map<String, Any>> {
-    return this +
+): List<Map<String, Any>> =
+    this +
         listOf(
             mapOf(
                 "type" to "SkjønnsfastsattSykepengegrunnlagMal",
@@ -193,4 +193,3 @@ private fun List<Map<String, Any>>.supplerMedSkjønnsfastsettingsbegrunnelse(
                     ),
             ),
         )
-}

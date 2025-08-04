@@ -9,7 +9,10 @@ import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 
-class PgVarselDao internal constructor(dataSource: DataSource) : VarselDao, QueryRunner by MedDataSource(dataSource) {
+class PgVarselDao internal constructor(
+    dataSource: DataSource,
+) : VarselDao,
+    QueryRunner by MedDataSource(dataSource) {
     override fun avvikleVarsel(
         varselkode: String,
         definisjonId: UUID,

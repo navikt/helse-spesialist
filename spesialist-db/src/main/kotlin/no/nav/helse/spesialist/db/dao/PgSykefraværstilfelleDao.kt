@@ -10,7 +10,9 @@ import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.HelseDao.Companion.list
 import no.nav.helse.spesialist.db.objectMapper
 
-class PgSykefraværstilfelleDao internal constructor(private val session: Session) : SykefraværstilfelleDao {
+class PgSykefraværstilfelleDao internal constructor(
+    private val session: Session,
+) : SykefraværstilfelleDao {
     override fun finnSkjønnsfastsatteSykepengegrunnlag(fødselsnummer: String): List<SkjønnsfastsattSykepengegrunnlagDto> =
         asSQL(
             """
@@ -27,8 +29,11 @@ class PgSykefraværstilfelleDao internal constructor(private val session: Sessio
             SkjønnsfastsattSykepengegrunnlagDto(
                 type = enumValueOf(it.string("type")),
                 årsak =
-                    it.string("subsumsjon")
-                        .let { objectMapper.readValue<LovhjemmelForDatabase>(it) }.ledd!!.tilÅrsakDto(),
+                    it
+                        .string("subsumsjon")
+                        .let { objectMapper.readValue<LovhjemmelForDatabase>(it) }
+                        .ledd!!
+                        .tilÅrsakDto(),
                 skjæringstidspunkt = it.localDate("skjaeringstidspunkt"),
                 begrunnelseFraMal = it.string("mal"),
                 begrunnelseFraFritekst = it.string("fritekst"),
@@ -37,11 +42,10 @@ class PgSykefraværstilfelleDao internal constructor(private val session: Sessio
             )
         }
 
-    private fun String.tilÅrsakDto(): SkjønnsfastsettingsårsakDto {
-        return when (this) {
+    private fun String.tilÅrsakDto(): SkjønnsfastsettingsårsakDto =
+        when (this) {
             "2" -> SkjønnsfastsettingsårsakDto.ANDRE_AVSNITT
             "3" -> SkjønnsfastsettingsårsakDto.TREDJE_AVSNITT
             else -> SkjønnsfastsettingsårsakDto.ANDRE_AVSNITT
         }
-    }
 }

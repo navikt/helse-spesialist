@@ -11,7 +11,8 @@ import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
 
 internal class PgArbeidsgiverRepository(
     private val session: Session,
-) : QueryRunner by MedSession(session), ArbeidsgiverRepository {
+) : QueryRunner by MedSession(session),
+    ArbeidsgiverRepository {
     override fun lagre(arbeidsgiver: Arbeidsgiver) {
         asSQL(
             """

@@ -16,11 +16,10 @@ import no.nav.helse.spesialist.domain.Periode
 class TilbakedateringBehandletRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
-    override fun preconditions(): River.PacketValidation {
-        return River.PacketValidation {
+    override fun preconditions(): River.PacketValidation =
+        River.PacketValidation {
             it.requireValue("@event_name", "tilbakedatering_behandlet")
         }
-    }
 
     override fun validations() =
         River.PacketValidation {

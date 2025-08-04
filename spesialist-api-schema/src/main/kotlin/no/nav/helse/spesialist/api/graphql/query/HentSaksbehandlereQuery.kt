@@ -9,5 +9,6 @@ interface HentSaksbehandlereQuerySchema : Query {
     suspend fun hentSaksbehandlere(env: DataFetchingEnvironment): DataFetcherResult<List<ApiSaksbehandler>>
 }
 
-class HentSaksbehandlereQuery(private val handler: HentSaksbehandlereQuerySchema) :
-    HentSaksbehandlereQuerySchema by handler
+class HentSaksbehandlereQuery(
+    private val handler: HentSaksbehandlereQuerySchema,
+) : HentSaksbehandlereQuerySchema by handler

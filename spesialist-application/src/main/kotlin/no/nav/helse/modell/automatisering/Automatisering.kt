@@ -52,8 +52,8 @@ internal class Automatisering(
             sessionContext: SessionContext,
             subsumsjonsmelderProvider: () -> Subsumsjonsmelder,
             stikkprøver: Stikkprøver,
-        ): Automatisering {
-            return Automatisering(
+        ): Automatisering =
+            Automatisering(
                 risikovurderingDao = sessionContext.risikovurderingDao,
                 automatiseringStansetSjekker =
                     StansAutomatiskBehandlingMediator.Factory.stansAutomatiskBehandlingMediator(
@@ -72,7 +72,6 @@ internal class Automatisering(
                 totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository,
                 stansAutomatiskBehandlingSaksbehandlerDao = sessionContext.stansAutomatiskBehandlingSaksbehandlerDao,
             )
-        }
     }
 
     private companion object {
@@ -143,7 +142,9 @@ internal class Automatisering(
 
     private sealed interface AutomatiserKorrigertSøknadResultat {
         sealed interface SkyldesKorrigertSøknad : AutomatiserKorrigertSøknadResultat {
-            data class KanIkkeAutomatiseres(val årsak: String) : SkyldesKorrigertSøknad
+            data class KanIkkeAutomatiseres(
+                val årsak: String,
+            ) : SkyldesKorrigertSøknad
 
             data object KanAutomatiseres : SkyldesKorrigertSøknad
         }
@@ -171,7 +172,8 @@ internal class Automatisering(
         if (meldingDao.erKorrigertSøknadAutomatiskBehandlet(hendelseId)) return SkyldesKorrigertSøknad.KanAutomatiseres
 
         val merEnn6MånederSidenVedtakPåFørsteMottattSøknad =
-            generasjonDao.førsteGenerasjonVedtakFattetTidspunkt(vedtaksperiodeId)
+            generasjonDao
+                .førsteGenerasjonVedtakFattetTidspunkt(vedtaksperiodeId)
                 ?.isBefore(LocalDateTime.now().minusMonths(6))
                 ?: true
         val antallKorrigeringer = meldingDao.finnAntallAutomatisertKorrigertSøknad(vedtaksperiodeId)
@@ -268,7 +270,8 @@ internal class Automatisering(
     }
 
     private fun valider(vararg valideringer: AutomatiseringValidering) =
-        valideringer.toList()
+        valideringer
+            .toList()
             .filterNot(AutomatiseringValidering::erAautomatiserbar)
             .map(AutomatiseringValidering::error)
 
@@ -333,11 +336,9 @@ interface Stikkprøver {
 
                 override fun utsEnArbeidsgiverForlengelse() = plukkTilManuell(env["STIKKPROEVER_UTS_EN_AG_FORLENGELSE_DIVISOR"])
 
-                override fun fullRefusjonFlereArbeidsgivereFørstegangsbehandling() =
-                    plukkTilManuell(env["STIKKPROEVER_FULL_REFUSJON_FLERE_AG_FGB_DIVISOR"])
+                override fun fullRefusjonFlereArbeidsgivereFørstegangsbehandling() = plukkTilManuell(env["STIKKPROEVER_FULL_REFUSJON_FLERE_AG_FGB_DIVISOR"])
 
-                override fun fullRefusjonFlereArbeidsgivereForlengelse() =
-                    plukkTilManuell(env["STIKKPROEVER_FULL_REFUSJON_FLERE_AG_FORLENGELSE_DIVISOR"])
+                override fun fullRefusjonFlereArbeidsgivereForlengelse() = plukkTilManuell(env["STIKKPROEVER_FULL_REFUSJON_FLERE_AG_FORLENGELSE_DIVISOR"])
 
                 override fun fullRefusjonEnArbeidsgiver() = plukkTilManuell(env["STIKKPROEVER_FULL_REFUSJON_EN_AG_DIVISOR"])
             }

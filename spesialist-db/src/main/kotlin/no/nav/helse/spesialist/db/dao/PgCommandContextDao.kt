@@ -20,7 +20,8 @@ import javax.sql.DataSource
 
 class PgCommandContextDao private constructor(
     queryRunner: QueryRunner,
-) : CommandContextDao, QueryRunner by queryRunner {
+) : CommandContextDao,
+    QueryRunner by queryRunner {
     internal constructor(session: Session) : this(MedSession(session))
     internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 

@@ -15,7 +15,8 @@ import java.util.UUID
 
 internal class PgNotatRepository(
     session: Session,
-) : QueryRunner by MedSession(session), NotatRepository {
+) : QueryRunner by MedSession(session),
+    NotatRepository {
     override fun lagre(notat: Notat) {
         if (!notat.harFåttTildeltId()) {
             insertNotat(notat).let(::NotatId).let(notat::tildelId)

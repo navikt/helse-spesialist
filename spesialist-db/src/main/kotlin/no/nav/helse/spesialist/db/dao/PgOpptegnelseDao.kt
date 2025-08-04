@@ -9,7 +9,10 @@ import no.nav.helse.spesialist.db.QueryRunner
 import java.util.UUID
 import javax.sql.DataSource
 
-class PgOpptegnelseDao private constructor(private val queryRunner: QueryRunner) : OpptegnelseDao, QueryRunner by queryRunner {
+class PgOpptegnelseDao private constructor(
+    private val queryRunner: QueryRunner,
+) : OpptegnelseDao,
+    QueryRunner by queryRunner {
     internal constructor(session: Session) : this(MedSession(session))
     internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 

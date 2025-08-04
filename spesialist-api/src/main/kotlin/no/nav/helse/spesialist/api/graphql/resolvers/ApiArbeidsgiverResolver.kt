@@ -120,19 +120,20 @@ class ApiArbeidsgiverResolver(
 
     @Suppress("unused")
     override fun inntekterFraAordningen(): List<ApiArbeidsgiverInntekterFraAOrdningen> =
-        arbeidsgiverApiDao.finnArbeidsgiverInntekterFraAordningen(
-            fødselsnummer,
-            organisasjonsnummer,
-        ).map { fraAO ->
-            ApiArbeidsgiverInntekterFraAOrdningen(
-                skjaeringstidspunkt = fraAO.skjaeringstidspunkt,
-                inntekter =
-                    fraAO.inntekter.map { inntekt ->
-                        ApiInntektFraAOrdningen(
-                            maned = inntekt.maned,
-                            sum = inntekt.sum,
-                        )
-                    },
-            )
-        }
+        arbeidsgiverApiDao
+            .finnArbeidsgiverInntekterFraAordningen(
+                fødselsnummer,
+                organisasjonsnummer,
+            ).map { fraAO ->
+                ApiArbeidsgiverInntekterFraAOrdningen(
+                    skjaeringstidspunkt = fraAO.skjaeringstidspunkt,
+                    inntekter =
+                        fraAO.inntekter.map { inntekt ->
+                            ApiInntektFraAOrdningen(
+                                maned = inntekt.maned,
+                                sum = inntekt.sum,
+                            )
+                        },
+                )
+            }
 }

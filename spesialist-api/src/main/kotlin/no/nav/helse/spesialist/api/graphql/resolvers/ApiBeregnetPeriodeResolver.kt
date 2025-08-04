@@ -433,18 +433,17 @@ data class ApiBeregnetPeriodeResolver(
         }
 
     override fun avslag(): List<ApiAvslag> =
-        vedtakBegrunnelseDao.finnAlleVedtakBegrunnelser(
-            vedtaksperiodeId = periode.vedtaksperiodeId,
-            utbetalingId = periode.utbetaling.id,
-        )
-            .filter {
+        vedtakBegrunnelseDao
+            .finnAlleVedtakBegrunnelser(
+                vedtaksperiodeId = periode.vedtaksperiodeId,
+                utbetalingId = periode.utbetaling.id,
+            ).filter {
                 it.type in
                     setOf(
                         VedtakBegrunnelseTypeFraDatabase.AVSLAG,
                         VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE,
                     )
-            }
-            .map { vedtakBegrunnelse ->
+            }.map { vedtakBegrunnelse ->
                 ApiAvslag(
                     type =
                         when (vedtakBegrunnelse.type) {
@@ -460,38 +459,40 @@ data class ApiBeregnetPeriodeResolver(
             }
 
     override fun vedtakBegrunnelser(): List<ApiVedtakBegrunnelse> =
-        vedtakBegrunnelseDao.finnAlleVedtakBegrunnelser(
-            vedtaksperiodeId = periode.vedtaksperiodeId,
-            utbetalingId = periode.utbetaling.id,
-        ).map { vedtakBegrunnelse ->
-            ApiVedtakBegrunnelse(
-                utfall =
-                    when (vedtakBegrunnelse.type) {
-                        VedtakBegrunnelseTypeFraDatabase.AVSLAG -> ApiVedtakUtfall.AVSLAG
-                        VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE -> ApiVedtakUtfall.DELVIS_INNVILGELSE
-                        VedtakBegrunnelseTypeFraDatabase.INNVILGELSE -> ApiVedtakUtfall.INNVILGELSE
-                    },
-                begrunnelse = vedtakBegrunnelse.begrunnelse,
-                opprettet = vedtakBegrunnelse.opprettet,
-                saksbehandlerIdent = vedtakBegrunnelse.saksbehandlerIdent,
-            )
-        }
+        vedtakBegrunnelseDao
+            .finnAlleVedtakBegrunnelser(
+                vedtaksperiodeId = periode.vedtaksperiodeId,
+                utbetalingId = periode.utbetaling.id,
+            ).map { vedtakBegrunnelse ->
+                ApiVedtakBegrunnelse(
+                    utfall =
+                        when (vedtakBegrunnelse.type) {
+                            VedtakBegrunnelseTypeFraDatabase.AVSLAG -> ApiVedtakUtfall.AVSLAG
+                            VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE -> ApiVedtakUtfall.DELVIS_INNVILGELSE
+                            VedtakBegrunnelseTypeFraDatabase.INNVILGELSE -> ApiVedtakUtfall.INNVILGELSE
+                        },
+                    begrunnelse = vedtakBegrunnelse.begrunnelse,
+                    opprettet = vedtakBegrunnelse.opprettet,
+                    saksbehandlerIdent = vedtakBegrunnelse.saksbehandlerIdent,
+                )
+            }
 
     override fun annullering(): ApiAnnullering? =
         if (erSisteGenerasjon) {
-            saksbehandlerMediator.hentAnnullering(
-                periode.utbetaling.arbeidsgiverFagsystemId,
-                periode.utbetaling.personFagsystemId,
-            )?.let {
-                ApiAnnullering(
-                    saksbehandlerIdent = it.saksbehandlerIdent,
-                    arbeidsgiverFagsystemId = it.arbeidsgiverFagsystemId,
-                    personFagsystemId = it.personFagsystemId,
-                    tidspunkt = it.tidspunkt,
-                    arsaker = it.arsaker,
-                    begrunnelse = it.begrunnelse,
-                )
-            }
+            saksbehandlerMediator
+                .hentAnnullering(
+                    periode.utbetaling.arbeidsgiverFagsystemId,
+                    periode.utbetaling.personFagsystemId,
+                )?.let {
+                    ApiAnnullering(
+                        saksbehandlerIdent = it.saksbehandlerIdent,
+                        arbeidsgiverFagsystemId = it.arbeidsgiverFagsystemId,
+                        personFagsystemId = it.personFagsystemId,
+                        tidspunkt = it.tidspunkt,
+                        arsaker = it.arsaker,
+                        begrunnelse = it.begrunnelse,
+                    )
+                }
         } else {
             null
         }
@@ -565,5 +566,4 @@ private fun SnapshotOppdrag.tilSimulering(): ApiSimulering =
             },
     )
 
-private fun List<JsonNode>.tilFaresignaler(): List<ApiFaresignal> =
-    map { objectMapper.readValue(it.traverse(), object : TypeReference<ApiFaresignal>() {}) }
+private fun List<JsonNode>.tilFaresignaler(): List<ApiFaresignal> = map { objectMapper.readValue(it.traverse(), object : TypeReference<ApiFaresignal>() {}) }

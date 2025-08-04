@@ -12,23 +12,38 @@ sealed interface Behov : UtgåendeMelding {
 
     data object EgenAnsatt : Behov
 
-    data class ÅpneOppgaver(val ikkeEldreEnn: LocalDate) : Behov
+    data class ÅpneOppgaver(
+        val ikkeEldreEnn: LocalDate,
+    ) : Behov
 
-    data class Infotrygdutbetalinger(val fom: LocalDate, val tom: LocalDate) : Behov
+    data class Infotrygdutbetalinger(
+        val fom: LocalDate,
+        val tom: LocalDate,
+    ) : Behov
 
     data object Personinfo : Behov
 
     data object Enhet : Behov
 
     sealed interface Arbeidsgiverinformasjon : Behov {
-        data class Enkeltpersonforetak(val identer: List<String>) : Arbeidsgiverinformasjon
+        data class Enkeltpersonforetak(
+            val identer: List<String>,
+        ) : Arbeidsgiverinformasjon
 
-        data class OrdinærArbeidsgiver(val organisasjonsnumre: List<String>) : Arbeidsgiverinformasjon
+        data class OrdinærArbeidsgiver(
+            val organisasjonsnumre: List<String>,
+        ) : Arbeidsgiverinformasjon
     }
 
-    data class Arbeidsforhold(val fødselsnummer: String, val organisasjonsnummer: String) : Behov
+    data class Arbeidsforhold(
+        val fødselsnummer: String,
+        val organisasjonsnummer: String,
+    ) : Behov
 
-    data class InntekterForSykepengegrunnlag(val fom: YearMonth, val tom: YearMonth) : Behov
+    data class InntekterForSykepengegrunnlag(
+        val fom: YearMonth,
+        val tom: YearMonth,
+    ) : Behov
 
     data class Avviksvurdering(
         val omregnedeÅrsinntekter: List<OmregnetÅrsinntekt>,

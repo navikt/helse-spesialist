@@ -9,7 +9,10 @@ import no.nav.helse.spesialist.db.QueryRunner
 import java.time.LocalDateTime
 import javax.sql.DataSource
 
-class PgEgenAnsattDao private constructor(queryRunner: QueryRunner) : EgenAnsattDao, QueryRunner by queryRunner {
+class PgEgenAnsattDao private constructor(
+    queryRunner: QueryRunner,
+) : EgenAnsattDao,
+    QueryRunner by queryRunner {
     internal constructor(session: Session) : this(MedSession(session))
     internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 

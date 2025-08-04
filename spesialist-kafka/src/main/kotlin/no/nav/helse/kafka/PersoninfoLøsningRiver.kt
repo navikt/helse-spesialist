@@ -18,14 +18,13 @@ import no.nav.helse.spesialist.typer.Kjønn
 class PersoninfoløsningRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
-    override fun preconditions(): River.PacketValidation {
-        return River.PacketValidation {
+    override fun preconditions(): River.PacketValidation =
+        River.PacketValidation {
             it.requireValue("@event_name", "behov")
             it.requireValue("@final", true)
             it.requireAll("@behov", listOf("HentPersoninfoV2"))
             it.require("@løsning.HentPersoninfoV2") { node -> require(node.isObject) }
         }
-    }
 
     override fun validations() =
         River.PacketValidation {
@@ -61,14 +60,13 @@ class PersoninfoløsningRiver(
 class FlerePersoninfoRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
-    override fun preconditions(): River.PacketValidation {
-        return River.PacketValidation {
+    override fun preconditions(): River.PacketValidation =
+        River.PacketValidation {
             it.requireValue("@event_name", "behov")
             it.requireValue("@final", true)
             it.requireAll("@behov", listOf("HentPersoninfoV2"))
             it.require("@løsning.HentPersoninfoV2") { node -> require(node.isArray) }
         }
-    }
 
     override fun validations() =
         River.PacketValidation {

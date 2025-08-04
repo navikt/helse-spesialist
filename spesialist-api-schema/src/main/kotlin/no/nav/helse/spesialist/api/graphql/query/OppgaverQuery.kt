@@ -30,4 +30,6 @@ interface OppgaverQuerySchema : Query {
     suspend fun antallOppgaver(env: DataFetchingEnvironment): DataFetcherResult<ApiAntallOppgaver>
 }
 
-class OppgaverQuery(private val handler: OppgaverQuerySchema) : OppgaverQuerySchema by handler
+class OppgaverQuery(
+    private val handler: OppgaverQuerySchema,
+) : OppgaverQuerySchema by handler

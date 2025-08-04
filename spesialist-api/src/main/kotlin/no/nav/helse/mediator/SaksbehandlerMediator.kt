@@ -465,11 +465,12 @@ class SaksbehandlerMediator(
     }
 
     fun hentAbonnerteOpptegnelser(saksbehandlerFraApi: SaksbehandlerFraApi): List<ApiOpptegnelse> =
-        sessionFactory.transactionalSessionScope { session ->
-            val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
-            session.saksbehandlerRepository.lagre(saksbehandler)
-            session.opptegnelseDao.finnOpptegnelser(saksbehandler.id().value)
-        }.toApiOpptegnelser()
+        sessionFactory
+            .transactionalSessionScope { session ->
+                val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
+                session.saksbehandlerRepository.lagre(saksbehandler)
+                session.opptegnelseDao.finnOpptegnelser(saksbehandler.id().value)
+            }.toApiOpptegnelser()
 
     private fun List<OpptegnelseDao.Opptegnelse>.toApiOpptegnelser() =
         map { opptegnelse ->
@@ -548,7 +549,8 @@ class SaksbehandlerMediator(
                 }
                 val opprinneligSaksbehandler =
                     checkNotNull(
-                        totrinnsvurdering.saksbehandler?.let(session.saksbehandlerRepository::finn)
+                        totrinnsvurdering.saksbehandler
+                            ?.let(session.saksbehandlerRepository::finn)
                             ?.let(this::tilLegacySaksbehandler),
                     ) {
                         "Opprinnelig saksbehandler kan ikke være null ved retur av beslutteroppgave"
@@ -629,7 +631,8 @@ class SaksbehandlerMediator(
                     }
 
                     val beslutter =
-                        totrinnsvurdering.beslutter?.let(session.saksbehandlerRepository::finn)
+                        totrinnsvurdering.beslutter
+                            ?.let(session.saksbehandlerRepository::finn)
                             ?.let(this::tilLegacySaksbehandler)
                     apiOppgaveService.sendTilBeslutter(oppgavereferanse, beslutter)
                     totrinnsvurdering.sendTilBeslutter(oppgavereferanse, SaksbehandlerOid(saksbehandlerFraApi.oid))
@@ -671,8 +674,7 @@ class SaksbehandlerMediator(
             return@transactionalSessionScope SendTilGodkjenningResult.Ok
         }
 
-    private fun tilLegacySaksbehandler(saksbehandler: Saksbehandler): LegacySaksbehandler =
-        saksbehandler.gjenopprett(tilgangskontroll = tilgangskontroll)
+    private fun tilLegacySaksbehandler(saksbehandler: Saksbehandler): LegacySaksbehandler = saksbehandler.gjenopprett(tilgangskontroll = tilgangskontroll)
 
     private fun vurderVarsel(
         fødselsnummer: String,
@@ -736,7 +738,9 @@ class SaksbehandlerMediator(
 
             is ManglerTilgang -> IkkeTilgang(oid, oppgaveId)
 
-            is AlleredeAnnullert -> no.nav.helse.spesialist.api.feilhåndtering.AlleredeAnnullert(handling.toDto().vedtaksperiodeId)
+            is AlleredeAnnullert ->
+                no.nav.helse.spesialist.api.feilhåndtering
+                    .AlleredeAnnullert(handling.toDto().vedtaksperiodeId)
 
             is FinnerIkkePåVent -> FinnerIkkeLagtPåVent(oppgaveId)
         }
@@ -749,8 +753,7 @@ class SaksbehandlerMediator(
             ident = ident,
         )
 
-    private fun Saksbehandler.tilLegacySaksbehandler(saksbehandlergrupper: List<UUID>): LegacySaksbehandler =
-        gjenopprett(TilgangskontrollørForApi(saksbehandlergrupper, tilgangsgrupper))
+    private fun Saksbehandler.tilLegacySaksbehandler(saksbehandlergrupper: List<UUID>): LegacySaksbehandler = gjenopprett(TilgangskontrollørForApi(saksbehandlergrupper, tilgangsgrupper))
 
     private fun HandlingFraApi.tilModellversjon(saksbehandlerOid: SaksbehandlerOid): Handling =
         when (this) {
@@ -944,8 +947,8 @@ class SaksbehandlerMediator(
             årsaker = årsaker.map { årsak -> PåVentÅrsak(key = årsak._key, årsak = årsak.arsak) },
         )
 
-    private fun ApiPaVentRequest.ApiEndrePaVent.tilModellversjon(): EndrePåVent {
-        return EndrePåVent(
+    private fun ApiPaVentRequest.ApiEndrePaVent.tilModellversjon(): EndrePåVent =
+        EndrePåVent(
             fødselsnummer = apiOppgaveService.fødselsnummer(oppgaveId),
             oppgaveId = oppgaveId,
             behandlingId = apiOppgaveService.spleisBehandlingId(oppgaveId),
@@ -954,18 +957,18 @@ class SaksbehandlerMediator(
             notatTekst = notatTekst,
             årsaker = årsaker.map { årsak -> PåVentÅrsak(key = årsak._key, årsak = årsak.arsak) },
         )
-    }
 
     private fun ApiPaVentRequest.ApiFjernPaVent.tilModellversjon(): FjernPåVent = FjernPåVent(oppgaveId)
 
-    private fun ApiPaVentRequest.ApiFjernPaVentUtenHistorikkinnslag.tilModellversjon(): FjernPåVentUtenHistorikkinnslag =
-        FjernPåVentUtenHistorikkinnslag(oppgaveId)
+    private fun ApiPaVentRequest.ApiFjernPaVentUtenHistorikkinnslag.tilModellversjon(): FjernPåVentUtenHistorikkinnslag = FjernPåVentUtenHistorikkinnslag(oppgaveId)
 
     private fun TildelOppgave.tilModellversjon(): no.nav.helse.modell.saksbehandler.handlinger.TildelOppgave =
-        no.nav.helse.modell.saksbehandler.handlinger.TildelOppgave(this.oppgaveId)
+        no.nav.helse.modell.saksbehandler.handlinger
+            .TildelOppgave(this.oppgaveId)
 
     private fun AvmeldOppgave.tilModellversjon(): no.nav.helse.modell.saksbehandler.handlinger.AvmeldOppgave =
-        no.nav.helse.modell.saksbehandler.handlinger.AvmeldOppgave(this.oppgaveId)
+        no.nav.helse.modell.saksbehandler.handlinger
+            .AvmeldOppgave(this.oppgaveId)
 
     private fun ApiOpphevStans.tilModellversjon(): OpphevStans = OpphevStans(this.fødselsnummer, this.begrunnelse)
 

@@ -90,8 +90,8 @@ class OverstyrtTidslinje private constructor(
             dager = dager.map(OverstyrtTidslinjedag::byggEvent),
         )
 
-    internal fun byggSubsumsjoner(saksbehandlerEpost: String): List<Subsumsjon> {
-        return dager.byggSubsumsjoner(
+    internal fun byggSubsumsjoner(saksbehandlerEpost: String): List<Subsumsjon> =
+        dager.byggSubsumsjoner(
             overstyringId = eksternHendelseId,
             vedtaksperiodeId = vedtaksperiodeId,
             fødselsnummer = fødselsnummer,
@@ -99,7 +99,6 @@ class OverstyrtTidslinje private constructor(
             begrunnelse = begrunnelse,
             saksbehandlerEpost = saksbehandlerEpost,
         )
-    }
 }
 
 data class OverstyrtTidslinjedag(

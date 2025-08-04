@@ -1,6 +1,8 @@
 package no.nav.helse.spesialist.domain.ddd
 
-abstract class Entity<IDTYPE>(private var id: IDTYPE?) {
+abstract class Entity<IDTYPE>(
+    private var id: IDTYPE?,
+) {
     fun harFåttTildeltId() = id != null
 
     fun tildelId(id: IDTYPE) {
@@ -16,7 +18,5 @@ abstract class Entity<IDTYPE>(private var id: IDTYPE?) {
 
     override fun equals(other: Any?): Boolean = other != null && this::class == other::class && this.id == (other as Entity<*>).id
 
-    override fun hashCode(): Int {
-        return 31 * id.hashCode() + javaClass.hashCode()
-    }
+    override fun hashCode(): Int = 31 * id.hashCode() + javaClass.hashCode()
 }

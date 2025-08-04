@@ -13,7 +13,9 @@ import java.util.UUID
 import kotlin.reflect.KMutableProperty0
 
 @JvmInline
-value class TilkommenInntektId(val value: UUID)
+value class TilkommenInntektId(
+    val value: UUID,
+)
 
 class TilkommenInntekt private constructor(
     opprettetEvent: TilkommenInntektOpprettetEvent,
@@ -38,7 +40,8 @@ class TilkommenInntekt private constructor(
         private set
 
     fun dagerTilGradering(): SortedSet<LocalDate> =
-        periode.datoer()
+        periode
+            .datoer()
             .filterNot { it.erHelg() }
             .filterNot { it in ekskluderteUkedager }
             .toSortedSet()

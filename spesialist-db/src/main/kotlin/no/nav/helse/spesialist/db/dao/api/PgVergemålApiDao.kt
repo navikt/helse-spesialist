@@ -4,7 +4,10 @@ import no.nav.helse.db.api.VergemålApiDao
 import no.nav.helse.spesialist.db.HelseDao
 import javax.sql.DataSource
 
-class PgVergemålApiDao internal constructor(dataSource: DataSource) : HelseDao(dataSource), VergemålApiDao {
+class PgVergemålApiDao internal constructor(
+    dataSource: DataSource,
+) : HelseDao(dataSource),
+    VergemålApiDao {
     override fun harFullmakt(fødselsnummer: String): Boolean? =
         asSQL(
             """

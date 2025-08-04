@@ -2,7 +2,9 @@ package no.nav.helse.modell.risiko
 
 import no.nav.helse.modell.automatisering.AutomatiseringValidering
 
-class Risikovurdering private constructor(private val kanGodkjennesAutomatisk: Boolean) : AutomatiseringValidering {
+class Risikovurdering private constructor(
+    private val kanGodkjennesAutomatisk: Boolean,
+) : AutomatiseringValidering {
     companion object {
         fun restore(kanGodkjennesAutomatisk: Boolean) = Risikovurdering(kanGodkjennesAutomatisk)
     }

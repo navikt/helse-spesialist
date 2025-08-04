@@ -27,7 +27,8 @@ import java.util.UUID
 
 class PgOverstyringRepository(
     session: Session,
-) : QueryRunner by MedSession(session), OverstyringRepository {
+) : QueryRunner by MedSession(session),
+    OverstyringRepository {
     override fun lagre(
         overstyringer: List<Overstyring>,
         totrinnsvurderingId: TotrinnsvurderingId,

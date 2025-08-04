@@ -101,12 +101,11 @@ class DokumentQueryHandler(
 
         fun getExpectationFailedError() = graphqlErrorException(417, "Noe gikk galt, vennligst prøv igjen.")
 
-        fun getNotFoundErrorEkstern() =
-            graphqlErrorException(404, "Speil har ikke tilgang til denne inntektsmeldingen, den må åpnes i Gosys.")
+        fun getNotFoundErrorEkstern() = graphqlErrorException(404, "Speil har ikke tilgang til denne inntektsmeldingen, den må åpnes i Gosys.")
     }
 
-    private fun JsonNode.tilInntektsmelding(): ApiDokumentInntektsmelding {
-        return ApiDokumentInntektsmelding(
+    private fun JsonNode.tilInntektsmelding(): ApiDokumentInntektsmelding =
+        ApiDokumentInntektsmelding(
             arbeidsforholdId = getIfNotNull("arbeidsforholdId")?.asText(),
             virksomhetsnummer = getIfNotNull("virksomhetsnummer")?.asText(),
             begrunnelseForReduksjonEllerIkkeUtbetalt = getIfNotNull("begrunnelseForReduksjonEllerIkkeUtbetalt")?.asText(),
@@ -130,7 +129,9 @@ class DokumentQueryHandler(
                 getIfNotNull("opphoerAvNaturalytelser")?.map { opphørAvNaturalytelse ->
                     ApiOpphoerAvNaturalytelse(
                         naturalytelse =
-                            opphørAvNaturalytelse.getIfNotNull("naturalytelse")?.asText()
+                            opphørAvNaturalytelse
+                                .getIfNotNull("naturalytelse")
+                                ?.asText()
                                 ?.tilNaturalytelse(),
                         fom = opphørAvNaturalytelse.getIfNotNull("fom")?.asLocalDate(),
                         beloepPrMnd = opphørAvNaturalytelse.getIfNotNull("beloepPrMnd")?.asDouble(),
@@ -140,7 +141,9 @@ class DokumentQueryHandler(
                 getIfNotNull("gjenopptakelseNaturalytelser")?.map { gjenopptakelseNaturalytelse ->
                     ApiGjenopptakelseNaturalytelse(
                         naturalytelse =
-                            gjenopptakelseNaturalytelse.getIfNotNull("naturalytelse")?.asText()
+                            gjenopptakelseNaturalytelse
+                                .getIfNotNull("naturalytelse")
+                                ?.asText()
                                 ?.tilNaturalytelse(),
                         fom = gjenopptakelseNaturalytelse.getIfNotNull("fom")?.asLocalDate(),
                         beloepPrMnd = gjenopptakelseNaturalytelse.getIfNotNull("beloepPrMnd")?.asDouble(),
@@ -188,7 +191,6 @@ class DokumentQueryHandler(
                     )
                 },
         )
-    }
 
     private fun String.tilNaturalytelse(): ApiNaturalytelse {
         return when (this) {
@@ -258,15 +260,14 @@ class DokumentQueryHandler(
         }
     }
 
-    private fun JsonNode.tilSøknadsperioder(): ApiSoknadsperioder {
-        return ApiSoknadsperioder(
+    private fun JsonNode.tilSøknadsperioder(): ApiSoknadsperioder =
+        ApiSoknadsperioder(
             fom = get("fom").asLocalDate(),
             tom = get("tom").asLocalDate(),
             grad = getIfNotNull("grad")?.asInt(),
             sykmeldingsgrad = getIfNotNull("sykmeldingsgrad")?.asInt(),
             faktiskGrad = getIfNotNull("faktiskGrad")?.asInt(),
         )
-    }
 
     private fun JsonNode.tilSpørsmål(): ApiSporsmal {
         val svar = getIfNotNull("svar")?.map { ApiSvar(it.getIfNotNull("verdi")?.asText()) }

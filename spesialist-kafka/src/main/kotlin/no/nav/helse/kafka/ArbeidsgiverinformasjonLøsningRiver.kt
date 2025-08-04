@@ -12,13 +12,12 @@ import no.nav.helse.modell.arbeidsgiver.Arbeidsgiverinformasjonløsning
 class ArbeidsgiverinformasjonLøsningRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
-    override fun preconditions(): River.PacketValidation {
-        return River.PacketValidation {
+    override fun preconditions(): River.PacketValidation =
+        River.PacketValidation {
             it.requireValue("@event_name", "behov")
             it.requireValue("@final", true)
             it.requireAll("@behov", listOf("Arbeidsgiverinformasjon"))
         }
-    }
 
     override fun validations() =
         River.PacketValidation {

@@ -18,5 +18,6 @@ interface TotrinnsvurderingMutationSchema : Mutation {
     ): DataFetcherResult<Boolean?>
 }
 
-class TotrinnsvurderingMutation(private val handler: TotrinnsvurderingMutationSchema) :
-    TotrinnsvurderingMutationSchema by handler
+class TotrinnsvurderingMutation(
+    private val handler: TotrinnsvurderingMutationSchema,
+) : TotrinnsvurderingMutationSchema by handler

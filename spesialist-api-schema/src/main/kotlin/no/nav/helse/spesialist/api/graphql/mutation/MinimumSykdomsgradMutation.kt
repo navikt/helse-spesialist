@@ -12,5 +12,6 @@ interface MinimumSykdomsgradMutationSchema : Mutation {
     ): DataFetcherResult<Boolean?>
 }
 
-class MinimumSykdomsgradMutation(private val handler: MinimumSykdomsgradMutationSchema) :
-    MinimumSykdomsgradMutationSchema by handler
+class MinimumSykdomsgradMutation(
+    private val handler: MinimumSykdomsgradMutationSchema,
+) : MinimumSykdomsgradMutationSchema by handler

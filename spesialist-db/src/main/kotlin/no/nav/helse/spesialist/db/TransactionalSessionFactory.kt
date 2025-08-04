@@ -5,7 +5,9 @@ import no.nav.helse.db.SessionContext
 import no.nav.helse.db.SessionFactory
 import javax.sql.DataSource
 
-class TransactionalSessionFactory(private val dataSource: DataSource) : SessionFactory {
+class TransactionalSessionFactory(
+    private val dataSource: DataSource,
+) : SessionFactory {
     override fun <T> transactionalSessionScope(transactionalBlock: (SessionContext) -> T): T =
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             session.transaction { transactionalSession ->

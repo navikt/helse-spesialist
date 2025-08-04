@@ -38,11 +38,12 @@ internal fun Application.requestResponseTracing(logger: Logger) {
         try {
             if (call.request.uri in ignoredPaths) return@intercept proceed()
             logger.info("incoming callId=${call.callId} method=${call.request.httpMethod.value} uri=${call.request.uri}")
-            httpRequestDuration.wrap {
-                runBlocking {
-                    proceed()
-                }
-            }.run()
+            httpRequestDuration
+                .wrap {
+                    runBlocking {
+                        proceed()
+                    }
+                }.run()
         } catch (err: Throwable) {
             logger.error("exception thrown during processing: ${err.message} callId=${call.callId} ", err)
             throw err

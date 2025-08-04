@@ -35,6 +35,10 @@ interface TilkommenInntektMutationSchema : Mutation {
     ): DataFetcherResult<Boolean>
 }
 
-data class LeggTilTilkommenInntektResponse(val tilkommenInntektId: UUID)
+data class LeggTilTilkommenInntektResponse(
+    val tilkommenInntektId: UUID,
+)
 
-class TilkommenInntektMutation(private val handler: TilkommenInntektMutationSchema) : TilkommenInntektMutationSchema by handler
+class TilkommenInntektMutation(
+    private val handler: TilkommenInntektMutationSchema,
+) : TilkommenInntektMutationSchema by handler

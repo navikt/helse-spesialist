@@ -62,8 +62,7 @@ class SkjønnsfastsattSykepengegrunnlag(
     }
 
     companion object {
-        fun List<SkjønnsfastsattSykepengegrunnlag>.relevanteFor(skjæringstidspunkt: LocalDate) =
-            filter { it.skjæringstidspunkt == skjæringstidspunkt }
+        fun List<SkjønnsfastsattSykepengegrunnlag>.relevanteFor(skjæringstidspunkt: LocalDate) = filter { it.skjæringstidspunkt == skjæringstidspunkt }
 
         fun gjenopprett(
             type: SkjønnsfastsettingstypeDto,

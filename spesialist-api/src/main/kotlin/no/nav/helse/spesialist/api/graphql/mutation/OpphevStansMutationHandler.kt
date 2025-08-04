@@ -8,8 +8,9 @@ import no.nav.helse.spesialist.api.graphql.byggRespons
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.ApiOpphevStans
 
-class OpphevStansMutationHandler(private val saksbehandlerMediator: SaksbehandlerMediator) :
-    OpphevStansMutationSchema {
+class OpphevStansMutationHandler(
+    private val saksbehandlerMediator: SaksbehandlerMediator,
+) : OpphevStansMutationSchema {
     override fun opphevStans(
         env: DataFetchingEnvironment,
         fodselsnummer: String,

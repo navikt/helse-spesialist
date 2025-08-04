@@ -8,7 +8,9 @@ import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import io.prometheus.metrics.model.registry.PrometheusRegistry
 import java.time.Duration
 
-internal class DataSourceBuilder(configuration: DBModule.Configuration) {
+internal class DataSourceBuilder(
+    configuration: DBModule.Configuration,
+) {
     private val hikariConfig =
         HikariConfig().apply {
             jdbcUrl = configuration.jdbcUrl

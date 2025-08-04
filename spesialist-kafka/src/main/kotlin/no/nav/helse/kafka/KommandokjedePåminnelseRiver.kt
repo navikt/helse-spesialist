@@ -11,11 +11,10 @@ import no.nav.helse.mediator.asUUID
 class KommandokjedePåminnelseRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
-    override fun preconditions(): River.PacketValidation {
-        return River.PacketValidation {
+    override fun preconditions(): River.PacketValidation =
+        River.PacketValidation {
             it.requireValue("@event_name", "kommandokjede_påminnelse")
         }
-    }
 
     override fun validations() =
         River.PacketValidation {

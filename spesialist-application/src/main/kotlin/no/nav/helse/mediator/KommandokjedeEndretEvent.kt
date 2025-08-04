@@ -23,9 +23,7 @@ sealed class KommandokjedeEndretEvent {
     ) : KommandokjedeEndretEvent() {
         override val eventName: String = "kommandokjede_ferdigstilt"
 
-        override fun ekstraDetaljer(): Map<String, Any> {
-            return mapOf("command" to kommandonavn)
-        }
+        override fun ekstraDetaljer(): Map<String, Any> = mapOf("command" to kommandonavn)
     }
 
     class Suspendert(
@@ -36,9 +34,7 @@ sealed class KommandokjedeEndretEvent {
     ) : KommandokjedeEndretEvent() {
         override val eventName: String = "kommandokjede_suspendert"
 
-        override fun ekstraDetaljer(): Map<String, Any> {
-            return mapOf("command" to kommandonavn, "sti" to sti)
-        }
+        override fun ekstraDetaljer(): Map<String, Any> = mapOf("command" to kommandonavn, "sti" to sti)
     }
 
     class Avbrutt(

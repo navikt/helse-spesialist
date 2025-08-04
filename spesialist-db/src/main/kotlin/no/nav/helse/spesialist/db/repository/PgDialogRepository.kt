@@ -13,7 +13,8 @@ import no.nav.helse.spesialist.domain.KommentarId
 
 internal class PgDialogRepository(
     session: Session,
-) : QueryRunner by MedSession(session), DialogRepository {
+) : QueryRunner by MedSession(session),
+    DialogRepository {
     override fun lagre(dialog: Dialog) {
         val dialogId = if (dialog.harFåttTildeltId()) dialog.id() else insertDialog(dialog).let(::DialogId).also(dialog::tildelId)
 

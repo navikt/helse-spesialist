@@ -24,12 +24,11 @@ import java.time.LocalDate
 class GodkjenningsbehovRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
-    override fun preconditions(): River.PacketValidation {
-        return River.PacketValidation {
+    override fun preconditions(): River.PacketValidation =
+        River.PacketValidation {
             it.requireAll("@behov", listOf("Godkjenning"))
             it.forbid("@løsning")
         }
-    }
 
     override fun validations() =
         River.PacketValidation {
@@ -139,8 +138,8 @@ class GodkjenningsbehovRiver(
         )
     }
 
-    private fun spleisvedtaksperioder(packet: JsonMessage): List<SpleisVedtaksperiode> {
-        return packet["Godkjenning.perioderMedSammeSkjæringstidspunkt"].map { periodeNode ->
+    private fun spleisvedtaksperioder(packet: JsonMessage): List<SpleisVedtaksperiode> =
+        packet["Godkjenning.perioderMedSammeSkjæringstidspunkt"].map { periodeNode ->
             SpleisVedtaksperiode(
                 vedtaksperiodeId = periodeNode["vedtaksperiodeId"].asUUID(),
                 spleisBehandlingId = periodeNode["behandlingId"].asUUID(),
@@ -149,16 +148,14 @@ class GodkjenningsbehovRiver(
                 skjæringstidspunkt = packet["Godkjenning.skjæringstidspunkt"].asLocalDate(),
             )
         }
-    }
 
-    private fun faktatype(packet: JsonMessage): Faktatype {
-        return when (val fastsattString = packet["Godkjenning.sykepengegrunnlagsfakta.fastsatt"].asText()) {
+    private fun faktatype(packet: JsonMessage): Faktatype =
+        when (val fastsattString = packet["Godkjenning.sykepengegrunnlagsfakta.fastsatt"].asText()) {
             "EtterSkjønn" -> Faktatype.ETTER_SKJØNN
             "EtterHovedregel" -> Faktatype.ETTER_HOVEDREGEL
             "IInfotrygd" -> Faktatype.I_INFOTRYGD
             else -> throw IllegalArgumentException("FastsattType $fastsattString er ikke støttet")
         }
-    }
 
     private fun sykepengegrunnlagsfakta(
         packet: JsonMessage,
@@ -208,12 +205,11 @@ class GodkjenningsbehovRiver(
         }
     }
 
-    private fun inntektskilde(inntektskildeNode: JsonNode): Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde {
-        return when (val inntektskildeString = inntektskildeNode.asText()) {
+    private fun inntektskilde(inntektskildeNode: JsonNode): Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde =
+        when (val inntektskildeString = inntektskildeNode.asText()) {
             "Arbeidsgiver" -> Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Arbeidsgiver
             "AOrdningen" -> Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.AOrdningen
             "Saksbehandler" -> Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Saksbehandler
             else -> error("$inntektskildeString er ikke en gyldig inntektskilde")
         }
-    }
 }

@@ -12,11 +12,10 @@ import no.nav.helse.modell.person.OppdaterPersondata
 class OppdaterPersondataRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
-    override fun preconditions(): River.PacketValidation {
-        return River.PacketValidation {
+    override fun preconditions(): River.PacketValidation =
+        River.PacketValidation {
             it.requireValue("@event_name", "oppdater_persondata")
         }
-    }
 
     override fun validations() =
         River.PacketValidation {

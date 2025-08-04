@@ -11,4 +11,6 @@ interface OpptegnelseMutationSchema : Mutation {
     ): DataFetcherResult<Boolean>
 }
 
-class OpptegnelseMutation(private val handler: OpptegnelseMutationSchema) : OpptegnelseMutationSchema by handler
+class OpptegnelseMutation(
+    private val handler: OpptegnelseMutationSchema,
+) : OpptegnelseMutationSchema by handler

@@ -5,9 +5,13 @@ import no.nav.helse.spesialist.domain.ddd.ValueObject
 import java.time.LocalDate
 
 sealed interface ArbeidsgiverIdentifikator : ValueObject {
-    data class Fødselsnummer(val fødselsnummer: String) : ArbeidsgiverIdentifikator
+    data class Fødselsnummer(
+        val fødselsnummer: String,
+    ) : ArbeidsgiverIdentifikator
 
-    data class Organisasjonsnummer(val organisasjonsnummer: String) : ArbeidsgiverIdentifikator
+    data class Organisasjonsnummer(
+        val organisasjonsnummer: String,
+    ) : ArbeidsgiverIdentifikator
 
     companion object {
         fun fraString(string: String): ArbeidsgiverIdentifikator =

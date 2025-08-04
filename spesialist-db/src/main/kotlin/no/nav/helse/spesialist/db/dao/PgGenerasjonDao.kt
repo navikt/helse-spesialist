@@ -16,36 +16,37 @@ import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 
-class PgGenerasjonDao private constructor(private val queryRunner: QueryRunner) : GenerasjonDao, QueryRunner by queryRunner {
+class PgGenerasjonDao private constructor(
+    private val queryRunner: QueryRunner,
+) : GenerasjonDao,
+    QueryRunner by queryRunner {
     internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
     internal constructor(session: Session) : this(MedSession(session))
 
-    override fun finnGenerasjoner(vedtaksperiodeId: UUID): List<BehandlingDto> {
-        return asSQL(
+    override fun finnGenerasjoner(vedtaksperiodeId: UUID): List<BehandlingDto> =
+        asSQL(
             """
             SELECT id, unik_id, vedtaksperiode_id, utbetaling_id, spleis_behandling_id, skjæringstidspunkt, fom, tom, tilstand, tags
             FROM behandling 
             WHERE vedtaksperiode_id = :vedtaksperiode_id ORDER BY id;
         """,
             "vedtaksperiode_id" to vedtaksperiodeId,
-        )
-            .list { row ->
-                val generasjonRef = row.long("id")
-                BehandlingDto(
-                    id = row.uuid("unik_id"),
-                    vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
-                    utbetalingId = row.uuidOrNull("utbetaling_id"),
-                    spleisBehandlingId = row.uuidOrNull("spleis_behandling_id"),
-                    skjæringstidspunkt = row.localDateOrNull("skjæringstidspunkt") ?: row.localDate("fom"),
-                    fom = row.localDate("fom"),
-                    tom = row.localDate("tom"),
-                    tilstand = enumValueOf(row.string("tilstand")),
-                    tags = row.array<String>("tags").toList(),
-                    vedtakBegrunnelse = PgVedtakBegrunnelseDao(queryRunner).finnVedtakBegrunnelse(vedtaksperiodeId, generasjonRef),
-                    varsler = finnVarsler(generasjonRef),
-                )
-            }
-    }
+        ).list { row ->
+            val generasjonRef = row.long("id")
+            BehandlingDto(
+                id = row.uuid("unik_id"),
+                vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
+                utbetalingId = row.uuidOrNull("utbetaling_id"),
+                spleisBehandlingId = row.uuidOrNull("spleis_behandling_id"),
+                skjæringstidspunkt = row.localDateOrNull("skjæringstidspunkt") ?: row.localDate("fom"),
+                fom = row.localDate("fom"),
+                tom = row.localDate("tom"),
+                tilstand = enumValueOf(row.string("tilstand")),
+                tags = row.array<String>("tags").toList(),
+                vedtakBegrunnelse = PgVedtakBegrunnelseDao(queryRunner).finnVedtakBegrunnelse(vedtaksperiodeId, generasjonRef),
+                varsler = finnVarsler(generasjonRef),
+            )
+        }
 
     override fun lagreGenerasjon(behandlingDto: BehandlingDto) {
         lagre(behandlingDto)
@@ -115,8 +116,8 @@ class PgGenerasjonDao private constructor(private val queryRunner: QueryRunner) 
         ).update()
     }
 
-    private fun finnVarsler(generasjonRef: Long): List<VarselDto> {
-        return asSQL(
+    private fun finnVarsler(generasjonRef: Long): List<VarselDto> =
+        asSQL(
             """
             SELECT 
             unik_id, 
@@ -144,10 +145,9 @@ class PgGenerasjonDao private constructor(private val queryRunner: QueryRunner) 
                 },
             )
         }
-    }
 
-    override fun finnVedtaksperiodeIderFor(fødselsnummer: String): Set<UUID> {
-        return asSQL(
+    override fun finnVedtaksperiodeIderFor(fødselsnummer: String): Set<UUID> =
+        asSQL(
             """
             SELECT b.vedtaksperiode_id FROM behandling b 
             INNER JOIN vedtak v on b.vedtaksperiode_id = v.vedtaksperiode_id
@@ -158,10 +158,9 @@ class PgGenerasjonDao private constructor(private val queryRunner: QueryRunner) 
         ).list {
             it.uuid("vedtaksperiode_id")
         }.toSet()
-    }
 
-    override fun førsteGenerasjonVedtakFattetTidspunkt(vedtaksperiodeId: UUID): LocalDateTime? {
-        return asSQL(
+    override fun førsteGenerasjonVedtakFattetTidspunkt(vedtaksperiodeId: UUID): LocalDateTime? =
+        asSQL(
             """
             SELECT tilstand_endret_tidspunkt 
             FROM behandling 
@@ -173,10 +172,9 @@ class PgGenerasjonDao private constructor(private val queryRunner: QueryRunner) 
         ).singleOrNull {
             it.localDateTimeOrNull("tilstand_endret_tidspunkt")
         }
-    }
 
-    override fun førsteKjenteDag(fødselsnummer: String): LocalDate {
-        return asSQL(
+    override fun førsteKjenteDag(fødselsnummer: String): LocalDate =
+        asSQL(
             """
             select min(b.fom) as foersteFom
             from behandling b
@@ -188,5 +186,4 @@ class PgGenerasjonDao private constructor(private val queryRunner: QueryRunner) 
         ).single {
             it.localDate("foersteFom")
         }
-    }
 }

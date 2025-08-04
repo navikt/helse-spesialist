@@ -77,77 +77,80 @@ class TilkommenInntektQueryHandler(
         fødselsnummer: String,
         sessionContext: SessionContext,
     ): List<ApiTilkommenInntektskilde> =
-        sessionContext.tilkommenInntektRepository.finnAlleForFødselsnummer(fødselsnummer)
+        sessionContext.tilkommenInntektRepository
+            .finnAlleForFødselsnummer(fødselsnummer)
             .groupBy { it.organisasjonsnummer }
             .map { (organisasjonsnummer, inntekter) ->
                 ApiTilkommenInntektskilde(
                     organisasjonsnummer = organisasjonsnummer,
                     inntekter =
-                        inntekter.map { tilkommenInntekt ->
-                            ApiTilkommenInntekt(
-                                tilkommenInntektId = tilkommenInntekt.id().value,
-                                periode =
-                                    ApiDatoPeriode(
-                                        fom = tilkommenInntekt.periode.fom,
-                                        tom = tilkommenInntekt.periode.tom,
-                                    ),
-                                periodebelop = tilkommenInntekt.periodebeløp,
-                                ekskluderteUkedager = tilkommenInntekt.ekskluderteUkedager.sorted(),
-                                fjernet = tilkommenInntekt.fjernet,
-                                erDelAvAktivTotrinnsvurdering =
-                                    sessionFactory.transactionalSessionScope {
-                                        it.totrinnsvurderingRepository.finn(
-                                            id = tilkommenInntekt.totrinnsvurderingId,
-                                        )?.tilstand != TotrinnsvurderingTilstand.GODKJENT
-                                    },
-                                events =
-                                    tilkommenInntekt.events.map { event ->
-                                        val metadata =
-                                            ApiTilkommenInntektEvent.Metadata(
-                                                sekvensnummer = event.metadata.sekvensnummer,
-                                                tidspunkt =
-                                                    event.metadata.tidspunkt.atZone(ZoneId.of("Europe/Oslo"))
-                                                        .toLocalDateTime(),
-                                                utfortAvSaksbehandlerIdent = event.metadata.utførtAvSaksbehandlerIdent,
-                                                notatTilBeslutter = event.metadata.notatTilBeslutter,
-                                            )
-                                        when (event) {
-                                            is TilkommenInntektOpprettetEvent ->
-                                                ApiTilkommenInntektOpprettetEvent(
-                                                    metadata = metadata,
-                                                    organisasjonsnummer = event.organisasjonsnummer,
-                                                    periode =
-                                                        ApiDatoPeriode(
-                                                            fom = event.periode.fom,
-                                                            tom = event.periode.tom,
-                                                        ),
-                                                    periodebelop = event.periodebeløp,
-                                                    ekskluderteUkedager = event.ekskluderteUkedager.sorted(),
+                        inntekter
+                            .map { tilkommenInntekt ->
+                                ApiTilkommenInntekt(
+                                    tilkommenInntektId = tilkommenInntekt.id().value,
+                                    periode =
+                                        ApiDatoPeriode(
+                                            fom = tilkommenInntekt.periode.fom,
+                                            tom = tilkommenInntekt.periode.tom,
+                                        ),
+                                    periodebelop = tilkommenInntekt.periodebeløp,
+                                    ekskluderteUkedager = tilkommenInntekt.ekskluderteUkedager.sorted(),
+                                    fjernet = tilkommenInntekt.fjernet,
+                                    erDelAvAktivTotrinnsvurdering =
+                                        sessionFactory.transactionalSessionScope {
+                                            it.totrinnsvurderingRepository
+                                                .finn(
+                                                    id = tilkommenInntekt.totrinnsvurderingId,
+                                                )?.tilstand != TotrinnsvurderingTilstand.GODKJENT
+                                        },
+                                    events =
+                                        tilkommenInntekt.events.map { event ->
+                                            val metadata =
+                                                ApiTilkommenInntektEvent.Metadata(
+                                                    sekvensnummer = event.metadata.sekvensnummer,
+                                                    tidspunkt =
+                                                        event.metadata.tidspunkt
+                                                            .atZone(ZoneId.of("Europe/Oslo"))
+                                                            .toLocalDateTime(),
+                                                    utfortAvSaksbehandlerIdent = event.metadata.utførtAvSaksbehandlerIdent,
+                                                    notatTilBeslutter = event.metadata.notatTilBeslutter,
                                                 )
+                                            when (event) {
+                                                is TilkommenInntektOpprettetEvent ->
+                                                    ApiTilkommenInntektOpprettetEvent(
+                                                        metadata = metadata,
+                                                        organisasjonsnummer = event.organisasjonsnummer,
+                                                        periode =
+                                                            ApiDatoPeriode(
+                                                                fom = event.periode.fom,
+                                                                tom = event.periode.tom,
+                                                            ),
+                                                        periodebelop = event.periodebeløp,
+                                                        ekskluderteUkedager = event.ekskluderteUkedager.sorted(),
+                                                    )
 
-                                            is TilkommenInntektEndretEvent ->
-                                                ApiTilkommenInntektEndretEvent(
-                                                    metadata = metadata,
-                                                    endringer = event.endringer.toApiEndringer(),
-                                                )
+                                                is TilkommenInntektEndretEvent ->
+                                                    ApiTilkommenInntektEndretEvent(
+                                                        metadata = metadata,
+                                                        endringer = event.endringer.toApiEndringer(),
+                                                    )
 
-                                            is TilkommenInntektFjernetEvent ->
-                                                ApiTilkommenInntektFjernetEvent(
-                                                    metadata = metadata,
-                                                )
+                                                is TilkommenInntektFjernetEvent ->
+                                                    ApiTilkommenInntektFjernetEvent(
+                                                        metadata = metadata,
+                                                    )
 
-                                            is TilkommenInntektGjenopprettetEvent ->
-                                                ApiTilkommenInntektGjenopprettetEvent(
-                                                    metadata = metadata,
-                                                    endringer = event.endringer.toApiEndringer(),
-                                                )
-                                        }
-                                    },
-                            )
-                        }.sortedBy { it.periode.fom },
+                                                is TilkommenInntektGjenopprettetEvent ->
+                                                    ApiTilkommenInntektGjenopprettetEvent(
+                                                        metadata = metadata,
+                                                        endringer = event.endringer.toApiEndringer(),
+                                                    )
+                                            }
+                                        },
+                                )
+                            }.sortedBy { it.periode.fom },
                 )
-            }
-            .sortedBy { it.organisasjonsnummer }
+            }.sortedBy { it.organisasjonsnummer }
 
     private fun TilkommenInntektEvent.Endringer.toApiEndringer() =
         ApiTilkommenInntektEvent.Endringer(
@@ -169,9 +172,7 @@ class TilkommenInntektQueryHandler(
                 },
         )
 
-    private fun Endring<String>.tilApiEndring(): ApiTilkommenInntektEvent.Endringer.StringEndring =
-        ApiTilkommenInntektEvent.Endringer.StringEndring(fra = fra, til = til)
+    private fun Endring<String>.tilApiEndring(): ApiTilkommenInntektEvent.Endringer.StringEndring = ApiTilkommenInntektEvent.Endringer.StringEndring(fra = fra, til = til)
 
-    private fun Endring<BigDecimal>.tilApiEndring(): ApiTilkommenInntektEvent.Endringer.BigDecimalEndring =
-        ApiTilkommenInntektEvent.Endringer.BigDecimalEndring(fra = fra, til = til)
+    private fun Endring<BigDecimal>.tilApiEndring(): ApiTilkommenInntektEvent.Endringer.BigDecimalEndring = ApiTilkommenInntektEvent.Endringer.BigDecimalEndring(fra = fra, til = til)
 }

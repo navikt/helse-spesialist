@@ -339,7 +339,9 @@ interface UberegnetPeriodeSchema : ApiPeriode {
 }
 
 @GraphQLName("UberegnetPeriode")
-class ApiUberegnetPeriode(private val resolver: UberegnetPeriodeSchema) : UberegnetPeriodeSchema by resolver
+class ApiUberegnetPeriode(
+    private val resolver: UberegnetPeriodeSchema,
+) : UberegnetPeriodeSchema by resolver
 
 @GraphQLName("Periodehandling")
 enum class ApiPeriodehandling {
@@ -398,7 +400,9 @@ interface BeregnetPeriodeSchema : ApiPeriode {
 }
 
 @GraphQLName("BeregnetPeriode")
-class ApiBeregnetPeriode(private val resolver: BeregnetPeriodeSchema) : BeregnetPeriodeSchema by resolver
+class ApiBeregnetPeriode(
+    private val resolver: BeregnetPeriodeSchema,
+) : BeregnetPeriodeSchema by resolver
 
 @GraphQLName("PeriodehistorikkType")
 enum class ApiPeriodehistorikkType {

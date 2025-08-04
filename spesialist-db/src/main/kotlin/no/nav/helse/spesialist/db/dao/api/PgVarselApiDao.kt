@@ -9,7 +9,9 @@ import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 
-class PgVarselApiDao internal constructor(dataSource: DataSource) : HelseDao(dataSource) {
+class PgVarselApiDao internal constructor(
+    dataSource: DataSource,
+) : HelseDao(dataSource) {
     private companion object {
         private val log = LoggerFactory.getLogger(PgVarselApiDao::class.java)
     }
@@ -214,7 +216,8 @@ class PgVarselApiDao internal constructor(dataSource: DataSource) : HelseDao(dat
     }
 
     private fun Query.listKomplett() =
-        list { row -> sjekkForDefinisjonOgMapVerdier(row) }.filterNot { it.status == VarselDbDto.Varselstatus.AVVIKLET }
+        list { row -> sjekkForDefinisjonOgMapVerdier(row) }
+            .filterNot { it.status == VarselDbDto.Varselstatus.AVVIKLET }
             .filter { it.varseldefinisjon != null }
             .toSet()
 

@@ -7,7 +7,10 @@ import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
 
-class PgÅpneGosysOppgaverDao internal constructor(session: Session) : ÅpneGosysOppgaverDao, QueryRunner by MedSession(session) {
+class PgÅpneGosysOppgaverDao internal constructor(
+    session: Session,
+) : ÅpneGosysOppgaverDao,
+    QueryRunner by MedSession(session) {
     override fun persisterÅpneGosysOppgaver(åpneGosysOppgaver: ÅpneGosysOppgaverDto) {
         asSQL(
             """

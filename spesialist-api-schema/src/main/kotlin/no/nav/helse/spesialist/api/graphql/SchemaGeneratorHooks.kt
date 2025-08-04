@@ -36,42 +36,48 @@ val schemaGeneratorHooks =
     }
 
 private val graphQLLocalDateTime: GraphQLScalarType =
-    GraphQLScalarType.newScalar()
+    GraphQLScalarType
+        .newScalar()
         .name(LocalDateTime::class.simpleName)
         .description(LocalDateTime::class.toString())
         .coercing(LocalDateTimeCoercing)
         .build()
 
 private val graphQLLocalDate: GraphQLScalarType =
-    GraphQLScalarType.newScalar()
+    GraphQLScalarType
+        .newScalar()
         .name(LocalDate::class.simpleName)
         .description(LocalDate::class.toString())
         .coercing(LocalDateCoercing)
         .build()
 
 private val graphQLYearMonth: GraphQLScalarType =
-    GraphQLScalarType.newScalar()
+    GraphQLScalarType
+        .newScalar()
         .name(YearMonth::class.simpleName)
         .description(YearMonth::class.toString())
         .coercing(YearMonthCoercing)
         .build()
 
 private val graphQLYear: GraphQLScalarType =
-    GraphQLScalarType.newScalar()
+    GraphQLScalarType
+        .newScalar()
         .name(Year::class.simpleName)
         .description(Year::class.toString())
         .coercing(YearCoercing)
         .build()
 
 private val graphQLUUID: GraphQLScalarType =
-    GraphQLScalarType.newScalar()
+    GraphQLScalarType
+        .newScalar()
         .name(UUID::class.simpleName)
         .description(UUID::class.toString())
         .coercing(UuidCoercing)
         .build()
 
 private val graphQLBigDecimal: GraphQLScalarType =
-    GraphQLScalarType.newScalar()
+    GraphQLScalarType
+        .newScalar()
         .name(BigDecimal::class.simpleName)
         .description(BigDecimal::class.toString())
         .coercing(BigDecimalCoercing)
@@ -174,9 +180,7 @@ private object LocalDateCoercing : Coercing<LocalDate, String> {
         variables: CoercedVariables,
         graphQLContext: GraphQLContext,
         locale: Locale,
-    ): LocalDate {
-        return LocalDate.parse(serialize(input, graphQLContext, locale))
-    }
+    ): LocalDate = LocalDate.parse(serialize(input, graphQLContext, locale))
 }
 
 private object YearMonthCoercing : Coercing<YearMonth, String> {
@@ -201,9 +205,7 @@ private object YearMonthCoercing : Coercing<YearMonth, String> {
         variables: CoercedVariables,
         graphQLContext: GraphQLContext,
         locale: Locale,
-    ): YearMonth {
-        return YearMonth.parse(serialize(input, graphQLContext, locale))
-    }
+    ): YearMonth = YearMonth.parse(serialize(input, graphQLContext, locale))
 }
 
 private object YearCoercing : Coercing<Year, String> {
@@ -228,7 +230,5 @@ private object YearCoercing : Coercing<Year, String> {
         variables: CoercedVariables,
         graphQLContext: GraphQLContext,
         locale: Locale,
-    ): Year {
-        return Year.parse(serialize(input, graphQLContext, locale))
-    }
+    ): Year = Year.parse(serialize(input, graphQLContext, locale))
 }

@@ -51,16 +51,28 @@ sealed interface ApiTilkommenInntektEvent {
         val ekskluderteUkedager: ListLocalDateEndring?,
     ) {
         @GraphQLName("TilkommenInntektEventDatoPeriodeEndring")
-        data class DatoPeriodeEndring(val fra: ApiDatoPeriode, val til: ApiDatoPeriode)
+        data class DatoPeriodeEndring(
+            val fra: ApiDatoPeriode,
+            val til: ApiDatoPeriode,
+        )
 
         @GraphQLName("TilkommenInntektEventBigDecimalEndring")
-        data class BigDecimalEndring(val fra: BigDecimal, val til: BigDecimal)
+        data class BigDecimalEndring(
+            val fra: BigDecimal,
+            val til: BigDecimal,
+        )
 
         @GraphQLName("TilkommenInntektEventStringEndring")
-        data class StringEndring(val fra: String, val til: String)
+        data class StringEndring(
+            val fra: String,
+            val til: String,
+        )
 
         @GraphQLName("TilkommenInntektEventListLocalDateEndring")
-        data class ListLocalDateEndring(val fra: List<LocalDate>, val til: List<LocalDate>)
+        data class ListLocalDateEndring(
+            val fra: List<LocalDate>,
+            val til: List<LocalDate>,
+        )
     }
 }
 

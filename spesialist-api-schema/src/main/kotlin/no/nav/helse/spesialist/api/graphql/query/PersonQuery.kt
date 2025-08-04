@@ -13,4 +13,6 @@ interface PersonQuerySchema : Query {
     ): DataFetcherResult<ApiPerson?>
 }
 
-class PersonQuery(private val handler: PersonQuerySchema) : PersonQuerySchema by handler
+class PersonQuery(
+    private val handler: PersonQuerySchema,
+) : PersonQuerySchema by handler

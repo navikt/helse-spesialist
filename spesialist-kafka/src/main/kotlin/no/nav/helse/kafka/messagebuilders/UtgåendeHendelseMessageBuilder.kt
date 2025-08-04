@@ -37,9 +37,7 @@ import java.util.UUID
 private const val AUTOMATISK_BEHANDLET_IDENT = "Automatisk behandlet"
 private const val AUTOMATISK_BEHANDLET_EPOSTADRESSE = "tbd@nav.no"
 
-fun UtgåendeHendelse.somJsonMessage(fødselsnummer: String): JsonMessage {
-    return JsonMessage.newMessage(eventName(), mapOf("fødselsnummer" to fødselsnummer) + detaljer())
-}
+fun UtgåendeHendelse.somJsonMessage(fødselsnummer: String): JsonMessage = JsonMessage.newMessage(eventName(), mapOf("fødselsnummer" to fødselsnummer) + detaljer())
 
 internal fun UtgåendeHendelse.eventName() =
     when (this) {
@@ -70,8 +68,8 @@ internal fun UtgåendeHendelse.eventName() =
         is InntektsendringerEvent -> "inntektsendringer"
     }
 
-private fun UtgåendeHendelse.detaljer(): Map<String, Any> {
-    return when (this) {
+private fun UtgåendeHendelse.detaljer(): Map<String, Any> =
+    when (this) {
         is VedtaksperiodeAvvistManuelt -> this.detaljer()
         is VedtaksperiodeAvvistAutomatisk -> this.detaljer()
         is VedtaksperiodeGodkjentManuelt -> this.detaljer()
@@ -94,7 +92,6 @@ private fun UtgåendeHendelse.detaljer(): Map<String, Any> {
         is VarselEndret -> this.detaljer()
         is InntektsendringerEvent -> this.detaljer()
     }
-}
 
 private fun Godkjenningsbehovløsning.detaljer(): Map<String, Any> {
     val orginaltBehov = objectMapper.readValue<Map<String, Any>>(this.json)
@@ -122,8 +119,8 @@ private fun Godkjenningsbehovløsning.detaljer(): Map<String, Any> {
         mapOf("@id" to UUID.randomUUID(), "@opprettet" to LocalDateTime.now())
 }
 
-private fun VedtaksperiodeAvvistAutomatisk.detaljer(): Map<String, Any> {
-    return buildMap {
+private fun VedtaksperiodeAvvistAutomatisk.detaljer(): Map<String, Any> =
+    buildMap {
         put("fødselsnummer", fødselsnummer)
         put("vedtaksperiodeId", vedtaksperiodeId)
         put("saksbehandlerIdent", AUTOMATISK_BEHANDLET_IDENT)
@@ -142,10 +139,9 @@ private fun VedtaksperiodeAvvistAutomatisk.detaljer(): Map<String, Any> {
         put("periodetype", periodetype)
         put("behandlingId", behandlingId)
     }
-}
 
-private fun VedtaksperiodeAvvistManuelt.detaljer(): Map<String, Any> {
-    return buildMap {
+private fun VedtaksperiodeAvvistManuelt.detaljer(): Map<String, Any> =
+    buildMap {
         put("fødselsnummer", fødselsnummer)
         put("vedtaksperiodeId", vedtaksperiodeId)
         put("saksbehandlerIdent", saksbehandlerIdent)
@@ -164,10 +160,9 @@ private fun VedtaksperiodeAvvistManuelt.detaljer(): Map<String, Any> {
         put("periodetype", periodetype)
         put("behandlingId", behandlingId)
     }
-}
 
-private fun VedtaksperiodeGodkjentAutomatisk.detaljer(): Map<String, Any> {
-    return mapOf(
+private fun VedtaksperiodeGodkjentAutomatisk.detaljer(): Map<String, Any> =
+    mapOf(
         "fødselsnummer" to fødselsnummer,
         "vedtaksperiodeId" to vedtaksperiodeId,
         "periodetype" to periodetype,
@@ -181,10 +176,9 @@ private fun VedtaksperiodeGodkjentAutomatisk.detaljer(): Map<String, Any> {
             ),
         "behandlingId" to behandlingId,
     )
-}
 
-private fun VedtaksperiodeGodkjentManuelt.detaljer(): Map<String, Any> {
-    return buildMap {
+private fun VedtaksperiodeGodkjentManuelt.detaljer(): Map<String, Any> =
+    buildMap {
         put("fødselsnummer", fødselsnummer)
         put("vedtaksperiodeId", vedtaksperiodeId)
         put("periodetype", periodetype)
@@ -209,7 +203,6 @@ private fun VedtaksperiodeGodkjentManuelt.detaljer(): Map<String, Any> {
         }
         put("behandlingId", behandlingId)
     }
-}
 
 private fun Saksbehandlerløsning.detaljer(): Map<String, Any> =
     listOfNotNull(
@@ -408,8 +401,8 @@ private fun VarselEndret.detaljer(): Map<String, Any> =
         "gjeldende_status" to gjeldendeStatus,
     )
 
-private fun InntektsendringerEvent.detaljer(): Map<String, Any> {
-    return buildMap {
+private fun InntektsendringerEvent.detaljer(): Map<String, Any> =
+    buildMap {
         put(
             "inntektsendringer",
             this@detaljer.inntektskilder.map { inntektskilde ->
@@ -434,4 +427,3 @@ private fun InntektsendringerEvent.detaljer(): Map<String, Any> {
             },
         )
     }
-}

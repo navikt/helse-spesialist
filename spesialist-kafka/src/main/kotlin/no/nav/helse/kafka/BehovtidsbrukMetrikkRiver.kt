@@ -17,13 +17,12 @@ import kotlin.time.toKotlinDuration
 class BehovtidsbrukMetrikkRiver : SpesialistRiver {
     private val logg: Logger = LoggerFactory.getLogger("MetrikkRiver")
 
-    override fun preconditions(): River.PacketValidation {
-        return River.PacketValidation {
+    override fun preconditions(): River.PacketValidation =
+        River.PacketValidation {
             it.requireValue("@event_name", "behov")
             it.requireValue("@final", true)
             it.requireKey("@løsning")
         }
-    }
 
     override fun validations() =
         River.PacketValidation {

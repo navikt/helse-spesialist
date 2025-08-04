@@ -12,4 +12,6 @@ interface OpphevStansMutationSchema : Mutation {
     ): DataFetcherResult<Boolean>
 }
 
-class OpphevStansMutation(private val handler: OpphevStansMutationSchema) : OpphevStansMutationSchema by handler
+class OpphevStansMutation(
+    private val handler: OpphevStansMutationSchema,
+) : OpphevStansMutationSchema by handler

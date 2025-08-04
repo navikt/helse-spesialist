@@ -14,8 +14,7 @@ data class VedtaksperiodeDbDto(
 ) {
     fun vedtaksperiodeId() = this.vedtaksperiodeId
 
-    fun tidligereEnnOgSammenhengende(other: VedtaksperiodeDbDto): Boolean =
-        this.fom <= other.tom && this.skjæringstidspunkt == other.skjæringstidspunkt
+    fun tidligereEnnOgSammenhengende(other: VedtaksperiodeDbDto): Boolean = this.fom <= other.tom && this.skjæringstidspunkt == other.skjæringstidspunkt
 
     // I stedet for å logge her, kunne man ha bygget opp et feilresponsobjekt og returnert det i stedet for en boolean,
     // og så logge på høyere nivå og med mer info, for eksempel organisasjonsnummer (og kanskje sende med detaljer i
@@ -38,9 +37,7 @@ data class VedtaksperiodeDbDto(
     }
 
     companion object {
-        fun Set<VedtaksperiodeDbDto>.harAktiveVarsler(): Boolean {
-            return any { it.harAktiveVarsler() }
-        }
+        fun Set<VedtaksperiodeDbDto>.harAktiveVarsler(): Boolean = any { it.harAktiveVarsler() }
 
         fun Set<VedtaksperiodeDbDto>.godkjennVarsler(
             fødselsnummer: String,

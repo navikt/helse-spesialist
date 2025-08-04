@@ -36,8 +36,8 @@ enum class EgenskapDto {
     ;
 
     internal companion object {
-        fun Egenskap.toDto(): EgenskapDto {
-            return when (this) {
+        fun Egenskap.toDto(): EgenskapDto =
+            when (this) {
                 Egenskap.RISK_QA -> RISK_QA
                 Egenskap.FORTROLIG_ADRESSE -> FORTROLIG_ADRESSE
                 Egenskap.STRENGT_FORTROLIG_ADRESSE -> STRENGT_FORTROLIG_ADRESSE
@@ -71,7 +71,6 @@ enum class EgenskapDto {
                 Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE -> SELVSTENDIG_NÆRINGSDRIVENDE
                 Egenskap.ARBEIDSTAKER -> ARBEIDSTAKER
             }
-        }
 
         fun EgenskapDto.gjenopprett() =
             when (this) {

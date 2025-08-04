@@ -2,7 +2,9 @@ package no.nav.helse.opprydding
 
 import no.nav.helse.rapids_rivers.RapidApplication
 
-internal class ApplicationBuilder(env: Map<String, String>) {
+internal class ApplicationBuilder(
+    env: Map<String, String>,
+) {
     // Sikrer at man ikke får tilgang til db andre steder enn i dev-gcp
     private val dataSourceBuilder =
         when (env["NAIS_CLUSTER_NAME"]) {

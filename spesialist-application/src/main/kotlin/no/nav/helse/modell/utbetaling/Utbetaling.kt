@@ -34,13 +34,14 @@ class Utbetaling(
     internal fun harEndringIUtbetalingTilSykmeldt() = personbeløp != 0
 
     override fun equals(other: Any?): Boolean =
-        this === other || (
-            other is Utbetaling &&
-                this.javaClass == other.javaClass &&
-                this.utbetalingId == other.utbetalingId &&
-                this.arbeidsgiverbeløp == other.arbeidsgiverbeløp &&
-                this.personbeløp == other.personbeløp
-        )
+        this === other ||
+            (
+                other is Utbetaling &&
+                    this.javaClass == other.javaClass &&
+                    this.utbetalingId == other.utbetalingId &&
+                    this.arbeidsgiverbeløp == other.arbeidsgiverbeløp &&
+                    this.personbeløp == other.personbeløp
+            )
 
     override fun hashCode(): Int {
         var result = utbetalingId.hashCode()
@@ -49,9 +50,7 @@ class Utbetaling(
         return result
     }
 
-    override fun toString(): String {
-        return "Utbetaling(utbetalingId=$utbetalingId, arbeidsgiverbeløp=$arbeidsgiverbeløp, personbeløp=$personbeløp, type=$type)"
-    }
+    override fun toString(): String = "Utbetaling(utbetalingId=$utbetalingId, arbeidsgiverbeløp=$arbeidsgiverbeløp, personbeløp=$personbeløp, type=$type)"
 }
 
 enum class Refusjonstype {

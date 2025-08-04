@@ -48,7 +48,10 @@ import no.nav.helse.spesialist.db.objectMapper
 import java.util.UUID
 import javax.sql.DataSource
 
-class PgMeldingDao private constructor(queryRunner: QueryRunner) : MeldingDao, QueryRunner by queryRunner {
+class PgMeldingDao private constructor(
+    queryRunner: QueryRunner,
+) : MeldingDao,
+    QueryRunner by queryRunner {
     internal constructor(session: Session) : this(MedSession(session))
     internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 

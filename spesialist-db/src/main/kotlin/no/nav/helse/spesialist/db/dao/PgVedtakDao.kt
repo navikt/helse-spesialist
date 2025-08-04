@@ -12,12 +12,15 @@ import no.nav.helse.spesialist.db.QueryRunner
 import java.util.UUID
 import javax.sql.DataSource
 
-class PgVedtakDao private constructor(queryRunner: QueryRunner) : VedtakDao, QueryRunner by queryRunner {
+class PgVedtakDao private constructor(
+    queryRunner: QueryRunner,
+) : VedtakDao,
+    QueryRunner by queryRunner {
     internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
     internal constructor(session: Session) : this(MedSession(session))
 
-    override fun finnVedtaksperiode(vedtaksperiodeId: UUID): VedtaksperiodeDto? {
-        return asSQL(
+    override fun finnVedtaksperiode(vedtaksperiodeId: UUID): VedtaksperiodeDto? =
+        asSQL(
             """
             SELECT 
                 vedtaksperiode_id,
@@ -35,7 +38,6 @@ class PgVedtakDao private constructor(queryRunner: QueryRunner) : VedtakDao, Que
                 behandlinger = emptyList(),
             )
         }
-    }
 
     override fun lagreVedtaksperiode(
         fødselsnummer: String,
@@ -115,33 +117,28 @@ class PgVedtakDao private constructor(queryRunner: QueryRunner) : VedtakDao, Que
         ).update()
     }
 
-    override fun finnOrganisasjonsnummer(vedtaksperiodeId: UUID): String? {
-        return asSQL(
+    override fun finnOrganisasjonsnummer(vedtaksperiodeId: UUID): String? =
+        asSQL(
             """
             SELECT arbeidsgiver_identifikator FROM vedtak
             WHERE vedtaksperiode_id = :vedtaksperiodeId
             """,
             "vedtaksperiodeId" to vedtaksperiodeId,
-        )
-            .singleOrNull {
-                it.string("arbeidsgiver_identifikator")
-            }
-    }
+        ).singleOrNull {
+            it.string("arbeidsgiver_identifikator")
+        }
 
-    override fun finnInntektskilde(vedtaksperiodeId: UUID): Inntektskilde? {
-        return asSQL(
+    override fun finnInntektskilde(vedtaksperiodeId: UUID): Inntektskilde? =
+        asSQL(
             "SELECT inntektskilde FROM saksbehandleroppgavetype WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)",
             "vedtaksperiodeId" to vedtaksperiodeId,
-        )
-            .singleOrNull {
-                enumValueOf<Inntektskilde>(it.string("inntektskilde"))
-            }
-    }
+        ).singleOrNull {
+            enumValueOf<Inntektskilde>(it.string("inntektskilde"))
+        }
 
-    fun finnVedtakId(vedtaksperiodeId: UUID): Long? {
-        return asSQL("SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId", "vedtaksperiodeId" to vedtaksperiodeId)
+    fun finnVedtakId(vedtaksperiodeId: UUID): Long? =
+        asSQL("SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId", "vedtaksperiodeId" to vedtaksperiodeId)
             .singleOrNull {
                 it.long("id")
             }
-    }
 }

@@ -15,14 +15,13 @@ import no.nav.helse.mediator.meldinger.løsninger.Inntektløsning
 class InntektLøsningRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
-    override fun preconditions(): River.PacketValidation {
-        return River.PacketValidation {
+    override fun preconditions(): River.PacketValidation =
+        River.PacketValidation {
             it.requireValue("@event_name", "behov")
             it.requireValue("@final", true)
             it.requireAll("@behov", listOf("InntekterForSykepengegrunnlag"))
             it.requireKey("contextId", "hendelseId")
         }
-    }
 
     override fun validations() =
         River.PacketValidation {

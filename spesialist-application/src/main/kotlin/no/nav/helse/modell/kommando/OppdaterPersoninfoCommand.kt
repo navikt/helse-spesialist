@@ -21,9 +21,7 @@ internal class OppdaterPersoninfoCommand(
         return behandle(context, personDao, fødselsnummer)
     }
 
-    override fun resume(context: CommandContext): Boolean {
-        return behandle(context, personDao, fødselsnummer)
-    }
+    override fun resume(context: CommandContext): Boolean = behandle(context, personDao, fødselsnummer)
 
     private fun ignorer(): Boolean {
         logg.info("har ikke behov for ${BEHOV::class.simpleName}, informasjonen er ny nok")

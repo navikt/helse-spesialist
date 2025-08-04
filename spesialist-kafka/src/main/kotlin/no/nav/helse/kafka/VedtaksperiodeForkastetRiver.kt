@@ -12,11 +12,10 @@ import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
 class VedtaksperiodeForkastetRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
-    override fun preconditions(): River.PacketValidation {
-        return River.PacketValidation {
+    override fun preconditions(): River.PacketValidation =
+        River.PacketValidation {
             it.requireValue("@event_name", "vedtaksperiode_forkastet")
         }
-    }
 
     override fun validations() =
         River.PacketValidation {

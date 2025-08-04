@@ -175,4 +175,6 @@ interface ArbeidsgiverSchema {
 }
 
 @GraphQLName("Arbeidsgiver")
-class ApiArbeidsgiver(private val resolver: ArbeidsgiverSchema) : ArbeidsgiverSchema by resolver
+class ApiArbeidsgiver(
+    private val resolver: ArbeidsgiverSchema,
+) : ArbeidsgiverSchema by resolver

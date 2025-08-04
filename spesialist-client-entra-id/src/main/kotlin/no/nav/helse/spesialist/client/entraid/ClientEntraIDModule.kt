@@ -1,6 +1,8 @@
 package no.nav.helse.spesialist.client.entraid
 
-class ClientEntraIDModule(configuration: Configuration) {
+class ClientEntraIDModule(
+    configuration: Configuration,
+) {
     data class Configuration(
         val clientId: String,
         val tokenEndpoint: String,

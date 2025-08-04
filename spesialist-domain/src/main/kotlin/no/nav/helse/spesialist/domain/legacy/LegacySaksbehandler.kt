@@ -94,13 +94,14 @@ class LegacySaksbehandler(
     override fun toString(): String = "epostadresse=$epostadresse, oid=$oid"
 
     override fun equals(other: Any?) =
-        this === other || (
-            other is LegacySaksbehandler &&
-                epostadresse == other.epostadresse &&
-                navn == other.navn &&
-                oid == other.oid &&
-                ident == other.ident
-        )
+        this === other ||
+            (
+                other is LegacySaksbehandler &&
+                    epostadresse == other.epostadresse &&
+                    navn == other.navn &&
+                    oid == other.oid &&
+                    ident == other.ident
+            )
 
     override fun hashCode(): Int {
         var result = epostadresse.hashCode()
@@ -111,8 +112,7 @@ class LegacySaksbehandler(
     }
 
     companion object {
-        fun SaksbehandlerDto.gjenopprett(tilgangskontroll: Tilgangskontroll): LegacySaksbehandler =
-            LegacySaksbehandler(epostadresse, oid, navn, ident, tilgangskontroll)
+        fun SaksbehandlerDto.gjenopprett(tilgangskontroll: Tilgangskontroll): LegacySaksbehandler = LegacySaksbehandler(epostadresse, oid, navn, ident, tilgangskontroll)
 
         fun LegacySaksbehandler.toDto(): SaksbehandlerDto =
             SaksbehandlerDto(

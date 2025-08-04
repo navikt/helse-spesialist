@@ -17,4 +17,6 @@ interface TildelingMutationSchema : Mutation {
     ): DataFetcherResult<Boolean>
 }
 
-class TildelingMutation(private val handler: TildelingMutationSchema) : TildelingMutationSchema by handler
+class TildelingMutation(
+    private val handler: TildelingMutationSchema,
+) : TildelingMutationSchema by handler

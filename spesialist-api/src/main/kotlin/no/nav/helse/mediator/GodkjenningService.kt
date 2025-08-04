@@ -54,9 +54,11 @@ class GodkjenningService(
                     saksbehandlerEpost = epost,
                     godkjenttidspunkt = LocalDateTime.now(),
                     saksbehandleroverstyringer =
-                        totrinnsvurdering?.overstyringer?.filter {
-                            it.vedtaksperiodeId == vedtaksperiodeId
-                        }?.map { it.eksternHendelseId } ?: emptyList(),
+                        totrinnsvurdering
+                            ?.overstyringer
+                            ?.filter {
+                                it.vedtaksperiodeId == vedtaksperiodeId
+                            }?.map { it.eksternHendelseId } ?: emptyList(),
                     saksbehandler = saksbehandler(godkjenningDTO, totrinnsvurdering, oid),
                     årsak = godkjenningDTO.årsak,
                     begrunnelser = godkjenningDTO.begrunnelser,

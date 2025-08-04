@@ -8,7 +8,10 @@ import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
 import java.time.LocalDateTime
 
-class PgVergemålDao internal constructor(session: Session) : VergemålDao, QueryRunner by MedSession(session) {
+class PgVergemålDao internal constructor(
+    session: Session,
+) : VergemålDao,
+    QueryRunner by MedSession(session) {
     override fun lagre(
         fødselsnummer: String,
         vergemålOgFremtidsfullmakt: VergemålOgFremtidsfullmakt,

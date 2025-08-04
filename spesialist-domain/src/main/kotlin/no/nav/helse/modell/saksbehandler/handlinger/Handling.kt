@@ -13,7 +13,9 @@ interface Personhandling : Handling {
     val fødselsnummer: String
 }
 
-abstract class Oppgavehandling(private val oppgaveId: Long) : Handling {
+abstract class Oppgavehandling(
+    private val oppgaveId: Long,
+) : Handling {
     protected lateinit var oppgave: Oppgave
 
     fun oppgaveId(): Long = oppgaveId

@@ -37,9 +37,7 @@ data class VarselDbDto(
         val handling: String?,
     )
 
-    fun erAktiv(): Boolean {
-        return status == Varselstatus.AKTIV
-    }
+    fun erAktiv(): Boolean = status == Varselstatus.AKTIV
 
     fun vurder(
         godkjent: Boolean,

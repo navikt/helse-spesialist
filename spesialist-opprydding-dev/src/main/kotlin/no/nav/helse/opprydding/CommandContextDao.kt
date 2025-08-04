@@ -6,7 +6,9 @@ import org.intellij.lang.annotations.Language
 import java.util.UUID
 import javax.sql.DataSource
 
-class CommandContextDao(private val dataSource: DataSource) {
+class CommandContextDao(
+    private val dataSource: DataSource,
+) {
     fun finnAktiveKommandokjeder(fødselsnummer: String): List<Kommandokjedeinfo> =
         sessionOf(dataSource).use { session ->
             @Language("postgresql")
@@ -26,5 +28,8 @@ class CommandContextDao(private val dataSource: DataSource) {
             )
         }
 
-    data class Kommandokjedeinfo(val contextId: UUID, val hendelseId: UUID)
+    data class Kommandokjedeinfo(
+        val contextId: UUID,
+        val hendelseId: UUID,
+    )
 }

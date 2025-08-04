@@ -13,7 +13,8 @@ import javax.sql.DataSource
 
 class PgNotatApiDao internal constructor(
     private val dataSource: DataSource,
-) : QueryRunner by MedDataSource(dataSource), NotatApiDao {
+) : QueryRunner by MedDataSource(dataSource),
+    NotatApiDao {
     // PåVent-notater og Retur-notater lagres nå i periodehistorikk, og skal ikke være med til speil som en del av notater
     override fun finnNotater(vedtaksperiodeId: UUID): List<NotatDto> =
         asSQL(

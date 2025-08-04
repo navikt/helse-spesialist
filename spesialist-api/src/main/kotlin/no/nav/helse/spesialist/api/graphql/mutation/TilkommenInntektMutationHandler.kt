@@ -77,7 +77,8 @@ class TilkommenInntektMutationHandler(
                 periode = endretTilPeriode,
                 organisasjonsnummer = endretTil.organisasjonsnummer,
                 andreTilkomneInntekter =
-                    session.tilkommenInntektRepository.finnAlleForFødselsnummer(tilkommenInntekt.fødselsnummer)
+                    session.tilkommenInntektRepository
+                        .finnAlleForFødselsnummer(tilkommenInntekt.fødselsnummer)
                         .minus(tilkommenInntekt),
                 vedtaksperioder = session.vedtaksperiodeRepository.finnVedtaksperioder(tilkommenInntekt.fødselsnummer),
             )
@@ -174,7 +175,8 @@ class TilkommenInntektMutationHandler(
                 periode = endretTilPeriode,
                 organisasjonsnummer = endretTil.organisasjonsnummer,
                 andreTilkomneInntekter =
-                    session.tilkommenInntektRepository.finnAlleForFødselsnummer(tilkommenInntekt.fødselsnummer)
+                    session.tilkommenInntektRepository
+                        .finnAlleForFødselsnummer(tilkommenInntekt.fødselsnummer)
                         .minus(tilkommenInntekt),
                 vedtaksperioder = session.vedtaksperiodeRepository.finnVedtaksperioder(tilkommenInntekt.fødselsnummer),
             )

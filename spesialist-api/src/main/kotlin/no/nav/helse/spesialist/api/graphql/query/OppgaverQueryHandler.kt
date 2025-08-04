@@ -16,7 +16,9 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import kotlin.time.measureTimedValue
 
-class OppgaverQueryHandler(private val apiOppgaveService: ApiOppgaveService) : OppgaverQuerySchema {
+class OppgaverQueryHandler(
+    private val apiOppgaveService: ApiOppgaveService,
+) : OppgaverQuerySchema {
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
     override suspend fun behandledeOppgaverFeed(

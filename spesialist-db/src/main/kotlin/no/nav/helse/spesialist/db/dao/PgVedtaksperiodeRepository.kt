@@ -17,9 +17,7 @@ class PgVedtaksperiodeRepository(
 
     private val sikkerLogger = LoggerFactory.getLogger("tjenestekall")
 
-    override fun finnVedtaksperioder(fødselsnummer: String): List<VedtaksperiodeDto> {
-        return generasjonDao.finnVedtaksperiodeIderFor(fødselsnummer).map { finnVedtaksperiode(it) }
-    }
+    override fun finnVedtaksperioder(fødselsnummer: String): List<VedtaksperiodeDto> = generasjonDao.finnVedtaksperiodeIderFor(fødselsnummer).map { finnVedtaksperiode(it) }
 
     override fun lagreVedtaksperioder(
         fødselsnummer: String,
@@ -28,17 +26,16 @@ class PgVedtaksperiodeRepository(
         vedtaksperioder.forEach { lagreVedtaksperiode(fødselsnummer, it) }
     }
 
-    private fun finnVedtaksperiode(vedtaksperiodeId: UUID): VedtaksperiodeDto {
-        return vedtakDao.finnVedtaksperiode(vedtaksperiodeId)
+    private fun finnVedtaksperiode(vedtaksperiodeId: UUID): VedtaksperiodeDto =
+        vedtakDao
+            .finnVedtaksperiode(vedtaksperiodeId)
             ?.copy(behandlinger = finnGenerasjoner(vedtaksperiodeId))
             ?: throw IllegalStateException("Forventer å finne vedtaksperiode for vedtaksperiodeId=$vedtaksperiodeId")
-    }
 
-    private fun finnGenerasjoner(vedtaksperiodeId: UUID): List<BehandlingDto> {
-        return generasjonDao.finnGenerasjoner(vedtaksperiodeId).also {
+    private fun finnGenerasjoner(vedtaksperiodeId: UUID): List<BehandlingDto> =
+        generasjonDao.finnGenerasjoner(vedtaksperiodeId).also {
             hentedeBehandlinger[vedtaksperiodeId] = it
         }
-    }
 
     private fun lagreVedtaksperiode(
         fødselsnummer: String,

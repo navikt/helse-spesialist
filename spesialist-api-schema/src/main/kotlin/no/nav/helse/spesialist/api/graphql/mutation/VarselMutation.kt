@@ -13,4 +13,6 @@ interface VarselMutationSchema : Mutation {
     ): DataFetcherResult<ApiVarselDTO?>
 }
 
-class VarselMutation(private val handler: VarselMutationSchema) : VarselMutationSchema by handler
+class VarselMutation(
+    private val handler: VarselMutationSchema,
+) : VarselMutationSchema by handler

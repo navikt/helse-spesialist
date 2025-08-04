@@ -387,8 +387,7 @@ class Kommandofabrikk(
             }
         }
 
-    private fun transaksjonellOppgaveService(sessionContext: SessionContext): OppgaveService =
-        oppgaveService.nyOppgaveService(sessionContext)
+    private fun transaksjonellOppgaveService(sessionContext: SessionContext): OppgaveService = oppgaveService.nyOppgaveService(sessionContext)
 
     private fun transaksjonellAutomatisering(sessionContext: SessionContext): Automatisering =
         Automatisering.Factory.automatisering(

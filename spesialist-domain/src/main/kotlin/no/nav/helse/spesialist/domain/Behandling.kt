@@ -5,7 +5,9 @@ import no.nav.helse.spesialist.domain.ddd.Entity
 import java.util.UUID
 
 @JvmInline
-value class SpleisBehandlingId(val value: UUID)
+value class SpleisBehandlingId(
+    val value: UUID,
+)
 
 enum class Tag {
     Innvilget,

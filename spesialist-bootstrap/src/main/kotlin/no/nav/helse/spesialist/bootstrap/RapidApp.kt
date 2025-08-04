@@ -106,7 +106,9 @@ private fun Map<String, String>.getBoolean(
 ): Boolean = this[key]?.toBoolean() ?: defaultValue
 
 class RapidApp {
-    class Modules(val dbModule: DBModule)
+    class Modules(
+        val dbModule: DBModule,
+    )
 
     lateinit var ktorSetupCallback: (Application) -> Unit
 

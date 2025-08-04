@@ -9,7 +9,9 @@ import no.nav.helse.spesialist.db.QueryRunner
 import java.util.UUID
 import javax.sql.DataSource
 
-class PgBehandlingApiDao internal constructor(dataSource: DataSource) : QueryRunner by MedDataSource(dataSource) {
+class PgBehandlingApiDao internal constructor(
+    dataSource: DataSource,
+) : QueryRunner by MedDataSource(dataSource) {
     fun gjeldendeBehandlingFor(oppgaveId: Long): VedtaksperiodeDbDto =
         asSQL(
             """
@@ -72,8 +74,7 @@ class PgBehandlingApiDao internal constructor(dataSource: DataSource) : QueryRun
             "oppgave_id" to oppgaveId,
         ).list { it.tilVedtaksperiode(varselSupplier) }.toSet()
 
-    private fun Row.tilVedtaksperiode(varselSupplier: (generasjonId: UUID) -> Set<VarselDbDto>) =
-        tilVedtaksperiode(varselSupplier(uuid("unik_id")))
+    private fun Row.tilVedtaksperiode(varselSupplier: (generasjonId: UUID) -> Set<VarselDbDto>) = tilVedtaksperiode(varselSupplier(uuid("unik_id")))
 
     private fun Row.tilVedtaksperiode(varsler: Set<VarselDbDto> = emptySet()) =
         VedtaksperiodeDbDto(

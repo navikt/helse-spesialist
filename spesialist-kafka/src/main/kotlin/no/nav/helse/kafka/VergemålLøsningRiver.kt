@@ -14,14 +14,13 @@ import no.nav.helse.mediator.meldinger.løsninger.Vergemålløsning
 class VergemålLøsningRiver(
     private val meldingMediator: MeldingMediator,
 ) : SpesialistRiver {
-    override fun preconditions(): River.PacketValidation {
-        return River.PacketValidation {
+    override fun preconditions(): River.PacketValidation =
+        River.PacketValidation {
             it.requireValue("@event_name", "behov")
             it.requireValue("@final", true)
             it.requireAll("@behov", listOf("Vergemål"))
             it.requireKey("fødselsnummer", "hendelseId", "contextId")
         }
-    }
 
     override fun validations() =
         River.PacketValidation {

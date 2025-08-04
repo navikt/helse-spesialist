@@ -18,7 +18,10 @@ interface ArbeidsgiverApiDao {
         val årMåned: YearMonth,
         val inntektsliste: List<Inntekt>,
     ) {
-        data class Inntekt(val beløp: Double, val orgnummer: String)
+        data class Inntekt(
+            val beløp: Double,
+            val orgnummer: String,
+        )
     }
 
     data class ArbeidsgiverInntekterFraAOrdningen(

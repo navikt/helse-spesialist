@@ -27,4 +27,6 @@ interface NotatMutationSchema : Mutation {
     ): DataFetcherResult<ApiKommentar?>
 }
 
-class NotatMutation(private val handler: NotatMutationSchema) : NotatMutationSchema by handler
+class NotatMutation(
+    private val handler: NotatMutationSchema,
+) : NotatMutationSchema by handler

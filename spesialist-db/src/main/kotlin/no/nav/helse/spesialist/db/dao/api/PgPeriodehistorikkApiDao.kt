@@ -12,7 +12,8 @@ import javax.sql.DataSource
 
 class PgPeriodehistorikkApiDao internal constructor(
     private val dataSource: DataSource,
-) : QueryRunner by MedDataSource(dataSource), PeriodehistorikkApiDao {
+) : QueryRunner by MedDataSource(dataSource),
+    PeriodehistorikkApiDao {
     override fun finn(utbetalingId: UUID) =
         asSQL(
             // Fiklete greier, for å unngå sequential scan. Spørringen gjøres mange ganger når GraphQL skal bygge

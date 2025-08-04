@@ -109,4 +109,6 @@ interface PersonSchema {
 }
 
 @GraphQLName("Person")
-class ApiPerson(private val resolver: PersonSchema) : PersonSchema by resolver
+class ApiPerson(
+    private val resolver: PersonSchema,
+) : PersonSchema by resolver

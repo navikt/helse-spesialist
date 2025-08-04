@@ -24,4 +24,6 @@ interface OverstyringMutationSchema : Mutation {
     ): DataFetcherResult<Boolean?>
 }
 
-class OverstyringMutation(private val handler: OverstyringMutationSchema) : OverstyringMutationSchema by handler
+class OverstyringMutation(
+    private val handler: OverstyringMutationSchema,
+) : OverstyringMutationSchema by handler

@@ -23,12 +23,11 @@ class KomplettArbeidsforholdDto(
         fødselsnummer,
         organisasjonsnummer,
     ) {
-    override fun måOppdateres(): Boolean {
-        return oppdatert <= LocalDateTime.now().minusDays(1)
-    }
+    override fun måOppdateres(): Boolean = oppdatert <= LocalDateTime.now().minusDays(1)
 
     override fun equals(other: Any?): Boolean =
-        this === other || other is KomplettArbeidsforholdDto &&
+        this === other ||
+            other is KomplettArbeidsforholdDto &&
             javaClass == other.javaClass &&
             fødselsnummer == other.fødselsnummer &&
             organisasjonsnummer == other.organisasjonsnummer &&

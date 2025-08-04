@@ -4,7 +4,9 @@ import com.zaxxer.hikari.HikariDataSource
 import no.nav.helse.spesialist.application.logg.logg
 import javax.sql.DataSource
 
-class DBModule(configuration: Configuration) {
+class DBModule(
+    configuration: Configuration,
+) {
     data class Configuration(
         val jdbcUrl: String,
         val username: String,

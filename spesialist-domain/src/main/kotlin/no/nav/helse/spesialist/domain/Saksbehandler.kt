@@ -4,7 +4,9 @@ import no.nav.helse.spesialist.domain.ddd.Entity
 import java.util.UUID
 
 @JvmInline
-value class SaksbehandlerOid(val value: UUID)
+value class SaksbehandlerOid(
+    val value: UUID,
+)
 
 class Saksbehandler(
     id: SaksbehandlerOid,

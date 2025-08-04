@@ -93,8 +93,8 @@ internal class VurderVidereBehandlingAvGodkjenningsbehov(
     private fun harEndringerIGodkjenningsbehov(
         gammelt: GodkjenningsbehovData,
         nytt: GodkjenningsbehovData,
-    ): Boolean {
-        return nytt.fødselsnummer != gammelt.fødselsnummer ||
+    ): Boolean =
+        nytt.fødselsnummer != gammelt.fødselsnummer ||
             nytt.organisasjonsnummer != gammelt.organisasjonsnummer ||
             nytt.vedtaksperiodeId != gammelt.vedtaksperiodeId ||
             nytt.spleisVedtaksperioder.sortedBy { it.vedtaksperiodeId } != gammelt.spleisVedtaksperioder.sortedBy { it.vedtaksperiodeId } ||
@@ -112,5 +112,4 @@ internal class VurderVidereBehandlingAvGodkjenningsbehov(
             nytt.skjæringstidspunkt != gammelt.skjæringstidspunkt ||
             nytt.sykepengegrunnlagsfakta != gammelt.sykepengegrunnlagsfakta ||
             nytt.omregnedeÅrsinntekter.sortedBy { it.arbeidsgiverreferanse } != gammelt.omregnedeÅrsinntekter.sortedBy { it.arbeidsgiverreferanse }
-    }
 }

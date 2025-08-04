@@ -12,7 +12,9 @@ import no.nav.helse.modell.melding.UtgåendeHendelse
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-class MessageContextMeldingPubliserer(private val context: MessageContext) : MeldingPubliserer {
+class MessageContextMeldingPubliserer(
+    private val context: MessageContext,
+) : MeldingPubliserer {
     override fun publiser(
         fødselsnummer: String,
         hendelse: UtgåendeHendelse,

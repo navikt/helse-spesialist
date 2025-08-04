@@ -9,7 +9,10 @@ import no.nav.helse.spesialist.application.snapshot.SnapshotPerson
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class SnapshotService(private val personinfoDao: PersoninfoDao, private val snapshothenter: Snapshothenter) {
+class SnapshotService(
+    private val personinfoDao: PersoninfoDao,
+    private val snapshothenter: Snapshothenter,
+) {
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
     fun hentSnapshot(fødselsnummer: String): Pair<ApiPersoninfo, SnapshotPerson>? {

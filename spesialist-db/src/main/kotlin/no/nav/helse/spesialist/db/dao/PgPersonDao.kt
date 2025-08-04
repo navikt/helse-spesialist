@@ -19,7 +19,8 @@ import javax.sql.DataSource
 
 class PgPersonDao internal constructor(
     queryRunner: QueryRunner,
-) : PersonDao, QueryRunner by queryRunner {
+) : PersonDao,
+    QueryRunner by queryRunner {
     internal constructor(session: Session) : this(MedSession(session))
     internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 

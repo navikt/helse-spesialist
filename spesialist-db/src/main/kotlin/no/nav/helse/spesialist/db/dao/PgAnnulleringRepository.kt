@@ -9,7 +9,9 @@ import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 import java.util.UUID
 import javax.sql.DataSource
 
-class PgAnnulleringRepository internal constructor(dataSource: DataSource) : AnnulleringRepository {
+class PgAnnulleringRepository internal constructor(
+    dataSource: DataSource,
+) : AnnulleringRepository {
     private val dbQuery = DbQuery(dataSource)
 
     override fun lagreAnnullering(
@@ -69,7 +71,5 @@ class PgAnnulleringRepository internal constructor(dataSource: DataSource) : Ann
             )
         }
 
-    override fun finnAnnullering(annulleringDto: AnnulleringDto): Annullering? {
-        return finnAnnullering(annulleringDto.arbeidsgiverFagsystemId, annulleringDto.personFagsystemId)
-    }
+    override fun finnAnnullering(annulleringDto: AnnulleringDto): Annullering? = finnAnnullering(annulleringDto.arbeidsgiverFagsystemId, annulleringDto.personFagsystemId)
 }

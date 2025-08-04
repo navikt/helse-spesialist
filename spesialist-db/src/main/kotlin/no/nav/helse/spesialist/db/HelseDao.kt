@@ -8,7 +8,9 @@ import kotliquery.sessionOf
 import org.intellij.lang.annotations.Language
 import javax.sql.DataSource
 
-abstract class HelseDao(private val dataSource: DataSource) {
+abstract class HelseDao(
+    private val dataSource: DataSource,
+) {
     companion object {
         fun asSQL(
             @Language("SQL") sql: String,
@@ -26,8 +28,7 @@ abstract class HelseDao(private val dataSource: DataSource) {
          *   :identer::varchar[]
          * ```
          */
-        fun <T> Iterable<T>?.somDbArray(transform: (T) -> CharSequence = { it.toString() }) =
-            this?.joinToString(prefix = "{", postfix = "}", transform = transform) ?: "{}"
+        fun <T> Iterable<T>?.somDbArray(transform: (T) -> CharSequence = { it.toString() }) = this?.joinToString(prefix = "{", postfix = "}", transform = transform) ?: "{}"
 
         fun insert(
             @Language("SQL") sql: String,

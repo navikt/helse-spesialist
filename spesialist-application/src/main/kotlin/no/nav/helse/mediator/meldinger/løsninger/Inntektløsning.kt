@@ -14,6 +14,12 @@ class Inntektløsning(
     ): Long? = personDao.lagreInntekter(fødselsnummer, skjæringstidspunkt, inntekter)
 }
 
-data class Inntekter(val årMåned: YearMonth, val inntektsliste: List<Inntekt>) {
-    data class Inntekt(val beløp: Double, val orgnummer: String)
+data class Inntekter(
+    val årMåned: YearMonth,
+    val inntektsliste: List<Inntekt>,
+) {
+    data class Inntekt(
+        val beløp: Double,
+        val orgnummer: String,
+    )
 }

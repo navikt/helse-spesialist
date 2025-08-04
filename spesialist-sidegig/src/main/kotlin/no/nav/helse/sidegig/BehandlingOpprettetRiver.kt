@@ -22,17 +22,18 @@ class BehandlingOpprettetRiver(
     }
 
     init {
-        River(rapidsConnection).apply {
-            precondition {
-                it.requireValue("@event_name", "behandling_opprettet")
-                it.forbidValues("organisasjonsnummer", listOf("ARBEIDSLEDIG", "SELVSTENDIG", "FRILANS"))
-            }
-            validate {
-                it.requireKey("vedtaksperiodeId", "behandlingId")
-                it.requireKey("fom", "tom")
-                it.requireKey("@opprettet")
-            }
-        }.register(this)
+        River(rapidsConnection)
+            .apply {
+                precondition {
+                    it.requireValue("@event_name", "behandling_opprettet")
+                    it.forbidValues("organisasjonsnummer", listOf("ARBEIDSLEDIG", "SELVSTENDIG", "FRILANS"))
+                }
+                validate {
+                    it.requireKey("vedtaksperiodeId", "behandlingId")
+                    it.requireKey("fom", "tom")
+                    it.requireKey("@opprettet")
+                }
+            }.register(this)
     }
 
     override fun onError(
@@ -62,7 +63,5 @@ class BehandlingOpprettetRiver(
         behandlingDao.lagreBehandling(behandling)
     }
 
-    private fun JsonNode.asUuid(): UUID {
-        return UUID.fromString(this.asText())
-    }
+    private fun JsonNode.asUuid(): UUID = UUID.fromString(this.asText())
 }

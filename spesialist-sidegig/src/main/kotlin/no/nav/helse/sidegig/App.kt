@@ -11,7 +11,10 @@ internal fun main() {
     rapidApp.start()
 }
 
-private class App(private val rapidsConnection: RapidsConnection, env: Map<String, String>) {
+private class App(
+    private val rapidsConnection: RapidsConnection,
+    env: Map<String, String>,
+) {
     private val dataSourceBuilder = DataSourceBuilder(env)
 
     fun setupRivers() {

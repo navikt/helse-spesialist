@@ -5,7 +5,9 @@ import com.zaxxer.hikari.HikariDataSource
 import java.time.Duration
 
 // Understands how to create a data source from environment variables
-internal class DataSourceBuilder(env: Map<String, String>) {
+internal class DataSourceBuilder(
+    env: Map<String, String>,
+) {
     private val gcpProjectId: String = requireNotNull(env["GCP_TEAM_PROJECT_ID"]) { "GCP_TEAM_PROJECT_ID must be set" }
     private val databaseRegion: String = requireNotNull(env["DATABASE_REGION"]) { "DATABASE_REGION must be set" }
     private val databaseInstance: String = requireNotNull(env["DATABASE_INSTANCE"]) { "DATABASE_INSTANCE must be set" }

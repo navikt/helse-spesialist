@@ -93,16 +93,18 @@ class EntraIDAccessTokenGenerator(
     private fun lagAssertion(): String {
         val privateKey = RSAKey.parse(privateJwk)
         val now = Instant.now()
-        return JWT.create().apply {
-            withKeyId(privateKey.keyID)
-            withSubject(clientId)
-            withIssuer(clientId)
-            withAudience(tokenEndpoint)
-            withJWTId(UUID.randomUUID().toString())
-            withIssuedAt(Date.from(now))
-            withNotBefore(Date.from(now))
-            withExpiresAt(Date.from(now.plus(1, ChronoUnit.HOURS)))
-        }.sign(Algorithm.RSA256(null, privateKey.toRSAPrivateKey()))
+        return JWT
+            .create()
+            .apply {
+                withKeyId(privateKey.keyID)
+                withSubject(clientId)
+                withIssuer(clientId)
+                withAudience(tokenEndpoint)
+                withJWTId(UUID.randomUUID().toString())
+                withIssuedAt(Date.from(now))
+                withNotBefore(Date.from(now))
+                withExpiresAt(Date.from(now.plus(1, ChronoUnit.HOURS)))
+            }.sign(Algorithm.RSA256(null, privateKey.toRSAPrivateKey()))
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

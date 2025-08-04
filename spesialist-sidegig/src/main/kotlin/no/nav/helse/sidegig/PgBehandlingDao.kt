@@ -5,7 +5,9 @@ import kotliquery.sessionOf
 import org.intellij.lang.annotations.Language
 import javax.sql.DataSource
 
-class PgBehandlingDao(private val dataSource: DataSource) : BehandlingDao {
+class PgBehandlingDao(
+    private val dataSource: DataSource,
+) : BehandlingDao {
     override fun lagreBehandling(behandling: Behandling) {
         @Language("PostgreSQL")
         val query =

@@ -331,9 +331,7 @@ class Oppgave private constructor(
         return result
     }
 
-    override fun toString(): String {
-        return "Oppgave(tilstand=$tilstand, vedtaksperiodeId=$vedtaksperiodeId, utbetalingId=$utbetalingId, id=$id)"
-    }
+    override fun toString(): String = "Oppgave(tilstand=$tilstand, vedtaksperiodeId=$vedtaksperiodeId, utbetalingId=$utbetalingId, id=$id)"
 
     companion object {
         private val logg = LoggerFactory.getLogger(this::class.java.declaringClass)

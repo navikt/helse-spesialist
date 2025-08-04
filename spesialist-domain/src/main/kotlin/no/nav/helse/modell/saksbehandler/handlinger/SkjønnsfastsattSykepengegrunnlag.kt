@@ -81,8 +81,8 @@ class SkjønnsfastsattSykepengegrunnlag private constructor(
         navn: String,
         epost: String,
         ident: String,
-    ): SkjønnsfastsattSykepengegrunnlagEvent {
-        return SkjønnsfastsattSykepengegrunnlagEvent(
+    ): SkjønnsfastsattSykepengegrunnlagEvent =
+        SkjønnsfastsattSykepengegrunnlagEvent(
             eksternHendelseId = eksternHendelseId,
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
@@ -93,11 +93,8 @@ class SkjønnsfastsattSykepengegrunnlag private constructor(
             skjæringstidspunkt = skjæringstidspunkt,
             arbeidsgivere = arbeidsgivere.map(SkjønnsfastsattArbeidsgiver::byggEvent),
         )
-    }
 
-    internal fun byggSubsumsjon(saksbehandlerEpost: String): Subsumsjon {
-        return arbeidsgivere.byggSubsumsjon(saksbehandlerEpost, fødselsnummer)
-    }
+    internal fun byggSubsumsjon(saksbehandlerEpost: String): Subsumsjon = arbeidsgivere.byggSubsumsjon(saksbehandlerEpost, fødselsnummer)
 }
 
 data class SkjønnsfastsattArbeidsgiver(

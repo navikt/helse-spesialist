@@ -16,11 +16,10 @@ import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta
 class AvsluttetMedVedtakRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
-    override fun preconditions(): River.PacketValidation {
-        return River.PacketValidation {
+    override fun preconditions(): River.PacketValidation =
+        River.PacketValidation {
             it.requireValue("@event_name", "avsluttet_med_vedtak")
         }
-    }
 
     override fun validations() =
         River.PacketValidation {
@@ -90,14 +89,13 @@ class AvsluttetMedVedtakRiver(
         )
     }
 
-    private fun faktatype(packet: JsonMessage): Faktatype {
-        return when (val fastsattString = packet["sykepengegrunnlagsfakta.fastsatt"].asText()) {
+    private fun faktatype(packet: JsonMessage): Faktatype =
+        when (val fastsattString = packet["sykepengegrunnlagsfakta.fastsatt"].asText()) {
             "EtterSkjønn" -> Faktatype.ETTER_SKJØNN
             "EtterHovedregel" -> Faktatype.ETTER_HOVEDREGEL
             "IInfotrygd" -> Faktatype.I_INFOTRYGD
             else -> throw IllegalArgumentException("FastsattType $fastsattString er ikke støttet")
         }
-    }
 
     private fun sykepengegrunnlagsfakta(
         packet: JsonMessage,
@@ -147,12 +145,11 @@ class AvsluttetMedVedtakRiver(
         }
     }
 
-    private fun inntektskilde(inntektskildeNode: JsonNode): Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde {
-        return when (val inntektskildeString = inntektskildeNode.asText()) {
+    private fun inntektskilde(inntektskildeNode: JsonNode): Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde =
+        when (val inntektskildeString = inntektskildeNode.asText()) {
             "Arbeidsgiver" -> Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Arbeidsgiver
             "AOrdningen" -> Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.AOrdningen
             "Saksbehandler" -> Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Saksbehandler
             else -> error("$inntektskildeString er ikke en gyldig inntektskilde")
         }
-    }
 }

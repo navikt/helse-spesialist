@@ -18,5 +18,6 @@ interface StansAutomatiskBehandlingMutationSchema : Mutation {
     ): DataFetcherResult<Boolean>
 }
 
-class StansAutomatiskBehandlingMutation(private val handler: StansAutomatiskBehandlingMutationSchema) :
-    StansAutomatiskBehandlingMutationSchema by handler
+class StansAutomatiskBehandlingMutation(
+    private val handler: StansAutomatiskBehandlingMutationSchema,
+) : StansAutomatiskBehandlingMutationSchema by handler

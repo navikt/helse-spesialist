@@ -77,8 +77,8 @@ class OverstyrtArbeidsforhold private constructor(
         navn: String,
         epost: String,
         ident: String,
-    ): OverstyrtArbeidsforholdEvent {
-        return OverstyrtArbeidsforholdEvent(
+    ): OverstyrtArbeidsforholdEvent =
+        OverstyrtArbeidsforholdEvent(
             eksternHendelseId = eksternHendelseId,
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
@@ -89,7 +89,6 @@ class OverstyrtArbeidsforhold private constructor(
             skjæringstidspunkt = skjæringstidspunkt,
             overstyrteArbeidsforhold = overstyrteArbeidsforhold.map { it.byggEvent() },
         )
-    }
 }
 
 data class Arbeidsforhold(
@@ -99,12 +98,11 @@ data class Arbeidsforhold(
     val forklaring: String,
     val lovhjemmel: Lovhjemmel?,
 ) {
-    fun byggEvent(): OverstyrtArbeidsforholdEvent.Arbeidsforhold {
-        return OverstyrtArbeidsforholdEvent.Arbeidsforhold(
+    fun byggEvent(): OverstyrtArbeidsforholdEvent.Arbeidsforhold =
+        OverstyrtArbeidsforholdEvent.Arbeidsforhold(
             orgnummer = organisasjonsnummer,
             deaktivert = deaktivert,
             begrunnelse = begrunnelse,
             forklaring = forklaring,
         )
-    }
 }

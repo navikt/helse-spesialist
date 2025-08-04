@@ -33,9 +33,7 @@ internal class OppdaterPersonCommand(
             return behandle(context, personDao, fødselsnummer)
         }
 
-        override fun resume(context: CommandContext): Boolean {
-            return behandle(context, personDao, fødselsnummer)
-        }
+        override fun resume(context: CommandContext): Boolean = behandle(context, personDao, fødselsnummer)
 
         private fun ignorer(): Boolean {
             log.info("har ikke behov for ${behov::class.simpleName}, informasjonen er ny nok")
@@ -88,16 +86,15 @@ internal class OppdaterPersonCommand(
         fødselsnummer: String,
         personDao: PersonDao,
         førsteKjenteDagFinner: () -> LocalDate,
-    ) :
-        OppdaterCommand(
-                fødselsnummer = fødselsnummer,
-                personDao = personDao,
-                behov =
-                    Behov.Infotrygdutbetalinger(
-                        førsteKjenteDagFinner().minusYears(3),
-                        LocalDate.now(),
-                    ),
-            ) {
+    ) : OppdaterCommand(
+            fødselsnummer = fødselsnummer,
+            personDao = personDao,
+            behov =
+                Behov.Infotrygdutbetalinger(
+                    førsteKjenteDagFinner().minusYears(3),
+                    LocalDate.now(),
+                ),
+        ) {
         override fun erOppdatert(
             personDao: PersonDao,
             fødselsnummer: String,

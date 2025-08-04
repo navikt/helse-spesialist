@@ -20,17 +20,16 @@ import no.nav.helse.modell.vilkårsprøving.Sammenligningsgrunnlag
 class AvviksvurderingLøsningRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
-    override fun preconditions(): River.PacketValidation {
-        return River.PacketValidation {
+    override fun preconditions(): River.PacketValidation =
+        River.PacketValidation {
             it.requireValue("@event_name", "behov")
             it.requireValue("@final", true)
             it.requireAll("@behov", listOf("Avviksvurdering"))
             it.requireKey("fødselsnummer", "contextId", "hendelseId", "@id")
         }
-    }
 
-    override fun validations(): River.PacketValidation {
-        return River.PacketValidation {
+    override fun validations(): River.PacketValidation =
+        River.PacketValidation {
             it.requireKey("@løsning.Avviksvurdering.avviksvurderingId")
             it.requireKey(
                 "@løsning.Avviksvurdering.avviksprosent",
@@ -53,7 +52,6 @@ class AvviksvurderingLøsningRiver(
                 }
             }
         }
-    }
 
     override fun onPacket(
         packet: JsonMessage,
@@ -70,8 +68,8 @@ class AvviksvurderingLøsningRiver(
         )
     }
 
-    private fun løsning(packet: JsonMessage): AvviksvurderingBehovLøsning {
-        return AvviksvurderingBehovLøsning(
+    private fun løsning(packet: JsonMessage): AvviksvurderingBehovLøsning =
+        AvviksvurderingBehovLøsning(
             avviksvurderingId = packet["@løsning.Avviksvurdering.avviksvurderingId"].asUUID(),
             avviksprosent = packet["@løsning.Avviksvurdering.avviksprosent"].asDouble(),
             harAkseptabeltAvvik = packet["@løsning.Avviksvurdering.harAkseptabeltAvvik"].asBoolean(),
@@ -80,7 +78,6 @@ class AvviksvurderingLøsningRiver(
             beregningsgrunnlag = beregningsgrunnlag(packet["@løsning.Avviksvurdering.beregningsgrunnlag"]),
             sammenligningsgrunnlag = sammenligningsgrunnlag(packet["@løsning.Avviksvurdering.sammenligningsgrunnlag"]),
         )
-    }
 
     private fun beregningsgrunnlag(json: JsonNode): Beregningsgrunnlag =
         Beregningsgrunnlag(

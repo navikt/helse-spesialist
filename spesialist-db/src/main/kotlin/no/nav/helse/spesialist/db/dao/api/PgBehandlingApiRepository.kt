@@ -4,7 +4,9 @@ import no.nav.helse.db.api.BehandlingApiRepository
 import no.nav.helse.db.api.VedtaksperiodeDbDto
 import javax.sql.DataSource
 
-class PgBehandlingApiRepository internal constructor(dataSource: DataSource) : BehandlingApiRepository {
+class PgBehandlingApiRepository internal constructor(
+    dataSource: DataSource,
+) : BehandlingApiRepository {
     private val varselDao = PgVarselApiDao(dataSource)
     private val behandlingDao = PgBehandlingApiDao(dataSource)
 
@@ -15,13 +17,11 @@ class PgBehandlingApiRepository internal constructor(dataSource: DataSource) : B
         return sammenhengendePerioder + periodeTilGodkjenning
     }
 
-    override fun periodeTilGodkjenning(oppgaveId: Long): VedtaksperiodeDbDto {
-        return behandlingDao.gjeldendeBehandlingFor(oppgaveId, varselDao::finnVarslerFor)
-    }
+    override fun periodeTilGodkjenning(oppgaveId: Long): VedtaksperiodeDbDto = behandlingDao.gjeldendeBehandlingFor(oppgaveId, varselDao::finnVarslerFor)
 
-    private fun Set<VedtaksperiodeDbDto>.tidligereEnnOgSammenhengende(periode: VedtaksperiodeDbDto): Set<VedtaksperiodeDbDto> {
-        return this.filter { other ->
-            other.tidligereEnnOgSammenhengende(periode)
-        }.toSet()
-    }
+    private fun Set<VedtaksperiodeDbDto>.tidligereEnnOgSammenhengende(periode: VedtaksperiodeDbDto): Set<VedtaksperiodeDbDto> =
+        this
+            .filter { other ->
+                other.tidligereEnnOgSammenhengende(periode)
+            }.toSet()
 }

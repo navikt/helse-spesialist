@@ -4,7 +4,9 @@ import no.nav.helse.spesialist.domain.ddd.AggregateRoot
 import java.time.LocalDateTime
 
 @JvmInline
-value class DialogId(val value: Long)
+value class DialogId(
+    val value: Long,
+)
 
 class Dialog private constructor(
     id: DialogId?,
@@ -19,10 +21,11 @@ class Dialog private constructor(
         tekst: String,
         saksbehandlerident: String,
     ): Kommentar =
-        Kommentar.Factory.ny(
-            tekst = tekst,
-            saksbehandlerident = saksbehandlerident,
-        ).also(_kommentarer::add)
+        Kommentar.Factory
+            .ny(
+                tekst = tekst,
+                saksbehandlerident = saksbehandlerident,
+            ).also(_kommentarer::add)
 
     fun finnKommentar(kommentarId: KommentarId): Kommentar? = kommentarer.firstOrNull { it.harFåttTildeltId() && it.id() == kommentarId }
 

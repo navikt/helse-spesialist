@@ -4,7 +4,9 @@ import no.nav.helse.spesialist.domain.ddd.Entity
 import java.time.LocalDateTime
 
 @JvmInline
-value class KommentarId(val value: Int)
+value class KommentarId(
+    val value: Int,
+)
 
 class Kommentar private constructor(
     id: KommentarId?,

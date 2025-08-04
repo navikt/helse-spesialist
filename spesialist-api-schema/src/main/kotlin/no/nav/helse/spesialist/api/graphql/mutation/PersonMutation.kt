@@ -7,4 +7,6 @@ interface PersonMutationSchema : Mutation {
     fun oppdaterPerson(fodselsnummer: String): DataFetcherResult<Boolean>
 }
 
-class PersonMutation(private val handler: PersonMutationSchema) : PersonMutationSchema by handler
+class PersonMutation(
+    private val handler: PersonMutationSchema,
+) : PersonMutationSchema by handler

@@ -23,12 +23,14 @@ private val automatiseringsteller =
         .register(registry)
 
 private val annulleringsteller =
-    Counter.builder("annulleringer")
+    Counter
+        .builder("annulleringer")
         .description("Teller antall annulleringer")
         .register(registry)
 
 private val automatiskAvvistÅrsakerTellerBuilder =
-    Counter.builder("automatisk_avvist_aarsaker")
+    Counter
+        .builder("automatisk_avvist_aarsaker")
         .description("Årsaker til at en vedtaksperiode avvises automatisk. En vedtaksperiode kan avvises av flere årsaker")
         .withRegistry(registry)
 

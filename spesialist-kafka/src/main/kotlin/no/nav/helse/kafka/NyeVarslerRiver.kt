@@ -16,12 +16,11 @@ import no.nav.helse.modell.vedtaksperiode.NyeVarsler
 class NyeVarslerRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
-    override fun preconditions(): River.PacketValidation {
-        return River.PacketValidation {
+    override fun preconditions(): River.PacketValidation =
+        River.PacketValidation {
             it.requireAny("@event_name", listOf("aktivitetslogg_ny_aktivitet", "nye_varsler"))
             it.require("aktiviteter", inneholderVarslerParser)
         }
-    }
 
     override fun validations() =
         River.PacketValidation {

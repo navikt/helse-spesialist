@@ -108,8 +108,8 @@ class SykepengevedtakBuilder {
 
     fun build(): Sykepengevedtak = buildSykepengevedtak()
 
-    private fun buildSykepengevedtak(): Sykepengevedtak {
-        return when (val sykepengegrunnlagsfakta = this.sykepengegrunnlagsfakta) {
+    private fun buildSykepengevedtak(): Sykepengevedtak =
+        when (val sykepengegrunnlagsfakta = this.sykepengegrunnlagsfakta) {
             is Sykepengegrunnlagsfakta.Infotrygd -> buildVedtakMedOpphavIInfotrygd(utbetalingId, sykepengegrunnlagsfakta)
             is Sykepengegrunnlagsfakta.Spleis -> {
                 val (tagsForSykepengegrunnlagsfakta, tagsForPeriode) = tags.partition { it in TAGS_SOM_SKAL_LIGGE_I_SYKEPENGEGRUNNLAGSFAKTA }
@@ -134,7 +134,6 @@ class SykepengevedtakBuilder {
                 }
             }
         }
-    }
 
     private fun buildVedtakEtterHovedregel(
         utbetalingId: UUID,
@@ -142,8 +141,8 @@ class SykepengevedtakBuilder {
         avviksprosent: Double,
         sammenligningsgrunnlag: Sammenligningsgrunnlag,
         tagsForPeriode: List<String>,
-    ): Sykepengevedtak.Vedtak {
-        return Sykepengevedtak.Vedtak(
+    ): Sykepengevedtak.Vedtak =
+        Sykepengevedtak.Vedtak(
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
             organisasjonsnummer = organisasjonsnummer,
@@ -162,7 +161,6 @@ class SykepengevedtakBuilder {
             avviksprosent = avviksprosent,
             sammenligningsgrunnlag = sammenligningsgrunnlag,
         )
-    }
 
     private fun buildVedtakEtterSkjønn(
         utbetalingId: UUID,
@@ -201,8 +199,8 @@ class SykepengevedtakBuilder {
     private fun buildVedtakMedOpphavIInfotrygd(
         utbetalingId: UUID,
         sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta.Infotrygd,
-    ): Sykepengevedtak.VedtakMedOpphavIInfotrygd {
-        return Sykepengevedtak.VedtakMedOpphavIInfotrygd(
+    ): Sykepengevedtak.VedtakMedOpphavIInfotrygd =
+        Sykepengevedtak.VedtakMedOpphavIInfotrygd(
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
             organisasjonsnummer = organisasjonsnummer,
@@ -219,7 +217,6 @@ class SykepengevedtakBuilder {
             tags = tags,
             vedtakBegrunnelse = vedtakBegrunnelse,
         )
-    }
 
     companion object {
         private val TAGS_SOM_SKAL_LIGGE_I_SYKEPENGEGRUNNLAGSFAKTA = listOf("6GBegrenset")

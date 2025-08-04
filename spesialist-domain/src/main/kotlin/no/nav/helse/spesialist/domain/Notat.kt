@@ -5,7 +5,9 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 @JvmInline
-value class NotatId(val value: Int)
+value class NotatId(
+    val value: Int,
+)
 
 class Notat private constructor(
     id: NotatId?,

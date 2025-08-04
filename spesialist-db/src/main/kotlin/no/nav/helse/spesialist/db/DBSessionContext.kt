@@ -50,7 +50,9 @@ import no.nav.helse.spesialist.db.repository.PgSaksbehandlerRepository
 import no.nav.helse.spesialist.db.repository.PgTilkommenInntektRepository
 import no.nav.helse.spesialist.db.repository.PgTotrinnsvurderingRepository
 
-class DBSessionContext(session: Session) : SessionContext {
+class DBSessionContext(
+    session: Session,
+) : SessionContext {
     override val arbeidsforholdDao = PgArbeidsforholdDao(session)
     override val automatiseringDao = PgAutomatiseringDao(session)
     override val commandContextDao = PgCommandContextDao(session)

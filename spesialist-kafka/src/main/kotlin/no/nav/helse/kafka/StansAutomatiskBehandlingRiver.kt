@@ -14,11 +14,10 @@ import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak
 class StansAutomatiskBehandlingRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
-    override fun preconditions(): River.PacketValidation {
-        return River.PacketValidation {
+    override fun preconditions(): River.PacketValidation =
+        River.PacketValidation {
             it.requireValue("@event_name", "stans_automatisk_behandling")
         }
-    }
 
     override fun validations() =
         River.PacketValidation {

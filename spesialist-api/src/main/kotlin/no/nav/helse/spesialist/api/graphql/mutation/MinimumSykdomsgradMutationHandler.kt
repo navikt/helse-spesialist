@@ -12,8 +12,9 @@ import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class MinimumSykdomsgradMutationHandler(private val saksbehandlerMediator: SaksbehandlerMediator) :
-    MinimumSykdomsgradMutationSchema {
+class MinimumSykdomsgradMutationHandler(
+    private val saksbehandlerMediator: SaksbehandlerMediator,
+) : MinimumSykdomsgradMutationSchema {
     private companion object {
         private val logg: Logger = LoggerFactory.getLogger(MinimumSykdomsgradMutation::class.java)
     }

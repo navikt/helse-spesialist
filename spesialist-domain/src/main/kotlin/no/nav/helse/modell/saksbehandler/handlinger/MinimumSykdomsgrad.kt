@@ -91,8 +91,8 @@ class MinimumSykdomsgrad private constructor(
         navn: String,
         epost: String,
         ident: String,
-    ): MinimumSykdomsgradVurdertEvent {
-        return MinimumSykdomsgradVurdertEvent(
+    ): MinimumSykdomsgradVurdertEvent =
+        MinimumSykdomsgradVurdertEvent(
             eksternHendelseId = eksternHendelseId,
             fødselsnummer = fødselsnummer,
             aktørId = aktørId,
@@ -103,27 +103,26 @@ class MinimumSykdomsgrad private constructor(
             perioderMedMinimumSykdomsgradVurdertOk = perioderVurdertOk,
             perioderMedMinimumSykdomsgradVurdertIkkeOk = perioderVurdertIkkeOk,
         )
-    }
 
-    internal fun byggSubsumsjoner(saksbehandlerEpost: String): List<Subsumsjon> {
-        return perioderVurdertOk.byggSubsumsjoner(
-            overstyringId = eksternHendelseId,
-            fødselsnummer = fødselsnummer,
-            saksbehandlerEpost = saksbehandlerEpost,
-            initierendeVedtaksperiodeId = vedtaksperiodeId,
-            arbeidsgivere = arbeidsgivere,
-            avslag = false,
-        ).plus(
-            perioderVurdertIkkeOk.byggSubsumsjoner(
+    internal fun byggSubsumsjoner(saksbehandlerEpost: String): List<Subsumsjon> =
+        perioderVurdertOk
+            .byggSubsumsjoner(
                 overstyringId = eksternHendelseId,
                 fødselsnummer = fødselsnummer,
                 saksbehandlerEpost = saksbehandlerEpost,
                 initierendeVedtaksperiodeId = vedtaksperiodeId,
                 arbeidsgivere = arbeidsgivere,
-                avslag = true,
-            ),
-        )
-    }
+                avslag = false,
+            ).plus(
+                perioderVurdertIkkeOk.byggSubsumsjoner(
+                    overstyringId = eksternHendelseId,
+                    fødselsnummer = fødselsnummer,
+                    saksbehandlerEpost = saksbehandlerEpost,
+                    initierendeVedtaksperiodeId = vedtaksperiodeId,
+                    arbeidsgivere = arbeidsgivere,
+                    avslag = true,
+                ),
+            )
 }
 
 data class MinimumSykdomsgradArbeidsgiver(

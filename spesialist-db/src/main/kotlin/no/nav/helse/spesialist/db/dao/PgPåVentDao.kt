@@ -14,7 +14,8 @@ import javax.sql.DataSource
 
 class PgPåVentDao private constructor(
     private val queryRunner: QueryRunner,
-) : PåVentDao, QueryRunner by queryRunner {
+) : PåVentDao,
+    QueryRunner by queryRunner {
     internal constructor(session: Session) : this(MedSession(session))
     internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 

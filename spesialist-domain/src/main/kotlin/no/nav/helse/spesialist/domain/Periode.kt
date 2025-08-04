@@ -21,8 +21,7 @@ data class Periode(
 
     fun etterfølgesAv(dato: LocalDate): Boolean = tom.plusDays(1) == dato
 
-    operator fun ClosedRange<LocalDate>.contains(closedRange: ClosedRange<LocalDate>): Boolean =
-        start <= closedRange.start && endInclusive >= closedRange.endInclusive
+    operator fun ClosedRange<LocalDate>.contains(closedRange: ClosedRange<LocalDate>): Boolean = start <= closedRange.start && endInclusive >= closedRange.endInclusive
 
     companion object {
         infix fun LocalDate.tilOgMed(other: LocalDate) = Periode(this, other)

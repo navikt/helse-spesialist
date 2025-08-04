@@ -12,4 +12,6 @@ interface AnnulleringMutationSchema : Mutation {
     ): DataFetcherResult<Boolean>
 }
 
-class AnnulleringMutation(private val handler: AnnulleringMutationSchema) : AnnulleringMutationSchema by handler
+class AnnulleringMutation(
+    private val handler: AnnulleringMutationSchema,
+) : AnnulleringMutationSchema by handler

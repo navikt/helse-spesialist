@@ -9,7 +9,9 @@ import no.nav.helse.db.api.PersoninfoDao.Personinfo.Kjonn
 import org.intellij.lang.annotations.Language
 import javax.sql.DataSource
 
-class PgPersoninfoDao internal constructor(private val dataSource: DataSource) : PersoninfoDao {
+class PgPersoninfoDao internal constructor(
+    private val dataSource: DataSource,
+) : PersoninfoDao {
     override fun hentPersoninfo(fødselsnummer: String): Personinfo? =
         sessionOf(dataSource).use { session ->
             @Language("PostgreSQL")

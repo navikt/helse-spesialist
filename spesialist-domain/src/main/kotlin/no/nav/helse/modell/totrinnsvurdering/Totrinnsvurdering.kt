@@ -19,7 +19,9 @@ enum class TotrinnsvurderingTilstand {
 }
 
 @JvmInline
-value class TotrinnsvurderingId(val value: Long)
+value class TotrinnsvurderingId(
+    val value: Long,
+)
 
 class Totrinnsvurdering private constructor(
     id: TotrinnsvurderingId?,
@@ -110,23 +112,22 @@ class Totrinnsvurdering private constructor(
             }
         }
 
-    private fun <T> oppdatering(block: () -> T): T {
-        return block().also {
+    private fun <T> oppdatering(block: () -> T): T =
+        block().also {
             oppdatert = LocalDateTime.now()
         }
-    }
 
-    override fun equals(other: Any?): Boolean {
-        return this === other || (
-            other is Totrinnsvurdering &&
-                tilstand == other.tilstand &&
-                saksbehandler == other.saksbehandler &&
-                beslutter == other.beslutter &&
-                utbetalingId == other.utbetalingId &&
-                opprettet.withNano(0) == other.opprettet.withNano(0) &&
-                oppdatert?.withNano(0) == other.oppdatert?.withNano(0)
-        )
-    }
+    override fun equals(other: Any?): Boolean =
+        this === other ||
+            (
+                other is Totrinnsvurdering &&
+                    tilstand == other.tilstand &&
+                    saksbehandler == other.saksbehandler &&
+                    beslutter == other.beslutter &&
+                    utbetalingId == other.utbetalingId &&
+                    opprettet.withNano(0) == other.opprettet.withNano(0) &&
+                    oppdatert?.withNano(0) == other.oppdatert?.withNano(0)
+            )
 
     override fun hashCode(): Int {
         var result = tilstand.hashCode()
@@ -139,8 +140,8 @@ class Totrinnsvurdering private constructor(
     }
 
     companion object {
-        fun ny(fødselsnummer: String): Totrinnsvurdering {
-            return Totrinnsvurdering(
+        fun ny(fødselsnummer: String): Totrinnsvurdering =
+            Totrinnsvurdering(
                 id = null,
                 fødselsnummer = fødselsnummer,
                 saksbehandler = null,
@@ -152,7 +153,6 @@ class Totrinnsvurdering private constructor(
                 tilstand = AVVENTER_SAKSBEHANDLER,
                 vedtaksperiodeForkastet = false,
             )
-        }
 
         fun fraLagring(
             id: TotrinnsvurderingId,
@@ -165,8 +165,8 @@ class Totrinnsvurdering private constructor(
             overstyringer: List<Overstyring>,
             tilstand: TotrinnsvurderingTilstand,
             vedtaksperiodeForkastet: Boolean,
-        ): Totrinnsvurdering {
-            return Totrinnsvurdering(
+        ): Totrinnsvurdering =
+            Totrinnsvurdering(
                 id = id,
                 fødselsnummer = fødselsnummer,
                 saksbehandler = saksbehandler,
@@ -178,6 +178,5 @@ class Totrinnsvurdering private constructor(
                 tilstand = tilstand,
                 vedtaksperiodeForkastet = vedtaksperiodeForkastet,
             )
-        }
     }
 }

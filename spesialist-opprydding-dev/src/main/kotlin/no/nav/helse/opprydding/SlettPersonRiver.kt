@@ -20,14 +20,15 @@ internal class SlettPersonRiver(
     }
 
     init {
-        River(rapidsConnection).apply {
-            precondition {
-                it.requireValue("@event_name", "slett_person")
-            }
-            validate {
-                it.requireKey("@id", "fødselsnummer")
-            }
-        }.register(this)
+        River(rapidsConnection)
+            .apply {
+                precondition {
+                    it.requireValue("@event_name", "slett_person")
+                }
+                validate {
+                    it.requireKey("@id", "fødselsnummer")
+                }
+            }.register(this)
     }
 
     override fun onPacket(

@@ -12,7 +12,9 @@ import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
 import java.util.UUID
 
-abstract class MicrosoftTilgangskontroll(private val tilgangsgrupper: Tilgangsgrupper) : Tilgangskontroll {
+abstract class MicrosoftTilgangskontroll(
+    private val tilgangsgrupper: Tilgangsgrupper,
+) : Tilgangskontroll {
     final override fun harTilgangTil(
         oid: UUID,
         egenskaper: Collection<Egenskap>,

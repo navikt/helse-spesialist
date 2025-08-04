@@ -12,13 +12,12 @@ import no.nav.helse.modell.person.HentEnhetløsning
 class HentEnhetLøsningRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
-    override fun preconditions(): River.PacketValidation {
-        return River.PacketValidation {
+    override fun preconditions(): River.PacketValidation =
+        River.PacketValidation {
             it.requireValue("@event_name", "behov")
             it.requireValue("@final", true)
             it.requireAll("@behov", listOf("HentEnhet"))
         }
-    }
 
     override fun validations() =
         River.PacketValidation {

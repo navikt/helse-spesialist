@@ -94,13 +94,15 @@ internal class OpprettEllerOppdaterInntektskilder(
     ): String? =
         when (identifikator) {
             is ArbeidsgiverIdentifikator.Fødselsnummer -> {
-                context.get<HentPersoninfoløsninger>()
+                context
+                    .get<HentPersoninfoløsninger>()
                     ?.relevantLøsning(identifikator.fødselsnummer)
                     ?.navn()
             }
 
             is ArbeidsgiverIdentifikator.Organisasjonsnummer -> {
-                context.get<Arbeidsgiverinformasjonløsning>()
+                context
+                    .get<Arbeidsgiverinformasjonløsning>()
                     ?.relevantLøsning(identifikator.organisasjonsnummer)
                     ?.navn
             }

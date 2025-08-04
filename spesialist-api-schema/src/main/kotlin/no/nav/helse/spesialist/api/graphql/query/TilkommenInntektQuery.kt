@@ -17,4 +17,6 @@ interface TilkommenInntektQuerySchema : Query {
     ): DataFetcherResult<List<ApiTilkommenInntektskilde>>
 }
 
-class TilkommenInntektQuery(private val handler: TilkommenInntektQuerySchema) : TilkommenInntektQuerySchema by handler
+class TilkommenInntektQuery(
+    private val handler: TilkommenInntektQuerySchema,
+) : TilkommenInntektQuerySchema by handler

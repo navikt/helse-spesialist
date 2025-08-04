@@ -185,13 +185,9 @@ class LegacyBehandling private constructor(
         vedtakBegrunnelse?.also { vedtakBuilder.vedtakBegrunnelse(it) }
     }
 
-    private fun behandlingId(): UUID {
-        return spleisBehandlingId ?: throw IllegalStateException("Forventer at spleisBehandlingId er satt")
-    }
+    private fun behandlingId(): UUID = spleisBehandlingId ?: throw IllegalStateException("Forventer at spleisBehandlingId er satt")
 
-    private fun utbetalingId(): UUID {
-        return utbetalingId ?: throw IllegalStateException("Forventer at utbetalingId er satt")
-    }
+    private fun utbetalingId(): UUID = utbetalingId ?: throw IllegalStateException("Forventer at utbetalingId er satt")
 
     private fun nyTilstand(ny: Tilstand) {
         this.tilstand = ny
@@ -271,8 +267,7 @@ class LegacyBehandling private constructor(
                 KlarTilBehandling -> TilstandDto.KlarTilBehandling
             }
 
-        fun avsluttetUtenVedtak(legacyBehandling: LegacyBehandling): Unit =
-            throw IllegalStateException("Forventer ikke avsluttet_uten_vedtak i tilstand=${this::class.simpleName}")
+        fun avsluttetUtenVedtak(legacyBehandling: LegacyBehandling): Unit = throw IllegalStateException("Forventer ikke avsluttet_uten_vedtak i tilstand=${this::class.simpleName}")
 
         fun vedtakFattet(legacyBehandling: LegacyBehandling) {
             sikkerlogg.info("Forventet ikke vedtak_fattet i {}", kv("tilstand", this::class.simpleName))
@@ -456,14 +451,11 @@ class LegacyBehandling private constructor(
         val logg: Logger = LoggerFactory.getLogger(LegacyBehandling::class.java)
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
-        internal fun List<LegacyBehandling>.finnBehandlingForVedtaksperiode(vedtaksperiodeId: UUID): LegacyBehandling? =
-            this.find { it.vedtaksperiodeId == vedtaksperiodeId }
+        internal fun List<LegacyBehandling>.finnBehandlingForVedtaksperiode(vedtaksperiodeId: UUID): LegacyBehandling? = this.find { it.vedtaksperiodeId == vedtaksperiodeId }
 
-        internal fun List<LegacyBehandling>.finnBehandlingForSpleisBehandling(spleisBehandlingId: UUID): LegacyBehandling? =
-            this.find { it.spleisBehandlingId == spleisBehandlingId }
+        internal fun List<LegacyBehandling>.finnBehandlingForSpleisBehandling(spleisBehandlingId: UUID): LegacyBehandling? = this.find { it.spleisBehandlingId == spleisBehandlingId }
 
-        internal fun List<LegacyBehandling>.finnSisteBehandlingUtenSpleisBehandlingId(): LegacyBehandling? =
-            this.lastOrNull { it.spleisBehandlingId == null }
+        internal fun List<LegacyBehandling>.finnSisteBehandlingUtenSpleisBehandlingId(): LegacyBehandling? = this.lastOrNull { it.spleisBehandlingId == null }
 
         internal fun fraLagring(
             id: UUID,
@@ -520,8 +512,7 @@ class LegacyBehandling private constructor(
                 .filter { it.varsler.isNotEmpty() }
                 .any { it.harVarselOmManglendeInntektsmelding() }
 
-        internal fun List<LegacyBehandling>.harVarselOmManglendeInntektsmelding(vedtaksperiodeId: UUID): Boolean =
-            finnBehandlingForVedtaksperiode(vedtaksperiodeId)?.harVarselOmManglendeInntektsmelding() == true
+        internal fun List<LegacyBehandling>.harVarselOmManglendeInntektsmelding(vedtaksperiodeId: UUID): Boolean = finnBehandlingForVedtaksperiode(vedtaksperiodeId)?.harVarselOmManglendeInntektsmelding() == true
 
         internal fun List<LegacyBehandling>.harMedlemskapsvarsel(vedtaksperiodeId: UUID): Boolean =
             overlapperMedEllerTidligereEnn(vedtaksperiodeId).any {

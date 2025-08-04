@@ -25,7 +25,9 @@ abstract class Modellfeil protected constructor() : RuntimeException() {
     override val message: String get() = feilkode
 }
 
-class OppgaveIkkeTildelt(private val oppgaveId: Long) : Modellfeil() {
+class OppgaveIkkeTildelt(
+    private val oppgaveId: Long,
+) : Modellfeil() {
     override val eksternKontekst: Map<String, Any> = mapOf("oppgaveId" to oppgaveId.toString())
     override val httpkode = HttpStatusCode.FailedDependency
     override val feilkode: String = "oppgave_er_ikke_tildelt"
@@ -39,7 +41,9 @@ class OppgaveIkkeTildelt(private val oppgaveId: Long) : Modellfeil() {
     }
 }
 
-class OppgaveTildeltNoenAndre(val tildeling: TildelingApiDto) : Modellfeil() {
+class OppgaveTildeltNoenAndre(
+    val tildeling: TildelingApiDto,
+) : Modellfeil() {
     override val eksternKontekst: Map<String, Any> = mapOf("tildeling" to tildeling)
     override val httpkode = HttpStatusCode.Conflict
     override val feilkode: String = "oppgave_tildelt_noen_andre"
@@ -58,7 +62,9 @@ class OppgaveTildeltNoenAndre(val tildeling: TildelingApiDto) : Modellfeil() {
     }
 }
 
-class ManglerVurderingAvVarsler(private val oppgaveId: Long) : Modellfeil() {
+class ManglerVurderingAvVarsler(
+    private val oppgaveId: Long,
+) : Modellfeil() {
     override val eksternKontekst: Map<String, Any> = mapOf("oppgaveId" to oppgaveId.toString())
     override val httpkode = HttpStatusCode.BadRequest
     override val feilkode: String = "mangler_vurdering_av_varsler"
@@ -72,7 +78,9 @@ class ManglerVurderingAvVarsler(private val oppgaveId: Long) : Modellfeil() {
     }
 }
 
-class FinnerIkkeLagtPåVent(private val oppgaveId: Long) : Modellfeil() {
+class FinnerIkkeLagtPåVent(
+    private val oppgaveId: Long,
+) : Modellfeil() {
     override val eksternKontekst: Map<String, Any> = mapOf("oppgaveId" to oppgaveId.toString())
     override val httpkode = HttpStatusCode.BadRequest
     override val feilkode: String = "finner_ikke_paa_vent"
@@ -85,7 +93,10 @@ class FinnerIkkeLagtPåVent(private val oppgaveId: Long) : Modellfeil() {
     }
 }
 
-class IkkeTilgang(private val oid: UUID, private val oppgaveId: Long) : Modellfeil() {
+class IkkeTilgang(
+    private val oid: UUID,
+    private val oppgaveId: Long,
+) : Modellfeil() {
     override val eksternKontekst: Map<String, Any> = emptyMap()
     override val httpkode = HttpStatusCode.Forbidden
     override val feilkode: String = "ikke_tilgang_til_oppgave"
@@ -103,7 +114,9 @@ class IkkeTilgang(private val oid: UUID, private val oppgaveId: Long) : Modellfe
     }
 }
 
-class AlleredeAnnullert(private val vedtaksperiodeId: UUID) : Modellfeil() {
+class AlleredeAnnullert(
+    private val vedtaksperiodeId: UUID,
+) : Modellfeil() {
     override val eksternKontekst: Map<String, Any> = emptyMap()
     override val feilkode: String = "allerede_annullert"
     override val httpkode: HttpStatusCode = HttpStatusCode.Conflict
@@ -113,7 +126,9 @@ class AlleredeAnnullert(private val vedtaksperiodeId: UUID) : Modellfeil() {
     }
 }
 
-class OppgaveAlleredeSendtBeslutter(private val oppgaveId: Long) : Modellfeil() {
+class OppgaveAlleredeSendtBeslutter(
+    private val oppgaveId: Long,
+) : Modellfeil() {
     override val eksternKontekst: Map<String, Any> = emptyMap()
     override val feilkode: String = "oppgave_allerede_sendt_beslutter"
     override val httpkode: HttpStatusCode = HttpStatusCode.Conflict
@@ -123,7 +138,9 @@ class OppgaveAlleredeSendtBeslutter(private val oppgaveId: Long) : Modellfeil() 
     }
 }
 
-class OppgaveAlleredeSendtIRetur(private val oppgaveId: Long) : Modellfeil() {
+class OppgaveAlleredeSendtIRetur(
+    private val oppgaveId: Long,
+) : Modellfeil() {
     override val eksternKontekst: Map<String, Any> = emptyMap()
     override val feilkode: String = "oppgave_allerede_sendt_i_retur"
     override val httpkode: HttpStatusCode = HttpStatusCode.Conflict
@@ -133,7 +150,9 @@ class OppgaveAlleredeSendtIRetur(private val oppgaveId: Long) : Modellfeil() {
     }
 }
 
-class OppgaveKreverVurderingAvToSaksbehandlere(private val oppgaveId: Long) : Modellfeil() {
+class OppgaveKreverVurderingAvToSaksbehandlere(
+    private val oppgaveId: Long,
+) : Modellfeil() {
     override val eksternKontekst: Map<String, Any> = emptyMap()
     override val feilkode: String = "oppgave_krever_totrinnsvurdering"
     override val httpkode: HttpStatusCode = HttpStatusCode.Conflict
@@ -143,7 +162,10 @@ class OppgaveKreverVurderingAvToSaksbehandlere(private val oppgaveId: Long) : Mo
     }
 }
 
-class IkkeÅpenOppgave(private val saksbehandlerIdent: String, private val oppgaveId: Long) : Modellfeil() {
+class IkkeÅpenOppgave(
+    private val saksbehandlerIdent: String,
+    private val oppgaveId: Long,
+) : Modellfeil() {
     override val eksternKontekst: Map<String, Any> = emptyMap()
     override val httpkode = HttpStatusCode.Conflict
     override val feilkode: String = "ikke_aapen_saksbehandleroppgave"
@@ -161,7 +183,10 @@ class IkkeÅpenOppgave(private val saksbehandlerIdent: String, private val oppga
     }
 }
 
-class OverlapperMedInfotrygd(private val saksbehandlerIdent: String, private val oppgaveId: Long) : Modellfeil() {
+class OverlapperMedInfotrygd(
+    private val saksbehandlerIdent: String,
+    private val oppgaveId: Long,
+) : Modellfeil() {
     override val eksternKontekst: Map<String, Any> = emptyMap()
     override val httpkode = HttpStatusCode.Conflict
     override val feilkode: String = "overlappende_utbetaling_i_infotrygd"

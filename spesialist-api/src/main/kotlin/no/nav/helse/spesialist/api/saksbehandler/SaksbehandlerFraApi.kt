@@ -14,10 +14,18 @@ data class SaksbehandlerFraApi(
         fun fraOnBehalfOfToken(jwtPrincipal: JWTPrincipal) =
             SaksbehandlerFraApi(
                 epost = jwtPrincipal.payload.getClaim("preferred_username").asString(),
-                oid = jwtPrincipal.payload.getClaim("oid").asString().let { UUID.fromString(it) },
+                oid =
+                    jwtPrincipal.payload
+                        .getClaim("oid")
+                        .asString()
+                        .let { UUID.fromString(it) },
                 navn = jwtPrincipal.payload.getClaim("name").asString(),
                 ident = jwtPrincipal.payload.getClaim("NAVident").asString(),
-                grupper = jwtPrincipal.payload.getClaim("groups")?.asList(String::class.java)?.map(UUID::fromString) ?: emptyList(),
+                grupper =
+                    jwtPrincipal.payload
+                        .getClaim("groups")
+                        ?.asList(String::class.java)
+                        ?.map(UUID::fromString) ?: emptyList(),
             )
     }
 }

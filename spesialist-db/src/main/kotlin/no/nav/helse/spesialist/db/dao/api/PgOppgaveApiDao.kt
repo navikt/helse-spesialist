@@ -8,40 +8,41 @@ import no.nav.helse.spesialist.db.QueryRunner
 import java.util.UUID
 import javax.sql.DataSource
 
-class PgOppgaveApiDao internal constructor(dataSource: DataSource) :
-    QueryRunner by MedDataSource(dataSource),
+class PgOppgaveApiDao internal constructor(
+    dataSource: DataSource,
+) : QueryRunner by MedDataSource(dataSource),
     OppgaveApiDao {
-        override fun finnOppgaveId(fødselsnummer: String) =
-            asSQL(
-                """
-                SELECT o.id as oppgaveId FROM oppgave o
-                JOIN vedtak v ON v.id = o.vedtak_ref
-                JOIN person p ON v.person_ref = p.id
-                WHERE p.fødselsnummer = :fodselsnummer AND status = 'AvventerSaksbehandler'::oppgavestatus;
-                """.trimIndent(),
-                "fodselsnummer" to fødselsnummer,
-            ).singleOrNull { it.long("oppgaveId") }
+    override fun finnOppgaveId(fødselsnummer: String) =
+        asSQL(
+            """
+            SELECT o.id as oppgaveId FROM oppgave o
+            JOIN vedtak v ON v.id = o.vedtak_ref
+            JOIN person p ON v.person_ref = p.id
+            WHERE p.fødselsnummer = :fodselsnummer AND status = 'AvventerSaksbehandler'::oppgavestatus;
+            """.trimIndent(),
+            "fodselsnummer" to fødselsnummer,
+        ).singleOrNull { it.long("oppgaveId") }
 
-        override fun finnPeriodeoppgave(vedtaksperiodeId: UUID) =
-            asSQL(
-                """
-                SELECT o.id, o.kan_avvises
-                FROM oppgave o
-                INNER JOIN vedtak v ON o.vedtak_ref = v.id
-                WHERE v.vedtaksperiode_id = :vedtaksperiodeId 
-                    AND status = 'AvventerSaksbehandler'::oppgavestatus 
-                """.trimIndent(),
-                "vedtaksperiodeId" to vedtaksperiodeId,
-            ).singleOrNull { OppgaveForPeriodevisningDto(id = it.string("id"), kanAvvises = it.boolean("kan_avvises")) }
+    override fun finnPeriodeoppgave(vedtaksperiodeId: UUID) =
+        asSQL(
+            """
+            SELECT o.id, o.kan_avvises
+            FROM oppgave o
+            INNER JOIN vedtak v ON o.vedtak_ref = v.id
+            WHERE v.vedtaksperiode_id = :vedtaksperiodeId 
+                AND status = 'AvventerSaksbehandler'::oppgavestatus 
+            """.trimIndent(),
+            "vedtaksperiodeId" to vedtaksperiodeId,
+        ).singleOrNull { OppgaveForPeriodevisningDto(id = it.string("id"), kanAvvises = it.boolean("kan_avvises")) }
 
-        override fun finnFødselsnummer(oppgaveId: Long) =
-            asSQL(
-                """
-                SELECT fødselsnummer from person
-                INNER JOIN vedtak v on person.id = v.person_ref
-                INNER JOIN oppgave o on v.id = o.vedtak_ref
-                WHERE o.id = :oppgaveId
-                """.trimIndent(),
-                "oppgaveId" to oppgaveId,
-            ).single { it.string("fødselsnummer") }
-    }
+    override fun finnFødselsnummer(oppgaveId: Long) =
+        asSQL(
+            """
+            SELECT fødselsnummer from person
+            INNER JOIN vedtak v on person.id = v.person_ref
+            INNER JOIN oppgave o on v.id = o.vedtak_ref
+            WHERE o.id = :oppgaveId
+            """.trimIndent(),
+            "oppgaveId" to oppgaveId,
+        ).single { it.string("fødselsnummer") }
+}

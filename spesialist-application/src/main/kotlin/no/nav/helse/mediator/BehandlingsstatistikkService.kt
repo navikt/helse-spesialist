@@ -11,8 +11,9 @@ import no.nav.helse.spesialist.api.behandlingsstatistikk.IBehandlingsstatistikkS
 import no.nav.helse.spesialist.api.behandlingsstatistikk.Statistikk
 import java.time.LocalDate
 
-class BehandlingsstatistikkService(private val behandlingsstatistikkDao: BehandlingsstatistikkDao) :
-    IBehandlingsstatistikkService {
+class BehandlingsstatistikkService(
+    private val behandlingsstatistikkDao: BehandlingsstatistikkDao,
+) : IBehandlingsstatistikkService {
     override fun getBehandlingsstatistikk(fom: LocalDate): BehandlingsstatistikkResponse {
         val automatisertPerKombinasjon = behandlingsstatistikkDao.getAutomatiseringPerKombinasjon(fom)
         val manueltUtførteOppgaver = behandlingsstatistikkDao.getManueltUtførteOppgaverPerInntektOgPeriodetype(fom)

@@ -62,8 +62,7 @@ class Subsumsjon(
         private val saksbehandler: List<String>,
         private val overstyrtTidslinjeId: UUID,
     ) : Sporing(vedtaksperioder, organisasjonsnummer) {
-        override fun ekstraSporing(): Map<String, List<String>> =
-            mapOf("saksbehandler" to saksbehandler, "overstyrtidslinje" to listOf(overstyrtTidslinjeId.toString()))
+        override fun ekstraSporing(): Map<String, List<String>> = mapOf("saksbehandler" to saksbehandler, "overstyrtidslinje" to listOf(overstyrtTidslinjeId.toString()))
     }
 
     class SporingSkjønnsfastsattSykepengegrunnlag(
@@ -80,8 +79,7 @@ class Subsumsjon(
         private val saksbehandler: List<String>,
         private val minimumSykdomsgradId: UUID,
     ) : Sporing(vedtaksperioder, organisasjonsnummer) {
-        override fun ekstraSporing(): Map<String, List<String>> =
-            mapOf("saksbehandler" to saksbehandler, "vurdertMinimumSykdomsgrad" to listOf(minimumSykdomsgradId.toString()))
+        override fun ekstraSporing(): Map<String, List<String>> = mapOf("saksbehandler" to saksbehandler, "vurdertMinimumSykdomsgrad" to listOf(minimumSykdomsgradId.toString()))
     }
 
     enum class Utfall {

@@ -4,7 +4,9 @@ import java.util.UUID
 
 // Definisjoner på gruppene vi har et forhold til, og deres runtime UUID-er
 
-enum class Gruppe(private val gruppenøkkel: String) {
+enum class Gruppe(
+    private val gruppenøkkel: String,
+) {
     KODE7("KODE7_SAKSBEHANDLER_GROUP"),
     BESLUTTER("BESLUTTER_SAKSBEHANDLER_GROUP"),
     SKJERMEDE("SKJERMEDE_PERSONER_GROUP"),
@@ -28,7 +30,9 @@ interface Tilgangsgrupper {
     fun gruppeId(gruppe: Gruppe): UUID
 }
 
-class SpeilTilgangsgrupper(private val env: Map<String, String>) : Tilgangsgrupper {
+class SpeilTilgangsgrupper(
+    private val env: Map<String, String>,
+) : Tilgangsgrupper {
     override val kode7GruppeId: UUID by lazy { Gruppe.KODE7.idFra(env) }
     override val beslutterGruppeId: UUID by lazy { Gruppe.BESLUTTER.idFra(env) }
     override val skjermedePersonerGruppeId: UUID by lazy { Gruppe.SKJERMEDE.idFra(env) }

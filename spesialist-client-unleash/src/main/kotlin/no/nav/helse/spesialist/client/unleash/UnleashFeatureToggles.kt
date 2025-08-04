@@ -11,7 +11,8 @@ class UnleashFeatureToggles(
     apiEnv: String,
 ) : FeatureToggles {
     private val config: UnleashConfig =
-        UnleashConfig.builder()
+        UnleashConfig
+            .builder()
             .appName("spesialist")
             .instanceId("spesialist")
             .unleashAPI("$apiUrl/api")
@@ -21,7 +22,5 @@ class UnleashFeatureToggles(
 
     private val unleash: Unleash = DefaultUnleash(config)
 
-    override fun skalBehandleSelvstendig(): Boolean {
-        return unleash.isEnabled("skal-behandle-selvstendig")
-    }
+    override fun skalBehandleSelvstendig(): Boolean = unleash.isEnabled("skal-behandle-selvstendig")
 }

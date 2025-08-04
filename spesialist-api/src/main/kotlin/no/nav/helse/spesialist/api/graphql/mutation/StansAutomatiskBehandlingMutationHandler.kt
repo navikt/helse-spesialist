@@ -12,8 +12,9 @@ import no.nav.helse.spesialist.api.graphql.byggRespons
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.domain.Dialog
 
-class StansAutomatiskBehandlingMutationHandler(private val sessionFactory: SessionFactory) :
-    StansAutomatiskBehandlingMutationSchema {
+class StansAutomatiskBehandlingMutationHandler(
+    private val sessionFactory: SessionFactory,
+) : StansAutomatiskBehandlingMutationSchema {
     override fun stansAutomatiskBehandling(
         env: DataFetchingEnvironment,
         fodselsnummer: String,
@@ -76,8 +77,7 @@ class StansAutomatiskBehandlingMutationHandler(private val sessionFactory: Sessi
         this.periodehistorikkDao.lagreMedOppgaveId(innslag, oppgaveId)
     }
 
-    private fun OppgaveDao.oppgaveId(fødselsnummer: String) =
-        this.finnOppgaveId(fødselsnummer) ?: this.finnOppgaveIdUansettStatus(fødselsnummer)
+    private fun OppgaveDao.oppgaveId(fødselsnummer: String) = this.finnOppgaveId(fødselsnummer) ?: this.finnOppgaveIdUansettStatus(fødselsnummer)
 
     private fun SaksbehandlerFraApi.toDto(): SaksbehandlerDto =
         SaksbehandlerDto(

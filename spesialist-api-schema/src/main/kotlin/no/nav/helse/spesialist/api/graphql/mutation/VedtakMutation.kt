@@ -20,4 +20,6 @@ interface VedtakMutationSchema : Mutation {
     ): DataFetcherResult<Boolean>
 }
 
-class VedtakMutation(private val handler: VedtakMutationSchema) : VedtakMutationSchema by handler
+class VedtakMutation(
+    private val handler: VedtakMutationSchema,
+) : VedtakMutationSchema by handler

@@ -12,5 +12,6 @@ interface SkjonnsfastsettelseMutationSchema : Mutation {
     ): DataFetcherResult<Boolean?>
 }
 
-class SkjonnsfastsettelseMutation(private val handler: SkjonnsfastsettelseMutationSchema) :
-    SkjonnsfastsettelseMutationSchema by handler
+class SkjonnsfastsettelseMutation(
+    private val handler: SkjonnsfastsettelseMutationSchema,
+) : SkjonnsfastsettelseMutationSchema by handler

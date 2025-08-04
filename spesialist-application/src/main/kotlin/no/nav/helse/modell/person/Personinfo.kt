@@ -4,7 +4,9 @@ import no.nav.helse.db.PersonDao
 import no.nav.helse.spesialist.typer.Kjønn
 import java.time.LocalDate
 
-class HentPersoninfoløsninger(private val løsninger: List<HentPersoninfoløsning>) {
+class HentPersoninfoløsninger(
+    private val løsninger: List<HentPersoninfoløsning>,
+) {
     internal fun relevantLøsning(ident: String) = løsninger.find { it.ident == ident }
 }
 

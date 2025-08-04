@@ -13,7 +13,8 @@ import java.util.UUID
 
 internal class PgSaksbehandlerRepository(
     session: Session,
-) : QueryRunner by MedSession(session), SaksbehandlerRepository {
+) : QueryRunner by MedSession(session),
+    SaksbehandlerRepository {
     override fun finn(oid: SaksbehandlerOid): Saksbehandler? =
         asSQL(
             """ 

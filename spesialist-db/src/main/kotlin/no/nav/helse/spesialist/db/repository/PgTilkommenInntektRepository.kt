@@ -23,7 +23,8 @@ import java.util.SortedSet
 
 class PgTilkommenInntektRepository(
     session: Session,
-) : QueryRunner by MedSession(session), TilkommenInntektRepository {
+) : QueryRunner by MedSession(session),
+    TilkommenInntektRepository {
     override fun finnAlleForFødselsnummer(fødselsnummer: String): List<TilkommenInntekt> =
         asSQL(
             """
@@ -129,8 +130,7 @@ class PgTilkommenInntektRepository(
 
     private fun DBPeriode.tilPeriode(): Periode = Periode(fom = fom, tom = tom)
 
-    private fun List<TilkommenInntektEvent>.tilTilkommenInntekt(): TilkommenInntekt =
-        TilkommenInntekt.fraLagring(events = sortedBy { it.metadata.sekvensnummer })
+    private fun List<TilkommenInntektEvent>.tilTilkommenInntekt(): TilkommenInntekt = TilkommenInntekt.fraLagring(events = sortedBy { it.metadata.sekvensnummer })
 
     override fun lagre(tilkommenInntekt: TilkommenInntekt) {
         val sistePersisterteSekvensnummer =
@@ -292,7 +292,10 @@ private data class DBEndringer(
     val periodebeløp: DBEndring<BigDecimal>?,
     val ekskluderteUkedager: DBEndring<SortedSet<LocalDate>>?,
 ) {
-    data class DBEndring<T>(val fra: T, val til: T)
+    data class DBEndring<T>(
+        val fra: T,
+        val til: T,
+    )
 }
 
 private data class DBInntektskildeIdentifikator(

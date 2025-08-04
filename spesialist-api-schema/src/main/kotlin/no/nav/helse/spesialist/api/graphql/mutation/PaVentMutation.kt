@@ -32,4 +32,6 @@ interface PaVentMutationSchema : Mutation {
     ): DataFetcherResult<ApiPaVent?>
 }
 
-class PaVentMutation(private val handler: PaVentMutationSchema) : PaVentMutationSchema by handler
+class PaVentMutation(
+    private val handler: PaVentMutationSchema,
+) : PaVentMutationSchema by handler

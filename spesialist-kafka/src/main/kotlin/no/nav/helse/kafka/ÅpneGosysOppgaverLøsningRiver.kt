@@ -14,13 +14,12 @@ import no.nav.helse.mediator.meldinger.løsninger.ÅpneGosysOppgaverløsning
 class ÅpneGosysOppgaverLøsningRiver(
     private val meldingMediator: MeldingMediator,
 ) : SpesialistRiver {
-    override fun preconditions(): River.PacketValidation {
-        return River.PacketValidation {
+    override fun preconditions(): River.PacketValidation =
+        River.PacketValidation {
             it.requireValue("@event_name", "behov")
             it.requireValue("@final", true)
             it.requireAll("@behov", listOf("ÅpneOppgaver"))
         }
-    }
 
     override fun validations() =
         River.PacketValidation {

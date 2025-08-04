@@ -116,8 +116,7 @@ class Vedtaksperiode private constructor(
         vedtakBuilder.organisasjonsnummer(organisasjonsnummer)
     }
 
-    private fun finnes(spleisBehandling: SpleisBehandling): Boolean =
-        behandlinger.finnBehandlingForSpleisBehandling(spleisBehandling.spleisBehandlingId) != null
+    private fun finnes(spleisBehandling: SpleisBehandling): Boolean = behandlinger.finnBehandlingForSpleisBehandling(spleisBehandling.spleisBehandlingId) != null
 
     companion object {
         fun nyVedtaksperiode(spleisBehandling: SpleisBehandling): Vedtaksperiode =
@@ -204,5 +203,8 @@ class Vedtaksperiode private constructor(
             )
     }
 
-    data class BehandlingData(val vedtaksperiodeId: UUID, val spleisBehandlingId: UUID?)
+    data class BehandlingData(
+        val vedtaksperiodeId: UUID,
+        val spleisBehandlingId: UUID?,
+    )
 }

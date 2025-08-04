@@ -88,24 +88,25 @@ data class ApiPersonResolver(
         }
 
     @Suppress("unused")
-    override fun tilleggsinfoForInntektskilder(): List<ApiTilleggsinfoForInntektskilde> {
-        return snapshot.vilkarsgrunnlag.flatMap { vilkårsgrunnlag ->
-            val avviksvurdering =
-                sessionFactory.transactionalSessionScope {
-                    it.avviksvurderingRepository.hentAvviksvurdering(vilkårsgrunnlag.id)
-                }
-            (
-                avviksvurdering?.sammenligningsgrunnlag?.innrapporterteInntekter?.map { innrapportertInntekt ->
-                    innrapportertInntekt.arbeidsgiverreferanse
-                } ?: emptyList()
-            ) + vilkårsgrunnlag.inntekter.map { inntekt -> inntekt.arbeidsgiver }
-        }.toSet().map { organisasjonsnummer ->
-            ApiTilleggsinfoForInntektskilde(
-                orgnummer = organisasjonsnummer,
-                navn = finnNavnForOrganisasjonsnummer(organisasjonsnummer),
-            )
-        }
-    }
+    override fun tilleggsinfoForInntektskilder(): List<ApiTilleggsinfoForInntektskilde> =
+        snapshot.vilkarsgrunnlag
+            .flatMap { vilkårsgrunnlag ->
+                val avviksvurdering =
+                    sessionFactory.transactionalSessionScope {
+                        it.avviksvurderingRepository.hentAvviksvurdering(vilkårsgrunnlag.id)
+                    }
+                (
+                    avviksvurdering?.sammenligningsgrunnlag?.innrapporterteInntekter?.map { innrapportertInntekt ->
+                        innrapportertInntekt.arbeidsgiverreferanse
+                    } ?: emptyList()
+                ) + vilkårsgrunnlag.inntekter.map { inntekt -> inntekt.arbeidsgiver }
+            }.toSet()
+            .map { organisasjonsnummer ->
+                ApiTilleggsinfoForInntektskilde(
+                    orgnummer = organisasjonsnummer,
+                    navn = finnNavnForOrganisasjonsnummer(organisasjonsnummer),
+                )
+            }
 
     override fun arbeidsgivere(): List<ApiArbeidsgiver> {
         val overstyringer = overstyringApiDao.finnOverstyringer(snapshot.fodselsnummer)
@@ -150,7 +151,10 @@ data class ApiPersonResolver(
 
     private fun finnNavnForOrganisasjonsnummer(organisasjonsnummer: String): String =
         sessionFactory.transactionalSessionScope {
-            it.arbeidsgiverRepository.finn(ArbeidsgiverIdentifikator.fraString(organisasjonsnummer))?.navn?.navn
+            it.arbeidsgiverRepository
+                .finn(ArbeidsgiverIdentifikator.fraString(organisasjonsnummer))
+                ?.navn
+                ?.navn
                 ?: "navn er utilgjengelig"
         }
 
@@ -159,7 +163,8 @@ data class ApiPersonResolver(
         personApiDao
             .finnInfotrygdutbetalinger(snapshot.fodselsnummer)
             ?.let { jsonString ->
-                objectMapper.readTree(jsonString)
+                objectMapper
+                    .readTree(jsonString)
                     .filterNot { it["typetekst"].asText().lowercase() == "sanksjon" }
                     .map {
                         ApiInfotrygdutbetaling(
@@ -173,11 +178,10 @@ data class ApiPersonResolver(
                     }
             }
 
-    override fun vilkarsgrunnlagV2(): List<ApiVilkårsgrunnlagV2> {
-        return sessionFactory.transactionalSessionScope { sessionContext ->
+    override fun vilkarsgrunnlagV2(): List<ApiVilkårsgrunnlagV2> =
+        sessionFactory.transactionalSessionScope { sessionContext ->
             snapshot.vilkarsgrunnlag.map { it.tilVilkarsgrunnlagV2(sessionContext.avviksvurderingRepository) }
         }
-    }
 
     private fun List<SnapshotGhostPeriode>.tilGhostPerioder(organisasjonsnummer: String): List<ApiGhostPeriode> =
         map {

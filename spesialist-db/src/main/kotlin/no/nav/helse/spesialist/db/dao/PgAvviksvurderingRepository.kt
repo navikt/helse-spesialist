@@ -13,7 +13,10 @@ import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.db.objectMapper
 import java.util.UUID
 
-class PgAvviksvurderingRepository(session: Session) : AvviksvurderingRepository, QueryRunner by MedSession(session) {
+class PgAvviksvurderingRepository(
+    session: Session,
+) : AvviksvurderingRepository,
+    QueryRunner by MedSession(session) {
     override fun lagre(avviksvurdering: Avviksvurdering) {
         val sammenligningsgrunnlagRef =
             asSQL(
@@ -62,8 +65,8 @@ class PgAvviksvurderingRepository(session: Session) : AvviksvurderingRepository,
             "vilkaarsgrunnlagId" to vilkårsgrunnlagId,
         ).singleOrNull { it.avviksvurdering() }
 
-    override fun hentAvviksvurderingFor(avviksvurderingId: UUID): Avviksvurdering? {
-        return asSQL(
+    override fun hentAvviksvurderingFor(avviksvurderingId: UUID): Avviksvurdering? =
+        asSQL(
             """
             SELECT av.unik_id, vpa.vilkårsgrunnlag_id, av.fødselsnummer, av.skjæringstidspunkt, av.opprettet, avviksprosent, beregningsgrunnlag, sg.sammenligningsgrunnlag 
             FROM avviksvurdering av 
@@ -75,7 +78,6 @@ class PgAvviksvurderingRepository(session: Session) : AvviksvurderingRepository,
             """.trimIndent(),
             "avviksvurderingId" to avviksvurderingId,
         ).singleOrNull { it.avviksvurdering() }
-    }
 
     override fun finnAvviksvurderinger(fødselsnummer: String): List<Avviksvurdering> =
         asSQL(

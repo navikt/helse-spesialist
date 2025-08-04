@@ -29,7 +29,9 @@ interface QueryRunner {
     ): Array
 }
 
-class MedSession(private val session: Session) : QueryRunner {
+class MedSession(
+    private val session: Session,
+) : QueryRunner {
     override fun <T> Query.singleOrNull(mapping: (Row) -> T?) = session.run(map(mapping).asSingle)
 
     override fun <T> Query.single(mapping: (Row) -> T): T =
@@ -54,9 +56,10 @@ class MedSession(private val session: Session) : QueryRunner {
     ) = session.createArrayOf(typeName, map)
 }
 
-class MedDataSource(private val dataSource: DataSource) : QueryRunner {
-    private fun <T> QueryAction<T>.runInSession(returnGeneratedKey: Boolean = false) =
-        sessionOf(dataSource, returnGeneratedKey, strict = true).use(::runWithSession)
+class MedDataSource(
+    private val dataSource: DataSource,
+) : QueryRunner {
+    private fun <T> QueryAction<T>.runInSession(returnGeneratedKey: Boolean = false) = sessionOf(dataSource, returnGeneratedKey, strict = true).use(::runWithSession)
 
     override fun <T> Query.single(mapping: (Row) -> T): T =
         requireNotNull(map(mapping).asSingle.runInSession()) {
@@ -79,12 +82,12 @@ class MedDataSource(private val dataSource: DataSource) : QueryRunner {
     override fun createArrayOf(
         typeName: String,
         map: Collection<Any>,
-    ): Array {
-        throw UnsupportedOperationException("Dette har vi ikke støtte for...")
-    }
+    ): Array = throw UnsupportedOperationException("Dette har vi ikke støtte for...")
 }
 
-class DbQuery(private val dataSource: DataSource) {
+class DbQuery(
+    private val dataSource: DataSource,
+) {
     private fun <T> run(
         returnGeneratedKey: Boolean = false,
         block: () -> QueryAction<T>,

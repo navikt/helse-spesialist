@@ -7,7 +7,9 @@ import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.HelseDao.Companion.single
 import java.util.UUID
 
-class PgMetrikkDao internal constructor(private val session: Session) : MetrikkDao {
+class PgMetrikkDao internal constructor(
+    private val session: Session,
+) : MetrikkDao {
     override fun finnUtfallForGodkjenningsbehov(contextId: UUID): GodkjenningsbehovUtfall {
         val antallSuspenderinger =
             asSQL(

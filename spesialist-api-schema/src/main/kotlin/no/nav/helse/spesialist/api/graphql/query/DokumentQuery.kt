@@ -20,4 +20,6 @@ interface DokumentQuerySchema : Query {
     ): DataFetcherResult<ApiDokumentInntektsmelding?>
 }
 
-class DokumentQuery(private val handler: DokumentQuerySchema) : DokumentQuerySchema by handler
+class DokumentQuery(
+    private val handler: DokumentQuerySchema,
+) : DokumentQuerySchema by handler

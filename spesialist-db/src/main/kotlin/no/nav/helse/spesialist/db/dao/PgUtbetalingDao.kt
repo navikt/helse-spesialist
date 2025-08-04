@@ -11,7 +11,10 @@ import no.nav.helse.spesialist.db.QueryRunner
 import java.time.LocalDateTime
 import java.util.UUID
 
-class PgUtbetalingDao internal constructor(session: Session) : UtbetalingDao, QueryRunner by MedSession(session) {
+class PgUtbetalingDao internal constructor(
+    session: Session,
+) : UtbetalingDao,
+    QueryRunner by MedSession(session) {
     override fun finnUtbetalingIdRef(utbetalingId: UUID): Long? =
         asSQL(
             """
@@ -77,8 +80,7 @@ class PgUtbetalingDao internal constructor(session: Session) : UtbetalingDao, Qu
                 :personbelop
             )
             ON CONFLICT (utbetaling_id) DO NOTHING RETURNING id
-        """
-                .trimIndent(),
+            """.trimIndent(),
             "utbetalingId" to utbetalingId,
             "fodselsnummer" to fødselsnummer,
             "arbeidsgiver_identifikator" to arbeidsgiverIdentifikator,
@@ -118,8 +120,7 @@ class PgUtbetalingDao internal constructor(session: Session) : UtbetalingDao, Qu
         ).update()
     }
 
-    override fun hentUtbetaling(utbetalingId: UUID): Utbetaling =
-        checkNotNull(utbetalingFor(utbetalingId)) { "Finner ikke utbetaling, utbetalingId=$utbetalingId" }
+    override fun hentUtbetaling(utbetalingId: UUID): Utbetaling = checkNotNull(utbetalingFor(utbetalingId)) { "Finner ikke utbetaling, utbetalingId=$utbetalingId" }
 
     private fun utbetalingFor(utbetalingId: UUID): Utbetaling? =
         asSQL(

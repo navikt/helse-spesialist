@@ -16,7 +16,8 @@ internal class OpprettEllerOppdaterArbeidsforhold(
     }
 
     private val arbeidsforhold =
-        arbeidsforholdDao.findArbeidsforhold(fødselsnummer, organisasjonsnummer)
+        arbeidsforholdDao
+            .findArbeidsforhold(fødselsnummer, organisasjonsnummer)
             .ifEmpty {
                 listOf(ArbeidsforholdDto(fødselsnummer = fødselsnummer, organisasjonsnummer = organisasjonsnummer))
             }

@@ -14,14 +14,13 @@ internal class DelegatedRapid(
     private val skalBehandleMelding: (String) -> Boolean,
     private val afterRiversAction: (String) -> Unit,
     private val errorAction: (Exception, String) -> Unit,
-) : RapidsConnection(), RapidsConnection.MessageListener {
+) : RapidsConnection(),
+    RapidsConnection.MessageListener {
     init {
         rapidsConnection.register(this)
     }
 
-    override fun rapidName(): String {
-        return "Spesialist"
-    }
+    override fun rapidName(): String = "Spesialist"
 
     override fun onMessage(
         message: String,

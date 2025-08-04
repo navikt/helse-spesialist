@@ -16,7 +16,10 @@ import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 
-class PgOppgaveRepository private constructor(queryRunner: QueryRunner) : QueryRunner by queryRunner, OppgaveRepository {
+class PgOppgaveRepository private constructor(
+    queryRunner: QueryRunner,
+) : QueryRunner by queryRunner,
+    OppgaveRepository {
     constructor(session: Session) : this(MedSession(session))
     constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
@@ -33,9 +36,7 @@ class PgOppgaveRepository private constructor(queryRunner: QueryRunner) : QueryR
     override fun finn(
         id: Long,
         tilgangskontroll: Tilgangskontroll,
-    ): Oppgave? {
-        return finnOppgave(id, tilgangskontroll)
-    }
+    ): Oppgave? = finnOppgave(id, tilgangskontroll)
 
     override fun finnSisteOppgaveForUtbetaling(utbetalingId: UUID): OppgaveRepository.OppgaveTilstandStatusOgGodkjenningsbehov? =
         asSQL(
@@ -124,8 +125,8 @@ class PgOppgaveRepository private constructor(queryRunner: QueryRunner) : QueryR
     private fun finnesAnnenAktivOppgavePåPerson(
         oppgaveId: Long,
         vedtaksperiodeId: UUID,
-    ): Boolean {
-        return asSQL(
+    ): Boolean =
+        asSQL(
             """
             SELECT 1 FROM oppgave o 
                 JOIN vedtak v ON o.vedtak_ref = v.id
@@ -138,15 +139,15 @@ class PgOppgaveRepository private constructor(queryRunner: QueryRunner) : QueryR
             AND o.id != :oppgave_id 
             AND o.status = 'AvventerSaksbehandler'
             """.trimIndent(),
-            "oppgave_id" to oppgaveId, "vedtaksperiode_id" to vedtaksperiodeId,
+            "oppgave_id" to oppgaveId,
+            "vedtaksperiode_id" to vedtaksperiodeId,
         ).singleOrNull { it.boolean(1) } ?: false
-    }
 
     private fun finnOppgave(
         id: Long,
         tilgangskontroll: Tilgangskontroll,
-    ): Oppgave? {
-        return asSQL(
+    ): Oppgave? =
+        asSQL(
             """
             SELECT 
                 o.egenskaper, 
@@ -195,26 +196,23 @@ class PgOppgaveRepository private constructor(queryRunner: QueryRunner) : QueryR
                     },
             )
         }
-    }
 
-    private fun tilstand(oppgavestatus: String): Oppgave.Tilstand {
-        return when (oppgavestatus) {
+    private fun tilstand(oppgavestatus: String): Oppgave.Tilstand =
+        when (oppgavestatus) {
             "AvventerSaksbehandler" -> Oppgave.AvventerSaksbehandler
             "AvventerSystem" -> Oppgave.AvventerSystem
             "Ferdigstilt" -> Oppgave.Ferdigstilt
             "Invalidert" -> Oppgave.Invalidert
             else -> throw IllegalStateException("Oppgavestatus $oppgavestatus er ikke en gyldig status")
         }
-    }
 
-    private fun status(tilstand: Oppgave.Tilstand): String {
-        return when (tilstand) {
+    private fun status(tilstand: Oppgave.Tilstand): String =
+        when (tilstand) {
             Oppgave.AvventerSaksbehandler -> "AvventerSaksbehandler"
             Oppgave.AvventerSystem -> "AvventerSystem"
             Oppgave.Ferdigstilt -> "Ferdigstilt"
             Oppgave.Invalidert -> "Invalidert"
         }
-    }
 
     private fun Egenskap.toDb() =
         when (this) {

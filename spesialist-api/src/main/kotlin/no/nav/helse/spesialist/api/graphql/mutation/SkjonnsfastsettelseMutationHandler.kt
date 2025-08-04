@@ -11,8 +11,9 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.application.logg.logg
 
-class SkjonnsfastsettelseMutationHandler(private val saksbehandlerMediator: SaksbehandlerMediator) :
-    SkjonnsfastsettelseMutationSchema {
+class SkjonnsfastsettelseMutationHandler(
+    private val saksbehandlerMediator: SaksbehandlerMediator,
+) : SkjonnsfastsettelseMutationSchema {
     override fun skjonnsfastsettSykepengegrunnlag(
         skjonnsfastsettelse: ApiSkjonnsfastsettelse,
         env: DataFetchingEnvironment,

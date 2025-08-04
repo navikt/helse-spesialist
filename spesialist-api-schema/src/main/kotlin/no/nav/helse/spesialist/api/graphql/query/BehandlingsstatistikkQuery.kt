@@ -8,4 +8,6 @@ interface BehandlingsstatistikkQuerySchema : Query {
     fun behandlingsstatistikk(): DataFetcherResult<ApiBehandlingsstatistikk>
 }
 
-class BehandlingsstatistikkQuery(private val handler: BehandlingsstatistikkQuerySchema) : BehandlingsstatistikkQuerySchema by handler
+class BehandlingsstatistikkQuery(
+    private val handler: BehandlingsstatistikkQuerySchema,
+) : BehandlingsstatistikkQuerySchema by handler

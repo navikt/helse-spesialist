@@ -12,4 +12,6 @@ interface OpptegnelseQuerySchema : Query {
     ): DataFetcherResult<List<ApiOpptegnelse>>
 }
 
-class OpptegnelseQuery(private val handler: OpptegnelseQuerySchema) : OpptegnelseQuerySchema by handler
+class OpptegnelseQuery(
+    private val handler: OpptegnelseQuerySchema,
+) : OpptegnelseQuerySchema by handler

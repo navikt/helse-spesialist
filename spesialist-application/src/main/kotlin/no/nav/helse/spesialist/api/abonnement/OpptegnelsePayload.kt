@@ -8,14 +8,18 @@ sealed class OpptegnelsePayload {
     abstract fun toJson(): String
 }
 
-data class UtbetalingPayload(private val utbetalingId: UUID) : OpptegnelsePayload() {
+data class UtbetalingPayload(
+    private val utbetalingId: UUID,
+) : OpptegnelsePayload() {
     override fun toJson() =
         """
         { "utbetalingId": "$utbetalingId" }
         """.trimIndent()
 }
 
-data class GodkjenningsbehovPayload(private val hendelseId: UUID) : OpptegnelsePayload() {
+data class GodkjenningsbehovPayload(
+    private val hendelseId: UUID,
+) : OpptegnelsePayload() {
     override fun toJson() =
         """
         { "hendelseId": "$hendelseId" }
@@ -27,7 +31,10 @@ enum class AutomatiskBehandlingUtfall {
     AVVIST,
 }
 
-data class AutomatiskBehandlingPayload(private val hendelseId: UUID, private val utfall: AutomatiskBehandlingUtfall) : OpptegnelsePayload() {
+data class AutomatiskBehandlingPayload(
+    private val hendelseId: UUID,
+    private val utfall: AutomatiskBehandlingUtfall,
+) : OpptegnelsePayload() {
     override fun toJson() =
         """
         { "hendelseId": "$hendelseId", "utfall": "$utfall" }

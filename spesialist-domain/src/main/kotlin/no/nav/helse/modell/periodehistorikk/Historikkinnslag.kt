@@ -52,11 +52,9 @@ sealed interface Historikkinnslag {
                 dialogRef = dialogRef,
             )
 
-        fun totrinnsvurderingFerdigbehandletInnslag(saksbehandler: SaksbehandlerDto): TotrinnsvurderingFerdigbehandlet =
-            TotrinnsvurderingFerdigbehandlet(saksbehandler = saksbehandler, tidspunkt = LocalDateTime.now())
+        fun totrinnsvurderingFerdigbehandletInnslag(saksbehandler: SaksbehandlerDto): TotrinnsvurderingFerdigbehandlet = TotrinnsvurderingFerdigbehandlet(saksbehandler = saksbehandler, tidspunkt = LocalDateTime.now())
 
-        fun avventerTotrinnsvurdering(saksbehandler: SaksbehandlerDto): AvventerTotrinnsvurdering =
-            AvventerTotrinnsvurdering(saksbehandler = saksbehandler, tidspunkt = LocalDateTime.now())
+        fun avventerTotrinnsvurdering(saksbehandler: SaksbehandlerDto): AvventerTotrinnsvurdering = AvventerTotrinnsvurdering(saksbehandler = saksbehandler, tidspunkt = LocalDateTime.now())
 
         fun totrinnsvurderingRetur(
             notattekst: String,
@@ -70,8 +68,7 @@ sealed interface Historikkinnslag {
                 dialogRef = dialogRef,
             )
 
-        fun totrinnsvurderingAutomatiskRetur(): TotrinnsvurderingAutomatiskRetur =
-            TotrinnsvurderingAutomatiskRetur(tidspunkt = LocalDateTime.now())
+        fun totrinnsvurderingAutomatiskRetur(): TotrinnsvurderingAutomatiskRetur = TotrinnsvurderingAutomatiskRetur(tidspunkt = LocalDateTime.now())
 
         fun automatiskBehandlingStanset(): AutomatiskBehandlingStanset = AutomatiskBehandlingStanset(tidspunkt = LocalDateTime.now())
 

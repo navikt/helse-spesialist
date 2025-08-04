@@ -16,13 +16,12 @@ class InfotrygdutbetalingerLøsningRiver(
 ) : SpesialistRiver {
     private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
-    override fun preconditions(): River.PacketValidation {
-        return River.PacketValidation {
+    override fun preconditions(): River.PacketValidation =
+        River.PacketValidation {
             it.requireValue("@event_name", "behov")
             it.requireValue("@final", true)
             it.requireAll("@behov", listOf("HentInfotrygdutbetalinger"))
         }
-    }
 
     override fun validations() =
         River.PacketValidation {

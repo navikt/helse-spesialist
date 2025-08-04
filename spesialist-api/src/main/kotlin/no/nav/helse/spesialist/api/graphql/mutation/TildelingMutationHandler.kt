@@ -60,6 +60,5 @@ class TildelingMutationHandler(
         return graphqlErrorException(500, message)
     }
 
-    private fun alleredeTildeltError(error: OppgaveTildeltNoenAndre) =
-        graphqlErrorException(error.httpkode.value, "Oppgave allerede tildelt", "tildeling" to error.tildeling)
+    private fun alleredeTildeltError(error: OppgaveTildeltNoenAndre) = graphqlErrorException(error.httpkode.value, "Oppgave allerede tildelt", "tildeling" to error.tildeling)
 }

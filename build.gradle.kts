@@ -25,7 +25,6 @@ allprojects {
     apply(plugin = "org.jlleitschuh.gradle.ktlint")
 
     ktlint {
-        ignoreFailures = true
         // Hvis du gjør endringer i disse filterne må du slette alle "build"/"out"-mappene og deretter
         // kjøre ./gradlew --no-build-cache ktlintCheck minst én gang for at endringene skal ta effekt
         filter {

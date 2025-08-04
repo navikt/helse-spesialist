@@ -98,47 +98,65 @@ class VedtakMutationHandler(
 
             is VedtakResultat.Feil -> {
                 logg.warn("Kunne ikke sende oppgave til Infotrygd: ${resultat.melding}")
-                newResult<Boolean>().error(vedtakGraphQLError(resultat.melding, resultat.code, resultat.exception))
-                    .data(false).build()
+                newResult<Boolean>()
+                    .error(vedtakGraphQLError(resultat.melding, resultat.code, resultat.exception))
+                    .data(false)
+                    .build()
             }
         }
     }
 
     sealed interface VedtakResultat {
-        data class Ok(val spleisBehandlingId: UUID) : VedtakResultat
+        data class Ok(
+            val spleisBehandlingId: UUID,
+        ) : VedtakResultat
 
-        sealed class Feil(val melding: String, val code: Int, val exception: Exception?) : VedtakResultat {
-            class IkkeÅpenOppgave : Feil(
-                melding = "Oppgaven er ikke åpen.",
-                code = 500,
-                exception = IkkeÅpenOppgave("Oppgaven er ikke åpen.", 500),
-            )
-
-            class OverlapperMedInfotrygd(saksbehandlerIdent: String) : Feil(
-                melding = "Det er overlappende utbetaling i Infotrygd.",
-                code = 409,
-                exception = OverlapperMedInfotrygd(saksbehandlerIdent, 409),
-            )
-
-            class HarAktiveVarsler(oppgavereferanse: Long) : Feil(
-                melding = "Har aktive varsler",
-                code = 400,
-                exception = ManglerVurderingAvVarsler(oppgavereferanse),
-            )
-
-            sealed class BeslutterFeil(melding: String, code: Int, exception: Exception?) :
-                Feil(melding, code, exception) {
-                class TrengerBeslutterRolle : BeslutterFeil(
-                    melding = "Saksbehandler trenger beslutter-rolle for å kunne utbetale beslutteroppgaver",
-                    code = 401,
-                    exception = null,
+        sealed class Feil(
+            val melding: String,
+            val code: Int,
+            val exception: Exception?,
+        ) : VedtakResultat {
+            class IkkeÅpenOppgave :
+                Feil(
+                    melding = "Oppgaven er ikke åpen.",
+                    code = 500,
+                    exception = IkkeÅpenOppgave("Oppgaven er ikke åpen.", 500),
                 )
 
-                class KanIkkeBeslutteEgenOppgave : BeslutterFeil(
-                    melding = "Kan ikke beslutte egne oppgaver.",
-                    code = 401,
-                    exception = null,
+            class OverlapperMedInfotrygd(
+                saksbehandlerIdent: String,
+            ) : Feil(
+                    melding = "Det er overlappende utbetaling i Infotrygd.",
+                    code = 409,
+                    exception = OverlapperMedInfotrygd(saksbehandlerIdent, 409),
                 )
+
+            class HarAktiveVarsler(
+                oppgavereferanse: Long,
+            ) : Feil(
+                    melding = "Har aktive varsler",
+                    code = 400,
+                    exception = ManglerVurderingAvVarsler(oppgavereferanse),
+                )
+
+            sealed class BeslutterFeil(
+                melding: String,
+                code: Int,
+                exception: Exception?,
+            ) : Feil(melding, code, exception) {
+                class TrengerBeslutterRolle :
+                    BeslutterFeil(
+                        melding = "Saksbehandler trenger beslutter-rolle for å kunne utbetale beslutteroppgaver",
+                        code = 401,
+                        exception = null,
+                    )
+
+                class KanIkkeBeslutteEgenOppgave :
+                    BeslutterFeil(
+                        melding = "Kan ikke beslutte egne oppgaver.",
+                        code = 401,
+                        exception = null,
+                    )
             }
         }
     }
@@ -148,8 +166,11 @@ class VedtakMutationHandler(
         code: Int,
         exception: Exception?,
     ): GraphQLError =
-        GraphqlErrorException.newErrorException().message(melding)
-            .extensions(mapOf("code" to code, "exception" to exception)).build()
+        GraphqlErrorException
+            .newErrorException()
+            .message(melding)
+            .extensions(mapOf("code" to code, "exception" to exception))
+            .build()
 }
 
 data class Avslag(

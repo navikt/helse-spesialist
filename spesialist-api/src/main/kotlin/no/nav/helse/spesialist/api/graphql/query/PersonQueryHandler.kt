@@ -21,18 +21,35 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 private sealed interface Inputvalidering {
-    class Ok(val fødselsnummer: String) : Inputvalidering
+    class Ok(
+        val fødselsnummer: String,
+    ) : Inputvalidering
 
-    sealed class UgyldigInput(val graphqlError: GraphQLError) : Inputvalidering {
-        class UkjentFødselsnummer(val fødselsnummer: String, graphqlError: GraphQLError) : UgyldigInput(graphqlError)
+    sealed class UgyldigInput(
+        val graphqlError: GraphQLError,
+    ) : Inputvalidering {
+        class UkjentFødselsnummer(
+            val fødselsnummer: String,
+            graphqlError: GraphQLError,
+        ) : UgyldigInput(graphqlError)
 
-        class UkjentAktørId(val aktørId: String, graphqlError: GraphQLError) : UgyldigInput(graphqlError)
+        class UkjentAktørId(
+            val aktørId: String,
+            graphqlError: GraphQLError,
+        ) : UgyldigInput(graphqlError)
 
-        class ParametreMangler(graphqlError: GraphQLError) : UgyldigInput(graphqlError)
+        class ParametreMangler(
+            graphqlError: GraphQLError,
+        ) : UgyldigInput(graphqlError)
 
-        class UgyldigAktørId(graphqlError: GraphQLError) : UgyldigInput(graphqlError)
+        class UgyldigAktørId(
+            graphqlError: GraphQLError,
+        ) : UgyldigInput(graphqlError)
 
-        class HarFlereFødselsnumre(val aktørId: String, graphqlError: GraphQLError) : UgyldigInput(graphqlError)
+        class HarFlereFødselsnumre(
+            val aktørId: String,
+            graphqlError: GraphQLError,
+        ) : UgyldigInput(graphqlError)
     }
 }
 
@@ -48,10 +65,14 @@ interface PersonoppslagService {
 }
 
 sealed interface FetchPersonResult {
-    class Ok(val person: ApiPerson) : FetchPersonResult
+    class Ok(
+        val person: ApiPerson,
+    ) : FetchPersonResult
 
     sealed interface Feil : FetchPersonResult {
-        class IkkeKlarTilVisning(val aktørId: String) : Feil
+        class IkkeKlarTilVisning(
+            val aktørId: String,
+        ) : Feil
 
         data object ManglerTilgang : Feil
 
@@ -200,8 +221,7 @@ class PersonQueryHandler(
             "fodselsnumre" to fødselsnumre,
         )
 
-    private fun getSnapshotFetchError(): GraphQLError =
-        graphqlErrorException(501, "Feil ved henting av snapshot for person", "field" to "person")
+    private fun getSnapshotFetchError(): GraphQLError = graphqlErrorException(501, "Feil ved henting av snapshot for person", "field" to "person")
 
     private fun getBadRequestError(melding: String): GraphQLError = graphqlErrorException(400, melding)
 

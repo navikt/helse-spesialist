@@ -15,15 +15,16 @@ class Varseldefinisjon(
     fun toDto() = VarseldefinisjonDto(id, varselkode, tittel, forklaring, handling, avviklet, opprettet)
 
     override fun equals(other: Any?) =
-        this === other || (
-            other is Varseldefinisjon &&
-                id == other.id &&
-                varselkode == other.varselkode &&
-                tittel == other.tittel &&
-                forklaring == other.forklaring &&
-                handling == other.handling &&
-                avviklet == other.avviklet
-        )
+        this === other ||
+            (
+                other is Varseldefinisjon &&
+                    id == other.id &&
+                    varselkode == other.varselkode &&
+                    tittel == other.tittel &&
+                    forklaring == other.forklaring &&
+                    handling == other.handling &&
+                    avviklet == other.avviklet
+            )
 
     override fun hashCode(): Int {
         var result = id.hashCode()

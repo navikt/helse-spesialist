@@ -136,7 +136,10 @@ class Godkjenningsbehov(
                     fom = periodeNode["fom"].asText().let(LocalDate::parse),
                     tom = periodeNode["tom"].asText().let(LocalDate::parse),
                     skjæringstidspunkt =
-                        jsonNode.path("Godkjenning").path("skjæringstidspunkt").asText()
+                        jsonNode
+                            .path("Godkjenning")
+                            .path("skjæringstidspunkt")
+                            .asText()
                             .let(LocalDate::parse),
                 )
             },
@@ -170,14 +173,20 @@ class Godkjenningsbehov(
     )
 
     private companion object {
-        private fun faktatype(jsonNode: JsonNode): Faktatype {
-            return when (val fastsattString = jsonNode.path("Godkjenning").path("sykepengegrunnlagsfakta").path("fastsatt").asText()) {
+        private fun faktatype(jsonNode: JsonNode): Faktatype =
+            when (
+                val fastsattString =
+                    jsonNode
+                        .path("Godkjenning")
+                        .path("sykepengegrunnlagsfakta")
+                        .path("fastsatt")
+                        .asText()
+            ) {
                 "EtterSkjønn" -> Faktatype.ETTER_SKJØNN
                 "EtterHovedregel" -> Faktatype.ETTER_HOVEDREGEL
                 "IInfotrygd" -> Faktatype.I_INFOTRYGD
                 else -> throw IllegalArgumentException("FastsattType $fastsattString er ikke støttet")
             }
-        }
 
         private fun sykepengegrunnlagsfakta(
             jsonNode: JsonNode,
@@ -186,9 +195,12 @@ class Godkjenningsbehov(
             if (faktatype == Faktatype.I_INFOTRYGD) {
                 return Sykepengegrunnlagsfakta.Infotrygd(
                     omregnetÅrsinntekt =
-                        jsonNode.path(
-                            "Godkjenning",
-                        ).path("sykepengegrunnlagsfakta").path("omregnetÅrsinntektTotalt").asDouble(),
+                        jsonNode
+                            .path(
+                                "Godkjenning",
+                            ).path("sykepengegrunnlagsfakta")
+                            .path("omregnetÅrsinntektTotalt")
+                            .asDouble(),
                 )
             }
 
@@ -196,11 +208,24 @@ class Godkjenningsbehov(
                 Faktatype.ETTER_SKJØNN ->
                     Sykepengegrunnlagsfakta.Spleis.EtterSkjønn(
                         omregnetÅrsinntekt =
-                            jsonNode.path(
-                                "Godkjenning",
-                            ).path("sykepengegrunnlagsfakta").path("omregnetÅrsinntektTotalt").asDouble(),
-                        seksG = jsonNode.path("Godkjenning").path("sykepengegrunnlagsfakta").path("6G").asDouble(),
-                        skjønnsfastsatt = jsonNode.path("Godkjenning").path("sykepengegrunnlagsfakta").path("skjønnsfastsatt").asDouble(),
+                            jsonNode
+                                .path(
+                                    "Godkjenning",
+                                ).path("sykepengegrunnlagsfakta")
+                                .path("omregnetÅrsinntektTotalt")
+                                .asDouble(),
+                        seksG =
+                            jsonNode
+                                .path("Godkjenning")
+                                .path("sykepengegrunnlagsfakta")
+                                .path("6G")
+                                .asDouble(),
+                        skjønnsfastsatt =
+                            jsonNode
+                                .path("Godkjenning")
+                                .path("sykepengegrunnlagsfakta")
+                                .path("skjønnsfastsatt")
+                                .asDouble(),
                         arbeidsgivere =
                             jsonNode.path("Godkjenning").path("sykepengegrunnlagsfakta").path("arbeidsgivere").map { arbeidsgiver ->
                                 val organisasjonsnummer = arbeidsgiver["arbeidsgiver"].asText()
@@ -216,14 +241,25 @@ class Godkjenningsbehov(
                 Faktatype.ETTER_HOVEDREGEL ->
                     Sykepengegrunnlagsfakta.Spleis.EtterHovedregel(
                         omregnetÅrsinntekt =
-                            jsonNode.path(
-                                "Godkjenning",
-                            ).path("sykepengegrunnlagsfakta").path("omregnetÅrsinntektTotalt").asDouble(),
-                        seksG = jsonNode.path("Godkjenning").path("sykepengegrunnlagsfakta").path("6G").asDouble(),
+                            jsonNode
+                                .path(
+                                    "Godkjenning",
+                                ).path("sykepengegrunnlagsfakta")
+                                .path("omregnetÅrsinntektTotalt")
+                                .asDouble(),
+                        seksG =
+                            jsonNode
+                                .path("Godkjenning")
+                                .path("sykepengegrunnlagsfakta")
+                                .path("6G")
+                                .asDouble(),
                         sykepengegrunnlag =
-                            jsonNode.path(
-                                "Godkjenning",
-                            ).path("sykepengegrunnlagsfakta").path("sykepengegrunnlag").asDouble(),
+                            jsonNode
+                                .path(
+                                    "Godkjenning",
+                                ).path("sykepengegrunnlagsfakta")
+                                .path("sykepengegrunnlag")
+                                .asDouble(),
                         arbeidsgivere =
                             jsonNode.path("Godkjenning").path("sykepengegrunnlagsfakta").path("arbeidsgivere").map { arbeidsgiver ->
                                 val organisasjonsnummer = arbeidsgiver["arbeidsgiver"].asText()
@@ -239,14 +275,13 @@ class Godkjenningsbehov(
             }
         }
 
-        private fun inntektskilde(inntektskildeNode: JsonNode): Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde {
-            return when (val inntektskildeString = inntektskildeNode.asText()) {
+        private fun inntektskilde(inntektskildeNode: JsonNode): Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde =
+            when (val inntektskildeString = inntektskildeNode.asText()) {
                 "Arbeidsgiver" -> Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Arbeidsgiver
                 "AOrdningen" -> Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.AOrdningen
                 "Saksbehandler" -> Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Saksbehandler
                 else -> error("$inntektskildeString er ikke en gyldig inntektskilde")
             }
-        }
     }
 }
 
@@ -313,7 +348,8 @@ internal class GodkjenningsbehovCommand(
                 omregnedeÅrsinntekter = behovData.omregnedeÅrsinntekter,
                 vilkårsgrunnlagId = behovData.vilkårsgrunnlagId,
                 legacyBehandling =
-                    person.vedtaksperiode(behovData.vedtaksperiodeId)
+                    person
+                        .vedtaksperiode(behovData.vedtaksperiodeId)
                         .finnBehandling(behovData.spleisBehandlingId),
                 erInngangsvilkårVurdertISpleis = behovData.erInngangsvilkårVurdertISpleis,
                 organisasjonsnummer = behovData.organisasjonsnummer,

@@ -34,7 +34,8 @@ class OppgaveService(
     private val tilgangskontroll: Tilgangskontroll,
     private val tilgangsgrupper: Tilgangsgrupper,
     private val oppgaveRepository: OppgaveRepository,
-) : Oppgavehåndterer, Oppgavefinner {
+) : Oppgavehåndterer,
+    Oppgavefinner {
     private val logg = LoggerFactory.getLogger(this::class.java)
     private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
@@ -110,9 +111,7 @@ class OppgaveService(
     }
 
     // Sørger for at vi alltid bruker den aktive oppgaven, i tilfelle saksbehandler har utdaterte data når de forsøker å utføre handlingen
-    private fun finnAktivOppgaveId(oppgaveId: Long): Long? {
-        return oppgaveDao.finnVedtaksperiodeId(oppgaveId).let { oppgaveDao.finnIdForAktivOppgave(it) }
-    }
+    private fun finnAktivOppgaveId(oppgaveId: Long): Long? = oppgaveDao.finnVedtaksperiodeId(oppgaveId).let { oppgaveDao.finnIdForAktivOppgave(it) }
 
     fun leggPåVent(
         handling: LeggPåVent,

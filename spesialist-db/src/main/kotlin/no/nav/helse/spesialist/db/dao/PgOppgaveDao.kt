@@ -185,7 +185,11 @@ class PgOppgaveDao internal constructor(
         ).singleOrNull { row ->
             val json = objectMapper.readTree(row.string("godkjenningbehovJson"))
             val skjæringstidspunkt =
-                json.path("Godkjenning").path("skjæringstidspunkt").asText().let(LocalDate::parse)
+                json
+                    .path("Godkjenning")
+                    .path("skjæringstidspunkt")
+                    .asText()
+                    .let(LocalDate::parse)
             OppgaveDataForAutomatisering(
                 oppgaveId = oppgaveId,
                 vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
@@ -337,8 +341,8 @@ class PgOppgaveDao internal constructor(
         ekskluderEgenskaper: List<String>,
         offset: Int,
         limit: Int,
-    ): List<OppgaveFraDatabaseForVisning> {
-        return asSQL(
+    ): List<OppgaveFraDatabaseForVisning> =
+        asSQL(
             """
             SELECT
                 o.id as oppgave_id,
@@ -372,50 +376,48 @@ class PgOppgaveDao internal constructor(
             """.trimIndent(),
             "saksbehandler_oid" to saksbehandlerOid,
             "egenskaper_som_skal_ekskluderes" to ekskluderEgenskaper.somDbArray(),
-        )
-            .list { row ->
-                val egenskaper =
-                    row.array<String>("egenskaper").map { enumValueOf<EgenskapForDatabase>(it) }.toSet()
-                OppgaveFraDatabaseForVisning(
-                    id = row.long("oppgave_id"),
-                    aktørId = row.string("aktør_id"),
-                    vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
-                    navn =
-                        PersonnavnFraDatabase(
-                            row.string("fornavn"),
-                            row.stringOrNull("mellomnavn"),
-                            row.string("etternavn"),
-                        ),
-                    egenskaper = egenskaper,
-                    tildelt =
-                        row.uuidOrNull("oid")?.let {
-                            SaksbehandlerFraDatabase(
-                                epostadresse = row.string("epost"),
-                                it,
-                                row.string("navn"),
-                                row.string("ident"),
-                            )
-                        },
-                    påVent = egenskaper.contains(EgenskapForDatabase.PÅ_VENT),
-                    opprettet = row.localDateTime("opprettet"),
-                    opprinneligSøknadsdato = row.localDateTime("opprinnelig_soknadsdato"),
-                    tidsfrist = row.localDateOrNull("frist"),
-                    filtrertAntall = row.int("filtered_count"),
-                    paVentInfo =
-                        row.localDateTimeOrNull("på_vent_opprettet")?.let {
-                            PaVentInfoFraDatabase(
-                                årsaker = row.array<String>("årsaker").toList(),
-                                tekst = row.stringOrNull("notattekst"),
-                                dialogRef = row.long("dialog_ref"),
-                                saksbehandler = row.string("på_vent_saksbehandler"),
-                                opprettet = it,
-                                tidsfrist = row.localDate("frist"),
-                                kommentarer = finnKommentarerMedDialogRef(row.long("dialog_ref").toInt()),
-                            )
-                        },
-                )
-            }
-    }
+        ).list { row ->
+            val egenskaper =
+                row.array<String>("egenskaper").map { enumValueOf<EgenskapForDatabase>(it) }.toSet()
+            OppgaveFraDatabaseForVisning(
+                id = row.long("oppgave_id"),
+                aktørId = row.string("aktør_id"),
+                vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
+                navn =
+                    PersonnavnFraDatabase(
+                        row.string("fornavn"),
+                        row.stringOrNull("mellomnavn"),
+                        row.string("etternavn"),
+                    ),
+                egenskaper = egenskaper,
+                tildelt =
+                    row.uuidOrNull("oid")?.let {
+                        SaksbehandlerFraDatabase(
+                            epostadresse = row.string("epost"),
+                            it,
+                            row.string("navn"),
+                            row.string("ident"),
+                        )
+                    },
+                påVent = egenskaper.contains(EgenskapForDatabase.PÅ_VENT),
+                opprettet = row.localDateTime("opprettet"),
+                opprinneligSøknadsdato = row.localDateTime("opprinnelig_soknadsdato"),
+                tidsfrist = row.localDateOrNull("frist"),
+                filtrertAntall = row.int("filtered_count"),
+                paVentInfo =
+                    row.localDateTimeOrNull("på_vent_opprettet")?.let {
+                        PaVentInfoFraDatabase(
+                            årsaker = row.array<String>("årsaker").toList(),
+                            tekst = row.stringOrNull("notattekst"),
+                            dialogRef = row.long("dialog_ref"),
+                            saksbehandler = row.string("på_vent_saksbehandler"),
+                            opprettet = it,
+                            tidsfrist = row.localDate("frist"),
+                            kommentarer = finnKommentarerMedDialogRef(row.long("dialog_ref").toInt()),
+                        )
+                    },
+            )
+        }
 
     private fun finnKommentarerMedDialogRef(dialogRef: Int): List<KommentarFraDatabase> =
         asSQL(

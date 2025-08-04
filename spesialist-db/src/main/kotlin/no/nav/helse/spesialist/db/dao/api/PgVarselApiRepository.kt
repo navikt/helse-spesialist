@@ -8,31 +8,25 @@ import no.nav.helse.db.api.VedtaksperiodeDbDto
 import java.util.UUID
 import javax.sql.DataSource
 
-class PgVarselApiRepository internal constructor(dataSource: DataSource) : VarselApiRepository {
+class PgVarselApiRepository internal constructor(
+    dataSource: DataSource,
+) : VarselApiRepository {
     private val varselDao = PgVarselApiDao(dataSource)
     private val behandlingDao = PgBehandlingApiDao(dataSource)
 
     override fun finnVarslerSomIkkeErInaktiveFor(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
-    ): Set<VarselDbDto> {
-        return varselDao.finnVarslerSomIkkeErInaktiveFor(vedtaksperiodeId, utbetalingId)
-    }
+    ): Set<VarselDbDto> = varselDao.finnVarslerSomIkkeErInaktiveFor(vedtaksperiodeId, utbetalingId)
 
     override fun finnVarslerSomIkkeErInaktiveForSisteGenerasjon(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
-    ): Set<VarselDbDto> {
-        return varselDao.finnVarslerSomIkkeErInaktiveForSisteGenerasjon(vedtaksperiodeId, utbetalingId)
-    }
+    ): Set<VarselDbDto> = varselDao.finnVarslerSomIkkeErInaktiveForSisteGenerasjon(vedtaksperiodeId, utbetalingId)
 
-    override fun finnVarslerForUberegnetPeriode(vedtaksperiodeId: UUID): Set<VarselDbDto> {
-        return varselDao.finnVarslerForUberegnetPeriode(vedtaksperiodeId)
-    }
+    override fun finnVarslerForUberegnetPeriode(vedtaksperiodeId: UUID): Set<VarselDbDto> = varselDao.finnVarslerForUberegnetPeriode(vedtaksperiodeId)
 
-    override fun finnGodkjenteVarslerForUberegnetPeriode(vedtaksperiodeId: UUID): Set<VarselDbDto> {
-        return varselDao.finnGodkjenteVarslerForUberegnetPeriode(vedtaksperiodeId)
-    }
+    override fun finnGodkjenteVarslerForUberegnetPeriode(vedtaksperiodeId: UUID): Set<VarselDbDto> = varselDao.finnGodkjenteVarslerForUberegnetPeriode(vedtaksperiodeId)
 
     override fun godkjennVarslerFor(oppgaveId: Long) {
         val vedtaksperioder = sammenhengendePerioder(oppgaveId)
@@ -68,17 +62,13 @@ class PgVarselApiRepository internal constructor(dataSource: DataSource) : Varse
         definisjonId: UUID,
         varselkode: String,
         ident: String,
-    ): VarselDbDto? {
-        return varselDao.settStatusVurdert(generasjonId, definisjonId, varselkode, ident)
-    }
+    ): VarselDbDto? = varselDao.settStatusVurdert(generasjonId, definisjonId, varselkode, ident)
 
     override fun settStatusAktiv(
         generasjonId: UUID,
         varselkode: String,
         ident: String,
-    ): VarselDbDto? {
-        return varselDao.settStatusAktiv(generasjonId, varselkode, ident)
-    }
+    ): VarselDbDto? = varselDao.settStatusAktiv(generasjonId, varselkode, ident)
 
     override fun perioderSomSkalViseVarsler(oppgaveId: Long?): Set<UUID> {
         if (oppgaveId == null) return emptySet()
@@ -92,9 +82,9 @@ class PgVarselApiRepository internal constructor(dataSource: DataSource) : Varse
         return sammenhengendePerioder + vedtaksperiodeMedOppgave
     }
 
-    private fun Set<VedtaksperiodeDbDto>.tidligereEnnOgSammenhengende(periode: VedtaksperiodeDbDto): Set<VedtaksperiodeDbDto> {
-        return this.filter { other ->
-            other.tidligereEnnOgSammenhengende(periode)
-        }.toSet()
-    }
+    private fun Set<VedtaksperiodeDbDto>.tidligereEnnOgSammenhengende(periode: VedtaksperiodeDbDto): Set<VedtaksperiodeDbDto> =
+        this
+            .filter { other ->
+                other.tidligereEnnOgSammenhengende(periode)
+            }.toSet()
 }

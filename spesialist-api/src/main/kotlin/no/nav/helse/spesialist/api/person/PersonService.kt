@@ -40,7 +40,9 @@ import no.nav.helse.spesialist.application.snapshot.SnapshotPerson
 import org.slf4j.LoggerFactory
 
 private sealed interface HentSnapshotResult {
-    class Ok(val snapshot: Pair<ApiPersoninfo, SnapshotPerson>) : HentSnapshotResult
+    class Ok(
+        val snapshot: Pair<ApiPersoninfo, SnapshotPerson>,
+    ) : HentSnapshotResult
 
     sealed interface Feil : HentSnapshotResult {
         data object IkkeFunnet : Feil
@@ -77,13 +79,9 @@ class PersonService(
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
 
-    override fun finnesPersonMedFødselsnummer(fødselsnummer: String): Boolean {
-        return personApiDao.finnesPersonMedFødselsnummer(fødselsnummer)
-    }
+    override fun finnesPersonMedFødselsnummer(fødselsnummer: String): Boolean = personApiDao.finnesPersonMedFødselsnummer(fødselsnummer)
 
-    override fun fødselsnumreKnyttetTil(aktørId: String): Set<String> {
-        return personApiDao.finnFødselsnumre(aktørId).toSet()
-    }
+    override fun fødselsnumreKnyttetTil(aktørId: String): Set<String> = personApiDao.finnFødselsnumre(aktørId).toSet()
 
     override suspend fun hentPerson(
         fødselsnummer: String,

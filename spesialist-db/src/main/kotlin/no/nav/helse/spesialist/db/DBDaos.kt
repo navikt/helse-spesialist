@@ -44,7 +44,9 @@ import no.nav.helse.spesialist.db.dao.api.PgVergemålApiDao
 import no.nav.helse.spesialist.db.repository.PgOppgaveRepository
 import javax.sql.DataSource
 
-class DBDaos(dataSource: DataSource) : Daos {
+class DBDaos(
+    dataSource: DataSource,
+) : Daos {
     override val annulleringRepository = PgAnnulleringRepository(dataSource)
     override val behandlingsstatistikkDao = PgBehandlingsstatistikkDao(dataSource)
     override val commandContextDao = PgCommandContextDao(dataSource)

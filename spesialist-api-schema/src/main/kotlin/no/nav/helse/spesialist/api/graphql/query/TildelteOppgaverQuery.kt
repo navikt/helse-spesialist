@@ -15,4 +15,6 @@ interface TildelteOppgaverQuerySchema : Query {
     ): DataFetcherResult<ApiOppgaverTilBehandling>
 }
 
-class TildelteOppgaverQuery(private val handler: TildelteOppgaverQuerySchema) : TildelteOppgaverQuerySchema by handler
+class TildelteOppgaverQuery(
+    private val handler: TildelteOppgaverQuerySchema,
+) : TildelteOppgaverQuerySchema by handler

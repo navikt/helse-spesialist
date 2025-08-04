@@ -8,8 +8,8 @@ fun Collection<Behov>.somJsonMessage(
     contextId: UUID,
     fødselsnummer: String,
     hendelseId: UUID,
-): JsonMessage {
-    return JsonMessage.newNeed(
+): JsonMessage =
+    JsonMessage.newNeed(
         behov = this.map { behov -> behov.behovName() },
         map =
             this.associate {
@@ -21,7 +21,6 @@ fun Collection<Behov>.somJsonMessage(
                     "hendelseId" to hendelseId,
                 ),
     )
-}
 
 fun Behov.behovName() =
     when (this) {
@@ -41,8 +40,8 @@ fun Behov.behovName() =
         is Behov.Avviksvurdering -> "Avviksvurdering"
     }
 
-private fun Behov.detaljer(): Map<String, Any?> {
-    return when (this) {
+private fun Behov.detaljer(): Map<String, Any?> =
+    when (this) {
         is Behov.EgenAnsatt -> emptyMap()
         is Behov.Enhet -> emptyMap()
         is Behov.Fullmakt -> emptyMap()
@@ -57,10 +56,9 @@ private fun Behov.detaljer(): Map<String, Any?> {
         is Behov.ÅpneOppgaver -> this.detaljer()
         is Behov.Avviksvurdering -> this.detaljer()
     }
-}
 
-private fun Behov.Avviksvurdering.detaljer(): Map<String, Any> {
-    return mapOf(
+private fun Behov.Avviksvurdering.detaljer(): Map<String, Any> =
+    mapOf(
         "organisasjonsnummer" to organisasjonsnummer,
         "vedtaksperiodeId" to vedtaksperiodeId,
         "vilkårsgrunnlagId" to vilkårsgrunnlagId,
@@ -73,51 +71,42 @@ private fun Behov.Avviksvurdering.detaljer(): Map<String, Any> {
                 )
             },
     )
-}
 
-private fun Behov.Arbeidsforhold.detaljer(): Map<String, Any> {
-    return mapOf(
+private fun Behov.Arbeidsforhold.detaljer(): Map<String, Any> =
+    mapOf(
         "fødselsnummer" to fødselsnummer,
         "organisasjonsnummer" to organisasjonsnummer,
     )
-}
 
-private fun Behov.Arbeidsgiverinformasjon.OrdinærArbeidsgiver.detaljer(): Map<String, Any> {
-    return mapOf(
+private fun Behov.Arbeidsgiverinformasjon.OrdinærArbeidsgiver.detaljer(): Map<String, Any> =
+    mapOf(
         "organisasjonsnummer" to this.organisasjonsnumre,
     )
-}
 
-private fun Behov.Arbeidsgiverinformasjon.Enkeltpersonforetak.detaljer(): Map<String, Any> {
-    return mapOf(
+private fun Behov.Arbeidsgiverinformasjon.Enkeltpersonforetak.detaljer(): Map<String, Any> =
+    mapOf(
         "ident" to this.identer,
     )
-}
 
-private fun Behov.Infotrygdutbetalinger.detaljer(): Map<String, Any> {
-    return mapOf(
+private fun Behov.Infotrygdutbetalinger.detaljer(): Map<String, Any> =
+    mapOf(
         "historikkFom" to this.fom,
         "historikkTom" to this.tom,
     )
-}
 
-private fun Behov.InntekterForSykepengegrunnlag.detaljer(): Map<String, Any> {
-    return mapOf(
+private fun Behov.InntekterForSykepengegrunnlag.detaljer(): Map<String, Any> =
+    mapOf(
         "beregningStart" to this.fom.toString(),
         "beregningSlutt" to this.tom.toString(),
     )
-}
 
-private fun Behov.Risikovurdering.detaljer(): Map<String, Any?> {
-    return mapOf(
+private fun Behov.Risikovurdering.detaljer(): Map<String, Any?> =
+    mapOf(
         "vedtaksperiodeId" to vedtaksperiodeId,
         "organisasjonsnummer" to organisasjonsnummer,
         "førstegangsbehandling" to førstegangsbehandling,
         "kunRefusjon" to kunRefusjon,
         "inntekt" to inntekt,
     )
-}
 
-private fun Behov.ÅpneOppgaver.detaljer(): Map<String, Any> {
-    return mapOf("ikkeEldreEnn" to this.ikkeEldreEnn)
-}
+private fun Behov.ÅpneOppgaver.detaljer(): Map<String, Any> = mapOf("ikkeEldreEnn" to this.ikkeEldreEnn)
