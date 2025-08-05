@@ -55,17 +55,38 @@ class PgAnnulleringRepositoryTest : AbstractDBIntegrationTest() {
         assertNull(annullering?.begrunnelse)
     }
 
+    @Test
+    fun `kan lagre og finne annullering med vedtaksperiodeId`() {
+        val arbeidsgiverFagsystemId = "EN-ARBEIDSGIVER-FAGSYSTEMID3"
+        val personFagsystemId = "EN-PERSON-FAGSYSTEMID3"
+        val vedtaksperiodeId = UUID.randomUUID()
+        opprettSaksbehandler()
+        annulleringRepository.lagreAnnullering(
+            annulleringDto(
+                begrunnelse = null,
+                arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
+                personFagsystemId = personFagsystemId,
+                årsaker = setOf("en årsak", "to årsak"),
+                vedtaksperiodeId = vedtaksperiodeId,
+            ),
+            saksbehandler(),
+        )
+        val annullering = annulleringRepository.finnAnnullering(arbeidsgiverFagsystemId, personFagsystemId)
+        assertEquals(vedtaksperiodeId, annullering?.vedtaksperiodeId)
+    }
+
     private fun annulleringDto(
         begrunnelse: String? = "annulleringsbegrunnelse",
         utbetalingId: UUID = UTBETALING_ID,
         arbeidsgiverFagsystemId: String = "EN-ARBEIDSGIVER-FAGSYSTEMID",
         personFagsystemId: String = "EN-PERSON-FAGSYSTEMID",
         årsaker: Collection<String>,
+        vedtaksperiodeId: UUID = VEDTAKSPERIODE,
     ) = AnnulleringDto(
         aktørId = AKTØR,
         fødselsnummer = FNR,
         organisasjonsnummer = ORGNUMMER,
-        vedtaksperiodeId = VEDTAKSPERIODE,
+        vedtaksperiodeId = vedtaksperiodeId,
         utbetalingId = utbetalingId,
         arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
         personFagsystemId = personFagsystemId,

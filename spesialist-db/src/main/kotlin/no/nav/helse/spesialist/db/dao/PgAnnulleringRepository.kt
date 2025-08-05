@@ -24,14 +24,15 @@ class PgAnnulleringRepository internal constructor(
             }
         dbQuery.update(
             """
-            INSERT INTO annullert_av_saksbehandler (annullert_tidspunkt, saksbehandler_ref, årsaker, begrunnelse_ref, arbeidsgiver_fagsystem_id, person_fagsystem_id) 
-            VALUES (now(), :saksbehandler, :arsaker::varchar[], :begrunnelseRef, :arbeidsgiverFagsystemId, :personFagsystemId)
+            INSERT INTO annullert_av_saksbehandler (annullert_tidspunkt, saksbehandler_ref, årsaker, begrunnelse_ref, arbeidsgiver_fagsystem_id, person_fagsystem_id, vedtaksperiode_id) 
+            VALUES (now(), :saksbehandler, :arsaker::varchar[], :begrunnelseRef, :arbeidsgiverFagsystemId, :personFagsystemId, :vedtaksperiodeId)
             """.trimIndent(),
             "saksbehandler" to legacySaksbehandler.oid(),
             "arsaker" to annulleringDto.årsaker.somDbArray { it.arsak },
             "begrunnelseRef" to begrunnelseId,
             "arbeidsgiverFagsystemId" to annulleringDto.arbeidsgiverFagsystemId,
             "personFagsystemId" to annulleringDto.personFagsystemId,
+            "vedtaksperiodeId" to annulleringDto.vedtaksperiodeId,
         )
     }
 
@@ -53,9 +54,10 @@ class PgAnnulleringRepository internal constructor(
     ): Annullering? =
         dbQuery.singleOrNull(
             """
-            select aas.id, aas.annullert_tidspunkt, aas.arbeidsgiver_fagsystem_id, aas.person_fagsystem_id, s.ident, aas.årsaker, b.tekst from annullert_av_saksbehandler aas
-            inner join saksbehandler s on s.oid = aas.saksbehandler_ref
-            left join begrunnelse b on b.id = aas.begrunnelse_ref
+            select aas.id, aas.annullert_tidspunkt, aas.arbeidsgiver_fagsystem_id, aas.person_fagsystem_id, s.ident, aas.årsaker, b.tekst, vedtaksperiode_id
+            from annullert_av_saksbehandler aas
+                inner join saksbehandler s on s.oid = aas.saksbehandler_ref
+                left join begrunnelse b on b.id = aas.begrunnelse_ref
             where arbeidsgiver_fagsystem_id = :arbeidsgiverFagsystemId or person_fagsystem_id = :personFagsystemId;
             """.trimIndent(),
             "arbeidsgiverFagsystemId" to arbeidsgiverFagsystemId,
@@ -68,6 +70,7 @@ class PgAnnulleringRepository internal constructor(
                 tidspunkt = it.localDateTime("annullert_tidspunkt"),
                 arsaker = it.array<String>("årsaker").toList(),
                 begrunnelse = it.stringOrNull("tekst"),
+                vedtaksperiodeId = it.stringOrNull("vedtaksperiode_id")?.let(UUID::fromString),
             )
         }
 

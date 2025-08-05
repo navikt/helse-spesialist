@@ -491,6 +491,7 @@ data class ApiBeregnetPeriodeResolver(
                         tidspunkt = it.tidspunkt,
                         arsaker = it.arsaker,
                         begrunnelse = it.begrunnelse,
+                        vedtaksperiodeId = it.vedtaksperiodeId,
                     )
                 }
         } else {
