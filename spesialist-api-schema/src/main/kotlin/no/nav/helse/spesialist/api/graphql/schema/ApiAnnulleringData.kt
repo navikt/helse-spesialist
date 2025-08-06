@@ -15,6 +15,7 @@ data class ApiAnnulleringData(
     val personFagsystemId: String,
     val arsaker: List<ApiAnnulleringArsak>,
     val kommentar: String?,
+    val annulleringskandidater: List<UUID>?,
 ) : HandlingFraApi {
     @GraphQLName("AnnulleringArsak")
     data class ApiAnnulleringArsak(
