@@ -15,6 +15,7 @@ class Annullering(
     private val begrunnelser: List<String> = emptyList(),
     private val arsaker: List<AnnulleringArsak>,
     private val kommentar: String?,
+    private val annulleringskandidater: Set<UUID>,
 ) : Handling {
     override fun utførAv(legacySaksbehandler: LegacySaksbehandler) {
         legacySaksbehandler.håndter(this)
@@ -43,6 +44,7 @@ class Annullering(
             begrunnelser = begrunnelser,
             arsaker = arsaker,
             kommentar = kommentar,
+            annulleringskandidater = annulleringskandidater,
         )
 
     fun toDto() =
@@ -56,6 +58,7 @@ class Annullering(
             personFagsystemId = personFagsystemId,
             årsaker = arsaker,
             kommentar = kommentar,
+            annulleringskandidater = annulleringskandidater,
         )
 }
 
@@ -69,6 +72,7 @@ data class AnnulleringDto(
     val personFagsystemId: String,
     val årsaker: List<AnnulleringArsak>,
     val kommentar: String?,
+    val annulleringskandidater: Set<UUID>,
 )
 
 data class AnnulleringArsak(
