@@ -5,10 +5,11 @@ import java.util.UUID
 
 class AvsluttetMedVedtak(
     val spleisBehandlingId: UUID,
-    private val hendelser: List<UUID>,
-    private val sykepengegrunnlag: Double,
-    private val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta,
-    private val vedtakFattetTidspunkt: LocalDateTime,
+    val yrkesaktivitetstype: String,
+    val hendelser: List<UUID>,
+    val sykepengegrunnlag: Double,
+    val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta,
+    val vedtakFattetTidspunkt: LocalDateTime,
 ) {
     fun byggVedtak(vedtakBuilder: SykepengevedtakBuilder) {
         vedtakBuilder.hendelser(hendelser)

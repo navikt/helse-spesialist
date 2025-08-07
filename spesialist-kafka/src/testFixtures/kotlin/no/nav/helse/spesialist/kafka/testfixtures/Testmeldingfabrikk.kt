@@ -1059,6 +1059,7 @@ object Testmeldingfabrikk {
         id: UUID,
     ): String = nyHendelse(
         id, "avsluttet_med_vedtak", mutableMapOf(
+            "yrkesaktivitetstype" to "ARBEIDSTAKER",
             "aktørId" to aktørId,
             "fødselsnummer" to fødselsnummer,
             "organisasjonsnummer" to organisasjonsnummer,

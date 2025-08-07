@@ -11,6 +11,7 @@ import java.util.UUID
 
 class AvsluttetMedVedtakMessage(
     override val id: UUID,
+    private val yrkesaktivitetstype: String,
     private val fødselsnummer: String,
     private val vedtakFattetTidspunkt: LocalDateTime,
     private val vedtaksperiodeId: UUID,
@@ -35,6 +36,7 @@ class AvsluttetMedVedtakMessage(
     private val avsluttetMedVedtak get() =
         AvsluttetMedVedtak(
             spleisBehandlingId = spleisBehandlingId,
+            yrkesaktivitetstype = yrkesaktivitetstype,
             hendelser = hendelser,
             sykepengegrunnlag = sykepengegrunnlag,
             sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,

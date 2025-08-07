@@ -33,7 +33,7 @@ class LegacyBehandling private constructor(
     private var periode: Periode,
     private var tilstand: Tilstand,
     private var tags: List<String>,
-    private val vedtakBegrunnelse: VedtakBegrunnelse?,
+    val vedtakBegrunnelse: VedtakBegrunnelse?,
     varsler: Set<Varsel>,
 ) {
     constructor(
@@ -187,7 +187,7 @@ class LegacyBehandling private constructor(
 
     private fun behandlingId(): UUID = spleisBehandlingId ?: throw IllegalStateException("Forventer at spleisBehandlingId er satt")
 
-    private fun utbetalingId(): UUID = utbetalingId ?: throw IllegalStateException("Forventer at utbetalingId er satt")
+    fun utbetalingId(): UUID = utbetalingId ?: throw IllegalStateException("Forventer at utbetalingId er satt")
 
     private fun nyTilstand(ny: Tilstand) {
         this.tilstand = ny

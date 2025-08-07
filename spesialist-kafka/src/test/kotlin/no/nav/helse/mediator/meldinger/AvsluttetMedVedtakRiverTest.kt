@@ -39,6 +39,7 @@ internal class AvsluttetMedVedtakRiverTest {
         return """
             {
               "@event_name": "avsluttet_med_vedtak",
+              "yrkesaktivitetstype": "ARBEIDSTAKER",
               "organisasjonsnummer": "987654321",
               "vedtaksperiodeId": "${UUID.randomUUID()}",
               "behandlingId": "${UUID.randomUUID()}",

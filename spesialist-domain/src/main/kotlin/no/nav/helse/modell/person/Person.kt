@@ -2,6 +2,7 @@ package no.nav.helse.modell.person
 
 import no.nav.helse.modell.Meldingslogg
 import no.nav.helse.modell.melding.Sykepengevedtak
+import no.nav.helse.modell.melding.SykepengevedtakSelvstendigNæringsdrivendeDto
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
@@ -14,6 +15,7 @@ import no.nav.helse.modell.vedtak.AvsluttetUtenVedtak
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlag.Companion.relevanteFor
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlagDto
+import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering.Companion.finnRiktigAvviksvurdering
@@ -21,7 +23,9 @@ import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.flyttEventueltAvviksvarselTil
 import org.slf4j.LoggerFactory
+import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.ZoneId
 import java.util.UUID
 
 class Person private constructor(
@@ -76,19 +80,55 @@ class Person private constructor(
     }
 
     fun avsluttetMedVedtak(avsluttetMedVedtak: AvsluttetMedVedtak) {
-        val vedtakBuilder = SykepengevedtakBuilder()
         val vedtaksperiode = vedtaksperiodeForBehandling(avsluttetMedVedtak.spleisBehandlingId)
         val behandling = vedtaksperiode.finnBehandling(avsluttetMedVedtak.spleisBehandlingId)
 
-        vedtakBuilder.leggTilAvviksvurderinger(behandling)
-        vedtakBuilder.leggTilSkjønnsmessigFastsettelse(behandling)
+        if (avsluttetMedVedtak.yrkesaktivitetstype.lowercase() == "selvstendig") {
+            val vedtak =
+                SykepengevedtakSelvstendigNæringsdrivendeDto(
+                    fødselsnummer = fødselsnummer,
+                    vedtaksperiodeId = behandling.vedtaksperiodeId(),
+                    sykepengegrunnlag = BigDecimal(avsluttetMedVedtak.sykepengegrunnlag.toString()),
+                    sykepengegrunnlagsfakta =
+                        (avsluttetMedVedtak.sykepengegrunnlagsfakta as Sykepengegrunnlagsfakta.Spleis)
+                            .let { fakta ->
+                                SykepengevedtakSelvstendigNæringsdrivendeDto.Sykepengegrunnlagsfakta(
+                                    beregningsgrunnlag =
+                                        BigDecimal(
+                                            fakta.arbeidsgivere
+                                                .single { it.organisasjonsnummer.lowercase() == "selvstendig" }
+                                                .omregnetÅrsinntekt
+                                                .toString(),
+                                        ),
+                                    pensjonsgivendeInntekter = emptyList(),
+                                    erBegrensetTil6G = avsluttetMedVedtak.sykepengegrunnlag == fakta.seksG,
+                                    `6G` = BigDecimal(fakta.seksG.toString()),
+                                )
+                            },
+                    fom = behandling.fom(),
+                    tom = behandling.tom(),
+                    skjæringstidspunkt = behandling.skjæringstidspunkt(),
+                    vedtakFattetTidspunkt =
+                        avsluttetMedVedtak.vedtakFattetTidspunkt
+                            .atZone(ZoneId.of("Europe/Oslo"))
+                            .toInstant(),
+                    utbetalingId = behandling.utbetalingId(),
+                    vedtakBegrunnelse = behandling.vedtakBegrunnelse,
+                )
+            behandling.håndterVedtakFattet()
+            meldingslogg.nyMelding(vedtak)
+        } else {
+            val vedtakBuilder = SykepengevedtakBuilder()
+            vedtakBuilder.leggTilAvviksvurderinger(behandling)
+            vedtakBuilder.leggTilSkjønnsmessigFastsettelse(behandling)
 
-        vedtaksperiode.byggVedtak(vedtakBuilder)
-        behandling.byggVedtak(vedtakBuilder)
-        avsluttetMedVedtak.byggVedtak(vedtakBuilder)
-        byggVedtak(vedtakBuilder)
-        behandling.håndterVedtakFattet()
-        avsluttetMedVedtak(vedtakBuilder.build())
+            vedtaksperiode.byggVedtak(vedtakBuilder)
+            behandling.byggVedtak(vedtakBuilder)
+            avsluttetMedVedtak.byggVedtak(vedtakBuilder)
+            byggVedtak(vedtakBuilder)
+            behandling.håndterVedtakFattet()
+            avsluttetMedVedtak(vedtakBuilder.build())
+        }
     }
 
     fun avsluttetUtenVedtak(avsluttetUtenVedtak: AvsluttetUtenVedtak) {

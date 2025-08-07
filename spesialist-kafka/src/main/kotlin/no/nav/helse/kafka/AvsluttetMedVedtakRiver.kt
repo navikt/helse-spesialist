@@ -29,6 +29,7 @@ class AvsluttetMedVedtakRiver(
             it.requireKey("sykepengegrunnlag")
             it.requireKey("vedtakFattetTidspunkt")
             it.requireKey("utbetalingId", "behandlingId")
+            it.requireKey("yrkesaktivitetstype")
 
             it.requireAny(
                 "sykepengegrunnlagsfakta.fastsatt",
@@ -76,6 +77,7 @@ class AvsluttetMedVedtakRiver(
             melding =
                 AvsluttetMedVedtakMessage(
                     id = packet["@id"].asUUID(),
+                    yrkesaktivitetstype = packet["yrkesaktivitetstype"].asText(),
                     fødselsnummer = packet["fødselsnummer"].asText(),
                     vedtakFattetTidspunkt = packet["vedtakFattetTidspunkt"].asLocalDateTime(),
                     vedtaksperiodeId = packet["vedtaksperiodeId"].asUUID(),
