@@ -27,10 +27,12 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Month
 import java.time.YearMonth
+import java.time.ZoneId
 import java.util.UUID
 
 class AvsluttetMedVedtakRiverIntegrationTest {
@@ -46,7 +48,8 @@ class AvsluttetMedVedtakRiverIntegrationTest {
     private val hendelser = listOf(UUID.randomUUID(), UUID.randomUUID())
     private val skjæringstidspunkt = fom
     private val fødselsnummer = lagFødselsnummer()
-    private val vedtakFattetTidspunkt = LocalDateTime.now().minusMinutes(1)
+    private val vedtakFattetTidspunktInstant = Instant.now().minusSeconds(60)
+    private val vedtakFattetTidspunkt = vedtakFattetTidspunktInstant.atZone(ZoneId.of("Europe/Oslo")).toLocalDateTime()
     private val utbetalingId = UUID.randomUUID()
 
     private val behandlingId = UUID.randomUUID()
@@ -66,9 +69,6 @@ class AvsluttetMedVedtakRiverIntegrationTest {
         val skjønnsfastsettelseBegrunnelseFraFritekst = "Begrunnelse fra fritekst her"
         val skjønnsfastsettelseBegrunnelseFraKonklusjon = "Begrunnelse fra konklusjon her"
         initPerson(
-            omregnetÅrsinntekt = omregnetÅrsinntekt,
-            innrapportertÅrsinntekt = innrapportertÅrsinntekt,
-            avviksprosent = avviksprosent,
             behandlingTags = behandlingTags,
             vedtakBegrunnelse = vedtakBegrunnelse,
             skjønnsfastsettelse = SkjønnsfastsattSykepengegrunnlagDto(
@@ -79,6 +79,11 @@ class AvsluttetMedVedtakRiverIntegrationTest {
                 begrunnelseFraFritekst = skjønnsfastsettelseBegrunnelseFraFritekst,
                 begrunnelseFraKonklusjon = skjønnsfastsettelseBegrunnelseFraKonklusjon,
                 opprettet = LocalDateTime.now().minusDays(1),
+            ),
+            avviksvurdering = lagAvviksvurdering(
+                avviksprosent = avviksprosent,
+                innrapportertÅrsinntekt = innrapportertÅrsinntekt,
+                omregnetÅrsinntekt = omregnetÅrsinntekt
             )
         )
 
@@ -191,11 +196,13 @@ class AvsluttetMedVedtakRiverIntegrationTest {
         val behandlingTags = listOf("Behandling tag 1", "Behandling tag 2")
         val vedtakBegrunnelse = "Begrunnelse for innvilgelse"
         initPerson(
-            omregnetÅrsinntekt = omregnetÅrsinntekt,
-            innrapportertÅrsinntekt = innrapportertÅrsinntekt,
-            avviksprosent = avviksprosent,
             behandlingTags = behandlingTags,
-            vedtakBegrunnelse = vedtakBegrunnelse
+            vedtakBegrunnelse = vedtakBegrunnelse,
+            avviksvurdering = lagAvviksvurdering(
+                avviksprosent = avviksprosent,
+                innrapportertÅrsinntekt = innrapportertÅrsinntekt,
+                omregnetÅrsinntekt = omregnetÅrsinntekt
+            )
         )
 
         // When:
@@ -272,11 +279,13 @@ class AvsluttetMedVedtakRiverIntegrationTest {
         val behandlingTags = listOf("Behandling tag 1", "Behandling tag 2")
         val vedtakBegrunnelse = "Begrunnelse for innvilgelse"
         initPerson(
-            omregnetÅrsinntekt = omregnetÅrsinntekt,
-            innrapportertÅrsinntekt = innrapportertÅrsinntekt,
-            avviksprosent = avviksprosent,
             behandlingTags = behandlingTags + "6GBegrenset",
-            vedtakBegrunnelse = vedtakBegrunnelse
+            vedtakBegrunnelse = vedtakBegrunnelse,
+            avviksvurdering = lagAvviksvurdering(
+                avviksprosent = avviksprosent,
+                innrapportertÅrsinntekt = innrapportertÅrsinntekt,
+                omregnetÅrsinntekt = omregnetÅrsinntekt
+            )
         )
 
         // When:
@@ -352,11 +361,13 @@ class AvsluttetMedVedtakRiverIntegrationTest {
         val behandlingTags = listOf("Behandling tag 1", "Behandling tag 2")
         val vedtakBegrunnelse = "Begrunnelse for innvilgelse"
         initPerson(
-            omregnetÅrsinntekt = omregnetÅrsinntekt,
-            innrapportertÅrsinntekt = innrapportertÅrsinntekt,
-            avviksprosent = avviksprosent,
             behandlingTags = behandlingTags,
-            vedtakBegrunnelse = vedtakBegrunnelse
+            vedtakBegrunnelse = vedtakBegrunnelse,
+            avviksvurdering = lagAvviksvurdering(
+                avviksprosent = avviksprosent,
+                innrapportertÅrsinntekt = innrapportertÅrsinntekt,
+                omregnetÅrsinntekt = omregnetÅrsinntekt
+            )
         )
 
         // When:
@@ -411,14 +422,138 @@ class AvsluttetMedVedtakRiverIntegrationTest {
         assertJsonEquals(expectedJson, actualJsonNode)
     }
 
+    @Test
+    fun `selvstendig næringsdrivende`() {
+        // Given:
+        val beregningsgrunnlag = BigDecimal("600000.00")
+        val seksG = BigDecimal("666666.66")
+        val behandlingTags = listOf("Behandling tag 1", "Behandling tag 2")
+        val vedtakBegrunnelse = "Begrunnelse for innvilgelse"
+        initPerson(
+            behandlingTags = behandlingTags,
+            vedtakBegrunnelse = vedtakBegrunnelse
+        )
+
+        // When:
+        testRapid.sendTestMessage(
+            selvstendigNæringsdrivendeMelding(
+                sykepengegrunnlag = beregningsgrunnlag,
+                beregningsgrunnlag = beregningsgrunnlag,
+                seksG = seksG,
+            )
+        )
+
+        // Then:
+        val meldinger = testRapid.publiserteMeldingerUtenGenererteFelter()
+        assertEquals(1, meldinger.size)
+        assertEquals(fødselsnummer, meldinger.single().key)
+        val actualJsonNode = meldinger.single().json
+
+        @Language("JSON")
+        val expectedJson = """
+            {
+              "@event_name": "vedtak_fattet",
+              "fødselsnummer": "$fødselsnummer",
+              "yrkesaktivitetstype": "SELVSTENDIG",
+              "vedtaksperiodeId": "$vedtaksperiodeId",
+              "fom": "$fom",
+              "tom": "$tom",
+              "skjæringstidspunkt": "$skjæringstidspunkt",
+              "sykepengegrunnlag": $beregningsgrunnlag,
+              "vedtakFattetTidspunkt": "$vedtakFattetTidspunktInstant",
+              "utbetalingId": "$utbetalingId",
+              "sykepengegrunnlagsfakta": {
+                "beregningsgrunnlag": $beregningsgrunnlag,
+                "pensjonsgivendeInntekter": [],
+                "erBegrensetTil6G": false,
+                "6G": $seksG
+              },
+              "begrunnelser": [
+                {
+                  "type" : "Innvilgelse",
+                  "begrunnelse" : "$vedtakBegrunnelse",
+                  "perioder" : [
+                    {
+                      "fom" : "$fom",
+                      "tom" : "$tom"
+                    }
+                  ]
+                }
+              ]
+            }
+        """.trimIndent()
+        assertJsonEquals(expectedJson, actualJsonNode)
+    }
+
+    @Test
+    fun `selvstendig næringsdrivende begrenset til 6G`() {
+        // Given:
+        val beregningsgrunnlag = BigDecimal("800000.00")
+        val seksG = BigDecimal("666666.66")
+        val behandlingTags = listOf("Behandling tag 1", "Behandling tag 2")
+        val vedtakBegrunnelse = "Begrunnelse for innvilgelse"
+        initPerson(
+            behandlingTags = behandlingTags + "6GBegrenset",
+            vedtakBegrunnelse = vedtakBegrunnelse
+        )
+
+        // When:
+        testRapid.sendTestMessage(
+            selvstendigNæringsdrivendeMelding(
+                sykepengegrunnlag = seksG,
+                beregningsgrunnlag = beregningsgrunnlag,
+                seksG = seksG,
+            )
+        )
+
+        // Then:
+        val meldinger = testRapid.publiserteMeldingerUtenGenererteFelter()
+        assertEquals(1, meldinger.size)
+        assertEquals(fødselsnummer, meldinger.single().key)
+        val actualJsonNode = meldinger.single().json
+
+        @Language("JSON")
+        val expectedJson = """
+            {
+              "@event_name": "vedtak_fattet",
+              "fødselsnummer": "$fødselsnummer",
+              "yrkesaktivitetstype": "SELVSTENDIG",
+              "vedtaksperiodeId": "$vedtaksperiodeId",
+              "fom": "$fom",
+              "tom": "$tom",
+              "skjæringstidspunkt": "$skjæringstidspunkt",
+              "sykepengegrunnlag": $seksG,
+              "vedtakFattetTidspunkt": "$vedtakFattetTidspunktInstant",
+              "utbetalingId": "$utbetalingId",
+              "sykepengegrunnlagsfakta": {
+                "beregningsgrunnlag": $beregningsgrunnlag,
+                "pensjonsgivendeInntekter": [],
+                "erBegrensetTil6G": true,
+                "6G": $seksG
+              },
+              "begrunnelser": [
+                {
+                  "type" : "Innvilgelse",
+                  "begrunnelse" : "$vedtakBegrunnelse",
+                  "perioder" : [
+                    {
+                      "fom" : "$fom",
+                      "tom" : "$tom"
+                    }
+                  ]
+                }
+              ]
+            }
+        """.trimIndent()
+        assertJsonEquals(expectedJson, actualJsonNode)
+    }
+
     private fun initPerson(
-        omregnetÅrsinntekt: BigDecimal,
-        innrapportertÅrsinntekt: BigDecimal,
-        avviksprosent: Double,
         behandlingTags: List<String>,
         vedtakUtfall: Utfall = Utfall.INNVILGELSE,
         vedtakBegrunnelse: String,
-        skjønnsfastsettelse: SkjønnsfastsattSykepengegrunnlagDto? = null
+        skjønnsfastsettelse: SkjønnsfastsattSykepengegrunnlagDto? = null,
+        avviksvurdering: Avviksvurdering? = null
     ) {
         personRepository.leggTilPerson(
             Person.Companion.gjenopprett(
@@ -450,45 +585,49 @@ class AvsluttetMedVedtakRiverIntegrationTest {
                     )
                 ),
                 skjønnsfastsattSykepengegrunnlag = listOfNotNull(skjønnsfastsettelse),
-                avviksvurderinger = listOf(
-                    Avviksvurdering(
-                        unikId = UUID.randomUUID(),
-                        vilkårsgrunnlagId = UUID.randomUUID(),
-                        fødselsnummer = fødselsnummer,
-                        skjæringstidspunkt = skjæringstidspunkt,
-                        opprettet = LocalDateTime.now(),
-                        avviksprosent = avviksprosent,
-                        sammenligningsgrunnlag = Sammenligningsgrunnlag(
-                            totalbeløp = innrapportertÅrsinntekt.toDouble(),
-                            innrapporterteInntekter = listOf(
-                                InnrapportertInntekt(
-                                    arbeidsgiverreferanse = organisasjonsnummer,
-                                    inntekter = (1..12).map {
-                                        Inntekt(
-                                            årMåned = YearMonth.of(
-                                                skjæringstidspunkt.year - 1,
-                                                Month.of(it)
-                                            ),
-                                            beløp = (innrapportertÅrsinntekt / BigDecimal(12)).toDouble()
-                                        )
-                                    }
-                                )
-                            )
-                        ),
-                        beregningsgrunnlag = Beregningsgrunnlag(
-                            totalbeløp = omregnetÅrsinntekt.toDouble(),
-                            omregnedeÅrsinntekter = listOf(
-                                OmregnetÅrsinntekt(
-                                    arbeidsgiverreferanse = organisasjonsnummer,
-                                    beløp = omregnetÅrsinntekt.toDouble()
-                                )
-                            )
-                        )
-                    )
-                )
+                avviksvurderinger = listOfNotNull(avviksvurdering)
             )
         )
     }
+
+    private fun lagAvviksvurdering(
+        avviksprosent: Double,
+        innrapportertÅrsinntekt: BigDecimal,
+        omregnetÅrsinntekt: BigDecimal
+    ): Avviksvurdering = Avviksvurdering(
+        unikId = UUID.randomUUID(),
+        vilkårsgrunnlagId = UUID.randomUUID(),
+        fødselsnummer = fødselsnummer,
+        skjæringstidspunkt = skjæringstidspunkt,
+        opprettet = LocalDateTime.now(),
+        avviksprosent = avviksprosent,
+        sammenligningsgrunnlag = Sammenligningsgrunnlag(
+            totalbeløp = innrapportertÅrsinntekt.toDouble(),
+            innrapporterteInntekter = listOf(
+                InnrapportertInntekt(
+                    arbeidsgiverreferanse = organisasjonsnummer,
+                    inntekter = (1..12).map {
+                        Inntekt(
+                            årMåned = YearMonth.of(
+                                skjæringstidspunkt.year - 1,
+                                Month.of(it)
+                            ),
+                            beløp = (innrapportertÅrsinntekt / BigDecimal(12)).toDouble()
+                        )
+                    }
+                )
+            )
+        ),
+        beregningsgrunnlag = Beregningsgrunnlag(
+            totalbeløp = omregnetÅrsinntekt.toDouble(),
+            omregnedeÅrsinntekter = listOf(
+                OmregnetÅrsinntekt(
+                    arbeidsgiverreferanse = organisasjonsnummer,
+                    beløp = omregnetÅrsinntekt.toDouble()
+                )
+            )
+        )
+    )
 
     private fun assertJsonEquals(expectedJson: String, actualJsonNode: JsonNode) {
         val writer = objectMapper.writerWithDefaultPrettyPrinter()
@@ -673,6 +812,70 @@ class AvsluttetMedVedtakRiverIntegrationTest {
           "@forårsaket_av": {
             "id": "37d42c5a-2f5c-4acf-88de-3e7f958730ad",
             "opprettet": "2025-08-06T07:20:35.756560675",
+            "event_name": "behov",
+            "behov": [
+              "Utbetaling"
+            ]
+          }
+        }
+    """.trimIndent()
+
+    @Language("JSON")
+    private fun selvstendigNæringsdrivendeMelding(
+        sykepengegrunnlag: BigDecimal,
+        beregningsgrunnlag: BigDecimal,
+        seksG: BigDecimal,
+    ) = """
+        {
+          "@event_name": "avsluttet_med_vedtak",
+          "organisasjonsnummer": "SELVSTENDIG",
+          "yrkesaktivitetstype": "SELVSTENDIG",
+          "vedtaksperiodeId": "$vedtaksperiodeId",
+          "behandlingId": "$spleisBehandlingId",
+          "fom": "$fom",
+          "tom": "$tom",
+          "hendelser": [ ${hendelser.joinToString(separator = ", ") { "\"$it\"" }} ],
+          "skjæringstidspunkt": "$skjæringstidspunkt",
+          "sykepengegrunnlag": $sykepengegrunnlag,
+          "vedtakFattetTidspunkt": "$vedtakFattetTidspunkt",
+          "utbetalingId": "$utbetalingId",
+          "sykepengegrunnlagsfakta": {
+            "fastsatt": "EtterHovedregel",
+            "omregnetÅrsinntekt": 0.0,
+            "omregnetÅrsinntektTotalt": 0.0,
+            "sykepengegrunnlag": $sykepengegrunnlag,
+            "6G": $seksG,
+            "arbeidsgivere": [
+              {
+                "arbeidsgiver": "SELVSTENDIG",
+                "omregnetÅrsinntekt": $beregningsgrunnlag,
+                "inntektskilde": "AOrdningen"
+              }
+            ]
+          },
+          "@id": "60839d76-0619-4028-8ae0-9946088335f3",
+          "@opprettet": "2025-08-07T16:01:33.811264213",
+          "system_read_count": 1,
+          "system_participating_services": [
+            {
+              "id": "60839d76-0619-4028-8ae0-9946088335f3",
+              "time": "2025-08-07T16:01:33.811264213",
+              "service": "helse-spleis",
+              "instance": "helse-spleis-655b9d9d9-4zqfh",
+              "image": "europe-north1-docker.pkg.dev/nais-management-233d/tbd/helse-spleis-spleis:2025.08.07-09.50-53e68d5"
+            },
+            {
+              "id": "60839d76-0619-4028-8ae0-9946088335f3",
+              "time": "2025-08-07T16:01:34.014712156",
+              "service": "spesialist",
+              "instance": "spesialist-67995bc5d-gcwgt",
+              "image": "europe-north1-docker.pkg.dev/nais-management-233d/tbd/helse-spesialist:2025.08.07-13.55-163f597"
+            }
+          ],
+          "fødselsnummer": "$fødselsnummer",
+          "@forårsaket_av": {
+            "id": "d4a5fe16-3261-4a3f-a82e-f0c303a73c29",
+            "opprettet": "2025-08-07T16:01:33.744250322",
             "event_name": "behov",
             "behov": [
               "Utbetaling"
