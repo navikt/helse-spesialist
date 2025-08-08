@@ -219,6 +219,7 @@ class SykepengevedtakBuilder {
         )
 
     companion object {
-        private val TAGS_SOM_SKAL_LIGGE_I_SYKEPENGEGRUNNLAGSFAKTA = listOf("6GBegrenset")
+        const val TAG_6G_BEGRENSET = "6GBegrenset"
+        private val TAGS_SOM_SKAL_LIGGE_I_SYKEPENGEGRUNNLAGSFAKTA = listOf(TAG_6G_BEGRENSET)
     }
 }

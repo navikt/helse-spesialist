@@ -101,7 +101,7 @@ class Person private constructor(
                                                 .toString(),
                                         ),
                                     pensjonsgivendeInntekter = emptyList(),
-                                    erBegrensetTil6G = avsluttetMedVedtak.sykepengegrunnlag == fakta.seksG,
+                                    erBegrensetTil6G = SykepengevedtakBuilder.TAG_6G_BEGRENSET in behandling.tags,
                                     `6G` = BigDecimal(fakta.seksG.toString()),
                                 )
                             },

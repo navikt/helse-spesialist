@@ -32,7 +32,7 @@ class LegacyBehandling private constructor(
     private var skjæringstidspunkt: LocalDate,
     private var periode: Periode,
     private var tilstand: Tilstand,
-    private var tags: List<String>,
+    tags: List<String>,
     val vedtakBegrunnelse: VedtakBegrunnelse?,
     varsler: Set<Varsel>,
 ) {
@@ -56,6 +56,9 @@ class LegacyBehandling private constructor(
         vedtakBegrunnelse = null,
         varsler = emptySet(),
     )
+
+    var tags: List<String> = tags
+        private set
 
     private val varsler: MutableList<Varsel> = varsler.toMutableList()
 
