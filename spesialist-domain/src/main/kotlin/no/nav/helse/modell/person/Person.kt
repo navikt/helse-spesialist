@@ -25,7 +25,6 @@ import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.flyttEve
 import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.time.LocalDate
-import java.time.ZoneId
 import java.util.UUID
 
 class Person private constructor(
@@ -109,10 +108,7 @@ class Person private constructor(
                     tom = behandling.tom(),
                     skjæringstidspunkt = behandling.skjæringstidspunkt(),
                     hendelser = avsluttetMedVedtak.hendelser,
-                    vedtakFattetTidspunkt =
-                        avsluttetMedVedtak.vedtakFattetTidspunkt
-                            .atZone(ZoneId.of("Europe/Oslo"))
-                            .toInstant(),
+                    vedtakFattetTidspunkt = avsluttetMedVedtak.vedtakFattetTidspunkt,
                     utbetalingId = behandling.utbetalingId(),
                     vedtakBegrunnelse = behandling.vedtakBegrunnelse,
                 )

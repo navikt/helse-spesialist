@@ -2,8 +2,8 @@ package no.nav.helse.modell.melding
 
 import no.nav.helse.modell.vedtak.VedtakBegrunnelse
 import java.math.BigDecimal
-import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 data class SykepengevedtakSelvstendigNæringsdrivendeDto(
@@ -15,7 +15,7 @@ data class SykepengevedtakSelvstendigNæringsdrivendeDto(
     val tom: LocalDate,
     val skjæringstidspunkt: LocalDate,
     val hendelser: List<UUID>,
-    val vedtakFattetTidspunkt: Instant,
+    val vedtakFattetTidspunkt: LocalDateTime,
     val utbetalingId: UUID,
     val vedtakBegrunnelse: VedtakBegrunnelse?,
 ) : UtgåendeHendelse {

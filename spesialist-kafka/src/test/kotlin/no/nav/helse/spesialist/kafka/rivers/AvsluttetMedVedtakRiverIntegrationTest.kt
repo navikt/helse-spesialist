@@ -27,12 +27,10 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
-import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Month
 import java.time.YearMonth
-import java.time.ZoneId
 import java.util.UUID
 
 class AvsluttetMedVedtakRiverIntegrationTest {
@@ -48,8 +46,7 @@ class AvsluttetMedVedtakRiverIntegrationTest {
     private val hendelser = listOf(UUID.randomUUID(), UUID.randomUUID())
     private val skjæringstidspunkt = fom
     private val fødselsnummer = lagFødselsnummer()
-    private val vedtakFattetTidspunktInstant = Instant.now().minusSeconds(60)
-    private val vedtakFattetTidspunkt = vedtakFattetTidspunktInstant.atZone(ZoneId.of("Europe/Oslo")).toLocalDateTime()
+    private val vedtakFattetTidspunkt = LocalDateTime.now()
     private val utbetalingId = UUID.randomUUID()
 
     private val behandlingId = UUID.randomUUID()
@@ -462,7 +459,7 @@ class AvsluttetMedVedtakRiverIntegrationTest {
               "skjæringstidspunkt": "$skjæringstidspunkt",
               "hendelser": [ ${hendelser.joinToString(separator = ", ") { "\"$it\"" }} ],
               "sykepengegrunnlag": $beregningsgrunnlag,
-              "vedtakFattetTidspunkt": "$vedtakFattetTidspunktInstant",
+              "vedtakFattetTidspunkt": "$vedtakFattetTidspunkt",
               "utbetalingId": "$utbetalingId",
               "sykepengegrunnlagsfakta": {
                 "beregningsgrunnlag": $beregningsgrunnlag,
@@ -527,7 +524,7 @@ class AvsluttetMedVedtakRiverIntegrationTest {
               "skjæringstidspunkt": "$skjæringstidspunkt",
               "hendelser": [ ${hendelser.joinToString(separator = ", ") { "\"$it\"" }} ],
               "sykepengegrunnlag": $seksG,
-              "vedtakFattetTidspunkt": "$vedtakFattetTidspunktInstant",
+              "vedtakFattetTidspunkt": "$vedtakFattetTidspunkt",
               "utbetalingId": "$utbetalingId",
               "sykepengegrunnlagsfakta": {
                 "beregningsgrunnlag": $beregningsgrunnlag,
