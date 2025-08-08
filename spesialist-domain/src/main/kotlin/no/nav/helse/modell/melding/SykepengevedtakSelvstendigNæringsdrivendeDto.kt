@@ -14,6 +14,7 @@ data class SykepengevedtakSelvstendigNæringsdrivendeDto(
     val fom: LocalDate,
     val tom: LocalDate,
     val skjæringstidspunkt: LocalDate,
+    val hendelser: List<UUID>,
     val vedtakFattetTidspunkt: Instant,
     val utbetalingId: UUID,
     val vedtakBegrunnelse: VedtakBegrunnelse?,

@@ -108,6 +108,7 @@ class Person private constructor(
                     fom = behandling.fom(),
                     tom = behandling.tom(),
                     skjæringstidspunkt = behandling.skjæringstidspunkt(),
+                    hendelser = avsluttetMedVedtak.hendelser,
                     vedtakFattetTidspunkt =
                         avsluttetMedVedtak.vedtakFattetTidspunkt
                             .atZone(ZoneId.of("Europe/Oslo"))
