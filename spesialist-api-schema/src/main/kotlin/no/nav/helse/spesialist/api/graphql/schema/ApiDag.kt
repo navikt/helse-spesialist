@@ -34,6 +34,7 @@ enum class ApiSykdomsdagtype {
     ANDRE_YTELSER_OPPLARINGSPENGER,
     ANDRE_YTELSER_PLEIEPENGER,
     ANDRE_YTELSER_SVANGERSKAPSPENGER,
+    VENTEPERIODEDAG,
     UKJENT,
 }
 
@@ -47,6 +48,7 @@ enum class ApiUtbetalingsdagtype {
     HELGEDAG,
     NAVDAG,
     NAVHELGDAG,
+    VENTEPERIODEDAG,
     UKJENT_DAG,
 }
 

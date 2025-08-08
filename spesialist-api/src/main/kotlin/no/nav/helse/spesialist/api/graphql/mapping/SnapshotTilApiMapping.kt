@@ -122,6 +122,7 @@ private fun SnapshotSykdomsdagtype.tilApiSykdomsdagtype() =
         SnapshotSykdomsdagtype.ANDREYTELSEROPPLARINGSPENGER -> ApiSykdomsdagtype.ANDRE_YTELSER_OPPLARINGSPENGER
         SnapshotSykdomsdagtype.ANDREYTELSERPLEIEPENGER -> ApiSykdomsdagtype.ANDRE_YTELSER_PLEIEPENGER
         SnapshotSykdomsdagtype.ANDREYTELSERSVANGERSKAPSPENGER -> ApiSykdomsdagtype.ANDRE_YTELSER_SVANGERSKAPSPENGER
+        SnapshotSykdomsdagtype.VENTEPERIODEDAG -> ApiSykdomsdagtype.VENTEPERIODEDAG
         SnapshotSykdomsdagtype.UNKNOWN_VALUE -> ApiSykdomsdagtype.UKJENT
     }
 
@@ -135,6 +136,7 @@ private fun SnapshotUtbetalingsdagType.tilApiUtbetalingsdagtype() =
         SnapshotUtbetalingsdagType.HELGEDAG -> ApiUtbetalingsdagtype.HELGEDAG
         SnapshotUtbetalingsdagType.NAVDAG -> ApiUtbetalingsdagtype.NAVDAG
         SnapshotUtbetalingsdagType.NAVHELGDAG -> ApiUtbetalingsdagtype.NAVHELGDAG
+        SnapshotUtbetalingsdagType.VENTEPERIODEDAG -> ApiUtbetalingsdagtype.VENTEPERIODEDAG
         SnapshotUtbetalingsdagType.UKJENTDAG,
         SnapshotUtbetalingsdagType.UNKNOWN_VALUE,
         -> ApiUtbetalingsdagtype.UKJENT_DAG
