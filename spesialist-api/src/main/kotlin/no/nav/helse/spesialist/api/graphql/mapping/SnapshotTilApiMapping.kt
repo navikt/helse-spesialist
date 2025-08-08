@@ -118,7 +118,7 @@ private fun SnapshotSykdomsdagtype.tilApiSykdomsdagtype() =
         SnapshotSykdomsdagtype.ANDREYTELSEROPPLARINGSPENGER -> ApiSykdomsdagtype.ANDRE_YTELSER_OPPLARINGSPENGER
         SnapshotSykdomsdagtype.ANDREYTELSERPLEIEPENGER -> ApiSykdomsdagtype.ANDRE_YTELSER_PLEIEPENGER
         SnapshotSykdomsdagtype.ANDREYTELSERSVANGERSKAPSPENGER -> ApiSykdomsdagtype.ANDRE_YTELSER_SVANGERSKAPSPENGER
-        else -> throw Exception("Ukjent sykdomsdagtype $name")
+        SnapshotSykdomsdagtype.UNKNOWN_VALUE -> ApiSykdomsdagtype.UKJENT
     }
 
 private fun SnapshotUtbetalingsdagType.tilApiUtbetalingsdagtype() =
@@ -313,6 +313,7 @@ fun SnapshotPeriodetilstand.tilApiPeriodetilstand(erSisteGenerasjon: Boolean) =
                 ApiPeriodetilstand.UtbetaltVenterPaEnAnnenPeriode
             }
         }
+
         SnapshotPeriodetilstand.AVVENTERANNULLERING -> ApiPeriodetilstand.AvventerAnnullering
         SnapshotPeriodetilstand.AVVENTERINNTEKTSOPPLYSNINGER -> ApiPeriodetilstand.AvventerInntektsopplysninger
         SnapshotPeriodetilstand.TILSKJONNSFASTSETTELSE -> ApiPeriodetilstand.TilSkjonnsfastsettelse

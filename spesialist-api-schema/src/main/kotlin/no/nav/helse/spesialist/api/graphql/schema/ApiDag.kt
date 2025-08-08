@@ -34,6 +34,7 @@ enum class ApiSykdomsdagtype {
     ANDRE_YTELSER_OPPLARINGSPENGER,
     ANDRE_YTELSER_PLEIEPENGER,
     ANDRE_YTELSER_SVANGERSKAPSPENGER,
+    UKJENT,
 }
 
 @GraphQLName("Utbetalingsdagtype")
