@@ -10,6 +10,7 @@ class ClientSpleisModule(
     data class Configuration(
         val spleisUrl: URI,
         val spleisClientId: String,
+        val loggRespons: Boolean,
     )
 
     val snapshothenter =
@@ -18,6 +19,7 @@ class ClientSpleisModule(
                 accessTokenGenerator = accessTokenGenerator,
                 spleisUrl = configuration.spleisUrl,
                 spleisClientId = configuration.spleisClientId,
+                loggRespons = configuration.loggRespons,
             ),
         )
 }

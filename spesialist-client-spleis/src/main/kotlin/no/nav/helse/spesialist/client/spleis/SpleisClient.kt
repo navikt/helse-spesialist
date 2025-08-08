@@ -34,6 +34,7 @@ class SpleisClient(
     private val accessTokenGenerator: AccessTokenGenerator,
     private val spleisUrl: URI,
     private val spleisClientId: String,
+    private val loggRespons: Boolean,
 ) {
     private val serializer: GraphQLClientSerializer =
         GraphQLClientJacksonSerializer(
@@ -118,6 +119,11 @@ class SpleisClient(
                     )
                 }
         val responseBody = response.body<String>()
+
+        if (loggRespons) {
+            sikkerlogg.trace("Fikk HTTP ${response.status.value}-svar fra Spleis: $responseBody")
+        }
+
         if (!response.status.isSuccess()) {
             logg.error("Fikk HTTP ${response.status.value} i svar fra Spleis. Se sikkerlogg for mer info.")
             sikkerlogg.error("Fikk HTTP ${response.status.value}-svar fra Spleis: $responseBody")

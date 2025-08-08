@@ -121,6 +121,8 @@ spec:
       value: api://dev-gcp.tbd.spleis-api/.default
     - name: SPLEIS_API_URL
       value: "http://spleis-api"
+    - name: SPLEIS_CLIENT_LOGG_RESPONS
+      value: "true"
     - name: BRUK_DUMMY_FOR_KONTAKT_OG_RESERVASJONSREGISTERET
       value: "true"
     - name: TILLAT_GODKJENNING_UTEN_BESLUTTERTILGANG

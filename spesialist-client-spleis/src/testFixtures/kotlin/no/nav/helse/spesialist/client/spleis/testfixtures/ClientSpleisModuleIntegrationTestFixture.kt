@@ -13,5 +13,6 @@ object ClientSpleisModuleIntegrationTestFixture {
     val moduleConfiguration = ClientSpleisModule.Configuration(
         spleisUrl = URI.create(wireMockServer.baseUrl()),
         spleisClientId = "local-app",
+        loggRespons = true,
     )
 }

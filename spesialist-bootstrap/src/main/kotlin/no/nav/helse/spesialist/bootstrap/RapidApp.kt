@@ -53,6 +53,7 @@ fun main() {
                     ClientSpleisModule.Configuration(
                         spleisUrl = URI.create(env.getValue("SPLEIS_API_URL")),
                         spleisClientId = env.getValue("SPLEIS_CLIENT_ID"),
+                        loggRespons = env.getBoolean("SPLEIS_CLIENT_LOGG_RESPONS", false),
                     ),
                 clientUnleash =
                     ClientUnleashModule.Configuration(
