@@ -17,7 +17,7 @@ graphqlKotlin-client-jackson = { module = "com.expediagroup:graphql-kotlin-clien
 graphqlKotlin-client-ktor = { module = "com.expediagroup:graphql-kotlin-ktor-client", version.ref = "graphqlKotlin" }
 graphqlKotlin-server-ktor = { module = "com.expediagroup:graphql-kotlin-ktor-server", version.ref = "graphqlKotlin" }
 
-hikari = "com.zaxxer:HikariCP:7.0.0"
+hikari = "com.zaxxer:HikariCP:7.0.1"
 
 jackson-jsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310", version.ref = "jackson" }
 jackson-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
