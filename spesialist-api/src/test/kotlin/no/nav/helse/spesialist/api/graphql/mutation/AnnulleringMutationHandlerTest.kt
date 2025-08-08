@@ -36,7 +36,7 @@ class AnnulleringMutationHandlerTest {
                             arsak = "Ekstra ferie",
                         )
                     ),
-                    annulleringskandidater = null
+                    annulleringskandidater = emptyList()
                 )
             ),
             then = { _, body, _ ->
@@ -59,7 +59,7 @@ class AnnulleringMutationHandlerTest {
                     vedtaksperiodeId = UUID.randomUUID(),
                     kommentar = "kommentar",
                     arsaker = emptyList(),
-                    annulleringskandidater = null,
+                    annulleringskandidater = emptyList(),
                 )
             ),
             then = { _, body, _ ->

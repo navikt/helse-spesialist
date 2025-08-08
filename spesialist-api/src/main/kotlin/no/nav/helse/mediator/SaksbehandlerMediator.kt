@@ -934,7 +934,7 @@ class SaksbehandlerMediator(
             begrunnelser = this.arsaker.map { arsak -> arsak.arsak },
             arsaker = this.arsaker.map { arsak -> AnnulleringArsak(key = arsak._key, arsak = arsak.arsak) },
             kommentar = this.kommentar,
-            annulleringskandidater = this.annulleringskandidater?.toSet() ?: emptySet(),
+            annulleringskandidater = this.annulleringskandidater.toSet(),
         )
 
     private fun ApiPaVentRequest.ApiLeggPaVent.tilModellversjon(): LeggPåVent =

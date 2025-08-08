@@ -70,6 +70,7 @@ type Annullering {
     personFagsystemId: String
     saksbehandlerIdent: String!
     tidspunkt: LocalDateTime!
+    vedtaksperiodeId: UUID
 }
 
 type Annulleringskandidat {
@@ -1285,6 +1286,7 @@ enum PeriodehistorikkType {
 enum Periodetilstand {
     AnnulleringFeilet
     Annullert
+    AvventerAnnullering
     AvventerInntektsopplysninger
     ForberederGodkjenning
     IngenUtbetaling
@@ -1476,6 +1478,7 @@ input AnnulleringArsakInput {
 
 input AnnulleringDataInput {
     aktorId: String!
+    annulleringskandidater: [UUID!]!
     arbeidsgiverFagsystemId: String!
     arsaker: [AnnulleringArsakInput!]!
     fodselsnummer: String!
