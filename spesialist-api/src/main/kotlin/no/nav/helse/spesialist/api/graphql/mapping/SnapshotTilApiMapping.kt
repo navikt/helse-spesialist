@@ -65,6 +65,8 @@ import no.nav.helse.spesialist.application.snapshot.SnapshotSykdomsdagtype
 import no.nav.helse.spesialist.application.snapshot.SnapshotSykepengegrunnlagsgrense
 import no.nav.helse.spesialist.application.snapshot.SnapshotSykmelding
 import no.nav.helse.spesialist.application.snapshot.SnapshotTidslinjeperiode
+import no.nav.helse.spesialist.application.snapshot.SnapshotUkjentHendelse
+import no.nav.helse.spesialist.application.snapshot.SnapshotUkjentVilkarsgrunnlag
 import no.nav.helse.spesialist.application.snapshot.SnapshotUtbetalingsdagType
 import no.nav.helse.spesialist.application.snapshot.SnapshotUtbetalingsinfo
 import no.nav.helse.spesialist.application.snapshot.SnapshotVilkarsgrunnlag
@@ -94,7 +96,9 @@ private fun SnapshotSykdomsdagkildetype.tilApiKildetype() =
         SnapshotSykdomsdagkildetype.SAKSBEHANDLER -> ApiKildetype.SAKSBEHANDLER
         SnapshotSykdomsdagkildetype.SOKNAD -> ApiKildetype.SOKNAD
         SnapshotSykdomsdagkildetype.SYKMELDING -> ApiKildetype.SYKMELDING
-        else -> ApiKildetype.UKJENT
+        SnapshotSykdomsdagkildetype.UKJENT,
+        SnapshotSykdomsdagkildetype.UNKNOWN_VALUE,
+        -> ApiKildetype.UKJENT
     }
 
 private fun SnapshotSykdomsdagtype.tilApiSykdomsdagtype() =
@@ -131,7 +135,9 @@ private fun SnapshotUtbetalingsdagType.tilApiUtbetalingsdagtype() =
         SnapshotUtbetalingsdagType.HELGEDAG -> ApiUtbetalingsdagtype.HELGEDAG
         SnapshotUtbetalingsdagType.NAVDAG -> ApiUtbetalingsdagtype.NAVDAG
         SnapshotUtbetalingsdagType.NAVHELGDAG -> ApiUtbetalingsdagtype.NAVHELGDAG
-        else -> ApiUtbetalingsdagtype.UKJENT_DAG
+        SnapshotUtbetalingsdagType.UKJENTDAG,
+        SnapshotUtbetalingsdagType.UNKNOWN_VALUE,
+        -> ApiUtbetalingsdagtype.UKJENT_DAG
     }
 
 private fun SnapshotUtbetalingsinfo.tilApiUtbetalingsinfo() =
@@ -242,7 +248,7 @@ fun SnapshotHendelse.tilApiHendelse(): ApiHendelse =
                 mottattDato = mottattDato,
             )
 
-        else -> throw Exception("Ukjent hendelsestype ${javaClass.name}")
+        SnapshotUkjentHendelse -> error("Ukjent hendelsestype ${javaClass.name}")
     }
 
 fun SnapshotOmregnetArsinntekt.tilApiOmregnetArsinntekt() =
@@ -274,7 +280,7 @@ private fun SnapshotInntektskilde.tilApiInntektskilde() =
         SnapshotInntektskilde.INNTEKTSMELDING -> ApiInntektskilde.INNTEKTSMELDING
         SnapshotInntektskilde.SAKSBEHANDLER -> ApiInntektskilde.SAKSBEHANDLER
         SnapshotInntektskilde.IKKERAPPORTERT -> ApiInntektskilde.IKKE_RAPPORTERT
-        else -> throw Exception("Ukjent inntektskilde ${this.name}")
+        SnapshotInntektskilde.UNKNOWN_VALUE -> error("Ukjent inntektskilde ${this.name}")
     }
 
 fun SnapshotArbeidsgiverrefusjon.tilApiArbeidsgiverrefusjon() =
@@ -317,7 +323,7 @@ fun SnapshotPeriodetilstand.tilApiPeriodetilstand(erSisteGenerasjon: Boolean) =
         SnapshotPeriodetilstand.AVVENTERANNULLERING -> ApiPeriodetilstand.AvventerAnnullering
         SnapshotPeriodetilstand.AVVENTERINNTEKTSOPPLYSNINGER -> ApiPeriodetilstand.AvventerInntektsopplysninger
         SnapshotPeriodetilstand.TILSKJONNSFASTSETTELSE -> ApiPeriodetilstand.TilSkjonnsfastsettelse
-        else -> ApiPeriodetilstand.Ukjent
+        SnapshotPeriodetilstand.UNKNOWN_VALUE -> ApiPeriodetilstand.Ukjent
     }
 
 fun NotatApiDao.NotatDto.tilApiNotat() =
@@ -352,14 +358,14 @@ fun SnapshotTidslinjeperiode.tilApiPeriodetype() =
         SnapshotPeriodetype.FORSTEGANGSBEHANDLING -> ApiPeriodetype.FORSTEGANGSBEHANDLING
         SnapshotPeriodetype.INFOTRYGDFORLENGELSE -> ApiPeriodetype.INFOTRYGDFORLENGELSE
         SnapshotPeriodetype.OVERGANGFRAIT -> ApiPeriodetype.OVERGANG_FRA_IT
-        else -> throw Exception("Ukjent periodetype $periodetype")
+        SnapshotPeriodetype.UNKNOWN_VALUE -> error("Ukjent periodetype $periodetype")
     }
 
 fun SnapshotInntektstype.tilApiInntektstype() =
     when (this) {
         SnapshotInntektstype.ENARBEIDSGIVER -> ApiInntektstype.ENARBEIDSGIVER
         SnapshotInntektstype.FLEREARBEIDSGIVERE -> ApiInntektstype.FLEREARBEIDSGIVERE
-        else -> throw Exception("Ukjent inntektstype $this")
+        SnapshotInntektstype.UNKNOWN_VALUE -> error("Ukjent inntektstype $this")
     }
 
 fun SnapshotVilkarsgrunnlag.tilVilkarsgrunnlagV2(avviksvurderingRepository: AvviksvurderingRepository): ApiVilkårsgrunnlagV2 =
@@ -454,7 +460,7 @@ fun SnapshotVilkarsgrunnlag.tilVilkarsgrunnlagV2(avviksvurderingRepository: Avvi
                 sykepengegrunnlag = sykepengegrunnlag,
             )
 
-        else -> throw Exception("Ukjent vilkårsgrunnlag ${this.javaClass.name}")
+        is SnapshotUkjentVilkarsgrunnlag -> error("Ukjent vilkårsgrunnlag ${this.javaClass.name}")
     }
 
 internal fun SnapshotSykepengegrunnlagsgrense.tilSykepengegrunnlaggrense() =
