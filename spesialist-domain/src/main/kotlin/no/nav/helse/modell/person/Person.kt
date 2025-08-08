@@ -30,7 +30,7 @@ import java.util.UUID
 
 class Person private constructor(
     private val aktørId: String,
-    private val fødselsnummer: String,
+    val fødselsnummer: String,
     vedtaksperioder: List<Vedtaksperiode>,
     private val skjønnsfastsatteSykepengegrunnlag: List<SkjønnsfastsattSykepengegrunnlag>,
     private val avviksvurderinger: List<Avviksvurdering>,

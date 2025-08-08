@@ -11,6 +11,7 @@ dependencies {
 
     testImplementation(libs.tbdLibs.rapidsAndRiversTest)
     testImplementation("io.github.optimumcode:json-schema-validator:0.5.2")
+    testImplementation(testFixtures(project(":spesialist-application")))
     testImplementation(testFixtures(project(":spesialist-kafka")))
     testImplementation(testFixtures(project(":spesialist-domain")))
 

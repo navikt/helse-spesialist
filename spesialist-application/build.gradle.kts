@@ -13,4 +13,7 @@ dependencies {
     implementation(libs.micrometer.prometheus)
 
     testImplementation(testFixtures(project(":spesialist-domain")))
+
+    testFixturesImplementation(libs.bundles.jackson)
+    testFixturesImplementation(libs.bundles.logback)
 }

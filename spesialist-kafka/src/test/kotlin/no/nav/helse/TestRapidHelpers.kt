@@ -1,6 +1,7 @@
 package no.nav.helse
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.node.ObjectNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
@@ -130,6 +131,24 @@ object TestRapidHelpers {
         val type: String
     )
 
+    fun TestRapid.publiserteMeldingerUtenGenererteFelter() = (0 until inspektør.size).map { index ->
+        PublisertMelding(
+            key = inspektør.key(index),
+            json = inspektør.message(index).also {
+                taBortRapidsAndRiversGenererteFelter(it as ObjectNode)
+            }
+        )
+    }
+
+    private fun taBortRapidsAndRiversGenererteFelter(obj: ObjectNode) {
+        obj.remove("@id")
+        obj.remove("@opprettet")
+        obj.remove("system_read_count")
+        obj.remove("system_participating_services")
+        obj.remove("@forårsaket_av")
+    }
+
+    data class PublisertMelding(val key: String?, val json: JsonNode)
 }
 
 internal fun TestRapid.medRivers(vararg river: SpesialistRiver): TestRapid {
