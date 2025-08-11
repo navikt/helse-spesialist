@@ -9,6 +9,7 @@ import kotlinx.serialization.json.JsonElement
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.melding.Godkjenningsbehovløsning
 import no.nav.helse.modell.melding.InntektsendringerEvent
+import no.nav.helse.modell.melding.OverstyrtTidslinjeEvent
 import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.melding.VedtaksperiodeAvvistAutomatisk
 import no.nav.helse.modell.melding.VedtaksperiodeAvvistManuelt
@@ -18,6 +19,7 @@ import no.nav.helse.modell.utbetaling.Refusjonstype
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.domain.testfixtures.feb
 import no.nav.helse.spesialist.domain.testfixtures.jan
+import no.nav.helse.spesialist.domain.testfixtures.lagAktørId
 import no.nav.helse.spesialist.domain.testfixtures.lagEpostadresseFraFulltNavn
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
@@ -32,6 +34,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.io.InputStreamReader
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -386,6 +389,48 @@ class UtgåendeHendelseMessageBuilderTest {
             )
         )
         assertValidByJsonSchema(json, "/inntektsendringer.schema.json")
+    }
+
+    @Test
+    fun `Overstyr tidslinje-hendelse for selvstendig næringsdrivende har yrkesaktivitetstype SELVSTENDIG`() {
+        val aktørId = lagAktørId()
+        val organisasjonsnummer = "SELVSTENDIG"
+        val dager = listOf(
+            OverstyrtTidslinjeEvent.OverstyrtTidslinjeEventDag(
+                dato = LocalDate.parse("2025-02-01"),
+                type = "ventetid",
+                fraType = "tid",
+                grad = 100,
+                fraGrad = 50
+            )
+        )
+
+        val hendelse = OverstyrtTidslinjeEvent(
+            eksternHendelseId = UUID.randomUUID(),
+            fødselsnummer = fødselsnummer,
+            aktørId = aktørId,
+            organisasjonsnummer = organisasjonsnummer,
+            dager = dager
+        )
+
+        hendelse.somJson().assertHendelse(
+            eventName = "overstyr_tidslinje",
+            payload = mapOf(
+                "fødselsnummer" to fødselsnummer,
+                "aktørId" to aktørId,
+                "organisasjonsnummer" to organisasjonsnummer,
+                "dager" to listOf(
+                    mapOf(
+                        "dato" to "2025-02-01",
+                        "type" to "ventetid",
+                        "fraType" to "tid",
+                        "grad" to 100,
+                        "fraGrad" to 50
+                    )
+                ),
+                "yrkesaktivitetstype" to "SELVSTENDIG",
+            )
+        )
     }
 
     private fun String.assertHendelse(eventName: String, payload: Map<String, Any>) {

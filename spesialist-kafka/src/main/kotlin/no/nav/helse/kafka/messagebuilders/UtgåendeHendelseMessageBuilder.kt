@@ -381,7 +381,7 @@ private fun OverstyrtTidslinjeEvent.detaljer(): Map<String, Any> =
         "aktørId" to aktørId,
         "organisasjonsnummer" to organisasjonsnummer,
         "dager" to dager,
-    )
+    ).let { if (organisasjonsnummer.uppercase() == "SELVSTENDIG") it + mapOf("yrkesaktivitetstype" to "SELVSTENDIG") else it }
 
 private fun SkjønnsfastsattSykepengegrunnlagEvent.detaljer(): Map<String, Any> =
     mapOf(
