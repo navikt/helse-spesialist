@@ -1,0 +1,1 @@
+drop table annulleringskandidater_annullert_av_saksbehandler;

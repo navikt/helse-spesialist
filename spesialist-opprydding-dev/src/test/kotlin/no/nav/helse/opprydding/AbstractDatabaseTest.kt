@@ -143,8 +143,6 @@ internal abstract class AbstractDatabaseTest {
         
         INSERT INTO annullert_av_saksbehandler(id, annullert_tidspunkt, saksbehandler_ref)
         VALUES (${sequence_number}, now(), '${saksbehandler_oid}');
-        INSERT INTO annulleringskandidater_annullert_av_saksbehandler(vedtaksperiode_id, annullert_av_saksbehandler_ref)
-        VALUES ('${vedtaksperiode_id}', ${sequence_number});
         INSERT INTO oppdrag(id, fagsystem_id, mottaker)
         VALUES (${sequence_number}, 'EN_PERSON_FAGSYSTEMID', 'MOTTAKER');
         INSERT INTO oppdrag(id, fagsystem_id, mottaker)
