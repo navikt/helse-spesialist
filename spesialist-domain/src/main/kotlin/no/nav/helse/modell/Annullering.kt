@@ -11,5 +11,4 @@ data class Annullering(
     val arsaker: List<String>,
     val begrunnelse: String?,
     val vedtaksperiodeId: UUID?,
-    val annulleringskandidater: Set<UUID>,
 )

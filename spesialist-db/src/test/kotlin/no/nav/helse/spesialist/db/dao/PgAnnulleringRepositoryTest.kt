@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 import java.util.UUID
-import kotlin.test.assertContains
 
 class PgAnnulleringRepositoryTest : AbstractDBIntegrationTest() {
     @Test
@@ -76,33 +75,6 @@ class PgAnnulleringRepositoryTest : AbstractDBIntegrationTest() {
         assertEquals(vedtaksperiodeId, annullering?.vedtaksperiodeId)
     }
 
-    @Test
-    fun `kan lagre annullering med referanse til annulleringskandidater`() {
-        val arbeidsgiverFagsystemId = "EN-ARBEIDSGIVER-FAGSYSTEMID4"
-        val personFagsystemId = "EN-PERSON-FAGSYSTEMID4"
-        val vedtaksperiodeId = UUID.randomUUID()
-        opprettSaksbehandler()
-        val annulleringskandidat = UUID.randomUUID()
-        annulleringRepository.lagreAnnullering(
-            annulleringDto(
-                begrunnelse = null,
-                arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
-                personFagsystemId = personFagsystemId,
-                årsaker = setOf("en årsak", "to årsak"),
-                vedtaksperiodeId = vedtaksperiodeId,
-                annulleringskandidater = setOf(
-                    annulleringskandidat,
-                ),
-            ),
-            saksbehandler(),
-        )
-        val annullering = annulleringRepository.finnAnnullering(arbeidsgiverFagsystemId, personFagsystemId)
-        requireNotNull(annullering)
-        assertEquals(vedtaksperiodeId, annullering.vedtaksperiodeId)
-        assertContains(annullering.annulleringskandidater, annulleringskandidat)
-    }
-
-
     private fun annulleringDto(
         begrunnelse: String? = "annulleringsbegrunnelse",
         utbetalingId: UUID = UTBETALING_ID,
@@ -110,7 +82,6 @@ class PgAnnulleringRepositoryTest : AbstractDBIntegrationTest() {
         personFagsystemId: String = "EN-PERSON-FAGSYSTEMID",
         årsaker: Collection<String>,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
-        annulleringskandidater: Set<UUID> = emptySet(),
     ) = AnnulleringDto(
         aktørId = AKTØR,
         fødselsnummer = FNR,
@@ -121,7 +92,6 @@ class PgAnnulleringRepositoryTest : AbstractDBIntegrationTest() {
         personFagsystemId = personFagsystemId,
         årsaker = årsaker.mapIndexed { i, årsak -> AnnulleringArsak("key$i", årsak) },
         kommentar = begrunnelse,
-        annulleringskandidater = annulleringskandidater
     )
 
     private fun saksbehandler(saksbehandlerOid: UUID = SAKSBEHANDLER_OID) =

@@ -22,29 +22,18 @@ class PgAnnulleringRepository internal constructor(
             annulleringDto.kommentar?.let {
                 lagreBegrunnelse(it, legacySaksbehandler.oid())
             }
-        val annullertAvSaksbehandlerKey =
-            dbQuery.updateAndReturnGeneratedKey(
-                """
-                INSERT INTO annullert_av_saksbehandler (annullert_tidspunkt, saksbehandler_ref, årsaker, begrunnelse_ref, arbeidsgiver_fagsystem_id, person_fagsystem_id, vedtaksperiode_id) 
-                VALUES (now(), :saksbehandler, :arsaker::varchar[], :begrunnelseRef, :arbeidsgiverFagsystemId, :personFagsystemId, :vedtaksperiodeId)
-                """.trimIndent(),
-                "saksbehandler" to legacySaksbehandler.oid(),
-                "arsaker" to annulleringDto.årsaker.somDbArray { it.arsak },
-                "begrunnelseRef" to begrunnelseId,
-                "arbeidsgiverFagsystemId" to annulleringDto.arbeidsgiverFagsystemId,
-                "personFagsystemId" to annulleringDto.personFagsystemId,
-                "vedtaksperiodeId" to annulleringDto.vedtaksperiodeId,
-            )
-        annulleringDto.annulleringskandidater.forEach { kandidat ->
-            dbQuery.update(
-                """
-                insert into annulleringskandidater_annullert_av_saksbehandler (vedtaksperiode_id, annullert_av_saksbehandler_ref)
-                values (:vedtaksperiodeId, :annullertAvSaksbehandlerKey)
-                """.trimIndent(),
-                "vedtaksperiodeId" to kandidat,
-                "annullertAvSaksbehandlerKey" to annullertAvSaksbehandlerKey,
-            )
-        }
+        dbQuery.update(
+            """
+            INSERT INTO annullert_av_saksbehandler (annullert_tidspunkt, saksbehandler_ref, årsaker, begrunnelse_ref, arbeidsgiver_fagsystem_id, person_fagsystem_id, vedtaksperiode_id) 
+            VALUES (now(), :saksbehandler, :arsaker::varchar[], :begrunnelseRef, :arbeidsgiverFagsystemId, :personFagsystemId, :vedtaksperiodeId)
+            """.trimIndent(),
+            "saksbehandler" to legacySaksbehandler.oid(),
+            "arsaker" to annulleringDto.årsaker.somDbArray { it.arsak },
+            "begrunnelseRef" to begrunnelseId,
+            "arbeidsgiverFagsystemId" to annulleringDto.arbeidsgiverFagsystemId,
+            "personFagsystemId" to annulleringDto.personFagsystemId,
+            "vedtaksperiodeId" to annulleringDto.vedtaksperiodeId,
+        )
     }
 
     private fun lagreBegrunnelse(
@@ -62,22 +51,8 @@ class PgAnnulleringRepository internal constructor(
     override fun finnAnnullering(
         arbeidsgiverFagsystemId: String,
         personFagsystemId: String,
-    ): Annullering? {
-        val annulleringskandidater =
-            dbQuery
-                .list(
-                    """
-                    select aaas.vedtaksperiode_id
-                    from annulleringskandidater_annullert_av_saksbehandler aaas
-                    inner join annullert_av_saksbehandler as aas on aas.id = aaas.annullert_av_saksbehandler_ref
-                    where arbeidsgiver_fagsystem_id = :arbeidsgiverFagsystemId or person_fagsystem_id = :personFagsystemId;
-                    """.trimIndent(),
-                    "arbeidsgiverFagsystemId" to arbeidsgiverFagsystemId,
-                    "personFagsystemId" to personFagsystemId,
-                ) {
-                    it.uuid("vedtaksperiode_id")
-                }.toSet()
-        return dbQuery.singleOrNull(
+    ): Annullering? =
+        dbQuery.singleOrNull(
             """
             select aas.id, aas.annullert_tidspunkt, aas.arbeidsgiver_fagsystem_id, aas.person_fagsystem_id, s.ident, aas.årsaker, b.tekst, vedtaksperiode_id
             from annullert_av_saksbehandler aas
@@ -96,10 +71,8 @@ class PgAnnulleringRepository internal constructor(
                 arsaker = it.array<String>("årsaker").toList(),
                 begrunnelse = it.stringOrNull("tekst"),
                 vedtaksperiodeId = it.stringOrNull("vedtaksperiode_id")?.let(UUID::fromString),
-                annulleringskandidater = annulleringskandidater,
             )
         }
-    }
 
     override fun finnAnnullering(annulleringDto: AnnulleringDto): Annullering? = finnAnnullering(annulleringDto.arbeidsgiverFagsystemId, annulleringDto.personFagsystemId)
 }

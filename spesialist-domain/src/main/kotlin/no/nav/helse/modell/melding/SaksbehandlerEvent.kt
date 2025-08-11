@@ -123,7 +123,6 @@ data class AnnullertUtbetalingEvent(
     val begrunnelser: List<String>,
     val arsaker: List<AnnulleringArsak>?,
     val kommentar: String?,
-    val annulleringskandidater: Set<UUID>,
 ) : UtgåendeHendelse
 
 data class LagtPåVentEvent(
