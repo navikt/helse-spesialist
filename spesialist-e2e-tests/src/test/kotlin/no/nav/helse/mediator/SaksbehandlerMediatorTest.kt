@@ -1534,6 +1534,5 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         personFagsystemId = "EN-FAGSYSTEMID${Random.nextInt(1000)}",
         arsaker = arsaker,
         kommentar = kommentar,
-        annulleringskandidater = emptyList(),
     )
 }

@@ -1393,6 +1393,8 @@ enum Sykdomsdagtype {
     SYKEDAG_NAV
     SYK_HELGEDAG
     UBESTEMTDAG
+    UKJENT
+    VENTEPERIODEDAG
 }
 
 enum Utbetalingsdagtype {
@@ -1405,6 +1407,7 @@ enum Utbetalingsdagtype {
     NAVDAG
     NAVHELGDAG
     UKJENT_DAG
+    VENTEPERIODEDAG
 }
 
 enum Utbetalingstatus {
@@ -1478,7 +1481,6 @@ input AnnulleringArsakInput {
 
 input AnnulleringDataInput {
     aktorId: String!
-    annulleringskandidater: [UUID!]!
     arbeidsgiverFagsystemId: String!
     arsaker: [AnnulleringArsakInput!]!
     fodselsnummer: String!
