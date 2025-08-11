@@ -18,7 +18,7 @@ jobs:
     outputs:
       tag: ${{ steps.lage-tag.outputs.tag }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ github.event.inputs.commitHash }}
       - name: Lag tag for senere workflows
@@ -54,7 +54,7 @@ jobs:
         id: login
         with:
           team: tbd
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ needs.lag_tag.outputs.tag }}
       - uses: nais/deploy/actions/deploy@v2
@@ -74,6 +74,6 @@ jobs:
     if: ${{ needs.lag_tag.outputs.tag != '' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - run: |
           git push --delete origin refs/tags/${{ needs.lag_tag.outputs.tag }}
