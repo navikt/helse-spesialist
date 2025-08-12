@@ -59,7 +59,6 @@ jobs:
           ref: ${{ needs.lag_tag.outputs.tag }}
       - uses: nais/deploy/actions/deploy@v2
         env:
-          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-gcp
           RESOURCE: deploy/dev.yml
           # Konstruere image-navn selv, for å unngå at imaget som er tagget med sha-en til HEAD på den branchen
