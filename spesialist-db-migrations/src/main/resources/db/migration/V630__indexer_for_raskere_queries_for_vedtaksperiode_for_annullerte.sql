@@ -1,4 +1,0 @@
-CREATE INDEX idx_annullert_person_arb ON annullert_av_saksbehandler(person_fagsystem_id, arbeidsgiver_fagsystem_id);
-CREATE INDEX idx_utbetaling_annullert ON utbetaling(annullert_av_saksbehandler_ref);
-CREATE INDEX idx_behandling_utbetaling ON behandling(utbetaling_id);
-CREATE INDEX idx_annullert_vedtak ON annullert_av_saksbehandler(vedtaksperiode_id);
