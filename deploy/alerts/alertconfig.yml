@@ -13,7 +13,7 @@ spec:
         - apiURL:
             key: apiUrl
             name: slack-webhook
-          channel: "#speilvendt-alerts"
+          channel: "#team-speilvendt-alerts"
           iconEmoji: ":speil:"
           username: "Varsling"
           sendResolved: true
