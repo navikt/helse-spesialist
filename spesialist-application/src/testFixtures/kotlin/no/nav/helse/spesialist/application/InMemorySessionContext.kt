@@ -7,7 +7,6 @@ import no.nav.helse.db.CommandContextDao
 import no.nav.helse.db.DialogDao
 import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.GenerasjonDao
-import no.nav.helse.db.MeldingDao
 import no.nav.helse.db.MetrikkDao
 import no.nav.helse.db.NotatDao
 import no.nav.helse.db.OppgaveDao
@@ -88,8 +87,7 @@ class InMemorySessionContext : SessionContext {
         get() = TODO("Not yet implemented")
     override val generasjonDao: GenerasjonDao
         get() = TODO("Not yet implemented")
-    override val meldingDao: MeldingDao
-        get() = TODO("Not yet implemented")
+    override val meldingDao: InMemoryMeldingDao = InMemoryMeldingDao()
     override val metrikkDao: MetrikkDao
         get() = TODO("Not yet implemented")
     override val notatDao: NotatDao

@@ -103,8 +103,9 @@ class TestMediator(
 
 
     init {
+        val sessionFactory = TransactionalSessionFactory(dataSource)
         val meldingMediator = MeldingMediator(
-            sessionFactory = TransactionalSessionFactory(dataSource),
+            sessionFactory = sessionFactory,
             personDao = daos.personDao,
             commandContextDao = daos.commandContextDao,
             meldingDao = daos.meldingDao,
@@ -121,6 +122,7 @@ class TestMediator(
         RiverSetup(
             mediator = meldingMediator,
             meldingDuplikatkontrollDao = daos.meldingDuplikatkontrollDao,
+            sessionFactory = sessionFactory,
             featureToggles = object : FeatureToggles {},
         ).registrerRivers(testRapid)
     }

@@ -80,6 +80,7 @@ class KafkaModule(
                     ignorerMeldingerForUkjentePersoner = configuration.ignorerMeldingerForUkjentePersoner,
                 ),
             meldingDuplikatkontrollDao = daos.meldingDuplikatkontrollDao,
+            sessionFactory = sessionFactory,
             featureToggles = featureToggles,
         )
 

@@ -3,10 +3,26 @@ package no.nav.helse.spesialist.db.dao
 import kotliquery.Session
 import no.nav.helse.db.MeldingDao
 import no.nav.helse.db.MeldingDao.BehandlingOpprettetKorrigertSøknad
+import no.nav.helse.db.MeldingDao.Meldingtype
+import no.nav.helse.db.MeldingDao.Meldingtype.ADRESSEBESKYTTELSE_ENDRET
+import no.nav.helse.db.MeldingDao.Meldingtype.AVSLUTTET_UTEN_VEDTAK
+import no.nav.helse.db.MeldingDao.Meldingtype.BEHANDLING_OPPRETTET
+import no.nav.helse.db.MeldingDao.Meldingtype.ENDRET_EGEN_ANSATT_STATUS
+import no.nav.helse.db.MeldingDao.Meldingtype.GODKJENNING
+import no.nav.helse.db.MeldingDao.Meldingtype.GODKJENT_TILBAKEDATERT_SYKMELDING
+import no.nav.helse.db.MeldingDao.Meldingtype.GOSYS_OPPGAVE_ENDRET
+import no.nav.helse.db.MeldingDao.Meldingtype.KLARGJØR_TILGANGSRELATERTE_DATA
+import no.nav.helse.db.MeldingDao.Meldingtype.NYE_VARSLER
+import no.nav.helse.db.MeldingDao.Meldingtype.OPPDATER_PERSONSNAPSHOT
+import no.nav.helse.db.MeldingDao.Meldingtype.SAKSBEHANDLERLØSNING
+import no.nav.helse.db.MeldingDao.Meldingtype.SØKNAD_SENDT
+import no.nav.helse.db.MeldingDao.Meldingtype.UTBETALING_ENDRET
+import no.nav.helse.db.MeldingDao.Meldingtype.VEDTAKSPERIODE_FORKASTET
+import no.nav.helse.db.MeldingDao.Meldingtype.VEDTAKSPERIODE_NY_UTBETALING
+import no.nav.helse.db.MeldingDao.Meldingtype.VEDTAKSPERIODE_REBEREGNET
 import no.nav.helse.mediator.meldinger.AdressebeskyttelseEndret
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
-import no.nav.helse.mediator.meldinger.hendelser.AvsluttetMedVedtakMessage
 import no.nav.helse.mediator.meldinger.hendelser.AvsluttetUtenVedtakMessage
 import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndret
 import no.nav.helse.modell.kommando.TilbakedateringBehandlet
@@ -27,23 +43,6 @@ import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
-import no.nav.helse.spesialist.db.dao.PgMeldingDao.Meldingtype.ADRESSEBESKYTTELSE_ENDRET
-import no.nav.helse.spesialist.db.dao.PgMeldingDao.Meldingtype.AVSLUTTET_MED_VEDTAK
-import no.nav.helse.spesialist.db.dao.PgMeldingDao.Meldingtype.AVSLUTTET_UTEN_VEDTAK
-import no.nav.helse.spesialist.db.dao.PgMeldingDao.Meldingtype.BEHANDLING_OPPRETTET
-import no.nav.helse.spesialist.db.dao.PgMeldingDao.Meldingtype.ENDRET_EGEN_ANSATT_STATUS
-import no.nav.helse.spesialist.db.dao.PgMeldingDao.Meldingtype.GODKJENNING
-import no.nav.helse.spesialist.db.dao.PgMeldingDao.Meldingtype.GODKJENT_TILBAKEDATERT_SYKMELDING
-import no.nav.helse.spesialist.db.dao.PgMeldingDao.Meldingtype.GOSYS_OPPGAVE_ENDRET
-import no.nav.helse.spesialist.db.dao.PgMeldingDao.Meldingtype.KLARGJØR_TILGANGSRELATERTE_DATA
-import no.nav.helse.spesialist.db.dao.PgMeldingDao.Meldingtype.NYE_VARSLER
-import no.nav.helse.spesialist.db.dao.PgMeldingDao.Meldingtype.OPPDATER_PERSONSNAPSHOT
-import no.nav.helse.spesialist.db.dao.PgMeldingDao.Meldingtype.SAKSBEHANDLERLØSNING
-import no.nav.helse.spesialist.db.dao.PgMeldingDao.Meldingtype.SØKNAD_SENDT
-import no.nav.helse.spesialist.db.dao.PgMeldingDao.Meldingtype.UTBETALING_ENDRET
-import no.nav.helse.spesialist.db.dao.PgMeldingDao.Meldingtype.VEDTAKSPERIODE_FORKASTET
-import no.nav.helse.spesialist.db.dao.PgMeldingDao.Meldingtype.VEDTAKSPERIODE_NY_UTBETALING
-import no.nav.helse.spesialist.db.dao.PgMeldingDao.Meldingtype.VEDTAKSPERIODE_REBEREGNET
 import no.nav.helse.spesialist.db.objectMapper
 import java.util.UUID
 import javax.sql.DataSource
@@ -56,18 +55,40 @@ class PgMeldingDao private constructor(
     internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
 
     override fun lagre(melding: Personmelding) {
+        if (melding is Vedtaksperiodemelding) {
+            lagre(
+                id = melding.id,
+                json = melding.toJson(),
+                meldingtype = tilMeldingtype(melding),
+                vedtaksperiodeId = melding.vedtaksperiodeId(),
+            )
+        } else {
+            lagre(
+                id = melding.id,
+                json = melding.toJson(),
+                meldingtype = tilMeldingtype(melding),
+            )
+        }
+    }
+
+    override fun lagre(
+        id: UUID,
+        json: String,
+        meldingtype: Meldingtype,
+        vedtaksperiodeId: UUID?,
+    ) {
         asSQL(
             """
-            INSERT INTO hendelse(id, data, type)
-                VALUES(:id, CAST(:data as json), :type)
-            ON CONFLICT DO NOTHING
-            """,
-            "id" to melding.id,
-            "data" to melding.toJson(),
-            "type" to tilMeldingtype(melding).name,
+                INSERT INTO hendelse(id, data, type)
+                    VALUES(:id, CAST(:data as json), :type)
+                ON CONFLICT DO NOTHING
+                """,
+            "id" to id,
+            "data" to json,
+            "type" to meldingtype.name,
         ).update()
-        if (melding is Vedtaksperiodemelding) {
-            opprettKobling(melding.vedtaksperiodeId(), melding.id)
+        if (vedtaksperiodeId != null) {
+            opprettKobling(vedtaksperiodeId, id)
         }
     }
 
@@ -203,30 +224,8 @@ class PgMeldingDao private constructor(
             is TilbakedateringBehandlet -> GODKJENT_TILBAKEDATERT_SYKMELDING
             is BehandlingOpprettet -> BEHANDLING_OPPRETTET
             is AvsluttetUtenVedtakMessage -> AVSLUTTET_UTEN_VEDTAK
-            is AvsluttetMedVedtakMessage -> AVSLUTTET_MED_VEDTAK
             is KlargjørTilgangsrelaterteData -> KLARGJØR_TILGANGSRELATERTE_DATA
             is StansAutomatiskBehandlingMelding -> Meldingtype.STANS_AUTOMATISK_BEHANDLING
             else -> throw IllegalArgumentException("ukjent meldingtype: ${melding::class.simpleName}")
         }
-
-    private enum class Meldingtype {
-        ADRESSEBESKYTTELSE_ENDRET,
-        VEDTAKSPERIODE_FORKASTET,
-        GODKJENNING,
-        SAKSBEHANDLERLØSNING,
-        OPPDATER_PERSONSNAPSHOT,
-        UTBETALING_ENDRET,
-        VEDTAKSPERIODE_REBEREGNET,
-        BEHANDLING_OPPRETTET,
-        GOSYS_OPPGAVE_ENDRET,
-        ENDRET_EGEN_ANSATT_STATUS,
-        NYE_VARSLER,
-        SØKNAD_SENDT,
-        VEDTAKSPERIODE_NY_UTBETALING,
-        GODKJENT_TILBAKEDATERT_SYKMELDING,
-        AVSLUTTET_UTEN_VEDTAK,
-        AVSLUTTET_MED_VEDTAK,
-        KLARGJØR_TILGANGSRELATERTE_DATA,
-        STANS_AUTOMATISK_BEHANDLING,
-    }
 }

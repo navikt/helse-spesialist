@@ -1,6 +1,5 @@
 package no.nav.helse.modell.person
 
-import no.nav.helse.modell.Meldingslogg
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
@@ -28,8 +27,6 @@ class Person private constructor(
     private val vedtaksperioder = vedtaksperioder.toMutableList()
 
     fun vedtaksperioder(): List<Vedtaksperiode> = vedtaksperioder
-
-    val meldingslogg = Meldingslogg()
 
     fun toDto() =
         PersonDto(

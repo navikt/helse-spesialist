@@ -10,7 +10,6 @@ import no.nav.helse.db.DialogDao
 import no.nav.helse.db.DokumentDao
 import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.GenerasjonDao
-import no.nav.helse.db.MeldingDao
 import no.nav.helse.db.MeldingDuplikatkontrollDao
 import no.nav.helse.db.NotatDao
 import no.nav.helse.db.OppgaveDao
@@ -42,7 +41,6 @@ import no.nav.helse.db.api.RisikovurderingApiDao
 import no.nav.helse.db.api.TildelingApiDao
 import no.nav.helse.db.api.VarselApiRepository
 import no.nav.helse.db.api.VergemålApiDao
-import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.mediator.meldinger.PoisonPills
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.mediator.oppgave.OppgaveRepository
@@ -50,7 +48,6 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.MinimalPersonDto
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.varsel.Varseldefinisjon
-import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.spesialist.typer.Kjønn
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -154,40 +151,7 @@ class InMemoryDaos : Daos {
         get() = TODO("Not yet implemented")
     override val generasjonDao: GenerasjonDao
         get() = TODO("Not yet implemented")
-    override val meldingDao = object : MeldingDao {
-        override fun finnGodkjenningsbehov(meldingId: UUID): Godkjenningsbehov {
-            TODO("Not yet implemented")
-        }
-
-        override fun finn(id: UUID): Personmelding? {
-            TODO("Not yet implemented")
-        }
-
-        override fun lagre(melding: Personmelding) {}
-
-        override fun sisteBehandlingOpprettetOmKorrigertSøknad(
-            fødselsnummer: String,
-            vedtaksperiodeId: UUID
-        ): MeldingDao.BehandlingOpprettetKorrigertSøknad? {
-            TODO("Not yet implemented")
-        }
-
-        override fun erKorrigertSøknadAutomatiskBehandlet(meldingId: UUID): Boolean {
-            TODO("Not yet implemented")
-        }
-
-        override fun finnAntallAutomatisertKorrigertSøknad(vedtaksperiodeId: UUID): Int {
-            TODO("Not yet implemented")
-        }
-
-        override fun opprettAutomatiseringKorrigertSøknad(
-            vedtaksperiodeId: UUID,
-            meldingId: UUID
-        ) {
-            TODO("Not yet implemented")
-        }
-
-    }
+    override val meldingDao: InMemoryMeldingDao = InMemoryMeldingDao()
     override val meldingDuplikatkontrollDao = object : MeldingDuplikatkontrollDao {
         override fun lagre(meldingId: UUID, type: String) {}
 
