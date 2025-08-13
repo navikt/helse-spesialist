@@ -12,7 +12,6 @@ import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode.Companion.finnBehandling
-import no.nav.helse.modell.vedtak.AvsluttetMedVedtak
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlag.Companion.relevanteFor
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering.Companion.finnRiktigAvviksvurdering
@@ -44,9 +43,9 @@ class AvsluttetMedVedtakMessage(
         sessionContext: SessionContext,
     ) {
         val vedtaksperiode =
-            person.vedtaksperioder().finnBehandling(avsluttetMedVedtak.spleisBehandlingId)
-                ?: throw IllegalStateException("Behandling med spleisBehandlingId=${avsluttetMedVedtak.spleisBehandlingId} finnes ikke")
-        val behandling = vedtaksperiode.finnBehandling(avsluttetMedVedtak.spleisBehandlingId)
+            person.vedtaksperioder().finnBehandling(spleisBehandlingId)
+                ?: throw IllegalStateException("Behandling med spleisBehandlingId=$spleisBehandlingId finnes ikke")
+        val behandling = vedtaksperiode.finnBehandling(spleisBehandlingId)
         behandling.håndterVedtakFattet()
         val vedtaksperiodeMelding = lagMelding(person, behandling, vedtaksperiode)
         person.meldingslogg.nyMelding(vedtaksperiodeMelding)
@@ -58,13 +57,13 @@ class AvsluttetMedVedtakMessage(
         vedtaksperiode: Vedtaksperiode,
     ): UtgåendeHendelse {
         val tag6gBegrenset = "6GBegrenset"
-        return if (avsluttetMedVedtak.yrkesaktivitetstype.lowercase() == "selvstendig") {
+        return if (yrkesaktivitetstype.lowercase() == "selvstendig") {
             SykepengevedtakSelvstendigNæringsdrivendeDto(
                 fødselsnummer = person.fødselsnummer,
                 vedtaksperiodeId = behandling.vedtaksperiodeId(),
-                sykepengegrunnlag = BigDecimal(avsluttetMedVedtak.sykepengegrunnlag.toString()),
+                sykepengegrunnlag = BigDecimal(sykepengegrunnlag.toString()),
                 sykepengegrunnlagsfakta =
-                    (avsluttetMedVedtak.sykepengegrunnlagsfakta as Sykepengegrunnlagsfakta.Spleis)
+                    (sykepengegrunnlagsfakta as Sykepengegrunnlagsfakta.Spleis)
                         .let { fakta ->
                             SykepengevedtakSelvstendigNæringsdrivendeDto.Sykepengegrunnlagsfakta(
                                 beregningsgrunnlag =
@@ -82,8 +81,8 @@ class AvsluttetMedVedtakMessage(
                 fom = behandling.fom(),
                 tom = behandling.tom(),
                 skjæringstidspunkt = behandling.skjæringstidspunkt(),
-                hendelser = avsluttetMedVedtak.hendelser,
-                vedtakFattetTidspunkt = avsluttetMedVedtak.vedtakFattetTidspunkt,
+                hendelser = hendelser,
+                vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 utbetalingId = behandling.utbetalingId(),
                 vedtakBegrunnelse = behandling.vedtakBegrunnelse,
             )
@@ -93,7 +92,7 @@ class AvsluttetMedVedtakMessage(
                     "Ingen tags funnet for spleisBehandlingId: ${behandling.spleisBehandlingId} på vedtaksperiodeId: ${behandling.vedtaksperiodeId}",
                 )
             }
-            when (val sykepengegrunnlagsfakta = avsluttetMedVedtak.sykepengegrunnlagsfakta) {
+            when (val sykepengegrunnlagsfakta = sykepengegrunnlagsfakta) {
                 is Sykepengegrunnlagsfakta.Infotrygd -> {
                     VedtakMedOpphavIInfotrygd(
                         fødselsnummer = person.fødselsnummer,
@@ -105,10 +104,10 @@ class AvsluttetMedVedtakMessage(
                         fom = behandling.fom(),
                         tom = behandling.tom(),
                         skjæringstidspunkt = behandling.skjæringstidspunkt,
-                        hendelser = avsluttetMedVedtak.hendelser,
-                        sykepengegrunnlag = avsluttetMedVedtak.sykepengegrunnlag,
+                        hendelser = hendelser,
+                        sykepengegrunnlag = sykepengegrunnlag,
                         sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
-                        vedtakFattetTidspunkt = avsluttetMedVedtak.vedtakFattetTidspunkt,
+                        vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                         tags = behandling.tags.toSet(),
                         vedtakBegrunnelse = behandling.vedtakBegrunnelse,
                     )
@@ -133,10 +132,10 @@ class AvsluttetMedVedtakMessage(
                                 fom = behandling.fom(),
                                 tom = behandling.tom(),
                                 skjæringstidspunkt = behandling.skjæringstidspunkt,
-                                hendelser = avsluttetMedVedtak.hendelser,
-                                sykepengegrunnlag = avsluttetMedVedtak.sykepengegrunnlag,
+                                hendelser = hendelser,
+                                sykepengegrunnlag = sykepengegrunnlag,
                                 sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
-                                vedtakFattetTidspunkt = avsluttetMedVedtak.vedtakFattetTidspunkt,
+                                vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                                 tags = tagsForPeriode.toSet(),
                                 vedtakBegrunnelse = behandling.vedtakBegrunnelse,
                                 avviksprosent = avviksvurdering.avviksprosent,
@@ -155,8 +154,8 @@ class AvsluttetMedVedtakMessage(
                                 fom = behandling.fom(),
                                 tom = behandling.tom(),
                                 skjæringstidspunkt = behandling.skjæringstidspunkt,
-                                hendelser = avsluttetMedVedtak.hendelser,
-                                sykepengegrunnlag = avsluttetMedVedtak.sykepengegrunnlag,
+                                hendelser = hendelser,
+                                sykepengegrunnlag = sykepengegrunnlag,
                                 sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
                                 skjønnsfastsettingopplysninger =
                                     person.skjønnsfastsatteSykepengegrunnlag
@@ -173,7 +172,7 @@ class AvsluttetMedVedtakMessage(
                                             )
                                         }
                                         ?: error("Forventer å finne opplysninger fra saksbehandler ved bygging av vedtak når sykepengegrunnlaget er fastsatt etter skjønn"),
-                                vedtakFattetTidspunkt = avsluttetMedVedtak.vedtakFattetTidspunkt,
+                                vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                                 tags = tagsForPeriode.toSet(),
                                 vedtakBegrunnelse = behandling.vedtakBegrunnelse,
                                 avviksprosent = avviksvurdering.avviksprosent,
@@ -187,14 +186,4 @@ class AvsluttetMedVedtakMessage(
     }
 
     override fun toJson(): String = json
-
-    private val avsluttetMedVedtak get() =
-        AvsluttetMedVedtak(
-            spleisBehandlingId = spleisBehandlingId,
-            yrkesaktivitetstype = yrkesaktivitetstype,
-            hendelser = hendelser,
-            sykepengegrunnlag = sykepengegrunnlag,
-            sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
-            vedtakFattetTidspunkt = vedtakFattetTidspunkt,
-        )
 }
