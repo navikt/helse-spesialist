@@ -1,7 +1,6 @@
 package no.nav.helse.modell.person.vedtaksperiode
 
 import net.logstash.logback.argument.StructuredArguments.kv
-import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.finnBehandlingForSpleisBehandling
@@ -11,7 +10,7 @@ import java.util.UUID
 
 class Vedtaksperiode private constructor(
     private val vedtaksperiodeId: UUID,
-    private val organisasjonsnummer: String,
+    val organisasjonsnummer: String,
     private var forkastet: Boolean,
     behandlinger: List<LegacyBehandling>,
 ) {
@@ -111,10 +110,6 @@ class Vedtaksperiode private constructor(
     fun finnBehandling(spleisBehandlingId: UUID): LegacyBehandling =
         behandlinger.find { it.spleisBehandlingId() == spleisBehandlingId }
             ?: throw IllegalArgumentException("Forventer at behandling med spleisBehandlingId=$spleisBehandlingId finnes")
-
-    internal fun byggVedtak(vedtakBuilder: SykepengevedtakBuilder) {
-        vedtakBuilder.organisasjonsnummer(organisasjonsnummer)
-    }
 
     private fun finnes(spleisBehandling: SpleisBehandling): Boolean = behandlinger.finnBehandlingForSpleisBehandling(spleisBehandling.spleisBehandlingId) != null
 

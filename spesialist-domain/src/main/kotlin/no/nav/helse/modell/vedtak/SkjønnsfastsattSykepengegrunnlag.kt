@@ -4,24 +4,14 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 
 class SkjønnsfastsattSykepengegrunnlag(
-    private val type: Skjønnsfastsettingstype,
-    private val årsak: Skjønnsfastsettingsårsak,
-    private val skjæringstidspunkt: LocalDate,
-    private val begrunnelseFraMal: String,
-    private val begrunnelseFraFritekst: String,
-    private val begrunnelseFraKonklusjon: String,
-    private val opprettet: LocalDateTime,
+    val type: Skjønnsfastsettingstype,
+    val årsak: Skjønnsfastsettingsårsak,
+    val skjæringstidspunkt: LocalDate,
+    val begrunnelseFraMal: String,
+    val begrunnelseFraFritekst: String,
+    val begrunnelseFraKonklusjon: String,
+    val opprettet: LocalDateTime,
 ) {
-    internal fun byggVedtak(vedtakBuilder: SykepengevedtakBuilder) {
-        vedtakBuilder.skjønnsfastsettingData(
-            begrunnelseFraMal,
-            begrunnelseFraFritekst,
-            begrunnelseFraKonklusjon,
-            type,
-            årsak,
-        )
-    }
-
     fun toDto() =
         SkjønnsfastsattSykepengegrunnlagDto(
             type = type.toDto(),

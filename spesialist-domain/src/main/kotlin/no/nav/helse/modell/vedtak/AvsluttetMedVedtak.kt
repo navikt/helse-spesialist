@@ -10,11 +10,4 @@ class AvsluttetMedVedtak(
     val sykepengegrunnlag: Double,
     val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta,
     val vedtakFattetTidspunkt: LocalDateTime,
-) {
-    fun byggVedtak(vedtakBuilder: SykepengevedtakBuilder) {
-        vedtakBuilder.hendelser(hendelser)
-        vedtakBuilder.sykepengegrunnlag(sykepengegrunnlag)
-        vedtakBuilder.vedtakFattetTidspunkt(vedtakFattetTidspunkt)
-        vedtakBuilder.sykepengegrunnlagsfakta(sykepengegrunnlagsfakta)
-    }
-}
+)

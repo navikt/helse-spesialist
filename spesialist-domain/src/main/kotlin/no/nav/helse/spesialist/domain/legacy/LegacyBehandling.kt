@@ -16,7 +16,6 @@ import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderVars
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderVarselOmTilbakedatering
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderVarselOmÅpenGosysOppgave
 import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode
-import no.nav.helse.modell.vedtak.SykepengevedtakBuilder
 import no.nav.helse.modell.vedtak.VedtakBegrunnelse
 import no.nav.helse.spesialist.domain.Periode
 import org.slf4j.Logger
@@ -26,10 +25,10 @@ import java.util.UUID
 
 class LegacyBehandling private constructor(
     private val id: UUID,
-    private val vedtaksperiodeId: UUID,
+    val vedtaksperiodeId: UUID,
     utbetalingId: UUID?,
-    private var spleisBehandlingId: UUID?,
-    private var skjæringstidspunkt: LocalDate,
+    spleisBehandlingId: UUID?,
+    skjæringstidspunkt: LocalDate,
     private var periode: Periode,
     private var tilstand: Tilstand,
     tags: List<String>,
@@ -56,6 +55,12 @@ class LegacyBehandling private constructor(
         vedtakBegrunnelse = null,
         varsler = emptySet(),
     )
+
+    var spleisBehandlingId: UUID? = spleisBehandlingId
+        private set
+
+    var skjæringstidspunkt: LocalDate = skjæringstidspunkt
+        private set
 
     var tags: List<String> = tags
         private set
@@ -171,24 +176,7 @@ class LegacyBehandling private constructor(
         tilstand.avsluttetUtenVedtak(this)
     }
 
-    internal fun byggVedtak(vedtakBuilder: SykepengevedtakBuilder) {
-        if (tags.isEmpty()) {
-            sikkerlogg.error(
-                "Ingen tags funnet for spleisBehandlingId: $spleisBehandlingId på vedtaksperiodeId: $vedtaksperiodeId",
-            )
-        }
-
-        vedtakBuilder.tags(tags)
-        vedtakBuilder.vedtaksperiodeId(vedtaksperiodeId)
-        vedtakBuilder.spleisBehandlingId(behandlingId())
-        vedtakBuilder.utbetalingId(utbetalingId())
-        vedtakBuilder.skjæringstidspunkt(skjæringstidspunkt)
-        vedtakBuilder.fom(fom())
-        vedtakBuilder.tom(tom())
-        vedtakBegrunnelse?.also { vedtakBuilder.vedtakBegrunnelse(it) }
-    }
-
-    private fun behandlingId(): UUID = spleisBehandlingId ?: throw IllegalStateException("Forventer at spleisBehandlingId er satt")
+    fun behandlingId(): UUID = spleisBehandlingId ?: throw IllegalStateException("Forventer at spleisBehandlingId er satt")
 
     fun utbetalingId(): UUID = utbetalingId ?: throw IllegalStateException("Forventer at utbetalingId er satt")
 

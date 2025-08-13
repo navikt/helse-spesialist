@@ -184,6 +184,138 @@ class AvsluttetMedVedtakRiverIntegrationTest {
     }
 
     @Test
+    fun `fastsatt etter skjønn - delvis innvilgelse`() {
+        // Given:
+        val skjønnsfastsattBeløp = BigDecimal("650000.00")
+        val omregnetÅrsinntekt = BigDecimal("800000.00")
+        val seksG = BigDecimal("666666.66")
+        val innrapportertÅrsinntekt = BigDecimal("1200000.00")
+        val avviksprosent = 50.0
+        val behandlingTags = listOf("Behandling tag 1", "Behandling tag 2")
+        val vedtakBegrunnelse = "Begrunnelse for delvis innvilgelse"
+        val skjønnsfastsettelseBegrunnelseFraMal = "Begrunnelse fra mal her"
+        val skjønnsfastsettelseBegrunnelseFraFritekst = "Begrunnelse fra fritekst her"
+        val skjønnsfastsettelseBegrunnelseFraKonklusjon = "Begrunnelse fra konklusjon her"
+        initPerson(
+            behandlingTags = behandlingTags,
+            vedtakUtfall = Utfall.DELVIS_INNVILGELSE,
+            vedtakBegrunnelse = vedtakBegrunnelse,
+            skjønnsfastsettelse = SkjønnsfastsattSykepengegrunnlagDto(
+                type = SkjønnsfastsettingstypeDto.ANNET,
+                årsak = SkjønnsfastsettingsårsakDto.ANDRE_AVSNITT,
+                skjæringstidspunkt = skjæringstidspunkt,
+                begrunnelseFraMal = skjønnsfastsettelseBegrunnelseFraMal,
+                begrunnelseFraFritekst = skjønnsfastsettelseBegrunnelseFraFritekst,
+                begrunnelseFraKonklusjon = skjønnsfastsettelseBegrunnelseFraKonklusjon,
+                opprettet = LocalDateTime.now().minusDays(1),
+            ),
+            avviksvurdering = lagAvviksvurdering(
+                avviksprosent = avviksprosent,
+                innrapportertÅrsinntekt = innrapportertÅrsinntekt,
+                omregnetÅrsinntekt = omregnetÅrsinntekt
+            )
+        )
+
+        // When:
+        testRapid.sendTestMessage(
+            skjønnsfastsettelseMelding(
+                sykepengegrunnlag = skjønnsfastsattBeløp,
+                omregnetÅrsinntekt = omregnetÅrsinntekt,
+                seksG = seksG,
+                skjønnsfastsatt = skjønnsfastsattBeløp,
+            )
+        )
+
+        // Then:
+        val meldinger = testRapid.publiserteMeldingerUtenGenererteFelter()
+        assertEquals(1, meldinger.size)
+        assertEquals(fødselsnummer, meldinger.single().key)
+        val actualJsonNode = meldinger.single().json
+
+        @Language("JSON")
+        val expectedJson = """
+            {
+              "@event_name": "vedtak_fattet",
+              "fødselsnummer": "$fødselsnummer",
+              "aktørId": "$aktørId",
+              "vedtaksperiodeId": "$vedtaksperiodeId",
+              "behandlingId": "$spleisBehandlingId",
+              "organisasjonsnummer": "$organisasjonsnummer",
+              "fom": "$fom",
+              "tom": "$tom",
+              "skjæringstidspunkt": "$skjæringstidspunkt",
+              "hendelser": [ ${hendelser.joinToString(separator = ", ") { "\"$it\"" }} ],
+              "sykepengegrunnlag": $skjønnsfastsattBeløp,
+              "vedtakFattetTidspunkt": "$vedtakFattetTidspunkt",
+              "utbetalingId": "$utbetalingId",
+              "tags": [ ${behandlingTags.joinToString(separator = ", ") { "\"$it\"" }} ],
+              "sykepengegrunnlagsfakta": {
+                "omregnetÅrsinntekt": $omregnetÅrsinntekt,
+                "innrapportertÅrsinntekt": $innrapportertÅrsinntekt,
+                "avviksprosent": $avviksprosent,
+                "6G": $seksG,
+                "tags": [],
+                "arbeidsgivere": [
+                  {
+                    "arbeidsgiver": "$organisasjonsnummer",
+                    "omregnetÅrsinntekt": $omregnetÅrsinntekt,
+                    "innrapportertÅrsinntekt": $innrapportertÅrsinntekt,
+                    "skjønnsfastsatt": $skjønnsfastsattBeløp
+                  }
+                ],
+                "fastsatt": "EtterSkjønn",
+                "skjønnsfastsettingtype": "ANNET",
+                "skjønnsfastsettingårsak": "ANDRE_AVSNITT",
+                "skjønnsfastsatt": $skjønnsfastsattBeløp
+              },
+              "begrunnelser": [
+                {
+                  "type": "SkjønnsfastsattSykepengegrunnlagMal",
+                  "begrunnelse": "$skjønnsfastsettelseBegrunnelseFraMal",
+                  "perioder": [
+                    {
+                      "fom": "$fom",
+                      "tom": "$tom"
+                    }
+                  ]
+                },
+                {
+                  "type": "SkjønnsfastsattSykepengegrunnlagFritekst",
+                  "begrunnelse": "$skjønnsfastsettelseBegrunnelseFraFritekst",
+                  "perioder": [
+                    {
+                      "fom": "$fom",
+                      "tom": "$tom"
+                    }
+                  ]
+                },
+                {
+                  "type": "SkjønnsfastsattSykepengegrunnlagKonklusjon",
+                  "begrunnelse": "$skjønnsfastsettelseBegrunnelseFraKonklusjon",
+                  "perioder": [
+                    {
+                      "fom": "$fom",
+                      "tom": "$tom"
+                    }
+                  ]
+                },
+                {
+                  "type" : "DelvisInnvilgelse",
+                  "begrunnelse" : "$vedtakBegrunnelse",
+                  "perioder" : [
+                    {
+                      "fom" : "$fom",
+                      "tom" : "$tom"
+                    }
+                  ]
+                }
+              ]
+            }
+        """.trimIndent()
+        assertJsonEquals(expectedJson, actualJsonNode)
+    }
+
+    @Test
     fun `fastsatt etter hovedregel`() {
         // Given:
         val omregnetÅrsinntekt = BigDecimal("600000.00")
@@ -252,6 +384,90 @@ class AvsluttetMedVedtakRiverIntegrationTest {
               "begrunnelser": [
                 {
                   "type" : "Innvilgelse",
+                  "begrunnelse" : "$vedtakBegrunnelse",
+                  "perioder" : [
+                    {
+                      "fom" : "$fom",
+                      "tom" : "$tom"
+                    }
+                  ]
+                }
+              ]
+            }
+        """.trimIndent()
+        assertJsonEquals(expectedJson, actualJsonNode)
+    }
+
+    @Test
+    fun `fastsatt etter hovedregel - delvis innvilgelse`() {
+        // Given:
+        val omregnetÅrsinntekt = BigDecimal("600000.00")
+        val seksG = BigDecimal("666666.66")
+        val innrapportertÅrsinntekt = BigDecimal("660000.00")
+        val avviksprosent = 10.0
+        val behandlingTags = listOf("Behandling tag 1", "Behandling tag 2")
+        val vedtakBegrunnelse = "Begrunnelse for delvis innvilgelse"
+        initPerson(
+            behandlingTags = behandlingTags,
+            vedtakUtfall = Utfall.DELVIS_INNVILGELSE,
+            vedtakBegrunnelse = vedtakBegrunnelse,
+            avviksvurdering = lagAvviksvurdering(
+                avviksprosent = avviksprosent,
+                innrapportertÅrsinntekt = innrapportertÅrsinntekt,
+                omregnetÅrsinntekt = omregnetÅrsinntekt
+            )
+        )
+
+        // When:
+        testRapid.sendTestMessage(
+            etterHovedregelMelding(
+                sykepengegrunnlag = omregnetÅrsinntekt,
+                omregnetÅrsinntekt = omregnetÅrsinntekt,
+                seksG = seksG,
+            )
+        )
+
+        // Then:
+        val meldinger = testRapid.publiserteMeldingerUtenGenererteFelter()
+        assertEquals(1, meldinger.size)
+        assertEquals(fødselsnummer, meldinger.single().key)
+        val actualJsonNode = meldinger.single().json
+
+        @Language("JSON")
+        val expectedJson = """
+            {
+              "@event_name": "vedtak_fattet",
+              "fødselsnummer": "$fødselsnummer",
+              "aktørId": "$aktørId",
+              "vedtaksperiodeId": "$vedtaksperiodeId",
+              "behandlingId": "$spleisBehandlingId",
+              "organisasjonsnummer": "$organisasjonsnummer",
+              "fom": "$fom",
+              "tom": "$tom",
+              "skjæringstidspunkt": "$skjæringstidspunkt",
+              "hendelser": [ ${hendelser.joinToString(separator = ", ") { "\"$it\"" }} ],
+              "sykepengegrunnlag": $omregnetÅrsinntekt,
+              "vedtakFattetTidspunkt": "$vedtakFattetTidspunkt",
+              "utbetalingId": "$utbetalingId",
+              "tags": [ ${behandlingTags.joinToString(separator = ", ") { "\"$it\"" }} ],
+              "sykepengegrunnlagsfakta": {
+                "omregnetÅrsinntekt": $omregnetÅrsinntekt,
+                "innrapportertÅrsinntekt": $innrapportertÅrsinntekt,
+                "avviksprosent": $avviksprosent,
+                "6G": $seksG,
+                "tags": [],
+                "arbeidsgivere": [
+                  {
+                    "arbeidsgiver": "$organisasjonsnummer",
+                    "omregnetÅrsinntekt": $omregnetÅrsinntekt,
+                    "innrapportertÅrsinntekt": $innrapportertÅrsinntekt
+                  }
+                ],
+                "fastsatt": "EtterHovedregel"
+              },
+              "begrunnelser": [
+                {
+                  "type" : "DelvisInnvilgelse",
                   "begrunnelse" : "$vedtakBegrunnelse",
                   "perioder" : [
                     {
