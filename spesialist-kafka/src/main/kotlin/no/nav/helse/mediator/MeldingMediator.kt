@@ -325,7 +325,7 @@ class MeldingMediator(
                             sessionContext,
                         )
                     melding.behandle(this, kommandostarter, sessionContext)
-                    utgåendeMeldinger().forEach(utgåendeMeldingerMediator::hendelse)
+                    meldingslogg.hendelser().forEach(utgåendeMeldingerMediator::hendelse)
                 }
             }
             utgåendeMeldingerMediator.publiserOppsamledeMeldinger(melding, kontekstbasertPubliserer)

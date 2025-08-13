@@ -72,7 +72,7 @@ class LegacyBehandling private constructor(
 
     internal fun spleisBehandlingId() = spleisBehandlingId
 
-    internal fun skjæringstidspunkt() = skjæringstidspunkt
+    fun skjæringstidspunkt() = skjæringstidspunkt
 
     fun vedtaksperiodeId() = vedtaksperiodeId
 
@@ -82,9 +82,9 @@ class LegacyBehandling private constructor(
 
     internal fun hasterÅBehandle() = varsler.inneholderVarselOmNegativtBeløp()
 
-    internal fun fom() = periode.fom
+    fun fom() = periode.fom
 
-    internal fun tom() = periode.tom
+    fun tom() = periode.tom
 
     fun toDto(): BehandlingDto =
         BehandlingDto(
@@ -168,7 +168,7 @@ class LegacyBehandling private constructor(
         tilstand.håndterGodkjenning(this)
     }
 
-    internal fun håndterVedtakFattet() {
+    fun håndterVedtakFattet() {
         tilstand.vedtakFattet(this)
     }
 

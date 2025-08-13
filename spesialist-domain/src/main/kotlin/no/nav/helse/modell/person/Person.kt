@@ -1,10 +1,6 @@
 package no.nav.helse.modell.person
 
 import no.nav.helse.modell.Meldingslogg
-import no.nav.helse.modell.melding.Sykepengevedtak.Vedtak
-import no.nav.helse.modell.melding.Sykepengevedtak.VedtakMedOpphavIInfotrygd
-import no.nav.helse.modell.melding.Sykepengevedtak.VedtakMedSkjønnsvurdering
-import no.nav.helse.modell.melding.SykepengevedtakSelvstendigNæringsdrivendeDto
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
@@ -12,30 +8,28 @@ import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode.Companion.finnBehandling
 import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode.Companion.relevanteFor
 import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
-import no.nav.helse.modell.vedtak.AvsluttetMedVedtak
 import no.nav.helse.modell.vedtak.AvsluttetUtenVedtak
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlag
-import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlag.Companion.relevanteFor
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlagDto
-import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
-import no.nav.helse.modell.vilkårsprøving.Avviksvurdering.Companion.finnRiktigAvviksvurdering
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.flyttEventueltAvviksvarselTil
 import org.slf4j.LoggerFactory
-import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.UUID
 
 class Person private constructor(
-    private val aktørId: String,
+    val aktørId: String,
     val fødselsnummer: String,
     vedtaksperioder: List<Vedtaksperiode>,
-    private val skjønnsfastsatteSykepengegrunnlag: List<SkjønnsfastsattSykepengegrunnlag>,
-    private val avviksvurderinger: List<Avviksvurdering>,
+    val skjønnsfastsatteSykepengegrunnlag: List<SkjønnsfastsattSykepengegrunnlag>,
+    val avviksvurderinger: List<Avviksvurdering>,
 ) {
     private val vedtaksperioder = vedtaksperioder.toMutableList()
-    private val meldingslogg = Meldingslogg()
+
+    fun vedtaksperioder(): List<Vedtaksperiode> = vedtaksperioder
+
+    val meldingslogg = Meldingslogg()
 
     fun toDto() =
         PersonDto(
@@ -45,8 +39,6 @@ class Person private constructor(
             avviksvurderinger = avviksvurderinger,
             skjønnsfastsatteSykepengegrunnlag = skjønnsfastsatteSykepengegrunnlag.map { it.toDto() },
         )
-
-    fun utgåendeMeldinger() = meldingslogg.hendelser()
 
     fun forkastedeVedtaksperiodeIder() =
         vedtaksperioder
@@ -76,145 +68,6 @@ class Person private constructor(
         utbetalingId: UUID,
     ) {
         vedtaksperiodeOrNull(vedtaksperiodeId)?.mottaBehandlingsinformasjon(tags, spleisBehandlingId, utbetalingId)
-    }
-
-    fun avsluttetMedVedtak(avsluttetMedVedtak: AvsluttetMedVedtak) {
-        val vedtaksperiode = vedtaksperiodeForBehandling(avsluttetMedVedtak.spleisBehandlingId)
-        val behandling = vedtaksperiode.finnBehandling(avsluttetMedVedtak.spleisBehandlingId)
-        val tag6gBegrenset = "6GBegrenset"
-
-        if (avsluttetMedVedtak.yrkesaktivitetstype.lowercase() == "selvstendig") {
-            val vedtak =
-                SykepengevedtakSelvstendigNæringsdrivendeDto(
-                    fødselsnummer = fødselsnummer,
-                    vedtaksperiodeId = behandling.vedtaksperiodeId(),
-                    sykepengegrunnlag = BigDecimal(avsluttetMedVedtak.sykepengegrunnlag.toString()),
-                    sykepengegrunnlagsfakta =
-                        (avsluttetMedVedtak.sykepengegrunnlagsfakta as Sykepengegrunnlagsfakta.Spleis)
-                            .let { fakta ->
-                                SykepengevedtakSelvstendigNæringsdrivendeDto.Sykepengegrunnlagsfakta(
-                                    beregningsgrunnlag =
-                                        BigDecimal(
-                                            fakta.arbeidsgivere
-                                                .single { it.organisasjonsnummer.lowercase() == "selvstendig" }
-                                                .omregnetÅrsinntekt
-                                                .toString(),
-                                        ),
-                                    pensjonsgivendeInntekter = emptyList(),
-                                    erBegrensetTil6G = tag6gBegrenset in behandling.tags,
-                                    `6G` = BigDecimal(fakta.seksG.toString()),
-                                )
-                            },
-                    fom = behandling.fom(),
-                    tom = behandling.tom(),
-                    skjæringstidspunkt = behandling.skjæringstidspunkt(),
-                    hendelser = avsluttetMedVedtak.hendelser,
-                    vedtakFattetTidspunkt = avsluttetMedVedtak.vedtakFattetTidspunkt,
-                    utbetalingId = behandling.utbetalingId(),
-                    vedtakBegrunnelse = behandling.vedtakBegrunnelse,
-                )
-            behandling.håndterVedtakFattet()
-            meldingslogg.nyMelding(vedtak)
-        } else {
-            if (behandling.tags.isEmpty()) {
-                sikkerlogg.error(
-                    "Ingen tags funnet for spleisBehandlingId: ${behandling.spleisBehandlingId} på vedtaksperiodeId: ${behandling.vedtaksperiodeId}",
-                )
-            }
-            val melding =
-                when (val sykepengegrunnlagsfakta = avsluttetMedVedtak.sykepengegrunnlagsfakta) {
-                    is Sykepengegrunnlagsfakta.Infotrygd -> {
-                        VedtakMedOpphavIInfotrygd(
-                            fødselsnummer = fødselsnummer,
-                            aktørId = aktørId,
-                            organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
-                            vedtaksperiodeId = behandling.vedtaksperiodeId,
-                            spleisBehandlingId = behandling.behandlingId(),
-                            utbetalingId = behandling.utbetalingId(),
-                            fom = behandling.fom(),
-                            tom = behandling.tom(),
-                            skjæringstidspunkt = behandling.skjæringstidspunkt,
-                            hendelser = avsluttetMedVedtak.hendelser,
-                            sykepengegrunnlag = avsluttetMedVedtak.sykepengegrunnlag,
-                            sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
-                            vedtakFattetTidspunkt = avsluttetMedVedtak.vedtakFattetTidspunkt,
-                            tags = behandling.tags.toSet(),
-                            vedtakBegrunnelse = behandling.vedtakBegrunnelse,
-                        )
-                    }
-
-                    is Sykepengegrunnlagsfakta.Spleis -> {
-                        val avviksvurdering =
-                            avviksvurderinger.finnRiktigAvviksvurdering(behandling.skjæringstidspunkt())
-                                ?: error("Fant ikke avviksvurdering for vedtak")
-
-                        val (tagsForSykepengegrunnlagsfakta, tagsForPeriode) = behandling.tags.partition { it == tag6gBegrenset }
-                        sykepengegrunnlagsfakta.leggTilTags(tagsForSykepengegrunnlagsfakta.toSet())
-                        when (sykepengegrunnlagsfakta) {
-                            is Sykepengegrunnlagsfakta.Spleis.EtterHovedregel -> {
-                                Vedtak(
-                                    fødselsnummer = fødselsnummer,
-                                    aktørId = aktørId,
-                                    organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
-                                    vedtaksperiodeId = behandling.vedtaksperiodeId,
-                                    spleisBehandlingId = behandling.behandlingId(),
-                                    utbetalingId = behandling.utbetalingId(),
-                                    fom = behandling.fom(),
-                                    tom = behandling.tom(),
-                                    skjæringstidspunkt = behandling.skjæringstidspunkt,
-                                    hendelser = avsluttetMedVedtak.hendelser,
-                                    sykepengegrunnlag = avsluttetMedVedtak.sykepengegrunnlag,
-                                    sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
-                                    vedtakFattetTidspunkt = avsluttetMedVedtak.vedtakFattetTidspunkt,
-                                    tags = tagsForPeriode.toSet(),
-                                    vedtakBegrunnelse = behandling.vedtakBegrunnelse,
-                                    avviksprosent = avviksvurdering.avviksprosent,
-                                    sammenligningsgrunnlag = avviksvurdering.sammenligningsgrunnlag,
-                                )
-                            }
-
-                            is Sykepengegrunnlagsfakta.Spleis.EtterSkjønn -> {
-                                VedtakMedSkjønnsvurdering(
-                                    fødselsnummer = fødselsnummer,
-                                    aktørId = aktørId,
-                                    organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
-                                    vedtaksperiodeId = behandling.vedtaksperiodeId,
-                                    spleisBehandlingId = behandling.behandlingId(),
-                                    utbetalingId = behandling.utbetalingId(),
-                                    fom = behandling.fom(),
-                                    tom = behandling.tom(),
-                                    skjæringstidspunkt = behandling.skjæringstidspunkt,
-                                    hendelser = avsluttetMedVedtak.hendelser,
-                                    sykepengegrunnlag = avsluttetMedVedtak.sykepengegrunnlag,
-                                    sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
-                                    skjønnsfastsettingopplysninger =
-                                        skjønnsfastsatteSykepengegrunnlag
-                                            .relevanteFor(
-                                                skjæringstidspunkt = behandling.skjæringstidspunkt(),
-                                            ).lastOrNull()
-                                            ?.let {
-                                                VedtakMedSkjønnsvurdering.Skjønnsfastsettingopplysninger(
-                                                    begrunnelseFraMal = it.begrunnelseFraMal,
-                                                    begrunnelseFraFritekst = it.begrunnelseFraFritekst,
-                                                    begrunnelseFraKonklusjon = it.begrunnelseFraKonklusjon,
-                                                    skjønnsfastsettingtype = it.type,
-                                                    skjønnsfastsettingsårsak = it.årsak,
-                                                )
-                                            }
-                                            ?: error("Forventer å finne opplysninger fra saksbehandler ved bygging av vedtak når sykepengegrunnlaget er fastsatt etter skjønn"),
-                                    vedtakFattetTidspunkt = avsluttetMedVedtak.vedtakFattetTidspunkt,
-                                    tags = tagsForPeriode.toSet(),
-                                    vedtakBegrunnelse = behandling.vedtakBegrunnelse,
-                                    avviksprosent = avviksvurdering.avviksprosent,
-                                    sammenligningsgrunnlag = avviksvurdering.sammenligningsgrunnlag,
-                                )
-                            }
-                        }
-                    }
-                }
-            meldingslogg.nyMelding(melding)
-            behandling.håndterVedtakFattet()
-        }
     }
 
     fun avsluttetUtenVedtak(avsluttetUtenVedtak: AvsluttetUtenVedtak) {
@@ -287,7 +140,6 @@ class Person private constructor(
 
     companion object {
         private val logg = LoggerFactory.getLogger(this::class.java)
-        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
 
         fun gjenopprett(
             aktørId: String,

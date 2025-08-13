@@ -148,7 +148,7 @@ class Vedtaksperiode private constructor(
             )
         }
 
-        internal fun List<Vedtaksperiode>.finnBehandling(spleisBehandlingId: UUID): Vedtaksperiode? =
+        fun List<Vedtaksperiode>.finnBehandling(spleisBehandlingId: UUID): Vedtaksperiode? =
             find { vedtaksperiode ->
                 vedtaksperiode.behandlinger.any { it.spleisBehandlingId() == spleisBehandlingId }
             }
