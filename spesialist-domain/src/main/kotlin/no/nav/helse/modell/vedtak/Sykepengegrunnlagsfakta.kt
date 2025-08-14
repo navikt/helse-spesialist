@@ -53,6 +53,7 @@ sealed interface Sykepengegrunnlagsfakta {
                 Arbeidsgiver,
                 AOrdningen,
                 Saksbehandler,
+                Sigrun,
             }
         }
     }

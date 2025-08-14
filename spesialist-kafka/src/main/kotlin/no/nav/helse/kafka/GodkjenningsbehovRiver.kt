@@ -210,6 +210,7 @@ class GodkjenningsbehovRiver(
             "Arbeidsgiver" -> Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Arbeidsgiver
             "AOrdningen" -> Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.AOrdningen
             "Saksbehandler" -> Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Saksbehandler
+            "Sigrun" -> Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Sigrun
             else -> error("$inntektskildeString er ikke en gyldig inntektskilde")
         }
 }
