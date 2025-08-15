@@ -16,7 +16,7 @@ data class VedtakFattetMelding(
     val tom: LocalDate,
     val skjæringstidspunkt: LocalDate,
     val hendelser: List<UUID>,
-    val sykepengegrunnlag: Double,
+    val sykepengegrunnlag: BigDecimal,
     val vedtakFattetTidspunkt: LocalDateTime,
     val utbetalingId: UUID,
     val tags: Set<String>,
@@ -26,41 +26,41 @@ data class VedtakFattetMelding(
     sealed interface Sykepengegrunnlagsfakta
 
     data class FastsattEtterHovedregelSykepengegrunnlagsfakta(
-        val omregnetÅrsinntekt: Double,
-        val innrapportertÅrsinntekt: Double,
-        val avviksprosent: Double,
-        val seksG: Double,
+        val omregnetÅrsinntekt: BigDecimal,
+        val innrapportertÅrsinntekt: BigDecimal,
+        val avviksprosent: BigDecimal,
+        val seksG: BigDecimal,
         val tags: Set<String>,
         val arbeidsgivere: List<Arbeidsgiver>,
     ) : Sykepengegrunnlagsfakta {
         data class Arbeidsgiver(
             val organisasjonsnummer: String,
-            val omregnetÅrsinntekt: Double,
-            val innrapportertÅrsinntekt: Double,
+            val omregnetÅrsinntekt: BigDecimal,
+            val innrapportertÅrsinntekt: BigDecimal,
         )
     }
 
     data class FastsattEtterSkjønnSykepengegrunnlagsfakta(
-        val omregnetÅrsinntekt: Double,
-        val innrapportertÅrsinntekt: Double,
-        val avviksprosent: Double,
-        val seksG: Double,
+        val omregnetÅrsinntekt: BigDecimal,
+        val innrapportertÅrsinntekt: BigDecimal,
+        val avviksprosent: BigDecimal,
+        val seksG: BigDecimal,
         val tags: Set<String>,
         val arbeidsgivere: List<Arbeidsgiver>,
         val skjønnsfastsettingtype: Skjønnsfastsettingstype,
         val skjønnsfastsettingsårsak: Skjønnsfastsettingsårsak,
-        val skjønnsfastsatt: Double,
+        val skjønnsfastsatt: BigDecimal,
     ) : Sykepengegrunnlagsfakta {
         data class Arbeidsgiver(
             val organisasjonsnummer: String,
-            val omregnetÅrsinntekt: Double,
-            val innrapportertÅrsinntekt: Double,
-            val skjønnsfastsatt: Double,
+            val omregnetÅrsinntekt: BigDecimal,
+            val innrapportertÅrsinntekt: BigDecimal,
+            val skjønnsfastsatt: BigDecimal,
         )
     }
 
     data class FastsattIInfotrygdSykepengegrunnlagsfakta(
-        val omregnetÅrsinntekt: Double,
+        val omregnetÅrsinntekt: BigDecimal,
     ) : Sykepengegrunnlagsfakta
 
     data class SelvstendigNæringsdrivendeSykepengegrunnlagsfakta(

@@ -14,6 +14,7 @@ import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.kafka.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -69,9 +70,9 @@ internal class PubliserSykepengevedtakTest {
                 tom = tom,
                 skjæringstidspunkt = skjæringstidspunkt,
                 hendelser = hendelser,
-                sykepengegrunnlag = 10000.0,
+                sykepengegrunnlag = BigDecimal("10000.0"),
                 sykepengegrunnlagsfakta = VedtakFattetMelding.FastsattIInfotrygdSykepengegrunnlagsfakta(
-                    omregnetÅrsinntekt = 10000.0,
+                    omregnetÅrsinntekt = BigDecimal("10000.0"),
                 ),
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
@@ -94,11 +95,11 @@ internal class PubliserSykepengevedtakTest {
         assertEquals(tom, event["tom"].asLocalDate())
         assertEquals(skjæringstidspunkt, event["skjæringstidspunkt"].asLocalDate())
         assertEquals(hendelser, event["hendelser"].map { UUID.fromString(it.asText()) })
-        assertEquals(10000.0, event["sykepengegrunnlag"].asDouble())
+        assertEquals("10000.0", event["sykepengegrunnlag"].asText())
         assertEquals(vedtakFattetTidspunkt, event["vedtakFattetTidspunkt"].asLocalDateTime())
         assertEquals(utbetalingId.toString(), event["utbetalingId"].asText())
         assertEquals("IInfotrygd", event["sykepengegrunnlagsfakta"]["fastsatt"].asText())
-        assertEquals(10000.0, event["sykepengegrunnlagsfakta"]["omregnetÅrsinntekt"].asDouble())
+        assertEquals("10000.0", event["sykepengegrunnlagsfakta"]["omregnetÅrsinntekt"].asText())
         assertEquals(0, event["begrunnelser"].size())
         assertEquals(1, event["tags"].size())
         assertEquals("IngenNyArbeidsgiverperiode", event["tags"].first().asText())
@@ -119,19 +120,19 @@ internal class PubliserSykepengevedtakTest {
                 tom = tom,
                 skjæringstidspunkt = skjæringstidspunkt,
                 hendelser = hendelser,
-                sykepengegrunnlag = 10000.0,
+                sykepengegrunnlag = BigDecimal("10000.0"),
                 sykepengegrunnlagsfakta = VedtakFattetMelding.FastsattEtterHovedregelSykepengegrunnlagsfakta(
-                    omregnetÅrsinntekt = 10000.0,
-                    seksG = 711720.0,
-                    avviksprosent = 0.0,
-                    innrapportertÅrsinntekt = 10000.0,
+                    omregnetÅrsinntekt = BigDecimal("10000.0"),
+                    seksG = BigDecimal("711720.0"),
+                    avviksprosent = BigDecimal("0.0"),
+                    innrapportertÅrsinntekt = BigDecimal("10000.0"),
                     tags = setOf(),
                     arbeidsgivere =
                         listOf(
                             VedtakFattetMelding.FastsattEtterHovedregelSykepengegrunnlagsfakta.Arbeidsgiver(
                                 organisasjonsnummer = ORGANISASJONSNUMMER,
-                                omregnetÅrsinntekt = 10000.0,
-                                innrapportertÅrsinntekt = 10000.0,
+                                omregnetÅrsinntekt = BigDecimal("10000.0"),
+                                innrapportertÅrsinntekt = BigDecimal("10000.0"),
                             ),
                         ),
                 ),
@@ -156,25 +157,19 @@ internal class PubliserSykepengevedtakTest {
         assertEquals(tom, event["tom"].asLocalDate())
         assertEquals(skjæringstidspunkt, event["skjæringstidspunkt"].asLocalDate())
         assertEquals(hendelser, event["hendelser"].map { UUID.fromString(it.asText()) })
-        assertEquals(10000.0, event["sykepengegrunnlag"].asDouble())
+        assertEquals("10000.0", event["sykepengegrunnlag"].asText())
         assertEquals(vedtakFattetTidspunkt, event["vedtakFattetTidspunkt"].asLocalDateTime())
         assertEquals(utbetalingId.toString(), event["utbetalingId"].asText())
         assertEquals("EtterHovedregel", event["sykepengegrunnlagsfakta"]["fastsatt"].asText())
-        assertEquals(10000.0, event["sykepengegrunnlagsfakta"]["omregnetÅrsinntekt"].asDouble())
-        assertEquals(10000.0, event["sykepengegrunnlagsfakta"]["innrapportertÅrsinntekt"].asDouble())
-        assertEquals(0.0, event["sykepengegrunnlagsfakta"]["avviksprosent"].asDouble())
-        assertEquals(711720.0, event["sykepengegrunnlagsfakta"]["6G"].asDouble())
+        assertEquals("10000.0", event["sykepengegrunnlagsfakta"]["omregnetÅrsinntekt"].asText())
+        assertEquals("10000.0", event["sykepengegrunnlagsfakta"]["innrapportertÅrsinntekt"].asText())
+        assertEquals("0.0", event["sykepengegrunnlagsfakta"]["avviksprosent"].asText())
+        assertEquals("711720.0", event["sykepengegrunnlagsfakta"]["6G"].asText())
         assertEquals(emptyList<String>(), objectMapper.convertValue(event["sykepengegrunnlagsfakta"]["tags"]))
-        assertEquals(
-            listOf(
-                mapOf(
-                    "arbeidsgiver" to ORGANISASJONSNUMMER,
-                    "omregnetÅrsinntekt" to 10000.0,
-                    "innrapportertÅrsinntekt" to 10000.0,
-                ),
-            ),
-            objectMapper.convertValue(event["sykepengegrunnlagsfakta"]["arbeidsgivere"]),
-        )
+        assertEquals(1, event["sykepengegrunnlagsfakta"]["arbeidsgivere"].size())
+        assertEquals(ORGANISASJONSNUMMER, event["sykepengegrunnlagsfakta"]["arbeidsgivere"][0]["arbeidsgiver"].asText())
+        assertEquals("10000.0", event["sykepengegrunnlagsfakta"]["arbeidsgivere"][0]["omregnetÅrsinntekt"].asText())
+        assertEquals("10000.0", event["sykepengegrunnlagsfakta"]["arbeidsgivere"][0]["innrapportertÅrsinntekt"].asText())
         assertEquals(0, event["begrunnelser"].size())
         assertEquals(1, event["tags"].size())
         assertEquals("IngenNyArbeidsgiverperiode", event["tags"].first().asText())
@@ -195,19 +190,19 @@ internal class PubliserSykepengevedtakTest {
                 tom = tom,
                 skjæringstidspunkt = skjæringstidspunkt,
                 hendelser = hendelser,
-                sykepengegrunnlag = 10000.0,
+                sykepengegrunnlag = BigDecimal("10000.0"),
                 sykepengegrunnlagsfakta = VedtakFattetMelding.FastsattEtterHovedregelSykepengegrunnlagsfakta(
                     tags = setOf(),
-                    omregnetÅrsinntekt = 10000.0,
-                    seksG = 711720.0,
-                    avviksprosent = 0.0,
-                    innrapportertÅrsinntekt = 10000.0,
+                    omregnetÅrsinntekt = BigDecimal("10000.0"),
+                    seksG = BigDecimal("711720.0"),
+                    avviksprosent = BigDecimal("0.0"),
+                    innrapportertÅrsinntekt = BigDecimal("10000.0"),
                     arbeidsgivere =
                         listOf(
                             VedtakFattetMelding.FastsattEtterHovedregelSykepengegrunnlagsfakta.Arbeidsgiver(
                                 organisasjonsnummer = ORGANISASJONSNUMMER,
-                                omregnetÅrsinntekt = 10000.0,
-                                innrapportertÅrsinntekt = 10000.0,
+                                omregnetÅrsinntekt = BigDecimal("10000.0"),
+                                innrapportertÅrsinntekt = BigDecimal("10000.0"),
                             ),
                         ),
                 ),
@@ -237,25 +232,19 @@ internal class PubliserSykepengevedtakTest {
         assertEquals(tom, event["tom"].asLocalDate())
         assertEquals(skjæringstidspunkt, event["skjæringstidspunkt"].asLocalDate())
         assertEquals(hendelser, event["hendelser"].map { UUID.fromString(it.asText()) })
-        assertEquals(10000.0, event["sykepengegrunnlag"].asDouble())
+        assertEquals("10000.0", event["sykepengegrunnlag"].asText())
         assertEquals(vedtakFattetTidspunkt, event["vedtakFattetTidspunkt"].asLocalDateTime())
         assertEquals(utbetalingId.toString(), event["utbetalingId"].asText())
         assertEquals("EtterHovedregel", event["sykepengegrunnlagsfakta"]["fastsatt"].asText())
-        assertEquals(10000.0, event["sykepengegrunnlagsfakta"]["omregnetÅrsinntekt"].asDouble())
-        assertEquals(10000.0, event["sykepengegrunnlagsfakta"]["innrapportertÅrsinntekt"].asDouble())
-        assertEquals(0.0, event["sykepengegrunnlagsfakta"]["avviksprosent"].asDouble())
-        assertEquals(711720.0, event["sykepengegrunnlagsfakta"]["6G"].asDouble())
+        assertEquals("10000.0", event["sykepengegrunnlagsfakta"]["omregnetÅrsinntekt"].asText())
+        assertEquals("10000.0", event["sykepengegrunnlagsfakta"]["innrapportertÅrsinntekt"].asText())
+        assertEquals("0.0", event["sykepengegrunnlagsfakta"]["avviksprosent"].asText())
+        assertEquals("711720.0", event["sykepengegrunnlagsfakta"]["6G"].asText())
         assertEquals(emptyList<String>(), objectMapper.convertValue(event["sykepengegrunnlagsfakta"]["tags"]))
-        assertEquals(
-            listOf(
-                mapOf(
-                    "arbeidsgiver" to ORGANISASJONSNUMMER,
-                    "omregnetÅrsinntekt" to 10000.0,
-                    "innrapportertÅrsinntekt" to 10000.0,
-                ),
-            ),
-            objectMapper.convertValue(event["sykepengegrunnlagsfakta"]["arbeidsgivere"]),
-        )
+        assertEquals(1, event["sykepengegrunnlagsfakta"]["arbeidsgivere"].size())
+        assertEquals(ORGANISASJONSNUMMER, event["sykepengegrunnlagsfakta"]["arbeidsgivere"][0]["arbeidsgiver"].asText())
+        assertEquals("10000.0", event["sykepengegrunnlagsfakta"]["arbeidsgivere"][0]["omregnetÅrsinntekt"].asText())
+        assertEquals("10000.0", event["sykepengegrunnlagsfakta"]["arbeidsgivere"][0]["innrapportertÅrsinntekt"].asText())
 
         assertEquals(1, event["begrunnelser"].size())
         assertEquals(1, event["tags"].size())
@@ -283,23 +272,23 @@ internal class PubliserSykepengevedtakTest {
                 tom = tom,
                 skjæringstidspunkt = skjæringstidspunkt,
                 hendelser = hendelser,
-                sykepengegrunnlag = 10000.0,
+                sykepengegrunnlag = BigDecimal("10000.0"),
                 sykepengegrunnlagsfakta = VedtakFattetMelding.FastsattEtterSkjønnSykepengegrunnlagsfakta(
-                    omregnetÅrsinntekt = 10000.0,
-                    seksG = 711720.0,
-                    avviksprosent = 30.0,
-                    innrapportertÅrsinntekt = 12000.0,
+                    omregnetÅrsinntekt = BigDecimal("10000.0"),
+                    seksG = BigDecimal("711720.0"),
+                    avviksprosent = BigDecimal("30.0"),
+                    innrapportertÅrsinntekt = BigDecimal("12000.0"),
                     tags = setOf(),
                     arbeidsgivere =
                         listOf(
                             VedtakFattetMelding.FastsattEtterSkjønnSykepengegrunnlagsfakta.Arbeidsgiver(
                                 organisasjonsnummer = ORGANISASJONSNUMMER,
-                                omregnetÅrsinntekt = 10000.0,
-                                innrapportertÅrsinntekt = 12000.0,
-                                skjønnsfastsatt = 13000.0,
+                                omregnetÅrsinntekt = BigDecimal("10000.0"),
+                                innrapportertÅrsinntekt = BigDecimal("12000.0"),
+                                skjønnsfastsatt = BigDecimal("13000.0"),
                             ),
                         ),
-                    skjønnsfastsatt = 13000.0,
+                    skjønnsfastsatt = BigDecimal("13000.0"),
                     skjønnsfastsettingtype = VedtakFattetMelding.Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,
                     skjønnsfastsettingsårsak = VedtakFattetMelding.Skjønnsfastsettingsårsak.ANDRE_AVSNITT
                 ),
@@ -337,27 +326,21 @@ internal class PubliserSykepengevedtakTest {
         assertEquals(tom, event["tom"].asLocalDate())
         assertEquals(skjæringstidspunkt, event["skjæringstidspunkt"].asLocalDate())
         assertEquals(hendelser, event["hendelser"].map { UUID.fromString(it.asText()) })
-        assertEquals(10000.0, event["sykepengegrunnlag"].asDouble())
+        assertEquals("10000.0", event["sykepengegrunnlag"].asText())
         assertEquals(vedtakFattetTidspunkt, event["vedtakFattetTidspunkt"].asLocalDateTime())
         assertEquals(utbetalingId.toString(), event["utbetalingId"].asText())
         assertEquals("EtterSkjønn", event["sykepengegrunnlagsfakta"]["fastsatt"].asText())
-        assertEquals(10000.0, event["sykepengegrunnlagsfakta"]["omregnetÅrsinntekt"].asDouble())
-        assertEquals(12000.0, event["sykepengegrunnlagsfakta"]["innrapportertÅrsinntekt"].asDouble())
-        assertEquals(30.0, event["sykepengegrunnlagsfakta"]["avviksprosent"].asDouble())
-        assertEquals(711720.0, event["sykepengegrunnlagsfakta"]["6G"].asDouble())
+        assertEquals("10000.0", event["sykepengegrunnlagsfakta"]["omregnetÅrsinntekt"].asText())
+        assertEquals("12000.0", event["sykepengegrunnlagsfakta"]["innrapportertÅrsinntekt"].asText())
+        assertEquals("30.0", event["sykepengegrunnlagsfakta"]["avviksprosent"].asText())
+        assertEquals("711720.0", event["sykepengegrunnlagsfakta"]["6G"].asText())
         assertEquals(emptyList<String>(), objectMapper.convertValue(event["sykepengegrunnlagsfakta"]["tags"]))
-        assertEquals(
-            listOf(
-                mapOf(
-                    "arbeidsgiver" to ORGANISASJONSNUMMER,
-                    "omregnetÅrsinntekt" to 10000.0,
-                    "innrapportertÅrsinntekt" to 12000.0,
-                    "skjønnsfastsatt" to 13000.0,
-                ),
-            ),
-            objectMapper.convertValue(event["sykepengegrunnlagsfakta"]["arbeidsgivere"]),
-        )
-        assertEquals(13000.0, event["sykepengegrunnlagsfakta"]["skjønnsfastsatt"].asDouble())
+        assertEquals(1, event["sykepengegrunnlagsfakta"]["arbeidsgivere"].size())
+        assertEquals(ORGANISASJONSNUMMER, event["sykepengegrunnlagsfakta"]["arbeidsgivere"][0]["arbeidsgiver"].asText())
+        assertEquals("10000.0", event["sykepengegrunnlagsfakta"]["arbeidsgivere"][0]["omregnetÅrsinntekt"].asText())
+        assertEquals("12000.0", event["sykepengegrunnlagsfakta"]["arbeidsgivere"][0]["innrapportertÅrsinntekt"].asText())
+        assertEquals("13000.0", event["sykepengegrunnlagsfakta"]["arbeidsgivere"][0]["skjønnsfastsatt"].asText())
+        assertEquals("13000.0", event["sykepengegrunnlagsfakta"]["skjønnsfastsatt"].asText())
 
         assertEquals(3, event["begrunnelser"].size())
 
@@ -401,23 +384,23 @@ internal class PubliserSykepengevedtakTest {
                 tom = tom,
                 skjæringstidspunkt = skjæringstidspunkt,
                 hendelser = hendelser,
-                sykepengegrunnlag = 10000.0,
+                sykepengegrunnlag = BigDecimal("10000.0"),
                 sykepengegrunnlagsfakta = VedtakFattetMelding.FastsattEtterSkjønnSykepengegrunnlagsfakta(
-                    omregnetÅrsinntekt = 10000.0,
-                    seksG = 711720.0,
-                    avviksprosent = 30.0,
-                    innrapportertÅrsinntekt = 13000.0,
+                    omregnetÅrsinntekt = BigDecimal("10000.0"),
+                    seksG = BigDecimal("711720.0"),
+                    avviksprosent = BigDecimal("30.0"),
+                    innrapportertÅrsinntekt = BigDecimal("13000.0"),
                     tags = setOf(),
                     arbeidsgivere =
                         listOf(
                             VedtakFattetMelding.FastsattEtterSkjønnSykepengegrunnlagsfakta.Arbeidsgiver(
                                 organisasjonsnummer = ORGANISASJONSNUMMER,
-                                omregnetÅrsinntekt = 10000.0,
-                                innrapportertÅrsinntekt = 13000.0,
-                                skjønnsfastsatt = 13000.0,
+                                omregnetÅrsinntekt = BigDecimal("10000.0"),
+                                innrapportertÅrsinntekt = BigDecimal("13000.0"),
+                                skjønnsfastsatt = BigDecimal("13000.0"),
                             ),
                         ),
-                    skjønnsfastsatt = 13000.0,
+                    skjønnsfastsatt = BigDecimal("13000.0"),
                     skjønnsfastsettingtype = VedtakFattetMelding.Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,
                     skjønnsfastsettingsårsak = VedtakFattetMelding.Skjønnsfastsettingsårsak.ANDRE_AVSNITT
                 ),
@@ -459,27 +442,21 @@ internal class PubliserSykepengevedtakTest {
         assertEquals(tom, event["tom"].asLocalDate())
         assertEquals(skjæringstidspunkt, event["skjæringstidspunkt"].asLocalDate())
         assertEquals(hendelser, event["hendelser"].map { UUID.fromString(it.asText()) })
-        assertEquals(10000.0, event["sykepengegrunnlag"].asDouble())
+        assertEquals("10000.0", event["sykepengegrunnlag"].asText())
         assertEquals(vedtakFattetTidspunkt, event["vedtakFattetTidspunkt"].asLocalDateTime())
         assertEquals(utbetalingId.toString(), event["utbetalingId"].asText())
         assertEquals("EtterSkjønn", event["sykepengegrunnlagsfakta"]["fastsatt"].asText())
-        assertEquals(10000.0, event["sykepengegrunnlagsfakta"]["omregnetÅrsinntekt"].asDouble())
-        assertEquals(13000.0, event["sykepengegrunnlagsfakta"]["innrapportertÅrsinntekt"].asDouble())
-        assertEquals(30.0, event["sykepengegrunnlagsfakta"]["avviksprosent"].asDouble())
-        assertEquals(711720.0, event["sykepengegrunnlagsfakta"]["6G"].asDouble())
+        assertEquals("10000.0", event["sykepengegrunnlagsfakta"]["omregnetÅrsinntekt"].asText())
+        assertEquals("13000.0", event["sykepengegrunnlagsfakta"]["innrapportertÅrsinntekt"].asText())
+        assertEquals("30.0", event["sykepengegrunnlagsfakta"]["avviksprosent"].asText())
+        assertEquals("711720.0", event["sykepengegrunnlagsfakta"]["6G"].asText())
         assertEquals(emptyList<String>(), objectMapper.convertValue(event["sykepengegrunnlagsfakta"]["tags"]))
-        assertEquals(
-            listOf(
-                mapOf(
-                    "arbeidsgiver" to ORGANISASJONSNUMMER,
-                    "omregnetÅrsinntekt" to 10000.0,
-                    "innrapportertÅrsinntekt" to 13000.0,
-                    "skjønnsfastsatt" to 13000.0,
-                ),
-            ),
-            objectMapper.convertValue(event["sykepengegrunnlagsfakta"]["arbeidsgivere"]),
-        )
-        assertEquals(13000.0, event["sykepengegrunnlagsfakta"]["skjønnsfastsatt"].asDouble())
+        assertEquals(1, event["sykepengegrunnlagsfakta"]["arbeidsgivere"].size())
+        assertEquals(ORGANISASJONSNUMMER, event["sykepengegrunnlagsfakta"]["arbeidsgivere"][0]["arbeidsgiver"].asText())
+        assertEquals("10000.0", event["sykepengegrunnlagsfakta"]["arbeidsgivere"][0]["omregnetÅrsinntekt"].asText())
+        assertEquals("13000.0", event["sykepengegrunnlagsfakta"]["arbeidsgivere"][0]["innrapportertÅrsinntekt"].asText())
+        assertEquals("13000.0", event["sykepengegrunnlagsfakta"]["arbeidsgivere"][0]["skjønnsfastsatt"].asText())
+        assertEquals("13000.0", event["sykepengegrunnlagsfakta"]["skjønnsfastsatt"].asText())
 
         assertEquals(4, event["begrunnelser"].size())
 

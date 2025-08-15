@@ -144,7 +144,7 @@ class AvsluttetMedVedtakRiver(
             tom = behandling.tom(),
             skjæringstidspunkt = behandling.skjæringstidspunkt,
             hendelser = packet["hendelser"].map<JsonNode, UUID> { it.asUUID() },
-            sykepengegrunnlag = packet["sykepengegrunnlag"].asDouble(),
+            sykepengegrunnlag = packet["sykepengegrunnlag"].asBigDecimal(),
             vedtakFattetTidspunkt = packet["vedtakFattetTidspunkt"].asLocalDateTime(),
             tags =
                 (
@@ -235,22 +235,23 @@ class AvsluttetMedVedtakRiver(
         avviksvurdering: Avviksvurdering,
         tags: List<String>,
     ) = VedtakFattetMelding.FastsattEtterHovedregelSykepengegrunnlagsfakta(
-        omregnetÅrsinntekt = packet["sykepengegrunnlagsfakta"]["omregnetÅrsinntektTotalt"].asDouble(),
-        seksG = packet["sykepengegrunnlagsfakta"]["6G"].asDouble(),
+        omregnetÅrsinntekt = packet["sykepengegrunnlagsfakta"]["omregnetÅrsinntektTotalt"].asBigDecimal(),
+        seksG = packet["sykepengegrunnlagsfakta"]["6G"].asBigDecimal(),
         tags = tags.filter { it == TAG_6G_BEGRENSET }.toSet(),
-        avviksprosent = avviksvurdering.avviksprosent,
-        innrapportertÅrsinntekt = avviksvurdering.sammenligningsgrunnlag.totalbeløp,
+        avviksprosent = avviksvurdering.avviksprosent.toBigDecimal(),
+        innrapportertÅrsinntekt = avviksvurdering.sammenligningsgrunnlag.totalbeløp.toBigDecimal(),
         arbeidsgivere =
             packet["sykepengegrunnlagsfakta"]["arbeidsgivere"].map { arbeidsgiver ->
                 val arbeidsgiverreferanse = arbeidsgiver["arbeidsgiver"].asText()
                 VedtakFattetMelding.FastsattEtterHovedregelSykepengegrunnlagsfakta.Arbeidsgiver(
                     organisasjonsnummer = arbeidsgiver["arbeidsgiver"].asText(),
-                    omregnetÅrsinntekt = arbeidsgiver["omregnetÅrsinntekt"].asDouble(),
+                    omregnetÅrsinntekt = arbeidsgiver["omregnetÅrsinntekt"].asBigDecimal(),
                     innrapportertÅrsinntekt =
                         avviksvurdering.sammenligningsgrunnlag.innrapporterteInntekter
                             .filter { it.arbeidsgiverreferanse == arbeidsgiverreferanse }
                             .flatMap(InnrapportertInntekt::inntekter)
-                            .sumOf(Inntekt::beløp),
+                            .sumOf(Inntekt::beløp)
+                            .toBigDecimal(),
                 )
             },
     )
@@ -261,12 +262,12 @@ class AvsluttetMedVedtakRiver(
         avviksvurdering: Avviksvurdering,
         tags: List<String>,
     ) = VedtakFattetMelding.FastsattEtterSkjønnSykepengegrunnlagsfakta(
-        omregnetÅrsinntekt = packet["sykepengegrunnlagsfakta"]["omregnetÅrsinntektTotalt"].asDouble(),
-        seksG = packet["sykepengegrunnlagsfakta"]["6G"].asDouble(),
-        avviksprosent = avviksvurdering.avviksprosent,
-        innrapportertÅrsinntekt = avviksvurdering.sammenligningsgrunnlag.totalbeløp,
+        omregnetÅrsinntekt = packet["sykepengegrunnlagsfakta"]["omregnetÅrsinntektTotalt"].asBigDecimal(),
+        seksG = packet["sykepengegrunnlagsfakta"]["6G"].asBigDecimal(),
+        avviksprosent = avviksvurdering.avviksprosent.toBigDecimal(),
+        innrapportertÅrsinntekt = avviksvurdering.sammenligningsgrunnlag.totalbeløp.toBigDecimal(),
         tags = tags.filter { it == TAG_6G_BEGRENSET }.toSet(),
-        skjønnsfastsatt = packet["sykepengegrunnlagsfakta"]["skjønnsfastsatt"].asDouble(),
+        skjønnsfastsatt = packet["sykepengegrunnlagsfakta"]["skjønnsfastsatt"].asBigDecimal(),
         skjønnsfastsettingtype =
             when (skjønnsfastsattSykepengegrunnlag.type) {
                 Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT -> VedtakFattetMelding.Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT
@@ -283,20 +284,21 @@ class AvsluttetMedVedtakRiver(
                 val organisasjonsnummer = arbeidsgiver["arbeidsgiver"].asText()
                 VedtakFattetMelding.FastsattEtterSkjønnSykepengegrunnlagsfakta.Arbeidsgiver(
                     organisasjonsnummer = organisasjonsnummer,
-                    omregnetÅrsinntekt = arbeidsgiver["omregnetÅrsinntekt"].asDouble(),
+                    omregnetÅrsinntekt = arbeidsgiver["omregnetÅrsinntekt"].asBigDecimal(),
                     innrapportertÅrsinntekt =
                         avviksvurdering.sammenligningsgrunnlag.innrapporterteInntekter
                             .filter { it.arbeidsgiverreferanse == organisasjonsnummer }
                             .flatMap(InnrapportertInntekt::inntekter)
-                            .sumOf(Inntekt::beløp),
-                    skjønnsfastsatt = arbeidsgiver["skjønnsfastsatt"].asDouble(),
+                            .sumOf(Inntekt::beløp)
+                            .toBigDecimal(),
+                    skjønnsfastsatt = arbeidsgiver["skjønnsfastsatt"].asBigDecimal(),
                 )
             },
     )
 
     private fun byggFastsattIInfotrygdSykepengegrunnlagsfakta(packet: JsonMessage) =
         VedtakFattetMelding.FastsattIInfotrygdSykepengegrunnlagsfakta(
-            omregnetÅrsinntekt = packet["sykepengegrunnlagsfakta"]["omregnetÅrsinntektTotalt"].asDouble(),
+            omregnetÅrsinntekt = packet["sykepengegrunnlagsfakta"]["omregnetÅrsinntektTotalt"].asBigDecimal(),
         )
 
     private fun Person.finnAvviksvurdering(behandling: LegacyBehandling): Avviksvurdering =
@@ -327,3 +329,5 @@ class AvsluttetMedVedtakRiver(
         private const val TAG_6G_BEGRENSET = "6GBegrenset"
     }
 }
+
+private fun JsonNode.asBigDecimal(): BigDecimal = BigDecimal(asText())
