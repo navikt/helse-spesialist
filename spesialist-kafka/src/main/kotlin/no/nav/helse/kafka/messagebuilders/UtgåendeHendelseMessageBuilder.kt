@@ -17,10 +17,10 @@ import no.nav.helse.modell.melding.OverstyrtInntektOgRefusjonEvent
 import no.nav.helse.modell.melding.OverstyrtTidslinjeEvent
 import no.nav.helse.modell.melding.Saksbehandlerløsning
 import no.nav.helse.modell.melding.SkjønnsfastsattSykepengegrunnlagEvent
-import no.nav.helse.modell.melding.Sykepengevedtak
 import no.nav.helse.modell.melding.SykepengevedtakSelvstendigNæringsdrivendeDto
 import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.melding.VarselEndret
+import no.nav.helse.modell.melding.VedtakFattetMelding
 import no.nav.helse.modell.melding.VedtaksperiodeAvvistAutomatisk
 import no.nav.helse.modell.melding.VedtaksperiodeAvvistManuelt
 import no.nav.helse.modell.melding.VedtaksperiodeGodkjentAutomatisk
@@ -51,7 +51,7 @@ internal fun UtgåendeHendelse.eventName() =
         -> "vedtaksperiode_godkjent"
 
         is Godkjenningsbehovløsning -> "behov"
-        is Sykepengevedtak,
+        is VedtakFattetMelding,
         is SykepengevedtakSelvstendigNæringsdrivendeDto,
         -> "vedtak_fattet"
 
@@ -79,7 +79,7 @@ private fun UtgåendeHendelse.detaljer(): Map<String, Any> =
         is VedtaksperiodeGodkjentManuelt -> this.detaljer()
         is VedtaksperiodeGodkjentAutomatisk -> this.detaljer()
         is Godkjenningsbehovløsning -> this.detaljer()
-        is Sykepengevedtak -> this.detaljer()
+        is VedtakFattetMelding -> this.detaljer()
         is SykepengevedtakSelvstendigNæringsdrivendeDto -> this.detaljer()
         is KlargjørPersonForVisning -> emptyMap()
         is OppdaterPersondata -> emptyMap()

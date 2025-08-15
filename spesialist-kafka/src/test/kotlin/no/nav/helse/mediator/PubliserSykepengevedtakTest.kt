@@ -8,26 +8,14 @@ import no.nav.helse.TestRapidHelpers.meldinger
 import no.nav.helse.db.SessionContext
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.mediator.meldinger.Personmelding
-import no.nav.helse.modell.melding.Sykepengevedtak
-import no.nav.helse.modell.melding.Sykepengevedtak.VedtakMedSkjønnsvurdering
+import no.nav.helse.modell.melding.VedtakFattetMelding
 import no.nav.helse.modell.person.Person
-import no.nav.helse.modell.vedtak.Skjønnsfastsettingstype
-import no.nav.helse.modell.vedtak.Skjønnsfastsettingsårsak
-import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta
-import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Arbeidsgiver
-import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Saksbehandler
-import no.nav.helse.modell.vedtak.Utfall
-import no.nav.helse.modell.vedtak.VedtakBegrunnelse
-import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
-import no.nav.helse.modell.vilkårsprøving.Inntekt
-import no.nav.helse.modell.vilkårsprøving.Sammenligningsgrunnlag
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.kafka.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.YearMonth
 import java.util.UUID
 
 internal class PubliserSykepengevedtakTest {
@@ -49,12 +37,13 @@ internal class PubliserSykepengevedtakTest {
         private val vedtakFattetTidspunkt = LocalDateTime.now()
     }
 
-    private val personmelding = object: Personmelding {
+    private val personmelding = object : Personmelding {
         override fun behandle(
             person: Person,
             kommandostarter: Kommandostarter,
             sessionContext: SessionContext,
-        ) {}
+        ) {
+        }
 
         override fun fødselsnummer(): String = FØDSELSNUMMER
 
@@ -67,25 +56,24 @@ internal class PubliserSykepengevedtakTest {
     @Test
     fun `vedtak med opphav i infotrygd`() {
         val infotrygd =
-            Sykepengevedtak.VedtakMedOpphavIInfotrygd(
+            VedtakFattetMelding(
                 fødselsnummer = FØDSELSNUMMER,
                 aktørId = AKTØRID,
                 organisasjonsnummer = ORGANISASJONSNUMMER,
                 vedtaksperiodeId = vedtaksperiodeId,
-                spleisBehandlingId = spleisBehandlingId,
+                behandlingId = spleisBehandlingId,
                 utbetalingId = utbetalingId,
                 fom = fom,
                 tom = tom,
                 skjæringstidspunkt = skjæringstidspunkt,
                 hendelser = hendelser,
                 sykepengegrunnlag = 10000.0,
-                sykepengegrunnlagsfakta =
-                    Sykepengegrunnlagsfakta.Infotrygd(
-                        omregnetÅrsinntekt = 10000.0,
-                    ),
+                sykepengegrunnlagsfakta = VedtakFattetMelding.FastsattIInfotrygdSykepengegrunnlagsfakta(
+                    omregnetÅrsinntekt = 10000.0,
+                ),
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                vedtakBegrunnelse = null,
+                begrunnelser = emptyList(),
             )
         utgåendeMeldingerMediator.hendelse(infotrygd)
         utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, publiserer)
@@ -117,38 +105,37 @@ internal class PubliserSykepengevedtakTest {
     @Test
     fun `vanlig vedtak sykepengegrunnlag fastsatt etter hovedregel`() {
         val infotrygd =
-            Sykepengevedtak.Vedtak(
+            VedtakFattetMelding(
                 fødselsnummer = FØDSELSNUMMER,
                 aktørId = AKTØRID,
                 organisasjonsnummer = ORGANISASJONSNUMMER,
                 vedtaksperiodeId = vedtaksperiodeId,
-                spleisBehandlingId = spleisBehandlingId,
+                behandlingId = spleisBehandlingId,
                 utbetalingId = utbetalingId,
                 fom = fom,
                 tom = tom,
                 skjæringstidspunkt = skjæringstidspunkt,
                 hendelser = hendelser,
                 sykepengegrunnlag = 10000.0,
-                sykepengegrunnlagsfakta =
-                    Sykepengegrunnlagsfakta.Spleis.EtterHovedregel(
-                        omregnetÅrsinntekt = 10000.0,
-                        seksG = 711720.0,
-                        sykepengegrunnlag = 10000.0,
-                        arbeidsgivere =
-                            listOf(
-                                Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
-                                    organisasjonsnummer = ORGANISASJONSNUMMER,
-                                    omregnetÅrsinntekt = 10000.0,
-                                    inntektskilde = Arbeidsgiver
-                                ),
+                sykepengegrunnlagsfakta = VedtakFattetMelding.FastsattEtterHovedregelSykepengegrunnlagsfakta(
+                    omregnetÅrsinntekt = 10000.0,
+                    seksG = 711720.0,
+                    avviksprosent = 0.0,
+                    innrapportertÅrsinntekt = 10000.0,
+                    tags = setOf(),
+                    arbeidsgivere =
+                        listOf(
+                            VedtakFattetMelding.FastsattEtterHovedregelSykepengegrunnlagsfakta.Arbeidsgiver(
+                                organisasjonsnummer = ORGANISASJONSNUMMER,
+                                omregnetÅrsinntekt = 10000.0,
+                                innrapportertÅrsinntekt = 10000.0,
                             ),
-                    ),
+                        ),
+                ),
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                vedtakBegrunnelse = null,
-                avviksprosent = 0.0,
-                sammenligningsgrunnlag = sammenligningsgrunnlag(10000.0, ORGANISASJONSNUMMER),
-                )
+                begrunnelser = emptyList(),
+            )
         utgåendeMeldingerMediator.hendelse(infotrygd)
         utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, publiserer)
         val eventer = testRapid.inspektør.meldinger()
@@ -193,40 +180,41 @@ internal class PubliserSykepengevedtakTest {
     @Test
     fun `vanlig vedtak sykepengegrunnlag fastsatt etter hovedregel med delvis innvilgelse`() {
         val spleis =
-            Sykepengevedtak.Vedtak(
+            VedtakFattetMelding(
                 fødselsnummer = FØDSELSNUMMER,
                 aktørId = AKTØRID,
                 organisasjonsnummer = ORGANISASJONSNUMMER,
                 vedtaksperiodeId = vedtaksperiodeId,
-                spleisBehandlingId = spleisBehandlingId,
+                behandlingId = spleisBehandlingId,
                 utbetalingId = utbetalingId,
                 fom = fom,
                 tom = tom,
                 skjæringstidspunkt = skjæringstidspunkt,
                 hendelser = hendelser,
                 sykepengegrunnlag = 10000.0,
-                sykepengegrunnlagsfakta =
-                    Sykepengegrunnlagsfakta.Spleis.EtterHovedregel(
-                        omregnetÅrsinntekt = 10000.0,
-                        sykepengegrunnlag = 10000.0,
-                        seksG = 711720.0,
-                        arbeidsgivere =
-                            listOf(
-                                Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
-                                    organisasjonsnummer = ORGANISASJONSNUMMER,
-                                    omregnetÅrsinntekt = 10000.0,
-                                    inntektskilde = Arbeidsgiver
-                                ),
+                sykepengegrunnlagsfakta = VedtakFattetMelding.FastsattEtterHovedregelSykepengegrunnlagsfakta(
+                    tags = setOf(),
+                    omregnetÅrsinntekt = 10000.0,
+                    seksG = 711720.0,
+                    avviksprosent = 0.0,
+                    innrapportertÅrsinntekt = 10000.0,
+                    arbeidsgivere =
+                        listOf(
+                            VedtakFattetMelding.FastsattEtterHovedregelSykepengegrunnlagsfakta.Arbeidsgiver(
+                                organisasjonsnummer = ORGANISASJONSNUMMER,
+                                omregnetÅrsinntekt = 10000.0,
+                                innrapportertÅrsinntekt = 10000.0,
                             ),
-                    ),
+                        ),
+                ),
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                vedtakBegrunnelse = VedtakBegrunnelse(
-                    Utfall.DELVIS_INNVILGELSE,
-                    "En individuell begrunnelse"
+                begrunnelser = listOf(
+                    VedtakFattetMelding.Begrunnelse(
+                        type = VedtakFattetMelding.BegrunnelseType.DelvisInnvilgelse,
+                        begrunnelse = "En individuell begrunnelse"
+                    )
                 ),
-                avviksprosent = 0.0,
-                sammenligningsgrunnlag = sammenligningsgrunnlag(10000.0, ORGANISASJONSNUMMER),
             )
         utgåendeMeldingerMediator.hendelse(spleis)
         utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, publiserer)
@@ -279,46 +267,53 @@ internal class PubliserSykepengevedtakTest {
     @Test
     fun `vanlig vedtak sykepengegrunnlag fastsatt etter skjønn`() {
         val infotrygd =
-            VedtakMedSkjønnsvurdering(
+            VedtakFattetMelding(
                 fødselsnummer = FØDSELSNUMMER,
                 aktørId = AKTØRID,
                 organisasjonsnummer = ORGANISASJONSNUMMER,
                 vedtaksperiodeId = vedtaksperiodeId,
-                spleisBehandlingId = spleisBehandlingId,
+                behandlingId = spleisBehandlingId,
                 utbetalingId = utbetalingId,
                 fom = fom,
                 tom = tom,
                 skjæringstidspunkt = skjæringstidspunkt,
                 hendelser = hendelser,
                 sykepengegrunnlag = 10000.0,
-                sykepengegrunnlagsfakta =
-                    Sykepengegrunnlagsfakta.Spleis.EtterSkjønn(
-                        omregnetÅrsinntekt = 10000.0,
-                        seksG = 711720.0,
-                        arbeidsgivere =
-                            listOf(
-                                Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterSkjønn(
-                                    organisasjonsnummer = ORGANISASJONSNUMMER,
-                                    omregnetÅrsinntekt = 10000.0,
-                                    skjønnsfastsatt = 13000.0,
-                                    inntektskilde = Saksbehandler
-                                ),
+                sykepengegrunnlagsfakta = VedtakFattetMelding.FastsattEtterSkjønnSykepengegrunnlagsfakta(
+                    omregnetÅrsinntekt = 10000.0,
+                    seksG = 711720.0,
+                    avviksprosent = 30.0,
+                    innrapportertÅrsinntekt = 12000.0,
+                    tags = setOf(),
+                    arbeidsgivere =
+                        listOf(
+                            VedtakFattetMelding.FastsattEtterSkjønnSykepengegrunnlagsfakta.Arbeidsgiver(
+                                organisasjonsnummer = ORGANISASJONSNUMMER,
+                                omregnetÅrsinntekt = 10000.0,
+                                innrapportertÅrsinntekt = 12000.0,
+                                skjønnsfastsatt = 13000.0,
                             ),
-                        skjønnsfastsatt = 13000.0,
-                    ),
-                skjønnsfastsettingopplysninger =
-                    VedtakMedSkjønnsvurdering.Skjønnsfastsettingopplysninger(
-                        "Mal",
-                        "Fritekst",
-                        "Konklusjon",
-                        Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,
-                        Skjønnsfastsettingsårsak.ANDRE_AVSNITT,
-                    ),
+                        ),
+                    skjønnsfastsatt = 13000.0,
+                    skjønnsfastsettingtype = VedtakFattetMelding.Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,
+                    skjønnsfastsettingsårsak = VedtakFattetMelding.Skjønnsfastsettingsårsak.ANDRE_AVSNITT
+                ),
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                vedtakBegrunnelse = null,
-                avviksprosent = 30.0,
-                sammenligningsgrunnlag = sammenligningsgrunnlag(12000.0, ORGANISASJONSNUMMER),
+                begrunnelser = listOf(
+                    VedtakFattetMelding.Begrunnelse(
+                        type = VedtakFattetMelding.BegrunnelseType.SkjønnsfastsattSykepengegrunnlagMal,
+                        begrunnelse = "Mal"
+                    ),
+                    VedtakFattetMelding.Begrunnelse(
+                        type = VedtakFattetMelding.BegrunnelseType.SkjønnsfastsattSykepengegrunnlagFritekst,
+                        begrunnelse = "Fritekst"
+                    ),
+                    VedtakFattetMelding.Begrunnelse(
+                        type = VedtakFattetMelding.BegrunnelseType.SkjønnsfastsattSykepengegrunnlagKonklusjon,
+                        begrunnelse = "Konklusjon"
+                    )
+                ),
             )
         utgåendeMeldingerMediator.hendelse(infotrygd)
         utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, publiserer)
@@ -389,46 +384,57 @@ internal class PubliserSykepengevedtakTest {
     @Test
     fun `vanlig vedtak sykepengegrunnlag fastsatt etter skjønn med avslag`() {
         val infotrygd =
-            VedtakMedSkjønnsvurdering(
+            VedtakFattetMelding(
                 fødselsnummer = FØDSELSNUMMER,
                 aktørId = AKTØRID,
                 organisasjonsnummer = ORGANISASJONSNUMMER,
                 vedtaksperiodeId = vedtaksperiodeId,
-                spleisBehandlingId = spleisBehandlingId,
+                behandlingId = spleisBehandlingId,
                 utbetalingId = utbetalingId,
                 fom = fom,
                 tom = tom,
                 skjæringstidspunkt = skjæringstidspunkt,
                 hendelser = hendelser,
                 sykepengegrunnlag = 10000.0,
-                sykepengegrunnlagsfakta =
-                    Sykepengegrunnlagsfakta.Spleis.EtterSkjønn(
-                        omregnetÅrsinntekt = 10000.0,
-                        seksG = 711720.0,
-                        arbeidsgivere =
+                sykepengegrunnlagsfakta = VedtakFattetMelding.FastsattEtterSkjønnSykepengegrunnlagsfakta(
+                    omregnetÅrsinntekt = 10000.0,
+                    seksG = 711720.0,
+                    avviksprosent = 30.0,
+                    innrapportertÅrsinntekt = 13000.0,
+                    tags = setOf(),
+                    arbeidsgivere =
                         listOf(
-                            Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterSkjønn(
+                            VedtakFattetMelding.FastsattEtterSkjønnSykepengegrunnlagsfakta.Arbeidsgiver(
                                 organisasjonsnummer = ORGANISASJONSNUMMER,
                                 omregnetÅrsinntekt = 10000.0,
+                                innrapportertÅrsinntekt = 13000.0,
                                 skjønnsfastsatt = 13000.0,
-                                inntektskilde = Saksbehandler
                             ),
                         ),
-                        skjønnsfastsatt = 13000.0,
-                    ),
-                skjønnsfastsettingopplysninger =
-                    VedtakMedSkjønnsvurdering.Skjønnsfastsettingopplysninger(
-                        "Mal",
-                        "Fritekst",
-                        "Konklusjon",
-                        Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,
-                        Skjønnsfastsettingsårsak.ANDRE_AVSNITT,
-                    ),
+                    skjønnsfastsatt = 13000.0,
+                    skjønnsfastsettingtype = VedtakFattetMelding.Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT,
+                    skjønnsfastsettingsårsak = VedtakFattetMelding.Skjønnsfastsettingsårsak.ANDRE_AVSNITT
+                ),
                 vedtakFattetTidspunkt = vedtakFattetTidspunkt,
                 tags = setOf("IngenNyArbeidsgiverperiode"),
-                vedtakBegrunnelse = VedtakBegrunnelse(Utfall.AVSLAG, "En individuell begrunnelse"),
-                avviksprosent = 30.0,
-                sammenligningsgrunnlag = sammenligningsgrunnlag(13000.0, ORGANISASJONSNUMMER),
+                begrunnelser = listOf(
+                    VedtakFattetMelding.Begrunnelse(
+                        type = VedtakFattetMelding.BegrunnelseType.SkjønnsfastsattSykepengegrunnlagMal,
+                        begrunnelse = "Mal"
+                    ),
+                    VedtakFattetMelding.Begrunnelse(
+                        type = VedtakFattetMelding.BegrunnelseType.SkjønnsfastsattSykepengegrunnlagFritekst,
+                        begrunnelse = "Fritekst"
+                    ),
+                    VedtakFattetMelding.Begrunnelse(
+                        type = VedtakFattetMelding.BegrunnelseType.SkjønnsfastsattSykepengegrunnlagKonklusjon,
+                        begrunnelse = "Konklusjon"
+                    ),
+                    VedtakFattetMelding.Begrunnelse(
+                        type = VedtakFattetMelding.BegrunnelseType.Avslag,
+                        begrunnelse = "En individuell begrunnelse"
+                    )
+                ),
             )
         utgåendeMeldingerMediator.hendelse(infotrygd)
         utgåendeMeldingerMediator.publiserOppsamledeMeldinger(personmelding, publiserer)
@@ -501,18 +507,5 @@ internal class PubliserSykepengevedtakTest {
 
         assertEquals(1, event["tags"].size())
         assertEquals("IngenNyArbeidsgiverperiode", event["tags"].first().asText())
-    }
-
-    private fun sammenligningsgrunnlag(
-        totalbeløp: Double,
-        arbeidsgiver: String
-    ): Sammenligningsgrunnlag {
-        val yearMonth = YearMonth.from(skjæringstidspunkt.minusMonths(1))
-        return Sammenligningsgrunnlag(
-            totalbeløp = totalbeløp,
-            innrapporterteInntekter = listOf(
-                InnrapportertInntekt(arbeidsgiver, listOf(Inntekt(yearMonth, totalbeløp)))
-            )
-        )
     }
 }

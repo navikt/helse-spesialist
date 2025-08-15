@@ -16,8 +16,6 @@ data class Avviksvurdering(
     val beregningsgrunnlag: Beregningsgrunnlag,
 ) {
     companion object {
-        fun List<Avviksvurdering>.finnRiktigAvviksvurdering(skjæringstidspunkt: LocalDate) = filter { it.skjæringstidspunkt == skjæringstidspunkt }.maxByOrNull { it.opprettet }
-
         fun ny(
             id: UUID,
             vilkårsgrunnlagId: UUID,
@@ -43,15 +41,7 @@ data class Avviksvurdering(
 data class Sammenligningsgrunnlag(
     val totalbeløp: Double,
     val innrapporterteInntekter: List<InnrapportertInntekt>,
-) {
-    private fun relevanteInntekterFor(arbeidsgiverreferanse: String) = innrapporterteInntekter.filter { it.arbeidsgiverreferanse == arbeidsgiverreferanse }
-
-    fun innrapportertÅrsinntektFor(arbeidsgiverreferanse: String) =
-        relevanteInntekterFor(arbeidsgiverreferanse)
-            .flatMap {
-                it.inntekter
-            }.sumOf { it.beløp }
-}
+)
 
 data class InnrapportertInntekt(
     val arbeidsgiverreferanse: String,
