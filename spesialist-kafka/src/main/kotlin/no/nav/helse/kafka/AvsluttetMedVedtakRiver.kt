@@ -39,48 +39,18 @@ class AvsluttetMedVedtakRiver(
 
     override fun validations() =
         River.PacketValidation {
-            it.requireKey("@id", "fødselsnummer", "vedtaksperiodeId", "organisasjonsnummer")
-            it.requireKey("fom", "tom", "skjæringstidspunkt")
-            it.requireArray("hendelser")
-            it.requireKey("sykepengegrunnlag")
-            it.requireKey("vedtakFattetTidspunkt")
-            it.requireKey("utbetalingId", "behandlingId")
-            it.requireKey("yrkesaktivitetstype")
-
-            it.requireAny(
-                "sykepengegrunnlagsfakta.fastsatt",
-                listOf(FASTSATT_ETTER_HOVEDREGEL, FASTSATT_I_INFOTRYGD, FASTSATT_ETTER_SKJØNN),
+            it.requireKey(
+                "@id",
+                "fødselsnummer",
+                "yrkesaktivitetstype",
+                "vedtaksperiodeId",
+                "behandlingId",
+                "vedtakFattetTidspunkt",
+                "hendelser",
+                "sykepengegrunnlag",
+                "sykepengegrunnlagsfakta",
             )
-            it.requireKey("sykepengegrunnlagsfakta.omregnetÅrsinntektTotalt")
-            it.require("sykepengegrunnlagsfakta.fastsatt") { fastsattNode ->
-                when (fastsattNode.asText()) {
-                    FASTSATT_ETTER_HOVEDREGEL -> {
-                        it.requireKey(
-                            "sykepengegrunnlagsfakta.6G",
-                            "sykepengegrunnlagsfakta.arbeidsgivere",
-                            "sykepengegrunnlagsfakta.sykepengegrunnlag",
-                        )
-
-                        it.requireArray("sykepengegrunnlagsfakta.arbeidsgivere") {
-                            requireKey("arbeidsgiver", "omregnetÅrsinntekt", "inntektskilde")
-                        }
-                    }
-
-                    FASTSATT_ETTER_SKJØNN -> {
-                        it.requireKey(
-                            "sykepengegrunnlagsfakta.6G",
-                            "sykepengegrunnlagsfakta.arbeidsgivere",
-                            "sykepengegrunnlagsfakta.skjønnsfastsatt",
-                        )
-
-                        it.requireArray("sykepengegrunnlagsfakta.arbeidsgivere") {
-                            requireKey("arbeidsgiver", "omregnetÅrsinntekt", "skjønnsfastsatt", "inntektskilde")
-                        }
-                    }
-
-                    else -> {}
-                }
-            }
+            it.requireArray("hendelser")
         }
 
     override fun onPacket(
@@ -158,7 +128,7 @@ class AvsluttetMedVedtakRiver(
         vedtaksperiode: Vedtaksperiode,
     ): UtgåendeHendelse {
         val erSelvstendigNæringsdrivende = packet["yrkesaktivitetstype"].asText() == "SELVSTENDIG"
-        val fastsatt = packet["sykepengegrunnlagsfakta.fastsatt"].asText()
+        val fastsatt = packet["sykepengegrunnlagsfakta"]["fastsatt"].asText()
         val vedtaksperiodeMelding =
             if (erSelvstendigNæringsdrivende) {
                 if (fastsatt != FASTSATT_ETTER_HOVEDREGEL) {
@@ -252,14 +222,14 @@ class AvsluttetMedVedtakRiver(
                 SykepengevedtakSelvstendigNæringsdrivendeDto.Sykepengegrunnlagsfakta(
                     beregningsgrunnlag =
                         BigDecimal(
-                            packet["sykepengegrunnlagsfakta.arbeidsgivere"]
+                            packet["sykepengegrunnlagsfakta"]["arbeidsgivere"]
                                 .single { it["arbeidsgiver"].asText().lowercase() == "selvstendig" }
                                 ["omregnetÅrsinntekt"]
                                 .asText(),
                         ),
                     pensjonsgivendeInntekter = emptyList(),
                     erBegrensetTil6G = "6GBegrenset" in behandling.tags,
-                    `6G` = BigDecimal(packet["sykepengegrunnlagsfakta.6G"].asText()),
+                    `6G` = BigDecimal(packet["sykepengegrunnlagsfakta"]["6G"].asText()),
                 ),
             fom = behandling.fom(),
             tom = behandling.tom(),
@@ -275,13 +245,13 @@ class AvsluttetMedVedtakRiver(
         avviksvurdering: Avviksvurdering,
         tags: List<String>,
     ) = VedtakFattetMelding.FastsattEtterHovedregelSykepengegrunnlagsfakta(
-        omregnetÅrsinntekt = packet["sykepengegrunnlagsfakta.omregnetÅrsinntektTotalt"].asDouble(),
-        seksG = packet["sykepengegrunnlagsfakta.6G"].asDouble(),
+        omregnetÅrsinntekt = packet["sykepengegrunnlagsfakta"]["omregnetÅrsinntektTotalt"].asDouble(),
+        seksG = packet["sykepengegrunnlagsfakta"]["6G"].asDouble(),
         tags = tags.filter { it == TAG_6G_BEGRENSET }.toSet(),
         avviksprosent = avviksvurdering.avviksprosent,
         innrapportertÅrsinntekt = avviksvurdering.sammenligningsgrunnlag.totalbeløp,
         arbeidsgivere =
-            packet["sykepengegrunnlagsfakta.arbeidsgivere"].map { arbeidsgiver ->
+            packet["sykepengegrunnlagsfakta"]["arbeidsgivere"].map { arbeidsgiver ->
                 val arbeidsgiverreferanse = arbeidsgiver["arbeidsgiver"].asText()
                 VedtakFattetMelding.FastsattEtterHovedregelSykepengegrunnlagsfakta.Arbeidsgiver(
                     organisasjonsnummer = arbeidsgiver["arbeidsgiver"].asText(),
@@ -301,12 +271,12 @@ class AvsluttetMedVedtakRiver(
         avviksvurdering: Avviksvurdering,
         tags: List<String>,
     ) = VedtakFattetMelding.FastsattEtterSkjønnSykepengegrunnlagsfakta(
-        omregnetÅrsinntekt = packet["sykepengegrunnlagsfakta.omregnetÅrsinntektTotalt"].asDouble(),
-        seksG = packet["sykepengegrunnlagsfakta.6G"].asDouble(),
+        omregnetÅrsinntekt = packet["sykepengegrunnlagsfakta"]["omregnetÅrsinntektTotalt"].asDouble(),
+        seksG = packet["sykepengegrunnlagsfakta"]["6G"].asDouble(),
         avviksprosent = avviksvurdering.avviksprosent,
         innrapportertÅrsinntekt = avviksvurdering.sammenligningsgrunnlag.totalbeløp,
         tags = tags.filter { it == TAG_6G_BEGRENSET }.toSet(),
-        skjønnsfastsatt = packet["sykepengegrunnlagsfakta.skjønnsfastsatt"].asDouble(),
+        skjønnsfastsatt = packet["sykepengegrunnlagsfakta"]["skjønnsfastsatt"].asDouble(),
         skjønnsfastsettingtype =
             when (skjønnsfastsattSykepengegrunnlag.type) {
                 Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT -> VedtakFattetMelding.Skjønnsfastsettingstype.OMREGNET_ÅRSINNTEKT
@@ -319,7 +289,7 @@ class AvsluttetMedVedtakRiver(
                 Skjønnsfastsettingsårsak.TREDJE_AVSNITT -> VedtakFattetMelding.Skjønnsfastsettingsårsak.TREDJE_AVSNITT
             },
         arbeidsgivere =
-            packet["sykepengegrunnlagsfakta.arbeidsgivere"].map { arbeidsgiver ->
+            packet["sykepengegrunnlagsfakta"]["arbeidsgivere"].map { arbeidsgiver ->
                 val arbeidsgiverreferanse = arbeidsgiver["arbeidsgiver"].asText()
                 VedtakFattetMelding.FastsattEtterSkjønnSykepengegrunnlagsfakta.Arbeidsgiver(
                     organisasjonsnummer = arbeidsgiver["arbeidsgiver"].asText(),
@@ -336,7 +306,7 @@ class AvsluttetMedVedtakRiver(
 
     private fun byggFastsattIInfotrygdSykepengegrunnlagsfakta(packet: JsonMessage) =
         VedtakFattetMelding.FastsattIInfotrygdSykepengegrunnlagsfakta(
-            omregnetÅrsinntekt = packet["sykepengegrunnlagsfakta.omregnetÅrsinntektTotalt"].asDouble(),
+            omregnetÅrsinntekt = packet["sykepengegrunnlagsfakta"]["omregnetÅrsinntektTotalt"].asDouble(),
         )
 
     private fun Person.finnAvviksvurdering(behandling: LegacyBehandling): Avviksvurdering =
