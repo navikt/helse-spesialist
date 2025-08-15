@@ -141,8 +141,6 @@ class AvsluttetMedVedtakRiver(
                 }
                 byggSykepengevedtakSelvstendigNæringsdrivendeDto(packet, behandling)
             } else {
-                val skjønnsfastsattSykepengegrunnlag =
-                    skjønnsfastsatteSykepengegrunnlag.lastOrNull { it.skjæringstidspunkt == behandling.skjæringstidspunkt() }
                 VedtakFattetMelding(
                     fødselsnummer = packet["fødselsnummer"].asText(),
                     aktørId = aktørId,
@@ -166,6 +164,9 @@ class AvsluttetMedVedtakRiver(
                         ).toSet(),
                     begrunnelser =
                         if (fastsatt == FASTSATT_ETTER_SKJØNN) {
+                            val skjønnsfastsattSykepengegrunnlag =
+                                skjønnsfastsatteSykepengegrunnlag.lastOrNull { it.skjæringstidspunkt == behandling.skjæringstidspunkt() }
+                                    ?: error("Forventer å finne opplysninger fra saksbehandler ved bygging av vedtak når sykepengegrunnlaget er fastsatt etter skjønn")
                             listOf(
                                 VedtakFattetMelding.Begrunnelse(
                                     type = VedtakFattetMelding.BegrunnelseType.SkjønnsfastsattSykepengegrunnlagMal,
@@ -185,7 +186,8 @@ class AvsluttetMedVedtakRiver(
                         } + listOfNotNull(behandling.vedtakBegrunnelse?.toBegrunnelse()),
                     sykepengegrunnlagsfakta =
                         when (fastsatt) {
-                            FASTSATT_I_INFOTRYGD -> byggFastsattIInfotrygdSykepengegrunnlagsfakta(packet = packet)
+                            FASTSATT_I_INFOTRYGD ->
+                                byggFastsattIInfotrygdSykepengegrunnlagsfakta(packet = packet)
 
                             FASTSATT_ETTER_HOVEDREGEL ->
                                 byggFastsattEtterHovedregelSykepengegrunnlagsfakta(
@@ -195,12 +197,13 @@ class AvsluttetMedVedtakRiver(
                                 )
 
                             FASTSATT_ETTER_SKJØNN -> {
+                                val skjønnsfastsattSykepengegrunnlag =
+                                    skjønnsfastsatteSykepengegrunnlag.lastOrNull { it.skjæringstidspunkt == behandling.skjæringstidspunkt() }
+                                        ?: error("Forventer å finne opplysninger fra saksbehandler ved bygging av vedtak når sykepengegrunnlaget er fastsatt etter skjønn")
                                 byggFastsattEtterSkjønnSykepengegrunnlagsfakta(
                                     packet = packet,
                                     tags = behandling.tags,
-                                    skjønnsfastsattSykepengegrunnlag =
-                                        skjønnsfastsattSykepengegrunnlag
-                                            ?: error("Forventer å finne opplysninger fra saksbehandler ved bygging av vedtak når sykepengegrunnlaget er fastsatt etter skjønn"),
+                                    skjønnsfastsattSykepengegrunnlag = skjønnsfastsattSykepengegrunnlag,
                                     avviksvurdering = finnAvviksvurdering(behandling),
                                 )
                             }
@@ -225,12 +228,12 @@ class AvsluttetMedVedtakRiver(
                     beregningsgrunnlag =
                         BigDecimal(
                             packet["sykepengegrunnlagsfakta"]["arbeidsgivere"]
-                                .single { it["arbeidsgiver"].asText().lowercase() == "selvstendig" }
+                                .single { it["arbeidsgiver"].asText() == "SELVSTENDIG" }
                                 ["omregnetÅrsinntekt"]
                                 .asText(),
                         ),
                     pensjonsgivendeInntekter = emptyList(),
-                    erBegrensetTil6G = "6GBegrenset" in behandling.tags,
+                    erBegrensetTil6G = TAG_6G_BEGRENSET in behandling.tags,
                     `6G` = BigDecimal(packet["sykepengegrunnlagsfakta"]["6G"].asText()),
                 ),
             fom = behandling.fom(),
@@ -292,13 +295,13 @@ class AvsluttetMedVedtakRiver(
             },
         arbeidsgivere =
             packet["sykepengegrunnlagsfakta"]["arbeidsgivere"].map { arbeidsgiver ->
-                val arbeidsgiverreferanse = arbeidsgiver["arbeidsgiver"].asText()
+                val organisasjonsnummer = arbeidsgiver["arbeidsgiver"].asText()
                 VedtakFattetMelding.FastsattEtterSkjønnSykepengegrunnlagsfakta.Arbeidsgiver(
-                    organisasjonsnummer = arbeidsgiver["arbeidsgiver"].asText(),
+                    organisasjonsnummer = organisasjonsnummer,
                     omregnetÅrsinntekt = arbeidsgiver["omregnetÅrsinntekt"].asDouble(),
                     innrapportertÅrsinntekt =
                         avviksvurdering.sammenligningsgrunnlag.innrapporterteInntekter
-                            .filter { it.arbeidsgiverreferanse == arbeidsgiverreferanse }
+                            .filter { it.arbeidsgiverreferanse == organisasjonsnummer }
                             .flatMap(InnrapportertInntekt::inntekter)
                             .sumOf(Inntekt::beløp),
                     skjønnsfastsatt = arbeidsgiver["skjønnsfastsatt"].asDouble(),
