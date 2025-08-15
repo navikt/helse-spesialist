@@ -70,10 +70,10 @@ class AvsluttetMedVedtakRiver(
             val meldingJson = packet.toJson()
             sikkerlogg.info("Melding $MELDINGNAVN mottatt:\n$meldingJson")
 
-            val meldingPubliserer = MessageContextMeldingPubliserer(context)
-            val outbox = mutableListOf<UtgåendeHendelse>()
-
             try {
+                val meldingPubliserer = MessageContextMeldingPubliserer(context)
+                val outbox = mutableListOf<UtgåendeHendelse>()
+
                 sessionFactory.transactionalSessionScope { sessionContext ->
                     sessionContext.meldingDao.lagre(
                         id = packet["@id"].asUUID(),
@@ -81,6 +81,8 @@ class AvsluttetMedVedtakRiver(
                         meldingtype = MeldingDao.Meldingtype.AVSLUTTET_MED_VEDTAK,
                         vedtaksperiodeId = packet["vedtaksperiodeId"].asUUID(),
                     )
+                }
+                sessionFactory.transactionalSessionScope { sessionContext ->
                     sessionContext.personRepository.brukPersonHvisFinnes(packet["fødselsnummer"].asText()) {
                         logg.info("Personen finnes i databasen, behandler melding $MELDINGNAVN")
                         sikkerlogg.info("Personen finnes i databasen, behandler melding $MELDINGNAVN")
