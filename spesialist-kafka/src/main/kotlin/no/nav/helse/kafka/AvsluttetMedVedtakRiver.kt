@@ -162,7 +162,7 @@ class AvsluttetMedVedtakRiver(
                     listOf(
                         VedtakFattetMelding.Begrunnelse(
                             type = VedtakFattetMelding.BegrunnelseType.SkjønnsfastsattSykepengegrunnlagMal,
-                            begrunnelse = skjønnsfastsattSykepengegrunnlag!!.begrunnelseFraMal,
+                            begrunnelse = skjønnsfastsattSykepengegrunnlag.begrunnelseFraMal,
                         ),
                         VedtakFattetMelding.Begrunnelse(
                             type = VedtakFattetMelding.BegrunnelseType.SkjønnsfastsattSykepengegrunnlagFritekst,
