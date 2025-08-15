@@ -51,3 +51,15 @@ jobs:
                   CLUSTER: dev-gcp
                   RESOURCE: deploy/dev.yml,deploy/dev-db-policy.yml,deploy/unleash/dev.yml
                   IMAGE: ${{ needs.build.outputs.image }}
+
+    deployProd:
+        name: Deploy to prod
+        needs: [build]
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v5
+            - uses: nais/deploy/actions/deploy@v2
+              env:
+                  CLUSTER: prod-gcp
+                  RESOURCE: deploy/prod.yml,deploy/prod-db-policy.yml,deploy/unleash/prod.yml
+                  IMAGE: ${{ needs.build.outputs.image }}
