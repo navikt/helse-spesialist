@@ -29,6 +29,7 @@ internal class PubliserSykepengevedtakTest {
         private val spleisBehandlingId = UUID.randomUUID()
         private val utbetalingId = UUID.randomUUID()
         private const val ORGANISASJONSNUMMER = "123456789"
+        private const val YRKESAKTIVITETSTYPE = "ARBEIDSTAKER"
         private const val AKTØRID = "1234567891011"
         private val fom = 1 jan 2018
         private val tom = 31 jan 2018
@@ -60,6 +61,7 @@ internal class PubliserSykepengevedtakTest {
                 fødselsnummer = FØDSELSNUMMER,
                 aktørId = AKTØRID,
                 organisasjonsnummer = ORGANISASJONSNUMMER,
+                yrkesaktivitetstype = YRKESAKTIVITETSTYPE,
                 vedtaksperiodeId = vedtaksperiodeId,
                 behandlingId = spleisBehandlingId,
                 utbetalingId = utbetalingId,
@@ -109,6 +111,7 @@ internal class PubliserSykepengevedtakTest {
                 fødselsnummer = FØDSELSNUMMER,
                 aktørId = AKTØRID,
                 organisasjonsnummer = ORGANISASJONSNUMMER,
+                yrkesaktivitetstype = YRKESAKTIVITETSTYPE,
                 vedtaksperiodeId = vedtaksperiodeId,
                 behandlingId = spleisBehandlingId,
                 utbetalingId = utbetalingId,
@@ -184,6 +187,7 @@ internal class PubliserSykepengevedtakTest {
                 fødselsnummer = FØDSELSNUMMER,
                 aktørId = AKTØRID,
                 organisasjonsnummer = ORGANISASJONSNUMMER,
+                yrkesaktivitetstype = YRKESAKTIVITETSTYPE,
                 vedtaksperiodeId = vedtaksperiodeId,
                 behandlingId = spleisBehandlingId,
                 utbetalingId = utbetalingId,
@@ -271,6 +275,7 @@ internal class PubliserSykepengevedtakTest {
                 fødselsnummer = FØDSELSNUMMER,
                 aktørId = AKTØRID,
                 organisasjonsnummer = ORGANISASJONSNUMMER,
+                yrkesaktivitetstype = YRKESAKTIVITETSTYPE,
                 vedtaksperiodeId = vedtaksperiodeId,
                 behandlingId = spleisBehandlingId,
                 utbetalingId = utbetalingId,
@@ -388,6 +393,7 @@ internal class PubliserSykepengevedtakTest {
                 fødselsnummer = FØDSELSNUMMER,
                 aktørId = AKTØRID,
                 organisasjonsnummer = ORGANISASJONSNUMMER,
+                yrkesaktivitetstype = YRKESAKTIVITETSTYPE,
                 vedtaksperiodeId = vedtaksperiodeId,
                 behandlingId = spleisBehandlingId,
                 utbetalingId = utbetalingId,

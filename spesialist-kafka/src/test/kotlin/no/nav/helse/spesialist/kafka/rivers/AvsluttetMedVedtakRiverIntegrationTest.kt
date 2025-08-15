@@ -38,7 +38,7 @@ class AvsluttetMedVedtakRiverIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture(testRapid)
     private val personRepository = integrationTestFixture.sessionFactory.sessionContext.personRepository
 
-    private val organisasjonsnummer = lagOrganisasjonsnummer()
+    private lateinit var organisasjonsnummer: String
     private val vedtaksperiodeId = UUID.randomUUID()
     private val spleisBehandlingId = UUID.randomUUID()
     private val fom = LocalDate.parse("2024-10-01")
@@ -55,6 +55,7 @@ class AvsluttetMedVedtakRiverIntegrationTest {
     @Test
     fun `fastsatt etter skjønn`() {
         // Given:
+        organisasjonsnummer = lagOrganisasjonsnummer()
         val skjønnsfastsattBeløp = BigDecimal("650000.00")
         val omregnetÅrsinntekt = BigDecimal("800000.00")
         val seksG = BigDecimal("666666.66")
@@ -106,6 +107,7 @@ class AvsluttetMedVedtakRiverIntegrationTest {
               "@event_name": "vedtak_fattet",
               "fødselsnummer": "$fødselsnummer",
               "aktørId": "$aktørId",
+              "yrkesaktivitetstype" : "ARBEIDSTAKER",
               "vedtaksperiodeId": "$vedtaksperiodeId",
               "behandlingId": "$spleisBehandlingId",
               "organisasjonsnummer": "$organisasjonsnummer",
@@ -186,6 +188,7 @@ class AvsluttetMedVedtakRiverIntegrationTest {
     @Test
     fun `fastsatt etter skjønn - delvis innvilgelse`() {
         // Given:
+        organisasjonsnummer = lagOrganisasjonsnummer()
         val skjønnsfastsattBeløp = BigDecimal("650000.00")
         val omregnetÅrsinntekt = BigDecimal("800000.00")
         val seksG = BigDecimal("666666.66")
@@ -238,6 +241,7 @@ class AvsluttetMedVedtakRiverIntegrationTest {
               "@event_name": "vedtak_fattet",
               "fødselsnummer": "$fødselsnummer",
               "aktørId": "$aktørId",
+              "yrkesaktivitetstype" : "ARBEIDSTAKER",
               "vedtaksperiodeId": "$vedtaksperiodeId",
               "behandlingId": "$spleisBehandlingId",
               "organisasjonsnummer": "$organisasjonsnummer",
@@ -318,6 +322,7 @@ class AvsluttetMedVedtakRiverIntegrationTest {
     @Test
     fun `fastsatt etter hovedregel`() {
         // Given:
+        organisasjonsnummer = lagOrganisasjonsnummer()
         val omregnetÅrsinntekt = BigDecimal("600000.00")
         val seksG = BigDecimal("666666.66")
         val innrapportertÅrsinntekt = BigDecimal("660000.00")
@@ -355,6 +360,7 @@ class AvsluttetMedVedtakRiverIntegrationTest {
               "@event_name": "vedtak_fattet",
               "fødselsnummer": "$fødselsnummer",
               "aktørId": "$aktørId",
+              "yrkesaktivitetstype" : "ARBEIDSTAKER",
               "vedtaksperiodeId": "$vedtaksperiodeId",
               "behandlingId": "$spleisBehandlingId",
               "organisasjonsnummer": "$organisasjonsnummer",
@@ -401,6 +407,7 @@ class AvsluttetMedVedtakRiverIntegrationTest {
     @Test
     fun `fastsatt etter hovedregel - delvis innvilgelse`() {
         // Given:
+        organisasjonsnummer = lagOrganisasjonsnummer()
         val omregnetÅrsinntekt = BigDecimal("600000.00")
         val seksG = BigDecimal("666666.66")
         val innrapportertÅrsinntekt = BigDecimal("660000.00")
@@ -439,6 +446,7 @@ class AvsluttetMedVedtakRiverIntegrationTest {
               "@event_name": "vedtak_fattet",
               "fødselsnummer": "$fødselsnummer",
               "aktørId": "$aktørId",
+              "yrkesaktivitetstype" : "ARBEIDSTAKER",
               "vedtaksperiodeId": "$vedtaksperiodeId",
               "behandlingId": "$spleisBehandlingId",
               "organisasjonsnummer": "$organisasjonsnummer",
@@ -485,6 +493,7 @@ class AvsluttetMedVedtakRiverIntegrationTest {
     @Test
     fun `fastsatt etter hovedregel begrenset til 6G`() {
         // Given:
+        organisasjonsnummer = lagOrganisasjonsnummer()
         val omregnetÅrsinntekt = BigDecimal("900000.00")
         val seksG = BigDecimal("666666.66")
         val innrapportertÅrsinntekt = BigDecimal("990000.00")
@@ -522,6 +531,7 @@ class AvsluttetMedVedtakRiverIntegrationTest {
               "@event_name": "vedtak_fattet",
               "fødselsnummer": "$fødselsnummer",
               "aktørId": "$aktørId",
+              "yrkesaktivitetstype" : "ARBEIDSTAKER",
               "vedtaksperiodeId": "$vedtaksperiodeId",
               "behandlingId": "$spleisBehandlingId",
               "organisasjonsnummer": "$organisasjonsnummer",
@@ -568,6 +578,7 @@ class AvsluttetMedVedtakRiverIntegrationTest {
     @Test
     fun `fastsatt i infotrygd`() {
         // Given:
+        organisasjonsnummer = lagOrganisasjonsnummer()
         val omregnetÅrsinntekt = BigDecimal("600000.00")
         val innrapportertÅrsinntekt = BigDecimal("660000.00")
         val avviksprosent = 10.0
@@ -603,6 +614,7 @@ class AvsluttetMedVedtakRiverIntegrationTest {
               "@event_name": "vedtak_fattet",
               "fødselsnummer": "$fødselsnummer",
               "aktørId": "$aktørId",
+              "yrkesaktivitetstype" : "ARBEIDSTAKER",
               "vedtaksperiodeId": "$vedtaksperiodeId",
               "behandlingId": "$spleisBehandlingId",
               "organisasjonsnummer": "$organisasjonsnummer",
@@ -638,6 +650,7 @@ class AvsluttetMedVedtakRiverIntegrationTest {
     @Test
     fun `selvstendig næringsdrivende`() {
         // Given:
+        organisasjonsnummer = "SELVSTENDIG"
         val beregningsgrunnlag = BigDecimal("600000.00")
         val seksG = BigDecimal("666666.66")
         val behandlingTags = listOf("Behandling tag 1", "Behandling tag 2")
@@ -667,8 +680,10 @@ class AvsluttetMedVedtakRiverIntegrationTest {
             {
               "@event_name": "vedtak_fattet",
               "fødselsnummer": "$fødselsnummer",
+              "aktørId": "$aktørId",
               "yrkesaktivitetstype": "SELVSTENDIG",
               "vedtaksperiodeId": "$vedtaksperiodeId",
+              "behandlingId": "$spleisBehandlingId",
               "organisasjonsnummer" : "SELVSTENDIG",
               "fom": "$fom",
               "tom": "$tom",
@@ -677,9 +692,9 @@ class AvsluttetMedVedtakRiverIntegrationTest {
               "sykepengegrunnlag": $beregningsgrunnlag,
               "vedtakFattetTidspunkt": "$vedtakFattetTidspunkt",
               "utbetalingId": "$utbetalingId",
+              "tags": [ ${behandlingTags.joinToString(separator = ", ") { "\"$it\"" }} ],
               "sykepengegrunnlagsfakta": {
                 "beregningsgrunnlag": $beregningsgrunnlag,
-                "pensjonsgivendeInntekter": [],
                 "erBegrensetTil6G": false,
                 "6G": $seksG
               },
@@ -703,6 +718,7 @@ class AvsluttetMedVedtakRiverIntegrationTest {
     @Test
     fun `selvstendig næringsdrivende begrenset til 6G`() {
         // Given:
+        organisasjonsnummer = "SELVSTENDIG"
         val beregningsgrunnlag = BigDecimal("800000.00")
         val seksG = BigDecimal("666666.66")
         val behandlingTags = listOf("Behandling tag 1", "Behandling tag 2")
@@ -732,8 +748,10 @@ class AvsluttetMedVedtakRiverIntegrationTest {
             {
               "@event_name": "vedtak_fattet",
               "fødselsnummer": "$fødselsnummer",
+              "aktørId": "$aktørId",
               "yrkesaktivitetstype": "SELVSTENDIG",
               "vedtaksperiodeId": "$vedtaksperiodeId",
+              "behandlingId": "$spleisBehandlingId",
               "organisasjonsnummer" : "SELVSTENDIG",
               "fom": "$fom",
               "tom": "$tom",
@@ -742,9 +760,9 @@ class AvsluttetMedVedtakRiverIntegrationTest {
               "sykepengegrunnlag": $seksG,
               "vedtakFattetTidspunkt": "$vedtakFattetTidspunkt",
               "utbetalingId": "$utbetalingId",
+              "tags": [ ${behandlingTags.joinToString(separator = ", ") { "\"$it\"" }} ],
               "sykepengegrunnlagsfakta": {
                 "beregningsgrunnlag": $beregningsgrunnlag,
-                "pensjonsgivendeInntekter": [],
                 "erBegrensetTil6G": true,
                 "6G": $seksG
               },
@@ -773,7 +791,7 @@ class AvsluttetMedVedtakRiverIntegrationTest {
         avviksvurdering: Avviksvurdering? = null
     ) {
         personRepository.leggTilPerson(
-            Person.Companion.gjenopprett(
+            Person.gjenopprett(
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
                 vedtaksperioder = listOf(

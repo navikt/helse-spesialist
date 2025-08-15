@@ -1,5 +1,6 @@
 package no.nav.helse.modell.melding
 
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -10,6 +11,7 @@ data class VedtakFattetMelding(
     val vedtaksperiodeId: UUID,
     val behandlingId: UUID,
     val organisasjonsnummer: String,
+    val yrkesaktivitetstype: String,
     val fom: LocalDate,
     val tom: LocalDate,
     val skjæringstidspunkt: LocalDate,
@@ -59,6 +61,12 @@ data class VedtakFattetMelding(
 
     data class FastsattIInfotrygdSykepengegrunnlagsfakta(
         val omregnetÅrsinntekt: Double,
+    ) : Sykepengegrunnlagsfakta
+
+    data class SelvstendigNæringsdrivendeSykepengegrunnlagsfakta(
+        val beregningsgrunnlag: BigDecimal,
+        val erBegrensetTil6G: Boolean,
+        val seksG: BigDecimal,
     ) : Sykepengegrunnlagsfakta
 
     data class Begrunnelse(

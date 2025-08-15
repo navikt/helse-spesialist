@@ -7,6 +7,7 @@ internal fun VedtakFattetMelding.detaljer(): Map<String, Any> =
     mapOf(
         "fødselsnummer" to fødselsnummer,
         "aktørId" to aktørId,
+        "yrkesaktivitetstype" to yrkesaktivitetstype,
         "vedtaksperiodeId" to vedtaksperiodeId,
         "behandlingId" to behandlingId,
         "organisasjonsnummer" to organisasjonsnummer,
@@ -27,6 +28,7 @@ private fun VedtakFattetMelding.Sykepengegrunnlagsfakta.tilSykepengegrunnlagsfak
         is VedtakFattetMelding.FastsattEtterHovedregelSykepengegrunnlagsfakta -> tilSykepengegrunnlagsfakta()
         is VedtakFattetMelding.FastsattEtterSkjønnSykepengegrunnlagsfakta -> tilSykepengegrunnlagsfakta()
         is VedtakFattetMelding.FastsattIInfotrygdSykepengegrunnlagsfakta -> tilSykepengegrunnlagsfakta()
+        is VedtakFattetMelding.SelvstendigNæringsdrivendeSykepengegrunnlagsfakta -> tilSykepengegrunnlagsfakta()
     }
 
 private fun VedtakFattetMelding.FastsattEtterHovedregelSykepengegrunnlagsfakta.tilSykepengegrunnlagsfakta(): Map<String, Any> =
@@ -73,6 +75,13 @@ private fun VedtakFattetMelding.FastsattIInfotrygdSykepengegrunnlagsfakta.tilSyk
     mapOf(
         "fastsatt" to "IInfotrygd",
         "omregnetÅrsinntekt" to omregnetÅrsinntekt,
+    )
+
+private fun VedtakFattetMelding.SelvstendigNæringsdrivendeSykepengegrunnlagsfakta.tilSykepengegrunnlagsfakta(): Map<String, Any> =
+    mapOf(
+        "beregningsgrunnlag" to beregningsgrunnlag,
+        "erBegrensetTil6G" to erBegrensetTil6G,
+        "6G" to seksG,
     )
 
 private fun VedtakFattetMelding.Begrunnelse.tilBegrunnelse(

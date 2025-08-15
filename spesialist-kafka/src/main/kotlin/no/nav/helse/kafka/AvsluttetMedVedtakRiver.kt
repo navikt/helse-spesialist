@@ -1,5 +1,6 @@
 package no.nav.helse.kafka
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
@@ -10,7 +11,6 @@ import no.nav.helse.db.MeldingDao
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.withMDC
-import no.nav.helse.modell.melding.SykepengevedtakSelvstendigNæringsdrivendeDto
 import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.melding.VedtakFattetMelding
 import no.nav.helse.modell.person.Person
@@ -28,6 +28,7 @@ import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.sikkerlogg
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import java.math.BigDecimal
+import java.util.UUID
 
 class AvsluttetMedVedtakRiver(
     private val sessionFactory: SessionFactory,
@@ -129,121 +130,105 @@ class AvsluttetMedVedtakRiver(
         behandling: LegacyBehandling,
         vedtaksperiode: Vedtaksperiode,
     ): UtgåendeHendelse {
-        val erSelvstendigNæringsdrivende = packet["yrkesaktivitetstype"].asText() == "SELVSTENDIG"
         val fastsatt = packet["sykepengegrunnlagsfakta"]["fastsatt"].asText()
-        val vedtaksperiodeMelding =
-            if (erSelvstendigNæringsdrivende) {
-                if (fastsatt != FASTSATT_ETTER_HOVEDREGEL) {
-                    error(
-                        "Ustøttet verdi sykepengegrunnlagsfakta.fastsatt for selvstendig næringsdrivende: \"$fastsatt\"." +
-                            " Kun \"$FASTSATT_ETTER_HOVEDREGEL\" støttes.",
+
+        return VedtakFattetMelding(
+            fødselsnummer = packet["fødselsnummer"].asText(),
+            aktørId = aktørId,
+            organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
+            yrkesaktivitetstype = packet["yrkesaktivitetstype"].asText(),
+            vedtaksperiodeId = behandling.vedtaksperiodeId,
+            behandlingId = behandling.behandlingId(),
+            utbetalingId = behandling.utbetalingId(),
+            fom = behandling.fom(),
+            tom = behandling.tom(),
+            skjæringstidspunkt = behandling.skjæringstidspunkt,
+            hendelser = packet["hendelser"].map<JsonNode, UUID> { it.asUUID() },
+            sykepengegrunnlag = packet["sykepengegrunnlag"].asDouble(),
+            vedtakFattetTidspunkt = packet["vedtakFattetTidspunkt"].asLocalDateTime(),
+            tags =
+                (
+                    if (fastsatt == FASTSATT_I_INFOTRYGD) {
+                        behandling.tags
+                    } else {
+                        behandling.tags.filterNot { it == TAG_6G_BEGRENSET }
+                    }
+                ).toSet(),
+            begrunnelser =
+                if (fastsatt == FASTSATT_ETTER_SKJØNN) {
+                    val skjønnsfastsattSykepengegrunnlag =
+                        skjønnsfastsatteSykepengegrunnlag.lastOrNull { it.skjæringstidspunkt == behandling.skjæringstidspunkt() }
+                            ?: error("Forventer å finne opplysninger fra saksbehandler ved bygging av vedtak når sykepengegrunnlaget er fastsatt etter skjønn")
+                    listOf(
+                        VedtakFattetMelding.Begrunnelse(
+                            type = VedtakFattetMelding.BegrunnelseType.SkjønnsfastsattSykepengegrunnlagMal,
+                            begrunnelse = skjønnsfastsattSykepengegrunnlag!!.begrunnelseFraMal,
+                        ),
+                        VedtakFattetMelding.Begrunnelse(
+                            type = VedtakFattetMelding.BegrunnelseType.SkjønnsfastsattSykepengegrunnlagFritekst,
+                            begrunnelse = skjønnsfastsattSykepengegrunnlag.begrunnelseFraFritekst,
+                        ),
+                        VedtakFattetMelding.Begrunnelse(
+                            type = VedtakFattetMelding.BegrunnelseType.SkjønnsfastsattSykepengegrunnlagKonklusjon,
+                            begrunnelse = skjønnsfastsattSykepengegrunnlag.begrunnelseFraKonklusjon,
+                        ),
                     )
-                }
-                byggSykepengevedtakSelvstendigNæringsdrivendeDto(packet, behandling)
-            } else {
-                VedtakFattetMelding(
-                    fødselsnummer = packet["fødselsnummer"].asText(),
-                    aktørId = aktørId,
-                    organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
-                    vedtaksperiodeId = behandling.vedtaksperiodeId,
-                    behandlingId = behandling.behandlingId(),
-                    utbetalingId = behandling.utbetalingId(),
-                    fom = behandling.fom(),
-                    tom = behandling.tom(),
-                    skjæringstidspunkt = behandling.skjæringstidspunkt,
-                    hendelser = packet["hendelser"].map { it.asUUID() },
-                    sykepengegrunnlag = packet["sykepengegrunnlag"].asDouble(),
-                    vedtakFattetTidspunkt = packet["vedtakFattetTidspunkt"].asLocalDateTime(),
-                    tags =
-                        (
-                            if (fastsatt == FASTSATT_I_INFOTRYGD) {
-                                behandling.tags
-                            } else {
-                                behandling.tags.filterNot { it == TAG_6G_BEGRENSET }
-                            }
-                        ).toSet(),
-                    begrunnelser =
-                        if (fastsatt == FASTSATT_ETTER_SKJØNN) {
+                } else {
+                    emptyList()
+                } + listOfNotNull(behandling.vedtakBegrunnelse?.toBegrunnelse()),
+            sykepengegrunnlagsfakta =
+                if (packet["yrkesaktivitetstype"].asText() == YRKESAKTIVITETSTYPE_SELVSTENDIG_NÆRINGSDRIVENDE) {
+                    if (fastsatt != FASTSATT_ETTER_HOVEDREGEL) {
+                        error(
+                            "Ustøttet verdi sykepengegrunnlagsfakta.fastsatt for selvstendig næringsdrivende: \"$fastsatt\"." +
+                                " Kun \"${FASTSATT_ETTER_HOVEDREGEL}\" støttes.",
+                        )
+                    }
+                    byggSelvstendigNæringsdrivendeSykepengegrunnlagsfakta(packet, behandling)
+                } else {
+                    when (fastsatt) {
+                        FASTSATT_I_INFOTRYGD ->
+                            byggFastsattIInfotrygdSykepengegrunnlagsfakta(packet = packet)
+
+                        FASTSATT_ETTER_HOVEDREGEL ->
+                            byggFastsattEtterHovedregelSykepengegrunnlagsfakta(
+                                packet = packet,
+                                tags = behandling.tags,
+                                avviksvurdering = finnAvviksvurdering(behandling),
+                            )
+
+                        FASTSATT_ETTER_SKJØNN -> {
                             val skjønnsfastsattSykepengegrunnlag =
                                 skjønnsfastsatteSykepengegrunnlag.lastOrNull { it.skjæringstidspunkt == behandling.skjæringstidspunkt() }
                                     ?: error("Forventer å finne opplysninger fra saksbehandler ved bygging av vedtak når sykepengegrunnlaget er fastsatt etter skjønn")
-                            listOf(
-                                VedtakFattetMelding.Begrunnelse(
-                                    type = VedtakFattetMelding.BegrunnelseType.SkjønnsfastsattSykepengegrunnlagMal,
-                                    begrunnelse = skjønnsfastsattSykepengegrunnlag!!.begrunnelseFraMal,
-                                ),
-                                VedtakFattetMelding.Begrunnelse(
-                                    type = VedtakFattetMelding.BegrunnelseType.SkjønnsfastsattSykepengegrunnlagFritekst,
-                                    begrunnelse = skjønnsfastsattSykepengegrunnlag.begrunnelseFraFritekst,
-                                ),
-                                VedtakFattetMelding.Begrunnelse(
-                                    type = VedtakFattetMelding.BegrunnelseType.SkjønnsfastsattSykepengegrunnlagKonklusjon,
-                                    begrunnelse = skjønnsfastsattSykepengegrunnlag.begrunnelseFraKonklusjon,
-                                ),
+                            byggFastsattEtterSkjønnSykepengegrunnlagsfakta(
+                                packet = packet,
+                                tags = behandling.tags,
+                                skjønnsfastsattSykepengegrunnlag = skjønnsfastsattSykepengegrunnlag,
+                                avviksvurdering = finnAvviksvurdering(behandling),
                             )
-                        } else {
-                            emptyList()
-                        } + listOfNotNull(behandling.vedtakBegrunnelse?.toBegrunnelse()),
-                    sykepengegrunnlagsfakta =
-                        when (fastsatt) {
-                            FASTSATT_I_INFOTRYGD ->
-                                byggFastsattIInfotrygdSykepengegrunnlagsfakta(packet = packet)
+                        }
 
-                            FASTSATT_ETTER_HOVEDREGEL ->
-                                byggFastsattEtterHovedregelSykepengegrunnlagsfakta(
-                                    packet = packet,
-                                    tags = behandling.tags,
-                                    avviksvurdering = finnAvviksvurdering(behandling),
-                                )
-
-                            FASTSATT_ETTER_SKJØNN -> {
-                                val skjønnsfastsattSykepengegrunnlag =
-                                    skjønnsfastsatteSykepengegrunnlag.lastOrNull { it.skjæringstidspunkt == behandling.skjæringstidspunkt() }
-                                        ?: error("Forventer å finne opplysninger fra saksbehandler ved bygging av vedtak når sykepengegrunnlaget er fastsatt etter skjønn")
-                                byggFastsattEtterSkjønnSykepengegrunnlagsfakta(
-                                    packet = packet,
-                                    tags = behandling.tags,
-                                    skjønnsfastsattSykepengegrunnlag = skjønnsfastsattSykepengegrunnlag,
-                                    avviksvurdering = finnAvviksvurdering(behandling),
-                                )
-                            }
-
-                            else -> error("Ukjent verdi for sykepengegrunnlagsfakta.fastsatt: \"$fastsatt\"")
-                        },
-                )
-            }
-        return vedtaksperiodeMelding
+                        else -> error("Ukjent verdi for sykepengegrunnlagsfakta.fastsatt: \"$fastsatt\"")
+                    }
+                },
+        )
     }
 
-    private fun byggSykepengevedtakSelvstendigNæringsdrivendeDto(
+    private fun byggSelvstendigNæringsdrivendeSykepengegrunnlagsfakta(
         packet: JsonMessage,
         behandling: LegacyBehandling,
-    ): SykepengevedtakSelvstendigNæringsdrivendeDto =
-        SykepengevedtakSelvstendigNæringsdrivendeDto(
-            fødselsnummer = packet["fødselsnummer"].asText(),
-            vedtaksperiodeId = behandling.vedtaksperiodeId(),
-            sykepengegrunnlag = BigDecimal(packet["sykepengegrunnlag"].asDouble().toString()),
-            sykepengegrunnlagsfakta =
-                SykepengevedtakSelvstendigNæringsdrivendeDto.Sykepengegrunnlagsfakta(
-                    beregningsgrunnlag =
-                        BigDecimal(
-                            packet["sykepengegrunnlagsfakta"]["arbeidsgivere"]
-                                .single { it["arbeidsgiver"].asText() == "SELVSTENDIG" }
-                                ["omregnetÅrsinntekt"]
-                                .asText(),
-                        ),
-                    pensjonsgivendeInntekter = emptyList(),
-                    erBegrensetTil6G = TAG_6G_BEGRENSET in behandling.tags,
-                    `6G` = BigDecimal(packet["sykepengegrunnlagsfakta"]["6G"].asText()),
-                ),
-            fom = behandling.fom(),
-            tom = behandling.tom(),
-            skjæringstidspunkt = behandling.skjæringstidspunkt(),
-            hendelser = packet["hendelser"].map { it.asUUID() },
-            vedtakFattetTidspunkt = packet["vedtakFattetTidspunkt"].asLocalDateTime(),
-            utbetalingId = behandling.utbetalingId(),
-            vedtakBegrunnelse = behandling.vedtakBegrunnelse,
-        )
+    ) = VedtakFattetMelding.SelvstendigNæringsdrivendeSykepengegrunnlagsfakta(
+        beregningsgrunnlag =
+            BigDecimal(
+                packet["sykepengegrunnlagsfakta"]["arbeidsgivere"]
+                    .single { it["arbeidsgiver"].asText() == YRKESAKTIVITETSTYPE_SELVSTENDIG_NÆRINGSDRIVENDE }
+                    ["omregnetÅrsinntekt"]
+                    .asText(),
+            ),
+        erBegrensetTil6G = TAG_6G_BEGRENSET in behandling.tags,
+        seksG = BigDecimal(packet["sykepengegrunnlagsfakta"]["6G"].asText()),
+    )
 
     private fun byggFastsattEtterHovedregelSykepengegrunnlagsfakta(
         packet: JsonMessage,
@@ -338,6 +323,7 @@ class AvsluttetMedVedtakRiver(
         private const val FASTSATT_ETTER_SKJØNN = "EtterSkjønn"
         private const val FASTSATT_I_INFOTRYGD = "IInfotrygd"
 
+        private const val YRKESAKTIVITETSTYPE_SELVSTENDIG_NÆRINGSDRIVENDE = "SELVSTENDIG"
         private const val TAG_6G_BEGRENSET = "6GBegrenset"
     }
 }
