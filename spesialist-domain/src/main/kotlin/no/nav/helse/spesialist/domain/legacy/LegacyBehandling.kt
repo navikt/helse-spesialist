@@ -30,7 +30,7 @@ class LegacyBehandling private constructor(
     spleisBehandlingId: UUID?,
     skjæringstidspunkt: LocalDate,
     private var periode: Periode,
-    private var tilstand: Tilstand,
+    tilstand: Tilstand,
     tags: List<String>,
     val vedtakBegrunnelse: VedtakBegrunnelse?,
     varsler: Set<Varsel>,
@@ -60,6 +60,9 @@ class LegacyBehandling private constructor(
         private set
 
     var skjæringstidspunkt: LocalDate = skjæringstidspunkt
+        private set
+
+    var tilstand: Tilstand = tilstand
         private set
 
     var tags: List<String> = tags
@@ -246,7 +249,7 @@ class LegacyBehandling private constructor(
         return inneholderKunÅpenGosysOppgaveVarsel
     }
 
-    internal sealed interface Tilstand {
+    sealed interface Tilstand {
         fun navn(): String
 
         fun toDto(): TilstandDto =
