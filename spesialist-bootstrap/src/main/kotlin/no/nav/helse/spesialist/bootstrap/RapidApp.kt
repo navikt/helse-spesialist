@@ -174,16 +174,6 @@ class RapidApp {
             }
         }
 
-        rapidsConnection.register(
-            object : RapidsConnection.StatusListener {
-                override fun onStartup(rapidsConnection: RapidsConnection) {
-                    if (System.getenv().getValue("NAIS_CLUSTER_NAME") == "prod-gcp") {
-                        dbModule.migrate()
-                    }
-                }
-            },
-        )
-
         rapidsConnection.start()
         return modules
     }
