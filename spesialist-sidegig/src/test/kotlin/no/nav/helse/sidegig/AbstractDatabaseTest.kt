@@ -12,9 +12,17 @@ internal abstract class AbstractDatabaseTest {
     fun insert(
         @Language("PostgreSQL") query: String,
         paramMap: Map<String, Any?> = emptyMap(),
-    ): Int =
+    ) =
         sessionOf(dataSource).use { session ->
             session.run(queryOf(query, paramMap).asUpdate)
+        }
+
+    fun insertAndReturnGeneratedKey(
+        @Language("PostgreSQL") query: String,
+        paramMap: Map<String, Any?> = emptyMap(),
+    ): Long? =
+        sessionOf(dataSource, returnGeneratedKey = true).use { session ->
+            session.run(queryOf(query, paramMap).asUpdateAndReturnGeneratedKey)
         }
 }
 

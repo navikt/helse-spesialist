@@ -72,9 +72,9 @@ class MyDao(
             paramMap = mapOf("utbetalingId" to utbetalingId),
         ) { row ->
             BehandlingISykefraværstilfelleRow(
-                behandlingId = row.uuid("id"),
+                behandlingId = row.long("id"),
                 vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
-                skjæringstidspunkt = row.localDate("skjaringstidspunkt"),
+                skjæringstidspunkt = row.localDate("skjæringstidspunkt"),
                 personId = row.long("person_id"),
                 arbeidsgiverId = row.string("arbeidsgiver_identifikator"),
             )
@@ -90,6 +90,8 @@ class MyDao(
                      person
                 WHERE person.id = :personId
                   AND vedtak.arbeidsgiver_identifikator = :arbeidsgiverId
+                  AND vedtak.person_ref = person.id
+                  AND vedtak.vedtaksperiode_id = behandling.vedtaksperiode_id
                   AND behandling.skjæringstidspunkt = :skjaringstidspunkt
                 ORDER BY behandling.fom 
                 LIMIT 1
@@ -109,7 +111,7 @@ class MyDao(
     )
 
     data class BehandlingISykefraværstilfelleRow(
-        val behandlingId: UUID,
+        val behandlingId: Long,
         val vedtaksperiodeId: UUID,
         val skjæringstidspunkt: LocalDate,
         val personId: Long,
