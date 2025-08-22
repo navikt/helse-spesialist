@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.InntektTilRisk
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
@@ -86,6 +87,7 @@ class BehovMessageBuilderTest {
         val behov = Behov.Risikovurdering(
             vedtaksperiodeId = vedtaksperiodeId,
             organisasjonsnummer = organisasjonsnummer,
+            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
             førstegangsbehandling = true,
             kunRefusjon = false,
             inntekt = InntektTilRisk(

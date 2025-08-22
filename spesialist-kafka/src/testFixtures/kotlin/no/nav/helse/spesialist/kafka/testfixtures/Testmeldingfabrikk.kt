@@ -7,6 +7,7 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.kafka.objectMapper
@@ -244,6 +245,7 @@ object Testmeldingfabrikk {
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         utbetalingId: UUID = UUID.randomUUID(),
         organisasjonsnummer: String = "orgnr",
+        yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
         periodeFom: LocalDate = now(),
         periodeTom: LocalDate = now(),
         skjæringstidspunkt: LocalDate = now(),
@@ -274,6 +276,7 @@ object Testmeldingfabrikk {
                 "aktørId" to aktørId,
                 "fødselsnummer" to fødselsnummer,
                 "organisasjonsnummer" to organisasjonsnummer,
+                "yrkesaktivitetstype" to yrkesaktivitetstype,
                 "vedtaksperiodeId" to "$vedtaksperiodeId",
                 "utbetalingId" to "$utbetalingId",
                 "Godkjenning" to mapOf(

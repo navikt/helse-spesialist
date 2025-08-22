@@ -17,6 +17,7 @@ import no.nav.helse.modell.melding.VedtaksperiodeGodkjentAutomatisk
 import no.nav.helse.modell.melding.VedtaksperiodeGodkjentManuelt
 import no.nav.helse.modell.utbetaling.Refusjonstype
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.domain.testfixtures.feb
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagAktørId
@@ -55,6 +56,7 @@ class UtgåendeHendelseMessageBuilderTest {
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
+            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
             periodetype = periodetype.name,
             saksbehandlerIdent = saksbehandlerIdent,
             saksbehandlerEpost = saksbehandlerEpost,
@@ -75,7 +77,8 @@ class UtgåendeHendelseMessageBuilderTest {
                 "saksbehandler" to mapOf(
                     "ident" to saksbehandlerIdent,
                     "epostadresse" to saksbehandlerEpost,
-                )
+                ),
+                "yrkesaktivitetstype" to Yrkesaktivitetstype.ARBEIDSTAKER
             )
         )
     }
@@ -86,6 +89,7 @@ class UtgåendeHendelseMessageBuilderTest {
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
+            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
             periodetype = periodetype.name,
             saksbehandlerIdent = saksbehandlerIdent,
             saksbehandlerEpost = saksbehandlerEpost,
@@ -111,6 +115,7 @@ class UtgåendeHendelseMessageBuilderTest {
                     "epostadresse" to beslutterEpost,
                 ),
                 "behandlingId" to behandlingId,
+                "yrkesaktivitetstype" to Yrkesaktivitetstype.ARBEIDSTAKER
             )
         )
     }
@@ -121,6 +126,7 @@ class UtgåendeHendelseMessageBuilderTest {
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
+            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
             periodetype = periodetype.name,
             saksbehandlerIdent = saksbehandlerIdent,
             saksbehandlerEpost = saksbehandlerEpost,
@@ -146,6 +152,7 @@ class UtgåendeHendelseMessageBuilderTest {
                 "årsak" to "En årsak",
                 "begrunnelser" to listOf("En begrunnelse"),
                 "kommentar" to "En kommentar",
+                "yrkesaktivitetstype" to Yrkesaktivitetstype.ARBEIDSTAKER
             )
         )
     }
@@ -156,6 +163,7 @@ class UtgåendeHendelseMessageBuilderTest {
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
+            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
             periodetype = periodetype.name,
             saksbehandlerIdent = saksbehandlerIdent,
             saksbehandlerEpost = saksbehandlerEpost,
@@ -178,6 +186,7 @@ class UtgåendeHendelseMessageBuilderTest {
                     "epostadresse" to saksbehandlerEpost,
                 ),
                 "behandlingId" to behandlingId,
+                "yrkesaktivitetstype" to Yrkesaktivitetstype.ARBEIDSTAKER
             )
         )
     }
@@ -188,6 +197,7 @@ class UtgåendeHendelseMessageBuilderTest {
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
+            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
             periodetype = periodetype.name,
         )
 
@@ -205,6 +215,7 @@ class UtgåendeHendelseMessageBuilderTest {
                     "epostadresse" to "tbd@nav.no",
                 ),
                 "behandlingId" to behandlingId,
+                "yrkesaktivitetstype" to Yrkesaktivitetstype.ARBEIDSTAKER
             )
         )
     }
@@ -215,6 +226,7 @@ class UtgåendeHendelseMessageBuilderTest {
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
+            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
             periodetype = periodetype.name,
             årsak = null,
             begrunnelser = null,
@@ -235,6 +247,7 @@ class UtgåendeHendelseMessageBuilderTest {
                     "epostadresse" to "tbd@nav.no",
                 ),
                 "behandlingId" to behandlingId,
+                "yrkesaktivitetstype" to Yrkesaktivitetstype.ARBEIDSTAKER
             )
         )
     }
@@ -285,6 +298,7 @@ class UtgåendeHendelseMessageBuilderTest {
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
+            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
             periodetype = periodetype.name,
             årsak = "En årsak",
             begrunnelser = listOf("En begrunnelse"),
@@ -308,6 +322,7 @@ class UtgåendeHendelseMessageBuilderTest {
                 "årsak" to "En årsak",
                 "begrunnelser" to listOf("En begrunnelse"),
                 "kommentar" to "En kommentar",
+                "yrkesaktivitetstype" to Yrkesaktivitetstype.ARBEIDSTAKER
             )
         )
     }

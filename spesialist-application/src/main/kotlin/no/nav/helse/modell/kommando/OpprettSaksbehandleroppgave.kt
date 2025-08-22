@@ -48,6 +48,7 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
 import java.util.UUID
 
@@ -85,7 +86,7 @@ internal class OpprettSaksbehandleroppgave(
                 enhetUtland(fødselsnummer)
                 mottaker()
                 inntektskilde(inntektskilde)
-                inntektsforhold(behovData.organisasjonsnummer)
+                inntektsforhold(behovData.yrkesaktivitetstype)
                 periodetype(periodetype)
                 påVent(vedtaksperiodeId)
                 skjønnsfastsettelse(vedtaksperiodeId)
@@ -174,8 +175,14 @@ internal class OpprettSaksbehandleroppgave(
         }
     }
 
-    private fun MutableSet<Egenskap>.inntektsforhold(organisasjonsnummer: String) {
-        if (organisasjonsnummer == "SELVSTENDIG") add(SELVSTENDIG_NÆRINGSDRIVENDE) else add(ARBEIDSTAKER)
+    private fun MutableSet<Egenskap>.inntektsforhold(yrkesaktivitetstype: Yrkesaktivitetstype) {
+        when (yrkesaktivitetstype) {
+            Yrkesaktivitetstype.SELVSTENDIG -> add(SELVSTENDIG_NÆRINGSDRIVENDE)
+            Yrkesaktivitetstype.ARBEIDSTAKER -> add(ARBEIDSTAKER)
+            Yrkesaktivitetstype.FRILANS,
+            Yrkesaktivitetstype.ARBEIDSLEDIG,
+            -> error("Støtter ikke yrkesaktivitetstype $yrkesaktivitetstype")
+        }
     }
 
     private fun MutableSet<Egenskap>.periodetype(periodetype: Periodetype) {

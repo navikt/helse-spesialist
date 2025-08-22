@@ -15,6 +15,7 @@ import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.modell.melding.VedtaksperiodeGodkjentAutomatisk
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import no.nav.helse.spesialist.kafka.objectMapper
@@ -73,6 +74,7 @@ internal class MessageContextMeldingPublisererTest {
             fødselsnummer = fødselsnummer,
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
+            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
             periodetype = periodetype
         )
 

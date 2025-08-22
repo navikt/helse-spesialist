@@ -246,6 +246,7 @@ internal class Meldingssender(private val testRapid: TestRapid) {
                 vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId,
                 utbetalingId = godkjenningsbehovTestdata.utbetalingId,
                 organisasjonsnummer = godkjenningsbehovTestdata.organisasjonsnummer,
+                yrkesaktivitetstype = godkjenningsbehovTestdata.yrkesaktivitetstype,
                 periodeFom = godkjenningsbehovTestdata.periodeFom,
                 periodeTom = godkjenningsbehovTestdata.periodeTom,
                 skjæringstidspunkt = godkjenningsbehovTestdata.skjæringstidspunkt,

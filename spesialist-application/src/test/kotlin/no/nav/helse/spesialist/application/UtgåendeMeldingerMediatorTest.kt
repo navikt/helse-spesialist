@@ -12,6 +12,7 @@ import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.melding.VedtaksperiodeGodkjentAutomatisk
 import no.nav.helse.modell.person.Person
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -66,13 +67,16 @@ internal class UtgåendeMeldingerMediatorTest {
             fødselsnummer = lagFødselsnummer(),
             vedtaksperiodeId = UUID.randomUUID(),
             behandlingId = UUID.randomUUID(),
-            periodetype = "FØRSTEGANGSBEHANDLING"
+            periodetype = "FØRSTEGANGSBEHANDLING",
+            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
         )
         val hendelse2 = VedtaksperiodeGodkjentAutomatisk(
             fødselsnummer = lagFødselsnummer(),
             vedtaksperiodeId = UUID.randomUUID(),
             behandlingId = UUID.randomUUID(),
-            periodetype = "FORLENGELSE"
+            periodetype = "FORLENGELSE",
+            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
+
         )
         testContext.hendelse(hendelse1)
         testContext.hendelse(hendelse2)

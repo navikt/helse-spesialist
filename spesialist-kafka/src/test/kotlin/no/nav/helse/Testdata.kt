@@ -5,6 +5,7 @@ import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
@@ -17,6 +18,7 @@ object Testdata {
         id: UUID = UUID.randomUUID(),
         fødselsnummer: String = lagFødselsnummer(),
         organisasjonsnummer: String = lagOrganisasjonsnummer(),
+        yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         utbetalingId: UUID = UUID.randomUUID(),
         spleisBehandlingId: UUID = UUID.randomUUID(),
@@ -31,6 +33,7 @@ object Testdata {
             id = id,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
+            yrkesaktivitetstype = yrkesaktivitetstype,
             vedtaksperiodeId = vedtaksperiodeId,
             spleisVedtaksperioder = emptyList(),
             utbetalingId = utbetalingId,
@@ -73,6 +76,7 @@ internal data class GodkjenningsbehovTestdata(
     val aktørId: String,
     val fødselsnummer: String,
     val organisasjonsnummer: String,
+    val yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
     val vedtaksperiodeId: UUID,
     val utbetalingId: UUID,
     val periodeFom: LocalDate = 1 jan 2018,

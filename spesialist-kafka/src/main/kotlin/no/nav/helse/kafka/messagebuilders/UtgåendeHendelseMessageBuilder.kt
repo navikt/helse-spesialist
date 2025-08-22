@@ -138,6 +138,7 @@ private fun VedtaksperiodeAvvistAutomatisk.detaljer(): Map<String, Any> =
         kommentar?.let { put("kommentar", it) }
         put("periodetype", periodetype)
         put("behandlingId", behandlingId)
+        put("yrkesaktivitetstype", yrkesaktivitetstype)
     }
 
 private fun VedtaksperiodeAvvistManuelt.detaljer(): Map<String, Any> =
@@ -159,6 +160,7 @@ private fun VedtaksperiodeAvvistManuelt.detaljer(): Map<String, Any> =
         kommentar?.let { put("kommentar", it) }
         put("periodetype", periodetype)
         put("behandlingId", behandlingId)
+        put("yrkesaktivitetstype", yrkesaktivitetstype)
     }
 
 private fun VedtaksperiodeGodkjentAutomatisk.detaljer(): Map<String, Any> =
@@ -175,6 +177,7 @@ private fun VedtaksperiodeGodkjentAutomatisk.detaljer(): Map<String, Any> =
                 "epostadresse" to AUTOMATISK_BEHANDLET_EPOSTADRESSE,
             ),
         "behandlingId" to behandlingId,
+        "yrkesaktivitetstype" to yrkesaktivitetstype,
     )
 
 private fun VedtaksperiodeGodkjentManuelt.detaljer(): Map<String, Any> =
@@ -202,6 +205,7 @@ private fun VedtaksperiodeGodkjentManuelt.detaljer(): Map<String, Any> =
             )
         }
         put("behandlingId", behandlingId)
+        put("yrkesaktivitetstype", yrkesaktivitetstype)
     }
 
 private fun Saksbehandlerløsning.detaljer(): Map<String, Any> =

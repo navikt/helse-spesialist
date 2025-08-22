@@ -6,6 +6,7 @@ import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.In
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
 import no.nav.helse.spesialist.api.bootstrap.Gruppe
 import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
@@ -68,6 +69,7 @@ object Testdata {
         id: UUID = UUID.randomUUID(),
         fødselsnummer: String = lagFødselsnummer(),
         organisasjonsnummer: String = lagOrganisasjonsnummer(),
+        yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         utbetalingId: UUID = UUID.randomUUID(),
         spleisBehandlingId: UUID = UUID.randomUUID(),
@@ -83,6 +85,7 @@ object Testdata {
             id = id,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
+            yrkesaktivitetstype = yrkesaktivitetstype,
             vedtaksperiodeId = vedtaksperiodeId,
             spleisVedtaksperioder = emptyList(),
             utbetalingId = utbetalingId,

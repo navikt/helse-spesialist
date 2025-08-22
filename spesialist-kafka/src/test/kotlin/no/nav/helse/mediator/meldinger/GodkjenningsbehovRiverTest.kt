@@ -11,6 +11,7 @@ import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
 import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -216,6 +217,62 @@ internal class GodkjenningsbehovRiverTest {
                     assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, it.periodetype)
                     assertEquals(Utbetalingtype.UTBETALING, it.utbetalingtype)
                     assertEquals(Sykepengegrunnlagsfakta.Infotrygd(omregnetÅrsinntekt = 500000.0), it.sykepengegrunnlagsfakta)
+                },
+                kontekstbasertPubliserer = any()
+            )
+        }
+    }
+
+    @Test
+    fun `leser Godkjenningbehov med yrkesaktivitetstype selvstendig`() {
+        val vilkårsgrunnlagId = UUID.randomUUID()
+        testRapid.sendTestMessage(
+            Testmeldingfabrikk.lagGodkjenningsbehov(
+                aktørId = AKTØR,
+                fødselsnummer = FNR,
+                vedtaksperiodeId = VEDTAKSPERIODE,
+                utbetalingId = UTBETALING_ID,
+                organisasjonsnummer = "",
+                yrkesaktivitetstype = Yrkesaktivitetstype.SELVSTENDIG,
+                periodeFom = FOM,
+                periodeTom = TOM,
+                skjæringstidspunkt = FOM,
+                periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
+                førstegangsbehandling = true,
+                utbetalingtype = Utbetalingtype.UTBETALING,
+                inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
+                orgnummereMedRelevanteArbeidsforhold = emptyList(),
+                kanAvvises = true,
+                id = HENDELSE,
+                vilkårsgrunnlagId = vilkårsgrunnlagId,
+                sykepengegrunnlagsfakta = Testmeldingfabrikk.fastsattEtterHovedregel(
+                    organisasjonsnummer = ORGNR,
+                    arbeidsgivere = listOf(
+                        mapOf(
+                            "arbeidsgiver" to ORGNR,
+                            "omregnetÅrsinntekt" to 500000.00,
+                            "skjønnsfastsatt" to 600000.00,
+                            "inntektskilde" to "Saksbehandler"
+                        )
+                    )),
+            )
+        )
+        verify(exactly = 1) {
+            mediator.mottaMelding(
+                melding = withArg<Godkjenningsbehov> {
+                    assertEquals(HENDELSE, it.id)
+                    assertEquals(FNR, it.fødselsnummer())
+                    assertEquals(VEDTAKSPERIODE, it.vedtaksperiodeId())
+                    assertEquals("", it.organisasjonsnummer)
+                    assertEquals(Yrkesaktivitetstype.SELVSTENDIG, it.yrkesaktivitetstype)
+                    assertEquals(FOM, it.periodeFom)
+                    assertEquals(TOM, it.periodeTom)
+                    assertEquals(FOM, it.skjæringstidspunkt)
+                    assertEquals(Inntektskilde.EN_ARBEIDSGIVER, it.inntektskilde)
+                    assertEquals(true, it.kanAvvises)
+                    assertEquals(true, it.førstegangsbehandling)
+                    assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, it.periodetype)
+                    assertEquals(Utbetalingtype.UTBETALING, it.utbetalingtype)
                 },
                 kontekstbasertPubliserer = any()
             )

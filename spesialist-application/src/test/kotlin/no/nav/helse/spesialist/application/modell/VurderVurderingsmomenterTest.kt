@@ -16,6 +16,7 @@ import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.risiko.VurderVurderingsmomenter
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.application.TestPerson
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import no.nav.helse.spesialist.domain.testfixtures.jan
@@ -80,6 +81,7 @@ internal class VurderVurderingsmomenterTest {
             Behov.Risikovurdering(
                 vedtaksperiodeId = testperson.vedtaksperiodeId1,
                 organisasjonsnummer = testperson.orgnummer,
+                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
                 førstegangsbehandling = true,
                 kunRefusjon = false,
                 inntekt = inntekt()
@@ -98,6 +100,7 @@ internal class VurderVurderingsmomenterTest {
             Behov.Risikovurdering(
                 vedtaksperiodeId = testperson.vedtaksperiodeId1,
                 organisasjonsnummer = testperson.orgnummer,
+                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
                 førstegangsbehandling = true,
                 kunRefusjon = false,
                 inntekt = inntekt()
@@ -115,6 +118,7 @@ internal class VurderVurderingsmomenterTest {
             Behov.Risikovurdering(
                 vedtaksperiodeId = testperson.vedtaksperiodeId1,
                 organisasjonsnummer = testperson.orgnummer,
+                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
                 førstegangsbehandling = true,
                 kunRefusjon = true,
                 inntekt = inntekt()
@@ -132,6 +136,7 @@ internal class VurderVurderingsmomenterTest {
             Behov.Risikovurdering(
                 vedtaksperiodeId = testperson.vedtaksperiodeId1,
                 organisasjonsnummer = testperson.orgnummer,
+                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
                 førstegangsbehandling = true,
                 kunRefusjon = false,
                 inntekt = inntekt()
@@ -173,6 +178,7 @@ internal class VurderVurderingsmomenterTest {
             Behov.Risikovurdering(
                 vedtaksperiodeId = testperson.vedtaksperiodeId1,
                 organisasjonsnummer = testperson.orgnummer,
+                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
                 førstegangsbehandling = true,
                 kunRefusjon = true,
                 inntekt = inntekt()
@@ -186,6 +192,7 @@ internal class VurderVurderingsmomenterTest {
             Behov.Risikovurdering(
                 vedtaksperiodeId = testperson.vedtaksperiodeId1,
                 organisasjonsnummer = testperson.orgnummer,
+                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
                 førstegangsbehandling = true,
                 kunRefusjon = true,
                 inntekt = inntekt()
@@ -216,6 +223,7 @@ internal class VurderVurderingsmomenterTest {
         vedtaksperiodeId = vedtaksperiodeId,
         risikovurderingDao = risikovurderingDao,
         organisasjonsnummer = organisasjonsnummer,
+        yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
         førstegangsbehandling = førstegangsbehandling,
         sykefraværstilfelle = sykefraværstilfelle,
         utbetaling = utbetalingMock,

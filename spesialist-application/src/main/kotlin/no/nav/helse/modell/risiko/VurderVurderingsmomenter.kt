@@ -10,6 +10,7 @@ import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_RV_1
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -17,6 +18,7 @@ internal class VurderVurderingsmomenter(
     private val vedtaksperiodeId: UUID,
     private val risikovurderingDao: RisikovurderingDao,
     private val organisasjonsnummer: String,
+    private val yrkesaktivitetstype: Yrkesaktivitetstype,
     private val førstegangsbehandling: Boolean,
     private val sykefraværstilfelle: Sykefraværstilfelle,
     private val utbetaling: Utbetaling,
@@ -36,6 +38,7 @@ internal class VurderVurderingsmomenter(
                 Behov.Risikovurdering(
                     vedtaksperiodeId = vedtaksperiodeId,
                     organisasjonsnummer = organisasjonsnummer,
+                    yrkesaktivitetstype = yrkesaktivitetstype,
                     førstegangsbehandling = førstegangsbehandling,
                     kunRefusjon = !utbetaling.harEndringIUtbetalingTilSykmeldt(),
                     inntekt =

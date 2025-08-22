@@ -1,5 +1,6 @@
 package no.nav.helse.modell.melding
 
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
 import java.time.LocalDate
 import java.time.YearMonth
@@ -56,6 +57,7 @@ sealed interface Behov : UtgåendeMelding {
     data class Risikovurdering(
         val vedtaksperiodeId: UUID,
         val organisasjonsnummer: String,
+        val yrkesaktivitetstype: Yrkesaktivitetstype,
         val førstegangsbehandling: Boolean,
         val kunRefusjon: Boolean,
         val inntekt: InntektTilRisk?,

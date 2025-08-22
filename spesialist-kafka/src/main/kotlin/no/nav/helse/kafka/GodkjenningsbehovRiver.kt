@@ -18,6 +18,7 @@ import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
 import java.time.LocalDate
 
@@ -36,6 +37,7 @@ class GodkjenningsbehovRiver(
                 "@id",
                 "fødselsnummer",
                 "organisasjonsnummer",
+                "yrkesaktivitetstype",
                 "vedtaksperiodeId",
                 "utbetalingId",
             )
@@ -106,6 +108,7 @@ class GodkjenningsbehovRiver(
                 id = packet["@id"].asUUID(),
                 fødselsnummer = packet["fødselsnummer"].asText(),
                 organisasjonsnummer = packet["organisasjonsnummer"].asText(),
+                yrkesaktivitetstype = Yrkesaktivitetstype.valueOf(packet["yrkesaktivitetstype"].asText()),
                 vedtaksperiodeId = packet["vedtaksperiodeId"].asUUID(),
                 spleisVedtaksperioder = spleisvedtaksperioder(packet),
                 utbetalingId = packet["utbetalingId"].asUUID(),

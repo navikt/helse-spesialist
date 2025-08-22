@@ -8,6 +8,7 @@ import no.nav.helse.modell.vedtaksperiode.BehandlingOpprettet
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.spesialist.db.objectMapper
 import no.nav.helse.spesialist.db.testfixtures.DBTestFixture
@@ -203,6 +204,7 @@ class PgMeldingDaoTest {
                 "aktørId" to lagAktørId(),
                 "fødselsnummer" to fødselsnummer,
                 "organisasjonsnummer" to "orgnr",
+                "yrkesaktivitetstype" to Yrkesaktivitetstype.ARBEIDSTAKER,
                 "vedtaksperiodeId" to "$vedtaksperiodeId",
                 "utbetalingId" to "${UUID.randomUUID()}",
                 "Godkjenning" to mapOf(

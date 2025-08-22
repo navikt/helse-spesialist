@@ -65,6 +65,7 @@ class Godkjenningsbehov(
     override val id: UUID,
     private val fødselsnummer: String,
     val organisasjonsnummer: String,
+    val yrkesaktivitetstype: Yrkesaktivitetstype,
     private val vedtaksperiodeId: UUID,
     private val spleisVedtaksperioder: List<SpleisVedtaksperiode>,
     private val utbetalingId: UUID,
@@ -103,6 +104,7 @@ class Godkjenningsbehov(
             id = id,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
+            yrkesaktivitetstype = yrkesaktivitetstype,
             vedtaksperiodeId = vedtaksperiodeId,
             spleisVedtaksperioder = spleisVedtaksperioder,
             utbetalingId = utbetalingId,
@@ -127,6 +129,7 @@ class Godkjenningsbehov(
         id = UUID.fromString(jsonNode.path("@id").asText()),
         fødselsnummer = jsonNode.path("fødselsnummer").asText(),
         organisasjonsnummer = jsonNode.path("organisasjonsnummer").asText(),
+        yrkesaktivitetstype = Yrkesaktivitetstype.valueOf(jsonNode.path("yrkesaktivitetstype").asText()),
         vedtaksperiodeId = UUID.fromString(jsonNode.path("vedtaksperiodeId").asText()),
         spleisVedtaksperioder =
             jsonNode.path("Godkjenning").path("perioderMedSammeSkjæringstidspunkt").map { periodeNode ->
@@ -403,6 +406,7 @@ internal class GodkjenningsbehovCommand(
                 vedtaksperiodeId = behovData.vedtaksperiodeId,
                 risikovurderingDao = risikovurderingDao,
                 organisasjonsnummer = behovData.organisasjonsnummer,
+                yrkesaktivitetstype = behovData.yrkesaktivitetstype,
                 førstegangsbehandling = behovData.førstegangsbehandling,
                 sykefraværstilfelle = sykefraværstilfelle,
                 utbetaling = utbetaling,
