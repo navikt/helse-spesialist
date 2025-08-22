@@ -40,7 +40,7 @@ class OppdaterPersondata(
 
 internal class OppdaterPersondataCommand(
     fødselsnummer: String,
-    førsteKjenteDagFinner: () -> LocalDate,
+    førsteKjenteDagFinner: () -> LocalDate?,
     personDao: PersonDao,
     opptegnelseDao: OpptegnelseDao,
 ) : MacroCommand() {

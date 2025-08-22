@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.UUID
 
-class Person private constructor(
+class Person(
     val aktørId: String,
     val fødselsnummer: String,
     vedtaksperioder: List<Vedtaksperiode>,

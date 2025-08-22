@@ -173,7 +173,7 @@ class PgGenerasjonDao private constructor(
             it.localDateTimeOrNull("tilstand_endret_tidspunkt")
         }
 
-    override fun førsteKjenteDag(fødselsnummer: String): LocalDate =
+    override fun førsteKjenteDag(fødselsnummer: String): LocalDate? =
         asSQL(
             """
             select min(b.fom) as foersteFom
@@ -183,7 +183,7 @@ class PgGenerasjonDao private constructor(
             where p.fødselsnummer = :fodselsnummer
             """,
             "fodselsnummer" to fødselsnummer,
-        ).single {
-            it.localDate("foersteFom")
+        ).singleOrNull {
+            it.localDateOrNull("foersteFom")
         }
 }

@@ -289,7 +289,7 @@ class Godkjenningsbehov(
 internal class GodkjenningsbehovCommand(
     behovData: GodkjenningsbehovData,
     utbetaling: Utbetaling,
-    førsteKjenteDagFinner: () -> LocalDate,
+    førsteKjenteDagFinner: () -> LocalDate?,
     automatisering: Automatisering,
     vedtakDao: VedtakDao,
     meldingDao: MeldingDao,
@@ -457,7 +457,7 @@ internal class GodkjenningsbehovCommand(
 private class ForberedVisningCommand(
     fødselsnummer: String,
     organisasjonsnummer: String,
-    førsteKjenteDagFinner: () -> LocalDate,
+    førsteKjenteDagFinner: () -> LocalDate?,
     personDao: PersonDao,
     arbeidsgiverIdentifikatorer: Set<String>,
     arbeidsgiverRepository: ArbeidsgiverRepository,

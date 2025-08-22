@@ -8,7 +8,7 @@ import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.logg
 import java.time.LocalDate
 import java.util.UUID
 
-class Vedtaksperiode private constructor(
+class Vedtaksperiode(
     private val vedtaksperiodeId: UUID,
     val organisasjonsnummer: String,
     private var forkastet: Boolean,
@@ -157,7 +157,7 @@ class Vedtaksperiode private constructor(
             filter { it.gjeldendeSkjæringstidspunkt == skjæringstidspunkt }
                 .map { it.gjeldendeBehandling }
 
-        private fun BehandlingDto.tilBehandling(): LegacyBehandling =
+        fun BehandlingDto.tilBehandling(): LegacyBehandling =
             LegacyBehandling.fraLagring(
                 id = id,
                 vedtaksperiodeId = vedtaksperiodeId,

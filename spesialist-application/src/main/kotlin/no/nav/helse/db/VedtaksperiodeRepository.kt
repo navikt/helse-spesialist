@@ -11,5 +11,5 @@ interface VedtaksperiodeRepository {
         vedtaksperioder: List<VedtaksperiodeDto>,
     )
 
-    fun førsteKjenteDag(fødselsnummer: String): LocalDate
+    fun førsteKjenteDag(fødselsnummer: String): LocalDate?
 }

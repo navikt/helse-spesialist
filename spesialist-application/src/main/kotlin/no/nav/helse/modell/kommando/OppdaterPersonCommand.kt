@@ -9,7 +9,7 @@ import java.time.LocalDate
 
 internal class OppdaterPersonCommand(
     fødselsnummer: String,
-    førsteKjenteDagFinner: () -> LocalDate,
+    førsteKjenteDagFinner: () -> LocalDate?,
     personDao: PersonDao,
 ) : MacroCommand() {
     private companion object {
@@ -23,10 +23,9 @@ internal class OppdaterPersonCommand(
             OppdaterInfotrygdutbetalingerCommand(fødselsnummer, personDao, førsteKjenteDagFinner),
         )
 
-    internal abstract class OppdaterCommand protected constructor(
+    internal class OppdaterEnhetCommand(
         private val fødselsnummer: String,
         private val personDao: PersonDao,
-        private val behov: Behov,
     ) : Command {
         override fun execute(context: CommandContext): Boolean {
             if (erOppdatert(personDao, fødselsnummer)) return ignorer()
@@ -36,33 +35,18 @@ internal class OppdaterPersonCommand(
         override fun resume(context: CommandContext): Boolean = behandle(context, personDao, fødselsnummer)
 
         private fun ignorer(): Boolean {
-            log.info("har ikke behov for ${behov::class.simpleName}, informasjonen er ny nok")
+            log.info("har ikke behov for Enhet, informasjonen er ny nok")
             return true
         }
 
-        protected abstract fun erOppdatert(
-            personDao: PersonDao,
-            fødselsnummer: String,
-        ): Boolean
-
-        protected abstract fun behandle(
-            context: CommandContext,
-            personDao: PersonDao,
-            fødselsnummer: String,
-        ): Boolean
-
-        protected fun trengerMerInformasjon(context: CommandContext): Boolean {
+        private fun trengerMerInformasjon(context: CommandContext): Boolean {
+            val behov = Behov.Enhet
             log.info("trenger oppdatert $behov")
             context.behov(behov)
             return false
         }
-    }
 
-    internal class OppdaterEnhetCommand(
-        fødselsnummer: String,
-        personDao: PersonDao,
-    ) : OppdaterCommand(fødselsnummer, personDao, Behov.Enhet) {
-        override fun erOppdatert(
+        private fun erOppdatert(
             personDao: PersonDao,
             fødselsnummer: String,
         ): Boolean {
@@ -70,7 +54,7 @@ internal class OppdaterPersonCommand(
             return sistOppdatert != null && sistOppdatert > LocalDate.now().minusDays(5)
         }
 
-        override fun behandle(
+        private fun behandle(
             context: CommandContext,
             personDao: PersonDao,
             fødselsnummer: String,
@@ -83,19 +67,39 @@ internal class OppdaterPersonCommand(
     }
 
     private class OppdaterInfotrygdutbetalingerCommand(
-        fødselsnummer: String,
-        personDao: PersonDao,
-        førsteKjenteDagFinner: () -> LocalDate,
-    ) : OppdaterCommand(
-            fødselsnummer = fødselsnummer,
-            personDao = personDao,
-            behov =
+        private val fødselsnummer: String,
+        private val personDao: PersonDao,
+        private val førsteKjenteDagFinner: () -> LocalDate?,
+    ) : Command {
+        override fun execute(context: CommandContext): Boolean {
+            if (erOppdatert(personDao, fødselsnummer)) return ignorer()
+            return behandle(context, personDao, fødselsnummer)
+        }
+
+        override fun resume(context: CommandContext): Boolean = behandle(context, personDao, fødselsnummer)
+
+        private fun ignorer(): Boolean {
+            log.info("har ikke behov for Infotrygdutbetalinger, informasjonen er ny nok")
+            return true
+        }
+
+        private fun trengerMerInformasjon(context: CommandContext): Boolean {
+            val førsteKjenteDag = førsteKjenteDagFinner()
+            if (førsteKjenteDag == null) {
+                log.warn("Hopper over behov for Infotrygdutbetalinger - har ingen kjent dato å starte uthentingen fra")
+                return true
+            }
+            val behov =
                 Behov.Infotrygdutbetalinger(
-                    førsteKjenteDagFinner().minusYears(3),
+                    førsteKjenteDag.minusYears(3),
                     LocalDate.now(),
-                ),
-        ) {
-        override fun erOppdatert(
+                )
+            log.info("trenger oppdatert $behov")
+            context.behov(behov)
+            return false
+        }
+
+        private fun erOppdatert(
             personDao: PersonDao,
             fødselsnummer: String,
         ): Boolean {
@@ -103,7 +107,7 @@ internal class OppdaterPersonCommand(
             return sistOppdatert != null && sistOppdatert > LocalDate.now().minusDays(1)
         }
 
-        override fun behandle(
+        private fun behandle(
             context: CommandContext,
             personDao: PersonDao,
             fødselsnummer: String,

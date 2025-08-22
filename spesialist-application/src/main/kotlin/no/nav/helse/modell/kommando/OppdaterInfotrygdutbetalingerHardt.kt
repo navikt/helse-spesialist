@@ -9,7 +9,7 @@ import java.time.LocalDate
 internal class OppdaterInfotrygdutbetalingerHardt(
     private val fødselsnummer: String,
     private val personDao: PersonDao,
-    private val førsteKjenteDagFinner: () -> LocalDate,
+    private val førsteKjenteDagFinner: () -> LocalDate?,
 ) : Command {
     override fun execute(context: CommandContext) = behandle(context, personDao, fødselsnummer)
 
@@ -27,10 +27,15 @@ internal class OppdaterInfotrygdutbetalingerHardt(
     }
 
     private fun trengerMerInformasjon(context: CommandContext): Boolean {
+        val førsteKjenteDag = førsteKjenteDagFinner()
+        if (førsteKjenteDag == null) {
+            log.warn("Hopper over behov for Infotrygdutbetalinger - har ingen kjent dato å starte uthentingen fra")
+            return true
+        }
         log.info("Etterspør Infotrygdutbetalinger")
         context.behov(
             Behov.Infotrygdutbetalinger(
-                fom = førsteKjenteDagFinner().minusYears(3),
+                fom = førsteKjenteDag.minusYears(3),
                 tom = LocalDate.now(),
             ),
         )
