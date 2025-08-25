@@ -371,7 +371,11 @@ class PgOppgaveDao internal constructor(
             WHERE o.status = 'AvventerSaksbehandler'
                 AND t.saksbehandler_ref = :saksbehandler_oid
                 AND NOT (egenskaper && :egenskaper_som_skal_ekskluderes::varchar[]) -- egenskaper saksbehandler ikke har tilgang til
+            OFFSET :offset
+            LIMIT :limit
             """.trimIndent(),
+            "offset" to offset,
+            "limit" to limit,
             "saksbehandler_oid" to saksbehandlerOid,
             "egenskaper_som_skal_ekskluderes" to ekskluderEgenskaper.somDbArray(),
         ).list { row ->
