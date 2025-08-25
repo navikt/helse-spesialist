@@ -4,7 +4,7 @@
 # Except jar files
 !spesialist-bootstrap/build/deps/**
 !spesialist-bootstrap/build/libs/**
-!spesialist-db-migrations/build/libs/**
+!spesialist-db-migrations/build/install/app/**
 !spesialist-opprydding-dev/build/libs/**
 !spesialist-migrering/build/libs/**
 !spesialist-sidegig/build/libs/**

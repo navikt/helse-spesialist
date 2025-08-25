@@ -20,7 +20,7 @@ jobs:
   build:
     uses: navikt/helse-spesialist/.github/workflows/build-image.yml@main
     with:
-      gradle_command: :spesialist-db-migrations:build
+      gradle_command: :spesialist-db-migrations:installDist
       dockerfile: Dockerfile-db-migrations
       image_suffix: db-migrations
     secrets: inherit
