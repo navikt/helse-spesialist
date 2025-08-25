@@ -121,7 +121,70 @@ internal class MyDaoTest : AbstractDatabaseTest() {
         assertEquals(vedtakperiodeId, result)
     }
 
-    private fun lagBehandling(vedtakperiodeId: UUID, utbetalingId: UUID, skjæringstidspunkt: LocalDate) =
+    @Test
+    fun `Finn første vedtaksperiodeid for sykefraværstilfelle med fler perioder og samme arbeidsgiver og person fagsystemId for alle utbetalinger`() {
+        // Given:
+        val arbeidsgiverFagsystemId = lagFagsystemId()
+        val arbeidsgiverOppdragId = lagOppdrag(arbeidsgiverFagsystemId)
+        val personFagsystemId = lagFagsystemId()
+        val personOppdragId = lagOppdrag(personFagsystemId)
+
+        val personRef = requireNotNull(lagPerson())
+        val arbeidsgiverIdentifikator = lagOrganisasjonsnummer()
+
+        val utbetalingId1 = UUID.randomUUID()
+        val utbetalingId2 = UUID.randomUUID()
+        val utbetalingId3 = UUID.randomUUID()
+
+        val skjæringstidspunkt = LocalDate.now()
+        val vedtakperiodeId1 = UUID.randomUUID()
+        val vedtakperiodeId2 = UUID.randomUUID()
+        val vedtakperiodeId3 = UUID.randomUUID()
+
+
+        // When:
+        listOf(
+            vedtakperiodeId1 to utbetalingId1,
+            vedtakperiodeId2 to utbetalingId2,
+            vedtakperiodeId3 to utbetalingId3
+        ).forEachIndexed { i, (vedtaksperiodeId, utbetalingId) ->
+            val fom = skjæringstidspunkt.plusDays(i.toLong())
+            lagVedtak(
+                vedtakperiodeId = vedtaksperiodeId,
+                personRef = personRef,
+                arbeidsgiverIdentifikator = arbeidsgiverIdentifikator,
+                fom = fom,
+                tom = fom
+            )
+            lagUtbetalingId(
+                utbetalingId = utbetalingId,
+                personRef = personRef,
+                arbeidsgiverFagsystemId = arbeidsgiverOppdragId,
+                personFagsystemId = personOppdragId,
+                arbeidsgiverIdentifikator = arbeidsgiverIdentifikator,
+            )
+            lagBehandling(
+                vedtakperiodeId = vedtaksperiodeId,
+                utbetalingId = utbetalingId,
+                skjæringstidspunkt = skjæringstidspunkt,
+                fom = fom,
+                tom = fom,
+            )
+        }
+
+        // Then:
+        val behandling = requireNotNull(myDao.finnBehandlingISykefraværstilfelle(utbetalingId2))
+        val result = myDao.finnFørsteVedtaksperiodeIdForEttSykefraværstilfelle(behandling)
+        assertEquals(vedtakperiodeId1, result)
+    }
+
+    private fun lagBehandling(
+        vedtakperiodeId: UUID,
+        utbetalingId: UUID,
+        skjæringstidspunkt: LocalDate,
+        fom: LocalDate = LocalDate.now(),
+        tom: LocalDate = LocalDate.now()
+    ) =
         insertAndReturnGeneratedKey(
             query = """
             INSERT INTO behandling(
@@ -141,8 +204,8 @@ internal class MyDaoTest : AbstractDatabaseTest() {
                 :opprettetAvHendelse,
                 now(),
                 :tilstandEndretAvHendelse,
-                now(),
-                now(),
+                :fom,
+                :tom,
                 :skjaringstidspunkt,
                 :tilstand::generasjon_tilstand,
                 :spleisBehandlingId
@@ -153,6 +216,8 @@ internal class MyDaoTest : AbstractDatabaseTest() {
                 "utbetalingId" to utbetalingId,
                 "opprettetAvHendelse" to UUID.randomUUID(),
                 "tilstandEndretAvHendelse" to UUID.randomUUID(),
+                "fom" to fom,
+                "tom" to tom,
                 "skjaringstidspunkt" to skjæringstidspunkt,
                 "tilstand" to TilstandDto.AvsluttetUtenVedtak.name,
                 "spleisBehandlingId" to UUID.randomUUID(),
@@ -162,7 +227,9 @@ internal class MyDaoTest : AbstractDatabaseTest() {
     private fun lagVedtak(
         vedtakperiodeId: UUID,
         personRef: Long?,
-        arbeidsgiverIdentifikator: String
+        arbeidsgiverIdentifikator: String,
+        fom: LocalDate = LocalDate.now(),
+        tom: LocalDate = LocalDate.now(),
     ) = insert(
         query = """
             INSERT INTO vedtak (
@@ -171,26 +238,23 @@ internal class MyDaoTest : AbstractDatabaseTest() {
                 tom,
                 person_ref,
                 forkastet,
-                forkastet_tidspunkt,
-                forkastet_av_hendelse,
                 arbeidsgiver_identifikator
             ) 
             VALUES (
                 :vedtaksperiodeId,
-                now(),
-                now(),
+                :fom,
+                :tom,
                 :personRef,
                 :forkastet,
-                now(),
-                :forkastetAvHendelse,
                 :arbeidsgiverIdentifikator
             ) 
         """.trimIndent(),
         paramMap = mapOf(
             "vedtaksperiodeId" to vedtakperiodeId,
+            "fom" to fom,
+            "tom" to tom,
             "personRef" to personRef,
             "forkastet" to false,
-            "forkastetAvHendelse" to UUID.randomUUID(),
             "arbeidsgiverIdentifikator" to arbeidsgiverIdentifikator
         )
     )
