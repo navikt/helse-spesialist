@@ -66,7 +66,7 @@ internal class OppdaterPersondataRiverIntegrationTest {
               ],
               "HentInfotrygdutbetalinger": {
                 "historikkFom": "2021-10-01",
-                "historikkTom": "2025-08-22"
+                "historikkTom": "${LocalDate.now()}"
               },
               "fødselsnummer": "$fødselsnummer",
               "hendelseId": "bff52e44-d009-43c8-af43-a14a38b66cfb"
