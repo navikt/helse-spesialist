@@ -17,6 +17,7 @@ import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_BESLUTTER
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_SAKSBEHANDLER
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
@@ -39,11 +40,12 @@ internal class VurderBehovForTotrinnskontrollTest {
         private val VEDTAKSPERIODE_ID_1 = UUID.randomUUID()
         private val VEDTAKSPERIODE = Vedtaksperiode.nyVedtaksperiode(
             SpleisBehandling(
-                "987654321",
-                VEDTAKSPERIODE_ID_2,
-                UUID.randomUUID(),
-                LocalDate.now(),
-                LocalDate.now()
+                organisasjonsnummer = "987654321",
+                vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
+                spleisBehandlingId = UUID.randomUUID(),
+                fom = LocalDate.now(),
+                tom = LocalDate.now(),
+                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
             )
         )
         private val FØDSELSNUMMER = "fnr"
@@ -72,8 +74,22 @@ internal class VurderBehovForTotrinnskontrollTest {
             FØDSELSNUMMER,
             1 jan 2018,
             listOf(
-                LegacyBehandling(UUID.randomUUID(), VEDTAKSPERIODE_ID_1, 1 jan 2018, 31 jan 2018, 1 jan 2018),
-                LegacyBehandling(UUID.randomUUID(), VEDTAKSPERIODE_ID_2, 1 feb 2018, 28 feb 2018, 1 jan 2018),
+                LegacyBehandling(
+                    id = UUID.randomUUID(),
+                    vedtaksperiodeId = VEDTAKSPERIODE_ID_1,
+                    fom = 1 jan 2018,
+                    tom = 31 jan 2018,
+                    skjæringstidspunkt = 1 jan 2018,
+                    yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
+                ),
+                LegacyBehandling(
+                    id = UUID.randomUUID(),
+                    vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
+                    fom = 1 feb 2018,
+                    tom = 28 feb 2018,
+                    skjæringstidspunkt = 1 jan 2018,
+                    yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
+                ),
             ),
         )
     private val command =

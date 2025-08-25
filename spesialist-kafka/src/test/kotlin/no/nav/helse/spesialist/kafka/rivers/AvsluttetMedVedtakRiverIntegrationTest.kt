@@ -12,6 +12,7 @@ import no.nav.helse.modell.vedtak.SkjønnsfastsettingstypeDto
 import no.nav.helse.modell.vedtak.SkjønnsfastsettingsårsakDto
 import no.nav.helse.modell.vedtak.Utfall
 import no.nav.helse.modell.vedtak.VedtakBegrunnelse
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.modell.vilkårsprøving.Beregningsgrunnlag
 import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
@@ -814,7 +815,8 @@ class AvsluttetMedVedtakRiverIntegrationTest {
                                     utfall = vedtakUtfall,
                                     begrunnelse = vedtakBegrunnelse
                                 ),
-                                varsler = emptyList()
+                                varsler = emptyList(),
+                                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
                             )
                         )
                     )

@@ -29,6 +29,7 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import no.nav.helse.spesialist.domain.testfixtures.jan
@@ -330,11 +331,12 @@ internal class AutomatiseringTest {
         periodetype: Periodetype = FORLENGELSE,
         generasjoners: List<LegacyBehandling> = listOf(
             LegacyBehandling(
-                UUID.randomUUID(),
-                vedtaksperiodeId,
-                1 jan 2018,
-                31 jan 2018,
-                1 jan 2018
+                id = UUID.randomUUID(),
+                vedtaksperiodeId = vedtaksperiodeId,
+                fom = 1 jan 2018,
+                tom = 31 jan 2018,
+                skjæringstidspunkt = 1 jan 2018,
+                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
             )
         ),
         utbetaling: Utbetaling = enUtbetaling(),
@@ -359,7 +361,14 @@ internal class AutomatiseringTest {
         skjæringstidspunkt: LocalDate = fom,
         vedtaksperiodeId: UUID = this.vedtaksperiodeId,
         generasjonId: UUID = UUID.randomUUID(),
-    ) = LegacyBehandling(generasjonId, vedtaksperiodeId, fom, tom, skjæringstidspunkt)
+    ) = LegacyBehandling(
+        id = generasjonId,
+        vedtaksperiodeId = vedtaksperiodeId,
+        fom = fom,
+        tom = tom,
+        skjæringstidspunkt = skjæringstidspunkt,
+        yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
+    )
 
     private fun etVarsel(
         varselId: UUID = UUID.randomUUID(),

@@ -6,6 +6,7 @@ import no.nav.helse.modell.person.vedtaksperiode.VarselDto
 import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
 import no.nav.helse.modell.vedtak.Utfall
 import no.nav.helse.modell.vedtak.VedtakBegrunnelse
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagAktørId
@@ -103,6 +104,7 @@ internal class PgLegacyBehandlingDaoTest : AbstractDBIntegrationTest() {
                 tags = listOf("TAG"),
                 vedtakBegrunnelse = VedtakBegrunnelse(Utfall.AVSLAG, "En begrunnelse"),
                 varsler = listOf(varsel),
+                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
             )
 
         )
@@ -121,6 +123,7 @@ internal class PgLegacyBehandlingDaoTest : AbstractDBIntegrationTest() {
                 tags = listOf("TAG"),
                 vedtakBegrunnelse = null,
                 varsler = listOf(varsel),
+                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
             ),
             funnet.single()
         )

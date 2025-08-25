@@ -7,6 +7,7 @@ import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_UTBETALT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.NY
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk
 import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk.ArbeidsgiverinformasjonJson
@@ -70,6 +71,7 @@ class Meldingssender(private val testRapid: TestRapid) {
         fom: LocalDate,
         tom: LocalDate,
         spleisBehandlingId: UUID,
+        yrkesaktivitetstype: Yrkesaktivitetstype,
     ): UUID = newUUID.also { id ->
         testRapid.sendTestMessage(
             Testmeldingfabrikk.lagBehandlingOpprettet(
@@ -80,7 +82,8 @@ class Meldingssender(private val testRapid: TestRapid) {
                 vedtaksperiodeId = vedtaksperiodeId,
                 fom = fom,
                 tom = tom,
-                spleisBehandlingId = spleisBehandlingId
+                spleisBehandlingId = spleisBehandlingId,
+                yrkesaktivitetstype = yrkesaktivitetstype
             )
         )
     }

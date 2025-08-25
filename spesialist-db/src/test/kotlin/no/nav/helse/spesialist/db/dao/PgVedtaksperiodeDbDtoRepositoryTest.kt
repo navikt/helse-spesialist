@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.db.dao
 import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
 import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
 import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.testfixtures.feb
 import no.nav.helse.spesialist.domain.testfixtures.jan
@@ -48,6 +49,7 @@ class PgVedtaksperiodeDbDtoRepositoryTest: AbstractDBIntegrationTest() {
                         emptyList(),
                         null,
                         emptyList(),
+                        Yrkesaktivitetstype.ARBEIDSTAKER
                     ),
                 )
             ),
@@ -68,6 +70,7 @@ class PgVedtaksperiodeDbDtoRepositoryTest: AbstractDBIntegrationTest() {
                         emptyList(),
                         null,
                         emptyList(),
+                        Yrkesaktivitetstype.ARBEIDSTAKER
                     ),
                 )
             )

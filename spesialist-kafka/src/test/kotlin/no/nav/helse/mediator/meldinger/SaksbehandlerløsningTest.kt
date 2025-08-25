@@ -13,6 +13,7 @@ import no.nav.helse.modell.utbetaling.Refusjonstype
 import no.nav.helse.modell.utbetaling.Refusjonstype.DELVIS_REFUSJON
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import no.nav.helse.spesialist.domain.testfixtures.jan
@@ -51,7 +52,14 @@ internal class SaksbehandlerløsningTest {
             sykefraværstilfelle = Sykefraværstilfelle(
                 fødselsnummer = FNR,
                 skjæringstidspunkt = 1 jan 2018,
-                gjeldendeBehandlinger = listOf(LegacyBehandling(randomUUID(), vedtaksperiodeId, 1 jan 2018, 31 jan 2018, 1 jan 2018))
+                gjeldendeBehandlinger = listOf(LegacyBehandling(
+                    id = randomUUID(),
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    fom = 1 jan 2018,
+                    tom = 31 jan 2018,
+                    skjæringstidspunkt = 1 jan 2018,
+                    yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
+                )),
             ),
             godkjent = godkjent,
             godkjenttidspunkt = GODKJENTTIDSPUNKT,

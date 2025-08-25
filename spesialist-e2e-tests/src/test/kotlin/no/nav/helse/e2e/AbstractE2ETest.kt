@@ -27,6 +27,7 @@ import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_UTBETALT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.NY
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.SENDT
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.UTBETALT
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdOverstyringHandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiInntektOgRefusjonOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiLovhjemmel
@@ -351,6 +352,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 fom = fom,
                 tom = tom,
                 spleisBehandlingId = spleisBehandlingId,
+                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
             )
         assertIngenEtterspurteBehov()
         assertVedtaksperiodeEksisterer(vedtaksperiodeId)

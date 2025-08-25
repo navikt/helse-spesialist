@@ -4,6 +4,7 @@ import io.mockk.mockk
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.AKTIV
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.VURDERT
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_EX_1
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.finnBehandlingForSpleisBehandling
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.finnBehandlingForVedtaksperiode
@@ -28,7 +29,14 @@ import java.util.UUID
 internal class LegacyBehandlingTest {
     @Test
     fun `behandling ligger før dato`() {
-        val legacyBehandling = LegacyBehandling(UUID.randomUUID(), UUID.randomUUID(), 1 jan 2018, 31 jan 2018, 1 jan 2018)
+        val legacyBehandling = LegacyBehandling(
+            id = UUID.randomUUID(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            fom = 1 jan 2018,
+            tom = 31 jan 2018,
+            skjæringstidspunkt = 1 jan 2018,
+            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
+        )
         assertTrue(legacyBehandling.tilhører(31 jan 2018))
         assertTrue(legacyBehandling.tilhører(1 feb 2018))
         assertFalse(legacyBehandling.tilhører(1 jan 2018))
@@ -490,7 +498,14 @@ internal class LegacyBehandlingTest {
         val skjæringstidspunkt = 1 jan 2018
         val utbetalingId = UUID.randomUUID()
         val spleisBehandlingId = UUID.randomUUID()
-        val legacyBehandling = LegacyBehandling(behandlingId, vedtaksperiodeId, fom, tom, skjæringstidspunkt)
+        val legacyBehandling = LegacyBehandling(
+            id = behandlingId,
+            vedtaksperiodeId = vedtaksperiodeId,
+            fom = fom,
+            tom = tom,
+            skjæringstidspunkt = skjæringstidspunkt,
+            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
+        )
         legacyBehandling.håndterNyUtbetaling(utbetalingId)
         val tags = listOf("tag 1")
         legacyBehandling.oppdaterBehandlingsinformasjon(tags, spleisBehandlingId, utbetalingId)
@@ -514,6 +529,7 @@ internal class LegacyBehandlingTest {
                 tags,
                 null,
                 listOf(varsel.toDto()),
+                Yrkesaktivitetstype.ARBEIDSTAKER
             ),
             dto,
         )
@@ -551,6 +567,7 @@ internal class LegacyBehandlingTest {
         fom = fom,
         tom = tom,
         skjæringstidspunkt = skjæringstidspunkt,
+        yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
     )
 
     private fun LegacyBehandling.assertVarsler(

@@ -18,6 +18,7 @@ class BehandlingOpprettet(
     private val spleisBehandlingId: UUID,
     private val fom: LocalDate,
     private val tom: LocalDate,
+    private val yrkesaktivitetstype: Yrkesaktivitetstype,
     private val json: String,
 ) : Vedtaksperiodemelding {
     constructor(jsonNode: JsonNode) : this(
@@ -28,6 +29,7 @@ class BehandlingOpprettet(
         spleisBehandlingId = jsonNode["behandlingId"].asUUID(),
         fom = jsonNode["fom"].asText().let(LocalDate::parse),
         tom = jsonNode["tom"].asText().let(LocalDate::parse),
+        yrkesaktivitetstype = Yrkesaktivitetstype.valueOf(jsonNode["yrkesaktivitetstype"].asText()),
         json = jsonNode.toString(),
     )
 
@@ -36,7 +38,7 @@ class BehandlingOpprettet(
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
     ) {
-        person.nySpleisBehandling(SpleisBehandling(organisasjonsnummer, vedtaksperiodeId, spleisBehandlingId, fom, tom))
+        person.nySpleisBehandling(SpleisBehandling(organisasjonsnummer, vedtaksperiodeId, spleisBehandlingId, fom, tom, yrkesaktivitetstype))
     }
 
     override fun fødselsnummer(): String = fødselsnummer

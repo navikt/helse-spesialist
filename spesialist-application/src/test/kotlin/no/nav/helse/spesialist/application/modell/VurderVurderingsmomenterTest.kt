@@ -48,7 +48,14 @@ internal class VurderVurderingsmomenterTest {
     }
 
     private val legacyBehandling =
-        LegacyBehandling(UUID.randomUUID(), testperson.vedtaksperiodeId1, 1 jan 2018, 31 jan 2018, 1 jan 2018)
+        LegacyBehandling(
+            id = UUID.randomUUID(),
+            vedtaksperiodeId = testperson.vedtaksperiodeId1,
+            fom = 1 jan 2018,
+            tom = 31 jan 2018,
+            skjæringstidspunkt = 1 jan 2018,
+            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
+        )
     private val sykefraværstilfelle =
         Sykefraværstilfelle(testperson.fødselsnummer, 1 jan 2018, listOf(legacyBehandling))
 

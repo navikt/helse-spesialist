@@ -6,6 +6,7 @@ import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
 import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
 import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.modell.vilkårsprøving.Beregningsgrunnlag
 import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
@@ -70,7 +71,8 @@ internal class AvsluttetUtenVedtakRiverIntegrationTest {
                                 tilstand = TilstandDto.VidereBehandlingAvklares,
                                 tags = listOf("Behandling tag 1", "Behandling tag 2"),
                                 vedtakBegrunnelse = null,
-                                varsler = emptyList()
+                                varsler = emptyList(),
+                                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
                             )
                         )
                     )

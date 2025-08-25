@@ -17,6 +17,7 @@ import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderVars
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderVarselOmÅpenGosysOppgave
 import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.modell.vedtak.VedtakBegrunnelse
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.domain.Periode
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -34,6 +35,7 @@ class LegacyBehandling private constructor(
     tags: List<String>,
     val vedtakBegrunnelse: VedtakBegrunnelse?,
     varsler: Set<Varsel>,
+    val yrkesaktivitetstype: Yrkesaktivitetstype?,
 ) {
     constructor(
         id: UUID,
@@ -43,6 +45,7 @@ class LegacyBehandling private constructor(
         skjæringstidspunkt: LocalDate,
         spleisBehandlingId: UUID? = null,
         utbetalingId: UUID? = null,
+        yrkesaktivitetstype: Yrkesaktivitetstype,
     ) : this(
         id = id,
         vedtaksperiodeId = vedtaksperiodeId,
@@ -54,6 +57,7 @@ class LegacyBehandling private constructor(
         tags = emptyList(),
         vedtakBegrunnelse = null,
         varsler = emptySet(),
+        yrkesaktivitetstype = yrkesaktivitetstype,
     )
 
     var spleisBehandlingId: UUID? = spleisBehandlingId
@@ -102,6 +106,7 @@ class LegacyBehandling private constructor(
             tags = tags,
             vedtakBegrunnelse = vedtakBegrunnelse,
             varsler = varsler.map(Varsel::toDto),
+            yrkesaktivitetstype = yrkesaktivitetstype,
         )
 
     internal fun tilhører(dato: LocalDate): Boolean = periode.tom <= dato
@@ -200,6 +205,7 @@ class LegacyBehandling private constructor(
                 tom = spleisBehandling.tom,
                 skjæringstidspunkt = skjæringstidspunkt,
                 spleisBehandlingId = spleisBehandling.spleisBehandlingId,
+                yrkesaktivitetstype = spleisBehandling.yrkesaktivitetstype,
             )
         flyttAktiveVarslerTil(nyLegacyBehandling)
         return nyLegacyBehandling
@@ -463,6 +469,7 @@ class LegacyBehandling private constructor(
             tags: List<String>,
             varsler: Set<Varsel>,
             vedtakBegrunnelse: VedtakBegrunnelse?,
+            yrkesaktivitetstype: Yrkesaktivitetstype?,
         ) = LegacyBehandling(
             id = id,
             vedtaksperiodeId = vedtaksperiodeId,
@@ -474,6 +481,7 @@ class LegacyBehandling private constructor(
             tags = tags,
             vedtakBegrunnelse = vedtakBegrunnelse,
             varsler = varsler,
+            yrkesaktivitetstype = yrkesaktivitetstype,
         )
 
         internal fun List<LegacyBehandling>.håndterNyttVarsel(varsler: List<Varsel>) {

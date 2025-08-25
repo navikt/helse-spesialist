@@ -4,6 +4,7 @@ import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
 import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
 import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
 import no.nav.helse.spesialist.domain.testfixtures.des
 import no.nav.helse.spesialist.domain.testfixtures.feb
@@ -131,7 +132,8 @@ class TilkommenInntektPeriodeValidatorTest {
                     tilstand = TilstandDto.KlarTilBehandling,
                     tags = emptyList(),
                     vedtakBegrunnelse = null,
-                    varsler = emptyList()
+                    varsler = emptyList(),
+                    yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
                 )
             )
         )

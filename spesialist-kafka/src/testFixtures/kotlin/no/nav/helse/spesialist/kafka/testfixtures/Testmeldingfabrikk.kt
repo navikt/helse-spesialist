@@ -210,6 +210,7 @@ object Testmeldingfabrikk {
         spleisBehandlingId: UUID,
         fom: LocalDate = 1 jan 2018,
         tom: LocalDate = 31 jan 2018,
+        yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
     ) =
         nyHendelse(
             id, "behandling_opprettet", mapOf(
@@ -219,7 +220,8 @@ object Testmeldingfabrikk {
                 "aktørId" to aktørId,
                 "organisasjonsnummer" to organisasjonsnummer,
                 "fom" to fom,
-                "tom" to tom
+                "tom" to tom,
+                "yrkesaktivitetstype" to yrkesaktivitetstype
             )
         )
 

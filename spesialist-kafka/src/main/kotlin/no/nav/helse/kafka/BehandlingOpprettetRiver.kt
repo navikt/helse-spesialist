@@ -10,6 +10,7 @@ import no.nav.helse.FeatureToggles
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.vedtaksperiode.BehandlingOpprettet
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.application.logg.logg
 
 class BehandlingOpprettetRiver(
@@ -29,6 +30,7 @@ class BehandlingOpprettetRiver(
                 "behandlingId",
                 "fødselsnummer",
                 "organisasjonsnummer",
+                "yrkesaktivitetstype",
             )
             it.requireKey("fom", "tom")
         }
@@ -61,6 +63,7 @@ class BehandlingOpprettetRiver(
                 spleisBehandlingId = packet["behandlingId"].asUUID(),
                 fom = packet["fom"].asLocalDate(),
                 tom = packet["tom"].asLocalDate(),
+                yrkesaktivitetstype = Yrkesaktivitetstype.valueOf(packet["yrkesaktivitetstype"].asText()),
                 json = packet.toJson(),
             ),
             MessageContextMeldingPubliserer(context),

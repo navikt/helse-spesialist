@@ -18,6 +18,7 @@ import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.application.Testdata.godkjenningsbehovData
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import no.nav.helse.spesialist.domain.testfixtures.jan
@@ -40,7 +41,14 @@ internal class VurderAutomatiskInnvilgelseTest {
 
     private val automatisering = mockk<Automatisering>(relaxed = true)
     private val legacyBehandling =
-        LegacyBehandling(UUID.randomUUID(), vedtaksperiodeId, 1 jan 2018, 31 jan 2018, 1 jan 2018)
+        LegacyBehandling(
+            id = UUID.randomUUID(),
+            vedtaksperiodeId = vedtaksperiodeId,
+            fom = 1 jan 2018,
+            tom = 31 jan 2018,
+            skjæringstidspunkt = 1 jan 2018,
+            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
+        )
     private val automatiseringDao = mockk<AutomatiseringDao>(relaxed = true)
     private val command =
         VurderAutomatiskInnvilgelse(

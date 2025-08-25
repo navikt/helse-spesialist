@@ -5,6 +5,7 @@ import no.nav.helse.db.GenerasjonDao
 import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
 import no.nav.helse.modell.person.vedtaksperiode.VarselDto
 import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQLWithQuestionMarks
 import no.nav.helse.spesialist.db.HelseDao.Companion.somDbArray
@@ -26,7 +27,7 @@ class PgGenerasjonDao private constructor(
     override fun finnGenerasjoner(vedtaksperiodeId: UUID): List<BehandlingDto> =
         asSQL(
             """
-            SELECT id, unik_id, vedtaksperiode_id, utbetaling_id, spleis_behandling_id, skjæringstidspunkt, fom, tom, tilstand, tags
+            SELECT id, unik_id, vedtaksperiode_id, utbetaling_id, spleis_behandling_id, skjæringstidspunkt, fom, tom, tilstand, tags, yrkesaktivitetstype
             FROM behandling 
             WHERE vedtaksperiode_id = :vedtaksperiode_id ORDER BY id;
         """,
@@ -45,6 +46,7 @@ class PgGenerasjonDao private constructor(
                 tags = row.array<String>("tags").toList(),
                 vedtakBegrunnelse = PgVedtakBegrunnelseDao(queryRunner).finnVedtakBegrunnelse(vedtaksperiodeId, generasjonRef),
                 varsler = finnVarsler(generasjonRef),
+                yrkesaktivitetstype = row.stringOrNull("yrkesaktivitetstype")?.let { Yrkesaktivitetstype.valueOf(it) },
             )
         }
 
@@ -59,9 +61,9 @@ class PgGenerasjonDao private constructor(
     private fun lagre(behandlingDto: BehandlingDto) {
         asSQL(
             """
-            INSERT INTO behandling (unik_id, vedtaksperiode_id, utbetaling_id, spleis_behandling_id, opprettet_tidspunkt, opprettet_av_hendelse, tilstand_endret_tidspunkt, tilstand_endret_av_hendelse, fom, tom, skjæringstidspunkt, tilstand, tags) 
-            VALUES (:unik_id, :vedtaksperiode_id, :utbetaling_id, :spleis_behandling_id, now(), gen_random_uuid(), now(), gen_random_uuid(), :fom, :tom, :skjaeringstidspunkt, :tilstand::generasjon_tilstand, :tags::varchar[])
-            ON CONFLICT (unik_id) DO UPDATE SET utbetaling_id = excluded.utbetaling_id, spleis_behandling_id = excluded.spleis_behandling_id, fom = excluded.fom, tom = excluded.tom, skjæringstidspunkt = excluded.skjæringstidspunkt, tilstand = excluded.tilstand, tags = excluded.tags
+            INSERT INTO behandling (unik_id, vedtaksperiode_id, utbetaling_id, spleis_behandling_id, opprettet_tidspunkt, opprettet_av_hendelse, tilstand_endret_tidspunkt, tilstand_endret_av_hendelse, fom, tom, skjæringstidspunkt, tilstand, tags, yrkesaktivitetstype) 
+            VALUES (:unik_id, :vedtaksperiode_id, :utbetaling_id, :spleis_behandling_id, now(), gen_random_uuid(), now(), gen_random_uuid(), :fom, :tom, :skjaeringstidspunkt, :tilstand::generasjon_tilstand, :tags::varchar[], :yrkesaktivitetstype)
+            ON CONFLICT (unik_id) DO UPDATE SET utbetaling_id = excluded.utbetaling_id, spleis_behandling_id = excluded.spleis_behandling_id, fom = excluded.fom, tom = excluded.tom, skjæringstidspunkt = excluded.skjæringstidspunkt, tilstand = excluded.tilstand, tags = excluded.tags, yrkesaktivitetstype = excluded.yrkesaktivitetstype
             """,
             "unik_id" to behandlingDto.id,
             "vedtaksperiode_id" to behandlingDto.vedtaksperiodeId,
@@ -72,6 +74,7 @@ class PgGenerasjonDao private constructor(
             "skjaeringstidspunkt" to behandlingDto.skjæringstidspunkt,
             "tilstand" to behandlingDto.tilstand.name,
             "tags" to behandlingDto.tags.somDbArray(),
+            "yrkesaktivitetstype" to behandlingDto.yrkesaktivitetstype?.name,
         ).update()
     }
 

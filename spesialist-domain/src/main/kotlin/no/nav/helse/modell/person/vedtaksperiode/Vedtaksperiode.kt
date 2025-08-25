@@ -126,6 +126,7 @@ class Vedtaksperiode(
                             spleisBehandlingId = spleisBehandling.spleisBehandlingId,
                             fom = spleisBehandling.fom,
                             tom = spleisBehandling.tom,
+                            yrkesaktivitetstype = spleisBehandling.yrkesaktivitetstype,
                             // Spleis sender oss ikke skjæringstidspunkt på dette tidspunktet
                             skjæringstidspunkt = spleisBehandling.fom,
                         ),
@@ -195,6 +196,7 @@ class Vedtaksperiode(
                             )
                         }.toSet(),
                 vedtakBegrunnelse = vedtakBegrunnelse,
+                yrkesaktivitetstype = yrkesaktivitetstype,
             )
     }
 

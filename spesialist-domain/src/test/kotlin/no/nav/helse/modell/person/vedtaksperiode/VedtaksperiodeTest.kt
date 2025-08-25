@@ -1,5 +1,6 @@
 package no.nav.helse.modell.person.vedtaksperiode
 
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.domain.testfixtures.feb
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -172,7 +173,7 @@ class VedtaksperiodeTest {
     private fun nySpleisBehandling(
         vedtaksperiodeId: UUID,
         spleisBehandlingId: UUID = UUID.randomUUID(),
-    ) = SpleisBehandling("987654321", vedtaksperiodeId, spleisBehandlingId, 1 jan 2018, 31 jan 2018)
+    ) = SpleisBehandling("987654321", vedtaksperiodeId, spleisBehandlingId, 1 jan 2018, 31 jan 2018, Yrkesaktivitetstype.ARBEIDSTAKER)
 
     private fun nyttVarsel(
         vedtaksperiodeId: UUID,

@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.application.modell
 
 import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.application.TestPerson
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -29,5 +30,6 @@ class PersonTest {
             spleisBehandlingId = UUID.randomUUID(),
             fom = 1 jan 2018,
             tom = 31 jan 2018,
+            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
         )
 }

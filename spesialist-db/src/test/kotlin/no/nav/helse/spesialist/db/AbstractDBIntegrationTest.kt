@@ -21,6 +21,7 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde.EN_ARBEIDSGIVER
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.db.dao.PgMeldingDuplikatkontrollDao
 import no.nav.helse.spesialist.db.dao.PgPersonDao
@@ -347,7 +348,8 @@ abstract class AbstractDBIntegrationTest {
                     vedtaksperiodeId,
                     spleisBehandlingId,
                     fom,
-                    tom
+                    tom,
+                    Yrkesaktivitetstype.ARBEIDSTAKER
                 )
             )
             nyUtbetalingForVedtaksperiode(vedtaksperiodeId, utbetalingId)
@@ -384,7 +386,8 @@ abstract class AbstractDBIntegrationTest {
                     vedtaksperiodeId,
                     spleisBehandlingId,
                     fom,
-                    tom
+                    tom,
+                    Yrkesaktivitetstype.ARBEIDSTAKER
                 )
             )
             if (utbetalingId != null) this.nyUtbetalingForVedtaksperiode(vedtaksperiodeId, utbetalingId)

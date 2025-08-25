@@ -1,5 +1,6 @@
 package no.nav.helse.modell.person.vedtaksperiode
 
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -164,5 +165,6 @@ internal class LegacyBehandlingTilstandTest {
         fom = fom,
         tom = tom,
         skjæringstidspunkt = skjæringstidspunkt,
+        yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
     )
 }

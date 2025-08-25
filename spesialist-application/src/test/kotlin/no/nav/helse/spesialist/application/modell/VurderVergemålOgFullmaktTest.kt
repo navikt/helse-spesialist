@@ -11,6 +11,7 @@ import no.nav.helse.mediator.meldinger.løsninger.Vergemålløsning
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.Sykefraværstilfelle
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.modell.vergemal.VurderVergemålOgFullmakt
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import no.nav.helse.spesialist.domain.testfixtures.jan
@@ -29,7 +30,14 @@ class VurderVergemålOgFullmaktTest {
 
     private val vergemålDao = mockk<VergemålDao>(relaxed = true)
     private val legacyBehandling =
-        LegacyBehandling(UUID.randomUUID(), VEDTAKSPERIODE_ID, 1 jan 2018, 31 jan 2018, 1 jan 2018)
+        LegacyBehandling(
+            id = UUID.randomUUID(),
+            vedtaksperiodeId = VEDTAKSPERIODE_ID,
+            fom = 1 jan 2018,
+            tom = 31 jan 2018,
+            skjæringstidspunkt = 1 jan 2018,
+            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
+        )
     private val sykefraværstilfelle = Sykefraværstilfelle(FNR, 1 jan 2018, listOf(legacyBehandling))
 
     private val command =

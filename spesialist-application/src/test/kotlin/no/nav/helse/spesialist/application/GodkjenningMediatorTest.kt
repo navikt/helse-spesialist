@@ -16,6 +16,7 @@ import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.spesialist.application.Testdata.godkjenningsbehovData
 import no.nav.helse.spesialist.application.modell.inspektør
@@ -211,6 +212,7 @@ internal class GodkjenningMediatorTest {
         fom = 1 jan 2018,
         tom = 31 jan 2018,
         skjæringstidspunkt = 1 jan 2018,
+        yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
     )
 
     private fun godkjenning(generasjoner: List<LegacyBehandling>) =

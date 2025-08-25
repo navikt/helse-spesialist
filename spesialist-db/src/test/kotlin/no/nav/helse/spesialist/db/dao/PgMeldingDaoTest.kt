@@ -152,6 +152,7 @@ class PgMeldingDaoTest {
             "fødselsnummer" to fødselsnummer,
             "fom" to LocalDate.now().minusDays(20),
             "tom" to LocalDate.now(),
+            "yrkesaktivitetstype" to Yrkesaktivitetstype.ARBEIDSTAKER,
             "type" to type,
             "kilde" to mapOf(
                 "avsender" to "SYKMELDT"

@@ -1,6 +1,7 @@
 package no.nav.helse.modell.person
 
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.forhindrerAutomatisering
 import no.nav.helse.spesialist.domain.testfixtures.feb
@@ -61,6 +62,7 @@ internal class SykefraværstilfelleTest {
             fom = 1 jan 2018,
             tom = 31 jan 2018,
             skjæringstidspunkt = 1 jan 2018,
+            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
         )
 
     private fun sykefraværstilfelle(

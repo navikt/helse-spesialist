@@ -7,6 +7,7 @@ import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
 import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -45,6 +46,7 @@ internal class VedtakDaoTest : AbstractDBIntegrationTest() {
                                             tags = emptyList(),
                                             vedtakBegrunnelse = null,
                                             varsler = emptyList(),
+                                            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
                                         ),
                                     ),
                             ),
@@ -90,6 +92,7 @@ internal class VedtakDaoTest : AbstractDBIntegrationTest() {
                                             tags = emptyList(),
                                             vedtakBegrunnelse = null,
                                             varsler = emptyList(),
+                                            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
                                         ),
                                     ),
                             ),

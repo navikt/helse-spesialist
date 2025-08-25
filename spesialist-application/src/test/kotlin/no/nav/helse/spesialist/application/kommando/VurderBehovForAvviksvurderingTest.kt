@@ -6,6 +6,7 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.VurderBehovForAvviksvurdering
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderVarselOmAvvik
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.modell.vilkårsprøving.AvviksvurderingBehovLøsning
 import no.nav.helse.modell.vilkårsprøving.Beregningsgrunnlag
@@ -61,7 +62,8 @@ class VurderBehovForAvviksvurderingTest {
         tom = 31 jan 2018,
         skjæringstidspunkt = 1 jan 2018,
         spleisBehandlingId = UUID.randomUUID(),
-        utbetalingId = null
+        utbetalingId = null,
+        yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
     )
 
     private val repository = object : AvviksvurderingRepository {
