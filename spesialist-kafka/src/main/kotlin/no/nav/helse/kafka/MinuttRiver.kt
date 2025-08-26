@@ -31,6 +31,7 @@ class MinuttRiver(
         metadata: MessageMetadata,
         meterRegistry: MeterRegistry,
     ) {
+        logg.info("Setter i gang med oppdatering av yrkesaktivitetstype")
         val antallOppdaterteMedArbeidstaker = mediator.oppdaterBehandlingMedYrkesaktivitetArbeidstaker()
         val antallOppdaterteMedSelvstendig = mediator.oppdaterBehandlingMedYrkesaktivitetSelvstendig()
         logg.info("Oppdatert $antallOppdaterteMedArbeidstaker oppgaver med egenskap ARBEIDSTAKER og $antallOppdaterteMedSelvstendig med SELVSTENDIG")

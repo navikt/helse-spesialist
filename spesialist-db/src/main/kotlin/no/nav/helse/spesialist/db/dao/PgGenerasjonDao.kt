@@ -66,7 +66,7 @@ class PgGenerasjonDao private constructor(
                     FROM behandling b
                     INNER JOIN public.vedtak v ON b.vedtaksperiode_id = v.vedtaksperiode_id
                     WHERE v.arbeidsgiver_identifikator != 'SELVSTENDIG'
-                      AND b.yrkesaktivitet IS NULL
+                      AND b.yrkesaktivitetstype IS NULL
                     LIMIT 1000
             )
             UPDATE behandling b
@@ -85,7 +85,7 @@ class PgGenerasjonDao private constructor(
                     FROM behandling b
                     INNER JOIN public.vedtak v ON b.vedtaksperiode_id = v.vedtaksperiode_id
                     WHERE v.arbeidsgiver_identifikator == 'SELVSTENDIG'
-                      AND b.yrkesaktivitet IS NULL
+                      AND b.yrkesaktivitetstype IS NULL
                     LIMIT 1000
             )
             UPDATE behandling b
