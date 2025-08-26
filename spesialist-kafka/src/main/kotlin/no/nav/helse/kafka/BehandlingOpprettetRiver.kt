@@ -50,7 +50,8 @@ class BehandlingOpprettetRiver(
             behandlerIkke(organisasjonsnummer)
             return
         }
-        if (organisasjonsnummer == "SELVSTENDIG" && !featureToggles.skalBehandleSelvstendig()) {
+        val yrkesaktivitetstype = Yrkesaktivitetstype.valueOf(packet["yrkesaktivitetstype"].asText())
+        if (yrkesaktivitetstype == Yrkesaktivitetstype.SELVSTENDIG && !featureToggles.skalBehandleSelvstendig()) {
             behandlerIkke(organisasjonsnummer)
             return
         }
@@ -63,7 +64,7 @@ class BehandlingOpprettetRiver(
                 spleisBehandlingId = packet["behandlingId"].asUUID(),
                 fom = packet["fom"].asLocalDate(),
                 tom = packet["tom"].asLocalDate(),
-                yrkesaktivitetstype = Yrkesaktivitetstype.valueOf(packet["yrkesaktivitetstype"].asText()),
+                yrkesaktivitetstype = yrkesaktivitetstype,
                 json = packet.toJson(),
             ),
             MessageContextMeldingPubliserer(context),

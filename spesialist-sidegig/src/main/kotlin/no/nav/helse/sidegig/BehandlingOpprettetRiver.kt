@@ -27,6 +27,7 @@ class BehandlingOpprettetRiver(
                 precondition {
                     it.requireValue("@event_name", "behandling_opprettet")
                     it.forbidValues("organisasjonsnummer", listOf("ARBEIDSLEDIG", "SELVSTENDIG", "FRILANS"))
+                    it.forbidValues("yrkesaktivitetstype", listOf("ARBEIDSLEDIG", "SELVSTENDIG", "FRILANS"))
                 }
                 validate {
                     it.requireKey("vedtaksperiodeId", "behandlingId")

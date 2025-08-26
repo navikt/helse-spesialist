@@ -104,7 +104,7 @@ class VurderBehovForAvviksvurderingTest {
 
     @Test
     fun `Ikke send ut behov dersom person er selvstendig næringsdrivende`() {
-        val command = vurderBehovForAvviksvurderingCommand(organisasjonsnummer = "SELVSTENDIG")
+        val command = vurderBehovForAvviksvurderingCommand(yrkesaktivitetstype = Yrkesaktivitetstype.SELVSTENDIG)
         val context = CommandContext(UUID.randomUUID())
         context.nyObserver(observer)
         assertTrue(command.execute(context))
@@ -246,6 +246,7 @@ class VurderBehovForAvviksvurderingTest {
 
     private fun vurderBehovForAvviksvurderingCommand(
         erInngangsvilkårVurdertISpleis: Boolean = true,
+        yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
         organisasjonsnummer: String = this.organisasjonsnummer
     ) =
         VurderBehovForAvviksvurdering(
@@ -256,6 +257,7 @@ class VurderBehovForAvviksvurderingTest {
             vilkårsgrunnlagId = vilkårsgrunnlagId,
             legacyBehandling = legacyBehandling,
             erInngangsvilkårVurdertISpleis = erInngangsvilkårVurdertISpleis,
+            yrkesaktivitetstype = yrkesaktivitetstype,
             organisasjonsnummer = organisasjonsnummer,
         )
 }

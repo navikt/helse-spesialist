@@ -3,6 +3,7 @@ package no.nav.helse.modell.kommando
 import no.nav.helse.db.AvviksvurderingRepository
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode.RV_IV_2
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.modell.vilkårsprøving.AvviksvurderingBehovLøsning
 import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
@@ -18,13 +19,12 @@ class VurderBehovForAvviksvurdering(
     private val vilkårsgrunnlagId: UUID,
     private val legacyBehandling: LegacyBehandling,
     private val erInngangsvilkårVurdertISpleis: Boolean,
+    private val yrkesaktivitetstype: Yrkesaktivitetstype,
     private val organisasjonsnummer: String,
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
         if (!erInngangsvilkårVurdertISpleis) return true
-        if ("SELVSTENDIG" in organisasjonsnummer) {
-            return true
-        }
+        if (yrkesaktivitetstype == Yrkesaktivitetstype.SELVSTENDIG) return true
         return behov(context)
     }
 

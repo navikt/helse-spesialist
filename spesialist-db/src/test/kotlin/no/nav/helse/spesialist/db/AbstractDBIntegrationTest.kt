@@ -378,6 +378,7 @@ abstract class AbstractDBIntegrationTest {
         utbetalingId: UUID? = UTBETALING_ID,
         forkastet: Boolean = false,
         spleisBehandlingId: UUID = UUID.randomUUID(),
+        yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
     ) {
         pgPersonRepository.brukPersonHvisFinnes(fødselsnummer) {
             this.nySpleisBehandling(
@@ -387,7 +388,7 @@ abstract class AbstractDBIntegrationTest {
                     spleisBehandlingId,
                     fom,
                     tom,
-                    Yrkesaktivitetstype.ARBEIDSTAKER
+                    yrkesaktivitetstype
                 )
             )
             if (utbetalingId != null) this.nyUtbetalingForVedtaksperiode(vedtaksperiodeId, utbetalingId)
@@ -544,6 +545,7 @@ abstract class AbstractDBIntegrationTest {
         aktørId: String = lagAktørId(),
         adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert,
         organisasjonsnummer: String = lagOrganisasjonsnummer(),
+        yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         behandlingId: UUID = UUID.randomUUID(),
         utbetalingId: UUID = UUID.randomUUID(),
@@ -569,6 +571,7 @@ abstract class AbstractDBIntegrationTest {
             vedtaksperiodeId = vedtaksperiodeId,
             spleisBehandlingId = behandlingId,
             utbetalingId = utbetalingId,
+            yrkesaktivitetstype = yrkesaktivitetstype
         )
         utbetalingsopplegg(
             fødselsnummer = fødselsnummer,

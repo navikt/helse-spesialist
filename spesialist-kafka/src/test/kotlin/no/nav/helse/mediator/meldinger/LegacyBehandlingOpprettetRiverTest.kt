@@ -10,6 +10,7 @@ import no.nav.helse.kafka.BehandlingOpprettetRiver
 import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.vedtaksperiode.BehandlingOpprettet
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk
 import no.nav.helse.spesialist.test.TestPerson
 import org.junit.jupiter.api.BeforeEach
@@ -71,14 +72,15 @@ internal class LegacyBehandlingOpprettetRiverTest {
     }
 
     @Test
-    fun `ignorerer organisasjonsnummer SELVSTENDIG uten å tryne`() {
+    fun `ignorerer yrkesaktivitetstype SELVSTENDIG uten å tryne`() {
         rapid.sendTestMessage(
             Testmeldingfabrikk.lagBehandlingOpprettet(
                 aktørId = testperson.aktørId,
                 fødselsnummer = testperson.fødselsnummer,
-                organisasjonsnummer = "SELVSTENDIG",
+                organisasjonsnummer = testperson.orgnummer,
                 vedtaksperiodeId = UUID.randomUUID(),
-                spleisBehandlingId = UUID.randomUUID()
+                spleisBehandlingId = UUID.randomUUID(),
+                yrkesaktivitetstype = Yrkesaktivitetstype.SELVSTENDIG
             )
         )
         verify { mediator wasNot called }

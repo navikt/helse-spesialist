@@ -39,7 +39,7 @@ class AvsluttetMedVedtakRiverIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture(testRapid)
     private val personRepository = integrationTestFixture.sessionFactory.sessionContext.personRepository
 
-    private lateinit var organisasjonsnummer: String
+    private val organisasjonsnummer = lagOrganisasjonsnummer()
     private val vedtaksperiodeId = UUID.randomUUID()
     private val spleisBehandlingId = UUID.randomUUID()
     private val fom = LocalDate.parse("2024-10-01")
@@ -56,7 +56,6 @@ class AvsluttetMedVedtakRiverIntegrationTest {
     @Test
     fun `fastsatt etter skjønn`() {
         // Given:
-        organisasjonsnummer = lagOrganisasjonsnummer()
         val skjønnsfastsattBeløp = BigDecimal("650000.00")
         val omregnetÅrsinntekt = BigDecimal("800000.00")
         val seksG = BigDecimal("666666.66")
@@ -189,7 +188,6 @@ class AvsluttetMedVedtakRiverIntegrationTest {
     @Test
     fun `fastsatt etter skjønn - delvis innvilgelse`() {
         // Given:
-        organisasjonsnummer = lagOrganisasjonsnummer()
         val skjønnsfastsattBeløp = BigDecimal("650000.00")
         val omregnetÅrsinntekt = BigDecimal("800000.00")
         val seksG = BigDecimal("666666.66")
@@ -323,7 +321,6 @@ class AvsluttetMedVedtakRiverIntegrationTest {
     @Test
     fun `fastsatt etter hovedregel`() {
         // Given:
-        organisasjonsnummer = lagOrganisasjonsnummer()
         val omregnetÅrsinntekt = BigDecimal("600000.00")
         val seksG = BigDecimal("666666.66")
         val innrapportertÅrsinntekt = BigDecimal("660000.00")
@@ -408,7 +405,6 @@ class AvsluttetMedVedtakRiverIntegrationTest {
     @Test
     fun `fastsatt etter hovedregel - delvis innvilgelse`() {
         // Given:
-        organisasjonsnummer = lagOrganisasjonsnummer()
         val omregnetÅrsinntekt = BigDecimal("600000.00")
         val seksG = BigDecimal("666666.66")
         val innrapportertÅrsinntekt = BigDecimal("660000.00")
@@ -494,7 +490,6 @@ class AvsluttetMedVedtakRiverIntegrationTest {
     @Test
     fun `fastsatt etter hovedregel begrenset til 6G`() {
         // Given:
-        organisasjonsnummer = lagOrganisasjonsnummer()
         val omregnetÅrsinntekt = BigDecimal("900000.00")
         val seksG = BigDecimal("666666.66")
         val innrapportertÅrsinntekt = BigDecimal("990000.00")
@@ -579,7 +574,6 @@ class AvsluttetMedVedtakRiverIntegrationTest {
     @Test
     fun `fastsatt i infotrygd`() {
         // Given:
-        organisasjonsnummer = lagOrganisasjonsnummer()
         val omregnetÅrsinntekt = BigDecimal("600000.00")
         val innrapportertÅrsinntekt = BigDecimal("660000.00")
         val avviksprosent = 10.0
@@ -651,14 +645,15 @@ class AvsluttetMedVedtakRiverIntegrationTest {
     @Test
     fun `selvstendig næringsdrivende`() {
         // Given:
-        organisasjonsnummer = "SELVSTENDIG"
         val beregningsgrunnlag = BigDecimal("600000.00")
         val seksG = BigDecimal("666666.66")
         val behandlingTags = listOf("Behandling tag 1", "Behandling tag 2")
         val vedtakBegrunnelse = "Begrunnelse for innvilgelse"
         initPerson(
             behandlingTags = behandlingTags,
-            vedtakBegrunnelse = vedtakBegrunnelse
+            vedtakBegrunnelse = vedtakBegrunnelse,
+            organisasjonsnummer = "SELVSTENDIG",
+            yrkesaktivitetstype = Yrkesaktivitetstype.SELVSTENDIG
         )
 
         // When:
@@ -719,14 +714,15 @@ class AvsluttetMedVedtakRiverIntegrationTest {
     @Test
     fun `selvstendig næringsdrivende begrenset til 6G`() {
         // Given:
-        organisasjonsnummer = "SELVSTENDIG"
         val beregningsgrunnlag = BigDecimal("800000.00")
         val seksG = BigDecimal("666666.66")
         val behandlingTags = listOf("Behandling tag 1", "Behandling tag 2")
         val vedtakBegrunnelse = "Begrunnelse for innvilgelse"
         initPerson(
             behandlingTags = behandlingTags + "6GBegrenset",
-            vedtakBegrunnelse = vedtakBegrunnelse
+            vedtakBegrunnelse = vedtakBegrunnelse,
+            organisasjonsnummer = "SELVSTENDIG",
+            yrkesaktivitetstype = Yrkesaktivitetstype.SELVSTENDIG
         )
 
         // When:
@@ -789,7 +785,9 @@ class AvsluttetMedVedtakRiverIntegrationTest {
         vedtakUtfall: Utfall = Utfall.INNVILGELSE,
         vedtakBegrunnelse: String,
         skjønnsfastsettelse: SkjønnsfastsattSykepengegrunnlagDto? = null,
-        avviksvurdering: Avviksvurdering? = null
+        avviksvurdering: Avviksvurdering? = null,
+        organisasjonsnummer: String = this.organisasjonsnummer,
+        yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
     ) {
         personRepository.leggTilPerson(
             Person.gjenopprett(
@@ -816,7 +814,7 @@ class AvsluttetMedVedtakRiverIntegrationTest {
                                     begrunnelse = vedtakBegrunnelse
                                 ),
                                 varsler = emptyList(),
-                                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
+                                yrkesaktivitetstype = yrkesaktivitetstype
                             )
                         )
                     )
@@ -828,6 +826,7 @@ class AvsluttetMedVedtakRiverIntegrationTest {
     }
 
     private fun lagAvviksvurdering(
+        organisasjonsnummer: String = this.organisasjonsnummer,
         avviksprosent: Double,
         innrapportertÅrsinntekt: BigDecimal,
         omregnetÅrsinntekt: BigDecimal

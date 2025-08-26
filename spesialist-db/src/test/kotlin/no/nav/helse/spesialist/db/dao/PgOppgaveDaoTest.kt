@@ -25,6 +25,7 @@ import no.nav.helse.modell.oppgave.Egenskap.Kategori
 import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.person.Adressebeskyttelse
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.db.TestMelding
 import no.nav.helse.spesialist.domain.testfixtures.lagAktørId
@@ -430,7 +431,7 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
     @Test
     fun `Finn oppgaver med bestemte egenskaper -- selvstendig`() {
         nyOppgaveForNyPerson()
-        val oppgave2 = nyOppgaveForNyPerson(organisasjonsnummer = "SELVSTENDIG", oppgaveegenskaper = setOf(Egenskap.SØKNAD, Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE))
+        val oppgave2 = nyOppgaveForNyPerson(yrkesaktivitetstype = Yrkesaktivitetstype.SELVSTENDIG, oppgaveegenskaper = setOf(Egenskap.SØKNAD, Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE))
         val oppgaver =
             oppgaveDao.finnOppgaverForVisning(
                 emptyList(),

@@ -44,16 +44,17 @@ class BehandlingOpprettetRiverTest {
 
     @ParameterizedTest
     @ValueSource(strings = ["ARBEIDSLEDIG", "SELVSTENDIG", "FRILANS"])
-    fun `leser ikke behandlinger med organisasjonsnummer=`(organisasjonsnummer: String) {
+    fun `leser ikke behandlinger med yrkesaktivitetstype=`(yrkesaktivitetstype: String) {
         BehandlingOpprettetRiver(testRapid, dao)
 
-        testRapid.sendTestMessage(melding(organisasjonsnummer = organisasjonsnummer,))
+        testRapid.sendTestMessage(melding(yrkesaktivitetstype = yrkesaktivitetstype,))
         assertEquals(0, dao.behandlinger.size)
     }
 
     @Language("JSON")
     private fun melding(
         organisasjonsnummer: String = "987654321",
+        yrkesaktivitetstype: String = "ARBEIDSTAKER",
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         behandlingId: UUID = UUID.randomUUID(),
         fom: LocalDate = LocalDate.now(),
@@ -62,6 +63,7 @@ class BehandlingOpprettetRiverTest {
     ) = """{
   "@event_name": "behandling_opprettet",
   "organisasjonsnummer": "$organisasjonsnummer",
+  "yrkesaktivitetstype": "$yrkesaktivitetstype",
   "vedtaksperiodeId": "$vedtaksperiodeId",
   "behandlingId": "$behandlingId",
   "søknadIder": [

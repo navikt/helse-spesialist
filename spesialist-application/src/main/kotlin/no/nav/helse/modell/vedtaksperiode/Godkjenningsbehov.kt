@@ -356,6 +356,7 @@ internal class GodkjenningsbehovCommand(
                         .vedtaksperiode(behovData.vedtaksperiodeId)
                         .finnBehandling(behovData.spleisBehandlingId),
                 erInngangsvilkårVurdertISpleis = behovData.erInngangsvilkårVurdertISpleis,
+                yrkesaktivitetstype = behovData.yrkesaktivitetstype,
                 organisasjonsnummer = behovData.organisasjonsnummer,
             ),
             PersisterVedtaksperiodetypeCommand(
