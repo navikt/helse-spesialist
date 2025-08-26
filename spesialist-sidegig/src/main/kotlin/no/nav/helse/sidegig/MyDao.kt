@@ -1,5 +1,6 @@
 package no.nav.helse.sidegig
 
+import kotliquery.Query
 import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
@@ -123,6 +124,23 @@ class MyDao(
         }.firstOrNull()
             ?.vedtaksperiodeId
 
+    fun oppdaterAnnulleringMedVedtaksperiodeId(
+        annulleringId: Int,
+        vedtaksperiodeId: UUID,
+    ) = update(
+        query =
+            """
+            UPDATE annullert_av_saksbehandler
+            SET vedtaksperiode_id = :vedtaksperiodeId
+            WHERE id = :annulleringId
+            """.trimIndent(),
+        paramMap =
+            mapOf(
+                "vedtaksperiodeId" to vedtaksperiodeId,
+                "annulleringId" to annulleringId,
+            ),
+    )
+
     data class BehandlingsperiodeRow(
         val vedtaksperiodeId: UUID,
         val fom: LocalDate,
@@ -160,4 +178,16 @@ class MyDao(
         sessionOf(dataSource).use { session ->
             session.run(queryOf(query, paramMap).map(extractor).asList)
         }
+
+    private fun update(
+        @Language("PostgreSQL") query: String,
+        paramMap: Map<String, Any> = emptyMap(),
+    ) = sessionOf(dataSource).use { session ->
+        session.update(
+            Query(
+                statement = query,
+                paramMap = paramMap,
+            ),
+        )
+    }
 }

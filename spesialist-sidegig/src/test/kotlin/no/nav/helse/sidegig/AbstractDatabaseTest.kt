@@ -1,5 +1,6 @@
 package no.nav.helse.sidegig
 
+import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.spesialist.db.testfixtures.DBTestFixture
@@ -23,6 +24,15 @@ internal abstract class AbstractDatabaseTest {
     ): Long? =
         sessionOf(dataSource, returnGeneratedKey = true).use { session ->
             session.run(queryOf(query, paramMap).asUpdateAndReturnGeneratedKey)
+        }
+
+    fun <T> query(
+        @Language("PostgreSQL") query: String,
+        paramMap: Map<String, Any> = emptyMap(),
+        extractor: (row: Row) -> T,
+    ): T? =
+        sessionOf(dataSource).use { session ->
+            session.run(queryOf(query, paramMap).map(extractor).asSingle)
         }
 }
 

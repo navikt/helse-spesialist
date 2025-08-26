@@ -1,8 +1,11 @@
 package no.nav.helse.sidegig
 
 import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
+import no.nav.helse.spesialist.db.DbQuery
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertNull
+import org.junit.jupiter.api.parallel.Isolated
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -10,15 +13,16 @@ import java.util.Random
 import java.util.UUID
 import kotlin.random.Random.Default.nextLong
 
+@Isolated
 internal class MyDaoTest : AbstractDatabaseTest() {
     val SAKSBEHANDLEROID = UUID.randomUUID()
     private val myDao = MyDao(dataSource)
 
-
     @Test
     fun `Returnerer 10 annulleringer`() {
+        DbQuery(dataSource).execute("TRUNCATE annullert_av_saksbehandler CASCADE")
         lagSaksbehandler(SAKSBEHANDLEROID)
-        repeat(10) {
+        repeat(5) {
             lagAnnullertAvSaksbehandler(
                 saksbehandlerRef = SAKSBEHANDLEROID,
                 arbeidsgiverFagsystemId = lagFagsystemId(),
@@ -31,7 +35,7 @@ internal class MyDaoTest : AbstractDatabaseTest() {
             )
         }
         val result = myDao.find10Annulleringer()
-        assertEquals(10, result.size)
+        assertEquals(5, result.size)
     }
 
     @Test
@@ -348,6 +352,43 @@ internal class MyDaoTest : AbstractDatabaseTest() {
         val result = myDao.finnFørsteVedtaksperiodeIdForEttSykefraværstilfelle(behandling)
         assertEquals(vedtaksperiodeId1, result)
     }
+
+    @Test
+    fun `Oppdaterer annullering med vedtaksperiodeid`() {
+        DbQuery(dataSource).execute("TRUNCATE annullert_av_saksbehandler CASCADE")
+        lagSaksbehandler(SAKSBEHANDLEROID)
+        val vedtakperiodeId = UUID.randomUUID()
+        val annulleringId = lagAnnullertAvSaksbehandler(SAKSBEHANDLEROID)
+        val annullering = hentAnnullering(annulleringId)
+        assertNull(annullering?.vedtaksperiodeId)
+        myDao.oppdaterAnnulleringMedVedtaksperiodeId(
+            annulleringId = annulleringId,
+            vedtaksperiodeId = vedtakperiodeId
+        )
+        val result = hentAnnullering(annulleringId)
+        assertEquals(vedtakperiodeId, result?.vedtaksperiodeId)
+    }
+
+    private fun hentAnnullering(annulleringId: Int) = query(
+        query = """
+            SELECT * from annullert_av_saksbehandler 
+            WHERE id = :annulleringId
+            """.trimMargin(),
+        paramMap = mapOf(
+            "annulleringId" to annulleringId
+        )
+    ) { row ->
+        AnnulleringMedVedtaksperiodeId(
+            id = row.long("id"),
+            vedtaksperiodeId = row.uuidOrNull("vedtaksperiode_id")
+        )
+    }
+
+
+    data class AnnulleringMedVedtaksperiodeId(
+        val id: Long,
+        val vedtaksperiodeId: UUID?
+    )
 
     private fun opprettUtbetaltVedtak(
         vedtaksperiodeId: UUID,
