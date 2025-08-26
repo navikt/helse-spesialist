@@ -20,6 +20,6 @@ enum class SnapshotSykdomsdagtype {
     SYKEDAG,
     SYKEDAGNAV,
     UBESTEMTDAG,
-    VENTEPERIODEDAG,
+    VENTETIDSDAG,
     UNKNOWN_VALUE,
 }

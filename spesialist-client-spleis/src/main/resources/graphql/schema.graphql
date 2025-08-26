@@ -510,7 +510,7 @@ enum GraphQLSykdomsdagtype {
   Sykedag
   SykedagNav
   Ubestemtdag
-  Venteperiodedag
+  Ventetidsdag
 }
 
 enum GraphQLUtbetalingsdagType {
@@ -523,7 +523,7 @@ enum GraphQLUtbetalingsdagType {
   NavDag
   NavHelgDag
   UkjentDag
-  Venteperiodedag
+  Ventetidsdag
 }
 
 enum GraphQLUtbetalingstatus {

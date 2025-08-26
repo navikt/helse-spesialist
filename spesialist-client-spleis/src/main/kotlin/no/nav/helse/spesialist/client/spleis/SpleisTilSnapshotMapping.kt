@@ -651,7 +651,7 @@ fun GraphQLSykdomsdagtype.tilSnapshotSykdomsdagtype() =
         GraphQLSykdomsdagtype.SYKEDAG -> SnapshotSykdomsdagtype.SYKEDAG
         GraphQLSykdomsdagtype.SYKEDAGNAV -> SnapshotSykdomsdagtype.SYKEDAGNAV
         GraphQLSykdomsdagtype.UBESTEMTDAG -> SnapshotSykdomsdagtype.UBESTEMTDAG
-        GraphQLSykdomsdagtype.VENTEPERIODEDAG -> SnapshotSykdomsdagtype.VENTEPERIODEDAG
+        GraphQLSykdomsdagtype.VENTETIDSDAG -> SnapshotSykdomsdagtype.VENTETIDSDAG
         GraphQLSykdomsdagtype.__UNKNOWN_VALUE -> SnapshotSykdomsdagtype.UNKNOWN_VALUE
     }
 
@@ -666,7 +666,7 @@ fun GraphQLUtbetalingsdagType.tilSnapshotUtbetalingsdagType() =
         GraphQLUtbetalingsdagType.NAVDAG -> SnapshotUtbetalingsdagType.NAVDAG
         GraphQLUtbetalingsdagType.NAVHELGDAG -> SnapshotUtbetalingsdagType.NAVHELGDAG
         GraphQLUtbetalingsdagType.UKJENTDAG -> SnapshotUtbetalingsdagType.UKJENTDAG
-        GraphQLUtbetalingsdagType.VENTEPERIODEDAG -> SnapshotUtbetalingsdagType.VENTEPERIODEDAG
+        GraphQLUtbetalingsdagType.VENTETIDSDAG -> SnapshotUtbetalingsdagType.VENTETIDSDAG
         GraphQLUtbetalingsdagType.__UNKNOWN_VALUE -> SnapshotUtbetalingsdagType.UNKNOWN_VALUE
     }
 
