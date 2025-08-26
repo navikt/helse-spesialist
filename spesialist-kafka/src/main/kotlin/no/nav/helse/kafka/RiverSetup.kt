@@ -57,6 +57,7 @@ class RiverSetup(
             AvsluttetMedVedtakRiver(sessionFactory),
             AvsluttetUtenVedtakRiver(mediator),
             MidnattRiver(mediator),
+            MinuttRiver(mediator),
             BehandlingOpprettetRiver(mediator, featureToggles),
             KommandokjedePåminnelseRiver(mediator),
             StansAutomatiskBehandlingRiver(mediator),

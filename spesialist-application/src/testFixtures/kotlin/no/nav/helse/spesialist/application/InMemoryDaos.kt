@@ -47,6 +47,7 @@ import no.nav.helse.mediator.oppgave.OppgaveRepository
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.MinimalPersonDto
 import no.nav.helse.modell.person.Adressebeskyttelse
+import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.spesialist.typer.Kjønn
 import java.time.LocalDate
@@ -149,8 +150,37 @@ class InMemoryDaos : Daos {
     }
     override val egenAnsattDao: EgenAnsattDao
         get() = TODO("Not yet implemented")
-    override val generasjonDao: GenerasjonDao
-        get() = TODO("Not yet implemented")
+    override val generasjonDao = object : GenerasjonDao {
+        override fun førsteGenerasjonVedtakFattetTidspunkt(vedtaksperiodeId: UUID): LocalDateTime? {
+            TODO("Not yet implemented")
+        }
+
+        override fun finnGenerasjoner(vedtaksperiodeId: UUID): List<BehandlingDto> {
+            TODO("Not yet implemented")
+        }
+
+        override fun lagreGenerasjon(behandlingDto: BehandlingDto) {
+            TODO("Not yet implemented")
+        }
+
+        override fun finnVedtaksperiodeIderFor(fødselsnummer: String): Set<UUID> {
+            TODO("Not yet implemented")
+        }
+
+        override fun førsteKjenteDag(fødselsnummer: String): LocalDate? {
+            TODO("Not yet implemented")
+        }
+
+        override fun oppdaterYrkesaktivitetMedArbeidstaker(): Int {
+            TODO("Not yet implemented")
+        }
+
+        override fun oppdaterYrkesaktivitetMedSelvstendig(): Int {
+            TODO("Not yet implemented")
+        }
+
+    }
+
     override val meldingDao: InMemoryMeldingDao = InMemoryMeldingDao()
     override val meldingDuplikatkontrollDao = object : MeldingDuplikatkontrollDao {
         override fun lagre(meldingId: UUID, type: String) {}

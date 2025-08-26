@@ -58,6 +58,44 @@ class PgGenerasjonDao private constructor(
         }
     }
 
+    override fun oppdaterYrkesaktivitetMedArbeidstaker(): Int =
+        asSQL(
+            """
+                WITH behandlinger_uten_yrkesaktivitet AS (
+                    SELECT b.id
+                    FROM behandling b
+                    INNER JOIN public.vedtak v ON b.vedtaksperiode_id = v.vedtaksperiode_id
+                    WHERE v.arbeidsgiver_identifikator != 'SELVSTENDIG'
+                      AND b.yrkesaktivitet IS NULL
+                    LIMIT 1000
+            )
+            UPDATE behandling b
+            SET yrkesaktivitetstype = 'ARBEIDSTAKER'
+            FROM behandlinger_uten_yrkesaktivitet u
+            WHERE b.id = u.id;
+                
+            """.trimIndent(),
+        ).update()
+
+    override fun oppdaterYrkesaktivitetMedSelvstendig(): Int =
+        asSQL(
+            """
+                WITH behandlinger_uten_yrkesaktivitet AS (
+                    SELECT b.id
+                    FROM behandling b
+                    INNER JOIN public.vedtak v ON b.vedtaksperiode_id = v.vedtaksperiode_id
+                    WHERE v.arbeidsgiver_identifikator == 'SELVSTENDIG'
+                      AND b.yrkesaktivitet IS NULL
+                    LIMIT 1000
+            )
+            UPDATE behandling b
+            SET yrkesaktivitetstype = 'SELVSTENDIG'
+            FROM behandlinger_uten_yrkesaktivitet u
+            WHERE b.id = u.id;
+                
+            """.trimIndent(),
+        ).update()
+
     private fun lagre(behandlingDto: BehandlingDto) {
         asSQL(
             """

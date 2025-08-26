@@ -15,4 +15,8 @@ interface GenerasjonDao {
     fun finnVedtaksperiodeIderFor(fødselsnummer: String): Set<UUID>
 
     fun førsteKjenteDag(fødselsnummer: String): LocalDate?
+
+    fun oppdaterYrkesaktivitetMedArbeidstaker(): Int
+
+    fun oppdaterYrkesaktivitetMedSelvstendig(): Int
 }
