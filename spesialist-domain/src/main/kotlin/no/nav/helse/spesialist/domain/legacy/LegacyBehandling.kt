@@ -35,7 +35,7 @@ class LegacyBehandling private constructor(
     tags: List<String>,
     val vedtakBegrunnelse: VedtakBegrunnelse?,
     varsler: Set<Varsel>,
-    val yrkesaktivitetstype: Yrkesaktivitetstype?,
+    val yrkesaktivitetstype: Yrkesaktivitetstype,
 ) {
     constructor(
         id: UUID,
@@ -469,7 +469,7 @@ class LegacyBehandling private constructor(
             tags: List<String>,
             varsler: Set<Varsel>,
             vedtakBegrunnelse: VedtakBegrunnelse?,
-            yrkesaktivitetstype: Yrkesaktivitetstype?,
+            yrkesaktivitetstype: Yrkesaktivitetstype,
         ) = LegacyBehandling(
             id = id,
             vedtaksperiodeId = vedtaksperiodeId,

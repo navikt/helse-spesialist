@@ -17,7 +17,7 @@ data class BehandlingDto(
     val tags: List<String>,
     val vedtakBegrunnelse: VedtakBegrunnelse?,
     val varsler: List<VarselDto>,
-    val yrkesaktivitetstype: Yrkesaktivitetstype?,
+    val yrkesaktivitetstype: Yrkesaktivitetstype,
 )
 
 enum class TilstandDto {

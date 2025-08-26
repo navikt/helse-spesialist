@@ -175,10 +175,6 @@ class InMemoryDaos : Daos {
             TODO("Not yet implemented")
         }
 
-        override fun oppdaterYrkesaktivitetMedSelvstendig(): Int {
-            TODO("Not yet implemented")
-        }
-
     }
 
     override val meldingDao: InMemoryMeldingDao = InMemoryMeldingDao()

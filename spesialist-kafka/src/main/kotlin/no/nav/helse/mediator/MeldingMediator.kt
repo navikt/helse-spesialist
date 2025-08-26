@@ -163,8 +163,6 @@ class MeldingMediator(
 
     fun oppdaterBehandlingMedYrkesaktivitetArbeidstaker(): Int = generasjonDao.oppdaterYrkesaktivitetMedArbeidstaker()
 
-    fun oppdaterBehandlingMedYrkesaktivitetSelvstendig(): Int = generasjonDao.oppdaterYrkesaktivitetMedSelvstendig()
-
     fun nullstillTilstand() {
         løsninger.set(null)
         meldingenHarBlittBehandletAvEnRiver.set(false)

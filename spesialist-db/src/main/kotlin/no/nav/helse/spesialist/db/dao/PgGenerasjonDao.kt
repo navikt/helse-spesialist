@@ -46,7 +46,7 @@ class PgGenerasjonDao private constructor(
                 tags = row.array<String>("tags").toList(),
                 vedtakBegrunnelse = PgVedtakBegrunnelseDao(queryRunner).finnVedtakBegrunnelse(vedtaksperiodeId, generasjonRef),
                 varsler = finnVarsler(generasjonRef),
-                yrkesaktivitetstype = row.stringOrNull("yrkesaktivitetstype")?.let { Yrkesaktivitetstype.valueOf(it) },
+                yrkesaktivitetstype = row.stringOrNull("yrkesaktivitetstype")?.let { Yrkesaktivitetstype.valueOf(it) } ?: Yrkesaktivitetstype.ARBEIDSTAKER,
             )
         }
 
@@ -64,32 +64,11 @@ class PgGenerasjonDao private constructor(
                 WITH behandlinger_uten_yrkesaktivitet AS (
                     SELECT b.id
                     FROM behandling b
-                    INNER JOIN public.vedtak v ON b.vedtaksperiode_id = v.vedtaksperiode_id
-                    WHERE v.arbeidsgiver_identifikator != 'SELVSTENDIG'
-                      AND b.yrkesaktivitetstype IS NULL
-                    LIMIT 1000
+                    WHERE b.yrkesaktivitetstype IS NULL
+                    LIMIT 5000
             )
             UPDATE behandling b
             SET yrkesaktivitetstype = 'ARBEIDSTAKER'
-            FROM behandlinger_uten_yrkesaktivitet u
-            WHERE b.id = u.id;
-                
-            """.trimIndent(),
-        ).update()
-
-    override fun oppdaterYrkesaktivitetMedSelvstendig(): Int =
-        asSQL(
-            """
-                WITH behandlinger_uten_yrkesaktivitet AS (
-                    SELECT b.id
-                    FROM behandling b
-                    INNER JOIN public.vedtak v ON b.vedtaksperiode_id = v.vedtaksperiode_id
-                    WHERE v.arbeidsgiver_identifikator = 'SELVSTENDIG'
-                      AND b.yrkesaktivitetstype IS NULL
-                    LIMIT 1000
-            )
-            UPDATE behandling b
-            SET yrkesaktivitetstype = 'SELVSTENDIG'
             FROM behandlinger_uten_yrkesaktivitet u
             WHERE b.id = u.id;
                 

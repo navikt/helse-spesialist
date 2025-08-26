@@ -17,6 +17,4 @@ interface GenerasjonDao {
     fun førsteKjenteDag(fødselsnummer: String): LocalDate?
 
     fun oppdaterYrkesaktivitetMedArbeidstaker(): Int
-
-    fun oppdaterYrkesaktivitetMedSelvstendig(): Int
 }
