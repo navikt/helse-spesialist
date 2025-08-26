@@ -81,10 +81,12 @@ class MyDao(
         }
 
     fun finnFørsteVedtaksperiodeIdForEttSykefraværstilfelle(behandlingISykefraværstilfelleRow: BehandlingISykefraværstilfelleRow): UUID? =
-        query(
+        listQuery(
             query =
                 """
-                SELECT behandling.vedtaksperiode_id
+                SELECT behandling.vedtaksperiode_id,
+                    behandling.fom,
+                    behandling.tom
                 FROM behandling,
                      vedtak,
                      person
@@ -92,17 +94,40 @@ class MyDao(
                   AND vedtak.arbeidsgiver_identifikator = :arbeidsgiverId
                   AND vedtak.person_ref = person.id
                   AND vedtak.vedtaksperiode_id = behandling.vedtaksperiode_id
-                  AND behandling.skjæringstidspunkt = :skjaringstidspunkt
                 ORDER BY behandling.fom 
-                LIMIT 1
                 """.trimIndent(),
             paramMap =
                 mapOf(
                     "personId" to behandlingISykefraværstilfelleRow.personId,
                     "arbeidsgiverId" to behandlingISykefraværstilfelleRow.arbeidsgiverId,
-                    "skjaringstidspunkt" to behandlingISykefraværstilfelleRow.skjæringstidspunkt,
                 ),
-        ) { row -> UUID.fromString(row.string("vedtaksperiode_id")) }
+        ) { row ->
+            BehandlingsperiodeRow(
+                vedtaksperiodeId = UUID.fromString(row.string("vedtaksperiode_id")),
+                fom = row.localDate("fom"),
+                tom = row.localDate("tom"),
+            )
+        }.fold(emptyList<BehandlingsperiodeRow>()) { acc, row ->
+            if (acc.isEmpty()) {
+                acc.plus(row)
+            } else if (acc
+                    .last()
+                    .tom
+                    .plusDays(16)
+                    .isAfter(row.fom)
+            ) {
+                acc.plus(row)
+            } else {
+                acc
+            }
+        }.firstOrNull()
+            ?.vedtaksperiodeId
+
+    data class BehandlingsperiodeRow(
+        val vedtaksperiodeId: UUID,
+        val fom: LocalDate,
+        val tom: LocalDate,
+    )
 
     data class AnnullertAvSaksbehandlerRow(
         val id: Int,

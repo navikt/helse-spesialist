@@ -234,6 +234,154 @@ internal class MyDaoTest : AbstractDatabaseTest() {
         assertEquals(vedtakperiodeId1, result)
     }
 
+    @Test
+    fun `Gammel utbetalingsrigg - Velg første vedtaksperiodeid for sykefraværstilfelle der det er ett opphold i sykefraværstilfelle på mindre enn 16 dager`() {
+        // Given:
+        val personRef = requireNotNull(lagPerson())
+        val arbeidsgiverIdentifikator = lagOrganisasjonsnummer()
+
+        val utbetalingId1 = UUID.randomUUID()
+        val utbetalingId2 = UUID.randomUUID()
+        val utbetalingId3 = UUID.randomUUID()
+
+        val førsteSkjæringstidspunkt = LocalDate.now()
+        val andreSkjæringstidspunkt = førsteSkjæringstidspunkt.plusDays(4)
+        val vedtaksperiodeId1 = UUID.randomUUID()
+        val vedtaksperiodeId2 = UUID.randomUUID()
+        val vedtaksperiodeId3 = UUID.randomUUID()
+
+
+        // When:
+        val arbeidsgiverFagsystemId = lagFagsystemId()
+        val arbeidsgiverOppdragId = lagOppdrag(arbeidsgiverFagsystemId)
+        val personFagsystemId = lagFagsystemId()
+        val personOppdragId = lagOppdrag(personFagsystemId)
+
+        // Første periode
+        opprettUtbetaltVedtak(
+            vedtaksperiodeId = vedtaksperiodeId1,
+            personRef = personRef,
+            arbeidsgiverIdentifikator = arbeidsgiverIdentifikator,
+            skjæringstidspunkt = førsteSkjæringstidspunkt,
+            fom = førsteSkjæringstidspunkt,
+            utbetalingId = utbetalingId1,
+            arbeidsgiverOppdragId = arbeidsgiverOppdragId,
+            personOppdragId = personOppdragId
+        )
+        // Andre periode
+        opprettUtbetaltVedtak(
+            vedtaksperiodeId = vedtaksperiodeId2,
+            personRef = personRef,
+            arbeidsgiverIdentifikator = arbeidsgiverIdentifikator,
+            skjæringstidspunkt = andreSkjæringstidspunkt,
+            fom = andreSkjæringstidspunkt,
+            utbetalingId = utbetalingId2,
+            arbeidsgiverOppdragId = arbeidsgiverOppdragId,
+            personOppdragId = personOppdragId
+        )
+        // Tredje periode
+        opprettUtbetaltVedtak(
+            vedtaksperiodeId = vedtaksperiodeId3,
+            personRef = personRef,
+            arbeidsgiverIdentifikator = arbeidsgiverIdentifikator,
+            skjæringstidspunkt = andreSkjæringstidspunkt,
+            fom = andreSkjæringstidspunkt.plusDays(2),
+            utbetalingId = utbetalingId3,
+            arbeidsgiverOppdragId = arbeidsgiverOppdragId,
+            personOppdragId = personOppdragId
+        )
+
+        // Then:
+        val behandling = requireNotNull(myDao.finnBehandlingISykefraværstilfelle(utbetalingId3))
+        val result = myDao.finnFørsteVedtaksperiodeIdForEttSykefraværstilfelle(behandling)
+        assertEquals(vedtaksperiodeId1, result)
+    }
+
+    @Test
+    fun `Ny utbetalingsrigg - Velg første vedtaksperiodeid for sykefraværstilfelle der det er flere opphold i sykefraværstilfelle der hver er mindre enn 16 dager`() {
+        // Given:
+        val personRef = requireNotNull(lagPerson())
+        val arbeidsgiverIdentifikator = lagOrganisasjonsnummer()
+
+        val utbetalingId1 = UUID.randomUUID()
+        val utbetalingId2 = UUID.randomUUID()
+        val utbetalingId3 = UUID.randomUUID()
+
+        val førsteSkjæringstidspunkt = LocalDate.now()
+        val andreSkjæringstidspunkt = førsteSkjæringstidspunkt.plusDays(4)
+        val vedtaksperiodeId1 = UUID.randomUUID()
+        val vedtaksperiodeId2 = UUID.randomUUID()
+        val vedtaksperiodeId3 = UUID.randomUUID()
+
+
+        // When:
+        // Første periode
+        opprettUtbetaltVedtak(
+            vedtaksperiodeId = vedtaksperiodeId1,
+            personRef = personRef,
+            arbeidsgiverIdentifikator = arbeidsgiverIdentifikator,
+            skjæringstidspunkt = førsteSkjæringstidspunkt,
+            fom = førsteSkjæringstidspunkt,
+            utbetalingId = utbetalingId1,
+        )
+        // Andre periode
+        opprettUtbetaltVedtak(
+            vedtaksperiodeId = vedtaksperiodeId2,
+            personRef = personRef,
+            arbeidsgiverIdentifikator = arbeidsgiverIdentifikator,
+            skjæringstidspunkt = andreSkjæringstidspunkt,
+            fom = andreSkjæringstidspunkt,
+            utbetalingId = utbetalingId2,
+        )
+        // Tredje periode
+        opprettUtbetaltVedtak(
+            vedtaksperiodeId = vedtaksperiodeId3,
+            personRef = personRef,
+            arbeidsgiverIdentifikator = arbeidsgiverIdentifikator,
+            skjæringstidspunkt = andreSkjæringstidspunkt,
+            fom = andreSkjæringstidspunkt.plusDays(2),
+            utbetalingId = utbetalingId3,
+        )
+
+        // Then:
+        val behandling = requireNotNull(myDao.finnBehandlingISykefraværstilfelle(utbetalingId3))
+        val result = myDao.finnFørsteVedtaksperiodeIdForEttSykefraværstilfelle(behandling)
+        assertEquals(vedtaksperiodeId1, result)
+    }
+
+    private fun opprettUtbetaltVedtak(
+        vedtaksperiodeId: UUID,
+        personRef: Long,
+        arbeidsgiverIdentifikator: String,
+        skjæringstidspunkt: LocalDate,
+        fom: LocalDate,
+        utbetalingId: UUID,
+        arbeidsgiverOppdragId: Long? = lagOppdrag(lagFagsystemId()),
+        personOppdragId: Long? = lagOppdrag(lagFagsystemId())
+    ) {
+        lagVedtak(
+            vedtakperiodeId = vedtaksperiodeId,
+            personRef = personRef,
+            arbeidsgiverIdentifikator = arbeidsgiverIdentifikator,
+            fom = fom,
+            tom = fom.plusDays(1)
+        )
+        lagUtbetalingId(
+            utbetalingId = utbetalingId,
+            personRef = personRef,
+            arbeidsgiverFagsystemId = arbeidsgiverOppdragId,
+            personFagsystemId = personOppdragId,
+            arbeidsgiverIdentifikator = arbeidsgiverIdentifikator,
+        )
+        lagBehandling(
+            vedtakperiodeId = vedtaksperiodeId,
+            utbetalingId = utbetalingId,
+            skjæringstidspunkt = skjæringstidspunkt,
+            fom = fom,
+            tom = fom.plusDays(1)
+        )
+    }
+
     private fun lagBehandling(
         vedtakperiodeId: UUID,
         utbetalingId: UUID,
