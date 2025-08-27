@@ -208,6 +208,62 @@ class BehandlingOpprettetRiverIntegrationTest {
     }
 
     @Test
+    fun `oppretter ikke ny vedtaksperiode for frilans`() {
+        // Given:
+        val fødselsnummer = lagFødselsnummer()
+        initPerson(fødselsnummer = fødselsnummer, vedtaksperioder = emptyList())
+
+        // When:
+        testRapid.sendTestMessage(
+            behandlingOpprettetMelding(
+                fødselsnummer = fødselsnummer,
+                organisasjonsnummer = "FRILANS",
+                vedtaksperiodeId = UUID.randomUUID(),
+                behandlingId = UUID.randomUUID(),
+                fom = LocalDate.parse("2024-10-01"),
+                tom = LocalDate.parse("2024-10-31"),
+                yrkesaktivitetstype = "FRILANS"
+            )
+        )
+
+        // Then:
+        personRepository.brukPersonHvisFinnes(fødselsnummer) {
+            assertEquals(emptyList<Vedtaksperiode>(), vedtaksperioder())
+        }
+
+        val meldinger = testRapid.publiserteMeldingerUtenGenererteFelter()
+        assertEquals(0, meldinger.size)
+    }
+
+    @Test
+    fun `oppretter ikke ny vedtaksperiode for arbeidsledig`() {
+        // Given:
+        val fødselsnummer = lagFødselsnummer()
+        initPerson(fødselsnummer = fødselsnummer, vedtaksperioder = emptyList())
+
+        // When:
+        testRapid.sendTestMessage(
+            behandlingOpprettetMelding(
+                fødselsnummer = fødselsnummer,
+                organisasjonsnummer = "ARBEIDSLEDIG",
+                vedtaksperiodeId = UUID.randomUUID(),
+                behandlingId = UUID.randomUUID(),
+                fom = LocalDate.parse("2024-10-01"),
+                tom = LocalDate.parse("2024-10-31"),
+                yrkesaktivitetstype = "ARBEIDSLEDIG"
+            )
+        )
+
+        // Then:
+        personRepository.brukPersonHvisFinnes(fødselsnummer) {
+            assertEquals(emptyList<Vedtaksperiode>(), vedtaksperioder())
+        }
+
+        val meldinger = testRapid.publiserteMeldingerUtenGenererteFelter()
+        assertEquals(0, meldinger.size)
+    }
+
+    @Test
     fun `oppretter ikke ny vedtaksperiode for selvstendig næringsdrivende dersom feature toggle er av`() {
         // Given:
         integrationTestFixture.featureToggles.skalBehandleSelvstendig = false
