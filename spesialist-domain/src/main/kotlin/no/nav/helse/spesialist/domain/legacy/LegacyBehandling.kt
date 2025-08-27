@@ -30,7 +30,7 @@ class LegacyBehandling private constructor(
     utbetalingId: UUID?,
     spleisBehandlingId: UUID?,
     skjæringstidspunkt: LocalDate,
-    private var periode: Periode,
+    periode: Periode,
     tilstand: Tilstand,
     tags: List<String>,
     val vedtakBegrunnelse: VedtakBegrunnelse?,
@@ -66,6 +66,9 @@ class LegacyBehandling private constructor(
     var skjæringstidspunkt: LocalDate = skjæringstidspunkt
         private set
 
+    var periode: Periode = periode
+        private set
+
     var tilstand: Tilstand = tilstand
         private set
 
@@ -74,7 +77,7 @@ class LegacyBehandling private constructor(
 
     private val varsler: MutableList<Varsel> = varsler.toMutableList()
 
-    internal var utbetalingId: UUID? = utbetalingId
+    var utbetalingId: UUID? = utbetalingId
         private set
 
     internal fun spleisBehandlingId() = spleisBehandlingId
