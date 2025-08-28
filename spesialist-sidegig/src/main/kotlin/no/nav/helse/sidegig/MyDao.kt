@@ -62,7 +62,8 @@ class MyDao(
                        behandling.vedtaksperiode_id,
                        behandling.skjæringstidspunkt,
                        person.id as person_id,
-                       vedtak.arbeidsgiver_identifikator
+                       vedtak.arbeidsgiver_identifikator,
+                       behandling.utbetaling_id
                 FROM behandling,
                      vedtak,
                      person
@@ -78,6 +79,7 @@ class MyDao(
                 skjæringstidspunkt = row.localDate("skjæringstidspunkt"),
                 personId = row.long("person_id"),
                 arbeidsgiverId = row.string("arbeidsgiver_identifikator"),
+                utbetalingId = row.uuid("utbetaling_id"),
             )
         }
 
@@ -87,7 +89,8 @@ class MyDao(
                 """
                 SELECT behandling.vedtaksperiode_id,
                     behandling.fom,
-                    behandling.tom
+                    behandling.tom,
+                    behandling.utbetaling_id
                 FROM behandling,
                      vedtak,
                      person
@@ -95,7 +98,7 @@ class MyDao(
                   AND vedtak.arbeidsgiver_identifikator = :arbeidsgiverId
                   AND vedtak.person_ref = person.id
                   AND vedtak.vedtaksperiode_id = behandling.vedtaksperiode_id
-                ORDER BY behandling.fom 
+                ORDER BY behandling.fom DESC
                 """.trimIndent(),
             paramMap =
                 mapOf(
@@ -107,21 +110,24 @@ class MyDao(
                 vedtaksperiodeId = UUID.fromString(row.string("vedtaksperiode_id")),
                 fom = row.localDate("fom"),
                 tom = row.localDate("tom"),
+                utbetalingId = row.uuid("utbetaling_id"),
             )
-        }.fold(emptyList<BehandlingsperiodeRow>()) { acc, row ->
-            if (acc.isEmpty()) {
-                acc.plus(row)
-            } else if (acc
-                    .last()
-                    .tom
-                    .plusDays(16)
-                    .isAfter(row.fom)
-            ) {
-                acc.plus(row)
-            } else {
-                acc
-            }
-        }.firstOrNull()
+        }.let {
+            val behandlingForUtbetaling =
+                it.find { behandling -> behandling.vedtaksperiodeId == behandlingISykefraværstilfelleRow.vedtaksperiodeId }
+            checkNotNull(behandlingForUtbetaling)
+            it
+                .filter { behandling -> behandling.fom < behandlingForUtbetaling.fom } // Fjerne alle nyere enn den "vilkårlige" behandlingen man har funnet
+                .filter { behandling -> behandling.vedtaksperiodeId != behandlingForUtbetaling.vedtaksperiodeId } // Fjerne den "vilkårlige" behandlingen, siden initial state på fold er den
+                .fold(listOf(behandlingForUtbetaling)) { acc, row ->
+                    // Sjekk bakover i tid
+                    if (acc.last().fom.minusDays(16) < row.tom) {
+                        acc.plus(row)
+                    } else {
+                        acc
+                    }
+                }
+        }.lastOrNull()
             ?.vedtaksperiodeId
 
     fun oppdaterAnnulleringMedVedtaksperiodeId(
@@ -145,6 +151,7 @@ class MyDao(
         val vedtaksperiodeId: UUID,
         val fom: LocalDate,
         val tom: LocalDate,
+        val utbetalingId: UUID,
     )
 
     data class AnnullertAvSaksbehandlerRow(
@@ -159,6 +166,7 @@ class MyDao(
         val skjæringstidspunkt: LocalDate,
         val personId: Long,
         val arbeidsgiverId: String,
+        val utbetalingId: UUID,
     )
 
     private fun <T> query(

@@ -91,7 +91,8 @@ internal class MyDaoTest : AbstractDatabaseTest() {
                 vedtaksperiodeId = vedtakperiodeId,
                 skjæringstidspunkt = skjæringstidspunkt,
                 personId = personRef,
-                arbeidsgiverId = arbeidsgiverIdentifikator
+                arbeidsgiverId = arbeidsgiverIdentifikator,
+                utbetalingId = utbetalingId,
             ),
             result
         )
@@ -351,6 +352,93 @@ internal class MyDaoTest : AbstractDatabaseTest() {
         val behandling = requireNotNull(myDao.finnBehandlingISykefraværstilfelle(utbetalingId3))
         val result = myDao.finnFørsteVedtaksperiodeIdForEttSykefraværstilfelle(behandling)
         assertEquals(vedtaksperiodeId1, result)
+    }
+
+    @Test
+    fun `Henter eldste vedtaksperiodeid for sykefraværstilfelle som er annuller det er flere sykefraværstilfeller`(){
+        // Given:
+        val personRef = requireNotNull(lagPerson())
+        val arbeidsgiverIdentifikator = lagOrganisasjonsnummer()
+
+        // When:
+        // Sykefraværstilfelle 1
+        val utbetalingId1 = UUID.randomUUID()
+        val utbetalingId2 = UUID.randomUUID()
+        val utbetalingId3 = UUID.randomUUID()
+
+        val skjæringstidspunkt1 = LocalDate.now()
+        val vedtaksperiodeId1 = UUID.randomUUID()
+        val vedtaksperiodeId2 = UUID.randomUUID()
+        val vedtaksperiodeId3 = UUID.randomUUID()
+        // Første periode
+        opprettUtbetaltVedtak(
+            vedtaksperiodeId = vedtaksperiodeId1,
+            personRef = personRef,
+            arbeidsgiverIdentifikator = arbeidsgiverIdentifikator,
+            skjæringstidspunkt = skjæringstidspunkt1,
+            fom = skjæringstidspunkt1,
+            utbetalingId = utbetalingId1,
+        )
+        // Andre periode
+        opprettUtbetaltVedtak(
+            vedtaksperiodeId = vedtaksperiodeId2,
+            personRef = personRef,
+            arbeidsgiverIdentifikator = arbeidsgiverIdentifikator,
+            skjæringstidspunkt = skjæringstidspunkt1,
+            fom = skjæringstidspunkt1.plusDays(2),
+            utbetalingId = utbetalingId2,
+        )
+        // Tredje periode
+        opprettUtbetaltVedtak(
+            vedtaksperiodeId = vedtaksperiodeId3,
+            personRef = personRef,
+            arbeidsgiverIdentifikator = arbeidsgiverIdentifikator,
+            skjæringstidspunkt = skjæringstidspunkt1,
+            fom = skjæringstidspunkt1.plusDays(4),
+            utbetalingId = utbetalingId3,
+        )
+
+        // Sykefraværstilfelle 2
+        val utbetalingId4 = UUID.randomUUID()
+        val utbetalingId5 = UUID.randomUUID()
+        val utbetalingId6 = UUID.randomUUID()
+
+        val skjæringstidspunkt2 = LocalDate.now().plusDays(30)
+        val vedtaksperiodeId4 = UUID.randomUUID()
+        val vedtaksperiodeId5 = UUID.randomUUID()
+        val vedtaksperiodeId6 = UUID.randomUUID()
+        // Første periode
+        opprettUtbetaltVedtak(
+            vedtaksperiodeId = vedtaksperiodeId4,
+            personRef = personRef,
+            arbeidsgiverIdentifikator = arbeidsgiverIdentifikator,
+            skjæringstidspunkt = skjæringstidspunkt2,
+            fom = skjæringstidspunkt2,
+            utbetalingId = utbetalingId4,
+        )
+        // Andre periode
+        opprettUtbetaltVedtak(
+            vedtaksperiodeId = vedtaksperiodeId5,
+            personRef = personRef,
+            arbeidsgiverIdentifikator = arbeidsgiverIdentifikator,
+            skjæringstidspunkt = skjæringstidspunkt2,
+            fom = skjæringstidspunkt2.plusDays(2),
+            utbetalingId = utbetalingId5,
+        )
+        // Tredje periode
+        opprettUtbetaltVedtak(
+            vedtaksperiodeId = vedtaksperiodeId6,
+            personRef = personRef,
+            arbeidsgiverIdentifikator = arbeidsgiverIdentifikator,
+            skjæringstidspunkt = skjæringstidspunkt2,
+            fom = skjæringstidspunkt2.plusDays(4),
+            utbetalingId = utbetalingId6,
+        )
+
+        // Then:
+        val behandling = requireNotNull(myDao.finnBehandlingISykefraværstilfelle(utbetalingId6))
+        val result = myDao.finnFørsteVedtaksperiodeIdForEttSykefraværstilfelle(behandling)
+        assertEquals(vedtaksperiodeId4, result)
     }
 
     @Test
