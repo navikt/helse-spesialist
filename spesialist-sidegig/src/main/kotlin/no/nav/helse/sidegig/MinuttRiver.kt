@@ -39,6 +39,7 @@ class MinuttRiver(
 
     private fun oppdaterAnnulleringerMedManglendeVedtaksperiodeId() {
         logg.info("Setter i gang med oppdatering av annulleringer som mangler vedtaksperiodeId")
+        return
 
         val annulleringer =
             myDao
