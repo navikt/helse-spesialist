@@ -58,23 +58,6 @@ class PgGenerasjonDao private constructor(
         }
     }
 
-    override fun oppdaterYrkesaktivitetMedArbeidstaker(): Int =
-        asSQL(
-            """
-                WITH behandlinger_uten_yrkesaktivitet AS (
-                    SELECT b.id
-                    FROM behandling b
-                    WHERE b.yrkesaktivitetstype IS NULL
-                    LIMIT 5000
-            )
-            UPDATE behandling b
-            SET yrkesaktivitetstype = 'ARBEIDSTAKER'
-            FROM behandlinger_uten_yrkesaktivitet u
-            WHERE b.id = u.id;
-                
-            """.trimIndent(),
-        ).update()
-
     private fun lagre(behandlingDto: BehandlingDto) {
         asSQL(
             """
@@ -91,7 +74,7 @@ class PgGenerasjonDao private constructor(
             "skjaeringstidspunkt" to behandlingDto.skjæringstidspunkt,
             "tilstand" to behandlingDto.tilstand.name,
             "tags" to behandlingDto.tags.somDbArray(),
-            "yrkesaktivitetstype" to behandlingDto.yrkesaktivitetstype?.name,
+            "yrkesaktivitetstype" to behandlingDto.yrkesaktivitetstype.name,
         ).update()
     }
 

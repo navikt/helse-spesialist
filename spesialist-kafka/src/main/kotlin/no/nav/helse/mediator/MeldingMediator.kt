@@ -7,7 +7,6 @@ import com.github.benmanes.caffeine.cache.LoadingCache
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.CommandContextDao
 import no.nav.helse.db.DokumentDao
-import no.nav.helse.db.GenerasjonDao
 import no.nav.helse.db.MeldingDao
 import no.nav.helse.db.MeldingDuplikatkontrollDao
 import no.nav.helse.db.PersonDao
@@ -32,7 +31,6 @@ class MeldingMediator(
     private val commandContextDao: CommandContextDao,
     private val meldingDao: MeldingDao,
     private val meldingDuplikatkontrollDao: MeldingDuplikatkontrollDao,
-    private val generasjonDao: GenerasjonDao,
     private val kommandofabrikk: Kommandofabrikk,
     private val dokumentDao: DokumentDao,
     private val varselRepository: VarselRepository,
@@ -160,8 +158,6 @@ class MeldingMediator(
     }
 
     fun slettGamleDokumenter(): Int = dokumentDao.slettGamleDokumenter()
-
-    fun oppdaterBehandlingMedYrkesaktivitetArbeidstaker(): Int = generasjonDao.oppdaterYrkesaktivitetMedArbeidstaker()
 
     fun nullstillTilstand() {
         løsninger.set(null)

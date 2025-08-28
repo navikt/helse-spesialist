@@ -170,11 +170,6 @@ class InMemoryDaos : Daos {
         override fun førsteKjenteDag(fødselsnummer: String): LocalDate? {
             TODO("Not yet implemented")
         }
-
-        override fun oppdaterYrkesaktivitetMedArbeidstaker(): Int {
-            TODO("Not yet implemented")
-        }
-
     }
 
     override val meldingDao: InMemoryMeldingDao = InMemoryMeldingDao()
