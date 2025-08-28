@@ -86,14 +86,14 @@ internal class VurderAutomatiskInnvilgelseTest {
     fun `kaller automatiser utfør og returnerer true`() {
         assertTrue(command.execute(context))
         verify(exactly = 1) {
-            automatisering.utfør(any(), any(), any(), any(), any(), any())
+            automatisering.utfør(any(), any(), any(), any(), any(), any(), any())
         }
     }
 
     @Test
     fun `publiserer godkjenningsmelding ved automatisert godkjenning`() {
         every {
-            automatisering.utfør(any(), any(), any(), any(), any(), any())
+            automatisering.utfør(any(), any(), any(), any(), any(), any(), any())
         } returns Automatiseringsresultat.KanAutomatiseres
 
         assertTrue(command.execute(context))
@@ -110,7 +110,7 @@ internal class VurderAutomatiskInnvilgelseTest {
 
     @Test
     fun `automatiserer når resultat er at perioden kan automatiseres`() {
-        every { automatisering.utfør(any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanAutomatiseres
+        every { automatisering.utfør(any(), any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanAutomatiseres
         assertTrue(command.execute(context))
         verify(exactly = 1) { automatiseringDao.automatisert(vedtaksperiodeId, hendelseId, utbetalingId) }
         verify(exactly = 0) { automatiseringDao.manuellSaksbehandling(any(), any(), any(), any()) }
@@ -119,7 +119,7 @@ internal class VurderAutomatiskInnvilgelseTest {
     @Test
     fun `automatiserer ikke når resultat er at perioden kan ikke automatiseres`() {
         val problemer = listOf("Problem 1", "Problem 2")
-        every { automatisering.utfør(any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanIkkeAutomatiseres(
+        every { automatisering.utfør(any(), any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanIkkeAutomatiseres(
             problemer
         )
         assertTrue(command.execute(context))
@@ -129,7 +129,7 @@ internal class VurderAutomatiskInnvilgelseTest {
 
     @Test
     fun `automatiserer ikke når resultat er at perioden er stikkprøve`() {
-        every { automatisering.utfør(any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.Stikkprøve(
+        every { automatisering.utfør(any(), any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.Stikkprøve(
             "En årsak"
         )
         assertTrue(command.execute(context))
@@ -139,14 +139,14 @@ internal class VurderAutomatiskInnvilgelseTest {
 
     @Test
     fun `Ferdigstiller kjede når perioden kan behandles automatisk`() {
-        every { automatisering.utfør(any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanAutomatiseres
+        every { automatisering.utfør(any(), any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanAutomatiseres
         context.utfør(commandContextDao, UUID.randomUUID(), command)
         assertEquals("Ferdig", observatør.gjeldendeTilstand)
     }
 
     @Test
     fun `Ferdigstiller kjede når perioden er spesialsak som kan behandles automatisk`() {
-        every { automatisering.utfør(any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanAutomatiseres
+        every { automatisering.utfør(any(), any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanAutomatiseres
         context.utfør(commandContextDao, UUID.randomUUID(), command)
         assertEquals("Ferdig", observatør.gjeldendeTilstand)
     }

@@ -49,6 +49,7 @@ internal class VurderAutomatiskInnvilgelse(
                 periodetype = godkjenningsbehov.periodetype,
                 sykefraværstilfelle = sykefraværstilfelle,
                 organisasjonsnummer = godkjenningsbehov.organisasjonsnummer,
+                yrkesaktivitetstype = godkjenningsbehov.yrkesaktivitetstype,
             )
 
         when (resultat) {

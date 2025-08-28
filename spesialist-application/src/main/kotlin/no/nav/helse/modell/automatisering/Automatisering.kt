@@ -26,6 +26,7 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
@@ -94,6 +95,7 @@ internal class Automatisering(
         periodetype: Periodetype,
         sykefraværstilfelle: Sykefraværstilfelle,
         organisasjonsnummer: String,
+        yrkesaktivitetstype: Yrkesaktivitetstype,
     ): Automatiseringsresultat {
         if (automatiseringDao.skalTvingeAutomatisering(vedtaksperiodeId)) {
             logger.info("Tvinger automatisering for vedtaksperiode $vedtaksperiodeId")
@@ -101,7 +103,15 @@ internal class Automatisering(
         }
 
         val problemer =
-            vurder(fødselsnummer, vedtaksperiodeId, utbetaling, periodetype, sykefraværstilfelle, organisasjonsnummer)
+            vurder(
+                fødselsnummer = fødselsnummer,
+                vedtaksperiodeId = vedtaksperiodeId,
+                utbetaling = utbetaling,
+                periodetype = periodetype,
+                sykefraværstilfelle = sykefraværstilfelle,
+                organisasjonsnummer = organisasjonsnummer,
+                yrkesaktivitetstype = yrkesaktivitetstype,
+            )
         val erUTS = utbetaling.harEndringIUtbetalingTilSykmeldt()
         val flereArbeidsgivere = vedtakDao.finnInntektskilde(vedtaksperiodeId) == Inntektskilde.FLERE_ARBEIDSGIVERE
         val erFørstegangsbehandling = periodetype == FØRSTEGANGSBEHANDLING
@@ -232,6 +242,7 @@ internal class Automatisering(
         periodetype: Periodetype,
         sykefraværstilfelle: Sykefraværstilfelle,
         organisasjonsnummer: String,
+        yrkesaktivitetstype: Yrkesaktivitetstype,
     ): List<String> {
         val risikovurdering =
             risikovurderingDao.hentRisikovurdering(vedtaksperiodeId)
@@ -254,6 +265,7 @@ internal class Automatisering(
         val skalStoppesPgaUTS = harUtbetalingTilSykmeldt && periodetype !in listOf(FORLENGELSE, FØRSTEGANGSBEHANDLING)
 
         return valider(
+            validering("Gjelder selvstendig næring") { yrkesaktivitetstype != Yrkesaktivitetstype.SELVSTENDIG },
             risikovurdering,
             validering("Automatisering stanset av saksbehandler") { !automatiseringStansetAvSaksbehandler },
             validering("Unntatt fra automatisk godkjenning") { !unntattFraAutomatisering },

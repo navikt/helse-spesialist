@@ -31,6 +31,7 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
+import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
@@ -306,7 +307,13 @@ internal class AutomatiseringTest {
         blirManuellOppgave()
     }
 
+    @Test
+    fun `selvstendig næringsdrivende stanser automatisk behandling`() {
+        blirManuellOppgave(yrkesaktivitetstype = Yrkesaktivitetstype.SELVSTENDIG)
+    }
+
     private fun assertKanIkkeAutomatiseres(resultat: Automatiseringsresultat) {
+        logg.info("Fikk resultat $resultat")
         assertTrue(
             resultat is Automatiseringsresultat.KanIkkeAutomatiseres,
             "Expected ${Automatiseringsresultat.KanIkkeAutomatiseres::class.simpleName}, got ${resultat::class.simpleName}"
@@ -328,6 +335,7 @@ internal class AutomatiseringTest {
     }
 
     private fun forsøkAutomatisering(
+        yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
         periodetype: Periodetype = FORLENGELSE,
         generasjoners: List<LegacyBehandling> = listOf(
             LegacyBehandling(
@@ -336,17 +344,18 @@ internal class AutomatiseringTest {
                 fom = 1 jan 2018,
                 tom = 31 jan 2018,
                 skjæringstidspunkt = 1 jan 2018,
-                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
+                yrkesaktivitetstype = yrkesaktivitetstype
             )
         ),
         utbetaling: Utbetaling = enUtbetaling(),
     ) = automatisering.utfør(
-        fødselsnummer,
-        vedtaksperiodeId,
-        utbetaling,
-        periodetype,
+        fødselsnummer = fødselsnummer,
+        vedtaksperiodeId = vedtaksperiodeId,
+        utbetaling = utbetaling,
+        periodetype = periodetype,
         sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, 1 jan 2018, generasjoners),
-        orgnummer,
+        organisasjonsnummer = orgnummer,
+        yrkesaktivitetstype = yrkesaktivitetstype
     )
 
     private fun enUtbetaling(
@@ -378,10 +387,12 @@ internal class AutomatiseringTest {
 
     private fun blirManuellOppgave(
         utbetaling: Utbetaling = enUtbetaling(),
-        legacyBehandling: LegacyBehandling = enGenerasjon()
+        legacyBehandling: LegacyBehandling = enGenerasjon(),
+        yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
     ) =
         assertKanIkkeAutomatiseres(
             forsøkAutomatisering(
+                yrkesaktivitetstype = yrkesaktivitetstype,
                 utbetaling = utbetaling,
                 generasjoners = listOf(legacyBehandling)
             )
