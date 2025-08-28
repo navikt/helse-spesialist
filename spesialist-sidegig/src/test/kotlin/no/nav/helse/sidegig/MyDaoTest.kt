@@ -355,6 +355,57 @@ internal class MyDaoTest : AbstractDatabaseTest() {
     }
 
     @Test
+    fun `Håndterer manglende utbetalingId på behandling`() {
+        // Given:
+        val personRef = requireNotNull(lagPerson())
+        val arbeidsgiverIdentifikator = lagOrganisasjonsnummer()
+
+        val utbetalingId1 = UUID.randomUUID()
+        val utbetalingId3 = UUID.randomUUID()
+
+        val førsteSkjæringstidspunkt = LocalDate.now()
+        val andreSkjæringstidspunkt = førsteSkjæringstidspunkt.plusDays(4)
+        val vedtaksperiodeId1 = UUID.randomUUID()
+        val vedtaksperiodeId2 = UUID.randomUUID()
+        val vedtaksperiodeId3 = UUID.randomUUID()
+
+
+        // When:
+        // Første periode
+        opprettUtbetaltVedtak(
+            vedtaksperiodeId = vedtaksperiodeId1,
+            personRef = personRef,
+            arbeidsgiverIdentifikator = arbeidsgiverIdentifikator,
+            skjæringstidspunkt = førsteSkjæringstidspunkt,
+            fom = førsteSkjæringstidspunkt,
+            utbetalingId = utbetalingId1,
+        )
+        // Andre periode
+        opprettUtbetaltVedtak(
+            vedtaksperiodeId = vedtaksperiodeId2,
+            personRef = personRef,
+            arbeidsgiverIdentifikator = arbeidsgiverIdentifikator,
+            skjæringstidspunkt = andreSkjæringstidspunkt,
+            fom = andreSkjæringstidspunkt,
+            utbetalingId = null,
+        )
+        // Tredje periode
+        opprettUtbetaltVedtak(
+            vedtaksperiodeId = vedtaksperiodeId3,
+            personRef = personRef,
+            arbeidsgiverIdentifikator = arbeidsgiverIdentifikator,
+            skjæringstidspunkt = andreSkjæringstidspunkt,
+            fom = andreSkjæringstidspunkt.plusDays(2),
+            utbetalingId = utbetalingId3,
+        )
+
+        // Then:
+        val behandling = requireNotNull(myDao.finnBehandlingISykefraværstilfelle(utbetalingId3))
+        val result = myDao.finnFørsteVedtaksperiodeIdForEttSykefraværstilfelle(behandling)
+        assertEquals(vedtaksperiodeId1, result)
+    }
+
+    @Test
     fun `Henter eldste vedtaksperiodeid for sykefraværstilfelle som er annuller det er flere sykefraværstilfeller`(){
         // Given:
         val personRef = requireNotNull(lagPerson())
@@ -484,7 +535,7 @@ internal class MyDaoTest : AbstractDatabaseTest() {
         arbeidsgiverIdentifikator: String,
         skjæringstidspunkt: LocalDate,
         fom: LocalDate,
-        utbetalingId: UUID,
+        utbetalingId: UUID?,
         arbeidsgiverOppdragId: Long? = lagOppdrag(lagFagsystemId()),
         personOppdragId: Long? = lagOppdrag(lagFagsystemId())
     ) {
@@ -495,13 +546,15 @@ internal class MyDaoTest : AbstractDatabaseTest() {
             fom = fom,
             tom = fom.plusDays(1)
         )
-        lagUtbetalingId(
-            utbetalingId = utbetalingId,
-            personRef = personRef,
-            arbeidsgiverFagsystemId = arbeidsgiverOppdragId,
-            personFagsystemId = personOppdragId,
-            arbeidsgiverIdentifikator = arbeidsgiverIdentifikator,
-        )
+        utbetalingId?.let {
+            lagUtbetalingId(
+                utbetalingId = utbetalingId,
+                personRef = personRef,
+                arbeidsgiverFagsystemId = arbeidsgiverOppdragId,
+                personFagsystemId = personOppdragId,
+                arbeidsgiverIdentifikator = arbeidsgiverIdentifikator,
+            )
+        }
         lagBehandling(
             vedtakperiodeId = vedtaksperiodeId,
             utbetalingId = utbetalingId,
@@ -513,7 +566,7 @@ internal class MyDaoTest : AbstractDatabaseTest() {
 
     private fun lagBehandling(
         vedtakperiodeId: UUID,
-        utbetalingId: UUID,
+        utbetalingId: UUID?,
         skjæringstidspunkt: LocalDate,
         fom: LocalDate = LocalDate.now(),
         tom: LocalDate = LocalDate.now()

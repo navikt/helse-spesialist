@@ -110,7 +110,7 @@ class MyDao(
                 vedtaksperiodeId = UUID.fromString(row.string("vedtaksperiode_id")),
                 fom = row.localDate("fom"),
                 tom = row.localDate("tom"),
-                utbetalingId = row.uuid("utbetaling_id"),
+                utbetalingId = row.uuidOrNull("utbetaling_id"),
             )
         }.let {
             val behandlingForUtbetaling =
@@ -151,7 +151,7 @@ class MyDao(
         val vedtaksperiodeId: UUID,
         val fom: LocalDate,
         val tom: LocalDate,
-        val utbetalingId: UUID,
+        val utbetalingId: UUID?,
     )
 
     data class AnnullertAvSaksbehandlerRow(
