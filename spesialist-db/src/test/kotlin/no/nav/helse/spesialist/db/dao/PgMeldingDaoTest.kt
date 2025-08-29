@@ -196,8 +196,8 @@ class PgMeldingDaoTest {
         val fom = LocalDate.now()
         val tom = LocalDate.now()
         val spleisBehandlingId = UUID.randomUUID()
-        return Godkjenningsbehov(
-            jsonNode = mapOf(
+        return Godkjenningsbehov.fraJson(
+            json = mapOf(
                 "@event_name" to "behov",
                 "@id" to hendelseId,
                 "@opprettet" to LocalDateTime.now(),
@@ -231,6 +231,9 @@ class PgMeldingDaoTest {
                     ),
                     "sykepengegrunnlagsfakta" to mapOf(
                         "fastsatt" to "EtterHovedregel",
+                        "omregnetÅrsinntektTotalt" to 123456.7,
+                        "6G" to 666666.0,
+                        "sykepengegrunnlag" to 123456.7,
                         "arbeidsgivere" to listOf(
                             mapOf(
                                 "arbeidsgiver" to "orgnr",
@@ -246,10 +249,13 @@ class PgMeldingDaoTest {
                         )
                     ),
                 ),
-            ).toJsonNode()
+            ).toJson()
         )
     }
 
+    private fun Map<String, Any>.toJson(): String =
+        objectMapper.writeValueAsString(this)
+
     private fun Map<String, Any>.toJsonNode(): JsonNode =
-        objectMapper.readTree(objectMapper.writeValueAsString(this))
+        objectMapper.readTree(this.toJson())
 }

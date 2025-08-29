@@ -58,9 +58,3 @@ sealed interface Sykepengegrunnlagsfakta {
         }
     }
 }
-
-enum class Faktatype {
-    ETTER_SKJØNN,
-    ETTER_HOVEDREGEL,
-    I_INFOTRYGD,
-}

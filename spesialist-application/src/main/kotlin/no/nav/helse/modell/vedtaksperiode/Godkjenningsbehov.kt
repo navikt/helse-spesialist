@@ -22,6 +22,8 @@ import no.nav.helse.db.VergemålDao
 import no.nav.helse.db.ÅpneGosysOppgaverDao
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Kommandostarter
+import no.nav.helse.mediator.asEnum
+import no.nav.helse.mediator.asLocalDate
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.mediator.oppgave.OppgaveRepository
@@ -52,7 +54,6 @@ import no.nav.helse.modell.risiko.VurderVurderingsmomenter
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.VurderEnhetUtland
-import no.nav.helse.modell.vedtak.Faktatype
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta
 import no.nav.helse.modell.vergemal.VurderVergemålOgFullmakt
 import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
@@ -125,166 +126,107 @@ class Godkjenningsbehov(
             json = json,
         )
 
-    constructor(jsonNode: JsonNode) : this(
-        id = UUID.fromString(jsonNode.path("@id").asText()),
-        fødselsnummer = jsonNode.path("fødselsnummer").asText(),
-        organisasjonsnummer = jsonNode.path("organisasjonsnummer").asText(),
-        yrkesaktivitetstype = Yrkesaktivitetstype.valueOf(jsonNode.path("yrkesaktivitetstype").asText()),
-        vedtaksperiodeId = UUID.fromString(jsonNode.path("vedtaksperiodeId").asText()),
-        spleisVedtaksperioder =
-            jsonNode.path("Godkjenning").path("perioderMedSammeSkjæringstidspunkt").map { periodeNode ->
-                SpleisVedtaksperiode(
-                    vedtaksperiodeId = periodeNode["vedtaksperiodeId"].asUUID(),
-                    spleisBehandlingId = periodeNode["behandlingId"].asUUID(),
-                    fom = periodeNode["fom"].asText().let(LocalDate::parse),
-                    tom = periodeNode["tom"].asText().let(LocalDate::parse),
-                    skjæringstidspunkt =
-                        jsonNode
-                            .path("Godkjenning")
-                            .path("skjæringstidspunkt")
-                            .asText()
-                            .let(LocalDate::parse),
-                )
-            },
-        utbetalingId = UUID.fromString(jsonNode.path("utbetalingId").asText()),
-        spleisBehandlingId = UUID.fromString(jsonNode.path("Godkjenning").path("behandlingId").asText()),
-        vilkårsgrunnlagId = UUID.fromString(jsonNode.path("Godkjenning").path("vilkårsgrunnlagId").asText()),
-        tags = jsonNode.path("Godkjenning").path("tags").map { it.asText() },
-        periodeFom = LocalDate.parse(jsonNode.path("Godkjenning").path("periodeFom").asText()),
-        periodeTom = LocalDate.parse(jsonNode.path("Godkjenning").path("periodeTom").asText()),
-        periodetype = Periodetype.valueOf(jsonNode.path("Godkjenning").path("periodetype").asText()),
-        førstegangsbehandling = jsonNode.path("Godkjenning").path("førstegangsbehandling").asBoolean(),
-        utbetalingtype = Utbetalingtype.valueOf(jsonNode.path("Godkjenning").path("utbetalingtype").asText()),
-        kanAvvises = jsonNode.path("Godkjenning").path("kanAvvises").asBoolean(),
-        inntektskilde = Inntektskilde.valueOf(jsonNode.path("Godkjenning").path("inntektskilde").asText()),
-        orgnummereMedRelevanteArbeidsforhold =
-            jsonNode
-                .path("Godkjenning")
-                .path("orgnummereMedRelevanteArbeidsforhold")
-                .takeUnless { it.isMissingNode || it.isNull }
-                ?.map { it.asText() } ?: emptyList(),
-        skjæringstidspunkt = LocalDate.parse(jsonNode.path("Godkjenning").path("skjæringstidspunkt").asText()),
-        sykepengegrunnlagsfakta = sykepengegrunnlagsfakta(jsonNode, faktatype = faktatype(jsonNode)),
-        omregnedeÅrsinntekter =
-            jsonNode.path("Godkjenning").get("omregnedeÅrsinntekter").map {
-                OmregnetÅrsinntekt(
-                    arbeidsgiverreferanse = it["organisasjonsnummer"].asText(),
-                    beløp = it["beløp"].asDouble(),
-                )
-            },
-        json = jsonNode.toString(),
-    )
-
-    private companion object {
-        private fun faktatype(jsonNode: JsonNode): Faktatype =
-            when (
-                val fastsattString =
-                    jsonNode
-                        .path("Godkjenning")
-                        .path("sykepengegrunnlagsfakta")
-                        .path("fastsatt")
-                        .asText()
-            ) {
-                "EtterSkjønn" -> Faktatype.ETTER_SKJØNN
-                "EtterHovedregel" -> Faktatype.ETTER_HOVEDREGEL
-                "IInfotrygd" -> Faktatype.I_INFOTRYGD
-                else -> throw IllegalArgumentException("FastsattType $fastsattString er ikke støttet")
-            }
-
-        private fun sykepengegrunnlagsfakta(
-            jsonNode: JsonNode,
-            faktatype: Faktatype,
-        ): Sykepengegrunnlagsfakta {
-            if (faktatype == Faktatype.I_INFOTRYGD) {
-                return Sykepengegrunnlagsfakta.Infotrygd(
-                    omregnetÅrsinntekt =
-                        jsonNode
-                            .path(
-                                "Godkjenning",
-                            ).path("sykepengegrunnlagsfakta")
-                            .path("omregnetÅrsinntektTotalt")
-                            .asDouble(),
-                )
-            }
-
-            return when (faktatype) {
-                Faktatype.ETTER_SKJØNN ->
-                    Sykepengegrunnlagsfakta.Spleis.EtterSkjønn(
-                        omregnetÅrsinntekt =
-                            jsonNode
-                                .path(
-                                    "Godkjenning",
-                                ).path("sykepengegrunnlagsfakta")
-                                .path("omregnetÅrsinntektTotalt")
-                                .asDouble(),
-                        seksG =
-                            jsonNode
-                                .path("Godkjenning")
-                                .path("sykepengegrunnlagsfakta")
-                                .path("6G")
-                                .asDouble(),
-                        skjønnsfastsatt =
-                            jsonNode
-                                .path("Godkjenning")
-                                .path("sykepengegrunnlagsfakta")
-                                .path("skjønnsfastsatt")
-                                .asDouble(),
-                        arbeidsgivere =
-                            jsonNode.path("Godkjenning").path("sykepengegrunnlagsfakta").path("arbeidsgivere").map { arbeidsgiver ->
-                                val organisasjonsnummer = arbeidsgiver["arbeidsgiver"].asText()
-                                Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterSkjønn(
-                                    organisasjonsnummer = organisasjonsnummer,
-                                    omregnetÅrsinntekt = arbeidsgiver["omregnetÅrsinntekt"].asDouble(),
-                                    skjønnsfastsatt = arbeidsgiver["skjønnsfastsatt"].asDouble(),
-                                    inntektskilde = inntektskilde(arbeidsgiver["inntektskilde"]),
-                                )
-                            },
-                    )
-
-                Faktatype.ETTER_HOVEDREGEL ->
-                    Sykepengegrunnlagsfakta.Spleis.EtterHovedregel(
-                        omregnetÅrsinntekt =
-                            jsonNode
-                                .path(
-                                    "Godkjenning",
-                                ).path("sykepengegrunnlagsfakta")
-                                .path("omregnetÅrsinntektTotalt")
-                                .asDouble(),
-                        seksG =
-                            jsonNode
-                                .path("Godkjenning")
-                                .path("sykepengegrunnlagsfakta")
-                                .path("6G")
-                                .asDouble(),
-                        sykepengegrunnlag =
-                            jsonNode
-                                .path(
-                                    "Godkjenning",
-                                ).path("sykepengegrunnlagsfakta")
-                                .path("sykepengegrunnlag")
-                                .asDouble(),
-                        arbeidsgivere =
-                            jsonNode.path("Godkjenning").path("sykepengegrunnlagsfakta").path("arbeidsgivere").map { arbeidsgiver ->
-                                val organisasjonsnummer = arbeidsgiver["arbeidsgiver"].asText()
-                                Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
-                                    organisasjonsnummer = organisasjonsnummer,
-                                    omregnetÅrsinntekt = arbeidsgiver["omregnetÅrsinntekt"].asDouble(),
-                                    inntektskilde = inntektskilde(arbeidsgiver["inntektskilde"]),
-                                )
-                            },
-                    )
-
-                else -> error("Her vet vi ikke hva som har skjedd. Feil i kompilatoren?")
-            }
+    companion object {
+        fun fraJson(json: String): Godkjenningsbehov {
+            val jsonNode = objectMapper.readTree(json)
+            val godkjenning = jsonNode["Godkjenning"]
+            return Godkjenningsbehov(
+                id = jsonNode["@id"].asUUID(),
+                fødselsnummer = jsonNode["fødselsnummer"].asText(),
+                organisasjonsnummer = jsonNode["organisasjonsnummer"].asText(),
+                yrkesaktivitetstype = jsonNode["yrkesaktivitetstype"].asEnum<Yrkesaktivitetstype>(),
+                vedtaksperiodeId = jsonNode["vedtaksperiodeId"].asUUID(),
+                spleisVedtaksperioder =
+                    godkjenning["perioderMedSammeSkjæringstidspunkt"].map { periode ->
+                        periode.asSpleisVedtaksperiode(
+                            skjæringstidspunkt = godkjenning["skjæringstidspunkt"].asLocalDate(),
+                        )
+                    },
+                utbetalingId = jsonNode["utbetalingId"].asUUID(),
+                spleisBehandlingId = godkjenning["behandlingId"].asUUID(),
+                vilkårsgrunnlagId = godkjenning["vilkårsgrunnlagId"].asUUID(),
+                tags = godkjenning["tags"].map { it.asText() },
+                periodeFom = godkjenning["periodeFom"].asLocalDate(),
+                periodeTom = godkjenning["periodeTom"].asLocalDate(),
+                periodetype = godkjenning["periodetype"].asEnum<Periodetype>(),
+                førstegangsbehandling = godkjenning["førstegangsbehandling"].asBoolean(),
+                utbetalingtype = godkjenning["utbetalingtype"].asEnum<Utbetalingtype>(),
+                kanAvvises = godkjenning["kanAvvises"].asBoolean(),
+                inntektskilde = godkjenning["inntektskilde"].asEnum<Inntektskilde>(),
+                orgnummereMedRelevanteArbeidsforhold =
+                    godkjenning["orgnummereMedRelevanteArbeidsforhold"]
+                        ?.map(JsonNode::asText)
+                        .orEmpty(),
+                skjæringstidspunkt = godkjenning["skjæringstidspunkt"].asLocalDate(),
+                sykepengegrunnlagsfakta = godkjenning["sykepengegrunnlagsfakta"].asSykepengegrunnlagsfakta(),
+                omregnedeÅrsinntekter =
+                    godkjenning["omregnedeÅrsinntekter"].map {
+                        OmregnetÅrsinntekt(
+                            arbeidsgiverreferanse = it["organisasjonsnummer"].asText(),
+                            beløp = it["beløp"].asDouble(),
+                        )
+                    },
+                json = json,
+            )
         }
 
-        private fun inntektskilde(inntektskildeNode: JsonNode): Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde =
-            when (val inntektskildeString = inntektskildeNode.asText()) {
+        private fun JsonNode.asSpleisVedtaksperiode(skjæringstidspunkt: LocalDate): SpleisVedtaksperiode =
+            SpleisVedtaksperiode(
+                vedtaksperiodeId = this["vedtaksperiodeId"].asUUID(),
+                spleisBehandlingId = this["behandlingId"].asUUID(),
+                fom = this["fom"].asLocalDate(),
+                tom = this["tom"].asLocalDate(),
+                skjæringstidspunkt = skjæringstidspunkt,
+            )
+
+        private fun JsonNode.asSykepengegrunnlagsfakta(): Sykepengegrunnlagsfakta =
+            when (val fastsatt = this["fastsatt"].asText()) {
+                "IInfotrygd" ->
+                    Sykepengegrunnlagsfakta.Infotrygd(
+                        omregnetÅrsinntekt = this["omregnetÅrsinntektTotalt"].asDouble(),
+                    )
+
+                "EtterSkjønn" ->
+                    Sykepengegrunnlagsfakta.Spleis.EtterSkjønn(
+                        omregnetÅrsinntekt = this["omregnetÅrsinntektTotalt"].asDouble(),
+                        seksG = this["6G"].asDouble(),
+                        skjønnsfastsatt = this["skjønnsfastsatt"].asDouble(),
+                        arbeidsgivere =
+                            this["arbeidsgivere"].map { arbeidsgiver ->
+                                Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterSkjønn(
+                                    organisasjonsnummer = arbeidsgiver["arbeidsgiver"].asText(),
+                                    omregnetÅrsinntekt = arbeidsgiver["omregnetÅrsinntekt"].asDouble(),
+                                    skjønnsfastsatt = arbeidsgiver["skjønnsfastsatt"].asDouble(),
+                                    inntektskilde = arbeidsgiver["inntektskilde"].asInntektskilde(),
+                                )
+                            },
+                    )
+
+                "EtterHovedregel" ->
+                    Sykepengegrunnlagsfakta.Spleis.EtterHovedregel(
+                        omregnetÅrsinntekt = this["omregnetÅrsinntektTotalt"].asDouble(),
+                        seksG = this["6G"].asDouble(),
+                        sykepengegrunnlag = this["sykepengegrunnlag"].asDouble(),
+                        arbeidsgivere =
+                            this["arbeidsgivere"].map { arbeidsgiver ->
+                                Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
+                                    organisasjonsnummer = arbeidsgiver["arbeidsgiver"].asText(),
+                                    omregnetÅrsinntekt = arbeidsgiver["omregnetÅrsinntekt"].asDouble(),
+                                    inntektskilde = arbeidsgiver["inntektskilde"].asInntektskilde(),
+                                )
+                            },
+                    )
+
+                else -> error("Ukjent verdi for fastsatt: \"$fastsatt\"")
+            }
+
+        private fun JsonNode.asInntektskilde(): Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde =
+            when (val inntektskilde = asText()) {
                 "Arbeidsgiver" -> Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Arbeidsgiver
                 "AOrdningen" -> Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.AOrdningen
                 "Saksbehandler" -> Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Saksbehandler
                 "Sigrun" -> Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Sigrun
-                else -> error("$inntektskildeString er ikke en gyldig inntektskilde")
+                else -> error("Ukjent verdi for inntektskilde: \"$inntektskilde\"")
             }
     }
 }

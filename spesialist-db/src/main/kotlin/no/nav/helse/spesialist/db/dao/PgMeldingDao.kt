@@ -188,7 +188,7 @@ class PgMeldingDao private constructor(
         val jsonNode = objectMapper.readTree(json)
         return when (meldingtype) {
             ADRESSEBESKYTTELSE_ENDRET -> AdressebeskyttelseEndret(jsonNode)
-            GODKJENNING -> Godkjenningsbehov(jsonNode)
+            GODKJENNING -> Godkjenningsbehov.fraJson(json)
             OPPDATER_PERSONSNAPSHOT -> OppdaterPersondata(jsonNode)
             GOSYS_OPPGAVE_ENDRET -> GosysOppgaveEndret(jsonNode)
             VEDTAKSPERIODE_FORKASTET -> VedtaksperiodeForkastet(jsonNode)
