@@ -5,6 +5,8 @@ import com.github.benmanes.caffeine.cache.CacheLoader
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.benmanes.caffeine.cache.LoadingCache
 import no.nav.helse.MeldingPubliserer
+import no.nav.helse.db.AnnulleringDao
+import no.nav.helse.db.AnnullertAvSaksbehandlerRow
 import no.nav.helse.db.CommandContextDao
 import no.nav.helse.db.DokumentDao
 import no.nav.helse.db.MeldingDao
@@ -36,6 +38,7 @@ class MeldingMediator(
     private val varselRepository: VarselRepository,
     private val poisonPillDao: PoisonPillDao,
     private val ignorerMeldingerForUkjentePersoner: Boolean,
+    private val annulleringDao: AnnulleringDao,
     poisonPillTimeToLive: Duration = Duration.ofMinutes(1),
 ) {
     private companion object {
@@ -378,4 +381,57 @@ class MeldingMediator(
             mediator.gjenopptaMelding(melding, commandContext, kontekstbasertPubliserer)
         }
     }
+
+    fun oppdaterAnnulleringerMedManglendeVedtaksperiodeId(id: String) =
+        withMDC(
+            mapOf("meldingId" to id),
+        ) {
+            logg.info("Setter i gang med oppdatering av annulleringer som mangler vedtaksperiodeId")
+
+            val annulleringer: List<AnnullertAvSaksbehandlerRow> =
+                annulleringDao
+                    .find10Annulleringer()
+                    .also { logg.info("Hentet ${it.size} annulleringer ${it.map { annullering -> annullering.id }}") }
+            val annulleringerOppdatert =
+                annulleringer.mapNotNull { annullering ->
+                    annulleringDao
+                        .findUtbetalingId(
+                            arbeidsgiverFagsystemId = annullering.arbeidsgiver_fagsystem_id,
+                            personFagsystemId = annullering.person_fagsystem_id,
+                        ).also { utbetalingId ->
+                            if (utbetalingId == null) {
+                                logg.info("Fant ingen utbetalingid for annullering ${annullering.id}")
+                            } else {
+                                logg.info("Fant utbetalingid $utbetalingId for annullering ${annullering.id}")
+                            }
+                        }?.let { utbetalingId ->
+                            annulleringDao
+                                .finnBehandlingISykefraværstilfelle(utbetalingId)
+                                .also { behandling ->
+                                    if (behandling != null) {
+                                        logg.info("Fant behandling ${behandling.behandlingId} for utbetalingid $utbetalingId")
+                                    } else {
+                                        logg.info("Fant ingen behandling for utbetalingid $utbetalingId")
+                                    }
+                                }
+                        }?.let { behandling ->
+                            annulleringDao
+                                .finnFørsteVedtaksperiodeIdForEttSykefraværstilfelle(behandling)
+                                .also { vedtaksperiodeId ->
+                                    if (vedtaksperiodeId != null) {
+                                        logg.info("Fant vedtaksperiodeid $vedtaksperiodeId for behandling ${behandling.behandlingId}")
+                                    } else {
+                                        logg.info("Fant ingen vedtaksperiodeid for behandling ${behandling.behandlingId}")
+                                    }
+                                }
+                        }?.let { førsteVedtaksperiodeId ->
+                            logg.info("Oppdaterer annullering ${annullering.id} med vedtaksperiodeid $førsteVedtaksperiodeId")
+                            annulleringDao.oppdaterAnnulleringMedVedtaksperiodeId(
+                                annullering.id,
+                                førsteVedtaksperiodeId,
+                            )
+                        }
+                }
+            logg.info("Hentet ${annulleringer.size} annulleringer og oppdaterte ${annulleringerOppdatert.size} annulleringer med vedtaksperiodeId")
+        }
 }

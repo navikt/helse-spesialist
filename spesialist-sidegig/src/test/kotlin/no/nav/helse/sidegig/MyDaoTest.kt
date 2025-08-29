@@ -1,7 +1,9 @@
 package no.nav.helse.sidegig
 
+import no.nav.helse.db.BehandlingISykefraværstilfelleRow
 import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
 import no.nav.helse.spesialist.db.DbQuery
+import no.nav.helse.spesialist.db.dao.PgAnnulleringDao
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertNull
@@ -16,7 +18,7 @@ import kotlin.random.Random.Default.nextLong
 @Isolated
 internal class MyDaoTest : AbstractDatabaseTest() {
     val SAKSBEHANDLEROID = UUID.randomUUID()
-    private val myDao = MyDao(dataSource)
+    private val pgAnnulleringDao = PgAnnulleringDao(dataSource)
 
     @Test
     fun `Returnerer 10 annulleringer`() {
@@ -34,7 +36,7 @@ internal class MyDaoTest : AbstractDatabaseTest() {
                 personFagsystemId = null
             )
         }
-        val result = myDao.find10Annulleringer()
+        val result = pgAnnulleringDao.find10Annulleringer()
         assertEquals(5, result.size)
     }
 
@@ -55,7 +57,7 @@ internal class MyDaoTest : AbstractDatabaseTest() {
             arbeidsgiverIdentifikator = lagOrganisasjonsnummer()
         )
 
-        val result = myDao.findUtbetalingId(
+        val result = pgAnnulleringDao.findUtbetalingId(
             arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
             personFagsystemId = personFagsystemId
         )
@@ -84,9 +86,9 @@ internal class MyDaoTest : AbstractDatabaseTest() {
         val skjæringstidspunkt = LocalDate.now()
         val behandlingId = requireNotNull(lagBehandling(vedtakperiodeId, utbetalingId, skjæringstidspunkt))
 
-        val result = myDao.finnBehandlingISykefraværstilfelle(utbetalingId)
+        val result = pgAnnulleringDao.finnBehandlingISykefraværstilfelle(utbetalingId)
         assertEquals(
-            MyDao.BehandlingISykefraværstilfelleRow(
+            BehandlingISykefraværstilfelleRow(
                 behandlingId = behandlingId,
                 vedtaksperiodeId = vedtakperiodeId,
                 skjæringstidspunkt = skjæringstidspunkt,
@@ -119,9 +121,9 @@ internal class MyDaoTest : AbstractDatabaseTest() {
         lagVedtak(vedtakperiodeId, personRef, arbeidsgiverIdentifikator)
         lagBehandling(vedtakperiodeId, utbetalingId, LocalDate.now())
 
-        val behandling = requireNotNull(myDao.finnBehandlingISykefraværstilfelle(utbetalingId))
+        val behandling = requireNotNull(pgAnnulleringDao.finnBehandlingISykefraværstilfelle(utbetalingId))
 
-        val result = myDao.finnFørsteVedtaksperiodeIdForEttSykefraværstilfelle(behandling)
+        val result = pgAnnulleringDao.finnFørsteVedtaksperiodeIdForEttSykefraværstilfelle(behandling)
 
         assertEquals(vedtakperiodeId, result)
     }
@@ -178,8 +180,8 @@ internal class MyDaoTest : AbstractDatabaseTest() {
         }
 
         // Then:
-        val behandling = requireNotNull(myDao.finnBehandlingISykefraværstilfelle(utbetalingId2))
-        val result = myDao.finnFørsteVedtaksperiodeIdForEttSykefraværstilfelle(behandling)
+        val behandling = requireNotNull(pgAnnulleringDao.finnBehandlingISykefraværstilfelle(utbetalingId2))
+        val result = pgAnnulleringDao.finnFørsteVedtaksperiodeIdForEttSykefraværstilfelle(behandling)
         assertEquals(vedtakperiodeId1, result)
     }
 
@@ -234,8 +236,8 @@ internal class MyDaoTest : AbstractDatabaseTest() {
         }
 
         // Then:
-        val behandling = requireNotNull(myDao.finnBehandlingISykefraværstilfelle(utbetalingId2))
-        val result = myDao.finnFørsteVedtaksperiodeIdForEttSykefraværstilfelle(behandling)
+        val behandling = requireNotNull(pgAnnulleringDao.finnBehandlingISykefraværstilfelle(utbetalingId2))
+        val result = pgAnnulleringDao.finnFørsteVedtaksperiodeIdForEttSykefraværstilfelle(behandling)
         assertEquals(vedtakperiodeId1, result)
     }
 
@@ -297,8 +299,8 @@ internal class MyDaoTest : AbstractDatabaseTest() {
         )
 
         // Then:
-        val behandling = requireNotNull(myDao.finnBehandlingISykefraværstilfelle(utbetalingId3))
-        val result = myDao.finnFørsteVedtaksperiodeIdForEttSykefraværstilfelle(behandling)
+        val behandling = requireNotNull(pgAnnulleringDao.finnBehandlingISykefraværstilfelle(utbetalingId3))
+        val result = pgAnnulleringDao.finnFørsteVedtaksperiodeIdForEttSykefraværstilfelle(behandling)
         assertEquals(vedtaksperiodeId1, result)
     }
 
@@ -349,8 +351,8 @@ internal class MyDaoTest : AbstractDatabaseTest() {
         )
 
         // Then:
-        val behandling = requireNotNull(myDao.finnBehandlingISykefraværstilfelle(utbetalingId3))
-        val result = myDao.finnFørsteVedtaksperiodeIdForEttSykefraværstilfelle(behandling)
+        val behandling = requireNotNull(pgAnnulleringDao.finnBehandlingISykefraværstilfelle(utbetalingId3))
+        val result = pgAnnulleringDao.finnFørsteVedtaksperiodeIdForEttSykefraværstilfelle(behandling)
         assertEquals(vedtaksperiodeId1, result)
     }
 
@@ -400,8 +402,8 @@ internal class MyDaoTest : AbstractDatabaseTest() {
         )
 
         // Then:
-        val behandling = requireNotNull(myDao.finnBehandlingISykefraværstilfelle(utbetalingId3))
-        val result = myDao.finnFørsteVedtaksperiodeIdForEttSykefraværstilfelle(behandling)
+        val behandling = requireNotNull(pgAnnulleringDao.finnBehandlingISykefraværstilfelle(utbetalingId3))
+        val result = pgAnnulleringDao.finnFørsteVedtaksperiodeIdForEttSykefraværstilfelle(behandling)
         assertEquals(vedtaksperiodeId1, result)
     }
 
@@ -487,8 +489,8 @@ internal class MyDaoTest : AbstractDatabaseTest() {
         )
 
         // Then:
-        val behandling = requireNotNull(myDao.finnBehandlingISykefraværstilfelle(utbetalingId6))
-        val result = myDao.finnFørsteVedtaksperiodeIdForEttSykefraværstilfelle(behandling)
+        val behandling = requireNotNull(pgAnnulleringDao.finnBehandlingISykefraværstilfelle(utbetalingId6))
+        val result = pgAnnulleringDao.finnFørsteVedtaksperiodeIdForEttSykefraværstilfelle(behandling)
         assertEquals(vedtaksperiodeId4, result)
     }
 
@@ -500,7 +502,7 @@ internal class MyDaoTest : AbstractDatabaseTest() {
         val annulleringId = lagAnnullertAvSaksbehandler(SAKSBEHANDLEROID)
         val annullering = hentAnnullering(annulleringId)
         assertNull(annullering?.vedtaksperiodeId)
-        myDao.oppdaterAnnulleringMedVedtaksperiodeId(
+        pgAnnulleringDao.oppdaterAnnulleringMedVedtaksperiodeId(
             annulleringId = annulleringId,
             vedtaksperiodeId = vedtakperiodeId
         )

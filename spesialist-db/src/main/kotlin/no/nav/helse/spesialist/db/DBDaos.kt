@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.db
 
 import no.nav.helse.db.Daos
+import no.nav.helse.spesialist.db.dao.PgAnnulleringDao
 import no.nav.helse.spesialist.db.dao.PgAnnulleringRepository
 import no.nav.helse.spesialist.db.dao.PgBehandlingsstatistikkDao
 import no.nav.helse.spesialist.db.dao.PgCommandContextDao
@@ -47,6 +48,7 @@ import javax.sql.DataSource
 class DBDaos(
     dataSource: DataSource,
 ) : Daos {
+    override val annulleringDao = PgAnnulleringDao(dataSource)
     override val annulleringRepository = PgAnnulleringRepository(dataSource)
     override val behandlingsstatistikkDao = PgBehandlingsstatistikkDao(dataSource)
     override val commandContextDao = PgCommandContextDao(dataSource)

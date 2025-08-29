@@ -45,6 +45,7 @@ class MeldingMediatorTest : AbstractDatabaseTest() {
             poisonPillDao = poisonPillDao,
             ignorerMeldingerForUkjentePersoner = false,
             poisonPillTimeToLive = Duration.ofMillis(50),
+            annulleringDao = daos.annulleringDao,
         )
 
     @BeforeEach

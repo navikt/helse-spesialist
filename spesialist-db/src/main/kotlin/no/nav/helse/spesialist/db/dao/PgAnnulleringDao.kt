@@ -1,18 +1,21 @@
-package no.nav.helse.sidegig
+package no.nav.helse.spesialist.db.dao
 
 import kotliquery.Query
 import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
+import no.nav.helse.db.AnnulleringDao
+import no.nav.helse.db.AnnullertAvSaksbehandlerRow
+import no.nav.helse.db.BehandlingISykefraværstilfelleRow
+import no.nav.helse.db.BehandlingsperiodeRow
 import org.intellij.lang.annotations.Language
-import java.time.LocalDate
 import java.util.UUID
 import javax.sql.DataSource
 
-class MyDao(
+class PgAnnulleringDao(
     private val dataSource: DataSource,
-) {
-    fun find10Annulleringer(): List<AnnullertAvSaksbehandlerRow> =
+) : AnnulleringDao {
+    override fun find10Annulleringer(): List<AnnullertAvSaksbehandlerRow> =
         listQuery(
             query =
                 """
@@ -31,7 +34,7 @@ class MyDao(
             )
         }
 
-    fun findUtbetalingId(
+    override fun findUtbetalingId(
         arbeidsgiverFagsystemId: String,
         personFagsystemId: String,
     ): UUID? =
@@ -54,7 +57,7 @@ class MyDao(
                 ),
         ) { row -> row.uuid("utbetaling_id") }.firstOrNull()
 
-    fun finnBehandlingISykefraværstilfelle(utbetalingId: UUID): BehandlingISykefraværstilfelleRow? =
+    override fun finnBehandlingISykefraværstilfelle(utbetalingId: UUID): BehandlingISykefraværstilfelleRow? =
         query(
             query =
                 """
@@ -83,7 +86,7 @@ class MyDao(
             )
         }
 
-    fun finnFørsteVedtaksperiodeIdForEttSykefraværstilfelle(behandlingISykefraværstilfelleRow: BehandlingISykefraværstilfelleRow): UUID? =
+    override fun finnFørsteVedtaksperiodeIdForEttSykefraværstilfelle(behandlingISykefraværstilfelleRow: BehandlingISykefraværstilfelleRow): UUID? =
         listQuery(
             query =
                 """
@@ -130,7 +133,7 @@ class MyDao(
         }.lastOrNull()
             ?.vedtaksperiodeId
 
-    fun oppdaterAnnulleringMedVedtaksperiodeId(
+    override fun oppdaterAnnulleringMedVedtaksperiodeId(
         annulleringId: Int,
         vedtaksperiodeId: UUID,
     ) = update(
@@ -145,28 +148,6 @@ class MyDao(
                 "vedtaksperiodeId" to vedtaksperiodeId,
                 "annulleringId" to annulleringId,
             ),
-    )
-
-    data class BehandlingsperiodeRow(
-        val vedtaksperiodeId: UUID,
-        val fom: LocalDate,
-        val tom: LocalDate,
-        val utbetalingId: UUID?,
-    )
-
-    data class AnnullertAvSaksbehandlerRow(
-        val id: Int,
-        val arbeidsgiver_fagsystem_id: String,
-        val person_fagsystem_id: String,
-    )
-
-    data class BehandlingISykefraværstilfelleRow(
-        val behandlingId: Long,
-        val vedtaksperiodeId: UUID,
-        val skjæringstidspunkt: LocalDate,
-        val personId: Long,
-        val arbeidsgiverId: String,
-        val utbetalingId: UUID,
     )
 
     private fun <T> query(

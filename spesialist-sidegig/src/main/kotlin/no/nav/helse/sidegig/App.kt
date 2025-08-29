@@ -19,6 +19,5 @@ private class App(
 
     fun setupRivers() {
         BehandlingOpprettetRiver(rapidsConnection, PgBehandlingDao(dataSourceBuilder.getDataSource()))
-        MinuttRiver(rapidsConnection, MyDao(dataSourceBuilder.getDataSource()))
     }
 }
