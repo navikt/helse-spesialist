@@ -1,7 +1,7 @@
 [versions]
 flyway = "11.11.1"
 graphqlKotlin = "8.4.0"
-jackson = "2.19.2"
+jackson = "2.20.0"
 ktor = "3.2.3"
 tbdLibs = "2025.08.16-09.21-71db7cad"
 testcontainers = "1.21.3"
