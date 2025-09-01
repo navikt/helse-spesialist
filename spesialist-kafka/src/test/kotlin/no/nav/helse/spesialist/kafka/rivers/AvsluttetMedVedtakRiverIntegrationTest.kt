@@ -690,9 +690,12 @@ class AvsluttetMedVedtakRiverIntegrationTest {
               "utbetalingId": "$utbetalingId",
               "tags": [ ${behandlingTags.joinToString(separator = ", ") { "\"$it\"" }} ],
               "sykepengegrunnlagsfakta": {
-                "beregningsgrunnlag": $beregningsgrunnlag,
-                "erBegrensetTil6G": false,
-                "6G": $seksG
+                "fastsatt": "EtterHovedregel",
+                "6G": $seksG,
+                "tags" : [ ],
+                "selvstendig": {
+                  "beregningsgrunnlag": $beregningsgrunnlag
+                }
               },
               "begrunnelser": [
                 {
@@ -759,9 +762,12 @@ class AvsluttetMedVedtakRiverIntegrationTest {
               "utbetalingId": "$utbetalingId",
               "tags": [ ${behandlingTags.joinToString(separator = ", ") { "\"$it\"" }} ],
               "sykepengegrunnlagsfakta": {
-                "beregningsgrunnlag": $beregningsgrunnlag,
-                "erBegrensetTil6G": true,
-                "6G": $seksG
+                "fastsatt": "EtterHovedregel",
+                "6G": $seksG,
+                "tags" : [ "6GBegrenset" ],
+                "selvstendig": {
+                  "beregningsgrunnlag": $beregningsgrunnlag
+                }
               },
               "begrunnelser": [
                 {

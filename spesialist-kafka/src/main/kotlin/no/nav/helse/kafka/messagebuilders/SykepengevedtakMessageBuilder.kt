@@ -79,9 +79,13 @@ private fun VedtakFattetMelding.FastsattIInfotrygdSykepengegrunnlagsfakta.tilSyk
 
 private fun VedtakFattetMelding.SelvstendigNæringsdrivendeSykepengegrunnlagsfakta.tilSykepengegrunnlagsfakta(): Map<String, Any> =
     mapOf(
-        "beregningsgrunnlag" to beregningsgrunnlag,
-        "erBegrensetTil6G" to erBegrensetTil6G,
+        "fastsatt" to "EtterHovedregel",
         "6G" to seksG,
+        "tags" to tags,
+        "selvstendig" to
+            mapOf(
+                "beregningsgrunnlag" to beregningsgrunnlag,
+            ),
     )
 
 private fun VedtakFattetMelding.Begrunnelse.tilBegrunnelse(

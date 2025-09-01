@@ -65,7 +65,7 @@ data class VedtakFattetMelding(
 
     data class SelvstendigNæringsdrivendeSykepengegrunnlagsfakta(
         val beregningsgrunnlag: BigDecimal,
-        val erBegrensetTil6G: Boolean,
+        val tags: Set<String>,
         val seksG: BigDecimal,
     ) : Sykepengegrunnlagsfakta
 

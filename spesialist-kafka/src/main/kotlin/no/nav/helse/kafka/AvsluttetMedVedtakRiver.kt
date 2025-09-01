@@ -184,7 +184,10 @@ class AvsluttetMedVedtakRiver(
                                 " Kun \"${FASTSATT_ETTER_HOVEDREGEL}\" støttes.",
                         )
                     }
-                    byggSelvstendigNæringsdrivendeSykepengegrunnlagsfakta(packet, behandling)
+                    byggSelvstendigNæringsdrivendeSykepengegrunnlagsfakta(
+                        packet = packet,
+                        tags = behandling.tags,
+                    )
                 } else {
                     when (fastsatt) {
                         FASTSATT_I_INFOTRYGD ->
@@ -217,7 +220,7 @@ class AvsluttetMedVedtakRiver(
 
     private fun byggSelvstendigNæringsdrivendeSykepengegrunnlagsfakta(
         packet: JsonMessage,
-        behandling: LegacyBehandling,
+        tags: List<String>,
     ) = VedtakFattetMelding.SelvstendigNæringsdrivendeSykepengegrunnlagsfakta(
         beregningsgrunnlag =
             BigDecimal(
@@ -226,7 +229,7 @@ class AvsluttetMedVedtakRiver(
                     ["omregnetÅrsinntekt"]
                     .asText(),
             ),
-        erBegrensetTil6G = TAG_6G_BEGRENSET in behandling.tags,
+        tags = tags.filter { it == TAG_6G_BEGRENSET }.toSet(),
         seksG = BigDecimal(packet["sykepengegrunnlagsfakta"]["6G"].asText()),
     )
 
