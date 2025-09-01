@@ -399,10 +399,10 @@ class MeldingMediator(
                             arbeidsgiverFagsystemId = annullering.arbeidsgiver_fagsystem_id,
                             personFagsystemId = annullering.person_fagsystem_id,
                         ).also { utbetalingId ->
-                            if (utbetalingId == null) {
-                                logg.info("Fant ingen utbetalingid for annullering ${annullering.id}")
-                            } else {
+                            if (utbetalingId != null) {
                                 logg.info("Fant utbetalingid $utbetalingId for annullering ${annullering.id}")
+                            } else {
+                                logg.warn("Fant ingen utbetalingid for annullering ${annullering.id}")
                             }
                         }?.let { utbetalingId ->
                             annulleringDao
@@ -411,7 +411,7 @@ class MeldingMediator(
                                     if (behandling != null) {
                                         logg.info("Fant behandling ${behandling.behandlingId} for utbetalingid $utbetalingId")
                                     } else {
-                                        logg.info("Fant ingen behandling for utbetalingid $utbetalingId")
+                                        logg.warn("Fant ingen behandling for utbetalingid $utbetalingId")
                                     }
                                 }
                         }?.let { behandling ->
@@ -421,7 +421,7 @@ class MeldingMediator(
                                     if (vedtaksperiodeId != null) {
                                         logg.info("Fant vedtaksperiodeid $vedtaksperiodeId for behandling ${behandling.behandlingId}")
                                     } else {
-                                        logg.info("Fant ingen vedtaksperiodeid for behandling ${behandling.behandlingId}")
+                                        logg.warn("Fant ingen vedtaksperiodeid for behandling ${behandling.behandlingId}")
                                     }
                                 }
                         }?.let { førsteVedtaksperiodeId ->
