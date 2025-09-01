@@ -141,8 +141,8 @@ internal abstract class AbstractDatabaseTest {
         INSERT INTO skjonnsfastsetting_sykepengegrunnlag_arbeidsgiver(id, arlig, fra_arlig, arbeidsgiver_identifikator, skjonnsfastsetting_sykepengegrunnlag_ref)
         VALUES (${sequence_number}, 1000, 1200, '${organisasjonsnummer}', ${sequence_number});
         
-        INSERT INTO annullert_av_saksbehandler(id, annullert_tidspunkt, saksbehandler_ref)
-        VALUES (${sequence_number}, now(), '${saksbehandler_oid}');
+        INSERT INTO annullert_av_saksbehandler(id, annullert_tidspunkt, saksbehandler_ref, vedtaksperiode_id)
+        VALUES (${sequence_number}, now(), '${saksbehandler_oid}', '${vedtaksperiode_id}');
         INSERT INTO oppdrag(id, fagsystem_id, mottaker)
         VALUES (${sequence_number}, 'EN_PERSON_FAGSYSTEMID', 'MOTTAKER');
         INSERT INTO oppdrag(id, fagsystem_id, mottaker)
@@ -156,8 +156,8 @@ internal abstract class AbstractDatabaseTest {
         VALUES (${sequence_number}, '${utbetaling_id}', ${sequence_number}, '${organisasjonsnummer}', ${sequence_number} + 1000,
                 ${sequence_number}, 'UTBETALING', now(), 0, 0);
         
-        INSERT INTO utbetaling(id, status, opprettet, data, utbetaling_id_ref, annullert_av_saksbehandler_ref)
-        VALUES (${sequence_number}, 'UTBETALT', now(), '{}'::json, ${sequence_number}, ${sequence_number});
+        INSERT INTO utbetaling(id, status, opprettet, data, utbetaling_id_ref)
+        VALUES (${sequence_number}, 'UTBETALT', now(), '{}'::json, ${sequence_number});
         
         INSERT INTO totrinnsvurdering(id, vedtaksperiode_id, saksbehandler, beslutter, person_ref, utbetaling_id_ref, tilstand, opprettet, oppdatert)
         VALUES (${sequence_number}, '${vedtaksperiode_id}', '${saksbehandler_oid}', '${saksbehandler_oid}', ${sequence_number}, ${sequence_number}, 'AVVENTER_SAKSBEHANDLER', now(), null);

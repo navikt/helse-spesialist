@@ -468,13 +468,12 @@ internal class PersonRepository(
 
     private fun TransactionalSession.finnAnnullertAvSaksbehandler(personRef: Int): List<Int> {
         @Language("PostgreSQL")
-        val query = """
-            SELECT id FROM annullert_av_saksbehandler 
-            WHERE id IN (
-                SELECT annullert_av_saksbehandler_ref FROM utbetaling_id ui 
-                INNER JOIN utbetaling u ON ui.id = u.utbetaling_id_ref 
-                WHERE ui.person_ref = ?
-            )"""
+        val query =
+            """
+            SELECT aas.id FROM annullert_av_saksbehandler aas 
+            INNER JOIN vedtak v USING (vedtaksperiode_id)
+            WHERE v.person_ref = ?
+            """
         return run(queryOf(query, personRef).map { it.int("id") }.asList)
     }
 
