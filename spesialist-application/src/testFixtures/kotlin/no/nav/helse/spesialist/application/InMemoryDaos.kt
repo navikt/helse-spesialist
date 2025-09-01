@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.application
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.db.AnnulleringDao
+import no.nav.helse.db.AnnulleringMigreringStatus
 import no.nav.helse.db.AnnulleringRepository
 import no.nav.helse.db.AnnullertAvSaksbehandlerRow
 import no.nav.helse.db.BehandlingISykefraværstilfelleRow
@@ -82,6 +83,10 @@ class InMemoryDaos : Daos {
             annulleringId: Int,
             vedtaksperiodeId: UUID
         ): Int {
+            TODO("Not yet implemented")
+        }
+
+        override fun oppdaterAnnulleringMigreringStatus(annulleringer: List<Pair<Int, AnnulleringMigreringStatus>>) {
             TODO("Not yet implemented")
         }
 

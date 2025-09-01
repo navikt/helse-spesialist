@@ -1,5 +1,6 @@
 package no.nav.helse.sidegig
 
+import no.nav.helse.db.AnnulleringMigreringStatus
 import no.nav.helse.db.BehandlingISykefraværstilfelleRow
 import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
 import no.nav.helse.spesialist.db.DbQuery
@@ -408,7 +409,7 @@ internal class MyDaoTest : AbstractDatabaseTest() {
     }
 
     @Test
-    fun `Henter eldste vedtaksperiodeid for sykefraværstilfelle som er annuller det er flere sykefraværstilfeller`(){
+    fun `Henter eldste vedtaksperiodeid for sykefraværstilfelle som er annuller det er flere sykefraværstilfeller`() {
         // Given:
         val personRef = requireNotNull(lagPerson())
         val arbeidsgiverIdentifikator = lagOrganisasjonsnummer()
@@ -500,6 +501,7 @@ internal class MyDaoTest : AbstractDatabaseTest() {
         lagSaksbehandler(SAKSBEHANDLEROID)
         val vedtakperiodeId = UUID.randomUUID()
         val annulleringId = lagAnnullertAvSaksbehandler(SAKSBEHANDLEROID)
+        checkNotNull(annulleringId)
         val annullering = hentAnnullering(annulleringId)
         assertNull(annullering?.vedtaksperiodeId)
         pgAnnulleringDao.oppdaterAnnulleringMedVedtaksperiodeId(
@@ -508,6 +510,23 @@ internal class MyDaoTest : AbstractDatabaseTest() {
         )
         val result = hentAnnullering(annulleringId)
         assertEquals(vedtakperiodeId, result?.vedtaksperiodeId)
+    }
+
+    @Test
+    fun `Oppdaterer status for annulleringsmigrering`() {
+        DbQuery(dataSource).execute("TRUNCATE annullert_av_saksbehandler CASCADE")
+        lagSaksbehandler(SAKSBEHANDLEROID)
+        val annulleringId = lagAnnullertAvSaksbehandler(SAKSBEHANDLEROID)
+        checkNotNull(annulleringId)
+        val annullering = hentAnnullering(annulleringId)
+        assertNull(annullering?.migreringStatus)
+        pgAnnulleringDao.oppdaterAnnulleringMigreringStatus(
+            listOf(
+                annulleringId to AnnulleringMigreringStatus.MANGLER_VEDTAKSPERIODEID
+            )
+        )
+        val result = hentAnnullering(annulleringId)
+        assertEquals(AnnulleringMigreringStatus.MANGLER_VEDTAKSPERIODEID, result?.migreringStatus)
     }
 
     private fun hentAnnullering(annulleringId: Int) = query(
@@ -521,14 +540,16 @@ internal class MyDaoTest : AbstractDatabaseTest() {
     ) { row ->
         AnnulleringMedVedtaksperiodeId(
             id = row.long("id"),
-            vedtaksperiodeId = row.uuidOrNull("vedtaksperiode_id")
+            vedtaksperiodeId = row.uuidOrNull("vedtaksperiode_id"),
+            migreringStatus = row.stringOrNull("migreringsstatus")?.let { AnnulleringMigreringStatus.valueOf(it) }
         )
     }
 
 
     data class AnnulleringMedVedtaksperiodeId(
         val id: Long,
-        val vedtaksperiodeId: UUID?
+        val vedtaksperiodeId: UUID?,
+        val migreringStatus: AnnulleringMigreringStatus?,
     )
 
     private fun opprettUtbetaltVedtak(
@@ -744,7 +765,7 @@ internal class MyDaoTest : AbstractDatabaseTest() {
         saksbehandlerRef: UUID,
         arbeidsgiverFagsystemId: String? = UUID.randomUUID().toString(),
         personFagsystemId: String? = UUID.randomUUID().toString()
-    ) = insert(
+    ) = insertAndReturnGeneratedKey(
         query = """
             INSERT INTO annullert_av_saksbehandler (
                 annullert_tidspunkt,
@@ -771,7 +792,7 @@ internal class MyDaoTest : AbstractDatabaseTest() {
             "arbeidsgiver_fagsystem_id" to arbeidsgiverFagsystemId,
             "person_fagsystem_id" to personFagsystemId
         )
-    )
+    )?.toInt()
 
     private fun lagFagsystemId() = (0..31).map { 'A' + Random().nextInt('Z' - 'A') }.joinToString("")
 

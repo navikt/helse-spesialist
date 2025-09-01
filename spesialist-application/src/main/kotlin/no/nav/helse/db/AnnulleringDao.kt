@@ -19,6 +19,8 @@ interface AnnulleringDao {
         annulleringId: Int,
         vedtaksperiodeId: UUID,
     ): Int
+
+    fun oppdaterAnnulleringMigreringStatus(annulleringer: List<Pair<Int, AnnulleringMigreringStatus>>)
 }
 
 data class BehandlingsperiodeRow(
@@ -42,3 +44,10 @@ data class BehandlingISykefraværstilfelleRow(
     val arbeidsgiverId: String,
     val utbetalingId: UUID,
 )
+
+enum class AnnulleringMigreringStatus {
+    OPPDATERT_MED_VEDTAKSPERIODEID,
+    MANGLER_UTBETALINGID,
+    MANGLER_BEHANDLINGID,
+    MANGLER_VEDTAKSPERIODEID,
+}
