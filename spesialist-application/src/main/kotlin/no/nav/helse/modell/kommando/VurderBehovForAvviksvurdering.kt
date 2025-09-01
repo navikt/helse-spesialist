@@ -23,7 +23,7 @@ class VurderBehovForAvviksvurdering(
     private val organisasjonsnummer: String,
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
-        if (sykepengegrunnlagsfakta !is Sykepengegrunnlagsfakta.Spleis) return true
+        if (sykepengegrunnlagsfakta !is Sykepengegrunnlagsfakta.Spleis.Arbeidstaker) return true
         if (yrkesaktivitetstype == Yrkesaktivitetstype.SELVSTENDIG) return true
         return behov(context)
     }
@@ -56,7 +56,7 @@ class VurderBehovForAvviksvurdering(
         context.behov(
             Behov.Avviksvurdering(
                 omregnedeÅrsinntekter =
-                    (sykepengegrunnlagsfakta as Sykepengegrunnlagsfakta.Spleis).arbeidsgivere.map {
+                    (sykepengegrunnlagsfakta as Sykepengegrunnlagsfakta.Spleis.Arbeidstaker).arbeidsgivere.map {
                         OmregnetÅrsinntekt(
                             arbeidsgiverreferanse = it.organisasjonsnummer,
                             beløp = it.omregnetÅrsinntekt,

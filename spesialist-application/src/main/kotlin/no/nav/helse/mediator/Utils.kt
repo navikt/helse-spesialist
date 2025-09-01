@@ -1,8 +1,11 @@
 package no.nav.helse.mediator
 
 import com.fasterxml.jackson.databind.JsonNode
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.UUID
+
+fun JsonNode.asBigDecimal(): BigDecimal = BigDecimal(asText())
 
 inline fun <reified T : Enum<T>> JsonNode.asEnum(): T = enumValueOf<T>(asText())
 

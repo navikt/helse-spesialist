@@ -44,13 +44,21 @@ internal class VurderVurderingsmomenter(
                     inntekt =
                         when (sykepengegrunnlagsfakta) {
                             is Sykepengegrunnlagsfakta.Infotrygd -> null
-                            is Sykepengegrunnlagsfakta.Spleis ->
-                                sykepengegrunnlagsfakta.arbeidsgivere.find { it.organisasjonsnummer == organisasjonsnummer }?.let { sykepengegrunnlagsArbeidsgiver ->
-                                    InntektTilRisk(
-                                        omregnetÅrsinntekt = sykepengegrunnlagsArbeidsgiver.omregnetÅrsinntekt,
-                                        inntektskilde = sykepengegrunnlagsArbeidsgiver.inntektskilde.name,
-                                    )
-                                }
+                            is Sykepengegrunnlagsfakta.Spleis.Arbeidstaker ->
+                                sykepengegrunnlagsfakta.arbeidsgivere
+                                    .find { it.organisasjonsnummer == organisasjonsnummer }
+                                    ?.let { sykepengegrunnlagsArbeidsgiver ->
+                                        InntektTilRisk(
+                                            omregnetÅrsinntekt = sykepengegrunnlagsArbeidsgiver.omregnetÅrsinntekt,
+                                            inntektskilde = sykepengegrunnlagsArbeidsgiver.inntektskilde.name,
+                                        )
+                                    }
+
+                            is Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende ->
+                                InntektTilRisk(
+                                    omregnetÅrsinntekt = sykepengegrunnlagsfakta.selvstendig.beregningsgrunnlag.toDouble(),
+                                    inntektskilde = "Sigrun", // TODO: Hardkodet, verdi - avklar med Risk og Spleis
+                                )
                         },
                 ),
             )

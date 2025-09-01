@@ -40,7 +40,7 @@ class VurderBehovForAvviksvurderingTest {
     private val harAkseptabeltAvvik = false
     private val beregningsgrunnlagTotalbeløp = 900000.0
     private val sammenligningsgrunnlagTotalbeløp = 600000.0
-    private val spleisSykepengegrunnlagsfakta = Sykepengegrunnlagsfakta.Spleis.EtterHovedregel(
+    private val spleisSykepengegrunnlagsfakta = Sykepengegrunnlagsfakta.Spleis.Arbeidstaker.EtterHovedregel(
         seksG = 666666.00,
         arbeidsgivere = listOf(
             Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(

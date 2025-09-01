@@ -16,6 +16,7 @@ import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.UUID
 
@@ -88,7 +89,7 @@ internal class GodkjenningsbehovRiverTest {
                     assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, it.periodetype)
                     assertEquals(Utbetalingtype.UTBETALING, it.utbetalingtype)
                     assertEquals(
-                        Sykepengegrunnlagsfakta.Spleis.EtterHovedregel(
+                        Sykepengegrunnlagsfakta.Spleis.Arbeidstaker.EtterHovedregel(
                             seksG = 6 * 118620.0,
                             arbeidsgivere = listOf(
                                 Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
@@ -160,7 +161,7 @@ internal class GodkjenningsbehovRiverTest {
                     assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, it.periodetype)
                     assertEquals(Utbetalingtype.UTBETALING, it.utbetalingtype)
                     assertEquals(
-                        Sykepengegrunnlagsfakta.Spleis.EtterSkjønn(
+                        Sykepengegrunnlagsfakta.Spleis.Arbeidstaker.EtterSkjønn(
                             seksG = 6 * 118620.0,
                             arbeidsgivere = listOf(
                                 Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterSkjønn(
@@ -228,7 +229,69 @@ internal class GodkjenningsbehovRiverTest {
     }
 
     @Test
-    fun `leser Godkjenningbehov med yrkesaktivitetstype selvstendig`() {
+    fun `leser Godkjenningbehov for selvstendig næringsdrivende`() {
+        val vilkårsgrunnlagId = UUID.randomUUID()
+        testRapid.sendTestMessage(
+            Testmeldingfabrikk.lagGodkjenningsbehov(
+                aktørId = AKTØR,
+                fødselsnummer = FNR,
+                vedtaksperiodeId = VEDTAKSPERIODE,
+                utbetalingId = UTBETALING_ID,
+                organisasjonsnummer = "",
+                yrkesaktivitetstype = Yrkesaktivitetstype.SELVSTENDIG,
+                periodeFom = FOM,
+                periodeTom = TOM,
+                skjæringstidspunkt = FOM,
+                periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
+                førstegangsbehandling = true,
+                utbetalingtype = Utbetalingtype.UTBETALING,
+                inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
+                orgnummereMedRelevanteArbeidsforhold = emptyList(),
+                kanAvvises = true,
+                id = HENDELSE,
+                vilkårsgrunnlagId = vilkårsgrunnlagId,
+                sykepengegrunnlagsfakta = Testmeldingfabrikk.godkjenningsbehovSelvstendigNæringsdrivende(
+                    sykepengegrunnlag = BigDecimal("600000.00"),
+                    seksG = BigDecimal("666666.66"),
+                    beregningsgrunnlag = BigDecimal("600000.00"),
+                ),
+            )
+        )
+        verify(exactly = 1) {
+            mediator.mottaMelding(
+                melding = withArg<Godkjenningsbehov> {
+                    assertEquals(HENDELSE, it.id)
+                    assertEquals(FNR, it.fødselsnummer())
+                    assertEquals(VEDTAKSPERIODE, it.vedtaksperiodeId())
+                    assertEquals("", it.organisasjonsnummer)
+                    assertEquals(Yrkesaktivitetstype.SELVSTENDIG, it.yrkesaktivitetstype)
+                    assertEquals(FOM, it.periodeFom)
+                    assertEquals(TOM, it.periodeTom)
+                    assertEquals(FOM, it.skjæringstidspunkt)
+                    assertEquals(Inntektskilde.EN_ARBEIDSGIVER, it.inntektskilde)
+                    assertEquals(true, it.kanAvvises)
+                    assertEquals(true, it.førstegangsbehandling)
+                    assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, it.periodetype)
+                    assertEquals(Utbetalingtype.UTBETALING, it.utbetalingtype)
+                    assertEquals(
+                        Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende(
+                            sykepengegrunnlag = 600000.00,
+                            seksG = 666666.66,
+                            selvstendig = Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende.Selvstendig(
+                                beregningsgrunnlag = BigDecimal("600000.0"),
+                            ),
+                        ),
+                        it.sykepengegrunnlagsfakta
+                    )
+                },
+                kontekstbasertPubliserer = any()
+            )
+        }
+    }
+
+    // TODO: Midlertidig bakoverkompatibilitet til Spleis har merget sin branch om dette
+    @Test
+    fun `leser fortsatt gammelt sykepengegrunnlagsfakta for selvstendig næringsdrivende`() {
         val vilkårsgrunnlagId = UUID.randomUUID()
         testRapid.sendTestMessage(
             Testmeldingfabrikk.lagGodkjenningsbehov(
@@ -250,14 +313,15 @@ internal class GodkjenningsbehovRiverTest {
                 id = HENDELSE,
                 vilkårsgrunnlagId = vilkårsgrunnlagId,
                 sykepengegrunnlagsfakta = Testmeldingfabrikk.godkjenningsbehovFastsattEtterHovedregel(
+                    seksG = 666666.66,
                     arbeidsgivere = listOf(
                         mapOf(
-                            "arbeidsgiver" to ORGNR,
-                            "omregnetÅrsinntekt" to 500000.00,
-                            "skjønnsfastsatt" to 600000.00,
-                            "inntektskilde" to "Saksbehandler"
+                            "arbeidsgiver" to "SELVSTENDIG",
+                            "omregnetÅrsinntekt" to 600000.00,
+                            "inntektskilde" to "Sigrun"
                         )
-                    )),
+                    )
+                ),
             )
         )
         verify(exactly = 1) {
@@ -276,6 +340,16 @@ internal class GodkjenningsbehovRiverTest {
                     assertEquals(true, it.førstegangsbehandling)
                     assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, it.periodetype)
                     assertEquals(Utbetalingtype.UTBETALING, it.utbetalingtype)
+                    assertEquals(
+                        Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende(
+                            sykepengegrunnlag = 600000.00,
+                            seksG = 666666.66,
+                            selvstendig = Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende.Selvstendig(
+                                beregningsgrunnlag = BigDecimal("600000.0"),
+                            ),
+                        ),
+                        it.sykepengegrunnlagsfakta
+                    )
                 },
                 kontekstbasertPubliserer = any()
             )

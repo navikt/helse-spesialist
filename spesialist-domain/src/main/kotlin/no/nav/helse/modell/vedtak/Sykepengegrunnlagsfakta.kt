@@ -1,22 +1,37 @@
 package no.nav.helse.modell.vedtak
 
+import java.math.BigDecimal
+
 sealed interface Sykepengegrunnlagsfakta {
     data object Infotrygd : Sykepengegrunnlagsfakta
 
     sealed class Spleis : Sykepengegrunnlagsfakta {
         abstract val seksG: Double
-        abstract val arbeidsgivere: List<Arbeidsgiver>
 
-        data class EtterSkjønn(
-            override val seksG: Double,
-            override val arbeidsgivere: List<Arbeidsgiver.EtterSkjønn>,
-        ) : Spleis()
+        sealed class Arbeidstaker : Spleis() {
+            abstract val arbeidsgivere: List<Arbeidsgiver>
 
-        data class EtterHovedregel(
-            override val seksG: Double,
-            override val arbeidsgivere: List<Arbeidsgiver.EtterHovedregel>,
+            data class EtterSkjønn(
+                override val seksG: Double,
+                override val arbeidsgivere: List<Arbeidsgiver.EtterSkjønn>,
+            ) : Arbeidstaker()
+
+            data class EtterHovedregel(
+                override val seksG: Double,
+                override val arbeidsgivere: List<Arbeidsgiver.EtterHovedregel>,
+                val sykepengegrunnlag: Double,
+            ) : Arbeidstaker()
+        }
+
+        data class SelvstendigNæringsdrivende(
             val sykepengegrunnlag: Double,
-        ) : Spleis()
+            override val seksG: Double,
+            val selvstendig: Selvstendig,
+        ) : Spleis() {
+            data class Selvstendig(
+                val beregningsgrunnlag: BigDecimal,
+            )
+        }
 
         sealed interface Arbeidsgiver {
             val organisasjonsnummer: String

@@ -234,7 +234,7 @@ internal class VurderVurderingsmomenterTest {
         førstegangsbehandling = førstegangsbehandling,
         sykefraværstilfelle = sykefraværstilfelle,
         utbetaling = utbetalingMock,
-        sykepengegrunnlagsfakta = Sykepengegrunnlagsfakta.Spleis.EtterHovedregel(
+        sykepengegrunnlagsfakta = Sykepengegrunnlagsfakta.Spleis.Arbeidstaker.EtterHovedregel(
             arbeidsgivere = listOf(
                 Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
                     omregnetÅrsinntekt = 123456.7,

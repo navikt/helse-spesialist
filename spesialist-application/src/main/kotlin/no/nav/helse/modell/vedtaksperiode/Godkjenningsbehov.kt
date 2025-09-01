@@ -22,6 +22,7 @@ import no.nav.helse.db.VergemålDao
 import no.nav.helse.db.ÅpneGosysOppgaverDao
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Kommandostarter
+import no.nav.helse.mediator.asBigDecimal
 import no.nav.helse.mediator.asEnum
 import no.nav.helse.mediator.asLocalDate
 import no.nav.helse.mediator.asUUID
@@ -127,11 +128,12 @@ class Godkjenningsbehov(
         fun fraJson(json: String): Godkjenningsbehov {
             val jsonNode = objectMapper.readTree(json)
             val godkjenning = jsonNode["Godkjenning"]
+            val yrkesaktivitetstype = jsonNode["yrkesaktivitetstype"].asEnum<Yrkesaktivitetstype>()
             return Godkjenningsbehov(
                 id = jsonNode["@id"].asUUID(),
                 fødselsnummer = jsonNode["fødselsnummer"].asText(),
                 organisasjonsnummer = jsonNode["organisasjonsnummer"].asText(),
-                yrkesaktivitetstype = jsonNode["yrkesaktivitetstype"].asEnum<Yrkesaktivitetstype>(),
+                yrkesaktivitetstype = yrkesaktivitetstype,
                 vedtaksperiodeId = jsonNode["vedtaksperiodeId"].asUUID(),
                 spleisVedtaksperioder =
                     godkjenning["perioderMedSammeSkjæringstidspunkt"].map { periode ->
@@ -155,7 +157,7 @@ class Godkjenningsbehov(
                         ?.map(JsonNode::asText)
                         .orEmpty(),
                 skjæringstidspunkt = godkjenning["skjæringstidspunkt"].asLocalDate(),
-                sykepengegrunnlagsfakta = godkjenning["sykepengegrunnlagsfakta"].asSykepengegrunnlagsfakta(),
+                sykepengegrunnlagsfakta = godkjenning["sykepengegrunnlagsfakta"].asSykepengegrunnlagsfakta(yrkesaktivitetstype),
                 json = json,
             )
         }
@@ -169,40 +171,65 @@ class Godkjenningsbehov(
                 skjæringstidspunkt = skjæringstidspunkt,
             )
 
-        private fun JsonNode.asSykepengegrunnlagsfakta(): Sykepengegrunnlagsfakta =
-            when (val fastsatt = this["fastsatt"].asText()) {
-                "IInfotrygd" ->
-                    Sykepengegrunnlagsfakta.Infotrygd
+        private fun JsonNode.asSykepengegrunnlagsfakta(yrkesaktivitetstype: Yrkesaktivitetstype): Sykepengegrunnlagsfakta =
+            if (yrkesaktivitetstype == Yrkesaktivitetstype.SELVSTENDIG) {
+                when (val fastsatt = this["fastsatt"].asText()) {
+                    "EtterHovedregel" -> {
+                        Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende(
+                            seksG = this["6G"].asDouble(),
+                            sykepengegrunnlag = this["sykepengegrunnlag"].asDouble(),
+                            selvstendig =
+                                this["selvstendig"]?.let {
+                                    Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende.Selvstendig(
+                                        beregningsgrunnlag = it["beregningsgrunnlag"].asBigDecimal(),
+                                    )
+                                }
+                                    // TODO: Midlertidig bakoverkompatibilitet til Spleis har merget sin branch om dette
+                                    ?: this["arbeidsgivere"].first { it["arbeidsgiver"].asText() == "SELVSTENDIG" }.let { arbeidsgiver ->
+                                        Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende.Selvstendig(
+                                            beregningsgrunnlag = arbeidsgiver["omregnetÅrsinntekt"].asBigDecimal(),
+                                        )
+                                    },
+                        )
+                    }
 
-                "EtterSkjønn" ->
-                    Sykepengegrunnlagsfakta.Spleis.EtterSkjønn(
-                        seksG = this["6G"].asDouble(),
-                        arbeidsgivere =
-                            this["arbeidsgivere"].map { arbeidsgiver ->
-                                Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterSkjønn(
-                                    organisasjonsnummer = arbeidsgiver["arbeidsgiver"].asText(),
-                                    omregnetÅrsinntekt = arbeidsgiver["omregnetÅrsinntekt"].asDouble(),
-                                    skjønnsfastsatt = arbeidsgiver["skjønnsfastsatt"].asDouble(),
-                                    inntektskilde = arbeidsgiver["inntektskilde"].asInntektskilde(),
-                                )
-                            },
-                    )
+                    else -> error("Ugyldig verdi for fastsatt for selvstendig næringsdrivende: \"$fastsatt\"")
+                }
+            } else {
+                when (val fastsatt = this["fastsatt"].asText()) {
+                    "IInfotrygd" ->
+                        Sykepengegrunnlagsfakta.Infotrygd
 
-                "EtterHovedregel" ->
-                    Sykepengegrunnlagsfakta.Spleis.EtterHovedregel(
-                        seksG = this["6G"].asDouble(),
-                        sykepengegrunnlag = this["sykepengegrunnlag"].asDouble(),
-                        arbeidsgivere =
-                            this["arbeidsgivere"].map { arbeidsgiver ->
-                                Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
-                                    organisasjonsnummer = arbeidsgiver["arbeidsgiver"].asText(),
-                                    omregnetÅrsinntekt = arbeidsgiver["omregnetÅrsinntekt"].asDouble(),
-                                    inntektskilde = arbeidsgiver["inntektskilde"].asInntektskilde(),
-                                )
-                            },
-                    )
+                    "EtterSkjønn" ->
+                        Sykepengegrunnlagsfakta.Spleis.Arbeidstaker.EtterSkjønn(
+                            seksG = this["6G"].asDouble(),
+                            arbeidsgivere =
+                                this["arbeidsgivere"].map { arbeidsgiver ->
+                                    Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterSkjønn(
+                                        organisasjonsnummer = arbeidsgiver["arbeidsgiver"].asText(),
+                                        omregnetÅrsinntekt = arbeidsgiver["omregnetÅrsinntekt"].asDouble(),
+                                        skjønnsfastsatt = arbeidsgiver["skjønnsfastsatt"].asDouble(),
+                                        inntektskilde = arbeidsgiver["inntektskilde"].asInntektskilde(),
+                                    )
+                                },
+                        )
 
-                else -> error("Ukjent verdi for fastsatt: \"$fastsatt\"")
+                    "EtterHovedregel" ->
+                        Sykepengegrunnlagsfakta.Spleis.Arbeidstaker.EtterHovedregel(
+                            seksG = this["6G"].asDouble(),
+                            sykepengegrunnlag = this["sykepengegrunnlag"].asDouble(),
+                            arbeidsgivere =
+                                this["arbeidsgivere"].map { arbeidsgiver ->
+                                    Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
+                                        organisasjonsnummer = arbeidsgiver["arbeidsgiver"].asText(),
+                                        omregnetÅrsinntekt = arbeidsgiver["omregnetÅrsinntekt"].asDouble(),
+                                        inntektskilde = arbeidsgiver["inntektskilde"].asInntektskilde(),
+                                    )
+                                },
+                        )
+
+                    else -> error("Ukjent verdi for fastsatt: \"$fastsatt\"")
+                }
             }
 
         private fun JsonNode.asInntektskilde(): Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde =

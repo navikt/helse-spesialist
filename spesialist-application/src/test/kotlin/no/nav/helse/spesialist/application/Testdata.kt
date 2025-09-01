@@ -100,7 +100,7 @@ object Testdata {
             inntektskilde = inntektskilde,
             orgnummereMedRelevanteArbeidsforhold = emptyList(),
             skjæringstidspunkt = 1 jan 2018,
-            sykepengegrunnlagsfakta = Sykepengegrunnlagsfakta.Spleis.EtterHovedregel(
+            sykepengegrunnlagsfakta = Sykepengegrunnlagsfakta.Spleis.Arbeidstaker.EtterHovedregel(
                 seksG = 6 * 118620.0,
                 arbeidsgivere = listOf(
                     Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(

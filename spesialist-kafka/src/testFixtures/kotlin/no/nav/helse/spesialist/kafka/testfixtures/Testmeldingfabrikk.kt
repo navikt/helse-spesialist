@@ -13,6 +13,7 @@ import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.kafka.objectMapper
 import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk.Risikofunn.Companion.tilJson
 import org.intellij.lang.annotations.Language
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDate.now
 import java.time.LocalDateTime
@@ -1206,6 +1207,19 @@ object Testmeldingfabrikk {
         "fastsatt" to "IInfotrygd",
         "sykepengegrunnlag" to sykepengegrunnlag,
         "6G" to seksG,
+    )
+
+    fun godkjenningsbehovSelvstendigNæringsdrivende(
+        sykepengegrunnlag: BigDecimal,
+        seksG: BigDecimal,
+        beregningsgrunnlag: BigDecimal
+    ): Map<String, Any> = mapOf(
+        "fastsatt" to "EtterHovedregel",
+        "sykepengegrunnlag" to sykepengegrunnlag,
+        "6G" to seksG,
+        "selvstendig" to mapOf(
+            "beregningsgrunnlag" to beregningsgrunnlag
+        )
     )
 
     private fun nyHendelse(id: UUID, navn: String, hendelse: Map<String, Any>) =
