@@ -269,7 +269,7 @@ object Testmeldingfabrikk {
                 "behandlingId" to spleisBehandlingId
             )
         ),
-        sykepengegrunnlagsfakta: Map<String, Any> = fastsattEtterHovedregel(organisasjonsnummer)
+        sykepengegrunnlagsfakta: Map<String, Any> = godkjenningsbehovFastsattEtterHovedregel(organisasjonsnummer)
     ) =
         nyHendelse(
             id, "behov",
@@ -1060,7 +1060,7 @@ object Testmeldingfabrikk {
         fom: LocalDate,
         tom: LocalDate,
         skjæringstidspunkt: LocalDate,
-        sykepengegrunnlagsfakta: Map<String, Any> = fastsattEtterHovedregel(organisasjonsnummer),
+        sykepengegrunnlagsfakta: Map<String, Any> = avsluttetMedVedtakFastsattEtterHovedregel(organisasjonsnummer),
         id: UUID,
     ): String = nyHendelse(
         id, "avsluttet_med_vedtak", mutableMapOf(
@@ -1109,7 +1109,7 @@ object Testmeldingfabrikk {
         )
     )
 
-    fun fastsattEtterSkjønn(
+    fun avsluttetMedVedtakFastsattEtterSkjønn(
         organisasjonsnummer: String,
         settInnAvviksvurderingFraSpleis: Boolean = true,
         omregnetÅrsinntektTotalt: Double = 500000.0,
@@ -1139,7 +1139,7 @@ object Testmeldingfabrikk {
         }
     }
 
-    fun fastsattEtterHovedregel(
+    fun avsluttetMedVedtakFastsattEtterHovedregel(
         organisasjonsnummer: String,
         settInnAvviksvurderingFraSpleis: Boolean = true,
         omregnetÅrsinntektTotalt: Double = 600000.0,
@@ -1168,7 +1168,73 @@ object Testmeldingfabrikk {
         }
     }
 
-    fun fastsattIInfotrygd(omregnetÅrsinntektTotalt: Double = 500000.0): Map<String, Any> {
+    fun avsluttetMedVedtakFastsattIInfotrygd(omregnetÅrsinntektTotalt: Double = 500000.0): Map<String, Any> {
+        return mapOf(
+            "fastsatt" to "IInfotrygd",
+            "omregnetÅrsinntektTotalt" to omregnetÅrsinntektTotalt,
+        )
+    }
+
+    fun godkjenningsbehovFastsattEtterSkjønn(
+        organisasjonsnummer: String,
+        settInnAvviksvurderingFraSpleis: Boolean = true,
+        omregnetÅrsinntektTotalt: Double = 500000.0,
+        skjønnsfastsatt: Double = 600000.0,
+        innrapportertÅrsinntekt: Double = 600000.0,
+        avviksprosent: Double = 16.67,
+        arbeidsgivere: List<Map<String, Any>> = listOf(
+            mapOf(
+                "arbeidsgiver" to organisasjonsnummer,
+                "omregnetÅrsinntekt" to 500000.00,
+                "skjønnsfastsatt" to 600000.00,
+                "inntektskilde" to "Saksbehandler"
+            )
+        ),
+    ): Map<String, Any> {
+        return mutableMapOf(
+            "fastsatt" to "EtterSkjønn",
+            "omregnetÅrsinntektTotalt" to omregnetÅrsinntektTotalt,
+            "skjønnsfastsatt" to skjønnsfastsatt,
+            "6G" to 6 * 118620.0,
+            "arbeidsgivere" to arbeidsgivere
+        ).apply {
+            if (settInnAvviksvurderingFraSpleis) {
+                this["innrapportertÅrsinntekt"] = innrapportertÅrsinntekt
+                this["avviksprosent"] = avviksprosent
+            }
+        }
+    }
+
+    fun godkjenningsbehovFastsattEtterHovedregel(
+        organisasjonsnummer: String,
+        settInnAvviksvurderingFraSpleis: Boolean = true,
+        omregnetÅrsinntektTotalt: Double = 600000.0,
+        sykepengegrunnlag: Double = 600000.0,
+        innrapportertÅrsinntekt: Double = 600000.0,
+        avviksprosent: Double = 0.0,
+        arbeidsgivere: List<Map<String, Any>> = listOf(
+            mapOf(
+                "arbeidsgiver" to organisasjonsnummer,
+                "omregnetÅrsinntekt" to 600000.00,
+                "inntektskilde" to "Arbeidsgiver"
+            )
+        )
+    ): Map<String, Any> {
+        return mutableMapOf(
+            "fastsatt" to "EtterHovedregel",
+            "omregnetÅrsinntektTotalt" to omregnetÅrsinntektTotalt,
+            "sykepengegrunnlag" to sykepengegrunnlag,
+            "6G" to 6 * 118620.0,
+            "arbeidsgivere" to arbeidsgivere
+        ).apply {
+            if (settInnAvviksvurderingFraSpleis) {
+                this["innrapportertÅrsinntekt"] = innrapportertÅrsinntekt
+                this["avviksprosent"] = avviksprosent
+            }
+        }
+    }
+
+    fun godkjenningsbehovFastsattIInfotrygd(omregnetÅrsinntektTotalt: Double = 500000.0): Map<String, Any> {
         return mapOf(
             "fastsatt" to "IInfotrygd",
             "omregnetÅrsinntektTotalt" to omregnetÅrsinntektTotalt,

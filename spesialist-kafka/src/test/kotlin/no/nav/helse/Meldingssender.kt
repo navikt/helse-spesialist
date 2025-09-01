@@ -10,7 +10,7 @@ import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk
 import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk.ArbeidsgiverinformasjonJson
 import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk.VergemålJson.Fullmakt
 import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk.VergemålJson.Vergemål
-import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk.fastsattEtterHovedregel
+import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk.avsluttetMedVedtakFastsattEtterHovedregel
 import no.nav.helse.spesialist.typer.Kjønn
 import org.junit.jupiter.api.Assertions.assertEquals
 import java.time.LocalDate
@@ -639,7 +639,7 @@ internal class Meldingssender(private val testRapid: TestRapid) {
                 tom = tom,
                 skjæringstidspunkt = skjæringstidspunkt,
                 id = id,
-                sykepengegrunnlagsfakta = fastsattEtterHovedregel(organisasjonsnummer),
+                sykepengegrunnlagsfakta = avsluttetMedVedtakFastsattEtterHovedregel(organisasjonsnummer),
             )
         )
     }

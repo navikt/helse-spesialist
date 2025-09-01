@@ -13,9 +13,9 @@ import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk
 import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk.ArbeidsgiverinformasjonJson
 import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk.VergemålJson.Fullmakt
 import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk.VergemålJson.Vergemål
-import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk.fastsattEtterHovedregel
-import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk.fastsattEtterSkjønn
-import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk.fastsattIInfotrygd
+import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk.avsluttetMedVedtakFastsattEtterHovedregel
+import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk.avsluttetMedVedtakFastsattEtterSkjønn
+import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk.avsluttetMedVedtakFastsattIInfotrygd
 import no.nav.helse.spesialist.typer.Kjønn
 import org.junit.jupiter.api.Assertions.assertEquals
 import java.time.LocalDate
@@ -654,9 +654,9 @@ class Meldingssender(private val testRapid: TestRapid) {
                 skjæringstidspunkt = skjæringstidspunkt,
                 id = id,
                 sykepengegrunnlagsfakta = when (fastsattType) {
-                    "EtterHovedregel" -> fastsattEtterHovedregel(organisasjonsnummer)
-                    "EtterSkjønn" -> fastsattEtterSkjønn(organisasjonsnummer)
-                    "IInfotrygd" -> fastsattIInfotrygd()
+                    "EtterHovedregel" -> avsluttetMedVedtakFastsattEtterHovedregel(organisasjonsnummer)
+                    "EtterSkjønn" -> avsluttetMedVedtakFastsattEtterSkjønn(organisasjonsnummer)
+                    "IInfotrygd" -> avsluttetMedVedtakFastsattIInfotrygd()
                     else -> error("$fastsattType er ikke en gyldig sykepengegrunnlagsfakta-type")
                 }
             )

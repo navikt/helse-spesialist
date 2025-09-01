@@ -106,7 +106,7 @@ object Meldingsbygger {
                 )
             ),
             sykepengegrunnlagsfakta = when (sykepengegrunnlagsfakta.fastsatt) {
-                Sykepengegrunnlagsfakta.FastsattType.EtterHovedregel -> Testmeldingfabrikk.fastsattEtterHovedregel(
+                Sykepengegrunnlagsfakta.FastsattType.EtterHovedregel -> Testmeldingfabrikk.godkjenningsbehovFastsattEtterHovedregel(
                     organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
                     omregnetÅrsinntektTotalt = 600000.0,
                     innrapportertÅrsinntekt = 600000.0,
@@ -120,7 +120,7 @@ object Meldingsbygger {
                         }
                     }
                 )
-                Sykepengegrunnlagsfakta.FastsattType.EtterSkjønn -> Testmeldingfabrikk.fastsattEtterSkjønn(
+                Sykepengegrunnlagsfakta.FastsattType.EtterSkjønn -> Testmeldingfabrikk.godkjenningsbehovFastsattEtterSkjønn(
                     organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
                     omregnetÅrsinntektTotalt = 600000.0,
                     innrapportertÅrsinntekt = 600000.0,
@@ -190,7 +190,7 @@ object Meldingsbygger {
         tom = vedtaksperiode.tom,
         skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt,
         sykepengegrunnlagsfakta = when (vedtaksperiode.sykepengegrunnlagsfakta.fastsatt) {
-            Sykepengegrunnlagsfakta.FastsattType.EtterHovedregel -> Testmeldingfabrikk.fastsattEtterHovedregel(
+            Sykepengegrunnlagsfakta.FastsattType.EtterHovedregel -> Testmeldingfabrikk.avsluttetMedVedtakFastsattEtterHovedregel(
                 organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
                 omregnetÅrsinntektTotalt = 600000.0,
                 innrapportertÅrsinntekt = 600000.0,
@@ -204,7 +204,7 @@ object Meldingsbygger {
                     }
                 }
             )
-            Sykepengegrunnlagsfakta.FastsattType.EtterSkjønn -> Testmeldingfabrikk.fastsattEtterSkjønn(
+            Sykepengegrunnlagsfakta.FastsattType.EtterSkjønn -> Testmeldingfabrikk.avsluttetMedVedtakFastsattEtterSkjønn(
                 organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
                 omregnetÅrsinntektTotalt = 600000.0,
                 innrapportertÅrsinntekt = 600000.0,

@@ -119,7 +119,7 @@ internal class GodkjenningsbehovRiverTest {
                 kanAvvises = true,
                 id = HENDELSE,
                 vilkårsgrunnlagId = vilkårsgrunnlagId,
-                sykepengegrunnlagsfakta = Testmeldingfabrikk.fastsattEtterSkjønn(
+                sykepengegrunnlagsfakta = Testmeldingfabrikk.godkjenningsbehovFastsattEtterSkjønn(
                     organisasjonsnummer = ORGNR,
                     arbeidsgivere = listOf(
                         mapOf(
@@ -190,7 +190,7 @@ internal class GodkjenningsbehovRiverTest {
                 kanAvvises = true,
                 id = HENDELSE,
                 vilkårsgrunnlagId = vilkårsgrunnlagId,
-                sykepengegrunnlagsfakta = Testmeldingfabrikk.fastsattIInfotrygd(),
+                sykepengegrunnlagsfakta = Testmeldingfabrikk.godkjenningsbehovFastsattIInfotrygd(),
             )
         )
         verify(exactly = 1) {
@@ -238,7 +238,7 @@ internal class GodkjenningsbehovRiverTest {
                 kanAvvises = true,
                 id = HENDELSE,
                 vilkårsgrunnlagId = vilkårsgrunnlagId,
-                sykepengegrunnlagsfakta = Testmeldingfabrikk.fastsattEtterHovedregel(
+                sykepengegrunnlagsfakta = Testmeldingfabrikk.godkjenningsbehovFastsattEtterHovedregel(
                     organisasjonsnummer = ORGNR,
                     arbeidsgivere = listOf(
                         mapOf(
