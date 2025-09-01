@@ -231,7 +231,6 @@ class PgMeldingDaoTest {
                     ),
                     "sykepengegrunnlagsfakta" to mapOf(
                         "fastsatt" to "EtterHovedregel",
-                        "omregnetÅrsinntektTotalt" to 123456.7,
                         "6G" to 666666.0,
                         "sykepengegrunnlag" to 123456.7,
                         "arbeidsgivere" to listOf(
@@ -240,12 +239,6 @@ class PgMeldingDaoTest {
                                 "omregnetÅrsinntekt" to 123456.7,
                                 "inntektskilde" to "Arbeidsgiver",
                             )
-                        )
-                    ),
-                    "omregnedeÅrsinntekter" to listOf(
-                        mapOf(
-                            "organisasjonsnummer" to "orgnr",
-                            "beløp" to 123456.7,
                         )
                     ),
                 ),

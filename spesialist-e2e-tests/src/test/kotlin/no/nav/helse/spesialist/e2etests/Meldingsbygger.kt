@@ -107,10 +107,6 @@ object Meldingsbygger {
             ),
             sykepengegrunnlagsfakta = when (sykepengegrunnlagsfakta.fastsatt) {
                 Sykepengegrunnlagsfakta.FastsattType.EtterHovedregel -> Testmeldingfabrikk.godkjenningsbehovFastsattEtterHovedregel(
-                    organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
-                    omregnetÅrsinntektTotalt = 600000.0,
-                    innrapportertÅrsinntekt = 600000.0,
-                    avviksprosent = 0.0,
                     sykepengegrunnlag = sykepengegrunnlagsfakta.arbeidsgivere.sumOf { it.omregnetÅrsinntekt },
                     arbeidsgivere = sykepengegrunnlagsfakta.arbeidsgivere.map {
                         buildMap {
@@ -121,11 +117,7 @@ object Meldingsbygger {
                     }
                 )
                 Sykepengegrunnlagsfakta.FastsattType.EtterSkjønn -> Testmeldingfabrikk.godkjenningsbehovFastsattEtterSkjønn(
-                    organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
-                    omregnetÅrsinntektTotalt = 600000.0,
-                    innrapportertÅrsinntekt = 600000.0,
-                    avviksprosent = 0.0,
-                    skjønnsfastsatt = sykepengegrunnlagsfakta.arbeidsgivere.sumOf { it.omregnetÅrsinntekt },
+                    sykepengegrunnlag = sykepengegrunnlagsfakta.arbeidsgivere.sumOf { it.omregnetÅrsinntekt },
                     arbeidsgivere = sykepengegrunnlagsfakta.arbeidsgivere.map {
                         buildMap {
                             put("arbeidsgiver", it.organisasjonsnummer)

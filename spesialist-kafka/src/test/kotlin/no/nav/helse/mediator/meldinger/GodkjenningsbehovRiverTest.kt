@@ -59,6 +59,16 @@ internal class GodkjenningsbehovRiverTest {
                 kanAvvises = true,
                 id = HENDELSE,
                 vilkårsgrunnlagId = vilkårsgrunnlagId,
+                sykepengegrunnlagsfakta = Testmeldingfabrikk.godkjenningsbehovFastsattEtterHovedregel(
+                    seksG = 6 * 118620.0,
+                    arbeidsgivere = listOf(
+                        mapOf(
+                            "arbeidsgiver" to ORGNR,
+                            "omregnetÅrsinntekt" to 600000.00,
+                            "inntektskilde" to "Arbeidsgiver"
+                        )
+                    )
+                )
             )
         )
         verify(exactly = 1) {
@@ -120,7 +130,8 @@ internal class GodkjenningsbehovRiverTest {
                 id = HENDELSE,
                 vilkårsgrunnlagId = vilkårsgrunnlagId,
                 sykepengegrunnlagsfakta = Testmeldingfabrikk.godkjenningsbehovFastsattEtterSkjønn(
-                    organisasjonsnummer = ORGNR,
+                    sykepengegrunnlag = 500000.00,
+                    seksG = 6 * 118620.0,
                     arbeidsgivere = listOf(
                         mapOf(
                             "arbeidsgiver" to ORGNR,
@@ -239,7 +250,6 @@ internal class GodkjenningsbehovRiverTest {
                 id = HENDELSE,
                 vilkårsgrunnlagId = vilkårsgrunnlagId,
                 sykepengegrunnlagsfakta = Testmeldingfabrikk.godkjenningsbehovFastsattEtterHovedregel(
-                    organisasjonsnummer = ORGNR,
                     arbeidsgivere = listOf(
                         mapOf(
                             "arbeidsgiver" to ORGNR,
