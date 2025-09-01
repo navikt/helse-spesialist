@@ -10,7 +10,6 @@ sealed interface Sykepengegrunnlagsfakta {
         data class EtterSkjønn(
             override val seksG: Double,
             override val arbeidsgivere: List<Arbeidsgiver.EtterSkjønn>,
-            val skjønnsfastsatt: Double,
         ) : Spleis()
 
         data class EtterHovedregel(

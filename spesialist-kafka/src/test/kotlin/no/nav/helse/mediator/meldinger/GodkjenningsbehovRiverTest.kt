@@ -158,8 +158,7 @@ internal class GodkjenningsbehovRiverTest {
                                     inntektskilde = Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Saksbehandler,
                                     skjønnsfastsatt = 600000.0
                                 )
-                            ),
-                            skjønnsfastsatt = 600000.0
+                            )
                         ),
                         it.sykepengegrunnlagsfakta
                     )

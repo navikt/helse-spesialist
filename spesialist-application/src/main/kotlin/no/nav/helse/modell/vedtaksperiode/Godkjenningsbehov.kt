@@ -177,7 +177,6 @@ class Godkjenningsbehov(
                 "EtterSkjønn" ->
                     Sykepengegrunnlagsfakta.Spleis.EtterSkjønn(
                         seksG = this["6G"].asDouble(),
-                        skjønnsfastsatt = this["skjønnsfastsatt"].asDouble(),
                         arbeidsgivere =
                             this["arbeidsgivere"].map { arbeidsgiver ->
                                 Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterSkjønn(
