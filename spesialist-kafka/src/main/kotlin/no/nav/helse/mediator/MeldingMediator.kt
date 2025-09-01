@@ -6,6 +6,7 @@ import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.benmanes.caffeine.cache.LoadingCache
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.AnnulleringDao
+import no.nav.helse.db.AnnulleringMigreringStatus
 import no.nav.helse.db.AnnullertAvSaksbehandlerRow
 import no.nav.helse.db.CommandContextDao
 import no.nav.helse.db.DokumentDao
@@ -387,6 +388,7 @@ class MeldingMediator(
             mapOf("meldingId" to id),
         ) {
             logg.info("Setter i gang med oppdatering av annulleringer som mangler vedtaksperiodeId")
+            val feiledeMigreringer = mutableListOf<Pair<Int, AnnulleringMigreringStatus>>()
 
             val annulleringer: List<AnnullertAvSaksbehandlerRow> =
                 annulleringDao
@@ -403,6 +405,7 @@ class MeldingMediator(
                                 logg.info("Fant utbetalingid $utbetalingId for annullering ${annullering.id}")
                             } else {
                                 logg.warn("Fant ingen utbetalingid for annullering ${annullering.id}")
+                                feiledeMigreringer.add(annullering.id to AnnulleringMigreringStatus.MANGLER_UTBETALINGID)
                             }
                         }?.let { utbetalingId ->
                             annulleringDao
@@ -412,6 +415,7 @@ class MeldingMediator(
                                         logg.info("Fant behandling ${behandling.behandlingId} for utbetalingid $utbetalingId")
                                     } else {
                                         logg.warn("Fant ingen behandling for utbetalingid $utbetalingId")
+                                        feiledeMigreringer.add(annullering.id to AnnulleringMigreringStatus.MANGLER_BEHANDLINGID)
                                     }
                                 }
                         }?.let { behandling ->
@@ -422,6 +426,7 @@ class MeldingMediator(
                                         logg.info("Fant vedtaksperiodeid $vedtaksperiodeId for behandling ${behandling.behandlingId}")
                                     } else {
                                         logg.warn("Fant ingen vedtaksperiodeid for behandling ${behandling.behandlingId}")
+                                        feiledeMigreringer.add(annullering.id to AnnulleringMigreringStatus.MANGLER_VEDTAKSPERIODEID)
                                     }
                                 }
                         }?.let { førsteVedtaksperiodeId ->
@@ -432,6 +437,9 @@ class MeldingMediator(
                             )
                         }
                 }
+            feiledeMigreringer
+                .takeIf { it.isNotEmpty() }
+                ?.let { annulleringDao.oppdaterAnnulleringMigreringStatus(it) }
             logg.info("Hentet ${annulleringer.size} annulleringer og oppdaterte ${annulleringerOppdatert.size} annulleringer med vedtaksperiodeId")
         }
 }
