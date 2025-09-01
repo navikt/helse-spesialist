@@ -63,7 +63,7 @@ class OppgaverQueryHandler(
         sikkerLogg.debug("Query OppgaverTilBehandling er ferdig etter ${tid.inWholeMilliseconds} ms")
         val grense = 5000
         if (tid.inWholeMilliseconds > grense) {
-            sikkerLogg.info("Det tok over $grense ms å hente oppgaver med disse filtrene: $filtrering")
+            sikkerLogg.info("Det tok over $grense ms å hente oppgaver med disse filtrene: $filtrering\nog denne sorteringen: $sortering")
         }
 
         return byggRespons(oppgaver)
