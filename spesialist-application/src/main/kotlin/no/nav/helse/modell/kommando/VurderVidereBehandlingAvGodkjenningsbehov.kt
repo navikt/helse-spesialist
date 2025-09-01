@@ -110,6 +110,5 @@ internal class VurderVidereBehandlingAvGodkjenningsbehov(
             nytt.inntektskilde != gammelt.inntektskilde ||
             nytt.orgnummereMedRelevanteArbeidsforhold.sorted() != gammelt.orgnummereMedRelevanteArbeidsforhold.sorted() ||
             nytt.skjæringstidspunkt != gammelt.skjæringstidspunkt ||
-            nytt.sykepengegrunnlagsfakta != gammelt.sykepengegrunnlagsfakta ||
-            nytt.omregnedeÅrsinntekter.sortedBy { it.arbeidsgiverreferanse } != gammelt.omregnedeÅrsinntekter.sortedBy { it.arbeidsgiverreferanse }
+            nytt.sykepengegrunnlagsfakta != gammelt.sykepengegrunnlagsfakta
 }

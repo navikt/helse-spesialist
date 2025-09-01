@@ -6,6 +6,7 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.VurderBehovForAvviksvurdering
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderVarselOmAvvik
+import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.modell.vilkårsprøving.AvviksvurderingBehovLøsning
@@ -39,10 +40,21 @@ class VurderBehovForAvviksvurderingTest {
     private val harAkseptabeltAvvik = false
     private val beregningsgrunnlagTotalbeløp = 900000.0
     private val sammenligningsgrunnlagTotalbeløp = 600000.0
-    private val omregnedeÅrsinntekter = listOf(OmregnetÅrsinntekt(organisasjonsnummer, beregningsgrunnlagTotalbeløp))
+    private val spleisSykepengegrunnlagsfakta = Sykepengegrunnlagsfakta.Spleis.EtterHovedregel(
+        seksG = 666666.00,
+        arbeidsgivere = listOf(
+            Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
+                organisasjonsnummer = organisasjonsnummer,
+                omregnetÅrsinntekt = beregningsgrunnlagTotalbeløp,
+                inntektskilde = Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Arbeidsgiver
+            )
+        ),
+        sykepengegrunnlag = 666666.00
+    )
+    private val expectedOmregnedeÅrsinntekter = listOf(OmregnetÅrsinntekt(organisasjonsnummer, beregningsgrunnlagTotalbeløp))
     private val beregningsgrunnlag = Beregningsgrunnlag(
         totalbeløp = beregningsgrunnlagTotalbeløp,
-        omregnedeÅrsinntekter = omregnedeÅrsinntekter
+        omregnedeÅrsinntekter = expectedOmregnedeÅrsinntekter
     )
 
     private val sammenligningsgrunnlag = Sammenligningsgrunnlag(
@@ -95,7 +107,7 @@ class VurderBehovForAvviksvurderingTest {
 
     @Test
     fun `Ikke send ut behov dersom inngangsvilkårene ikke er vurdert i Spleis`() {
-        val command = vurderBehovForAvviksvurderingCommand(erInngangsvilkårVurdertISpleis = false)
+        val command = vurderBehovForAvviksvurderingCommand(sykepengegrunnlagsfakta = Sykepengegrunnlagsfakta.Infotrygd)
         val context = CommandContext(UUID.randomUUID())
         context.nyObserver(observer)
         assertTrue(command.execute(context))
@@ -120,7 +132,7 @@ class VurderBehovForAvviksvurderingTest {
         assertEquals(1, observer.behov.size)
         val behov = observer.behov.single()
         assertInstanceOf<Behov.Avviksvurdering>(behov)
-        assertEquals(omregnedeÅrsinntekter, behov.omregnedeÅrsinntekter)
+        assertEquals(expectedOmregnedeÅrsinntekter, behov.omregnedeÅrsinntekter)
         assertEquals(organisasjonsnummer, behov.organisasjonsnummer)
         assertEquals(vilkårsgrunnlagId, behov.vilkårsgrunnlagId)
         assertEquals(skjæringstidspunkt, behov.skjæringstidspunkt)
@@ -245,7 +257,7 @@ class VurderBehovForAvviksvurderingTest {
     }
 
     private fun vurderBehovForAvviksvurderingCommand(
-        erInngangsvilkårVurdertISpleis: Boolean = true,
+        sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta = spleisSykepengegrunnlagsfakta,
         yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
         organisasjonsnummer: String = this.organisasjonsnummer
     ) =
@@ -253,10 +265,9 @@ class VurderBehovForAvviksvurderingTest {
             fødselsnummer = fødselsnummer,
             skjæringstidspunkt = skjæringstidspunkt,
             avviksvurderingRepository = repository,
-            omregnedeÅrsinntekter = omregnedeÅrsinntekter,
+            sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
             vilkårsgrunnlagId = vilkårsgrunnlagId,
             legacyBehandling = legacyBehandling,
-            erInngangsvilkårVurdertISpleis = erInngangsvilkårVurdertISpleis,
             yrkesaktivitetstype = yrkesaktivitetstype,
             organisasjonsnummer = organisasjonsnummer,
         )

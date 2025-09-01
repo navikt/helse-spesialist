@@ -7,7 +7,6 @@ import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
-import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
 import no.nav.helse.spesialist.api.bootstrap.Gruppe
 import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
 import no.nav.helse.spesialist.domain.testfixtures.jan
@@ -102,7 +101,6 @@ object Testdata {
             orgnummereMedRelevanteArbeidsforhold = emptyList(),
             skjæringstidspunkt = 1 jan 2018,
             sykepengegrunnlagsfakta = Sykepengegrunnlagsfakta.Spleis.EtterHovedregel(
-                omregnetÅrsinntekt = 123456.7,
                 seksG = 6 * 118620.0,
                 arbeidsgivere = listOf(
                     Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
@@ -112,12 +110,6 @@ object Testdata {
                     )
                 ),
                 sykepengegrunnlag = 123456.7
-            ),
-            omregnedeÅrsinntekter = listOf(
-                OmregnetÅrsinntekt(
-                    arbeidsgiverreferanse = organisasjonsnummer,
-                    beløp = 123456.7,
-                )
             ),
             json = json,
         )

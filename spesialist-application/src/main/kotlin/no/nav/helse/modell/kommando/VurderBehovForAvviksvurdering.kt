@@ -3,6 +3,7 @@ package no.nav.helse.modell.kommando
 import no.nav.helse.db.AvviksvurderingRepository
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode.RV_IV_2
+import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.modell.vilkårsprøving.AvviksvurderingBehovLøsning
@@ -15,15 +16,14 @@ class VurderBehovForAvviksvurdering(
     private val fødselsnummer: String,
     private val skjæringstidspunkt: LocalDate,
     private val avviksvurderingRepository: AvviksvurderingRepository,
-    private val omregnedeÅrsinntekter: List<OmregnetÅrsinntekt>,
+    private val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta,
     private val vilkårsgrunnlagId: UUID,
     private val legacyBehandling: LegacyBehandling,
-    private val erInngangsvilkårVurdertISpleis: Boolean,
     private val yrkesaktivitetstype: Yrkesaktivitetstype,
     private val organisasjonsnummer: String,
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
-        if (!erInngangsvilkårVurdertISpleis) return true
+        if (sykepengegrunnlagsfakta !is Sykepengegrunnlagsfakta.Spleis) return true
         if (yrkesaktivitetstype == Yrkesaktivitetstype.SELVSTENDIG) return true
         return behov(context)
     }
@@ -55,11 +55,17 @@ class VurderBehovForAvviksvurdering(
     private fun behov(context: CommandContext): Boolean {
         context.behov(
             Behov.Avviksvurdering(
-                omregnedeÅrsinntekter,
-                vilkårsgrunnlagId,
-                skjæringstidspunkt,
-                organisasjonsnummer,
-                legacyBehandling.vedtaksperiodeId(),
+                omregnedeÅrsinntekter =
+                    (sykepengegrunnlagsfakta as Sykepengegrunnlagsfakta.Spleis).arbeidsgivere.map {
+                        OmregnetÅrsinntekt(
+                            arbeidsgiverreferanse = it.organisasjonsnummer,
+                            beløp = it.omregnetÅrsinntekt,
+                        )
+                    },
+                vilkårsgrunnlagId = vilkårsgrunnlagId,
+                skjæringstidspunkt = skjæringstidspunkt,
+                organisasjonsnummer = organisasjonsnummer,
+                vedtaksperiodeId = legacyBehandling.vedtaksperiodeId(),
             ),
         )
         return false

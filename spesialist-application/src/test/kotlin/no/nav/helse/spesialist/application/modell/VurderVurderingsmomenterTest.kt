@@ -242,7 +242,6 @@ internal class VurderVurderingsmomenterTest {
                     inntektskilde = Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Arbeidsgiver,
                 )
             ),
-            omregnetÅrsinntekt = 123456.7,
             seksG = 6 * 118620.0,
             sykepengegrunnlag = 123456.7
         )

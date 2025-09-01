@@ -56,7 +56,6 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.VurderEnhetUtland
 import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta
 import no.nav.helse.modell.vergemal.VurderVergemålOgFullmakt
-import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
 import no.nav.helse.spesialist.application.ArbeidsgiverRepository
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import java.time.LocalDate
@@ -83,7 +82,6 @@ class Godkjenningsbehov(
     val orgnummereMedRelevanteArbeidsforhold: List<String>,
     val skjæringstidspunkt: LocalDate,
     val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta,
-    val omregnedeÅrsinntekter: List<OmregnetÅrsinntekt>,
     private val json: String,
 ) : Vedtaksperiodemelding {
     override fun fødselsnummer() = fødselsnummer
@@ -122,7 +120,6 @@ class Godkjenningsbehov(
             sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
             orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
             skjæringstidspunkt = skjæringstidspunkt,
-            omregnedeÅrsinntekter = omregnedeÅrsinntekter,
             json = json,
         )
 
@@ -159,13 +156,6 @@ class Godkjenningsbehov(
                         .orEmpty(),
                 skjæringstidspunkt = godkjenning["skjæringstidspunkt"].asLocalDate(),
                 sykepengegrunnlagsfakta = godkjenning["sykepengegrunnlagsfakta"].asSykepengegrunnlagsfakta(),
-                omregnedeÅrsinntekter =
-                    godkjenning["omregnedeÅrsinntekter"].map {
-                        OmregnetÅrsinntekt(
-                            arbeidsgiverreferanse = it["organisasjonsnummer"].asText(),
-                            beløp = it["beløp"].asDouble(),
-                        )
-                    },
                 json = json,
             )
         }
@@ -182,13 +172,10 @@ class Godkjenningsbehov(
         private fun JsonNode.asSykepengegrunnlagsfakta(): Sykepengegrunnlagsfakta =
             when (val fastsatt = this["fastsatt"].asText()) {
                 "IInfotrygd" ->
-                    Sykepengegrunnlagsfakta.Infotrygd(
-                        omregnetÅrsinntekt = this["omregnetÅrsinntektTotalt"].asDouble(),
-                    )
+                    Sykepengegrunnlagsfakta.Infotrygd
 
                 "EtterSkjønn" ->
                     Sykepengegrunnlagsfakta.Spleis.EtterSkjønn(
-                        omregnetÅrsinntekt = this["omregnetÅrsinntektTotalt"].asDouble(),
                         seksG = this["6G"].asDouble(),
                         skjønnsfastsatt = this["skjønnsfastsatt"].asDouble(),
                         arbeidsgivere =
@@ -204,7 +191,6 @@ class Godkjenningsbehov(
 
                 "EtterHovedregel" ->
                     Sykepengegrunnlagsfakta.Spleis.EtterHovedregel(
-                        omregnetÅrsinntekt = this["omregnetÅrsinntektTotalt"].asDouble(),
                         seksG = this["6G"].asDouble(),
                         sykepengegrunnlag = this["sykepengegrunnlag"].asDouble(),
                         arbeidsgivere =
@@ -291,13 +277,12 @@ internal class GodkjenningsbehovCommand(
                 fødselsnummer = behovData.fødselsnummer,
                 skjæringstidspunkt = behovData.skjæringstidspunkt,
                 avviksvurderingRepository = avviksvurderingRepository,
-                omregnedeÅrsinntekter = behovData.omregnedeÅrsinntekter,
+                sykepengegrunnlagsfakta = behovData.sykepengegrunnlagsfakta,
                 vilkårsgrunnlagId = behovData.vilkårsgrunnlagId,
                 legacyBehandling =
                     person
                         .vedtaksperiode(behovData.vedtaksperiodeId)
                         .finnBehandling(behovData.spleisBehandlingId),
-                erInngangsvilkårVurdertISpleis = behovData.erInngangsvilkårVurdertISpleis,
                 yrkesaktivitetstype = behovData.yrkesaktivitetstype,
                 organisasjonsnummer = behovData.organisasjonsnummer,
             ),
