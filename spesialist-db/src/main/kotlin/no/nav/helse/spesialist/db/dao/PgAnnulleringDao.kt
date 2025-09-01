@@ -5,7 +5,6 @@ import kotliquery.Row
 import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.db.AnnulleringDao
-import no.nav.helse.db.AnnulleringMigreringStatus
 import no.nav.helse.db.AnnullertAvSaksbehandlerRow
 import no.nav.helse.db.BehandlingISykefraværstilfelleRow
 import no.nav.helse.db.BehandlingsperiodeRow
@@ -25,7 +24,6 @@ class PgAnnulleringDao(
                 WHERE vedtaksperiode_id IS NULL
                   AND arbeidsgiver_fagsystem_id IS NOT NULL
                   AND person_fagsystem_id IS NOT NULL
-                  AND migreringsstatus IS NULL 
                 LIMIT 10
                 """.trimIndent(),
         ) { row ->
@@ -142,33 +140,15 @@ class PgAnnulleringDao(
         query =
             """
             UPDATE annullert_av_saksbehandler
-            SET vedtaksperiode_id = :vedtaksperiodeId, migreringsstatus = :migreringsstatus
+            SET vedtaksperiode_id = :vedtaksperiodeId
             WHERE id = :annulleringId
             """.trimIndent(),
         paramMap =
             mapOf(
                 "vedtaksperiodeId" to vedtaksperiodeId,
                 "annulleringId" to annulleringId,
-                "migreringsstatus" to AnnulleringMigreringStatus.OPPDATERT_MED_VEDTAKSPERIODEID.name,
             ),
     )
-
-    override fun oppdaterAnnulleringMigreringStatus(annulleringer: List<Pair<Int, AnnulleringMigreringStatus>>) =
-        annulleringer.forEach { (annulleringId, migreringsstatus) ->
-            update(
-                query =
-                    """
-                    UPDATE annullert_av_saksbehandler
-                    SET migreringsstatus = :migreringsstatus
-                    WHERE id = :id
-                    """.trimIndent(),
-                paramMap =
-                    mapOf(
-                        "migreringsstatus" to migreringsstatus.name,
-                        "id" to annulleringId,
-                    ),
-            )
-        }
 
     private fun <T> query(
         @Language("PostgreSQL") query: String,

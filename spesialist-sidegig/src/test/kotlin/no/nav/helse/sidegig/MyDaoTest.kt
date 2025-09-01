@@ -1,6 +1,5 @@
 package no.nav.helse.sidegig
 
-import no.nav.helse.db.AnnulleringMigreringStatus
 import no.nav.helse.db.BehandlingISykefraværstilfelleRow
 import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
 import no.nav.helse.spesialist.db.DbQuery
@@ -501,7 +500,6 @@ internal class MyDaoTest : AbstractDatabaseTest() {
         lagSaksbehandler(SAKSBEHANDLEROID)
         val vedtakperiodeId = UUID.randomUUID()
         val annulleringId = lagAnnullertAvSaksbehandler(SAKSBEHANDLEROID)
-        checkNotNull(annulleringId)
         val annullering = hentAnnullering(annulleringId)
         assertNull(annullering?.vedtaksperiodeId)
         pgAnnulleringDao.oppdaterAnnulleringMedVedtaksperiodeId(
@@ -523,16 +521,14 @@ internal class MyDaoTest : AbstractDatabaseTest() {
     ) { row ->
         AnnulleringMedVedtaksperiodeId(
             id = row.long("id"),
-            vedtaksperiodeId = row.uuidOrNull("vedtaksperiode_id"),
-            migreringStatus = row.stringOrNull("migreringsstatus")?.let { AnnulleringMigreringStatus.valueOf(it) }
+            vedtaksperiodeId = row.uuidOrNull("vedtaksperiode_id")
         )
     }
 
 
     data class AnnulleringMedVedtaksperiodeId(
         val id: Long,
-        val vedtaksperiodeId: UUID?,
-        val migreringStatus: AnnulleringMigreringStatus?,
+        val vedtaksperiodeId: UUID?
     )
 
     private fun opprettUtbetaltVedtak(
@@ -748,7 +744,7 @@ internal class MyDaoTest : AbstractDatabaseTest() {
         saksbehandlerRef: UUID,
         arbeidsgiverFagsystemId: String? = UUID.randomUUID().toString(),
         personFagsystemId: String? = UUID.randomUUID().toString()
-    ) = insertAndReturnGeneratedKey(
+    ) = insert(
         query = """
             INSERT INTO annullert_av_saksbehandler (
                 annullert_tidspunkt,
@@ -775,7 +771,7 @@ internal class MyDaoTest : AbstractDatabaseTest() {
             "arbeidsgiver_fagsystem_id" to arbeidsgiverFagsystemId,
             "person_fagsystem_id" to personFagsystemId
         )
-    )?.toInt()
+    )
 
     private fun lagFagsystemId() = (0..31).map { 'A' + Random().nextInt('Z' - 'A') }.joinToString("")
 
