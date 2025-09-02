@@ -86,10 +86,12 @@ class InMemoryDaos : Daos {
             TODO("Not yet implemented")
         }
 
-        override fun oppdaterAnnulleringMigreringStatus(annulleringer: List<Pair<Int, AnnulleringMigreringStatus>>) {
+        override fun oppdaterAnnulleringMigreringStatus(
+            annulleringId: Int,
+            migreringStatus: AnnulleringMigreringStatus
+        ): Int {
             TODO("Not yet implemented")
         }
-
     }
     override val annulleringRepository: AnnulleringRepository
         get() = TODO("Not yet implemented")

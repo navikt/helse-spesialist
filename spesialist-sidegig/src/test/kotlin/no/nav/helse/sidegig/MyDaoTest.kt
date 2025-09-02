@@ -521,9 +521,8 @@ internal class MyDaoTest : AbstractDatabaseTest() {
         val annullering = hentAnnullering(annulleringId)
         assertNull(annullering?.migreringStatus)
         pgAnnulleringDao.oppdaterAnnulleringMigreringStatus(
-            listOf(
-                annulleringId to AnnulleringMigreringStatus.MANGLER_VEDTAKSPERIODEID
-            )
+            annulleringId = annulleringId,
+            migreringStatus = AnnulleringMigreringStatus.MANGLER_VEDTAKSPERIODEID
         )
         val result = hentAnnullering(annulleringId)
         assertEquals(AnnulleringMigreringStatus.MANGLER_VEDTAKSPERIODEID, result?.migreringStatus)

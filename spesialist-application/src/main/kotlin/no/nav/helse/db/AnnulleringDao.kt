@@ -20,7 +20,10 @@ interface AnnulleringDao {
         vedtaksperiodeId: UUID,
     ): Int
 
-    fun oppdaterAnnulleringMigreringStatus(annulleringer: List<Pair<Int, AnnulleringMigreringStatus>>)
+    fun oppdaterAnnulleringMigreringStatus(
+        annulleringId: Int,
+        migreringStatus: AnnulleringMigreringStatus,
+    ): Int
 }
 
 data class BehandlingsperiodeRow(

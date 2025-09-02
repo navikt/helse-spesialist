@@ -153,22 +153,22 @@ class PgAnnulleringDao(
             ),
     )
 
-    override fun oppdaterAnnulleringMigreringStatus(annulleringer: List<Pair<Int, AnnulleringMigreringStatus>>) =
-        annulleringer.forEach { (annulleringId, migreringsstatus) ->
-            update(
-                query =
-                    """
-                    UPDATE annullert_av_saksbehandler
-                    SET migreringsstatus = :migreringsstatus
-                    WHERE id = :id
-                    """.trimIndent(),
-                paramMap =
-                    mapOf(
-                        "migreringsstatus" to migreringsstatus.name,
-                        "id" to annulleringId,
-                    ),
-            )
-        }
+    override fun oppdaterAnnulleringMigreringStatus(
+        annulleringId: Int,
+        migreringStatus: AnnulleringMigreringStatus,
+    ) = update(
+        query =
+            """
+            UPDATE annullert_av_saksbehandler
+            SET migreringsstatus = :migreringsstatus
+            WHERE id = :id
+            """.trimIndent(),
+        paramMap =
+            mapOf(
+                "migreringsstatus" to migreringStatus.name,
+                "id" to annulleringId,
+            ),
+    )
 
     private fun <T> query(
         @Language("PostgreSQL") query: String,
