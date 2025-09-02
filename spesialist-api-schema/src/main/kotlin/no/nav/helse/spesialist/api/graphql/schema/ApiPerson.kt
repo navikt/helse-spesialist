@@ -104,6 +104,8 @@ interface PersonSchema {
 
     fun arbeidsgivere(): List<ApiArbeidsgiver>
 
+    fun selvstendigNaering(): ApiSelvstendigNaering?
+
     fun infotrygdutbetalinger(): List<ApiInfotrygdutbetaling>?
 
     fun vilkarsgrunnlagV2(): List<ApiVilkårsgrunnlagV2>

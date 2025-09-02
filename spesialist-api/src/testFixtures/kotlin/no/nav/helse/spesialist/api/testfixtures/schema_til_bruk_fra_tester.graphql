@@ -602,6 +602,7 @@ type Person {
     fodselsnummer: String!
     infotrygdutbetalinger: [Infotrygdutbetaling!]
     personinfo: Personinfo!
+    selvstendigNaering: SelvstendigNaering
     tildeling: Tildeling
     tilleggsinfoForInntektskilder: [TilleggsinfoForInntektskilde!]!
     versjon: Int!
@@ -678,6 +679,11 @@ type Saksbehandler {
 type Sammenligningsgrunnlag {
     belop: Float!
     inntektFraAOrdningen: [InntektFraAOrdningen!]!
+}
+
+type SelvstendigNaering {
+    generasjoner: [Generasjon!]!
+    overstyringer: [Overstyring!]!
 }
 
 type Simulering {

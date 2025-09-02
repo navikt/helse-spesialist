@@ -26,6 +26,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiInntektoverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiMinimumSykdomsgradOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiPersoninfo
 import no.nav.helse.spesialist.api.graphql.schema.ApiSaksbehandler
+import no.nav.helse.spesialist.api.graphql.schema.ApiSelvstendigNaering
 import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettingstype
 import no.nav.helse.spesialist.api.graphql.schema.ApiSykepengegrunnlagskjonnsfastsetting
 import no.nav.helse.spesialist.api.graphql.schema.ApiTildeling
@@ -147,6 +148,45 @@ data class ApiPersonResolver(
                     ),
             )
         }
+    }
+
+    override fun selvstendigNaering(): ApiSelvstendigNaering? {
+        val overstyringer = overstyringApiDao.finnOverstyringer(snapshot.fodselsnummer)
+        val selvstendig =
+            snapshot.arbeidsgivere
+                .firstOrNull { it.organisasjonsnummer == "SELVSTENDIG" }
+                ?: return null
+
+        return ApiSelvstendigNaering(
+            resolver =
+                ApiSelvstendigNaeringResolver(
+                    generasjoner = selvstendig.generasjoner,
+                    fødselsnummer = snapshot.fodselsnummer,
+                    apiOppgaveService = apiOppgaveService,
+                    saksbehandlerMediator = saksbehandlerMediator,
+                    risikovurderinger = risikovurderinger,
+                    varselRepository = varselRepository,
+                    oppgaveApiDao = oppgaveApiDao,
+                    periodehistorikkApiDao = periodehistorikkApiDao,
+                    notatDao = notatDao,
+                    påVentApiDao = påVentApiDao,
+                    overstyringer =
+                        overstyringer
+                            .filter { it.relevantFor(selvstendig.organisasjonsnummer) }
+                            .map { overstyring ->
+                                when (overstyring) {
+                                    is OverstyringTidslinjeDto -> overstyring.tilDagoverstyring()
+                                    is OverstyringArbeidsforholdDto -> overstyring.tilArbeidsforholdoverstyring()
+                                    is OverstyringInntektDto -> overstyring.tilInntektoverstyring()
+                                    is SkjønnsfastsettingSykepengegrunnlagDto -> overstyring.tilSykepengegrunnlagSkjønnsfastsetting()
+                                    is OverstyringMinimumSykdomsgradDto -> overstyring.tilMinimumSykdomsgradOverstyring()
+                                }
+                            },
+                    vedtakBegrunnelseDao = vedtakBegrunnelseDao,
+                    sessionFactory = sessionFactory,
+                    featureToggles = featureToggles,
+                ),
+        )
     }
 
     private fun finnNavnForOrganisasjonsnummer(organisasjonsnummer: String): String =
