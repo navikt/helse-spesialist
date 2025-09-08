@@ -18,7 +18,6 @@ import no.nav.helse.db.api.VergemålApiDao
 import no.nav.helse.mediator.oppgave.OppgaveRepository
 
 interface Daos {
-    val annulleringDao: AnnulleringDao
     val annulleringRepository: AnnulleringRepository
     val behandlingsstatistikkDao: BehandlingsstatistikkDao
     val commandContextDao: CommandContextDao

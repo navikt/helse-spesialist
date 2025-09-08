@@ -1,11 +1,7 @@
 package no.nav.helse.spesialist.application
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.db.AnnulleringDao
-import no.nav.helse.db.AnnulleringMigreringStatus
 import no.nav.helse.db.AnnulleringRepository
-import no.nav.helse.db.AnnullertAvSaksbehandlerRow
-import no.nav.helse.db.BehandlingISykefraværstilfelleRow
 import no.nav.helse.db.BehandlingsstatistikkDao
 import no.nav.helse.db.CommandContextDao
 import no.nav.helse.db.Daos
@@ -59,40 +55,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 class InMemoryDaos : Daos {
-    override val annulleringDao: AnnulleringDao = object : AnnulleringDao {
-        override fun finnAnnulleringer(): List<AnnullertAvSaksbehandlerRow> {
-            TODO("Not yet implemented")
-        }
-
-        override fun finnUtbetalingId(
-            arbeidsgiverFagsystemId: String,
-            personFagsystemId: String
-        ): UUID? {
-            TODO("Not yet implemented")
-        }
-
-        override fun finnBehandlingISykefraværstilfelle(utbetalingId: UUID): BehandlingISykefraværstilfelleRow? {
-            TODO("Not yet implemented")
-        }
-
-        override fun finnFørsteVedtaksperiodeIdForEttSykefraværstilfelle(behandlingISykefraværstilfelleRow: BehandlingISykefraværstilfelleRow): UUID? {
-            TODO("Not yet implemented")
-        }
-
-        override fun oppdaterAnnulleringMedVedtaksperiodeId(
-            annulleringId: Int,
-            vedtaksperiodeId: UUID
-        ): Int {
-            TODO("Not yet implemented")
-        }
-
-        override fun oppdaterAnnulleringMigreringStatus(
-            annulleringId: Int,
-            migreringStatus: AnnulleringMigreringStatus
-        ): Int {
-            TODO("Not yet implemented")
-        }
-    }
     override val annulleringRepository: AnnulleringRepository
         get() = TODO("Not yet implemented")
     override val behandlingsstatistikkDao: BehandlingsstatistikkDao

@@ -5,9 +5,6 @@ import com.github.benmanes.caffeine.cache.CacheLoader
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.benmanes.caffeine.cache.LoadingCache
 import no.nav.helse.MeldingPubliserer
-import no.nav.helse.db.AnnulleringDao
-import no.nav.helse.db.AnnulleringMigreringStatus
-import no.nav.helse.db.AnnullertAvSaksbehandlerRow
 import no.nav.helse.db.CommandContextDao
 import no.nav.helse.db.DokumentDao
 import no.nav.helse.db.MeldingDao
@@ -39,7 +36,6 @@ class MeldingMediator(
     private val varselRepository: VarselRepository,
     private val poisonPillDao: PoisonPillDao,
     private val ignorerMeldingerForUkjentePersoner: Boolean,
-    private val annulleringDao: AnnulleringDao,
     poisonPillTimeToLive: Duration = Duration.ofMinutes(1),
 ) {
     private companion object {
@@ -382,69 +378,4 @@ class MeldingMediator(
             mediator.gjenopptaMelding(melding, commandContext, kontekstbasertPubliserer)
         }
     }
-
-    fun oppdaterAnnulleringerMedManglendeVedtaksperiodeId(id: String) =
-        withMDC(
-            mapOf("meldingId" to id),
-        ) {
-            logg.info("Setter i gang med oppdatering av annulleringer som mangler vedtaksperiodeId")
-
-            val annulleringer: List<AnnullertAvSaksbehandlerRow> =
-                annulleringDao
-                    .finnAnnulleringer()
-                    .also { logg.info("Hentet ${it.size} annulleringer ${it.map { annullering -> annullering.id }}") }
-            val annulleringerOppdatert =
-                annulleringer.mapNotNull { annullering ->
-                    annulleringDao
-                        .finnUtbetalingId(
-                            arbeidsgiverFagsystemId = annullering.arbeidsgiver_fagsystem_id,
-                            personFagsystemId = annullering.person_fagsystem_id,
-                        ).also { utbetalingId ->
-                            if (utbetalingId != null) {
-                                logg.info("Fant utbetalingid $utbetalingId for annullering ${annullering.id}")
-                            } else {
-                                logg.warn("Fant ingen utbetalingid for annullering ${annullering.id}")
-                                annulleringDao.oppdaterAnnulleringMigreringStatus(
-                                    annullering.id,
-                                    AnnulleringMigreringStatus.MANGLER_UTBETALINGID,
-                                )
-                            }
-                        }?.let { utbetalingId ->
-                            annulleringDao
-                                .finnBehandlingISykefraværstilfelle(utbetalingId)
-                                .also { behandling ->
-                                    if (behandling != null) {
-                                        logg.info("Fant behandling ${behandling.behandlingId} for utbetalingid $utbetalingId")
-                                    } else {
-                                        logg.warn("Fant ingen behandling for utbetalingid $utbetalingId")
-                                        annulleringDao.oppdaterAnnulleringMigreringStatus(
-                                            annullering.id,
-                                            AnnulleringMigreringStatus.MANGLER_BEHANDLINGID,
-                                        )
-                                    }
-                                }
-                        }?.let { behandling ->
-                            annulleringDao
-                                .finnFørsteVedtaksperiodeIdForEttSykefraværstilfelle(behandling)
-                                .also { vedtaksperiodeId ->
-                                    if (vedtaksperiodeId != null) {
-                                        logg.info("Fant vedtaksperiodeid $vedtaksperiodeId for behandling ${behandling.behandlingId}")
-                                    } else {
-                                        logg.warn("Fant ingen vedtaksperiodeid for behandling ${behandling.behandlingId}")
-                                        annulleringDao.oppdaterAnnulleringMigreringStatus(
-                                            annullering.id,
-                                            AnnulleringMigreringStatus.MANGLER_VEDTAKSPERIODEID,
-                                        )
-                                    }
-                                }
-                        }?.let { førsteVedtaksperiodeId ->
-                            logg.info("Oppdaterer annullering ${annullering.id} med vedtaksperiodeid $førsteVedtaksperiodeId")
-                            annulleringDao.oppdaterAnnulleringMedVedtaksperiodeId(
-                                annullering.id,
-                                førsteVedtaksperiodeId,
-                            )
-                        }
-                }
-            logg.info("Hentet ${annulleringer.size} annulleringer og oppdaterte ${annulleringerOppdatert.size} annulleringer med vedtaksperiodeId")
-        }
 }

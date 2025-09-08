@@ -118,7 +118,6 @@ class TestMediator(
             ),
             poisonPillDao = daos.poisonPillDao,
             ignorerMeldingerForUkjentePersoner = false,
-            annulleringDao = daos.annulleringDao,
         )
         RiverSetup(
             mediator = meldingMediator,
