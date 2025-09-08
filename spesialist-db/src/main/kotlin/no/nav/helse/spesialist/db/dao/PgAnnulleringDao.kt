@@ -16,7 +16,7 @@ import javax.sql.DataSource
 class PgAnnulleringDao(
     private val dataSource: DataSource,
 ) : AnnulleringDao {
-    override fun find10Annulleringer(): List<AnnullertAvSaksbehandlerRow> =
+    override fun finnAnnulleringer(): List<AnnullertAvSaksbehandlerRow> =
         listQuery(
             query =
                 """
@@ -26,7 +26,7 @@ class PgAnnulleringDao(
                   AND arbeidsgiver_fagsystem_id IS NOT NULL
                   AND person_fagsystem_id IS NOT NULL
                   AND migreringsstatus IS NULL 
-                LIMIT 10
+                LIMIT 100
                 """.trimIndent(),
         ) { row ->
             AnnullertAvSaksbehandlerRow(
@@ -36,7 +36,7 @@ class PgAnnulleringDao(
             )
         }
 
-    override fun findUtbetalingId(
+    override fun finnUtbetalingId(
         arbeidsgiverFagsystemId: String,
         personFagsystemId: String,
     ): UUID? =

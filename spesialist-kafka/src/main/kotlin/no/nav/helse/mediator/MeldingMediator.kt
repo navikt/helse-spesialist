@@ -391,12 +391,12 @@ class MeldingMediator(
 
             val annulleringer: List<AnnullertAvSaksbehandlerRow> =
                 annulleringDao
-                    .find10Annulleringer()
+                    .finnAnnulleringer()
                     .also { logg.info("Hentet ${it.size} annulleringer ${it.map { annullering -> annullering.id }}") }
             val annulleringerOppdatert =
                 annulleringer.mapNotNull { annullering ->
                     annulleringDao
-                        .findUtbetalingId(
+                        .finnUtbetalingId(
                             arbeidsgiverFagsystemId = annullering.arbeidsgiver_fagsystem_id,
                             personFagsystemId = annullering.person_fagsystem_id,
                         ).also { utbetalingId ->

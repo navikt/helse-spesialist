@@ -60,11 +60,11 @@ import java.util.UUID
 
 class InMemoryDaos : Daos {
     override val annulleringDao: AnnulleringDao = object : AnnulleringDao {
-        override fun find10Annulleringer(): List<AnnullertAvSaksbehandlerRow> {
+        override fun finnAnnulleringer(): List<AnnullertAvSaksbehandlerRow> {
             TODO("Not yet implemented")
         }
 
-        override fun findUtbetalingId(
+        override fun finnUtbetalingId(
             arbeidsgiverFagsystemId: String,
             personFagsystemId: String
         ): UUID? {

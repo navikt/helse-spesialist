@@ -12,7 +12,7 @@ class MinuttRiver(
 ) : SpesialistRiver {
     override fun preconditions(): River.PacketValidation =
         River.PacketValidation {
-            it.requireAny("@event_name", listOf("minutt_spout"))
+            it.requireAny("@event_name", listOf("minutt"))
         }
 
     override fun validations(): River.PacketValidation =

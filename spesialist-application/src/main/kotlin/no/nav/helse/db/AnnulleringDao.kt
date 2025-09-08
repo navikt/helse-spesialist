@@ -4,9 +4,9 @@ import java.time.LocalDate
 import java.util.UUID
 
 interface AnnulleringDao {
-    fun find10Annulleringer(): List<AnnullertAvSaksbehandlerRow>
+    fun finnAnnulleringer(): List<AnnullertAvSaksbehandlerRow>
 
-    fun findUtbetalingId(
+    fun finnUtbetalingId(
         arbeidsgiverFagsystemId: String,
         personFagsystemId: String,
     ): UUID?

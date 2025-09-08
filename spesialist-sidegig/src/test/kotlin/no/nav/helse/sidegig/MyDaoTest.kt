@@ -37,7 +37,7 @@ internal class MyDaoTest : AbstractDatabaseTest() {
                 personFagsystemId = null
             )
         }
-        val result = pgAnnulleringDao.find10Annulleringer()
+        val result = pgAnnulleringDao.finnAnnulleringer()
         assertEquals(5, result.size)
     }
 
@@ -58,7 +58,7 @@ internal class MyDaoTest : AbstractDatabaseTest() {
             arbeidsgiverIdentifikator = lagOrganisasjonsnummer()
         )
 
-        val result = pgAnnulleringDao.findUtbetalingId(
+        val result = pgAnnulleringDao.finnUtbetalingId(
             arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
             personFagsystemId = personFagsystemId
         )
