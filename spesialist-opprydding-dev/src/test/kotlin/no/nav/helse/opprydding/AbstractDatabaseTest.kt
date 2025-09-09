@@ -143,6 +143,8 @@ internal abstract class AbstractDatabaseTest {
         
         INSERT INTO annullert_av_saksbehandler(id, annullert_tidspunkt, saksbehandler_ref, vedtaksperiode_id)
         VALUES (${sequence_number}, now(), '${saksbehandler_oid}', '${vedtaksperiode_id}');
+        INSERT INTO ukoblede_annulleringer(id, annullert_tidspunkt, saksbehandler_ref)
+        VALUES (${sequence_number}, now(), '${saksbehandler_oid}');
         INSERT INTO oppdrag(id, fagsystem_id, mottaker)
         VALUES (${sequence_number}, 'EN_PERSON_FAGSYSTEMID', 'MOTTAKER');
         INSERT INTO oppdrag(id, fagsystem_id, mottaker)
@@ -218,7 +220,8 @@ internal abstract class AbstractDatabaseTest {
                 "risikovurdering_arbeidsuforhetvurdering",
                 "risikovurdering_faresignal",
                 "overstyringer_for_vedtaksperioder",
-                "tilkommen_inntekt_events"
+                "tilkommen_inntekt_events",
+                "ukoblede_annulleringer"
             ),
         )
         tabeller.forEach { tabellnavn ->
