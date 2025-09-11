@@ -70,7 +70,7 @@ type Annullering {
     personFagsystemId: String
     saksbehandlerIdent: String!
     tidspunkt: LocalDateTime!
-    vedtaksperiodeId: UUID
+    vedtaksperiodeId: UUID!
 }
 
 type Annulleringskandidat {

@@ -70,7 +70,7 @@ class PgAnnulleringRepository internal constructor(
                 tidspunkt = it.localDateTime("annullert_tidspunkt"),
                 arsaker = it.array<String>("årsaker").toList(),
                 begrunnelse = it.stringOrNull("tekst"),
-                vedtaksperiodeId = it.stringOrNull("vedtaksperiode_id")?.let(UUID::fromString),
+                vedtaksperiodeId = it.uuid("vedtaksperiode_id"),
             )
         }
 

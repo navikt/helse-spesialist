@@ -10,5 +10,5 @@ data class Annullering(
     val tidspunkt: LocalDateTime,
     val arsaker: List<String>,
     val begrunnelse: String?,
-    val vedtaksperiodeId: UUID?,
+    val vedtaksperiodeId: UUID,
 )
