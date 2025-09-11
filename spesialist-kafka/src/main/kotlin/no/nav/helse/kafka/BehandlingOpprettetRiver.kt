@@ -50,11 +50,6 @@ class BehandlingOpprettetRiver(
             behandlerIkke(organisasjonsnummer)
             return
         }
-        val yrkesaktivitetstype = Yrkesaktivitetstype.valueOf(packet["yrkesaktivitetstype"].asText())
-        if (yrkesaktivitetstype == Yrkesaktivitetstype.SELVSTENDIG) {
-            behandlerIkke(organisasjonsnummer)
-            return
-        }
         mediator.mottaMelding(
             BehandlingOpprettet(
                 id = packet["@id"].asUUID(),
@@ -64,7 +59,7 @@ class BehandlingOpprettetRiver(
                 spleisBehandlingId = packet["behandlingId"].asUUID(),
                 fom = packet["fom"].asLocalDate(),
                 tom = packet["tom"].asLocalDate(),
-                yrkesaktivitetstype = yrkesaktivitetstype,
+                yrkesaktivitetstype = Yrkesaktivitetstype.valueOf(packet["yrkesaktivitetstype"].asText()),
                 json = packet.toJson(),
             ),
             MessageContextMeldingPubliserer(context),

@@ -39,14 +39,6 @@ class SøknadSendtRiver(
         metadata: MessageMetadata,
         meterRegistry: MeterRegistry,
     ) {
-        if (packet["@event_name"].asText() == "sendt_søknad_selvstendig") {
-            logg.info(
-                "Mottok, men behandler ikke {} med {}",
-                keyValue("hendelse", packet["@event_name"].asText()),
-                keyValue("hendelseId", packet["@id"].asUUID()),
-            )
-            return
-        }
         logg.info(
             "Mottok {} med {}",
             keyValue("hendelse", packet["@event_name"].asText()),
