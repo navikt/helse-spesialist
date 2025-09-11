@@ -16,15 +16,15 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.path
 import io.ktor.serialization.jackson.JacksonConverter
-import no.nav.helse.Gruppekontroll
 import no.nav.helse.spesialist.application.AccessTokenGenerator
+import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-class MsGraphGruppekontroll(
+class MsGraphTilgangsgruppehenter(
     private val accessTokenGenerator: AccessTokenGenerator,
-) : Gruppekontroll {
-    private val logg = LoggerFactory.getLogger(MsGraphGruppekontroll::class.java)
+) : Tilgangsgruppehenter {
+    private val logg = LoggerFactory.getLogger(MsGraphTilgangsgruppehenter::class.java)
     private val graphUrl = "https://graph.microsoft.com/v1.0"
     private val httpClient: HttpClient =
         HttpClient(Apache) {
@@ -43,7 +43,7 @@ class MsGraphGruppekontroll(
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-    override suspend fun hentGrupper(
+    override suspend fun hentTilgangsgrupper(
         oid: UUID,
         gruppeIder: List<UUID>,
     ): Set<UUID> {

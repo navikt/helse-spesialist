@@ -1,12 +1,12 @@
 package no.nav.helse.spesialist.kafka
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
-import no.nav.helse.Gruppekontroll
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.spesialist.api.bootstrap.Gruppe
 import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
 import no.nav.helse.spesialist.application.InMemoryDaos
 import no.nav.helse.spesialist.application.InMemorySessionFactory
+import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
 import no.nav.helse.spesialist.kafka.testfixtures.KafkaModuleTestRapidTestFixture
 import java.util.UUID
 
@@ -37,8 +37,8 @@ class IntegrationTestFixture(
                 override fun fullRefusjonFlereArbeidsgivereForlengelse() = false
                 override fun fullRefusjonEnArbeidsgiver() = false
             },
-            gruppekontroll = object : Gruppekontroll {
-                override suspend fun hentGrupper(oid: UUID, gruppeIder: List<UUID>) = emptySet<UUID>()
+            tilgangsgruppehenter = object : Tilgangsgruppehenter {
+                override suspend fun hentTilgangsgrupper(oid: UUID, gruppeIder: List<UUID>) = emptySet<UUID>()
             },
         ).also(KafkaModule::kobleOppRivers)
     }

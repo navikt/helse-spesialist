@@ -16,5 +16,5 @@ class ClientEntraIDModule(
             privateJwk = configuration.privateJwk,
         )
 
-    val gruppekontroll = MsGraphGruppekontroll(accessTokenGenerator)
+    val gruppekontroll = MsGraphTilgangsgruppehenter(accessTokenGenerator)
 }

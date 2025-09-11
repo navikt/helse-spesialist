@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.application.tilgangskontroll
 
-import no.nav.helse.Gruppekontroll
 import no.nav.helse.db.Daos
 import no.nav.helse.mediator.TilgangskontrollørForReservasjon
 import no.nav.helse.modell.oppgave.Egenskap
@@ -10,7 +9,7 @@ import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 
 class NyTilgangskontroll(
     private val daos: Daos,
-    private val gruppekontroll: Gruppekontroll,
+    private val tilgangsgruppehenter: Tilgangsgruppehenter,
     private val tilgangsgrupper: Tilgangsgrupper,
 ) {
     fun harTilgangTilPerson(
@@ -29,7 +28,7 @@ class NyTilgangskontroll(
     ): Boolean {
         val tilgangskontroll =
             TilgangskontrollørForReservasjon(
-                gruppekontroll = gruppekontroll,
+                tilgangsgruppehenter = tilgangsgruppehenter,
                 tilgangsgrupper = tilgangsgrupper,
             )
         return tilgangskontroll.harTilgangTil(saksbehandler.id().value, egenskaper)

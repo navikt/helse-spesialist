@@ -1,7 +1,6 @@
 package no.nav.helse.spesialist.api
 
 import io.ktor.server.application.Application
-import no.nav.helse.Gruppekontroll
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.db.Daos
@@ -20,13 +19,14 @@ import no.nav.helse.spesialist.api.graphql.kobleOppApi
 import no.nav.helse.spesialist.api.graphql.lagSchemaMedResolversOgHandlers
 import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.application.Snapshothenter
+import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
 
 class ApiModule(
     private val configuration: Configuration,
     private val tilgangsgrupper: Tilgangsgrupper,
     daos: Daos,
     meldingPubliserer: MeldingPubliserer,
-    gruppekontroll: Gruppekontroll,
+    tilgangsgruppehenter: Tilgangsgruppehenter,
     sessionFactory: SessionFactory,
     versjonAvKode: String,
     environmentToggles: EnvironmentToggles,
@@ -47,7 +47,7 @@ class ApiModule(
             meldingPubliserer = meldingPubliserer,
             tilgangskontroll =
                 TilgangskontrollørForReservasjon(
-                    gruppekontroll,
+                    tilgangsgruppehenter,
                     tilgangsgrupper,
                 ),
             tilgangsgrupper = tilgangsgrupper,
@@ -87,7 +87,7 @@ class ApiModule(
                     sessionFactory = sessionFactory,
                     tilgangskontroll =
                         TilgangskontrollørForReservasjon(
-                            gruppekontroll,
+                            tilgangsgruppehenter,
                             tilgangsgrupper,
                         ),
                 ),

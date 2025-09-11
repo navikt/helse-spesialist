@@ -134,7 +134,7 @@ class RapidApp {
                 daos = dbModule.daos,
                 tilgangsgrupper = configuration.tilgangsgrupper,
                 stikkprøver = configuration.stikkprøver,
-                gruppekontroll = clientEntraIdModule.gruppekontroll,
+                tilgangsgruppehenter = clientEntraIdModule.gruppekontroll,
             )
 
         val apiModule =
@@ -143,7 +143,7 @@ class RapidApp {
                 daos = dbModule.daos,
                 tilgangsgrupper = configuration.tilgangsgrupper,
                 meldingPubliserer = kafkaModule.meldingPubliserer,
-                gruppekontroll = clientEntraIdModule.gruppekontroll,
+                tilgangsgruppehenter = clientEntraIdModule.gruppekontroll,
                 sessionFactory = dbModule.sessionFactory,
                 versjonAvKode = configuration.versjonAvKode,
                 environmentToggles = configuration.environmentToggles,

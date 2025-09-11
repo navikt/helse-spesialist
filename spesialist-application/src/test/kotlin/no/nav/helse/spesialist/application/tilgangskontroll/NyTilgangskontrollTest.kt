@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.application.tilgangskontroll
 
-import no.nav.helse.Gruppekontroll
 import no.nav.helse.db.PartialDaos
 import no.nav.helse.db.api.EgenAnsattApiDao
 import no.nav.helse.db.api.PartialPersonApiDao
@@ -321,8 +320,8 @@ class NyTilgangskontrollTest {
                 ) = personAdressebeskyttelseMap[fødselsnummer] == adressebeskyttelse
             }
         },
-        gruppekontroll = object : Gruppekontroll {
-            override suspend fun hentGrupper(oid: UUID, gruppeIder: List<UUID>) =
+        tilgangsgruppehenter = object : Tilgangsgruppehenter {
+            override suspend fun hentTilgangsgrupper(oid: UUID, gruppeIder: List<UUID>) =
                 saksbehandlerGruppeOppslagMap[oid].orEmpty()
         },
         tilgangsgrupper = tilgangsgrupper

@@ -1,7 +1,6 @@
 package no.nav.helse.spesialist.kafka
 
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
-import no.nav.helse.Gruppekontroll
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.Daos
 import no.nav.helse.db.SessionFactory
@@ -16,6 +15,7 @@ import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
+import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
 
 class KafkaModule(
     configuration: Configuration,
@@ -24,7 +24,7 @@ class KafkaModule(
     daos: Daos,
     tilgangsgrupper: Tilgangsgrupper,
     stikkprøver: Stikkprøver,
-    gruppekontroll: Gruppekontroll,
+    tilgangsgruppehenter: Tilgangsgruppehenter,
 ) {
     data class Configuration(
         val versjonAvKode: String,
@@ -51,7 +51,7 @@ class KafkaModule(
                                     meldingPubliserer = meldingPubliserer,
                                     tilgangskontroll =
                                         TilgangskontrollørForReservasjon(
-                                            gruppekontroll,
+                                            tilgangsgruppehenter,
                                             tilgangsgrupper,
                                         ),
                                     tilgangsgrupper = tilgangsgrupper,

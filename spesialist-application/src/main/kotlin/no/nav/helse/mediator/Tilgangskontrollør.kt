@@ -1,7 +1,6 @@
 package no.nav.helse.mediator
 
 import kotlinx.coroutines.runBlocking
-import no.nav.helse.Gruppekontroll
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Egenskap.BESLUTTER
 import no.nav.helse.modell.oppgave.Egenskap.EGEN_ANSATT
@@ -10,6 +9,7 @@ import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
+import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
 import java.util.UUID
 
 abstract class MicrosoftTilgangskontroll(
@@ -39,7 +39,7 @@ abstract class MicrosoftTilgangskontroll(
 }
 
 class TilgangskontrollørForReservasjon(
-    private val gruppekontroll: Gruppekontroll,
+    private val tilgangsgruppehenter: Tilgangsgruppehenter,
     tilgangsgrupper: Tilgangsgrupper,
 ) : MicrosoftTilgangskontroll(tilgangsgrupper) {
     override fun harTilgangTil(
@@ -47,7 +47,7 @@ class TilgangskontrollørForReservasjon(
         grupper: List<UUID>,
     ): Boolean =
         runBlocking {
-            gruppekontroll.hentGrupper(oid, grupper).containsAll(grupper)
+            tilgangsgruppehenter.hentTilgangsgrupper(oid, grupper).containsAll(grupper)
         }
 }
 
