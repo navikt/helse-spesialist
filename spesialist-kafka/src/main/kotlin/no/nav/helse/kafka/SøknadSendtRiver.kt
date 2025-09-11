@@ -39,7 +39,7 @@ class SøknadSendtRiver(
         metadata: MessageMetadata,
         meterRegistry: MeterRegistry,
     ) {
-        if (packet["@event_name"].asText() == "sendt_søknad_selvstendig" && !featureToggles.skalBehandleSelvstendig()) {
+        if (packet["@event_name"].asText() == "sendt_søknad_selvstendig") {
             logg.info(
                 "Mottok, men behandler ikke {} med {}",
                 keyValue("hendelse", packet["@event_name"].asText()),

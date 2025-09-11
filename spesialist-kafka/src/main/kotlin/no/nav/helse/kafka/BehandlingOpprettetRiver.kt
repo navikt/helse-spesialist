@@ -51,7 +51,7 @@ class BehandlingOpprettetRiver(
             return
         }
         val yrkesaktivitetstype = Yrkesaktivitetstype.valueOf(packet["yrkesaktivitetstype"].asText())
-        if (yrkesaktivitetstype == Yrkesaktivitetstype.SELVSTENDIG && !featureToggles.skalBehandleSelvstendig()) {
+        if (yrkesaktivitetstype == Yrkesaktivitetstype.SELVSTENDIG) {
             behandlerIkke(organisasjonsnummer)
             return
         }
