@@ -15,6 +15,8 @@ import no.nav.helse.db.PersonnavnFraDatabase
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.TildelingDao
+import no.nav.helse.db.api.EgenAnsattApiDao
+import no.nav.helse.db.api.PartialPersonApiDao
 import no.nav.helse.mediator.KommandokjedeEndretEvent
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.SubsumsjonEvent
@@ -30,7 +32,9 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavetype
 import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodetype
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.application.tilgangskontroll.Gruppe
+import no.nav.helse.spesialist.application.tilgangskontroll.NyTilgangskontroll
 import no.nav.helse.spesialist.application.tilgangskontroll.SpeilTilgangsgrupper
+import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
@@ -95,7 +99,6 @@ internal class ApiOppgaveServiceTest {
     private val apiOppgaveService =
         ApiOppgaveService(
             oppgaveDao = oppgaveDao,
-            tilgangsgrupper = SpeilTilgangsgrupper(testEnv),
             oppgaveService = OppgaveService(
                 oppgaveDao = oppgaveDao,
                 reservasjonDao = reservasjonDao,
@@ -103,6 +106,16 @@ internal class ApiOppgaveServiceTest {
                 tilgangskontroll = { _, _ -> false },
                 tilgangsgrupper = SpeilTilgangsgrupper(testEnv),
                 oppgaveRepository = oppgaveRepository
+            ),
+            nyTilgangskontroll = NyTilgangskontroll(
+                egenAnsattApiDao = object : EgenAnsattApiDao {
+                    override fun erEgenAnsatt(fødselsnummer: String) = false
+                },
+                personApiDao = object : PartialPersonApiDao {},
+                tilgangsgruppehenter = object: Tilgangsgruppehenter {
+                    override suspend fun hentTilgangsgrupper(oid: UUID, gruppeIder: List<UUID>): Set<UUID> = emptySet()
+                    override suspend fun hentTilgangsgrupper(oid: UUID): Set<Gruppe> = emptySet()
+                }
             )
         )
 

@@ -55,11 +55,18 @@ class ApiModule(
             oppgaveRepository = daos.oppgaveRepository,
         )
 
+    private val nyTilgangskontroll =
+        NyTilgangskontroll(
+            egenAnsattApiDao = daos.egenAnsattApiDao,
+            personApiDao = daos.personApiDao,
+            tilgangsgruppehenter = tilgangsgruppehenter,
+        )
+
     private val apiOppgaveService =
         ApiOppgaveService(
             oppgaveDao = daos.oppgaveDao,
-            tilgangsgrupper = tilgangsgrupper,
             oppgaveService = oppgaveService,
+            nyTilgangskontroll = nyTilgangskontroll,
         )
 
     private val stansAutomatiskBehandlinghåndterer =
@@ -92,10 +99,7 @@ class ApiModule(
                             tilgangsgrupper,
                         ),
                     nyTilgangskontroll =
-                        NyTilgangskontroll(
-                            daos = daos,
-                            tilgangsgruppehenter = tilgangsgruppehenter,
-                        ),
+                    nyTilgangskontroll,
                 ),
             stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
             personhåndterer = PersonhåndtererImpl(publiserer = meldingPubliserer),

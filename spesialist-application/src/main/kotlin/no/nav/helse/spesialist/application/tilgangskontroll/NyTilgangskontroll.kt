@@ -1,7 +1,8 @@
 package no.nav.helse.spesialist.application.tilgangskontroll
 
 import kotlinx.coroutines.runBlocking
-import no.nav.helse.db.Daos
+import no.nav.helse.db.api.EgenAnsattApiDao
+import no.nav.helse.db.api.PersonApiDao
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Egenskap.BESLUTTER
 import no.nav.helse.modell.oppgave.Egenskap.EGEN_ANSATT
@@ -12,13 +13,14 @@ import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 
 class NyTilgangskontroll(
-    private val daos: Daos,
+    private val egenAnsattApiDao: EgenAnsattApiDao,
+    private val personApiDao: PersonApiDao,
     private val tilgangsgruppehenter: Tilgangsgruppehenter,
 ) {
     fun harTilgangTilPerson(
         saksbehandlerTilganger: SaksbehandlerTilganger,
         fødselsnummer: String,
-    ): Boolean = !manglerTilgang(daos.egenAnsattApiDao, daos.personApiDao, fødselsnummer, saksbehandlerTilganger)
+    ): Boolean = !manglerTilgang(egenAnsattApiDao, personApiDao, fødselsnummer, saksbehandlerTilganger)
 
     fun harTilgangTilOppgave(
         saksbehandler: LegacySaksbehandler,

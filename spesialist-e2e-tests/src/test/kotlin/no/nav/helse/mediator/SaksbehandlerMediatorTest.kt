@@ -10,6 +10,8 @@ import kotliquery.sessionOf
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.TestRapidHelpers.hendelser
 import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
+import no.nav.helse.db.api.EgenAnsattApiDao
+import no.nav.helse.db.api.PartialPersonApiDao
 import no.nav.helse.e2e.AbstractDatabaseTest
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
@@ -437,8 +439,17 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         )
     private val apiOppgaveService = ApiOppgaveService(
         oppgaveDao = daos.oppgaveDao,
-        tilgangsgrupper = tilgangsgrupper,
-        oppgaveService = oppgaveService
+        oppgaveService = oppgaveService,
+        nyTilgangskontroll = NyTilgangskontroll(
+            egenAnsattApiDao = object : EgenAnsattApiDao {
+                override fun erEgenAnsatt(fødselsnummer: String) = false
+            },
+            personApiDao = object : PartialPersonApiDao {},
+            tilgangsgruppehenter = object : Tilgangsgruppehenter {
+                override suspend fun hentTilgangsgrupper(oid: UUID, gruppeIder: List<UUID>): Set<UUID> = emptySet()
+                override suspend fun hentTilgangsgrupper(oid: UUID): Set<Gruppe> = emptySet()
+            }
+        )
     )
 
     private val mediator =
@@ -455,7 +466,10 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             sessionFactory = TransactionalSessionFactory(dataSource),
             tilgangskontroll = { _, _ -> false },
             nyTilgangskontroll = NyTilgangskontroll(
-                daos = daos,
+                egenAnsattApiDao = object : EgenAnsattApiDao {
+                    override fun erEgenAnsatt(fødselsnummer: String) = false
+                },
+                personApiDao = object : PartialPersonApiDao {},
                 tilgangsgruppehenter = object : Tilgangsgruppehenter {
                     override suspend fun hentTilgangsgrupper(oid: UUID, gruppeIder: List<UUID>): Set<UUID> = emptySet()
                     override suspend fun hentTilgangsgrupper(oid: UUID): Set<Gruppe> = emptySet()

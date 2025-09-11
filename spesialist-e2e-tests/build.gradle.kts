@@ -18,6 +18,7 @@ dependencies {
     testImplementation(libs.mockOauth2Server)
     testImplementation(libs.wiremock)
 
+    testImplementation(testFixtures(project(":spesialist-application")))
     testImplementation(testFixtures(project(":spesialist-db")))
     testImplementation(testFixtures(project(":spesialist-api")))
     testImplementation(testFixtures(project(":spesialist-kafka")))

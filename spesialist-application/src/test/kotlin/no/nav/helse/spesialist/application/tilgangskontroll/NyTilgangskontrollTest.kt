@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.application.tilgangskontroll
 
-import no.nav.helse.db.PartialDaos
 import no.nav.helse.db.api.EgenAnsattApiDao
 import no.nav.helse.db.api.PartialPersonApiDao
 import no.nav.helse.modell.oppgave.Egenskap
@@ -305,17 +304,15 @@ class NyTilgangskontrollTest {
     private val saksbehandlerGruppeOppslagMap = mutableMapOf<UUID, Set<Gruppe>>()
 
     private val tilgangskontroll = NyTilgangskontroll(
-        daos = object : PartialDaos {
-            override val egenAnsattApiDao = object : EgenAnsattApiDao {
-                override fun erEgenAnsatt(fødselsnummer: String) =
-                    personErEgenAnsattMap[fødselsnummer]
-            }
-            override val personApiDao = object : PartialPersonApiDao {
-                override fun personHarAdressebeskyttelse(
-                    fødselsnummer: String,
-                    adressebeskyttelse: Adressebeskyttelse
-                ) = personAdressebeskyttelseMap[fødselsnummer] == adressebeskyttelse
-            }
+        egenAnsattApiDao = object : EgenAnsattApiDao {
+            override fun erEgenAnsatt(fødselsnummer: String) =
+                personErEgenAnsattMap[fødselsnummer]
+        },
+        personApiDao = object : PartialPersonApiDao {
+            override fun personHarAdressebeskyttelse(
+                fødselsnummer: String,
+                adressebeskyttelse: Adressebeskyttelse
+            ) = personAdressebeskyttelseMap[fødselsnummer] == adressebeskyttelse
         },
         tilgangsgruppehenter = object : Tilgangsgruppehenter {
             override suspend fun hentTilgangsgrupper(oid: UUID, gruppeIder: List<UUID>) =

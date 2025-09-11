@@ -2,6 +2,8 @@ package no.nav.helse
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.helse.bootstrap.EnvironmentToggles
+import no.nav.helse.db.api.EgenAnsattApiDao
+import no.nav.helse.db.api.PartialPersonApiDao
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.kafka.RiverSetup
 import no.nav.helse.mediator.GodkjenningMediator
@@ -60,8 +62,17 @@ class TestMediator(
         )
     private val apiOppgaveService = ApiOppgaveService(
         oppgaveDao = daos.oppgaveDao,
-        tilgangsgrupper = tilgangsgrupper,
-        oppgaveService = oppgaveService
+        oppgaveService = oppgaveService,
+        nyTilgangskontroll = NyTilgangskontroll(
+            egenAnsattApiDao = object : EgenAnsattApiDao {
+                override fun erEgenAnsatt(fødselsnummer: String) = false
+            },
+            personApiDao = object : PartialPersonApiDao {},
+            tilgangsgruppehenter = object: Tilgangsgruppehenter {
+                override suspend fun hentTilgangsgrupper(oid: UUID, gruppeIder: List<UUID>): Set<UUID> = emptySet()
+                override suspend fun hentTilgangsgrupper(oid: UUID): Set<Gruppe> = emptySet()
+            }
+        )
     )
 
     private val saksbehandlerMediator =
@@ -78,7 +89,10 @@ class TestMediator(
             sessionFactory = TransactionalSessionFactory(dataSource),
             tilgangskontroll = { _, _ -> false },
             nyTilgangskontroll = NyTilgangskontroll(
-                daos = daos,
+                egenAnsattApiDao = object : EgenAnsattApiDao {
+                    override fun erEgenAnsatt(fødselsnummer: String) = false
+                },
+                personApiDao = object : PartialPersonApiDao {},
                 tilgangsgruppehenter = object : Tilgangsgruppehenter {
                     override suspend fun hentTilgangsgrupper(oid: UUID, gruppeIder: List<UUID>): Set<UUID> = emptySet()
                     override suspend fun hentTilgangsgrupper(oid: UUID): Set<Gruppe> = emptySet()

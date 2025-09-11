@@ -13,6 +13,7 @@ dependencies {
     implementation(libs.bundles.logback)
     implementation(libs.micrometer.prometheus)
 
+    testImplementation(testFixtures(project(":spesialist-application")))
     testImplementation(testFixtures(project(":spesialist-domain")))
     testImplementation(libs.bundles.ktor.server.test)
     testImplementation(libs.bundles.ktor.client)

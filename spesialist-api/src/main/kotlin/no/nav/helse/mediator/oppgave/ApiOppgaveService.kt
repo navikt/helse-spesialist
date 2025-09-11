@@ -18,17 +18,17 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaverTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavesortering
 import no.nav.helse.spesialist.api.graphql.schema.ApiSorteringsnokkel
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
-import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
-import no.nav.helse.spesialist.application.tilgangskontroll.TilgangskontrollørForApi
+import no.nav.helse.spesialist.application.tilgangskontroll.NyTilgangskontroll
 import no.nav.helse.spesialist.domain.Saksbehandler
+import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 import java.time.LocalDate
 import java.util.UUID
 
 class ApiOppgaveService(
     private val oppgaveDao: OppgaveDao,
-    private val tilgangsgrupper: Tilgangsgrupper,
     private val oppgaveService: OppgaveService,
+    private val nyTilgangskontroll: NyTilgangskontroll,
 ) {
     fun oppgaver(
         saksbehandlerFraApi: SaksbehandlerFraApi,
@@ -41,7 +41,7 @@ class ApiOppgaveService(
         val egenskaperSaksbehandlerIkkeHarTilgangTil =
             Egenskap
                 .alleTilgangsstyrteEgenskaper
-                .filterNot { saksbehandler.harTilgangTil(listOf(it)) }
+                .filterNot { nyTilgangskontroll.harTilgangTilEgenskap(it, saksbehandlerFraApi.tilgangsgrupper) }
                 .map(Egenskap::toString)
 
         val alleUkategoriserteEgenskaper =
@@ -67,7 +67,7 @@ class ApiOppgaveService(
             oppgaveDao
                 .finnOppgaverForVisning(
                     ekskluderEgenskaper = egenskaperSomSkalEkskluderes,
-                    saksbehandlerOid = saksbehandler.oid(),
+                    saksbehandlerOid = saksbehandler.id().value,
                     offset = offset,
                     limit = limit,
                     sortering = sortering.tilOppgavesorteringForDatabase(),
@@ -88,11 +88,10 @@ class ApiOppgaveService(
         offset: Int,
         limit: Int,
     ): ApiOppgaverTilBehandling {
-        val saksbehandler = innloggetSaksbehandler.tilSaksbehandler()
         val egenskaperSaksbehandlerIkkeHarTilgangTil =
             Egenskap
                 .alleTilgangsstyrteEgenskaper
-                .filterNot { saksbehandler.harTilgangTil(listOf(it)) }
+                .filterNot { nyTilgangskontroll.harTilgangTilEgenskap(it, innloggetSaksbehandler.tilgangsgrupper) }
                 .map(Egenskap::toString)
 
         val oppgaver =
@@ -111,7 +110,7 @@ class ApiOppgaveService(
 
     fun antallOppgaver(saksbehandlerFraApi: SaksbehandlerFraApi): ApiAntallOppgaver {
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
-        val antallOppgaver = oppgaveDao.finnAntallOppgaver(saksbehandlerOid = saksbehandler.oid())
+        val antallOppgaver = oppgaveDao.finnAntallOppgaver(saksbehandlerOid = saksbehandler.id().value)
         return antallOppgaver.tilApiversjon()
     }
 
@@ -125,7 +124,7 @@ class ApiOppgaveService(
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
         val behandledeOppgaver =
             oppgaveDao.finnBehandledeOppgaver(
-                behandletAvOid = saksbehandler.oid(),
+                behandletAvOid = saksbehandler.id().value,
                 offset = offset,
                 limit = limit,
                 fom = fom,
@@ -151,12 +150,11 @@ class ApiOppgaveService(
     }
 
     private fun SaksbehandlerFraApi.tilSaksbehandler() =
-        LegacySaksbehandler(
-            epostadresse = epost,
-            oid = oid,
+        Saksbehandler(
+            id = SaksbehandlerOid(oid),
+            epost = epost,
             navn = navn,
             ident = ident,
-            tilgangskontroll = TilgangskontrollørForApi(grupper, this@ApiOppgaveService.tilgangsgrupper),
         )
 
     private fun List<ApiOppgavesortering>.tilOppgavesorteringForDatabase() =
