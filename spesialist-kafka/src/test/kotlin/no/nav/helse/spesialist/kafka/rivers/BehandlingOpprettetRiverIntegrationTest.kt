@@ -264,42 +264,8 @@ class BehandlingOpprettetRiverIntegrationTest {
     }
 
     @Test
-    fun `oppretter ikke ny vedtaksperiode for selvstendig næringsdrivende dersom feature toggle er av`() {
+    fun `oppretter ny vedtaksperiode for selvstendig næringsdrivende`() {
         // Given:
-        integrationTestFixture.featureToggles.skalBehandleSelvstendig = false
-        val fødselsnummer = lagFødselsnummer()
-        val vedtaksperiodeId = UUID.randomUUID()
-        val behandlingId = UUID.randomUUID()
-        val fom = LocalDate.parse("2024-10-01")
-        val tom = LocalDate.parse("2024-10-31")
-        initPerson(fødselsnummer = fødselsnummer, vedtaksperioder = emptyList())
-
-        // When:
-        testRapid.sendTestMessage(
-            behandlingOpprettetMelding(
-                fødselsnummer = fødselsnummer,
-                organisasjonsnummer = "SELVSTENDIG",
-                vedtaksperiodeId = vedtaksperiodeId,
-                behandlingId = behandlingId,
-                fom = fom,
-                tom = tom,
-                yrkesaktivitetstype = "SELVSTENDIG"
-            )
-        )
-
-        // Then:
-        personRepository.brukPersonHvisFinnes(fødselsnummer) {
-            assertEquals(emptyList<Vedtaksperiode>(), vedtaksperioder())
-        }
-
-        val meldinger = testRapid.publiserteMeldingerUtenGenererteFelter()
-        assertEquals(0, meldinger.size)
-    }
-
-    @Test
-    fun `oppretter ny vedtaksperiode for selvstendig næringsdrivende dersom feature toggle er på`() {
-        // Given:
-        integrationTestFixture.featureToggles.skalBehandleSelvstendig = true
         val fødselsnummer = lagFødselsnummer()
         val vedtaksperiodeId = UUID.randomUUID()
         val behandlingId = UUID.randomUUID()
