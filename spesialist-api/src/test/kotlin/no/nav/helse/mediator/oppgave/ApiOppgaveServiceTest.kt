@@ -31,6 +31,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodetype
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.application.tilgangskontroll.Gruppe
 import no.nav.helse.spesialist.application.tilgangskontroll.SpeilTilgangsgrupper
+import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.testfixtures.lagEpostadresseFraFulltNavn
@@ -49,9 +50,8 @@ import java.util.UUID
 import kotlin.random.Random
 
 internal class ApiOppgaveServiceTest {
-    private fun idForGruppe(gruppe: Gruppe) = SpeilTilgangsgrupper(testEnv).gruppeId(gruppe).toString()
     private val testEnv = Gruppe.__indreInnhold_kunForTest().values.associateWith { _ -> UUID.randomUUID().toString() }
-
+    private val tilgangsgrupper: Tilgangsgrupper = SpeilTilgangsgrupper(testEnv)
     private val SAKSBEHANDLERIDENT = lagSaksbehandlerident()
     private val SAKSBEHANDLEROID = UUID.randomUUID()
     private val SAKSBEHANDLERNAVN = lagSaksbehandlernavn()
@@ -106,8 +106,8 @@ internal class ApiOppgaveServiceTest {
             )
         )
 
-    private fun saksbehandlerFraApi(tilganger: List<UUID> = emptyList()) =
-        SaksbehandlerFraApi(SAKSBEHANDLEROID, SAKSBEHANDLEREPOST, SAKSBEHANDLERNAVN, SAKSBEHANDLERIDENT, tilganger)
+    private fun saksbehandlerFraApi(grupper: Set<Gruppe> = emptySet()) =
+        SaksbehandlerFraApi(SAKSBEHANDLEROID, SAKSBEHANDLEREPOST, SAKSBEHANDLERNAVN, SAKSBEHANDLERIDENT, tilgangsgrupper.tilUuider(grupper).toList(), grupper)
 
     @BeforeEach
     fun setup() {
@@ -293,11 +293,7 @@ internal class ApiOppgaveServiceTest {
                         påVent = true,
                     ),
                 )
-        val saksbehandler = saksbehandlerFraApi(tilganger = EnumSet.allOf(Gruppe::class.java).map {
-            UUID.fromString(
-                idForGruppe(it)
-            )
-        })
+        val saksbehandler = saksbehandlerFraApi(grupper = EnumSet.allOf(Gruppe::class.java))
         val oppgaver = apiOppgaveService.oppgaver(
             saksbehandler, 0,
             Int.MAX_VALUE, emptyList(),
@@ -351,11 +347,7 @@ internal class ApiOppgaveServiceTest {
                         egenskaper = egenskaper,
                     ),
                 )
-        val saksbehandler = saksbehandlerFraApi(tilganger = EnumSet.allOf(Gruppe::class.java).map {
-            UUID.fromString(
-                idForGruppe(it)
-            )
-        })
+        val saksbehandler = saksbehandlerFraApi(grupper = EnumSet.allOf(Gruppe::class.java))
         val oppgaver = apiOppgaveService.oppgaver(
             saksbehandler, 0,
             Int.MAX_VALUE, emptyList(),
@@ -400,11 +392,7 @@ internal class ApiOppgaveServiceTest {
                         egenskaper = egenskaper,
                     ),
                 )
-        val saksbehandler = saksbehandlerFraApi(tilganger = EnumSet.allOf(Gruppe::class.java).map {
-            UUID.fromString(
-                idForGruppe(it)
-            )
-        })
+        val saksbehandler = saksbehandlerFraApi(grupper = EnumSet.allOf(Gruppe::class.java))
         val oppgaver = apiOppgaveService.oppgaver(
             saksbehandler, 0,
             Int.MAX_VALUE, emptyList(),
@@ -449,11 +437,7 @@ internal class ApiOppgaveServiceTest {
                         egenskaper = egenskaper,
                     ),
                 )
-        val saksbehandler = saksbehandlerFraApi(tilganger = EnumSet.allOf(Gruppe::class.java).map {
-            UUID.fromString(
-                idForGruppe(it)
-            )
-        })
+        val saksbehandler = saksbehandlerFraApi(grupper = EnumSet.allOf(Gruppe::class.java))
         val oppgaver = apiOppgaveService.oppgaver(
             saksbehandler, 0,
             Int.MAX_VALUE, emptyList(),
@@ -495,11 +479,7 @@ internal class ApiOppgaveServiceTest {
                         egenskaper = egenskaper,
                     ),
                 )
-        val saksbehandler = saksbehandlerFraApi(tilganger = EnumSet.allOf(Gruppe::class.java).map {
-            UUID.fromString(
-                idForGruppe(it)
-            )
-        })
+        val saksbehandler = saksbehandlerFraApi(grupper = EnumSet.allOf(Gruppe::class.java))
         val oppgaver = apiOppgaveService.oppgaver(
             saksbehandler, 0,
             Int.MAX_VALUE, emptyList(),

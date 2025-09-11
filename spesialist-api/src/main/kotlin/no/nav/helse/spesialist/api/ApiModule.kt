@@ -17,6 +17,7 @@ import no.nav.helse.spesialist.api.graphql.kobleOppApi
 import no.nav.helse.spesialist.api.graphql.lagSchemaMedResolversOgHandlers
 import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.application.Snapshothenter
+import no.nav.helse.spesialist.application.tilgangskontroll.NyTilgangskontroll
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangskontrollørForReservasjon
@@ -89,6 +90,11 @@ class ApiModule(
                         TilgangskontrollørForReservasjon(
                             tilgangsgruppehenter,
                             tilgangsgrupper,
+                        ),
+                    nyTilgangskontroll =
+                        NyTilgangskontroll(
+                            daos = daos,
+                            tilgangsgruppehenter = tilgangsgruppehenter,
                         ),
                 ),
             stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,

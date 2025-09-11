@@ -104,6 +104,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
             epost = SAKSBEHANDLER_EPOST,
             ident = SAKSBEHANDLER_IDENT,
             grupper = emptyList(),
+            tilgangsgrupper = emptySet()
         )
     private val enhetsnummerOslo = "0301"
 

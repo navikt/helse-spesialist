@@ -39,6 +39,8 @@ interface Tilgangsgrupper {
 
     fun alleUuider(): Set<UUID> = gruppeUuidMap().values.toSet()
 
+    fun tilUuider(grupper: Set<Gruppe>) = gruppeUuidMap().filter { it.key in grupper }.values.toSet()
+
     fun tilGrupper(uuider: Set<UUID>) = gruppeUuidMap().filter { it.value in uuider }.keys
 }
 

@@ -51,7 +51,10 @@ import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.ApiOpphevStans
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
+import no.nav.helse.spesialist.application.tilgangskontroll.Gruppe
+import no.nav.helse.spesialist.application.tilgangskontroll.NyTilgangskontroll
 import no.nav.helse.spesialist.application.tilgangskontroll.SpeilTilgangsgrupper
+import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
 import no.nav.helse.spesialist.db.DBDaos
 import no.nav.helse.spesialist.db.DBSessionContext
 import no.nav.helse.spesialist.db.DbQuery
@@ -451,6 +454,13 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             environmentToggles = environmentToggles,
             sessionFactory = TransactionalSessionFactory(dataSource),
             tilgangskontroll = { _, _ -> false },
+            nyTilgangskontroll = NyTilgangskontroll(
+                daos = daos,
+                tilgangsgruppehenter = object : Tilgangsgruppehenter {
+                    override suspend fun hentTilgangsgrupper(oid: UUID, gruppeIder: List<UUID>): Set<UUID> = emptySet()
+                    override suspend fun hentTilgangsgrupper(oid: UUID): Set<Gruppe> = emptySet()
+                }
+            )
         )
 
     private val AKTØR_ID = lagAktørId()
@@ -461,13 +471,15 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
 
     private val saksbehandler = saksbehandler()
 
-    private fun saksbehandler(
-        oid: UUID = SAKSBEHANDLER_OID,
-        navn: String = SAKSBEHANDLER_NAVN,
-        epost: String = SAKSBEHANDLER_EPOST,
-        ident: String = SAKSBEHANDLER_IDENT,
-        grupper: List<UUID> = emptyList(),
-    ): SaksbehandlerFraApi = SaksbehandlerFraApi(oid, navn, epost, ident, grupper)
+    private fun saksbehandler(oid: UUID = SAKSBEHANDLER_OID): SaksbehandlerFraApi =
+        SaksbehandlerFraApi(
+            oid = oid,
+            navn = SAKSBEHANDLER_NAVN,
+            epost = SAKSBEHANDLER_EPOST,
+            ident = SAKSBEHANDLER_IDENT,
+            grupper = emptyList(),
+            tilgangsgrupper = emptySet()
+        )
 
     @BeforeEach
     fun beforeEach() {
@@ -497,7 +509,8 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             SAKSBEHANDLER_NAVN,
             SAKSBEHANDLER_EPOST,
             SAKSBEHANDLER_IDENT,
-            emptyList()
+            emptyList(),
+            emptySet(),
         )
         sessionFactory.transactionalSessionScope { session ->
             session.personRepository.brukPersonHvisFinnes(fødselsnummer = fødselsnummer) {
@@ -541,7 +554,8 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             SAKSBEHANDLER_NAVN,
             SAKSBEHANDLER_EPOST,
             SAKSBEHANDLER_IDENT,
-            emptyList()
+            emptyList(),
+            emptySet(),
         )
         sessionFactory.transactionalSessionScope { session ->
             session.personRepository.brukPersonHvisFinnes(fødselsnummer = fødselsnummer) {
@@ -586,7 +600,8 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             SAKSBEHANDLER_NAVN,
             SAKSBEHANDLER_EPOST,
             SAKSBEHANDLER_IDENT,
-            emptyList()
+            emptyList(),
+            emptySet(),
         )
         val overstyring =
             ApiTidslinjeOverstyring(
@@ -637,7 +652,8 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             SAKSBEHANDLER_NAVN,
             SAKSBEHANDLER_EPOST,
             SAKSBEHANDLER_IDENT,
-            emptyList()
+            emptyList(),
+            emptySet(),
         )
         val overstyring =
             ApiTidslinjeOverstyring(
@@ -688,7 +704,8 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             SAKSBEHANDLER_NAVN,
             SAKSBEHANDLER_EPOST,
             SAKSBEHANDLER_IDENT,
-            emptyList()
+            emptyList(),
+            emptySet(),
         )
         sessionFactory.transactionalSessionScope { session ->
             session.personRepository.brukPersonHvisFinnes(fødselsnummer = fødselsnummer) {
@@ -717,7 +734,8 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             lagSaksbehandlernavn(),
             lagTilfeldigSaksbehandlerepost(),
             lagSaksbehandlerident(),
-            emptyList()
+            emptyList(),
+            emptySet(),
         )
         opprettSaksbehandler(beslutter.oid, beslutter.navn, beslutter.epost, beslutter.ident)
         val resultRetur = mediator.sendIRetur(oppgaveId, beslutter, "begrunnelse")
@@ -752,7 +770,8 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             SAKSBEHANDLER_NAVN,
             SAKSBEHANDLER_EPOST,
             SAKSBEHANDLER_IDENT,
-            emptyList()
+            emptyList(),
+            emptySet(),
         )
         val definisjonRef = opprettVarseldefinisjon()
         nyttVarsel(
@@ -800,7 +819,8 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             SAKSBEHANDLER_NAVN,
             SAKSBEHANDLER_EPOST,
             SAKSBEHANDLER_IDENT,
-            emptyList()
+            emptyList(),
+            emptySet(),
         )
         sessionFactory.transactionalSessionScope { session ->
             session.personRepository.brukPersonHvisFinnes(fødselsnummer = fødselsnummer) {
@@ -1100,7 +1120,8 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             SAKSBEHANDLER_NAVN,
             SAKSBEHANDLER_EPOST,
             SAKSBEHANDLER_IDENT,
-            emptyList()
+            emptyList(),
+            emptySet(),
         )
         sessionFactory.transactionalSessionScope { session ->
             session.personRepository.brukPersonHvisFinnes(fødselsnummer = fødselsnummer) {

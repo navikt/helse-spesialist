@@ -80,12 +80,7 @@ fun kobleOppApi(
             }
             server {
                 requestParser = KtorGraphQLRequestParser(objectMapper)
-                contextFactory =
-                    ContextFactory(
-                        kode7Saksbehandlergruppe = tilgangsgrupper.kode7GruppeId,
-                        skjermedePersonerSaksbehandlergruppe = tilgangsgrupper.skjermedePersonerGruppeId,
-                        beslutterSaksbehandlergruppe = tilgangsgrupper.beslutterGruppeId,
-                    )
+                contextFactory = ContextFactory(tilgangsgrupper = tilgangsgrupper)
             }
             schema(spesialistSchema::setup)
         }

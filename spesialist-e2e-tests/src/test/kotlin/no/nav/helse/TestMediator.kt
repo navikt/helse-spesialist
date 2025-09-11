@@ -16,10 +16,14 @@ import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingh√
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
+import no.nav.helse.spesialist.application.tilgangskontroll.Gruppe
+import no.nav.helse.spesialist.application.tilgangskontroll.NyTilgangskontroll
 import no.nav.helse.spesialist.application.tilgangskontroll.SpeilTilgangsgrupper
+import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
 import no.nav.helse.spesialist.db.DBDaos
 import no.nav.helse.spesialist.db.TransactionalSessionFactory
 import no.nav.helse.util.testEnv
+import java.util.UUID
 import javax.sql.DataSource
 
 class TestMediator(
@@ -73,6 +77,13 @@ class TestMediator(
             environmentToggles = environmentToggles,
             sessionFactory = TransactionalSessionFactory(dataSource),
             tilgangskontroll = { _, _ -> false },
+            nyTilgangskontroll = NyTilgangskontroll(
+                daos = daos,
+                tilgangsgruppehenter = object : Tilgangsgruppehenter {
+                    override suspend fun hentTilgangsgrupper(oid: UUID, gruppeIder: List<UUID>): Set<UUID> = emptySet()
+                    override suspend fun hentTilgangsgrupper(oid: UUID): Set<Gruppe> = emptySet()
+                }
+            )
         )
 
     private val stikkpr√∏ver =

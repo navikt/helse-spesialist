@@ -88,6 +88,8 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.application.logg.sikkerlogg
+import no.nav.helse.spesialist.application.tilgangskontroll.Gruppe
+import no.nav.helse.spesialist.application.tilgangskontroll.NyTilgangskontroll
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangskontrollørForApi
 import no.nav.helse.spesialist.domain.Saksbehandler
@@ -113,6 +115,7 @@ class SaksbehandlerMediator(
     private val environmentToggles: EnvironmentToggles,
     private val sessionFactory: SessionFactory,
     private val tilgangskontroll: Tilgangskontroll,
+    private val nyTilgangskontroll: NyTilgangskontroll,
 ) {
     private val behandlingRepository = daos.behandlingApiRepository
     private val varselRepository = daos.varselApiRepository
@@ -171,8 +174,7 @@ class SaksbehandlerMediator(
         begrunnelse: String?,
     ): VedtakResultat =
         sessionFactory.transactionalSessionScope { sessionContext ->
-            val legacySaksbehandler =
-                saksbehandlerFraApi.tilSaksbehandler().tilLegacySaksbehandler(saksbehandlerFraApi.grupper)
+            val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
             val spleisBehandlingId = apiOppgaveService.spleisBehandlingId(oppgavereferanse)
             val fødselsnummer = oppgaveApiDao.finnFødselsnummer(oppgavereferanse)
             if (!apiOppgaveService.venterPåSaksbehandler(oppgavereferanse)) {
@@ -180,14 +182,15 @@ class SaksbehandlerMediator(
             } else {
                 håndterTotrinnsvurderingBeslutning(
                     fødselsnummer = fødselsnummer,
-                    legacySaksbehandler = legacySaksbehandler,
+                    saksbehandler = saksbehandler,
+                    tilgangsgrupper = saksbehandlerFraApi.tilgangsgrupper,
                     totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository,
-                ) ?: håndterGodkjenning(oppgavereferanse, fødselsnummer, spleisBehandlingId, legacySaksbehandler).also {
+                ) ?: håndterGodkjenning(oppgavereferanse, fødselsnummer, spleisBehandlingId, saksbehandler).also {
                     håndterVedtakBegrunnelse(
                         utfall = hentUtfallFraBehandling(spleisBehandlingId, sessionContext),
                         begrunnelse = begrunnelse,
                         oppgaveId = oppgavereferanse,
-                        saksbehandlerOid = legacySaksbehandler.oid(),
+                        saksbehandlerOid = saksbehandler.id().value,
                     )
                 }
             }
@@ -208,8 +211,7 @@ class SaksbehandlerMediator(
         oppgavereferanse: Long,
     ): VedtakResultat =
         sessionFactory.transactionalSessionScope { sessionContext ->
-            val legacySaksbehandler =
-                saksbehandlerFraApi.tilSaksbehandler().tilLegacySaksbehandler(saksbehandlerFraApi.grupper)
+            val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
             val spleisBehandlingId = apiOppgaveService.spleisBehandlingId(oppgavereferanse)
             val fødselsnummer = oppgaveApiDao.finnFødselsnummer(oppgavereferanse)
             if (!apiOppgaveService.venterPåSaksbehandler(oppgavereferanse)) {
@@ -217,9 +219,10 @@ class SaksbehandlerMediator(
             } else {
                 håndterTotrinnsvurderingBeslutning(
                     fødselsnummer = fødselsnummer,
-                    legacySaksbehandler = legacySaksbehandler,
+                    saksbehandler = saksbehandler,
+                    tilgangsgrupper = saksbehandlerFraApi.tilgangsgrupper,
                     totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository,
-                ) ?: håndterAvvisning(oppgavereferanse, fødselsnummer, spleisBehandlingId, legacySaksbehandler)
+                ) ?: håndterAvvisning(oppgavereferanse, fødselsnummer, spleisBehandlingId, saksbehandler)
             }
         }
 
@@ -227,13 +230,13 @@ class SaksbehandlerMediator(
         oppgavereferanse: Long,
         fødselsnummer: String,
         spleisBehandlingId: UUID,
-        legacySaksbehandler: LegacySaksbehandler,
+        saksbehandler: Saksbehandler,
     ): VedtakResultat.Ok {
         val periodeTilGodkjenning = behandlingRepository.periodeTilGodkjenning(oppgavereferanse)
         periodeTilGodkjenning.avvisVarsler(
             fødselsnummer = fødselsnummer,
             behandlingId = spleisBehandlingId,
-            ident = legacySaksbehandler.ident(),
+            ident = saksbehandler.ident,
             godkjenner = this::vurderVarsel,
         )
 
@@ -245,20 +248,20 @@ class SaksbehandlerMediator(
         oppgavereferanse: Long,
         fødselsnummer: String,
         spleisBehandlingId: UUID,
-        legacySaksbehandler: LegacySaksbehandler,
+        saksbehandler: Saksbehandler,
     ): VedtakResultat {
         val perioderTilBehandling = behandlingRepository.perioderTilBehandling(oppgavereferanse)
         val periodeTilGodkjenning = behandlingRepository.periodeTilGodkjenning(oppgavereferanse)
         return when {
             perioderTilBehandling.harAktiveVarsler() -> VedtakResultat.Feil.HarAktiveVarsler(oppgavereferanse)
             periodeTilGodkjenning.overlapperMedInfotrygd() ->
-                VedtakResultat.Feil.OverlapperMedInfotrygd(legacySaksbehandler.ident())
+                VedtakResultat.Feil.OverlapperMedInfotrygd(saksbehandler.ident)
 
             else -> {
                 perioderTilBehandling.godkjennVarsler(
                     fødselsnummer = fødselsnummer,
                     behandlingId = spleisBehandlingId,
-                    ident = legacySaksbehandler.ident(),
+                    ident = saksbehandler.ident,
                     godkjenner = this::vurderVarsel,
                 )
 
@@ -270,18 +273,19 @@ class SaksbehandlerMediator(
 
     private fun håndterTotrinnsvurderingBeslutning(
         fødselsnummer: String,
-        legacySaksbehandler: LegacySaksbehandler,
+        saksbehandler: Saksbehandler,
+        tilgangsgrupper: Set<Gruppe>,
         totrinnsvurderingRepository: TotrinnsvurderingRepository,
     ): VedtakResultat.Feil.BeslutterFeil? {
         val totrinnsvurdering = totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)
         val feil =
             if (totrinnsvurdering?.tilstand == AVVENTER_BESLUTTER) {
-                if (!legacySaksbehandler.harTilgangTil(listOf(Egenskap.BESLUTTER)) && !environmentToggles.kanGodkjenneUtenBesluttertilgang) {
+                if (!nyTilgangskontroll.harTilgangTilEgenskap(Egenskap.BESLUTTER, tilgangsgrupper) && !environmentToggles.kanGodkjenneUtenBesluttertilgang) {
                     VedtakResultat.Feil.BeslutterFeil.TrengerBeslutterRolle()
-                } else if (totrinnsvurdering.saksbehandler?.value == legacySaksbehandler.oid && !environmentToggles.kanBeslutteEgneSaker) {
+                } else if (totrinnsvurdering.saksbehandler?.value == saksbehandler.id().value && !environmentToggles.kanBeslutteEgneSaker) {
                     VedtakResultat.Feil.BeslutterFeil.KanIkkeBeslutteEgenOppgave()
                 } else {
-                    totrinnsvurdering.settBeslutter(SaksbehandlerOid(legacySaksbehandler.oid))
+                    totrinnsvurdering.settBeslutter(saksbehandler.id())
                     totrinnsvurderingRepository.lagre(totrinnsvurdering)
                     null
                 }

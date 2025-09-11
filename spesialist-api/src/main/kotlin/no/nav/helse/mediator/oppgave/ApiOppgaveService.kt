@@ -156,7 +156,7 @@ class ApiOppgaveService(
             oid = oid,
             navn = navn,
             ident = ident,
-            tilgangskontroll = TilgangskontrollørForApi(grupper, tilgangsgrupper),
+            tilgangskontroll = TilgangskontrollørForApi(grupper, this@ApiOppgaveService.tilgangsgrupper),
         )
 
     private fun List<ApiOppgavesortering>.tilOppgavesorteringForDatabase() =

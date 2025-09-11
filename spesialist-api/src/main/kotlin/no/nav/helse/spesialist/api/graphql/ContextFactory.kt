@@ -11,6 +11,7 @@ import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGER
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.application.tilgangskontroll.SaksbehandlerTilganger
+import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -23,9 +24,7 @@ enum class ContextValues {
 }
 
 class ContextFactory(
-    private val kode7Saksbehandlergruppe: UUID,
-    private val skjermedePersonerSaksbehandlergruppe: UUID,
-    private val beslutterSaksbehandlergruppe: UUID,
+    private val tilgangsgrupper: Tilgangsgrupper,
 ) : KtorGraphQLContextFactory() {
     override suspend fun generateContext(request: ApplicationRequest): GraphQLContext {
         val principal =
@@ -37,11 +36,11 @@ class ContextFactory(
             TILGANGER to
                 SaksbehandlerTilganger(
                     gruppetilganger = principal.getGrupper(),
-                    kode7Saksbehandlergruppe = kode7Saksbehandlergruppe,
-                    beslutterSaksbehandlergruppe = beslutterSaksbehandlergruppe,
-                    skjermedePersonerSaksbehandlergruppe = skjermedePersonerSaksbehandlergruppe,
+                    kode7Saksbehandlergruppe = tilgangsgrupper.kode7GruppeId,
+                    beslutterSaksbehandlergruppe = tilgangsgrupper.beslutterGruppeId,
+                    skjermedePersonerSaksbehandlergruppe = tilgangsgrupper.skjermedePersonerGruppeId,
                 ),
-            SAKSBEHANDLER to SaksbehandlerFraApi.fraOnBehalfOfToken(principal),
+            SAKSBEHANDLER to SaksbehandlerFraApi.fraOnBehalfOfToken(principal, tilgangsgrupper),
         ).toGraphQLContext()
     }
 }

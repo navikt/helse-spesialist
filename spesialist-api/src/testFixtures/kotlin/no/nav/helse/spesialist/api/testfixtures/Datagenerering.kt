@@ -18,6 +18,7 @@ fun lagSaksbehandlerFraApi(
         navn = saksbehandlernavn,
         epost = epostadresse,
         ident = ident,
-        grupper = grupper
+        grupper = grupper,
+        tilgangsgrupper = emptySet()
     )
 }
