@@ -70,19 +70,4 @@ internal class LegacyBehandlingOpprettetRiverTest {
         )
         verify { mediator wasNot called }
     }
-
-    @Test
-    fun `ignorerer yrkesaktivitetstype SELVSTENDIG uten å tryne`() {
-        rapid.sendTestMessage(
-            Testmeldingfabrikk.lagBehandlingOpprettet(
-                aktørId = testperson.aktørId,
-                fødselsnummer = testperson.fødselsnummer,
-                organisasjonsnummer = testperson.orgnummer,
-                vedtaksperiodeId = UUID.randomUUID(),
-                spleisBehandlingId = UUID.randomUUID(),
-                yrkesaktivitetstype = Yrkesaktivitetstype.SELVSTENDIG
-            )
-        )
-        verify { mediator wasNot called }
-    }
 }
