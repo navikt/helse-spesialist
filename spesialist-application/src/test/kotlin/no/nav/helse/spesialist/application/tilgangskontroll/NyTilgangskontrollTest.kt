@@ -5,12 +5,13 @@ import no.nav.helse.db.PartialDaos
 import no.nav.helse.db.api.EgenAnsattApiDao
 import no.nav.helse.db.api.PartialPersonApiDao
 import no.nav.helse.mediator.TilgangskontrollørForApi
-import no.nav.helse.mediator.TilgangskontrollørForReservasjon
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.spesialist.api.bootstrap.Gruppe
 import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
+import no.nav.helse.spesialist.domain.Saksbehandler
+import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 import no.nav.helse.spesialist.domain.testfixtures.lagEpostadresseFraFulltNavn
 import no.nav.helse.spesialist.domain.testfixtures.lagEtternavn
@@ -27,16 +28,18 @@ import java.util.stream.Stream
 
 class NyTilgangskontrollTest {
 
+    private val fødselsnummer = lagFødselsnummer()
+
     @ParameterizedTest(name = "egenAnsatt={0}, adressebeskyttelse={1}")
     @MethodSource("personKombinasjonerIngenHarTilgangTil")
     fun `saksbehandler har ikke tilgang til person selv med alle tilganger`(
         egenAnsatt: Boolean?,
         adressebeskyttelse: Adressebeskyttelse?,
     ) {
-        initPersonEgenAnsatt(egenAnsatt)
-        initPersonAdressebeskyttelse(adressebeskyttelse)
+        personErEgenAnsattMap[fødselsnummer] = egenAnsatt
+        personAdressebeskyttelseMap[fødselsnummer] = adressebeskyttelse
 
-        assertFalse(harTilgangTilPersonGittGrupper(SaksbehandlerGruppe.entries))
+        assertFalse(harTilgangTilPersonGittGrupper(fødselsnummer, SaksbehandlerGruppe.entries))
     }
 
     @ParameterizedTest(name = "egenAnsatt={0}, adressebeskyttelse={1}, grupper={2}")
@@ -46,10 +49,10 @@ class NyTilgangskontrollTest {
         adressebeskyttelse: Adressebeskyttelse,
         grupper: List<SaksbehandlerGruppe>
     ) {
-        initPersonEgenAnsatt(egenAnsatt)
-        initPersonAdressebeskyttelse(adressebeskyttelse)
+        personErEgenAnsattMap[fødselsnummer] = egenAnsatt
+        personAdressebeskyttelseMap[fødselsnummer] = adressebeskyttelse
 
-        assertTrue(harTilgangTilPersonGittGrupper(grupper))
+        assertTrue(harTilgangTilPersonGittGrupper(fødselsnummer, grupper))
     }
 
     @ParameterizedTest(name = "egenAnsatt={0}, adressebeskyttelse={1}, grupper={2}")
@@ -59,10 +62,10 @@ class NyTilgangskontrollTest {
         adressebeskyttelse: Adressebeskyttelse,
         grupper: List<SaksbehandlerGruppe>
     ) {
-        initPersonEgenAnsatt(egenAnsatt)
-        initPersonAdressebeskyttelse(adressebeskyttelse)
+        personErEgenAnsattMap[fødselsnummer] = egenAnsatt
+        personAdressebeskyttelseMap[fødselsnummer] = adressebeskyttelse
 
-        assertFalse(harTilgangTilPersonGittGrupper(grupper))
+        assertFalse(harTilgangTilPersonGittGrupper(fødselsnummer, grupper))
     }
 
     @ParameterizedTest(name = "egenskaper={0}")
@@ -79,9 +82,7 @@ class NyTilgangskontrollTest {
         egenskaper: List<Egenskap>,
         grupper: List<SaksbehandlerGruppe>
     ) {
-        assertTrue(
-            harTilgangTilOppgaveGittGrupper(egenskaper, grupper)
-        )
+        assertTrue(harTilgangTilOppgaveGittGrupper(egenskaper, grupper))
     }
 
     @ParameterizedTest(name = "egenskaper={0}, grupper={1}")
@@ -90,9 +91,7 @@ class NyTilgangskontrollTest {
         egenskaper: List<Egenskap>,
         grupper: List<SaksbehandlerGruppe>
     ) {
-        assertFalse(
-            harTilgangTilOppgaveGittGrupper(egenskaper, grupper)
-        )
+        assertFalse(harTilgangTilOppgaveGittGrupper(egenskaper, grupper))
     }
 
     @ParameterizedTest(name = "egenskaper={0}")
@@ -245,7 +244,7 @@ class NyTilgangskontrollTest {
         }
     }
 
-    private fun harTilgangTilPersonGittGrupper(grupper: List<SaksbehandlerGruppe>) =
+    private fun harTilgangTilPersonGittGrupper(fødselsnummer: String, grupper: List<SaksbehandlerGruppe>) =
         tilgangskontroll.harTilgangTilPerson(
             saksbehandlerTilganger = SaksbehandlerTilganger(
                 gruppetilganger = grupper.tilUUIDer(),
@@ -260,7 +259,7 @@ class NyTilgangskontrollTest {
         egenskaper: List<Egenskap>,
         grupper: List<SaksbehandlerGruppe>
     ) = tilgangskontroll.harTilgangTilOppgave(
-        saksbehandler = lagSaksbehandler(
+        saksbehandler = lagLegacySaksbehandler(
             tilgangskontrollør = TilgangskontrollørForApi(
                 saksbehandlergrupper = grupper.tilUUIDer(),
                 tilgangsgrupper = tilgangsgrupper
@@ -272,20 +271,16 @@ class NyTilgangskontrollTest {
     private fun harTilgangTilOppgaveGittGrupperSomSlåsOpp(
         egenskaper: List<Egenskap>,
         grupper: List<SaksbehandlerGruppe>
-    ) = tilgangskontroll.harTilgangTilOppgave(
-        saksbehandler = lagSaksbehandler(
-            tilgangskontrollør = TilgangskontrollørForReservasjon(
-                gruppekontroll = object : Gruppekontroll {
-                    override suspend fun erIGrupper(oid: UUID, gruppeIder: List<UUID>) =
-                        grupper.tilUUIDer().containsAll(gruppeIder)
-                },
-                tilgangsgrupper = tilgangsgrupper
-            )
-        ),
-        egenskaper = egenskaper
-    )
+    ): Boolean {
+        val saksbehandler = lagSaksbehandler()
+        saksbehandlerGruppeOppslagMap[saksbehandler.id().value] = grupper.tilUUIDer().toSet()
+        return tilgangskontroll.harTilgangTilOppgave(
+            saksbehandler = saksbehandler,
+            egenskaper = egenskaper
+        )
+    }
 
-    private fun lagSaksbehandler(
+    private fun lagLegacySaksbehandler(
         ident: String = "A123456",
         tilgangskontrollør: Tilgangskontroll
     ): LegacySaksbehandler {
@@ -299,31 +294,39 @@ class NyTilgangskontrollTest {
         )
     }
 
-    private val fødselsnummer = lagFødselsnummer()
+    private fun lagSaksbehandler(ident: String = "A123456"): Saksbehandler {
+        val navn = lagFornavn() + " " + lagEtternavn()
+        return Saksbehandler(
+            id = SaksbehandlerOid(UUID.randomUUID()),
+            navn = navn,
+            epost = lagEpostadresseFraFulltNavn(navn),
+            ident = ident,
+        )
+    }
 
     private val personErEgenAnsattMap = mutableMapOf<String, Boolean?>()
     private val personAdressebeskyttelseMap = mutableMapOf<String, Adressebeskyttelse?>()
+    private val saksbehandlerGruppeOppslagMap = mutableMapOf<UUID, Set<UUID>>()
 
-    private fun initPersonEgenAnsatt(egenAnsatt: Boolean?) {
-        personErEgenAnsattMap[fødselsnummer] = egenAnsatt
-    }
-
-    private fun initPersonAdressebeskyttelse(adressebeskyttelse: Adressebeskyttelse?) {
-        personAdressebeskyttelseMap[fødselsnummer] = adressebeskyttelse
-    }
-
-    private val tilgangskontroll = NyTilgangskontroll(object : PartialDaos {
-        override val egenAnsattApiDao = object : EgenAnsattApiDao {
-            override fun erEgenAnsatt(fødselsnummer: String) =
-                personErEgenAnsattMap[fødselsnummer]
-        }
-        override val personApiDao = object : PartialPersonApiDao {
-            override fun personHarAdressebeskyttelse(
-                fødselsnummer: String,
-                adressebeskyttelse: Adressebeskyttelse
-            ) = personAdressebeskyttelseMap[fødselsnummer] == adressebeskyttelse
-        }
-    })
+    private val tilgangskontroll = NyTilgangskontroll(
+        daos = object : PartialDaos {
+            override val egenAnsattApiDao = object : EgenAnsattApiDao {
+                override fun erEgenAnsatt(fødselsnummer: String) =
+                    personErEgenAnsattMap[fødselsnummer]
+            }
+            override val personApiDao = object : PartialPersonApiDao {
+                override fun personHarAdressebeskyttelse(
+                    fødselsnummer: String,
+                    adressebeskyttelse: Adressebeskyttelse
+                ) = personAdressebeskyttelseMap[fødselsnummer] == adressebeskyttelse
+            }
+        },
+        gruppekontroll = object : Gruppekontroll {
+            override suspend fun erIGrupper(oid: UUID, gruppeIder: List<UUID>) =
+                saksbehandlerGruppeOppslagMap[oid].orEmpty().containsAll(gruppeIder)
+        },
+        tilgangsgrupper = tilgangsgrupper
+    )
 
     private fun List<SaksbehandlerGruppe>.tilUUIDer(): List<UUID> =
         map {
