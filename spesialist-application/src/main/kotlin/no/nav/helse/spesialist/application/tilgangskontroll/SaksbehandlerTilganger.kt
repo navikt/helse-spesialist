@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.api
+package no.nav.helse.spesialist.application.tilgangskontroll
 
 import java.util.UUID
 

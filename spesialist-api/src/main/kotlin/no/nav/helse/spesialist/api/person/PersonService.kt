@@ -23,7 +23,6 @@ import no.nav.helse.db.api.VergemålApiDao
 import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.spesialist.api.Personhåndterer
-import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.graphql.mapping.toApiReservasjon
 import no.nav.helse.spesialist.api.graphql.query.FetchPersonResult
@@ -31,11 +30,12 @@ import no.nav.helse.spesialist.api.graphql.query.PersonoppslagService
 import no.nav.helse.spesialist.api.graphql.resolvers.ApiPersonResolver
 import no.nav.helse.spesialist.api.graphql.schema.ApiPerson
 import no.nav.helse.spesialist.api.graphql.schema.ApiPersoninfo
-import no.nav.helse.spesialist.api.saksbehandler.manglerTilgang
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
 import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.application.Reservasjonshenter.ReservasjonDto
 import no.nav.helse.spesialist.application.snapshot.SnapshotPerson
+import no.nav.helse.spesialist.application.tilgangskontroll.SaksbehandlerTilganger
+import no.nav.helse.spesialist.application.tilgangskontroll.manglerTilgang
 import org.slf4j.LoggerFactory
 
 private sealed interface HentSnapshotResult {

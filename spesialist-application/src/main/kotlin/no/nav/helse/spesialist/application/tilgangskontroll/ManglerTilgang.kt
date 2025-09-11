@@ -1,11 +1,10 @@
-package no.nav.helse.spesialist.api.saksbehandler
+package no.nav.helse.spesialist.application.tilgangskontroll
 
 import no.nav.helse.db.api.EgenAnsattApiDao
 import no.nav.helse.db.api.PersonApiDao
-import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 
-internal fun manglerTilgang(
+fun manglerTilgang(
     egenAnsattApiDao: EgenAnsattApiDao,
     personApiDao: PersonApiDao,
     fnr: String,

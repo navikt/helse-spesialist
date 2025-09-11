@@ -7,7 +7,6 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.Personhåndterer
-import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGER
 import no.nav.helse.spesialist.api.graphql.query.PersonQuery
@@ -15,6 +14,7 @@ import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.api.person.PersonService
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
+import no.nav.helse.spesialist.application.tilgangskontroll.SaksbehandlerTilganger
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull

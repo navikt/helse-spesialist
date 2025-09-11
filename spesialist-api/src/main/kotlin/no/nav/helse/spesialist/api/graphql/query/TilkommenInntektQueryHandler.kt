@@ -6,7 +6,6 @@ import no.nav.helse.db.Daos
 import no.nav.helse.db.SessionContext
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand
-import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGER
 import no.nav.helse.spesialist.api.graphql.schema.ApiDatoPeriode
 import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntekt
@@ -16,8 +15,9 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektFjernetEven
 import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektGjenopprettetEvent
 import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektOpprettetEvent
 import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektskilde
-import no.nav.helse.spesialist.api.saksbehandler.manglerTilgang
 import no.nav.helse.spesialist.application.logg.sikkerlogg
+import no.nav.helse.spesialist.application.tilgangskontroll.SaksbehandlerTilganger
+import no.nav.helse.spesialist.application.tilgangskontroll.manglerTilgang
 import no.nav.helse.spesialist.domain.tilkommeninntekt.Endring
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektEndretEvent
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektEvent

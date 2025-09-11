@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.api
 
+import no.nav.helse.spesialist.application.tilgangskontroll.SaksbehandlerTilganger
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test

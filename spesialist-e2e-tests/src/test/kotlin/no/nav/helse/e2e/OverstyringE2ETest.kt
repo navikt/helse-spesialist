@@ -8,7 +8,6 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.TestRapidHelpers.siste
 import no.nav.helse.spesialist.api.Personhåndterer
-import no.nav.helse.spesialist.api.SaksbehandlerTilganger
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGER
 import no.nav.helse.spesialist.api.graphql.query.PersonQuery
@@ -25,6 +24,7 @@ import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.Invalidert
 import no.nav.helse.spesialist.api.person.PersonService
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
+import no.nav.helse.spesialist.application.tilgangskontroll.SaksbehandlerTilganger
 import no.nav.helse.util.januar
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
