@@ -26,6 +26,20 @@ interface Tilgangsgrupper {
     val stikkprøveGruppeId: UUID
 
     fun gruppeId(gruppe: Gruppe): UUID
+
+    fun gruppeUuidMap(): Map<Gruppe, UUID> =
+        mapOf(
+            Gruppe.KODE7 to kode7GruppeId,
+            Gruppe.BESLUTTER to beslutterGruppeId,
+            Gruppe.SKJERMEDE to skjermedePersonerGruppeId,
+            Gruppe.STIKKPRØVE to stikkprøveGruppeId,
+        )
+
+    fun alleGrupper(): Set<Gruppe> = gruppeUuidMap().keys
+
+    fun alleUuider(): Set<UUID> = gruppeUuidMap().values.toSet()
+
+    fun tilGrupper(uuider: Set<UUID>) = gruppeUuidMap().filter { it.value in uuider }.keys
 }
 
 class SpeilTilgangsgrupper(

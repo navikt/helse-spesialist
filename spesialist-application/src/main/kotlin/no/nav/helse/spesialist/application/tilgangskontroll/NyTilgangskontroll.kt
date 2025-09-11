@@ -1,15 +1,19 @@
 package no.nav.helse.spesialist.application.tilgangskontroll
 
+import kotlinx.coroutines.runBlocking
 import no.nav.helse.db.Daos
-import no.nav.helse.mediator.TilgangskontrollørForReservasjon
 import no.nav.helse.modell.oppgave.Egenskap
+import no.nav.helse.modell.oppgave.Egenskap.BESLUTTER
+import no.nav.helse.modell.oppgave.Egenskap.EGEN_ANSATT
+import no.nav.helse.modell.oppgave.Egenskap.FORTROLIG_ADRESSE
+import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
+import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 
 class NyTilgangskontroll(
     private val daos: Daos,
     private val tilgangsgruppehenter: Tilgangsgruppehenter,
-    private val tilgangsgrupper: Tilgangsgrupper,
 ) {
     fun harTilgangTilPerson(
         saksbehandlerTilganger: SaksbehandlerTilganger,
@@ -25,11 +29,32 @@ class NyTilgangskontroll(
         saksbehandler: Saksbehandler,
         egenskaper: List<Egenskap>,
     ): Boolean {
-        val tilgangskontroll =
-            TilgangskontrollørForReservasjon(
-                tilgangsgruppehenter = tilgangsgruppehenter,
-                tilgangsgrupper = tilgangsgrupper,
-            )
-        return tilgangskontroll.harTilgangTil(saksbehandler.id().value, egenskaper)
+        val tilgangsgrupper = hentTilgangsgrupper(saksbehandler)
+        return egenskaper.isEmpty() ||
+            run {
+                egenskaper.forEach {
+                    if (!harTilgangTilEgenskap(it, tilgangsgrupper)) {
+                        return false
+                    }
+                }
+                return true
+            }
     }
+
+    fun harTilgangTilEgenskap(
+        egenskap: Egenskap,
+        grupper: Set<Gruppe>,
+    ) = when (egenskap) {
+        STRENGT_FORTROLIG_ADRESSE -> false // Ingen skal ha tilgang til disse i Speil foreløpig
+        EGEN_ANSATT -> Gruppe.SKJERMEDE in grupper
+        FORTROLIG_ADRESSE -> Gruppe.KODE7 in grupper
+        BESLUTTER -> Gruppe.BESLUTTER in grupper
+        STIKKPRØVE -> Gruppe.STIKKPRØVE in grupper
+        else -> true
+    }
+
+    private fun hentTilgangsgrupper(saksbehandler: Saksbehandler): Set<Gruppe> =
+        runBlocking {
+            tilgangsgruppehenter.hentTilgangsgrupper(saksbehandler.id().value)
+        }
 }

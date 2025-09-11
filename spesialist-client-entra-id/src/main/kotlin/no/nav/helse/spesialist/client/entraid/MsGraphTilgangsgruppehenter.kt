@@ -17,12 +17,15 @@ import io.ktor.http.contentType
 import io.ktor.http.path
 import io.ktor.serialization.jackson.JacksonConverter
 import no.nav.helse.spesialist.application.AccessTokenGenerator
+import no.nav.helse.spesialist.application.tilgangskontroll.Gruppe
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
+import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class MsGraphTilgangsgruppehenter(
     private val accessTokenGenerator: AccessTokenGenerator,
+    private val tilgangsgrupper: Tilgangsgrupper,
 ) : Tilgangsgruppehenter {
     private val logg = LoggerFactory.getLogger(MsGraphTilgangsgruppehenter::class.java)
     private val graphUrl = "https://graph.microsoft.com/v1.0"
@@ -63,5 +66,10 @@ class MsGraphTilgangsgruppehenter(
         val grupper = responseNode["value"].map { UUID.fromString(it.asText()) }
         logg.debug("Hentet ${grupper.size} grupper fra MS")
         return grupper.toSet()
+    }
+
+    override suspend fun hentTilgangsgrupper(oid: UUID): Set<Gruppe> {
+        val gruppeUuider = hentTilgangsgrupper(oid, tilgangsgrupper.alleUuider().toList())
+        return tilgangsgrupper.tilGrupper(gruppeUuider)
     }
 }

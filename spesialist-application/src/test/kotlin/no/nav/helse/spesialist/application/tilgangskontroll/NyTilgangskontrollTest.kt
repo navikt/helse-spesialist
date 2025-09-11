@@ -36,7 +36,7 @@ class NyTilgangskontrollTest {
         personErEgenAnsattMap[fødselsnummer] = egenAnsatt
         personAdressebeskyttelseMap[fødselsnummer] = adressebeskyttelse
 
-        assertFalse(harTilgangTilPersonGittGrupper(fødselsnummer, SaksbehandlerGruppe.entries))
+        assertFalse(harTilgangTilPersonGittGrupper(fødselsnummer, Gruppe.entries))
     }
 
     @ParameterizedTest(name = "egenAnsatt={0}, adressebeskyttelse={1}, grupper={2}")
@@ -44,7 +44,7 @@ class NyTilgangskontrollTest {
     fun `saksbehandler med visse grupper har tilgang til visse personer`(
         egenAnsatt: Boolean,
         adressebeskyttelse: Adressebeskyttelse,
-        grupper: List<SaksbehandlerGruppe>
+        grupper: List<Gruppe>
     ) {
         personErEgenAnsattMap[fødselsnummer] = egenAnsatt
         personAdressebeskyttelseMap[fødselsnummer] = adressebeskyttelse
@@ -57,7 +57,7 @@ class NyTilgangskontrollTest {
     fun `saksbehandler med visse grupper har ikke tilgang til visse personer`(
         egenAnsatt: Boolean,
         adressebeskyttelse: Adressebeskyttelse,
-        grupper: List<SaksbehandlerGruppe>
+        grupper: List<Gruppe>
     ) {
         personErEgenAnsattMap[fødselsnummer] = egenAnsatt
         personAdressebeskyttelseMap[fødselsnummer] = adressebeskyttelse
@@ -70,14 +70,14 @@ class NyTilgangskontrollTest {
     fun `saksbehandler har ikke tilgang til oppgave selv med kjente alle tilganger`(
         egenskaper: List<Egenskap>,
     ) {
-        assertFalse(harTilgangTilOppgaveGittGrupper(egenskaper, SaksbehandlerGruppe.entries))
+        assertFalse(harTilgangTilOppgaveGittGrupper(egenskaper, Gruppe.entries))
     }
 
     @ParameterizedTest(name = "egenskaper={0}, grupper={1}")
     @MethodSource("oppgaveKombinasjonerSomGirTilgang")
     fun `saksbehandler med visse kjente grupper har tilgang til visse oppgaver`(
         egenskaper: List<Egenskap>,
-        grupper: List<SaksbehandlerGruppe>
+        grupper: List<Gruppe>
     ) {
         assertTrue(harTilgangTilOppgaveGittGrupper(egenskaper, grupper))
     }
@@ -86,7 +86,7 @@ class NyTilgangskontrollTest {
     @MethodSource("oppgaveKombinasjonerSomIkkeGirTilgang")
     fun `saksbehandler med visse kjente grupper har ikke tilgang til visse oppgaver`(
         egenskaper: List<Egenskap>,
-        grupper: List<SaksbehandlerGruppe>
+        grupper: List<Gruppe>
     ) {
         assertFalse(harTilgangTilOppgaveGittGrupper(egenskaper, grupper))
     }
@@ -96,14 +96,14 @@ class NyTilgangskontrollTest {
     fun `saksbehandler har ikke tilgang til oppgave selv med oppslåtte alle tilganger`(
         egenskaper: List<Egenskap>,
     ) {
-        assertFalse(harTilgangTilOppgaveGittGrupperSomSlåsOpp(egenskaper, SaksbehandlerGruppe.entries))
+        assertFalse(harTilgangTilOppgaveGittGrupperSomSlåsOpp(egenskaper, Gruppe.entries))
     }
 
     @ParameterizedTest(name = "egenskaper={0}, grupper={1}")
     @MethodSource("oppgaveKombinasjonerSomGirTilgang")
     fun `saksbehandler med visse oppslåtte grupper har tilgang til visse oppgaver`(
         egenskaper: List<Egenskap>,
-        grupper: List<SaksbehandlerGruppe>
+        grupper: List<Gruppe>
     ) {
         assertTrue(harTilgangTilOppgaveGittGrupperSomSlåsOpp(egenskaper, grupper))
     }
@@ -112,7 +112,7 @@ class NyTilgangskontrollTest {
     @MethodSource("oppgaveKombinasjonerSomIkkeGirTilgang")
     fun `saksbehandler med visse oppslåtte grupper har ikke tilgang til visse oppgaver`(
         egenskaper: List<Egenskap>,
-        grupper: List<SaksbehandlerGruppe>
+        grupper: List<Gruppe>
     ) {
         assertFalse(harTilgangTilOppgaveGittGrupperSomSlåsOpp(egenskaper, grupper))
     }
@@ -135,9 +135,9 @@ class NyTilgangskontrollTest {
         @JvmStatic
         private fun personKombinasjonerSomGirTilgang(): Stream<Arguments> =
             Stream.of(
-                Arguments.of(false, Adressebeskyttelse.Ugradert, emptyList<SaksbehandlerGruppe>()),
-                Arguments.of(false, Adressebeskyttelse.Fortrolig, listOf(SaksbehandlerGruppe.KODE_7)),
-                Arguments.of(true, Adressebeskyttelse.Ugradert, listOf(SaksbehandlerGruppe.SKJERMEDE_PERSONER)),
+                Arguments.of(false, Adressebeskyttelse.Ugradert, emptyList<Gruppe>()),
+                Arguments.of(false, Adressebeskyttelse.Fortrolig, listOf(Gruppe.KODE7)),
+                Arguments.of(true, Adressebeskyttelse.Ugradert, listOf(Gruppe.SKJERMEDE)),
             )
 
         @JvmStatic
@@ -145,22 +145,22 @@ class NyTilgangskontrollTest {
             Arguments.of(
                 false,
                 Adressebeskyttelse.Fortrolig,
-                emptyList<SaksbehandlerGruppe>()
+                emptyList<Gruppe>()
             ),
             Arguments.of(
                 false,
                 Adressebeskyttelse.Fortrolig,
-                SaksbehandlerGruppe.entries - SaksbehandlerGruppe.KODE_7
+                Gruppe.entries - Gruppe.KODE7
             ),
             Arguments.of(
                 true,
                 Adressebeskyttelse.Ugradert,
-                emptyList<SaksbehandlerGruppe>()
+                emptyList<Gruppe>()
             ),
             Arguments.of(
                 true,
                 Adressebeskyttelse.Ugradert,
-                SaksbehandlerGruppe.entries - SaksbehandlerGruppe.SKJERMEDE_PERSONER
+                Gruppe.entries - Gruppe.SKJERMEDE
             ),
         )
 
@@ -175,23 +175,23 @@ class NyTilgangskontrollTest {
         private fun oppgaveKombinasjonerSomGirTilgang(): Stream<Arguments> = Stream.of(
             Arguments.of(
                 emptyList<Egenskap>(),
-                emptyList<SaksbehandlerGruppe>()
+                emptyList<Gruppe>()
             ),
             Arguments.of(
                 listOf(Egenskap.FORTROLIG_ADRESSE),
-                listOf(SaksbehandlerGruppe.KODE_7)
+                listOf(Gruppe.KODE7)
             ),
             Arguments.of(
                 listOf(Egenskap.EGEN_ANSATT),
-                listOf(SaksbehandlerGruppe.SKJERMEDE_PERSONER)
+                listOf(Gruppe.SKJERMEDE)
             ),
             Arguments.of(
                 listOf(Egenskap.BESLUTTER),
-                listOf(SaksbehandlerGruppe.BESLUTTER)
+                listOf(Gruppe.BESLUTTER)
             ),
             Arguments.of(
                 listOf(Egenskap.STIKKPRØVE),
-                listOf(SaksbehandlerGruppe.STIKKPRØVE)
+                listOf(Gruppe.STIKKPRØVE)
             ),
         )
 
@@ -200,35 +200,35 @@ class NyTilgangskontrollTest {
             Stream.of(
                 Arguments.of(
                     listOf(Egenskap.FORTROLIG_ADRESSE),
-                    emptyList<SaksbehandlerGruppe>()
+                    emptyList<Gruppe>()
                 ),
                 Arguments.of(
                     listOf(Egenskap.EGEN_ANSATT),
-                    emptyList<SaksbehandlerGruppe>()
+                    emptyList<Gruppe>()
                 ),
                 Arguments.of(
                     listOf(Egenskap.BESLUTTER),
-                    emptyList<SaksbehandlerGruppe>()
+                    emptyList<Gruppe>()
                 ),
                 Arguments.of(
                     listOf(Egenskap.STIKKPRØVE),
-                    emptyList<SaksbehandlerGruppe>()
+                    emptyList<Gruppe>()
                 ),
                 Arguments.of(
                     listOf(Egenskap.FORTROLIG_ADRESSE),
-                    SaksbehandlerGruppe.entries - SaksbehandlerGruppe.KODE_7
+                    Gruppe.entries - Gruppe.KODE7
                 ),
                 Arguments.of(
                     listOf(Egenskap.EGEN_ANSATT),
-                    SaksbehandlerGruppe.entries - SaksbehandlerGruppe.SKJERMEDE_PERSONER
+                    Gruppe.entries - Gruppe.SKJERMEDE
                 ),
                 Arguments.of(
                     listOf(Egenskap.BESLUTTER),
-                    SaksbehandlerGruppe.entries - SaksbehandlerGruppe.BESLUTTER
+                    Gruppe.entries - Gruppe.BESLUTTER
                 ),
                 Arguments.of(
                     listOf(Egenskap.STIKKPRØVE),
-                    SaksbehandlerGruppe.entries - SaksbehandlerGruppe.STIKKPRØVE
+                    Gruppe.entries - Gruppe.STIKKPRØVE
                 ),
             )
 
@@ -241,7 +241,7 @@ class NyTilgangskontrollTest {
         }
     }
 
-    private fun harTilgangTilPersonGittGrupper(fødselsnummer: String, grupper: List<SaksbehandlerGruppe>) =
+    private fun harTilgangTilPersonGittGrupper(fødselsnummer: String, grupper: List<Gruppe>) =
         tilgangskontroll.harTilgangTilPerson(
             saksbehandlerTilganger = SaksbehandlerTilganger(
                 gruppetilganger = grupper.tilUUIDer(),
@@ -254,7 +254,7 @@ class NyTilgangskontrollTest {
 
     private fun harTilgangTilOppgaveGittGrupper(
         egenskaper: List<Egenskap>,
-        grupper: List<SaksbehandlerGruppe>
+        grupper: List<Gruppe>
     ) = tilgangskontroll.harTilgangTilOppgave(
         saksbehandler = lagLegacySaksbehandler(
             tilgangskontrollør = TilgangskontrollørForApi(
@@ -267,10 +267,10 @@ class NyTilgangskontrollTest {
 
     private fun harTilgangTilOppgaveGittGrupperSomSlåsOpp(
         egenskaper: List<Egenskap>,
-        grupper: List<SaksbehandlerGruppe>
+        grupper: List<Gruppe>
     ): Boolean {
         val saksbehandler = lagSaksbehandler()
-        saksbehandlerGruppeOppslagMap[saksbehandler.id().value] = grupper.tilUUIDer().toSet()
+        saksbehandlerGruppeOppslagMap[saksbehandler.id().value] = grupper.toSet()
         return tilgangskontroll.harTilgangTilOppgave(
             saksbehandler = saksbehandler,
             egenskaper = egenskaper
@@ -303,7 +303,7 @@ class NyTilgangskontrollTest {
 
     private val personErEgenAnsattMap = mutableMapOf<String, Boolean?>()
     private val personAdressebeskyttelseMap = mutableMapOf<String, Adressebeskyttelse?>()
-    private val saksbehandlerGruppeOppslagMap = mutableMapOf<UUID, Set<UUID>>()
+    private val saksbehandlerGruppeOppslagMap = mutableMapOf<UUID, Set<Gruppe>>()
 
     private val tilgangskontroll = NyTilgangskontroll(
         daos = object : PartialDaos {
@@ -320,25 +320,20 @@ class NyTilgangskontrollTest {
         },
         tilgangsgruppehenter = object : Tilgangsgruppehenter {
             override suspend fun hentTilgangsgrupper(oid: UUID, gruppeIder: List<UUID>) =
+                saksbehandlerGruppeOppslagMap[oid].orEmpty().toList().tilUUIDer().toSet()
+
+            override suspend fun hentTilgangsgrupper(oid: UUID) =
                 saksbehandlerGruppeOppslagMap[oid].orEmpty()
-        },
-        tilgangsgrupper = tilgangsgrupper
+        }
     )
 
-    private fun List<SaksbehandlerGruppe>.tilUUIDer(): List<UUID> =
+    private fun List<Gruppe>.tilUUIDer(): List<UUID> =
         map {
             when (it) {
-                SaksbehandlerGruppe.KODE_7 -> tilgangsgrupper.kode7GruppeId
-                SaksbehandlerGruppe.BESLUTTER -> tilgangsgrupper.beslutterGruppeId
-                SaksbehandlerGruppe.SKJERMEDE_PERSONER -> tilgangsgrupper.skjermedePersonerGruppeId
-                SaksbehandlerGruppe.STIKKPRØVE -> tilgangsgrupper.stikkprøveGruppeId
+                Gruppe.KODE7 -> tilgangsgrupper.kode7GruppeId
+                Gruppe.BESLUTTER -> tilgangsgrupper.beslutterGruppeId
+                Gruppe.SKJERMEDE -> tilgangsgrupper.skjermedePersonerGruppeId
+                Gruppe.STIKKPRØVE -> tilgangsgrupper.stikkprøveGruppeId
             }
         }
-
-    enum class SaksbehandlerGruppe {
-        KODE_7,
-        BESLUTTER,
-        SKJERMEDE_PERSONER,
-        STIKKPRØVE,
-    }
 }

@@ -1,7 +1,10 @@
 package no.nav.helse.spesialist.client.entraid
 
+import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
+
 class ClientEntraIDModule(
     configuration: Configuration,
+    tilgangsgrupper: Tilgangsgrupper,
 ) {
     data class Configuration(
         val clientId: String,
@@ -16,5 +19,5 @@ class ClientEntraIDModule(
             privateJwk = configuration.privateJwk,
         )
 
-    val gruppekontroll = MsGraphTilgangsgruppehenter(accessTokenGenerator)
+    val tilgangsgruppehenter = MsGraphTilgangsgruppehenter(accessTokenGenerator, tilgangsgrupper)
 }

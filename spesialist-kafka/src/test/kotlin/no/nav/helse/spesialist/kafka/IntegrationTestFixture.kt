@@ -39,6 +39,7 @@ class IntegrationTestFixture(
             },
             tilgangsgruppehenter = object : Tilgangsgruppehenter {
                 override suspend fun hentTilgangsgrupper(oid: UUID, gruppeIder: List<UUID>) = emptySet<UUID>()
+                override suspend fun hentTilgangsgrupper(oid: UUID)= emptySet<Gruppe>()
             },
         ).also(KafkaModule::kobleOppRivers)
     }
