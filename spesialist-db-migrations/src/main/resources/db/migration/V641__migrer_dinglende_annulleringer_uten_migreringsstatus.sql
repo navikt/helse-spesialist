@@ -4,8 +4,7 @@ INSERT INTO ukoblede_annulleringer (id,
                                     årsaker,
                                     begrunnelse_ref,
                                     arbeidsgiver_fagsystem_id,
-                                    person_fagsystem_id,
-                                    migreringsstatus)
+                                    person_fagsystem_id)
 SELECT id,
        annullert_tidspunkt,
        saksbehandler_ref,
@@ -13,6 +12,6 @@ SELECT id,
        begrunnelse_ref,
        arbeidsgiver_fagsystem_id,
        person_fagsystem_id,
-       migreringsstatus
 FROM annullert_av_saksbehandler
-WHERE migreringsstatus IS NULL AND vedtaksperiode_id IS NULL;
+WHERE migreringsstatus IS NULL
+  AND vedtaksperiode_id IS NULL;
