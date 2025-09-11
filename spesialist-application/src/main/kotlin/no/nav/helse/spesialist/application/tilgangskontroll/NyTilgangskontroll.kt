@@ -26,15 +26,12 @@ class NyTilgangskontroll(
     fun harTilgangTilOppgave(
         saksbehandler: Saksbehandler,
         egenskaper: List<Egenskap>,
-    ) = LegacySaksbehandler(
-        oid = saksbehandler.id().value,
-        navn = saksbehandler.navn,
-        epostadresse = saksbehandler.epost,
-        ident = saksbehandler.ident,
-        tilgangskontroll =
+    ): Boolean {
+        val tilgangskontroll =
             TilgangskontrollørForReservasjon(
                 gruppekontroll = gruppekontroll,
                 tilgangsgrupper = tilgangsgrupper,
-            ),
-    ).harTilgangTil(egenskaper)
+            )
+        return tilgangskontroll.harTilgangTil(saksbehandler.id().value, egenskaper)
+    }
 }

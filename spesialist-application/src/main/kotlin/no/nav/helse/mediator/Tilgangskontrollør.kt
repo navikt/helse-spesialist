@@ -47,7 +47,7 @@ class TilgangskontrollørForReservasjon(
         grupper: List<UUID>,
     ): Boolean =
         runBlocking {
-            gruppekontroll.erIGrupper(oid, grupper)
+            gruppekontroll.hentGrupper(oid, grupper).containsAll(grupper)
         }
 }
 

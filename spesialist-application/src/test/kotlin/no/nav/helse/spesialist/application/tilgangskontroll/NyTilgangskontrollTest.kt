@@ -322,8 +322,8 @@ class NyTilgangskontrollTest {
             }
         },
         gruppekontroll = object : Gruppekontroll {
-            override suspend fun erIGrupper(oid: UUID, gruppeIder: List<UUID>) =
-                saksbehandlerGruppeOppslagMap[oid].orEmpty().containsAll(gruppeIder)
+            override suspend fun hentGrupper(oid: UUID, gruppeIder: List<UUID>) =
+                saksbehandlerGruppeOppslagMap[oid].orEmpty()
         },
         tilgangsgrupper = tilgangsgrupper
     )

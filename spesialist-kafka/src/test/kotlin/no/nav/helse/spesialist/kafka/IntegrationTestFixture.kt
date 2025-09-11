@@ -38,7 +38,7 @@ class IntegrationTestFixture(
                 override fun fullRefusjonEnArbeidsgiver() = false
             },
             gruppekontroll = object : Gruppekontroll {
-                override suspend fun erIGrupper(oid: UUID, gruppeIder: List<UUID>) = false
+                override suspend fun hentGrupper(oid: UUID, gruppeIder: List<UUID>) = emptySet<UUID>()
             },
         ).also(KafkaModule::kobleOppRivers)
     }

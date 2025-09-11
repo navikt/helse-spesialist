@@ -43,10 +43,10 @@ class MsGraphGruppekontroll(
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-    override suspend fun erIGrupper(
+    override suspend fun hentGrupper(
         oid: UUID,
         gruppeIder: List<UUID>,
-    ): Boolean {
+    ): Set<UUID> {
         val token = accessTokenGenerator.hentAccessToken("https://graph.microsoft.com/.default")
         val response =
             httpClient.post(graphUrl) {
@@ -62,7 +62,6 @@ class MsGraphGruppekontroll(
         val responseNode = objectMapper.readTree(response.bodyAsText())
         val grupper = responseNode["value"].map { UUID.fromString(it.asText()) }
         logg.debug("Hentet ${grupper.size} grupper fra MS")
-
-        return grupper.containsAll(gruppeIder)
+        return grupper.toSet()
     }
 }

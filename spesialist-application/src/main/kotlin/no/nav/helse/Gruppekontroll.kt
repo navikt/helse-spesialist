@@ -3,8 +3,8 @@ package no.nav.helse
 import java.util.UUID
 
 interface Gruppekontroll {
-    suspend fun erIGrupper(
+    suspend fun hentGrupper(
         oid: UUID,
         gruppeIder: List<UUID>,
-    ): Boolean
+    ): Set<UUID>
 }
