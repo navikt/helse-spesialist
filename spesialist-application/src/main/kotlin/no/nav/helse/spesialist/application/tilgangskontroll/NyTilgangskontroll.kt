@@ -3,7 +3,6 @@ package no.nav.helse.spesialist.application.tilgangskontroll
 import no.nav.helse.db.Daos
 import no.nav.helse.mediator.TilgangskontrollørForReservasjon
 import no.nav.helse.modell.oppgave.Egenskap
-import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 

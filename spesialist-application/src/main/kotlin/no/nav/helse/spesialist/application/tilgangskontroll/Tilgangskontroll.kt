@@ -1,8 +1,6 @@
-package no.nav.helse.spesialist.api.bootstrap
+package no.nav.helse.spesialist.application.tilgangskontroll
 
 import java.util.UUID
-
-// Definisjoner på gruppene vi har et forhold til, og deres runtime UUID-er
 
 enum class Gruppe(
     private val gruppenøkkel: String,

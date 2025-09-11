@@ -6,8 +6,6 @@ import no.nav.helse.db.api.PartialPersonApiDao
 import no.nav.helse.mediator.TilgangskontrollørForApi
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
-import no.nav.helse.spesialist.api.bootstrap.Gruppe
-import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid

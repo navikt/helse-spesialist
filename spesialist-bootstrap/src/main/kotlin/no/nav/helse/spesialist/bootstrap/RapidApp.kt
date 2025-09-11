@@ -9,7 +9,7 @@ import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.spesialist.api.ApiModule
-import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
+import no.nav.helse.spesialist.application.tilgangskontroll.SpeilTilgangsgrupper
 import no.nav.helse.spesialist.client.entraid.ClientEntraIDModule
 import no.nav.helse.spesialist.client.krr.ClientKrrModule
 import no.nav.helse.spesialist.client.spleis.ClientSpleisModule

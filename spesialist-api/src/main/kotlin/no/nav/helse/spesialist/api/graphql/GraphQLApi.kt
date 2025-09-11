@@ -28,7 +28,6 @@ import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.azureAdAppAuthentication
 import no.nav.helse.spesialist.api.behandlingsstatistikk.IBehandlingsstatistikkService
-import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
 import no.nav.helse.spesialist.api.bootstrap.debugMinneApi
 import no.nav.helse.spesialist.api.bootstrap.installPlugins
 import no.nav.helse.spesialist.api.feilhåndtering.SpesialistDataFetcherExceptionHandler
@@ -61,6 +60,7 @@ import no.nav.helse.spesialist.api.snapshot.SnapshotService
 import no.nav.helse.spesialist.api.websockets.webSocketsApi
 import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.application.Snapshothenter
+import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.Duration
