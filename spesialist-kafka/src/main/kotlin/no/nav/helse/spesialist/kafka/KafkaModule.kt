@@ -1,7 +1,6 @@
 package no.nav.helse.spesialist.kafka
 
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
-import no.nav.helse.FeatureToggles
 import no.nav.helse.Gruppekontroll
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.Daos
@@ -25,7 +24,6 @@ class KafkaModule(
     daos: Daos,
     tilgangsgrupper: Tilgangsgrupper,
     stikkprøver: Stikkprøver,
-    featureToggles: FeatureToggles,
     gruppekontroll: Gruppekontroll,
 ) {
     data class Configuration(
@@ -68,7 +66,6 @@ class KafkaModule(
                                 )
                             },
                             stikkprøver = stikkprøver,
-                            featureToggles = featureToggles,
                         ),
                     dokumentDao = daos.dokumentDao,
                     varselRepository =
@@ -81,7 +78,6 @@ class KafkaModule(
                 ),
             meldingDuplikatkontrollDao = daos.meldingDuplikatkontrollDao,
             sessionFactory = sessionFactory,
-            featureToggles = featureToggles,
         )
 
     fun kobleOppRivers() {

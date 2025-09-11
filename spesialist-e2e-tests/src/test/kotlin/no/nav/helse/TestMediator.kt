@@ -98,7 +98,6 @@ class TestMediator(
             godkjenningMediator = godkjenningMediator,
             subsumsjonsmelderProvider = { Subsumsjonsmelder("versjonAvKode", meldingPubliserer) },
             stikkprøver = stikkprøver,
-            featureToggles = object : FeatureToggles {}
         )
 
 
@@ -123,7 +122,6 @@ class TestMediator(
             mediator = meldingMediator,
             meldingDuplikatkontrollDao = daos.meldingDuplikatkontrollDao,
             sessionFactory = sessionFactory,
-            featureToggles = object : FeatureToggles {},
         ).registrerRivers(testRapid)
     }
 

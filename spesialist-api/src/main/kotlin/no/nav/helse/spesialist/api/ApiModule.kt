@@ -1,7 +1,6 @@
 package no.nav.helse.spesialist.api
 
 import io.ktor.server.application.Application
-import no.nav.helse.FeatureToggles
 import no.nav.helse.Gruppekontroll
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.bootstrap.EnvironmentToggles
@@ -31,7 +30,6 @@ class ApiModule(
     sessionFactory: SessionFactory,
     versjonAvKode: String,
     environmentToggles: EnvironmentToggles,
-    featureToggles: FeatureToggles,
     snapshothenter: Snapshothenter,
     reservasjonshenter: Reservasjonshenter,
 ) {
@@ -110,7 +108,6 @@ class ApiModule(
                     sessionFactory = sessionFactory,
                 ),
             meldingPubliserer = meldingPubliserer,
-            featureToggles = featureToggles,
         )
 
     fun setUpApi(application: Application) {

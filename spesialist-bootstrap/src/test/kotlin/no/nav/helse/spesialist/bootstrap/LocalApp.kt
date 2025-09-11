@@ -8,7 +8,6 @@ import no.nav.helse.spesialist.api.testfixtures.ApiModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.entraid.testfixtures.ClientEntraIDModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.krr.testfixtures.ClientKRRModuleIntegationTestFixture
 import no.nav.helse.spesialist.client.spleis.testfixtures.ClientSpleisModuleIntegrationTestFixture
-import no.nav.helse.spesialist.client.unleash.testfixtures.ClientUnleashModuleIntegrationTestFixture
 import no.nav.helse.spesialist.db.testfixtures.DBTestFixture
 import no.nav.helse.spesialist.kafka.testfixtures.KafkaModuleIntegrationTestFixture
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -24,7 +23,6 @@ fun main() {
             clientEntraID = ClientEntraIDModuleIntegrationTestFixture(mockOAuth2Server).entraIDAccessTokenGeneratorConfiguration,
             clientKrr = ClientKRRModuleIntegationTestFixture.moduleConfiguration,
             clientSpleis = ClientSpleisModuleIntegrationTestFixture.moduleConfiguration,
-            clientUnleash = ClientUnleashModuleIntegrationTestFixture.moduleConfiguration,
             db = DBTestFixture.database.dbModuleConfiguration,
             kafka = KafkaModuleIntegrationTestFixture.moduleConfiguration,
             versjonAvKode = "versjon_1",

@@ -7,7 +7,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.RapidsConnection
 import io.micrometer.core.instrument.MeterRegistry
-import no.nav.helse.FeatureToggles
 import no.nav.helse.db.MeldingDuplikatkontrollDao
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.mediator.MeldingMediator
@@ -21,12 +20,11 @@ class RiverSetup(
     private val mediator: MeldingMediator,
     private val meldingDuplikatkontrollDao: MeldingDuplikatkontrollDao,
     sessionFactory: SessionFactory,
-    featureToggles: FeatureToggles,
 ) {
     private val rivers =
         listOf(
             GodkjenningsbehovRiver(mediator),
-            SøknadSendtRiver(mediator, featureToggles),
+            SøknadSendtRiver(mediator),
             PersoninfoløsningRiver(mediator),
             FlerePersoninfoRiver(mediator),
             HentEnhetLøsningRiver(mediator),
@@ -57,7 +55,7 @@ class RiverSetup(
             AvsluttetMedVedtakRiver(sessionFactory),
             AvsluttetUtenVedtakRiver(mediator),
             MidnattRiver(mediator),
-            BehandlingOpprettetRiver(mediator, featureToggles),
+            BehandlingOpprettetRiver(mediator),
             KommandokjedePåminnelseRiver(mediator),
             StansAutomatiskBehandlingRiver(mediator),
             AvviksvurderingLøsningRiver(mediator),

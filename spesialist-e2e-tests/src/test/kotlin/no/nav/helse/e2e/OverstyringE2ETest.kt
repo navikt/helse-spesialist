@@ -6,7 +6,6 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.FeatureToggles
 import no.nav.helse.TestRapidHelpers.siste
 import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
@@ -341,7 +340,6 @@ class OverstyringE2ETest : AbstractE2ETest() {
                     sessionFactory = sessionFactory,
                     vedtakBegrunnelseDao = daos.vedtakBegrunnelseDao,
                     stansAutomatiskBehandlingSaksbehandlerDao = daos.stansAutomatiskBehandlingSaksbehandlerDao,
-                    featureToggles = object: FeatureToggles {},
                 ),
             ),
         )

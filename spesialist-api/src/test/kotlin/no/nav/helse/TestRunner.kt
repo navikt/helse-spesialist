@@ -81,7 +81,6 @@ object TestRunner {
             reservasjonshenter = mockk(relaxed = true),
             tilgangsgrupper = mockk(relaxed = true),
             meldingPubliserer = mockk(relaxed = true),
-            featureToggles = mockk(relaxed = true),
         )
         testApplication {
             application {
@@ -99,7 +98,6 @@ object TestRunner {
                         dokumenthåndterer = avhengigheter.dokumenthåndterer,
                         godkjenninghåndterer = avhengigheter.godkjenninghåndterer,
                         meldingPubliserer = avhengigheter.meldingPubliserer,
-                        featureToggles = avhengigheter.featureToggles,
                     )
                 kobleOppApi(
                     this, apiModuleConfiguration = configuration,
@@ -140,6 +138,5 @@ object TestRunner {
         val reservasjonshenter: Reservasjonshenter,
         val tilgangsgrupper: Tilgangsgrupper,
         val meldingPubliserer: MeldingPubliserer,
-        val featureToggles: FeatureToggles,
     )
 }

@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.graphql.resolvers
 
-import no.nav.helse.FeatureToggles
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.db.VedtakBegrunnelseDao
 import no.nav.helse.db.api.ArbeidsgiverApiDao
@@ -44,7 +43,6 @@ class ApiArbeidsgiverResolver(
     private val overstyringer: List<ApiOverstyring>,
     private val vedtakBegrunnelseDao: VedtakBegrunnelseDao,
     private val sessionFactory: SessionFactory,
-    private val featureToggles: FeatureToggles,
 ) : ArbeidsgiverSchema {
     override fun organisasjonsnummer(): String = organisasjonsnummer
 
@@ -96,7 +94,6 @@ class ApiArbeidsgiverResolver(
                                             index = index,
                                             vedtakBegrunnelseDao = vedtakBegrunnelseDao,
                                             sessionFactory = sessionFactory,
-                                            featureToggles = featureToggles,
                                         ),
                                 )
 

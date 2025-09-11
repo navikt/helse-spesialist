@@ -6,7 +6,6 @@ import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.spesialist.api.bootstrap.Gruppe
 import no.nav.helse.spesialist.api.bootstrap.Tilgangsgrupper
 import no.nav.helse.spesialist.application.InMemoryDaos
-import no.nav.helse.spesialist.application.InMemoryFeatureToggles
 import no.nav.helse.spesialist.application.InMemorySessionFactory
 import no.nav.helse.spesialist.kafka.testfixtures.KafkaModuleTestRapidTestFixture
 import java.util.UUID
@@ -15,7 +14,6 @@ class IntegrationTestFixture(
     val testRapid: TestRapid,
     val sessionFactory: InMemorySessionFactory = InMemorySessionFactory(),
     val daos: InMemoryDaos = InMemoryDaos(),
-    val featureToggles: InMemoryFeatureToggles = InMemoryFeatureToggles()
 ) {
     init {
         KafkaModule(
@@ -39,7 +37,6 @@ class IntegrationTestFixture(
                 override fun fullRefusjonFlereArbeidsgivereForlengelse() = false
                 override fun fullRefusjonEnArbeidsgiver() = false
             },
-            featureToggles = featureToggles,
             gruppekontroll = object : Gruppekontroll {
                 override suspend fun erIGrupper(oid: UUID, gruppeIder: List<UUID>) = false
             },

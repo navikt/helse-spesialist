@@ -1,6 +1,5 @@
 package no.nav.helse.mediator
 
-import no.nav.helse.FeatureToggles
 import no.nav.helse.db.CommandContextDao
 import no.nav.helse.db.GodkjenningsbehovUtfall
 import no.nav.helse.db.MetrikkDao
@@ -52,8 +51,6 @@ class Kommandofabrikk(
     private val godkjenningMediator: GodkjenningMediator,
     private val subsumsjonsmelderProvider: () -> Subsumsjonsmelder,
     private val stikkprøver: Stikkprøver,
-    @Suppress("unused")
-    private val featureToggles: FeatureToggles,
 ) {
     private companion object {
         private val logg = LoggerFactory.getLogger(this::class.java)

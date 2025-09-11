@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.jackson.asLocalDate
 import com.github.navikt.tbd_libs.jackson.isMissingOrNull
 import io.ktor.utils.io.core.toByteArray
-import no.nav.helse.FeatureToggles
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.db.VedtakBegrunnelseDao
 import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
@@ -100,7 +99,6 @@ data class ApiBeregnetPeriodeResolver(
     private val index: Int,
     private val vedtakBegrunnelseDao: VedtakBegrunnelseDao,
     private val sessionFactory: SessionFactory,
-    private val featureToggles: FeatureToggles,
 ) : BeregnetPeriodeSchema {
     private val periodetilstand = periode.periodetilstand.tilApiPeriodetilstand(erSisteGenerasjon)
 

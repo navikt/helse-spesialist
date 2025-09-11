@@ -6,7 +6,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import io.micrometer.core.instrument.MeterRegistry
 import net.logstash.logback.argument.StructuredArguments.keyValue
-import no.nav.helse.FeatureToggles
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.person.SøknadSendt
@@ -15,7 +14,6 @@ import org.slf4j.LoggerFactory
 
 class SøknadSendtRiver(
     private val mediator: MeldingMediator,
-    private val featureToggles: FeatureToggles,
 ) : SpesialistRiver {
     private val logg = LoggerFactory.getLogger(this::class.java)
     private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")

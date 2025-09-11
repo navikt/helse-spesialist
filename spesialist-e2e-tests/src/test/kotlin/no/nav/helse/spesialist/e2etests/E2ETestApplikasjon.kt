@@ -14,7 +14,6 @@ import no.nav.helse.spesialist.bootstrap.RapidApp
 import no.nav.helse.spesialist.client.entraid.testfixtures.ClientEntraIDModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.krr.testfixtures.ClientKRRModuleIntegationTestFixture
 import no.nav.helse.spesialist.client.spleis.testfixtures.ClientSpleisModuleIntegrationTestFixture
-import no.nav.helse.spesialist.client.unleash.testfixtures.ClientUnleashModuleIntegrationTestFixture
 import no.nav.helse.spesialist.db.testfixtures.DBTestFixture
 import no.nav.helse.spesialist.e2etests.behovløserstubs.BehovLøserStub
 import no.nav.helse.spesialist.kafka.testfixtures.KafkaModuleTestRapidTestFixture
@@ -38,7 +37,6 @@ object E2ETestApplikasjon {
             clientEntraID = ClientEntraIDModuleIntegrationTestFixture(mockOAuth2Server).entraIDAccessTokenGeneratorConfiguration,
             clientKrr = ClientKRRModuleIntegationTestFixture.moduleConfiguration,
             clientSpleis = ClientSpleisModuleIntegrationTestFixture.moduleConfiguration,
-            clientUnleash = ClientUnleashModuleIntegrationTestFixture.moduleConfiguration,
             db = DBTestFixture.database.dbModuleConfiguration,
             kafka = KafkaModuleTestRapidTestFixture.moduleConfiguration,
             versjonAvKode = "versjon_1",

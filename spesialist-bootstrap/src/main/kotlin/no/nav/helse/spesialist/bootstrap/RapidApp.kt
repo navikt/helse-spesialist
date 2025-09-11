@@ -13,7 +13,6 @@ import no.nav.helse.spesialist.api.bootstrap.SpeilTilgangsgrupper
 import no.nav.helse.spesialist.client.entraid.ClientEntraIDModule
 import no.nav.helse.spesialist.client.krr.ClientKrrModule
 import no.nav.helse.spesialist.client.spleis.ClientSpleisModule
-import no.nav.helse.spesialist.client.unleash.ClientUnleashModule
 import no.nav.helse.spesialist.db.DBModule
 import no.nav.helse.spesialist.kafka.KafkaModule
 import java.net.URI
@@ -54,12 +53,6 @@ fun main() {
                         spleisUrl = URI.create(env.getValue("SPLEIS_API_URL")),
                         spleisClientId = env.getValue("SPLEIS_CLIENT_ID"),
                         loggRespons = env.getBoolean("SPLEIS_CLIENT_LOGG_RESPONS", false),
-                    ),
-                clientUnleash =
-                    ClientUnleashModule.Configuration(
-                        apiKey = env.getValue("UNLEASH_SERVER_API_TOKEN"),
-                        apiUrl = env.getValue("UNLEASH_SERVER_API_URL"),
-                        apiEnv = env.getValue("UNLEASH_SERVER_API_ENV"),
                     ),
                 db =
                     DBModule.Configuration(
@@ -131,8 +124,6 @@ class RapidApp {
                 accessTokenGenerator = clientEntraIdModule.accessTokenGenerator,
             )
 
-        val clientUnleashModule = ClientUnleashModule(configuration.clientUnleash)
-
         val dbModule = DBModule(configuration.db)
 
         val kafkaModule =
@@ -143,7 +134,6 @@ class RapidApp {
                 daos = dbModule.daos,
                 tilgangsgrupper = configuration.tilgangsgrupper,
                 stikkprøver = configuration.stikkprøver,
-                featureToggles = clientUnleashModule.featureToggles,
                 gruppekontroll = clientEntraIdModule.gruppekontroll,
             )
 
@@ -157,7 +147,6 @@ class RapidApp {
                 sessionFactory = dbModule.sessionFactory,
                 versjonAvKode = configuration.versjonAvKode,
                 environmentToggles = configuration.environmentToggles,
-                featureToggles = clientUnleashModule.featureToggles,
                 snapshothenter = clientSpleisModule.snapshothenter,
                 reservasjonshenter = clientKrrModule.reservasjonshenter,
             )

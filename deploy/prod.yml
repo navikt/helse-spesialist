@@ -79,8 +79,6 @@ spec:
           cluster: prod-gcp
         - application: logging
           namespace: nais-system
-      external:
-        - host: tbd-unleash-api.nav.cloud.nais.io
   gcp:
     permissions:
       - resource:
@@ -110,8 +108,6 @@ spec:
               - name: bigquery_connection_user
               - name: spesialist-db-migrations
               - name: spesialist-sidegig
-  envFrom:
-    - secret: spesialist-unleash-api-token
   env:
     - name: KAFKA_RAPID_TOPIC
       value: tbd.rapid.v1

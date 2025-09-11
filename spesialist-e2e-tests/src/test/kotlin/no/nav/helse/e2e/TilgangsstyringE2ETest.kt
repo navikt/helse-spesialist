@@ -5,7 +5,6 @@ import graphql.schema.DataFetchingEnvironment
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import no.nav.helse.FeatureToggles
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.SaksbehandlerTilganger
@@ -185,7 +184,6 @@ class TilgangsstyringE2ETest : AbstractE2ETest() {
                     sessionFactory = sessionFactory,
                     vedtakBegrunnelseDao = daos.vedtakBegrunnelseDao,
                     stansAutomatiskBehandlingSaksbehandlerDao = daos.stansAutomatiskBehandlingSaksbehandlerDao,
-                    featureToggles = object: FeatureToggles {},
                 ),
             ),
         )

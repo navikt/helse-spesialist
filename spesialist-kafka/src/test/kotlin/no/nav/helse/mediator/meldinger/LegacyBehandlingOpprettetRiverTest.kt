@@ -5,12 +5,10 @@ import io.mockk.called
 import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.helse.FeatureToggles
 import no.nav.helse.kafka.BehandlingOpprettetRiver
 import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.vedtaksperiode.BehandlingOpprettet
-import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk
 import no.nav.helse.spesialist.test.TestPerson
 import org.junit.jupiter.api.BeforeEach
@@ -20,7 +18,7 @@ import java.util.UUID
 internal class LegacyBehandlingOpprettetRiverTest {
 
     private val mediator = mockk<MeldingMediator>(relaxed = true)
-    private val rapid = TestRapid().medRivers(BehandlingOpprettetRiver(mediator, object : FeatureToggles {}))
+    private val rapid = TestRapid().medRivers(BehandlingOpprettetRiver(mediator))
     private val testperson = TestPerson()
 
     @BeforeEach

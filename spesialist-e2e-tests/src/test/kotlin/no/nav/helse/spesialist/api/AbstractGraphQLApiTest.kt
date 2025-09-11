@@ -17,7 +17,6 @@ import io.ktor.server.routing.route
 import io.ktor.server.testing.ApplicationTestBuilder
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.helse.FeatureToggles
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.StansAutomatiskBehandlingSaksbehandlerDao
 import no.nav.helse.db.VedtakBegrunnelseDao
@@ -88,7 +87,6 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
     private val personinfoDao = daos.personinfoDao
     private val snapshotService = SnapshotService(personinfoDao, snapshothenter)
     private val meldingPubliserer = mockk<MeldingPubliserer>(relaxed = true)
-    private val featureToggles = object : FeatureToggles {}
 
     private val apiTesting = ApiTesting(
         jwtStub,
@@ -130,7 +128,6 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                                 sessionFactory = sessionFactory,
                                 vedtakBegrunnelseDao = vedtakBegrunnelseDao,
                                 stansAutomatiskBehandlingSaksbehandlerDao = stansAutomatiskBehandlingSaksbehandlerDao,
-                                featureToggles = featureToggles,
                             ),
                     ),
                     oppgaver = OppgaverQueryHandler(

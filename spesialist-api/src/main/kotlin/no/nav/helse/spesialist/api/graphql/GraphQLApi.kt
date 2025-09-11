@@ -14,7 +14,6 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
-import no.nav.helse.FeatureToggles
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.Daos
 import no.nav.helse.db.SessionFactory
@@ -115,7 +114,6 @@ fun lagSchemaMedResolversOgHandlers(
     behandlingstatistikk: IBehandlingsstatistikkService,
     dokumenthåndterer: Dokumenthåndterer,
     godkjenninghåndterer: Godkjenninghåndterer,
-    featureToggles: FeatureToggles,
     meldingPubliserer: MeldingPubliserer,
 ): SpesialistSchema =
     SpesialistSchema(
@@ -146,7 +144,6 @@ fun lagSchemaMedResolversOgHandlers(
                                 sessionFactory = sessionFactory,
                                 vedtakBegrunnelseDao = daos.vedtakBegrunnelseDao,
                                 stansAutomatiskBehandlingSaksbehandlerDao = daos.stansAutomatiskBehandlingSaksbehandlerDao,
-                                featureToggles = featureToggles,
                             ),
                     ),
                 oppgaver =
