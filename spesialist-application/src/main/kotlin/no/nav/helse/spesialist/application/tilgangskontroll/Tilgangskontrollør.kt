@@ -1,15 +1,8 @@
-package no.nav.helse.mediator
+package no.nav.helse.spesialist.application.tilgangskontroll
 
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.modell.oppgave.Egenskap
-import no.nav.helse.modell.oppgave.Egenskap.BESLUTTER
-import no.nav.helse.modell.oppgave.Egenskap.EGEN_ANSATT
-import no.nav.helse.modell.oppgave.Egenskap.FORTROLIG_ADRESSE
-import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
-import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
-import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
-import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
 import java.util.UUID
 
 abstract class MicrosoftTilgangskontroll(
@@ -28,11 +21,11 @@ abstract class MicrosoftTilgangskontroll(
     private fun Collection<Egenskap>.tilTilgangsgrupper() =
         map { egenskap ->
             when (egenskap) {
-                EGEN_ANSATT -> tilgangsgrupper.skjermedePersonerGruppeId
-                FORTROLIG_ADRESSE -> tilgangsgrupper.kode7GruppeId
-                STRENGT_FORTROLIG_ADRESSE -> UUID.randomUUID() // Ingen skal ha tilgang til disse i Speil foreløpig
-                BESLUTTER -> tilgangsgrupper.beslutterGruppeId
-                STIKKPRØVE -> tilgangsgrupper.stikkprøveGruppeId
+                Egenskap.EGEN_ANSATT -> tilgangsgrupper.skjermedePersonerGruppeId
+                Egenskap.FORTROLIG_ADRESSE -> tilgangsgrupper.kode7GruppeId
+                Egenskap.STRENGT_FORTROLIG_ADRESSE -> UUID.randomUUID() // Ingen skal ha tilgang til disse i Speil foreløpig
+                Egenskap.BESLUTTER -> tilgangsgrupper.beslutterGruppeId
+                Egenskap.STIKKPRØVE -> tilgangsgrupper.stikkprøveGruppeId
                 else -> throw IllegalArgumentException("Egenskap $egenskap er ikke støttet som tilgangsstyrt egenskap")
             }
         }

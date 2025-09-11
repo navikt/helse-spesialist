@@ -89,6 +89,7 @@ import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.application.logg.sikkerlogg
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
+import no.nav.helse.spesialist.application.tilgangskontroll.TilgangskontrollørForApi
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
@@ -753,7 +754,10 @@ class SaksbehandlerMediator(
             ident = ident,
         )
 
-    private fun Saksbehandler.tilLegacySaksbehandler(saksbehandlergrupper: List<UUID>): LegacySaksbehandler = gjenopprett(TilgangskontrollørForApi(saksbehandlergrupper, tilgangsgrupper))
+    private fun Saksbehandler.tilLegacySaksbehandler(saksbehandlergrupper: List<UUID>): LegacySaksbehandler =
+        gjenopprett(
+            TilgangskontrollørForApi(saksbehandlergrupper, tilgangsgrupper),
+        )
 
     private fun HandlingFraApi.tilModellversjon(saksbehandlerOid: SaksbehandlerOid): Handling =
         when (this) {

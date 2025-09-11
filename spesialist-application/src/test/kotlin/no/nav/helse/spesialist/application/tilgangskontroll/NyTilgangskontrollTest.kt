@@ -3,7 +3,6 @@ package no.nav.helse.spesialist.application.tilgangskontroll
 import no.nav.helse.db.PartialDaos
 import no.nav.helse.db.api.EgenAnsattApiDao
 import no.nav.helse.db.api.PartialPersonApiDao
-import no.nav.helse.mediator.TilgangskontrollørForApi
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
