@@ -53,7 +53,10 @@ class OppgavemelderTest {
     @Test
     fun `bygg kafkamelding med saksbehandler og beslutter`() {
         val oppgave = nyOppgave()
-        oppgave.forsøkTildelingVedReservasjon(legacySaksbehandler = saksbehandler)
+        oppgave.forsøkTildelingVedReservasjon(
+            legacySaksbehandler = saksbehandler,
+            saksbehandlerTilgangsgrupper = emptySet()
+        )
         oppgave.register(Oppgavemelder(FNR, meldingPubliserer))
         oppgave.avventerSystem("IDENT", UUID.randomUUID())
         val meldinger = testRapid.inspektør.meldinger()

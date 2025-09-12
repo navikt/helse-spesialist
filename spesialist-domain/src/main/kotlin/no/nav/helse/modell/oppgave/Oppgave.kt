@@ -5,14 +5,18 @@ import no.nav.helse.modell.ManglerTilgang
 import no.nav.helse.modell.OppgaveIkkeTildelt
 import no.nav.helse.modell.OppgaveTildeltNoenAndre
 import no.nav.helse.modell.oppgave.Egenskap.BESLUTTER
-import no.nav.helse.modell.oppgave.Egenskap.Companion.tilgangsstyrteEgenskaper
 import no.nav.helse.modell.oppgave.Egenskap.EGEN_ANSATT
+import no.nav.helse.modell.oppgave.Egenskap.FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Egenskap.GOSYS
 import no.nav.helse.modell.oppgave.Egenskap.PÅ_VENT
 import no.nav.helse.modell.oppgave.Egenskap.RETUR
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
+import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Egenskap.TILBAKEDATERT
+import no.nav.helse.spesialist.domain.Saksbehandler
+import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
+import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -49,14 +53,21 @@ class Oppgave private constructor(
         observers.add(observer)
     }
 
-    fun forsøkTildeling(legacySaksbehandler: LegacySaksbehandler) {
+    fun forsøkTildeling(
+        legacySaksbehandler: LegacySaksbehandler,
+        saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe>,
+    ) {
         logg.info("Oppgave med {} forsøkes tildelt av saksbehandler.", kv("oppgaveId", id))
         val tildelt = tildeltTil
         if (tildelt != null && tildelt.oid != legacySaksbehandler.oid) {
             logg.warn("Oppgave med {} kan ikke tildeles fordi den er tildelt noen andre.", kv("oppgaveId", id))
             throw OppgaveTildeltNoenAndre(tildelt.oid, false)
         }
-        tilstand.tildel(this, legacySaksbehandler)
+        tilstand.tildel(
+            oppgave = this,
+            legacySaksbehandler = legacySaksbehandler,
+            saksbehandlerTilgangsgrupper = saksbehandlerTilgangsgrupper,
+        )
     }
 
     fun forsøkAvmelding(legacySaksbehandler: LegacySaksbehandler) {
@@ -74,14 +85,21 @@ class Oppgave private constructor(
         tilstand.avmeld(this, legacySaksbehandler)
     }
 
-    fun forsøkTildelingVedReservasjon(legacySaksbehandler: LegacySaksbehandler) {
+    fun forsøkTildelingVedReservasjon(
+        legacySaksbehandler: LegacySaksbehandler,
+        saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe>,
+    ) {
         logg.info("Oppgave med {} forsøkes tildelt grunnet reservasjon.", kv("oppgaveId", id))
         sikkerlogg.info("Oppgave med {} forsøkes tildelt $legacySaksbehandler grunnet reservasjon.", kv("oppgaveId", id))
         if (_egenskaper.contains(STIKKPRØVE)) {
             logg.info("Oppgave med {} er stikkprøve og tildeles ikke på tross av reservasjon.", kv("oppgaveId", id))
             return
         }
-        tilstand.tildel(this, legacySaksbehandler)
+        tilstand.tildel(
+            oppgave = this,
+            legacySaksbehandler = legacySaksbehandler,
+            saksbehandlerTilgangsgrupper = saksbehandlerTilgangsgrupper,
+        )
     }
 
     fun sendTilBeslutter(beslutter: LegacySaksbehandler?) {
@@ -244,6 +262,7 @@ class Oppgave private constructor(
         fun tildel(
             oppgave: Oppgave,
             legacySaksbehandler: LegacySaksbehandler,
+            saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe>,
         ) {
             logg.warn(
                 "Forventer ikke forsøk på tildeling i {} for oppgave med {} av $legacySaksbehandler",
@@ -282,9 +301,13 @@ class Oppgave private constructor(
         override fun tildel(
             oppgave: Oppgave,
             legacySaksbehandler: LegacySaksbehandler,
+            saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe>,
         ) {
-            val tilgangsstyrteEgenskaper = oppgave._egenskaper.tilgangsstyrteEgenskaper()
-            if (tilgangsstyrteEgenskaper.isNotEmpty() && !legacySaksbehandler.harTilgangTil(tilgangsstyrteEgenskaper)) {
+            if (!oppgave.harTilgang(
+                    saksbehandler = legacySaksbehandler.tilSaksbehandler(),
+                    saksbehandlerTilgangsgrupper = saksbehandlerTilgangsgrupper,
+                )
+            ) {
                 logg.info(
                     "Oppgave med {} har egenskaper som saksbehandler med {} ikke har tilgang til å behandle.",
                     kv("oppgaveId", oppgave.id),
@@ -332,6 +355,18 @@ class Oppgave private constructor(
     }
 
     override fun toString(): String = "Oppgave(tilstand=$tilstand, vedtaksperiodeId=$vedtaksperiodeId, utbetalingId=$utbetalingId, id=$id)"
+
+    fun harTilgang(
+        saksbehandler: Saksbehandler,
+        saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe>,
+    ): Boolean =
+        egenskaper.all {
+            harTilgangTilEgenskap(
+                egenskap = it,
+                saksbehandler = saksbehandler,
+                saksbehandlerTilgangsgrupper = saksbehandlerTilgangsgrupper,
+            )
+        }
 
     companion object {
         private val logg = LoggerFactory.getLogger(this::class.java.declaringClass)
@@ -384,5 +419,27 @@ class Oppgave private constructor(
             tildeltTil = tildeltTil,
             egenskaper = egenskaper,
         )
+
+        fun harTilgangTilEgenskap(
+            egenskap: Egenskap,
+            saksbehandler: Saksbehandler,
+            saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe>,
+        ): Boolean =
+            when (egenskap) {
+                STRENGT_FORTROLIG_ADRESSE -> false // Ingen skal ha tilgang til disse i Speil foreløpig
+                EGEN_ANSATT -> Tilgangsgruppe.SKJERMEDE in saksbehandlerTilgangsgrupper
+                FORTROLIG_ADRESSE -> Tilgangsgruppe.KODE7 in saksbehandlerTilgangsgrupper
+                BESLUTTER -> Tilgangsgruppe.BESLUTTER in saksbehandlerTilgangsgrupper
+                STIKKPRØVE -> Tilgangsgruppe.STIKKPRØVE in saksbehandlerTilgangsgrupper
+                else -> true
+            }
     }
 }
+
+private fun LegacySaksbehandler.tilSaksbehandler(): Saksbehandler =
+    Saksbehandler(
+        id = SaksbehandlerOid(oid),
+        navn = navn,
+        epost = epostadresse,
+        ident = ident(),
+    )

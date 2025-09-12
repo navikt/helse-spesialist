@@ -14,6 +14,7 @@ import no.nav.helse.modell.saksbehandler.handlinger.TilgangskontrollForTestHarIk
 import no.nav.helse.modell.saksbehandler.handlinger.TilgangskontrollForTestHarTilgang
 import no.nav.helse.modell.saksbehandler.handlinger.TilgangskontrollForTestMedKunFortroligAdresse
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
+import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -59,7 +60,10 @@ internal class OppgaveTest {
     @Test
     fun `Forsøker tildeling ved reservasjon`() {
         val oppgave = nyOppgave(SØKNAD)
-        oppgave.forsøkTildelingVedReservasjon(saksbehandlerUtenTilgang)
+        oppgave.forsøkTildelingVedReservasjon(
+            legacySaksbehandler = saksbehandlerUtenTilgang,
+            saksbehandlerTilgangsgrupper = emptySet()
+        )
 
         inspektør(oppgave) {
             assertEquals(true, tildelt)
@@ -70,9 +74,12 @@ internal class OppgaveTest {
 
     @Test
     fun `Kan tildele ved reservasjon dersom saksbehandler har tilgang til alle tilgangsstyrte egenskaper på oppgaven`() {
-        val oppgave = nyOppgave(SØKNAD, STRENGT_FORTROLIG_ADRESSE, FORTROLIG_ADRESSE)
+        val oppgave = nyOppgave(SØKNAD, FORTROLIG_ADRESSE)
         val saksbehandler = saksbehandler(tilgangskontroll = TilgangskontrollForTestHarTilgang)
-        oppgave.forsøkTildelingVedReservasjon(saksbehandler)
+        oppgave.forsøkTildelingVedReservasjon(
+            legacySaksbehandler = saksbehandler,
+            saksbehandlerTilgangsgrupper = Tilgangsgruppe.entries.toSet()
+        )
 
         inspektør(oppgave) {
             assertEquals(true, tildelt)
@@ -84,7 +91,10 @@ internal class OppgaveTest {
     fun `Kan ikke tildele ved reservasjon dersom saksbehandler ikke har tilgang til alle tilgangsstyrte egenskaper på oppgaven`() {
         val oppgave = nyOppgave(SØKNAD, FORTROLIG_ADRESSE, STRENGT_FORTROLIG_ADRESSE)
         assertThrows<ManglerTilgang> {
-            oppgave.forsøkTildelingVedReservasjon(saksbehandler(tilgangskontroll = TilgangskontrollForTestMedKunFortroligAdresse))
+            oppgave.forsøkTildelingVedReservasjon(
+                legacySaksbehandler = saksbehandler(tilgangskontroll = TilgangskontrollForTestMedKunFortroligAdresse),
+                saksbehandlerTilgangsgrupper = setOf(Tilgangsgruppe.KODE7)
+            )
         }
 
         inspektør(oppgave) {
@@ -96,7 +106,10 @@ internal class OppgaveTest {
     @Test
     fun `Forsøker tildeling ved reservasjon med påVent`() {
         val oppgave = nyOppgave(PÅ_VENT, SØKNAD)
-        oppgave.forsøkTildelingVedReservasjon(saksbehandlerUtenTilgang)
+        oppgave.forsøkTildelingVedReservasjon(
+            legacySaksbehandler = saksbehandlerUtenTilgang,
+            saksbehandlerTilgangsgrupper = emptySet()
+        )
 
         inspektør(oppgave) {
             assertEquals(true, tildelt)
@@ -108,7 +121,10 @@ internal class OppgaveTest {
     @Test
     fun `Forsøker tildeling ved reservasjon ved stikkprøve`() {
         val oppgave = nyOppgave(PÅ_VENT, STIKKPRØVE)
-        oppgave.forsøkTildelingVedReservasjon(saksbehandlerUtenTilgang)
+        oppgave.forsøkTildelingVedReservasjon(
+            legacySaksbehandler = saksbehandlerUtenTilgang,
+            saksbehandlerTilgangsgrupper = emptySet()
+        )
 
         inspektør(oppgave) {
             assertEquals(false, tildelt)
@@ -119,7 +135,10 @@ internal class OppgaveTest {
     @Test
     fun `Forsøk avmelding av oppgave`() {
         val oppgave = nyOppgave()
-        oppgave.forsøkTildeling(saksbehandlerUtenTilgang)
+        oppgave.forsøkTildeling(
+            legacySaksbehandler = saksbehandlerUtenTilgang,
+            saksbehandlerTilgangsgrupper = emptySet()
+        )
         oppgave.forsøkAvmelding(saksbehandlerUtenTilgang)
 
         inspektør(oppgave) {
@@ -132,7 +151,10 @@ internal class OppgaveTest {
     @Test
     fun `Forsøk avmelding av oppgave når oppgaven er tildelt noen andre`() {
         val oppgave = nyOppgave()
-        oppgave.forsøkTildeling(saksbehandler(oid = UUID.randomUUID()))
+        oppgave.forsøkTildeling(
+            legacySaksbehandler = saksbehandler(oid = UUID.randomUUID()),
+            saksbehandlerTilgangsgrupper = emptySet()
+        )
         oppgave.forsøkAvmelding(saksbehandlerUtenTilgang)
 
         inspektør(oppgave) {
@@ -155,7 +177,10 @@ internal class OppgaveTest {
     fun `Forsøker tildeling ved reservasjon ved manglende tilgang`(egenskap: Egenskap) {
         val oppgave = nyOppgave(egenskap)
         assertThrows<ManglerTilgang> {
-            oppgave.forsøkTildelingVedReservasjon(saksbehandlerUtenTilgang)
+            oppgave.forsøkTildelingVedReservasjon(
+                legacySaksbehandler = saksbehandlerUtenTilgang,
+                saksbehandlerTilgangsgrupper = emptySet()
+            )
         }
 
         inspektør(oppgave) {
@@ -169,7 +194,10 @@ internal class OppgaveTest {
     fun `Forsøker tildeling ved manglende tilgang`(egenskap: Egenskap) {
         val oppgave = nyOppgave(egenskap)
         assertThrows<ManglerTilgang> {
-            oppgave.forsøkTildeling(saksbehandlerUtenTilgang)
+            oppgave.forsøkTildeling(
+                legacySaksbehandler = saksbehandlerUtenTilgang,
+                saksbehandlerTilgangsgrupper = emptySet()
+            )
         }
 
         inspektør(oppgave) {
@@ -179,11 +207,14 @@ internal class OppgaveTest {
     }
 
     @ParameterizedTest
-    @EnumSource(names = ["EGEN_ANSATT", "FORTROLIG_ADRESSE", "BESLUTTER", "SPESIALSAK", "STRENGT_FORTROLIG_ADRESSE", "STIKKPRØVE"])
+    @EnumSource(names = ["EGEN_ANSATT", "FORTROLIG_ADRESSE", "BESLUTTER", "SPESIALSAK", "STIKKPRØVE"])
     fun `Forsøker tildeling ved tilgang`(egenskap: Egenskap) {
         val oppgave = nyOppgave(egenskap)
         val saksbehandlerMedTilgang = saksbehandler(tilgangskontroll = TilgangskontrollForTestHarTilgang)
-        oppgave.forsøkTildeling(saksbehandlerMedTilgang)
+        oppgave.forsøkTildeling(
+            legacySaksbehandler = saksbehandlerMedTilgang,
+            saksbehandlerTilgangsgrupper = Tilgangsgruppe.entries.toSet()
+        )
 
         inspektør(oppgave) {
             assertEquals(true, tildelt)
@@ -195,9 +226,15 @@ internal class OppgaveTest {
     @Test
     fun `Forsøker tildeling når oppgaven er tildelt noen andre`() {
         val oppgave = nyOppgave()
-        oppgave.forsøkTildeling(saksbehandlerUtenTilgang)
+        oppgave.forsøkTildeling(
+            legacySaksbehandler = saksbehandlerUtenTilgang,
+            saksbehandlerTilgangsgrupper = emptySet()
+        )
         assertThrows<OppgaveTildeltNoenAndre> {
-            oppgave.forsøkTildeling(saksbehandler(oid = UUID.randomUUID()))
+            oppgave.forsøkTildeling(
+                legacySaksbehandler = saksbehandler(oid = UUID.randomUUID()),
+                saksbehandlerTilgangsgrupper = emptySet()
+            )
         }
 
         inspektør(oppgave) {
@@ -241,7 +278,10 @@ internal class OppgaveTest {
     @Test
     fun `oppgave sendt til beslutter tildeles ingen dersom det ikke finnes noen tidligere beslutter`() {
         val oppgave = nyOppgave(SØKNAD)
-        oppgave.forsøkTildelingVedReservasjon(saksbehandlerUtenTilgang)
+        oppgave.forsøkTildelingVedReservasjon(
+            legacySaksbehandler = saksbehandlerUtenTilgang,
+            saksbehandlerTilgangsgrupper = emptySet()
+        )
         oppgave.sendTilBeslutter(null)
         inspektør(oppgave) {
             assertEquals(null, tildeltTil)
@@ -271,9 +311,15 @@ internal class OppgaveTest {
     @Test
     fun `oppgave sendt i retur ligger ikke lenger på vent`() {
         val oppgave = nyOppgave(SØKNAD)
-        oppgave.forsøkTildelingVedReservasjon(saksbehandlerUtenTilgang)
+        oppgave.forsøkTildelingVedReservasjon(
+            legacySaksbehandler = saksbehandlerUtenTilgang,
+            saksbehandlerTilgangsgrupper = emptySet()
+        )
         oppgave.sendTilBeslutter(saksbehandlerUtenTilgang)
-        oppgave.forsøkTildelingVedReservasjon(beslutter)
+        oppgave.forsøkTildelingVedReservasjon(
+            legacySaksbehandler = beslutter,
+            saksbehandlerTilgangsgrupper = Tilgangsgruppe.entries.toSet()
+        )
         oppgave.sendIRetur(beslutter)
         inspektør(oppgave) {
             assertFalse(påVent)
@@ -426,7 +472,10 @@ internal class OppgaveTest {
     @Test
     fun `legg på vent`() {
         val oppgave = nyOppgave(SØKNAD)
-        oppgave.forsøkTildelingVedReservasjon(saksbehandlerUtenTilgang)
+        oppgave.forsøkTildelingVedReservasjon(
+            legacySaksbehandler = saksbehandlerUtenTilgang,
+            saksbehandlerTilgangsgrupper = emptySet()
+        )
         oppgave.leggPåVent(true, saksbehandlerUtenTilgang)
 
         inspektør(oppgave) {
@@ -449,7 +498,10 @@ internal class OppgaveTest {
     @Test
     fun `legg på vent og skalTildeles ny saksbehandler`() {
         val oppgave = nyOppgave(SØKNAD)
-        oppgave.forsøkTildelingVedReservasjon(saksbehandlerUtenTilgang)
+        oppgave.forsøkTildelingVedReservasjon(
+            legacySaksbehandler = saksbehandlerUtenTilgang,
+            saksbehandlerTilgangsgrupper = emptySet()
+        )
         oppgave.leggPåVent(true, beslutter)
 
         inspektør(oppgave) {
@@ -462,7 +514,10 @@ internal class OppgaveTest {
     @Test
     fun `legg på vent og !skalTildeles`() {
         val oppgave = nyOppgave(SØKNAD)
-        oppgave.forsøkTildelingVedReservasjon(saksbehandlerUtenTilgang)
+        oppgave.forsøkTildelingVedReservasjon(
+            legacySaksbehandler = saksbehandlerUtenTilgang,
+            saksbehandlerTilgangsgrupper = emptySet()
+        )
         oppgave.leggPåVent(false, saksbehandlerUtenTilgang)
 
         inspektør(oppgave) {
@@ -489,7 +544,10 @@ internal class OppgaveTest {
     fun `sender ut oppgaveEndret når oppgave sendes legges på vent`() {
         val oppgave = nyOppgave(SØKNAD)
         oppgave.register(observer)
-        oppgave.forsøkTildelingVedReservasjon(saksbehandlerUtenTilgang)
+        oppgave.forsøkTildelingVedReservasjon(
+            legacySaksbehandler = saksbehandlerUtenTilgang,
+            saksbehandlerTilgangsgrupper = emptySet()
+        )
         oppgave.leggPåVent(true, saksbehandlerUtenTilgang)
 
         assertEquals(2, observer.oppgaverEndret.size)
@@ -505,7 +563,10 @@ internal class OppgaveTest {
     fun `sender ut oppgaveEndret når oppgave ikke er på vent lenger`() {
         val oppgave = nyOppgave(SØKNAD)
         oppgave.register(observer)
-        oppgave.forsøkTildelingVedReservasjon(saksbehandlerUtenTilgang)
+        oppgave.forsøkTildelingVedReservasjon(
+            legacySaksbehandler = saksbehandlerUtenTilgang,
+            saksbehandlerTilgangsgrupper = emptySet()
+        )
         oppgave.leggPåVent(true, saksbehandlerUtenTilgang)
         oppgave.fjernFraPåVent()
 

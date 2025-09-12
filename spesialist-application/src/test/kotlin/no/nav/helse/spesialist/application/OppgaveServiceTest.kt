@@ -17,12 +17,14 @@ import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Oppgave
+import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
 import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgrupper
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 import no.nav.helse.spesialist.domain.testfixtures.lagEpostadresseFraFulltNavn
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlerident
 import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlernavn
+import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -77,7 +79,14 @@ internal class OppgaveServiceTest {
             meldingPubliserer = meldingPubliserer,
             tilgangskontroll = { _, _ -> false },
             tilgangsgrupper = randomTilgangsgrupper(),
-            oppgaveRepository = oppgaveRepository
+            oppgaveRepository = oppgaveRepository,
+            tilgangsgruppehenter = object : Tilgangsgruppehenter {
+                override suspend fun hentTilgangsgrupper(
+                    oid: UUID,
+                    gruppeIder: List<UUID>
+                ): Set<UUID> = emptySet()
+                override suspend fun hentTilgangsgrupper(oid: UUID): Set<Tilgangsgruppe> = emptySet()
+            }
         )
 
     private fun lagSøknadsoppgave(

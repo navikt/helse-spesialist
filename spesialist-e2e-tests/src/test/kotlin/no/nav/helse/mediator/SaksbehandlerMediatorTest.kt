@@ -10,8 +10,6 @@ import kotliquery.sessionOf
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.TestRapidHelpers.hendelser
 import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
-import no.nav.helse.db.api.EgenAnsattApiDao
-import no.nav.helse.db.api.PartialPersonApiDao
 import no.nav.helse.e2e.AbstractDatabaseTest
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
@@ -53,7 +51,6 @@ import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.ApiOpphevStans
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
-import no.nav.helse.spesialist.application.tilgangskontroll.NyTilgangskontroll
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
 import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgrupper
 import no.nav.helse.spesialist.db.DBDaos
@@ -435,20 +432,18 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             tilgangskontroll = { _, _ -> false },
             tilgangsgrupper = tilgangsgrupper,
             oppgaveRepository = daos.oppgaveRepository,
-        )
-    private val apiOppgaveService = ApiOppgaveService(
-        oppgaveDao = daos.oppgaveDao,
-        oppgaveService = oppgaveService,
-        nyTilgangskontroll = NyTilgangskontroll(
-            egenAnsattApiDao = object : EgenAnsattApiDao {
-                override fun erEgenAnsatt(fødselsnummer: String) = false
-            },
-            personApiDao = object : PartialPersonApiDao {},
             tilgangsgruppehenter = object : Tilgangsgruppehenter {
-                override suspend fun hentTilgangsgrupper(oid: UUID, gruppeIder: List<UUID>): Set<UUID> = emptySet()
+                override suspend fun hentTilgangsgrupper(
+                    oid: UUID,
+                    gruppeIder: List<UUID>
+                ): Set<UUID> = emptySet()
+
                 override suspend fun hentTilgangsgrupper(oid: UUID): Set<Tilgangsgruppe> = emptySet()
             }
         )
+    private val apiOppgaveService = ApiOppgaveService(
+        oppgaveDao = daos.oppgaveDao,
+        oppgaveService = oppgaveService
     )
 
     private val mediator =
@@ -464,16 +459,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             environmentToggles = environmentToggles,
             sessionFactory = TransactionalSessionFactory(dataSource),
             tilgangskontroll = { _, _ -> false },
-            nyTilgangskontroll = NyTilgangskontroll(
-                egenAnsattApiDao = object : EgenAnsattApiDao {
-                    override fun erEgenAnsatt(fødselsnummer: String) = false
-                },
-                personApiDao = object : PartialPersonApiDao {},
-                tilgangsgruppehenter = object : Tilgangsgruppehenter {
-                    override suspend fun hentTilgangsgrupper(oid: UUID, gruppeIder: List<UUID>): Set<UUID> = emptySet()
-                    override suspend fun hentTilgangsgrupper(oid: UUID): Set<Tilgangsgruppe> = emptySet()
-                }
-            )
         )
 
     private val AKTØR_ID = lagAktørId()

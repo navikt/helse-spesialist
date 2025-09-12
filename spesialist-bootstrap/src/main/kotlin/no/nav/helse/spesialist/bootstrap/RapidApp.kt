@@ -37,6 +37,7 @@ fun main() {
                         clientId = env.getValue("AZURE_APP_CLIENT_ID"),
                         tokenEndpoint = env.getValue("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
                         privateJwk = env.getValue("AZURE_APP_JWK"),
+                        msGraphUrl = "https://graph.microsoft.com/v1.0",
                     ),
                 clientKrr =
                     ClientKrrModule.Configuration(

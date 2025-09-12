@@ -47,6 +47,7 @@ import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlerident
 import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlernavn
+import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.typer.Kjønn
 import org.junit.jupiter.api.AfterEach
 import java.time.LocalDate
@@ -593,6 +594,7 @@ abstract class AbstractDBIntegrationTest {
 
     protected fun Oppgave.tildelOgLagre(
         legacySaksbehandler: LegacySaksbehandler,
+        saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe> = emptySet(),
     ): Oppgave {
         opprettSaksbehandler(
             saksbehandlerOID = legacySaksbehandler.oid,
@@ -600,7 +602,7 @@ abstract class AbstractDBIntegrationTest {
             epost = legacySaksbehandler.epostadresse,
             ident = legacySaksbehandler.ident()
         )
-        this.forsøkTildeling(legacySaksbehandler)
+        this.forsøkTildeling(legacySaksbehandler, saksbehandlerTilgangsgrupper)
         sessionContext.oppgaveRepository.lagre(this)
         return this
     }
@@ -684,13 +686,13 @@ abstract class AbstractDBIntegrationTest {
         val oppgave: Oppgave,
     )
 
-    protected fun nyLegacySaksbehandler(navn: String = lagSaksbehandlernavn(), tilgangkontroll: (UUID, Collection<Egenskap>) -> Boolean = { _, _ -> false }): LegacySaksbehandler {
+    protected fun nyLegacySaksbehandler(navn: String = lagSaksbehandlernavn()): LegacySaksbehandler {
         val saksbehandler = LegacySaksbehandler(
             epostadresse = lagEpostadresseFraFulltNavn(navn),
             oid = UUID.randomUUID(),
             navn = navn,
             ident = lagSaksbehandlerident(),
-            tilgangskontroll = tilgangkontroll
+            tilgangskontroll = { _, _ -> false }
         )
         opprettSaksbehandler(saksbehandler.oid, saksbehandler.navn, saksbehandler.epostadresse, saksbehandler.ident())
         return saksbehandler

@@ -17,7 +17,6 @@ import no.nav.helse.spesialist.api.graphql.kobleOppApi
 import no.nav.helse.spesialist.api.graphql.lagSchemaMedResolversOgHandlers
 import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.application.Snapshothenter
-import no.nav.helse.spesialist.application.tilgangskontroll.NyTilgangskontroll
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangskontrollørForReservasjon
@@ -53,12 +52,6 @@ class ApiModule(
                 ),
             tilgangsgrupper = tilgangsgrupper,
             oppgaveRepository = daos.oppgaveRepository,
-        )
-
-    private val nyTilgangskontroll =
-        NyTilgangskontroll(
-            egenAnsattApiDao = daos.egenAnsattApiDao,
-            personApiDao = daos.personApiDao,
             tilgangsgruppehenter = tilgangsgruppehenter,
         )
 
@@ -66,7 +59,6 @@ class ApiModule(
         ApiOppgaveService(
             oppgaveDao = daos.oppgaveDao,
             oppgaveService = oppgaveService,
-            nyTilgangskontroll = nyTilgangskontroll,
         )
 
     private val stansAutomatiskBehandlinghåndterer =
@@ -98,8 +90,6 @@ class ApiModule(
                             tilgangsgruppehenter,
                             tilgangsgrupper,
                         ),
-                    nyTilgangskontroll =
-                    nyTilgangskontroll,
                 ),
             stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
             personhåndterer = PersonhåndtererImpl(publiserer = meldingPubliserer),

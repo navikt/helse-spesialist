@@ -24,7 +24,6 @@ import no.nav.helse.modell.oppgave.Egenskap.FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Egenskap.Kategori
 import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Oppgave
-import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.db.TestMelding
@@ -820,20 +819,6 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
         nyOppgaveForNyPerson()
         val oppgaver = oppgaveDao.finnTildelteOppgaver(saksbehandler.oid(), emptyList(), 0, 2)
         assertEquals(0, oppgaver.size)
-    }
-
-    @Test
-    fun `Henter kun oppgaver saksbehandler har tilgang til å se`() {
-        val saksbehandler = nyLegacySaksbehandler(tilgangkontroll = {_,_ -> true})
-        val fortroligOppgave = nyOppgaveForNyPerson(
-            adressebeskyttelse = Adressebeskyttelse.StrengtFortrolig,
-            oppgaveegenskaper = setOf(STRENGT_FORTROLIG_ADRESSE)
-        ).tildelOgLagre(saksbehandler)
-        nyOppgaveForNyPerson().tildelOgLagre(saksbehandler)
-        nyOppgaveForNyPerson().tildelOgLagre(saksbehandler)
-        val oppgaver = oppgaveDao.finnTildelteOppgaver(saksbehandler.oid(), listOf(STRENGT_FORTROLIG_ADRESSE.toString()), 0, 2)
-        assertEquals(2, oppgaver.size)
-        oppgaver.assertIderIkkeOverlapperMed(fortroligOppgave)
     }
 
     @Test

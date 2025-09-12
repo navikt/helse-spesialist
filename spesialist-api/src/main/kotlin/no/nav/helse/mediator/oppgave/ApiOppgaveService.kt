@@ -10,6 +10,7 @@ import no.nav.helse.mediator.oppgave.OppgaveMapper.tilDatabaseversjon
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilEgenskaperForVisning
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilOppgaverTilBehandling
 import no.nav.helse.modell.oppgave.Egenskap
+import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.spesialist.api.graphql.schema.ApiAntallOppgaver
 import no.nav.helse.spesialist.api.graphql.schema.ApiBehandledeOppgaver
 import no.nav.helse.spesialist.api.graphql.schema.ApiFiltrering
@@ -18,7 +19,6 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaverTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavesortering
 import no.nav.helse.spesialist.api.graphql.schema.ApiSorteringsnokkel
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
-import no.nav.helse.spesialist.application.tilgangskontroll.NyTilgangskontroll
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
@@ -28,7 +28,6 @@ import java.util.UUID
 class ApiOppgaveService(
     private val oppgaveDao: OppgaveDao,
     private val oppgaveService: OppgaveService,
-    private val nyTilgangskontroll: NyTilgangskontroll,
 ) {
     fun oppgaver(
         saksbehandlerFraApi: SaksbehandlerFraApi,
@@ -42,10 +41,10 @@ class ApiOppgaveService(
             Egenskap
                 .alleTilgangsstyrteEgenskaper
                 .filterNot {
-                    nyTilgangskontroll.harTilgangTilOppgaveMedEgenskap(
+                    Oppgave.harTilgangTilEgenskap(
                         egenskap = it,
                         saksbehandler = saksbehandler,
-                        tilgangsgrupper = saksbehandlerFraApi.tilgangsgrupper,
+                        saksbehandlerTilgangsgrupper = saksbehandlerFraApi.tilgangsgrupper,
                     )
                 }.map(Egenskap::toString)
 
@@ -97,10 +96,10 @@ class ApiOppgaveService(
             Egenskap
                 .alleTilgangsstyrteEgenskaper
                 .filterNot {
-                    nyTilgangskontroll.harTilgangTilOppgaveMedEgenskap(
+                    Oppgave.harTilgangTilEgenskap(
                         egenskap = it,
                         saksbehandler = innloggetSaksbehandler.tilSaksbehandler(),
-                        tilgangsgrupper = innloggetSaksbehandler.tilgangsgrupper,
+                        saksbehandlerTilgangsgrupper = innloggetSaksbehandler.tilgangsgrupper,
                     )
                 }.map(Egenskap::toString)
 

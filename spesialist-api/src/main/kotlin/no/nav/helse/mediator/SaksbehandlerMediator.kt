@@ -28,6 +28,7 @@ import no.nav.helse.modell.OppgaveKreverVurderingAvToSaksbehandlere
 import no.nav.helse.modell.OppgaveTildeltNoenAndre
 import no.nav.helse.modell.melding.VarselEndret
 import no.nav.helse.modell.oppgave.Egenskap
+import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDto
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
@@ -88,7 +89,6 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.application.logg.sikkerlogg
-import no.nav.helse.spesialist.application.tilgangskontroll.NyTilgangskontroll
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangskontrollørForApi
 import no.nav.helse.spesialist.domain.Saksbehandler
@@ -115,7 +115,6 @@ class SaksbehandlerMediator(
     private val environmentToggles: EnvironmentToggles,
     private val sessionFactory: SessionFactory,
     private val tilgangskontroll: Tilgangskontroll,
-    private val nyTilgangskontroll: NyTilgangskontroll,
 ) {
     private val behandlingRepository = daos.behandlingApiRepository
     private val varselRepository = daos.varselApiRepository
@@ -132,7 +131,11 @@ class SaksbehandlerMediator(
         saksbehandlerFraApi: SaksbehandlerFraApi,
     ) {
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
-        val modellhandling = handlingFraApi.tilModellversjon(saksbehandler.id())
+        val modellhandling =
+            handlingFraApi.tilModellversjon(
+                saksbehandlerOid = saksbehandler.id(),
+                saksbehandlerTilgangsgrupper = saksbehandlerFraApi.tilgangsgrupper,
+            )
         sessionFactory.transactionalSessionScope { it.saksbehandlerRepository.lagre(saksbehandler) }
         tell(modellhandling)
         val legacySaksbehandler = saksbehandler.tilLegacySaksbehandler(saksbehandlerFraApi.grupper)
@@ -280,7 +283,7 @@ class SaksbehandlerMediator(
         val totrinnsvurdering = totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)
         val feil =
             if (totrinnsvurdering?.tilstand == AVVENTER_BESLUTTER) {
-                if (!nyTilgangskontroll.harTilgangTilOppgaveMedEgenskap(Egenskap.BESLUTTER, saksbehandler, tilgangsgrupper) && !environmentToggles.kanGodkjenneUtenBesluttertilgang) {
+                if (!Oppgave.harTilgangTilEgenskap(Egenskap.BESLUTTER, saksbehandler, tilgangsgrupper) && !environmentToggles.kanGodkjenneUtenBesluttertilgang) {
                     VedtakResultat.Feil.BeslutterFeil.TrengerBeslutterRolle()
                 } else if (totrinnsvurdering.saksbehandler?.value == saksbehandler.id().value && !environmentToggles.kanBeslutteEgneSaker) {
                     VedtakResultat.Feil.BeslutterFeil.KanIkkeBeslutteEgenOppgave()
@@ -763,7 +766,10 @@ class SaksbehandlerMediator(
             TilgangskontrollørForApi(saksbehandlergrupper, tilgangsgrupper),
         )
 
-    private fun HandlingFraApi.tilModellversjon(saksbehandlerOid: SaksbehandlerOid): Handling =
+    private fun HandlingFraApi.tilModellversjon(
+        saksbehandlerOid: SaksbehandlerOid,
+        saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe>,
+    ): Handling =
         when (this) {
             is ApiArbeidsforholdOverstyringHandling -> this.tilModellversjon(saksbehandlerOid)
             is ApiInntektOgRefusjonOverstyring -> this.tilModellversjon(saksbehandlerOid)
@@ -771,7 +777,7 @@ class SaksbehandlerMediator(
             is ApiSkjonnsfastsettelse -> this.tilModellversjon(saksbehandlerOid)
             is ApiMinimumSykdomsgrad -> this.tilModellversjon(saksbehandlerOid)
             is ApiAnnulleringData -> this.tilModellversjon()
-            is TildelOppgave -> this.tilModellversjon()
+            is TildelOppgave -> this.tilModellversjon(saksbehandlerTilgangsgrupper)
             is AvmeldOppgave -> this.tilModellversjon()
             is ApiOpphevStans -> this.tilModellversjon()
             else -> throw IllegalStateException("Støtter ikke handling ${this::class.simpleName}")
@@ -970,9 +976,11 @@ class SaksbehandlerMediator(
 
     private fun ApiPaVentRequest.ApiFjernPaVentUtenHistorikkinnslag.tilModellversjon(): FjernPåVentUtenHistorikkinnslag = FjernPåVentUtenHistorikkinnslag(oppgaveId)
 
-    private fun TildelOppgave.tilModellversjon(): no.nav.helse.modell.saksbehandler.handlinger.TildelOppgave =
+    private fun TildelOppgave.tilModellversjon(
+        saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe>,
+    ): no.nav.helse.modell.saksbehandler.handlinger.TildelOppgave =
         no.nav.helse.modell.saksbehandler.handlinger
-            .TildelOppgave(this.oppgaveId)
+            .TildelOppgave(this.oppgaveId, saksbehandlerTilgangsgrupper)
 
     private fun AvmeldOppgave.tilModellversjon(): no.nav.helse.modell.saksbehandler.handlinger.AvmeldOppgave =
         no.nav.helse.modell.saksbehandler.handlinger

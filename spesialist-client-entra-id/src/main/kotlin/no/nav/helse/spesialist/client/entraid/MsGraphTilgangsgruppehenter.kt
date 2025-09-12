@@ -26,9 +26,9 @@ import java.util.UUID
 class MsGraphTilgangsgruppehenter(
     private val accessTokenGenerator: AccessTokenGenerator,
     private val tilgangsgrupper: Tilgangsgrupper,
+    private val msGraphUrl: String,
 ) : Tilgangsgruppehenter {
     private val logg = LoggerFactory.getLogger(MsGraphTilgangsgruppehenter::class.java)
-    private val graphUrl = "https://graph.microsoft.com/v1.0"
     private val httpClient: HttpClient =
         HttpClient(Apache) {
             install(ContentNegotiation) {
@@ -52,7 +52,7 @@ class MsGraphTilgangsgruppehenter(
     ): Set<UUID> {
         val token = accessTokenGenerator.hentAccessToken("https://graph.microsoft.com/.default")
         val response =
-            httpClient.post(graphUrl) {
+            httpClient.post(msGraphUrl) {
                 url {
                     path("v1.0/users/$oid/checkMemberGroups")
                 }

@@ -1,5 +1,6 @@
 package no.nav.helse.mediator.oppgave
 
+import kotlinx.coroutines.runBlocking
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.OppgaveDao
@@ -14,6 +15,7 @@ import no.nav.helse.modell.saksbehandler.handlinger.EndrePåVent
 import no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent
 import no.nav.helse.modell.saksbehandler.handlinger.Oppgavehandling
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
+import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 import org.slf4j.LoggerFactory
@@ -34,6 +36,7 @@ class OppgaveService(
     private val tilgangskontroll: Tilgangskontroll,
     private val tilgangsgrupper: Tilgangsgrupper,
     private val oppgaveRepository: OppgaveRepository,
+    private val tilgangsgruppehenter: Tilgangsgruppehenter,
 ) : Oppgavehåndterer,
     Oppgavefinner {
     private val logg = LoggerFactory.getLogger(this::class.java)
@@ -47,6 +50,7 @@ class OppgaveService(
             tilgangskontroll = tilgangskontroll,
             tilgangsgrupper = tilgangsgrupper,
             oppgaveRepository = sessionContext.oppgaveRepository,
+            tilgangsgruppehenter = tilgangsgruppehenter,
         )
 
     fun nyOppgave(
@@ -228,8 +232,10 @@ class OppgaveService(
                 tilgangskontroll = tilgangskontroll,
             )
 
+        val saksbehandlerTilgangsgrupper = runBlocking { tilgangsgruppehenter.hentTilgangsgrupper(legacySaksbehandler.oid()) }
+
         try {
-            oppgave.forsøkTildelingVedReservasjon(legacySaksbehandler)
+            oppgave.forsøkTildelingVedReservasjon(legacySaksbehandler, saksbehandlerTilgangsgrupper)
         } catch (manglerTilgang: ManglerTilgang) {
             logg.info("Saksbehandler har ikke (lenger) tilgang til egenskapene i denne oppgaven, tildeler ikke tross reservasjon")
             sikkerlogg.info(

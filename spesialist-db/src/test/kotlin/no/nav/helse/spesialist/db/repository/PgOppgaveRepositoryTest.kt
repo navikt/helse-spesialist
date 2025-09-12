@@ -59,7 +59,7 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
             kanAvvises = true,
             egenskaper = setOf(SØKNAD)
         )
-        oppgave.forsøkTildeling(saksbehandler)
+        oppgave.forsøkTildeling(saksbehandler, emptySet())
 
         repository.lagre(oppgave)
         val funnetOppgave = repository.finn(oppgave.id) { _, _ -> false }
@@ -78,7 +78,7 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
             kanAvvises = true,
             egenskaper = setOf(SØKNAD)
         )
-        oppgave.forsøkTildeling(saksbehandler)
+        oppgave.forsøkTildeling(saksbehandler, emptySet())
         repository.lagre(oppgave)
 
         oppgave.forsøkAvmelding(saksbehandler)

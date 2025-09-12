@@ -56,6 +56,7 @@ class KafkaModule(
                                         ),
                                     tilgangsgrupper = tilgangsgrupper,
                                     oppgaveRepository = daos.oppgaveRepository,
+                                    tilgangsgruppehenter = tilgangsgruppehenter,
                                 )
                             },
                             godkjenningMediator = GodkjenningMediator(daos.opptegnelseDao),
