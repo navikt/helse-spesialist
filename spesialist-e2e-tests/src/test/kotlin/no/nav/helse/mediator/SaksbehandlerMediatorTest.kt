@@ -53,8 +53,8 @@ import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.ApiOpphevStans
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
-import no.nav.helse.spesialist.application.tilgangskontroll.Gruppe
 import no.nav.helse.spesialist.application.tilgangskontroll.NyTilgangskontroll
+import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
 import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgrupper
 import no.nav.helse.spesialist.db.DBDaos
@@ -446,7 +446,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             personApiDao = object : PartialPersonApiDao {},
             tilgangsgruppehenter = object : Tilgangsgruppehenter {
                 override suspend fun hentTilgangsgrupper(oid: UUID, gruppeIder: List<UUID>): Set<UUID> = emptySet()
-                override suspend fun hentTilgangsgrupper(oid: UUID): Set<Gruppe> = emptySet()
+                override suspend fun hentTilgangsgrupper(oid: UUID): Set<Tilgangsgruppe> = emptySet()
             }
         )
     )
@@ -471,7 +471,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
                 personApiDao = object : PartialPersonApiDao {},
                 tilgangsgruppehenter = object : Tilgangsgruppehenter {
                     override suspend fun hentTilgangsgrupper(oid: UUID, gruppeIder: List<UUID>): Set<UUID> = emptySet()
-                    override suspend fun hentTilgangsgrupper(oid: UUID): Set<Gruppe> = emptySet()
+                    override suspend fun hentTilgangsgrupper(oid: UUID): Set<Tilgangsgruppe> = emptySet()
                 }
             )
         )

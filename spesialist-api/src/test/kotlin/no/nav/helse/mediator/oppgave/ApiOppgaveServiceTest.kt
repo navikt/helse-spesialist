@@ -31,8 +31,8 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveegenskap
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavetype
 import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodetype
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
-import no.nav.helse.spesialist.application.tilgangskontroll.Gruppe
 import no.nav.helse.spesialist.application.tilgangskontroll.NyTilgangskontroll
+import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
 import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgrupper
@@ -113,12 +113,12 @@ internal class ApiOppgaveServiceTest {
                 personApiDao = object : PartialPersonApiDao {},
                 tilgangsgruppehenter = object: Tilgangsgruppehenter {
                     override suspend fun hentTilgangsgrupper(oid: UUID, gruppeIder: List<UUID>): Set<UUID> = emptySet()
-                    override suspend fun hentTilgangsgrupper(oid: UUID): Set<Gruppe> = emptySet()
+                    override suspend fun hentTilgangsgrupper(oid: UUID): Set<Tilgangsgruppe> = emptySet()
                 }
             )
         )
 
-    private fun saksbehandlerFraApi(grupper: Set<Gruppe> = emptySet()) =
+    private fun saksbehandlerFraApi(grupper: Set<Tilgangsgruppe> = emptySet()) =
         SaksbehandlerFraApi(SAKSBEHANDLEROID, SAKSBEHANDLEREPOST, SAKSBEHANDLERNAVN, SAKSBEHANDLERIDENT, tilgangsgrupper.uuiderFor(grupper).toList(), grupper)
 
     @BeforeEach
@@ -305,7 +305,7 @@ internal class ApiOppgaveServiceTest {
                         påVent = true,
                     ),
                 )
-        val saksbehandler = saksbehandlerFraApi(grupper = EnumSet.allOf(Gruppe::class.java))
+        val saksbehandler = saksbehandlerFraApi(grupper = EnumSet.allOf(Tilgangsgruppe::class.java))
         val oppgaver = apiOppgaveService.oppgaver(
             saksbehandler, 0,
             Int.MAX_VALUE, emptyList(),
@@ -359,7 +359,7 @@ internal class ApiOppgaveServiceTest {
                         egenskaper = egenskaper,
                     ),
                 )
-        val saksbehandler = saksbehandlerFraApi(grupper = EnumSet.allOf(Gruppe::class.java))
+        val saksbehandler = saksbehandlerFraApi(grupper = EnumSet.allOf(Tilgangsgruppe::class.java))
         val oppgaver = apiOppgaveService.oppgaver(
             saksbehandler, 0,
             Int.MAX_VALUE, emptyList(),
@@ -404,7 +404,7 @@ internal class ApiOppgaveServiceTest {
                         egenskaper = egenskaper,
                     ),
                 )
-        val saksbehandler = saksbehandlerFraApi(grupper = EnumSet.allOf(Gruppe::class.java))
+        val saksbehandler = saksbehandlerFraApi(grupper = EnumSet.allOf(Tilgangsgruppe::class.java))
         val oppgaver = apiOppgaveService.oppgaver(
             saksbehandler, 0,
             Int.MAX_VALUE, emptyList(),
@@ -449,7 +449,7 @@ internal class ApiOppgaveServiceTest {
                         egenskaper = egenskaper,
                     ),
                 )
-        val saksbehandler = saksbehandlerFraApi(grupper = EnumSet.allOf(Gruppe::class.java))
+        val saksbehandler = saksbehandlerFraApi(grupper = EnumSet.allOf(Tilgangsgruppe::class.java))
         val oppgaver = apiOppgaveService.oppgaver(
             saksbehandler, 0,
             Int.MAX_VALUE, emptyList(),
@@ -491,7 +491,7 @@ internal class ApiOppgaveServiceTest {
                         egenskaper = egenskaper,
                     ),
                 )
-        val saksbehandler = saksbehandlerFraApi(grupper = EnumSet.allOf(Gruppe::class.java))
+        val saksbehandler = saksbehandlerFraApi(grupper = EnumSet.allOf(Tilgangsgruppe::class.java))
         val oppgaver = apiOppgaveService.oppgaver(
             saksbehandler, 0,
             Int.MAX_VALUE, emptyList(),

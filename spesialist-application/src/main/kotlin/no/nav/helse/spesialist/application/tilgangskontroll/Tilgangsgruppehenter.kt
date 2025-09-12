@@ -8,5 +8,5 @@ interface Tilgangsgruppehenter {
         gruppeIder: List<UUID>,
     ): Set<UUID>
 
-    suspend fun hentTilgangsgrupper(oid: UUID): Set<Gruppe>
+    suspend fun hentTilgangsgrupper(oid: UUID): Set<Tilgangsgruppe>
 }

@@ -17,7 +17,7 @@ import io.ktor.http.contentType
 import io.ktor.http.path
 import io.ktor.serialization.jackson.JacksonConverter
 import no.nav.helse.spesialist.application.AccessTokenGenerator
-import no.nav.helse.spesialist.application.tilgangskontroll.Gruppe
+import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
 import org.slf4j.LoggerFactory
@@ -68,7 +68,7 @@ class MsGraphTilgangsgruppehenter(
         return grupper.toSet()
     }
 
-    override suspend fun hentTilgangsgrupper(oid: UUID): Set<Gruppe> {
+    override suspend fun hentTilgangsgrupper(oid: UUID): Set<Tilgangsgruppe> {
         val gruppeUuider = hentTilgangsgrupper(oid, tilgangsgrupper.alleUuider().toList())
         return tilgangsgrupper.grupperFor(gruppeUuider)
     }

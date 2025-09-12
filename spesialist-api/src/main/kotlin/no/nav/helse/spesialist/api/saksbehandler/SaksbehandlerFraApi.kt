@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.api.saksbehandler
 
 import io.ktor.server.auth.jwt.JWTPrincipal
-import no.nav.helse.spesialist.application.tilgangskontroll.Gruppe
+import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
 import java.util.UUID
 
@@ -11,7 +11,7 @@ data class SaksbehandlerFraApi(
     val epost: String,
     val ident: String,
     val grupper: List<UUID>,
-    val tilgangsgrupper: Set<Gruppe>,
+    val tilgangsgrupper: Set<Tilgangsgruppe>,
 ) {
     companion object {
         fun fraOnBehalfOfToken(

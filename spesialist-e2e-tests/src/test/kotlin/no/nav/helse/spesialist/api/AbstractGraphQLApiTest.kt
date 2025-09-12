@@ -56,7 +56,7 @@ import no.nav.helse.spesialist.api.graphql.queryHandler
 import no.nav.helse.spesialist.api.person.PersonService
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
 import no.nav.helse.spesialist.application.Reservasjonshenter
-import no.nav.helse.spesialist.application.tilgangskontroll.Gruppe
+import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgrupper
 import no.nav.helse.spesialist.client.spleis.SpleisClient
 import no.nav.helse.spesialist.client.spleis.SpleisClientSnapshothenter
@@ -68,8 +68,8 @@ import java.util.UUID
 
 abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
     private val tilgangsgrupper = randomTilgangsgrupper()
-    protected val kode7Saksbehandlergruppe: UUID = tilgangsgrupper.uuidFor(Gruppe.KODE7)
-    protected val skjermedePersonerGruppeId: UUID = tilgangsgrupper.uuidFor(Gruppe.SKJERMEDE)
+    protected val kode7Saksbehandlergruppe: UUID = tilgangsgrupper.uuidFor(Tilgangsgruppe.KODE7)
+    protected val skjermedePersonerGruppeId: UUID = tilgangsgrupper.uuidFor(Tilgangsgruppe.SKJERMEDE)
     private val avviksvurderingId: UUID = UUID.randomUUID()
 
     private val reservasjonshenter = mockk<Reservasjonshenter>(relaxed = true)

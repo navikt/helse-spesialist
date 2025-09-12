@@ -34,7 +34,7 @@ class NyTilgangskontroll(
     fun harTilgangTilOppgaveMedEgenskaper(
         egenskaper: Set<Egenskap>,
         saksbehandler: Saksbehandler,
-        tilgangsgrupper: Set<Gruppe>,
+        tilgangsgrupper: Set<Tilgangsgruppe>,
     ): Boolean =
         egenskaper.all {
             harTilgangTilOppgaveMedEgenskap(
@@ -47,17 +47,17 @@ class NyTilgangskontroll(
     fun harTilgangTilOppgaveMedEgenskap(
         egenskap: Egenskap,
         saksbehandler: Saksbehandler,
-        tilgangsgrupper: Set<Gruppe>,
+        tilgangsgrupper: Set<Tilgangsgruppe>,
     ) = when (egenskap) {
         STRENGT_FORTROLIG_ADRESSE -> false // Ingen skal ha tilgang til disse i Speil foreløpig
-        EGEN_ANSATT -> Gruppe.SKJERMEDE in tilgangsgrupper
-        FORTROLIG_ADRESSE -> Gruppe.KODE7 in tilgangsgrupper
-        BESLUTTER -> Gruppe.BESLUTTER in tilgangsgrupper
-        STIKKPRØVE -> Gruppe.STIKKPRØVE in tilgangsgrupper
+        EGEN_ANSATT -> Tilgangsgruppe.SKJERMEDE in tilgangsgrupper
+        FORTROLIG_ADRESSE -> Tilgangsgruppe.KODE7 in tilgangsgrupper
+        BESLUTTER -> Tilgangsgruppe.BESLUTTER in tilgangsgrupper
+        STIKKPRØVE -> Tilgangsgruppe.STIKKPRØVE in tilgangsgrupper
         else -> true
     }
 
-    private fun hentTilgangsgrupper(saksbehandler: Saksbehandler): Set<Gruppe> =
+    private fun hentTilgangsgrupper(saksbehandler: Saksbehandler): Set<Tilgangsgruppe> =
         runBlocking {
             tilgangsgruppehenter.hentTilgangsgrupper(saksbehandler.id().value)
         }

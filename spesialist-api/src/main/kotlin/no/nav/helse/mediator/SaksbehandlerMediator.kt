@@ -88,8 +88,8 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.application.logg.sikkerlogg
-import no.nav.helse.spesialist.application.tilgangskontroll.Gruppe
 import no.nav.helse.spesialist.application.tilgangskontroll.NyTilgangskontroll
+import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangskontrollørForApi
 import no.nav.helse.spesialist.domain.Saksbehandler
@@ -274,7 +274,7 @@ class SaksbehandlerMediator(
     private fun håndterTotrinnsvurderingBeslutning(
         fødselsnummer: String,
         saksbehandler: Saksbehandler,
-        tilgangsgrupper: Set<Gruppe>,
+        tilgangsgrupper: Set<Tilgangsgruppe>,
         totrinnsvurderingRepository: TotrinnsvurderingRepository,
     ): VedtakResultat.Feil.BeslutterFeil? {
         val totrinnsvurdering = totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)
