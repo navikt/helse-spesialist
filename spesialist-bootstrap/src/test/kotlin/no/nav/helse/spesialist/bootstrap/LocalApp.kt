@@ -3,14 +3,13 @@ package no.nav.helse.spesialist.bootstrap
 import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.spesialist.api.testfixtures.ApiModuleIntegrationTestFixture
-import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
+import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgrupper
 import no.nav.helse.spesialist.client.entraid.testfixtures.ClientEntraIDModuleIntegrationTestFixture
 import no.nav.helse.spesialist.client.krr.testfixtures.ClientKRRModuleIntegationTestFixture
 import no.nav.helse.spesialist.client.spleis.testfixtures.ClientSpleisModuleIntegrationTestFixture
 import no.nav.helse.spesialist.db.testfixtures.DBTestFixture
 import no.nav.helse.spesialist.kafka.testfixtures.KafkaModuleIntegrationTestFixture
 import no.nav.security.mock.oauth2.MockOAuth2Server
-import java.util.UUID
 
 fun main() {
     val rapidApp = RapidApp()
@@ -25,12 +24,7 @@ fun main() {
             db = DBTestFixture.database.dbModuleConfiguration,
             kafka = KafkaModuleIntegrationTestFixture.moduleConfiguration,
             versjonAvKode = "versjon_1",
-            tilgangsgrupper = Tilgangsgrupper(
-                kode7GruppeId = UUID.randomUUID(),
-                beslutterGruppeId = UUID.randomUUID(),
-                skjermedePersonerGruppeId = UUID.randomUUID(),
-                stikkprøveGruppeId = UUID.randomUUID(),
-            ),
+            tilgangsgrupper = randomTilgangsgrupper(),
             environmentToggles = object : EnvironmentToggles {
                 override val kanBeslutteEgneSaker = false
                 override val kanGodkjenneUtenBesluttertilgang = false

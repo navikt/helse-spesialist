@@ -7,7 +7,7 @@ import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.rapids_rivers.NaisEndpoints
 import no.nav.helse.rapids_rivers.ktorApplication
 import no.nav.helse.spesialist.api.testfixtures.ApiModuleIntegrationTestFixture
-import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
+import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgrupper
 import no.nav.helse.spesialist.bootstrap.Configuration
 import no.nav.helse.spesialist.bootstrap.RapidApp
 import no.nav.helse.spesialist.client.entraid.testfixtures.ClientEntraIDModuleIntegrationTestFixture
@@ -17,7 +17,6 @@ import no.nav.helse.spesialist.db.testfixtures.DBTestFixture
 import no.nav.helse.spesialist.e2etests.behovløserstubs.BehovLøserStub
 import no.nav.helse.spesialist.kafka.testfixtures.KafkaModuleTestRapidTestFixture
 import no.nav.security.mock.oauth2.MockOAuth2Server
-import java.util.UUID
 import kotlin.random.Random
 
 object E2ETestApplikasjon {
@@ -29,12 +28,7 @@ object E2ETestApplikasjon {
 
     private val mockOAuth2Server = MockOAuth2Server().also { it.start() }
     val apiModuleIntegrationTestFixture = ApiModuleIntegrationTestFixture(mockOAuth2Server)
-    val tilgangsgrupper = Tilgangsgrupper(
-        kode7GruppeId = UUID.randomUUID(),
-        beslutterGruppeId = UUID.randomUUID(),
-        skjermedePersonerGruppeId = UUID.randomUUID(),
-        stikkprøveGruppeId = UUID.randomUUID(),
-    )
+    val tilgangsgrupper = randomTilgangsgrupper()
     private val rapidApp = RapidApp()
     private val modules = rapidApp.start(
         configuration = Configuration(

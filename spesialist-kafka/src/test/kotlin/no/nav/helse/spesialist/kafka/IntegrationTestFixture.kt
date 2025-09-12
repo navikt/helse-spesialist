@@ -6,7 +6,7 @@ import no.nav.helse.spesialist.application.InMemoryDaos
 import no.nav.helse.spesialist.application.InMemorySessionFactory
 import no.nav.helse.spesialist.application.tilgangskontroll.Gruppe
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
-import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
+import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgrupper
 import no.nav.helse.spesialist.kafka.testfixtures.KafkaModuleTestRapidTestFixture
 import java.util.UUID
 
@@ -21,12 +21,7 @@ class IntegrationTestFixture(
             rapidsConnection = testRapid,
             sessionFactory = sessionFactory,
             daos = daos,
-            tilgangsgrupper = Tilgangsgrupper(
-                kode7GruppeId = UUID.randomUUID(),
-                beslutterGruppeId = UUID.randomUUID(),
-                skjermedePersonerGruppeId = UUID.randomUUID(),
-                stikkprøveGruppeId = UUID.randomUUID(),
-            ),
+            tilgangsgrupper = randomTilgangsgrupper(),
             stikkprøver = object : Stikkprøver {
                 override fun utsFlereArbeidsgivereFørstegangsbehandling() = false
                 override fun utsFlereArbeidsgivereForlengelse() = false
