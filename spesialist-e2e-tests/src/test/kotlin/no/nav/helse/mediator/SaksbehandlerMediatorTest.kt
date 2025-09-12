@@ -51,7 +51,6 @@ import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.ApiOpphevStans
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
-import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgrupper
 import no.nav.helse.spesialist.db.DBDaos
 import no.nav.helse.spesialist.db.DBSessionContext
 import no.nav.helse.spesialist.db.DbQuery
@@ -412,7 +411,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
     )
 
 
-    private val tilgangsgrupper = randomTilgangsgrupper()
     private val testRapid = TestRapid()
     private val meldingPubliserer: MeldingPubliserer = MessageContextMeldingPubliserer(testRapid)
     private val stansAutomatiskBehandlinghåndterer =
@@ -427,9 +425,8 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             oppgaveDao = daos.oppgaveDao,
             reservasjonDao = sessionContext.reservasjonDao,
             meldingPubliserer = meldingPubliserer,
-            tilgangsgrupper = tilgangsgrupper,
             oppgaveRepository = daos.oppgaveRepository,
-            tilgangsgruppehenter = { emptySet() }
+            tilgangsgruppehenter = { emptySet() },
         )
     private val apiOppgaveService = ApiOppgaveService(
         oppgaveDao = daos.oppgaveDao,

@@ -16,7 +16,6 @@ import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingh√
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
-import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgrupper
 import no.nav.helse.spesialist.db.DBDaos
 import no.nav.helse.spesialist.db.TransactionalSessionFactory
 import javax.sql.DataSource
@@ -43,15 +42,13 @@ class TestMediator(
         )
 
     private val godkjenningMediator = GodkjenningMediator(opptegnelseDao)
-    private val tilgangsgrupper = randomTilgangsgrupper()
     private val oppgaveService =
         OppgaveService(
             oppgaveDao = daos.oppgaveDao,
             reservasjonDao = daos.reservasjonDao,
             meldingPubliserer = meldingPubliserer,
-            tilgangsgrupper = tilgangsgrupper,
             oppgaveRepository = daos.oppgaveRepository,
-            tilgangsgruppehenter = { emptySet() }
+            tilgangsgruppehenter = { emptySet() },
         )
     private val apiOppgaveService = ApiOppgaveService(
         oppgaveDao = daos.oppgaveDao,

@@ -14,7 +14,6 @@ import no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent
 import no.nav.helse.modell.saksbehandler.handlinger.Oppgavehandling
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
-import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
@@ -34,7 +33,6 @@ class OppgaveService(
     private val oppgaveDao: OppgaveDao,
     private val reservasjonDao: ReservasjonDao,
     private val meldingPubliserer: MeldingPubliserer,
-    private val tilgangsgrupper: Tilgangsgrupper,
     private val oppgaveRepository: OppgaveRepository,
     private val tilgangsgruppehenter: Tilgangsgruppehenter,
 ) : Oppgavehåndterer,
@@ -47,7 +45,6 @@ class OppgaveService(
             oppgaveDao = sessionContext.oppgaveDao,
             reservasjonDao = sessionContext.reservasjonDao,
             meldingPubliserer = meldingPubliserer,
-            tilgangsgrupper = tilgangsgrupper,
             oppgaveRepository = sessionContext.oppgaveRepository,
             tilgangsgruppehenter = tilgangsgruppehenter,
         )

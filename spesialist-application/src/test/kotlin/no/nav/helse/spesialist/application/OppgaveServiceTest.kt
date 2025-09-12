@@ -17,7 +17,6 @@ import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Oppgave
-import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgrupper
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 import no.nav.helse.spesialist.domain.testfixtures.lagEpostadresseFraFulltNavn
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
@@ -75,9 +74,8 @@ internal class OppgaveServiceTest {
             oppgaveDao = oppgaveDao,
             reservasjonDao = reservasjonDao,
             meldingPubliserer = meldingPubliserer,
-            tilgangsgrupper = randomTilgangsgrupper(),
             oppgaveRepository = oppgaveRepository,
-            tilgangsgruppehenter = { emptySet() }
+            tilgangsgruppehenter = { emptySet() },
         )
 
     private fun lagSøknadsoppgave(

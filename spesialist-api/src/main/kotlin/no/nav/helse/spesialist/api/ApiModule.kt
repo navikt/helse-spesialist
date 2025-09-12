@@ -44,7 +44,6 @@ class ApiModule(
             oppgaveDao = daos.oppgaveDao,
             reservasjonDao = daos.reservasjonDao,
             meldingPubliserer = meldingPubliserer,
-            tilgangsgrupper = tilgangsgrupper,
             oppgaveRepository = daos.oppgaveRepository,
             tilgangsgruppehenter = tilgangsgruppehenter,
         )

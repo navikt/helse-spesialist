@@ -4,7 +4,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.spesialist.application.InMemoryDaos
 import no.nav.helse.spesialist.application.InMemorySessionFactory
-import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgrupper
 import no.nav.helse.spesialist.kafka.testfixtures.KafkaModuleTestRapidTestFixture
 
 class IntegrationTestFixture(
@@ -18,7 +17,6 @@ class IntegrationTestFixture(
             rapidsConnection = testRapid,
             sessionFactory = sessionFactory,
             daos = daos,
-            tilgangsgrupper = randomTilgangsgrupper(),
             stikkprøver = object : Stikkprøver {
                 override fun utsFlereArbeidsgivereFørstegangsbehandling() = false
                 override fun utsFlereArbeidsgivereForlengelse() = false

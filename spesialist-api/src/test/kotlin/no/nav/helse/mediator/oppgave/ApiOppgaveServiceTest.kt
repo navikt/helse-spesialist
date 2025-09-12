@@ -98,9 +98,8 @@ internal class ApiOppgaveServiceTest {
                 oppgaveDao = oppgaveDao,
                 reservasjonDao = reservasjonDao,
                 meldingPubliserer = meldingPubliserer,
-                tilgangsgrupper = tilgangsgrupper,
                 oppgaveRepository = oppgaveRepository,
-                tilgangsgruppehenter = { emptySet() }
+                tilgangsgruppehenter = { emptySet() },
             )
         )
 

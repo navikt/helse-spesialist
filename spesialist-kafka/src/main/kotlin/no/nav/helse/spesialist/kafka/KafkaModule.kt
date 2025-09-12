@@ -14,14 +14,12 @@ import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
-import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
 
 class KafkaModule(
     configuration: Configuration,
     private val rapidsConnection: RapidsConnection,
     sessionFactory: SessionFactory,
     daos: Daos,
-    tilgangsgrupper: Tilgangsgrupper,
     stikkprøver: Stikkprøver,
     tilgangsgruppehenter: Tilgangsgruppehenter,
 ) {
@@ -48,7 +46,6 @@ class KafkaModule(
                                     oppgaveDao = daos.oppgaveDao,
                                     reservasjonDao = daos.reservasjonDao,
                                     meldingPubliserer = meldingPubliserer,
-                                    tilgangsgrupper = tilgangsgrupper,
                                     oppgaveRepository = daos.oppgaveRepository,
                                     tilgangsgruppehenter = tilgangsgruppehenter,
                                 )

@@ -146,7 +146,6 @@ class RapidApp {
                 rapidsConnection = rapidsConnection,
                 sessionFactory = dbModule.sessionFactory,
                 daos = dbModule.daos,
-                tilgangsgrupper = configuration.tilgangsgrupper,
                 stikkprøver = configuration.stikkprøver,
                 tilgangsgruppehenter = clientEntraIdModule.tilgangsgruppehenter,
             )
