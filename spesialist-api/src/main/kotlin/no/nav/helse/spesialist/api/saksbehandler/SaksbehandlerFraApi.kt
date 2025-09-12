@@ -1,8 +1,8 @@
 package no.nav.helse.spesialist.api.saksbehandler
 
 import io.ktor.server.auth.jwt.JWTPrincipal
-import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
+import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import java.util.UUID
 
 data class SaksbehandlerFraApi(

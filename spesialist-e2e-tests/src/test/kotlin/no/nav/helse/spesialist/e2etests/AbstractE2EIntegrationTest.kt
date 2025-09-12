@@ -4,8 +4,8 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import kotliquery.sessionOf
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.spesialist.api.testfixtures.lagSaksbehandlerFraApi
-import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
+import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.e2etests.Meldingsbygger.byggUtbetalingEndret
 import no.nav.helse.spesialist.e2etests.behovløserstubs.AbstractBehovLøser
 import no.nav.helse.spesialist.e2etests.behovløserstubs.AvviksvurderingBehovLøser

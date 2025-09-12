@@ -34,8 +34,8 @@ import no.nav.helse.spesialist.api.snapshot.SnapshotService
 import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.application.Reservasjonshenter.ReservasjonDto
 import no.nav.helse.spesialist.application.snapshot.SnapshotPerson
-import no.nav.helse.spesialist.application.tilgangskontroll.SaksbehandlerTilganger
 import no.nav.helse.spesialist.application.tilgangskontroll.manglerTilgang
+import no.nav.helse.spesialist.domain.tilgangskontroll.SaksbehandlerTilganger
 import org.slf4j.LoggerFactory
 
 private sealed interface HentSnapshotResult {

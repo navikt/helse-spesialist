@@ -10,18 +10,21 @@ import no.nav.helse.modell.oppgave.Egenskap.FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
 import no.nav.helse.spesialist.domain.Saksbehandler
+import no.nav.helse.spesialist.domain.tilgangskontroll.NyTilgangskontrollIf
+import no.nav.helse.spesialist.domain.tilgangskontroll.SaksbehandlerTilganger
+import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 
 class NyTilgangskontroll(
     private val egenAnsattApiDao: EgenAnsattApiDao,
     private val personApiDao: PersonApiDao,
     private val tilgangsgruppehenter: Tilgangsgruppehenter,
-) {
-    fun harTilgangTilPerson(
+) : NyTilgangskontrollIf {
+    override fun harTilgangTilPerson(
         saksbehandlerTilganger: SaksbehandlerTilganger,
         fødselsnummer: String,
     ): Boolean = !manglerTilgang(egenAnsattApiDao, personApiDao, fødselsnummer, saksbehandlerTilganger)
 
-    fun harTilgangTilOppgaveMedEgenskaper(
+    override fun harTilgangTilOppgaveMedEgenskaper(
         egenskaper: Set<Egenskap>,
         saksbehandler: Saksbehandler,
     ): Boolean =
@@ -31,7 +34,7 @@ class NyTilgangskontroll(
             tilgangsgrupper = hentTilgangsgrupper(saksbehandler),
         )
 
-    fun harTilgangTilOppgaveMedEgenskaper(
+    override fun harTilgangTilOppgaveMedEgenskaper(
         egenskaper: Set<Egenskap>,
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
@@ -44,18 +47,19 @@ class NyTilgangskontroll(
             )
         }
 
-    fun harTilgangTilOppgaveMedEgenskap(
+    override fun harTilgangTilOppgaveMedEgenskap(
         egenskap: Egenskap,
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
-    ) = when (egenskap) {
-        STRENGT_FORTROLIG_ADRESSE -> false // Ingen skal ha tilgang til disse i Speil foreløpig
-        EGEN_ANSATT -> Tilgangsgruppe.SKJERMEDE in tilgangsgrupper
-        FORTROLIG_ADRESSE -> Tilgangsgruppe.KODE7 in tilgangsgrupper
-        BESLUTTER -> Tilgangsgruppe.BESLUTTER in tilgangsgrupper
-        STIKKPRØVE -> Tilgangsgruppe.STIKKPRØVE in tilgangsgrupper
-        else -> true
-    }
+    ): Boolean =
+        when (egenskap) {
+            STRENGT_FORTROLIG_ADRESSE -> false // Ingen skal ha tilgang til disse i Speil foreløpig
+            EGEN_ANSATT -> Tilgangsgruppe.SKJERMEDE in tilgangsgrupper
+            FORTROLIG_ADRESSE -> Tilgangsgruppe.KODE7 in tilgangsgrupper
+            BESLUTTER -> Tilgangsgruppe.BESLUTTER in tilgangsgrupper
+            STIKKPRØVE -> Tilgangsgruppe.STIKKPRØVE in tilgangsgrupper
+            else -> true
+        }
 
     private fun hentTilgangsgrupper(saksbehandler: Saksbehandler): Set<Tilgangsgruppe> =
         runBlocking {

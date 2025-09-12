@@ -1,8 +1,7 @@
 package no.nav.helse.spesialist.application.tilgangskontroll
 
+import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import java.util.UUID
-
-enum class Tilgangsgruppe { KODE7, BESLUTTER, SKJERMEDE, STIKKPRØVE }
 
 class Tilgangsgrupper(
     private val kode7GruppeId: UUID,

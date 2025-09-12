@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.application.tilgangskontroll
 import no.nav.helse.db.api.EgenAnsattApiDao
 import no.nav.helse.db.api.PersonApiDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
+import no.nav.helse.spesialist.domain.tilgangskontroll.SaksbehandlerTilganger
 
 fun manglerTilgang(
     egenAnsattApiDao: EgenAnsattApiDao,

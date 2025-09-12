@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.application.tilgangskontroll
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.saksbehandler.Tilgangskontroll
+import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import java.util.UUID
 
 abstract class MicrosoftTilgangskontroll(
