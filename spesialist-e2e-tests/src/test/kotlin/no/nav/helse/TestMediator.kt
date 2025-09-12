@@ -20,11 +20,10 @@ import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
 import no.nav.helse.spesialist.application.tilgangskontroll.Gruppe
 import no.nav.helse.spesialist.application.tilgangskontroll.NyTilgangskontroll
-import no.nav.helse.spesialist.application.tilgangskontroll.SpeilTilgangsgrupper
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
+import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgrupper
 import no.nav.helse.spesialist.db.DBDaos
 import no.nav.helse.spesialist.db.TransactionalSessionFactory
-import no.nav.helse.util.testEnv
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -50,7 +49,7 @@ class TestMediator(
         )
 
     private val godkjenningMediator = GodkjenningMediator(opptegnelseDao)
-    private val tilgangsgrupper = SpeilTilgangsgrupper(testEnv)
+    private val tilgangsgrupper = randomTilgangsgrupper()
     private val oppgaveService =
         OppgaveService(
             oppgaveDao = daos.oppgaveDao,

@@ -12,11 +12,6 @@ enum class Gruppe(
     ;
 
     fun idFra(env: Map<String, String>): UUID = UUID.fromString(env.getValue(gruppenøkkel))
-
-    companion object {
-        @Suppress("ktlint:standard:function-naming")
-        fun __indreInnhold_kunForTest() = entries.associate { it.name to it.gruppenøkkel }
-    }
 }
 
 open class Tilgangsgrupper(

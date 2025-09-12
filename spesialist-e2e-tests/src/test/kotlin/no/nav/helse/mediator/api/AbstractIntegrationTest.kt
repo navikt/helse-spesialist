@@ -8,8 +8,7 @@ import no.nav.helse.e2e.AbstractE2ETest
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.mediator.GodkjenningService
 import no.nav.helse.mediator.oppgave.OppgaveService
-import no.nav.helse.spesialist.application.tilgangskontroll.SpeilTilgangsgrupper
-import no.nav.helse.util.testEnv
+import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgrupper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -30,7 +29,7 @@ abstract class AbstractIntegrationTest : AbstractE2ETest() {
             reservasjonDao = reservasjonDao,
             meldingPubliserer = meldingPubliserer,
             tilgangskontroll = { _, _ -> false },
-            tilgangsgrupper = SpeilTilgangsgrupper(testEnv),
+            tilgangsgrupper = randomTilgangsgrupper(),
             oppgaveRepository = daos.oppgaveRepository,
         )
 

@@ -33,9 +33,9 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodetype
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.application.tilgangskontroll.Gruppe
 import no.nav.helse.spesialist.application.tilgangskontroll.NyTilgangskontroll
-import no.nav.helse.spesialist.application.tilgangskontroll.SpeilTilgangsgrupper
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
+import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgrupper
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.testfixtures.lagEpostadresseFraFulltNavn
@@ -54,8 +54,7 @@ import java.util.UUID
 import kotlin.random.Random
 
 internal class ApiOppgaveServiceTest {
-    private val testEnv = Gruppe.__indreInnhold_kunForTest().values.associateWith { _ -> UUID.randomUUID().toString() }
-    private val tilgangsgrupper: Tilgangsgrupper = SpeilTilgangsgrupper(testEnv)
+    private val tilgangsgrupper: Tilgangsgrupper = randomTilgangsgrupper()
     private val SAKSBEHANDLERIDENT = lagSaksbehandlerident()
     private val SAKSBEHANDLEROID = UUID.randomUUID()
     private val SAKSBEHANDLERNAVN = lagSaksbehandlernavn()
@@ -104,7 +103,7 @@ internal class ApiOppgaveServiceTest {
                 reservasjonDao = reservasjonDao,
                 meldingPubliserer = meldingPubliserer,
                 tilgangskontroll = { _, _ -> false },
-                tilgangsgrupper = SpeilTilgangsgrupper(testEnv),
+                tilgangsgrupper = tilgangsgrupper,
                 oppgaveRepository = oppgaveRepository
             ),
             nyTilgangskontroll = NyTilgangskontroll(
