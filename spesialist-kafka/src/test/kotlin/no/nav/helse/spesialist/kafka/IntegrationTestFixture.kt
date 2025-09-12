@@ -21,13 +21,12 @@ class IntegrationTestFixture(
             rapidsConnection = testRapid,
             sessionFactory = sessionFactory,
             daos = daos,
-            tilgangsgrupper = object : Tilgangsgrupper {
-                override val kode7GruppeId = UUID.randomUUID()
-                override val beslutterGruppeId = UUID.randomUUID()
-                override val skjermedePersonerGruppeId = UUID.randomUUID()
-                override val stikkprøveGruppeId = UUID.randomUUID()
-                override fun gruppeId(gruppe: Gruppe) = UUID.randomUUID()
-            },
+            tilgangsgrupper = Tilgangsgrupper(
+                kode7GruppeId = UUID.randomUUID(),
+                beslutterGruppeId = UUID.randomUUID(),
+                skjermedePersonerGruppeId = UUID.randomUUID(),
+                stikkprøveGruppeId = UUID.randomUUID(),
+            ),
             stikkprøver = object : Stikkprøver {
                 override fun utsFlereArbeidsgivereFørstegangsbehandling() = false
                 override fun utsFlereArbeidsgivereForlengelse() = false

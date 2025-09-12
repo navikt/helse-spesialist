@@ -226,22 +226,21 @@ class NyTilgangskontrollTest {
                 ),
             )
 
-        private val tilgangsgrupper = object : Tilgangsgrupper {
-            override val kode7GruppeId: UUID = UUID.randomUUID()
-            override val beslutterGruppeId: UUID = UUID.randomUUID()
-            override val skjermedePersonerGruppeId: UUID = UUID.randomUUID()
-            override val stikkprøveGruppeId: UUID = UUID.randomUUID()
-            override fun gruppeId(gruppe: Gruppe) = error("Brukes bare i tester, bør ikke eksistere / bli kalt")
-        }
+        private val tilgangsgrupper = Tilgangsgrupper(
+            kode7GruppeId = UUID.randomUUID(),
+            beslutterGruppeId = UUID.randomUUID(),
+            skjermedePersonerGruppeId = UUID.randomUUID(),
+            stikkprøveGruppeId = UUID.randomUUID(),
+        )
     }
 
     private fun harTilgangTilPersonGittGrupper(fødselsnummer: String, grupper: Set<Gruppe>) =
         tilgangskontroll.harTilgangTilPerson(
             saksbehandlerTilganger = SaksbehandlerTilganger(
-                gruppetilganger = grupper.tilUUIDer().toList(),
-                kode7Saksbehandlergruppe = tilgangsgrupper.kode7GruppeId,
-                beslutterSaksbehandlergruppe = tilgangsgrupper.beslutterGruppeId,
-                skjermedePersonerSaksbehandlergruppe = tilgangsgrupper.skjermedePersonerGruppeId,
+                gruppetilganger = tilgangsgrupper.tilUuider(grupper).toList(),
+                kode7Saksbehandlergruppe = tilgangsgrupper.gruppeId(Gruppe.KODE7),
+                beslutterSaksbehandlergruppe = tilgangsgrupper.gruppeId(Gruppe.BESLUTTER),
+                skjermedePersonerSaksbehandlergruppe = tilgangsgrupper.gruppeId(Gruppe.SKJERMEDE),
             ),
             fødselsnummer = fødselsnummer
         )
@@ -298,20 +297,10 @@ class NyTilgangskontrollTest {
         },
         tilgangsgruppehenter = object : Tilgangsgruppehenter {
             override suspend fun hentTilgangsgrupper(oid: UUID, gruppeIder: List<UUID>) =
-                saksbehandlerGruppeOppslagMap[oid].orEmpty().tilUUIDer()
+                tilgangsgrupper.tilUuider(saksbehandlerGruppeOppslagMap[oid].orEmpty())
 
             override suspend fun hentTilgangsgrupper(oid: UUID) =
                 saksbehandlerGruppeOppslagMap[oid].orEmpty()
         }
     )
-
-    private fun Set<Gruppe>.tilUUIDer(): Set<UUID> =
-        map {
-            when (it) {
-                Gruppe.KODE7 -> tilgangsgrupper.kode7GruppeId
-                Gruppe.BESLUTTER -> tilgangsgrupper.beslutterGruppeId
-                Gruppe.SKJERMEDE -> tilgangsgrupper.skjermedePersonerGruppeId
-                Gruppe.STIKKPRØVE -> tilgangsgrupper.stikkprøveGruppeId
-            }
-        }.toSet()
 }

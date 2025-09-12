@@ -7,7 +7,6 @@ import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.rapids_rivers.NaisEndpoints
 import no.nav.helse.rapids_rivers.ktorApplication
 import no.nav.helse.spesialist.api.testfixtures.ApiModuleIntegrationTestFixture
-import no.nav.helse.spesialist.application.tilgangskontroll.Gruppe
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
 import no.nav.helse.spesialist.bootstrap.Configuration
 import no.nav.helse.spesialist.bootstrap.RapidApp
@@ -30,6 +29,12 @@ object E2ETestApplikasjon {
 
     private val mockOAuth2Server = MockOAuth2Server().also { it.start() }
     val apiModuleIntegrationTestFixture = ApiModuleIntegrationTestFixture(mockOAuth2Server)
+    val tilgangsgrupper = Tilgangsgrupper(
+        kode7GruppeId = UUID.randomUUID(),
+        beslutterGruppeId = UUID.randomUUID(),
+        skjermedePersonerGruppeId = UUID.randomUUID(),
+        stikkprøveGruppeId = UUID.randomUUID(),
+    )
     private val rapidApp = RapidApp()
     private val modules = rapidApp.start(
         configuration = Configuration(
@@ -40,7 +45,7 @@ object E2ETestApplikasjon {
             db = DBTestFixture.database.dbModuleConfiguration,
             kafka = KafkaModuleTestRapidTestFixture.moduleConfiguration,
             versjonAvKode = "versjon_1",
-            tilgangsgrupper = TilgangsgrupperForTest,
+            tilgangsgrupper = tilgangsgrupper,
             environmentToggles = object : EnvironmentToggles {
                 override val kanBeslutteEgneSaker = false
                 override val kanGodkjenneUtenBesluttertilgang = false
@@ -76,19 +81,4 @@ object E2ETestApplikasjon {
     }
 
     val dbModule = modules.dbModule
-
-    object TilgangsgrupperForTest: Tilgangsgrupper {
-        override val kode7GruppeId: UUID = UUID.randomUUID()
-        override val beslutterGruppeId: UUID = UUID.randomUUID()
-        override val skjermedePersonerGruppeId: UUID = UUID.randomUUID()
-        override val stikkprøveGruppeId: UUID = UUID.randomUUID()
-
-        override fun gruppeId(gruppe: Gruppe): UUID {
-            return when (gruppe) {
-                Gruppe.KODE7 -> kode7GruppeId
-                Gruppe.BESLUTTER -> beslutterGruppeId
-                Gruppe.SKJERMEDE -> skjermedePersonerGruppeId
-                Gruppe.STIKKPRØVE -> stikkprøveGruppeId
-            }
-        }
-    }}
+}

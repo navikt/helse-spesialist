@@ -19,15 +19,13 @@ enum class Gruppe(
     }
 }
 
-interface Tilgangsgrupper {
-    val kode7GruppeId: UUID
-    val beslutterGruppeId: UUID
-    val skjermedePersonerGruppeId: UUID
-    val stikkprøveGruppeId: UUID
-
-    fun gruppeId(gruppe: Gruppe): UUID
-
-    fun gruppeUuidMap(): Map<Gruppe, UUID> =
+open class Tilgangsgrupper(
+    kode7GruppeId: UUID,
+    beslutterGruppeId: UUID,
+    skjermedePersonerGruppeId: UUID,
+    stikkprøveGruppeId: UUID,
+) {
+    private val gruppeUuidMap: Map<Gruppe, UUID> =
         mapOf(
             Gruppe.KODE7 to kode7GruppeId,
             Gruppe.BESLUTTER to beslutterGruppeId,
@@ -35,22 +33,22 @@ interface Tilgangsgrupper {
             Gruppe.STIKKPRØVE to stikkprøveGruppeId,
         )
 
-    fun alleGrupper(): Set<Gruppe> = gruppeUuidMap().keys
+    fun gruppeId(gruppe: Gruppe): UUID = gruppeUuidMap[gruppe]!!
 
-    fun alleUuider(): Set<UUID> = gruppeUuidMap().values.toSet()
+    fun alleGrupper(): Set<Gruppe> = gruppeUuidMap.keys
 
-    fun tilUuider(grupper: Set<Gruppe>) = gruppeUuidMap().filter { it.key in grupper }.values.toSet()
+    fun alleUuider(): Set<UUID> = gruppeUuidMap.values.toSet()
 
-    fun tilGrupper(uuider: Set<UUID>) = gruppeUuidMap().filter { it.value in uuider }.keys
+    fun tilUuider(grupper: Set<Gruppe>) = gruppeUuidMap.filter { it.key in grupper }.values.toSet()
+
+    fun tilGrupper(uuider: Set<UUID>) = gruppeUuidMap.filter { it.value in uuider }.keys
 }
 
 class SpeilTilgangsgrupper(
     private val env: Map<String, String>,
-) : Tilgangsgrupper {
-    override val kode7GruppeId: UUID by lazy { Gruppe.KODE7.idFra(env) }
-    override val beslutterGruppeId: UUID by lazy { Gruppe.BESLUTTER.idFra(env) }
-    override val skjermedePersonerGruppeId: UUID by lazy { Gruppe.SKJERMEDE.idFra(env) }
-    override val stikkprøveGruppeId: UUID by lazy { Gruppe.STIKKPRØVE.idFra(env) }
-
-    override fun gruppeId(gruppe: Gruppe): UUID = gruppe.idFra(env)
-}
+) : Tilgangsgrupper(
+        kode7GruppeId = Gruppe.KODE7.idFra(env),
+        beslutterGruppeId = Gruppe.BESLUTTER.idFra(env),
+        skjermedePersonerGruppeId = Gruppe.SKJERMEDE.idFra(env),
+        stikkprøveGruppeId = Gruppe.STIKKPRØVE.idFra(env),
+    )

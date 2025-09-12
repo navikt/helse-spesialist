@@ -10,6 +10,7 @@ import io.ktor.server.request.ApplicationRequest
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGER
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
+import no.nav.helse.spesialist.application.tilgangskontroll.Gruppe
 import no.nav.helse.spesialist.application.tilgangskontroll.SaksbehandlerTilganger
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
 import org.slf4j.Logger
@@ -36,9 +37,9 @@ class ContextFactory(
             TILGANGER to
                 SaksbehandlerTilganger(
                     gruppetilganger = principal.getGrupper(),
-                    kode7Saksbehandlergruppe = tilgangsgrupper.kode7GruppeId,
-                    beslutterSaksbehandlergruppe = tilgangsgrupper.beslutterGruppeId,
-                    skjermedePersonerSaksbehandlergruppe = tilgangsgrupper.skjermedePersonerGruppeId,
+                    kode7Saksbehandlergruppe = tilgangsgrupper.gruppeId(Gruppe.KODE7),
+                    beslutterSaksbehandlergruppe = tilgangsgrupper.gruppeId(Gruppe.BESLUTTER),
+                    skjermedePersonerSaksbehandlergruppe = tilgangsgrupper.gruppeId(Gruppe.SKJERMEDE),
                 ),
             SAKSBEHANDLER to SaksbehandlerFraApi.fraOnBehalfOfToken(principal, tilgangsgrupper),
         ).toGraphQLContext()

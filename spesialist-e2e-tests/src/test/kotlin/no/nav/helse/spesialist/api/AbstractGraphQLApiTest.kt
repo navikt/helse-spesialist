@@ -56,7 +56,6 @@ import no.nav.helse.spesialist.api.graphql.queryHandler
 import no.nav.helse.spesialist.api.person.PersonService
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
 import no.nav.helse.spesialist.application.Reservasjonshenter
-import no.nav.helse.spesialist.application.tilgangskontroll.Gruppe
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
 import no.nav.helse.spesialist.client.spleis.SpleisClient
 import no.nav.helse.spesialist.client.spleis.SpleisClientSnapshothenter
@@ -191,13 +190,12 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                 requestParser = KtorGraphQLRequestParser(objectMapper)
                 contextFactory =
                     ContextFactory(
-                        tilgangsgrupper = object : Tilgangsgrupper{
-                            override val kode7GruppeId: UUID = this@AbstractGraphQLApiTest.kode7Saksbehandlergruppe
-                            override val beslutterGruppeId: UUID = this@AbstractGraphQLApiTest.beslutterGruppeId
-                            override val skjermedePersonerGruppeId: UUID = this@AbstractGraphQLApiTest.skjermedePersonerGruppeId
-                            override val stikkprøveGruppeId: UUID = UUID.randomUUID()
-                            override fun gruppeId(gruppe: Gruppe): UUID = UUID.randomUUID()
-                        },
+                        tilgangsgrupper = Tilgangsgrupper(
+                            kode7GruppeId = this@AbstractGraphQLApiTest.kode7Saksbehandlergruppe,
+                            beslutterGruppeId = this@AbstractGraphQLApiTest.beslutterGruppeId,
+                            skjermedePersonerGruppeId = this@AbstractGraphQLApiTest.skjermedePersonerGruppeId,
+                            stikkprøveGruppeId = UUID.randomUUID(),
+                        ),
                     )
             }
             schema(spesialistSchema::setup)

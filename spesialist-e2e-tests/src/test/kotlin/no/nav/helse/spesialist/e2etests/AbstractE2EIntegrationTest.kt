@@ -4,6 +4,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import kotliquery.sessionOf
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.spesialist.api.testfixtures.lagSaksbehandlerFraApi
+import no.nav.helse.spesialist.application.tilgangskontroll.Gruppe
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.e2etests.Meldingsbygger.byggUtbetalingEndret
 import no.nav.helse.spesialist.e2etests.behovløserstubs.AbstractBehovLøser
@@ -25,7 +26,7 @@ abstract class AbstractE2EIntegrationTest {
     private val testContext: TestContext = TestContext()
     private var saksbehandler = lagSaksbehandlerFraApi()
     private var beslutter = lagSaksbehandlerFraApi(
-        grupper = listOf(E2ETestApplikasjon.TilgangsgrupperForTest.beslutterGruppeId)
+        grupper = listOf(E2ETestApplikasjon.tilgangsgrupper.gruppeId(Gruppe.BESLUTTER))
     )
 
     enum class Tilgangstype {
@@ -37,8 +38,8 @@ abstract class AbstractE2EIntegrationTest {
         saksbehandler = saksbehandler.copy(
             grupper = saksbehandler.grupper.plus(
                 when (tilgangstype) {
-                    Tilgangstype.KODE7 -> E2ETestApplikasjon.TilgangsgrupperForTest.kode7GruppeId
-                    Tilgangstype.SKJERMEDE -> E2ETestApplikasjon.TilgangsgrupperForTest.skjermedePersonerGruppeId
+                    Tilgangstype.KODE7 -> E2ETestApplikasjon.tilgangsgrupper.gruppeId(Gruppe.KODE7)
+                    Tilgangstype.SKJERMEDE -> E2ETestApplikasjon.tilgangsgrupper.gruppeId(Gruppe.SKJERMEDE)
                 }
             )
         )
