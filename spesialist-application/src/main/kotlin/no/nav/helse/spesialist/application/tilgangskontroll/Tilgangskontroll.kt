@@ -2,19 +2,9 @@ package no.nav.helse.spesialist.application.tilgangskontroll
 
 import java.util.UUID
 
-enum class Gruppe(
-    private val gruppenøkkel: String,
-) {
-    KODE7("KODE7_SAKSBEHANDLER_GROUP"),
-    BESLUTTER("BESLUTTER_SAKSBEHANDLER_GROUP"),
-    SKJERMEDE("SKJERMEDE_PERSONER_GROUP"),
-    STIKKPRØVE("SAKSBEHANDLERE_MED_TILGANG_TIL_STIKKPROVER"),
-    ;
+enum class Gruppe { KODE7, BESLUTTER, SKJERMEDE, STIKKPRØVE }
 
-    fun idFra(env: Map<String, String>): UUID = UUID.fromString(env.getValue(gruppenøkkel))
-}
-
-open class Tilgangsgrupper(
+class Tilgangsgrupper(
     kode7GruppeId: UUID,
     beslutterGruppeId: UUID,
     skjermedePersonerGruppeId: UUID,
@@ -38,12 +28,3 @@ open class Tilgangsgrupper(
 
     fun tilGrupper(uuider: Set<UUID>) = gruppeUuidMap.filter { it.value in uuider }.keys
 }
-
-class SpeilTilgangsgrupper(
-    private val env: Map<String, String>,
-) : Tilgangsgrupper(
-        kode7GruppeId = Gruppe.KODE7.idFra(env),
-        beslutterGruppeId = Gruppe.BESLUTTER.idFra(env),
-        skjermedePersonerGruppeId = Gruppe.SKJERMEDE.idFra(env),
-        stikkprøveGruppeId = Gruppe.STIKKPRØVE.idFra(env),
-    )

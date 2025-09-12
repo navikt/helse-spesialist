@@ -9,13 +9,14 @@ import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.rapids_rivers.RapidApplication
 import no.nav.helse.spesialist.api.ApiModule
-import no.nav.helse.spesialist.application.tilgangskontroll.SpeilTilgangsgrupper
+import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
 import no.nav.helse.spesialist.client.entraid.ClientEntraIDModule
 import no.nav.helse.spesialist.client.krr.ClientKrrModule
 import no.nav.helse.spesialist.client.spleis.ClientSpleisModule
 import no.nav.helse.spesialist.db.DBModule
 import no.nav.helse.spesialist.kafka.KafkaModule
 import java.net.URI
+import java.util.UUID
 
 fun main() {
     val env = System.getenv()
@@ -76,7 +77,13 @@ fun main() {
                             ),
                     ),
                 versjonAvKode = versjonAvKode,
-                tilgangsgrupper = SpeilTilgangsgrupper(env),
+                tilgangsgrupper =
+                    Tilgangsgrupper(
+                        kode7GruppeId = env.getUUID("KODE7_SAKSBEHANDLER_GROUP"),
+                        beslutterGruppeId = env.getUUID("BESLUTTER_SAKSBEHANDLER_GROUP"),
+                        skjermedePersonerGruppeId = env.getUUID("SKJERMEDE_PERSONER_GROUP"),
+                        stikkprøveGruppeId = env.getUUID("SAKSBEHANDLERE_MED_TILGANG_TIL_STIKKPROVER"),
+                    ),
                 environmentToggles = EnvironmentTogglesImpl(env),
                 stikkprøver = Stikkprøver.fraEnv(env),
             ),
@@ -93,6 +100,8 @@ fun main() {
             ),
     )
 }
+
+private fun Map<String, String>.getUUID(key: String): UUID = UUID.fromString(getValue(key))
 
 private fun Map<String, String>.getBoolean(
     key: String,
