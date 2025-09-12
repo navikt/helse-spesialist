@@ -39,7 +39,7 @@ class ApiOppgaveService(
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
         val egenskaperSaksbehandlerIkkeHarTilgangTil =
             Egenskap
-                .alleTilgangsstyrteEgenskaper
+                .entries
                 .filterNot {
                     Oppgave.harTilgangTilEgenskap(
                         egenskap = it,
@@ -49,8 +49,8 @@ class ApiOppgaveService(
                 }.map(Egenskap::toString)
 
         val alleUkategoriserteEgenskaper =
-            Egenskap
-                .alleUkategoriserteEgenskaper
+            Egenskap.entries
+                .filter { it.kategori == Egenskap.Kategori.Ukategorisert }
                 .map(Egenskap::toString)
 
         val ekskluderteEgenskaper =
@@ -94,7 +94,7 @@ class ApiOppgaveService(
     ): ApiOppgaverTilBehandling {
         val egenskaperSaksbehandlerIkkeHarTilgangTil =
             Egenskap
-                .alleTilgangsstyrteEgenskaper
+                .entries
                 .filterNot {
                     Oppgave.harTilgangTilEgenskap(
                         egenskap = it,

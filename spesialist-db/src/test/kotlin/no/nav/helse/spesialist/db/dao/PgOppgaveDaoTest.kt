@@ -532,7 +532,8 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
         nyOppgaveForNyPerson(oppgaveegenskaper = setOf(Egenskap.UTLAND, Egenskap.HASTER))
         val oppgaver =
             oppgaveDao.finnOppgaverForVisning(
-                ekskluderEgenskaper = listOf("BESLUTTER", "RISK_QA") + Egenskap.alleUkategoriserteEgenskaper.map(Egenskap::toString),
+                ekskluderEgenskaper = listOf("BESLUTTER", "RISK_QA") + Egenskap.entries.filter { it.kategori == Egenskap.Kategori.Ukategorisert }
+                    .map(Egenskap::toString),
                 UUID.randomUUID(),
             )
         assertEquals(1, oppgaver.size)
@@ -785,7 +786,8 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
 
         val oppgaver =
             oppgaveDao.finnOppgaverForVisning(
-                ekskluderEgenskaper = Egenskap.alleUkategoriserteEgenskaper.map(Egenskap::toString),
+                ekskluderEgenskaper = Egenskap.entries.filter { it.kategori == Egenskap.Kategori.Ukategorisert }
+                    .map(Egenskap::toString),
                 saksbehandlerOid = UUID.randomUUID(),
                 grupperteFiltrerteEgenskaper =
                     mapOf(

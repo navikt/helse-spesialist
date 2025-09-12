@@ -181,10 +181,16 @@ internal class ApiOppgaveServiceTest {
         apiOppgaveService.oppgaver(saksbehandlerFraApi(), 0, Int.MAX_VALUE, emptyList(), ApiFiltrering())
         verify(exactly = 1) {
             oppgaveDao.finnOppgaverForVisning(
-                ekskluderEgenskaper = Egenskap.alleTilgangsstyrteEgenskaper.map { it.name },
-                SAKSBEHANDLEROID,
-                0,
-                Int.MAX_VALUE,
+                ekskluderEgenskaper = setOf(
+                    Egenskap.FORTROLIG_ADRESSE,
+                    Egenskap.STRENGT_FORTROLIG_ADRESSE,
+                    Egenskap.EGEN_ANSATT,
+                    Egenskap.BESLUTTER,
+                    Egenskap.STIKKPRØVE
+                ).map { it.name },
+                saksbehandlerOid = SAKSBEHANDLEROID,
+                offset = 0,
+                limit = Int.MAX_VALUE,
             )
         }
     }
@@ -201,7 +207,16 @@ internal class ApiOppgaveServiceTest {
         verify(exactly = 1) {
             oppgaveDao.finnOppgaverForVisning(
                 ekskluderEgenskaper =
-                    Egenskap.alleTilgangsstyrteEgenskaper.map { it.name } + Egenskap.alleUkategoriserteEgenskaper.map { it.name },
+                    setOf(
+                        Egenskap.FORTROLIG_ADRESSE,
+                        Egenskap.STRENGT_FORTROLIG_ADRESSE,
+                        Egenskap.EGEN_ANSATT,
+                        Egenskap.BESLUTTER,
+                        Egenskap.STIKKPRØVE
+                    ).map { it.name } +
+                            Egenskap.entries
+                                .filter { it.kategori == Egenskap.Kategori.Ukategorisert }
+                                .map { it.name },
                 SAKSBEHANDLEROID,
                 0,
                 Int.MAX_VALUE,
@@ -228,7 +243,14 @@ internal class ApiOppgaveServiceTest {
         )
         verify(exactly = 1) {
             oppgaveDao.finnOppgaverForVisning(
-                ekskluderEgenskaper = Egenskap.alleTilgangsstyrteEgenskaper.map { it.name } + Egenskap.PÅ_VENT.name,
+                ekskluderEgenskaper = setOf(
+                    Egenskap.FORTROLIG_ADRESSE,
+                    Egenskap.STRENGT_FORTROLIG_ADRESSE,
+                    Egenskap.EGEN_ANSATT,
+                    Egenskap.BESLUTTER,
+                    Egenskap.STIKKPRØVE,
+                    Egenskap.PÅ_VENT
+                ).map { it.name },
                 SAKSBEHANDLEROID,
                 0,
                 Int.MAX_VALUE,
