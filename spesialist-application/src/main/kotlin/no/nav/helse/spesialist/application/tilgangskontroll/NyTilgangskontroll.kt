@@ -25,16 +25,9 @@ class NyTilgangskontroll(
         saksbehandler: Saksbehandler,
         egenskaper: List<Egenskap>,
     ): Boolean {
+        if (egenskaper.isEmpty()) return true
         val tilgangsgrupper = hentTilgangsgrupper(saksbehandler)
-        return egenskaper.isEmpty() ||
-            run {
-                egenskaper.forEach {
-                    if (!harTilgangTilEgenskap(it, tilgangsgrupper)) {
-                        return false
-                    }
-                }
-                return true
-            }
+        return egenskaper.all { harTilgangTilEgenskap(it, tilgangsgrupper) }
     }
 
     fun harTilgangTilEgenskap(
