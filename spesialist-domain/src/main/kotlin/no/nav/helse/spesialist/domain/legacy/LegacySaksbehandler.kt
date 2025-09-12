@@ -1,9 +1,7 @@
 package no.nav.helse.spesialist.domain.legacy
 
-import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDto
 import no.nav.helse.modell.saksbehandler.SaksbehandlerObserver
-import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.modell.saksbehandler.handlinger.Annullering
 import no.nav.helse.modell.saksbehandler.handlinger.EndrePåVent
 import no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent
@@ -20,7 +18,6 @@ class LegacySaksbehandler(
     val oid: UUID,
     val navn: String,
     private val ident: String,
-    private val tilgangskontroll: Tilgangskontroll,
 ) {
     private val observers = mutableListOf<SaksbehandlerObserver>()
 
@@ -33,8 +30,6 @@ class LegacySaksbehandler(
     fun oid(): UUID = oid
 
     fun epostadresse(): String = epostadresse
-
-    fun harTilgangTil(egenskaper: List<Egenskap>): Boolean = tilgangskontroll.harTilgangTil(oid, egenskaper)
 
     internal fun håndter(hendelse: OverstyrtTidslinje) {
         val event = hendelse.byggEvent()
@@ -95,13 +90,11 @@ class LegacySaksbehandler(
 
     override fun equals(other: Any?) =
         this === other ||
-            (
-                other is LegacySaksbehandler &&
-                    epostadresse == other.epostadresse &&
-                    navn == other.navn &&
-                    oid == other.oid &&
-                    ident == other.ident
-            )
+            other is LegacySaksbehandler &&
+            epostadresse == other.epostadresse &&
+            navn == other.navn &&
+            oid == other.oid &&
+            ident == other.ident
 
     override fun hashCode(): Int {
         var result = epostadresse.hashCode()
@@ -112,7 +105,13 @@ class LegacySaksbehandler(
     }
 
     companion object {
-        fun SaksbehandlerDto.gjenopprett(tilgangskontroll: Tilgangskontroll): LegacySaksbehandler = LegacySaksbehandler(epostadresse, oid, navn, ident, tilgangskontroll)
+        fun SaksbehandlerDto.gjenopprett(): LegacySaksbehandler =
+            LegacySaksbehandler(
+                epostadresse = epostadresse,
+                oid = oid,
+                navn = navn,
+                ident = ident,
+            )
 
         fun LegacySaksbehandler.toDto(): SaksbehandlerDto =
             SaksbehandlerDto(
@@ -122,13 +121,12 @@ class LegacySaksbehandler(
                 ident = ident,
             )
 
-        fun no.nav.helse.spesialist.domain.Saksbehandler.gjenopprett(tilgangskontroll: Tilgangskontroll): LegacySaksbehandler =
+        fun no.nav.helse.spesialist.domain.Saksbehandler.gjenopprett(): LegacySaksbehandler =
             LegacySaksbehandler(
                 epostadresse = epost,
                 oid = id().value,
                 navn = navn,
                 ident = ident,
-                tilgangskontroll = tilgangskontroll,
             )
     }
 }

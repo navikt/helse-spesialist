@@ -692,7 +692,6 @@ abstract class AbstractDBIntegrationTest {
             oid = UUID.randomUUID(),
             navn = navn,
             ident = lagSaksbehandlerident(),
-            tilgangskontroll = { _, _ -> false }
         )
         opprettSaksbehandler(saksbehandler.oid, saksbehandler.navn, saksbehandler.epostadresse, saksbehandler.ident())
         return saksbehandler

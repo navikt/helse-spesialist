@@ -31,7 +31,6 @@ abstract class AbstractIntegrationTest : AbstractE2ETest() {
             oppgaveDao = oppgaveDao,
             reservasjonDao = reservasjonDao,
             meldingPubliserer = meldingPubliserer,
-            tilgangskontroll = { _, _ -> false },
             tilgangsgrupper = randomTilgangsgrupper(),
             oppgaveRepository = daos.oppgaveRepository,
             tilgangsgruppehenter = object : Tilgangsgruppehenter {

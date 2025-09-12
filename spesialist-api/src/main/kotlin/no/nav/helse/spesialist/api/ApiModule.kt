@@ -19,7 +19,6 @@ import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
-import no.nav.helse.spesialist.application.tilgangskontroll.TilgangskontrollørForReservasjon
 
 class ApiModule(
     private val configuration: Configuration,
@@ -45,11 +44,6 @@ class ApiModule(
             oppgaveDao = daos.oppgaveDao,
             reservasjonDao = daos.reservasjonDao,
             meldingPubliserer = meldingPubliserer,
-            tilgangskontroll =
-                TilgangskontrollørForReservasjon(
-                    tilgangsgruppehenter,
-                    tilgangsgrupper,
-                ),
             tilgangsgrupper = tilgangsgrupper,
             oppgaveRepository = daos.oppgaveRepository,
             tilgangsgruppehenter = tilgangsgruppehenter,
@@ -80,16 +74,10 @@ class ApiModule(
                     meldingPubliserer = meldingPubliserer,
                     oppgaveService = oppgaveService,
                     apiOppgaveService = apiOppgaveService,
-                    tilgangsgrupper = tilgangsgrupper,
                     stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
                     annulleringRepository = daos.annulleringRepository,
                     environmentToggles = environmentToggles,
                     sessionFactory = sessionFactory,
-                    tilgangskontroll =
-                        TilgangskontrollørForReservasjon(
-                            tilgangsgruppehenter,
-                            tilgangsgrupper,
-                        ),
                 ),
             stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
             personhåndterer = PersonhåndtererImpl(publiserer = meldingPubliserer),

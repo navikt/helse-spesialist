@@ -52,7 +52,6 @@ class TestMediator(
             oppgaveDao = daos.oppgaveDao,
             reservasjonDao = daos.reservasjonDao,
             meldingPubliserer = meldingPubliserer,
-            tilgangskontroll = { _, _ -> false },
             tilgangsgrupper = tilgangsgrupper,
             oppgaveRepository = daos.oppgaveRepository,
             tilgangsgruppehenter = object : Tilgangsgruppehenter {
@@ -76,12 +75,10 @@ class TestMediator(
             meldingPubliserer = meldingPubliserer,
             oppgaveService = oppgaveService,
             apiOppgaveService = apiOppgaveService,
-            tilgangsgrupper = tilgangsgrupper,
             stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
             annulleringRepository = annulleringRepository,
             environmentToggles = environmentToggles,
             sessionFactory = TransactionalSessionFactory(dataSource),
-            tilgangskontroll = { _, _ -> false },
         )
 
     private val stikkprøver =

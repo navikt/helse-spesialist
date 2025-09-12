@@ -9,10 +9,6 @@ import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.OppgaveInspektør.Companion.inspektør
-import no.nav.helse.modell.saksbehandler.Tilgangskontroll
-import no.nav.helse.modell.saksbehandler.handlinger.TilgangskontrollForTestHarIkkeTilgang
-import no.nav.helse.modell.saksbehandler.handlinger.TilgangskontrollForTestHarTilgang
-import no.nav.helse.modell.saksbehandler.handlinger.TilgangskontrollForTestMedKunFortroligAdresse
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -40,20 +36,18 @@ internal class OppgaveTest {
         private val BESLUTTER_OID = UUID.randomUUID()
         private val OPPGAVE_ID = nextLong()
         private val saksbehandlerUtenTilgang = saksbehandler()
-        private val beslutter = saksbehandler(oid = BESLUTTER_OID, tilgangskontroll = TilgangskontrollForTestHarTilgang)
+        private val beslutter = saksbehandler(oid = BESLUTTER_OID)
 
         private fun saksbehandler(
             epost: String = SAKSBEHANDLER_EPOST,
             oid: UUID = SAKSBEHANDLER_OID,
             navn: String = SAKSBEHANDLER_NAVN,
             ident: String = SAKSBEHANDLER_IDENT,
-            tilgangskontroll: Tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
         ) = LegacySaksbehandler(
             epostadresse = epost,
             oid = oid,
             navn = navn,
             ident = ident,
-            tilgangskontroll = tilgangskontroll,
         )
     }
 
@@ -75,7 +69,7 @@ internal class OppgaveTest {
     @Test
     fun `Kan tildele ved reservasjon dersom saksbehandler har tilgang til alle tilgangsstyrte egenskaper på oppgaven`() {
         val oppgave = nyOppgave(SØKNAD, FORTROLIG_ADRESSE)
-        val saksbehandler = saksbehandler(tilgangskontroll = TilgangskontrollForTestHarTilgang)
+        val saksbehandler = saksbehandler()
         oppgave.forsøkTildelingVedReservasjon(
             legacySaksbehandler = saksbehandler,
             saksbehandlerTilgangsgrupper = Tilgangsgruppe.entries.toSet()
@@ -92,7 +86,7 @@ internal class OppgaveTest {
         val oppgave = nyOppgave(SØKNAD, FORTROLIG_ADRESSE, STRENGT_FORTROLIG_ADRESSE)
         assertThrows<ManglerTilgang> {
             oppgave.forsøkTildelingVedReservasjon(
-                legacySaksbehandler = saksbehandler(tilgangskontroll = TilgangskontrollForTestMedKunFortroligAdresse),
+                legacySaksbehandler = saksbehandler(),
                 saksbehandlerTilgangsgrupper = setOf(Tilgangsgruppe.KODE7)
             )
         }
@@ -210,7 +204,7 @@ internal class OppgaveTest {
     @EnumSource(names = ["EGEN_ANSATT", "FORTROLIG_ADRESSE", "BESLUTTER", "SPESIALSAK", "STIKKPRØVE"])
     fun `Forsøker tildeling ved tilgang`(egenskap: Egenskap) {
         val oppgave = nyOppgave(egenskap)
-        val saksbehandlerMedTilgang = saksbehandler(tilgangskontroll = TilgangskontrollForTestHarTilgang)
+        val saksbehandlerMedTilgang = saksbehandler()
         oppgave.forsøkTildeling(
             legacySaksbehandler = saksbehandlerMedTilgang,
             saksbehandlerTilgangsgrupper = Tilgangsgruppe.entries.toSet()

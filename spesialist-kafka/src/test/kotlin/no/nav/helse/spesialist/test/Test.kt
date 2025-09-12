@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.test
 
-import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 import no.nav.helse.spesialist.domain.testfixtures.lagAktørId
 import no.nav.helse.spesialist.domain.testfixtures.lagEpostadresseFraFulltNavn
@@ -15,13 +14,11 @@ fun lagSaksbehandler(
     epostadresse: String = lagEpostadresseFraFulltNavn(navn),
     oid: UUID = UUID.randomUUID(),
     ident: String = lagSaksbehandlerident(),
-    tilgangskontroll: Tilgangskontroll = Tilgangskontroll { _, _ -> true },
 ) = LegacySaksbehandler(
     epostadresse = epostadresse,
     oid = oid,
     navn = navn,
     ident = ident,
-    tilgangskontroll = tilgangskontroll
 )
 
 class TestPerson {

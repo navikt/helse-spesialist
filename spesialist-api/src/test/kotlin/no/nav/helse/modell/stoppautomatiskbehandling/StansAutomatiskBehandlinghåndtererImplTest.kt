@@ -44,7 +44,6 @@ class StansAutomatiskBehandlinghåndtererImplTest {
                     oid = oid,
                     navn = "navn",
                     ident = "ident",
-                    tilgangskontroll = { _, _ -> false },
                 ),
         )
 

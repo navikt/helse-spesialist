@@ -79,7 +79,6 @@ class OppgavemelderTest {
         oid = UUID.randomUUID(),
         navn = "En Saksbehandler",
         ident = "S123456",
-        tilgangskontroll = { _, _ -> false }
     )
 
     private fun nyOppgave() = Oppgave.ny(

@@ -10,7 +10,6 @@ import no.nav.helse.modell.ManglerTilgang
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.oppgave.Oppgave.Companion.ny
-import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.modell.saksbehandler.handlinger.EndrePåVent
 import no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent
 import no.nav.helse.modell.saksbehandler.handlinger.Oppgavehandling
@@ -33,7 +32,6 @@ class OppgaveService(
     private val oppgaveDao: OppgaveDao,
     private val reservasjonDao: ReservasjonDao,
     private val meldingPubliserer: MeldingPubliserer,
-    private val tilgangskontroll: Tilgangskontroll,
     private val tilgangsgrupper: Tilgangsgrupper,
     private val oppgaveRepository: OppgaveRepository,
     private val tilgangsgruppehenter: Tilgangsgruppehenter,
@@ -47,7 +45,6 @@ class OppgaveService(
             oppgaveDao = sessionContext.oppgaveDao,
             reservasjonDao = sessionContext.reservasjonDao,
             meldingPubliserer = meldingPubliserer,
-            tilgangskontroll = tilgangskontroll,
             tilgangsgrupper = tilgangsgrupper,
             oppgaveRepository = sessionContext.oppgaveRepository,
             tilgangsgruppehenter = tilgangsgruppehenter,
@@ -86,7 +83,7 @@ class OppgaveService(
         id: Long,
         oppgaveBlock: Oppgave.() -> T,
     ): T {
-        val oppgave = oppgaveRepository.finn(id, tilgangskontroll) ?: error("Forventer å finne oppgave med oppgaveId=$id")
+        val oppgave = oppgaveRepository.finn(id) ?: error("Forventer å finne oppgave med oppgaveId=$id")
         val fødselsnummer = oppgaveDao.finnFødselsnummer(id)
         oppgave.register(Oppgavemelder(fødselsnummer, meldingPubliserer))
         val returverdi = oppgaveBlock(oppgave)
@@ -229,7 +226,6 @@ class OppgaveService(
                 oid = saksbehandlerFraDatabase.oid,
                 navn = saksbehandlerFraDatabase.navn,
                 ident = saksbehandlerFraDatabase.ident,
-                tilgangskontroll = tilgangskontroll,
             )
 
         val saksbehandlerTilgangsgrupper = runBlocking { tilgangsgruppehenter.hentTilgangsgrupper(legacySaksbehandler.oid()) }

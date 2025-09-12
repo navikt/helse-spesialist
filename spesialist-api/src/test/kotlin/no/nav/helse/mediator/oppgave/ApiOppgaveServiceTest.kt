@@ -99,7 +99,6 @@ internal class ApiOppgaveServiceTest {
                 oppgaveDao = oppgaveDao,
                 reservasjonDao = reservasjonDao,
                 meldingPubliserer = meldingPubliserer,
-                tilgangskontroll = { _, _ -> false },
                 tilgangsgrupper = tilgangsgrupper,
                 oppgaveRepository = oppgaveRepository,
                 tilgangsgruppehenter = object : Tilgangsgruppehenter {

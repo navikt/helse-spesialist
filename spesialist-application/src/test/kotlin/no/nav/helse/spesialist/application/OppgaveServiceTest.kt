@@ -77,7 +77,6 @@ internal class OppgaveServiceTest {
             oppgaveDao = oppgaveDao,
             reservasjonDao = reservasjonDao,
             meldingPubliserer = meldingPubliserer,
-            tilgangskontroll = { _, _ -> false },
             tilgangsgrupper = randomTilgangsgrupper(),
             oppgaveRepository = oppgaveRepository,
             tilgangsgruppehenter = object : Tilgangsgruppehenter {
@@ -159,7 +158,7 @@ internal class OppgaveServiceTest {
 
     @Test
     fun `oppdaterer oppgave`() {
-        every { oppgaveRepository.finn(OPPGAVE_ID, any()) } returns oppgave()
+        every { oppgaveRepository.finn(OPPGAVE_ID) } returns oppgave()
         every { oppgaveDao.finnHendelseId(any()) } returns HENDELSE_ID
         oppgaveService.oppgave(OPPGAVE_ID) {
             avventerSystem(SAKSBEHANDLERIDENT, SAKSBEHANDLEROID)
@@ -198,11 +197,10 @@ internal class OppgaveServiceTest {
         tildeltTil =
             if (tildelt) {
                 LegacySaksbehandler(
-                    SAKSBEHANDLEREPOST,
-                    SAKSBEHANDLEROID,
-                    SAKSBEHANDLERNAVN,
-                    SAKSBEHANDLERIDENT,
-                    { _, _ -> false }
+                    epostadresse = SAKSBEHANDLEREPOST,
+                    oid = SAKSBEHANDLEROID,
+                    navn = SAKSBEHANDLERNAVN,
+                    ident = SAKSBEHANDLERIDENT,
                 )
             } else {
                 null

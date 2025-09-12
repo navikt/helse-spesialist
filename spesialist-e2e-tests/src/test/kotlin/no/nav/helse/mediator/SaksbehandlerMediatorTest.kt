@@ -429,7 +429,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             oppgaveDao = daos.oppgaveDao,
             reservasjonDao = sessionContext.reservasjonDao,
             meldingPubliserer = meldingPubliserer,
-            tilgangskontroll = { _, _ -> false },
             tilgangsgrupper = tilgangsgrupper,
             oppgaveRepository = daos.oppgaveRepository,
             tilgangsgruppehenter = object : Tilgangsgruppehenter {
@@ -453,12 +452,10 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             meldingPubliserer = meldingPubliserer,
             oppgaveService = oppgaveService,
             apiOppgaveService = apiOppgaveService,
-            tilgangsgrupper = tilgangsgrupper,
             stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
             annulleringRepository = daos.annulleringRepository,
             environmentToggles = environmentToggles,
             sessionFactory = TransactionalSessionFactory(dataSource),
-            tilgangskontroll = { _, _ -> false },
         )
 
     private val AKTØR_ID = lagAktørId()

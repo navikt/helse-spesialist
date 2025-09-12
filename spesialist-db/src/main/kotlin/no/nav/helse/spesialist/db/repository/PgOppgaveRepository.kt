@@ -4,7 +4,6 @@ import kotliquery.Session
 import no.nav.helse.mediator.oppgave.OppgaveRepository
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
-import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.HelseDao.Companion.somDbArray
 import no.nav.helse.spesialist.db.MedDataSource
@@ -33,10 +32,7 @@ class PgOppgaveRepository private constructor(
         lagreTildeling(oppgave)
     }
 
-    override fun finn(
-        id: Long,
-        tilgangskontroll: Tilgangskontroll,
-    ): Oppgave? = finnOppgave(id, tilgangskontroll)
+    override fun finn(id: Long): Oppgave? = finnOppgave(id)
 
     override fun finnSisteOppgaveForUtbetaling(utbetalingId: UUID): OppgaveRepository.OppgaveTilstandStatusOgGodkjenningsbehov? =
         asSQL(
@@ -143,10 +139,7 @@ class PgOppgaveRepository private constructor(
             "vedtaksperiode_id" to vedtaksperiodeId,
         ).singleOrNull { it.boolean(1) } ?: false
 
-    private fun finnOppgave(
-        id: Long,
-        tilgangskontroll: Tilgangskontroll,
-    ): Oppgave? =
+    private fun finnOppgave(id: Long): Oppgave? =
         asSQL(
             """
             SELECT 
@@ -191,7 +184,6 @@ class PgOppgaveRepository private constructor(
                             oid = it,
                             navn = row.string("navn"),
                             ident = row.string("ident"),
-                            tilgangskontroll = tilgangskontroll,
                         )
                     },
             )

@@ -31,7 +31,6 @@ import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
 import no.nav.helse.modell.saksbehandler.SaksbehandlerDto
-import no.nav.helse.modell.saksbehandler.Tilgangskontroll
 import no.nav.helse.modell.saksbehandler.handlinger.Annullering
 import no.nav.helse.modell.saksbehandler.handlinger.AnnulleringArsak
 import no.nav.helse.modell.saksbehandler.handlinger.Arbeidsforhold
@@ -89,8 +88,6 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.application.logg.sikkerlogg
-import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
-import no.nav.helse.spesialist.application.tilgangskontroll.TilgangskontrollørForApi
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
@@ -109,12 +106,10 @@ class SaksbehandlerMediator(
     private val meldingPubliserer: MeldingPubliserer,
     private val oppgaveService: OppgaveService,
     private val apiOppgaveService: ApiOppgaveService,
-    private val tilgangsgrupper: Tilgangsgrupper,
     private val stansAutomatiskBehandlinghåndterer: StansAutomatiskBehandlinghåndtererImpl,
     private val annulleringRepository: AnnulleringRepository,
     private val environmentToggles: EnvironmentToggles,
     private val sessionFactory: SessionFactory,
-    private val tilgangskontroll: Tilgangskontroll,
 ) {
     private val behandlingRepository = daos.behandlingApiRepository
     private val varselRepository = daos.varselApiRepository
@@ -138,7 +133,7 @@ class SaksbehandlerMediator(
             )
         sessionFactory.transactionalSessionScope { it.saksbehandlerRepository.lagre(saksbehandler) }
         tell(modellhandling)
-        val legacySaksbehandler = saksbehandler.tilLegacySaksbehandler(saksbehandlerFraApi.grupper)
+        val legacySaksbehandler = saksbehandler.gjenopprett()
         legacySaksbehandler.register(Saksbehandlingsmelder(meldingPubliserer))
         legacySaksbehandler.register(Subsumsjonsmelder(versjonAvKode, meldingPubliserer))
         val handlingId = UUID.randomUUID()
@@ -315,7 +310,7 @@ class SaksbehandlerMediator(
             ),
         ) {
             sikkerlogg.info("Utfører handling ${modellhandling.loggnavn()} på vegne av saksbehandler $saksbehandler")
-            val legacySaksbehandler = saksbehandler.tilLegacySaksbehandler(saksbehandlerFraApi.grupper)
+            val legacySaksbehandler = saksbehandler.gjenopprett()
             when (modellhandling) {
                 is LeggPåVent -> leggPåVent(modellhandling, legacySaksbehandler)
                 is FjernPåVent -> fjernFraPåVent(modellhandling, legacySaksbehandler)
@@ -682,7 +677,7 @@ class SaksbehandlerMediator(
             return@transactionalSessionScope SendTilGodkjenningResult.Ok
         }
 
-    private fun tilLegacySaksbehandler(saksbehandler: Saksbehandler): LegacySaksbehandler = saksbehandler.gjenopprett(tilgangskontroll = tilgangskontroll)
+    private fun tilLegacySaksbehandler(saksbehandler: Saksbehandler): LegacySaksbehandler = saksbehandler.gjenopprett()
 
     private fun vurderVarsel(
         fødselsnummer: String,
@@ -759,11 +754,6 @@ class SaksbehandlerMediator(
             navn = navn,
             epost = epost,
             ident = ident,
-        )
-
-    private fun Saksbehandler.tilLegacySaksbehandler(saksbehandlergrupper: List<UUID>): LegacySaksbehandler =
-        gjenopprett(
-            TilgangskontrollørForApi(saksbehandlergrupper, tilgangsgrupper),
         )
 
     private fun HandlingFraApi.tilModellversjon(

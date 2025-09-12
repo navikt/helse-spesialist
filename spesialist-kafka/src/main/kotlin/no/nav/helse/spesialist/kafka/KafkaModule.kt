@@ -15,7 +15,6 @@ import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
-import no.nav.helse.spesialist.application.tilgangskontroll.TilgangskontrollørForReservasjon
 
 class KafkaModule(
     configuration: Configuration,
@@ -49,11 +48,6 @@ class KafkaModule(
                                     oppgaveDao = daos.oppgaveDao,
                                     reservasjonDao = daos.reservasjonDao,
                                     meldingPubliserer = meldingPubliserer,
-                                    tilgangskontroll =
-                                        TilgangskontrollørForReservasjon(
-                                            tilgangsgruppehenter,
-                                            tilgangsgrupper,
-                                        ),
                                     tilgangsgrupper = tilgangsgrupper,
                                     oppgaveRepository = daos.oppgaveRepository,
                                     tilgangsgruppehenter = tilgangsgruppehenter,

@@ -308,7 +308,7 @@ internal class LegacySaksbehandlerTest {
             ident = "X999999",
         )
 
-        assertEquals(saksbehandlerDto, saksbehandlerDto.gjenopprett(TilgangskontrollForTestHarIkkeTilgang).toDto())
+        assertEquals(saksbehandlerDto, saksbehandlerDto.gjenopprett().toDto())
     }
 
     private fun overstyrteDager(): List<OverstyrtTidslinjedag> = listOf(
@@ -372,6 +372,5 @@ internal class LegacySaksbehandlerTest {
         oid = oid,
         navn = navn,
         ident = ident,
-        tilgangskontroll = TilgangskontrollForTestHarIkkeTilgang,
     )
 }

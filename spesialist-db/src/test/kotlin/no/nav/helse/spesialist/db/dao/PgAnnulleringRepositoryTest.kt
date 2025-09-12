@@ -100,6 +100,5 @@ class PgAnnulleringRepositoryTest : AbstractDBIntegrationTest() {
             oid = saksbehandlerOid,
             navn = SAKSBEHANDLER_NAVN,
             ident = SAKSBEHANDLER_IDENT,
-            tilgangskontroll = { _, _ -> false },
         )
 }
