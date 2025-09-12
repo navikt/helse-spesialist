@@ -5,26 +5,27 @@ import java.util.UUID
 enum class Gruppe { KODE7, BESLUTTER, SKJERMEDE, STIKKPRØVE }
 
 class Tilgangsgrupper(
-    kode7GruppeId: UUID,
-    beslutterGruppeId: UUID,
-    skjermedePersonerGruppeId: UUID,
-    stikkprøveGruppeId: UUID,
+    private val kode7GruppeId: UUID,
+    private val beslutterGruppeId: UUID,
+    private val skjermedePersonerGruppeId: UUID,
+    private val stikkprøveGruppeId: UUID,
 ) {
-    private val gruppeUuidMap: Map<Gruppe, UUID> =
-        mapOf(
-            Gruppe.KODE7 to kode7GruppeId,
-            Gruppe.BESLUTTER to beslutterGruppeId,
-            Gruppe.SKJERMEDE to skjermedePersonerGruppeId,
-            Gruppe.STIKKPRØVE to stikkprøveGruppeId,
-        )
+    fun gruppeId(gruppe: Gruppe): UUID =
+        when (gruppe) {
+            Gruppe.KODE7 -> kode7GruppeId
+            Gruppe.BESLUTTER -> beslutterGruppeId
+            Gruppe.SKJERMEDE -> skjermedePersonerGruppeId
+            Gruppe.STIKKPRØVE -> stikkprøveGruppeId
+        }
 
-    fun gruppeId(gruppe: Gruppe): UUID = gruppeUuidMap[gruppe]!!
+    fun alleGrupper(): Set<Gruppe> = Gruppe.entries.toSet()
 
-    fun alleGrupper(): Set<Gruppe> = gruppeUuidMap.keys
+    fun alleUuider(): Set<UUID> = Gruppe.entries.map(::gruppeId).toSet()
 
-    fun alleUuider(): Set<UUID> = gruppeUuidMap.values.toSet()
+    fun tilUuider(grupper: Set<Gruppe>) = grupper.map(::gruppeId).toSet()
 
-    fun tilUuider(grupper: Set<Gruppe>) = gruppeUuidMap.filter { it.key in grupper }.values.toSet()
-
-    fun tilGrupper(uuider: Set<UUID>) = gruppeUuidMap.filter { it.value in uuider }.keys
+    fun tilGrupper(uuider: Set<UUID>) =
+        Gruppe.entries.associateBy { gruppeId(it) }.let { uuidMap ->
+            uuider.mapNotNull { uuidMap[it] }.toSet()
+        }
 }
