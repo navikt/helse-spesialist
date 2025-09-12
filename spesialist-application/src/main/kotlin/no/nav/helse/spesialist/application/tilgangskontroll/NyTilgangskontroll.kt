@@ -10,7 +10,6 @@ import no.nav.helse.modell.oppgave.Egenskap.FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
 import no.nav.helse.spesialist.domain.Saksbehandler
-import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 
 class NyTilgangskontroll(
     private val egenAnsattApiDao: EgenAnsattApiDao,
@@ -21,11 +20,6 @@ class NyTilgangskontroll(
         saksbehandlerTilganger: SaksbehandlerTilganger,
         fødselsnummer: String,
     ): Boolean = !manglerTilgang(egenAnsattApiDao, personApiDao, fødselsnummer, saksbehandlerTilganger)
-
-    fun harTilgangTilOppgave(
-        saksbehandler: LegacySaksbehandler,
-        egenskaper: List<Egenskap>,
-    ): Boolean = saksbehandler.harTilgangTil(egenskaper)
 
     fun harTilgangTilOppgave(
         saksbehandler: Saksbehandler,
