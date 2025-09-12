@@ -27,11 +27,18 @@ class NyTilgangskontroll(
     ): Boolean {
         if (egenskaper.isEmpty()) return true
         val tilgangsgrupper = hentTilgangsgrupper(saksbehandler)
-        return egenskaper.all { harTilgangTilEgenskap(it, tilgangsgrupper) }
+        return egenskaper.all {
+            harTilgangTilEgenskap(
+                egenskap = it,
+                saksbehandler = saksbehandler,
+                grupper = tilgangsgrupper,
+            )
+        }
     }
 
     fun harTilgangTilEgenskap(
         egenskap: Egenskap,
+        saksbehandler: Saksbehandler,
         grupper: Set<Gruppe>,
     ) = when (egenskap) {
         STRENGT_FORTROLIG_ADRESSE -> false // Ingen skal ha tilgang til disse i Speil foreløpig
