@@ -29,7 +29,6 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveegenskap
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavetype
 import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodetype
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
-import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
 import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgrupper
 import no.nav.helse.spesialist.domain.Saksbehandler
@@ -101,14 +100,7 @@ internal class ApiOppgaveServiceTest {
                 meldingPubliserer = meldingPubliserer,
                 tilgangsgrupper = tilgangsgrupper,
                 oppgaveRepository = oppgaveRepository,
-                tilgangsgruppehenter = object : Tilgangsgruppehenter {
-                    override suspend fun hentTilgangsgrupper(
-                        oid: UUID,
-                        gruppeIder: List<UUID>
-                    ): Set<UUID> = emptySet()
-
-                    override suspend fun hentTilgangsgrupper(oid: UUID): Set<Tilgangsgruppe> = emptySet()
-                }
+                tilgangsgruppehenter = { emptySet() }
             )
         )
 

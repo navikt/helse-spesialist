@@ -51,7 +51,6 @@ import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.ApiOpphevStans
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
-import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
 import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgrupper
 import no.nav.helse.spesialist.db.DBDaos
 import no.nav.helse.spesialist.db.DBSessionContext
@@ -66,7 +65,6 @@ import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlerident
 import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlernavn
 import no.nav.helse.spesialist.domain.testfixtures.lagTilfeldigSaksbehandlerepost
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.test.TestPerson
 import no.nav.helse.spesialist.typer.Kjønn
 import no.nav.helse.util.februar
@@ -431,14 +429,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             meldingPubliserer = meldingPubliserer,
             tilgangsgrupper = tilgangsgrupper,
             oppgaveRepository = daos.oppgaveRepository,
-            tilgangsgruppehenter = object : Tilgangsgruppehenter {
-                override suspend fun hentTilgangsgrupper(
-                    oid: UUID,
-                    gruppeIder: List<UUID>
-                ): Set<UUID> = emptySet()
-
-                override suspend fun hentTilgangsgrupper(oid: UUID): Set<Tilgangsgruppe> = emptySet()
-            }
+            tilgangsgruppehenter = { emptySet() }
         )
     private val apiOppgaveService = ApiOppgaveService(
         oppgaveDao = daos.oppgaveDao,

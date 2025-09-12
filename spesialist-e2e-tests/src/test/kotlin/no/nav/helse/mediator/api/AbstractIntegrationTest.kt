@@ -8,14 +8,11 @@ import no.nav.helse.e2e.AbstractE2ETest
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.mediator.GodkjenningService
 import no.nav.helse.mediator.oppgave.OppgaveService
-import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
 import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgrupper
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
-import java.util.UUID
 
 // Snakk med Christian før du lager flere subklasser av denne. Det er mulig vi ønsker å lage (eller allerede har laget?)
 // et annet opplegg for å teste samspillet mellom API og selve/mediator/modell
@@ -33,14 +30,7 @@ abstract class AbstractIntegrationTest : AbstractE2ETest() {
             meldingPubliserer = meldingPubliserer,
             tilgangsgrupper = randomTilgangsgrupper(),
             oppgaveRepository = daos.oppgaveRepository,
-            tilgangsgruppehenter = object : Tilgangsgruppehenter {
-                override suspend fun hentTilgangsgrupper(
-                    oid: UUID,
-                    gruppeIder: List<UUID>
-                ): Set<UUID> = emptySet()
-
-                override suspend fun hentTilgangsgrupper(oid: UUID): Set<Tilgangsgruppe> = emptySet()
-            },
+            tilgangsgruppehenter = { emptySet() },
         )
 
     val godkjenningService =

@@ -121,7 +121,7 @@ class LegacySaksbehandler(
                 ident = ident,
             )
 
-        fun no.nav.helse.spesialist.domain.Saksbehandler.gjenopprett(): LegacySaksbehandler =
+        fun no.nav.helse.spesialist.domain.Saksbehandler.tilLegacy(): LegacySaksbehandler =
             LegacySaksbehandler(
                 epostadresse = epost,
                 oid = id().value,

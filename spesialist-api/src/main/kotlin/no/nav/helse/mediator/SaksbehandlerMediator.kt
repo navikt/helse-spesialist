@@ -92,7 +92,7 @@ import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
-import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler.Companion.gjenopprett
+import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler.Companion.tilLegacy
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler.Companion.toDto
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.tell
@@ -133,7 +133,7 @@ class SaksbehandlerMediator(
             )
         sessionFactory.transactionalSessionScope { it.saksbehandlerRepository.lagre(saksbehandler) }
         tell(modellhandling)
-        val legacySaksbehandler = saksbehandler.gjenopprett()
+        val legacySaksbehandler = saksbehandler.tilLegacy()
         legacySaksbehandler.register(Saksbehandlingsmelder(meldingPubliserer))
         legacySaksbehandler.register(Subsumsjonsmelder(versjonAvKode, meldingPubliserer))
         val handlingId = UUID.randomUUID()
@@ -310,7 +310,7 @@ class SaksbehandlerMediator(
             ),
         ) {
             sikkerlogg.info("Utfører handling ${modellhandling.loggnavn()} på vegne av saksbehandler $saksbehandler")
-            val legacySaksbehandler = saksbehandler.gjenopprett()
+            val legacySaksbehandler = saksbehandler.tilLegacy()
             when (modellhandling) {
                 is LeggPåVent -> leggPåVent(modellhandling, legacySaksbehandler)
                 is FjernPåVent -> fjernFraPåVent(modellhandling, legacySaksbehandler)
@@ -554,7 +554,7 @@ class SaksbehandlerMediator(
                     checkNotNull(
                         totrinnsvurdering.saksbehandler
                             ?.let(session.saksbehandlerRepository::finn)
-                            ?.let(this::tilLegacySaksbehandler),
+                            ?.tilLegacy(),
                     ) {
                         "Opprinnelig saksbehandler kan ikke være null ved retur av beslutteroppgave"
                     }
@@ -636,7 +636,7 @@ class SaksbehandlerMediator(
                     val beslutter =
                         totrinnsvurdering.beslutter
                             ?.let(session.saksbehandlerRepository::finn)
-                            ?.let(this::tilLegacySaksbehandler)
+                            ?.tilLegacy()
                     apiOppgaveService.sendTilBeslutter(oppgavereferanse, beslutter)
                     totrinnsvurdering.sendTilBeslutter(oppgavereferanse, SaksbehandlerOid(saksbehandlerFraApi.oid))
                     session.totrinnsvurderingRepository.lagre(totrinnsvurdering)
@@ -677,8 +677,6 @@ class SaksbehandlerMediator(
             return@transactionalSessionScope SendTilGodkjenningResult.Ok
         }
 
-    private fun tilLegacySaksbehandler(saksbehandler: Saksbehandler): LegacySaksbehandler = saksbehandler.gjenopprett()
-
     private fun vurderVarsel(
         fødselsnummer: String,
         behandlingId: UUID,
@@ -718,7 +716,7 @@ class SaksbehandlerMediator(
                         sessionFactory.transactionalSessionScope { session ->
                             session.saksbehandlerRepository.finn(SaksbehandlerOid(saksbehandlerOid))
                         },
-                    ).let(this@SaksbehandlerMediator::tilLegacySaksbehandler)
+                    ).tilLegacy()
                 no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre(
                     TildelingApiDto(saksbehandler.navn, saksbehandler.epostadresse, saksbehandler.oid),
                 )

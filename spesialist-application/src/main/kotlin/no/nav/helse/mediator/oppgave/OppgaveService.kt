@@ -1,6 +1,5 @@
 package no.nav.helse.mediator.oppgave
 
-import kotlinx.coroutines.runBlocking
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.OppgaveDao
@@ -16,7 +15,10 @@ import no.nav.helse.modell.saksbehandler.handlinger.Oppgavehandling
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
+import no.nav.helse.spesialist.domain.Saksbehandler
+import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
+import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler.Companion.tilLegacy
 import org.slf4j.LoggerFactory
 import java.sql.SQLException
 import java.util.UUID
@@ -220,18 +222,18 @@ class OppgaveService(
                 logg.info("Finner ingen reservasjon for $oppgave, blir ikke tildelt.")
                 return
             }
-        val legacySaksbehandler =
-            LegacySaksbehandler(
-                epostadresse = saksbehandlerFraDatabase.epostadresse,
-                oid = saksbehandlerFraDatabase.oid,
+        val saksbehandler =
+            Saksbehandler(
+                id = SaksbehandlerOid(saksbehandlerFraDatabase.oid),
                 navn = saksbehandlerFraDatabase.navn,
+                epost = saksbehandlerFraDatabase.epostadresse,
                 ident = saksbehandlerFraDatabase.ident,
             )
 
-        val saksbehandlerTilgangsgrupper = runBlocking { tilgangsgruppehenter.hentTilgangsgrupper(legacySaksbehandler.oid()) }
+        val saksbehandlerTilgangsgrupper = tilgangsgruppehenter.hentTilgangsgrupper(saksbehandler.id())
 
         try {
-            oppgave.forsøkTildelingVedReservasjon(legacySaksbehandler, saksbehandlerTilgangsgrupper)
+            oppgave.forsøkTildelingVedReservasjon(saksbehandler.tilLegacy(), saksbehandlerTilgangsgrupper)
         } catch (manglerTilgang: ManglerTilgang) {
             logg.info("Saksbehandler har ikke (lenger) tilgang til egenskapene i denne oppgaven, tildeler ikke tross reservasjon")
             sikkerlogg.info(

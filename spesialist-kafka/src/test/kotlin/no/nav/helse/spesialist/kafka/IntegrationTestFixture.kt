@@ -4,11 +4,8 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.spesialist.application.InMemoryDaos
 import no.nav.helse.spesialist.application.InMemorySessionFactory
-import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
 import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgrupper
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.kafka.testfixtures.KafkaModuleTestRapidTestFixture
-import java.util.UUID
 
 class IntegrationTestFixture(
     val testRapid: TestRapid,
@@ -31,10 +28,7 @@ class IntegrationTestFixture(
                 override fun fullRefusjonFlereArbeidsgivereForlengelse() = false
                 override fun fullRefusjonEnArbeidsgiver() = false
             },
-            tilgangsgruppehenter = object : Tilgangsgruppehenter {
-                override suspend fun hentTilgangsgrupper(oid: UUID, gruppeIder: List<UUID>) = emptySet<UUID>()
-                override suspend fun hentTilgangsgrupper(oid: UUID)= emptySet<Tilgangsgruppe>()
-            },
+            tilgangsgruppehenter = { emptySet() },
         ).also(KafkaModule::kobleOppRivers)
     }
 }
