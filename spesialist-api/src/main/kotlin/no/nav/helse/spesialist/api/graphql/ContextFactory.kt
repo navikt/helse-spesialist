@@ -37,9 +37,9 @@ class ContextFactory(
             TILGANGER to
                 SaksbehandlerTilganger(
                     gruppetilganger = principal.getGrupper(),
-                    kode7Saksbehandlergruppe = tilgangsgrupper.gruppeId(Gruppe.KODE7),
-                    beslutterSaksbehandlergruppe = tilgangsgrupper.gruppeId(Gruppe.BESLUTTER),
-                    skjermedePersonerSaksbehandlergruppe = tilgangsgrupper.gruppeId(Gruppe.SKJERMEDE),
+                    kode7Saksbehandlergruppe = tilgangsgrupper.uuidFor(Gruppe.KODE7),
+                    beslutterSaksbehandlergruppe = tilgangsgrupper.uuidFor(Gruppe.BESLUTTER),
+                    skjermedePersonerSaksbehandlergruppe = tilgangsgrupper.uuidFor(Gruppe.SKJERMEDE),
                 ),
             SAKSBEHANDLER to SaksbehandlerFraApi.fraOnBehalfOfToken(principal, tilgangsgrupper),
         ).toGraphQLContext()

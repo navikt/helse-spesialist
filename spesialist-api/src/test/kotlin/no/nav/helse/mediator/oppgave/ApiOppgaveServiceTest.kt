@@ -119,7 +119,7 @@ internal class ApiOppgaveServiceTest {
         )
 
     private fun saksbehandlerFraApi(grupper: Set<Gruppe> = emptySet()) =
-        SaksbehandlerFraApi(SAKSBEHANDLEROID, SAKSBEHANDLEREPOST, SAKSBEHANDLERNAVN, SAKSBEHANDLERIDENT, tilgangsgrupper.tilUuider(grupper).toList(), grupper)
+        SaksbehandlerFraApi(SAKSBEHANDLEROID, SAKSBEHANDLEREPOST, SAKSBEHANDLERNAVN, SAKSBEHANDLERIDENT, tilgangsgrupper.uuiderFor(grupper).toList(), grupper)
 
     @BeforeEach
     fun setup() {

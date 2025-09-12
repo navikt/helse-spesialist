@@ -283,10 +283,10 @@ class NyTilgangskontrollTest {
     private fun harTilgangTilPersonGittGrupper(fødselsnummer: String, grupper: Set<Gruppe>) =
         tilgangskontroll.harTilgangTilPerson(
             saksbehandlerTilganger = SaksbehandlerTilganger(
-                gruppetilganger = tilgangsgrupper.tilUuider(grupper).toList(),
-                kode7Saksbehandlergruppe = tilgangsgrupper.gruppeId(Gruppe.KODE7),
-                beslutterSaksbehandlergruppe = tilgangsgrupper.gruppeId(Gruppe.BESLUTTER),
-                skjermedePersonerSaksbehandlergruppe = tilgangsgrupper.gruppeId(Gruppe.SKJERMEDE),
+                gruppetilganger = tilgangsgrupper.uuiderFor(grupper).toList(),
+                kode7Saksbehandlergruppe = tilgangsgrupper.uuidFor(Gruppe.KODE7),
+                beslutterSaksbehandlergruppe = tilgangsgrupper.uuidFor(Gruppe.BESLUTTER),
+                skjermedePersonerSaksbehandlergruppe = tilgangsgrupper.uuidFor(Gruppe.SKJERMEDE),
             ),
             fødselsnummer = fødselsnummer
         )
@@ -343,7 +343,7 @@ class NyTilgangskontrollTest {
         },
         tilgangsgruppehenter = object : Tilgangsgruppehenter {
             override suspend fun hentTilgangsgrupper(oid: UUID, gruppeIder: List<UUID>) =
-                tilgangsgrupper.tilUuider(saksbehandlerGruppeOppslagMap[oid].orEmpty())
+                tilgangsgrupper.uuiderFor(saksbehandlerGruppeOppslagMap[oid].orEmpty())
 
             override suspend fun hentTilgangsgrupper(oid: UUID) =
                 saksbehandlerGruppeOppslagMap[oid].orEmpty()

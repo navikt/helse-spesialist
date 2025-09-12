@@ -33,7 +33,7 @@ data class SaksbehandlerFraApi(
                 navn = jwtPrincipal.payload.getClaim("name").asString(),
                 ident = jwtPrincipal.payload.getClaim("NAVident").asString(),
                 grupper = gruppeUuider,
-                tilgangsgrupper = tilgangsgrupper.tilGrupper(gruppeUuider.toSet()),
+                tilgangsgrupper = tilgangsgrupper.grupperFor(gruppeUuider.toSet()),
             )
         }
     }

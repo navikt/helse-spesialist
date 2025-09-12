@@ -68,8 +68,8 @@ import java.util.UUID
 
 abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
     private val tilgangsgrupper = randomTilgangsgrupper()
-    protected val kode7Saksbehandlergruppe: UUID = tilgangsgrupper.gruppeId(Gruppe.KODE7)
-    protected val skjermedePersonerGruppeId: UUID = tilgangsgrupper.gruppeId(Gruppe.SKJERMEDE)
+    protected val kode7Saksbehandlergruppe: UUID = tilgangsgrupper.uuidFor(Gruppe.KODE7)
+    protected val skjermedePersonerGruppeId: UUID = tilgangsgrupper.uuidFor(Gruppe.SKJERMEDE)
     private val avviksvurderingId: UUID = UUID.randomUUID()
 
     private val reservasjonshenter = mockk<Reservasjonshenter>(relaxed = true)

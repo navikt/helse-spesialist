@@ -70,6 +70,6 @@ class MsGraphTilgangsgruppehenter(
 
     override suspend fun hentTilgangsgrupper(oid: UUID): Set<Gruppe> {
         val gruppeUuider = hentTilgangsgrupper(oid, tilgangsgrupper.alleUuider().toList())
-        return tilgangsgrupper.tilGrupper(gruppeUuider)
+        return tilgangsgrupper.grupperFor(gruppeUuider)
     }
 }

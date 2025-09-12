@@ -26,7 +26,7 @@ abstract class AbstractE2EIntegrationTest {
     private val testContext: TestContext = TestContext()
     private var saksbehandler = lagSaksbehandlerFraApi()
     private var beslutter = lagSaksbehandlerFraApi(
-        grupper = listOf(E2ETestApplikasjon.tilgangsgrupper.gruppeId(Gruppe.BESLUTTER))
+        grupper = listOf(E2ETestApplikasjon.tilgangsgrupper.uuidFor(Gruppe.BESLUTTER))
     )
 
     enum class Tilgangstype {
@@ -38,8 +38,8 @@ abstract class AbstractE2EIntegrationTest {
         saksbehandler = saksbehandler.copy(
             grupper = saksbehandler.grupper.plus(
                 when (tilgangstype) {
-                    Tilgangstype.KODE7 -> E2ETestApplikasjon.tilgangsgrupper.gruppeId(Gruppe.KODE7)
-                    Tilgangstype.SKJERMEDE -> E2ETestApplikasjon.tilgangsgrupper.gruppeId(Gruppe.SKJERMEDE)
+                    Tilgangstype.KODE7 -> E2ETestApplikasjon.tilgangsgrupper.uuidFor(Gruppe.KODE7)
+                    Tilgangstype.SKJERMEDE -> E2ETestApplikasjon.tilgangsgrupper.uuidFor(Gruppe.SKJERMEDE)
                 }
             )
         )

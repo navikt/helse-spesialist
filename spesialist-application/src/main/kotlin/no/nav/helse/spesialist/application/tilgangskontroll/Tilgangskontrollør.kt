@@ -21,11 +21,11 @@ abstract class MicrosoftTilgangskontroll(
     private fun Collection<Egenskap>.tilTilgangsgrupper() =
         map { egenskap ->
             when (egenskap) {
-                Egenskap.EGEN_ANSATT -> tilgangsgrupper.gruppeId(Gruppe.SKJERMEDE)
-                Egenskap.FORTROLIG_ADRESSE -> tilgangsgrupper.gruppeId(Gruppe.KODE7)
+                Egenskap.EGEN_ANSATT -> tilgangsgrupper.uuidFor(Gruppe.SKJERMEDE)
+                Egenskap.FORTROLIG_ADRESSE -> tilgangsgrupper.uuidFor(Gruppe.KODE7)
                 Egenskap.STRENGT_FORTROLIG_ADRESSE -> UUID.randomUUID() // Ingen skal ha tilgang til disse i Speil foreløpig
-                Egenskap.BESLUTTER -> tilgangsgrupper.gruppeId(Gruppe.BESLUTTER)
-                Egenskap.STIKKPRØVE -> tilgangsgrupper.gruppeId(Gruppe.STIKKPRØVE)
+                Egenskap.BESLUTTER -> tilgangsgrupper.uuidFor(Gruppe.BESLUTTER)
+                Egenskap.STIKKPRØVE -> tilgangsgrupper.uuidFor(Gruppe.STIKKPRØVE)
                 else -> throw IllegalArgumentException("Egenskap $egenskap er ikke støttet som tilgangsstyrt egenskap")
             }
         }

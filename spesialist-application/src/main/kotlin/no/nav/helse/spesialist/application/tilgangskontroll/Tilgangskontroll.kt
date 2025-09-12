@@ -10,7 +10,7 @@ class Tilgangsgrupper(
     private val skjermedePersonerGruppeId: UUID,
     private val stikkprøveGruppeId: UUID,
 ) {
-    fun gruppeId(gruppe: Gruppe): UUID =
+    fun uuidFor(gruppe: Gruppe): UUID =
         when (gruppe) {
             Gruppe.KODE7 -> kode7GruppeId
             Gruppe.BESLUTTER -> beslutterGruppeId
@@ -20,12 +20,12 @@ class Tilgangsgrupper(
 
     fun alleGrupper(): Set<Gruppe> = Gruppe.entries.toSet()
 
-    fun alleUuider(): Set<UUID> = Gruppe.entries.map(::gruppeId).toSet()
+    fun alleUuider(): Set<UUID> = Gruppe.entries.map(::uuidFor).toSet()
 
-    fun tilUuider(grupper: Set<Gruppe>) = grupper.map(::gruppeId).toSet()
+    fun uuiderFor(grupper: Set<Gruppe>) = grupper.map(::uuidFor).toSet()
 
-    fun tilGrupper(uuider: Set<UUID>) =
-        Gruppe.entries.associateBy { gruppeId(it) }.let { uuidMap ->
+    fun grupperFor(uuider: Set<UUID>) =
+        Gruppe.entries.associateBy { uuidFor(it) }.let { uuidMap ->
             uuider.mapNotNull { uuidMap[it] }.toSet()
         }
 }
