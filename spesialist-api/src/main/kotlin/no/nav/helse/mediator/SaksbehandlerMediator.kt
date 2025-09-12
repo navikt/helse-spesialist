@@ -280,7 +280,7 @@ class SaksbehandlerMediator(
         val totrinnsvurdering = totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)
         val feil =
             if (totrinnsvurdering?.tilstand == AVVENTER_BESLUTTER) {
-                if (!nyTilgangskontroll.harTilgangTilEgenskap(Egenskap.BESLUTTER, tilgangsgrupper) && !environmentToggles.kanGodkjenneUtenBesluttertilgang) {
+                if (!nyTilgangskontroll.harTilgangTilOppgaveMedEgenskap(Egenskap.BESLUTTER, saksbehandler, tilgangsgrupper) && !environmentToggles.kanGodkjenneUtenBesluttertilgang) {
                     VedtakResultat.Feil.BeslutterFeil.TrengerBeslutterRolle()
                 } else if (totrinnsvurdering.saksbehandler?.value == saksbehandler.id().value && !environmentToggles.kanBeslutteEgneSaker) {
                     VedtakResultat.Feil.BeslutterFeil.KanIkkeBeslutteEgenOppgave()

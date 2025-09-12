@@ -21,31 +21,39 @@ class NyTilgangskontroll(
         fødselsnummer: String,
     ): Boolean = !manglerTilgang(egenAnsattApiDao, personApiDao, fødselsnummer, saksbehandlerTilganger)
 
-    fun harTilgangTilOppgave(
+    fun harTilgangTilOppgaveMedEgenskaper(
+        egenskaper: Set<Egenskap>,
         saksbehandler: Saksbehandler,
-        egenskaper: List<Egenskap>,
-    ): Boolean {
-        if (egenskaper.isEmpty()) return true
-        val tilgangsgrupper = hentTilgangsgrupper(saksbehandler)
-        return egenskaper.all {
-            harTilgangTilEgenskap(
+    ): Boolean =
+        harTilgangTilOppgaveMedEgenskaper(
+            egenskaper = egenskaper,
+            saksbehandler = saksbehandler,
+            tilgangsgrupper = hentTilgangsgrupper(saksbehandler),
+        )
+
+    fun harTilgangTilOppgaveMedEgenskaper(
+        egenskaper: Set<Egenskap>,
+        saksbehandler: Saksbehandler,
+        tilgangsgrupper: Set<Gruppe>,
+    ): Boolean =
+        egenskaper.all {
+            harTilgangTilOppgaveMedEgenskap(
                 egenskap = it,
                 saksbehandler = saksbehandler,
-                grupper = tilgangsgrupper,
+                tilgangsgrupper = tilgangsgrupper,
             )
         }
-    }
 
-    fun harTilgangTilEgenskap(
+    fun harTilgangTilOppgaveMedEgenskap(
         egenskap: Egenskap,
         saksbehandler: Saksbehandler,
-        grupper: Set<Gruppe>,
+        tilgangsgrupper: Set<Gruppe>,
     ) = when (egenskap) {
         STRENGT_FORTROLIG_ADRESSE -> false // Ingen skal ha tilgang til disse i Speil foreløpig
-        EGEN_ANSATT -> Gruppe.SKJERMEDE in grupper
-        FORTROLIG_ADRESSE -> Gruppe.KODE7 in grupper
-        BESLUTTER -> Gruppe.BESLUTTER in grupper
-        STIKKPRØVE -> Gruppe.STIKKPRØVE in grupper
+        EGEN_ANSATT -> Gruppe.SKJERMEDE in tilgangsgrupper
+        FORTROLIG_ADRESSE -> Gruppe.KODE7 in tilgangsgrupper
+        BESLUTTER -> Gruppe.BESLUTTER in tilgangsgrupper
+        STIKKPRØVE -> Gruppe.STIKKPRØVE in tilgangsgrupper
         else -> true
     }
 

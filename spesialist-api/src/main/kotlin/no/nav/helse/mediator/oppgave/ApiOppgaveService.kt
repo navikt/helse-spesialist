@@ -41,8 +41,13 @@ class ApiOppgaveService(
         val egenskaperSaksbehandlerIkkeHarTilgangTil =
             Egenskap
                 .alleTilgangsstyrteEgenskaper
-                .filterNot { nyTilgangskontroll.harTilgangTilEgenskap(it, saksbehandlerFraApi.tilgangsgrupper) }
-                .map(Egenskap::toString)
+                .filterNot {
+                    nyTilgangskontroll.harTilgangTilOppgaveMedEgenskap(
+                        egenskap = it,
+                        saksbehandler = saksbehandler,
+                        tilgangsgrupper = saksbehandlerFraApi.tilgangsgrupper,
+                    )
+                }.map(Egenskap::toString)
 
         val alleUkategoriserteEgenskaper =
             Egenskap
@@ -91,8 +96,13 @@ class ApiOppgaveService(
         val egenskaperSaksbehandlerIkkeHarTilgangTil =
             Egenskap
                 .alleTilgangsstyrteEgenskaper
-                .filterNot { nyTilgangskontroll.harTilgangTilEgenskap(it, innloggetSaksbehandler.tilgangsgrupper) }
-                .map(Egenskap::toString)
+                .filterNot {
+                    nyTilgangskontroll.harTilgangTilOppgaveMedEgenskap(
+                        egenskap = it,
+                        saksbehandler = innloggetSaksbehandler.tilSaksbehandler(),
+                        tilgangsgrupper = innloggetSaksbehandler.tilgangsgrupper,
+                    )
+                }.map(Egenskap::toString)
 
         val oppgaver =
             oppgaveDao

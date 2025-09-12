@@ -64,7 +64,7 @@ class NyTilgangskontrollTest {
     @ParameterizedTest(name = "egenskaper={0}")
     @MethodSource("oppgaveKombinasjonerIngenHarTilgangTil")
     fun `saksbehandler har ikke tilgang til oppgave selv med kjente alle tilganger`(egenskaper: Set<Egenskap>) {
-        assertFalse(harTilgangTilOppgaveGittGrupper(egenskaper, lagSaksbehandler(), Gruppe.entries.toSet()))
+        assertFalse(harTilgangTilOppgaveMedEgenskaperGittEksplisitteGrupper(egenskaper, lagSaksbehandler(), Gruppe.entries.toSet()))
     }
 
     @ParameterizedTest(name = "egenskaper={0}, grupper={1}")
@@ -73,7 +73,7 @@ class NyTilgangskontrollTest {
         egenskaper: Set<Egenskap>,
         grupper: Set<Gruppe>
     ) {
-        assertTrue(harTilgangTilOppgaveGittGrupper(egenskaper, lagSaksbehandler(), grupper))
+        assertTrue(harTilgangTilOppgaveMedEgenskaperGittEksplisitteGrupper(egenskaper, lagSaksbehandler(), grupper))
     }
 
     @ParameterizedTest(name = "egenskaper={0}, grupper={1}")
@@ -82,7 +82,7 @@ class NyTilgangskontrollTest {
         egenskaper: Set<Egenskap>,
         grupper: Set<Gruppe>
     ) {
-        assertFalse(harTilgangTilOppgaveGittGrupper(egenskaper, lagSaksbehandler(), grupper))
+        assertFalse(harTilgangTilOppgaveMedEgenskaperGittEksplisitteGrupper(egenskaper, lagSaksbehandler(), grupper))
     }
 
     @ParameterizedTest(name = "egenskaper={0}")
@@ -90,7 +90,7 @@ class NyTilgangskontrollTest {
     fun `saksbehandler har ikke tilgang til oppgave selv med oppslåtte alle tilganger`(
         egenskaper: Set<Egenskap>,
     ) {
-        assertFalse(harTilgangTilOppgaveGittGrupperSomSlåsOpp(egenskaper, lagSaksbehandler(), Gruppe.entries.toSet()))
+        assertFalse(harTilgangTilOppgaveMedEgenskaperGittGrupperSomSlåsOpp(egenskaper, lagSaksbehandler(), Gruppe.entries.toSet()))
     }
 
     @ParameterizedTest(name = "egenskaper={0}, grupper={1}")
@@ -99,7 +99,7 @@ class NyTilgangskontrollTest {
         egenskaper: Set<Egenskap>,
         grupper: Set<Gruppe>
     ) {
-        assertTrue(harTilgangTilOppgaveGittGrupperSomSlåsOpp(egenskaper, lagSaksbehandler(), grupper))
+        assertTrue(harTilgangTilOppgaveMedEgenskaperGittGrupperSomSlåsOpp(egenskaper, lagSaksbehandler(), grupper))
     }
 
     @ParameterizedTest(name = "egenskaper={0}, grupper={1}")
@@ -108,7 +108,7 @@ class NyTilgangskontrollTest {
         egenskaper: Set<Egenskap>,
         grupper: Set<Gruppe>
     ) {
-        assertFalse(harTilgangTilOppgaveGittGrupperSomSlåsOpp(egenskaper, lagSaksbehandler(), grupper))
+        assertFalse(harTilgangTilOppgaveMedEgenskaperGittGrupperSomSlåsOpp(egenskaper, lagSaksbehandler(), grupper))
     }
 
     companion object {
@@ -246,28 +246,28 @@ class NyTilgangskontrollTest {
             fødselsnummer = fødselsnummer
         )
 
-    private fun harTilgangTilOppgaveGittGrupper(
+    private fun harTilgangTilOppgaveMedEgenskaperGittEksplisitteGrupper(
         egenskaper: Set<Egenskap>,
         saksbehandler: Saksbehandler = lagSaksbehandler(),
         grupper: Set<Gruppe>
     ): Boolean =
         egenskaper.all {
-            tilgangskontroll.harTilgangTilEgenskap(
+            tilgangskontroll.harTilgangTilOppgaveMedEgenskap(
                 egenskap = it,
                 saksbehandler = saksbehandler,
-                grupper = grupper
+                tilgangsgrupper = grupper
             )
         }
 
-    private fun harTilgangTilOppgaveGittGrupperSomSlåsOpp(
+    private fun harTilgangTilOppgaveMedEgenskaperGittGrupperSomSlåsOpp(
         egenskaper: Set<Egenskap>,
         saksbehandler: Saksbehandler = lagSaksbehandler(),
         grupper: Set<Gruppe>
     ): Boolean {
         saksbehandlerGruppeOppslagMap[saksbehandler.id().value] = grupper
-        return tilgangskontroll.harTilgangTilOppgave(
-            saksbehandler = saksbehandler,
-            egenskaper = egenskaper.toList()
+        return tilgangskontroll.harTilgangTilOppgaveMedEgenskaper(
+            egenskaper = egenskaper,
+            saksbehandler = saksbehandler
         )
     }
 
