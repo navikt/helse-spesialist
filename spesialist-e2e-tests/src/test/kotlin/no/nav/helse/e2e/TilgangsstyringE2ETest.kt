@@ -142,12 +142,12 @@ class TilgangsstyringE2ETest : AbstractE2ETest() {
 
     private fun saksbehandlertilgangTilSkjermede(harTilgang: Boolean) {
         every { dataFetchingEnvironment.graphQlContext.get<Set<Tilgangsgruppe>>(ContextValues.TILGANGSGRUPPER) } returns
-                setOfNotNull(Tilgangsgruppe.SKJERMEDE.takeIf { harTilgang })
+                setOfNotNull(Tilgangsgruppe.EGEN_ANSATT.takeIf { harTilgang })
     }
 
     private fun saksbehandlertilgangTilKode7(@Suppress("SameParameterValue") harTilgang: Boolean) {
         every { dataFetchingEnvironment.graphQlContext.get<Set<Tilgangsgruppe>>(ContextValues.TILGANGSGRUPPER) } returns
-                setOfNotNull(Tilgangsgruppe.KODE7.takeIf { harTilgang })
+                setOfNotNull(Tilgangsgruppe.KODE_7.takeIf { harTilgang })
     }
 
     private val dataFetchingEnvironment = mockk<DataFetchingEnvironment>(relaxed = true)

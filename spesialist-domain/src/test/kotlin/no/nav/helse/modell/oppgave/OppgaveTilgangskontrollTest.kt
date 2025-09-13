@@ -66,12 +66,12 @@ class OppgaveTilgangskontrollTest {
             Arguments.of(
                 Egenskap.FORTROLIG_ADRESSE,
                 "A123456",
-                setOf(Tilgangsgruppe.KODE7)
+                setOf(Tilgangsgruppe.KODE_7)
             ),
             Arguments.of(
                 Egenskap.EGEN_ANSATT,
                 "A123456",
-                setOf(Tilgangsgruppe.SKJERMEDE)
+                setOf(Tilgangsgruppe.EGEN_ANSATT)
             ),
             Arguments.of(
                 Egenskap.BESLUTTER,
@@ -126,12 +126,12 @@ class OppgaveTilgangskontrollTest {
                 Arguments.of(
                     Egenskap.FORTROLIG_ADRESSE,
                     "A123456",
-                    (Tilgangsgruppe.entries - Tilgangsgruppe.KODE7).toSet()
+                    (Tilgangsgruppe.entries - Tilgangsgruppe.KODE_7).toSet()
                 ),
                 Arguments.of(
                     Egenskap.EGEN_ANSATT,
                     "A123456",
-                    (Tilgangsgruppe.entries - Tilgangsgruppe.SKJERMEDE).toSet()
+                    (Tilgangsgruppe.entries - Tilgangsgruppe.EGEN_ANSATT).toSet()
                 ),
                 Arguments.of(
                     Egenskap.BESLUTTER,

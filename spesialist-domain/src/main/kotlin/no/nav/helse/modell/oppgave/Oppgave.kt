@@ -443,8 +443,8 @@ class Oppgave private constructor(
         ): Boolean =
             when (egenskap) {
                 STRENGT_FORTROLIG_ADRESSE -> false // Ingen skal ha tilgang til disse i Speil foreløpig
-                EGEN_ANSATT -> Tilgangsgruppe.SKJERMEDE in saksbehandlerTilgangsgrupper
-                FORTROLIG_ADRESSE -> Tilgangsgruppe.KODE7 in saksbehandlerTilgangsgrupper
+                EGEN_ANSATT -> Tilgangsgruppe.EGEN_ANSATT in saksbehandlerTilgangsgrupper
+                FORTROLIG_ADRESSE -> Tilgangsgruppe.KODE_7 in saksbehandlerTilgangsgrupper
                 BESLUTTER -> Tilgangsgruppe.BESLUTTER in saksbehandlerTilgangsgrupper
                 STIKKPRØVE -> Tilgangsgruppe.STIKKPRØVE in saksbehandlerTilgangsgrupper
                 SELVSTENDIG_NÆRINGSDRIVENDE ->

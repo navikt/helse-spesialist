@@ -4,17 +4,17 @@ import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import java.util.UUID
 
 class TilgangsgruppeUuider(
-    private val kode7GruppeUuid: UUID,
     private val beslutterGruppeUuid: UUID,
-    private val skjermedePersonerGruppeUuid: UUID,
+    private val egenAnsattGruppeUuid: UUID,
+    private val kode7GruppeUuid: UUID,
     private val stikkprøveGruppeUuid: UUID,
     private val tbdGruppeUuid: UUID,
 ) {
     fun uuidFor(tilgangsgruppe: Tilgangsgruppe): UUID =
         when (tilgangsgruppe) {
-            Tilgangsgruppe.KODE7 -> kode7GruppeUuid
             Tilgangsgruppe.BESLUTTER -> beslutterGruppeUuid
-            Tilgangsgruppe.SKJERMEDE -> skjermedePersonerGruppeUuid
+            Tilgangsgruppe.EGEN_ANSATT -> egenAnsattGruppeUuid
+            Tilgangsgruppe.KODE_7 -> kode7GruppeUuid
             Tilgangsgruppe.STIKKPRØVE -> stikkprøveGruppeUuid
             Tilgangsgruppe.TBD -> tbdGruppeUuid
         }

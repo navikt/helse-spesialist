@@ -8,7 +8,7 @@ class AdressebeskyttelseEndretE2ETest : AbstractE2EIntegrationTest() {
     @Test
     fun `oppdaterer adressebeskyttelse på en person vi kjenner til fra før`() {
         // Given:
-        saksbehandlerHarTilgang(Tilgangsgruppe.KODE7)
+        saksbehandlerHarTilgang(Tilgangsgruppe.KODE_7)
         risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
         hentPersoninfoV2BehovLøser.adressebeskyttelse = "Ugradert"
         søknadOgGodkjenningbehovKommerInn()

@@ -88,8 +88,8 @@ class PersonTilgangskontrollTest {
         private fun personKombinasjonerSomGirTilgang(): Stream<Arguments> =
             Stream.of(
                 Arguments.of(false, Adressebeskyttelse.Ugradert, emptySet<Tilgangsgruppe>()),
-                Arguments.of(false, Adressebeskyttelse.Fortrolig, setOf(Tilgangsgruppe.KODE7)),
-                Arguments.of(true, Adressebeskyttelse.Ugradert, setOf(Tilgangsgruppe.SKJERMEDE)),
+                Arguments.of(false, Adressebeskyttelse.Fortrolig, setOf(Tilgangsgruppe.KODE_7)),
+                Arguments.of(true, Adressebeskyttelse.Ugradert, setOf(Tilgangsgruppe.EGEN_ANSATT)),
             )
 
         @JvmStatic
@@ -102,7 +102,7 @@ class PersonTilgangskontrollTest {
             Arguments.of(
                 false,
                 Adressebeskyttelse.Fortrolig,
-                (Tilgangsgruppe.entries - Tilgangsgruppe.KODE7).toSet()
+                (Tilgangsgruppe.entries - Tilgangsgruppe.KODE_7).toSet()
             ),
             Arguments.of(
                 true,
@@ -112,7 +112,7 @@ class PersonTilgangskontrollTest {
             Arguments.of(
                 true,
                 Adressebeskyttelse.Ugradert,
-                (Tilgangsgruppe.entries - Tilgangsgruppe.SKJERMEDE).toSet()
+                (Tilgangsgruppe.entries - Tilgangsgruppe.EGEN_ANSATT).toSet()
             ),
         )
     }

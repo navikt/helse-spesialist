@@ -27,7 +27,7 @@ class PersonTilgangskontroll(
         tilgangsgrupper: Set<Tilgangsgruppe>,
     ): Boolean =
         when (erEgenAnsatt) {
-            true -> Tilgangsgruppe.SKJERMEDE in tilgangsgrupper
+            true -> Tilgangsgruppe.EGEN_ANSATT in tilgangsgrupper
             false -> true
             null -> false
         }
@@ -38,7 +38,7 @@ class PersonTilgangskontroll(
     ): Boolean =
         when (adressebeskyttelse) {
             Adressebeskyttelse.Ugradert -> true
-            Adressebeskyttelse.Fortrolig -> Tilgangsgruppe.KODE7 in tilgangsgrupper
+            Adressebeskyttelse.Fortrolig -> Tilgangsgruppe.KODE_7 in tilgangsgrupper
             else -> false
         }
 }

@@ -91,7 +91,7 @@ internal class OppgaveTest {
         assertThrows<ManglerTilgang> {
             oppgave.forsøkTildelingVedReservasjon(
                 saksbehandlerWrapper = saksbehandler(),
-                saksbehandlerTilgangsgrupper = setOf(Tilgangsgruppe.KODE7)
+                saksbehandlerTilgangsgrupper = setOf(Tilgangsgruppe.KODE_7)
             )
         }
 

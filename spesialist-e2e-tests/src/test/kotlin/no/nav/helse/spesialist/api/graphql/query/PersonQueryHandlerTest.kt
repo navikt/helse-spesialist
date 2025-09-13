@@ -136,7 +136,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         val logglytter = Logglytter()
         val body = runQuery(
             query = """{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""",
-            tilgangsgruppe = Tilgangsgruppe.KODE7,
+            tilgangsgruppe = Tilgangsgruppe.KODE_7,
         )
 
         assertEquals(AKTØRID, body["data"]["person"]["aktorId"].asText())
@@ -165,7 +165,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         val logglytter = Logglytter()
         val body = runQuery(
             query = """{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""",
-            tilgangsgruppe = Tilgangsgruppe.SKJERMEDE,
+            tilgangsgruppe = Tilgangsgruppe.EGEN_ANSATT,
         )
 
         assertEquals(AKTØRID, body["data"]["person"]["aktorId"].asText())

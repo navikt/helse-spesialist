@@ -80,10 +80,10 @@ fun main() {
                 versjonAvKode = versjonAvKode,
                 tilgangsgruppeUuider =
                     TilgangsgruppeUuider(
-                        kode7GruppeUuid = env.getUUID("KODE7_SAKSBEHANDLER_GROUP"),
-                        beslutterGruppeUuid = env.getUUID("BESLUTTER_SAKSBEHANDLER_GROUP"),
-                        skjermedePersonerGruppeUuid = env.getUUID("SKJERMEDE_PERSONER_GROUP"),
-                        stikkprøveGruppeUuid = env.getUUID("SAKSBEHANDLERE_MED_TILGANG_TIL_STIKKPROVER"),
+                        beslutterGruppeUuid = env.getUUID("TILGANGSGRUPPE_UUID_BESLUTTER"),
+                        egenAnsattGruppeUuid = env.getUUID("TILGANGSGRUPPE_UUID_EGEN_ANSATT"),
+                        kode7GruppeUuid = env.getUUID("TILGANGSGRUPPE_UUID_KODE_7"),
+                        stikkprøveGruppeUuid = env.getUUID("TILGANGSGRUPPE_UUID_STIKKPROVE"),
                         tbdGruppeUuid = env.getUUID("TILGANGSGRUPPE_UUID_TBD"),
                     ),
                 environmentToggles = EnvironmentTogglesImpl(env),
