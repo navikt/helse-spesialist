@@ -16,7 +16,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektGjenopprett
 import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektOpprettetEvent
 import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektskilde
 import no.nav.helse.spesialist.application.logg.sikkerlogg
-import no.nav.helse.spesialist.application.tilgangskontroll.manglerTilgang
+import no.nav.helse.spesialist.application.tilgangskontroll.NyTilgangskontroll
 import no.nav.helse.spesialist.domain.tilgangskontroll.SaksbehandlerTilganger
 import no.nav.helse.spesialist.domain.tilkommeninntekt.Endring
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektEndretEvent
@@ -53,11 +53,12 @@ class TilkommenInntektQueryHandler(
         tilganger: SaksbehandlerTilganger,
     ): DataFetcherResult<List<ApiTilkommenInntektskilde>> {
         fødselsnumre.forEach { fødselsnummer ->
-            if (manglerTilgang(
+            if (!NyTilgangskontroll(
                     egenAnsattApiDao = daos.egenAnsattApiDao,
                     personApiDao = daos.personApiDao,
-                    fnr = fødselsnummer,
-                    tilganger = tilganger,
+                ).harTilgangTilPerson(
+                    saksbehandlerTilganger = tilganger,
+                    fødselsnummer = fødselsnummer,
                 )
             ) {
                 sikkerlogg.info("Saksbehandler mangler nødvendig tilgang til fødselsnummer $fødselsnummer")

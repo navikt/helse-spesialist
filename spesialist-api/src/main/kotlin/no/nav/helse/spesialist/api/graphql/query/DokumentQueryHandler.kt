@@ -35,7 +35,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiSporsmal
 import no.nav.helse.spesialist.api.graphql.schema.ApiSvar
 import no.nav.helse.spesialist.api.graphql.schema.ApiSvartype
 import no.nav.helse.spesialist.api.graphql.schema.ApiVisningskriterium
-import no.nav.helse.spesialist.application.tilgangskontroll.manglerTilgang
+import no.nav.helse.spesialist.application.tilgangskontroll.NyTilgangskontroll
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -361,7 +361,14 @@ class DokumentQueryHandler(
     private fun isForbidden(
         fnr: String,
         env: DataFetchingEnvironment,
-    ): Boolean = manglerTilgang(egenAnsattApiDao, personApiDao, fnr, env.graphQlContext.get(TILGANGER))
+    ): Boolean =
+        !NyTilgangskontroll(
+            egenAnsattApiDao = egenAnsattApiDao,
+            personApiDao = personApiDao,
+        ).harTilgangTilPerson(
+            saksbehandlerTilganger = env.graphQlContext.get(TILGANGER),
+            fødselsnummer = fnr,
+        )
 }
 
 private fun JsonNode.getIfNotNull(key: String) = get(key).takeUnless { it.isMissingOrNull() }
