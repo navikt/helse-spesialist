@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.UUID
 
-internal class LegacySaksbehandlerTest {
+internal class SaksbehandlerWrapperTest {
 
     @Test
     fun `håndtering av OverstyrtTidslinje medfører utgående event`() {
