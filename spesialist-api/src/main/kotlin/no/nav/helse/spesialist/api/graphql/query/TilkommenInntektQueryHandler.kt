@@ -16,7 +16,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektGjenopprett
 import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektOpprettetEvent
 import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektskilde
 import no.nav.helse.spesialist.application.logg.sikkerlogg
-import no.nav.helse.spesialist.application.tilgangskontroll.NyTilgangskontroll
+import no.nav.helse.spesialist.application.tilgangskontroll.PersonTilgangskontroll
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.domain.tilkommeninntekt.Endring
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektEndretEvent
@@ -53,7 +53,7 @@ class TilkommenInntektQueryHandler(
         tilgangsgrupper: Set<Tilgangsgruppe>,
     ): DataFetcherResult<List<ApiTilkommenInntektskilde>> {
         fødselsnumre.forEach { fødselsnummer ->
-            if (!NyTilgangskontroll(
+            if (!PersonTilgangskontroll(
                     egenAnsattApiDao = daos.egenAnsattApiDao,
                     personApiDao = daos.personApiDao,
                 ).harTilgangTilPerson(

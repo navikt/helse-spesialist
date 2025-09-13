@@ -35,7 +35,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiSporsmal
 import no.nav.helse.spesialist.api.graphql.schema.ApiSvar
 import no.nav.helse.spesialist.api.graphql.schema.ApiSvartype
 import no.nav.helse.spesialist.api.graphql.schema.ApiVisningskriterium
-import no.nav.helse.spesialist.application.tilgangskontroll.NyTilgangskontroll
+import no.nav.helse.spesialist.application.tilgangskontroll.PersonTilgangskontroll
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -362,7 +362,7 @@ class DokumentQueryHandler(
         fnr: String,
         env: DataFetchingEnvironment,
     ): Boolean =
-        !NyTilgangskontroll(
+        !PersonTilgangskontroll(
             egenAnsattApiDao = egenAnsattApiDao,
             personApiDao = personApiDao,
         ).harTilgangTilPerson(

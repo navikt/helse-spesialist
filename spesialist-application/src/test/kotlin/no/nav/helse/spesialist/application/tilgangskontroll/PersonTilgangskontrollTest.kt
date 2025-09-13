@@ -13,8 +13,7 @@ import org.junit.jupiter.params.provider.MethodSource
 import java.util.stream.Stream
 
 
-class NyTilgangskontrollTest {
-
+class PersonTilgangskontrollTest {
     private val fødselsnummer = lagFødselsnummer()
 
     @ParameterizedTest(name = "egenAnsatt={0}, adressebeskyttelse={1}")
@@ -127,7 +126,7 @@ class NyTilgangskontrollTest {
     private val personErEgenAnsattMap = mutableMapOf<String, Boolean?>()
     private val personAdressebeskyttelseMap = mutableMapOf<String, Adressebeskyttelse?>()
 
-    private val tilgangskontroll = NyTilgangskontroll(
+    private val tilgangskontroll = PersonTilgangskontroll(
         egenAnsattApiDao = object : EgenAnsattApiDao {
             override fun erEgenAnsatt(fødselsnummer: String) =
                 personErEgenAnsattMap[fødselsnummer]

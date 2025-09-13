@@ -5,7 +5,7 @@ import no.nav.helse.db.api.PersonApiDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 
-class NyTilgangskontroll(
+class PersonTilgangskontroll(
     private val egenAnsattApiDao: EgenAnsattApiDao,
     private val personApiDao: PersonApiDao,
 ) {

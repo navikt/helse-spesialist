@@ -34,7 +34,7 @@ import no.nav.helse.spesialist.api.snapshot.SnapshotService
 import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.application.Reservasjonshenter.ReservasjonDto
 import no.nav.helse.spesialist.application.snapshot.SnapshotPerson
-import no.nav.helse.spesialist.application.tilgangskontroll.NyTilgangskontroll
+import no.nav.helse.spesialist.application.tilgangskontroll.PersonTilgangskontroll
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.slf4j.LoggerFactory
 
@@ -94,7 +94,7 @@ class PersonService(
 
             return FetchPersonResult.Feil.IkkeKlarTilVisning(aktørId)
         }
-        if (!NyTilgangskontroll(
+        if (!PersonTilgangskontroll(
                 egenAnsattApiDao = egenAnsattApiDao,
                 personApiDao = personApiDao,
             ).harTilgangTilPerson(
