@@ -7,6 +7,7 @@ import no.nav.helse.modell.person.Adressebeskyttelse.StrengtFortroligUtland
 import no.nav.helse.modell.person.Adressebeskyttelse.Ugradert
 import no.nav.helse.modell.person.Adressebeskyttelse.Ukjent
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -14,33 +15,33 @@ import org.junit.jupiter.api.Test
 internal class PgPersonApiDaoTest : AbstractDBIntegrationTest() {
 
     @Test
-    fun `skal oppdage at en person har fortrolig adresse`() {
+    fun `henter adressebeskyttelse Fortrolig`() {
         opprettPerson(adressebeskyttelse = Fortrolig)
-        assertTrue(personApiDao.personHarAdressebeskyttelse(FNR, Fortrolig.somApiType()))
+        assertEquals(Fortrolig.somApiType(), personApiDao.hentAdressebeskyttelse(FNR))
     }
 
     @Test
-    fun `person med ugradert adresse er ikke kode 7`() {
+    fun `henter adressebeskyttelse Ugradert`() {
         opprettPerson(adressebeskyttelse = Ugradert)
-        assertFalse(personApiDao.personHarAdressebeskyttelse(FNR, Fortrolig.somApiType()))
+        assertEquals(Ugradert.somApiType(), personApiDao.hentAdressebeskyttelse(FNR))
     }
 
     @Test
-    fun `person med strengt fortrolig adresse er ikke kode 7`() {
+    fun `henter adressebeskyttelse Strengt Fortrolig`() {
         opprettPerson(adressebeskyttelse = StrengtFortrolig)
-        assertFalse(personApiDao.personHarAdressebeskyttelse(FNR, Fortrolig.somApiType()))
+        assertEquals(StrengtFortrolig.somApiType(), personApiDao.hentAdressebeskyttelse(FNR))
     }
 
     @Test
-    fun `person med strengt fortrolig utland adresse er ikke kode 7`() {
+    fun `henter adressebeskyttelse Strengt Fortrolig Utland`() {
         opprettPerson(adressebeskyttelse = StrengtFortroligUtland)
-        assertFalse(personApiDao.personHarAdressebeskyttelse(FNR, Fortrolig.somApiType()))
+        assertEquals(StrengtFortroligUtland.somApiType(), personApiDao.hentAdressebeskyttelse(FNR))
     }
 
     @Test
-    fun `person med ukjent adressebeskyttelse er (kanskje) ikke kode 7`() {
+    fun `henter adressebeskyttelse Ukjent`() {
         opprettPerson(adressebeskyttelse = Ukjent)
-        assertFalse(personApiDao.personHarAdressebeskyttelse(FNR, Fortrolig.somApiType()))
+        assertEquals(Ukjent.somApiType(), personApiDao.hentAdressebeskyttelse(FNR))
     }
 
     @Test

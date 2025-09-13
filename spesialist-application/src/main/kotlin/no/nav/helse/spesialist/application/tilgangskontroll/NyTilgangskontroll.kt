@@ -3,7 +3,6 @@ package no.nav.helse.spesialist.application.tilgangskontroll
 import no.nav.helse.db.api.EgenAnsattApiDao
 import no.nav.helse.db.api.PersonApiDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
-import no.nav.helse.spesialist.domain.tilgangskontroll.SaksbehandlerTilganger
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 
 class NyTilgangskontroll(
@@ -13,32 +12,33 @@ class NyTilgangskontroll(
     fun harTilgangTilPerson(
         tilgangsgrupper: Set<Tilgangsgruppe>,
         fødselsnummer: String,
-    ): Boolean = harTilgangTilPerson(SaksbehandlerTilganger(tilgangsgrupper), fødselsnummer)
-
-    fun harTilgangTilPerson(
-        saksbehandlerTilganger: SaksbehandlerTilganger,
-        fødselsnummer: String,
     ): Boolean =
-        !manglerTilgang(
-            egenAnsattApiDao = egenAnsattApiDao,
-            personApiDao = personApiDao,
-            fødselsnummer = fødselsnummer,
-            tilganger = saksbehandlerTilganger,
-        )
+        harTilgangTilEgenAnsattStatus(
+            erEgenAnsatt = egenAnsattApiDao.erEgenAnsatt(fødselsnummer),
+            tilgangsgrupper = tilgangsgrupper,
+        ) &&
+            harTilgangTilAdressebeskyttelse(
+                adressebeskyttelse = personApiDao.hentAdressebeskyttelse(fødselsnummer),
+                tilgangsgrupper = tilgangsgrupper,
+            )
 
-    private fun manglerTilgang(
-        egenAnsattApiDao: EgenAnsattApiDao,
-        personApiDao: PersonApiDao,
-        fødselsnummer: String,
-        tilganger: SaksbehandlerTilganger,
-    ): Boolean {
-        val kanSeSkjermede = tilganger.harTilgangTilSkjermedePersoner()
-        val erSkjermet = egenAnsattApiDao.erEgenAnsatt(fødselsnummer) ?: return true
-        if (erSkjermet && !kanSeSkjermede) return true
+    private fun harTilgangTilEgenAnsattStatus(
+        erEgenAnsatt: Boolean?,
+        tilgangsgrupper: Set<Tilgangsgruppe>,
+    ): Boolean =
+        when (erEgenAnsatt) {
+            true -> Tilgangsgruppe.SKJERMEDE in tilgangsgrupper
+            false -> true
+            null -> false
+        }
 
-        val kanSeKode7 = tilganger.harTilgangTilKode7()
-        val erFortrolig = personApiDao.personHarAdressebeskyttelse(fødselsnummer, Adressebeskyttelse.Fortrolig)
-        val erUgradert = personApiDao.personHarAdressebeskyttelse(fødselsnummer, Adressebeskyttelse.Ugradert)
-        return (!kanSeKode7 && erFortrolig) || (!erFortrolig && !erUgradert)
-    }
+    private fun harTilgangTilAdressebeskyttelse(
+        adressebeskyttelse: Adressebeskyttelse?,
+        tilgangsgrupper: Set<Tilgangsgruppe>,
+    ): Boolean =
+        when (adressebeskyttelse) {
+            Adressebeskyttelse.Ugradert -> true
+            Adressebeskyttelse.Fortrolig -> Tilgangsgruppe.KODE7 in tilgangsgrupper
+            else -> false
+        }
 }

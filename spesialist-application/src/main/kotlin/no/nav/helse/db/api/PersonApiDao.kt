@@ -14,10 +14,7 @@ interface PersonApiDao {
 
     fun finnesPersonMedFødselsnummer(fødselsnummer: String): Boolean
 
-    fun personHarAdressebeskyttelse(
-        fødselsnummer: String,
-        adressebeskyttelse: Adressebeskyttelse,
-    ): Boolean
+    fun hentAdressebeskyttelse(fødselsnummer: String): Adressebeskyttelse?
 
     fun finnAktørId(fødselsnummer: String): String
 

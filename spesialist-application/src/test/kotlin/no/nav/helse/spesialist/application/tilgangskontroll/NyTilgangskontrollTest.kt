@@ -133,10 +133,8 @@ class NyTilgangskontrollTest {
                 personErEgenAnsattMap[fødselsnummer]
         },
         personApiDao = object : PartialPersonApiDao {
-            override fun personHarAdressebeskyttelse(
-                fødselsnummer: String,
-                adressebeskyttelse: Adressebeskyttelse
-            ) = personAdressebeskyttelseMap[fødselsnummer] == adressebeskyttelse
+            override fun hentAdressebeskyttelse(fødselsnummer: String) =
+                personAdressebeskyttelseMap[fødselsnummer]
         }
     )
 }

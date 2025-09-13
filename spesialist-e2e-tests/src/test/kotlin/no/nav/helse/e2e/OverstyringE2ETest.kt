@@ -25,7 +25,6 @@ import no.nav.helse.spesialist.api.person.PersonService
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
-import no.nav.helse.spesialist.domain.tilgangskontroll.SaksbehandlerTilganger
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.util.januar
 import org.intellij.lang.annotations.Language
@@ -155,9 +154,6 @@ class OverstyringE2ETest : AbstractE2ETest() {
         assertSaksbehandleroppgave(oppgavestatus = AvventerSaksbehandler)
         assertTildeling(SAKSBEHANDLER_EPOST, nyUtbetalingId)
     }
-
-    private val saksbehandlertilgangerIngenTilganger =
-        SaksbehandlerTilganger(emptySet())
 
     @Test
     fun `legger ved overstyringer i speil snapshot`() {

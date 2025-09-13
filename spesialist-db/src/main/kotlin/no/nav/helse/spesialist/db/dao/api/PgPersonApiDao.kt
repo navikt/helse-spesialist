@@ -48,16 +48,16 @@ class PgPersonApiDao internal constructor(
             "fodselsnummer" to fødselsnummer,
         ).singleOrNull { true } ?: false
 
-    override fun personHarAdressebeskyttelse(
-        fødselsnummer: String,
-        adressebeskyttelse: Adressebeskyttelse,
-    ) = asSQL(
-        """SELECT 1 FROM person p JOIN person_info pi ON p.info_ref = pi.id
+    override fun hentAdressebeskyttelse(fødselsnummer: String): Adressebeskyttelse? =
+        asSQL(
+            """
+            SELECT pi.adressebeskyttelse
+            FROM person p
+            JOIN person_info pi ON p.info_ref = pi.id
             WHERE p.fødselsnummer = :fodselsnummer
-            AND pi.adressebeskyttelse = '${adressebeskyttelse.name}'
-        """,
-        "fodselsnummer" to fødselsnummer,
-    ).list { it }.isNotEmpty()
+            """.trimIndent(),
+            "fodselsnummer" to fødselsnummer,
+        ).singleOrNull { Adressebeskyttelse.valueOf(it.string("adressebeskyttelse")) }
 
     override fun finnAktørId(fødselsnummer: String): String =
         asSQL(

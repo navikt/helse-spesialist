@@ -24,10 +24,7 @@ interface PartialPersonApiDao : PersonApiDao {
         error("Not implemented for this test")
     }
 
-    override fun personHarAdressebeskyttelse(
-        fødselsnummer: String,
-        adressebeskyttelse: Adressebeskyttelse
-    ): Boolean {
+    override fun hentAdressebeskyttelse(fødselsnummer: String): Adressebeskyttelse? {
         error("Not implemented for this test")
     }
 
