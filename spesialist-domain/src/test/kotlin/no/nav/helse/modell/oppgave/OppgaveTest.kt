@@ -62,7 +62,7 @@ internal class OppgaveTest {
         inspektør(oppgave) {
             assertEquals(true, tildelt)
             assertEquals(false, påVent)
-            assertEquals(saksbehandlerUtenTilgang, tildeltTil)
+            assertEquals(saksbehandlerUtenTilgang.saksbehandlerOid, tildeltTil)
         }
     }
 
@@ -77,7 +77,7 @@ internal class OppgaveTest {
 
         inspektør(oppgave) {
             assertEquals(true, tildelt)
-            assertEquals(saksbehandler, tildeltTil)
+            assertEquals(saksbehandler.saksbehandlerOid, tildeltTil)
         }
     }
 
@@ -108,7 +108,7 @@ internal class OppgaveTest {
         inspektør(oppgave) {
             assertEquals(true, tildelt)
             assertEquals(true, påVent)
-            assertEquals(saksbehandlerUtenTilgang, tildeltTil)
+            assertEquals(saksbehandlerUtenTilgang.saksbehandlerOid, tildeltTil)
         }
     }
 
@@ -213,7 +213,7 @@ internal class OppgaveTest {
         inspektør(oppgave) {
             assertEquals(true, tildelt)
             assertEquals(false, påVent)
-            assertEquals(saksbehandlerMedTilgang, tildeltTil)
+            assertEquals(saksbehandlerMedTilgang.saksbehandlerOid, tildeltTil)
         }
     }
 
@@ -234,7 +234,7 @@ internal class OppgaveTest {
         inspektør(oppgave) {
             assertEquals(true, tildelt)
             assertEquals(false, påVent)
-            assertEquals(saksbehandlerUtenTilgang, tildeltTil)
+            assertEquals(saksbehandlerUtenTilgang.saksbehandlerOid, tildeltTil)
         }
     }
 
@@ -338,7 +338,7 @@ internal class OppgaveTest {
         oppgave.sendTilBeslutter(beslutter)
         oppgave.sendIRetur(saksbehandlerUtenTilgang)
         inspektør(oppgave) {
-            assertEquals(saksbehandlerUtenTilgang, tildeltTil)
+            assertEquals(saksbehandlerUtenTilgang.saksbehandlerOid, tildeltTil)
         }
     }
 
@@ -349,7 +349,7 @@ internal class OppgaveTest {
         oppgave.sendIRetur(saksbehandlerUtenTilgang)
         oppgave.sendTilBeslutter(beslutter)
         inspektør(oppgave) {
-            assertEquals(beslutter, tildeltTil)
+            assertEquals(beslutter.saksbehandlerOid, tildeltTil)
         }
     }
 
@@ -485,7 +485,7 @@ internal class OppgaveTest {
         inspektør(oppgave) {
             assertEquals(true, påVent)
             assertTrue(egenskaper.contains(PÅ_VENT))
-            assertEquals(saksbehandlerUtenTilgang, this.tildeltTil)
+            assertEquals(saksbehandlerUtenTilgang.saksbehandlerOid, tildeltTil)
         }
     }
 
@@ -501,7 +501,7 @@ internal class OppgaveTest {
         inspektør(oppgave) {
             assertEquals(true, påVent)
             assertTrue(egenskaper.contains(PÅ_VENT))
-            assertEquals(beslutter, this.tildeltTil)
+            assertEquals(beslutter.saksbehandlerOid, tildeltTil)
         }
     }
 

@@ -31,7 +31,7 @@ class Oppgave private constructor(
     ferdigstiltAvIdent: String?,
     ferdigstiltAvOid: UUID?,
     egenskaper: Set<Egenskap>,
-    tildeltTil: LegacySaksbehandler?,
+    tildeltTil: SaksbehandlerOid?,
 ) {
     private val observers = mutableListOf<OppgaveObserver>()
     private val _egenskaper = egenskaper.toMutableSet()
@@ -44,7 +44,7 @@ class Oppgave private constructor(
     var tilstand: Tilstand = tilstand
         private set
 
-    var tildeltTil: LegacySaksbehandler? = tildeltTil
+    var tildeltTil: SaksbehandlerOid? = tildeltTil
         private set
 
     val egenskaper: Set<Egenskap> get() = _egenskaper.toSet()
@@ -59,9 +59,9 @@ class Oppgave private constructor(
     ) {
         logg.info("Oppgave med {} forsøkes tildelt av saksbehandler.", kv("oppgaveId", id))
         val tildelt = tildeltTil
-        if (tildelt != null && tildelt.oid != legacySaksbehandler.oid) {
+        if (tildelt != null && tildelt != legacySaksbehandler.saksbehandlerOid) {
             logg.warn("Oppgave med {} kan ikke tildeles fordi den er tildelt noen andre.", kv("oppgaveId", id))
-            throw OppgaveTildeltNoenAndre(tildelt.oid, false)
+            throw OppgaveTildeltNoenAndre(tildelt.value, false)
         }
         tilstand.tildel(
             oppgave = this,
@@ -78,7 +78,7 @@ class Oppgave private constructor(
                 throw OppgaveIkkeTildelt(this.id)
             }
 
-        if (tildelt.oid != legacySaksbehandler.oid) {
+        if (tildelt != legacySaksbehandler.saksbehandlerOid) {
             logg.info("Oppgave med {} er tildelt noen andre, avmeldes", kv("oppgaveId", id))
             sikkerlogg.info("Oppgave med {} er tildelt $tildelt, avmeldes av $legacySaksbehandler", kv("oppgaveId", id))
         }
@@ -105,14 +105,14 @@ class Oppgave private constructor(
     fun sendTilBeslutter(beslutter: LegacySaksbehandler?) {
         _egenskaper.remove(RETUR)
         _egenskaper.add(BESLUTTER)
-        tildeltTil = beslutter
+        tildeltTil = beslutter?.saksbehandlerOid
         oppgaveEndret()
     }
 
     fun sendIRetur(opprinneligLegacySaksbehandler: LegacySaksbehandler) {
         _egenskaper.remove(BESLUTTER)
         _egenskaper.add(RETUR)
-        tildeltTil = opprinneligLegacySaksbehandler
+        tildeltTil = opprinneligLegacySaksbehandler.saksbehandlerOid
         oppgaveEndret()
     }
 
@@ -157,10 +157,10 @@ class Oppgave private constructor(
         skalTildeles: Boolean,
         legacySaksbehandler: LegacySaksbehandler,
     ) {
-        if (this.tildeltTil?.oid != legacySaksbehandler.oid && skalTildeles) {
+        if (this.tildeltTil != legacySaksbehandler.saksbehandlerOid && skalTildeles) {
             tildel(legacySaksbehandler)
         }
-        if (this.tildeltTil?.oid != null && !skalTildeles) {
+        if (this.tildeltTil != null && !skalTildeles) {
             avmeld(legacySaksbehandler)
         }
         _egenskaper.add(PÅ_VENT)
@@ -171,7 +171,7 @@ class Oppgave private constructor(
         skalVæreTildeltSaksbehandler: Boolean,
         legacySaksbehandler: LegacySaksbehandler,
     ) {
-        if (tildeltTil?.oid == legacySaksbehandler.oid) {
+        if (tildeltTil == legacySaksbehandler.saksbehandlerOid) {
             if (!skalVæreTildeltSaksbehandler) {
                 avmeld(legacySaksbehandler)
             }
@@ -201,7 +201,7 @@ class Oppgave private constructor(
     }
 
     private fun tildel(legacySaksbehandler: LegacySaksbehandler) {
-        this.tildeltTil = legacySaksbehandler
+        this.tildeltTil = legacySaksbehandler.saksbehandlerOid
         logg.info("Oppgave med {} tildeles saksbehandler med {}", kv("oppgaveId", id), kv("oid", legacySaksbehandler.oid()))
         sikkerlogg.info("Oppgave med {} tildeles $legacySaksbehandler", kv("oppgaveId", id))
         oppgaveEndret()
@@ -404,7 +404,7 @@ class Oppgave private constructor(
             kanAvvises: Boolean,
             ferdigstiltAvOid: UUID?,
             ferdigstiltAvIdent: String?,
-            tildeltTil: LegacySaksbehandler?,
+            tildeltTil: SaksbehandlerOid?,
             egenskaper: Set<Egenskap>,
         ) = Oppgave(
             id = id,

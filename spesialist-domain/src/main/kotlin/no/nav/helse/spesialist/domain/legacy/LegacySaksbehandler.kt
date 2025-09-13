@@ -20,6 +20,7 @@ class LegacySaksbehandler(
     val navn: String,
     private val ident: String,
 ) {
+    val saksbehandlerOid = SaksbehandlerOid(oid)
     private val observers = mutableListOf<SaksbehandlerObserver>()
 
     fun register(observer: SaksbehandlerObserver) {

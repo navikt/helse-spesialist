@@ -17,7 +17,7 @@ import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Oppgave
-import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
+import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.testfixtures.lagEpostadresseFraFulltNavn
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlerident
@@ -184,16 +184,6 @@ internal class OppgaveServiceTest {
         kanAvvises = true,
         ferdigstiltAvIdent = null,
         ferdigstiltAvOid = null,
-        tildeltTil =
-            if (tildelt) {
-                LegacySaksbehandler(
-                    epostadresse = SAKSBEHANDLEREPOST,
-                    oid = SAKSBEHANDLEROID,
-                    navn = SAKSBEHANDLERNAVN,
-                    ident = SAKSBEHANDLERIDENT,
-                )
-            } else {
-                null
-            },
+        tildeltTil = SaksbehandlerOid(SAKSBEHANDLEROID).takeIf { tildelt },
     )
 }

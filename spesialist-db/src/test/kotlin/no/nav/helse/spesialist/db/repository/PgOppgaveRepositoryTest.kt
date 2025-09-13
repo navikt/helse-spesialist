@@ -64,7 +64,7 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
         repository.lagre(oppgave)
         val funnetOppgave = repository.finn(oppgave.id)
         assertNotNull(funnetOppgave)
-        assertEquals(saksbehandler, funnetOppgave.tildeltTil)
+        assertEquals(saksbehandler.saksbehandlerOid, funnetOppgave.tildeltTil)
     }
 
     @Test

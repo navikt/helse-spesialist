@@ -302,7 +302,7 @@ private fun Oppgave.toDetaljer(): Map<String, Any> =
             },
         "behandlingId" to behandlingId,
         tildeltTil?.let {
-            "saksbehandler" to it.oid
+            "saksbehandler" to it.value
         },
     ).toMap()
 

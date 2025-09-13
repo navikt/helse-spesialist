@@ -7,7 +7,7 @@ import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
-import java.util.UUID
+import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import javax.sql.DataSource
 
 class PgTildelingDao internal constructor(
@@ -19,14 +19,14 @@ class PgTildelingDao internal constructor(
 
     fun tildel(
         oppgaveId: Long,
-        saksbehandlerOid: UUID,
+        saksbehandlerOid: SaksbehandlerOid,
     ) {
         asSQL(
             """
             INSERT INTO tildeling (saksbehandler_ref, oppgave_id_ref) VALUES (:oid, :oppgave_id)
             ON CONFLICT (oppgave_id_ref) DO UPDATE SET saksbehandler_ref = :oid
             """.trimIndent(),
-            "oid" to saksbehandlerOid,
+            "oid" to saksbehandlerOid.value,
             "oppgave_id" to oppgaveId,
         ).update()
     }

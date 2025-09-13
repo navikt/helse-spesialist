@@ -10,7 +10,7 @@ import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.db.dao.PgTildelingDao
-import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
+import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
@@ -112,7 +112,7 @@ class PgOppgaveRepository private constructor(
     private fun lagreTildeling(oppgave: Oppgave) {
         val tildeltTil = oppgave.tildeltTil
         if (tildeltTil != null) {
-            tildelingDao.tildel(oppgave.id, tildeltTil.oid)
+            tildelingDao.tildel(oppgave.id, tildeltTil)
         } else {
             tildelingDao.avmeld(oppgave.id)
         }
@@ -177,15 +177,7 @@ class PgOppgaveRepository private constructor(
                 kanAvvises = row.boolean("kan_avvises"),
                 ferdigstiltAvIdent = row.stringOrNull("ferdigstilt_av"),
                 ferdigstiltAvOid = row.uuidOrNull("ferdigstilt_av_oid"),
-                tildeltTil =
-                    row.uuidOrNull("oid")?.let {
-                        LegacySaksbehandler(
-                            epostadresse = row.string("epost"),
-                            oid = it,
-                            navn = row.string("navn"),
-                            ident = row.string("ident"),
-                        )
-                    },
+                tildeltTil = row.uuidOrNull("oid")?.let(::SaksbehandlerOid),
             )
         }
 
