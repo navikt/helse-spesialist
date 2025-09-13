@@ -11,9 +11,7 @@ import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
-import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
-import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler.Companion.tilLegacy
-import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler.Companion.tilSaksbehandler
+import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -42,7 +40,7 @@ internal class LegacySaksbehandlerTest {
                 organisasjonsnummer = "12345",
                 dager = emptyList(),
                 begrunnelse = "begrunnelse",
-                saksbehandlerOid = SaksbehandlerOid(saksbehandler.oid),
+                saksbehandlerOid = saksbehandler.saksbehandler.id(),
             )
         )
         assertEquals(true, observert)
@@ -67,7 +65,7 @@ internal class LegacySaksbehandlerTest {
             organisasjonsnummer = "12345",
             dager = overstyrteDager(),
             begrunnelse = "begrunnelse",
-            saksbehandlerOid = SaksbehandlerOid(saksbehandler.oid),
+            saksbehandlerOid = saksbehandler.saksbehandler.id(),
         )
         saksbehandler.håndter(
             overstyring
@@ -167,7 +165,7 @@ internal class LegacySaksbehandlerTest {
                 skjæringstidspunkt = 1 jan 2018,
                 arbeidsgivere = emptyList(),
                 vedtaksperiodeId = UUID.randomUUID(),
-                saksbehandlerOid = SaksbehandlerOid(saksbehandler.oid),
+                saksbehandlerOid = saksbehandler.saksbehandler.id(),
             )
         )
         assertEquals(true, observert)
@@ -191,7 +189,7 @@ internal class LegacySaksbehandlerTest {
                 skjæringstidspunkt = 1 jan 2018,
                 overstyrteArbeidsforhold = emptyList(),
                 vedtaksperiodeId = UUID.randomUUID(),
-                saksbehandlerOid = SaksbehandlerOid(saksbehandler.oid),
+                saksbehandlerOid = saksbehandler.saksbehandler.id(),
             )
         )
         assertEquals(true, observert)
@@ -217,7 +215,7 @@ internal class LegacySaksbehandlerTest {
                 perioderVurdertOk = emptyList(),
                 perioderVurdertIkkeOk = listOf(MinimumSykdomsgradPeriode(1 jan 2018, 31 jan 2018)),
                 arbeidsgivere = listOf(MinimumSykdomsgradArbeidsgiver(organisasjonsnummer = "12345", berørtVedtaksperiodeId = UUID.randomUUID())),
-                saksbehandlerOid = SaksbehandlerOid(saksbehandler.oid),
+                saksbehandlerOid = saksbehandler.saksbehandler.id(),
             )
         )
         assertEquals(true, observert)
@@ -299,22 +297,6 @@ internal class LegacySaksbehandlerTest {
         assertNotEquals(saksbehandler1.hashCode(), saksbehandler2.hashCode())
     }
 
-    @Test
-    fun `fra og til saksbehandler`() {
-        val saksbehandler = Saksbehandler(
-            id = SaksbehandlerOid(UUID.randomUUID()),
-            navn = "Kim Saksbehandler",
-            epost = "saksbehandler@nav.no",
-            ident = "X999999",
-        )
-
-        val dobbelOversatt = saksbehandler.tilLegacy().tilSaksbehandler()
-        assertEquals(saksbehandler.id(), dobbelOversatt.id())
-        assertEquals(saksbehandler.navn, dobbelOversatt.navn)
-        assertEquals(saksbehandler.epost, dobbelOversatt.epost)
-        assertEquals(saksbehandler.ident, dobbelOversatt.ident)
-    }
-
     private fun overstyrteDager(): List<OverstyrtTidslinjedag> = listOf(
         OverstyrtTidslinjedag(
             dato = 1 jan 2018,
@@ -371,10 +353,12 @@ internal class LegacySaksbehandlerTest {
         oid: UUID = UUID.randomUUID(),
         navn: String = "navn",
         ident: String = "Z999999",
-    ) = LegacySaksbehandler(
-        epostadresse = epost,
-        oid = oid,
-        navn = navn,
-        ident = ident,
+    ) = SaksbehandlerWrapper(
+        Saksbehandler(
+            id = SaksbehandlerOid(oid),
+            navn = navn,
+            epost = epost,
+            ident = ident,
+        )
     )
 }

@@ -7,7 +7,7 @@ import no.nav.helse.modell.vilkårsprøving.Subsumsjon
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.Utfall.VILKAR_OPPFYLT
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
-import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
+import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -26,8 +26,8 @@ class MinimumSykdomsgrad private constructor(
     val begrunnelse: String,
     val arbeidsgivere: List<MinimumSykdomsgradArbeidsgiver>,
 ) : Overstyring(id, ferdigstilt) {
-    override fun utførAv(legacySaksbehandler: LegacySaksbehandler) {
-        legacySaksbehandler.håndter(this)
+    override fun utførAv(saksbehandlerWrapper: SaksbehandlerWrapper) {
+        saksbehandlerWrapper.håndter(this)
     }
 
     override fun loggnavn(): String = "minimum_sykdomsgrad_vurdert"

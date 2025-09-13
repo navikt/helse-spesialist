@@ -3,7 +3,7 @@ package no.nav.helse.modell.saksbehandler.handlinger
 import no.nav.helse.modell.melding.OverstyrtInntektOgRefusjonEvent
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
-import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
+import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -20,8 +20,8 @@ class OverstyrtInntektOgRefusjon private constructor(
     val skjæringstidspunkt: LocalDate,
     val arbeidsgivere: List<OverstyrtArbeidsgiver>,
 ) : Overstyring(id, ferdigstilt) {
-    override fun utførAv(legacySaksbehandler: LegacySaksbehandler) {
-        legacySaksbehandler.håndter(this)
+    override fun utførAv(saksbehandlerWrapper: SaksbehandlerWrapper) {
+        saksbehandlerWrapper.håndter(this)
     }
 
     override fun loggnavn(): String = "overstyr_inntekt_og_refusjon"

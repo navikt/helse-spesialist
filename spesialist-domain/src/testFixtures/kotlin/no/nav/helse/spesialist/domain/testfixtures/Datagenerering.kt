@@ -1,6 +1,8 @@
 package no.nav.helse.spesialist.domain.testfixtures
 
+import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import java.time.LocalDate
+import java.util.UUID
 import kotlin.random.Random.Default.nextInt
 import kotlin.random.Random.Default.nextLong
 
@@ -44,6 +46,7 @@ private val organisasjonsnavnDel2 = listOf("AVDELINGEN", "SENTERET", "FORUM", "K
 
 fun lagOrganisasjonsnavn() = organisasjonsnavnDel1.random() + organisasjonsnavnDel2.random()
 
+fun lagSaksbehandlerOid() = SaksbehandlerOid(UUID.randomUUID())
 fun lagSaksbehandlerident() = ('A'..'Z').random() + "${nextInt(from = 100_000, until = 999_999)}"
 fun lagSaksbehandlernavn() = listOfNotNull(lagFornavn(), lagMellomnavnOrNull(), lagEtternavn()).joinToString(separator = " ")
 fun lagEpostadresseFraFulltNavn(fulltNavn: String) = fulltNavn.split(" ").joinToString(".").lowercase() + "@nav.no"

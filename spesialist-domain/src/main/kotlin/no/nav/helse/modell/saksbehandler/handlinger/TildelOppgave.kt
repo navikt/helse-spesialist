@@ -1,6 +1,6 @@
 package no.nav.helse.modell.saksbehandler.handlinger
 
-import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
+import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 
 class TildelOppgave(
@@ -9,7 +9,7 @@ class TildelOppgave(
 ) : Oppgavehandling(oppgaveId) {
     override fun loggnavn(): String = "tildel_oppgave"
 
-    override fun utførAv(legacySaksbehandler: LegacySaksbehandler) {
-        oppgave.forsøkTildeling(legacySaksbehandler, saksbehandlerTilgangsgrupper)
+    override fun utførAv(saksbehandlerWrapper: SaksbehandlerWrapper) {
+        oppgave.forsøkTildeling(saksbehandlerWrapper, saksbehandlerTilgangsgrupper)
     }
 }

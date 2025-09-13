@@ -38,7 +38,7 @@ import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
 import no.nav.helse.spesialist.domain.Dialog
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
-import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
+import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagAktørId
 import no.nav.helse.spesialist.domain.testfixtures.lagEpostadresseFraFulltNavn
@@ -46,6 +46,7 @@ import no.nav.helse.spesialist.domain.testfixtures.lagEtternavn
 import no.nav.helse.spesialist.domain.testfixtures.lagFornavn
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
+import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlerOid
 import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlerident
 import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlernavn
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
@@ -594,39 +595,40 @@ abstract class AbstractDBIntegrationTest {
     }
 
     protected fun Oppgave.tildelOgLagre(
-        legacySaksbehandler: LegacySaksbehandler,
+        saksbehandlerWrapper: SaksbehandlerWrapper,
         saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe> = emptySet(),
     ): Oppgave {
         opprettSaksbehandler(
-            saksbehandlerOID = legacySaksbehandler.oid,
-            navn = legacySaksbehandler.navn,
-            epost = legacySaksbehandler.epostadresse,
-            ident = legacySaksbehandler.ident()
+            saksbehandlerOID = saksbehandlerWrapper.saksbehandler.id().value,
+            navn = saksbehandlerWrapper.saksbehandler.navn,
+            epost = saksbehandlerWrapper.saksbehandler.epost,
+            ident = saksbehandlerWrapper.saksbehandler.ident
         )
-        this.forsøkTildeling(legacySaksbehandler, saksbehandlerTilgangsgrupper)
+        this.forsøkTildeling(saksbehandlerWrapper, saksbehandlerTilgangsgrupper)
         sessionContext.oppgaveRepository.lagre(this)
         return this
     }
 
     protected fun Oppgave.leggPåVentOgLagre(
-        legacySaksbehandler: LegacySaksbehandler,
+        saksbehandlerWrapper: SaksbehandlerWrapper,
         frist: LocalDate = LocalDate.now().plusDays(1),
         årsaker: List<PåVentÅrsak> = emptyList(),
         tekst: String? = null,
     ): Oppgave {
         opprettSaksbehandler(
-            saksbehandlerOID = legacySaksbehandler.oid,
-            navn = legacySaksbehandler.navn,
-            epost = legacySaksbehandler.epostadresse,
-            ident = legacySaksbehandler.ident()
+            saksbehandlerOID = saksbehandlerWrapper.saksbehandler.id().value,
+            navn = saksbehandlerWrapper.saksbehandler.navn,
+            epost = saksbehandlerWrapper.saksbehandler.epost,
+            ident = saksbehandlerWrapper.saksbehandler.ident
         )
-        this.leggPåVent(true, legacySaksbehandler)
+        this.leggPåVent(true, saksbehandlerWrapper)
         val dialog = Dialog.Factory.ny().apply {
             leggTilKommentar(tekst = "En kommentar", saksbehandlerident = SAKSBEHANDLER_IDENT)
         }
         sessionContext.dialogRepository.lagre(dialog)
         sessionContext.oppgaveRepository.lagre(this)
-        påVentDao.lagrePåVent(this.id, legacySaksbehandler.oid, frist, årsaker, tekst, dialog.id().value)
+        påVentDao.lagrePåVent(this.id,
+            saksbehandlerWrapper.saksbehandler.id().value, frist, årsaker, tekst, dialog.id().value)
         return this
     }
 
@@ -636,14 +638,14 @@ abstract class AbstractDBIntegrationTest {
         return this
     }
 
-    protected fun Oppgave.sendTilBeslutterOgLagre(beslutter: LegacySaksbehandler?): Oppgave {
+    protected fun Oppgave.sendTilBeslutterOgLagre(beslutter: SaksbehandlerWrapper?): Oppgave {
         this.sendTilBeslutter(beslutter)
         sessionContext.oppgaveRepository.lagre(this)
         return this
     }
 
-    protected fun Oppgave.avventSystemOgLagre(legacySaksbehandler: LegacySaksbehandler): Oppgave {
-        this.avventerSystem(legacySaksbehandler.ident(), legacySaksbehandler.oid)
+    protected fun Oppgave.avventSystemOgLagre(saksbehandlerWrapper: SaksbehandlerWrapper): Oppgave {
+        this.avventerSystem(saksbehandlerWrapper.saksbehandler.ident, saksbehandlerWrapper.saksbehandler.id().value)
         sessionContext.oppgaveRepository.lagre(this)
         return this
     }
@@ -668,14 +670,14 @@ abstract class AbstractDBIntegrationTest {
         return TotrinnsvurderingKontekst(totrinnsvurdering, fødselsnummer, oppgave)
     }
 
-    protected fun TotrinnsvurderingKontekst.sendTilBeslutterOgLagre(legacySaksbehandler: LegacySaksbehandler): TotrinnsvurderingKontekst {
-        totrinnsvurdering.sendTilBeslutter(oppgave.id, SaksbehandlerOid(legacySaksbehandler.oid))
+    protected fun TotrinnsvurderingKontekst.sendTilBeslutterOgLagre(saksbehandlerWrapper: SaksbehandlerWrapper): TotrinnsvurderingKontekst {
+        totrinnsvurdering.sendTilBeslutter(oppgave.id, SaksbehandlerOid(saksbehandlerWrapper.saksbehandler.id().value))
         sessionContext.totrinnsvurderingRepository.lagre(totrinnsvurdering)
         return this
     }
 
-    protected fun TotrinnsvurderingKontekst.ferdigstillOgLagre(beslutter: LegacySaksbehandler): TotrinnsvurderingKontekst {
-        totrinnsvurdering.settBeslutter(SaksbehandlerOid(beslutter.oid))
+    protected fun TotrinnsvurderingKontekst.ferdigstillOgLagre(beslutter: SaksbehandlerWrapper): TotrinnsvurderingKontekst {
+        totrinnsvurdering.settBeslutter(SaksbehandlerOid(beslutter.saksbehandler.id().value))
         totrinnsvurdering.ferdigstill(utbetalingId = oppgave.utbetalingId)
         sessionContext.totrinnsvurderingRepository.lagre(totrinnsvurdering)
         return this
@@ -687,14 +689,19 @@ abstract class AbstractDBIntegrationTest {
         val oppgave: Oppgave,
     )
 
-    protected fun nyLegacySaksbehandler(navn: String = lagSaksbehandlernavn()): LegacySaksbehandler {
-        val saksbehandler = LegacySaksbehandler(
-            epostadresse = lagEpostadresseFraFulltNavn(navn),
-            oid = UUID.randomUUID(),
-            navn = navn,
-            ident = lagSaksbehandlerident(),
+    protected fun nyLegacySaksbehandler(navn: String = lagSaksbehandlernavn()): SaksbehandlerWrapper {
+        val saksbehandler = SaksbehandlerWrapper(
+            Saksbehandler(
+                id = lagSaksbehandlerOid(),
+                navn = navn,
+                epost = lagEpostadresseFraFulltNavn(navn),
+                ident = lagSaksbehandlerident(),
+            )
         )
-        opprettSaksbehandler(saksbehandler.oid, saksbehandler.navn, saksbehandler.epostadresse, saksbehandler.ident())
+        opprettSaksbehandler(
+            saksbehandler.saksbehandler.id().value, saksbehandler.saksbehandler.navn,
+            saksbehandler.saksbehandler.epost, saksbehandler.saksbehandler.ident
+        )
         return saksbehandler
     }
 

@@ -14,8 +14,7 @@ import no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent
 import no.nav.helse.modell.saksbehandler.handlinger.Oppgavehandling
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
-import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
-import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler.Companion.tilLegacy
+import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import org.slf4j.LoggerFactory
 import java.sql.SQLException
 import java.util.UUID
@@ -100,11 +99,11 @@ class OppgaveService(
 
     fun avbrytOppgave(
         handling: Oppgavehandling,
-        legacySaksbehandler: LegacySaksbehandler,
+        saksbehandlerWrapper: SaksbehandlerWrapper,
     ) {
         oppgave(handling.oppgaveId()) {
             handling.oppgave(this)
-            handling.utførAv(legacySaksbehandler)
+            handling.utførAv(saksbehandlerWrapper)
         }
     }
 
@@ -113,22 +112,22 @@ class OppgaveService(
 
     fun leggPåVent(
         handling: LeggPåVent,
-        legacySaksbehandler: LegacySaksbehandler,
+        saksbehandlerWrapper: SaksbehandlerWrapper,
     ) {
         finnAktivOppgaveId(handling.oppgaveId)?.let { oppgaveId ->
             oppgave(oppgaveId) {
-                this.leggPåVent(handling.skalTildeles, legacySaksbehandler)
+                this.leggPåVent(handling.skalTildeles, saksbehandlerWrapper)
             }
         }
     }
 
     fun endrePåVent(
         handling: EndrePåVent,
-        legacySaksbehandler: LegacySaksbehandler,
+        saksbehandlerWrapper: SaksbehandlerWrapper,
     ) {
         finnAktivOppgaveId(handling.oppgaveId)?.let { oppgaveId ->
             oppgave(oppgaveId) {
-                this.endrePåVent(handling.skalTildeles, legacySaksbehandler)
+                this.endrePåVent(handling.skalTildeles, saksbehandlerWrapper)
             }
         }
     }
@@ -221,7 +220,7 @@ class OppgaveService(
         val saksbehandlerTilgangsgrupper = tilgangsgruppehenter.hentTilgangsgrupper(saksbehandler.id())
 
         try {
-            oppgave.forsøkTildelingVedReservasjon(saksbehandler.tilLegacy(), saksbehandlerTilgangsgrupper)
+            oppgave.forsøkTildelingVedReservasjon(SaksbehandlerWrapper(saksbehandler = saksbehandler), saksbehandlerTilgangsgrupper)
         } catch (manglerTilgang: ManglerTilgang) {
             logg.info("Saksbehandler har ikke (lenger) tilgang til egenskapene i denne oppgaven, tildeler ikke tross reservasjon")
             sikkerlogg.info(

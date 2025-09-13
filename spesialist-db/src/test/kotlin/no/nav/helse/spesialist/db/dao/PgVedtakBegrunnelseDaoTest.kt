@@ -24,7 +24,7 @@ internal class PgVedtakBegrunnelseDaoTest : AbstractDBIntegrationTest() {
                 type = VedtakBegrunnelseTypeFraDatabase.AVSLAG,
                 tekst = "En individuell begrunelse"
             ),
-            saksbehandlerOid = saksbehandler.oid,
+            saksbehandlerOid = saksbehandler.saksbehandler.id().value,
         )
 
         val generasjonId = finnGenerasjonId(oppgave.vedtaksperiodeId)
@@ -46,7 +46,7 @@ internal class PgVedtakBegrunnelseDaoTest : AbstractDBIntegrationTest() {
                 type = VedtakBegrunnelseTypeFraDatabase.AVSLAG,
                 tekst = "En individuell begrunelse"
             ),
-            saksbehandlerOid = saksbehandler.oid
+            saksbehandlerOid = saksbehandler.saksbehandler.id().value
         )
 
         val generasjonId = finnGenerasjonId(oppgave.vedtaksperiodeId)
@@ -69,7 +69,7 @@ internal class PgVedtakBegrunnelseDaoTest : AbstractDBIntegrationTest() {
                 type = VedtakBegrunnelseTypeFraDatabase.AVSLAG,
                 tekst = "En individuell begrunelse"
             ),
-            saksbehandlerOid = saksbehandler.oid
+            saksbehandlerOid = saksbehandler.saksbehandler.id().value
         )
 
         val lagretVedtakBegrunnelse = dao.finnVedtakBegrunnelse(oppgave.id)
@@ -91,7 +91,7 @@ internal class PgVedtakBegrunnelseDaoTest : AbstractDBIntegrationTest() {
                 type = VedtakBegrunnelseTypeFraDatabase.AVSLAG,
                 tekst = "En individuell begrunelse"
             ),
-            saksbehandlerOid = saksbehandler.oid
+            saksbehandlerOid = saksbehandler.saksbehandler.id().value
         )
         dao.invaliderVedtakBegrunnelse(oppgave.id)
         val lagretVedtakBegrunnelse = dao.finnVedtakBegrunnelse(oppgave.vedtaksperiodeId, generasjonId)
@@ -108,7 +108,7 @@ internal class PgVedtakBegrunnelseDaoTest : AbstractDBIntegrationTest() {
                 type = VedtakBegrunnelseTypeFraDatabase.AVSLAG,
                 tekst = "En individuell begrunelse"
             ),
-            saksbehandlerOid = saksbehandler.oid
+            saksbehandlerOid = saksbehandler.saksbehandler.id().value
         )
         dao.lagreVedtakBegrunnelse(
             oppgaveId = oppgave.id,
@@ -116,7 +116,7 @@ internal class PgVedtakBegrunnelseDaoTest : AbstractDBIntegrationTest() {
                 type = VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE,
                 tekst = "En individuell begrunelse delvis innvilgelse retter skrivefeil"
             ),
-            saksbehandlerOid = saksbehandler.oid
+            saksbehandlerOid = saksbehandler.saksbehandler.id().value
         )
         dao.lagreVedtakBegrunnelse(
             oppgaveId = oppgave.id,
@@ -124,7 +124,7 @@ internal class PgVedtakBegrunnelseDaoTest : AbstractDBIntegrationTest() {
                 type = VedtakBegrunnelseTypeFraDatabase.INNVILGELSE,
                 tekst = "En individuell begrunelse innvilgelse beholder skrivefeil"
             ),
-            saksbehandlerOid = saksbehandler.oid
+            saksbehandlerOid = saksbehandler.saksbehandler.id().value
         )
 
         val lagredeAvslag = dao.finnAlleVedtakBegrunnelser(oppgave.vedtaksperiodeId, oppgave.utbetalingId)
@@ -133,19 +133,19 @@ internal class PgVedtakBegrunnelseDaoTest : AbstractDBIntegrationTest() {
         with(lagredeAvslag[0]) {
             assertEquals(VedtakBegrunnelseTypeFraDatabase.INNVILGELSE, type)
             assertEquals("En individuell begrunelse innvilgelse beholder skrivefeil", begrunnelse)
-            assertEquals(saksbehandler.ident(), saksbehandlerIdent)
+            assertEquals(saksbehandler.saksbehandler.ident, saksbehandlerIdent)
             assertFalse(invalidert)
         }
         with(lagredeAvslag[1]) {
             assertEquals(VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE, type)
             assertEquals("En individuell begrunelse delvis innvilgelse retter skrivefeil", begrunnelse)
-            assertEquals(saksbehandler.ident(), saksbehandlerIdent)
+            assertEquals(saksbehandler.saksbehandler.ident, saksbehandlerIdent)
             assertFalse(invalidert)
         }
         with(lagredeAvslag[2]) {
             assertEquals(VedtakBegrunnelseTypeFraDatabase.AVSLAG, type)
             assertEquals("En individuell begrunelse", begrunnelse)
-            assertEquals(saksbehandler.ident(), saksbehandlerIdent)
+            assertEquals(saksbehandler.saksbehandler.ident, saksbehandlerIdent)
             assertFalse(invalidert)
         }
     }

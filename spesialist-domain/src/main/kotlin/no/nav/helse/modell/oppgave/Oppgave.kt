@@ -15,7 +15,7 @@ import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Egenskap.TILBAKEDATERT
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
-import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
+import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -54,23 +54,23 @@ class Oppgave private constructor(
     }
 
     fun forsøkTildeling(
-        legacySaksbehandler: LegacySaksbehandler,
+        saksbehandlerWrapper: SaksbehandlerWrapper,
         saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe>,
     ) {
         logg.info("Oppgave med {} forsøkes tildelt av saksbehandler.", kv("oppgaveId", id))
         val tildelt = tildeltTil
-        if (tildelt != null && tildelt != legacySaksbehandler.saksbehandlerOid) {
+        if (tildelt != null && tildelt != saksbehandlerWrapper.saksbehandler.id()) {
             logg.warn("Oppgave med {} kan ikke tildeles fordi den er tildelt noen andre.", kv("oppgaveId", id))
             throw OppgaveTildeltNoenAndre(tildelt.value, false)
         }
         tilstand.tildel(
             oppgave = this,
-            legacySaksbehandler = legacySaksbehandler,
+            saksbehandlerWrapper = saksbehandlerWrapper,
             saksbehandlerTilgangsgrupper = saksbehandlerTilgangsgrupper,
         )
     }
 
-    fun forsøkAvmelding(legacySaksbehandler: LegacySaksbehandler) {
+    fun forsøkAvmelding(saksbehandlerWrapper: SaksbehandlerWrapper) {
         logg.info("Oppgave med {} forsøkes avmeldt av saksbehandler.", kv("oppgaveId", id))
         val tildelt =
             tildeltTil ?: run {
@@ -78,41 +78,41 @@ class Oppgave private constructor(
                 throw OppgaveIkkeTildelt(this.id)
             }
 
-        if (tildelt != legacySaksbehandler.saksbehandlerOid) {
+        if (tildelt != saksbehandlerWrapper.saksbehandler.id()) {
             logg.info("Oppgave med {} er tildelt noen andre, avmeldes", kv("oppgaveId", id))
-            sikkerlogg.info("Oppgave med {} er tildelt $tildelt, avmeldes av $legacySaksbehandler", kv("oppgaveId", id))
+            sikkerlogg.info("Oppgave med {} er tildelt $tildelt, avmeldes av $saksbehandlerWrapper", kv("oppgaveId", id))
         }
-        tilstand.avmeld(this, legacySaksbehandler)
+        tilstand.avmeld(this, saksbehandlerWrapper)
     }
 
     fun forsøkTildelingVedReservasjon(
-        legacySaksbehandler: LegacySaksbehandler,
+        saksbehandlerWrapper: SaksbehandlerWrapper,
         saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe>,
     ) {
         logg.info("Oppgave med {} forsøkes tildelt grunnet reservasjon.", kv("oppgaveId", id))
-        sikkerlogg.info("Oppgave med {} forsøkes tildelt $legacySaksbehandler grunnet reservasjon.", kv("oppgaveId", id))
+        sikkerlogg.info("Oppgave med {} forsøkes tildelt $saksbehandlerWrapper grunnet reservasjon.", kv("oppgaveId", id))
         if (_egenskaper.contains(STIKKPRØVE)) {
             logg.info("Oppgave med {} er stikkprøve og tildeles ikke på tross av reservasjon.", kv("oppgaveId", id))
             return
         }
         tilstand.tildel(
             oppgave = this,
-            legacySaksbehandler = legacySaksbehandler,
+            saksbehandlerWrapper = saksbehandlerWrapper,
             saksbehandlerTilgangsgrupper = saksbehandlerTilgangsgrupper,
         )
     }
 
-    fun sendTilBeslutter(beslutter: LegacySaksbehandler?) {
+    fun sendTilBeslutter(beslutter: SaksbehandlerWrapper?) {
         _egenskaper.remove(RETUR)
         _egenskaper.add(BESLUTTER)
-        tildeltTil = beslutter?.saksbehandlerOid
+        tildeltTil = beslutter?.saksbehandler?.id()
         oppgaveEndret()
     }
 
-    fun sendIRetur(opprinneligLegacySaksbehandler: LegacySaksbehandler) {
+    fun sendIRetur(opprinneligSaksbehandlerWrapper: SaksbehandlerWrapper) {
         _egenskaper.remove(BESLUTTER)
         _egenskaper.add(RETUR)
-        tildeltTil = opprinneligLegacySaksbehandler.saksbehandlerOid
+        tildeltTil = opprinneligSaksbehandlerWrapper.saksbehandler.id()
         oppgaveEndret()
     }
 
@@ -155,13 +155,13 @@ class Oppgave private constructor(
 
     fun leggPåVent(
         skalTildeles: Boolean,
-        legacySaksbehandler: LegacySaksbehandler,
+        saksbehandlerWrapper: SaksbehandlerWrapper,
     ) {
-        if (this.tildeltTil != legacySaksbehandler.saksbehandlerOid && skalTildeles) {
-            tildel(legacySaksbehandler)
+        if (this.tildeltTil != saksbehandlerWrapper.saksbehandler.id() && skalTildeles) {
+            tildel(saksbehandlerWrapper)
         }
         if (this.tildeltTil != null && !skalTildeles) {
-            avmeld(legacySaksbehandler)
+            avmeld(saksbehandlerWrapper)
         }
         _egenskaper.add(PÅ_VENT)
         oppgaveEndret()
@@ -169,14 +169,14 @@ class Oppgave private constructor(
 
     fun endrePåVent(
         skalVæreTildeltSaksbehandler: Boolean,
-        legacySaksbehandler: LegacySaksbehandler,
+        saksbehandlerWrapper: SaksbehandlerWrapper,
     ) {
-        if (tildeltTil == legacySaksbehandler.saksbehandlerOid) {
+        if (tildeltTil == saksbehandlerWrapper.saksbehandler.id()) {
             if (!skalVæreTildeltSaksbehandler) {
-                avmeld(legacySaksbehandler)
+                avmeld(saksbehandlerWrapper)
             }
         } else if (skalVæreTildeltSaksbehandler) {
-            tildel(legacySaksbehandler)
+            tildel(saksbehandlerWrapper)
         }
     }
 
@@ -200,17 +200,31 @@ class Oppgave private constructor(
         tilstand.invalider(this)
     }
 
-    private fun tildel(legacySaksbehandler: LegacySaksbehandler) {
-        this.tildeltTil = legacySaksbehandler.saksbehandlerOid
-        logg.info("Oppgave med {} tildeles saksbehandler med {}", kv("oppgaveId", id), kv("oid", legacySaksbehandler.oid()))
-        sikkerlogg.info("Oppgave med {} tildeles $legacySaksbehandler", kv("oppgaveId", id))
+    private fun tildel(saksbehandlerWrapper: SaksbehandlerWrapper) {
+        this.tildeltTil = saksbehandlerWrapper.saksbehandler.id()
+        logg.info(
+            "Oppgave med {} tildeles saksbehandler med {}",
+            kv("oppgaveId", id),
+            kv(
+                "oid",
+                saksbehandlerWrapper.saksbehandler.id().value,
+            ),
+        )
+        sikkerlogg.info("Oppgave med {} tildeles $saksbehandlerWrapper", kv("oppgaveId", id))
         oppgaveEndret()
     }
 
-    private fun avmeld(legacySaksbehandler: LegacySaksbehandler) {
+    private fun avmeld(saksbehandlerWrapper: SaksbehandlerWrapper) {
         this.tildeltTil = null
-        logg.info("Oppgave med {} avmeldes saksbehandler med {}", kv("oppgaveId", id), kv("oid", legacySaksbehandler.oid()))
-        sikkerlogg.info("Oppgave med {} avmeldes $legacySaksbehandler", kv("oppgaveId", id))
+        logg.info(
+            "Oppgave med {} avmeldes saksbehandler med {}",
+            kv("oppgaveId", id),
+            kv(
+                "oid",
+                saksbehandlerWrapper.saksbehandler.id().value,
+            ),
+        )
+        sikkerlogg.info("Oppgave med {} avmeldes $saksbehandlerWrapper", kv("oppgaveId", id))
         oppgaveEndret()
     }
 
@@ -261,11 +275,11 @@ class Oppgave private constructor(
 
         fun tildel(
             oppgave: Oppgave,
-            legacySaksbehandler: LegacySaksbehandler,
+            saksbehandlerWrapper: SaksbehandlerWrapper,
             saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe>,
         ) {
             logg.warn(
-                "Forventer ikke forsøk på tildeling i {} for oppgave med {} av $legacySaksbehandler",
+                "Forventer ikke forsøk på tildeling i {} for oppgave med {} av $saksbehandlerWrapper",
                 kv("tilstand", this),
                 kv("oppgaveId", oppgave.id),
             )
@@ -273,10 +287,10 @@ class Oppgave private constructor(
 
         fun avmeld(
             oppgave: Oppgave,
-            legacySaksbehandler: LegacySaksbehandler,
+            saksbehandlerWrapper: SaksbehandlerWrapper,
         ) {
             logg.warn(
-                "Forventer ikke forsøk på avmelding i {} for oppgave med {} av $legacySaksbehandler",
+                "Forventer ikke forsøk på avmelding i {} for oppgave med {} av $saksbehandlerWrapper",
                 kv("tilstand", this),
                 kv("oppgaveId", oppgave.id),
             )
@@ -300,29 +314,29 @@ class Oppgave private constructor(
 
         override fun tildel(
             oppgave: Oppgave,
-            legacySaksbehandler: LegacySaksbehandler,
+            saksbehandlerWrapper: SaksbehandlerWrapper,
             saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe>,
         ) {
             if (!oppgave.harTilgang(
-                    saksbehandler = legacySaksbehandler.tilSaksbehandler(),
+                    saksbehandler = saksbehandlerWrapper.tilSaksbehandler(),
                     saksbehandlerTilgangsgrupper = saksbehandlerTilgangsgrupper,
                 )
             ) {
                 logg.info(
                     "Oppgave med {} har egenskaper som saksbehandler med {} ikke har tilgang til å behandle.",
                     kv("oppgaveId", oppgave.id),
-                    kv("oid", legacySaksbehandler.oid()),
+                    kv("oid", saksbehandlerWrapper.saksbehandler.id().value),
                 )
-                throw ManglerTilgang(legacySaksbehandler.oid(), oppgave.id)
+                throw ManglerTilgang(saksbehandlerWrapper.saksbehandler.id().value, oppgave.id)
             }
-            oppgave.tildel(legacySaksbehandler)
+            oppgave.tildel(saksbehandlerWrapper)
         }
 
         override fun avmeld(
             oppgave: Oppgave,
-            legacySaksbehandler: LegacySaksbehandler,
+            saksbehandlerWrapper: SaksbehandlerWrapper,
         ) {
-            oppgave.avmeld(legacySaksbehandler)
+            oppgave.avmeld(saksbehandlerWrapper)
         }
     }
 
@@ -436,10 +450,10 @@ class Oppgave private constructor(
     }
 }
 
-private fun LegacySaksbehandler.tilSaksbehandler(): Saksbehandler =
+private fun SaksbehandlerWrapper.tilSaksbehandler(): Saksbehandler =
     Saksbehandler(
-        id = SaksbehandlerOid(oid),
-        navn = navn,
-        epost = epostadresse,
-        ident = ident(),
+        id = SaksbehandlerOid(saksbehandler.id().value),
+        navn = saksbehandler.navn,
+        epost = saksbehandler.epost,
+        ident = saksbehandler.ident,
     )

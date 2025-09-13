@@ -199,7 +199,7 @@ internal class MessageContextMeldingPublisererTest {
         val saksbehandler = lagSaksbehandler()
         val beslutter = lagSaksbehandler()
         oppgave.forsøkTildeling(
-            legacySaksbehandler = saksbehandler,
+            saksbehandlerWrapper = saksbehandler,
             saksbehandlerTilgangsgrupper = Tilgangsgruppe.entries.toSet()
         )
         oppgave.sendTilBeslutter(beslutter)
@@ -228,7 +228,7 @@ internal class MessageContextMeldingPublisererTest {
             assertEquals(Oppgavestatus.AvventerSaksbehandler, enumValueOf<Oppgavestatus>(it["tilstand"].asText()))
             assertEquals(setOf("SØKNAD", "RETUR"), it["egenskaper"].map(JsonNode::asText).toSet())
             assertEquals(behandlingId, UUID.fromString(it["behandlingId"]?.asText()))
-            assertEquals(saksbehandler.oid, it["saksbehandler"]?.asUUID())
+            assertEquals(saksbehandler.saksbehandler.id().value, it["saksbehandler"]?.asUUID())
         }
     }
 

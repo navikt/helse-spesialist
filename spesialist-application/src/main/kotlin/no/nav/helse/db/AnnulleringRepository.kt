@@ -2,12 +2,12 @@ package no.nav.helse.db
 
 import no.nav.helse.modell.Annullering
 import no.nav.helse.modell.saksbehandler.handlinger.AnnulleringDto
-import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
+import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 
 interface AnnulleringRepository {
     fun lagreAnnullering(
         annulleringDto: AnnulleringDto,
-        legacySaksbehandler: LegacySaksbehandler,
+        saksbehandlerWrapper: SaksbehandlerWrapper,
     )
 
     fun finnAnnullering(

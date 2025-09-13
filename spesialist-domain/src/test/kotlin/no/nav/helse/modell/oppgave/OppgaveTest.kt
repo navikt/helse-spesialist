@@ -9,7 +9,9 @@ import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.OppgaveInspektør.Companion.inspektør
-import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
+import no.nav.helse.spesialist.domain.Saksbehandler
+import no.nav.helse.spesialist.domain.SaksbehandlerOid
+import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -43,11 +45,13 @@ internal class OppgaveTest {
             oid: UUID = SAKSBEHANDLER_OID,
             navn: String = SAKSBEHANDLER_NAVN,
             ident: String = SAKSBEHANDLER_IDENT,
-        ) = LegacySaksbehandler(
-            epostadresse = epost,
-            oid = oid,
-            navn = navn,
-            ident = ident,
+        ) = SaksbehandlerWrapper(
+            Saksbehandler(
+                id = SaksbehandlerOid(oid),
+                navn = navn,
+                epost = epost,
+                ident = ident,
+            )
         )
     }
 
@@ -55,14 +59,14 @@ internal class OppgaveTest {
     fun `Forsøker tildeling ved reservasjon`() {
         val oppgave = nyOppgave(SØKNAD)
         oppgave.forsøkTildelingVedReservasjon(
-            legacySaksbehandler = saksbehandlerUtenTilgang,
+            saksbehandlerWrapper = saksbehandlerUtenTilgang,
             saksbehandlerTilgangsgrupper = emptySet()
         )
 
         inspektør(oppgave) {
             assertEquals(true, tildelt)
             assertEquals(false, påVent)
-            assertEquals(saksbehandlerUtenTilgang.saksbehandlerOid, tildeltTil)
+            assertEquals(saksbehandlerUtenTilgang.saksbehandler.id(), tildeltTil)
         }
     }
 
@@ -71,13 +75,13 @@ internal class OppgaveTest {
         val oppgave = nyOppgave(SØKNAD, FORTROLIG_ADRESSE)
         val saksbehandler = saksbehandler()
         oppgave.forsøkTildelingVedReservasjon(
-            legacySaksbehandler = saksbehandler,
+            saksbehandlerWrapper = saksbehandler,
             saksbehandlerTilgangsgrupper = Tilgangsgruppe.entries.toSet()
         )
 
         inspektør(oppgave) {
             assertEquals(true, tildelt)
-            assertEquals(saksbehandler.saksbehandlerOid, tildeltTil)
+            assertEquals(saksbehandler.saksbehandler.id(), tildeltTil)
         }
     }
 
@@ -86,7 +90,7 @@ internal class OppgaveTest {
         val oppgave = nyOppgave(SØKNAD, FORTROLIG_ADRESSE, STRENGT_FORTROLIG_ADRESSE)
         assertThrows<ManglerTilgang> {
             oppgave.forsøkTildelingVedReservasjon(
-                legacySaksbehandler = saksbehandler(),
+                saksbehandlerWrapper = saksbehandler(),
                 saksbehandlerTilgangsgrupper = setOf(Tilgangsgruppe.KODE7)
             )
         }
@@ -101,14 +105,14 @@ internal class OppgaveTest {
     fun `Forsøker tildeling ved reservasjon med påVent`() {
         val oppgave = nyOppgave(PÅ_VENT, SØKNAD)
         oppgave.forsøkTildelingVedReservasjon(
-            legacySaksbehandler = saksbehandlerUtenTilgang,
+            saksbehandlerWrapper = saksbehandlerUtenTilgang,
             saksbehandlerTilgangsgrupper = emptySet()
         )
 
         inspektør(oppgave) {
             assertEquals(true, tildelt)
             assertEquals(true, påVent)
-            assertEquals(saksbehandlerUtenTilgang.saksbehandlerOid, tildeltTil)
+            assertEquals(saksbehandlerUtenTilgang.saksbehandler.id(), tildeltTil)
         }
     }
 
@@ -116,7 +120,7 @@ internal class OppgaveTest {
     fun `Forsøker tildeling ved reservasjon ved stikkprøve`() {
         val oppgave = nyOppgave(PÅ_VENT, STIKKPRØVE)
         oppgave.forsøkTildelingVedReservasjon(
-            legacySaksbehandler = saksbehandlerUtenTilgang,
+            saksbehandlerWrapper = saksbehandlerUtenTilgang,
             saksbehandlerTilgangsgrupper = emptySet()
         )
 
@@ -130,7 +134,7 @@ internal class OppgaveTest {
     fun `Forsøk avmelding av oppgave`() {
         val oppgave = nyOppgave()
         oppgave.forsøkTildeling(
-            legacySaksbehandler = saksbehandlerUtenTilgang,
+            saksbehandlerWrapper = saksbehandlerUtenTilgang,
             saksbehandlerTilgangsgrupper = emptySet()
         )
         oppgave.forsøkAvmelding(saksbehandlerUtenTilgang)
@@ -146,7 +150,7 @@ internal class OppgaveTest {
     fun `Forsøk avmelding av oppgave når oppgaven er tildelt noen andre`() {
         val oppgave = nyOppgave()
         oppgave.forsøkTildeling(
-            legacySaksbehandler = saksbehandler(oid = UUID.randomUUID()),
+            saksbehandlerWrapper = saksbehandler(oid = UUID.randomUUID()),
             saksbehandlerTilgangsgrupper = emptySet()
         )
         oppgave.forsøkAvmelding(saksbehandlerUtenTilgang)
@@ -172,7 +176,7 @@ internal class OppgaveTest {
         val oppgave = nyOppgave(egenskap)
         assertThrows<ManglerTilgang> {
             oppgave.forsøkTildelingVedReservasjon(
-                legacySaksbehandler = saksbehandlerUtenTilgang,
+                saksbehandlerWrapper = saksbehandlerUtenTilgang,
                 saksbehandlerTilgangsgrupper = emptySet()
             )
         }
@@ -189,7 +193,7 @@ internal class OppgaveTest {
         val oppgave = nyOppgave(egenskap)
         assertThrows<ManglerTilgang> {
             oppgave.forsøkTildeling(
-                legacySaksbehandler = saksbehandlerUtenTilgang,
+                saksbehandlerWrapper = saksbehandlerUtenTilgang,
                 saksbehandlerTilgangsgrupper = emptySet()
             )
         }
@@ -206,14 +210,14 @@ internal class OppgaveTest {
         val oppgave = nyOppgave(egenskap)
         val saksbehandlerMedTilgang = saksbehandler()
         oppgave.forsøkTildeling(
-            legacySaksbehandler = saksbehandlerMedTilgang,
+            saksbehandlerWrapper = saksbehandlerMedTilgang,
             saksbehandlerTilgangsgrupper = Tilgangsgruppe.entries.toSet()
         )
 
         inspektør(oppgave) {
             assertEquals(true, tildelt)
             assertEquals(false, påVent)
-            assertEquals(saksbehandlerMedTilgang.saksbehandlerOid, tildeltTil)
+            assertEquals(saksbehandlerMedTilgang.saksbehandler.id(), tildeltTil)
         }
     }
 
@@ -221,12 +225,12 @@ internal class OppgaveTest {
     fun `Forsøker tildeling når oppgaven er tildelt noen andre`() {
         val oppgave = nyOppgave()
         oppgave.forsøkTildeling(
-            legacySaksbehandler = saksbehandlerUtenTilgang,
+            saksbehandlerWrapper = saksbehandlerUtenTilgang,
             saksbehandlerTilgangsgrupper = emptySet()
         )
         assertThrows<OppgaveTildeltNoenAndre> {
             oppgave.forsøkTildeling(
-                legacySaksbehandler = saksbehandler(oid = UUID.randomUUID()),
+                saksbehandlerWrapper = saksbehandler(oid = UUID.randomUUID()),
                 saksbehandlerTilgangsgrupper = emptySet()
             )
         }
@@ -234,7 +238,7 @@ internal class OppgaveTest {
         inspektør(oppgave) {
             assertEquals(true, tildelt)
             assertEquals(false, påVent)
-            assertEquals(saksbehandlerUtenTilgang.saksbehandlerOid, tildeltTil)
+            assertEquals(saksbehandlerUtenTilgang.saksbehandler.id(), tildeltTil)
         }
     }
 
@@ -273,7 +277,7 @@ internal class OppgaveTest {
     fun `oppgave sendt til beslutter tildeles ingen dersom det ikke finnes noen tidligere beslutter`() {
         val oppgave = nyOppgave(SØKNAD)
         oppgave.forsøkTildelingVedReservasjon(
-            legacySaksbehandler = saksbehandlerUtenTilgang,
+            saksbehandlerWrapper = saksbehandlerUtenTilgang,
             saksbehandlerTilgangsgrupper = emptySet()
         )
         oppgave.sendTilBeslutter(null)
@@ -306,12 +310,12 @@ internal class OppgaveTest {
     fun `oppgave sendt i retur ligger ikke lenger på vent`() {
         val oppgave = nyOppgave(SØKNAD)
         oppgave.forsøkTildelingVedReservasjon(
-            legacySaksbehandler = saksbehandlerUtenTilgang,
+            saksbehandlerWrapper = saksbehandlerUtenTilgang,
             saksbehandlerTilgangsgrupper = emptySet()
         )
         oppgave.sendTilBeslutter(saksbehandlerUtenTilgang)
         oppgave.forsøkTildelingVedReservasjon(
-            legacySaksbehandler = beslutter,
+            saksbehandlerWrapper = beslutter,
             saksbehandlerTilgangsgrupper = Tilgangsgruppe.entries.toSet()
         )
         oppgave.sendIRetur(beslutter)
@@ -338,7 +342,7 @@ internal class OppgaveTest {
         oppgave.sendTilBeslutter(beslutter)
         oppgave.sendIRetur(saksbehandlerUtenTilgang)
         inspektør(oppgave) {
-            assertEquals(saksbehandlerUtenTilgang.saksbehandlerOid, tildeltTil)
+            assertEquals(saksbehandlerUtenTilgang.saksbehandler.id(), tildeltTil)
         }
     }
 
@@ -349,7 +353,7 @@ internal class OppgaveTest {
         oppgave.sendIRetur(saksbehandlerUtenTilgang)
         oppgave.sendTilBeslutter(beslutter)
         inspektør(oppgave) {
-            assertEquals(beslutter.saksbehandlerOid, tildeltTil)
+            assertEquals(beslutter.saksbehandler.id(), tildeltTil)
         }
     }
 
@@ -467,7 +471,7 @@ internal class OppgaveTest {
     fun `legg på vent`() {
         val oppgave = nyOppgave(SØKNAD)
         oppgave.forsøkTildelingVedReservasjon(
-            legacySaksbehandler = saksbehandlerUtenTilgang,
+            saksbehandlerWrapper = saksbehandlerUtenTilgang,
             saksbehandlerTilgangsgrupper = emptySet()
         )
         oppgave.leggPåVent(true, saksbehandlerUtenTilgang)
@@ -485,7 +489,7 @@ internal class OppgaveTest {
         inspektør(oppgave) {
             assertEquals(true, påVent)
             assertTrue(egenskaper.contains(PÅ_VENT))
-            assertEquals(saksbehandlerUtenTilgang.saksbehandlerOid, tildeltTil)
+            assertEquals(saksbehandlerUtenTilgang.saksbehandler.id(), tildeltTil)
         }
     }
 
@@ -493,7 +497,7 @@ internal class OppgaveTest {
     fun `legg på vent og skalTildeles ny saksbehandler`() {
         val oppgave = nyOppgave(SØKNAD)
         oppgave.forsøkTildelingVedReservasjon(
-            legacySaksbehandler = saksbehandlerUtenTilgang,
+            saksbehandlerWrapper = saksbehandlerUtenTilgang,
             saksbehandlerTilgangsgrupper = emptySet()
         )
         oppgave.leggPåVent(true, beslutter)
@@ -501,7 +505,7 @@ internal class OppgaveTest {
         inspektør(oppgave) {
             assertEquals(true, påVent)
             assertTrue(egenskaper.contains(PÅ_VENT))
-            assertEquals(beslutter.saksbehandlerOid, tildeltTil)
+            assertEquals(beslutter.saksbehandler.id(), tildeltTil)
         }
     }
 
@@ -509,7 +513,7 @@ internal class OppgaveTest {
     fun `legg på vent og !skalTildeles`() {
         val oppgave = nyOppgave(SØKNAD)
         oppgave.forsøkTildelingVedReservasjon(
-            legacySaksbehandler = saksbehandlerUtenTilgang,
+            saksbehandlerWrapper = saksbehandlerUtenTilgang,
             saksbehandlerTilgangsgrupper = emptySet()
         )
         oppgave.leggPåVent(false, saksbehandlerUtenTilgang)
@@ -539,7 +543,7 @@ internal class OppgaveTest {
         val oppgave = nyOppgave(SØKNAD)
         oppgave.register(observer)
         oppgave.forsøkTildelingVedReservasjon(
-            legacySaksbehandler = saksbehandlerUtenTilgang,
+            saksbehandlerWrapper = saksbehandlerUtenTilgang,
             saksbehandlerTilgangsgrupper = emptySet()
         )
         oppgave.leggPåVent(true, saksbehandlerUtenTilgang)
@@ -558,7 +562,7 @@ internal class OppgaveTest {
         val oppgave = nyOppgave(SØKNAD)
         oppgave.register(observer)
         oppgave.forsøkTildelingVedReservasjon(
-            legacySaksbehandler = saksbehandlerUtenTilgang,
+            saksbehandlerWrapper = saksbehandlerUtenTilgang,
             saksbehandlerTilgangsgrupper = emptySet()
         )
         oppgave.leggPåVent(true, saksbehandlerUtenTilgang)

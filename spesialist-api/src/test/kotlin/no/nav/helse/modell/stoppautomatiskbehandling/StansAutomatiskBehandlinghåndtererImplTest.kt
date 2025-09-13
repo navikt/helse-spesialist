@@ -10,7 +10,9 @@ import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.StansAutomatiskBehandlingFraDatabase
 import no.nav.helse.modell.saksbehandler.handlinger.OpphevStans
 import no.nav.helse.spesialist.domain.NotatType
-import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
+import no.nav.helse.spesialist.domain.Saksbehandler
+import no.nav.helse.spesialist.domain.SaksbehandlerOid
+import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -38,12 +40,14 @@ class StansAutomatiskBehandlinghåndtererImplTest {
         val oid = UUID.randomUUID()
         stansAutomatiskBehandlinghåndterer.håndter(
             handling = OpphevStans(fødselsnummer, "begrunnelse"),
-            legacySaksbehandler =
-                LegacySaksbehandler(
-                    epostadresse = "epost",
-                    oid = oid,
-                    navn = "navn",
-                    ident = "ident",
+            saksbehandlerWrapper =
+                SaksbehandlerWrapper(
+                    Saksbehandler(
+                        id = SaksbehandlerOid(oid),
+                        navn = "navn",
+                        epost = "epost",
+                        ident = "ident",
+                    )
                 ),
         )
 

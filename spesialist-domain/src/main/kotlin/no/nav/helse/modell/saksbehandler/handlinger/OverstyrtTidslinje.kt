@@ -7,7 +7,7 @@ import no.nav.helse.modell.vilkårsprøving.Subsumsjon
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.SporingOverstyrtTidslinje
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.Utfall.VILKAR_BEREGNET
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
-import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
+import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -25,8 +25,8 @@ class OverstyrtTidslinje private constructor(
     val dager: List<OverstyrtTidslinjedag>,
     val begrunnelse: String,
 ) : Overstyring(id, ferdigstilt) {
-    override fun utførAv(legacySaksbehandler: LegacySaksbehandler) {
-        legacySaksbehandler.håndter(this)
+    override fun utførAv(saksbehandlerWrapper: SaksbehandlerWrapper) {
+        saksbehandlerWrapper.håndter(this)
     }
 
     override fun loggnavn(): String = "overstyr_tidslinje"

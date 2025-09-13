@@ -90,9 +90,7 @@ import no.nav.helse.spesialist.application.logg.sikkerlogg
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
-import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
-import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler.Companion.tilLegacy
-import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler.Companion.tilSaksbehandler
+import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.tell
 import org.slf4j.LoggerFactory
@@ -132,9 +130,9 @@ class SaksbehandlerMediator(
             )
         sessionFactory.transactionalSessionScope { it.saksbehandlerRepository.lagre(saksbehandler) }
         tell(modellhandling)
-        val legacySaksbehandler = saksbehandler.tilLegacy()
-        legacySaksbehandler.register(Saksbehandlingsmelder(meldingPubliserer))
-        legacySaksbehandler.register(Subsumsjonsmelder(versjonAvKode, meldingPubliserer))
+        val saksbehandlerWrapper = SaksbehandlerWrapper(saksbehandler = saksbehandler)
+        saksbehandlerWrapper.register(Saksbehandlingsmelder(meldingPubliserer))
+        saksbehandlerWrapper.register(Subsumsjonsmelder(versjonAvKode, meldingPubliserer))
         val handlingId = UUID.randomUUID()
 
         withMDC(
@@ -151,15 +149,15 @@ class SaksbehandlerMediator(
                         saksbehandler = saksbehandlerFraApi.tilSaksbehandler(),
                         sessionFactory = sessionFactory,
                     )
-                    modellhandling.utførAv(legacySaksbehandler)
+                    modellhandling.utførAv(saksbehandlerWrapper)
                 }
 
-                is Oppgavehandling -> håndter(modellhandling, legacySaksbehandler)
+                is Oppgavehandling -> håndter(modellhandling, saksbehandlerWrapper)
                 is PåVent -> error("dette burde ikke skje")
-                is OpphevStans -> håndter(modellhandling, legacySaksbehandler)
-                is Personhandling -> håndter(modellhandling, legacySaksbehandler)
-                is Annullering -> håndter(modellhandling, legacySaksbehandler)
-                else -> modellhandling.utførAv(legacySaksbehandler)
+                is OpphevStans -> håndter(modellhandling, saksbehandlerWrapper)
+                is Personhandling -> håndter(modellhandling, saksbehandlerWrapper)
+                is Annullering -> håndter(modellhandling, saksbehandlerWrapper)
+                else -> modellhandling.utførAv(saksbehandlerWrapper)
             }
             sikkerlogg.info("Handling ${modellhandling.loggnavn()} utført")
         }
@@ -309,16 +307,16 @@ class SaksbehandlerMediator(
             ),
         ) {
             sikkerlogg.info("Utfører handling ${modellhandling.loggnavn()} på vegne av saksbehandler $saksbehandler")
-            val legacySaksbehandler = saksbehandler.tilLegacy()
+            val saksbehandlerWrapper = SaksbehandlerWrapper(saksbehandler = saksbehandler)
             when (modellhandling) {
-                is LeggPåVent -> leggPåVent(modellhandling, legacySaksbehandler)
-                is FjernPåVent -> fjernFraPåVent(modellhandling, legacySaksbehandler)
+                is LeggPåVent -> leggPåVent(modellhandling, saksbehandlerWrapper)
+                is FjernPåVent -> fjernFraPåVent(modellhandling, saksbehandlerWrapper)
                 is FjernPåVentUtenHistorikkinnslag ->
                     fjernFraPåVentUtenHistorikkinnslag(
                         modellhandling,
                     )
 
-                is EndrePåVent -> endrePåVent(modellhandling, legacySaksbehandler)
+                is EndrePåVent -> endrePåVent(modellhandling, saksbehandlerWrapper)
             }
             sikkerlogg.info(
                 "Handling ${modellhandling.loggnavn()} utført på oppgave ${modellhandling.oppgaveId} på vegne av saksbehandler $saksbehandler",
@@ -328,12 +326,12 @@ class SaksbehandlerMediator(
 
     private fun håndter(
         handling: Annullering,
-        legacySaksbehandler: LegacySaksbehandler,
+        saksbehandlerWrapper: SaksbehandlerWrapper,
     ) {
         try {
             if (annulleringRepository.finnAnnullering(handling.toDto()) != null) throw AlleredeAnnullert(handling)
-            annulleringRepository.lagreAnnullering(handling.toDto(), legacySaksbehandler)
-            handling.utførAv(legacySaksbehandler)
+            annulleringRepository.lagreAnnullering(handling.toDto(), saksbehandlerWrapper)
+            handling.utførAv(saksbehandlerWrapper)
         } catch (e: Modellfeil) {
             throw e.tilApiversjon()
         }
@@ -341,10 +339,10 @@ class SaksbehandlerMediator(
 
     private fun håndter(
         handling: Oppgavehandling,
-        legacySaksbehandler: LegacySaksbehandler,
+        saksbehandlerWrapper: SaksbehandlerWrapper,
     ) {
         try {
-            oppgaveService.avbrytOppgave(handling, legacySaksbehandler)
+            oppgaveService.avbrytOppgave(handling, saksbehandlerWrapper)
         } catch (e: Modellfeil) {
             throw e.tilApiversjon()
         }
@@ -352,42 +350,42 @@ class SaksbehandlerMediator(
 
     private fun håndter(
         handling: OpphevStans,
-        legacySaksbehandler: LegacySaksbehandler,
+        saksbehandlerWrapper: SaksbehandlerWrapper,
     ) = try {
-        stansAutomatiskBehandlinghåndterer.håndter(handling, legacySaksbehandler)
-        handling.utførAv(legacySaksbehandler)
+        stansAutomatiskBehandlinghåndterer.håndter(handling, saksbehandlerWrapper)
+        handling.utførAv(saksbehandlerWrapper)
     } catch (e: Modellfeil) {
         throw e.tilApiversjon()
     }
 
     private fun håndter(
         handling: Personhandling,
-        legacySaksbehandler: LegacySaksbehandler,
+        saksbehandlerWrapper: SaksbehandlerWrapper,
     ) = try {
-        handling.utførAv(legacySaksbehandler)
+        handling.utførAv(saksbehandlerWrapper)
     } catch (e: Modellfeil) {
         throw e.tilApiversjon()
     }
 
     private fun leggPåVent(
         handling: LeggPåVent,
-        legacySaksbehandler: LegacySaksbehandler,
+        saksbehandlerWrapper: SaksbehandlerWrapper,
     ) {
         try {
             val dialogRef = dialogDao.lagre()
             val innslag =
                 Historikkinnslag.lagtPåVentInnslag(
                     notattekst = handling.notatTekst,
-                    saksbehandler = legacySaksbehandler.tilSaksbehandler(),
+                    saksbehandler = saksbehandlerWrapper.saksbehandler,
                     årsaker = handling.årsaker,
                     frist = handling.frist,
                     dialogRef = dialogRef,
                 )
             periodehistorikkDao.lagreMedOppgaveId(innslag, handling.oppgaveId)
-            oppgaveService.leggPåVent(handling, legacySaksbehandler)
-            PåVentRepository(påVentDao).leggPåVent(legacySaksbehandler.oid(), handling, dialogRef)
-            legacySaksbehandler.register(Saksbehandlingsmelder(meldingPubliserer))
-            handling.utførAv(legacySaksbehandler)
+            oppgaveService.leggPåVent(handling, saksbehandlerWrapper)
+            PåVentRepository(påVentDao).leggPåVent(saksbehandlerWrapper.saksbehandler.id().value, handling, dialogRef)
+            saksbehandlerWrapper.register(Saksbehandlingsmelder(meldingPubliserer))
+            handling.utførAv(saksbehandlerWrapper)
         } catch (e: Modellfeil) {
             throw e.tilApiversjon()
         }
@@ -395,7 +393,7 @@ class SaksbehandlerMediator(
 
     private fun endrePåVent(
         handling: EndrePåVent,
-        legacySaksbehandler: LegacySaksbehandler,
+        saksbehandlerWrapper: SaksbehandlerWrapper,
     ) {
         if (!påVentDao.erPåVent(handling.oppgaveId)) throw FinnerIkkeLagtPåVent(handling.oppgaveId)
 
@@ -403,29 +401,29 @@ class SaksbehandlerMediator(
         val innslag =
             Historikkinnslag.endrePåVentInnslag(
                 notattekst = handling.notatTekst,
-                saksbehandler = legacySaksbehandler.tilSaksbehandler(),
+                saksbehandler = saksbehandlerWrapper.saksbehandler,
                 årsaker = handling.årsaker,
                 frist = handling.frist,
                 dialogRef = dialogRef,
             )
         periodehistorikkDao.lagreMedOppgaveId(innslag, handling.oppgaveId)
-        oppgaveService.endrePåVent(handling, legacySaksbehandler)
-        PåVentRepository(påVentDao).endrePåVent(legacySaksbehandler.oid(), handling, dialogRef)
+        oppgaveService.endrePåVent(handling, saksbehandlerWrapper)
+        PåVentRepository(påVentDao).endrePåVent(saksbehandlerWrapper.saksbehandler.id().value, handling, dialogRef)
 
-        legacySaksbehandler.register(Saksbehandlingsmelder(meldingPubliserer))
-        handling.utførAv(legacySaksbehandler)
+        saksbehandlerWrapper.register(Saksbehandlingsmelder(meldingPubliserer))
+        handling.utførAv(saksbehandlerWrapper)
     }
 
     private fun fjernFraPåVent(
         handling: FjernPåVent,
-        legacySaksbehandler: LegacySaksbehandler,
+        saksbehandlerWrapper: SaksbehandlerWrapper,
     ) {
         if (!påVentDao.erPåVent(handling.oppgaveId)) {
             sikkerlogg.info("Oppgave ${handling.oppgaveId} er ikke på vent")
             return
         }
         try {
-            val innslag = Historikkinnslag.fjernetFraPåVentInnslag(legacySaksbehandler.tilSaksbehandler())
+            val innslag = Historikkinnslag.fjernetFraPåVentInnslag(saksbehandlerWrapper.saksbehandler)
             periodehistorikkDao.lagreMedOppgaveId(innslag, handling.oppgaveId)
             oppgaveService.fjernFraPåVent(handling.oppgaveId)
             PåVentRepository(påVentDao).fjernFraPåVent(handling.oppgaveId)
@@ -553,7 +551,7 @@ class SaksbehandlerMediator(
                     checkNotNull(
                         totrinnsvurdering.saksbehandler
                             ?.let(session.saksbehandlerRepository::finn)
-                            ?.tilLegacy(),
+                            ?.let { SaksbehandlerWrapper(saksbehandler = it) },
                     ) {
                         "Opprinnelig saksbehandler kan ikke være null ved retur av beslutteroppgave"
                     }
@@ -635,7 +633,7 @@ class SaksbehandlerMediator(
                     val beslutter =
                         totrinnsvurdering.beslutter
                             ?.let(session.saksbehandlerRepository::finn)
-                            ?.tilLegacy()
+                            ?.let { SaksbehandlerWrapper(saksbehandler = it) }
                     apiOppgaveService.sendTilBeslutter(oppgavereferanse, beslutter)
                     totrinnsvurdering.sendTilBeslutter(oppgavereferanse, SaksbehandlerOid(saksbehandlerFraApi.oid))
                     session.totrinnsvurderingRepository.lagre(totrinnsvurdering)
@@ -711,13 +709,20 @@ class SaksbehandlerMediator(
             is no.nav.helse.modell.OppgaveIkkeTildelt -> OppgaveIkkeTildelt(oppgaveId)
             is OppgaveTildeltNoenAndre -> {
                 val saksbehandler =
-                    checkNotNull(
-                        sessionFactory.transactionalSessionScope { session ->
-                            session.saksbehandlerRepository.finn(SaksbehandlerOid(saksbehandlerOid))
-                        },
-                    ).tilLegacy()
+                    SaksbehandlerWrapper(
+                        saksbehandler =
+                            checkNotNull(
+                                sessionFactory.transactionalSessionScope { session ->
+                                    session.saksbehandlerRepository.finn(SaksbehandlerOid(saksbehandlerOid))
+                                },
+                            ),
+                    )
                 no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre(
-                    TildelingApiDto(saksbehandler.navn, saksbehandler.epostadresse, saksbehandler.oid),
+                    TildelingApiDto(
+                        saksbehandler.saksbehandler.navn,
+                        saksbehandler.saksbehandler.epost,
+                        saksbehandler.saksbehandler.id().value,
+                    ),
                 )
             }
 
@@ -744,14 +749,6 @@ class SaksbehandlerMediator(
 
             is FinnerIkkePåVent -> FinnerIkkeLagtPåVent(oppgaveId)
         }
-
-    private fun SaksbehandlerFraApi.tilSaksbehandler(): Saksbehandler =
-        Saksbehandler(
-            id = SaksbehandlerOid(oid),
-            navn = navn,
-            epost = epost,
-            ident = ident,
-        )
 
     private fun HandlingFraApi.tilModellversjon(
         saksbehandlerOid: SaksbehandlerOid,

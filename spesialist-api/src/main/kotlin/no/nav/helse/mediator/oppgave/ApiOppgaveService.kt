@@ -20,8 +20,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavesortering
 import no.nav.helse.spesialist.api.graphql.schema.ApiSorteringsnokkel
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.domain.Saksbehandler
-import no.nav.helse.spesialist.domain.SaksbehandlerOid
-import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
+import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import java.time.LocalDate
 import java.util.UUID
 
@@ -158,14 +157,6 @@ class ApiOppgaveService(
         return egenskaper?.tilEgenskaperForVisning() ?: emptyList()
     }
 
-    private fun SaksbehandlerFraApi.tilSaksbehandler() =
-        Saksbehandler(
-            id = SaksbehandlerOid(oid),
-            epost = epost,
-            navn = navn,
-            ident = ident,
-        )
-
     private fun List<ApiOppgavesortering>.tilOppgavesorteringForDatabase() =
         map {
             when (it.nokkel) {
@@ -197,7 +188,7 @@ class ApiOppgaveService(
 
     fun sendTilBeslutter(
         oppgaveId: Long,
-        beslutter: LegacySaksbehandler?,
+        beslutter: SaksbehandlerWrapper?,
     ) {
         oppgaveService.oppgave(oppgaveId) {
             sendTilBeslutter(beslutter)
@@ -206,10 +197,10 @@ class ApiOppgaveService(
 
     fun sendIRetur(
         oppgaveId: Long,
-        opprinneligLegacySaksbehandler: LegacySaksbehandler,
+        opprinneligSaksbehandlerWrapper: SaksbehandlerWrapper,
     ) {
         oppgaveService.oppgave(oppgaveId) {
-            sendIRetur(opprinneligLegacySaksbehandler)
+            sendIRetur(opprinneligSaksbehandlerWrapper)
         }
     }
 

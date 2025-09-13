@@ -5,7 +5,7 @@ import no.nav.helse.modell.Annullering
 import no.nav.helse.modell.saksbehandler.handlinger.AnnulleringDto
 import no.nav.helse.spesialist.db.DbQuery
 import no.nav.helse.spesialist.db.HelseDao.Companion.somDbArray
-import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
+import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -16,18 +16,18 @@ class PgAnnulleringRepository internal constructor(
 
     override fun lagreAnnullering(
         annulleringDto: AnnulleringDto,
-        legacySaksbehandler: LegacySaksbehandler,
+        saksbehandlerWrapper: SaksbehandlerWrapper,
     ) {
         val begrunnelseId =
             annulleringDto.kommentar?.let {
-                lagreBegrunnelse(it, legacySaksbehandler.oid())
+                lagreBegrunnelse(it, saksbehandlerWrapper.saksbehandler.id().value)
             }
         dbQuery.update(
             """
             INSERT INTO annullert_av_saksbehandler (annullert_tidspunkt, saksbehandler_ref, årsaker, begrunnelse_ref, arbeidsgiver_fagsystem_id, person_fagsystem_id, vedtaksperiode_id) 
             VALUES (now(), :saksbehandler, :arsaker::varchar[], :begrunnelseRef, :arbeidsgiverFagsystemId, :personFagsystemId, :vedtaksperiodeId)
             """.trimIndent(),
-            "saksbehandler" to legacySaksbehandler.oid(),
+            "saksbehandler" to saksbehandlerWrapper.saksbehandler.id().value,
             "arsaker" to annulleringDto.årsaker.somDbArray { it.arsak },
             "begrunnelseRef" to begrunnelseId,
             "arbeidsgiverFagsystemId" to annulleringDto.arbeidsgiverFagsystemId,

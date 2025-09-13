@@ -76,12 +76,12 @@ internal class PgBehandlingsstatistikkDaoTest : AbstractDBIntegrationTest() {
 
         assertEquals(0, behandlingsstatistikkDao.getAntallTilgjengeligeBeslutteroppgaver())
 
-        nyTotrinnsvurdering(fødselsnummer, oppgave).sendTilBeslutterOgLagre(legacySaksbehandler = saksbehandler)
+        nyTotrinnsvurdering(fødselsnummer, oppgave).sendTilBeslutterOgLagre(saksbehandlerWrapper = saksbehandler)
         oppgave.sendTilBeslutterOgLagre(beslutter = beslutter)
         assertEquals(1, behandlingsstatistikkDao.getAntallTilgjengeligeBeslutteroppgaver())
 
         oppgave
-            .avventSystemOgLagre(legacySaksbehandler = beslutter)
+            .avventSystemOgLagre(saksbehandlerWrapper = beslutter)
             .ferdigstillOgLagre()
         assertEquals(0, behandlingsstatistikkDao.getAntallTilgjengeligeBeslutteroppgaver())
     }
@@ -99,7 +99,7 @@ internal class PgBehandlingsstatistikkDaoTest : AbstractDBIntegrationTest() {
             .sendTilBeslutterOgLagre(beslutter = beslutter)
             .ferdigstillOgLagre()
         nyTotrinnsvurdering(fødselsnummer, oppgave)
-            .sendTilBeslutterOgLagre(legacySaksbehandler = saksbehandler)
+            .sendTilBeslutterOgLagre(saksbehandlerWrapper = saksbehandler)
             .ferdigstillOgLagre(beslutter = beslutter)
 
         assertEquals(1, behandlingsstatistikkDao.getAntallFullførteBeslutteroppgaver(LocalDate.now().minusDays(1)))

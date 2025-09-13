@@ -1,6 +1,8 @@
 package no.nav.helse.spesialist.test
 
-import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
+import no.nav.helse.spesialist.domain.Saksbehandler
+import no.nav.helse.spesialist.domain.SaksbehandlerOid
+import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import no.nav.helse.spesialist.domain.testfixtures.lagAktørId
 import no.nav.helse.spesialist.domain.testfixtures.lagEpostadresseFraFulltNavn
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
@@ -14,11 +16,13 @@ fun lagSaksbehandler(
     epostadresse: String = lagEpostadresseFraFulltNavn(navn),
     oid: UUID = UUID.randomUUID(),
     ident: String = lagSaksbehandlerident(),
-) = LegacySaksbehandler(
-    epostadresse = epostadresse,
-    oid = oid,
-    navn = navn,
-    ident = ident,
+) = SaksbehandlerWrapper(
+    Saksbehandler(
+        id = SaksbehandlerOid(oid),
+        navn = navn,
+        epost = epostadresse,
+        ident = ident,
+    )
 )
 
 class TestPerson {

@@ -1,7 +1,7 @@
 package no.nav.helse.modell.saksbehandler.handlinger
 
 import no.nav.helse.modell.melding.LagtPåVentEvent
-import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
+import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import java.time.LocalDate
 import java.util.UUID
 
@@ -20,8 +20,8 @@ class LeggPåVent(
 ) : PåVent(oppgaveId) {
     override fun loggnavn(): String = "lagt_på_vent"
 
-    override fun utførAv(legacySaksbehandler: LegacySaksbehandler) {
-        legacySaksbehandler.håndter(this)
+    override fun utførAv(saksbehandlerWrapper: SaksbehandlerWrapper) {
+        saksbehandlerWrapper.håndter(this)
     }
 
     internal fun byggEvent(
@@ -52,8 +52,8 @@ class EndrePåVent(
 ) : PåVent(oppgaveId) {
     override fun loggnavn(): String = "endre_på_vent"
 
-    override fun utførAv(legacySaksbehandler: LegacySaksbehandler) {
-        legacySaksbehandler.håndter(this)
+    override fun utførAv(saksbehandlerWrapper: SaksbehandlerWrapper) {
+        saksbehandlerWrapper.håndter(this)
     }
 
     internal fun byggEvent(
@@ -78,7 +78,7 @@ class FjernPåVent(
 ) : PåVent(oppgaveId) {
     override fun loggnavn(): String = "fjern_på_vent"
 
-    override fun utførAv(legacySaksbehandler: LegacySaksbehandler) {}
+    override fun utførAv(saksbehandlerWrapper: SaksbehandlerWrapper) {}
 }
 
 class FjernPåVentUtenHistorikkinnslag(
@@ -86,7 +86,7 @@ class FjernPåVentUtenHistorikkinnslag(
 ) : PåVent(oppgaveId) {
     override fun loggnavn(): String = "fjern_på_vent_uten_historikkinnslag"
 
-    override fun utførAv(legacySaksbehandler: LegacySaksbehandler) {}
+    override fun utførAv(saksbehandlerWrapper: SaksbehandlerWrapper) {}
 }
 
 data class PåVentÅrsak(

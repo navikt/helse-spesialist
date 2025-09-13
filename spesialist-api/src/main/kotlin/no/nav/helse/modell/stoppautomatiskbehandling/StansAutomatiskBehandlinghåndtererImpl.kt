@@ -9,7 +9,7 @@ import no.nav.helse.modell.saksbehandler.handlinger.OpphevStans
 import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.graphql.schema.ApiUnntattFraAutomatiskGodkjenning
 import no.nav.helse.spesialist.domain.NotatType
-import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
+import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -24,10 +24,10 @@ class StansAutomatiskBehandlinghåndtererImpl(
 
     fun håndter(
         handling: OpphevStans,
-        legacySaksbehandler: LegacySaksbehandler,
+        saksbehandlerWrapper: SaksbehandlerWrapper,
     ) {
         stansAutomatiskBehandlingDao.lagreFraSpeil(handling.fødselsnummer)
-        lagreNotat(handling.fødselsnummer, handling.begrunnelse, legacySaksbehandler.oid())
+        lagreNotat(handling.fødselsnummer, handling.begrunnelse, saksbehandlerWrapper.saksbehandler.id().value)
     }
 
     override fun unntattFraAutomatiskGodkjenning(fødselsnummer: String): ApiUnntattFraAutomatiskGodkjenning =

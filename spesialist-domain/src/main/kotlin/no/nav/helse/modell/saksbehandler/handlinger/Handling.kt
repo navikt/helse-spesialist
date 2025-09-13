@@ -1,10 +1,10 @@
 package no.nav.helse.modell.saksbehandler.handlinger
 
 import no.nav.helse.modell.oppgave.Oppgave
-import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
+import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 
 interface Handling {
-    fun utførAv(legacySaksbehandler: LegacySaksbehandler)
+    fun utførAv(saksbehandlerWrapper: SaksbehandlerWrapper)
 
     fun loggnavn(): String
 }

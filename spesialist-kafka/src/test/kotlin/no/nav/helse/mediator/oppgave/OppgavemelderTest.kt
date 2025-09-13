@@ -7,8 +7,10 @@ import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Oppgave
-import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
+import no.nav.helse.spesialist.domain.Saksbehandler
+import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
+import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlerOid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.UUID
@@ -54,7 +56,7 @@ class OppgavemelderTest {
     fun `bygg kafkamelding med saksbehandler og beslutter`() {
         val oppgave = nyOppgave()
         oppgave.forsøkTildelingVedReservasjon(
-            legacySaksbehandler = saksbehandler,
+            saksbehandlerWrapper = saksbehandler,
             saksbehandlerTilgangsgrupper = emptySet()
         )
         oppgave.register(Oppgavemelder(FNR, meldingPubliserer))
@@ -70,15 +72,17 @@ class OppgavemelderTest {
         assertEquals(BEHANDLING_ID, melding["behandlingId"].asUUID())
         assertEquals("AvventerSystem", melding["tilstand"].asText())
         assertEquals(FNR, melding["fødselsnummer"].asText())
-        assertEquals(saksbehandler.oid(), melding["saksbehandler"].asUUID())
+        assertEquals(saksbehandler.saksbehandler.id().value, melding["saksbehandler"].asUUID())
         assertEquals(listOf("SØKNAD"), melding["egenskaper"].map { it.asText() })
     }
 
-    private fun saksbehandler(@Suppress("SameParameterValue") epostadresse: String) = LegacySaksbehandler(
-        epostadresse = epostadresse,
-        oid = UUID.randomUUID(),
-        navn = "En Saksbehandler",
-        ident = "S123456",
+    private fun saksbehandler(@Suppress("SameParameterValue") epostadresse: String) = SaksbehandlerWrapper(
+        Saksbehandler(
+            id = lagSaksbehandlerOid(),
+            navn = "En Saksbehandler",
+            epost = epostadresse,
+            ident = "S123456",
+        )
     )
 
     private fun nyOppgave() = Oppgave.ny(
