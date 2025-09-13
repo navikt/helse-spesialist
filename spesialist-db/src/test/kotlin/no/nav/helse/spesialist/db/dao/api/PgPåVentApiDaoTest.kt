@@ -18,7 +18,7 @@ internal class PgPåVentApiDaoTest : AbstractDBIntegrationTest() {
         val påvent = påVentApiDao.hentAktivPåVent(vedtaksperiodeId)
         assertNotNull(påvent)
         assertEquals(LocalDate.now().plusDays(21), påvent?.frist)
-        assertEquals(SAKSBEHANDLER.oid, påvent?.oid)
+        assertEquals(SAKSBEHANDLER.id().value, påvent?.oid)
     }
 
     private fun opprettPåVent(

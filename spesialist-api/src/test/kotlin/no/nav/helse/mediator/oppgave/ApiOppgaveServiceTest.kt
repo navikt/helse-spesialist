@@ -13,7 +13,6 @@ import no.nav.helse.db.OppgaveFraDatabaseForVisning
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PersonnavnFraDatabase
 import no.nav.helse.db.ReservasjonDao
-import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.mediator.KommandokjedeEndretEvent
 import no.nav.helse.modell.melding.Behov
@@ -303,11 +302,11 @@ internal class ApiOppgaveServiceTest {
                         opprinneligSøknadsdato = opprinneligSøknadsdato,
                         vedtaksperiodeId = vedtaksperiodeId,
                         personnavnFraDatabase = PersonnavnFraDatabase("fornavn", "mellomnavn", "etternavn"),
-                        tildelt = SaksbehandlerFraDatabase(
-                            SAKSBEHANDLEREPOST,
-                            SAKSBEHANDLEROID,
-                            SAKSBEHANDLERNAVN,
-                            SAKSBEHANDLERIDENT
+                        tildelt = Saksbehandler(
+                            id = SaksbehandlerOid(SAKSBEHANDLEROID),
+                            navn = SAKSBEHANDLERNAVN,
+                            epost = SAKSBEHANDLEREPOST,
+                            ident = SAKSBEHANDLERIDENT
                         ),
                         påVent = true,
                     ),
@@ -356,11 +355,11 @@ internal class ApiOppgaveServiceTest {
                         opprinneligSøknadsdato = opprinneligSøknadsdato,
                         vedtaksperiodeId = vedtaksperiodeId,
                         personnavnFraDatabase = PersonnavnFraDatabase("fornavn", "mellomnavn", "etternavn"),
-                        tildelt = SaksbehandlerFraDatabase(
-                            SAKSBEHANDLEREPOST,
-                            SAKSBEHANDLEROID,
-                            SAKSBEHANDLERNAVN,
-                            SAKSBEHANDLERIDENT
+                        tildelt = Saksbehandler(
+                            id = SaksbehandlerOid(SAKSBEHANDLEROID),
+                            navn = SAKSBEHANDLERNAVN,
+                            epost = SAKSBEHANDLEREPOST,
+                            ident = SAKSBEHANDLERIDENT
                         ),
                         påVent = true,
                         egenskaper = egenskaper,
@@ -401,11 +400,11 @@ internal class ApiOppgaveServiceTest {
                         opprinneligSøknadsdato = opprinneligSøknadsdato,
                         vedtaksperiodeId = vedtaksperiodeId,
                         personnavnFraDatabase = PersonnavnFraDatabase("fornavn", "mellomnavn", "etternavn"),
-                        tildelt = SaksbehandlerFraDatabase(
-                            SAKSBEHANDLEREPOST,
-                            SAKSBEHANDLEROID,
-                            SAKSBEHANDLERNAVN,
-                            SAKSBEHANDLERIDENT
+                        tildelt = Saksbehandler(
+                            id = SaksbehandlerOid(SAKSBEHANDLEROID),
+                            navn = SAKSBEHANDLERNAVN,
+                            epost = SAKSBEHANDLEREPOST,
+                            ident = SAKSBEHANDLERIDENT
                         ),
                         påVent = true,
                         egenskaper = egenskaper,
@@ -446,11 +445,11 @@ internal class ApiOppgaveServiceTest {
                         opprinneligSøknadsdato = opprinneligSøknadsdato,
                         vedtaksperiodeId = vedtaksperiodeId,
                         personnavnFraDatabase = PersonnavnFraDatabase("fornavn", "mellomnavn", "etternavn"),
-                        tildelt = SaksbehandlerFraDatabase(
-                            SAKSBEHANDLEREPOST,
-                            SAKSBEHANDLEROID,
-                            SAKSBEHANDLERNAVN,
-                            SAKSBEHANDLERIDENT
+                        tildelt = Saksbehandler(
+                            id = SaksbehandlerOid(SAKSBEHANDLEROID),
+                            navn = SAKSBEHANDLERNAVN,
+                            epost = SAKSBEHANDLEREPOST,
+                            ident = SAKSBEHANDLERIDENT
                         ),
                         påVent = true,
                         egenskaper = egenskaper,
@@ -488,11 +487,11 @@ internal class ApiOppgaveServiceTest {
                         opprinneligSøknadsdato = opprinneligSøknadsdato,
                         vedtaksperiodeId = vedtaksperiodeId,
                         personnavnFraDatabase = PersonnavnFraDatabase("fornavn", "mellomnavn", "etternavn"),
-                        tildelt = SaksbehandlerFraDatabase(
-                            SAKSBEHANDLEREPOST,
-                            SAKSBEHANDLEROID,
-                            SAKSBEHANDLERNAVN,
-                            SAKSBEHANDLERIDENT
+                        tildelt = Saksbehandler(
+                            id = SaksbehandlerOid(SAKSBEHANDLEROID),
+                            navn = SAKSBEHANDLERNAVN,
+                            epost = SAKSBEHANDLEREPOST,
+                            ident = SAKSBEHANDLERIDENT
                         ),
                         påVent = true,
                         egenskaper = egenskaper,
@@ -539,7 +538,7 @@ internal class ApiOppgaveServiceTest {
         tidsfrist: LocalDate = LocalDate.now(),
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         personnavnFraDatabase: PersonnavnFraDatabase = PersonnavnFraDatabase("navn", "mellomnavn", "etternavn"),
-        tildelt: SaksbehandlerFraDatabase? = null,
+        tildelt: Saksbehandler? = null,
         påVent: Boolean = false,
         filtrertAntall: Int = 1,
     ) = OppgaveFraDatabaseForVisning(

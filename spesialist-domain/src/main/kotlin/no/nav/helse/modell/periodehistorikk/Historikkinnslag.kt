@@ -1,14 +1,14 @@
 package no.nav.helse.modell.periodehistorikk
 
-import no.nav.helse.modell.saksbehandler.SaksbehandlerDto
 import no.nav.helse.modell.saksbehandler.handlinger.PåVentÅrsak
 import no.nav.helse.spesialist.domain.DialogId
+import no.nav.helse.spesialist.domain.Saksbehandler
 import java.time.LocalDate
 import java.time.LocalDateTime
 
 sealed interface Historikkinnslag {
     val dialogRef: Long?
-    val saksbehandler: SaksbehandlerDto?
+    val saksbehandler: Saksbehandler?
     val tidspunkt: LocalDateTime
 
     fun detaljer(): Map<String, Any?> = emptyMap()
@@ -16,7 +16,7 @@ sealed interface Historikkinnslag {
     companion object {
         fun lagtPåVentInnslag(
             notattekst: String?,
-            saksbehandler: SaksbehandlerDto,
+            saksbehandler: Saksbehandler,
             årsaker: List<PåVentÅrsak>,
             frist: LocalDate,
             dialogRef: Long,
@@ -30,7 +30,7 @@ sealed interface Historikkinnslag {
                 dialogRef = dialogRef,
             )
 
-        fun fjernetFraPåVentInnslag(saksbehandler: SaksbehandlerDto): FjernetFraPåVent =
+        fun fjernetFraPåVentInnslag(saksbehandler: Saksbehandler): FjernetFraPåVent =
             FjernetFraPåVent(
                 saksbehandler = saksbehandler,
                 tidspunkt = LocalDateTime.now(),
@@ -38,7 +38,7 @@ sealed interface Historikkinnslag {
 
         fun endrePåVentInnslag(
             notattekst: String?,
-            saksbehandler: SaksbehandlerDto,
+            saksbehandler: Saksbehandler,
             årsaker: List<PåVentÅrsak>,
             frist: LocalDate,
             dialogRef: Long,
@@ -52,13 +52,13 @@ sealed interface Historikkinnslag {
                 dialogRef = dialogRef,
             )
 
-        fun totrinnsvurderingFerdigbehandletInnslag(saksbehandler: SaksbehandlerDto): TotrinnsvurderingFerdigbehandlet = TotrinnsvurderingFerdigbehandlet(saksbehandler = saksbehandler, tidspunkt = LocalDateTime.now())
+        fun totrinnsvurderingFerdigbehandletInnslag(saksbehandler: Saksbehandler): TotrinnsvurderingFerdigbehandlet = TotrinnsvurderingFerdigbehandlet(saksbehandler = saksbehandler, tidspunkt = LocalDateTime.now())
 
-        fun avventerTotrinnsvurdering(saksbehandler: SaksbehandlerDto): AvventerTotrinnsvurdering = AvventerTotrinnsvurdering(saksbehandler = saksbehandler, tidspunkt = LocalDateTime.now())
+        fun avventerTotrinnsvurdering(saksbehandler: Saksbehandler): AvventerTotrinnsvurdering = AvventerTotrinnsvurdering(saksbehandler = saksbehandler, tidspunkt = LocalDateTime.now())
 
         fun totrinnsvurderingRetur(
             notattekst: String,
-            saksbehandler: SaksbehandlerDto,
+            saksbehandler: Saksbehandler,
             dialogRef: Long,
         ): TotrinnsvurderingRetur =
             TotrinnsvurderingRetur(
@@ -73,7 +73,7 @@ sealed interface Historikkinnslag {
         fun automatiskBehandlingStanset(): AutomatiskBehandlingStanset = AutomatiskBehandlingStanset(tidspunkt = LocalDateTime.now())
 
         fun automatiskBehandlingStansetAvSaksbehandler(
-            saksbehandler: SaksbehandlerDto,
+            saksbehandler: Saksbehandler,
             begrunnelse: String,
             dialogId: DialogId,
         ): AutomatiskBehandlingStansetAvSaksbehandler =
@@ -85,7 +85,7 @@ sealed interface Historikkinnslag {
             )
 
         fun opphevStansAvSaksbehandler(
-            saksbehandler: SaksbehandlerDto,
+            saksbehandler: Saksbehandler,
             begrunnelse: String,
             dialogId: DialogId,
         ): OpphevStansAvSaksbehandler =
@@ -101,7 +101,7 @@ sealed interface Historikkinnslag {
 }
 
 data class LagtPåVent(
-    override val saksbehandler: SaksbehandlerDto,
+    override val saksbehandler: Saksbehandler,
     override val tidspunkt: LocalDateTime,
     override val dialogRef: Long,
     val årsaker: List<PåVentÅrsak>,
@@ -117,14 +117,14 @@ data class LagtPåVent(
 }
 
 data class FjernetFraPåVent(
-    override val saksbehandler: SaksbehandlerDto,
+    override val saksbehandler: Saksbehandler,
     override val tidspunkt: LocalDateTime,
 ) : Historikkinnslag {
     override val dialogRef: Long? = null
 }
 
 data class EndrePåVent(
-    override val saksbehandler: SaksbehandlerDto,
+    override val saksbehandler: Saksbehandler,
     override val tidspunkt: LocalDateTime,
     override val dialogRef: Long,
     val årsaker: List<PåVentÅrsak>,
@@ -140,21 +140,21 @@ data class EndrePåVent(
 }
 
 data class TotrinnsvurderingFerdigbehandlet(
-    override val saksbehandler: SaksbehandlerDto,
+    override val saksbehandler: Saksbehandler,
     override val tidspunkt: LocalDateTime,
 ) : Historikkinnslag {
     override val dialogRef: Long? = null
 }
 
 data class AvventerTotrinnsvurdering(
-    override val saksbehandler: SaksbehandlerDto,
+    override val saksbehandler: Saksbehandler,
     override val tidspunkt: LocalDateTime,
 ) : Historikkinnslag {
     override val dialogRef: Long? = null
 }
 
 data class TotrinnsvurderingRetur(
-    override val saksbehandler: SaksbehandlerDto,
+    override val saksbehandler: Saksbehandler,
     override val tidspunkt: LocalDateTime,
     override val dialogRef: Long,
     val notattekst: String,
@@ -169,19 +169,19 @@ data class TotrinnsvurderingAutomatiskRetur(
     override val tidspunkt: LocalDateTime,
 ) : Historikkinnslag {
     override val dialogRef: Long? = null
-    override val saksbehandler: SaksbehandlerDto? = null
+    override val saksbehandler: Saksbehandler? = null
 }
 
 data class AutomatiskBehandlingStanset(
     override val tidspunkt: LocalDateTime,
 ) : Historikkinnslag {
     override val dialogRef: Long? = null
-    override val saksbehandler: SaksbehandlerDto? = null
+    override val saksbehandler: Saksbehandler? = null
 }
 
 data class AutomatiskBehandlingStansetAvSaksbehandler(
     override val tidspunkt: LocalDateTime,
-    override val saksbehandler: SaksbehandlerDto,
+    override val saksbehandler: Saksbehandler,
     override val dialogRef: Long,
     val notattekst: String,
 ) : Historikkinnslag {
@@ -193,7 +193,7 @@ data class AutomatiskBehandlingStansetAvSaksbehandler(
 
 data class OpphevStansAvSaksbehandler(
     override val tidspunkt: LocalDateTime,
-    override val saksbehandler: SaksbehandlerDto,
+    override val saksbehandler: Saksbehandler,
     override val dialogRef: Long,
     val notattekst: String,
 ) : Historikkinnslag {
@@ -207,5 +207,5 @@ data class VedtaksperiodeReberegnet(
     override val tidspunkt: LocalDateTime,
 ) : Historikkinnslag {
     override val dialogRef: Long? = null
-    override val saksbehandler: SaksbehandlerDto? = null
+    override val saksbehandler: Saksbehandler? = null
 }

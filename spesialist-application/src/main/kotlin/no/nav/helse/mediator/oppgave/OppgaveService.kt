@@ -14,8 +14,6 @@ import no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent
 import no.nav.helse.modell.saksbehandler.handlinger.Oppgavehandling
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
-import no.nav.helse.spesialist.domain.Saksbehandler
-import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler.Companion.tilLegacy
 import org.slf4j.LoggerFactory
@@ -214,18 +212,11 @@ class OppgaveService(
         fødselsnummer: String,
         oppgave: Oppgave,
     ) {
-        val (saksbehandlerFraDatabase) =
+        val (saksbehandler) =
             reservasjonDao.hentReservasjonFor(fødselsnummer) ?: run {
                 logg.info("Finner ingen reservasjon for $oppgave, blir ikke tildelt.")
                 return
             }
-        val saksbehandler =
-            Saksbehandler(
-                id = SaksbehandlerOid(saksbehandlerFraDatabase.oid),
-                navn = saksbehandlerFraDatabase.navn,
-                epost = saksbehandlerFraDatabase.epostadresse,
-                ident = saksbehandlerFraDatabase.ident,
-            )
 
         val saksbehandlerTilgangsgrupper = tilgangsgruppehenter.hentTilgangsgrupper(saksbehandler.id())
 

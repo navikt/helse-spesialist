@@ -61,9 +61,9 @@ internal object OppgaveMapper {
                 tildeling =
                     oppgave.tildelt?.let { tildelt ->
                         ApiTildeling(
-                            tildelt.navn,
-                            tildelt.epostadresse,
-                            tildelt.oid,
+                            navn = tildelt.navn,
+                            epost = tildelt.epost,
+                            oid = tildelt.id().value,
                         )
                     },
                 egenskaper =

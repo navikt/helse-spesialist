@@ -22,7 +22,7 @@ internal class PgReservasjonDaoTest : AbstractDBIntegrationTest() {
             reservasjonDao.hentReservasjonFor(FNR)?.reservertTil
                 ?: fail("Forventet at det skulle finnes en reservasjon i basen")
         }
-        assertEquals(SAKSBEHANDLER_OID, saksbehandler.oid)
+        assertEquals(SAKSBEHANDLER_OID, saksbehandler.id().value)
         assertRiktigVarighet(finnGyldigTil())
     }
 
@@ -46,7 +46,7 @@ internal class PgReservasjonDaoTest : AbstractDBIntegrationTest() {
             reservasjonDao.hentReservasjonFor(FNR)?.reservertTil
                 ?: fail("Forventet at det skulle finnes en reservasjon i basen")
         }
-        assertEquals(SAKSBEHANDLER_OID, saksbehandler.oid)
+        assertEquals(SAKSBEHANDLER_OID, saksbehandler.id().value)
         assertRiktigVarighet(finnGyldigTil())
     }
 

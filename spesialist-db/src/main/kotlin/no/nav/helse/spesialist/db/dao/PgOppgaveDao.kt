@@ -11,7 +11,6 @@ import no.nav.helse.db.OppgaveFraDatabaseForVisning
 import no.nav.helse.db.OppgavesorteringForDatabase
 import no.nav.helse.db.PaVentInfoFraDatabase
 import no.nav.helse.db.PersonnavnFraDatabase
-import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.SorteringsnøkkelForDatabase
 import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.oppgave.Egenskap
@@ -21,6 +20,8 @@ import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.db.objectMapper
+import no.nav.helse.spesialist.domain.Saksbehandler
+import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import java.time.LocalDate
 import java.util.UUID
 import javax.sql.DataSource
@@ -307,11 +308,11 @@ class PgOppgaveDao internal constructor(
                 egenskaper = egenskaper,
                 tildelt =
                     row.uuidOrNull("oid")?.let {
-                        SaksbehandlerFraDatabase(
-                            epostadresse = row.string("epost"),
-                            it,
-                            row.string("navn"),
-                            row.string("ident"),
+                        Saksbehandler(
+                            id = SaksbehandlerOid(it),
+                            navn = row.string("navn"),
+                            epost = row.string("epost"),
+                            ident = row.string("ident"),
                         )
                     },
                 påVent = egenskaper.contains(EgenskapForDatabase.PÅ_VENT),
@@ -394,11 +395,11 @@ class PgOppgaveDao internal constructor(
                 egenskaper = egenskaper,
                 tildelt =
                     row.uuidOrNull("oid")?.let {
-                        SaksbehandlerFraDatabase(
-                            epostadresse = row.string("epost"),
-                            it,
-                            row.string("navn"),
-                            row.string("ident"),
+                        Saksbehandler(
+                            id = SaksbehandlerOid(it),
+                            navn = row.string("navn"),
+                            epost = row.string("epost"),
+                            ident = row.string("ident"),
                         )
                     },
                 påVent = egenskaper.contains(EgenskapForDatabase.PÅ_VENT),

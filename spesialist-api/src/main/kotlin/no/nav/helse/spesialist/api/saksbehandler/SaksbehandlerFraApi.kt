@@ -2,6 +2,8 @@ package no.nav.helse.spesialist.api.saksbehandler
 
 import io.ktor.server.auth.jwt.JWTPrincipal
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
+import no.nav.helse.spesialist.domain.Saksbehandler
+import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import java.util.UUID
 
@@ -13,6 +15,14 @@ data class SaksbehandlerFraApi(
     val grupper: List<UUID>,
     val tilgangsgrupper: Set<Tilgangsgruppe>,
 ) {
+    fun tilSaksbehandler(): Saksbehandler =
+        Saksbehandler(
+            id = SaksbehandlerOid(oid),
+            navn = navn,
+            epost = epost,
+            ident = ident,
+        )
+
     companion object {
         fun fraOnBehalfOfToken(
             jwtPrincipal: JWTPrincipal,

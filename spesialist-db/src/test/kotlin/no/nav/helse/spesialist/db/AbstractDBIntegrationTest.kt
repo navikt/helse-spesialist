@@ -36,6 +36,7 @@ import no.nav.helse.spesialist.db.testfixtures.ModuleIsolatedDBTestFixture
 import no.nav.helse.spesialist.domain.Arbeidsgiver
 import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
 import no.nav.helse.spesialist.domain.Dialog
+import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 import no.nav.helse.spesialist.domain.testfixtures.jan
@@ -94,10 +95,10 @@ abstract class AbstractDBIntegrationTest {
     protected val SAKSBEHANDLER_IDENT = lagSaksbehandlerident()
     protected val SAKSBEHANDLER =
         Saksbehandler(
-            oid = SAKSBEHANDLER_OID,
+            id = SaksbehandlerOid(SAKSBEHANDLER_OID),
             navn = SAKSBEHANDLER_NAVN,
-            ident = SAKSBEHANDLER_IDENT,
             epost = SAKSBEHANDLER_EPOST,
+            ident = SAKSBEHANDLER_IDENT,
         )
 
     protected val dataSource = DBDBTestFixture.fixture.module.dataSource
@@ -707,13 +708,6 @@ abstract class AbstractDBIntegrationTest {
         val id: UUID,
         val fom: LocalDate,
         val tom: LocalDate,
-    )
-
-    protected data class Saksbehandler(
-        val oid: UUID,
-        val navn: String,
-        val ident: String,
-        val epost: String,
     )
 
     protected data class ArbeidsforholdForTest(

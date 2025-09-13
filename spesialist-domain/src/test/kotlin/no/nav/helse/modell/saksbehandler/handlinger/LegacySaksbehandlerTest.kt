@@ -6,14 +6,14 @@ import no.nav.helse.modell.melding.OverstyrtArbeidsforholdEvent
 import no.nav.helse.modell.melding.OverstyrtInntektOgRefusjonEvent
 import no.nav.helse.modell.melding.OverstyrtTidslinjeEvent
 import no.nav.helse.modell.melding.SubsumsjonEvent
-import no.nav.helse.modell.saksbehandler.SaksbehandlerDto
 import no.nav.helse.modell.saksbehandler.SaksbehandlerObserver
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon
+import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
-import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler.Companion.gjenopprett
-import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler.Companion.toDto
+import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler.Companion.tilLegacy
+import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler.Companion.tilSaksbehandler
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -300,15 +300,19 @@ internal class LegacySaksbehandlerTest {
     }
 
     @Test
-    fun `fra og til dto`() {
-        val saksbehandlerDto = SaksbehandlerDto(
-            epostadresse = "saksbehandler@nav.no",
-            oid = UUID.randomUUID(),
+    fun `fra og til saksbehandler`() {
+        val saksbehandler = Saksbehandler(
+            id = SaksbehandlerOid(UUID.randomUUID()),
             navn = "Kim Saksbehandler",
+            epost = "saksbehandler@nav.no",
             ident = "X999999",
         )
 
-        assertEquals(saksbehandlerDto, saksbehandlerDto.gjenopprett().toDto())
+        val dobbelOversatt = saksbehandler.tilLegacy().tilSaksbehandler()
+        assertEquals(saksbehandler.id(), dobbelOversatt.id())
+        assertEquals(saksbehandler.navn, dobbelOversatt.navn)
+        assertEquals(saksbehandler.epost, dobbelOversatt.epost)
+        assertEquals(saksbehandler.ident, dobbelOversatt.ident)
     }
 
     private fun overstyrteDager(): List<OverstyrtTidslinjedag> = listOf(

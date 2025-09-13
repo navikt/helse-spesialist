@@ -1,5 +1,6 @@
 package no.nav.helse.db
 
+import no.nav.helse.spesialist.domain.Saksbehandler
 import java.util.UUID
 
 interface ReservasjonDao {
@@ -12,5 +13,5 @@ interface ReservasjonDao {
 }
 
 data class Reservasjon(
-    val reservertTil: SaksbehandlerFraDatabase,
+    val reservertTil: Saksbehandler,
 )

@@ -3,11 +3,12 @@ package no.nav.helse.spesialist.db.dao
 import kotliquery.Session
 import no.nav.helse.db.Reservasjon
 import no.nav.helse.db.ReservasjonDao
-import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.spesialist.db.HelseDao
 import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
+import no.nav.helse.spesialist.domain.Saksbehandler
+import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import java.util.UUID
 import javax.sql.DataSource
 
@@ -50,10 +51,10 @@ class PgReservasjonDao private constructor(
                 "foedselsnummer" to fødselsnummer,
             ).singleOrNull { row ->
                 Reservasjon(
-                    SaksbehandlerFraDatabase(
-                        oid = row.uuid("oid"),
+                    Saksbehandler(
+                        id = SaksbehandlerOid(row.uuid("oid")),
                         navn = row.string("navn"),
-                        epostadresse = row.string("epost"),
+                        epost = row.string("epost"),
                         ident = row.string("ident"),
                     ),
                 )

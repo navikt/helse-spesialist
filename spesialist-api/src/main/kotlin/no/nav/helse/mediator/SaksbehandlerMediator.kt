@@ -30,7 +30,6 @@ import no.nav.helse.modell.melding.VarselEndret
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
-import no.nav.helse.modell.saksbehandler.SaksbehandlerDto
 import no.nav.helse.modell.saksbehandler.handlinger.Annullering
 import no.nav.helse.modell.saksbehandler.handlinger.AnnulleringArsak
 import no.nav.helse.modell.saksbehandler.handlinger.Arbeidsforhold
@@ -93,7 +92,7 @@ import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler
 import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler.Companion.tilLegacy
-import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler.Companion.toDto
+import no.nav.helse.spesialist.domain.legacy.LegacySaksbehandler.Companion.tilSaksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.tell
 import org.slf4j.LoggerFactory
@@ -379,7 +378,7 @@ class SaksbehandlerMediator(
             val innslag =
                 Historikkinnslag.lagtPåVentInnslag(
                     notattekst = handling.notatTekst,
-                    saksbehandler = legacySaksbehandler.toDto(),
+                    saksbehandler = legacySaksbehandler.tilSaksbehandler(),
                     årsaker = handling.årsaker,
                     frist = handling.frist,
                     dialogRef = dialogRef,
@@ -404,7 +403,7 @@ class SaksbehandlerMediator(
         val innslag =
             Historikkinnslag.endrePåVentInnslag(
                 notattekst = handling.notatTekst,
-                saksbehandler = legacySaksbehandler.toDto(),
+                saksbehandler = legacySaksbehandler.tilSaksbehandler(),
                 årsaker = handling.årsaker,
                 frist = handling.frist,
                 dialogRef = dialogRef,
@@ -426,7 +425,7 @@ class SaksbehandlerMediator(
             return
         }
         try {
-            val innslag = Historikkinnslag.fjernetFraPåVentInnslag(legacySaksbehandler.toDto())
+            val innslag = Historikkinnslag.fjernetFraPåVentInnslag(legacySaksbehandler.tilSaksbehandler())
             periodehistorikkDao.lagreMedOppgaveId(innslag, handling.oppgaveId)
             oppgaveService.fjernFraPåVent(handling.oppgaveId)
             PåVentRepository(påVentDao).fjernFraPåVent(handling.oppgaveId)
@@ -581,7 +580,7 @@ class SaksbehandlerMediator(
             val innslag =
                 Historikkinnslag.totrinnsvurderingRetur(
                     notattekst = notatTekst,
-                    saksbehandler = besluttendeSaksbehandler.toDto(),
+                    saksbehandler = besluttendeSaksbehandler.tilSaksbehandler(),
                     dialogRef = dialogRef,
                 )
             periodehistorikkDao.lagreMedOppgaveId(innslag, oppgavereferanse)
@@ -664,7 +663,7 @@ class SaksbehandlerMediator(
             )
 
             try {
-                val innslag = Historikkinnslag.avventerTotrinnsvurdering(saksbehandlerFraApi.toDto())
+                val innslag = Historikkinnslag.avventerTotrinnsvurdering(saksbehandlerFraApi.tilSaksbehandler())
                 periodehistorikkDao.lagreMedOppgaveId(innslag, oppgavereferanse)
             } catch (e: Exception) {
                 return@transactionalSessionScope SendTilGodkjenningResult.Feil.UventetFeilVedOpprettingAvPeriodehistorikk(
@@ -982,14 +981,6 @@ class SaksbehandlerMediator(
             Utfall.DELVIS_INNVILGELSE -> VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE
             Utfall.INNVILGELSE -> VedtakBegrunnelseTypeFraDatabase.INNVILGELSE
         }
-
-    private fun SaksbehandlerFraApi.toDto(): SaksbehandlerDto =
-        SaksbehandlerDto(
-            epostadresse = this.epost,
-            oid = this.oid,
-            navn = this.navn,
-            ident = this.ident,
-        )
 }
 
 private fun overstyringUnitOfWork(

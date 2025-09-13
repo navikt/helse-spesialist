@@ -5,7 +5,6 @@ import no.nav.helse.db.KommentarFraDatabase
 import no.nav.helse.db.OppgaveFraDatabaseForVisning
 import no.nav.helse.db.PaVentInfoFraDatabase
 import no.nav.helse.db.PersonnavnFraDatabase
-import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilEgenskaperForVisning
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilOppgaverTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiAntallArbeidsforhold
@@ -16,6 +15,8 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveegenskap
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavetype
 import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodetype
 import no.nav.helse.spesialist.api.graphql.schema.ApiPersonnavn
+import no.nav.helse.spesialist.domain.Saksbehandler
+import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.testfixtures.lagAktørId
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -31,7 +32,13 @@ internal class OppgaveMapperTest {
         private const val oppgaveId = 1L
         private val aktørId = lagAktørId()
         private val vedtaksperiodeId = UUID.randomUUID()
-        private val saksbehandler = SaksbehandlerFraDatabase("epost", UUID.randomUUID(), "navn", "ident")
+        private val saksbehandler =
+            Saksbehandler(
+                id = SaksbehandlerOid(UUID.randomUUID()),
+                navn = "navn",
+                epost = "epost",
+                ident = "ident"
+            )
         private val opprettet = LocalDateTime.now()
         private val opprinneligSøknadsdato = LocalDateTime.now()
         private val tidsfrist = LocalDate.now()

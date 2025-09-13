@@ -1,5 +1,6 @@
 package no.nav.helse.db
 
+import no.nav.helse.spesialist.domain.Saksbehandler
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -10,7 +11,7 @@ data class OppgaveFraDatabaseForVisning(
     val vedtaksperiodeId: UUID,
     val navn: PersonnavnFraDatabase,
     val egenskaper: Set<EgenskapForDatabase>,
-    val tildelt: SaksbehandlerFraDatabase? = null,
+    val tildelt: Saksbehandler? = null,
     val påVent: Boolean = false,
     val opprettet: LocalDateTime,
     val opprinneligSøknadsdato: LocalDateTime,

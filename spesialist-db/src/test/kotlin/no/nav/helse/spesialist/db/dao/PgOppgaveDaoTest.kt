@@ -15,7 +15,6 @@ import no.nav.helse.db.EgenskapForDatabase.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.db.EgenskapForDatabase.UTLAND
 import no.nav.helse.db.OppgaveFraDatabaseForVisning
 import no.nav.helse.db.OppgavesorteringForDatabase
-import no.nav.helse.db.SaksbehandlerFraDatabase
 import no.nav.helse.db.SorteringsnøkkelForDatabase
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.oppgave.Egenskap
@@ -129,15 +128,10 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
         assertEquals(mellomnavn, førsteOppgave.navn.mellomnavn)
         assertEquals(etternavn, førsteOppgave.navn.etternavn)
         assertEquals(false, førsteOppgave.påVent)
-        assertEquals(
-            SaksbehandlerFraDatabase(
-                epostadresse = legacySaksbehandler.epostadresse,
-                oid = legacySaksbehandler.oid,
-                navn = legacySaksbehandler.navn,
-                ident = legacySaksbehandler.ident(),
-            ),
-            førsteOppgave.tildelt,
-        )
+        assertEquals(legacySaksbehandler.oid, førsteOppgave.tildelt?.id()?.value)
+        assertEquals(legacySaksbehandler.navn, førsteOppgave.tildelt?.navn)
+        assertEquals(legacySaksbehandler.epostadresse, førsteOppgave.tildelt?.epost)
+        assertEquals(legacySaksbehandler.ident(), førsteOppgave.tildelt?.ident)
         assertEquals(oppgave.vedtaksperiodeId, førsteOppgave.vedtaksperiodeId)
     }
 
@@ -166,15 +160,10 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
         assertEquals(mellomnavn, førsteOppgave.navn.mellomnavn)
         assertEquals(etternavn, førsteOppgave.navn.etternavn)
         assertEquals(true, førsteOppgave.påVent)
-        assertEquals(
-            SaksbehandlerFraDatabase(
-                epostadresse = legacySaksbehandler.epostadresse,
-                oid = legacySaksbehandler.oid,
-                navn = legacySaksbehandler.navn,
-                ident = legacySaksbehandler.ident(),
-            ),
-            førsteOppgave.tildelt,
-        )
+        assertEquals(legacySaksbehandler.oid, førsteOppgave.tildelt?.id()?.value)
+        assertEquals(legacySaksbehandler.navn, førsteOppgave.tildelt?.navn)
+        assertEquals(legacySaksbehandler.epostadresse, førsteOppgave.tildelt?.epost)
+        assertEquals(legacySaksbehandler.ident(), førsteOppgave.tildelt?.ident)
         assertEquals(oppgave.vedtaksperiodeId, førsteOppgave.vedtaksperiodeId)
         assertNotNull(førsteOppgave.paVentInfo)
         assertEquals(legacySaksbehandler.ident(), førsteOppgave.paVentInfo?.saksbehandler)

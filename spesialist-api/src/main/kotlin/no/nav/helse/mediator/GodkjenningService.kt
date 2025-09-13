@@ -9,7 +9,6 @@ import no.nav.helse.db.SessionFactory
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.melding.Saksbehandlerløsning
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
-import no.nav.helse.modell.saksbehandler.SaksbehandlerDto
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.spesialist.api.Godkjenninghåndterer
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
@@ -83,14 +82,7 @@ class GodkjenningService(
                 if (godkjenningDTO.godkjent) {
                     val beslutter =
                         totrinnsvurdering.beslutter?.let { saksbehandlerId ->
-                            session.saksbehandlerRepository.finn(saksbehandlerId)?.let { saksbehandler ->
-                                SaksbehandlerDto(
-                                    epostadresse = saksbehandler.epost,
-                                    oid = saksbehandler.id().value,
-                                    navn = saksbehandler.navn,
-                                    ident = saksbehandler.ident,
-                                )
-                            }
+                            session.saksbehandlerRepository.finn(saksbehandlerId)
                         }
                     checkNotNull(beslutter) { "Forventer at beslutter er satt" }
                     val innslag = Historikkinnslag.totrinnsvurderingFerdigbehandletInnslag(beslutter)

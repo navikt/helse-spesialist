@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.domain.legacy
 
-import no.nav.helse.modell.saksbehandler.SaksbehandlerDto
 import no.nav.helse.modell.saksbehandler.SaksbehandlerObserver
 import no.nav.helse.modell.saksbehandler.handlinger.Annullering
 import no.nav.helse.modell.saksbehandler.handlinger.EndrePåVent
@@ -11,6 +10,8 @@ import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtArbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtInntektOgRefusjon
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinje
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlag
+import no.nav.helse.spesialist.domain.Saksbehandler
+import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import java.util.UUID
 
 class LegacySaksbehandler(
@@ -105,23 +106,15 @@ class LegacySaksbehandler(
     }
 
     companion object {
-        fun SaksbehandlerDto.gjenopprett(): LegacySaksbehandler =
-            LegacySaksbehandler(
-                epostadresse = epostadresse,
-                oid = oid,
+        fun LegacySaksbehandler.tilSaksbehandler(): Saksbehandler =
+            Saksbehandler(
+                id = SaksbehandlerOid(oid),
                 navn = navn,
+                epost = epostadresse,
                 ident = ident,
             )
 
-        fun LegacySaksbehandler.toDto(): SaksbehandlerDto =
-            SaksbehandlerDto(
-                epostadresse = epostadresse,
-                oid = oid,
-                navn = navn,
-                ident = ident,
-            )
-
-        fun no.nav.helse.spesialist.domain.Saksbehandler.tilLegacy(): LegacySaksbehandler =
+        fun Saksbehandler.tilLegacy(): LegacySaksbehandler =
             LegacySaksbehandler(
                 epostadresse = epost,
                 oid = id().value,

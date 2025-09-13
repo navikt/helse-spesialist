@@ -6,7 +6,6 @@ import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.SessionContext
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
-import no.nav.helse.modell.saksbehandler.SaksbehandlerDto
 import no.nav.helse.spesialist.api.graphql.ContextValues
 import no.nav.helse.spesialist.api.graphql.byggRespons
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
@@ -52,7 +51,7 @@ class StansAutomatiskBehandlingMutationHandler(
 
         val innslag =
             Historikkinnslag.automatiskBehandlingStansetAvSaksbehandler(
-                saksbehandler = saksbehandler.toDto(),
+                saksbehandler = saksbehandler.tilSaksbehandler(),
                 dialogId = dialog.id(),
                 begrunnelse = begrunnelse,
             )
@@ -70,7 +69,7 @@ class StansAutomatiskBehandlingMutationHandler(
 
         val innslag =
             Historikkinnslag.opphevStansAvSaksbehandler(
-                saksbehandler = saksbehandler.toDto(),
+                saksbehandler = saksbehandler.tilSaksbehandler(),
                 dialogId = dialog.id(),
                 begrunnelse = begrunnelse,
             )
@@ -78,12 +77,4 @@ class StansAutomatiskBehandlingMutationHandler(
     }
 
     private fun OppgaveDao.oppgaveId(fødselsnummer: String) = this.finnOppgaveId(fødselsnummer) ?: this.finnOppgaveIdUansettStatus(fødselsnummer)
-
-    private fun SaksbehandlerFraApi.toDto(): SaksbehandlerDto =
-        SaksbehandlerDto(
-            epostadresse = this.epost,
-            oid = this.oid,
-            navn = this.navn,
-            ident = this.ident,
-        )
 }
