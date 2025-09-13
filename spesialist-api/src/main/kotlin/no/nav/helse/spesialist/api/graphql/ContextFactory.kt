@@ -8,7 +8,7 @@ import io.ktor.server.auth.principal
 import io.ktor.server.request.ApplicationRequest
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGSGRUPPER
-import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
+import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import org.slf4j.Logger
@@ -23,7 +23,7 @@ enum class ContextValues {
 }
 
 class ContextFactory(
-    private val tilgangsgrupper: Tilgangsgrupper,
+    private val tilgangsgruppeUuider: TilgangsgruppeUuider,
 ) : KtorGraphQLContextFactory() {
     override suspend fun generateContext(request: ApplicationRequest): GraphQLContext {
         val jwt =
@@ -36,7 +36,7 @@ class ContextFactory(
 
         return mapOf(
             TILGANGSGRUPPER to
-                this.tilgangsgrupper.grupperFor(
+                tilgangsgruppeUuider.grupperFor(
                     jwt
                         .getClaim("groups")
                         ?.asList(String::class.java)

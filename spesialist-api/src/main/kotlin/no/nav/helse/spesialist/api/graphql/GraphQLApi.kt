@@ -60,7 +60,7 @@ import no.nav.helse.spesialist.api.snapshot.SnapshotService
 import no.nav.helse.spesialist.api.websockets.webSocketsApi
 import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.application.Snapshothenter
-import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
+import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -68,7 +68,7 @@ import java.time.Duration
 fun kobleOppApi(
     ktorApplication: Application,
     apiModuleConfiguration: ApiModule.Configuration,
-    tilgangsgrupper: Tilgangsgrupper,
+    tilgangsgruppeUuider: TilgangsgruppeUuider,
     spesialistSchema: SpesialistSchema,
 ) {
     ktorApplication.installPlugins()
@@ -80,7 +80,7 @@ fun kobleOppApi(
             }
             server {
                 requestParser = KtorGraphQLRequestParser(objectMapper)
-                contextFactory = ContextFactory(tilgangsgrupper = tilgangsgrupper)
+                contextFactory = ContextFactory(tilgangsgruppeUuider = tilgangsgruppeUuider)
             }
             schema(spesialistSchema::setup)
         }

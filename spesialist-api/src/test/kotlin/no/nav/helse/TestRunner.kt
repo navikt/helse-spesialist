@@ -29,8 +29,8 @@ import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.testfixtures.lagSaksbehandler
 import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.application.Snapshothenter
-import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
-import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgrupper
+import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
+import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgruppeUuider
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -50,7 +50,7 @@ object TestRunner {
         tokenEndpoint = mockOAuth2Server.tokenEndpointUrl(issuerId).toString(),
     )
 
-    private val tilgangsgrupper = randomTilgangsgrupper()
+    private val tilgangsgruppeUuider = randomTilgangsgruppeUuider()
 
     private fun token(saksbehandler: Saksbehandler, tilgangsgrupper: Set<Tilgangsgruppe>): String =
         mockOAuth2Server.issueToken(
@@ -62,7 +62,7 @@ object TestRunner {
                 "preferred_username" to saksbehandler.epost,
                 "oid" to saksbehandler.id().value.toString(),
                 "name" to saksbehandler.navn,
-                "groups" to this.tilgangsgrupper.uuiderFor(tilgangsgrupper).map { it.toString() }
+                "groups" to tilgangsgruppeUuider.uuiderFor(tilgangsgrupper).map { it.toString() }
             )
         ).serialize()
 
@@ -85,7 +85,7 @@ object TestRunner {
             behandlingstatistikk = mockk(relaxed = true),
             snapshothenter = mockk(relaxed = true),
             reservasjonshenter = mockk(relaxed = true),
-            tilgangsgrupper = this.tilgangsgrupper,
+            tilgangsgruppeUuider = tilgangsgruppeUuider,
             meldingPubliserer = mockk(relaxed = true),
         )
         testApplication {
@@ -107,7 +107,7 @@ object TestRunner {
                     )
                 kobleOppApi(
                     this, apiModuleConfiguration = configuration,
-                    tilgangsgrupper = avhengigheter.tilgangsgrupper,
+                    tilgangsgruppeUuider = avhengigheter.tilgangsgruppeUuider,
                     spesialistSchema = spesialistSchema
                 )
             }
@@ -142,7 +142,7 @@ object TestRunner {
         val behandlingstatistikk: IBehandlingsstatistikkService,
         val snapshothenter: Snapshothenter,
         val reservasjonshenter: Reservasjonshenter,
-        val tilgangsgrupper: Tilgangsgrupper,
+        val tilgangsgruppeUuider: TilgangsgruppeUuider,
         val meldingPubliserer: MeldingPubliserer,
     )
 }

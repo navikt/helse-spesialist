@@ -1,10 +1,10 @@
 package no.nav.helse.spesialist.client.entraid
 
-import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
+import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
 
 class ClientEntraIDModule(
     configuration: Configuration,
-    tilgangsgrupper: Tilgangsgrupper,
+    tilgangsgruppeUuider: TilgangsgruppeUuider,
 ) {
     data class Configuration(
         val clientId: String,
@@ -23,7 +23,7 @@ class ClientEntraIDModule(
     val tilgangsgruppehenter =
         MsGraphTilgangsgruppehenter(
             accessTokenGenerator = accessTokenGenerator,
-            tilgangsgrupper = tilgangsgrupper,
+            tilgangsgruppeUuider = tilgangsgruppeUuider,
             msGraphUrl = configuration.msGraphUrl,
         )
 }

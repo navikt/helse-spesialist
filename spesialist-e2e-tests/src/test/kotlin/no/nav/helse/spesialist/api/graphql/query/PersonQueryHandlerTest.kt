@@ -26,6 +26,7 @@ import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagDnummer
+import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spleis.graphql.enums.GraphQLPeriodetilstand
 import no.nav.helse.spleis.graphql.hentsnapshot.GraphQLBeregnetPeriode
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -133,7 +134,10 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         opprettVedtaksperiode(opprettPerson(adressebeskyttelse = Adressebeskyttelse.Fortrolig))
 
         val logglytter = Logglytter()
-        val body = runQuery("""{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""", kode7Saksbehandlergruppe)
+        val body = runQuery(
+            query = """{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""",
+            tilgangsgruppe = Tilgangsgruppe.KODE7,
+        )
 
         assertEquals(AKTØRID, body["data"]["person"]["aktorId"].asText())
         logglytter.assertBleLogget("suid=${SAKSBEHANDLER.ident} duid=$FØDSELSNUMMER", Level.INFO)
@@ -159,7 +163,10 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         opprettVedtaksperiode(opprettPerson())
 
         val logglytter = Logglytter()
-        val body = runQuery("""{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""", skjermedePersonerGruppeId)
+        val body = runQuery(
+            query = """{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""",
+            tilgangsgruppe = Tilgangsgruppe.SKJERMEDE,
+        )
 
         assertEquals(AKTØRID, body["data"]["person"]["aktorId"].asText())
         logglytter.assertBleLogget("suid=${SAKSBEHANDLER.ident} duid=$FØDSELSNUMMER operation=PersonQuery", Level.INFO)
@@ -346,7 +353,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotGenerasjon))
         mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
 
-        val body = runPersonQuery(null)
+        val body = runPersonQuery()
 
         val hendelse = body["data"]["person"]["arbeidsgivere"].first()["generasjoner"].first()["perioder"].first()["hendelser"].first()
         assertNotNull(hendelse)
@@ -376,7 +383,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         val arbeidsgiver = opprettSnapshotArbeidsgiver(ORGANISASJONSNUMMER, listOf(snapshotGenerasjon))
         mockSnapshot(arbeidsgivere = listOf(arbeidsgiver))
 
-        val body = runPersonQuery(null)
+        val body = runPersonQuery()
 
         val avslag = body["data"]["person"]["arbeidsgivere"].first()["generasjoner"].first()["perioder"].first()["avslag"].first()
         assertNotNull(avslag)
@@ -407,7 +414,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         assertEquals(objectMapper.convertValue<Set<ObjectNode>>(forventedeHandlinger), periode["handlinger"].toSet())
     }
 
-    private fun runPersonQuery(group: UUID? = null) =
+    private fun runPersonQuery() =
         runQuery(
             """
             { 
@@ -461,7 +468,6 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
                 } 
             }
         """,
-            group,
         )
 
     private fun JsonNode.plukkUtPeriodeMed(vedtaksperiodeId: UUID): PersonQueryTestPeriode {

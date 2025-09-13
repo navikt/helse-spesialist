@@ -19,8 +19,8 @@ import io.ktor.http.path
 import io.ktor.serialization.jackson.JacksonConverter
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.spesialist.application.AccessTokenGenerator
+import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
-import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.slf4j.LoggerFactory
@@ -28,7 +28,7 @@ import java.util.UUID
 
 class MsGraphTilgangsgruppehenter(
     private val accessTokenGenerator: AccessTokenGenerator,
-    private val tilgangsgrupper: Tilgangsgrupper,
+    private val tilgangsgruppeUuider: TilgangsgruppeUuider,
     private val msGraphUrl: String,
 ) : Tilgangsgruppehenter {
     private val logg = LoggerFactory.getLogger(MsGraphTilgangsgruppehenter::class.java)
@@ -60,7 +60,7 @@ class MsGraphTilgangsgruppehenter(
                         bearerAuth(accessTokenGenerator.hentAccessToken("https://graph.microsoft.com/.default"))
                         accept(ContentType.Application.Json)
                         contentType(ContentType.Application.Json)
-                        setBody(mapOf("groupIds" to tilgangsgrupper.alleUuider().toList().map { it.toString() }))
+                        setBody(mapOf("groupIds" to tilgangsgruppeUuider.uuiderFor(Tilgangsgruppe.entries).map { it.toString() }))
                     }.bodyAsText()
             }
 
@@ -70,6 +70,6 @@ class MsGraphTilgangsgruppehenter(
                 .map(JsonNode::asText)
                 .map(UUID::fromString)
         logg.debug("Hentet ${grupper.size} grupper fra MS")
-        return tilgangsgrupper.grupperFor(grupper.toSet())
+        return tilgangsgruppeUuider.grupperFor(grupper.toSet())
     }
 }

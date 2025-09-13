@@ -17,12 +17,12 @@ import no.nav.helse.spesialist.api.graphql.kobleOppApi
 import no.nav.helse.spesialist.api.graphql.lagSchemaMedResolversOgHandlers
 import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.application.Snapshothenter
+import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
-import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
 
 class ApiModule(
     private val configuration: Configuration,
-    private val tilgangsgrupper: Tilgangsgrupper,
+    private val tilgangsgruppeUuider: TilgangsgruppeUuider,
     daos: Daos,
     meldingPubliserer: MeldingPubliserer,
     tilgangsgruppehenter: Tilgangsgruppehenter,
@@ -101,7 +101,7 @@ class ApiModule(
         kobleOppApi(
             ktorApplication = application,
             apiModuleConfiguration = configuration,
-            tilgangsgrupper = tilgangsgrupper,
+            tilgangsgruppeUuider = tilgangsgruppeUuider,
             spesialistSchema = spesialistSchema,
         )
     }

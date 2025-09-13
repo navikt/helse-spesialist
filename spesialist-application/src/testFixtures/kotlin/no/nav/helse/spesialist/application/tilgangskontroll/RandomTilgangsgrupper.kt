@@ -2,9 +2,9 @@ package no.nav.helse.spesialist.application.tilgangskontroll
 
 import java.util.UUID
 
-fun randomTilgangsgrupper(): Tilgangsgrupper = Tilgangsgrupper(
-    kode7GruppeId = UUID.randomUUID(),
-    beslutterGruppeId = UUID.randomUUID(),
-    skjermedePersonerGruppeId = UUID.randomUUID(),
-    stikkprøveGruppeId = UUID.randomUUID()
+fun randomTilgangsgruppeUuider(): TilgangsgruppeUuider = TilgangsgruppeUuider(
+    kode7GruppeUuid = UUID.randomUUID(),
+    beslutterGruppeUuid = UUID.randomUUID(),
+    skjermedePersonerGruppeUuid = UUID.randomUUID(),
+    stikkprøveGruppeUuid = UUID.randomUUID()
 )

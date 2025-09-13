@@ -7,7 +7,7 @@ import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.rapids_rivers.NaisEndpoints
 import no.nav.helse.rapids_rivers.ktorApplication
 import no.nav.helse.spesialist.api.testfixtures.ApiModuleIntegrationTestFixture
-import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgrupper
+import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgruppeUuider
 import no.nav.helse.spesialist.bootstrap.Configuration
 import no.nav.helse.spesialist.bootstrap.RapidApp
 import no.nav.helse.spesialist.client.entraid.testfixtures.ClientEntraIDModuleIntegrationTestFixture
@@ -27,8 +27,8 @@ object E2ETestApplikasjon {
     }
 
     private val mockOAuth2Server = MockOAuth2Server().also { it.start() }
-    val tilgangsgrupper = randomTilgangsgrupper()
-    val apiModuleIntegrationTestFixture = ApiModuleIntegrationTestFixture(mockOAuth2Server, tilgangsgrupper)
+    val tilgangsgruppeUuider = randomTilgangsgruppeUuider()
+    val apiModuleIntegrationTestFixture = ApiModuleIntegrationTestFixture(mockOAuth2Server, tilgangsgruppeUuider)
     private val rapidApp = RapidApp()
     private val modules = rapidApp.start(
         configuration = Configuration(
@@ -39,7 +39,7 @@ object E2ETestApplikasjon {
             db = DBTestFixture.database.dbModuleConfiguration,
             kafka = KafkaModuleTestRapidTestFixture.moduleConfiguration,
             versjonAvKode = "versjon_1",
-            tilgangsgrupper = tilgangsgrupper,
+            tilgangsgruppeUuider = tilgangsgruppeUuider,
             environmentToggles = object : EnvironmentToggles {
                 override val kanBeslutteEgneSaker = false
                 override val kanGodkjenneUtenBesluttertilgang = false

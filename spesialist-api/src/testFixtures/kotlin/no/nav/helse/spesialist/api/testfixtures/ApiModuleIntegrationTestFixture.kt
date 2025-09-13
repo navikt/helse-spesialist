@@ -7,7 +7,7 @@ import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
 import no.nav.helse.spesialist.api.ApiModule
-import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
+import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.security.mock.oauth2.MockOAuth2Server
@@ -15,7 +15,7 @@ import java.util.UUID
 
 class ApiModuleIntegrationTestFixture(
     private val mockOAuth2Server: MockOAuth2Server = MockOAuth2Server().also(MockOAuth2Server::start),
-    private val tilgangsgrupper: Tilgangsgrupper,
+    private val tilgangsgruppeUuider: TilgangsgruppeUuider,
 ) {
     val token: String =
         mockOAuth2Server.issueToken(
@@ -43,7 +43,7 @@ class ApiModuleIntegrationTestFixture(
                 "preferred_username" to saksbehandler.epost,
                 "oid" to saksbehandler.id().value.toString(),
                 "name" to saksbehandler.navn,
-                "groups" to this.tilgangsgrupper.uuiderFor(tilgangsgrupper).map { it.toString() }
+                "groups" to tilgangsgruppeUuider.uuiderFor(tilgangsgrupper).map { it.toString() }
             )
     ).serialize()
 
