@@ -10,48 +10,51 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.EnumSource
 import org.junit.jupiter.params.provider.MethodSource
 import java.util.UUID
 import java.util.stream.Stream
 
 class OppgaveTilgangskontrollTest {
-    @ParameterizedTest(name = "egenskaper={0}")
-    @MethodSource("oppgaveKombinasjonerIngenHarTilgangTil")
-    fun `saksbehandler har ikke tilgang til oppgave selv med alle tilganger`(egenskaper: Set<Egenskap>) {
+    @ParameterizedTest(name = "egenskap={0}")
+    @EnumSource(value = Egenskap::class, names = ["STRENGT_FORTROLIG_ADRESSE"])
+    fun `saksbehandler har ikke tilgang til oppgaveegenskap selv med alle tilgangsgrupper`(egenskap: Egenskap) {
         assertFalse(
-            harTilgangTilOppgaveMedEgenskaperGittEksplisitteGrupper(
-                egenskaper = egenskaper,
+            Oppgave.harTilgangTilEgenskap(
+                egenskap = egenskap,
                 saksbehandler = lagSaksbehandler(),
                 saksbehandlerTilgangsgrupper = Tilgangsgruppe.entries.toSet()
             )
         )
     }
 
-    @ParameterizedTest(name = "egenskaper={0}, grupper={1}")
-    @MethodSource("oppgaveKombinasjonerSomGirTilgang")
-    fun `saksbehandler med visse grupper har tilgang til visse oppgaver`(
-        egenskaper: Set<Egenskap>,
+    @ParameterizedTest(name = "egenskap={0}, ident={1}, grupper={2}")
+    @MethodSource("kombinasjonerSomGirTilgang")
+    fun `saksbehandler har tilgang til oppgaveegenskap`(
+        egenskap: Egenskap,
+        ident: String,
         grupper: Set<Tilgangsgruppe>
     ) {
         assertTrue(
-            harTilgangTilOppgaveMedEgenskaperGittEksplisitteGrupper(
-                egenskaper = egenskaper,
-                saksbehandler = lagSaksbehandler(),
+            Oppgave.harTilgangTilEgenskap(
+                egenskap = egenskap,
+                saksbehandler = lagSaksbehandler(ident = ident),
                 saksbehandlerTilgangsgrupper = grupper
             )
         )
     }
 
-    @ParameterizedTest(name = "egenskaper={0}, grupper={1}")
-    @MethodSource("oppgaveKombinasjonerSomIkkeGirTilgang")
-    fun `saksbehandler med visse grupper har ikke tilgang til visse oppgaver`(
-        egenskaper: Set<Egenskap>,
+    @ParameterizedTest(name = "egenskap={0}, ident={1}, grupper={2}")
+    @MethodSource("kombinasjonerSomIkkeGirTilgang")
+    fun `saksbehandler har ikke tilgang til oppgaveegenskap`(
+        egenskap: Egenskap,
+        ident: String,
         grupper: Set<Tilgangsgruppe>
     ) {
         assertFalse(
-            harTilgangTilOppgaveMedEgenskaperGittEksplisitteGrupper(
-                egenskaper = egenskaper,
-                saksbehandler = lagSaksbehandler(),
+            Oppgave.harTilgangTilEgenskap(
+                egenskap = egenskap,
+                saksbehandler = lagSaksbehandler(ident = ident),
                 saksbehandlerTilgangsgrupper = grupper
             )
         )
@@ -59,86 +62,94 @@ class OppgaveTilgangskontrollTest {
 
     companion object {
         @JvmStatic
-        private fun oppgaveKombinasjonerIngenHarTilgangTil(): Stream<Arguments> = Stream.of(
+        private fun kombinasjonerSomGirTilgang(): Stream<Arguments> = Stream.of(
             Arguments.of(
-                setOf(Egenskap.STRENGT_FORTROLIG_ADRESSE)
-            )
-        )
-
-        @JvmStatic
-        private fun oppgaveKombinasjonerSomGirTilgang(): Stream<Arguments> = Stream.of(
-            Arguments.of(
-                emptySet<Egenskap>(),
-                emptySet<Tilgangsgruppe>()
-            ),
-            Arguments.of(
-                setOf(Egenskap.FORTROLIG_ADRESSE),
+                Egenskap.FORTROLIG_ADRESSE,
+                "A123456",
                 setOf(Tilgangsgruppe.KODE7)
             ),
             Arguments.of(
-                setOf(Egenskap.EGEN_ANSATT),
+                Egenskap.EGEN_ANSATT,
+                "A123456",
                 setOf(Tilgangsgruppe.SKJERMEDE)
             ),
             Arguments.of(
-                setOf(Egenskap.BESLUTTER),
+                Egenskap.BESLUTTER,
+                "A123456",
                 setOf(Tilgangsgruppe.BESLUTTER)
             ),
             Arguments.of(
-                setOf(Egenskap.STIKKPRØVE),
+                Egenskap.STIKKPRØVE,
+                "A123456",
                 setOf(Tilgangsgruppe.STIKKPRØVE)
+            ),
+            Arguments.of(
+                Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE,
+                "A123456",
+                setOf(Tilgangsgruppe.TBD)
+            ),
+            Arguments.of(
+                Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE,
+                "G155258", // En coach
+                emptySet<Tilgangsgruppe>()
             ),
         )
 
         @JvmStatic
-        private fun oppgaveKombinasjonerSomIkkeGirTilgang(): Stream<Arguments> =
+        private fun kombinasjonerSomIkkeGirTilgang(): Stream<Arguments> =
             Stream.of(
                 Arguments.of(
-                    setOf(Egenskap.FORTROLIG_ADRESSE),
+                    Egenskap.FORTROLIG_ADRESSE,
+                    "A123456",
                     emptySet<Tilgangsgruppe>()
                 ),
                 Arguments.of(
-                    setOf(Egenskap.EGEN_ANSATT),
+                    Egenskap.EGEN_ANSATT,
+                    "A123456",
                     emptySet<Tilgangsgruppe>()
                 ),
                 Arguments.of(
-                    setOf(Egenskap.BESLUTTER),
+                    Egenskap.BESLUTTER,
+                    "A123456",
                     emptySet<Tilgangsgruppe>()
                 ),
                 Arguments.of(
-                    setOf(Egenskap.STIKKPRØVE),
+                    Egenskap.STIKKPRØVE,
+                    "A123456",
                     emptySet<Tilgangsgruppe>()
                 ),
                 Arguments.of(
-                    setOf(Egenskap.FORTROLIG_ADRESSE),
+                    Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE,
+                    "A123456",
+                    emptySet<Tilgangsgruppe>()
+                ),
+                Arguments.of(
+                    Egenskap.FORTROLIG_ADRESSE,
+                    "A123456",
                     (Tilgangsgruppe.entries - Tilgangsgruppe.KODE7).toSet()
                 ),
                 Arguments.of(
-                    setOf(Egenskap.EGEN_ANSATT),
+                    Egenskap.EGEN_ANSATT,
+                    "A123456",
                     (Tilgangsgruppe.entries - Tilgangsgruppe.SKJERMEDE).toSet()
                 ),
                 Arguments.of(
-                    setOf(Egenskap.BESLUTTER),
+                    Egenskap.BESLUTTER,
+                    "A123456",
                     (Tilgangsgruppe.entries - Tilgangsgruppe.BESLUTTER).toSet()
                 ),
                 Arguments.of(
-                    setOf(Egenskap.STIKKPRØVE),
+                    Egenskap.STIKKPRØVE,
+                    "A123456",
                     (Tilgangsgruppe.entries - Tilgangsgruppe.STIKKPRØVE).toSet()
+                ),
+                Arguments.of(
+                    Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE,
+                    "A123456",
+                    (Tilgangsgruppe.entries - Tilgangsgruppe.TBD).toSet()
                 ),
             )
     }
-
-    private fun harTilgangTilOppgaveMedEgenskaperGittEksplisitteGrupper(
-        egenskaper: Set<Egenskap>,
-        saksbehandler: Saksbehandler = lagSaksbehandler(),
-        saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe>
-    ): Boolean =
-        egenskaper.all {
-            Oppgave.harTilgangTilEgenskap(
-                egenskap = it,
-                saksbehandler = saksbehandler,
-                saksbehandlerTilgangsgrupper = saksbehandlerTilgangsgrupper
-            )
-        }
 
     private fun lagSaksbehandler(ident: String = "A123456"): Saksbehandler {
         val navn = lagFornavn() + " " + lagEtternavn()

@@ -10,12 +10,14 @@ import no.nav.helse.modell.oppgave.Egenskap.FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Egenskap.GOSYS
 import no.nav.helse.modell.oppgave.Egenskap.PÅ_VENT
 import no.nav.helse.modell.oppgave.Egenskap.RETUR
+import no.nav.helse.modell.oppgave.Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE
 import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.STRENGT_FORTROLIG_ADRESSE
 import no.nav.helse.modell.oppgave.Egenskap.TILBAKEDATERT
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
+import no.nav.helse.spesialist.domain.tilgangskontroll.SaksbehandlerIdentGrupper
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -445,6 +447,9 @@ class Oppgave private constructor(
                 FORTROLIG_ADRESSE -> Tilgangsgruppe.KODE7 in saksbehandlerTilgangsgrupper
                 BESLUTTER -> Tilgangsgruppe.BESLUTTER in saksbehandlerTilgangsgrupper
                 STIKKPRØVE -> Tilgangsgruppe.STIKKPRØVE in saksbehandlerTilgangsgrupper
+                SELVSTENDIG_NÆRINGSDRIVENDE ->
+                    Tilgangsgruppe.TBD in saksbehandlerTilgangsgrupper ||
+                        SaksbehandlerIdentGrupper.COACHER.inneholder(saksbehandler.ident)
                 else -> true
             }
     }

@@ -84,6 +84,7 @@ fun main() {
                         beslutterGruppeUuid = env.getUUID("BESLUTTER_SAKSBEHANDLER_GROUP"),
                         skjermedePersonerGruppeUuid = env.getUUID("SKJERMEDE_PERSONER_GROUP"),
                         stikkprøveGruppeUuid = env.getUUID("SAKSBEHANDLERE_MED_TILGANG_TIL_STIKKPROVER"),
+                        tbdGruppeUuid = env.getUUID("TILGANGSGRUPPE_UUID_TBD"),
                     ),
                 environmentToggles = EnvironmentTogglesImpl(env),
                 stikkprøver = Stikkprøver.fraEnv(env),

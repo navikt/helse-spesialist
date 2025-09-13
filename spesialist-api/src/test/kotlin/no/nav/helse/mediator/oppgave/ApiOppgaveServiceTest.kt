@@ -195,7 +195,8 @@ internal class ApiOppgaveServiceTest {
                     Egenskap.STRENGT_FORTROLIG_ADRESSE,
                     Egenskap.EGEN_ANSATT,
                     Egenskap.BESLUTTER,
-                    Egenskap.STIKKPRØVE
+                    Egenskap.STIKKPRØVE,
+                    Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE,
                 ).map { it.name },
                 saksbehandlerOid = SAKSBEHANDLEROID,
                 offset = 0,
@@ -222,7 +223,8 @@ internal class ApiOppgaveServiceTest {
                         Egenskap.STRENGT_FORTROLIG_ADRESSE,
                         Egenskap.EGEN_ANSATT,
                         Egenskap.BESLUTTER,
-                        Egenskap.STIKKPRØVE
+                        Egenskap.STIKKPRØVE,
+                        Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE,
                     ).map { it.name } +
                             Egenskap.entries
                                 .filter { it.kategori == Egenskap.Kategori.Ukategorisert }
@@ -260,7 +262,8 @@ internal class ApiOppgaveServiceTest {
                     Egenskap.EGEN_ANSATT,
                     Egenskap.BESLUTTER,
                     Egenskap.STIKKPRØVE,
-                    Egenskap.PÅ_VENT
+                    Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE,
+                    Egenskap.PÅ_VENT,
                 ).map { it.name },
                 SAKSBEHANDLEROID,
                 0,
