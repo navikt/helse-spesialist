@@ -14,7 +14,8 @@ import no.nav.security.mock.oauth2.MockOAuth2Server
 fun main() {
     val rapidApp = RapidApp()
     val mockOAuth2Server = MockOAuth2Server().also { it.start() }
-    val apiModuleIntegrationTestFixture = ApiModuleIntegrationTestFixture(mockOAuth2Server)
+    val tilgangsgrupper = randomTilgangsgrupper()
+    val apiModuleIntegrationTestFixture = ApiModuleIntegrationTestFixture(mockOAuth2Server, tilgangsgrupper)
     rapidApp.start(
         configuration = Configuration(
             api = apiModuleIntegrationTestFixture.apiModuleConfiguration,
@@ -24,7 +25,7 @@ fun main() {
             db = DBTestFixture.database.dbModuleConfiguration,
             kafka = KafkaModuleIntegrationTestFixture.moduleConfiguration,
             versjonAvKode = "versjon_1",
-            tilgangsgrupper = randomTilgangsgrupper(),
+            tilgangsgrupper = tilgangsgrupper,
             environmentToggles = object : EnvironmentToggles {
                 override val kanBeslutteEgneSaker = false
                 override val kanGodkjenneUtenBesluttertilgang = false

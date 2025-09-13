@@ -135,7 +135,6 @@ class TilgangsstyringE2ETest : AbstractE2ETest() {
                 navn = "epost",
                 epost = "navn",
                 ident = "A123456",
-                grupper = emptyList(),
                 tilgangsgrupper = emptySet()
             )
         saksbehandlertilgangTilSkjermede(harTilgang = false)

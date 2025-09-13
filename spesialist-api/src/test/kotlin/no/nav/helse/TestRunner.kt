@@ -31,6 +31,7 @@ import no.nav.helse.spesialist.api.testfixtures.lagSaksbehandlerFraApi
 import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
+import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgrupper
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.intellij.lang.annotations.Language
 
@@ -48,6 +49,8 @@ object TestRunner {
         tokenEndpoint = mockOAuth2Server.tokenEndpointUrl(issuerId).toString(),
     )
 
+    private val tilgangsgrupper = randomTilgangsgrupper()
+
     private fun token(saksbehandlerFraApi: SaksbehandlerFraApi): String = mockOAuth2Server.issueToken(
         issuerId = issuerId,
         audience = clientId,
@@ -57,7 +60,7 @@ object TestRunner {
             "preferred_username" to saksbehandlerFraApi.epost,
             "oid" to saksbehandlerFraApi.oid.toString(),
             "name" to saksbehandlerFraApi.navn,
-            "groups" to saksbehandlerFraApi.grupper.map { it.toString() }.toTypedArray()
+            "groups" to tilgangsgrupper.uuiderFor(saksbehandlerFraApi.tilgangsgrupper).map { it.toString() }
         )
     ).serialize()
 
@@ -79,7 +82,7 @@ object TestRunner {
             behandlingstatistikk = mockk(relaxed = true),
             snapshothenter = mockk(relaxed = true),
             reservasjonshenter = mockk(relaxed = true),
-            tilgangsgrupper = mockk(relaxed = true),
+            tilgangsgrupper = tilgangsgrupper,
             meldingPubliserer = mockk(relaxed = true),
         )
         testApplication {

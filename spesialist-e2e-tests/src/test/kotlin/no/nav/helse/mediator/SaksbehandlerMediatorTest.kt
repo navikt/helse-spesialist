@@ -460,7 +460,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             navn = SAKSBEHANDLER_NAVN,
             epost = SAKSBEHANDLER_EPOST,
             ident = SAKSBEHANDLER_IDENT,
-            grupper = emptyList(),
             tilgangsgrupper = emptySet()
         )
 
@@ -492,7 +491,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             SAKSBEHANDLER_NAVN,
             SAKSBEHANDLER_EPOST,
             SAKSBEHANDLER_IDENT,
-            emptyList(),
             emptySet(),
         )
         sessionFactory.transactionalSessionScope { session ->
@@ -537,7 +535,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             SAKSBEHANDLER_NAVN,
             SAKSBEHANDLER_EPOST,
             SAKSBEHANDLER_IDENT,
-            emptyList(),
             emptySet(),
         )
         sessionFactory.transactionalSessionScope { session ->
@@ -583,7 +580,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             SAKSBEHANDLER_NAVN,
             SAKSBEHANDLER_EPOST,
             SAKSBEHANDLER_IDENT,
-            emptyList(),
             emptySet(),
         )
         val overstyring =
@@ -635,7 +631,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             SAKSBEHANDLER_NAVN,
             SAKSBEHANDLER_EPOST,
             SAKSBEHANDLER_IDENT,
-            emptyList(),
             emptySet(),
         )
         val overstyring =
@@ -687,7 +682,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             SAKSBEHANDLER_NAVN,
             SAKSBEHANDLER_EPOST,
             SAKSBEHANDLER_IDENT,
-            emptyList(),
             emptySet(),
         )
         sessionFactory.transactionalSessionScope { session ->
@@ -717,7 +711,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             lagSaksbehandlernavn(),
             lagTilfeldigSaksbehandlerepost(),
             lagSaksbehandlerident(),
-            emptyList(),
             emptySet(),
         )
         opprettSaksbehandler(beslutter.oid, beslutter.navn, beslutter.epost, beslutter.ident)
@@ -753,7 +746,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             SAKSBEHANDLER_NAVN,
             SAKSBEHANDLER_EPOST,
             SAKSBEHANDLER_IDENT,
-            emptyList(),
             emptySet(),
         )
         val definisjonRef = opprettVarseldefinisjon()
@@ -802,7 +794,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             SAKSBEHANDLER_NAVN,
             SAKSBEHANDLER_EPOST,
             SAKSBEHANDLER_IDENT,
-            emptyList(),
             emptySet(),
         )
         sessionFactory.transactionalSessionScope { session ->
@@ -1103,7 +1094,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             SAKSBEHANDLER_NAVN,
             SAKSBEHANDLER_EPOST,
             SAKSBEHANDLER_IDENT,
-            emptyList(),
             emptySet(),
         )
         sessionFactory.transactionalSessionScope { session ->

@@ -27,8 +27,8 @@ object E2ETestApplikasjon {
     }
 
     private val mockOAuth2Server = MockOAuth2Server().also { it.start() }
-    val apiModuleIntegrationTestFixture = ApiModuleIntegrationTestFixture(mockOAuth2Server)
     val tilgangsgrupper = randomTilgangsgrupper()
+    val apiModuleIntegrationTestFixture = ApiModuleIntegrationTestFixture(mockOAuth2Server, tilgangsgrupper)
     private val rapidApp = RapidApp()
     private val modules = rapidApp.start(
         configuration = Configuration(
