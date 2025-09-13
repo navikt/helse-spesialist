@@ -1,16 +1,11 @@
 package no.nav.helse.spesialist.domain.tilgangskontroll
 
-import java.util.UUID
-
 class SaksbehandlerTilganger(
-    private val gruppetilganger: List<UUID>,
-    private val kode7Saksbehandlergruppe: UUID,
-    private val beslutterSaksbehandlergruppe: UUID,
-    private val skjermedePersonerSaksbehandlergruppe: UUID,
+    private val tilgangsgrupper: Set<Tilgangsgruppe>,
 ) {
-    fun harTilgangTilKode7() = kode7Saksbehandlergruppe in gruppetilganger
+    fun harTilgangTilKode7() = Tilgangsgruppe.KODE7 in tilgangsgrupper
 
-    fun harTilgangTilBeslutterOppgaver() = beslutterSaksbehandlergruppe in gruppetilganger
+    fun harTilgangTilBeslutterOppgaver() = Tilgangsgruppe.BESLUTTER in tilgangsgrupper
 
-    fun harTilgangTilSkjermedePersoner() = skjermedePersonerSaksbehandlergruppe in gruppetilganger
+    fun harTilgangTilSkjermedePersoner() = Tilgangsgruppe.SKJERMEDE in tilgangsgrupper
 }

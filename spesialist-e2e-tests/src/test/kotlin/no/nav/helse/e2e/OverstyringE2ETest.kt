@@ -155,12 +155,7 @@ class OverstyringE2ETest : AbstractE2ETest() {
     }
 
     private val saksbehandlertilgangerIngenTilganger =
-        SaksbehandlerTilganger(
-            gruppetilganger = emptyList(),
-            kode7Saksbehandlergruppe = UUID.randomUUID(),
-            beslutterSaksbehandlergruppe = UUID.randomUUID(),
-            skjermedePersonerSaksbehandlergruppe = UUID.randomUUID(),
-        )
+        SaksbehandlerTilganger(emptySet())
 
     @Test
     fun `legger ved overstyringer i speil snapshot`() {

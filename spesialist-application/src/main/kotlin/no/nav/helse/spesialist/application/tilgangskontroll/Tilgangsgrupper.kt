@@ -21,9 +21,9 @@ class Tilgangsgrupper(
 
     fun alleUuider(): Set<UUID> = Tilgangsgruppe.entries.map(::uuidFor).toSet()
 
-    fun uuiderFor(grupper: Set<Tilgangsgruppe>) = grupper.map(::uuidFor).toSet()
+    fun uuiderFor(grupper: Collection<Tilgangsgruppe>) = grupper.map(::uuidFor).toSet()
 
-    fun grupperFor(uuider: Set<UUID>) =
+    fun grupperFor(uuider: Collection<UUID>) =
         Tilgangsgruppe.entries.associateBy { uuidFor(it) }.let { uuidMap ->
             uuider.mapNotNull { uuidMap[it] }.toSet()
         }

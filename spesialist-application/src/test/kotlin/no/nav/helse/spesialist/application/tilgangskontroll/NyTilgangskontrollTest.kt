@@ -123,12 +123,7 @@ class NyTilgangskontrollTest {
 
     private fun harTilgangTilPersonGittGrupper(fødselsnummer: String, grupper: Set<Tilgangsgruppe>) =
         tilgangskontroll.harTilgangTilPerson(
-            saksbehandlerTilganger = SaksbehandlerTilganger(
-                gruppetilganger = tilgangsgrupper.uuiderFor(grupper).toList(),
-                kode7Saksbehandlergruppe = tilgangsgrupper.uuidFor(Tilgangsgruppe.KODE7),
-                beslutterSaksbehandlergruppe = tilgangsgrupper.uuidFor(Tilgangsgruppe.BESLUTTER),
-                skjermedePersonerSaksbehandlergruppe = tilgangsgrupper.uuidFor(Tilgangsgruppe.SKJERMEDE),
-            ),
+            saksbehandlerTilganger = SaksbehandlerTilganger(grupper),
             fødselsnummer = fødselsnummer
         )
 

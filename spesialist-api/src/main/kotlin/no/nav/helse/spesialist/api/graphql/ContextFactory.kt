@@ -12,7 +12,6 @@ import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGER
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
 import no.nav.helse.spesialist.domain.tilgangskontroll.SaksbehandlerTilganger
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -34,13 +33,7 @@ class ContextFactory(
                 return emptyMap<Any, Any>().toGraphQLContext()
             }
         return mapOf(
-            TILGANGER to
-                SaksbehandlerTilganger(
-                    gruppetilganger = principal.getGrupper(),
-                    kode7Saksbehandlergruppe = tilgangsgrupper.uuidFor(Tilgangsgruppe.KODE7),
-                    beslutterSaksbehandlergruppe = tilgangsgrupper.uuidFor(Tilgangsgruppe.BESLUTTER),
-                    skjermedePersonerSaksbehandlergruppe = tilgangsgrupper.uuidFor(Tilgangsgruppe.SKJERMEDE),
-                ),
+            TILGANGER to SaksbehandlerTilganger(tilgangsgrupper.grupperFor(principal.getGrupper())),
             SAKSBEHANDLER to SaksbehandlerFraApi.fraOnBehalfOfToken(principal, tilgangsgrupper),
         ).toGraphQLContext()
     }
