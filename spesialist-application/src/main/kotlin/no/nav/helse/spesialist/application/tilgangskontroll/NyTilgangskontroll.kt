@@ -4,11 +4,17 @@ import no.nav.helse.db.api.EgenAnsattApiDao
 import no.nav.helse.db.api.PersonApiDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.domain.tilgangskontroll.SaksbehandlerTilganger
+import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 
 class NyTilgangskontroll(
     private val egenAnsattApiDao: EgenAnsattApiDao,
     private val personApiDao: PersonApiDao,
 ) {
+    fun harTilgangTilPerson(
+        tilgangsgrupper: Set<Tilgangsgruppe>,
+        fødselsnummer: String,
+    ): Boolean = harTilgangTilPerson(SaksbehandlerTilganger(tilgangsgrupper), fødselsnummer)
+
     fun harTilgangTilPerson(
         saksbehandlerTilganger: SaksbehandlerTilganger,
         fødselsnummer: String,

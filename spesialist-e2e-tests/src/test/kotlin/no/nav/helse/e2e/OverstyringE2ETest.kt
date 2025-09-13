@@ -8,8 +8,8 @@ import kotliquery.queryOf
 import kotliquery.sessionOf
 import no.nav.helse.TestRapidHelpers.siste
 import no.nav.helse.spesialist.api.Personhåndterer
+import no.nav.helse.spesialist.api.graphql.ContextValues
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
-import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGER
 import no.nav.helse.spesialist.api.graphql.query.PersonQuery
 import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdoverstyring
@@ -25,6 +25,7 @@ import no.nav.helse.spesialist.api.person.PersonService
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
 import no.nav.helse.spesialist.domain.tilgangskontroll.SaksbehandlerTilganger
+import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.util.januar
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -184,7 +185,7 @@ class OverstyringE2ETest : AbstractE2ETest() {
                 ident = "A123456",
                 tilgangsgrupper = emptySet()
             )
-        every { dataFetchingEnvironment.graphQlContext.get<SaksbehandlerTilganger>(TILGANGER) } returns saksbehandlertilgangerIngenTilganger
+        every { dataFetchingEnvironment.graphQlContext.get<Set<Tilgangsgruppe>>(ContextValues.TILGANGSGRUPPER) } returns emptySet()
         val nyUtbetalingId = UUID.randomUUID()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             harRisikovurdering = true,

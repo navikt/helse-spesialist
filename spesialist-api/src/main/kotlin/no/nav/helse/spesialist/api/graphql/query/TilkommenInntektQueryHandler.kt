@@ -6,7 +6,7 @@ import no.nav.helse.db.Daos
 import no.nav.helse.db.SessionContext
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand
-import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGER
+import no.nav.helse.spesialist.api.graphql.ContextValues
 import no.nav.helse.spesialist.api.graphql.schema.ApiDatoPeriode
 import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntekt
 import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektEndretEvent
@@ -17,7 +17,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektOpprettetEv
 import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektskilde
 import no.nav.helse.spesialist.application.logg.sikkerlogg
 import no.nav.helse.spesialist.application.tilgangskontroll.NyTilgangskontroll
-import no.nav.helse.spesialist.domain.tilgangskontroll.SaksbehandlerTilganger
+import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.domain.tilkommeninntekt.Endring
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektEndretEvent
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektEvent
@@ -35,29 +35,29 @@ class TilkommenInntektQueryHandler(
         aktorId: String,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<List<ApiTilkommenInntektskilde>> {
-        val tilganger = env.graphQlContext.get<SaksbehandlerTilganger>(TILGANGER)
+        val tilgangsgrupper = env.graphQlContext.get<Set<Tilgangsgruppe>>(ContextValues.TILGANGSGRUPPER)
         val fødselsnumre = daos.personApiDao.finnFødselsnumre(aktorId).toSet()
-        return tilkomneInntekterForFødselsnummer(fødselsnumre, tilganger)
+        return tilkomneInntekterForFødselsnummer(fødselsnumre, tilgangsgrupper)
     }
 
     override suspend fun tilkomneInntektskilderV2(
         fodselsnummer: String,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<List<ApiTilkommenInntektskilde>> {
-        val tilganger = env.graphQlContext.get<SaksbehandlerTilganger>(TILGANGER)
-        return tilkomneInntekterForFødselsnummer(setOf(fodselsnummer), tilganger)
+        val tilgangsgrupper = env.graphQlContext.get<Set<Tilgangsgruppe>>(ContextValues.TILGANGSGRUPPER)
+        return tilkomneInntekterForFødselsnummer(setOf(fodselsnummer), tilgangsgrupper)
     }
 
     private fun tilkomneInntekterForFødselsnummer(
         fødselsnumre: Set<String>,
-        tilganger: SaksbehandlerTilganger,
+        tilgangsgrupper: Set<Tilgangsgruppe>,
     ): DataFetcherResult<List<ApiTilkommenInntektskilde>> {
         fødselsnumre.forEach { fødselsnummer ->
             if (!NyTilgangskontroll(
                     egenAnsattApiDao = daos.egenAnsattApiDao,
                     personApiDao = daos.personApiDao,
                 ).harTilgangTilPerson(
-                    saksbehandlerTilganger = tilganger,
+                    tilgangsgrupper = tilgangsgrupper,
                     fødselsnummer = fødselsnummer,
                 )
             ) {

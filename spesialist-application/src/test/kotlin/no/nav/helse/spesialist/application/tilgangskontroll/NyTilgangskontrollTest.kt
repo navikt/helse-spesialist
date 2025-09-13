@@ -4,7 +4,6 @@ import no.nav.helse.db.api.EgenAnsattApiDao
 import no.nav.helse.db.api.PartialPersonApiDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
-import no.nav.helse.spesialist.domain.tilgangskontroll.SaksbehandlerTilganger
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -30,7 +29,7 @@ class NyTilgangskontrollTest {
         assertFalse(
             harTilgangTilPersonGittGrupper(
                 fødselsnummer = fødselsnummer,
-                grupper = Tilgangsgruppe.entries.toSet()
+                tilgangsgrupper = Tilgangsgruppe.entries.toSet()
             )
         )
     }
@@ -48,7 +47,7 @@ class NyTilgangskontrollTest {
         assertTrue(
             harTilgangTilPersonGittGrupper(
                 fødselsnummer = fødselsnummer,
-                grupper = grupper
+                tilgangsgrupper = grupper
             )
         )
     }
@@ -66,7 +65,7 @@ class NyTilgangskontrollTest {
         assertFalse(
             harTilgangTilPersonGittGrupper(
                 fødselsnummer = fødselsnummer,
-                grupper = grupper
+                tilgangsgrupper = grupper
             )
         )
     }
@@ -117,13 +116,11 @@ class NyTilgangskontrollTest {
                 (Tilgangsgruppe.entries - Tilgangsgruppe.SKJERMEDE).toSet()
             ),
         )
-
-        private val tilgangsgrupper = randomTilgangsgrupper()
     }
 
-    private fun harTilgangTilPersonGittGrupper(fødselsnummer: String, grupper: Set<Tilgangsgruppe>) =
+    private fun harTilgangTilPersonGittGrupper(fødselsnummer: String, tilgangsgrupper: Set<Tilgangsgruppe>) =
         tilgangskontroll.harTilgangTilPerson(
-            saksbehandlerTilganger = SaksbehandlerTilganger(grupper),
+            tilgangsgrupper = tilgangsgrupper,
             fødselsnummer = fødselsnummer
         )
 

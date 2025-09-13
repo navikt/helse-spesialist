@@ -7,14 +7,14 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.Personhåndterer
+import no.nav.helse.spesialist.api.graphql.ContextValues
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
-import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGER
 import no.nav.helse.spesialist.api.graphql.query.PersonQuery
 import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.api.person.PersonService
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
-import no.nav.helse.spesialist.domain.tilgangskontroll.SaksbehandlerTilganger
+import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -141,17 +141,13 @@ class TilgangsstyringE2ETest : AbstractE2ETest() {
     }
 
     private fun saksbehandlertilgangTilSkjermede(harTilgang: Boolean) {
-        every { dataFetchingEnvironment.graphQlContext.get<SaksbehandlerTilganger>(TILGANGER) } returns
-            mockk(relaxed = true) {
-                every { harTilgangTilSkjermedePersoner() } returns harTilgang
-            }
+        every { dataFetchingEnvironment.graphQlContext.get<Set<Tilgangsgruppe>>(ContextValues.TILGANGSGRUPPER) } returns
+                setOfNotNull(Tilgangsgruppe.SKJERMEDE.takeIf { harTilgang })
     }
 
     private fun saksbehandlertilgangTilKode7(@Suppress("SameParameterValue") harTilgang: Boolean) {
-        every { dataFetchingEnvironment.graphQlContext.get<SaksbehandlerTilganger>(TILGANGER) } returns
-            mockk(relaxed = true) {
-                every { harTilgangTilKode7() } returns harTilgang
-            }
+        every { dataFetchingEnvironment.graphQlContext.get<Set<Tilgangsgruppe>>(ContextValues.TILGANGSGRUPPER) } returns
+                setOfNotNull(Tilgangsgruppe.KODE7.takeIf { harTilgang })
     }
 
     private val dataFetchingEnvironment = mockk<DataFetchingEnvironment>(relaxed = true)

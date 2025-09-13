@@ -8,10 +8,9 @@ import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.principal
 import io.ktor.server.request.ApplicationRequest
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
-import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGER
+import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGSGRUPPER
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
-import no.nav.helse.spesialist.domain.tilgangskontroll.SaksbehandlerTilganger
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -19,7 +18,7 @@ import java.util.UUID
 private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
 enum class ContextValues {
-    TILGANGER,
+    TILGANGSGRUPPER,
     SAKSBEHANDLER,
 }
 
@@ -32,9 +31,10 @@ class ContextFactory(
                 sikkerlogg.error("Ingen access_token for graphql-kall")
                 return emptyMap<Any, Any>().toGraphQLContext()
             }
+        val tilgangsgrupper = tilgangsgrupper.grupperFor(principal.getGrupper())
         return mapOf(
-            TILGANGER to SaksbehandlerTilganger(tilgangsgrupper.grupperFor(principal.getGrupper())),
-            SAKSBEHANDLER to SaksbehandlerFraApi.fraOnBehalfOfToken(principal, tilgangsgrupper),
+            TILGANGSGRUPPER to tilgangsgrupper,
+            SAKSBEHANDLER to SaksbehandlerFraApi.fraOnBehalfOfToken(principal, this.tilgangsgrupper),
         ).toGraphQLContext()
     }
 }

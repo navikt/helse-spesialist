@@ -35,7 +35,7 @@ import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.application.Reservasjonshenter.ReservasjonDto
 import no.nav.helse.spesialist.application.snapshot.SnapshotPerson
 import no.nav.helse.spesialist.application.tilgangskontroll.NyTilgangskontroll
-import no.nav.helse.spesialist.domain.tilgangskontroll.SaksbehandlerTilganger
+import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.slf4j.LoggerFactory
 
 private sealed interface HentSnapshotResult {
@@ -83,7 +83,7 @@ class PersonService(
 
     override suspend fun hentPerson(
         fødselsnummer: String,
-        tilganger: SaksbehandlerTilganger,
+        tilgangsgrupper: Set<Tilgangsgruppe>,
     ): FetchPersonResult {
         val aktørId = personApiDao.finnAktørId(fødselsnummer)
         if (!personApiDao.harDataNødvendigForVisning(fødselsnummer)) {
@@ -98,7 +98,7 @@ class PersonService(
                 egenAnsattApiDao = egenAnsattApiDao,
                 personApiDao = personApiDao,
             ).harTilgangTilPerson(
-                saksbehandlerTilganger = tilganger,
+                tilgangsgrupper = tilgangsgrupper,
                 fødselsnummer = fødselsnummer,
             )
         ) {

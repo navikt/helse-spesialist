@@ -5,8 +5,8 @@ import graphql.GraphQLError
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import no.nav.helse.spesialist.api.auditLogTeller
+import no.nav.helse.spesialist.api.graphql.ContextValues
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
-import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGER
 import no.nav.helse.spesialist.api.graphql.byggFeilrespons
 import no.nav.helse.spesialist.api.graphql.byggRespons
 import no.nav.helse.spesialist.api.graphql.forbiddenError
@@ -16,7 +16,7 @@ import no.nav.helse.spesialist.api.graphql.personNotReadyError
 import no.nav.helse.spesialist.api.graphql.query.Inputvalidering.UgyldigInput
 import no.nav.helse.spesialist.api.graphql.schema.ApiPerson
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
-import no.nav.helse.spesialist.domain.tilgangskontroll.SaksbehandlerTilganger
+import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -56,7 +56,7 @@ private sealed interface Inputvalidering {
 interface PersonoppslagService {
     suspend fun hentPerson(
         fødselsnummer: String,
-        tilganger: SaksbehandlerTilganger,
+        tilgangsgrupper: Set<Tilgangsgruppe>,
     ): FetchPersonResult
 
     fun finnesPersonMedFødselsnummer(fødselsnummer: String): Boolean
@@ -107,9 +107,9 @@ class PersonQueryHandler(
             }
         sikkerLogg.info("Personoppslag på fnr=$fødselsnummer")
 
-        val tilganger = env.graphQlContext.get<SaksbehandlerTilganger>(TILGANGER)
+        val tilgangsgrupper = env.graphQlContext.get<Set<Tilgangsgruppe>>(ContextValues.TILGANGSGRUPPER)
 
-        return when (val result = personoppslagService.hentPerson(fødselsnummer, tilganger)) {
+        return when (val result = personoppslagService.hentPerson(fødselsnummer, tilgangsgrupper)) {
             is FetchPersonResult.Feil -> {
                 result.auditlogg(env, fødselsnummer)
                 result.tilGraphqlError(fødselsnummer)

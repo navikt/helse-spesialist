@@ -10,7 +10,7 @@ import graphql.schema.DataFetchingEnvironment
 import no.nav.helse.db.api.EgenAnsattApiDao
 import no.nav.helse.db.api.PersonApiDao
 import no.nav.helse.spesialist.api.Dokumenthåndterer
-import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGER
+import no.nav.helse.spesialist.api.graphql.ContextValues
 import no.nav.helse.spesialist.api.graphql.byggFeilrespons
 import no.nav.helse.spesialist.api.graphql.byggRespons
 import no.nav.helse.spesialist.api.graphql.forbiddenError
@@ -366,7 +366,7 @@ class DokumentQueryHandler(
             egenAnsattApiDao = egenAnsattApiDao,
             personApiDao = personApiDao,
         ).harTilgangTilPerson(
-            saksbehandlerTilganger = env.graphQlContext.get(TILGANGER),
+            tilgangsgrupper = env.graphQlContext.get(ContextValues.TILGANGSGRUPPER),
             fødselsnummer = fnr,
         )
 }
