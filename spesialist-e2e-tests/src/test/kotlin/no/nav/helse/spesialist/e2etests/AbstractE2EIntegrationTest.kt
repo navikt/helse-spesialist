@@ -3,7 +3,7 @@ package no.nav.helse.spesialist.e2etests
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import kotliquery.sessionOf
 import no.nav.helse.mediator.asUUID
-import no.nav.helse.spesialist.api.testfixtures.lagSaksbehandlerFraApi
+import no.nav.helse.spesialist.api.testfixtures.lagSaksbehandler
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.e2etests.Meldingsbygger.byggUtbetalingEndret
@@ -24,9 +24,9 @@ import java.util.UUID
 
 abstract class AbstractE2EIntegrationTest {
     private val testContext: TestContext = TestContext()
-    private var saksbehandler = lagSaksbehandlerFraApi()
+    private var saksbehandler = lagSaksbehandler()
     private var saksbehandlerTilgangsgrupper = mutableSetOf<Tilgangsgruppe>()
-    private var beslutter = lagSaksbehandlerFraApi()
+    private var beslutter = lagSaksbehandler()
 
     protected fun saksbehandlerHarTilgang(tilgangsgruppe: Tilgangsgruppe) {
         saksbehandlerTilgangsgrupper += tilgangsgruppe
@@ -163,7 +163,7 @@ abstract class AbstractE2EIntegrationTest {
         val oppgaveEvent = testRapid.meldingslogg(testContext.person.fødselsnummer)
             .findLast { it["@event_name"].asText() in listOf("oppgave_oppdatert", "oppgave_opprettet") }
             ?: error("Forventet å finne oppgave_opprettet/oppdatert i meldingslogg")
-        assertEquals(saksbehandler.oid, oppgaveEvent["saksbehandler"].asUUID())
+        assertEquals(saksbehandler.id().value, oppgaveEvent["saksbehandler"].asUUID())
     }
 
     protected fun assertBehandlingTilstand(expectedTilstand: String) {

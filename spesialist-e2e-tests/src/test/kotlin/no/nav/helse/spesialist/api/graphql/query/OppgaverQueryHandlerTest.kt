@@ -84,7 +84,7 @@ class OppgaverQueryHandlerTest : AbstractGraphQLApiTest() {
 
         verify(exactly = 1) {
             apiOppgaveService.oppgaver(
-                saksbehandlerFraApi = any(),
+                saksbehandler = any(),
                 tilgangsgrupper = any(),
                 offset = 14,
                 limit = 14,
@@ -125,7 +125,7 @@ class OppgaverQueryHandlerTest : AbstractGraphQLApiTest() {
 
         verify(exactly = 1) {
             apiOppgaveService.oppgaver(
-                saksbehandlerFraApi = any(),
+                saksbehandler = any(),
                 tilgangsgrupper = any(),
                 offset = 14,
                 limit = 14,
@@ -185,7 +185,7 @@ class OppgaverQueryHandlerTest : AbstractGraphQLApiTest() {
 
         verify(exactly = 1) {
             apiOppgaveService.behandledeOppgaver(
-                saksbehandlerFraApi = any(), offset = 14, limit = 14, fom = 10.juni(2025), tom = 13.juni(2025)
+                saksbehandler = any(), offset = 14, limit = 14, fom = 10.juni(2025), tom = 13.juni(2025)
             )
         }
         assertEquals(1, antallOppgaver)
@@ -213,7 +213,7 @@ class OppgaverQueryHandlerTest : AbstractGraphQLApiTest() {
 
         verify(exactly = 1) {
             apiOppgaveService.antallOppgaver(
-                saksbehandlerFraApi = any(),
+                saksbehandler = any(),
             )
         }
         assertEquals(2, antallMineSaker)

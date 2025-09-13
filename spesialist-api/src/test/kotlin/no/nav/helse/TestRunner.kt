@@ -26,12 +26,12 @@ import no.nav.helse.spesialist.api.behandlingsstatistikk.IBehandlingsstatistikkS
 import no.nav.helse.spesialist.api.graphql.kobleOppApi
 import no.nav.helse.spesialist.api.graphql.lagSchemaMedResolversOgHandlers
 import no.nav.helse.spesialist.api.objectMapper
-import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
-import no.nav.helse.spesialist.api.testfixtures.lagSaksbehandlerFraApi
+import no.nav.helse.spesialist.api.testfixtures.lagSaksbehandler
 import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
 import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgrupper
+import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.intellij.lang.annotations.Language
@@ -52,22 +52,22 @@ object TestRunner {
 
     private val tilgangsgrupper = randomTilgangsgrupper()
 
-    private fun token(saksbehandlerFraApi: SaksbehandlerFraApi, tilgangsgrupper: Set<Tilgangsgruppe>): String =
+    private fun token(saksbehandler: Saksbehandler, tilgangsgrupper: Set<Tilgangsgruppe>): String =
         mockOAuth2Server.issueToken(
             issuerId = issuerId,
             audience = clientId,
-            subject = saksbehandlerFraApi.oid.toString(),
+            subject = saksbehandler.id().value.toString(),
             claims = mapOf(
-                "NAVident" to saksbehandlerFraApi.ident,
-                "preferred_username" to saksbehandlerFraApi.epost,
-                "oid" to saksbehandlerFraApi.oid.toString(),
-                "name" to saksbehandlerFraApi.navn,
+                "NAVident" to saksbehandler.ident,
+                "preferred_username" to saksbehandler.epost,
+                "oid" to saksbehandler.id().value.toString(),
+                "name" to saksbehandler.navn,
                 "groups" to this.tilgangsgrupper.uuiderFor(tilgangsgrupper).map { it.toString() }
             )
         ).serialize()
 
     fun runQuery(
-        saksbehandlerFraApi: SaksbehandlerFraApi = lagSaksbehandlerFraApi(),
+        saksbehandler: Saksbehandler = lagSaksbehandler(),
         tilgangsgrupper: Set<Tilgangsgruppe> = emptySet(),
         given: (avhengigheter: Avhengigheter) -> Unit = {},
         @Language("GraphQL") whenever: String,
@@ -122,7 +122,7 @@ object TestRunner {
             val response = client.post("/graphql") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
-                bearerAuth(token(saksbehandlerFraApi, tilgangsgrupper))
+                bearerAuth(token(saksbehandler, tilgangsgrupper))
                 setBody(mapOf("query" to whenever))
             }
 

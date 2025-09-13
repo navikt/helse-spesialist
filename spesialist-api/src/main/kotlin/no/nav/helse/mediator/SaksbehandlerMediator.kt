@@ -79,7 +79,6 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse.ApiSkjo
 import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse.ApiSkjonnsfastsettelseArbeidsgiver.ApiSkjonnsfastsettelseType.OMREGNET_ARSINNTEKT
 import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse.ApiSkjonnsfastsettelseArbeidsgiver.ApiSkjonnsfastsettelseType.RAPPORTERT_ARSINNTEKT
 import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
-import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.ApiOpphevStans
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
@@ -120,10 +119,9 @@ class SaksbehandlerMediator(
 
     fun håndter(
         handlingFraApi: HandlingFraApi,
-        saksbehandlerFraApi: SaksbehandlerFraApi,
+        saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
     ) {
-        val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
         val modellhandling =
             handlingFraApi.tilModellversjon(
                 saksbehandlerOid = saksbehandler.id(),
@@ -147,7 +145,7 @@ class SaksbehandlerMediator(
                 is Overstyring -> {
                     overstyringUnitOfWork(
                         overstyring = modellhandling,
-                        saksbehandler = saksbehandlerFraApi.tilSaksbehandler(),
+                        saksbehandler = saksbehandler,
                         sessionFactory = sessionFactory,
                     )
                     modellhandling.utførAv(saksbehandlerWrapper)
@@ -165,13 +163,12 @@ class SaksbehandlerMediator(
     }
 
     fun vedtak(
-        saksbehandlerFraApi: SaksbehandlerFraApi,
+        saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
         oppgavereferanse: Long,
         begrunnelse: String?,
     ): VedtakResultat =
         sessionFactory.transactionalSessionScope { sessionContext ->
-            val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
             val spleisBehandlingId = apiOppgaveService.spleisBehandlingId(oppgavereferanse)
             val fødselsnummer = oppgaveApiDao.finnFødselsnummer(oppgavereferanse)
             if (!apiOppgaveService.venterPåSaksbehandler(oppgavereferanse)) {
@@ -204,12 +201,11 @@ class SaksbehandlerMediator(
     }
 
     fun infotrygdVedtak(
-        saksbehandlerFraApi: SaksbehandlerFraApi,
+        saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
         oppgavereferanse: Long,
     ): VedtakResultat =
         sessionFactory.transactionalSessionScope { sessionContext ->
-            val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
             val spleisBehandlingId = apiOppgaveService.spleisBehandlingId(oppgavereferanse)
             val fødselsnummer = oppgaveApiDao.finnFødselsnummer(oppgavereferanse)
             if (!apiOppgaveService.venterPåSaksbehandler(oppgavereferanse)) {
@@ -295,9 +291,8 @@ class SaksbehandlerMediator(
 
     fun påVent(
         handling: ApiPaVentRequest,
-        saksbehandlerFraApi: SaksbehandlerFraApi,
+        saksbehandler: Saksbehandler,
     ) {
-        val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
         val modellhandling = handling.tilModellversjon()
         sessionFactory.transactionalSessionScope { it.saksbehandlerRepository.lagre(saksbehandler) }
         tell(modellhandling)
@@ -449,28 +444,25 @@ class SaksbehandlerMediator(
     }
 
     fun opprettAbonnement(
-        saksbehandlerFraApi: SaksbehandlerFraApi,
+        saksbehandler: Saksbehandler,
         personidentifikator: String,
     ) {
-        val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
         sessionFactory.transactionalSessionScope { it.saksbehandlerRepository.lagre(saksbehandler) }
         abonnementDao.opprettAbonnement(saksbehandler.id().value, personidentifikator)
     }
 
     fun hentAbonnerteOpptegnelser(
-        saksbehandlerFraApi: SaksbehandlerFraApi,
+        saksbehandler: Saksbehandler,
         sisteSekvensId: Int,
     ): List<ApiOpptegnelse> {
-        val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
         sessionFactory.transactionalSessionScope { it.saksbehandlerRepository.lagre(saksbehandler) }
         abonnementDao.registrerSistekvensnummer(saksbehandler.id().value, sisteSekvensId)
         return opptegnelseRepository.finnOpptegnelser(saksbehandler.id().value).toApiOpptegnelser()
     }
 
-    fun hentAbonnerteOpptegnelser(saksbehandlerFraApi: SaksbehandlerFraApi): List<ApiOpptegnelse> =
+    fun hentAbonnerteOpptegnelser(saksbehandler: Saksbehandler): List<ApiOpptegnelse> =
         sessionFactory
             .transactionalSessionScope { session ->
-                val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
                 session.saksbehandlerRepository.lagre(saksbehandler)
                 session.opptegnelseDao.finnOpptegnelser(saksbehandler.id().value)
             }.toApiOpptegnelser()
@@ -534,13 +526,13 @@ class SaksbehandlerMediator(
 
     fun sendIRetur(
         oppgavereferanse: Long,
-        besluttendeSaksbehandler: SaksbehandlerFraApi,
+        besluttendeSaksbehandler: Saksbehandler,
         notatTekst: String,
     ): SendIReturResult {
         sikkerlogg.info(
             "Oppgave med {} sendes i retur av beslutter med {}",
             StructuredArguments.kv("oppgaveId", oppgavereferanse),
-            StructuredArguments.kv("oid", besluttendeSaksbehandler.oid),
+            StructuredArguments.kv("oid", besluttendeSaksbehandler.id().value),
         )
 
         try {
@@ -560,7 +552,7 @@ class SaksbehandlerMediator(
                     }
 
                 apiOppgaveService.sendIRetur(oppgavereferanse, opprinneligSaksbehandler)
-                totrinnsvurdering.sendIRetur(oppgavereferanse, SaksbehandlerOid(besluttendeSaksbehandler.oid))
+                totrinnsvurdering.sendIRetur(oppgavereferanse, SaksbehandlerOid(besluttendeSaksbehandler.id().value))
                 session.totrinnsvurderingRepository.lagre(totrinnsvurdering)
             }
         } catch (modellfeil: Modellfeil) {
@@ -581,7 +573,7 @@ class SaksbehandlerMediator(
             val innslag =
                 Historikkinnslag.totrinnsvurderingRetur(
                     notattekst = notatTekst,
-                    saksbehandler = besluttendeSaksbehandler.tilSaksbehandler(),
+                    saksbehandler = besluttendeSaksbehandler,
                     dialogRef = dialogRef,
                 )
             periodehistorikkDao.lagreMedOppgaveId(innslag, oppgavereferanse)
@@ -596,7 +588,7 @@ class SaksbehandlerMediator(
 
     fun håndterTotrinnsvurdering(
         oppgavereferanse: Long,
-        saksbehandlerFraApi: SaksbehandlerFraApi,
+        saksbehandler: Saksbehandler,
         begrunnelse: String?,
     ): SendTilGodkjenningResult =
         sessionFactory.transactionalSessionScope { sessionContext ->
@@ -619,7 +611,7 @@ class SaksbehandlerMediator(
                     utfall = hentUtfallFraBehandling(spleisBehandlingId, sessionContext),
                     begrunnelse = begrunnelse,
                     oppgaveId = oppgavereferanse,
-                    saksbehandlerOid = saksbehandlerFraApi.oid,
+                    saksbehandlerOid = saksbehandler.id().value,
                 )
             } catch (e: Exception) {
                 return@transactionalSessionScope SendTilGodkjenningResult.Feil.KunneIkkeHåndtereBegrunnelse(e)
@@ -638,7 +630,7 @@ class SaksbehandlerMediator(
                             ?.let(session.saksbehandlerRepository::finn)
                             ?.let { SaksbehandlerWrapper(saksbehandler = it) }
                     apiOppgaveService.sendTilBeslutter(oppgavereferanse, beslutter)
-                    totrinnsvurdering.sendTilBeslutter(oppgavereferanse, SaksbehandlerOid(saksbehandlerFraApi.oid))
+                    totrinnsvurdering.sendTilBeslutter(oppgavereferanse, saksbehandler.id())
                     session.totrinnsvurderingRepository.lagre(totrinnsvurdering)
                 }
             } catch (modellfeil: Modellfeil) {
@@ -650,7 +642,7 @@ class SaksbehandlerMediator(
             }
 
             try {
-                påVent(ApiPaVentRequest.ApiFjernPaVentUtenHistorikkinnslag(oppgavereferanse), saksbehandlerFraApi)
+                påVent(ApiPaVentRequest.ApiFjernPaVentUtenHistorikkinnslag(oppgavereferanse), saksbehandler)
             } catch (modellfeil: ApiModellfeil) {
                 return@transactionalSessionScope SendTilGodkjenningResult.Feil.KunneIkkeFjerneFraPåVent(modellfeil)
             } catch (e: Exception) {
@@ -660,11 +652,11 @@ class SaksbehandlerMediator(
             sikkerlogg.info(
                 "Oppgave med {} sendes til godkjenning av saksbehandler med {}",
                 StructuredArguments.kv("oppgaveId", oppgavereferanse),
-                StructuredArguments.kv("oid", saksbehandlerFraApi.oid),
+                StructuredArguments.kv("oid", saksbehandler.id().value),
             )
 
             try {
-                val innslag = Historikkinnslag.avventerTotrinnsvurdering(saksbehandlerFraApi.tilSaksbehandler())
+                val innslag = Historikkinnslag.avventerTotrinnsvurdering(saksbehandler)
                 periodehistorikkDao.lagreMedOppgaveId(innslag, oppgavereferanse)
             } catch (e: Exception) {
                 return@transactionalSessionScope SendTilGodkjenningResult.Feil.UventetFeilVedOpprettingAvPeriodehistorikk(

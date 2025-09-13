@@ -10,7 +10,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiBehandledeOppgaver
 import no.nav.helse.spesialist.api.graphql.schema.ApiFiltrering
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaverTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavesortering
-import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
+import no.nav.helse.spesialist.domain.Saksbehandler
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -28,10 +28,10 @@ class OppgaverQueryHandler(
         tom: LocalDate,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<ApiBehandledeOppgaver> {
-        val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(ContextValues.SAKSBEHANDLER)
+        val saksbehandler = env.graphQlContext.get<Saksbehandler>(ContextValues.SAKSBEHANDLER)
         val behandledeOppgaver =
             apiOppgaveService.behandledeOppgaver(
-                saksbehandlerFraApi = saksbehandler,
+                saksbehandler = saksbehandler,
                 offset = offset,
                 limit = limit,
                 fom = fom,
@@ -48,12 +48,12 @@ class OppgaverQueryHandler(
         filtrering: ApiFiltrering,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<ApiOppgaverTilBehandling> {
-        val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(ContextValues.SAKSBEHANDLER)
+        val saksbehandler = env.graphQlContext.get<Saksbehandler>(ContextValues.SAKSBEHANDLER)
         sikkerLogg.debug("Henter OppgaverTilBehandling for ${saksbehandler.navn}")
         val (oppgaver, tid) =
             measureTimedValue {
                 apiOppgaveService.oppgaver(
-                    saksbehandlerFraApi = saksbehandler,
+                    saksbehandler = saksbehandler,
                     tilgangsgrupper = env.graphQlContext.get(ContextValues.TILGANGSGRUPPER),
                     offset = offset,
                     limit = limit,
@@ -71,12 +71,12 @@ class OppgaverQueryHandler(
     }
 
     override suspend fun antallOppgaver(env: DataFetchingEnvironment): DataFetcherResult<ApiAntallOppgaver> {
-        val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(ContextValues.SAKSBEHANDLER)
+        val saksbehandler = env.graphQlContext.get<Saksbehandler>(ContextValues.SAKSBEHANDLER)
         sikkerLogg.info("Henter AntallOppgaver for ${saksbehandler.navn}")
         val (antallOppgaver, tid) =
             measureTimedValue {
                 apiOppgaveService.antallOppgaver(
-                    saksbehandlerFraApi = saksbehandler,
+                    saksbehandler = saksbehandler,
                 )
             }
         sikkerLogg.debug("Query antallOppgaver er ferdig etter ${tid.inWholeMilliseconds} ms")

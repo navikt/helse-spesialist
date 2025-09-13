@@ -16,7 +16,7 @@ class AnnulleringMutationHandler(
     ): DataFetcherResult<Boolean> {
         saksbehandlerMediator.håndter(
             handlingFraApi = annullering,
-            saksbehandlerFraApi = env.graphQlContext.get(ContextValues.SAKSBEHANDLER),
+            saksbehandler = env.graphQlContext.get(ContextValues.SAKSBEHANDLER),
             tilgangsgrupper = env.graphQlContext.get(ContextValues.TILGANGSGRUPPER),
         )
 

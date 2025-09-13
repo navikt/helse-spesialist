@@ -27,7 +27,6 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiMottaker
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveegenskap
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavetype
 import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodetype
-import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.testfixtures.lagEpostadresseFraFulltNavn
@@ -98,8 +97,13 @@ internal class ApiOppgaveServiceTest {
             )
         )
 
-    private fun saksbehandlerFraApi() =
-        SaksbehandlerFraApi(SAKSBEHANDLEROID, SAKSBEHANDLEREPOST, SAKSBEHANDLERNAVN, SAKSBEHANDLERIDENT)
+    private fun saksbehandler() =
+        Saksbehandler(
+            id = SaksbehandlerOid(SAKSBEHANDLEROID),
+            navn = SAKSBEHANDLEREPOST,
+            epost = SAKSBEHANDLERNAVN,
+            ident = SAKSBEHANDLERIDENT
+        )
 
     @BeforeEach
     fun setup() {
@@ -114,7 +118,7 @@ internal class ApiOppgaveServiceTest {
                     oppgaveFraDatabaseForVisning(filtrertAntall = 2),
                 )
         val oppgaver = apiOppgaveService.oppgaver(
-            saksbehandlerFraApi = saksbehandlerFraApi(),
+            saksbehandler = saksbehandler(),
             tilgangsgrupper = emptySet(),
             offset = 0,
             limit = Int.MAX_VALUE,
@@ -132,7 +136,7 @@ internal class ApiOppgaveServiceTest {
                     oppgaveFraDatabaseForVisning(filtrertAntall = 2),
                 )
         val oppgaver = apiOppgaveService.tildelteOppgaver(
-            innloggetSaksbehandler = saksbehandlerFraApi(),
+            innloggetSaksbehandler = saksbehandler(),
             tilgangsgrupper = emptySet(),
             oppslåttSaksbehandler = Saksbehandler(
                 id = SaksbehandlerOid(UUID.randomUUID()),
@@ -152,7 +156,7 @@ internal class ApiOppgaveServiceTest {
             antallMineSaker = 2,
             antallMineSakerPåVent = 1
         )
-        val antallOppgaver = apiOppgaveService.antallOppgaver(saksbehandlerFraApi())
+        val antallOppgaver = apiOppgaveService.antallOppgaver(saksbehandler())
         assertEquals(2, antallOppgaver.antallMineSaker)
         assertEquals(1, antallOppgaver.antallMineSakerPaVent)
     }
@@ -165,7 +169,7 @@ internal class ApiOppgaveServiceTest {
                     behandletOppgaveFraDatabaseForVisning(filtrertAntall = 2),
                 )
         val oppgaver = apiOppgaveService.behandledeOppgaver(
-            saksbehandlerFraApi(),
+            saksbehandler(),
             0,
             Int.MAX_VALUE,
             LocalDate.now(),
@@ -177,7 +181,7 @@ internal class ApiOppgaveServiceTest {
     @Test
     fun `Hent kun oppgaver til visning som saksbehandler har tilgang til`() {
         apiOppgaveService.oppgaver(
-            saksbehandlerFraApi = saksbehandlerFraApi(),
+            saksbehandler = saksbehandler(),
             tilgangsgrupper = emptySet(),
             offset = 0,
             limit = Int.MAX_VALUE,
@@ -203,7 +207,7 @@ internal class ApiOppgaveServiceTest {
     @Test
     fun `Ekskluderer alle ukategoriserte egenskaper hvis ingenUkategoriserteEgenskaper i Filtrering er satt til true`() {
         apiOppgaveService.oppgaver(
-            saksbehandlerFraApi = saksbehandlerFraApi(),
+            saksbehandler = saksbehandler(),
             tilgangsgrupper = emptySet(),
             offset = 0,
             limit = Int.MAX_VALUE,
@@ -233,7 +237,7 @@ internal class ApiOppgaveServiceTest {
     @Test
     fun `Ekskluderer alle ekskluderteEgenskaper`() {
         apiOppgaveService.oppgaver(
-            saksbehandlerFraApi = saksbehandlerFraApi(),
+            saksbehandler = saksbehandler(),
             tilgangsgrupper = emptySet(),
             offset = 0,
             limit = Int.MAX_VALUE,
@@ -278,7 +282,7 @@ internal class ApiOppgaveServiceTest {
                         ferdigstiltTidspunkt = ferdigstiltTidspunkt,
                     ),
                 )
-        val saksbehandler = saksbehandlerFraApi()
+        val saksbehandler = saksbehandler()
         val oppgaver =
             apiOppgaveService.behandledeOppgaver(saksbehandler, 0, Int.MAX_VALUE, LocalDate.now(), LocalDate.now())
         assertEquals(1, oppgaver.oppgaver.size)
@@ -320,9 +324,8 @@ internal class ApiOppgaveServiceTest {
                         påVent = true,
                     ),
                 )
-        val saksbehandler = saksbehandlerFraApi()
         val oppgaver = apiOppgaveService.oppgaver(
-            saksbehandlerFraApi = saksbehandler,
+            saksbehandler = saksbehandler(),
             tilgangsgrupper = Tilgangsgruppe.entries.toSet(),
             offset = 0,
             limit = Int.MAX_VALUE,
@@ -378,7 +381,7 @@ internal class ApiOppgaveServiceTest {
                     ),
                 )
         val oppgaver = apiOppgaveService.oppgaver(
-            saksbehandlerFraApi = saksbehandlerFraApi(),
+            saksbehandler = saksbehandler(),
             tilgangsgrupper = Tilgangsgruppe.entries.toSet(),
             offset = 0,
             limit = Int.MAX_VALUE,
@@ -425,7 +428,7 @@ internal class ApiOppgaveServiceTest {
                     ),
                 )
         val oppgaver = apiOppgaveService.oppgaver(
-            saksbehandlerFraApi = saksbehandlerFraApi(),
+            saksbehandler = saksbehandler(),
             tilgangsgrupper = Tilgangsgruppe.entries.toSet(),
             offset = 0,
             limit = Int.MAX_VALUE,
@@ -472,7 +475,7 @@ internal class ApiOppgaveServiceTest {
                     ),
                 )
         val oppgaver = apiOppgaveService.oppgaver(
-            saksbehandlerFraApi = saksbehandlerFraApi(),
+            saksbehandler = saksbehandler(),
             tilgangsgrupper = Tilgangsgruppe.entries.toSet(),
             offset = 0,
             limit = Int.MAX_VALUE,
@@ -516,7 +519,7 @@ internal class ApiOppgaveServiceTest {
                     ),
                 )
         val oppgaver = apiOppgaveService.oppgaver(
-            saksbehandlerFraApi = saksbehandlerFraApi(),
+            saksbehandler = saksbehandler(),
             tilgangsgrupper = Tilgangsgruppe.entries.toSet(),
             offset = 0,
             limit = Int.MAX_VALUE,

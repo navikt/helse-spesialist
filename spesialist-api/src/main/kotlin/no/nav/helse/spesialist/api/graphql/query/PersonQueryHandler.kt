@@ -15,7 +15,7 @@ import no.nav.helse.spesialist.api.graphql.notFoundError
 import no.nav.helse.spesialist.api.graphql.personNotReadyError
 import no.nav.helse.spesialist.api.graphql.query.Inputvalidering.UgyldigInput
 import no.nav.helse.spesialist.api.graphql.schema.ApiPerson
-import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
+import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -231,7 +231,7 @@ class PersonQueryHandler(
         harTilgang: Boolean?,
         fantIkkePersonErrorMsg: String?,
     ) {
-        val saksbehandlerIdent = graphQLContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER).ident
+        val saksbehandlerIdent = graphQLContext.get<Saksbehandler>(SAKSBEHANDLER).ident
         auditLogTeller.increment()
 
         if (harTilgang == false) {

@@ -14,7 +14,7 @@ import no.nav.helse.spesialist.api.graphql.byggRespons
 import no.nav.helse.spesialist.api.graphql.graphqlErrorException
 import no.nav.helse.spesialist.api.graphql.schema.ApiPaVent
 import no.nav.helse.spesialist.api.graphql.schema.ApiPaVentRequest
-import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
+import no.nav.helse.spesialist.domain.Saksbehandler
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -34,12 +34,12 @@ class PaVentMutationHandler(
         arsaker: List<ApiPaVentRequest.ApiPaVentArsak>?,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<ApiPaVent?> {
-        val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
+        val saksbehandler = env.graphQlContext.get<Saksbehandler>(SAKSBEHANDLER)
         return try {
             saksbehandlerMediator.påVent(
                 ApiPaVentRequest.ApiLeggPaVent(
                     oppgaveId.toLong(),
-                    saksbehandler.oid,
+                    saksbehandler.id().value,
                     frist,
                     tildeling,
                     notatTekst,
@@ -47,7 +47,7 @@ class PaVentMutationHandler(
                 ),
                 saksbehandler,
             )
-            byggRespons(ApiPaVent(frist = frist, oid = saksbehandler.oid))
+            byggRespons(ApiPaVent(frist = frist, oid = saksbehandler.id().value))
         } catch (e: OppgaveIkkeTildelt) {
             byggFeilrespons(graphqlErrorException(e.httpkode.value, "Oppgave ikke tildelt"))
         } catch (e: OppgaveTildeltNoenAndre) {
@@ -64,7 +64,7 @@ class PaVentMutationHandler(
         oppgaveId: String,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean?> {
-        val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
+        val saksbehandler = env.graphQlContext.get<Saksbehandler>(SAKSBEHANDLER)
         return try {
             saksbehandlerMediator.påVent(ApiPaVentRequest.ApiFjernPaVent(oppgaveId.toLong()), saksbehandler)
             byggRespons(true)
@@ -85,12 +85,12 @@ class PaVentMutationHandler(
         arsaker: List<ApiPaVentRequest.ApiPaVentArsak>,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<ApiPaVent?> {
-        val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
+        val saksbehandler = env.graphQlContext.get<Saksbehandler>(SAKSBEHANDLER)
         return try {
             saksbehandlerMediator.påVent(
                 ApiPaVentRequest.ApiEndrePaVent(
                     oppgaveId = oppgaveId.toLong(),
-                    saksbehandlerOid = saksbehandler.oid,
+                    saksbehandlerOid = saksbehandler.id().value,
                     frist = frist,
                     skalTildeles = tildeling,
                     notatTekst = notatTekst,
@@ -98,7 +98,7 @@ class PaVentMutationHandler(
                 ),
                 saksbehandler,
             )
-            byggRespons(ApiPaVent(frist = frist, oid = saksbehandler.oid))
+            byggRespons(ApiPaVent(frist = frist, oid = saksbehandler.id().value))
         } catch (e: FinnerIkkeLagtPåVent) {
             e.logger()
             byggFeilrespons(getUpdateError(oppgaveId))

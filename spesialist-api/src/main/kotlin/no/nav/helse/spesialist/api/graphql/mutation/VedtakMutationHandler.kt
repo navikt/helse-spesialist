@@ -13,8 +13,8 @@ import no.nav.helse.spesialist.api.feilhåndtering.OverlapperMedInfotrygd
 import no.nav.helse.spesialist.api.graphql.ContextValues
 import no.nav.helse.spesialist.api.graphql.byggRespons
 import no.nav.helse.spesialist.api.graphql.schema.ApiAvslagstype
-import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
+import no.nav.helse.spesialist.domain.Saksbehandler
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
@@ -31,12 +31,12 @@ class VedtakMutationHandler(
         env: DataFetchingEnvironment,
         begrunnelse: String?,
     ): DataFetcherResult<Boolean> {
-        val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(ContextValues.SAKSBEHANDLER)
+        val saksbehandler: Saksbehandler = env.graphQlContext.get(ContextValues.SAKSBEHANDLER)
         logg.info("Behandler kall for fatting av vedtak for oppgave $oppgavereferanse")
 
         val resultat =
             saksbehandlerMediator.vedtak(
-                saksbehandlerFraApi = saksbehandler,
+                saksbehandler = saksbehandler,
                 tilgangsgrupper = env.graphQlContext.get(ContextValues.TILGANGSGRUPPER),
                 oppgavereferanse = oppgavereferanse.toLong(),
                 begrunnelse = begrunnelse,
@@ -53,7 +53,7 @@ class VedtakMutationHandler(
                         kommentar = null,
                         avslag = null,
                     )
-                godkjenninghåndterer.håndter(dto, saksbehandler.epost, saksbehandler.oid)
+                godkjenninghåndterer.håndter(dto, saksbehandler.epost, saksbehandler.id().value)
                 byggRespons(true)
             }
 
@@ -74,12 +74,12 @@ class VedtakMutationHandler(
         kommentar: String?,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> {
-        val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(ContextValues.SAKSBEHANDLER)
+        val saksbehandler: Saksbehandler = env.graphQlContext.get(ContextValues.SAKSBEHANDLER)
         logg.info("Sender oppgave $oppgavereferanse til Infotrygd")
 
         val resultat =
             saksbehandlerMediator.infotrygdVedtak(
-                saksbehandlerFraApi = saksbehandler,
+                saksbehandler = saksbehandler,
                 tilgangsgrupper = env.graphQlContext.get(ContextValues.TILGANGSGRUPPER),
                 oppgavereferanse = oppgavereferanse.toLong(),
             )
@@ -94,7 +94,7 @@ class VedtakMutationHandler(
                         begrunnelser = begrunnelser,
                         kommentar = kommentar,
                     )
-                godkjenninghåndterer.håndter(godkjenning, saksbehandler.epost, saksbehandler.oid)
+                godkjenninghåndterer.håndter(godkjenning, saksbehandler.epost, saksbehandler.id().value)
                 byggRespons(true)
             }
 

@@ -29,7 +29,7 @@ class MinimumSykdomsgradMutationHandler(
         return try {
             saksbehandlerMediator.håndter(
                 handlingFraApi = minimumSykdomsgrad,
-                saksbehandlerFraApi = env.graphQlContext.get(ContextValues.SAKSBEHANDLER),
+                saksbehandler = env.graphQlContext.get(ContextValues.SAKSBEHANDLER),
                 tilgangsgrupper = env.graphQlContext.get(ContextValues.TILGANGSGRUPPER),
             )
             byggRespons(true)

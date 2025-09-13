@@ -10,7 +10,7 @@ import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.byggFeilrespons
 import no.nav.helse.spesialist.api.graphql.byggRespons
 import no.nav.helse.spesialist.api.graphql.graphqlErrorException
-import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
+import no.nav.helse.spesialist.domain.Saksbehandler
 
 class TotrinnsvurderingMutationHandler(
     private val saksbehandlerMediator: SaksbehandlerMediator,
@@ -20,13 +20,13 @@ class TotrinnsvurderingMutationHandler(
         vedtakBegrunnelse: String?,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean?> {
-        val behandlendeSaksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
+        val behandlendeSaksbehandler: Saksbehandler = env.graphQlContext.get(SAKSBEHANDLER)
 
         return when (
             val result =
                 saksbehandlerMediator.håndterTotrinnsvurdering(
                     oppgavereferanse = oppgavereferanse.toLong(),
-                    saksbehandlerFraApi = behandlendeSaksbehandler,
+                    saksbehandler = behandlendeSaksbehandler,
                     begrunnelse = vedtakBegrunnelse,
                 )
         ) {
@@ -89,7 +89,7 @@ class TotrinnsvurderingMutationHandler(
         notatTekst: String,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean?> {
-        val besluttendeSaksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
+        val besluttendeSaksbehandler: Saksbehandler = env.graphQlContext.get(SAKSBEHANDLER)
 
         return when (
             val result =

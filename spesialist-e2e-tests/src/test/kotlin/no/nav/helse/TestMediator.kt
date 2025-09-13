@@ -14,10 +14,10 @@ import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlinghåndtererImpl
 import no.nav.helse.modell.varsel.VarselRepository
-import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
 import no.nav.helse.spesialist.db.DBDaos
 import no.nav.helse.spesialist.db.TransactionalSessionFactory
+import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import javax.sql.DataSource
 
@@ -121,9 +121,9 @@ class TestMediator(
 
     fun håndter(
         handling: HandlingFraApi,
-        saksbehandlerFraApi: SaksbehandlerFraApi,
+        saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
     ) {
-        saksbehandlerMediator.håndter(handling, saksbehandlerFraApi, tilgangsgrupper)
+        saksbehandlerMediator.håndter(handling, saksbehandler, tilgangsgrupper)
     }
 }

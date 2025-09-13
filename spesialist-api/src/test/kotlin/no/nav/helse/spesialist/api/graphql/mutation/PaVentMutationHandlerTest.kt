@@ -2,7 +2,7 @@ package no.nav.helse.spesialist.api.graphql.mutation
 
 import io.mockk.every
 import no.nav.helse.TestRunner.runQuery
-import no.nav.helse.spesialist.api.testfixtures.lagSaksbehandlerFraApi
+import no.nav.helse.spesialist.api.testfixtures.lagSaksbehandler
 import no.nav.helse.spesialist.api.testfixtures.mutation.fjernPåVentMutation
 import no.nav.helse.spesialist.api.testfixtures.mutation.leggPåVentMutation
 import no.nav.helse.spesialist.domain.testfixtures.jan
@@ -16,22 +16,22 @@ internal class PaVentMutationHandlerTest {
 
     @Test
     fun `legger på vent`() {
-        val saksbehandler = lagSaksbehandlerFraApi()
+        val saksbehandler = lagSaksbehandler()
         runQuery(
-            saksbehandlerFraApi = saksbehandler,
+            saksbehandler = saksbehandler,
             whenever = leggPåVentMutation(nextLong(), """Dette er et notat""", 1 jan 2024, true),
             then = { _, body, _ ->
-                assertEquals(saksbehandler.oid.toString(), body["data"]["leggPaVent"]["oid"].asText())
+                assertEquals(saksbehandler.id().value.toString(), body["data"]["leggPaVent"]["oid"].asText())
             }
         )
     }
 
     @Test
     fun `legger på vent med årsaker`() {
-        val saksbehandler = lagSaksbehandlerFraApi()
+        val saksbehandler = lagSaksbehandler()
 
         runQuery(
-            saksbehandlerFraApi = saksbehandler,
+            saksbehandler = saksbehandler,
             whenever = leggPåVentMutation(
                 nextLong(),
                 "Dette er et notat",
@@ -40,7 +40,7 @@ internal class PaVentMutationHandlerTest {
                 arsaker = mapOf("_key" to "en_key", "arsak" to "en_arsak")
             ),
             then = { _, body, _ ->
-                assertEquals(saksbehandler.oid.toString(), body["data"]["leggPaVent"]["oid"].asText())
+                assertEquals(saksbehandler.id().value.toString(), body["data"]["leggPaVent"]["oid"].asText())
             }
         )
     }

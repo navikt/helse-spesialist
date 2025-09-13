@@ -9,8 +9,8 @@ import no.nav.helse.spesialist.api.graphql.byggRespons
 import no.nav.helse.spesialist.api.graphql.notFound
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaverTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiSaksbehandler
-import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.application.logg.sikkerlogg
+import no.nav.helse.spesialist.domain.Saksbehandler
 import kotlin.time.measureTimedValue
 
 class TildelteOppgaverQueryHandler(
@@ -23,7 +23,7 @@ class TildelteOppgaverQueryHandler(
         oppslattSaksbehandler: ApiSaksbehandler,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<ApiOppgaverTilBehandling> {
-        val innloggetSaksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(ContextValues.SAKSBEHANDLER)
+        val innloggetSaksbehandler = env.graphQlContext.get<Saksbehandler>(ContextValues.SAKSBEHANDLER)
 
         val oppslåttSaksbehandler =
             oppslattSaksbehandler.ident

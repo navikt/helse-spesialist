@@ -7,7 +7,7 @@ import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
-import no.nav.helse.spesialist.api.testfixtures.lagSaksbehandlerFraApi
+import no.nav.helse.spesialist.api.testfixtures.lagSaksbehandler
 import no.nav.helse.spesialist.api.testfixtures.mutation.fjernTildelingMutation
 import no.nav.helse.spesialist.api.testfixtures.mutation.opprettTildelingMutation
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
@@ -22,18 +22,18 @@ class TildelingMutationHandlerTest {
     @Test
     fun `oppretter tildeling`() {
         val oppgaveId = nextLong()
-        val saksbehandler = lagSaksbehandlerFraApi()
+        val saksbehandler = lagSaksbehandler()
 
         runQuery(
-            saksbehandlerFraApi = saksbehandler,
+            saksbehandler = saksbehandler,
             whenever = opprettTildelingMutation(oppgaveId),
             then = { _, body, avhengigheter ->
                 verify(exactly = 1) { avhengigheter.saksbehandlerMediator.håndter(
                     handlingFraApi = TildelOppgave(oppgaveId),
-                    saksbehandlerFraApi = saksbehandler,
+                    saksbehandler = saksbehandler,
                     tilgangsgrupper = emptySet()
                 ) }
-                assertEquals(saksbehandler.oid, UUID.fromString(body["data"]["opprettTildeling"]["oid"].asText()))
+                assertEquals(saksbehandler.id().value, UUID.fromString(body["data"]["opprettTildeling"]["oid"].asText()))
             }
         )
     }

@@ -8,8 +8,8 @@ import no.nav.helse.db.SessionFactory
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
 import no.nav.helse.spesialist.api.graphql.ContextValues
 import no.nav.helse.spesialist.api.graphql.byggRespons
-import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.domain.Dialog
+import no.nav.helse.spesialist.domain.Saksbehandler
 
 class StansAutomatiskBehandlingMutationHandler(
     private val sessionFactory: SessionFactory,
@@ -19,7 +19,7 @@ class StansAutomatiskBehandlingMutationHandler(
         fodselsnummer: String,
         begrunnelse: String,
     ): DataFetcherResult<Boolean> {
-        val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(ContextValues.SAKSBEHANDLER)
+        val saksbehandler = env.graphQlContext.get<Saksbehandler>(ContextValues.SAKSBEHANDLER)
         sessionFactory.transactionalSessionScope { session ->
             session.lagrePeriodehistorikkForStans(fodselsnummer, saksbehandler, begrunnelse)
             session.stansAutomatiskBehandlingSaksbehandlerDao.lagreStans(fodselsnummer)
@@ -32,7 +32,7 @@ class StansAutomatiskBehandlingMutationHandler(
         fodselsnummer: String,
         begrunnelse: String,
     ): DataFetcherResult<Boolean> {
-        val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(ContextValues.SAKSBEHANDLER)
+        val saksbehandler = env.graphQlContext.get<Saksbehandler>(ContextValues.SAKSBEHANDLER)
         sessionFactory.transactionalSessionScope { session ->
             session.lagrePeriodehistorikkForOpphevStans(fodselsnummer, saksbehandler, begrunnelse)
             session.stansAutomatiskBehandlingSaksbehandlerDao.opphevStans(fodselsnummer)
@@ -42,7 +42,7 @@ class StansAutomatiskBehandlingMutationHandler(
 
     private fun SessionContext.lagrePeriodehistorikkForStans(
         fødselsnummer: String,
-        saksbehandler: SaksbehandlerFraApi,
+        saksbehandler: Saksbehandler,
         begrunnelse: String,
     ) {
         val oppgaveId = this.oppgaveDao.oppgaveId(fødselsnummer)
@@ -51,7 +51,7 @@ class StansAutomatiskBehandlingMutationHandler(
 
         val innslag =
             Historikkinnslag.automatiskBehandlingStansetAvSaksbehandler(
-                saksbehandler = saksbehandler.tilSaksbehandler(),
+                saksbehandler = saksbehandler,
                 dialogId = dialog.id(),
                 begrunnelse = begrunnelse,
             )
@@ -60,7 +60,7 @@ class StansAutomatiskBehandlingMutationHandler(
 
     private fun SessionContext.lagrePeriodehistorikkForOpphevStans(
         fødselsnummer: String,
-        saksbehandler: SaksbehandlerFraApi,
+        saksbehandler: Saksbehandler,
         begrunnelse: String,
     ) {
         val oppgaveId = this.oppgaveDao.oppgaveId(fødselsnummer)
@@ -69,7 +69,7 @@ class StansAutomatiskBehandlingMutationHandler(
 
         val innslag =
             Historikkinnslag.opphevStansAvSaksbehandler(
-                saksbehandler = saksbehandler.tilSaksbehandler(),
+                saksbehandler = saksbehandler,
                 dialogId = dialog.id(),
                 begrunnelse = begrunnelse,
             )

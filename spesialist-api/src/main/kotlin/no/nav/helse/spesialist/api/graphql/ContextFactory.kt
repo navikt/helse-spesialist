@@ -8,8 +8,9 @@ import io.ktor.server.auth.principal
 import io.ktor.server.request.ApplicationRequest
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGSGRUPPER
-import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
+import no.nav.helse.spesialist.domain.Saksbehandler
+import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -25,17 +26,37 @@ class ContextFactory(
     private val tilgangsgrupper: Tilgangsgrupper,
 ) : KtorGraphQLContextFactory() {
     override suspend fun generateContext(request: ApplicationRequest): GraphQLContext {
-        val principal =
-            request.call.principal<JWTPrincipal>() ?: run {
-                sikkerlogg.error("Ingen access_token for graphql-kall")
-                return emptyMap<Any, Any>().toGraphQLContext()
-            }
-        val tilgangsgrupper = tilgangsgrupper.grupperFor(principal.getGrupper())
+        val jwt =
+            (
+                request.call.principal<JWTPrincipal>() ?: this.run {
+                    sikkerlogg.error("Ingen access_token for graphql-kall")
+                    return emptyMap<Any, Any>().toGraphQLContext()
+                }
+            ).payload
+
         return mapOf(
-            TILGANGSGRUPPER to tilgangsgrupper,
-            SAKSBEHANDLER to SaksbehandlerFraApi.fraOnBehalfOfToken(principal),
+            TILGANGSGRUPPER to
+                this.tilgangsgrupper.grupperFor(
+                    jwt
+                        .getClaim("groups")
+                        ?.asList(String::class.java)
+                        ?.map(UUID::fromString)
+                        .orEmpty(),
+                ),
+            SAKSBEHANDLER to
+                Saksbehandler(
+                    id =
+                        SaksbehandlerOid(
+                            value =
+                                jwt
+                                    .getClaim("oid")
+                                    .asString()
+                                    .let(UUID::fromString),
+                        ),
+                    navn = jwt.getClaim("name").asString(),
+                    epost = jwt.getClaim("preferred_username").asString(),
+                    ident = jwt.getClaim("NAVident").asString(),
+                ),
         ).toGraphQLContext()
     }
 }
-
-private fun JWTPrincipal.getGrupper() = payload.getClaim("groups")?.asList(String::class.java)?.map(UUID::fromString) ?: emptyList()

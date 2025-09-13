@@ -8,9 +8,9 @@ import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.byggRespons
 import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektInput
-import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
+import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntekt
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektId
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektPeriodeValidator
@@ -38,7 +38,7 @@ class TilkommenInntektMutationHandler(
             val tilkommenInntekt =
                 TilkommenInntekt.ny(
                     fødselsnummer = fodselsnummer,
-                    saksbehandlerIdent = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER).ident,
+                    saksbehandlerIdent = env.graphQlContext.get<Saksbehandler>(SAKSBEHANDLER).ident,
                     notatTilBeslutter = notatTilBeslutter,
                     totrinnsvurderingId =
                         finnEllerOpprettTotrinnsvurdering(
@@ -92,7 +92,7 @@ class TilkommenInntektMutationHandler(
                 periode = endretTil.periode.fom tilOgMed endretTil.periode.tom,
                 periodebeløp = endretTil.periodebelop,
                 ekskluderteUkedager = endretTil.ekskluderteUkedager.toSet(),
-                saksbehandlerIdent = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER).ident,
+                saksbehandlerIdent = env.graphQlContext.get<Saksbehandler>(SAKSBEHANDLER).ident,
                 notatTilBeslutter = notatTilBeslutter,
                 totrinnsvurderingId =
                     finnEllerOpprettTotrinnsvurdering(
@@ -139,7 +139,7 @@ class TilkommenInntektMutationHandler(
                     ?: error("Fant ikke tilkommen inntekt med tilkommenInntektId $tilkommenInntektId")
 
             tilkommenInntekt.fjern(
-                saksbehandlerIdent = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER).ident,
+                saksbehandlerIdent = env.graphQlContext.get<Saksbehandler>(SAKSBEHANDLER).ident,
                 notatTilBeslutter = notatTilBeslutter,
                 totrinnsvurderingId =
                     finnEllerOpprettTotrinnsvurdering(
@@ -186,7 +186,7 @@ class TilkommenInntektMutationHandler(
                 periode = endretTilPeriode,
                 periodebeløp = endretTil.periodebelop,
                 ekskluderteUkedager = endretTil.ekskluderteUkedager.toSet(),
-                saksbehandlerIdent = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER).ident,
+                saksbehandlerIdent = env.graphQlContext.get<Saksbehandler>(SAKSBEHANDLER).ident,
                 notatTilBeslutter = notatTilBeslutter,
                 totrinnsvurderingId =
                     finnEllerOpprettTotrinnsvurdering(

@@ -11,9 +11,9 @@ import no.nav.helse.spesialist.api.graphql.byggFeilrespons
 import no.nav.helse.spesialist.api.graphql.byggRespons
 import no.nav.helse.spesialist.api.graphql.graphqlErrorException
 import no.nav.helse.spesialist.api.graphql.schema.ApiTildeling
-import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
+import no.nav.helse.spesialist.domain.Saksbehandler
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -28,14 +28,14 @@ class TildelingMutationHandler(
         oppgaveId: String,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<ApiTildeling?> {
-        val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(ContextValues.SAKSBEHANDLER)
+        val saksbehandler = env.graphQlContext.get<Saksbehandler>(ContextValues.SAKSBEHANDLER)
         return try {
             saksbehandlerMediator.håndter(
                 TildelOppgave(oppgaveId = oppgaveId.toLong()),
-                saksbehandlerFraApi = saksbehandler,
+                saksbehandler = saksbehandler,
                 tilgangsgrupper = env.graphQlContext.get(ContextValues.TILGANGSGRUPPER),
             )
-            byggRespons(ApiTildeling(saksbehandler.navn, saksbehandler.epost, saksbehandler.oid))
+            byggRespons(ApiTildeling(saksbehandler.navn, saksbehandler.epost, saksbehandler.id().value))
         } catch (e: OppgaveTildeltNoenAndre) {
             byggFeilrespons(alleredeTildeltError(e))
         } catch (e: RuntimeException) {
@@ -50,7 +50,7 @@ class TildelingMutationHandler(
         try {
             saksbehandlerMediator.håndter(
                 handlingFraApi = AvmeldOppgave(oppgaveId = oppgaveId.toLong()),
-                saksbehandlerFraApi = env.graphQlContext.get(ContextValues.SAKSBEHANDLER),
+                saksbehandler = env.graphQlContext.get(ContextValues.SAKSBEHANDLER),
                 tilgangsgrupper = env.graphQlContext.get(ContextValues.TILGANGSGRUPPER),
             )
             byggRespons(true)

@@ -17,7 +17,7 @@ class OpphevStansMutationHandler(
     ): DataFetcherResult<Boolean> {
         saksbehandlerMediator.håndter(
             handlingFraApi = ApiOpphevStans(fødselsnummer = fodselsnummer, begrunnelse = begrunnelse),
-            saksbehandlerFraApi = env.graphQlContext.get(ContextValues.SAKSBEHANDLER),
+            saksbehandler = env.graphQlContext.get(ContextValues.SAKSBEHANDLER),
             tilgangsgrupper = env.graphQlContext.get(ContextValues.TILGANGSGRUPPER),
         )
         return byggRespons(true)

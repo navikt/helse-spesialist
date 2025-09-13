@@ -38,12 +38,13 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse
 import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.overstyring.Dagtype
-import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.client.spleis.SpleisClient
 import no.nav.helse.spesialist.client.spleis.SpleisClientSnapshothenter
 import no.nav.helse.spesialist.db.DbQuery
 import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
 import no.nav.helse.spesialist.domain.Periode
+import no.nav.helse.spesialist.domain.Saksbehandler
+import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk
 import no.nav.helse.spesialist.test.TestPerson
@@ -98,11 +99,11 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val SAKSBEHANDLER_IDENT = "S199999"
     protected val SAKSBEHANDLER_NAVN = "Augunn Saksbehandler"
     private val saksbehandler =
-        SaksbehandlerFraApi(
-            oid = SAKSBEHANDLER_OID,
+        Saksbehandler(
+            id = SaksbehandlerOid(value = SAKSBEHANDLER_OID),
             navn = SAKSBEHANDLER_NAVN,
             epost = SAKSBEHANDLER_EPOST,
-            ident = SAKSBEHANDLER_IDENT,
+            ident = SAKSBEHANDLER_IDENT
         )
     private val enhetsnummerOslo = "0301"
 

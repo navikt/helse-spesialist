@@ -18,7 +18,6 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveegenskap
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaverTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavesortering
 import no.nav.helse.spesialist.api.graphql.schema.ApiSorteringsnokkel
-import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
@@ -30,14 +29,13 @@ class ApiOppgaveService(
     private val oppgaveService: OppgaveService,
 ) {
     fun oppgaver(
-        saksbehandlerFraApi: SaksbehandlerFraApi,
+        saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
         offset: Int,
         limit: Int,
         sortering: List<ApiOppgavesortering>,
         filtrering: ApiFiltrering,
     ): ApiOppgaverTilBehandling {
-        val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
         val egenskaperSaksbehandlerIkkeHarTilgangTil =
             Egenskap
                 .entries
@@ -88,7 +86,7 @@ class ApiOppgaveService(
     }
 
     fun tildelteOppgaver(
-        innloggetSaksbehandler: SaksbehandlerFraApi,
+        innloggetSaksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
         oppslåttSaksbehandler: Saksbehandler,
         offset: Int,
@@ -100,7 +98,7 @@ class ApiOppgaveService(
                 .filterNot {
                     Oppgave.harTilgangTilEgenskap(
                         egenskap = it,
-                        saksbehandler = innloggetSaksbehandler.tilSaksbehandler(),
+                        saksbehandler = innloggetSaksbehandler,
                         saksbehandlerTilgangsgrupper = tilgangsgrupper,
                     )
                 }.map(Egenskap::toString)
@@ -119,20 +117,18 @@ class ApiOppgaveService(
         )
     }
 
-    fun antallOppgaver(saksbehandlerFraApi: SaksbehandlerFraApi): ApiAntallOppgaver {
-        val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
+    fun antallOppgaver(saksbehandler: Saksbehandler): ApiAntallOppgaver {
         val antallOppgaver = oppgaveDao.finnAntallOppgaver(saksbehandlerOid = saksbehandler.id().value)
         return antallOppgaver.tilApiversjon()
     }
 
     fun behandledeOppgaver(
-        saksbehandlerFraApi: SaksbehandlerFraApi,
+        saksbehandler: Saksbehandler,
         offset: Int,
         limit: Int,
         fom: LocalDate,
         tom: LocalDate,
     ): ApiBehandledeOppgaver {
-        val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
         val behandledeOppgaver =
             oppgaveDao.finnBehandledeOppgaver(
                 behandletAvOid = saksbehandler.id().value,
