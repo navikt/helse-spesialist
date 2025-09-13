@@ -3,12 +3,11 @@ package no.nav.helse.spesialist.api.graphql.mutation
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import no.nav.helse.mediator.SaksbehandlerMediator
-import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
+import no.nav.helse.spesialist.api.graphql.ContextValues
 import no.nav.helse.spesialist.api.graphql.byggFeilrespons
 import no.nav.helse.spesialist.api.graphql.byggRespons
 import no.nav.helse.spesialist.api.graphql.graphqlErrorException
 import no.nav.helse.spesialist.api.graphql.schema.ApiMinimumSykdomsgrad
-import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -23,13 +22,16 @@ class MinimumSykdomsgradMutationHandler(
         minimumSykdomsgrad: ApiMinimumSykdomsgrad,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean?> {
-        val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
         if (minimumSykdomsgrad.perioderVurdertOk.isEmpty() && minimumSykdomsgrad.perioderVurdertIkkeOk.isEmpty()) {
             return byggFeilrespons(graphqlErrorException(400, "Mangler vurderte perioder"))
         }
 
         return try {
-            saksbehandlerMediator.håndter(minimumSykdomsgrad, saksbehandler)
+            saksbehandlerMediator.håndter(
+                handlingFraApi = minimumSykdomsgrad,
+                saksbehandlerFraApi = env.graphQlContext.get(ContextValues.SAKSBEHANDLER),
+                tilgangsgrupper = env.graphQlContext.get(ContextValues.TILGANGSGRUPPER),
+            )
             byggRespons(true)
         } catch (e: Exception) {
             val kunneIkkeVurdereMinimumSykdomsgradError =

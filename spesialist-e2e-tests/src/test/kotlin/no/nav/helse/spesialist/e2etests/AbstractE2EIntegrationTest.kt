@@ -25,14 +25,11 @@ import java.util.UUID
 abstract class AbstractE2EIntegrationTest {
     private val testContext: TestContext = TestContext()
     private var saksbehandler = lagSaksbehandlerFraApi()
-    private var beslutter = lagSaksbehandlerFraApi(
-        tilgangsgrupper = setOf(Tilgangsgruppe.BESLUTTER)
-    )
+    private var saksbehandlerTilgangsgrupper = mutableSetOf<Tilgangsgruppe>()
+    private var beslutter = lagSaksbehandlerFraApi()
 
     protected fun saksbehandlerHarTilgang(tilgangsgruppe: Tilgangsgruppe) {
-        saksbehandler = saksbehandler.copy(
-            tilgangsgrupper = saksbehandler.tilgangsgrupper.plus(tilgangsgruppe).toSet()
-        )
+        saksbehandlerTilgangsgrupper += tilgangsgruppe
     }
 
     private val behovLøserStub = E2ETestApplikasjon.behovLøserStub.also {
@@ -211,7 +208,7 @@ abstract class AbstractE2EIntegrationTest {
         SpeilPersonReceiver(
             testContext = testContext,
             saksbehandlerIdent = saksbehandler.ident,
-            bearerAuthToken = E2ETestApplikasjon.apiModuleIntegrationTestFixture.token(saksbehandler)
+            bearerAuthToken = E2ETestApplikasjon.apiModuleIntegrationTestFixture.token(saksbehandler, saksbehandlerTilgangsgrupper)
         ).block()
     }
 
@@ -220,7 +217,7 @@ abstract class AbstractE2EIntegrationTest {
         SpeilPersonReceiver(
             testContext = testContext,
             saksbehandlerIdent = beslutter.ident,
-            bearerAuthToken = E2ETestApplikasjon.apiModuleIntegrationTestFixture.token(beslutter)
+            bearerAuthToken = E2ETestApplikasjon.apiModuleIntegrationTestFixture.token(beslutter, setOf(Tilgangsgruppe.BESLUTTER))
         ).block()
     }
 

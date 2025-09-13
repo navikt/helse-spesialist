@@ -31,7 +31,7 @@ class OppgaverQueryHandlerTest : AbstractGraphQLApiTest() {
     @Test
     fun `oppgaver query uten parametere returnerer oppgave`() {
         every {
-            apiOppgaveService.oppgaver(any(), any(), any(), any(), any())
+            apiOppgaveService.oppgaver(any(), any(), any(), any(), any(), any())
         } returns ApiOppgaverTilBehandling(oppgaver = listOf(oppgaveTilBehandling()), totaltAntallOppgaver = 1)
 
         val body = runQuery(
@@ -53,14 +53,14 @@ class OppgaverQueryHandlerTest : AbstractGraphQLApiTest() {
         )
         val antallOppgaver = body["data"]["oppgaveFeed"].size()
 
-        verify(exactly = 1) { apiOppgaveService.oppgaver(any(), 0, 14, any(), any()) }
+        verify(exactly = 1) { apiOppgaveService.oppgaver(any(), any(), 0, 14, any(), any()) }
         assertEquals(1, antallOppgaver)
     }
 
     @Test
     fun `oppgaver query med parametere returnerer oppgave`() {
         every {
-            apiOppgaveService.oppgaver(any(), any(), any(), any(), any())
+            apiOppgaveService.oppgaver(any(), any(), any(), any(), any(), any())
         } returns ApiOppgaverTilBehandling(oppgaver = listOf(oppgaveTilBehandling()), totaltAntallOppgaver = 1)
 
         val body = runQuery(
@@ -85,6 +85,7 @@ class OppgaverQueryHandlerTest : AbstractGraphQLApiTest() {
         verify(exactly = 1) {
             apiOppgaveService.oppgaver(
                 saksbehandlerFraApi = any(),
+                tilgangsgrupper = any(),
                 offset = 14,
                 limit = 14,
                 sortering = listOf(ApiOppgavesortering(ApiSorteringsnokkel.TILDELT_TIL, true)),
@@ -100,7 +101,7 @@ class OppgaverQueryHandlerTest : AbstractGraphQLApiTest() {
     @Test
     fun `oppgaver query sortert på tidsfrist`() {
         every {
-            apiOppgaveService.oppgaver(any(), any(), any(), any(), any())
+            apiOppgaveService.oppgaver(any(), any(), any(), any(), any(), any())
         } returns ApiOppgaverTilBehandling(oppgaver = listOf(oppgaveTilBehandling()), totaltAntallOppgaver = 1)
 
         val body = runQuery(
@@ -125,6 +126,7 @@ class OppgaverQueryHandlerTest : AbstractGraphQLApiTest() {
         verify(exactly = 1) {
             apiOppgaveService.oppgaver(
                 saksbehandlerFraApi = any(),
+                tilgangsgrupper = any(),
                 offset = 14,
                 limit = 14,
                 sortering = listOf(ApiOppgavesortering(ApiSorteringsnokkel.TIDSFRIST, true)),

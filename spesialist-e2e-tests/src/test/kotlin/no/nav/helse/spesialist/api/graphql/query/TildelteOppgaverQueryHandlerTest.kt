@@ -29,7 +29,7 @@ class TildelteOppgaverQueryHandlerTest : AbstractGraphQLApiTest() {
             epost = "ola@nordmann.no"
         )
         every {
-            apiOppgaveService.tildelteOppgaver(any(), any(), any(), any())
+            apiOppgaveService.tildelteOppgaver(any(), any(), any(), any(), any())
         } returns ApiOppgaverTilBehandling(oppgaver = listOf(oppgaveTilBehandling()), totaltAntallOppgaver = 1)
 
         val body = runQuery(
@@ -48,7 +48,7 @@ class TildelteOppgaverQueryHandlerTest : AbstractGraphQLApiTest() {
         )
         val antallOppgaver = body["data"]["tildelteOppgaverFeed"].size()
 
-        verify(exactly = 1) { apiOppgaveService.tildelteOppgaver(any(), any(), 0, 14) }
+        verify(exactly = 1) { apiOppgaveService.tildelteOppgaver(any(), any(), any(), 0, 14) }
         assertEquals(1, antallOppgaver)
     }
 
@@ -71,7 +71,7 @@ class TildelteOppgaverQueryHandlerTest : AbstractGraphQLApiTest() {
         val error = body["errors"].first()
 
         verify(exactly = 0) { saksbehandlerDao.hent(any()) }
-        verify(exactly = 0) { apiOppgaveService.tildelteOppgaver(any(), any(), any(),  any()) }
+        verify(exactly = 0) { apiOppgaveService.tildelteOppgaver(any(), any(), any(), any(),  any()) }
 
         assertTrue(error["message"].asText().contains("Saksbehandler mangler ident"))
         assertEquals(404, error["extensions"]["code"].asInt())
@@ -96,7 +96,7 @@ class TildelteOppgaverQueryHandlerTest : AbstractGraphQLApiTest() {
         )
         val error = body["errors"].first()
 
-        verify(exactly = 0) { apiOppgaveService.tildelteOppgaver(any(), any(), any(),  any()) }
+        verify(exactly = 0) { apiOppgaveService.tildelteOppgaver(any(), any(), any(), any(),  any()) }
 
         assertTrue(error["message"].asText().contains("Finner ikke saksbehandler"))
         assertEquals(404, error["extensions"]["code"].asInt())

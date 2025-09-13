@@ -9,6 +9,7 @@ import io.ktor.server.routing.routing
 import no.nav.helse.spesialist.api.ApiModule
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
+import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import java.util.UUID
 
@@ -32,17 +33,18 @@ class ApiModuleIntegrationTestFixture(
             println(it)
         }
 
-    fun token(saksbehandlerFraApi: SaksbehandlerFraApi): String = mockOAuth2Server.issueToken(
-        issuerId = ISSUER_ID,
-        audience = CLIENT_ID,
-        subject = saksbehandlerFraApi.oid.toString(),
-        claims = mapOf(
-            "NAVident" to saksbehandlerFraApi.ident,
-            "preferred_username" to saksbehandlerFraApi.epost,
-            "oid" to saksbehandlerFraApi.oid.toString(),
-            "name" to saksbehandlerFraApi.navn,
-            "groups" to tilgangsgrupper.uuiderFor(saksbehandlerFraApi.tilgangsgrupper).map { it.toString() }
-        )
+    fun token(saksbehandlerFraApi: SaksbehandlerFraApi, tilgangsgrupper: Set<Tilgangsgruppe>): String =
+        mockOAuth2Server.issueToken(
+            issuerId = ISSUER_ID,
+            audience = CLIENT_ID,
+            subject = saksbehandlerFraApi.oid.toString(),
+            claims = mapOf(
+                "NAVident" to saksbehandlerFraApi.ident,
+                "preferred_username" to saksbehandlerFraApi.epost,
+                "oid" to saksbehandlerFraApi.oid.toString(),
+                "name" to saksbehandlerFraApi.navn,
+                "groups" to this.tilgangsgrupper.uuiderFor(tilgangsgrupper).map { it.toString() }
+            )
     ).serialize()
 
     val apiModuleConfiguration = ApiModule.Configuration(

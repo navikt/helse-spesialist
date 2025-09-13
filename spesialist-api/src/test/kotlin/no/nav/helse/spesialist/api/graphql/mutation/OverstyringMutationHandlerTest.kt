@@ -155,7 +155,7 @@ internal class OverstyringMutationHandlerTest {
         runQuery(
             given = {
                 every {
-                    it.saksbehandlerMediator.håndter(any(), any())
+                    it.saksbehandlerMediator.håndter(any(), any(), any())
                 } throws IOException("noe galt skjedde liksom mot databasen")
             },
             whenever = overstyrTidslinjeMutation(

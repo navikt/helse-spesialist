@@ -6,7 +6,6 @@ import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.graphql.ContextValues
 import no.nav.helse.spesialist.api.graphql.byggRespons
 import no.nav.helse.spesialist.api.graphql.schema.ApiAnnulleringData
-import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 
 class AnnulleringMutationHandler(
     private val saksbehandlerMediator: SaksbehandlerMediator,
@@ -15,9 +14,11 @@ class AnnulleringMutationHandler(
         annullering: ApiAnnulleringData,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> {
-        val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(ContextValues.SAKSBEHANDLER)
-
-        saksbehandlerMediator.håndter(annullering, saksbehandler)
+        saksbehandlerMediator.håndter(
+            handlingFraApi = annullering,
+            saksbehandlerFraApi = env.graphQlContext.get(ContextValues.SAKSBEHANDLER),
+            tilgangsgrupper = env.graphQlContext.get(ContextValues.TILGANGSGRUPPER),
+        )
 
         return byggRespons(true)
     }

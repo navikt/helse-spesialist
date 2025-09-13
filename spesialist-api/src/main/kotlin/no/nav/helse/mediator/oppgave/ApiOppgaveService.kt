@@ -21,6 +21,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiSorteringsnokkel
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
+import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import java.time.LocalDate
 import java.util.UUID
 
@@ -30,6 +31,7 @@ class ApiOppgaveService(
 ) {
     fun oppgaver(
         saksbehandlerFraApi: SaksbehandlerFraApi,
+        tilgangsgrupper: Set<Tilgangsgruppe>,
         offset: Int,
         limit: Int,
         sortering: List<ApiOppgavesortering>,
@@ -43,7 +45,7 @@ class ApiOppgaveService(
                     Oppgave.harTilgangTilEgenskap(
                         egenskap = it,
                         saksbehandler = saksbehandler,
-                        saksbehandlerTilgangsgrupper = saksbehandlerFraApi.tilgangsgrupper,
+                        saksbehandlerTilgangsgrupper = tilgangsgrupper,
                     )
                 }.map(Egenskap::toString)
 
@@ -87,6 +89,7 @@ class ApiOppgaveService(
 
     fun tildelteOppgaver(
         innloggetSaksbehandler: SaksbehandlerFraApi,
+        tilgangsgrupper: Set<Tilgangsgruppe>,
         oppslåttSaksbehandler: Saksbehandler,
         offset: Int,
         limit: Int,
@@ -98,7 +101,7 @@ class ApiOppgaveService(
                     Oppgave.harTilgangTilEgenskap(
                         egenskap = it,
                         saksbehandler = innloggetSaksbehandler.tilSaksbehandler(),
-                        saksbehandlerTilgangsgrupper = innloggetSaksbehandler.tilgangsgrupper,
+                        saksbehandlerTilgangsgrupper = tilgangsgrupper,
                     )
                 }.map(Egenskap::toString)
 

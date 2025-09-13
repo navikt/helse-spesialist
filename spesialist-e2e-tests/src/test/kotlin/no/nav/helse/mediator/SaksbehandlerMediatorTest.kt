@@ -460,7 +460,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             navn = SAKSBEHANDLER_NAVN,
             epost = SAKSBEHANDLER_EPOST,
             ident = SAKSBEHANDLER_IDENT,
-            tilgangsgrupper = emptySet()
         )
 
     @BeforeEach
@@ -491,7 +490,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             SAKSBEHANDLER_NAVN,
             SAKSBEHANDLER_EPOST,
             SAKSBEHANDLER_IDENT,
-            emptySet(),
         )
         sessionFactory.transactionalSessionScope { session ->
             session.personRepository.brukPersonHvisFinnes(fødselsnummer = fødselsnummer) {
@@ -535,7 +533,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             SAKSBEHANDLER_NAVN,
             SAKSBEHANDLER_EPOST,
             SAKSBEHANDLER_IDENT,
-            emptySet(),
         )
         sessionFactory.transactionalSessionScope { session ->
             session.personRepository.brukPersonHvisFinnes(fødselsnummer = fødselsnummer) {
@@ -580,7 +577,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             SAKSBEHANDLER_NAVN,
             SAKSBEHANDLER_EPOST,
             SAKSBEHANDLER_IDENT,
-            emptySet(),
         )
         val overstyring =
             ApiTidslinjeOverstyring(
@@ -602,7 +598,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
                     ),
             )
 
-        mediator.håndter(overstyring, saksbehandler)
+        mediator.håndter(overstyring, saksbehandler, emptySet())
         val totrinnsvurdering = sessionFactory.transactionalSessionScope { session ->
             session.totrinnsvurderingRepository.finnAktivForPerson(person.fødselsnummer)
         }
@@ -631,7 +627,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             SAKSBEHANDLER_NAVN,
             SAKSBEHANDLER_EPOST,
             SAKSBEHANDLER_IDENT,
-            emptySet(),
         )
         val overstyring =
             ApiTidslinjeOverstyring(
@@ -653,7 +648,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
                     ),
             )
 
-        mediator.håndter(overstyring, saksbehandler)
+        mediator.håndter(overstyring, saksbehandler, emptySet())
         val totrinnsvurdering = sessionFactory.transactionalSessionScope { session ->
             session.totrinnsvurderingRepository.finnAktivForPerson(person.fødselsnummer)
         }
@@ -682,7 +677,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             SAKSBEHANDLER_NAVN,
             SAKSBEHANDLER_EPOST,
             SAKSBEHANDLER_IDENT,
-            emptySet(),
         )
         sessionFactory.transactionalSessionScope { session ->
             session.personRepository.brukPersonHvisFinnes(fødselsnummer = fødselsnummer) {
@@ -711,7 +705,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             lagSaksbehandlernavn(),
             lagTilfeldigSaksbehandlerepost(),
             lagSaksbehandlerident(),
-            emptySet(),
         )
         opprettSaksbehandler(beslutter.oid, beslutter.navn, beslutter.epost, beslutter.ident)
         val resultRetur = mediator.sendIRetur(oppgaveId, beslutter, "begrunnelse")
@@ -746,7 +739,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             SAKSBEHANDLER_NAVN,
             SAKSBEHANDLER_EPOST,
             SAKSBEHANDLER_IDENT,
-            emptySet(),
         )
         val definisjonRef = opprettVarseldefinisjon()
         nyttVarsel(
@@ -794,7 +786,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             SAKSBEHANDLER_NAVN,
             SAKSBEHANDLER_EPOST,
             SAKSBEHANDLER_IDENT,
-            emptySet(),
         )
         sessionFactory.transactionalSessionScope { session ->
             session.personRepository.brukPersonHvisFinnes(fødselsnummer = fødselsnummer) {
@@ -816,7 +807,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
     @Test
     fun `forsøk tildeling av oppgave`() {
         nyPerson()
-        mediator.håndter(TildelOppgave(oppgaveId), saksbehandler)
+        mediator.håndter(TildelOppgave(oppgaveId), saksbehandler, emptySet())
         val melding = testRapid.inspektør.hendelser().last()
         assertEquals("oppgave_oppdatert", melding)
     }
@@ -900,10 +891,10 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
     @Test
     fun `forsøk tildeling av oppgave når den allerede er tildelt`() {
         nyPerson()
-        mediator.håndter(TildelOppgave(oppgaveId), saksbehandler)
+        mediator.håndter(TildelOppgave(oppgaveId), saksbehandler, emptySet())
         testRapid.reset()
         assertThrows<OppgaveTildeltNoenAndre> {
-            mediator.håndter(TildelOppgave(oppgaveId), saksbehandler(UUID.randomUUID()))
+            mediator.håndter(TildelOppgave(oppgaveId), saksbehandler(UUID.randomUUID()), emptySet())
         }
         assertEquals(0, testRapid.inspektør.hendelser().size)
     }
@@ -911,9 +902,9 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
     @Test
     fun `forsøk avmelding av oppgave`() {
         nyPerson()
-        mediator.håndter(TildelOppgave(oppgaveId), saksbehandler)
+        mediator.håndter(TildelOppgave(oppgaveId), saksbehandler, emptySet())
         testRapid.reset()
-        mediator.håndter(AvmeldOppgave(oppgaveId), saksbehandler)
+        mediator.håndter(AvmeldOppgave(oppgaveId), saksbehandler, emptySet())
         val melding = testRapid.inspektør.hendelser().last()
         assertEquals("oppgave_oppdatert", melding)
     }
@@ -922,7 +913,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
     fun `forsøk avmelding av oppgave når den ikke er tildelt`() {
         nyPerson()
         assertThrows<OppgaveIkkeTildelt> {
-            mediator.håndter(AvmeldOppgave(oppgaveId), saksbehandler(UUID.randomUUID()))
+            mediator.håndter(AvmeldOppgave(oppgaveId), saksbehandler(UUID.randomUUID()), emptySet())
         }
         assertEquals(0, testRapid.inspektør.hendelser().size)
     }
@@ -1018,7 +1009,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
 
     @Test
     fun `håndterer annullering`() {
-        mediator.håndter(annullering(), saksbehandler)
+        mediator.håndter(annullering(), saksbehandler, emptySet())
 
         assertEquals(1, testRapid.inspektør.size)
         val melding = testRapid.inspektør.message(0)
@@ -1045,7 +1036,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
 
     @Test
     fun `håndterer annullering uten kommentar, begrunnelser eller årsak`() {
-        mediator.håndter(annullering(kommentar = null, arsaker = emptyList()), saksbehandler)
+        mediator.håndter(annullering(kommentar = null, arsaker = emptyList()), saksbehandler, emptySet())
 
         val melding = testRapid.inspektør.message(0)
 
@@ -1066,9 +1057,9 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
     @Test
     fun `godtar ikke å annullere samme utbetaling mer enn 1 gang`() {
         val annullering = annullering(kommentar = null)
-        mediator.håndter(annullering, saksbehandler)
+        mediator.håndter(annullering, saksbehandler, emptySet())
         assertThrows<AlleredeAnnullert> {
-            mediator.håndter(annullering, saksbehandler)
+            mediator.håndter(annullering, saksbehandler, emptySet())
         }
     }
 
@@ -1094,7 +1085,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             SAKSBEHANDLER_NAVN,
             SAKSBEHANDLER_EPOST,
             SAKSBEHANDLER_IDENT,
-            emptySet(),
         )
         sessionFactory.transactionalSessionScope { session ->
             session.personRepository.brukPersonHvisFinnes(fødselsnummer = fødselsnummer) {
@@ -1109,6 +1099,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
 
         val result = mediator.vedtak(
             saksbehandlerFraApi = saksbehandler,
+            tilgangsgrupper = emptySet(),
             oppgavereferanse = oppgaveId,
             begrunnelse = "En begrunnelse",
         )
@@ -1199,7 +1190,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
                     ),
             )
 
-        mediator.håndter(overstyring, saksbehandler)
+        mediator.håndter(overstyring, saksbehandler, emptySet())
         val hendelse = testRapid.inspektør.hendelser("overstyr_tidslinje").first()
         val overstyringId = finnOverstyringId(person.fødselsnummer)
 
@@ -1237,7 +1228,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
                     ),
             )
 
-        mediator.håndter(overstyring, saksbehandler)
+        mediator.håndter(overstyring, saksbehandler, emptySet())
         val hendelse = testRapid.inspektør.hendelser("overstyr_arbeidsforhold").first()
 
         assertNotNull(hendelse["@id"].asText())
@@ -1326,7 +1317,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
                     ),
             )
 
-        mediator.håndter(overstyring, saksbehandler)
+        mediator.håndter(overstyring, saksbehandler, emptySet())
 
         val hendelse = testRapid.inspektør.hendelser("overstyr_inntekt_og_refusjon").first()
 
@@ -1400,7 +1391,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
                 vedtaksperiodeId = PERIODE.id,
             )
 
-        mediator.håndter(skjønnsfastsetting, saksbehandler)
+        mediator.håndter(skjønnsfastsetting, saksbehandler, emptySet())
 
         val hendelse = testRapid.inspektør.hendelser("skjønnsmessig_fastsettelse").first()
 
@@ -1465,7 +1456,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
                 initierendeVedtaksperiodeId = PERIODE.id,
             )
 
-        mediator.håndter(minimumSykdomsgrad, saksbehandler)
+        mediator.håndter(minimumSykdomsgrad, saksbehandler, emptySet())
 
         val hendelse = testRapid.inspektør.hendelser("minimum_sykdomsgrad_vurdert").first()
 
@@ -1493,7 +1484,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
     @Test
     fun `opphev stans`() {
         nyPerson()
-        mediator.håndter(ApiOpphevStans(FNR, "EN_ÅRSAK"), saksbehandler)
+        mediator.håndter(ApiOpphevStans(FNR, "EN_ÅRSAK"), saksbehandler, emptySet())
         assertStansOpphevet(FNR)
     }
 

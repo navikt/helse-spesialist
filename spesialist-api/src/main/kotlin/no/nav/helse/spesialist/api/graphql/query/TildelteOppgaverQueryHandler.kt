@@ -4,7 +4,7 @@ import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
-import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
+import no.nav.helse.spesialist.api.graphql.ContextValues
 import no.nav.helse.spesialist.api.graphql.byggRespons
 import no.nav.helse.spesialist.api.graphql.notFound
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaverTilBehandling
@@ -23,7 +23,7 @@ class TildelteOppgaverQueryHandler(
         oppslattSaksbehandler: ApiSaksbehandler,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<ApiOppgaverTilBehandling> {
-        val innloggetSaksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
+        val innloggetSaksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(ContextValues.SAKSBEHANDLER)
 
         val oppslåttSaksbehandler =
             oppslattSaksbehandler.ident
@@ -37,6 +37,7 @@ class TildelteOppgaverQueryHandler(
             measureTimedValue {
                 apiOppgaveService.tildelteOppgaver(
                     innloggetSaksbehandler = innloggetSaksbehandler,
+                    tilgangsgrupper = env.graphQlContext.get(ContextValues.TILGANGSGRUPPER),
                     oppslåttSaksbehandler = oppslåttSaksbehandler,
                     offset = offset,
                     limit = limit,

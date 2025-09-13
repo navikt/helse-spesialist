@@ -18,6 +18,7 @@ import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
 import no.nav.helse.spesialist.db.DBDaos
 import no.nav.helse.spesialist.db.TransactionalSessionFactory
+import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import javax.sql.DataSource
 
 class TestMediator(
@@ -121,7 +122,8 @@ class TestMediator(
     fun håndter(
         handling: HandlingFraApi,
         saksbehandlerFraApi: SaksbehandlerFraApi,
+        tilgangsgrupper: Set<Tilgangsgruppe>,
     ) {
-        saksbehandlerMediator.håndter(handling, saksbehandlerFraApi)
+        saksbehandlerMediator.håndter(handling, saksbehandlerFraApi, tilgangsgrupper)
     }
 }

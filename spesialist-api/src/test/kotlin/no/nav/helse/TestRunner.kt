@@ -32,6 +32,7 @@ import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
 import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgrupper
+import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.intellij.lang.annotations.Language
 
@@ -51,21 +52,23 @@ object TestRunner {
 
     private val tilgangsgrupper = randomTilgangsgrupper()
 
-    private fun token(saksbehandlerFraApi: SaksbehandlerFraApi): String = mockOAuth2Server.issueToken(
-        issuerId = issuerId,
-        audience = clientId,
-        subject = saksbehandlerFraApi.oid.toString(),
-        claims = mapOf(
-            "NAVident" to saksbehandlerFraApi.ident,
-            "preferred_username" to saksbehandlerFraApi.epost,
-            "oid" to saksbehandlerFraApi.oid.toString(),
-            "name" to saksbehandlerFraApi.navn,
-            "groups" to tilgangsgrupper.uuiderFor(saksbehandlerFraApi.tilgangsgrupper).map { it.toString() }
-        )
-    ).serialize()
+    private fun token(saksbehandlerFraApi: SaksbehandlerFraApi, tilgangsgrupper: Set<Tilgangsgruppe>): String =
+        mockOAuth2Server.issueToken(
+            issuerId = issuerId,
+            audience = clientId,
+            subject = saksbehandlerFraApi.oid.toString(),
+            claims = mapOf(
+                "NAVident" to saksbehandlerFraApi.ident,
+                "preferred_username" to saksbehandlerFraApi.epost,
+                "oid" to saksbehandlerFraApi.oid.toString(),
+                "name" to saksbehandlerFraApi.navn,
+                "groups" to this.tilgangsgrupper.uuiderFor(tilgangsgrupper).map { it.toString() }
+            )
+        ).serialize()
 
     fun runQuery(
         saksbehandlerFraApi: SaksbehandlerFraApi = lagSaksbehandlerFraApi(),
+        tilgangsgrupper: Set<Tilgangsgruppe> = emptySet(),
         given: (avhengigheter: Avhengigheter) -> Unit = {},
         @Language("GraphQL") whenever: String,
         then: suspend (response: HttpResponse, body: JsonNode, avhengigheter: Avhengigheter) -> Unit,
@@ -82,7 +85,7 @@ object TestRunner {
             behandlingstatistikk = mockk(relaxed = true),
             snapshothenter = mockk(relaxed = true),
             reservasjonshenter = mockk(relaxed = true),
-            tilgangsgrupper = tilgangsgrupper,
+            tilgangsgrupper = this.tilgangsgrupper,
             meldingPubliserer = mockk(relaxed = true),
         )
         testApplication {
@@ -119,7 +122,7 @@ object TestRunner {
             val response = client.post("/graphql") {
                 contentType(ContentType.Application.Json)
                 accept(ContentType.Application.Json)
-                bearerAuth(token(saksbehandlerFraApi))
+                bearerAuth(token(saksbehandlerFraApi, tilgangsgrupper))
                 setBody(mapOf("query" to whenever))
             }
 

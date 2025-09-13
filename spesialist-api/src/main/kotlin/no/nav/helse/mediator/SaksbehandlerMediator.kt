@@ -121,12 +121,13 @@ class SaksbehandlerMediator(
     fun håndter(
         handlingFraApi: HandlingFraApi,
         saksbehandlerFraApi: SaksbehandlerFraApi,
+        tilgangsgrupper: Set<Tilgangsgruppe>,
     ) {
         val saksbehandler = saksbehandlerFraApi.tilSaksbehandler()
         val modellhandling =
             handlingFraApi.tilModellversjon(
                 saksbehandlerOid = saksbehandler.id(),
-                saksbehandlerTilgangsgrupper = saksbehandlerFraApi.tilgangsgrupper,
+                saksbehandlerTilgangsgrupper = tilgangsgrupper,
             )
         sessionFactory.transactionalSessionScope { it.saksbehandlerRepository.lagre(saksbehandler) }
         tell(modellhandling)
@@ -165,6 +166,7 @@ class SaksbehandlerMediator(
 
     fun vedtak(
         saksbehandlerFraApi: SaksbehandlerFraApi,
+        tilgangsgrupper: Set<Tilgangsgruppe>,
         oppgavereferanse: Long,
         begrunnelse: String?,
     ): VedtakResultat =
@@ -178,7 +180,7 @@ class SaksbehandlerMediator(
                 håndterTotrinnsvurderingBeslutning(
                     fødselsnummer = fødselsnummer,
                     saksbehandler = saksbehandler,
-                    tilgangsgrupper = saksbehandlerFraApi.tilgangsgrupper,
+                    tilgangsgrupper = tilgangsgrupper,
                     totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository,
                 ) ?: håndterGodkjenning(oppgavereferanse, fødselsnummer, spleisBehandlingId, saksbehandler).also {
                     håndterVedtakBegrunnelse(
@@ -203,6 +205,7 @@ class SaksbehandlerMediator(
 
     fun infotrygdVedtak(
         saksbehandlerFraApi: SaksbehandlerFraApi,
+        tilgangsgrupper: Set<Tilgangsgruppe>,
         oppgavereferanse: Long,
     ): VedtakResultat =
         sessionFactory.transactionalSessionScope { sessionContext ->
@@ -215,7 +218,7 @@ class SaksbehandlerMediator(
                 håndterTotrinnsvurderingBeslutning(
                     fødselsnummer = fødselsnummer,
                     saksbehandler = saksbehandler,
-                    tilgangsgrupper = saksbehandlerFraApi.tilgangsgrupper,
+                    tilgangsgrupper = tilgangsgrupper,
                     totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository,
                 ) ?: håndterAvvisning(oppgavereferanse, fødselsnummer, spleisBehandlingId, saksbehandler)
             }

@@ -28,8 +28,6 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveegenskap
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavetype
 import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodetype
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
-import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgrupper
-import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgrupper
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.testfixtures.lagEpostadresseFraFulltNavn
@@ -44,12 +42,10 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.EnumSet
 import java.util.UUID
 import kotlin.random.Random
 
 internal class ApiOppgaveServiceTest {
-    private val tilgangsgrupper: Tilgangsgrupper = randomTilgangsgrupper()
     private val SAKSBEHANDLERIDENT = lagSaksbehandlerident()
     private val SAKSBEHANDLEROID = UUID.randomUUID()
     private val SAKSBEHANDLERNAVN = lagSaksbehandlernavn()
@@ -102,8 +98,8 @@ internal class ApiOppgaveServiceTest {
             )
         )
 
-    private fun saksbehandlerFraApi(grupper: Set<Tilgangsgruppe> = emptySet()) =
-        SaksbehandlerFraApi(SAKSBEHANDLEROID, SAKSBEHANDLEREPOST, SAKSBEHANDLERNAVN, SAKSBEHANDLERIDENT, grupper)
+    private fun saksbehandlerFraApi() =
+        SaksbehandlerFraApi(SAKSBEHANDLEROID, SAKSBEHANDLEREPOST, SAKSBEHANDLERNAVN, SAKSBEHANDLERIDENT)
 
     @BeforeEach
     fun setup() {
@@ -118,9 +114,12 @@ internal class ApiOppgaveServiceTest {
                     oppgaveFraDatabaseForVisning(filtrertAntall = 2),
                 )
         val oppgaver = apiOppgaveService.oppgaver(
-            saksbehandlerFraApi(), 0,
-            Int.MAX_VALUE, emptyList(),
-            ApiFiltrering()
+            saksbehandlerFraApi = saksbehandlerFraApi(),
+            tilgangsgrupper = emptySet(),
+            offset = 0,
+            limit = Int.MAX_VALUE,
+            sortering = emptyList(),
+            filtrering = ApiFiltrering()
         )
         assertEquals(2, oppgaver.oppgaver.size)
     }
@@ -133,15 +132,16 @@ internal class ApiOppgaveServiceTest {
                     oppgaveFraDatabaseForVisning(filtrertAntall = 2),
                 )
         val oppgaver = apiOppgaveService.tildelteOppgaver(
-            saksbehandlerFraApi(),
-            Saksbehandler(
+            innloggetSaksbehandler = saksbehandlerFraApi(),
+            tilgangsgrupper = emptySet(),
+            oppslåttSaksbehandler = Saksbehandler(
                 id = SaksbehandlerOid(UUID.randomUUID()),
                 navn = "Navn Navnesen",
                 ident = "L815493",
                 epost = "navn@navnesen.no"
             ),
-            0,
-            Int.MAX_VALUE,
+            offset = 0,
+            limit = Int.MAX_VALUE,
         )
         assertEquals(2, oppgaver.oppgaver.size)
     }
@@ -176,7 +176,14 @@ internal class ApiOppgaveServiceTest {
 
     @Test
     fun `Hent kun oppgaver til visning som saksbehandler har tilgang til`() {
-        apiOppgaveService.oppgaver(saksbehandlerFraApi(), 0, Int.MAX_VALUE, emptyList(), ApiFiltrering())
+        apiOppgaveService.oppgaver(
+            saksbehandlerFraApi = saksbehandlerFraApi(),
+            tilgangsgrupper = emptySet(),
+            offset = 0,
+            limit = Int.MAX_VALUE,
+            sortering = emptyList(),
+            filtrering = ApiFiltrering()
+        )
         verify(exactly = 1) {
             oppgaveDao.finnOppgaverForVisning(
                 ekskluderEgenskaper = setOf(
@@ -197,6 +204,7 @@ internal class ApiOppgaveServiceTest {
     fun `Ekskluderer alle ukategoriserte egenskaper hvis ingenUkategoriserteEgenskaper i Filtrering er satt til true`() {
         apiOppgaveService.oppgaver(
             saksbehandlerFraApi = saksbehandlerFraApi(),
+            tilgangsgrupper = emptySet(),
             offset = 0,
             limit = Int.MAX_VALUE,
             sortering = emptyList(),
@@ -225,11 +233,12 @@ internal class ApiOppgaveServiceTest {
     @Test
     fun `Ekskluderer alle ekskluderteEgenskaper`() {
         apiOppgaveService.oppgaver(
-            saksbehandlerFraApi(),
-            0,
-            Int.MAX_VALUE,
-            emptyList(),
-            ApiFiltrering(
+            saksbehandlerFraApi = saksbehandlerFraApi(),
+            tilgangsgrupper = emptySet(),
+            offset = 0,
+            limit = Int.MAX_VALUE,
+            sortering = emptyList(),
+            filtrering = ApiFiltrering(
                 ekskluderteEgenskaper =
                     listOf(
                         ApiOppgaveegenskap(
@@ -311,11 +320,14 @@ internal class ApiOppgaveServiceTest {
                         påVent = true,
                     ),
                 )
-        val saksbehandler = saksbehandlerFraApi(grupper = EnumSet.allOf(Tilgangsgruppe::class.java))
+        val saksbehandler = saksbehandlerFraApi()
         val oppgaver = apiOppgaveService.oppgaver(
-            saksbehandler, 0,
-            Int.MAX_VALUE, emptyList(),
-            ApiFiltrering()
+            saksbehandlerFraApi = saksbehandler,
+            tilgangsgrupper = Tilgangsgruppe.entries.toSet(),
+            offset = 0,
+            limit = Int.MAX_VALUE,
+            sortering = emptyList(),
+            filtrering = ApiFiltrering()
         )
         assertEquals(1, oppgaver.oppgaver.size)
         val oppgave = oppgaver.oppgaver.single()
@@ -365,11 +377,13 @@ internal class ApiOppgaveServiceTest {
                         egenskaper = egenskaper,
                     ),
                 )
-        val saksbehandler = saksbehandlerFraApi(grupper = EnumSet.allOf(Tilgangsgruppe::class.java))
         val oppgaver = apiOppgaveService.oppgaver(
-            saksbehandler, 0,
-            Int.MAX_VALUE, emptyList(),
-            ApiFiltrering()
+            saksbehandlerFraApi = saksbehandlerFraApi(),
+            tilgangsgrupper = Tilgangsgruppe.entries.toSet(),
+            offset = 0,
+            limit = Int.MAX_VALUE,
+            sortering = emptyList(),
+            filtrering = ApiFiltrering()
         )
         val oppgave = oppgaver.oppgaver.single()
         assertEquals(egenskap.oppgavetype(), oppgave.oppgavetype)
@@ -410,11 +424,13 @@ internal class ApiOppgaveServiceTest {
                         egenskaper = egenskaper,
                     ),
                 )
-        val saksbehandler = saksbehandlerFraApi(grupper = EnumSet.allOf(Tilgangsgruppe::class.java))
         val oppgaver = apiOppgaveService.oppgaver(
-            saksbehandler, 0,
-            Int.MAX_VALUE, emptyList(),
-            ApiFiltrering()
+            saksbehandlerFraApi = saksbehandlerFraApi(),
+            tilgangsgrupper = Tilgangsgruppe.entries.toSet(),
+            offset = 0,
+            limit = Int.MAX_VALUE,
+            sortering = emptyList(),
+            filtrering = ApiFiltrering()
         )
         val oppgave = oppgaver.oppgaver.single()
         assertEquals(egenskap.periodetype(), oppgave.periodetype)
@@ -455,11 +471,13 @@ internal class ApiOppgaveServiceTest {
                         egenskaper = egenskaper,
                     ),
                 )
-        val saksbehandler = saksbehandlerFraApi(grupper = EnumSet.allOf(Tilgangsgruppe::class.java))
         val oppgaver = apiOppgaveService.oppgaver(
-            saksbehandler, 0,
-            Int.MAX_VALUE, emptyList(),
-            ApiFiltrering()
+            saksbehandlerFraApi = saksbehandlerFraApi(),
+            tilgangsgrupper = Tilgangsgruppe.entries.toSet(),
+            offset = 0,
+            limit = Int.MAX_VALUE,
+            sortering = emptyList(),
+            filtrering = ApiFiltrering()
         )
         val oppgave = oppgaver.oppgaver.single()
         assertEquals(egenskap.mottaker(), oppgave.mottaker)
@@ -497,11 +515,13 @@ internal class ApiOppgaveServiceTest {
                         egenskaper = egenskaper,
                     ),
                 )
-        val saksbehandler = saksbehandlerFraApi(grupper = EnumSet.allOf(Tilgangsgruppe::class.java))
         val oppgaver = apiOppgaveService.oppgaver(
-            saksbehandler, 0,
-            Int.MAX_VALUE, emptyList(),
-            ApiFiltrering()
+            saksbehandlerFraApi = saksbehandlerFraApi(),
+            tilgangsgrupper = Tilgangsgruppe.entries.toSet(),
+            offset = 0,
+            limit = Int.MAX_VALUE,
+            sortering = emptyList(),
+            filtrering = ApiFiltrering()
         )
         val oppgave = oppgaver.oppgaver.single()
         assertEquals(egenskap.antallArbeidsforhold(), oppgave.antallArbeidsforhold)

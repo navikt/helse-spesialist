@@ -10,7 +10,7 @@ import no.nav.helse.spesialist.api.Godkjenninghåndterer
 import no.nav.helse.spesialist.api.feilhåndtering.IkkeÅpenOppgave
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.feilhåndtering.OverlapperMedInfotrygd
-import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
+import no.nav.helse.spesialist.api.graphql.ContextValues
 import no.nav.helse.spesialist.api.graphql.byggRespons
 import no.nav.helse.spesialist.api.graphql.schema.ApiAvslagstype
 import no.nav.helse.spesialist.api.saksbehandler.SaksbehandlerFraApi
@@ -31,12 +31,13 @@ class VedtakMutationHandler(
         env: DataFetchingEnvironment,
         begrunnelse: String?,
     ): DataFetcherResult<Boolean> {
-        val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
+        val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(ContextValues.SAKSBEHANDLER)
         logg.info("Behandler kall for fatting av vedtak for oppgave $oppgavereferanse")
 
         val resultat =
             saksbehandlerMediator.vedtak(
                 saksbehandlerFraApi = saksbehandler,
+                tilgangsgrupper = env.graphQlContext.get(ContextValues.TILGANGSGRUPPER),
                 oppgavereferanse = oppgavereferanse.toLong(),
                 begrunnelse = begrunnelse,
             )
@@ -73,12 +74,13 @@ class VedtakMutationHandler(
         kommentar: String?,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> {
-        val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(SAKSBEHANDLER)
+        val saksbehandler: SaksbehandlerFraApi = env.graphQlContext.get(ContextValues.SAKSBEHANDLER)
         logg.info("Sender oppgave $oppgavereferanse til Infotrygd")
 
         val resultat =
             saksbehandlerMediator.infotrygdVedtak(
                 saksbehandlerFraApi = saksbehandler,
+                tilgangsgrupper = env.graphQlContext.get(ContextValues.TILGANGSGRUPPER),
                 oppgavereferanse = oppgavereferanse.toLong(),
             )
         return when (resultat) {

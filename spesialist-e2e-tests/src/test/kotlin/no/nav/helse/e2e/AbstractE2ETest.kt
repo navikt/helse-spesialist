@@ -103,7 +103,6 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
             navn = SAKSBEHANDLER_NAVN,
             epost = SAKSBEHANDLER_EPOST,
             ident = SAKSBEHANDLER_IDENT,
-            tilgangsgrupper = emptySet()
         )
     private val enhetsnummerOslo = "0301"
 
@@ -996,7 +995,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
                     arbeidsgivere = arbeidsgivere,
                     vedtaksperiodeId = vedtaksperiodeId,
                 )
-            testMediator.håndter(handling, saksbehandler)
+            testMediator.håndter(handling, saksbehandler, emptySet())
             // Her må det gjøres kall til api for å sende inn skjønnsfastsettelse
         }
     }
@@ -1028,7 +1027,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
                     "En begrunnelse",
                     dager,
                 )
-            testMediator.håndter(handling, saksbehandler)
+            testMediator.håndter(handling, saksbehandler, emptySet())
             // Her må det gjøres kall til api for å sende inn overstyring av tidslinje
         }
     }
@@ -1063,7 +1062,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
                     arbeidsgivere,
                     vedtaksperiodeId,
                 )
-            testMediator.håndter(handling, saksbehandler)
+            testMediator.håndter(handling, saksbehandler, emptySet())
         }
     }
 
@@ -1093,7 +1092,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
                     overstyrteArbeidsforhold = overstyrteArbeidsforhold,
                     vedtaksperiodeId = vedtaksperiodeId,
                 )
-            testMediator.håndter(handling, saksbehandler)
+            testMediator.håndter(handling, saksbehandler, emptySet())
         }
     }
 

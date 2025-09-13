@@ -28,7 +28,11 @@ class TildelingMutationHandlerTest {
             saksbehandlerFraApi = saksbehandler,
             whenever = opprettTildelingMutation(oppgaveId),
             then = { _, body, avhengigheter ->
-                verify(exactly = 1) { avhengigheter.saksbehandlerMediator.håndter(TildelOppgave(oppgaveId), saksbehandler) }
+                verify(exactly = 1) { avhengigheter.saksbehandlerMediator.håndter(
+                    handlingFraApi = TildelOppgave(oppgaveId),
+                    saksbehandlerFraApi = saksbehandler,
+                    tilgangsgrupper = emptySet()
+                ) }
                 assertEquals(saksbehandler.oid, UUID.fromString(body["data"]["opprettTildeling"]["oid"].asText()))
             }
         )
@@ -40,7 +44,7 @@ class TildelingMutationHandlerTest {
 
         runQuery(
             given = {
-                every { it.saksbehandlerMediator.håndter(any<TildelOppgave>(), any()) } throws
+                every { it.saksbehandlerMediator.håndter(any<TildelOppgave>(), any(), any()) } throws
                         OppgaveTildeltNoenAndre(TildelingApiDto("navn", "epost", UUID.randomUUID()))
             },
             whenever = opprettTildelingMutation(oppgaveId),
@@ -67,7 +71,7 @@ class TildelingMutationHandlerTest {
         val oppgaveId = nextLong()
         runQuery(
             given = {
-                every { it.saksbehandlerMediator.håndter(any<AvmeldOppgave>(), any()) } throws OppgaveIkkeTildelt(oppgaveId)
+                every { it.saksbehandlerMediator.håndter(any<AvmeldOppgave>(), any(), any()) } throws OppgaveIkkeTildelt(oppgaveId)
             },
             whenever = fjernTildelingMutation(oppgaveId),
             then = { _, body, _ ->
@@ -80,7 +84,7 @@ class TildelingMutationHandlerTest {
     fun `returnerer false hvis oppgaven ikke finnes`() {
         runQuery(
             given = {
-                every { it.saksbehandlerMediator.håndter(any<AvmeldOppgave>(), any()) } throws IllegalStateException()
+                every { it.saksbehandlerMediator.håndter(any<AvmeldOppgave>(), any(), any()) } throws IllegalStateException()
             },
             whenever = fjernTildelingMutation(nextLong()),
             then = { _, body, _ ->

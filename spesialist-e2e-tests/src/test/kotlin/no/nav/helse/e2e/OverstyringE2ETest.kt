@@ -183,7 +183,6 @@ class OverstyringE2ETest : AbstractE2ETest() {
                 navn = "epost",
                 epost = "navn",
                 ident = "A123456",
-                tilgangsgrupper = emptySet()
             )
         every { dataFetchingEnvironment.graphQlContext.get<Set<Tilgangsgruppe>>(ContextValues.TILGANGSGRUPPER) } returns emptySet()
         val nyUtbetalingId = UUID.randomUUID()

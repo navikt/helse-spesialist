@@ -3,7 +3,7 @@ package no.nav.helse.spesialist.api.graphql.query
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
-import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
+import no.nav.helse.spesialist.api.graphql.ContextValues
 import no.nav.helse.spesialist.api.graphql.byggRespons
 import no.nav.helse.spesialist.api.graphql.schema.ApiAntallOppgaver
 import no.nav.helse.spesialist.api.graphql.schema.ApiBehandledeOppgaver
@@ -28,7 +28,7 @@ class OppgaverQueryHandler(
         tom: LocalDate,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<ApiBehandledeOppgaver> {
-        val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
+        val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(ContextValues.SAKSBEHANDLER)
         val behandledeOppgaver =
             apiOppgaveService.behandledeOppgaver(
                 saksbehandlerFraApi = saksbehandler,
@@ -48,12 +48,13 @@ class OppgaverQueryHandler(
         filtrering: ApiFiltrering,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<ApiOppgaverTilBehandling> {
-        val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
+        val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(ContextValues.SAKSBEHANDLER)
         sikkerLogg.debug("Henter OppgaverTilBehandling for ${saksbehandler.navn}")
         val (oppgaver, tid) =
             measureTimedValue {
                 apiOppgaveService.oppgaver(
                     saksbehandlerFraApi = saksbehandler,
+                    tilgangsgrupper = env.graphQlContext.get(ContextValues.TILGANGSGRUPPER),
                     offset = offset,
                     limit = limit,
                     sortering = sortering,
@@ -70,7 +71,7 @@ class OppgaverQueryHandler(
     }
 
     override suspend fun antallOppgaver(env: DataFetchingEnvironment): DataFetcherResult<ApiAntallOppgaver> {
-        val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(SAKSBEHANDLER)
+        val saksbehandler = env.graphQlContext.get<SaksbehandlerFraApi>(ContextValues.SAKSBEHANDLER)
         sikkerLogg.info("Henter AntallOppgaver for ${saksbehandler.navn}")
         val (antallOppgaver, tid) =
             measureTimedValue {
