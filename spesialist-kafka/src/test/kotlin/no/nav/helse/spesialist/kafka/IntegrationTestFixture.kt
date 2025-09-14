@@ -2,15 +2,14 @@ package no.nav.helse.spesialist.kafka
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.helse.modell.automatisering.Stikkprøver
-import no.nav.helse.spesialist.application.InMemoryDaos
-import no.nav.helse.spesialist.application.InMemorySessionFactory
+import no.nav.helse.spesialist.application.InMemoryRepositoriesAndDaos
 import no.nav.helse.spesialist.kafka.testfixtures.KafkaModuleTestRapidTestFixture
 
-class IntegrationTestFixture(
-    val testRapid: TestRapid,
-    val sessionFactory: InMemorySessionFactory = InMemorySessionFactory(),
-    val daos: InMemoryDaos = InMemoryDaos(),
-) {
+class IntegrationTestFixture(val testRapid: TestRapid) {
+    private val inMemoryRepositoriesAndDaos = InMemoryRepositoriesAndDaos()
+    val daos = inMemoryRepositoriesAndDaos.daos
+    val sessionFactory = inMemoryRepositoriesAndDaos.sessionFactory
+
     init {
         KafkaModule(
             configuration = KafkaModuleTestRapidTestFixture.moduleConfiguration,

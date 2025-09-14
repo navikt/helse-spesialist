@@ -13,7 +13,7 @@ class InMemoryVedtaksperiodeRepository: VedtaksperiodeRepository {
         fødselsnummer: String,
         vedtaksperioder: List<VedtaksperiodeDto>
     ) {
-        val list = vedtaksperioderPerFødselsnummer[fødselsnummer] ?: mutableListOf()
+        val list = vedtaksperioderPerFødselsnummer.getOrPut(fødselsnummer) { mutableListOf() }
         list.removeAll { it.vedtaksperiodeId in vedtaksperioder.map(VedtaksperiodeDto::vedtaksperiodeId) }
         list.addAll(vedtaksperioder)
     }

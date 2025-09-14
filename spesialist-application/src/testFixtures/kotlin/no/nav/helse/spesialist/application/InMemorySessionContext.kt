@@ -5,7 +5,6 @@ import no.nav.helse.db.ArbeidsforholdDao
 import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.BehandlingRepository
 import no.nav.helse.db.CommandContextDao
-import no.nav.helse.db.DialogDao
 import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.GenerasjonDao
 import no.nav.helse.db.GodkjenningsbehovUtfall
@@ -20,7 +19,6 @@ import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.RisikovurderingDao
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.SessionContext
-import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.StansAutomatiskBehandlingSaksbehandlerDao
 import no.nav.helse.db.SykefraværstilfelleDao
 import no.nav.helse.db.TildelingDao
@@ -29,7 +27,6 @@ import no.nav.helse.db.VedtakDao
 import no.nav.helse.db.VergemålDao
 import no.nav.helse.db.ÅpneGosysOppgaverDao
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
-import no.nav.helse.mediator.oppgave.OppgaveRepository
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.MinimalPersonDto
 import no.nav.helse.modell.person.Adressebeskyttelse
@@ -37,7 +34,15 @@ import no.nav.helse.spesialist.typer.Kjønn
 import java.time.LocalDate
 import java.util.UUID
 
-class InMemorySessionContext : SessionContext {
+class InMemorySessionContext(
+    override val notatRepository: InMemoryNotatRepository,
+    override val oppgaveRepository: InMemoryOppgaveRepository,
+    override val notatDao: NotatDao,
+    override val oppgaveDao: OppgaveDao,
+    override val vedtaksperiodeRepository: InMemoryVedtaksperiodeRepository,
+    override val dialogDao: InMemoryDialogDao,
+    override val stansAutomatiskBehandlingDao: InMemoryStansAutomatiskBehandlingDao,
+) : SessionContext {
     override val arbeidsforholdDao: ArbeidsforholdDao
         get() = TODO("Not yet implemented")
     override val automatiseringDao: AutomatiseringDao
@@ -82,8 +87,6 @@ class InMemorySessionContext : SessionContext {
         }
 
     }
-    override val dialogDao: DialogDao
-        get() = TODO("Not yet implemented")
     override val egenAnsattDao: EgenAnsattDao
         get() = TODO("Not yet implemented")
     override val generasjonDao: GenerasjonDao
@@ -94,10 +97,6 @@ class InMemorySessionContext : SessionContext {
             TODO("Not yet implemented")
         }
     }
-    override val notatDao: NotatDao
-        get() = TODO("Not yet implemented")
-    override val oppgaveDao: OppgaveDao
-        get() = TODO("Not yet implemented")
     override val opptegnelseDao = object : OpptegnelseDao {
         override fun opprettOpptegnelse(
             fødselsnummer: String,
@@ -212,8 +211,6 @@ class InMemorySessionContext : SessionContext {
         get() = TODO("Not yet implemented")
     override val saksbehandlerDao: SaksbehandlerDao
         get() = TODO("Not yet implemented")
-    override val stansAutomatiskBehandlingDao: StansAutomatiskBehandlingDao
-        get() = TODO("Not yet implemented")
     override val sykefraværstilfelleDao: SykefraværstilfelleDao
         get() = TODO("Not yet implemented")
     override val tildelingDao: TildelingDao
@@ -226,7 +223,6 @@ class InMemorySessionContext : SessionContext {
         get() = TODO("Not yet implemented")
     override val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao
         get() = TODO("Not yet implemented")
-    override val vedtaksperiodeRepository = InMemoryVedtaksperiodeRepository()
     override val personRepository: InMemoryPersonRepository = InMemoryPersonRepository()
     override val stansAutomatiskBehandlingSaksbehandlerDao: StansAutomatiskBehandlingSaksbehandlerDao
         get() = TODO("Not yet implemented")
@@ -234,15 +230,10 @@ class InMemorySessionContext : SessionContext {
         get() = TODO("Not yet implemented")
     override val overstyringRepository: OverstyringRepository
         get() = TODO("Not yet implemented")
-    override val notatRepository: NotatRepository
-        get() = TODO("Not yet implemented")
     override val dialogRepository: DialogRepository
         get() = TODO("Not yet implemented")
-    override val saksbehandlerRepository: SaksbehandlerRepository
-        get() = TODO("Not yet implemented")
+    override val saksbehandlerRepository: InMemorySaksbehandlerRepository = InMemorySaksbehandlerRepository()
     override val avviksvurderingRepository: InMemoryAvviksvurderingRepository = InMemoryAvviksvurderingRepository()
-    override val oppgaveRepository: OppgaveRepository
-        get() = TODO("Not yet implemented")
     override val behandlingRepository: BehandlingRepository
         get() = TODO("Not yet implemented")
     override val tilkommenInntektRepository: TilkommenInntektRepository

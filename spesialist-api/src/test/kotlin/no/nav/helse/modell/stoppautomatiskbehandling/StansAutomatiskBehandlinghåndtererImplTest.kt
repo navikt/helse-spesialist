@@ -2,17 +2,11 @@ package no.nav.helse.modell.stoppautomatiskbehandling
 
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import no.nav.helse.db.DialogDao
 import no.nav.helse.db.NotatDao
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.StansAutomatiskBehandlingFraDatabase
-import no.nav.helse.modell.saksbehandler.handlinger.OpphevStans
-import no.nav.helse.spesialist.domain.NotatType
-import no.nav.helse.spesialist.domain.Saksbehandler
-import no.nav.helse.spesialist.domain.SaksbehandlerOid
-import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -33,35 +27,6 @@ class StansAutomatiskBehandlinghåndtererImplTest {
             notatDao,
             dialogDao,
         )
-
-    @Test
-    fun `Lagrer melding og notat når stans oppheves fra speil`() {
-        val fødselsnummer = lagFødselsnummer()
-        val oid = UUID.randomUUID()
-        stansAutomatiskBehandlinghåndterer.håndter(
-            handling = OpphevStans(fødselsnummer, "begrunnelse"),
-            saksbehandlerWrapper =
-                SaksbehandlerWrapper(
-                    Saksbehandler(
-                        id = SaksbehandlerOid(oid),
-                        navn = "navn",
-                        epost = "epost",
-                        ident = "ident",
-                    )
-                ),
-        )
-
-        verify(exactly = 1) { stansAutomatiskBehandlingDao.lagreFraSpeil(fødselsnummer = fødselsnummer) }
-        verify(exactly = 1) {
-            notatDao.lagreForOppgaveId(
-                oppgaveId = any(),
-                tekst = "begrunnelse",
-                saksbehandlerOid = oid,
-                notatType = NotatType.OpphevStans,
-                dialogRef = any(),
-            )
-        }
-    }
 
     @Test
     fun `Kan stanses på nytt etter stans er opphevet`() {

@@ -47,7 +47,6 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse
 import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
-import no.nav.helse.spesialist.api.saksbehandler.handlinger.ApiOpphevStans
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.db.DBDaos
@@ -1479,22 +1478,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             assertEquals(16.januar, it["fom"].asLocalDate())
             assertEquals(29.januar, it["tom"].asLocalDate())
         }
-    }
-
-    @Test
-    fun `opphev stans`() {
-        nyPerson()
-        mediator.håndter(ApiOpphevStans(FNR, "EN_ÅRSAK"), saksbehandler, emptySet())
-        assertStansOpphevet(FNR)
-    }
-
-    private fun assertStansOpphevet(fødselsnummer: String) {
-        val status =
-            dbQuery.single(
-                "select status from stans_automatisering where fødselsnummer = :fnr",
-                "fnr" to fødselsnummer,
-            ) { it.string(1) }
-        assertEquals("NORMAL", status)
     }
 
     private fun finnOverstyringId(fødselsnummer: String): UUID {
