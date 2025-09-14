@@ -15,6 +15,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.spesialist.api.testfixtures.ApiModuleIntegrationTestFixture
 import no.nav.helse.spesialist.api.testfixtures.lagSaksbehandler
+import no.nav.helse.spesialist.application.InMemoryMeldingPubliserer
 import no.nav.helse.spesialist.application.InMemoryRepositoriesAndDaos
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgruppeUuider
@@ -22,11 +23,13 @@ import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.intellij.lang.annotations.Language
+import org.junit.jupiter.api.Assertions.assertEquals
 
 class IntegrationTestFixture() {
     private val inMemoryRepositoriesAndDaos = InMemoryRepositoriesAndDaos()
     val daos = inMemoryRepositoriesAndDaos.daos
     val sessionFactory = inMemoryRepositoriesAndDaos.sessionFactory
+    val meldingPubliserer = InMemoryMeldingPubliserer()
 
     companion object {
         val mockOAuth2Server = MockOAuth2Server().also(MockOAuth2Server::start)
@@ -41,7 +44,7 @@ class IntegrationTestFixture() {
         configuration = apiModuleIntegrationTestFixture.apiModuleConfiguration,
         tilgangsgruppeUuider = tilgangsgruppeUuider,
         daos = daos,
-        meldingPubliserer = mockk(relaxed = true),
+        meldingPubliserer = meldingPubliserer,
         tilgangsgruppehenter = { emptySet() },
         sessionFactory = sessionFactory,
         versjonAvKode = "0.0.0",
@@ -81,5 +84,41 @@ class IntegrationTestFixture() {
         }
 
         return responseJson
+    }
+
+    fun assertPubliserteBehovLister(
+        vararg publiserteBehovLister: InMemoryMeldingPubliserer.PublisertBehovListe
+    ) {
+        assertEquals(
+            publiserteBehovLister.toList(),
+            meldingPubliserer.publiserteBehovLister
+        )
+    }
+
+    fun assertPubliserteKommandokjedeEndretEvents(
+        vararg publiserteKommandokjedeEndretEvents: InMemoryMeldingPubliserer.PublisertKommandokjedeEndretEvent
+    ) {
+        assertEquals(
+            publiserteKommandokjedeEndretEvents.toList(),
+            meldingPubliserer.publiserteKommandokjedeEndretEvents
+        )
+    }
+
+    fun assertPubliserteSubsumsjoner(
+        vararg publiserteSubsumsjoner: InMemoryMeldingPubliserer.PublisertSubsumsjon
+    ) {
+        assertEquals(
+            publiserteSubsumsjoner.toList(),
+            meldingPubliserer.publiserteSubsumsjoner
+        )
+    }
+
+    fun assertPubliserteUtgåendeHendelser(
+        vararg publiserteUtgåendeHendelse: InMemoryMeldingPubliserer.PublisertUtgåendeHendelse
+    ) {
+        assertEquals(
+            publiserteUtgåendeHendelse.toList(),
+            meldingPubliserer.publiserteUtgåendeHendelser
+        )
     }
 }
