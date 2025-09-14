@@ -12,7 +12,6 @@ import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Stikkprøver
-import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlinghåndtererImpl
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
 import no.nav.helse.spesialist.db.DBDaos
@@ -28,19 +27,8 @@ class TestMediator(
 ) {
     private val daos = DBDaos(dataSource)
     private val opptegnelseDao = daos.opptegnelseDao
-    private val oppgaveDao = daos.oppgaveDao
-    private val notatDao = daos.notatDao
-    private val dialogDao = daos.dialogDao
     private val annulleringRepository = daos.annulleringRepository
     private val meldingPubliserer = MessageContextMeldingPubliserer(testRapid)
-
-    private val stansAutomatiskBehandlinghåndterer =
-        StansAutomatiskBehandlinghåndtererImpl(
-            daos.stansAutomatiskBehandlingDao,
-            oppgaveDao,
-            notatDao,
-            dialogDao,
-        )
 
     private val godkjenningMediator = GodkjenningMediator(opptegnelseDao)
     private val oppgaveService =
@@ -63,7 +51,6 @@ class TestMediator(
             meldingPubliserer = meldingPubliserer,
             oppgaveService = oppgaveService,
             apiOppgaveService = apiOppgaveService,
-            stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
             annulleringRepository = annulleringRepository,
             environmentToggles = environmentToggles,
             sessionFactory = TransactionalSessionFactory(dataSource),

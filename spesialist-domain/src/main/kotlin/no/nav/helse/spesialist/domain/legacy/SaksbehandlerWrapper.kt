@@ -5,7 +5,6 @@ import no.nav.helse.modell.saksbehandler.handlinger.Annullering
 import no.nav.helse.modell.saksbehandler.handlinger.EndrePåVent
 import no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent
 import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgrad
-import no.nav.helse.modell.saksbehandler.handlinger.OpphevStans
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtArbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtInntektOgRefusjon
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinje
@@ -107,11 +106,6 @@ class SaksbehandlerWrapper(
                 ident = saksbehandler.ident,
             )
         observers.forEach { it.lagtPåVent(event.fødselsnummer, event) }
-    }
-
-    internal fun håndter(hendelse: OpphevStans) {
-        // TODO: Sende melding på kafka kanskje? Vil iSyfo vite at stans er opphevet?
-        return
     }
 
     override fun toString(): String = "epostadresse=${saksbehandler.epost}, oid=${saksbehandler.id().value}"

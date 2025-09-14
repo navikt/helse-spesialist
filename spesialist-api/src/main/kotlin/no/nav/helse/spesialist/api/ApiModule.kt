@@ -54,13 +54,7 @@ class ApiModule(
             oppgaveService = oppgaveService,
         )
 
-    private val stansAutomatiskBehandlinghåndterer =
-        StansAutomatiskBehandlinghåndtererImpl(
-            daos.stansAutomatiskBehandlingDao,
-            daos.oppgaveDao,
-            daos.notatDao,
-            daos.dialogDao,
-        )
+    private val stansAutomatiskBehandlinghåndterer = StansAutomatiskBehandlinghåndtererImpl(daos.stansAutomatiskBehandlingDao)
 
     private val spesialistSchema =
         lagSchemaMedResolversOgHandlers(
@@ -73,7 +67,6 @@ class ApiModule(
                     meldingPubliserer = meldingPubliserer,
                     oppgaveService = oppgaveService,
                     apiOppgaveService = apiOppgaveService,
-                    stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
                     annulleringRepository = daos.annulleringRepository,
                     environmentToggles = environmentToggles,
                     sessionFactory = sessionFactory,

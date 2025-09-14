@@ -2,9 +2,6 @@ package no.nav.helse.modell.stoppautomatiskbehandling
 
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.helse.db.DialogDao
-import no.nav.helse.db.NotatDao
-import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.StansAutomatiskBehandlingFraDatabase
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
@@ -16,17 +13,9 @@ import java.util.UUID
 
 class StansAutomatiskBehandlinghåndtererImplTest {
     private val stansAutomatiskBehandlingDao = mockk<StansAutomatiskBehandlingDao>(relaxed = true)
-    private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
-    private val notatDao = mockk<NotatDao>(relaxed = true)
-    private val dialogDao = mockk<DialogDao>(relaxed = true)
 
     private val stansAutomatiskBehandlinghåndterer =
-        StansAutomatiskBehandlinghåndtererImpl(
-            stansAutomatiskBehandlingDao,
-            oppgaveDao,
-            notatDao,
-            dialogDao,
-        )
+        StansAutomatiskBehandlinghåndtererImpl(stansAutomatiskBehandlingDao)
 
     @Test
     fun `Kan stanses på nytt etter stans er opphevet`() {

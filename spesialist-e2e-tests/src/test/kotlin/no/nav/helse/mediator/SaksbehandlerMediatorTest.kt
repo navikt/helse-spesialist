@@ -18,7 +18,6 @@ import no.nav.helse.modell.kommando.TestMelding
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
-import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlinghåndtererImpl
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_BESLUTTER
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_SAKSBEHANDLER
@@ -412,13 +411,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
 
     private val testRapid = TestRapid()
     private val meldingPubliserer: MeldingPubliserer = MessageContextMeldingPubliserer(testRapid)
-    private val stansAutomatiskBehandlinghåndterer =
-        StansAutomatiskBehandlinghåndtererImpl(
-            sessionContext.stansAutomatiskBehandlingDao,
-            daos.oppgaveDao,
-            daos.notatDao,
-            daos.dialogDao,
-        )
     private val oppgaveService =
         OppgaveService(
             oppgaveDao = daos.oppgaveDao,
@@ -439,7 +431,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             meldingPubliserer = meldingPubliserer,
             oppgaveService = oppgaveService,
             apiOppgaveService = apiOppgaveService,
-            stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
             annulleringRepository = daos.annulleringRepository,
             environmentToggles = environmentToggles,
             sessionFactory = TransactionalSessionFactory(dataSource),

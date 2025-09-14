@@ -1,54 +1,19 @@
 package no.nav.helse.modell.stoppautomatiskbehandling
 
-import no.nav.helse.db.DialogDao
-import no.nav.helse.db.NotatDao
-import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.StansAutomatiskBehandlingDao
 import no.nav.helse.db.StansAutomatiskBehandlingFraDatabase
-import no.nav.helse.modell.saksbehandler.handlinger.OpphevStans
 import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.graphql.schema.ApiUnntattFraAutomatiskGodkjenning
-import no.nav.helse.spesialist.domain.NotatType
-import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
-import org.slf4j.LoggerFactory
-import java.util.UUID
+import no.nav.helse.spesialist.application.logg.logg
 
 class StansAutomatiskBehandlinghåndtererImpl(
-    private val stansAutomatiskBehandlingDao: StansAutomatiskBehandlingDao,
-    private val oppgaveDao: OppgaveDao,
-    private val notatDao: NotatDao,
-    private val dialogDao: DialogDao,
+    val stansAutomatiskBehandlingDao: StansAutomatiskBehandlingDao,
 ) : StansAutomatiskBehandlinghåndterer {
-    private val logg = LoggerFactory.getLogger(this::class.java)
-    private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
-
-    fun håndter(
-        handling: OpphevStans,
-        saksbehandlerWrapper: SaksbehandlerWrapper,
-    ) {
-        stansAutomatiskBehandlingDao.lagreFraSpeil(handling.fødselsnummer)
-        lagreNotat(handling.fødselsnummer, handling.begrunnelse, saksbehandlerWrapper.saksbehandler.id().value)
-    }
-
     override fun unntattFraAutomatiskGodkjenning(fødselsnummer: String): ApiUnntattFraAutomatiskGodkjenning =
         stansAutomatiskBehandlingDao
             .hentFor(fødselsnummer)
             .filtrerGjeldendeStopp()
             .tilUnntattFraAutomatiskGodkjenning()
-
-    private fun lagreNotat(
-        fødselsnummer: String,
-        begrunnelse: String,
-        saksbehandlerOid: UUID,
-    ) = try {
-        val oppgaveId = fødselsnummer.finnOppgaveId()
-        val dialogRef = dialogDao.lagre()
-        notatDao.lagreForOppgaveId(oppgaveId, begrunnelse, saksbehandlerOid, NotatType.OpphevStans, dialogRef)
-    } catch (e: Exception) {
-        sikkerlogg.error("Fant ikke oppgave for $fødselsnummer. Fikk ikke lagret notat om oppheving av stans")
-    }
-
-    private fun String.finnOppgaveId() = oppgaveDao.finnOppgaveId(this) ?: oppgaveDao.finnOppgaveIdUansettStatus(this)
 
     private fun List<StansAutomatiskBehandlingFraDatabase>.filtrerGjeldendeStopp(): List<StansAutomatiskBehandlingFraDatabase> {
         val gjeldende = mutableListOf<StansAutomatiskBehandlingFraDatabase>()

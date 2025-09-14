@@ -22,15 +22,6 @@ class OpphevStansMutationIntegrationTest {
     private val vedtaksperiodeRepository = integrationTestFixture.sessionFactory.sessionContext.vedtaksperiodeRepository
 
     @Test
-    fun `opphev stans`() {
-        val responseJson = integrationTestFixture.executeQuery(
-            query = opphevStansMutation(lagFødselsnummer(), "EN_BEGRUNNELSE"),
-        )
-
-        assertEquals(true, responseJson.get("data")?.get("opphevStans")?.asBoolean())
-    }
-
-    @Test
     fun `Lagrer melding og notat når stans oppheves fra speil`() {
         // Given:
         val fødselsnummer = lagFødselsnummer()
