@@ -1,7 +1,6 @@
 package no.nav.helse.spesialist.application
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.db.AnnulleringRepository
 import no.nav.helse.db.BehandlingsstatistikkDao
 import no.nav.helse.db.CommandContextDao
 import no.nav.helse.db.Daos
@@ -46,13 +45,11 @@ import no.nav.helse.db.api.VedtaksperiodeDbDto
 import no.nav.helse.db.api.VergemålApiDao
 import no.nav.helse.mediator.meldinger.PoisonPills
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
-import no.nav.helse.modell.Annullering
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.MinimalPersonDto
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
-import no.nav.helse.modell.saksbehandler.handlinger.AnnulleringDto
 import no.nav.helse.modell.saksbehandler.handlinger.PåVentÅrsak
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.modell.vedtak.VedtakBegrunnelse
@@ -65,7 +62,6 @@ import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDto
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import no.nav.helse.spesialist.api.vedtaksperiode.EnhetDto
 import no.nav.helse.spesialist.domain.Saksbehandler
-import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import no.nav.helse.spesialist.typer.Kjønn
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -78,25 +74,7 @@ class InMemoryDaos(
     override val dialogDao: InMemoryDialogDao,
     override val stansAutomatiskBehandlingDao: InMemoryStansAutomatiskBehandlingDao,
 ) : Daos {
-    override val annulleringRepository = object : AnnulleringRepository {
-        override fun lagreAnnullering(
-            annulleringDto: AnnulleringDto,
-            saksbehandlerWrapper: SaksbehandlerWrapper
-        ) {
-            TODO("Not yet implemented")
-        }
-
-        override fun finnAnnullering(
-            arbeidsgiverFagsystemId: String,
-            personFagsystemId: String
-        ): Annullering? {
-            TODO("Not yet implemented")
-        }
-
-        override fun finnAnnullering(annulleringDto: AnnulleringDto): Annullering? {
-            TODO("Not yet implemented")
-        }
-    }
+    override val annulleringRepository: InMemoryAnnulleringRepository = InMemoryAnnulleringRepository()
     override val behandlingsstatistikkDao: BehandlingsstatistikkDao = object : BehandlingsstatistikkDao {
         override fun getAntallTilgjengeligeBeslutteroppgaver(): Int {
             TODO("Not yet implemented")

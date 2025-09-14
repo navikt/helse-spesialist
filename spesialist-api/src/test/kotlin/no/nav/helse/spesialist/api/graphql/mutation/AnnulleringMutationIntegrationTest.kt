@@ -1,22 +1,23 @@
 package no.nav.helse.spesialist.api.graphql.mutation
 
-import no.nav.helse.TestRunner.runQuery
+import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.api.graphql.schema.ApiAnnulleringData
 import no.nav.helse.spesialist.api.testfixtures.mutation.annullerMutation
 import no.nav.helse.spesialist.domain.testfixtures.lagAktørId
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
-import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-class AnnulleringMutationHandlerTest {
+class AnnulleringMutationIntegrationTest {
+    private val integrationTestFixture = IntegrationTestFixture()
 
     @Test
     fun `annullering ok`() {
-        runQuery(
-            given = {},
-            whenever = annullerMutation(
+        // When:
+        val responseJson = integrationTestFixture.executeQuery(
+            query = annullerMutation(
                 ApiAnnulleringData(
                     organisasjonsnummer = lagOrganisasjonsnummer(),
                     fodselsnummer = lagFødselsnummer(),
@@ -38,16 +39,17 @@ class AnnulleringMutationHandlerTest {
                     ),
                 )
             ),
-            then = { _, body, _ ->
-                assertTrue(body["data"]["annuller"].asBoolean())
-            }
         )
+
+        // Then:
+        assertEquals(true, responseJson.get("data")?.get("annuller")?.asBoolean())
     }
 
     @Test
     fun `annullering av tomme verdier`() {
-        runQuery(
-            whenever = annullerMutation(
+        // When:
+        val responseJson = integrationTestFixture.executeQuery(
+            query = annullerMutation(
                 ApiAnnulleringData(
                     organisasjonsnummer = lagOrganisasjonsnummer(),
                     fodselsnummer = lagFødselsnummer(),
@@ -60,9 +62,9 @@ class AnnulleringMutationHandlerTest {
                     arsaker = emptyList(),
                 )
             ),
-            then = { _, body, _ ->
-                assertTrue(body["data"]["annuller"].asBoolean())
-            }
         )
+
+        // Then:
+        assertEquals(true, responseJson.get("data")?.get("annuller")?.asBoolean())
     }
 }
