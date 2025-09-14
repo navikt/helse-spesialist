@@ -2,14 +2,14 @@ package no.nav.helse.mediator
 
 import org.slf4j.MDC
 
-fun withMDC(
+fun <T> withMDC(
     context: Map<String, String>,
-    block: () -> Unit,
-) {
+    block: () -> T,
+): T {
     val contextMap = MDC.getCopyOfContextMap() ?: emptyMap()
     try {
         MDC.setContextMap(contextMap + context)
-        block()
+        return block()
     } finally {
         MDC.setContextMap(contextMap)
     }

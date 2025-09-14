@@ -15,6 +15,7 @@ import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlinghåndtererImpl
 import no.nav.helse.spesialist.api.graphql.kobleOppApi
 import no.nav.helse.spesialist.api.graphql.lagSchemaMedResolversOgHandlers
+import no.nav.helse.spesialist.api.rest.OpphevStansController
 import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
@@ -56,21 +57,24 @@ class ApiModule(
 
     private val stansAutomatiskBehandlinghåndterer = StansAutomatiskBehandlinghåndtererImpl(daos.stansAutomatiskBehandlingDao)
 
+    private val saksbehandlerMediator =
+        SaksbehandlerMediator(
+            daos = daos,
+            versjonAvKode = versjonAvKode,
+            meldingPubliserer = meldingPubliserer,
+            oppgaveService = oppgaveService,
+            apiOppgaveService = apiOppgaveService,
+            annulleringRepository = daos.annulleringRepository,
+            environmentToggles = environmentToggles,
+            sessionFactory = sessionFactory,
+            tilgangsgruppeUuider = tilgangsgruppeUuider,
+        )
+
     private val spesialistSchema =
         lagSchemaMedResolversOgHandlers(
             daos = daos,
             apiOppgaveService = apiOppgaveService,
-            saksbehandlerMediator =
-                SaksbehandlerMediator(
-                    daos = daos,
-                    versjonAvKode = versjonAvKode,
-                    meldingPubliserer = meldingPubliserer,
-                    oppgaveService = oppgaveService,
-                    apiOppgaveService = apiOppgaveService,
-                    annulleringRepository = daos.annulleringRepository,
-                    environmentToggles = environmentToggles,
-                    sessionFactory = sessionFactory,
-                ),
+            saksbehandlerMediator = saksbehandlerMediator,
             stansAutomatiskBehandlinghåndterer = stansAutomatiskBehandlinghåndterer,
             personhåndterer = PersonhåndtererImpl(publiserer = meldingPubliserer),
             snapshothenter = snapshothenter,
@@ -96,6 +100,7 @@ class ApiModule(
             apiModuleConfiguration = configuration,
             tilgangsgruppeUuider = tilgangsgruppeUuider,
             spesialistSchema = spesialistSchema,
+            opphevStansController = OpphevStansController(saksbehandlerMediator),
         )
     }
 }

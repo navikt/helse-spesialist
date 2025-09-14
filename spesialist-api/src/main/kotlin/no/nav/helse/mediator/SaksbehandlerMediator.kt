@@ -1,6 +1,9 @@
 package no.nav.helse.mediator
 
 import graphql.schema.DataFetchingEnvironment
+import io.ktor.server.application.ApplicationCall
+import io.ktor.server.auth.jwt.JWTPrincipal
+import io.ktor.server.auth.principal
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.bootstrap.EnvironmentToggles
@@ -65,6 +68,8 @@ import no.nav.helse.spesialist.api.feilhåndtering.FinnerIkkeLagtPåVent
 import no.nav.helse.spesialist.api.feilhåndtering.IkkeTilgang
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
+import no.nav.helse.spesialist.api.graphql.ContextFactory.Companion.gruppeUuider
+import no.nav.helse.spesialist.api.graphql.ContextFactory.Companion.tilSaksbehandler
 import no.nav.helse.spesialist.api.graphql.ContextValues
 import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutationHandler.VedtakResultat
 import no.nav.helse.spesialist.api.graphql.schema.ApiAnnulleringData
@@ -88,6 +93,7 @@ import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.application.logg.loggThrowable
 import no.nav.helse.spesialist.application.logg.sikkerlogg
+import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
@@ -106,6 +112,7 @@ class SaksbehandlerMediator(
     private val annulleringRepository: AnnulleringRepository,
     private val environmentToggles: EnvironmentToggles,
     private val sessionFactory: SessionFactory,
+    private val tilgangsgruppeUuider: TilgangsgruppeUuider,
 ) {
     private val behandlingRepository = daos.behandlingApiRepository
     private val varselRepository = daos.varselApiRepository
@@ -121,10 +128,35 @@ class SaksbehandlerMediator(
         navnPåHandling: String,
         env: DataFetchingEnvironment,
         block: (saksbehandler: Saksbehandler, tilgangsgrupper: Set<Tilgangsgruppe>, transaction: SessionContext) -> T,
-    ) {
-        val saksbehandler = env.graphQlContext.get<Saksbehandler>(ContextValues.SAKSBEHANDLER)
-        val tilgangsgrupper = env.graphQlContext.get<Set<Tilgangsgruppe>>(ContextValues.TILGANGSGRUPPER)
+    ): T =
+        utførHandling(
+            navnPåHandling = navnPåHandling,
+            saksbehandler = env.graphQlContext.get(ContextValues.SAKSBEHANDLER),
+            tilgangsgrupper = env.graphQlContext.get(ContextValues.TILGANGSGRUPPER),
+            block = block,
+        )
 
+    fun <T> utførHandling(
+        navnPåHandling: String,
+        call: ApplicationCall,
+        block: (saksbehandler: Saksbehandler, tilgangsgrupper: Set<Tilgangsgruppe>, transaction: SessionContext) -> T,
+    ): T {
+        val jwt = (call.principal<JWTPrincipal>() ?: error("Uatentisert")).payload
+
+        return utførHandling(
+            navnPåHandling = navnPåHandling,
+            saksbehandler = jwt.tilSaksbehandler(),
+            tilgangsgrupper = tilgangsgruppeUuider.grupperFor(jwt.gruppeUuider()),
+            block = block,
+        )
+    }
+
+    fun <T> utførHandling(
+        navnPåHandling: String,
+        saksbehandler: Saksbehandler,
+        tilgangsgrupper: Set<Tilgangsgruppe>,
+        block: (Saksbehandler, Set<Tilgangsgruppe>, SessionContext) -> T,
+    ): T =
         withMDC(
             mapOf(
                 "saksbehandlerOid" to saksbehandler.id().value.toString(),
@@ -137,18 +169,18 @@ class SaksbehandlerMediator(
                 melding = "Utfører handling $navnPåHandling på vegne av saksbehandler",
                 sikkerloggDetaljer = "epostadresse=${saksbehandler.epost}, oid=${saksbehandler.id().value}",
             )
-            runCatching {
-                sessionFactory.transactionalSessionScope { transaction ->
-                    block(saksbehandler, tilgangsgrupper, transaction)
+            val returnValue =
+                runCatching {
+                    sessionFactory.transactionalSessionScope { transaction ->
+                        block(saksbehandler, tilgangsgrupper, transaction)
+                    }
+                }.onFailure { throwable ->
+                    loggThrowable("Handling $navnPåHandling feilet", throwable)
+                    throw throwable
                 }
-            }.onSuccess {
-                loggInfo("Handling $navnPåHandling utført")
-            }.onFailure { throwable ->
-                loggThrowable("Handling $navnPåHandling feilet", throwable)
-                throw throwable
-            }
+            loggInfo("Handling $navnPåHandling utført")
+            returnValue.getOrThrow()
         }
-    }
 
     fun håndter(
         handlingFraApi: HandlingFraApi,

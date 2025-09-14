@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.api.graphql
 
+import com.auth0.jwt.interfaces.Payload
 import com.expediagroup.graphql.generator.extensions.toGraphQLContext
 import com.expediagroup.graphql.server.ktor.KtorGraphQLContextFactory
 import graphql.GraphQLContext
@@ -35,28 +36,30 @@ class ContextFactory(
             ).payload
 
         return mapOf(
-            TILGANGSGRUPPER to
-                tilgangsgruppeUuider.grupperFor(
-                    jwt
-                        .getClaim("groups")
-                        ?.asList(String::class.java)
-                        ?.map(UUID::fromString)
-                        .orEmpty(),
-                ),
-            SAKSBEHANDLER to
-                Saksbehandler(
-                    id =
-                        SaksbehandlerOid(
-                            value =
-                                jwt
-                                    .getClaim("oid")
-                                    .asString()
-                                    .let(UUID::fromString),
-                        ),
-                    navn = jwt.getClaim("name").asString(),
-                    epost = jwt.getClaim("preferred_username").asString(),
-                    ident = jwt.getClaim("NAVident").asString(),
-                ),
+            TILGANGSGRUPPER to tilgangsgruppeUuider.grupperFor(jwt.gruppeUuider()),
+            SAKSBEHANDLER to jwt.tilSaksbehandler(),
         ).toGraphQLContext()
+    }
+
+    companion object {
+        fun Payload.gruppeUuider(): List<UUID> =
+            getClaim("groups")
+                ?.asList(String::class.java)
+                ?.map(UUID::fromString)
+                .orEmpty()
+
+        fun Payload.tilSaksbehandler(): Saksbehandler =
+            Saksbehandler(
+                id =
+                    SaksbehandlerOid(
+                        value =
+                            getClaim("oid")
+                                .asString()
+                                .let(UUID::fromString),
+                    ),
+                navn = getClaim("name").asString(),
+                epost = getClaim("preferred_username").asString(),
+                ident = getClaim("NAVident").asString(),
+            )
     }
 }
