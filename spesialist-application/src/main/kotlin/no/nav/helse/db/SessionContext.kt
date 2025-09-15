@@ -49,4 +49,5 @@ interface SessionContext {
     val behandlingRepository: BehandlingRepository
     val tilkommenInntektRepository: TilkommenInntektRepository
     val arbeidsgiverRepository: ArbeidsgiverRepository
+    val annulleringRepository: AnnulleringRepository
 }

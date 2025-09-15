@@ -40,7 +40,7 @@ import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.overstyring.Dagtype
 import no.nav.helse.spesialist.client.spleis.SpleisClient
 import no.nav.helse.spesialist.client.spleis.SpleisClientSnapshothenter
-import no.nav.helse.spesialist.db.DbQuery
+import no.nav.helse.spesialist.db.DataSourceDbQuery
 import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.Saksbehandler
@@ -60,7 +60,7 @@ import java.util.UUID
 
 abstract class AbstractE2ETest : AbstractDatabaseTest() {
     protected val testperson = TestPerson().also { println("Bruker testdata: $it") }
-    protected val dbQuery = DbQuery(dataSource)
+    protected val dbQuery = DataSourceDbQuery(dataSource)
 
     val FØDSELSNUMMER = testperson.fødselsnummer
     val ORGNR =

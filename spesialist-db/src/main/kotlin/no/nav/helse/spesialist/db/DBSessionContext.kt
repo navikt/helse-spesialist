@@ -12,6 +12,7 @@ import no.nav.helse.spesialist.application.OverstyringRepository
 import no.nav.helse.spesialist.application.SaksbehandlerRepository
 import no.nav.helse.spesialist.application.TilkommenInntektRepository
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
+import no.nav.helse.spesialist.db.dao.PgAnnulleringRepository
 import no.nav.helse.spesialist.db.dao.PgArbeidsforholdDao
 import no.nav.helse.spesialist.db.dao.PgAutomatiseringDao
 import no.nav.helse.spesialist.db.dao.PgAvviksvurderingRepository
@@ -92,4 +93,5 @@ class DBSessionContext(
     override val behandlingRepository: BehandlingRepository = PgBehandlingRepository(session)
     override val tilkommenInntektRepository: TilkommenInntektRepository = PgTilkommenInntektRepository(session)
     override val arbeidsgiverRepository: ArbeidsgiverRepository = PgArbeidsgiverRepository(session)
+    override val annulleringRepository: PgAnnulleringRepository = PgAnnulleringRepository(session)
 }

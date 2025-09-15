@@ -6,8 +6,8 @@ import io.micrometer.core.instrument.Metrics
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.helse.db.GodkjenningsbehovUtfall
-import no.nav.helse.modell.saksbehandler.handlinger.Annullering
 import no.nav.helse.modell.saksbehandler.handlinger.Handling
+import no.nav.helse.modell.saksbehandler.handlinger.HandlingType
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtArbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtInntektOgRefusjon
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinje
@@ -134,6 +134,11 @@ fun tell(handling: Handling) =
         is OverstyrtInntektOgRefusjon -> tellOverstyrInntektOgRefusjon()
         is OverstyrtArbeidsforhold -> tellOverstyrArbeidsforhold()
         is SkjønnsfastsattSykepengegrunnlag -> tellSkjønnsfastsettingSykepengegrunnlag()
-        is Annullering -> tellAnnullering()
+        else -> {}
+    }
+
+fun tell(handlingType: HandlingType) =
+    when (handlingType) {
+        HandlingType.ANNULLER_UTBETALING -> tellAnnullering()
         else -> {}
     }

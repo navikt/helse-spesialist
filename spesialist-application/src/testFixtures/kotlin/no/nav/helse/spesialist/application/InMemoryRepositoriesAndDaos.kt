@@ -52,13 +52,15 @@ class InMemoryRepositoriesAndDaos() {
     }
     private val dialogDao = InMemoryDialogDao()
     private val stansAutomatiskBehandlingDao = InMemoryStansAutomatiskBehandlingDao()
+    private val annulleringRepository = InMemoryAnnulleringRepository()
 
     val daos = InMemoryDaos(
         oppgaveRepository,
         notatDao,
         oppgaveDao,
         dialogDao,
-        stansAutomatiskBehandlingDao
+        stansAutomatiskBehandlingDao,
+        annulleringRepository,
     )
     val sessionFactory = InMemorySessionFactory(
         notatRepository,
@@ -67,6 +69,7 @@ class InMemoryRepositoriesAndDaos() {
         oppgaveDao,
         vedtaksperiodeRepository,
         dialogDao,
-        stansAutomatiskBehandlingDao
+        stansAutomatiskBehandlingDao,
+        annulleringRepository,
     )
 }

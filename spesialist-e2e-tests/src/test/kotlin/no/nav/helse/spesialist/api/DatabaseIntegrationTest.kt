@@ -17,7 +17,7 @@ import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
 import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
-import no.nav.helse.spesialist.db.DbQuery
+import no.nav.helse.spesialist.db.DataSourceDbQuery
 import no.nav.helse.spesialist.domain.Arbeidsgiver
 import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
 import no.nav.helse.spesialist.domain.Dialog
@@ -43,7 +43,7 @@ import java.time.YearMonth
 import java.util.UUID
 
 abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
-    protected val dbQuery = DbQuery(dataSource)
+    protected val dbQuery = DataSourceDbQuery(dataSource)
     private val NAVN = Navn(lagFornavn(), lagFornavn(), lagEtternavn())
     private val ENHET = Enhet(101, "Halden")
     protected val PERIODE = Periode(UUID.randomUUID(), LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 31))

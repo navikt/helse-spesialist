@@ -14,6 +14,4 @@ interface AnnulleringRepository {
         arbeidsgiverFagsystemId: String,
         personFagsystemId: String,
     ): Annullering?
-
-    fun finnAnnullering(annulleringDto: AnnulleringDto): Annullering?
 }

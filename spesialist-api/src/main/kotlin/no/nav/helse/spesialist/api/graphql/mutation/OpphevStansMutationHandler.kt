@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.api.graphql.mutation
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import no.nav.helse.mediator.SaksbehandlerMediator
+import no.nav.helse.modell.saksbehandler.handlinger.HandlingType
 import no.nav.helse.spesialist.api.graphql.byggRespons
 import no.nav.helse.spesialist.domain.NotatType
 
@@ -14,7 +15,7 @@ class OpphevStansMutationHandler(
         fodselsnummer: String,
         begrunnelse: String,
     ): DataFetcherResult<Boolean> {
-        saksbehandlerMediator.utførHandling("opphev_stans", env) { saksbehandler, _, tx ->
+        saksbehandlerMediator.utførHandling(HandlingType.OPPHEV_STANS, env) { saksbehandler, _, tx, _ ->
             tx.stansAutomatiskBehandlingDao.lagreFraSpeil(fødselsnummer = fodselsnummer)
             tx.notatDao.lagreForOppgaveId(
                 oppgaveId =

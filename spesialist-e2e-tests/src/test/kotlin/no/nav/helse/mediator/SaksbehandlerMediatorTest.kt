@@ -28,12 +28,9 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.api.SendIReturResult
 import no.nav.helse.spesialist.api.SendTilGodkjenningResult
-import no.nav.helse.spesialist.api.feilhåndtering.AlleredeAnnullert
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre
 import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutationHandler.VedtakResultat
-import no.nav.helse.spesialist.api.graphql.schema.ApiAnnulleringData
-import no.nav.helse.spesialist.api.graphql.schema.ApiAnnulleringData.ApiAnnulleringArsak
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdOverstyringHandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiInntektOgRefusjonOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiLovhjemmel
@@ -51,7 +48,7 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgruppeUuider
 import no.nav.helse.spesialist.db.DBDaos
 import no.nav.helse.spesialist.db.DBSessionContext
-import no.nav.helse.spesialist.db.DbQuery
+import no.nav.helse.spesialist.db.DataSourceDbQuery
 import no.nav.helse.spesialist.db.TransactionalSessionFactory
 import no.nav.helse.spesialist.domain.Arbeidsgiver
 import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
@@ -81,11 +78,10 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.math.absoluteValue
-import kotlin.random.Random
 import kotlin.random.Random.Default.nextLong
 
 class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
-    private val dbQuery = DbQuery(dataSource)
+    private val dbQuery = DataSourceDbQuery(dataSource)
     private val testperson = TestPerson()
     private val HENDELSE_ID: UUID = UUID.randomUUID()
 
@@ -999,62 +995,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         assertFalse(melding["egenskaper"].map { it.asText() }.contains("PÅ_VENT"))
     }
 
-    @Test
-    fun `håndterer annullering`() {
-        mediator.håndter(annullering(), saksbehandler, emptySet())
-
-        assertEquals(1, testRapid.inspektør.size)
-        val melding = testRapid.inspektør.message(0)
-        assertEquals("annullering", melding["@event_name"].asText())
-
-        assertEquals(SAKSBEHANDLER_OID.toString(), melding["saksbehandler"]["oid"].asText())
-        assertEquals(SAKSBEHANDLER_EPOST, melding["saksbehandler"]["epostaddresse"].asText())
-        assertEquals(SAKSBEHANDLER_NAVN, melding["saksbehandler"]["navn"].asText())
-        assertEquals(SAKSBEHANDLER_IDENT, melding["saksbehandler"]["ident"].asText())
-
-        assertEquals(VEDTAKSPERIODE, melding["vedtaksperiodeId"].asUUID())
-        assertEquals(UTBETALING_ID, melding["utbetalingId"].asUUID())
-        assertEquals("EN_KOMMENTAR", melding["kommentar"]?.asText())
-        assertEquals(2, melding["begrunnelser"].map { it.asText() }.size)
-        assertEquals(listOf("Ferie", "Perm"), melding["begrunnelser"].map { it.asText() })
-        melding["arsaker"].let {
-            assertEquals(2, it.size())
-            it.first().let { node ->
-                assertEquals("Ferie", node["arsak"].asText())
-                assertEquals("key01", node["key"].asText())
-            }
-        }
-    }
-
-    @Test
-    fun `håndterer annullering uten kommentar, begrunnelser eller årsak`() {
-        mediator.håndter(annullering(kommentar = null, arsaker = emptyList()), saksbehandler, emptySet())
-
-        val melding = testRapid.inspektør.message(0)
-
-        assertEquals("annullering", melding["@event_name"].asText())
-
-        assertEquals(SAKSBEHANDLER_OID.toString(), melding["saksbehandler"]["oid"].asText())
-        assertEquals(SAKSBEHANDLER_EPOST, melding["saksbehandler"]["epostaddresse"].asText())
-        assertEquals(SAKSBEHANDLER_NAVN, melding["saksbehandler"]["navn"].asText())
-        assertEquals(SAKSBEHANDLER_IDENT, melding["saksbehandler"]["ident"].asText())
-
-        assertEquals(VEDTAKSPERIODE, melding["vedtaksperiodeId"].asUUID())
-        assertEquals(UTBETALING_ID, melding["utbetalingId"].asUUID())
-        assertEquals(null, melding["kommentar"]?.asText())
-        assertEquals(0, melding["begrunnelser"].map { it.asText() }.size)
-        assertEquals("", melding["arsaker"].asText())
-    }
-
-    @Test
-    fun `godtar ikke å annullere samme utbetaling mer enn 1 gang`() {
-        val annullering = annullering(kommentar = null)
-        mediator.håndter(annullering, saksbehandler, emptySet())
-        assertThrows<AlleredeAnnullert> {
-            mediator.håndter(annullering, saksbehandler, emptySet())
-        }
-    }
-
     @ParameterizedTest
     @CsvSource("Innvilget,INNVILGELSE", "DelvisInnvilget,DELVIS_INNVILGELSE", "Avslag,AVSLAG")
     fun `fatter vedtak med utfall innvilgelse basert på tags fra Spleis`(
@@ -1479,23 +1419,4 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             "fodselsnummer" to fødselsnummer
         ) { it.uuid("ekstern_hendelse_id") }
     }
-
-    private fun annullering(
-        kommentar: String? = "EN_KOMMENTAR",
-        arsaker: List<ApiAnnulleringArsak> =
-            listOf(
-                ApiAnnulleringArsak(_key = "key01", arsak = "Ferie"),
-                ApiAnnulleringArsak(_key = "key02", arsak = "Perm")
-            ),
-    ) = ApiAnnulleringData(
-        aktorId = AKTØR_ID,
-        fodselsnummer = FØDSELSNUMMER,
-        organisasjonsnummer = ORGANISASJONSNUMMER,
-        vedtaksperiodeId = VEDTAKSPERIODE,
-        utbetalingId = UTBETALING_ID,
-        arbeidsgiverFagsystemId = "EN-FAGSYSTEMID${Random.nextInt(1000)}",
-        personFagsystemId = "EN-FAGSYSTEMID${Random.nextInt(1000)}",
-        arsaker = arsaker,
-        kommentar = kommentar,
-    )
 }

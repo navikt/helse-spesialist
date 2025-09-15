@@ -1,18 +1,22 @@
 package no.nav.helse.spesialist.db.dao
 
+import kotliquery.Session
 import no.nav.helse.db.AnnulleringRepository
 import no.nav.helse.modell.Annullering
 import no.nav.helse.modell.saksbehandler.handlinger.AnnulleringDto
+import no.nav.helse.spesialist.db.DataSourceDbQuery
 import no.nav.helse.spesialist.db.DbQuery
 import no.nav.helse.spesialist.db.HelseDao.Companion.somDbArray
+import no.nav.helse.spesialist.db.SessionDbQuery
 import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import java.util.UUID
 import javax.sql.DataSource
 
-class PgAnnulleringRepository internal constructor(
-    dataSource: DataSource,
+class PgAnnulleringRepository private constructor(
+    private val dbQuery: DbQuery,
 ) : AnnulleringRepository {
-    private val dbQuery = DbQuery(dataSource)
+    internal constructor(session: Session) : this(SessionDbQuery(session))
+    internal constructor(dataSource: DataSource) : this(DataSourceDbQuery(dataSource))
 
     override fun lagreAnnullering(
         annulleringDto: AnnulleringDto,
@@ -73,6 +77,4 @@ class PgAnnulleringRepository internal constructor(
                 vedtaksperiodeId = it.uuid("vedtaksperiode_id"),
             )
         }
-
-    override fun finnAnnullering(annulleringDto: AnnulleringDto): Annullering? = finnAnnullering(annulleringDto.arbeidsgiverFagsystemId, annulleringDto.personFagsystemId)
 }

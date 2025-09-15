@@ -1,7 +1,6 @@
 package no.nav.helse.spesialist.domain.legacy
 
 import no.nav.helse.modell.saksbehandler.SaksbehandlerObserver
-import no.nav.helse.modell.saksbehandler.handlinger.Annullering
 import no.nav.helse.modell.saksbehandler.handlinger.EndrePåVent
 import no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent
 import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgrad
@@ -77,17 +76,6 @@ class SaksbehandlerWrapper(
             observers.forEach { it.nySubsumsjon(subsumsjonEvent.fødselsnummer, subsumsjonEvent) }
         }
         observers.forEach { it.minimumSykdomsgradVurdert(event.fødselsnummer, event) }
-    }
-
-    internal fun håndter(hendelse: Annullering) {
-        val event =
-            hendelse.byggEvent(
-                oid = saksbehandler.id().value,
-                navn = saksbehandler.navn,
-                epost = saksbehandler.epost,
-                ident = saksbehandler.ident,
-            )
-        observers.forEach { it.utbetalingAnnullert(event.fødselsnummer, event) }
     }
 
     internal fun håndter(hendelse: LeggPåVent) {

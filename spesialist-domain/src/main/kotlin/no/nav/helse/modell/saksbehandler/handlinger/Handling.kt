@@ -3,6 +3,11 @@ package no.nav.helse.modell.saksbehandler.handlinger
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 
+enum class HandlingType {
+    ANNULLER_UTBETALING,
+    OPPHEV_STANS,
+}
+
 interface Handling {
     fun utførAv(saksbehandlerWrapper: SaksbehandlerWrapper)
 

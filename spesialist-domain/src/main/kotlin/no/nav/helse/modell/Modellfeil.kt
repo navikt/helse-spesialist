@@ -1,6 +1,5 @@
 package no.nav.helse.modell
 
-import no.nav.helse.modell.saksbehandler.handlinger.Annullering
 import java.util.UUID
 
 sealed class Modellfeil : RuntimeException()
@@ -33,8 +32,4 @@ class ManglerTilgang(
 
 class FinnerIkkePåVent(
     val oppgaveId: Long,
-) : Modellfeil()
-
-class AlleredeAnnullert(
-    val handling: Annullering,
 ) : Modellfeil()

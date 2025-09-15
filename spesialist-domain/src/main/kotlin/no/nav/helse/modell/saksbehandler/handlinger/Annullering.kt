@@ -1,63 +1,6 @@
 package no.nav.helse.modell.saksbehandler.handlinger
 
-import no.nav.helse.modell.melding.AnnullertUtbetalingEvent
-import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import java.util.UUID
-
-class Annullering(
-    private val aktørId: String,
-    private val fødselsnummer: String,
-    private val organisasjonsnummer: String,
-    private val vedtaksperiodeId: UUID,
-    private val utbetalingId: UUID,
-    private val arbeidsgiverFagsystemId: String,
-    private val personFagsystemId: String,
-    private val begrunnelser: List<String> = emptyList(),
-    private val arsaker: List<AnnulleringArsak>,
-    private val kommentar: String?,
-) : Handling {
-    override fun utførAv(saksbehandlerWrapper: SaksbehandlerWrapper) {
-        saksbehandlerWrapper.håndter(this)
-    }
-
-    override fun loggnavn(): String = "annuller_utbetaling"
-
-    internal fun byggEvent(
-        oid: UUID,
-        navn: String,
-        epost: String,
-        ident: String,
-    ): AnnullertUtbetalingEvent =
-        AnnullertUtbetalingEvent(
-            fødselsnummer = fødselsnummer,
-            aktørId = aktørId,
-            organisasjonsnummer = organisasjonsnummer,
-            saksbehandlerOid = oid,
-            saksbehandlerNavn = navn,
-            saksbehandlerIdent = ident,
-            saksbehandlerEpost = epost,
-            vedtaksperiodeId = vedtaksperiodeId,
-            utbetalingId = utbetalingId,
-            arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
-            personFagsystemId = personFagsystemId,
-            begrunnelser = begrunnelser,
-            arsaker = arsaker,
-            kommentar = kommentar,
-        )
-
-    fun toDto() =
-        AnnulleringDto(
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            utbetalingId = utbetalingId,
-            arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
-            personFagsystemId = personFagsystemId,
-            årsaker = arsaker,
-            kommentar = kommentar,
-        )
-}
 
 data class AnnulleringDto(
     val aktørId: String,

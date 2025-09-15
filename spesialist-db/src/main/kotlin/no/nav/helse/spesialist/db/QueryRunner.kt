@@ -85,13 +85,29 @@ class MedDataSource(
     ): Array = throw UnsupportedOperationException("Dette har vi ikke støtte for...")
 }
 
-class DbQuery(
+class DataSourceDbQuery(
     private val dataSource: DataSource,
-) {
-    private fun <T> run(
-        returnGeneratedKey: Boolean = false,
+) : DbQuery {
+    override fun <T> run(
+        returnGeneratedKey: Boolean,
         block: () -> QueryAction<T>,
     ) = sessionOf(dataSource, returnGeneratedKey = returnGeneratedKey, strict = true).use { block().runWithSession(it) }
+}
+
+class SessionDbQuery(
+    private val session: Session,
+) : DbQuery {
+    override fun <T> run(
+        returnGeneratedKey: Boolean,
+        block: () -> QueryAction<T>,
+    ) = block().runWithSession(session)
+}
+
+interface DbQuery {
+    fun <T> run(
+        returnGeneratedKey: Boolean = false,
+        block: () -> QueryAction<T>,
+    ): T
 
     fun <T> single(
         @Language("PostgreSQL") sql: String,

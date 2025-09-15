@@ -36,10 +36,4 @@ class InMemoryAnnulleringRepository : AnnulleringRepository {
 
     override fun finnAnnullering(arbeidsgiverFagsystemId: String, personFagsystemId: String): Annullering? =
         data[Key(arbeidsgiverFagsystemId = arbeidsgiverFagsystemId, personFagsystemId = personFagsystemId)]
-
-    override fun finnAnnullering(annulleringDto: AnnulleringDto): Annullering? =
-        finnAnnullering(
-            arbeidsgiverFagsystemId = annulleringDto.arbeidsgiverFagsystemId,
-            personFagsystemId = annulleringDto.personFagsystemId
-        )
 }

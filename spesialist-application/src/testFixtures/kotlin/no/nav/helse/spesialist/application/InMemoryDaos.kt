@@ -73,8 +73,8 @@ class InMemoryDaos(
     override val oppgaveDao: OppgaveDao,
     override val dialogDao: InMemoryDialogDao,
     override val stansAutomatiskBehandlingDao: InMemoryStansAutomatiskBehandlingDao,
+    override val annulleringRepository: InMemoryAnnulleringRepository,
 ) : Daos {
-    override val annulleringRepository: InMemoryAnnulleringRepository = InMemoryAnnulleringRepository()
     override val behandlingsstatistikkDao: BehandlingsstatistikkDao = object : BehandlingsstatistikkDao {
         override fun getAntallTilgjengeligeBeslutteroppgaver(): Int {
             TODO("Not yet implemented")

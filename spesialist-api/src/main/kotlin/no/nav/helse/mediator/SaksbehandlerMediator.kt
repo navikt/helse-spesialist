@@ -22,7 +22,6 @@ import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.mediator.overstyring.Saksbehandlingsmelder
 import no.nav.helse.mediator.påvent.PåVentRepository
-import no.nav.helse.modell.AlleredeAnnullert
 import no.nav.helse.modell.FinnerIkkePåVent
 import no.nav.helse.modell.ManglerTilgang
 import no.nav.helse.modell.Modellfeil
@@ -34,13 +33,12 @@ import no.nav.helse.modell.melding.VarselEndret
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
-import no.nav.helse.modell.saksbehandler.handlinger.Annullering
-import no.nav.helse.modell.saksbehandler.handlinger.AnnulleringArsak
 import no.nav.helse.modell.saksbehandler.handlinger.Arbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.EndrePåVent
 import no.nav.helse.modell.saksbehandler.handlinger.FjernPåVent
 import no.nav.helse.modell.saksbehandler.handlinger.FjernPåVentUtenHistorikkinnslag
 import no.nav.helse.modell.saksbehandler.handlinger.Handling
+import no.nav.helse.modell.saksbehandler.handlinger.HandlingType
 import no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent
 import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgrad
 import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgradArbeidsgiver
@@ -72,7 +70,6 @@ import no.nav.helse.spesialist.api.graphql.ContextFactory.Companion.gruppeUuider
 import no.nav.helse.spesialist.api.graphql.ContextFactory.Companion.tilSaksbehandler
 import no.nav.helse.spesialist.api.graphql.ContextValues
 import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutationHandler.VedtakResultat
-import no.nav.helse.spesialist.api.graphql.schema.ApiAnnulleringData
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdOverstyringHandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiInntektOgRefusjonOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiMinimumSykdomsgrad
@@ -88,6 +85,7 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
+import no.nav.helse.spesialist.application.KøetMeldingPubliserer
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.loggInfo
@@ -125,26 +123,26 @@ class SaksbehandlerMediator(
     private val dialogDao = daos.dialogDao
 
     fun <T> utførHandling(
-        navnPåHandling: String,
+        handlingType: HandlingType,
         env: DataFetchingEnvironment,
-        block: (saksbehandler: Saksbehandler, tilgangsgrupper: Set<Tilgangsgruppe>, transaction: SessionContext) -> T,
+        block: (saksbehandler: Saksbehandler, tilgangsgrupper: Set<Tilgangsgruppe>, transaction: SessionContext, meldingsKø: KøetMeldingPubliserer) -> T,
     ): T =
         utførHandling(
-            navnPåHandling = navnPåHandling,
+            handlingType = handlingType,
             saksbehandler = env.graphQlContext.get(ContextValues.SAKSBEHANDLER),
             tilgangsgrupper = env.graphQlContext.get(ContextValues.TILGANGSGRUPPER),
             block = block,
         )
 
     fun <T> utførHandling(
-        navnPåHandling: String,
+        handlingType: HandlingType,
         call: ApplicationCall,
-        block: (saksbehandler: Saksbehandler, tilgangsgrupper: Set<Tilgangsgruppe>, transaction: SessionContext) -> T,
+        block: (saksbehandler: Saksbehandler, tilgangsgrupper: Set<Tilgangsgruppe>, transaction: SessionContext, meldingsKø: KøetMeldingPubliserer) -> T,
     ): T {
         val jwt = (call.principal<JWTPrincipal>() ?: error("Uatentisert")).payload
 
         return utførHandling(
-            navnPåHandling = navnPåHandling,
+            handlingType = handlingType,
             saksbehandler = jwt.tilSaksbehandler(),
             tilgangsgrupper = tilgangsgruppeUuider.grupperFor(jwt.gruppeUuider()),
             block = block,
@@ -152,10 +150,10 @@ class SaksbehandlerMediator(
     }
 
     fun <T> utførHandling(
-        navnPåHandling: String,
+        handlingType: HandlingType,
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
-        block: (Saksbehandler, Set<Tilgangsgruppe>, SessionContext) -> T,
+        block: (saksbehandler: Saksbehandler, tilgangsgrupper: Set<Tilgangsgruppe>, transaction: SessionContext, meldingsKø: KøetMeldingPubliserer) -> T,
     ): T =
         withMDC(
             mapOf(
@@ -164,16 +162,20 @@ class SaksbehandlerMediator(
             ),
         ) {
             sessionFactory.transactionalSessionScope { it.saksbehandlerRepository.lagre(saksbehandler = saksbehandler) }
+            tell(handlingType)
 
+            val navnPåHandling = handlingType.name.lowercase()
             loggInfo(
                 melding = "Utfører handling $navnPåHandling på vegne av saksbehandler",
                 sikkerloggDetaljer = "epostadresse=${saksbehandler.epost}, oid=${saksbehandler.id().value}",
             )
+            val meldingsKø = KøetMeldingPubliserer(meldingPubliserer)
             val returnValue =
                 runCatching {
-                    sessionFactory.transactionalSessionScope { transaction ->
-                        block(saksbehandler, tilgangsgrupper, transaction)
-                    }
+                    sessionFactory
+                        .transactionalSessionScope { transaction ->
+                            block(saksbehandler, tilgangsgrupper, transaction, meldingsKø)
+                        }.also { meldingsKø.flush() }
                 }.onFailure { throwable ->
                     loggThrowable("Handling $navnPåHandling feilet", throwable)
                     throw throwable
@@ -219,7 +221,6 @@ class SaksbehandlerMediator(
                 is Oppgavehandling -> håndter(modellhandling, saksbehandlerWrapper)
                 is PåVent -> error("dette burde ikke skje")
                 is Personhandling -> håndter(modellhandling, saksbehandlerWrapper)
-                is Annullering -> håndter(modellhandling, saksbehandlerWrapper)
                 else -> modellhandling.utførAv(saksbehandlerWrapper)
             }
             sikkerlogg.info("Handling ${modellhandling.loggnavn()} utført")
@@ -338,7 +339,13 @@ class SaksbehandlerMediator(
         val totrinnsvurdering = totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)
         val feil =
             if (totrinnsvurdering?.tilstand == AVVENTER_BESLUTTER) {
-                if (!Oppgave.harTilgangTilEgenskap(Egenskap.BESLUTTER, saksbehandler, tilgangsgrupper) && !environmentToggles.kanGodkjenneUtenBesluttertilgang) {
+                if (!Oppgave.harTilgangTilEgenskap(
+                        Egenskap.BESLUTTER,
+                        saksbehandler,
+                        tilgangsgrupper,
+                    ) &&
+                    !environmentToggles.kanGodkjenneUtenBesluttertilgang
+                ) {
                     VedtakResultat.Feil.BeslutterFeil.TrengerBeslutterRolle()
                 } else if (totrinnsvurdering.saksbehandler?.value == saksbehandler.id().value && !environmentToggles.kanBeslutteEgneSaker) {
                     VedtakResultat.Feil.BeslutterFeil.KanIkkeBeslutteEgenOppgave()
@@ -383,19 +390,6 @@ class SaksbehandlerMediator(
             sikkerlogg.info(
                 "Handling ${modellhandling.loggnavn()} utført på oppgave ${modellhandling.oppgaveId} på vegne av saksbehandler $saksbehandler",
             )
-        }
-    }
-
-    private fun håndter(
-        handling: Annullering,
-        saksbehandlerWrapper: SaksbehandlerWrapper,
-    ) {
-        try {
-            if (annulleringRepository.finnAnnullering(handling.toDto()) != null) throw AlleredeAnnullert(handling)
-            annulleringRepository.lagreAnnullering(handling.toDto(), saksbehandlerWrapper)
-            handling.utførAv(saksbehandlerWrapper)
-        } catch (e: Modellfeil) {
-            throw e.tilApiversjon()
         }
     }
 
@@ -787,10 +781,6 @@ class SaksbehandlerMediator(
 
             is ManglerTilgang -> IkkeTilgang(oid, oppgaveId)
 
-            is AlleredeAnnullert ->
-                no.nav.helse.spesialist.api.feilhåndtering
-                    .AlleredeAnnullert(handling.toDto().vedtaksperiodeId)
-
             is FinnerIkkePåVent -> FinnerIkkeLagtPåVent(oppgaveId)
         }
 
@@ -804,7 +794,6 @@ class SaksbehandlerMediator(
             is ApiTidslinjeOverstyring -> this.tilModellversjon(saksbehandlerOid)
             is ApiSkjonnsfastsettelse -> this.tilModellversjon(saksbehandlerOid)
             is ApiMinimumSykdomsgrad -> this.tilModellversjon(saksbehandlerOid)
-            is ApiAnnulleringData -> this.tilModellversjon()
             is TildelOppgave -> this.tilModellversjon(saksbehandlerTilgangsgrupper)
             is AvmeldOppgave -> this.tilModellversjon()
             else -> throw IllegalStateException("Støtter ikke handling ${this::class.simpleName}")
@@ -961,20 +950,6 @@ class SaksbehandlerMediator(
                     )
                 },
             begrunnelse = begrunnelse,
-        )
-
-    private fun ApiAnnulleringData.tilModellversjon(): Annullering =
-        Annullering(
-            aktørId = this.aktorId,
-            fødselsnummer = this.fodselsnummer,
-            organisasjonsnummer = this.organisasjonsnummer,
-            vedtaksperiodeId = this.vedtaksperiodeId,
-            utbetalingId = this.utbetalingId,
-            arbeidsgiverFagsystemId = this.arbeidsgiverFagsystemId,
-            personFagsystemId = this.personFagsystemId,
-            begrunnelser = this.arsaker.map { arsak -> arsak.arsak },
-            arsaker = this.arsaker.map { arsak -> AnnulleringArsak(key = arsak._key, arsak = arsak.arsak) },
-            kommentar = this.kommentar,
         )
 
     private fun ApiPaVentRequest.ApiLeggPaVent.tilModellversjon(): LeggPåVent =

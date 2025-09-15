@@ -6,6 +6,7 @@ import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import no.nav.helse.mediator.SaksbehandlerMediator
+import no.nav.helse.modell.saksbehandler.handlinger.HandlingType
 import no.nav.helse.spesialist.domain.NotatType
 
 class OpphevStansController(
@@ -19,7 +20,7 @@ class OpphevStansController(
     fun addToRoute(route: Route) {
         route.post("/opphevstans") {
             val parameters = call.receive<Parameters>()
-            saksbehandlerMediator.utførHandling("opphev_stans", call) { saksbehandler, _, tx ->
+            saksbehandlerMediator.utførHandling(HandlingType.OPPHEV_STANS, call) { saksbehandler, _, tx, _ ->
                 val fodselsnummer = parameters.fødselsnummer
                 val begrunnelse = parameters.begrunnelse
                 tx.stansAutomatiskBehandlingDao.lagreFraSpeil(fødselsnummer = fodselsnummer)

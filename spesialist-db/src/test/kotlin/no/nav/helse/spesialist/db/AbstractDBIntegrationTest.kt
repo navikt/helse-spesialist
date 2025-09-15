@@ -103,7 +103,7 @@ abstract class AbstractDBIntegrationTest {
         )
 
     protected val dataSource = DBDBTestFixture.fixture.module.dataSource
-    protected val dbQuery = DbQuery(dataSource)
+    protected val dbQuery = DataSourceDbQuery(dataSource)
     protected val daos = DBDBTestFixture.fixture.module.daos
 
     protected val session = sessionOf(dataSource, returnGeneratedKey = true)

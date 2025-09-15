@@ -1,7 +1,6 @@
 package no.nav.helse.mediator.overstyring
 
 import no.nav.helse.MeldingPubliserer
-import no.nav.helse.modell.melding.AnnullertUtbetalingEvent
 import no.nav.helse.modell.melding.LagtPåVentEvent
 import no.nav.helse.modell.melding.MinimumSykdomsgradVurdertEvent
 import no.nav.helse.modell.melding.OverstyrtArbeidsforholdEvent
@@ -46,13 +45,6 @@ class Saksbehandlingsmelder(
         event: MinimumSykdomsgradVurdertEvent,
     ) {
         meldingPubliserer.publiser(fødselsnummer, event, "vurdering av minimum sykdomsgrad")
-    }
-
-    override fun utbetalingAnnullert(
-        fødselsnummer: String,
-        event: AnnullertUtbetalingEvent,
-    ) {
-        meldingPubliserer.publiser(fødselsnummer, event, "annullering av utbetaling")
     }
 
     override fun lagtPåVent(
