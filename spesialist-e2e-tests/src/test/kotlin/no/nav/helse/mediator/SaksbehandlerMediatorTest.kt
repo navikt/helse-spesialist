@@ -428,7 +428,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             meldingPubliserer = meldingPubliserer,
             oppgaveService = oppgaveService,
             apiOppgaveService = apiOppgaveService,
-            annulleringRepository = daos.annulleringRepository,
             environmentToggles = environmentToggles,
             sessionFactory = TransactionalSessionFactory(dataSource),
             tilgangsgruppeUuider = randomTilgangsgruppeUuider()

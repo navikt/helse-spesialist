@@ -64,7 +64,6 @@ class ApiModule(
             meldingPubliserer = meldingPubliserer,
             oppgaveService = oppgaveService,
             apiOppgaveService = apiOppgaveService,
-            annulleringRepository = daos.annulleringRepository,
             environmentToggles = environmentToggles,
             sessionFactory = sessionFactory,
             tilgangsgruppeUuider = tilgangsgruppeUuider,

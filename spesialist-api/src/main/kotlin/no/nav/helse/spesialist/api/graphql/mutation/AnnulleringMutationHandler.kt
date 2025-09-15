@@ -3,14 +3,12 @@ package no.nav.helse.spesialist.api.graphql.mutation
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import no.nav.helse.mediator.SaksbehandlerMediator
+import no.nav.helse.modell.Annullering
 import no.nav.helse.modell.melding.AnnullertUtbetalingEvent
-import no.nav.helse.modell.saksbehandler.handlinger.AnnulleringArsak
-import no.nav.helse.modell.saksbehandler.handlinger.AnnulleringDto
 import no.nav.helse.modell.saksbehandler.handlinger.HandlingType
 import no.nav.helse.spesialist.api.feilhåndtering.AlleredeAnnullert
 import no.nav.helse.spesialist.api.graphql.byggRespons
 import no.nav.helse.spesialist.api.graphql.schema.ApiAnnulleringData
-import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 
 class AnnulleringMutationHandler(
     private val saksbehandlerMediator: SaksbehandlerMediator,
@@ -20,34 +18,27 @@ class AnnulleringMutationHandler(
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> {
         saksbehandlerMediator.utførHandling(HandlingType.ANNULLER_UTBETALING, env) { saksbehandler, _, tx, kø ->
-            if (tx.annulleringRepository.finnAnnullering(
-                    annullering.arbeidsgiverFagsystemId,
-                    annullering.personFagsystemId,
+            if (
+                tx.annulleringRepository.finnAnnulleringMedEnAv(
+                    arbeidsgiverFagsystemId = annullering.arbeidsgiverFagsystemId,
+                    personFagsystemId = annullering.personFagsystemId,
                 ) != null
             ) {
                 throw AlleredeAnnullert(annullering.vedtaksperiodeId)
             }
+
             tx.annulleringRepository.lagreAnnullering(
-                annulleringDto =
-                    AnnulleringDto(
-                        aktørId = annullering.aktorId,
-                        fødselsnummer = annullering.fodselsnummer,
-                        organisasjonsnummer = annullering.organisasjonsnummer,
-                        vedtaksperiodeId = annullering.vedtaksperiodeId,
-                        utbetalingId = annullering.utbetalingId,
+                annullering =
+                    Annullering.Factory.ny(
                         arbeidsgiverFagsystemId = annullering.arbeidsgiverFagsystemId,
                         personFagsystemId = annullering.personFagsystemId,
-                        årsaker =
-                            annullering.arsaker.map { arsak ->
-                                AnnulleringArsak(
-                                    key = arsak._key,
-                                    arsak = arsak.arsak,
-                                )
-                            },
+                        saksbehandlerOid = saksbehandler.id(),
+                        vedtaksperiodeId = annullering.vedtaksperiodeId,
+                        årsaker = annullering.arsaker.map { it.arsak },
                         kommentar = annullering.kommentar,
                     ),
-                saksbehandlerWrapper = SaksbehandlerWrapper(saksbehandler = saksbehandler),
             )
+
             kø.publiser(
                 fødselsnummer = annullering.fodselsnummer,
                 hendelse =
@@ -66,7 +57,7 @@ class AnnulleringMutationHandler(
                         begrunnelser = annullering.arsaker.map { arsak -> arsak.arsak },
                         arsaker =
                             annullering.arsaker.map { arsak ->
-                                AnnulleringArsak(
+                                AnnullertUtbetalingEvent.Årsak(
                                     key = arsak._key,
                                     arsak = arsak.arsak,
                                 )

@@ -1,11 +1,8 @@
 package no.nav.helse.spesialist.db.dao
 
-import no.nav.helse.modell.saksbehandler.handlinger.AnnulleringArsak
-import no.nav.helse.modell.saksbehandler.handlinger.AnnulleringDto
+import no.nav.helse.modell.Annullering
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
-import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
-import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -19,21 +16,20 @@ class PgAnnulleringRepositoryTest : AbstractDBIntegrationTest() {
         val arbeidsgiverFagsystemId = "EN-ARBEIDSGIVER-FAGSYSTEMID1"
         val personFagsystemId = "EN-PERSON-FAGSYSTEMID1"
         opprettSaksbehandler()
-        val årsaker = setOf("en årsak", "to årsak")
+        val årsaker = listOf("en årsak", "to årsak")
         annulleringRepository.lagreAnnullering(
-            annulleringDto(
+            annullering(
                 arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
                 personFagsystemId = personFagsystemId,
                 årsaker = årsaker,
             ),
-            saksbehandler(),
         )
-        val annullering = annulleringRepository.finnAnnullering(arbeidsgiverFagsystemId, personFagsystemId) ?: fail()
+        val annullering = annulleringRepository.finnAnnulleringMedEnAv(arbeidsgiverFagsystemId, personFagsystemId) ?: fail()
         assertEquals(arbeidsgiverFagsystemId, annullering.arbeidsgiverFagsystemId)
         assertEquals(personFagsystemId, annullering.personFagsystemId)
-        assertEquals(SAKSBEHANDLER_IDENT, annullering.saksbehandlerIdent)
-        assertNotNull(annullering.begrunnelse)
-        assertEquals(årsaker, annullering.arsaker.toSet())
+        assertEquals(SAKSBEHANDLER_OID, annullering.saksbehandlerOid.value)
+        assertNotNull(annullering.kommentar)
+        assertEquals(årsaker, annullering.årsaker)
     }
 
     @Test
@@ -42,19 +38,18 @@ class PgAnnulleringRepositoryTest : AbstractDBIntegrationTest() {
         val personFagsystemId = "EN-PERSON-FAGSYSTEMID2"
         opprettSaksbehandler()
         annulleringRepository.lagreAnnullering(
-            annulleringDto(
-                begrunnelse = null,
+            annullering(
                 arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
                 personFagsystemId = personFagsystemId,
-                årsaker = emptySet() // Vi burde kanskje egentlig ha validering på at årsaker må ha innhold.. 🤔
+                årsaker = emptyList(),
+                begrunnelse = null // Vi burde kanskje egentlig ha validering på at årsaker må ha innhold.. 🤔
             ),
-            saksbehandler(),
         )
-        val annullering = annulleringRepository.finnAnnullering(arbeidsgiverFagsystemId, personFagsystemId)
+        val annullering = annulleringRepository.finnAnnulleringMedEnAv(arbeidsgiverFagsystemId, personFagsystemId)
         assertEquals(arbeidsgiverFagsystemId, annullering?.arbeidsgiverFagsystemId)
         assertEquals(personFagsystemId, annullering?.personFagsystemId)
-        assertEquals(SAKSBEHANDLER_IDENT, annullering?.saksbehandlerIdent)
-        assertNull(annullering?.begrunnelse)
+        assertEquals(SAKSBEHANDLER_OID, annullering?.saksbehandlerOid?.value)
+        assertNull(annullering?.kommentar)
     }
 
     @Test
@@ -64,45 +59,30 @@ class PgAnnulleringRepositoryTest : AbstractDBIntegrationTest() {
         val vedtaksperiodeId = UUID.randomUUID()
         opprettSaksbehandler()
         annulleringRepository.lagreAnnullering(
-            annulleringDto(
-                begrunnelse = null,
+            annullering(
                 arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
                 personFagsystemId = personFagsystemId,
-                årsaker = setOf("en årsak", "to årsak"),
                 vedtaksperiodeId = vedtaksperiodeId,
+                årsaker = listOf("en årsak", "to årsak"),
+                begrunnelse = null,
             ),
-            saksbehandler(),
         )
-        val annullering = annulleringRepository.finnAnnullering(arbeidsgiverFagsystemId, personFagsystemId)
+        val annullering = annulleringRepository.finnAnnulleringMedEnAv(arbeidsgiverFagsystemId, personFagsystemId)
         assertEquals(vedtaksperiodeId, annullering?.vedtaksperiodeId)
     }
 
-    private fun annulleringDto(
-        begrunnelse: String? = "annulleringsbegrunnelse",
-        utbetalingId: UUID = UTBETALING_ID,
+    private fun annullering(
         arbeidsgiverFagsystemId: String = "EN-ARBEIDSGIVER-FAGSYSTEMID",
         personFagsystemId: String = "EN-PERSON-FAGSYSTEMID",
-        årsaker: Collection<String>,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
-    ) = AnnulleringDto(
-        aktørId = AKTØR,
-        fødselsnummer = FNR,
-        organisasjonsnummer = ORGNUMMER,
-        vedtaksperiodeId = vedtaksperiodeId,
-        utbetalingId = utbetalingId,
+        årsaker: List<String>,
+        begrunnelse: String? = "annulleringsbegrunnelse",
+    ) = Annullering.Factory.ny(
         arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
         personFagsystemId = personFagsystemId,
-        årsaker = årsaker.mapIndexed { i, årsak -> AnnulleringArsak("key$i", årsak) },
+        saksbehandlerOid = SaksbehandlerOid(SAKSBEHANDLER_OID),
+        vedtaksperiodeId = vedtaksperiodeId,
+        årsaker = årsaker,
         kommentar = begrunnelse,
     )
-
-    private fun saksbehandler(saksbehandlerOid: UUID = SAKSBEHANDLER_OID) =
-        SaksbehandlerWrapper(
-            Saksbehandler(
-                id = SaksbehandlerOid(saksbehandlerOid),
-                navn = SAKSBEHANDLER_NAVN,
-                epost = SAKSBEHANDLER_EPOST,
-                ident = SAKSBEHANDLER_IDENT,
-            )
-        )
 }

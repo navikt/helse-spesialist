@@ -332,6 +332,8 @@ class OverstyringE2ETest : AbstractE2ETest() {
                     sessionFactory = sessionFactory,
                     vedtakBegrunnelseDao = daos.vedtakBegrunnelseDao,
                     stansAutomatiskBehandlingSaksbehandlerDao = daos.stansAutomatiskBehandlingSaksbehandlerDao,
+                    annulleringRepository = daos.annulleringRepository,
+                    saksbehandlerRepository = daos.saksbehandlerRepository,
                 ),
             ),
         )

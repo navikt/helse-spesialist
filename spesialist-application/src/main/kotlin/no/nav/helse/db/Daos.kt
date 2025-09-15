@@ -16,6 +16,7 @@ import no.nav.helse.db.api.TildelingApiDao
 import no.nav.helse.db.api.VarselApiRepository
 import no.nav.helse.db.api.VergemålApiDao
 import no.nav.helse.mediator.oppgave.OppgaveRepository
+import no.nav.helse.spesialist.application.SaksbehandlerRepository
 
 interface Daos {
     val annulleringRepository: AnnulleringRepository
@@ -60,4 +61,5 @@ interface Daos {
     val varselApiRepository: VarselApiRepository
     val vergemålApiDao: VergemålApiDao
     val oppgaveRepository: OppgaveRepository
+    val saksbehandlerRepository: SaksbehandlerRepository
 }

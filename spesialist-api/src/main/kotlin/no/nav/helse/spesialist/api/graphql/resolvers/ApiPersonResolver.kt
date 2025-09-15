@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.api.graphql.resolvers
 
+import no.nav.helse.db.AnnulleringRepository
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.db.VedtakBegrunnelseDao
 import no.nav.helse.db.api.ArbeidsgiverApiDao
@@ -41,6 +42,7 @@ import no.nav.helse.spesialist.api.overstyring.OverstyringTidslinjeDto
 import no.nav.helse.spesialist.api.overstyring.Skjonnsfastsettingstype
 import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsettingSykepengegrunnlagDto
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDto
+import no.nav.helse.spesialist.application.SaksbehandlerRepository
 import no.nav.helse.spesialist.application.snapshot.SnapshotGhostPeriode
 import no.nav.helse.spesialist.application.snapshot.SnapshotPerson
 import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
@@ -64,6 +66,8 @@ data class ApiPersonResolver(
     private val apiOppgaveService: ApiOppgaveService,
     private val saksbehandlerMediator: SaksbehandlerMediator,
     private val vedtakBegrunnelseDao: VedtakBegrunnelseDao,
+    private val annulleringRepository: AnnulleringRepository,
+    private val saksbehandlerRepository: SaksbehandlerRepository,
 ) : PersonSchema {
     override fun versjon(): Int = snapshot.versjon
 
@@ -142,6 +146,8 @@ data class ApiPersonResolver(
                                 },
                         vedtakBegrunnelseDao = vedtakBegrunnelseDao,
                         sessionFactory = sessionFactory,
+                        annulleringRepository = annulleringRepository,
+                        saksbehandlerRepository = saksbehandlerRepository,
                     ),
             )
         }
@@ -181,6 +187,8 @@ data class ApiPersonResolver(
                             },
                     vedtakBegrunnelseDao = vedtakBegrunnelseDao,
                     sessionFactory = sessionFactory,
+                    annulleringRepository = annulleringRepository,
+                    saksbehandlerRepository = saksbehandlerRepository,
                 ),
         )
     }

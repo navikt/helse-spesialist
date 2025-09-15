@@ -1,6 +1,5 @@
 package no.nav.helse.modell.melding
 
-import no.nav.helse.modell.saksbehandler.handlinger.AnnulleringArsak
 import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgradPeriode
 import no.nav.helse.modell.saksbehandler.handlinger.PåVentÅrsak
 import java.math.BigDecimal
@@ -121,9 +120,14 @@ data class AnnullertUtbetalingEvent(
     val arbeidsgiverFagsystemId: String,
     val personFagsystemId: String,
     val begrunnelser: List<String>,
-    val arsaker: List<AnnulleringArsak>?,
+    val arsaker: List<Årsak>?,
     val kommentar: String?,
-) : UtgåendeHendelse
+) : UtgåendeHendelse {
+    data class Årsak(
+        val key: String,
+        val arsak: String,
+    )
+}
 
 data class LagtPåVentEvent(
     val fødselsnummer: String,

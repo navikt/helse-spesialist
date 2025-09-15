@@ -68,7 +68,6 @@ import java.util.UUID
 
 abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
     protected val tilgangsgruppeUuider = randomTilgangsgruppeUuider()
-    private val avviksvurderingId: UUID = UUID.randomUUID()
 
     private val reservasjonshenter = mockk<Reservasjonshenter>(relaxed = true)
     private val behandlingsstatistikkMediator = mockk<IBehandlingsstatistikkService>(relaxed = true)
@@ -79,7 +78,6 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
     private val godkjenninghåndterer = mockk<Godkjenninghåndterer>(relaxed = true)
     private val personhåndterer = mockk<Personhåndterer>(relaxed = true)
     protected val dokumenthåndterer = mockk<Dokumenthåndterer>(relaxed = true)
-    private val avviksvurderinghenter = mockk<Avviksvurderinghenter>(relaxed = true)
     private val stansAutomatiskBehandlinghåndterer = mockk<StansAutomatiskBehandlinghåndterer>(relaxed = true)
 
     protected val spleisClient = mockk<SpleisClient>(relaxed = true)
@@ -128,6 +126,8 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                                 sessionFactory = sessionFactory,
                                 vedtakBegrunnelseDao = vedtakBegrunnelseDao,
                                 stansAutomatiskBehandlingSaksbehandlerDao = stansAutomatiskBehandlingSaksbehandlerDao,
+                                annulleringRepository = daos.annulleringRepository,
+                                saksbehandlerRepository = daos.saksbehandlerRepository,
                             ),
                     ),
                     oppgaver = OppgaverQueryHandler(

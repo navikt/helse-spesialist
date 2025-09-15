@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.jackson.asLocalDate
 import com.github.navikt.tbd_libs.jackson.isMissingOrNull
 import io.ktor.utils.io.core.toByteArray
+import no.nav.helse.db.AnnulleringRepository
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.db.VedtakBegrunnelseDao
 import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
@@ -74,6 +75,7 @@ import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.oppgave.OppgaveForPeriodevisningDto
 import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDto
+import no.nav.helse.spesialist.application.SaksbehandlerRepository
 import no.nav.helse.spesialist.application.snapshot.SnapshotBeregnetPeriode
 import no.nav.helse.spesialist.application.snapshot.SnapshotOppdrag
 import no.nav.helse.spesialist.application.snapshot.SnapshotUtbetalingstatus
@@ -99,6 +101,8 @@ data class ApiBeregnetPeriodeResolver(
     private val index: Int,
     private val vedtakBegrunnelseDao: VedtakBegrunnelseDao,
     private val sessionFactory: SessionFactory,
+    private val annulleringRepository: AnnulleringRepository,
+    private val saksbehandlerRepository: SaksbehandlerRepository,
 ) : BeregnetPeriodeSchema {
     private val periodetilstand = periode.periodetilstand.tilApiPeriodetilstand(erSisteGenerasjon)
 
@@ -477,18 +481,21 @@ data class ApiBeregnetPeriodeResolver(
 
     override fun annullering(): ApiAnnullering? =
         if (erSisteGenerasjon) {
-            saksbehandlerMediator
-                .hentAnnullering(
-                    periode.utbetaling.arbeidsgiverFagsystemId,
-                    periode.utbetaling.personFagsystemId,
+            annulleringRepository
+                .finnAnnulleringMedEnAv(
+                    arbeidsgiverFagsystemId = periode.utbetaling.arbeidsgiverFagsystemId,
+                    personFagsystemId = periode.utbetaling.personFagsystemId,
                 )?.let {
+                    val saksbehandler =
+                        saksbehandlerRepository.finn(it.saksbehandlerOid)
+                            ?: error("Fant ikke saksbehandler med ${it.saksbehandlerOid}")
                     ApiAnnullering(
-                        saksbehandlerIdent = it.saksbehandlerIdent,
+                        saksbehandlerIdent = saksbehandler.ident,
                         arbeidsgiverFagsystemId = it.arbeidsgiverFagsystemId,
                         personFagsystemId = it.personFagsystemId,
                         tidspunkt = it.tidspunkt,
-                        arsaker = it.arsaker,
-                        begrunnelse = it.begrunnelse,
+                        arsaker = it.årsaker,
+                        begrunnelse = it.kommentar,
                         vedtaksperiodeId = it.vedtaksperiodeId,
                     )
                 }

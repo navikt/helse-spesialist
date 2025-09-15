@@ -7,7 +7,6 @@ import io.ktor.server.auth.principal
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.bootstrap.EnvironmentToggles
-import no.nav.helse.db.AnnulleringRepository
 import no.nav.helse.db.Daos
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.SessionContext
@@ -107,7 +106,6 @@ class SaksbehandlerMediator(
     private val meldingPubliserer: MeldingPubliserer,
     private val oppgaveService: OppgaveService,
     private val apiOppgaveService: ApiOppgaveService,
-    private val annulleringRepository: AnnulleringRepository,
     private val environmentToggles: EnvironmentToggles,
     private val sessionFactory: SessionFactory,
     private val tilgangsgruppeUuider: TilgangsgruppeUuider,
@@ -562,15 +560,6 @@ class SaksbehandlerMediator(
             )
         }
     }
-
-    fun hentAnnullering(
-        arbeidsgiverFagsystemId: String,
-        personFagsystemId: String,
-    ): no.nav.helse.modell.Annullering? =
-        annulleringRepository.finnAnnullering(
-            arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
-            personFagsystemId = personFagsystemId,
-        )
 
     fun sendIRetur(
         oppgavereferanse: Long,

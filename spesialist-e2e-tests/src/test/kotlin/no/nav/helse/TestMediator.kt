@@ -28,7 +28,6 @@ class TestMediator(
 ) {
     private val daos = DBDaos(dataSource)
     private val opptegnelseDao = daos.opptegnelseDao
-    private val annulleringRepository = daos.annulleringRepository
     private val meldingPubliserer = MessageContextMeldingPubliserer(testRapid)
 
     private val godkjenningMediator = GodkjenningMediator(opptegnelseDao)
@@ -52,7 +51,6 @@ class TestMediator(
             meldingPubliserer = meldingPubliserer,
             oppgaveService = oppgaveService,
             apiOppgaveService = apiOppgaveService,
-            annulleringRepository = annulleringRepository,
             environmentToggles = environmentToggles,
             sessionFactory = TransactionalSessionFactory(dataSource),
             tilgangsgruppeUuider = randomTilgangsgruppeUuider()

@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.api.graphql.resolvers
 
+import no.nav.helse.db.AnnulleringRepository
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.db.VedtakBegrunnelseDao
 import no.nav.helse.db.api.ArbeidsgiverApiDao
@@ -20,6 +21,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiUberegnetPeriode
 import no.nav.helse.spesialist.api.graphql.schema.ArbeidsgiverSchema
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDto
+import no.nav.helse.spesialist.application.SaksbehandlerRepository
 import no.nav.helse.spesialist.application.snapshot.SnapshotBeregnetPeriode
 import no.nav.helse.spesialist.application.snapshot.SnapshotGenerasjon
 import no.nav.helse.spesialist.application.snapshot.SnapshotUberegnetPeriode
@@ -43,6 +45,8 @@ class ApiArbeidsgiverResolver(
     private val overstyringer: List<ApiOverstyring>,
     private val vedtakBegrunnelseDao: VedtakBegrunnelseDao,
     private val sessionFactory: SessionFactory,
+    private val annulleringRepository: AnnulleringRepository,
+    private val saksbehandlerRepository: SaksbehandlerRepository,
 ) : ArbeidsgiverSchema {
     override fun organisasjonsnummer(): String = organisasjonsnummer
 
@@ -94,6 +98,8 @@ class ApiArbeidsgiverResolver(
                                             index = index,
                                             vedtakBegrunnelseDao = vedtakBegrunnelseDao,
                                             sessionFactory = sessionFactory,
+                                            annulleringRepository = annulleringRepository,
+                                            saksbehandlerRepository = saksbehandlerRepository,
                                         ),
                                 )
 

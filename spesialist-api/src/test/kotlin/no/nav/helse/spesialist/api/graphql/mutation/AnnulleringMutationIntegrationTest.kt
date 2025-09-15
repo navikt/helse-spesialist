@@ -2,18 +2,17 @@ package no.nav.helse.spesialist.api.graphql.mutation
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import no.nav.helse.modell.Annullering
 import no.nav.helse.modell.melding.AnnullertUtbetalingEvent
-import no.nav.helse.modell.saksbehandler.handlinger.AnnulleringArsak
-import no.nav.helse.modell.saksbehandler.handlinger.AnnulleringDto
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.api.graphql.schema.ApiAnnulleringData
 import no.nav.helse.spesialist.api.testfixtures.lagSaksbehandler
 import no.nav.helse.spesialist.api.testfixtures.mutation.annullerMutation
 import no.nav.helse.spesialist.application.InMemoryMeldingPubliserer
-import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import no.nav.helse.spesialist.domain.testfixtures.lagAktørId
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
+import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlerOid
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertNotNull
@@ -64,15 +63,15 @@ class AnnulleringMutationIntegrationTest {
             integrationTestFixture
                 .daos
                 .annulleringRepository
-                .finnAnnullering(arbeidsgiverFagsystemId, personFagsystemId)
+                .finnAnnulleringMedEnAv(arbeidsgiverFagsystemId, personFagsystemId)
 
         assertNotNull(lagretAnnullering)
 
-        assertEquals(saksbehandler.ident, lagretAnnullering.saksbehandlerIdent)
+        assertEquals(saksbehandler.id(), lagretAnnullering.saksbehandlerOid)
         assertEquals(arbeidsgiverFagsystemId, lagretAnnullering.arbeidsgiverFagsystemId)
         assertEquals(personFagsystemId, lagretAnnullering.personFagsystemId)
-        assertEquals(årsaker.values.sorted(), lagretAnnullering.arsaker.sorted())
-        assertEquals(kommentar, lagretAnnullering.begrunnelse)
+        assertEquals(årsaker.values.sorted(), lagretAnnullering.årsaker.sorted())
+        assertEquals(kommentar, lagretAnnullering.kommentar)
         assertEquals(vedtaksperiodeId, lagretAnnullering.vedtaksperiodeId)
 
         // Sjekk publiserte meldinger
@@ -95,7 +94,7 @@ class AnnulleringMutationIntegrationTest {
                     arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
                     personFagsystemId = personFagsystemId,
                     begrunnelser = årsaker.values.toList(),
-                    arsaker = årsaker.map { AnnulleringArsak(key = it.key, arsak = it.value) },
+                    arsaker = årsaker.map { AnnullertUtbetalingEvent.Årsak(key = it.key, arsak = it.value) },
                     kommentar = kommentar
                 ),
                 årsak = "annullering av utbetaling"
@@ -144,15 +143,15 @@ class AnnulleringMutationIntegrationTest {
             integrationTestFixture
                 .daos
                 .annulleringRepository
-                .finnAnnullering(arbeidsgiverFagsystemId, personFagsystemId)
+                .finnAnnulleringMedEnAv(arbeidsgiverFagsystemId, personFagsystemId)
 
         assertNotNull(lagretAnnullering)
 
-        assertEquals(saksbehandler.ident, lagretAnnullering.saksbehandlerIdent)
+        assertEquals(saksbehandler.id(), lagretAnnullering.saksbehandlerOid)
         assertEquals(arbeidsgiverFagsystemId, lagretAnnullering.arbeidsgiverFagsystemId)
         assertEquals(personFagsystemId, lagretAnnullering.personFagsystemId)
-        assertEquals(emptyList<String>(), lagretAnnullering.arsaker)
-        assertEquals(kommentar, lagretAnnullering.begrunnelse)
+        assertEquals(emptyList<String>(), lagretAnnullering.årsaker)
+        assertEquals(kommentar, lagretAnnullering.kommentar)
         assertEquals(vedtaksperiodeId, lagretAnnullering.vedtaksperiodeId)
 
         // Sjekk publiserte meldinger
@@ -186,33 +185,26 @@ class AnnulleringMutationIntegrationTest {
     @Test
     fun `annullering allerede lagret`() {
         // Given:
-        val fødselsnummer = lagFødselsnummer()
-        val aktørId = lagAktørId()
-        val organisasjonsnummer = lagOrganisasjonsnummer()
         val saksbehandler = lagSaksbehandler()
 
         val arbeidsgiverFagsystemId = "EN_ARBEIDSGIVER_FAGSYSTEM_ID"
         val kommentar = "kommentar"
         val personFagsystemId = "EN_PERSON_FAGSYSTEM_ID"
-        val utbetalingId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
         val årsaker = mapOf("årsak-1" to "Ferie", "årsak-2" to "Ekstra ferie")
+        val tidligereSaksbehandlerOid = lagSaksbehandlerOid()
         integrationTestFixture
             .daos
             .annulleringRepository
             .lagreAnnullering(
-                annulleringDto = AnnulleringDto(
-                    aktørId = aktørId,
-                    fødselsnummer = fødselsnummer,
-                    organisasjonsnummer = organisasjonsnummer,
-                    vedtaksperiodeId = vedtaksperiodeId,
-                    utbetalingId = utbetalingId,
+                annullering = Annullering.Factory.ny(
                     arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
                     personFagsystemId = personFagsystemId,
-                    årsaker = årsaker.map { AnnulleringArsak(key = it.key, arsak = it.value) },
+                    saksbehandlerOid = tidligereSaksbehandlerOid,
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    årsaker = årsaker.map { it.value },
                     kommentar = kommentar
-                ),
-                saksbehandlerWrapper = SaksbehandlerWrapper(saksbehandler)
+                )
             )
 
         // When:
@@ -255,15 +247,15 @@ class AnnulleringMutationIntegrationTest {
             integrationTestFixture
                 .daos
                 .annulleringRepository
-                .finnAnnullering(arbeidsgiverFagsystemId, personFagsystemId)
+                .finnAnnulleringMedEnAv(arbeidsgiverFagsystemId, personFagsystemId)
 
         assertNotNull(lagretAnnullering)
 
-        assertEquals(saksbehandler.ident, lagretAnnullering.saksbehandlerIdent)
+        assertEquals(tidligereSaksbehandlerOid, lagretAnnullering.saksbehandlerOid)
         assertEquals(arbeidsgiverFagsystemId, lagretAnnullering.arbeidsgiverFagsystemId)
         assertEquals(personFagsystemId, lagretAnnullering.personFagsystemId)
-        assertEquals(årsaker.values.sorted(), lagretAnnullering.arsaker.sorted())
-        assertEquals(kommentar, lagretAnnullering.begrunnelse)
+        assertEquals(årsaker.values.sorted(), lagretAnnullering.årsaker.sorted())
+        assertEquals(kommentar, lagretAnnullering.kommentar)
         assertEquals(vedtaksperiodeId, lagretAnnullering.vedtaksperiodeId)
 
         // Sjekk publiserte meldinger

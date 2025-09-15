@@ -146,6 +146,8 @@ fun lagSchemaMedResolversOgHandlers(
                                 sessionFactory = sessionFactory,
                                 vedtakBegrunnelseDao = daos.vedtakBegrunnelseDao,
                                 stansAutomatiskBehandlingSaksbehandlerDao = daos.stansAutomatiskBehandlingSaksbehandlerDao,
+                                annulleringRepository = daos.annulleringRepository,
+                                saksbehandlerRepository = daos.saksbehandlerRepository,
                             ),
                     ),
                 oppgaver =

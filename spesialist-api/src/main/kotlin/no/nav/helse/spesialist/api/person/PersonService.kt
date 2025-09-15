@@ -5,6 +5,7 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import net.logstash.logback.argument.StructuredArguments.keyValue
+import no.nav.helse.db.AnnulleringRepository
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.db.StansAutomatiskBehandlingSaksbehandlerDao
 import no.nav.helse.db.VedtakBegrunnelseDao
@@ -33,6 +34,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiPersoninfo
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
 import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.application.Reservasjonshenter.ReservasjonDto
+import no.nav.helse.spesialist.application.SaksbehandlerRepository
 import no.nav.helse.spesialist.application.snapshot.SnapshotPerson
 import no.nav.helse.spesialist.application.tilgangskontroll.PersonTilgangskontroll
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
@@ -72,6 +74,8 @@ class PersonService(
     private val sessionFactory: SessionFactory,
     private val vedtakBegrunnelseDao: VedtakBegrunnelseDao,
     private val stansAutomatiskBehandlingSaksbehandlerDao: StansAutomatiskBehandlingSaksbehandlerDao,
+    private val annulleringRepository: AnnulleringRepository,
+    private val saksbehandlerRepository: SaksbehandlerRepository,
 ) : PersonoppslagService {
     private companion object {
         private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
@@ -150,6 +154,8 @@ class PersonService(
                         saksbehandlerMediator = saksbehandlerMediator,
                         sessionFactory = sessionFactory,
                         vedtakBegrunnelseDao = vedtakBegrunnelseDao,
+                        annulleringRepository = annulleringRepository,
+                        saksbehandlerRepository = saksbehandlerRepository,
                     ),
             ),
         )

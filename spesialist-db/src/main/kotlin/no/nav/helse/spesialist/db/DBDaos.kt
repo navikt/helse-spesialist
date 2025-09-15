@@ -42,6 +42,7 @@ import no.nav.helse.spesialist.db.dao.api.PgTildelingApiDao
 import no.nav.helse.spesialist.db.dao.api.PgVarselApiRepository
 import no.nav.helse.spesialist.db.dao.api.PgVergemålApiDao
 import no.nav.helse.spesialist.db.repository.PgOppgaveRepository
+import no.nav.helse.spesialist.db.repository.PgSaksbehandlerRepository
 import javax.sql.DataSource
 
 class DBDaos(
@@ -89,4 +90,5 @@ class DBDaos(
     override val varselApiRepository = PgVarselApiRepository(dataSource)
     override val vergemålApiDao = PgVergemålApiDao(dataSource)
     override val oppgaveRepository = PgOppgaveRepository(dataSource)
+    override val saksbehandlerRepository = PgSaksbehandlerRepository(dataSource)
 }
