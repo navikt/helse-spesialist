@@ -9,7 +9,7 @@ class SaksbehandlerIdentGruppe(
 }
 
 object SaksbehandlerIdentGrupper {
-    val COACHER =
+    val TILGANG_TIL_SN =
         SaksbehandlerIdentGruppe(
             "B164848",
             "F131883",
@@ -20,5 +20,9 @@ object SaksbehandlerIdentGrupper {
             "S157539",
             "S165568",
             "V149621",
+            "F160464",
+            "M136300",
+            "A148751",
+            "S161635",
         )
 }

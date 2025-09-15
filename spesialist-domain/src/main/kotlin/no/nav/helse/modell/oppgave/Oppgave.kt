@@ -449,7 +449,7 @@ class Oppgave private constructor(
                 STIKKPRØVE -> Tilgangsgruppe.STIKKPRØVE in saksbehandlerTilgangsgrupper
                 SELVSTENDIG_NÆRINGSDRIVENDE ->
                     Tilgangsgruppe.TBD in saksbehandlerTilgangsgrupper ||
-                        SaksbehandlerIdentGrupper.COACHER.inneholder(saksbehandler.ident)
+                        SaksbehandlerIdentGrupper.TILGANG_TIL_SN.inneholder(saksbehandler.ident)
                 else -> true
             }
     }
