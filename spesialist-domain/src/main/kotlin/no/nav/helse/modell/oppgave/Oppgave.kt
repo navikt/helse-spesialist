@@ -320,7 +320,7 @@ class Oppgave private constructor(
             saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe>,
         ) {
             if (!oppgave.harTilgang(
-                    saksbehandler = saksbehandlerWrapper.tilSaksbehandler(),
+                    saksbehandler = saksbehandlerWrapper.saksbehandler,
                     saksbehandlerTilgangsgrupper = saksbehandlerTilgangsgrupper,
                 )
             ) {
@@ -454,11 +454,3 @@ class Oppgave private constructor(
             }
     }
 }
-
-private fun SaksbehandlerWrapper.tilSaksbehandler(): Saksbehandler =
-    Saksbehandler(
-        id = SaksbehandlerOid(saksbehandler.id().value),
-        navn = saksbehandler.navn,
-        epost = saksbehandler.epost,
-        ident = saksbehandler.ident,
-    )

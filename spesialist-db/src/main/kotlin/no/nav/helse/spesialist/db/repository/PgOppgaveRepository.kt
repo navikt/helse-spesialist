@@ -150,25 +150,20 @@ class PgOppgaveRepository private constructor(
                 o.hendelse_id_godkjenningsbehov, 
                 o.ferdigstilt_av, 
                 o.ferdigstilt_av_oid, 
-                o.utbetaling_id, 
-                s.navn, 
-                s.epost, 
-                s.ident, 
-                s.oid, 
+                o.utbetaling_id,
+                t.saksbehandler_ref, 
                 o.kan_avvises
             FROM oppgave o
             INNER JOIN vedtak v on o.vedtak_ref = v.id
             LEFT JOIN tildeling t on o.id = t.oppgave_id_ref
-            LEFT JOIN saksbehandler s on s.oid = t.saksbehandler_ref
             WHERE o.id = :oppgaveId
             ORDER BY o.id DESC LIMIT 1
             """,
             "oppgaveId" to id,
         ).singleOrNull { row ->
-            val egenskaper = row.array<String>("egenskaper").mapNotNull { it.fromDb() }.toSet()
             Oppgave.fraLagring(
                 id = id,
-                egenskaper = egenskaper,
+                egenskaper = row.array<String>("egenskaper").mapNotNull { it.fromDb() }.toSet(),
                 tilstand = tilstand(row.string("status")),
                 vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
                 behandlingId = row.uuid("behandling_id"),
@@ -177,7 +172,7 @@ class PgOppgaveRepository private constructor(
                 kanAvvises = row.boolean("kan_avvises"),
                 ferdigstiltAvIdent = row.stringOrNull("ferdigstilt_av"),
                 ferdigstiltAvOid = row.uuidOrNull("ferdigstilt_av_oid"),
-                tildeltTil = row.uuidOrNull("oid")?.let(::SaksbehandlerOid),
+                tildeltTil = row.uuidOrNull("saksbehandler_ref")?.let(::SaksbehandlerOid),
             )
         }
 

@@ -1,7 +1,7 @@
 package no.nav.helse.mediator.oppgave
 
-import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveDao
+import no.nav.helse.db.OppgaveFraDatabaseForVisning
 import no.nav.helse.db.OppgavesorteringForDatabase
 import no.nav.helse.db.SorteringsnøkkelForDatabase
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilApiversjon
@@ -13,6 +13,7 @@ import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.spesialist.api.graphql.schema.ApiAntallOppgaver
 import no.nav.helse.spesialist.api.graphql.schema.ApiBehandledeOppgaver
+import no.nav.helse.spesialist.api.graphql.schema.ApiEgenskap
 import no.nav.helse.spesialist.api.graphql.schema.ApiFiltrering
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveegenskap
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaverTilBehandling
@@ -35,55 +36,70 @@ class ApiOppgaveService(
         limit: Int,
         sortering: List<ApiOppgavesortering>,
         filtrering: ApiFiltrering,
-    ): ApiOppgaverTilBehandling {
-        val egenskaperSaksbehandlerIkkeHarTilgangTil =
-            Egenskap
-                .entries
-                .filterNot {
-                    Oppgave.harTilgangTilEgenskap(
-                        egenskap = it,
-                        saksbehandler = saksbehandler,
-                        saksbehandlerTilgangsgrupper = tilgangsgrupper,
-                    )
-                }.map(Egenskap::toString)
+    ): ApiOppgaverTilBehandling =
+        oppgaveDao
+            .finnOppgaverForVisning(
+                ekskluderEgenskaper =
+                    egenskaperSaksbehandlerIkkeHarTilgangTil(saksbehandler, tilgangsgrupper)
+                        .plus(filtrering.tilEkskluderteEgenskaper())
+                        .map(Egenskap::toString),
+                saksbehandlerOid = saksbehandler.id().value,
+                offset = offset,
+                limit = limit,
+                sortering = sortering.tilOppgavesorteringForDatabase(),
+                egneSakerPåVent = filtrering.egneSakerPaVent,
+                egneSaker = filtrering.egneSaker,
+                tildelt = filtrering.tildelt,
+                grupperteFiltrerteEgenskaper =
+                    filtrering.egenskaper
+                        .groupBy { it.kategori }
+                        .map { it.key.tilDatabaseversjon() to it.value.tilDatabaseversjon() }
+                        .toMap(),
+            ).tilApiOppgaverTilBehandling()
 
-        val alleUkategoriserteEgenskaper =
-            Egenskap.entries
-                .filter { it.kategori == Egenskap.Kategori.Ukategorisert }
-                .map(Egenskap::toString)
+    private fun ApiFiltrering.tilEkskluderteEgenskaper(): List<Egenskap> =
+        buildList {
+            addAll(ekskluderteEgenskaper.orEmpty().map { it.egenskap }.map { it.tilEgenskap() })
+            if (ingenUkategoriserteEgenskaper) {
+                addAll(Egenskap.entries.filter { it.kategori == Egenskap.Kategori.Ukategorisert })
+            }
+        }
 
-        val ekskluderteEgenskaper =
-            filtrering.ekskluderteEgenskaper?.tilDatabaseversjon()?.map(
-                EgenskapForDatabase::toString,
-            ) ?: emptyList()
-
-        val egenskaperSomSkalEkskluderes =
-            egenskaperSaksbehandlerIkkeHarTilgangTil + ekskluderteEgenskaper + if (filtrering.ingenUkategoriserteEgenskaper) alleUkategoriserteEgenskaper else emptyList()
-
-        val grupperteFiltrerteEgenskaper =
-            filtrering.egenskaper
-                .groupBy { it.kategori }
-                .map { it.key.tilDatabaseversjon() to it.value.tilDatabaseversjon() }
-                .toMap()
-
-        val oppgaver =
-            oppgaveDao
-                .finnOppgaverForVisning(
-                    ekskluderEgenskaper = egenskaperSomSkalEkskluderes,
-                    saksbehandlerOid = saksbehandler.id().value,
-                    offset = offset,
-                    limit = limit,
-                    sortering = sortering.tilOppgavesorteringForDatabase(),
-                    egneSakerPåVent = filtrering.egneSakerPaVent,
-                    egneSaker = filtrering.egneSaker,
-                    tildelt = filtrering.tildelt,
-                    grupperteFiltrerteEgenskaper = grupperteFiltrerteEgenskaper,
-                )
-        return ApiOppgaverTilBehandling(
-            oppgaver = oppgaver.tilOppgaverTilBehandling(),
-            totaltAntallOppgaver = if (oppgaver.isEmpty()) 0 else oppgaver.first().filtrertAntall,
-        )
-    }
+    private fun ApiEgenskap.tilEgenskap(): Egenskap =
+        when (this) {
+            ApiEgenskap.RISK_QA -> Egenskap.RISK_QA
+            ApiEgenskap.FORTROLIG_ADRESSE -> Egenskap.FORTROLIG_ADRESSE
+            ApiEgenskap.STRENGT_FORTROLIG_ADRESSE -> Egenskap.STRENGT_FORTROLIG_ADRESSE
+            ApiEgenskap.EGEN_ANSATT -> Egenskap.EGEN_ANSATT
+            ApiEgenskap.BESLUTTER -> Egenskap.BESLUTTER
+            ApiEgenskap.SPESIALSAK -> Egenskap.SPESIALSAK
+            ApiEgenskap.REVURDERING -> Egenskap.REVURDERING
+            ApiEgenskap.SOKNAD -> Egenskap.SØKNAD
+            ApiEgenskap.STIKKPROVE -> Egenskap.STIKKPRØVE
+            ApiEgenskap.UTBETALING_TIL_SYKMELDT -> Egenskap.UTBETALING_TIL_SYKMELDT
+            ApiEgenskap.DELVIS_REFUSJON -> Egenskap.DELVIS_REFUSJON
+            ApiEgenskap.UTBETALING_TIL_ARBEIDSGIVER -> Egenskap.UTBETALING_TIL_ARBEIDSGIVER
+            ApiEgenskap.INGEN_UTBETALING -> Egenskap.INGEN_UTBETALING
+            ApiEgenskap.EN_ARBEIDSGIVER -> Egenskap.EN_ARBEIDSGIVER
+            ApiEgenskap.FLERE_ARBEIDSGIVERE -> Egenskap.FLERE_ARBEIDSGIVERE
+            ApiEgenskap.FORLENGELSE -> Egenskap.FORLENGELSE
+            ApiEgenskap.FORSTEGANGSBEHANDLING -> Egenskap.FORSTEGANGSBEHANDLING
+            ApiEgenskap.INFOTRYGDFORLENGELSE -> Egenskap.INFOTRYGDFORLENGELSE
+            ApiEgenskap.OVERGANG_FRA_IT -> Egenskap.OVERGANG_FRA_IT
+            ApiEgenskap.UTLAND -> Egenskap.UTLAND
+            ApiEgenskap.HASTER -> Egenskap.HASTER
+            ApiEgenskap.RETUR -> Egenskap.RETUR
+            ApiEgenskap.VERGEMAL -> Egenskap.VERGEMÅL
+            ApiEgenskap.SKJONNSFASTSETTELSE -> Egenskap.SKJØNNSFASTSETTELSE
+            ApiEgenskap.PA_VENT -> Egenskap.PÅ_VENT
+            ApiEgenskap.TILBAKEDATERT -> Egenskap.TILBAKEDATERT
+            ApiEgenskap.GOSYS -> Egenskap.GOSYS
+            ApiEgenskap.MANGLER_IM -> Egenskap.MANGLER_IM
+            ApiEgenskap.MEDLEMSKAP -> Egenskap.MEDLEMSKAP
+            ApiEgenskap.GRUNNBELOPSREGULERING -> Egenskap.GRUNNBELØPSREGULERING
+            ApiEgenskap.SELVSTENDIG_NAERINGSDRIVENDE -> Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE
+            ApiEgenskap.ARBEIDSTAKER -> Egenskap.ARBEIDSTAKER
+        }
 
     fun tildelteOppgaver(
         innloggetSaksbehandler: Saksbehandler,
@@ -91,31 +107,34 @@ class ApiOppgaveService(
         oppslåttSaksbehandler: Saksbehandler,
         offset: Int,
         limit: Int,
-    ): ApiOppgaverTilBehandling {
-        val egenskaperSaksbehandlerIkkeHarTilgangTil =
-            Egenskap
-                .entries
-                .filterNot {
-                    Oppgave.harTilgangTilEgenskap(
-                        egenskap = it,
-                        saksbehandler = innloggetSaksbehandler,
-                        saksbehandlerTilgangsgrupper = tilgangsgrupper,
-                    )
-                }.map(Egenskap::toString)
+    ): ApiOppgaverTilBehandling =
+        oppgaveDao
+            .finnTildelteOppgaver(
+                saksbehandlerOid = oppslåttSaksbehandler.id().value,
+                ekskluderEgenskaper =
+                    egenskaperSaksbehandlerIkkeHarTilgangTil(innloggetSaksbehandler, tilgangsgrupper)
+                        .map(Egenskap::toString),
+                offset = offset,
+                limit = limit,
+            ).tilApiOppgaverTilBehandling()
 
-        val oppgaver =
-            oppgaveDao
-                .finnTildelteOppgaver(
-                    saksbehandlerOid = oppslåttSaksbehandler.id().value,
-                    ekskluderEgenskaper = egenskaperSaksbehandlerIkkeHarTilgangTil,
-                    offset = offset,
-                    limit = limit,
-                )
-        return ApiOppgaverTilBehandling(
-            oppgaver = oppgaver.tilOppgaverTilBehandling(),
-            totaltAntallOppgaver = if (oppgaver.isEmpty()) 0 else oppgaver.first().filtrertAntall,
+    private fun egenskaperSaksbehandlerIkkeHarTilgangTil(
+        saksbehandler: Saksbehandler,
+        tilgangsgrupper: Set<Tilgangsgruppe>,
+    ): List<Egenskap> =
+        Egenskap.entries.filterNot {
+            Oppgave.harTilgangTilEgenskap(
+                egenskap = it,
+                saksbehandler = saksbehandler,
+                saksbehandlerTilgangsgrupper = tilgangsgrupper,
+            )
+        }
+
+    private fun List<OppgaveFraDatabaseForVisning>.tilApiOppgaverTilBehandling(): ApiOppgaverTilBehandling =
+        ApiOppgaverTilBehandling(
+            oppgaver = tilOppgaverTilBehandling(),
+            totaltAntallOppgaver = if (isEmpty()) 0 else this.first().filtrertAntall,
         )
-    }
 
     fun antallOppgaver(saksbehandler: Saksbehandler): ApiAntallOppgaver {
         val antallOppgaver = oppgaveDao.finnAntallOppgaver(saksbehandlerOid = saksbehandler.id().value)
