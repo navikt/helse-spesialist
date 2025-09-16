@@ -67,8 +67,11 @@ class PgAnnulleringRepositoryTest : AbstractDBIntegrationTest() {
                 begrunnelse = null,
             ),
         )
-        val annullering = annulleringRepository.finnAnnulleringMedEnAv(arbeidsgiverFagsystemId, personFagsystemId)
+        val annullering = annulleringRepository.finnAnnullering(vedtaksperiodeId)
         assertEquals(vedtaksperiodeId, annullering?.vedtaksperiodeId)
+        assertEquals(arbeidsgiverFagsystemId, annullering?.arbeidsgiverFagsystemId)
+        assertEquals(personFagsystemId, annullering?.personFagsystemId)
+        assertEquals(SAKSBEHANDLER_OID, annullering?.saksbehandlerOid?.value)
     }
 
     private fun annullering(

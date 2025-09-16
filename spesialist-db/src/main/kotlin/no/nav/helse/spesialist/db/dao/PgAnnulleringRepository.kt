@@ -10,6 +10,7 @@ import no.nav.helse.spesialist.db.DbQuery
 import no.nav.helse.spesialist.db.HelseDao.Companion.somDbArray
 import no.nav.helse.spesialist.db.SessionDbQuery
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
+import java.util.UUID
 import javax.sql.DataSource
 
 class PgAnnulleringRepository private constructor(
@@ -66,6 +67,17 @@ class PgAnnulleringRepository private constructor(
             where aas.id = :id
             """.trimIndent(),
             "id" to id.value,
+        ) { it.tilAnnullering() }
+
+    override fun finnAnnullering(vedtaksperiodeId: UUID): Annullering? =
+        dbQuery.singleOrNull(
+            """
+            select aas.id, aas.annullert_tidspunkt, aas.arbeidsgiver_fagsystem_id, aas.person_fagsystem_id, aas.saksbehandler_ref, aas.årsaker, b.tekst, vedtaksperiode_id
+            from annullert_av_saksbehandler aas
+                left join begrunnelse b on b.id = aas.begrunnelse_ref
+            where aas.vedtaksperiode_id = :vedtaksperiodeId 
+            """.trimIndent(),
+            "vedtaksperiodeId" to vedtaksperiodeId,
         ) { it.tilAnnullering() }
 
     override fun finnAnnulleringMedEnAv(

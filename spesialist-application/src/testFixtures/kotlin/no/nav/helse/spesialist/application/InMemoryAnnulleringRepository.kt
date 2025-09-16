@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.application
 import no.nav.helse.db.AnnulleringRepository
 import no.nav.helse.modell.Annullering
 import no.nav.helse.modell.AnnulleringId
+import java.util.UUID
 
 class InMemoryAnnulleringRepository : AnnulleringRepository {
     private val data = mutableMapOf<AnnulleringId, Annullering>()
@@ -16,6 +17,10 @@ class InMemoryAnnulleringRepository : AnnulleringRepository {
 
     override fun finnAnnullering(id: AnnulleringId): Annullering? =
         data[id]
+
+    override fun finnAnnullering(vedtaksperiodeId: UUID): Annullering? = data.values.firstOrNull {
+        it.vedtaksperiodeId == vedtaksperiodeId
+    }
 
     override fun finnAnnulleringMedEnAv(
         arbeidsgiverFagsystemId: String,

@@ -482,10 +482,8 @@ data class ApiBeregnetPeriodeResolver(
     override fun annullering(): ApiAnnullering? =
         if (erSisteGenerasjon) {
             annulleringRepository
-                .finnAnnulleringMedEnAv(
-                    arbeidsgiverFagsystemId = periode.utbetaling.arbeidsgiverFagsystemId,
-                    personFagsystemId = periode.utbetaling.personFagsystemId,
-                )?.let {
+                .finnAnnullering(vedtaksperiodeId())
+                ?.let {
                     val saksbehandler =
                         saksbehandlerRepository.finn(it.saksbehandlerOid)
                             ?: error("Fant ikke saksbehandler med ${it.saksbehandlerOid}")
