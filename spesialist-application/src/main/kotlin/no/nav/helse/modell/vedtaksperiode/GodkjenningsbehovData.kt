@@ -9,7 +9,6 @@ import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.utbetaling.Refusjonstype
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
-import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -35,7 +34,7 @@ data class GodkjenningsbehovData(
     val inntektskilde: Inntektskilde,
     val orgnummereMedRelevanteArbeidsforhold: List<String>,
     val skjæringstidspunkt: LocalDate,
-    val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta,
+    val sykepengegrunnlagsfakta: Godkjenningsbehov.Sykepengegrunnlagsfakta,
     private val json: String,
 ) {
     private lateinit var løsning: Løsning

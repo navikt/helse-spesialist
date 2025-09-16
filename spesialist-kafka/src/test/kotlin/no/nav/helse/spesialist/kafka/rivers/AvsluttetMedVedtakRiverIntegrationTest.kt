@@ -12,6 +12,7 @@ import no.nav.helse.modell.vedtak.SkjønnsfastsettingstypeDto
 import no.nav.helse.modell.vedtak.SkjønnsfastsettingsårsakDto
 import no.nav.helse.modell.vedtak.Utfall
 import no.nav.helse.modell.vedtak.VedtakBegrunnelse
+import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.modell.vilkårsprøving.Beregningsgrunnlag
@@ -24,6 +25,9 @@ import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.kafka.IntegrationTestFixture
 import no.nav.helse.spesialist.kafka.objectMapper
+import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk.godkjenningsbehovFastsattEtterHovedregel
+import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk.godkjenningsbehovSelvstendigNæringsdrivende
+import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk.lagGodkjenningsbehov
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -38,6 +42,8 @@ class AvsluttetMedVedtakRiverIntegrationTest {
     private val testRapid = TestRapid()
     private val integrationTestFixture = IntegrationTestFixture(testRapid)
     private val personRepository = integrationTestFixture.sessionFactory.sessionContext.personRepository
+    private val vedtakDao = integrationTestFixture.sessionFactory.sessionContext.vedtakDao
+    private val meldingDao = integrationTestFixture.sessionFactory.sessionContext.meldingDao
 
     private val organisasjonsnummer = lagOrganisasjonsnummer()
     private val vedtaksperiodeId = UUID.randomUUID()
@@ -642,6 +648,40 @@ class AvsluttetMedVedtakRiverIntegrationTest {
         assertJsonEquals(expectedJson, actualJsonNode)
     }
 
+    private fun initGodkjenningsbehov(yrkesaktivitetstype: Yrkesaktivitetstype) {
+        val godkjenningsbehovId = UUID.randomUUID()
+        val godkjenningsbehovJson = lagGodkjenningsbehov(
+            id = godkjenningsbehovId,
+            aktørId = lagAktørId(),
+            fødselsnummer = lagFødselsnummer(),
+            spleisBehandlingId = spleisBehandlingId,
+            yrkesaktivitetstype = yrkesaktivitetstype,
+            sykepengegrunnlagsfakta = when (yrkesaktivitetstype) {
+                Yrkesaktivitetstype.ARBEIDSTAKER -> godkjenningsbehovFastsattEtterHovedregel(
+                    arbeidsgivere = listOf(
+                        mapOf(
+                            "arbeidsgiver" to organisasjonsnummer,
+                            "omregnetÅrsinntekt" to 600000.00,
+                            "inntektskilde" to "Arbeidsgiver"
+                        )
+                    )
+                )
+
+                Yrkesaktivitetstype.SELVSTENDIG -> godkjenningsbehovSelvstendigNæringsdrivende(
+                    sykepengegrunnlag = BigDecimal(600000),
+                    seksG = BigDecimal(666666),
+                    beregningsgrunnlag = BigDecimal(600000),
+                    pensjonsgivendeInntekter = (2022..2024).map { år -> år to BigDecimal(200000) }
+                )
+
+                Yrkesaktivitetstype.FRILANS,
+                Yrkesaktivitetstype.ARBEIDSLEDIG -> error("Ukjent yrkesaktivitetstype: $yrkesaktivitetstype")
+            }
+        )
+        vedtakDao.vedtaksperiodeHendelseTabell.add(vedtaksperiodeId to godkjenningsbehovId)
+        meldingDao.godkjenningsbehov.add(Godkjenningsbehov.fraJson(godkjenningsbehovJson))
+    }
+
     @Test
     fun `selvstendig næringsdrivende`() {
         // Given:
@@ -694,7 +734,19 @@ class AvsluttetMedVedtakRiverIntegrationTest {
                 "6G": $seksG,
                 "tags" : [ ],
                 "selvstendig": {
-                  "beregningsgrunnlag": $beregningsgrunnlag
+                  "beregningsgrunnlag": $beregningsgrunnlag,
+                  "pensjonsgivendeInntekter" : [ 
+                      {
+                        "årstall" : 2022,
+                        "beløp" : 200000
+                      }, {
+                        "årstall" : 2023,
+                        "beløp" : 200000
+                      }, {
+                        "årstall" : 2024,
+                        "beløp" : 200000
+                      } 
+                  ]
                 }
               },
               "begrunnelser": [
@@ -766,7 +818,19 @@ class AvsluttetMedVedtakRiverIntegrationTest {
                 "6G": $seksG,
                 "tags" : [ "6GBegrenset" ],
                 "selvstendig": {
-                  "beregningsgrunnlag": $beregningsgrunnlag
+                  "beregningsgrunnlag": $beregningsgrunnlag,
+                  "pensjonsgivendeInntekter" : [ 
+                      {
+                        "årstall" : 2022,
+                        "beløp" : 200000
+                      }, {
+                        "årstall" : 2023,
+                        "beløp" : 200000
+                      }, {
+                        "årstall" : 2024,
+                        "beløp" : 200000
+                      } 
+                  ]
                 }
               },
               "begrunnelser": [
@@ -829,6 +893,7 @@ class AvsluttetMedVedtakRiverIntegrationTest {
                 avviksvurderinger = listOfNotNull(avviksvurdering)
             )
         )
+        initGodkjenningsbehov(yrkesaktivitetstype)
     }
 
     private fun lagAvviksvurdering(

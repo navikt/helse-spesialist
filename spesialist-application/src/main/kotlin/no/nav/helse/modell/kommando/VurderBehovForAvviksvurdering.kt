@@ -3,7 +3,7 @@ package no.nav.helse.modell.kommando
 import no.nav.helse.db.AvviksvurderingRepository
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode.RV_IV_2
-import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta
+import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.modell.vilkårsprøving.AvviksvurderingBehovLøsning
@@ -16,14 +16,14 @@ class VurderBehovForAvviksvurdering(
     private val fødselsnummer: String,
     private val skjæringstidspunkt: LocalDate,
     private val avviksvurderingRepository: AvviksvurderingRepository,
-    private val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta,
+    private val sykepengegrunnlagsfakta: Godkjenningsbehov.Sykepengegrunnlagsfakta,
     private val vilkårsgrunnlagId: UUID,
     private val legacyBehandling: LegacyBehandling,
     private val yrkesaktivitetstype: Yrkesaktivitetstype,
     private val organisasjonsnummer: String,
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
-        if (sykepengegrunnlagsfakta !is Sykepengegrunnlagsfakta.Spleis.Arbeidstaker) return true
+        if (sykepengegrunnlagsfakta !is Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidstaker) return true
         if (yrkesaktivitetstype == Yrkesaktivitetstype.SELVSTENDIG) return true
         return behov(context)
     }
@@ -56,7 +56,7 @@ class VurderBehovForAvviksvurdering(
         context.behov(
             Behov.Avviksvurdering(
                 omregnedeÅrsinntekter =
-                    (sykepengegrunnlagsfakta as Sykepengegrunnlagsfakta.Spleis.Arbeidstaker).arbeidsgivere.map {
+                    (sykepengegrunnlagsfakta as Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidstaker).arbeidsgivere.map {
                         OmregnetÅrsinntekt(
                             arbeidsgiverreferanse = it.organisasjonsnummer,
                             beløp = it.omregnetÅrsinntekt,

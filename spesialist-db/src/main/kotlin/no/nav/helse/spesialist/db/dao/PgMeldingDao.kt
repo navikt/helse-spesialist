@@ -164,6 +164,15 @@ class PgMeldingDao private constructor(
         return melding
     }
 
+    override fun finnAlleGodkjenningsbehov(meldingIder: Set<UUID>): List<Godkjenningsbehov> = asSQL(
+        "SELECT id, type, data FROM hendelse WHERE id = ANY (:meldingIder) AND type = '${GODKJENNING}'",
+        "meldingIder" to meldingIder.toTypedArray(),
+    )
+        .list { it.uuid("id") to fraMeldingtype(enumValueOf(it.string("type")), it.string("data")) }
+        .map { (id, data) ->
+            data as? Godkjenningsbehov ?: error("Forventer at melding funnet med meldingId=$id er et godkjenningsbehov")
+        }
+
     override fun finn(id: UUID): Personmelding? =
         asSQL(
             "SELECT type, data FROM hendelse WHERE id = :id",
