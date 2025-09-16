@@ -106,10 +106,11 @@ class AvsluttetMedVedtakRiver(
                             sessionContext.vedtakDao.hentKobledeMeldingIder(vedtaksperiode.vedtaksperiodeId())
                         val alleGodkjenningsbehov: List<Godkjenningsbehov> =
                             sessionContext.meldingDao.finnAlleGodkjenningsbehov(
-                                godkjenningsbehovUuider
+                                godkjenningsbehovUuider,
                             )
                         val nyesteGodkjenningsbehov =
-                            alleGodkjenningsbehov.filter { it.spleisBehandlingId == spleisBehandlingId }
+                            alleGodkjenningsbehov
+                                .filter { it.spleisBehandlingId == spleisBehandlingId }
                                 .maxByOrNull { it.opprettet }
                         checkNotNull(nyesteGodkjenningsbehov) { "Fant ikke godkjenningsbehov for vedtaksperiodeId: ${vedtaksperiode.vedtaksperiodeId()} og spleis behandlingId: $spleisBehandlingId." }
 
@@ -163,12 +164,12 @@ class AvsluttetMedVedtakRiver(
             vedtakFattetTidspunkt = packet["vedtakFattetTidspunkt"].asLocalDateTime(),
             tags =
                 (
-                        if (fastsatt == FASTSATT_I_INFOTRYGD) {
-                            behandling.tags
-                        } else {
-                            behandling.tags.filterNot { it == TAG_6G_BEGRENSET }
-                        }
-                        ).toSet(),
+                    if (fastsatt == FASTSATT_I_INFOTRYGD) {
+                        behandling.tags
+                    } else {
+                        behandling.tags.filterNot { it == TAG_6G_BEGRENSET }
+                    }
+                ).toSet(),
             begrunnelser =
                 if (fastsatt == FASTSATT_ETTER_SKJØNN) {
                     val skjønnsfastsattSykepengegrunnlag =
@@ -196,13 +197,13 @@ class AvsluttetMedVedtakRiver(
                     if (fastsatt != FASTSATT_ETTER_HOVEDREGEL) {
                         error(
                             "Ustøttet verdi sykepengegrunnlagsfakta.fastsatt for selvstendig næringsdrivende: \"$fastsatt\"." +
-                                    " Kun \"${FASTSATT_ETTER_HOVEDREGEL}\" støttes.",
+                                " Kun \"${FASTSATT_ETTER_HOVEDREGEL}\" støttes.",
                         )
                     }
                     byggSelvstendigNæringsdrivendeSykepengegrunnlagsfakta(
                         packet = packet,
                         tags = behandling.tags,
-                        sykepengegrunnlagsfakta = godkjenningsbehov.sykepengegrunnlagsfakta as Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende
+                        sykepengegrunnlagsfakta = godkjenningsbehov.sykepengegrunnlagsfakta as Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende,
                     )
                 } else {
                     when (fastsatt) {
@@ -248,12 +249,13 @@ class AvsluttetMedVedtakRiver(
             ),
         tags = tags.filter { it == TAG_6G_BEGRENSET }.toSet(),
         seksG = BigDecimal(packet["sykepengegrunnlagsfakta"]["6G"].asText()),
-        pensjonsgivendeInntekter = sykepengegrunnlagsfakta.selvstendig.pensjonsgivendeInntekter.map { inntekt ->
-            PensjonsgivendeInntekt(
-                årstall = inntekt.årstall,
-                beløp = inntekt.beløp
-            )
-        }
+        pensjonsgivendeInntekter =
+            sykepengegrunnlagsfakta.selvstendig.pensjonsgivendeInntekter.map { inntekt ->
+                PensjonsgivendeInntekt(
+                    årstall = inntekt.årstall,
+                    beløp = inntekt.beløp,
+                )
+            },
     )
 
     private fun byggFastsattEtterHovedregelSykepengegrunnlagsfakta(

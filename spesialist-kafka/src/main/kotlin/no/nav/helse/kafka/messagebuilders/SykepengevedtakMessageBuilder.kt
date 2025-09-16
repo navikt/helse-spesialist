@@ -39,13 +39,13 @@ private fun VedtakFattetMelding.FastsattEtterHovedregelSykepengegrunnlagsfakta.t
         "6G" to seksG,
         "tags" to tags,
         "arbeidsgivere" to
-                arbeidsgivere.map {
-                    mapOf(
-                        "arbeidsgiver" to it.organisasjonsnummer,
-                        "omregnetÅrsinntekt" to it.omregnetÅrsinntekt,
-                        "innrapportertÅrsinntekt" to it.innrapportertÅrsinntekt,
-                    )
-                },
+            arbeidsgivere.map {
+                mapOf(
+                    "arbeidsgiver" to it.organisasjonsnummer,
+                    "omregnetÅrsinntekt" to it.omregnetÅrsinntekt,
+                    "innrapportertÅrsinntekt" to it.innrapportertÅrsinntekt,
+                )
+            },
         "fastsatt" to "EtterHovedregel",
     )
 
@@ -57,14 +57,14 @@ private fun VedtakFattetMelding.FastsattEtterSkjønnSykepengegrunnlagsfakta.tilS
         "6G" to seksG,
         "tags" to tags,
         "arbeidsgivere" to
-                arbeidsgivere.map {
-                    mapOf(
-                        "arbeidsgiver" to it.organisasjonsnummer,
-                        "omregnetÅrsinntekt" to it.omregnetÅrsinntekt,
-                        "innrapportertÅrsinntekt" to it.innrapportertÅrsinntekt,
-                        "skjønnsfastsatt" to it.skjønnsfastsatt,
-                    )
-                },
+            arbeidsgivere.map {
+                mapOf(
+                    "arbeidsgiver" to it.organisasjonsnummer,
+                    "omregnetÅrsinntekt" to it.omregnetÅrsinntekt,
+                    "innrapportertÅrsinntekt" to it.innrapportertÅrsinntekt,
+                    "skjønnsfastsatt" to it.skjønnsfastsatt,
+                )
+            },
         "fastsatt" to "EtterSkjønn",
         "skjønnsfastsettingtype" to skjønnsfastsettingtype,
         "skjønnsfastsettingårsak" to skjønnsfastsettingsårsak,
@@ -83,15 +83,16 @@ private fun VedtakFattetMelding.SelvstendigNæringsdrivendeSykepengegrunnlagsfak
         "6G" to seksG,
         "tags" to tags,
         "selvstendig" to
-                mapOf(
-                    "beregningsgrunnlag" to beregningsgrunnlag,
-                    "pensjonsgivendeInntekter" to pensjonsgivendeInntekter.map { inntekt ->
+            mapOf(
+                "beregningsgrunnlag" to beregningsgrunnlag,
+                "pensjonsgivendeInntekter" to
+                    pensjonsgivendeInntekter.map { inntekt ->
                         mapOf(
                             "årstall" to inntekt.årstall,
-                            "beløp" to inntekt.beløp
+                            "beløp" to inntekt.beløp,
                         )
-                    }
-                ),
+                    },
+            ),
     )
 
 private fun VedtakFattetMelding.Begrunnelse.tilBegrunnelse(
