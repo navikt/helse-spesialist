@@ -50,7 +50,7 @@ mockOauth2Server = "no.nav.security:mock-oauth2-server:2.3.0"
 nimbus-joseJwt = "com.nimbusds:nimbus-jose-jwt:10.5"
 postgresJdbcDriver = "org.postgresql:postgresql:42.7.7"
 postgresSocketFactory = "com.google.cloud.sql:postgres-socket-factory:1.25.3"
-rapidsAndRivers = "com.github.navikt:rapids-and-rivers:2025081612341755340488.ff2c2d01e04f"
+rapidsAndRivers = "com.github.navikt:rapids-and-rivers:2025091514481757940492.363722e3ca80"
 slf4jApi = "org.slf4j:slf4j-api:2.0.17"
 
 tbdLibs-jackson = { module = "com.github.navikt.tbd-libs:jackson", version.ref = "tbdLibs" }
