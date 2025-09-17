@@ -8,7 +8,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import kotliquery.sessionOf
 import no.nav.helse.MeldingPubliserer
-import no.nav.helse.TestRapidHelpers.hendelser
+import no.nav.helse.spesialist.e2etests.TestRapidHelpers.hendelser
 import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
 import no.nav.helse.e2e.AbstractDatabaseTest
 import no.nav.helse.kafka.MessageContextMeldingPubliserer

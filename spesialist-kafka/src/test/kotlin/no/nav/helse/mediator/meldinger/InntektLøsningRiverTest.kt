@@ -5,8 +5,8 @@ import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.kafka.InntektLøsningRiver
-import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
+import no.nav.helse.spesialist.kafka.medRivers
 import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk
 import no.nav.helse.spesialist.test.TestPerson
 import org.junit.jupiter.api.BeforeEach

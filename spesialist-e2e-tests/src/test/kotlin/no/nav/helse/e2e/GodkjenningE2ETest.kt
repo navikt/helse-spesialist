@@ -1,7 +1,6 @@
 package no.nav.helse.e2e
 
 import no.nav.helse.GodkjenningsbehovTestdata
-import no.nav.helse.TestRapidHelpers.oppgaveId
 import no.nav.helse.e2e.AbstractE2ETest.Kommandokjedetilstand.AVBRUTT
 import no.nav.helse.e2e.AbstractE2ETest.Kommandokjedetilstand.FERDIG
 import no.nav.helse.e2e.AbstractE2ETest.Kommandokjedetilstand.NY
@@ -11,6 +10,7 @@ import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSystem
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
+import no.nav.helse.spesialist.e2etests.TestRapidHelpers.oppgaveId
 import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk.VergemålJson
 import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk.VergemålJson.VergemålType.mindreaarig
 import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk.VergemålJson.VergemålType.voksen

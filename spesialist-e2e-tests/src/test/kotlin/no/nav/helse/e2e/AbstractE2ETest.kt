@@ -9,12 +9,6 @@ import no.nav.helse.AvviksvurderingTestdata
 import no.nav.helse.GodkjenningsbehovTestdata
 import no.nav.helse.Meldingssender
 import no.nav.helse.TestMediator
-import no.nav.helse.TestRapidHelpers.behov
-import no.nav.helse.TestRapidHelpers.hendelser
-import no.nav.helse.TestRapidHelpers.løsning
-import no.nav.helse.TestRapidHelpers.løsningOrNull
-import no.nav.helse.TestRapidHelpers.siste
-import no.nav.helse.TestRapidHelpers.sisteBehov
 import no.nav.helse.Testdata
 import no.nav.helse.Testdata.snapshot
 import no.nav.helse.modell.oppgave.Egenskap
@@ -46,6 +40,12 @@ import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
+import no.nav.helse.spesialist.e2etests.TestRapidHelpers.behov
+import no.nav.helse.spesialist.e2etests.TestRapidHelpers.hendelser
+import no.nav.helse.spesialist.e2etests.TestRapidHelpers.løsning
+import no.nav.helse.spesialist.e2etests.TestRapidHelpers.løsningOrNull
+import no.nav.helse.spesialist.e2etests.TestRapidHelpers.siste
+import no.nav.helse.spesialist.e2etests.TestRapidHelpers.sisteBehov
 import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk
 import no.nav.helse.spesialist.test.TestPerson
 import no.nav.helse.util.januar

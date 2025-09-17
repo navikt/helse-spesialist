@@ -6,9 +6,9 @@ import io.mockk.mockk
 import io.mockk.spyk
 import io.mockk.verify
 import no.nav.helse.kafka.NyeVarslerRiver
-import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.vedtaksperiode.NyeVarsler
+import no.nav.helse.spesialist.kafka.medRivers
 import no.nav.helse.spesialist.kafka.objectMapper
 import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk
 import org.junit.jupiter.api.BeforeEach

@@ -6,7 +6,6 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.TestRapidHelpers.siste
 import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.graphql.ContextValues
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
@@ -26,6 +25,7 @@ import no.nav.helse.spesialist.api.snapshot.SnapshotService
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
+import no.nav.helse.spesialist.e2etests.TestRapidHelpers.siste
 import no.nav.helse.util.januar
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals

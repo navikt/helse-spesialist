@@ -4,13 +4,13 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
-import no.nav.helse.TestRapidHelpers.meldinger
 import no.nav.helse.db.SessionContext
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.melding.VedtakFattetMelding
 import no.nav.helse.modell.person.Person
 import no.nav.helse.spesialist.domain.testfixtures.jan
+import no.nav.helse.spesialist.kafka.TestRapidHelpers.meldinger
 import no.nav.helse.spesialist.kafka.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

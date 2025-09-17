@@ -3,7 +3,7 @@ package no.nav.helse.kafka
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import io.micrometer.core.instrument.Metrics
-import no.nav.helse.medRivers
+import no.nav.helse.spesialist.kafka.medRivers
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime

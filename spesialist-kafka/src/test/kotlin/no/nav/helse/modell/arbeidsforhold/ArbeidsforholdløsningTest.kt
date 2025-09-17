@@ -5,9 +5,9 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.db.ArbeidsforholdDao
 import no.nav.helse.kafka.ArbeidsforholdLøsningRiver
-import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.KomplettArbeidsforholdDto
+import no.nav.helse.spesialist.kafka.medRivers
 import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

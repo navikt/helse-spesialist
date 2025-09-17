@@ -2,7 +2,6 @@ package no.nav.helse.mediator.oppgave
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.helse.MeldingPubliserer
-import no.nav.helse.TestRapidHelpers.meldinger
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
@@ -11,6 +10,7 @@ import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlerOid
+import no.nav.helse.spesialist.kafka.TestRapidHelpers.meldinger
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.UUID

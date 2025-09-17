@@ -1,6 +1,6 @@
 package no.nav.helse.e2e
 
-import no.nav.helse.TestRapidHelpers.behov
+import no.nav.helse.spesialist.e2etests.TestRapidHelpers.behov
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

@@ -1,8 +1,8 @@
 package no.nav.helse.e2e
 
 import no.nav.helse.GodkjenningsbehovTestdata
-import no.nav.helse.TestRapidHelpers.meldinger
 import no.nav.helse.Testdata.skjønnsvurdering
+import no.nav.helse.spesialist.e2etests.TestRapidHelpers.meldinger
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test

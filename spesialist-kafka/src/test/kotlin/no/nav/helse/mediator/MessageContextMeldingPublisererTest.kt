@@ -5,7 +5,6 @@ import com.fasterxml.jackson.module.kotlin.convertValue
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import com.github.navikt.tbd_libs.rapids_and_rivers.isMissingOrNull
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
-import no.nav.helse.TestRapidHelpers.meldinger
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.HentDokument
@@ -19,6 +18,7 @@ import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
+import no.nav.helse.spesialist.kafka.TestRapidHelpers.meldinger
 import no.nav.helse.spesialist.kafka.objectMapper
 import no.nav.helse.spesialist.test.lagSaksbehandler
 import org.junit.jupiter.api.Assertions.assertEquals

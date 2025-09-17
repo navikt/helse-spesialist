@@ -6,7 +6,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.kafka.TilbakedateringBehandletRiver
-import no.nav.helse.medRivers
+import no.nav.helse.spesialist.kafka.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.kommando.TilbakedateringBehandlet

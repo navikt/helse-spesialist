@@ -2,12 +2,12 @@ package no.nav.helse.mediator.api
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import no.nav.helse.MeldingPubliserer
-import no.nav.helse.TestRapidHelpers.oppgaveId
-import no.nav.helse.TestRapidHelpers.siste
 import no.nav.helse.e2e.AbstractE2ETest
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.mediator.GodkjenningService
 import no.nav.helse.mediator.oppgave.OppgaveService
+import no.nav.helse.spesialist.e2etests.TestRapidHelpers.oppgaveId
+import no.nav.helse.spesialist.e2etests.TestRapidHelpers.siste
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
