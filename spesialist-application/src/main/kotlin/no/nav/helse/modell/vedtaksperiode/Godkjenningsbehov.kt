@@ -161,10 +161,9 @@ class Godkjenningsbehov(
                         ?.map(JsonNode::asText)
                         .orEmpty(),
                 skjæringstidspunkt = godkjenning["skjæringstidspunkt"].asLocalDate(),
-                sykepengegrunnlagsfakta =
-                    godkjenning["sykepengegrunnlagsfakta"].asSykepengegrunnlagsfakta(
-                        yrkesaktivitetstype,
-                    ),
+                sykepengegrunnlagsfakta = godkjenning["sykepengegrunnlagsfakta"].asSykepengegrunnlagsfakta(
+                    yrkesaktivitetstype
+                ),
                 json = json,
             )
         }
@@ -188,7 +187,7 @@ class Godkjenningsbehov(
                         Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende(
                             seksG = this["6G"].asDouble(),
                             sykepengegrunnlag = this["sykepengegrunnlag"].asDouble(),
-                            selvstendig = this["selvstendig"].tilSelvstendig(),
+                            selvstendig = this["selvstendig"].tilSelvstendig()
                         )
                     }
 
@@ -234,13 +233,12 @@ class Godkjenningsbehov(
         private fun JsonNode.tilSelvstendig(): Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende.Selvstendig =
             Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende.Selvstendig(
                 beregningsgrunnlag = this["beregningsgrunnlag"].asBigDecimal(),
-                pensjonsgivendeInntekter =
-                    this["pensjonsgivendeInntekter"].map { inntekt ->
-                        Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende.Selvstendig.PensjonsgivendeInntekt(
-                            årstall = inntekt["årstall"].asInt(),
-                            beløp = inntekt["beløp"].asBigDecimal(),
-                        )
-                    },
+                pensjonsgivendeInntekter = this["pensjonsgivendeInntekter"].map { inntekt ->
+                    Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende.Selvstendig.PensjonsgivendeInntekt(
+                        årstall = inntekt["årstall"].asInt(),
+                        beløp = inntekt["beløp"].asBigDecimal()
+                    )
+                },
             )
 
         private fun JsonNode.asInntektskilde(): Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde =
@@ -281,11 +279,11 @@ class Godkjenningsbehov(
             ) : Spleis() {
                 data class Selvstendig(
                     val beregningsgrunnlag: BigDecimal,
-                    val pensjonsgivendeInntekter: List<PensjonsgivendeInntekt>,
+                    val pensjonsgivendeInntekter: List<PensjonsgivendeInntekt>
                 ) {
                     data class PensjonsgivendeInntekt(
                         val årstall: Int,
-                        val beløp: BigDecimal,
+                        val beløp: BigDecimal
                     )
                 }
             }
