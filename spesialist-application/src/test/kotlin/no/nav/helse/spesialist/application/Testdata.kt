@@ -1,8 +1,8 @@
 package no.nav.helse.spesialist.application
 
 import no.nav.helse.modell.utbetaling.Utbetalingtype
-import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
-import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Arbeidsgiver
+import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta
+import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Arbeidsgiver
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -75,7 +75,7 @@ object Testdata {
         utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING,
         kanAvvises: Boolean = true,
         inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
-        inntektsopplysningkilde: Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde = Arbeidsgiver,
+        inntektsopplysningkilde: Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde = Arbeidsgiver,
         json: String = "{}",
     ): GodkjenningsbehovData {
         return GodkjenningsbehovData(
@@ -98,10 +98,10 @@ object Testdata {
             inntektskilde = inntektskilde,
             orgnummereMedRelevanteArbeidsforhold = emptyList(),
             skjæringstidspunkt = 1 jan 2018,
-            sykepengegrunnlagsfakta = Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidstaker.EtterHovedregel(
+            sykepengegrunnlagsfakta = Sykepengegrunnlagsfakta.Spleis.Arbeidstaker.EtterHovedregel(
                 seksG = 6 * 118620.0,
                 arbeidsgivere = listOf(
-                    Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
+                    Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
                         organisasjonsnummer = organisasjonsnummer,
                         omregnetÅrsinntekt = 123456.7,
                         inntektskilde = inntektsopplysningkilde

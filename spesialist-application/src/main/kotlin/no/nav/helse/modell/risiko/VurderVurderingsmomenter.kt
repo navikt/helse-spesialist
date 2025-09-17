@@ -9,7 +9,7 @@ import no.nav.helse.modell.melding.InntektTilRisk
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_RV_1
 import no.nav.helse.modell.utbetaling.Utbetaling
-import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
+import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -22,7 +22,7 @@ internal class VurderVurderingsmomenter(
     private val førstegangsbehandling: Boolean,
     private val sykefraværstilfelle: Sykefraværstilfelle,
     private val utbetaling: Utbetaling,
-    private val sykepengegrunnlagsfakta: Godkjenningsbehov.Sykepengegrunnlagsfakta,
+    private val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta,
 ) : Command {
     override fun execute(context: CommandContext) = behandle(context)
 
@@ -43,8 +43,8 @@ internal class VurderVurderingsmomenter(
                     kunRefusjon = !utbetaling.harEndringIUtbetalingTilSykmeldt(),
                     inntekt =
                         when (sykepengegrunnlagsfakta) {
-                            is Godkjenningsbehov.Sykepengegrunnlagsfakta.Infotrygd -> null
-                            is Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidstaker ->
+                            is Sykepengegrunnlagsfakta.Infotrygd -> null
+                            is Sykepengegrunnlagsfakta.Spleis.Arbeidstaker ->
                                 sykepengegrunnlagsfakta.arbeidsgivere
                                     .find { it.organisasjonsnummer == organisasjonsnummer }
                                     ?.let { sykepengegrunnlagsArbeidsgiver ->
@@ -54,7 +54,7 @@ internal class VurderVurderingsmomenter(
                                         )
                                     }
 
-                            is Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende ->
+                            is Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende ->
                                 InntektTilRisk(
                                     omregnetÅrsinntekt = sykepengegrunnlagsfakta.selvstendig.beregningsgrunnlag.toDouble(),
                                     inntektskilde = "Sigrun", // TODO: Hardkodet, verdi - avklar med Risk og Spleis

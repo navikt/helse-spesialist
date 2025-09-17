@@ -23,6 +23,7 @@ import no.nav.helse.db.StansAutomatiskBehandlingSaksbehandlerDao
 import no.nav.helse.db.SykefraværstilfelleDao
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.UtbetalingDao
+import no.nav.helse.db.VedtakDao
 import no.nav.helse.db.VergemålDao
 import no.nav.helse.db.ÅpneGosysOppgaverDao
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
@@ -217,7 +218,8 @@ class InMemorySessionContext(
         get() = TODO("Not yet implemented")
     override val utbetalingDao: UtbetalingDao
         get() = TODO("Not yet implemented")
-    override val vedtakDao = InMemoryVedtakDao()
+    override val vedtakDao: VedtakDao
+        get() = TODO("Not yet implemented")
     override val vergemålDao: VergemålDao
         get() = TODO("Not yet implemented")
     override val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao

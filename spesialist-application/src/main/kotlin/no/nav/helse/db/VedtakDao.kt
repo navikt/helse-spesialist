@@ -31,6 +31,4 @@ interface VedtakDao {
     )
 
     fun lagreOpprinneligSøknadsdato(vedtaksperiodeId: UUID)
-
-    fun hentKobledeMeldingIder(vedtaksperiodeId: UUID): Set<UUID>
 }

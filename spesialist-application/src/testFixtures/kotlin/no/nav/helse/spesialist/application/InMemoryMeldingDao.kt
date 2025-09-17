@@ -6,14 +6,8 @@ import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import java.util.UUID
 
 class InMemoryMeldingDao : MeldingDao {
-    val godkjenningsbehov = mutableListOf<Godkjenningsbehov>()
-
     override fun finnGodkjenningsbehov(meldingId: UUID): Godkjenningsbehov {
         TODO("Not yet implemented")
-    }
-
-    override fun finnAlleGodkjenningsbehov(meldingIder: Set<UUID>): List<Godkjenningsbehov> {
-        return godkjenningsbehov.filter { it.id in meldingIder }
     }
 
     override fun finn(id: UUID): Personmelding? {

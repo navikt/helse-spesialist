@@ -1212,20 +1212,13 @@ object Testmeldingfabrikk {
     fun godkjenningsbehovSelvstendigNæringsdrivende(
         sykepengegrunnlag: BigDecimal,
         seksG: BigDecimal,
-        beregningsgrunnlag: BigDecimal,
-        pensjonsgivendeInntekter: List<Pair<Int, BigDecimal>>,
+        beregningsgrunnlag: BigDecimal
     ): Map<String, Any> = mapOf(
         "fastsatt" to "EtterHovedregel",
         "sykepengegrunnlag" to sykepengegrunnlag,
         "6G" to seksG,
         "selvstendig" to mapOf(
-            "beregningsgrunnlag" to beregningsgrunnlag,
-            "pensjonsgivendeInntekter" to pensjonsgivendeInntekter.map {(årstall, beløp)  ->
-                mapOf(
-                    "årstall" to årstall,
-                    "beløp" to beløp
-                )
-            }
+            "beregningsgrunnlag" to beregningsgrunnlag
         )
     )
 

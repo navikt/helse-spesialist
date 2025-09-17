@@ -67,13 +67,7 @@ data class VedtakFattetMelding(
         val beregningsgrunnlag: BigDecimal,
         val tags: Set<String>,
         val seksG: BigDecimal,
-        val pensjonsgivendeInntekter: List<PensjonsgivendeInntekt>
-    ) : Sykepengegrunnlagsfakta {
-        data class PensjonsgivendeInntekt(
-            val årstall: Int,
-            val beløp: BigDecimal
-        )
-    }
+    ) : Sykepengegrunnlagsfakta
 
     data class Begrunnelse(
         val type: BegrunnelseType,

@@ -39,13 +39,6 @@ class PgVedtakDao private constructor(
             )
         }
 
-    override fun hentKobledeMeldingIder(vedtaksperiodeId: UUID): Set<UUID> = asSQL(
-        "SELECT hendelse_ref FROM vedtaksperiode_hendelse WHERE vedtaksperiode_id = :vedtaksperiodeId",
-        "vedtaksperiodeId" to vedtaksperiodeId
-    )
-        .list { it.uuid("hendelse_ref") }
-        .toSet()
-
     override fun lagreVedtaksperiode(
         fødselsnummer: String,
         vedtaksperiodeDto: VedtaksperiodeDto,
@@ -144,10 +137,7 @@ class PgVedtakDao private constructor(
         }
 
     fun finnVedtakId(vedtaksperiodeId: UUID): Long? =
-        asSQL(
-            "SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId",
-            "vedtaksperiodeId" to vedtaksperiodeId
-        )
+        asSQL("SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId", "vedtaksperiodeId" to vedtaksperiodeId)
             .singleOrNull {
                 it.long("id")
             }

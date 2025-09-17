@@ -6,7 +6,7 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.VurderBehovForAvviksvurdering
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderVarselOmAvvik
-import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
+import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.modell.vilkårsprøving.AvviksvurderingBehovLøsning
@@ -40,13 +40,13 @@ class VurderBehovForAvviksvurderingTest {
     private val harAkseptabeltAvvik = false
     private val beregningsgrunnlagTotalbeløp = 900000.0
     private val sammenligningsgrunnlagTotalbeløp = 600000.0
-    private val spleisSykepengegrunnlagsfakta = Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidstaker.EtterHovedregel(
+    private val spleisSykepengegrunnlagsfakta = Sykepengegrunnlagsfakta.Spleis.Arbeidstaker.EtterHovedregel(
         seksG = 666666.00,
         arbeidsgivere = listOf(
-            Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
+            Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
                 organisasjonsnummer = organisasjonsnummer,
                 omregnetÅrsinntekt = beregningsgrunnlagTotalbeløp,
-                inntektskilde = Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Arbeidsgiver
+                inntektskilde = Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Arbeidsgiver
             )
         ),
         sykepengegrunnlag = 666666.00
@@ -107,7 +107,7 @@ class VurderBehovForAvviksvurderingTest {
 
     @Test
     fun `Ikke send ut behov dersom inngangsvilkårene ikke er vurdert i Spleis`() {
-        val command = vurderBehovForAvviksvurderingCommand(sykepengegrunnlagsfakta = Godkjenningsbehov.Sykepengegrunnlagsfakta.Infotrygd)
+        val command = vurderBehovForAvviksvurderingCommand(sykepengegrunnlagsfakta = Sykepengegrunnlagsfakta.Infotrygd)
         val context = CommandContext(UUID.randomUUID())
         context.nyObserver(observer)
         assertTrue(command.execute(context))
@@ -257,7 +257,7 @@ class VurderBehovForAvviksvurderingTest {
     }
 
     private fun vurderBehovForAvviksvurderingCommand(
-        sykepengegrunnlagsfakta: Godkjenningsbehov.Sykepengegrunnlagsfakta = spleisSykepengegrunnlagsfakta,
+        sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta = spleisSykepengegrunnlagsfakta,
         yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
         organisasjonsnummer: String = this.organisasjonsnummer
     ) =

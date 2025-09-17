@@ -7,6 +7,7 @@ import no.nav.helse.kafka.GodkjenningsbehovRiver
 import no.nav.helse.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.utbetaling.Utbetalingtype
+import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -88,13 +89,13 @@ internal class GodkjenningsbehovRiverTest {
                     assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, it.periodetype)
                     assertEquals(Utbetalingtype.UTBETALING, it.utbetalingtype)
                     assertEquals(
-                        Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidstaker.EtterHovedregel(
+                        Sykepengegrunnlagsfakta.Spleis.Arbeidstaker.EtterHovedregel(
                             seksG = 6 * 118620.0,
                             arbeidsgivere = listOf(
-                                Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
+                                Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
                                     ORGNR,
                                     omregnetÅrsinntekt = 600000.0,
-                                    inntektskilde = Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Arbeidsgiver
+                                    inntektskilde = Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Arbeidsgiver
                                 )
                             ),
                             sykepengegrunnlag = 600000.0
@@ -160,13 +161,13 @@ internal class GodkjenningsbehovRiverTest {
                     assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, it.periodetype)
                     assertEquals(Utbetalingtype.UTBETALING, it.utbetalingtype)
                     assertEquals(
-                        Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidstaker.EtterSkjønn(
+                        Sykepengegrunnlagsfakta.Spleis.Arbeidstaker.EtterSkjønn(
                             seksG = 6 * 118620.0,
                             arbeidsgivere = listOf(
-                                Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterSkjønn(
+                                Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterSkjønn(
                                     ORGNR,
                                     omregnetÅrsinntekt = 500000.0,
-                                    inntektskilde = Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Saksbehandler,
+                                    inntektskilde = Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Saksbehandler,
                                     skjønnsfastsatt = 600000.0
                                 )
                             )
@@ -220,7 +221,7 @@ internal class GodkjenningsbehovRiverTest {
                     assertEquals(true, it.førstegangsbehandling)
                     assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, it.periodetype)
                     assertEquals(Utbetalingtype.UTBETALING, it.utbetalingtype)
-                    assertEquals(Godkjenningsbehov.Sykepengegrunnlagsfakta.Infotrygd, it.sykepengegrunnlagsfakta)
+                    assertEquals(Sykepengegrunnlagsfakta.Infotrygd, it.sykepengegrunnlagsfakta)
                 },
                 kontekstbasertPubliserer = any()
             )
@@ -253,7 +254,6 @@ internal class GodkjenningsbehovRiverTest {
                     sykepengegrunnlag = BigDecimal("600000.00"),
                     seksG = BigDecimal("666666.66"),
                     beregningsgrunnlag = BigDecimal("600000.00"),
-                    pensjonsgivendeInntekter = (2022..2024).map { år -> år to BigDecimal(200000) },
                 ),
             )
         )
@@ -274,17 +274,78 @@ internal class GodkjenningsbehovRiverTest {
                     assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, it.periodetype)
                     assertEquals(Utbetalingtype.UTBETALING, it.utbetalingtype)
                     assertEquals(
-                        Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende(
+                        Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende(
                             sykepengegrunnlag = 600000.00,
                             seksG = 666666.66,
-                            selvstendig = Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende.Selvstendig(
+                            selvstendig = Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende.Selvstendig(
                                 beregningsgrunnlag = BigDecimal("600000.0"),
-                                pensjonsgivendeInntekter = (2022..2024).map { år ->
-                                    Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende.Selvstendig.PensjonsgivendeInntekt(
-                                        årstall = år,
-                                        beløp = BigDecimal("200000")
-                                    )
-                                },
+                            ),
+                        ),
+                        it.sykepengegrunnlagsfakta
+                    )
+                },
+                kontekstbasertPubliserer = any()
+            )
+        }
+    }
+
+    // TODO: Midlertidig bakoverkompatibilitet til Spleis har merget sin branch om dette
+    @Test
+    fun `leser fortsatt gammelt sykepengegrunnlagsfakta for selvstendig næringsdrivende`() {
+        val vilkårsgrunnlagId = UUID.randomUUID()
+        testRapid.sendTestMessage(
+            Testmeldingfabrikk.lagGodkjenningsbehov(
+                aktørId = AKTØR,
+                fødselsnummer = FNR,
+                vedtaksperiodeId = VEDTAKSPERIODE,
+                utbetalingId = UTBETALING_ID,
+                organisasjonsnummer = "",
+                yrkesaktivitetstype = Yrkesaktivitetstype.SELVSTENDIG,
+                periodeFom = FOM,
+                periodeTom = TOM,
+                skjæringstidspunkt = FOM,
+                periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
+                førstegangsbehandling = true,
+                utbetalingtype = Utbetalingtype.UTBETALING,
+                inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
+                orgnummereMedRelevanteArbeidsforhold = emptyList(),
+                kanAvvises = true,
+                id = HENDELSE,
+                vilkårsgrunnlagId = vilkårsgrunnlagId,
+                sykepengegrunnlagsfakta = Testmeldingfabrikk.godkjenningsbehovFastsattEtterHovedregel(
+                    seksG = 666666.66,
+                    arbeidsgivere = listOf(
+                        mapOf(
+                            "arbeidsgiver" to "SELVSTENDIG",
+                            "omregnetÅrsinntekt" to 600000.00,
+                            "inntektskilde" to "Sigrun"
+                        )
+                    )
+                ),
+            )
+        )
+        verify(exactly = 1) {
+            mediator.mottaMelding(
+                melding = withArg<Godkjenningsbehov> {
+                    assertEquals(HENDELSE, it.id)
+                    assertEquals(FNR, it.fødselsnummer())
+                    assertEquals(VEDTAKSPERIODE, it.vedtaksperiodeId())
+                    assertEquals("", it.organisasjonsnummer)
+                    assertEquals(Yrkesaktivitetstype.SELVSTENDIG, it.yrkesaktivitetstype)
+                    assertEquals(FOM, it.periodeFom)
+                    assertEquals(TOM, it.periodeTom)
+                    assertEquals(FOM, it.skjæringstidspunkt)
+                    assertEquals(Inntektskilde.EN_ARBEIDSGIVER, it.inntektskilde)
+                    assertEquals(true, it.kanAvvises)
+                    assertEquals(true, it.førstegangsbehandling)
+                    assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, it.periodetype)
+                    assertEquals(Utbetalingtype.UTBETALING, it.utbetalingtype)
+                    assertEquals(
+                        Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende(
+                            sykepengegrunnlag = 600000.00,
+                            seksG = 666666.66,
+                            selvstendig = Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende.Selvstendig(
+                                beregningsgrunnlag = BigDecimal("600000.0"),
                             ),
                         ),
                         it.sykepengegrunnlagsfakta
