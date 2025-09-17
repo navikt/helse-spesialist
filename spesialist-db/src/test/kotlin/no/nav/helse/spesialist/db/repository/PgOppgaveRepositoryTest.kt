@@ -9,9 +9,12 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 import kotlin.random.Random.Default.nextLong
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 
 class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
@@ -34,6 +37,7 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
     fun `lagre og finn oppgave`() {
         val oppgave = Oppgave.ny(
             id = nextLong(),
+            førsteOpprettet = repository.førsteOpprettetForBehandlingId(behandlingId),
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
             utbetalingId = utbetalingId,
@@ -52,6 +56,7 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
     fun `tildel oppgave`() {
         val oppgave = Oppgave.ny(
             id = nextLong(),
+            førsteOpprettet = repository.førsteOpprettetForBehandlingId(behandlingId),
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
             utbetalingId = utbetalingId,
@@ -71,6 +76,7 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
     fun `avmeld oppgave`() {
         val oppgave = Oppgave.ny(
             id = nextLong(),
+            førsteOpprettet = repository.førsteOpprettetForBehandlingId(behandlingId),
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
             utbetalingId = utbetalingId,
@@ -93,6 +99,7 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
     fun `endre egenskaper`() {
         val oppgave = Oppgave.ny(
             id = nextLong(),
+            førsteOpprettet = repository.førsteOpprettetForBehandlingId(behandlingId),
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
             utbetalingId = utbetalingId,
@@ -117,6 +124,7 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
         )
         val oppgave = Oppgave.ny(
             id = nextLong(),
+            førsteOpprettet = repository.førsteOpprettetForBehandlingId(behandlingId),
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
             utbetalingId = utbetalingId,
@@ -140,6 +148,7 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
         )
         val oppgave = Oppgave.ny(
             id = nextLong(),
+            førsteOpprettet = repository.førsteOpprettetForBehandlingId(behandlingId),
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
             utbetalingId = utbetalingId,
@@ -162,6 +171,7 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
     fun `exception om det finnes en annen aktiv oppgave for personen ved lagring`() {
         val oppgave1 = Oppgave.ny(
             id = nextLong(),
+            førsteOpprettet = repository.førsteOpprettetForBehandlingId(behandlingId),
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
             utbetalingId = utbetalingId,
@@ -171,6 +181,7 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
         )
         val oppgave2 = Oppgave.ny(
             id = nextLong(),
+            førsteOpprettet = repository.førsteOpprettetForBehandlingId(behandlingId),
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
             utbetalingId = utbetalingId,
@@ -188,6 +199,7 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
     fun `skal lagre ny oppgave dersom eksisterende oppgave på samme person ikke avventer saksbehandler`() {
         val oppgave1 = Oppgave.ny(
             id = nextLong(),
+            førsteOpprettet = repository.førsteOpprettetForBehandlingId(behandlingId),
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
             utbetalingId = utbetalingId,
@@ -199,6 +211,7 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
         oppgave1.ferdigstill()
         val oppgave2 = Oppgave.ny(
             id = nextLong(),
+            førsteOpprettet = repository.førsteOpprettetForBehandlingId(behandlingId),
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
             utbetalingId = utbetalingId,
@@ -216,6 +229,7 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
     fun `finner tilstand på oppgave som avventer saksbehandler`() {
         val oppgave = Oppgave.ny(
             id = nextLong(),
+            førsteOpprettet = repository.førsteOpprettetForBehandlingId(behandlingId),
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
             utbetalingId = utbetalingId,
@@ -233,6 +247,7 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
     fun `finner tilstand på oppgave som avventer system`() {
         val oppgave = Oppgave.ny(
             id = nextLong(),
+            førsteOpprettet = repository.førsteOpprettetForBehandlingId(behandlingId),
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
             utbetalingId = utbetalingId,
@@ -251,6 +266,7 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
     fun `finner tilstand på ferdigstilt oppgave`() {
         val oppgave = Oppgave.ny(
             id = nextLong(),
+            førsteOpprettet = repository.førsteOpprettetForBehandlingId(behandlingId),
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
             utbetalingId = utbetalingId,
@@ -270,6 +286,7 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
     fun `finner tilstand på invalidert oppgave`() {
         val oppgave = Oppgave.ny(
             id = nextLong(),
+            førsteOpprettet = repository.førsteOpprettetForBehandlingId(behandlingId),
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
             utbetalingId = utbetalingId,
@@ -290,6 +307,7 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
         val oppgaveId = nextLong()
         val gammelOppgave = Oppgave.ny(
             id = oppgaveId,
+            førsteOpprettet = repository.førsteOpprettetForBehandlingId(behandlingId),
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
             utbetalingId = utbetalingId,
@@ -303,6 +321,7 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
 
         val oppgave = Oppgave.ny(
             id = oppgaveId+1,
+            førsteOpprettet = repository.førsteOpprettetForBehandlingId(behandlingId),
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
             utbetalingId = utbetalingId,
@@ -319,8 +338,96 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
     }
 
     @Test
+    fun `lagrer første opprettet-kolonnen på en oppgave når det ligger to fra før på behandlingen`() {
+        val oppgaveId = nextLong()
+        val førsteOppgave = Oppgave.ny(
+            id = oppgaveId,
+            førsteOpprettet = repository.førsteOpprettetForBehandlingId(behandlingId),
+            vedtaksperiodeId = vedtaksperiodeId,
+            behandlingId = behandlingId,
+            utbetalingId = utbetalingId,
+            hendelseId = godkjenningsbehovId,
+            kanAvvises = true,
+            egenskaper = setOf(SØKNAD)
+        )
+        førsteOppgave.avventerSystem(saksbehandler.saksbehandler.ident, saksbehandler.saksbehandler.id().value)
+        førsteOppgave.avbryt()
+        repository.lagre(førsteOppgave)
+        val lagretFørsteOppgave = repository.finn(førsteOppgave.id)
+        assertNotNull(lagretFørsteOppgave)
+        assertEqualsByMicrosecond(lagretFørsteOppgave.opprettet, lagretFørsteOppgave.førsteOpprettet)
+
+        Thread.sleep(100L)
+
+        val andreOppgave = Oppgave.ny(
+            id = oppgaveId + 1,
+            førsteOpprettet = repository.førsteOpprettetForBehandlingId(behandlingId),
+            vedtaksperiodeId = vedtaksperiodeId,
+            behandlingId = behandlingId,
+            utbetalingId = utbetalingId,
+            hendelseId = godkjenningsbehovId,
+            kanAvvises = true,
+            egenskaper = setOf(SØKNAD)
+        )
+        andreOppgave.avventerSystem(saksbehandler.saksbehandler.ident, saksbehandler.saksbehandler.id().value)
+        andreOppgave.avbryt()
+        repository.lagre(andreOppgave)
+        val lagretAndreOppgave = repository.finn(andreOppgave.id)
+        assertNotNull(lagretAndreOppgave)
+        assertNotEqualsByMicrosecond(lagretAndreOppgave.opprettet, lagretAndreOppgave.førsteOpprettet)
+        assertEqualsByMicrosecond(lagretFørsteOppgave.opprettet, lagretAndreOppgave.førsteOpprettet)
+
+        Thread.sleep(100L)
+
+        val tredjeOppgave = Oppgave.ny(
+            id = oppgaveId + 2,
+            førsteOpprettet = repository.førsteOpprettetForBehandlingId(behandlingId),
+            vedtaksperiodeId = vedtaksperiodeId,
+            behandlingId = behandlingId,
+            utbetalingId = utbetalingId,
+            hendelseId = godkjenningsbehovId,
+            kanAvvises = true,
+            egenskaper = setOf(SØKNAD)
+        )
+        repository.lagre(tredjeOppgave)
+        val lagretTredjeOppgave = repository.finn(tredjeOppgave.id)
+        assertNotNull(lagretTredjeOppgave)
+        assertNotEqualsByMicrosecond(lagretTredjeOppgave.opprettet, lagretTredjeOppgave.førsteOpprettet)
+        assertEqualsByMicrosecond(lagretFørsteOppgave.opprettet, lagretTredjeOppgave.førsteOpprettet)
+    }
+
+    @Test
     fun `gir null som tilstand når det ikke finnes noen oppgave for utbetalingen`() {
         val oppgaveTilstand = repository.finnSisteOppgaveForUtbetaling(utbetalingId)
         assertEquals(null, oppgaveTilstand?.let { it::class })
+    }
+
+    private fun assertEquals(expected: Oppgave, actual: Oppgave) {
+        assertEquals(expected.id, actual.id)
+        assertEqualsByMicrosecond(expected.opprettet, actual.opprettet)
+        assertEqualsByMicrosecond(expected.førsteOpprettet, actual.førsteOpprettet)
+        assertEquals(expected.tilstand, actual.tilstand)
+        assertEquals(expected.vedtaksperiodeId, actual.vedtaksperiodeId)
+        assertEquals(expected.behandlingId, actual.behandlingId)
+        assertEquals(expected.utbetalingId, actual.utbetalingId)
+        assertEquals(expected.godkjenningsbehovId, actual.godkjenningsbehovId)
+        assertEquals(expected.kanAvvises, actual.kanAvvises)
+        assertEquals(expected.ferdigstiltAvIdent, actual.ferdigstiltAvIdent)
+        assertEquals(expected.ferdigstiltAvOid, actual.ferdigstiltAvOid)
+        assertEquals(expected.egenskaper, actual.egenskaper)
+        assertEquals(expected.tildeltTil, actual.tildeltTil)
+    }
+
+    private fun assertEqualsByMicrosecond(expected: LocalDateTime?, actual: LocalDateTime?) {
+        assertEquals(expected?.roundToMicros(), actual?.roundToMicros())
+    }
+
+    private fun assertNotEqualsByMicrosecond(expected: LocalDateTime?, actual: LocalDateTime?) {
+        assertNotEquals(expected?.roundToMicros(), actual?.roundToMicros())
+    }
+
+    private fun LocalDateTime.roundToMicros(): LocalDateTime {
+        val roundUp = (this.nano % 1000) >= 500
+        return truncatedTo(ChronoUnit.MICROS).plus(if (roundUp) 1 else 0, ChronoUnit.MICROS)
     }
 }

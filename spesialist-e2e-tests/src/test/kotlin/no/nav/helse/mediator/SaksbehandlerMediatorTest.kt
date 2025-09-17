@@ -8,7 +8,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDate
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import kotliquery.sessionOf
 import no.nav.helse.MeldingPubliserer
-import no.nav.helse.spesialist.e2etests.TestRapidHelpers.hendelser
 import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
 import no.nav.helse.e2e.AbstractDatabaseTest
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
@@ -60,6 +59,7 @@ import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlerident
 import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlernavn
 import no.nav.helse.spesialist.domain.testfixtures.lagTilfeldigSaksbehandlerepost
+import no.nav.helse.spesialist.e2etests.TestRapidHelpers.hendelser
 import no.nav.helse.spesialist.test.TestPerson
 import no.nav.helse.spesialist.typer.Kjønn
 import no.nav.helse.util.februar
@@ -345,6 +345,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         sessionContext.oppgaveRepository.lagre(
             Oppgave.ny(
                 id = oppgaveId,
+                førsteOpprettet = null,
                 hendelseId = godkjenningsbehovId,
                 egenskaper = egenskaper,
                 vedtaksperiodeId = vedtaksperiodeId,

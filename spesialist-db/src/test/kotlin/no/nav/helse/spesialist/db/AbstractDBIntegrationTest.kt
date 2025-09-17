@@ -445,6 +445,7 @@ abstract class AbstractDBIntegrationTest {
 
     protected fun opprettOppgave(
         contextId: UUID = UUID.randomUUID(),
+        førsteOpprettet: LocalDateTime? = null,
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
         egenskaper: Set<Egenskap> = setOf(Egenskap.SØKNAD),
         kanAvvises: Boolean = true,
@@ -456,6 +457,7 @@ abstract class AbstractDBIntegrationTest {
         opprettCommandContext(hendelse, contextId)
         val oppgave = Oppgave.ny(
             id = nextLong(),
+            førsteOpprettet = førsteOpprettet,
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = behandlingId,
             utbetalingId = utbetalingId,

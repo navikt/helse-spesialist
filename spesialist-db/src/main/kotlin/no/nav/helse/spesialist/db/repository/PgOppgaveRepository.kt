@@ -57,7 +57,8 @@ class PgOppgaveRepository private constructor(
             INSERT INTO oppgave (
                 id,
                 opprettet,
-                oppdatert, 
+                første_opprettet,
+                oppdatert,
                 status, 
                 ferdigstilt_av, 
                 ferdigstilt_av_oid, 
@@ -73,6 +74,7 @@ class PgOppgaveRepository private constructor(
             SELECT
                 :id,
                 :opprettet,
+                :foerste_opprettet,
                 :oppdatert,
                 CAST(:oppgavestatus as oppgavestatus),
                 :ferdigstilt_av,
@@ -95,7 +97,8 @@ class PgOppgaveRepository private constructor(
                 hendelse_id_godkjenningsbehov = excluded.hendelse_id_godkjenningsbehov
             """,
             "id" to oppgave.id,
-            "opprettet" to LocalDateTime.now(),
+            "opprettet" to oppgave.opprettet,
+            "foerste_opprettet" to oppgave.førsteOpprettet,
             "oppdatert" to LocalDateTime.now(),
             "oppgavestatus" to status(oppgave.tilstand),
             "ferdigstilt_av" to oppgave.ferdigstiltAvIdent,
@@ -108,6 +111,12 @@ class PgOppgaveRepository private constructor(
             "kan_avvises" to oppgave.kanAvvises,
         ).update()
     }
+
+    override fun førsteOpprettetForBehandlingId(behandlingId: UUID): LocalDateTime? =
+        asSQL(
+            "SELECT min(opprettet) FROM oppgave WHERE behandling_id = :behandling_id",
+            "behandling_id" to behandlingId,
+        ).singleOrNull { it.localDateTimeOrNull(1) }
 
     private fun lagreTildeling(oppgave: Oppgave) {
         val tildeltTil = oppgave.tildeltTil
@@ -144,6 +153,8 @@ class PgOppgaveRepository private constructor(
             """
             SELECT 
                 o.egenskaper, 
+                o.opprettet, 
+                o.første_opprettet, 
                 o.status, 
                 v.vedtaksperiode_id, 
                 o.behandling_id, 
@@ -163,6 +174,8 @@ class PgOppgaveRepository private constructor(
         ).singleOrNull { row ->
             Oppgave.fraLagring(
                 id = id,
+                opprettet = row.localDateTime("opprettet"),
+                førsteOpprettet = row.localDateTimeOrNull("første_opprettet"),
                 egenskaper = row.array<String>("egenskaper").mapNotNull { it.fromDb() }.toSet(),
                 tilstand = tilstand(row.string("status")),
                 vedtaksperiodeId = row.uuid("vedtaksperiode_id"),

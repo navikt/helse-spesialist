@@ -20,10 +20,13 @@ import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import no.nav.helse.spesialist.domain.tilgangskontroll.SaksbehandlerIdentGrupper
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.slf4j.LoggerFactory
+import java.time.LocalDateTime
 import java.util.UUID
 
 class Oppgave private constructor(
     val id: Long,
+    val opprettet: LocalDateTime,
+    val førsteOpprettet: LocalDateTime?,
     tilstand: Tilstand,
     val vedtaksperiodeId: UUID,
     val behandlingId: UUID,
@@ -390,28 +393,36 @@ class Oppgave private constructor(
 
         fun ny(
             id: Long,
+            førsteOpprettet: LocalDateTime?,
             vedtaksperiodeId: UUID,
             behandlingId: UUID,
             utbetalingId: UUID,
             hendelseId: UUID,
             kanAvvises: Boolean,
             egenskaper: Set<Egenskap>,
-        ) = Oppgave(
-            id = id,
-            tilstand = AvventerSaksbehandler,
-            vedtaksperiodeId = vedtaksperiodeId,
-            behandlingId = behandlingId,
-            utbetalingId = utbetalingId,
-            godkjenningsbehovId = hendelseId,
-            kanAvvises = kanAvvises,
-            egenskaper = egenskaper,
-            ferdigstiltAvIdent = null,
-            ferdigstiltAvOid = null,
-            tildeltTil = null,
-        )
+        ): Oppgave {
+            val opprettet = LocalDateTime.now()
+            return Oppgave(
+                id = id,
+                opprettet = opprettet,
+                førsteOpprettet = førsteOpprettet ?: opprettet,
+                tilstand = AvventerSaksbehandler,
+                vedtaksperiodeId = vedtaksperiodeId,
+                behandlingId = behandlingId,
+                utbetalingId = utbetalingId,
+                godkjenningsbehovId = hendelseId,
+                kanAvvises = kanAvvises,
+                egenskaper = egenskaper,
+                ferdigstiltAvIdent = null,
+                ferdigstiltAvOid = null,
+                tildeltTil = null,
+            )
+        }
 
         fun fraLagring(
             id: Long,
+            opprettet: LocalDateTime,
+            førsteOpprettet: LocalDateTime?,
             tilstand: Tilstand,
             behandlingId: UUID,
             vedtaksperiodeId: UUID,
@@ -424,6 +435,8 @@ class Oppgave private constructor(
             egenskaper: Set<Egenskap>,
         ) = Oppgave(
             id = id,
+            opprettet = opprettet,
+            førsteOpprettet = førsteOpprettet,
             tilstand = tilstand,
             behandlingId = behandlingId,
             vedtaksperiodeId = vedtaksperiodeId,

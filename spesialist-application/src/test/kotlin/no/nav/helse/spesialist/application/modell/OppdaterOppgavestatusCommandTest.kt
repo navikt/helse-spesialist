@@ -27,6 +27,7 @@ internal class OppdaterOppgavestatusCommandTest {
     fun beforeEach() {
         oppgave = Oppgave.ny(
             id = 1L,
+            førsteOpprettet = null,
             vedtaksperiodeId = UUID.randomUUID(),
             behandlingId = UUID.randomUUID(),
             utbetalingId = UTBETALING_ID,

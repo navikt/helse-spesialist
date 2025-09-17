@@ -583,6 +583,7 @@ internal class OppgaveTest {
         val gjenopptattOppgave =
             Oppgave.ny(
                 id = 1L,
+                førsteOpprettet = null,
                 vedtaksperiodeId = VEDTAKSPERIODE_ID,
                 behandlingId = BEHANDLING_ID,
                 utbetalingId = UTBETALING_ID,
@@ -592,43 +593,47 @@ internal class OppgaveTest {
             )
         val oppgave1 =
             Oppgave.ny(
-                OPPGAVE_ID,
-                VEDTAKSPERIODE_ID,
-                BEHANDLING_ID,
-                UTBETALING_ID,
-                UUID.randomUUID(),
-                true,
-                setOf(SØKNAD)
+                id = OPPGAVE_ID,
+                førsteOpprettet = null,
+                vedtaksperiodeId = VEDTAKSPERIODE_ID,
+                behandlingId = BEHANDLING_ID,
+                utbetalingId = UTBETALING_ID,
+                hendelseId = UUID.randomUUID(),
+                kanAvvises = true,
+                egenskaper = setOf(SØKNAD)
             )
         val oppgave2 =
             Oppgave.ny(
-                OPPGAVE_ID,
-                VEDTAKSPERIODE_ID,
-                BEHANDLING_ID,
-                UTBETALING_ID,
-                UUID.randomUUID(),
-                true,
-                setOf(SØKNAD)
+                id = OPPGAVE_ID,
+                førsteOpprettet = null,
+                vedtaksperiodeId = VEDTAKSPERIODE_ID,
+                behandlingId = BEHANDLING_ID,
+                utbetalingId = UTBETALING_ID,
+                hendelseId = UUID.randomUUID(),
+                kanAvvises = true,
+                egenskaper = setOf(SØKNAD)
             )
         val oppgave3 =
             Oppgave.ny(
-                OPPGAVE_ID,
-                UUID.randomUUID(),
-                BEHANDLING_ID,
-                UTBETALING_ID,
-                UUID.randomUUID(),
-                true,
-                setOf(SØKNAD)
+                id = OPPGAVE_ID,
+                førsteOpprettet = null,
+                vedtaksperiodeId = UUID.randomUUID(),
+                behandlingId = BEHANDLING_ID,
+                utbetalingId = UTBETALING_ID,
+                hendelseId = UUID.randomUUID(),
+                kanAvvises = true,
+                egenskaper = setOf(SØKNAD)
             )
         val oppgave4 =
             Oppgave.ny(
-                OPPGAVE_ID,
-                VEDTAKSPERIODE_ID,
-                BEHANDLING_ID,
-                UTBETALING_ID,
-                UUID.randomUUID(),
-                true,
-                setOf(STIKKPRØVE)
+                id = OPPGAVE_ID,
+                førsteOpprettet = null,
+                vedtaksperiodeId = VEDTAKSPERIODE_ID,
+                behandlingId = BEHANDLING_ID,
+                utbetalingId = UTBETALING_ID,
+                hendelseId = UUID.randomUUID(),
+                kanAvvises = true,
+                egenskaper = setOf(STIKKPRØVE)
             )
         assertEquals(oppgave1, oppgave2)
         assertEquals(oppgave1.hashCode(), oppgave2.hashCode())
@@ -650,6 +655,7 @@ internal class OppgaveTest {
 
     private fun nyOppgave(vararg egenskaper: Egenskap) = Oppgave.ny(
         id = OPPGAVE_ID,
+        førsteOpprettet = null,
         vedtaksperiodeId = VEDTAKSPERIODE_ID,
         behandlingId = UTBETALING_ID,
         utbetalingId = BEHANDLING_ID,

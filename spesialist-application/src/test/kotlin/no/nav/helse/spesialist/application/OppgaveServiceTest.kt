@@ -25,6 +25,7 @@ import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlernavn
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.random.Random.Default.nextLong
 
@@ -124,6 +125,7 @@ internal class OppgaveServiceTest {
             oppgaveRepository.lagre(
                 Oppgave.ny(
                     id = oppgaveId,
+                    førsteOpprettet = null,
                     hendelseId = HENDELSE_ID,
                     egenskaper = setOf(EGENSKAP_SØKNAD),
                     vedtaksperiodeId = VEDTAKSPERIODE_ID,
@@ -175,6 +177,8 @@ internal class OppgaveServiceTest {
         tildelt: Boolean = false,
     ) = Oppgave.fraLagring(
         id = oppgaveId,
+        opprettet = LocalDateTime.now(),
+        førsteOpprettet = null,
         egenskaper = mutableSetOf(EGENSKAP_SØKNAD),
         tilstand = Oppgave.AvventerSaksbehandler,
         vedtaksperiodeId = VEDTAKSPERIODE_ID,

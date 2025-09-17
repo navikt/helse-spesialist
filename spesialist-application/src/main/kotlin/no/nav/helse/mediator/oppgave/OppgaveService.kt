@@ -62,6 +62,7 @@ class OppgaveService(
         val oppgave =
             ny(
                 id = nesteId,
+                førsteOpprettet = oppgaveRepository.førsteOpprettetForBehandlingId(behandlingId),
                 vedtaksperiodeId = vedtaksperiodeId,
                 behandlingId = behandlingId,
                 utbetalingId = utbetalingId,

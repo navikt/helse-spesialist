@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.application
 
 import no.nav.helse.mediator.oppgave.OppgaveRepository
 import no.nav.helse.modell.oppgave.Oppgave
+import java.time.LocalDateTime
 import java.util.UUID
 
 class InMemoryOppgaveRepository : OppgaveRepository {
@@ -27,4 +28,7 @@ class InMemoryOppgaveRepository : OppgaveRepository {
             )
         }
     }
+
+    override fun førsteOpprettetForBehandlingId(behandlingId: UUID): LocalDateTime? =
+        oppgaver.values.filter { it.behandlingId == behandlingId }.minOfOrNull { it.opprettet }
 }

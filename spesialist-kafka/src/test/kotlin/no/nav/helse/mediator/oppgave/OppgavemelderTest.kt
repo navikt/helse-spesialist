@@ -87,6 +87,7 @@ class OppgavemelderTest {
 
     private fun nyOppgave() = Oppgave.ny(
         id = OPPGAVE_ID,
+        førsteOpprettet = null,
         vedtaksperiodeId = VEDTAKSPERIODE_ID,
         behandlingId = BEHANDLING_ID,
         utbetalingId = UTBETALING_ID,

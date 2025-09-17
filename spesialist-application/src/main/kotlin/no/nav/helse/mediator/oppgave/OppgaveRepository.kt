@@ -1,6 +1,7 @@
 package no.nav.helse.mediator.oppgave
 
 import no.nav.helse.modell.oppgave.Oppgave
+import java.time.LocalDateTime
 import java.util.UUID
 
 interface OppgaveRepository {
@@ -10,6 +11,8 @@ interface OppgaveRepository {
 
     // TODO: Helst bør vi bruke finn(), men Oppgave er ikke et aggregat ennå
     fun finnSisteOppgaveForUtbetaling(utbetalingId: UUID): OppgaveTilstandStatusOgGodkjenningsbehov?
+
+    fun førsteOpprettetForBehandlingId(behandlingId: UUID): LocalDateTime?
 
     data class OppgaveTilstandStatusOgGodkjenningsbehov(
         val id: Long,

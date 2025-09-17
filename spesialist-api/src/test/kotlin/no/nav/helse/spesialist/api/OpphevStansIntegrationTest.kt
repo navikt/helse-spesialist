@@ -39,6 +39,7 @@ abstract class OpphevStansIntegrationTest {
         )
         oppgaveRepository.lagre(Oppgave.ny(
             id = 1,
+            førsteOpprettet = null,
             vedtaksperiodeId = vedtaksperiodeId,
             behandlingId = UUID.randomUUID(),
             utbetalingId = UUID.randomUUID(),
