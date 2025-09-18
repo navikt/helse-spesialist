@@ -8,7 +8,7 @@ import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.mediator.oppgave.OppgaveRepository
 import no.nav.helse.spesialist.application.logg.logg
 
-private const val CHUNK_SIZE = 1000
+private const val CHUNK_SIZE = 50
 
 class MinuttRiver(
     private val oppgaveRepository: OppgaveRepository,
