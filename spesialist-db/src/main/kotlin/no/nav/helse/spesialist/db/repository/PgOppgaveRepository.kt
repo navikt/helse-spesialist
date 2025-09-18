@@ -95,8 +95,7 @@ class PgOppgaveRepository private constructor(
                 ferdigstilt_av_oid = excluded.ferdigstilt_av_oid,
                 egenskaper = excluded.egenskaper,
                 kan_avvises = excluded.kan_avvises,
-                hendelse_id_godkjenningsbehov = excluded.hendelse_id_godkjenningsbehov,
-                første_opprettet = excluded.første_opprettet
+                hendelse_id_godkjenningsbehov = excluded.hendelse_id_godkjenningsbehov
             """,
             "id" to oppgave.id,
             "opprettet" to oppgave.opprettet,
