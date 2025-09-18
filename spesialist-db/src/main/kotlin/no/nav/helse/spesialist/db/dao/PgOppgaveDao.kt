@@ -215,7 +215,7 @@ class PgOppgaveDao internal constructor(
         tildelt: Boolean?,
         grupperteFiltrerteEgenskaper: Map<Egenskap.Kategori, List<EgenskapForDatabase>>,
     ): List<OppgaveFraDatabaseForVisning> {
-        val orderBy = if (sortering.isNotEmpty()) sortering.joinToString { it.nøkkelTilKolonne() } else "opprettet DESC"
+        val orderBy = if (sortering.isNotEmpty()) sortering.joinToString { it.nøkkelTilKolonne() } else "første_opprettet DESC"
         val ukategoriserteEgenskaper = grupperteFiltrerteEgenskaper[Egenskap.Kategori.Ukategorisert]
         val oppgavetypeegenskaper = grupperteFiltrerteEgenskaper[Egenskap.Kategori.Oppgavetype]
         val periodetypeegenskaper = grupperteFiltrerteEgenskaper[Egenskap.Kategori.Periodetype]
@@ -233,7 +233,7 @@ class PgOppgaveDao internal constructor(
                 pi.fornavn, pi.mellomnavn, pi.etternavn,
                 o.egenskaper,
                 s.oid, s.ident, s.epost, s.navn,
-                o.opprettet,
+                o.første_opprettet,
                 os.soknad_mottatt AS opprinnelig_soknadsdato,
                 pv.frist,
                 pv.opprettet AS på_vent_opprettet,
@@ -316,7 +316,7 @@ class PgOppgaveDao internal constructor(
                         )
                     },
                 påVent = egenskaper.contains(EgenskapForDatabase.PÅ_VENT),
-                opprettet = row.localDateTime("opprettet"),
+                opprettet = row.localDateTime("første_opprettet"),
                 opprinneligSøknadsdato = row.localDateTime("opprinnelig_soknadsdato"),
                 tidsfrist = row.localDateOrNull("frist"),
                 filtrertAntall = row.int("filtered_count"),
@@ -601,7 +601,7 @@ class PgOppgaveDao internal constructor(
     private fun OppgavesorteringForDatabase.nøkkelTilKolonne() =
         when (this.nøkkel) {
             SorteringsnøkkelForDatabase.TILDELT_TIL -> "navn".direction(this.stigende).nullsLast()
-            SorteringsnøkkelForDatabase.OPPRETTET -> "opprettet".direction(this.stigende)
+            SorteringsnøkkelForDatabase.OPPRETTET -> "første_opprettet".direction(this.stigende)
             SorteringsnøkkelForDatabase.TIDSFRIST -> "frist".direction(this.stigende).nullsLast()
             SorteringsnøkkelForDatabase.SØKNAD_MOTTATT -> "opprinnelig_soknadsdato".direction(this.stigende)
         }
