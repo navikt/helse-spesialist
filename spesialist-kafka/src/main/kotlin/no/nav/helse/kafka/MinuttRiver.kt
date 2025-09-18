@@ -10,10 +10,13 @@ import no.nav.helse.spesialist.application.logg.logg
 
 private const val CHUNK_SIZE = 50
 
-class MinuttRiver(private val oppgaveRepository: OppgaveRepository) : SpesialistRiver {
-    override fun preconditions(): River.PacketValidation = River.PacketValidation {
-        it.requireAny("@event_name", listOf("minutt"))
-    }
+class MinuttRiver(
+    private val oppgaveRepository: OppgaveRepository,
+) : SpesialistRiver {
+    override fun preconditions(): River.PacketValidation =
+        River.PacketValidation {
+            it.requireAny("@event_name", listOf("minutt"))
+        }
 
     override fun validations() = River.PacketValidation { }
 

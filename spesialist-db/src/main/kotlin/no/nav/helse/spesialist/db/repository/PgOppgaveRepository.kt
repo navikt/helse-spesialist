@@ -201,21 +201,22 @@ class PgOppgaveRepository private constructor(
             "oppgaveId" to id,
         ).singleOrNull { it.tilOppgave() }
 
-    private fun Row.tilOppgave(): Oppgave = Oppgave.fraLagring(
-        id = long("id"),
-        opprettet = localDateTime("opprettet"),
-        førsteOpprettet = localDateTimeOrNull("første_opprettet"),
-        egenskaper = array<String>("egenskaper").mapNotNull { it.fromDb() }.toSet(),
-        tilstand = tilstand(string("status")),
-        vedtaksperiodeId = uuid("vedtaksperiode_id"),
-        behandlingId = uuid("behandling_id"),
-        utbetalingId = uuid("utbetaling_id"),
-        godkjenningsbehovId = uuid("hendelse_id_godkjenningsbehov"),
-        kanAvvises = boolean("kan_avvises"),
-        ferdigstiltAvIdent = stringOrNull("ferdigstilt_av"),
-        ferdigstiltAvOid = uuidOrNull("ferdigstilt_av_oid"),
-        tildeltTil = uuidOrNull("saksbehandler_ref")?.let(::SaksbehandlerOid),
-    )
+    private fun Row.tilOppgave(): Oppgave =
+        Oppgave.fraLagring(
+            id = long("id"),
+            opprettet = localDateTime("opprettet"),
+            førsteOpprettet = localDateTimeOrNull("første_opprettet"),
+            egenskaper = array<String>("egenskaper").mapNotNull { it.fromDb() }.toSet(),
+            tilstand = tilstand(string("status")),
+            vedtaksperiodeId = uuid("vedtaksperiode_id"),
+            behandlingId = uuid("behandling_id"),
+            utbetalingId = uuid("utbetaling_id"),
+            godkjenningsbehovId = uuid("hendelse_id_godkjenningsbehov"),
+            kanAvvises = boolean("kan_avvises"),
+            ferdigstiltAvIdent = stringOrNull("ferdigstilt_av"),
+            ferdigstiltAvOid = uuidOrNull("ferdigstilt_av_oid"),
+            tildeltTil = uuidOrNull("saksbehandler_ref")?.let(::SaksbehandlerOid),
+        )
 
     private fun tilstand(oppgavestatus: String): Oppgave.Tilstand =
         when (oppgavestatus) {
