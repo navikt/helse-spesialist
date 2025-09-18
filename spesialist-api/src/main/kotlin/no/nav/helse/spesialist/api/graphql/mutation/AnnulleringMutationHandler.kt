@@ -18,12 +18,7 @@ class AnnulleringMutationHandler(
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> {
         saksbehandlerMediator.utførHandling(HandlingType.ANNULLER_UTBETALING, env) { saksbehandler, _, tx, kø ->
-            if (
-                tx.annulleringRepository.finnAnnulleringMedEnAv(
-                    arbeidsgiverFagsystemId = annullering.arbeidsgiverFagsystemId,
-                    personFagsystemId = annullering.personFagsystemId,
-                ) != null
-            ) {
+            if (tx.annulleringRepository.finnAnnullering(vedtaksperiodeId = annullering.vedtaksperiodeId) != null) {
                 throw AlleredeAnnullert(annullering.vedtaksperiodeId)
             }
 

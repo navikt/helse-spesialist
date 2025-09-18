@@ -218,7 +218,7 @@ class AnnulleringMutationIntegrationTest {
                     utbetalingId = UUID.randomUUID(),
                     arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
                     personFagsystemId = personFagsystemId,
-                    vedtaksperiodeId = UUID.randomUUID(),
+                    vedtaksperiodeId = vedtaksperiodeId,
                     kommentar = "En annen kommentar",
                     arsaker = listOf(ApiAnnulleringData.ApiAnnulleringArsak(_key = "ny", arsak = "Helt ny årsak"))
                 ),
