@@ -70,7 +70,6 @@ class KafkaModule(
                 ),
             meldingDuplikatkontrollDao = daos.meldingDuplikatkontrollDao,
             sessionFactory = sessionFactory,
-            oppgaveRepository = daos.oppgaveRepository,
         )
 
     fun kobleOppRivers() {

@@ -5,12 +5,6 @@ import no.nav.helse.modell.oppgave.Egenskap.PÅ_VENT
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
-import no.nav.helse.spesialist.domain.testfixtures.lagAktørId
-import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
-import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnavn
-import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
-import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlerident
-import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -400,108 +394,6 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
         assertNotNull(lagretTredjeOppgave)
         assertNotEqualsByMicrosecond(lagretTredjeOppgave.opprettet, lagretTredjeOppgave.førsteOpprettet)
         assertEqualsByMicrosecond(lagretFørsteOppgave.opprettet, lagretTredjeOppgave.førsteOpprettet)
-    }
-
-    var oppgaveId = nextLong()
-
-    private fun lagTilfeldigOppgave(
-        førsteOpprettet: LocalDateTime?,
-        tilstand: Oppgave.Tilstand
-    ): Oppgave {
-        val fødselsnummer = lagFødselsnummer()
-        val aktørId = lagAktørId()
-        val organisasjonsnummer = lagOrganisasjonsnummer()
-
-        val vedtaksperiodeId = UUID.randomUUID()
-        val behandlingId = UUID.randomUUID()
-        val utbetalingId = UUID.randomUUID()
-
-        opprettPerson(fødselsnummer = fødselsnummer, aktørId = aktørId)
-        opprettArbeidsgiver(identifikator = organisasjonsnummer, navn = lagOrganisasjonsnavn())
-        opprettVedtaksperiode(
-            fødselsnummer = fødselsnummer,
-            organisasjonsnummer = organisasjonsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            spleisBehandlingId = behandlingId,
-            utbetalingId = utbetalingId,
-        )
-
-        return Oppgave.fraLagring(
-            id = oppgaveId++,
-            opprettet = LocalDateTime.now(),
-            førsteOpprettet = førsteOpprettet,
-            tilstand = tilstand,
-            behandlingId = behandlingId,
-            vedtaksperiodeId = vedtaksperiodeId,
-            utbetalingId = utbetalingId,
-            godkjenningsbehovId = UUID.randomUUID(),
-            kanAvvises = true,
-            ferdigstiltAvOid = UUID.randomUUID().takeIf { tilstand == Oppgave.Ferdigstilt },
-            ferdigstiltAvIdent = lagSaksbehandlerident().takeIf { tilstand == Oppgave.Ferdigstilt },
-            tildeltTil = null,
-            egenskaper = setOf(SØKNAD)
-        )
-    }
-
-    @Test
-    fun `finner alle oppgaver med tilstand AvventerSaksbehandler uten første opprettet`() {
-        // Given:
-        listOf(
-            lagTilfeldigOppgave(førsteOpprettet = null, tilstand = Oppgave.AvventerSaksbehandler),
-            lagTilfeldigOppgave(førsteOpprettet = null, tilstand = Oppgave.AvventerSystem),
-            lagTilfeldigOppgave(førsteOpprettet = LocalDateTime.now(), tilstand = Oppgave.AvventerSystem),
-            lagTilfeldigOppgave(førsteOpprettet = LocalDateTime.now(), tilstand = Oppgave.AvventerSaksbehandler),
-            lagTilfeldigOppgave(førsteOpprettet = null, tilstand = Oppgave.AvventerSaksbehandler),
-            lagTilfeldigOppgave(førsteOpprettet = null, tilstand = Oppgave.Ferdigstilt),
-            lagTilfeldigOppgave(førsteOpprettet = LocalDateTime.now(), tilstand = Oppgave.Ferdigstilt),
-            lagTilfeldigOppgave(førsteOpprettet = null, tilstand = Oppgave.AvventerSaksbehandler),
-            lagTilfeldigOppgave(førsteOpprettet = null, tilstand = Oppgave.Invalidert),
-            lagTilfeldigOppgave(førsteOpprettet = LocalDateTime.now(), tilstand = Oppgave.Invalidert),
-        ).forEach { repository.lagre(it) }
-
-        // When:
-        val resultat = repository.finnFlereAvventerSaksbehandlerUtenFørsteOpprettet(1000)
-
-        // Then:
-        // Kan komme flere, siden databasen deles med andre tester
-        assertAtLeast(3, resultat.size)
-        resultat.forEach {
-            assertEquals(null, it.førsteOpprettet)
-            assertEquals(Oppgave.AvventerSaksbehandler, it.tilstand)
-        }
-    }
-
-    private fun assertAtLeast(expectedMinimum: Int, actual: Int) {
-        if (actual < expectedMinimum) {
-            fail<Nothing>("expected at least: <$expectedMinimum> but was: <$actual>")
-        }
-    }
-
-    @Test
-    fun `finner noen oppgaver med tilstand AvventerSaksbehandler uten første opprettet`() {
-        // Given:
-        listOf(
-            lagTilfeldigOppgave(førsteOpprettet = null, tilstand = Oppgave.AvventerSaksbehandler),
-            lagTilfeldigOppgave(førsteOpprettet = null, tilstand = Oppgave.AvventerSystem),
-            lagTilfeldigOppgave(førsteOpprettet = LocalDateTime.now(), tilstand = Oppgave.AvventerSystem),
-            lagTilfeldigOppgave(førsteOpprettet = LocalDateTime.now(), tilstand = Oppgave.AvventerSaksbehandler),
-            lagTilfeldigOppgave(førsteOpprettet = null, tilstand = Oppgave.AvventerSaksbehandler),
-            lagTilfeldigOppgave(førsteOpprettet = null, tilstand = Oppgave.Ferdigstilt),
-            lagTilfeldigOppgave(førsteOpprettet = LocalDateTime.now(), tilstand = Oppgave.Ferdigstilt),
-            lagTilfeldigOppgave(førsteOpprettet = null, tilstand = Oppgave.AvventerSaksbehandler),
-            lagTilfeldigOppgave(førsteOpprettet = null, tilstand = Oppgave.Invalidert),
-            lagTilfeldigOppgave(førsteOpprettet = LocalDateTime.now(), tilstand = Oppgave.Invalidert),
-        ).forEach { repository.lagre(it) }
-
-        // When:
-        val resultat = repository.finnFlereAvventerSaksbehandlerUtenFørsteOpprettet(2)
-
-        // Then:
-        assertEquals(2, resultat.size)
-        resultat.forEach {
-            assertEquals(null, it.førsteOpprettet)
-            assertEquals(Oppgave.AvventerSaksbehandler, it.tilstand)
-        }
     }
 
     @Test

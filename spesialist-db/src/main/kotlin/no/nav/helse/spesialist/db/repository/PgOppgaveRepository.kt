@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.db.repository
 
-import kotliquery.Row
 import kotliquery.Session
 import no.nav.helse.mediator.oppgave.OppgaveRepository
 import no.nav.helse.modell.oppgave.Egenskap
@@ -119,32 +118,6 @@ class PgOppgaveRepository private constructor(
             "behandling_id" to behandlingId,
         ).singleOrNull { it.localDateTimeOrNull(1) }
 
-    override fun finnFlereAvventerSaksbehandlerUtenFørsteOpprettet(antall: Int): List<Oppgave> =
-        asSQL(
-            """
-            SELECT 
-                o.id,
-                o.egenskaper, 
-                o.opprettet, 
-                o.første_opprettet, 
-                o.status, 
-                v.vedtaksperiode_id, 
-                o.behandling_id, 
-                o.hendelse_id_godkjenningsbehov, 
-                o.ferdigstilt_av, 
-                o.ferdigstilt_av_oid, 
-                o.utbetaling_id,
-                t.saksbehandler_ref, 
-                o.kan_avvises
-            FROM oppgave o
-            INNER JOIN vedtak v on o.vedtak_ref = v.id
-            LEFT JOIN tildeling t on o.id = t.oppgave_id_ref
-            WHERE o.første_opprettet IS NULL 
-            AND o.status = 'AvventerSaksbehandler'
-            LIMIT $antall
-        """,
-        ).list { it.tilOppgave() }
-
     private fun lagreTildeling(oppgave: Oppgave) {
         val tildeltTil = oppgave.tildeltTil
         if (tildeltTil != null) {
@@ -179,7 +152,6 @@ class PgOppgaveRepository private constructor(
         asSQL(
             """
             SELECT 
-                o.id,
                 o.egenskaper, 
                 o.opprettet, 
                 o.første_opprettet, 
@@ -199,23 +171,23 @@ class PgOppgaveRepository private constructor(
             ORDER BY o.id DESC LIMIT 1
             """,
             "oppgaveId" to id,
-        ).singleOrNull { it.tilOppgave() }
-
-    private fun Row.tilOppgave(): Oppgave = Oppgave.fraLagring(
-        id = long("id"),
-        opprettet = localDateTime("opprettet"),
-        førsteOpprettet = localDateTimeOrNull("første_opprettet"),
-        egenskaper = array<String>("egenskaper").mapNotNull { it.fromDb() }.toSet(),
-        tilstand = tilstand(string("status")),
-        vedtaksperiodeId = uuid("vedtaksperiode_id"),
-        behandlingId = uuid("behandling_id"),
-        utbetalingId = uuid("utbetaling_id"),
-        godkjenningsbehovId = uuid("hendelse_id_godkjenningsbehov"),
-        kanAvvises = boolean("kan_avvises"),
-        ferdigstiltAvIdent = stringOrNull("ferdigstilt_av"),
-        ferdigstiltAvOid = uuidOrNull("ferdigstilt_av_oid"),
-        tildeltTil = uuidOrNull("saksbehandler_ref")?.let(::SaksbehandlerOid),
-    )
+        ).singleOrNull { row ->
+            Oppgave.fraLagring(
+                id = id,
+                opprettet = row.localDateTime("opprettet"),
+                førsteOpprettet = row.localDateTimeOrNull("første_opprettet"),
+                egenskaper = row.array<String>("egenskaper").mapNotNull { it.fromDb() }.toSet(),
+                tilstand = tilstand(row.string("status")),
+                vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
+                behandlingId = row.uuid("behandling_id"),
+                utbetalingId = row.uuid("utbetaling_id"),
+                godkjenningsbehovId = row.uuid("hendelse_id_godkjenningsbehov"),
+                kanAvvises = row.boolean("kan_avvises"),
+                ferdigstiltAvIdent = row.stringOrNull("ferdigstilt_av"),
+                ferdigstiltAvOid = row.uuidOrNull("ferdigstilt_av_oid"),
+                tildeltTil = row.uuidOrNull("saksbehandler_ref")?.let(::SaksbehandlerOid),
+            )
+        }
 
     private fun tilstand(oppgavestatus: String): Oppgave.Tilstand =
         when (oppgavestatus) {

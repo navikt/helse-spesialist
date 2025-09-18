@@ -14,8 +14,6 @@ interface OppgaveRepository {
 
     fun førsteOpprettetForBehandlingId(behandlingId: UUID): LocalDateTime?
 
-    fun finnFlereAvventerSaksbehandlerUtenFørsteOpprettet(antall: Int): List<Oppgave>
-
     data class OppgaveTilstandStatusOgGodkjenningsbehov(
         val id: Long,
         val tilstand: Oppgave.Tilstand,
