@@ -10,6 +10,7 @@ import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.db.MeldingDuplikatkontrollDao
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.mediator.MeldingMediator
+import no.nav.helse.mediator.oppgave.OppgaveRepository
 import no.nav.helse.registrerTidsbrukForDuplikatsjekk
 import no.nav.helse.spesialist.application.logg.logg
 import java.util.UUID
@@ -19,6 +20,7 @@ import kotlin.time.measureTimedValue
 class RiverSetup(
     private val mediator: MeldingMediator,
     private val meldingDuplikatkontrollDao: MeldingDuplikatkontrollDao,
+    private val oppgaveRepository: OppgaveRepository,
     sessionFactory: SessionFactory,
 ) {
     private val rivers =
@@ -55,6 +57,7 @@ class RiverSetup(
             AvsluttetMedVedtakRiver(sessionFactory),
             AvsluttetUtenVedtakRiver(mediator),
             MidnattRiver(mediator),
+            MinuttRiver(oppgaveRepository),
             BehandlingOpprettetRiver(mediator),
             KommandokjedePåminnelseRiver(mediator),
             StansAutomatiskBehandlingRiver(mediator),

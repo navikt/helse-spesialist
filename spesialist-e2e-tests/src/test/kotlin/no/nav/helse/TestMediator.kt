@@ -103,6 +103,7 @@ class TestMediator(
             mediator = meldingMediator,
             meldingDuplikatkontrollDao = daos.meldingDuplikatkontrollDao,
             sessionFactory = sessionFactory,
+            oppgaveRepository = daos.oppgaveRepository,
         ).registrerRivers(testRapid)
     }
 

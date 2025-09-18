@@ -31,4 +31,8 @@ class InMemoryOppgaveRepository : OppgaveRepository {
 
     override fun førsteOpprettetForBehandlingId(behandlingId: UUID): LocalDateTime? =
         oppgaver.values.filter { it.behandlingId == behandlingId }.minOfOrNull { it.opprettet }
+
+    override fun finnFlereAvventerSaksbehandlerUtenFørsteOpprettet(antall: Int): List<Oppgave> {
+        TODO("Not yet implemented")
+    }
 }

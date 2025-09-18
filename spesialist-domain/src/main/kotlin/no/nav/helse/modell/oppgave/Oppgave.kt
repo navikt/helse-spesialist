@@ -26,7 +26,7 @@ import java.util.UUID
 class Oppgave private constructor(
     val id: Long,
     val opprettet: LocalDateTime,
-    val førsteOpprettet: LocalDateTime?,
+    var førsteOpprettet: LocalDateTime?,
     tilstand: Tilstand,
     val vedtaksperiodeId: UUID,
     val behandlingId: UUID,
