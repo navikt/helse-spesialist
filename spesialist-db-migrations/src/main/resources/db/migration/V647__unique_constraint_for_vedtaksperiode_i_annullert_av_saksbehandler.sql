@@ -1,0 +1,2 @@
+alter table annullert_av_saksbehandler
+    add constraint annullert_av_saksbehandler_unique_constraint_vedtaksperiode_id unique (vedtaksperiode_id);
