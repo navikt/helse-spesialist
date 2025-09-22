@@ -102,10 +102,9 @@ class AvsluttetMedVedtakRiver(
                             )
                         }
 
-
                         val sisteGodkjenningsbehov: Godkjenningsbehov? =
                             sessionContext.meldingDao.finnSisteGodkjenningsbehov(spleisBehandlingId)
-                        if(sisteGodkjenningsbehov == null) {
+                        if (sisteGodkjenningsbehov == null) {
                             logg.warn("Finner ikke godkjenningsbehov for spleis behandlingid $spleisBehandlingId")
                         }
 

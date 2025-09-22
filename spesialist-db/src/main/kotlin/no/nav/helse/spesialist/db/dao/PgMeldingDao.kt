@@ -178,7 +178,7 @@ class PgMeldingDao private constructor(
                   AND data -> 'Godkjenning' ->> 'behandlingId' = :spleisBehandlingId::text
                 ORDER BY data ->> '@opprettet' DESC
                 LIMIT 1
-                """.trimMargin(),
+            """.trimMargin(),
             "spleisBehandlingId" to spleisBehandlingId,
         ).singleOrNull {
             fraMeldingtype(enumValueOf(it.string("type")), it.string("data")) as? Godkjenningsbehov
