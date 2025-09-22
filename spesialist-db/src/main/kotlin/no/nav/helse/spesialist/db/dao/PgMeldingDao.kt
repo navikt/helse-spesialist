@@ -164,6 +164,27 @@ class PgMeldingDao private constructor(
         return melding
     }
 
+    override fun finnSisteGodkjenningsbehov(spleisBehandlingId: UUID): Godkjenningsbehov? =
+        asSQL(
+            """
+                SELECT id, type, data 
+                FROM hendelse 
+                WHERE id IN (
+                    SELECT hendelse_ref 
+                    FROM vedtaksperiode_hendelse vh, behandling b 
+                    WHERE vh.vedtaksperiode_id = b.vedtaksperiode_id AND b.spleis_behandling_id = :spleisBehandlingId
+                ) 
+                  AND type = '$GODKJENNING'
+                  AND data -> 'Godkjenning' ->> 'behandlingId' = :spleisBehandlingId::text
+                ORDER BY data ->> '@opprettet' DESC
+                LIMIT 1
+                """.trimMargin(),
+            "spleisBehandlingId" to spleisBehandlingId,
+        ).singleOrNull {
+            fraMeldingtype(enumValueOf(it.string("type")), it.string("data")) as? Godkjenningsbehov
+                ?: error("Forventer at melding funnet med meldingId=${it.uuid("id")} er et godkjenningsbehov")
+        }
+
     override fun finn(id: UUID): Personmelding? =
         asSQL(
             "SELECT type, data FROM hendelse WHERE id = :id",

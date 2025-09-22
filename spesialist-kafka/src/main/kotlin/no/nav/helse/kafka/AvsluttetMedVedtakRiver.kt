@@ -13,6 +13,7 @@ import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.withMDC
 import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.melding.VedtakFattetMelding
+import no.nav.helse.modell.melding.VedtakFattetMelding.SelvstendigNæringsdrivendeSykepengegrunnlagsfakta.PensjonsgivendeInntekt
 import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode.Companion.finnBehandling
@@ -21,6 +22,7 @@ import no.nav.helse.modell.vedtak.Skjønnsfastsettingstype
 import no.nav.helse.modell.vedtak.Skjønnsfastsettingsårsak
 import no.nav.helse.modell.vedtak.Utfall
 import no.nav.helse.modell.vedtak.VedtakBegrunnelse
+import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
 import no.nav.helse.modell.vilkårsprøving.Inntekt
@@ -100,6 +102,13 @@ class AvsluttetMedVedtakRiver(
                             )
                         }
 
+
+                        val sisteGodkjenningsbehov: Godkjenningsbehov? =
+                            sessionContext.meldingDao.finnSisteGodkjenningsbehov(spleisBehandlingId)
+                        if(sisteGodkjenningsbehov == null) {
+                            logg.warn("Finner ikke godkjenningsbehov for spleis behandlingid $spleisBehandlingId")
+                        }
+
                         behandling.håndterVedtakFattet()
 
                         outbox.add(
@@ -107,6 +116,7 @@ class AvsluttetMedVedtakRiver(
                                 packet = packet,
                                 behandling = behandling,
                                 vedtaksperiode = vedtaksperiode,
+                                godkjenningsbehov = sisteGodkjenningsbehov,
                             ),
                         )
                     }
@@ -129,6 +139,7 @@ class AvsluttetMedVedtakRiver(
         packet: JsonMessage,
         behandling: LegacyBehandling,
         vedtaksperiode: Vedtaksperiode,
+        godkjenningsbehov: Godkjenningsbehov?,
     ): UtgåendeHendelse {
         val fastsatt = packet["sykepengegrunnlagsfakta"]["fastsatt"].asText()
 
@@ -187,6 +198,7 @@ class AvsluttetMedVedtakRiver(
                     byggSelvstendigNæringsdrivendeSykepengegrunnlagsfakta(
                         packet = packet,
                         tags = behandling.tags,
+                        sykepengegrunnlagsfakta = godkjenningsbehov!!.sykepengegrunnlagsfakta as Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende,
                     )
                 } else {
                     when (fastsatt) {
@@ -221,6 +233,7 @@ class AvsluttetMedVedtakRiver(
     private fun byggSelvstendigNæringsdrivendeSykepengegrunnlagsfakta(
         packet: JsonMessage,
         tags: List<String>,
+        sykepengegrunnlagsfakta: Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende,
     ) = VedtakFattetMelding.SelvstendigNæringsdrivendeSykepengegrunnlagsfakta(
         beregningsgrunnlag =
             BigDecimal(
@@ -231,6 +244,13 @@ class AvsluttetMedVedtakRiver(
             ),
         tags = tags.filter { it == TAG_6G_BEGRENSET }.toSet(),
         seksG = BigDecimal(packet["sykepengegrunnlagsfakta"]["6G"].asText()),
+        pensjonsgivendeInntekter =
+            sykepengegrunnlagsfakta.selvstendig.pensjonsgivendeInntekter.map { inntekt ->
+                PensjonsgivendeInntekt(
+                    årstall = inntekt.årstall,
+                    beløp = inntekt.beløp,
+                )
+            },
     )
 
     private fun byggFastsattEtterHovedregelSykepengegrunnlagsfakta(

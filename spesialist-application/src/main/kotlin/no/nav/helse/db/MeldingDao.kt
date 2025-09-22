@@ -7,6 +7,8 @@ import java.util.UUID
 interface MeldingDao {
     fun finnGodkjenningsbehov(meldingId: UUID): Godkjenningsbehov
 
+    fun finnSisteGodkjenningsbehov(spleisBehandlingId: UUID): Godkjenningsbehov?
+
     fun finn(id: UUID): Personmelding?
 
     fun lagre(melding: Personmelding)

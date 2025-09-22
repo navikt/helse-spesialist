@@ -1,7 +1,7 @@
 package no.nav.helse
 
 import no.nav.helse.modell.utbetaling.Utbetalingtype.UTBETALING
-import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta
+import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -48,14 +48,14 @@ object Testdata {
             inntektskilde = inntektskilde,
             orgnummereMedRelevanteArbeidsforhold = emptyList(),
             skjæringstidspunkt = 1 jan 2018,
-            sykepengegrunnlagsfakta = Sykepengegrunnlagsfakta.Spleis.Arbeidstaker.EtterHovedregel(
+            sykepengegrunnlagsfakta = Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidstaker.EtterHovedregel(
                 seksG = 6 * 118620.0,
                 sykepengegrunnlag = 123456.7,
                 arbeidsgivere = listOf(
-                    Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
+                    Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
                         organisasjonsnummer = organisasjonsnummer,
                         omregnetÅrsinntekt = 123456.7,
-                        inntektskilde = Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Arbeidsgiver
+                        inntektskilde = Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Arbeidsgiver
                     )
                 )
             ),

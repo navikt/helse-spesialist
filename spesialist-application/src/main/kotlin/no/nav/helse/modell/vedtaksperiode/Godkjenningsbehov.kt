@@ -1,6 +1,7 @@
 package no.nav.helse.modell.vedtaksperiode
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.github.navikt.tbd_libs.jackson.asLocalDateTime
 import no.nav.helse.db.ArbeidsforholdDao
 import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.AvviksvurderingRepository
@@ -55,22 +56,24 @@ import no.nav.helse.modell.risiko.VurderVurderingsmomenter
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.VurderEnhetUtland
-import no.nav.helse.modell.vedtak.Sykepengegrunnlagsfakta
 import no.nav.helse.modell.vergemal.VurderVergemålOgFullmakt
 import no.nav.helse.spesialist.application.ArbeidsgiverRepository
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
+import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 class Godkjenningsbehov(
     override val id: UUID,
+    val opprettet: LocalDateTime,
     private val fødselsnummer: String,
     val organisasjonsnummer: String,
     val yrkesaktivitetstype: Yrkesaktivitetstype,
     private val vedtaksperiodeId: UUID,
     private val spleisVedtaksperioder: List<SpleisVedtaksperiode>,
     private val utbetalingId: UUID,
-    private val spleisBehandlingId: UUID,
+    val spleisBehandlingId: UUID,
     private val vilkårsgrunnlagId: UUID,
     private val tags: List<String>,
     val periodeFom: LocalDate,
@@ -131,6 +134,7 @@ class Godkjenningsbehov(
             val yrkesaktivitetstype = jsonNode["yrkesaktivitetstype"].asEnum<Yrkesaktivitetstype>()
             return Godkjenningsbehov(
                 id = jsonNode["@id"].asUUID(),
+                opprettet = jsonNode["@opprettet"].asLocalDateTime(),
                 fødselsnummer = jsonNode["fødselsnummer"].asText(),
                 organisasjonsnummer = jsonNode["organisasjonsnummer"].asText(),
                 yrkesaktivitetstype = yrkesaktivitetstype,
@@ -157,7 +161,10 @@ class Godkjenningsbehov(
                         ?.map(JsonNode::asText)
                         .orEmpty(),
                 skjæringstidspunkt = godkjenning["skjæringstidspunkt"].asLocalDate(),
-                sykepengegrunnlagsfakta = godkjenning["sykepengegrunnlagsfakta"].asSykepengegrunnlagsfakta(yrkesaktivitetstype),
+                sykepengegrunnlagsfakta =
+                    godkjenning["sykepengegrunnlagsfakta"].asSykepengegrunnlagsfakta(
+                        yrkesaktivitetstype,
+                    ),
                 json = json,
             )
         }
@@ -175,21 +182,13 @@ class Godkjenningsbehov(
             if (yrkesaktivitetstype == Yrkesaktivitetstype.SELVSTENDIG) {
                 when (val fastsatt = this["fastsatt"].asText()) {
                     "EtterHovedregel" -> {
+                        check(this["arbeidsgivere"] == null || this["arbeidsgivere"].isEmpty) {
+                            "Selvstendig næringsdrivende har arbeidsgiver(e)"
+                        }
                         Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende(
                             seksG = this["6G"].asDouble(),
                             sykepengegrunnlag = this["sykepengegrunnlag"].asDouble(),
-                            selvstendig =
-                                this["selvstendig"]?.let {
-                                    Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende.Selvstendig(
-                                        beregningsgrunnlag = it["beregningsgrunnlag"].asBigDecimal(),
-                                    )
-                                }
-                                    // TODO: Midlertidig bakoverkompatibilitet til Spleis har merget sin branch om dette
-                                    ?: this["arbeidsgivere"].first { it["arbeidsgiver"].asText() == "SELVSTENDIG" }.let { arbeidsgiver ->
-                                        Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende.Selvstendig(
-                                            beregningsgrunnlag = arbeidsgiver["omregnetÅrsinntekt"].asBigDecimal(),
-                                        )
-                                    },
+                            selvstendig = this["selvstendig"].tilSelvstendig(),
                         )
                     }
 
@@ -232,6 +231,18 @@ class Godkjenningsbehov(
                 }
             }
 
+        private fun JsonNode.tilSelvstendig(): Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende.Selvstendig =
+            Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende.Selvstendig(
+                beregningsgrunnlag = this["beregningsgrunnlag"].asBigDecimal(),
+                pensjonsgivendeInntekter =
+                    this["pensjonsgivendeInntekter"].map { inntekt ->
+                        Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende.Selvstendig.PensjonsgivendeInntekt(
+                            årstall = inntekt["årstall"].asInt(),
+                            beløp = inntekt["beløp"].asBigDecimal(),
+                        )
+                    },
+            )
+
         private fun JsonNode.asInntektskilde(): Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde =
             when (val inntektskilde = asText()) {
                 "Arbeidsgiver" -> Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Arbeidsgiver
@@ -240,6 +251,71 @@ class Godkjenningsbehov(
                 "Sigrun" -> Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Sigrun
                 else -> error("Ukjent verdi for inntektskilde: \"$inntektskilde\"")
             }
+    }
+
+    sealed interface Sykepengegrunnlagsfakta {
+        data object Infotrygd : Sykepengegrunnlagsfakta
+
+        sealed class Spleis : Sykepengegrunnlagsfakta {
+            abstract val seksG: Double
+
+            sealed class Arbeidstaker : Spleis() {
+                abstract val arbeidsgivere: List<Arbeidsgiver>
+
+                data class EtterSkjønn(
+                    override val seksG: Double,
+                    override val arbeidsgivere: List<Arbeidsgiver.EtterSkjønn>,
+                ) : Arbeidstaker()
+
+                data class EtterHovedregel(
+                    override val seksG: Double,
+                    override val arbeidsgivere: List<Arbeidsgiver.EtterHovedregel>,
+                    val sykepengegrunnlag: Double,
+                ) : Arbeidstaker()
+            }
+
+            data class SelvstendigNæringsdrivende(
+                val sykepengegrunnlag: Double,
+                override val seksG: Double,
+                val selvstendig: Selvstendig,
+            ) : Spleis() {
+                data class Selvstendig(
+                    val beregningsgrunnlag: BigDecimal,
+                    val pensjonsgivendeInntekter: List<PensjonsgivendeInntekt>,
+                ) {
+                    data class PensjonsgivendeInntekt(
+                        val årstall: Int,
+                        val beløp: BigDecimal,
+                    )
+                }
+            }
+
+            sealed interface Arbeidsgiver {
+                val organisasjonsnummer: String
+                val omregnetÅrsinntekt: Double
+                val inntektskilde: Inntektskilde
+
+                data class EtterSkjønn(
+                    override val organisasjonsnummer: String,
+                    override val omregnetÅrsinntekt: Double,
+                    override val inntektskilde: Inntektskilde,
+                    val skjønnsfastsatt: Double,
+                ) : Arbeidsgiver
+
+                data class EtterHovedregel(
+                    override val organisasjonsnummer: String,
+                    override val omregnetÅrsinntekt: Double,
+                    override val inntektskilde: Inntektskilde,
+                ) : Arbeidsgiver
+
+                enum class Inntektskilde {
+                    Arbeidsgiver,
+                    AOrdningen,
+                    Saksbehandler,
+                    Sigrun,
+                }
+            }
+        }
     }
 }
 

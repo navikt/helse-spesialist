@@ -31,4 +31,5 @@ interface VedtakDao {
     )
 
     fun lagreOpprinneligSøknadsdato(vedtaksperiodeId: UUID)
+
 }

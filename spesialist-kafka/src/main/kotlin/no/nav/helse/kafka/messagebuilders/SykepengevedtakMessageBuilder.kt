@@ -85,6 +85,13 @@ private fun VedtakFattetMelding.SelvstendigNæringsdrivendeSykepengegrunnlagsfak
         "selvstendig" to
             mapOf(
                 "beregningsgrunnlag" to beregningsgrunnlag,
+                "pensjonsgivendeInntekter" to
+                    pensjonsgivendeInntekter.map { inntekt ->
+                        mapOf(
+                            "årstall" to inntekt.årstall,
+                            "beløp" to inntekt.beløp,
+                        )
+                    },
             ),
     )
 

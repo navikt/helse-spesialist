@@ -137,8 +137,10 @@ class PgVedtakDao private constructor(
         }
 
     fun finnVedtakId(vedtaksperiodeId: UUID): Long? =
-        asSQL("SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId", "vedtaksperiodeId" to vedtaksperiodeId)
-            .singleOrNull {
-                it.long("id")
-            }
+        asSQL(
+            "SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId",
+            "vedtaksperiodeId" to vedtaksperiodeId,
+        ).singleOrNull {
+            it.long("id")
+        }
 }
