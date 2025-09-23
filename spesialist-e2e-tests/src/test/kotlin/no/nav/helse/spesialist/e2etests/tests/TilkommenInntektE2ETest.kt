@@ -698,7 +698,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         expectedSekvensnummer: Int,
         expectedNotatTilBeslutter: String
     ) {
-        assertEquals(expectedTypename, event["__typename"].asText())
+        assertEquals(expectedTypename, event["type"].asText())
 
         val metadata = event["metadata"]
         assertEquals(expectedSekvensnummer, metadata["sekvensnummer"].asInt())

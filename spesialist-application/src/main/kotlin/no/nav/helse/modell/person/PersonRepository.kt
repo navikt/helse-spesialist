@@ -5,4 +5,6 @@ interface PersonRepository {
         fødselsnummer: String,
         personScope: Person.() -> Unit,
     )
+
+    fun finnFødselsnumre(aktørId: String): List<String>
 }

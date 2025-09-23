@@ -16,6 +16,8 @@ import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingh√
 import no.nav.helse.spesialist.api.graphql.kobleOppApi
 import no.nav.helse.spesialist.api.graphql.lagSchemaMedResolversOgHandlers
 import no.nav.helse.spesialist.api.rest.OpphevStansController
+import no.nav.helse.spesialist.api.rest.RestHandler
+import no.nav.helse.spesialist.api.rest.TilkommenInntektController
 import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
@@ -69,6 +71,12 @@ class ApiModule(
             tilgangsgruppeUuider = tilgangsgruppeUuider,
         )
 
+    private val restHandler =
+        RestHandler(
+            sessionFactory = sessionFactory,
+            tilgangsgruppeUuider = tilgangsgruppeUuider,
+        )
+
     private val spesialistSchema =
         lagSchemaMedResolversOgHandlers(
             daos = daos,
@@ -100,6 +108,7 @@ class ApiModule(
             tilgangsgruppeUuider = tilgangsgruppeUuider,
             spesialistSchema = spesialistSchema,
             opphevStansController = OpphevStansController(saksbehandlerMediator),
+            tilkommenInntektController = TilkommenInntektController(restHandler),
         )
     }
 }

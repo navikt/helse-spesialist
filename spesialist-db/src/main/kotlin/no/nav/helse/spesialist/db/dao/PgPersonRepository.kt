@@ -10,9 +10,11 @@ import no.nav.helse.modell.person.PersonRepository
 import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.sikkerlogg
+import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
+import no.nav.helse.spesialist.db.HelseDao.Companion.list
 
 class PgPersonRepository(
-    session: Session,
+    private val session: Session,
     private val vedtaksperiodeRepository: VedtaksperiodeRepository,
     private val sykefraværstilfelleDao: SykefraværstilfelleDao,
     private val personDao: PersonDao,
@@ -74,4 +76,10 @@ class PgPersonRepository(
         val vedtaksperioderSomSkalLagres = finnEndredeVedtaksperioder(dtoFør, dtoEtter)
         vedtaksperiodeRepository.lagreVedtaksperioder(dtoEtter.fødselsnummer, vedtaksperioderSomSkalLagres)
     }
+
+    override fun finnFødselsnumre(aktørId: String): List<String> =
+        asSQL(
+            " SELECT fødselsnummer FROM person WHERE aktør_id = :aktor_id; ",
+            "aktor_id" to aktørId,
+        ).list(session) { it.string("fødselsnummer") }
 }

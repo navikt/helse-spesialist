@@ -57,6 +57,7 @@ import no.nav.helse.spesialist.api.graphql.query.TilkommenInntektQueryHandler
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.person.PersonService
 import no.nav.helse.spesialist.api.rest.OpphevStansController
+import no.nav.helse.spesialist.api.rest.TilkommenInntektController
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
 import no.nav.helse.spesialist.api.websockets.webSocketsApi
 import no.nav.helse.spesialist.application.Reservasjonshenter
@@ -72,6 +73,7 @@ fun kobleOppApi(
     tilgangsgruppeUuider: TilgangsgruppeUuider,
     spesialistSchema: SpesialistSchema,
     opphevStansController: OpphevStansController,
+    tilkommenInntektController: TilkommenInntektController,
 ) {
     ktorApplication.installPlugins()
     ktorApplication.azureAdAppAuthentication(apiModuleConfiguration)
@@ -99,6 +101,7 @@ fun kobleOppApi(
         route("api") {
             authenticate("oidc") {
                 opphevStansController.addToRoute(this)
+                tilkommenInntektController.addToRoute(this)
             }
         }
     }

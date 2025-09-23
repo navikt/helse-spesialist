@@ -33,6 +33,7 @@ data class ApiTilkommenInntektInput(
 
 @GraphQLName("TilkommenInntektEvent")
 sealed interface ApiTilkommenInntektEvent {
+    val type: ApiTilkommenInntektEventType
     val metadata: Metadata
 
     @GraphQLName("TilkommenInntektEventMetadata")
@@ -76,6 +77,14 @@ sealed interface ApiTilkommenInntektEvent {
     }
 }
 
+@GraphQLName("TilkommenInntektEventType")
+enum class ApiTilkommenInntektEventType {
+    TilkommenInntektOpprettetEvent,
+    TilkommenInntektEndretEvent,
+    TilkommenInntektFjernetEvent,
+    TilkommenInntektGjenopprettetEvent,
+}
+
 @GraphQLName("TilkommenInntektOpprettetEvent")
 data class ApiTilkommenInntektOpprettetEvent(
     override val metadata: ApiTilkommenInntektEvent.Metadata,
@@ -83,21 +92,29 @@ data class ApiTilkommenInntektOpprettetEvent(
     val periode: ApiDatoPeriode,
     val periodebelop: BigDecimal,
     val ekskluderteUkedager: List<LocalDate>,
-) : ApiTilkommenInntektEvent
+) : ApiTilkommenInntektEvent {
+    override val type: ApiTilkommenInntektEventType = ApiTilkommenInntektEventType.TilkommenInntektOpprettetEvent
+}
 
 @GraphQLName("TilkommenInntektEndretEvent")
 data class ApiTilkommenInntektEndretEvent(
     override val metadata: ApiTilkommenInntektEvent.Metadata,
     val endringer: ApiTilkommenInntektEvent.Endringer,
-) : ApiTilkommenInntektEvent
+) : ApiTilkommenInntektEvent {
+    override val type: ApiTilkommenInntektEventType = ApiTilkommenInntektEventType.TilkommenInntektEndretEvent
+}
 
 @GraphQLName("TilkommenInntektFjernetEvent")
 data class ApiTilkommenInntektFjernetEvent(
     override val metadata: ApiTilkommenInntektEvent.Metadata,
-) : ApiTilkommenInntektEvent
+) : ApiTilkommenInntektEvent {
+    override val type: ApiTilkommenInntektEventType = ApiTilkommenInntektEventType.TilkommenInntektFjernetEvent
+}
 
 @GraphQLName("TilkommenInntektGjenopprettetEvent")
 data class ApiTilkommenInntektGjenopprettetEvent(
     override val metadata: ApiTilkommenInntektEvent.Metadata,
     val endringer: ApiTilkommenInntektEvent.Endringer,
-) : ApiTilkommenInntektEvent
+) : ApiTilkommenInntektEvent {
+    override val type: ApiTilkommenInntektEventType = ApiTilkommenInntektEventType.TilkommenInntektGjenopprettetEvent
+}

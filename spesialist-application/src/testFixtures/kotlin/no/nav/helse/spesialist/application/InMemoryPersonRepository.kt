@@ -15,4 +15,7 @@ class InMemoryPersonRepository : PersonRepository {
         personer.firstOrNull { it.fødselsnummer == fødselsnummer }?.personScope()
             ?: logg.info("Person med fødselsnummer $fødselsnummer er ikke lagt til i testen")
     }
+
+    override fun finnFødselsnumre(aktørId: String) =
+        personer.filter { it.aktørId == aktørId }.map { it.fødselsnummer }
 }

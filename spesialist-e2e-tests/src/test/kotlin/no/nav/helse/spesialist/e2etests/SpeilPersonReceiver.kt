@@ -8,6 +8,7 @@ import io.ktor.client.engine.apache.Apache
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.accept
 import io.ktor.client.request.bearerAuth
+import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
@@ -252,16 +253,8 @@ class SpeilPersonReceiver(
         assertEquals(expected, person["personinfo"]["adressebeskyttelse"].asText())
     }
 
-    fun hentTilkomneInntektskilder(): JsonNode {
-        val tilkomneInntektskilderResponse = callGraphQL(
-            operationName = "TilkomneInntektskilder",
-            variables = mapOf(
-                "aktorId" to testContext.person.aktørId,
-            )
-        )
-        return tilkomneInntektskilderResponse["data"]["tilkomneInntektskilder"].takeUnless { it.isNull }
-            ?: error("Fikk ikke data.tilkomneInntektskilder i respons fra FetchPerson. Responsen var: ${tilkomneInntektskilderResponse.toPrettyString()}")
-    }
+    fun hentTilkomneInntektskilder(): JsonNode =
+        callHttpGet("api/personer/${testContext.person.aktørId}/tilkomne-inntekter/")
 
     private fun fetchPerson(aktørId: String): JsonNode {
         val fetchPersonResponse = callGraphQL(
@@ -297,6 +290,18 @@ class SpeilPersonReceiver(
         return objectMapper.readTree(bodyAsText).also {
             assertNull(it["errors"]) { "Fikk feil i GraphQL-response" }
         }
+    }
+
+    private fun callHttpGet(relativeUrl: String): JsonNode {
+        val (status, bodyAsText) = runBlocking {
+            httpClient.get("http://localhost:${E2ETestApplikasjon.port}/$relativeUrl") {
+                accept(ContentType.Application.Json)
+                bearerAuth(bearerAuthToken)
+            }.let { it.status to it.bodyAsText() }
+        }
+        logg.info("Respons fra HTTP GET: $bodyAsText")
+        assertTrue(status.isSuccess()) { "Fikk HTTP-feilkode ${status.value} fra HTTP GET" }
+        return objectMapper.readTree(bodyAsText)
     }
 
     companion object {

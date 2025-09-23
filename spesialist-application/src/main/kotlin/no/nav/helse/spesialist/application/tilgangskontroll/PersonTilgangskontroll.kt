@@ -1,5 +1,7 @@
 package no.nav.helse.spesialist.application.tilgangskontroll
 
+import no.nav.helse.db.EgenAnsattDao
+import no.nav.helse.db.PersonDao
 import no.nav.helse.db.api.EgenAnsattApiDao
 import no.nav.helse.db.api.PersonApiDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
@@ -18,6 +20,31 @@ object PersonTilgangskontroll {
         ) &&
             harTilgangTilAdressebeskyttelse(
                 adressebeskyttelse = personApiDao.hentAdressebeskyttelse(fødselsnummer),
+                tilgangsgrupper = tilgangsgrupper,
+            )
+
+    fun harTilgangTilPerson(
+        tilgangsgrupper: Set<Tilgangsgruppe>,
+        fødselsnummer: String,
+        egenAnsattDao: EgenAnsattDao,
+        personDao: PersonDao,
+    ): Boolean =
+        harTilgangTilEgenAnsattStatus(
+            erEgenAnsatt = egenAnsattDao.erEgenAnsatt(fødselsnummer),
+            tilgangsgrupper = tilgangsgrupper,
+        ) &&
+            harTilgangTilAdressebeskyttelse(
+                adressebeskyttelse =
+                    personDao.finnAdressebeskyttelse(fødselsnummer).let {
+                        when (it) {
+                            no.nav.helse.modell.person.Adressebeskyttelse.Ugradert -> Adressebeskyttelse.Ugradert
+                            no.nav.helse.modell.person.Adressebeskyttelse.Fortrolig -> Adressebeskyttelse.Fortrolig
+                            no.nav.helse.modell.person.Adressebeskyttelse.StrengtFortrolig -> Adressebeskyttelse.StrengtFortrolig
+                            no.nav.helse.modell.person.Adressebeskyttelse.StrengtFortroligUtland -> Adressebeskyttelse.StrengtFortroligUtland
+                            no.nav.helse.modell.person.Adressebeskyttelse.Ukjent -> Adressebeskyttelse.Ukjent
+                            null -> null
+                        }
+                    },
                 tilgangsgrupper = tilgangsgrupper,
             )
 
