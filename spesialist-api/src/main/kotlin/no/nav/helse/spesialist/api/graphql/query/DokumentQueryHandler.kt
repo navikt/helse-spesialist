@@ -362,12 +362,11 @@ class DokumentQueryHandler(
         fnr: String,
         env: DataFetchingEnvironment,
     ): Boolean =
-        !PersonTilgangskontroll(
-            egenAnsattApiDao = egenAnsattApiDao,
-            personApiDao = personApiDao,
-        ).harTilgangTilPerson(
+        !PersonTilgangskontroll.harTilgangTilPerson(
             tilgangsgrupper = env.graphQlContext.get(ContextValues.TILGANGSGRUPPER),
             fødselsnummer = fnr,
+            egenAnsattApiDao = egenAnsattApiDao,
+            personApiDao = personApiDao,
         )
 }
 

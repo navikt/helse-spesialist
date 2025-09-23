@@ -53,12 +53,11 @@ class TilkommenInntektQueryHandler(
         tilgangsgrupper: Set<Tilgangsgruppe>,
     ): DataFetcherResult<List<ApiTilkommenInntektskilde>> {
         fødselsnumre.forEach { fødselsnummer ->
-            if (!PersonTilgangskontroll(
-                    egenAnsattApiDao = daos.egenAnsattApiDao,
-                    personApiDao = daos.personApiDao,
-                ).harTilgangTilPerson(
+            if (!PersonTilgangskontroll.harTilgangTilPerson(
                     tilgangsgrupper = tilgangsgrupper,
                     fødselsnummer = fødselsnummer,
+                    egenAnsattApiDao = daos.egenAnsattApiDao,
+                    personApiDao = daos.personApiDao,
                 )
             ) {
                 sikkerlogg.info("Saksbehandler mangler nødvendig tilgang til fødselsnummer $fødselsnummer")

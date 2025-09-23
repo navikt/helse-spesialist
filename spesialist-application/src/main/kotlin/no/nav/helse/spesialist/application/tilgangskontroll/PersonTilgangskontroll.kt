@@ -5,13 +5,12 @@ import no.nav.helse.db.api.PersonApiDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 
-class PersonTilgangskontroll(
-    private val egenAnsattApiDao: EgenAnsattApiDao,
-    private val personApiDao: PersonApiDao,
-) {
+object PersonTilgangskontroll {
     fun harTilgangTilPerson(
         tilgangsgrupper: Set<Tilgangsgruppe>,
         fødselsnummer: String,
+        egenAnsattApiDao: EgenAnsattApiDao,
+        personApiDao: PersonApiDao,
     ): Boolean =
         harTilgangTilEgenAnsattStatus(
             erEgenAnsatt = egenAnsattApiDao.erEgenAnsatt(fødselsnummer),

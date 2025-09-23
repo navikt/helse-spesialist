@@ -118,22 +118,23 @@ class PersonTilgangskontrollTest {
     }
 
     private fun harTilgangTilPersonGittGrupper(fødselsnummer: String, tilgangsgrupper: Set<Tilgangsgruppe>) =
-        tilgangskontroll.harTilgangTilPerson(
+        PersonTilgangskontroll.harTilgangTilPerson(
             tilgangsgrupper = tilgangsgrupper,
-            fødselsnummer = fødselsnummer
+            fødselsnummer = fødselsnummer,
+            egenAnsattApiDao = egenAnsattApiDao,
+            personApiDao = personApiDao
         )
 
     private val personErEgenAnsattMap = mutableMapOf<String, Boolean?>()
     private val personAdressebeskyttelseMap = mutableMapOf<String, Adressebeskyttelse?>()
 
-    private val tilgangskontroll = PersonTilgangskontroll(
-        egenAnsattApiDao = object : EgenAnsattApiDao {
-            override fun erEgenAnsatt(fødselsnummer: String) =
-                personErEgenAnsattMap[fødselsnummer]
-        },
-        personApiDao = object : PartialPersonApiDao {
-            override fun hentAdressebeskyttelse(fødselsnummer: String) =
-                personAdressebeskyttelseMap[fødselsnummer]
-        }
-    )
+    private val egenAnsattApiDao = object : EgenAnsattApiDao {
+        override fun erEgenAnsatt(fødselsnummer: String) =
+            personErEgenAnsattMap[fødselsnummer]
+    }
+
+    private val personApiDao = object : PartialPersonApiDao {
+        override fun hentAdressebeskyttelse(fødselsnummer: String) =
+            personAdressebeskyttelseMap[fødselsnummer]
+    }
 }

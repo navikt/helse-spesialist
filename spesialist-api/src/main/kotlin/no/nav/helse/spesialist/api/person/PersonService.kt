@@ -98,12 +98,11 @@ class PersonService(
 
             return FetchPersonResult.Feil.IkkeKlarTilVisning(aktørId)
         }
-        if (!PersonTilgangskontroll(
-                egenAnsattApiDao = egenAnsattApiDao,
-                personApiDao = personApiDao,
-            ).harTilgangTilPerson(
+        if (!PersonTilgangskontroll.harTilgangTilPerson(
                 tilgangsgrupper = tilgangsgrupper,
                 fødselsnummer = fødselsnummer,
+                egenAnsattApiDao = egenAnsattApiDao,
+                personApiDao = personApiDao,
             )
         ) {
             return FetchPersonResult.Feil.ManglerTilgang
