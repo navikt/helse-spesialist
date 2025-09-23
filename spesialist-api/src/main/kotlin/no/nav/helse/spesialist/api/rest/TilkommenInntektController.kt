@@ -27,7 +27,7 @@ class TilkommenInntektController(
     private val handler: RestHandler,
 ) {
     fun addToRoute(route: Route) {
-        route.route("personer/{aktørId}/tilkomne-inntekter/") {
+        route.route("personer/{aktørId}/tilkomne-inntekter") {
             get {
                 handler.handleGet(call) { parametre, saksbehandler, tilgangsgrupper, transaksjon ->
                     val aktørId = parametre.getRequired("aktørId")

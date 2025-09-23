@@ -254,7 +254,7 @@ class SpeilPersonReceiver(
     }
 
     fun hentTilkomneInntektskilder(): JsonNode =
-        callHttpGet("api/personer/${testContext.person.aktørId}/tilkomne-inntekter/")
+        callHttpGet("api/personer/${testContext.person.aktørId}/tilkomne-inntekter")
 
     private fun fetchPerson(aktørId: String): JsonNode {
         val fetchPersonResponse = callGraphQL(
