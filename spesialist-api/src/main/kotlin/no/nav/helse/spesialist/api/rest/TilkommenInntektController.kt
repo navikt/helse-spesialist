@@ -2,15 +2,18 @@ package no.nav.helse.spesialist.api.rest
 
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
+import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.helse.db.SessionContext
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand
+import no.nav.helse.spesialist.api.graphql.mutation.TilkommenInntektMutationHandler
 import no.nav.helse.spesialist.api.graphql.schema.ApiDatoPeriode
 import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntekt
 import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektEndretEvent
 import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektEvent
 import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektFjernetEvent
 import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektGjenopprettetEvent
+import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektInput
 import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektOpprettetEvent
 import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektskilde
 import no.nav.helse.spesialist.api.rest.RestHandler.Companion.getRequired
@@ -25,8 +28,37 @@ import java.time.ZoneId
 
 class TilkommenInntektController(
     private val handler: RestHandler,
+    private val tilkommenInntektMutationHandler: TilkommenInntektMutationHandler,
 ) {
+    data class LeggTilTilkommenInntektInput(
+        val fodselsnummer: String,
+        val verdier: ApiTilkommenInntektInput,
+        val notatTilBeslutter: String,
+    )
+
     fun addToRoute(route: Route) {
+        route.post("tidligere-mutations/tilkommen-inntekt/legg-til") {
+            handler.handlePost(
+                call = call,
+                requestType = LeggTilTilkommenInntektInput::class,
+            ) { _, request, saksbehandler, tilgangsgrupper, transaksjon ->
+                handler.kontrollerTilgangTilPerson(
+                    fødselsnummer = request.fodselsnummer,
+                    saksbehandler = saksbehandler,
+                    tilgangsgrupper = tilgangsgrupper,
+                    transaksjon = transaksjon,
+                    feilSupplier = ::HttpForbidden,
+                )
+
+                tilkommenInntektMutationHandler.leggTilTilkommenInntekt(
+                    fodselsnummer = request.fodselsnummer,
+                    verdier = request.verdier,
+                    notatTilBeslutter = request.notatTilBeslutter,
+                    saksbehandler = saksbehandler,
+                    session = transaksjon,
+                )
+            }
+        }
         route.route("personer/{aktørId}/tilkomne-inntektskilder") {
             get {
                 handler.handleGet(call) { parametre, saksbehandler, tilgangsgrupper, transaksjon ->

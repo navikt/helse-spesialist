@@ -15,6 +15,7 @@ import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlinghåndtererImpl
 import no.nav.helse.spesialist.api.graphql.kobleOppApi
 import no.nav.helse.spesialist.api.graphql.lagSchemaMedResolversOgHandlers
+import no.nav.helse.spesialist.api.graphql.mutation.TilkommenInntektMutationHandler
 import no.nav.helse.spesialist.api.rest.OpphevStansController
 import no.nav.helse.spesialist.api.rest.RestHandler
 import no.nav.helse.spesialist.api.rest.TilkommenInntektController
@@ -108,7 +109,11 @@ class ApiModule(
             tilgangsgruppeUuider = tilgangsgruppeUuider,
             spesialistSchema = spesialistSchema,
             opphevStansController = OpphevStansController(saksbehandlerMediator),
-            tilkommenInntektController = TilkommenInntektController(restHandler),
+            tilkommenInntektController =
+                TilkommenInntektController(
+                    handler = restHandler,
+                    tilkommenInntektMutationHandler = spesialistSchema.mutationHandlers.tilkommenInntekt as TilkommenInntektMutationHandler,
+                ),
         )
     }
 }

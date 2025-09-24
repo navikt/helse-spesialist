@@ -81,9 +81,9 @@ class SpeilPersonReceiver(
         ekskluderteUkedager: Collection<LocalDate>,
         notatTilBeslutter: String
     ): UUID =
-        callGraphQL(
-            operationName = "LeggTilTilkommenInntekt",
-            variables = mapOf(
+        callHttpPost(
+            relativeUrl = "api/tidligere-mutations/tilkommen-inntekt/legg-til",
+            request = mapOf(
                 "fodselsnummer" to testContext.person.fødselsnummer,
                 "verdier" to mapOf(
                     "organisasjonsnummer" to organisasjonsnummer,
@@ -96,11 +96,7 @@ class SpeilPersonReceiver(
                 ),
                 "notatTilBeslutter" to notatTilBeslutter
             )
-        ).also {
-            if (it["data"].isMissingOrNull()) {
-                error("Forventer at mutation ikke feiler, fikk: $it")
-            }
-        }["data"]["leggTilTilkommenInntekt"]["tilkommenInntektId"].asUUID()
+        )["tilkommenInntektId"].asUUID()
 
     fun saksbehandlerEndrerTilkommenInntekt(
         tilkommenInntektId: UUID,
@@ -301,6 +297,20 @@ class SpeilPersonReceiver(
         }
         logg.info("Respons fra HTTP GET: $bodyAsText")
         assertTrue(status.isSuccess()) { "Fikk HTTP-feilkode ${status.value} fra HTTP GET" }
+        return objectMapper.readTree(bodyAsText)
+    }
+
+    private fun callHttpPost(relativeUrl: String, request: Any): JsonNode {
+        val (status, bodyAsText) = runBlocking {
+            httpClient.post("http://localhost:${E2ETestApplikasjon.port}/$relativeUrl") {
+                bearerAuth(bearerAuthToken)
+                accept(ContentType.Application.Json)
+                contentType(ContentType.Application.Json)
+                setBody(request)
+            }.let { it.status to it.bodyAsText() }
+        }
+        logg.info("Respons fra HTTP POST: $bodyAsText")
+        assertTrue(status.isSuccess()) { "Fikk HTTP-feilkode ${status.value} fra HTTP POST" }
         return objectMapper.readTree(bodyAsText)
     }
 

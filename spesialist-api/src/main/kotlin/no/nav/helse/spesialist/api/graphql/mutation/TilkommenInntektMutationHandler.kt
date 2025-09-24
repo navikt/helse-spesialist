@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.api.graphql.mutation
 import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import no.nav.helse.MeldingPubliserer
+import no.nav.helse.db.SessionContext
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
@@ -27,39 +28,57 @@ class TilkommenInntektMutationHandler(
         env: DataFetchingEnvironment,
     ): DataFetcherResult<LeggTilTilkommenInntektResponse> =
         sessionFactory.transactionalSessionScope { session ->
-            val periode = verdier.periode.fom tilOgMed verdier.periode.tom
-            TilkommenInntektPeriodeValidator.validerPeriode(
-                periode = periode,
-                organisasjonsnummer = verdier.organisasjonsnummer,
-                andreTilkomneInntekter = session.tilkommenInntektRepository.finnAlleForFødselsnummer(fodselsnummer),
-                vedtaksperioder = session.vedtaksperiodeRepository.finnVedtaksperioder(fodselsnummer),
-            )
-
-            val tilkommenInntekt =
-                TilkommenInntekt.ny(
-                    fødselsnummer = fodselsnummer,
-                    saksbehandlerIdent = env.graphQlContext.get<Saksbehandler>(SAKSBEHANDLER).ident,
+            byggRespons(
+                leggTilTilkommenInntekt(
+                    fodselsnummer = fodselsnummer,
+                    verdier = verdier,
                     notatTilBeslutter = notatTilBeslutter,
-                    totrinnsvurderingId =
-                        finnEllerOpprettTotrinnsvurdering(
-                            fodselsnummer = fodselsnummer,
-                            totrinnsvurderingRepository = session.totrinnsvurderingRepository,
-                        ).id(),
-                    organisasjonsnummer = verdier.organisasjonsnummer,
-                    periode = periode,
-                    periodebeløp = verdier.periodebelop,
-                    ekskluderteUkedager = verdier.ekskluderteUkedager.toSet(),
-                )
-            session.tilkommenInntektRepository.lagre(tilkommenInntekt)
-
-            meldingPubliserer.publiser(
-                fødselsnummer = tilkommenInntekt.fødselsnummer,
-                hendelse = InntektsendringerEventBygger.forNy(tilkommenInntekt),
-                årsak = "tilkommen inntekt lagt til",
+                    saksbehandler = env.graphQlContext.get(SAKSBEHANDLER),
+                    session = session,
+                ),
             )
-
-            byggRespons(LeggTilTilkommenInntektResponse(tilkommenInntekt.id().value))
         }
+
+    fun leggTilTilkommenInntekt(
+        fodselsnummer: String,
+        verdier: ApiTilkommenInntektInput,
+        notatTilBeslutter: String,
+        saksbehandler: Saksbehandler,
+        session: SessionContext,
+    ): LeggTilTilkommenInntektResponse {
+        val periode = verdier.periode.fom tilOgMed verdier.periode.tom
+        TilkommenInntektPeriodeValidator.validerPeriode(
+            periode = periode,
+            organisasjonsnummer = verdier.organisasjonsnummer,
+            andreTilkomneInntekter = session.tilkommenInntektRepository.finnAlleForFødselsnummer(fodselsnummer),
+            vedtaksperioder = session.vedtaksperiodeRepository.finnVedtaksperioder(fodselsnummer),
+        )
+
+        val tilkommenInntekt =
+            TilkommenInntekt.ny(
+                fødselsnummer = fodselsnummer,
+                saksbehandlerIdent = saksbehandler.ident,
+                notatTilBeslutter = notatTilBeslutter,
+                totrinnsvurderingId =
+                    finnEllerOpprettTotrinnsvurdering(
+                        fodselsnummer = fodselsnummer,
+                        totrinnsvurderingRepository = session.totrinnsvurderingRepository,
+                    ).id(),
+                organisasjonsnummer = verdier.organisasjonsnummer,
+                periode = periode,
+                periodebeløp = verdier.periodebelop,
+                ekskluderteUkedager = verdier.ekskluderteUkedager.toSet(),
+            )
+        session.tilkommenInntektRepository.lagre(tilkommenInntekt)
+
+        meldingPubliserer.publiser(
+            fødselsnummer = tilkommenInntekt.fødselsnummer,
+            hendelse = InntektsendringerEventBygger.forNy(tilkommenInntekt),
+            årsak = "tilkommen inntekt lagt til",
+        )
+
+        return LeggTilTilkommenInntektResponse(tilkommenInntekt.id().value)
+    }
 
     override fun endreTilkommenInntekt(
         tilkommenInntektId: UUID,

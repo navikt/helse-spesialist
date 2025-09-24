@@ -8,4 +8,6 @@ abstract class HttpException(
 
 class HttpUnauthorized : HttpException(HttpStatusCode.Unauthorized)
 
+class HttpForbidden : HttpException(HttpStatusCode.Forbidden)
+
 class HttpNotFound : HttpException(HttpStatusCode.NotFound)

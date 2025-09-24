@@ -49,8 +49,8 @@ import no.nav.helse.spesialist.api.graphql.query.TilkommenInntektQuery
 import no.nav.helse.spesialist.api.graphql.query.TilkommenInntektQuerySchema
 
 class SpesialistSchema(
-    private val queryHandlers: QueryHandlers,
-    private val mutationHandlers: MutationHandlers,
+    val queryHandlers: QueryHandlers,
+    val mutationHandlers: MutationHandlers,
 ) {
     class QueryHandlers(
         val person: PersonQuerySchema,
