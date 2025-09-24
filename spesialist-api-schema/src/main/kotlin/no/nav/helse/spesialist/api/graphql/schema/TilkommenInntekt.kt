@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
+import com.expediagroup.graphql.generator.annotations.GraphQLIgnore
 import com.expediagroup.graphql.generator.annotations.GraphQLName
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -33,7 +34,10 @@ data class ApiTilkommenInntektInput(
 
 @GraphQLName("TilkommenInntektEvent")
 sealed interface ApiTilkommenInntektEvent {
-    val type: ApiTilkommenInntektEventType
+    @GraphQLIgnore
+    @Suppress("ktlint:standard:backing-property-naming")
+    val __typename: String
+        get() = this::class.java.simpleName.removePrefix("Api")
     val metadata: Metadata
 
     @GraphQLName("TilkommenInntektEventMetadata")
@@ -77,14 +81,6 @@ sealed interface ApiTilkommenInntektEvent {
     }
 }
 
-@GraphQLName("TilkommenInntektEventType")
-enum class ApiTilkommenInntektEventType {
-    TilkommenInntektOpprettetEvent,
-    TilkommenInntektEndretEvent,
-    TilkommenInntektFjernetEvent,
-    TilkommenInntektGjenopprettetEvent,
-}
-
 @GraphQLName("TilkommenInntektOpprettetEvent")
 data class ApiTilkommenInntektOpprettetEvent(
     override val metadata: ApiTilkommenInntektEvent.Metadata,
@@ -92,29 +88,21 @@ data class ApiTilkommenInntektOpprettetEvent(
     val periode: ApiDatoPeriode,
     val periodebelop: BigDecimal,
     val ekskluderteUkedager: List<LocalDate>,
-) : ApiTilkommenInntektEvent {
-    override val type: ApiTilkommenInntektEventType = ApiTilkommenInntektEventType.TilkommenInntektOpprettetEvent
-}
+) : ApiTilkommenInntektEvent
 
 @GraphQLName("TilkommenInntektEndretEvent")
 data class ApiTilkommenInntektEndretEvent(
     override val metadata: ApiTilkommenInntektEvent.Metadata,
     val endringer: ApiTilkommenInntektEvent.Endringer,
-) : ApiTilkommenInntektEvent {
-    override val type: ApiTilkommenInntektEventType = ApiTilkommenInntektEventType.TilkommenInntektEndretEvent
-}
+) : ApiTilkommenInntektEvent
 
 @GraphQLName("TilkommenInntektFjernetEvent")
 data class ApiTilkommenInntektFjernetEvent(
     override val metadata: ApiTilkommenInntektEvent.Metadata,
-) : ApiTilkommenInntektEvent {
-    override val type: ApiTilkommenInntektEventType = ApiTilkommenInntektEventType.TilkommenInntektFjernetEvent
-}
+) : ApiTilkommenInntektEvent
 
 @GraphQLName("TilkommenInntektGjenopprettetEvent")
 data class ApiTilkommenInntektGjenopprettetEvent(
     override val metadata: ApiTilkommenInntektEvent.Metadata,
     val endringer: ApiTilkommenInntektEvent.Endringer,
-) : ApiTilkommenInntektEvent {
-    override val type: ApiTilkommenInntektEventType = ApiTilkommenInntektEventType.TilkommenInntektGjenopprettetEvent
-}
+) : ApiTilkommenInntektEvent
