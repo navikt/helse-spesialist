@@ -14,6 +14,7 @@ import java.util.UUID
 internal class PgVedtakBegrunnelseDaoTest : AbstractDBIntegrationTest() {
     private val saksbehandler = nyLegacySaksbehandler()
     private val dao = daos.vedtakBegrunnelseDao
+    private val generasjonDao = daos.generasjonDao
 
     @Test
     fun `lagrer og finner vedtaksbegrunnelse`() {
@@ -27,14 +28,12 @@ internal class PgVedtakBegrunnelseDaoTest : AbstractDBIntegrationTest() {
             saksbehandlerOid = saksbehandler.saksbehandler.id().value,
         )
 
-        val generasjonId = finnGenerasjonId(oppgave.vedtaksperiodeId)
+        val behandlingId = finnBehandlingId(oppgave.vedtaksperiodeId)
 
-        val lagretVedtakBegrunnelse = dao.finnVedtakBegrunnelse(oppgave.vedtaksperiodeId, generasjonId)
-        assertNotNull(lagretVedtakBegrunnelse)
-        with(lagretVedtakBegrunnelse!!) {
-            assertEquals(Utfall.AVSLAG, utfall)
-            assertEquals("En individuell begrunelse", begrunnelse)
-        }
+        val behandlinger = generasjonDao.finnGenerasjoner(oppgave.vedtaksperiodeId)
+        val lagretVedtakBegrunnelse = behandlinger.first { it.id == behandlingId }
+        assertEquals(Utfall.AVSLAG, lagretVedtakBegrunnelse.vedtakBegrunnelse?.utfall)
+        assertEquals("En individuell begrunelse", lagretVedtakBegrunnelse.vedtakBegrunnelse?.begrunnelse)
     }
 
     @Test
@@ -133,4 +132,10 @@ internal class PgVedtakBegrunnelseDaoTest : AbstractDBIntegrationTest() {
             "SELECT id FROM behandling WHERE vedtaksperiode_id = :vedtaksperiodeId",
             "vedtaksperiodeId" to vedtaksperiodeId
         ) { it.long("id") }
+
+    private fun finnBehandlingId(vedtaksperiodeId: UUID): UUID =
+        dbQuery.single(
+            "SELECT unik_id FROM behandling WHERE vedtaksperiode_id = :vedtaksperiodeId",
+            "vedtaksperiodeId" to vedtaksperiodeId
+        ) { it.uuid("unik_id") }
 }

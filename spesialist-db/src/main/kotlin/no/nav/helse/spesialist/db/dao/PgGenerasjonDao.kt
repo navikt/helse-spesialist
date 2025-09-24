@@ -1,10 +1,16 @@
 package no.nav.helse.spesialist.db.dao
 
+import kotliquery.Row
 import kotliquery.Session
 import no.nav.helse.db.GenerasjonDao
+import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
+import no.nav.helse.mediator.asLocalDateTime
+import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
 import no.nav.helse.modell.person.vedtaksperiode.VarselDto
 import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
+import no.nav.helse.modell.vedtak.Utfall
+import no.nav.helse.modell.vedtak.VedtakBegrunnelse
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQLWithQuestionMarks
@@ -12,6 +18,7 @@ import no.nav.helse.spesialist.db.HelseDao.Companion.somDbArray
 import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
+import no.nav.helse.spesialist.db.objectMapper
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -27,13 +34,25 @@ class PgGenerasjonDao private constructor(
     override fun finnGenerasjoner(vedtaksperiodeId: UUID): List<BehandlingDto> =
         asSQL(
             """
-            SELECT id, unik_id, vedtaksperiode_id, utbetaling_id, spleis_behandling_id, skjæringstidspunkt, fom, tom, tilstand, tags, yrkesaktivitetstype
-            FROM behandling 
-            WHERE vedtaksperiode_id = :vedtaksperiode_id ORDER BY id;
-        """,
+            WITH behandlinger AS (
+                SELECT b.id, b.unik_id, b.vedtaksperiode_id, utbetaling_id, spleis_behandling_id, skjæringstidspunkt, fom, tom, tilstand, tags, yrkesaktivitetstype, json_agg(DISTINCT to_jsonb(sv.*)) FILTER (WHERE sv.id IS NOT NULL) AS varsler
+                FROM behandling b
+                LEFT JOIN selve_varsel sv ON b.id = sv.generasjon_ref
+                WHERE b.vedtaksperiode_id = :vedtaksperiode_id
+                GROUP BY b.id
+                ORDER BY b.id
+            ), begrunnelser AS (
+                SELECT b.type, b.tekst, vb.generasjon_ref FROM vedtak_begrunnelse vb
+                LEFT JOIN begrunnelse b ON b.id = vb.begrunnelse_ref
+                WHERE vb.vedtaksperiode_id = :vedtaksperiode_id AND vb.invalidert = false
+                ORDER BY vb.opprettet DESC LIMIT 1
+            )
+            SELECT bh.*, beg.*
+            FROM behandlinger AS bh
+            LEFT JOIN begrunnelser beg ON beg.generasjon_ref = bh.id
+            """,
             "vedtaksperiode_id" to vedtaksperiodeId,
         ).list { row ->
-            val generasjonRef = row.long("id")
             BehandlingDto(
                 id = row.uuid("unik_id"),
                 vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
@@ -44,10 +63,23 @@ class PgGenerasjonDao private constructor(
                 tom = row.localDate("tom"),
                 tilstand = enumValueOf(row.string("tilstand")),
                 tags = row.array<String>("tags").toList(),
-                vedtakBegrunnelse = PgVedtakBegrunnelseDao(queryRunner).finnVedtakBegrunnelse(vedtaksperiodeId, generasjonRef),
-                varsler = finnVarsler(generasjonRef),
+                vedtakBegrunnelse = row.mapVedtaksbegrunnelse(),
+                varsler = row.toDto(),
                 yrkesaktivitetstype = row.stringOrNull("yrkesaktivitetstype")?.let { Yrkesaktivitetstype.valueOf(it) } ?: Yrkesaktivitetstype.ARBEIDSTAKER,
             )
+        }
+
+    fun Row.mapVedtaksbegrunnelse(): VedtakBegrunnelse? {
+        val begrunnelse = this.stringOrNull("tekst") ?: return null
+        val type = enumValueOf<VedtakBegrunnelseTypeFraDatabase>(this.stringOrNull("type") ?: return null)
+        return VedtakBegrunnelse(utfall = type.toDomain(), begrunnelse = begrunnelse)
+    }
+
+    fun VedtakBegrunnelseTypeFraDatabase.toDomain() =
+        when (this) {
+            VedtakBegrunnelseTypeFraDatabase.AVSLAG -> Utfall.AVSLAG
+            VedtakBegrunnelseTypeFraDatabase.DELVIS_INNVILGELSE -> Utfall.DELVIS_INNVILGELSE
+            VedtakBegrunnelseTypeFraDatabase.INNVILGELSE -> Utfall.INNVILGELSE
         }
 
     override fun lagreGenerasjon(behandlingDto: BehandlingDto) {
@@ -119,25 +151,15 @@ class PgGenerasjonDao private constructor(
         ).update()
     }
 
-    private fun finnVarsler(generasjonRef: Long): List<VarselDto> =
-        asSQL(
-            """
-            SELECT 
-            unik_id, 
-            kode, 
-            vedtaksperiode_id, 
-            opprettet, 
-            status 
-            FROM selve_varsel sv WHERE generasjon_ref = :generasjon_ref
-            """,
-            "generasjon_ref" to generasjonRef,
-        ).list { row ->
+    private fun Row.toDto(): List<VarselDto> {
+        val varsler = this.stringOrNull("varsler") ?: return emptyList()
+        return objectMapper.readTree(varsler).map { varsel ->
             VarselDto(
-                row.uuid("unik_id"),
-                row.string("kode"),
-                row.localDateTime("opprettet"),
-                row.uuid("vedtaksperiode_id"),
-                when (val status = row.string("status")) {
+                varsel["unik_id"].asUUID(),
+                varsel["kode"].asText(),
+                varsel["opprettet"].asLocalDateTime(),
+                varsel["vedtaksperiode_id"].asUUID(),
+                when (val status = varsel["status"].asText()) {
                     "AKTIV" -> VarselStatusDto.AKTIV
                     "INAKTIV" -> VarselStatusDto.INAKTIV
                     "GODKJENT" -> VarselStatusDto.GODKJENT
@@ -148,6 +170,7 @@ class PgGenerasjonDao private constructor(
                 },
             )
         }
+    }
 
     override fun finnVedtaksperiodeIderFor(fødselsnummer: String): Set<UUID> =
         asSQL(
