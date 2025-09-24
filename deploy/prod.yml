@@ -31,8 +31,9 @@ spec:
       maxSurge: 100%
       maxUnavailable: 50%
   replicas:
-    min: 8
-    max: 8
+    min: 0
+    max: 0
+    disableAutoScaling: true
   observability:
     autoInstrumentation:
       enabled: true
