@@ -87,7 +87,7 @@ spec:
           kind: Project
         role: roles/cloudprofiler.agent
     sqlInstances:
-      - type: POSTGRES_14
+      - type: POSTGRES_15
         diskAutoresize: true
         pointInTimeRecovery: true
         diskSize: 1024
