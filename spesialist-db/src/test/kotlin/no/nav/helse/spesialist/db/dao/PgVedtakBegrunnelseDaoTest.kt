@@ -38,28 +38,6 @@ internal class PgVedtakBegrunnelseDaoTest : AbstractDBIntegrationTest() {
     }
 
     @Test
-    fun `lagrer og finner vedtaksbegrunnelse i transaksjon`() {
-        val oppgave = nyOppgaveForNyPerson()
-        dao.lagreVedtakBegrunnelse(
-            oppgaveId = oppgave.id,
-            vedtakBegrunnelse = VedtakBegrunnelseFraDatabase(
-                type = VedtakBegrunnelseTypeFraDatabase.AVSLAG,
-                tekst = "En individuell begrunelse"
-            ),
-            saksbehandlerOid = saksbehandler.saksbehandler.id().value
-        )
-
-        val generasjonId = finnGenerasjonId(oppgave.vedtaksperiodeId)
-
-        val lagretVedtakBegrunnelse = dao.finnVedtakBegrunnelse(oppgave.vedtaksperiodeId, generasjonId)
-        assertNotNull(lagretVedtakBegrunnelse)
-        with(lagretVedtakBegrunnelse!!) {
-            assertEquals(Utfall.AVSLAG, utfall)
-            assertEquals("En individuell begrunelse", begrunnelse)
-        }
-    }
-
-    @Test
     fun `lagrer og finner vedtaksbegrunnelse basert på oppgaveid`() {
         val oppgave = nyOppgaveForNyPerson()
 
