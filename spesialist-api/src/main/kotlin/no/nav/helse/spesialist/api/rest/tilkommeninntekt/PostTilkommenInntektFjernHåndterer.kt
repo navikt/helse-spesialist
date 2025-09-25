@@ -3,23 +3,19 @@ package no.nav.helse.spesialist.api.rest.tilkommeninntekt
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.db.SessionContext
 import no.nav.helse.spesialist.api.graphql.mutation.InntektsendringerEventBygger
-import no.nav.helse.spesialist.api.graphql.mutation.TilkommenInntektMutationHandler
 import no.nav.helse.spesialist.api.rest.HttpForbidden
 import no.nav.helse.spesialist.api.rest.HttpNotFound
 import no.nav.helse.spesialist.api.rest.PostHåndterer
 import no.nav.helse.spesialist.api.rest.RestHandler
+import no.nav.helse.spesialist.application.KøetMeldingPubliserer
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
-import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntekt
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektId
 import java.util.UUID
 
 class PostTilkommenInntektFjernHåndterer(
     private val handler: RestHandler,
-    tilkommenInntektMutationHandler: TilkommenInntektMutationHandler,
 ) : PostHåndterer<PostTilkommenInntektFjernHåndterer.URLParametre, PostTilkommenInntektFjernHåndterer.RequestBody, HttpStatusCode> {
-    private val meldingPubliserer = tilkommenInntektMutationHandler.meldingPubliserer
-
     data class URLParametre(
         val tilkommenInntektId: UUID,
     )
@@ -34,6 +30,7 @@ class PostTilkommenInntektFjernHåndterer(
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
+        meldingsKø: KøetMeldingPubliserer,
     ): HttpStatusCode {
         val tilkommenInntekt =
             transaksjon.tilkommenInntektRepository.finn(TilkommenInntektId(urlParametre.tilkommenInntektId))
@@ -47,37 +44,23 @@ class PostTilkommenInntektFjernHåndterer(
             feilSupplier = ::HttpForbidden,
         )
 
-        fjernTilkommenInntekt(
-            tilkommenInntekt = tilkommenInntekt,
-            notatTilBeslutter = requestBody.notatTilBeslutter,
-            saksbehandler = saksbehandler,
-            session = transaksjon,
-        )
-
-        return HttpStatusCode.NoContent
-    }
-
-    private fun fjernTilkommenInntekt(
-        tilkommenInntekt: TilkommenInntekt,
-        notatTilBeslutter: String,
-        saksbehandler: Saksbehandler,
-        session: SessionContext,
-    ) {
         tilkommenInntekt.fjern(
             saksbehandlerIdent = saksbehandler.ident,
-            notatTilBeslutter = notatTilBeslutter,
+            notatTilBeslutter = requestBody.notatTilBeslutter,
             totrinnsvurderingId =
                 finnEllerOpprettTotrinnsvurdering(
                     fodselsnummer = tilkommenInntekt.fødselsnummer,
-                    totrinnsvurderingRepository = session.totrinnsvurderingRepository,
+                    totrinnsvurderingRepository = transaksjon.totrinnsvurderingRepository,
                 ).id(),
         )
-        session.tilkommenInntektRepository.lagre(tilkommenInntekt)
+        transaksjon.tilkommenInntektRepository.lagre(tilkommenInntekt)
 
-        meldingPubliserer.publiser(
+        meldingsKø.publiser(
             fødselsnummer = tilkommenInntekt.fødselsnummer,
             hendelse = InntektsendringerEventBygger.forFjernet(tilkommenInntekt),
             årsak = "tilkommen inntekt fjernet",
         )
+
+        return HttpStatusCode.NoContent
     }
 }

@@ -25,7 +25,6 @@ import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.behandlingsstatistikk.IBehandlingsstatistikkService
 import no.nav.helse.spesialist.api.graphql.kobleOppApi
 import no.nav.helse.spesialist.api.graphql.lagSchemaMedResolversOgHandlers
-import no.nav.helse.spesialist.api.graphql.mutation.TilkommenInntektMutationHandler
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.rest.OpphevStansController
 import no.nav.helse.spesialist.api.rest.RestHandler
@@ -117,8 +116,7 @@ object TestRunner {
                     spesialistSchema = spesialistSchema,
                     opphevStansController = OpphevStansController(avhengigheter.saksbehandlerMediator),
                     tilkommenInntektController = TilkommenInntektController(
-                        handler = avhengigheter.restHandler,
-                        tilkommenInntektMutationHandler = spesialistSchema.mutationHandlers.tilkommenInntekt as TilkommenInntektMutationHandler
+                        handler = avhengigheter.restHandler
                     ),
                 )
             }

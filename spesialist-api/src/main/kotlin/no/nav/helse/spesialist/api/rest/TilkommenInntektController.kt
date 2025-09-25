@@ -4,7 +4,6 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.helse.spesialist.api.graphql.mutation.TilkommenInntektMutationHandler
 import no.nav.helse.spesialist.api.rest.RestHandler.Companion.getRequired
 import no.nav.helse.spesialist.api.rest.RestHandler.Companion.getRequiredUUID
 import no.nav.helse.spesialist.api.rest.tilkommeninntekt.GetTilkomneInntektskilderHåndterer
@@ -15,13 +14,12 @@ import no.nav.helse.spesialist.api.rest.tilkommeninntekt.PostTilkommenInntektLeg
 
 class TilkommenInntektController(
     private val handler: RestHandler,
-    private val tilkommenInntektMutationHandler: TilkommenInntektMutationHandler,
 ) {
     fun addToRoute(route: Route) {
         route.post("tidligere-mutations/tilkommen-inntekt/legg-til") {
             handler.håndterPost(
                 call = call,
-                håndterer = PostTilkommenInntektLeggTilHåndterer(handler, tilkommenInntektMutationHandler),
+                håndterer = PostTilkommenInntektLeggTilHåndterer(handler),
                 parameterTolkning = { },
             )
         }
@@ -29,7 +27,7 @@ class TilkommenInntektController(
             post("legg-til") {
                 handler.håndterPost(
                     call = call,
-                    håndterer = PostTilkommenInntektLeggTilHåndterer(handler, tilkommenInntektMutationHandler),
+                    håndterer = PostTilkommenInntektLeggTilHåndterer(handler),
                     parameterTolkning = { },
                 )
             }
@@ -37,7 +35,7 @@ class TilkommenInntektController(
                 post("endre") {
                     handler.håndterPost(
                         call = call,
-                        håndterer = PostTilkommenInntektEndreHåndterer(handler, tilkommenInntektMutationHandler),
+                        håndterer = PostTilkommenInntektEndreHåndterer(handler),
                         parameterTolkning = { parametre ->
                             PostTilkommenInntektEndreHåndterer.URLParametre(
                                 tilkommenInntektId = parametre.getRequiredUUID("tilkommenInntektId"),
@@ -48,7 +46,7 @@ class TilkommenInntektController(
                 post("fjern") {
                     handler.håndterPost(
                         call = call,
-                        håndterer = PostTilkommenInntektFjernHåndterer(handler, tilkommenInntektMutationHandler),
+                        håndterer = PostTilkommenInntektFjernHåndterer(handler),
                         parameterTolkning = { parametre ->
                             PostTilkommenInntektFjernHåndterer.URLParametre(
                                 tilkommenInntektId = parametre.getRequiredUUID("tilkommenInntektId"),
@@ -59,7 +57,7 @@ class TilkommenInntektController(
                 post("gjenopprett") {
                     handler.håndterPost(
                         call = call,
-                        håndterer = PostTilkommenInntektGjenopprettHåndterer(handler, tilkommenInntektMutationHandler),
+                        håndterer = PostTilkommenInntektGjenopprettHåndterer(handler),
                         parameterTolkning = { parametre ->
                             PostTilkommenInntektGjenopprettHåndterer.URLParametre(
                                 tilkommenInntektId = parametre.getRequiredUUID("tilkommenInntektId"),

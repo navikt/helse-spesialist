@@ -7,10 +7,12 @@ import io.ktor.server.auth.principal
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.RoutingCall
+import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.SessionContext
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.spesialist.api.graphql.ContextFactory.Companion.gruppeUuider
 import no.nav.helse.spesialist.api.graphql.ContextFactory.Companion.tilSaksbehandler
+import no.nav.helse.spesialist.application.KøetMeldingPubliserer
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.loggThrowable
 import no.nav.helse.spesialist.application.logg.sikkerlogg
@@ -24,6 +26,7 @@ import kotlin.reflect.KClass
 class RestHandler(
     private val sessionFactory: SessionFactory,
     private val tilgangsgruppeUuider: TilgangsgruppeUuider,
+    private val meldingPubliserer: MeldingPubliserer,
 ) {
     suspend fun <RESPONSE, URLPARAMETRE> håndterGet(
         call: RoutingCall,
@@ -80,17 +83,20 @@ class RestHandler(
             it.saksbehandlerRepository.lagre(saksbehandler = saksbehandler)
         }
 
+        val meldingsKø = KøetMeldingPubliserer(meldingPubliserer)
         val request: REQUESTBODY = call.receive(type = requestType)
         runCatching {
-            sessionFactory.transactionalSessionScope { tx ->
-                håndterer.håndter(
-                    urlParametre = parameterTolkning.invoke(call.parameters),
-                    requestBody = request,
-                    saksbehandler = saksbehandler,
-                    tilgangsgrupper = tilgangsgrupper,
-                    transaksjon = tx,
-                )
-            }
+            sessionFactory
+                .transactionalSessionScope { tx ->
+                    håndterer.håndter(
+                        urlParametre = parameterTolkning.invoke(call.parameters),
+                        requestBody = request,
+                        saksbehandler = saksbehandler,
+                        tilgangsgrupper = tilgangsgrupper,
+                        transaksjon = tx,
+                        meldingsKø = meldingsKø,
+                    )
+                }.also { meldingsKø.flush() }
         }.onFailure { cause ->
             val statusCode = (cause as? HttpException)?.statusCode ?: HttpStatusCode.InternalServerError
             loggThrowable("Returnerer HTTP ${statusCode.value}", cause)

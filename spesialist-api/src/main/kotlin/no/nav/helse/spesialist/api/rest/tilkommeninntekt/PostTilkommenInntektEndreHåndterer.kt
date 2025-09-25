@@ -3,26 +3,22 @@ package no.nav.helse.spesialist.api.rest.tilkommeninntekt
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.db.SessionContext
 import no.nav.helse.spesialist.api.graphql.mutation.InntektsendringerEventBygger
-import no.nav.helse.spesialist.api.graphql.mutation.TilkommenInntektMutationHandler
 import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektInput
 import no.nav.helse.spesialist.api.rest.HttpForbidden
 import no.nav.helse.spesialist.api.rest.HttpNotFound
 import no.nav.helse.spesialist.api.rest.PostHåndterer
 import no.nav.helse.spesialist.api.rest.RestHandler
+import no.nav.helse.spesialist.application.KøetMeldingPubliserer
 import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
-import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntekt
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektId
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektPeriodeValidator
 import java.util.UUID
 
 class PostTilkommenInntektEndreHåndterer(
     private val handler: RestHandler,
-    tilkommenInntektMutationHandler: TilkommenInntektMutationHandler,
 ) : PostHåndterer<PostTilkommenInntektEndreHåndterer.URLParametre, PostTilkommenInntektEndreHåndterer.RequestBody, HttpStatusCode> {
-    private val meldingPubliserer = tilkommenInntektMutationHandler.meldingPubliserer
-
     data class URLParametre(
         val tilkommenInntektId: UUID,
     )
@@ -38,6 +34,7 @@ class PostTilkommenInntektEndreHåndterer(
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
+        meldingsKø: KøetMeldingPubliserer,
     ): HttpStatusCode {
         val tilkommenInntekt =
             transaksjon.tilkommenInntektRepository.finn(TilkommenInntektId(urlParametre.tilkommenInntektId))
@@ -51,33 +48,15 @@ class PostTilkommenInntektEndreHåndterer(
             feilSupplier = ::HttpForbidden,
         )
 
-        endreTilkommenInntekt(
-            tilkommenInntekt = tilkommenInntekt,
-            endretTil = requestBody.endretTil,
-            notatTilBeslutter = requestBody.notatTilBeslutter,
-            saksbehandler = saksbehandler,
-            session = transaksjon,
-        )
-
-        return HttpStatusCode.NoContent
-    }
-
-    private fun endreTilkommenInntekt(
-        tilkommenInntekt: TilkommenInntekt,
-        endretTil: ApiTilkommenInntektInput,
-        notatTilBeslutter: String,
-        saksbehandler: Saksbehandler,
-        session: SessionContext,
-    ) {
-        val endretTilPeriode = endretTil.periode.fom tilOgMed endretTil.periode.tom
+        val endretTilPeriode = requestBody.endretTil.periode.fom tilOgMed requestBody.endretTil.periode.tom
         TilkommenInntektPeriodeValidator.validerPeriode(
             periode = endretTilPeriode,
-            organisasjonsnummer = endretTil.organisasjonsnummer,
+            organisasjonsnummer = requestBody.endretTil.organisasjonsnummer,
             andreTilkomneInntekter =
-                session.tilkommenInntektRepository
+                transaksjon.tilkommenInntektRepository
                     .finnAlleForFødselsnummer(tilkommenInntekt.fødselsnummer)
                     .minus(tilkommenInntekt),
-            vedtaksperioder = session.vedtaksperiodeRepository.finnVedtaksperioder(tilkommenInntekt.fødselsnummer),
+            vedtaksperioder = transaksjon.vedtaksperiodeRepository.finnVedtaksperioder(tilkommenInntekt.fødselsnummer),
         )
 
         val arbeidsgiverFør = tilkommenInntekt.organisasjonsnummer
@@ -85,19 +64,19 @@ class PostTilkommenInntektEndreHåndterer(
         val dagsbeløpFør = tilkommenInntekt.dagbeløp()
 
         tilkommenInntekt.endreTil(
-            organisasjonsnummer = endretTil.organisasjonsnummer,
-            periode = endretTil.periode.fom tilOgMed endretTil.periode.tom,
-            periodebeløp = endretTil.periodebelop,
-            ekskluderteUkedager = endretTil.ekskluderteUkedager.toSet(),
+            organisasjonsnummer = requestBody.endretTil.organisasjonsnummer,
+            periode = requestBody.endretTil.periode.fom tilOgMed requestBody.endretTil.periode.tom,
+            periodebeløp = requestBody.endretTil.periodebelop,
+            ekskluderteUkedager = requestBody.endretTil.ekskluderteUkedager.toSet(),
             saksbehandlerIdent = saksbehandler.ident,
-            notatTilBeslutter = notatTilBeslutter,
+            notatTilBeslutter = requestBody.notatTilBeslutter,
             totrinnsvurderingId =
                 finnEllerOpprettTotrinnsvurdering(
                     fodselsnummer = tilkommenInntekt.fødselsnummer,
-                    totrinnsvurderingRepository = session.totrinnsvurderingRepository,
+                    totrinnsvurderingRepository = transaksjon.totrinnsvurderingRepository,
                 ).id(),
         )
-        session.tilkommenInntektRepository.lagre(tilkommenInntekt)
+        transaksjon.tilkommenInntektRepository.lagre(tilkommenInntekt)
 
         val arbeidsgiverEtter = tilkommenInntekt.organisasjonsnummer
         val dagerEtter = tilkommenInntekt.dagerTilGradering()
@@ -114,11 +93,13 @@ class PostTilkommenInntektEndreHåndterer(
             )
 
         event?.let {
-            meldingPubliserer.publiser(
+            meldingsKø.publiser(
                 fødselsnummer = tilkommenInntekt.fødselsnummer,
                 hendelse = it,
                 årsak = "tilkommen inntekt endret",
             )
         }
+
+        return HttpStatusCode.NoContent
     }
 }
