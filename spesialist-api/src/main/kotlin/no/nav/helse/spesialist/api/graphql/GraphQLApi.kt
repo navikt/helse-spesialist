@@ -56,7 +56,6 @@ import no.nav.helse.spesialist.api.graphql.query.TildelteOppgaverQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.TilkommenInntektQueryHandler
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.person.PersonService
-import no.nav.helse.spesialist.api.rest.OpphevStansController
 import no.nav.helse.spesialist.api.rest.RestDelegator
 import no.nav.helse.spesialist.api.rest.restRoutes
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
@@ -73,7 +72,6 @@ fun kobleOppApi(
     apiModuleConfiguration: ApiModule.Configuration,
     tilgangsgruppeUuider: TilgangsgruppeUuider,
     spesialistSchema: SpesialistSchema,
-    opphevStansController: OpphevStansController,
     restDelegator: RestDelegator,
 ) {
     ktorApplication.installPlugins()
@@ -99,7 +97,7 @@ fun kobleOppApi(
                 queryHandler(graphQLPlugin.server)
             }
         }
-        restRoutes(opphevStansController, restDelegator)
+        restRoutes(restDelegator)
     }
 }
 

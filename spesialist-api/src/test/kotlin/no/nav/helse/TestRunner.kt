@@ -26,7 +26,6 @@ import no.nav.helse.spesialist.api.behandlingsstatistikk.IBehandlingsstatistikkS
 import no.nav.helse.spesialist.api.graphql.kobleOppApi
 import no.nav.helse.spesialist.api.graphql.lagSchemaMedResolversOgHandlers
 import no.nav.helse.spesialist.api.objectMapper
-import no.nav.helse.spesialist.api.rest.OpphevStansController
 import no.nav.helse.spesialist.api.rest.RestDelegator
 import no.nav.helse.spesialist.api.testfixtures.lagSaksbehandler
 import no.nav.helse.spesialist.application.Reservasjonshenter
@@ -113,7 +112,6 @@ object TestRunner {
                     apiModuleConfiguration = configuration,
                     tilgangsgruppeUuider = avhengigheter.tilgangsgruppeUuider,
                     spesialistSchema = spesialistSchema,
-                    opphevStansController = OpphevStansController(avhengigheter.saksbehandlerMediator),
                     restDelegator = avhengigheter.restDelegator,
                 )
             }

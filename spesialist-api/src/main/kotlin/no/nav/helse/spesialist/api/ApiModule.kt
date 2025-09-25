@@ -15,7 +15,6 @@ import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlinghåndtererImpl
 import no.nav.helse.spesialist.api.graphql.kobleOppApi
 import no.nav.helse.spesialist.api.graphql.lagSchemaMedResolversOgHandlers
-import no.nav.helse.spesialist.api.rest.OpphevStansController
 import no.nav.helse.spesialist.api.rest.RestDelegator
 import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.application.Snapshothenter
@@ -107,7 +106,6 @@ class ApiModule(
             apiModuleConfiguration = configuration,
             tilgangsgruppeUuider = tilgangsgruppeUuider,
             spesialistSchema = spesialistSchema,
-            opphevStansController = OpphevStansController(saksbehandlerMediator),
             restDelegator = restDelegator,
         )
     }

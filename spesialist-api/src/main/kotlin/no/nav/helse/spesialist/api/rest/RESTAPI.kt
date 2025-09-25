@@ -13,13 +13,16 @@ import no.nav.helse.spesialist.api.rest.tilkommeninntekt.PostTilkommenInntektGje
 import no.nav.helse.spesialist.api.rest.tilkommeninntekt.PostTilkommenInntektLeggTilHåndterer
 import java.util.UUID
 
-fun Routing.restRoutes(
-    opphevStansController: OpphevStansController,
-    restDelegator: RestDelegator,
-) {
+fun Routing.restRoutes(restDelegator: RestDelegator) {
     route("api") {
         authenticate("oidc") {
-            opphevStansController.addToRoute(this)
+            post("opphevstans") {
+                restDelegator.utførPost(
+                    call = call,
+                    håndterer = PostOpphevStansHåndterer(),
+                    parameterTolkning = { },
+                )
+            }
             post("tidligere-mutations/tilkommen-inntekt/legg-til") {
                 restDelegator.utførPost(
                     call = call,

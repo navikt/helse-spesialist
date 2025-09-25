@@ -31,6 +31,7 @@ import no.nav.helse.modell.kommando.MinimalPersonDto
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.spesialist.typer.Kjønn
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 class InMemorySessionContext(
@@ -87,8 +88,10 @@ class InMemorySessionContext(
         }
 
     }
-    override val egenAnsattDao: EgenAnsattDao
-        get() = TODO("Not yet implemented")
+    override val egenAnsattDao = object : EgenAnsattDao {
+        override fun erEgenAnsatt(fødselsnummer: String) = false
+        override fun lagre(fødselsnummer: String, erEgenAnsatt: Boolean, opprettet: LocalDateTime) {}
+    }
     override val generasjonDao: GenerasjonDao
         get() = TODO("Not yet implemented")
     override val meldingDao: InMemoryMeldingDao = InMemoryMeldingDao()
@@ -185,9 +188,7 @@ class InMemorySessionContext(
             TODO("Not yet implemented")
         }
 
-        override fun finnAdressebeskyttelse(fødselsnummer: String): Adressebeskyttelse? {
-            TODO("Not yet implemented")
-        }
+        override fun finnAdressebeskyttelse(fødselsnummer: String) = Adressebeskyttelse.Ugradert
 
         override fun finnAktørId(fødselsnummer: String): String? {
             TODO("Not yet implemented")
