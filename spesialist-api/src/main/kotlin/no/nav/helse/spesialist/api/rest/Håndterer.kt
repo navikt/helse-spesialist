@@ -5,16 +5,16 @@ import no.nav.helse.spesialist.application.KøetMeldingPubliserer
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 
-interface GetHåndterer<URLPARAMETRE, RESPONSE> {
+interface GetHåndterer<URLPARAMETRE, RESPONSEBODY> {
     fun håndter(
         urlParametre: URLPARAMETRE,
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
-    ): RESPONSE
+    ): RestResponse<RESPONSEBODY>
 }
 
-interface PostHåndterer<URLPARAMETRE, REQUESTBODY, RESPONSE> {
+interface PostHåndterer<URLPARAMETRE, REQUESTBODY, RESPONSEBODY> {
     fun håndter(
         urlParametre: URLPARAMETRE,
         requestBody: REQUESTBODY,
@@ -22,5 +22,5 @@ interface PostHåndterer<URLPARAMETRE, REQUESTBODY, RESPONSE> {
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
         meldingsKø: KøetMeldingPubliserer,
-    ): RESPONSE
+    ): RestResponse<RESPONSEBODY>
 }

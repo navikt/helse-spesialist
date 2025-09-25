@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.api.rest
 
-import io.ktor.http.HttpStatusCode
 import no.nav.helse.db.SessionContext
 import no.nav.helse.spesialist.api.rest.tilkommeninntekt.bekreftTilgangTilPerson
 import no.nav.helse.spesialist.application.KøetMeldingPubliserer
@@ -8,7 +7,7 @@ import no.nav.helse.spesialist.domain.NotatType
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 
-class PostOpphevStansHåndterer : PostHåndterer<Unit, PostOpphevStansHåndterer.RequestBody, HttpStatusCode> {
+class PostOpphevStansHåndterer : PostHåndterer<Unit, PostOpphevStansHåndterer.RequestBody, Boolean> {
     data class RequestBody(
         val fødselsnummer: String,
         val begrunnelse: String,
@@ -21,7 +20,7 @@ class PostOpphevStansHåndterer : PostHåndterer<Unit, PostOpphevStansHåndterer
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
         meldingsKø: KøetMeldingPubliserer,
-    ): HttpStatusCode {
+    ): RestResponse<Boolean> {
         val fødselsnummer = requestBody.fødselsnummer
         bekreftTilgangTilPerson(
             fødselsnummer = fødselsnummer,
@@ -42,6 +41,6 @@ class PostOpphevStansHåndterer : PostHåndterer<Unit, PostOpphevStansHåndterer
             dialogRef = transaksjon.dialogDao.lagre(),
         )
 
-        return HttpStatusCode.NoContent
+        return RestResponse.ok(true)
     }
 }

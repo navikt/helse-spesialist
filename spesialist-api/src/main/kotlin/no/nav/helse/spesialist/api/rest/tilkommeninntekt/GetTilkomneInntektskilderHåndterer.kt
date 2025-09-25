@@ -12,6 +12,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektOpprettetEv
 import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektskilde
 import no.nav.helse.spesialist.api.rest.GetHåndterer
 import no.nav.helse.spesialist.api.rest.HttpNotFound
+import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.domain.tilkommeninntekt.Endring
@@ -33,7 +34,7 @@ class GetTilkomneInntektskilderHåndterer : GetHåndterer<GetTilkomneInntektskil
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
-    ): List<ApiTilkommenInntektskilde> {
+    ): RestResponse<List<ApiTilkommenInntektskilde>> {
         val aktørId = urlParametre.aktørId
         val fødselsnumre = transaksjon.personRepository.finnFødselsnumre(aktørId = aktørId).toSet()
 
@@ -47,12 +48,14 @@ class GetTilkomneInntektskilderHåndterer : GetHåndterer<GetTilkomneInntektskil
             )
         }
 
-        return fødselsnumre.flatMap { fødselsnummer ->
-            hentTilkomneInntektskilder(
-                fødselsnummer = fødselsnummer,
-                transaksjon = transaksjon,
-            )
-        }
+        return RestResponse.ok(
+            fødselsnumre.flatMap { fødselsnummer ->
+                hentTilkomneInntektskilder(
+                    fødselsnummer = fødselsnummer,
+                    transaksjon = transaksjon,
+                )
+            },
+        )
     }
 
     private fun hentTilkomneInntektskilder(

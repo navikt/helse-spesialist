@@ -6,6 +6,7 @@ import no.nav.helse.spesialist.api.graphql.mutation.LeggTilTilkommenInntektRespo
 import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektInput
 import no.nav.helse.spesialist.api.rest.HttpForbidden
 import no.nav.helse.spesialist.api.rest.PostHåndterer
+import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.application.KøetMeldingPubliserer
 import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
 import no.nav.helse.spesialist.domain.Saksbehandler
@@ -27,7 +28,7 @@ class PostTilkommenInntektLeggTilHåndterer : PostHåndterer<Unit, PostTilkommen
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
         meldingsKø: KøetMeldingPubliserer,
-    ): LeggTilTilkommenInntektResponse {
+    ): RestResponse<LeggTilTilkommenInntektResponse> {
         bekreftTilgangTilPerson(
             fødselsnummer = requestBody.fodselsnummer,
             saksbehandler = saksbehandler,
@@ -67,6 +68,6 @@ class PostTilkommenInntektLeggTilHåndterer : PostHåndterer<Unit, PostTilkommen
             årsak = "tilkommen inntekt lagt til",
         )
 
-        return LeggTilTilkommenInntektResponse(tilkommenInntekt.id().value)
+        return RestResponse.created(LeggTilTilkommenInntektResponse(tilkommenInntekt.id().value))
     }
 }

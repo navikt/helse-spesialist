@@ -8,12 +8,15 @@ import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.RoutingCall
 import no.nav.helse.MeldingPubliserer
+import no.nav.helse.db.SessionContext
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.spesialist.api.graphql.ContextFactory.Companion.gruppeUuider
 import no.nav.helse.spesialist.api.graphql.ContextFactory.Companion.tilSaksbehandler
 import no.nav.helse.spesialist.application.KøetMeldingPubliserer
 import no.nav.helse.spesialist.application.logg.loggThrowable
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
+import no.nav.helse.spesialist.domain.Saksbehandler
+import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import kotlin.reflect.KClass
 
 class RestDelegator(
@@ -21,59 +24,56 @@ class RestDelegator(
     private val tilgangsgruppeUuider: TilgangsgruppeUuider,
     private val meldingPubliserer: MeldingPubliserer,
 ) {
-    suspend fun <RESPONSE, URLPARAMETRE> utførGet(
+    suspend fun <URLPARAMETRE, RESPONSEBODY> utførGet(
         call: RoutingCall,
-        håndterer: GetHåndterer<URLPARAMETRE, RESPONSE>,
+        håndterer: GetHåndterer<URLPARAMETRE, RESPONSEBODY>,
         parameterTolkning: (Parameters) -> URLPARAMETRE,
     ) {
-        val jwt = (call.principal<JWTPrincipal>() ?: throw HttpUnauthorized()).payload
-
-        val saksbehandler = jwt.tilSaksbehandler()
-        val tilgangsgrupper = tilgangsgruppeUuider.grupperFor(jwt.gruppeUuider())
-
-        sessionFactory.transactionalSessionScope {
-            it.saksbehandlerRepository.lagre(saksbehandler = saksbehandler)
-        }
-
-        runCatching {
-            sessionFactory.transactionalSessionScope { tx ->
-                håndterer.håndter(
-                    urlParametre = parameterTolkning.invoke(call.parameters),
-                    saksbehandler = saksbehandler,
-                    tilgangsgrupper = tilgangsgrupper,
-                    transaksjon = tx,
-                )
-            }
-        }.onFailure { cause ->
-            val statusCode = (cause as? HttpException)?.statusCode ?: HttpStatusCode.InternalServerError
-            loggThrowable("Returnerer HTTP ${statusCode.value}", cause)
-            // GraphQL-biblioteket vi fortsatt bruker i Speil for å snakke med REST, liker dårlig å ikke få noe
-            // body i svaret. Vi legger det derfor på her så lenge vi har GraphQL der.
-            call.respond(statusCode, false)
-        }.onSuccess { result ->
-            if (result is HttpStatusCode) {
-                // GraphQL-biblioteket vi fortsatt bruker i Speil for å snakke med REST, liker dårlig å ikke få noe
-                // body i svaret. Vi legger det derfor på her så lenge vi har GraphQL der.
-                call.respond(result, true)
-            } else {
-                call.respond(result as Any)
-            }
+        wrapOgDeleger(call, parameterTolkning) { urlParametre, saksbehandler, tilgangsgrupper, transaksjon, _ ->
+            håndterer.håndter(
+                urlParametre = urlParametre,
+                saksbehandler = saksbehandler,
+                tilgangsgrupper = tilgangsgrupper,
+                transaksjon = transaksjon,
+            )
         }
     }
 
-    suspend inline fun <URLPARAMETRE, reified REQUESTBODY : Any, RESPONSE> utførPost(
+    suspend inline fun <URLPARAMETRE, reified REQUESTBODY : Any, RESPONSEBODY> utførPost(
         call: RoutingCall,
-        håndterer: PostHåndterer<URLPARAMETRE, REQUESTBODY, RESPONSE>,
+        håndterer: PostHåndterer<URLPARAMETRE, REQUESTBODY, RESPONSEBODY>,
         noinline parameterTolkning: (Parameters) -> URLPARAMETRE,
     ) {
         utførPost(call, håndterer, parameterTolkning, REQUESTBODY::class)
     }
 
-    suspend fun <REQUESTBODY : Any, RESPONSE, URLPARAMETRE> utførPost(
+    suspend fun <URLPARAMETRE, REQUESTBODY : Any, RESPONSEBODY> utførPost(
         call: RoutingCall,
-        håndterer: PostHåndterer<URLPARAMETRE, REQUESTBODY, RESPONSE>,
+        håndterer: PostHåndterer<URLPARAMETRE, REQUESTBODY, RESPONSEBODY>,
         parameterTolkning: (Parameters) -> URLPARAMETRE,
         requestType: KClass<REQUESTBODY>,
+    ) {
+        val request: REQUESTBODY = call.receive(type = requestType)
+        wrapOgDeleger(
+            call = call,
+            parameterTolkning = parameterTolkning,
+            håndterer = { urlParametre, saksbehandler, tilgangsgrupper, transaksjon, meldingsKø ->
+                håndterer.håndter(
+                    urlParametre = urlParametre,
+                    requestBody = request,
+                    saksbehandler = saksbehandler,
+                    tilgangsgrupper = tilgangsgrupper,
+                    transaksjon = transaksjon,
+                    meldingsKø = meldingsKø,
+                )
+            },
+        )
+    }
+
+    private suspend fun <RESPONSEBODY, URLPARAMETRE> wrapOgDeleger(
+        call: RoutingCall,
+        parameterTolkning: (Parameters) -> URLPARAMETRE,
+        håndterer: (URLPARAMETRE, Saksbehandler, Set<Tilgangsgruppe>, SessionContext, KøetMeldingPubliserer) -> RestResponse<RESPONSEBODY>,
     ) {
         val jwt = (call.principal<JWTPrincipal>() ?: throw HttpUnauthorized()).payload
 
@@ -84,26 +84,26 @@ class RestDelegator(
             it.saksbehandlerRepository.lagre(saksbehandler = saksbehandler)
         }
 
-        val meldingsKø = KøetMeldingPubliserer(meldingPubliserer)
-        val request: REQUESTBODY = call.receive(type = requestType)
         runCatching {
+            val urlParametre = parameterTolkning.invoke(call.parameters)
+            val meldingsKø = KøetMeldingPubliserer(meldingPubliserer)
             sessionFactory
-                .transactionalSessionScope { tx ->
-                    håndterer.håndter(
-                        urlParametre = parameterTolkning.invoke(call.parameters),
-                        requestBody = request,
-                        saksbehandler = saksbehandler,
-                        tilgangsgrupper = tilgangsgrupper,
-                        transaksjon = tx,
-                        meldingsKø = meldingsKø,
+                .transactionalSessionScope { transaksjon ->
+                    håndterer.invoke(
+                        urlParametre,
+                        saksbehandler,
+                        tilgangsgrupper,
+                        transaksjon,
+                        meldingsKø,
                     )
                 }.also { meldingsKø.flush() }
         }.onFailure { cause ->
             val statusCode = (cause as? HttpException)?.statusCode ?: HttpStatusCode.InternalServerError
             loggThrowable("Returnerer HTTP ${statusCode.value}", cause)
-            call.respond(statusCode)
+            call.respond(statusCode, "{ \"httpStatusCode\": ${statusCode.value} }")
         }.onSuccess { result ->
-            call.respond(result as Any)
+            call.response.status(result.statusCode)
+            call.respond(result.body as Any)
         }
     }
 }

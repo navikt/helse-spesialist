@@ -1,18 +1,18 @@
 package no.nav.helse.spesialist.api.rest.tilkommeninntekt
 
-import io.ktor.http.HttpStatusCode
 import no.nav.helse.db.SessionContext
 import no.nav.helse.spesialist.api.graphql.mutation.InntektsendringerEventBygger
 import no.nav.helse.spesialist.api.rest.HttpForbidden
 import no.nav.helse.spesialist.api.rest.HttpNotFound
 import no.nav.helse.spesialist.api.rest.PostHåndterer
+import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.application.KøetMeldingPubliserer
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektId
 import java.util.UUID
 
-class PostTilkommenInntektFjernHåndterer : PostHåndterer<PostTilkommenInntektFjernHåndterer.URLParametre, PostTilkommenInntektFjernHåndterer.RequestBody, HttpStatusCode> {
+class PostTilkommenInntektFjernHåndterer : PostHåndterer<PostTilkommenInntektFjernHåndterer.URLParametre, PostTilkommenInntektFjernHåndterer.RequestBody, Boolean> {
     data class URLParametre(
         val tilkommenInntektId: UUID,
     )
@@ -28,7 +28,7 @@ class PostTilkommenInntektFjernHåndterer : PostHåndterer<PostTilkommenInntektF
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
         meldingsKø: KøetMeldingPubliserer,
-    ): HttpStatusCode {
+    ): RestResponse<Boolean> {
         val tilkommenInntekt =
             transaksjon.tilkommenInntektRepository.finn(TilkommenInntektId(urlParametre.tilkommenInntektId))
                 ?: throw HttpNotFound("Fant ikke tilkommen inntekt med tilkommentInntektId ${urlParametre.tilkommenInntektId}")
@@ -58,6 +58,6 @@ class PostTilkommenInntektFjernHåndterer : PostHåndterer<PostTilkommenInntektF
             årsak = "tilkommen inntekt fjernet",
         )
 
-        return HttpStatusCode.NoContent
+        return RestResponse.ok(true)
     }
 }

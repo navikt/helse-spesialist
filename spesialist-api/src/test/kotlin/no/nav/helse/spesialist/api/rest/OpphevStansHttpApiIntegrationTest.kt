@@ -16,7 +16,7 @@ class OpphevStansHttpApiIntegrationTest : OpphevStansIntegrationTest() {
             saksbehandler = saksbehandler,
         )
 
-        assertEquals(204, response.status)
-        assertEquals("", response.bodyAsText)
+        assertEquals(200, response.status)
+        assertEquals("true", response.bodyAsText)
     }
 }
