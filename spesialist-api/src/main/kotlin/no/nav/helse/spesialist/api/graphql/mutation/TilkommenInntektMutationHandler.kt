@@ -87,64 +87,80 @@ class TilkommenInntektMutationHandler(
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> {
         sessionFactory.transactionalSessionScope { session ->
-            val endretTilPeriode = endretTil.periode.fom tilOgMed endretTil.periode.tom
             val tilkommenInntekt =
                 session.tilkommenInntektRepository.finn(TilkommenInntektId(tilkommenInntektId))
                     ?: error("Fant ikke tilkommen inntekt med tilkommentInntektId $tilkommenInntektId")
 
-            TilkommenInntektPeriodeValidator.validerPeriode(
-                periode = endretTilPeriode,
-                organisasjonsnummer = endretTil.organisasjonsnummer,
-                andreTilkomneInntekter =
-                    session.tilkommenInntektRepository
-                        .finnAlleForFødselsnummer(tilkommenInntekt.fødselsnummer)
-                        .minus(tilkommenInntekt),
-                vedtaksperioder = session.vedtaksperiodeRepository.finnVedtaksperioder(tilkommenInntekt.fødselsnummer),
-            )
-
-            val arbeidsgiverFør = tilkommenInntekt.organisasjonsnummer
-            val dagerFør = tilkommenInntekt.dagerTilGradering()
-            val dagsbeløpFør = tilkommenInntekt.dagbeløp()
-
-            tilkommenInntekt.endreTil(
-                organisasjonsnummer = endretTil.organisasjonsnummer,
-                periode = endretTil.periode.fom tilOgMed endretTil.periode.tom,
-                periodebeløp = endretTil.periodebelop,
-                ekskluderteUkedager = endretTil.ekskluderteUkedager.toSet(),
-                saksbehandlerIdent = env.graphQlContext.get<Saksbehandler>(SAKSBEHANDLER).ident,
+            endreTilkommenInntekt(
+                tilkommenInntekt = tilkommenInntekt,
+                endretTil = endretTil,
                 notatTilBeslutter = notatTilBeslutter,
-                totrinnsvurderingId =
-                    finnEllerOpprettTotrinnsvurdering(
-                        fodselsnummer = tilkommenInntekt.fødselsnummer,
-                        totrinnsvurderingRepository = session.totrinnsvurderingRepository,
-                    ).id(),
+                saksbehandler = env.graphQlContext.get(SAKSBEHANDLER),
+                session = session,
             )
-            session.tilkommenInntektRepository.lagre(tilkommenInntekt)
-
-            val arbeidsgiverEtter = tilkommenInntekt.organisasjonsnummer
-            val dagerEtter = tilkommenInntekt.dagerTilGradering()
-            val dagsbeløpEtter = tilkommenInntekt.dagbeløp()
-
-            val event =
-                InntektsendringerEventBygger.forEndring(
-                    arbeidsgiverFør = arbeidsgiverFør,
-                    arbeidsgiverEtter = arbeidsgiverEtter,
-                    dagerFør = dagerFør,
-                    dagerEtter = dagerEtter,
-                    dagsbeløpFør = dagsbeløpFør,
-                    dagsbeløpEtter = dagsbeløpEtter,
-                )
-
-            event?.let {
-                meldingPubliserer.publiser(
-                    fødselsnummer = tilkommenInntekt.fødselsnummer,
-                    hendelse = it,
-                    årsak = "tilkommen inntekt endret",
-                )
-            }
         }
 
         return byggRespons(true)
+    }
+
+    fun endreTilkommenInntekt(
+        tilkommenInntekt: TilkommenInntekt,
+        endretTil: ApiTilkommenInntektInput,
+        notatTilBeslutter: String,
+        saksbehandler: Saksbehandler,
+        session: SessionContext,
+    ) {
+        val endretTilPeriode = endretTil.periode.fom tilOgMed endretTil.periode.tom
+        TilkommenInntektPeriodeValidator.validerPeriode(
+            periode = endretTilPeriode,
+            organisasjonsnummer = endretTil.organisasjonsnummer,
+            andreTilkomneInntekter =
+                session.tilkommenInntektRepository
+                    .finnAlleForFødselsnummer(tilkommenInntekt.fødselsnummer)
+                    .minus(tilkommenInntekt),
+            vedtaksperioder = session.vedtaksperiodeRepository.finnVedtaksperioder(tilkommenInntekt.fødselsnummer),
+        )
+
+        val arbeidsgiverFør = tilkommenInntekt.organisasjonsnummer
+        val dagerFør = tilkommenInntekt.dagerTilGradering()
+        val dagsbeløpFør = tilkommenInntekt.dagbeløp()
+
+        tilkommenInntekt.endreTil(
+            organisasjonsnummer = endretTil.organisasjonsnummer,
+            periode = endretTil.periode.fom tilOgMed endretTil.periode.tom,
+            periodebeløp = endretTil.periodebelop,
+            ekskluderteUkedager = endretTil.ekskluderteUkedager.toSet(),
+            saksbehandlerIdent = saksbehandler.ident,
+            notatTilBeslutter = notatTilBeslutter,
+            totrinnsvurderingId =
+                finnEllerOpprettTotrinnsvurdering(
+                    fodselsnummer = tilkommenInntekt.fødselsnummer,
+                    totrinnsvurderingRepository = session.totrinnsvurderingRepository,
+                ).id(),
+        )
+        session.tilkommenInntektRepository.lagre(tilkommenInntekt)
+
+        val arbeidsgiverEtter = tilkommenInntekt.organisasjonsnummer
+        val dagerEtter = tilkommenInntekt.dagerTilGradering()
+        val dagsbeløpEtter = tilkommenInntekt.dagbeløp()
+
+        val event =
+            InntektsendringerEventBygger.forEndring(
+                arbeidsgiverFør = arbeidsgiverFør,
+                arbeidsgiverEtter = arbeidsgiverEtter,
+                dagerFør = dagerFør,
+                dagerEtter = dagerEtter,
+                dagsbeløpFør = dagsbeløpFør,
+                dagsbeløpEtter = dagsbeløpEtter,
+            )
+
+        event?.let {
+            meldingPubliserer.publiser(
+                fødselsnummer = tilkommenInntekt.fødselsnummer,
+                hendelse = it,
+                årsak = "tilkommen inntekt endret",
+            )
+        }
     }
 
     override fun fjernTilkommenInntekt(
@@ -157,25 +173,39 @@ class TilkommenInntektMutationHandler(
                 session.tilkommenInntektRepository.finn(TilkommenInntektId(tilkommenInntektId))
                     ?: error("Fant ikke tilkommen inntekt med tilkommenInntektId $tilkommenInntektId")
 
-            tilkommenInntekt.fjern(
-                saksbehandlerIdent = env.graphQlContext.get<Saksbehandler>(SAKSBEHANDLER).ident,
+            fjernTilkommenInntekt(
+                tilkommenInntekt = tilkommenInntekt,
                 notatTilBeslutter = notatTilBeslutter,
-                totrinnsvurderingId =
-                    finnEllerOpprettTotrinnsvurdering(
-                        fodselsnummer = tilkommenInntekt.fødselsnummer,
-                        totrinnsvurderingRepository = session.totrinnsvurderingRepository,
-                    ).id(),
-            )
-            session.tilkommenInntektRepository.lagre(tilkommenInntekt)
-
-            meldingPubliserer.publiser(
-                fødselsnummer = tilkommenInntekt.fødselsnummer,
-                hendelse = InntektsendringerEventBygger.forFjernet(tilkommenInntekt),
-                årsak = "tilkommen inntekt fjernet",
+                saksbehandler = env.graphQlContext.get(SAKSBEHANDLER),
+                session = session,
             )
         }
 
         return byggRespons(true)
+    }
+
+    fun fjernTilkommenInntekt(
+        tilkommenInntekt: TilkommenInntekt,
+        notatTilBeslutter: String,
+        saksbehandler: Saksbehandler,
+        session: SessionContext,
+    ) {
+        tilkommenInntekt.fjern(
+            saksbehandlerIdent = saksbehandler.ident,
+            notatTilBeslutter = notatTilBeslutter,
+            totrinnsvurderingId =
+                finnEllerOpprettTotrinnsvurdering(
+                    fodselsnummer = tilkommenInntekt.fødselsnummer,
+                    totrinnsvurderingRepository = session.totrinnsvurderingRepository,
+                ).id(),
+        )
+        session.tilkommenInntektRepository.lagre(tilkommenInntekt)
+
+        meldingPubliserer.publiser(
+            fødselsnummer = tilkommenInntekt.fødselsnummer,
+            hendelse = InntektsendringerEventBygger.forFjernet(tilkommenInntekt),
+            årsak = "tilkommen inntekt fjernet",
+        )
     }
 
     override fun gjenopprettTilkommenInntekt(
@@ -185,44 +215,60 @@ class TilkommenInntektMutationHandler(
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> {
         sessionFactory.transactionalSessionScope { session ->
-            val endretTilPeriode = endretTil.periode.fom tilOgMed endretTil.periode.tom
             val tilkommenInntekt =
                 session.tilkommenInntektRepository.finn(TilkommenInntektId(tilkommenInntektId))
                     ?: error("Fant ikke tilkommen inntekt med tilkommenInntektId $tilkommenInntektId")
 
-            TilkommenInntektPeriodeValidator.validerPeriode(
-                periode = endretTilPeriode,
-                organisasjonsnummer = endretTil.organisasjonsnummer,
-                andreTilkomneInntekter =
-                    session.tilkommenInntektRepository
-                        .finnAlleForFødselsnummer(tilkommenInntekt.fødselsnummer)
-                        .minus(tilkommenInntekt),
-                vedtaksperioder = session.vedtaksperiodeRepository.finnVedtaksperioder(tilkommenInntekt.fødselsnummer),
-            )
-
-            tilkommenInntekt.gjenopprett(
-                organisasjonsnummer = endretTil.organisasjonsnummer,
-                periode = endretTilPeriode,
-                periodebeløp = endretTil.periodebelop,
-                ekskluderteUkedager = endretTil.ekskluderteUkedager.toSet(),
-                saksbehandlerIdent = env.graphQlContext.get<Saksbehandler>(SAKSBEHANDLER).ident,
+            gjenopprettTilkommenInntekt(
+                tilkommenInntekt = tilkommenInntekt,
+                endretTil = endretTil,
                 notatTilBeslutter = notatTilBeslutter,
-                totrinnsvurderingId =
-                    finnEllerOpprettTotrinnsvurdering(
-                        fodselsnummer = tilkommenInntekt.fødselsnummer,
-                        totrinnsvurderingRepository = session.totrinnsvurderingRepository,
-                    ).id(),
-            )
-            session.tilkommenInntektRepository.lagre(tilkommenInntekt)
-
-            meldingPubliserer.publiser(
-                fødselsnummer = tilkommenInntekt.fødselsnummer,
-                hendelse = InntektsendringerEventBygger.forNy(tilkommenInntekt),
-                årsak = "tilkommen inntekt gjenopprettet",
+                saksbehandler = env.graphQlContext.get(SAKSBEHANDLER),
+                session = session,
             )
         }
 
         return byggRespons(true)
+    }
+
+    fun gjenopprettTilkommenInntekt(
+        tilkommenInntekt: TilkommenInntekt,
+        endretTil: ApiTilkommenInntektInput,
+        notatTilBeslutter: String,
+        saksbehandler: Saksbehandler,
+        session: SessionContext,
+    ) {
+        val endretTilPeriode = endretTil.periode.fom tilOgMed endretTil.periode.tom
+        TilkommenInntektPeriodeValidator.validerPeriode(
+            periode = endretTilPeriode,
+            organisasjonsnummer = endretTil.organisasjonsnummer,
+            andreTilkomneInntekter =
+                session.tilkommenInntektRepository
+                    .finnAlleForFødselsnummer(tilkommenInntekt.fødselsnummer)
+                    .minus(tilkommenInntekt),
+            vedtaksperioder = session.vedtaksperiodeRepository.finnVedtaksperioder(tilkommenInntekt.fødselsnummer),
+        )
+
+        tilkommenInntekt.gjenopprett(
+            organisasjonsnummer = endretTil.organisasjonsnummer,
+            periode = endretTilPeriode,
+            periodebeløp = endretTil.periodebelop,
+            ekskluderteUkedager = endretTil.ekskluderteUkedager.toSet(),
+            saksbehandlerIdent = saksbehandler.ident,
+            notatTilBeslutter = notatTilBeslutter,
+            totrinnsvurderingId =
+                finnEllerOpprettTotrinnsvurdering(
+                    fodselsnummer = tilkommenInntekt.fødselsnummer,
+                    totrinnsvurderingRepository = session.totrinnsvurderingRepository,
+                ).id(),
+        )
+        session.tilkommenInntektRepository.lagre(tilkommenInntekt)
+
+        meldingPubliserer.publiser(
+            fødselsnummer = tilkommenInntekt.fødselsnummer,
+            hendelse = InntektsendringerEventBygger.forNy(tilkommenInntekt),
+            årsak = "tilkommen inntekt gjenopprettet",
+        )
     }
 
     private fun finnEllerOpprettTotrinnsvurdering(

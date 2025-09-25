@@ -4,10 +4,17 @@ import io.ktor.http.HttpStatusCode
 
 abstract class HttpException(
     val statusCode: HttpStatusCode,
-) : Exception()
+    message: String?,
+) : Exception(message)
 
-class HttpUnauthorized : HttpException(HttpStatusCode.Unauthorized)
+class HttpUnauthorized(
+    message: String? = null,
+) : HttpException(HttpStatusCode.Unauthorized, message)
 
-class HttpForbidden : HttpException(HttpStatusCode.Forbidden)
+class HttpForbidden(
+    message: String? = null,
+) : HttpException(HttpStatusCode.Forbidden, message)
 
-class HttpNotFound : HttpException(HttpStatusCode.NotFound)
+class HttpNotFound(
+    message: String? = null,
+) : HttpException(HttpStatusCode.NotFound, message)

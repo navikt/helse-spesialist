@@ -18,6 +18,7 @@ import no.nav.helse.spesialist.application.tilgangskontroll.PersonTilgangskontro
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
+import java.util.UUID
 import kotlin.reflect.KClass
 
 class RestHandler(
@@ -116,12 +117,21 @@ class RestHandler(
             )
         ) {
             logg.warn("Saksbehandler mangler nødvendig tilgang")
-            sikkerlogg.warn("Saksbehandler mangler nødvendig tilgang til fødselsnummer $fødselsnummer")
+            sikkerlogg.warn("Saksbehandler ${saksbehandler.id().value} mangler nødvendig tilgang til fødselsnummer $fødselsnummer")
             throw feilSupplier()
         }
     }
 
     companion object {
-        fun Parameters.getRequired(name: String): String = this[name] ?: throw HttpNotFound()
+        fun Parameters.getRequired(name: String): String = this[name] ?: throw HttpNotFound("Mangler parameter $name i URL'en")
+
+        fun Parameters.getRequiredUUID(name: String): UUID {
+            val string = getRequired(name)
+            try {
+                return UUID.fromString(string)
+            } catch (e: IllegalArgumentException) {
+                throw HttpNotFound("Parameter $name i URL'en er ikke en UUID")
+            }
+        }
     }
 }

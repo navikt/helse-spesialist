@@ -120,10 +120,9 @@ class SpeilPersonReceiver(
         ekskluderteUkedager: Collection<LocalDate>,
         notatTilBeslutter: String
     ) {
-        callGraphQL(
-            operationName = "EndreTilkommenInntekt",
-            variables = mapOf(
-                "tilkommenInntektId" to tilkommenInntektId.toString(),
+        callHttpPost(
+            relativeUrl = "api/tilkomne-inntekter/${tilkommenInntektId}/endre",
+            request = mapOf(
                 "endretTil" to mapOf(
                     "organisasjonsnummer" to organisasjonsnummer,
                     "periode" to mapOf(
@@ -142,10 +141,9 @@ class SpeilPersonReceiver(
         tilkommenInntektId: UUID,
         notatTilBeslutter: String
     ) {
-        callGraphQL(
-            operationName = "FjernTilkommenInntekt",
-            variables = mapOf(
-                "tilkommenInntektId" to tilkommenInntektId.toString(),
+        callHttpPost(
+            relativeUrl = "api/tilkomne-inntekter/${tilkommenInntektId}/fjern",
+            request = mapOf(
                 "notatTilBeslutter" to notatTilBeslutter
             )
         )
@@ -160,10 +158,9 @@ class SpeilPersonReceiver(
         ekskluderteUkedager: Collection<LocalDate>,
         notatTilBeslutter: String
     ) {
-        callGraphQL(
-            operationName = "GjenopprettTilkommenInntekt",
-            variables = mapOf(
-                "tilkommenInntektId" to tilkommenInntektId.toString(),
+        callHttpPost(
+            relativeUrl = "api/tilkomne-inntekter/${tilkommenInntektId}/gjenopprett",
+            request = mapOf(
                 "endretTil" to mapOf(
                     "organisasjonsnummer" to organisasjonsnummer,
                     "periode" to mapOf(
