@@ -14,7 +14,6 @@ import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
-import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgruppeUuider
 import no.nav.helse.spesialist.db.DBDaos
 import no.nav.helse.spesialist.db.TransactionalSessionFactory
 import no.nav.helse.spesialist.domain.Saksbehandler
@@ -52,8 +51,7 @@ class TestMediator(
             oppgaveService = oppgaveService,
             apiOppgaveService = apiOppgaveService,
             environmentToggles = environmentToggles,
-            sessionFactory = TransactionalSessionFactory(dataSource),
-            tilgangsgruppeUuider = randomTilgangsgruppeUuider()
+            sessionFactory = TransactionalSessionFactory(dataSource)
         )
 
     private val stikkprøver =

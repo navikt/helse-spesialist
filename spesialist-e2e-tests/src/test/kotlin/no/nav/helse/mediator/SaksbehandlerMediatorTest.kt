@@ -44,7 +44,6 @@ import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkType
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
-import no.nav.helse.spesialist.application.tilgangskontroll.randomTilgangsgruppeUuider
 import no.nav.helse.spesialist.db.DBDaos
 import no.nav.helse.spesialist.db.DBSessionContext
 import no.nav.helse.spesialist.db.DataSourceDbQuery
@@ -430,8 +429,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             oppgaveService = oppgaveService,
             apiOppgaveService = apiOppgaveService,
             environmentToggles = environmentToggles,
-            sessionFactory = TransactionalSessionFactory(dataSource),
-            tilgangsgruppeUuider = randomTilgangsgruppeUuider()
+            sessionFactory = TransactionalSessionFactory(dataSource)
         )
 
     private val AKTØR_ID = lagAktørId()

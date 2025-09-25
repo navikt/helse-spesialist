@@ -66,7 +66,6 @@ class ApiModule(
             apiOppgaveService = apiOppgaveService,
             environmentToggles = environmentToggles,
             sessionFactory = sessionFactory,
-            tilgangsgruppeUuider = tilgangsgruppeUuider,
         )
 
     private val restDelegator =
