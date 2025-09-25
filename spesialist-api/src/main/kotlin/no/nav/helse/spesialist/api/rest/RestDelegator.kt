@@ -47,9 +47,17 @@ class RestDelegator(
         }.onFailure { cause ->
             val statusCode = (cause as? HttpException)?.statusCode ?: HttpStatusCode.InternalServerError
             loggThrowable("Returnerer HTTP ${statusCode.value}", cause)
-            call.respond(statusCode)
+            // GraphQL-biblioteket vi fortsatt bruker i Speil for å snakke med REST, liker dårlig å ikke få noe
+            // body i svaret. Vi legger det derfor på her så lenge vi har GraphQL der.
+            call.respond(statusCode, false)
         }.onSuccess { result ->
-            call.respond(result as Any)
+            if (result is HttpStatusCode) {
+                // GraphQL-biblioteket vi fortsatt bruker i Speil for å snakke med REST, liker dårlig å ikke få noe
+                // body i svaret. Vi legger det derfor på her så lenge vi har GraphQL der.
+                call.respond(result, true)
+            } else {
+                call.respond(result as Any)
+            }
         }
     }
 
