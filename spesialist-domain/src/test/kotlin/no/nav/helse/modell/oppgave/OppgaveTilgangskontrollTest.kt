@@ -75,6 +75,11 @@ class OppgaveTilgangskontrollTest {
             ),
             Arguments.of(
                 Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE,
+                "A123456",
+                setOf(Tilgangsgruppe.TBD)
+            ),
+            Arguments.of(
+                Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE,
                 "G155258", // En coach
                 emptySet<Tilgangsgruppe>()
             ),
