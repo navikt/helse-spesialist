@@ -481,9 +481,7 @@ class Oppgave private constructor(
                 STRENGT_FORTROLIG_ADRESSE -> false // Ingen skal ha tilgang til disse i Speil foreløpig
                 EGEN_ANSATT -> Tilgangsgruppe.EGEN_ANSATT in saksbehandlerTilgangsgrupper
                 FORTROLIG_ADRESSE -> Tilgangsgruppe.KODE_7 in saksbehandlerTilgangsgrupper
-                SELVSTENDIG_NÆRINGSDRIVENDE ->
-                    Tilgangsgruppe.TBD in saksbehandlerTilgangsgrupper ||
-                        SaksbehandlerIdentGrupper.TILGANG_TIL_SN.inneholder(saksbehandler.ident)
+                SELVSTENDIG_NÆRINGSDRIVENDE -> SaksbehandlerIdentGrupper.TILGANG_TIL_SN.inneholder(saksbehandler.ident)
 
                 else -> true
             }
