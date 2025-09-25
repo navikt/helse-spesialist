@@ -17,7 +17,6 @@ import io.ktor.server.routing.route
 import io.ktor.server.testing.ApplicationTestBuilder
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.StansAutomatiskBehandlingSaksbehandlerDao
 import no.nav.helse.db.VedtakBegrunnelseDao
 import no.nav.helse.mediator.SaksbehandlerMediator
@@ -84,7 +83,6 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
     private val snapshothenter = SpleisClientSnapshothenter(spleisClient)
     private val personinfoDao = daos.personinfoDao
     private val snapshotService = SnapshotService(personinfoDao, snapshothenter)
-    private val meldingPubliserer = mockk<MeldingPubliserer>(relaxed = true)
 
     private val apiTesting = ApiTesting(
         jwtStub,
@@ -148,10 +146,7 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                         egenAnsattApiDao = egenAnsattApiDao,
                         dokumenthåndterer = dokumenthåndterer,
                     ),
-                    tilkommenInntekt = TilkommenInntektQueryHandler(
-                        sessionFactory = sessionFactory,
-                        daos = daos
-                    ),
+                    tilkommenInntekt = TilkommenInntektQueryHandler(),
                     hentSaksbehandlere = HentSaksbehandlereQueryHandler(
                         saksbehandlerDao = saksbehandlerDao,
                     )
@@ -179,7 +174,7 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                     ),
                     paVent = PaVentMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
                     opphevStans = OpphevStansMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
-                    tilkommenInntekt = TilkommenInntektMutationHandler(sessionFactory, meldingPubliserer),
+                    tilkommenInntekt = TilkommenInntektMutationHandler(),
                     stansAutomatiskBehandling = StansAutomatiskBehandlingMutationHandler(sessionFactory)
                 ),
             )

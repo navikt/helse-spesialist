@@ -14,7 +14,6 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
-import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.Daos
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.mediator.SaksbehandlerMediator
@@ -113,7 +112,6 @@ fun lagSchemaMedResolversOgHandlers(
     behandlingstatistikk: IBehandlingsstatistikkService,
     dokumenthåndterer: Dokumenthåndterer,
     godkjenninghåndterer: Godkjenninghåndterer,
-    meldingPubliserer: MeldingPubliserer,
 ): SpesialistSchema =
     SpesialistSchema(
         queryHandlers =
@@ -171,10 +169,7 @@ fun lagSchemaMedResolversOgHandlers(
                         dokumenthåndterer = dokumenthåndterer,
                     ),
                 tilkommenInntekt =
-                    TilkommenInntektQueryHandler(
-                        sessionFactory = sessionFactory,
-                        daos = daos,
-                    ),
+                    TilkommenInntektQueryHandler(),
                 hentSaksbehandlere =
                     HentSaksbehandlereQueryHandler(
                         saksbehandlerDao = daos.saksbehandlerDao,
@@ -209,10 +204,7 @@ fun lagSchemaMedResolversOgHandlers(
                 paVent = PaVentMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
                 opphevStans = OpphevStansMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
                 tilkommenInntekt =
-                    TilkommenInntektMutationHandler(
-                        sessionFactory = sessionFactory,
-                        meldingPubliserer = meldingPubliserer,
-                    ),
+                    TilkommenInntektMutationHandler(),
                 stansAutomatiskBehandling = StansAutomatiskBehandlingMutationHandler(sessionFactory = sessionFactory),
             ),
     )

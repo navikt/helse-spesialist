@@ -96,7 +96,6 @@ class ApiModule(
                     periodehistorikkDao = daos.periodehistorikkDao,
                     sessionFactory = sessionFactory,
                 ),
-            meldingPubliserer = meldingPubliserer,
         )
 
     fun setUpApi(application: Application) {

@@ -105,7 +105,6 @@ object TestRunner {
                         behandlingstatistikk = avhengigheter.behandlingstatistikk,
                         dokumenthåndterer = avhengigheter.dokumenthåndterer,
                         godkjenninghåndterer = avhengigheter.godkjenninghåndterer,
-                        meldingPubliserer = avhengigheter.meldingPubliserer,
                     )
                 kobleOppApi(
                     ktorApplication = this,
