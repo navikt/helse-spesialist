@@ -61,7 +61,35 @@ class RestHandler(
         }
     }
 
-    suspend fun <REQUEST : Any, RESPONSE> handlePost(
+    suspend inline fun <URLPARAMETRE, reified REQUESTBODY : Any, RESPONSE> håndterPost(
+        call: RoutingCall,
+        håndterer: PostHåndterer<URLPARAMETRE, REQUESTBODY, RESPONSE>,
+        noinline parameterTolkning: (Parameters) -> URLPARAMETRE,
+    ) {
+        håndterPost(call, håndterer, parameterTolkning, REQUESTBODY::class)
+    }
+
+    suspend fun <REQUESTBODY : Any, RESPONSE, URLPARAMETRE> håndterPost(
+        call: RoutingCall,
+        håndterer: PostHåndterer<URLPARAMETRE, REQUESTBODY, RESPONSE>,
+        parameterTolkning: (Parameters) -> URLPARAMETRE,
+        requestType: KClass<REQUESTBODY>,
+    ) {
+        håndterPost(
+            call = call,
+            requestType = requestType,
+        ) { parametre, request, saksbehandler, tilgangsgrupper, transaksjon ->
+            håndterer.håndter(
+                urlParametre = parameterTolkning.invoke(parametre),
+                requestBody = request,
+                saksbehandler = saksbehandler,
+                tilgangsgrupper = tilgangsgrupper,
+                transaksjon = transaksjon,
+            )
+        }
+    }
+
+    suspend fun <REQUEST : Any, RESPONSE> håndterPost(
         call: RoutingCall,
         requestType: KClass<REQUEST>,
         callback: (
@@ -129,7 +157,7 @@ class RestHandler(
             val string = getRequired(name)
             try {
                 return UUID.fromString(string)
-            } catch (e: IllegalArgumentException) {
+            } catch (_: IllegalArgumentException) {
                 throw HttpNotFound("Parameter $name i URL'en er ikke en UUID")
             }
         }

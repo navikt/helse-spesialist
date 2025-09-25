@@ -11,6 +11,7 @@ import io.ktor.server.auth.authenticate
 import io.ktor.server.request.ApplicationRequest
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
+import io.ktor.server.routing.Routing
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
@@ -98,11 +99,18 @@ fun kobleOppApi(
                 queryHandler(graphQLPlugin.server)
             }
         }
-        route("api") {
-            authenticate("oidc") {
-                opphevStansController.addToRoute(this)
-                tilkommenInntektController.addToRoute(this)
-            }
+        restRoutes(opphevStansController, tilkommenInntektController)
+    }
+}
+
+private fun Routing.restRoutes(
+    opphevStansController: OpphevStansController,
+    tilkommenInntektController: TilkommenInntektController,
+) {
+    route("api") {
+        authenticate("oidc") {
+            opphevStansController.addToRoute(this)
+            tilkommenInntektController.addToRoute(this)
         }
     }
 }

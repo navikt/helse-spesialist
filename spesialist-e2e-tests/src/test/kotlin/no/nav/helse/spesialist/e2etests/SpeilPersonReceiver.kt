@@ -95,7 +95,7 @@ class SpeilPersonReceiver(
         notatTilBeslutter: String
     ): UUID =
         callHttpPost(
-            relativeUrl = "api/tidligere-mutations/tilkommen-inntekt/legg-til",
+            relativeUrl = "api/tilkomne-inntekter/legg-til",
             request = mapOf(
                 "fodselsnummer" to testContext.person.fødselsnummer,
                 "verdier" to mapOf(

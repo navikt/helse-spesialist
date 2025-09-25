@@ -6,7 +6,6 @@ import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.helse.db.SessionContext
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand
-import no.nav.helse.spesialist.api.graphql.mutation.LeggTilTilkommenInntektResponse
 import no.nav.helse.spesialist.api.graphql.mutation.TilkommenInntektMutationHandler
 import no.nav.helse.spesialist.api.graphql.schema.ApiDatoPeriode
 import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntekt
@@ -14,11 +13,14 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektEndretEvent
 import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektEvent
 import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektFjernetEvent
 import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektGjenopprettetEvent
-import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektInput
 import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektOpprettetEvent
 import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektskilde
 import no.nav.helse.spesialist.api.rest.RestHandler.Companion.getRequired
 import no.nav.helse.spesialist.api.rest.RestHandler.Companion.getRequiredUUID
+import no.nav.helse.spesialist.api.rest.tilkommeninntekt.TilkommenInntektEndreHåndterer
+import no.nav.helse.spesialist.api.rest.tilkommeninntekt.TilkommenInntektFjernHåndterer
+import no.nav.helse.spesialist.api.rest.tilkommeninntekt.TilkommenInntektGjenopprettHåndterer
+import no.nav.helse.spesialist.api.rest.tilkommeninntekt.TilkommenInntektLeggTilHåndterer
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.domain.tilkommeninntekt.Endring
@@ -26,107 +28,66 @@ import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektEndretEve
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektEvent
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektFjernetEvent
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektGjenopprettetEvent
-import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektId
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektOpprettetEvent
 import java.math.BigDecimal
 import java.time.ZoneId
-import java.util.UUID
 
 class TilkommenInntektController(
     private val handler: RestHandler,
     private val tilkommenInntektMutationHandler: TilkommenInntektMutationHandler,
 ) {
-    data class LeggTilTilkommenInntektInput(
-        val fodselsnummer: String,
-        val verdier: ApiTilkommenInntektInput,
-        val notatTilBeslutter: String,
-    )
-
-    data class TilkommenInntektUrlParametre(
-        val tilkommenInntektId: UUID,
-    )
-
     data class AktørUrlParametre(
         val aktørId: String,
     )
 
-    data class EndreTilkommenInntektInput(
-        val endretTil: ApiTilkommenInntektInput,
-        val notatTilBeslutter: String,
-    )
-
-    data class FjernTilkommenInntektInput(
-        val notatTilBeslutter: String,
-    )
-
-    data class GjenopprettTilkommenInntektInput(
-        val endretTil: ApiTilkommenInntektInput,
-        val notatTilBeslutter: String,
-    )
-
     fun addToRoute(route: Route) {
         route.post("tidligere-mutations/tilkommen-inntekt/legg-til") {
-            handler.handlePost(
+            handler.håndterPost(
                 call = call,
-                requestType = LeggTilTilkommenInntektInput::class,
-            ) { _, request, saksbehandler, tilgangsgrupper, transaksjon ->
-                leggTil(
-                    request = request,
-                    saksbehandler = saksbehandler,
-                    tilgangsgrupper = tilgangsgrupper,
-                    transaksjon = transaksjon,
+                håndterer = TilkommenInntektLeggTilHåndterer(handler, tilkommenInntektMutationHandler),
+                parameterTolkning = { },
+            )
+        }
+        route.route("tilkomne-inntekter") {
+            post("legg-til") {
+                handler.håndterPost(
+                    call = call,
+                    håndterer = TilkommenInntektLeggTilHåndterer(handler, tilkommenInntektMutationHandler),
+                    parameterTolkning = { },
                 )
             }
-        }
-        route.route("tilkomne-inntekter/{tilkommenInntektId}") {
-            post("endre") {
-                handler.handlePost(
-                    call = call,
-                    requestType = EndreTilkommenInntektInput::class,
-                ) { parametre, request, saksbehandler, tilgangsgrupper, transaksjon ->
-                    endre(
-                        parametre =
-                            TilkommenInntektUrlParametre(
+            route("{tilkommenInntektId}") {
+                post("endre") {
+                    handler.håndterPost(
+                        call = call,
+                        håndterer = TilkommenInntektEndreHåndterer(handler, tilkommenInntektMutationHandler),
+                        parameterTolkning = { parametre ->
+                            TilkommenInntektEndreHåndterer.URLParametre(
                                 tilkommenInntektId = parametre.getRequiredUUID("tilkommenInntektId"),
-                            ),
-                        request = request,
-                        saksbehandler = saksbehandler,
-                        tilgangsgrupper = tilgangsgrupper,
-                        transaksjon = transaksjon,
+                            )
+                        },
                     )
                 }
-            }
-            post("fjern") {
-                handler.handlePost(
-                    call = call,
-                    requestType = FjernTilkommenInntektInput::class,
-                ) { parametre, request, saksbehandler, tilgangsgrupper, transaksjon ->
-                    fjern(
-                        parametre =
-                            TilkommenInntektUrlParametre(
+                post("fjern") {
+                    handler.håndterPost(
+                        call = call,
+                        håndterer = TilkommenInntektFjernHåndterer(handler, tilkommenInntektMutationHandler),
+                        parameterTolkning = { parametre ->
+                            TilkommenInntektFjernHåndterer.URLParametre(
                                 tilkommenInntektId = parametre.getRequiredUUID("tilkommenInntektId"),
-                            ),
-                        transaksjon = transaksjon,
-                        saksbehandler = saksbehandler,
-                        tilgangsgrupper = tilgangsgrupper,
-                        request = request,
+                            )
+                        },
                     )
                 }
-            }
-            post("gjenopprett") {
-                handler.handlePost(
-                    call = call,
-                    requestType = GjenopprettTilkommenInntektInput::class,
-                ) { parametre, request, saksbehandler, tilgangsgrupper, transaksjon ->
-                    gjenopprett(
-                        parametre =
-                            TilkommenInntektUrlParametre(
+                post("gjenopprett") {
+                    handler.håndterPost(
+                        call = call,
+                        håndterer = TilkommenInntektGjenopprettHåndterer(handler, tilkommenInntektMutationHandler),
+                        parameterTolkning = { parametre ->
+                            TilkommenInntektGjenopprettHåndterer.URLParametre(
                                 tilkommenInntektId = parametre.getRequiredUUID("tilkommenInntektId"),
-                            ),
-                        transaksjon = transaksjon,
-                        saksbehandler = saksbehandler,
-                        tilgangsgrupper = tilgangsgrupper,
-                        request = request,
+                            )
+                        },
                     )
                 }
             }
@@ -173,116 +134,6 @@ class TilkommenInntektController(
                 transaksjon = transaksjon,
             )
         }
-    }
-
-    private fun gjenopprett(
-        parametre: TilkommenInntektUrlParametre,
-        transaksjon: SessionContext,
-        saksbehandler: Saksbehandler,
-        tilgangsgrupper: Set<Tilgangsgruppe>,
-        request: GjenopprettTilkommenInntektInput,
-    ) {
-        val tilkommenInntektId = parametre.tilkommenInntektId
-
-        val tilkommenInntekt =
-            transaksjon.tilkommenInntektRepository.finn(TilkommenInntektId(tilkommenInntektId))
-                ?: throw HttpNotFound("Fant ikke tilkommen inntekt med tilkommentInntektId $tilkommenInntektId")
-
-        handler.kontrollerTilgangTilPerson(
-            fødselsnummer = tilkommenInntekt.fødselsnummer,
-            saksbehandler = saksbehandler,
-            tilgangsgrupper = tilgangsgrupper,
-            transaksjon = transaksjon,
-            feilSupplier = ::HttpForbidden,
-        )
-
-        tilkommenInntektMutationHandler.gjenopprettTilkommenInntekt(
-            tilkommenInntekt = tilkommenInntekt,
-            endretTil = request.endretTil,
-            notatTilBeslutter = request.notatTilBeslutter,
-            saksbehandler = saksbehandler,
-            session = transaksjon,
-        )
-    }
-
-    private fun fjern(
-        parametre: TilkommenInntektUrlParametre,
-        transaksjon: SessionContext,
-        saksbehandler: Saksbehandler,
-        tilgangsgrupper: Set<Tilgangsgruppe>,
-        request: FjernTilkommenInntektInput,
-    ) {
-        val tilkommenInntektId = parametre.tilkommenInntektId
-
-        val tilkommenInntekt =
-            transaksjon.tilkommenInntektRepository.finn(TilkommenInntektId(tilkommenInntektId))
-                ?: throw HttpNotFound("Fant ikke tilkommen inntekt med tilkommentInntektId $tilkommenInntektId")
-
-        handler.kontrollerTilgangTilPerson(
-            fødselsnummer = tilkommenInntekt.fødselsnummer,
-            saksbehandler = saksbehandler,
-            tilgangsgrupper = tilgangsgrupper,
-            transaksjon = transaksjon,
-            feilSupplier = ::HttpForbidden,
-        )
-
-        tilkommenInntektMutationHandler.fjernTilkommenInntekt(
-            tilkommenInntekt = tilkommenInntekt,
-            notatTilBeslutter = request.notatTilBeslutter,
-            saksbehandler = saksbehandler,
-            session = transaksjon,
-        )
-    }
-
-    private fun leggTil(
-        request: LeggTilTilkommenInntektInput,
-        saksbehandler: Saksbehandler,
-        tilgangsgrupper: Set<Tilgangsgruppe>,
-        transaksjon: SessionContext,
-    ): LeggTilTilkommenInntektResponse {
-        handler.kontrollerTilgangTilPerson(
-            fødselsnummer = request.fodselsnummer,
-            saksbehandler = saksbehandler,
-            tilgangsgrupper = tilgangsgrupper,
-            transaksjon = transaksjon,
-            feilSupplier = ::HttpForbidden,
-        )
-
-        return tilkommenInntektMutationHandler.leggTilTilkommenInntekt(
-            fodselsnummer = request.fodselsnummer,
-            verdier = request.verdier,
-            notatTilBeslutter = request.notatTilBeslutter,
-            saksbehandler = saksbehandler,
-            session = transaksjon,
-        )
-    }
-
-    fun endre(
-        parametre: TilkommenInntektUrlParametre,
-        request: EndreTilkommenInntektInput,
-        saksbehandler: Saksbehandler,
-        tilgangsgrupper: Set<Tilgangsgruppe>,
-        transaksjon: SessionContext,
-    ) {
-        val tilkommenInntekt =
-            transaksjon.tilkommenInntektRepository.finn(TilkommenInntektId(parametre.tilkommenInntektId))
-                ?: throw HttpNotFound("Fant ikke tilkommen inntekt med tilkommentInntektId ${parametre.tilkommenInntektId}")
-
-        handler.kontrollerTilgangTilPerson(
-            fødselsnummer = tilkommenInntekt.fødselsnummer,
-            saksbehandler = saksbehandler,
-            tilgangsgrupper = tilgangsgrupper,
-            transaksjon = transaksjon,
-            feilSupplier = ::HttpForbidden,
-        )
-
-        tilkommenInntektMutationHandler.endreTilkommenInntekt(
-            tilkommenInntekt = tilkommenInntekt,
-            endretTil = request.endretTil,
-            notatTilBeslutter = request.notatTilBeslutter,
-            saksbehandler = saksbehandler,
-            session = transaksjon,
-        )
     }
 
     private fun hentTilkomneInntektskilder(
