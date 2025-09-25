@@ -4,23 +4,20 @@ import io.ktor.http.HttpStatusCode
 import no.nav.helse.db.SessionContext
 import no.nav.helse.spesialist.api.graphql.mutation.InntektsendringerEventBygger
 import no.nav.helse.spesialist.api.graphql.mutation.TilkommenInntektMutationHandler
-import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektInput
 import no.nav.helse.spesialist.api.rest.HttpForbidden
 import no.nav.helse.spesialist.api.rest.HttpNotFound
 import no.nav.helse.spesialist.api.rest.PostHåndterer
 import no.nav.helse.spesialist.api.rest.RestHandler
-import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntekt
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektId
-import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektPeriodeValidator
 import java.util.UUID
 
-class TilkommenInntektEndreHåndterer(
+class PostTilkommenInntektFjernHåndterer(
     private val handler: RestHandler,
     tilkommenInntektMutationHandler: TilkommenInntektMutationHandler,
-) : PostHåndterer<TilkommenInntektEndreHåndterer.URLParametre, TilkommenInntektEndreHåndterer.RequestBody, HttpStatusCode> {
+) : PostHåndterer<PostTilkommenInntektFjernHåndterer.URLParametre, PostTilkommenInntektFjernHåndterer.RequestBody, HttpStatusCode> {
     private val meldingPubliserer = tilkommenInntektMutationHandler.meldingPubliserer
 
     data class URLParametre(
@@ -28,7 +25,6 @@ class TilkommenInntektEndreHåndterer(
     )
 
     data class RequestBody(
-        val endretTil: ApiTilkommenInntektInput,
         val notatTilBeslutter: String,
     )
 
@@ -51,9 +47,8 @@ class TilkommenInntektEndreHåndterer(
             feilSupplier = ::HttpForbidden,
         )
 
-        endreTilkommenInntekt(
+        fjernTilkommenInntekt(
             tilkommenInntekt = tilkommenInntekt,
-            endretTil = requestBody.endretTil,
             notatTilBeslutter = requestBody.notatTilBeslutter,
             saksbehandler = saksbehandler,
             session = transaksjon,
@@ -62,33 +57,13 @@ class TilkommenInntektEndreHåndterer(
         return HttpStatusCode.NoContent
     }
 
-    private fun endreTilkommenInntekt(
+    private fun fjernTilkommenInntekt(
         tilkommenInntekt: TilkommenInntekt,
-        endretTil: ApiTilkommenInntektInput,
         notatTilBeslutter: String,
         saksbehandler: Saksbehandler,
         session: SessionContext,
     ) {
-        val endretTilPeriode = endretTil.periode.fom tilOgMed endretTil.periode.tom
-        TilkommenInntektPeriodeValidator.validerPeriode(
-            periode = endretTilPeriode,
-            organisasjonsnummer = endretTil.organisasjonsnummer,
-            andreTilkomneInntekter =
-                session.tilkommenInntektRepository
-                    .finnAlleForFødselsnummer(tilkommenInntekt.fødselsnummer)
-                    .minus(tilkommenInntekt),
-            vedtaksperioder = session.vedtaksperiodeRepository.finnVedtaksperioder(tilkommenInntekt.fødselsnummer),
-        )
-
-        val arbeidsgiverFør = tilkommenInntekt.organisasjonsnummer
-        val dagerFør = tilkommenInntekt.dagerTilGradering()
-        val dagsbeløpFør = tilkommenInntekt.dagbeløp()
-
-        tilkommenInntekt.endreTil(
-            organisasjonsnummer = endretTil.organisasjonsnummer,
-            periode = endretTil.periode.fom tilOgMed endretTil.periode.tom,
-            periodebeløp = endretTil.periodebelop,
-            ekskluderteUkedager = endretTil.ekskluderteUkedager.toSet(),
+        tilkommenInntekt.fjern(
             saksbehandlerIdent = saksbehandler.ident,
             notatTilBeslutter = notatTilBeslutter,
             totrinnsvurderingId =
@@ -99,26 +74,10 @@ class TilkommenInntektEndreHåndterer(
         )
         session.tilkommenInntektRepository.lagre(tilkommenInntekt)
 
-        val arbeidsgiverEtter = tilkommenInntekt.organisasjonsnummer
-        val dagerEtter = tilkommenInntekt.dagerTilGradering()
-        val dagsbeløpEtter = tilkommenInntekt.dagbeløp()
-
-        val event =
-            InntektsendringerEventBygger.forEndring(
-                arbeidsgiverFør = arbeidsgiverFør,
-                arbeidsgiverEtter = arbeidsgiverEtter,
-                dagerFør = dagerFør,
-                dagerEtter = dagerEtter,
-                dagsbeløpFør = dagsbeløpFør,
-                dagsbeløpEtter = dagsbeløpEtter,
-            )
-
-        event?.let {
-            meldingPubliserer.publiser(
-                fødselsnummer = tilkommenInntekt.fødselsnummer,
-                hendelse = it,
-                årsak = "tilkommen inntekt endret",
-            )
-        }
+        meldingPubliserer.publiser(
+            fødselsnummer = tilkommenInntekt.fødselsnummer,
+            hendelse = InntektsendringerEventBygger.forFjernet(tilkommenInntekt),
+            årsak = "tilkommen inntekt fjernet",
+        )
     }
 }

@@ -8,10 +8,10 @@ import no.nav.helse.spesialist.api.graphql.mutation.TilkommenInntektMutationHand
 import no.nav.helse.spesialist.api.rest.RestHandler.Companion.getRequired
 import no.nav.helse.spesialist.api.rest.RestHandler.Companion.getRequiredUUID
 import no.nav.helse.spesialist.api.rest.tilkommeninntekt.GetTilkomneInntektskilderHåndterer
-import no.nav.helse.spesialist.api.rest.tilkommeninntekt.TilkommenInntektEndreHåndterer
-import no.nav.helse.spesialist.api.rest.tilkommeninntekt.TilkommenInntektFjernHåndterer
-import no.nav.helse.spesialist.api.rest.tilkommeninntekt.TilkommenInntektGjenopprettHåndterer
-import no.nav.helse.spesialist.api.rest.tilkommeninntekt.TilkommenInntektLeggTilHåndterer
+import no.nav.helse.spesialist.api.rest.tilkommeninntekt.PostTilkommenInntektEndreHåndterer
+import no.nav.helse.spesialist.api.rest.tilkommeninntekt.PostTilkommenInntektFjernHåndterer
+import no.nav.helse.spesialist.api.rest.tilkommeninntekt.PostTilkommenInntektGjenopprettHåndterer
+import no.nav.helse.spesialist.api.rest.tilkommeninntekt.PostTilkommenInntektLeggTilHåndterer
 
 class TilkommenInntektController(
     private val handler: RestHandler,
@@ -21,7 +21,7 @@ class TilkommenInntektController(
         route.post("tidligere-mutations/tilkommen-inntekt/legg-til") {
             handler.håndterPost(
                 call = call,
-                håndterer = TilkommenInntektLeggTilHåndterer(handler, tilkommenInntektMutationHandler),
+                håndterer = PostTilkommenInntektLeggTilHåndterer(handler, tilkommenInntektMutationHandler),
                 parameterTolkning = { },
             )
         }
@@ -29,7 +29,7 @@ class TilkommenInntektController(
             post("legg-til") {
                 handler.håndterPost(
                     call = call,
-                    håndterer = TilkommenInntektLeggTilHåndterer(handler, tilkommenInntektMutationHandler),
+                    håndterer = PostTilkommenInntektLeggTilHåndterer(handler, tilkommenInntektMutationHandler),
                     parameterTolkning = { },
                 )
             }
@@ -37,9 +37,9 @@ class TilkommenInntektController(
                 post("endre") {
                     handler.håndterPost(
                         call = call,
-                        håndterer = TilkommenInntektEndreHåndterer(handler, tilkommenInntektMutationHandler),
+                        håndterer = PostTilkommenInntektEndreHåndterer(handler, tilkommenInntektMutationHandler),
                         parameterTolkning = { parametre ->
-                            TilkommenInntektEndreHåndterer.URLParametre(
+                            PostTilkommenInntektEndreHåndterer.URLParametre(
                                 tilkommenInntektId = parametre.getRequiredUUID("tilkommenInntektId"),
                             )
                         },
@@ -48,9 +48,9 @@ class TilkommenInntektController(
                 post("fjern") {
                     handler.håndterPost(
                         call = call,
-                        håndterer = TilkommenInntektFjernHåndterer(handler, tilkommenInntektMutationHandler),
+                        håndterer = PostTilkommenInntektFjernHåndterer(handler, tilkommenInntektMutationHandler),
                         parameterTolkning = { parametre ->
-                            TilkommenInntektFjernHåndterer.URLParametre(
+                            PostTilkommenInntektFjernHåndterer.URLParametre(
                                 tilkommenInntektId = parametre.getRequiredUUID("tilkommenInntektId"),
                             )
                         },
@@ -59,9 +59,9 @@ class TilkommenInntektController(
                 post("gjenopprett") {
                     handler.håndterPost(
                         call = call,
-                        håndterer = TilkommenInntektGjenopprettHåndterer(handler, tilkommenInntektMutationHandler),
+                        håndterer = PostTilkommenInntektGjenopprettHåndterer(handler, tilkommenInntektMutationHandler),
                         parameterTolkning = { parametre ->
-                            TilkommenInntektGjenopprettHåndterer.URLParametre(
+                            PostTilkommenInntektGjenopprettHåndterer.URLParametre(
                                 tilkommenInntektId = parametre.getRequiredUUID("tilkommenInntektId"),
                             )
                         },

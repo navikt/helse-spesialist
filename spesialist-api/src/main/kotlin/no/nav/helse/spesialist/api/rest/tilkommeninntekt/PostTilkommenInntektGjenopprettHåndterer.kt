@@ -4,20 +4,23 @@ import io.ktor.http.HttpStatusCode
 import no.nav.helse.db.SessionContext
 import no.nav.helse.spesialist.api.graphql.mutation.InntektsendringerEventBygger
 import no.nav.helse.spesialist.api.graphql.mutation.TilkommenInntektMutationHandler
+import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektInput
 import no.nav.helse.spesialist.api.rest.HttpForbidden
 import no.nav.helse.spesialist.api.rest.HttpNotFound
 import no.nav.helse.spesialist.api.rest.PostHåndterer
 import no.nav.helse.spesialist.api.rest.RestHandler
+import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntekt
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektId
+import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektPeriodeValidator
 import java.util.UUID
 
-class TilkommenInntektFjernHåndterer(
+class PostTilkommenInntektGjenopprettHåndterer(
     private val handler: RestHandler,
     tilkommenInntektMutationHandler: TilkommenInntektMutationHandler,
-) : PostHåndterer<TilkommenInntektFjernHåndterer.URLParametre, TilkommenInntektFjernHåndterer.RequestBody, HttpStatusCode> {
+) : PostHåndterer<PostTilkommenInntektGjenopprettHåndterer.URLParametre, PostTilkommenInntektGjenopprettHåndterer.RequestBody, HttpStatusCode> {
     private val meldingPubliserer = tilkommenInntektMutationHandler.meldingPubliserer
 
     data class URLParametre(
@@ -25,6 +28,7 @@ class TilkommenInntektFjernHåndterer(
     )
 
     data class RequestBody(
+        val endretTil: ApiTilkommenInntektInput,
         val notatTilBeslutter: String,
     )
 
@@ -47,8 +51,9 @@ class TilkommenInntektFjernHåndterer(
             feilSupplier = ::HttpForbidden,
         )
 
-        fjernTilkommenInntekt(
+        gjenopprettTilkommenInntekt(
             tilkommenInntekt = tilkommenInntekt,
+            endretTil = requestBody.endretTil,
             notatTilBeslutter = requestBody.notatTilBeslutter,
             saksbehandler = saksbehandler,
             session = transaksjon,
@@ -57,13 +62,29 @@ class TilkommenInntektFjernHåndterer(
         return HttpStatusCode.NoContent
     }
 
-    private fun fjernTilkommenInntekt(
+    private fun gjenopprettTilkommenInntekt(
         tilkommenInntekt: TilkommenInntekt,
+        endretTil: ApiTilkommenInntektInput,
         notatTilBeslutter: String,
         saksbehandler: Saksbehandler,
         session: SessionContext,
     ) {
-        tilkommenInntekt.fjern(
+        val endretTilPeriode = endretTil.periode.fom tilOgMed endretTil.periode.tom
+        TilkommenInntektPeriodeValidator.validerPeriode(
+            periode = endretTilPeriode,
+            organisasjonsnummer = endretTil.organisasjonsnummer,
+            andreTilkomneInntekter =
+                session.tilkommenInntektRepository
+                    .finnAlleForFødselsnummer(tilkommenInntekt.fødselsnummer)
+                    .minus(tilkommenInntekt),
+            vedtaksperioder = session.vedtaksperiodeRepository.finnVedtaksperioder(tilkommenInntekt.fødselsnummer),
+        )
+
+        tilkommenInntekt.gjenopprett(
+            organisasjonsnummer = endretTil.organisasjonsnummer,
+            periode = endretTilPeriode,
+            periodebeløp = endretTil.periodebelop,
+            ekskluderteUkedager = endretTil.ekskluderteUkedager.toSet(),
             saksbehandlerIdent = saksbehandler.ident,
             notatTilBeslutter = notatTilBeslutter,
             totrinnsvurderingId =
@@ -76,8 +97,8 @@ class TilkommenInntektFjernHåndterer(
 
         meldingPubliserer.publiser(
             fødselsnummer = tilkommenInntekt.fødselsnummer,
-            hendelse = InntektsendringerEventBygger.forFjernet(tilkommenInntekt),
-            årsak = "tilkommen inntekt fjernet",
+            hendelse = InntektsendringerEventBygger.forNy(tilkommenInntekt),
+            årsak = "tilkommen inntekt gjenopprettet",
         )
     }
 }

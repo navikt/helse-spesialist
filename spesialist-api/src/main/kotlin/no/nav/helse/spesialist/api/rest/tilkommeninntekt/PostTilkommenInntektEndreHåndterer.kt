@@ -17,10 +17,10 @@ import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektId
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektPeriodeValidator
 import java.util.UUID
 
-class TilkommenInntektGjenopprettHåndterer(
+class PostTilkommenInntektEndreHåndterer(
     private val handler: RestHandler,
     tilkommenInntektMutationHandler: TilkommenInntektMutationHandler,
-) : PostHåndterer<TilkommenInntektGjenopprettHåndterer.URLParametre, TilkommenInntektGjenopprettHåndterer.RequestBody, HttpStatusCode> {
+) : PostHåndterer<PostTilkommenInntektEndreHåndterer.URLParametre, PostTilkommenInntektEndreHåndterer.RequestBody, HttpStatusCode> {
     private val meldingPubliserer = tilkommenInntektMutationHandler.meldingPubliserer
 
     data class URLParametre(
@@ -51,7 +51,7 @@ class TilkommenInntektGjenopprettHåndterer(
             feilSupplier = ::HttpForbidden,
         )
 
-        gjenopprettTilkommenInntekt(
+        endreTilkommenInntekt(
             tilkommenInntekt = tilkommenInntekt,
             endretTil = requestBody.endretTil,
             notatTilBeslutter = requestBody.notatTilBeslutter,
@@ -62,7 +62,7 @@ class TilkommenInntektGjenopprettHåndterer(
         return HttpStatusCode.NoContent
     }
 
-    private fun gjenopprettTilkommenInntekt(
+    private fun endreTilkommenInntekt(
         tilkommenInntekt: TilkommenInntekt,
         endretTil: ApiTilkommenInntektInput,
         notatTilBeslutter: String,
@@ -80,9 +80,13 @@ class TilkommenInntektGjenopprettHåndterer(
             vedtaksperioder = session.vedtaksperiodeRepository.finnVedtaksperioder(tilkommenInntekt.fødselsnummer),
         )
 
-        tilkommenInntekt.gjenopprett(
+        val arbeidsgiverFør = tilkommenInntekt.organisasjonsnummer
+        val dagerFør = tilkommenInntekt.dagerTilGradering()
+        val dagsbeløpFør = tilkommenInntekt.dagbeløp()
+
+        tilkommenInntekt.endreTil(
             organisasjonsnummer = endretTil.organisasjonsnummer,
-            periode = endretTilPeriode,
+            periode = endretTil.periode.fom tilOgMed endretTil.periode.tom,
             periodebeløp = endretTil.periodebelop,
             ekskluderteUkedager = endretTil.ekskluderteUkedager.toSet(),
             saksbehandlerIdent = saksbehandler.ident,
@@ -95,10 +99,26 @@ class TilkommenInntektGjenopprettHåndterer(
         )
         session.tilkommenInntektRepository.lagre(tilkommenInntekt)
 
-        meldingPubliserer.publiser(
-            fødselsnummer = tilkommenInntekt.fødselsnummer,
-            hendelse = InntektsendringerEventBygger.forNy(tilkommenInntekt),
-            årsak = "tilkommen inntekt gjenopprettet",
-        )
+        val arbeidsgiverEtter = tilkommenInntekt.organisasjonsnummer
+        val dagerEtter = tilkommenInntekt.dagerTilGradering()
+        val dagsbeløpEtter = tilkommenInntekt.dagbeløp()
+
+        val event =
+            InntektsendringerEventBygger.forEndring(
+                arbeidsgiverFør = arbeidsgiverFør,
+                arbeidsgiverEtter = arbeidsgiverEtter,
+                dagerFør = dagerFør,
+                dagerEtter = dagerEtter,
+                dagsbeløpFør = dagsbeløpFør,
+                dagsbeløpEtter = dagsbeløpEtter,
+            )
+
+        event?.let {
+            meldingPubliserer.publiser(
+                fødselsnummer = tilkommenInntekt.fødselsnummer,
+                hendelse = it,
+                årsak = "tilkommen inntekt endret",
+            )
+        }
     }
 }

@@ -14,10 +14,10 @@ import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntekt
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektPeriodeValidator
 
-class TilkommenInntektLeggTilHåndterer(
+class PostTilkommenInntektLeggTilHåndterer(
     private val handler: RestHandler,
     tilkommenInntektMutationHandler: TilkommenInntektMutationHandler,
-) : PostHåndterer<Unit, TilkommenInntektLeggTilHåndterer.RequestBody, LeggTilTilkommenInntektResponse> {
+) : PostHåndterer<Unit, PostTilkommenInntektLeggTilHåndterer.RequestBody, LeggTilTilkommenInntektResponse> {
     private val meldingPubliserer = tilkommenInntektMutationHandler.meldingPubliserer
 
     data class RequestBody(
