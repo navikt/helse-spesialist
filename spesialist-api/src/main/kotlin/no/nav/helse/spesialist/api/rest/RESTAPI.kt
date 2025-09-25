@@ -31,7 +31,7 @@ fun Routing.restRoutes(restDelegator: RestDelegator) {
                 )
             }
             route("tilkomne-inntekter") {
-                post("legg-til") {
+                post {
                     restDelegator.utførPost(
                         call = call,
                         håndterer = PostTilkommenInntektLeggTilHåndterer(),
