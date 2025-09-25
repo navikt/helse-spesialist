@@ -25,14 +25,10 @@ class RestHandler(
     private val sessionFactory: SessionFactory,
     private val tilgangsgruppeUuider: TilgangsgruppeUuider,
 ) {
-    suspend fun <RESPONSE> handleGet(
+    suspend fun <RESPONSE, URLPARAMETRE> håndterGet(
         call: RoutingCall,
-        callback: (
-            parametre: Parameters,
-            saksbehandler: Saksbehandler,
-            tilgangsgrupper: Set<Tilgangsgruppe>,
-            transaksjon: SessionContext,
-        ) -> RESPONSE,
+        håndterer: GetHåndterer<URLPARAMETRE, RESPONSE>,
+        parameterTolkning: (Parameters) -> URLPARAMETRE,
     ) {
         val jwt = (call.principal<JWTPrincipal>() ?: throw HttpUnauthorized()).payload
 
@@ -45,11 +41,11 @@ class RestHandler(
 
         runCatching {
             sessionFactory.transactionalSessionScope { tx ->
-                callback.invoke(
-                    call.parameters,
-                    saksbehandler,
-                    tilgangsgrupper,
-                    tx,
+                håndterer.håndter(
+                    urlParametre = parameterTolkning.invoke(call.parameters),
+                    saksbehandler = saksbehandler,
+                    tilgangsgrupper = tilgangsgrupper,
+                    transaksjon = tx,
                 )
             }
         }.onFailure { cause ->
@@ -75,31 +71,6 @@ class RestHandler(
         parameterTolkning: (Parameters) -> URLPARAMETRE,
         requestType: KClass<REQUESTBODY>,
     ) {
-        håndterPost(
-            call = call,
-            requestType = requestType,
-        ) { parametre, request, saksbehandler, tilgangsgrupper, transaksjon ->
-            håndterer.håndter(
-                urlParametre = parameterTolkning.invoke(parametre),
-                requestBody = request,
-                saksbehandler = saksbehandler,
-                tilgangsgrupper = tilgangsgrupper,
-                transaksjon = transaksjon,
-            )
-        }
-    }
-
-    suspend fun <REQUEST : Any, RESPONSE> håndterPost(
-        call: RoutingCall,
-        requestType: KClass<REQUEST>,
-        callback: (
-            parametre: Parameters,
-            request: REQUEST,
-            saksbehandler: Saksbehandler,
-            tilgangsgrupper: Set<Tilgangsgruppe>,
-            transaksjon: SessionContext,
-        ) -> RESPONSE,
-    ) {
         val jwt = (call.principal<JWTPrincipal>() ?: throw HttpUnauthorized()).payload
 
         val saksbehandler = jwt.tilSaksbehandler()
@@ -109,16 +80,15 @@ class RestHandler(
             it.saksbehandlerRepository.lagre(saksbehandler = saksbehandler)
         }
 
-        val request: REQUEST = call.receive(requestType)
-
+        val request: REQUESTBODY = call.receive(type = requestType)
         runCatching {
             sessionFactory.transactionalSessionScope { tx ->
-                callback.invoke(
-                    call.parameters,
-                    request,
-                    saksbehandler,
-                    tilgangsgrupper,
-                    tx,
+                håndterer.håndter(
+                    urlParametre = parameterTolkning.invoke(call.parameters),
+                    requestBody = request,
+                    saksbehandler = saksbehandler,
+                    tilgangsgrupper = tilgangsgrupper,
+                    transaksjon = tx,
                 )
             }
         }.onFailure { cause ->
