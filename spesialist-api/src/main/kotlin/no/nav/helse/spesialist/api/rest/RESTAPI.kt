@@ -23,13 +23,6 @@ fun Routing.restRoutes(restDelegator: RestDelegator) {
                     parameterTolkning = { },
                 )
             }
-            post("tidligere-mutations/tilkommen-inntekt/legg-til") {
-                restDelegator.utførPost(
-                    call = call,
-                    håndterer = PostTilkommenInntektLeggTilHåndterer(),
-                    parameterTolkning = { },
-                )
-            }
             route("tilkomne-inntekter") {
                 post {
                     restDelegator.utførPost(
