@@ -19,7 +19,7 @@ import java.util.UUID
 
 class TilkommenInntektMutationHandler(
     private val sessionFactory: SessionFactory,
-    private val meldingPubliserer: MeldingPubliserer,
+    val meldingPubliserer: MeldingPubliserer,
 ) : TilkommenInntektMutationSchema {
     override fun leggTilTilkommenInntekt(
         fodselsnummer: String,
