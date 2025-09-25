@@ -12,7 +12,7 @@ class HentSaksbehandlereQueryHandler(
     override suspend fun hentSaksbehandlere(env: DataFetchingEnvironment): DataFetcherResult<List<ApiSaksbehandler>> {
         val saksbehandlere =
             saksbehandlerDao
-                .hentAlleAktiveSisteTreMnder()
+                .hentAlleAktiveSisteTreMnderEllerHarTildelteOppgaver()
                 .map { ApiSaksbehandler(ident = it.ident, navn = it.navn) }
         return byggRespons(saksbehandlere)
     }

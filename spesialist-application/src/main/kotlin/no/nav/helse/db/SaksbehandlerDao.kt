@@ -7,7 +7,7 @@ import java.util.UUID
 interface SaksbehandlerDao {
     fun hent(ident: String): Saksbehandler?
 
-    fun hentAlleAktiveSisteTreMnder(): List<Saksbehandler>
+    fun hentAlleAktiveSisteTreMnderEllerHarTildelteOppgaver(): List<Saksbehandler>
 
     fun opprettEllerOppdater(
         oid: UUID,

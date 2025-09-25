@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.db.dao
 
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
+import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -56,7 +57,33 @@ class PgSaksbehandlerDaoTest : AbstractDBIntegrationTest() {
             )
         }
 
-        val aktiveSaksbehandlereSisteTreMnd = saksbehandlerDao.hentAlleAktiveSisteTreMnder()
+        val aktiveSaksbehandlereSisteTreMnd = saksbehandlerDao.hentAlleAktiveSisteTreMnderEllerHarTildelteOppgaver()
         assertEquals(2, aktiveSaksbehandlereSisteTreMnd.size)
+    }
+
+    @Test
+    fun `henter alle saksbehandlere som har vært inaktiv mer enn tre mnd og har tildelte oppgaver`() {
+        val fødselsnummer = lagFødselsnummer()
+        val saksbehandler = nyLegacySaksbehandler()
+        val saksbehandler2 = nyLegacySaksbehandler()
+
+
+        saksbehandlerDao.oppdaterSistObservert(
+            saksbehandler.saksbehandler.id().value,
+            LocalDateTime.now().minusMonths(4)
+        )
+
+       saksbehandlerDao.oppdaterSistObservert(
+            saksbehandler2.saksbehandler.id().value,
+            LocalDateTime.now().minusMonths(4)
+        )
+
+        nyOppgaveForNyPerson(fødselsnummer = fødselsnummer)
+            .tildelOgLagre(saksbehandler)
+            .avventSystemOgLagre(saksbehandler)
+            .ferdigstillOgLagre()
+
+        val aktiveSaksbehandlereSisteTreMnd = saksbehandlerDao.hentAlleAktiveSisteTreMnderEllerHarTildelteOppgaver()
+        assertEquals(1, aktiveSaksbehandlereSisteTreMnd.size)
     }
 }

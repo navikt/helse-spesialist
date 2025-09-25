@@ -12,7 +12,7 @@ class HentSaksbehandlereQueryHandlerTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `henter alle aktive saksbehandlere siste tre mnder`() {
-        every { saksbehandlerDao.hentAlleAktiveSisteTreMnder() } returns listOf(
+        every { saksbehandlerDao.hentAlleAktiveSisteTreMnderEllerHarTildelteOppgaver() } returns listOf(
             DomainSaksbehandler(
                 id = SaksbehandlerOid(UUID.randomUUID()),
                 "Navn Navnesen",

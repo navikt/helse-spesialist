@@ -407,7 +407,7 @@ class InMemoryDaos(
             TODO("Not yet implemented")
         }
 
-        override fun hentAlleAktiveSisteTreMnder(): List<Saksbehandler> {
+        override fun hentAlleAktiveSisteTreMnderEllerHarTildelteOppgaver(): List<Saksbehandler> {
             TODO("Not yet implemented")
         }
 
