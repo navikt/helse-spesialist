@@ -8,27 +8,20 @@ import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.routing.RoutingCall
 import no.nav.helse.MeldingPubliserer
-import no.nav.helse.db.SessionContext
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.spesialist.api.graphql.ContextFactory.Companion.gruppeUuider
 import no.nav.helse.spesialist.api.graphql.ContextFactory.Companion.tilSaksbehandler
 import no.nav.helse.spesialist.application.KøetMeldingPubliserer
-import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.loggThrowable
-import no.nav.helse.spesialist.application.logg.sikkerlogg
-import no.nav.helse.spesialist.application.tilgangskontroll.PersonTilgangskontroll
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
-import no.nav.helse.spesialist.domain.Saksbehandler
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
-import java.util.UUID
 import kotlin.reflect.KClass
 
-class RestHandler(
+class RestDelegator(
     private val sessionFactory: SessionFactory,
     private val tilgangsgruppeUuider: TilgangsgruppeUuider,
     private val meldingPubliserer: MeldingPubliserer,
 ) {
-    suspend fun <RESPONSE, URLPARAMETRE> håndterGet(
+    suspend fun <RESPONSE, URLPARAMETRE> utførGet(
         call: RoutingCall,
         håndterer: GetHåndterer<URLPARAMETRE, RESPONSE>,
         parameterTolkning: (Parameters) -> URLPARAMETRE,
@@ -60,15 +53,15 @@ class RestHandler(
         }
     }
 
-    suspend inline fun <URLPARAMETRE, reified REQUESTBODY : Any, RESPONSE> håndterPost(
+    suspend inline fun <URLPARAMETRE, reified REQUESTBODY : Any, RESPONSE> utførPost(
         call: RoutingCall,
         håndterer: PostHåndterer<URLPARAMETRE, REQUESTBODY, RESPONSE>,
         noinline parameterTolkning: (Parameters) -> URLPARAMETRE,
     ) {
-        håndterPost(call, håndterer, parameterTolkning, REQUESTBODY::class)
+        utførPost(call, håndterer, parameterTolkning, REQUESTBODY::class)
     }
 
-    suspend fun <REQUESTBODY : Any, RESPONSE, URLPARAMETRE> håndterPost(
+    suspend fun <REQUESTBODY : Any, RESPONSE, URLPARAMETRE> utførPost(
         call: RoutingCall,
         håndterer: PostHåndterer<URLPARAMETRE, REQUESTBODY, RESPONSE>,
         parameterTolkning: (Parameters) -> URLPARAMETRE,
@@ -103,39 +96,6 @@ class RestHandler(
             call.respond(statusCode)
         }.onSuccess { result ->
             call.respond(result as Any)
-        }
-    }
-
-    fun kontrollerTilgangTilPerson(
-        fødselsnummer: String,
-        saksbehandler: Saksbehandler,
-        tilgangsgrupper: Set<Tilgangsgruppe>,
-        transaksjon: SessionContext,
-        feilSupplier: () -> HttpException,
-    ) {
-        if (!PersonTilgangskontroll.harTilgangTilPerson(
-                tilgangsgrupper = tilgangsgrupper,
-                fødselsnummer = fødselsnummer,
-                egenAnsattDao = transaksjon.egenAnsattDao,
-                personDao = transaksjon.personDao,
-            )
-        ) {
-            logg.warn("Saksbehandler mangler nødvendig tilgang")
-            sikkerlogg.warn("Saksbehandler ${saksbehandler.id().value} mangler nødvendig tilgang til fødselsnummer $fødselsnummer")
-            throw feilSupplier()
-        }
-    }
-
-    companion object {
-        fun Parameters.getRequired(name: String): String = this[name] ?: throw HttpNotFound("Mangler parameter $name i URL'en")
-
-        fun Parameters.getRequiredUUID(name: String): UUID {
-            val string = getRequired(name)
-            try {
-                return UUID.fromString(string)
-            } catch (_: IllegalArgumentException) {
-                throw HttpNotFound("Parameter $name i URL'en er ikke en UUID")
-            }
         }
     }
 }

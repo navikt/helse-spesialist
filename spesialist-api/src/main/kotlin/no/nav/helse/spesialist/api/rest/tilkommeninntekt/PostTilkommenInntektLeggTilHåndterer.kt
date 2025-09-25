@@ -6,7 +6,6 @@ import no.nav.helse.spesialist.api.graphql.mutation.LeggTilTilkommenInntektRespo
 import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektInput
 import no.nav.helse.spesialist.api.rest.HttpForbidden
 import no.nav.helse.spesialist.api.rest.PostHåndterer
-import no.nav.helse.spesialist.api.rest.RestHandler
 import no.nav.helse.spesialist.application.KøetMeldingPubliserer
 import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
 import no.nav.helse.spesialist.domain.Saksbehandler
@@ -14,9 +13,7 @@ import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntekt
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektPeriodeValidator
 
-class PostTilkommenInntektLeggTilHåndterer(
-    private val handler: RestHandler,
-) : PostHåndterer<Unit, PostTilkommenInntektLeggTilHåndterer.RequestBody, LeggTilTilkommenInntektResponse> {
+class PostTilkommenInntektLeggTilHåndterer : PostHåndterer<Unit, PostTilkommenInntektLeggTilHåndterer.RequestBody, LeggTilTilkommenInntektResponse> {
     data class RequestBody(
         val fodselsnummer: String,
         val verdier: ApiTilkommenInntektInput,
@@ -31,7 +28,7 @@ class PostTilkommenInntektLeggTilHåndterer(
         transaksjon: SessionContext,
         meldingsKø: KøetMeldingPubliserer,
     ): LeggTilTilkommenInntektResponse {
-        handler.kontrollerTilgangTilPerson(
+        bekreftTilgangTilPerson(
             fødselsnummer = requestBody.fodselsnummer,
             saksbehandler = saksbehandler,
             tilgangsgrupper = tilgangsgrupper,

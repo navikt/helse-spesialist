@@ -7,7 +7,6 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektInput
 import no.nav.helse.spesialist.api.rest.HttpForbidden
 import no.nav.helse.spesialist.api.rest.HttpNotFound
 import no.nav.helse.spesialist.api.rest.PostHåndterer
-import no.nav.helse.spesialist.api.rest.RestHandler
 import no.nav.helse.spesialist.application.KøetMeldingPubliserer
 import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
 import no.nav.helse.spesialist.domain.Saksbehandler
@@ -16,9 +15,7 @@ import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektId
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektPeriodeValidator
 import java.util.UUID
 
-class PostTilkommenInntektEndreHåndterer(
-    private val handler: RestHandler,
-) : PostHåndterer<PostTilkommenInntektEndreHåndterer.URLParametre, PostTilkommenInntektEndreHåndterer.RequestBody, HttpStatusCode> {
+class PostTilkommenInntektEndreHåndterer : PostHåndterer<PostTilkommenInntektEndreHåndterer.URLParametre, PostTilkommenInntektEndreHåndterer.RequestBody, HttpStatusCode> {
     data class URLParametre(
         val tilkommenInntektId: UUID,
     )
@@ -40,7 +37,7 @@ class PostTilkommenInntektEndreHåndterer(
             transaksjon.tilkommenInntektRepository.finn(TilkommenInntektId(urlParametre.tilkommenInntektId))
                 ?: throw HttpNotFound("Fant ikke tilkommen inntekt med tilkommentInntektId ${urlParametre.tilkommenInntektId}")
 
-        handler.kontrollerTilgangTilPerson(
+        bekreftTilgangTilPerson(
             fødselsnummer = tilkommenInntekt.fødselsnummer,
             saksbehandler = saksbehandler,
             tilgangsgrupper = tilgangsgrupper,

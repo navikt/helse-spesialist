@@ -27,8 +27,7 @@ import no.nav.helse.spesialist.api.graphql.kobleOppApi
 import no.nav.helse.spesialist.api.graphql.lagSchemaMedResolversOgHandlers
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.rest.OpphevStansController
-import no.nav.helse.spesialist.api.rest.RestHandler
-import no.nav.helse.spesialist.api.rest.TilkommenInntektController
+import no.nav.helse.spesialist.api.rest.RestDelegator
 import no.nav.helse.spesialist.api.testfixtures.lagSaksbehandler
 import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.application.Snapshothenter
@@ -80,7 +79,7 @@ object TestRunner {
             daos = mockk(relaxed = true),
             sessionFactory = mockk(relaxed = true),
             saksbehandlerMediator = mockk(relaxed = true),
-            restHandler = mockk(relaxed = true),
+            restDelegator = mockk(relaxed = true),
             apiOppgaveService = mockk(relaxed = true),
             godkjenninghåndterer = mockk(relaxed = true),
             personhåndterer = mockk(relaxed = true),
@@ -115,9 +114,7 @@ object TestRunner {
                     tilgangsgruppeUuider = avhengigheter.tilgangsgruppeUuider,
                     spesialistSchema = spesialistSchema,
                     opphevStansController = OpphevStansController(avhengigheter.saksbehandlerMediator),
-                    tilkommenInntektController = TilkommenInntektController(
-                        handler = avhengigheter.restHandler
-                    ),
+                    restDelegator = avhengigheter.restDelegator,
                 )
             }
 
@@ -143,7 +140,7 @@ object TestRunner {
         val daos: Daos,
         val sessionFactory: SessionFactory,
         val saksbehandlerMediator: SaksbehandlerMediator,
-        val restHandler: RestHandler,
+        val restDelegator: RestDelegator,
         val apiOppgaveService: ApiOppgaveService,
         val godkjenninghåndterer: Godkjenninghåndterer,
         val personhåndterer: Personhåndterer,

@@ -6,16 +6,13 @@ import no.nav.helse.spesialist.api.graphql.mutation.InntektsendringerEventBygger
 import no.nav.helse.spesialist.api.rest.HttpForbidden
 import no.nav.helse.spesialist.api.rest.HttpNotFound
 import no.nav.helse.spesialist.api.rest.PostHåndterer
-import no.nav.helse.spesialist.api.rest.RestHandler
 import no.nav.helse.spesialist.application.KøetMeldingPubliserer
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektId
 import java.util.UUID
 
-class PostTilkommenInntektFjernHåndterer(
-    private val handler: RestHandler,
-) : PostHåndterer<PostTilkommenInntektFjernHåndterer.URLParametre, PostTilkommenInntektFjernHåndterer.RequestBody, HttpStatusCode> {
+class PostTilkommenInntektFjernHåndterer : PostHåndterer<PostTilkommenInntektFjernHåndterer.URLParametre, PostTilkommenInntektFjernHåndterer.RequestBody, HttpStatusCode> {
     data class URLParametre(
         val tilkommenInntektId: UUID,
     )
@@ -36,7 +33,7 @@ class PostTilkommenInntektFjernHåndterer(
             transaksjon.tilkommenInntektRepository.finn(TilkommenInntektId(urlParametre.tilkommenInntektId))
                 ?: throw HttpNotFound("Fant ikke tilkommen inntekt med tilkommentInntektId ${urlParametre.tilkommenInntektId}")
 
-        handler.kontrollerTilgangTilPerson(
+        bekreftTilgangTilPerson(
             fødselsnummer = tilkommenInntekt.fødselsnummer,
             saksbehandler = saksbehandler,
             tilgangsgrupper = tilgangsgrupper,

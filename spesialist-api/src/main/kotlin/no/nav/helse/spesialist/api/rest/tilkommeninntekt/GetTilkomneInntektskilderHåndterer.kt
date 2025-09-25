@@ -12,7 +12,6 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektOpprettetEv
 import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektskilde
 import no.nav.helse.spesialist.api.rest.GetHåndterer
 import no.nav.helse.spesialist.api.rest.HttpNotFound
-import no.nav.helse.spesialist.api.rest.RestHandler
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.domain.tilkommeninntekt.Endring
@@ -24,9 +23,7 @@ import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektOpprettet
 import java.math.BigDecimal
 import java.time.ZoneId
 
-class GetTilkomneInntektskilderHåndterer(
-    private val handler: RestHandler,
-) : GetHåndterer<GetTilkomneInntektskilderHåndterer.URLParametre, List<ApiTilkommenInntektskilde>> {
+class GetTilkomneInntektskilderHåndterer : GetHåndterer<GetTilkomneInntektskilderHåndterer.URLParametre, List<ApiTilkommenInntektskilde>> {
     data class URLParametre(
         val aktørId: String,
     )
@@ -41,7 +38,7 @@ class GetTilkomneInntektskilderHåndterer(
         val fødselsnumre = transaksjon.personRepository.finnFødselsnumre(aktørId = aktørId).toSet()
 
         fødselsnumre.forEach { fødselsnummer ->
-            handler.kontrollerTilgangTilPerson(
+            bekreftTilgangTilPerson(
                 fødselsnummer = fødselsnummer,
                 saksbehandler = saksbehandler,
                 tilgangsgrupper = tilgangsgrupper,

@@ -11,7 +11,6 @@ import io.ktor.server.auth.authenticate
 import io.ktor.server.request.ApplicationRequest
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
-import io.ktor.server.routing.Routing
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
@@ -58,7 +57,8 @@ import no.nav.helse.spesialist.api.graphql.query.TilkommenInntektQueryHandler
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.person.PersonService
 import no.nav.helse.spesialist.api.rest.OpphevStansController
-import no.nav.helse.spesialist.api.rest.TilkommenInntektController
+import no.nav.helse.spesialist.api.rest.RestDelegator
+import no.nav.helse.spesialist.api.rest.restRoutes
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
 import no.nav.helse.spesialist.api.websockets.webSocketsApi
 import no.nav.helse.spesialist.application.Reservasjonshenter
@@ -74,7 +74,7 @@ fun kobleOppApi(
     tilgangsgruppeUuider: TilgangsgruppeUuider,
     spesialistSchema: SpesialistSchema,
     opphevStansController: OpphevStansController,
-    tilkommenInntektController: TilkommenInntektController,
+    restDelegator: RestDelegator,
 ) {
     ktorApplication.installPlugins()
     ktorApplication.azureAdAppAuthentication(apiModuleConfiguration)
@@ -99,19 +99,7 @@ fun kobleOppApi(
                 queryHandler(graphQLPlugin.server)
             }
         }
-        restRoutes(opphevStansController, tilkommenInntektController)
-    }
-}
-
-private fun Routing.restRoutes(
-    opphevStansController: OpphevStansController,
-    tilkommenInntektController: TilkommenInntektController,
-) {
-    route("api") {
-        authenticate("oidc") {
-            opphevStansController.addToRoute(this)
-            tilkommenInntektController.addToRoute(this)
-        }
+        restRoutes(opphevStansController, restDelegator)
     }
 }
 
