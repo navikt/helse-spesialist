@@ -40,7 +40,7 @@ class ApiOppgaveService(
         oppgaveDao
             .finnOppgaverForVisning(
                 ekskluderEgenskaper =
-                    egenskaperSaksbehandlerIkkeHarTilgangTil(saksbehandler, tilgangsgrupper)
+                    egenskaperSaksbehandlerIkkeSkalFåOppIOversikten(saksbehandler, tilgangsgrupper)
                         .plus(filtrering.tilEkskluderteEgenskaper())
                         .map(Egenskap::toString),
                 saksbehandlerOid = saksbehandler.id().value,
@@ -112,13 +112,13 @@ class ApiOppgaveService(
             .finnTildelteOppgaver(
                 saksbehandlerOid = oppslåttSaksbehandler.id().value,
                 ekskluderEgenskaper =
-                    egenskaperSaksbehandlerIkkeHarTilgangTil(innloggetSaksbehandler, tilgangsgrupper)
+                    egenskaperSaksbehandlerIkkeSkalFåOppIOversikten(innloggetSaksbehandler, tilgangsgrupper)
                         .map(Egenskap::toString),
                 offset = offset,
                 limit = limit,
             ).tilApiOppgaverTilBehandling()
 
-    private fun egenskaperSaksbehandlerIkkeHarTilgangTil(
+    private fun egenskaperSaksbehandlerIkkeSkalFåOppIOversikten(
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
     ): List<Egenskap> =
@@ -127,7 +127,12 @@ class ApiOppgaveService(
                 egenskap = it,
                 saksbehandler = saksbehandler,
                 saksbehandlerTilgangsgrupper = tilgangsgrupper,
-            )
+            ) &&
+                when (it) {
+                    Egenskap.BESLUTTER -> Tilgangsgruppe.BESLUTTER in tilgangsgrupper
+                    Egenskap.STIKKPRØVE -> Tilgangsgruppe.STIKKPRØVE in tilgangsgrupper
+                    else -> true
+                }
         }
 
     private fun List<OppgaveFraDatabaseForVisning>.tilApiOppgaverTilBehandling(): ApiOppgaverTilBehandling =

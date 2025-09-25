@@ -85,7 +85,10 @@ class Oppgave private constructor(
 
         if (tildelt != saksbehandlerWrapper.saksbehandler.id()) {
             logg.info("Oppgave med {} er tildelt noen andre, avmeldes", kv("oppgaveId", id))
-            sikkerlogg.info("Oppgave med {} er tildelt $tildelt, avmeldes av $saksbehandlerWrapper", kv("oppgaveId", id))
+            sikkerlogg.info(
+                "Oppgave med {} er tildelt $tildelt, avmeldes av $saksbehandlerWrapper",
+                kv("oppgaveId", id),
+            )
         }
         tilstand.avmeld(this, saksbehandlerWrapper)
     }
@@ -95,7 +98,10 @@ class Oppgave private constructor(
         saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe>,
     ) {
         logg.info("Oppgave med {} forsøkes tildelt grunnet reservasjon.", kv("oppgaveId", id))
-        sikkerlogg.info("Oppgave med {} forsøkes tildelt $saksbehandlerWrapper grunnet reservasjon.", kv("oppgaveId", id))
+        sikkerlogg.info(
+            "Oppgave med {} forsøkes tildelt $saksbehandlerWrapper grunnet reservasjon.",
+            kv("oppgaveId", id),
+        )
         if (_egenskaper.contains(STIKKPRØVE)) {
             logg.info("Oppgave med {} er stikkprøve og tildeles ikke på tross av reservasjon.", kv("oppgaveId", id))
             return
@@ -322,7 +328,7 @@ class Oppgave private constructor(
             saksbehandlerWrapper: SaksbehandlerWrapper,
             saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe>,
         ) {
-            if (!oppgave.harTilgang(
+            if (!oppgave.kanTildelesTil(
                     saksbehandler = saksbehandlerWrapper.saksbehandler,
                     saksbehandlerTilgangsgrupper = saksbehandlerTilgangsgrupper,
                 )
@@ -375,7 +381,7 @@ class Oppgave private constructor(
 
     override fun toString(): String = "Oppgave(tilstand=$tilstand, vedtaksperiodeId=$vedtaksperiodeId, utbetalingId=$utbetalingId, id=$id)"
 
-    fun harTilgang(
+    fun kanSeesAv(
         saksbehandler: Saksbehandler,
         saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe>,
     ): Boolean =
@@ -385,6 +391,23 @@ class Oppgave private constructor(
                 saksbehandler = saksbehandler,
                 saksbehandlerTilgangsgrupper = saksbehandlerTilgangsgrupper,
             )
+        }
+
+    fun kanTildelesTil(
+        saksbehandler: Saksbehandler,
+        saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe>,
+    ): Boolean =
+        egenskaper.all {
+            harTilgangTilEgenskap(
+                egenskap = it,
+                saksbehandler = saksbehandler,
+                saksbehandlerTilgangsgrupper = saksbehandlerTilgangsgrupper,
+            ) &&
+                when (it) {
+                    BESLUTTER -> Tilgangsgruppe.BESLUTTER in saksbehandlerTilgangsgrupper
+                    STIKKPRØVE -> Tilgangsgruppe.STIKKPRØVE in saksbehandlerTilgangsgrupper
+                    else -> true
+                }
         }
 
     companion object {
@@ -458,11 +481,10 @@ class Oppgave private constructor(
                 STRENGT_FORTROLIG_ADRESSE -> false // Ingen skal ha tilgang til disse i Speil foreløpig
                 EGEN_ANSATT -> Tilgangsgruppe.EGEN_ANSATT in saksbehandlerTilgangsgrupper
                 FORTROLIG_ADRESSE -> Tilgangsgruppe.KODE_7 in saksbehandlerTilgangsgrupper
-                BESLUTTER -> Tilgangsgruppe.BESLUTTER in saksbehandlerTilgangsgrupper
-                STIKKPRØVE -> Tilgangsgruppe.STIKKPRØVE in saksbehandlerTilgangsgrupper
                 SELVSTENDIG_NÆRINGSDRIVENDE ->
                     Tilgangsgruppe.TBD in saksbehandlerTilgangsgrupper ||
                         SaksbehandlerIdentGrupper.TILGANG_TIL_SN.inneholder(saksbehandler.ident)
+
                 else -> true
             }
     }

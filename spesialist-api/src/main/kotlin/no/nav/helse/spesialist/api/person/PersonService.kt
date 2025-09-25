@@ -35,8 +35,10 @@ import no.nav.helse.spesialist.api.snapshot.SnapshotService
 import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.application.Reservasjonshenter.ReservasjonDto
 import no.nav.helse.spesialist.application.SaksbehandlerRepository
+import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.snapshot.SnapshotPerson
 import no.nav.helse.spesialist.application.tilgangskontroll.PersonTilgangskontroll
+import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.slf4j.LoggerFactory
 
@@ -87,6 +89,7 @@ class PersonService(
 
     override suspend fun hentPerson(
         fødselsnummer: String,
+        saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
     ): FetchPersonResult {
         val aktørId = personApiDao.finnAktørId(fødselsnummer)
@@ -115,6 +118,20 @@ class PersonService(
                 HentSnapshotResult.Feil.KlarteIkkeHente -> return FetchPersonResult.Feil.KlarteIkkeHente
                 is HentSnapshotResult.Ok -> snapshotResult.snapshot
             }
+
+        // Best effort for å finne ut om saksbehandler har tilgang til oppgaven som gjelder
+        // Litt vanskelig å få pent så lenge vi har dynamisk resolving av resten, og tilsynelatende "mange" oppgaver
+        val harTilgangTilOppgave =
+            oppgaveApiDao.finnOppgaveId(fødselsnummer)?.let { oppgaveId ->
+                sessionFactory.transactionalSessionScope {
+                    it.oppgaveRepository.finn(oppgaveId)?.kanSeesAv(saksbehandler, tilgangsgrupper)
+                }
+            } ?: true
+
+        if (!harTilgangTilOppgave) {
+            logg.warn("Saksbehandler mangler tilgang til aktiv oppgave på denne personen")
+            return FetchPersonResult.Feil.ManglerTilgang
+        }
 
         return person(fødselsnummer, snapshot, reservasjon)
     }

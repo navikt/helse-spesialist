@@ -74,16 +74,6 @@ class OppgaveTilgangskontrollTest {
                 setOf(Tilgangsgruppe.EGEN_ANSATT)
             ),
             Arguments.of(
-                Egenskap.BESLUTTER,
-                "A123456",
-                setOf(Tilgangsgruppe.BESLUTTER)
-            ),
-            Arguments.of(
-                Egenskap.STIKKPRØVE,
-                "A123456",
-                setOf(Tilgangsgruppe.STIKKPRØVE)
-            ),
-            Arguments.of(
                 Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE,
                 "A123456",
                 setOf(Tilgangsgruppe.TBD)
@@ -109,16 +99,6 @@ class OppgaveTilgangskontrollTest {
                     emptySet<Tilgangsgruppe>()
                 ),
                 Arguments.of(
-                    Egenskap.BESLUTTER,
-                    "A123456",
-                    emptySet<Tilgangsgruppe>()
-                ),
-                Arguments.of(
-                    Egenskap.STIKKPRØVE,
-                    "A123456",
-                    emptySet<Tilgangsgruppe>()
-                ),
-                Arguments.of(
                     Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE,
                     "A123456",
                     emptySet<Tilgangsgruppe>()
@@ -132,16 +112,6 @@ class OppgaveTilgangskontrollTest {
                     Egenskap.EGEN_ANSATT,
                     "A123456",
                     (Tilgangsgruppe.entries - Tilgangsgruppe.EGEN_ANSATT).toSet()
-                ),
-                Arguments.of(
-                    Egenskap.BESLUTTER,
-                    "A123456",
-                    (Tilgangsgruppe.entries - Tilgangsgruppe.BESLUTTER).toSet()
-                ),
-                Arguments.of(
-                    Egenskap.STIKKPRØVE,
-                    "A123456",
-                    (Tilgangsgruppe.entries - Tilgangsgruppe.STIKKPRØVE).toSet()
                 ),
                 Arguments.of(
                     Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE,

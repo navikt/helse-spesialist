@@ -6,7 +6,6 @@ import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import no.nav.helse.spesialist.api.auditLogTeller
 import no.nav.helse.spesialist.api.graphql.ContextValues
-import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.byggFeilrespons
 import no.nav.helse.spesialist.api.graphql.byggRespons
 import no.nav.helse.spesialist.api.graphql.forbiddenError
@@ -56,6 +55,7 @@ private sealed interface Inputvalidering {
 interface PersonoppslagService {
     suspend fun hentPerson(
         fødselsnummer: String,
+        saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
     ): FetchPersonResult
 
@@ -107,9 +107,10 @@ class PersonQueryHandler(
             }
         sikkerLogg.info("Personoppslag på fnr=$fødselsnummer")
 
+        val saksbehandler = env.graphQlContext.get<Saksbehandler>(ContextValues.SAKSBEHANDLER)
         val tilgangsgrupper = env.graphQlContext.get<Set<Tilgangsgruppe>>(ContextValues.TILGANGSGRUPPER)
 
-        return when (val result = personoppslagService.hentPerson(fødselsnummer, tilgangsgrupper)) {
+        return when (val result = personoppslagService.hentPerson(fødselsnummer, saksbehandler, tilgangsgrupper)) {
             is FetchPersonResult.Feil -> {
                 result.auditlogg(env, fødselsnummer)
                 result.tilGraphqlError(fødselsnummer)
@@ -231,7 +232,7 @@ class PersonQueryHandler(
         harTilgang: Boolean?,
         fantIkkePersonErrorMsg: String?,
     ) {
-        val saksbehandlerIdent = graphQLContext.get<Saksbehandler>(SAKSBEHANDLER).ident
+        val saksbehandlerIdent = graphQLContext.get<Saksbehandler>(ContextValues.SAKSBEHANDLER).ident
         auditLogTeller.increment()
 
         if (harTilgang == false) {

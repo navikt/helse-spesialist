@@ -26,8 +26,6 @@ import no.nav.helse.modell.OppgaveAlleredeSendtIRetur
 import no.nav.helse.modell.OppgaveKreverVurderingAvToSaksbehandlere
 import no.nav.helse.modell.OppgaveTildeltNoenAndre
 import no.nav.helse.modell.melding.VarselEndret
-import no.nav.helse.modell.oppgave.Egenskap
-import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
 import no.nav.helse.modell.saksbehandler.handlinger.Arbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.EndrePåVent
@@ -317,13 +315,7 @@ class SaksbehandlerMediator(
         val totrinnsvurdering = totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)
         val feil =
             if (totrinnsvurdering?.tilstand == AVVENTER_BESLUTTER) {
-                if (!Oppgave.harTilgangTilEgenskap(
-                        Egenskap.BESLUTTER,
-                        saksbehandler,
-                        tilgangsgrupper,
-                    ) &&
-                    !environmentToggles.kanGodkjenneUtenBesluttertilgang
-                ) {
+                if (Tilgangsgruppe.BESLUTTER !in tilgangsgrupper && !environmentToggles.kanGodkjenneUtenBesluttertilgang) {
                     VedtakResultat.Feil.BeslutterFeil.TrengerBeslutterRolle()
                 } else if (totrinnsvurdering.saksbehandler?.value == saksbehandler.id().value && !environmentToggles.kanBeslutteEgneSaker) {
                     VedtakResultat.Feil.BeslutterFeil.KanIkkeBeslutteEgenOppgave()
