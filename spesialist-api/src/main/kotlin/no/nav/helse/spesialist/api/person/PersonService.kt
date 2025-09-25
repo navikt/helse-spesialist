@@ -124,7 +124,9 @@ class PersonService(
         val harTilgangTilOppgave =
             oppgaveApiDao.finnOppgaveId(fødselsnummer)?.let { oppgaveId ->
                 sessionFactory.transactionalSessionScope {
-                    it.oppgaveRepository.finn(oppgaveId)?.kanSeesAv(saksbehandler, tilgangsgrupper)
+                    it.oppgaveRepository
+                        .finn(oppgaveId)
+                        ?.kanSeesAv(saksbehandler, tilgangsgrupper)
                 }
             } ?: true
 

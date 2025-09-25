@@ -86,32 +86,45 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         skjæringstidspunkt: LocalDate = periode.fom,
         forkastet: Boolean = false,
         kanAvvises: Boolean = true,
-    ) = opprettVedtak(personId, periode, skjæringstidspunkt, forkastet).also {
-        klargjørVedtak(
-            it,
-            utbetalingId,
-            periode,
-            kanAvvises = kanAvvises,
-        )
+    ): Long {
+        val behandlingId = UUID.randomUUID()
+        return opprettVedtak(
+            behandlingId = behandlingId,
+            personId = personId,
+            periode = periode,
+            skjæringstidspunkt = skjæringstidspunkt,
+            forkastet = forkastet
+        ).also {
+            klargjørVedtak(
+                vedtakId = it,
+                utbetalingId = utbetalingId,
+                periode = periode,
+                kanAvvises = kanAvvises,
+                behandlingId = behandlingId,
+            )
+        }
     }
 
-    private fun opprettGenerasjon(
+    private fun opprettBehandling(
+        behandlingId: UUID?,
         periode: Periode,
-        skjæringstidspunkt: LocalDate = periode.fom,
-    ) = requireNotNull(
-        dbQuery.update(
-            """
-            INSERT INTO behandling (unik_id, vedtaksperiode_id, opprettet_av_hendelse, tilstand, fom, tom, skjæringstidspunkt)
-            VALUES (:unik_id, :vedtaksperiode_id, :hendelse_id, 'VidereBehandlingAvklares',:fom, :tom, :skjaeringstidspunkt)
-            """.trimIndent(),
-            "unik_id" to UUID.randomUUID(),
-            "vedtaksperiode_id" to periode.id,
-            "hendelse_id" to UUID.randomUUID(),
-            "fom" to periode.fom,
-            "tom" to periode.tom,
-            "skjaeringstidspunkt" to skjæringstidspunkt,
+        skjæringstidspunkt: LocalDate
+    ) {
+        requireNotNull(
+            dbQuery.update(
+                """
+                    INSERT INTO behandling (unik_id, vedtaksperiode_id, opprettet_av_hendelse, tilstand, fom, tom, skjæringstidspunkt)
+                    VALUES (:unik_id, :vedtaksperiode_id, :hendelse_id, 'VidereBehandlingAvklares',:fom, :tom, :skjaeringstidspunkt)
+                    """.trimIndent(),
+                "unik_id" to behandlingId,
+                "vedtaksperiode_id" to periode.id,
+                "hendelse_id" to UUID.randomUUID(),
+                "fom" to periode.fom,
+                "tom" to periode.tom,
+                "skjaeringstidspunkt" to skjæringstidspunkt,
+            )
         )
-    )
+    }
 
     protected fun opprettAvviksvurdering(
         fødselsnummer: String = FØDSELSNUMMER,
@@ -192,18 +205,19 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     )
 
     protected fun opprettVedtak(
+        behandlingId: UUID = UUID.randomUUID(),
         personId: Long,
         periode: Periode = PERIODE,
         skjæringstidspunkt: LocalDate = periode.fom,
         forkastet: Boolean = false,
     ): Long {
-        opprettGenerasjon(periode, skjæringstidspunkt)
+        opprettBehandling(behandlingId, periode, skjæringstidspunkt)
         opprettOpprinneligSøknadsdato(periode)
         return dbQuery.updateAndReturnGeneratedKey(
             """
-            INSERT INTO vedtak (vedtaksperiode_id, fom, tom, arbeidsgiver_identifikator, person_ref, forkastet)
-            VALUES (:id, :fom, :tom, :arbeidsgiver_identifikator, :personId, :forkastet)
-            """.trimMargin(),
+                INSERT INTO vedtak (vedtaksperiode_id, fom, tom, arbeidsgiver_identifikator, person_ref, forkastet)
+                VALUES (:id, :fom, :tom, :arbeidsgiver_identifikator, :personId, :forkastet)
+                """.trimMargin(),
             "id" to periode.id,
             "fom" to periode.fom,
             "tom" to periode.tom,
@@ -294,12 +308,19 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         utbetalingId: UUID = UUID.randomUUID(),
         periode: Periode,
         kanAvvises: Boolean = true,
+        behandlingId: UUID = UUID.randomUUID(),
     ) {
         opprettSaksbehandleroppgavetype(Periodetype.FØRSTEGANGSBEHANDLING, Inntektskilde.EN_ARBEIDSGIVER, vedtakId)
         val hendelseId = UUID.randomUUID()
         opprettHendelse(hendelseId)
         opprettAutomatisering(false, vedtaksperiodeId = periode.id, hendelseId = hendelseId)
-        opprettOppgave(Oppgavestatus.AvventerSaksbehandler, vedtakId, utbetalingId, kanAvvises = kanAvvises)
+        opprettOppgave(
+            status = Oppgavestatus.AvventerSaksbehandler,
+            vedtakRef = vedtakId,
+            utbetalingId = utbetalingId,
+            kanAvvises = kanAvvises,
+            behandlingId = behandlingId,
+        )
     }
 
     private fun opprettSaksbehandleroppgavetype(
@@ -512,13 +533,15 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         utbetalingId: UUID = UUID.randomUUID(),
         opprettet: LocalDateTime = LocalDateTime.now(),
         kanAvvises: Boolean = true,
+        behandlingId: UUID = UUID.randomUUID(),
     ): Long {
         val oppgaveId = dbQuery.updateAndReturnGeneratedKey(
             """
-            INSERT INTO oppgave (utbetaling_id, opprettet, oppdatert, status, vedtak_ref, hendelse_id_godkjenningsbehov, kan_avvises)
-            VALUES (:utbetalingId, :opprettet, now(), CAST(:status as oppgavestatus), :vedtakRef, :godkjenningsbehovId, :kanAvvises)
+            INSERT INTO oppgave (utbetaling_id, behandling_id, opprettet, oppdatert, status, vedtak_ref, hendelse_id_godkjenningsbehov, kan_avvises)
+            VALUES (:utbetalingId, :behandlingId, :opprettet, now(), CAST(:status as oppgavestatus), :vedtakRef, :godkjenningsbehovId, :kanAvvises)
             """.trimIndent(),
             "utbetalingId" to utbetalingId,
+            "behandlingId" to behandlingId,
             "opprettet" to opprettet,
             "status" to status.name,
             "vedtakRef" to vedtakRef,

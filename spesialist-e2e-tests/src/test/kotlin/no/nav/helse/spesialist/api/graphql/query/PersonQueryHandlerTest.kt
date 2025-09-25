@@ -206,7 +206,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         val uberegnetPeriode = 2 jan 2023 til (3 jan 2023)
         val periodeMedOppgave = 4 jan 2023 til (5 jan 2023)
         opprettVedtaksperiode(personRef, periode = periodeMedOppgave, skjæringstidspunkt = 2 jan 2018)
-        opprettVedtak(personRef, periode = uberegnetPeriode, skjæringstidspunkt = 2 jan 2018)
+        opprettVedtak(personId = personRef, periode = uberegnetPeriode, skjæringstidspunkt = 2 jan 2018)
         val generasjonId = UUID.randomUUID()
         val generasjonRef =
             nyGenerasjon(
@@ -255,7 +255,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
         val uberegnetPeriode = 2 jan 2023 til (3 jan 2023)
         val periodeMedOppgave = 4 jan 2023 til (5 jan 2023)
         opprettVedtaksperiode(personRef, periode = periodeMedOppgave, skjæringstidspunkt = 2 jan 2018)
-        opprettVedtak(personRef, periode = uberegnetPeriode, skjæringstidspunkt = 2 jan 2018)
+        opprettVedtak(personId = personRef, periode = uberegnetPeriode, skjæringstidspunkt = 2 jan 2018)
         val generasjonId1 = UUID.randomUUID()
         val generasjonId2 = UUID.randomUUID()
         val generasjonRef1 =
