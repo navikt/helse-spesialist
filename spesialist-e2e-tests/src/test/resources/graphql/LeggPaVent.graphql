@@ -1,0 +1,9 @@
+mutation LeggPaVent($oppgaveId: String!, $frist: LocalDate!, $tildeling: Boolean!, $notatTekst: String, $arsaker: [PaVentArsakInput!]) {
+    leggPaVent(oppgaveId: $oppgaveId, frist: $frist, tildeling: $tildeling, notatTekst: $notatTekst, arsaker: $arsaker) {
+        ...pavent
+    }
+}
+
+fragment pavent on PaVent {
+    frist, oid
+}

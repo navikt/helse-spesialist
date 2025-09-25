@@ -297,6 +297,7 @@ class SaksbehandlerMediator(
             godkjenner = this::vurderVarsel,
         )
 
+        oppgaveService.fjernFraPåVent(oppgavereferanse)
         påVentDao.slettPåVent(oppgavereferanse)
         return VedtakResultat.Ok(spleisBehandlingId)
     }
@@ -322,6 +323,7 @@ class SaksbehandlerMediator(
                     godkjenner = this::vurderVarsel,
                 )
 
+                oppgaveService.fjernFraPåVent(oppgavereferanse)
                 påVentDao.slettPåVent(oppgavereferanse)
                 VedtakResultat.Ok(spleisBehandlingId)
             }

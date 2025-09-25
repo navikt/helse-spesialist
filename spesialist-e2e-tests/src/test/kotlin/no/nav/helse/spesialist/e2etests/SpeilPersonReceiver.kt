@@ -73,6 +73,19 @@ class SpeilPersonReceiver(
         )
     }
 
+    fun saksbehandlerLeggerOppgavePåVent() {
+        callGraphQL(
+            operationName = "LeggPaVent",
+            variables = mapOf(
+                "oppgaveId" to getOppgaveId(),
+                "notatTekst" to "",
+                "frist" to LocalDate.now().plusDays(1).toString(),
+                "tildeling" to true,
+                "arsaker" to listOf(mapOf("_key" to "noe", "arsak" to "Opplæring")),
+            )
+        )
+    }
+
     fun saksbehandlerLeggerTilTilkommenInntekt(
         organisasjonsnummer: String,
         fom: LocalDate,
