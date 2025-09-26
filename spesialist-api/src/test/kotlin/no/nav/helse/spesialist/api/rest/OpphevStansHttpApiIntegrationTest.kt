@@ -12,7 +12,7 @@ class OpphevStansHttpApiIntegrationTest : OpphevStansIntegrationTest() {
     ) {
         val response = integrationTestFixture.post(
             "/api/opphevstans",
-            body = """{ "fødselsnummer": "$fødselsnummer", "begrunnelse": "$begrunnelse" }""",
+            body = """{ "fodselsnummer": "$fødselsnummer", "begrunnelse": "$begrunnelse" }""",
             saksbehandler = saksbehandler,
         )
 
