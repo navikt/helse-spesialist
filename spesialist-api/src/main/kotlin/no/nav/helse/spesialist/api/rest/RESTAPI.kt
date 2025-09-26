@@ -6,74 +6,37 @@ import io.ktor.server.routing.Routing
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.helse.spesialist.api.rest.tilkommeninntekt.GetTilkomneInntektskilderHåndterer
-import no.nav.helse.spesialist.api.rest.tilkommeninntekt.PostTilkommenInntektEndreHåndterer
-import no.nav.helse.spesialist.api.rest.tilkommeninntekt.PostTilkommenInntektFjernHåndterer
-import no.nav.helse.spesialist.api.rest.tilkommeninntekt.PostTilkommenInntektGjenopprettHåndterer
-import no.nav.helse.spesialist.api.rest.tilkommeninntekt.PostTilkommenInntektLeggTilHåndterer
+import no.nav.helse.spesialist.api.rest.tilkommeninntekt.PersonTilkomneInntektskilderGetHåndterer
+import no.nav.helse.spesialist.api.rest.tilkommeninntekt.TilkommenInntektEndrePostHåndterer
+import no.nav.helse.spesialist.api.rest.tilkommeninntekt.TilkommenInntektFjernPostHåndterer
+import no.nav.helse.spesialist.api.rest.tilkommeninntekt.TilkommenInntektGjenopprettPostHåndterer
+import no.nav.helse.spesialist.api.rest.tilkommeninntekt.TilkomneInntekterPostHåndterer
 import java.util.UUID
+
+val RESTHÅNDTERERE =
+    listOf(
+        PersonTilkomneInntektskilderGetHåndterer(),
+        OpphevStansPostHåndterer(),
+        TilkomneInntekterPostHåndterer(),
+        TilkommenInntektEndrePostHåndterer(),
+        TilkommenInntektFjernPostHåndterer(),
+        TilkommenInntektGjenopprettPostHåndterer(),
+    )
 
 fun Routing.restRoutes(restDelegator: RestDelegator) {
     route("api") {
         authenticate("oidc") {
-            listOf(GetTilkomneInntektskilderHåndterer()).forEach {
-                get(it.urlPath) {
-                    restDelegator.utførGet(
-                        call = call,
-                        håndterer = it,
-                        parameterTolkning = it::extractParametre,
-                    )
-                }
-            }
-            post("opphevstans") {
-                restDelegator.utførPost(
-                    call = call,
-                    håndterer = PostOpphevStansHåndterer(),
-                    parameterTolkning = { },
-                )
-            }
-            route("tilkomne-inntekter") {
-                post {
-                    restDelegator.utførPost(
-                        call = call,
-                        håndterer = PostTilkommenInntektLeggTilHåndterer(),
-                        parameterTolkning = { },
-                    )
-                }
-                route("{tilkommenInntektId}") {
-                    post("endre") {
-                        restDelegator.utførPost(
-                            call = call,
-                            håndterer = PostTilkommenInntektEndreHåndterer(),
-                            parameterTolkning = { parametre ->
-                                PostTilkommenInntektEndreHåndterer.URLParametre(
-                                    tilkommenInntektId = parametre.getRequiredUUID("tilkommenInntektId"),
-                                )
-                            },
-                        )
-                    }
-                    post("fjern") {
-                        restDelegator.utførPost(
-                            call = call,
-                            håndterer = PostTilkommenInntektFjernHåndterer(),
-                            parameterTolkning = { parametre ->
-                                PostTilkommenInntektFjernHåndterer.URLParametre(
-                                    tilkommenInntektId = parametre.getRequiredUUID("tilkommenInntektId"),
-                                )
-                            },
-                        )
-                    }
-                    post("gjenopprett") {
-                        restDelegator.utførPost(
-                            call = call,
-                            håndterer = PostTilkommenInntektGjenopprettHåndterer(),
-                            parameterTolkning = { parametre ->
-                                PostTilkommenInntektGjenopprettHåndterer.URLParametre(
-                                    tilkommenInntektId = parametre.getRequiredUUID("tilkommenInntektId"),
-                                )
-                            },
-                        )
-                    }
+            RESTHÅNDTERERE.forEach {
+                when (it) {
+                    is GetHåndterer<*, *> ->
+                        get(it.urlPath) {
+                            restDelegator.utførGet(call = call, håndterer = it)
+                        }
+
+                    is PostHåndterer<*, *, *> ->
+                        post(it.urlPath) {
+                            restDelegator.utførPost(call = call, håndterer = it)
+                        }
                 }
             }
         }
@@ -82,7 +45,7 @@ fun Routing.restRoutes(restDelegator: RestDelegator) {
 
 fun Parameters.getRequired(name: String): String = this[name] ?: throw HttpNotFound("Mangler parameter $name i URL'en")
 
-private fun Parameters.getRequiredUUID(name: String): UUID {
+fun Parameters.getRequiredUUID(name: String): UUID {
     val string = getRequired(name)
     try {
         return UUID.fromString(string)

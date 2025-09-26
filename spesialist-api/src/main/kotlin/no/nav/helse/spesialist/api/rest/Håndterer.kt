@@ -5,30 +5,37 @@ import no.nav.helse.db.SessionContext
 import no.nav.helse.spesialist.application.KøetMeldingPubliserer
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
+import kotlin.reflect.KClass
 import kotlin.reflect.KType
 
-interface GetHåndterer<URLPARAMETRE, RESPONSEBODY> {
+sealed interface RestOperasjonHåndterer<URLPARAMETERS : Any> {
     val urlPath: String
+    val responseBodyType: KType
+    val urlParametersClass: KClass<URLPARAMETERS>
+}
 
-    fun extractParametre(parameters: Parameters): URLPARAMETRE
+interface GetHåndterer<URLPARAMETERS : Any, RESPONSEBODY> : RestOperasjonHåndterer<URLPARAMETERS> {
+    fun extractParametre(parameters: Parameters): URLPARAMETERS
 
     fun håndter(
-        urlParametre: URLPARAMETRE,
+        urlParametre: URLPARAMETERS,
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
     ): RestResponse<RESPONSEBODY>
-
-    fun getResponseBodyType(): KType
 }
 
-interface PostHåndterer<URLPARAMETRE, REQUESTBODY, RESPONSEBODY> {
+interface PostHåndterer<URLPARAMETERS : Any, REQUESTBODY : Any, RESPONSEBODY> : RestOperasjonHåndterer<URLPARAMETERS> {
+    fun extractParametre(parameters: Parameters): URLPARAMETERS
+
     fun håndter(
-        urlParametre: URLPARAMETRE,
+        urlParametre: URLPARAMETERS,
         requestBody: REQUESTBODY,
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
         meldingsKø: KøetMeldingPubliserer,
     ): RestResponse<RESPONSEBODY>
+
+    val requestBodyType: KType
 }

@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.api.rest.tilkommeninntekt
 
+import io.ktor.http.Parameters
 import no.nav.helse.db.SessionContext
 import no.nav.helse.spesialist.api.graphql.mutation.InntektsendringerEventBygger
 import no.nav.helse.spesialist.api.graphql.mutation.LeggTilTilkommenInntektResponse
@@ -13,13 +14,18 @@ import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntekt
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektPeriodeValidator
+import kotlin.reflect.typeOf
 
-class PostTilkommenInntektLeggTilHåndterer : PostHåndterer<Unit, PostTilkommenInntektLeggTilHåndterer.RequestBody, LeggTilTilkommenInntektResponse> {
+class TilkomneInntekterPostHåndterer : PostHåndterer<Unit, TilkomneInntekterPostHåndterer.RequestBody, LeggTilTilkommenInntektResponse> {
+    override val urlPath: String = "tilkomne-inntekter"
+
     data class RequestBody(
         val fodselsnummer: String,
         val verdier: ApiTilkommenInntektInput,
         val notatTilBeslutter: String,
     )
+
+    override fun extractParametre(parameters: Parameters) = Unit
 
     override fun håndter(
         urlParametre: Unit,
@@ -70,4 +76,10 @@ class PostTilkommenInntektLeggTilHåndterer : PostHåndterer<Unit, PostTilkommen
 
         return RestResponse.created(LeggTilTilkommenInntektResponse(tilkommenInntekt.id().value))
     }
+
+    override val urlParametersClass = Unit::class
+
+    override val requestBodyType = typeOf<RequestBody>()
+
+    override val responseBodyType = typeOf<LeggTilTilkommenInntektResponse>()
 }

@@ -24,12 +24,14 @@ class RestDelegator(
     private val tilgangsgruppeUuider: TilgangsgruppeUuider,
     private val meldingPubliserer: MeldingPubliserer,
 ) {
-    suspend fun <URLPARAMETRE, RESPONSEBODY> utførGet(
+    suspend fun <URLPARAMETERS : Any, RESPONSEBODY> utførGet(
         call: RoutingCall,
-        håndterer: GetHåndterer<URLPARAMETRE, RESPONSEBODY>,
-        parameterTolkning: (Parameters) -> URLPARAMETRE,
+        håndterer: GetHåndterer<URLPARAMETERS, RESPONSEBODY>,
     ) {
-        wrapOgDeleger(call, parameterTolkning) { urlParametre, saksbehandler, tilgangsgrupper, transaksjon, _ ->
+        wrapOgDeleger(
+            call,
+            håndterer::extractParametre,
+        ) { urlParametre, saksbehandler, tilgangsgrupper, transaksjon, _ ->
             håndterer.håndter(
                 urlParametre = urlParametre,
                 saksbehandler = saksbehandler,
@@ -39,24 +41,16 @@ class RestDelegator(
         }
     }
 
-    suspend inline fun <URLPARAMETRE, reified REQUESTBODY : Any, RESPONSEBODY> utførPost(
+    suspend fun <URLPARAMETERS : Any, REQUESTBODY : Any, RESPONSEBODY> utførPost(
         call: RoutingCall,
-        håndterer: PostHåndterer<URLPARAMETRE, REQUESTBODY, RESPONSEBODY>,
-        noinline parameterTolkning: (Parameters) -> URLPARAMETRE,
+        håndterer: PostHåndterer<URLPARAMETERS, REQUESTBODY, RESPONSEBODY>,
     ) {
-        utførPost(call, håndterer, parameterTolkning, REQUESTBODY::class)
-    }
-
-    suspend fun <URLPARAMETRE, REQUESTBODY : Any, RESPONSEBODY> utførPost(
-        call: RoutingCall,
-        håndterer: PostHåndterer<URLPARAMETRE, REQUESTBODY, RESPONSEBODY>,
-        parameterTolkning: (Parameters) -> URLPARAMETRE,
-        requestType: KClass<REQUESTBODY>,
-    ) {
-        val request: REQUESTBODY = call.receive(type = requestType)
+        @Suppress("UNCHECKED_CAST")
+        val requestType = håndterer.requestBodyType.classifier as KClass<REQUESTBODY>
+        val request: REQUESTBODY = call.receive(requestType)
         wrapOgDeleger(
             call = call,
-            parameterTolkning = parameterTolkning,
+            parameterTolkning = håndterer::extractParametre,
             håndterer = { urlParametre, saksbehandler, tilgangsgrupper, transaksjon, meldingsKø ->
                 håndterer.håndter(
                     urlParametre = urlParametre,

@@ -27,17 +27,17 @@ import java.math.BigDecimal
 import java.time.ZoneId
 import kotlin.reflect.typeOf
 
-class GetTilkomneInntektskilderHåndterer : GetHåndterer<GetTilkomneInntektskilderHåndterer.URLParametre, List<ApiTilkommenInntektskilde>> {
+class PersonTilkomneInntektskilderGetHåndterer : GetHåndterer<PersonTilkomneInntektskilderGetHåndterer.URLParametre, List<ApiTilkommenInntektskilde>> {
     override val urlPath = "personer/{aktørId}/tilkomne-inntektskilder"
+
+    data class URLParametre(
+        val aktørId: String,
+    )
 
     override fun extractParametre(parameters: Parameters) =
         URLParametre(
             aktørId = parameters.getRequired("aktørId"),
         )
-
-    data class URLParametre(
-        val aktørId: String,
-    )
 
     override fun håndter(
         urlParametre: URLParametre,
@@ -67,8 +67,6 @@ class GetTilkomneInntektskilderHåndterer : GetHåndterer<GetTilkomneInntektskil
             },
         )
     }
-
-    override fun getResponseBodyType() = typeOf<List<ApiTilkommenInntektskilde>>()
 
     private fun hentTilkomneInntektskilder(
         fødselsnummer: String,
@@ -170,4 +168,8 @@ class GetTilkomneInntektskilderHåndterer : GetHåndterer<GetTilkomneInntektskil
     private fun Endring<String>.tilApiEndring(): ApiTilkommenInntektEvent.Endringer.StringEndring = ApiTilkommenInntektEvent.Endringer.StringEndring(fra = fra, til = til)
 
     private fun Endring<BigDecimal>.tilApiEndring(): ApiTilkommenInntektEvent.Endringer.BigDecimalEndring = ApiTilkommenInntektEvent.Endringer.BigDecimalEndring(fra = fra, til = til)
+
+    override val urlParametersClass = URLParametre::class
+
+    override val responseBodyType = typeOf<List<ApiTilkommenInntektskilde>>()
 }

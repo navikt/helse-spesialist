@@ -1,17 +1,23 @@
 package no.nav.helse.spesialist.api.rest
 
+import io.ktor.http.Parameters
 import no.nav.helse.db.SessionContext
 import no.nav.helse.spesialist.api.rest.tilkommeninntekt.bekreftTilgangTilPerson
 import no.nav.helse.spesialist.application.KøetMeldingPubliserer
 import no.nav.helse.spesialist.domain.NotatType
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
+import kotlin.reflect.typeOf
 
-class PostOpphevStansHåndterer : PostHåndterer<Unit, PostOpphevStansHåndterer.RequestBody, Boolean> {
+class OpphevStansPostHåndterer : PostHåndterer<Unit, OpphevStansPostHåndterer.RequestBody, Boolean> {
+    override val urlPath: String = "opphevstans"
+
     data class RequestBody(
-        val fødselsnummer: String,
+        val fodselsnummer: String,
         val begrunnelse: String,
     )
+
+    override fun extractParametre(parameters: Parameters) = Unit
 
     override fun håndter(
         urlParametre: Unit,
@@ -21,7 +27,7 @@ class PostOpphevStansHåndterer : PostHåndterer<Unit, PostOpphevStansHåndterer
         transaksjon: SessionContext,
         meldingsKø: KøetMeldingPubliserer,
     ): RestResponse<Boolean> {
-        val fødselsnummer = requestBody.fødselsnummer
+        val fødselsnummer = requestBody.fodselsnummer
         bekreftTilgangTilPerson(
             fødselsnummer = fødselsnummer,
             saksbehandler = saksbehandler,
@@ -43,4 +49,10 @@ class PostOpphevStansHåndterer : PostHåndterer<Unit, PostOpphevStansHåndterer
 
         return RestResponse.ok(true)
     }
+
+    override val urlParametersClass = Unit::class
+
+    override val requestBodyType = typeOf<RequestBody>()
+
+    override val responseBodyType = typeOf<Boolean>()
 }

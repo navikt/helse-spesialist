@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.api.rest.tilkommeninntekt
 
+import io.ktor.http.Parameters
 import no.nav.helse.db.SessionContext
 import no.nav.helse.spesialist.api.graphql.mutation.InntektsendringerEventBygger
 import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektInput
@@ -7,6 +8,7 @@ import no.nav.helse.spesialist.api.rest.HttpForbidden
 import no.nav.helse.spesialist.api.rest.HttpNotFound
 import no.nav.helse.spesialist.api.rest.PostHåndterer
 import no.nav.helse.spesialist.api.rest.RestResponse
+import no.nav.helse.spesialist.api.rest.getRequiredUUID
 import no.nav.helse.spesialist.application.KøetMeldingPubliserer
 import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
 import no.nav.helse.spesialist.domain.Saksbehandler
@@ -14,8 +16,11 @@ import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektId
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektPeriodeValidator
 import java.util.UUID
+import kotlin.reflect.typeOf
 
-class PostTilkommenInntektEndreHåndterer : PostHåndterer<PostTilkommenInntektEndreHåndterer.URLParametre, PostTilkommenInntektEndreHåndterer.RequestBody, Boolean> {
+class TilkommenInntektEndrePostHåndterer : PostHåndterer<TilkommenInntektEndrePostHåndterer.URLParametre, TilkommenInntektEndrePostHåndterer.RequestBody, Boolean> {
+    override val urlPath: String = "tilkomne-inntekter/{tilkommenInntektId}/endre"
+
     data class URLParametre(
         val tilkommenInntektId: UUID,
     )
@@ -24,6 +29,11 @@ class PostTilkommenInntektEndreHåndterer : PostHåndterer<PostTilkommenInntektE
         val endretTil: ApiTilkommenInntektInput,
         val notatTilBeslutter: String,
     )
+
+    override fun extractParametre(parameters: Parameters) =
+        URLParametre(
+            tilkommenInntektId = parameters.getRequiredUUID("tilkommenInntektId"),
+        )
 
     override fun håndter(
         urlParametre: URLParametre,
@@ -99,4 +109,10 @@ class PostTilkommenInntektEndreHåndterer : PostHåndterer<PostTilkommenInntektE
 
         return RestResponse.ok(true)
     }
+
+    override val urlParametersClass = URLParametre::class
+
+    override val requestBodyType = typeOf<RequestBody>()
+
+    override val responseBodyType = typeOf<Boolean>()
 }
