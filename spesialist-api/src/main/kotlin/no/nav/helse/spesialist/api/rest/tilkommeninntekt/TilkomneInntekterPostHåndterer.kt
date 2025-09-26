@@ -3,9 +3,9 @@ package no.nav.helse.spesialist.api.rest.tilkommeninntekt
 import io.ktor.http.Parameters
 import no.nav.helse.db.SessionContext
 import no.nav.helse.spesialist.api.graphql.mutation.InntektsendringerEventBygger
-import no.nav.helse.spesialist.api.graphql.mutation.LeggTilTilkommenInntektResponse
-import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektInput
+import no.nav.helse.spesialist.api.rest.ApiTilkommenInntektInput
 import no.nav.helse.spesialist.api.rest.HttpForbidden
+import no.nav.helse.spesialist.api.rest.LeggTilTilkommenInntektResponse
 import no.nav.helse.spesialist.api.rest.PostHåndterer
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.application.KøetMeldingPubliserer
