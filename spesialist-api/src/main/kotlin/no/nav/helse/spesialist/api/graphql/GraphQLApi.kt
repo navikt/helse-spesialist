@@ -52,7 +52,6 @@ import no.nav.helse.spesialist.api.graphql.query.OppgaverQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.OpptegnelseQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.TildelteOppgaverQueryHandler
-import no.nav.helse.spesialist.api.graphql.query.TilkommenInntektQueryHandler
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.person.PersonService
 import no.nav.helse.spesialist.api.rest.RestDelegator
@@ -168,8 +167,6 @@ fun lagSchemaMedResolversOgHandlers(
                         egenAnsattApiDao = daos.egenAnsattApiDao,
                         dokumenthåndterer = dokumenthåndterer,
                     ),
-                tilkommenInntekt =
-                    TilkommenInntektQueryHandler(),
                 hentSaksbehandlere =
                     HentSaksbehandlereQueryHandler(
                         saksbehandlerDao = daos.saksbehandlerDao,

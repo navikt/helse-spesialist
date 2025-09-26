@@ -45,8 +45,6 @@ import no.nav.helse.spesialist.api.graphql.query.PersonQuery
 import no.nav.helse.spesialist.api.graphql.query.PersonQuerySchema
 import no.nav.helse.spesialist.api.graphql.query.TildelteOppgaverQuery
 import no.nav.helse.spesialist.api.graphql.query.TildelteOppgaverQuerySchema
-import no.nav.helse.spesialist.api.graphql.query.TilkommenInntektQuery
-import no.nav.helse.spesialist.api.graphql.query.TilkommenInntektQuerySchema
 
 class SpesialistSchema(
     val queryHandlers: QueryHandlers,
@@ -59,7 +57,6 @@ class SpesialistSchema(
         val behandlingsstatistikk: BehandlingsstatistikkQuerySchema,
         val opptegnelse: OpptegnelseQuerySchema,
         val dokument: DokumentQuerySchema,
-        val tilkommenInntekt: TilkommenInntektQuerySchema,
         val hentSaksbehandlere: HentSaksbehandlereQuerySchema,
     )
 
@@ -92,7 +89,6 @@ class SpesialistSchema(
                 BehandlingsstatistikkQuery(handler = queryHandlers.behandlingsstatistikk),
                 OpptegnelseQuery(handler = queryHandlers.opptegnelse),
                 DokumentQuery(handler = queryHandlers.dokument),
-                TilkommenInntektQuery(handler = queryHandlers.tilkommenInntekt),
                 HentSaksbehandlereQuery(handler = queryHandlers.hentSaksbehandlere),
             )
 
