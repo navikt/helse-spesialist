@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.api.rest.tilkommeninntekt
 
+import io.ktor.http.Parameters
 import no.nav.helse.db.SessionContext
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand
 import no.nav.helse.spesialist.api.graphql.schema.ApiDatoPeriode
@@ -13,6 +14,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiTilkommenInntektskilde
 import no.nav.helse.spesialist.api.rest.GetHåndterer
 import no.nav.helse.spesialist.api.rest.HttpNotFound
 import no.nav.helse.spesialist.api.rest.RestResponse
+import no.nav.helse.spesialist.api.rest.getRequired
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.domain.tilkommeninntekt.Endring
@@ -23,8 +25,16 @@ import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektGjenoppre
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektOpprettetEvent
 import java.math.BigDecimal
 import java.time.ZoneId
+import kotlin.reflect.typeOf
 
 class GetTilkomneInntektskilderHåndterer : GetHåndterer<GetTilkomneInntektskilderHåndterer.URLParametre, List<ApiTilkommenInntektskilde>> {
+    override val urlPath = "personer/{aktørId}/tilkomne-inntektskilder"
+
+    override fun extractParametre(parameters: Parameters) =
+        URLParametre(
+            aktørId = parameters.getRequired("aktørId"),
+        )
+
     data class URLParametre(
         val aktørId: String,
     )
@@ -57,6 +67,8 @@ class GetTilkomneInntektskilderHåndterer : GetHåndterer<GetTilkomneInntektskil
             },
         )
     }
+
+    override fun getResponseBodyType() = typeOf<List<ApiTilkommenInntektskilde>>()
 
     private fun hentTilkomneInntektskilder(
         fødselsnummer: String,

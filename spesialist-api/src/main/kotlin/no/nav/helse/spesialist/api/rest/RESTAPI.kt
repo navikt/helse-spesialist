@@ -16,6 +16,15 @@ import java.util.UUID
 fun Routing.restRoutes(restDelegator: RestDelegator) {
     route("api") {
         authenticate("oidc") {
+            listOf(GetTilkomneInntektskilderHåndterer()).forEach {
+                get(it.urlPath) {
+                    restDelegator.utførGet(
+                        call = call,
+                        håndterer = it,
+                        parameterTolkning = it::extractParametre,
+                    )
+                }
+            }
             post("opphevstans") {
                 restDelegator.utførPost(
                     call = call,
@@ -67,24 +76,11 @@ fun Routing.restRoutes(restDelegator: RestDelegator) {
                     }
                 }
             }
-            route("personer/{aktørId}/tilkomne-inntektskilder") {
-                get {
-                    restDelegator.utførGet(
-                        call = call,
-                        håndterer = GetTilkomneInntektskilderHåndterer(),
-                        parameterTolkning = { parametre ->
-                            GetTilkomneInntektskilderHåndterer.URLParametre(
-                                aktørId = parametre.getRequired("aktørId"),
-                            )
-                        },
-                    )
-                }
-            }
         }
     }
 }
 
-private fun Parameters.getRequired(name: String): String = this[name] ?: throw HttpNotFound("Mangler parameter $name i URL'en")
+fun Parameters.getRequired(name: String): String = this[name] ?: throw HttpNotFound("Mangler parameter $name i URL'en")
 
 private fun Parameters.getRequiredUUID(name: String): UUID {
     val string = getRequired(name)
