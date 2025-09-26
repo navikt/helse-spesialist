@@ -39,7 +39,6 @@ import no.nav.helse.spesialist.api.graphql.mutation.PersonMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.SkjonnsfastsettelseMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.StansAutomatiskBehandlingMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.TildelingMutationHandler
-import no.nav.helse.spesialist.api.graphql.mutation.TilkommenInntektMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.VarselMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutationHandler
@@ -172,7 +171,6 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                     ),
                     paVent = PaVentMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
                     opphevStans = OpphevStansMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
-                    tilkommenInntekt = TilkommenInntektMutationHandler(),
                     stansAutomatiskBehandling = StansAutomatiskBehandlingMutationHandler(sessionFactory)
                 ),
             )

@@ -23,8 +23,6 @@ import no.nav.helse.spesialist.api.graphql.mutation.StansAutomatiskBehandlingMut
 import no.nav.helse.spesialist.api.graphql.mutation.StansAutomatiskBehandlingMutationSchema
 import no.nav.helse.spesialist.api.graphql.mutation.TildelingMutation
 import no.nav.helse.spesialist.api.graphql.mutation.TildelingMutationSchema
-import no.nav.helse.spesialist.api.graphql.mutation.TilkommenInntektMutation
-import no.nav.helse.spesialist.api.graphql.mutation.TilkommenInntektMutationSchema
 import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutation
 import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutationSchema
 import no.nav.helse.spesialist.api.graphql.mutation.VarselMutation
@@ -74,7 +72,6 @@ class SpesialistSchema(
         val annullering: AnnulleringMutationSchema,
         val paVent: PaVentMutationSchema,
         val opphevStans: OpphevStansMutationSchema,
-        val tilkommenInntekt: TilkommenInntektMutationSchema,
         val stansAutomatiskBehandling: StansAutomatiskBehandlingMutationSchema,
     )
 
@@ -107,7 +104,6 @@ class SpesialistSchema(
                 AnnulleringMutation(handler = mutationHandlers.annullering),
                 PaVentMutation(handler = mutationHandlers.paVent),
                 OpphevStansMutation(handler = mutationHandlers.opphevStans),
-                TilkommenInntektMutation(handler = mutationHandlers.tilkommenInntekt),
                 StansAutomatiskBehandlingMutation(handler = mutationHandlers.stansAutomatiskBehandling),
             )
 
