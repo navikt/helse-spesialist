@@ -3,235 +3,239 @@ package no.nav.helse.spesialist.api.rest.graphqlgenerator
 import no.nav.helse.spesialist.api.rest.GetHåndterer
 import no.nav.helse.spesialist.api.rest.PostHåndterer
 import no.nav.helse.spesialist.api.rest.RESTHÅNDTERERE
-import java.io.File
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.declaredMemberProperties
-import kotlin.reflect.full.starProjectedType
-import kotlin.reflect.full.withNullability
+import kotlin.reflect.full.superclasses
 import kotlin.reflect.jvm.jvmName
-import kotlin.reflect.typeOf
 
 class Generator {
     fun generate() {
         RESTHÅNDTERERE.forEach { håndterer ->
             println("Genererer output-typer nødvendige for ${håndterer::class.simpleName}...")
-            generateOutputTypesRecursively(håndterer.responseBodyType)
+            resolveOutputReferenceWithGeneration(håndterer.responseBodyType)
         }
         RESTHÅNDTERERE.filterIsInstance<PostHåndterer<*, *, *>>().forEach { håndterer ->
             println("Genererer input-typer nødvendige for ${håndterer::class.simpleName}...")
-            generateInputTypesRecursively(håndterer.requestBodyType)
+            resolveInputReferenceWithGeneration(håndterer.requestBodyType)
         }
         RESTHÅNDTERERE.forEach { håndterer ->
-            println("--- Genererer for ${håndterer::class.simpleName} ---")
-            val operationName = håndterer::class.simpleName!!.removeSuffix("Håndterer")
+            println("Genererer query / mutation basert på ${håndterer::class.simpleName}...")
+
+            val håndtererNavn = håndterer::class.simpleName!!.removeSuffix("Håndterer")
             val urlParameters =
                 håndterer.urlParametersClass.declaredMemberProperties
                     .associate { property -> property.name.replaceÆØÅ() to property.returnType.toUrlParameterTypeReference() }
-            val responseBodyType = håndterer.responseBodyType
 
-            val responseBodyTypeReference = responseBodyType.resolveTypeReference()
+            val path = "/${håndterer.urlPath.gqlParameterizedPath()}"
+
+            val fieldType = resolveOutputReferenceWithGeneration(håndterer.responseBodyType)
+
+            val operationName = "REST$håndtererNavn"
+            val fieldName = "rest$håndtererNavn"
 
             when (håndterer) {
                 is GetHåndterer<*, *> -> {
-                    println("Genererer query siden dette er en GET-operasjon...")
-                    val query = """
-            query REST$operationName(${urlParameters.entries.joinToString(separator = ", ") { (name, type) -> $$"$$$name: $$type" }}) {
-                rest$operationName(${urlParameters.keys.joinToString { $$"$$it: $$$it" }})
-                @rest(
-                    type: "$responseBodyTypeReference"
-                    endpoint: "spesialist"
-                    path: "/${håndterer.urlPath.gqlParameterizedPath()}"
-                    method: "GET"
-                )""".trimIndent() + printQueryTree(responseBodyType) + "\n}"
-                    generatedQueries.add(
-                        "rest$operationName(${
-                            urlParameters.entries.joinToString(separator = ", ") { (name, type) -> "$name: $type" }
-                        }): $responseBodyTypeReference"
+                    queries.add(
+                        GQLRestQuery(
+                            operationName = operationName,
+                            fieldName = fieldName,
+                            arguments = urlParameters,
+                            fieldType = fieldType,
+                            path = path
+                        )
                     )
-                    val outputPath = "../helse-speil/src/io/graphql/rest/spesialist/$operationName.query.graphql"
-                    println("Lagrer query som $outputPath...")
-                    File(outputPath).writeText(query)
                 }
 
                 is PostHåndterer<*, *, *> -> {
-                    val requestBodyType = håndterer.requestBodyType
-                    val requestBodyTypeReference = requestBodyType.resolveTypeReference()
-                    println("Genererer mutation siden dette er en POST-operasjon...")
-                    val parameters = urlParameters + ("input" to requestBodyTypeReference)
-                    val query = $$"""
-            mutation REST$$operationName($${parameters.entries.joinToString(separator = ", ") { (name, type) -> $$"$$$name: $$type" }}) {
-                rest$$operationName($${parameters.keys.joinToString { $$"$$it: $$$it" }})
-                @rest(
-                    type: "$$responseBodyTypeReference"
-                    endpoint: "spesialist"
-                    path: "/$${håndterer.urlPath.gqlParameterizedPath()}"
-                    method: "POST"
-                )""".trimIndent() + printQueryTree(responseBodyType) + "\n}"
-                    generatedMutations.add(
-                        "rest$operationName(${
-                            parameters.entries.joinToString(separator = ", ") { (name, type) -> "$name: $type" }
-                        }): $responseBodyTypeReference"
+                    mutations.add(
+                        GQLRestMutation(
+                            operationName = operationName,
+                            fieldName = fieldName,
+                            arguments = urlParameters,
+                            inputArgument = resolveInputReferenceWithGeneration(håndterer.requestBodyType),
+                            fieldType = fieldType,
+                            path = path
+                        )
                     )
-                    val outputPath = "../helse-speil/src/io/graphql/rest/spesialist/$operationName.mutation.graphql"
-                    println("Lagrer mutation som $outputPath...")
-                    File(outputPath).writeText(query)
                 }
             }
         }
     }
 
-    private fun printQueryTree(responseBodyType: KType): String =
-        responseBodyType.resolveTypeReference().type.printQueryPropertyTree(2)
+    val inputTypes = mutableMapOf<KClass<*>, GQLInputObjectType>()
+    val outputTypes = mutableMapOf<KClass<*>, GQLObjectOrInterfaceType>()
+    val queries = mutableListOf<GQLRestQuery>()
+    val mutations = mutableListOf<GQLRestMutation>()
+    val referencedTypes = mutableSetOf<GQLType>()
 
-    private fun KType.resolveTypeReference(): TypeReference =
-        (scalarTypes[withNullability(false)]
-            ?: outputTypes[withNullability(false)]
-            ?: inputTypes[withNullability(false)]
-            ?: error("På en eller annen måte har ikke $this blitt generert"))
-            .toReference(isMarkedNullable)
-
-    val inputTypes = mutableMapOf<KType, InputTypeDefinition>()
-    val outputTypes = mutableMapOf<KType, OutputTypeDefinition>()
-    val generatedQueries = mutableListOf<String>()
-    val generatedMutations = mutableListOf<String>()
-
-    private fun generateOutputTypesRecursively(type: KType): TypeReference {
-        val key = type.withNullability(false)
-        return (when {
-            scalarTypes.containsKey(key) -> scalarTypes[key]!!
-            outputTypes.containsKey(key) -> outputTypes[key]!!
-
-            type.isCollection() -> OutputCollectionTypeDefinition(
-                elementType = generateOutputTypesRecursively(type.getCollectionElementType())
-            ).also { outputTypes[key] = it }
-
-            else -> {
-                println("Genererer output-type for $type...")
-                val klass = type.classifier as KClass<*>
-                val supertypes = klass.supertypes.filterNot { it == typeOf<Any>() }
-                OutputObjectTypeDefinition(
-                    name = klass.gqlTypeName(),
-                    implements = supertypes
-                        .map { generateOutputTypesRecursively(type = it).type },
-                    isInterface = klass.java.isInterface,
-                    properties = klass.declaredMemberProperties
-                        .filterNot { it.name == "__typename" }
-                        .onEach { it.name.assertNoÆØÅ() }
-                        .associate { it.name to generateOutputTypesRecursively(type = it.returnType) }
-                )
-                    .also { outputTypes[key] = it }
-                    .also {
-                        // Pass på å generere alle undertyper, selv om de ikke er eksplisitt referert til
-                        klass.sealedSubclasses.forEach {
-                            generateOutputTypesRecursively(type = it.starProjectedType)
-                        }
-                    }
-            }
-        }).toReference(type.isMarkedNullable)
-    }
-
-    private fun generateInputTypesRecursively(type: KType): TypeReference {
-        val key = type.withNullability(false)
-        return (when {
-            scalarTypes.containsKey(key) -> scalarTypes[key]!!
-            inputTypes.containsKey(key) -> inputTypes[key]!!
-
-            type.isCollection() -> InputCollectionTypeDefinition(
-                elementType = generateInputTypesRecursively(type.getCollectionElementType())
-            ).also { inputTypes[key] = it }
-
-            else -> {
-                println("Genererer input-type for $type...")
-                val klass = type.classifier as KClass<*>
-
-                klass.sealedSubclasses
-                    .takeUnless { it.isEmpty() }
-                    ?.let { error("$klass har (sealed) subclasses (${it.joinToString()}), dette støttes ikke i input") }
-
-                klass.supertypes.filterNot { it == typeOf<Any>() }
-                    .takeUnless { it.isEmpty() }
-                    ?.let { error("$klass extender en annen type (${it.joinToString()}), dette støttes ikke i input") }
-
-                InputObjectTypeDefinition(
-                    name = klass.gqlTypeName() + if (outputTypes.containsKey(key)) "Input" else "",
-                    properties = klass.declaredMemberProperties
-                        .filterNot { it.name == "__typename" }
-                        .onEach { it.name.assertNoÆØÅ() }
-                        .associate { it.name to generateInputTypesRecursively(type = it.returnType) }
-                ).also { inputTypes[key] = it }
-            }
-        }).toReference(type.isMarkedNullable)
-    }
-
-    private fun KType.isCollection(): Boolean = (classifier as? KClass<*>) in setOf(
-        List::class,
-        Set::class
-    )
-
-    private fun KType.getCollectionElementType(): KType = this.arguments.single().type!!
-
-    private fun TypeDefinition.toReference(nullable: Boolean): TypeReference =
-        TypeReference(type = this, nullable = nullable)
-
-    private fun KType.toUrlParameterTypeReference(): TypeReference =
-        TypeReference(
-            type = scalarTypes[withNullability(false)]
-                ?: error("Type $this er ikke en skalar type. Kun skalare typer kan brukes som URL-parametre."),
-            nullable = isMarkedNullable
+    private fun resolveOutputReferenceWithGeneration(type: KType): GQLTypeReference<GQLOutputType> =
+        resolveReferenceWithGeneration(
+            type = type,
+            referenceResolver = ::resolveOutputReferenceWithGeneration,
+            typeResolver = ::resolveOutputTypeWithGeneration
         )
 
-    private fun TypeDefinition.printQueryPropertyTree(indentLevel: Int): String {
-        return when (this) {
-            is InputTypeDefinition -> {
-                error("Gir ingen mening å spørre etter felter i en inputtype")
-            }
+    private fun resolveOutputType(klass: KClass<*>): GQLOutputType? =
+        resolveScalarType(klass) ?: outputTypes[klass]
 
-            is OutputCollectionTypeDefinition -> {
-                elementType.type.printQueryPropertyTree(indentLevel)
-            }
+    private fun resolveOutputReference(type: KType): GQLTypeReference<GQLOutputType>? =
+        resolveReference(
+            type = type,
+            referenceResolver = ::resolveOutputReference,
+            typeResolver = ::resolveOutputType
+        )
 
-            is ScalarTypeDefinition -> {
-                ""
-            }
+    private fun resolveOutputTypeWithGeneration(klass: KClass<*>): GQLOutputType {
+        if (klass.java.isEnum) {
+            error("Støtter ikke enum-klasser (ennå). Gjelder $klass.")
+        }
 
-            is OutputObjectTypeDefinition -> {
-                buildString {
-                    append(" {")
-                    append("\n")
-                    properties.entries.sortedBy { it.key }
-                        .filterNot { property ->
-                            this@printQueryPropertyTree.implements.map { it as OutputObjectTypeDefinition }
-                                .any { it.properties.containsKey(property.key) }
-                        }
-                        .forEach { (key, typeReference) ->
-                            append((1..indentLevel).joinToString(separator = "") { "    " })
-                            append(key)
-                            append(typeReference.type.printQueryPropertyTree(indentLevel + 1))
-                            append("\n")
-                        }
-                    outputTypes.values.filterIsInstance<OutputObjectTypeDefinition>()
-                        .filter {
-                            it.properties
-                                .filterNot { property ->
-                                    it.implements.map { it as OutputObjectTypeDefinition }
-                                        .any { it.properties.containsKey(property.key) }
-                                }
-                                .isNotEmpty()
-                        }
-                        .filter { this@printQueryPropertyTree in it.implements }
-                        .sortedBy { it.name }
-                        .forEach { subtype ->
-                            append((1..indentLevel).joinToString(separator = "") { "    " })
-                            append("... on ${subtype.name}" + subtype.printQueryPropertyTree(indentLevel + 1))
-                            append("\n")
-                        }
-                    append((1..<indentLevel).joinToString(separator = "") { "    " })
-                    append("}")
+        resolveOutputType(klass)?.let { return it }
+
+        println("Genererer output-type for $klass...")
+        val superclasses = klass.superclasses.filterNot { it == Any::class }
+        val fields = klass.declaredMemberProperties
+            .filterNot { it.name == "__typename" }
+            .onEach { it.name.assertNoÆØÅ() }
+            .associate { it.name to resolveOutputReferenceWithGeneration(it.returnType) }
+
+        val typeName = klass.gqlTypeName()
+        val implementedInterfaces =
+            superclasses.map {
+                val resolveWithGenerationBasedOnClass = resolveOutputTypeWithGeneration(it)
+                if (resolveWithGenerationBasedOnClass !is GQLInterfaceType) {
+                    error(
+                        "Støtter ikke ikke-abstrakte superklasser, ettersom de ikke kan bli" +
+                                " til GraphQL interfaces. Gjelder $klass."
+                    )
                 }
+                resolveWithGenerationBasedOnClass
+            }
+
+        if (klass.isAbstract || klass.java.isInterface) {
+            if (!klass.isSealed) {
+                error(
+                    "Støtter ikke abtrakt klasse / interface som ikke er sealed," +
+                            " ettersom vi da ikke vet hvilke undertyper som finnes mtp. query'en." +
+                            " Gjelder $klass."
+                )
+            }
+            GQLInterfaceType(
+                name = typeName,
+                implementedInterfaces = implementedInterfaces,
+                fields = fields
+            ).also { outputTypes[klass] = it }
+                .also {
+                    // Pass på å generere alle undertyper, selv om de ikke er eksplisitt referert til
+                    klass.sealedSubclasses.forEach { subclass ->
+                        resolveOutputTypeWithGeneration(subclass).also { referencedTypes += it }
+                    }
+                }
+        } else {
+            GQLObjectType(
+                name = typeName,
+                implementedInterfaces = implementedInterfaces,
+                fields = fields
+            ).also { outputTypes[klass] = it }
+        }
+
+        return resolveOutputType(klass)!!
+    }
+
+    private fun <INPUT_OR_OUTPUT : GQLType> resolveReference(
+        type: KType,
+        referenceResolver: (KType) -> GQLTypeReference<INPUT_OR_OUTPUT>?,
+        typeResolver: (KClass<*>) -> INPUT_OR_OUTPUT?,
+    ): GQLTypeReference<INPUT_OR_OUTPUT>? =
+        when (val forenklet = type.tilForenkletType()) {
+            is CollectionForenkletType -> referenceResolver(forenklet.elementType)?.let {
+                GQLListTypeReference(
+                    wrappedReference = it,
+                    nullable = type.isMarkedNullable
+                )
+            }
+
+            is KClassForenkletType -> typeResolver(forenklet.klass)?.also { referencedTypes += it }?.let {
+                GQLDirectTypeReference(
+                    type = it,
+                    nullable = type.isMarkedNullable
+                )
+            }
+        }
+
+    private fun <INPUT_OR_OUTPUT : GQLType> resolveReferenceWithGeneration(
+        type: KType,
+        referenceResolver: (KType) -> GQLTypeReference<INPUT_OR_OUTPUT>,
+        typeResolver: (KClass<*>) -> INPUT_OR_OUTPUT,
+    ): GQLTypeReference<INPUT_OR_OUTPUT> =
+        when (val forenklet = type.tilForenkletType()) {
+            is CollectionForenkletType -> GQLListTypeReference(
+                wrappedReference = referenceResolver(forenklet.elementType),
+                nullable = type.isMarkedNullable
+            )
+
+            is KClassForenkletType -> GQLDirectTypeReference(
+                type = typeResolver(forenklet.klass).also { referencedTypes += it },
+                nullable = type.isMarkedNullable
+            )
+        }
+
+    private fun resolveInputReferenceWithGeneration(type: KType): GQLTypeReference<GQLInputType> =
+        resolveReferenceWithGeneration(
+            type = type,
+            referenceResolver = ::resolveInputReferenceWithGeneration,
+            typeResolver = ::resolveInputTypeWithGeneration
+        )
+
+    private fun resolveToInputType(klass: KClass<*>): GQLInputType? =
+        resolveScalarType(klass) ?: inputTypes[klass]
+
+    private fun resolveInputTypeWithGeneration(klass: KClass<*>): GQLInputType {
+        if (klass.java.isEnum) {
+            error("Støtter ikke enum-klasser (ennå). Gjelder $klass.")
+        }
+
+        resolveToInputType(klass)?.let { return it }
+
+        println("Genererer input-type for $klass...")
+
+        if (klass.superclasses.filterNot { it == Any::class }.isNotEmpty()) {
+            error("Støtter ikke input-typer som arver av andre typer. Gjelder $klass.")
+        }
+        if (klass.isAbstract || klass.java.isInterface) {
+            error("Støtter ikke abstrakt klasse / interface som input. Gjelder $klass.")
+        }
+
+        GQLInputObjectType(
+            name = klass.gqlTypeName() + if (outputTypes.containsKey(klass)) "Input" else "",
+            fields = klass.declaredMemberProperties
+                .filterNot { it.name == "__typename" }
+                .onEach { it.name.assertNoÆØÅ() }
+                .associate { it.name to resolveInputReferenceWithGeneration(it.returnType) }
+        ).also { inputTypes[klass] = it }
+
+        return resolveToInputType(klass)!!
+    }
+
+    private fun KType.toUrlParameterTypeReference(): GQLDirectTypeReference<GQLScalarType> {
+        when (val forenklet = tilForenkletType()) {
+            is CollectionForenkletType -> {
+                error("Kan ikke ha lister som URL-parametre. Gjelder type $this.")
+            }
+
+            is KClassForenkletType -> {
+                val type = resolveScalarType(forenklet.klass)
+                    ?: error("URL-parameter må være en skalartype. Gjelder type $this.")
+                return GQLDirectTypeReference(
+                    type = type,
+                    nullable = isMarkedNullable
+                )
             }
         }
     }
+
+    private fun resolveScalarType(klass: KClass<*>): GQLScalarType? = scalarTypes[klass]
 
     private fun String.gqlParameterizedPath(): String =
         split('/').joinToString(separator = "/") {
@@ -274,4 +278,7 @@ class Generator {
                 )
             }
         }
+
+    fun getReferencedCustomScalarTypes(): Collection<GQLCustomScalarType> =
+        scalarTypes.values.filterIsInstance<GQLCustomScalarType>().filter { it in referencedTypes }
 }
