@@ -69,6 +69,7 @@ class Generator {
         }
     }
 
+    val enumTypes = mutableMapOf<KClass<*>, GQLEnumType>()
     val inputTypes = mutableMapOf<KClass<*>, GQLInputObjectType>()
     val outputTypes = mutableMapOf<KClass<*>, GQLObjectOrInterfaceType>()
     val queries = mutableListOf<GQLRestQuery>()
@@ -76,78 +77,87 @@ class Generator {
     val referencedTypes = mutableSetOf<GQLNamedType>()
 
     private fun resolveNamedOutputType(klass: KClass<*>): GQLNamedOutputType? =
-        resolveScalarType(klass) ?: outputTypes[klass]
+        resolveScalarType(klass) ?: enumTypes[klass] ?: outputTypes[klass]
 
     private fun resolveOrGenerateNamedOutputType(klass: KClass<*>): GQLNamedOutputType {
-        if (klass.java.isEnum) {
-            error("Støtter ikke enum-klasser (ennå). Gjelder $klass.")
-        }
-
         resolveNamedOutputType(klass)?.let { return it }
 
-        println("Genererer output-type for $klass...")
-        val superclasses = klass.superclasses.filterNot { it == Any::class }
-        val fields = klass.declaredMemberProperties
-            .filterNot { it.name == "__typename" }
-            .onEach { it.name.assertNoÆØÅ() }
-            .associate {
-                it.name to resolveOutputType(
-                    type = it.returnType,
-                    namedTypeResolver = ::resolveOrGenerateNamedOutputType
-                )
-            }
-        if (fields.isEmpty()) {
-            error("Alle GraphQL-typer må ha minst ett felt. Hvis dette er en skalarverdi, legg den til i genereringen." +
-                    " Gjelder $klass.")
-        }
-
-        val implementedInterfaces =
-            superclasses.map {
-                val generatedInterface = resolveOrGenerateNamedOutputType(it)
-                if (generatedInterface !is GQLInterfaceType) {
-                    error(
-                        "Støtter ikke ikke-abstrakte superklasser, ettersom de ikke kan bli" +
-                                " til GraphQL interfaces. Gjelder $klass."
+        if (klass.java.isEnum) {
+            generateEnumType(klass)
+        } else {
+            println("Genererer output-type for $klass...")
+            val superclasses = klass.superclasses.filterNot { it == Any::class }
+            val fields = klass.declaredMemberProperties
+                .filterNot { it.name == "__typename" }
+                .onEach { it.name.assertNoÆØÅ() }
+                .associate {
+                    it.name to resolveOutputType(
+                        type = it.returnType,
+                        namedTypeResolver = ::resolveOrGenerateNamedOutputType
                     )
                 }
-                generatedInterface
+            if (fields.isEmpty()) {
+                error(
+                    "Alle GraphQL-typer må ha minst ett felt. Hvis dette er en skalarverdi, legg den til i genereringen." +
+                            " Gjelder $klass."
+                )
             }
 
-        val typeName = getUniqueName(klass, false)
-        if (klass.isAbstract || klass.java.isInterface) {
-            if (!klass.isSealed) {
-                error(
-                    "Støtter ikke abtrakt klasse / interface som ikke er sealed," +
-                            " ettersom vi da ikke vet hvilke undertyper som finnes mtp. query'en." +
-                            " Gjelder $klass."
-                )
-            }
-            if (klass.declaredMemberProperties.none { it.name == "__typename" }) {
-                error(
-                    "Må ha et __typename-felt på et interface for å simulere GraphQL sin typeklassifisering." +
-                            " Gjelder $klass."
-                )
-            }
-            GQLInterfaceType(
-                name = typeName,
-                implementedInterfaces = implementedInterfaces,
-                fields = fields
-            ).also { outputTypes[klass] = it }
-                .also {
-                    // Pass på å generere alle undertyper, selv om de ikke er eksplisitt referert til
-                    klass.sealedSubclasses.forEach { subclass ->
-                        resolveOrGenerateNamedOutputType(subclass).also { referencedTypes += it }
+            val implementedInterfaces =
+                superclasses.map {
+                    val generatedInterface = resolveOrGenerateNamedOutputType(it)
+                    if (generatedInterface !is GQLInterfaceType) {
+                        error(
+                            "Støtter ikke ikke-abstrakte superklasser, ettersom de ikke kan bli" +
+                                    " til GraphQL interfaces. Gjelder $klass."
+                        )
                     }
+                    generatedInterface
                 }
-        } else {
-            GQLObjectType(
-                name = typeName,
-                implementedInterfaces = implementedInterfaces,
-                fields = fields
-            ).also { outputTypes[klass] = it }
+
+            if (klass.isAbstract || klass.java.isInterface) {
+                if (!klass.isSealed) {
+                    error(
+                        "Støtter ikke abtrakt klasse / interface som ikke er sealed," +
+                                " ettersom vi da ikke vet hvilke undertyper som finnes mtp. query'en." +
+                                " Gjelder $klass."
+                    )
+                }
+                if (klass.declaredMemberProperties.none { it.name == "__typename" }) {
+                    error(
+                        "Må ha et __typename-felt på et interface for å simulere GraphQL sin typeklassifisering." +
+                                " Gjelder $klass."
+                    )
+                }
+                GQLInterfaceType(
+                    name = getUniqueName(klass, false),
+                    implementedInterfaces = implementedInterfaces,
+                    fields = fields
+                ).also { outputTypes[klass] = it }
+                    .also {
+                        // Pass på å generere alle undertyper, selv om de ikke er eksplisitt referert til
+                        klass.sealedSubclasses.forEach { subclass ->
+                            resolveOrGenerateNamedOutputType(subclass).also { referencedTypes += it }
+                        }
+                    }
+            } else {
+                GQLObjectType(
+                    name = getUniqueName(klass, false),
+                    implementedInterfaces = implementedInterfaces,
+                    fields = fields
+                ).also { outputTypes[klass] = it }
+            }
         }
 
         return resolveNamedOutputType(klass)!!
+    }
+
+    private fun generateEnumType(klass: KClass<*>) {
+        println("Genererer enum-type for $klass...")
+        GQLEnumType(
+            name = getUniqueName(klass, false),
+            values = klass.java.enumConstants.map { it as Enum<*> }.map { it.name }.toSet()
+        ).also { enumTypes[klass] = it }
     }
 
     private fun resolveOutputType(
@@ -213,41 +223,41 @@ class Generator {
         }
 
     private fun resolveNamedInputType(klass: KClass<*>): GQLNamedInputType? =
-        resolveScalarType(klass) ?: inputTypes[klass]
+        resolveScalarType(klass) ?: enumTypes[klass] ?: inputTypes[klass]
 
     private fun resolveNamedInputTypeWithGeneration(klass: KClass<*>): GQLNamedInputType {
-        if (klass.java.isEnum) {
-            error("Støtter ikke enum-klasser (ennå). Gjelder $klass.")
-        }
-
         resolveNamedInputType(klass)?.let { return it }
 
-        println("Genererer input-type for $klass...")
+        if (klass.java.isEnum) {
+            generateEnumType(klass)
+        } else {
+            println("Genererer input-type for $klass...")
 
-        if (klass.superclasses.filterNot { it == Any::class }.isNotEmpty()) {
-            error("Støtter ikke input-typer som arver av andre typer. Gjelder $klass.")
-        }
-        if (klass.isAbstract || klass.java.isInterface) {
-            error("Støtter ikke abstrakt klasse / interface som input. Gjelder $klass.")
-        }
-
-        val fields = klass.declaredMemberProperties
-            .filterNot { it.name == "__typename" }
-            .onEach { it.name.assertNoÆØÅ() }
-            .associate {
-                it.name to resolveInputType(
-                    type = it.returnType,
-                    namedTypeResolver = ::resolveNamedInputTypeWithGeneration
-                )
+            if (klass.superclasses.filterNot { it == Any::class }.isNotEmpty()) {
+                error("Støtter ikke input-typer som arver av andre typer. Gjelder $klass.")
             }
-        if (fields.isEmpty()) {
-            error("Alle GraphQL-typer må ha minst ett felt. Gjelder $klass.")
-        }
+            if (klass.isAbstract || klass.java.isInterface) {
+                error("Støtter ikke abstrakt klasse / interface som input. Gjelder $klass.")
+            }
 
-        GQLInputObjectType(
-            name = getUniqueName(klass, true),
-            fields = fields
-        ).also { inputTypes[klass] = it }
+            val fields = klass.declaredMemberProperties
+                .filterNot { it.name == "__typename" }
+                .onEach { it.name.assertNoÆØÅ() }
+                .associate {
+                    it.name to resolveInputType(
+                        type = it.returnType,
+                        namedTypeResolver = ::resolveNamedInputTypeWithGeneration
+                    )
+                }
+            if (fields.isEmpty()) {
+                error("Alle GraphQL-typer må ha minst ett felt. Gjelder $klass.")
+            }
+
+            GQLInputObjectType(
+                name = getUniqueName(klass, true),
+                fields = fields
+            ).also { inputTypes[klass] = it }
+        }
 
         return resolveNamedInputType(klass)!!
     }

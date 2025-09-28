@@ -26,6 +26,10 @@ fun main() {
             append(scalarType.toSDL())
             append("\n")
         }
+        generator.enumTypes.values.sortedBy { it.name }.forEach { enumType ->
+            append(enumType.toSDL())
+            append("\n")
+        }
         generator.inputTypes.values.sortedBy { it.name }.forEach { definition ->
             append(definition.toSDL())
             append("\n")
