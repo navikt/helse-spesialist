@@ -20,19 +20,29 @@ class GQLObjectType(
     override fun toSelectionSet(
         indentationLevel: Int,
         allOutputTypes: Collection<GQLOutputType>,
+    ): String = toSelectionSet(
+        indentationLevel = indentationLevel,
+        allOutputTypes = allOutputTypes,
+        alreadySelectedFields = emptySet()
+    )
+
+    fun toSelectionSet(
+        indentationLevel: Int,
+        allOutputTypes: Collection<GQLOutputType>,
+        alreadySelectedFields: Set<String>
     ): String = buildString {
-        val entries = fields.entries.sortedBy { it.key }
-            .filterNot { property -> implementedInterfaces.any { it.fields.containsKey(property.key) } }
+        val selections = fields.entries.sortedBy { it.key }
+            .filterNot { property -> alreadySelectedFields.contains(property.key) }
             .map { (key, type) ->
                 buildString {
                     append(key)
                     append(type.toSelectionSet(indentationLevel + 1, allOutputTypes))
                 }
             }
-        if (entries.isNotEmpty()) {
+        if (selections.isNotEmpty()) {
             append(" {")
             append("\n")
-            entries.forEach { entry ->
+            selections.forEach { entry ->
                 append(indentation(indentationLevel + 1))
                 append(entry)
                 append("\n")

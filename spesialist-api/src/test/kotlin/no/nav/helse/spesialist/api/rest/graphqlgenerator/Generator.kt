@@ -96,6 +96,10 @@ class Generator {
                     namedTypeResolver = ::resolveOrGenerateNamedOutputType
                 )
             }
+        if (fields.isEmpty()) {
+            error("Alle GraphQL-typer må ha minst ett felt. Hvis dette er en skalarverdi, legg den til i genereringen." +
+                    " Gjelder $klass.")
+        }
 
         val implementedInterfaces =
             superclasses.map {
@@ -115,6 +119,12 @@ class Generator {
                 error(
                     "Støtter ikke abtrakt klasse / interface som ikke er sealed," +
                             " ettersom vi da ikke vet hvilke undertyper som finnes mtp. query'en." +
+                            " Gjelder $klass."
+                )
+            }
+            if (klass.declaredMemberProperties.none { it.name == "__typename" }) {
+                error(
+                    "Må ha et __typename-felt på et interface for å simulere GraphQL sin typeklassifisering." +
                             " Gjelder $klass."
                 )
             }
@@ -221,17 +231,22 @@ class Generator {
             error("Støtter ikke abstrakt klasse / interface som input. Gjelder $klass.")
         }
 
+        val fields = klass.declaredMemberProperties
+            .filterNot { it.name == "__typename" }
+            .onEach { it.name.assertNoÆØÅ() }
+            .associate {
+                it.name to resolveInputType(
+                    type = it.returnType,
+                    namedTypeResolver = ::resolveNamedInputTypeWithGeneration
+                )
+            }
+        if (fields.isEmpty()) {
+            error("Alle GraphQL-typer må ha minst ett felt. Gjelder $klass.")
+        }
+
         GQLInputObjectType(
             name = getUniqueName(klass, true),
-            fields = klass.declaredMemberProperties
-                .filterNot { it.name == "__typename" }
-                .onEach { it.name.assertNoÆØÅ() }
-                .associate {
-                    it.name to resolveInputType(
-                        type = it.returnType,
-                        namedTypeResolver = ::resolveNamedInputTypeWithGeneration
-                    )
-                }
+            fields = fields
         ).also { inputTypes[klass] = it }
 
         return resolveNamedInputType(klass)!!
