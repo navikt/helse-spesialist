@@ -1,4 +1,7 @@
-package no.nav.helse.spesialist.api.rest.graphqlgenerator
+package no.nav.helse.spesialist.api.rest.graphqlgenerator.types
+
+import no.nav.helse.spesialist.api.rest.graphqlgenerator.indentNewlines
+import no.nav.helse.spesialist.api.rest.graphqlgenerator.indentation
 
 class GQLObjectType(
     override val name: String,
@@ -13,21 +16,18 @@ class GQLObjectType(
             append(implementedInterfaces.joinToString(" & ") { it.name })
         }
         append(" {\n")
-        append(fields.entries.joinToString("\n", postfix = "\n") { (name, type) -> "    $name: ${type.asReference()}" })
-        append("}\n")
+        append(
+            fields.entries.joinToString(
+                "\n",
+                postfix = "\n"
+            ) { (name, type) -> "${indentation()}$name: ${type.asReference()}" })
+        append("}")
     }
 
-    override fun toSelectionSet(
-        indentationLevel: Int,
-        allOutputTypes: Collection<GQLOutputType>,
-    ): String = toSelectionSet(
-        indentationLevel = indentationLevel,
-        allOutputTypes = allOutputTypes,
-        alreadySelectedFields = emptySet()
-    )
+    override fun toSelectionSet(allOutputTypes: Collection<GQLOutputType>): String =
+        toSelectionSet(allOutputTypes = allOutputTypes, alreadySelectedFields = emptySet())
 
     fun toSelectionSet(
-        indentationLevel: Int,
         allOutputTypes: Collection<GQLOutputType>,
         alreadySelectedFields: Set<String>
     ): String = buildString {
@@ -36,18 +36,20 @@ class GQLObjectType(
             .map { (key, type) ->
                 buildString {
                     append(key)
-                    append(type.toSelectionSet(indentationLevel + 1, allOutputTypes))
+                    val subSelectionSet = type.toSelectionSet(allOutputTypes)
+                    if (subSelectionSet.isNotEmpty()) {
+                        append(" ")
+                        append(subSelectionSet)
+                    }
                 }
             }
         if (selections.isNotEmpty()) {
-            append(" {")
-            append("\n")
-            selections.forEach { entry ->
-                append(indentation(indentationLevel + 1))
-                append(entry)
+            append("{\n")
+            selections.forEach { selection ->
+                append(indentation())
+                append(selection.indentNewlines())
                 append("\n")
             }
-            append(indentation(indentationLevel))
             append("}")
         }
     }

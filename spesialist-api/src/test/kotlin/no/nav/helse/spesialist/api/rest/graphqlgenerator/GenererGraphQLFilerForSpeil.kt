@@ -22,31 +22,23 @@ fun main() {
     val outputPath = "$OUTPUT_DIR/schema.graphql"
     println("Lagrer skjema som $outputPath...")
     File(outputPath).writeText(buildString {
-        generator.getReferencedCustomScalarTypes().sortedBy(GQLNamedType::name).forEach { scalarType ->
-            append(scalarType.toSDL())
+        (generator.getReferencedCustomScalarTypes().sortedBy { it.name } +
+                generator.enumTypes.values.sortedBy { it.name } +
+                generator.inputTypes.values.sortedBy { it.name } +
+                generator.outputTypes.values.sortedBy { it.name }).forEach { type ->
+            append(type.toSDL() + "\n")
             append("\n")
         }
-        generator.enumTypes.values.sortedBy { it.name }.forEach { enumType ->
-            append(enumType.toSDL())
-            append("\n")
-        }
-        generator.inputTypes.values.sortedBy { it.name }.forEach { definition ->
-            append(definition.toSDL())
-            append("\n")
-        }
-        generator.outputTypes.values.sortedBy { it.name }
-            .forEach { definition ->
-                append(definition.toSDL())
-                append("\n")
-            }
         append("extend type Query {\n")
-        append(generator.queries.sortedBy { it.fieldName }
-            .joinToString("\n    ", prefix = "    ", postfix = "\n") { it.toQueryObjectField() })
+        generator.queries.sortedBy { it.fieldName }.forEach { query ->
+            append(indentation() + query.toQueryObjectField() + "\n")
+        }
         append("}\n")
         append("\n")
         append("extend type Mutation {\n")
-        append(generator.mutations.sortedBy { it.fieldName }
-            .joinToString("\n    ", prefix = "    ", postfix = "\n") { it.toMutationObjectField() })
+        generator.mutations.sortedBy { it.fieldName }.forEach { mutation ->
+            append(indentation() + mutation.toMutationObjectField() + "\n")
+        }
         append("}\n")
     })
 }

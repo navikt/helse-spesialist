@@ -1,4 +1,7 @@
-package no.nav.helse.spesialist.api.rest.graphqlgenerator
+package no.nav.helse.spesialist.api.rest.graphqlgenerator.types
+
+import no.nav.helse.spesialist.api.rest.graphqlgenerator.indentNewlines
+import no.nav.helse.spesialist.api.rest.graphqlgenerator.indentation
 
 class GQLInterfaceType(
     override val name: String,
@@ -13,38 +16,42 @@ class GQLInterfaceType(
             append(implementedInterfaces.joinToString(" & ") { it.name })
         }
         append(" {\n")
-        append(fields.entries.joinToString("\n", postfix = "\n") { (name, type) -> "    $name: ${type.asReference()}" })
-        append("}\n")
+        append(
+            fields.entries.joinToString(
+                "\n",
+                postfix = "\n"
+            ) { (name, type) -> "${indentation()}$name: ${type.asReference()}" })
+        append("}")
     }
 
     override fun toSelectionSet(
-        indentationLevel: Int,
         allOutputTypes: Collection<GQLOutputType>,
     ): String {
         val fieldSelections = fields.entries.sortedBy { it.key }
-            .map { (key, type) -> key + type.toSelectionSet(indentationLevel + 1, allOutputTypes) }
+            .map { (key, type) ->
+                buildString {
+                    append(key)
+                    val subSelectionSet = type.toSelectionSet(allOutputTypes)
+                    if (subSelectionSet.isNotEmpty()) {
+                        append(" ")
+                        append(subSelectionSet)
+                    }
+                }
+            }
         val inlineFragments = findImplementors(this, allOutputTypes)
             .sortedBy { it.name }
-            .map {
-                it.name to it.toSelectionSet(
-                    indentationLevel = indentationLevel + 1,
-                    allOutputTypes = allOutputTypes,
-                    alreadySelectedFields = fields.keys
-                )
-            }
+            .map { it.name to it.toSelectionSet(allOutputTypes = allOutputTypes, alreadySelectedFields = fields.keys) }
             .filterNot { (_, selectionSet) -> selectionSet.isEmpty() }
-            .map { (name, selectionSet) -> "... on $name$selectionSet" }
+            .map { (name, selectionSet) -> "... on $name $selectionSet" }
         val selections = fieldSelections + inlineFragments
         return buildString {
             if (selections.isNotEmpty()) {
-                append(" {")
-                append("\n")
-                selections.forEach { entry ->
-                    append(indentation(indentationLevel + 1))
-                    append(entry)
+                append("{\n")
+                selections.forEach { selection ->
+                    append(indentation())
+                    append(selection.indentNewlines())
                     append("\n")
                 }
-                append(indentation(indentationLevel))
                 append("}")
             }
         }

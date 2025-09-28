@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.api.rest.graphqlgenerator
+package no.nav.helse.spesialist.api.rest.graphqlgenerator.types
 
 sealed interface GQLInputType : GQLType
 

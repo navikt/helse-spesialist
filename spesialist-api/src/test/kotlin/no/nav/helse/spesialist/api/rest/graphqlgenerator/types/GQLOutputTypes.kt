@@ -1,7 +1,7 @@
-package no.nav.helse.spesialist.api.rest.graphqlgenerator
+package no.nav.helse.spesialist.api.rest.graphqlgenerator.types
 
 sealed interface GQLOutputType : GQLType {
-    fun toSelectionSet(indentationLevel: Int, allOutputTypes: Collection<GQLOutputType>): String
+    fun toSelectionSet(allOutputTypes: Collection<GQLOutputType>): String
 }
 
 sealed interface GQLNamedOrListOutputType: GQLOutputType
@@ -10,8 +10,8 @@ sealed interface GQLNamedOutputType : GQLNamedType, GQLOutputType, GQLNamedOrLis
 
 sealed interface GQLWrappedOutputType : GQLOutputType {
     fun unwrap(): GQLNamedOutputType
-    override fun toSelectionSet(indentationLevel: Int, allOutputTypes: Collection<GQLOutputType>): String =
-        unwrap().toSelectionSet(indentationLevel, allOutputTypes)
+    override fun toSelectionSet(allOutputTypes: Collection<GQLOutputType>): String =
+        unwrap().toSelectionSet(allOutputTypes)
 }
 
 class GQLListOutputType(val itemType: GQLOutputType) : GQLWrappedOutputType, GQLNamedOrListOutputType {

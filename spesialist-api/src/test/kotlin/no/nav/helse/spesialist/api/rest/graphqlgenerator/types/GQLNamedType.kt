@@ -1,8 +1,4 @@
-package no.nav.helse.spesialist.api.rest.graphqlgenerator
-
-sealed interface GQLType {
-    fun asReference(): String
-}
+package no.nav.helse.spesialist.api.rest.graphqlgenerator.types
 
 sealed interface GQLNamedType: GQLType {
     val name: String
