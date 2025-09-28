@@ -22,7 +22,7 @@ fun main() {
     val outputPath = "$OUTPUT_DIR/schema.graphql"
     println("Lagrer skjema som $outputPath...")
     File(outputPath).writeText(buildString {
-        generator.getReferencedCustomScalarTypes().sortedBy(GQLType::name).forEach { scalarType ->
+        generator.getReferencedCustomScalarTypes().sortedBy(GQLNamedType::name).forEach { scalarType ->
             append(scalarType.toSDL())
             append("\n")
         }

@@ -1,10 +1,10 @@
 package no.nav.helse.spesialist.api.rest.graphqlgenerator
 
-data class GQLInterfaceType(
+class GQLInterfaceType(
     override val name: String,
     override val implementedInterfaces: List<GQLInterfaceType>,
-    override val fields: Map<String, GQLTypeReference<GQLOutputType>>
-) : GQLObjectOrInterfaceType {
+    override val fields: Map<String, GQLOutputType>
+) : GQLNamedOutputType, GQLObjectOrInterfaceType {
     override fun toSDL(): String = buildString {
         append("interface ")
         append(name)
@@ -13,7 +13,7 @@ data class GQLInterfaceType(
             append(implementedInterfaces.joinToString(" & ") { it.name })
         }
         append(" {\n")
-        append(fields.entries.joinToString("\n", postfix = "\n") { (name, type) -> "    $name: $type" })
+        append(fields.entries.joinToString("\n", postfix = "\n") { (name, type) -> "    $name: ${type.asReference()}" })
         append("}\n")
     }
 
@@ -24,8 +24,8 @@ data class GQLInterfaceType(
         val entries =
             fields.entries.sortedBy { it.key }
                 .filterNot { property -> implementedInterfaces.any { it.fields.containsKey(property.key) } }
-                .map { (key, typeReference) ->
-                    key + typeReference.unwrappedType().toSelectionSet(indentationLevel + 1, allOutputTypes)
+                .map { (key, type) ->
+                    key + type.toSelectionSet(indentationLevel + 1, allOutputTypes)
                 } +
                     allOutputTypes.filterIsInstance<GQLObjectOrInterfaceType>()
                         .filter { this@GQLInterfaceType in it.implementedInterfaces }

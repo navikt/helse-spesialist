@@ -2,14 +2,14 @@ package no.nav.helse.spesialist.api.rest.graphqlgenerator
 
 import kotlin.reflect.KClass
 
-sealed interface GQLScalarType : GQLInputType, GQLOutputType {
+sealed interface GQLScalarType : GQLNamedInputType, GQLNamedOutputType {
     override fun toSDL(): String = "scalar $name\n"
     override fun toSelectionSet(indentationLevel: Int, allOutputTypes: Collection<GQLOutputType>): String = ""
 }
 
-data class GQLCustomScalarType(override val name: String) : GQLScalarType
+class GQLCustomScalarType(override val name: String) : GQLScalarType
 
-data class GQLDefaultScalarType(override val name: String) : GQLScalarType
+class GQLDefaultScalarType(override val name: String) : GQLScalarType
 
 val scalarTypes = mapOf(
     defaultScalarType(klass = kotlin.Int::class, name = "Int"),

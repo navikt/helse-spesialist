@@ -3,27 +3,23 @@ package no.nav.helse.spesialist.api.rest.graphqlgenerator
 data class GQLRestMutation(
     val operationName: String,
     val fieldName: String,
-    val arguments: Map<String, GQLTypeReference<GQLScalarType>>,
-    val inputArgument: GQLTypeReference<GQLInputType>,
-    val fieldType: GQLTypeReference<GQLOutputType>,
+    val arguments: Map<String, GQLInputType>,
+    val fieldType: GQLOutputType,
     val path: String,
 ) {
-    private fun allArguments(): Map<String, GQLTypeReference<out GQLInputType>> =
-        arguments.plus("input" to inputArgument)
-
     fun toDocument(allOutputTypes: Collection<GQLOutputType>): String {
-        val variables = allArguments().entries.joinToString(separator = ", ") { (name, type) -> $$"$$$name: $$type" }
-        val fieldArguments = allArguments().keys.joinToString { $$"$$it: $$$it" }
+        val variables = arguments.entries.joinToString(separator = ", ") { (name, type) -> $$"$$$name: $${type.asReference()}" }
+        val fieldArguments = arguments.keys.joinToString { $$"$$it: $$$it" }
         return $$"""
             mutation $$operationName($$variables) {
                 $$fieldName($$fieldArguments)
                 @rest(
-                    type: "$$fieldType"
+                    type: "$${fieldType.asReference()}"
                     endpoint: "spesialist"
                     path: "$$path"
                     method: "POST"
                 )""".trimIndent() +
-                fieldType.unwrappedType().toSelectionSet(
+                fieldType.toSelectionSet(
                     indentationLevel = 1,
                     allOutputTypes = allOutputTypes
                 ) +
@@ -31,5 +27,5 @@ data class GQLRestMutation(
     }
 
     fun toMutationObjectField(): String =
-        "${fieldName}(${allArguments().entries.joinToString(separator = ", ") { (name, type) -> "$name: $type" }}): $fieldType"
+        "${fieldName}(${arguments.entries.joinToString(separator = ", ") { (name, type) -> "$name: ${type.asReference()}" }}): ${fieldType.asReference()}"
 }
