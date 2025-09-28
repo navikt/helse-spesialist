@@ -3,11 +3,11 @@ package no.nav.helse.spesialist.api.rest.graphqlgenerator
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 
-sealed interface ForenkletType
-class CollectionForenkletType(val elementType: KType) : ForenkletType
-class KClassForenkletType(val klass: KClass<*>) : ForenkletType
+sealed interface CollectionOrKClassType
+class CollectionType(val elementType: KType) : CollectionOrKClassType
+class KClassType(val klass: KClass<*>) : CollectionOrKClassType
 
-fun KType.tilForenkletType(): ForenkletType {
+fun KType.toCollectionOrKClassType(): CollectionOrKClassType {
     if (classifier !is KClass<*>) {
         error(
             "Støtter ikke type som ikke kan refereres til som klasse." +
@@ -28,7 +28,7 @@ fun KType.tilForenkletType(): ForenkletType {
                 "Støtter ikke collections med stjerneargument. " +
                         " Gjelder: $this, som har argumenter $arguments"
             )
-        CollectionForenkletType(argumentType)
+        CollectionType(argumentType)
     } else {
         if (arguments.isNotEmpty()) {
             error(
@@ -36,6 +36,6 @@ fun KType.tilForenkletType(): ForenkletType {
                         " Gjelder: $this, som har argumenter $arguments"
             )
         }
-        KClassForenkletType(classifierKlass)
+        KClassType(classifierKlass)
     }
 }

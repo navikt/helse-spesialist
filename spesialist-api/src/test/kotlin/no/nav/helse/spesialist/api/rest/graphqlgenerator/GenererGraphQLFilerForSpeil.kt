@@ -10,35 +10,37 @@ fun main() {
     generator.queries.forEach { query ->
         val outputPath = "$OUTPUT_DIR/${query.operationName}.query.graphql"
         println("Lagrer query som $outputPath...")
-        File(outputPath).writeText(query.toDocument(generator.outputTypes.values))
+        File(outputPath).writeText(query.toDocument(generator.allOutputTypes()))
     }
 
     generator.mutations.forEach { mutation ->
         val outputPath = "$OUTPUT_DIR/${mutation.operationName}.mutation.graphql"
         println("Lagrer mutation som $outputPath...")
-        File(outputPath).writeText(mutation.toDocument(generator.outputTypes.values))
+        File(outputPath).writeText(mutation.toDocument(generator.allOutputTypes()))
     }
 
     val outputPath = "$OUTPUT_DIR/schema.graphql"
     println("Lagrer skjema som $outputPath...")
-    File(outputPath).writeText(buildString {
-        (generator.getReferencedCustomScalarTypes().sortedBy { it.name } +
-                generator.enumTypes.values.sortedBy { it.name } +
-                generator.inputTypes.values.sortedBy { it.name } +
-                generator.outputTypes.values.sortedBy { it.name }).forEach { type ->
-            append(type.toSDL() + "\n")
+    File(outputPath).writeText(
+        buildString {
+            (generator.scalars.allTypes().sortedBy { it.name } +
+                    generator.enums.allTypes().sortedBy { it.name } +
+                    generator.inputTypes.allTypes().sortedBy { it.name } +
+                    generator.outputTypes.allTypes().sortedBy { it.name }).forEach { type ->
+                append(type.toSDL() + "\n")
+                append("\n")
+            }
+            append("extend type Query {\n")
+            generator.queries.sortedBy { it.fieldName }.forEach { query ->
+                append(indentation() + query.toQueryObjectField() + "\n")
+            }
+            append("}\n")
             append("\n")
+            append("extend type Mutation {\n")
+            generator.mutations.sortedBy { it.fieldName }.forEach { mutation ->
+                append(indentation() + mutation.toMutationObjectField() + "\n")
+            }
+            append("}\n")
         }
-        append("extend type Query {\n")
-        generator.queries.sortedBy { it.fieldName }.forEach { query ->
-            append(indentation() + query.toQueryObjectField() + "\n")
-        }
-        append("}\n")
-        append("\n")
-        append("extend type Mutation {\n")
-        generator.mutations.sortedBy { it.fieldName }.forEach { mutation ->
-            append(indentation() + mutation.toMutationObjectField() + "\n")
-        }
-        append("}\n")
-    })
+    )
 }
