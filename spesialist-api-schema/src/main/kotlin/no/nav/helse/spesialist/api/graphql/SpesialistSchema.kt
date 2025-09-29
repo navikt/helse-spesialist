@@ -33,8 +33,6 @@ import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQuery
 import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQuerySchema
 import no.nav.helse.spesialist.api.graphql.query.DokumentQuery
 import no.nav.helse.spesialist.api.graphql.query.DokumentQuerySchema
-import no.nav.helse.spesialist.api.graphql.query.HentSaksbehandlereQuery
-import no.nav.helse.spesialist.api.graphql.query.HentSaksbehandlereQuerySchema
 import no.nav.helse.spesialist.api.graphql.query.OppgaverQuery
 import no.nav.helse.spesialist.api.graphql.query.OppgaverQuerySchema
 import no.nav.helse.spesialist.api.graphql.query.OpptegnelseQuery
@@ -55,7 +53,6 @@ class SpesialistSchema(
         val behandlingsstatistikk: BehandlingsstatistikkQuerySchema,
         val opptegnelse: OpptegnelseQuerySchema,
         val dokument: DokumentQuerySchema,
-        val hentSaksbehandlere: HentSaksbehandlereQuerySchema,
     )
 
     class MutationHandlers(
@@ -86,7 +83,6 @@ class SpesialistSchema(
                 BehandlingsstatistikkQuery(handler = queryHandlers.behandlingsstatistikk),
                 OpptegnelseQuery(handler = queryHandlers.opptegnelse),
                 DokumentQuery(handler = queryHandlers.dokument),
-                HentSaksbehandlereQuery(handler = queryHandlers.hentSaksbehandlere),
             )
 
         schemaConfiguration.mutations =

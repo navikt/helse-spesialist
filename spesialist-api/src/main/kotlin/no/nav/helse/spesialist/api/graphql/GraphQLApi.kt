@@ -46,7 +46,6 @@ import no.nav.helse.spesialist.api.graphql.mutation.VarselMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutationHandler
 import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.DokumentQueryHandler
-import no.nav.helse.spesialist.api.graphql.query.HentSaksbehandlereQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.OppgaverQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.OpptegnelseQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
@@ -165,10 +164,6 @@ fun lagSchemaMedResolversOgHandlers(
                         personApiDao = daos.personApiDao,
                         egenAnsattApiDao = daos.egenAnsattApiDao,
                         dokumenthåndterer = dokumenthåndterer,
-                    ),
-                hentSaksbehandlere =
-                    HentSaksbehandlereQueryHandler(
-                        saksbehandlerDao = daos.saksbehandlerDao,
                     ),
             ),
         mutationHandlers =
