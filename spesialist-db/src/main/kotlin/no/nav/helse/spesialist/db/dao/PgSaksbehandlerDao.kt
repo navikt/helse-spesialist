@@ -39,14 +39,10 @@ class PgSaksbehandlerDao private constructor(
     override fun hentAlleAktiveSisteTreMnderEllerHarTildelteOppgaver(): List<Saksbehandler> =
         asSQL(
             """
-            SELECT s.*
-            FROM saksbehandler s
-            WHERE s.siste_handling_utført_tidspunkt > CURRENT_DATE - INTERVAL '3 months'
-               OR EXISTS (
-                   SELECT 1
-                   FROM tildeling t
-                   WHERE t.saksbehandler_ref = s.oid
-               );
+            SELECT *
+            FROM saksbehandler
+            WHERE siste_handling_utført_tidspunkt > CURRENT_DATE - INTERVAL '3 months'
+               OR oid IN (SELECT DISTINCT saksbehandler_ref FROM tildeling)
             """.trimIndent(),
         ).list {
             Saksbehandler(
