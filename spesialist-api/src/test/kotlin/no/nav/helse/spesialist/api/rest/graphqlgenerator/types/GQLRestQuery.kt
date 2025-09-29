@@ -10,19 +10,31 @@ data class GQLRestQuery(
     val fieldType: GQLOutputType,
     val path: String,
 ) {
-    fun toDocument(allOutputTypes: Collection<GQLOutputType>): String {
-        val variables = arguments.entries.joinToString(separator = ", ") { (name, type) -> $$"$$$name: $${type.asReference()}" }
-        val fieldArguments = arguments.keys.joinToString { $$"$$it: $$$it" }
-        val selectionSet = fieldType.toSelectionSet(allOutputTypes)
-        return buildString {
-            append("query $operationName($variables) {\n")
-            append(indentation()+"$fieldName($fieldArguments)\n")
-            append(indentation()+"@rest(\n")
-            append(indentation(2)+"type: \"${fieldType.asReference()}\"\n")
-            append(indentation(2)+"endpoint: \"spesialist\"\n")
-            append(indentation(2)+"path: \"$path\"\n")
-            append(indentation(2)+"method: \"GET\"\n")
-            append(indentation()+")")
+    fun toDocument(allOutputTypes: Collection<GQLOutputType>): String =
+        buildString {
+            append("query $operationName")
+            if (arguments.isNotEmpty()) {
+                append("(")
+                append(arguments.entries.joinToString(separator = ", ") { (name, type) -> "$$name: ${type.asReference()}" })
+                append(")")
+            }
+            append(" {\n")
+
+            append(indentation() + fieldName)
+            if (arguments.isNotEmpty()) {
+                append("(")
+                append(arguments.keys.joinToString { name -> "$name: $$name" })
+                append(")")
+            }
+            append("\n")
+
+            append(indentation() + "@rest(\n")
+            append(indentation(2) + "type: \"${fieldType.asReference()}\"\n")
+            append(indentation(2) + "endpoint: \"spesialist\"\n")
+            append(indentation(2) + "path: \"$path\"\n")
+            append(indentation(2) + "method: \"GET\"\n")
+            append(indentation() + ")")
+            val selectionSet = fieldType.toSelectionSet(allOutputTypes)
             if (selectionSet.isNotEmpty()) {
                 append(" ")
                 append(selectionSet.indentNewlines())
@@ -30,8 +42,15 @@ data class GQLRestQuery(
             append("\n")
             append("}")
         }
-    }
 
     fun toQueryObjectField(): String =
-        "${fieldName}(${arguments.entries.joinToString(separator = ", ") { (name, type) -> "$name: ${type.asReference()}" }}): ${fieldType.asReference()}"
+        buildString {
+            append(fieldName)
+            if (arguments.isNotEmpty()) {
+                append("(")
+                append(arguments.entries.joinToString(separator = ", ") { (name, type) -> "$name: ${type.asReference()}" })
+                append(")")
+            }
+            append(": ${fieldType.asReference()}")
+        }
 }
