@@ -21,6 +21,7 @@ val RESTHÅNDTERERE =
         TilkommenInntektEndrePostHåndterer(),
         TilkommenInntektFjernPostHåndterer(),
         TilkommenInntektGjenopprettPostHåndterer(),
+        AktiveSaksbehandlereGetHåndterer(),
     )
 
 fun Routing.restRoutes(restDelegator: RestDelegator) {
