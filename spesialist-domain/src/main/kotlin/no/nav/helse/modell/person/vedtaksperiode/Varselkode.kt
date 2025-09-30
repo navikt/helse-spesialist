@@ -11,6 +11,7 @@ private val regex = "^$VARSELKODEFORMAT$".toRegex()
 // BO = Beslutteroppgave
 // EX = Eksterne systemer
 // IK = Inngangskriterier
+// SØ = Søknad
 
 enum class Varselkode(
     private val varseltekst: String,
@@ -35,6 +36,7 @@ enum class Varselkode(
     SB_EX_5(
         "Det har kommet inn dokumentasjon som igangsetter en revurdering, og den sykmeldte er nå registrert på bokommune 0393 (NAV utland og fellestjenester)",
     ),
+    SB_SØ_1("Sjekk endring av søknad"),
 
     RV_IV_2("Over 25% avvik"),
     ;

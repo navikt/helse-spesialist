@@ -19,6 +19,7 @@ import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
+import no.nav.helse.modell.person.vedtaksperiode.Varselkode
 import no.nav.helse.modell.risiko.Risikovurdering
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
@@ -154,7 +155,12 @@ internal class AutomatiseringTest {
     @Test
     fun `vedtaksperiode med 2 tidligere korrigerte søknader er ikke automatiserbar`() {
         every { meldingDaoMock.finnAntallAutomatisertKorrigertSøknad(vedtaksperiodeId) } returns 3
-        blirManuellOppgaveMedFeil(problems = listOf("Antall automatisk godkjente korrigerte søknader er større eller lik 2"))
+        val gjeldendeGenerasjon = enGenerasjon()
+        blirManuellOppgaveMedFeilOgVarsel(
+            legacyBehandling = gjeldendeGenerasjon,
+            problems = listOf("Antall automatisk godkjente korrigerte søknader er større eller lik 2"),
+            varselkode = Varselkode.SB_SØ_1
+        )
     }
 
     @Test
@@ -417,4 +423,16 @@ internal class AutomatiseringTest {
     private fun blirAutomatiskBehandlet(utbetaling: Utbetaling = enUtbetaling()) =
         assertKanAutomatiseres(forsøkAutomatisering(utbetaling = utbetaling))
 
+    private fun blirManuellOppgaveMedFeilOgVarsel(
+        utbetaling: Utbetaling = enUtbetaling(),
+        problems: List<String>,
+        legacyBehandling: LegacyBehandling = enGenerasjon(),
+        varselkode: Varselkode
+    ) {
+        val resultat = forsøkAutomatisering(utbetaling = utbetaling, generasjoners = listOf(legacyBehandling))
+        assertKanIkkeAutomatiseres(resultat)
+        check(resultat is Automatiseringsresultat.KanIkkeAutomatiseres)
+        assertEquals(problems.toSet(), resultat.problemer.toSet())
+        assertEquals(varselkode.name, legacyBehandling.varsler().first().varselkode)
+    }
 }

@@ -9,12 +9,15 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 class Varsel(
-    private val id: UUID,
-    private val varselkode: String,
-    private val opprettet: LocalDateTime,
-    private val vedtaksperiodeId: UUID,
-    private var status: Status = AKTIV,
+    val id: UUID,
+    val varselkode: String,
+    val opprettet: LocalDateTime,
+    val vedtaksperiodeId: UUID,
+    status: Status = AKTIV,
 ) {
+    var status: Status = status
+        private set
+
     enum class Status {
         AKTIV,
         INAKTIV,

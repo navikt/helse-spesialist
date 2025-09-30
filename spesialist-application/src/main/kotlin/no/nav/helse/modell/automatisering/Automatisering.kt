@@ -18,6 +18,7 @@ import no.nav.helse.modell.automatisering.Automatisering.AutomatiserKorrigertSø
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.person.HentEnhetløsning.Companion.erEnhetUtland
 import no.nav.helse.modell.person.Sykefraværstilfelle
+import no.nav.helse.modell.person.vedtaksperiode.Varselkode
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.GODKJENT
 import no.nav.helse.modell.utbetaling.Refusjonstype
@@ -118,7 +119,7 @@ internal class Automatisering(
 
         if (problemer.isNotEmpty()) return Automatiseringsresultat.KanIkkeAutomatiseres(problemer)
 
-        when (val resultat = vurderOmBehandlingSkyldesKorrigertSøknad(fødselsnummer, vedtaksperiodeId)) {
+        when (val resultat = vurderOmBehandlingSkyldesKorrigertSøknad(fødselsnummer, vedtaksperiodeId, sykefraværstilfelle)) {
             is SkyldesKorrigertSøknad.KanIkkeAutomatiseres,
             -> return Automatiseringsresultat.KanIkkeAutomatiseres(listOf(resultat.årsak))
 
@@ -165,16 +166,18 @@ internal class Automatisering(
     private fun vurderOmBehandlingSkyldesKorrigertSøknad(
         fødselsnummer: String,
         vedtaksperiodeId: UUID,
+        sykefraværstilfelle: Sykefraværstilfelle,
     ): AutomatiserKorrigertSøknadResultat {
         val behandlingOpprettetKorrigertSøknad =
             finnSisteBehandlingOpprettetSomSkyldesKorrigertSøknad(fødselsnummer, vedtaksperiodeId)
                 ?: return AutomatiserKorrigertSøknadResultat.SkyldesIkkeKorrigertSøknad
 
-        return kanKorrigertSøknadAutomatiseres(behandlingOpprettetKorrigertSøknad)
+        return kanKorrigertSøknadAutomatiseres(behandlingOpprettetKorrigertSøknad, sykefraværstilfelle)
     }
 
     private fun kanKorrigertSøknadAutomatiseres(
         behandlingOpprettetKorrigertSøknad: BehandlingOpprettetKorrigertSøknad,
+        sykefraværstilfelle: Sykefraværstilfelle,
     ): AutomatiserKorrigertSøknadResultat {
         val hendelseId = behandlingOpprettetKorrigertSøknad.meldingId
         val vedtaksperiodeId = behandlingOpprettetKorrigertSøknad.vedtaksperiodeId
@@ -195,6 +198,7 @@ internal class Automatisering(
             )
         }
         if (antallKorrigeringer >= 2) {
+            sykefraværstilfelle.håndter(Varselkode.SB_SØ_1.nyttVarsel(vedtaksperiodeId))
             return SkyldesKorrigertSøknad.KanIkkeAutomatiseres(
                 "Antall automatisk godkjente korrigerte søknader er større eller lik 2",
             )
