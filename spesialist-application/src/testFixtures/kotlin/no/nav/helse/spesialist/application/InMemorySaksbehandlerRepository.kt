@@ -4,7 +4,7 @@ import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 
 class InMemorySaksbehandlerRepository : SaksbehandlerRepository {
-    private val data = mutableMapOf<SaksbehandlerOid, Saksbehandler>()
+    val data = mutableMapOf<SaksbehandlerOid, Saksbehandler>()
 
     override fun lagre(saksbehandler: Saksbehandler) {
         data[saksbehandler.id()] = saksbehandler

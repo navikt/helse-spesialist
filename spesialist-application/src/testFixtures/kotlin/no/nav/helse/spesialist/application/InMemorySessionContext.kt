@@ -17,7 +17,6 @@ import no.nav.helse.db.PersonDao
 import no.nav.helse.db.PåVentDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.RisikovurderingDao
-import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.SessionContext
 import no.nav.helse.db.StansAutomatiskBehandlingSaksbehandlerDao
 import no.nav.helse.db.SykefraværstilfelleDao
@@ -43,6 +42,7 @@ class InMemorySessionContext(
     override val dialogDao: InMemoryDialogDao,
     override val stansAutomatiskBehandlingDao: InMemoryStansAutomatiskBehandlingDao,
     override val annulleringRepository: InMemoryAnnulleringRepository,
+    override val saksbehandlerRepository: InMemorySaksbehandlerRepository,
 ) : SessionContext {
     override val arbeidsforholdDao: ArbeidsforholdDao
         get() = TODO("Not yet implemented")
@@ -210,8 +210,7 @@ class InMemorySessionContext(
         get() = TODO("Not yet implemented")
     override val risikovurderingDao: RisikovurderingDao
         get() = TODO("Not yet implemented")
-    override val saksbehandlerDao: SaksbehandlerDao
-        get() = TODO("Not yet implemented")
+    override val saksbehandlerDao: InMemorySaksbehandlerDao = InMemorySaksbehandlerDao(saksbehandlerRepository)
     override val sykefraværstilfelleDao: SykefraværstilfelleDao
         get() = TODO("Not yet implemented")
     override val tildelingDao: TildelingDao
@@ -232,7 +231,6 @@ class InMemorySessionContext(
         get() = TODO("Not yet implemented")
     override val dialogRepository: DialogRepository
         get() = TODO("Not yet implemented")
-    override val saksbehandlerRepository: InMemorySaksbehandlerRepository = InMemorySaksbehandlerRepository()
     override val avviksvurderingRepository: InMemoryAvviksvurderingRepository = InMemoryAvviksvurderingRepository()
     override val behandlingRepository: BehandlingRepository
         get() = TODO("Not yet implemented")

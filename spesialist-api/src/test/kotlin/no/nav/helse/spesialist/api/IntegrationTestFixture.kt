@@ -5,6 +5,7 @@ import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.accept
 import io.ktor.client.request.bearerAuth
+import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
@@ -92,6 +93,39 @@ class IntegrationTestFixture() {
         val bodyAsText: String
     ) {
         val bodyAsJsonNode = bodyAsText.takeUnless(String::isEmpty)?.let(objectMapper::readTree)
+    }
+
+    fun get(
+        url: String,
+        saksbehandler: Saksbehandler = lagSaksbehandler(),
+        tilgangsgrupper: Set<Tilgangsgruppe> = emptySet(),
+    ): Response {
+        lateinit var response: Response
+
+        testApplication {
+            application {
+                apiModule.setUpApi(this)
+            }
+
+            client = createClient {
+                install(ContentNegotiation) {
+                    register(ContentType.Application.Json, JacksonConverter(objectMapper))
+                }
+            }
+
+            runBlocking {
+                logg.info("Sender GET $url")
+                val httpResponse = client.get(url) {
+                    accept(ContentType.Application.Json)
+                    bearerAuth(apiModuleIntegrationTestFixture.token(saksbehandler, tilgangsgrupper))
+                }
+                val bodyAsText = httpResponse.bodyAsText()
+                logg.info("Fikk respons: $bodyAsText")
+                response = Response(status = httpResponse.status.value, bodyAsText = bodyAsText)
+            }
+        }
+
+        return response
     }
 
     fun post(

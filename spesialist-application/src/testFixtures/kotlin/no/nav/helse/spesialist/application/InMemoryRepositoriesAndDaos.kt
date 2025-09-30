@@ -73,5 +73,6 @@ class InMemoryRepositoriesAndDaos() {
         dialogDao,
         stansAutomatiskBehandlingDao,
         annulleringRepository,
+        saksbehandlerRepository,
     )
 }

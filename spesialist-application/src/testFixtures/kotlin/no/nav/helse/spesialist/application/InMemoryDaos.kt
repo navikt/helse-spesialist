@@ -18,7 +18,6 @@ import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.PoisonPillDao
 import no.nav.helse.db.PåVentDao
-import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.StansAutomatiskBehandlingSaksbehandlerDao
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.VarselDao
@@ -61,7 +60,6 @@ import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDto
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDto
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import no.nav.helse.spesialist.api.vedtaksperiode.EnhetDto
-import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.typer.Kjønn
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -402,31 +400,7 @@ class InMemoryDaos(
         }
     }
     override val reservasjonDao = object : PartialReservasjonDao {}
-    override val saksbehandlerDao: SaksbehandlerDao = object : SaksbehandlerDao {
-        override fun hent(ident: String): Saksbehandler? {
-            TODO("Not yet implemented")
-        }
-
-        override fun hentAlleAktiveSisteTreMnderEllerHarTildelteOppgaver(): List<Saksbehandler> {
-            TODO("Not yet implemented")
-        }
-
-        override fun opprettEllerOppdater(
-            oid: UUID,
-            navn: String,
-            epost: String,
-            ident: String
-        ): Int {
-            TODO("Not yet implemented")
-        }
-
-        override fun oppdaterSistObservert(
-            oid: UUID,
-            sisteHandlingUtført: LocalDateTime
-        ): Int {
-            TODO("Not yet implemented")
-        }
-    }
+    override val saksbehandlerDao: InMemorySaksbehandlerDao = InMemorySaksbehandlerDao(saksbehandlerRepository)
     override val tildelingDao: TildelingDao
         get() = TODO("Not yet implemented")
     override val varselDao = object : VarselDao {
