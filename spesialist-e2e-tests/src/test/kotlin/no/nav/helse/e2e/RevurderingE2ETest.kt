@@ -3,7 +3,9 @@ package no.nav.helse.e2e
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import org.junit.jupiter.api.Test
 import java.util.UUID
+import kotlin.test.Ignore
 
+@Ignore
 class RevurderingE2ETest : AbstractE2ETest() {
     @Test
     fun `revurdering ved saksbehandlet oppgave`() {

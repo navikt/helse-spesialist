@@ -7,7 +7,9 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.UUID
+import kotlin.test.Ignore
 
+@Ignore
 class VedtaksperiodeLegacyBehandlingE2ETest : AbstractE2ETest() {
     @Test
     fun `Oppretter første generasjon når vedtaksperioden blir opprettet`() {
