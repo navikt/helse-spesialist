@@ -482,7 +482,8 @@ class Oppgave private constructor(
                 EGEN_ANSATT -> Tilgangsgruppe.EGEN_ANSATT in saksbehandlerTilgangsgrupper
                 FORTROLIG_ADRESSE -> Tilgangsgruppe.KODE_7 in saksbehandlerTilgangsgrupper
                 SELVSTENDIG_NÆRINGSDRIVENDE ->
-                    Tilgangsgruppe.TBD in saksbehandlerTilgangsgrupper ||
+                    "dev-gcp" == System.getenv("NAIS_CLUSTER_NAME") ||
+                        Tilgangsgruppe.TBD in saksbehandlerTilgangsgrupper ||
                         SaksbehandlerIdentGrupper.TILGANG_TIL_SN.inneholder(saksbehandler.ident)
 
                 else -> true
