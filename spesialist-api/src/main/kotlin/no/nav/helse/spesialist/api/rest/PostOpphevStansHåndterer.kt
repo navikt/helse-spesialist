@@ -9,7 +9,7 @@ import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import kotlin.reflect.typeOf
 
-class OpphevStansPostHåndterer : PostHåndterer<Unit, OpphevStansPostHåndterer.RequestBody, Boolean> {
+class PostOpphevStansHåndterer : PostHåndterer<Unit, PostOpphevStansHåndterer.RequestBody, Boolean> {
     override val urlPath: String = "opphevstans"
 
     data class RequestBody(

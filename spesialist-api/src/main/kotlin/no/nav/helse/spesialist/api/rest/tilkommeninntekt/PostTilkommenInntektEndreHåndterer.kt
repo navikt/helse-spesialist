@@ -18,8 +18,8 @@ import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektPeriodeVa
 import java.util.UUID
 import kotlin.reflect.typeOf
 
-class TilkommenInntektGjenopprettPostHåndterer : PostHåndterer<TilkommenInntektGjenopprettPostHåndterer.URLParametre, TilkommenInntektGjenopprettPostHåndterer.RequestBody, Boolean> {
-    override val urlPath: String = "tilkomne-inntekter/{tilkommenInntektId}/gjenopprett"
+class PostTilkommenInntektEndreHåndterer : PostHåndterer<PostTilkommenInntektEndreHåndterer.URLParametre, PostTilkommenInntektEndreHåndterer.RequestBody, Boolean> {
+    override val urlPath: String = "tilkomne-inntekter/{tilkommenInntektId}/endre"
 
     data class URLParametre(
         val tilkommenInntektId: UUID,
@@ -66,9 +66,13 @@ class TilkommenInntektGjenopprettPostHåndterer : PostHåndterer<TilkommenInntek
             vedtaksperioder = transaksjon.vedtaksperiodeRepository.finnVedtaksperioder(tilkommenInntekt.fødselsnummer),
         )
 
-        tilkommenInntekt.gjenopprett(
+        val arbeidsgiverFør = tilkommenInntekt.organisasjonsnummer
+        val dagerFør = tilkommenInntekt.dagerTilGradering()
+        val dagsbeløpFør = tilkommenInntekt.dagbeløp()
+
+        tilkommenInntekt.endreTil(
             organisasjonsnummer = requestBody.endretTil.organisasjonsnummer,
-            periode = endretTilPeriode,
+            periode = requestBody.endretTil.periode.fom tilOgMed requestBody.endretTil.periode.tom,
             periodebeløp = requestBody.endretTil.periodebelop,
             ekskluderteUkedager = requestBody.endretTil.ekskluderteUkedager.toSet(),
             saksbehandlerIdent = saksbehandler.ident,
@@ -81,11 +85,27 @@ class TilkommenInntektGjenopprettPostHåndterer : PostHåndterer<TilkommenInntek
         )
         transaksjon.tilkommenInntektRepository.lagre(tilkommenInntekt)
 
-        meldingsKø.publiser(
-            fødselsnummer = tilkommenInntekt.fødselsnummer,
-            hendelse = InntektsendringerEventBygger.forNy(tilkommenInntekt),
-            årsak = "tilkommen inntekt gjenopprettet",
-        )
+        val arbeidsgiverEtter = tilkommenInntekt.organisasjonsnummer
+        val dagerEtter = tilkommenInntekt.dagerTilGradering()
+        val dagsbeløpEtter = tilkommenInntekt.dagbeløp()
+
+        val event =
+            InntektsendringerEventBygger.forEndring(
+                arbeidsgiverFør = arbeidsgiverFør,
+                arbeidsgiverEtter = arbeidsgiverEtter,
+                dagerFør = dagerFør,
+                dagerEtter = dagerEtter,
+                dagsbeløpFør = dagsbeløpFør,
+                dagsbeløpEtter = dagsbeløpEtter,
+            )
+
+        event?.let {
+            meldingsKø.publiser(
+                fødselsnummer = tilkommenInntekt.fødselsnummer,
+                hendelse = it,
+                årsak = "tilkommen inntekt endret",
+            )
+        }
 
         return RestResponse.ok(true)
     }

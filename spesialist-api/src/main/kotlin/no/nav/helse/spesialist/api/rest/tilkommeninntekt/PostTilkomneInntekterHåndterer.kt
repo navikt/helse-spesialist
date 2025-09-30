@@ -16,7 +16,7 @@ import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntekt
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektPeriodeValidator
 import kotlin.reflect.typeOf
 
-class TilkomneInntekterPostHåndterer : PostHåndterer<Unit, TilkomneInntekterPostHåndterer.RequestBody, LeggTilTilkommenInntektResponse> {
+class PostTilkomneInntekterHåndterer : PostHåndterer<Unit, PostTilkomneInntekterHåndterer.RequestBody, LeggTilTilkommenInntektResponse> {
     override val urlPath: String = "tilkomne-inntekter"
 
     data class RequestBody(

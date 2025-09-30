@@ -6,22 +6,22 @@ import io.ktor.server.routing.Routing
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import no.nav.helse.spesialist.api.rest.tilkommeninntekt.PersonTilkomneInntektskilderGetHåndterer
-import no.nav.helse.spesialist.api.rest.tilkommeninntekt.TilkommenInntektEndrePostHåndterer
-import no.nav.helse.spesialist.api.rest.tilkommeninntekt.TilkommenInntektFjernPostHåndterer
-import no.nav.helse.spesialist.api.rest.tilkommeninntekt.TilkommenInntektGjenopprettPostHåndterer
-import no.nav.helse.spesialist.api.rest.tilkommeninntekt.TilkomneInntekterPostHåndterer
+import no.nav.helse.spesialist.api.rest.tilkommeninntekt.GetPersonTilkomneInntektskilderHåndterer
+import no.nav.helse.spesialist.api.rest.tilkommeninntekt.PostTilkommenInntektEndreHåndterer
+import no.nav.helse.spesialist.api.rest.tilkommeninntekt.PostTilkommenInntektFjernHåndterer
+import no.nav.helse.spesialist.api.rest.tilkommeninntekt.PostTilkommenInntektGjenopprettHåndterer
+import no.nav.helse.spesialist.api.rest.tilkommeninntekt.PostTilkomneInntekterHåndterer
 import java.util.UUID
 
 val RESTHÅNDTERERE =
     listOf(
-        PersonTilkomneInntektskilderGetHåndterer(),
-        OpphevStansPostHåndterer(),
-        TilkomneInntekterPostHåndterer(),
-        TilkommenInntektEndrePostHåndterer(),
-        TilkommenInntektFjernPostHåndterer(),
-        TilkommenInntektGjenopprettPostHåndterer(),
-        AktiveSaksbehandlereGetHåndterer(),
+        GetAktiveSaksbehandlereHåndterer(),
+        PostOpphevStansHåndterer(),
+        GetPersonTilkomneInntektskilderHåndterer(),
+        PostTilkomneInntekterHåndterer(),
+        PostTilkommenInntektEndreHåndterer(),
+        PostTilkommenInntektFjernHåndterer(),
+        PostTilkommenInntektGjenopprettHåndterer(),
     )
 
 fun Routing.restRoutes(restDelegator: RestDelegator) {

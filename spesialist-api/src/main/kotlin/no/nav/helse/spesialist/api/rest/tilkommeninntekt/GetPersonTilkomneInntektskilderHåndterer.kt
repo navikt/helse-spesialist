@@ -27,7 +27,7 @@ import java.math.BigDecimal
 import java.time.ZoneId
 import kotlin.reflect.typeOf
 
-class PersonTilkomneInntektskilderGetHåndterer : GetHåndterer<PersonTilkomneInntektskilderGetHåndterer.URLParametre, List<ApiTilkommenInntektskilde>> {
+class GetPersonTilkomneInntektskilderHåndterer : GetHåndterer<GetPersonTilkomneInntektskilderHåndterer.URLParametre, List<ApiTilkommenInntektskilde>> {
     override val urlPath = "personer/{aktørId}/tilkomne-inntektskilder"
 
     data class URLParametre(

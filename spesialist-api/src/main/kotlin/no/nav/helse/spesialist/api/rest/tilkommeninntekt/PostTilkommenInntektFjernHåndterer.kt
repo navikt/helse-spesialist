@@ -15,7 +15,7 @@ import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektId
 import java.util.UUID
 import kotlin.reflect.typeOf
 
-class TilkommenInntektFjernPostHåndterer : PostHåndterer<TilkommenInntektFjernPostHåndterer.URLParametre, TilkommenInntektFjernPostHåndterer.RequestBody, Boolean> {
+class PostTilkommenInntektFjernHåndterer : PostHåndterer<PostTilkommenInntektFjernHåndterer.URLParametre, PostTilkommenInntektFjernHåndterer.RequestBody, Boolean> {
     override val urlPath: String = "tilkomne-inntekter/{tilkommenInntektId}/fjern"
 
     data class URLParametre(

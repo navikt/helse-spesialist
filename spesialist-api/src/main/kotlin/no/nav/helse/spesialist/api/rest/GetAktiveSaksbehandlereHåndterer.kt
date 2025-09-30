@@ -7,7 +7,7 @@ import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import kotlin.reflect.typeOf
 
-class AktiveSaksbehandlereGetHåndterer : GetHåndterer<Unit, List<ApiSaksbehandler>> {
+class GetAktiveSaksbehandlereHåndterer : GetHåndterer<Unit, List<ApiSaksbehandler>> {
     override val urlPath = "aktive-saksbehandlere"
 
     override fun extractParametre(parameters: Parameters) = Unit
