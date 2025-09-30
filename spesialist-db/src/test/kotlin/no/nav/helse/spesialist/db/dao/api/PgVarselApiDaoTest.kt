@@ -847,8 +847,8 @@ internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
     ): Long = requireNotNull(
         dbQuery.updateAndReturnGeneratedKey(
             """
-                INSERT INTO oppgave (utbetaling_id, opprettet, oppdatert, status, vedtak_ref, hendelse_id_godkjenningsbehov, kan_avvises)
-                VALUES (:utbetalingId, :opprettet, now(), CAST(:status as oppgavestatus), :vedtakRef, :godkjenningsbehovId, :kanAvvises)
+                INSERT INTO oppgave (utbetaling_id, opprettet, første_opprettet, oppdatert, status, vedtak_ref, hendelse_id_godkjenningsbehov, kan_avvises)
+                VALUES (:utbetalingId, :opprettet, :opprettet, now(), CAST(:status as oppgavestatus), :vedtakRef, :godkjenningsbehovId, :kanAvvises)
                 """.trimIndent(),
             "utbetalingId" to utbetalingId,
             "opprettet" to opprettet,

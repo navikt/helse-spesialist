@@ -537,8 +537,8 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     ): Long {
         val oppgaveId = dbQuery.updateAndReturnGeneratedKey(
             """
-            INSERT INTO oppgave (utbetaling_id, behandling_id, opprettet, oppdatert, status, vedtak_ref, hendelse_id_godkjenningsbehov, kan_avvises)
-            VALUES (:utbetalingId, :behandlingId, :opprettet, now(), CAST(:status as oppgavestatus), :vedtakRef, :godkjenningsbehovId, :kanAvvises)
+            INSERT INTO oppgave (utbetaling_id, behandling_id, opprettet, første_opprettet, oppdatert, status, vedtak_ref, hendelse_id_godkjenningsbehov, kan_avvises)
+            VALUES (:utbetalingId, :behandlingId, :opprettet, :opprettet, now(), CAST(:status as oppgavestatus), :vedtakRef, :godkjenningsbehovId, :kanAvvises)
             """.trimIndent(),
             "utbetalingId" to utbetalingId,
             "behandlingId" to behandlingId,
