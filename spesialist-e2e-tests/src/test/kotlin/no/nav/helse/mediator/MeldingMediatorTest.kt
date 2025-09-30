@@ -73,7 +73,7 @@ class MeldingMediatorTest : AbstractDatabaseTest() {
         assertTrue(meldingMediator.skalBehandleMelding(""" { "@id": "ekkel id" } """))
         poisonPills["@id"] = setOf("ekkel id")
         assertTrue(meldingMediator.skalBehandleMelding(""" { "@id": "ekkel id" } """))
-        Thread.sleep(60)
+        Thread.sleep(250)
         assertFalse(meldingMediator.skalBehandleMelding(""" { "@id": "ekkel id" } """))
     }
 
