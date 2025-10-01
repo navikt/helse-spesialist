@@ -2,58 +2,15 @@ package no.nav.helse.spesialist.e2etests.tests
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
-import no.nav.helse.spesialist.e2etests.AbstractE2EIntegrationTest
-import no.nav.helse.spesialist.kafka.objectMapper
+import no.nav.helse.modell.oppgave.Egenskap
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-class OppgavelisteMedGraphQLE2ETest : AbstractE2EIntegrationTest() {
-    @Test
-    fun `minimal oppgave dukker opp i listen`() {
-        // Given:
-        risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
-        søknadOgGodkjenningbehovKommerInn()
-
-        // When:
-        val response = callGraphQL(
-            operationName = "OppgaveFeed",
-            variables = mapOf(
-                "offset" to 0,
-                "limit" to 10000,
-                "filtrering" to mapOf(
-                    "egenskaper" to emptyList<String>(),
-                    "ekskluderteEgenskaper" to emptyList<String>(),
-                    "ingenUkategoriserteEgenskaper" to false,
-                    "tildelt" to null,
-                    "egneSaker" to false,
-                    "egneSakerPaVent" to false
-                ),
-                "sortering" to listOf(
-                    mapOf(
-                        "nokkel" to "OPPRETTET",
-                        "stigende" to false
-                    )
-                )
-            )
-        )
-        val responseData = response["data"]["oppgaveFeed"]
-
-        assertAtLeast(1, responseData["totaltAntallOppgaver"].asInt())
-        assertAtLeast(1, responseData["oppgaver"].size())
-
-        val vedtaksperiodeId = førsteVedtaksperiode().vedtaksperiodeId
-
-        val oppgaverForVedtaksperiode = responseData["oppgaver"]
-            .filter { it["vedtaksperiodeId"].asText() == vedtaksperiodeId.toString() }
-        assertEquals(1, oppgaverForVedtaksperiode.size) {
-            "Fikk uventet antall oppgaver for vedtaksperioden (vedtaksperiodeId: $vedtaksperiodeId)"
-        }
-        val oppgave = oppgaverForVedtaksperiode.single()
-
+class OppgavelisteMedGraphQLE2ETest : AbstractOppgavelisteE2ETest() {
+    override fun assertMinimalOppgaveJson(oppgave: JsonNode) {
         // Sjekk genererte felter
         assertTrue(oppgave["id"]?.takeUnless { it.isNull }?.isTextual == true)
         val tiMinutterSiden = LocalDateTime.now().minusMinutes(10)
@@ -68,107 +25,53 @@ class OppgavelisteMedGraphQLE2ETest : AbstractE2EIntegrationTest() {
 
         @Language("JSON")
         val expectedOppgaveJson = """
-            {
-              "tidsfrist": null,
-              "vedtaksperiodeId": "$vedtaksperiodeId",
-              "navn": {
-                "fornavn": "${testContext.person.fornavn}",
-                "etternavn": "${testContext.person.etternavn}",
-                "mellomnavn": ${testContext.person.mellomnavn?.let { "\"$it\"" }}
-              },
-              "aktorId": "${testContext.person.aktørId}",
-              "tildeling": null,
-              "egenskaper": [
                 {
-                  "egenskap": "ARBEIDSTAKER",
-                  "kategori": "Inntektsforhold"
-                },
-                {
-                  "egenskap": "EN_ARBEIDSGIVER",
-                  "kategori": "Inntektskilde"
-                },
-                {
-                  "egenskap": "FORSTEGANGSBEHANDLING",
-                  "kategori": "Periodetype"
-                },
-                {
-                  "egenskap": "RISK_QA",
-                  "kategori": "Ukategorisert"
-                },
-                {
-                  "egenskap": "SOKNAD",
-                  "kategori": "Oppgavetype"
-                },
-                {
-                  "egenskap": "UTBETALING_TIL_ARBEIDSGIVER",
-                  "kategori": "Mottaker"
+                  "tidsfrist": null,
+                  "vedtaksperiodeId": "${førsteVedtaksperiode().vedtaksperiodeId}",
+                  "navn": {
+                    "fornavn": "${testContext.person.fornavn}",
+                    "etternavn": "${testContext.person.etternavn}",
+                    "mellomnavn": ${testContext.person.mellomnavn?.let { "\"$it\"" }}
+                  },
+                  "aktorId": "${testContext.person.aktørId}",
+                  "tildeling": null,
+                  "egenskaper": [
+                    {
+                      "egenskap": "ARBEIDSTAKER",
+                      "kategori": "Inntektsforhold"
+                    },
+                    {
+                      "egenskap": "EN_ARBEIDSGIVER",
+                      "kategori": "Inntektskilde"
+                    },
+                    {
+                      "egenskap": "FORSTEGANGSBEHANDLING",
+                      "kategori": "Periodetype"
+                    },
+                    {
+                      "egenskap": "RISK_QA",
+                      "kategori": "Ukategorisert"
+                    },
+                    {
+                      "egenskap": "SOKNAD",
+                      "kategori": "Oppgavetype"
+                    },
+                    {
+                      "egenskap": "UTBETALING_TIL_ARBEIDSGIVER",
+                      "kategori": "Mottaker"
+                    }
+                  ],
+                  "periodetype": "FORSTEGANGSBEHANDLING",
+                  "oppgavetype": "SOKNAD",
+                  "mottaker": "ARBEIDSGIVER",
+                  "antallArbeidsforhold": "ET_ARBEIDSFORHOLD",
+                  "paVentInfo": null
                 }
-              ],
-              "periodetype": "FORSTEGANGSBEHANDLING",
-              "oppgavetype": "SOKNAD",
-              "mottaker": "ARBEIDSGIVER",
-              "antallArbeidsforhold": "ET_ARBEIDSFORHOLD",
-              "paVentInfo": null
-            }
-        """.trimIndent()
+            """.trimIndent()
         assertJsonEquals(expectedOppgaveJson, oppgaveUtenGenererteFelter)
     }
 
-    @Test
-    fun `maksimal oppgave dukker opp i listen`() {
-        // Given:
-        risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
-        søknadOgGodkjenningbehovKommerInn()
-
-        medPersonISpeil {
-            saksbehandlerTildelerSegSaken()
-            saksbehandlerLeggerOppgavePåVent(
-                notatTekst = "Min notattekst",
-                frist = LocalDate.now().plusDays(1337),
-                arsaker = mapOf("arsak1" to "Min første årsak", "arsak2" to "Min andre årsak")
-            )
-            saksbehandlerKommentererLagtPåVent(tekst = "Her er én kommentar")
-            // TODO: Feilregistrerer korrekt i testen, men query'en gir alltid null tilbake uansett (!)
-            saksbehandlerFeilregistrererFørsteKommentarPåHistorikkinnslag()
-            saksbehandlerKommentererLagtPåVent(tekst = "Og her er en annen kommentar")
-        }
-
-        // When:
-        val response = callGraphQL(
-            operationName = "OppgaveFeed",
-            variables = mapOf(
-                "offset" to 0,
-                "limit" to 10000,
-                "filtrering" to mapOf(
-                    "egenskaper" to emptyList<String>(),
-                    "ekskluderteEgenskaper" to emptyList<String>(),
-                    "ingenUkategoriserteEgenskaper" to false,
-                    "tildelt" to null,
-                    "egneSaker" to false,
-                    "egneSakerPaVent" to false
-                ),
-                "sortering" to listOf(
-                    mapOf(
-                        "nokkel" to "OPPRETTET",
-                        "stigende" to false
-                    )
-                )
-            )
-        )
-        val responseData = response["data"]["oppgaveFeed"]
-
-        assertAtLeast(1, responseData["totaltAntallOppgaver"].asInt())
-        assertAtLeast(1, responseData["oppgaver"].size())
-
-        val vedtaksperiodeId = førsteVedtaksperiode().vedtaksperiodeId
-
-        val oppgaverForVedtaksperiode = responseData["oppgaver"]
-            .filter { it["vedtaksperiodeId"].asText() == vedtaksperiodeId.toString() }
-        assertEquals(1, oppgaverForVedtaksperiode.size) {
-            "Fikk uventet antall oppgaver for vedtaksperioden (vedtaksperiodeId: $vedtaksperiodeId)"
-        }
-        val oppgave = oppgaverForVedtaksperiode.single()
-
+    override fun assertMaksimalOppgaveJson(oppgave: JsonNode) {
         // Sjekk genererte felter
         assertIsTextual(oppgave["id"])
         val tiMinutterSiden = LocalDateTime.now().minusMinutes(10)
@@ -200,97 +103,126 @@ class OppgavelisteMedGraphQLE2ETest : AbstractE2EIntegrationTest() {
         // Sjekk mappede felter
         @Language("JSON")
         val expectedOppgaveJson = """
-            {
-              "tidsfrist": "${LocalDate.now().plusDays(1337)}",
-              "vedtaksperiodeId": "$vedtaksperiodeId",
-              "navn": {
-                "fornavn": "${testContext.person.fornavn}",
-                "etternavn": "${testContext.person.etternavn}",
-                "mellomnavn": ${testContext.person.mellomnavn?.let { "\"$it\"" }}
-              },
-              "aktorId": "${testContext.person.aktørId}",
-              "tildeling": {
-                "navn" : "${saksbehandler.navn}",
-                "epost" : "${saksbehandler.epost}",
-                "oid" : "${saksbehandler.id().value}"
-              },
-              "egenskaper": [
                 {
-                  "egenskap": "ARBEIDSTAKER",
-                  "kategori": "Inntektsforhold"
-                },
-                {
-                  "egenskap": "EN_ARBEIDSGIVER",
-                  "kategori": "Inntektskilde"
-                },
-                {
-                  "egenskap": "FORSTEGANGSBEHANDLING",
-                  "kategori": "Periodetype"
-                },
-                {
-                  "egenskap" : "PA_VENT",
-                  "kategori" : "Status"
-                }, {
-                  "egenskap": "RISK_QA",
-                  "kategori": "Ukategorisert"
-                },
-                {
-                  "egenskap": "SOKNAD",
-                  "kategori": "Oppgavetype"
-                },
-                {
-                  "egenskap": "UTBETALING_TIL_ARBEIDSGIVER",
-                  "kategori": "Mottaker"
-                }
-              ],
-              "periodetype": "FORSTEGANGSBEHANDLING",
-              "oppgavetype": "SOKNAD",
-              "mottaker": "ARBEIDSGIVER",
-              "antallArbeidsforhold": "ET_ARBEIDSFORHOLD",
-              "paVentInfo": {
-                "arsaker" : [ "Min første årsak", "Min andre årsak" ],
-                "tekst" : "Min notattekst",
-                "saksbehandler" : "${saksbehandler.ident}",
-                "tidsfrist" : "${LocalDate.now().plusDays(1337)}",
-                "kommentarer" : [
-                  {
-                    "tekst" : "Her er én kommentar",
-                    "saksbehandlerident" : "${saksbehandler.ident}",
-                    "feilregistrert_tidspunkt" : null
+                  "tidsfrist": "${LocalDate.now().plusDays(1337)}",
+                  "vedtaksperiodeId": "${førsteVedtaksperiode().vedtaksperiodeId}",
+                  "navn": {
+                    "fornavn": "${testContext.person.fornavn}",
+                    "etternavn": "${testContext.person.etternavn}",
+                    "mellomnavn": ${testContext.person.mellomnavn?.let { "\"$it\"" }}
                   },
-                  {
-                    "tekst" : "Og her er en annen kommentar",
-                    "saksbehandlerident" : "${saksbehandler.ident}",
-                    "feilregistrert_tidspunkt" : null
+                  "aktorId": "${testContext.person.aktørId}",
+                  "tildeling": {
+                    "navn" : "${saksbehandler.navn}",
+                    "epost" : "${saksbehandler.epost}",
+                    "oid" : "${saksbehandler.id().value}"
+                  },
+                  "egenskaper": [
+                    {
+                      "egenskap": "ARBEIDSTAKER",
+                      "kategori": "Inntektsforhold"
+                    },
+                    {
+                      "egenskap": "EN_ARBEIDSGIVER",
+                      "kategori": "Inntektskilde"
+                    },
+                    {
+                      "egenskap": "FORSTEGANGSBEHANDLING",
+                      "kategori": "Periodetype"
+                    },
+                    {
+                      "egenskap" : "PA_VENT",
+                      "kategori" : "Status"
+                    }, {
+                      "egenskap": "RISK_QA",
+                      "kategori": "Ukategorisert"
+                    },
+                    {
+                      "egenskap": "SOKNAD",
+                      "kategori": "Oppgavetype"
+                    },
+                    {
+                      "egenskap": "UTBETALING_TIL_ARBEIDSGIVER",
+                      "kategori": "Mottaker"
+                    }
+                  ],
+                  "periodetype": "FORSTEGANGSBEHANDLING",
+                  "oppgavetype": "SOKNAD",
+                  "mottaker": "ARBEIDSGIVER",
+                  "antallArbeidsforhold": "ET_ARBEIDSFORHOLD",
+                  "paVentInfo": {
+                    "arsaker" : [ "Min første årsak", "Min andre årsak" ],
+                    "tekst" : "Min notattekst",
+                    "saksbehandler" : "${saksbehandler.ident}",
+                    "tidsfrist" : "${LocalDate.now().plusDays(1337)}",
+                    "kommentarer" : [
+                      {
+                        "tekst" : "Her er én kommentar",
+                        "saksbehandlerident" : "${saksbehandler.ident}",
+                        "feilregistrert_tidspunkt" : null
+                      },
+                      {
+                        "tekst" : "Og her er en annen kommentar",
+                        "saksbehandlerident" : "${saksbehandler.ident}",
+                        "feilregistrert_tidspunkt" : null
+                      }
+                    ]
                   }
-                ]
-              }
-            }
-        """.trimIndent()
+                }
+            """.trimIndent()
         assertJsonEquals(expectedOppgaveJson, oppgaveUtenGenererteFelter)
     }
 
-    private fun assertIsNumber(actual: JsonNode?) {
-        assertTrue(actual?.takeUnless { it.isNull }?.isNumber == true)
-    }
-
-    private fun assertIsTextual(actual: JsonNode?) {
-        assertTrue(actual?.takeUnless { it.isNull }?.isTextual == true)
-    }
-
-    private fun assertAfter(expectedAfter: LocalDateTime, actual: LocalDateTime) {
-        assertTrue(actual.isAfter(expectedAfter)) { "Forventet tidspunkt etter $expectedAfter, men var $actual" }
-    }
-
-    private fun assertAtLeast(expectedMinimum: Int, actual: Int) {
-        assertTrue(actual >= expectedMinimum) { "Forventet minst $expectedMinimum, men var $actual" }
-    }
-
-    private fun assertJsonEquals(expectedJson: String, actualJsonNode: JsonNode) {
-        val writer = objectMapper.writerWithDefaultPrettyPrinter()
-        assertEquals(
-            writer.writeValueAsString(objectMapper.readTree(expectedJson)),
-            writer.writeValueAsString(actualJsonNode)
+    override fun hentOgAssertOppgaveIOppgaveliste(
+        fane: Fane,
+        forventetDukketOpp: Boolean,
+        tildelt: Boolean?,
+        egenskaper: Set<Egenskap>,
+        ekskluderteEgenskaper: Set<Egenskap>
+    ): JsonNode? {
+        // When:
+        val response = callGraphQL(
+            operationName = "OppgaveFeed",
+            variables = mapOf(
+                "offset" to 0,
+                "limit" to 10000,
+                "filtrering" to mapOf(
+                    "egenskaper" to egenskaper.map { egenskap ->
+                        mapOf("egenskap" to egenskap.name.replace('Ø', 'O'), "kategori" to egenskap.kategori.name)
+                    },
+                    "ekskluderteEgenskaper" to ekskluderteEgenskaper.map { egenskap ->
+                        mapOf("egenskap" to egenskap.name.replace('Ø', 'O'), "kategori" to egenskap.kategori.name)
+                    },
+                    "ingenUkategoriserteEgenskaper" to false,
+                    "tildelt" to tildelt,
+                    "egneSaker" to (fane == Fane.MINE_OPPGAVER),
+                    "egneSakerPaVent" to (fane == Fane.PÅ_VENT)
+                ),
+                "sortering" to listOf(
+                    mapOf(
+                        "nokkel" to "OPPRETTET",
+                        "stigende" to false
+                    )
+                )
+            ),
         )
+
+        // Then:
+        val responseData = response["data"]["oppgaveFeed"]
+
+        if (forventetDukketOpp) {
+            assertAtLeast(1, responseData["totaltAntallOppgaver"].asInt())
+            assertAtLeast(1, responseData["oppgaver"].size())
+        }
+
+        val vedtaksperiodeId = førsteVedtaksperiode().vedtaksperiodeId
+
+        val oppgaverForVedtaksperiode = responseData["oppgaver"]
+            .filter { it["vedtaksperiodeId"].asText() == vedtaksperiodeId.toString() }
+        assertEquals(if (forventetDukketOpp) 1 else 0, oppgaverForVedtaksperiode.size) {
+            "Fikk uventet antall oppgaver for vedtaksperioden (vedtaksperiodeId: $vedtaksperiodeId)"
+        }
+
+        return if (forventetDukketOpp) oppgaverForVedtaksperiode.single() else null
     }
 }

@@ -5,6 +5,7 @@ import kotliquery.sessionOf
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.spesialist.api.testfixtures.lagSaksbehandler
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
+import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.e2etests.Meldingsbygger.byggUtbetalingEndret
 import no.nav.helse.spesialist.e2etests.behovløserstubs.AbstractBehovLøser
@@ -203,7 +204,11 @@ abstract class AbstractE2EIntegrationTest {
 
     protected fun saksbehandlerIdent() = saksbehandler.ident
 
-    protected fun medPersonISpeil(block: SpeilPersonReceiver.() -> Unit) {
+    protected fun medPersonISpeil(
+        saksbehandler: Saksbehandler = this.saksbehandler,
+        saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe> = this.saksbehandlerTilgangsgrupper,
+        block: SpeilPersonReceiver.() -> Unit
+    ) {
         spleisStub.stubSnapshotForPerson(testContext)
         SpeilPersonReceiver(
             testContext = testContext,
@@ -281,6 +286,11 @@ abstract class AbstractE2EIntegrationTest {
         )
     }
 
-    protected fun callGraphQL(operationName: String, variables: Map<String, Any>) =
+    protected fun callGraphQL(
+        operationName: String,
+        saksbehandler: Saksbehandler = this.saksbehandler,
+        saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe> = this.saksbehandlerTilgangsgrupper,
+        variables: Map<String, Any>,
+    ) =
         GraphQL.call(operationName, saksbehandler, saksbehandlerTilgangsgrupper, variables)
 }
