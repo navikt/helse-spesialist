@@ -127,9 +127,7 @@ class OppgavelisteMedGraphQLE2ETest : AbstractE2EIntegrationTest() {
                 frist = LocalDate.now().plusDays(1337),
                 arsaker = mapOf("arsak1" to "Min første årsak", "arsak2" to "Min andre årsak")
             )
-            oppdater()
             saksbehandlerKommentererLagtPåVent(tekst = "Her er én kommentar")
-            oppdater()
             // TODO: Feilregistrerer korrekt i testen, men query'en gir alltid null tilbake uansett (!)
             saksbehandlerFeilregistrererFørsteKommentarPåHistorikkinnslag()
             saksbehandlerKommentererLagtPåVent(tekst = "Og her er en annen kommentar")

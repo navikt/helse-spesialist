@@ -35,7 +35,8 @@ class SpeilPersonReceiver(
 ) {
     var person: JsonNode = fetchPerson(testContext.person.aktørId)
 
-    fun oppdater() {
+    fun hentOppdatertPerson() {
+        logg.info("Henter oppdatert person...")
         person = fetchPerson(testContext.person.aktørId)
     }
 
@@ -57,6 +58,7 @@ class SpeilPersonReceiver(
                 )
             )
         }
+        hentOppdatertPerson()
     }
 
     fun saksbehandlerTildelerSegSaken() {
@@ -66,6 +68,7 @@ class SpeilPersonReceiver(
                 "oppgavereferanse" to getOppgaveId(),
             )
         )
+        hentOppdatertPerson()
     }
 
     fun saksbehandlerFatterVedtak() {
@@ -76,6 +79,7 @@ class SpeilPersonReceiver(
                 "begrunnelse" to "Fattet vedtak",
             )
         )
+        hentOppdatertPerson()
     }
 
     fun saksbehandlerLeggerOppgavePåVent(
@@ -93,6 +97,7 @@ class SpeilPersonReceiver(
                 "arsaker" to arsaker.map { (key, arsak) -> mapOf("_key" to key, "arsak" to arsak) },
             )
         )
+        hentOppdatertPerson()
     }
 
     fun saksbehandlerKommentererLagtPåVent(tekst: String = "") {
@@ -110,6 +115,7 @@ class SpeilPersonReceiver(
                 "saksbehandlerident" to saksbehandler.ident,
             )
         )
+        hentOppdatertPerson()
     }
 
     fun saksbehandlerFeilregistrererFørsteKommentarPåHistorikkinnslag() {
@@ -128,6 +134,7 @@ class SpeilPersonReceiver(
                 )
             )
         )
+        hentOppdatertPerson()
     }
 
     fun saksbehandlerLeggerTilTilkommenInntekt(
@@ -254,6 +261,7 @@ class SpeilPersonReceiver(
                 error("Forventer at mutation ikke feiler, fikk: $it")
             }
         }
+        hentOppdatertPerson()
     }
 
     fun saksbehandlerSenderTilGodkjenning() {
@@ -267,6 +275,7 @@ class SpeilPersonReceiver(
                 error("Forventer at mutation ikke feiler, fikk: $it")
             }
         }
+        hentOppdatertPerson()
     }
 
     fun assertHarOppgaveegenskap(vararg forventedeEgenskaper: String) {
