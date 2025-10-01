@@ -1,0 +1,10 @@
+mutation FeilregistrerKommentar($id: Int!) {
+    feilregistrerKommentar(id: $id) {
+        id
+        opprettet
+        feilregistrert_tidspunkt
+        saksbehandlerident
+        tekst
+        __typename
+    }
+}

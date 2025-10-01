@@ -23,8 +23,8 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import java.util.UUID
 
 abstract class AbstractE2EIntegrationTest {
-    private val testContext: TestContext = TestContext()
-    private var saksbehandler = lagSaksbehandler()
+    protected val testContext: TestContext = TestContext()
+    protected var saksbehandler = lagSaksbehandler()
     private var saksbehandlerTilgangsgrupper = mutableSetOf<Tilgangsgruppe>()
     private var beslutter = lagSaksbehandler()
 
@@ -207,8 +207,8 @@ abstract class AbstractE2EIntegrationTest {
         spleisStub.stubSnapshotForPerson(testContext)
         SpeilPersonReceiver(
             testContext = testContext,
-            saksbehandlerIdent = saksbehandler.ident,
-            bearerAuthToken = E2ETestApplikasjon.apiModuleIntegrationTestFixture.token(saksbehandler, saksbehandlerTilgangsgrupper)
+            saksbehandler = saksbehandler,
+            tilgangsgrupper = saksbehandlerTilgangsgrupper,
         ).block()
     }
 
@@ -216,8 +216,8 @@ abstract class AbstractE2EIntegrationTest {
         spleisStub.stubSnapshotForPerson(testContext)
         SpeilPersonReceiver(
             testContext = testContext,
-            saksbehandlerIdent = beslutter.ident,
-            bearerAuthToken = E2ETestApplikasjon.apiModuleIntegrationTestFixture.token(beslutter, setOf(Tilgangsgruppe.BESLUTTER))
+            saksbehandler = beslutter,
+            tilgangsgrupper = setOf(Tilgangsgruppe.BESLUTTER),
         ).block()
     }
 
@@ -280,4 +280,7 @@ abstract class AbstractE2EIntegrationTest {
             Meldingsbygger.byggEndretSkjermetinfo(testContext.person, skjermet)
         )
     }
+
+    protected fun callGraphQL(operationName: String, variables: Map<String, Any>) =
+        GraphQL.call(operationName, saksbehandler, saksbehandlerTilgangsgrupper, variables)
 }

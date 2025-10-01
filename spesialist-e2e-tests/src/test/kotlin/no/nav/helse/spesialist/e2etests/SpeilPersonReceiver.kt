@@ -18,10 +18,11 @@ import io.ktor.http.isSuccess
 import io.ktor.serialization.jackson.JacksonConverter
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.spesialist.application.logg.logg
+import no.nav.helse.spesialist.domain.Saksbehandler
+import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.e2etests.context.TestContext
 import no.nav.helse.spesialist.e2etests.context.Vedtaksperiode
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.assertNull
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.UUID
@@ -29,10 +30,14 @@ import kotlin.test.assertEquals
 
 class SpeilPersonReceiver(
     private val testContext: TestContext,
-    private val saksbehandlerIdent: String,
-    private val bearerAuthToken: String
+    private val saksbehandler: Saksbehandler,
+    private val tilgangsgrupper: Set<Tilgangsgruppe>,
 ) {
-    val person: JsonNode = fetchPerson(testContext.person.aktørId)
+    var person: JsonNode = fetchPerson(testContext.person.aktørId)
+
+    fun oppdater() {
+        person = fetchPerson(testContext.person.aktørId)
+    }
 
     fun saksbehandlerGodkjennerAlleVarsler() {
         person["arbeidsgivere"].flatMap { arbeidsgiver ->
@@ -47,7 +52,7 @@ class SpeilPersonReceiver(
                 variables = mapOf(
                     "generasjonIdString" to varsel["generasjonId"].asText(),
                     "varselkode" to varsel["kode"].asText(),
-                    "ident" to saksbehandlerIdent,
+                    "ident" to saksbehandler.ident,
                     "definisjonIdString" to varsel["definisjonId"].asText(),
                 )
             )
@@ -73,15 +78,54 @@ class SpeilPersonReceiver(
         )
     }
 
-    fun saksbehandlerLeggerOppgavePåVent() {
+    fun saksbehandlerLeggerOppgavePåVent(
+        notatTekst: String = "",
+        frist: LocalDate = LocalDate.now().plusDays(1),
+        arsaker: Map<String, String> = mapOf("noe" to "Opplæring")
+    ) {
         callGraphQL(
             operationName = "LeggPaVent",
             variables = mapOf(
                 "oppgaveId" to getOppgaveId(),
-                "notatTekst" to "",
-                "frist" to LocalDate.now().plusDays(1).toString(),
+                "notatTekst" to notatTekst,
+                "frist" to frist.toString(),
                 "tildeling" to true,
-                "arsaker" to listOf(mapOf("_key" to "noe", "arsak" to "Opplæring")),
+                "arsaker" to arsaker.map { (key, arsak) -> mapOf("_key" to key, "arsak" to arsak) },
+            )
+        )
+    }
+
+    fun saksbehandlerKommentererLagtPåVent(tekst: String = "") {
+        callGraphQL(
+            operationName = "LeggTilKommentar",
+            variables = mapOf(
+                "tekst" to tekst,
+                "dialogRef" to (person["arbeidsgivere"]
+                    .flatMap { it["generasjoner"] }
+                    .flatMap { it["perioder"] }
+                    .flatMap { it["historikkinnslag"] }
+                    .find { it["__typename"].asText() == "LagtPaVent" }
+                    ?.get("dialogRef")?.asInt()
+                    ?: error("Fant ikke historikkinnslag for \"Lagt på vent\" på personen")),
+                "saksbehandlerident" to saksbehandler.ident,
+            )
+        )
+    }
+
+    fun saksbehandlerFeilregistrererFørsteKommentarPåHistorikkinnslag() {
+        callGraphQL(
+            operationName = "FeilregistrerKommentar",
+            variables = mapOf(
+                "id" to (
+                        person["arbeidsgivere"]
+                            .flatMap { it["generasjoner"] }
+                            .flatMap { it["perioder"] }
+                            .flatMap { it["historikkinnslag"] }
+                            .flatMap { it["kommentarer"] }
+                            .firstOrNull()
+                            ?.get("id")?.asInt()
+                            ?: error("Fant ikke noen kommentar på noe historikkinnslag på personen")
+                )
             )
         )
     }
@@ -276,33 +320,14 @@ class SpeilPersonReceiver(
     private fun getOppgaveId(): String =
         person["arbeidsgivere"][0]["generasjoner"][0]["perioder"][0]["oppgave"]["id"].asText()
 
-    private fun callGraphQL(operationName: String, variables: Map<String, Any>): JsonNode {
-        val (status, bodyAsText) = runBlocking {
-            httpClient.post("http://localhost:${E2ETestApplikasjon.port}/graphql") {
-                contentType(ContentType.Application.Json)
-                accept(ContentType.Application.Json)
-                bearerAuth(bearerAuthToken)
-                setBody(
-                    mapOf(
-                        "query" to (this::class.java.getResourceAsStream("/graphql/$operationName.graphql")
-                            ?.use { it.reader().readText() }
-                            ?: error("Fant ikke $operationName.graphql")),
-                        "operationName" to operationName,
-                        "variables" to variables))
-            }.let { it.status to it.bodyAsText() }
-        }
-        logg.info("Respons fra GraphQL: $bodyAsText")
-        assertTrue(status.isSuccess()) { "Fikk HTTP-feilkode ${status.value} fra GraphQL" }
-        return objectMapper.readTree(bodyAsText).also {
-            assertNull(it["errors"]) { "Fikk feil i GraphQL-response" }
-        }
-    }
+    private fun callGraphQL(operationName: String, variables: Map<String, Any>) =
+        GraphQL.call(operationName, saksbehandler, tilgangsgrupper, variables)
 
     private fun callHttpGet(relativeUrl: String): JsonNode {
         val (status, bodyAsText) = runBlocking {
             httpClient.get("http://localhost:${E2ETestApplikasjon.port}/$relativeUrl") {
                 accept(ContentType.Application.Json)
-                bearerAuth(bearerAuthToken)
+                bearerAuth(E2ETestApplikasjon.apiModuleIntegrationTestFixture.token(saksbehandler, tilgangsgrupper))
             }.let { it.status to it.bodyAsText() }
         }
         logg.info("Respons fra HTTP GET: $bodyAsText")
@@ -313,7 +338,7 @@ class SpeilPersonReceiver(
     private fun callHttpPost(relativeUrl: String, request: Any): JsonNode {
         val (status, bodyAsText) = runBlocking {
             httpClient.post("http://localhost:${E2ETestApplikasjon.port}/$relativeUrl") {
-                bearerAuth(bearerAuthToken)
+                bearerAuth(E2ETestApplikasjon.apiModuleIntegrationTestFixture.token(saksbehandler, tilgangsgrupper))
                 accept(ContentType.Application.Json)
                 contentType(ContentType.Application.Json)
                 setBody(request)

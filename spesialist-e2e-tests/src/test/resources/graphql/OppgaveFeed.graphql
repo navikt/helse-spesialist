@@ -1,0 +1,46 @@
+query OppgaveFeed($filtrering: FiltreringInput!, $limit: Int!, $offset: Int!, $sortering: [OppgavesorteringInput!]!) {
+    oppgaveFeed(filtrering: $filtrering, limit: $limit, offset: $offset, sortering: $sortering) {
+        totaltAntallOppgaver
+        oppgaver {
+            id,
+            opprettet,
+            opprinneligSoknadsdato,
+            tidsfrist,
+            vedtaksperiodeId,
+            navn {
+                fornavn,
+                etternavn,
+                mellomnavn
+            }
+            aktorId,
+            tildeling {
+                navn,
+                epost,
+                oid
+            }
+            egenskaper {
+                egenskap,
+                kategori
+            }
+            periodetype,
+            oppgavetype,
+            mottaker,
+            antallArbeidsforhold,
+            paVentInfo {
+                arsaker,
+                tekst,
+                dialogRef,
+                saksbehandler,
+                opprettet,
+                tidsfrist,
+                kommentarer {
+                    id,
+                    tekst,
+                    opprettet,
+                    saksbehandlerident,
+                    feilregistrert_tidspunkt
+                }
+            }
+        }
+    }
+}

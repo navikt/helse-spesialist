@@ -67,7 +67,7 @@ internal object OppgaveMapper {
                         )
                     },
                 egenskaper =
-                    egenskaper.map { egenskap ->
+                    egenskaper.sortedBy { it.name }.map { egenskap ->
                         ApiOppgaveegenskap(egenskap.tilApiversjon(), egenskap.kategori.tilApiversjon())
                     },
                 periodetype = egenskaper.periodetype(),
