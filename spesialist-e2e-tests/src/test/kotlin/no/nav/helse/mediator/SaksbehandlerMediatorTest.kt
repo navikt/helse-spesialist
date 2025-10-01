@@ -168,7 +168,12 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         utbetalingId: UUID = UTBETALING_ID,
         contextId: UUID = UUID.randomUUID(),
         spleisBehandlingId: UUID = UUID.randomUUID(),
-        oppgaveEgenskaper: Set<Egenskap> = setOf(Egenskap.SØKNAD),
+        oppgaveEgenskaper: Set<Egenskap> = setOf(
+            Egenskap.SØKNAD,
+            Egenskap.FORSTEGANGSBEHANDLING,
+            Egenskap.UTBETALING_TIL_ARBEIDSGIVER,
+            Egenskap.EN_ARBEIDSGIVER
+        ),
     ) {
         opprettPerson(fødselsnummer = fødselsnummer, aktørId = aktørId)
         opprettArbeidsgiver(organisasjonsnummer = organisasjonsnummer)
@@ -333,7 +338,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
     private fun opprettOppgave(
         contextId: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID = VEDTAKSPERIODE,
-        egenskaper: Set<Egenskap> = setOf(Egenskap.SØKNAD),
+        egenskaper: Set<Egenskap>,
         kanAvvises: Boolean = true,
         utbetalingId: UUID = UTBETALING_ID,
         behandlingId: UUID = UUID.randomUUID(),

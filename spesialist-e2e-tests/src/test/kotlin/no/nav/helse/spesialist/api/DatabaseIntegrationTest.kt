@@ -6,6 +6,8 @@ import no.nav.helse.db.api.ArbeidsgiverApiDao.Inntekter
 import no.nav.helse.db.api.EgenAnsattApiDao
 import no.nav.helse.e2e.AbstractDatabaseTest
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
+import no.nav.helse.modell.oppgave.Egenskap
+import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.modell.vilkårsprøving.Beregningsgrunnlag
 import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
@@ -13,7 +15,6 @@ import no.nav.helse.modell.vilkårsprøving.Inntekt
 import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
 import no.nav.helse.modell.vilkårsprøving.Sammenligningsgrunnlag
 import no.nav.helse.objectMapper
-import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
 import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
@@ -315,8 +316,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         opprettHendelse(hendelseId)
         opprettAutomatisering(false, vedtaksperiodeId = periode.id, hendelseId = hendelseId)
         opprettOppgave(
-            status = Oppgavestatus.AvventerSaksbehandler,
-            vedtakRef = vedtakId,
+            vedtaksperiodeId = periode.id,
             utbetalingId = utbetalingId,
             kanAvvises = kanAvvises,
             behandlingId = behandlingId,
@@ -528,28 +528,32 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     )
 
     private fun opprettOppgave(
-        status: Oppgavestatus = Oppgavestatus.AvventerSaksbehandler,
-        vedtakRef: Long,
+        vedtaksperiodeId: UUID,
         utbetalingId: UUID = UUID.randomUUID(),
-        opprettet: LocalDateTime = LocalDateTime.now(),
         kanAvvises: Boolean = true,
         behandlingId: UUID = UUID.randomUUID(),
-    ): Long {
-        val oppgaveId = dbQuery.updateAndReturnGeneratedKey(
-            """
-            INSERT INTO oppgave (utbetaling_id, behandling_id, opprettet, første_opprettet, oppdatert, status, vedtak_ref, hendelse_id_godkjenningsbehov, kan_avvises)
-            VALUES (:utbetalingId, :behandlingId, :opprettet, :opprettet, now(), CAST(:status as oppgavestatus), :vedtakRef, :godkjenningsbehovId, :kanAvvises)
-            """.trimIndent(),
-            "utbetalingId" to utbetalingId,
-            "behandlingId" to behandlingId,
-            "opprettet" to opprettet,
-            "status" to status.name,
-            "vedtakRef" to vedtakRef,
-            "godkjenningsbehovId" to UUID.randomUUID(),
-            "kanAvvises" to kanAvvises,
-        )
-        return requireNotNull(oppgaveId)
-    }
+    ): Long =
+        sessionFactory.transactionalSessionScope {
+            it.oppgaveDao.reserverNesteId().also { oppgaveId ->
+                it.oppgaveRepository.lagre(
+                    Oppgave.ny(
+                        id = oppgaveId,
+                        førsteOpprettet = null,
+                        vedtaksperiodeId = vedtaksperiodeId,
+                        behandlingId = behandlingId,
+                        utbetalingId = utbetalingId,
+                        hendelseId = UUID.randomUUID(),
+                        kanAvvises = kanAvvises,
+                        egenskaper = setOf(
+                            Egenskap.SØKNAD,
+                            Egenskap.FORSTEGANGSBEHANDLING,
+                            Egenskap.UTBETALING_TIL_ARBEIDSGIVER,
+                            Egenskap.EN_ARBEIDSGIVER
+                        )
+                    )
+                )
+            }
+        }
 
     private fun opprettHendelse(
         hendelseId: UUID,
