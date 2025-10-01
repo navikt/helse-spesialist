@@ -34,10 +34,16 @@ class SpeilPersonReceiver(
     private val tilgangsgrupper: Set<Tilgangsgruppe>,
 ) {
     var person: JsonNode = fetchPerson(testContext.person.aktørId)
+    var tilkomneInntektskilder: JsonNode = callGetTilkomneInntektskilder()
 
     fun hentOppdatertPerson() {
         logg.info("Henter oppdatert person...")
         person = fetchPerson(testContext.person.aktørId)
+    }
+
+    fun hentOppdaterteTilkomneInntektskilder() {
+        logg.info("Henter oppdaterte tilkomne inntektskilder...")
+        tilkomneInntektskilder = callGetTilkomneInntektskilder()
     }
 
     fun saksbehandlerGodkjennerAlleVarsler() {
@@ -131,7 +137,7 @@ class SpeilPersonReceiver(
                             .firstOrNull()
                             ?.get("id")?.asInt()
                             ?: error("Fant ikke noen kommentar på noe historikkinnslag på personen")
-                )
+                        )
             )
         )
         hentOppdatertPerson()
@@ -144,23 +150,24 @@ class SpeilPersonReceiver(
         periodebeløp: BigDecimal,
         ekskluderteUkedager: Collection<LocalDate>,
         notatTilBeslutter: String
-    ): UUID =
-        callHttpPost(
-            relativeUrl = "api/tilkomne-inntekter",
-            request = mapOf(
-                "fodselsnummer" to testContext.person.fødselsnummer,
-                "verdier" to mapOf(
-                    "organisasjonsnummer" to organisasjonsnummer,
-                    "periode" to mapOf(
-                        "fom" to fom.toString(),
-                        "tom" to tom.toString(),
-                    ),
-                    "periodebelop" to periodebeløp.toString(),
-                    "ekskluderteUkedager" to ekskluderteUkedager.map(LocalDate::toString),
+    ): UUID = callHttpPost(
+        relativeUrl = "api/tilkomne-inntekter",
+        request = mapOf(
+            "fodselsnummer" to testContext.person.fødselsnummer,
+            "verdier" to mapOf(
+                "organisasjonsnummer" to organisasjonsnummer,
+                "periode" to mapOf(
+                    "fom" to fom.toString(),
+                    "tom" to tom.toString(),
                 ),
-                "notatTilBeslutter" to notatTilBeslutter
-            )
-        )["tilkommenInntektId"].asUUID()
+                "periodebelop" to periodebeløp.toString(),
+                "ekskluderteUkedager" to ekskluderteUkedager.map(LocalDate::toString),
+            ),
+            "notatTilBeslutter" to notatTilBeslutter
+        )
+    )["tilkommenInntektId"].asUUID().also {
+        hentOppdaterteTilkomneInntektskilder()
+    }
 
     fun saksbehandlerEndrerTilkommenInntekt(
         tilkommenInntektId: UUID,
@@ -186,6 +193,7 @@ class SpeilPersonReceiver(
                 "notatTilBeslutter" to notatTilBeslutter
             )
         )
+        hentOppdaterteTilkomneInntektskilder()
     }
 
     fun saksbehandlerFjernerTilkommenInntekt(
@@ -198,6 +206,7 @@ class SpeilPersonReceiver(
                 "notatTilBeslutter" to notatTilBeslutter
             )
         )
+        hentOppdaterteTilkomneInntektskilder()
     }
 
     fun saksbehandlerGjenoppretterTilkommenInntekt(
@@ -224,6 +233,7 @@ class SpeilPersonReceiver(
                 "notatTilBeslutter" to notatTilBeslutter
             )
         )
+        hentOppdaterteTilkomneInntektskilder()
     }
 
     fun saksbehandlerSkjønnsfastsetter830TredjeAvsnitt() {
@@ -312,9 +322,6 @@ class SpeilPersonReceiver(
         assertEquals(expected, person["personinfo"]["adressebeskyttelse"].asText())
     }
 
-    fun hentTilkomneInntektskilder(): JsonNode =
-        callHttpGet("api/personer/${testContext.person.aktørId}/tilkomne-inntektskilder")
-
     private fun fetchPerson(aktørId: String): JsonNode {
         val fetchPersonResponse = callGraphQL(
             operationName = "FetchPerson",
@@ -325,6 +332,9 @@ class SpeilPersonReceiver(
         return fetchPersonResponse["data"]["person"].takeUnless { it.isNull }
             ?: error("Fikk ikke data.person i respons fra FetchPerson. Responsen var: ${fetchPersonResponse.toPrettyString()}")
     }
+
+    fun callGetTilkomneInntektskilder(): JsonNode =
+        callHttpGet("api/personer/${testContext.person.aktørId}/tilkomne-inntektskilder")
 
     private fun getOppgaveId(): String =
         person["arbeidsgivere"][0]["generasjoner"][0]["perioder"][0]["oppgave"]["id"].asText()

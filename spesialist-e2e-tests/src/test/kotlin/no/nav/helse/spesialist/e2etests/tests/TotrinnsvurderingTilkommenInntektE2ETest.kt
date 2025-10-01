@@ -30,7 +30,6 @@ class TotrinnsvurderingTilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
             )
 
             // Then:
-            val tilkomneInntektskilder = hentTilkomneInntektskilder()
             assertEquals(1, tilkomneInntektskilder.size())
             tilkomneInntektskilder[0]["inntekter"].let { inntekter ->
                 assertEquals(1, inntekter.size())
@@ -71,7 +70,7 @@ class TotrinnsvurderingTilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
 
         // Then:
         medPersonISpeil {
-            val tilkomneInntektskilder = hentTilkomneInntektskilder()
+            val tilkomneInntektskilder = tilkomneInntektskilder
             assertEquals(1, tilkomneInntektskilder.size())
             tilkomneInntektskilder[0]["inntekter"].let { inntekter ->
                 assertEquals(1, inntekter.size())

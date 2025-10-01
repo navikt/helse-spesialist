@@ -42,7 +42,6 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
             )
 
             // Then:
-            val tilkomneInntektskilder = hentTilkomneInntektskilder()
             assertEquals(1, tilkomneInntektskilder.size())
             assertApiInntektskilde(
                 tilkommenInntektskilde = tilkomneInntektskilder[0],
@@ -135,7 +134,6 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
             )
 
             // Then:
-            val tilkomneInntektskilder = hentTilkomneInntektskilder()
             assertEquals(1, tilkomneInntektskilder.size())
             assertApiInntektskilde(
                 tilkommenInntektskilde = tilkomneInntektskilder[0],
@@ -232,7 +230,6 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
             )
 
             // Then:
-            val tilkomneInntektskilder = hentTilkomneInntektskilder()
             assertEquals(1, tilkomneInntektskilder.size())
             assertApiInntektskilde(
                 tilkommenInntektskilde = tilkomneInntektskilder[0],
@@ -319,7 +316,6 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
             )
 
             // Then:
-            val tilkomneInntektskilder = hentTilkomneInntektskilder()
             assertEquals(1, tilkomneInntektskilder.size())
             assertApiInntektskilde(
                 tilkommenInntektskilde = tilkomneInntektskilder[0],
@@ -443,7 +439,6 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
             )
 
             // Then:
-            val tilkomneInntektskilder = hentTilkomneInntektskilder()
             assertEquals(1, tilkomneInntektskilder.size())
             assertApiInntektskilde(
                 tilkommenInntektskilde = tilkomneInntektskilder[0],
@@ -553,7 +548,6 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
             )
 
             // Then:
-            val tilkomneInntektskilder = hentTilkomneInntektskilder()
             assertEquals(1, tilkomneInntektskilder.size())
             val tilkommenInntektskilde = tilkomneInntektskilder[0]
             assertEquals(
