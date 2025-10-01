@@ -10,7 +10,10 @@ import kotlin.reflect.typeOf
 class GetAktiveSaksbehandlereHåndterer : GetHåndterer<Unit, List<ApiSaksbehandler>> {
     override val urlPath = "aktive-saksbehandlere"
 
-    override fun extractParametre(parameters: Parameters) = Unit
+    override fun extractParametre(
+        pathParameters: Parameters,
+        queryParameters: Parameters,
+    ) = Unit
 
     override fun håndter(
         urlParametre: Unit,

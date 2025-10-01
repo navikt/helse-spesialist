@@ -84,13 +84,7 @@ class Generator {
     }
 
     private fun String.gqlParameterizedPath(): String =
-        split('/').joinToString(separator = "/") {
-            if (it.startsWith('{') && it.endsWith('}')) {
-                "{args." + it.substring(1, it.length - 1).replaceÆØÅ() + "}"
-            } else {
-                it
-            }
-        }
+        replace(Regex("\\{([^}]+)}"), "{args.$1}").replaceÆØÅ()
 
     private fun String.replaceÆØÅ(): String =
         replace("æ", "e")

@@ -25,7 +25,10 @@ class PostTilkomneInntekterHåndterer : PostHåndterer<Unit, PostTilkomneInntekt
         val notatTilBeslutter: String,
     )
 
-    override fun extractParametre(parameters: Parameters) = Unit
+    override fun extractParametre(
+        pathParameters: Parameters,
+        queryParameters: Parameters,
+    ) = Unit
 
     override fun håndter(
         urlParametre: Unit,

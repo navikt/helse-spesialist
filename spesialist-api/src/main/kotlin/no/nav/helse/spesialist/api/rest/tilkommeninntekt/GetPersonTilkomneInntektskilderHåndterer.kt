@@ -34,10 +34,12 @@ class GetPersonTilkomneInntektskilderHåndterer : GetHåndterer<GetPersonTilkomn
         val aktørId: String,
     )
 
-    override fun extractParametre(parameters: Parameters) =
-        URLParametre(
-            aktørId = parameters.getRequired("aktørId"),
-        )
+    override fun extractParametre(
+        pathParameters: Parameters,
+        queryParameters: Parameters,
+    ) = URLParametre(
+        aktørId = pathParameters.getRequired("aktørId"),
+    )
 
     override fun håndter(
         urlParametre: URLParametre,

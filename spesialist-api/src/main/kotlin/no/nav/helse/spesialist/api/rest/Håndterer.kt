@@ -15,7 +15,10 @@ sealed interface RestOperasjonHåndterer<URLPARAMETERS : Any> {
 }
 
 interface GetHåndterer<URLPARAMETERS : Any, RESPONSEBODY> : RestOperasjonHåndterer<URLPARAMETERS> {
-    fun extractParametre(parameters: Parameters): URLPARAMETERS
+    fun extractParametre(
+        pathParameters: Parameters,
+        queryParameters: Parameters,
+    ): URLPARAMETERS
 
     fun håndter(
         urlParametre: URLPARAMETERS,
@@ -26,7 +29,10 @@ interface GetHåndterer<URLPARAMETERS : Any, RESPONSEBODY> : RestOperasjonHåndt
 }
 
 interface PostHåndterer<URLPARAMETERS : Any, REQUESTBODY : Any, RESPONSEBODY> : RestOperasjonHåndterer<URLPARAMETERS> {
-    fun extractParametre(parameters: Parameters): URLPARAMETERS
+    fun extractParametre(
+        pathParameters: Parameters,
+        queryParameters: Parameters,
+    ): URLPARAMETERS
 
     fun håndter(
         urlParametre: URLPARAMETERS,

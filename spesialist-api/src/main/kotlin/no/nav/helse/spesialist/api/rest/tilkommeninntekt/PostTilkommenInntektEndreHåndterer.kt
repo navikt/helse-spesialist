@@ -30,10 +30,12 @@ class PostTilkommenInntektEndreHåndterer : PostHåndterer<PostTilkommenInntektE
         val notatTilBeslutter: String,
     )
 
-    override fun extractParametre(parameters: Parameters) =
-        URLParametre(
-            tilkommenInntektId = parameters.getRequiredUUID("tilkommenInntektId"),
-        )
+    override fun extractParametre(
+        pathParameters: Parameters,
+        queryParameters: Parameters,
+    ) = URLParametre(
+        tilkommenInntektId = pathParameters.getRequiredUUID("tilkommenInntektId"),
+    )
 
     override fun håndter(
         urlParametre: URLParametre,

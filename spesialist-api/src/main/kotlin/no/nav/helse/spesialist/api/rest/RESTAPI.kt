@@ -16,6 +16,7 @@ import java.util.UUID
 val RESTHÅNDTERERE =
     listOf(
         GetAktiveSaksbehandlereHåndterer(),
+        GetOppgaverHåndterer(),
         PostOpphevStansHåndterer(),
         GetPersonTilkomneInntektskilderHåndterer(),
         PostTilkomneInntekterHåndterer(),
@@ -30,12 +31,12 @@ fun Routing.restRoutes(restDelegator: RestDelegator) {
             RESTHÅNDTERERE.forEach {
                 when (it) {
                     is GetHåndterer<*, *> ->
-                        get(it.urlPath) {
+                        get(it.urlPath.substringBefore('?')) {
                             restDelegator.utførGet(call = call, håndterer = it)
                         }
 
                     is PostHåndterer<*, *, *> ->
-                        post(it.urlPath) {
+                        post(it.urlPath.substringBefore('?')) {
                             restDelegator.utførPost(call = call, håndterer = it)
                         }
                 }

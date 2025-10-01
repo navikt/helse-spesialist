@@ -95,6 +95,12 @@ enum class ApiSorteringsnokkel {
     TIDSFRIST,
 }
 
+@GraphQLName("Sorteringsrekkefolge")
+enum class ApiSorteringrekkefolge {
+    ASCENDING,
+    DESCENDING,
+}
+
 @GraphQLName("BehandledeOppgaver")
 data class ApiBehandledeOppgaver(
     val totaltAntallOppgaver: Int,

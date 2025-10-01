@@ -66,7 +66,7 @@ class RestDelegator(
 
     private suspend fun <RESPONSEBODY, URLPARAMETRE> wrapOgDeleger(
         call: RoutingCall,
-        parameterTolkning: (Parameters) -> URLPARAMETRE,
+        parameterTolkning: (pathParameters: Parameters, queryParameters: Parameters) -> URLPARAMETRE,
         håndterer: (URLPARAMETRE, Saksbehandler, Set<Tilgangsgruppe>, SessionContext, KøetMeldingPubliserer) -> RestResponse<RESPONSEBODY>,
     ) {
         val jwt = (call.principal<JWTPrincipal>() ?: throw HttpUnauthorized()).payload
@@ -79,7 +79,7 @@ class RestDelegator(
         }
 
         runCatching {
-            val urlParametre = parameterTolkning.invoke(call.parameters)
+            val urlParametre = parameterTolkning.invoke(call.parameters, call.request.queryParameters)
             val meldingsKø = KøetMeldingPubliserer(meldingPubliserer)
             sessionFactory
                 .transactionalSessionScope { transaksjon ->

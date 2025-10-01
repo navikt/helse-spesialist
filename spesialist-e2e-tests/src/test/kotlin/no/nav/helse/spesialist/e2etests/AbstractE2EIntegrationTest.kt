@@ -292,5 +292,35 @@ abstract class AbstractE2EIntegrationTest {
         saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe> = this.saksbehandlerTilgangsgrupper,
         variables: Map<String, Any>,
     ) =
-        GraphQL.call(operationName, saksbehandler, saksbehandlerTilgangsgrupper, variables)
+        GraphQL.call(
+            operationName = operationName,
+            saksbehandler = saksbehandler,
+            tilgangsgrupper = saksbehandlerTilgangsgrupper,
+            variables = variables
+        )
+
+    protected fun callHttpGet(
+        relativeUrl: String,
+        saksbehandler: Saksbehandler = this.saksbehandler,
+        saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe> = this.saksbehandlerTilgangsgrupper,
+    ) =
+        REST.get(
+            relativeUrl = relativeUrl,
+            saksbehandler = saksbehandler,
+            tilgangsgrupper = saksbehandlerTilgangsgrupper
+        )
+
+    protected fun callHttpPost(
+        relativeUrl: String,
+        saksbehandler: Saksbehandler = this.saksbehandler,
+        saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe> = this.saksbehandlerTilgangsgrupper,
+        request: Any
+    ) =
+        REST.post(
+            relativeUrl = relativeUrl,
+            saksbehandler = saksbehandler,
+            tilgangsgrupper = saksbehandlerTilgangsgrupper,
+            request = request
+        )
+
 }
