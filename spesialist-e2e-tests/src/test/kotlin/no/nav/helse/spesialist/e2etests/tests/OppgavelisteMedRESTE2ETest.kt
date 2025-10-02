@@ -6,6 +6,7 @@ import no.nav.helse.modell.oppgave.Egenskap
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -13,58 +14,27 @@ class OppgavelisteMedRESTE2ETest : AbstractOppgavelisteE2ETest() {
     override fun assertMinimalOppgaveJson(oppgave: JsonNode) {
         // Sjekk genererte felter
         assertTrue(oppgave["id"]?.takeUnless { it.isNull }?.isTextual == true)
-        val tiMinutterSiden = LocalDateTime.now().minusMinutes(10)
-        assertAfter(tiMinutterSiden, LocalDateTime.parse(oppgave["opprettet"].asText()))
-        assertAfter(tiMinutterSiden, LocalDateTime.parse(oppgave["opprinneligSoknadsdato"].asText()))
+        val tiMinutterSiden = Instant.now().minusSeconds(60*10)
+        assertAfter(tiMinutterSiden, Instant.parse(oppgave["opprettetTidspunkt"].asText()))
+        assertAfter(tiMinutterSiden, Instant.parse(oppgave["opprinneligSoeknadstidspunkt"].asText()))
 
         val oppgaveUtenGenererteFelter = (oppgave as ObjectNode).apply {
             remove("id")
-            remove("opprettet")
-            remove("opprinneligSoknadsdato")
+            remove("opprettetTidspunkt")
+            remove("opprinneligSoeknadstidspunkt")
         }
 
         @Language("JSON")
         val expectedOppgaveJson = """
                 {
-                  "tidsfrist": null,
-                  "vedtaksperiodeId": "${førsteVedtaksperiode().vedtaksperiodeId}",
+                  "aktorId": "${testContext.person.aktørId}",
                   "navn": {
                     "fornavn": "${testContext.person.fornavn}",
                     "etternavn": "${testContext.person.etternavn}",
                     "mellomnavn": ${testContext.person.mellomnavn?.let { "\"$it\"" }}
                   },
-                  "aktorId": "${testContext.person.aktørId}",
+                  "egenskaper": [ "ARBEIDSTAKER", "EN_ARBEIDSGIVER", "FORSTEGANGSBEHANDLING", "RISK_QA", "SOKNAD", "UTBETALING_TIL_ARBEIDSGIVER" ],
                   "tildeling": null,
-                  "egenskaper": [
-                    {
-                      "egenskap": "ARBEIDSTAKER",
-                      "kategori": "Inntektsforhold"
-                    },
-                    {
-                      "egenskap": "EN_ARBEIDSGIVER",
-                      "kategori": "Inntektskilde"
-                    },
-                    {
-                      "egenskap": "FORSTEGANGSBEHANDLING",
-                      "kategori": "Periodetype"
-                    },
-                    {
-                      "egenskap": "RISK_QA",
-                      "kategori": "Ukategorisert"
-                    },
-                    {
-                      "egenskap": "SOKNAD",
-                      "kategori": "Oppgavetype"
-                    },
-                    {
-                      "egenskap": "UTBETALING_TIL_ARBEIDSGIVER",
-                      "kategori": "Mottaker"
-                    }
-                  ],
-                  "periodetype": "FORSTEGANGSBEHANDLING",
-                  "oppgavetype": "SOKNAD",
-                  "mottaker": "ARBEIDSGIVER",
-                  "antallArbeidsforhold": "ET_ARBEIDSFORHOLD",
                   "paVentInfo": null
                 }
             """.trimIndent()
@@ -73,21 +43,22 @@ class OppgavelisteMedRESTE2ETest : AbstractOppgavelisteE2ETest() {
 
     override fun assertMaksimalOppgaveJson(oppgave: JsonNode) {
         // Sjekk genererte felter
-        assertIsTextual(oppgave["id"])
-        val tiMinutterSiden = LocalDateTime.now().minusMinutes(10)
-        assertAfter(tiMinutterSiden, LocalDateTime.parse(oppgave["opprettet"].asText()))
-        assertAfter(tiMinutterSiden, LocalDateTime.parse(oppgave["opprinneligSoknadsdato"].asText()))
+        assertTrue(oppgave["id"]?.takeUnless { it.isNull }?.isTextual == true)
+        val tiMinutterSidenLocalDateTime = LocalDateTime.now().minusSeconds(60*10)
+        val tiMinutterSiden = Instant.now().minusSeconds(60*10)
+        assertAfter(tiMinutterSiden, Instant.parse(oppgave["opprettetTidspunkt"].asText()))
+        assertAfter(tiMinutterSiden, Instant.parse(oppgave["opprinneligSoeknadstidspunkt"].asText()))
         assertIsNumber(oppgave["paVentInfo"]["dialogRef"])
-        assertAfter(tiMinutterSiden, LocalDateTime.parse(oppgave["paVentInfo"]["opprettet"].asText()))
+        assertAfter(tiMinutterSidenLocalDateTime, LocalDateTime.parse(oppgave["paVentInfo"]["opprettet"].asText()))
         oppgave["paVentInfo"]["kommentarer"].forEach { kommentar ->
             assertIsNumber(kommentar["id"])
-            assertAfter(tiMinutterSiden, LocalDateTime.parse(kommentar["opprettet"].asText()))
+            assertAfter(tiMinutterSidenLocalDateTime, LocalDateTime.parse(kommentar["opprettet"].asText()))
         }
 
         val oppgaveUtenGenererteFelter = (oppgave as ObjectNode).apply {
             remove("id")
-            remove("opprettet")
-            remove("opprinneligSoknadsdato")
+            remove("opprettetTidspunkt")
+            remove("opprinneligSoeknadstidspunkt")
             (get("paVentInfo") as ObjectNode).apply {
                 remove("dialogRef")
                 remove("opprettet")
@@ -104,52 +75,18 @@ class OppgavelisteMedRESTE2ETest : AbstractOppgavelisteE2ETest() {
         @Language("JSON")
         val expectedOppgaveJson = """
                 {
-                  "tidsfrist": "${LocalDate.now().plusDays(1337)}",
-                  "vedtaksperiodeId": "${førsteVedtaksperiode().vedtaksperiodeId}",
+                  "aktorId": "${testContext.person.aktørId}",
                   "navn": {
                     "fornavn": "${testContext.person.fornavn}",
                     "etternavn": "${testContext.person.etternavn}",
                     "mellomnavn": ${testContext.person.mellomnavn?.let { "\"$it\"" }}
                   },
-                  "aktorId": "${testContext.person.aktørId}",
+                  "egenskaper": [ "ARBEIDSTAKER", "EN_ARBEIDSGIVER", "FORSTEGANGSBEHANDLING", "PA_VENT", "RISK_QA", "SOKNAD", "UTBETALING_TIL_ARBEIDSGIVER" ],
                   "tildeling": {
                     "navn" : "${saksbehandler.navn}",
                     "epost" : "${saksbehandler.epost}",
                     "oid" : "${saksbehandler.id().value}"
                   },
-                  "egenskaper": [
-                    {
-                      "egenskap": "ARBEIDSTAKER",
-                      "kategori": "Inntektsforhold"
-                    },
-                    {
-                      "egenskap": "EN_ARBEIDSGIVER",
-                      "kategori": "Inntektskilde"
-                    },
-                    {
-                      "egenskap": "FORSTEGANGSBEHANDLING",
-                      "kategori": "Periodetype"
-                    },
-                    {
-                      "egenskap" : "PA_VENT",
-                      "kategori" : "Status"
-                    }, {
-                      "egenskap": "RISK_QA",
-                      "kategori": "Ukategorisert"
-                    },
-                    {
-                      "egenskap": "SOKNAD",
-                      "kategori": "Oppgavetype"
-                    },
-                    {
-                      "egenskap": "UTBETALING_TIL_ARBEIDSGIVER",
-                      "kategori": "Mottaker"
-                    }
-                  ],
-                  "periodetype": "FORSTEGANGSBEHANDLING",
-                  "oppgavetype": "SOKNAD",
-                  "mottaker": "ARBEIDSGIVER",
-                  "antallArbeidsforhold": "ET_ARBEIDSFORHOLD",
                   "paVentInfo": {
                     "arsaker" : [ "Min første årsak", "Min andre årsak" ],
                     "tekst" : "Min notattekst",
@@ -182,36 +119,42 @@ class OppgavelisteMedRESTE2ETest : AbstractOppgavelisteE2ETest() {
     ): JsonNode? {
         val minstEnAvEgenskapene = egenskaper.groupBy { it.kategori }.map { it.value }
         // When:
-        val response = callHttpGet(buildString {
-            append("api/oppgaver")
-            append("?pageNumber=1")
-            append("&pageSize=1000")
+        val response = callHttpGet("api/oppgaver" + buildList {
             minstEnAvEgenskapene.forEachIndexed { index, egenskaper ->
-                append("&minstEnAvEgenskapene[$index]=${egenskaper.tilKommaseparert()}")
+                add("minstEnAvEgenskapene[$index]=${egenskaper.tilKommaseparert()}")
             }
-            append("&ingenAvEgenskapene=${ingenAvEgenskapene.tilKommaseparert()}")
-            append("&erTildelt=${tildelt}")
-            append("&erPaaVent=${fane == Fane.PÅ_VENT}")
+            add("ingenAvEgenskapene=${ingenAvEgenskapene.tilKommaseparert()}")
+            add("erTildelt=${tildelt}")
             if (fane in setOf(Fane.MINE_OPPGAVER, Fane.PÅ_VENT)) {
-                append("&tildeltTilOid=${saksbehandler.id().value}")
+                add("tildeltTilOid=${saksbehandler.id().value}")
             }
-        })
+            when (fane) {
+                Fane.TIL_GODKJENNING -> {}
+                Fane.MINE_OPPGAVER -> add("erPaaVent=false")
+                Fane.PÅ_VENT -> add("erPaaVent=true")
+            }
+            add("sidetall=1")
+            add("sidestoerrelse=1000")
+        }.joinToString(prefix = "?", separator = "&"))
 
         // Then:
         if (forventetDukketOpp) {
-            assertAtLeast(1, response["totaltAntallOppgaver"].asInt())
-            assertAtLeast(1, response["oppgaver"].size())
+            assertAtLeast(1, response["totaltAntall"].asLong())
+            assertAtLeast(1, response["totaltAntallSider"].asLong())
+            assertEquals(1, response["sidetall"].asInt())
+            assertEquals(1000, response["sidestørrelse"].asInt())
+            assertAtLeast(1, response["elementer"].size())
         }
 
-        val vedtaksperiodeId = førsteVedtaksperiode().vedtaksperiodeId
+        val aktørId = testContext.person.aktørId
 
-        val oppgaverForVedtaksperiode = response["oppgaver"]
-            .filter { it["vedtaksperiodeId"].asText() == vedtaksperiodeId.toString() }
-        assertEquals(if (forventetDukketOpp) 1 else 0, oppgaverForVedtaksperiode.size) {
-            "Fikk uventet antall oppgaver for vedtaksperioden (vedtaksperiodeId: $vedtaksperiodeId)"
+        val oppgaverForPerson = response["elementer"]
+            .filter { it["aktorId"].asText() == aktørId }
+        assertEquals(if (forventetDukketOpp) 1 else 0, oppgaverForPerson.size) {
+            "Fikk uventet antall oppgaver for personen (aktørId: $aktørId)"
         }
 
-        return if (forventetDukketOpp) oppgaverForVedtaksperiode.single() else null
+        return if (forventetDukketOpp) oppgaverForPerson.single() else null
     }
 
     private fun Collection<Egenskap>.tilKommaseparert(): String =

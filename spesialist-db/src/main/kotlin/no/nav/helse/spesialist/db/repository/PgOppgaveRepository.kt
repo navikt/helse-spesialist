@@ -1,7 +1,16 @@
 package no.nav.helse.spesialist.db.repository
 
+import kotliquery.Row
 import kotliquery.Session
+import kotliquery.queryOf
+import no.nav.helse.db.EgenskapForDatabase
+import no.nav.helse.db.KommentarFraDatabase
+import no.nav.helse.db.PaVentInfoFraDatabase
+import no.nav.helse.db.SorteringsnøkkelForDatabase
+import no.nav.helse.db.Sorteringsrekkefølge
 import no.nav.helse.mediator.oppgave.OppgaveRepository
+import no.nav.helse.mediator.oppgave.OppgaveRepository.OppgaveProjeksjon
+import no.nav.helse.mediator.oppgave.OppgaveRepository.Side
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
@@ -117,6 +126,227 @@ class PgOppgaveRepository private constructor(
             "SELECT min(opprettet) FROM oppgave WHERE behandling_id = :behandling_id",
             "behandling_id" to behandlingId,
         ).singleOrNull { it.localDateTimeOrNull(1) }
+
+    override fun finnOppgaveProjeksjoner(
+        minstEnAvEgenskapene: List<Set<Egenskap>>,
+        ingenAvEgenskapene: Set<Egenskap>,
+        erTildelt: Boolean?,
+        tildeltTilOid: SaksbehandlerOid?,
+        erPåVent: Boolean?,
+        ikkeSendtTilBeslutterAvOid: SaksbehandlerOid?,
+        sorterPå: SorteringsnøkkelForDatabase,
+        sorteringsrekkefølge: Sorteringsrekkefølge,
+        sidetall: Int,
+        sidestørrelse: Int,
+    ): Side<OppgaveProjeksjon> {
+        val parameterMap = mutableMapOf<String, Any>()
+        val sql =
+            buildString {
+                append(
+                    """
+                    SELECT
+                        o.id as oppgave_id,
+                        p.aktør_id,
+                        pi.fornavn, pi.mellomnavn, pi.etternavn,
+                        o.egenskaper,
+                        s.oid as tildelt_til_oid,
+                        o.første_opprettet,
+                        os.soknad_mottatt AS opprinnelig_soknadsdato,
+                        pv.frist,
+                        pv.opprettet AS på_vent_opprettet,
+                        pv.årsaker,
+                        pv.notattekst,
+                        sb.ident AS på_vent_saksbehandler,
+                        pv.dialog_ref,
+                        count(1) OVER() AS filtered_count
+                    FROM oppgave o
+                    INNER JOIN vedtak v ON o.vedtak_ref = v.id
+                    INNER JOIN person p ON v.person_ref = p.id
+                    INNER JOIN person_info pi ON p.info_ref = pi.id
+                    INNER JOIN opprinnelig_soknadsdato os ON os.vedtaksperiode_id = v.vedtaksperiode_id
+                    LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
+                    LEFT JOIN totrinnsvurdering ttv ON (ttv.person_ref = v.person_ref AND ttv.tilstand != 'GODKJENT')
+                    LEFT JOIN saksbehandler s ON t.saksbehandler_ref = s.oid
+                    LEFT JOIN pa_vent pv ON v.vedtaksperiode_id = pv.vedtaksperiode_id
+                    LEFT JOIN saksbehandler sb ON pv.saksbehandler_ref = sb.oid
+                    WHERE o.status = 'AvventerSaksbehandler'
+                    """.trimIndent(),
+                )
+                minstEnAvEgenskapene.filter { it.isNotEmpty() }.forEachIndexed { index, minstEnAvEgenskapeneGruppe ->
+                    // inkluder alle oppgaver som har minst en av de valgte oppgavetype
+                    val parameterName = "minstEnAvEgenskapene$index"
+                    append("AND (egenskaper && :$parameterName::varchar[])\n")
+                    parameterMap[parameterName] = minstEnAvEgenskapeneGruppe.tilDatabaseArray()
+                }
+                ingenAvEgenskapene.takeUnless { it.isEmpty() }.let {
+                    val parameterName = "ingenAvEgenskapene"
+                    append("AND NOT (egenskaper && :$parameterName::varchar[])\n")
+                    parameterMap[parameterName] = ingenAvEgenskapene.tilDatabaseArray()
+                }
+                if (ikkeSendtTilBeslutterAvOid != null) {
+                    val parameterName = "ikkeSendtTilBeslutterAvOid"
+                    append("AND NOT ('BESLUTTER' = ANY(egenskaper) AND ttv.saksbehandler = :$parameterName)\n")
+                    parameterMap[parameterName] = ikkeSendtTilBeslutterAvOid.value
+                }
+                if (erPåVent != null) {
+                    if (erPåVent) {
+                        append("AND 'PÅ_VENT' = ANY(o.egenskaper)\n")
+                    } else {
+                        append("AND NOT 'PÅ_VENT' = ANY(o.egenskaper)\n")
+                    }
+                }
+                if (tildeltTilOid != null) {
+                    val parameterName = "tildeltTilOid"
+                    append("AND t.saksbehandler_ref = :$parameterName\n")
+                    parameterMap[parameterName] = tildeltTilOid.value
+                }
+                if (erTildelt != null) {
+                    if (erTildelt) {
+                        append("AND t.saksbehandler_ref IS NOT NULL\n")
+                    } else {
+                        append("AND t.saksbehandler_ref IS NULL\n")
+                    }
+                }
+                append("ORDER BY ${tilOrderBy(sorterPå, sorteringsrekkefølge)}\n")
+
+                val offsetParameterName = "offset"
+                append("OFFSET :$offsetParameterName\n")
+                parameterMap[offsetParameterName] = (sidetall - 1) * sidestørrelse
+
+                val limitParameterName = "limit"
+                append("LIMIT :$limitParameterName\n")
+                parameterMap[limitParameterName] = sidestørrelse
+            }
+        return queryOf(statement = sql, paramMap = parameterMap)
+            .list { row ->
+                val filtrertAntall = row.long("filtered_count")
+                val egenskaper =
+                    row.array<String>("egenskaper").map { enumValueOf<EgenskapForDatabase>(it) }.toSet()
+                filtrertAntall to
+                    OppgaveProjeksjon(
+                        id = row.long("oppgave_id"),
+                        aktørId = row.string("aktør_id"),
+                        navn =
+                            OppgaveProjeksjon.Personnavn(
+                                fornavn = row.string("fornavn"),
+                                mellomnavn = row.stringOrNull("mellomnavn"),
+                                etternavn = row.string("etternavn"),
+                            ),
+                        egenskaper = egenskaper.tilModellversjoner(),
+                        tildeltTilOid =
+                            row
+                                .uuidOrNull("tildelt_til_oid")
+                                ?.let { SaksbehandlerOid(it) },
+                        opprettetTidspunkt = row.instant("første_opprettet"),
+                        opprinneligSøknadstidspunkt = row.instant("opprinnelig_soknadsdato"),
+                        påVentFrist = row.localDateOrNull("frist"),
+                        påVentInfo =
+                            row.localDateTimeOrNull("på_vent_opprettet")?.let {
+                                PaVentInfoFraDatabase(
+                                    årsaker = row.array<String>("årsaker").toList(),
+                                    tekst = row.stringOrNull("notattekst"),
+                                    dialogRef = row.long("dialog_ref"),
+                                    saksbehandler = row.string("på_vent_saksbehandler"),
+                                    opprettet = it,
+                                    tidsfrist = row.localDate("frist"),
+                                    kommentarer = finnKommentarerMedDialogRef(row.long("dialog_ref").toInt()),
+                                )
+                            },
+                    )
+            }.let { listeMedTotaltAntallOgElement ->
+                Side(
+                    totaltAntall = listeMedTotaltAntallOgElement.firstOrNull()?.first ?: 0L,
+                    sidetall = sidetall,
+                    sidestørrelse = sidestørrelse,
+                    elementer = listeMedTotaltAntallOgElement.map(Pair<Long, OppgaveProjeksjon>::second),
+                )
+            }
+    }
+
+    private fun Collection<Enum<*>>.tilDatabaseArray(): String = joinToString(prefix = "{", postfix = "}") { it.name }
+
+    private fun tilOrderBy(
+        sorterPå: SorteringsnøkkelForDatabase,
+        sorteringsrekkefølge: Sorteringsrekkefølge,
+    ): String =
+        buildString {
+            append("${sorterPå.tilOrderByKolonne()} ${sorteringsrekkefølge.tilAscEllerDesc()} NULLS LAST")
+            if (sorterPå != SorteringsnøkkelForDatabase.OPPRETTET) {
+                append(", ${SorteringsnøkkelForDatabase.OPPRETTET.tilOrderByKolonne()} DESC NULLS LAST")
+            }
+        }
+
+    private fun finnKommentarerMedDialogRef(dialogRef: Int): List<KommentarFraDatabase> =
+        asSQL(
+            """
+            select id, tekst, feilregistrert_tidspunkt, opprettet, saksbehandlerident
+            from kommentarer k
+            where dialog_ref = :dialogRef
+            """.trimIndent(),
+            "dialogRef" to dialogRef,
+        ).list { mapKommentarFraDatabase(it) }
+
+    private fun mapKommentarFraDatabase(it: Row): KommentarFraDatabase =
+        KommentarFraDatabase(
+            id = it.int("id"),
+            tekst = it.string("tekst"),
+            opprettet = it.localDateTime("opprettet"),
+            saksbehandlerident = it.string("saksbehandlerident"),
+        )
+
+    private fun Set<EgenskapForDatabase>.tilModellversjoner() = mapNotNull { it.tilModellversjon() }.toSet()
+
+    private fun EgenskapForDatabase.tilModellversjon(): Egenskap? =
+        when (this) {
+            EgenskapForDatabase.RISK_QA -> Egenskap.RISK_QA
+            EgenskapForDatabase.FORTROLIG_ADRESSE -> Egenskap.FORTROLIG_ADRESSE
+            EgenskapForDatabase.STRENGT_FORTROLIG_ADRESSE -> Egenskap.STRENGT_FORTROLIG_ADRESSE
+            EgenskapForDatabase.EGEN_ANSATT -> Egenskap.EGEN_ANSATT
+            EgenskapForDatabase.BESLUTTER -> Egenskap.BESLUTTER
+            EgenskapForDatabase.SPESIALSAK -> Egenskap.SPESIALSAK
+            EgenskapForDatabase.REVURDERING -> Egenskap.REVURDERING
+            EgenskapForDatabase.SØKNAD -> Egenskap.SØKNAD
+            EgenskapForDatabase.STIKKPRØVE -> Egenskap.STIKKPRØVE
+            EgenskapForDatabase.UTBETALING_TIL_SYKMELDT -> Egenskap.UTBETALING_TIL_SYKMELDT
+            EgenskapForDatabase.DELVIS_REFUSJON -> Egenskap.DELVIS_REFUSJON
+            EgenskapForDatabase.UTBETALING_TIL_ARBEIDSGIVER -> Egenskap.UTBETALING_TIL_ARBEIDSGIVER
+            EgenskapForDatabase.INGEN_UTBETALING -> Egenskap.INGEN_UTBETALING
+            EgenskapForDatabase.HASTER -> Egenskap.HASTER
+            EgenskapForDatabase.RETUR -> Egenskap.RETUR
+            EgenskapForDatabase.VERGEMÅL -> Egenskap.VERGEMÅL
+            EgenskapForDatabase.EN_ARBEIDSGIVER -> Egenskap.EN_ARBEIDSGIVER
+            EgenskapForDatabase.FLERE_ARBEIDSGIVERE -> Egenskap.FLERE_ARBEIDSGIVERE
+            EgenskapForDatabase.UTLAND -> Egenskap.UTLAND
+            EgenskapForDatabase.FORLENGELSE -> Egenskap.FORLENGELSE
+            EgenskapForDatabase.FORSTEGANGSBEHANDLING -> Egenskap.FORSTEGANGSBEHANDLING
+            EgenskapForDatabase.INFOTRYGDFORLENGELSE -> Egenskap.INFOTRYGDFORLENGELSE
+            EgenskapForDatabase.OVERGANG_FRA_IT -> Egenskap.OVERGANG_FRA_IT
+            EgenskapForDatabase.SKJØNNSFASTSETTELSE -> Egenskap.SKJØNNSFASTSETTELSE
+            EgenskapForDatabase.PÅ_VENT -> Egenskap.PÅ_VENT
+            EgenskapForDatabase.TILBAKEDATERT -> Egenskap.TILBAKEDATERT
+            EgenskapForDatabase.GOSYS -> Egenskap.GOSYS
+            EgenskapForDatabase.MANGLER_IM -> Egenskap.MANGLER_IM
+            EgenskapForDatabase.MEDLEMSKAP -> Egenskap.MEDLEMSKAP
+            EgenskapForDatabase.GRUNNBELØPSREGULERING -> Egenskap.GRUNNBELØPSREGULERING
+            EgenskapForDatabase.SELVSTENDIG_NÆRINGSDRIVENDE -> Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE
+            EgenskapForDatabase.ARBEIDSTAKER -> Egenskap.ARBEIDSTAKER
+            // Gammel egenskap fra tidligere iterasjon av tilkommen inntekt, skal overses
+            EgenskapForDatabase.TILKOMMEN -> null
+        }
+
+    private fun Sorteringsrekkefølge.tilAscEllerDesc(): String =
+        when (this) {
+            Sorteringsrekkefølge.STIGENDE -> "ASC"
+            Sorteringsrekkefølge.SYNKENDE -> "DESC"
+        }
+
+    private fun SorteringsnøkkelForDatabase.tilOrderByKolonne(): String =
+        when (this) {
+            SorteringsnøkkelForDatabase.TILDELT_TIL -> "navn"
+            SorteringsnøkkelForDatabase.OPPRETTET -> "første_opprettet"
+            SorteringsnøkkelForDatabase.TIDSFRIST -> "frist"
+            SorteringsnøkkelForDatabase.SØKNAD_MOTTATT -> "opprinnelig_soknadsdato"
+        }
 
     private fun lagreTildeling(oppgave: Oppgave) {
         val tildeltTil = oppgave.tildeltTil

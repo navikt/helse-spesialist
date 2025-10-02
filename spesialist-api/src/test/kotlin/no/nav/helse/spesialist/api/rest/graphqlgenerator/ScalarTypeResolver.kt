@@ -5,6 +5,7 @@ import no.nav.helse.spesialist.api.rest.graphqlgenerator.types.GQLDefaultScalarT
 import no.nav.helse.spesialist.api.rest.graphqlgenerator.types.GQLNamedType
 import no.nav.helse.spesialist.api.rest.graphqlgenerator.types.GQLScalarType
 import java.math.BigDecimal
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -12,9 +13,11 @@ import kotlin.reflect.KClass
 
 class ScalarTypeResolver {
     val customScalarTypes = mapOf(
+        Long::class to GQLCustomScalarType(name = "Long"),
         BigDecimal::class to GQLCustomScalarType(name = "BigDecimal"),
         LocalDate::class to GQLCustomScalarType(name = "LocalDate"),
         LocalDateTime::class to GQLCustomScalarType(name = "LocalDateTime"),
+        Instant::class to GQLCustomScalarType(name = "Instant"),
         UUID::class to GQLCustomScalarType(name = "UUID"),
     )
 

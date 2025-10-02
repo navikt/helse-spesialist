@@ -8,6 +8,7 @@ import no.nav.helse.spesialist.kafka.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -225,8 +226,16 @@ abstract class AbstractOppgavelisteE2ETest : AbstractE2EIntegrationTest() {
         assertTrue(actual?.takeUnless { it.isNull }?.isTextual == true)
     }
 
+    protected fun assertAfter(expectedAfter: Instant, actual: Instant) {
+        assertTrue(actual.isAfter(expectedAfter)) { "Forventet tidspunkt etter $expectedAfter, men var $actual" }
+    }
+
     protected fun assertAfter(expectedAfter: LocalDateTime, actual: LocalDateTime) {
         assertTrue(actual.isAfter(expectedAfter)) { "Forventet tidspunkt etter $expectedAfter, men var $actual" }
+    }
+
+    protected fun assertAtLeast(expectedMinimum: Long, actual: Long) {
+        assertTrue(actual >= expectedMinimum) { "Forventet minst $expectedMinimum, men var $actual" }
     }
 
     protected fun assertAtLeast(expectedMinimum: Int, actual: Int) {

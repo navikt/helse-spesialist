@@ -96,9 +96,9 @@ enum class ApiSorteringsnokkel {
 }
 
 @GraphQLName("Sorteringsrekkefolge")
-enum class ApiSorteringrekkefolge {
-    ASCENDING,
-    DESCENDING,
+enum class ApiSorteringsrekkefolge {
+    STIGENDE,
+    SYNKENDE,
 }
 
 @GraphQLName("BehandledeOppgaver")

@@ -66,6 +66,11 @@ enum class SorteringsnøkkelForDatabase {
     TIDSFRIST,
 }
 
+enum class Sorteringsrekkefølge {
+    STIGENDE,
+    SYNKENDE,
+}
+
 enum class EgenskapForDatabase {
     RISK_QA,
     FORTROLIG_ADRESSE,

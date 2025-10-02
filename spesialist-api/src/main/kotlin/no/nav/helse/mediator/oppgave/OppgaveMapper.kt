@@ -165,7 +165,7 @@ internal object OppgaveMapper {
             ApiKategori.Status -> Egenskap.Kategori.Status
         }
 
-    private fun Egenskap.tilApiversjon(): ApiEgenskap =
+    fun Egenskap.tilApiversjon(): ApiEgenskap =
         when (this) {
             Egenskap.RISK_QA -> ApiEgenskap.RISK_QA
             Egenskap.FORTROLIG_ADRESSE -> ApiEgenskap.FORTROLIG_ADRESSE
