@@ -10,8 +10,6 @@ import no.nav.helse.mediator.oppgave.OppgaveRepository
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.spesialist.api.graphql.schema.ApiEgenskap
-import no.nav.helse.spesialist.api.graphql.schema.ApiKommentar
-import no.nav.helse.spesialist.api.graphql.schema.ApiPaVentInfo
 import no.nav.helse.spesialist.api.graphql.schema.ApiPersonnavn
 import no.nav.helse.spesialist.api.graphql.schema.ApiSorteringsnokkel
 import no.nav.helse.spesialist.api.graphql.schema.ApiSorteringsrekkefolge
@@ -20,6 +18,7 @@ import no.nav.helse.spesialist.application.logg.sikkerlogg
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
+import java.time.ZoneId
 import java.util.UUID
 import kotlin.reflect.typeOf
 import kotlin.time.measureTimedValue
@@ -118,9 +117,17 @@ class GetOppgaverHåndterer : GetHåndterer<GetOppgaverHåndterer.URLParametre, 
             .map { enumValueOf<ApiEgenskap>(it).tilEgenskap() }
 
     private fun OppgaveRepository.Side<OppgaveRepository.OppgaveProjeksjon>.tilApiType(transaksjon: SessionContext): ApiOppgaveProjeksjonSide {
+        val påVenter =
+            transaksjon.påVentRepository
+                .finnAlle(elementer.mapNotNull { it.påVentId }.toSet())
+                .associateBy { it.id() }
         val saksbehandlere =
             transaksjon.saksbehandlerRepository
-                .finnAlle(elementer.mapNotNull { it.tildeltTilOid }.toSet())
+                .finnAlle(elementer.mapNotNull { it.tildeltTilOid }.plus(påVenter.values.map { it.saksbehandlerOid }).toSet())
+                .associateBy { it.id() }
+        val dialoger =
+            transaksjon.dialogRepository
+                .finnAlle(påVenter.values.mapNotNull { it.dialogRef }.toSet())
                 .associateBy { it.id() }
         return ApiOppgaveProjeksjonSide(
             totaltAntall = totaltAntall,
@@ -154,26 +161,39 @@ class GetOppgaverHåndterer : GetHåndterer<GetOppgaverHåndterer.URLParametre, 
                         opprettetTidspunkt = oppgave.opprettetTidspunkt,
                         opprinneligSoeknadstidspunkt = oppgave.opprinneligSøknadstidspunkt,
                         paVentInfo =
-                            oppgave.påVentInfo?.let { påVentInfo ->
-                                ApiPaVentInfo(
-                                    arsaker = påVentInfo.årsaker,
-                                    tekst = påVentInfo.tekst,
-                                    dialogRef = påVentInfo.dialogRef.toInt(),
-                                    saksbehandler = påVentInfo.saksbehandler,
-                                    opprettet = påVentInfo.opprettet,
-                                    tidsfrist = påVentInfo.tidsfrist,
-                                    kommentarer =
-                                        påVentInfo.kommentarer.map {
-                                            ApiKommentar(
-                                                id = it.id,
-                                                tekst = it.tekst,
-                                                opprettet = it.opprettet,
-                                                saksbehandlerident = it.saksbehandlerident,
-                                                feilregistrert_tidspunkt = null,
-                                            )
-                                        },
-                                )
-                            },
+                            oppgave.påVentId
+                                ?.let { påVentId -> påVenter[påVentId] }
+                                ?.let { påVentInfo ->
+                                    ApiOppgaveProjeksjon.PaaVent(
+                                        arsaker = påVentInfo.årsaker,
+                                        tekst = påVentInfo.notattekst,
+                                        dialogRef =
+                                            påVentInfo.dialogRef?.value
+                                                ?: error("LagtPåVent ${påVentInfo.id()} har ingen dialogRef"),
+                                        saksbehandler =
+                                            saksbehandlere[påVentInfo.saksbehandlerOid]?.ident
+                                                ?: error("Feil i henting av saksbehandlere - skulle fått den som gjaldt på vent"),
+                                        opprettet = påVentInfo.opprettetTidspunkt.atZone(ZoneId.of("Europe/Oslo")).toLocalDateTime(),
+                                        tidsfrist = påVentInfo.frist,
+                                        kommentarer =
+                                            påVentInfo.dialogRef
+                                                ?.let {
+                                                    (
+                                                        dialoger[it]
+                                                            ?: error("Feil i henting av dialoger - skulle fått den som gjaldt på vent")
+                                                    ).kommentarer
+                                                        .map { kommentar ->
+                                                            ApiOppgaveProjeksjon.PaaVent.Kommentar(
+                                                                id = kommentar.id().value,
+                                                                tekst = kommentar.tekst,
+                                                                opprettet = kommentar.opprettetTidspunkt,
+                                                                saksbehandlerident = kommentar.saksbehandlerident,
+                                                                feilregistrert_tidspunkt = null,
+                                                            )
+                                                        }
+                                                }.orEmpty(),
+                                    )
+                                },
                     )
                 },
         )

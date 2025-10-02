@@ -237,4 +237,6 @@ class InMemorySessionContext(
     override val tilkommenInntektRepository: TilkommenInntektRepository
         get() = TODO("Not yet implemented")
     override val arbeidsgiverRepository: InMemoryArbeidsgiverRepository = InMemoryArbeidsgiverRepository()
+    override val påVentRepository: PåVentRepository
+        get() = TODO("Not yet implemented")
 }

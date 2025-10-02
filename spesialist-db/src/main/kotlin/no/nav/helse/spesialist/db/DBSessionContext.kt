@@ -9,6 +9,7 @@ import no.nav.helse.spesialist.application.ArbeidsgiverRepository
 import no.nav.helse.spesialist.application.DialogRepository
 import no.nav.helse.spesialist.application.NotatRepository
 import no.nav.helse.spesialist.application.OverstyringRepository
+import no.nav.helse.spesialist.application.PåVentRepository
 import no.nav.helse.spesialist.application.SaksbehandlerRepository
 import no.nav.helse.spesialist.application.TilkommenInntektRepository
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
@@ -47,6 +48,7 @@ import no.nav.helse.spesialist.db.repository.PgDialogRepository
 import no.nav.helse.spesialist.db.repository.PgNotatRepository
 import no.nav.helse.spesialist.db.repository.PgOppgaveRepository
 import no.nav.helse.spesialist.db.repository.PgOverstyringRepository
+import no.nav.helse.spesialist.db.repository.PgPåVentRepository
 import no.nav.helse.spesialist.db.repository.PgSaksbehandlerRepository
 import no.nav.helse.spesialist.db.repository.PgTilkommenInntektRepository
 import no.nav.helse.spesialist.db.repository.PgTotrinnsvurderingRepository
@@ -94,4 +96,5 @@ class DBSessionContext(
     override val tilkommenInntektRepository: TilkommenInntektRepository = PgTilkommenInntektRepository(session)
     override val arbeidsgiverRepository: ArbeidsgiverRepository = PgArbeidsgiverRepository(session)
     override val annulleringRepository: PgAnnulleringRepository = PgAnnulleringRepository(session)
+    override val påVentRepository: PåVentRepository = PgPåVentRepository(session)
 }

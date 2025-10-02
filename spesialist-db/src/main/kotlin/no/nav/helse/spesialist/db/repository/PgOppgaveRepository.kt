@@ -1,11 +1,8 @@
 package no.nav.helse.spesialist.db.repository
 
-import kotliquery.Row
 import kotliquery.Session
 import kotliquery.queryOf
 import no.nav.helse.db.EgenskapForDatabase
-import no.nav.helse.db.KommentarFraDatabase
-import no.nav.helse.db.PaVentInfoFraDatabase
 import no.nav.helse.db.SorteringsnøkkelForDatabase
 import no.nav.helse.db.Sorteringsrekkefølge
 import no.nav.helse.mediator.oppgave.OppgaveRepository
@@ -19,6 +16,7 @@ import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.db.dao.PgTildelingDao
+import no.nav.helse.spesialist.domain.PåVentId
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import java.time.LocalDateTime
 import java.util.UUID
@@ -149,15 +147,10 @@ class PgOppgaveRepository private constructor(
                         p.aktør_id,
                         pi.fornavn, pi.mellomnavn, pi.etternavn,
                         o.egenskaper,
-                        s.oid as tildelt_til_oid,
+                        t.saksbehandler_ref as tildelt_til_oid,
                         o.første_opprettet,
                         os.soknad_mottatt AS opprinnelig_soknadsdato,
-                        pv.frist,
-                        pv.opprettet AS på_vent_opprettet,
-                        pv.årsaker,
-                        pv.notattekst,
-                        sb.ident AS på_vent_saksbehandler,
-                        pv.dialog_ref,
+                        pv.id AS på_vent_id,
                         count(1) OVER() AS filtered_count
                     FROM oppgave o
                     INNER JOIN vedtak v ON o.vedtak_ref = v.id
@@ -166,9 +159,7 @@ class PgOppgaveRepository private constructor(
                     INNER JOIN opprinnelig_soknadsdato os ON os.vedtaksperiode_id = v.vedtaksperiode_id
                     LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
                     LEFT JOIN totrinnsvurdering ttv ON (ttv.person_ref = v.person_ref AND ttv.tilstand != 'GODKJENT')
-                    LEFT JOIN saksbehandler s ON t.saksbehandler_ref = s.oid
                     LEFT JOIN pa_vent pv ON v.vedtaksperiode_id = pv.vedtaksperiode_id
-                    LEFT JOIN saksbehandler sb ON pv.saksbehandler_ref = sb.oid
                     WHERE o.status = 'AvventerSaksbehandler'
                     """.trimIndent(),
                 )
@@ -239,19 +230,7 @@ class PgOppgaveRepository private constructor(
                                 ?.let { SaksbehandlerOid(it) },
                         opprettetTidspunkt = row.instant("første_opprettet"),
                         opprinneligSøknadstidspunkt = row.instant("opprinnelig_soknadsdato"),
-                        påVentFrist = row.localDateOrNull("frist"),
-                        påVentInfo =
-                            row.localDateTimeOrNull("på_vent_opprettet")?.let {
-                                PaVentInfoFraDatabase(
-                                    årsaker = row.array<String>("årsaker").toList(),
-                                    tekst = row.stringOrNull("notattekst"),
-                                    dialogRef = row.long("dialog_ref"),
-                                    saksbehandler = row.string("på_vent_saksbehandler"),
-                                    opprettet = it,
-                                    tidsfrist = row.localDate("frist"),
-                                    kommentarer = finnKommentarerMedDialogRef(row.long("dialog_ref").toInt()),
-                                )
-                            },
+                        påVentId = row.intOrNull("på_vent_id")?.let(::PåVentId),
                     )
             }.let { listeMedTotaltAntallOgElement ->
                 Side(
@@ -275,24 +254,6 @@ class PgOppgaveRepository private constructor(
                 append(", ${SorteringsnøkkelForDatabase.OPPRETTET.tilOrderByKolonne()} DESC NULLS LAST")
             }
         }
-
-    private fun finnKommentarerMedDialogRef(dialogRef: Int): List<KommentarFraDatabase> =
-        asSQL(
-            """
-            select id, tekst, feilregistrert_tidspunkt, opprettet, saksbehandlerident
-            from kommentarer k
-            where dialog_ref = :dialogRef
-            """.trimIndent(),
-            "dialogRef" to dialogRef,
-        ).list { mapKommentarFraDatabase(it) }
-
-    private fun mapKommentarFraDatabase(it: Row): KommentarFraDatabase =
-        KommentarFraDatabase(
-            id = it.int("id"),
-            tekst = it.string("tekst"),
-            opprettet = it.localDateTime("opprettet"),
-            saksbehandlerident = it.string("saksbehandlerident"),
-        )
 
     private fun Set<EgenskapForDatabase>.tilModellversjoner() = mapNotNull { it.tilModellversjon() }.toSet()
 

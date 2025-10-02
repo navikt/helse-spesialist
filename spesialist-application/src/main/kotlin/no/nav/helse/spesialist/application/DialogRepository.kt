@@ -9,5 +9,7 @@ interface DialogRepository {
 
     fun finn(id: DialogId): Dialog?
 
+    fun finnAlle(ider: Set<DialogId>): List<Dialog>
+
     fun finnForKommentar(id: KommentarId): Dialog?
 }

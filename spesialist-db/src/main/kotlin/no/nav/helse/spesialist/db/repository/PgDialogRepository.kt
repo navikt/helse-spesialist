@@ -16,7 +16,8 @@ internal class PgDialogRepository(
 ) : QueryRunner by MedSession(session),
     DialogRepository {
     override fun lagre(dialog: Dialog) {
-        val dialogId = if (dialog.harFåttTildeltId()) dialog.id() else insertDialog(dialog).let(::DialogId).also(dialog::tildelId)
+        val dialogId =
+            if (dialog.harFåttTildeltId()) dialog.id() else insertDialog(dialog).let(::DialogId).also(dialog::tildelId)
 
         dialog.kommentarer.forEach { kommentar ->
             if (!kommentar.harFåttTildeltId()) {
@@ -33,6 +34,19 @@ internal class PgDialogRepository(
                 .list { it.tilKommentar() }
         return asSQL("SELECT * FROM dialog WHERE id = :dialogId", "dialogId" to id.value)
             .singleOrNull { it.tilDialog(kommentarer) }
+    }
+
+    override fun finnAlle(ider: Set<DialogId>): List<Dialog> {
+        val kommentarerMap =
+            asSQL(
+                "SELECT * FROM kommentarer WHERE dialog_ref = ANY (:ider)",
+                "ider" to ider.map { it.value }.toTypedArray(),
+            ).list { DialogId(it.long("dialog_ref")) to it.tilKommentar() }
+                .groupBy(keySelector = { it.first }, valueTransform = { it.second })
+        return asSQL(
+            "SELECT * FROM dialog WHERE id = ANY (:ider)",
+            "ider" to ider.map { it.value }.toTypedArray(),
+        ).list { it.tilDialog(kommentarerMap[DialogId(it.long("id"))].orEmpty()) }
     }
 
     override fun finnForKommentar(id: KommentarId): Dialog? =

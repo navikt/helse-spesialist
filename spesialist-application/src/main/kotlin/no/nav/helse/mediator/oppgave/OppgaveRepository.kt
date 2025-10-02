@@ -1,13 +1,12 @@
 package no.nav.helse.mediator.oppgave
 
-import no.nav.helse.db.PaVentInfoFraDatabase
 import no.nav.helse.db.SorteringsnøkkelForDatabase
 import no.nav.helse.db.Sorteringsrekkefølge
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
+import no.nav.helse.spesialist.domain.PåVentId
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import java.time.Instant
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -49,8 +48,7 @@ interface OppgaveRepository {
         val tildeltTilOid: SaksbehandlerOid?,
         val opprettetTidspunkt: Instant,
         val opprinneligSøknadstidspunkt: Instant,
-        val påVentFrist: LocalDate?,
-        val påVentInfo: PaVentInfoFraDatabase?,
+        val påVentId: PåVentId?,
     ) {
         data class Personnavn(
             val fornavn: String,
