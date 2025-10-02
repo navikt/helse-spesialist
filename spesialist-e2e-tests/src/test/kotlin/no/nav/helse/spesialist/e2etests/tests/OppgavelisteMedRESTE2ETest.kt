@@ -142,7 +142,7 @@ class OppgavelisteMedRESTE2ETest : AbstractOppgavelisteE2ETest() {
             assertAtLeast(1, response["totaltAntall"].asLong())
             assertAtLeast(1, response["totaltAntallSider"].asLong())
             assertEquals(1, response["sidetall"].asInt())
-            assertEquals(1000, response["sidestørrelse"].asInt())
+            assertEquals(1000, response["sidestoerrelse"].asInt())
             assertAtLeast(1, response["elementer"].size())
         }
 
