@@ -4,6 +4,7 @@ import no.nav.helse.db.SorteringsnøkkelForDatabase
 import no.nav.helse.db.Sorteringsrekkefølge
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
+import no.nav.helse.spesialist.domain.PersonId
 import no.nav.helse.spesialist.domain.PåVentId
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import java.time.Instant
@@ -42,20 +43,13 @@ interface OppgaveRepository {
 
     data class OppgaveProjeksjon(
         val id: Long,
-        val aktørId: String,
-        val navn: Personnavn,
+        val personId: PersonId,
         val egenskaper: Set<Egenskap>,
         val tildeltTilOid: SaksbehandlerOid?,
         val opprettetTidspunkt: Instant,
         val opprinneligSøknadstidspunkt: Instant,
         val påVentId: PåVentId?,
-    ) {
-        data class Personnavn(
-            val fornavn: String,
-            val mellomnavn: String?,
-            val etternavn: String,
-        )
-    }
+    )
 
     data class OppgaveTilstandStatusOgGodkjenningsbehov(
         val id: Long,

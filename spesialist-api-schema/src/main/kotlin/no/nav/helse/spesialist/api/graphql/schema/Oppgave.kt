@@ -95,6 +95,15 @@ enum class ApiSorteringsnokkel {
     TIDSFRIST,
 }
 
+@GraphQLName("OppgaveSorteringsnokkel")
+@Suppress("ktlint:standard:enum-entry-name-case")
+enum class ApiOppgaveSorteringsfelt {
+    tildeling,
+    opprettetTidspunkt,
+    opprinneligSoeknadstidspunkt,
+    paVentInfo_tidsfrist,
+}
+
 @GraphQLName("Sorteringsrekkefolge")
 enum class ApiSorteringsrekkefolge {
     STIGENDE,

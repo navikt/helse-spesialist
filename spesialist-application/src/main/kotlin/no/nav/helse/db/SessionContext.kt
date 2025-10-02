@@ -6,6 +6,7 @@ import no.nav.helse.spesialist.application.ArbeidsgiverRepository
 import no.nav.helse.spesialist.application.DialogRepository
 import no.nav.helse.spesialist.application.NotatRepository
 import no.nav.helse.spesialist.application.OverstyringRepository
+import no.nav.helse.spesialist.application.PersonRepository
 import no.nav.helse.spesialist.application.PåVentRepository
 import no.nav.helse.spesialist.application.SaksbehandlerRepository
 import no.nav.helse.spesialist.application.TilkommenInntektRepository
@@ -52,4 +53,5 @@ interface SessionContext {
     val arbeidsgiverRepository: ArbeidsgiverRepository
     val annulleringRepository: AnnulleringRepository
     val påVentRepository: PåVentRepository
+    val personRepository: PersonRepository
 }

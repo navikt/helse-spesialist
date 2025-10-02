@@ -10,8 +10,8 @@ import no.nav.helse.mediator.oppgave.OppgaveRepository
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.spesialist.api.graphql.schema.ApiEgenskap
+import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveSorteringsfelt
 import no.nav.helse.spesialist.api.graphql.schema.ApiPersonnavn
-import no.nav.helse.spesialist.api.graphql.schema.ApiSorteringsnokkel
 import no.nav.helse.spesialist.api.graphql.schema.ApiSorteringsrekkefolge
 import no.nav.helse.spesialist.api.graphql.schema.ApiTildeling
 import no.nav.helse.spesialist.application.logg.sikkerlogg
@@ -32,7 +32,7 @@ class GetOppgaverHåndterer : GetHåndterer<GetOppgaverHåndterer.URLParametre, 
         val erTildelt: Boolean?,
         val tildeltTilOid: UUID?,
         val erPaaVent: Boolean?,
-        val sorterPaa: ApiSorteringsnokkel?,
+        val sorteringsfelt: ApiOppgaveSorteringsfelt?,
         val sorteringsrekkefoelge: ApiSorteringsrekkefolge?,
         val sidetall: Int?,
         val sidestoerrelse: Int?,
@@ -47,7 +47,7 @@ class GetOppgaverHåndterer : GetHåndterer<GetOppgaverHåndterer.URLParametre, 
         erTildelt = queryParameters["erTildelt"]?.toBooleanStrictOrNull(),
         tildeltTilOid = queryParameters["tildeltTilOid"]?.let(UUID::fromString),
         erPaaVent = queryParameters["erPaaVent"]?.toBooleanStrictOrNull(),
-        sorterPaa = queryParameters["sorterPaa"]?.let { enumValueOf<ApiSorteringsnokkel>(it) },
+        sorteringsfelt = queryParameters["sorteringsfelt"]?.let { enumValueOf<ApiOppgaveSorteringsfelt>(it) },
         sorteringsrekkefoelge = queryParameters["sorteringsrekkefoelge"]?.let { enumValueOf<ApiSorteringsrekkefolge>(it) },
         sidetall = queryParameters["sidetall"]?.toIntOrNull(),
         sidestoerrelse = queryParameters["sidestoerrelse"]?.toIntOrNull(),
@@ -78,14 +78,14 @@ class GetOppgaverHåndterer : GetHåndterer<GetOppgaverHåndterer.URLParametre, 
                         erPåVent = urlParametre.erPaaVent,
                         ikkeSendtTilBeslutterAvOid = saksbehandler.id(),
                         sorterPå =
-                            when (urlParametre.sorterPaa) {
+                            when (urlParametre.sorteringsfelt) {
                                 null,
-                                ApiSorteringsnokkel.OPPRETTET,
+                                ApiOppgaveSorteringsfelt.opprettetTidspunkt,
                                 -> SorteringsnøkkelForDatabase.OPPRETTET
 
-                                ApiSorteringsnokkel.TILDELT_TIL -> SorteringsnøkkelForDatabase.TILDELT_TIL
-                                ApiSorteringsnokkel.SOKNAD_MOTTATT -> SorteringsnøkkelForDatabase.SØKNAD_MOTTATT
-                                ApiSorteringsnokkel.TIDSFRIST -> SorteringsnøkkelForDatabase.TIDSFRIST
+                                ApiOppgaveSorteringsfelt.tildeling -> SorteringsnøkkelForDatabase.TILDELT_TIL
+                                ApiOppgaveSorteringsfelt.opprinneligSoeknadstidspunkt -> SorteringsnøkkelForDatabase.SØKNAD_MOTTATT
+                                ApiOppgaveSorteringsfelt.paVentInfo_tidsfrist -> SorteringsnøkkelForDatabase.TIDSFRIST
                             },
                         sorteringsrekkefølge =
                             when (urlParametre.sorteringsrekkefoelge) {
@@ -129,29 +129,40 @@ class GetOppgaverHåndterer : GetHåndterer<GetOppgaverHåndterer.URLParametre, 
             transaksjon.dialogRepository
                 .finnAlle(påVenter.values.mapNotNull { it.dialogRef }.toSet())
                 .associateBy { it.id() }
+        val personer =
+            transaksjon.personRepository
+                .finnAlle(elementer.map { it.personId }.toSet())
+                .associateBy { it.id() }
         return ApiOppgaveProjeksjonSide(
             totaltAntall = totaltAntall,
             sidetall = sidetall,
             sidestoerrelse = sidestørrelse,
             elementer =
                 elementer.map { oppgave ->
+                    val person =
+                        personer[oppgave.personId]
+                            ?: error("Feil i henting av person - skulle fått den som gjaldt oppgaven")
                     ApiOppgaveProjeksjon(
                         id = oppgave.id.toString(),
-                        aktorId = oppgave.aktørId,
+                        aktorId = person.aktørId,
                         navn =
-                            ApiPersonnavn(
-                                fornavn = oppgave.navn.fornavn,
-                                etternavn = oppgave.navn.etternavn,
-                                mellomnavn = oppgave.navn.mellomnavn,
-                            ),
+                            person.info?.let {
+                                ApiPersonnavn(
+                                    fornavn = it.fornavn,
+                                    etternavn = it.etternavn,
+                                    mellomnavn = it.mellomnavn,
+                                )
+                            } ?: error("Feil i henting av personinfo - skulle fått den som gjaldt oppgaven"),
                         egenskaper =
                             oppgave.egenskaper
                                 .map { egenskap -> egenskap.tilApiversjon() }
                                 .sortedBy { it.name },
                         tildeling =
                             oppgave.tildeltTilOid
-                                ?.let { tildeltTilOid -> saksbehandlere[tildeltTilOid] }
-                                ?.let { tildelt ->
+                                ?.let { tildeltTilOid ->
+                                    saksbehandlere[tildeltTilOid]
+                                        ?: error("Feil i henting av saksbehandlere - skulle fått den som hadde oppgaven tildelt")
+                                }?.let { tildelt ->
                                     ApiTildeling(
                                         navn = tildelt.navn,
                                         epost = tildelt.epost,

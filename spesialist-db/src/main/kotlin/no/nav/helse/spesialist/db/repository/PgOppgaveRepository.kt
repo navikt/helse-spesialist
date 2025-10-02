@@ -16,6 +16,7 @@ import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.db.dao.PgTildelingDao
+import no.nav.helse.spesialist.domain.PersonId
 import no.nav.helse.spesialist.domain.PåVentId
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import java.time.LocalDateTime
@@ -144,18 +145,15 @@ class PgOppgaveRepository private constructor(
                     """
                     SELECT
                         o.id as oppgave_id,
-                        p.aktør_id,
-                        pi.fornavn, pi.mellomnavn, pi.etternavn,
                         o.egenskaper,
-                        t.saksbehandler_ref as tildelt_til_oid,
                         o.første_opprettet,
+                        v.person_ref,
                         os.soknad_mottatt AS opprinnelig_soknadsdato,
+                        t.saksbehandler_ref as tildelt_til_oid,
                         pv.id AS på_vent_id,
                         count(1) OVER() AS filtered_count
                     FROM oppgave o
                     INNER JOIN vedtak v ON o.vedtak_ref = v.id
-                    INNER JOIN person p ON v.person_ref = p.id
-                    INNER JOIN person_info pi ON p.info_ref = pi.id
                     INNER JOIN opprinnelig_soknadsdato os ON os.vedtaksperiode_id = v.vedtaksperiode_id
                     LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
                     LEFT JOIN totrinnsvurdering ttv ON (ttv.person_ref = v.person_ref AND ttv.tilstand != 'GODKJENT')
@@ -210,24 +208,16 @@ class PgOppgaveRepository private constructor(
             }
         return queryOf(statement = sql, paramMap = parameterMap)
             .list { row ->
-                val filtrertAntall = row.long("filtered_count")
-                val egenskaper =
-                    row.array<String>("egenskaper").map { enumValueOf<EgenskapForDatabase>(it) }.toSet()
-                filtrertAntall to
+                row.long("filtered_count") to
                     OppgaveProjeksjon(
                         id = row.long("oppgave_id"),
-                        aktørId = row.string("aktør_id"),
-                        navn =
-                            OppgaveProjeksjon.Personnavn(
-                                fornavn = row.string("fornavn"),
-                                mellomnavn = row.stringOrNull("mellomnavn"),
-                                etternavn = row.string("etternavn"),
-                            ),
-                        egenskaper = egenskaper.tilModellversjoner(),
-                        tildeltTilOid =
+                        personId = PersonId(row.int("person_ref")),
+                        egenskaper =
                             row
-                                .uuidOrNull("tildelt_til_oid")
-                                ?.let { SaksbehandlerOid(it) },
+                                .array<String>("egenskaper")
+                                .map { enumValueOf<EgenskapForDatabase>(it) }
+                                .tilModellversjoner(),
+                        tildeltTilOid = row.uuidOrNull("tildelt_til_oid")?.let(::SaksbehandlerOid),
                         opprettetTidspunkt = row.instant("første_opprettet"),
                         opprinneligSøknadstidspunkt = row.instant("opprinnelig_soknadsdato"),
                         påVentId = row.intOrNull("på_vent_id")?.let(::PåVentId),
@@ -255,7 +245,7 @@ class PgOppgaveRepository private constructor(
             }
         }
 
-    private fun Set<EgenskapForDatabase>.tilModellversjoner() = mapNotNull { it.tilModellversjon() }.toSet()
+    private fun Collection<EgenskapForDatabase>.tilModellversjoner() = mapNotNull { it.tilModellversjon() }.toSet()
 
     private fun EgenskapForDatabase.tilModellversjon(): Egenskap? =
         when (this) {
