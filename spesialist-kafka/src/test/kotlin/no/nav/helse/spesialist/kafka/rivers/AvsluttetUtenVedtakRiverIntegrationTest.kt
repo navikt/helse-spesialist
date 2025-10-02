@@ -29,7 +29,7 @@ import java.util.UUID
 internal class AvsluttetUtenVedtakRiverIntegrationTest {
     private val testRapid = TestRapid()
     private val integrationTestFixture = IntegrationTestFixture(testRapid)
-    private val personRepository = integrationTestFixture.sessionFactory.sessionContext.personRepository
+    private val legacyPersonRepository = integrationTestFixture.sessionFactory.sessionContext.legacyPersonRepository
 
     private val fødselsnummer = lagFødselsnummer()
     private val vedtaksperiodeId = UUID.randomUUID()
@@ -50,7 +50,7 @@ internal class AvsluttetUtenVedtakRiverIntegrationTest {
     }
 
     private fun initPerson() {
-        personRepository.leggTilPerson(
+        legacyPersonRepository.leggTilPerson(
             Person.gjenopprett(
                 aktørId = lagAktørId(),
                 fødselsnummer = fødselsnummer,
@@ -115,7 +115,7 @@ internal class AvsluttetUtenVedtakRiverIntegrationTest {
     }
 
     private fun assertBehandlingTilstand(expected: String) {
-        personRepository.brukPersonHvisFinnes(fødselsnummer) {
+        legacyPersonRepository.brukPersonHvisFinnes(fødselsnummer) {
             assertEquals(expected, vedtaksperiode(vedtaksperiodeId).finnBehandling(spleisBehandlingId).tilstand.navn())
         }
     }

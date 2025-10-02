@@ -41,7 +41,7 @@ import java.util.UUID
 class AvsluttetMedVedtakRiverIntegrationTest {
     private val testRapid = TestRapid()
     private val integrationTestFixture = IntegrationTestFixture(testRapid)
-    private val personRepository = integrationTestFixture.sessionFactory.sessionContext.personRepository
+    private val legacyPersonRepository = integrationTestFixture.sessionFactory.sessionContext.legacyPersonRepository
     private val vedtakDao = integrationTestFixture.sessionFactory.sessionContext.vedtakDao
     private val meldingDao = integrationTestFixture.sessionFactory.sessionContext.meldingDao
 
@@ -964,7 +964,7 @@ class AvsluttetMedVedtakRiverIntegrationTest {
         organisasjonsnummer: String = this.organisasjonsnummer,
         yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
     ) {
-        personRepository.leggTilPerson(
+        legacyPersonRepository.leggTilPerson(
             Person.gjenopprett(
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,

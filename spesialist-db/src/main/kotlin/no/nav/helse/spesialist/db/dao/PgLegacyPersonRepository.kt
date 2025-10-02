@@ -4,21 +4,21 @@ import kotliquery.Session
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.SykefraværstilfelleDao
 import no.nav.helse.db.VedtaksperiodeRepository
+import no.nav.helse.modell.person.LegacyPersonRepository
 import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.person.PersonDto
-import no.nav.helse.modell.person.PersonRepository
 import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.sikkerlogg
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.HelseDao.Companion.list
 
-class PgPersonRepository(
+class PgLegacyPersonRepository(
     private val session: Session,
     private val vedtaksperiodeRepository: VedtaksperiodeRepository,
     private val sykefraværstilfelleDao: SykefraværstilfelleDao,
     private val personDao: PersonDao,
-) : PersonRepository {
+) : LegacyPersonRepository {
     private val avviksvurderingRepository = PgAvviksvurderingRepository(session)
 
     override fun brukPersonHvisFinnes(

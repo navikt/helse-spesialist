@@ -48,7 +48,7 @@ class GetPersonTilkomneInntektskilderHåndterer : GetHåndterer<GetPersonTilkomn
         transaksjon: SessionContext,
     ): RestResponse<List<ApiTilkommenInntektskilde>> {
         val aktørId = urlParametre.aktørId
-        val fødselsnumre = transaksjon.personRepository.finnFødselsnumre(aktørId = aktørId).toSet()
+        val fødselsnumre = transaksjon.legacyPersonRepository.finnFødselsnumre(aktørId = aktørId).toSet()
 
         fødselsnumre.forEach { fødselsnummer ->
             bekreftTilgangTilPerson(

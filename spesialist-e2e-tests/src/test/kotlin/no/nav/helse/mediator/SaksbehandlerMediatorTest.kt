@@ -315,7 +315,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         forkastet: Boolean = false,
         spleisBehandlingId: UUID = UUID.randomUUID(),
     ) {
-        sessionContext.personRepository.brukPersonHvisFinnes(fødselsnummer) {
+        sessionContext.legacyPersonRepository.brukPersonHvisFinnes(fødselsnummer) {
             this.nySpleisBehandling(
                 SpleisBehandling(
                     organisasjonsnummer,
@@ -483,7 +483,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             ident = SAKSBEHANDLER_IDENT
         )
         sessionFactory.transactionalSessionScope { session ->
-            session.personRepository.brukPersonHvisFinnes(fødselsnummer = fødselsnummer) {
+            session.legacyPersonRepository.brukPersonHvisFinnes(fødselsnummer = fødselsnummer) {
                 oppdaterPeriodeTilGodkjenning(
                     vedtaksperiodeId = vedtaksperiodeId,
                     spleisBehandlingId = spleisBehandlingId,
@@ -526,7 +526,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             ident = SAKSBEHANDLER_IDENT
         )
         sessionFactory.transactionalSessionScope { session ->
-            session.personRepository.brukPersonHvisFinnes(fødselsnummer = fødselsnummer) {
+            session.legacyPersonRepository.brukPersonHvisFinnes(fødselsnummer = fødselsnummer) {
                 oppdaterPeriodeTilGodkjenning(
                     vedtaksperiodeId = vedtaksperiodeId,
                     spleisBehandlingId = spleisBehandlingId,
@@ -670,7 +670,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             ident = SAKSBEHANDLER_IDENT
         )
         sessionFactory.transactionalSessionScope { session ->
-            session.personRepository.brukPersonHvisFinnes(fødselsnummer = fødselsnummer) {
+            session.legacyPersonRepository.brukPersonHvisFinnes(fødselsnummer = fødselsnummer) {
                 oppdaterPeriodeTilGodkjenning(
                     vedtaksperiodeId = vedtaksperiodeId,
                     spleisBehandlingId = spleisBehandlingId,
@@ -738,7 +738,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             status = "AKTIV",
         )
         sessionFactory.transactionalSessionScope { session ->
-            session.personRepository.brukPersonHvisFinnes(fødselsnummer = fødselsnummer) {
+            session.legacyPersonRepository.brukPersonHvisFinnes(fødselsnummer = fødselsnummer) {
                 oppdaterPeriodeTilGodkjenning(
                     vedtaksperiodeId = vedtaksperiodeId,
                     spleisBehandlingId = spleisBehandlingId,
@@ -779,7 +779,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             ident = SAKSBEHANDLER_IDENT
         )
         sessionFactory.transactionalSessionScope { session ->
-            session.personRepository.brukPersonHvisFinnes(fødselsnummer = fødselsnummer) {
+            session.legacyPersonRepository.brukPersonHvisFinnes(fødselsnummer = fødselsnummer) {
                 oppdaterPeriodeTilGodkjenning(
                     vedtaksperiodeId = vedtaksperiodeId,
                     spleisBehandlingId = spleisBehandlingId,
@@ -1022,7 +1022,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             ident = SAKSBEHANDLER_IDENT
         )
         sessionFactory.transactionalSessionScope { session ->
-            session.personRepository.brukPersonHvisFinnes(fødselsnummer = fødselsnummer) {
+            session.legacyPersonRepository.brukPersonHvisFinnes(fødselsnummer = fødselsnummer) {
                 oppdaterPeriodeTilGodkjenning(
                     vedtaksperiodeId = vedtaksperiodeId,
                     spleisBehandlingId = spleisBehandlingId,

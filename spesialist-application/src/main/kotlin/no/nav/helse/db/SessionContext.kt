@@ -1,7 +1,7 @@
 package no.nav.helse.db
 
 import no.nav.helse.mediator.oppgave.OppgaveRepository
-import no.nav.helse.modell.person.PersonRepository
+import no.nav.helse.modell.person.LegacyPersonRepository
 import no.nav.helse.spesialist.application.ArbeidsgiverRepository
 import no.nav.helse.spesialist.application.DialogRepository
 import no.nav.helse.spesialist.application.NotatRepository
@@ -37,7 +37,7 @@ interface SessionContext {
     val vergemålDao: VergemålDao
     val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao
     val vedtaksperiodeRepository: VedtaksperiodeRepository
-    val personRepository: PersonRepository
+    val legacyPersonRepository: LegacyPersonRepository
     val stansAutomatiskBehandlingSaksbehandlerDao: StansAutomatiskBehandlingSaksbehandlerDao
 
     val totrinnsvurderingRepository: TotrinnsvurderingRepository

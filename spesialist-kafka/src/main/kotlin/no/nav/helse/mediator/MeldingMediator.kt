@@ -151,7 +151,7 @@ class MeldingMediator(
     fun finnBehandlingerFor(fødselsnummer: String): List<Vedtaksperiode.BehandlingData> {
         var behandlinger: List<Vedtaksperiode.BehandlingData> = emptyList()
         sessionFactory.transactionalSessionScope { sessionContext ->
-            sessionContext.personRepository.brukPersonHvisFinnes(fødselsnummer) {
+            sessionContext.legacyPersonRepository.brukPersonHvisFinnes(fødselsnummer) {
                 behandlinger = behandlinger()
             }
         }
@@ -316,7 +316,7 @@ class MeldingMediator(
         val utgåendeMeldingerMediator = UtgåendeMeldingerMediator()
         try {
             sessionFactory.transactionalSessionScope { sessionContext ->
-                sessionContext.personRepository.brukPersonHvisFinnes(melding.fødselsnummer()) {
+                sessionContext.legacyPersonRepository.brukPersonHvisFinnes(melding.fødselsnummer()) {
                     logg.info("Personen finnes i databasen, behandler melding $meldingnavn")
                     sikkerlogg.info("Personen finnes i databasen, behandler melding $meldingnavn")
                     val kommandostarter =

@@ -34,7 +34,7 @@ import java.util.UUID
 internal class OppdaterPersondataRiverIntegrationTest {
     private val testRapid = TestRapid()
     private val integrationTestFixture = IntegrationTestFixture(testRapid)
-    private val personRepository = integrationTestFixture.sessionFactory.sessionContext.personRepository
+    private val legacyPersonRepository = integrationTestFixture.sessionFactory.sessionContext.legacyPersonRepository
     private val vedtaksperiodeRepository = integrationTestFixture.sessionFactory.sessionContext.vedtaksperiodeRepository
 
     private val fødselsnummer = lagFødselsnummer()
@@ -131,7 +131,7 @@ internal class OppdaterPersondataRiverIntegrationTest {
             )
         )
         vedtaksperiodeRepository.vedtaksperioderPerFødselsnummer[fødselsnummer] = vedtaksperioder.toMutableList()
-        personRepository.leggTilPerson(
+        legacyPersonRepository.leggTilPerson(
             Person(
                 aktørId = lagAktørId(),
                 fødselsnummer = fødselsnummer,

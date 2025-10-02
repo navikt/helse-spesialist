@@ -22,7 +22,7 @@ import java.util.UUID
 class BehandlingOpprettetRiverIntegrationTest {
     private val testRapid = TestRapid()
     private val integrationTestFixture = IntegrationTestFixture(testRapid)
-    private val personRepository = integrationTestFixture.sessionFactory.sessionContext.personRepository
+    private val legacyPersonRepository = integrationTestFixture.sessionFactory.sessionContext.legacyPersonRepository
 
     @Test
     fun `oppretter ny vedtaksperiode med behandling`() {
@@ -49,7 +49,7 @@ class BehandlingOpprettetRiverIntegrationTest {
         )
 
         // Then:
-        personRepository.brukPersonHvisFinnes(fødselsnummer) {
+        legacyPersonRepository.brukPersonHvisFinnes(fødselsnummer) {
             val behandling = vedtaksperioder().single().råBehandlinger().single()
             assertEquals(vedtaksperiodeId, behandling.vedtaksperiodeId)
             assertEquals(null, behandling.utbetalingId)
@@ -117,7 +117,7 @@ class BehandlingOpprettetRiverIntegrationTest {
         )
 
         // Then:
-        personRepository.brukPersonHvisFinnes(fødselsnummer) {
+        legacyPersonRepository.brukPersonHvisFinnes(fødselsnummer) {
             val vedtaksperiode = vedtaksperioder().single()
             val behandlinger = vedtaksperiode.råBehandlinger()
             assertEquals(2, behandlinger.size)
@@ -188,7 +188,7 @@ class BehandlingOpprettetRiverIntegrationTest {
         )
 
         // Then:
-        personRepository.brukPersonHvisFinnes(fødselsnummer) {
+        legacyPersonRepository.brukPersonHvisFinnes(fødselsnummer) {
             val behandling = vedtaksperioder().single().råBehandlinger().single()
             assertEquals(vedtaksperiodeId, behandling.vedtaksperiodeId)
             assertEquals(null, behandling.utbetalingId)
@@ -227,7 +227,7 @@ class BehandlingOpprettetRiverIntegrationTest {
         )
 
         // Then:
-        personRepository.brukPersonHvisFinnes(fødselsnummer) {
+        legacyPersonRepository.brukPersonHvisFinnes(fødselsnummer) {
             assertEquals(emptyList<Vedtaksperiode>(), vedtaksperioder())
         }
 
@@ -255,7 +255,7 @@ class BehandlingOpprettetRiverIntegrationTest {
         )
 
         // Then:
-        personRepository.brukPersonHvisFinnes(fødselsnummer) {
+        legacyPersonRepository.brukPersonHvisFinnes(fødselsnummer) {
             assertEquals(emptyList<Vedtaksperiode>(), vedtaksperioder())
         }
 
@@ -287,7 +287,7 @@ class BehandlingOpprettetRiverIntegrationTest {
         )
 
         // Then:
-        personRepository.brukPersonHvisFinnes(fødselsnummer) {
+        legacyPersonRepository.brukPersonHvisFinnes(fødselsnummer) {
             val behandling = vedtaksperioder().single().råBehandlinger().single()
             assertEquals(vedtaksperiodeId, behandling.vedtaksperiodeId)
             assertEquals(null, behandling.utbetalingId)
@@ -307,7 +307,7 @@ class BehandlingOpprettetRiverIntegrationTest {
     }
 
     private fun initPerson(fødselsnummer: String, vedtaksperioder: List<VedtaksperiodeDto>) {
-        personRepository.leggTilPerson(
+        legacyPersonRepository.leggTilPerson(
             Person.gjenopprett(
                 aktørId = lagAktørId(),
                 fødselsnummer = fødselsnummer,

@@ -86,7 +86,7 @@ class AvsluttetMedVedtakRiver(
                     )
                 }
                 sessionFactory.transactionalSessionScope { sessionContext ->
-                    sessionContext.personRepository.brukPersonHvisFinnes(packet["fødselsnummer"].asText()) {
+                    sessionContext.legacyPersonRepository.brukPersonHvisFinnes(packet["fødselsnummer"].asText()) {
                         logg.info("Personen finnes i databasen, behandler melding $MELDINGNAVN")
                         sikkerlogg.info("Personen finnes i databasen, behandler melding $MELDINGNAVN")
 

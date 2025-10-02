@@ -141,7 +141,7 @@ abstract class AbstractDBIntegrationTest {
     internal val stansAutomatiskBehandlingDao = sessionContext.stansAutomatiskBehandlingDao
     internal val dialogDao = daos.dialogDao
     internal val annulleringRepository = daos.annulleringRepository
-    private val pgPersonRepository = sessionContext.personRepository
+    private val pgLegacyPersonRepository = sessionContext.legacyPersonRepository
     internal val overstyringRepository = sessionContext.overstyringRepository
     internal val totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository
     internal val stansAutomatiskBehandlingSaksbehandlerDao = sessionContext.stansAutomatiskBehandlingSaksbehandlerDao
@@ -344,7 +344,7 @@ abstract class AbstractDBIntegrationTest {
         tom: LocalDate = 31 jan 2018,
         tags: List<String>? = emptyList(),
     ) {
-        pgPersonRepository.brukPersonHvisFinnes(FNR) {
+        pgLegacyPersonRepository.brukPersonHvisFinnes(FNR) {
             this.nySpleisBehandling(
                 SpleisBehandling(
                     ORGNUMMER,
@@ -365,7 +365,7 @@ abstract class AbstractDBIntegrationTest {
     // For å få satt riktig skjæringstidspunkt på behandlinger
     // Burde kanskje erstattes med bruk av DAO-er
     protected fun oppdaterBehandlingdata(vararg perioder: SpleisVedtaksperiode) {
-        pgPersonRepository.brukPersonHvisFinnes(FNR) {
+        pgLegacyPersonRepository.brukPersonHvisFinnes(FNR) {
             mottaSpleisVedtaksperioder(perioder.toList())
         }
     }
@@ -383,7 +383,7 @@ abstract class AbstractDBIntegrationTest {
         spleisBehandlingId: UUID = UUID.randomUUID(),
         yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
     ) {
-        pgPersonRepository.brukPersonHvisFinnes(fødselsnummer) {
+        pgLegacyPersonRepository.brukPersonHvisFinnes(fødselsnummer) {
             this.nySpleisBehandling(
                 SpleisBehandling(
                     organisasjonsnummer,

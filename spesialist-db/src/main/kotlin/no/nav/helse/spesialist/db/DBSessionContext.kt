@@ -21,6 +21,7 @@ import no.nav.helse.spesialist.db.dao.PgCommandContextDao
 import no.nav.helse.spesialist.db.dao.PgDialogDao
 import no.nav.helse.spesialist.db.dao.PgEgenAnsattDao
 import no.nav.helse.spesialist.db.dao.PgGenerasjonDao
+import no.nav.helse.spesialist.db.dao.PgLegacyPersonRepository
 import no.nav.helse.spesialist.db.dao.PgMeldingDao
 import no.nav.helse.spesialist.db.dao.PgMetrikkDao
 import no.nav.helse.spesialist.db.dao.PgNotatDao
@@ -28,7 +29,6 @@ import no.nav.helse.spesialist.db.dao.PgOppgaveDao
 import no.nav.helse.spesialist.db.dao.PgOpptegnelseDao
 import no.nav.helse.spesialist.db.dao.PgPeriodehistorikkDao
 import no.nav.helse.spesialist.db.dao.PgPersonDao
-import no.nav.helse.spesialist.db.dao.PgPersonRepository
 import no.nav.helse.spesialist.db.dao.PgPåVentDao
 import no.nav.helse.spesialist.db.dao.PgReservasjonDao
 import no.nav.helse.spesialist.db.dao.PgRisikovurderingDao
@@ -81,8 +81,8 @@ class DBSessionContext(
     override val vergemålDao = PgVergemålDao(session)
     override val åpneGosysOppgaverDao = PgÅpneGosysOppgaverDao(session)
     override val vedtaksperiodeRepository = PgVedtaksperiodeRepository(generasjonDao, vedtakDao)
-    override val personRepository =
-        PgPersonRepository(session, vedtaksperiodeRepository, sykefraværstilfelleDao, personDao)
+    override val legacyPersonRepository =
+        PgLegacyPersonRepository(session, vedtaksperiodeRepository, sykefraværstilfelleDao, personDao)
     override val stansAutomatiskBehandlingSaksbehandlerDao = PgStansAutomatiskBehandlingSaksbehandlerDao(session)
 
     override val overstyringRepository: OverstyringRepository = PgOverstyringRepository(session)

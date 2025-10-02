@@ -1,6 +1,6 @@
 package no.nav.helse.modell.person
 
-interface PersonRepository {
+interface LegacyPersonRepository {
     fun brukPersonHvisFinnes(
         fødselsnummer: String,
         personScope: Person.() -> Unit,
