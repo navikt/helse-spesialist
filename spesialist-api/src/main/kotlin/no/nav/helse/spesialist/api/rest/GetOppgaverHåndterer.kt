@@ -117,8 +117,12 @@ class GetOppgaverHåndterer : GetHåndterer<GetOppgaverHåndterer.URLParametre, 
             .orEmpty()
             .map { enumValueOf<ApiEgenskap>(it).tilEgenskap() }
 
-    private fun OppgaveRepository.Side<OppgaveRepository.OppgaveProjeksjon>.tilApiType(transaksjon: SessionContext): ApiOppgaveProjeksjonSide =
-        ApiOppgaveProjeksjonSide(
+    private fun OppgaveRepository.Side<OppgaveRepository.OppgaveProjeksjon>.tilApiType(transaksjon: SessionContext): ApiOppgaveProjeksjonSide {
+        val saksbehandlere =
+            transaksjon.saksbehandlerRepository
+                .finnAlle(elementer.mapNotNull { it.tildeltTilOid }.toSet())
+                .associateBy { it.id() }
+        return ApiOppgaveProjeksjonSide(
             totaltAntall = totaltAntall,
             sidetall = sidetall,
             sidestoerrelse = sidestørrelse,
@@ -133,10 +137,13 @@ class GetOppgaverHåndterer : GetHåndterer<GetOppgaverHåndterer.URLParametre, 
                                 etternavn = oppgave.navn.etternavn,
                                 mellomnavn = oppgave.navn.mellomnavn,
                             ),
-                        egenskaper = oppgave.egenskaper.map { egenskap -> egenskap.tilApiversjon() }.sortedBy { it.name },
+                        egenskaper =
+                            oppgave.egenskaper
+                                .map { egenskap -> egenskap.tilApiversjon() }
+                                .sortedBy { it.name },
                         tildeling =
                             oppgave.tildeltTilOid
-                                ?.let { transaksjon.saksbehandlerRepository.finn(it) }
+                                ?.let { tildeltTilOid -> saksbehandlere[tildeltTilOid] }
                                 ?.let { tildelt ->
                                     ApiTildeling(
                                         navn = tildelt.navn,
@@ -170,6 +177,7 @@ class GetOppgaverHåndterer : GetHåndterer<GetOppgaverHåndterer.URLParametre, 
                     )
                 },
         )
+    }
 
     private fun ApiEgenskap.tilEgenskap(): Egenskap =
         when (this) {

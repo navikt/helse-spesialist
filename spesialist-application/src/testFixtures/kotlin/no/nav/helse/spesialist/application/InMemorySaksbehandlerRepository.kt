@@ -12,4 +12,7 @@ class InMemorySaksbehandlerRepository : SaksbehandlerRepository {
 
     override fun finn(oid: SaksbehandlerOid): Saksbehandler? =
         data[oid]
+
+    override fun finnAlle(oider: Set<SaksbehandlerOid>): List<Saksbehandler> =
+        oider.mapNotNull { data[it] }
 }

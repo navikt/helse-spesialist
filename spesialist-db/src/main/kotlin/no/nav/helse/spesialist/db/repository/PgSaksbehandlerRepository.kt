@@ -28,6 +28,16 @@ class PgSaksbehandlerRepository private constructor(
             "oid" to oid.value,
         ).singleOrNull { it.toSaksbehandler() }
 
+    override fun finnAlle(oider: Set<SaksbehandlerOid>): List<Saksbehandler> =
+        if (oider.isEmpty()) {
+            emptyList()
+        } else {
+            asSQL(
+                "SELECT * FROM saksbehandler WHERE oid = ANY (:oider)",
+                "oider" to oider.map { it.value }.toTypedArray(),
+            ).list { it.toSaksbehandler() }
+        }
+
     private fun Row.toSaksbehandler(): Saksbehandler =
         Saksbehandler(
             id = SaksbehandlerOid(UUID.fromString(string("oid"))),

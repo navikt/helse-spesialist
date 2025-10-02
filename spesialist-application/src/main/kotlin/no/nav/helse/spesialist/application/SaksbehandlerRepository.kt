@@ -7,4 +7,6 @@ interface SaksbehandlerRepository {
     fun lagre(saksbehandler: Saksbehandler)
 
     fun finn(oid: SaksbehandlerOid): Saksbehandler?
+
+    fun finnAlle(oider: Set<SaksbehandlerOid>): List<Saksbehandler>
 }
