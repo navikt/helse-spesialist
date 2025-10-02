@@ -178,7 +178,7 @@ class OppgavelisteMedGraphQLE2ETest : AbstractOppgavelisteE2ETest() {
         forventetDukketOpp: Boolean,
         tildelt: Boolean?,
         egenskaper: Set<Egenskap>,
-        ekskluderteEgenskaper: Set<Egenskap>
+        ingenAvEgenskapene: Set<Egenskap>
     ): JsonNode? {
         // When:
         val response = callGraphQL(
@@ -190,7 +190,7 @@ class OppgavelisteMedGraphQLE2ETest : AbstractOppgavelisteE2ETest() {
                     "egenskaper" to egenskaper.map { egenskap ->
                         mapOf("egenskap" to egenskap.name.replace('Ø', 'O'), "kategori" to egenskap.kategori.name)
                     },
-                    "ekskluderteEgenskaper" to ekskluderteEgenskaper.map { egenskap ->
+                    "ekskluderteEgenskaper" to ingenAvEgenskapene.map { egenskap ->
                         mapOf("egenskap" to egenskap.name.replace('Ø', 'O'), "kategori" to egenskap.kategori.name)
                     },
                     "ingenUkategoriserteEgenskaper" to false,

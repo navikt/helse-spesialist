@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.api.rest
 
 import io.ktor.http.Parameters
+import io.ktor.util.flattenEntries
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveFraDatabaseForVisning
 import no.nav.helse.db.OppgavesorteringForDatabase
@@ -20,25 +21,15 @@ import kotlin.reflect.typeOf
 import kotlin.time.measureTimedValue
 
 class GetOppgaverHåndterer : GetHåndterer<GetOppgaverHåndterer.URLParametre, ApiOppgaverTilBehandling> {
-    override val urlPath =
-        "oppgaver" +
-            "?pageNumber={pageNumber}" +
-            "&pageSize={pageSize}" +
-            "&sortBy={sortBy}" +
-            "&sortDirection={sortDirection}" +
-            "&includedEgenskaper={includedEgenskaper}" +
-            "&excludedEgenskaper={excludedEgenskaper}" +
-            "&erTildelt={erTildelt}" +
-            "&erPaaVent={erPaaVent}" +
-            "&tildeltTilIdent={tildeltTilIdent}"
+    override val urlPath = "oppgaver?{args}"
 
     data class URLParametre(
         val pageNumber: Int?,
         val pageSize: Int?,
         val sortBy: ApiSorteringsnokkel?,
         val sortDirection: ApiSorteringrekkefolge?,
-        val includedEgenskaper: String?, // Kommaseparert
-        val excludedEgenskaper: String?, // Kommaseparert
+        val minstEnAvEgenskapene: List<String>?, // Kommaseparerte
+        val ingenAvEgenskapene: String?, // Kommaseparert
         val erTildelt: Boolean?,
         val erPaaVent: Boolean?,
         val tildeltTilIdent: String?,
@@ -52,12 +43,24 @@ class GetOppgaverHåndterer : GetHåndterer<GetOppgaverHåndterer.URLParametre, 
         pageSize = queryParameters["pageSize"]?.toIntOrNull(),
         sortBy = queryParameters["sortBy"]?.let { enumValueOf<ApiSorteringsnokkel>(it) },
         sortDirection = queryParameters["sortDirection"]?.let { enumValueOf<ApiSorteringrekkefolge>(it) },
-        includedEgenskaper = queryParameters["includedEgenskaper"],
-        excludedEgenskaper = queryParameters["excludedEgenskaper"],
+        minstEnAvEgenskapene = queryParameters.getList("minstEnAvEgenskapene"),
+        ingenAvEgenskapene = queryParameters["ingenAvEgenskapene"],
         erTildelt = queryParameters["erTildelt"]?.toBooleanStrictOrNull(),
         erPaaVent = queryParameters["erPaaVent"]?.toBooleanStrictOrNull(),
         tildeltTilIdent = queryParameters["tildeltTilIdent"],
     )
+
+    private fun Parameters.getList(name: String): List<String> {
+        val lowercaseName = name.lowercase()
+        return flattenEntries()
+            .asSequence()
+            .map { (name, value) -> name.lowercase() to value }
+            .filter { (name, _) -> name.startsWith("$lowercaseName[") && name.endsWith("]") }
+            .map { (name, value) -> name.removeSurrounding("${lowercaseName.lowercase()}[", "]").toInt() to value }
+            .sortedBy { (number, _) -> number }
+            .map { (_, value) -> value }
+            .toList()
+    }
 
     override fun håndter(
         urlParametre: URLParametre,
@@ -93,7 +96,7 @@ class GetOppgaverHåndterer : GetHåndterer<GetOppgaverHåndterer.URLParametre, 
                     egenskaperSaksbehandlerIkkeSkalFåOppIOversikten(
                         saksbehandler,
                         tilgangsgrupper,
-                    ).plus(tilEgenskaper(urlParametre.excludedEgenskaper))
+                    ).plus(tilEgenskaper(urlParametre.ingenAvEgenskapene))
                         .map(Egenskap::toString),
                 saksbehandlerOid = saksbehandler.id().value,
                 offset = (pageNumber - 1) * pageSize,
@@ -102,13 +105,18 @@ class GetOppgaverHåndterer : GetHåndterer<GetOppgaverHåndterer.URLParametre, 
                 egneSakerPåVent = urlParametre.tildeltTilIdent == saksbehandler.ident && urlParametre.erPaaVent == true,
                 egneSaker = urlParametre.tildeltTilIdent == saksbehandler.ident && urlParametre.erPaaVent == false,
                 tildelt = urlParametre.erTildelt,
-                grupperteFiltrerteEgenskaper =
-                    tilEgenskaper(urlParametre.includedEgenskaper)
-                        .groupBy { it.kategori }
-                        .map { it.key to it.value.tilDatabaseversjon() }
-                        .toMap(),
+                grupperteFiltrerteEgenskaper = tilGruppertMap(urlParametre.minstEnAvEgenskapene),
             ).tilApiOppgaverTilBehandling()
     }
+
+    private fun tilGruppertMap(minstEnAvEgenskapene: List<String>?): Map<Egenskap.Kategori, List<EgenskapForDatabase>> =
+        minstEnAvEgenskapene
+            .orEmpty()
+            .flatMap { it.split(',') }
+            .map { enumValueOf<ApiEgenskap>(it).tilEgenskap() }
+            .groupBy { it.kategori }
+            .map { it.key to it.value.tilDatabaseversjon() }
+            .toMap()
 
     private fun tilEgenskaper(excludedEgenskaper: String?): List<Egenskap> =
         excludedEgenskaper

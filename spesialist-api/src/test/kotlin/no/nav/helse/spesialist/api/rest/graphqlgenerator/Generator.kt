@@ -3,13 +3,10 @@ package no.nav.helse.spesialist.api.rest.graphqlgenerator
 import no.nav.helse.spesialist.api.rest.GetHåndterer
 import no.nav.helse.spesialist.api.rest.PostHåndterer
 import no.nav.helse.spesialist.api.rest.RESTHÅNDTERERE
-import no.nav.helse.spesialist.api.rest.graphqlgenerator.types.GQLInputType
-import no.nav.helse.spesialist.api.rest.graphqlgenerator.types.GQLListInputType
 import no.nav.helse.spesialist.api.rest.graphqlgenerator.types.GQLNamedType
 import no.nav.helse.spesialist.api.rest.graphqlgenerator.types.GQLRestMutation
 import no.nav.helse.spesialist.api.rest.graphqlgenerator.types.GQLRestQuery
 import kotlin.reflect.KClass
-import kotlin.reflect.KType
 import kotlin.reflect.full.declaredMemberProperties
 
 class Generator {
@@ -51,7 +48,7 @@ class Generator {
             operationName = "REST$håndtererNavn",
             fieldName = "rest$håndtererNavn",
             arguments = håndterer.urlParametersClass.declaredMemberProperties
-                .associate { property -> property.name.replaceÆØÅ() to property.returnType.toUrlParameterTypeReference() },
+                .associate { property -> property.name.replaceÆØÅ() to inputTypes.resolveOrGenerate(property.returnType) },
             fieldType = outputTypes.resolveOrGenerate(håndterer.responseBodyType),
             path = "/${håndterer.urlPath.gqlParameterizedPath()}"
         )
@@ -65,7 +62,7 @@ class Generator {
             fieldName = "rest$håndtererNavn",
             arguments =
                 håndterer.urlParametersClass.declaredMemberProperties
-                    .associate { property -> property.name.replaceÆØÅ() to property.returnType.toUrlParameterTypeReference() }
+                    .associate { property -> property.name.replaceÆØÅ() to inputTypes.resolveOrGenerate(property.returnType) }
                     .plus(mapOf("input" to inputTypes.resolveOrGenerate(håndterer.requestBodyType))),
             fieldType = outputTypes.resolveOrGenerate(håndterer.responseBodyType),
             path = "/${håndterer.urlPath.gqlParameterizedPath()}"
@@ -75,16 +72,9 @@ class Generator {
     val queries = mutableListOf<GQLRestQuery>()
     val mutations = mutableListOf<GQLRestMutation>()
 
-    private fun KType.toUrlParameterTypeReference(): GQLInputType {
-        val resolved = inputTypes.resolveOrGenerate(this)
-        if (resolved is GQLListInputType) {
-            error("Kan ikke ha lister som URL-parametre. Gjelder type $this.")
-        }
-        return resolved
-    }
-
     private fun String.gqlParameterizedPath(): String =
         replace(Regex("\\{([^}]+)}"), "{args.$1}").replaceÆØÅ()
+            .replace("{args.args}", "{args}")
 
     private fun String.replaceÆØÅ(): String =
         replace("æ", "e")

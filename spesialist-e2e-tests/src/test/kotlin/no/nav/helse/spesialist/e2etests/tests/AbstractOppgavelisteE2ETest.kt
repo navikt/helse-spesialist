@@ -21,7 +21,7 @@ abstract class AbstractOppgavelisteE2ETest : AbstractE2EIntegrationTest() {
         forventetDukketOpp: Boolean,
         tildelt: Boolean? = null,
         egenskaper: Set<Egenskap> = emptySet(),
-        ekskluderteEgenskaper: Set<Egenskap> = emptySet()
+        ingenAvEgenskapene: Set<Egenskap> = emptySet()
     ): JsonNode?
 
     enum class Fane { TIL_GODKJENNING, MINE_OPPGAVER, PÅ_VENT }
@@ -171,7 +171,7 @@ abstract class AbstractOppgavelisteE2ETest : AbstractE2EIntegrationTest() {
         hentOgAssertOppgaveIOppgaveliste(
             fane = Fane.TIL_GODKJENNING,
             forventetDukketOpp = false,
-            ekskluderteEgenskaper = setOf(Egenskap.UTBETALING_TIL_ARBEIDSGIVER)
+            ingenAvEgenskapene = setOf(Egenskap.UTBETALING_TIL_ARBEIDSGIVER)
         )
         hentOgAssertOppgaveIOppgaveliste(
             fane = Fane.TIL_GODKJENNING,
@@ -204,7 +204,7 @@ abstract class AbstractOppgavelisteE2ETest : AbstractE2EIntegrationTest() {
                 Egenskap.UTBETALING_TIL_ARBEIDSGIVER,
                 Egenskap.UTBETALING_TIL_SYKMELDT
             ),
-            ekskluderteEgenskaper = setOf(Egenskap.SØKNAD)
+            ingenAvEgenskapene = setOf(Egenskap.SØKNAD)
         )
         hentOgAssertOppgaveIOppgaveliste(
             fane = Fane.TIL_GODKJENNING,
@@ -213,7 +213,7 @@ abstract class AbstractOppgavelisteE2ETest : AbstractE2EIntegrationTest() {
                 Egenskap.UTBETALING_TIL_ARBEIDSGIVER,
                 Egenskap.UTBETALING_TIL_SYKMELDT
             ),
-            ekskluderteEgenskaper = setOf(Egenskap.REVURDERING)
+            ingenAvEgenskapene = setOf(Egenskap.REVURDERING)
         )
     }
 

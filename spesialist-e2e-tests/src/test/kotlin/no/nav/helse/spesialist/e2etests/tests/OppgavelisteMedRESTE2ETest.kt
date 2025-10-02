@@ -178,17 +178,31 @@ class OppgavelisteMedRESTE2ETest : AbstractOppgavelisteE2ETest() {
         forventetDukketOpp: Boolean,
         tildelt: Boolean?,
         egenskaper: Set<Egenskap>,
-        ekskluderteEgenskaper: Set<Egenskap>
+        ingenAvEgenskapene: Set<Egenskap>
     ): JsonNode? {
+        val minstEnAvEgenskapene = egenskaper.groupBy { it.kategori }.map { it.value }
         // When:
-        val response = callHttpGet("api/oppgaver" +
-                "?pageNumber=1" +
-                "&pageSize=1000" +
-                "&includedEgenskaper=${egenskaper.joinToString(separator = ",") { it.name.replace('Ø', 'O') }}" +
-                "&excludedEgenskaper=${ekskluderteEgenskaper.joinToString(separator = ",") { it.name.replace('Ø', 'O') }}" +
-                "&erTildelt=${tildelt}" +
-                "&erPaaVent=${fane == Fane.PÅ_VENT}" +
-                "&tildeltTilIdent=${saksbehandlerIdent().takeIf { fane in setOf(Fane.MINE_OPPGAVER, Fane.PÅ_VENT) }}")
+        val response = callHttpGet(buildString {
+            append("api/oppgaver")
+            append("?pageNumber=1")
+            append("&pageSize=1000")
+            minstEnAvEgenskapene.forEachIndexed { index, egenskaper ->
+                append("&minstEnAvEgenskapene[$index]=${egenskaper.tilKommaseparert()}")
+            }
+            append("&ingenAvEgenskapene=${ingenAvEgenskapene.tilKommaseparert()}")
+            append("&erTildelt=${tildelt}")
+            append("&erPaaVent=${fane == Fane.PÅ_VENT}")
+            append(
+                "&tildeltTilIdent=${
+                    saksbehandlerIdent().takeIf {
+                        fane in setOf(
+                            Fane.MINE_OPPGAVER,
+                            Fane.PÅ_VENT
+                        )
+                    }
+                }"
+            )
+        })
 
         // Then:
         if (forventetDukketOpp) {
@@ -206,4 +220,7 @@ class OppgavelisteMedRESTE2ETest : AbstractOppgavelisteE2ETest() {
 
         return if (forventetDukketOpp) oppgaverForVedtaksperiode.single() else null
     }
+
+    private fun Collection<Egenskap>.tilKommaseparert(): String =
+        joinToString(separator = ",") { it.name.replace('Ø', 'O') }
 }
