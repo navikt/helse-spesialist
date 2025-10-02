@@ -17,6 +17,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiSorteringsnokkel
 import no.nav.helse.spesialist.application.logg.sikkerlogg
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
+import java.util.UUID
 import kotlin.reflect.typeOf
 import kotlin.time.measureTimedValue
 
@@ -32,7 +33,7 @@ class GetOppgaverHåndterer : GetHåndterer<GetOppgaverHåndterer.URLParametre, 
         val ingenAvEgenskapene: String?, // Kommaseparert
         val erTildelt: Boolean?,
         val erPaaVent: Boolean?,
-        val tildeltTilIdent: String?,
+        val tildeltTilOid: UUID?,
     )
 
     override fun extractParametre(
@@ -47,7 +48,7 @@ class GetOppgaverHåndterer : GetHåndterer<GetOppgaverHåndterer.URLParametre, 
         ingenAvEgenskapene = queryParameters["ingenAvEgenskapene"],
         erTildelt = queryParameters["erTildelt"]?.toBooleanStrictOrNull(),
         erPaaVent = queryParameters["erPaaVent"]?.toBooleanStrictOrNull(),
-        tildeltTilIdent = queryParameters["tildeltTilIdent"],
+        tildeltTilOid = queryParameters["tildeltTilOid"]?.let(UUID::fromString),
     )
 
     private fun Parameters.getList(name: String): List<String> {
@@ -102,8 +103,8 @@ class GetOppgaverHåndterer : GetHåndterer<GetOppgaverHåndterer.URLParametre, 
                 offset = (pageNumber - 1) * pageSize,
                 limit = pageSize,
                 sortering = tilOppgavesorteringForDatabase(urlParametre.sortBy, urlParametre.sortDirection),
-                egneSakerPåVent = urlParametre.tildeltTilIdent == saksbehandler.ident && urlParametre.erPaaVent == true,
-                egneSaker = urlParametre.tildeltTilIdent == saksbehandler.ident && urlParametre.erPaaVent == false,
+                egneSakerPåVent = urlParametre.tildeltTilOid == saksbehandler.id().value && urlParametre.erPaaVent == true,
+                egneSaker = urlParametre.tildeltTilOid == saksbehandler.id().value && urlParametre.erPaaVent == false,
                 tildelt = urlParametre.erTildelt,
                 grupperteFiltrerteEgenskaper = tilGruppertMap(urlParametre.minstEnAvEgenskapene),
             ).tilApiOppgaverTilBehandling()

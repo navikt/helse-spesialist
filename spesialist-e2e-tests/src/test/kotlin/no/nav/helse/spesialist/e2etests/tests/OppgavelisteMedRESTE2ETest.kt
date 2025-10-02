@@ -192,16 +192,9 @@ class OppgavelisteMedRESTE2ETest : AbstractOppgavelisteE2ETest() {
             append("&ingenAvEgenskapene=${ingenAvEgenskapene.tilKommaseparert()}")
             append("&erTildelt=${tildelt}")
             append("&erPaaVent=${fane == Fane.PÅ_VENT}")
-            append(
-                "&tildeltTilIdent=${
-                    saksbehandlerIdent().takeIf {
-                        fane in setOf(
-                            Fane.MINE_OPPGAVER,
-                            Fane.PÅ_VENT
-                        )
-                    }
-                }"
-            )
+            if (fane in setOf(Fane.MINE_OPPGAVER, Fane.PÅ_VENT)) {
+                append("&tildeltTilOid=${saksbehandler.id().value}")
+            }
         })
 
         // Then:
