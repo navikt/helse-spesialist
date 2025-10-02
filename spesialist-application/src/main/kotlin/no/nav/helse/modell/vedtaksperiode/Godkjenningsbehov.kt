@@ -50,7 +50,7 @@ import no.nav.helse.modell.kommando.PersisterVedtaksperiodetypeCommand
 import no.nav.helse.modell.kommando.VurderBehovForAvviksvurdering
 import no.nav.helse.modell.kommando.VurderBehovForTotrinnskontroll
 import no.nav.helse.modell.kommando.VurderVidereBehandlingAvGodkjenningsbehov
-import no.nav.helse.modell.person.Person
+import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.risiko.VurderVurderingsmomenter
 import no.nav.helse.modell.utbetaling.Utbetaling
@@ -95,7 +95,7 @@ class Godkjenningsbehov(
     override fun toJson() = json
 
     override fun behandle(
-        person: Person,
+        person: LegacyPerson,
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
     ) {
@@ -347,7 +347,7 @@ internal class GodkjenningsbehovCommand(
     reservasjonDao: ReservasjonDao,
     oppgaveService: OppgaveService,
     godkjenningMediator: GodkjenningMediator,
-    person: Person,
+    person: LegacyPerson,
 ) : MacroCommand() {
     private val sykefraværstilfelle = person.sykefraværstilfelle(behovData.vedtaksperiodeId)
     override val commands: List<Command> =

@@ -3,7 +3,7 @@ package no.nav.helse.spesialist.kafka.rivers
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
-import no.nav.helse.modell.person.Person
+import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
 import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
 import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode
@@ -132,7 +132,7 @@ internal class OppdaterPersondataRiverIntegrationTest {
         )
         vedtaksperiodeRepository.vedtaksperioderPerFødselsnummer[fødselsnummer] = vedtaksperioder.toMutableList()
         legacyPersonRepository.leggTilPerson(
-            Person(
+            LegacyPerson(
                 aktørId = lagAktørId(),
                 fødselsnummer = fødselsnummer,
                 vedtaksperioder = vedtaksperioder.map { vedtaksperiodeDto ->

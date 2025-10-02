@@ -5,7 +5,7 @@ import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
-import no.nav.helse.modell.person.Person
+import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import java.time.LocalDate
 import java.util.UUID
@@ -34,7 +34,7 @@ class BehandlingOpprettet(
     )
 
     override fun behandle(
-        person: Person,
+        person: LegacyPerson,
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
     ) {

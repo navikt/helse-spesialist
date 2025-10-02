@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.kafka.rivers
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
-import no.nav.helse.modell.person.Person
+import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
 import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
@@ -308,7 +308,7 @@ class BehandlingOpprettetRiverIntegrationTest {
 
     private fun initPerson(fødselsnummer: String, vedtaksperioder: List<VedtaksperiodeDto>) {
         legacyPersonRepository.leggTilPerson(
-            Person.gjenopprett(
+            LegacyPerson.gjenopprett(
                 aktørId = lagAktørId(),
                 fødselsnummer = fødselsnummer,
                 vedtaksperioder = vedtaksperioder,

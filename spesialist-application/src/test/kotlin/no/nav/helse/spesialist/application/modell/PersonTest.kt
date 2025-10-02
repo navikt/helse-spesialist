@@ -1,6 +1,6 @@
 package no.nav.helse.spesialist.application.modell
 
-import no.nav.helse.modell.person.Person
+import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.application.TestPerson
@@ -17,7 +17,7 @@ class PersonTest {
 
     @Test
     fun `oppretter ny vedtaksperiode ved ny Spleis-behandling dersom perioden ikke er kjent fra før`() {
-        val person = Person.gjenopprett(aktørId, fødselsnummer, emptyList(), emptyList(), emptyList())
+        val person = LegacyPerson.gjenopprett(aktørId, fødselsnummer, emptyList(), emptyList(), emptyList())
         person.nySpleisBehandling(nySpleisBehandling(UUID.randomUUID()))
         val dto = person.toDto()
         assertEquals(1, dto.vedtaksperioder.size)

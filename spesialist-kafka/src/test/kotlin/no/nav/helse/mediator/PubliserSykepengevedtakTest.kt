@@ -8,7 +8,7 @@ import no.nav.helse.db.SessionContext
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.melding.VedtakFattetMelding
-import no.nav.helse.modell.person.Person
+import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.kafka.TestRapidHelpers.meldinger
 import no.nav.helse.spesialist.kafka.objectMapper
@@ -41,7 +41,7 @@ internal class PubliserSykepengevedtakTest {
 
     private val personmelding = object : Personmelding {
         override fun behandle(
-            person: Person,
+            person: LegacyPerson,
             kommandostarter: Kommandostarter,
             sessionContext: SessionContext,
         ) {

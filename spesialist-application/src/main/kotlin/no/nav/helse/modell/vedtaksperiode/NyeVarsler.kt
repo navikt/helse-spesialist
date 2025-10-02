@@ -5,7 +5,7 @@ import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.Personmelding
-import no.nav.helse.modell.person.Person
+import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import java.time.LocalDateTime
 import java.util.UUID
@@ -28,7 +28,7 @@ class NyeVarsler(
     override fun toJson(): String = json
 
     override fun behandle(
-        person: Person,
+        person: LegacyPerson,
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
     ) = person.nyeVarsler(varsler)

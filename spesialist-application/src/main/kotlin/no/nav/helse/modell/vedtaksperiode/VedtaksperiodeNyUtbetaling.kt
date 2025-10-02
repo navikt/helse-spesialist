@@ -8,7 +8,7 @@ import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.OpprettKoblingTilUtbetalingCommand
-import no.nav.helse.modell.person.Person
+import no.nav.helse.modell.person.LegacyPerson
 import java.util.UUID
 
 class VedtaksperiodeNyUtbetaling(
@@ -31,7 +31,7 @@ class VedtaksperiodeNyUtbetaling(
     override fun vedtaksperiodeId(): UUID = vedtaksperiodeId
 
     override fun behandle(
-        person: Person,
+        person: LegacyPerson,
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
     ) {

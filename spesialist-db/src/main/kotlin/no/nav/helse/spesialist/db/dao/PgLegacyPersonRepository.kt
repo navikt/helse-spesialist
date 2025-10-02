@@ -4,8 +4,8 @@ import kotliquery.Session
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.SykefraværstilfelleDao
 import no.nav.helse.db.VedtaksperiodeRepository
+import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.modell.person.LegacyPersonRepository
-import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.person.PersonDto
 import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
 import no.nav.helse.spesialist.application.logg.logg
@@ -23,7 +23,7 @@ class PgLegacyPersonRepository(
 
     override fun brukPersonHvisFinnes(
         fødselsnummer: String,
-        personScope: Person.() -> Unit,
+        personScope: LegacyPerson.() -> Unit,
     ) {
         val person =
             hentPerson(fødselsnummer) ?: run {
@@ -54,10 +54,10 @@ class PgLegacyPersonRepository(
         return tilLagring
     }
 
-    private fun hentPerson(fødselsnummer: String): Person? {
+    private fun hentPerson(fødselsnummer: String): LegacyPerson? {
         val minimalPerson = personDao.finnMinimalPerson(fødselsnummer) ?: return null
 
-        return Person.gjenopprett(
+        return LegacyPerson.gjenopprett(
             aktørId = minimalPerson.aktørId,
             fødselsnummer = minimalPerson.fødselsnummer,
             vedtaksperioder = vedtaksperiodeRepository.finnVedtaksperioder(fødselsnummer),

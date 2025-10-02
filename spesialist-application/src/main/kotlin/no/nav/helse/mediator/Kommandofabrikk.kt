@@ -22,8 +22,8 @@ import no.nav.helse.modell.kommando.ikkesuspenderendeCommand
 import no.nav.helse.modell.person.EndretEgenAnsattStatus
 import no.nav.helse.modell.person.EndretEgenAnsattStatusCommand
 import no.nav.helse.modell.person.KlargjørTilgangsrelaterteDataCommand
+import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.modell.person.OppdaterPersondataCommand
-import no.nav.helse.modell.person.Person
 import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
@@ -72,7 +72,7 @@ class Kommandofabrikk(
         )
 
     internal fun gosysOppgaveEndret(
-        person: Person,
+        person: LegacyPerson,
         oppgaveDataForAutomatisering: OppgaveDataForAutomatisering,
         sessionContext: SessionContext,
     ): GosysOppgaveEndretCommand {
@@ -101,7 +101,7 @@ class Kommandofabrikk(
 
     internal fun tilbakedateringGodkjent(
         melding: TilbakedateringBehandlet,
-        person: Person,
+        person: LegacyPerson,
         oppgaveDataForAutomatisering: OppgaveDataForAutomatisering,
         sessionContext: SessionContext,
     ): TilbakedateringGodkjentCommand {
@@ -274,7 +274,7 @@ class Kommandofabrikk(
 
     internal fun løsGodkjenningsbehov(
         melding: Saksbehandlerløsning,
-        person: Person,
+        person: LegacyPerson,
         sessionContext: SessionContext,
     ): LøsGodkjenningsbehov {
         val godkjenningsbehov = sessionContext.meldingDao.finnGodkjenningsbehov(melding.godkjenningsbehovhendelseId)
@@ -300,7 +300,7 @@ class Kommandofabrikk(
 
     internal fun godkjenningsbehov(
         godkjenningsbehovData: GodkjenningsbehovData,
-        person: Person,
+        person: LegacyPerson,
         sessionContext: SessionContext,
     ): GodkjenningsbehovCommand {
         val utbetaling = sessionContext.utbetalingDao.hentUtbetaling(godkjenningsbehovData.utbetalingId)

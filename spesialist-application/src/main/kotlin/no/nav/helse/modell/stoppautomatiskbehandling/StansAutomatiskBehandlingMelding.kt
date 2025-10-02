@@ -3,7 +3,7 @@ package no.nav.helse.modell.stoppautomatiskbehandling
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Personmelding
-import no.nav.helse.modell.person.Person
+import no.nav.helse.modell.person.LegacyPerson
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -18,7 +18,7 @@ class StansAutomatiskBehandlingMelding(
     private val json: String,
 ) : Personmelding {
     override fun behandle(
-        person: Person,
+        person: LegacyPerson,
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
     ) {

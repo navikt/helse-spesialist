@@ -24,7 +24,7 @@ class SøknadSendt(
     override fun toJson() = json
 
     override fun behandle(
-        person: Person,
+        person: LegacyPerson,
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
     ) {

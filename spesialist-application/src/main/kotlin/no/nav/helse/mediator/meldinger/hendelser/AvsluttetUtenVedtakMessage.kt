@@ -5,7 +5,7 @@ import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
-import no.nav.helse.modell.person.Person
+import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.modell.vedtak.AvsluttetUtenVedtak
 import java.util.UUID
 
@@ -37,7 +37,7 @@ class AvsluttetUtenVedtakMessage(
     override fun toJson(): String = json
 
     override fun behandle(
-        person: Person,
+        person: LegacyPerson,
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
     ) = person.avsluttetUtenVedtak(avsluttetUtenVedtak)

@@ -13,7 +13,7 @@ import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.ReserverPersonHvisTildeltCommand
 import no.nav.helse.modell.oppgave.OppdaterOppgavestatusCommand
-import no.nav.helse.modell.person.Person
+import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import java.time.LocalDateTime
 import java.util.UUID
@@ -48,7 +48,7 @@ class UtbetalingEndret(
     )
 
     override fun behandle(
-        person: Person,
+        person: LegacyPerson,
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
     ) {

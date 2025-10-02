@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import java.util.UUID
 
-class Person(
+class LegacyPerson(
     val aktørId: String,
     val fødselsnummer: String,
     vedtaksperioder: List<Vedtaksperiode>,
@@ -144,8 +144,8 @@ class Person(
             vedtaksperioder: List<VedtaksperiodeDto>,
             skjønnsfastsattSykepengegrunnlag: List<SkjønnsfastsattSykepengegrunnlagDto>,
             avviksvurderinger: List<Avviksvurdering>,
-        ): Person =
-            Person(
+        ): LegacyPerson =
+            LegacyPerson(
                 aktørId = aktørId,
                 fødselsnummer = fødselsnummer,
                 vedtaksperioder =

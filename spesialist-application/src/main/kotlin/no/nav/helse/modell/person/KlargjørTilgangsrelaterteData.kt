@@ -28,7 +28,7 @@ class KlargjørTilgangsrelaterteData(
     )
 
     override fun behandle(
-        person: Person,
+        person: LegacyPerson,
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
     ) {

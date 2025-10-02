@@ -12,7 +12,7 @@ import no.nav.helse.modell.kommando.AvbrytCommand
 import no.nav.helse.modell.kommando.AvbrytTotrinnsvurderingCommand
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
-import no.nav.helse.modell.person.Person
+import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import java.util.UUID
 
@@ -34,7 +34,7 @@ class VedtaksperiodeForkastet(
     override fun vedtaksperiodeId() = vedtaksperiodeId
 
     override fun behandle(
-        person: Person,
+        person: LegacyPerson,
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
     ) {

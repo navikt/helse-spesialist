@@ -2,7 +2,7 @@ package no.nav.helse.mediator.meldinger
 
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.Kommandostarter
-import no.nav.helse.modell.person.Person
+import no.nav.helse.modell.person.LegacyPerson
 import java.util.UUID
 
 interface Melding {
@@ -13,7 +13,7 @@ interface Melding {
 
 interface Personmelding : Melding {
     fun behandle(
-        person: Person,
+        person: LegacyPerson,
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
     )

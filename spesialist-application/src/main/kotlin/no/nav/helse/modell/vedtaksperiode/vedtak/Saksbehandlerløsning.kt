@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Personmelding
-import no.nav.helse.modell.person.Person
+import no.nav.helse.modell.person.LegacyPerson
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -66,7 +66,7 @@ class Saksbehandlerløsning(
     )
 
     override fun behandle(
-        person: Person,
+        person: LegacyPerson,
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext,
     ) = kommandostarter { løsGodkjenningsbehov(this@Saksbehandlerløsning, person, sessionContext) }

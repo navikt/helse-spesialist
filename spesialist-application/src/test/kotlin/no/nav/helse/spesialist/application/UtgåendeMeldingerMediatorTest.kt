@@ -11,7 +11,7 @@ import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.melding.VedtaksperiodeGodkjentAutomatisk
-import no.nav.helse.modell.person.Person
+import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import org.intellij.lang.annotations.Language
@@ -95,7 +95,7 @@ internal class UtgåendeMeldingerMediatorTest {
         }
 
         override fun behandle(
-            person: Person,
+            person: LegacyPerson,
             kommandostarter: Kommandostarter,
             sessionContext: SessionContext,
         ) {

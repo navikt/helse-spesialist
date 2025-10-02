@@ -3,7 +3,7 @@ package no.nav.helse.spesialist.application.kommando
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
-import no.nav.helse.modell.person.Person
+import no.nav.helse.modell.person.LegacyPerson
 import java.util.UUID
 
 internal class TestMelding(
@@ -16,7 +16,7 @@ internal class TestMelding(
 
     override fun vedtaksperiodeId(): UUID = vedtaksperiodeId
     override fun behandle(
-        person: Person,
+        person: LegacyPerson,
         kommandostarter: Kommandostarter,
         sessionContext: SessionContext
     ) {

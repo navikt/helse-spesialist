@@ -14,7 +14,7 @@ import no.nav.helse.mediator.withMDC
 import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.melding.VedtakFattetMelding
 import no.nav.helse.modell.melding.VedtakFattetMelding.SelvstendigNæringsdrivendeSykepengegrunnlagsfakta.PensjonsgivendeInntekt
-import no.nav.helse.modell.person.Person
+import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode.Companion.finnBehandling
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlag
@@ -134,7 +134,7 @@ class AvsluttetMedVedtakRiver(
         }
     }
 
-    private fun Person.byggVedtaksmelding(
+    private fun LegacyPerson.byggVedtaksmelding(
         packet: JsonMessage,
         behandling: LegacyBehandling,
         vedtaksperiode: Vedtaksperiode,
@@ -323,7 +323,7 @@ class AvsluttetMedVedtakRiver(
             omregnetÅrsinntekt = packet["sykepengegrunnlagsfakta"]["omregnetÅrsinntektTotalt"].asBigDecimal(),
         )
 
-    private fun Person.finnAvviksvurdering(behandling: LegacyBehandling): Avviksvurdering =
+    private fun LegacyPerson.finnAvviksvurdering(behandling: LegacyBehandling): Avviksvurdering =
         avviksvurderinger
             .filter { it.skjæringstidspunkt == behandling.skjæringstidspunkt() }
             .maxByOrNull { it.opprettet }
