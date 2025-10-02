@@ -47,6 +47,7 @@ class MeldingMediator(
         Caffeine
             .newBuilder()
             .refreshAfterWrite(poisonPillTimeToLive)
+            .expireAfterWrite(poisonPillTimeToLive + poisonPillTimeToLive)
             .build(CacheLoader { _ -> poisonPillDao.poisonPills() })
 
     fun skalBehandleMelding(melding: String): Boolean {

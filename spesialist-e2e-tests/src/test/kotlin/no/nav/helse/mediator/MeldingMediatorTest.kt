@@ -44,7 +44,7 @@ class MeldingMediatorTest : AbstractDatabaseTest() {
             ),
             poisonPillDao = poisonPillDao,
             ignorerMeldingerForUkjentePersoner = false,
-            poisonPillTimeToLive = Duration.ofMillis(50),
+            poisonPillTimeToLive = Duration.ofMillis(25),
         )
 
     @BeforeEach
@@ -73,7 +73,7 @@ class MeldingMediatorTest : AbstractDatabaseTest() {
         assertTrue(meldingMediator.skalBehandleMelding(""" { "@id": "ekkel id" } """))
         poisonPills["@id"] = setOf("ekkel id")
         assertTrue(meldingMediator.skalBehandleMelding(""" { "@id": "ekkel id" } """))
-        Thread.sleep(250)
+        Thread.sleep(60)
         assertFalse(meldingMediator.skalBehandleMelding(""" { "@id": "ekkel id" } """))
     }
 
