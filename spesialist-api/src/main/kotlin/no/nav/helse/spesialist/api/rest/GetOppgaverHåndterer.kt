@@ -14,14 +14,15 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveSorteringsfelt
 import no.nav.helse.spesialist.api.graphql.schema.ApiPersonnavn
 import no.nav.helse.spesialist.api.graphql.schema.ApiSorteringsrekkefolge
 import no.nav.helse.spesialist.api.graphql.schema.ApiTildeling
-import no.nav.helse.spesialist.application.logg.sikkerlogg
+import no.nav.helse.spesialist.domain.Dialog
+import no.nav.helse.spesialist.domain.DialogId
+import no.nav.helse.spesialist.domain.PåVent
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import java.time.ZoneId
 import java.util.UUID
 import kotlin.reflect.typeOf
-import kotlin.time.measureTimedValue
 
 class GetOppgaverHåndterer : GetHåndterer<GetOppgaverHåndterer.URLParametre, ApiOppgaveProjeksjonSide> {
     override val urlPath = "oppgaver?{args}"
@@ -58,160 +59,57 @@ class GetOppgaverHåndterer : GetHåndterer<GetOppgaverHåndterer.URLParametre, 
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
-    ): RestResponse<ApiOppgaveProjeksjonSide> {
-        sikkerlogg.debug("Henter OppgaverTilBehandling for ${saksbehandler.navn}")
-        val (oppgaver, tid) =
-            measureTimedValue {
-                transaksjon.oppgaveRepository
-                    .finnOppgaveProjeksjoner(
-                        minstEnAvEgenskapene =
-                            urlParametre.minstEnAvEgenskapene
-                                .orEmpty()
-                                .map { it.split(',').map { enumValueOf<ApiEgenskap>(it).tilEgenskap() }.toSet() },
-                        ingenAvEgenskapene =
-                            egenskaperSaksbehandlerIkkeSkalFåOppIOversikten(
-                                saksbehandler,
-                                tilgangsgrupper,
-                            ).plus(tilEgenskaper(urlParametre.ingenAvEgenskapene)).toSet(),
-                        erTildelt = urlParametre.erTildelt,
-                        tildeltTilOid = urlParametre.tildeltTilOid?.let(::SaksbehandlerOid),
-                        erPåVent = urlParametre.erPaaVent,
-                        ikkeSendtTilBeslutterAvOid = saksbehandler.id(),
-                        sorterPå =
-                            when (urlParametre.sorteringsfelt) {
-                                null,
-                                ApiOppgaveSorteringsfelt.opprettetTidspunkt,
-                                -> SorteringsnøkkelForDatabase.OPPRETTET
+    ): RestResponse<ApiOppgaveProjeksjonSide> =
+        RestResponse.ok(
+            transaksjon.oppgaveRepository
+                .finnOppgaveProjeksjoner(
+                    minstEnAvEgenskapene =
+                        urlParametre.minstEnAvEgenskapene
+                            .orEmpty()
+                            .map { it.tilEgenskaper() },
+                    ingenAvEgenskapene =
+                        Egenskap.entries
+                            .filterNot { it.skalDukkeOppFor(saksbehandler, tilgangsgrupper) }
+                            .plus(urlParametre.ingenAvEgenskapene.tilEgenskaper())
+                            .toSet(),
+                    erTildelt = urlParametre.erTildelt,
+                    tildeltTilOid = urlParametre.tildeltTilOid?.let(::SaksbehandlerOid),
+                    erPåVent = urlParametre.erPaaVent,
+                    ikkeSendtTilBeslutterAvOid = saksbehandler.id(),
+                    sorterPå =
+                        when (urlParametre.sorteringsfelt) {
+                            null,
+                            ApiOppgaveSorteringsfelt.opprettetTidspunkt,
+                            -> SorteringsnøkkelForDatabase.OPPRETTET
 
-                                ApiOppgaveSorteringsfelt.tildeling -> SorteringsnøkkelForDatabase.TILDELT_TIL
-                                ApiOppgaveSorteringsfelt.opprinneligSoeknadstidspunkt -> SorteringsnøkkelForDatabase.SØKNAD_MOTTATT
-                                ApiOppgaveSorteringsfelt.paVentInfo_tidsfrist -> SorteringsnøkkelForDatabase.TIDSFRIST
-                            },
-                        sorteringsrekkefølge =
-                            when (urlParametre.sorteringsrekkefoelge) {
-                                null,
-                                ApiSorteringsrekkefolge.STIGENDE,
-                                -> Sorteringsrekkefølge.STIGENDE
+                            ApiOppgaveSorteringsfelt.tildeling -> SorteringsnøkkelForDatabase.TILDELT_TIL
+                            ApiOppgaveSorteringsfelt.opprinneligSoeknadstidspunkt -> SorteringsnøkkelForDatabase.SØKNAD_MOTTATT
+                            ApiOppgaveSorteringsfelt.paVentInfo_tidsfrist -> SorteringsnøkkelForDatabase.TIDSFRIST
+                        },
+                    sorteringsrekkefølge =
+                        when (urlParametre.sorteringsrekkefoelge) {
+                            null,
+                            ApiSorteringsrekkefolge.STIGENDE,
+                            -> Sorteringsrekkefølge.STIGENDE
 
-                                ApiSorteringsrekkefolge.SYNKENDE -> Sorteringsrekkefølge.SYNKENDE
-                            },
-                        sidetall = urlParametre.sidetall?.takeUnless { it < 1 } ?: 1,
-                        sidestørrelse = urlParametre.sidestoerrelse?.takeUnless { it < 1 } ?: 10,
-                    ).tilApiType(transaksjon)
-            }
-        sikkerlogg.debug("Query OppgaverTilBehandling er ferdig etter ${tid.inWholeMilliseconds} ms")
-        val grense = 5000
-        if (tid.inWholeMilliseconds > grense) {
-            sikkerlogg.info("Det tok over $grense ms å hente oppgaver med disse queryparametrene: $urlParametre")
-        }
+                            ApiSorteringsrekkefolge.SYNKENDE -> Sorteringsrekkefølge.SYNKENDE
+                        },
+                    sidetall = urlParametre.sidetall?.takeUnless { it < 1 } ?: 1,
+                    sidestørrelse = urlParametre.sidestoerrelse?.takeUnless { it < 1 } ?: 10,
+                ).tilApiType(transaksjon),
+        )
 
-        return RestResponse.ok(oppgaver)
-    }
-
-    private fun tilEgenskaper(excludedEgenskaper: String?): List<Egenskap> =
-        excludedEgenskaper
+    private fun String?.tilEgenskaper(): Set<Egenskap> =
+        this
             ?.takeUnless { it.isEmpty() }
             ?.split(',')
             ?.toList()
             .orEmpty()
-            .map { enumValueOf<ApiEgenskap>(it).tilEgenskap() }
+            .map { it.tilEgenskap() }
+            .toSet()
 
-    private fun OppgaveRepository.Side<OppgaveRepository.OppgaveProjeksjon>.tilApiType(transaksjon: SessionContext): ApiOppgaveProjeksjonSide {
-        val påVenter =
-            transaksjon.påVentRepository
-                .finnAlle(elementer.mapNotNull { it.påVentId }.toSet())
-                .associateBy { it.id() }
-        val saksbehandlere =
-            transaksjon.saksbehandlerRepository
-                .finnAlle(elementer.mapNotNull { it.tildeltTilOid }.plus(påVenter.values.map { it.saksbehandlerOid }).toSet())
-                .associateBy { it.id() }
-        val dialoger =
-            transaksjon.dialogRepository
-                .finnAlle(påVenter.values.mapNotNull { it.dialogRef }.toSet())
-                .associateBy { it.id() }
-        val personer =
-            transaksjon.personRepository
-                .finnAlle(elementer.map { it.personId }.toSet())
-                .associateBy { it.id() }
-        return ApiOppgaveProjeksjonSide(
-            totaltAntall = totaltAntall,
-            sidetall = sidetall,
-            sidestoerrelse = sidestørrelse,
-            elementer =
-                elementer.map { oppgave ->
-                    val person =
-                        personer[oppgave.personId]
-                            ?: error("Feil i henting av person - skulle fått den som gjaldt oppgaven")
-                    ApiOppgaveProjeksjon(
-                        id = oppgave.id.toString(),
-                        aktorId = person.aktørId,
-                        navn =
-                            person.info?.let {
-                                ApiPersonnavn(
-                                    fornavn = it.fornavn,
-                                    etternavn = it.etternavn,
-                                    mellomnavn = it.mellomnavn,
-                                )
-                            } ?: error("Feil i henting av personinfo - skulle fått den som gjaldt oppgaven"),
-                        egenskaper =
-                            oppgave.egenskaper
-                                .map { egenskap -> egenskap.tilApiversjon() }
-                                .sortedBy { it.name },
-                        tildeling =
-                            oppgave.tildeltTilOid
-                                ?.let { tildeltTilOid ->
-                                    saksbehandlere[tildeltTilOid]
-                                        ?: error("Feil i henting av saksbehandlere - skulle fått den som hadde oppgaven tildelt")
-                                }?.let { tildelt ->
-                                    ApiTildeling(
-                                        navn = tildelt.navn,
-                                        epost = tildelt.epost,
-                                        oid = tildelt.id().value,
-                                    )
-                                },
-                        opprettetTidspunkt = oppgave.opprettetTidspunkt,
-                        opprinneligSoeknadstidspunkt = oppgave.opprinneligSøknadstidspunkt,
-                        paVentInfo =
-                            oppgave.påVentId
-                                ?.let { påVentId -> påVenter[påVentId] }
-                                ?.let { påVentInfo ->
-                                    ApiOppgaveProjeksjon.PaaVent(
-                                        arsaker = påVentInfo.årsaker,
-                                        tekst = påVentInfo.notattekst,
-                                        dialogRef =
-                                            påVentInfo.dialogRef?.value
-                                                ?: error("LagtPåVent ${påVentInfo.id()} har ingen dialogRef"),
-                                        saksbehandler =
-                                            saksbehandlere[påVentInfo.saksbehandlerOid]?.ident
-                                                ?: error("Feil i henting av saksbehandlere - skulle fått den som gjaldt på vent"),
-                                        opprettet = påVentInfo.opprettetTidspunkt.atZone(ZoneId.of("Europe/Oslo")).toLocalDateTime(),
-                                        tidsfrist = påVentInfo.frist,
-                                        kommentarer =
-                                            påVentInfo.dialogRef
-                                                ?.let {
-                                                    (
-                                                        dialoger[it]
-                                                            ?: error("Feil i henting av dialoger - skulle fått den som gjaldt på vent")
-                                                    ).kommentarer
-                                                        .map { kommentar ->
-                                                            ApiOppgaveProjeksjon.PaaVent.Kommentar(
-                                                                id = kommentar.id().value,
-                                                                tekst = kommentar.tekst,
-                                                                opprettet = kommentar.opprettetTidspunkt,
-                                                                saksbehandlerident = kommentar.saksbehandlerident,
-                                                                feilregistrert_tidspunkt = null,
-                                                            )
-                                                        }
-                                                }.orEmpty(),
-                                    )
-                                },
-                    )
-                },
-        )
-    }
-
-    private fun ApiEgenskap.tilEgenskap(): Egenskap =
-        when (this) {
+    private fun String.tilEgenskap(): Egenskap =
+        when (enumValueOf<ApiEgenskap>(this)) {
             ApiEgenskap.RISK_QA -> Egenskap.RISK_QA
             ApiEgenskap.FORTROLIG_ADRESSE -> Egenskap.FORTROLIG_ADRESSE
             ApiEgenskap.STRENGT_FORTROLIG_ADRESSE -> Egenskap.STRENGT_FORTROLIG_ADRESSE
@@ -246,22 +144,125 @@ class GetOppgaverHåndterer : GetHåndterer<GetOppgaverHåndterer.URLParametre, 
             ApiEgenskap.ARBEIDSTAKER -> Egenskap.ARBEIDSTAKER
         }
 
-    private fun egenskaperSaksbehandlerIkkeSkalFåOppIOversikten(
+    private fun OppgaveRepository.Side<OppgaveRepository.OppgaveProjeksjon>.tilApiType(transaksjon: SessionContext): ApiOppgaveProjeksjonSide {
+        val personer =
+            transaksjon.personRepository
+                .finnAlle(elementer.map { it.personId }.toSet())
+                .associateBy { it.id() }
+
+        val påVenter =
+            transaksjon.påVentRepository
+                .finnAlle(elementer.mapNotNull { it.påVentId }.toSet())
+                .associateBy { it.id() }
+
+        val dialoger =
+            transaksjon.dialogRepository
+                .finnAlle(påVenter.values.mapNotNull { it.dialogRef }.toSet())
+                .associateBy { it.id() }
+
+        val saksbehandlere =
+            transaksjon.saksbehandlerRepository
+                .finnAlle(
+                    elementer
+                        .mapNotNull { it.tildeltTilOid }
+                        .plus(påVenter.values.map { it.saksbehandlerOid })
+                        .toSet(),
+                ).associateBy { it.id() }
+
+        return ApiOppgaveProjeksjonSide(
+            totaltAntall = totaltAntall,
+            sidetall = sidetall,
+            sidestoerrelse = sidestørrelse,
+            elementer =
+                elementer.map { oppgave ->
+                    val person = personer.getRequired(oppgave.personId)
+                    ApiOppgaveProjeksjon(
+                        id = oppgave.id.toString(),
+                        aktorId = person.aktørId,
+                        navn =
+                            person.info?.let { personInfo ->
+                                ApiPersonnavn(
+                                    fornavn = personInfo.fornavn,
+                                    etternavn = personInfo.etternavn,
+                                    mellomnavn = personInfo.mellomnavn,
+                                )
+                            } ?: error("Person med id ${oppgave.personId} har ingen info"),
+                        egenskaper =
+                            oppgave.egenskaper
+                                .map { egenskap -> egenskap.tilApiversjon() }
+                                .sortedBy { it.name },
+                        tildeling =
+                            oppgave.tildeltTilOid
+                                ?.let { saksbehandlere.getRequired(it) }
+                                ?.let { tildeltSaksbehandler ->
+                                    ApiTildeling(
+                                        navn = tildeltSaksbehandler.navn,
+                                        epost = tildeltSaksbehandler.epost,
+                                        oid = tildeltSaksbehandler.id().value,
+                                    )
+                                },
+                        opprettetTidspunkt = oppgave.opprettetTidspunkt,
+                        opprinneligSoeknadstidspunkt = oppgave.opprinneligSøknadstidspunkt,
+                        paVentInfo =
+                            oppgave.påVentId
+                                ?.let { påVentId -> påVenter[påVentId] }
+                                ?.tilPaaVent(saksbehandlere, dialoger),
+                    )
+                },
+        )
+    }
+
+    private fun PåVent.tilPaaVent(
+        saksbehandlere: Map<SaksbehandlerOid, Saksbehandler>,
+        dialoger: Map<DialogId, Dialog>,
+    ): ApiOppgaveProjeksjon.PaaVent =
+        ApiOppgaveProjeksjon.PaaVent(
+            arsaker = årsaker,
+            tekst = notattekst,
+            dialogRef = dialogRef?.value ?: error("LagtPåVent ${id()} har ingen dialogRef"),
+            saksbehandler = saksbehandlere.getRequired(saksbehandlerOid).ident,
+            opprettet =
+                opprettetTidspunkt
+                    .atZone(ZoneId.of("Europe/Oslo"))
+                    .toLocalDateTime(),
+            tidsfrist = frist,
+            kommentarer =
+                dialogRef
+                    ?.let {
+                        dialoger
+                            .getRequired(it)
+                            .kommentarer
+                            .map { kommentar ->
+                                ApiOppgaveProjeksjon.PaaVent.Kommentar(
+                                    id = kommentar.id().value,
+                                    tekst = kommentar.tekst,
+                                    opprettet = kommentar.opprettetTidspunkt,
+                                    saksbehandlerident = kommentar.saksbehandlerident,
+                                    feilregistrert_tidspunkt = null,
+                                )
+                            }
+                    }.orEmpty(),
+        )
+
+    private fun <K, V> Map<K, V>.getRequired(key: K): V =
+        getOrElse(key) {
+            error("Fant ikke igjen nøkkel $key i map. Det betyr antageligvis at den ikke ble funnet i databasen.")
+        }
+
+    private fun Egenskap.skalDukkeOppFor(
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
-    ): List<Egenskap> =
-        Egenskap.entries.filterNot {
-            Oppgave.harTilgangTilEgenskap(
-                egenskap = it,
-                saksbehandler = saksbehandler,
-                saksbehandlerTilgangsgrupper = tilgangsgrupper,
-            ) &&
-                when (it) {
-                    Egenskap.BESLUTTER -> Tilgangsgruppe.BESLUTTER in tilgangsgrupper
-                    Egenskap.STIKKPRØVE -> Tilgangsgruppe.STIKKPRØVE in tilgangsgrupper
-                    else -> true
-                }
-        }
+    ): Boolean =
+        Oppgave.harTilgangTilEgenskap(
+            egenskap = this,
+            saksbehandler = saksbehandler,
+            saksbehandlerTilgangsgrupper = tilgangsgrupper,
+        ) &&
+            when (this) {
+                Egenskap.BESLUTTER -> Tilgangsgruppe.BESLUTTER in tilgangsgrupper
+                Egenskap.STIKKPRØVE -> Tilgangsgruppe.STIKKPRØVE in tilgangsgrupper
+                else -> true
+            }
 
     private fun Parameters.getList(name: String): List<String> {
         val lowercaseName = name.lowercase()
