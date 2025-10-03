@@ -43,7 +43,7 @@ internal fun Application.installPlugins() {
         logger = sikkerlogg
         level = Level.INFO
         callIdMdc("callId")
-        filter { call -> call.request.path().let { it.startsWith("/graphql") || it.startsWith("/ws/") } }
+        filter { call -> call.request.path().let { it.startsWith("/graphql") || it.startsWith("/ws/") || it.startsWith("/api/") } }
     }
     install(DoubleReceive)
     install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
