@@ -23,6 +23,13 @@ data class ApiSaksbehandler(
     val ident: String?,
 )
 
+@GraphQLName("AktivSaksbehandler")
+data class ApiAktivSaksbehandler(
+    val navn: String,
+    val ident: String,
+    val oid: UUID,
+)
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @GraphQLName("Reservasjon")
 data class ApiReservasjon(
