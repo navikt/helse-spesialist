@@ -158,9 +158,13 @@ class PgOppgaveRepository private constructor(
                     LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
                     LEFT JOIN totrinnsvurdering ttv ON (ttv.person_ref = v.person_ref AND ttv.tilstand != 'GODKJENT')
                     LEFT JOIN pa_vent pv ON v.vedtaksperiode_id = pv.vedtaksperiode_id
-                    WHERE o.status = 'AvventerSaksbehandler'
+                    
                     """.trimIndent(),
                 )
+                if (sorterPå == SorteringsnøkkelForDatabase.TILDELT_TIL) {
+                    append("LEFT JOIN saksbehandler s ON t.saksbehandler_ref = s.oid\n")
+                }
+                append("WHERE o.status = 'AvventerSaksbehandler'\n")
                 minstEnAvEgenskapene.filter { it.isNotEmpty() }.forEachIndexed { index, minstEnAvEgenskapeneGruppe ->
                     // inkluder alle oppgaver som har minst en av de valgte oppgavetype
                     val parameterName = "minstEnAvEgenskapene$index"
@@ -293,9 +297,9 @@ class PgOppgaveRepository private constructor(
 
     private fun SorteringsnøkkelForDatabase.tilOrderByKolonne(): String =
         when (this) {
-            SorteringsnøkkelForDatabase.TILDELT_TIL -> "navn"
+            SorteringsnøkkelForDatabase.TILDELT_TIL -> "s.navn"
             SorteringsnøkkelForDatabase.OPPRETTET -> "første_opprettet"
-            SorteringsnøkkelForDatabase.TIDSFRIST -> "frist"
+            SorteringsnøkkelForDatabase.TIDSFRIST -> "pv.frist"
             SorteringsnøkkelForDatabase.SØKNAD_MOTTATT -> "opprinnelig_soknadsdato"
         }
 

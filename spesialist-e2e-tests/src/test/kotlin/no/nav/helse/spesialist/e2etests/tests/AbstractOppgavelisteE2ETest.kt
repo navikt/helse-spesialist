@@ -2,12 +2,15 @@ package no.nav.helse.spesialist.e2etests.tests
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.modell.oppgave.Egenskap
+import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveSorteringsfelt
 import no.nav.helse.spesialist.api.testfixtures.lagSaksbehandler
 import no.nav.helse.spesialist.e2etests.AbstractE2EIntegrationTest
 import no.nav.helse.spesialist.kafka.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -22,7 +25,8 @@ abstract class AbstractOppgavelisteE2ETest : AbstractE2EIntegrationTest() {
         forventetDukketOpp: Boolean,
         tildelt: Boolean? = null,
         egenskaper: Set<Egenskap> = emptySet(),
-        ingenAvEgenskapene: Set<Egenskap> = emptySet()
+        ingenAvEgenskapene: Set<Egenskap> = emptySet(),
+        sorteringsfelt: ApiOppgaveSorteringsfelt? = null,
     ): JsonNode?
 
     enum class Fane { TIL_GODKJENNING, MINE_OPPGAVER, PÅ_VENT }
@@ -215,6 +219,21 @@ abstract class AbstractOppgavelisteE2ETest : AbstractE2EIntegrationTest() {
                 Egenskap.UTBETALING_TIL_SYKMELDT
             ),
             ingenAvEgenskapene = setOf(Egenskap.REVURDERING)
+        )
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = ApiOppgaveSorteringsfelt::class)
+    fun `oppgave sortert på sorteringsfelt dukker opp i Til godkjenning`(sorteringsfelt: ApiOppgaveSorteringsfelt) {
+        // Given:
+        risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
+        søknadOgGodkjenningbehovKommerInn()
+
+        // Then:
+        hentOgAssertOppgaveIOppgaveliste(
+            fane = Fane.TIL_GODKJENNING,
+            forventetDukketOpp = true,
+            sorteringsfelt = sorteringsfelt
         )
     }
 

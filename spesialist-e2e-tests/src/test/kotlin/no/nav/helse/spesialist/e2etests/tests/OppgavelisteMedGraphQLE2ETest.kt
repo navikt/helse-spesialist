@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.e2etests.tests
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.helse.modell.oppgave.Egenskap
+import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveSorteringsfelt
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -178,7 +179,8 @@ class OppgavelisteMedGraphQLE2ETest : AbstractOppgavelisteE2ETest() {
         forventetDukketOpp: Boolean,
         tildelt: Boolean?,
         egenskaper: Set<Egenskap>,
-        ingenAvEgenskapene: Set<Egenskap>
+        ingenAvEgenskapene: Set<Egenskap>,
+        sorteringsfelt: ApiOppgaveSorteringsfelt?
     ): JsonNode? {
         // When:
         val response = callGraphQL(
@@ -200,7 +202,16 @@ class OppgavelisteMedGraphQLE2ETest : AbstractOppgavelisteE2ETest() {
                 ),
                 "sortering" to listOf(
                     mapOf(
-                        "nokkel" to "OPPRETTET",
+                        "nokkel" to when (sorteringsfelt) {
+                            ApiOppgaveSorteringsfelt.opprettetTidspunkt,
+                            null
+                                -> "OPPRETTET"
+
+                            ApiOppgaveSorteringsfelt.tildeling -> "TILDELT_TIL"
+
+                            ApiOppgaveSorteringsfelt.opprinneligSoeknadstidspunkt -> "SOKNAD_MOTTATT"
+                            ApiOppgaveSorteringsfelt.paVentInfo_tidsfrist -> "TIDSFRIST"
+                        },
                         "stigende" to false
                     )
                 )

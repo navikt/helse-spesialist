@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.e2etests.tests
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.helse.modell.oppgave.Egenskap
+import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveSorteringsfelt
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -115,7 +116,8 @@ class OppgavelisteMedRESTE2ETest : AbstractOppgavelisteE2ETest() {
         forventetDukketOpp: Boolean,
         tildelt: Boolean?,
         egenskaper: Set<Egenskap>,
-        ingenAvEgenskapene: Set<Egenskap>
+        ingenAvEgenskapene: Set<Egenskap>,
+        sorteringsfelt: ApiOppgaveSorteringsfelt?
     ): JsonNode? {
         val minstEnAvEgenskapene = egenskaper.groupBy { it.kategori }.map { it.value }
         // When:
@@ -135,6 +137,9 @@ class OppgavelisteMedRESTE2ETest : AbstractOppgavelisteE2ETest() {
             }
             add("sidetall=1")
             add("sidestoerrelse=1000")
+            if (sorteringsfelt != null) {
+                add("sorteringsfelt=$sorteringsfelt")
+            }
         }.joinToString(prefix = "?", separator = "&"))
 
         // Then:
