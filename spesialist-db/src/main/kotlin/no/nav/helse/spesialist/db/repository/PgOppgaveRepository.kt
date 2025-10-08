@@ -195,9 +195,9 @@ class PgOppgaveRepository private constructor(
                 }
                 if (erTildelt != null) {
                     if (erTildelt) {
-                        append("AND t.saksbehandler_ref IS NOT NULL\n")
+                        append("AND t.oppgave_id_ref IS NOT NULL\n")
                     } else {
-                        append("AND t.saksbehandler_ref IS NULL\n")
+                        append("AND t.oppgave_id_ref IS NULL\n")
                     }
                 }
                 append("ORDER BY ${tilOrderBy(sorterPå, sorteringsrekkefølge)}\n")
