@@ -14,6 +14,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveSorteringsfelt
 import no.nav.helse.spesialist.api.graphql.schema.ApiPersonnavn
 import no.nav.helse.spesialist.api.graphql.schema.ApiSorteringsrekkefolge
 import no.nav.helse.spesialist.api.graphql.schema.ApiTildeling
+import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.domain.Dialog
 import no.nav.helse.spesialist.domain.DialogId
 import no.nav.helse.spesialist.domain.PåVent
@@ -23,6 +24,7 @@ import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import java.time.ZoneId
 import java.util.UUID
 import kotlin.reflect.typeOf
+import kotlin.time.measureTimedValue
 
 class GetOppgaverHåndterer : GetHåndterer<GetOppgaverHåndterer.URLParametre, ApiOppgaveProjeksjonSide> {
     override val urlPath = "oppgaver?{args}"
@@ -59,45 +61,51 @@ class GetOppgaverHåndterer : GetHåndterer<GetOppgaverHåndterer.URLParametre, 
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
-    ): RestResponse<ApiOppgaveProjeksjonSide> =
-        RestResponse.ok(
-            transaksjon.oppgaveRepository
-                .finnOppgaveProjeksjoner(
-                    minstEnAvEgenskapene =
-                        urlParametre.minstEnAvEgenskapene
-                            .orEmpty()
-                            .map { it.tilEgenskaper() },
-                    ingenAvEgenskapene =
-                        Egenskap.entries
-                            .filterNot { it.skalDukkeOppFor(saksbehandler, tilgangsgrupper) }
-                            .plus(urlParametre.ingenAvEgenskapene.tilEgenskaper())
-                            .toSet(),
-                    erTildelt = urlParametre.erTildelt,
-                    tildeltTilOid = urlParametre.tildeltTilOid?.let(::SaksbehandlerOid),
-                    erPåVent = urlParametre.erPaaVent,
-                    ikkeSendtTilBeslutterAvOid = saksbehandler.id(),
-                    sorterPå =
-                        when (urlParametre.sorteringsfelt) {
-                            null,
-                            ApiOppgaveSorteringsfelt.opprettetTidspunkt,
-                            -> SorteringsnøkkelForDatabase.OPPRETTET
+    ): RestResponse<ApiOppgaveProjeksjonSide> {
+        val (finnOppgaveProjeksjoner, tidsbruk) =
+            measureTimedValue {
+                transaksjon.oppgaveRepository
+                    .finnOppgaveProjeksjoner(
+                        minstEnAvEgenskapene =
+                            urlParametre.minstEnAvEgenskapene
+                                .orEmpty()
+                                .map { it.tilEgenskaper() },
+                        ingenAvEgenskapene =
+                            Egenskap.entries
+                                .filterNot { it.skalDukkeOppFor(saksbehandler, tilgangsgrupper) }
+                                .plus(urlParametre.ingenAvEgenskapene.tilEgenskaper())
+                                .toSet(),
+                        erTildelt = urlParametre.erTildelt,
+                        tildeltTilOid = urlParametre.tildeltTilOid?.let(::SaksbehandlerOid),
+                        erPåVent = urlParametre.erPaaVent,
+                        ikkeSendtTilBeslutterAvOid = saksbehandler.id(),
+                        sorterPå =
+                            when (urlParametre.sorteringsfelt) {
+                                null,
+                                ApiOppgaveSorteringsfelt.opprettetTidspunkt,
+                                -> SorteringsnøkkelForDatabase.OPPRETTET
 
-                            ApiOppgaveSorteringsfelt.tildeling -> SorteringsnøkkelForDatabase.TILDELT_TIL
-                            ApiOppgaveSorteringsfelt.opprinneligSoeknadstidspunkt -> SorteringsnøkkelForDatabase.SØKNAD_MOTTATT
-                            ApiOppgaveSorteringsfelt.paVentInfo_tidsfrist -> SorteringsnøkkelForDatabase.TIDSFRIST
-                        },
-                    sorteringsrekkefølge =
-                        when (urlParametre.sorteringsrekkefoelge) {
-                            null,
-                            ApiSorteringsrekkefolge.STIGENDE,
-                            -> Sorteringsrekkefølge.STIGENDE
+                                ApiOppgaveSorteringsfelt.tildeling -> SorteringsnøkkelForDatabase.TILDELT_TIL
+                                ApiOppgaveSorteringsfelt.opprinneligSoeknadstidspunkt -> SorteringsnøkkelForDatabase.SØKNAD_MOTTATT
+                                ApiOppgaveSorteringsfelt.paVentInfo_tidsfrist -> SorteringsnøkkelForDatabase.TIDSFRIST
+                            },
+                        sorteringsrekkefølge =
+                            when (urlParametre.sorteringsrekkefoelge) {
+                                null,
+                                ApiSorteringsrekkefolge.STIGENDE,
+                                -> Sorteringsrekkefølge.STIGENDE
 
-                            ApiSorteringsrekkefolge.SYNKENDE -> Sorteringsrekkefølge.SYNKENDE
-                        },
-                    sidetall = urlParametre.sidetall?.takeUnless { it < 1 } ?: 1,
-                    sidestørrelse = urlParametre.sidestoerrelse?.takeUnless { it < 1 } ?: 10,
-                ).tilApiType(transaksjon),
+                                ApiSorteringsrekkefolge.SYNKENDE -> Sorteringsrekkefølge.SYNKENDE
+                            },
+                        sidetall = urlParametre.sidetall?.takeUnless { it < 1 } ?: 1,
+                        sidestørrelse = urlParametre.sidestoerrelse?.takeUnless { it < 1 } ?: 10,
+                    )
+            }
+        logg.info("Hentet oppgaver på ${tidsbruk.inWholeMilliseconds} ms.\n Bruke følgende filtre: $urlParametre")
+        return RestResponse.ok(
+            finnOppgaveProjeksjoner.tilApiType(transaksjon),
         )
+    }
 
     private fun String?.tilEgenskaper(): Set<Egenskap> =
         this
@@ -146,28 +154,48 @@ class GetOppgaverHåndterer : GetHåndterer<GetOppgaverHåndterer.URLParametre, 
 
     private fun OppgaveRepository.Side<OppgaveRepository.OppgaveProjeksjon>.tilApiType(transaksjon: SessionContext): ApiOppgaveProjeksjonSide {
         val personer =
-            transaksjon.personRepository
-                .finnAlle(elementer.map { it.personId }.toSet())
-                .associateBy { it.id() }
+            measureTimedValue {
+                transaksjon.personRepository
+                    .finnAlle(elementer.map { it.personId }.toSet())
+                    .associateBy { it.id() }
+            }.let {
+                logg.info("Hentet personer for oppgaver. Brukte ${it.duration.inWholeMilliseconds} ms.")
+                it.value
+            }
 
         val påVenter =
-            transaksjon.påVentRepository
-                .finnAlle(elementer.mapNotNull { it.påVentId }.toSet())
-                .associateBy { it.id() }
+            measureTimedValue {
+                transaksjon.påVentRepository
+                    .finnAlle(elementer.mapNotNull { it.påVentId }.toSet())
+                    .associateBy { it.id() }
+            }.let {
+                logg.info("Hentet påventer for oppgaver. Brukte ${it.duration.inWholeMilliseconds} ms.")
+                it.value
+            }
 
         val dialoger =
-            transaksjon.dialogRepository
-                .finnAlle(påVenter.values.mapNotNull { it.dialogRef }.toSet())
-                .associateBy { it.id() }
+            measureTimedValue {
+                transaksjon.dialogRepository
+                    .finnAlle(påVenter.values.mapNotNull { it.dialogRef }.toSet())
+                    .associateBy { it.id() }
+            }.let {
+                logg.info("Hentet dialoger for oppgaver. Brukte ${it.duration.inWholeMilliseconds} ms.")
+                it.value
+            }
 
         val saksbehandlere =
-            transaksjon.saksbehandlerRepository
-                .finnAlle(
-                    elementer
-                        .mapNotNull { it.tildeltTilOid }
-                        .plus(påVenter.values.map { it.saksbehandlerOid })
-                        .toSet(),
-                ).associateBy { it.id() }
+            measureTimedValue {
+                transaksjon.saksbehandlerRepository
+                    .finnAlle(
+                        elementer
+                            .mapNotNull { it.tildeltTilOid }
+                            .plus(påVenter.values.map { it.saksbehandlerOid })
+                            .toSet(),
+                    ).associateBy { it.id() }
+            }.let {
+                logg.info("Hentet saksbehandlere for oppgaver. Brukte ${it.duration.inWholeMilliseconds} ms.")
+                it.value
+            }
 
         return ApiOppgaveProjeksjonSide(
             totaltAntall = totaltAntall,
