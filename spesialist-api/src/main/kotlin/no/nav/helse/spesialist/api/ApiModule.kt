@@ -38,6 +38,7 @@ class ApiModule(
         val issuerUrl: String,
         val jwkProviderUri: String,
         val tokenEndpoint: String,
+        val eksponerOpenApi: Boolean,
     )
 
     val oppgaveService =

@@ -52,6 +52,7 @@ class ApiModuleIntegrationTestFixture(
         issuerUrl = mockOAuth2Server.issuerUrl(ISSUER_ID).toString(),
         jwkProviderUri = mockOAuth2Server.jwksUrl(ISSUER_ID).toString(),
         tokenEndpoint = mockOAuth2Server.tokenEndpointUrl(ISSUER_ID).toString(),
+        eksponerOpenApi = true,
     )
 
     fun addAdditionalRoutings(application: Application) {

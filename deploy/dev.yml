@@ -131,3 +131,5 @@ spec:
       value: "true"
     - name: JDK_JAVA_OPTIONS
       value: -agentpath:/opt/cprof/profiler_java_agent.so=-cprof_service=spesialist,-cprof_enable_heap_sampling=true,-logtostderr,-minloglevel=1,-cprof_project_id=tbd-dev-7ff9
+    - name: EKSPONER_OPENAPI
+      value: "true"

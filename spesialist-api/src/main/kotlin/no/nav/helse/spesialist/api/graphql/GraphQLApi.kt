@@ -70,7 +70,7 @@ fun kobleOppApi(
     spesialistSchema: SpesialistSchema,
     restDelegator: RestDelegator,
 ) {
-    ktorApplication.installPlugins()
+    ktorApplication.installPlugins(apiModuleConfiguration.eksponerOpenApi)
     ktorApplication.azureAdAppAuthentication(apiModuleConfiguration)
     val graphQLPlugin =
         ktorApplication.install(GraphQL) {
@@ -93,7 +93,7 @@ fun kobleOppApi(
                 queryHandler(graphQLPlugin.server)
             }
         }
-        restRoutes(restDelegator)
+        restRoutes(restDelegator, apiModuleConfiguration.eksponerOpenApi)
     }
 }
 

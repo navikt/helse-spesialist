@@ -49,6 +49,7 @@ object TestRunner {
         issuerUrl = mockOAuth2Server.issuerUrl(issuerId).toString(),
         jwkProviderUri = mockOAuth2Server.jwksUrl(issuerId).toString(),
         tokenEndpoint = mockOAuth2Server.tokenEndpointUrl(issuerId).toString(),
+        eksponerOpenApi = true,
     )
 
     private val tilgangsgruppeUuider = randomTilgangsgruppeUuider()

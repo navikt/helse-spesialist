@@ -31,6 +31,7 @@ fun main() {
                         issuerUrl = env.getValue("AZURE_OPENID_CONFIG_ISSUER"),
                         jwkProviderUri = env.getValue("AZURE_OPENID_CONFIG_JWKS_URI"),
                         tokenEndpoint = env.getValue("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
+                        eksponerOpenApi = env.getBoolean("EKSPONER_OPENAPI"),
                     ),
                 clientEntraID =
                     ClientEntraIDModule.Configuration(
@@ -41,7 +42,7 @@ fun main() {
                     ),
                 clientKrr =
                     ClientKrrModule.Configuration(
-                        if (env.getBoolean("BRUK_DUMMY_FOR_KONTAKT_OG_RESERVASJONSREGISTERET", false)) {
+                        if (env.getBoolean("BRUK_DUMMY_FOR_KONTAKT_OG_RESERVASJONSREGISTERET")) {
                             null
                         } else {
                             ClientKrrModule.Configuration.Client(
@@ -54,7 +55,7 @@ fun main() {
                     ClientSpleisModule.Configuration(
                         spleisUrl = URI.create(env.getValue("SPLEIS_API_URL")),
                         spleisClientId = env.getValue("SPLEIS_CLIENT_ID"),
-                        loggRespons = env.getBoolean("SPLEIS_CLIENT_LOGG_RESPONS", false),
+                        loggRespons = env.getBoolean("SPLEIS_CLIENT_LOGG_RESPONS"),
                     ),
                 db =
                     DBModule.Configuration(
@@ -72,10 +73,7 @@ fun main() {
                     KafkaModule.Configuration(
                         versjonAvKode = versjonAvKode,
                         ignorerMeldingerForUkjentePersoner =
-                            env.getBoolean(
-                                "IGNORER_MELDINGER_FOR_UKJENTE_PERSONER",
-                                false,
-                            ),
+                            env.getBoolean("IGNORER_MELDINGER_FOR_UKJENTE_PERSONER"),
                     ),
                 versjonAvKode = versjonAvKode,
                 tilgangsgruppeUuider =
@@ -105,10 +103,7 @@ fun main() {
 
 private fun Map<String, String>.getUUID(key: String): UUID = UUID.fromString(getValue(key))
 
-private fun Map<String, String>.getBoolean(
-    key: String,
-    defaultValue: Boolean,
-): Boolean = this[key]?.toBoolean() ?: defaultValue
+private fun Map<String, String>.getBoolean(key: String): Boolean = this[key].toBoolean()
 
 class RapidApp {
     class Modules(

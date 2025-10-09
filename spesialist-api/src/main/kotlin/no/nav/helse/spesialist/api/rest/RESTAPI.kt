@@ -1,10 +1,13 @@
 package no.nav.helse.spesialist.api.rest
 
+import io.github.smiley4.ktoropenapi.get
+import io.github.smiley4.ktoropenapi.openApi
+import io.github.smiley4.ktoropenapi.post
+import io.github.smiley4.ktorswaggerui.swaggerUI
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.Parameters
 import io.ktor.server.auth.authenticate
 import io.ktor.server.routing.Routing
-import io.ktor.server.routing.get
-import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import no.nav.helse.spesialist.api.rest.tilkommeninntekt.GetPersonTilkomneInntektskilderHåndterer
 import no.nav.helse.spesialist.api.rest.tilkommeninntekt.PostTilkommenInntektEndreHåndterer
@@ -25,18 +28,44 @@ val RESTHÅNDTERERE =
         PostTilkommenInntektGjenopprettHåndterer(),
     )
 
-fun Routing.restRoutes(restDelegator: RestDelegator) {
-    route("api") {
+fun Routing.restRoutes(
+    restDelegator: RestDelegator,
+    eksponerOpenApi: Boolean,
+) {
+    route("/api") {
+        if (eksponerOpenApi) {
+            route("/openapi.json") {
+                openApi()
+            }
+            route("swagger") {
+                swaggerUI("/api/openapi.json")
+            }
+        }
         authenticate("oidc") {
             RESTHÅNDTERERE.forEach {
                 when (it) {
                     is GetHåndterer<*, *> ->
-                        get(it.urlPath.substringBefore('?')) {
+                        get(it.urlPath.substringBefore('?'), {
+                            response {
+                                code(HttpStatusCode.OK) {
+                                    body(it.responseBodyType)
+                                }
+                            }
+                        }) {
                             restDelegator.utførGet(call = call, håndterer = it)
                         }
 
                     is PostHåndterer<*, *, *> ->
-                        post(it.urlPath.substringBefore('?')) {
+                        post(it.urlPath.substringBefore('?'), {
+                            request {
+                                body(it.requestBodyType)
+                            }
+                            response {
+                                code(HttpStatusCode.OK) {
+                                    body(it.responseBodyType)
+                                }
+                            }
+                        }) {
                             restDelegator.utførPost(call = call, håndterer = it)
                         }
                 }

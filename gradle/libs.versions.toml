@@ -5,6 +5,8 @@ jackson = "2.20.0"
 ktor = "3.3.0"
 tbdLibs = "2025.09.19-13.31-61342e73"
 testcontainers = "1.21.3"
+smiley4KtorOpenapiTools = "5.3.0"
+smiley4SchemaKenerator = "2.4.0"
 
 [libraries]
 auth0-jwt = "com.auth0:java-jwt:4.5.0"
@@ -52,6 +54,13 @@ postgresJdbcDriver = "org.postgresql:postgresql:42.7.8"
 postgresSocketFactory = "com.google.cloud.sql:postgres-socket-factory:1.25.3"
 rapidsAndRivers = "com.github.navikt:rapids-and-rivers:2025091514481757940492.363722e3ca80"
 slf4jApi = "org.slf4j:slf4j-api:2.0.17"
+
+smiley4-ktor-openapi = { module = "io.github.smiley4:ktor-openapi", version.ref = "smiley4KtorOpenapiTools" }
+smiley4-ktor-swagger-ui = { module = "io.github.smiley4:ktor-swagger-ui", version.ref = "smiley4KtorOpenapiTools" }
+smiley4-schema-kenerator-core = { module = "io.github.smiley4:schema-kenerator-core", version.ref = "smiley4SchemaKenerator" }
+smiley4-schema-kenerator-reflection = { module = "io.github.smiley4:schema-kenerator-reflection", version.ref = "smiley4SchemaKenerator" }
+smiley4-schema-kenerator-serialization = { module = "io.github.smiley4:schema-kenerator-serialization", version.ref = "smiley4SchemaKenerator" }
+smiley4-schema-kenerator-swagger = { module = "io.github.smiley4:schema-kenerator-swagger", version.ref = "smiley4SchemaKenerator" }
 
 tbdLibs-jackson = { module = "com.github.navikt.tbd-libs:jackson", version.ref = "tbdLibs" }
 tbdLibs-rapidsAndRiversTest = { module = "com.github.navikt.tbd-libs:rapids-and-rivers-test", version.ref = "tbdLibs" }
@@ -103,6 +112,14 @@ logback = [
     "logback-classic",
     "logback-logstashEncoder",
     "slf4jApi"
+]
+smiley4-ktor-openapi-tools = [
+    "smiley4-ktor-openapi",
+    "smiley4-ktor-swagger-ui",
+    "smiley4-schema-kenerator-core",
+    "smiley4-schema-kenerator-reflection",
+    "smiley4-schema-kenerator-serialization",
+    "smiley4-schema-kenerator-swagger"
 ]
 
 [plugins]
