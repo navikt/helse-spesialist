@@ -11,7 +11,7 @@ import no.nav.helse.db.SessionContext
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.spesialist.api.graphql.ContextFactory.Companion.gruppeUuider
 import no.nav.helse.spesialist.api.graphql.ContextFactory.Companion.tilSaksbehandler
-import no.nav.helse.spesialist.application.KøetMeldingPubliserer
+import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.loggThrowable
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
 import no.nav.helse.spesialist.domain.Saksbehandler
@@ -42,13 +42,13 @@ class RestAdapter(
         call: RoutingCall,
         behandler: DeleteBehandler<RESOURCE, RESPONSE>,
     ) {
-        wrapOgDeleger(call) { saksbehandler, tilgangsgrupper, transaksjon, meldingsKø ->
+        wrapOgDeleger(call) { saksbehandler, tilgangsgrupper, transaksjon, outbox ->
             behandler.behandle(
                 resource = resource,
                 saksbehandler = saksbehandler,
                 tilgangsgrupper = tilgangsgrupper,
                 transaksjon = transaksjon,
-                meldingsKø = meldingsKø,
+                outbox = outbox,
             )
         }
     }
@@ -59,21 +59,21 @@ class RestAdapter(
         behandler: RestBehandlerMedBody<RESOURCE, REQUEST, RESPONSE>,
     ) {
         val request: REQUEST = call.receive()
-        wrapOgDeleger(call) { saksbehandler, tilgangsgrupper, transaksjon, meldingsKø ->
+        wrapOgDeleger(call) { saksbehandler, tilgangsgrupper, transaksjon, outbox ->
             behandler.behandle(
                 resource = resource,
                 request = request,
                 saksbehandler = saksbehandler,
                 tilgangsgrupper = tilgangsgrupper,
                 transaksjon = transaksjon,
-                meldingsKø = meldingsKø,
+                outbox = outbox,
             )
         }
     }
 
     suspend fun <RESPONSE> wrapOgDeleger(
         call: RoutingCall,
-        behandler: (Saksbehandler, Set<Tilgangsgruppe>, SessionContext, KøetMeldingPubliserer) -> RestResponse<RESPONSE>,
+        behandler: (Saksbehandler, Set<Tilgangsgruppe>, SessionContext, Outbox) -> RestResponse<RESPONSE>,
     ) {
         val jwt = (call.principal<JWTPrincipal>() ?: throw HttpUnauthorized()).payload
 
@@ -85,16 +85,16 @@ class RestAdapter(
         }
 
         runCatching {
-            val meldingsKø = KøetMeldingPubliserer(meldingPubliserer)
+            val outbox = Outbox()
             sessionFactory
                 .transactionalSessionScope { transaksjon ->
                     behandler.invoke(
                         saksbehandler,
                         tilgangsgrupper,
                         transaksjon,
-                        meldingsKø,
+                        outbox,
                     )
-                }.also { meldingsKø.flush() }
+                }.also { outbox.sendAlle(meldingPubliserer) }
         }.onFailure { cause ->
             val statusCode = (cause as? HttpException)?.statusCode ?: HttpStatusCode.InternalServerError
             loggThrowable("Returnerer HTTP ${statusCode.value}", cause)

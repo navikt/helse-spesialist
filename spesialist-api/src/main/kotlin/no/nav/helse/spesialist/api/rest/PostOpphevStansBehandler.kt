@@ -5,7 +5,7 @@ import io.ktor.http.HttpStatusCode
 import no.nav.helse.db.SessionContext
 import no.nav.helse.spesialist.api.rest.resources.Opphevstans
 import no.nav.helse.spesialist.api.rest.tilkommeninntekt.bekreftTilgangTilPerson
-import no.nav.helse.spesialist.application.KøetMeldingPubliserer
+import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.domain.NotatType
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
@@ -17,7 +17,7 @@ class PostOpphevStansBehandler : PostBehandler<Opphevstans, OpphevStansRequest, 
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
-        meldingsKø: KøetMeldingPubliserer,
+        outbox: Outbox,
     ): RestResponse<Boolean> {
         val fødselsnummer = request.fodselsnummer
         bekreftTilgangTilPerson(

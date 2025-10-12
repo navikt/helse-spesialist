@@ -10,7 +10,7 @@ import no.nav.helse.spesialist.api.rest.HttpNotFound
 import no.nav.helse.spesialist.api.rest.PostBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.TilkomneInntekter
-import no.nav.helse.spesialist.application.KøetMeldingPubliserer
+import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
@@ -24,7 +24,7 @@ class PostTilkommenInntektGjenopprettBehandler : PostBehandler<TilkomneInntekter
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
-        meldingsKø: KøetMeldingPubliserer,
+        outbox: Outbox,
     ): RestResponse<Boolean> {
         val tilkommenInntekt =
             transaksjon.tilkommenInntektRepository.finn(TilkommenInntektId(resource.parent.tilkommenInntektId))
@@ -64,7 +64,7 @@ class PostTilkommenInntektGjenopprettBehandler : PostBehandler<TilkomneInntekter
         )
         transaksjon.tilkommenInntektRepository.lagre(tilkommenInntekt)
 
-        meldingsKø.publiser(
+        outbox.leggTil(
             fødselsnummer = tilkommenInntekt.fødselsnummer,
             hendelse = InntektsendringerEventBygger.forNy(tilkommenInntekt),
             årsak = "tilkommen inntekt gjenopprettet",

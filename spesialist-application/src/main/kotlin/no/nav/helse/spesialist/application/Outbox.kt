@@ -7,28 +7,26 @@ import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.modell.melding.UtgåendeHendelse
 import java.util.UUID
 
-class KøetMeldingPubliserer(
-    private val meldingPubliserer: MeldingPubliserer,
-) : MeldingPubliserer {
-    private val kø = mutableListOf<KøetMelding>()
+class Outbox {
+    private val outbox = mutableListOf<OutboxMelding>()
 
-    private sealed interface KøetMelding
+    private sealed interface OutboxMelding
 
-    private data class KøetBehovListe(
+    private data class OutboxBehovListe(
         val hendelseId: UUID,
         val commandContextId: UUID,
         val fødselsnummer: String,
         val behov: List<Behov>,
-    ) : KøetMelding
+    ) : OutboxMelding
 
-    override fun publiser(
+    fun leggTil(
         hendelseId: UUID,
         commandContextId: UUID,
         fødselsnummer: String,
         behov: List<Behov>,
     ) {
-        kø.add(
-            KøetBehovListe(
+        outbox.add(
+            OutboxBehovListe(
                 hendelseId = hendelseId,
                 commandContextId = commandContextId,
                 fødselsnummer = fødselsnummer,
@@ -37,19 +35,19 @@ class KøetMeldingPubliserer(
         )
     }
 
-    private data class KøetKommandokjedeEndretEvent(
+    private data class OutboxKommandokjedeEndretEvent(
         val fødselsnummer: String,
         val event: KommandokjedeEndretEvent,
         val hendelseNavn: String,
-    ) : KøetMelding
+    ) : OutboxMelding
 
-    override fun publiser(
+    fun leggTil(
         fødselsnummer: String,
         event: KommandokjedeEndretEvent,
         hendelseNavn: String,
     ) {
-        kø.add(
-            KøetKommandokjedeEndretEvent(
+        outbox.add(
+            OutboxKommandokjedeEndretEvent(
                 fødselsnummer = fødselsnummer,
                 event = event,
                 hendelseNavn = hendelseNavn,
@@ -57,19 +55,19 @@ class KøetMeldingPubliserer(
         )
     }
 
-    private data class KøetSubsumsjon(
+    private data class OutboxSubsumsjon(
         val fødselsnummer: String,
         val subsumsjonEvent: SubsumsjonEvent,
         val versjonAvKode: String,
-    ) : KøetMelding
+    ) : OutboxMelding
 
-    override fun publiser(
+    fun leggTil(
         fødselsnummer: String,
         subsumsjonEvent: SubsumsjonEvent,
         versjonAvKode: String,
     ) {
-        kø.add(
-            KøetSubsumsjon(
+        outbox.add(
+            OutboxSubsumsjon(
                 fødselsnummer = fødselsnummer,
                 subsumsjonEvent = subsumsjonEvent,
                 versjonAvKode = versjonAvKode,
@@ -77,19 +75,19 @@ class KøetMeldingPubliserer(
         )
     }
 
-    private data class KøetUtgåendeHendelse(
+    private data class OutboxUtgåendeHendelse(
         val fødselsnummer: String,
         val hendelse: UtgåendeHendelse,
         val årsak: String,
-    ) : KøetMelding
+    ) : OutboxMelding
 
-    override fun publiser(
+    fun leggTil(
         fødselsnummer: String,
         hendelse: UtgåendeHendelse,
         årsak: String,
     ) {
-        kø.add(
-            KøetUtgåendeHendelse(
+        outbox.add(
+            OutboxUtgåendeHendelse(
                 fødselsnummer = fødselsnummer,
                 hendelse = hendelse,
                 årsak = årsak,
@@ -97,10 +95,10 @@ class KøetMeldingPubliserer(
         )
     }
 
-    fun flush() {
-        kø.forEach {
+    fun sendAlle(meldingPubliserer: MeldingPubliserer) {
+        outbox.forEach {
             when (it) {
-                is KøetBehovListe ->
+                is OutboxBehovListe ->
                     meldingPubliserer.publiser(
                         hendelseId = it.hendelseId,
                         commandContextId = it.commandContextId,
@@ -108,21 +106,21 @@ class KøetMeldingPubliserer(
                         behov = it.behov,
                     )
 
-                is KøetKommandokjedeEndretEvent ->
+                is OutboxKommandokjedeEndretEvent ->
                     meldingPubliserer.publiser(
                         fødselsnummer = it.fødselsnummer,
                         event = it.event,
                         hendelseNavn = it.hendelseNavn,
                     )
 
-                is KøetSubsumsjon ->
+                is OutboxSubsumsjon ->
                     meldingPubliserer.publiser(
                         fødselsnummer = it.fødselsnummer,
                         subsumsjonEvent = it.subsumsjonEvent,
                         versjonAvKode = it.versjonAvKode,
                     )
 
-                is KøetUtgåendeHendelse ->
+                is OutboxUtgåendeHendelse ->
                     meldingPubliserer.publiser(
                         fødselsnummer = it.fødselsnummer,
                         hendelse = it.hendelse,

@@ -2,7 +2,7 @@ package no.nav.helse.spesialist.api.rest
 
 import io.github.smiley4.ktoropenapi.config.RouteConfig
 import no.nav.helse.db.SessionContext
-import no.nav.helse.spesialist.application.KøetMeldingPubliserer
+import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 
@@ -23,7 +23,7 @@ interface RestBehandlerMedBody<RESOURCE, REQUEST, RESPONSE> : RestBehandler {
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
-        meldingsKø: KøetMeldingPubliserer,
+        outbox: Outbox,
     ): RestResponse<RESPONSE>
 }
 
@@ -39,7 +39,7 @@ interface DeleteBehandler<RESOURCE, RESPONSE> : RestBehandler {
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
-        meldingsKø: KøetMeldingPubliserer,
+        outbox: Outbox,
     ): RestResponse<RESPONSE>
 }
 

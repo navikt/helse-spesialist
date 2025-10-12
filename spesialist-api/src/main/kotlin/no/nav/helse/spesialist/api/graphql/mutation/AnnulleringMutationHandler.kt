@@ -17,7 +17,7 @@ class AnnulleringMutationHandler(
         annullering: ApiAnnulleringData,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<Boolean> {
-        saksbehandlerMediator.utførHandling(HandlingType.ANNULLER_UTBETALING, env) { saksbehandler, _, tx, kø ->
+        saksbehandlerMediator.utførHandling(HandlingType.ANNULLER_UTBETALING, env) { saksbehandler, _, tx, outbox ->
             if (tx.annulleringRepository.finnAnnullering(vedtaksperiodeId = annullering.vedtaksperiodeId) != null) {
                 throw AlleredeAnnullert(annullering.vedtaksperiodeId)
             }
@@ -34,7 +34,7 @@ class AnnulleringMutationHandler(
                     ),
             )
 
-            kø.publiser(
+            outbox.leggTil(
                 fødselsnummer = annullering.fodselsnummer,
                 hendelse =
                     AnnullertUtbetalingEvent(

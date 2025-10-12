@@ -77,7 +77,7 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
-import no.nav.helse.spesialist.application.KøetMeldingPubliserer
+import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.loggInfo
@@ -114,7 +114,7 @@ class SaksbehandlerMediator(
     fun <T> utførHandling(
         handlingType: HandlingType,
         env: DataFetchingEnvironment,
-        block: (saksbehandler: Saksbehandler, tilgangsgrupper: Set<Tilgangsgruppe>, transaction: SessionContext, meldingsKø: KøetMeldingPubliserer) -> T,
+        block: (saksbehandler: Saksbehandler, tilgangsgrupper: Set<Tilgangsgruppe>, transaction: SessionContext, outbox: Outbox) -> T,
     ): T =
         utførHandling(
             handlingType = handlingType,
@@ -127,7 +127,7 @@ class SaksbehandlerMediator(
         handlingType: HandlingType,
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
-        block: (saksbehandler: Saksbehandler, tilgangsgrupper: Set<Tilgangsgruppe>, transaction: SessionContext, meldingsKø: KøetMeldingPubliserer) -> T,
+        block: (saksbehandler: Saksbehandler, tilgangsgrupper: Set<Tilgangsgruppe>, transaction: SessionContext, outbox: Outbox) -> T,
     ): T =
         withMDC(
             mapOf(
@@ -143,13 +143,13 @@ class SaksbehandlerMediator(
                 melding = "Utfører handling $navnPåHandling på vegne av saksbehandler",
                 sikkerloggDetaljer = "epostadresse=${saksbehandler.epost}, oid=${saksbehandler.id().value}",
             )
-            val meldingsKø = KøetMeldingPubliserer(meldingPubliserer)
+            val outbox = Outbox()
             val returnValue =
                 runCatching {
                     sessionFactory
                         .transactionalSessionScope { transaction ->
-                            block(saksbehandler, tilgangsgrupper, transaction, meldingsKø)
-                        }.also { meldingsKø.flush() }
+                            block(saksbehandler, tilgangsgrupper, transaction, outbox)
+                        }.also { outbox.sendAlle(meldingPubliserer) }
                 }.onFailure { throwable ->
                     loggThrowable("Handling $navnPåHandling feilet", throwable)
                     throw throwable
