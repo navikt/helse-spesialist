@@ -1,36 +1,25 @@
 package no.nav.helse.spesialist.api.rest
 
-import io.ktor.http.Parameters
+import io.github.smiley4.ktoropenapi.config.RouteConfig
+import io.ktor.http.HttpStatusCode
 import no.nav.helse.db.SessionContext
+import no.nav.helse.spesialist.api.rest.resources.Opphevstans
 import no.nav.helse.spesialist.api.rest.tilkommeninntekt.bekreftTilgangTilPerson
 import no.nav.helse.spesialist.application.KøetMeldingPubliserer
 import no.nav.helse.spesialist.domain.NotatType
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
-import kotlin.reflect.typeOf
 
-class PostOpphevStansHåndterer : PostHåndterer<Unit, PostOpphevStansHåndterer.RequestBody, Boolean> {
-    override val urlPath: String = "opphevstans"
-
-    data class RequestBody(
-        val fodselsnummer: String,
-        val begrunnelse: String,
-    )
-
-    override fun extractParametre(
-        pathParameters: Parameters,
-        queryParameters: Parameters,
-    ) = Unit
-
-    override fun håndter(
-        urlParametre: Unit,
-        requestBody: RequestBody,
+class PostOpphevStansBehandler : PostBehandler<Opphevstans, OpphevStansRequest, Boolean> {
+    override fun behandle(
+        resource: Opphevstans,
+        request: OpphevStansRequest,
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
         meldingsKø: KøetMeldingPubliserer,
     ): RestResponse<Boolean> {
-        val fødselsnummer = requestBody.fodselsnummer
+        val fødselsnummer = request.fodselsnummer
         bekreftTilgangTilPerson(
             fødselsnummer = fødselsnummer,
             saksbehandler = saksbehandler,
@@ -44,7 +33,7 @@ class PostOpphevStansHåndterer : PostHåndterer<Unit, PostOpphevStansHåndterer
             oppgaveId =
                 transaksjon.oppgaveDao.finnOppgaveId(fødselsnummer = fødselsnummer)
                     ?: transaksjon.oppgaveDao.finnOppgaveIdUansettStatus(fødselsnummer = fødselsnummer),
-            tekst = requestBody.begrunnelse,
+            tekst = request.begrunnelse,
             saksbehandlerOid = saksbehandler.id().value,
             notatType = NotatType.OpphevStans,
             dialogRef = transaksjon.dialogDao.lagre(),
@@ -53,9 +42,19 @@ class PostOpphevStansHåndterer : PostHåndterer<Unit, PostOpphevStansHåndterer
         return RestResponse.ok(true)
     }
 
-    override val urlParametersClass = Unit::class
-
-    override val requestBodyType = typeOf<RequestBody>()
-
-    override val responseBodyType = typeOf<Boolean>()
+    override fun openApi(config: RouteConfig) {
+        with(config) {
+            tags = setOf("Stans av automatisering")
+            operationId = operationIdBasertPåKlassenavn()
+            request {
+                body<OpphevStansRequest>()
+            }
+            response {
+                code(HttpStatusCode.OK) {
+                    description = "Alltid true - henger igjen fra at Apollo ikke tåler å ikke få noe i body"
+                    body<Boolean>()
+                }
+            }
+        }
+    }
 }

@@ -7,19 +7,14 @@
     UUID::class,
 )
 
-package no.nav.helse.spesialist.api.graphql.schema
+package no.nav.helse.spesialist.api.rest.resources
 
-import com.expediagroup.graphql.generator.annotations.GraphQLName
-import kotlinx.serialization.Serializable
+import io.ktor.resources.Resource
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-@GraphQLName("DatoPeriode")
-@Serializable
-data class ApiDatoPeriode(
-    val fom: LocalDate,
-    val tom: LocalDate,
-)
+@Resource("opphevstans")
+class Opphevstans

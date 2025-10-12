@@ -1,53 +1,34 @@
 package no.nav.helse.spesialist.api.rest.tilkommeninntekt
 
-import io.ktor.http.Parameters
+import io.github.smiley4.ktoropenapi.config.RouteConfig
+import io.ktor.http.HttpStatusCode
 import no.nav.helse.db.SessionContext
 import no.nav.helse.spesialist.api.graphql.mutation.InntektsendringerEventBygger
-import no.nav.helse.spesialist.api.rest.ApiTilkommenInntektInput
+import no.nav.helse.spesialist.api.rest.GjenopprettTilkommenInntektRequest
 import no.nav.helse.spesialist.api.rest.HttpForbidden
 import no.nav.helse.spesialist.api.rest.HttpNotFound
-import no.nav.helse.spesialist.api.rest.PostHåndterer
+import no.nav.helse.spesialist.api.rest.PostBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
-import no.nav.helse.spesialist.api.rest.getRequiredUUID
+import no.nav.helse.spesialist.api.rest.resources.TilkomneInntekter
 import no.nav.helse.spesialist.application.KøetMeldingPubliserer
 import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektId
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektPeriodeValidator
-import java.util.UUID
-import kotlin.reflect.typeOf
 
-class PostTilkommenInntektGjenopprettHåndterer : PostHåndterer<PostTilkommenInntektGjenopprettHåndterer.URLParametre, PostTilkommenInntektGjenopprettHåndterer.RequestBody, Boolean> {
-    override val urlPath: String = "tilkomne-inntekter/{tilkommenInntektId}/gjenopprett"
-
-    data class URLParametre(
-        val tilkommenInntektId: UUID,
-    )
-
-    data class RequestBody(
-        val endretTil: ApiTilkommenInntektInput,
-        val notatTilBeslutter: String,
-    )
-
-    override fun extractParametre(
-        pathParameters: Parameters,
-        queryParameters: Parameters,
-    ) = URLParametre(
-        tilkommenInntektId = pathParameters.getRequiredUUID("tilkommenInntektId"),
-    )
-
-    override fun håndter(
-        urlParametre: URLParametre,
-        requestBody: RequestBody,
+class PostTilkommenInntektGjenopprettBehandler : PostBehandler<TilkomneInntekter.Id.Gjenopprett, GjenopprettTilkommenInntektRequest, Boolean> {
+    override fun behandle(
+        resource: TilkomneInntekter.Id.Gjenopprett,
+        request: GjenopprettTilkommenInntektRequest,
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
         meldingsKø: KøetMeldingPubliserer,
     ): RestResponse<Boolean> {
         val tilkommenInntekt =
-            transaksjon.tilkommenInntektRepository.finn(TilkommenInntektId(urlParametre.tilkommenInntektId))
-                ?: throw HttpNotFound("Fant ikke tilkommen inntekt med tilkommentInntektId ${urlParametre.tilkommenInntektId}")
+            transaksjon.tilkommenInntektRepository.finn(TilkommenInntektId(resource.parent.tilkommenInntektId))
+                ?: throw HttpNotFound("Fant ikke tilkommen inntekt med tilkommentInntektId ${resource.parent.tilkommenInntektId}")
 
         bekreftTilgangTilPerson(
             fødselsnummer = tilkommenInntekt.fødselsnummer,
@@ -57,10 +38,10 @@ class PostTilkommenInntektGjenopprettHåndterer : PostHåndterer<PostTilkommenIn
             feilSupplier = ::HttpForbidden,
         )
 
-        val endretTilPeriode = requestBody.endretTil.periode.fom tilOgMed requestBody.endretTil.periode.tom
+        val endretTilPeriode = request.endretTil.periode.fom tilOgMed request.endretTil.periode.tom
         TilkommenInntektPeriodeValidator.validerPeriode(
             periode = endretTilPeriode,
-            organisasjonsnummer = requestBody.endretTil.organisasjonsnummer,
+            organisasjonsnummer = request.endretTil.organisasjonsnummer,
             andreTilkomneInntekter =
                 transaksjon.tilkommenInntektRepository
                     .finnAlleForFødselsnummer(tilkommenInntekt.fødselsnummer)
@@ -69,12 +50,12 @@ class PostTilkommenInntektGjenopprettHåndterer : PostHåndterer<PostTilkommenIn
         )
 
         tilkommenInntekt.gjenopprett(
-            organisasjonsnummer = requestBody.endretTil.organisasjonsnummer,
+            organisasjonsnummer = request.endretTil.organisasjonsnummer,
             periode = endretTilPeriode,
-            periodebeløp = requestBody.endretTil.periodebelop,
-            ekskluderteUkedager = requestBody.endretTil.ekskluderteUkedager.toSet(),
+            periodebeløp = request.endretTil.periodebelop,
+            ekskluderteUkedager = request.endretTil.ekskluderteUkedager.toSet(),
             saksbehandlerIdent = saksbehandler.ident,
-            notatTilBeslutter = requestBody.notatTilBeslutter,
+            notatTilBeslutter = request.notatTilBeslutter,
             totrinnsvurderingId =
                 finnEllerOpprettTotrinnsvurdering(
                     fodselsnummer = tilkommenInntekt.fødselsnummer,
@@ -92,9 +73,19 @@ class PostTilkommenInntektGjenopprettHåndterer : PostHåndterer<PostTilkommenIn
         return RestResponse.ok(true)
     }
 
-    override val urlParametersClass = URLParametre::class
-
-    override val requestBodyType = typeOf<RequestBody>()
-
-    override val responseBodyType = typeOf<Boolean>()
+    override fun openApi(config: RouteConfig) {
+        with(config) {
+            tags = setOf("Tilkommen inntekt")
+            operationId = operationIdBasertPåKlassenavn()
+            request {
+                body<GjenopprettTilkommenInntektRequest>()
+            }
+            response {
+                code(HttpStatusCode.OK) {
+                    description = "Alltid true - henger igjen fra at Apollo ikke tåler å ikke få noe i body"
+                    body<Boolean>()
+                }
+            }
+        }
+    }
 }

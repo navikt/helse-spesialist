@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.api.rest.tilkommeninntekt
 
-import io.ktor.http.Parameters
+import io.github.smiley4.ktoropenapi.config.RouteConfig
+import io.ktor.http.HttpStatusCode
 import no.nav.helse.db.SessionContext
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand
 import no.nav.helse.spesialist.api.graphql.schema.ApiDatoPeriode
@@ -11,10 +12,10 @@ import no.nav.helse.spesialist.api.rest.ApiTilkommenInntektFjernetEvent
 import no.nav.helse.spesialist.api.rest.ApiTilkommenInntektGjenopprettetEvent
 import no.nav.helse.spesialist.api.rest.ApiTilkommenInntektOpprettetEvent
 import no.nav.helse.spesialist.api.rest.ApiTilkommenInntektskilde
-import no.nav.helse.spesialist.api.rest.GetHåndterer
+import no.nav.helse.spesialist.api.rest.GetBehandler
 import no.nav.helse.spesialist.api.rest.HttpNotFound
 import no.nav.helse.spesialist.api.rest.RestResponse
-import no.nav.helse.spesialist.api.rest.getRequired
+import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.domain.tilkommeninntekt.Endring
@@ -25,30 +26,16 @@ import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektGjenoppre
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektOpprettetEvent
 import java.math.BigDecimal
 import java.time.ZoneId
-import kotlin.reflect.typeOf
 
-class GetPersonTilkomneInntektskilderHåndterer : GetHåndterer<GetPersonTilkomneInntektskilderHåndterer.URLParametre, List<ApiTilkommenInntektskilde>> {
-    override val urlPath = "personer/{aktørId}/tilkomne-inntektskilder"
-
-    data class URLParametre(
-        val aktørId: String,
-    )
-
-    override fun extractParametre(
-        pathParameters: Parameters,
-        queryParameters: Parameters,
-    ) = URLParametre(
-        aktørId = pathParameters.getRequired("aktørId"),
-    )
-
-    override fun håndter(
-        urlParametre: URLParametre,
+class GetTilkomneInntektskilderForPersonBehandler : GetBehandler<Personer.AktørId.TilkomneInntektskilder, List<ApiTilkommenInntektskilde>> {
+    override fun behandle(
+        resource: Personer.AktørId.TilkomneInntektskilder,
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
     ): RestResponse<List<ApiTilkommenInntektskilde>> {
-        val aktørId = urlParametre.aktørId
-        val fødselsnumre = transaksjon.legacyPersonRepository.finnFødselsnumre(aktørId = aktørId).toSet()
+        val fødselsnumre =
+            transaksjon.legacyPersonRepository.finnFødselsnumre(aktørId = resource.parent.aktørId).toSet()
 
         fødselsnumre.forEach { fødselsnummer ->
             bekreftTilgangTilPerson(
@@ -171,7 +158,16 @@ class GetPersonTilkomneInntektskilderHåndterer : GetHåndterer<GetPersonTilkomn
 
     private fun Endring<BigDecimal>.tilApiEndring(): ApiTilkommenInntektEvent.Endringer.BigDecimalEndring = ApiTilkommenInntektEvent.Endringer.BigDecimalEndring(fra = fra, til = til)
 
-    override val urlParametersClass = URLParametre::class
-
-    override val responseBodyType = typeOf<List<ApiTilkommenInntektskilde>>()
+    override fun openApi(config: RouteConfig) {
+        with(config) {
+            tags = setOf("Tilkommen inntekt")
+            operationId = operationIdBasertPåKlassenavn()
+            response {
+                code(HttpStatusCode.OK) {
+                    description = "Alle tilkomne inntekter for personen, fordelt på inntektskilder"
+                    body<List<ApiTilkommenInntektskilde>>()
+                }
+            }
+        }
+    }
 }

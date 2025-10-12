@@ -171,7 +171,7 @@ class PgOppgaveRepository private constructor(
                     append("AND (egenskaper && :$parameterName::varchar[])\n")
                     parameterMap[parameterName] = minstEnAvEgenskapeneGruppe.tilDatabaseArray()
                 }
-                ingenAvEgenskapene.takeUnless { it.isEmpty() }.let {
+                ingenAvEgenskapene.takeUnless { it.isEmpty() }?.let {
                     val parameterName = "ingenAvEgenskapene"
                     append("AND NOT (egenskaper && :$parameterName::varchar[])\n")
                     parameterMap[parameterName] = ingenAvEgenskapene.tilDatabaseArray()

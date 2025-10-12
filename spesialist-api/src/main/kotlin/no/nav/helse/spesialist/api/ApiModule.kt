@@ -15,7 +15,7 @@ import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlinghåndtererImpl
 import no.nav.helse.spesialist.api.graphql.kobleOppApi
 import no.nav.helse.spesialist.api.graphql.lagSchemaMedResolversOgHandlers
-import no.nav.helse.spesialist.api.rest.RestDelegator
+import no.nav.helse.spesialist.api.rest.RestAdapter
 import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
@@ -69,8 +69,8 @@ class ApiModule(
             sessionFactory = sessionFactory,
         )
 
-    private val restDelegator =
-        RestDelegator(
+    private val restAdapter =
+        RestAdapter(
             sessionFactory = sessionFactory,
             tilgangsgruppeUuider = tilgangsgruppeUuider,
             meldingPubliserer = meldingPubliserer,
@@ -105,7 +105,7 @@ class ApiModule(
             apiModuleConfiguration = configuration,
             tilgangsgruppeUuider = tilgangsgruppeUuider,
             spesialistSchema = spesialistSchema,
-            restDelegator = restDelegator,
+            restAdapter = restAdapter,
         )
     }
 }

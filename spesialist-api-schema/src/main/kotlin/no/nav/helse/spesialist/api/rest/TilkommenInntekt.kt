@@ -1,16 +1,29 @@
+@file:kotlinx.serialization.UseContextualSerialization(
+    BigDecimal::class,
+    Boolean::class,
+    Instant::class,
+    LocalDate::class,
+    LocalDateTime::class,
+    UUID::class,
+)
+
 package no.nav.helse.spesialist.api.rest
 
+import kotlinx.serialization.Serializable
 import no.nav.helse.spesialist.api.graphql.schema.ApiDatoPeriode
 import java.math.BigDecimal
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
+@Serializable
 data class ApiTilkommenInntektskilde(
     val organisasjonsnummer: String,
     val inntekter: List<ApiTilkommenInntekt>,
 )
 
+@Serializable
 data class ApiTilkommenInntekt(
     val tilkommenInntektId: UUID,
     val periode: ApiDatoPeriode,
@@ -21,6 +34,7 @@ data class ApiTilkommenInntekt(
     val events: List<ApiTilkommenInntektEvent>,
 )
 
+@Serializable
 data class ApiTilkommenInntektInput(
     val organisasjonsnummer: String,
     val periode: ApiDatoPeriode,
@@ -28,12 +42,14 @@ data class ApiTilkommenInntektInput(
     val ekskluderteUkedager: List<LocalDate>,
 )
 
+@Serializable
 sealed interface ApiTilkommenInntektEvent {
     @Suppress("ktlint:standard:backing-property-naming")
     val __typename: String
         get() = this::class.java.simpleName.removePrefix("Api")
     val metadata: Metadata
 
+    @Serializable
     data class Metadata(
         val sekvensnummer: Int,
         val tidspunkt: LocalDateTime,
@@ -41,27 +57,32 @@ sealed interface ApiTilkommenInntektEvent {
         val notatTilBeslutter: String,
     )
 
+    @Serializable
     data class Endringer(
         val organisasjonsnummer: StringEndring?,
         val periode: DatoPeriodeEndring?,
         val periodebelop: BigDecimalEndring?,
         val ekskluderteUkedager: ListLocalDateEndring?,
     ) {
+        @Serializable
         data class DatoPeriodeEndring(
             val fra: ApiDatoPeriode,
             val til: ApiDatoPeriode,
         )
 
+        @Serializable
         data class BigDecimalEndring(
             val fra: BigDecimal,
             val til: BigDecimal,
         )
 
+        @Serializable
         data class StringEndring(
             val fra: String,
             val til: String,
         )
 
+        @Serializable
         data class ListLocalDateEndring(
             val fra: List<LocalDate>,
             val til: List<LocalDate>,
@@ -69,6 +90,7 @@ sealed interface ApiTilkommenInntektEvent {
     }
 }
 
+@Serializable
 data class ApiTilkommenInntektOpprettetEvent(
     override val metadata: ApiTilkommenInntektEvent.Metadata,
     val organisasjonsnummer: String,
@@ -77,20 +99,48 @@ data class ApiTilkommenInntektOpprettetEvent(
     val ekskluderteUkedager: List<LocalDate>,
 ) : ApiTilkommenInntektEvent
 
+@Serializable
 data class ApiTilkommenInntektEndretEvent(
     override val metadata: ApiTilkommenInntektEvent.Metadata,
     val endringer: ApiTilkommenInntektEvent.Endringer,
 ) : ApiTilkommenInntektEvent
 
+@Serializable
 data class ApiTilkommenInntektFjernetEvent(
     override val metadata: ApiTilkommenInntektEvent.Metadata,
 ) : ApiTilkommenInntektEvent
 
+@Serializable
 data class ApiTilkommenInntektGjenopprettetEvent(
     override val metadata: ApiTilkommenInntektEvent.Metadata,
     val endringer: ApiTilkommenInntektEvent.Endringer,
 ) : ApiTilkommenInntektEvent
 
+@Serializable
 data class LeggTilTilkommenInntektResponse(
     val tilkommenInntektId: UUID,
+)
+
+@Serializable
+data class EndreTilkommenInntektRequest(
+    val endretTil: ApiTilkommenInntektInput,
+    val notatTilBeslutter: String,
+)
+
+@Serializable
+data class FjernTilkommenInntektRequest(
+    val notatTilBeslutter: String,
+)
+
+@Serializable
+data class GjenopprettTilkommenInntektRequest(
+    val endretTil: ApiTilkommenInntektInput,
+    val notatTilBeslutter: String,
+)
+
+@Serializable
+data class LeggTilTilkommenInntektRequest(
+    val fodselsnummer: String,
+    val verdier: ApiTilkommenInntektInput,
+    val notatTilBeslutter: String,
 )

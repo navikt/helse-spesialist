@@ -1,49 +1,32 @@
 package no.nav.helse.spesialist.api.rest.tilkommeninntekt
 
-import io.ktor.http.Parameters
+import io.github.smiley4.ktoropenapi.config.RouteConfig
+import io.ktor.http.HttpStatusCode
 import no.nav.helse.db.SessionContext
 import no.nav.helse.spesialist.api.graphql.mutation.InntektsendringerEventBygger
+import no.nav.helse.spesialist.api.rest.FjernTilkommenInntektRequest
 import no.nav.helse.spesialist.api.rest.HttpForbidden
 import no.nav.helse.spesialist.api.rest.HttpNotFound
-import no.nav.helse.spesialist.api.rest.PostHåndterer
+import no.nav.helse.spesialist.api.rest.PostBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
-import no.nav.helse.spesialist.api.rest.getRequiredUUID
+import no.nav.helse.spesialist.api.rest.resources.TilkomneInntekter
 import no.nav.helse.spesialist.application.KøetMeldingPubliserer
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektId
-import java.util.UUID
-import kotlin.reflect.typeOf
 
-class PostTilkommenInntektFjernHåndterer : PostHåndterer<PostTilkommenInntektFjernHåndterer.URLParametre, PostTilkommenInntektFjernHåndterer.RequestBody, Boolean> {
-    override val urlPath: String = "tilkomne-inntekter/{tilkommenInntektId}/fjern"
-
-    data class URLParametre(
-        val tilkommenInntektId: UUID,
-    )
-
-    data class RequestBody(
-        val notatTilBeslutter: String,
-    )
-
-    override fun extractParametre(
-        pathParameters: Parameters,
-        queryParameters: Parameters,
-    ) = URLParametre(
-        tilkommenInntektId = pathParameters.getRequiredUUID("tilkommenInntektId"),
-    )
-
-    override fun håndter(
-        urlParametre: URLParametre,
-        requestBody: RequestBody,
+class PostTilkommenInntektFjernBehandler : PostBehandler<TilkomneInntekter.Id.Fjern, FjernTilkommenInntektRequest, Boolean> {
+    override fun behandle(
+        resource: TilkomneInntekter.Id.Fjern,
+        request: FjernTilkommenInntektRequest,
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
         meldingsKø: KøetMeldingPubliserer,
     ): RestResponse<Boolean> {
         val tilkommenInntekt =
-            transaksjon.tilkommenInntektRepository.finn(TilkommenInntektId(urlParametre.tilkommenInntektId))
-                ?: throw HttpNotFound("Fant ikke tilkommen inntekt med tilkommentInntektId ${urlParametre.tilkommenInntektId}")
+            transaksjon.tilkommenInntektRepository.finn(TilkommenInntektId(resource.parent.tilkommenInntektId))
+                ?: throw HttpNotFound("Fant ikke tilkommen inntekt med tilkommentInntektId ${resource.parent.tilkommenInntektId}")
 
         bekreftTilgangTilPerson(
             fødselsnummer = tilkommenInntekt.fødselsnummer,
@@ -55,7 +38,7 @@ class PostTilkommenInntektFjernHåndterer : PostHåndterer<PostTilkommenInntektF
 
         tilkommenInntekt.fjern(
             saksbehandlerIdent = saksbehandler.ident,
-            notatTilBeslutter = requestBody.notatTilBeslutter,
+            notatTilBeslutter = request.notatTilBeslutter,
             totrinnsvurderingId =
                 finnEllerOpprettTotrinnsvurdering(
                     fodselsnummer = tilkommenInntekt.fødselsnummer,
@@ -73,9 +56,19 @@ class PostTilkommenInntektFjernHåndterer : PostHåndterer<PostTilkommenInntektF
         return RestResponse.ok(true)
     }
 
-    override val urlParametersClass = URLParametre::class
-
-    override val requestBodyType = typeOf<RequestBody>()
-
-    override val responseBodyType = typeOf<Boolean>()
+    override fun openApi(config: RouteConfig) {
+        with(config) {
+            tags = setOf("Tilkommen inntekt")
+            operationId = operationIdBasertPåKlassenavn()
+            request {
+                body<FjernTilkommenInntektRequest>()
+            }
+            response {
+                code(HttpStatusCode.OK) {
+                    description = "Alltid true - henger igjen fra at Apollo ikke tåler å ikke få noe i body"
+                    body<Boolean>()
+                }
+            }
+        }
+    }
 }

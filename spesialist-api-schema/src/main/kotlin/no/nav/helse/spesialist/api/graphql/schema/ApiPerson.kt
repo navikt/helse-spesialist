@@ -1,8 +1,20 @@
+@file:kotlinx.serialization.UseContextualSerialization(
+    BigDecimal::class,
+    Boolean::class,
+    Instant::class,
+    LocalDate::class,
+    LocalDateTime::class,
+    UUID::class,
+)
+
 package no.nav.helse.spesialist.api.graphql.schema
 
 import com.expediagroup.graphql.generator.annotations.GraphQLIgnore
 import com.expediagroup.graphql.generator.annotations.GraphQLName
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import kotlinx.serialization.Serializable
+import java.math.BigDecimal
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -24,6 +36,7 @@ data class ApiSaksbehandler(
 )
 
 @GraphQLName("AktivSaksbehandler")
+@Serializable
 data class ApiAktivSaksbehandler(
     val navn: String,
     val ident: String,
@@ -51,6 +64,7 @@ data class ApiEnhet(
 )
 
 @GraphQLName("Tildeling")
+@Serializable
 data class ApiTildeling(
     val navn: String,
     val epost: String,

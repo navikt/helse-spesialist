@@ -1,7 +1,6 @@
 package no.nav.helse.spesialist.api.rest
 
 import io.ktor.http.HttpStatusCode
-import io.ktor.http.Parameters
 import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.principal
 import io.ktor.server.request.receive
@@ -17,23 +16,20 @@ import no.nav.helse.spesialist.application.logg.loggThrowable
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
-import kotlin.reflect.KClass
 
-class RestDelegator(
+class RestAdapter(
     private val sessionFactory: SessionFactory,
     private val tilgangsgruppeUuider: TilgangsgruppeUuider,
     private val meldingPubliserer: MeldingPubliserer,
 ) {
-    suspend fun <URLPARAMETERS : Any, RESPONSEBODY> utførGet(
+    suspend inline fun <RESOURCE, RESPONSE> behandle(
+        resource: RESOURCE,
         call: RoutingCall,
-        håndterer: GetHåndterer<URLPARAMETERS, RESPONSEBODY>,
+        behandler: GetBehandler<RESOURCE, RESPONSE>,
     ) {
-        wrapOgDeleger(
-            call,
-            håndterer::extractParametre,
-        ) { urlParametre, saksbehandler, tilgangsgrupper, transaksjon, _ ->
-            håndterer.håndter(
-                urlParametre = urlParametre,
+        wrapOgDeleger(call) { saksbehandler, tilgangsgrupper, transaksjon, _ ->
+            behandler.behandle(
+                resource = resource,
                 saksbehandler = saksbehandler,
                 tilgangsgrupper = tilgangsgrupper,
                 transaksjon = transaksjon,
@@ -41,33 +37,43 @@ class RestDelegator(
         }
     }
 
-    suspend fun <URLPARAMETERS : Any, REQUESTBODY : Any, RESPONSEBODY> utførPost(
+    suspend inline fun <RESOURCE, RESPONSE> behandle(
+        resource: RESOURCE,
         call: RoutingCall,
-        håndterer: PostHåndterer<URLPARAMETERS, REQUESTBODY, RESPONSEBODY>,
+        behandler: DeleteBehandler<RESOURCE, RESPONSE>,
     ) {
-        @Suppress("UNCHECKED_CAST")
-        val requestType = håndterer.requestBodyType.classifier as KClass<REQUESTBODY>
-        val request: REQUESTBODY = call.receive(requestType)
-        wrapOgDeleger(
-            call = call,
-            parameterTolkning = håndterer::extractParametre,
-            håndterer = { urlParametre, saksbehandler, tilgangsgrupper, transaksjon, meldingsKø ->
-                håndterer.håndter(
-                    urlParametre = urlParametre,
-                    requestBody = request,
-                    saksbehandler = saksbehandler,
-                    tilgangsgrupper = tilgangsgrupper,
-                    transaksjon = transaksjon,
-                    meldingsKø = meldingsKø,
-                )
-            },
-        )
+        wrapOgDeleger(call) { saksbehandler, tilgangsgrupper, transaksjon, meldingsKø ->
+            behandler.behandle(
+                resource = resource,
+                saksbehandler = saksbehandler,
+                tilgangsgrupper = tilgangsgrupper,
+                transaksjon = transaksjon,
+                meldingsKø = meldingsKø,
+            )
+        }
     }
 
-    private suspend fun <RESPONSEBODY, URLPARAMETRE> wrapOgDeleger(
+    suspend inline fun <RESOURCE, reified REQUEST, RESPONSE> behandle(
+        resource: RESOURCE,
         call: RoutingCall,
-        parameterTolkning: (pathParameters: Parameters, queryParameters: Parameters) -> URLPARAMETRE,
-        håndterer: (URLPARAMETRE, Saksbehandler, Set<Tilgangsgruppe>, SessionContext, KøetMeldingPubliserer) -> RestResponse<RESPONSEBODY>,
+        behandler: RestBehandlerMedBody<RESOURCE, REQUEST, RESPONSE>,
+    ) {
+        val request: REQUEST = call.receive()
+        wrapOgDeleger(call) { saksbehandler, tilgangsgrupper, transaksjon, meldingsKø ->
+            behandler.behandle(
+                resource = resource,
+                request = request,
+                saksbehandler = saksbehandler,
+                tilgangsgrupper = tilgangsgrupper,
+                transaksjon = transaksjon,
+                meldingsKø = meldingsKø,
+            )
+        }
+    }
+
+    suspend fun <RESPONSE> wrapOgDeleger(
+        call: RoutingCall,
+        behandler: (Saksbehandler, Set<Tilgangsgruppe>, SessionContext, KøetMeldingPubliserer) -> RestResponse<RESPONSE>,
     ) {
         val jwt = (call.principal<JWTPrincipal>() ?: throw HttpUnauthorized()).payload
 
@@ -79,12 +85,10 @@ class RestDelegator(
         }
 
         runCatching {
-            val urlParametre = parameterTolkning.invoke(call.parameters, call.request.queryParameters)
             val meldingsKø = KøetMeldingPubliserer(meldingPubliserer)
             sessionFactory
                 .transactionalSessionScope { transaksjon ->
-                    håndterer.invoke(
-                        urlParametre,
+                    behandler.invoke(
                         saksbehandler,
                         tilgangsgrupper,
                         transaksjon,

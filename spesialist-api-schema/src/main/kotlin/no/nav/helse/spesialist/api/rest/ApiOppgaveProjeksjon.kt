@@ -1,12 +1,25 @@
+@file:kotlinx.serialization.UseContextualSerialization(
+    BigDecimal::class,
+    Boolean::class,
+    Instant::class,
+    LocalDate::class,
+    LocalDateTime::class,
+    UUID::class,
+)
+
 package no.nav.helse.spesialist.api.rest
 
+import kotlinx.serialization.Serializable
 import no.nav.helse.spesialist.api.graphql.schema.ApiEgenskap
 import no.nav.helse.spesialist.api.graphql.schema.ApiPersonnavn
 import no.nav.helse.spesialist.api.graphql.schema.ApiTildeling
+import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.UUID
 
+@Serializable
 data class ApiOppgaveProjeksjon(
     val id: String,
     val aktorId: String,
@@ -17,6 +30,7 @@ data class ApiOppgaveProjeksjon(
     val opprinneligSoeknadstidspunkt: Instant,
     val paVentInfo: PaaVent?,
 ) {
+    @Serializable
     data class PaaVent(
         val arsaker: List<String>,
         val tekst: String?,
@@ -26,6 +40,7 @@ data class ApiOppgaveProjeksjon(
         val tidsfrist: LocalDate,
         val kommentarer: List<Kommentar>,
     ) {
+        @Serializable
         data class Kommentar(
             val id: Int,
             val tekst: String,
@@ -36,6 +51,7 @@ data class ApiOppgaveProjeksjon(
     }
 }
 
+@Serializable
 data class ApiOppgaveProjeksjonSide(
     val totaltAntall: Long,
     val sidetall: Int,

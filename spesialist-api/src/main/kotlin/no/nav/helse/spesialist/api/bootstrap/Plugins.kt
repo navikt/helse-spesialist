@@ -24,15 +24,26 @@ import io.ktor.server.plugins.statuspages.StatusPagesConfig
 import io.ktor.server.request.httpMethod
 import io.ktor.server.request.path
 import io.ktor.server.request.uri
+import io.ktor.server.resources.Resources
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.websocket.WebSockets
 import io.swagger.v3.oas.models.media.Schema
+import kotlinx.serialization.modules.SerializersModule
 import no.nav.helse.spesialist.api.feilhåndtering.Modellfeil
 import no.nav.helse.spesialist.api.objectMapper
+import no.nav.helse.spesialist.api.serialization.BigDecimalStringSerializer
+import no.nav.helse.spesialist.api.serialization.BooleanStrictSerializer
+import no.nav.helse.spesialist.api.serialization.InstantIsoSerializer
+import no.nav.helse.spesialist.api.serialization.LocalDateIsoSerializer
+import no.nav.helse.spesialist.api.serialization.LocalDateTimeIsoSerializer
+import no.nav.helse.spesialist.api.serialization.UUIDStringSerializer
 import org.slf4j.LoggerFactory
 import org.slf4j.event.Level
 import java.math.BigDecimal
+import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
@@ -62,14 +73,26 @@ internal fun Application.installPlugins(eksponerOpenApi: Boolean) {
     if (eksponerOpenApi) {
         install(OpenApi) { configureOpenApi() }
     }
+    install(Resources) { serializersModule = customSerializersModule }
 }
+
+private val customSerializersModule =
+    SerializersModule {
+        contextual(BigDecimal::class, BigDecimalStringSerializer)
+        contextual(Boolean::class, BooleanStrictSerializer)
+        contextual(Instant::class, InstantIsoSerializer)
+        contextual(LocalDate::class, LocalDateIsoSerializer)
+        contextual(LocalDateTime::class, LocalDateTimeIsoSerializer)
+        contextual(UUID::class, UUIDStringSerializer)
+    }
 
 private fun OpenApiPluginConfig.configureOpenApi() {
     pathFilter = { _, url -> url.firstOrNull() == "api" }
-
+    autoDocumentResourcesRoutes = true
     schemas {
         generator =
-            SchemaGenerator.reflection {
+            SchemaGenerator.kotlinx {
+                serializersModule = customSerializersModule
                 referencePath = RefType.OPENAPI_SIMPLE
                 overwrite(SchemaGenerator.TypeOverwrites.JavaUuid())
                 overwrite(SchemaGenerator.TypeOverwrites.Instant())

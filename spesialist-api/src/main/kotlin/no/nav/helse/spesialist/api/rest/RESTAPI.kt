@@ -1,35 +1,24 @@
 package no.nav.helse.spesialist.api.rest
 
-import io.github.smiley4.ktoropenapi.get
 import io.github.smiley4.ktoropenapi.openApi
-import io.github.smiley4.ktoropenapi.post
+import io.github.smiley4.ktoropenapi.resources.delete
+import io.github.smiley4.ktoropenapi.resources.get
+import io.github.smiley4.ktoropenapi.resources.patch
+import io.github.smiley4.ktoropenapi.resources.post
+import io.github.smiley4.ktoropenapi.resources.put
 import io.github.smiley4.ktorswaggerui.swaggerUI
-import io.ktor.http.HttpStatusCode
-import io.ktor.http.Parameters
 import io.ktor.server.auth.authenticate
+import io.ktor.server.routing.Route
 import io.ktor.server.routing.Routing
 import io.ktor.server.routing.route
-import no.nav.helse.spesialist.api.rest.tilkommeninntekt.GetPersonTilkomneInntektskilderHåndterer
-import no.nav.helse.spesialist.api.rest.tilkommeninntekt.PostTilkommenInntektEndreHåndterer
-import no.nav.helse.spesialist.api.rest.tilkommeninntekt.PostTilkommenInntektFjernHåndterer
-import no.nav.helse.spesialist.api.rest.tilkommeninntekt.PostTilkommenInntektGjenopprettHåndterer
-import no.nav.helse.spesialist.api.rest.tilkommeninntekt.PostTilkomneInntekterHåndterer
-import java.util.UUID
-
-val RESTHÅNDTERERE =
-    listOf(
-        GetAktiveSaksbehandlereHåndterer(),
-        GetOppgaverHåndterer(),
-        PostOpphevStansHåndterer(),
-        GetPersonTilkomneInntektskilderHåndterer(),
-        PostTilkomneInntekterHåndterer(),
-        PostTilkommenInntektEndreHåndterer(),
-        PostTilkommenInntektFjernHåndterer(),
-        PostTilkommenInntektGjenopprettHåndterer(),
-    )
+import no.nav.helse.spesialist.api.rest.tilkommeninntekt.GetTilkomneInntektskilderForPersonBehandler
+import no.nav.helse.spesialist.api.rest.tilkommeninntekt.PostTilkommenInntektEndreBehandler
+import no.nav.helse.spesialist.api.rest.tilkommeninntekt.PostTilkommenInntektFjernBehandler
+import no.nav.helse.spesialist.api.rest.tilkommeninntekt.PostTilkommenInntektGjenopprettBehandler
+import no.nav.helse.spesialist.api.rest.tilkommeninntekt.PostTilkomneInntekterBehandler
 
 fun Routing.restRoutes(
-    restDelegator: RestDelegator,
+    restAdapter: RestAdapter,
     eksponerOpenApi: Boolean,
 ) {
     route("/api") {
@@ -42,45 +31,55 @@ fun Routing.restRoutes(
             }
         }
         authenticate("oidc") {
-            RESTHÅNDTERERE.forEach {
-                when (it) {
-                    is GetHåndterer<*, *> ->
-                        get(it.urlPath.substringBefore('?'), {
-                            response {
-                                code(HttpStatusCode.OK) {
-                                    body(it.responseBodyType)
-                                }
-                            }
-                        }) {
-                            restDelegator.utførGet(call = call, håndterer = it)
-                        }
+            get(GetAktiveSaksbehandlereBehandler(), restAdapter)
 
-                    is PostHåndterer<*, *, *> ->
-                        post(it.urlPath.substringBefore('?'), {
-                            request {
-                                body(it.requestBodyType)
-                            }
-                            response {
-                                code(HttpStatusCode.OK) {
-                                    body(it.responseBodyType)
-                                }
-                            }
-                        }) {
-                            restDelegator.utførPost(call = call, håndterer = it)
-                        }
-                }
-            }
+            get(GetOppgaverBehandler(), restAdapter)
+
+            post(PostOpphevStansBehandler(), restAdapter)
+
+            get(GetTilkomneInntektskilderForPersonBehandler(), restAdapter)
+            post(PostTilkomneInntekterBehandler(), restAdapter)
+            post(PostTilkommenInntektEndreBehandler(), restAdapter)
+            post(PostTilkommenInntektFjernBehandler(), restAdapter)
+            post(PostTilkommenInntektGjenopprettBehandler(), restAdapter)
         }
     }
 }
 
-fun Parameters.getRequired(name: String): String = this[name] ?: throw HttpNotFound("Mangler parameter $name i URL'en")
+@Suppress("unused")
+private inline fun <reified RESOURCE : Any, reified RESPONSE : Any> Route.delete(
+    behandler: DeleteBehandler<RESOURCE, RESPONSE>,
+    adapter: RestAdapter,
+) {
+    delete<RESOURCE>(behandler::openApi) { resource -> adapter.behandle(resource, call, behandler) }
+}
 
-fun Parameters.getRequiredUUID(name: String): UUID {
-    val string = getRequired(name)
-    try {
-        return UUID.fromString(string)
-    } catch (_: IllegalArgumentException) {
-        throw HttpNotFound("Parameter $name i URL'en er ikke en UUID")
-    }
+private inline fun <reified RESOURCE : Any, reified RESPONSE : Any> Route.get(
+    behandler: GetBehandler<RESOURCE, RESPONSE>,
+    adapter: RestAdapter,
+) {
+    get<RESOURCE>(behandler::openApi) { resource -> adapter.behandle(resource, call, behandler) }
+}
+
+@Suppress("unused")
+private inline fun <reified RESOURCE : Any, reified REQUEST : Any, reified RESPONSE : Any> Route.patch(
+    behandler: PatchBehandler<RESOURCE, REQUEST, RESPONSE>,
+    adapter: RestAdapter,
+) {
+    patch<RESOURCE>(behandler::openApi) { resource -> adapter.behandle(resource, call, behandler) }
+}
+
+private inline fun <reified RESOURCE : Any, reified REQUEST : Any, reified RESPONSE : Any> Route.post(
+    behandler: PostBehandler<RESOURCE, REQUEST, RESPONSE>,
+    adapter: RestAdapter,
+) {
+    post<RESOURCE>(behandler::openApi) { resource -> adapter.behandle(resource, call, behandler) }
+}
+
+@Suppress("unused")
+private inline fun <reified RESOURCE : Any, reified REQUEST : Any, reified RESPONSE : Any> Route.put(
+    behandler: PutBehandler<RESOURCE, REQUEST, RESPONSE>,
+    adapter: RestAdapter,
+) {
+    put<RESOURCE>(behandler::openApi) { resource -> adapter.behandle(resource, call, behandler) }
 }

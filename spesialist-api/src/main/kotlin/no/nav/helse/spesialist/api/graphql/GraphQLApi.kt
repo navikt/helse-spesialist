@@ -52,7 +52,7 @@ import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.TildelteOppgaverQueryHandler
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.person.PersonService
-import no.nav.helse.spesialist.api.rest.RestDelegator
+import no.nav.helse.spesialist.api.rest.RestAdapter
 import no.nav.helse.spesialist.api.rest.restRoutes
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
 import no.nav.helse.spesialist.api.websockets.webSocketsApi
@@ -68,7 +68,7 @@ fun kobleOppApi(
     apiModuleConfiguration: ApiModule.Configuration,
     tilgangsgruppeUuider: TilgangsgruppeUuider,
     spesialistSchema: SpesialistSchema,
-    restDelegator: RestDelegator,
+    restAdapter: RestAdapter,
 ) {
     ktorApplication.installPlugins(apiModuleConfiguration.eksponerOpenApi)
     ktorApplication.azureAdAppAuthentication(apiModuleConfiguration)
@@ -93,7 +93,7 @@ fun kobleOppApi(
                 queryHandler(graphQLPlugin.server)
             }
         }
-        restRoutes(restDelegator, apiModuleConfiguration.eksponerOpenApi)
+        restRoutes(restAdapter, apiModuleConfiguration.eksponerOpenApi)
     }
 }
 

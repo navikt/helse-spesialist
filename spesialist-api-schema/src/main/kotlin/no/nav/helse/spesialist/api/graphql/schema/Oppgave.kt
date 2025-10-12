@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
 import com.expediagroup.graphql.generator.annotations.GraphQLName
+import kotlinx.serialization.Serializable
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -185,6 +186,7 @@ enum class ApiMottaker {
 }
 
 @GraphQLName("Personnavn")
+@Serializable
 data class ApiPersonnavn(
     val fornavn: String,
     val etternavn: String,

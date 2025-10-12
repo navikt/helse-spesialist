@@ -1,73 +1,61 @@
 package no.nav.helse.spesialist.api.rest.tilkommeninntekt
 
-import io.ktor.http.Parameters
+import io.github.smiley4.ktoropenapi.config.RouteConfig
+import io.ktor.http.HttpStatusCode
 import no.nav.helse.db.SessionContext
 import no.nav.helse.spesialist.api.graphql.mutation.InntektsendringerEventBygger
-import no.nav.helse.spesialist.api.rest.ApiTilkommenInntektInput
 import no.nav.helse.spesialist.api.rest.HttpForbidden
+import no.nav.helse.spesialist.api.rest.LeggTilTilkommenInntektRequest
 import no.nav.helse.spesialist.api.rest.LeggTilTilkommenInntektResponse
-import no.nav.helse.spesialist.api.rest.PostHåndterer
+import no.nav.helse.spesialist.api.rest.PostBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
+import no.nav.helse.spesialist.api.rest.resources.TilkomneInntekter
 import no.nav.helse.spesialist.application.KøetMeldingPubliserer
 import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntekt
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektPeriodeValidator
-import kotlin.reflect.typeOf
 
-class PostTilkomneInntekterHåndterer : PostHåndterer<Unit, PostTilkomneInntekterHåndterer.RequestBody, LeggTilTilkommenInntektResponse> {
-    override val urlPath: String = "tilkomne-inntekter"
-
-    data class RequestBody(
-        val fodselsnummer: String,
-        val verdier: ApiTilkommenInntektInput,
-        val notatTilBeslutter: String,
-    )
-
-    override fun extractParametre(
-        pathParameters: Parameters,
-        queryParameters: Parameters,
-    ) = Unit
-
-    override fun håndter(
-        urlParametre: Unit,
-        requestBody: RequestBody,
+class PostTilkomneInntekterBehandler : PostBehandler<TilkomneInntekter, LeggTilTilkommenInntektRequest, LeggTilTilkommenInntektResponse> {
+    override fun behandle(
+        resource: TilkomneInntekter,
+        request: LeggTilTilkommenInntektRequest,
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
         meldingsKø: KøetMeldingPubliserer,
     ): RestResponse<LeggTilTilkommenInntektResponse> {
         bekreftTilgangTilPerson(
-            fødselsnummer = requestBody.fodselsnummer,
+            fødselsnummer = request.fodselsnummer,
             saksbehandler = saksbehandler,
             tilgangsgrupper = tilgangsgrupper,
             transaksjon = transaksjon,
             feilSupplier = ::HttpForbidden,
         )
 
-        val periode = requestBody.verdier.periode.fom tilOgMed requestBody.verdier.periode.tom
+        val periode = request.verdier.periode.fom tilOgMed request.verdier.periode.tom
         TilkommenInntektPeriodeValidator.validerPeriode(
             periode = periode,
-            organisasjonsnummer = requestBody.verdier.organisasjonsnummer,
-            andreTilkomneInntekter = transaksjon.tilkommenInntektRepository.finnAlleForFødselsnummer(requestBody.fodselsnummer),
-            vedtaksperioder = transaksjon.vedtaksperiodeRepository.finnVedtaksperioder(requestBody.fodselsnummer),
+            organisasjonsnummer = request.verdier.organisasjonsnummer,
+            andreTilkomneInntekter = transaksjon.tilkommenInntektRepository.finnAlleForFødselsnummer(request.fodselsnummer),
+            vedtaksperioder = transaksjon.vedtaksperiodeRepository.finnVedtaksperioder(request.fodselsnummer),
         )
 
         val tilkommenInntekt =
             TilkommenInntekt.ny(
-                fødselsnummer = requestBody.fodselsnummer,
+                fødselsnummer = request.fodselsnummer,
                 saksbehandlerIdent = saksbehandler.ident,
-                notatTilBeslutter = requestBody.notatTilBeslutter,
+                notatTilBeslutter = request.notatTilBeslutter,
                 totrinnsvurderingId =
                     finnEllerOpprettTotrinnsvurdering(
-                        fodselsnummer = requestBody.fodselsnummer,
+                        fodselsnummer = request.fodselsnummer,
                         totrinnsvurderingRepository = transaksjon.totrinnsvurderingRepository,
                     ).id(),
-                organisasjonsnummer = requestBody.verdier.organisasjonsnummer,
+                organisasjonsnummer = request.verdier.organisasjonsnummer,
                 periode = periode,
-                periodebeløp = requestBody.verdier.periodebelop,
-                ekskluderteUkedager = requestBody.verdier.ekskluderteUkedager.toSet(),
+                periodebeløp = request.verdier.periodebelop,
+                ekskluderteUkedager = request.verdier.ekskluderteUkedager.toSet(),
             )
         transaksjon.tilkommenInntektRepository.lagre(tilkommenInntekt)
 
@@ -80,9 +68,19 @@ class PostTilkomneInntekterHåndterer : PostHåndterer<Unit, PostTilkomneInntekt
         return RestResponse.created(LeggTilTilkommenInntektResponse(tilkommenInntekt.id().value))
     }
 
-    override val urlParametersClass = Unit::class
-
-    override val requestBodyType = typeOf<RequestBody>()
-
-    override val responseBodyType = typeOf<LeggTilTilkommenInntektResponse>()
+    override fun openApi(config: RouteConfig) {
+        with(config) {
+            tags = setOf("Tilkommen inntekt")
+            operationId = operationIdBasertPåKlassenavn()
+            request {
+                body<LeggTilTilkommenInntektRequest>()
+            }
+            response {
+                code(HttpStatusCode.OK) {
+                    description = "Svar med ID på den opprettede tilkomne inntekten"
+                    body<LeggTilTilkommenInntektResponse>()
+                }
+            }
+        }
+    }
 }

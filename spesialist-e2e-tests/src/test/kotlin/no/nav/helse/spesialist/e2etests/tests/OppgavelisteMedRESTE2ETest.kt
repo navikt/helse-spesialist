@@ -122,11 +122,15 @@ class OppgavelisteMedRESTE2ETest : AbstractOppgavelisteE2ETest() {
         val minstEnAvEgenskapene = egenskaper.groupBy { it.kategori }.map { it.value }
         // When:
         val response = callHttpGet("api/oppgaver" + buildList {
-            minstEnAvEgenskapene.forEachIndexed { index, egenskaper ->
-                add("minstEnAvEgenskapene[$index]=${egenskaper.tilKommaseparert()}")
+            minstEnAvEgenskapene.forEach { egenskaper ->
+                add("minstEnAvEgenskapene=${egenskaper.tilKommaseparert()}")
             }
-            add("ingenAvEgenskapene=${ingenAvEgenskapene.tilKommaseparert()}")
-            add("erTildelt=${tildelt}")
+            if (ingenAvEgenskapene.isNotEmpty()) {
+                add("ingenAvEgenskapene=${ingenAvEgenskapene.tilKommaseparert()}")
+            }
+            if (tildelt != null) {
+                add("erTildelt=${tildelt}")
+            }
             if (fane in setOf(Fane.MINE_OPPGAVER, Fane.PÅ_VENT)) {
                 add("tildeltTilOid=${saksbehandler.id().value}")
             }

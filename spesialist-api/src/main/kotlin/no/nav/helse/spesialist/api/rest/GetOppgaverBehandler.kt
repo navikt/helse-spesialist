@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.api.rest
 
-import io.ktor.http.Parameters
-import io.ktor.util.flattenEntries
+import io.github.smiley4.ktoropenapi.config.RouteConfig
+import io.ktor.http.HttpStatusCode
 import no.nav.helse.db.SessionContext
 import no.nav.helse.db.SorteringsnøkkelForDatabase
 import no.nav.helse.db.Sorteringsrekkefølge
@@ -14,6 +14,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveSorteringsfelt
 import no.nav.helse.spesialist.api.graphql.schema.ApiPersonnavn
 import no.nav.helse.spesialist.api.graphql.schema.ApiSorteringsrekkefolge
 import no.nav.helse.spesialist.api.graphql.schema.ApiTildeling
+import no.nav.helse.spesialist.api.rest.resources.Oppgaver
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.domain.Dialog
 import no.nav.helse.spesialist.domain.DialogId
@@ -22,42 +23,11 @@ import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import java.time.ZoneId
-import java.util.UUID
-import kotlin.reflect.typeOf
 import kotlin.time.measureTimedValue
 
-class GetOppgaverHåndterer : GetHåndterer<GetOppgaverHåndterer.URLParametre, ApiOppgaveProjeksjonSide> {
-    override val urlPath = "oppgaver?{args}"
-
-    data class URLParametre(
-        val minstEnAvEgenskapene: List<String>?, // Kommaseparerte
-        val ingenAvEgenskapene: String?, // Kommaseparert
-        val erTildelt: Boolean?,
-        val tildeltTilOid: UUID?,
-        val erPaaVent: Boolean?,
-        val sorteringsfelt: ApiOppgaveSorteringsfelt?,
-        val sorteringsrekkefoelge: ApiSorteringsrekkefolge?,
-        val sidetall: Int?,
-        val sidestoerrelse: Int?,
-    )
-
-    override fun extractParametre(
-        pathParameters: Parameters,
-        queryParameters: Parameters,
-    ) = URLParametre(
-        minstEnAvEgenskapene = queryParameters.getList("minstEnAvEgenskapene"),
-        ingenAvEgenskapene = queryParameters["ingenAvEgenskapene"],
-        erTildelt = queryParameters["erTildelt"]?.toBooleanStrictOrNull(),
-        tildeltTilOid = queryParameters["tildeltTilOid"]?.let(UUID::fromString),
-        erPaaVent = queryParameters["erPaaVent"]?.toBooleanStrictOrNull(),
-        sorteringsfelt = queryParameters["sorteringsfelt"]?.let { enumValueOf<ApiOppgaveSorteringsfelt>(it) },
-        sorteringsrekkefoelge = queryParameters["sorteringsrekkefoelge"]?.let { enumValueOf<ApiSorteringsrekkefolge>(it) },
-        sidetall = queryParameters["sidetall"]?.toIntOrNull(),
-        sidestoerrelse = queryParameters["sidestoerrelse"]?.toIntOrNull(),
-    )
-
-    override fun håndter(
-        urlParametre: URLParametre,
+class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide> {
+    override fun behandle(
+        resource: Oppgaver,
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
@@ -66,21 +36,18 @@ class GetOppgaverHåndterer : GetHåndterer<GetOppgaverHåndterer.URLParametre, 
             measureTimedValue {
                 transaksjon.oppgaveRepository
                     .finnOppgaveProjeksjoner(
-                        minstEnAvEgenskapene =
-                            urlParametre.minstEnAvEgenskapene
-                                .orEmpty()
-                                .map { it.tilEgenskaper() },
+                        minstEnAvEgenskapene = resource.minstEnAvEgenskapene.map { it.tilEgenskaper() },
                         ingenAvEgenskapene =
                             Egenskap.entries
                                 .filterNot { it.skalDukkeOppFor(saksbehandler, tilgangsgrupper) }
-                                .plus(urlParametre.ingenAvEgenskapene.tilEgenskaper())
+                                .plus(resource.ingenAvEgenskapene.tilEgenskaper())
                                 .toSet(),
-                        erTildelt = urlParametre.erTildelt,
-                        tildeltTilOid = urlParametre.tildeltTilOid?.let(::SaksbehandlerOid),
-                        erPåVent = urlParametre.erPaaVent,
+                        erTildelt = resource.erTildelt,
+                        tildeltTilOid = resource.tildeltTilOid?.let(::SaksbehandlerOid),
+                        erPåVent = resource.erPaaVent,
                         ikkeSendtTilBeslutterAvOid = saksbehandler.id(),
                         sorterPå =
-                            when (urlParametre.sorteringsfelt) {
+                            when (resource.sorteringsfelt) {
                                 null,
                                 ApiOppgaveSorteringsfelt.opprettetTidspunkt,
                                 -> SorteringsnøkkelForDatabase.OPPRETTET
@@ -90,18 +57,18 @@ class GetOppgaverHåndterer : GetHåndterer<GetOppgaverHåndterer.URLParametre, 
                                 ApiOppgaveSorteringsfelt.paVentInfo_tidsfrist -> SorteringsnøkkelForDatabase.TIDSFRIST
                             },
                         sorteringsrekkefølge =
-                            when (urlParametre.sorteringsrekkefoelge) {
+                            when (resource.sorteringsrekkefoelge) {
                                 null,
                                 ApiSorteringsrekkefolge.STIGENDE,
                                 -> Sorteringsrekkefølge.STIGENDE
 
                                 ApiSorteringsrekkefolge.SYNKENDE -> Sorteringsrekkefølge.SYNKENDE
                             },
-                        sidetall = urlParametre.sidetall?.takeUnless { it < 1 } ?: 1,
-                        sidestørrelse = urlParametre.sidestoerrelse?.takeUnless { it < 1 } ?: 10,
+                        sidetall = resource.sidetall?.takeUnless { it < 1 } ?: 1,
+                        sidestørrelse = resource.sidestoerrelse?.takeUnless { it < 1 } ?: 10,
                     )
             }
-        logg.info("Hentet oppgaver på ${tidsbruk.inWholeMilliseconds} ms.\n Bruke følgende filtre: $urlParametre")
+        logg.info("Hentet oppgaver på ${tidsbruk.inWholeMilliseconds} ms.\nParametere: $resource")
         return RestResponse.ok(
             finnOppgaveProjeksjoner.tilApiType(transaksjon),
         )
@@ -292,19 +259,21 @@ class GetOppgaverHåndterer : GetHåndterer<GetOppgaverHåndterer.URLParametre, 
                 else -> true
             }
 
-    private fun Parameters.getList(name: String): List<String> {
-        val lowercaseName = name.lowercase()
-        return flattenEntries()
-            .asSequence()
-            .map { (name, value) -> name.lowercase() to value }
-            .filter { (name, _) -> name.startsWith("$lowercaseName[") && name.endsWith("]") }
-            .map { (name, value) -> name.removeSurrounding("${lowercaseName.lowercase()}[", "]").toInt() to value }
-            .sortedBy { (number, _) -> number }
-            .map { (_, value) -> value }
-            .toList()
+    override fun openApi(config: RouteConfig) {
+        with(config) {
+            tags = setOf("Oppgaver")
+            operationId = operationIdBasertPåKlassenavn()
+            request {
+                queryParameter<List<String>?>(Oppgaver::minstEnAvEgenskapene.name) {
+                    explode = true
+                }
+            }
+            response {
+                code(HttpStatusCode.OK) {
+                    description = "En side med oppgaver, filtrert og sortert som ønsket"
+                    body<ApiOppgaveProjeksjonSide>()
+                }
+            }
+        }
     }
-
-    override val urlParametersClass = URLParametre::class
-
-    override val responseBodyType = typeOf<ApiOppgaveProjeksjonSide>()
 }
