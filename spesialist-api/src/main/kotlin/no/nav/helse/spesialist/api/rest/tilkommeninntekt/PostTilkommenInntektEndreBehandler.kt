@@ -4,7 +4,7 @@ import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.db.SessionContext
 import no.nav.helse.spesialist.api.graphql.mutation.InntektsendringerEventBygger
-import no.nav.helse.spesialist.api.rest.EndreTilkommenInntektRequest
+import no.nav.helse.spesialist.api.rest.ApiEndreTilkommenInntektRequest
 import no.nav.helse.spesialist.api.rest.HttpForbidden
 import no.nav.helse.spesialist.api.rest.HttpNotFound
 import no.nav.helse.spesialist.api.rest.PostBehandler
@@ -17,10 +17,10 @@ import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektId
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektPeriodeValidator
 
-class PostTilkommenInntektEndreBehandler : PostBehandler<TilkomneInntekter.Id.Endre, EndreTilkommenInntektRequest, Boolean> {
+class PostTilkommenInntektEndreBehandler : PostBehandler<TilkomneInntekter.Id.Endre, ApiEndreTilkommenInntektRequest, Boolean> {
     override fun behandle(
         resource: TilkomneInntekter.Id.Endre,
-        request: EndreTilkommenInntektRequest,
+        request: ApiEndreTilkommenInntektRequest,
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
@@ -98,7 +98,7 @@ class PostTilkommenInntektEndreBehandler : PostBehandler<TilkomneInntekter.Id.En
             tags = setOf("Tilkommen inntekt")
             operationId = operationIdBasertPåKlassenavn()
             request {
-                body<EndreTilkommenInntektRequest>()
+                body<ApiEndreTilkommenInntektRequest>()
             }
             response {
                 code(HttpStatusCode.OK) {

@@ -12,6 +12,7 @@ package no.nav.helse.spesialist.api.graphql.schema
 import com.expediagroup.graphql.generator.annotations.GraphQLIgnore
 import com.expediagroup.graphql.generator.annotations.GraphQLName
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import io.github.smiley4.schemakenerator.core.annotations.Name
 import kotlinx.serialization.Serializable
 import java.math.BigDecimal
 import java.time.Instant
@@ -35,8 +36,9 @@ data class ApiSaksbehandler(
     val ident: String?,
 )
 
-@GraphQLName("AktivSaksbehandler")
 @Serializable
+@Name("AktivSaksbehandler")
+@GraphQLName("AktivSaksbehandler")
 data class ApiAktivSaksbehandler(
     val navn: String,
     val ident: String,
@@ -63,8 +65,9 @@ data class ApiEnhet(
     val navn: String,
 )
 
-@GraphQLName("Tildeling")
 @Serializable
+@Name("Tildeling")
+@GraphQLName("Tildeling")
 data class ApiTildeling(
     val navn: String,
     val epost: String,

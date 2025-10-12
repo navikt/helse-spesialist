@@ -1,7 +1,19 @@
+@file:kotlinx.serialization.UseContextualSerialization(
+    BigDecimal::class,
+    Boolean::class,
+    Instant::class,
+    LocalDate::class,
+    LocalDateTime::class,
+    UUID::class,
+)
+
 package no.nav.helse.spesialist.api.graphql.schema
 
 import com.expediagroup.graphql.generator.annotations.GraphQLName
+import io.github.smiley4.schemakenerator.core.annotations.Name
 import kotlinx.serialization.Serializable
+import java.math.BigDecimal
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -25,6 +37,7 @@ enum class ApiAntallArbeidsforhold {
     FLERE_ARBEIDSFORHOLD,
 }
 
+@Name("Egenskap")
 @GraphQLName("Egenskap")
 enum class ApiEgenskap {
     RISK_QA,
@@ -96,7 +109,8 @@ enum class ApiSorteringsnokkel {
     TIDSFRIST,
 }
 
-@GraphQLName("OppgaveSorteringsnokkel")
+@Name("OppgaveSorteringsfelt")
+@GraphQLName("OppgaveSorteringsfelt")
 @Suppress("ktlint:standard:enum-entry-name-case")
 enum class ApiOppgaveSorteringsfelt {
     tildeling,
@@ -105,8 +119,9 @@ enum class ApiOppgaveSorteringsfelt {
     paVentInfo_tidsfrist,
 }
 
+@Name("Sorteringsrekkefølge")
 @GraphQLName("Sorteringsrekkefolge")
-enum class ApiSorteringsrekkefolge {
+enum class ApiSorteringsrekkefølge {
     STIGENDE,
     SYNKENDE,
 }
@@ -185,8 +200,9 @@ enum class ApiMottaker {
     INGEN,
 }
 
-@GraphQLName("Personnavn")
 @Serializable
+@Name("Personnavn")
+@GraphQLName("Personnavn")
 data class ApiPersonnavn(
     val fornavn: String,
     val etternavn: String,

@@ -12,7 +12,7 @@ import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.spesialist.api.graphql.schema.ApiEgenskap
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveSorteringsfelt
 import no.nav.helse.spesialist.api.graphql.schema.ApiPersonnavn
-import no.nav.helse.spesialist.api.graphql.schema.ApiSorteringsrekkefolge
+import no.nav.helse.spesialist.api.graphql.schema.ApiSorteringsrekkefølge
 import no.nav.helse.spesialist.api.graphql.schema.ApiTildeling
 import no.nav.helse.spesialist.api.rest.resources.Oppgaver
 import no.nav.helse.spesialist.application.logg.logg
@@ -59,10 +59,10 @@ class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide> {
                         sorteringsrekkefølge =
                             when (resource.sorteringsrekkefoelge) {
                                 null,
-                                ApiSorteringsrekkefolge.STIGENDE,
+                                ApiSorteringsrekkefølge.STIGENDE,
                                 -> Sorteringsrekkefølge.STIGENDE
 
-                                ApiSorteringsrekkefolge.SYNKENDE -> Sorteringsrekkefølge.SYNKENDE
+                                ApiSorteringsrekkefølge.SYNKENDE -> Sorteringsrekkefølge.SYNKENDE
                             },
                         sidetall = resource.sidetall?.takeUnless { it < 1 } ?: 1,
                         sidestørrelse = resource.sidestoerrelse?.takeUnless { it < 1 } ?: 10,
@@ -210,8 +210,8 @@ class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide> {
     private fun PåVent.tilPaaVent(
         saksbehandlere: Map<SaksbehandlerOid, Saksbehandler>,
         dialoger: Map<DialogId, Dialog>,
-    ): ApiOppgaveProjeksjon.PaaVent =
-        ApiOppgaveProjeksjon.PaaVent(
+    ): ApiOppgaveProjeksjon.PaaVentInfo =
+        ApiOppgaveProjeksjon.PaaVentInfo(
             arsaker = årsaker,
             tekst = notattekst,
             dialogRef = dialogRef?.value ?: error("LagtPåVent ${id()} har ingen dialogRef"),
@@ -228,7 +228,7 @@ class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide> {
                             .getRequired(it)
                             .kommentarer
                             .map { kommentar ->
-                                ApiOppgaveProjeksjon.PaaVent.Kommentar(
+                                ApiOppgaveProjeksjon.PaaVentInfo.Kommentar(
                                     id = kommentar.id().value,
                                     tekst = kommentar.tekst,
                                     opprettet = kommentar.opprettetTidspunkt,

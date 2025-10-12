@@ -9,6 +9,7 @@
 
 package no.nav.helse.spesialist.api.rest
 
+import io.github.smiley4.schemakenerator.core.annotations.Name
 import kotlinx.serialization.Serializable
 import no.nav.helse.spesialist.api.graphql.schema.ApiEgenskap
 import no.nav.helse.spesialist.api.graphql.schema.ApiPersonnavn
@@ -20,6 +21,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 @Serializable
+@Name("OppgaveProjeksjon")
 data class ApiOppgaveProjeksjon(
     val id: String,
     val aktorId: String,
@@ -28,10 +30,11 @@ data class ApiOppgaveProjeksjon(
     val tildeling: ApiTildeling?,
     val opprettetTidspunkt: Instant,
     val opprinneligSoeknadstidspunkt: Instant,
-    val paVentInfo: PaaVent?,
+    val paVentInfo: PaaVentInfo?,
 ) {
     @Serializable
-    data class PaaVent(
+    @Name("OppgaveProjeksjonPaaVentInfo")
+    data class PaaVentInfo(
         val arsaker: List<String>,
         val tekst: String?,
         val dialogRef: Long,
@@ -41,6 +44,7 @@ data class ApiOppgaveProjeksjon(
         val kommentarer: List<Kommentar>,
     ) {
         @Serializable
+        @Name("OppgaveProjeksjonPaaVentInfoKommentar")
         data class Kommentar(
             val id: Int,
             val tekst: String,
@@ -52,6 +56,7 @@ data class ApiOppgaveProjeksjon(
 }
 
 @Serializable
+@Name("OppgaveProjeksjonSide")
 data class ApiOppgaveProjeksjonSide(
     val totaltAntall: Long,
     val sidetall: Int,

@@ -11,7 +11,7 @@ package no.nav.helse.spesialist.api.rest.resources
 
 import io.ktor.resources.Resource
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveSorteringsfelt
-import no.nav.helse.spesialist.api.graphql.schema.ApiSorteringsrekkefolge
+import no.nav.helse.spesialist.api.graphql.schema.ApiSorteringsrekkefølge
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
@@ -26,7 +26,7 @@ data class Oppgaver(
     val tildeltTilOid: UUID? = null,
     val erPaaVent: Boolean? = null,
     val sorteringsfelt: ApiOppgaveSorteringsfelt? = null,
-    val sorteringsrekkefoelge: ApiSorteringsrekkefolge? = null,
+    val sorteringsrekkefoelge: ApiSorteringsrekkefølge? = null,
     val sidetall: Int? = null,
     val sidestoerrelse: Int? = null,
 )

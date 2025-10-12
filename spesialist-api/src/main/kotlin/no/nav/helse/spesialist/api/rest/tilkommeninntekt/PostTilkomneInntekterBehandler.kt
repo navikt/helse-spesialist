@@ -4,9 +4,9 @@ import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.db.SessionContext
 import no.nav.helse.spesialist.api.graphql.mutation.InntektsendringerEventBygger
+import no.nav.helse.spesialist.api.rest.ApiLeggTilTilkommenInntektRequest
+import no.nav.helse.spesialist.api.rest.ApiLeggTilTilkommenInntektResponse
 import no.nav.helse.spesialist.api.rest.HttpForbidden
-import no.nav.helse.spesialist.api.rest.LeggTilTilkommenInntektRequest
-import no.nav.helse.spesialist.api.rest.LeggTilTilkommenInntektResponse
 import no.nav.helse.spesialist.api.rest.PostBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.TilkomneInntekter
@@ -17,15 +17,15 @@ import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntekt
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektPeriodeValidator
 
-class PostTilkomneInntekterBehandler : PostBehandler<TilkomneInntekter, LeggTilTilkommenInntektRequest, LeggTilTilkommenInntektResponse> {
+class PostTilkomneInntekterBehandler : PostBehandler<TilkomneInntekter, ApiLeggTilTilkommenInntektRequest, ApiLeggTilTilkommenInntektResponse> {
     override fun behandle(
         resource: TilkomneInntekter,
-        request: LeggTilTilkommenInntektRequest,
+        request: ApiLeggTilTilkommenInntektRequest,
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
         outbox: Outbox,
-    ): RestResponse<LeggTilTilkommenInntektResponse> {
+    ): RestResponse<ApiLeggTilTilkommenInntektResponse> {
         bekreftTilgangTilPerson(
             fødselsnummer = request.fodselsnummer,
             saksbehandler = saksbehandler,
@@ -65,7 +65,7 @@ class PostTilkomneInntekterBehandler : PostBehandler<TilkomneInntekter, LeggTilT
             årsak = "tilkommen inntekt lagt til",
         )
 
-        return RestResponse.created(LeggTilTilkommenInntektResponse(tilkommenInntekt.id().value))
+        return RestResponse.created(ApiLeggTilTilkommenInntektResponse(tilkommenInntekt.id().value))
     }
 
     override fun openApi(config: RouteConfig) {
@@ -73,12 +73,12 @@ class PostTilkomneInntekterBehandler : PostBehandler<TilkomneInntekter, LeggTilT
             tags = setOf("Tilkommen inntekt")
             operationId = operationIdBasertPåKlassenavn()
             request {
-                body<LeggTilTilkommenInntektRequest>()
+                body<ApiLeggTilTilkommenInntektRequest>()
             }
             response {
                 code(HttpStatusCode.OK) {
                     description = "Svar med ID på den opprettede tilkomne inntekten"
-                    body<LeggTilTilkommenInntektResponse>()
+                    body<ApiLeggTilTilkommenInntektResponse>()
                 }
             }
         }

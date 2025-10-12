@@ -10,10 +10,10 @@ import no.nav.helse.spesialist.domain.NotatType
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 
-class PostOpphevStansBehandler : PostBehandler<Opphevstans, OpphevStansRequest, Boolean> {
+class PostOpphevStansBehandler : PostBehandler<Opphevstans, ApiOpphevStansRequest, Boolean> {
     override fun behandle(
         resource: Opphevstans,
-        request: OpphevStansRequest,
+        request: ApiOpphevStansRequest,
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
@@ -47,7 +47,7 @@ class PostOpphevStansBehandler : PostBehandler<Opphevstans, OpphevStansRequest, 
             tags = setOf("Stans av automatisering")
             operationId = operationIdBasertPåKlassenavn()
             request {
-                body<OpphevStansRequest>()
+                body<ApiOpphevStansRequest>()
             }
             response {
                 code(HttpStatusCode.OK) {
