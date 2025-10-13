@@ -263,7 +263,7 @@ class DokumentQueryHandlerTest : AbstractGraphQLApiTest() {
     }
 
     @Test
-    fun `hentSoknad query returnerer kun spørsmål vi er interessert i å viseqb3keb2quo`() {
+    fun `hentSoknad query returnerer med selvstendig næring`() {
         val dokumentId = UUID.randomUUID()
 
         opprettSaksbehandler()
