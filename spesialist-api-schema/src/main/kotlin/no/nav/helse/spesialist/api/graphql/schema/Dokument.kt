@@ -12,6 +12,7 @@ data class ApiSoknad(
     val egenmeldingsdagerFraSykmelding: List<LocalDate>?,
     val soknadsperioder: List<ApiSoknadsperioder>?,
     val sporsmal: List<ApiSporsmal>?,
+    val selvstendigNaringsdrivende: ApiSoknadSelvstendigNaringsdrivende?,
 )
 
 @Suppress("ktlint:standard:enum-entry-name-case")
@@ -36,6 +37,25 @@ data class ApiSoknadsperioder(
     val faktiskGrad: Int?,
     val sykmeldingsgrad: Int?,
 )
+
+@GraphQLName("SoknadSelvstendigNaringsdrivende")
+data class ApiSoknadSelvstendigNaringsdrivende(
+    val inntekt: List<ApiInntektsar>,
+    val ventetid: ApiVentetidPeriode,
+) {
+    @GraphQLName("VentetidPeriode")
+    data class ApiVentetidPeriode(
+        val fom: LocalDate,
+        val tom: LocalDate,
+    )
+
+    @GraphQLName("Inntektsar")
+    data class ApiInntektsar(
+        val ar: String,
+        val pensjonsgivendeInntektAvNaringsinntekt: Int,
+        val erFerdigLignet: Boolean,
+    )
+}
 
 @GraphQLName("Sporsmal")
 data class ApiSporsmal(

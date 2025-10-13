@@ -29,6 +29,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiNaturalytelse
 import no.nav.helse.spesialist.api.graphql.schema.ApiOpphoerAvNaturalytelse
 import no.nav.helse.spesialist.api.graphql.schema.ApiRefusjon
 import no.nav.helse.spesialist.api.graphql.schema.ApiSoknad
+import no.nav.helse.spesialist.api.graphql.schema.ApiSoknadSelvstendigNaringsdrivende
 import no.nav.helse.spesialist.api.graphql.schema.ApiSoknadsperioder
 import no.nav.helse.spesialist.api.graphql.schema.ApiSoknadstype
 import no.nav.helse.spesialist.api.graphql.schema.ApiSporsmal
@@ -230,6 +231,7 @@ class DokumentQueryHandler(
         val egenmeldingsdagerFraSykmelding = getIfNotNull("egenmeldingsdagerFraSykmelding")?.map { it.asLocalDate() }
         val soknadsperioder = getIfNotNull("soknadsperioder")?.map { it.tilSøknadsperioder() }
         val sporsmal = getIfNotNull("sporsmal")?.map { it.tilSpørsmål() }?.filter { it.skalVises() }
+        val selvstendigNaringsdrivende = getIfNotNull("selvstendigNaringsdrivende")?.tilSelvstendigNæringsdrivende()
         return ApiSoknad(
             type = type,
             arbeidGjenopptatt = arbeidGjenopptatt,
@@ -237,6 +239,7 @@ class DokumentQueryHandler(
             egenmeldingsdagerFraSykmelding = egenmeldingsdagerFraSykmelding,
             soknadsperioder = soknadsperioder,
             sporsmal = sporsmal,
+            selvstendigNaringsdrivende = selvstendigNaringsdrivende,
         )
     }
 
@@ -267,6 +270,23 @@ class DokumentQueryHandler(
             grad = getIfNotNull("grad")?.asInt(),
             sykmeldingsgrad = getIfNotNull("sykmeldingsgrad")?.asInt(),
             faktiskGrad = getIfNotNull("faktiskGrad")?.asInt(),
+        )
+
+    private fun JsonNode.tilSelvstendigNæringsdrivende(): ApiSoknadSelvstendigNaringsdrivende =
+        ApiSoknadSelvstendigNaringsdrivende(
+            ventetid =
+                ApiSoknadSelvstendigNaringsdrivende.ApiVentetidPeriode(
+                    fom = get("ventetid")["fom"].asLocalDate(),
+                    tom = get("ventetid")["tom"].asLocalDate(),
+                ),
+            inntekt =
+                get("inntekt")["inntektsAar"].map {
+                    ApiSoknadSelvstendigNaringsdrivende.ApiInntektsar(
+                        ar = it.get("aar").asText(),
+                        pensjonsgivendeInntektAvNaringsinntekt = it.get("pensjonsgivendeInntekt")["pensjonsgivendeInntektAvNaeringsinntekt"].asInt(),
+                        erFerdigLignet = it.get("erFerdigLignet").asBoolean(),
+                    )
+                },
         )
 
     private fun JsonNode.tilSpørsmål(): ApiSporsmal {

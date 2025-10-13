@@ -4,9 +4,11 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.NullNode
 import io.mockk.every
 import io.mockk.verify
+import no.nav.helse.mediator.asLocalDate
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
 import no.nav.helse.spesialist.api.graphql.schema.ApiSoknadstype
 import no.nav.helse.spesialist.api.objectMapper
+import no.nav.helse.spesialist.domain.testfixtures.jan
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -258,6 +260,58 @@ class DokumentQueryHandlerTest : AbstractGraphQLApiTest() {
         assertEquals("NEI", andreInntektskilder["undersporsmal"].first()["undersporsmal"].first()["undersporsmal"].first()["svar"].first()["verdi"].asText())
         val kjenteInntektskilder = spørsmål.first { it["tag"].asText() == "KJENTE_INNTEKTSKILDER"}
         assertEquals("Jeg jobber turnus", kjenteInntektskilder["undersporsmal"].first()["undersporsmal"].first()["undersporsmal"].first()["undersporsmal"].first()["undersporsmal"].first()["undersporsmal"].first()["sporsmalstekst"].asText())
+    }
+
+    @Test
+    fun `hentSoknad query returnerer kun spørsmål vi er interessert i å viseqb3keb2quo`() {
+        val dokumentId = UUID.randomUUID()
+
+        opprettSaksbehandler()
+        opprettVedtaksperiode(opprettPerson())
+        every { dokumenthåndterer.håndter(any(), any(), any()) } returns objectMapper.readTree(
+            søknadJsonMedSelvstendigNaringsdrivende()
+        )
+        val dokument = runQuery(
+            """
+            {
+                hentSoknad(
+                    dokumentId: "$dokumentId"
+                    fnr: "$FØDSELSNUMMER"
+                ) {
+                    type,
+                    selvstendigNaringsdrivende { 
+                        inntekt {
+                            ar,
+                            pensjonsgivendeInntektAvNaringsinntekt,
+                            erFerdigLignet
+                        },
+                        ventetid {
+                            fom,
+                            tom
+                        }
+                    }
+                }
+            }
+        """
+        )["data"]["hentSoknad"]
+
+        verify(exactly = 1) {
+            dokumenthåndterer.håndter(
+                fødselsnummer = FØDSELSNUMMER,
+                dokumentId = dokumentId,
+                dokumentType = DokumentType.SØKNAD.name
+            )
+        }
+
+        val selvstendigNæringsdrivende = dokument["selvstendigNaringsdrivende"]
+        val inntekt1 = selvstendigNæringsdrivende["inntekt"][0]
+        val ventetid = selvstendigNæringsdrivende["ventetid"]
+        assertEquals(123456, inntekt1["pensjonsgivendeInntektAvNaringsinntekt"].asInt())
+        assertEquals("2018", inntekt1["ar"].asText())
+        assertTrue(inntekt1["erFerdigLignet"].asBoolean())
+        assertEquals(1 jan 2018, ventetid["fom"].asLocalDate())
+        assertEquals(16 jan 2018, ventetid["tom"].asLocalDate())
+
     }
 
     @Test
@@ -1722,6 +1776,48 @@ class DokumentQueryHandlerTest : AbstractGraphQLApiTest() {
       ]
 }
 """.trimIndent()
+    @Language("JSON")
+    private fun søknadJsonMedSelvstendigNaringsdrivende() = """{
+  "type": "SELVSTENDIGE_OG_FRILANSERE",
+  "arbeidGjenopptatt": "${LocalDate.now()}",
+  "sykmeldingSkrevet": "${LocalDateTime.now()}",
+  "egenmeldingsdagerFraSykmelding": ["2018-01-01"],
+  "soknadsperioder": [{"fom": "2018-01-01", "tom": "2018-01-31", "grad": 100, "faktiskGrad": null, "sykmeldingsgrad":  100}],
+  "selvstendigNaringsdrivende": {
+    "inntekt": {
+      "inntektsAar": [
+        {
+            "aar": "2018",
+            "pensjonsgivendeInntekt": {
+              "pensjonsgivendeInntektAvNaeringsinntekt": 123456
+            },
+             "erFerdigLignet": true
+        },
+        {
+            "aar": "2017",
+            "pensjonsgivendeInntekt": {
+              "pensjonsgivendeInntektAvNaeringsinntekt": 123456
+            },
+             "erFerdigLignet": true
+        },
+        {
+            "aar": "2016",
+            "pensjonsgivendeInntekt": {
+              "pensjonsgivendeInntektAvNaeringsinntekt": 123456
+            },
+             "erFerdigLignet": true
+        }
+        ]
+    },
+    "ventetid": {
+      "fom": "2018-01-01",
+      "tom": "2018-01-16"
+    }
+  },
+  "sporsmal": []
+}
+""".trimIndent()
+
 
     @Language("JSON")
     private fun inntektsmeldingJson() = """
