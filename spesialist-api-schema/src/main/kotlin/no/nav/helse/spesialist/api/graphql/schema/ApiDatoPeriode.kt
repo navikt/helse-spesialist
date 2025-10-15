@@ -10,7 +10,6 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
 import com.expediagroup.graphql.generator.annotations.GraphQLName
-import io.github.smiley4.schemakenerator.core.annotations.Name
 import kotlinx.serialization.Serializable
 import java.math.BigDecimal
 import java.time.Instant
@@ -19,7 +18,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 @Serializable
-@Name("DatoPeriode")
 @GraphQLName("DatoPeriode")
 data class ApiDatoPeriode(
     val fom: LocalDate,

@@ -10,7 +10,6 @@
 package no.nav.helse.spesialist.api.graphql.schema
 
 import com.expediagroup.graphql.generator.annotations.GraphQLName
-import io.github.smiley4.schemakenerator.core.annotations.Name
 import kotlinx.serialization.Serializable
 import java.math.BigDecimal
 import java.time.Instant
@@ -37,7 +36,6 @@ enum class ApiAntallArbeidsforhold {
     FLERE_ARBEIDSFORHOLD,
 }
 
-@Name("Egenskap")
 @GraphQLName("Egenskap")
 enum class ApiEgenskap {
     RISK_QA,
@@ -109,7 +107,6 @@ enum class ApiSorteringsnokkel {
     TIDSFRIST,
 }
 
-@Name("OppgaveSorteringsfelt")
 @GraphQLName("OppgaveSorteringsfelt")
 @Suppress("ktlint:standard:enum-entry-name-case")
 enum class ApiOppgaveSorteringsfelt {
@@ -119,7 +116,6 @@ enum class ApiOppgaveSorteringsfelt {
     paVentInfo_tidsfrist,
 }
 
-@Name("Sorteringsrekkefølge")
 @GraphQLName("Sorteringsrekkefolge")
 enum class ApiSorteringsrekkefølge {
     STIGENDE,
@@ -201,7 +197,6 @@ enum class ApiMottaker {
 }
 
 @Serializable
-@Name("Personnavn")
 @GraphQLName("Personnavn")
 data class ApiPersonnavn(
     val fornavn: String,
