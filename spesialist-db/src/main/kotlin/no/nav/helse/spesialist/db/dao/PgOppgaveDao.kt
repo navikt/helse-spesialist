@@ -215,7 +215,8 @@ class PgOppgaveDao internal constructor(
         tildelt: Boolean?,
         grupperteFiltrerteEgenskaper: Map<Egenskap.Kategori, List<EgenskapForDatabase>>,
     ): List<OppgaveFraDatabaseForVisning> {
-        val orderBy = if (sortering.isNotEmpty()) sortering.joinToString { it.nøkkelTilKolonne() } else "første_opprettet DESC"
+        val orderBy =
+            if (sortering.isNotEmpty()) sortering.joinToString { it.nøkkelTilKolonne() } else "første_opprettet DESC"
         val ukategoriserteEgenskaper = grupperteFiltrerteEgenskaper[Egenskap.Kategori.Ukategorisert]
         val oppgavetypeegenskaper = grupperteFiltrerteEgenskaper[Egenskap.Kategori.Oppgavetype]
         val periodetypeegenskaper = grupperteFiltrerteEgenskaper[Egenskap.Kategori.Periodetype]
@@ -601,9 +602,11 @@ class PgOppgaveDao internal constructor(
     private fun OppgavesorteringForDatabase.nøkkelTilKolonne() =
         when (this.nøkkel) {
             SorteringsnøkkelForDatabase.TILDELT_TIL -> "navn".direction(this.stigende).nullsLast()
-            SorteringsnøkkelForDatabase.OPPRETTET -> "første_opprettet".direction(this.stigende)
             SorteringsnøkkelForDatabase.TIDSFRIST -> "frist".direction(this.stigende).nullsLast()
             SorteringsnøkkelForDatabase.SØKNAD_MOTTATT -> "opprinnelig_soknadsdato".direction(this.stigende)
+            SorteringsnøkkelForDatabase.BEHANDLING_OPPRETTET_TIDSPUNKT,
+            SorteringsnøkkelForDatabase.OPPRETTET,
+            -> "første_opprettet".direction(this.stigende)
         }
 
     private fun String.direction(stigende: Boolean) = if (stigende) "$this ASC" else "$this DESC"

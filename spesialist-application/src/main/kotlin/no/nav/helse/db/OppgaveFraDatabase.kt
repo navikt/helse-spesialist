@@ -64,6 +64,7 @@ enum class SorteringsnøkkelForDatabase {
     OPPRETTET,
     SØKNAD_MOTTATT,
     TIDSFRIST,
+    BEHANDLING_OPPRETTET_TIDSPUNKT,
 }
 
 enum class Sorteringsrekkefølge {

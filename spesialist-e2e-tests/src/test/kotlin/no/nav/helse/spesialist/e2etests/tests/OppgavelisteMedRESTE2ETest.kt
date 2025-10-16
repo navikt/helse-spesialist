@@ -18,11 +18,13 @@ class OppgavelisteMedRESTE2ETest : AbstractOppgavelisteE2ETest() {
         val tiMinutterSiden = Instant.now().minusSeconds(60*10)
         assertAfter(tiMinutterSiden, Instant.parse(oppgave["opprettetTidspunkt"].asText()))
         assertAfter(tiMinutterSiden, Instant.parse(oppgave["opprinneligSoeknadstidspunkt"].asText()))
+        assertAfter(tiMinutterSiden, Instant.parse(oppgave["behandlingOpprettetTidspunkt"].asText()))
 
         val oppgaveUtenGenererteFelter = (oppgave as ObjectNode).apply {
             remove("id")
             remove("opprettetTidspunkt")
             remove("opprinneligSoeknadstidspunkt")
+            remove("behandlingOpprettetTidspunkt")
         }
 
         @Language("JSON")
@@ -49,6 +51,7 @@ class OppgavelisteMedRESTE2ETest : AbstractOppgavelisteE2ETest() {
         val tiMinutterSiden = Instant.now().minusSeconds(60*10)
         assertAfter(tiMinutterSiden, Instant.parse(oppgave["opprettetTidspunkt"].asText()))
         assertAfter(tiMinutterSiden, Instant.parse(oppgave["opprinneligSoeknadstidspunkt"].asText()))
+        assertAfter(tiMinutterSiden, Instant.parse(oppgave["behandlingOpprettetTidspunkt"].asText()))
         assertIsNumber(oppgave["paVentInfo"]["dialogRef"])
         assertAfter(tiMinutterSidenLocalDateTime, LocalDateTime.parse(oppgave["paVentInfo"]["opprettet"].asText()))
         oppgave["paVentInfo"]["kommentarer"].forEach { kommentar ->
@@ -60,6 +63,7 @@ class OppgavelisteMedRESTE2ETest : AbstractOppgavelisteE2ETest() {
             remove("id")
             remove("opprettetTidspunkt")
             remove("opprinneligSoeknadstidspunkt")
+            remove("behandlingOpprettetTidspunkt")
             (get("paVentInfo") as ObjectNode).apply {
                 remove("dialogRef")
                 remove("opprettet")

@@ -28,6 +28,7 @@ data class ApiOppgaveProjeksjon(
     val tildeling: ApiTildeling?,
     val opprettetTidspunkt: Instant,
     val opprinneligSoeknadstidspunkt: Instant,
+    val behandlingOpprettetTidspunkt: Instant,
     val paVentInfo: PaaVentInfo?,
 ) {
     @Serializable

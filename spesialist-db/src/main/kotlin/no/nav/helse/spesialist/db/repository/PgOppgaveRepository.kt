@@ -151,10 +151,12 @@ class PgOppgaveRepository private constructor(
                         os.soknad_mottatt AS opprinnelig_soknadsdato,
                         t.saksbehandler_ref as tildelt_til_oid,
                         pv.id AS på_vent_id,
+                        b.opprettet_tidspunkt as behandling_opprettet_tidspunkt,
                         count(1) OVER() AS filtered_count
                     FROM oppgave o
                     INNER JOIN vedtak v ON o.vedtak_ref = v.id
                     INNER JOIN opprinnelig_soknadsdato os ON os.vedtaksperiode_id = v.vedtaksperiode_id
+                    INNER JOIN behandling b ON b.spleis_behandling_id = o.behandling_id
                     LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
                     LEFT JOIN totrinnsvurdering ttv ON (ttv.person_ref = v.person_ref AND ttv.tilstand != 'GODKJENT')
                     LEFT JOIN pa_vent pv ON v.vedtaksperiode_id = pv.vedtaksperiode_id
@@ -224,6 +226,7 @@ class PgOppgaveRepository private constructor(
                         tildeltTilOid = row.uuidOrNull("tildelt_til_oid")?.let(::SaksbehandlerOid),
                         opprettetTidspunkt = row.instant("første_opprettet"),
                         opprinneligSøknadstidspunkt = row.instant("opprinnelig_soknadsdato"),
+                        behandlingOpprettetTidspunkt = row.instant("behandling_opprettet_tidspunkt"),
                         påVentId = row.intOrNull("på_vent_id")?.let(::PåVentId),
                     )
             }.let { listeMedTotaltAntallOgElement ->
@@ -301,6 +304,7 @@ class PgOppgaveRepository private constructor(
             SorteringsnøkkelForDatabase.OPPRETTET -> "første_opprettet"
             SorteringsnøkkelForDatabase.TIDSFRIST -> "pv.frist"
             SorteringsnøkkelForDatabase.SØKNAD_MOTTATT -> "opprinnelig_soknadsdato"
+            SorteringsnøkkelForDatabase.BEHANDLING_OPPRETTET_TIDSPUNKT -> "behandling_opprettet_tidspunkt"
         }
 
     private fun lagreTildeling(oppgave: Oppgave) {

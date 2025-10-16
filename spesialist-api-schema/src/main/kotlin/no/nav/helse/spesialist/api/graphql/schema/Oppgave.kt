@@ -114,6 +114,7 @@ enum class ApiOppgaveSorteringsfelt {
     opprettetTidspunkt,
     opprinneligSoeknadstidspunkt,
     paVentInfo_tidsfrist,
+    behandlingOpprettetTidspunkt,
 }
 
 @GraphQLName("Sorteringsrekkefolge")

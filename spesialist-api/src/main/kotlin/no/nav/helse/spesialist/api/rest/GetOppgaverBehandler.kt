@@ -55,6 +55,7 @@ class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide> {
                                 ApiOppgaveSorteringsfelt.tildeling -> SorteringsnøkkelForDatabase.TILDELT_TIL
                                 ApiOppgaveSorteringsfelt.opprinneligSoeknadstidspunkt -> SorteringsnøkkelForDatabase.SØKNAD_MOTTATT
                                 ApiOppgaveSorteringsfelt.paVentInfo_tidsfrist -> SorteringsnøkkelForDatabase.TIDSFRIST
+                                ApiOppgaveSorteringsfelt.behandlingOpprettetTidspunkt -> SorteringsnøkkelForDatabase.BEHANDLING_OPPRETTET_TIDSPUNKT
                             },
                         sorteringsrekkefølge =
                             when (resource.sorteringsrekkefoelge) {
@@ -198,6 +199,7 @@ class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide> {
                                 },
                         opprettetTidspunkt = oppgave.opprettetTidspunkt,
                         opprinneligSoeknadstidspunkt = oppgave.opprinneligSøknadstidspunkt,
+                        behandlingOpprettetTidspunkt = oppgave.behandlingOpprettetTidspunkt,
                         paVentInfo =
                             oppgave.påVentId
                                 ?.let { påVentId -> påVenter[påVentId] }

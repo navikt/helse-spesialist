@@ -203,6 +203,7 @@ class OppgavelisteMedGraphQLE2ETest : AbstractOppgavelisteE2ETest() {
                 "sortering" to listOf(
                     mapOf(
                         "nokkel" to when (sorteringsfelt) {
+                            ApiOppgaveSorteringsfelt.behandlingOpprettetTidspunkt,
                             ApiOppgaveSorteringsfelt.opprettetTidspunkt,
                             null
                                 -> "OPPRETTET"
