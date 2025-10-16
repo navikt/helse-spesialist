@@ -1,13 +1,18 @@
 package no.nav.helse.spesialist.api
 
 import no.nav.helse.modell.oppgave.Oppgave
+import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
 import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak
 import no.nav.helse.spesialist.api.testfixtures.lagSaksbehandler
 import no.nav.helse.spesialist.domain.NotatType
 import no.nav.helse.spesialist.domain.Saksbehandler
+import no.nav.helse.spesialist.domain.testfixtures.fødselsdato
+import no.nav.helse.spesialist.domain.testfixtures.lagEtternavn
+import no.nav.helse.spesialist.domain.testfixtures.lagFornavn
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
+import no.nav.helse.spesialist.typer.Kjønn
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.UUID
@@ -17,8 +22,10 @@ abstract class OpphevStansIntegrationTest {
 
     private val notatRepository = integrationTestFixture.sessionFactory.sessionContext.notatRepository
     private val oppgaveRepository = integrationTestFixture.sessionFactory.sessionContext.oppgaveRepository
-    private val stansAutomatiskBehandlingDao = integrationTestFixture.sessionFactory.sessionContext.stansAutomatiskBehandlingDao
+    private val stansAutomatiskBehandlingDao =
+        integrationTestFixture.sessionFactory.sessionContext.stansAutomatiskBehandlingDao
     private val vedtaksperiodeRepository = integrationTestFixture.sessionFactory.sessionContext.vedtaksperiodeRepository
+    private val personDao = integrationTestFixture.sessionFactory.sessionContext.personDao
 
     @Test
     fun `Lagrer melding og notat når stans oppheves fra speil`() {
@@ -26,6 +33,17 @@ abstract class OpphevStansIntegrationTest {
         val fødselsnummer = lagFødselsnummer()
         val saksbehandler = lagSaksbehandler()
         val vedtaksperiodeId = UUID.randomUUID()
+
+        personDao.upsertPersoninfo(
+            fødselsnummer = fødselsnummer,
+            fornavn = lagFornavn(),
+            mellomnavn = null,
+            etternavn = lagEtternavn(),
+            fødselsdato = fødselsdato(),
+            kjønn = Kjønn.Kvinne,
+            adressebeskyttelse = Adressebeskyttelse.Ugradert
+        )
+
         vedtaksperiodeRepository.lagreVedtaksperioder(
             fødselsnummer = fødselsnummer,
             vedtaksperioder = listOf(
@@ -37,16 +55,18 @@ abstract class OpphevStansIntegrationTest {
                 )
             )
         )
-        oppgaveRepository.lagre(Oppgave.ny(
-            id = 1,
-            førsteOpprettet = null,
-            vedtaksperiodeId = vedtaksperiodeId,
-            behandlingId = UUID.randomUUID(),
-            utbetalingId = UUID.randomUUID(),
-            hendelseId = UUID.randomUUID(),
-            kanAvvises = true,
-            egenskaper = emptySet(),
-        ))
+        oppgaveRepository.lagre(
+            Oppgave.ny(
+                id = 1,
+                førsteOpprettet = null,
+                vedtaksperiodeId = vedtaksperiodeId,
+                behandlingId = UUID.randomUUID(),
+                utbetalingId = UUID.randomUUID(),
+                hendelseId = UUID.randomUUID(),
+                kanAvvises = true,
+                egenskaper = emptySet(),
+            )
+        )
         val begrunnelse = "begrunnelse"
 
         // When:

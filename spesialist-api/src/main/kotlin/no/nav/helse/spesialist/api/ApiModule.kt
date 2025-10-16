@@ -41,6 +41,12 @@ class ApiModule(
         val eksponerOpenApi: Boolean,
     )
 
+    val dokumentMediator =
+        DokumentMediator(
+            daos.dokumentDao,
+            publiserer = meldingPubliserer,
+        )
+
     val oppgaveService =
         OppgaveService(
             oppgaveDao = daos.oppgaveDao,
@@ -106,6 +112,7 @@ class ApiModule(
             tilgangsgruppeUuider = tilgangsgruppeUuider,
             spesialistSchema = spesialistSchema,
             restAdapter = restAdapter,
+            dokumenthåndterer = dokumentMediator,
         )
     }
 }

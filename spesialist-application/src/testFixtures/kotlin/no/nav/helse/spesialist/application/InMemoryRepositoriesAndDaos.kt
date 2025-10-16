@@ -69,6 +69,7 @@ class InMemoryRepositoriesAndDaos() {
         oppgaveRepository,
         notatDao,
         oppgaveDao,
+        daos.dokumentDao,
         vedtaksperiodeRepository,
         dialogDao,
         stansAutomatiskBehandlingDao,

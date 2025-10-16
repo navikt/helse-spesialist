@@ -5,6 +5,7 @@ import no.nav.helse.db.ArbeidsforholdDao
 import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.BehandlingRepository
 import no.nav.helse.db.CommandContextDao
+import no.nav.helse.db.DokumentDao
 import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.GenerasjonDao
 import no.nav.helse.db.GodkjenningsbehovUtfall
@@ -43,6 +44,7 @@ class InMemorySessionContext(
     override val stansAutomatiskBehandlingDao: InMemoryStansAutomatiskBehandlingDao,
     override val annulleringRepository: InMemoryAnnulleringRepository,
     override val saksbehandlerRepository: InMemorySaksbehandlerRepository,
+    override val dokumentDao: DokumentDao,
 ) : SessionContext {
     override val arbeidsforholdDao: ArbeidsforholdDao
         get() = TODO("Not yet implemented")
@@ -115,7 +117,19 @@ class InMemorySessionContext(
     }
     override val periodehistorikkDao: PeriodehistorikkDao
         get() = TODO("Not yet implemented")
+
+    data class Personinfo(
+        val fødselsnummer: String,
+        val fornavn: String,
+        val mellomnavn: String?,
+        val etternavn: String,
+        val fødselsdato: LocalDate,
+        val kjønn: Kjønn,
+        val adressebeskyttelse: Adressebeskyttelse
+    )
+
     override val personDao = object : PersonDao {
+        val personinfo = mutableListOf<Personinfo>()
         override fun personKlargjort(fødselsnummer: String) {
             TODO("Not yet implemented")
         }
@@ -154,7 +168,17 @@ class InMemorySessionContext(
             kjønn: Kjønn,
             adressebeskyttelse: Adressebeskyttelse
         ) {
-            TODO("Not yet implemented")
+            personinfo.add(
+                Personinfo(
+                    fødselsnummer = fødselsnummer,
+                    fornavn = fornavn,
+                    mellomnavn = mellomnavn,
+                    etternavn = etternavn,
+                    fødselsdato = fødselsdato,
+                    kjønn = kjønn,
+                    adressebeskyttelse = adressebeskyttelse
+                )
+            )
         }
 
         override fun finnPersoninfoSistOppdatert(fødselsnummer: String): LocalDate? {
@@ -188,7 +212,8 @@ class InMemorySessionContext(
             TODO("Not yet implemented")
         }
 
-        override fun finnAdressebeskyttelse(fødselsnummer: String) = Adressebeskyttelse.Ugradert
+        override fun finnAdressebeskyttelse(fødselsnummer: String) =
+            personinfo.find { it.fødselsnummer == fødselsnummer }?.adressebeskyttelse
 
         override fun finnAktørId(fødselsnummer: String): String? {
             TODO("Not yet implemented")

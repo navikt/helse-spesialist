@@ -190,19 +190,20 @@ class InMemoryDaos(
         }
     }
     override val dokumentDao = object : DokumentDao {
+        val dokumenter = mutableMapOf<Pair<String, UUID>, JsonNode>()
         override fun lagre(
             fødselsnummer: String,
             dokumentId: UUID,
             dokument: JsonNode
         ) {
-            TODO("Not yet implemented")
+            dokumenter[fødselsnummer to dokumentId] = dokument
         }
 
         override fun hent(
             fødselsnummer: String,
             dokumentId: UUID
         ): JsonNode? {
-            TODO("Not yet implemented")
+            return dokumenter[fødselsnummer to dokumentId]
         }
 
         override fun slettGamleDokumenter(): Int {

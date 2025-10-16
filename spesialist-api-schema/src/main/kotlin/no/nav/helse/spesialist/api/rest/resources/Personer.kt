@@ -27,5 +27,26 @@ class Personer {
         class TilkomneInntektskilder(
             val parent: AktørId,
         )
+
+        @Resource("dokumenter")
+        class Dokumenter(
+            val parent: AktørId,
+        ) {
+            @Resource("{dokumentId}")
+            class DokumentId(
+                val parent: Dokumenter,
+                val dokumentId: UUID,
+            ) {
+                @Resource("søknad")
+                class Søknad(
+                    val parent: DokumentId,
+                )
+
+                @Resource("inntektsmelding")
+                class Inntektsmelding(
+                    val parent: DokumentId,
+                )
+            }
+        }
     }
 }

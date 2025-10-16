@@ -36,6 +36,7 @@ interface SessionContext {
     val utbetalingDao: UtbetalingDao
     val vedtakDao: VedtakDao
     val vergemålDao: VergemålDao
+    val dokumentDao: DokumentDao
     val åpneGosysOppgaverDao: ÅpneGosysOppgaverDao
     val vedtaksperiodeRepository: VedtaksperiodeRepository
     val legacyPersonRepository: LegacyPersonRepository

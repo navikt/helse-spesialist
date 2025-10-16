@@ -69,6 +69,7 @@ fun kobleOppApi(
     tilgangsgruppeUuider: TilgangsgruppeUuider,
     spesialistSchema: SpesialistSchema,
     restAdapter: RestAdapter,
+    dokumenthåndterer: Dokumenthåndterer,
 ) {
     ktorApplication.installPlugins(apiModuleConfiguration.eksponerOpenApi)
     ktorApplication.azureAdAppAuthentication(apiModuleConfiguration)
@@ -93,7 +94,7 @@ fun kobleOppApi(
                 queryHandler(graphQLPlugin.server)
             }
         }
-        restRoutes(restAdapter, apiModuleConfiguration.eksponerOpenApi)
+        restRoutes(restAdapter, apiModuleConfiguration.eksponerOpenApi, dokumenthåndterer)
     }
 }
 

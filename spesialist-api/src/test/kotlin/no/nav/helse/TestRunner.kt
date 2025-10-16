@@ -113,6 +113,7 @@ object TestRunner {
                     tilgangsgruppeUuider = avhengigheter.tilgangsgruppeUuider,
                     spesialistSchema = spesialistSchema,
                     restAdapter = avhengigheter.restAdapter,
+                    dokumenthåndterer = avhengigheter.dokumenthåndterer
                 )
             }
 

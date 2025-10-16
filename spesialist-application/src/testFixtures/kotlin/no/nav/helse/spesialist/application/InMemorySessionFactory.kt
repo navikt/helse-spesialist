@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.application
 
+import no.nav.helse.db.DokumentDao
 import no.nav.helse.db.NotatDao
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.SessionContext
@@ -10,6 +11,7 @@ class InMemorySessionFactory(
     oppgaveRepository: InMemoryOppgaveRepository,
     notatDao: NotatDao,
     oppgaveDao: OppgaveDao,
+    dokumentDao: DokumentDao,
     vedtaksperiodeRepository: InMemoryVedtaksperiodeRepository,
     dialogDao: InMemoryDialogDao,
     stansAutomatiskBehandlingDao: InMemoryStansAutomatiskBehandlingDao,
@@ -26,6 +28,7 @@ class InMemorySessionFactory(
         stansAutomatiskBehandlingDao,
         annulleringRepository,
         saksbehandlerRepository,
+        dokumentDao
     )
     override fun <T> transactionalSessionScope(transactionalBlock: (SessionContext) -> T) =
         transactionalBlock(sessionContext)

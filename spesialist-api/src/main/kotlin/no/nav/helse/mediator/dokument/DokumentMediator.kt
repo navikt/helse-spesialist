@@ -19,6 +19,13 @@ class DokumentMediator(
         fødselsnummer: String,
         dokumentId: UUID,
         dokumentType: String,
+    ): JsonNode = håndter(dokumentDao, fødselsnummer, dokumentId, dokumentType)
+
+    override fun håndter(
+        dokumentDao: DokumentDao,
+        fødselsnummer: String,
+        dokumentId: UUID,
+        dokumentType: String,
     ): JsonNode {
         val dokument = dokumentDao.hent(fødselsnummer, dokumentId)
 
@@ -57,5 +64,10 @@ class DokumentMediator(
             hendelse = HentDokument(dokumentId = dokumentId, dokumentType = dokumentType),
             årsak = "forespørsel om $dokumentType fra saksbehandler",
         )
+    }
+
+    enum class DokumentType {
+        SØKNAD,
+        INNTEKTSMELDING,
     }
 }

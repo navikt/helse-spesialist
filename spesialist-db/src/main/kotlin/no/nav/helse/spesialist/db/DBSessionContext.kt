@@ -20,6 +20,7 @@ import no.nav.helse.spesialist.db.dao.PgAutomatiseringDao
 import no.nav.helse.spesialist.db.dao.PgAvviksvurderingRepository
 import no.nav.helse.spesialist.db.dao.PgCommandContextDao
 import no.nav.helse.spesialist.db.dao.PgDialogDao
+import no.nav.helse.spesialist.db.dao.PgDokumentDao
 import no.nav.helse.spesialist.db.dao.PgEgenAnsattDao
 import no.nav.helse.spesialist.db.dao.PgGenerasjonDao
 import no.nav.helse.spesialist.db.dao.PgLegacyPersonRepository
@@ -81,6 +82,7 @@ class DBSessionContext(
     override val utbetalingDao = PgUtbetalingDao(session)
     override val vedtakDao = PgVedtakDao(session)
     override val vergemålDao = PgVergemålDao(session)
+    override val dokumentDao = PgDokumentDao(session)
     override val åpneGosysOppgaverDao = PgÅpneGosysOppgaverDao(session)
     override val vedtaksperiodeRepository = PgVedtaksperiodeRepository(generasjonDao, vedtakDao)
     override val legacyPersonRepository =
