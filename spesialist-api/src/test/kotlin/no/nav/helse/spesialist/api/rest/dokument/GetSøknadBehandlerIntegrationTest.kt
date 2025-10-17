@@ -59,7 +59,7 @@ class GetSøknadBehandlerIntegrationTest {
 
         // When:
         val response = integrationTestFixture.get(
-            url = "/api/personer/$aktørId/dokumenter/$dokumentId/søknad",
+            url = "/api/personer/$aktørId/dokumenter/$dokumentId/soknad",
             saksbehandler = saksbehandler
         )
 
@@ -104,7 +104,7 @@ class GetSøknadBehandlerIntegrationTest {
 
         // When:
         val response = integrationTestFixture.get(
-            url = "/api/personer/$aktørId/dokumenter/$dokumentId/søknad",
+            url = "/api/personer/$aktørId/dokumenter/$dokumentId/soknad",
             saksbehandler = saksbehandler
         )
 
