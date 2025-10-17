@@ -224,15 +224,14 @@ class MeldingMediator(
         err: Exception,
         message: String,
     ) {
-        val messageJson = objectMapper.readTree(message)
-        val meldingId = messageJson["@id"]?.asUUID()
+        val meldingId = runCatching { objectMapper.readTree(message)["@id"]?.asUUID() }.getOrNull()
         withMDC(
-            mapOf(
-                "@id" to meldingId.toString(),
-            ),
+            buildMap {
+                meldingId?.let { put("meldingId", it.toString()) }
+            },
         ) {
             logg.error("alvorlig feil: ${err.message} (se sikkerlogg for melding)", err)
-            sikkerlogg.error("alvorlig feil: ${err.message}\n${objectMapper.writeValueAsString(messageJson)}", err)
+            sikkerlogg.error("alvorlig feil: ${err.message}\n$message", err)
         }
     }
 
