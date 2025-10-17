@@ -5,7 +5,7 @@ import io.ktor.http.HttpStatusCode
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.dokument.DokumentMediator
 import no.nav.helse.spesialist.api.Dokumenthåndterer
-import no.nav.helse.spesialist.api.graphql.schema.ApiDokumentInntektsmelding
+import no.nav.helse.spesialist.api.rest.ApiDokumentInntektsmelding
 import no.nav.helse.spesialist.api.rest.GetBehandler
 import no.nav.helse.spesialist.api.rest.HttpNotFound
 import no.nav.helse.spesialist.api.rest.HttpRequestTimeout

@@ -13,7 +13,7 @@ import io.ktor.server.routing.Routing
 import io.ktor.server.routing.route
 import no.nav.helse.spesialist.api.Dokumenthåndterer
 import no.nav.helse.spesialist.api.rest.dokument.GetInntektsmeldingBehandler
-import no.nav.helse.spesialist.api.rest.dokument.GetSøknadBehandler
+import no.nav.helse.spesialist.api.rest.dokument.GetSoknadBehandler
 import no.nav.helse.spesialist.api.rest.tilkommeninntekt.GetTilkomneInntektskilderForPersonBehandler
 import no.nav.helse.spesialist.api.rest.tilkommeninntekt.PostTilkommenInntektEndreBehandler
 import no.nav.helse.spesialist.api.rest.tilkommeninntekt.PostTilkommenInntektFjernBehandler
@@ -41,7 +41,7 @@ fun Routing.restRoutes(
 
             post(PostOpphevStansBehandler(), restAdapter)
 
-            get(GetSøknadBehandler(dokumenthåndterer = dokumenthåndterer), restAdapter)
+            get(GetSoknadBehandler(dokumenthåndterer = dokumenthåndterer), restAdapter)
             get(GetInntektsmeldingBehandler(dokumenthåndterer = dokumenthåndterer), restAdapter)
 
             get(GetTilkomneInntektskilderForPersonBehandler(), restAdapter)

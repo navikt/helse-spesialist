@@ -5,7 +5,7 @@ import io.ktor.http.HttpStatusCode
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.dokument.DokumentMediator
 import no.nav.helse.spesialist.api.Dokumenthåndterer
-import no.nav.helse.spesialist.api.graphql.schema.ApiSoknad
+import no.nav.helse.spesialist.api.rest.ApiSoknad
 import no.nav.helse.spesialist.api.rest.GetBehandler
 import no.nav.helse.spesialist.api.rest.HttpNotFound
 import no.nav.helse.spesialist.api.rest.RestResponse
@@ -14,11 +14,11 @@ import no.nav.helse.spesialist.api.rest.tilkommeninntekt.bekreftTilgangTilPerson
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 
-class GetSøknadBehandler(
+class GetSoknadBehandler(
     private val dokumenthåndterer: Dokumenthåndterer,
-) : GetBehandler<Personer.AktørId.Dokumenter.DokumentId.Søknad, ApiSoknad> {
+) : GetBehandler<Personer.AktørId.Dokumenter.DokumentId.Soknad, ApiSoknad> {
     override fun behandle(
-        resource: Personer.AktørId.Dokumenter.DokumentId.Søknad,
+        resource: Personer.AktørId.Dokumenter.DokumentId.Soknad,
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,

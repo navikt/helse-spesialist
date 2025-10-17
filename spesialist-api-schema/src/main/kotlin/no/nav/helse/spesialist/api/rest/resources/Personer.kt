@@ -38,7 +38,7 @@ class Personer {
                 val dokumentId: UUID,
             ) {
                 @Resource("soknad")
-                class Søknad(
+                class Soknad(
                     val parent: DokumentId,
                 )
 
