@@ -83,30 +83,6 @@ enum class ApiKategori {
     Status,
 }
 
-@GraphQLName("Filtrering")
-data class ApiFiltrering(
-    val egenskaper: List<ApiOppgaveegenskap> = emptyList(),
-    val ekskluderteEgenskaper: List<ApiOppgaveegenskap>? = emptyList(),
-    val ingenUkategoriserteEgenskaper: Boolean = false,
-    val tildelt: Boolean? = null,
-    val egneSakerPaVent: Boolean = false,
-    val egneSaker: Boolean = false,
-)
-
-@GraphQLName("Oppgavesortering")
-data class ApiOppgavesortering(
-    val nokkel: ApiSorteringsnokkel,
-    val stigende: Boolean,
-)
-
-@GraphQLName("Sorteringsnokkel")
-enum class ApiSorteringsnokkel {
-    TILDELT_TIL,
-    OPPRETTET,
-    SOKNAD_MOTTATT,
-    TIDSFRIST,
-}
-
 @GraphQLName("OppgaveSorteringsfelt")
 @Suppress("ktlint:standard:enum-entry-name-case")
 enum class ApiOppgaveSorteringsfelt {
@@ -129,45 +105,10 @@ data class ApiBehandledeOppgaver(
     val oppgaver: List<ApiBehandletOppgave>,
 )
 
-@GraphQLName("OppgaverTilBehandling")
-data class ApiOppgaverTilBehandling(
-    val totaltAntallOppgaver: Int,
-    val oppgaver: List<ApiOppgaveTilBehandling>,
-)
-
 @GraphQLName("AntallOppgaver")
 data class ApiAntallOppgaver(
     val antallMineSaker: Int,
     val antallMineSakerPaVent: Int,
-)
-
-@GraphQLName("PaVentInfo")
-data class ApiPaVentInfo(
-    val arsaker: List<String>,
-    val tekst: String?,
-    val dialogRef: Int,
-    val saksbehandler: String,
-    val opprettet: LocalDateTime,
-    val tidsfrist: LocalDate,
-    val kommentarer: List<ApiKommentar>,
-)
-
-@GraphQLName("OppgaveTilBehandling")
-data class ApiOppgaveTilBehandling(
-    val id: String,
-    val opprettet: LocalDateTime,
-    val opprinneligSoknadsdato: LocalDateTime,
-    val tidsfrist: LocalDate?,
-    val vedtaksperiodeId: UUID,
-    val navn: ApiPersonnavn,
-    val aktorId: String,
-    val tildeling: ApiTildeling?,
-    val egenskaper: List<ApiOppgaveegenskap>,
-    val periodetype: ApiPeriodetype,
-    val oppgavetype: ApiOppgavetype,
-    val mottaker: ApiMottaker,
-    val antallArbeidsforhold: ApiAntallArbeidsforhold,
-    val paVentInfo: ApiPaVentInfo?,
 )
 
 @GraphQLName("Oppgaveegenskap")
@@ -188,14 +129,6 @@ data class ApiTotrinnsvurdering(
     val beslutter: UUID?,
     val erBeslutteroppgave: Boolean,
 )
-
-@GraphQLName("Mottaker")
-enum class ApiMottaker {
-    SYKMELDT,
-    ARBEIDSGIVER,
-    BEGGE,
-    INGEN,
-}
 
 @Serializable
 @GraphQLName("Personnavn")
