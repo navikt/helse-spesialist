@@ -3,13 +3,11 @@ package no.nav.helse.mediator.oppgave
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.AntallOppgaverFraDatabase
 import no.nav.helse.db.BehandletOppgaveFraDatabaseForVisning
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.OppgaveDao
-import no.nav.helse.db.OppgaveFraDatabaseForVisning
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PersonnavnFraDatabase
 import no.nav.helse.db.ReservasjonDao
@@ -18,13 +16,7 @@ import no.nav.helse.mediator.KommandokjedeEndretEvent
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.modell.melding.UtgåendeHendelse
-import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.spesialist.api.graphql.schema.ApiAntallArbeidsforhold
-import no.nav.helse.spesialist.api.graphql.schema.ApiEgenskap
-import no.nav.helse.spesialist.api.graphql.schema.ApiFiltrering
-import no.nav.helse.spesialist.api.graphql.schema.ApiKategori
-import no.nav.helse.spesialist.api.graphql.schema.ApiMottaker
-import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveegenskap
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavetype
 import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodetype
 import no.nav.helse.spesialist.domain.Saksbehandler
@@ -32,13 +24,10 @@ import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.testfixtures.lagEpostadresseFraFulltNavn
 import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlerident
 import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlernavn
-import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertNull
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -111,46 +100,6 @@ internal class ApiOppgaveServiceTest {
     }
 
     @Test
-    fun `Hent oppgaver til visning`() {
-        every { oppgaveDao.finnOppgaverForVisning(any(), any()) } returns
-                listOf(
-                    oppgaveFraDatabaseForVisning(filtrertAntall = 2),
-                    oppgaveFraDatabaseForVisning(filtrertAntall = 2),
-                )
-        val oppgaver = apiOppgaveService.oppgaver(
-            saksbehandler = saksbehandler(),
-            tilgangsgrupper = emptySet(),
-            offset = 0,
-            limit = Int.MAX_VALUE,
-            sortering = emptyList(),
-            filtrering = ApiFiltrering()
-        )
-        assertEquals(2, oppgaver.oppgaver.size)
-    }
-
-    @Test
-    fun `Hent tildelte oppgaver for en gitt saksbehandler`() {
-        every { oppgaveDao.finnTildelteOppgaver(any(), any()) } returns
-                listOf(
-                    oppgaveFraDatabaseForVisning(filtrertAntall = 2),
-                    oppgaveFraDatabaseForVisning(filtrertAntall = 2),
-                )
-        val oppgaver = apiOppgaveService.tildelteOppgaver(
-            innloggetSaksbehandler = saksbehandler(),
-            tilgangsgrupper = emptySet(),
-            oppslåttSaksbehandler = Saksbehandler(
-                id = SaksbehandlerOid(UUID.randomUUID()),
-                navn = "Navn Navnesen",
-                ident = "L815493",
-                epost = "navn@navnesen.no"
-            ),
-            offset = 0,
-            limit = Int.MAX_VALUE,
-        )
-        assertEquals(2, oppgaver.oppgaver.size)
-    }
-
-    @Test
     fun `Hent antall mine saker og mine saker på vent til visning`() {
         every { oppgaveDao.finnAntallOppgaver(any()) } returns AntallOppgaverFraDatabase(
             antallMineSaker = 2,
@@ -176,100 +125,6 @@ internal class ApiOppgaveServiceTest {
             LocalDate.now()
         )
         assertEquals(2, oppgaver.oppgaver.size)
-    }
-
-    @Test
-    fun `Hent kun oppgaver til visning som saksbehandler har tilgang til`() {
-        apiOppgaveService.oppgaver(
-            saksbehandler = saksbehandler(),
-            tilgangsgrupper = emptySet(),
-            offset = 0,
-            limit = Int.MAX_VALUE,
-            sortering = emptyList(),
-            filtrering = ApiFiltrering()
-        )
-        verify(exactly = 1) {
-            oppgaveDao.finnOppgaverForVisning(
-                ekskluderEgenskaper = setOf(
-                    Egenskap.FORTROLIG_ADRESSE,
-                    Egenskap.STRENGT_FORTROLIG_ADRESSE,
-                    Egenskap.EGEN_ANSATT,
-                    Egenskap.BESLUTTER,
-                    Egenskap.STIKKPRØVE,
-                    Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE,
-                ).map { it.name },
-                saksbehandlerOid = SAKSBEHANDLEROID,
-                offset = 0,
-                limit = Int.MAX_VALUE,
-            )
-        }
-    }
-
-    @Test
-    fun `Ekskluderer alle ukategoriserte egenskaper hvis ingenUkategoriserteEgenskaper i Filtrering er satt til true`() {
-        apiOppgaveService.oppgaver(
-            saksbehandler = saksbehandler(),
-            tilgangsgrupper = emptySet(),
-            offset = 0,
-            limit = Int.MAX_VALUE,
-            sortering = emptyList(),
-            filtrering = ApiFiltrering(ingenUkategoriserteEgenskaper = true)
-        )
-        verify(exactly = 1) {
-            oppgaveDao.finnOppgaverForVisning(
-                ekskluderEgenskaper =
-                    setOf(
-                        Egenskap.FORTROLIG_ADRESSE,
-                        Egenskap.STRENGT_FORTROLIG_ADRESSE,
-                        Egenskap.EGEN_ANSATT,
-                        Egenskap.BESLUTTER,
-                        Egenskap.STIKKPRØVE,
-                        Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE,
-                    ).map { it.name } +
-                            Egenskap.entries
-                                .filter { it.kategori == Egenskap.Kategori.Ukategorisert }
-                                .map { it.name },
-                SAKSBEHANDLEROID,
-                0,
-                Int.MAX_VALUE,
-            )
-        }
-    }
-
-    @Test
-    fun `Ekskluderer alle ekskluderteEgenskaper`() {
-        apiOppgaveService.oppgaver(
-            saksbehandler = saksbehandler(),
-            tilgangsgrupper = emptySet(),
-            offset = 0,
-            limit = Int.MAX_VALUE,
-            sortering = emptyList(),
-            filtrering = ApiFiltrering(
-                ekskluderteEgenskaper =
-                    listOf(
-                        ApiOppgaveegenskap(
-                            egenskap = ApiEgenskap.PA_VENT,
-                            kategori = ApiKategori.Status,
-                        ),
-                    ),
-            ),
-        )
-        verify(exactly = 1) {
-            oppgaveDao.finnOppgaverForVisning(
-                ekskluderEgenskaper = setOf(
-                    Egenskap.FORTROLIG_ADRESSE,
-                    Egenskap.STRENGT_FORTROLIG_ADRESSE,
-                    Egenskap.EGEN_ANSATT,
-                    Egenskap.BESLUTTER,
-                    Egenskap.STIKKPRØVE,
-                    Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE,
-                    Egenskap.PÅ_VENT,
-                ).map { it.name },
-                SAKSBEHANDLEROID,
-                0,
-                Int.MAX_VALUE,
-            )
-        }
     }
 
     @Test
@@ -304,235 +159,6 @@ internal class ApiOppgaveServiceTest {
         assertEquals(ApiAntallArbeidsforhold.ET_ARBEIDSFORHOLD, oppgave.antallArbeidsforhold)
     }
 
-    @Test
-    fun `Mapper oppgave til visning riktig`() {
-        val opprettet = LocalDateTime.now()
-        val vedtaksperiodeId = UUID.randomUUID()
-        val opprinneligSøknadsdato = LocalDateTime.now()
-        every { oppgaveDao.finnOppgaverForVisning(any(), any()) } returns
-                listOf(
-                    oppgaveFraDatabaseForVisning(
-                        oppgaveId = 1L,
-                        aktørId = "1234567891011",
-                        opprettet = opprettet,
-                        opprinneligSøknadsdato = opprinneligSøknadsdato,
-                        vedtaksperiodeId = vedtaksperiodeId,
-                        personnavnFraDatabase = PersonnavnFraDatabase("fornavn", "mellomnavn", "etternavn"),
-                        tildelt = Saksbehandler(
-                            id = SaksbehandlerOid(SAKSBEHANDLEROID),
-                            navn = SAKSBEHANDLERNAVN,
-                            epost = SAKSBEHANDLEREPOST,
-                            ident = SAKSBEHANDLERIDENT
-                        ),
-                        påVent = true,
-                    ),
-                )
-        val oppgaver = apiOppgaveService.oppgaver(
-            saksbehandler = saksbehandler(),
-            tilgangsgrupper = Tilgangsgruppe.entries.toSet(),
-            offset = 0,
-            limit = Int.MAX_VALUE,
-            sortering = emptyList(),
-            filtrering = ApiFiltrering()
-        )
-        assertEquals(1, oppgaver.oppgaver.size)
-        val oppgave = oppgaver.oppgaver.single()
-        assertEquals("1", oppgave.id)
-        assertEquals(opprettet, oppgave.opprettet)
-        assertEquals(opprinneligSøknadsdato, oppgave.opprinneligSoknadsdato)
-        assertEquals(vedtaksperiodeId, oppgave.vedtaksperiodeId)
-        assertEquals("fornavn", oppgave.navn.fornavn)
-        assertEquals("mellomnavn", oppgave.navn.mellomnavn)
-        assertEquals("etternavn", oppgave.navn.etternavn)
-        assertEquals("1234567891011", oppgave.aktorId)
-        assertEquals(SAKSBEHANDLERNAVN, oppgave.tildeling?.navn)
-        assertEquals(SAKSBEHANDLEREPOST, oppgave.tildeling?.epost)
-        assertEquals(SAKSBEHANDLEROID, oppgave.tildeling?.oid)
-        assertEquals(EGENSKAPER.size, oppgave.egenskaper.size)
-    }
-
-    @ParameterizedTest
-    @EnumSource(names = ["REVURDERING", "SØKNAD"], mode = EnumSource.Mode.INCLUDE)
-    fun `Mapper oppgavetypeegenskaper riktig`(egenskap: EgenskapForDatabase) {
-        val opprettet = LocalDateTime.now()
-        val vedtaksperiodeId = UUID.randomUUID()
-        val opprinneligSøknadsdato = LocalDateTime.now()
-        val egenskaper =
-            setOf(
-                egenskap,
-                EgenskapForDatabase.UTBETALING_TIL_SYKMELDT,
-                EgenskapForDatabase.EN_ARBEIDSGIVER,
-                EgenskapForDatabase.FORSTEGANGSBEHANDLING,
-            )
-        every { oppgaveDao.finnOppgaverForVisning(any(), any()) } returns
-                listOf(
-                    oppgaveFraDatabaseForVisning(
-                        oppgaveId = 1L,
-                        aktørId = "1234567891011",
-                        opprettet = opprettet,
-                        opprinneligSøknadsdato = opprinneligSøknadsdato,
-                        vedtaksperiodeId = vedtaksperiodeId,
-                        personnavnFraDatabase = PersonnavnFraDatabase("fornavn", "mellomnavn", "etternavn"),
-                        tildelt = Saksbehandler(
-                            id = SaksbehandlerOid(SAKSBEHANDLEROID),
-                            navn = SAKSBEHANDLERNAVN,
-                            epost = SAKSBEHANDLEREPOST,
-                            ident = SAKSBEHANDLERIDENT
-                        ),
-                        påVent = true,
-                        egenskaper = egenskaper,
-                    ),
-                )
-        val oppgaver = apiOppgaveService.oppgaver(
-            saksbehandler = saksbehandler(),
-            tilgangsgrupper = Tilgangsgruppe.entries.toSet(),
-            offset = 0,
-            limit = Int.MAX_VALUE,
-            sortering = emptyList(),
-            filtrering = ApiFiltrering()
-        )
-        val oppgave = oppgaver.oppgaver.single()
-        assertEquals(egenskap.oppgavetype(), oppgave.oppgavetype)
-    }
-
-    @ParameterizedTest
-    @EnumSource(
-        names = ["FORLENGELSE", "INFOTRYGDFORLENGELSE", "OVERGANG_FRA_IT", "FORSTEGANGSBEHANDLING"],
-        mode = EnumSource.Mode.INCLUDE
-    )
-    fun `Mapper periodetypeegenskaper riktig`(egenskap: EgenskapForDatabase) {
-        val opprettet = LocalDateTime.now()
-        val vedtaksperiodeId = UUID.randomUUID()
-        val opprinneligSøknadsdato = LocalDateTime.now()
-        val egenskaper =
-            setOf(
-                egenskap,
-                EgenskapForDatabase.UTBETALING_TIL_SYKMELDT,
-                EgenskapForDatabase.EN_ARBEIDSGIVER,
-                EgenskapForDatabase.SØKNAD
-            )
-        every { oppgaveDao.finnOppgaverForVisning(any(), any()) } returns
-                listOf(
-                    oppgaveFraDatabaseForVisning(
-                        oppgaveId = 1L,
-                        aktørId = "1234567891011",
-                        opprettet = opprettet,
-                        opprinneligSøknadsdato = opprinneligSøknadsdato,
-                        vedtaksperiodeId = vedtaksperiodeId,
-                        personnavnFraDatabase = PersonnavnFraDatabase("fornavn", "mellomnavn", "etternavn"),
-                        tildelt = Saksbehandler(
-                            id = SaksbehandlerOid(SAKSBEHANDLEROID),
-                            navn = SAKSBEHANDLERNAVN,
-                            epost = SAKSBEHANDLEREPOST,
-                            ident = SAKSBEHANDLERIDENT
-                        ),
-                        påVent = true,
-                        egenskaper = egenskaper,
-                    ),
-                )
-        val oppgaver = apiOppgaveService.oppgaver(
-            saksbehandler = saksbehandler(),
-            tilgangsgrupper = Tilgangsgruppe.entries.toSet(),
-            offset = 0,
-            limit = Int.MAX_VALUE,
-            sortering = emptyList(),
-            filtrering = ApiFiltrering()
-        )
-        val oppgave = oppgaver.oppgaver.single()
-        assertEquals(egenskap.periodetype(), oppgave.periodetype)
-    }
-
-    @ParameterizedTest
-    @EnumSource(
-        names = ["UTBETALING_TIL_SYKMELDT", "DELVIS_REFUSJON", "UTBETALING_TIL_ARBEIDSGIVER", "INGEN_UTBETALING"],
-        mode = EnumSource.Mode.INCLUDE,
-    )
-    fun `Mapper mottakeregenskaper riktig`(egenskap: EgenskapForDatabase) {
-        val opprettet = LocalDateTime.now()
-        val vedtaksperiodeId = UUID.randomUUID()
-        val opprinneligSøknadsdato = LocalDateTime.now()
-        val egenskaper =
-            setOf(
-                egenskap,
-                EgenskapForDatabase.FORSTEGANGSBEHANDLING,
-                EgenskapForDatabase.EN_ARBEIDSGIVER,
-                EgenskapForDatabase.SØKNAD
-            )
-        every { oppgaveDao.finnOppgaverForVisning(any(), any()) } returns
-                listOf(
-                    oppgaveFraDatabaseForVisning(
-                        oppgaveId = 1L,
-                        aktørId = "1234567891011",
-                        opprettet = opprettet,
-                        opprinneligSøknadsdato = opprinneligSøknadsdato,
-                        vedtaksperiodeId = vedtaksperiodeId,
-                        personnavnFraDatabase = PersonnavnFraDatabase("fornavn", "mellomnavn", "etternavn"),
-                        tildelt = Saksbehandler(
-                            id = SaksbehandlerOid(SAKSBEHANDLEROID),
-                            navn = SAKSBEHANDLERNAVN,
-                            epost = SAKSBEHANDLEREPOST,
-                            ident = SAKSBEHANDLERIDENT
-                        ),
-                        påVent = true,
-                        egenskaper = egenskaper,
-                    ),
-                )
-        val oppgaver = apiOppgaveService.oppgaver(
-            saksbehandler = saksbehandler(),
-            tilgangsgrupper = Tilgangsgruppe.entries.toSet(),
-            offset = 0,
-            limit = Int.MAX_VALUE,
-            sortering = emptyList(),
-            filtrering = ApiFiltrering()
-        )
-        val oppgave = oppgaver.oppgaver.single()
-        assertEquals(egenskap.mottaker(), oppgave.mottaker)
-    }
-
-    @ParameterizedTest
-    @EnumSource(names = ["EN_ARBEIDSGIVER", "FLERE_ARBEIDSGIVERE"], mode = EnumSource.Mode.INCLUDE)
-    fun `Mapper inntektskildegenskaper riktig`(egenskap: EgenskapForDatabase) {
-        val opprettet = LocalDateTime.now()
-        val vedtaksperiodeId = UUID.randomUUID()
-        val opprinneligSøknadsdato = LocalDateTime.now()
-        val egenskaper =
-            setOf(
-                egenskap,
-                EgenskapForDatabase.FORSTEGANGSBEHANDLING,
-                EgenskapForDatabase.UTBETALING_TIL_SYKMELDT,
-                EgenskapForDatabase.SØKNAD,
-            )
-        every { oppgaveDao.finnOppgaverForVisning(ekskluderEgenskaper = any(), saksbehandlerOid = any()) } returns
-                listOf(
-                    oppgaveFraDatabaseForVisning(
-                        oppgaveId = 1L,
-                        aktørId = "1234567891011",
-                        opprettet = opprettet,
-                        opprinneligSøknadsdato = opprinneligSøknadsdato,
-                        vedtaksperiodeId = vedtaksperiodeId,
-                        personnavnFraDatabase = PersonnavnFraDatabase("fornavn", "mellomnavn", "etternavn"),
-                        tildelt = Saksbehandler(
-                            id = SaksbehandlerOid(SAKSBEHANDLEROID),
-                            navn = SAKSBEHANDLERNAVN,
-                            epost = SAKSBEHANDLEREPOST,
-                            ident = SAKSBEHANDLERIDENT
-                        ),
-                        påVent = true,
-                        egenskaper = egenskaper,
-                    ),
-                )
-        val oppgaver = apiOppgaveService.oppgaver(
-            saksbehandler = saksbehandler(),
-            tilgangsgrupper = Tilgangsgruppe.entries.toSet(),
-            offset = 0,
-            limit = Int.MAX_VALUE,
-            sortering = emptyList(),
-            filtrering = ApiFiltrering()
-        )
-        val oppgave = oppgaver.oppgaver.single()
-        assertEquals(egenskap.antallArbeidsforhold(), oppgave.antallArbeidsforhold)
-    }
-
     private fun behandletOppgaveFraDatabaseForVisning(
         oppgaveId: Long = Random.Default.nextLong(),
         aktørId: String = Random.Default.nextLong(1000000000000, 2000000000000).toString(),
@@ -554,64 +180,4 @@ internal class ApiOppgaveServiceTest {
         navn = personnavnFraDatabase,
         filtrertAntall = filtrertAntall,
     )
-
-    private fun oppgaveFraDatabaseForVisning(
-        oppgaveId: Long = Random.Default.nextLong(),
-        egenskaper: Set<EgenskapForDatabase> = EGENSKAPER,
-        aktørId: String = Random.Default.nextLong(1000000000000, 2000000000000).toString(),
-        opprettet: LocalDateTime = LocalDateTime.now(),
-        opprinneligSøknadsdato: LocalDateTime = LocalDateTime.now(),
-        tidsfrist: LocalDate = LocalDate.now(),
-        vedtaksperiodeId: UUID = UUID.randomUUID(),
-        personnavnFraDatabase: PersonnavnFraDatabase = PersonnavnFraDatabase("navn", "mellomnavn", "etternavn"),
-        tildelt: Saksbehandler? = null,
-        påVent: Boolean = false,
-        filtrertAntall: Int = 1,
-    ) = OppgaveFraDatabaseForVisning(
-        id = oppgaveId,
-        aktørId = aktørId,
-        vedtaksperiodeId = vedtaksperiodeId,
-        navn = personnavnFraDatabase,
-        egenskaper = egenskaper,
-        tildelt = tildelt,
-        påVent = påVent,
-        opprettet = opprettet,
-        opprinneligSøknadsdato = opprinneligSøknadsdato,
-        tidsfrist = tidsfrist,
-        filtrertAntall = filtrertAntall,
-        paVentInfo = null,
-    )
-
-    private fun EgenskapForDatabase.periodetype(): ApiPeriodetype =
-        when (this) {
-            EgenskapForDatabase.FORSTEGANGSBEHANDLING -> ApiPeriodetype.FORSTEGANGSBEHANDLING
-            EgenskapForDatabase.FORLENGELSE -> ApiPeriodetype.FORLENGELSE
-            EgenskapForDatabase.INFOTRYGDFORLENGELSE -> ApiPeriodetype.INFOTRYGDFORLENGELSE
-            EgenskapForDatabase.OVERGANG_FRA_IT -> ApiPeriodetype.OVERGANG_FRA_IT
-            else -> throw IllegalArgumentException("Kunne ikke mappe egenskap til periodetype")
-        }
-
-    private fun EgenskapForDatabase.oppgavetype(): ApiOppgavetype =
-        when (this) {
-            EgenskapForDatabase.SØKNAD -> ApiOppgavetype.SOKNAD
-            EgenskapForDatabase.REVURDERING -> ApiOppgavetype.REVURDERING
-            EgenskapForDatabase.STIKKPRØVE -> ApiOppgavetype.STIKKPROVE
-            else -> throw IllegalArgumentException("Kunne ikke mappe egenskap til periodetype")
-        }
-
-    private fun EgenskapForDatabase.mottaker(): ApiMottaker =
-        when (this) {
-            EgenskapForDatabase.UTBETALING_TIL_SYKMELDT -> ApiMottaker.SYKMELDT
-            EgenskapForDatabase.UTBETALING_TIL_ARBEIDSGIVER -> ApiMottaker.ARBEIDSGIVER
-            EgenskapForDatabase.DELVIS_REFUSJON -> ApiMottaker.BEGGE
-            EgenskapForDatabase.INGEN_UTBETALING -> ApiMottaker.INGEN
-            else -> throw IllegalArgumentException("Kunne ikke mappe egenskap til periodetype")
-        }
-
-    private fun EgenskapForDatabase.antallArbeidsforhold(): ApiAntallArbeidsforhold =
-        when (this) {
-            EgenskapForDatabase.EN_ARBEIDSGIVER -> ApiAntallArbeidsforhold.ET_ARBEIDSFORHOLD
-            EgenskapForDatabase.FLERE_ARBEIDSGIVERE -> ApiAntallArbeidsforhold.FLERE_ARBEIDSFORHOLD
-            else -> throw IllegalArgumentException("Kunne ikke mappe egenskap til periodetype")
-        }
 }

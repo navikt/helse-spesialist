@@ -6,11 +6,11 @@ import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.kafka.TilbakedateringBehandletRiver
-import no.nav.helse.spesialist.kafka.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.kommando.TilbakedateringBehandlet
 import no.nav.helse.modell.vedtaksperiode.Periodetype
+import no.nav.helse.spesialist.kafka.medRivers
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
 import java.time.LocalDate

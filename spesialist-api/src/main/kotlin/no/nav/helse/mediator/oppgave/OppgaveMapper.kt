@@ -3,80 +3,18 @@ package no.nav.helse.mediator.oppgave
 import no.nav.helse.db.AntallOppgaverFraDatabase
 import no.nav.helse.db.BehandletOppgaveFraDatabaseForVisning
 import no.nav.helse.db.EgenskapForDatabase
-import no.nav.helse.db.OppgaveFraDatabaseForVisning
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.spesialist.api.graphql.schema.ApiAntallArbeidsforhold
 import no.nav.helse.spesialist.api.graphql.schema.ApiAntallOppgaver
 import no.nav.helse.spesialist.api.graphql.schema.ApiBehandletOppgave
 import no.nav.helse.spesialist.api.graphql.schema.ApiEgenskap
 import no.nav.helse.spesialist.api.graphql.schema.ApiKategori
-import no.nav.helse.spesialist.api.graphql.schema.ApiKommentar
-import no.nav.helse.spesialist.api.graphql.schema.ApiMottaker
-import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveTilBehandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveegenskap
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavetype
-import no.nav.helse.spesialist.api.graphql.schema.ApiPaVentInfo
 import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodetype
 import no.nav.helse.spesialist.api.graphql.schema.ApiPersonnavn
-import no.nav.helse.spesialist.api.graphql.schema.ApiTildeling
 
 internal object OppgaveMapper {
-    internal fun List<OppgaveFraDatabaseForVisning>.tilOppgaverTilBehandling() =
-        map { oppgave ->
-            val egenskaper = oppgave.egenskaper.tilModellversjoner()
-            ApiOppgaveTilBehandling(
-                id = oppgave.id.toString(),
-                opprettet = oppgave.opprettet,
-                opprinneligSoknadsdato = oppgave.opprinneligSøknadsdato,
-                tidsfrist = oppgave.tidsfrist,
-                paVentInfo =
-                    oppgave.paVentInfo?.let { påVentInfo ->
-                        ApiPaVentInfo(
-                            arsaker = påVentInfo.årsaker,
-                            tekst = påVentInfo.tekst,
-                            dialogRef = påVentInfo.dialogRef.toInt(),
-                            saksbehandler = påVentInfo.saksbehandler,
-                            opprettet = påVentInfo.opprettet,
-                            tidsfrist = påVentInfo.tidsfrist,
-                            kommentarer =
-                                påVentInfo.kommentarer.map {
-                                    ApiKommentar(
-                                        id = it.id,
-                                        tekst = it.tekst,
-                                        opprettet = it.opprettet,
-                                        saksbehandlerident = it.saksbehandlerident,
-                                        feilregistrert_tidspunkt = null,
-                                    )
-                                },
-                        )
-                    },
-                vedtaksperiodeId = oppgave.vedtaksperiodeId,
-                navn =
-                    ApiPersonnavn(
-                        fornavn = oppgave.navn.fornavn,
-                        etternavn = oppgave.navn.etternavn,
-                        mellomnavn = oppgave.navn.mellomnavn,
-                    ),
-                aktorId = oppgave.aktørId,
-                tildeling =
-                    oppgave.tildelt?.let { tildelt ->
-                        ApiTildeling(
-                            navn = tildelt.navn,
-                            epost = tildelt.epost,
-                            oid = tildelt.id().value,
-                        )
-                    },
-                egenskaper =
-                    egenskaper.sortedBy { it.name }.map { egenskap ->
-                        ApiOppgaveegenskap(egenskap.tilApiversjon(), egenskap.kategori.tilApiversjon())
-                    },
-                periodetype = egenskaper.periodetype(),
-                oppgavetype = egenskaper.oppgavetype(),
-                mottaker = egenskaper.mottaker(),
-                antallArbeidsforhold = egenskaper.antallArbeidsforhold(),
-            )
-        }
-
     internal fun Set<EgenskapForDatabase>.tilEgenskaperForVisning() =
         tilModellversjoner().map { egenskap ->
             ApiOppgaveegenskap(egenskap.tilApiversjon(), egenskap.kategori.tilApiversjon())
@@ -132,17 +70,6 @@ internal object OppgaveMapper {
         }
     }
 
-    private fun List<Egenskap>.mottaker(): ApiMottaker {
-        val egenskap = single { egenskap -> egenskap.kategori == Egenskap.Kategori.Mottaker }
-        return when (egenskap) {
-            Egenskap.UTBETALING_TIL_SYKMELDT -> ApiMottaker.SYKMELDT
-            Egenskap.UTBETALING_TIL_ARBEIDSGIVER -> ApiMottaker.ARBEIDSGIVER
-            Egenskap.DELVIS_REFUSJON -> ApiMottaker.BEGGE
-            Egenskap.INGEN_UTBETALING -> ApiMottaker.INGEN
-            else -> throw IllegalArgumentException("Kunne ikke mappe egenskap til periodetype")
-        }
-    }
-
     private fun List<Egenskap>.antallArbeidsforhold(): ApiAntallArbeidsforhold {
         val egenskap = single { egenskap -> egenskap.kategori == Egenskap.Kategori.Inntektskilde }
         return when (egenskap) {
@@ -151,19 +78,6 @@ internal object OppgaveMapper {
             else -> throw IllegalArgumentException("Kunne ikke mappe egenskap til periodetype")
         }
     }
-
-    internal fun List<ApiOppgaveegenskap>.tilDatabaseversjon(): List<EgenskapForDatabase> = this.map { it.tilDatabaseversjon() }
-
-    internal fun ApiKategori.tilDatabaseversjon(): Egenskap.Kategori =
-        when (this) {
-            ApiKategori.Mottaker -> Egenskap.Kategori.Mottaker
-            ApiKategori.Inntektskilde -> Egenskap.Kategori.Inntektskilde
-            ApiKategori.Inntektsforhold -> Egenskap.Kategori.Inntektsforhold
-            ApiKategori.Oppgavetype -> Egenskap.Kategori.Oppgavetype
-            ApiKategori.Ukategorisert -> Egenskap.Kategori.Ukategorisert
-            ApiKategori.Periodetype -> Egenskap.Kategori.Periodetype
-            ApiKategori.Status -> Egenskap.Kategori.Status
-        }
 
     fun Egenskap.tilApiversjon(): ApiEgenskap =
         when (this) {
@@ -248,41 +162,5 @@ internal object OppgaveMapper {
             EgenskapForDatabase.ARBEIDSTAKER -> Egenskap.ARBEIDSTAKER
             // Gammel egenskap fra tidligere iterasjon av tilkommen inntekt, skal overses
             EgenskapForDatabase.TILKOMMEN -> null
-        }
-
-    private fun ApiOppgaveegenskap.tilDatabaseversjon() =
-        when (this.egenskap) {
-            ApiEgenskap.RISK_QA -> EgenskapForDatabase.RISK_QA
-            ApiEgenskap.FORTROLIG_ADRESSE -> EgenskapForDatabase.FORTROLIG_ADRESSE
-            ApiEgenskap.STRENGT_FORTROLIG_ADRESSE -> EgenskapForDatabase.STRENGT_FORTROLIG_ADRESSE
-            ApiEgenskap.EGEN_ANSATT -> EgenskapForDatabase.EGEN_ANSATT
-            ApiEgenskap.BESLUTTER -> EgenskapForDatabase.BESLUTTER
-            ApiEgenskap.SPESIALSAK -> EgenskapForDatabase.SPESIALSAK
-            ApiEgenskap.REVURDERING -> EgenskapForDatabase.REVURDERING
-            ApiEgenskap.SOKNAD -> EgenskapForDatabase.SØKNAD
-            ApiEgenskap.STIKKPROVE -> EgenskapForDatabase.STIKKPRØVE
-            ApiEgenskap.UTBETALING_TIL_SYKMELDT -> EgenskapForDatabase.UTBETALING_TIL_SYKMELDT
-            ApiEgenskap.DELVIS_REFUSJON -> EgenskapForDatabase.DELVIS_REFUSJON
-            ApiEgenskap.UTBETALING_TIL_ARBEIDSGIVER -> EgenskapForDatabase.UTBETALING_TIL_ARBEIDSGIVER
-            ApiEgenskap.INGEN_UTBETALING -> EgenskapForDatabase.INGEN_UTBETALING
-            ApiEgenskap.EN_ARBEIDSGIVER -> EgenskapForDatabase.EN_ARBEIDSGIVER
-            ApiEgenskap.FLERE_ARBEIDSGIVERE -> EgenskapForDatabase.FLERE_ARBEIDSGIVERE
-            ApiEgenskap.FORLENGELSE -> EgenskapForDatabase.FORLENGELSE
-            ApiEgenskap.FORSTEGANGSBEHANDLING -> EgenskapForDatabase.FORSTEGANGSBEHANDLING
-            ApiEgenskap.INFOTRYGDFORLENGELSE -> EgenskapForDatabase.INFOTRYGDFORLENGELSE
-            ApiEgenskap.OVERGANG_FRA_IT -> EgenskapForDatabase.OVERGANG_FRA_IT
-            ApiEgenskap.UTLAND -> EgenskapForDatabase.UTLAND
-            ApiEgenskap.HASTER -> EgenskapForDatabase.HASTER
-            ApiEgenskap.RETUR -> EgenskapForDatabase.RETUR
-            ApiEgenskap.VERGEMAL -> EgenskapForDatabase.VERGEMÅL
-            ApiEgenskap.SKJONNSFASTSETTELSE -> EgenskapForDatabase.SKJØNNSFASTSETTELSE
-            ApiEgenskap.PA_VENT -> EgenskapForDatabase.PÅ_VENT
-            ApiEgenskap.TILBAKEDATERT -> EgenskapForDatabase.TILBAKEDATERT
-            ApiEgenskap.GOSYS -> EgenskapForDatabase.GOSYS
-            ApiEgenskap.MANGLER_IM -> EgenskapForDatabase.MANGLER_IM
-            ApiEgenskap.MEDLEMSKAP -> EgenskapForDatabase.MEDLEMSKAP
-            ApiEgenskap.GRUNNBELOPSREGULERING -> EgenskapForDatabase.GRUNNBELØPSREGULERING
-            ApiEgenskap.SELVSTENDIG_NAERINGSDRIVENDE -> EgenskapForDatabase.SELVSTENDIG_NÆRINGSDRIVENDE
-            ApiEgenskap.ARBEIDSTAKER -> EgenskapForDatabase.ARBEIDSTAKER
         }
 }

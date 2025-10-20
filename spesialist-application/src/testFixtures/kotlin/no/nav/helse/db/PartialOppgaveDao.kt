@@ -1,7 +1,6 @@
 package no.nav.helse.db
 
 import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
-import no.nav.helse.modell.oppgave.Egenskap
 import java.time.LocalDate
 import java.util.UUID
 
@@ -55,29 +54,6 @@ interface PartialOppgaveDao : OppgaveDao {
     }
 
     override fun oppgaveDataForAutomatisering(oppgaveId: Long): OppgaveDataForAutomatisering? {
-        error("Not implemented for this test")
-    }
-
-    override fun finnOppgaverForVisning(
-        ekskluderEgenskaper: List<String>,
-        saksbehandlerOid: UUID,
-        offset: Int,
-        limit: Int,
-        sortering: List<OppgavesorteringForDatabase>,
-        egneSakerPåVent: Boolean,
-        egneSaker: Boolean,
-        tildelt: Boolean?,
-        grupperteFiltrerteEgenskaper: Map<Egenskap.Kategori, List<EgenskapForDatabase>>
-    ): List<OppgaveFraDatabaseForVisning> {
-        error("Not implemented for this test")
-    }
-
-    override fun finnTildelteOppgaver(
-        saksbehandlerOid: UUID,
-        ekskluderEgenskaper: List<String>,
-        offset: Int,
-        limit: Int
-    ): List<OppgaveFraDatabaseForVisning> {
         error("Not implemented for this test")
     }
 

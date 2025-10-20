@@ -1,27 +1,17 @@
 package no.nav.helse.spesialist.db.dao
 
-import kotliquery.Row
 import kotliquery.Session
 import no.nav.helse.db.AntallOppgaverFraDatabase
 import no.nav.helse.db.BehandletOppgaveFraDatabaseForVisning
 import no.nav.helse.db.EgenskapForDatabase
-import no.nav.helse.db.KommentarFraDatabase
 import no.nav.helse.db.OppgaveDao
-import no.nav.helse.db.OppgaveFraDatabaseForVisning
-import no.nav.helse.db.OppgavesorteringForDatabase
-import no.nav.helse.db.PaVentInfoFraDatabase
 import no.nav.helse.db.PersonnavnFraDatabase
-import no.nav.helse.db.SorteringsnøkkelForDatabase
 import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
-import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
-import no.nav.helse.spesialist.db.HelseDao.Companion.somDbArray
 import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.db.objectMapper
-import no.nav.helse.spesialist.domain.Saksbehandler
-import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import java.time.LocalDate
 import java.util.UUID
 import javax.sql.DataSource
@@ -204,243 +194,6 @@ class PgOppgaveDao internal constructor(
             )
         }
 
-    override fun finnOppgaverForVisning(
-        ekskluderEgenskaper: List<String>,
-        saksbehandlerOid: UUID,
-        offset: Int,
-        limit: Int,
-        sortering: List<OppgavesorteringForDatabase>,
-        egneSakerPåVent: Boolean,
-        egneSaker: Boolean,
-        tildelt: Boolean?,
-        grupperteFiltrerteEgenskaper: Map<Egenskap.Kategori, List<EgenskapForDatabase>>,
-    ): List<OppgaveFraDatabaseForVisning> {
-        val orderBy =
-            if (sortering.isNotEmpty()) sortering.joinToString { it.nøkkelTilKolonne() } else "første_opprettet DESC"
-        val ukategoriserteEgenskaper = grupperteFiltrerteEgenskaper[Egenskap.Kategori.Ukategorisert]
-        val oppgavetypeegenskaper = grupperteFiltrerteEgenskaper[Egenskap.Kategori.Oppgavetype]
-        val periodetypeegenskaper = grupperteFiltrerteEgenskaper[Egenskap.Kategori.Periodetype]
-        val mottakeregenskaper = grupperteFiltrerteEgenskaper[Egenskap.Kategori.Mottaker]
-        val antallArbeidsforholdEgenskaper = grupperteFiltrerteEgenskaper[Egenskap.Kategori.Inntektskilde]
-        val statusegenskaper = grupperteFiltrerteEgenskaper[Egenskap.Kategori.Status]
-        val inntektsforhold = grupperteFiltrerteEgenskaper[Egenskap.Kategori.Inntektsforhold]
-
-        return asSQL(
-            """
-            SELECT
-                o.id as oppgave_id,
-                p.aktør_id,
-                v.vedtaksperiode_id,
-                pi.fornavn, pi.mellomnavn, pi.etternavn,
-                o.egenskaper,
-                s.oid, s.ident, s.epost, s.navn,
-                o.første_opprettet,
-                os.soknad_mottatt AS opprinnelig_soknadsdato,
-                pv.frist,
-                pv.opprettet AS på_vent_opprettet,
-                pv.årsaker,
-                pv.notattekst,
-                sb.ident AS på_vent_saksbehandler,
-                pv.dialog_ref,
-                count(1) OVER() AS filtered_count
-            FROM oppgave o
-            INNER JOIN vedtak v ON o.vedtak_ref = v.id
-            INNER JOIN person p ON v.person_ref = p.id
-            INNER JOIN person_info pi ON p.info_ref = pi.id
-            INNER JOIN opprinnelig_soknadsdato os ON os.vedtaksperiode_id = v.vedtaksperiode_id
-            LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
-            LEFT JOIN totrinnsvurdering ttv ON (ttv.person_ref = v.person_ref AND ttv.tilstand != 'GODKJENT')
-            LEFT JOIN saksbehandler s ON t.saksbehandler_ref = s.oid
-            LEFT JOIN pa_vent pv ON v.vedtaksperiode_id = pv.vedtaksperiode_id
-            LEFT JOIN saksbehandler sb ON pv.saksbehandler_ref = sb.oid
-            WHERE o.status = 'AvventerSaksbehandler'
-                AND (:ukategoriserte_egenskaper = '{}' OR egenskaper @> :ukategoriserte_egenskaper::varchar[]) -- ukategoriserte egenskaper, inkluder oppgaver som inneholder alle saksbehandler har valgt
-                AND (:oppgavetypeegenskaper = '{}' OR egenskaper && :oppgavetypeegenskaper::varchar[]) -- inkluder alle oppgaver som har minst en av de valgte oppgavetype
-                AND (:periodetypeegenskaper = '{}' OR egenskaper && :periodetypeegenskaper::varchar[]) -- inkluder alle oppgaver som har minst en av de valgte periodetypene
-                AND (:mottakeregenskaper = '{}' OR egenskaper && :mottakeregenskaper::varchar[]) -- inkluder alle oppgaver som har minst en av de valgte mottakertypene
-                AND (:antall_arbeidsforhold_egenskaper = '{}' OR egenskaper && :antall_arbeidsforhold_egenskaper::varchar[]) -- inkluder alle oppgaver som har minst en av de valgte
-                AND (:statusegenskaper = '{}' OR egenskaper && :statusegenskaper::varchar[]) -- inkluder alle oppgaver som har minst en av de valgte statusene
-                AND (:inntektsforhold = '{}' OR egenskaper && :inntektsforhold::varchar[]) -- inkluder alle oppgaver som har minst en av de valgte inntektsforhold
-                AND NOT (egenskaper && :egenskaper_som_skal_ekskluderes::varchar[]) -- egenskaper saksbehandler ikke har tilgang til
-                AND NOT ('BESLUTTER' = ANY(egenskaper) AND ttv.saksbehandler = :oid) -- hvis oppgaven er sendt til beslutter og saksbehandler var den som sendte
-                AND
-                    CASE
-                        WHEN :egne_saker_pa_vent THEN t.saksbehandler_ref = :oid AND ('PÅ_VENT' = ANY(o.egenskaper))
-                        WHEN :egne_saker THEN t.saksbehandler_ref = :oid AND NOT ('PÅ_VENT' = ANY(o.egenskaper))
-                        ELSE true
-                    END
-                AND
-                    CASE
-                        WHEN :tildelt THEN t.oppgave_id_ref IS NOT NULL
-                        WHEN :tildelt = false THEN t.oppgave_id_ref IS NULL
-                        ELSE true
-                    END
-            ORDER BY $orderBy
-            OFFSET :offset
-            LIMIT :limit
-            """,
-            "oid" to saksbehandlerOid,
-            "offset" to offset,
-            "limit" to limit,
-            "egne_saker_pa_vent" to egneSakerPåVent,
-            "egne_saker" to egneSaker,
-            "tildelt" to tildelt,
-            "ukategoriserte_egenskaper" to ukategoriserteEgenskaper.somDbArray(),
-            "oppgavetypeegenskaper" to oppgavetypeegenskaper.somDbArray(),
-            "periodetypeegenskaper" to periodetypeegenskaper.somDbArray(),
-            "mottakeregenskaper" to mottakeregenskaper.somDbArray(),
-            "antall_arbeidsforhold_egenskaper" to antallArbeidsforholdEgenskaper.somDbArray(),
-            "statusegenskaper" to statusegenskaper.somDbArray(),
-            "inntektsforhold" to inntektsforhold.somDbArray(),
-            "egenskaper_som_skal_ekskluderes" to ekskluderEgenskaper.somDbArray(),
-        ).list { row ->
-            val egenskaper =
-                row.array<String>("egenskaper").map { enumValueOf<EgenskapForDatabase>(it) }.toSet()
-            OppgaveFraDatabaseForVisning(
-                id = row.long("oppgave_id"),
-                aktørId = row.string("aktør_id"),
-                vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
-                navn =
-                    PersonnavnFraDatabase(
-                        row.string("fornavn"),
-                        row.stringOrNull("mellomnavn"),
-                        row.string("etternavn"),
-                    ),
-                egenskaper = egenskaper,
-                tildelt =
-                    row.uuidOrNull("oid")?.let {
-                        Saksbehandler(
-                            id = SaksbehandlerOid(it),
-                            navn = row.string("navn"),
-                            epost = row.string("epost"),
-                            ident = row.string("ident"),
-                        )
-                    },
-                påVent = egenskaper.contains(EgenskapForDatabase.PÅ_VENT),
-                opprettet = row.localDateTime("første_opprettet"),
-                opprinneligSøknadsdato = row.localDateTime("opprinnelig_soknadsdato"),
-                tidsfrist = row.localDateOrNull("frist"),
-                filtrertAntall = row.int("filtered_count"),
-                paVentInfo =
-                    row.localDateTimeOrNull("på_vent_opprettet")?.let {
-                        PaVentInfoFraDatabase(
-                            årsaker = row.array<String>("årsaker").toList(),
-                            tekst = row.stringOrNull("notattekst"),
-                            dialogRef = row.long("dialog_ref"),
-                            saksbehandler = row.string("på_vent_saksbehandler"),
-                            opprettet = it,
-                            tidsfrist = row.localDate("frist"),
-                            kommentarer = finnKommentarerMedDialogRef(row.long("dialog_ref").toInt()),
-                        )
-                    },
-            )
-        }
-    }
-
-    override fun finnTildelteOppgaver(
-        saksbehandlerOid: UUID,
-        ekskluderEgenskaper: List<String>,
-        offset: Int,
-        limit: Int,
-    ): List<OppgaveFraDatabaseForVisning> =
-        asSQL(
-            """
-            SELECT
-                o.id as oppgave_id,
-                p.aktør_id,
-                v.vedtaksperiode_id,
-                pi.fornavn, pi.mellomnavn, pi.etternavn,
-                o.egenskaper,
-                s.oid, s.ident, s.epost, s.navn,
-                o.opprettet,
-                os.soknad_mottatt AS opprinnelig_soknadsdato,
-                pv.frist,
-                pv.opprettet AS på_vent_opprettet,
-                pv.årsaker,
-                pv.notattekst,
-                sb.ident AS på_vent_saksbehandler,
-                pv.dialog_ref,
-                count(1) OVER() AS filtered_count
-            FROM oppgave o
-            INNER JOIN vedtak v ON o.vedtak_ref = v.id
-            INNER JOIN person p ON v.person_ref = p.id
-            INNER JOIN person_info pi ON p.info_ref = pi.id
-            INNER JOIN opprinnelig_soknadsdato os ON os.vedtaksperiode_id = v.vedtaksperiode_id
-            LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
-            LEFT JOIN pa_vent pv ON v.vedtaksperiode_id = pv.vedtaksperiode_id
-            LEFT JOIN saksbehandler s ON t.saksbehandler_ref = s.oid
-            LEFT JOIN saksbehandler sb ON pv.saksbehandler_ref = sb.oid
-            WHERE o.status = 'AvventerSaksbehandler'
-                AND t.saksbehandler_ref = :saksbehandler_oid
-                AND NOT (egenskaper && :egenskaper_som_skal_ekskluderes::varchar[]) -- egenskaper saksbehandler ikke har tilgang til
-            OFFSET :offset
-            LIMIT :limit
-            """.trimIndent(),
-            "offset" to offset,
-            "limit" to limit,
-            "saksbehandler_oid" to saksbehandlerOid,
-            "egenskaper_som_skal_ekskluderes" to ekskluderEgenskaper.somDbArray(),
-        ).list { row ->
-            val egenskaper =
-                row.array<String>("egenskaper").map { enumValueOf<EgenskapForDatabase>(it) }.toSet()
-            OppgaveFraDatabaseForVisning(
-                id = row.long("oppgave_id"),
-                aktørId = row.string("aktør_id"),
-                vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
-                navn =
-                    PersonnavnFraDatabase(
-                        row.string("fornavn"),
-                        row.stringOrNull("mellomnavn"),
-                        row.string("etternavn"),
-                    ),
-                egenskaper = egenskaper,
-                tildelt =
-                    row.uuidOrNull("oid")?.let {
-                        Saksbehandler(
-                            id = SaksbehandlerOid(it),
-                            navn = row.string("navn"),
-                            epost = row.string("epost"),
-                            ident = row.string("ident"),
-                        )
-                    },
-                påVent = egenskaper.contains(EgenskapForDatabase.PÅ_VENT),
-                opprettet = row.localDateTime("opprettet"),
-                opprinneligSøknadsdato = row.localDateTime("opprinnelig_soknadsdato"),
-                tidsfrist = row.localDateOrNull("frist"),
-                filtrertAntall = row.int("filtered_count"),
-                paVentInfo =
-                    row.localDateTimeOrNull("på_vent_opprettet")?.let {
-                        PaVentInfoFraDatabase(
-                            årsaker = row.array<String>("årsaker").toList(),
-                            tekst = row.stringOrNull("notattekst"),
-                            dialogRef = row.long("dialog_ref"),
-                            saksbehandler = row.string("på_vent_saksbehandler"),
-                            opprettet = it,
-                            tidsfrist = row.localDate("frist"),
-                            kommentarer = finnKommentarerMedDialogRef(row.long("dialog_ref").toInt()),
-                        )
-                    },
-            )
-        }
-
-    private fun finnKommentarerMedDialogRef(dialogRef: Int): List<KommentarFraDatabase> =
-        asSQL(
-            """
-            select id, tekst, feilregistrert_tidspunkt, opprettet, saksbehandlerident
-            from kommentarer k
-            where dialog_ref = :dialogRef
-            """.trimIndent(),
-            "dialogRef" to dialogRef,
-        ).list { mapKommentarFraDatabase(it) }
-
-    private fun mapKommentarFraDatabase(it: Row): KommentarFraDatabase =
-        KommentarFraDatabase(
-            id = it.int("id"),
-            tekst = it.string("tekst"),
-            opprettet = it.localDateTime("opprettet"),
-            saksbehandlerident = it.string("saksbehandlerident"),
-        )
-
     override fun finnAntallOppgaver(saksbehandlerOid: UUID): AntallOppgaverFraDatabase =
         asSQL(
             """
@@ -598,18 +351,4 @@ class PgOppgaveDao internal constructor(
         ).singleOrNull {
             it.long("id")
         }
-
-    private fun OppgavesorteringForDatabase.nøkkelTilKolonne() =
-        when (this.nøkkel) {
-            SorteringsnøkkelForDatabase.TILDELT_TIL -> "navn".direction(this.stigende).nullsLast()
-            SorteringsnøkkelForDatabase.TIDSFRIST -> "frist".direction(this.stigende).nullsLast()
-            SorteringsnøkkelForDatabase.SØKNAD_MOTTATT -> "opprinnelig_soknadsdato".direction(this.stigende)
-            SorteringsnøkkelForDatabase.BEHANDLING_OPPRETTET_TIDSPUNKT,
-            SorteringsnøkkelForDatabase.OPPRETTET,
-            -> "første_opprettet".direction(this.stigende)
-        }
-
-    private fun String.direction(stigende: Boolean) = if (stigende) "$this ASC" else "$this DESC"
-
-    private fun String.nullsLast() = "$this NULLS LAST"
 }

@@ -7,9 +7,6 @@ import no.nav.helse.spesialist.api.graphql.ContextValues
 import no.nav.helse.spesialist.api.graphql.byggRespons
 import no.nav.helse.spesialist.api.graphql.schema.ApiAntallOppgaver
 import no.nav.helse.spesialist.api.graphql.schema.ApiBehandledeOppgaver
-import no.nav.helse.spesialist.api.graphql.schema.ApiFiltrering
-import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaverTilBehandling
-import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavesortering
 import no.nav.helse.spesialist.domain.Saksbehandler
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -39,35 +36,6 @@ class OppgaverQueryHandler(
             )
 
         return byggRespons(behandledeOppgaver)
-    }
-
-    override suspend fun oppgaveFeed(
-        offset: Int,
-        limit: Int,
-        sortering: List<ApiOppgavesortering>,
-        filtrering: ApiFiltrering,
-        env: DataFetchingEnvironment,
-    ): DataFetcherResult<ApiOppgaverTilBehandling> {
-        val saksbehandler = env.graphQlContext.get<Saksbehandler>(ContextValues.SAKSBEHANDLER)
-        sikkerLogg.debug("Henter OppgaverTilBehandling for ${saksbehandler.navn}")
-        val (oppgaver, tid) =
-            measureTimedValue {
-                apiOppgaveService.oppgaver(
-                    saksbehandler = saksbehandler,
-                    tilgangsgrupper = env.graphQlContext.get(ContextValues.TILGANGSGRUPPER),
-                    offset = offset,
-                    limit = limit,
-                    sortering = sortering,
-                    filtrering = filtrering,
-                )
-            }
-        sikkerLogg.debug("Query OppgaverTilBehandling er ferdig etter ${tid.inWholeMilliseconds} ms")
-        val grense = 5000
-        if (tid.inWholeMilliseconds > grense) {
-            sikkerLogg.info("Det tok over $grense ms å hente oppgaver med disse filtrene: $filtrering\nog denne sorteringen: $sortering")
-        }
-
-        return byggRespons(oppgaver)
     }
 
     override suspend fun antallOppgaver(env: DataFetchingEnvironment): DataFetcherResult<ApiAntallOppgaver> {

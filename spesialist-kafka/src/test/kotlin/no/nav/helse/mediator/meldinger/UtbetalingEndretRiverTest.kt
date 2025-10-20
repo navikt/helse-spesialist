@@ -4,9 +4,9 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.kafka.UtbetalingEndretRiver
-import no.nav.helse.spesialist.kafka.medRivers
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
+import no.nav.helse.spesialist.kafka.medRivers
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows

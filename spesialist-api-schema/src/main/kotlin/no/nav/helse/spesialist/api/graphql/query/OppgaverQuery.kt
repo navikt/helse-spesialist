@@ -5,9 +5,6 @@ import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 import no.nav.helse.spesialist.api.graphql.schema.ApiAntallOppgaver
 import no.nav.helse.spesialist.api.graphql.schema.ApiBehandledeOppgaver
-import no.nav.helse.spesialist.api.graphql.schema.ApiFiltrering
-import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaverTilBehandling
-import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavesortering
 import java.time.LocalDate
 
 interface OppgaverQuerySchema : Query {
@@ -18,14 +15,6 @@ interface OppgaverQuerySchema : Query {
         tom: LocalDate,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<ApiBehandledeOppgaver>
-
-    suspend fun oppgaveFeed(
-        offset: Int,
-        limit: Int,
-        sortering: List<ApiOppgavesortering>,
-        filtrering: ApiFiltrering,
-        env: DataFetchingEnvironment,
-    ): DataFetcherResult<ApiOppgaverTilBehandling>
 
     suspend fun antallOppgaver(env: DataFetchingEnvironment): DataFetcherResult<ApiAntallOppgaver>
 }
