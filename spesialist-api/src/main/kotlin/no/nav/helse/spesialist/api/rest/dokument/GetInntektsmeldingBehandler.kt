@@ -40,11 +40,16 @@ class GetInntektsmeldingBehandler(
             throw HttpRequestTimeout("Henting av dokument timet ut")
         }
 
-        val fødselsnummerForIM = dokument.get("arbeidstakerFnr").asText(null)?.let { setOf(it) } ?: emptySet()
-        val aktørIdForIM = dokument.get("arbeidstakerAktorId").asText()
+        val fødselsnummerForIM =
+            dokument
+                .get("arbeidstakerFnr")
+                ?.asText()
+                ?.takeUnless { it.isEmpty() }
+                ?.let { setOf(it) } ?: emptySet()
+        val aktørIdForIM = dokument.get("arbeidstakerAktorId")?.asText()?.takeUnless { it.isEmpty() }
 
         val fødselsnummreForIM =
-            fødselsnummerForIM + transaksjon.legacyPersonRepository.finnFødselsnumre(aktørIdForIM).toSet()
+            fødselsnummerForIM + aktørIdForIM?.let { transaksjon.legacyPersonRepository.finnFødselsnumre(it).toSet() }.orEmpty()
 
         fødselsnummreForIM.forEach { fødselsnummer ->
             bekreftTilgangTilPerson(
