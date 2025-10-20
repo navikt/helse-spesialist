@@ -1,41 +1,6 @@
 package no.nav.helse.db
 
-import no.nav.helse.spesialist.domain.Saksbehandler
-import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
-
-data class OppgaveFraDatabaseForVisning(
-    val id: Long,
-    val aktørId: String,
-    val vedtaksperiodeId: UUID,
-    val navn: PersonnavnFraDatabase,
-    val egenskaper: Set<EgenskapForDatabase>,
-    val tildelt: Saksbehandler? = null,
-    val påVent: Boolean = false,
-    val opprettet: LocalDateTime,
-    val opprinneligSøknadsdato: LocalDateTime,
-    val tidsfrist: LocalDate?,
-    val filtrertAntall: Int,
-    val paVentInfo: PaVentInfoFraDatabase?,
-)
-
-data class PaVentInfoFraDatabase(
-    val årsaker: List<String>,
-    val tekst: String?,
-    val dialogRef: Long,
-    val saksbehandler: String,
-    val opprettet: LocalDateTime,
-    val tidsfrist: LocalDate,
-    val kommentarer: List<KommentarFraDatabase>,
-)
-
-data class KommentarFraDatabase(
-    val id: Int,
-    val tekst: String,
-    val opprettet: LocalDateTime,
-    val saksbehandlerident: String,
-)
 
 data class AntallOppgaverFraDatabase(
     val antallMineSaker: Int,
@@ -52,11 +17,6 @@ data class BehandletOppgaveFraDatabaseForVisning(
     val beslutter: String?,
     val navn: PersonnavnFraDatabase,
     val filtrertAntall: Int,
-)
-
-data class OppgavesorteringForDatabase(
-    val nøkkel: SorteringsnøkkelForDatabase,
-    val stigende: Boolean,
 )
 
 enum class SorteringsnøkkelForDatabase {
