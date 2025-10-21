@@ -276,14 +276,13 @@ class PgOppgaveDao internal constructor(
                 INNER JOIN vedtak v ON o.vedtak_ref = v.id
                 INNER JOIN person p ON v.person_ref = p.id
                 INNER JOIN person_info pi ON p.info_ref = pi.id
-                LEFT JOIN (SELECT utbetaling_id, beslutter.ident as beslutter, saksbehandler.ident as saksbehandler
+                LEFT JOIN (SELECT tv.person_ref, tv.tilstand, beslutter.ident as beslutter, saksbehandler.ident as saksbehandler
                          FROM totrinnsvurdering tv
-                         INNER JOIN utbetaling_id ui ON ui.id = utbetaling_id_ref
                          INNER JOIN saksbehandler beslutter on tv.beslutter = beslutter.oid
                          INNER JOIN saksbehandler saksbehandler on tv.saksbehandler = saksbehandler.oid
                          WHERE (saksbehandler = :oid OR beslutter = :oid) AND (tv.oppdatert::date >= :fom::date AND tv.oppdatert::date <= :tom::date)
-                     ) ttv ON ttv.utbetaling_id = o.utbetaling_id
-            WHERE (ttv.utbetaling_id IS NOT NULL OR o.ferdigstilt_av_oid = :oid)
+                     ) ttv ON ttv.person_ref = p.id
+            WHERE (ttv.tilstand = 'GODKJENT' OR o.ferdigstilt_av_oid = :oid)
                 AND (o.status in ('Ferdigstilt', 'AvventerSystem'))
                 AND (o.oppdatert::date >= :fom::date AND o.oppdatert::date <= :tom::date)
             ORDER BY o.oppdatert

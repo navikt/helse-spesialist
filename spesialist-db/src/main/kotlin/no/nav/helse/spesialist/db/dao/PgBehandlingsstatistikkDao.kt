@@ -56,7 +56,7 @@ class PgBehandlingsstatistikkDao internal constructor(
             """
             SELECT count(1)
             FROM totrinnsvurdering
-            WHERE utbetaling_id_ref IS NOT NULL
+            WHERE tilstand = 'GODKJENT'
             AND oppdatert >= :fom
             """.trimIndent(),
             "fom" to fom,
