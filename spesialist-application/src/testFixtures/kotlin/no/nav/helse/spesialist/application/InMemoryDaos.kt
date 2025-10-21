@@ -73,6 +73,7 @@ class InMemoryDaos(
     override val stansAutomatiskBehandlingDao: InMemoryStansAutomatiskBehandlingDao,
     override val annulleringRepository: InMemoryAnnulleringRepository,
     override val saksbehandlerRepository: InMemorySaksbehandlerRepository,
+    private val vedtaksperiodeRepository: InMemoryVedtaksperiodeRepository
 ) : Daos {
     override val behandlingsstatistikkDao: BehandlingsstatistikkDao = object : BehandlingsstatistikkDao {
         override fun getAntallTilgjengeligeBeslutteroppgaver(): Int {
@@ -516,7 +517,8 @@ class InMemoryDaos(
         }
 
         override fun finnFødselsnummer(oppgaveId: Long): String {
-            TODO("Not yet implemented")
+            val vedtaksperiodeId = oppgaveRepository.finn(oppgaveId)!!.vedtaksperiodeId
+            return vedtaksperiodeRepository.finnFødselsnummer(vedtaksperiodeId)
         }
     }
     override val overstyringApiDao: OverstyringApiDao = object : OverstyringApiDao {

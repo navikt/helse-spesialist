@@ -42,6 +42,19 @@ class InMemoryRepositoriesAndDaos() {
                 ?.id
         }
 
+        override fun finnSpleisBehandlingId(oppgaveId: Long): UUID {
+            val behandlingId = oppgaveRepository.finn(oppgaveId)!!.behandlingId
+            val spleisBehandlingId = vedtaksperiodeRepository.alle()
+                .flatMap { it.behandlinger }
+                .first { it.id == behandlingId }.spleisBehandlingId!!
+            return spleisBehandlingId
+        }
+
+        override fun venterPåSaksbehandler(oppgaveId: Long): Boolean {
+            val oppgave = oppgaveRepository.finn(oppgaveId)!!
+            return oppgave.tilstand is Oppgave.AvventerSaksbehandler
+        }
+
         override fun finnOppgaveIdUansettStatus(fødselsnummer: String): Long {
             val vedtaksperiodeIder =
                 vedtaksperiodeRepository.finnVedtaksperioder(fødselsnummer).map { it.vedtaksperiodeId }
@@ -63,6 +76,7 @@ class InMemoryRepositoriesAndDaos() {
         stansAutomatiskBehandlingDao,
         annulleringRepository,
         saksbehandlerRepository,
+        vedtaksperiodeRepository
     )
     val sessionFactory = InMemorySessionFactory(
         notatRepository,

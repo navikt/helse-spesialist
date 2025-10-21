@@ -250,8 +250,7 @@ class InMemorySessionContext(
     override val legacyPersonRepository: InMemoryLegacyPersonRepository = InMemoryLegacyPersonRepository()
     override val stansAutomatiskBehandlingSaksbehandlerDao: StansAutomatiskBehandlingSaksbehandlerDao
         get() = TODO("Not yet implemented")
-    override val totrinnsvurderingRepository: TotrinnsvurderingRepository
-        get() = TODO("Not yet implemented")
+    override val totrinnsvurderingRepository: InMemoryTotrinnsvurderingRepository = InMemoryTotrinnsvurderingRepository()
     override val overstyringRepository: OverstyringRepository
         get() = TODO("Not yet implemented")
     override val dialogRepository: DialogRepository
