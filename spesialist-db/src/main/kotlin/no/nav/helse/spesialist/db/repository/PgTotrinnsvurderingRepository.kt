@@ -23,14 +23,12 @@ class PgTotrinnsvurderingRepository(
                    p.fødselsnummer,
                    tv.saksbehandler as saksbehandler_oid,
                    tv.beslutter as beslutter_oid,
-                   ui.utbetaling_id,
                    tv.tilstand,
                    tv.vedtaksperiode_forkastet,
                    tv.opprettet,
                    tv.oppdatert
             FROM totrinnsvurdering tv
                      INNER JOIN person p on tv.person_ref = p.id
-                     LEFT JOIN utbetaling_id ui on ui.id = tv.utbetaling_id_ref
             WHERE tv.id = :id
             """.trimIndent(),
             "id" to id.value,
@@ -43,14 +41,12 @@ class PgTotrinnsvurderingRepository(
                    p.fødselsnummer,
                    tv.saksbehandler as saksbehandler_oid,
                    tv.beslutter as beslutter_oid,
-                   ui.utbetaling_id,
                    tv.tilstand,
                    tv.vedtaksperiode_forkastet,
                    tv.opprettet,
                    tv.oppdatert
             FROM totrinnsvurdering tv
                      INNER JOIN person p on tv.person_ref = p.id
-                     LEFT JOIN utbetaling_id ui on ui.id = tv.utbetaling_id_ref
             WHERE p.fødselsnummer = :fodselsnummer
               AND tv.tilstand != 'GODKJENT'
               AND tv.vedtaksperiode_forkastet = false
@@ -90,7 +86,6 @@ class PgTotrinnsvurderingRepository(
             UPDATE totrinnsvurdering 
             SET saksbehandler       = :saksbehandler,
                 beslutter           = :beslutter,
-                utbetaling_id_ref   = (SELECT id from utbetaling_id ui WHERE ui.utbetaling_id = :utbetalingId),
                 tilstand            = CAST(:tilstand AS totrinnsvurdering_tilstand),
                 vedtaksperiode_forkastet = :vedtaksperiodeForkastet,
                 oppdatert           = :oppdatert
@@ -99,7 +94,6 @@ class PgTotrinnsvurderingRepository(
             "id" to totrinnsvurdering.id().value,
             "saksbehandler" to totrinnsvurdering.saksbehandler?.value,
             "beslutter" to totrinnsvurdering.beslutter?.value,
-            "utbetalingId" to null,
             "tilstand" to totrinnsvurdering.tilstand.name,
             "vedtaksperiodeForkastet" to totrinnsvurdering.vedtaksperiodeForkastet,
             "oppdatert" to totrinnsvurdering.oppdatert,

@@ -161,8 +161,8 @@ internal abstract class AbstractDatabaseTest {
         INSERT INTO utbetaling(id, status, opprettet, data, utbetaling_id_ref)
         VALUES (${sequence_number}, 'UTBETALT', now(), '{}'::json, ${sequence_number});
         
-        INSERT INTO totrinnsvurdering(id, vedtaksperiode_id, saksbehandler, beslutter, person_ref, utbetaling_id_ref, tilstand, opprettet, oppdatert)
-        VALUES (${sequence_number}, '${vedtaksperiode_id}', '${saksbehandler_oid}', '${saksbehandler_oid}', ${sequence_number}, ${sequence_number}, 'AVVENTER_SAKSBEHANDLER', now(), null);
+        INSERT INTO totrinnsvurdering(id, vedtaksperiode_id, saksbehandler, beslutter, person_ref, tilstand, opprettet, oppdatert)
+        VALUES (${sequence_number}, '${vedtaksperiode_id}', '${saksbehandler_oid}', '${saksbehandler_oid}', ${sequence_number}, 'AVVENTER_SAKSBEHANDLER', now(), null);
         
         INSERT INTO dialog(id, opprettet)
         VALUES (${periodehistorikk_dialog_id}, now());

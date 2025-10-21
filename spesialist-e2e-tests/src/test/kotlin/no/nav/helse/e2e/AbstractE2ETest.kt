@@ -1367,7 +1367,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
             INNER JOIN vedtak v on tv.person_ref = v.person_ref
             INNER JOIN oppgave o on v.id = o.vedtak_ref
             WHERE o.id = :oppgaveId
-            AND utbetaling_id_ref IS NULL
+            AND tv.tilstand = 'AVVENTER_SAKSBEHANDLER'
             """.trimIndent(),
             "oppgaveId" to oppgaveId,
         ) { it.boolean(1) } ?: throw IllegalStateException("Finner ikke oppgave med id $oppgaveId")
