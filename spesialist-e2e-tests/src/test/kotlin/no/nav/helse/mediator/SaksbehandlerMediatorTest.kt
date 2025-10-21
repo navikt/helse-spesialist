@@ -215,7 +215,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             beslutter = SaksbehandlerOid(UUID.randomUUID())
         )
 
-        if (ferdigstill) totrinnsvurdering.ferdigstill(UTBETALING_ID)
+        if (ferdigstill) totrinnsvurdering.ferdigstill()
 
         sessionContext.totrinnsvurderingRepository.lagre(totrinnsvurdering)
     }

@@ -77,7 +77,7 @@ class GodkjenningService(
 
                 if (totrinnsvurdering == null) return@oppgave
 
-                totrinnsvurdering.ferdigstill(this.utbetalingId)
+                totrinnsvurdering.ferdigstill()
 
                 if (godkjenningDTO.godkjent) {
                     val beslutter =

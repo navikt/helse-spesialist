@@ -680,7 +680,7 @@ abstract class AbstractDBIntegrationTest {
 
     protected fun TotrinnsvurderingKontekst.ferdigstillOgLagre(beslutter: SaksbehandlerWrapper): TotrinnsvurderingKontekst {
         totrinnsvurdering.settBeslutter(SaksbehandlerOid(beslutter.saksbehandler.id().value))
-        totrinnsvurdering.ferdigstill(utbetalingId = oppgave.utbetalingId)
+        totrinnsvurdering.ferdigstill()
         sessionContext.totrinnsvurderingRepository.lagre(totrinnsvurdering)
         return this
     }

@@ -28,7 +28,6 @@ class Totrinnsvurdering private constructor(
     val fødselsnummer: String,
     saksbehandler: SaksbehandlerOid?,
     beslutter: SaksbehandlerOid?,
-    utbetalingId: UUID?,
     val opprettet: LocalDateTime,
     oppdatert: LocalDateTime?,
     overstyringer: List<Overstyring> = emptyList(),
@@ -43,9 +42,6 @@ class Totrinnsvurdering private constructor(
         private set
 
     var beslutter: SaksbehandlerOid? = beslutter
-        private set
-
-    var utbetalingId: UUID? = utbetalingId
         private set
 
     var oppdatert: LocalDateTime? = oppdatert
@@ -94,9 +90,8 @@ class Totrinnsvurdering private constructor(
         tilstand = AVVENTER_SAKSBEHANDLER
     }
 
-    fun ferdigstill(utbetalingId: UUID) =
+    fun ferdigstill() =
         oppdatering {
-            this.utbetalingId = utbetalingId
             tilstand = GODKJENT
             this._overstyringer.forEach { it.ferdigstill() }
         }
@@ -124,7 +119,6 @@ class Totrinnsvurdering private constructor(
                     tilstand == other.tilstand &&
                     saksbehandler == other.saksbehandler &&
                     beslutter == other.beslutter &&
-                    utbetalingId == other.utbetalingId &&
                     opprettet.withNano(0) == other.opprettet.withNano(0) &&
                     oppdatert?.withNano(0) == other.oppdatert?.withNano(0)
             )
@@ -133,7 +127,6 @@ class Totrinnsvurdering private constructor(
         var result = tilstand.hashCode()
         result = 31 * result + (saksbehandler?.hashCode() ?: 0)
         result = 31 * result + (beslutter?.hashCode() ?: 0)
-        result = 31 * result + (utbetalingId?.hashCode() ?: 0)
         result = 31 * result + opprettet.hashCode()
         result = 31 * result + (oppdatert?.hashCode() ?: 0)
         return result
@@ -146,7 +139,6 @@ class Totrinnsvurdering private constructor(
                 fødselsnummer = fødselsnummer,
                 saksbehandler = null,
                 beslutter = null,
-                utbetalingId = null,
                 opprettet = LocalDateTime.now(),
                 oppdatert = null,
                 overstyringer = emptyList(),
@@ -159,7 +151,6 @@ class Totrinnsvurdering private constructor(
             fødselsnummer: String,
             saksbehandler: SaksbehandlerOid?,
             beslutter: SaksbehandlerOid?,
-            utbetalingId: UUID?,
             opprettet: LocalDateTime,
             oppdatert: LocalDateTime?,
             overstyringer: List<Overstyring>,
@@ -171,7 +162,6 @@ class Totrinnsvurdering private constructor(
                 fødselsnummer = fødselsnummer,
                 saksbehandler = saksbehandler,
                 beslutter = beslutter,
-                utbetalingId = utbetalingId,
                 opprettet = opprettet,
                 oppdatert = oppdatert,
                 overstyringer = overstyringer,

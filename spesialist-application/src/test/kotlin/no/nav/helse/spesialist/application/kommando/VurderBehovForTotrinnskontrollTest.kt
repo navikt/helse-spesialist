@@ -213,7 +213,6 @@ internal class VurderBehovForTotrinnskontrollTest {
             fødselsnummer = FØDSELSNUMMER,
             saksbehandler = saksbehandler,
             beslutter = beslutter,
-            utbetalingId = null,
             opprettet = LocalDateTime.now(),
             oppdatert = LocalDateTime.now(),
             overstyringer = emptyList(),

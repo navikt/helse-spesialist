@@ -25,11 +25,12 @@ class VurderBehovForAvviksvurdering(
     override fun execute(context: CommandContext): Boolean {
         if (sykepengegrunnlagsfakta !is Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidstaker) return true
         if (yrkesaktivitetstype == Yrkesaktivitetstype.SELVSTENDIG) return true
-        return behov(context)
+        return behov(context, sykepengegrunnlagsfakta)
     }
 
     override fun resume(context: CommandContext): Boolean {
-        val løsning = context.get<AvviksvurderingBehovLøsning>() ?: return behov(context)
+        if (sykepengegrunnlagsfakta !is Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidstaker) return true
+        val løsning = context.get<AvviksvurderingBehovLøsning>() ?: return behov(context, sykepengegrunnlagsfakta)
         val eksisterendeAvviksvurdering = avviksvurderingRepository.hentAvviksvurderingFor(løsning.avviksvurderingId)
 
         if (eksisterendeAvviksvurdering != null) {
@@ -52,11 +53,14 @@ class VurderBehovForAvviksvurdering(
         return true
     }
 
-    private fun behov(context: CommandContext): Boolean {
+    private fun behov(
+        context: CommandContext,
+        sykepengegrunnlagsfakta: Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidstaker,
+    ): Boolean {
         context.behov(
             Behov.Avviksvurdering(
                 omregnedeÅrsinntekter =
-                    (sykepengegrunnlagsfakta as Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidstaker).arbeidsgivere.map {
+                    sykepengegrunnlagsfakta.arbeidsgivere.map {
                         OmregnetÅrsinntekt(
                             arbeidsgiverreferanse = it.organisasjonsnummer,
                             beløp = it.omregnetÅrsinntekt,
