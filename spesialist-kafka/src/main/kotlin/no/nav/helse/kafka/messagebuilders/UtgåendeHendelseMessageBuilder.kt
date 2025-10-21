@@ -309,6 +309,7 @@ private fun Oppgave.toDetaljer(): Map<String, Any> =
 private fun AnnullertUtbetalingEvent.detaljer(): Map<String, Any> =
     listOfNotNull(
         "organisasjonsnummer" to organisasjonsnummer,
+        ("yrkesaktivitetstype" to "SELVSTENDIG").takeIf { organisasjonsnummer == "SELVSTENDIG" },
         "aktørId" to aktørId,
         "saksbehandler" to
             mapOf(
