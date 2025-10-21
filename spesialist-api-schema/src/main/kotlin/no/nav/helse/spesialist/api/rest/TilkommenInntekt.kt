@@ -9,7 +9,11 @@
 
 package no.nav.helse.spesialist.api.rest
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonClassDiscriminator
 import no.nav.helse.spesialist.api.graphql.schema.ApiDatoPeriode
 import java.math.BigDecimal
 import java.time.Instant
@@ -42,6 +46,9 @@ data class ApiTilkommenInntektInput(
     val ekskluderteUkedager: List<LocalDate>,
 )
 
+@OptIn(ExperimentalSerializationApi::class)
+@JsonClassDiscriminator("type")
+@JsonTypeInfo(use = JsonTypeInfo.Id.SIMPLE_NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @Serializable
 sealed interface ApiTilkommenInntektEvent {
     @Suppress("ktlint:standard:backing-property-naming")
@@ -91,6 +98,7 @@ sealed interface ApiTilkommenInntektEvent {
 }
 
 @Serializable
+@SerialName("ApiTilkommenInntektOpprettetEvent")
 data class ApiTilkommenInntektOpprettetEvent(
     override val metadata: ApiTilkommenInntektEvent.Metadata,
     val organisasjonsnummer: String,
@@ -100,17 +108,20 @@ data class ApiTilkommenInntektOpprettetEvent(
 ) : ApiTilkommenInntektEvent
 
 @Serializable
+@SerialName("ApiTilkommenInntektEndretEvent")
 data class ApiTilkommenInntektEndretEvent(
     override val metadata: ApiTilkommenInntektEvent.Metadata,
     val endringer: ApiTilkommenInntektEvent.Endringer,
 ) : ApiTilkommenInntektEvent
 
 @Serializable
+@SerialName("ApiTilkommenInntektFjernetEvent")
 data class ApiTilkommenInntektFjernetEvent(
     override val metadata: ApiTilkommenInntektEvent.Metadata,
 ) : ApiTilkommenInntektEvent
 
 @Serializable
+@SerialName("ApiTilkommenInntektGjenopprettetEvent")
 data class ApiTilkommenInntektGjenopprettetEvent(
     override val metadata: ApiTilkommenInntektEvent.Metadata,
     val endringer: ApiTilkommenInntektEvent.Endringer,
