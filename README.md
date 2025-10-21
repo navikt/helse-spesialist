@@ -95,6 +95,13 @@ bedre liv. Da gjør du følgende:
 - TODO: finn ut hvordan man veksler inn tokenet som skrives ut under oppstart av LocalApp til et bearer token, og sett
   det som header i playgrounden
 
+## Kjøre lokal Swagger UI
+
+- Kjør opp [LocalApp.kt](spesialist-bootstrap/src/test/kotlin/no/nav/helse/spesialist/bootstrap/LocalApp.kt) sin main-metode, det starter en lokal server.
+- Gå til http://localhost:8080/api/swagger i en nettleser
+- Søk etter "OAuth2-token" i oppstartsloggen, kopier tokenet som står under og lim det inn under "Authorize"-knappen i Swagger UI
+- Requests kan nå kjøres mot lokal instans via "Try it out"
+
 ## Kjøre tester raskere
 
 - Finn filen .testcontainers.properties, ligger ofte på hjemmeområdet ditt, eksempelvis `~/.testcontainers.properties`
