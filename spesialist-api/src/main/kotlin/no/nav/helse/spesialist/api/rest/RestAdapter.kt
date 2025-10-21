@@ -13,6 +13,7 @@ import no.nav.helse.spesialist.api.graphql.ContextFactory.Companion.gruppeUuider
 import no.nav.helse.spesialist.api.graphql.ContextFactory.Companion.tilSaksbehandler
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.loggThrowable
+import no.nav.helse.spesialist.application.logg.loggWarnThrowable
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
@@ -97,7 +98,11 @@ class RestAdapter(
                 }.also { outbox.sendAlle(meldingPubliserer) }
         }.onFailure { cause ->
             val statusCode = (cause as? HttpException)?.statusCode ?: HttpStatusCode.InternalServerError
-            loggThrowable("Returnerer HTTP ${statusCode.value}", cause)
+            if (statusCode.value in 400..<500) {
+                loggWarnThrowable("Returnerer HTTP ${statusCode.value}", cause)
+            } else {
+                loggThrowable("Returnerer HTTP ${statusCode.value}", cause)
+            }
             call.respond(statusCode, "{ \"httpStatusCode\": ${statusCode.value} }")
         }.onSuccess { result ->
             call.response.status(result.statusCode)

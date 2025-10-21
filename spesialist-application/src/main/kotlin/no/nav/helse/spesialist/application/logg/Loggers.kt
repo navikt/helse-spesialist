@@ -47,3 +47,28 @@ inline fun <reified T> T.loggThrowable(
 ) {
     loggThrowable(message, "", throwable)
 }
+
+inline fun <reified T> T.loggWarnThrowable(
+    message: String,
+    securelogDetails: String = "",
+    throwable: Throwable,
+) {
+    logg.warn(message)
+    sikkerlogg.warn(
+        buildString {
+            append(message)
+            if (securelogDetails.isNotEmpty()) {
+                append(" - ")
+                append(securelogDetails)
+            }
+        },
+        throwable,
+    )
+}
+
+inline fun <reified T> T.loggWarnThrowable(
+    message: String,
+    throwable: Throwable,
+) {
+    loggWarnThrowable(message, "", throwable)
+}
