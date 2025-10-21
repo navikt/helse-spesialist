@@ -43,7 +43,6 @@ import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutationHan
 import no.nav.helse.spesialist.api.graphql.mutation.VarselMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutationHandler
 import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQueryHandler
-import no.nav.helse.spesialist.api.graphql.query.DokumentQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.OppgaverQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.OpptegnelseQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
@@ -72,7 +71,6 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
         mockk<StansAutomatiskBehandlingSaksbehandlerDao>(relaxed = true)
     private val godkjenninghåndterer = mockk<Godkjenninghåndterer>(relaxed = true)
     private val personhåndterer = mockk<Personhåndterer>(relaxed = true)
-    protected val dokumenthåndterer = mockk<Dokumenthåndterer>(relaxed = true)
     private val stansAutomatiskBehandlinghåndterer = mockk<StansAutomatiskBehandlinghåndterer>(relaxed = true)
 
     protected val spleisClient = mockk<SpleisClient>(relaxed = true)
@@ -132,11 +130,6 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                     ),
                     opptegnelse = OpptegnelseQueryHandler(
                         saksbehandlerMediator = saksbehandlerMediator,
-                    ),
-                    dokument = DokumentQueryHandler(
-                        personApiDao = personApiDao,
-                        egenAnsattApiDao = egenAnsattApiDao,
-                        dokumenthåndterer = dokumenthåndterer,
                     ),
                 ),
                 mutationHandlers = SpesialistSchema.MutationHandlers(

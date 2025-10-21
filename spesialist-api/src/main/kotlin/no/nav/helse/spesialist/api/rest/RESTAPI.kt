@@ -11,7 +11,7 @@ import io.ktor.server.auth.authenticate
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.Routing
 import io.ktor.server.routing.route
-import no.nav.helse.spesialist.api.Dokumenthåndterer
+import no.nav.helse.mediator.dokument.DokumentMediator
 import no.nav.helse.spesialist.api.rest.dokument.GetInntektsmeldingBehandler
 import no.nav.helse.spesialist.api.rest.dokument.GetSoknadBehandler
 import no.nav.helse.spesialist.api.rest.tilkommeninntekt.GetTilkomneInntektskilderForPersonBehandler
@@ -23,7 +23,7 @@ import no.nav.helse.spesialist.api.rest.tilkommeninntekt.PostTilkomneInntekterBe
 fun Routing.restRoutes(
     restAdapter: RestAdapter,
     eksponerOpenApi: Boolean,
-    dokumenthåndterer: Dokumenthåndterer,
+    dokumentMediator: DokumentMediator,
 ) {
     route("/api") {
         if (eksponerOpenApi) {
@@ -41,8 +41,8 @@ fun Routing.restRoutes(
 
             post(PostOpphevStansBehandler(), restAdapter)
 
-            get(GetSoknadBehandler(dokumenthåndterer = dokumenthåndterer), restAdapter)
-            get(GetInntektsmeldingBehandler(dokumenthåndterer = dokumenthåndterer), restAdapter)
+            get(GetSoknadBehandler(dokumentMediator = dokumentMediator), restAdapter)
+            get(GetInntektsmeldingBehandler(dokumentMediator = dokumentMediator), restAdapter)
 
             get(GetTilkomneInntektskilderForPersonBehandler(), restAdapter)
             post(PostTilkomneInntekterBehandler(), restAdapter)

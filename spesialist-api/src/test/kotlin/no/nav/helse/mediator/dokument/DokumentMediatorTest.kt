@@ -13,6 +13,7 @@ import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.util.UUID
 
 internal class DokumentMediatorTest {
@@ -50,7 +51,7 @@ internal class DokumentMediatorTest {
     @Test
     fun `Prøver å hente dokumentet {retries + 1} ganger`() {
         every { dokumentDao.hent(any(), any()) } returns null
-        mediator.håndter(FNR, DOKUMENTID, DOKUMENTTYPE)
+        assertThrows<RuntimeException> { mediator.håndter(FNR, DOKUMENTID, DOKUMENTTYPE) }
         verify(exactly = RETRIES + 1) {
             dokumentDao.hent(any(), any())
         }
@@ -59,7 +60,7 @@ internal class DokumentMediatorTest {
     @Test
     fun `Sender behov dersom dokumentet ikke finnes i databasen`() {
         every { dokumentDao.hent(any(), any()) } returns null
-        mediator.håndter(FNR, DOKUMENTID, DOKUMENTTYPE)
+        assertThrows<RuntimeException> { mediator.håndter(FNR, DOKUMENTID, DOKUMENTTYPE) }
         assertEquals(1, meldingPubliserer.antallMeldinger)
     }
 
@@ -68,20 +69,6 @@ internal class DokumentMediatorTest {
         every { dokumentDao.hent(any(), any()) } returns objectMapper.createObjectNode()
         mediator.håndter(FNR, DOKUMENTID, DOKUMENTTYPE)
         assertEquals(1, meldingPubliserer.antallMeldinger)
-    }
-
-    @Test
-    fun `Sender nytt behov dersom dokumentet i databasen ikke har 404 error`() {
-        every { dokumentDao.hent(any(), any()) } returns objectMapper.createObjectNode().put("error", 403)
-        mediator.håndter(FNR, DOKUMENTID, DOKUMENTTYPE)
-        assertEquals(1, meldingPubliserer.antallMeldinger)
-    }
-
-    @Test
-    fun `Sender ikke nytt behov dersom dokumentet i databasen har 404 error`() {
-        every { dokumentDao.hent(any(), any()) } returns objectMapper.createObjectNode().put("error", 404)
-        mediator.håndter(FNR, DOKUMENTID, DOKUMENTTYPE)
-        assertEquals(0, meldingPubliserer.antallMeldinger)
     }
 
     @Test

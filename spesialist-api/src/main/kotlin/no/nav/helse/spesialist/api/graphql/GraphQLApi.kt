@@ -17,9 +17,9 @@ import io.ktor.server.routing.routing
 import no.nav.helse.db.Daos
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.mediator.SaksbehandlerMediator
+import no.nav.helse.mediator.dokument.DokumentMediator
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.spesialist.api.ApiModule
-import no.nav.helse.spesialist.api.Dokumenthåndterer
 import no.nav.helse.spesialist.api.Godkjenninghåndterer
 import no.nav.helse.spesialist.api.GraphQLCallLogging
 import no.nav.helse.spesialist.api.GraphQLMetrikker
@@ -45,7 +45,6 @@ import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutationHan
 import no.nav.helse.spesialist.api.graphql.mutation.VarselMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutationHandler
 import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQueryHandler
-import no.nav.helse.spesialist.api.graphql.query.DokumentQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.OppgaverQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.OpptegnelseQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.PersonQueryHandler
@@ -68,7 +67,7 @@ fun kobleOppApi(
     tilgangsgruppeUuider: TilgangsgruppeUuider,
     spesialistSchema: SpesialistSchema,
     restAdapter: RestAdapter,
-    dokumenthåndterer: Dokumenthåndterer,
+    dokumentMediator: DokumentMediator,
 ) {
     ktorApplication.installPlugins(apiModuleConfiguration.eksponerOpenApi)
     ktorApplication.azureAdAppAuthentication(apiModuleConfiguration)
@@ -93,7 +92,7 @@ fun kobleOppApi(
                 queryHandler(graphQLPlugin.server)
             }
         }
-        restRoutes(restAdapter, apiModuleConfiguration.eksponerOpenApi, dokumenthåndterer)
+        restRoutes(restAdapter, apiModuleConfiguration.eksponerOpenApi, dokumentMediator)
     }
 }
 
@@ -107,7 +106,6 @@ fun lagSchemaMedResolversOgHandlers(
     reservasjonshenter: Reservasjonshenter,
     sessionFactory: SessionFactory,
     behandlingstatistikk: IBehandlingsstatistikkService,
-    dokumenthåndterer: Dokumenthåndterer,
     godkjenninghåndterer: Godkjenninghåndterer,
 ): SpesialistSchema =
     SpesialistSchema(
@@ -153,12 +151,6 @@ fun lagSchemaMedResolversOgHandlers(
                 opptegnelse =
                     OpptegnelseQueryHandler(
                         saksbehandlerMediator = saksbehandlerMediator,
-                    ),
-                dokument =
-                    DokumentQueryHandler(
-                        personApiDao = daos.personApiDao,
-                        egenAnsattApiDao = daos.egenAnsattApiDao,
-                        dokumenthåndterer = dokumenthåndterer,
                     ),
             ),
         mutationHandlers =

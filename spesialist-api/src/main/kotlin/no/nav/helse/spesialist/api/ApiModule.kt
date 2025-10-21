@@ -93,7 +93,6 @@ class ApiModule(
             reservasjonshenter = reservasjonshenter,
             sessionFactory = sessionFactory,
             behandlingstatistikk = BehandlingsstatistikkService(behandlingsstatistikkDao = daos.behandlingsstatistikkDao),
-            dokumenthåndterer = DokumentMediator(daos.dokumentDao, meldingPubliserer),
             godkjenninghåndterer =
                 GodkjenningService(
                     oppgaveDao = daos.oppgaveDao,
@@ -112,7 +111,7 @@ class ApiModule(
             tilgangsgruppeUuider = tilgangsgruppeUuider,
             spesialistSchema = spesialistSchema,
             restAdapter = restAdapter,
-            dokumenthåndterer = dokumentMediator,
+            dokumentMediator = dokumentMediator,
         )
     }
 }

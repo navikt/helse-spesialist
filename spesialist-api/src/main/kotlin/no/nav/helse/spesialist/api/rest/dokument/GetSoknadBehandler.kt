@@ -4,7 +4,6 @@ import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.dokument.DokumentMediator
-import no.nav.helse.spesialist.api.Dokumenthåndterer
 import no.nav.helse.spesialist.api.rest.ApiSoknad
 import no.nav.helse.spesialist.api.rest.GetBehandler
 import no.nav.helse.spesialist.api.rest.HttpNotFound
@@ -15,7 +14,7 @@ import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 
 class GetSoknadBehandler(
-    private val dokumenthåndterer: Dokumenthåndterer,
+    private val dokumentMediator: DokumentMediator,
 ) : GetBehandler<Personer.AktørId.Dokumenter.DokumentId.Soknad, ApiSoknad> {
     override fun behandle(
         resource: Personer.AktørId.Dokumenter.DokumentId.Soknad,
@@ -27,7 +26,7 @@ class GetSoknadBehandler(
             transaksjon.legacyPersonRepository.finnFødselsnumre(aktørId = resource.parent.parent.parent.aktørId).toSet()
 
         val dokument =
-            dokumenthåndterer.håndter(
+            dokumentMediator.håndter(
                 dokumentDao = transaksjon.dokumentDao,
                 fødselsnummer = fødselsnumre.first(),
                 dokumentId = resource.parent.dokumentId,
@@ -57,12 +56,6 @@ class GetSoknadBehandler(
                 code(HttpStatusCode.OK) {
                     description = "Sykepengesøknad med dokumentId."
                     body<ApiSoknad>()
-                }
-                code(HttpStatusCode.NotFound) {
-                    description = "Fant ikke søknad eller saksbehandler mangler tilgang til personen som eier søknaden."
-                }
-                code(HttpStatusCode.RequestTimeout) {
-                    description = "Henting av søknad tok for lang tid."
                 }
             }
         }

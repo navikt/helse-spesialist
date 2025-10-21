@@ -6,22 +6,20 @@ import kotlinx.coroutines.runBlocking
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.db.DokumentDao
 import no.nav.helse.modell.melding.HentDokument
-import no.nav.helse.spesialist.api.Dokumenthåndterer
-import no.nav.helse.spesialist.api.objectMapper
 import java.util.UUID
 
 class DokumentMediator(
     private val dokumentDao: DokumentDao,
     private val publiserer: MeldingPubliserer,
     private val retries: Int = 50,
-) : Dokumenthåndterer {
-    override fun håndter(
+) {
+    fun håndter(
         fødselsnummer: String,
         dokumentId: UUID,
         dokumentType: String,
     ): JsonNode = håndter(dokumentDao, fødselsnummer, dokumentId, dokumentType)
 
-    override fun håndter(
+    fun håndter(
         dokumentDao: DokumentDao,
         fødselsnummer: String,
         dokumentId: UUID,
@@ -51,7 +49,7 @@ class DokumentMediator(
                 delay(100)
                 dokumentDao.hent(fødselsnummer, dokumentId)?.let { return@runBlocking it }
             }
-            objectMapper.createObjectNode().put("error", 408) // Timeout error
+            error("Fant ikke dokument med id $dokumentId")
         }
 
     private fun sendHentDokument(

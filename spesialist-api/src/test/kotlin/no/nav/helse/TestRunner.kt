@@ -16,9 +16,9 @@ import io.mockk.mockk
 import no.nav.helse.db.Daos
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.mediator.SaksbehandlerMediator
+import no.nav.helse.mediator.dokument.DokumentMediator
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.spesialist.api.ApiModule
-import no.nav.helse.spesialist.api.Dokumenthåndterer
 import no.nav.helse.spesialist.api.Godkjenninghåndterer
 import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
@@ -83,7 +83,7 @@ object TestRunner {
             apiOppgaveService = mockk(relaxed = true),
             godkjenninghåndterer = mockk(relaxed = true),
             personhåndterer = mockk(relaxed = true),
-            dokumenthåndterer = mockk(relaxed = true),
+            dokumentMediator = mockk(relaxed = true),
             stansAutomatiskBehandlinghåndterer = mockk(relaxed = true),
             behandlingstatistikk = mockk(relaxed = true),
             snapshothenter = mockk(relaxed = true),
@@ -104,7 +104,6 @@ object TestRunner {
                         reservasjonshenter = avhengigheter.reservasjonshenter,
                         sessionFactory = avhengigheter.sessionFactory,
                         behandlingstatistikk = avhengigheter.behandlingstatistikk,
-                        dokumenthåndterer = avhengigheter.dokumenthåndterer,
                         godkjenninghåndterer = avhengigheter.godkjenninghåndterer,
                     )
                 kobleOppApi(
@@ -113,7 +112,7 @@ object TestRunner {
                     tilgangsgruppeUuider = avhengigheter.tilgangsgruppeUuider,
                     spesialistSchema = spesialistSchema,
                     restAdapter = avhengigheter.restAdapter,
-                    dokumenthåndterer = avhengigheter.dokumenthåndterer
+                    dokumentMediator = avhengigheter.dokumentMediator,
                 )
             }
 
@@ -143,7 +142,7 @@ object TestRunner {
         val apiOppgaveService: ApiOppgaveService,
         val godkjenninghåndterer: Godkjenninghåndterer,
         val personhåndterer: Personhåndterer,
-        val dokumenthåndterer: Dokumenthåndterer,
+        val dokumentMediator: DokumentMediator,
         val stansAutomatiskBehandlinghåndterer: StansAutomatiskBehandlinghåndterer,
         val behandlingstatistikk: IBehandlingsstatistikkService,
         val snapshothenter: Snapshothenter,
