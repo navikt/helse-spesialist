@@ -179,6 +179,23 @@ abstract class AbstractE2EIntegrationTest {
         assertEquals(expectedTilstand, actualTilstand)
     }
 
+    protected fun assertOppgavestatus(expectedStatus: String) {
+        val actualStatus = sessionOf(E2ETestApplikasjon.dbModule.dataSource, strict = true).use { session ->
+            session.run(
+                asSQL(
+                    """
+                        SELECT o.status
+                        FROM oppgave o, vedtak v
+                        WHERE o.vedtak_ref = v.id
+                        AND v.vedtaksperiode_id = :vedtaksperiode_id
+                        """.trimIndent(),
+                    "vedtaksperiode_id" to førsteVedtaksperiode().vedtaksperiodeId,
+                ).map { it.string("status") }.asSingle
+            )
+        }
+        assertEquals(expectedStatus, actualStatus)
+    }
+
     protected fun assertSykepengegrunnlagfakta() {
         val vedtakFattet = testRapid.meldingslogg(testContext.person.fødselsnummer)
             .find { it["@event_name"].asText() == "vedtak_fattet" }

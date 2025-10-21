@@ -63,12 +63,12 @@ class SpeilPersonReceiver(
         hentOppdatertPerson()
     }
 
-    fun saksbehandlerFatterVedtak() {
+    fun saksbehandlerFatterVedtak(begrunnelse: String = "Fattet vedtak") {
         callGraphQL(
             operationName = "FattVedtak",
             variables = mapOf(
                 "oppgavereferanse" to getOppgaveId(),
-                "begrunnelse" to "Fattet vedtak",
+                "begrunnelse" to begrunnelse,
             )
         )
         hentOppdatertPerson()
