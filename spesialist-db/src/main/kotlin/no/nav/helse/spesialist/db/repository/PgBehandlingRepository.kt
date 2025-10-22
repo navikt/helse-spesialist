@@ -15,8 +15,10 @@ class PgBehandlingRepository(
     override fun finn(id: SpleisBehandlingId): Behandling? =
         asSQL(
             """
-            SELECT spleis_behandling_id, tags
-            FROM behandling 
+            SELECT spleis_behandling_id, tags, p.fødselsnummer
+            FROM behandling b
+            INNER JOIN vedtak v on v.vedtaksperiode_id = b.vedtaksperiode_id
+            INNER JOIN person p on p.id = v.person_ref
             WHERE spleis_behandling_id = :spleis_behandling_id
         """,
             "spleis_behandling_id" to id.value,
@@ -24,6 +26,7 @@ class PgBehandlingRepository(
             Behandling.fraLagring(
                 id = SpleisBehandlingId(row.uuid("spleis_behandling_id")),
                 tags = row.array<String>("tags").toSet(),
+                fødselsnummer = row.string("fødselsnummer"),
             )
         }
 }

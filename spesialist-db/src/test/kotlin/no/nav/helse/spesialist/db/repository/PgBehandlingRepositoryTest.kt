@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.db.repository
 
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import org.junit.jupiter.api.Test
 import java.util.UUID
 import kotlin.test.assertEquals
@@ -14,9 +15,14 @@ class PgBehandlingRepositoryTest: AbstractDBIntegrationTest() {
         // given
         val spleisBehandlingId = UUID.randomUUID()
         val tags = listOf("FOOBAR")
-        opprettPerson()
+        val fødselsnummer = lagFødselsnummer()
+        opprettPerson(fødselsnummer = fødselsnummer)
         opprettArbeidsgiver()
-        opprettBehandling(spleisBehandlingId = spleisBehandlingId, tags = tags)
+        opprettBehandling(
+            spleisBehandlingId = spleisBehandlingId,
+            tags = tags,
+            fødselsnummer = fødselsnummer
+        )
 
         // when
         val funnet = repository.finn(SpleisBehandlingId(spleisBehandlingId))
@@ -25,5 +31,6 @@ class PgBehandlingRepositoryTest: AbstractDBIntegrationTest() {
         assertNotNull(funnet)
         assertEquals(spleisBehandlingId, funnet.id.value)
         assertEquals(tags.toSet(), funnet.tags)
+        assertEquals(fødselsnummer, funnet.fødselsnummer)
     }
 }

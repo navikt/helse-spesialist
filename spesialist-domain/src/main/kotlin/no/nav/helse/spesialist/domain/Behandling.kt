@@ -18,6 +18,7 @@ enum class Tag {
 class Behandling private constructor(
     val id: SpleisBehandlingId,
     val tags: Set<String>,
+    val fødselsnummer: String,
 ) : Entity<SpleisBehandlingId>(id) {
     fun utfall(): Utfall {
         val tags =
@@ -37,6 +38,7 @@ class Behandling private constructor(
         fun fraLagring(
             id: SpleisBehandlingId,
             tags: Set<String>,
-        ) = Behandling(id, tags)
+            fødselsnummer: String,
+        ) = Behandling(id, tags, fødselsnummer)
     }
 }

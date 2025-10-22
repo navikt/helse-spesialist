@@ -343,8 +343,9 @@ abstract class AbstractDBIntegrationTest {
         fom: LocalDate = 1 jan 2018,
         tom: LocalDate = 31 jan 2018,
         tags: List<String>? = emptyList(),
+        fødselsnummer: String = FNR,
     ) {
-        pgLegacyPersonRepository.brukPersonHvisFinnes(FNR) {
+        pgLegacyPersonRepository.brukPersonHvisFinnes(fødselsnummer) {
             this.nySpleisBehandling(
                 SpleisBehandling(
                     ORGNUMMER,
