@@ -10,7 +10,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
-import no.nav.helse.modell.person.vedtaksperiode.Varsel
+import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel
 import no.nav.helse.modell.vedtaksperiode.NyeVarsler
 
 class NyeVarslerRiver(
@@ -57,7 +57,7 @@ class NyeVarslerRiver(
     }
 
     private companion object {
-        private fun JsonNode.varsler(): List<Varsel> =
+        private fun JsonNode.varsler(): List<LegacyVarsel> =
             filter { it["nivå"].asText() == "VARSEL" && it["varselkode"]?.asText() != null }
                 .filter { it["kontekster"].any { kontekst -> kontekst["konteksttype"].asText() == "Vedtaksperiode" } }
                 .map { jsonNode ->
@@ -65,7 +65,7 @@ class NyeVarslerRiver(
                         jsonNode["kontekster"]
                             .find { it["konteksttype"].asText() == "Vedtaksperiode" }!!["kontekstmap"]["vedtaksperiodeId"]
                             .asUUID()
-                    Varsel(
+                    LegacyVarsel(
                         jsonNode["id"].asUUID(),
                         jsonNode["varselkode"].asText(),
                         jsonNode["tidsstempel"].asLocalDateTime(),

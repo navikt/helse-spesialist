@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
-class VarselMutationHandlerTest : AbstractGraphQLApiTest() {
+class LegacyVarselMutationHandlerTest : AbstractGraphQLApiTest() {
 
     @Test
     fun `sett status VURDERT`() {

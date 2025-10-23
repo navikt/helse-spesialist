@@ -10,7 +10,7 @@ import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class VarselTest {
+internal class LegacyVarselTest {
 
     @ParameterizedTest
     @EnumSource(value = VarselDbDto.Varselstatus::class, names = ["AKTIV"], mode = EnumSource.Mode.EXCLUDE)

@@ -6,14 +6,14 @@ import no.nav.helse.mediator.Kommandostarter
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.Personmelding
 import no.nav.helse.modell.person.LegacyPerson
-import no.nav.helse.modell.person.vedtaksperiode.Varsel
+import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel
 import java.time.LocalDateTime
 import java.util.UUID
 
 class NyeVarsler(
     override val id: UUID,
     private val fødselsnummer: String,
-    internal val varsler: List<Varsel>,
+    internal val varsler: List<LegacyVarsel>,
     private val json: String,
 ) : Personmelding {
     constructor(jsonNode: JsonNode) : this(
@@ -34,7 +34,7 @@ class NyeVarsler(
     ) = person.nyeVarsler(varsler)
 
     private companion object {
-        private fun JsonNode.varsler(): List<Varsel> =
+        private fun JsonNode.varsler(): List<LegacyVarsel> =
             filter { it["nivå"].asText() == "VARSEL" && it["varselkode"]?.asText() != null }
                 .filter { it["kontekster"].any { kontekst -> kontekst["konteksttype"].asText() == "Vedtaksperiode" } }
                 .map { jsonNode ->
@@ -42,7 +42,7 @@ class NyeVarsler(
                         jsonNode["kontekster"]
                             .find { it["konteksttype"].asText() == "Vedtaksperiode" }!!["kontekstmap"]["vedtaksperiodeId"]
                             .asUUID()
-                    Varsel(
+                    LegacyVarsel(
                         jsonNode["id"].asUUID(),
                         jsonNode["varselkode"].asText(),
                         jsonNode["tidsstempel"].asText().let(LocalDateTime::parse),

@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.db.dao
 
 import no.nav.helse.db.VarselDao
-import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status
+import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Status
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.QueryRunner

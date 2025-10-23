@@ -1,8 +1,8 @@
 package no.nav.helse.modell.person.vedtaksperiode
 
 import io.mockk.mockk
-import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.AKTIV
-import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.VURDERT
+import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Status.AKTIV
+import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Status.VURDERT
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_EX_1
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
@@ -47,7 +47,7 @@ internal class LegacyBehandlingTest {
     fun `behandling har aktive varsler`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val behandling = behandling(vedtaksperiodeId = vedtaksperiodeId)
-        behandling.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId))
+        behandling.håndterNyttVarsel(LegacyVarsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId))
         assertTrue(behandling.forhindrerAutomatisering())
     }
 
@@ -55,7 +55,7 @@ internal class LegacyBehandlingTest {
     fun `behandling har kun gosysvarsel`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val behandling = behandling(vedtaksperiodeId = vedtaksperiodeId)
-        behandling.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId))
+        behandling.håndterNyttVarsel(LegacyVarsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId))
         assertTrue(behandling.harKunGosysvarsel())
     }
 
@@ -70,8 +70,8 @@ internal class LegacyBehandlingTest {
     fun `behandling har flere varsler og dermed ikke kun gosysvarsel`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val behandling = behandling(vedtaksperiodeId = vedtaksperiodeId)
-        behandling.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId))
-        behandling.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_2", LocalDateTime.now(), vedtaksperiodeId))
+        behandling.håndterNyttVarsel(LegacyVarsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId))
+        behandling.håndterNyttVarsel(LegacyVarsel(UUID.randomUUID(), "SB_EX_2", LocalDateTime.now(), vedtaksperiodeId))
         assertFalse(behandling.harKunGosysvarsel())
     }
 
@@ -87,10 +87,10 @@ internal class LegacyBehandlingTest {
         val vedtaksperiodeId = UUID.randomUUID()
         val behandling = behandling(vedtaksperiodeId = vedtaksperiodeId)
         behandling.håndterNyttVarsel(
-            Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId, VURDERT),
+            LegacyVarsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId, VURDERT),
         )
         behandling.håndterNyttVarsel(
-            Varsel(UUID.randomUUID(), "SB_EX_2", LocalDateTime.now(), vedtaksperiodeId, VURDERT),
+            LegacyVarsel(UUID.randomUUID(), "SB_EX_2", LocalDateTime.now(), vedtaksperiodeId, VURDERT),
         )
         assertTrue(behandling.forhindrerAutomatisering())
     }
@@ -99,7 +99,7 @@ internal class LegacyBehandlingTest {
     fun `deaktiverer enkelt varsel`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val behandling = behandling(vedtaksperiodeId = vedtaksperiodeId)
-        val varsel = Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId)
+        val varsel = LegacyVarsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId)
         behandling.håndterNyttVarsel(varsel)
         behandling.håndterDeaktivertVarsel(varsel)
         behandling.assertVarsler(0, VarselStatusDto.AKTIV, SB_EX_1)
@@ -110,7 +110,7 @@ internal class LegacyBehandlingTest {
     fun `deaktiverer enkelt varsel basert på varselkode`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val behandling = behandling(vedtaksperiodeId = vedtaksperiodeId)
-        val varsel = Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId)
+        val varsel = LegacyVarsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId)
         behandling.håndterNyttVarsel(varsel)
         behandling.deaktiverVarsel("SB_EX_1")
         behandling.assertVarsler(0, VarselStatusDto.AKTIV, SB_EX_1)
@@ -122,8 +122,8 @@ internal class LegacyBehandlingTest {
         val vedtaksperiodeId = UUID.randomUUID()
         val varselId = UUID.randomUUID()
         val behandling = behandling(vedtaksperiodeId = vedtaksperiodeId)
-        behandling.håndterNyttVarsel(Varsel(UUID.randomUUID(), "RV_IV_2", LocalDateTime.now(), vedtaksperiodeId))
-        behandling.håndterNyttVarsel(Varsel(varselId, "RV_IV_2", LocalDateTime.now(), vedtaksperiodeId))
+        behandling.håndterNyttVarsel(LegacyVarsel(UUID.randomUUID(), "RV_IV_2", LocalDateTime.now(), vedtaksperiodeId))
+        behandling.håndterNyttVarsel(LegacyVarsel(varselId, "RV_IV_2", LocalDateTime.now(), vedtaksperiodeId))
         behandling.assertVarsler(1, VarselStatusDto.AKTIV, "RV_IV_2")
     }
 
@@ -131,8 +131,8 @@ internal class LegacyBehandlingTest {
     fun `Lagrer kun én utgave av et aktivt varsel`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val behandling = behandling(vedtaksperiodeId = vedtaksperiodeId)
-        behandling.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId))
-        behandling.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId))
+        behandling.håndterNyttVarsel(LegacyVarsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId))
+        behandling.håndterNyttVarsel(LegacyVarsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId))
 
         behandling.assertVarsler(1, VarselStatusDto.AKTIV, SB_EX_1)
     }
@@ -141,12 +141,12 @@ internal class LegacyBehandlingTest {
     fun `kan reaktivere deaktivert varsel`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val behandling = behandling(vedtaksperiodeId = vedtaksperiodeId)
-        val varsel = Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId)
+        val varsel = LegacyVarsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId)
         behandling.håndterNyttVarsel(varsel)
         behandling.håndterDeaktivertVarsel(varsel)
         behandling.assertVarsler(1, VarselStatusDto.INAKTIV, SB_EX_1)
 
-        behandling.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId))
+        behandling.håndterNyttVarsel(LegacyVarsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId))
 
         behandling.assertVarsler(0, VarselStatusDto.INAKTIV, SB_EX_1)
         behandling.assertVarsler(1, VarselStatusDto.AKTIV, SB_EX_1)
@@ -156,7 +156,7 @@ internal class LegacyBehandlingTest {
     fun `kan deaktivere reaktivert varsel`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val behandling = behandling(vedtaksperiodeId = vedtaksperiodeId)
-        val varsel = Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId)
+        val varsel = LegacyVarsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId)
         behandling.håndterNyttVarsel(varsel)
         behandling.assertVarsler(1, VarselStatusDto.AKTIV, SB_EX_1)
         behandling.håndterDeaktivertVarsel(varsel)
@@ -194,7 +194,7 @@ internal class LegacyBehandlingTest {
         val behandlingId = UUID.randomUUID()
         val behandling = behandling(vedtaksperiodeId = vedtaksperiodeId, behandlingId = behandlingId)
         behandling.håndterVedtakFattet()
-        val varsel = Varsel(UUID.randomUUID(), "RV_IM_1", LocalDateTime.now(), vedtaksperiodeId)
+        val varsel = LegacyVarsel(UUID.randomUUID(), "RV_IM_1", LocalDateTime.now(), vedtaksperiodeId)
         behandling.håndterNyttVarsel(varsel)
         behandling.assertVarsler(1, VarselStatusDto.AKTIV, "RV_IM_1")
     }
@@ -203,7 +203,7 @@ internal class LegacyBehandlingTest {
     fun `Skal kunne opprette varsel på behandling`() {
         val vedtaksperiodeId = UUID.randomUUID()
         val behandling = behandling(vedtaksperiodeId = vedtaksperiodeId)
-        behandling.håndterNyttVarsel(Varsel(UUID.randomUUID(), SB_EX_1.name, LocalDateTime.now(), vedtaksperiodeId))
+        behandling.håndterNyttVarsel(LegacyVarsel(UUID.randomUUID(), SB_EX_1.name, LocalDateTime.now(), vedtaksperiodeId))
         behandling.assertVarsler(1, VarselStatusDto.AKTIV, SB_EX_1)
     }
 
@@ -326,7 +326,7 @@ internal class LegacyBehandlingTest {
         val behandling = behandlingMedVarsel(1 feb 2018, 28 feb 2018, vedtaksperiodeId, "SB_EX_1")
         assertTrue(listOf(behandling).harÅpenGosysOppgave(vedtaksperiodeId))
 
-        behandling.håndterNyttVarsel(Varsel(UUID.randomUUID(), "RV_MV_1", LocalDateTime.now(), vedtaksperiodeId))
+        behandling.håndterNyttVarsel(LegacyVarsel(UUID.randomUUID(), "RV_MV_1", LocalDateTime.now(), vedtaksperiodeId))
         assertFalse(listOf(behandling).harÅpenGosysOppgave(vedtaksperiodeId))
     }
 
@@ -512,7 +512,7 @@ internal class LegacyBehandlingTest {
 
         val varselId = UUID.randomUUID()
         val opprettet = LocalDateTime.now()
-        val varsel = Varsel(varselId, "SB_EX_1", opprettet, vedtaksperiodeId, AKTIV)
+        val varsel = LegacyVarsel(varselId, "SB_EX_1", opprettet, vedtaksperiodeId, AKTIV)
         legacyBehandling.håndterNyttVarsel(varsel)
         val dto = legacyBehandling.toDto()
 
@@ -550,7 +550,7 @@ internal class LegacyBehandlingTest {
         varselkode: String = "SB_EX_1",
     ): LegacyBehandling =
         behandling(vedtaksperiodeId = vedtaksperiodeId, fom = fom, tom = tom).also {
-            it.håndterNyttVarsel(Varsel(UUID.randomUUID(), varselkode, LocalDateTime.now(), vedtaksperiodeId))
+            it.håndterNyttVarsel(LegacyVarsel(UUID.randomUUID(), varselkode, LocalDateTime.now(), vedtaksperiodeId))
         }
 
     private fun behandling(

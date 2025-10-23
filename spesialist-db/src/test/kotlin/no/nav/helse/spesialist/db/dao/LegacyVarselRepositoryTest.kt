@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class VarselRepositoryTest : AbstractDBIntegrationTest() {
+internal class LegacyVarselRepositoryTest : AbstractDBIntegrationTest() {
     private val varselRepository  = VarselRepository(
         varselDao = daos.varselDao,
         definisjonDao = daos.definisjonDao

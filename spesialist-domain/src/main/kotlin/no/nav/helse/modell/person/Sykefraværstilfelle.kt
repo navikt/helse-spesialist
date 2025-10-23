@@ -1,6 +1,6 @@
 package no.nav.helse.modell.person
 
-import no.nav.helse.modell.person.vedtaksperiode.Varsel
+import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.deaktiver
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.erTilbakedatert
@@ -57,11 +57,11 @@ class Sykefraværstilfelle(
         return gjeldendeBehandlinger.harVarselOmManglendeInntektsmelding(behandlingForPeriode)
     }
 
-    fun håndter(varsel: Varsel) {
+    fun håndter(varsel: LegacyVarsel) {
         gjeldendeBehandlinger.håndterNyttVarsel(listOf(varsel))
     }
 
-    fun deaktiver(varsel: Varsel) {
+    fun deaktiver(varsel: LegacyVarsel) {
         gjeldendeBehandlinger.deaktiver(varsel)
     }
 

@@ -1,14 +1,14 @@
 package no.nav.helse.modell.person.vedtaksperiode
 
-import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.AKTIV
-import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.AVVIST
-import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.INAKTIV
-import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status.VURDERT
+import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Status.AKTIV
+import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Status.AVVIST
+import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Status.INAKTIV
+import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Status.VURDERT
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.UUID
 
-class Varsel(
+class LegacyVarsel(
     val id: UUID,
     val varselkode: String,
     val opprettet: LocalDateTime,
@@ -65,7 +65,7 @@ class Varsel(
     override fun equals(other: Any?): Boolean =
         this === other ||
             (
-                other is Varsel &&
+                other is LegacyVarsel &&
                     javaClass == other.javaClass &&
                     id == other.id &&
                     vedtaksperiodeId == other.vedtaksperiodeId &&
@@ -84,24 +84,24 @@ class Varsel(
     internal fun erRelevantFor(vedtaksperiodeId: UUID): Boolean = this.vedtaksperiodeId == vedtaksperiodeId
 
     companion object {
-        internal fun List<Varsel>.finnEksisterendeVarsel(varsel: Varsel): Varsel? = find { it.varselkode == varsel.varselkode }
+        internal fun List<LegacyVarsel>.finnEksisterendeVarsel(varsel: LegacyVarsel): LegacyVarsel? = find { it.varselkode == varsel.varselkode }
 
-        internal fun List<Varsel>.finnEksisterendeVarsel(varselkode: String): Varsel? = find { it.varselkode == varselkode }
+        internal fun List<LegacyVarsel>.finnEksisterendeVarsel(varselkode: String): LegacyVarsel? = find { it.varselkode == varselkode }
 
-        internal fun List<Varsel>.inneholderMedlemskapsvarsel(): Boolean = any { it.status == AKTIV && it.varselkode == "RV_MV_1" }
+        internal fun List<LegacyVarsel>.inneholderMedlemskapsvarsel(): Boolean = any { it.status == AKTIV && it.varselkode == "RV_MV_1" }
 
-        internal fun List<Varsel>.inneholderVarselOmNegativtBeløp(): Boolean = any { it.status == AKTIV && it.varselkode == "RV_UT_23" }
+        internal fun List<LegacyVarsel>.inneholderVarselOmNegativtBeløp(): Boolean = any { it.status == AKTIV && it.varselkode == "RV_UT_23" }
 
-        internal fun List<Varsel>.inneholderAktivtVarselOmAvvik(): Boolean = any { it.status == AKTIV && it.varselkode == "RV_IV_2" }
+        internal fun List<LegacyVarsel>.inneholderAktivtVarselOmAvvik(): Boolean = any { it.status == AKTIV && it.varselkode == "RV_IV_2" }
 
-        fun List<Varsel>.inneholderVarselOmAvvik(): Boolean = any { it.varselkode == "RV_IV_2" }
+        fun List<LegacyVarsel>.inneholderVarselOmAvvik(): Boolean = any { it.varselkode == "RV_IV_2" }
 
-        internal fun List<Varsel>.inneholderVarselOmTilbakedatering(): Boolean = any { it.status == AKTIV && it.varselkode == "RV_SØ_3" }
+        internal fun List<LegacyVarsel>.inneholderVarselOmTilbakedatering(): Boolean = any { it.status == AKTIV && it.varselkode == "RV_SØ_3" }
 
-        internal fun List<Varsel>.inneholderVarselOmÅpenGosysOppgave(): Boolean = any { it.status == AKTIV && it.varselkode == "SB_EX_1" }
+        internal fun List<LegacyVarsel>.inneholderVarselOmÅpenGosysOppgave(): Boolean = any { it.status == AKTIV && it.varselkode == "SB_EX_1" }
 
-        internal fun List<Varsel>.forhindrerAutomatisering() = any { it.status in listOf(VURDERT, AKTIV, AVVIST) }
+        internal fun List<LegacyVarsel>.forhindrerAutomatisering() = any { it.status in listOf(VURDERT, AKTIV, AVVIST) }
     }
 }
 
-private val logg = LoggerFactory.getLogger(Varsel::class.java)
+private val logg = LoggerFactory.getLogger(LegacyVarsel::class.java)

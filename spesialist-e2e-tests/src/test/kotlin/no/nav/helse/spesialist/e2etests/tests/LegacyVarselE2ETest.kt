@@ -3,7 +3,7 @@ package no.nav.helse.spesialist.e2etests.tests
 import no.nav.helse.spesialist.e2etests.AbstractE2EIntegrationTest
 import org.junit.jupiter.api.Test
 
-class VarselE2ETest : AbstractE2EIntegrationTest() {
+class LegacyVarselE2ETest : AbstractE2EIntegrationTest() {
     @Test
     fun `ingen varsel`() {
         // Given:

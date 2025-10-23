@@ -45,7 +45,7 @@ enum class Varselkode(
         require(this.name.matches(regex)) { "Ugyldig varselkode-format: ${this.name}" }
     }
 
-    fun nyttVarsel(vedtaksperiodeId: UUID): Varsel = Varsel(UUID.randomUUID(), this.name, LocalDateTime.now(), vedtaksperiodeId)
+    fun nyttVarsel(vedtaksperiodeId: UUID): LegacyVarsel = LegacyVarsel(UUID.randomUUID(), this.name, LocalDateTime.now(), vedtaksperiodeId)
 
     override fun toString() = "${this.name}: $varseltekst"
 }

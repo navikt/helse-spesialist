@@ -32,7 +32,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 @Isolated
-internal class PgVarselApiDaoTest : AbstractDBIntegrationTest() {
+internal class PgLegacyVarselApiDaoTest : AbstractDBIntegrationTest() {
     private val apiVarselDao = PgVarselApiDao(dataSource)
 
     private val varseldefinisjoner: List<TestVarseldefinisjon> =
