@@ -19,6 +19,7 @@ import no.nav.helse.spesialist.db.dao.PgTildelingDao
 import no.nav.helse.spesialist.domain.PersonId
 import no.nav.helse.spesialist.domain.PåVentId
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
+import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
@@ -41,6 +42,8 @@ class PgOppgaveRepository private constructor(
     }
 
     override fun finn(id: Long): Oppgave? = finnOppgave(id)
+
+    override fun finn(id: SpleisBehandlingId): Oppgave? = finnOppgave(id)
 
     override fun finnSisteOppgaveForUtbetaling(utbetalingId: UUID): OppgaveRepository.OppgaveTilstandStatusOgGodkjenningsbehov? =
         asSQL(
@@ -369,6 +372,47 @@ class PgOppgaveRepository private constructor(
                 tilstand = tilstand(row.string("status")),
                 vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
                 behandlingId = row.uuid("behandling_id"),
+                utbetalingId = row.uuid("utbetaling_id"),
+                godkjenningsbehovId = row.uuid("hendelse_id_godkjenningsbehov"),
+                kanAvvises = row.boolean("kan_avvises"),
+                ferdigstiltAvIdent = row.stringOrNull("ferdigstilt_av"),
+                ferdigstiltAvOid = row.uuidOrNull("ferdigstilt_av_oid"),
+                tildeltTil = row.uuidOrNull("saksbehandler_ref")?.let(::SaksbehandlerOid),
+            )
+        }
+
+    private fun finnOppgave(id: SpleisBehandlingId): Oppgave? =
+        asSQL(
+            """
+            SELECT 
+                o.id,
+                o.egenskaper, 
+                o.opprettet, 
+                o.første_opprettet, 
+                o.status, 
+                v.vedtaksperiode_id, 
+                o.hendelse_id_godkjenningsbehov, 
+                o.ferdigstilt_av, 
+                o.ferdigstilt_av_oid, 
+                o.utbetaling_id,
+                t.saksbehandler_ref, 
+                o.kan_avvises
+            FROM oppgave o
+            INNER JOIN vedtak v on o.vedtak_ref = v.id
+            LEFT JOIN tildeling t on o.id = t.oppgave_id_ref
+            WHERE o.behandling_id = :spleisBehandlingId
+            ORDER BY o.id DESC LIMIT 1
+            """,
+            "spleisBehandlingId" to id.value,
+        ).singleOrNull { row ->
+            Oppgave.fraLagring(
+                id = row.long("id"),
+                opprettet = row.localDateTime("opprettet"),
+                førsteOpprettet = row.localDateTimeOrNull("første_opprettet"),
+                egenskaper = row.array<String>("egenskaper").mapNotNull { it.fromDb() }.toSet(),
+                tilstand = tilstand(row.string("status")),
+                vedtaksperiodeId = row.uuid("vedtaksperiode_id"),
+                behandlingId = id.value,
                 utbetalingId = row.uuid("utbetaling_id"),
                 godkjenningsbehovId = row.uuid("hendelse_id_godkjenningsbehov"),
                 kanAvvises = row.boolean("kan_avvises"),

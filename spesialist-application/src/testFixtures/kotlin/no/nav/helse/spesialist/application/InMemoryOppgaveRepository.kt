@@ -8,6 +8,7 @@ import no.nav.helse.mediator.oppgave.OppgaveRepository.Side
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
+import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -23,6 +24,8 @@ class InMemoryOppgaveRepository : OppgaveRepository {
 
     override fun finn(id: Long): Oppgave? =
         oppgaver[id]
+
+    override fun finn(id: SpleisBehandlingId): Oppgave? = oppgaver.values.find { it.behandlingId == id.value }
 
     override fun finnSisteOppgaveForUtbetaling(utbetalingId: UUID): OppgaveRepository.OppgaveTilstandStatusOgGodkjenningsbehov? {
         return oppgaver.values.firstOrNull { it.utbetalingId == utbetalingId }?.let {

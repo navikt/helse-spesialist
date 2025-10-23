@@ -7,6 +7,7 @@ import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.spesialist.domain.PersonId
 import no.nav.helse.spesialist.domain.PåVentId
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
+import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import java.time.Instant
 import java.time.LocalDateTime
 import java.util.UUID
@@ -15,6 +16,8 @@ interface OppgaveRepository {
     fun lagre(oppgave: Oppgave)
 
     fun finn(id: Long): Oppgave?
+
+    fun finn(id: SpleisBehandlingId): Oppgave?
 
     // TODO: Helst bør vi bruke finn(), men Oppgave er ikke et aggregat ennå
     fun finnSisteOppgaveForUtbetaling(utbetalingId: UUID): OppgaveTilstandStatusOgGodkjenningsbehov?

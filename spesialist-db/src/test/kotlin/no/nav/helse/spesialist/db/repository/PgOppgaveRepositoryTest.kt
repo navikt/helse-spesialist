@@ -5,6 +5,7 @@ import no.nav.helse.modell.oppgave.Egenskap.PÅ_VENT
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
+import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -48,6 +49,25 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
 
         repository.lagre(oppgave)
         val funnetOppgave = repository.finn(oppgave.id)
+        assertNotNull(funnetOppgave)
+        assertEquals(oppgave, funnetOppgave)
+    }
+
+    @Test
+    fun `lagre og finn oppgave for spleisBehandlingId`() {
+        val oppgave = Oppgave.ny(
+            id = nextLong(),
+            førsteOpprettet = repository.førsteOpprettetForBehandlingId(behandlingId),
+            vedtaksperiodeId = vedtaksperiodeId,
+            behandlingId = behandlingId,
+            utbetalingId = utbetalingId,
+            hendelseId = godkjenningsbehovId,
+            kanAvvises = true,
+            egenskaper = setOf(SØKNAD)
+        )
+
+        repository.lagre(oppgave)
+        val funnetOppgave = repository.finn(SpleisBehandlingId(behandlingId))
         assertNotNull(funnetOppgave)
         assertEquals(oppgave, funnetOppgave)
     }
