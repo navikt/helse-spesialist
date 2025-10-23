@@ -211,8 +211,8 @@ class InMemoryDaos(
             TODO("Not yet implemented")
         }
     }
-    override val egenAnsattDao: EgenAnsattDao
-        get() = TODO("Not yet implemented")
+    override val egenAnsattDao: EgenAnsattDao = InMemoryEgenansattDao()
+
     override val generasjonDao = object : GenerasjonDao {
         override fun førsteGenerasjonVedtakFattetTidspunkt(vedtaksperiodeId: UUID): LocalDateTime? {
             TODO("Not yet implemented")

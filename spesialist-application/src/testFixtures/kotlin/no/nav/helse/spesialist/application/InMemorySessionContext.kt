@@ -3,7 +3,6 @@ package no.nav.helse.spesialist.application
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.db.ArbeidsforholdDao
 import no.nav.helse.db.AutomatiseringDao
-import no.nav.helse.db.BehandlingRepository
 import no.nav.helse.db.CommandContextDao
 import no.nav.helse.db.DokumentDao
 import no.nav.helse.db.EgenAnsattDao
@@ -45,6 +44,7 @@ class InMemorySessionContext(
     override val annulleringRepository: InMemoryAnnulleringRepository,
     override val saksbehandlerRepository: InMemorySaksbehandlerRepository,
     override val dokumentDao: DokumentDao,
+    override val behandlingRepository: InMemoryBehandlingRepository
 ) : SessionContext {
     override val arbeidsforholdDao: ArbeidsforholdDao
         get() = TODO("Not yet implemented")
@@ -256,8 +256,6 @@ class InMemorySessionContext(
     override val dialogRepository: DialogRepository
         get() = TODO("Not yet implemented")
     override val avviksvurderingRepository: InMemoryAvviksvurderingRepository = InMemoryAvviksvurderingRepository()
-    override val behandlingRepository: BehandlingRepository
-        get() = TODO("Not yet implemented")
     override val tilkommenInntektRepository: TilkommenInntektRepository
         get() = TODO("Not yet implemented")
     override val arbeidsgiverRepository: InMemoryArbeidsgiverRepository = InMemoryArbeidsgiverRepository()
