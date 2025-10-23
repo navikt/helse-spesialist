@@ -64,7 +64,7 @@ object REST {
                 bearerAuth(E2ETestApplikasjon.apiModuleIntegrationTestFixture.token(saksbehandler, tilgangsgrupper))
                 accept(ContentType.Application.Json)
                 contentType(ContentType.Application.Json)
-                setBody(request)
+                if (request !is Unit) setBody(request)
             }.let { it.status to it.bodyAsText() }
         }
         logg.info("Respons fra HTTP POST: $bodyAsText")

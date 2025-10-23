@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.api.bootstrap
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.smiley4.ktoropenapi.OpenApi
 import io.github.smiley4.ktoropenapi.config.AuthScheme
 import io.github.smiley4.ktoropenapi.config.AuthType
@@ -10,6 +11,8 @@ import io.github.smiley4.schemakenerator.swagger.data.RefType
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.content.OutgoingContent
+import io.ktor.serialization.ContentConverter
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationCall
@@ -28,6 +31,11 @@ import io.ktor.server.resources.Resources
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
 import io.ktor.server.websocket.WebSockets
+import io.ktor.util.reflect.TypeInfo
+import io.ktor.utils.io.ByteReadChannel
+import io.ktor.utils.io.charsets.Charset
+import io.ktor.utils.io.readRemaining
+import io.ktor.utils.io.readText
 import io.swagger.v3.oas.models.media.Schema
 import kotlinx.serialization.modules.SerializersModule
 import no.nav.helse.spesialist.api.feilhåndtering.Modellfeil
@@ -68,7 +76,9 @@ internal fun Application.installPlugins(eksponerOpenApi: Boolean) {
         }
     }
     install(DoubleReceive)
-    install(ContentNegotiation) { register(ContentType.Application.Json, JacksonConverter(objectMapper)) }
+    install(ContentNegotiation) {
+        register(ContentType.Application.Json, UnitFriendlyJacksonConverter(objectMapper))
+    }
     requestResponseTracing(sikkerlogg)
     if (eksponerOpenApi) {
         install(OpenApi) { configureOpenApi() }
@@ -138,4 +148,32 @@ fun StatusPagesConfig.configureStatusPages() {
         )
         call.respond(HttpStatusCode.InternalServerError, "Det skjedde en uventet feil")
     }
+}
+
+private class UnitFriendlyJacksonConverter(
+    private val objectMapper: ObjectMapper,
+) : ContentConverter {
+    override suspend fun deserialize(
+        charset: Charset,
+        typeInfo: TypeInfo,
+        content: ByteReadChannel,
+    ): Any? {
+        // Håndter Unit som body eksplisitt
+        if (typeInfo.type == Unit::class) {
+            if (content.isClosedForRead) return Unit
+
+            val text = content.readRemaining().readText()
+            if (text.isBlank()) return Unit
+            return Unit // til og med om noen sender "{}"
+        }
+
+        return JacksonConverter(objectMapper).deserialize(charset, typeInfo, content)
+    }
+
+    override suspend fun serialize(
+        contentType: ContentType,
+        charset: Charset,
+        typeInfo: TypeInfo,
+        value: Any?,
+    ): OutgoingContent = JacksonConverter(objectMapper).serialize(contentType, charset, typeInfo, value)
 }
