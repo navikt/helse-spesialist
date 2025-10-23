@@ -3,11 +3,13 @@ package no.nav.helse.spesialist.api.rest
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.person.Adressebeskyttelse
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagEtternavn
 import no.nav.helse.spesialist.domain.testfixtures.lagFornavn
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
@@ -57,11 +59,7 @@ class PostFattVedtakIntegrationTest {
         // Given:
         val behandlingId = UUID.randomUUID()
         val fødselsnummer = lagFødselsnummer()
-        val behandling = Behandling.fraLagring(
-            id = SpleisBehandlingId(behandlingId),
-            tags = emptySet(),
-            fødselsnummer = fødselsnummer
-        )
+        val behandling = enBehandling(behandlingId, fødselsnummer)
         val saksbehandler = Saksbehandler(
             id = SaksbehandlerOid(UUID.randomUUID()),
             navn = "Navn Navnesen",
@@ -88,11 +86,7 @@ class PostFattVedtakIntegrationTest {
         // Given:
         val behandlingId = UUID.randomUUID()
         val fødselsnummer = lagFødselsnummer()
-        val behandling = Behandling.fraLagring(
-            id = SpleisBehandlingId(behandlingId),
-            tags = emptySet(),
-            fødselsnummer = fødselsnummer
-        )
+        val behandling = enBehandling(behandlingId, fødselsnummer)
         val saksbehandler = Saksbehandler(
             id = SaksbehandlerOid(UUID.randomUUID()),
             navn = "Navn Navnesen",
@@ -124,11 +118,7 @@ class PostFattVedtakIntegrationTest {
         // Given:
         val behandlingId = UUID.randomUUID()
         val fødselsnummer = lagFødselsnummer()
-        val behandling = Behandling.fraLagring(
-            id = SpleisBehandlingId(behandlingId),
-            tags = emptySet(),
-            fødselsnummer = fødselsnummer
-        )
+        val behandling = enBehandling(behandlingId, fødselsnummer)
         val saksbehandler = Saksbehandler(
             id = SaksbehandlerOid(UUID.randomUUID()),
             navn = "Navn Navnesen",
@@ -165,6 +155,19 @@ class PostFattVedtakIntegrationTest {
         assertEquals(HttpStatusCode.BadRequest.value, response.status)
         response.assertResponseMessage(PostFattVedtakBehandler.OPPGAVE_FEIL_TILSTAND)
     }
+
+    private fun enBehandling(
+        behandlingId: UUID,
+        fødselsnummer: String
+    ): Behandling = Behandling.fraLagring(
+        id = SpleisBehandlingId(behandlingId),
+        tags = emptySet(),
+        fødselsnummer = fødselsnummer,
+        fom = 1.jan(2018),
+        tom = 31.jan(2018),
+        skjæringstidspunkt = 1.jan(2018),
+        yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
+    )
 }
 
 private fun IntegrationTestFixture.Response.assertResponseMessage(melding: String) {

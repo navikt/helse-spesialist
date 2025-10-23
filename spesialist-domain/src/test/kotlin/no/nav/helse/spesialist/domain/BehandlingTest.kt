@@ -1,6 +1,8 @@
 package no.nav.helse.spesialist.domain
 
 import no.nav.helse.modell.vedtak.Utfall
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
+import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.assertThrows
@@ -12,21 +14,31 @@ import java.util.stream.Stream
 
 class BehandlingTest {
 
-    @ParameterizedTest()
+    @ParameterizedTest
     @MethodSource("utfallGittTagsSource")
     fun `tags gir utfall`(tags: Set<String>, expected: Utfall) {
-        val behandling = Behandling.fraLagring(SpleisBehandlingId(UUID.randomUUID()), tags = tags, lagFødselsnummer())
+        val behandling = enBehandling(tags = tags)
         assertEquals(expected, behandling.utfall())
     }
 
     @ParameterizedTest
     @MethodSource("exceptionGittTagsSource")
     fun `tags gir exception`(tags: Set<String>) {
-        val behandling = Behandling.fraLagring(SpleisBehandlingId(UUID.randomUUID()), tags = tags, lagFødselsnummer())
+        val behandling = enBehandling(tags = tags)
         assertThrows<IllegalStateException> {
             behandling.utfall()
         }
     }
+
+    private fun enBehandling(id: UUID = UUID.randomUUID(), tags: Set<String>): Behandling = Behandling.fraLagring(
+        id = SpleisBehandlingId(id),
+        tags = tags,
+        fødselsnummer = lagFødselsnummer(),
+        fom = 1.jan(2018),
+        tom = 31.jan(2018),
+        skjæringstidspunkt = 1.jan(2018),
+        yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
+    )
 
     private companion object {
         @JvmStatic

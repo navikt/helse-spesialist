@@ -1,7 +1,9 @@
 package no.nav.helse.spesialist.domain
 
 import no.nav.helse.modell.vedtak.Utfall
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.domain.ddd.Entity
+import java.time.LocalDate
 import java.util.UUID
 
 @JvmInline
@@ -19,7 +21,18 @@ class Behandling private constructor(
     val id: SpleisBehandlingId,
     val tags: Set<String>,
     val fødselsnummer: String,
+    fom: LocalDate,
+    tom: LocalDate,
+    skjæringstidspunkt: LocalDate,
+    val yrkesaktivitetstype: Yrkesaktivitetstype,
 ) : Entity<SpleisBehandlingId>(id) {
+    var fom: LocalDate = fom
+        private set
+    var tom: LocalDate = tom
+        private set
+    var skjæringstidspunkt: LocalDate = skjæringstidspunkt
+        private set
+
     fun utfall(): Utfall {
         val tags =
             tags
@@ -39,6 +52,18 @@ class Behandling private constructor(
             id: SpleisBehandlingId,
             tags: Set<String>,
             fødselsnummer: String,
-        ) = Behandling(id, tags, fødselsnummer)
+            fom: LocalDate,
+            tom: LocalDate,
+            skjæringstidspunkt: LocalDate,
+            yrkesaktivitetstype: Yrkesaktivitetstype,
+        ) = Behandling(
+            id = id,
+            tags = tags,
+            fødselsnummer = fødselsnummer,
+            fom = fom,
+            tom = tom,
+            skjæringstidspunkt = skjæringstidspunkt,
+            yrkesaktivitetstype = yrkesaktivitetstype,
+        )
     }
 }
