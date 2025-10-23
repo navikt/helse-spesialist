@@ -49,6 +49,8 @@ fun Routing.restRoutes(
             post(PostTilkommenInntektEndreBehandler(), restAdapter)
             post(PostTilkommenInntektFjernBehandler(), restAdapter)
             post(PostTilkommenInntektGjenopprettBehandler(), restAdapter)
+
+            post(PostFattVedtakBehandler(), restAdapter)
         }
     }
 }

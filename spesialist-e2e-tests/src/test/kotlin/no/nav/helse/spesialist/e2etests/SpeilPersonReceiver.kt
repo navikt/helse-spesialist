@@ -74,6 +74,13 @@ class SpeilPersonReceiver(
         hentOppdatertPerson()
     }
 
+    fun saksbehandlerFatterVedtakREST(behandlingId: UUID, begrunnelse: String = "Fattet vedtak") : JsonNode = callHttpPost(
+        relativeUrl = "api/vedtak/$behandlingId/fatt",
+        request = Unit
+    ).also {
+        hentOppdatertPerson()
+    }
+
     fun saksbehandlerLeggerOppgavePåVent(
         notatTekst: String = "",
         frist: LocalDate = LocalDate.now().plusDays(1),
