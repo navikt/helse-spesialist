@@ -18,3 +18,7 @@ class HttpForbidden(
 class HttpNotFound(
     message: String? = null,
 ) : HttpException(HttpStatusCode.NotFound, message)
+
+class HttpBadRequest(
+    message: String? = null,
+) : HttpException(HttpStatusCode.BadRequest, message)

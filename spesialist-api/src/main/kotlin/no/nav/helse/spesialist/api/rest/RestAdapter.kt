@@ -17,6 +17,7 @@ import no.nav.helse.spesialist.application.logg.loggWarnThrowable
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
+import org.intellij.lang.annotations.Language
 
 class RestAdapter(
     private val sessionFactory: SessionFactory,
@@ -103,7 +104,9 @@ class RestAdapter(
             } else {
                 loggThrowable("Returnerer HTTP ${statusCode.value}", cause)
             }
-            call.respond(statusCode, "{ \"httpStatusCode\": ${statusCode.value} }")
+            @Language("JSON")
+            val message = """{ "httpStatusCode": ${statusCode.value}, "message": "${cause.message}" }"""
+            call.respond(statusCode, message)
         }.onSuccess { result ->
             call.response.status(result.statusCode)
             call.respond(result.body as Any)

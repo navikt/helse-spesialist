@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.application
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.db.ArbeidsforholdDao
 import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.CommandContextDao
@@ -13,7 +12,6 @@ import no.nav.helse.db.NotatDao
 import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PeriodehistorikkDao
-import no.nav.helse.db.PersonDao
 import no.nav.helse.db.PåVentDao
 import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.RisikovurderingDao
@@ -24,9 +22,7 @@ import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.UtbetalingDao
 import no.nav.helse.db.VergemålDao
 import no.nav.helse.db.ÅpneGosysOppgaverDao
-import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.kommando.MinimalPersonDto
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.spesialist.typer.Kjønn
 import java.time.LocalDate
@@ -44,7 +40,7 @@ class InMemorySessionContext(
     override val annulleringRepository: InMemoryAnnulleringRepository,
     override val saksbehandlerRepository: InMemorySaksbehandlerRepository,
     override val dokumentDao: DokumentDao,
-    override val behandlingRepository: InMemoryBehandlingRepository
+    override val behandlingRepository: InMemoryBehandlingRepository,
 ) : SessionContext {
     override val arbeidsforholdDao: ArbeidsforholdDao
         get() = TODO("Not yet implemented")
@@ -128,107 +124,8 @@ class InMemorySessionContext(
         val adressebeskyttelse: Adressebeskyttelse
     )
 
-    override val personDao = object : PersonDao {
-        val personinfo = mutableListOf<Personinfo>()
-        override fun personKlargjort(fødselsnummer: String) {
-            TODO("Not yet implemented")
-        }
+    override val personDao = InMemoryPersonDao()
 
-        override fun finnMinimalPerson(fødselsnummer: String): MinimalPersonDto? {
-            TODO("Not yet implemented")
-        }
-
-        override fun lagreMinimalPerson(minimalPerson: MinimalPersonDto) {
-            TODO("Not yet implemented")
-        }
-
-        override fun finnEnhetSistOppdatert(fødselsnummer: String): LocalDate? {
-            TODO("Not yet implemented")
-        }
-
-        override fun oppdaterEnhet(fødselsnummer: String, enhetNr: Int): Int {
-            TODO("Not yet implemented")
-        }
-
-        override fun finnITUtbetalingsperioderSistOppdatert(fødselsnummer: String): LocalDate? {
-            TODO("Not yet implemented")
-        }
-
-        override fun upsertInfotrygdutbetalinger(
-            fødselsnummer: String,
-            utbetalinger: JsonNode
-        ) = -1L
-
-        override fun upsertPersoninfo(
-            fødselsnummer: String,
-            fornavn: String,
-            mellomnavn: String?,
-            etternavn: String,
-            fødselsdato: LocalDate,
-            kjønn: Kjønn,
-            adressebeskyttelse: Adressebeskyttelse
-        ) {
-            personinfo.add(
-                Personinfo(
-                    fødselsnummer = fødselsnummer,
-                    fornavn = fornavn,
-                    mellomnavn = mellomnavn,
-                    etternavn = etternavn,
-                    fødselsdato = fødselsdato,
-                    kjønn = kjønn,
-                    adressebeskyttelse = adressebeskyttelse
-                )
-            )
-        }
-
-        override fun finnPersoninfoSistOppdatert(fødselsnummer: String): LocalDate? {
-            TODO("Not yet implemented")
-        }
-
-        override fun finnInntekter(
-            fødselsnummer: String,
-            skjæringstidspunkt: LocalDate
-        ): List<Inntekter>? {
-            TODO("Not yet implemented")
-        }
-
-        override fun lagreInntekter(
-            fødselsnummer: String,
-            skjæringstidspunkt: LocalDate,
-            inntekter: List<Inntekter>
-        ): Long? {
-            TODO("Not yet implemented")
-        }
-
-        override fun finnPersonMedFødselsnummer(fødselsnummer: String): Long? {
-            TODO("Not yet implemented")
-        }
-
-        override fun finnPersoninfoRef(fødselsnummer: String): Long? {
-            TODO("Not yet implemented")
-        }
-
-        override fun finnEnhetId(fødselsnummer: String): String {
-            TODO("Not yet implemented")
-        }
-
-        override fun finnAdressebeskyttelse(fødselsnummer: String) =
-            personinfo.find { it.fødselsnummer == fødselsnummer }?.adressebeskyttelse
-
-        override fun finnAktørId(fødselsnummer: String): String? {
-            TODO("Not yet implemented")
-        }
-
-        override fun insertPerson(
-            fødselsnummer: String,
-            aktørId: String,
-            personinfoId: Long,
-            enhetId: Int,
-            infotrygdutbetalingerId: Long
-        ): Long {
-            TODO("Not yet implemented")
-        }
-    }
     override val påVentDao: PåVentDao
         get() = TODO("Not yet implemented")
     override val reservasjonDao: ReservasjonDao

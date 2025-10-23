@@ -15,7 +15,6 @@ import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PartialReservasjonDao
 import no.nav.helse.db.PeriodehistorikkDao
-import no.nav.helse.db.PersonDao
 import no.nav.helse.db.PoisonPillDao
 import no.nav.helse.db.PåVentDao
 import no.nav.helse.db.StansAutomatiskBehandlingSaksbehandlerDao
@@ -43,11 +42,8 @@ import no.nav.helse.db.api.VarselDbDto
 import no.nav.helse.db.api.VedtaksperiodeDbDto
 import no.nav.helse.db.api.VergemålApiDao
 import no.nav.helse.mediator.meldinger.PoisonPills
-import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.kommando.MinimalPersonDto
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
-import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
 import no.nav.helse.modell.saksbehandler.handlinger.PåVentÅrsak
 import no.nav.helse.modell.varsel.Varseldefinisjon
@@ -60,7 +56,6 @@ import no.nav.helse.spesialist.api.periodehistorikk.PeriodehistorikkDto
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDto
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
 import no.nav.helse.spesialist.api.vedtaksperiode.EnhetDto
-import no.nav.helse.spesialist.typer.Kjønn
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -269,100 +264,8 @@ class InMemoryDaos(
             TODO("Not yet implemented")
         }
     }
-    override val personDao: PersonDao = object : PersonDao {
-        override fun personKlargjort(fødselsnummer: String) {
-            TODO("Not yet implemented")
-        }
+    override val personDao: InMemoryPersonDao = InMemoryPersonDao()
 
-        override fun finnMinimalPerson(fødselsnummer: String): MinimalPersonDto? {
-            TODO("Not yet implemented")
-        }
-
-        override fun lagreMinimalPerson(minimalPerson: MinimalPersonDto) {
-            TODO("Not yet implemented")
-        }
-
-        override fun finnEnhetSistOppdatert(fødselsnummer: String): LocalDate? {
-            TODO("Not yet implemented")
-        }
-
-        override fun oppdaterEnhet(fødselsnummer: String, enhetNr: Int): Int {
-            TODO("Not yet implemented")
-        }
-
-        override fun finnITUtbetalingsperioderSistOppdatert(fødselsnummer: String): LocalDate? {
-            TODO("Not yet implemented")
-        }
-
-        override fun upsertInfotrygdutbetalinger(
-            fødselsnummer: String,
-            utbetalinger: JsonNode
-        ): Long {
-            TODO("Not yet implemented")
-        }
-
-        override fun upsertPersoninfo(
-            fødselsnummer: String,
-            fornavn: String,
-            mellomnavn: String?,
-            etternavn: String,
-            fødselsdato: LocalDate,
-            kjønn: Kjønn,
-            adressebeskyttelse: Adressebeskyttelse
-        ) {
-            TODO("Not yet implemented")
-        }
-
-        override fun finnPersoninfoSistOppdatert(fødselsnummer: String): LocalDate? {
-            TODO("Not yet implemented")
-        }
-
-        override fun finnInntekter(
-            fødselsnummer: String,
-            skjæringstidspunkt: LocalDate
-        ): List<Inntekter>? {
-            TODO("Not yet implemented")
-        }
-
-        override fun lagreInntekter(
-            fødselsnummer: String,
-            skjæringstidspunkt: LocalDate,
-            inntekter: List<Inntekter>
-        ): Long? {
-            TODO("Not yet implemented")
-        }
-
-        override fun finnPersonMedFødselsnummer(fødselsnummer: String): Long? {
-            TODO("Not yet implemented")
-        }
-
-        override fun finnPersoninfoRef(fødselsnummer: String): Long? {
-            TODO("Not yet implemented")
-        }
-
-        override fun finnEnhetId(fødselsnummer: String): String {
-            TODO("Not yet implemented")
-        }
-
-        override fun finnAdressebeskyttelse(fødselsnummer: String): Adressebeskyttelse? {
-            TODO("Not yet implemented")
-        }
-
-        override fun finnAktørId(fødselsnummer: String): String? {
-            TODO("Not yet implemented")
-        }
-
-        override fun insertPerson(
-            fødselsnummer: String,
-            aktørId: String,
-            personinfoId: Long,
-            enhetId: Int,
-            infotrygdutbetalingerId: Long
-        ): Long {
-            TODO("Not yet implemented")
-        }
-
-    }
     override val poisonPillDao = object : PoisonPillDao {
         override fun poisonPills() = PoisonPills(emptyMap())
     }
