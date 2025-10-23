@@ -3,12 +3,17 @@ package no.nav.helse.spesialist.application
 import no.nav.helse.db.BehandlingRepository
 import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import java.util.UUID
 
 class InMemoryBehandlingRepository : BehandlingRepository {
     val behandlinger = mutableMapOf<SpleisBehandlingId, Behandling>()
 
     override fun finn(id: SpleisBehandlingId): Behandling? {
         return behandlinger[id]
+    }
+
+    override fun finnNyeste(vedtaksperiodeId: UUID): Behandling? {
+        TODO("Not yet implemented")
     }
 
     fun lagre(behandling: Behandling) {

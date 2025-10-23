@@ -33,4 +33,37 @@ class PgBehandlingRepositoryTest: AbstractDBIntegrationTest() {
         assertEquals(tags.toSet(), funnet.tags)
         assertEquals(fødselsnummer, funnet.fødselsnummer)
     }
+    @Test
+    fun `finn nyeste behandling`() {
+        // given
+        val vedtaksperiodeId = UUID.randomUUID()
+        val spleisBehandlingId1 = UUID.randomUUID()
+        val spleisBehandlingId2 = UUID.randomUUID()
+        val tags1 = listOf("FOO")
+        val tags2 = listOf("BAR")
+        val fødselsnummer = lagFødselsnummer()
+        opprettPerson(fødselsnummer = fødselsnummer)
+        opprettArbeidsgiver()
+        opprettBehandling(
+            vedtaksperiodeId = vedtaksperiodeId,
+            spleisBehandlingId = spleisBehandlingId1,
+            tags = tags1,
+            fødselsnummer = fødselsnummer
+        )
+        opprettBehandling(
+            vedtaksperiodeId = vedtaksperiodeId,
+            spleisBehandlingId = spleisBehandlingId2,
+            tags = tags2,
+            fødselsnummer = fødselsnummer
+        )
+
+        // when
+        val funnet = repository.finnNyeste(vedtaksperiodeId)
+
+        // then
+        assertNotNull(funnet)
+        assertEquals(spleisBehandlingId2, funnet.id.value)
+        assertEquals(tags2.toSet(), funnet.tags)
+        assertEquals(fødselsnummer, funnet.fødselsnummer)
+    }
 }
