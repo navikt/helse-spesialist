@@ -10,7 +10,6 @@ import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.db.MeldingDao
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.mediator.asUUID
-import no.nav.helse.mediator.withMDC
 import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.melding.VedtakFattetMelding
 import no.nav.helse.modell.melding.VedtakFattetMelding.SelvstendigNæringsdrivendeSykepengegrunnlagsfakta.PensjonsgivendeInntekt
@@ -62,74 +61,46 @@ class AvsluttetMedVedtakRiver(
         metadata: MessageMetadata,
         meterRegistry: MeterRegistry,
     ) {
-        withMDC(
-            buildMap {
-                put("meldingId", packet["@id"].asText())
-                put("meldingnavn", MELDINGNAVN)
-                put("vedtaksperiodeId", packet["vedtaksperiodeId"].asText())
-            },
-        ) {
-            logg.info("Melding $MELDINGNAVN mottatt")
-            val meldingJson = packet.toJson()
-            sikkerlogg.info("Melding $MELDINGNAVN mottatt:\n$meldingJson")
+        val vedtaksperiodeId = packet["vedtaksperiodeId"].asUUID()
+        sessionFactory.wrapOgDeleger(
+            messageContext = context,
+            meldingnavn = MELDINGNAVN,
+            meldingtype = MeldingDao.Meldingtype.AVSLUTTET_MED_VEDTAK,
+            vedtaksperiodeId = vedtaksperiodeId,
+            packet = packet,
+        ) { outbox ->
+            legacyPersonRepository.brukPersonHvisFinnes(packet["fødselsnummer"].asText()) {
+                logg.info("Personen finnes i databasen, behandler melding $MELDINGNAVN")
+                sikkerlogg.info("Personen finnes i databasen, behandler melding $MELDINGNAVN")
 
-            try {
-                val meldingPubliserer = MessageContextMeldingPubliserer(context)
-                val outbox = mutableListOf<UtgåendeHendelse>()
+                val spleisBehandlingId = packet["behandlingId"].asUUID()
+                val vedtaksperiode =
+                    vedtaksperioder().finnBehandling(spleisBehandlingId)
+                        ?: error("Behandling med spleisBehandlingId=$spleisBehandlingId finnes ikke")
+                val behandling = vedtaksperiode.finnBehandling(spleisBehandlingId)
 
-                sessionFactory.transactionalSessionScope { sessionContext ->
-                    sessionContext.meldingDao.lagre(
-                        id = packet["@id"].asUUID(),
-                        json = meldingJson,
-                        meldingtype = MeldingDao.Meldingtype.AVSLUTTET_MED_VEDTAK,
-                        vedtaksperiodeId = packet["vedtaksperiodeId"].asUUID(),
+                if (behandling.tags.isEmpty()) {
+                    sikkerlogg.error(
+                        "Ingen tags funnet for spleisBehandlingId: ${behandling.spleisBehandlingId} på vedtaksperiodeId: ${behandling.vedtaksperiodeId}",
                     )
                 }
-                sessionFactory.transactionalSessionScope { sessionContext ->
-                    sessionContext.legacyPersonRepository.brukPersonHvisFinnes(packet["fødselsnummer"].asText()) {
-                        logg.info("Personen finnes i databasen, behandler melding $MELDINGNAVN")
-                        sikkerlogg.info("Personen finnes i databasen, behandler melding $MELDINGNAVN")
 
-                        val spleisBehandlingId = packet["behandlingId"].asUUID()
-                        val vedtaksperiode =
-                            vedtaksperioder().finnBehandling(spleisBehandlingId)
-                                ?: error("Behandling med spleisBehandlingId=$spleisBehandlingId finnes ikke")
-                        val behandling = vedtaksperiode.finnBehandling(spleisBehandlingId)
-
-                        if (behandling.tags.isEmpty()) {
-                            sikkerlogg.error(
-                                "Ingen tags funnet for spleisBehandlingId: ${behandling.spleisBehandlingId} på vedtaksperiodeId: ${behandling.vedtaksperiodeId}",
-                            )
-                        }
-
-                        val sisteGodkjenningsbehov: Godkjenningsbehov? =
-                            sessionContext.meldingDao.finnSisteGodkjenningsbehov(spleisBehandlingId)
-                        if (sisteGodkjenningsbehov == null) {
-                            logg.warn("Finner ikke godkjenningsbehov for spleis behandlingid $spleisBehandlingId")
-                        }
-
-                        behandling.håndterVedtakFattet()
-
-                        outbox.add(
-                            byggVedtaksmelding(
-                                packet = packet,
-                                behandling = behandling,
-                                vedtaksperiode = vedtaksperiode,
-                                godkjenningsbehov = sisteGodkjenningsbehov,
-                            ),
-                        )
-                    }
+                val sisteGodkjenningsbehov: Godkjenningsbehov? =
+                    meldingDao.finnSisteGodkjenningsbehov(spleisBehandlingId)
+                if (sisteGodkjenningsbehov == null) {
+                    logg.warn("Finner ikke godkjenningsbehov for spleis behandlingid $spleisBehandlingId")
                 }
-                outbox.forEach { utgåendeHendelse ->
-                    meldingPubliserer.publiser(
-                        fødselsnummer = packet["fødselsnummer"].asText(),
-                        hendelse = utgåendeHendelse,
-                        årsak = MELDINGNAVN,
-                    )
-                }
-            } finally {
-                logg.info("Melding $MELDINGNAVN lest")
-                sikkerlogg.info("Melding $MELDINGNAVN lest")
+
+                behandling.håndterVedtakFattet()
+
+                outbox.add(
+                    byggVedtaksmelding(
+                        packet = packet,
+                        behandling = behandling,
+                        vedtaksperiode = vedtaksperiode,
+                        godkjenningsbehov = sisteGodkjenningsbehov,
+                    ),
+                )
             }
         }
     }
