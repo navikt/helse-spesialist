@@ -8,7 +8,7 @@ import no.nav.helse.db.DefinisjonDao
 import no.nav.helse.db.DokumentDao
 import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.EgenskapForDatabase
-import no.nav.helse.db.GenerasjonDao
+import no.nav.helse.db.LegacyBehandlingDao
 import no.nav.helse.db.MeldingDuplikatkontrollDao
 import no.nav.helse.db.NotatDao
 import no.nav.helse.db.OppgaveDao
@@ -208,16 +208,16 @@ class InMemoryDaos(
     }
     override val egenAnsattDao: EgenAnsattDao = InMemoryEgenansattDao()
 
-    override val generasjonDao = object : GenerasjonDao {
-        override fun førsteGenerasjonVedtakFattetTidspunkt(vedtaksperiodeId: UUID): LocalDateTime? {
+    override val legacyBehandlingDao = object : LegacyBehandlingDao {
+        override fun førsteLegacyBehandlingVedtakFattetTidspunkt(vedtaksperiodeId: UUID): LocalDateTime? {
             TODO("Not yet implemented")
         }
 
-        override fun finnGenerasjoner(vedtaksperiodeId: UUID): List<BehandlingDto> {
+        override fun finnLegacyBehandlinger(vedtaksperiodeId: UUID): List<BehandlingDto> {
             TODO("Not yet implemented")
         }
 
-        override fun lagreGenerasjon(behandlingDto: BehandlingDto) {
+        override fun finnLegacyBehandling(behandlingDto: BehandlingDto) {
             TODO("Not yet implemented")
         }
 

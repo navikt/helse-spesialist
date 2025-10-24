@@ -5,8 +5,8 @@ import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.CommandContextDao
 import no.nav.helse.db.DokumentDao
 import no.nav.helse.db.EgenAnsattDao
-import no.nav.helse.db.GenerasjonDao
 import no.nav.helse.db.GodkjenningsbehovUtfall
+import no.nav.helse.db.LegacyBehandlingDao
 import no.nav.helse.db.MetrikkDao
 import no.nav.helse.db.NotatDao
 import no.nav.helse.db.OppgaveDao
@@ -90,7 +90,7 @@ class InMemorySessionContext(
         override fun erEgenAnsatt(fødselsnummer: String) = false
         override fun lagre(fødselsnummer: String, erEgenAnsatt: Boolean, opprettet: LocalDateTime) {}
     }
-    override val generasjonDao: GenerasjonDao
+    override val legacyBehandlingDao: LegacyBehandlingDao
         get() = TODO("Not yet implemented")
     override val meldingDao: InMemoryMeldingDao = InMemoryMeldingDao()
     override val metrikkDao = object : MetrikkDao {

@@ -5,12 +5,12 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
-interface GenerasjonDao {
-    fun førsteGenerasjonVedtakFattetTidspunkt(vedtaksperiodeId: UUID): LocalDateTime?
+interface LegacyBehandlingDao {
+    fun førsteLegacyBehandlingVedtakFattetTidspunkt(vedtaksperiodeId: UUID): LocalDateTime?
 
-    fun finnGenerasjoner(vedtaksperiodeId: UUID): List<BehandlingDto>
+    fun finnLegacyBehandlinger(vedtaksperiodeId: UUID): List<BehandlingDto>
 
-    fun lagreGenerasjon(behandlingDto: BehandlingDto)
+    fun finnLegacyBehandling(behandlingDto: BehandlingDto)
 
     fun finnVedtaksperiodeIderFor(fødselsnummer: String): Set<UUID>
 

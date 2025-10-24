@@ -3,7 +3,7 @@ package no.nav.helse.modell.automatisering
 import no.nav.helse.AutomatiseringStansetSjekker
 import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.EgenAnsattDao
-import no.nav.helse.db.GenerasjonDao
+import no.nav.helse.db.LegacyBehandlingDao
 import no.nav.helse.db.MeldingDao
 import no.nav.helse.db.MeldingDao.BehandlingOpprettetKorrigertSøknad
 import no.nav.helse.db.PersonDao
@@ -44,7 +44,7 @@ internal class Automatisering(
     private val vedtakDao: VedtakDao,
     private val stikkprøver: Stikkprøver,
     private val meldingDao: MeldingDao,
-    private val generasjonDao: GenerasjonDao,
+    private val legacyBehandlingDao: LegacyBehandlingDao,
     private val egenAnsattDao: EgenAnsattDao,
     private val totrinnsvurderingRepository: TotrinnsvurderingRepository,
     private val stansAutomatiskBehandlingSaksbehandlerDao: StansAutomatiskBehandlingSaksbehandlerDao,
@@ -69,7 +69,7 @@ internal class Automatisering(
                 vedtakDao = sessionContext.vedtakDao,
                 stikkprøver = stikkprøver,
                 meldingDao = sessionContext.meldingDao,
-                generasjonDao = sessionContext.generasjonDao,
+                legacyBehandlingDao = sessionContext.legacyBehandlingDao,
                 egenAnsattDao = sessionContext.egenAnsattDao,
                 totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository,
                 stansAutomatiskBehandlingSaksbehandlerDao = sessionContext.stansAutomatiskBehandlingSaksbehandlerDao,
@@ -147,7 +147,7 @@ internal class Automatisering(
         fødselsnummer: String,
         vedtaksperiodeId: UUID,
     ): BehandlingOpprettetKorrigertSøknad? =
-        generasjonDao.førsteGenerasjonVedtakFattetTidspunkt(vedtaksperiodeId)?.let {
+        legacyBehandlingDao.førsteLegacyBehandlingVedtakFattetTidspunkt(vedtaksperiodeId)?.let {
             meldingDao.sisteBehandlingOpprettetOmKorrigertSøknad(fødselsnummer, vedtaksperiodeId)
         }
 
@@ -185,8 +185,8 @@ internal class Automatisering(
         if (meldingDao.erKorrigertSøknadAutomatiskBehandlet(hendelseId)) return SkyldesKorrigertSøknad.KanAutomatiseres
 
         val merEnn6MånederSidenVedtakPåFørsteMottattSøknad =
-            generasjonDao
-                .førsteGenerasjonVedtakFattetTidspunkt(vedtaksperiodeId)
+            legacyBehandlingDao
+                .førsteLegacyBehandlingVedtakFattetTidspunkt(vedtaksperiodeId)
                 ?.isBefore(LocalDateTime.now().minusMonths(6))
                 ?: true
         val antallTidligereKorrigeringer = meldingDao.finnAntallAutomatisertKorrigertSøknad(vedtaksperiodeId)

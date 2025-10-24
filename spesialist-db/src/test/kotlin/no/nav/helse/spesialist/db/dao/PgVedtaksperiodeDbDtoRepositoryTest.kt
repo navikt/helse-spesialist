@@ -17,7 +17,7 @@ import java.util.UUID
 class PgVedtaksperiodeDbDtoRepositoryTest: AbstractDBIntegrationTest() {
 
     private val pgVedtaksperiodeRepository = PgVedtaksperiodeRepository(
-        generasjonDao = PgGenerasjonDao(session),
+        legacyBehandlingDao = PgLegacyBehandlingDao(session),
         vedtakDao = PgVedtakDao(session),
     )
 

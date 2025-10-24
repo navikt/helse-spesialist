@@ -2,7 +2,7 @@ package no.nav.helse.spesialist.db.dao
 
 import kotliquery.Row
 import kotliquery.Session
-import no.nav.helse.db.GenerasjonDao
+import no.nav.helse.db.LegacyBehandlingDao
 import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
 import no.nav.helse.mediator.asLocalDateTime
 import no.nav.helse.mediator.asUUID
@@ -24,14 +24,14 @@ import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 
-class PgGenerasjonDao private constructor(
+class PgLegacyBehandlingDao private constructor(
     private val queryRunner: QueryRunner,
-) : GenerasjonDao,
+) : LegacyBehandlingDao,
     QueryRunner by queryRunner {
     internal constructor(dataSource: DataSource) : this(MedDataSource(dataSource))
     internal constructor(session: Session) : this(MedSession(session))
 
-    override fun finnGenerasjoner(vedtaksperiodeId: UUID): List<BehandlingDto> =
+    override fun finnLegacyBehandlinger(vedtaksperiodeId: UUID): List<BehandlingDto> =
         asSQL(
             """
             WITH behandlinger AS (
@@ -82,7 +82,7 @@ class PgGenerasjonDao private constructor(
             VedtakBegrunnelseTypeFraDatabase.INNVILGELSE -> Utfall.INNVILGELSE
         }
 
-    override fun lagreGenerasjon(behandlingDto: BehandlingDto) {
+    override fun finnLegacyBehandling(behandlingDto: BehandlingDto) {
         lagre(behandlingDto)
         slettVarsler(behandlingDto.id, behandlingDto.varsler.map { it.id })
         behandlingDto.varsler.forEach { varselDto ->
@@ -185,7 +185,7 @@ class PgGenerasjonDao private constructor(
             it.uuid("vedtaksperiode_id")
         }.toSet()
 
-    override fun førsteGenerasjonVedtakFattetTidspunkt(vedtaksperiodeId: UUID): LocalDateTime? =
+    override fun førsteLegacyBehandlingVedtakFattetTidspunkt(vedtaksperiodeId: UUID): LocalDateTime? =
         asSQL(
             """
             SELECT tilstand_endret_tidspunkt 

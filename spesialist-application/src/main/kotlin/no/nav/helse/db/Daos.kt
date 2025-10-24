@@ -26,7 +26,7 @@ interface Daos {
     val dialogDao: DialogDao
     val dokumentDao: DokumentDao
     val egenAnsattDao: EgenAnsattDao
-    val generasjonDao: GenerasjonDao
+    val legacyBehandlingDao: LegacyBehandlingDao
     val meldingDao: MeldingDao
     val meldingDuplikatkontrollDao: MeldingDuplikatkontrollDao
     val notatDao: NotatDao

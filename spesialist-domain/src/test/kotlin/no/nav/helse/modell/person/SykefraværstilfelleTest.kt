@@ -24,15 +24,15 @@ internal class SykefraværstilfelleTest {
 
     @Test
     fun `har ikke aktive varsler`() {
-        val gjeldendeGenerasjon1 = generasjon(UUID.randomUUID())
-        val gjeldendeGenerasjon2 = generasjon(UUID.randomUUID())
+        val gjeldendeGenerasjon1 = legacyBehandling(UUID.randomUUID())
+        val gjeldendeGenerasjon2 = legacyBehandling(UUID.randomUUID())
         assertFalse(listOf(gjeldendeGenerasjon1, gjeldendeGenerasjon2).forhindrerAutomatisering(28 feb 2018))
     }
 
     @Test
     fun `har ikke aktive varsler når generasjonene har utbetalingId men ikke fom`() {
-        val gjeldendeGenerasjon1 = generasjon(UUID.randomUUID())
-        val gjeldendeGenerasjon2 = generasjon(UUID.randomUUID())
+        val gjeldendeGenerasjon1 = legacyBehandling(UUID.randomUUID())
+        val gjeldendeGenerasjon2 = legacyBehandling(UUID.randomUUID())
         val utbetalingId = UUID.randomUUID()
         gjeldendeGenerasjon1.håndterNyUtbetaling(utbetalingId)
         gjeldendeGenerasjon2.håndterNyUtbetaling(utbetalingId)
@@ -42,8 +42,8 @@ internal class SykefraværstilfelleTest {
     @Test
     fun `har aktive varsler`() {
         val vedtaksperiodeId2 = UUID.randomUUID()
-        val gjeldendeGenerasjon1 = generasjon(UUID.randomUUID())
-        val gjeldendeGenerasjon2 = generasjon(vedtaksperiodeId2)
+        val gjeldendeGenerasjon1 = legacyBehandling(UUID.randomUUID())
+        val gjeldendeGenerasjon2 = legacyBehandling(vedtaksperiodeId2)
         gjeldendeGenerasjon2.håndterNyttVarsel(
             Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId2),
         )
@@ -55,7 +55,7 @@ internal class SykefraværstilfelleTest {
         assertThrows<IllegalArgumentException> { sykefraværstilfelle().haster(UUID.randomUUID()) }
     }
 
-    private fun generasjon(vedtaksperiodeId: UUID = UUID.randomUUID()) =
+    private fun legacyBehandling(vedtaksperiodeId: UUID = UUID.randomUUID()) =
         LegacyBehandling(
             id = UUID.randomUUID(),
             vedtaksperiodeId = vedtaksperiodeId,
@@ -68,7 +68,7 @@ internal class SykefraværstilfelleTest {
     private fun sykefraværstilfelle(
         fødselsnummer: String = "12345678910",
         skjæringstidspunkt: LocalDate = 1 jan 2018,
-        gjeldendeGenerasjoner: List<LegacyBehandling> = listOf(generasjon()),
+        gjeldendeGenerasjoner: List<LegacyBehandling> = listOf(legacyBehandling()),
     ) = Sykefraværstilfelle(
         fødselsnummer,
         skjæringstidspunkt,

@@ -14,7 +14,7 @@ import java.util.UUID
 internal class PgVedtakBegrunnelseDaoTest : AbstractDBIntegrationTest() {
     private val saksbehandler = nyLegacySaksbehandler()
     private val dao = daos.vedtakBegrunnelseDao
-    private val generasjonDao = daos.generasjonDao
+    private val generasjonDao = daos.legacyBehandlingDao
 
     @Test
     fun `lagrer og finner vedtaksbegrunnelse`() {
@@ -30,7 +30,7 @@ internal class PgVedtakBegrunnelseDaoTest : AbstractDBIntegrationTest() {
 
         val behandlingId = finnBehandlingId(oppgave.vedtaksperiodeId)
 
-        val behandlinger = generasjonDao.finnGenerasjoner(oppgave.vedtaksperiodeId)
+        val behandlinger = generasjonDao.finnLegacyBehandlinger(oppgave.vedtaksperiodeId)
         val lagretVedtakBegrunnelse = behandlinger.first { it.id == behandlingId }
         assertEquals(Utfall.AVSLAG, lagretVedtakBegrunnelse.vedtakBegrunnelse?.utfall)
         assertEquals("En individuell begrunelse", lagretVedtakBegrunnelse.vedtakBegrunnelse?.begrunnelse)

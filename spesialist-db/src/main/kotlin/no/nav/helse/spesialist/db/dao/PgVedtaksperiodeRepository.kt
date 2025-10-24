@@ -1,6 +1,6 @@
 package no.nav.helse.spesialist.db.dao
 
-import no.nav.helse.db.GenerasjonDao
+import no.nav.helse.db.LegacyBehandlingDao
 import no.nav.helse.db.VedtakDao
 import no.nav.helse.db.VedtaksperiodeRepository
 import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
@@ -10,14 +10,14 @@ import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class PgVedtaksperiodeRepository(
-    private val generasjonDao: GenerasjonDao,
+    private val legacyBehandlingDao: LegacyBehandlingDao,
     private val vedtakDao: VedtakDao,
 ) : VedtaksperiodeRepository {
     private val hentedeBehandlinger: MutableMap<UUID, List<BehandlingDto>> = mutableMapOf()
 
     private val sikkerLogger = LoggerFactory.getLogger("tjenestekall")
 
-    override fun finnVedtaksperioder(fødselsnummer: String): List<VedtaksperiodeDto> = generasjonDao.finnVedtaksperiodeIderFor(fødselsnummer).map { finnVedtaksperiode(it) }
+    override fun finnVedtaksperioder(fødselsnummer: String): List<VedtaksperiodeDto> = legacyBehandlingDao.finnVedtaksperiodeIderFor(fødselsnummer).map { finnVedtaksperiode(it) }
 
     override fun lagreVedtaksperioder(
         fødselsnummer: String,
@@ -33,7 +33,7 @@ class PgVedtaksperiodeRepository(
             ?: throw IllegalStateException("Forventer å finne vedtaksperiode for vedtaksperiodeId=$vedtaksperiodeId")
 
     private fun finnGenerasjoner(vedtaksperiodeId: UUID): List<BehandlingDto> =
-        generasjonDao.finnGenerasjoner(vedtaksperiodeId).also {
+        legacyBehandlingDao.finnLegacyBehandlinger(vedtaksperiodeId).also {
             hentedeBehandlinger[vedtaksperiodeId] = it
         }
 
@@ -45,7 +45,7 @@ class PgVedtaksperiodeRepository(
         loggDiffMellomHentetOgSkalLagres(vedtaksperiode)
         hentedeBehandlinger.remove(vedtaksperiode.vedtaksperiodeId)
         vedtaksperiode.behandlinger.forEach { generasjonDto ->
-            generasjonDao.lagreGenerasjon(generasjonDto)
+            legacyBehandlingDao.finnLegacyBehandling(generasjonDto)
         }
         vedtakDao.lagreOpprinneligSøknadsdato(vedtaksperiode.vedtaksperiodeId)
     }
@@ -104,5 +104,5 @@ class PgVedtaksperiodeRepository(
 
     private fun List<VarselDto>.prettyPrint(): List<String> = map { "${it.varselkode} (${it.status})" }
 
-    override fun førsteKjenteDag(fødselsnummer: String) = generasjonDao.førsteKjenteDag(fødselsnummer)
+    override fun førsteKjenteDag(fødselsnummer: String) = legacyBehandlingDao.førsteKjenteDag(fødselsnummer)
 }

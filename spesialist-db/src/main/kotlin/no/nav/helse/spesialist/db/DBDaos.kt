@@ -8,7 +8,7 @@ import no.nav.helse.spesialist.db.dao.PgDefinisjonDao
 import no.nav.helse.spesialist.db.dao.PgDialogDao
 import no.nav.helse.spesialist.db.dao.PgDokumentDao
 import no.nav.helse.spesialist.db.dao.PgEgenAnsattDao
-import no.nav.helse.spesialist.db.dao.PgGenerasjonDao
+import no.nav.helse.spesialist.db.dao.PgLegacyBehandlingDao
 import no.nav.helse.spesialist.db.dao.PgMeldingDao
 import no.nav.helse.spesialist.db.dao.PgMeldingDuplikatkontrollDao
 import no.nav.helse.spesialist.db.dao.PgNotatDao
@@ -55,7 +55,7 @@ class DBDaos(
     override val dialogDao = PgDialogDao(dataSource)
     override val dokumentDao = PgDokumentDao(dataSource)
     override val egenAnsattDao = PgEgenAnsattDao(dataSource)
-    override val generasjonDao = PgGenerasjonDao(dataSource)
+    override val legacyBehandlingDao = PgLegacyBehandlingDao(dataSource)
     override val meldingDao = PgMeldingDao(dataSource)
     override val meldingDuplikatkontrollDao = PgMeldingDuplikatkontrollDao(dataSource)
     override val notatDao = PgNotatDao(dataSource)

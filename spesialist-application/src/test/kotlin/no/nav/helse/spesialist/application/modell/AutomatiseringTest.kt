@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.db.EgenAnsattDao
-import no.nav.helse.db.GenerasjonDao
+import no.nav.helse.db.LegacyBehandlingDao
 import no.nav.helse.db.MeldingDao
 import no.nav.helse.db.MeldingDao.BehandlingOpprettetKorrigertSøknad
 import no.nav.helse.db.PersonDao
@@ -72,7 +72,7 @@ internal class AutomatiseringTest {
     private val automatiseringDaoMock = mockk<AutomatiseringDao>(relaxed = true)
     private val vergemålDaoMock = mockk<VergemålDao>(relaxed = true)
     private val meldingDaoMock = mockk<MeldingDao>(relaxed = true)
-    private val generasjonDaoMock = mockk<GenerasjonDao>(relaxed = true)
+    private val legacyBehandlingDaoMock = mockk<LegacyBehandlingDao>(relaxed = true)
     private var stikkprøveFullRefusjonEnArbeidsgiver = false
     private var stikkprøveUtsEnArbeidsgiverFørstegangsbehandling = false
     private var stikkprøveUtsEnArbeidsgiverForlengelse = false
@@ -104,7 +104,7 @@ internal class AutomatiseringTest {
             vedtakDao = vedtakDaoMock,
             stikkprøver = stikkprøver,
             meldingDao = meldingDaoMock,
-            generasjonDao = generasjonDaoMock,
+            legacyBehandlingDao = legacyBehandlingDaoMock,
             egenAnsattDao = egenAnsattDao,
             totrinnsvurderingRepository = totrinnsvurderingRepositoryMock,
             stansAutomatiskBehandlingSaksbehandlerDao = stansAutomatiskBehandlingSaksbehandlerDaoMock,
@@ -125,7 +125,7 @@ internal class AutomatiseringTest {
         every { meldingDaoMock.finnAntallAutomatisertKorrigertSøknad(vedtaksperiodeId) } returns 1
         every { meldingDaoMock.erKorrigertSøknadAutomatiskBehandlet(hendelseId) } returns false
         every {
-            generasjonDaoMock.førsteGenerasjonVedtakFattetTidspunkt(
+            legacyBehandlingDaoMock.førsteLegacyBehandlingVedtakFattetTidspunkt(
                 vedtaksperiodeId,
             )
         } returns LocalDateTime.now().minusMonths(6).plusDays(1)
@@ -165,7 +165,7 @@ internal class AutomatiseringTest {
 
     @Test
     fun `vedtaksperiode som mottok første søknad for mer enn 6 måneder er ikke automatiserbar`() {
-        every { generasjonDaoMock.førsteGenerasjonVedtakFattetTidspunkt(vedtaksperiodeId) } returns LocalDateTime.now()
+        every { legacyBehandlingDaoMock.førsteLegacyBehandlingVedtakFattetTidspunkt(vedtaksperiodeId) } returns LocalDateTime.now()
             .minusMonths(6)
         blirManuellOppgaveMedFeil(problems = listOf("Mer enn 6 måneder siden vedtak på første mottatt søknad"))
     }

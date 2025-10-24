@@ -20,7 +20,7 @@ import java.util.UUID
 
 internal class PgLegacyBehandlingDaoTest : AbstractDBIntegrationTest() {
 
-    private val generasjonDao = daos.generasjonDao
+    private val generasjonDao = daos.legacyBehandlingDao
 
     @Test
     fun `finner liste av unike vedtaksperiodeIder med fnr`() {
@@ -91,7 +91,7 @@ internal class PgLegacyBehandlingDaoTest : AbstractDBIntegrationTest() {
             vedtaksperiodeId = vedtaksperiodeId,
             status = VarselStatusDto.AKTIV
         )
-        generasjonDao.lagreGenerasjon(
+        generasjonDao.finnLegacyBehandling(
             BehandlingDto(
                 id = generasjonId,
                 vedtaksperiodeId = vedtaksperiodeId,
@@ -108,7 +108,7 @@ internal class PgLegacyBehandlingDaoTest : AbstractDBIntegrationTest() {
             )
 
         )
-        val funnet = generasjonDao.finnGenerasjoner(vedtaksperiodeId)
+        val funnet = generasjonDao.finnLegacyBehandlinger(vedtaksperiodeId)
         assertEquals(1, funnet.size)
         assertEquals(
             BehandlingDto(
