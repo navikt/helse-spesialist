@@ -2,14 +2,17 @@ package no.nav.helse.kafka
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import com.github.navikt.tbd_libs.rapids_and_rivers.River
-import com.github.navikt.tbd_libs.rapids_and_rivers.asInstant
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import io.micrometer.core.instrument.MeterRegistry
+import no.nav.helse.db.SessionFactory
 import no.nav.helse.spesialist.application.logg.logg
+import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import java.util.UUID
 
-class SisRiver : SpesialistRiver {
+class SisRiver(
+    private val sessionFactory: SessionFactory,
+) : SpesialistRiver {
     override fun preconditions() =
         River.PacketValidation {
             it.forbid("@event_name")
@@ -28,11 +31,16 @@ class SisRiver : SpesialistRiver {
         metadata: MessageMetadata,
         meterRegistry: MeterRegistry,
     ) {
-        val vedtaksperiodeId = packet["vedtaksperiodeId"].asText().let(UUID::fromString)
         val behandlingId = packet["behandlingId"].asText().let(UUID::fromString)
-        val tidspunkt = packet["tidspunkt"].asInstant()
         val eksterneSøknadIder = packet["eksterneSøknadIder"].map { it.asText().let(UUID::fromString) }.toSet()
 
-        logg.info("Mottok opprettet melding på sis topic, vedtaksperiode: $vedtaksperiodeId, beandlingId: $behandlingId")
+        logg.info("Mottok opprettet melding på sis topic beandlingId: $behandlingId")
+
+        sessionFactory.transactionalSessionScope { session ->
+            session.behandlingRepository.finn(SpleisBehandlingId(behandlingId))?.also { behandling ->
+                behandling.kobleSøknader(eksterneSøknadIder)
+                session.behandlingRepository.lagre(behandling)
+            }
+        }
     }
 }
