@@ -14,6 +14,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
+import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.db.Daos
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.mediator.SaksbehandlerMediator
@@ -68,6 +69,7 @@ fun kobleOppApi(
     spesialistSchema: SpesialistSchema,
     restAdapter: RestAdapter,
     dokumentMediator: DokumentMediator,
+    environmentToggles: EnvironmentToggles,
 ) {
     ktorApplication.installPlugins(apiModuleConfiguration.eksponerOpenApi)
     ktorApplication.azureAdAppAuthentication(apiModuleConfiguration)
@@ -92,7 +94,7 @@ fun kobleOppApi(
                 queryHandler(graphQLPlugin.server)
             }
         }
-        restRoutes(restAdapter, apiModuleConfiguration.eksponerOpenApi, dokumentMediator)
+        restRoutes(restAdapter, apiModuleConfiguration.eksponerOpenApi, dokumentMediator, environmentToggles)
     }
 }
 

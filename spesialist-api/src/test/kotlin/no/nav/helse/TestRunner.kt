@@ -113,6 +113,10 @@ object TestRunner {
                     spesialistSchema = spesialistSchema,
                     restAdapter = avhengigheter.restAdapter,
                     dokumentMediator = avhengigheter.dokumentMediator,
+                    environmentToggles = object : no.nav.helse.bootstrap.EnvironmentToggles{
+                        override val kanBeslutteEgneSaker = false
+                        override val kanGodkjenneUtenBesluttertilgang = false
+                    },
                 )
             }
 

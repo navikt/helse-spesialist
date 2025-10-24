@@ -2,8 +2,10 @@ package no.nav.helse.spesialist.api.rest
 
 import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
+import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.db.SessionContext
 import no.nav.helse.modell.oppgave.Oppgave
+import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.spesialist.api.rest.resources.Vedtak
 import no.nav.helse.spesialist.api.rest.tilkommeninntekt.bekreftTilgangTilPerson
 import no.nav.helse.spesialist.application.Outbox
@@ -11,7 +13,9 @@ import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 
-class PostFattVedtakBehandler : PostBehandler<Vedtak.Id.Fatt, Unit, Boolean> {
+class PostFattVedtakBehandler(
+    private val environmentToggles: EnvironmentToggles,
+) : PostBehandler<Vedtak.Id.Fatt, Unit, Boolean> {
     override fun behandle(
         resource: Vedtak.Id.Fatt,
         request: Unit,
@@ -39,7 +43,30 @@ class PostFattVedtakBehandler : PostBehandler<Vedtak.Id.Fatt, Unit, Boolean> {
             throw HttpBadRequest(OPPGAVE_FEIL_TILSTAND)
         }
 
+        val totrinnsvurdering = transaksjon.totrinnsvurderingRepository.finnAktivForPerson(behandling.fødselsnummer)
+        if (totrinnsvurdering == null) {
+            fattVedtak()
+        } else {
+            totrinnsvurdering.godkjenn(saksbehandler, tilgangsgrupper)
+            transaksjon.totrinnsvurderingRepository.lagre(totrinnsvurdering)
+        }
+
         return RestResponse(HttpStatusCode.OK, false)
+    }
+
+    private fun fattVedtak() {}
+
+    private fun Totrinnsvurdering.godkjenn(
+        beslutter: Saksbehandler,
+        tilgangsgrupper: Set<Tilgangsgruppe>,
+    ) {
+        if (Tilgangsgruppe.BESLUTTER !in tilgangsgrupper && !environmentToggles.kanGodkjenneUtenBesluttertilgang) {
+            throw HttpForbidden(SAKSBEHANDLER_MANGLER_BESLUTTERTILGANG)
+        }
+        if (this.saksbehandler?.value == beslutter.id().value && !environmentToggles.kanBeslutteEgneSaker) {
+            throw HttpForbidden(SAKSBEHANDLER_KAN_IKKE_BESLUTTE_EGEN_OPPGAVE)
+        }
+        settBeslutter(beslutter.id())
     }
 
     override fun openApi(config: RouteConfig) {
@@ -57,5 +84,7 @@ class PostFattVedtakBehandler : PostBehandler<Vedtak.Id.Fatt, Unit, Boolean> {
     companion object {
         const val OPPGAVE_IKKE_FUNNET = "Fant ikke oppgave."
         const val OPPGAVE_FEIL_TILSTAND = "Oppgaven er i feil tilstand."
+        const val SAKSBEHANDLER_MANGLER_BESLUTTERTILGANG = "Mangler besluttertilgang"
+        const val SAKSBEHANDLER_KAN_IKKE_BESLUTTE_EGEN_OPPGAVE = "Kan ikke beslutte egen oppgave"
     }
 }

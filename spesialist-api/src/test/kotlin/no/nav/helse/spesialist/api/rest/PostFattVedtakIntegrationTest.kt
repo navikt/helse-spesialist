@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.api.rest
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.person.Adressebeskyttelse
+import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.Saksbehandler
@@ -13,6 +14,7 @@ import no.nav.helse.spesialist.domain.testfixtures.lagFornavn
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.lagMellomnavn
 import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlerident
+import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.typer.Kjønn
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -28,6 +30,7 @@ class PostFattVedtakIntegrationTest {
     private val egenansattDao = integrationTestFixture.sessionFactory.sessionContext.egenAnsattDao
     private val oppgaveRepository = integrationTestFixture.sessionFactory.sessionContext.oppgaveRepository
     private val personDao = integrationTestFixture.sessionFactory.sessionContext.personDao
+    private val totrinnsvurderingRepository = integrationTestFixture.sessionFactory.sessionContext.totrinnsvurderingRepository
 
     @Test
     fun `gir 404 hvis behandlingen ikke finnes`() {
@@ -168,6 +171,112 @@ class PostFattVedtakIntegrationTest {
         assertEquals(HttpStatusCode.BadRequest.value, response.status)
         response.assertResponseMessage(PostFattVedtakBehandler.OPPGAVE_FEIL_TILSTAND)
     }
+
+    @Test
+    fun `gir forbidden hvis saksbehandler mangler besluttertilgang`() {
+        // Given:
+        val behandlingId = UUID.randomUUID()
+        val fødselsnummer = lagFødselsnummer()
+        val behandling = Behandling.fraLagring(
+            id = SpleisBehandlingId(behandlingId),
+            tags = emptySet(),
+            fødselsnummer = fødselsnummer
+        )
+        val saksbehandler = Saksbehandler(
+            id = SaksbehandlerOid(UUID.randomUUID()),
+            navn = "Navn Navnesen",
+            epost = "navn@navnesen.no",
+            ident = "L112233"
+        )
+        saksbehandlerRepository.lagre(saksbehandler)
+        behandlingRepository.lagre(behandling)
+        egenansattDao.lagre(fødselsnummer, false, LocalDateTime.now())
+        personDao.upsertPersoninfo(
+            fødselsnummer, lagFornavn(), lagMellomnavn(), lagEtternavn(), LocalDate.now(),
+            Kjønn.Ukjent, Adressebeskyttelse.Ugradert
+        )
+        val oppgave = Oppgave.ny(
+            id = nextLong(),
+            førsteOpprettet = LocalDateTime.now(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            behandlingId = behandlingId,
+            utbetalingId = UUID.randomUUID(),
+            hendelseId = UUID.randomUUID(),
+            kanAvvises = true,
+            egenskaper = emptySet(),
+        )
+        oppgaveRepository.lagre(oppgave)
+
+        val totrinnsvurdering = Totrinnsvurdering.ny(fødselsnummer = fødselsnummer)
+        totrinnsvurdering.sendTilBeslutter(oppgave.id, SaksbehandlerOid(UUID.randomUUID()))
+        totrinnsvurderingRepository.lagre(totrinnsvurdering)
+
+        // When:
+        val response = integrationTestFixture.post(
+            url = "/api/vedtak/$behandlingId/fatt",
+            body = "{}",
+            saksbehandler = saksbehandler,
+            tilgangsgrupper = emptySet()
+        )
+
+
+        // Then:
+        assertEquals(HttpStatusCode.Forbidden.value, response.status)
+        response.assertResponseMessage(PostFattVedtakBehandler.SAKSBEHANDLER_MANGLER_BESLUTTERTILGANG)
+    }
+
+    @Test
+    fun `gir forbidden hvis saksbehandler prøver å beslutte egen oppgave`() {
+        // Given:
+        val behandlingId = UUID.randomUUID()
+        val fødselsnummer = lagFødselsnummer()
+        val behandling = Behandling.fraLagring(
+            id = SpleisBehandlingId(behandlingId),
+            tags = emptySet(),
+            fødselsnummer = fødselsnummer
+        )
+        val saksbehandler = Saksbehandler(
+            id = SaksbehandlerOid(UUID.randomUUID()),
+            navn = "Navn Navnesen",
+            epost = "navn@navnesen.no",
+            ident = "L112233"
+        )
+        saksbehandlerRepository.lagre(saksbehandler)
+        behandlingRepository.lagre(behandling)
+        egenansattDao.lagre(fødselsnummer, false, LocalDateTime.now())
+        personDao.upsertPersoninfo(
+            fødselsnummer, lagFornavn(), lagMellomnavn(), lagEtternavn(), LocalDate.now(),
+            Kjønn.Ukjent, Adressebeskyttelse.Ugradert
+        )
+        val oppgave = Oppgave.ny(
+            id = nextLong(),
+            førsteOpprettet = LocalDateTime.now(),
+            vedtaksperiodeId = UUID.randomUUID(),
+            behandlingId = behandlingId,
+            utbetalingId = UUID.randomUUID(),
+            hendelseId = UUID.randomUUID(),
+            kanAvvises = true,
+            egenskaper = emptySet(),
+        )
+        oppgaveRepository.lagre(oppgave)
+
+        val totrinnsvurdering = Totrinnsvurdering.ny(fødselsnummer = fødselsnummer)
+        totrinnsvurdering.sendTilBeslutter(oppgave.id, saksbehandler.id())
+        totrinnsvurderingRepository.lagre(totrinnsvurdering)
+
+        // When:
+        val response = integrationTestFixture.post(
+            url = "/api/vedtak/$behandlingId/fatt",
+            body = "{}",
+            saksbehandler = saksbehandler,
+            tilgangsgrupper = setOf(Tilgangsgruppe.BESLUTTER)
+        )
+
+        // Then:
+        assertEquals(HttpStatusCode.Forbidden.value, response.status)
+        response.assertResponseMessage(PostFattVedtakBehandler.SAKSBEHANDLER_KAN_IKKE_BESLUTTE_EGEN_OPPGAVE)
+    }
+
 }
 
 private fun IntegrationTestFixture.Response.assertResponseMessage(melding: String) {

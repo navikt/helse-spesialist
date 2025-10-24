@@ -11,6 +11,7 @@ import io.ktor.server.auth.authenticate
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.Routing
 import io.ktor.server.routing.route
+import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.mediator.dokument.DokumentMediator
 import no.nav.helse.spesialist.api.rest.dokument.GetInntektsmeldingBehandler
 import no.nav.helse.spesialist.api.rest.dokument.GetSoknadBehandler
@@ -24,6 +25,7 @@ fun Routing.restRoutes(
     restAdapter: RestAdapter,
     eksponerOpenApi: Boolean,
     dokumentMediator: DokumentMediator,
+    environmentToggles: EnvironmentToggles,
 ) {
     route("/api") {
         if (eksponerOpenApi) {
@@ -50,7 +52,7 @@ fun Routing.restRoutes(
             post(PostTilkommenInntektFjernBehandler(), restAdapter)
             post(PostTilkommenInntektGjenopprettBehandler(), restAdapter)
 
-            post(PostFattVedtakBehandler(), restAdapter)
+            post(PostFattVedtakBehandler(environmentToggles), restAdapter)
         }
     }
 }

@@ -29,7 +29,7 @@ class ApiModule(
     tilgangsgruppehenter: Tilgangsgruppehenter,
     sessionFactory: SessionFactory,
     versjonAvKode: String,
-    environmentToggles: EnvironmentToggles,
+    private val environmentToggles: EnvironmentToggles,
     snapshothenter: Snapshothenter,
     reservasjonshenter: Reservasjonshenter,
 ) {
@@ -112,6 +112,7 @@ class ApiModule(
             spesialistSchema = spesialistSchema,
             restAdapter = restAdapter,
             dokumentMediator = dokumentMediator,
+            environmentToggles = environmentToggles,
         )
     }
 }
