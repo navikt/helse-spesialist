@@ -278,7 +278,6 @@ internal class PersonRepository(
         slettStansAutomatiskBehandlingSaksbehandler(fødselsnummer)
         slettAutomatiseringProblem(personRef)
         slettSaksbehandleroppgavetype(personRef)
-        slettBehandlingSøknadKobling(personRef)
         slettVedtaksperiodegenerasjoner(personRef)
         slettVedtaksperiodebehandlingV2(personRef)
         slettOpprinneligSøknadsdato(personRef)
@@ -403,12 +402,6 @@ internal class PersonRepository(
     private fun TransactionalSession.slettOppgaveBehandlingKobling(personRef: Int) {
         @Language("PostgreSQL")
         val query = "DELETE FROM oppgave_behandling_kobling WHERE oppgave_id IN (SELECT o.id FROM oppgave o INNER JOIN vedtak v on v.id = o.vedtak_ref WHERE v.person_ref = ?)"
-        run(queryOf(query, personRef).asExecute)
-    }
-
-    private fun TransactionalSession.slettBehandlingSøknadKobling(personRef: Int) {
-        @Language("PostgreSQL")
-        val query = "DELETE FROM behandling_soknad WHERE behandling_id IN (SELECT b.spleis_behandling_id FROM vedtak v INNER JOIN behandling b ON v.vedtaksperiode_id = b.vedtaksperiode_id WHERE person_ref = ?) "
         run(queryOf(query, personRef).asExecute)
     }
 

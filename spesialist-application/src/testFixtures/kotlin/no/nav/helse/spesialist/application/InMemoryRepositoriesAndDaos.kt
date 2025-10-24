@@ -67,6 +67,7 @@ class InMemoryRepositoriesAndDaos() {
     private val stansAutomatiskBehandlingDao = InMemoryStansAutomatiskBehandlingDao()
     private val annulleringRepository = InMemoryAnnulleringRepository()
     private val saksbehandlerRepository = InMemorySaksbehandlerRepository()
+    private val behandlingRepository = InMemoryBehandlingRepository()
 
     val daos = InMemoryDaos(
         oppgaveRepository,
@@ -89,5 +90,6 @@ class InMemoryRepositoriesAndDaos() {
         stansAutomatiskBehandlingDao,
         annulleringRepository,
         saksbehandlerRepository,
+        behandlingRepository
     )
 }
