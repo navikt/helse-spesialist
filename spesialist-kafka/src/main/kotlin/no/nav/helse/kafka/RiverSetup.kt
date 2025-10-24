@@ -60,7 +60,7 @@ class RiverSetup(
             StansAutomatiskBehandlingRiver(mediator),
             AvviksvurderingLøsningRiver(mediator),
             PersonAvstemmingRiver(mediator),
-            SisRiver(sessionFactory),
+            SisRiver(),
         ).map { DuplikatsjekkendeRiver(it, meldingDuplikatkontrollDao) }
 
     fun registrerRivers(rapidsConnection: RapidsConnection) {

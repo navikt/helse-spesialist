@@ -19,12 +19,7 @@ class Behandling private constructor(
     val id: SpleisBehandlingId,
     val tags: Set<String>,
     val fødselsnummer: String,
-    søknadIder: Set<UUID>,
 ) : Entity<SpleisBehandlingId>(id) {
-    private val søknadIder = søknadIder.toMutableSet()
-
-    fun søknadIder() = søknadIder.toSet()
-
     fun utfall(): Utfall {
         val tags =
             tags
@@ -39,16 +34,11 @@ class Behandling private constructor(
         return tags.singleOrNull() ?: error("Mangler utfall-tag eller har flere utfall-tags")
     }
 
-    fun kobleSøknader(eksterneSøknadIder: Set<UUID>) {
-        søknadIder += eksterneSøknadIder
-    }
-
     companion object {
         fun fraLagring(
             id: SpleisBehandlingId,
             tags: Set<String>,
             fødselsnummer: String,
-            søknadIder: Set<UUID>,
-        ) = Behandling(id, tags, fødselsnummer, søknadIder)
+        ) = Behandling(id, tags, fødselsnummer)
     }
 }

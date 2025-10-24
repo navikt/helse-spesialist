@@ -60,8 +60,7 @@ class PostFattVedtakIntegrationTest {
         val behandling = Behandling.fraLagring(
             id = SpleisBehandlingId(behandlingId),
             tags = emptySet(),
-            fødselsnummer = fødselsnummer,
-            søknadIder = emptySet()
+            fødselsnummer = fødselsnummer
         )
         val saksbehandler = Saksbehandler(
             id = SaksbehandlerOid(UUID.randomUUID()),
@@ -92,8 +91,7 @@ class PostFattVedtakIntegrationTest {
         val behandling = Behandling.fraLagring(
             id = SpleisBehandlingId(behandlingId),
             tags = emptySet(),
-            fødselsnummer = fødselsnummer,
-            søknadIder = emptySet()
+            fødselsnummer = fødselsnummer
         )
         val saksbehandler = Saksbehandler(
             id = SaksbehandlerOid(UUID.randomUUID()),
@@ -129,8 +127,7 @@ class PostFattVedtakIntegrationTest {
         val behandling = Behandling.fraLagring(
             id = SpleisBehandlingId(behandlingId),
             tags = emptySet(),
-            fødselsnummer = fødselsnummer,
-            søknadIder = emptySet()
+            fødselsnummer = fødselsnummer
         )
         val saksbehandler = Saksbehandler(
             id = SaksbehandlerOid(UUID.randomUUID()),
