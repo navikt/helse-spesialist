@@ -17,7 +17,6 @@ class InMemorySessionFactory(
     stansAutomatiskBehandlingDao: InMemoryStansAutomatiskBehandlingDao,
     annulleringRepository: InMemoryAnnulleringRepository,
     saksbehandlerRepository: InMemorySaksbehandlerRepository,
-    behandlingRepository: InMemoryBehandlingRepository,
 ) : SessionFactory {
     val sessionContext: InMemorySessionContext = InMemorySessionContext(
         notatRepository,
@@ -30,7 +29,6 @@ class InMemorySessionFactory(
         annulleringRepository,
         saksbehandlerRepository,
         dokumentDao,
-        behandlingRepository
     )
     override fun <T> transactionalSessionScope(transactionalBlock: (SessionContext) -> T) =
         transactionalBlock(sessionContext)
