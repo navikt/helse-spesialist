@@ -28,6 +28,7 @@ internal abstract class AbstractDatabaseTest {
         val organisasjonsnummer = Random.nextInt(100000000, 999999999).toString()
         val utbetaling_id = UUID.randomUUID().toString()
         val avviksvurdering_unik_id = UUID.randomUUID().toString()
+        val spleisBehandlingId = UUID.randomUUID().toString()
 
         @Language("PostgreSQL")
         val sql = """
@@ -59,8 +60,10 @@ internal abstract class AbstractDatabaseTest {
         VALUES (${sequence_number}, '{}'::json, ${sequence_number}, 1);
         INSERT INTO vedtak(id, vedtaksperiode_id, fom, tom, arbeidsgiver_identifikator, person_ref, forkastet)
         VALUES (${sequence_number}, '${vedtaksperiode_id}', now(), now(), '${organisasjonsnummer}', ${sequence_number}, false);
-        INSERT INTO behandling(id, unik_id, vedtaksperiode_id, opprettet_av_hendelse, tilstand)
-        VALUES (${sequence_number}, '${generasjon_id}', '${vedtaksperiode_id}', '${hendelse_id}', 'VidereBehandlingAvklares');
+        INSERT INTO behandling(id, unik_id, vedtaksperiode_id, opprettet_av_hendelse, tilstand, spleis_behandling_id)
+        VALUES (${sequence_number}, '${generasjon_id}', '${vedtaksperiode_id}', '${hendelse_id}', 'VidereBehandlingAvklares', '${spleisBehandlingId}');
+        INSERT INTO behandling_soknad(behandling_id, søknad_id) 
+        VALUES ('${spleisBehandlingId}', '${UUID.randomUUID()}');
         INSERT INTO behandling_v2(vedtaksperiode_id, behandling_id, fom, tom, skjæringstidspunkt, opprettet)
         VALUES ('${vedtaksperiode_id}', gen_random_uuid(), now(), now(), now(), now());
         INSERT INTO opprinnelig_soknadsdato (vedtaksperiode_id, soknad_mottatt)

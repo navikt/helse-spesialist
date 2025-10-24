@@ -5,6 +5,7 @@ import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import org.junit.jupiter.api.Test
 import java.util.UUID
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
@@ -33,4 +34,32 @@ class PgBehandlingRepositoryTest: AbstractDBIntegrationTest() {
         assertEquals(tags.toSet(), funnet.tags)
         assertEquals(fødselsnummer, funnet.fødselsnummer)
     }
+
+    @Test
+    fun `lagre kobling mellom behandling og søknadId`() {
+        // given
+        val spleisBehandlingId = UUID.randomUUID()
+        val tags = listOf("FOOBAR")
+        val fødselsnummer = lagFødselsnummer()
+        opprettPerson(fødselsnummer = fødselsnummer)
+        opprettArbeidsgiver()
+        opprettBehandling(
+            spleisBehandlingId = spleisBehandlingId,
+            tags = tags,
+            fødselsnummer = fødselsnummer
+        )
+
+        val funnet = requireNotNull(repository.finn(SpleisBehandlingId(spleisBehandlingId)))
+
+        //when
+        val søknadId = UUID.randomUUID()
+        funnet.kobleSøknader(mutableSetOf(søknadId))
+        repository.lagre(funnet)
+
+        val funnetIgjen = requireNotNull(repository.finn(SpleisBehandlingId(spleisBehandlingId)))
+
+        //then
+        assertContains(funnetIgjen.søknadIder(), søknadId)
+    }
+
 }
