@@ -47,6 +47,21 @@ class Behandling private constructor(
         return tags.singleOrNull() ?: error("Mangler utfall-tag eller har flere utfall-tags")
     }
 
+    fun lagNyGjeldendeBehandlingFra(
+        spleisBehandlingId: SpleisBehandlingId,
+        fom: LocalDate,
+        tom: LocalDate,
+        yrkesaktivitetstype: Yrkesaktivitetstype,
+    ) = Behandling(
+        id = spleisBehandlingId,
+        tags = tags,
+        fødselsnummer = fødselsnummer,
+        fom = fom,
+        tom = tom,
+        skjæringstidspunkt = skjæringstidspunkt,
+        yrkesaktivitetstype = yrkesaktivitetstype,
+    )
+
     companion object {
         fun fraLagring(
             id: SpleisBehandlingId,
