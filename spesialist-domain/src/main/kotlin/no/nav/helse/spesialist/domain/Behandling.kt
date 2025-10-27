@@ -18,6 +18,7 @@ enum class Tag {
 
 class Behandling private constructor(
     val id: SpleisBehandlingId,
+    val vedtaksperiodeId: VedtaksperiodeId,
     val tags: Set<String>,
     val fødselsnummer: String,
     val fom: LocalDate,
@@ -51,6 +52,7 @@ class Behandling private constructor(
     companion object {
         fun fraLagring(
             id: SpleisBehandlingId,
+            vedtaksperiodeId: VedtaksperiodeId,
             tags: Set<String>,
             fødselsnummer: String,
             fom: LocalDate,
@@ -60,6 +62,7 @@ class Behandling private constructor(
             søknadIder: Set<UUID>,
         ) = Behandling(
             id = id,
+            vedtaksperiodeId = vedtaksperiodeId,
             tags = tags,
             fødselsnummer = fødselsnummer,
             fom = fom,

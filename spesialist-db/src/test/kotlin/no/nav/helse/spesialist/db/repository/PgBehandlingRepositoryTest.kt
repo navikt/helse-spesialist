@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.db.repository
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import org.junit.jupiter.api.Test
@@ -18,6 +19,7 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
     fun `finn behandling`() {
         // given
         val spleisBehandlingId = UUID.randomUUID()
+        val vedtaksperiodeId = UUID.randomUUID()
         val tags = listOf("FOOBAR")
         val fødselsnummer = lagFødselsnummer()
         val fom = 1.jan(2018)
@@ -26,6 +28,7 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
         opprettArbeidsgiver()
         opprettBehandling(
             spleisBehandlingId = spleisBehandlingId,
+            vedtaksperiodeId = vedtaksperiodeId,
             tags = tags,
             fødselsnummer = fødselsnummer,
             fom = fom,
@@ -38,6 +41,7 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
         // then
         assertNotNull(funnet)
         assertEquals(spleisBehandlingId, funnet.id.value)
+        assertEquals(vedtaksperiodeId, funnet.vedtaksperiodeId.value)
         assertEquals(tags.toSet(), funnet.tags)
         assertEquals(fødselsnummer, funnet.fødselsnummer)
         assertEquals(fom, funnet.fom)
@@ -120,6 +124,7 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
                 tom = 31.jan(2018),
                 skjæringstidspunkt = 1.jan(2018),
                 varselIder = emptySet(),
+                vedtaksperiodeId = VedtaksperiodeId(UUID.randomUUID())
             )
         ).map { it.id.value }
 
@@ -165,6 +170,7 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
                 tom = 31.jan(2018),
                 skjæringstidspunkt = 2.jan(2018),
                 varselIder = emptySet(),
+                vedtaksperiodeId = VedtaksperiodeId(UUID.randomUUID())
             ))
 
         // then
@@ -198,6 +204,7 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
                 tom = 31.jan(2018),
                 skjæringstidspunkt = 1.jan(2018),
                 varselIder = emptySet(),
+                vedtaksperiodeId = VedtaksperiodeId(UUID.randomUUID())
             )
         )
 

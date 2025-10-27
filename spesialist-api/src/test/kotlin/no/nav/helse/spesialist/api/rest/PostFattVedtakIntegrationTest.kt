@@ -9,6 +9,7 @@ import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagEtternavn
 import no.nav.helse.spesialist.domain.testfixtures.lagFornavn
@@ -228,6 +229,7 @@ class PostFattVedtakIntegrationTest {
         tom = 31.jan(2018),
         skjæringstidspunkt = 1.jan(2018),
         varselIder = emptySet(),
+        vedtaksperiodeId = VedtaksperiodeId(UUID.randomUUID())
     )
 
 }
