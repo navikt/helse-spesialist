@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.db.repository
 
+import kotliquery.Row
 import kotliquery.Session
 import no.nav.helse.db.BehandlingRepository
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
@@ -17,22 +18,15 @@ class PgBehandlingRepository(
     override fun finn(id: SpleisBehandlingId): Behandling? =
         asSQL(
             """
-            SELECT spleis_behandling_id, tags, p.fødselsnummer, array_agg(bs.søknad_id) as søknad_ider
+            SELECT spleis_behandling_id, tags, p.fødselsnummer, b.fom, b.tom
             FROM behandling b
             INNER JOIN vedtak v on v.vedtaksperiode_id = b.vedtaksperiode_id
             INNER JOIN person p on p.id = v.person_ref
-            LEFT JOIN behandling_soknad bs ON b.spleis_behandling_id = bs.behandling_id
             WHERE b.spleis_behandling_id = :spleis_behandling_id
-            GROUP BY b.spleis_behandling_id, tags, p.fødselsnummer
         """,
             "spleis_behandling_id" to id.value,
         ).singleOrNull { row ->
-            Behandling.fraLagring(
-                id = SpleisBehandlingId(row.uuid("spleis_behandling_id")),
-                tags = row.array<String>("tags").toSet(),
-                fødselsnummer = row.string("fødselsnummer"),
-                søknadIder = row.arrayOrNull<UUID?>("søknad_ider")?.filterNotNull()?.toSet() ?: emptySet(),
-            )
+            row.mapTilbehandling()
         }
 
     override fun finnBehandlingerISykefraværstilfelle(
@@ -41,25 +35,18 @@ class PgBehandlingRepository(
     ): List<Behandling> =
         asSQL(
             """
-            SELECT DISTINCT ON (b.vedtaksperiode_id) spleis_behandling_id, tags, array_agg(bs.søknad_id) as søknad_ider
+            SELECT DISTINCT ON (b.vedtaksperiode_id) spleis_behandling_id, tags, p.fødselsnummer, b.fom, b.tom
             FROM behandling b
                      INNER JOIN vedtak v on v.vedtaksperiode_id = b.vedtaksperiode_id
                      INNER JOIN person p on p.id = v.person_ref
-                     LEFT JOIN behandling_soknad bs ON b.spleis_behandling_id = bs.behandling_id
             WHERE fødselsnummer = :fodselsnummer
               AND skjæringstidspunkt = :skjaeringstidspunkt
-            GROUP BY b.vedtaksperiode_id, b.id, tags, p.fødselsnummer
             ORDER BY b.vedtaksperiode_id, b.id DESC
         """,
             "fodselsnummer" to fødselsnummer,
             "skjaeringstidspunkt" to skjæringstidspunkt,
         ).list { row ->
-            Behandling.fraLagring(
-                id = SpleisBehandlingId(row.uuid("spleis_behandling_id")),
-                tags = row.array<String>("tags").toSet(),
-                fødselsnummer = fødselsnummer,
-                søknadIder = row.arrayOrNull<UUID?>("søknad_ider")?.filterNotNull()?.toSet() ?: emptySet(),
-            )
+            row.mapTilbehandling()
         }
 
     override fun lagre(behandling: Behandling) {
@@ -72,5 +59,25 @@ class PgBehandlingRepository(
                 "soknadId" to søknadId,
             ).update()
         }
+    }
+
+    private fun hentSøkadIderForBehandling(behandlingId: SpleisBehandlingId): Set<UUID> =
+        asSQL(
+            "SELECT søknad_id FROM behandling_soknad bs WHERE bs.behandling_id = :spleisBehandlingId",
+            "spleisBehandlingId" to behandlingId.value,
+        ).list {
+            it.uuid("søknad_id")
+        }.toSet()
+
+    private fun Row.mapTilbehandling(): Behandling {
+        val spleisBehandlingId = SpleisBehandlingId(uuid("spleis_behandling_id"))
+        return Behandling.fraLagring(
+            id = spleisBehandlingId,
+            tags = array<String>("tags").toSet(),
+            fødselsnummer = string("fødselsnummer"),
+            fom = localDate("fom"),
+            tom = localDate("tom"),
+            søknadIder = hentSøkadIderForBehandling(spleisBehandlingId),
+        )
     }
 }

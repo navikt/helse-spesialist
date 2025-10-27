@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.domain
 
 import no.nav.helse.modell.vedtak.Utfall
+import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.assertThrows
@@ -15,14 +16,14 @@ class BehandlingTest {
     @ParameterizedTest()
     @MethodSource("utfallGittTagsSource")
     fun `tags gir utfall`(tags: Set<String>, expected: Utfall) {
-        val behandling = Behandling.fraLagring(SpleisBehandlingId(UUID.randomUUID()), tags = tags, lagFødselsnummer(), emptySet())
+        val behandling = Behandling.fraLagring(SpleisBehandlingId(UUID.randomUUID()), tags = tags, lagFødselsnummer(), emptySet(), 1.jan(2018), 31.jan(2018))
         assertEquals(expected, behandling.utfall())
     }
 
     @ParameterizedTest
     @MethodSource("exceptionGittTagsSource")
     fun `tags gir exception`(tags: Set<String>) {
-        val behandling = Behandling.fraLagring(SpleisBehandlingId(UUID.randomUUID()), tags = tags, lagFødselsnummer(), emptySet())
+        val behandling = Behandling.fraLagring(SpleisBehandlingId(UUID.randomUUID()), tags = tags, lagFødselsnummer(), emptySet(), 1.jan(2018), 31.jan(2018))
         assertThrows<IllegalStateException> {
             behandling.utfall()
         }

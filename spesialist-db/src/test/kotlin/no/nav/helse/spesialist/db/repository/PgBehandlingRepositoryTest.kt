@@ -19,12 +19,16 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
         val spleisBehandlingId = UUID.randomUUID()
         val tags = listOf("FOOBAR")
         val fødselsnummer = lagFødselsnummer()
+        val fom = 1.jan(2018)
+        val tom = 31.jan(2018)
         opprettPerson(fødselsnummer = fødselsnummer)
         opprettArbeidsgiver()
         opprettBehandling(
             spleisBehandlingId = spleisBehandlingId,
             tags = tags,
-            fødselsnummer = fødselsnummer
+            fødselsnummer = fødselsnummer,
+            fom = fom,
+            tom = tom
         )
 
         // when
@@ -35,6 +39,40 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
         assertEquals(spleisBehandlingId, funnet.id.value)
         assertEquals(tags.toSet(), funnet.tags)
         assertEquals(fødselsnummer, funnet.fødselsnummer)
+        assertEquals(fom, funnet.fom)
+        assertEquals(tom, funnet.tom)
+    }
+
+    @Test
+    fun `finn behandling med søknad-ider`() {
+        // given
+        val spleisBehandlingId = UUID.randomUUID()
+        val tags = listOf("FOOBAR")
+        val fødselsnummer = lagFødselsnummer()
+        val fom = 1.jan(2018)
+        val tom = 31.jan(2018)
+        val søknadId = UUID.randomUUID()
+        opprettPerson(fødselsnummer = fødselsnummer)
+        opprettArbeidsgiver()
+        opprettBehandling(
+            spleisBehandlingId = spleisBehandlingId,
+            tags = tags,
+            fødselsnummer = fødselsnummer,
+            fom = fom,
+            tom = tom
+        )
+        repository.finn(SpleisBehandlingId(spleisBehandlingId))
+            ?.also {
+                it.kobleSøknader(setOf(søknadId))
+                repository.lagre(it)
+            }
+
+        // when
+        val funnet = repository.finn(SpleisBehandlingId(spleisBehandlingId))
+
+        // then
+        assertNotNull(funnet)
+        assertEquals(setOf(søknadId), funnet.søknadIder())
     }
 
     @Test

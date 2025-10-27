@@ -9,6 +9,7 @@ import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagEtternavn
 import no.nav.helse.spesialist.domain.testfixtures.lagFornavn
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
@@ -36,12 +37,7 @@ class PostFattVedtakIntegrationTest {
     fun `gir 404 hvis behandlingen ikke finnes`() {
         // Given:
         val behandlingId = UUID.randomUUID()
-        val saksbehandler = Saksbehandler(
-            id = SaksbehandlerOid(UUID.randomUUID()),
-            navn = "Navn Navnesen",
-            epost = "navn@navnesen.no",
-            ident = "L112233"
-        )
+        val saksbehandler = lagEnSaksbehandler()
         saksbehandlerRepository.lagre(saksbehandler)
 
         // When:
@@ -60,18 +56,8 @@ class PostFattVedtakIntegrationTest {
         // Given:
         val behandlingId = UUID.randomUUID()
         val fødselsnummer = lagFødselsnummer()
-        val behandling = Behandling.fraLagring(
-            id = SpleisBehandlingId(behandlingId),
-            tags = emptySet(),
-            fødselsnummer = fødselsnummer,
-            søknadIder = emptySet()
-        )
-        val saksbehandler = Saksbehandler(
-            id = SaksbehandlerOid(UUID.randomUUID()),
-            navn = "Navn Navnesen",
-            epost = "navn@navnesen.no",
-            ident = "L112233"
-        )
+        val behandling = lagEnBehandling(behandlingId, fødselsnummer)
+        val saksbehandler = lagEnSaksbehandler()
         saksbehandlerRepository.lagre(saksbehandler)
         behandlingRepository.lagre(behandling)
         egenansattDao.lagre(fødselsnummer, true, LocalDateTime.now())
@@ -92,18 +78,8 @@ class PostFattVedtakIntegrationTest {
         // Given:
         val behandlingId = UUID.randomUUID()
         val fødselsnummer = lagFødselsnummer()
-        val behandling = Behandling.fraLagring(
-            id = SpleisBehandlingId(behandlingId),
-            tags = emptySet(),
-            fødselsnummer = fødselsnummer,
-            søknadIder = emptySet()
-        )
-        val saksbehandler = Saksbehandler(
-            id = SaksbehandlerOid(UUID.randomUUID()),
-            navn = "Navn Navnesen",
-            epost = "navn@navnesen.no",
-            ident = "L112233"
-        )
+        val behandling = lagEnBehandling(behandlingId, fødselsnummer)
+        val saksbehandler = lagEnSaksbehandler()
         saksbehandlerRepository.lagre(saksbehandler)
         behandlingRepository.lagre(behandling)
         egenansattDao.lagre(fødselsnummer, false, LocalDateTime.now())
@@ -129,18 +105,8 @@ class PostFattVedtakIntegrationTest {
         // Given:
         val behandlingId = UUID.randomUUID()
         val fødselsnummer = lagFødselsnummer()
-        val behandling = Behandling.fraLagring(
-            id = SpleisBehandlingId(behandlingId),
-            tags = emptySet(),
-            fødselsnummer = fødselsnummer,
-            søknadIder = emptySet()
-        )
-        val saksbehandler = Saksbehandler(
-            id = SaksbehandlerOid(UUID.randomUUID()),
-            navn = "Navn Navnesen",
-            epost = "navn@navnesen.no",
-            ident = "L112233"
-        )
+        val behandling = lagEnBehandling(behandlingId, fødselsnummer)
+        val saksbehandler = lagEnSaksbehandler()
         saksbehandlerRepository.lagre(saksbehandler)
         behandlingRepository.lagre(behandling)
         egenansattDao.lagre(fødselsnummer, false, LocalDateTime.now())
@@ -148,16 +114,7 @@ class PostFattVedtakIntegrationTest {
             fødselsnummer, lagFornavn(), lagMellomnavn(), lagEtternavn(), LocalDate.now(),
             Kjønn.Ukjent, Adressebeskyttelse.Ugradert
         )
-        val oppgave = Oppgave.ny(
-            id = nextLong(),
-            førsteOpprettet = LocalDateTime.now(),
-            vedtaksperiodeId = UUID.randomUUID(),
-            behandlingId = behandlingId,
-            utbetalingId = UUID.randomUUID(),
-            hendelseId = UUID.randomUUID(),
-            kanAvvises = true,
-            egenskaper = emptySet(),
-        )
+        val oppgave = lagEnOppgave(behandlingId)
         oppgave.avventerSystem(lagSaksbehandlerident(),UUID.randomUUID())
         oppgaveRepository.lagre(oppgave)
         // When:
@@ -177,18 +134,8 @@ class PostFattVedtakIntegrationTest {
         // Given:
         val behandlingId = UUID.randomUUID()
         val fødselsnummer = lagFødselsnummer()
-        val behandling = Behandling.fraLagring(
-            id = SpleisBehandlingId(behandlingId),
-            tags = emptySet(),
-            fødselsnummer = fødselsnummer,
-            søknadIder = emptySet(),
-        )
-        val saksbehandler = Saksbehandler(
-            id = SaksbehandlerOid(UUID.randomUUID()),
-            navn = "Navn Navnesen",
-            epost = "navn@navnesen.no",
-            ident = "L112233"
-        )
+        val behandling = lagEnBehandling(behandlingId, fødselsnummer)
+        val saksbehandler = lagEnSaksbehandler()
         saksbehandlerRepository.lagre(saksbehandler)
         behandlingRepository.lagre(behandling)
         egenansattDao.lagre(fødselsnummer, false, LocalDateTime.now())
@@ -196,16 +143,7 @@ class PostFattVedtakIntegrationTest {
             fødselsnummer, lagFornavn(), lagMellomnavn(), lagEtternavn(), LocalDate.now(),
             Kjønn.Ukjent, Adressebeskyttelse.Ugradert
         )
-        val oppgave = Oppgave.ny(
-            id = nextLong(),
-            førsteOpprettet = LocalDateTime.now(),
-            vedtaksperiodeId = UUID.randomUUID(),
-            behandlingId = behandlingId,
-            utbetalingId = UUID.randomUUID(),
-            hendelseId = UUID.randomUUID(),
-            kanAvvises = true,
-            egenskaper = emptySet(),
-        )
+        val oppgave = lagEnOppgave(behandlingId)
         oppgaveRepository.lagre(oppgave)
 
         val totrinnsvurdering = Totrinnsvurdering.ny(fødselsnummer = fødselsnummer)
@@ -231,18 +169,8 @@ class PostFattVedtakIntegrationTest {
         // Given:
         val behandlingId = UUID.randomUUID()
         val fødselsnummer = lagFødselsnummer()
-        val behandling = Behandling.fraLagring(
-            id = SpleisBehandlingId(behandlingId),
-            tags = emptySet(),
-            fødselsnummer = fødselsnummer,
-            søknadIder = emptySet(),
-        )
-        val saksbehandler = Saksbehandler(
-            id = SaksbehandlerOid(UUID.randomUUID()),
-            navn = "Navn Navnesen",
-            epost = "navn@navnesen.no",
-            ident = "L112233"
-        )
+        val behandling = lagEnBehandling(behandlingId, fødselsnummer)
+        val saksbehandler = lagEnSaksbehandler()
         saksbehandlerRepository.lagre(saksbehandler)
         behandlingRepository.lagre(behandling)
         egenansattDao.lagre(fødselsnummer, false, LocalDateTime.now())
@@ -250,16 +178,7 @@ class PostFattVedtakIntegrationTest {
             fødselsnummer, lagFornavn(), lagMellomnavn(), lagEtternavn(), LocalDate.now(),
             Kjønn.Ukjent, Adressebeskyttelse.Ugradert
         )
-        val oppgave = Oppgave.ny(
-            id = nextLong(),
-            førsteOpprettet = LocalDateTime.now(),
-            vedtaksperiodeId = UUID.randomUUID(),
-            behandlingId = behandlingId,
-            utbetalingId = UUID.randomUUID(),
-            hendelseId = UUID.randomUUID(),
-            kanAvvises = true,
-            egenskaper = emptySet(),
-        )
+        val oppgave = lagEnOppgave(behandlingId)
         oppgaveRepository.lagre(oppgave)
 
         val totrinnsvurdering = Totrinnsvurdering.ny(fødselsnummer = fødselsnummer)
@@ -278,6 +197,36 @@ class PostFattVedtakIntegrationTest {
         assertEquals(HttpStatusCode.Forbidden.value, response.status)
         response.assertResponseMessage(PostFattVedtakBehandler.SAKSBEHANDLER_KAN_IKKE_BESLUTTE_EGEN_OPPGAVE)
     }
+
+    private fun lagEnOppgave(behandlingId: UUID): Oppgave = Oppgave.ny(
+        id = nextLong(),
+        førsteOpprettet = LocalDateTime.now(),
+        vedtaksperiodeId = UUID.randomUUID(),
+        behandlingId = behandlingId,
+        utbetalingId = UUID.randomUUID(),
+        hendelseId = UUID.randomUUID(),
+        kanAvvises = true,
+        egenskaper = emptySet(),
+    )
+
+    private fun lagEnSaksbehandler(): Saksbehandler = Saksbehandler(
+        id = SaksbehandlerOid(UUID.randomUUID()),
+        navn = "Navn Navnesen",
+        epost = "navn@navnesen.no",
+        ident = "L112233"
+    )
+
+    private fun lagEnBehandling(
+        behandlingId: UUID,
+        fødselsnummer: String
+    ): Behandling = Behandling.fraLagring(
+        id = SpleisBehandlingId(behandlingId),
+        tags = emptySet(),
+        fødselsnummer = fødselsnummer,
+        søknadIder = emptySet(),
+        fom = 1.jan(2018),
+        tom = 31.jan(2018)
+    )
 
 }
 

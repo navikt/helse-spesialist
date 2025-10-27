@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.domain
 
 import no.nav.helse.modell.vedtak.Utfall
 import no.nav.helse.spesialist.domain.ddd.Entity
+import java.time.LocalDate
 import java.util.UUID
 
 @JvmInline
@@ -19,6 +20,8 @@ class Behandling private constructor(
     val id: SpleisBehandlingId,
     val tags: Set<String>,
     val fødselsnummer: String,
+    val fom: LocalDate,
+    val tom: LocalDate,
     søknadIder: Set<UUID>,
 ) : Entity<SpleisBehandlingId>(id) {
     private val søknadIder = søknadIder.toMutableSet()
@@ -49,6 +52,15 @@ class Behandling private constructor(
             tags: Set<String>,
             fødselsnummer: String,
             søknadIder: Set<UUID>,
-        ) = Behandling(id, tags, fødselsnummer, søknadIder)
+            fom: LocalDate,
+            tom: LocalDate,
+        ) = Behandling(
+            id = id,
+            tags = tags,
+            fødselsnummer = fødselsnummer,
+            fom = fom,
+            tom = tom,
+            søknadIder = søknadIder,
+        )
     }
 }
