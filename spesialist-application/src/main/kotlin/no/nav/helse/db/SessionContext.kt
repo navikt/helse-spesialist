@@ -11,6 +11,7 @@ import no.nav.helse.spesialist.application.PåVentRepository
 import no.nav.helse.spesialist.application.SaksbehandlerRepository
 import no.nav.helse.spesialist.application.TilkommenInntektRepository
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
+import no.nav.helse.spesialist.application.VedtaksperiodeRepository
 
 interface SessionContext {
     val arbeidsforholdDao: ArbeidsforholdDao
@@ -55,4 +56,5 @@ interface SessionContext {
     val annulleringRepository: AnnulleringRepository
     val påVentRepository: PåVentRepository
     val personRepository: PersonRepository
+    val vedtaksperiodeRepository: VedtaksperiodeRepository
 }

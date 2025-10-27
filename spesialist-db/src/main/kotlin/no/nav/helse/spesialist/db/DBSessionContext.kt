@@ -14,6 +14,7 @@ import no.nav.helse.spesialist.application.PåVentRepository
 import no.nav.helse.spesialist.application.SaksbehandlerRepository
 import no.nav.helse.spesialist.application.TilkommenInntektRepository
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
+import no.nav.helse.spesialist.application.VedtaksperiodeRepository
 import no.nav.helse.spesialist.db.dao.PgAnnulleringRepository
 import no.nav.helse.spesialist.db.dao.PgArbeidsforholdDao
 import no.nav.helse.spesialist.db.dao.PgAutomatiseringDao
@@ -55,6 +56,7 @@ import no.nav.helse.spesialist.db.repository.PgPåVentRepository
 import no.nav.helse.spesialist.db.repository.PgSaksbehandlerRepository
 import no.nav.helse.spesialist.db.repository.PgTilkommenInntektRepository
 import no.nav.helse.spesialist.db.repository.PgTotrinnsvurderingRepository
+import no.nav.helse.spesialist.db.repository.PgVedtaksperiodeRepository
 
 class DBSessionContext(
     session: Session,
@@ -102,4 +104,5 @@ class DBSessionContext(
     override val annulleringRepository: PgAnnulleringRepository = PgAnnulleringRepository(session)
     override val påVentRepository: PåVentRepository = PgPåVentRepository(session)
     override val personRepository: PersonRepository = PgPersonRepository(session)
+    override val vedtaksperiodeRepository: VedtaksperiodeRepository = PgVedtaksperiodeRepository(session)
 }
