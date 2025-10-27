@@ -227,6 +227,7 @@ class PostFattVedtakIntegrationTest {
         fom = 1.jan(2018),
         tom = 31.jan(2018),
         skjæringstidspunkt = 1.jan(2018),
+        varselIder = emptySet(),
     )
 
 }
