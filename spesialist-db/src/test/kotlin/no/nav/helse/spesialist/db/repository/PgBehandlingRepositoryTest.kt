@@ -10,8 +10,9 @@ import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
-class PgBehandlingRepositoryTest: AbstractDBIntegrationTest() {
+class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
     private val repository = PgBehandlingRepository(session)
+
     @Test
     fun `finn behandling`() {
         // given
@@ -78,6 +79,39 @@ class PgBehandlingRepositoryTest: AbstractDBIntegrationTest() {
     }
 
     @Test
+    fun `finn kun siste behandling for en gitt vedtaksperiode`() {
+        // given
+        val spleisBehandlingId1 = UUID.randomUUID()
+        val spleisBehandlingId2 = UUID.randomUUID()
+        val tags = listOf("FOOBAR")
+        val fødselsnummer = lagFødselsnummer()
+        opprettPerson(fødselsnummer = fødselsnummer)
+        opprettArbeidsgiver()
+        val vedtaksperiodeId = UUID.randomUUID()
+        opprettBehandling(
+            fom = 2.jan(2018),
+            spleisBehandlingId = spleisBehandlingId1,
+            vedtaksperiodeId = vedtaksperiodeId,
+            tags = tags,
+            fødselsnummer = fødselsnummer
+        )
+        opprettBehandling(
+            fom = 2.jan(2018),
+            spleisBehandlingId = spleisBehandlingId2,
+            vedtaksperiodeId = vedtaksperiodeId,
+            tags = tags,
+            fødselsnummer = fødselsnummer
+        )
+
+        // when
+        val funnet = repository.finnBehandlingerISykefraværstilfelle(fødselsnummer, 2.jan(2018))
+
+        // then
+        assertEquals(1, funnet.size)
+        assertEquals(spleisBehandlingId2, funnet[0].id.value)
+    }
+
+    @Test
     fun `ikke finn behandlinger som hører til annen person`() {
         // given
         val spleisBehandlingId1 = UUID.randomUUID()
@@ -125,5 +159,4 @@ class PgBehandlingRepositoryTest: AbstractDBIntegrationTest() {
         //then
         assertContains(funnetIgjen.søknadIder(), søknadId)
     }
-
 }

@@ -41,15 +41,15 @@ class PgBehandlingRepository(
     ): List<Behandling> =
         asSQL(
             """
-            SELECT spleis_behandling_id, tags, array_agg(bs.søknad_id) as søknad_ider
+            SELECT DISTINCT ON (b.vedtaksperiode_id) spleis_behandling_id, tags, array_agg(bs.søknad_id) as søknad_ider
             FROM behandling b
-            INNER JOIN vedtak v on v.vedtaksperiode_id = b.vedtaksperiode_id
-            INNER JOIN person p on p.id = v.person_ref
-            LEFT JOIN behandling_soknad bs ON b.spleis_behandling_id = bs.behandling_id
+                     INNER JOIN vedtak v on v.vedtaksperiode_id = b.vedtaksperiode_id
+                     INNER JOIN person p on p.id = v.person_ref
+                     LEFT JOIN behandling_soknad bs ON b.spleis_behandling_id = bs.behandling_id
             WHERE fødselsnummer = :fodselsnummer
-            AND skjæringstidspunkt = :skjaeringstidspunkt
-            GROUP BY b.spleis_behandling_id, b.id, tags, p.fødselsnummer
-            ORDER BY b.id
+              AND skjæringstidspunkt = :skjaeringstidspunkt
+            GROUP BY b.vedtaksperiode_id, b.spleis_behandling_id, b.id, tags, p.fødselsnummer
+            ORDER BY b.vedtaksperiode_id, b.id DESC
         """,
             "fodselsnummer" to fødselsnummer,
             "skjaeringstidspunkt" to skjæringstidspunkt,
