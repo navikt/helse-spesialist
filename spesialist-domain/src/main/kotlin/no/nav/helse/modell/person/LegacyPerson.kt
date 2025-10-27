@@ -1,11 +1,11 @@
 package no.nav.helse.modell.person
 
+import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode
+import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode.Companion.finnBehandling
+import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode.Companion.relevanteFor
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
-import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode
-import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode.Companion.finnBehandling
-import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode.Companion.relevanteFor
 import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
 import no.nav.helse.modell.vedtak.AvsluttetUtenVedtak
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlag
@@ -20,13 +20,13 @@ import java.util.UUID
 class LegacyPerson(
     val aktørId: String,
     val fødselsnummer: String,
-    vedtaksperioder: List<Vedtaksperiode>,
+    vedtaksperioder: List<LegacyVedtaksperiode>,
     val skjønnsfastsatteSykepengegrunnlag: List<SkjønnsfastsattSykepengegrunnlag>,
     val avviksvurderinger: List<Avviksvurdering>,
 ) {
     private val vedtaksperioder = vedtaksperioder.toMutableList()
 
-    fun vedtaksperioder(): List<Vedtaksperiode> = vedtaksperioder
+    fun vedtaksperioder(): List<LegacyVedtaksperiode> = vedtaksperioder
 
     fun toDto() =
         PersonDto(
@@ -88,20 +88,20 @@ class LegacyPerson(
         vedtaksperioder
             .find { spleisBehandling.erRelevantFor(it.vedtaksperiodeId()) }
             ?.nySpleisBehandling(spleisBehandling)
-            ?: vedtaksperioder.add(Vedtaksperiode.nyVedtaksperiode(spleisBehandling))
+            ?: vedtaksperioder.add(LegacyVedtaksperiode.nyVedtaksperiode(spleisBehandling))
     }
 
-    fun vedtaksperiodeOrNull(vedtaksperiodeId: UUID): Vedtaksperiode? {
+    fun vedtaksperiodeOrNull(vedtaksperiodeId: UUID): LegacyVedtaksperiode? {
         return vedtaksperioder.find { it.vedtaksperiodeId() == vedtaksperiodeId }
             ?: logg.warn("Vedtaksperiode med id={} finnes ikke", vedtaksperiodeId).let { return null }
     }
 
-    fun vedtaksperiode(vedtaksperiodeId: UUID): Vedtaksperiode {
+    fun vedtaksperiode(vedtaksperiodeId: UUID): LegacyVedtaksperiode {
         val vedtaksperiode = vedtaksperiodeOrNull(vedtaksperiodeId)
         return checkNotNull(vedtaksperiode)
     }
 
-    private fun vedtaksperiodeForBehandling(spleisBehandlingId: UUID): Vedtaksperiode =
+    private fun vedtaksperiodeForBehandling(spleisBehandlingId: UUID): LegacyVedtaksperiode =
         vedtaksperioder.finnBehandling(spleisBehandlingId)
             ?: throw IllegalStateException("Behandling med spleisBehandlingId=$spleisBehandlingId finnes ikke")
 
@@ -150,7 +150,7 @@ class LegacyPerson(
                 fødselsnummer = fødselsnummer,
                 vedtaksperioder =
                     vedtaksperioder.map {
-                        Vedtaksperiode.gjenopprett(
+                        LegacyVedtaksperiode.gjenopprett(
                             organisasjonsnummer = it.organisasjonsnummer,
                             vedtaksperiodeId = it.vedtaksperiodeId,
                             forkastet = it.forkastet,

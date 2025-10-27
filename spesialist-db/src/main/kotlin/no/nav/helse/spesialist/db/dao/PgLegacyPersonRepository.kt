@@ -1,9 +1,9 @@
 package no.nav.helse.spesialist.db.dao
 
 import kotliquery.Session
+import no.nav.helse.db.LegacyVedtaksperiodeRepository
 import no.nav.helse.db.PersonDao
 import no.nav.helse.db.SykefraværstilfelleDao
-import no.nav.helse.db.VedtaksperiodeRepository
 import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.modell.person.LegacyPersonRepository
 import no.nav.helse.modell.person.PersonDto
@@ -15,7 +15,7 @@ import no.nav.helse.spesialist.db.HelseDao.Companion.list
 
 class PgLegacyPersonRepository(
     private val session: Session,
-    private val vedtaksperiodeRepository: VedtaksperiodeRepository,
+    private val legacyVedtaksperiodeRepository: LegacyVedtaksperiodeRepository,
     private val sykefraværstilfelleDao: SykefraværstilfelleDao,
     private val personDao: PersonDao,
 ) : LegacyPersonRepository {
@@ -60,7 +60,7 @@ class PgLegacyPersonRepository(
         return LegacyPerson.gjenopprett(
             aktørId = minimalPerson.aktørId,
             fødselsnummer = minimalPerson.fødselsnummer,
-            vedtaksperioder = vedtaksperiodeRepository.finnVedtaksperioder(fødselsnummer),
+            vedtaksperioder = legacyVedtaksperiodeRepository.finnVedtaksperioder(fødselsnummer),
             skjønnsfastsattSykepengegrunnlag =
                 sykefraværstilfelleDao.finnSkjønnsfastsatteSykepengegrunnlag(
                     fødselsnummer,
@@ -74,7 +74,7 @@ class PgLegacyPersonRepository(
         dtoEtter: PersonDto,
     ) {
         val vedtaksperioderSomSkalLagres = finnEndredeVedtaksperioder(dtoFør, dtoEtter)
-        vedtaksperiodeRepository.lagreVedtaksperioder(dtoEtter.fødselsnummer, vedtaksperioderSomSkalLagres)
+        legacyVedtaksperiodeRepository.lagreVedtaksperioder(dtoEtter.fødselsnummer, vedtaksperioderSomSkalLagres)
     }
 
     override fun finnFødselsnumre(aktørId: String): List<String> =

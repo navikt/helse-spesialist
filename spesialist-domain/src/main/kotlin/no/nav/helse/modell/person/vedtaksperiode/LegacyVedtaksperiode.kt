@@ -8,7 +8,7 @@ import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.logg
 import java.time.LocalDate
 import java.util.UUID
 
-class Vedtaksperiode(
+class LegacyVedtaksperiode(
     private val vedtaksperiodeId: UUID,
     val organisasjonsnummer: String,
     private var forkastet: Boolean,
@@ -116,8 +116,8 @@ class Vedtaksperiode(
     private fun finnes(spleisBehandling: SpleisBehandling): Boolean = behandlinger.finnBehandlingForSpleisBehandling(spleisBehandling.spleisBehandlingId) != null
 
     companion object {
-        fun nyVedtaksperiode(spleisBehandling: SpleisBehandling): Vedtaksperiode =
-            Vedtaksperiode(
+        fun nyVedtaksperiode(spleisBehandling: SpleisBehandling): LegacyVedtaksperiode =
+            LegacyVedtaksperiode(
                 vedtaksperiodeId = spleisBehandling.vedtaksperiodeId,
                 organisasjonsnummer = spleisBehandling.organisasjonsnummer,
                 behandlinger =
@@ -141,9 +141,9 @@ class Vedtaksperiode(
             vedtaksperiodeId: UUID,
             forkastet: Boolean,
             behandlinger: List<BehandlingDto>,
-        ): Vedtaksperiode {
+        ): LegacyVedtaksperiode {
             check(behandlinger.isNotEmpty()) { "En vedtaksperiode uten behandlinger skal ikke være mulig" }
-            return Vedtaksperiode(
+            return LegacyVedtaksperiode(
                 organisasjonsnummer = organisasjonsnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
                 forkastet = forkastet,
@@ -151,12 +151,12 @@ class Vedtaksperiode(
             )
         }
 
-        fun List<Vedtaksperiode>.finnBehandling(spleisBehandlingId: UUID): Vedtaksperiode? =
+        fun List<LegacyVedtaksperiode>.finnBehandling(spleisBehandlingId: UUID): LegacyVedtaksperiode? =
             find { vedtaksperiode ->
                 vedtaksperiode.behandlinger.any { it.spleisBehandlingId() == spleisBehandlingId }
             }
 
-        internal fun List<Vedtaksperiode>.relevanteFor(skjæringstidspunkt: LocalDate) =
+        internal fun List<LegacyVedtaksperiode>.relevanteFor(skjæringstidspunkt: LocalDate) =
             filter { it.gjeldendeSkjæringstidspunkt == skjæringstidspunkt }
                 .map { it.gjeldendeBehandling }
 

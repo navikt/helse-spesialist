@@ -1,18 +1,18 @@
 package no.nav.helse.spesialist.db.dao
 
 import no.nav.helse.db.LegacyBehandlingDao
+import no.nav.helse.db.LegacyVedtaksperiodeRepository
 import no.nav.helse.db.VedtakDao
-import no.nav.helse.db.VedtaksperiodeRepository
 import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
 import no.nav.helse.modell.person.vedtaksperiode.VarselDto
 import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
 import org.slf4j.LoggerFactory
 import java.util.UUID
 
-class PgVedtaksperiodeRepository(
+class PgLegacyVedtaksperiodeRepository(
     private val legacyBehandlingDao: LegacyBehandlingDao,
     private val vedtakDao: VedtakDao,
-) : VedtaksperiodeRepository {
+) : LegacyVedtaksperiodeRepository {
     private val hentedeBehandlinger: MutableMap<UUID, List<BehandlingDto>> = mutableMapOf()
 
     private val sikkerLogger = LoggerFactory.getLogger("tjenestekall")

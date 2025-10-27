@@ -46,7 +46,7 @@ class PostTilkommenInntektGjenopprettBehandler : PostBehandler<TilkomneInntekter
                 transaksjon.tilkommenInntektRepository
                     .finnAlleForFødselsnummer(tilkommenInntekt.fødselsnummer)
                     .minus(tilkommenInntekt),
-            vedtaksperioder = transaksjon.vedtaksperiodeRepository.finnVedtaksperioder(tilkommenInntekt.fødselsnummer),
+            vedtaksperioder = transaksjon.legacyVedtaksperiodeRepository.finnVedtaksperioder(tilkommenInntekt.fødselsnummer),
         )
 
         tilkommenInntekt.gjenopprett(

@@ -15,8 +15,8 @@ import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.melding.VedtakFattetMelding
 import no.nav.helse.modell.melding.VedtakFattetMelding.SelvstendigNæringsdrivendeSykepengegrunnlagsfakta.PensjonsgivendeInntekt
 import no.nav.helse.modell.person.LegacyPerson
-import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode
-import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode.Companion.finnBehandling
+import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode
+import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode.Companion.finnBehandling
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.modell.vedtak.Skjønnsfastsettingstype
 import no.nav.helse.modell.vedtak.Skjønnsfastsettingsårsak
@@ -137,7 +137,7 @@ class AvsluttetMedVedtakRiver(
     private fun LegacyPerson.byggVedtaksmelding(
         packet: JsonMessage,
         behandling: LegacyBehandling,
-        vedtaksperiode: Vedtaksperiode,
+        vedtaksperiode: LegacyVedtaksperiode,
         godkjenningsbehov: Godkjenningsbehov?,
     ): UtgåendeHendelse {
         val fastsatt = packet["sykepengegrunnlagsfakta"]["fastsatt"].asText()

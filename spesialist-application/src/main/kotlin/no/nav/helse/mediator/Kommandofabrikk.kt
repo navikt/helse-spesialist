@@ -25,7 +25,7 @@ import no.nav.helse.modell.person.KlargjørTilgangsrelaterteDataCommand
 import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.modell.person.OppdaterPersondataCommand
 import no.nav.helse.modell.person.SøknadSendt
-import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode
+import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMelding
 import no.nav.helse.modell.utbetaling.UtbetalingEndret
@@ -149,7 +149,7 @@ class Kommandofabrikk(
 
     internal fun vedtaksperiodeReberegnet(
         hendelse: VedtaksperiodeReberegnet,
-        vedtaksperiode: Vedtaksperiode,
+        vedtaksperiode: LegacyVedtaksperiode,
         sessionContext: SessionContext,
     ): VedtaksperiodeReberegnetCommand =
         VedtaksperiodeReberegnetCommand(
@@ -201,7 +201,7 @@ class Kommandofabrikk(
         OppdaterPersondataCommand(
             fødselsnummer = hendelse.fødselsnummer(),
             førsteKjenteDagFinner = {
-                sessionContext.vedtaksperiodeRepository.førsteKjenteDag(
+                sessionContext.legacyVedtaksperiodeRepository.førsteKjenteDag(
                     hendelse.fødselsnummer(),
                 )
             },
@@ -305,7 +305,7 @@ class Kommandofabrikk(
     ): GodkjenningsbehovCommand {
         val utbetaling = sessionContext.utbetalingDao.hentUtbetaling(godkjenningsbehovData.utbetalingId)
         val førsteKjenteDagFinner = {
-            sessionContext.vedtaksperiodeRepository.førsteKjenteDag(
+            sessionContext.legacyVedtaksperiodeRepository.førsteKjenteDag(
                 godkjenningsbehovData.fødselsnummer,
             )
         }

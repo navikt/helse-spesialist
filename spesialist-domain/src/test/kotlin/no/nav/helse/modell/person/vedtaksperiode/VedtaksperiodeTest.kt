@@ -166,7 +166,7 @@ class VedtaksperiodeTest {
     @Test
     fun `Kan ikke gjenopprette vedtaksperiode uten behandlinger`() {
         assertThrows<IllegalStateException> {
-            Vedtaksperiode.gjenopprett("987654321", UUID.randomUUID(), false, emptyList())
+            LegacyVedtaksperiode.gjenopprett("987654321", UUID.randomUUID(), false, emptyList())
         }
     }
 
@@ -183,5 +183,5 @@ class VedtaksperiodeTest {
     private fun nyVedtaksperiode(
         vedtaksperiodeId: UUID,
         spleisBehandlingId: UUID = UUID.randomUUID(),
-    ) = Vedtaksperiode.nyVedtaksperiode(nySpleisBehandling(vedtaksperiodeId, spleisBehandlingId))
+    ) = LegacyVedtaksperiode.nyVedtaksperiode(nySpleisBehandling(vedtaksperiodeId, spleisBehandlingId))
 }

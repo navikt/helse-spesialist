@@ -3,9 +3,9 @@ package no.nav.helse.spesialist.kafka.rivers
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
+import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
-import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.domain.testfixtures.lagAktørId
@@ -228,7 +228,7 @@ class BehandlingOpprettetRiverIntegrationTest {
 
         // Then:
         legacyPersonRepository.brukPersonHvisFinnes(fødselsnummer) {
-            assertEquals(emptyList<Vedtaksperiode>(), vedtaksperioder())
+            assertEquals(emptyList<LegacyVedtaksperiode>(), vedtaksperioder())
         }
 
         val meldinger = testRapid.publiserteMeldingerUtenGenererteFelter()
@@ -256,7 +256,7 @@ class BehandlingOpprettetRiverIntegrationTest {
 
         // Then:
         legacyPersonRepository.brukPersonHvisFinnes(fødselsnummer) {
-            assertEquals(emptyList<Vedtaksperiode>(), vedtaksperioder())
+            assertEquals(emptyList<LegacyVedtaksperiode>(), vedtaksperioder())
         }
 
         val meldinger = testRapid.publiserteMeldingerUtenGenererteFelter()

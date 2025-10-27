@@ -46,7 +46,7 @@ class PostTilkommenInntektEndreBehandler : PostBehandler<TilkomneInntekter.Id.En
                 transaksjon.tilkommenInntektRepository
                     .finnAlleForFødselsnummer(tilkommenInntekt.fødselsnummer)
                     .minus(tilkommenInntekt),
-            vedtaksperioder = transaksjon.vedtaksperiodeRepository.finnVedtaksperioder(tilkommenInntekt.fødselsnummer),
+            vedtaksperioder = transaksjon.legacyVedtaksperiodeRepository.finnVedtaksperioder(tilkommenInntekt.fødselsnummer),
         )
 
         val arbeidsgiverFør = tilkommenInntekt.organisasjonsnummer

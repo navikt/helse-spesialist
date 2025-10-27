@@ -14,7 +14,7 @@ import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.kommando.VedtaksperiodeReberegnetPeriodehistorikk
 import no.nav.helse.modell.person.LegacyPerson
-import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode
+import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import java.util.UUID
 
@@ -50,7 +50,7 @@ class VedtaksperiodeReberegnet(
 
 internal class VedtaksperiodeReberegnetCommand(
     fødselsnummer: String,
-    vedtaksperiode: Vedtaksperiode,
+    vedtaksperiode: LegacyVedtaksperiode,
     periodehistorikkDao: PeriodehistorikkDao,
     commandContextDao: CommandContextDao,
     oppgaveService: OppgaveService,

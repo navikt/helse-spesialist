@@ -12,7 +12,7 @@ class InMemorySessionFactory(
     notatDao: NotatDao,
     oppgaveDao: OppgaveDao,
     dokumentDao: DokumentDao,
-    vedtaksperiodeRepository: InMemoryVedtaksperiodeRepository,
+    vedtaksperiodeRepository: InMemoryLegacyVedtaksperiodeRepository,
     dialogDao: InMemoryDialogDao,
     stansAutomatiskBehandlingDao: InMemoryStansAutomatiskBehandlingDao,
     annulleringRepository: InMemoryAnnulleringRepository,

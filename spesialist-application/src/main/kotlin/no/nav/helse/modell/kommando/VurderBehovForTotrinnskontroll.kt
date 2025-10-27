@@ -4,7 +4,7 @@ import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
 import no.nav.helse.modell.person.Sykefraværstilfelle
-import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode
+import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_BESLUTTER
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory
 
 internal class VurderBehovForTotrinnskontroll(
     private val fødselsnummer: String,
-    private val vedtaksperiode: Vedtaksperiode,
+    private val vedtaksperiode: LegacyVedtaksperiode,
     private val oppgaveService: OppgaveService,
     private val periodehistorikkDao: PeriodehistorikkDao,
     private val totrinnsvurderingRepository: TotrinnsvurderingRepository,

@@ -16,7 +16,7 @@ import java.util.UUID
 
 class PgVedtaksperiodeDbDtoRepositoryTest: AbstractDBIntegrationTest() {
 
-    private val pgVedtaksperiodeRepository = PgVedtaksperiodeRepository(
+    private val pgLegacyVedtaksperiodeRepository = PgLegacyVedtaksperiodeRepository(
         legacyBehandlingDao = PgLegacyBehandlingDao(session),
         vedtakDao = PgVedtakDao(session),
     )
@@ -75,9 +75,9 @@ class PgVedtaksperiodeDbDtoRepositoryTest: AbstractDBIntegrationTest() {
                 )
             )
         )
-        pgVedtaksperiodeRepository.lagreVedtaksperioder(person1, vedtaksperioder)
+        pgLegacyVedtaksperiodeRepository.lagreVedtaksperioder(person1, vedtaksperioder)
 
-        val funnet = pgVedtaksperiodeRepository.finnVedtaksperioder(person1)
+        val funnet = pgLegacyVedtaksperiodeRepository.finnVedtaksperioder(person1)
         assertEquals(vedtaksperioder.toSet(), funnet.toSet())
     }
 }

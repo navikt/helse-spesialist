@@ -5,9 +5,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
+import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode
+import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode.Companion.tilBehandling
 import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
-import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode
-import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode.Companion.tilBehandling
 import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
@@ -35,7 +35,7 @@ internal class OppdaterPersondataRiverIntegrationTest {
     private val testRapid = TestRapid()
     private val integrationTestFixture = IntegrationTestFixture(testRapid)
     private val legacyPersonRepository = integrationTestFixture.sessionFactory.sessionContext.legacyPersonRepository
-    private val vedtaksperiodeRepository = integrationTestFixture.sessionFactory.sessionContext.vedtaksperiodeRepository
+    private val vedtaksperiodeRepository = integrationTestFixture.sessionFactory.sessionContext.legacyVedtaksperiodeRepository
 
     private val fødselsnummer = lagFødselsnummer()
     private val vedtaksperiodeId = UUID.randomUUID()
@@ -136,7 +136,7 @@ internal class OppdaterPersondataRiverIntegrationTest {
                 aktørId = lagAktørId(),
                 fødselsnummer = fødselsnummer,
                 vedtaksperioder = vedtaksperioder.map { vedtaksperiodeDto ->
-                    Vedtaksperiode(
+                    LegacyVedtaksperiode(
                         organisasjonsnummer = vedtaksperiodeDto.organisasjonsnummer,
                         vedtaksperiodeId = vedtaksperiodeDto.vedtaksperiodeId,
                         forkastet = vedtaksperiodeDto.forkastet,

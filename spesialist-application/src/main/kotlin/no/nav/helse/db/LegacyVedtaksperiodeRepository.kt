@@ -3,7 +3,7 @@ package no.nav.helse.db
 import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
 import java.time.LocalDate
 
-interface VedtaksperiodeRepository {
+interface LegacyVedtaksperiodeRepository {
     fun finnVedtaksperioder(fødselsnummer: String): List<VedtaksperiodeDto>
 
     fun lagreVedtaksperioder(

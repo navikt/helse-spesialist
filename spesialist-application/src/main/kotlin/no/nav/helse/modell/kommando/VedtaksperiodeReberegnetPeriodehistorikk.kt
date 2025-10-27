@@ -2,10 +2,10 @@ package no.nav.helse.modell.kommando
 
 import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
-import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode
+import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode
 
 internal class VedtaksperiodeReberegnetPeriodehistorikk(
-    private val vedtaksperiode: Vedtaksperiode,
+    private val vedtaksperiode: LegacyVedtaksperiode,
     private val periodehistorikkDao: PeriodehistorikkDao,
 ) : Command {
     override fun execute(context: CommandContext): Boolean {

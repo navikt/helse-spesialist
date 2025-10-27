@@ -34,7 +34,7 @@ class InMemorySessionContext(
     override val oppgaveRepository: InMemoryOppgaveRepository,
     override val notatDao: NotatDao,
     override val oppgaveDao: OppgaveDao,
-    override val vedtaksperiodeRepository: InMemoryVedtaksperiodeRepository,
+    override val legacyVedtaksperiodeRepository: InMemoryLegacyVedtaksperiodeRepository,
     override val dialogDao: InMemoryDialogDao,
     override val stansAutomatiskBehandlingDao: InMemoryStansAutomatiskBehandlingDao,
     override val annulleringRepository: InMemoryAnnulleringRepository,

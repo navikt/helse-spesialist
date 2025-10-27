@@ -1,10 +1,10 @@
 package no.nav.helse.spesialist.application
 
-import no.nav.helse.db.VedtaksperiodeRepository
+import no.nav.helse.db.LegacyVedtaksperiodeRepository
 import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
 import java.util.UUID
 
-class InMemoryVedtaksperiodeRepository: VedtaksperiodeRepository {
+class InMemoryLegacyVedtaksperiodeRepository: LegacyVedtaksperiodeRepository {
     val vedtaksperioderPerFødselsnummer = mutableMapOf<String, MutableList<VedtaksperiodeDto>>()
 
     override fun finnVedtaksperioder(fødselsnummer: String) =

@@ -24,7 +24,7 @@ abstract class OpphevStansIntegrationTest {
     private val oppgaveRepository = integrationTestFixture.sessionFactory.sessionContext.oppgaveRepository
     private val stansAutomatiskBehandlingDao =
         integrationTestFixture.sessionFactory.sessionContext.stansAutomatiskBehandlingDao
-    private val vedtaksperiodeRepository = integrationTestFixture.sessionFactory.sessionContext.vedtaksperiodeRepository
+    private val vedtaksperiodeRepository = integrationTestFixture.sessionFactory.sessionContext.legacyVedtaksperiodeRepository
     private val personDao = integrationTestFixture.sessionFactory.sessionContext.personDao
 
     @Test

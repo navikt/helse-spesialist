@@ -39,7 +39,7 @@ class PostTilkomneInntekterBehandler : PostBehandler<TilkomneInntekter, ApiLeggT
             periode = periode,
             organisasjonsnummer = request.verdier.organisasjonsnummer,
             andreTilkomneInntekter = transaksjon.tilkommenInntektRepository.finnAlleForFødselsnummer(request.fodselsnummer),
-            vedtaksperioder = transaksjon.vedtaksperiodeRepository.finnVedtaksperioder(request.fodselsnummer),
+            vedtaksperioder = transaksjon.legacyVedtaksperiodeRepository.finnVedtaksperioder(request.fodselsnummer),
         )
 
         val tilkommenInntekt =

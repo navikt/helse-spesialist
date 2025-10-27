@@ -17,7 +17,7 @@ import no.nav.helse.mediator.meldinger.PoisonPills
 import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.SøknadSendt
-import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode
+import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode
 import no.nav.helse.modell.varsel.VarselRepository
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.spesialist.kafka.objectMapper
@@ -148,8 +148,8 @@ class MeldingMediator(
         dokumentDao.lagre(fødselsnummer, dokumentId, dokument)
     }
 
-    fun finnBehandlingerFor(fødselsnummer: String): List<Vedtaksperiode.BehandlingData> {
-        var behandlinger: List<Vedtaksperiode.BehandlingData> = emptyList()
+    fun finnBehandlingerFor(fødselsnummer: String): List<LegacyVedtaksperiode.BehandlingData> {
+        var behandlinger: List<LegacyVedtaksperiode.BehandlingData> = emptyList()
         sessionFactory.transactionalSessionScope { sessionContext ->
             sessionContext.legacyPersonRepository.brukPersonHvisFinnes(fødselsnummer) {
                 behandlinger = behandlinger()

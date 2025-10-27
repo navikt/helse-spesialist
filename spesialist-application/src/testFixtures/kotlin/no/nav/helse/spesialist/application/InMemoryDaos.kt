@@ -68,7 +68,7 @@ class InMemoryDaos(
     override val stansAutomatiskBehandlingDao: InMemoryStansAutomatiskBehandlingDao,
     override val annulleringRepository: InMemoryAnnulleringRepository,
     override val saksbehandlerRepository: InMemorySaksbehandlerRepository,
-    private val vedtaksperiodeRepository: InMemoryVedtaksperiodeRepository
+    private val vedtaksperiodeRepository: InMemoryLegacyVedtaksperiodeRepository
 ) : Daos {
     override val behandlingsstatistikkDao: BehandlingsstatistikkDao = object : BehandlingsstatistikkDao {
         override fun getAntallTilgjengeligeBeslutteroppgaver(): Int {

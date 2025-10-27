@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.domain.legacy
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
+import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
@@ -15,7 +16,6 @@ import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderVars
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderVarselOmNegativtBeløp
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderVarselOmTilbakedatering
 import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderVarselOmÅpenGosysOppgave
-import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.modell.vedtak.VedtakBegrunnelse
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.domain.Periode
@@ -123,7 +123,7 @@ class LegacyBehandling private constructor(
     internal fun harVarselOmManglendeInntektsmelding() = varsler.any { it.erVarselOmManglendeInntektsmelding() }
 
     internal fun håndter(
-        vedtaksperiode: Vedtaksperiode,
+        vedtaksperiode: LegacyVedtaksperiode,
         spleisVedtaksperiode: SpleisVedtaksperiode,
     ) {
         tilstand.spleisVedtaksperiode(vedtaksperiode, this, spleisVedtaksperiode)
@@ -277,7 +277,7 @@ class LegacyBehandling private constructor(
         }
 
         fun spleisVedtaksperiode(
-            vedtaksperiode: Vedtaksperiode,
+            vedtaksperiode: LegacyVedtaksperiode,
             legacyBehandling: LegacyBehandling,
             spleisVedtaksperiode: SpleisVedtaksperiode,
         ) {
@@ -342,7 +342,7 @@ class LegacyBehandling private constructor(
         }
 
         override fun spleisVedtaksperiode(
-            vedtaksperiode: Vedtaksperiode,
+            vedtaksperiode: LegacyVedtaksperiode,
             legacyBehandling: LegacyBehandling,
             spleisVedtaksperiode: SpleisVedtaksperiode,
         ) {
@@ -390,7 +390,7 @@ class LegacyBehandling private constructor(
         }
 
         override fun spleisVedtaksperiode(
-            vedtaksperiode: Vedtaksperiode,
+            vedtaksperiode: LegacyVedtaksperiode,
             legacyBehandling: LegacyBehandling,
             spleisVedtaksperiode: SpleisVedtaksperiode,
         ) {

@@ -12,7 +12,7 @@ import java.util.UUID
 class InMemoryRepositoriesAndDaos() {
     private val notatRepository = InMemoryNotatRepository()
     private val oppgaveRepository = InMemoryOppgaveRepository()
-    private val vedtaksperiodeRepository = InMemoryVedtaksperiodeRepository()
+    private val vedtaksperiodeRepository = InMemoryLegacyVedtaksperiodeRepository()
     private val notatDao = object : NotatDao {
         override fun lagreForOppgaveId(
             oppgaveId: Long,

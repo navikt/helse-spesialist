@@ -9,9 +9,9 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.VurderBehovForTotrinnskontroll
 import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingAutomatiskRetur
 import no.nav.helse.modell.person.Sykefraværstilfelle
+import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.person.vedtaksperiode.Varsel
-import no.nav.helse.modell.person.vedtaksperiode.Vedtaksperiode
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand
@@ -38,7 +38,7 @@ internal class VurderBehovForTotrinnskontrollTest {
     private companion object {
         private val VEDTAKSPERIODE_ID_2 = UUID.randomUUID()
         private val VEDTAKSPERIODE_ID_1 = UUID.randomUUID()
-        private val VEDTAKSPERIODE = Vedtaksperiode.nyVedtaksperiode(
+        private val VEDTAKSPERIODE = LegacyVedtaksperiode.nyVedtaksperiode(
             SpleisBehandling(
                 organisasjonsnummer = "987654321",
                 vedtaksperiodeId = VEDTAKSPERIODE_ID_2,
