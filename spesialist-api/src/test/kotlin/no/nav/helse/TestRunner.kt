@@ -13,6 +13,7 @@ import io.ktor.http.contentType
 import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.testing.testApplication
 import io.mockk.mockk
+import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.db.Daos
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.mediator.SaksbehandlerMediator
@@ -113,10 +114,10 @@ object TestRunner {
                     spesialistSchema = spesialistSchema,
                     restAdapter = avhengigheter.restAdapter,
                     dokumentMediator = avhengigheter.dokumentMediator,
-                    environmentToggles = object : no.nav.helse.bootstrap.EnvironmentToggles{
-                        override val kanBeslutteEgneSaker = false
-                        override val kanGodkjenneUtenBesluttertilgang = false
-                    },
+                    environmentToggles = object : EnvironmentToggles {
+                        override val kanBeslutteEgneSaker: Boolean = false
+                        override val kanGodkjenneUtenBesluttertilgang: Boolean = false
+                    }
                 )
             }
 
