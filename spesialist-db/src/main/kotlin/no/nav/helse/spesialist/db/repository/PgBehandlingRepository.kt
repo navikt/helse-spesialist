@@ -18,7 +18,7 @@ class PgBehandlingRepository(
     override fun finn(id: SpleisBehandlingId): Behandling? =
         asSQL(
             """
-            SELECT spleis_behandling_id, tags, p.fødselsnummer, b.fom, b.tom
+            SELECT spleis_behandling_id, tags, p.fødselsnummer, b.fom, b.tom, b.skjæringstidspunkt
             FROM behandling b
             INNER JOIN vedtak v on v.vedtaksperiode_id = b.vedtaksperiode_id
             INNER JOIN person p on p.id = v.person_ref
@@ -26,7 +26,7 @@ class PgBehandlingRepository(
         """,
             "spleis_behandling_id" to id.value,
         ).singleOrNull { row ->
-            row.mapTilbehandling()
+            row.mapTilBehandling()
         }
 
     override fun finnBehandlingerISykefraværstilfelle(
@@ -35,7 +35,7 @@ class PgBehandlingRepository(
     ): List<Behandling> =
         asSQL(
             """
-            SELECT DISTINCT ON (b.vedtaksperiode_id) spleis_behandling_id, tags, p.fødselsnummer, b.fom, b.tom
+            SELECT DISTINCT ON (b.vedtaksperiode_id) spleis_behandling_id, tags, p.fødselsnummer, b.fom, b.tom, b.skjæringstidspunkt
             FROM behandling b
                      INNER JOIN vedtak v on v.vedtaksperiode_id = b.vedtaksperiode_id
                      INNER JOIN person p on p.id = v.person_ref
@@ -46,7 +46,7 @@ class PgBehandlingRepository(
             "fodselsnummer" to fødselsnummer,
             "skjaeringstidspunkt" to skjæringstidspunkt,
         ).list { row ->
-            row.mapTilbehandling()
+            row.mapTilBehandling()
         }
 
     override fun lagre(behandling: Behandling) {
@@ -69,7 +69,7 @@ class PgBehandlingRepository(
             it.uuid("søknad_id")
         }.toSet()
 
-    private fun Row.mapTilbehandling(): Behandling {
+    private fun Row.mapTilBehandling(): Behandling {
         val spleisBehandlingId = SpleisBehandlingId(uuid("spleis_behandling_id"))
         return Behandling.fraLagring(
             id = spleisBehandlingId,
@@ -78,6 +78,7 @@ class PgBehandlingRepository(
             fom = localDate("fom"),
             tom = localDate("tom"),
             søknadIder = hentSøkadIderForBehandling(spleisBehandlingId),
+            skjæringstidspunkt = localDate("skjæringstidspunkt"),
         )
     }
 }

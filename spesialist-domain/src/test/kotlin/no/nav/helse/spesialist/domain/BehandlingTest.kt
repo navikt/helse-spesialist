@@ -16,18 +16,28 @@ class BehandlingTest {
     @ParameterizedTest()
     @MethodSource("utfallGittTagsSource")
     fun `tags gir utfall`(tags: Set<String>, expected: Utfall) {
-        val behandling = Behandling.fraLagring(SpleisBehandlingId(UUID.randomUUID()), tags = tags, lagFødselsnummer(), emptySet(), 1.jan(2018), 31.jan(2018))
+        val behandling = lagEnBehandling(tags)
         assertEquals(expected, behandling.utfall())
     }
 
     @ParameterizedTest
     @MethodSource("exceptionGittTagsSource")
     fun `tags gir exception`(tags: Set<String>) {
-        val behandling = Behandling.fraLagring(SpleisBehandlingId(UUID.randomUUID()), tags = tags, lagFødselsnummer(), emptySet(), 1.jan(2018), 31.jan(2018))
+        val behandling = lagEnBehandling(tags)
         assertThrows<IllegalStateException> {
             behandling.utfall()
         }
     }
+
+    private fun lagEnBehandling(tags: Set<String>): Behandling = Behandling.fraLagring(
+        id = SpleisBehandlingId(UUID.randomUUID()),
+        tags = tags,
+        fødselsnummer = lagFødselsnummer(),
+        søknadIder = emptySet(),
+        fom = 1.jan(2018),
+        tom = 31.jan(2018),
+        skjæringstidspunkt = 1.jan(2018),
+    )
 
     private companion object {
         @JvmStatic

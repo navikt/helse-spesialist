@@ -28,7 +28,7 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
             tags = tags,
             fødselsnummer = fødselsnummer,
             fom = fom,
-            tom = tom
+            tom = tom,
         )
 
         // when
@@ -41,6 +41,7 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
         assertEquals(fødselsnummer, funnet.fødselsnummer)
         assertEquals(fom, funnet.fom)
         assertEquals(tom, funnet.tom)
+        assertEquals(fom, funnet.skjæringstidspunkt) //ved ny behandling defaultes skjæringstidspunkt til fom
     }
 
     @Test
