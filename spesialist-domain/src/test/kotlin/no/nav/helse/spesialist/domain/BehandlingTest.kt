@@ -2,7 +2,6 @@ package no.nav.helse.spesialist.domain
 
 import no.nav.helse.modell.vedtak.Utfall
 import no.nav.helse.spesialist.domain.testfixtures.jan
-import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
@@ -32,7 +31,6 @@ class BehandlingTest {
     private fun lagEnBehandling(tags: Set<String>): Behandling = Behandling.fraLagring(
         id = SpleisBehandlingId(UUID.randomUUID()),
         tags = tags,
-        fødselsnummer = lagFødselsnummer(),
         søknadIder = emptySet(),
         fom = 1.jan(2018),
         tom = 31.jan(2018),

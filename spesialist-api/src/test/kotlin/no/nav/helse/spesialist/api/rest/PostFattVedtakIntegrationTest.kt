@@ -236,7 +236,6 @@ class PostFattVedtakIntegrationTest {
     ): Behandling = Behandling.fraLagring(
         id = SpleisBehandlingId(behandlingId),
         tags = emptySet(),
-        fødselsnummer = fødselsnummer,
         søknadIder = emptySet(),
         fom = 1.jan(2018),
         tom = 31.jan(2018),

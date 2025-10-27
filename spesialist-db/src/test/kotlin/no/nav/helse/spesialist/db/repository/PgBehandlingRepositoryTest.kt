@@ -43,7 +43,6 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
         assertEquals(spleisBehandlingId, funnet.id.value)
         assertEquals(vedtaksperiodeId, funnet.vedtaksperiodeId.value)
         assertEquals(tags.toSet(), funnet.tags)
-        assertEquals(fødselsnummer, funnet.fødselsnummer)
         assertEquals(fom, funnet.fom)
         assertEquals(tom, funnet.tom)
         assertEquals(fom, funnet.skjæringstidspunkt) //ved ny behandling defaultes skjæringstidspunkt til fom
@@ -118,7 +117,6 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
             Behandling.fraLagring(
                 id = SpleisBehandlingId(UUID.randomUUID()),
                 tags = emptySet(),
-                fødselsnummer = fødselsnummer,
                 søknadIder = emptySet(),
                 fom = 1.jan(2018),
                 tom = 31.jan(2018),
@@ -165,7 +163,6 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
             Behandling.fraLagring(
                 id = SpleisBehandlingId(UUID.randomUUID()),
                 tags = emptySet(),
-                fødselsnummer = fødselsnummer,
                 søknadIder = emptySet(),
                 fom = 1.jan(2018),
                 tom = 31.jan(2018),
@@ -201,7 +198,6 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
             Behandling.fraLagring(
                 id = SpleisBehandlingId(UUID.randomUUID()),
                 tags = emptySet(),
-                fødselsnummer = lagFødselsnummer(),
                 søknadIder = emptySet(),
                 fom = 1.jan(2018),
                 tom = 31.jan(2018),

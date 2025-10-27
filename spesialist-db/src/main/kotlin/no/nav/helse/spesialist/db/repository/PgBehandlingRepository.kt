@@ -18,10 +18,9 @@ class PgBehandlingRepository(
     override fun finn(id: SpleisBehandlingId): Behandling? =
         asSQL(
             """
-            SELECT b.vedtaksperiode_id, spleis_behandling_id, tags, p.fødselsnummer, b.fom, b.tom, b.skjæringstidspunkt
+            SELECT b.vedtaksperiode_id, spleis_behandling_id, tags, b.fom, b.tom, b.skjæringstidspunkt
             FROM behandling b
             INNER JOIN vedtak v on v.vedtaksperiode_id = b.vedtaksperiode_id
-            INNER JOIN person p on p.id = v.person_ref
             WHERE b.spleis_behandling_id = :spleis_behandling_id
         """,
             "spleis_behandling_id" to id.value,
@@ -33,7 +32,7 @@ class PgBehandlingRepository(
     ): Set<Behandling> =
         asSQL(
             """
-            SELECT DISTINCT ON (b.vedtaksperiode_id) b.vedtaksperiode_id, spleis_behandling_id, tags, p.fødselsnummer, b.fom, b.tom, b.skjæringstidspunkt
+            SELECT DISTINCT ON (b.vedtaksperiode_id) b.vedtaksperiode_id, spleis_behandling_id, tags, b.fom, b.tom, b.skjæringstidspunkt
             FROM behandling b
                      INNER JOIN vedtak v on v.vedtaksperiode_id = b.vedtaksperiode_id
                      INNER JOIN person p on p.id = v.person_ref
@@ -86,7 +85,6 @@ class PgBehandlingRepository(
             id = spleisBehandlingId,
             vedtaksperiodeId = VedtaksperiodeId(row.uuid("vedtaksperiode_id")),
             tags = row.array<String>("tags").toSet(),
-            fødselsnummer = row.string("fødselsnummer"),
             fom = row.localDate("fom"),
             tom = row.localDate("tom"),
             skjæringstidspunkt = row.localDate("skjæringstidspunkt"),
