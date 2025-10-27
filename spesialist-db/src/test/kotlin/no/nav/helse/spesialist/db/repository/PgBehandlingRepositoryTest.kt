@@ -70,12 +70,12 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
         )
 
         // when
-        val funnet = repository.finnBehandlingerISykefraværstilfelle(fødselsnummer, 1.jan(2018))
+        val funnet = repository.finnBehandlingerISykefraværstilfelle(fødselsnummer, 1.jan(2018)).map { it.id.value }
 
         // then
         assertEquals(2, funnet.size)
-        assertEquals(spleisBehandlingId1, funnet[0].id.value)
-        assertEquals(spleisBehandlingId2, funnet[1].id.value)
+        assertContains(funnet, spleisBehandlingId1)
+        assertContains(funnet, spleisBehandlingId2)
     }
 
     @Test

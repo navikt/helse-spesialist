@@ -48,7 +48,7 @@ class PgBehandlingRepository(
                      LEFT JOIN behandling_soknad bs ON b.spleis_behandling_id = bs.behandling_id
             WHERE fødselsnummer = :fodselsnummer
               AND skjæringstidspunkt = :skjaeringstidspunkt
-            GROUP BY b.vedtaksperiode_id, b.spleis_behandling_id, b.id, tags, p.fødselsnummer
+            GROUP BY b.vedtaksperiode_id, b.id, tags, p.fødselsnummer
             ORDER BY b.vedtaksperiode_id, b.id DESC
         """,
             "fodselsnummer" to fødselsnummer,
