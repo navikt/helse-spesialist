@@ -41,6 +41,7 @@ class PgBehandlingRepositoryTest: AbstractDBIntegrationTest() {
         // given
         val spleisBehandlingId1 = UUID.randomUUID()
         val spleisBehandlingId2 = UUID.randomUUID()
+        val spleisBehandlingId3 = UUID.randomUUID()
         val tags = listOf("FOOBAR")
         val fødselsnummer = lagFødselsnummer()
         opprettPerson(fødselsnummer = fødselsnummer)
@@ -48,18 +49,21 @@ class PgBehandlingRepositoryTest: AbstractDBIntegrationTest() {
         opprettBehandling(
             fom = 1.jan(2018),
             spleisBehandlingId = spleisBehandlingId1,
+            vedtaksperiodeId = UUID.randomUUID(),
             tags = tags,
             fødselsnummer = fødselsnummer
         )
         opprettBehandling(
             fom = 1.jan(2018),
             spleisBehandlingId = spleisBehandlingId2,
+            vedtaksperiodeId = UUID.randomUUID(),
             tags = tags,
             fødselsnummer = fødselsnummer
         )
         opprettBehandling(
             fom = 2.jan(2018),
-            spleisBehandlingId = spleisBehandlingId2,
+            spleisBehandlingId = spleisBehandlingId3,
+            vedtaksperiodeId = UUID.randomUUID(),
             tags = tags,
             fødselsnummer = fødselsnummer
         )
