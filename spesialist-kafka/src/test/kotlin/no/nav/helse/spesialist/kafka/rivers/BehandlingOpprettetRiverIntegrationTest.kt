@@ -3,9 +3,9 @@ package no.nav.helse.spesialist.kafka.rivers
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
+import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
-import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.domain.testfixtures.lagAktørId
@@ -60,7 +60,7 @@ class BehandlingOpprettetRiverIntegrationTest {
             assertEquals("VidereBehandlingAvklares", behandling.tilstand.navn())
             assertEquals(emptyList<String>(), behandling.tags)
             assertEquals(null, behandling.vedtakBegrunnelse)
-            assertEquals(emptyList<Varsel>(), behandling.varsler())
+            assertEquals(emptyList<LegacyVarsel>(), behandling.varsler())
             assertEquals(Yrkesaktivitetstype.ARBEIDSTAKER, behandling.yrkesaktivitetstype)
         }
 
@@ -131,7 +131,7 @@ class BehandlingOpprettetRiverIntegrationTest {
             assertEquals("VidereBehandlingAvklares", behandling.tilstand.navn())
             assertEquals(emptyList<String>(), behandling.tags)
             assertEquals(null, behandling.vedtakBegrunnelse)
-            assertEquals(emptyList<Varsel>(), behandling.varsler())
+            assertEquals(emptyList<LegacyVarsel>(), behandling.varsler())
             assertEquals(Yrkesaktivitetstype.ARBEIDSTAKER, behandling.yrkesaktivitetstype)
         }
 
@@ -199,7 +199,7 @@ class BehandlingOpprettetRiverIntegrationTest {
             assertEquals("KlarTilBehandling", behandling.tilstand.navn())
             assertEquals(emptyList<String>(), behandling.tags)
             assertEquals(null, behandling.vedtakBegrunnelse)
-            assertEquals(emptyList<Varsel>(), behandling.varsler())
+            assertEquals(emptyList<LegacyVarsel>(), behandling.varsler())
             assertEquals(Yrkesaktivitetstype.ARBEIDSTAKER, behandling.yrkesaktivitetstype)
         }
 
@@ -298,7 +298,7 @@ class BehandlingOpprettetRiverIntegrationTest {
             assertEquals("VidereBehandlingAvklares", behandling.tilstand.navn())
             assertEquals(emptyList<String>(), behandling.tags)
             assertEquals(null, behandling.vedtakBegrunnelse)
-            assertEquals(emptyList<Varsel>(), behandling.varsler())
+            assertEquals(emptyList<LegacyVarsel>(), behandling.varsler())
             assertEquals(Yrkesaktivitetstype.SELVSTENDIG, behandling.yrkesaktivitetstype)
         }
 

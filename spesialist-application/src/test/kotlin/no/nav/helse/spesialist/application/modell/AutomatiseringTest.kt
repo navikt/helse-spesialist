@@ -18,7 +18,7 @@ import no.nav.helse.modell.automatisering.Automatiseringsresultat
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.person.Sykefraværstilfelle
-import no.nav.helse.modell.person.vedtaksperiode.Varsel
+import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode
 import no.nav.helse.modell.risiko.Risikovurdering
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
@@ -389,7 +389,7 @@ internal class AutomatiseringTest {
         varselId: UUID = UUID.randomUUID(),
         vedtaksperiodeId: UUID = this.vedtaksperiodeId,
         varselkode: String = "RV_IM_1",
-    ) = Varsel(varselId, varselkode, LocalDateTime.now(), vedtaksperiodeId)
+    ) = LegacyVarsel(varselId, varselkode, LocalDateTime.now(), vedtaksperiodeId)
 
     private fun blirManuellOppgave(
         utbetaling: Utbetaling = enUtbetaling(),

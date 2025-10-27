@@ -1,6 +1,6 @@
 package no.nav.helse.spesialist.db.dao
 
-import no.nav.helse.modell.varsel.VarselRepository
+import no.nav.helse.modell.varsel.LegacyVarselRepository
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.modell.varsel.VarseldefinisjonDto
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
@@ -9,9 +9,9 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.UUID
 
-internal class VarselRepositoryTest : AbstractDBIntegrationTest() {
-    private val varselRepository  = VarselRepository(
-        varselDao = daos.varselDao,
+internal class LegacyVarselRepositoryTest : AbstractDBIntegrationTest() {
+    private val legacyVarselRepository  = LegacyVarselRepository(
+        legacyVarselDao = daos.legacyVarselDao,
         definisjonDao = daos.definisjonDao
     )
     private val definisjonDao = daos.definisjonDao
@@ -21,7 +21,7 @@ internal class VarselRepositoryTest : AbstractDBIntegrationTest() {
         val definisjonId = UUID.randomUUID()
         val definisjonDto =
             VarseldefinisjonDto(definisjonId, "EN_KODE", "EN_TITTEL", "EN_FORKLARING", "EN_HANDLING", false, LocalDateTime.now())
-        varselRepository.lagreDefinisjon(definisjonDto)
+        legacyVarselRepository.lagreDefinisjon(definisjonDto)
         assertEquals(
             Varseldefinisjon(
                 id = definisjonId,

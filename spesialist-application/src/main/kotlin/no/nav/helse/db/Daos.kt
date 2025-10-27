@@ -40,7 +40,7 @@ interface Daos {
     val saksbehandlerDao: SaksbehandlerDao
     val stansAutomatiskBehandlingDao: StansAutomatiskBehandlingDao
     val tildelingDao: TildelingDao
-    val varselDao: VarselDao
+    val legacyVarselDao: LegacyVarselDao
     val vedtakDao: VedtakDao
     val vedtakBegrunnelseDao: VedtakBegrunnelseDao
     val stansAutomatiskBehandlingSaksbehandlerDao: StansAutomatiskBehandlingSaksbehandlerDao

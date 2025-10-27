@@ -10,7 +10,7 @@ import org.junit.jupiter.api.assertThrows
 import java.time.LocalDateTime
 import java.util.UUID
 
-class VedtaksperiodeTest {
+class LegacyVedtaksperiodeTest {
     @Test
     fun `ignorerer behandling som ikke er relevant for vedtaksperioden`() {
         val vedtaksperiodeId = UUID.randomUUID()
@@ -152,7 +152,7 @@ class VedtaksperiodeTest {
         val vedtaksperiodeId = UUID.randomUUID()
         val spleisBehandlingId = UUID.randomUUID()
         val vedtaksperiode = nyVedtaksperiode(vedtaksperiodeId, spleisBehandlingId)
-        vedtaksperiode.nyeVarsler(listOf(Varsel(UUID.randomUUID(), "RV_IM_1", LocalDateTime.now(), vedtaksperiodeId)))
+        vedtaksperiode.nyeVarsler(listOf(LegacyVarsel(UUID.randomUUID(), "RV_IM_1", LocalDateTime.now(), vedtaksperiodeId)))
         vedtaksperiode.finnBehandling(spleisBehandlingId).avsluttetUtenVedtak()
 
         vedtaksperiode.nyttGodkjenningsbehov(
@@ -178,7 +178,7 @@ class VedtaksperiodeTest {
     private fun nyttVarsel(
         vedtaksperiodeId: UUID,
         varselkode: String = "SB_EX_1",
-    ) = Varsel(UUID.randomUUID(), varselkode, LocalDateTime.now(), vedtaksperiodeId)
+    ) = LegacyVarsel(UUID.randomUUID(), varselkode, LocalDateTime.now(), vedtaksperiodeId)
 
     private fun nyVedtaksperiode(
         vedtaksperiodeId: UUID,

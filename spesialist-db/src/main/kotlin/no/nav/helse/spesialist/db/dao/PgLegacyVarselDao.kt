@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.db.dao
 
-import no.nav.helse.db.VarselDao
-import no.nav.helse.modell.person.vedtaksperiode.Varsel.Status
+import no.nav.helse.db.LegacyVarselDao
+import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Status
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.QueryRunner
@@ -9,9 +9,9 @@ import java.time.LocalDateTime
 import java.util.UUID
 import javax.sql.DataSource
 
-class PgVarselDao internal constructor(
+class PgLegacyVarselDao internal constructor(
     dataSource: DataSource,
-) : VarselDao,
+) : LegacyVarselDao,
     QueryRunner by MedDataSource(dataSource) {
     override fun avvikleVarsel(
         varselkode: String,

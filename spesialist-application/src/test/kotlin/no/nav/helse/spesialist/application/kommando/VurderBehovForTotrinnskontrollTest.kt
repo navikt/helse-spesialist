@@ -9,9 +9,9 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.VurderBehovForTotrinnskontroll
 import no.nav.helse.modell.periodehistorikk.TotrinnsvurderingAutomatiskRetur
 import no.nav.helse.modell.person.Sykefraværstilfelle
+import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
-import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand
@@ -110,7 +110,7 @@ internal class VurderBehovForTotrinnskontrollTest {
     @Test
     fun `Oppretter totrinssvurdering dersom vedtaksperioden har varsel for lovvalg og medlemskap, og ikke har hatt oppgave som har vært ferdigstilt før`() {
         sykefraværstilfelle.håndter(
-            Varsel(UUID.randomUUID(), "RV_MV_1", LocalDateTime.now(), VEDTAKSPERIODE_ID_2),
+            LegacyVarsel(UUID.randomUUID(), "RV_MV_1", LocalDateTime.now(), VEDTAKSPERIODE_ID_2),
         )
         every { oppgaveService.harFerdigstiltOppgave(VEDTAKSPERIODE_ID_2) } returns false
 
@@ -121,7 +121,7 @@ internal class VurderBehovForTotrinnskontrollTest {
     @Test
     fun `Oppretter totrinssvurdering dersom vedtaksperioden har varsel for manglende inntektsmelding, og ikke har hatt oppgave som har vært ferdigstilt før`() {
         sykefraværstilfelle.håndter(
-            Varsel(UUID.randomUUID(), "RV_IV_10", LocalDateTime.now(), VEDTAKSPERIODE_ID_2),
+            LegacyVarsel(UUID.randomUUID(), "RV_IV_10", LocalDateTime.now(), VEDTAKSPERIODE_ID_2),
         )
         every { oppgaveService.harFerdigstiltOppgave(VEDTAKSPERIODE_ID_2) } returns false
 
@@ -130,12 +130,12 @@ internal class VurderBehovForTotrinnskontrollTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = Varsel.Status::class, names = ["AKTIV"], mode = EnumSource.Mode.EXCLUDE)
+    @EnumSource(value = LegacyVarsel.Status::class, names = ["AKTIV"], mode = EnumSource.Mode.EXCLUDE)
     fun `Oppretter ikke totrinnssvurdering dersom tidligere vedtaksperiode har varsel for lovvalg og medlemskap og er utbetalt`(
-        status: Varsel.Status,
+        status: LegacyVarsel.Status,
     ) {
         sykefraværstilfelle.håndter(
-            Varsel(UUID.randomUUID(), "RV_MV_1", LocalDateTime.now(), VEDTAKSPERIODE_ID_1, status),
+            LegacyVarsel(UUID.randomUUID(), "RV_MV_1", LocalDateTime.now(), VEDTAKSPERIODE_ID_1, status),
         )
         every { oppgaveService.harFerdigstiltOppgave(VEDTAKSPERIODE_ID_2) } returns false
 
@@ -144,12 +144,12 @@ internal class VurderBehovForTotrinnskontrollTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = Varsel.Status::class, names = ["AKTIV"], mode = EnumSource.Mode.EXCLUDE)
+    @EnumSource(value = LegacyVarsel.Status::class, names = ["AKTIV"], mode = EnumSource.Mode.EXCLUDE)
     fun `Oppretter ikke totrinnssvurdering dersom tidligere vedtaksperiode har varsel for manglende inntektsmelding og er utbetalt`(
-        status: Varsel.Status,
+        status: LegacyVarsel.Status,
     ) {
         sykefraværstilfelle.håndter(
-            Varsel(UUID.randomUUID(), "RV_IV_10", LocalDateTime.now(), VEDTAKSPERIODE_ID_1, status),
+            LegacyVarsel(UUID.randomUUID(), "RV_IV_10", LocalDateTime.now(), VEDTAKSPERIODE_ID_1, status),
         )
         every { oppgaveService.harFerdigstiltOppgave(VEDTAKSPERIODE_ID_2) } returns false
 

@@ -89,7 +89,7 @@ class LegacyVedtaksperiode(
         forkastet = true
     }
 
-    internal fun nyeVarsler(nyeVarsler: List<Varsel>) {
+    internal fun nyeVarsler(nyeVarsler: List<LegacyVarsel>) {
         val varsler = nyeVarsler.filter { it.erRelevantFor(vedtaksperiodeId) }
         if (forkastet || varsler.isEmpty()) return
         varsler.forEach { gjeldendeBehandling.håndterNyttVarsel(it) }
@@ -181,19 +181,19 @@ class LegacyVedtaksperiode(
                 varsler =
                     varsler
                         .map { varselDto ->
-                            Varsel(
+                            LegacyVarsel(
                                 id = varselDto.id,
                                 varselkode = varselDto.varselkode,
                                 opprettet = varselDto.opprettet,
                                 vedtaksperiodeId = varselDto.vedtaksperiodeId,
                                 status =
                                     when (varselDto.status) {
-                                        VarselStatusDto.AKTIV -> Varsel.Status.AKTIV
-                                        VarselStatusDto.INAKTIV -> Varsel.Status.INAKTIV
-                                        VarselStatusDto.GODKJENT -> Varsel.Status.GODKJENT
-                                        VarselStatusDto.VURDERT -> Varsel.Status.VURDERT
-                                        VarselStatusDto.AVVIST -> Varsel.Status.AVVIST
-                                        VarselStatusDto.AVVIKLET -> Varsel.Status.AVVIKLET
+                                        VarselStatusDto.AKTIV -> LegacyVarsel.Status.AKTIV
+                                        VarselStatusDto.INAKTIV -> LegacyVarsel.Status.INAKTIV
+                                        VarselStatusDto.GODKJENT -> LegacyVarsel.Status.GODKJENT
+                                        VarselStatusDto.VURDERT -> LegacyVarsel.Status.VURDERT
+                                        VarselStatusDto.AVVIST -> LegacyVarsel.Status.AVVIST
+                                        VarselStatusDto.AVVIKLET -> LegacyVarsel.Status.AVVIKLET
                                     },
                             )
                         }.toSet(),

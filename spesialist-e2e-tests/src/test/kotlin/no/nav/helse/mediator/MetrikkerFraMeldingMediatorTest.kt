@@ -6,7 +6,7 @@ import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import io.mockk.mockk
 import no.nav.helse.Meldingssender
 import no.nav.helse.e2e.AbstractDatabaseTest
-import no.nav.helse.modell.varsel.VarselRepository
+import no.nav.helse.modell.varsel.LegacyVarselRepository
 import no.nav.helse.spesialist.db.TransactionalSessionFactory
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -30,8 +30,8 @@ class MetrikkerFraMeldingMediatorTest : AbstractDatabaseTest() {
             meldingDuplikatkontrollDao = daos.meldingDuplikatkontrollDao,
             kommandofabrikk = kommandofabrikk,
             dokumentDao = daos.dokumentDao,
-            varselRepository = VarselRepository(
-                varselDao = daos.varselDao,
+            legacyVarselRepository = LegacyVarselRepository(
+                legacyVarselDao = daos.legacyVarselDao,
                 definisjonDao = daos.definisjonDao
             ),
             poisonPillDao = daos.poisonPillDao,

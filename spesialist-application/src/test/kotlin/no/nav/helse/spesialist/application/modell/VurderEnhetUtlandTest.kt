@@ -9,7 +9,7 @@ import no.nav.helse.db.PersonDao
 import no.nav.helse.db.VergemålDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.Sykefraværstilfelle
-import no.nav.helse.modell.person.vedtaksperiode.Varsel
+import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel
 import no.nav.helse.modell.varsel.VurderEnhetUtland
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -32,7 +32,7 @@ internal class VurderEnhetUtlandTest {
 
     @Test
     fun `skal legge på varsel om utland`() {
-        val slot = slot<Varsel>()
+        val slot = slot<LegacyVarsel>()
         every { personDao.finnEnhetId(fødselsnummer) } returns "0393"
         assertTrue(hentCommand().execute(context))
         verify(exactly = 1) { sykefraværstilfelle.håndter(capture(slot)) }
@@ -41,7 +41,7 @@ internal class VurderEnhetUtlandTest {
 
     @Test
     fun `skal legge på varsel for utland også ved revurdering`() {
-        val slot = slot<Varsel>()
+        val slot = slot<LegacyVarsel>()
         every { personDao.finnEnhetId(fødselsnummer) } returns "0393"
         assertTrue(hentCommand().execute(context))
         verify(exactly = 1) { sykefraværstilfelle.håndter(capture(slot)) }

@@ -18,7 +18,7 @@ import no.nav.helse.mediator.meldinger.Vedtaksperiodemelding
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode
-import no.nav.helse.modell.varsel.VarselRepository
+import no.nav.helse.modell.varsel.LegacyVarselRepository
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.spesialist.kafka.objectMapper
 import org.slf4j.LoggerFactory
@@ -33,7 +33,7 @@ class MeldingMediator(
     private val meldingDuplikatkontrollDao: MeldingDuplikatkontrollDao,
     private val kommandofabrikk: Kommandofabrikk,
     private val dokumentDao: DokumentDao,
-    private val varselRepository: VarselRepository,
+    private val legacyVarselRepository: LegacyVarselRepository,
     private val poisonPillDao: PoisonPillDao,
     private val ignorerMeldingerForUkjentePersoner: Boolean,
     poisonPillTimeToLive: Duration = Duration.ofMinutes(1),
@@ -134,9 +134,9 @@ class MeldingMediator(
 
     fun håndter(varseldefinisjon: Varseldefinisjon) {
         val varseldefinisjonDto = varseldefinisjon.toDto()
-        varselRepository.lagreDefinisjon(varseldefinisjonDto)
+        legacyVarselRepository.lagreDefinisjon(varseldefinisjonDto)
         if (varseldefinisjonDto.avviklet) {
-            varselRepository.avvikleVarsel(varseldefinisjonDto)
+            legacyVarselRepository.avvikleVarsel(varseldefinisjonDto)
         }
     }
 

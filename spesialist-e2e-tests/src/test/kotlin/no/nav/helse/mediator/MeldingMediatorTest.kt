@@ -8,7 +8,7 @@ import no.nav.helse.db.PoisonPillDao
 import no.nav.helse.e2e.AbstractDatabaseTest
 import no.nav.helse.mediator.meldinger.PoisonPills
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode
-import no.nav.helse.modell.varsel.VarselRepository
+import no.nav.helse.modell.varsel.LegacyVarselRepository
 import no.nav.helse.modell.varsel.Varseldefinisjon
 import no.nav.helse.spesialist.db.TransactionalSessionFactory
 import org.intellij.lang.annotations.Language
@@ -38,8 +38,8 @@ class MeldingMediatorTest : AbstractDatabaseTest() {
             meldingDuplikatkontrollDao = daos.meldingDuplikatkontrollDao,
             kommandofabrikk = kommandofabrikk,
             dokumentDao = daos.dokumentDao,
-            varselRepository = VarselRepository(
-                varselDao = daos.varselDao,
+            legacyVarselRepository = LegacyVarselRepository(
+                legacyVarselDao = daos.legacyVarselDao,
                 definisjonDao = daos.definisjonDao
             ),
             poisonPillDao = poisonPillDao,

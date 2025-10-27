@@ -12,7 +12,7 @@ import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Stikkprøver
-import no.nav.helse.modell.varsel.VarselRepository
+import no.nav.helse.modell.varsel.LegacyVarselRepository
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
 
 class KafkaModule(
@@ -60,9 +60,9 @@ class KafkaModule(
                             stikkprøver = stikkprøver,
                         ),
                     dokumentDao = daos.dokumentDao,
-                    varselRepository =
-                        VarselRepository(
-                            varselDao = daos.varselDao,
+                    legacyVarselRepository =
+                        LegacyVarselRepository(
+                            legacyVarselDao = daos.legacyVarselDao,
                             definisjonDao = daos.definisjonDao,
                         ),
                     poisonPillDao = daos.poisonPillDao,

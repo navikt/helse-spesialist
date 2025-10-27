@@ -1,11 +1,11 @@
 package no.nav.helse.modell.person
 
+import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode.Companion.finnBehandling
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode.Companion.relevanteFor
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
-import no.nav.helse.modell.person.vedtaksperiode.Varsel
 import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
 import no.nav.helse.modell.vedtak.AvsluttetUtenVedtak
 import no.nav.helse.modell.vedtak.SkjønnsfastsattSykepengegrunnlag
@@ -117,7 +117,7 @@ class LegacyPerson(
         )
     }
 
-    fun nyeVarsler(varsler: List<Varsel>) {
+    fun nyeVarsler(varsler: List<LegacyVarsel>) {
         vedtaksperioder.forEach { it.nyeVarsler(varsler) }
     }
 

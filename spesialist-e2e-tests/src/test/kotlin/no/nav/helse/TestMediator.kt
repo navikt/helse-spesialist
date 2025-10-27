@@ -12,7 +12,7 @@ import no.nav.helse.mediator.Subsumsjonsmelder
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Stikkprøver
-import no.nav.helse.modell.varsel.VarselRepository
+import no.nav.helse.modell.varsel.LegacyVarselRepository
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
 import no.nav.helse.spesialist.db.DBDaos
 import no.nav.helse.spesialist.db.TransactionalSessionFactory
@@ -90,8 +90,8 @@ class TestMediator(
             meldingDuplikatkontrollDao = daos.meldingDuplikatkontrollDao,
             kommandofabrikk = kommandofabrikk,
             dokumentDao = daos.dokumentDao,
-            varselRepository = VarselRepository(
-                varselDao = daos.varselDao,
+            legacyVarselRepository = LegacyVarselRepository(
+                legacyVarselDao = daos.legacyVarselDao,
                 definisjonDao = daos.definisjonDao
             ),
             poisonPillDao = daos.poisonPillDao,

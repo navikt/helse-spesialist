@@ -13,7 +13,7 @@ import no.nav.helse.modell.melding.VedtaksperiodeAvvistManuelt
 import no.nav.helse.modell.melding.VedtaksperiodeGodkjentAutomatisk
 import no.nav.helse.modell.melding.VedtaksperiodeGodkjentManuelt
 import no.nav.helse.modell.person.Sykefraværstilfelle
-import no.nav.helse.modell.person.vedtaksperiode.Varsel
+import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
@@ -187,8 +187,8 @@ internal class GodkjenningMediatorTest {
         val vedtaksperiodeId2 = UUID.randomUUID()
         val generasjon1 = generasjon(generasjonId1, vedtaksperiodeId1)
         val generasjon2 = generasjon(generasjonId2, vedtaksperiodeId2)
-        val varsel1 = Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId1)
-        val varsel2 = Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId2)
+        val varsel1 = LegacyVarsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId1)
+        val varsel2 = LegacyVarsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId2)
         generasjon1.håndterNyttVarsel(varsel1)
         generasjon2.håndterNyttVarsel(varsel2)
 

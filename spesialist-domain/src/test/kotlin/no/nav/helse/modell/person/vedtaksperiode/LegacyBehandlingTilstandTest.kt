@@ -37,7 +37,7 @@ internal class LegacyBehandlingTilstandTest {
     fun `Går fra VidereBehandlingAvklares til AvsluttetUtenVedtakMedVarsler ved avsluttet uten vedtak og har varsler`() {
         val behandlingId = UUID.randomUUID()
         val behandling = behandling(behandlingId, UUID.randomUUID())
-        behandling.håndterNyttVarsel(Varsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), UUID.randomUUID()))
+        behandling.håndterNyttVarsel(LegacyVarsel(UUID.randomUUID(), "EN_KODE", LocalDateTime.now(), UUID.randomUUID()))
         behandling.assertTilstand(TilstandDto.VidereBehandlingAvklares)
         behandling.avsluttetUtenVedtak()
         behandling.assertTilstand(TilstandDto.AvsluttetUtenVedtak)
@@ -103,7 +103,7 @@ internal class LegacyBehandlingTilstandTest {
         behandling.avsluttetUtenVedtak()
         behandling.assertTilstand(TilstandDto.AvsluttetUtenVedtak)
 
-        behandling.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId))
+        behandling.håndterNyttVarsel(LegacyVarsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId))
         behandling.assertTilstand(TilstandDto.AvsluttetUtenVedtakMedVarsler)
         behandling.assertAntallVarsler(1)
     }
@@ -117,7 +117,7 @@ internal class LegacyBehandlingTilstandTest {
         behandling.avsluttetUtenVedtak()
         behandling.assertTilstand(TilstandDto.AvsluttetUtenVedtak)
 
-        behandling.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId))
+        behandling.håndterNyttVarsel(LegacyVarsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId))
         behandling.assertTilstand(TilstandDto.AvsluttetUtenVedtakMedVarsler)
         behandling.assertAntallVarsler(1)
 
@@ -134,7 +134,7 @@ internal class LegacyBehandlingTilstandTest {
         behandling.avsluttetUtenVedtak()
         behandling.assertTilstand(TilstandDto.AvsluttetUtenVedtak)
 
-        behandling.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId))
+        behandling.håndterNyttVarsel(LegacyVarsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId))
         behandling.assertTilstand(TilstandDto.AvsluttetUtenVedtakMedVarsler)
 
         behandling.håndterVedtakFattet()

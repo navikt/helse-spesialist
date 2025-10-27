@@ -1,10 +1,10 @@
 package no.nav.helse.modell.varsel
 
 import no.nav.helse.db.DefinisjonDao
-import no.nav.helse.db.VarselDao
+import no.nav.helse.db.LegacyVarselDao
 
-class VarselRepository(
-    private val varselDao: VarselDao,
+class LegacyVarselRepository(
+    private val legacyVarselDao: LegacyVarselDao,
     private val definisjonDao: DefinisjonDao,
 ) {
     fun lagreDefinisjon(definisjonDto: VarseldefinisjonDto) {
@@ -20,6 +20,6 @@ class VarselRepository(
     }
 
     fun avvikleVarsel(definisjonDto: VarseldefinisjonDto) {
-        varselDao.avvikleVarsel(varselkode = definisjonDto.varselkode, definisjonId = definisjonDto.id)
+        legacyVarselDao.avvikleVarsel(varselkode = definisjonDto.varselkode, definisjonId = definisjonDto.id)
     }
 }

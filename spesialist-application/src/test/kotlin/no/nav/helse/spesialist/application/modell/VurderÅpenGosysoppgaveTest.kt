@@ -12,7 +12,7 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
-import no.nav.helse.modell.person.vedtaksperiode.Varsel
+import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel
 import no.nav.helse.modell.person.vedtaksperiode.VarselStatusDto
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
@@ -92,7 +92,7 @@ internal class VurderÅpenGosysoppgaveTest {
 
     @Test
     fun `Lagrer ikke varsel ved ingen åpne oppgaver og deaktiverer eventuelt eksisterende varsel`() {
-        behandlingAg1.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), VEDTAKPERIODE_ID_AG_1))
+        behandlingAg1.håndterNyttVarsel(LegacyVarsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), VEDTAKPERIODE_ID_AG_1))
         behandlingAg1.inspektør {
             assertEquals(1, varsler.size)
         }
@@ -111,7 +111,7 @@ internal class VurderÅpenGosysoppgaveTest {
 
     @Test
     fun `Deaktiverer ikke varsel dersom oppgave er tildelt`() {
-        behandlingAg1.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), VEDTAKPERIODE_ID_AG_1))
+        behandlingAg1.håndterNyttVarsel(LegacyVarsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), VEDTAKPERIODE_ID_AG_1))
         val context = commandContext()
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 0, false))
         assertTrue(command(harTildeltOppgave = true).resume(context))
@@ -144,7 +144,7 @@ internal class VurderÅpenGosysoppgaveTest {
 
     @Test
     fun `Legger ikke til egenskap for gosys dersom det er andre varsler på perioden`() {
-        behandlingAg1.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_4", LocalDateTime.now(), VEDTAKPERIODE_ID_AG_1))
+        behandlingAg1.håndterNyttVarsel(LegacyVarsel(UUID.randomUUID(), "SB_EX_4", LocalDateTime.now(), VEDTAKPERIODE_ID_AG_1))
         val context = commandContext()
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 1, false))
         command().resume(context)
@@ -153,7 +153,7 @@ internal class VurderÅpenGosysoppgaveTest {
 
     @Test
     fun `Legger ikke til egenskap for gosys dersom det er andre varsler på andre overlappende perioder`() {
-        behandlingAg2.håndterNyttVarsel(Varsel(UUID.randomUUID(), "SB_EX_4", LocalDateTime.now(), VEDTAKPERIODE_ID_AG_2))
+        behandlingAg2.håndterNyttVarsel(LegacyVarsel(UUID.randomUUID(), "SB_EX_4", LocalDateTime.now(), VEDTAKPERIODE_ID_AG_2))
         val context = commandContext()
         context.add(ÅpneGosysOppgaverløsning(LocalDateTime.now(), FNR, 1, false))
         command().resume(context)

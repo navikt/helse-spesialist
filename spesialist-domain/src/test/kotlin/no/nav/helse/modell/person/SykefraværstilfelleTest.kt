@@ -1,6 +1,6 @@
 package no.nav.helse.modell.person
 
-import no.nav.helse.modell.person.vedtaksperiode.Varsel
+import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.forhindrerAutomatisering
@@ -45,7 +45,7 @@ internal class SykefraværstilfelleTest {
         val gjeldendeGenerasjon1 = legacyBehandling(UUID.randomUUID())
         val gjeldendeGenerasjon2 = legacyBehandling(vedtaksperiodeId2)
         gjeldendeGenerasjon2.håndterNyttVarsel(
-            Varsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId2),
+            LegacyVarsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId2),
         )
         assertTrue(listOf(gjeldendeGenerasjon1, gjeldendeGenerasjon2).forhindrerAutomatisering(28 feb 2018))
     }

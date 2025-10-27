@@ -9,6 +9,7 @@ import no.nav.helse.spesialist.db.dao.PgDialogDao
 import no.nav.helse.spesialist.db.dao.PgDokumentDao
 import no.nav.helse.spesialist.db.dao.PgEgenAnsattDao
 import no.nav.helse.spesialist.db.dao.PgLegacyBehandlingDao
+import no.nav.helse.spesialist.db.dao.PgLegacyVarselDao
 import no.nav.helse.spesialist.db.dao.PgMeldingDao
 import no.nav.helse.spesialist.db.dao.PgMeldingDuplikatkontrollDao
 import no.nav.helse.spesialist.db.dao.PgNotatDao
@@ -23,7 +24,6 @@ import no.nav.helse.spesialist.db.dao.PgSaksbehandlerDao
 import no.nav.helse.spesialist.db.dao.PgStansAutomatiskBehandlingDao
 import no.nav.helse.spesialist.db.dao.PgStansAutomatiskBehandlingSaksbehandlerDao
 import no.nav.helse.spesialist.db.dao.PgTildelingDao
-import no.nav.helse.spesialist.db.dao.PgVarselDao
 import no.nav.helse.spesialist.db.dao.PgVedtakBegrunnelseDao
 import no.nav.helse.spesialist.db.dao.PgVedtakDao
 import no.nav.helse.spesialist.db.dao.api.PgAbonnementApiDao
@@ -69,7 +69,7 @@ class DBDaos(
     override val saksbehandlerDao = PgSaksbehandlerDao(dataSource)
     override val stansAutomatiskBehandlingDao = PgStansAutomatiskBehandlingDao(dataSource)
     override val tildelingDao = PgTildelingDao(dataSource)
-    override val varselDao = PgVarselDao(dataSource)
+    override val legacyVarselDao = PgLegacyVarselDao(dataSource)
     override val vedtakDao = PgVedtakDao(dataSource)
     override val vedtakBegrunnelseDao = PgVedtakBegrunnelseDao(dataSource)
     override val stansAutomatiskBehandlingSaksbehandlerDao = PgStansAutomatiskBehandlingSaksbehandlerDao(dataSource)

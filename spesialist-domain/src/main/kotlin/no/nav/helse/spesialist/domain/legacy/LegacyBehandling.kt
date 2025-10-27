@@ -3,19 +3,19 @@ package no.nav.helse.spesialist.domain.legacy
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
+import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel
+import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Companion.finnEksisterendeVarsel
+import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Companion.forhindrerAutomatisering
+import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Companion.inneholderAktivtVarselOmAvvik
+import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Companion.inneholderMedlemskapsvarsel
+import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Companion.inneholderVarselOmAvvik
+import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Companion.inneholderVarselOmNegativtBeløp
+import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Companion.inneholderVarselOmTilbakedatering
+import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel.Companion.inneholderVarselOmÅpenGosysOppgave
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.SpleisBehandling
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
-import no.nav.helse.modell.person.vedtaksperiode.Varsel
-import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.finnEksisterendeVarsel
-import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.forhindrerAutomatisering
-import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderAktivtVarselOmAvvik
-import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderMedlemskapsvarsel
-import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderVarselOmAvvik
-import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderVarselOmNegativtBeløp
-import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderVarselOmTilbakedatering
-import no.nav.helse.modell.person.vedtaksperiode.Varsel.Companion.inneholderVarselOmÅpenGosysOppgave
 import no.nav.helse.modell.vedtak.VedtakBegrunnelse
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.domain.Periode
@@ -34,7 +34,7 @@ class LegacyBehandling private constructor(
     tilstand: Tilstand,
     tags: List<String>,
     val vedtakBegrunnelse: VedtakBegrunnelse?,
-    varsler: Set<Varsel>,
+    varsler: Set<LegacyVarsel>,
     val yrkesaktivitetstype: Yrkesaktivitetstype,
 ) {
     constructor(
@@ -75,7 +75,7 @@ class LegacyBehandling private constructor(
     var tags: List<String> = tags
         private set
 
-    private val varsler: MutableList<Varsel> = varsler.toMutableList()
+    private val varsler: MutableList<LegacyVarsel> = varsler.toMutableList()
 
     var utbetalingId: UUID? = utbetalingId
         private set
@@ -86,7 +86,7 @@ class LegacyBehandling private constructor(
 
     fun vedtaksperiodeId() = vedtaksperiodeId
 
-    fun varsler(): List<Varsel> = varsler.toList()
+    fun varsler(): List<LegacyVarsel> = varsler.toList()
 
     internal fun unikId() = id
 
@@ -108,7 +108,7 @@ class LegacyBehandling private constructor(
             tilstand = tilstand.toDto(),
             tags = tags,
             vedtakBegrunnelse = vedtakBegrunnelse,
-            varsler = varsler.map(Varsel::toDto),
+            varsler = varsler.map(LegacyVarsel::toDto),
             yrkesaktivitetstype = yrkesaktivitetstype,
         )
 
@@ -144,7 +144,7 @@ class LegacyBehandling private constructor(
         tilstand.invaliderUtbetaling(this, utbetalingId)
     }
 
-    fun håndterNyttVarsel(varsel: Varsel) {
+    fun håndterNyttVarsel(varsel: LegacyVarsel) {
         if (!varsel.erRelevantFor(vedtaksperiodeId)) return
         val eksisterendeVarsel = varsler.finnEksisterendeVarsel(varsel) ?: return nyttVarsel(varsel)
         if (varsel.erVarselOmAvvik() && varsler.inneholderVarselOmAvvik()) {
@@ -156,7 +156,7 @@ class LegacyBehandling private constructor(
         eksisterendeVarsel.reaktiver()
     }
 
-    internal fun håndterDeaktivertVarsel(varsel: Varsel) {
+    internal fun håndterDeaktivertVarsel(varsel: LegacyVarsel) {
         val funnetVarsel = varsler.finnEksisterendeVarsel(varsel) ?: return
         funnetVarsel.deaktiver()
     }
@@ -215,7 +215,7 @@ class LegacyBehandling private constructor(
     }
 
     private fun flyttAktiveVarslerTil(legacyBehandling: LegacyBehandling) {
-        val aktiveVarsler = varsler.filter(Varsel::erAktiv)
+        val aktiveVarsler = varsler.filter(LegacyVarsel::erAktiv)
         this.varsler.removeAll(aktiveVarsler)
         legacyBehandling.varsler.addAll(aktiveVarsler)
         if (aktiveVarsler.isNotEmpty()) {
@@ -228,7 +228,7 @@ class LegacyBehandling private constructor(
         }
     }
 
-    private fun nyttVarsel(varsel: Varsel) {
+    private fun nyttVarsel(varsel: LegacyVarsel) {
         logg.info("Legger til varsel $varsel")
         varsler.add(varsel)
         tilstand.nyttVarsel(this)
@@ -470,7 +470,7 @@ class LegacyBehandling private constructor(
             tom: LocalDate,
             tilstand: Tilstand,
             tags: List<String>,
-            varsler: Set<Varsel>,
+            varsler: Set<LegacyVarsel>,
             vedtakBegrunnelse: VedtakBegrunnelse?,
             yrkesaktivitetstype: Yrkesaktivitetstype,
         ) = LegacyBehandling(
@@ -487,7 +487,7 @@ class LegacyBehandling private constructor(
             yrkesaktivitetstype = yrkesaktivitetstype,
         )
 
-        internal fun List<LegacyBehandling>.håndterNyttVarsel(varsler: List<Varsel>) {
+        internal fun List<LegacyBehandling>.håndterNyttVarsel(varsler: List<LegacyVarsel>) {
             forEach { behandling ->
                 varsler.forEach { behandling.håndterNyttVarsel(it) }
             }
@@ -539,7 +539,7 @@ class LegacyBehandling private constructor(
                 it.harKunÅpenGosysOppgave()
             }
 
-        internal fun List<LegacyBehandling>.deaktiver(varsel: Varsel) {
+        internal fun List<LegacyBehandling>.deaktiver(varsel: LegacyVarsel) {
             find { varsel.erRelevantFor(it.vedtaksperiodeId) }?.håndterDeaktivertVarsel(varsel)
         }
 

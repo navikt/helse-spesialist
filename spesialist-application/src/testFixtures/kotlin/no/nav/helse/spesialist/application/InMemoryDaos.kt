@@ -9,6 +9,7 @@ import no.nav.helse.db.DokumentDao
 import no.nav.helse.db.EgenAnsattDao
 import no.nav.helse.db.EgenskapForDatabase
 import no.nav.helse.db.LegacyBehandlingDao
+import no.nav.helse.db.LegacyVarselDao
 import no.nav.helse.db.MeldingDuplikatkontrollDao
 import no.nav.helse.db.NotatDao
 import no.nav.helse.db.OppgaveDao
@@ -19,7 +20,6 @@ import no.nav.helse.db.PoisonPillDao
 import no.nav.helse.db.PåVentDao
 import no.nav.helse.db.StansAutomatiskBehandlingSaksbehandlerDao
 import no.nav.helse.db.TildelingDao
-import no.nav.helse.db.VarselDao
 import no.nav.helse.db.VedtakBegrunnelseDao
 import no.nav.helse.db.VedtakBegrunnelseFraDatabase
 import no.nav.helse.db.VedtakBegrunnelseMedSaksbehandlerIdentFraDatabase
@@ -308,7 +308,7 @@ class InMemoryDaos(
     override val saksbehandlerDao: InMemorySaksbehandlerDao = InMemorySaksbehandlerDao(saksbehandlerRepository)
     override val tildelingDao: TildelingDao
         get() = TODO("Not yet implemented")
-    override val varselDao = object : VarselDao {
+    override val legacyVarselDao = object : LegacyVarselDao {
         override fun avvikleVarsel(varselkode: String, definisjonId: UUID) {
             TODO("Not yet implemented")
         }
