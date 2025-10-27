@@ -125,7 +125,8 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
                 skjæringstidspunkt = 1.jan(2018),
                 varselIder = emptySet(),
                 vedtaksperiodeId = VedtaksperiodeId(UUID.randomUUID())
-            )
+            ),
+            fødselsnummer = fødselsnummer
         ).map { it.id.value }
 
         // then
@@ -171,7 +172,9 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
                 skjæringstidspunkt = 2.jan(2018),
                 varselIder = emptySet(),
                 vedtaksperiodeId = VedtaksperiodeId(UUID.randomUUID())
-            ))
+            ),
+            fødselsnummer = fødselsnummer
+        )
 
         // then
         assertEquals(1, funnet.size)
@@ -205,7 +208,8 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
                 skjæringstidspunkt = 1.jan(2018),
                 varselIder = emptySet(),
                 vedtaksperiodeId = VedtaksperiodeId(UUID.randomUUID())
-            )
+            ),
+            fødselsnummer = lagFødselsnummer()
         )
 
         // then
@@ -302,7 +306,7 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
 
         // when
         val behandling1 = requireNotNull(repository.finn(SpleisBehandlingId(spleisBehandlingId1)))
-        val andreBehandlinger = repository.finnAndreBehandlingerISykefraværstilfelle(behandling1)
+        val andreBehandlinger = repository.finnAndreBehandlingerISykefraværstilfelle(behandling1, fødselsnummer)
 
         // then
         assertEquals(1, andreBehandlinger.size)

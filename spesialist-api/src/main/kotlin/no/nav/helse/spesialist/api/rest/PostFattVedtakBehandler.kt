@@ -30,8 +30,12 @@ class PostFattVedtakBehandler(
         val behandling =
             transaksjon.behandlingRepository.finn(spleisBehandlingId)
                 ?: throw HttpNotFound("Fant ikke behandling med behandlingId ${resource.parent.behandlingId}")
+        val vedtaksperiode =
+            transaksjon.vedtaksperiodeRepository.finn(behandling.vedtaksperiodeId)
+                ?: throw HttpNotFound("Fant ikke vedtaksperiode med id ${behandling.vedtaksperiodeId.value}")
+        val fødselsnummer = vedtaksperiode.fødselsnummer
         bekreftTilgangTilPerson(
-            fødselsnummer = behandling.fødselsnummer,
+            fødselsnummer = fødselsnummer,
             saksbehandler = saksbehandler,
             tilgangsgrupper = tilgangsgrupper,
             transaksjon = transaksjon,
@@ -45,9 +49,9 @@ class PostFattVedtakBehandler(
             throw HttpBadRequest(OPPGAVE_FEIL_TILSTAND)
         }
 
-        val totrinnsvurdering = transaksjon.totrinnsvurderingRepository.finnAktivForPerson(behandling.fødselsnummer)
+        val totrinnsvurdering = transaksjon.totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)
         if (totrinnsvurdering == null) {
-            behandling.fattVedtak(transaksjon.behandlingRepository)
+            behandling.fattVedtak(transaksjon.behandlingRepository, fødselsnummer)
         } else {
             totrinnsvurdering.godkjenn(saksbehandler, tilgangsgrupper)
             transaksjon.totrinnsvurderingRepository.lagre(totrinnsvurdering)
@@ -56,10 +60,13 @@ class PostFattVedtakBehandler(
         return RestResponse(HttpStatusCode.OK, false)
     }
 
-    private fun Behandling.fattVedtak(behandlingRepository: BehandlingRepository) {
+    private fun Behandling.fattVedtak(
+        behandlingRepository: BehandlingRepository,
+        fødselsnummer: String,
+    ) {
         val behandlingerSomMåSeesUnderEtt =
             behandlingRepository
-                .finnAndreBehandlingerISykefraværstilfelle(this)
+                .finnAndreBehandlingerISykefraværstilfelle(this, fødselsnummer)
                 .filterNot { it.fom > tom }
                 .plus(this)
     }

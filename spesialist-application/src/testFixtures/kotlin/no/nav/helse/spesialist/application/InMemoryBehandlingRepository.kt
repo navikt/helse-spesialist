@@ -12,7 +12,8 @@ class InMemoryBehandlingRepository : BehandlingRepository {
     }
 
     override fun finnAndreBehandlingerISykefraværstilfelle(
-        behandling: Behandling
+        behandling: Behandling,
+        fødselsnummer: String
     ): Set<Behandling> {
         TODO("Not yet implemented")
     }

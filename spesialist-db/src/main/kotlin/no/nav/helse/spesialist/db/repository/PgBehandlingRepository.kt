@@ -27,7 +27,10 @@ class PgBehandlingRepository(
             "spleis_behandling_id" to id.value,
         ).singleOrNull(::tilBehandling)
 
-    override fun finnAndreBehandlingerISykefraværstilfelle(behandling: Behandling): Set<Behandling> =
+    override fun finnAndreBehandlingerISykefraværstilfelle(
+        behandling: Behandling,
+        fødselsnummer: String,
+    ): Set<Behandling> =
         asSQL(
             """
             SELECT DISTINCT ON (b.vedtaksperiode_id) b.vedtaksperiode_id, spleis_behandling_id, tags, p.fødselsnummer, b.fom, b.tom, b.skjæringstidspunkt
@@ -38,7 +41,7 @@ class PgBehandlingRepository(
               AND skjæringstidspunkt = :skjaeringstidspunkt
             ORDER BY b.vedtaksperiode_id, b.id DESC
         """,
-            "fodselsnummer" to behandling.fødselsnummer,
+            "fodselsnummer" to fødselsnummer,
             "skjaeringstidspunkt" to behandling.skjæringstidspunkt,
         ).list(::tilBehandling)
             .filterNot { it.id == behandling.id }

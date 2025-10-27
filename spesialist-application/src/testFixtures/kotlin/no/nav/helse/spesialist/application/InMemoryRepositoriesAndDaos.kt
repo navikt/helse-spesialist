@@ -12,7 +12,7 @@ import java.util.UUID
 class InMemoryRepositoriesAndDaos() {
     private val notatRepository = InMemoryNotatRepository()
     private val oppgaveRepository = InMemoryOppgaveRepository()
-    private val vedtaksperiodeRepository = InMemoryLegacyVedtaksperiodeRepository()
+    private val legacyVedtaksperiodeRepository = InMemoryLegacyVedtaksperiodeRepository()
     private val notatDao = object : NotatDao {
         override fun lagreForOppgaveId(
             oppgaveId: Long,
@@ -35,7 +35,7 @@ class InMemoryRepositoriesAndDaos() {
     private val oppgaveDao = object : PartialOppgaveDao {
         override fun finnOppgaveId(fødselsnummer: String): Long? {
             val vedtaksperiodeIder =
-                vedtaksperiodeRepository.finnVedtaksperioder(fødselsnummer).map { it.vedtaksperiodeId }
+                legacyVedtaksperiodeRepository.finnVedtaksperioder(fødselsnummer).map { it.vedtaksperiodeId }
             return oppgaveRepository.alle()
                 .filter { it.vedtaksperiodeId in vedtaksperiodeIder }
                 .firstOrNull { it.tilstand is Oppgave.AvventerSaksbehandler }
@@ -44,7 +44,7 @@ class InMemoryRepositoriesAndDaos() {
 
         override fun finnSpleisBehandlingId(oppgaveId: Long): UUID {
             val behandlingId = oppgaveRepository.finn(oppgaveId)!!.behandlingId
-            val spleisBehandlingId = vedtaksperiodeRepository.alle()
+            val spleisBehandlingId = legacyVedtaksperiodeRepository.alle()
                 .flatMap { it.behandlinger }
                 .first { it.id == behandlingId }.spleisBehandlingId!!
             return spleisBehandlingId
@@ -57,7 +57,7 @@ class InMemoryRepositoriesAndDaos() {
 
         override fun finnOppgaveIdUansettStatus(fødselsnummer: String): Long {
             val vedtaksperiodeIder =
-                vedtaksperiodeRepository.finnVedtaksperioder(fødselsnummer).map { it.vedtaksperiodeId }
+                legacyVedtaksperiodeRepository.finnVedtaksperioder(fødselsnummer).map { it.vedtaksperiodeId }
             return oppgaveRepository.alle()
                 .filter { it.vedtaksperiodeId in vedtaksperiodeIder }
                 .maxOf { it.id }
@@ -67,6 +67,7 @@ class InMemoryRepositoriesAndDaos() {
     private val stansAutomatiskBehandlingDao = InMemoryStansAutomatiskBehandlingDao()
     private val annulleringRepository = InMemoryAnnulleringRepository()
     private val saksbehandlerRepository = InMemorySaksbehandlerRepository()
+    private val vedtaksperiodeRepository = InMemoryVedtaksperiodeRepository()
 
     val daos = InMemoryDaos(
         oppgaveRepository,
@@ -76,7 +77,7 @@ class InMemoryRepositoriesAndDaos() {
         stansAutomatiskBehandlingDao,
         annulleringRepository,
         saksbehandlerRepository,
-        vedtaksperiodeRepository
+        legacyVedtaksperiodeRepository
     )
     val sessionFactory = InMemorySessionFactory(
         notatRepository,
@@ -84,10 +85,11 @@ class InMemoryRepositoriesAndDaos() {
         notatDao,
         oppgaveDao,
         daos.dokumentDao,
-        vedtaksperiodeRepository,
+        legacyVedtaksperiodeRepository,
         dialogDao,
         stansAutomatiskBehandlingDao,
         annulleringRepository,
         saksbehandlerRepository,
+        vedtaksperiodeRepository
     )
 }

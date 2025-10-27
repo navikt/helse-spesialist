@@ -6,7 +6,10 @@ import no.nav.helse.spesialist.domain.SpleisBehandlingId
 interface BehandlingRepository {
     fun finn(id: SpleisBehandlingId): Behandling?
 
-    fun finnAndreBehandlingerISykefraværstilfelle(behandling: Behandling): Set<Behandling>
+    fun finnAndreBehandlingerISykefraværstilfelle(
+        behandling: Behandling,
+        fødselsnummer: String,
+    ): Set<Behandling>
 
     fun lagre(behandling: Behandling)
 }
