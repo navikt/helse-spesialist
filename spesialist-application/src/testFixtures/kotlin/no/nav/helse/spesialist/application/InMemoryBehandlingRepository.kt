@@ -3,7 +3,6 @@ package no.nav.helse.spesialist.application
 import no.nav.helse.db.BehandlingRepository
 import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
-import java.time.LocalDate
 
 class InMemoryBehandlingRepository : BehandlingRepository {
     val behandlinger = mutableMapOf<SpleisBehandlingId, Behandling>()
@@ -12,10 +11,9 @@ class InMemoryBehandlingRepository : BehandlingRepository {
         return behandlinger[id]
     }
 
-    override fun finnBehandlingerISykefraværstilfelle(
-        fødselsnummer: String,
-        skjæringstidspunkt: LocalDate
-    ): List<Behandling> {
+    override fun finnAndreBehandlingerISykefraværstilfelle(
+        behandling: Behandling
+    ): Set<Behandling> {
         TODO("Not yet implemented")
     }
 

@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.db.repository
 
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
+import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
@@ -109,7 +110,17 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
         )
 
         // when
-        val funnet = repository.finnBehandlingerISykefraværstilfelle(fødselsnummer, 1.jan(2018)).map { it.id.value }
+        val funnet = repository.finnAndreBehandlingerISykefraværstilfelle(
+            Behandling.fraLagring(
+                id = SpleisBehandlingId(UUID.randomUUID()),
+                tags = emptySet(),
+                fødselsnummer = fødselsnummer,
+                søknadIder = emptySet(),
+                fom = 1.jan(2018),
+                tom = 31.jan(2018),
+                skjæringstidspunkt = 1.jan(2018),
+            )
+        ).map { it.id.value }
 
         // then
         assertEquals(2, funnet.size)
@@ -143,11 +154,20 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
         )
 
         // when
-        val funnet = repository.finnBehandlingerISykefraværstilfelle(fødselsnummer, 2.jan(2018))
+        val funnet = repository.finnAndreBehandlingerISykefraværstilfelle(
+            Behandling.fraLagring(
+                id = SpleisBehandlingId(UUID.randomUUID()),
+                tags = emptySet(),
+                fødselsnummer = fødselsnummer,
+                søknadIder = emptySet(),
+                fom = 1.jan(2018),
+                tom = 31.jan(2018),
+                skjæringstidspunkt = 2.jan(2018),
+            ))
 
         // then
         assertEquals(1, funnet.size)
-        assertEquals(spleisBehandlingId2, funnet[0].id.value)
+        assertEquals(spleisBehandlingId2, funnet.first().id.value)
     }
 
     @Test
@@ -166,7 +186,17 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
         )
 
         // when
-        val funnet = repository.finnBehandlingerISykefraværstilfelle(lagFødselsnummer(), 1.jan(2018))
+        val funnet = repository.finnAndreBehandlingerISykefraværstilfelle(
+            Behandling.fraLagring(
+                id = SpleisBehandlingId(UUID.randomUUID()),
+                tags = emptySet(),
+                fødselsnummer = lagFødselsnummer(),
+                søknadIder = emptySet(),
+                fom = 1.jan(2018),
+                tom = 31.jan(2018),
+                skjæringstidspunkt = 1.jan(2018),
+            )
+        )
 
         // then
         assertEquals(0, funnet.size)

@@ -3,12 +3,14 @@ package no.nav.helse.spesialist.api.rest
 import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.bootstrap.EnvironmentToggles
+import no.nav.helse.db.BehandlingRepository
 import no.nav.helse.db.SessionContext
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.spesialist.api.rest.resources.Vedtak
 import no.nav.helse.spesialist.api.rest.tilkommeninntekt.bekreftTilgangTilPerson
 import no.nav.helse.spesialist.application.Outbox
+import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
@@ -45,7 +47,7 @@ class PostFattVedtakBehandler(
 
         val totrinnsvurdering = transaksjon.totrinnsvurderingRepository.finnAktivForPerson(behandling.fødselsnummer)
         if (totrinnsvurdering == null) {
-            fattVedtak()
+            behandling.fattVedtak(transaksjon.behandlingRepository)
         } else {
             totrinnsvurdering.godkjenn(saksbehandler, tilgangsgrupper)
             transaksjon.totrinnsvurderingRepository.lagre(totrinnsvurdering)
@@ -54,7 +56,13 @@ class PostFattVedtakBehandler(
         return RestResponse(HttpStatusCode.OK, false)
     }
 
-    private fun fattVedtak() {}
+    private fun Behandling.fattVedtak(behandlingRepository: BehandlingRepository) {
+        val behandlingerSomMåSeesUnderEtt =
+            behandlingRepository
+                .finnAndreBehandlingerISykefraværstilfelle(this)
+                .filterNot { it.fom > tom }
+                .plus(this)
+    }
 
     private fun Totrinnsvurdering.godkjenn(
         beslutter: Saksbehandler,

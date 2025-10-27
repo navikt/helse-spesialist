@@ -8,7 +8,6 @@ import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
-import java.time.LocalDate
 import java.util.UUID
 
 class PgBehandlingRepository(
@@ -29,10 +28,7 @@ class PgBehandlingRepository(
             row.mapTilBehandling()
         }
 
-    override fun finnBehandlingerISykefraværstilfelle(
-        fødselsnummer: String,
-        skjæringstidspunkt: LocalDate,
-    ): List<Behandling> =
+    override fun finnAndreBehandlingerISykefraværstilfelle(behandling: Behandling): Set<Behandling> =
         asSQL(
             """
             SELECT DISTINCT ON (b.vedtaksperiode_id) spleis_behandling_id, tags, p.fødselsnummer, b.fom, b.tom, b.skjæringstidspunkt
@@ -43,11 +39,11 @@ class PgBehandlingRepository(
               AND skjæringstidspunkt = :skjaeringstidspunkt
             ORDER BY b.vedtaksperiode_id, b.id DESC
         """,
-            "fodselsnummer" to fødselsnummer,
-            "skjaeringstidspunkt" to skjæringstidspunkt,
-        ).list { row ->
-            row.mapTilBehandling()
-        }
+            "fodselsnummer" to behandling.fødselsnummer,
+            "skjaeringstidspunkt" to behandling.skjæringstidspunkt,
+        ).list { row -> row.mapTilBehandling() }
+            .filterNot { it.id == behandling.id }
+            .toSet()
 
     override fun lagre(behandling: Behandling) {
         behandling.søknadIder().forEach { søknadId ->
