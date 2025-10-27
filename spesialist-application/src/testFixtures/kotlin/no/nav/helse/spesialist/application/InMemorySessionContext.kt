@@ -161,4 +161,6 @@ class InMemorySessionContext(
         get() = TODO("Not yet implemented")
     override val personRepository: PersonRepository
         get() = TODO("Not yet implemented")
+    override val varselRepository: VarselRepository
+        get() = TODO("Not yet implemented")
 }

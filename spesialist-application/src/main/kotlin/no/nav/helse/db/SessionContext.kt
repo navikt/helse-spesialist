@@ -11,6 +11,7 @@ import no.nav.helse.spesialist.application.PåVentRepository
 import no.nav.helse.spesialist.application.SaksbehandlerRepository
 import no.nav.helse.spesialist.application.TilkommenInntektRepository
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
+import no.nav.helse.spesialist.application.VarselRepository
 import no.nav.helse.spesialist.application.VedtaksperiodeRepository
 
 interface SessionContext {
@@ -57,4 +58,5 @@ interface SessionContext {
     val påVentRepository: PåVentRepository
     val personRepository: PersonRepository
     val vedtaksperiodeRepository: VedtaksperiodeRepository
+    val varselRepository: VarselRepository
 }
