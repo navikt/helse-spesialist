@@ -20,6 +20,7 @@ import no.nav.helse.db.StansAutomatiskBehandlingSaksbehandlerDao
 import no.nav.helse.db.SykefraværstilfelleDao
 import no.nav.helse.db.TildelingDao
 import no.nav.helse.db.UtbetalingDao
+import no.nav.helse.db.VedtakBegrunnelseRepository
 import no.nav.helse.db.VergemålDao
 import no.nav.helse.db.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.kommando.CommandContext
@@ -162,5 +163,7 @@ class InMemorySessionContext(
     override val personRepository: PersonRepository
         get() = TODO("Not yet implemented")
     override val varselRepository: VarselRepository
+        get() = TODO("Not yet implemented")
+    override val vedtakBegrunnelseRepository: VedtakBegrunnelseRepository
         get() = TODO("Not yet implemented")
 }

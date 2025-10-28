@@ -59,4 +59,5 @@ interface SessionContext {
     val personRepository: PersonRepository
     val vedtaksperiodeRepository: VedtaksperiodeRepository
     val varselRepository: VarselRepository
+    val vedtakBegrunnelseRepository: VedtakBegrunnelseRepository
 }

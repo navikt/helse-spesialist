@@ -4,6 +4,7 @@ import kotliquery.Session
 import no.nav.helse.db.AvviksvurderingRepository
 import no.nav.helse.db.BehandlingRepository
 import no.nav.helse.db.SessionContext
+import no.nav.helse.db.VedtakBegrunnelseRepository
 import no.nav.helse.mediator.oppgave.OppgaveRepository
 import no.nav.helse.spesialist.application.ArbeidsgiverRepository
 import no.nav.helse.spesialist.application.DialogRepository
@@ -58,6 +59,7 @@ import no.nav.helse.spesialist.db.repository.PgSaksbehandlerRepository
 import no.nav.helse.spesialist.db.repository.PgTilkommenInntektRepository
 import no.nav.helse.spesialist.db.repository.PgTotrinnsvurderingRepository
 import no.nav.helse.spesialist.db.repository.PgVarselRepository
+import no.nav.helse.spesialist.db.repository.PgVedtakBegrunnelseRepository
 import no.nav.helse.spesialist.db.repository.PgVedtaksperiodeRepository
 
 class DBSessionContext(
@@ -108,4 +110,5 @@ class DBSessionContext(
     override val personRepository: PersonRepository = PgPersonRepository(session)
     override val vedtaksperiodeRepository: VedtaksperiodeRepository = PgVedtaksperiodeRepository(session)
     override val varselRepository: VarselRepository = PgVarselRepository(session)
+    override val vedtakBegrunnelseRepository: VedtakBegrunnelseRepository = PgVedtakBegrunnelseRepository(session)
 }

@@ -19,6 +19,7 @@ class VedtakBegrunnelseTest {
             tekst = tekst,
             utfall = Utfall.INNVILGELSE,
             invalidert = false,
+            saksbehandlerOid = SaksbehandlerOid(UUID.randomUUID()),
         )
         assertFalse(vedtakBegrunnelse.erForskjelligFra(tekst, Utfall.INNVILGELSE))
         assertTrue(vedtakBegrunnelse.erForskjelligFra("En ulik tekst.", Utfall.INNVILGELSE))
@@ -34,6 +35,7 @@ class VedtakBegrunnelseTest {
             tekst = "Lorem ipsum dolor sit amet",
             utfall = Utfall.INNVILGELSE,
             invalidert = false,
+            saksbehandlerOid = SaksbehandlerOid(UUID.randomUUID()),
         )
         assertFalse(vedtakBegrunnelse.invalidert)
         vedtakBegrunnelse.invalider()
