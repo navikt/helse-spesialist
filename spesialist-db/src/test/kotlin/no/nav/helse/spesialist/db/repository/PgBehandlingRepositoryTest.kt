@@ -121,7 +121,6 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
                 fom = 1.jan(2018),
                 tom = 31.jan(2018),
                 skjæringstidspunkt = 1.jan(2018),
-                varselIder = emptySet(),
                 vedtaksperiodeId = VedtaksperiodeId(UUID.randomUUID())
             ),
             fødselsnummer = fødselsnummer
@@ -167,7 +166,6 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
                 fom = 1.jan(2018),
                 tom = 31.jan(2018),
                 skjæringstidspunkt = 2.jan(2018),
-                varselIder = emptySet(),
                 vedtaksperiodeId = VedtaksperiodeId(UUID.randomUUID())
             ),
             fødselsnummer = fødselsnummer
@@ -202,7 +200,6 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
                 fom = 1.jan(2018),
                 tom = 31.jan(2018),
                 skjæringstidspunkt = 1.jan(2018),
-                varselIder = emptySet(),
                 vedtaksperiodeId = VedtaksperiodeId(UUID.randomUUID())
             ),
             fødselsnummer = lagFødselsnummer()
@@ -237,77 +234,5 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
 
         //then
         assertContains(funnetIgjen.søknadIder(), søknadId)
-    }
-
-    @Test
-    fun `finn behandling inkluderer varselIder`() {
-        // given
-        val spleisBehandlingId = UUID.randomUUID()
-        val vedtaksperiodeId = UUID.randomUUID()
-        val tags = listOf("FOOBAR")
-        val fødselsnummer = lagFødselsnummer()
-        opprettPerson(fødselsnummer = fødselsnummer)
-        opprettArbeidsgiver()
-        opprettBehandling(
-            spleisBehandlingId = spleisBehandlingId,
-            vedtaksperiodeId = vedtaksperiodeId,
-            tags = tags,
-            fødselsnummer = fødselsnummer
-        )
-        val varselId1 = UUID.randomUUID()
-        val varselId2 = UUID.randomUUID()
-        nyttVarsel(id = varselId1, vedtaksperiodeId = vedtaksperiodeId, spleisBehandlingId = spleisBehandlingId, kode = "EN_KODE_1")
-        nyttVarsel(id = varselId2, vedtaksperiodeId = vedtaksperiodeId, spleisBehandlingId = spleisBehandlingId, kode = "EN_KODE_2")
-
-        // when
-        val funnet = requireNotNull(repository.finn(SpleisBehandlingId(spleisBehandlingId)))
-
-        // then
-        assertEquals(setOf(varselId1, varselId2), funnet.varselIder)
-    }
-
-    @Test
-    fun `finnAndreBehandlingerISykefraværstilfelle inkluderer varselIder`() {
-        // given
-        val fødselsnummer = lagFødselsnummer()
-        val tags = listOf("FOOBAR")
-        val fom = 1.jan(2018)
-        val tom = 31.jan(2018)
-        opprettPerson(fødselsnummer = fødselsnummer)
-        opprettArbeidsgiver()
-
-        val vedtaksperiodeId1 = UUID.randomUUID()
-        val vedtaksperiodeId2 = UUID.randomUUID()
-        val spleisBehandlingId1 = UUID.randomUUID()
-        val spleisBehandlingId2 = UUID.randomUUID()
-
-        opprettBehandling(
-            spleisBehandlingId = spleisBehandlingId1,
-            vedtaksperiodeId = vedtaksperiodeId1,
-            tags = tags,
-            fødselsnummer = fødselsnummer,
-            fom = fom,
-            tom = tom
-        )
-        opprettBehandling(
-            spleisBehandlingId = spleisBehandlingId2,
-            vedtaksperiodeId = vedtaksperiodeId2,
-            tags = tags,
-            fødselsnummer = fødselsnummer,
-            fom = fom,
-            tom = tom
-        )
-        val varselId = UUID.randomUUID()
-        nyttVarsel(id = varselId, vedtaksperiodeId = vedtaksperiodeId2, spleisBehandlingId = spleisBehandlingId2)
-
-        // when
-        val behandling1 = requireNotNull(repository.finn(SpleisBehandlingId(spleisBehandlingId1)))
-        val andreBehandlinger = repository.finnAndreBehandlingerISykefraværstilfelle(behandling1, fødselsnummer)
-
-        // then
-        assertEquals(1, andreBehandlinger.size)
-        val behandling2 = andreBehandlinger.first()
-        assertEquals(spleisBehandlingId2, behandling2.id.value)
-        assertEquals(setOf(varselId), behandling2.varselIder)
     }
 }

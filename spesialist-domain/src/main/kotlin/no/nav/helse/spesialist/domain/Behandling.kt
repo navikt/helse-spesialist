@@ -23,7 +23,6 @@ class Behandling private constructor(
     val fom: LocalDate,
     val tom: LocalDate,
     val skjæringstidspunkt: LocalDate,
-    val varselIder: Set<UUID>,
     søknadIder: Set<UUID>,
 ) : Entity<SpleisBehandlingId>(id) {
     private val søknadIder = søknadIder.toMutableSet()
@@ -56,7 +55,6 @@ class Behandling private constructor(
             fom: LocalDate,
             tom: LocalDate,
             skjæringstidspunkt: LocalDate,
-            varselIder: Set<UUID>,
             søknadIder: Set<UUID>,
         ) = Behandling(
             id = id,
@@ -65,7 +63,6 @@ class Behandling private constructor(
             fom = fom,
             tom = tom,
             skjæringstidspunkt = skjæringstidspunkt,
-            varselIder = varselIder,
             søknadIder = søknadIder,
         )
     }

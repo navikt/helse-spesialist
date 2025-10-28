@@ -66,19 +66,6 @@ class PgBehandlingRepository(
             it.uuid("søknad_id")
         }.toSet()
 
-    private fun hentVarselIderForBehandling(spleisBehandlingId: SpleisBehandlingId): Set<UUID> =
-        asSQL(
-            """
-            SELECT sv.unik_id
-            FROM selve_varsel sv
-                INNER JOIN behandling b on sv.vedtaksperiode_id = b.vedtaksperiode_id
-            WHERE b.spleis_behandling_id = :spleisBehandlingId
-            """.trimIndent(),
-            "spleisBehandlingId" to spleisBehandlingId.value,
-        ).list {
-            it.uuid("unik_id")
-        }.toSet()
-
     private fun tilBehandling(row: Row): Behandling {
         val spleisBehandlingId = SpleisBehandlingId(row.uuid("spleis_behandling_id"))
         return Behandling.fraLagring(
@@ -88,7 +75,6 @@ class PgBehandlingRepository(
             fom = row.localDate("fom"),
             tom = row.localDate("tom"),
             skjæringstidspunkt = row.localDate("skjæringstidspunkt"),
-            varselIder = hentVarselIderForBehandling(spleisBehandlingId),
             søknadIder = hentSøkadIderForBehandling(spleisBehandlingId),
         )
     }
