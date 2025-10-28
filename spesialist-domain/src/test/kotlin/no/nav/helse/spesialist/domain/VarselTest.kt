@@ -12,12 +12,13 @@ import kotlin.test.assertEquals
 class VarselTest {
 
     @Test
-    fun `varsel kan godkjennes`() {
+    fun `varsel kan godkjennes hvis det er vurdert`() {
         // given
         val varsel = Varsel.fraLagring(
             id = VarselId(value = UUID.randomUUID()),
             spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
-            status = Varsel.Status.VURDERT
+            status = Varsel.Status.VURDERT,
+            vurdering = null
         )
 
         // then
@@ -26,12 +27,13 @@ class VarselTest {
 
     @ParameterizedTest
     @EnumSource(Varsel.Status::class, names = ["VURDERT"], mode = EnumSource.Mode.EXCLUDE)
-    fun `varsel kan ikke godkjennes`(status: Varsel.Status) {
+    fun `varsel kan ikke godkjennes hvis det har feil status`(status: Varsel.Status) {
         // given
         val varsel = Varsel.fraLagring(
             id = VarselId(value = UUID.randomUUID()),
             spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
-            status = status
+            status = status,
+            vurdering = null
         )
 
         // then
@@ -44,13 +46,17 @@ class VarselTest {
         val varsel = Varsel.fraLagring(
             id = VarselId(value = UUID.randomUUID()),
             spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
-            status = Varsel.Status.VURDERT
+            status = Varsel.Status.VURDERT,
+            vurdering = null
         )
+        val saksbehandlerId = SaksbehandlerOid(UUID.randomUUID())
+
         // given
-        varsel.godkjenn()
+        varsel.godkjenn(saksbehandlerId)
 
         // then
         assertEquals(Varsel.Status.GODKJENT, varsel.status)
+        assertEquals(saksbehandlerId, varsel.vurdering?.saksbehandlerId)
     }
 
     @Test
@@ -59,13 +65,13 @@ class VarselTest {
         val varsel = Varsel.fraLagring(
             id = VarselId(value = UUID.randomUUID()),
             spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
-            status = Varsel.Status.AKTIV
+            status = Varsel.Status.AKTIV,
+            vurdering = null
         )
 
         // then
         assertThrows<IllegalStateException> {
-            varsel.godkjenn()
+            varsel.godkjenn(SaksbehandlerOid(UUID.randomUUID()))
         }
     }
-
 }

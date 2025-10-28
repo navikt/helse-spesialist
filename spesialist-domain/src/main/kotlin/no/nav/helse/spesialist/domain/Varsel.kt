@@ -1,6 +1,8 @@
 package no.nav.helse.spesialist.domain
 
+import no.nav.helse.Varselvurdering
 import no.nav.helse.spesialist.domain.ddd.Entity
+import java.time.LocalDateTime
 import java.util.UUID
 
 @JvmInline
@@ -12,8 +14,11 @@ class Varsel private constructor(
     id: VarselId,
     val spleisBehandlingId: SpleisBehandlingId,
     status: Status,
+    vurdering: Varselvurdering?,
 ) : Entity<VarselId>(id) {
     var status: Status = status
+        private set
+    var vurdering: Varselvurdering? = vurdering
         private set
 
     enum class Status {
@@ -27,9 +32,14 @@ class Varsel private constructor(
 
     fun kanGodkjennes() = status == Status.VURDERT
 
-    fun godkjenn() {
+    fun godkjenn(saksbehandlerId: SaksbehandlerOid) {
         if (!kanGodkjennes()) error("Kan ikke godkjennes, varselet er ikke vurdert")
         status = Status.GODKJENT
+        vurdering =
+            Varselvurdering(
+                saksbehandlerId = saksbehandlerId,
+                tidspunkt = LocalDateTime.now(),
+            )
     }
 
     companion object {
@@ -37,11 +47,13 @@ class Varsel private constructor(
             id: VarselId,
             spleisBehandlingId: SpleisBehandlingId,
             status: Status,
+            vurdering: Varselvurdering?,
         ): Varsel =
             Varsel(
                 id = id,
                 spleisBehandlingId = spleisBehandlingId,
                 status = status,
+                vurdering = vurdering,
             )
     }
 }

@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.db.repository
 
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
+import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.VarselId
@@ -8,6 +9,7 @@ import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
 import java.util.UUID
 
 class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
@@ -27,7 +29,13 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
             spleisBehandlingId = spleisBehandlingId.value,
             fødselsnummer = fødselsnummer,
         )
-        nyttVarsel(id = varselId.value, vedtaksperiodeId = vedtaksperiodeId.value, spleisBehandlingId = spleisBehandlingId.value)
+        nyttVarsel(
+            id = varselId.value,
+            vedtaksperiodeId = vedtaksperiodeId.value,
+            spleisBehandlingId = spleisBehandlingId.value,
+            saksbehandlerSomEndretId = null,
+            endretTidspunkt = null
+        )
 
         // when
         val funnet = repository.finnVarsler(listOf(spleisBehandlingId))
@@ -36,6 +44,40 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
         assertEquals(1, funnet.size)
         assertEquals(varselId, funnet.first().id())
         assertEquals(Varsel.Status.AKTIV, funnet.first().status)
+    }
+
+    @Test
+    fun `finn varsel med vurdering for gitt behandling`() {
+        // given
+        val vedtaksperiodeId = VedtaksperiodeId(UUID.randomUUID())
+        val spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID())
+        val varselId = VarselId(UUID.randomUUID())
+        val fødselsnummer = lagFødselsnummer()
+        val saksbehandlerOid = SaksbehandlerOid(UUID.randomUUID())
+        opprettPerson(fødselsnummer = fødselsnummer)
+        opprettArbeidsgiver()
+        opprettBehandling(
+            vedtaksperiodeId = vedtaksperiodeId.value,
+            spleisBehandlingId = spleisBehandlingId.value,
+            fødselsnummer = fødselsnummer,
+        )
+        nyttVarsel(
+            id = varselId.value,
+            vedtaksperiodeId = vedtaksperiodeId.value,
+            spleisBehandlingId = spleisBehandlingId.value,
+            saksbehandlerSomEndretId = saksbehandlerOid,
+            endretTidspunkt = LocalDateTime.now(),
+            status = "VURDERT"
+        )
+
+        // when
+        val funnet = repository.finnVarsler(listOf(spleisBehandlingId))
+
+        // then
+        assertEquals(1, funnet.size)
+        assertEquals(varselId, funnet.first().id())
+        assertEquals(Varsel.Status.VURDERT, funnet.first().status)
+        assertEquals(saksbehandlerOid, funnet.first().vurdering?.saksbehandlerId)
     }
 
     @Test

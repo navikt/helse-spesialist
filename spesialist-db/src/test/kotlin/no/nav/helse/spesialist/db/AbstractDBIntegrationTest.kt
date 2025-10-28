@@ -425,6 +425,7 @@ abstract class AbstractDBIntegrationTest {
         spleisBehandlingId: UUID = UUID.randomUUID(),
         definisjonRef: Long? = null,
         status: String = "AKTIV",
+        saksbehandlerSomEndretId: SaksbehandlerOid? = SaksbehandlerOid(UUID.randomUUID()),
         endretTidspunkt: LocalDateTime? = LocalDateTime.now(),
     ) = dbQuery.update(
         """
@@ -440,7 +441,7 @@ abstract class AbstractDBIntegrationTest {
         "definisjonRef" to definisjonRef,
         "opprettet" to opprettet,
         "status" to status,
-        "ident" to if (endretTidspunkt != null) "EN_IDENT" else null,
+        "ident" to saksbehandlerSomEndretId?.value,
         "endretTidspunkt" to endretTidspunkt,
     )
 
