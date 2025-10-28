@@ -9,16 +9,9 @@ import no.nav.helse.modell.melding.HentDokument
 import java.util.UUID
 
 class DokumentMediator(
-    private val dokumentDao: DokumentDao,
     private val publiserer: MeldingPubliserer,
     private val retries: Int = 50,
 ) {
-    fun håndter(
-        fødselsnummer: String,
-        dokumentId: UUID,
-        dokumentType: String,
-    ): JsonNode = håndter(dokumentDao, fødselsnummer, dokumentId, dokumentType)
-
     fun håndter(
         dokumentDao: DokumentDao,
         fødselsnummer: String,
@@ -29,7 +22,7 @@ class DokumentMediator(
 
         if (dokument == null || dokument.isEmpty || dokument.harFeil()) {
             sendHentDokument(fødselsnummer, dokumentId, dokumentType)
-            return hentDokumentMedRetry(fødselsnummer, dokumentId, retries)
+            return hentDokumentMedRetry(dokumentDao, fødselsnummer, dokumentId, retries)
         }
         return dokument
     }
@@ -40,6 +33,7 @@ class DokumentMediator(
     }
 
     private fun hentDokumentMedRetry(
+        dokumentDao: DokumentDao,
         fødselsnummer: String,
         dokumentId: UUID,
         retries: Int,

@@ -43,7 +43,6 @@ internal class DokumentMediatorTest {
     }
 
     private val mediator = DokumentMediator(
-        dokumentDao = dokumentDao,
         publiserer = meldingPubliserer,
         retries = RETRIES,
     )
@@ -51,7 +50,7 @@ internal class DokumentMediatorTest {
     @Test
     fun `Prøver å hente dokumentet {retries + 1} ganger`() {
         every { dokumentDao.hent(any(), any()) } returns null
-        assertThrows<RuntimeException> { mediator.håndter(FNR, DOKUMENTID, DOKUMENTTYPE) }
+        assertThrows<RuntimeException> { mediator.håndter(dokumentDao, FNR, DOKUMENTID, DOKUMENTTYPE) }
         verify(exactly = RETRIES + 1) {
             dokumentDao.hent(any(), any())
         }
@@ -60,14 +59,14 @@ internal class DokumentMediatorTest {
     @Test
     fun `Sender behov dersom dokumentet ikke finnes i databasen`() {
         every { dokumentDao.hent(any(), any()) } returns null
-        assertThrows<RuntimeException> { mediator.håndter(FNR, DOKUMENTID, DOKUMENTTYPE) }
+        assertThrows<RuntimeException> { mediator.håndter(dokumentDao, FNR, DOKUMENTID, DOKUMENTTYPE) }
         assertEquals(1, meldingPubliserer.antallMeldinger)
     }
 
     @Test
     fun `Sender nytt behov dersom dokumentet i databasen er tomt`() {
         every { dokumentDao.hent(any(), any()) } returns objectMapper.createObjectNode()
-        mediator.håndter(FNR, DOKUMENTID, DOKUMENTTYPE)
+        mediator.håndter(dokumentDao, FNR, DOKUMENTID, DOKUMENTTYPE)
         assertEquals(1, meldingPubliserer.antallMeldinger)
     }
 
@@ -75,7 +74,7 @@ internal class DokumentMediatorTest {
     fun `Sender ikke behov dersom dokumentet finnes i databasen`() {
         every { dokumentDao.hent(any(), any()) } returns objectMapper.readTree("""{"ikkeTom":"harVerdi"}""")
 
-        mediator.håndter(FNR, DOKUMENTID, DOKUMENTTYPE)
+        mediator.håndter(dokumentDao, FNR, DOKUMENTID, DOKUMENTTYPE)
         verify(exactly = 1) {
             dokumentDao.hent(any(), any())
         }

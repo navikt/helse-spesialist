@@ -43,7 +43,6 @@ class ApiModule(
 
     val dokumentMediator =
         DokumentMediator(
-            daos.dokumentDao,
             publiserer = meldingPubliserer,
         )
 
@@ -62,7 +61,8 @@ class ApiModule(
             oppgaveService = oppgaveService,
         )
 
-    private val stansAutomatiskBehandlinghåndterer = StansAutomatiskBehandlinghåndtererImpl(daos.stansAutomatiskBehandlingDao)
+    private val stansAutomatiskBehandlinghåndterer =
+        StansAutomatiskBehandlinghåndtererImpl(daos.stansAutomatiskBehandlingDao)
 
     private val saksbehandlerMediator =
         SaksbehandlerMediator(
