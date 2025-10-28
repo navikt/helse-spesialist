@@ -60,7 +60,7 @@ class PostFattVedtakIntegrationTest {
         val behandlingId = UUID.randomUUID()
         val fødselsnummer = lagFødselsnummer()
         val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer)
-        val behandling = lagEnBehandling(behandlingId, vedtaksperiode.id(), fødselsnummer)
+        val behandling = lagEnBehandling(behandlingId, vedtaksperiode.id())
         val saksbehandler = lagEnSaksbehandler()
         saksbehandlerRepository.lagre(saksbehandler)
         vedtaksperiodeRepository.lagre(vedtaksperiode)
@@ -84,7 +84,7 @@ class PostFattVedtakIntegrationTest {
         val behandlingId = UUID.randomUUID()
         val fødselsnummer = lagFødselsnummer()
         val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer)
-        val behandling = lagEnBehandling(behandlingId, vedtaksperiode.id(), fødselsnummer)
+        val behandling = lagEnBehandling(behandlingId, vedtaksperiode.id())
         val saksbehandler = lagEnSaksbehandler()
         saksbehandlerRepository.lagre(saksbehandler)
         vedtaksperiodeRepository.lagre(vedtaksperiode)
@@ -113,7 +113,7 @@ class PostFattVedtakIntegrationTest {
         val behandlingId = UUID.randomUUID()
         val fødselsnummer = lagFødselsnummer()
         val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer)
-        val behandling = lagEnBehandling(behandlingId, vedtaksperiode.id(), fødselsnummer)
+        val behandling = lagEnBehandling(behandlingId, vedtaksperiode.id())
         val saksbehandler = lagEnSaksbehandler()
         saksbehandlerRepository.lagre(saksbehandler)
         vedtaksperiodeRepository.lagre(vedtaksperiode)
@@ -144,7 +144,7 @@ class PostFattVedtakIntegrationTest {
         val behandlingId = UUID.randomUUID()
         val fødselsnummer = lagFødselsnummer()
         val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer)
-        val behandling = lagEnBehandling(behandlingId, vedtaksperiode.id(), fødselsnummer)
+        val behandling = lagEnBehandling(behandlingId, vedtaksperiode.id())
         val saksbehandler = lagEnSaksbehandler()
         saksbehandlerRepository.lagre(saksbehandler)
         vedtaksperiodeRepository.lagre(vedtaksperiode)
@@ -181,7 +181,7 @@ class PostFattVedtakIntegrationTest {
         val behandlingId = UUID.randomUUID()
         val fødselsnummer = lagFødselsnummer()
         val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer)
-        val behandling = lagEnBehandling(behandlingId, vedtaksperiode.id(), fødselsnummer)
+        val behandling = lagEnBehandling(behandlingId, vedtaksperiode.id())
         val saksbehandler = lagEnSaksbehandler()
         saksbehandlerRepository.lagre(saksbehandler)
         vedtaksperiodeRepository.lagre(vedtaksperiode)
@@ -232,7 +232,6 @@ class PostFattVedtakIntegrationTest {
     private fun lagEnBehandling(
         behandlingId: UUID,
         vedtaksperiodeId: VedtaksperiodeId,
-        fødselsnummer: String,
     ): Behandling = Behandling.fraLagring(
         id = SpleisBehandlingId(behandlingId),
         tags = emptySet(),
