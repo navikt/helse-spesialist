@@ -30,7 +30,7 @@ class GetInntektsmeldingBehandler(
                 dokumentDao = transaksjon.dokumentDao,
                 fødselsnummer = fødselsnumre.first(),
                 dokumentId = resource.parent.dokumentId,
-                dokumentType = DokumentMediator.DokumentType.INNTEKTSMELDING.name,
+                dokumentType = DokumentMediator.DokumentType.INNTEKTSMELDING,
             )
 
         val fødselsnummerForIM =

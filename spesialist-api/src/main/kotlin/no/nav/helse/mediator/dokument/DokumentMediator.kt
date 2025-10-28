@@ -16,7 +16,7 @@ class DokumentMediator(
         dokumentDao: DokumentDao,
         fødselsnummer: String,
         dokumentId: UUID,
-        dokumentType: String,
+        dokumentType: DokumentType,
     ): JsonNode {
         val dokument = dokumentDao.hent(fødselsnummer, dokumentId)
 
@@ -49,12 +49,12 @@ class DokumentMediator(
     private fun sendHentDokument(
         fødselsnummer: String,
         dokumentId: UUID,
-        dokumentType: String,
+        dokumentType: DokumentType,
     ) {
         publiserer.publiser(
             fødselsnummer = fødselsnummer,
-            hendelse = HentDokument(dokumentId = dokumentId, dokumentType = dokumentType),
-            årsak = "forespørsel om $dokumentType fra saksbehandler",
+            hendelse = HentDokument(dokumentId = dokumentId, dokumentType = dokumentType.name),
+            årsak = "forespørsel om ${dokumentType.name.lowercase()} fra saksbehandler",
         )
     }
 

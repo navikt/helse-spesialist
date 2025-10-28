@@ -19,7 +19,7 @@ import java.util.UUID
 internal class DokumentMediatorTest {
     private val FNR = lagFødselsnummer()
     private val DOKUMENTID = UUID.randomUUID()
-    private val DOKUMENTTYPE = "SØKNAD"
+    private val DOKUMENTTYPE = DokumentMediator.DokumentType.SØKNAD
     private val RETRIES = 2
 
     private val dokumentDao = mockk<DokumentDao>(relaxed = true)

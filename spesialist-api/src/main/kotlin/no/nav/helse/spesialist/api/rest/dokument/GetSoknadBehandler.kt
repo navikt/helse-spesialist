@@ -30,7 +30,7 @@ class GetSoknadBehandler(
                 dokumentDao = transaksjon.dokumentDao,
                 fødselsnummer = fødselsnumre.first(),
                 dokumentId = resource.parent.dokumentId,
-                dokumentType = DokumentMediator.DokumentType.SØKNAD.name,
+                dokumentType = DokumentMediator.DokumentType.SØKNAD,
             )
 
         val fødselsnummerForSøknad = dokument.get("fnr").asText()
