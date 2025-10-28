@@ -5,4 +5,8 @@ import no.nav.helse.spesialist.domain.Varsel
 
 interface VarselRepository {
     fun finnVarsler(behandlingIder: List<SpleisBehandlingId>): List<Varsel>
+
+    fun lagre(varsel: Varsel)
+
+    fun lagre(varsler: List<Varsel>)
 }

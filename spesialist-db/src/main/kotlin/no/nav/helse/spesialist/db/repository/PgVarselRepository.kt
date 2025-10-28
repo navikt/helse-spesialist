@@ -37,4 +37,22 @@ class PgVarselRepository private constructor(
                     },
             )
         }
+
+    override fun lagre(varsel: Varsel) {
+        dbQuery.update(
+            """
+            UPDATE selve_varsel 
+            SET status = :status, status_endret_ident = :saksbehandler, status_endret_tidspunkt = :tidspunkt
+            WHERE unik_id = :unik_id
+            """.trimIndent(),
+            "status" to varsel.status.toString(),
+            "saksbehandler" to varsel.vurdering?.saksbehandlerId?.value,
+            "tidspunkt" to varsel.vurdering?.tidspunkt,
+            "unik_id" to varsel.id().value,
+        )
+    }
+
+    override fun lagre(varsler: List<Varsel>) {
+        varsler.forEach { lagre(it) }
+    }
 }
