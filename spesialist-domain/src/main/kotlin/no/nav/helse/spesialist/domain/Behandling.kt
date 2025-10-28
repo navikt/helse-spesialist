@@ -47,6 +47,8 @@ class Behandling private constructor(
         søknadIder += eksterneSøknadIder
     }
 
+    fun overlapperMedInfotrygd(): Boolean = tags.any { it == "OverlapperMedInfotrygd" }
+
     companion object {
         fun fraLagring(
             id: SpleisBehandlingId,

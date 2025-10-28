@@ -9,6 +9,9 @@ import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import java.util.UUID
 import java.util.stream.Stream
+import kotlin.test.Test
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class BehandlingTest {
 
@@ -26,6 +29,20 @@ class BehandlingTest {
         assertThrows<IllegalStateException> {
             behandling.utfall()
         }
+    }
+
+    @Test
+    fun `behandlingen overlapper med infotrygd`() {
+        val tags = setOf("OverlapperMedInfotrygd")
+        val behandling = lagEnBehandling(tags)
+        assertTrue(behandling.overlapperMedInfotrygd())
+    }
+
+    @Test
+    fun `behandlingen overlapper ikke med infotrygd`() {
+        val tags = setOf("Innvilget")
+        val behandling = lagEnBehandling(tags)
+        assertFalse(behandling.overlapperMedInfotrygd())
     }
 
     private fun lagEnBehandling(tags: Set<String>): Behandling = Behandling.fraLagring(
