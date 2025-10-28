@@ -33,11 +33,18 @@ class GetInntektsmeldingBehandler(
                 dokumentType = DokumentMediator.DokumentType.INNTEKTSMELDING.name,
             )
 
-        val fødselsnummerForIM = dokument.get("arbeidstakerFnr").asText(null)?.let { setOf(it) } ?: emptySet()
+        val fødselsnummerForIM =
+            dokument
+                .get("arbeidstakerFnr")
+                .asText()
+                .takeUnless { it.isEmpty() }
+                ?.let { setOf(it) } ?: emptySet()
         val aktørIdForIM = dokument.get("arbeidstakerAktorId").asText()
 
         val fødselsnummreForIM =
             fødselsnummerForIM + transaksjon.legacyPersonRepository.finnFødselsnumre(aktørIdForIM).toSet()
+
+        if (fødselsnummreForIM.isEmpty()) throw HttpNotFound("IM mangler fødselsnummer og aktørId")
 
         fødselsnummreForIM.forEach { fødselsnummer ->
             bekreftTilgangTilPerson(

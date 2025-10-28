@@ -78,6 +78,109 @@ class GetInntektsmeldingBehandlerTest {
     }
 
     @Test
+    fun `har tilgang til å hente inntektsmelding hvis person mangler FNR og har aktørId`() {
+        // Given:
+        val dokumentId = UUID.randomUUID()
+        val fødselsnummer = "29419408008"
+        val aktørId = "100000123123"
+        val organisasjonsnummer = "99999999"
+        dokumentDao.lagre(
+            fødselsnummer = fødselsnummer,
+            dokumentId = dokumentId,
+            dokument = objectMapper.readTree(
+                lagInntektsmeldingJson(
+                    id = dokumentId,
+                    fødselsnummer = "",
+                    aktørId = aktørId,
+                    organisasjonsnummer = organisasjonsnummer
+                )
+            )
+        )
+
+        val person: LegacyPerson = LegacyPerson.gjenopprett(
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            vedtaksperioder = emptyList(),
+            skjønnsfastsattSykepengegrunnlag = emptyList(),
+            avviksvurderinger = emptyList()
+        )
+
+        legacyPersonRepository.leggTilPerson(person)
+        personDao.upsertPersoninfo(
+            fødselsnummer = fødselsnummer,
+            fornavn = lagFornavn(),
+            mellomnavn = lagMellomnavn(),
+            etternavn = lagEtternavn(),
+            fødselsdato = fødselsdato(),
+            kjønn = Kjønn.Kvinne,
+            adressebeskyttelse = Adressebeskyttelse.Ugradert
+        )
+
+        val saksbehandler = lagSaksbehandler()
+
+        // When:
+        val response = integrationTestFixture.get(
+            url = "/api/personer/$aktørId/dokumenter/$dokumentId/inntektsmelding",
+            saksbehandler = saksbehandler
+        )
+
+        // Then:
+        assertEquals(HttpStatusCode.OK.value, response.status)
+        assertEquals(organisasjonsnummer, response.bodyAsJsonNode?.get("virksomhetsnummer")?.asText())
+    }
+
+    @Test
+    fun `har ikke tilgang til å hente inntektsmelding hvis person mangler FNR og aktørId`() {
+        // Given:
+        val dokumentId = UUID.randomUUID()
+        val fødselsnummer = "29419408008"
+        val aktørId = "100000123123"
+        val organisasjonsnummer = "99999999"
+        dokumentDao.lagre(
+            fødselsnummer = fødselsnummer,
+            dokumentId = dokumentId,
+            dokument = objectMapper.readTree(
+                lagInntektsmeldingJson(
+                    id = dokumentId,
+                    fødselsnummer = "",
+                    aktørId = "",
+                    organisasjonsnummer = organisasjonsnummer
+                )
+            )
+        )
+
+        val person: LegacyPerson = LegacyPerson.gjenopprett(
+            aktørId = aktørId,
+            fødselsnummer = fødselsnummer,
+            vedtaksperioder = emptyList(),
+            skjønnsfastsattSykepengegrunnlag = emptyList(),
+            avviksvurderinger = emptyList()
+        )
+
+        legacyPersonRepository.leggTilPerson(person)
+        personDao.upsertPersoninfo(
+            fødselsnummer = fødselsnummer,
+            fornavn = lagFornavn(),
+            mellomnavn = lagMellomnavn(),
+            etternavn = lagEtternavn(),
+            fødselsdato = fødselsdato(),
+            kjønn = Kjønn.Kvinne,
+            adressebeskyttelse = Adressebeskyttelse.Ugradert
+        )
+
+        val saksbehandler = lagSaksbehandler()
+
+        // When:
+        val response = integrationTestFixture.get(
+            url = "/api/personer/$aktørId/dokumenter/$dokumentId/inntektsmelding",
+            saksbehandler = saksbehandler
+        )
+
+        // Then:
+        assertEquals(HttpStatusCode.NotFound.value, response.status)
+    }
+
+    @Test
     fun `kan ikke hente inntektsmelding hvis man ikke har tilgang til person`() {
         // Given:
         val dokumentId = UUID.randomUUID()
