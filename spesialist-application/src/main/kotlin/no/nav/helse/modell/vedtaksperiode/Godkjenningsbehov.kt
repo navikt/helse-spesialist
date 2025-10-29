@@ -86,6 +86,7 @@ class Godkjenningsbehov(
     val orgnummereMedRelevanteArbeidsforhold: List<String>,
     val skjæringstidspunkt: LocalDate,
     val sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta,
+    val foreløpigBeregnetSluttPåSykepenger: LocalDate,
     private val json: String,
 ) : Vedtaksperiodemelding {
     override fun fødselsnummer() = fødselsnummer
@@ -124,6 +125,7 @@ class Godkjenningsbehov(
             sykepengegrunnlagsfakta = sykepengegrunnlagsfakta,
             orgnummereMedRelevanteArbeidsforhold = orgnummereMedRelevanteArbeidsforhold,
             skjæringstidspunkt = skjæringstidspunkt,
+            foreløpigBeregnetSluttPåSykepenger = foreløpigBeregnetSluttPåSykepenger,
             json = json,
         )
 
@@ -165,6 +167,7 @@ class Godkjenningsbehov(
                     godkjenning["sykepengegrunnlagsfakta"].asSykepengegrunnlagsfakta(
                         yrkesaktivitetstype,
                     ),
+                foreløpigBeregnetSluttPåSykepenger = godkjenning["foreløpigBeregnetSluttPåSykepenger"].asLocalDate(),
                 json = json,
             )
         }

@@ -241,6 +241,7 @@ class PgMeldingDaoTest {
                             )
                         )
                     ),
+                    "foreløpigBeregnetSluttPåSykepenger" to LocalDate.of(2018, 12, 1)
                 ),
             ).toJson()
         )

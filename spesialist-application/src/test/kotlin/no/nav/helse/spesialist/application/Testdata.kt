@@ -7,6 +7,7 @@ import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
+import no.nav.helse.spesialist.domain.testfixtures.des
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagAktørId
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
@@ -109,6 +110,7 @@ object Testdata {
                 ),
                 sykepengegrunnlag = 123456.7
             ),
+            foreløpigBeregnetSluttPåSykepenger = 1 des 2018,
             json = json,
         )
     }

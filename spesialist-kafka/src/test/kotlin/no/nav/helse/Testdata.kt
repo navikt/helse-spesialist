@@ -6,6 +6,7 @@ import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
+import no.nav.helse.spesialist.domain.testfixtures.des
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
@@ -59,6 +60,7 @@ object Testdata {
                     )
                 )
             ),
+            foreløpigBeregnetSluttPåSykepenger = 1 des 2018,
             json = json,
         )
     }
@@ -83,4 +85,5 @@ internal data class GodkjenningsbehovTestdata(
     val vilkårsgrunnlagId: UUID = UUID.randomUUID(),
     val spleisBehandlingId: UUID = UUID.randomUUID(),
     val tags: List<String> = emptyList(),
+    val foreløpigBeregnetSluttPåSykepenger: LocalDate = 1 des 2018
 )

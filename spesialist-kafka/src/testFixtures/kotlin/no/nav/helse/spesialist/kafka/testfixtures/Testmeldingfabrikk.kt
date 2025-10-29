@@ -305,6 +305,7 @@ object Testmeldingfabrikk {
                     "tags" to tags,
                     "perioderMedSammeSkjæringstidspunkt" to perioderMedSammeSkjæringstidspunkt,
                     "sykepengegrunnlagsfakta" to sykepengegrunnlagsfakta,
+                    "foreløpigBeregnetSluttPåSykepenger" to LocalDate.of(2018, 12, 1).toString(),
                 ),
             )
         )

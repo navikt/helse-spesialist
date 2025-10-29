@@ -35,6 +35,7 @@ data class GodkjenningsbehovData(
     val orgnummereMedRelevanteArbeidsforhold: List<String>,
     val skjæringstidspunkt: LocalDate,
     val sykepengegrunnlagsfakta: Godkjenningsbehov.Sykepengegrunnlagsfakta,
+    val foreløpigBeregnetSluttPåSykepenger: LocalDate,
     private val json: String,
 ) {
     private lateinit var løsning: Løsning
