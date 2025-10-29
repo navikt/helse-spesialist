@@ -37,11 +37,9 @@ class PostFattVedtakBehandler(
     ): RestResponse<Boolean> {
         val spleisBehandlingId = SpleisBehandlingId(resource.parent.behandlingId)
         val behandling =
-            transaksjon.behandlingRepository.finn(spleisBehandlingId)
-                ?: throw HttpNotFound("Fant ikke behandling med behandlingId ${resource.parent.behandlingId}")
+            transaksjon.behandlingRepository.finn(spleisBehandlingId) ?: throw HttpNotFound(BEHANDLING_IKKE_FUNNET)
         val vedtaksperiode =
-            transaksjon.vedtaksperiodeRepository.finn(behandling.vedtaksperiodeId)
-                ?: throw HttpNotFound("Fant ikke vedtaksperiode med id ${behandling.vedtaksperiodeId.value}")
+            transaksjon.vedtaksperiodeRepository.finn(behandling.vedtaksperiodeId) ?: throw HttpNotFound(VEDTAKSPERIODE_IKKE_FUNNET)
         val fødselsnummer = vedtaksperiode.fødselsnummer
 
         bekreftTilgangTilPerson(
@@ -56,19 +54,18 @@ class PostFattVedtakBehandler(
         if (oppgave.tilstand != Oppgave.AvventerSaksbehandler) throw HttpBadRequest(OPPGAVE_FEIL_TILSTAND)
 
         val totrinnsvurdering = transaksjon.totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)
-        val oidPersonSkalReserveresTil: SaksbehandlerOid
-        if (totrinnsvurdering == null) {
-            oidPersonSkalReserveresTil = saksbehandler.id()
-            behandling.fattVedtak(transaksjon, fødselsnummer, saksbehandler, oppgave, request.begrunnelse, outbox)
-        } else {
-            oidPersonSkalReserveresTil = totrinnsvurdering.saksbehandler ?: throw HttpConflict("Behandlende saksbehandler mangler i totrinnsvurdering")
+        var oidPersonSkalReserveresTil: SaksbehandlerOid = saksbehandler.id()
+
+        if (totrinnsvurdering != null) {
             totrinnsvurdering.godkjenn(saksbehandler, tilgangsgrupper)
+            oidPersonSkalReserveresTil = totrinnsvurdering.saksbehandler ?: throw HttpConflict(TOTRINNSVURDERING_MANGLER_SAKSBEHANDLER)
             val innslag = Historikkinnslag.totrinnsvurderingFerdigbehandletInnslag(saksbehandler)
             transaksjon.periodehistorikkDao.lagreMedOppgaveId(innslag, oppgave.id)
             transaksjon.totrinnsvurderingRepository.lagre(totrinnsvurdering)
         }
-
         transaksjon.reservasjonDao.reserverPerson(oidPersonSkalReserveresTil.value, fødselsnummer)
+        behandling.fattVedtak(transaksjon, fødselsnummer, saksbehandler, oppgave, request.begrunnelse, outbox)
+
         return RestResponse(HttpStatusCode.OK, false)
     }
 
@@ -207,5 +204,8 @@ class PostFattVedtakBehandler(
         const val SAKSBEHANDLER_KAN_IKKE_BESLUTTE_EGEN_OPPGAVE = "Kan ikke beslutte egen oppgave"
         const val VARSLER_MANGLER_VURDERING = "Kan ikke godkjenne varsler som ikke er vurdert av en saksbehandler"
         const val OVERLAPPER_MED_INFOTRYGD = "Kan ikke fatte vedtak fordi perioden overlapper med infotrygd"
+        const val BEHANDLING_IKKE_FUNNET = "Fant ikke behandling"
+        const val VEDTAKSPERIODE_IKKE_FUNNET = "Fant ikke vedtaksperiode"
+        const val TOTRINNSVURDERING_MANGLER_SAKSBEHANDLER = "Behandlende saksbehandler mangler i totrinnsvurdering"
     }
 }

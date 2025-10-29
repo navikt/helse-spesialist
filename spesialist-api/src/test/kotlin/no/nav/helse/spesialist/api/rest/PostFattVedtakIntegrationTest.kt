@@ -41,7 +41,7 @@ class PostFattVedtakIntegrationTest {
     private val varseldefinisjonRepository = integrationTestFixture.sessionFactory.sessionContext.varseldefinisjonRepository
 
     @Test
-    fun `gir 404 hvis behandlingen ikke finnes`() {
+    fun `gir NotFound hvis behandlingen ikke finnes`() {
         // Given:
         val behandlingId = UUID.randomUUID()
         val saksbehandler = lagEnSaksbehandler()
@@ -56,6 +56,28 @@ class PostFattVedtakIntegrationTest {
 
         // Then:
         assertEquals(HttpStatusCode.NotFound.value, response.status)
+        response.assertResponseMessage(PostFattVedtakBehandler.BEHANDLING_IKKE_FUNNET)
+    }
+
+    @Test
+    fun `gir NotFound hvis vedtaksperioden ikke finnes`() {
+        // Given:
+        val behandlingId = UUID.randomUUID()
+        val saksbehandler = lagEnSaksbehandler()
+        val behandling = lagEnBehandling(behandlingId, VedtaksperiodeId(UUID.randomUUID()))
+        behandlingRepository.lagre(behandling)
+        saksbehandlerRepository.lagre(saksbehandler)
+
+        // When:
+        val response = integrationTestFixture.post(
+            url = "/api/vedtak/$behandlingId/fatt",
+            body = "{}",
+            saksbehandler = saksbehandler,
+        )
+
+        // Then:
+        assertEquals(HttpStatusCode.NotFound.value, response.status)
+        response.assertResponseMessage(PostFattVedtakBehandler.VEDTAKSPERIODE_IKKE_FUNNET)
     }
 
     @Test
@@ -213,6 +235,41 @@ class PostFattVedtakIntegrationTest {
         // Then:
         assertEquals(HttpStatusCode.Forbidden.value, response.status)
         response.assertResponseMessage(PostFattVedtakBehandler.SAKSBEHANDLER_KAN_IKKE_BESLUTTE_EGEN_OPPGAVE)
+    }
+
+    @Test
+    fun `gir conflict hvis totrinnsvurdering mangler beslutter`() {
+        // Given:
+        val behandlingId = UUID.randomUUID()
+        val fødselsnummer = lagFødselsnummer()
+        val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer)
+        val behandling = lagEnBehandling(behandlingId, vedtaksperiode.id())
+        val saksbehandler = lagEnSaksbehandler()
+        saksbehandlerRepository.lagre(saksbehandler)
+        vedtaksperiodeRepository.lagre(vedtaksperiode)
+        behandlingRepository.lagre(behandling)
+        egenansattDao.lagre(fødselsnummer, false, LocalDateTime.now())
+        personDao.upsertPersoninfo(
+            fødselsnummer, lagFornavn(), lagMellomnavn(), lagEtternavn(), LocalDate.now(),
+            Kjønn.Ukjent, Adressebeskyttelse.Ugradert
+        )
+        val oppgave = lagEnOppgave(behandlingId)
+        oppgaveRepository.lagre(oppgave)
+
+        val totrinnsvurdering = Totrinnsvurdering.ny(fødselsnummer = fødselsnummer)
+        totrinnsvurderingRepository.lagre(totrinnsvurdering)
+
+        // When:
+        val response = integrationTestFixture.post(
+            url = "/api/vedtak/$behandlingId/fatt",
+            body = "{}",
+            saksbehandler = saksbehandler,
+            tilgangsgrupper = setOf(Tilgangsgruppe.BESLUTTER)
+        )
+
+        // Then:
+        assertEquals(HttpStatusCode.Conflict.value, response.status)
+        response.assertResponseMessage(PostFattVedtakBehandler.TOTRINNSVURDERING_MANGLER_SAKSBEHANDLER)
     }
 
     @Test
