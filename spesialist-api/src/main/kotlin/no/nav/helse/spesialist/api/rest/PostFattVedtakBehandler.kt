@@ -185,6 +185,7 @@ class PostFattVedtakBehandler(
             throw HttpForbidden(SAKSBEHANDLER_KAN_IKKE_BESLUTTE_EGEN_OPPGAVE)
         }
         settBeslutter(beslutter.id())
+        ferdigstill()
     }
 
     override fun openApi(config: RouteConfig) {
