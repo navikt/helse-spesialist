@@ -4,23 +4,28 @@ import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.db.BehandlingRepository
+import no.nav.helse.db.PåVentDao
 import no.nav.helse.db.SessionContext
+import no.nav.helse.mediator.oppgave.OppgaveRepository
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.spesialist.api.rest.resources.Vedtak
 import no.nav.helse.spesialist.api.rest.tilkommeninntekt.bekreftTilgangTilPerson
 import no.nav.helse.spesialist.application.Outbox
+import no.nav.helse.spesialist.application.VarselRepository
 import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.Saksbehandler
+import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.VedtakBegrunnelse
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 
 class PostFattVedtakBehandler(
     private val environmentToggles: EnvironmentToggles,
-) : PostBehandler<Vedtak.Id.Fatt, Unit, Boolean> {
+) : PostBehandler<Vedtak.Id.Fatt, ApiFattVedtakRequest, Boolean> {
     override fun behandle(
         resource: Vedtak.Id.Fatt,
-        request: Unit,
+        request: ApiFattVedtakRequest,
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
@@ -51,7 +56,7 @@ class PostFattVedtakBehandler(
 
         val totrinnsvurdering = transaksjon.totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)
         if (totrinnsvurdering == null) {
-            behandling.fattVedtak(transaksjon.behandlingRepository, fødselsnummer)
+            behandling.fattVedtak(transaksjon, fødselsnummer, saksbehandler.id(), oppgave, request.begrunnelse)
         } else {
             totrinnsvurdering.godkjenn(saksbehandler, tilgangsgrupper)
             transaksjon.totrinnsvurderingRepository.lagre(totrinnsvurdering)
@@ -61,14 +66,67 @@ class PostFattVedtakBehandler(
     }
 
     private fun Behandling.fattVedtak(
-        behandlingRepository: BehandlingRepository,
+        transaksjon: SessionContext,
         fødselsnummer: String,
+        saksbehandlerOid: SaksbehandlerOid,
+        oppgave: Oppgave,
+        begrunnelse: String?,
+    ) {
+        if (overlapperMedInfotrygd()) throw HttpBadRequest(OVERLAPPER_MED_INFOTRYGD)
+        validerOgGodkjennVarsler(
+            behandlingRepository = transaksjon.behandlingRepository,
+            varselRepository = transaksjon.varselRepository,
+            fødselsnummer = fødselsnummer,
+            saksbehandlerOid = saksbehandlerOid,
+        )
+        opphevPåVentStatus(oppgave, transaksjon.oppgaveRepository, transaksjon.påVentDao)
+        oppdaterVedtakBegrunnelse(transaksjon, begrunnelse, saksbehandlerOid)
+    }
+
+    private fun Behandling.oppdaterVedtakBegrunnelse(
+        transaksjon: SessionContext,
+        begrunnelse: String?,
+        saksbehandlerOid: SaksbehandlerOid,
+    ) {
+        val repo = transaksjon.vedtakBegrunnelseRepository
+        val eksisterende = repo.finn(id())
+        val nyBegrunnelse = VedtakBegrunnelse.ny(id(), begrunnelse.orEmpty(), utfall(), saksbehandlerOid)
+        if (eksisterende == null) {
+            repo.lagre(nyBegrunnelse)
+        } else if (eksisterende.erForskjelligFra(begrunnelse.orEmpty(), utfall())) {
+            eksisterende.invalider()
+            repo.lagre(eksisterende)
+            repo.lagre(nyBegrunnelse)
+        }
+    }
+
+    private fun Behandling.validerOgGodkjennVarsler(
+        behandlingRepository: BehandlingRepository,
+        varselRepository: VarselRepository,
+        fødselsnummer: String,
+        saksbehandlerOid: SaksbehandlerOid,
     ) {
         val behandlingerSomMåSeesUnderEtt =
             behandlingRepository
                 .finnAndreBehandlingerISykefraværstilfelle(this, fødselsnummer)
                 .filterNot { it.fom > tom }
                 .plus(this)
+
+        val behandlingIder = behandlingerSomMåSeesUnderEtt.map { behandling -> behandling.id() }
+        val varsler = varselRepository.finnVarsler(behandlingIder)
+        if (varsler.any { varsel -> !varsel.kanGodkjennes() }) throw HttpBadRequest(VARSLER_MANGLER_VURDERING)
+        varsler.forEach { it.godkjenn(saksbehandlerOid) }
+        varselRepository.lagre(varsler)
+    }
+
+    private fun opphevPåVentStatus(
+        oppgave: Oppgave,
+        oppgaveRepository: OppgaveRepository,
+        påVentDao: PåVentDao,
+    ) {
+        oppgave.fjernFraPåVent()
+        oppgaveRepository.lagre(oppgave)
+        påVentDao.slettPåVent(oppgave.id)
     }
 
     private fun Totrinnsvurdering.godkjenn(
@@ -101,5 +159,7 @@ class PostFattVedtakBehandler(
         const val OPPGAVE_FEIL_TILSTAND = "Oppgaven er i feil tilstand."
         const val SAKSBEHANDLER_MANGLER_BESLUTTERTILGANG = "Mangler besluttertilgang"
         const val SAKSBEHANDLER_KAN_IKKE_BESLUTTE_EGEN_OPPGAVE = "Kan ikke beslutte egen oppgave"
+        const val VARSLER_MANGLER_VURDERING = "Kan ikke godkjenne varsler som ikke er vurdert av en saksbehandler"
+        const val OVERLAPPER_MED_INFOTRYGD = "Kan ikke fatte vedtak fordi perioden overlapper med infotrygd"
     }
 }

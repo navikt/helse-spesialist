@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.e2etests
 import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.jackson.asUUID
 import com.github.navikt.tbd_libs.jackson.isMissingOrNull
+import no.nav.helse.spesialist.api.rest.ApiFattVedtakRequest
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
@@ -74,9 +75,9 @@ class SpeilPersonReceiver(
         hentOppdatertPerson()
     }
 
-    fun saksbehandlerFatterVedtakREST(behandlingId: UUID, begrunnelse: String = "Fattet vedtak") : JsonNode = callHttpPost(
+    fun saksbehandlerFatterVedtakREST(behandlingId: UUID, begrunnelse: String? = null) : JsonNode = callHttpPost(
         relativeUrl = "api/vedtak/$behandlingId/fatt",
-        request = Unit
+        request = ApiFattVedtakRequest(begrunnelse)
     ).also {
         hentOppdatertPerson()
     }
@@ -299,6 +300,18 @@ class SpeilPersonReceiver(
                     person["arbeidsgivere"][0]["generasjoner"][0]["perioder"][0]["oppgave"].toPrettyString()
         }
     }
+
+    fun assertVarslerHarStatus(status: String, behandlingId: UUID) {
+        val vedtaksperiodeFraFetchPerson = person["arbeidsgivere"].flatMap { arbeidsgiver ->
+            arbeidsgiver["generasjoner"].flatMap { generasjon ->
+                generasjon["perioder"]
+            }
+        }.find { it["behandlingId"].asText() == behandlingId.toString() }
+            ?: error("Fant ikke periode med behandlingId $behandlingId i FetchPerson-svaret")
+
+        assertTrue(vedtaksperiodeFraFetchPerson["varsler"].map { it["vurdering"]["status"].asText() }.sorted().all { it == status })
+    }
+
 
     fun assertVarselkoder(expected: List<String>, vedtaksperiode: Vedtaksperiode) {
         val vedtaksperiodeFraFetchPerson = person["arbeidsgivere"].flatMap { arbeidsgiver ->

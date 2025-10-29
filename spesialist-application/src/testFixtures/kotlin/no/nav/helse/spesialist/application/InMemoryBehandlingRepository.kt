@@ -15,10 +15,10 @@ class InMemoryBehandlingRepository : BehandlingRepository {
         behandling: Behandling,
         fødselsnummer: String
     ): Set<Behandling> {
-        TODO("Not yet implemented")
+        return behandlinger.values.filter { it.skjæringstidspunkt.isEqual(behandling.skjæringstidspunkt) }.toSet()
     }
 
     override fun lagre(behandling: Behandling) {
-        behandlinger[behandling.id] = behandling
+        behandlinger[behandling.id()] = behandling
     }
 }

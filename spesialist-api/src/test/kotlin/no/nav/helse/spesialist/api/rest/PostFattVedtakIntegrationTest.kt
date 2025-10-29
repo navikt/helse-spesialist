@@ -9,6 +9,8 @@ import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.Varsel
+import no.nav.helse.spesialist.domain.VarselId
 import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.testfixtures.jan
@@ -35,6 +37,7 @@ class PostFattVedtakIntegrationTest {
     private val personDao = integrationTestFixture.sessionFactory.sessionContext.personDao
     private val totrinnsvurderingRepository = integrationTestFixture.sessionFactory.sessionContext.totrinnsvurderingRepository
     private val vedtaksperiodeRepository = integrationTestFixture.sessionFactory.sessionContext.vedtaksperiodeRepository
+    private val varselRepository = integrationTestFixture.sessionFactory.sessionContext.varselRepository
 
     @Test
     fun `gir 404 hvis behandlingen ikke finnes`() {
@@ -211,6 +214,71 @@ class PostFattVedtakIntegrationTest {
         response.assertResponseMessage(PostFattVedtakBehandler.SAKSBEHANDLER_KAN_IKKE_BESLUTTE_EGEN_OPPGAVE)
     }
 
+    @Test
+    fun `gir bad request hvis behandlingen overlapper med Infotrygd`() {
+        // Given:
+        val behandlingId = UUID.randomUUID()
+        val fødselsnummer = lagFødselsnummer()
+        val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer)
+        val behandling = lagEnBehandling(behandlingId, vedtaksperiode.id(), tags = setOf("OverlapperMedInfotrygd"))
+        val saksbehandler = lagEnSaksbehandler()
+        saksbehandlerRepository.lagre(saksbehandler)
+        vedtaksperiodeRepository.lagre(vedtaksperiode)
+        behandlingRepository.lagre(behandling)
+        egenansattDao.lagre(fødselsnummer, false, LocalDateTime.now())
+        personDao.upsertPersoninfo(
+            fødselsnummer, lagFornavn(), lagMellomnavn(), lagEtternavn(), LocalDate.now(),
+            Kjønn.Ukjent, Adressebeskyttelse.Ugradert
+        )
+        val oppgave = lagEnOppgave(behandlingId)
+        oppgaveRepository.lagre(oppgave)
+
+        // When:
+        val response = integrationTestFixture.post(
+            url = "/api/vedtak/$behandlingId/fatt",
+            body = "{}",
+            saksbehandler = saksbehandler,
+            tilgangsgrupper = setOf(Tilgangsgruppe.BESLUTTER)
+        )
+
+        // Then:
+        assertEquals(HttpStatusCode.BadRequest.value, response.status)
+        response.assertResponseMessage(PostFattVedtakBehandler.OVERLAPPER_MED_INFOTRYGD)
+    }
+
+    @Test
+    fun `gir bad request hvis det finnes relevante varsler som ikke er vurdert`() {
+        // Given:
+        val behandlingId = UUID.randomUUID()
+        val fødselsnummer = lagFødselsnummer()
+        val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer)
+        val behandling = lagEnBehandling(behandlingId, vedtaksperiode.id())
+        val saksbehandler = lagEnSaksbehandler()
+        saksbehandlerRepository.lagre(saksbehandler)
+        vedtaksperiodeRepository.lagre(vedtaksperiode)
+        behandlingRepository.lagre(behandling)
+        egenansattDao.lagre(fødselsnummer, false, LocalDateTime.now())
+        personDao.upsertPersoninfo(
+            fødselsnummer, lagFornavn(), lagMellomnavn(), lagEtternavn(), LocalDate.now(),
+            Kjønn.Ukjent, Adressebeskyttelse.Ugradert
+        )
+        varselRepository.lagre(Varsel.fraLagring(VarselId(UUID.randomUUID()), behandling.id(), status = Varsel.Status.AKTIV, vurdering = null))
+        val oppgave = lagEnOppgave(behandlingId)
+        oppgaveRepository.lagre(oppgave)
+
+        // When:
+        val response = integrationTestFixture.post(
+            url = "/api/vedtak/$behandlingId/fatt",
+            body = "{}",
+            saksbehandler = saksbehandler,
+            tilgangsgrupper = setOf(Tilgangsgruppe.BESLUTTER)
+        )
+
+        // Then:
+        assertEquals(HttpStatusCode.BadRequest.value, response.status)
+        response.assertResponseMessage(PostFattVedtakBehandler.VARSLER_MANGLER_VURDERING)
+    }
+
     private fun lagEnOppgave(behandlingId: UUID): Oppgave = Oppgave.ny(
         id = nextLong(),
         førsteOpprettet = LocalDateTime.now(),
@@ -232,9 +300,10 @@ class PostFattVedtakIntegrationTest {
     private fun lagEnBehandling(
         behandlingId: UUID,
         vedtaksperiodeId: VedtaksperiodeId,
+        tags: Set<String> = emptySet(),
     ): Behandling = Behandling.fraLagring(
         id = SpleisBehandlingId(behandlingId),
-        tags = emptySet(),
+        tags = tags,
         søknadIder = emptySet(),
         fom = 1.jan(2018),
         tom = 31.jan(2018),

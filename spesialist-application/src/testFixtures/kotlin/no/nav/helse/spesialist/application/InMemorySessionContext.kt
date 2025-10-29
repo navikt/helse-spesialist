@@ -25,6 +25,8 @@ import no.nav.helse.db.VergemålDao
 import no.nav.helse.db.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.Adressebeskyttelse
+import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.typer.Kjønn
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -162,8 +164,21 @@ class InMemorySessionContext(
         get() = TODO("Not yet implemented")
     override val personRepository: PersonRepository
         get() = TODO("Not yet implemented")
-    override val varselRepository: VarselRepository
-        get() = TODO("Not yet implemented")
+    override val varselRepository: VarselRepository = object : VarselRepository {
+        private val varsler = mutableSetOf<Varsel>()
+        override fun finnVarsler(behandlingIder: List<SpleisBehandlingId>): List<Varsel> {
+            return varsler.filter { it.spleisBehandlingId in behandlingIder }
+        }
+
+        override fun lagre(varsel: Varsel) {
+            varsler.add(varsel)
+        }
+
+        override fun lagre(varsler: List<Varsel>) {
+            this.varsler.addAll(varsler)
+        }
+
+    }
     override val vedtakBegrunnelseRepository: VedtakBegrunnelseRepository
         get() = TODO("Not yet implemented")
 }
