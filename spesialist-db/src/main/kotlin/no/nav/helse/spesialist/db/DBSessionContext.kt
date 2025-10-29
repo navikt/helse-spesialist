@@ -16,6 +16,7 @@ import no.nav.helse.spesialist.application.SaksbehandlerRepository
 import no.nav.helse.spesialist.application.TilkommenInntektRepository
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.application.VarselRepository
+import no.nav.helse.spesialist.application.VarseldefinisjonRepository
 import no.nav.helse.spesialist.application.VedtaksperiodeRepository
 import no.nav.helse.spesialist.db.dao.PgAnnulleringRepository
 import no.nav.helse.spesialist.db.dao.PgArbeidsforholdDao
@@ -59,6 +60,7 @@ import no.nav.helse.spesialist.db.repository.PgSaksbehandlerRepository
 import no.nav.helse.spesialist.db.repository.PgTilkommenInntektRepository
 import no.nav.helse.spesialist.db.repository.PgTotrinnsvurderingRepository
 import no.nav.helse.spesialist.db.repository.PgVarselRepository
+import no.nav.helse.spesialist.db.repository.PgVarseldefinisjonRepository
 import no.nav.helse.spesialist.db.repository.PgVedtakBegrunnelseRepository
 import no.nav.helse.spesialist.db.repository.PgVedtaksperiodeRepository
 
@@ -110,5 +112,6 @@ class DBSessionContext(
     override val personRepository: PersonRepository = PgPersonRepository(session)
     override val vedtaksperiodeRepository: VedtaksperiodeRepository = PgVedtaksperiodeRepository(session)
     override val varselRepository: VarselRepository = PgVarselRepository(session)
+    override val varseldefinisjonRepository: VarseldefinisjonRepository = PgVarseldefinisjonRepository(session)
     override val vedtakBegrunnelseRepository: VedtakBegrunnelseRepository = PgVedtakBegrunnelseRepository(session)
 }

@@ -179,6 +179,8 @@ class InMemorySessionContext(
         }
 
     }
+    override val varseldefinisjonRepository: VarseldefinisjonRepository
+        get() = TODO("Not yet implemented")
     override val vedtakBegrunnelseRepository: VedtakBegrunnelseRepository
         get() = TODO("Not yet implemented")
 }
