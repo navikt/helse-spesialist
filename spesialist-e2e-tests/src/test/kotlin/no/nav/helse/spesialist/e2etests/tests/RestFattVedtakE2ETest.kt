@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.spesialist.e2etests.AbstractE2EIntegrationTest
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
-import java.util.UUID
 import kotlin.test.assertEquals
 
 class RESTFattVedtakE2ETest : AbstractE2EIntegrationTest() {
@@ -167,7 +166,7 @@ class RESTFattVedtakE2ETest : AbstractE2EIntegrationTest() {
         medPersonISpeil {
             saksbehandlerTildelerSegSaken() // Må til for å "opprette" saksbehandler
             saksbehandlerGodkjennerAlleVarsler()
-            saksbehandlerFatterVedtakREST(UUID.randomUUID(), "Her er min begrunnelse")
+            saksbehandlerFatterVedtakREST(førsteVedtaksperiode().spleisBehandlingId!!, "Her er min begrunnelse")
 
             // Sjekk at varsler er godkjent
             person["arbeidsgivere"].flatMap { arbeidsgiver ->

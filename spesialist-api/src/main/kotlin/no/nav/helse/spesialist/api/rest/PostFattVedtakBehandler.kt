@@ -7,17 +7,21 @@ import no.nav.helse.db.BehandlingRepository
 import no.nav.helse.db.PåVentDao
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.oppgave.OppgaveRepository
+import no.nav.helse.modell.melding.VarselEndret
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.spesialist.api.rest.resources.Vedtak
 import no.nav.helse.spesialist.api.rest.tilkommeninntekt.bekreftTilgangTilPerson
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.VarselRepository
+import no.nav.helse.spesialist.application.VarseldefinisjonRepository
 import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.VedtakBegrunnelse
+import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 
 class PostFattVedtakBehandler(
@@ -56,7 +60,7 @@ class PostFattVedtakBehandler(
 
         val totrinnsvurdering = transaksjon.totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)
         if (totrinnsvurdering == null) {
-            behandling.fattVedtak(transaksjon, fødselsnummer, saksbehandler.id(), oppgave, request.begrunnelse)
+            behandling.fattVedtak(transaksjon, fødselsnummer, saksbehandler.id(), oppgave, request.begrunnelse, outbox)
         } else {
             totrinnsvurdering.godkjenn(saksbehandler, tilgangsgrupper)
             transaksjon.totrinnsvurderingRepository.lagre(totrinnsvurdering)
@@ -71,13 +75,16 @@ class PostFattVedtakBehandler(
         saksbehandlerOid: SaksbehandlerOid,
         oppgave: Oppgave,
         begrunnelse: String?,
+        outbox: Outbox,
     ) {
         if (overlapperMedInfotrygd()) throw HttpBadRequest(OVERLAPPER_MED_INFOTRYGD)
         validerOgGodkjennVarsler(
             behandlingRepository = transaksjon.behandlingRepository,
             varselRepository = transaksjon.varselRepository,
+            varseldefinisjonRepository = transaksjon.varseldefinisjonRepository,
             fødselsnummer = fødselsnummer,
             saksbehandlerOid = saksbehandlerOid,
+            outbox = outbox,
         )
         opphevPåVentStatus(oppgave, transaksjon.oppgaveRepository, transaksjon.påVentDao)
         oppdaterVedtakBegrunnelse(transaksjon, begrunnelse, saksbehandlerOid)
@@ -101,10 +108,12 @@ class PostFattVedtakBehandler(
     }
 
     private fun Behandling.validerOgGodkjennVarsler(
+        varseldefinisjonRepository: VarseldefinisjonRepository,
         behandlingRepository: BehandlingRepository,
         varselRepository: VarselRepository,
         fødselsnummer: String,
         saksbehandlerOid: SaksbehandlerOid,
+        outbox: Outbox,
     ) {
         val behandlingerSomMåSeesUnderEtt =
             behandlingRepository
@@ -114,9 +123,47 @@ class PostFattVedtakBehandler(
 
         val behandlingIder = behandlingerSomMåSeesUnderEtt.map { behandling -> behandling.id() }
         val varsler = varselRepository.finnVarsler(behandlingIder)
-        if (varsler.any { varsel -> !varsel.kanGodkjennes() }) throw HttpBadRequest(VARSLER_MANGLER_VURDERING)
-        varsler.forEach { it.godkjenn(saksbehandlerOid) }
+        if (varsler.any { !it.kanGodkjennes() }) throw HttpBadRequest(VARSLER_MANGLER_VURDERING)
+        varsler.forEach {
+            it.godkjennOgPubliserEndring(
+                vedtaksperiodeId = vedtaksperiodeId,
+                spleisBehandlingId = id(),
+                saksbehandlerOid = saksbehandlerOid,
+                varseldefinisjonRepository = varseldefinisjonRepository,
+                outbox = outbox,
+                fødselsnummer = fødselsnummer,
+            )
+        }
         varselRepository.lagre(varsler)
+    }
+
+    private fun Varsel.godkjennOgPubliserEndring(
+        vedtaksperiodeId: VedtaksperiodeId,
+        spleisBehandlingId: SpleisBehandlingId,
+        saksbehandlerOid: SaksbehandlerOid,
+        varseldefinisjonRepository: VarseldefinisjonRepository,
+        outbox: Outbox,
+        fødselsnummer: String,
+    ) {
+        val gammelStatus = status
+        godkjenn(saksbehandlerOid)
+        val varseldefinisjon =
+            varseldefinisjonRepository.finnGjeldendeFor(kode)
+                ?: throw HttpBadRequest("Varsel mangler varseldefinisjon")
+        outbox.leggTil(
+            fødselsnummer = fødselsnummer,
+            hendelse =
+                VarselEndret(
+                    vedtaksperiodeId = vedtaksperiodeId.value,
+                    behandlingId = spleisBehandlingId.value,
+                    varselId = id().value,
+                    varseltittel = varseldefinisjon.tittel,
+                    varselkode = kode,
+                    forrigeStatus = gammelStatus.name,
+                    gjeldendeStatus = status.name,
+                ),
+            årsak = "varsel godkjent",
+        )
     }
 
     private fun opphevPåVentStatus(

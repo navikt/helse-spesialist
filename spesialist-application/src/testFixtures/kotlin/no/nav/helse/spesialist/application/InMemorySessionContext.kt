@@ -43,7 +43,8 @@ class InMemorySessionContext(
     override val annulleringRepository: InMemoryAnnulleringRepository,
     override val saksbehandlerRepository: InMemorySaksbehandlerRepository,
     override val dokumentDao: DokumentDao,
-    override val vedtaksperiodeRepository: InMemoryVedtaksperiodeRepository
+    override val vedtaksperiodeRepository: InMemoryVedtaksperiodeRepository,
+    override val varseldefinisjonRepository: InMemoryVarseldefinisjonRepository
 ) : SessionContext {
     override val arbeidsforholdDao: ArbeidsforholdDao
         get() = TODO("Not yet implemented")
@@ -179,8 +180,6 @@ class InMemorySessionContext(
         }
 
     }
-    override val varseldefinisjonRepository: VarseldefinisjonRepository
-        get() = TODO("Not yet implemented")
     override val vedtakBegrunnelseRepository: VedtakBegrunnelseRepository
         get() = TODO("Not yet implemented")
 }

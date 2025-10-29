@@ -38,6 +38,7 @@ class PostFattVedtakIntegrationTest {
     private val totrinnsvurderingRepository = integrationTestFixture.sessionFactory.sessionContext.totrinnsvurderingRepository
     private val vedtaksperiodeRepository = integrationTestFixture.sessionFactory.sessionContext.vedtaksperiodeRepository
     private val varselRepository = integrationTestFixture.sessionFactory.sessionContext.varselRepository
+    private val varseldefinisjonRepository = integrationTestFixture.sessionFactory.sessionContext.varseldefinisjonRepository
 
     @Test
     fun `gir 404 hvis behandlingen ikke finnes`() {
@@ -254,6 +255,7 @@ class PostFattVedtakIntegrationTest {
         val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer)
         val behandling = lagEnBehandling(behandlingId, vedtaksperiode.id())
         val saksbehandler = lagEnSaksbehandler()
+        val kode = "RV_IV_2"
         saksbehandlerRepository.lagre(saksbehandler)
         vedtaksperiodeRepository.lagre(vedtaksperiode)
         behandlingRepository.lagre(behandling)
@@ -262,12 +264,13 @@ class PostFattVedtakIntegrationTest {
             fødselsnummer, lagFornavn(), lagMellomnavn(), lagEtternavn(), LocalDate.now(),
             Kjønn.Ukjent, Adressebeskyttelse.Ugradert
         )
+        varseldefinisjonRepository.lagre(kode)
         varselRepository.lagre(Varsel.fraLagring(
             VarselId(UUID.randomUUID()),
             behandling.id(),
             status = Varsel.Status.AKTIV,
             vurdering = null,
-            kode = "RV_IV_2"
+            kode = kode
         ))
         val oppgave = lagEnOppgave(behandlingId)
         oppgaveRepository.lagre(oppgave)
