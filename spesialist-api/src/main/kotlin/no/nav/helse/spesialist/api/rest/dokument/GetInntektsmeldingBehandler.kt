@@ -26,7 +26,7 @@ class GetInntektsmeldingBehandler(
             transaksjon.legacyPersonRepository.finnFødselsnumre(aktørId = resource.parent.parent.parent.aktørId).toSet()
 
         val dokument =
-            dokumentMediator.håndter(
+            dokumentMediator.hentDokument(
                 dokumentDao = transaksjon.dokumentDao,
                 fødselsnummer = fødselsnumre.first(),
                 dokumentId = resource.parent.dokumentId,

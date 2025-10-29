@@ -12,7 +12,7 @@ class DokumentMediator(
     private val publiserer: MeldingPubliserer,
     private val retries: Int = 50,
 ) {
-    fun håndter(
+    fun hentDokument(
         dokumentDao: DokumentDao,
         fødselsnummer: String,
         dokumentId: UUID,
