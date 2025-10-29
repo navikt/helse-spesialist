@@ -42,6 +42,7 @@ class PostFattVedtakBehandler(
             transaksjon.vedtaksperiodeRepository.finn(behandling.vedtaksperiodeId)
                 ?: throw HttpNotFound("Fant ikke vedtaksperiode med id ${behandling.vedtaksperiodeId.value}")
         val fødselsnummer = vedtaksperiode.fødselsnummer
+
         bekreftTilgangTilPerson(
             fødselsnummer = fødselsnummer,
             saksbehandler = saksbehandler,
@@ -49,22 +50,22 @@ class PostFattVedtakBehandler(
             transaksjon = transaksjon,
             feilSupplier = ::HttpForbidden,
         )
-        val oppgave = transaksjon.oppgaveRepository.finn(spleisBehandlingId)
 
-        if (oppgave == null) {
-            throw HttpBadRequest(OPPGAVE_IKKE_FUNNET)
-        } else if (oppgave.tilstand != Oppgave.AvventerSaksbehandler) {
-            throw HttpBadRequest(OPPGAVE_FEIL_TILSTAND)
-        }
+        val oppgave = transaksjon.oppgaveRepository.finn(spleisBehandlingId) ?: throw HttpBadRequest(OPPGAVE_IKKE_FUNNET)
+        if (oppgave.tilstand != Oppgave.AvventerSaksbehandler) throw HttpBadRequest(OPPGAVE_FEIL_TILSTAND)
 
         val totrinnsvurdering = transaksjon.totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)
+        val oidPersonSkalReserveresTil: SaksbehandlerOid
         if (totrinnsvurdering == null) {
+            oidPersonSkalReserveresTil = saksbehandler.id()
             behandling.fattVedtak(transaksjon, fødselsnummer, saksbehandler, oppgave, request.begrunnelse, outbox)
         } else {
+            oidPersonSkalReserveresTil = totrinnsvurdering.saksbehandler ?: throw HttpConflict("Behandlende saksbehandler mangler i totrinnsvurdering")
             totrinnsvurdering.godkjenn(saksbehandler, tilgangsgrupper)
             transaksjon.totrinnsvurderingRepository.lagre(totrinnsvurdering)
         }
 
+        transaksjon.reservasjonDao.reserverPerson(oidPersonSkalReserveresTil.value, fødselsnummer)
         return RestResponse(HttpStatusCode.OK, false)
     }
 

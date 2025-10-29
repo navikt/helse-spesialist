@@ -22,3 +22,7 @@ class HttpNotFound(
 class HttpBadRequest(
     message: String? = null,
 ) : HttpException(HttpStatusCode.BadRequest, message)
+
+class HttpConflict(
+    message: String? = null,
+) : HttpException(HttpStatusCode.Conflict, message)
