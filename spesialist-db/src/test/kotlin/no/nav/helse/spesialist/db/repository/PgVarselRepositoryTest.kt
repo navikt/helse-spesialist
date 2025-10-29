@@ -7,10 +7,12 @@ import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.VarselId
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
+import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlerident
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.UUID
+import kotlin.test.assertContains
 
 class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
     private val repository = sessionContext.varselRepository
@@ -53,7 +55,8 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
         val spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID())
         val varselId = VarselId(UUID.randomUUID())
         val fødselsnummer = lagFødselsnummer()
-        val saksbehandlerOid = SaksbehandlerOid(UUID.randomUUID())
+        val saksbehandlerIdent = lagSaksbehandlerident()
+        val saksbehandlerOid = SaksbehandlerOid(opprettSaksbehandler(ident = saksbehandlerIdent))
         opprettPerson(fødselsnummer = fødselsnummer)
         opprettArbeidsgiver()
         opprettBehandling(
@@ -65,7 +68,7 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
             id = varselId.value,
             vedtaksperiodeId = vedtaksperiodeId.value,
             spleisBehandlingId = spleisBehandlingId.value,
-            saksbehandlerSomEndretId = saksbehandlerOid,
+            saksbehandlerSomEndretId = saksbehandlerIdent,
             endretTidspunkt = LocalDateTime.now(),
             status = "VURDERT"
         )
@@ -110,11 +113,10 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
 
         // then
         assertEquals(2, funnet.size)
-        assertEquals(varselId1, funnet[0].id())
-        assertEquals(Varsel.Status.AKTIV, funnet[0].status)
-
-        assertEquals(varselId2, funnet[1].id())
-        assertEquals(Varsel.Status.AKTIV, funnet[1].status)
+        assertContains(funnet.map { it.id() }, varselId1)
+        assertContains(funnet.map { it.id() }, varselId2)
+        assertEquals(Varsel.Status.AKTIV, funnet.find { it.id() == varselId1 }?.status)
+        assertEquals(Varsel.Status.AKTIV, funnet.find { it.id() == varselId2 }?.status)
     }
 
     @Test
@@ -124,7 +126,8 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
         val spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID())
         val varselId = VarselId(UUID.randomUUID())
         val fødselsnummer = lagFødselsnummer()
-        val saksbehandlerId = SaksbehandlerOid(UUID.randomUUID())
+        val saksbehandlerIdent = lagSaksbehandlerident()
+        val saksbehandlerId = SaksbehandlerOid(opprettSaksbehandler(ident = saksbehandlerIdent))
         opprettPerson(fødselsnummer = fødselsnummer)
         opprettArbeidsgiver()
         opprettBehandling(
@@ -132,7 +135,13 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
             spleisBehandlingId = spleisBehandlingId.value,
             fødselsnummer = fødselsnummer,
         )
-        nyttVarsel(id = varselId.value, vedtaksperiodeId = vedtaksperiodeId.value, spleisBehandlingId = spleisBehandlingId.value, status = "VURDERT")
+        nyttVarsel(
+            id = varselId.value,
+            vedtaksperiodeId = vedtaksperiodeId.value,
+            spleisBehandlingId = spleisBehandlingId.value,
+            saksbehandlerSomEndretId = saksbehandlerIdent,
+            status = "VURDERT"
+        )
 
         // when
         val funnet = repository.finnVarsler(listOf(spleisBehandlingId)).single()

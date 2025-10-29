@@ -18,8 +18,9 @@ class PgVarselRepository private constructor(
     override fun finnVarsler(behandlingIder: List<SpleisBehandlingId>): List<Varsel> =
         dbQuery.listWithListParameter(
             """
-               SELECT sv.unik_id, b.spleis_behandling_id, sv.status, sv.status_endret_ident::uuid, sv.status_endret_tidspunkt FROM selve_varsel sv 
+               SELECT sv.unik_id, b.spleis_behandling_id, sv.status, sb.oid, sv.status_endret_tidspunkt FROM selve_varsel sv 
                 JOIN behandling b ON sv.generasjon_ref = b.id
+                LEFT JOIN saksbehandler sb ON sv.status_endret_ident = sb.ident
                 WHERE b.spleis_behandling_id IN (${behandlingIder.joinToString { "?" }})
             """,
             *behandlingIder.map { it.value }.toTypedArray(),
@@ -29,7 +30,7 @@ class PgVarselRepository private constructor(
                 spleisBehandlingId = SpleisBehandlingId(row.uuid("spleis_behandling_id")),
                 status = enumValueOf(row.string("status")),
                 vurdering =
-                    row.uuidOrNull("status_endret_ident")?.let {
+                    row.uuidOrNull("oid")?.let {
                         Varselvurdering(
                             SaksbehandlerOid(it),
                             tidspunkt = row.localDateTime("status_endret_tidspunkt"),
@@ -42,8 +43,9 @@ class PgVarselRepository private constructor(
         dbQuery.update(
             """
             UPDATE selve_varsel 
-            SET status = :status, status_endret_ident = :saksbehandler, status_endret_tidspunkt = :tidspunkt
-            WHERE unik_id = :unik_id
+            SET status = :status, status_endret_ident = sb.ident, status_endret_tidspunkt = :tidspunkt
+            FROM saksbehandler sb WHERE sb.oid = :saksbehandler
+            AND unik_id = :unik_id
             """.trimIndent(),
             "status" to varsel.status.toString(),
             "saksbehandler" to varsel.vurdering?.saksbehandlerId?.value,
