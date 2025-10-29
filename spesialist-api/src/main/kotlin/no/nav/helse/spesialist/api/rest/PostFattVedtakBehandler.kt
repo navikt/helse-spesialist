@@ -4,9 +4,8 @@ import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.db.BehandlingRepository
-import no.nav.helse.db.PåVentDao
 import no.nav.helse.db.SessionContext
-import no.nav.helse.mediator.oppgave.OppgaveRepository
+import no.nav.helse.modell.melding.OppgaveOppdatert
 import no.nav.helse.modell.melding.VarselEndret
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
@@ -60,7 +59,7 @@ class PostFattVedtakBehandler(
 
         val totrinnsvurdering = transaksjon.totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)
         if (totrinnsvurdering == null) {
-            behandling.fattVedtak(transaksjon, fødselsnummer, saksbehandler.id(), oppgave, request.begrunnelse, outbox)
+            behandling.fattVedtak(transaksjon, fødselsnummer, saksbehandler, oppgave, request.begrunnelse, outbox)
         } else {
             totrinnsvurdering.godkjenn(saksbehandler, tilgangsgrupper)
             transaksjon.totrinnsvurderingRepository.lagre(totrinnsvurdering)
@@ -72,12 +71,13 @@ class PostFattVedtakBehandler(
     private fun Behandling.fattVedtak(
         transaksjon: SessionContext,
         fødselsnummer: String,
-        saksbehandlerOid: SaksbehandlerOid,
+        saksbehandler: Saksbehandler,
         oppgave: Oppgave,
         begrunnelse: String?,
         outbox: Outbox,
     ) {
         if (overlapperMedInfotrygd()) throw HttpBadRequest(OVERLAPPER_MED_INFOTRYGD)
+        val saksbehandlerOid = saksbehandler.id()
         validerOgGodkjennVarsler(
             behandlingRepository = transaksjon.behandlingRepository,
             varselRepository = transaksjon.varselRepository,
@@ -86,7 +86,11 @@ class PostFattVedtakBehandler(
             saksbehandlerOid = saksbehandlerOid,
             outbox = outbox,
         )
-        opphevPåVentStatus(oppgave, transaksjon.oppgaveRepository, transaksjon.påVentDao)
+        oppgave.avventerSystem(saksbehandler.ident, saksbehandlerOid.value)
+        oppgave.fjernFraPåVent()
+        transaksjon.påVentDao.slettPåVent(oppgave.id)
+        transaksjon.oppgaveRepository.lagre(oppgave)
+        outbox.leggTil(fødselsnummer, OppgaveOppdatert(oppgave), "oppgave avventer system")
         oppdaterVedtakBegrunnelse(transaksjon, begrunnelse, saksbehandlerOid)
     }
 
@@ -164,16 +168,6 @@ class PostFattVedtakBehandler(
                 ),
             årsak = "varsel godkjent",
         )
-    }
-
-    private fun opphevPåVentStatus(
-        oppgave: Oppgave,
-        oppgaveRepository: OppgaveRepository,
-        påVentDao: PåVentDao,
-    ) {
-        oppgave.fjernFraPåVent()
-        oppgaveRepository.lagre(oppgave)
-        påVentDao.slettPåVent(oppgave.id)
     }
 
     private fun Totrinnsvurdering.godkjenn(
