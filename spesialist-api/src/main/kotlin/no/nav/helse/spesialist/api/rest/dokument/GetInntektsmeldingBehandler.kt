@@ -31,7 +31,7 @@ class GetInntektsmeldingBehandler(
                 fødselsnummer = fødselsnumre.first(),
                 dokumentId = resource.parent.dokumentId,
                 dokumentType = DokumentMediator.DokumentType.INNTEKTSMELDING,
-            )
+            ) ?: throw HttpNotFound("Fant ikke inntektsmeldingdokument")
 
         val fødselsnummerForIM =
             dokument

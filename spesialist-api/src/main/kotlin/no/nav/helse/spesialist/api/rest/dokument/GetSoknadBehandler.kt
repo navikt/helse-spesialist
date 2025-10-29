@@ -31,7 +31,7 @@ class GetSoknadBehandler(
                 fødselsnummer = fødselsnumre.first(),
                 dokumentId = resource.parent.dokumentId,
                 dokumentType = DokumentMediator.DokumentType.SØKNAD,
-            )
+            ) ?: throw HttpNotFound("Fant ikke søknadsdokument")
 
         val fødselsnummerForSøknad = dokument.get("fnr").asText()
 

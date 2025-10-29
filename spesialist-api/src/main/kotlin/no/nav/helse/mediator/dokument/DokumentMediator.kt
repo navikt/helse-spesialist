@@ -17,34 +17,33 @@ class DokumentMediator(
         fødselsnummer: String,
         dokumentId: UUID,
         dokumentType: DokumentType,
-    ): JsonNode {
+    ): JsonNode? {
         val dokument = dokumentDao.hent(fødselsnummer, dokumentId)
 
         if (dokument == null || dokument.isEmpty || dokument.harFeil()) {
             sendHentDokument(fødselsnummer, dokumentId, dokumentType)
-            return hentDokumentMedRetry(dokumentDao, fødselsnummer, dokumentId, retries)
+            return runBlocking { hentDokumentMedRetry(dokumentDao, fødselsnummer, dokumentId, retries) }
         }
         return dokument
     }
 
-    private fun JsonNode.harFeil(): Boolean {
-        val errorNode = this.get("error") ?: return false
-        return errorNode.asInt() != 404
-    }
+    private fun JsonNode.harFeil(): Boolean = get("error") != null
 
-    private fun hentDokumentMedRetry(
+    private suspend fun hentDokumentMedRetry(
         dokumentDao: DokumentDao,
         fødselsnummer: String,
         dokumentId: UUID,
         retries: Int,
-    ): JsonNode =
-        runBlocking {
-            repeat(retries) {
-                delay(100)
-                dokumentDao.hent(fødselsnummer, dokumentId)?.let { return@runBlocking it }
+    ): JsonNode? {
+        repeat(retries) {
+            delay(100)
+            val dokument = dokumentDao.hent(fødselsnummer, dokumentId)
+            if (dokument != null && !dokument.isEmpty && !dokument.harFeil()) {
+                return dokument
             }
-            error("Fant ikke dokument med id $dokumentId")
         }
+        return null
+    }
 
     private fun sendHentDokument(
         fødselsnummer: String,

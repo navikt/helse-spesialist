@@ -13,7 +13,6 @@ import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.util.UUID
 
 internal class DokumentMediatorTest {
@@ -50,7 +49,7 @@ internal class DokumentMediatorTest {
     @Test
     fun `Prøver å hente dokumentet {retries + 1} ganger`() {
         every { dokumentDao.hent(any(), any()) } returns null
-        assertThrows<RuntimeException> { mediator.hentDokument(dokumentDao, FNR, DOKUMENTID, DOKUMENTTYPE) }
+        mediator.hentDokument(dokumentDao, FNR, DOKUMENTID, DOKUMENTTYPE)
         verify(exactly = RETRIES + 1) {
             dokumentDao.hent(any(), any())
         }
@@ -59,7 +58,7 @@ internal class DokumentMediatorTest {
     @Test
     fun `Sender behov dersom dokumentet ikke finnes i databasen`() {
         every { dokumentDao.hent(any(), any()) } returns null
-        assertThrows<RuntimeException> { mediator.hentDokument(dokumentDao, FNR, DOKUMENTID, DOKUMENTTYPE) }
+        mediator.hentDokument(dokumentDao, FNR, DOKUMENTID, DOKUMENTTYPE)
         assertEquals(1, meldingPubliserer.antallMeldinger)
     }
 
