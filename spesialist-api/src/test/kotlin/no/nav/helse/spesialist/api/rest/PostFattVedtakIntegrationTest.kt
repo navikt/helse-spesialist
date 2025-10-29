@@ -262,7 +262,13 @@ class PostFattVedtakIntegrationTest {
             fødselsnummer, lagFornavn(), lagMellomnavn(), lagEtternavn(), LocalDate.now(),
             Kjønn.Ukjent, Adressebeskyttelse.Ugradert
         )
-        varselRepository.lagre(Varsel.fraLagring(VarselId(UUID.randomUUID()), behandling.id(), status = Varsel.Status.AKTIV, vurdering = null))
+        varselRepository.lagre(Varsel.fraLagring(
+            VarselId(UUID.randomUUID()),
+            behandling.id(),
+            status = Varsel.Status.AKTIV,
+            vurdering = null,
+            kode = "RV_IV_2"
+        ))
         val oppgave = lagEnOppgave(behandlingId)
         oppgaveRepository.lagre(oppgave)
 

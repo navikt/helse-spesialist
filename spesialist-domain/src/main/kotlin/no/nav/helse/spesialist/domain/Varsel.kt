@@ -15,6 +15,7 @@ class Varsel private constructor(
     val spleisBehandlingId: SpleisBehandlingId,
     status: Status,
     vurdering: Varselvurdering?,
+    val kode: String,
 ) : Entity<VarselId>(id) {
     var status: Status = status
         private set
@@ -48,12 +49,14 @@ class Varsel private constructor(
             spleisBehandlingId: SpleisBehandlingId,
             status: Status,
             vurdering: Varselvurdering?,
+            kode: String,
         ): Varsel =
             Varsel(
                 id = id,
                 spleisBehandlingId = spleisBehandlingId,
                 status = status,
                 vurdering = vurdering,
+                kode = kode,
             )
     }
 }

@@ -18,7 +18,7 @@ class PgVarselRepository private constructor(
     override fun finnVarsler(behandlingIder: List<SpleisBehandlingId>): List<Varsel> =
         dbQuery.listWithListParameter(
             """
-               SELECT sv.unik_id, b.spleis_behandling_id, sv.status, sb.oid, sv.status_endret_tidspunkt FROM selve_varsel sv 
+               SELECT sv.unik_id, b.spleis_behandling_id, sv.status, sb.oid, sv.status_endret_tidspunkt, sv.kode FROM selve_varsel sv 
                 JOIN behandling b ON sv.generasjon_ref = b.id
                 LEFT JOIN saksbehandler sb ON sv.status_endret_ident = sb.ident
                 WHERE b.spleis_behandling_id IN (${behandlingIder.joinToString { "?" }})
@@ -32,10 +32,11 @@ class PgVarselRepository private constructor(
                 vurdering =
                     row.uuidOrNull("oid")?.let {
                         Varselvurdering(
-                            SaksbehandlerOid(it),
+                            saksbehandlerId = SaksbehandlerOid(it),
                             tidspunkt = row.localDateTime("status_endret_tidspunkt"),
                         )
                     },
+                kode = row.string("kode"),
             )
         }
 

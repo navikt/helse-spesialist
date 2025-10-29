@@ -18,7 +18,8 @@ class VarselTest {
             id = VarselId(value = UUID.randomUUID()),
             spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
             status = Varsel.Status.VURDERT,
-            vurdering = null
+            vurdering = null,
+            kode = "RV_IV_2"
         )
 
         // then
@@ -33,7 +34,8 @@ class VarselTest {
             id = VarselId(value = UUID.randomUUID()),
             spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
             status = status,
-            vurdering = null
+            vurdering = null,
+            kode = "RV_IV_2"
         )
 
         // then
@@ -47,7 +49,8 @@ class VarselTest {
             id = VarselId(value = UUID.randomUUID()),
             spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
             status = Varsel.Status.VURDERT,
-            vurdering = null
+            vurdering = null,
+            kode = "RV_IV_2"
         )
         val saksbehandlerId = SaksbehandlerOid(UUID.randomUUID())
 
@@ -66,7 +69,8 @@ class VarselTest {
             id = VarselId(value = UUID.randomUUID()),
             spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
             status = Varsel.Status.AKTIV,
-            vurdering = null
+            vurdering = null,
+            kode = "RV_IV_2"
         )
 
         // then
