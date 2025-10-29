@@ -8,6 +8,7 @@ import no.nav.helse.db.SessionContext
 import no.nav.helse.modell.melding.OppgaveOppdatert
 import no.nav.helse.modell.melding.VarselEndret
 import no.nav.helse.modell.oppgave.Oppgave
+import no.nav.helse.modell.periodehistorikk.Historikkinnslag
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.spesialist.api.rest.resources.Vedtak
 import no.nav.helse.spesialist.api.rest.tilkommeninntekt.bekreftTilgangTilPerson
@@ -62,6 +63,8 @@ class PostFattVedtakBehandler(
         } else {
             oidPersonSkalReserveresTil = totrinnsvurdering.saksbehandler ?: throw HttpConflict("Behandlende saksbehandler mangler i totrinnsvurdering")
             totrinnsvurdering.godkjenn(saksbehandler, tilgangsgrupper)
+            val innslag = Historikkinnslag.totrinnsvurderingFerdigbehandletInnslag(saksbehandler)
+            transaksjon.periodehistorikkDao.lagreMedOppgaveId(innslag, oppgave.id)
             transaksjon.totrinnsvurderingRepository.lagre(totrinnsvurdering)
         }
 
