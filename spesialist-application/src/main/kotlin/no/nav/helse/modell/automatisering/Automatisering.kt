@@ -30,6 +30,7 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import org.slf4j.LoggerFactory
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.random.Random
@@ -97,6 +98,8 @@ internal class Automatisering(
         sykefraværstilfelle: Sykefraværstilfelle,
         organisasjonsnummer: String,
         yrkesaktivitetstype: Yrkesaktivitetstype,
+        maksdato: LocalDate,
+        tags: List<String>,
     ): Automatiseringsresultat {
         if (automatiseringDao.skalTvingeAutomatisering(vedtaksperiodeId)) {
             logger.info("Tvinger automatisering for vedtaksperiode $vedtaksperiodeId")
@@ -112,6 +115,8 @@ internal class Automatisering(
                 sykefraværstilfelle = sykefraværstilfelle,
                 organisasjonsnummer = organisasjonsnummer,
                 yrkesaktivitetstype = yrkesaktivitetstype,
+                maksdato = maksdato,
+                tags = tags,
             )
         val erUTS = utbetaling.harEndringIUtbetalingTilSykmeldt()
         val flereArbeidsgivere = vedtakDao.finnInntektskilde(vedtaksperiodeId) == Inntektskilde.FLERE_ARBEIDSGIVERE
@@ -247,6 +252,8 @@ internal class Automatisering(
         sykefraværstilfelle: Sykefraværstilfelle,
         organisasjonsnummer: String,
         yrkesaktivitetstype: Yrkesaktivitetstype,
+        maksdato: LocalDate,
+        tags: List<String>,
     ): List<String> {
         val risikovurdering =
             risikovurderingDao.hentRisikovurdering(vedtaksperiodeId)
@@ -267,6 +274,7 @@ internal class Automatisering(
         val harUtbetalingTilSykmeldt = utbetaling.harEndringIUtbetalingTilSykmeldt()
 
         val skalStoppesPgaUTS = harUtbetalingTilSykmeldt && periodetype !in listOf(FORLENGELSE, FØRSTEGANGSBEHANDLING)
+        val harNåddMaksdato = maksdato < sykefraværstilfelle.skjæringstidspunkt
 
         return valider(
             validering("Gjelder selvstendig næring") { yrkesaktivitetstype != Yrkesaktivitetstype.SELVSTENDIG },
@@ -282,6 +290,7 @@ internal class Automatisering(
             validering("Utbetaling til sykmeldt") { !skalStoppesPgaUTS },
             AutomatiserRevurderinger(utbetaling, fødselsnummer, vedtaksperiodeId),
             validering("Vedtaksperioden har et krav om totrinnsvurdering") { !harKravOmTotrinnsvurdering },
+            validering("Nådd maksdato og har refusjon til arbeidsgiver") { !(harNåddMaksdato && tags.contains("ArbeidsgiverØnskerRefusjon")) },
         )
     }
 

@@ -45,7 +45,7 @@ internal class VurderÅpenGosysoppgave(
     }
 
     private fun ikkeEldreEnn(vedtaksperiodeId: UUID): LocalDate {
-        val ikkeEldreEnn = sykefraværstilfelle.skjæringstidspunkt().minusYears(1)
+        val ikkeEldreEnn = sykefraværstilfelle.skjæringstidspunkt.minusYears(1)
         logg.info(
             "Sender {} for {} i behov for oppgaveinformasjon fra Gosys",
             kv("ikkeEldreEnn", ikkeEldreEnn),

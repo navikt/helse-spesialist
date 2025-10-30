@@ -34,6 +34,7 @@ import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
+import no.nav.helse.spesialist.domain.testfixtures.des
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
@@ -186,6 +187,11 @@ internal class AutomatiseringTest {
     fun `vedtaksperiode med null risikovurdering er ikke automatiserbar`() {
         every { risikovurderingDaoMock.hentRisikovurdering(vedtaksperiodeId) } returns null
         blirManuellOppgave()
+    }
+
+    @Test
+    fun `vedtaksperiode med nådd maksdato og refusjon fra AG er ikke automatiserbar`() {
+        blirManuellOppgave(legacyBehandling = enGenerasjon(skjæringstidspunkt = 1 jan 2018), maksdato = 1 des 2017, tags = listOf("ArbeidsgiverØnskerRefusjon"))
     }
 
     @Test
@@ -354,6 +360,8 @@ internal class AutomatiseringTest {
             )
         ),
         utbetaling: Utbetaling = enUtbetaling(),
+        maksdato: LocalDate = 1 des 2018,
+        tags: List<String> = emptyList(),
     ) = automatisering.utfør(
         fødselsnummer = fødselsnummer,
         vedtaksperiodeId = vedtaksperiodeId,
@@ -361,7 +369,9 @@ internal class AutomatiseringTest {
         periodetype = periodetype,
         sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, 1 jan 2018, generasjoners),
         organisasjonsnummer = orgnummer,
-        yrkesaktivitetstype = yrkesaktivitetstype
+        yrkesaktivitetstype = yrkesaktivitetstype,
+        maksdato = maksdato,
+        tags = tags,
     )
 
     private fun enUtbetaling(
@@ -395,12 +405,16 @@ internal class AutomatiseringTest {
         utbetaling: Utbetaling = enUtbetaling(),
         legacyBehandling: LegacyBehandling = enGenerasjon(),
         yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
+        maksdato: LocalDate = 1 des 2018,
+        tags: List<String> = emptyList(),
     ) =
         assertKanIkkeAutomatiseres(
             forsøkAutomatisering(
                 yrkesaktivitetstype = yrkesaktivitetstype,
                 utbetaling = utbetaling,
-                generasjoners = listOf(legacyBehandling)
+                generasjoners = listOf(legacyBehandling),
+                maksdato = maksdato,
+                tags = tags,
             )
         )
 

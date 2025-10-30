@@ -18,14 +18,12 @@ import java.util.UUID
 
 class Sykefraværstilfelle(
     private val fødselsnummer: String,
-    private val skjæringstidspunkt: LocalDate,
+    val skjæringstidspunkt: LocalDate,
     private val gjeldendeBehandlinger: List<LegacyBehandling>,
 ) {
     init {
         check(gjeldendeBehandlinger.isNotEmpty()) { "Kan ikke opprette et sykefraværstilfelle uten behandlinger" }
     }
-
-    fun skjæringstidspunkt() = skjæringstidspunkt
 
     fun haster(vedtaksperiodeId: UUID): Boolean {
         val behandling =

@@ -50,6 +50,8 @@ internal class VurderAutomatiskInnvilgelse(
                 sykefraværstilfelle = sykefraværstilfelle,
                 organisasjonsnummer = godkjenningsbehov.organisasjonsnummer,
                 yrkesaktivitetstype = godkjenningsbehov.yrkesaktivitetstype,
+                maksdato = godkjenningsbehov.foreløpigBeregnetSluttPåSykepenger,
+                tags = godkjenningsbehov.tags,
             )
 
         when (resultat) {
