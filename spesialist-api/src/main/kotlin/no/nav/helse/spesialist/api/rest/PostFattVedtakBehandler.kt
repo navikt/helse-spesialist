@@ -41,11 +41,11 @@ class PostFattVedtakBehandler(
     ): RestResponse<Unit> {
         val spleisBehandlingId = SpleisBehandlingId(resource.parent.behandlingId)
         val behandling =
-            transaksjon.behandlingRepository.finn(spleisBehandlingId) ?: throw HttpNotFound(BEHANDLING_IKKE_FUNNET)
+            transaksjon.behandlingRepository.finn(spleisBehandlingId)
+                ?: throw HttpNotFound(BEHANDLING_IKKE_FUNNET)
         val vedtaksperiode =
-            transaksjon.vedtaksperiodeRepository.finn(behandling.vedtaksperiodeId) ?: throw HttpNotFound(
-                VEDTAKSPERIODE_IKKE_FUNNET,
-            )
+            transaksjon.vedtaksperiodeRepository.finn(behandling.vedtaksperiodeId)
+                ?: throw HttpNotFound(VEDTAKSPERIODE_IKKE_FUNNET)
         val fødselsnummer = vedtaksperiode.fødselsnummer
 
         bekreftTilgangTilPerson(
@@ -57,7 +57,8 @@ class PostFattVedtakBehandler(
         )
 
         val oppgave =
-            transaksjon.oppgaveRepository.finn(spleisBehandlingId) ?: throw HttpBadRequest(OPPGAVE_IKKE_FUNNET)
+            transaksjon.oppgaveRepository.finn(spleisBehandlingId)
+                ?: throw HttpBadRequest(OPPGAVE_IKKE_FUNNET)
         if (oppgave.tilstand != Oppgave.AvventerSaksbehandler) throw HttpBadRequest(OPPGAVE_FEIL_TILSTAND)
 
         val totrinnsvurdering = transaksjon.totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)
@@ -77,33 +78,15 @@ class PostFattVedtakBehandler(
         transaksjon.reservasjonDao.reserverPerson(saksbehandlerSomFattetVedtak.id().value, fødselsnummer)
         behandling.fattVedtak(transaksjon, fødselsnummer, saksbehandler, oppgave, request.begrunnelse, outbox)
 
-        val saksbehandlerløsning =
-            Saksbehandlerløsning(
-                godkjenningsbehovId = oppgave.godkjenningsbehovId,
-                oppgaveId = oppgave.id,
-                godkjent = true,
-                saksbehandlerIdent = saksbehandlerSomFattetVedtak.ident,
-                saksbehandlerOid = saksbehandlerSomFattetVedtak.id().value,
-                saksbehandlerEpost = saksbehandlerSomFattetVedtak.epost,
-                godkjenttidspunkt = LocalDateTime.now(),
-                saksbehandleroverstyringer =
-                    totrinnsvurdering
-                        ?.overstyringer
-                        ?.filter {
-                            it.vedtaksperiodeId == behandling.vedtaksperiodeId.value
-                        }?.map { it.eksternHendelseId } ?: emptyList(),
-                saksbehandler = saksbehandlerSomFattetVedtak,
-                årsak = null,
-                begrunnelser = null,
-                kommentar = null,
-                beslutter = beslutter,
-            )
-        logg.info(
-            "Publiserer saksbehandler-løsning for {}, {}",
-            StructuredArguments.keyValue("oppgaveId", oppgave.id),
-            StructuredArguments.keyValue("hendelseId", oppgave.godkjenningsbehovId),
+        sendSaksbehandlerLøsning(
+            fødselsnummer = fødselsnummer,
+            behandling = behandling,
+            oppgave = oppgave,
+            totrinnsvurdering = totrinnsvurdering,
+            saksbehandlerSomFattetVedtak = saksbehandlerSomFattetVedtak,
+            beslutter = beslutter,
+            outbox = outbox,
         )
-        outbox.leggTil(fødselsnummer, saksbehandlerløsning, "saksbehandlergodkjenning")
 
         return RestResponse.noContent()
     }
@@ -222,6 +205,44 @@ class PostFattVedtakBehandler(
         }
         settBeslutter(beslutter.id())
         ferdigstill()
+    }
+
+    private fun sendSaksbehandlerLøsning(
+        fødselsnummer: String,
+        behandling: Behandling,
+        oppgave: Oppgave,
+        totrinnsvurdering: Totrinnsvurdering?,
+        saksbehandlerSomFattetVedtak: Saksbehandler,
+        beslutter: Saksbehandler?,
+        outbox: Outbox,
+    ) {
+        val saksbehandlerløsning =
+            Saksbehandlerløsning(
+                godkjenningsbehovId = oppgave.godkjenningsbehovId,
+                oppgaveId = oppgave.id,
+                godkjent = true,
+                saksbehandlerIdent = saksbehandlerSomFattetVedtak.ident,
+                saksbehandlerOid = saksbehandlerSomFattetVedtak.id().value,
+                saksbehandlerEpost = saksbehandlerSomFattetVedtak.epost,
+                godkjenttidspunkt = LocalDateTime.now(),
+                saksbehandleroverstyringer =
+                    totrinnsvurdering
+                        ?.overstyringer
+                        ?.filter {
+                            it.vedtaksperiodeId == behandling.vedtaksperiodeId.value
+                        }?.map { it.eksternHendelseId } ?: emptyList(),
+                saksbehandler = saksbehandlerSomFattetVedtak,
+                årsak = null,
+                begrunnelser = null,
+                kommentar = null,
+                beslutter = beslutter,
+            )
+        logg.info(
+            "Publiserer saksbehandler-løsning for {}, {}",
+            StructuredArguments.keyValue("oppgaveId", oppgave.id),
+            StructuredArguments.keyValue("hendelseId", oppgave.godkjenningsbehovId),
+        )
+        outbox.leggTil(fødselsnummer, saksbehandlerløsning, "saksbehandlergodkjenning")
     }
 
     override fun openApi(config: RouteConfig) {
