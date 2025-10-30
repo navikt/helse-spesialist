@@ -26,7 +26,7 @@ import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 
 class PostFattVedtakBehandler(
     private val environmentToggles: EnvironmentToggles,
-) : PostBehandler<Vedtak.Id.Fatt, ApiFattVedtakRequest, Boolean> {
+) : PostBehandler<Vedtak.Id.Fatt, ApiFattVedtakRequest, Unit> {
     override fun behandle(
         resource: Vedtak.Id.Fatt,
         request: ApiFattVedtakRequest,
@@ -34,7 +34,7 @@ class PostFattVedtakBehandler(
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
         outbox: Outbox,
-    ): RestResponse<Boolean> {
+    ): RestResponse<Unit> {
         val spleisBehandlingId = SpleisBehandlingId(resource.parent.behandlingId)
         val behandling =
             transaksjon.behandlingRepository.finn(spleisBehandlingId) ?: throw HttpNotFound(BEHANDLING_IKKE_FUNNET)
@@ -66,7 +66,7 @@ class PostFattVedtakBehandler(
         transaksjon.reservasjonDao.reserverPerson(oidPersonSkalReserveresTil.value, fødselsnummer)
         behandling.fattVedtak(transaksjon, fødselsnummer, saksbehandler, oppgave, request.begrunnelse, outbox)
 
-        return RestResponse(HttpStatusCode.OK, false)
+        return RestResponse.noContent()
     }
 
     private fun Behandling.fattVedtak(
