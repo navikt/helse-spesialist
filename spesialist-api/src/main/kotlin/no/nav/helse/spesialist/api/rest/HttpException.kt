@@ -4,25 +4,42 @@ import io.ktor.http.HttpStatusCode
 
 abstract class HttpException(
     val statusCode: HttpStatusCode,
-    message: String?,
-) : Exception(message)
+    val title: String?,
+    val detail: String?,
+) : Exception(
+        buildString {
+            append("HTTP ")
+            append(statusCode.value)
+            append(" - ")
+            append(title)
+            if (detail != null) {
+                append(" - ")
+                append(detail)
+            }
+        },
+    )
 
 class HttpUnauthorized(
-    message: String? = null,
-) : HttpException(HttpStatusCode.Unauthorized, message)
+    title: String? = null,
+    detail: String? = null,
+) : HttpException(HttpStatusCode.Unauthorized, title, detail)
 
 class HttpForbidden(
-    message: String? = null,
-) : HttpException(HttpStatusCode.Forbidden, message)
+    title: String? = null,
+    detail: String? = null,
+) : HttpException(HttpStatusCode.Forbidden, title, detail)
 
 class HttpNotFound(
-    message: String? = null,
-) : HttpException(HttpStatusCode.NotFound, message)
+    title: String? = null,
+    detail: String? = null,
+) : HttpException(HttpStatusCode.NotFound, title, detail)
 
 class HttpBadRequest(
-    message: String? = null,
-) : HttpException(HttpStatusCode.BadRequest, message)
+    title: String? = null,
+    detail: String? = null,
+) : HttpException(HttpStatusCode.BadRequest, title, detail)
 
 class HttpConflict(
-    message: String? = null,
-) : HttpException(HttpStatusCode.Conflict, message)
+    title: String? = null,
+    detail: String? = null,
+) : HttpException(HttpStatusCode.Conflict, title, detail)

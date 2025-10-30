@@ -4,6 +4,7 @@ import no.nav.helse.db.SessionContext
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.spesialist.api.rest.HttpException
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
+import no.nav.helse.spesialist.application.logg.sikkerlogg
 import no.nav.helse.spesialist.application.tilgangskontroll.PersonTilgangskontroll
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
@@ -20,7 +21,7 @@ internal fun bekreftTilgangTilPerson(
     saksbehandler: Saksbehandler,
     tilgangsgrupper: Set<Tilgangsgruppe>,
     transaksjon: SessionContext,
-    feilSupplier: (String) -> HttpException,
+    feilSupplier: () -> HttpException,
 ) {
     if (!PersonTilgangskontroll.harTilgangTilPerson(
             tilgangsgrupper = tilgangsgrupper,
@@ -29,6 +30,7 @@ internal fun bekreftTilgangTilPerson(
             personDao = transaksjon.personDao,
         )
     ) {
-        throw feilSupplier("Saksbehandler mangler tilgang")
+        sikkerlogg.warn("Saksbehandler ${saksbehandler.id().value} har ikke tilgang til person med fødselsnummer $fødselsnummer")
+        throw feilSupplier()
     }
 }

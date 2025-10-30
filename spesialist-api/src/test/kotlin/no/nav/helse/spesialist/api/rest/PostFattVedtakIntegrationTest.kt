@@ -1,10 +1,12 @@
 package no.nav.helse.spesialist.api.rest
 
+import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.spesialist.api.IntegrationTestFixture
+import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
@@ -30,15 +32,17 @@ import kotlin.random.Random.Default.nextLong
 
 class PostFattVedtakIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
-    private val saksbehandlerRepository = integrationTestFixture.sessionFactory.sessionContext.saksbehandlerRepository
-    private val behandlingRepository = integrationTestFixture.sessionFactory.sessionContext.behandlingRepository
-    private val egenansattDao = integrationTestFixture.sessionFactory.sessionContext.egenAnsattDao
-    private val oppgaveRepository = integrationTestFixture.sessionFactory.sessionContext.oppgaveRepository
-    private val personDao = integrationTestFixture.sessionFactory.sessionContext.personDao
-    private val totrinnsvurderingRepository = integrationTestFixture.sessionFactory.sessionContext.totrinnsvurderingRepository
-    private val vedtaksperiodeRepository = integrationTestFixture.sessionFactory.sessionContext.vedtaksperiodeRepository
-    private val varselRepository = integrationTestFixture.sessionFactory.sessionContext.varselRepository
-    private val varseldefinisjonRepository = integrationTestFixture.sessionFactory.sessionContext.varseldefinisjonRepository
+    private val sessionContext = integrationTestFixture.sessionFactory.sessionContext
+
+    private val saksbehandlerRepository = sessionContext.saksbehandlerRepository
+    private val behandlingRepository = sessionContext.behandlingRepository
+    private val egenansattDao = sessionContext.egenAnsattDao
+    private val oppgaveRepository = sessionContext.oppgaveRepository
+    private val personDao = sessionContext.personDao
+    private val totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository
+    private val vedtaksperiodeRepository = sessionContext.vedtaksperiodeRepository
+    private val varselRepository = sessionContext.varselRepository
+    private val varseldefinisjonRepository = sessionContext.varseldefinisjonRepository
 
     @Test
     fun `gir NotFound hvis behandlingen ikke finnes`() {
@@ -56,7 +60,16 @@ class PostFattVedtakIntegrationTest {
 
         // Then:
         assertEquals(HttpStatusCode.NotFound.value, response.status)
-        response.assertResponseMessage(PostFattVedtakBehandler.BEHANDLING_IKKE_FUNNET)
+        assertJsonEquals(
+            """
+            {
+              "type" : "about:blank",
+              "title" : "${PostFattVedtakBehandler.BEHANDLING_IKKE_FUNNET}",
+              "status" : 404
+            }
+            """.trimIndent(),
+            response.bodyAsJsonNode!!
+        )
     }
 
     @Test
@@ -77,7 +90,16 @@ class PostFattVedtakIntegrationTest {
 
         // Then:
         assertEquals(HttpStatusCode.NotFound.value, response.status)
-        response.assertResponseMessage(PostFattVedtakBehandler.VEDTAKSPERIODE_IKKE_FUNNET)
+        assertJsonEquals(
+            """
+            {
+              "type" : "about:blank",
+              "title" : "${PostFattVedtakBehandler.VEDTAKSPERIODE_IKKE_FUNNET}",
+              "status" : 404
+            }
+            """.trimIndent(),
+            response.bodyAsJsonNode!!
+        )
     }
 
     @Test
@@ -130,7 +152,16 @@ class PostFattVedtakIntegrationTest {
 
         // Then:
         assertEquals(HttpStatusCode.BadRequest.value, response.status)
-        response.assertResponseMessage(PostFattVedtakBehandler.OPPGAVE_IKKE_FUNNET)
+        assertJsonEquals(
+            """
+            {
+              "type" : "about:blank",
+              "title" : "${PostFattVedtakBehandler.OPPGAVE_IKKE_FUNNET}",
+              "status" : 400
+            }
+            """.trimIndent(),
+            response.bodyAsJsonNode!!
+        )
     }
 
     @Test
@@ -150,7 +181,7 @@ class PostFattVedtakIntegrationTest {
             Kjønn.Ukjent, Adressebeskyttelse.Ugradert
         )
         val oppgave = lagEnOppgave(behandlingId)
-        oppgave.avventerSystem(lagSaksbehandlerident(),UUID.randomUUID())
+        oppgave.avventerSystem(lagSaksbehandlerident(), UUID.randomUUID())
         oppgaveRepository.lagre(oppgave)
         // When:
         val response = integrationTestFixture.post(
@@ -161,7 +192,16 @@ class PostFattVedtakIntegrationTest {
 
         // Then:
         assertEquals(HttpStatusCode.BadRequest.value, response.status)
-        response.assertResponseMessage(PostFattVedtakBehandler.OPPGAVE_FEIL_TILSTAND)
+        assertJsonEquals(
+            """
+            {
+              "type" : "about:blank",
+              "title" : "${PostFattVedtakBehandler.OPPGAVE_FEIL_TILSTAND}",
+              "status" : 400
+            }
+            """.trimIndent(),
+            response.bodyAsJsonNode!!
+        )
     }
 
     @Test
@@ -198,7 +238,16 @@ class PostFattVedtakIntegrationTest {
 
         // Then:
         assertEquals(HttpStatusCode.Forbidden.value, response.status)
-        response.assertResponseMessage(PostFattVedtakBehandler.SAKSBEHANDLER_MANGLER_BESLUTTERTILGANG)
+        assertJsonEquals(
+            """
+            {
+              "type" : "about:blank",
+              "title" : "${PostFattVedtakBehandler.SAKSBEHANDLER_MANGLER_BESLUTTERTILGANG}",
+              "status" : 403
+            }
+            """.trimIndent(),
+            response.bodyAsJsonNode!!
+        )
     }
 
     @Test
@@ -234,7 +283,16 @@ class PostFattVedtakIntegrationTest {
 
         // Then:
         assertEquals(HttpStatusCode.Forbidden.value, response.status)
-        response.assertResponseMessage(PostFattVedtakBehandler.SAKSBEHANDLER_KAN_IKKE_BESLUTTE_EGEN_OPPGAVE)
+        assertJsonEquals(
+            """
+            {
+              "type" : "about:blank",
+              "title" : "${PostFattVedtakBehandler.SAKSBEHANDLER_KAN_IKKE_BESLUTTE_EGEN_OPPGAVE}",
+              "status" : 403
+            }
+            """.trimIndent(),
+            response.bodyAsJsonNode!!
+        )
     }
 
     @Test
@@ -269,7 +327,16 @@ class PostFattVedtakIntegrationTest {
 
         // Then:
         assertEquals(HttpStatusCode.Conflict.value, response.status)
-        response.assertResponseMessage(PostFattVedtakBehandler.TOTRINNSVURDERING_MANGLER_SAKSBEHANDLER)
+        assertJsonEquals(
+            """
+            {
+              "type" : "about:blank",
+              "title" : "${PostFattVedtakBehandler.TOTRINNSVURDERING_MANGLER_SAKSBEHANDLER}",
+              "status" : 409
+            }
+            """.trimIndent(),
+            response.bodyAsJsonNode!!
+        )
     }
 
     @Test
@@ -301,7 +368,16 @@ class PostFattVedtakIntegrationTest {
 
         // Then:
         assertEquals(HttpStatusCode.BadRequest.value, response.status)
-        response.assertResponseMessage(PostFattVedtakBehandler.OVERLAPPER_MED_INFOTRYGD)
+        assertJsonEquals(
+            """
+            {
+              "type" : "about:blank",
+              "title" : "${PostFattVedtakBehandler.OVERLAPPER_MED_INFOTRYGD}",
+              "status" : 400
+            }
+            """.trimIndent(),
+            response.bodyAsJsonNode!!
+        )
     }
 
     @Test
@@ -322,13 +398,15 @@ class PostFattVedtakIntegrationTest {
             Kjønn.Ukjent, Adressebeskyttelse.Ugradert
         )
         varseldefinisjonRepository.lagre(kode)
-        varselRepository.lagre(Varsel.fraLagring(
-            VarselId(UUID.randomUUID()),
-            behandling.id(),
-            status = Varsel.Status.AKTIV,
-            vurdering = null,
-            kode = kode
-        ))
+        varselRepository.lagre(
+            Varsel.fraLagring(
+                VarselId(UUID.randomUUID()),
+                behandling.id(),
+                status = Varsel.Status.AKTIV,
+                vurdering = null,
+                kode = kode
+            )
+        )
         val oppgave = lagEnOppgave(behandlingId)
         oppgaveRepository.lagre(oppgave)
 
@@ -342,7 +420,16 @@ class PostFattVedtakIntegrationTest {
 
         // Then:
         assertEquals(HttpStatusCode.BadRequest.value, response.status)
-        response.assertResponseMessage(PostFattVedtakBehandler.VARSLER_MANGLER_VURDERING)
+        assertJsonEquals(
+            """
+            {
+              "type" : "about:blank",
+              "title" : "${PostFattVedtakBehandler.VARSLER_MANGLER_VURDERING}",
+              "status" : 400
+            }
+            """.trimIndent(),
+            response.bodyAsJsonNode!!
+        )
     }
 
     private fun lagEnOppgave(behandlingId: UUID): Oppgave = Oppgave.ny(
@@ -383,6 +470,10 @@ class PostFattVedtakIntegrationTest {
     ): Vedtaksperiode = Vedtaksperiode(VedtaksperiodeId(vedtaksperiodeId), fødselsnummer)
 }
 
-private fun IntegrationTestFixture.Response.assertResponseMessage(melding: String) {
-    assertEquals(melding, this.bodyAsJsonNode?.get("message")?.asText())
+private fun assertJsonEquals(expectedJson: String, actualJsonNode: JsonNode) {
+    val writer = objectMapper.writerWithDefaultPrettyPrinter()
+    assertEquals(
+        writer.writeValueAsString(objectMapper.readTree(expectedJson)),
+        writer.writeValueAsString(actualJsonNode)
+    )
 }

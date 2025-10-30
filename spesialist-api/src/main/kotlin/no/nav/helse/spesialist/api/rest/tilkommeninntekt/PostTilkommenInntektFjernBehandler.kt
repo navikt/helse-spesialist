@@ -26,7 +26,10 @@ class PostTilkommenInntektFjernBehandler : PostBehandler<TilkomneInntekter.Id.Fj
     ): RestResponse<Boolean> {
         val tilkommenInntekt =
             transaksjon.tilkommenInntektRepository.finn(TilkommenInntektId(resource.parent.tilkommenInntektId))
-                ?: throw HttpNotFound("Fant ikke tilkommen inntekt med tilkommentInntektId ${resource.parent.tilkommenInntektId}")
+                ?: throw HttpNotFound(
+                    title = "Fant ikke tilkommen inntekt",
+                    detail = "Tilkommen inntekt med id ${resource.parent.tilkommenInntektId} ble ikke funnet",
+                )
 
         bekreftTilgangTilPerson(
             fødselsnummer = tilkommenInntekt.fødselsnummer,
