@@ -1,14 +1,14 @@
 package no.nav.helse.spesialist.e2etests.tests
 
+import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.spesialist.e2etests.AbstractE2EIntegrationTest
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
 
 class RESTFattVedtakE2ETest : AbstractE2EIntegrationTest() {
 
-    @Disabled
     @Test
     fun `saksbehandler fatter vedtak etter hovedregel`() {
         // Given:
@@ -28,7 +28,6 @@ class RESTFattVedtakE2ETest : AbstractE2EIntegrationTest() {
         assertSykepengegrunnlagfakta()
     }
 
-    @Disabled
     @Test
     fun `saksbehandler fatter vedtak med skjønnsfastsettelse`() {
         // Given:
@@ -155,17 +154,14 @@ class RESTFattVedtakE2ETest : AbstractE2EIntegrationTest() {
         }
     }
 
-    @Disabled("Start på test for totrinnsvurdering")
     @Test
-    fun totrinnsvurdering() {
+    fun `beslutter godkjenner totrinnsvurdering`() {
         // Given:
         risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
         personSenderSøknad()
 
         val vedtaksperiode = førsteVedtaksperiode()
-        spleisForberederBehandling(vedtaksperiode) {
-            aktivitetsloggNyAktivitet(listOf("RV_IV_1"))
-        }
+        spleisForberederBehandling(vedtaksperiode) {}
 
         spleisSenderGodkjenningsbehov(vedtaksperiode)
 
@@ -195,7 +191,43 @@ class RESTFattVedtakE2ETest : AbstractE2EIntegrationTest() {
             assertEquals("INNVILGELSE", vedtakBegrunnelse["utfall"].asText())
             assertEquals("Her er min begrunnelse", vedtakBegrunnelse["begrunnelse"].asText())
             assertEquals(saksbehandler.ident, vedtakBegrunnelse["saksbehandlerIdent"].asText())
+
+            val historikkinnslag = person["arbeidsgivere"].flatMap { arbeidsgiver ->
+                arbeidsgiver["generasjoner"].flatMap { generasjon ->
+                    generasjon["perioder"].flatMap { periode ->
+                        periode["historikkinnslag"]?.toList().orEmpty()
+                    }
+                }
+            }
+            assertContains(historikkinnslag.map { it["type"].asText() }, "TOTRINNSVURDERING_ATTESTERT")
         }
+
+        assertOppgavestatus("Ferdigstilt")
+
+        val meldinger = meldinger()
+        val nestSisteOppgaveOppdatert = meldinger.filter { it["@event_name"].asText() == "oppgave_oppdatert" }.dropLast(1).last()
+        val sisteOppgaveOppdatert = meldinger.last { it["@event_name"].asText() == "oppgave_oppdatert" }
+        assertEquals("AvventerSystem", nestSisteOppgaveOppdatert["tilstand"].asText())
+        assertEquals("Ferdigstilt", sisteOppgaveOppdatert["tilstand"].asText())
+
+        val varselEndret = meldinger.single { it["@event_name"].asText() == "varsel_endret" }
+        assertEquals("VURDERT", varselEndret["forrige_status"].asText())
+        assertEquals("GODKJENT", varselEndret["gjeldende_status"].asText())
+
+        // Sjekk at saksbehandlerløsning blir publisert
+        val saksbehandlerLøsning = meldinger.single { it["@event_name"].asText() == "saksbehandler_løsning" }
+        assertEquals("true", saksbehandlerLøsning["godkjent"].asText())
+        assertEquals(saksbehandler.ident, saksbehandlerLøsning["saksbehandlerident"].asText())
+        assertEquals(saksbehandler.id().value.toString(), saksbehandlerLøsning["saksbehandleroid"].asText())
+        assertEquals(saksbehandler.epost, saksbehandlerLøsning["saksbehandlerepost"].asText())
+        assertEquals(emptyList<JsonNode>(), saksbehandlerLøsning["saksbehandleroverstyringer"].toList())
+        assertEquals(saksbehandler.ident, saksbehandlerLøsning["saksbehandler"]["ident"].asText())
+        assertEquals(saksbehandler.epost, saksbehandlerLøsning["saksbehandler"]["epostadresse"].asText())
+        assertEquals(null, saksbehandlerLøsning["årsak"])
+        assertEquals(null, saksbehandlerLøsning["begrunnelser"])
+        assertEquals(null, saksbehandlerLøsning["kommentar"])
+        assertEquals(beslutter.ident, saksbehandlerLøsning["beslutter"]["ident"].asText())
+        assertEquals(beslutter.epost, saksbehandlerLøsning["beslutter"]["epostadresse"].asText())
     }
 
     @Test
@@ -238,29 +270,30 @@ class RESTFattVedtakE2ETest : AbstractE2EIntegrationTest() {
         }
 
         // Then:
-        // Sjekk at oppgaven har status "avventer system"
-        assertOppgavestatus("AvventerSystem")
+        assertOppgavestatus("Ferdigstilt")
 
         val meldinger = meldinger()
+        val nestSisteOppgaveOppdatert = meldinger.filter { it["@event_name"].asText() == "oppgave_oppdatert" }.dropLast(1).last()
         val sisteOppgaveOppdatert = meldinger.last { it["@event_name"].asText() == "oppgave_oppdatert" }
-        assertEquals("AvventerSystem", sisteOppgaveOppdatert["tilstand"].asText())
+        assertEquals("AvventerSystem", nestSisteOppgaveOppdatert["tilstand"].asText())
+        assertEquals("Ferdigstilt", sisteOppgaveOppdatert["tilstand"].asText())
 
         val varselEndret = meldinger.single { it["@event_name"].asText() == "varsel_endret" }
         assertEquals("VURDERT", varselEndret["forrige_status"].asText())
         assertEquals("GODKJENT", varselEndret["gjeldende_status"].asText())
 
         // Sjekk at saksbehandlerløsning blir publisert
-//        val saksbehandlerLøsning = meldinger.single { it["@event_name"].asText() == "saksbehandler_løsning" }
-//        assertEquals("true", saksbehandlerLøsning["godkjent"].asText())
-//        assertEquals(saksbehandler.ident, saksbehandlerLøsning["saksbehandlerident"].asText())
-//        assertEquals(saksbehandler.id().value.toString(), saksbehandlerLøsning["saksbehandleroid"].asText())
-//        assertEquals(saksbehandler.epost, saksbehandlerLøsning["saksbehandlerepost"].asText())
-//        assertEquals(emptyList<JsonNode>(), saksbehandlerLøsning["saksbehandleroverstyringer"].toList())
-//        assertEquals(saksbehandler.ident, saksbehandlerLøsning["saksbehandler"]["ident"].asText())
-//        assertEquals(saksbehandler.epost, saksbehandlerLøsning["saksbehandler"]["epostadresse"].asText())
-//        assertEquals(null, saksbehandlerLøsning["årsak"])
-//        assertEquals(null, saksbehandlerLøsning["begrunnelser"])
-//        assertEquals(null, saksbehandlerLøsning["kommentar"])
-//        assertEquals(null, saksbehandlerLøsning["beslutter"])
+        val saksbehandlerLøsning = meldinger.single { it["@event_name"].asText() == "saksbehandler_løsning" }
+        assertEquals("true", saksbehandlerLøsning["godkjent"].asText())
+        assertEquals(saksbehandler.ident, saksbehandlerLøsning["saksbehandlerident"].asText())
+        assertEquals(saksbehandler.id().value.toString(), saksbehandlerLøsning["saksbehandleroid"].asText())
+        assertEquals(saksbehandler.epost, saksbehandlerLøsning["saksbehandlerepost"].asText())
+        assertEquals(emptyList<JsonNode>(), saksbehandlerLøsning["saksbehandleroverstyringer"].toList())
+        assertEquals(saksbehandler.ident, saksbehandlerLøsning["saksbehandler"]["ident"].asText())
+        assertEquals(saksbehandler.epost, saksbehandlerLøsning["saksbehandler"]["epostadresse"].asText())
+        assertEquals(null, saksbehandlerLøsning["årsak"])
+        assertEquals(null, saksbehandlerLøsning["begrunnelser"])
+        assertEquals(null, saksbehandlerLøsning["kommentar"])
+        assertEquals(null, saksbehandlerLøsning["beslutter"])
     }
 }

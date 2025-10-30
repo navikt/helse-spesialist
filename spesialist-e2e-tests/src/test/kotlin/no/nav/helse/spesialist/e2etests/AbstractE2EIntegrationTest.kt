@@ -27,7 +27,7 @@ abstract class AbstractE2EIntegrationTest {
     protected val testContext: TestContext = TestContext()
     protected var saksbehandler = lagSaksbehandler()
     private var saksbehandlerTilgangsgrupper = mutableSetOf<Tilgangsgruppe>()
-    private var beslutter = lagSaksbehandler()
+    protected var beslutter = lagSaksbehandler()
 
     protected fun saksbehandlerHarTilgang(tilgangsgruppe: Tilgangsgruppe) {
         saksbehandlerTilgangsgrupper += tilgangsgruppe
