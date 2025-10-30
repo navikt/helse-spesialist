@@ -185,11 +185,7 @@ private fun JsonNode.tilSøknadsperioder(): ApiSoknadsperioder =
 
 private fun JsonNode.tilSelvstendigNæringsdrivende(): ApiSoknadSelvstendigNaringsdrivende =
     ApiSoknadSelvstendigNaringsdrivende(
-        ventetid =
-            ApiSoknadSelvstendigNaringsdrivende.ApiVentetidPeriode(
-                fom = get("ventetid")["fom"].asLocalDate(),
-                tom = get("ventetid")["tom"].asLocalDate(),
-            ),
+        ventetid = null,
         inntekt =
             get("inntekt")["inntektsAar"].map { inntektsår ->
                 ApiSoknadSelvstendigNaringsdrivende.ApiInntektsar(
