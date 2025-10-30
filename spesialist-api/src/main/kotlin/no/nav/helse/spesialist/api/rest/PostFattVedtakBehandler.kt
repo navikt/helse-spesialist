@@ -249,9 +249,12 @@ class PostFattVedtakBehandler(
         with(config) {
             tags = listOf("Vedtak")
             operationId = operationIdBasertPåKlassenavn()
+            request {
+                body<ApiFattVedtakRequest>()
+            }
             response {
-                code(HttpStatusCode.OK) {
-                    body<Boolean>()
+                code(HttpStatusCode.NoContent) {
+                    description = "Vedtak er fattet"
                 }
             }
         }
