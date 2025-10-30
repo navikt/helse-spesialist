@@ -268,11 +268,11 @@ class SpeilPersonReceiver(
         hentOppdatertPerson()
     }
 
-    fun saksbehandlerSenderTilGodkjenning() {
+    fun saksbehandlerSenderTilGodkjenning(begrunnelse: String = "Sender til godkjenning") {
         callGraphQL(
             "SendTilGodkjenningV2", mapOf(
                 "oppgavereferanse" to getOppgaveId(),
-                "vedtakBegrunnelse" to "Sender til godkjenning"
+                "vedtakBegrunnelse" to begrunnelse
             )
         ).also {
             if (it["data"].isMissingOrNull()) {

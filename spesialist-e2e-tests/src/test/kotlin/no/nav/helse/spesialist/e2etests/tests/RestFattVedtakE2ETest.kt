@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.e2etests.tests
 import no.nav.helse.spesialist.e2etests.AbstractE2EIntegrationTest
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 import kotlin.test.assertEquals
 
 class RESTFattVedtakE2ETest : AbstractE2EIntegrationTest() {
@@ -134,6 +135,49 @@ class RESTFattVedtakE2ETest : AbstractE2EIntegrationTest() {
         medPersonISpeil {
             saksbehandlerTildelerSegSaken() // Må til for å "opprette" saksbehandler
             saksbehandlerGodkjennerAlleVarsler()
+            saksbehandlerFatterVedtakREST(vedtaksperiode.spleisBehandlingId!!, "Her er min begrunnelse")
+        }
+
+        // Then:
+        medPersonISpeil {
+            // Sjekk at vedtaksbegrunnelse er lagret
+            val vedtakBegrunnelse = person["arbeidsgivere"].flatMap { arbeidsgiver ->
+                arbeidsgiver["generasjoner"].flatMap { generasjon ->
+                    generasjon["perioder"].flatMap { periode ->
+                        periode["vedtakBegrunnelser"]?.toList().orEmpty()
+                    }
+                }
+            }.single()
+
+            assertEquals("INNVILGELSE", vedtakBegrunnelse["utfall"].asText())
+            assertEquals("Her er min begrunnelse", vedtakBegrunnelse["begrunnelse"].asText())
+            assertEquals(saksbehandler.ident, vedtakBegrunnelse["saksbehandlerIdent"].asText())
+        }
+    }
+
+    @Disabled("Start på test for totrinnsvurdering")
+    @Test
+    fun totrinnsvurdering() {
+        // Given:
+        risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
+        personSenderSøknad()
+
+        val vedtaksperiode = førsteVedtaksperiode()
+        spleisForberederBehandling(vedtaksperiode) {
+            aktivitetsloggNyAktivitet(listOf("RV_IV_1"))
+        }
+
+        spleisSenderGodkjenningsbehov(vedtaksperiode)
+
+        // When:
+        medPersonISpeil {
+            saksbehandlerTildelerSegSaken() // Må til for å "opprette" saksbehandler
+            saksbehandlerLeggerTilTilkommenInntekt("999999999", vedtaksperiode.fom, vedtaksperiode.tom, BigDecimal.valueOf(10000.0), emptyList(), "Et notat")
+            saksbehandlerGodkjennerAlleVarsler()
+            saksbehandlerSenderTilGodkjenning("Her er min begrunnelse")
+        }
+
+        beslutterMedPersonISpeil {
             saksbehandlerFatterVedtakREST(vedtaksperiode.spleisBehandlingId!!, "Her er min begrunnelse")
         }
 
