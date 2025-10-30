@@ -54,7 +54,7 @@ mockOauth2Server = "no.nav.security:mock-oauth2-server:2.3.0"
 nimbus-joseJwt = "com.nimbusds:nimbus-jose-jwt:10.5"
 postgresJdbcDriver = "org.postgresql:postgresql:42.7.8"
 postgresSocketFactory = "com.google.cloud.sql:postgres-socket-factory:1.25.3"
-rapidsAndRivers = "com.github.navikt:rapids-and-rivers:2025091514481757940492.363722e3ca80"
+rapidsAndRivers = "com.github.navikt:rapids-and-rivers:2025091914191758284377.e07ac23cddbd"
 slf4jApi = "org.slf4j:slf4j-api:2.0.17"
 
 smiley4-ktor-openapi = { module = "io.github.smiley4:ktor-openapi", version.ref = "smiley4KtorOpenapiTools" }
