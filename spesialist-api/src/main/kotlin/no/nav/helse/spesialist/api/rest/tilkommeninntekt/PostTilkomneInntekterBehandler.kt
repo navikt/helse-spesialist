@@ -4,9 +4,9 @@ import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.db.SessionContext
 import no.nav.helse.spesialist.api.graphql.mutation.InntektsendringerEventBygger
+import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.ApiLeggTilTilkommenInntektRequest
 import no.nav.helse.spesialist.api.rest.ApiLeggTilTilkommenInntektResponse
-import no.nav.helse.spesialist.api.rest.HttpForbidden
 import no.nav.helse.spesialist.api.rest.PostBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.TilkomneInntekter
@@ -17,7 +17,7 @@ import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntekt
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektPeriodeValidator
 
-class PostTilkomneInntekterBehandler : PostBehandler<TilkomneInntekter, ApiLeggTilTilkommenInntektRequest, ApiLeggTilTilkommenInntektResponse> {
+class PostTilkomneInntekterBehandler : PostBehandler<TilkomneInntekter, ApiLeggTilTilkommenInntektRequest, ApiLeggTilTilkommenInntektResponse, ApiPostTilkomneInntekterErrorCode> {
     override fun behandle(
         resource: TilkomneInntekter,
         request: ApiLeggTilTilkommenInntektRequest,
@@ -25,14 +25,16 @@ class PostTilkomneInntekterBehandler : PostBehandler<TilkomneInntekter, ApiLeggT
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
         outbox: Outbox,
-    ): RestResponse<ApiLeggTilTilkommenInntektResponse> {
-        bekreftTilgangTilPerson(
-            fødselsnummer = request.fodselsnummer,
-            saksbehandler = saksbehandler,
-            tilgangsgrupper = tilgangsgrupper,
-            transaksjon = transaksjon,
-            feilSupplier = ::HttpForbidden,
-        )
+    ): RestResponse<ApiLeggTilTilkommenInntektResponse, ApiPostTilkomneInntekterErrorCode> {
+        if (!harTilgangTilPerson(
+                fødselsnummer = request.fodselsnummer,
+                saksbehandler = saksbehandler,
+                tilgangsgrupper = tilgangsgrupper,
+                transaksjon = transaksjon,
+            )
+        ) {
+            return RestResponse.Error(ApiPostTilkomneInntekterErrorCode.MANGLER_TILGANG_TIL_PERSON)
+        }
 
         val periode = request.verdier.periode.fom tilOgMed request.verdier.periode.tom
         TilkommenInntektPeriodeValidator.validerPeriode(
@@ -65,22 +67,19 @@ class PostTilkomneInntekterBehandler : PostBehandler<TilkomneInntekter, ApiLeggT
             årsak = "tilkommen inntekt lagt til",
         )
 
-        return RestResponse.created(ApiLeggTilTilkommenInntektResponse(tilkommenInntekt.id().value))
+        return RestResponse.OK(ApiLeggTilTilkommenInntektResponse(tilkommenInntekt.id().value))
     }
 
     override fun openApi(config: RouteConfig) {
         with(config) {
             tags = setOf("Tilkommen inntekt")
-            operationId = operationIdBasertPåKlassenavn()
-            request {
-                body<ApiLeggTilTilkommenInntektRequest>()
-            }
-            response {
-                code(HttpStatusCode.OK) {
-                    description = "Svar med ID på den opprettede tilkomne inntekten"
-                    body<ApiLeggTilTilkommenInntektResponse>()
-                }
-            }
         }
     }
+}
+
+enum class ApiPostTilkomneInntekterErrorCode(
+    override val title: String,
+    override val statusCode: HttpStatusCode,
+) : ApiErrorCode {
+    MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
 }

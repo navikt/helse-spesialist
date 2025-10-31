@@ -4,9 +4,8 @@ import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.db.SessionContext
 import no.nav.helse.spesialist.api.graphql.mutation.InntektsendringerEventBygger
+import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.ApiFjernTilkommenInntektRequest
-import no.nav.helse.spesialist.api.rest.HttpForbidden
-import no.nav.helse.spesialist.api.rest.HttpNotFound
 import no.nav.helse.spesialist.api.rest.PostBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.TilkomneInntekter
@@ -15,7 +14,7 @@ import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektId
 
-class PostTilkommenInntektFjernBehandler : PostBehandler<TilkomneInntekter.Id.Fjern, ApiFjernTilkommenInntektRequest, Boolean> {
+class PostTilkommenInntektFjernBehandler : PostBehandler<TilkomneInntekter.Id.Fjern, ApiFjernTilkommenInntektRequest, Boolean, ApiPostTilkommenInntektFjernErrorCode> {
     override fun behandle(
         resource: TilkomneInntekter.Id.Fjern,
         request: ApiFjernTilkommenInntektRequest,
@@ -23,21 +22,23 @@ class PostTilkommenInntektFjernBehandler : PostBehandler<TilkomneInntekter.Id.Fj
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
         outbox: Outbox,
-    ): RestResponse<Boolean> {
+    ): RestResponse<Boolean, ApiPostTilkommenInntektFjernErrorCode> {
         val tilkommenInntekt =
             transaksjon.tilkommenInntektRepository.finn(TilkommenInntektId(resource.parent.tilkommenInntektId))
-                ?: throw HttpNotFound(
-                    title = "Fant ikke tilkommen inntekt",
+                ?: return RestResponse.Error(
+                    errorCode = ApiPostTilkommenInntektFjernErrorCode.FANT_IKKE_TILKOMMEN_INNTEKT,
                     detail = "Tilkommen inntekt med id ${resource.parent.tilkommenInntektId} ble ikke funnet",
                 )
 
-        bekreftTilgangTilPerson(
-            fødselsnummer = tilkommenInntekt.fødselsnummer,
-            saksbehandler = saksbehandler,
-            tilgangsgrupper = tilgangsgrupper,
-            transaksjon = transaksjon,
-            feilSupplier = ::HttpForbidden,
-        )
+        if (!harTilgangTilPerson(
+                fødselsnummer = tilkommenInntekt.fødselsnummer,
+                saksbehandler = saksbehandler,
+                tilgangsgrupper = tilgangsgrupper,
+                transaksjon = transaksjon,
+            )
+        ) {
+            return RestResponse.Error(ApiPostTilkommenInntektFjernErrorCode.MANGLER_TILGANG_TIL_PERSON)
+        }
 
         tilkommenInntekt.fjern(
             saksbehandlerIdent = saksbehandler.ident,
@@ -56,22 +57,20 @@ class PostTilkommenInntektFjernBehandler : PostBehandler<TilkomneInntekter.Id.Fj
             årsak = "tilkommen inntekt fjernet",
         )
 
-        return RestResponse.ok(true)
+        return RestResponse.OK(true)
     }
 
     override fun openApi(config: RouteConfig) {
         with(config) {
             tags = setOf("Tilkommen inntekt")
-            operationId = operationIdBasertPåKlassenavn()
-            request {
-                body<ApiFjernTilkommenInntektRequest>()
-            }
-            response {
-                code(HttpStatusCode.OK) {
-                    description = "Alltid true - henger igjen fra at Apollo ikke tåler å ikke få noe i body"
-                    body<Boolean>()
-                }
-            }
         }
     }
+}
+
+enum class ApiPostTilkommenInntektFjernErrorCode(
+    override val title: String,
+    override val statusCode: HttpStatusCode,
+) : ApiErrorCode {
+    MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
+    FANT_IKKE_TILKOMMEN_INNTEKT("Fant ikke tilkommen inntekt", HttpStatusCode.NotFound),
 }

@@ -4,9 +4,8 @@ import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.db.SessionContext
 import no.nav.helse.spesialist.api.graphql.mutation.InntektsendringerEventBygger
+import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.ApiGjenopprettTilkommenInntektRequest
-import no.nav.helse.spesialist.api.rest.HttpForbidden
-import no.nav.helse.spesialist.api.rest.HttpNotFound
 import no.nav.helse.spesialist.api.rest.PostBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.TilkomneInntekter
@@ -17,7 +16,7 @@ import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektId
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektPeriodeValidator
 
-class PostTilkommenInntektGjenopprettBehandler : PostBehandler<TilkomneInntekter.Id.Gjenopprett, ApiGjenopprettTilkommenInntektRequest, Boolean> {
+class PostTilkommenInntektGjenopprettBehandler : PostBehandler<TilkomneInntekter.Id.Gjenopprett, ApiGjenopprettTilkommenInntektRequest, Boolean, ApiPostTilkommenInntektGjenopprettErrorCode> {
     override fun behandle(
         resource: TilkomneInntekter.Id.Gjenopprett,
         request: ApiGjenopprettTilkommenInntektRequest,
@@ -25,21 +24,23 @@ class PostTilkommenInntektGjenopprettBehandler : PostBehandler<TilkomneInntekter
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
         outbox: Outbox,
-    ): RestResponse<Boolean> {
+    ): RestResponse<Boolean, ApiPostTilkommenInntektGjenopprettErrorCode> {
         val tilkommenInntekt =
             transaksjon.tilkommenInntektRepository.finn(TilkommenInntektId(resource.parent.tilkommenInntektId))
-                ?: throw HttpNotFound(
-                    title = "Fant ikke tilkommen inntekt",
+                ?: return RestResponse.Error(
+                    errorCode = ApiPostTilkommenInntektGjenopprettErrorCode.FANT_IKKE_TILKOMMEN_INNTEKT,
                     detail = "Tilkommen inntekt med id ${resource.parent.tilkommenInntektId} ble ikke funnet",
                 )
 
-        bekreftTilgangTilPerson(
-            fødselsnummer = tilkommenInntekt.fødselsnummer,
-            saksbehandler = saksbehandler,
-            tilgangsgrupper = tilgangsgrupper,
-            transaksjon = transaksjon,
-            feilSupplier = ::HttpForbidden,
-        )
+        if (!harTilgangTilPerson(
+                fødselsnummer = tilkommenInntekt.fødselsnummer,
+                saksbehandler = saksbehandler,
+                tilgangsgrupper = tilgangsgrupper,
+                transaksjon = transaksjon,
+            )
+        ) {
+            return RestResponse.Error(ApiPostTilkommenInntektGjenopprettErrorCode.MANGLER_TILGANG_TIL_PERSON)
+        }
 
         val endretTilPeriode = request.endretTil.periode.fom tilOgMed request.endretTil.periode.tom
         TilkommenInntektPeriodeValidator.validerPeriode(
@@ -73,22 +74,20 @@ class PostTilkommenInntektGjenopprettBehandler : PostBehandler<TilkomneInntekter
             årsak = "tilkommen inntekt gjenopprettet",
         )
 
-        return RestResponse.ok(true)
+        return RestResponse.OK(true)
     }
 
     override fun openApi(config: RouteConfig) {
         with(config) {
             tags = setOf("Tilkommen inntekt")
-            operationId = operationIdBasertPåKlassenavn()
-            request {
-                body<ApiGjenopprettTilkommenInntektRequest>()
-            }
-            response {
-                code(HttpStatusCode.OK) {
-                    description = "Alltid true - henger igjen fra at Apollo ikke tåler å ikke få noe i body"
-                    body<Boolean>()
-                }
-            }
         }
     }
+}
+
+enum class ApiPostTilkommenInntektGjenopprettErrorCode(
+    override val title: String,
+    override val statusCode: HttpStatusCode,
+) : ApiErrorCode {
+    MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
+    FANT_IKKE_TILKOMMEN_INNTEKT("Fant ikke tilkommen inntekt", HttpStatusCode.NotFound),
 }

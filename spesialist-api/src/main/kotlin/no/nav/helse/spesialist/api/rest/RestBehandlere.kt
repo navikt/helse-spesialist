@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.api.rest
 
 import io.github.smiley4.ktoropenapi.config.RouteConfig
+import io.ktor.http.HttpStatusCode
 import no.nav.helse.db.SessionContext
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.domain.Saksbehandler
@@ -16,7 +17,34 @@ interface RestBehandler {
             .let { it[0].lowercase() + it.substring(1) }
 }
 
-interface RestBehandlerMedBody<RESOURCE, REQUEST, RESPONSE> : RestBehandler {
+inline fun <reified REQUEST, reified RESPONSE, reified ERROR : ApiErrorCode> RestBehandler.openApiMedRequestBody(config: RouteConfig) {
+    config.request {
+        body<REQUEST>()
+    }
+    openApiUtenRequestBody<RESPONSE, ERROR>(config)
+}
+
+inline fun <reified RESPONSE, reified ERROR : ApiErrorCode> RestBehandler.openApiUtenRequestBody(config: RouteConfig) {
+    config.operationId = operationIdBasertPåKlassenavn()
+    config.response {
+        val hasResponseBody = RESPONSE::class != Unit::class
+        code(if (hasResponseBody) HttpStatusCode.OK else HttpStatusCode.NoContent) {
+            description = "Vellykket svar"
+            if (hasResponseBody) {
+                body<RESPONSE>()
+            }
+        }
+        default {
+            description = "Svar ved feil"
+            body<ApiHttpProblemDetails<ERROR>> {
+                mediaTypes = setOf(io.ktor.http.ContentType.Application.ProblemJson)
+            }
+        }
+    }
+    openApi(config)
+}
+
+interface RestBehandlerMedBody<RESOURCE, REQUEST, RESPONSE, ERROR : ApiErrorCode> : RestBehandler {
     fun behandle(
         resource: RESOURCE,
         request: REQUEST,
@@ -24,30 +52,30 @@ interface RestBehandlerMedBody<RESOURCE, REQUEST, RESPONSE> : RestBehandler {
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
         outbox: Outbox,
-    ): RestResponse<RESPONSE>
+    ): RestResponse<RESPONSE, ERROR>
 }
 
-interface PostBehandler<RESOURCE, REQUEST, RESPONSE> : RestBehandlerMedBody<RESOURCE, REQUEST, RESPONSE>
+interface PostBehandler<RESOURCE, REQUEST, RESPONSE, ERROR : ApiErrorCode> : RestBehandlerMedBody<RESOURCE, REQUEST, RESPONSE, ERROR>
 
-interface PutBehandler<RESOURCE, REQUEST, RESPONSE> : RestBehandlerMedBody<RESOURCE, REQUEST, RESPONSE>
+interface PutBehandler<RESOURCE, REQUEST, RESPONSE, ERROR : ApiErrorCode> : RestBehandlerMedBody<RESOURCE, REQUEST, RESPONSE, ERROR>
 
-interface PatchBehandler<RESOURCE, REQUEST, RESPONSE> : RestBehandlerMedBody<RESOURCE, REQUEST, RESPONSE>
+interface PatchBehandler<RESOURCE, REQUEST, RESPONSE, ERROR : ApiErrorCode> : RestBehandlerMedBody<RESOURCE, REQUEST, RESPONSE, ERROR>
 
-interface DeleteBehandler<RESOURCE, RESPONSE> : RestBehandler {
+interface DeleteBehandler<RESOURCE, RESPONSE, ERROR : ApiErrorCode> : RestBehandler {
     fun behandle(
         resource: RESOURCE,
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
         outbox: Outbox,
-    ): RestResponse<RESPONSE>
+    ): RestResponse<RESPONSE, ERROR>
 }
 
-interface GetBehandler<RESOURCE, RESPONSE> : RestBehandler {
+interface GetBehandler<RESOURCE, RESPONSE, ERROR : ApiErrorCode> : RestBehandler {
     fun behandle(
         resource: RESOURCE,
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
-    ): RestResponse<RESPONSE>
+    ): RestResponse<RESPONSE, ERROR>
 }

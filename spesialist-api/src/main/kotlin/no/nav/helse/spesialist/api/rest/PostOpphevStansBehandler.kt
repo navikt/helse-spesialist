@@ -4,13 +4,13 @@ import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.db.SessionContext
 import no.nav.helse.spesialist.api.rest.resources.Opphevstans
-import no.nav.helse.spesialist.api.rest.tilkommeninntekt.bekreftTilgangTilPerson
+import no.nav.helse.spesialist.api.rest.tilkommeninntekt.harTilgangTilPerson
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.domain.NotatType
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 
-class PostOpphevStansBehandler : PostBehandler<Opphevstans, ApiOpphevStansRequest, Boolean> {
+class PostOpphevStansBehandler : PostBehandler<Opphevstans, ApiOpphevStansRequest, Boolean, ApiPostOpphevStansErrorCode> {
     override fun behandle(
         resource: Opphevstans,
         request: ApiOpphevStansRequest,
@@ -18,15 +18,17 @@ class PostOpphevStansBehandler : PostBehandler<Opphevstans, ApiOpphevStansReques
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
         outbox: Outbox,
-    ): RestResponse<Boolean> {
+    ): RestResponse<Boolean, ApiPostOpphevStansErrorCode> {
         val fødselsnummer = request.fodselsnummer
-        bekreftTilgangTilPerson(
-            fødselsnummer = fødselsnummer,
-            saksbehandler = saksbehandler,
-            tilgangsgrupper = tilgangsgrupper,
-            transaksjon = transaksjon,
-            feilSupplier = ::HttpForbidden,
-        )
+        if (!harTilgangTilPerson(
+                fødselsnummer = fødselsnummer,
+                saksbehandler = saksbehandler,
+                tilgangsgrupper = tilgangsgrupper,
+                transaksjon = transaksjon,
+            )
+        ) {
+            return RestResponse.Error(ApiPostOpphevStansErrorCode.MANGLER_TILGANG_TIL_PERSON)
+        }
 
         transaksjon.stansAutomatiskBehandlingDao.lagreFraSpeil(fødselsnummer = fødselsnummer)
         transaksjon.notatDao.lagreForOppgaveId(
@@ -39,22 +41,19 @@ class PostOpphevStansBehandler : PostBehandler<Opphevstans, ApiOpphevStansReques
             dialogRef = transaksjon.dialogDao.lagre(),
         )
 
-        return RestResponse.ok(true)
+        return RestResponse.OK(true)
     }
 
     override fun openApi(config: RouteConfig) {
         with(config) {
             tags = setOf("Stans av automatisering")
-            operationId = operationIdBasertPåKlassenavn()
-            request {
-                body<ApiOpphevStansRequest>()
-            }
-            response {
-                code(HttpStatusCode.OK) {
-                    description = "Alltid true - henger igjen fra at Apollo ikke tåler å ikke få noe i body"
-                    body<Boolean>()
-                }
-            }
         }
     }
+}
+
+enum class ApiPostOpphevStansErrorCode(
+    override val title: String,
+    override val statusCode: HttpStatusCode,
+) : ApiErrorCode {
+    MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
 }

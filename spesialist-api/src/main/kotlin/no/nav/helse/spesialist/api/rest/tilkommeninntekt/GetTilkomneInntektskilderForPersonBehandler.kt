@@ -5,6 +5,7 @@ import io.ktor.http.HttpStatusCode
 import no.nav.helse.db.SessionContext
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand
 import no.nav.helse.spesialist.api.graphql.schema.ApiDatoPeriode
+import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.ApiTilkommenInntekt
 import no.nav.helse.spesialist.api.rest.ApiTilkommenInntektEndretEvent
 import no.nav.helse.spesialist.api.rest.ApiTilkommenInntektEvent
@@ -13,7 +14,6 @@ import no.nav.helse.spesialist.api.rest.ApiTilkommenInntektGjenopprettetEvent
 import no.nav.helse.spesialist.api.rest.ApiTilkommenInntektOpprettetEvent
 import no.nav.helse.spesialist.api.rest.ApiTilkommenInntektskilde
 import no.nav.helse.spesialist.api.rest.GetBehandler
-import no.nav.helse.spesialist.api.rest.HttpNotFound
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.domain.Saksbehandler
@@ -27,27 +27,29 @@ import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektOpprettet
 import java.math.BigDecimal
 import java.time.ZoneId
 
-class GetTilkomneInntektskilderForPersonBehandler : GetBehandler<Personer.AktørId.TilkomneInntektskilder, List<ApiTilkommenInntektskilde>> {
+class GetTilkomneInntektskilderForPersonBehandler : GetBehandler<Personer.AktørId.TilkomneInntektskilder, List<ApiTilkommenInntektskilde>, ApiGetTilkomneInntektskilderForPersonErrorCode> {
     override fun behandle(
         resource: Personer.AktørId.TilkomneInntektskilder,
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
-    ): RestResponse<List<ApiTilkommenInntektskilde>> {
+    ): RestResponse<List<ApiTilkommenInntektskilde>, ApiGetTilkomneInntektskilderForPersonErrorCode> {
         val fødselsnumre =
             transaksjon.legacyPersonRepository.finnFødselsnumre(aktørId = resource.parent.aktørId).toSet()
 
         fødselsnumre.forEach { fødselsnummer ->
-            bekreftTilgangTilPerson(
-                fødselsnummer = fødselsnummer,
-                saksbehandler = saksbehandler,
-                tilgangsgrupper = tilgangsgrupper,
-                transaksjon = transaksjon,
-                feilSupplier = ::HttpNotFound,
-            )
+            if (!harTilgangTilPerson(
+                    fødselsnummer = fødselsnummer,
+                    saksbehandler = saksbehandler,
+                    tilgangsgrupper = tilgangsgrupper,
+                    transaksjon = transaksjon,
+                )
+            ) {
+                return RestResponse.Error(ApiGetTilkomneInntektskilderForPersonErrorCode.MANGLER_TILGANG_TIL_PERSON)
+            }
         }
 
-        return RestResponse.ok(
+        return RestResponse.OK(
             fødselsnumre.flatMap { fødselsnummer ->
                 hentTilkomneInntektskilder(
                     fødselsnummer = fødselsnummer,
@@ -161,13 +163,13 @@ class GetTilkomneInntektskilderForPersonBehandler : GetBehandler<Personer.Aktør
     override fun openApi(config: RouteConfig) {
         with(config) {
             tags = setOf("Tilkommen inntekt")
-            operationId = operationIdBasertPåKlassenavn()
-            response {
-                code(HttpStatusCode.OK) {
-                    description = "Alle tilkomne inntekter for personen, fordelt på inntektskilder"
-                    body<List<ApiTilkommenInntektskilde>>()
-                }
-            }
         }
     }
+}
+
+enum class ApiGetTilkomneInntektskilderForPersonErrorCode(
+    override val title: String,
+    override val statusCode: HttpStatusCode,
+) : ApiErrorCode {
+    MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
 }

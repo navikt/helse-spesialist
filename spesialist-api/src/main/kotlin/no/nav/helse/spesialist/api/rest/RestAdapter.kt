@@ -29,10 +29,10 @@ class RestAdapter(
 ) {
     private val problemObjectMapper = objectMapper.copy().setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL)
 
-    suspend inline fun <RESOURCE, RESPONSE> behandle(
+    suspend inline fun <RESOURCE, RESPONSE, ERROR : ApiErrorCode> behandle(
         resource: RESOURCE,
         call: RoutingCall,
-        behandler: GetBehandler<RESOURCE, RESPONSE>,
+        behandler: GetBehandler<RESOURCE, RESPONSE, ERROR>,
     ) {
         wrapOgDeleger(call) { saksbehandler, tilgangsgrupper, transaksjon, _ ->
             behandler.behandle(
@@ -44,10 +44,10 @@ class RestAdapter(
         }
     }
 
-    suspend inline fun <RESOURCE, RESPONSE> behandle(
+    suspend inline fun <RESOURCE, RESPONSE, ERROR : ApiErrorCode> behandle(
         resource: RESOURCE,
         call: RoutingCall,
-        behandler: DeleteBehandler<RESOURCE, RESPONSE>,
+        behandler: DeleteBehandler<RESOURCE, RESPONSE, ERROR>,
     ) {
         wrapOgDeleger(call) { saksbehandler, tilgangsgrupper, transaksjon, outbox ->
             behandler.behandle(
@@ -60,10 +60,10 @@ class RestAdapter(
         }
     }
 
-    suspend inline fun <RESOURCE, reified REQUEST, RESPONSE> behandle(
+    suspend inline fun <RESOURCE, reified REQUEST, RESPONSE, ERROR : ApiErrorCode> behandle(
         resource: RESOURCE,
         call: RoutingCall,
-        behandler: RestBehandlerMedBody<RESOURCE, REQUEST, RESPONSE>,
+        behandler: RestBehandlerMedBody<RESOURCE, REQUEST, RESPONSE, ERROR>,
     ) {
         val request: REQUEST = call.receive()
         wrapOgDeleger(call) { saksbehandler, tilgangsgrupper, transaksjon, outbox ->
@@ -78,12 +78,17 @@ class RestAdapter(
         }
     }
 
-    suspend fun <RESPONSE> wrapOgDeleger(
+    suspend fun <RESPONSE, ERROR : ApiErrorCode> wrapOgDeleger(
         call: RoutingCall,
-        behandler: (Saksbehandler, Set<Tilgangsgruppe>, SessionContext, Outbox) -> RestResponse<RESPONSE>,
+        behandler: (Saksbehandler, Set<Tilgangsgruppe>, SessionContext, Outbox) -> RestResponse<RESPONSE, ERROR>,
     ) {
         val jwt =
-            (call.principal<JWTPrincipal>() ?: throw HttpUnauthorized(title = "Token mangler i forespørsel")).payload
+            (
+                call.principal<JWTPrincipal>() ?: run {
+                    call.respondWithProblem(genericProblemDetails(HttpStatusCode.Unauthorized))
+                    return@wrapOgDeleger
+                }
+            ).payload
 
         val saksbehandler = jwt.tilSaksbehandler()
         val tilgangsgrupper = tilgangsgruppeUuider.grupperFor(jwt.gruppeUuider())
@@ -96,43 +101,65 @@ class RestAdapter(
             val outbox = Outbox()
             sessionFactory
                 .transactionalSessionScope { transaksjon ->
-                    behandler.invoke(
-                        saksbehandler,
-                        tilgangsgrupper,
-                        transaksjon,
-                        outbox,
-                    )
+                    val response =
+                        behandler.invoke(
+                            saksbehandler,
+                            tilgangsgrupper,
+                            transaksjon,
+                            outbox,
+                        )
+
+                    if (response is RestResponse.Error) {
+                        throw WrappedApiHttpProblemDetailsException(
+                            ApiHttpProblemDetails(
+                                status = response.errorCode.statusCode.value,
+                                title = response.errorCode.title,
+                                detail = response.detail,
+                                code = response.errorCode,
+                            ),
+                        )
+                    }
+                    response as RestResponse.Success
                 }.also { outbox.sendAlle(meldingPubliserer) }
         }.onFailure { cause ->
-            val statusCode = (cause as? HttpException)?.statusCode ?: HttpStatusCode.InternalServerError
-            val title = (cause as? HttpException)?.title ?: statusCode.description
-            val detail = (cause as? HttpException)?.detail
-            if (statusCode.value in 400..<500) {
-                loggWarnThrowable("Returnerer HTTP ${statusCode.value} - $title", cause)
+            val problemDetails =
+                if (cause is WrappedApiHttpProblemDetailsException) {
+                    cause.problemDetails
+                } else {
+                    genericProblemDetails(HttpStatusCode.InternalServerError)
+                }
+            val statusCode = problemDetails.status
+            val title = problemDetails.title
+            if (statusCode in 400..<500) {
+                loggWarnThrowable("Returnerer HTTP $statusCode - $title", cause)
             } else {
-                loggThrowable("Returnerer HTTP ${statusCode.value} - $title", cause)
+                loggThrowable("Returnerer HTTP $statusCode - $title", cause)
             }
-            call.respondText(
-                problemObjectMapper.writeValueAsString(
-                    HttpProblemDetails(
-                        title = title,
-                        status = statusCode.value,
-                        detail = detail,
-                    ),
-                ),
-                ContentType.Application.ProblemJson,
-                statusCode,
-            )
+            call.respondWithProblem(problemDetails)
         }.onSuccess { result ->
-            call.response.status(result.statusCode)
-            call.respond(result.body as Any)
+            when (result) {
+                is RestResponse.NoContent<*> -> call.respond(HttpStatusCode.NoContent)
+                is RestResponse.OK<*, *> -> call.respond(HttpStatusCode.OK, result.body as Any)
+            }
         }
     }
+
+    private suspend fun RoutingCall.respondWithProblem(problemDetails: ApiHttpProblemDetails<out ApiErrorCode>) {
+        respondText(
+            problemObjectMapper.writeValueAsString(problemDetails),
+            ContentType.Application.ProblemJson,
+            HttpStatusCode.fromValue(problemDetails.status),
+        )
+    }
+
+    private fun genericProblemDetails(internalServerError: HttpStatusCode): ApiHttpProblemDetails<ApiGenericErrorCode> =
+        ApiHttpProblemDetails(
+            status = internalServerError.value,
+            title = internalServerError.description,
+            code = ApiGenericErrorCode(internalServerError),
+        )
 }
 
-private data class HttpProblemDetails(
-    val type: String = "about:blank",
-    val title: String,
-    val status: Int,
-    val detail: String?,
-)
+private class WrappedApiHttpProblemDetailsException(
+    val problemDetails: ApiHttpProblemDetails<*>,
+) : Exception()

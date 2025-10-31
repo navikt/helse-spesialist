@@ -63,9 +63,10 @@ class PostFattVedtakIntegrationTest {
         assertJsonEquals(
             """
             {
-              "type" : "about:blank",
-              "title" : "${PostFattVedtakBehandler.BEHANDLING_IKKE_FUNNET}",
-              "status" : 404
+              "type": "about:blank",
+              "status": 404,
+              "title": "Fant ikke behandling",
+              "code": "BEHANDLING_IKKE_FUNNET" 
             }
             """.trimIndent(),
             response.bodyAsJsonNode!!
@@ -93,9 +94,10 @@ class PostFattVedtakIntegrationTest {
         assertJsonEquals(
             """
             {
-              "type" : "about:blank",
-              "title" : "${PostFattVedtakBehandler.VEDTAKSPERIODE_IKKE_FUNNET}",
-              "status" : 404
+              "type": "about:blank",
+              "status": 404,
+              "title": "Fant ikke vedtaksperiode",
+              "code": "VEDTAKSPERIODE_IKKE_FUNNET" 
             }
             """.trimIndent(),
             response.bodyAsJsonNode!!
@@ -155,9 +157,10 @@ class PostFattVedtakIntegrationTest {
         assertJsonEquals(
             """
             {
-              "type" : "about:blank",
-              "title" : "${PostFattVedtakBehandler.OPPGAVE_IKKE_FUNNET}",
-              "status" : 400
+              "type": "about:blank",
+              "status": 400,
+              "title": "Fant ikke oppgave.",
+              "code": "OPPGAVE_IKKE_FUNNET" 
             }
             """.trimIndent(),
             response.bodyAsJsonNode!!
@@ -195,9 +198,10 @@ class PostFattVedtakIntegrationTest {
         assertJsonEquals(
             """
             {
-              "type" : "about:blank",
-              "title" : "${PostFattVedtakBehandler.OPPGAVE_FEIL_TILSTAND}",
-              "status" : 400
+              "type": "about:blank",
+              "status": 400,
+              "title": "Oppgaven er i feil tilstand.",
+              "code": "OPPGAVE_FEIL_TILSTAND" 
             }
             """.trimIndent(),
             response.bodyAsJsonNode!!
@@ -241,9 +245,10 @@ class PostFattVedtakIntegrationTest {
         assertJsonEquals(
             """
             {
-              "type" : "about:blank",
-              "title" : "${PostFattVedtakBehandler.SAKSBEHANDLER_MANGLER_BESLUTTERTILGANG}",
-              "status" : 403
+              "type": "about:blank",
+              "status": 403,
+              "title": "Mangler besluttertilgang",
+              "code": "SAKSBEHANDLER_MANGLER_BESLUTTERTILGANG" 
             }
             """.trimIndent(),
             response.bodyAsJsonNode!!
@@ -286,9 +291,10 @@ class PostFattVedtakIntegrationTest {
         assertJsonEquals(
             """
             {
-              "type" : "about:blank",
-              "title" : "${PostFattVedtakBehandler.SAKSBEHANDLER_KAN_IKKE_BESLUTTE_EGEN_OPPGAVE}",
-              "status" : 403
+              "type": "about:blank",
+              "status": 403,
+              "title": "Kan ikke beslutte egen oppgave",
+              "code": "SAKSBEHANDLER_KAN_IKKE_BESLUTTE_EGEN_OPPGAVE" 
             }
             """.trimIndent(),
             response.bodyAsJsonNode!!
@@ -330,9 +336,10 @@ class PostFattVedtakIntegrationTest {
         assertJsonEquals(
             """
             {
-              "type" : "about:blank",
-              "title" : "${PostFattVedtakBehandler.TOTRINNSVURDERING_MANGLER_SAKSBEHANDLER}",
-              "status" : 409
+              "type": "about:blank",
+              "status": 409,
+              "title": "Behandlende saksbehandler mangler i totrinnsvurdering",
+              "code": "TOTRINNSVURDERING_MANGLER_SAKSBEHANDLER" 
             }
             """.trimIndent(),
             response.bodyAsJsonNode!!
@@ -371,9 +378,10 @@ class PostFattVedtakIntegrationTest {
         assertJsonEquals(
             """
             {
-              "type" : "about:blank",
-              "title" : "${PostFattVedtakBehandler.OVERLAPPER_MED_INFOTRYGD}",
-              "status" : 400
+              "type": "about:blank",
+              "status": 400,
+              "title": "Kan ikke fatte vedtak fordi perioden overlapper med infotrygd",
+              "code": "OVERLAPPER_MED_INFOTRYGD" 
             }
             """.trimIndent(),
             response.bodyAsJsonNode!!
@@ -423,9 +431,10 @@ class PostFattVedtakIntegrationTest {
         assertJsonEquals(
             """
             {
-              "type" : "about:blank",
-              "title" : "${PostFattVedtakBehandler.VARSLER_MANGLER_VURDERING}",
-              "status" : 400
+              "type": "about:blank",
+              "status": 400,
+              "title": "Kan ikke godkjenne varsler som ikke er vurdert av en saksbehandler",
+              "code": "VARSLER_MANGLER_VURDERING" 
             }
             """.trimIndent(),
             response.bodyAsJsonNode!!

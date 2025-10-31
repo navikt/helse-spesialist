@@ -5,23 +5,23 @@ import io.ktor.http.HttpStatusCode
 import no.nav.helse.db.SessionContext
 import no.nav.helse.mediator.dokument.DokumentMediator
 import no.nav.helse.spesialist.api.rest.ApiDokumentInntektsmelding
+import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.GetBehandler
-import no.nav.helse.spesialist.api.rest.HttpNotFound
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.Personer
-import no.nav.helse.spesialist.api.rest.tilkommeninntekt.bekreftTilgangTilPerson
+import no.nav.helse.spesialist.api.rest.tilkommeninntekt.harTilgangTilPerson
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 
 class GetInntektsmeldingBehandler(
     private val dokumentMediator: DokumentMediator,
-) : GetBehandler<Personer.AktørId.Dokumenter.DokumentId.Inntektsmelding, ApiDokumentInntektsmelding> {
+) : GetBehandler<Personer.AktørId.Dokumenter.DokumentId.Inntektsmelding, ApiDokumentInntektsmelding, ApiGetInntektsmeldingErrorCode> {
     override fun behandle(
         resource: Personer.AktørId.Dokumenter.DokumentId.Inntektsmelding,
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
-    ): RestResponse<ApiDokumentInntektsmelding> {
+    ): RestResponse<ApiDokumentInntektsmelding, ApiGetInntektsmeldingErrorCode> {
         val fødselsnumre =
             transaksjon.legacyPersonRepository.finnFødselsnumre(aktørId = resource.parent.parent.parent.aktørId).toSet()
 
@@ -31,7 +31,7 @@ class GetInntektsmeldingBehandler(
                 fødselsnummer = fødselsnumre.first(),
                 dokumentId = resource.parent.dokumentId,
                 dokumentType = DokumentMediator.DokumentType.INNTEKTSMELDING,
-            ) ?: throw HttpNotFound("Fant ikke inntektsmeldingdokument")
+            ) ?: return RestResponse.Error(ApiGetInntektsmeldingErrorCode.FANT_IKKE_DOKUMENT)
 
         val fødselsnummerForIM =
             dokument
@@ -44,19 +44,21 @@ class GetInntektsmeldingBehandler(
         val fødselsnummreForIM =
             fødselsnummerForIM + transaksjon.legacyPersonRepository.finnFødselsnumre(aktørIdForIM).toSet()
 
-        if (fødselsnummreForIM.isEmpty()) throw HttpNotFound("IM mangler fødselsnummer og aktørId")
+        if (fødselsnummreForIM.isEmpty()) return RestResponse.Error(ApiGetInntektsmeldingErrorCode.MANGLER_FØDSELSNUMMER_OG_AKTØRID)
 
         fødselsnummreForIM.forEach { fødselsnummer ->
-            bekreftTilgangTilPerson(
-                fødselsnummer = fødselsnummer,
-                saksbehandler = saksbehandler,
-                tilgangsgrupper = tilgangsgrupper,
-                transaksjon = transaksjon,
-                feilSupplier = ::HttpNotFound,
-            )
+            if (!harTilgangTilPerson(
+                    fødselsnummer = fødselsnummer,
+                    saksbehandler = saksbehandler,
+                    tilgangsgrupper = tilgangsgrupper,
+                    transaksjon = transaksjon,
+                )
+            ) {
+                return RestResponse.Error(ApiGetInntektsmeldingErrorCode.MANGLER_TILGANG_TIL_PERSON)
+            }
         }
 
-        return RestResponse.ok(
+        return RestResponse.OK(
             dokument.tilInntektsmelding(),
         )
     }
@@ -64,13 +66,15 @@ class GetInntektsmeldingBehandler(
     override fun openApi(config: RouteConfig) {
         with(config) {
             tags = setOf("Dokumenter")
-            operationId = operationIdBasertPåKlassenavn()
-            response {
-                code(HttpStatusCode.OK) {
-                    description = "Inntektsmelding med dokumentId."
-                    body<ApiDokumentInntektsmelding>()
-                }
-            }
         }
     }
+}
+
+enum class ApiGetInntektsmeldingErrorCode(
+    override val title: String,
+    override val statusCode: HttpStatusCode,
+) : ApiErrorCode {
+    MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
+    FANT_IKKE_DOKUMENT("Fant ikke inntektsmeldingdokument", HttpStatusCode.NotFound),
+    MANGLER_FØDSELSNUMMER_OG_AKTØRID("IM mangler fødselsnummer og aktørId", HttpStatusCode.NotFound),
 }

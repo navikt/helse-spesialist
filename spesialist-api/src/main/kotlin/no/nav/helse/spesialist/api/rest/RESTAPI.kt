@@ -58,39 +58,39 @@ fun Routing.restRoutes(
 }
 
 @Suppress("unused")
-private inline fun <reified RESOURCE : Any, reified RESPONSE : Any> Route.delete(
-    behandler: DeleteBehandler<RESOURCE, RESPONSE>,
+private inline fun <reified RESOURCE : Any, reified RESPONSE : Any, reified ERROR : ApiErrorCode> Route.delete(
+    behandler: DeleteBehandler<RESOURCE, RESPONSE, ERROR>,
     adapter: RestAdapter,
 ) {
-    delete<RESOURCE>(behandler::openApi) { resource -> adapter.behandle(resource, call, behandler) }
+    delete<RESOURCE>({ behandler.openApiUtenRequestBody<RESPONSE, ERROR>(this) }) { resource -> adapter.behandle(resource, call, behandler) }
 }
 
-private inline fun <reified RESOURCE : Any, reified RESPONSE : Any> Route.get(
-    behandler: GetBehandler<RESOURCE, RESPONSE>,
+private inline fun <reified RESOURCE : Any, reified RESPONSE : Any, reified ERROR : ApiErrorCode> Route.get(
+    behandler: GetBehandler<RESOURCE, RESPONSE, ERROR>,
     adapter: RestAdapter,
 ) {
-    get<RESOURCE>(behandler::openApi) { resource -> adapter.behandle(resource, call, behandler) }
-}
-
-@Suppress("unused")
-private inline fun <reified RESOURCE : Any, reified REQUEST : Any, reified RESPONSE : Any> Route.patch(
-    behandler: PatchBehandler<RESOURCE, REQUEST, RESPONSE>,
-    adapter: RestAdapter,
-) {
-    patch<RESOURCE>(behandler::openApi) { resource -> adapter.behandle(resource, call, behandler) }
-}
-
-private inline fun <reified RESOURCE : Any, reified REQUEST : Any, reified RESPONSE : Any> Route.post(
-    behandler: PostBehandler<RESOURCE, REQUEST, RESPONSE>,
-    adapter: RestAdapter,
-) {
-    post<RESOURCE>(behandler::openApi) { resource -> adapter.behandle(resource, call, behandler) }
+    get<RESOURCE>({ behandler.openApiUtenRequestBody<RESPONSE, ERROR>(this) }) { resource -> adapter.behandle(resource, call, behandler) }
 }
 
 @Suppress("unused")
-private inline fun <reified RESOURCE : Any, reified REQUEST : Any, reified RESPONSE : Any> Route.put(
-    behandler: PutBehandler<RESOURCE, REQUEST, RESPONSE>,
+private inline fun <reified RESOURCE : Any, reified REQUEST : Any, reified RESPONSE : Any, reified ERROR : ApiErrorCode> Route.patch(
+    behandler: PatchBehandler<RESOURCE, REQUEST, RESPONSE, ERROR>,
     adapter: RestAdapter,
 ) {
-    put<RESOURCE>(behandler::openApi) { resource -> adapter.behandle(resource, call, behandler) }
+    patch<RESOURCE>({ behandler.openApiMedRequestBody<REQUEST, RESPONSE, ERROR>(this) }) { resource -> adapter.behandle(resource, call, behandler) }
+}
+
+private inline fun <reified RESOURCE : Any, reified REQUEST : Any, reified RESPONSE : Any, reified ERROR : ApiErrorCode> Route.post(
+    behandler: PostBehandler<RESOURCE, REQUEST, RESPONSE, ERROR>,
+    adapter: RestAdapter,
+) {
+    post<RESOURCE>({ behandler.openApiMedRequestBody<REQUEST, RESPONSE, ERROR>(this) }) { resource -> adapter.behandle(resource, call, behandler) }
+}
+
+@Suppress("unused")
+private inline fun <reified RESOURCE : Any, reified REQUEST : Any, reified RESPONSE : Any, reified ERROR : ApiErrorCode> Route.put(
+    behandler: PutBehandler<RESOURCE, REQUEST, RESPONSE, ERROR>,
+    adapter: RestAdapter,
+) {
+    put<RESOURCE>({ behandler.openApiMedRequestBody<REQUEST, RESPONSE, ERROR>(this) }) { resource -> adapter.behandle(resource, call, behandler) }
 }

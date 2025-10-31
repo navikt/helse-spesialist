@@ -228,7 +228,7 @@ class GetInntektsmeldingBehandlerTest {
         )
 
         // Then:
-        assertEquals(HttpStatusCode.NotFound.value, response.status)
+        assertEquals(HttpStatusCode.Forbidden.value, response.status)
     }
 }
 

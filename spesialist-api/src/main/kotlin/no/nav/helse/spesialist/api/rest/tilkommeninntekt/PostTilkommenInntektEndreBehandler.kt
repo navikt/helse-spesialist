@@ -5,8 +5,7 @@ import io.ktor.http.HttpStatusCode
 import no.nav.helse.db.SessionContext
 import no.nav.helse.spesialist.api.graphql.mutation.InntektsendringerEventBygger
 import no.nav.helse.spesialist.api.rest.ApiEndreTilkommenInntektRequest
-import no.nav.helse.spesialist.api.rest.HttpForbidden
-import no.nav.helse.spesialist.api.rest.HttpNotFound
+import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.PostBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.TilkomneInntekter
@@ -17,7 +16,7 @@ import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektId
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektPeriodeValidator
 
-class PostTilkommenInntektEndreBehandler : PostBehandler<TilkomneInntekter.Id.Endre, ApiEndreTilkommenInntektRequest, Boolean> {
+class PostTilkommenInntektEndreBehandler : PostBehandler<TilkomneInntekter.Id.Endre, ApiEndreTilkommenInntektRequest, Boolean, ApiPostTilkommenInntektEndreErrorCode> {
     override fun behandle(
         resource: TilkomneInntekter.Id.Endre,
         request: ApiEndreTilkommenInntektRequest,
@@ -25,21 +24,23 @@ class PostTilkommenInntektEndreBehandler : PostBehandler<TilkomneInntekter.Id.En
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
         outbox: Outbox,
-    ): RestResponse<Boolean> {
+    ): RestResponse<Boolean, ApiPostTilkommenInntektEndreErrorCode> {
         val tilkommenInntekt =
             transaksjon.tilkommenInntektRepository.finn(TilkommenInntektId(resource.parent.tilkommenInntektId))
-                ?: throw HttpNotFound(
-                    title = "Fant ikke tilkommen inntekt",
+                ?: return RestResponse.Error(
+                    errorCode = ApiPostTilkommenInntektEndreErrorCode.FANT_IKKE_TILKOMMEN_INNTEKT,
                     detail = "Tilkommen inntekt med id ${resource.parent.tilkommenInntektId} ble ikke funnet",
                 )
 
-        bekreftTilgangTilPerson(
-            fødselsnummer = tilkommenInntekt.fødselsnummer,
-            saksbehandler = saksbehandler,
-            tilgangsgrupper = tilgangsgrupper,
-            transaksjon = transaksjon,
-            feilSupplier = ::HttpForbidden,
-        )
+        if (!harTilgangTilPerson(
+                fødselsnummer = tilkommenInntekt.fødselsnummer,
+                saksbehandler = saksbehandler,
+                tilgangsgrupper = tilgangsgrupper,
+                transaksjon = transaksjon,
+            )
+        ) {
+            return RestResponse.Error(ApiPostTilkommenInntektEndreErrorCode.MANGLER_TILGANG_TIL_PERSON)
+        }
 
         val endretTilPeriode = request.endretTil.periode.fom tilOgMed request.endretTil.periode.tom
         TilkommenInntektPeriodeValidator.validerPeriode(
@@ -93,22 +94,20 @@ class PostTilkommenInntektEndreBehandler : PostBehandler<TilkomneInntekter.Id.En
             )
         }
 
-        return RestResponse.ok(true)
+        return RestResponse.OK(true)
     }
 
     override fun openApi(config: RouteConfig) {
         with(config) {
             tags = setOf("Tilkommen inntekt")
-            operationId = operationIdBasertPåKlassenavn()
-            request {
-                body<ApiEndreTilkommenInntektRequest>()
-            }
-            response {
-                code(HttpStatusCode.OK) {
-                    description = "Alltid true - henger igjen fra at Apollo ikke tåler å ikke få noe i body"
-                    body<Boolean>()
-                }
-            }
         }
     }
+}
+
+enum class ApiPostTilkommenInntektEndreErrorCode(
+    override val title: String,
+    override val statusCode: HttpStatusCode,
+) : ApiErrorCode {
+    MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
+    FANT_IKKE_TILKOMMEN_INNTEKT("Fant ikke tilkommen inntekt", HttpStatusCode.NotFound),
 }

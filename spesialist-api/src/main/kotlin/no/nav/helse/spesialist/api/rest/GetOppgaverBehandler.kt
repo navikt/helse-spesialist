@@ -1,7 +1,6 @@
 package no.nav.helse.spesialist.api.rest
 
 import io.github.smiley4.ktoropenapi.config.RouteConfig
-import io.ktor.http.HttpStatusCode
 import no.nav.helse.db.SessionContext
 import no.nav.helse.db.SorteringsnøkkelForDatabase
 import no.nav.helse.db.Sorteringsrekkefølge
@@ -25,13 +24,13 @@ import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import java.time.ZoneId
 import kotlin.time.measureTimedValue
 
-class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide> {
+class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide, ApiGetOppgaverErrorCode> {
     override fun behandle(
         resource: Oppgaver,
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
-    ): RestResponse<ApiOppgaveProjeksjonSide> {
+    ): RestResponse<ApiOppgaveProjeksjonSide, ApiGetOppgaverErrorCode> {
         val (finnOppgaveProjeksjoner, tidsbruk) =
             measureTimedValue {
                 transaksjon.oppgaveRepository
@@ -70,7 +69,7 @@ class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide> {
                     )
             }
         logg.info("Hentet oppgaver på ${tidsbruk.inWholeMilliseconds} ms.\nParametere: $resource")
-        return RestResponse.ok(
+        return RestResponse.OK(
             finnOppgaveProjeksjoner.tilApiType(transaksjon),
         )
     }
@@ -264,18 +263,13 @@ class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide> {
     override fun openApi(config: RouteConfig) {
         with(config) {
             tags = setOf("Oppgaver")
-            operationId = operationIdBasertPåKlassenavn()
             request {
                 queryParameter<List<String>?>(Oppgaver::minstEnAvEgenskapene.name) {
                     explode = true
                 }
             }
-            response {
-                code(HttpStatusCode.OK) {
-                    description = "En side med oppgaver, filtrert og sortert som ønsket"
-                    body<ApiOppgaveProjeksjonSide>()
-                }
-            }
         }
     }
 }
+
+enum class ApiGetOppgaverErrorCode : ApiErrorCode

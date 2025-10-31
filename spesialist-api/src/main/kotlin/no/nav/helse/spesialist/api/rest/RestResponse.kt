@@ -1,16 +1,16 @@
 package no.nav.helse.spesialist.api.rest
 
-import io.ktor.http.HttpStatusCode
+sealed interface RestResponse<RESPONSE, ERROR : ApiErrorCode> {
+    sealed interface Success<RESPONSE, ERROR : ApiErrorCode> : RestResponse<RESPONSE, ERROR>
 
-class RestResponse<T>(
-    val statusCode: HttpStatusCode,
-    val body: T,
-) {
-    companion object {
-        fun <T> created(body: T) = RestResponse(statusCode = HttpStatusCode.Created, body = body)
+    class OK<RESPONSE, ERROR : ApiErrorCode>(
+        val body: RESPONSE,
+    ) : Success<RESPONSE, ERROR>
 
-        fun <T> ok(body: T) = RestResponse(statusCode = HttpStatusCode.OK, body = body)
+    class NoContent<ERROR : ApiErrorCode> : Success<Unit, ERROR>
 
-        fun noContent() = RestResponse(statusCode = HttpStatusCode.NoContent, body = Unit)
-    }
+    class Error<RESPONSE, ERROR : ApiErrorCode>(
+        val errorCode: ERROR,
+        val detail: String? = null,
+    ) : RestResponse<RESPONSE, ERROR>
 }
