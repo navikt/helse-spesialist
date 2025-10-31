@@ -65,7 +65,10 @@ data class ApiSoknadSelvstendigNaringsdrivende(
     @Serializable
     data class ApiInntektsar(
         val ar: String,
+        val pensjonsgivendeInntektAvLonnsinntekt: Int,
+        val pensjonsgivendeInntektAvLonnsinntektBarePensjonsdel: Int,
         val pensjonsgivendeInntektAvNaringsinntekt: Int,
+        val pensjonsgivendeInntektAvNaringsinntektFraFiskeFangstEllerFamiliebarnehage: Int,
         val erFerdigLignet: Boolean,
     )
 }

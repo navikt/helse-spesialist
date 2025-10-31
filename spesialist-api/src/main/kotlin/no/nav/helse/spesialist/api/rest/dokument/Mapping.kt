@@ -188,9 +188,13 @@ private fun JsonNode.tilSelvstendigNæringsdrivende(): ApiSoknadSelvstendigNarin
         ventetid = null,
         inntekt =
             get("inntekt")["inntektsAar"].map { inntektsår ->
+                val pensjonsgivendeInntekt = inntektsår.get("pensjonsgivendeInntekt")
                 ApiSoknadSelvstendigNaringsdrivende.ApiInntektsar(
                     ar = inntektsår.get("aar").asText(),
-                    pensjonsgivendeInntektAvNaringsinntekt = inntektsår.get("pensjonsgivendeInntekt")["pensjonsgivendeInntektAvNaeringsinntekt"].asInt(),
+                    pensjonsgivendeInntektAvLonnsinntekt = pensjonsgivendeInntekt["pensjonsgivendeInntektAvLoennsinntekt"].asInt(),
+                    pensjonsgivendeInntektAvLonnsinntektBarePensjonsdel = pensjonsgivendeInntekt["pensjonsgivendeInntektAvLoennsinntektBarePensjonsdel"].asInt(),
+                    pensjonsgivendeInntektAvNaringsinntekt = pensjonsgivendeInntekt["pensjonsgivendeInntektAvNaeringsinntekt"].asInt(),
+                    pensjonsgivendeInntektAvNaringsinntektFraFiskeFangstEllerFamiliebarnehage = pensjonsgivendeInntekt["pensjonsgivendeInntektAvNaeringsinntektFraFiskeFangstEllerFamiliebarnehage"].asInt(),
                     erFerdigLignet = inntektsår.get("erFerdigLignet").asBoolean(),
                 )
             },
