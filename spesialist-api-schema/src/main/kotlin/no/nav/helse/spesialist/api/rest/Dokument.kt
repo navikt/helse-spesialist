@@ -54,14 +54,7 @@ data class ApiSoknadsperioder(
 @Serializable
 data class ApiSoknadSelvstendigNaringsdrivende(
     val inntekt: List<ApiInntektsar>,
-    val ventetid: ApiVentetidPeriode?,
 ) {
-    @Serializable
-    data class ApiVentetidPeriode(
-        val fom: LocalDate,
-        val tom: LocalDate,
-    )
-
     @Serializable
     data class ApiInntektsar(
         val ar: String,

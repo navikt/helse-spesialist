@@ -185,7 +185,6 @@ private fun JsonNode.tilSøknadsperioder(): ApiSoknadsperioder =
 
 private fun JsonNode.tilSelvstendigNæringsdrivende(): ApiSoknadSelvstendigNaringsdrivende =
     ApiSoknadSelvstendigNaringsdrivende(
-        ventetid = null,
         inntekt =
             get("inntekt")["inntektsAar"].map { inntektsår ->
                 val pensjonsgivendeInntekt = inntektsår.get("pensjonsgivendeInntekt")
