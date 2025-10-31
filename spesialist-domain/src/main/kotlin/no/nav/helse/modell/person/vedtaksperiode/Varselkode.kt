@@ -39,6 +39,7 @@ enum class Varselkode(
     SB_SØ_1("Sjekk endring av søknad"),
 
     RV_IV_2("Over 25% avvik"),
+    RV_OV_5("Den sykmeldte ser ikke ut til å ha opptjent ny rett til sykepenger etter § 8-12 og arbeidsgiver krever refusjon"),
     ;
 
     init {

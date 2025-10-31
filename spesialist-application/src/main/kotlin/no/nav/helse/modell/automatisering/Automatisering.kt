@@ -124,7 +124,10 @@ internal class Automatisering(
 
         if (problemer.isNotEmpty()) return Automatiseringsresultat.KanIkkeAutomatiseres(problemer)
 
-        when (val resultat = vurderOmBehandlingSkyldesKorrigertSøknad(fødselsnummer, vedtaksperiodeId, sykefraværstilfelle)) {
+        when (
+            val resultat =
+                vurderOmBehandlingSkyldesKorrigertSøknad(fødselsnummer, vedtaksperiodeId, sykefraværstilfelle)
+        ) {
             is SkyldesKorrigertSøknad.KanIkkeAutomatiseres,
             -> return Automatiseringsresultat.KanIkkeAutomatiseres(listOf(resultat.årsak))
 
@@ -274,7 +277,6 @@ internal class Automatisering(
         val harUtbetalingTilSykmeldt = utbetaling.harEndringIUtbetalingTilSykmeldt()
 
         val skalStoppesPgaUTS = harUtbetalingTilSykmeldt && periodetype !in listOf(FORLENGELSE, FØRSTEGANGSBEHANDLING)
-        val harNåddMaksdato = maksdato < sykefraværstilfelle.skjæringstidspunkt
 
         return valider(
             validering("Gjelder selvstendig næring") { yrkesaktivitetstype != Yrkesaktivitetstype.SELVSTENDIG },
@@ -290,7 +292,7 @@ internal class Automatisering(
             validering("Utbetaling til sykmeldt") { !skalStoppesPgaUTS },
             AutomatiserRevurderinger(utbetaling, fødselsnummer, vedtaksperiodeId),
             validering("Vedtaksperioden har et krav om totrinnsvurdering") { !harKravOmTotrinnsvurdering },
-            validering("Nådd maksdato og har refusjon til arbeidsgiver") { !(harNåddMaksdato && tags.contains("ArbeidsgiverØnskerRefusjon")) },
+            IkkeAutomatiserNåddMaksdatoOgRefusjonAG(maksdato, tags, sykefraværstilfelle, vedtaksperiodeId),
         )
     }
 
@@ -325,6 +327,26 @@ internal class Automatisering(
                 }
 
         override fun error() = "Utbetalingen er revurdering med negativt beløp"
+    }
+
+    private class IkkeAutomatiserNåddMaksdatoOgRefusjonAG(
+        maksdato: LocalDate,
+        tags: List<String>,
+        private val sykefraværstilfelle: Sykefraværstilfelle,
+        private val vedtaksperiodeId: UUID,
+    ) : AutomatiseringValidering {
+        private val harNåddMaksdato = maksdato < sykefraværstilfelle.skjæringstidspunkt
+        private val arbeidsgiverØnskerRefusjon = tags.contains("ArbeidsgiverØnskerRefusjon")
+
+        override fun erAautomatiserbar(): Boolean {
+            val stopperAutomatisering = harNåddMaksdato && arbeidsgiverØnskerRefusjon
+            if (stopperAutomatisering) {
+                sykefraværstilfelle.håndter(Varselkode.RV_OV_5.nyttVarsel(vedtaksperiodeId))
+            }
+            return !stopperAutomatisering
+        }
+
+        override fun error() = "Nådd maksdato og har refusjon til arbeidsgiver"
     }
 
     fun erStikkprøve(

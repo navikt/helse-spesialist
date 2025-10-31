@@ -65,7 +65,8 @@ internal class AutomatiseringTest {
     private val åpneGosysOppgaverDaoMock = mockk<ÅpneGosysOppgaverDao>(relaxed = true)
     private val egenAnsattDao = mockk<EgenAnsattDao>(relaxed = true)
     private val totrinnsvurderingRepositoryMock = mockk<TotrinnsvurderingRepository>(relaxed = true)
-    private val stansAutomatiskBehandlingSaksbehandlerDaoMock = mockk<StansAutomatiskBehandlingSaksbehandlerDao>(relaxed = true)
+    private val stansAutomatiskBehandlingSaksbehandlerDaoMock =
+        mockk<StansAutomatiskBehandlingSaksbehandlerDao>(relaxed = true)
     private val personDaoMock =
         mockk<PersonDao>(relaxed = true) {
             every { finnAdressebeskyttelse(any()) } returns Adressebeskyttelse.Ugradert
@@ -191,7 +192,13 @@ internal class AutomatiseringTest {
 
     @Test
     fun `vedtaksperiode med nådd maksdato og refusjon fra AG er ikke automatiserbar`() {
-        blirManuellOppgave(legacyBehandling = enGenerasjon(skjæringstidspunkt = 1 jan 2018), maksdato = 1 des 2017, tags = listOf("ArbeidsgiverØnskerRefusjon"))
+        blirManuellOppgaveMedFeilOgVarsel(
+            legacyBehandling = enGenerasjon(skjæringstidspunkt = 1 jan 2018),
+            tags = listOf("ArbeidsgiverØnskerRefusjon"),
+            maksdato = 1 des 2017,
+            varselkode = Varselkode.RV_OV_5,
+            problems = listOf("Nådd maksdato og har refusjon til arbeidsgiver")
+        )
     }
 
     @Test
@@ -441,9 +448,16 @@ internal class AutomatiseringTest {
         utbetaling: Utbetaling = enUtbetaling(),
         problems: List<String>,
         legacyBehandling: LegacyBehandling = enGenerasjon(),
-        varselkode: Varselkode
+        varselkode: Varselkode,
+        maksdato: LocalDate = 1 des 2018,
+        tags: List<String> = emptyList(),
     ) {
-        val resultat = forsøkAutomatisering(utbetaling = utbetaling, generasjoners = listOf(legacyBehandling))
+        val resultat = forsøkAutomatisering(
+            utbetaling = utbetaling,
+            generasjoners = listOf(legacyBehandling),
+            maksdato = maksdato,
+            tags = tags
+        )
         assertKanIkkeAutomatiseres(resultat)
         check(resultat is Automatiseringsresultat.KanIkkeAutomatiseres)
         assertEquals(problems.toSet(), resultat.problemer.toSet())
