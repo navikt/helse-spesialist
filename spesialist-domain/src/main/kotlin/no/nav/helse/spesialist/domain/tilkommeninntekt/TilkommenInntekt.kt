@@ -47,7 +47,7 @@ class TilkommenInntekt private constructor(
             .toSortedSet()
 
     fun dagbeløp(): BigDecimal =
-        periodebeløp.setScale(4).divide(
+        periodebeløp.setScale(4, RoundingMode.HALF_UP).divide(
             dagerTilGradering().size.toBigDecimal(),
             RoundingMode.HALF_UP,
         )
