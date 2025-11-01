@@ -33,7 +33,7 @@ fun Routing.restRoutes(
                 openApi()
             }
             route("swagger") {
-                swaggerUI("/api/openapi.json")
+                swaggerUI("../openapi.json")
             }
         }
         authenticate("oidc") {
