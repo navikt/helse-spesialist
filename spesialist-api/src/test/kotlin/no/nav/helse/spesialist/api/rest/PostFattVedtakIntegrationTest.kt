@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.api.rest
 
 import io.ktor.http.HttpStatusCode
+import no.nav.helse.modell.melding.VarselEndret
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
@@ -22,11 +23,13 @@ import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlerident
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.typer.Kjønn
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.random.Random.Default.nextLong
+import kotlin.test.Test
 
 class PostFattVedtakIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
@@ -439,6 +442,104 @@ class PostFattVedtakIntegrationTest {
         )
     }
 
+    @ParameterizedTest
+    @EnumSource(value = Varsel.Status::class, names = ["AKTIV"], mode = EnumSource.Mode.EXCLUDE)
+    fun `varsler som har status annet enn aktiv medfører ikke valideringsfeil`(status: Varsel.Status) {
+        // Given:
+        val behandlingId = UUID.randomUUID()
+        val fødselsnummer = lagFødselsnummer()
+        val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer)
+        val behandling = lagEnBehandling(behandlingId, vedtaksperiode.id())
+        val saksbehandler = lagEnSaksbehandler()
+        val kode = "RV_IV_2"
+        saksbehandlerRepository.lagre(saksbehandler)
+        vedtaksperiodeRepository.lagre(vedtaksperiode)
+        behandlingRepository.lagre(behandling)
+        egenansattDao.lagre(fødselsnummer, false, LocalDateTime.now())
+        personDao.upsertPersoninfo(
+            fødselsnummer, lagFornavn(), lagMellomnavn(), lagEtternavn(), LocalDate.now(),
+            Kjønn.Ukjent, Adressebeskyttelse.Ugradert
+        )
+        varseldefinisjonRepository.lagre(kode)
+        varselRepository.lagre(
+            Varsel.fraLagring(
+                VarselId(UUID.randomUUID()),
+                behandling.id(),
+                status = status,
+                vurdering = null,
+                kode = kode
+            )
+        )
+        val oppgave = lagEnOppgave(behandlingId)
+        oppgaveRepository.lagre(oppgave)
+
+        // When:
+        val response = integrationTestFixture.post(
+            url = "/api/vedtak/$behandlingId/fatt",
+            body = "{}",
+            saksbehandler = saksbehandler,
+            tilgangsgrupper = setOf(Tilgangsgruppe.BESLUTTER)
+        )
+
+        // Then:
+        assertEquals(HttpStatusCode.NoContent.value, response.status)
+    }
+
+    @Test
+    fun `publiserer kun varsel_endret for varsler som har blitt godkjent`() {
+        // Given:
+        val behandlingId = UUID.randomUUID()
+        val fødselsnummer = lagFødselsnummer()
+        val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer)
+        val behandling = lagEnBehandling(behandlingId, vedtaksperiode.id())
+        val saksbehandler = lagEnSaksbehandler()
+        val kode = "RV_IV_2"
+        saksbehandlerRepository.lagre(saksbehandler)
+        vedtaksperiodeRepository.lagre(vedtaksperiode)
+        behandlingRepository.lagre(behandling)
+        egenansattDao.lagre(fødselsnummer, false, LocalDateTime.now())
+        personDao.upsertPersoninfo(
+            fødselsnummer, lagFornavn(), lagMellomnavn(), lagEtternavn(), LocalDate.now(),
+            Kjønn.Ukjent, Adressebeskyttelse.Ugradert
+        )
+        varseldefinisjonRepository.lagre(kode)
+        val godkjentVarsel = Varsel.fraLagring(
+            VarselId(UUID.randomUUID()),
+            behandling.id(),
+            status = Varsel.Status.GODKJENT,
+            vurdering = null,
+            kode = kode
+        )
+        val vurdertVarsel = Varsel.fraLagring(
+            VarselId(UUID.randomUUID()),
+            behandling.id(),
+            status = Varsel.Status.VURDERT,
+            vurdering = null,
+            kode = kode
+        )
+
+        varselRepository.lagre(godkjentVarsel)
+        varselRepository.lagre(vurdertVarsel)
+        val oppgave = lagEnOppgave(behandlingId)
+        oppgaveRepository.lagre(oppgave)
+
+        // When:
+        val response = integrationTestFixture.post(
+            url = "/api/vedtak/$behandlingId/fatt",
+            body = "{}",
+            saksbehandler = saksbehandler,
+            tilgangsgrupper = setOf(Tilgangsgruppe.BESLUTTER)
+        )
+
+        // Then:
+        assertEquals(HttpStatusCode.NoContent.value, response.status)
+        val iderForPubliserteVarsler = integrationTestFixture.meldingPubliserer.publiserteUtgåendeHendelser
+            .map { it.hendelse }
+            .filterIsInstance<VarselEndret>()
+            .map { it.varselId }
+        assertEquals(listOf(vurdertVarsel.id().value), iderForPubliserteVarsler)
+    }
+
     private fun lagEnOppgave(behandlingId: UUID): Oppgave = Oppgave.ny(
         id = nextLong(),
         førsteOpprettet = LocalDateTime.now(),
@@ -460,7 +561,7 @@ class PostFattVedtakIntegrationTest {
     private fun lagEnBehandling(
         behandlingId: UUID,
         vedtaksperiodeId: VedtaksperiodeId,
-        tags: Set<String> = emptySet(),
+        tags: Set<String> = setOf("Innvilget"),
     ): Behandling = Behandling.fraLagring(
         id = SpleisBehandlingId(behandlingId),
         tags = tags,

@@ -26,6 +26,37 @@ class VarselTest {
         assertTrue(varsel.kanGodkjennes())
     }
 
+    @Test
+    fun `varsel mangler vurdering dersom det er aktivt`() {
+        // given
+        val varsel = Varsel.fraLagring(
+            id = VarselId(value = UUID.randomUUID()),
+            spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
+            status = Varsel.Status.AKTIV,
+            vurdering = null,
+            kode = "RV_IV_2"
+        )
+
+        // then
+        assertTrue(varsel.manglerVurdering())
+    }
+
+    @ParameterizedTest
+    @EnumSource(Varsel.Status::class, names = ["AKTIV"], mode = EnumSource.Mode.EXCLUDE)
+    fun `varsel mangler ikke vurdering`(status: Varsel.Status) {
+        // given
+        val varsel = Varsel.fraLagring(
+            id = VarselId(value = UUID.randomUUID()),
+            spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
+            status = status,
+            vurdering = null,
+            kode = "RV_IV_2"
+        )
+
+        // then
+        assertFalse(varsel.manglerVurdering())
+    }
+
     @ParameterizedTest
     @EnumSource(Varsel.Status::class, names = ["VURDERT"], mode = EnumSource.Mode.EXCLUDE)
     fun `varsel kan ikke godkjennes hvis det har feil status`(status: Varsel.Status) {

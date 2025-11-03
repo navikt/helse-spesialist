@@ -156,17 +156,19 @@ class PostFattVedtakBehandler(
 
         val behandlingIder = behandlingerSomMåSeesUnderEtt.map { behandling -> behandling.id() }
         val varsler = varselRepository.finnVarsler(behandlingIder)
-        if (varsler.any { !it.kanGodkjennes() }) throw FattVedtakException(ApiPostFattVedtakErrorCode.VARSLER_MANGLER_VURDERING)
-        varsler.forEach {
-            it.godkjennOgPubliserEndring(
-                vedtaksperiodeId = vedtaksperiodeId,
-                spleisBehandlingId = id(),
-                saksbehandlerOid = saksbehandlerOid,
-                varseldefinisjonRepository = varseldefinisjonRepository,
-                outbox = outbox,
-                fødselsnummer = fødselsnummer,
-            )
-        }
+        if (varsler.any { it.manglerVurdering() }) throw FattVedtakException(ApiPostFattVedtakErrorCode.VARSLER_MANGLER_VURDERING)
+        varsler
+            .filter { it.kanGodkjennes() }
+            .forEach {
+                it.godkjennOgPubliserEndring(
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    spleisBehandlingId = id(),
+                    saksbehandlerOid = saksbehandlerOid,
+                    varseldefinisjonRepository = varseldefinisjonRepository,
+                    outbox = outbox,
+                    fødselsnummer = fødselsnummer,
+                )
+            }
         varselRepository.lagre(varsler)
     }
 

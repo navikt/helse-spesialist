@@ -26,8 +26,10 @@ import no.nav.helse.db.VergemålDao
 import no.nav.helse.db.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.Adressebeskyttelse
+import no.nav.helse.modell.saksbehandler.handlinger.PåVentÅrsak
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.Varsel
+import no.nav.helse.spesialist.domain.VedtakBegrunnelse
 import no.nav.helse.spesialist.typer.Kjønn
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -131,8 +133,43 @@ class InMemorySessionContext(
 
     override val personDao = InMemoryPersonDao()
 
-    override val påVentDao: PåVentDao
-        get() = TODO("Not yet implemented")
+    override val påVentDao: PåVentDao = object : PåVentDao {
+        private val påVent = mutableMapOf<Long, Boolean>()
+        override fun erPåVent(vedtaksperiodeId: UUID): Boolean {
+            return false
+        }
+
+        override fun lagrePåVent(
+            oppgaveId: Long,
+            saksbehandlerOid: UUID,
+            frist: LocalDate?,
+            årsaker: List<PåVentÅrsak>,
+            notatTekst: String?,
+            dialogRef: Long
+        ) {
+            påVent[oppgaveId] = true
+        }
+
+        override fun slettPåVent(oppgaveId: Long): Int? {
+            return if (påVent.remove(oppgaveId) == true) return 1 else 0
+        }
+
+        override fun erPåVent(oppgaveId: Long): Boolean {
+            return påVent[oppgaveId] ?: false
+        }
+
+        override fun oppdaterPåVent(
+            oppgaveId: Long,
+            saksbehandlerOid: UUID,
+            frist: LocalDate?,
+            årsaker: List<PåVentÅrsak>,
+            notatTekst: String?,
+            dialogRef: Long
+        ) {
+            påVent[oppgaveId] = true
+        }
+
+    }
     override val reservasjonDao: ReservasjonDao = object : ReservasjonDao {
         private val reservasjoner = mutableMapOf<String, UUID>()
         override fun reserverPerson(saksbehandlerOid: UUID, fødselsnummer: String) {
@@ -190,6 +227,14 @@ class InMemorySessionContext(
         }
 
     }
-    override val vedtakBegrunnelseRepository: VedtakBegrunnelseRepository
-        get() = TODO("Not yet implemented")
+    override val vedtakBegrunnelseRepository: VedtakBegrunnelseRepository = object : VedtakBegrunnelseRepository {
+        private val begrunnelser = mutableMapOf<SpleisBehandlingId, VedtakBegrunnelse>()
+        override fun finn(spleisBehandlingId: SpleisBehandlingId): VedtakBegrunnelse? {
+            return begrunnelser[spleisBehandlingId]
+        }
+
+        override fun lagre(vedtakBegrunnelse: VedtakBegrunnelse) {
+            begrunnelser[vedtakBegrunnelse.behandlingId] = vedtakBegrunnelse
+        }
+    }
 }
