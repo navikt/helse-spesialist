@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.api.graphql.mutation
+package no.nav.helse.spesialist.api.rest.tilkommeninntekt
 
 import no.nav.helse.modell.melding.InntektsendringerEvent
 import no.nav.helse.spesialist.domain.Periode.Companion.tilPerioder

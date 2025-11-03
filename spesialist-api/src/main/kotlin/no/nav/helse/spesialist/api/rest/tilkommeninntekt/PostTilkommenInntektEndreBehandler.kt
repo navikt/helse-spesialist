@@ -3,7 +3,6 @@ package no.nav.helse.spesialist.api.rest.tilkommeninntekt
 import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.db.SessionContext
-import no.nav.helse.spesialist.api.graphql.mutation.InntektsendringerEventBygger
 import no.nav.helse.spesialist.api.rest.ApiEndreTilkommenInntektRequest
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.PostBehandler
