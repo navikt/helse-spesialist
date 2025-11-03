@@ -1,0 +1,297 @@
+package no.nav.helse.spesialist.api.rest
+
+import no.nav.helse.modell.Annullering
+import no.nav.helse.modell.melding.AnnullertUtbetalingEvent
+import no.nav.helse.modell.person.Adressebeskyttelse
+import no.nav.helse.spesialist.api.IntegrationTestFixture
+import no.nav.helse.spesialist.api.graphql.schema.ApiAnnulleringData
+import no.nav.helse.spesialist.api.testfixtures.lagSaksbehandler
+import no.nav.helse.spesialist.application.InMemoryMeldingPubliserer
+import no.nav.helse.spesialist.domain.Vedtaksperiode
+import no.nav.helse.spesialist.domain.VedtaksperiodeId
+import no.nav.helse.spesialist.domain.testfixtures.lagAktørId
+import no.nav.helse.spesialist.domain.testfixtures.lagEtternavn
+import no.nav.helse.spesialist.domain.testfixtures.lagFornavn
+import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
+import no.nav.helse.spesialist.domain.testfixtures.lagMellomnavn
+import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
+import no.nav.helse.spesialist.typer.Kjønn
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertNotNull
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
+
+class PostVedtaksperiodeAnnullerIntegrationTest {
+    private val integrationTestFixture = IntegrationTestFixture()
+    private val sessionContext = integrationTestFixture.sessionFactory.sessionContext
+    private val egenansattDao = sessionContext.egenAnsattDao
+    private val personDao = sessionContext.personDao
+    private val vedtaksperiodeRepository = sessionContext.vedtaksperiodeRepository
+    private val annulleringRepository = sessionContext.annulleringRepository
+
+    @Test
+    fun `annullering ok`() {
+        // Given:
+        val fødselsnummer = lagFødselsnummer()
+        val aktørId = lagAktørId()
+        val organisasjonsnummer = lagOrganisasjonsnummer()
+        val saksbehandler = lagSaksbehandler()
+
+        val arbeidsgiverFagsystemId = "EN_ARBEIDSGIVER_FAGSYSTEM_ID"
+        val kommentar = "kommentar"
+        val personFagsystemId = "EN_PERSON_FAGSYSTEM_ID"
+        val utbetalingId = UUID.randomUUID()
+        val vedtaksperiodeId = UUID.randomUUID()
+        val årsaker = mapOf("årsak-1" to "Ferie", "årsak-2" to "Ekstra ferie")
+        vedtaksperiodeRepository.lagre(Vedtaksperiode(VedtaksperiodeId(vedtaksperiodeId), fødselsnummer))
+        egenansattDao.lagre(fødselsnummer, false, LocalDateTime.now())
+        personDao.upsertPersoninfo(
+            fødselsnummer, lagFornavn(), lagMellomnavn(), lagEtternavn(), LocalDate.now(),
+            Kjønn.Ukjent, Adressebeskyttelse.Ugradert
+        )
+
+        // When:
+        val response = integrationTestFixture.post(
+            url = "/api/vedtaksperioder/${vedtaksperiodeId}/annuller",
+            body = """
+                {
+                    "organisasjonsnummer": "$organisasjonsnummer",
+                    "aktørId": "$aktørId",
+                    "utbetalingId": "$utbetalingId",
+                    "arbeidsgiverFagsystemId": "$arbeidsgiverFagsystemId",
+                    "personFagsystemId": "$personFagsystemId",
+                    "kommentar": "$kommentar",
+                    "årsaker": [
+                      ${årsaker.map { (key, arsak) -> """{ "_key": "$key", "årsak": "$arsak" }""" }.joinToString()}
+                    ]
+                }
+            """.trimIndent(),
+            saksbehandler = saksbehandler,
+        )
+
+        // Then:
+        // Sjekk svaret
+        assertEquals(204, response.status)
+        assertEquals("", response.bodyAsText)
+
+        // Sjekk persistert data
+        val lagretAnnullering =
+            annulleringRepository
+                .finnAnnulleringMedEnAv(arbeidsgiverFagsystemId, personFagsystemId)
+
+        assertNotNull(lagretAnnullering)
+
+        assertEquals(saksbehandler.id(), lagretAnnullering.saksbehandlerOid)
+        assertEquals(arbeidsgiverFagsystemId, lagretAnnullering.arbeidsgiverFagsystemId)
+        assertEquals(personFagsystemId, lagretAnnullering.personFagsystemId)
+        assertEquals(årsaker.values.sorted(), lagretAnnullering.årsaker.sorted())
+        assertEquals(kommentar, lagretAnnullering.kommentar)
+        assertEquals(vedtaksperiodeId, lagretAnnullering.vedtaksperiodeId)
+
+        // Sjekk publiserte meldinger
+        integrationTestFixture.assertPubliserteBehovLister()
+        integrationTestFixture.assertPubliserteKommandokjedeEndretEvents()
+        integrationTestFixture.assertPubliserteSubsumsjoner()
+        integrationTestFixture.assertPubliserteUtgåendeHendelser(
+            InMemoryMeldingPubliserer.PublisertUtgåendeHendelse(
+                fødselsnummer = fødselsnummer,
+                hendelse = AnnullertUtbetalingEvent(
+                    fødselsnummer = fødselsnummer,
+                    aktørId = aktørId,
+                    organisasjonsnummer = organisasjonsnummer,
+                    saksbehandlerOid = saksbehandler.id().value,
+                    saksbehandlerNavn = saksbehandler.navn,
+                    saksbehandlerIdent = saksbehandler.ident,
+                    saksbehandlerEpost = saksbehandler.epost,
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    utbetalingId = utbetalingId,
+                    arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
+                    personFagsystemId = personFagsystemId,
+                    begrunnelser = årsaker.values.toList(),
+                    arsaker = årsaker.map { AnnullertUtbetalingEvent.Årsak(key = it.key, arsak = it.value) },
+                    kommentar = kommentar
+                ),
+                årsak = "annullering av utbetaling"
+            )
+        )
+    }
+
+    @Test
+    fun `annullering av tomme verdier`() {
+        // Given:
+        val fødselsnummer = lagFødselsnummer()
+        val aktørId = lagAktørId()
+        val organisasjonsnummer = lagOrganisasjonsnummer()
+        val saksbehandler = lagSaksbehandler()
+
+        val arbeidsgiverFagsystemId = "EN_ARBEIDSGIVER_FAGSYSTEM_ID"
+        val kommentar = "kommentar"
+        val personFagsystemId = "EN_PERSON_FAGSYSTEM_ID"
+        val utbetalingId = UUID.randomUUID()
+        val vedtaksperiodeId = UUID.randomUUID()
+        val årsaker = emptyList<ApiAnnulleringData.ApiAnnulleringArsak>()
+        vedtaksperiodeRepository.lagre(Vedtaksperiode(VedtaksperiodeId(vedtaksperiodeId), fødselsnummer))
+        egenansattDao.lagre(fødselsnummer, false, LocalDateTime.now())
+        personDao.upsertPersoninfo(
+            fødselsnummer, lagFornavn(), lagMellomnavn(), lagEtternavn(), LocalDate.now(),
+            Kjønn.Ukjent, Adressebeskyttelse.Ugradert
+        )
+
+        // When:
+        val response = integrationTestFixture.post(
+            url = "/api/vedtaksperioder/${vedtaksperiodeId}/annuller",
+            body = """
+                {
+                    "organisasjonsnummer": "$organisasjonsnummer",
+                    "aktørId": "$aktørId",
+                    "utbetalingId": "$utbetalingId",
+                    "arbeidsgiverFagsystemId": "$arbeidsgiverFagsystemId",
+                    "personFagsystemId": "$personFagsystemId",
+                    "kommentar": "$kommentar",
+                    "årsaker": [
+                      ${årsaker.joinToString { (key, arsak) -> """{ "_key": "$key", "årsak": "$arsak" }""" }}
+                    ]
+                }
+            """.trimIndent(),
+            saksbehandler = saksbehandler,
+        )
+
+        // Then:
+        // Sjekk svaret
+        assertEquals(204, response.status)
+        assertEquals("", response.bodyAsText)
+
+        // Sjekk persistert data
+        val lagretAnnullering =
+            annulleringRepository
+                .finnAnnulleringMedEnAv(arbeidsgiverFagsystemId, personFagsystemId)
+
+        assertNotNull(lagretAnnullering)
+
+        assertEquals(saksbehandler.id(), lagretAnnullering.saksbehandlerOid)
+        assertEquals(arbeidsgiverFagsystemId, lagretAnnullering.arbeidsgiverFagsystemId)
+        assertEquals(personFagsystemId, lagretAnnullering.personFagsystemId)
+        assertEquals(emptyList<String>(), lagretAnnullering.årsaker)
+        assertEquals(kommentar, lagretAnnullering.kommentar)
+        assertEquals(vedtaksperiodeId, lagretAnnullering.vedtaksperiodeId)
+
+        // Sjekk publiserte meldinger
+        integrationTestFixture.assertPubliserteBehovLister()
+        integrationTestFixture.assertPubliserteKommandokjedeEndretEvents()
+        integrationTestFixture.assertPubliserteSubsumsjoner()
+        integrationTestFixture.assertPubliserteUtgåendeHendelser(
+            InMemoryMeldingPubliserer.PublisertUtgåendeHendelse(
+                fødselsnummer = fødselsnummer,
+                hendelse = AnnullertUtbetalingEvent(
+                    fødselsnummer = fødselsnummer,
+                    aktørId = aktørId,
+                    organisasjonsnummer = organisasjonsnummer,
+                    saksbehandlerOid = saksbehandler.id().value,
+                    saksbehandlerNavn = saksbehandler.navn,
+                    saksbehandlerIdent = saksbehandler.ident,
+                    saksbehandlerEpost = saksbehandler.epost,
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    utbetalingId = utbetalingId,
+                    arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
+                    personFagsystemId = personFagsystemId,
+                    begrunnelser = emptyList(),
+                    arsaker = emptyList(),
+                    kommentar = kommentar
+                ),
+                årsak = "annullering av utbetaling"
+            )
+        )
+    }
+
+    @Test
+    fun `annullering allerede lagret`() {
+        // Given:
+        val fødselsnummer = lagFødselsnummer()
+        val aktørId = lagAktørId()
+        val organisasjonsnummer = lagOrganisasjonsnummer()
+        val tidligereSaksbehandler = lagSaksbehandler()
+        val saksbehandler = lagSaksbehandler()
+
+        val arbeidsgiverFagsystemId = "EN_ARBEIDSGIVER_FAGSYSTEM_ID"
+        val kommentar = "kommentar"
+        val personFagsystemId = "EN_PERSON_FAGSYSTEM_ID"
+        val utbetalingId = UUID.randomUUID()
+        val vedtaksperiodeId = UUID.randomUUID()
+        val tidligereÅrsaker = mapOf("årsak-1" to "Ferie", "årsak-2" to "Ekstra ferie")
+        val årsaker = mapOf("årsak-3" to "Ny ferie", "årsak-4" to "Ny ferie")
+        vedtaksperiodeRepository.lagre(Vedtaksperiode(VedtaksperiodeId(vedtaksperiodeId), fødselsnummer))
+        egenansattDao.lagre(fødselsnummer, false, LocalDateTime.now())
+        personDao.upsertPersoninfo(
+            fødselsnummer, lagFornavn(), lagMellomnavn(), lagEtternavn(), LocalDate.now(),
+            Kjønn.Ukjent, Adressebeskyttelse.Ugradert
+        )
+        annulleringRepository
+            .lagreAnnullering(
+                annullering = Annullering.Factory.ny(
+                    arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
+                    personFagsystemId = personFagsystemId,
+                    saksbehandlerOid = tidligereSaksbehandler.id(),
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    årsaker = tidligereÅrsaker.map { it.value },
+                    kommentar = kommentar
+                )
+            )
+
+        // When:
+        val response = integrationTestFixture.post(
+            url = "/api/vedtaksperioder/${vedtaksperiodeId}/annuller",
+            body = """
+                {
+                    "organisasjonsnummer": "$organisasjonsnummer",
+                    "aktørId": "$aktørId",
+                    "utbetalingId": "$utbetalingId",
+                    "arbeidsgiverFagsystemId": "$arbeidsgiverFagsystemId",
+                    "personFagsystemId": "$personFagsystemId",
+                    "kommentar": "$kommentar",
+                    "årsaker": [
+                      ${årsaker.map { (key, arsak) -> """{ "_key": "$key", "årsak": "$arsak" }""" }.joinToString()}
+                    ]
+                }
+            """.trimIndent(),
+            saksbehandler = saksbehandler,
+        )
+
+        // Then:
+        // Sjekk svaret
+        assertEquals(409, response.status)
+        integrationTestFixture.assertJsonEquals(
+            """
+            {
+              "type": "about:blank",
+              "status": 409,
+              "title": "Perioden er allerede annullert",
+              "code": "ALLEREDE_ANNULLERT" 
+            }
+            """.trimIndent(),
+            response.bodyAsJsonNode!!
+        )
+
+        // Sjekk persistert data
+        val lagretAnnullering =
+            annulleringRepository
+                .finnAnnulleringMedEnAv(arbeidsgiverFagsystemId, personFagsystemId)
+
+        assertNotNull(lagretAnnullering)
+
+        assertEquals(tidligereSaksbehandler.id(), lagretAnnullering.saksbehandlerOid)
+        assertEquals(arbeidsgiverFagsystemId, lagretAnnullering.arbeidsgiverFagsystemId)
+        assertEquals(personFagsystemId, lagretAnnullering.personFagsystemId)
+        assertEquals(tidligereÅrsaker.values.sorted(), lagretAnnullering.årsaker.sorted())
+        assertEquals(kommentar, lagretAnnullering.kommentar)
+        assertEquals(vedtaksperiodeId, lagretAnnullering.vedtaksperiodeId)
+
+        // Sjekk publiserte meldinger
+        integrationTestFixture.assertPubliserteBehovLister()
+        integrationTestFixture.assertPubliserteKommandokjedeEndretEvents()
+        integrationTestFixture.assertPubliserteSubsumsjoner()
+        integrationTestFixture.assertPubliserteUtgåendeHendelser()
+    }
+
+}

@@ -130,7 +130,7 @@ class IntegrationTestFixture() {
 
     fun post(
         url: String,
-        body: String,
+        @Language("JSON") body: String,
         saksbehandler: Saksbehandler = lagSaksbehandler(),
         tilgangsgrupper: Set<Tilgangsgruppe> = emptySet(),
     ): Response {
@@ -197,6 +197,14 @@ class IntegrationTestFixture() {
         assertEquals(
             publiserteUtgåendeHendelse.toList(),
             meldingPubliserer.publiserteUtgåendeHendelser
+        )
+    }
+
+    fun assertJsonEquals(expectedJson: String, actualJsonNode: JsonNode) {
+        val writer = objectMapper.writerWithDefaultPrettyPrinter()
+        assertEquals(
+            writer.writeValueAsString(objectMapper.readTree(expectedJson)),
+            writer.writeValueAsString(actualJsonNode)
         )
     }
 }

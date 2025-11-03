@@ -1,12 +1,10 @@
 package no.nav.helse.spesialist.api.rest
 
-import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.spesialist.api.IntegrationTestFixture
-import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
@@ -60,7 +58,7 @@ class PostFattVedtakIntegrationTest {
 
         // Then:
         assertEquals(HttpStatusCode.NotFound.value, response.status)
-        assertJsonEquals(
+        integrationTestFixture.assertJsonEquals(
             """
             {
               "type": "about:blank",
@@ -91,7 +89,7 @@ class PostFattVedtakIntegrationTest {
 
         // Then:
         assertEquals(HttpStatusCode.NotFound.value, response.status)
-        assertJsonEquals(
+        integrationTestFixture.assertJsonEquals(
             """
             {
               "type": "about:blank",
@@ -154,7 +152,7 @@ class PostFattVedtakIntegrationTest {
 
         // Then:
         assertEquals(HttpStatusCode.BadRequest.value, response.status)
-        assertJsonEquals(
+        integrationTestFixture.assertJsonEquals(
             """
             {
               "type": "about:blank",
@@ -195,7 +193,7 @@ class PostFattVedtakIntegrationTest {
 
         // Then:
         assertEquals(HttpStatusCode.BadRequest.value, response.status)
-        assertJsonEquals(
+        integrationTestFixture.assertJsonEquals(
             """
             {
               "type": "about:blank",
@@ -242,7 +240,7 @@ class PostFattVedtakIntegrationTest {
 
         // Then:
         assertEquals(HttpStatusCode.Forbidden.value, response.status)
-        assertJsonEquals(
+        integrationTestFixture.assertJsonEquals(
             """
             {
               "type": "about:blank",
@@ -288,7 +286,7 @@ class PostFattVedtakIntegrationTest {
 
         // Then:
         assertEquals(HttpStatusCode.Forbidden.value, response.status)
-        assertJsonEquals(
+        integrationTestFixture.assertJsonEquals(
             """
             {
               "type": "about:blank",
@@ -333,7 +331,7 @@ class PostFattVedtakIntegrationTest {
 
         // Then:
         assertEquals(HttpStatusCode.Conflict.value, response.status)
-        assertJsonEquals(
+        integrationTestFixture.assertJsonEquals(
             """
             {
               "type": "about:blank",
@@ -375,7 +373,7 @@ class PostFattVedtakIntegrationTest {
 
         // Then:
         assertEquals(HttpStatusCode.BadRequest.value, response.status)
-        assertJsonEquals(
+        integrationTestFixture.assertJsonEquals(
             """
             {
               "type": "about:blank",
@@ -428,7 +426,7 @@ class PostFattVedtakIntegrationTest {
 
         // Then:
         assertEquals(HttpStatusCode.BadRequest.value, response.status)
-        assertJsonEquals(
+        integrationTestFixture.assertJsonEquals(
             """
             {
               "type": "about:blank",
@@ -477,12 +475,4 @@ class PostFattVedtakIntegrationTest {
         vedtaksperiodeId: UUID,
         fødselsnummer: String,
     ): Vedtaksperiode = Vedtaksperiode(VedtaksperiodeId(vedtaksperiodeId), fødselsnummer)
-}
-
-private fun assertJsonEquals(expectedJson: String, actualJsonNode: JsonNode) {
-    val writer = objectMapper.writerWithDefaultPrettyPrinter()
-    assertEquals(
-        writer.writeValueAsString(objectMapper.readTree(expectedJson)),
-        writer.writeValueAsString(actualJsonNode)
-    )
 }

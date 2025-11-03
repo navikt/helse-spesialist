@@ -53,6 +53,8 @@ fun Routing.restRoutes(
             post(PostTilkommenInntektGjenopprettBehandler(), restAdapter)
 
             post(PostFattVedtakBehandler(environmentToggles), restAdapter)
+
+            post(PostVedtaksperiodeAnnullerBehandler(), restAdapter)
         }
     }
 }
