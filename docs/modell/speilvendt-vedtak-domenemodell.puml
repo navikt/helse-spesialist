@@ -1,0 +1,133 @@
+@startuml
+
+package Speilvendt {
+  class Person
+
+  class Avviksprosent
+
+  class Godkjenningsbehov as "Godkjenningsbehov\n/ "Utkast til vedtak""
+
+  class Vedtak
+
+  class Vedtaksperiode
+
+  class Behandling as "Behandling\n(tidl. "generasjon")"
+
+  class Inntektsforhold
+
+  class Arbeidsgiver
+
+  class Selvstendig as "Selvstendig Næring"
+
+  class Sykefraværstilfelle
+
+  class Sykepengegrunnlag as "Sykepengegrunnlag m/fakta"
+
+  class Overstyring
+  note left: Supplering eller korrigering\nav fakta
+
+  class Skjønnsfastsetting
+
+  class "Oppgave\n(Manuell gjennomgang)" as Oppgave
+
+  class Totrinnskontroll
+
+  class Saksbehandler
+
+  class Beslutter
+
+  class Dag
+
+  class "Beløp til utbetaling" as Utbetaling
+
+  class Varsel
+}
+
+package Spleiselaget {
+  class Behandling
+
+  class Inntektsgrunnlag
+
+  class Vedtaksperiode
+
+  class Vilkårsgrunnlag
+
+  class Utbetaling
+
+  class Annullering
+
+  class Varsel
+}
+
+package Flex {
+  class Sykmelding
+
+  class "Søknad om sykepenger" as Søknad
+
+  class "Svar på søknad" as Svar
+
+  class Søker
+}
+
+package Oppdragssystemet {
+  class Oppdrag
+  class "?FagsystemId?" as FagsystemId
+}
+
+Sykmelding --> Søknad: Leder til en eller flere
+Søknad --> Speilvendt.Behandling: Setter igang en
+Søknad --> Svar: Resulterer i et
+Søker --> Søknad: Sender en
+Speilvendt.Vedtak --> Svar: Blir til et
+
+Speilvendt.Saksbehandler --> Speilvendt.Overstyring: Utfører en
+Speilvendt.Overstyring --> Speilvendt.Sykepengegrunnlag: Basert på / Er endring på toppen av
+Speilvendt.Overstyring --> Speilvendt.Behandling: Basert på / Er endring på toppen av
+Speilvendt.Overstyring --> Spleiselaget.Behandling: Kommuniseres som endring til
+
+Speilvendt.Godkjenningsbehov --> Speilvendt.Behandling: Representerer oppdatert data om
+Speilvendt.Godkjenningsbehov --> Speilvendt.Sykepengegrunnlag: Representerer oppdatert data om
+Speilvendt.Behandling --> Speilvendt.Vedtaksperiode: Er en versjon av
+Speilvendt.Vedtaksperiode --> Speilvendt.Inntektsforhold: Gjelder én
+Speilvendt.Vedtaksperiode --> Speilvendt.Dag: Består av en eller flere
+Spleiselaget.Behandling --> Spleiselaget.Vedtaksperiode: Er en versjon av
+Speilvendt.Behandling --> Speilvendt.Vedtak: Resulterer kanskje i
+Speilvendt.Sykefraværstilfelle --> Speilvendt.Behandling: Er én eller flere sammenhengende
+Speilvendt.Sykefraværstilfelle --> Speilvendt.Sykepengegrunnlag: Har ett (til flere §8-30 4. ledd)
+Speilvendt.Sykepengegrunnlag --> Speilvendt.Sykefraværstilfelle: Gjelder for ett
+Speilvendt.Sykepengegrunnlag --> Speilvendt.Avviksprosent: Er grunnlag for\nberegning av
+Speilvendt.Avviksprosent --> Speilvendt.Sykepengegrunnlag: Inngår i
+Speilvendt.Skjønnsfastsetting --> Speilvendt.Sykepengegrunnlag: Inngår i
+Speilvendt.Skjønnsfastsetting --|> Speilvendt.Overstyring: Er en
+Speilvendt.Beslutter --|> Speilvendt.Saksbehandler: Er en
+Speilvendt.Totrinnskontroll --> Speilvendt.Beslutter: Godkjennes av
+Speilvendt.Avviksprosent --> Speilvendt.Skjønnsfastsetting: Kan resultere i
+Speilvendt.Behandling --> Spleiselaget.Behandling: Tilsvarer
+Speilvendt.Saksbehandler --> Speilvendt.Oppgave: Arbeider (stort sett) med
+Speilvendt.Vedtaksperiode --> Spleiselaget.Vedtaksperiode: Tilsvarer
+Speilvendt.Dag --> Speilvendt.Utbetaling: Kan ha 0-2
+Speilvendt.Dag --> Speilvendt.Dagtype: Har en
+Speilvendt.Oppgave --> Speilvendt.Behandling: Representerer en
+Spleiselaget.Behandling --> Spleiselaget.Vilkårsgrunnlag: Er basert på
+Spleiselaget.Behandling --> Speilvendt.Godkjenningsbehov: Er grunnlag for
+Speilvendt.Saksbehandler --> Speilvendt.Vedtak: Fatter\n(dersom manuelt)
+Speilvendt.Overstyring --> Speilvendt.Totrinnskontroll: Leder til
+Spleiselaget.Inntektsgrunnlag --> Spleiselaget.Vilkårsgrunnlag: Inngår i
+Spleiselaget.Vilkårsgrunnlag --> Speilvendt.Sykepengegrunnlag: Er grunnlag for
+Speilvendt.Inntektsforhold <|-- Speilvendt.Selvstendig: Er ett
+Speilvendt.Inntektsforhold <|-- Speilvendt.Arbeidsgiver: Er ett
+Spleiselaget.Varsel --> Speilvendt.Varsel: Medfører
+Spleiselaget.Varsel --> Spleiselaget.Vedtaksperiode: Knyttet til
+Speilvendt.Varsel --> Speilvendt.Vedtaksperiode: Knyttet til
+
+Speilvendt.Vedtaksperiode --> Speilvendt.Person: Gjelder én
+
+Annullering --> Spleiselaget.Utbetaling: Annullerer en
+Spleiselaget.Utbetaling --> Oppdrag: Tilhører nøyaktig to
+Spleiselaget.Utbetaling --> Spleiselaget.Vedtaksperiode: Tilhører en
+Oppdrag --> FagsystemId: ?Er identifisert av?
+
+hide empty members
+hide circle
+
+@enduml

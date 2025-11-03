@@ -1,0 +1,185 @@
+@startuml
+
+package Speilvendt {
+  class Person <<(?,gray)>>
+
+  class Avviksprosent <<(?,gray)>>
+
+  class Godkjenningsbehov as "Godkjenningsbehov\n/ "Utkast til vedtak"" <<(?,gray)>>
+
+  class Vedtak <<(?,gray)>>
+
+  class Vedtaksperiode <<(?,gray)>>
+
+  class Behandling as "Behandling\n(tidl. "generasjon")" <<(E,lightblue)>>
+
+  class Inntektsforhold <<(?,gray)>>
+
+  class Arbeidsgiver <<(?,gray)>> {
+    organisasjonsnummer
+  }
+
+  class Selvstendig as "Selvstendig Næring" <<(?,gray)>>
+
+  class Sykefraværstilfelle <<(?,gray)>>
+
+  class Sykepengegrunnlag as "Sykepengegrunnlag m/fakta" <<(?,gray)>>
+
+  class Overstyring <<(?,gray)>>
+  note left: Supplering eller korrigering\nav fakta
+
+  class Skjønnsfastsetting <<(?,gray)>>
+
+  class "Oppgave\n(Manuell gjennomgang)" as Oppgave <<(?,gray)>>
+
+  class Totrinnskontroll <<(?,gray)>>
+
+  class Saksbehandler <<(?,gray)>>
+
+  class Beslutter <<(?,gray)>>
+
+  class Dag <<(?,gray)>>
+
+  class "Beløp til utbetaling" as BeløpTilUtbetaling <<(?,gray)>>
+  class Arbeidsgiverbeløp <<(?,gray)>> extends BeløpTilUtbetaling
+  class Personbeløp <<(?,gray)>> extends BeløpTilUtbetaling
+
+  class Varsel <<(?,gray)>>
+
+  class PersonVarsel as "Varsel for person" <<(?,gray)>>
+
+  class VedtaksperiodeVarsel as "Varsel for vedtaksperiode" <<(?,gray)>>
+
+  class BehandlingVarsel as "Varsel for behandling" <<(?,gray)>>
+
+  class StansAutomatiseringVarsel as "Stans av automatisering" <<(?,gray)>>
+
+  class Riskvarsel <<(?,gray)>>
+
+  class Tildeling <<(?,gray)>>
+
+  class OverstyringInntektOgRefusjon as "Overstyring av inntekt / refusjon" <<(?,gray)>>
+
+  class OverstyringDag as "Overstyring av dag" <<(?,gray)>>
+
+  class OverstyringBehandling as "Overstyring av behandling" <<(?,gray)>>
+
+  class OverstyringSykefraværstilfelle as "Overstyring av sykefraværstilfelle" <<(?,gray)>>
+
+  class "Annullering\n(av utbetaling)" as Annullering <<(?,gray)>>
+}
+
+package Spleiselaget {
+  class Behandling <<(E,lightblue)>>
+  class "SpleisBehandlingId" as BehandlingId <<(V,orange)>>
+  Behandling ||--|| BehandlingId
+
+  class Generasjon <<(?,gray)>>
+
+  class Inntektsgrunnlag <<(?,gray)>>
+
+  class Vedtaksperiode <<(?,gray)>>
+
+  class Vilkårsgrunnlag <<(?,gray)>>
+
+  class Utbetaling <<(?,gray)>>
+
+  class Varsel <<(?,gray)>>
+}
+
+package Flex {
+  class Sykmelding <<(?,gray)>>
+
+  class "Søknad om sykepenger" as Søknad <<(?,gray)>>
+
+  class "Svar på søknad" as Svar <<(?,gray)>>
+
+  class Søker <<(?,gray)>>
+}
+
+package Oppdragssystemet {
+  class Oppdrag <<(?,gray)>>
+  class PersonOppdrag <<(?,gray)>>
+  class ArbeidsgiverOppdrag <<(?,gray)>>
+  class "?FagsystemId?" as FagsystemId <<(?,gray)>>
+}
+
+Flex.Sykmelding ||--|{ Flex.Søknad
+Flex.Søknad ||--|| Speilvendt.Vedtaksperiode
+Flex.Søknad --o{ Flex.Svar
+Flex.Søker ||--|{ Flex.Søknad
+Speilvendt.Vedtak ||--|| Flex.Svar
+
+Flex.Søker ||--|| Speilvendt.Person
+
+Speilvendt.Saksbehandler ||--o{ Speilvendt.Overstyring
+Speilvendt.OverstyringBehandling }o--|| Speilvendt.Behandling
+Speilvendt.OverstyringSykefraværstilfelle }o--|| Speilvendt.Sykefraværstilfelle
+
+Speilvendt.Godkjenningsbehov }o--|| Speilvendt.Behandling
+Speilvendt.Behandling }|--|| Speilvendt.Vedtaksperiode
+Speilvendt.Vedtaksperiode }|--|| Speilvendt.Inntektsforhold
+Speilvendt.Vedtaksperiode ||--|{ Speilvendt.Dag
+Spleiselaget.Behandling }|--|| Spleiselaget.Vedtaksperiode
+Speilvendt.Behandling ||--o| Speilvendt.Vedtak
+Speilvendt.Sykefraværstilfelle ||--|{ Speilvendt.Behandling
+
+Speilvendt.Sykepengegrunnlag ||--|| Speilvendt.Sykefraværstilfelle: Mange sykepengegrunnlag når vi dekker §8-30 4. ledd
+
+Speilvendt.Sykepengegrunnlag ||--|| Speilvendt.Avviksprosent
+Speilvendt.Skjønnsfastsetting |o--|| Speilvendt.Sykepengegrunnlag
+Speilvendt.OverstyringBehandling --|> Speilvendt.Overstyring
+Speilvendt.OverstyringSykefraværstilfelle --|> Speilvendt.Overstyring
+Speilvendt.Skjønnsfastsetting --|> Speilvendt.Overstyring
+Speilvendt.Beslutter --|> Speilvendt.Saksbehandler
+Speilvendt.Totrinnskontroll }|--|| Speilvendt.Beslutter
+Speilvendt.Avviksprosent ..> Speilvendt.Skjønnsfastsetting
+Speilvendt.Behandling ||--|| Spleiselaget.BehandlingId
+Speilvendt.Saksbehandler ..> Speilvendt.Oppgave: Arbeider (stort sett) med
+Speilvendt.Vedtaksperiode ||--|| Spleiselaget.Vedtaksperiode
+Speilvendt.Dag ||--o| Speilvendt.Arbeidsgiverbeløp
+Speilvendt.Dag ||--o| Speilvendt.Personbeløp
+Speilvendt.Dag ||--|| Speilvendt.Dagtype
+Speilvendt.Oppgave }o--|| Speilvendt.Behandling
+Spleiselaget.Behandling }o--|| Spleiselaget.Vilkårsgrunnlag
+Spleiselaget.Behandling ||--o{ Speilvendt.Godkjenningsbehov
+Speilvendt.Saksbehandler ..> Speilvendt.Vedtak: Fatter\n(dersom manuelt)
+Speilvendt.Overstyring }|--|| Speilvendt.Totrinnskontroll
+Spleiselaget.Inntektsgrunnlag ..> Spleiselaget.Vilkårsgrunnlag: Inngår i
+Spleiselaget.Vilkårsgrunnlag ||--|| Speilvendt.Sykepengegrunnlag
+Speilvendt.Inntektsforhold <|-- Speilvendt.Selvstendig
+Speilvendt.Inntektsforhold <|-- Speilvendt.Arbeidsgiver
+Spleiselaget.Varsel |o--|| Speilvendt.Varsel
+Spleiselaget.Varsel ||--|| Speilvendt.BehandlingVarsel: "LURER PÅ DETTE!"
+Speilvendt.PersonVarsel }o--|| Speilvendt.Person
+
+Speilvendt.Vedtaksperiode }|--|| Speilvendt.Person
+
+Speilvendt.Annullering |o--|{ Speilvendt.Vedtaksperiode
+Spleiselaget.Utbetaling ||--|| PersonOppdrag
+Spleiselaget.Utbetaling ||--|| ArbeidsgiverOppdrag
+Spleiselaget.Utbetaling }o--|| Spleiselaget.Vedtaksperiode
+PersonOppdrag <|-- Oppdrag
+ArbeidsgiverOppdrag <|-- Oppdrag
+Oppdrag ||--|| FagsystemId: ?Er identifisert av?
+
+Speilvendt.Tildeling |o--|| Speilvendt.Oppgave
+Speilvendt.Tildeling }o--|| Speilvendt.Saksbehandler
+
+Speilvendt.OverstyringBehandling <|-- Speilvendt.OverstyringDag
+Speilvendt.OverstyringSykefraværstilfelle <|-- Speilvendt.OverstyringInntektOgRefusjon
+
+Speilvendt.PersonVarsel <|-- Speilvendt.StansAutomatiseringVarsel
+
+Speilvendt.Varsel <|-- Speilvendt.PersonVarsel
+Speilvendt.Varsel <|-- Speilvendt.BehandlingVarsel
+Speilvendt.BehandlingVarsel }o--|| Speilvendt.Behandling
+Speilvendt.Varsel <|-- Speilvendt.VedtaksperiodeVarsel
+Speilvendt.VedtaksperiodeVarsel }o--|| Speilvendt.Vedtaksperiode
+Speilvendt.VedtaksperiodeVarsel <|-- Speilvendt.Riskvarsel
+
+Spleiselaget.Generasjon }|-- Spleiselaget.Behandling
+
+hide empty members
+
+@enduml
