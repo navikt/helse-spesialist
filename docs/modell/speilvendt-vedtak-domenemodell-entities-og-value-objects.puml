@@ -119,7 +119,7 @@ Speilvendt.OverstyringSykefraværstilfelle }o--|| Speilvendt.Sykefraværstilfell
 Speilvendt.Godkjenningsbehov }o--|| Speilvendt.Behandling
 Speilvendt.Behandling }|--|| Speilvendt.Vedtaksperiode
 Speilvendt.Vedtaksperiode }|--|| Speilvendt.Inntektsforhold
-Speilvendt.Vedtaksperiode ||--|{ Speilvendt.Dag
+Speilvendt.Behandling ||--|{ Speilvendt.Dag
 Spleiselaget.Behandling }|--|| Spleiselaget.Vedtaksperiode
 Speilvendt.Behandling ||--o| Speilvendt.Vedtak
 Speilvendt.Sykefraværstilfelle ||--|{ Speilvendt.Behandling
