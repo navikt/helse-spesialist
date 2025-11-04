@@ -130,10 +130,17 @@ class RestAdapter(
                 }
             val statusCode = problemDetails.status
             val title = problemDetails.title
+            val loggmelding =
+                buildString {
+                    append("Returnerer HTTP $statusCode - $title")
+                    if (cause !is WrappedApiHttpProblemDetailsException) {
+                        append(" (pga. ${cause::class.simpleName})")
+                    }
+                }
             if (statusCode in 400..<500) {
-                loggWarnThrowable("Returnerer HTTP $statusCode - $title", cause)
+                loggWarnThrowable(loggmelding, cause)
             } else {
-                loggThrowable("Returnerer HTTP $statusCode - $title", cause)
+                loggThrowable(loggmelding, cause)
             }
             call.respondWithProblem(problemDetails)
         }.onSuccess { result ->
