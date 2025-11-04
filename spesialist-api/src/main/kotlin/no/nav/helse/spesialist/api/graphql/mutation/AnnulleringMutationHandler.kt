@@ -39,16 +39,11 @@ class AnnulleringMutationHandler(
                 hendelse =
                     AnnullertUtbetalingEvent(
                         fødselsnummer = annullering.fodselsnummer,
-                        aktørId = annullering.aktorId,
                         organisasjonsnummer = annullering.organisasjonsnummer,
                         saksbehandlerOid = saksbehandler.id().value,
-                        saksbehandlerNavn = saksbehandler.navn,
                         saksbehandlerIdent = saksbehandler.ident,
                         saksbehandlerEpost = saksbehandler.epost,
                         vedtaksperiodeId = annullering.vedtaksperiodeId,
-                        utbetalingId = annullering.utbetalingId,
-                        arbeidsgiverFagsystemId = annullering.arbeidsgiverFagsystemId,
-                        personFagsystemId = annullering.personFagsystemId,
                         begrunnelser = annullering.arsaker.map { arsak -> arsak.arsak },
                         arsaker =
                             annullering.arsaker.map { arsak ->

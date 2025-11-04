@@ -83,16 +83,11 @@ class AnnulleringMutationIntegrationTest {
                 fødselsnummer = fødselsnummer,
                 hendelse = AnnullertUtbetalingEvent(
                     fødselsnummer = fødselsnummer,
-                    aktørId = aktørId,
                     organisasjonsnummer = organisasjonsnummer,
                     saksbehandlerOid = saksbehandler.id().value,
-                    saksbehandlerNavn = saksbehandler.navn,
                     saksbehandlerIdent = saksbehandler.ident,
                     saksbehandlerEpost = saksbehandler.epost,
                     vedtaksperiodeId = vedtaksperiodeId,
-                    utbetalingId = utbetalingId,
-                    arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
-                    personFagsystemId = personFagsystemId,
                     begrunnelser = årsaker.values.toList(),
                     arsaker = årsaker.map { AnnullertUtbetalingEvent.Årsak(key = it.key, arsak = it.value) },
                     kommentar = kommentar
@@ -163,16 +158,11 @@ class AnnulleringMutationIntegrationTest {
                 fødselsnummer = fødselsnummer,
                 hendelse = AnnullertUtbetalingEvent(
                     fødselsnummer = fødselsnummer,
-                    aktørId = aktørId,
                     organisasjonsnummer = organisasjonsnummer,
                     saksbehandlerOid = saksbehandler.id().value,
-                    saksbehandlerNavn = saksbehandler.navn,
                     saksbehandlerIdent = saksbehandler.ident,
                     saksbehandlerEpost = saksbehandler.epost,
                     vedtaksperiodeId = vedtaksperiodeId,
-                    utbetalingId = utbetalingId,
-                    arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
-                    personFagsystemId = personFagsystemId,
                     begrunnelser = emptyList(),
                     arsaker = emptyList(),
                     kommentar = kommentar

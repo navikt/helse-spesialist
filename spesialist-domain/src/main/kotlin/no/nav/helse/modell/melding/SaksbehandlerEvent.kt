@@ -109,16 +109,11 @@ data class MinimumSykdomsgradVurdertEvent(
 
 data class AnnullertUtbetalingEvent(
     val fødselsnummer: String,
-    val aktørId: String,
     val organisasjonsnummer: String,
     val saksbehandlerOid: UUID,
-    val saksbehandlerNavn: String,
     val saksbehandlerIdent: String,
     val saksbehandlerEpost: String,
     val vedtaksperiodeId: UUID,
-    val utbetalingId: UUID,
-    val arbeidsgiverFagsystemId: String,
-    val personFagsystemId: String,
     val begrunnelser: List<String>,
     val arsaker: List<Årsak>?,
     val kommentar: String?,

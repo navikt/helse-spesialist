@@ -310,19 +310,14 @@ private fun AnnullertUtbetalingEvent.detaljer(): Map<String, Any> =
     listOfNotNull(
         "organisasjonsnummer" to organisasjonsnummer,
         ("yrkesaktivitetstype" to "SELVSTENDIG").takeIf { organisasjonsnummer == "SELVSTENDIG" },
-        "aktørId" to aktørId,
         "saksbehandler" to
             mapOf(
                 "epostaddresse" to saksbehandlerEpost,
                 "oid" to saksbehandlerOid,
-                "navn" to saksbehandlerNavn,
                 "ident" to saksbehandlerIdent,
             ),
         "begrunnelser" to begrunnelser,
-        "utbetalingId" to utbetalingId,
         "vedtaksperiodeId" to vedtaksperiodeId,
-        "arbeidsgiverFagsystemId" to arbeidsgiverFagsystemId,
-        "personFagsystemId" to personFagsystemId,
         kommentar?.let { "kommentar" to it },
         arsaker?.let { "arsaker" to it.map { arsak -> mapOf("arsak" to arsak.arsak, "key" to arsak.key) } },
     ).toMap()

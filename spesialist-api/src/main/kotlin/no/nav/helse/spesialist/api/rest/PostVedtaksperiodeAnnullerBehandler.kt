@@ -58,16 +58,11 @@ class PostVedtaksperiodeAnnullerBehandler : PostBehandler<Vedtaksperioder.Id.Ann
             hendelse =
                 AnnullertUtbetalingEvent(
                     fødselsnummer = fødselsnummer,
-                    aktørId = request.aktørId,
                     organisasjonsnummer = request.organisasjonsnummer,
                     saksbehandlerOid = saksbehandler.id().value,
-                    saksbehandlerNavn = saksbehandler.navn,
                     saksbehandlerIdent = saksbehandler.ident,
                     saksbehandlerEpost = saksbehandler.epost,
                     vedtaksperiodeId = vedtaksperiodeId,
-                    utbetalingId = request.utbetalingId,
-                    arbeidsgiverFagsystemId = request.arbeidsgiverFagsystemId,
-                    personFagsystemId = request.personFagsystemId,
                     begrunnelser = request.årsaker.map { arsak -> arsak.årsak },
                     arsaker =
                         request.årsaker.map { arsak ->
