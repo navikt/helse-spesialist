@@ -13,7 +13,7 @@ import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektId
 
-class PostTilkommenInntektFjernBehandler : PostBehandler<TilkomneInntekter.Id.Fjern, ApiFjernTilkommenInntektRequest, Boolean, ApiPostTilkommenInntektFjernErrorCode> {
+class PostTilkommenInntektFjernBehandler : PostBehandler<TilkomneInntekter.Id.Fjern, ApiFjernTilkommenInntektRequest, Unit, ApiPostTilkommenInntektFjernErrorCode> {
     override fun behandle(
         resource: TilkomneInntekter.Id.Fjern,
         request: ApiFjernTilkommenInntektRequest,
@@ -21,7 +21,7 @@ class PostTilkommenInntektFjernBehandler : PostBehandler<TilkomneInntekter.Id.Fj
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
         outbox: Outbox,
-    ): RestResponse<Boolean, ApiPostTilkommenInntektFjernErrorCode> {
+    ): RestResponse<Unit, ApiPostTilkommenInntektFjernErrorCode> {
         val tilkommenInntekt =
             transaksjon.tilkommenInntektRepository.finn(TilkommenInntektId(resource.parent.tilkommenInntektId))
                 ?: return RestResponse.Error(
@@ -56,7 +56,7 @@ class PostTilkommenInntektFjernBehandler : PostBehandler<TilkomneInntekter.Id.Fj
             årsak = "tilkommen inntekt fjernet",
         )
 
-        return RestResponse.OK(true)
+        return RestResponse.NoContent()
     }
 
     override fun openApi(config: RouteConfig) {

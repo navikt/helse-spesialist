@@ -15,7 +15,7 @@ import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektId
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektPeriodeValidator
 
-class PostTilkommenInntektEndreBehandler : PostBehandler<TilkomneInntekter.Id.Endre, ApiEndreTilkommenInntektRequest, Boolean, ApiPostTilkommenInntektEndreErrorCode> {
+class PostTilkommenInntektEndreBehandler : PostBehandler<TilkomneInntekter.Id.Endre, ApiEndreTilkommenInntektRequest, Unit, ApiPostTilkommenInntektEndreErrorCode> {
     override fun behandle(
         resource: TilkomneInntekter.Id.Endre,
         request: ApiEndreTilkommenInntektRequest,
@@ -23,7 +23,7 @@ class PostTilkommenInntektEndreBehandler : PostBehandler<TilkomneInntekter.Id.En
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
         outbox: Outbox,
-    ): RestResponse<Boolean, ApiPostTilkommenInntektEndreErrorCode> {
+    ): RestResponse<Unit, ApiPostTilkommenInntektEndreErrorCode> {
         val tilkommenInntekt =
             transaksjon.tilkommenInntektRepository.finn(TilkommenInntektId(resource.parent.tilkommenInntektId))
                 ?: return RestResponse.Error(
@@ -93,7 +93,7 @@ class PostTilkommenInntektEndreBehandler : PostBehandler<TilkomneInntekter.Id.En
             )
         }
 
-        return RestResponse.OK(true)
+        return RestResponse.NoContent()
     }
 
     override fun openApi(config: RouteConfig) {

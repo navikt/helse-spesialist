@@ -15,7 +15,7 @@ import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektId
 import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektPeriodeValidator
 
-class PostTilkommenInntektGjenopprettBehandler : PostBehandler<TilkomneInntekter.Id.Gjenopprett, ApiGjenopprettTilkommenInntektRequest, Boolean, ApiPostTilkommenInntektGjenopprettErrorCode> {
+class PostTilkommenInntektGjenopprettBehandler : PostBehandler<TilkomneInntekter.Id.Gjenopprett, ApiGjenopprettTilkommenInntektRequest, Unit, ApiPostTilkommenInntektGjenopprettErrorCode> {
     override fun behandle(
         resource: TilkomneInntekter.Id.Gjenopprett,
         request: ApiGjenopprettTilkommenInntektRequest,
@@ -23,7 +23,7 @@ class PostTilkommenInntektGjenopprettBehandler : PostBehandler<TilkomneInntekter
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
         outbox: Outbox,
-    ): RestResponse<Boolean, ApiPostTilkommenInntektGjenopprettErrorCode> {
+    ): RestResponse<Unit, ApiPostTilkommenInntektGjenopprettErrorCode> {
         val tilkommenInntekt =
             transaksjon.tilkommenInntektRepository.finn(TilkommenInntektId(resource.parent.tilkommenInntektId))
                 ?: return RestResponse.Error(
@@ -73,7 +73,7 @@ class PostTilkommenInntektGjenopprettBehandler : PostBehandler<TilkomneInntekter
             årsak = "tilkommen inntekt gjenopprettet",
         )
 
-        return RestResponse.OK(true)
+        return RestResponse.NoContent()
     }
 
     override fun openApi(config: RouteConfig) {

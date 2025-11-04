@@ -10,7 +10,7 @@ import no.nav.helse.spesialist.domain.NotatType
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 
-class PostOpphevStansBehandler : PostBehandler<Opphevstans, ApiOpphevStansRequest, Boolean, ApiPostOpphevStansErrorCode> {
+class PostOpphevStansBehandler : PostBehandler<Opphevstans, ApiOpphevStansRequest, Unit, ApiPostOpphevStansErrorCode> {
     override fun behandle(
         resource: Opphevstans,
         request: ApiOpphevStansRequest,
@@ -18,7 +18,7 @@ class PostOpphevStansBehandler : PostBehandler<Opphevstans, ApiOpphevStansReques
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
         outbox: Outbox,
-    ): RestResponse<Boolean, ApiPostOpphevStansErrorCode> {
+    ): RestResponse<Unit, ApiPostOpphevStansErrorCode> {
         val fødselsnummer = request.fodselsnummer
         if (!harTilgangTilPerson(
                 fødselsnummer = fødselsnummer,
@@ -41,7 +41,7 @@ class PostOpphevStansBehandler : PostBehandler<Opphevstans, ApiOpphevStansReques
             dialogRef = transaksjon.dialogDao.lagre(),
         )
 
-        return RestResponse.OK(true)
+        return RestResponse.NoContent()
     }
 
     override fun openApi(config: RouteConfig) {
