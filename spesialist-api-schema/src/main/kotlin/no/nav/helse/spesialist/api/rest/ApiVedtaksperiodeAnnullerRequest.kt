@@ -18,9 +18,7 @@ import java.util.UUID
 
 @Serializable
 data class ApiVedtaksperiodeAnnullerRequest(
-    val aktørId: String,
     val organisasjonsnummer: String,
-    val utbetalingId: UUID,
     val arbeidsgiverFagsystemId: String,
     val personFagsystemId: String,
     val årsaker: List<Årsak>,
