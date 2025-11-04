@@ -18,7 +18,6 @@ import java.util.UUID
 
 @Serializable
 data class ApiVedtaksperiodeAnnullerRequest(
-    val organisasjonsnummer: String,
     val arbeidsgiverFagsystemId: String,
     val personFagsystemId: String,
     val årsaker: List<Årsak>,
@@ -26,7 +25,7 @@ data class ApiVedtaksperiodeAnnullerRequest(
 ) {
     @Serializable
     data class Årsak(
-        val _key: String,
+        val key: String,
         val årsak: String,
     )
 }

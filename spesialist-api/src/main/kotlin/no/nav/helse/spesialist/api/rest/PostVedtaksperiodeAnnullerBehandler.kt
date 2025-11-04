@@ -23,12 +23,12 @@ class PostVedtaksperiodeAnnullerBehandler : PostBehandler<Vedtaksperioder.Id.Ann
     ): RestResponse<Unit, ApiPostVedtaksperiodeAnnullerErrorCode> {
         val vedtaksperiodeId = resource.parent.vedtaksperiodeId
 
-        val fødselsnummer =
-            transaksjon.vedtaksperiodeRepository.finn(VedtaksperiodeId(vedtaksperiodeId))?.fødselsnummer
+        val vedtaksperiode =
+            transaksjon.vedtaksperiodeRepository.finn(VedtaksperiodeId(vedtaksperiodeId))
                 ?: return RestResponse.Error(ApiPostVedtaksperiodeAnnullerErrorCode.VEDTAKSPERIODE_IKKE_FUNNET)
 
         if (!harTilgangTilPerson(
-                fødselsnummer = fødselsnummer,
+                fødselsnummer = vedtaksperiode.fødselsnummer,
                 saksbehandler = saksbehandler,
                 tilgangsgrupper = tilgangsgrupper,
                 transaksjon = transaksjon,
@@ -54,11 +54,11 @@ class PostVedtaksperiodeAnnullerBehandler : PostBehandler<Vedtaksperioder.Id.Ann
         )
 
         outbox.leggTil(
-            fødselsnummer = fødselsnummer,
+            fødselsnummer = vedtaksperiode.fødselsnummer,
             hendelse =
                 AnnullertUtbetalingEvent(
-                    fødselsnummer = fødselsnummer,
-                    organisasjonsnummer = request.organisasjonsnummer,
+                    fødselsnummer = vedtaksperiode.fødselsnummer,
+                    organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
                     saksbehandlerOid = saksbehandler.id().value,
                     saksbehandlerIdent = saksbehandler.ident,
                     saksbehandlerEpost = saksbehandler.epost,
@@ -67,7 +67,7 @@ class PostVedtaksperiodeAnnullerBehandler : PostBehandler<Vedtaksperioder.Id.Ann
                     arsaker =
                         request.årsaker.map { arsak ->
                             AnnullertUtbetalingEvent.Årsak(
-                                key = arsak._key,
+                                key = arsak.key,
                                 arsak = arsak.årsak,
                             )
                         },

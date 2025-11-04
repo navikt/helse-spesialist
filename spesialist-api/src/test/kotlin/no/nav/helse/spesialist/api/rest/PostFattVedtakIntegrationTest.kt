@@ -19,6 +19,7 @@ import no.nav.helse.spesialist.domain.testfixtures.lagEtternavn
 import no.nav.helse.spesialist.domain.testfixtures.lagFornavn
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.lagMellomnavn
+import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlerident
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.typer.Kjønn
@@ -110,7 +111,7 @@ class PostFattVedtakIntegrationTest {
         // Given:
         val behandlingId = UUID.randomUUID()
         val fødselsnummer = lagFødselsnummer()
-        val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer)
+        val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer, lagOrganisasjonsnummer())
         val behandling = lagEnBehandling(behandlingId, vedtaksperiode.id())
         val saksbehandler = lagEnSaksbehandler()
         saksbehandlerRepository.lagre(saksbehandler)
@@ -134,7 +135,7 @@ class PostFattVedtakIntegrationTest {
         // Given:
         val behandlingId = UUID.randomUUID()
         val fødselsnummer = lagFødselsnummer()
-        val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer)
+        val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer, lagOrganisasjonsnummer())
         val behandling = lagEnBehandling(behandlingId, vedtaksperiode.id())
         val saksbehandler = lagEnSaksbehandler()
         saksbehandlerRepository.lagre(saksbehandler)
@@ -173,7 +174,7 @@ class PostFattVedtakIntegrationTest {
         // Given:
         val behandlingId = UUID.randomUUID()
         val fødselsnummer = lagFødselsnummer()
-        val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer)
+        val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer, lagOrganisasjonsnummer())
         val behandling = lagEnBehandling(behandlingId, vedtaksperiode.id())
         val saksbehandler = lagEnSaksbehandler()
         saksbehandlerRepository.lagre(saksbehandler)
@@ -214,7 +215,7 @@ class PostFattVedtakIntegrationTest {
         // Given:
         val behandlingId = UUID.randomUUID()
         val fødselsnummer = lagFødselsnummer()
-        val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer)
+        val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer, lagOrganisasjonsnummer())
         val behandling = lagEnBehandling(behandlingId, vedtaksperiode.id())
         val saksbehandler = lagEnSaksbehandler()
         saksbehandlerRepository.lagre(saksbehandler)
@@ -261,7 +262,7 @@ class PostFattVedtakIntegrationTest {
         // Given:
         val behandlingId = UUID.randomUUID()
         val fødselsnummer = lagFødselsnummer()
-        val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer)
+        val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer, lagOrganisasjonsnummer())
         val behandling = lagEnBehandling(behandlingId, vedtaksperiode.id())
         val saksbehandler = lagEnSaksbehandler()
         saksbehandlerRepository.lagre(saksbehandler)
@@ -307,7 +308,7 @@ class PostFattVedtakIntegrationTest {
         // Given:
         val behandlingId = UUID.randomUUID()
         val fødselsnummer = lagFødselsnummer()
-        val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer)
+        val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer, lagOrganisasjonsnummer())
         val behandling = lagEnBehandling(behandlingId, vedtaksperiode.id())
         val saksbehandler = lagEnSaksbehandler()
         saksbehandlerRepository.lagre(saksbehandler)
@@ -352,7 +353,7 @@ class PostFattVedtakIntegrationTest {
         // Given:
         val behandlingId = UUID.randomUUID()
         val fødselsnummer = lagFødselsnummer()
-        val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer)
+        val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer, lagOrganisasjonsnummer())
         val behandling = lagEnBehandling(behandlingId, vedtaksperiode.id(), tags = setOf("OverlapperMedInfotrygd"))
         val saksbehandler = lagEnSaksbehandler()
         saksbehandlerRepository.lagre(saksbehandler)
@@ -394,7 +395,7 @@ class PostFattVedtakIntegrationTest {
         // Given:
         val behandlingId = UUID.randomUUID()
         val fødselsnummer = lagFødselsnummer()
-        val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer)
+        val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer, lagOrganisasjonsnummer())
         val behandling = lagEnBehandling(behandlingId, vedtaksperiode.id())
         val saksbehandler = lagEnSaksbehandler()
         val kode = "RV_IV_2"
@@ -448,7 +449,7 @@ class PostFattVedtakIntegrationTest {
         // Given:
         val behandlingId = UUID.randomUUID()
         val fødselsnummer = lagFødselsnummer()
-        val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer)
+        val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer, lagOrganisasjonsnummer())
         val behandling = lagEnBehandling(behandlingId, vedtaksperiode.id())
         val saksbehandler = lagEnSaksbehandler()
         val kode = "RV_IV_2"
@@ -490,7 +491,7 @@ class PostFattVedtakIntegrationTest {
         // Given:
         val behandlingId = UUID.randomUUID()
         val fødselsnummer = lagFødselsnummer()
-        val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer)
+        val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer, lagOrganisasjonsnummer())
         val behandling = lagEnBehandling(behandlingId, vedtaksperiode.id())
         val saksbehandler = lagEnSaksbehandler()
         val kode = "RV_IV_2"
@@ -575,5 +576,6 @@ class PostFattVedtakIntegrationTest {
     private fun lagEnVedtaksperiode(
         vedtaksperiodeId: UUID,
         fødselsnummer: String,
-    ): Vedtaksperiode = Vedtaksperiode(VedtaksperiodeId(vedtaksperiodeId), fødselsnummer)
+        organisasjonsnummer: String,
+    ): Vedtaksperiode = Vedtaksperiode(VedtaksperiodeId(vedtaksperiodeId), fødselsnummer, organisasjonsnummer)
 }

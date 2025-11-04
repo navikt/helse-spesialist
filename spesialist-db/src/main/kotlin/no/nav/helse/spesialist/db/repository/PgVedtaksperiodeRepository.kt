@@ -15,7 +15,7 @@ class PgVedtaksperiodeRepository private constructor(
     override fun finn(vedtaksperiodeId: VedtaksperiodeId): Vedtaksperiode? =
         dbQuery.singleOrNull(
             """
-                SELECT vedtaksperiode_id, fødselsnummer
+                SELECT vedtaksperiode_id, fødselsnummer, arbeidsgiver_identifikator
                 FROM vedtak v
                          JOIN person p ON v.person_ref = p.id
                 WHERE v.vedtaksperiode_id = :vedtaksperiodeId
@@ -25,6 +25,7 @@ class PgVedtaksperiodeRepository private constructor(
             Vedtaksperiode(
                 id = VedtaksperiodeId(it.uuid("vedtaksperiode_id")),
                 fødselsnummer = it.string("fødselsnummer"),
+                organisasjonsnummer = it.string("arbeidsgiver_identifikator"),
             )
         }
 }

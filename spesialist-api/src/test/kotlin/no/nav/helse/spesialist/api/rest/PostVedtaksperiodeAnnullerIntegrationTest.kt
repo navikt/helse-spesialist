@@ -9,7 +9,6 @@ import no.nav.helse.spesialist.api.testfixtures.lagSaksbehandler
 import no.nav.helse.spesialist.application.InMemoryMeldingPubliserer
 import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
-import no.nav.helse.spesialist.domain.testfixtures.lagAktørId
 import no.nav.helse.spesialist.domain.testfixtures.lagEtternavn
 import no.nav.helse.spesialist.domain.testfixtures.lagFornavn
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
@@ -35,17 +34,15 @@ class PostVedtaksperiodeAnnullerIntegrationTest {
     fun `annullering ok`() {
         // Given:
         val fødselsnummer = lagFødselsnummer()
-        val aktørId = lagAktørId()
         val organisasjonsnummer = lagOrganisasjonsnummer()
         val saksbehandler = lagSaksbehandler()
 
         val arbeidsgiverFagsystemId = "EN_ARBEIDSGIVER_FAGSYSTEM_ID"
         val kommentar = "kommentar"
         val personFagsystemId = "EN_PERSON_FAGSYSTEM_ID"
-        val utbetalingId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
         val årsaker = mapOf("årsak-1" to "Ferie", "årsak-2" to "Ekstra ferie")
-        vedtaksperiodeRepository.lagre(Vedtaksperiode(VedtaksperiodeId(vedtaksperiodeId), fødselsnummer))
+        vedtaksperiodeRepository.lagre(Vedtaksperiode(VedtaksperiodeId(vedtaksperiodeId), fødselsnummer, organisasjonsnummer))
         egenansattDao.lagre(fødselsnummer, false, LocalDateTime.now())
         personDao.upsertPersoninfo(
             fødselsnummer, lagFornavn(), lagMellomnavn(), lagEtternavn(), LocalDate.now(),
@@ -57,14 +54,11 @@ class PostVedtaksperiodeAnnullerIntegrationTest {
             url = "/api/vedtaksperioder/${vedtaksperiodeId}/annuller",
             body = """
                 {
-                    "organisasjonsnummer": "$organisasjonsnummer",
-                    "aktørId": "$aktørId",
-                    "utbetalingId": "$utbetalingId",
                     "arbeidsgiverFagsystemId": "$arbeidsgiverFagsystemId",
                     "personFagsystemId": "$personFagsystemId",
                     "kommentar": "$kommentar",
                     "årsaker": [
-                      ${årsaker.map { (key, arsak) -> """{ "_key": "$key", "årsak": "$arsak" }""" }.joinToString()}
+                      ${årsaker.map { (key, arsak) -> """{ "key": "$key", "årsak": "$arsak" }""" }.joinToString()}
                     ]
                 }
             """.trimIndent(),
@@ -117,17 +111,15 @@ class PostVedtaksperiodeAnnullerIntegrationTest {
     fun `annullering av tomme verdier`() {
         // Given:
         val fødselsnummer = lagFødselsnummer()
-        val aktørId = lagAktørId()
         val organisasjonsnummer = lagOrganisasjonsnummer()
         val saksbehandler = lagSaksbehandler()
 
         val arbeidsgiverFagsystemId = "EN_ARBEIDSGIVER_FAGSYSTEM_ID"
         val kommentar = "kommentar"
         val personFagsystemId = "EN_PERSON_FAGSYSTEM_ID"
-        val utbetalingId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
         val årsaker = emptyList<ApiAnnulleringData.ApiAnnulleringArsak>()
-        vedtaksperiodeRepository.lagre(Vedtaksperiode(VedtaksperiodeId(vedtaksperiodeId), fødselsnummer))
+        vedtaksperiodeRepository.lagre(Vedtaksperiode(VedtaksperiodeId(vedtaksperiodeId), fødselsnummer, organisasjonsnummer))
         egenansattDao.lagre(fødselsnummer, false, LocalDateTime.now())
         personDao.upsertPersoninfo(
             fødselsnummer, lagFornavn(), lagMellomnavn(), lagEtternavn(), LocalDate.now(),
@@ -139,14 +131,11 @@ class PostVedtaksperiodeAnnullerIntegrationTest {
             url = "/api/vedtaksperioder/${vedtaksperiodeId}/annuller",
             body = """
                 {
-                    "organisasjonsnummer": "$organisasjonsnummer",
-                    "aktørId": "$aktørId",
-                    "utbetalingId": "$utbetalingId",
                     "arbeidsgiverFagsystemId": "$arbeidsgiverFagsystemId",
                     "personFagsystemId": "$personFagsystemId",
                     "kommentar": "$kommentar",
                     "årsaker": [
-                      ${årsaker.joinToString { (key, arsak) -> """{ "_key": "$key", "årsak": "$arsak" }""" }}
+                      ${årsaker.joinToString { (key, arsak) -> """{ "key": "$key", "årsak": "$arsak" }""" }}
                     ]
                 }
             """.trimIndent(),
@@ -199,7 +188,6 @@ class PostVedtaksperiodeAnnullerIntegrationTest {
     fun `annullering allerede lagret`() {
         // Given:
         val fødselsnummer = lagFødselsnummer()
-        val aktørId = lagAktørId()
         val organisasjonsnummer = lagOrganisasjonsnummer()
         val tidligereSaksbehandler = lagSaksbehandler()
         val saksbehandler = lagSaksbehandler()
@@ -207,11 +195,10 @@ class PostVedtaksperiodeAnnullerIntegrationTest {
         val arbeidsgiverFagsystemId = "EN_ARBEIDSGIVER_FAGSYSTEM_ID"
         val kommentar = "kommentar"
         val personFagsystemId = "EN_PERSON_FAGSYSTEM_ID"
-        val utbetalingId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()
         val tidligereÅrsaker = mapOf("årsak-1" to "Ferie", "årsak-2" to "Ekstra ferie")
         val årsaker = mapOf("årsak-3" to "Ny ferie", "årsak-4" to "Ny ferie")
-        vedtaksperiodeRepository.lagre(Vedtaksperiode(VedtaksperiodeId(vedtaksperiodeId), fødselsnummer))
+        vedtaksperiodeRepository.lagre(Vedtaksperiode(VedtaksperiodeId(vedtaksperiodeId), fødselsnummer, organisasjonsnummer))
         egenansattDao.lagre(fødselsnummer, false, LocalDateTime.now())
         personDao.upsertPersoninfo(
             fødselsnummer, lagFornavn(), lagMellomnavn(), lagEtternavn(), LocalDate.now(),
@@ -234,14 +221,11 @@ class PostVedtaksperiodeAnnullerIntegrationTest {
             url = "/api/vedtaksperioder/${vedtaksperiodeId}/annuller",
             body = """
                 {
-                    "organisasjonsnummer": "$organisasjonsnummer",
-                    "aktørId": "$aktørId",
-                    "utbetalingId": "$utbetalingId",
                     "arbeidsgiverFagsystemId": "$arbeidsgiverFagsystemId",
                     "personFagsystemId": "$personFagsystemId",
                     "kommentar": "$kommentar",
                     "årsaker": [
-                      ${årsaker.map { (key, arsak) -> """{ "_key": "$key", "årsak": "$arsak" }""" }.joinToString()}
+                      ${årsaker.map { (key, arsak) -> """{ "key": "$key", "årsak": "$arsak" }""" }.joinToString()}
                     ]
                 }
             """.trimIndent(),

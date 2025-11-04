@@ -11,4 +11,5 @@ value class VedtaksperiodeId(
 class Vedtaksperiode(
     id: VedtaksperiodeId,
     val fødselsnummer: String,
+    val organisasjonsnummer: String,
 ) : Entity<VedtaksperiodeId>(id)
