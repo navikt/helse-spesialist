@@ -1,8 +1,6 @@
 package no.nav.helse.spesialist.api.graphql
 
 import com.expediagroup.graphql.server.ktor.GraphQLConfiguration
-import no.nav.helse.spesialist.api.graphql.mutation.AnnulleringMutation
-import no.nav.helse.spesialist.api.graphql.mutation.AnnulleringMutationSchema
 import no.nav.helse.spesialist.api.graphql.mutation.MinimumSykdomsgradMutation
 import no.nav.helse.spesialist.api.graphql.mutation.MinimumSykdomsgradMutationSchema
 import no.nav.helse.spesialist.api.graphql.mutation.NotatMutation
@@ -60,7 +58,6 @@ class SpesialistSchema(
         val totrinnsvurdering: TotrinnsvurderingMutationSchema,
         val vedtak: VedtakMutationSchema,
         val person: PersonMutationSchema,
-        val annullering: AnnulleringMutationSchema,
         val paVent: PaVentMutationSchema,
         val opphevStans: OpphevStansMutationSchema,
         val stansAutomatiskBehandling: StansAutomatiskBehandlingMutationSchema,
@@ -89,7 +86,6 @@ class SpesialistSchema(
                 TotrinnsvurderingMutation(handler = mutationHandlers.totrinnsvurdering),
                 VedtakMutation(handler = mutationHandlers.vedtak),
                 PersonMutation(handler = mutationHandlers.person),
-                AnnulleringMutation(handler = mutationHandlers.annullering),
                 PaVentMutation(handler = mutationHandlers.paVent),
                 OpphevStansMutation(handler = mutationHandlers.opphevStans),
                 StansAutomatiskBehandlingMutation(handler = mutationHandlers.stansAutomatiskBehandling),

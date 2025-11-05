@@ -4,7 +4,6 @@ import no.nav.helse.modell.Annullering
 import no.nav.helse.modell.melding.AnnullertUtbetalingEvent
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.IntegrationTestFixture
-import no.nav.helse.spesialist.api.graphql.schema.ApiAnnulleringData
 import no.nav.helse.spesialist.api.testfixtures.lagSaksbehandler
 import no.nav.helse.spesialist.application.InMemoryMeldingPubliserer
 import no.nav.helse.spesialist.domain.Vedtaksperiode
@@ -118,7 +117,7 @@ class PostVedtaksperiodeAnnullerIntegrationTest {
         val kommentar = "kommentar"
         val personFagsystemId = "EN_PERSON_FAGSYSTEM_ID"
         val vedtaksperiodeId = UUID.randomUUID()
-        val årsaker = emptyList<ApiAnnulleringData.ApiAnnulleringArsak>()
+        val årsaker = emptyList<ApiVedtaksperiodeAnnullerRequest.Årsak>()
         vedtaksperiodeRepository.lagre(Vedtaksperiode(VedtaksperiodeId(vedtaksperiodeId), fødselsnummer, organisasjonsnummer))
         egenansattDao.lagre(fødselsnummer, false, LocalDateTime.now())
         personDao.upsertPersoninfo(

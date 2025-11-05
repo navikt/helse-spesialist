@@ -31,7 +31,6 @@ import no.nav.helse.spesialist.api.behandlingsstatistikk.IBehandlingsstatistikkS
 import no.nav.helse.spesialist.api.bootstrap.debugMinneApi
 import no.nav.helse.spesialist.api.bootstrap.installPlugins
 import no.nav.helse.spesialist.api.feilhåndtering.SpesialistDataFetcherExceptionHandler
-import no.nav.helse.spesialist.api.graphql.mutation.AnnulleringMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.MinimumSykdomsgradMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.NotatMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.OpphevStansMutationHandler
@@ -177,10 +176,6 @@ fun lagSchemaMedResolversOgHandlers(
                         godkjenninghåndterer = godkjenninghåndterer,
                     ),
                 person = PersonMutationHandler(personhåndterer = personhåndterer),
-                annullering =
-                    AnnulleringMutationHandler(
-                        saksbehandlerMediator = saksbehandlerMediator,
-                    ),
                 paVent = PaVentMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
                 opphevStans = OpphevStansMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
                 stansAutomatiskBehandling = StansAutomatiskBehandlingMutationHandler(sessionFactory = sessionFactory),
