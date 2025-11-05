@@ -9,9 +9,13 @@ package Speilvendt {
 
   class Vedtak <<(?,gray)>>
 
-  class Vedtaksperiode <<(?,gray)>>
+  class Dagtype <<(?,gray)>>
+
+  class Vedtaksperiode <<(E,lightblue)>>
 
   class Behandling as "Behandling\n(tidl. "generasjon")" <<(E,lightblue)>>
+
+  class Behandlingspakke <<(V,orange)>>
 
   class Inntektsforhold <<(?,gray)>>
 
@@ -71,7 +75,7 @@ package Speilvendt {
 
 package Spleiselaget {
   class Behandling <<(E,lightblue)>>
-  class "SpleisBehandlingId" as BehandlingId <<(V,orange)>>
+  class "(Spleis)BehandlingId" as BehandlingId <<(V,orange)>>
   Behandling ||--|| BehandlingId
 
   class Generasjon <<(?,gray)>>
@@ -79,6 +83,8 @@ package Spleiselaget {
   class Inntektsgrunnlag <<(?,gray)>>
 
   class Vedtaksperiode <<(?,gray)>>
+
+  class VedtaksperiodeId <<(V,orange)>>
 
   class Vilkårsgrunnlag <<(?,gray)>>
 
@@ -113,6 +119,7 @@ Speilvendt.Vedtak ||--|| Flex.Svar
 Flex.Søker ||--|| Speilvendt.Person
 
 Speilvendt.Saksbehandler ||--o{ Speilvendt.Overstyring
+Speilvendt.Behandlingspakke }o--|{ Spleiselaget.BehandlingId
 Speilvendt.OverstyringBehandling }o--|| Speilvendt.Behandling
 Speilvendt.OverstyringSykefraværstilfelle }o--|| Speilvendt.Sykefraværstilfelle
 
@@ -136,7 +143,8 @@ Speilvendt.Totrinnskontroll }|--|| Speilvendt.Beslutter
 Speilvendt.Avviksprosent ..> Speilvendt.Skjønnsfastsetting
 Speilvendt.Behandling ||--|| Spleiselaget.BehandlingId
 Speilvendt.Saksbehandler ..> Speilvendt.Oppgave: Arbeider (stort sett) med
-Speilvendt.Vedtaksperiode ||--|| Spleiselaget.Vedtaksperiode
+Speilvendt.Vedtaksperiode ||--|| Spleiselaget.VedtaksperiodeId
+Spleiselaget.Vedtaksperiode ||--|| Spleiselaget.VedtaksperiodeId
 Speilvendt.Dag ||--o| Speilvendt.Arbeidsgiverbeløp
 Speilvendt.Dag ||--o| Speilvendt.Personbeløp
 Speilvendt.Dag ||--|| Speilvendt.Dagtype
