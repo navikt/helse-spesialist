@@ -129,8 +129,8 @@ class PostFattVedtakBehandler(
         saksbehandlerOid: SaksbehandlerOid,
     ) {
         val repo = transaksjon.vedtakBegrunnelseRepository
-        val eksisterende = repo.finn(id())
-        val nyBegrunnelse = VedtakBegrunnelse.ny(id(), begrunnelse.orEmpty(), utfall(), saksbehandlerOid)
+        val eksisterende = repo.finn(spleisBehandlingId)
+        val nyBegrunnelse = VedtakBegrunnelse.ny(spleisBehandlingId, begrunnelse.orEmpty(), utfall(), saksbehandlerOid)
         if (eksisterende == null) {
             repo.lagre(nyBegrunnelse)
         } else if (eksisterende.erForskjelligFra(begrunnelse.orEmpty(), utfall())) {
@@ -154,15 +154,15 @@ class PostFattVedtakBehandler(
                 .filterNot { it.fom > tom }
                 .plus(this)
 
-        val behandlingIder = behandlingerSomMåSeesUnderEtt.map { behandling -> behandling.id() }
-        val varsler = varselRepository.finnVarsler(behandlingIder)
+        val behandlingIder = behandlingerSomMåSeesUnderEtt.map { behandling -> behandling.spleisBehandlingId }
+        val varsler = varselRepository.finnVarsler(behandlingIder) // TODO Bruk unikId i stede for spleisBehandlingId
         if (varsler.any { it.manglerVurdering() }) throw FattVedtakException(ApiPostFattVedtakErrorCode.VARSLER_MANGLER_VURDERING)
         varsler
             .filter { it.kanGodkjennes() }
             .forEach {
                 it.godkjennOgPubliserEndring(
                     vedtaksperiodeId = vedtaksperiodeId,
-                    spleisBehandlingId = id(),
+                    spleisBehandlingId = spleisBehandlingId,
                     saksbehandlerOid = saksbehandlerOid,
                     varseldefinisjonRepository = varseldefinisjonRepository,
                     outbox = outbox,

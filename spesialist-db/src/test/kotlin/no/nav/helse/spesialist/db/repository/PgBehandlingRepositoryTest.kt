@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.db.repository
 
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.Behandling
+import no.nav.helse.spesialist.domain.BehandlingUnikId
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.testfixtures.jan
@@ -115,7 +116,8 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
         // when
         val funnet = repository.finnAndreBehandlingerISykefraværstilfelle(
             Behandling.fraLagring(
-                id = SpleisBehandlingId(UUID.randomUUID()),
+                id = BehandlingUnikId(UUID.randomUUID()),
+                spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
                 tags = emptySet(),
                 søknadIder = emptySet(),
                 fom = 1.jan(2018),
@@ -160,7 +162,8 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
         // when
         val funnet = repository.finnAndreBehandlingerISykefraværstilfelle(
             Behandling.fraLagring(
-                id = SpleisBehandlingId(UUID.randomUUID()),
+                id = BehandlingUnikId(UUID.randomUUID()),
+                spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
                 tags = emptySet(),
                 søknadIder = emptySet(),
                 fom = 1.jan(2018),
@@ -194,7 +197,8 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
         // when
         val funnet = repository.finnAndreBehandlingerISykefraværstilfelle(
             Behandling.fraLagring(
-                id = SpleisBehandlingId(UUID.randomUUID()),
+                id = BehandlingUnikId(UUID.randomUUID()),
+                spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
                 tags = emptySet(),
                 søknadIder = emptySet(),
                 fom = 1.jan(2018),

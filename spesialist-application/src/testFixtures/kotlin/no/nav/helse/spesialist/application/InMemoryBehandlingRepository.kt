@@ -19,6 +19,6 @@ class InMemoryBehandlingRepository : BehandlingRepository {
     }
 
     override fun lagre(behandling: Behandling) {
-        behandlinger[behandling.id()] = behandling
+        behandlinger[behandling.spleisBehandlingId] = behandling
     }
 }

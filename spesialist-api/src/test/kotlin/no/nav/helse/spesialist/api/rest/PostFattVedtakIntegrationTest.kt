@@ -7,6 +7,7 @@ import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.domain.Behandling
+import no.nav.helse.spesialist.domain.BehandlingUnikId
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
@@ -80,7 +81,7 @@ class PostFattVedtakIntegrationTest {
         // Given:
         val behandlingId = UUID.randomUUID()
         val saksbehandler = lagEnSaksbehandler()
-        val behandling = lagEnBehandling(behandlingId, VedtaksperiodeId(UUID.randomUUID()))
+        val behandling = lagEnBehandling(spleisBehandlingId = behandlingId, vedtaksperiodeId = VedtaksperiodeId(UUID.randomUUID()))
         behandlingRepository.lagre(behandling)
         saksbehandlerRepository.lagre(saksbehandler)
 
@@ -112,7 +113,7 @@ class PostFattVedtakIntegrationTest {
         val behandlingId = UUID.randomUUID()
         val fødselsnummer = lagFødselsnummer()
         val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer, lagOrganisasjonsnummer())
-        val behandling = lagEnBehandling(behandlingId, vedtaksperiode.id())
+        val behandling = lagEnBehandling(spleisBehandlingId = behandlingId, vedtaksperiodeId =  vedtaksperiode.id())
         val saksbehandler = lagEnSaksbehandler()
         saksbehandlerRepository.lagre(saksbehandler)
         vedtaksperiodeRepository.lagre(vedtaksperiode)
@@ -136,7 +137,7 @@ class PostFattVedtakIntegrationTest {
         val behandlingId = UUID.randomUUID()
         val fødselsnummer = lagFødselsnummer()
         val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer, lagOrganisasjonsnummer())
-        val behandling = lagEnBehandling(behandlingId, vedtaksperiode.id())
+        val behandling = lagEnBehandling(spleisBehandlingId = behandlingId, vedtaksperiodeId = vedtaksperiode.id())
         val saksbehandler = lagEnSaksbehandler()
         saksbehandlerRepository.lagre(saksbehandler)
         vedtaksperiodeRepository.lagre(vedtaksperiode)
@@ -175,7 +176,7 @@ class PostFattVedtakIntegrationTest {
         val behandlingId = UUID.randomUUID()
         val fødselsnummer = lagFødselsnummer()
         val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer, lagOrganisasjonsnummer())
-        val behandling = lagEnBehandling(behandlingId, vedtaksperiode.id())
+        val behandling = lagEnBehandling(spleisBehandlingId = behandlingId, vedtaksperiodeId = vedtaksperiode.id())
         val saksbehandler = lagEnSaksbehandler()
         saksbehandlerRepository.lagre(saksbehandler)
         vedtaksperiodeRepository.lagre(vedtaksperiode)
@@ -216,7 +217,7 @@ class PostFattVedtakIntegrationTest {
         val behandlingId = UUID.randomUUID()
         val fødselsnummer = lagFødselsnummer()
         val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer, lagOrganisasjonsnummer())
-        val behandling = lagEnBehandling(behandlingId, vedtaksperiode.id())
+        val behandling = lagEnBehandling(spleisBehandlingId = behandlingId, vedtaksperiodeId = vedtaksperiode.id())
         val saksbehandler = lagEnSaksbehandler()
         saksbehandlerRepository.lagre(saksbehandler)
         vedtaksperiodeRepository.lagre(vedtaksperiode)
@@ -263,7 +264,7 @@ class PostFattVedtakIntegrationTest {
         val behandlingId = UUID.randomUUID()
         val fødselsnummer = lagFødselsnummer()
         val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer, lagOrganisasjonsnummer())
-        val behandling = lagEnBehandling(behandlingId, vedtaksperiode.id())
+        val behandling = lagEnBehandling(spleisBehandlingId = behandlingId, vedtaksperiodeId =  vedtaksperiode.id())
         val saksbehandler = lagEnSaksbehandler()
         saksbehandlerRepository.lagre(saksbehandler)
         vedtaksperiodeRepository.lagre(vedtaksperiode)
@@ -309,7 +310,7 @@ class PostFattVedtakIntegrationTest {
         val behandlingId = UUID.randomUUID()
         val fødselsnummer = lagFødselsnummer()
         val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer, lagOrganisasjonsnummer())
-        val behandling = lagEnBehandling(behandlingId, vedtaksperiode.id())
+        val behandling = lagEnBehandling(spleisBehandlingId = behandlingId, vedtaksperiodeId = vedtaksperiode.id())
         val saksbehandler = lagEnSaksbehandler()
         saksbehandlerRepository.lagre(saksbehandler)
         vedtaksperiodeRepository.lagre(vedtaksperiode)
@@ -354,7 +355,7 @@ class PostFattVedtakIntegrationTest {
         val behandlingId = UUID.randomUUID()
         val fødselsnummer = lagFødselsnummer()
         val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer, lagOrganisasjonsnummer())
-        val behandling = lagEnBehandling(behandlingId, vedtaksperiode.id(), tags = setOf("OverlapperMedInfotrygd"))
+        val behandling = lagEnBehandling(spleisBehandlingId = behandlingId, vedtaksperiodeId = vedtaksperiode.id(), tags = setOf("OverlapperMedInfotrygd"))
         val saksbehandler = lagEnSaksbehandler()
         saksbehandlerRepository.lagre(saksbehandler)
         vedtaksperiodeRepository.lagre(vedtaksperiode)
@@ -396,7 +397,7 @@ class PostFattVedtakIntegrationTest {
         val behandlingId = UUID.randomUUID()
         val fødselsnummer = lagFødselsnummer()
         val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer, lagOrganisasjonsnummer())
-        val behandling = lagEnBehandling(behandlingId, vedtaksperiode.id())
+        val behandling = lagEnBehandling(spleisBehandlingId = behandlingId, vedtaksperiodeId = vedtaksperiode.id())
         val saksbehandler = lagEnSaksbehandler()
         val kode = "RV_IV_2"
         saksbehandlerRepository.lagre(saksbehandler)
@@ -411,7 +412,7 @@ class PostFattVedtakIntegrationTest {
         varselRepository.lagre(
             Varsel.fraLagring(
                 VarselId(UUID.randomUUID()),
-                behandling.id(),
+                behandling.spleisBehandlingId,
                 status = Varsel.Status.AKTIV,
                 vurdering = null,
                 kode = kode
@@ -450,7 +451,7 @@ class PostFattVedtakIntegrationTest {
         val behandlingId = UUID.randomUUID()
         val fødselsnummer = lagFødselsnummer()
         val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer, lagOrganisasjonsnummer())
-        val behandling = lagEnBehandling(behandlingId, vedtaksperiode.id())
+        val behandling = lagEnBehandling(spleisBehandlingId = behandlingId, vedtaksperiodeId = vedtaksperiode.id())
         val saksbehandler = lagEnSaksbehandler()
         val kode = "RV_IV_2"
         saksbehandlerRepository.lagre(saksbehandler)
@@ -465,7 +466,7 @@ class PostFattVedtakIntegrationTest {
         varselRepository.lagre(
             Varsel.fraLagring(
                 VarselId(UUID.randomUUID()),
-                behandling.id(),
+                behandling.spleisBehandlingId,
                 status = status,
                 vurdering = null,
                 kode = kode
@@ -492,7 +493,7 @@ class PostFattVedtakIntegrationTest {
         val behandlingId = UUID.randomUUID()
         val fødselsnummer = lagFødselsnummer()
         val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer, lagOrganisasjonsnummer())
-        val behandling = lagEnBehandling(behandlingId, vedtaksperiode.id())
+        val behandling = lagEnBehandling(spleisBehandlingId = behandlingId, vedtaksperiodeId = vedtaksperiode.id())
         val saksbehandler = lagEnSaksbehandler()
         val kode = "RV_IV_2"
         saksbehandlerRepository.lagre(saksbehandler)
@@ -506,14 +507,14 @@ class PostFattVedtakIntegrationTest {
         varseldefinisjonRepository.lagre(kode)
         val godkjentVarsel = Varsel.fraLagring(
             VarselId(UUID.randomUUID()),
-            behandling.id(),
+            behandling.spleisBehandlingId,
             status = Varsel.Status.GODKJENT,
             vurdering = null,
             kode = kode
         )
         val vurdertVarsel = Varsel.fraLagring(
             VarselId(UUID.randomUUID()),
-            behandling.id(),
+            behandling.spleisBehandlingId,
             status = Varsel.Status.VURDERT,
             vurdering = null,
             kode = kode
@@ -560,11 +561,13 @@ class PostFattVedtakIntegrationTest {
     )
 
     private fun lagEnBehandling(
-        behandlingId: UUID,
+        id: UUID = UUID.randomUUID(),
+        spleisBehandlingId: UUID,
         vedtaksperiodeId: VedtaksperiodeId,
         tags: Set<String> = setOf("Innvilget"),
     ): Behandling = Behandling.fraLagring(
-        id = SpleisBehandlingId(behandlingId),
+        id = BehandlingUnikId(id),
+        spleisBehandlingId = SpleisBehandlingId(spleisBehandlingId),
         tags = tags,
         søknadIder = emptySet(),
         fom = 1.jan(2018),

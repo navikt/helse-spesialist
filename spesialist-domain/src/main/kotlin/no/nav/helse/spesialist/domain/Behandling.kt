@@ -10,6 +10,11 @@ value class SpleisBehandlingId(
     val value: UUID,
 )
 
+@JvmInline
+value class BehandlingUnikId(
+    val value: UUID,
+)
+
 enum class Tag {
     Innvilget,
     DelvisInnvilget,
@@ -17,6 +22,7 @@ enum class Tag {
 }
 
 class Behandling private constructor(
+    val id: BehandlingUnikId,
     val spleisBehandlingId: SpleisBehandlingId,
     val vedtaksperiodeId: VedtaksperiodeId,
     val tags: Set<String>,
@@ -24,7 +30,7 @@ class Behandling private constructor(
     val tom: LocalDate,
     val skjæringstidspunkt: LocalDate,
     søknadIder: Set<UUID>,
-) : Entity<SpleisBehandlingId>(spleisBehandlingId) {
+) : Entity<BehandlingUnikId>(id) {
     private val søknadIder = søknadIder.toMutableSet()
 
     fun søknadIder() = søknadIder.toSet()
@@ -51,7 +57,8 @@ class Behandling private constructor(
 
     companion object {
         fun fraLagring(
-            id: SpleisBehandlingId,
+            id: BehandlingUnikId,
+            spleisBehandlingId: SpleisBehandlingId,
             vedtaksperiodeId: VedtaksperiodeId,
             tags: Set<String>,
             fom: LocalDate,
@@ -59,7 +66,8 @@ class Behandling private constructor(
             skjæringstidspunkt: LocalDate,
             søknadIder: Set<UUID>,
         ) = Behandling(
-            spleisBehandlingId = id,
+            id = id,
+            spleisBehandlingId = spleisBehandlingId,
             vedtaksperiodeId = vedtaksperiodeId,
             tags = tags,
             fom = fom,

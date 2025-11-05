@@ -7,6 +7,7 @@ import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.domain.Behandling
+import no.nav.helse.spesialist.domain.BehandlingUnikId
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import java.util.UUID
@@ -18,7 +19,7 @@ class PgBehandlingRepository(
     override fun finn(id: SpleisBehandlingId): Behandling? =
         asSQL(
             """
-            SELECT b.vedtaksperiode_id, spleis_behandling_id, tags, b.fom, b.tom, b.skjæringstidspunkt
+            SELECT b.unik_id, b.vedtaksperiode_id, spleis_behandling_id, tags, b.fom, b.tom, b.skjæringstidspunkt
             FROM behandling b
             INNER JOIN vedtak v on v.vedtaksperiode_id = b.vedtaksperiode_id
             WHERE b.spleis_behandling_id = :spleis_behandling_id
@@ -32,7 +33,7 @@ class PgBehandlingRepository(
     ): Set<Behandling> =
         asSQL(
             """
-            SELECT DISTINCT ON (b.vedtaksperiode_id) b.vedtaksperiode_id, spleis_behandling_id, tags, b.fom, b.tom, b.skjæringstidspunkt
+            SELECT DISTINCT ON (b.vedtaksperiode_id) b.vedtaksperiode_id, b.unik_id, spleis_behandling_id, tags, b.fom, b.tom, b.skjæringstidspunkt
             FROM behandling b
                      INNER JOIN vedtak v on v.vedtaksperiode_id = b.vedtaksperiode_id
                      INNER JOIN person p on p.id = v.person_ref
@@ -69,7 +70,8 @@ class PgBehandlingRepository(
     private fun tilBehandling(row: Row): Behandling {
         val spleisBehandlingId = SpleisBehandlingId(row.uuid("spleis_behandling_id"))
         return Behandling.fraLagring(
-            id = spleisBehandlingId,
+            id = BehandlingUnikId(row.uuid("unik_id")),
+            spleisBehandlingId = spleisBehandlingId,
             vedtaksperiodeId = VedtaksperiodeId(row.uuid("vedtaksperiode_id")),
             tags = row.array<String>("tags").toSet(),
             fom = row.localDate("fom"),

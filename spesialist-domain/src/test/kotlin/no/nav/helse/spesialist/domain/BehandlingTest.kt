@@ -46,7 +46,8 @@ class BehandlingTest {
     }
 
     private fun lagEnBehandling(tags: Set<String>): Behandling = Behandling.fraLagring(
-        id = SpleisBehandlingId(UUID.randomUUID()),
+        id = BehandlingUnikId(UUID.randomUUID()),
+        spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
         tags = tags,
         søknadIder = emptySet(),
         fom = 1.jan(2018),
