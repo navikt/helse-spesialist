@@ -43,7 +43,7 @@ class PgBehandlingRepository(
             "fodselsnummer" to fødselsnummer,
             "skjaeringstidspunkt" to behandling.skjæringstidspunkt,
         ).list(::tilBehandling)
-            .filterNot { it.id == behandling.id }
+            .filterNot { it.spleisBehandlingId == behandling.spleisBehandlingId }
             .toSet()
 
     override fun lagre(behandling: Behandling) {
@@ -52,7 +52,7 @@ class PgBehandlingRepository(
                 """
                 INSERT INTO behandling_soknad (behandling_id, søknad_id) VALUES (:behandlingId, :soknadId) ON CONFLICT DO NOTHING
                 """.trimIndent(),
-                "behandlingId" to behandling.id.value,
+                "behandlingId" to behandling.spleisBehandlingId.value,
                 "soknadId" to søknadId,
             ).update()
         }

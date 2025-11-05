@@ -17,14 +17,14 @@ enum class Tag {
 }
 
 class Behandling private constructor(
-    val id: SpleisBehandlingId,
+    val spleisBehandlingId: SpleisBehandlingId,
     val vedtaksperiodeId: VedtaksperiodeId,
     val tags: Set<String>,
     val fom: LocalDate,
     val tom: LocalDate,
     val skjæringstidspunkt: LocalDate,
     søknadIder: Set<UUID>,
-) : Entity<SpleisBehandlingId>(id) {
+) : Entity<SpleisBehandlingId>(spleisBehandlingId) {
     private val søknadIder = søknadIder.toMutableSet()
 
     fun søknadIder() = søknadIder.toSet()
@@ -59,7 +59,7 @@ class Behandling private constructor(
             skjæringstidspunkt: LocalDate,
             søknadIder: Set<UUID>,
         ) = Behandling(
-            id = id,
+            spleisBehandlingId = id,
             vedtaksperiodeId = vedtaksperiodeId,
             tags = tags,
             fom = fom,

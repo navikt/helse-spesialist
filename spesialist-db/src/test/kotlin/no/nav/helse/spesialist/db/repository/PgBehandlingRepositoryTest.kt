@@ -40,7 +40,7 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
 
         // then
         assertNotNull(funnet)
-        assertEquals(spleisBehandlingId, funnet.id.value)
+        assertEquals(spleisBehandlingId, funnet.spleisBehandlingId.value)
         assertEquals(vedtaksperiodeId, funnet.vedtaksperiodeId.value)
         assertEquals(tags.toSet(), funnet.tags)
         assertEquals(fom, funnet.fom)
@@ -124,7 +124,7 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
                 vedtaksperiodeId = VedtaksperiodeId(UUID.randomUUID())
             ),
             fødselsnummer = fødselsnummer
-        ).map { it.id.value }
+        ).map { it.spleisBehandlingId.value }
 
         // then
         assertEquals(2, funnet.size)
@@ -173,7 +173,7 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
 
         // then
         assertEquals(1, funnet.size)
-        assertEquals(spleisBehandlingId2, funnet.first().id.value)
+        assertEquals(spleisBehandlingId2, funnet.first().spleisBehandlingId.value)
     }
 
     @Test
