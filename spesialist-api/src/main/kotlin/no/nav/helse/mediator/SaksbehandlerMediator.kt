@@ -1,6 +1,5 @@
 package no.nav.helse.mediator
 
-import graphql.schema.DataFetchingEnvironment
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.MeldingPubliserer
 import no.nav.helse.bootstrap.EnvironmentToggles
@@ -32,7 +31,6 @@ import no.nav.helse.modell.saksbehandler.handlinger.EndrePåVent
 import no.nav.helse.modell.saksbehandler.handlinger.FjernPåVent
 import no.nav.helse.modell.saksbehandler.handlinger.FjernPåVentUtenHistorikkinnslag
 import no.nav.helse.modell.saksbehandler.handlinger.Handling
-import no.nav.helse.modell.saksbehandler.handlinger.HandlingType
 import no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent
 import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgrad
 import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgradArbeidsgiver
@@ -60,7 +58,6 @@ import no.nav.helse.spesialist.api.feilhåndtering.FinnerIkkeLagtPåVent
 import no.nav.helse.spesialist.api.feilhåndtering.IkkeTilgang
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
-import no.nav.helse.spesialist.api.graphql.ContextValues
 import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutationHandler.VedtakResultat
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdOverstyringHandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiInntektOgRefusjonOverstyring
@@ -77,11 +74,8 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
-import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.application.logg.logg
-import no.nav.helse.spesialist.application.logg.loggInfo
-import no.nav.helse.spesialist.application.logg.loggThrowable
 import no.nav.helse.spesialist.application.logg.sikkerlogg
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
@@ -110,53 +104,6 @@ class SaksbehandlerMediator(
     private val periodehistorikkDao = daos.periodehistorikkDao
     private val vedtakBegrunnelseDao = daos.vedtakBegrunnelseDao
     private val dialogDao = daos.dialogDao
-
-    fun <T> utførHandling(
-        handlingType: HandlingType,
-        env: DataFetchingEnvironment,
-        block: (saksbehandler: Saksbehandler, tilgangsgrupper: Set<Tilgangsgruppe>, transaction: SessionContext, outbox: Outbox) -> T,
-    ): T =
-        utførHandling(
-            handlingType = handlingType,
-            saksbehandler = env.graphQlContext.get(ContextValues.SAKSBEHANDLER),
-            tilgangsgrupper = env.graphQlContext.get(ContextValues.TILGANGSGRUPPER),
-            block = block,
-        )
-
-    fun <T> utførHandling(
-        handlingType: HandlingType,
-        saksbehandler: Saksbehandler,
-        tilgangsgrupper: Set<Tilgangsgruppe>,
-        block: (saksbehandler: Saksbehandler, tilgangsgrupper: Set<Tilgangsgruppe>, transaction: SessionContext, outbox: Outbox) -> T,
-    ): T =
-        withMDC(
-            mapOf(
-                "saksbehandlerOid" to saksbehandler.id().value.toString(),
-                "handlingId" to UUID.randomUUID().toString(),
-            ),
-        ) {
-            sessionFactory.transactionalSessionScope { it.saksbehandlerRepository.lagre(saksbehandler = saksbehandler) }
-            tell(handlingType)
-
-            val navnPåHandling = handlingType.name.lowercase()
-            loggInfo(
-                melding = "Utfører handling $navnPåHandling på vegne av saksbehandler",
-                sikkerloggDetaljer = "epostadresse=${saksbehandler.epost}, oid=${saksbehandler.id().value}",
-            )
-            val outbox = Outbox()
-            val returnValue =
-                runCatching {
-                    sessionFactory
-                        .transactionalSessionScope { transaction ->
-                            block(saksbehandler, tilgangsgrupper, transaction, outbox)
-                        }.also { outbox.sendAlle(meldingPubliserer) }
-                }.onFailure { throwable ->
-                    loggThrowable("Handling $navnPåHandling feilet", throwable)
-                    throw throwable
-                }
-            loggInfo("Handling $navnPåHandling utført")
-            returnValue.getOrThrow()
-        }
 
     fun håndter(
         handlingFraApi: HandlingFraApi,

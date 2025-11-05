@@ -1,24 +1,23 @@
-package no.nav.helse.spesialist.api
+package no.nav.helse.spesialist.api.rest
 
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
-import no.nav.helse.modell.stoppautomatiskbehandling.StoppknappÅrsak
+import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.api.testfixtures.lagSaksbehandler
 import no.nav.helse.spesialist.domain.NotatType
-import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.testfixtures.fødselsdato
 import no.nav.helse.spesialist.domain.testfixtures.lagEtternavn
 import no.nav.helse.spesialist.domain.testfixtures.lagFornavn
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.typer.Kjønn
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Test
 import java.util.UUID
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
-abstract class OpphevStansIntegrationTest {
-    protected val integrationTestFixture = IntegrationTestFixture()
+class PostOpphevStansIntegrationTest {
+    private val integrationTestFixture = IntegrationTestFixture()
 
     private val notatRepository = integrationTestFixture.sessionFactory.sessionContext.notatRepository
     private val oppgaveRepository = integrationTestFixture.sessionFactory.sessionContext.oppgaveRepository
@@ -70,7 +69,13 @@ abstract class OpphevStansIntegrationTest {
         val begrunnelse = "begrunnelse"
 
         // When:
-        postAndAssertSuccess(saksbehandler, fødselsnummer, begrunnelse)
+        val response = integrationTestFixture.post(
+            "/api/opphevstans",
+            body = """{ "fodselsnummer": "$fødselsnummer", "begrunnelse": "$begrunnelse" }""",
+            saksbehandler = saksbehandler,
+        )
+        assertEquals(204, response.status)
+        assertEquals("", response.bodyAsText)
 
         // Then:
         // Sjekk persistert data
@@ -79,7 +84,7 @@ abstract class OpphevStansIntegrationTest {
         val lagretStans = lagredeStans.first()
         assertEquals(fødselsnummer, lagretStans.fødselsnummer)
         assertEquals("NORMAL", lagretStans.status)
-        assertEquals(emptySet<StoppknappÅrsak>(), lagretStans.årsaker)
+        assertEquals(emptySet(), lagretStans.årsaker)
         assertEquals(null, lagretStans.meldingId)
 
         val notater = notatRepository.finnAlleForVedtaksperiode(vedtaksperiodeId)
@@ -99,9 +104,4 @@ abstract class OpphevStansIntegrationTest {
         integrationTestFixture.assertPubliserteUtgåendeHendelser()
     }
 
-    abstract fun postAndAssertSuccess(
-        saksbehandler: Saksbehandler,
-        fødselsnummer: String,
-        begrunnelse: String
-    )
 }

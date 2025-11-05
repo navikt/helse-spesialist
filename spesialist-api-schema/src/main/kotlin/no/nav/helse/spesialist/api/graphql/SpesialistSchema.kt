@@ -5,8 +5,6 @@ import no.nav.helse.spesialist.api.graphql.mutation.MinimumSykdomsgradMutation
 import no.nav.helse.spesialist.api.graphql.mutation.MinimumSykdomsgradMutationSchema
 import no.nav.helse.spesialist.api.graphql.mutation.NotatMutation
 import no.nav.helse.spesialist.api.graphql.mutation.NotatMutationSchema
-import no.nav.helse.spesialist.api.graphql.mutation.OpphevStansMutation
-import no.nav.helse.spesialist.api.graphql.mutation.OpphevStansMutationSchema
 import no.nav.helse.spesialist.api.graphql.mutation.OpptegnelseMutation
 import no.nav.helse.spesialist.api.graphql.mutation.OpptegnelseMutationSchema
 import no.nav.helse.spesialist.api.graphql.mutation.OverstyringMutation
@@ -59,7 +57,6 @@ class SpesialistSchema(
         val vedtak: VedtakMutationSchema,
         val person: PersonMutationSchema,
         val paVent: PaVentMutationSchema,
-        val opphevStans: OpphevStansMutationSchema,
         val stansAutomatiskBehandling: StansAutomatiskBehandlingMutationSchema,
     )
 
@@ -87,7 +84,6 @@ class SpesialistSchema(
                 VedtakMutation(handler = mutationHandlers.vedtak),
                 PersonMutation(handler = mutationHandlers.person),
                 PaVentMutation(handler = mutationHandlers.paVent),
-                OpphevStansMutation(handler = mutationHandlers.opphevStans),
                 StansAutomatiskBehandlingMutation(handler = mutationHandlers.stansAutomatiskBehandling),
             )
 

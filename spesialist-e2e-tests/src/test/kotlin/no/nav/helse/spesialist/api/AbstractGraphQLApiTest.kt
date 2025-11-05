@@ -30,7 +30,6 @@ import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettSnapshotGenera
 import no.nav.helse.spesialist.api.graphql.SpesialistSchema
 import no.nav.helse.spesialist.api.graphql.mutation.MinimumSykdomsgradMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.NotatMutationHandler
-import no.nav.helse.spesialist.api.graphql.mutation.OpphevStansMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.OpptegnelseMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.OverstyringMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.PaVentMutationHandler
@@ -150,7 +149,6 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                     ),
                     person = PersonMutationHandler(personhåndterer = personhåndterer),
                     paVent = PaVentMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
-                    opphevStans = OpphevStansMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
                     stansAutomatiskBehandling = StansAutomatiskBehandlingMutationHandler(sessionFactory)
                 ),
             )
