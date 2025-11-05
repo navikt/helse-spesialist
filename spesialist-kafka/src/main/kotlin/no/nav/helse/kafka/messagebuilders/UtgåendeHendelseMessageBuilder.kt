@@ -393,7 +393,7 @@ private fun SkjønnsfastsattSykepengegrunnlagEvent.detaljer(): Map<String, Any> 
 private fun VarselEndret.detaljer(): Map<String, Any> =
     mapOf(
         "vedtaksperiode_id" to vedtaksperiodeId,
-        "behandling_id" to behandlingId,
+        "behandling_id" to behandlingIdForBehandlingSomBleGodkjent,
         "varsel_id" to varselId,
         "varseltittel" to varseltittel,
         "varselkode" to varselkode,

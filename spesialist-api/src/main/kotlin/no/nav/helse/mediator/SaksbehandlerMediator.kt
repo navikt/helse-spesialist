@@ -640,7 +640,7 @@ class SaksbehandlerMediator(
         val varselEndret =
             VarselEndret(
                 vedtaksperiodeId = vedtaksperiodeId,
-                behandlingId = behandlingId,
+                behandlingIdForBehandlingSomBleGodkjent = behandlingId,
                 varselId = varselId,
                 varseltittel = varseltittel,
                 varselkode = varselkode,

@@ -48,12 +48,13 @@ class PgBehandlingRepository(
             .toSet()
 
     override fun lagre(behandling: Behandling) {
+        val spleisBehandlingId = checkNotNull(behandling.spleisBehandlingId)
         behandling.søknadIder().forEach { søknadId ->
             asSQL(
                 """
                 INSERT INTO behandling_soknad (behandling_id, søknad_id) VALUES (:behandlingId, :soknadId) ON CONFLICT DO NOTHING
                 """.trimIndent(),
-                "behandlingId" to behandling.spleisBehandlingId.value,
+                "behandlingId" to spleisBehandlingId.value,
                 "soknadId" to søknadId,
             ).update()
         }
@@ -68,7 +69,7 @@ class PgBehandlingRepository(
         }.toSet()
 
     private fun tilBehandling(row: Row): Behandling {
-        val spleisBehandlingId = SpleisBehandlingId(row.uuid("spleis_behandling_id"))
+        val spleisBehandlingId = row.uuidOrNull("spleis_behandling_id")?.let { SpleisBehandlingId(it) }
         return Behandling.fraLagring(
             id = BehandlingUnikId(row.uuid("unik_id")),
             spleisBehandlingId = spleisBehandlingId,
@@ -77,7 +78,7 @@ class PgBehandlingRepository(
             fom = row.localDate("fom"),
             tom = row.localDate("tom"),
             skjæringstidspunkt = row.localDate("skjæringstidspunkt"),
-            søknadIder = hentSøkadIderForBehandling(spleisBehandlingId),
+            søknadIder = spleisBehandlingId?.let { hentSøkadIderForBehandling(it) } ?: emptySet(),
         )
     }
 }

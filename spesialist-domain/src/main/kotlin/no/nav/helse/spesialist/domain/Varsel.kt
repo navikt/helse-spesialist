@@ -12,7 +12,8 @@ value class VarselId(
 
 class Varsel private constructor(
     id: VarselId,
-    val spleisBehandlingId: SpleisBehandlingId,
+    val spleisBehandlingId: SpleisBehandlingId?,
+    val behandlingUnikId: BehandlingUnikId,
     status: Status,
     vurdering: Varselvurdering?,
     val kode: String,
@@ -48,7 +49,8 @@ class Varsel private constructor(
     companion object {
         fun fraLagring(
             id: VarselId,
-            spleisBehandlingId: SpleisBehandlingId,
+            spleisBehandlingId: SpleisBehandlingId?,
+            behandlingUnikId: BehandlingUnikId,
             status: Status,
             vurdering: Varselvurdering?,
             kode: String,
@@ -56,6 +58,7 @@ class Varsel private constructor(
             Varsel(
                 id = id,
                 spleisBehandlingId = spleisBehandlingId,
+                behandlingUnikId = behandlingUnikId,
                 status = status,
                 vurdering = vurdering,
                 kode = kode,

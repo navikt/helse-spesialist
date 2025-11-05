@@ -79,7 +79,15 @@ class PostFattVedtakBehandler(
                 transaksjon.totrinnsvurderingRepository.lagre(totrinnsvurdering)
             }
             transaksjon.reservasjonDao.reserverPerson(saksbehandlerSomFattetVedtak.id().value, fødselsnummer)
-            behandling.fattVedtak(transaksjon, fødselsnummer, saksbehandler, oppgave, request.begrunnelse, outbox)
+            behandling.fattVedtak(
+                transaksjon = transaksjon,
+                fødselsnummer = fødselsnummer,
+                saksbehandler = saksbehandler,
+                oppgave = oppgave,
+                spleisBehandlingId = spleisBehandlingId,
+                begrunnelse = request.begrunnelse,
+                outbox = outbox,
+            )
 
             sendSaksbehandlerLøsning(
                 fødselsnummer = fødselsnummer,
@@ -102,6 +110,7 @@ class PostFattVedtakBehandler(
         fødselsnummer: String,
         saksbehandler: Saksbehandler,
         oppgave: Oppgave,
+        spleisBehandlingId: SpleisBehandlingId,
         begrunnelse: String?,
         outbox: Outbox,
     ) {
@@ -112,6 +121,7 @@ class PostFattVedtakBehandler(
             varselRepository = transaksjon.varselRepository,
             varseldefinisjonRepository = transaksjon.varseldefinisjonRepository,
             fødselsnummer = fødselsnummer,
+            spleisBehandlingId = spleisBehandlingId,
             saksbehandlerOid = saksbehandlerOid,
             outbox = outbox,
         )
@@ -120,13 +130,14 @@ class PostFattVedtakBehandler(
         transaksjon.påVentDao.slettPåVent(oppgave.id)
         transaksjon.oppgaveRepository.lagre(oppgave)
         outbox.leggTil(fødselsnummer, OppgaveOppdatert(oppgave), "oppgave avventer system")
-        oppdaterVedtakBegrunnelse(transaksjon, begrunnelse, saksbehandlerOid)
+        oppdaterVedtakBegrunnelse(transaksjon, begrunnelse, saksbehandlerOid, spleisBehandlingId)
     }
 
     private fun Behandling.oppdaterVedtakBegrunnelse(
         transaksjon: SessionContext,
         begrunnelse: String?,
         saksbehandlerOid: SaksbehandlerOid,
+        spleisBehandlingId: SpleisBehandlingId,
     ) {
         val repo = transaksjon.vedtakBegrunnelseRepository
         val eksisterende = repo.finn(spleisBehandlingId)
@@ -145,6 +156,7 @@ class PostFattVedtakBehandler(
         behandlingRepository: BehandlingRepository,
         varselRepository: VarselRepository,
         fødselsnummer: String,
+        spleisBehandlingId: SpleisBehandlingId,
         saksbehandlerOid: SaksbehandlerOid,
         outbox: Outbox,
     ) {
@@ -154,8 +166,8 @@ class PostFattVedtakBehandler(
                 .filterNot { it.fom > tom }
                 .plus(this)
 
-        val behandlingIder = behandlingerSomMåSeesUnderEtt.map { behandling -> behandling.spleisBehandlingId }
-        val varsler = varselRepository.finnVarsler(behandlingIder) // TODO Bruk unikId i stede for spleisBehandlingId
+        val behandlingUnikIder = behandlingerSomMåSeesUnderEtt.map { behandling -> behandling.id() }
+        val varsler = varselRepository.finnVarslerFor(behandlingUnikIder)
         if (varsler.any { it.manglerVurdering() }) throw FattVedtakException(ApiPostFattVedtakErrorCode.VARSLER_MANGLER_VURDERING)
         varsler
             .filter { it.kanGodkjennes() }
@@ -190,7 +202,7 @@ class PostFattVedtakBehandler(
             hendelse =
                 VarselEndret(
                     vedtaksperiodeId = vedtaksperiodeId.value,
-                    behandlingId = spleisBehandlingId.value,
+                    behandlingIdForBehandlingSomBleGodkjent = spleisBehandlingId.value,
                     varselId = id().value,
                     varseltittel = varseldefinisjon.tittel,
                     varselkode = kode,

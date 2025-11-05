@@ -17,9 +17,10 @@ class VarselTest {
         val varsel = Varsel.fraLagring(
             id = VarselId(value = UUID.randomUUID()),
             spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
+            behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
             status = Varsel.Status.VURDERT,
             vurdering = null,
-            kode = "RV_IV_2"
+            kode = "RV_IV_2",
         )
 
         // then
@@ -32,6 +33,7 @@ class VarselTest {
         val varsel = Varsel.fraLagring(
             id = VarselId(value = UUID.randomUUID()),
             spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
+            behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
             status = Varsel.Status.AKTIV,
             vurdering = null,
             kode = "RV_IV_2"
@@ -48,6 +50,7 @@ class VarselTest {
         val varsel = Varsel.fraLagring(
             id = VarselId(value = UUID.randomUUID()),
             spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
+            behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
             status = status,
             vurdering = null,
             kode = "RV_IV_2"
@@ -64,6 +67,7 @@ class VarselTest {
         val varsel = Varsel.fraLagring(
             id = VarselId(value = UUID.randomUUID()),
             spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
+            behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
             status = status,
             vurdering = null,
             kode = "RV_IV_2"
@@ -79,6 +83,7 @@ class VarselTest {
         val varsel = Varsel.fraLagring(
             id = VarselId(value = UUID.randomUUID()),
             spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
+            behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
             status = Varsel.Status.VURDERT,
             vurdering = null,
             kode = "RV_IV_2"
@@ -99,6 +104,7 @@ class VarselTest {
         val varsel = Varsel.fraLagring(
             id = VarselId(value = UUID.randomUUID()),
             spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
+            behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
             status = Varsel.Status.AKTIV,
             vurdering = null,
             kode = "RV_IV_2"

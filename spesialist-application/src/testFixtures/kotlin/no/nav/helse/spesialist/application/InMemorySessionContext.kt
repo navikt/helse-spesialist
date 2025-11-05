@@ -25,6 +25,7 @@ import no.nav.helse.db.ÅpneGosysOppgaverDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.saksbehandler.handlinger.PåVentÅrsak
+import no.nav.helse.spesialist.domain.BehandlingUnikId
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.VedtakBegrunnelse
@@ -204,6 +205,10 @@ class InMemorySessionContext(
         private val varsler = mutableSetOf<Varsel>()
         override fun finnVarsler(behandlingIder: List<SpleisBehandlingId>): List<Varsel> {
             return varsler.filter { it.spleisBehandlingId in behandlingIder }
+        }
+
+        override fun finnVarslerFor(behandlingUnikIder: List<BehandlingUnikId>): List<Varsel> {
+            return varsler.filter { it.behandlingUnikId in behandlingUnikIder }
         }
 
         override fun lagre(varsel: Varsel) {

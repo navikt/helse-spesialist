@@ -1,10 +1,12 @@
 package no.nav.helse.spesialist.db.repository
 
+import kotliquery.Row
 import kotliquery.Session
 import no.nav.helse.Varselvurdering
 import no.nav.helse.spesialist.application.VarselRepository
 import no.nav.helse.spesialist.db.DbQuery
 import no.nav.helse.spesialist.db.SessionDbQuery
+import no.nav.helse.spesialist.domain.BehandlingUnikId
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.Varsel
@@ -18,27 +20,44 @@ class PgVarselRepository private constructor(
     override fun finnVarsler(behandlingIder: List<SpleisBehandlingId>): List<Varsel> =
         dbQuery.listWithListParameter(
             """
-               SELECT sv.unik_id, b.spleis_behandling_id, sv.status, sb.oid, sv.status_endret_tidspunkt, sv.kode FROM selve_varsel sv 
+               SELECT sv.unik_id, b.spleis_behandling_id, b.unik_id as behandling_unik_id, sv.status, sb.oid, sv.status_endret_tidspunkt, sv.kode FROM selve_varsel sv 
                 JOIN behandling b ON sv.generasjon_ref = b.id
                 LEFT JOIN saksbehandler sb ON sv.status_endret_ident = sb.ident
                 WHERE b.spleis_behandling_id IN (${behandlingIder.joinToString { "?" }})
             """,
             *behandlingIder.map { it.value }.toTypedArray(),
         ) { row ->
-            Varsel.fraLagring(
-                id = VarselId(row.uuid("unik_id")),
-                spleisBehandlingId = SpleisBehandlingId(row.uuid("spleis_behandling_id")),
-                status = enumValueOf(row.string("status")),
-                vurdering =
-                    row.uuidOrNull("oid")?.let {
-                        Varselvurdering(
-                            saksbehandlerId = SaksbehandlerOid(it),
-                            tidspunkt = row.localDateTime("status_endret_tidspunkt"),
-                        )
-                    },
-                kode = row.string("kode"),
-            )
+            row.mapTilVarsel()
         }
+
+    override fun finnVarslerFor(behandlingUnikIder: List<BehandlingUnikId>): List<Varsel> =
+        dbQuery.listWithListParameter(
+            """
+                SELECT sv.unik_id, b.spleis_behandling_id, b.unik_id as behandling_unik_id, sv.status, sb.oid, sv.status_endret_tidspunkt, sv.kode FROM selve_varsel sv 
+                JOIN behandling b ON sv.generasjon_ref = b.id
+                LEFT JOIN saksbehandler sb ON sv.status_endret_ident = sb.ident
+                WHERE b.unik_id IN (${behandlingUnikIder.joinToString { "?" }})
+            """,
+            *behandlingUnikIder.map { it.value }.toTypedArray(),
+        ) { row ->
+            row.mapTilVarsel()
+        }
+
+    private fun Row.mapTilVarsel(): Varsel =
+        Varsel.fraLagring(
+            id = VarselId(uuid("unik_id")),
+            spleisBehandlingId = uuidOrNull("spleis_behandling_id")?.let { SpleisBehandlingId(it) },
+            behandlingUnikId = BehandlingUnikId(uuid("behandling_unik_id")),
+            status = enumValueOf(string("status")),
+            vurdering =
+                uuidOrNull("oid")?.let {
+                    Varselvurdering(
+                        saksbehandlerId = SaksbehandlerOid(it),
+                        tidspunkt = localDateTime("status_endret_tidspunkt"),
+                    )
+                },
+            kode = string("kode"),
+        )
 
     override fun lagre(varsel: Varsel) {
         dbQuery.update(
