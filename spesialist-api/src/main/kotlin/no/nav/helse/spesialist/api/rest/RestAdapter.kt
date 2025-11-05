@@ -126,7 +126,7 @@ class RestAdapter(
                 if (cause is WrappedApiHttpProblemDetailsException) {
                     cause.problemDetails
                 } else {
-                    genericProblemDetails(HttpStatusCode.InternalServerError)
+                    genericProblemDetails<ERROR>(HttpStatusCode.InternalServerError)
                 }
             val statusCode = problemDetails.status
             val title = problemDetails.title
@@ -159,11 +159,11 @@ class RestAdapter(
         )
     }
 
-    private fun genericProblemDetails(internalServerError: HttpStatusCode): ApiHttpProblemDetails<ApiGenericErrorCode> =
+    private fun <T : ApiErrorCode> genericProblemDetails(internalServerError: HttpStatusCode): ApiHttpProblemDetails<T> =
         ApiHttpProblemDetails(
             status = internalServerError.value,
             title = internalServerError.description,
-            code = ApiGenericErrorCode(internalServerError),
+            code = null,
         )
 }
 

@@ -22,5 +22,5 @@ data class ApiHttpProblemDetails<T : ApiErrorCode>(
     val status: Int,
     val title: String,
     val detail: String? = null,
-    val code: T,
+    val code: T?,
 )
