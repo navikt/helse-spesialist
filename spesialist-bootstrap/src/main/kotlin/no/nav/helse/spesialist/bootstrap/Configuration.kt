@@ -17,7 +17,6 @@ data class Configuration(
     val clientSpleis: ClientSpleisModule.Configuration,
     val db: DBModule.Configuration,
     val kafka: KafkaModule.Configuration,
-    val versjonAvKode: String,
     val tilgangsgruppeUuider: TilgangsgruppeUuider,
     val environmentToggles: EnvironmentToggles,
     val stikkprøver: Stikkprøver,

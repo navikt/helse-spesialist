@@ -50,7 +50,6 @@ class IntegrationTestFixture() {
         meldingPubliserer = meldingPubliserer,
         tilgangsgruppehenter = { emptySet() },
         sessionFactory = sessionFactory,
-        versjonAvKode = "0.0.0",
         environmentToggles = mockk(relaxed = true),
         snapshothenter = mockk(relaxed = true),
         reservasjonshenter = mockk(relaxed = true),

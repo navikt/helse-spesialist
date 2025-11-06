@@ -92,7 +92,7 @@ fun kobleOppApi(
                 queryHandler(graphQLPlugin.server)
             }
         }
-        restRoutes(restAdapter, apiModuleConfiguration.eksponerOpenApi, dokumentMediator, environmentToggles)
+        restRoutes(restAdapter, apiModuleConfiguration, dokumentMediator, environmentToggles)
     }
 }
 

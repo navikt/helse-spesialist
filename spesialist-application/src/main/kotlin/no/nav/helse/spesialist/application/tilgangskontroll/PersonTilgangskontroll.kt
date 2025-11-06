@@ -5,6 +5,7 @@ import no.nav.helse.db.PersonDao
 import no.nav.helse.db.api.EgenAnsattApiDao
 import no.nav.helse.db.api.PersonApiDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
+import no.nav.helse.spesialist.application.logg.sikkerlogg
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 
 object PersonTilgangskontroll {
@@ -56,7 +57,7 @@ object PersonTilgangskontroll {
             true -> Tilgangsgruppe.EGEN_ANSATT in tilgangsgrupper
             false -> true
             null -> false
-        }
+        }.also { if (!it) sikkerlogg.warn("Mangler tilgang til egenansatte") }
 
     private fun harTilgangTilAdressebeskyttelse(
         adressebeskyttelse: Adressebeskyttelse?,
@@ -66,5 +67,5 @@ object PersonTilgangskontroll {
             Adressebeskyttelse.Ugradert -> true
             Adressebeskyttelse.Fortrolig -> Tilgangsgruppe.KODE_7 in tilgangsgrupper
             else -> false
-        }
+        }.also { if (!it) sikkerlogg.warn("Mangler tilgang til adressebeskyttelse") }
 }

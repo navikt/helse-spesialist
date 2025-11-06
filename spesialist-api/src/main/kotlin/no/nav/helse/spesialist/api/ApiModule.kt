@@ -28,7 +28,6 @@ class ApiModule(
     meldingPubliserer: MeldingPubliserer,
     tilgangsgruppehenter: Tilgangsgruppehenter,
     sessionFactory: SessionFactory,
-    versjonAvKode: String,
     private val environmentToggles: EnvironmentToggles,
     snapshothenter: Snapshothenter,
     reservasjonshenter: Reservasjonshenter,
@@ -39,6 +38,7 @@ class ApiModule(
         val jwkProviderUri: String,
         val tokenEndpoint: String,
         val eksponerOpenApi: Boolean,
+        val versjonAvKode: String,
     )
 
     val dokumentMediator =
@@ -67,7 +67,7 @@ class ApiModule(
     private val saksbehandlerMediator =
         SaksbehandlerMediator(
             daos = daos,
-            versjonAvKode = versjonAvKode,
+            versjonAvKode = configuration.versjonAvKode,
             meldingPubliserer = meldingPubliserer,
             oppgaveService = oppgaveService,
             apiOppgaveService = apiOppgaveService,

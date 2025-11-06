@@ -13,6 +13,7 @@ import io.ktor.server.routing.Routing
 import io.ktor.server.routing.route
 import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.mediator.dokument.DokumentMediator
+import no.nav.helse.spesialist.api.ApiModule
 import no.nav.helse.spesialist.api.rest.dokument.GetInntektsmeldingBehandler
 import no.nav.helse.spesialist.api.rest.dokument.GetSoknadBehandler
 import no.nav.helse.spesialist.api.rest.tilkommeninntekt.GetTilkomneInntektskilderForPersonBehandler
@@ -23,12 +24,12 @@ import no.nav.helse.spesialist.api.rest.tilkommeninntekt.PostTilkomneInntekterBe
 
 fun Routing.restRoutes(
     restAdapter: RestAdapter,
-    eksponerOpenApi: Boolean,
+    configuration: ApiModule.Configuration,
     dokumentMediator: DokumentMediator,
     environmentToggles: EnvironmentToggles,
 ) {
     route("/api") {
-        if (eksponerOpenApi) {
+        if (configuration.eksponerOpenApi) {
             route("/openapi.json") {
                 openApi()
             }
@@ -55,6 +56,8 @@ fun Routing.restRoutes(
             post(PostFattVedtakBehandler(environmentToggles), restAdapter)
 
             post(PostVedtaksperiodeAnnullerBehandler(), restAdapter)
+
+            post(PostMinimumSykdomsgradBehandler(configuration.versjonAvKode), restAdapter)
         }
     }
 }

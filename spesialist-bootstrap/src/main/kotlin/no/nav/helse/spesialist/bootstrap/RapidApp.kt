@@ -32,6 +32,7 @@ fun main() {
                         jwkProviderUri = env.getValue("AZURE_OPENID_CONFIG_JWKS_URI"),
                         tokenEndpoint = env.getValue("AZURE_OPENID_CONFIG_TOKEN_ENDPOINT"),
                         eksponerOpenApi = env.getBoolean("EKSPONER_OPENAPI"),
+                        versjonAvKode = versjonAvKode,
                     ),
                 clientEntraID =
                     ClientEntraIDModule.Configuration(
@@ -75,7 +76,6 @@ fun main() {
                         ignorerMeldingerForUkjentePersoner =
                             env.getBoolean("IGNORER_MELDINGER_FOR_UKJENTE_PERSONER"),
                     ),
-                versjonAvKode = versjonAvKode,
                 tilgangsgruppeUuider =
                     TilgangsgruppeUuider(
                         beslutterGruppeUuid = env.getUUID("TILGANGSGRUPPE_UUID_BESLUTTER"),
@@ -149,12 +149,11 @@ class RapidApp {
         val apiModule =
             ApiModule(
                 configuration = configuration.api,
-                daos = dbModule.daos,
                 tilgangsgruppeUuider = configuration.tilgangsgruppeUuider,
+                daos = dbModule.daos,
                 meldingPubliserer = kafkaModule.meldingPubliserer,
                 tilgangsgruppehenter = clientEntraIdModule.tilgangsgruppehenter,
                 sessionFactory = dbModule.sessionFactory,
-                versjonAvKode = configuration.versjonAvKode,
                 environmentToggles = configuration.environmentToggles,
                 snapshothenter = clientSpleisModule.snapshothenter,
                 reservasjonshenter = clientKrrModule.reservasjonshenter,

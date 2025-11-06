@@ -38,7 +38,6 @@ object E2ETestApplikasjon {
             clientSpleis = ClientSpleisModuleIntegrationTestFixture.moduleConfiguration,
             db = DBTestFixture.database.dbModuleConfiguration,
             kafka = KafkaModuleTestRapidTestFixture.moduleConfiguration,
-            versjonAvKode = "versjon_1",
             tilgangsgruppeUuider = tilgangsgruppeUuider,
             environmentToggles = object : EnvironmentToggles {
                 override val kanBeslutteEgneSaker = false

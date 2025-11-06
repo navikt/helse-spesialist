@@ -24,7 +24,6 @@ fun main() {
             clientSpleis = ClientSpleisModuleIntegrationTestFixture.moduleConfiguration,
             db = DBTestFixture.database.dbModuleConfiguration,
             kafka = KafkaModuleIntegrationTestFixture.moduleConfiguration,
-            versjonAvKode = "versjon_1",
             tilgangsgruppeUuider = tilgangsgruppeUuider,
             environmentToggles = object : EnvironmentToggles {
                 override val kanBeslutteEgneSaker = false

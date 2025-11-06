@@ -51,6 +51,7 @@ object TestRunner {
         jwkProviderUri = mockOAuth2Server.jwksUrl(issuerId).toString(),
         tokenEndpoint = mockOAuth2Server.tokenEndpointUrl(issuerId).toString(),
         eksponerOpenApi = true,
+        versjonAvKode = "0.0.0"
     )
 
     private val tilgangsgruppeUuider = randomTilgangsgruppeUuider()
@@ -117,7 +118,7 @@ object TestRunner {
                     environmentToggles = object : EnvironmentToggles {
                         override val kanBeslutteEgneSaker: Boolean = false
                         override val kanGodkjenneUtenBesluttertilgang: Boolean = false
-                    }
+                    },
                 )
             }
 
