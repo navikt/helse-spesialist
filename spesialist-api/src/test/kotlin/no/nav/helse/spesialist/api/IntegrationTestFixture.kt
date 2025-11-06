@@ -15,6 +15,7 @@ import io.ktor.serialization.jackson.JacksonConverter
 import io.ktor.server.testing.testApplication
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.spesialist.api.testfixtures.ApiModuleIntegrationTestFixture
 import no.nav.helse.spesialist.api.testfixtures.lagSaksbehandler
 import no.nav.helse.spesialist.application.InMemoryMeldingPubliserer
@@ -185,10 +186,26 @@ class IntegrationTestFixture() {
     fun assertPubliserteSubsumsjoner(
         vararg publiserteSubsumsjoner: InMemoryMeldingPubliserer.PublisertSubsumsjon
     ) {
-        assertEquals(
-            publiserteSubsumsjoner.toList(),
-            meldingPubliserer.publiserteSubsumsjoner
-        )
+        assertEquals(publiserteSubsumsjoner.size, meldingPubliserer.publiserteSubsumsjoner.size)
+        publiserteSubsumsjoner.zip(meldingPubliserer.publiserteSubsumsjoner).forEach { (expected, actual) ->
+            assertEquals(expected.fødselsnummer, actual.fødselsnummer)
+            assertSubsumsjonEventEquals(expected.subsumsjonEvent, actual.subsumsjonEvent)
+            assertEquals(expected.versjonAvKode, actual.versjonAvKode)
+        }
+    }
+
+    private fun assertSubsumsjonEventEquals(expected: SubsumsjonEvent, actual: SubsumsjonEvent) {
+        assertEquals(expected.fødselsnummer, actual.fødselsnummer)
+        assertEquals(expected.paragraf, actual.paragraf)
+        assertEquals(expected.ledd, actual.ledd)
+        assertEquals(expected.bokstav, actual.bokstav)
+        assertEquals(expected.lovverk, actual.lovverk)
+        assertEquals(expected.lovverksversjon, actual.lovverksversjon)
+        assertEquals(expected.utfall, actual.utfall)
+        assertEquals(expected.input, actual.input)
+        assertEquals(expected.output, actual.output)
+        assertEquals(expected.sporing, actual.sporing)
+        assertEquals(expected.kilde, actual.kilde)
     }
 
     fun assertPubliserteUtgåendeHendelser(

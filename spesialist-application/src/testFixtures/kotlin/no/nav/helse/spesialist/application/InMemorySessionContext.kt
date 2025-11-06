@@ -13,8 +13,6 @@ import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.PeriodehistorikkDao
 import no.nav.helse.db.PåVentDao
-import no.nav.helse.db.Reservasjon
-import no.nav.helse.db.ReservasjonDao
 import no.nav.helse.db.RisikovurderingDao
 import no.nav.helse.db.SessionContext
 import no.nav.helse.db.StansAutomatiskBehandlingSaksbehandlerDao
@@ -170,17 +168,7 @@ class InMemorySessionContext(
         }
 
     }
-    override val reservasjonDao: ReservasjonDao = object : ReservasjonDao {
-        private val reservasjoner = mutableMapOf<String, UUID>()
-        override fun reserverPerson(saksbehandlerOid: UUID, fødselsnummer: String) {
-            reservasjoner[fødselsnummer] = saksbehandlerOid
-        }
-
-        override fun hentReservasjonFor(fødselsnummer: String): Reservasjon? {
-            return null
-        }
-
-    }
+    override val reservasjonDao: InMemoryReservasjonDao = InMemoryReservasjonDao(saksbehandlerRepository)
     override val risikovurderingDao: RisikovurderingDao
         get() = TODO("Not yet implemented")
     override val saksbehandlerDao: InMemorySaksbehandlerDao = InMemorySaksbehandlerDao(saksbehandlerRepository)

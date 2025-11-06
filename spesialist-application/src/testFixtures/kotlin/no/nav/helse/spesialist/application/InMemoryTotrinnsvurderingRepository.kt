@@ -4,7 +4,7 @@ import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
 
 class InMemoryTotrinnsvurderingRepository : TotrinnsvurderingRepository {
-    private val data = mutableMapOf<TotrinnsvurderingId, Totrinnsvurdering>()
+    val data = mutableMapOf<TotrinnsvurderingId, Totrinnsvurdering>()
 
     override fun lagre(totrinnsvurdering: Totrinnsvurdering) {
         if (!totrinnsvurdering.harFåttTildeltId()) {
