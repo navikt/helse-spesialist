@@ -18,7 +18,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 @Serializable
-data class ApiMinimumSykdomsgradRequest(
+data class ApiArbeidstidsvurderingRequest(
     val aktørId: String,
     val fødselsnummer: String,
     val perioderVurdertOk: List<ApiDatoPeriode>,

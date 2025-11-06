@@ -9,6 +9,7 @@ import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgradArbeidsgiv
 import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgradPeriode
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.SporingVurdertMinimumSykdomsgrad
+import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.api.rest.tilkommeninntekt.harTilgangTilPerson
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.sikkerlogg
@@ -16,17 +17,16 @@ import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import java.time.LocalDateTime
 import java.util.UUID
-import no.nav.helse.spesialist.api.rest.resources.MinimumSykdomsgrad as MinimumSykdomsgradResource
 
-class PostMinimumSykdomsgradBehandler : PostBehandler<MinimumSykdomsgradResource, ApiMinimumSykdomsgradRequest, Unit, ApiPostMinimumSykdomsgradErrorCode> {
+class PostArbeidstidsvurderingBehandler : PostBehandler<Personer.AktørId.Vurderinger.Arbeidstid, ApiArbeidstidsvurderingRequest, Unit, ApiArbeidstidsvurderingErrorCode> {
     override fun behandle(
-        resource: MinimumSykdomsgradResource,
-        request: ApiMinimumSykdomsgradRequest,
+        resource: Personer.AktørId.Vurderinger.Arbeidstid,
+        request: ApiArbeidstidsvurderingRequest,
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
         outbox: Outbox,
-    ): RestResponse<Unit, ApiPostMinimumSykdomsgradErrorCode> {
+    ): RestResponse<Unit, ApiArbeidstidsvurderingErrorCode> {
         val fødselsnummer = request.fødselsnummer
 
         if (!harTilgangTilPerson(
@@ -36,11 +36,11 @@ class PostMinimumSykdomsgradBehandler : PostBehandler<MinimumSykdomsgradResource
                 transaksjon = transaksjon,
             )
         ) {
-            return RestResponse.Error(ApiPostMinimumSykdomsgradErrorCode.MANGLER_TILGANG_TIL_PERSON)
+            return RestResponse.Error(ApiArbeidstidsvurderingErrorCode.MANGLER_TILGANG_TIL_PERSON)
         }
 
         if (request.perioderVurdertOk.isEmpty() && request.perioderVurdertIkkeOk.isEmpty()) {
-            return RestResponse.Error(ApiPostMinimumSykdomsgradErrorCode.MANGLER_VURDERTE_PERIODER)
+            return RestResponse.Error(ApiArbeidstidsvurderingErrorCode.MANGLER_VURDERTE_PERIODER)
         }
 
         val overstyring =
@@ -147,7 +147,7 @@ class PostMinimumSykdomsgradBehandler : PostBehandler<MinimumSykdomsgradResource
         )
 }
 
-enum class ApiPostMinimumSykdomsgradErrorCode(
+enum class ApiArbeidstidsvurderingErrorCode(
     override val title: String,
     override val statusCode: HttpStatusCode,
 ) : ApiErrorCode {

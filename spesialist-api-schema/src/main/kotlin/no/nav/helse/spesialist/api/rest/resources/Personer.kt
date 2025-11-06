@@ -28,6 +28,16 @@ class Personer {
             val parent: AktørId,
         )
 
+        @Resource("vurderinger")
+        class Vurderinger(
+            val parent: AktørId,
+        ) {
+            @Resource("arbeidstid")
+            class Arbeidstid(
+                val parent: Vurderinger,
+            )
+        }
+
         @Resource("dokumenter")
         class Dokumenter(
             val parent: AktørId,

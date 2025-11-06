@@ -21,7 +21,7 @@ import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class PostMinimumSykdomsgradIntegrationTest {
+class PostArbeidstidsvurderingIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
     private val sessionContext = integrationTestFixture.sessionFactory.sessionContext
     private val totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository
@@ -46,7 +46,7 @@ class PostMinimumSykdomsgradIntegrationTest {
 
         // When:
         val response = integrationTestFixture.post(
-            url = "/api/minimumsykdomsgrad",
+            url = "/api/personer/$aktørId/vurderinger/arbeidstid",
             saksbehandler = saksbehandler,
             body = """
                 {
@@ -103,7 +103,7 @@ class PostMinimumSykdomsgradIntegrationTest {
 
         // When:
         val response = integrationTestFixture.post(
-            url = "/api/minimumsykdomsgrad",
+            url = "/api/personer/$aktørId/vurderinger/arbeidstid",
             saksbehandler = saksbehandler,
             body = """
                 {
@@ -169,7 +169,7 @@ class PostMinimumSykdomsgradIntegrationTest {
 
         // When:
         val response = integrationTestFixture.post(
-            url = "/api/minimumsykdomsgrad",
+            url = "/api/personer/$aktørId/vurderinger/arbeidstid",
             saksbehandler = saksbehandler,
             body = """
                 {

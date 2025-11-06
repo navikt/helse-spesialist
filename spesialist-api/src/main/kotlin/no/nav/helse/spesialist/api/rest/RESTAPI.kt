@@ -57,7 +57,7 @@ fun Routing.restRoutes(
 
             post(PostVedtaksperiodeAnnullerBehandler(), restAdapter)
 
-            post(PostMinimumSykdomsgradBehandler(), restAdapter)
+            post(PostArbeidstidsvurderingBehandler(), restAdapter)
         }
     }
 }
