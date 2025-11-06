@@ -80,6 +80,7 @@ class ApiModule(
             sessionFactory = sessionFactory,
             tilgangsgruppeUuider = tilgangsgruppeUuider,
             meldingPubliserer = meldingPubliserer,
+            versjonAvKode = configuration.versjonAvKode,
         )
 
     private val spesialistSchema =

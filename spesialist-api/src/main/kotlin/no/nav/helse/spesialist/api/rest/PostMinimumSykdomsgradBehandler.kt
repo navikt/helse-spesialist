@@ -8,7 +8,7 @@ import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgrad
 import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgradArbeidsgiver
 import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgradPeriode
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
-import no.nav.helse.modell.vilkårsprøving.Subsumsjon
+import no.nav.helse.modell.vilkårsprøving.Subsumsjon.SporingVurdertMinimumSykdomsgrad
 import no.nav.helse.spesialist.api.rest.tilkommeninntekt.harTilgangTilPerson
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.sikkerlogg
@@ -18,9 +18,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.spesialist.api.rest.resources.MinimumSykdomsgrad as MinimumSykdomsgradResource
 
-class PostMinimumSykdomsgradBehandler(
-    private val versjonAvKode: String,
-) : PostBehandler<MinimumSykdomsgradResource, ApiMinimumSykdomsgradRequest, Unit, ApiPostMinimumSykdomsgradErrorCode> {
+class PostMinimumSykdomsgradBehandler : PostBehandler<MinimumSykdomsgradResource, ApiMinimumSykdomsgradRequest, Unit, ApiPostMinimumSykdomsgradErrorCode> {
     override fun behandle(
         resource: MinimumSykdomsgradResource,
         request: ApiMinimumSykdomsgradRequest,
@@ -95,30 +93,14 @@ class PostMinimumSykdomsgradBehandler(
         val subsumsjoner =
             overstyring.perioderVurdertOk
                 .map { periode ->
-                    byggSubsumsjonEvent(
-                        avslag = false,
-                        periode = periode,
-                        fødselsnummer = overstyring.fødselsnummer,
-                        initierendeVedtaksperiodeId = overstyring.vedtaksperiodeId,
-                        arbeidsgivere = overstyring.arbeidsgivere,
-                        overstyringId = overstyring.eksternHendelseId,
-                        saksbehandlerEpost = saksbehandler.epost,
-                    )
+                    overstyring.byggSubsumsjonEvent(avslag = false, periode = periode, saksbehandler = saksbehandler)
                 }.plus(
                     overstyring.perioderVurdertIkkeOk.map { periode ->
-                        byggSubsumsjonEvent(
-                            avslag = true,
-                            periode = periode,
-                            fødselsnummer = overstyring.fødselsnummer,
-                            initierendeVedtaksperiodeId = overstyring.vedtaksperiodeId,
-                            arbeidsgivere = overstyring.arbeidsgivere,
-                            overstyringId = overstyring.eksternHendelseId,
-                            saksbehandlerEpost = saksbehandler.epost,
-                        )
+                        overstyring.byggSubsumsjonEvent(avslag = true, periode = periode, saksbehandler = saksbehandler)
                     },
                 )
         subsumsjoner.forEach { subsumsjonEvent ->
-            outbox.leggTil(fødselsnummer, subsumsjonEvent, versjonAvKode)
+            outbox.leggTil(fødselsnummer, subsumsjonEvent)
         }
 
         outbox.leggTil(fødselsnummer, event, "vurdering av minimum sykdomsgrad")
@@ -132,14 +114,10 @@ class PostMinimumSykdomsgradBehandler(
         }
     }
 
-    private fun byggSubsumsjonEvent(
+    private fun MinimumSykdomsgrad.byggSubsumsjonEvent(
         avslag: Boolean,
         periode: MinimumSykdomsgradPeriode,
-        fødselsnummer: String,
-        initierendeVedtaksperiodeId: UUID,
-        arbeidsgivere: List<MinimumSykdomsgradArbeidsgiver>,
-        overstyringId: UUID,
-        saksbehandlerEpost: String,
+        saksbehandler: Saksbehandler,
     ): SubsumsjonEvent =
         SubsumsjonEvent(
             id = UUID.randomUUID(),
@@ -154,17 +132,16 @@ class PostMinimumSykdomsgradBehandler(
                 mapOf(
                     "fom" to periode.fom,
                     "tom" to periode.tom,
-                    "initierendeVedtaksperiode" to initierendeVedtaksperiodeId,
+                    "initierendeVedtaksperiode" to vedtaksperiodeId,
                 ),
             output = emptyMap(),
             sporing =
-                Subsumsjon
-                    .SporingVurdertMinimumSykdomsgrad(
-                        vedtaksperioder = arbeidsgivere.map { it.berørtVedtaksperiodeId },
-                        organisasjonsnummer = arbeidsgivere.map { it.organisasjonsnummer },
-                        minimumSykdomsgradId = overstyringId,
-                        saksbehandler = listOf(saksbehandlerEpost),
-                    ).byggEvent(),
+                SporingVurdertMinimumSykdomsgrad(
+                    vedtaksperioder = arbeidsgivere.map { it.berørtVedtaksperiodeId },
+                    organisasjonsnummer = arbeidsgivere.map { it.organisasjonsnummer },
+                    minimumSykdomsgradId = eksternHendelseId,
+                    saksbehandler = listOf(element = saksbehandler.epost),
+                ).byggEvent(),
             tidsstempel = LocalDateTime.now(),
             kilde = "spesialist",
         )

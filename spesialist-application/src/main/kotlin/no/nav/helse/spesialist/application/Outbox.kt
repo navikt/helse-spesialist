@@ -7,7 +7,9 @@ import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.modell.melding.UtgåendeHendelse
 import java.util.UUID
 
-class Outbox {
+class Outbox(
+    private val versjonAvKode: String,
+) {
     private val outbox = mutableListOf<OutboxMelding>()
 
     private sealed interface OutboxMelding
@@ -64,7 +66,6 @@ class Outbox {
     fun leggTil(
         fødselsnummer: String,
         subsumsjonEvent: SubsumsjonEvent,
-        versjonAvKode: String,
     ) {
         outbox.add(
             OutboxSubsumsjon(

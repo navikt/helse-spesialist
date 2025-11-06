@@ -44,7 +44,10 @@ class RestAdapterTest {
         }
 
         val adapter = RestAdapter(
-            sessionFactory, IntegrationTestFixture.tilgangsgruppeUuider, integrationTestFixture.meldingPubliserer
+            sessionFactory = sessionFactory,
+            tilgangsgruppeUuider = IntegrationTestFixture.tilgangsgruppeUuider,
+            meldingPubliserer = integrationTestFixture.meldingPubliserer,
+            versjonAvKode = "0.0.0"
         )
 
         runBlocking {

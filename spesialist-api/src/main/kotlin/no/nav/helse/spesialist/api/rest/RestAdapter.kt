@@ -26,6 +26,7 @@ class RestAdapter(
     private val sessionFactory: SessionFactory,
     private val tilgangsgruppeUuider: TilgangsgruppeUuider,
     private val meldingPubliserer: MeldingPubliserer,
+    private val versjonAvKode: String,
 ) {
     private val problemObjectMapper = objectMapper.copy().setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL)
 
@@ -98,7 +99,7 @@ class RestAdapter(
         }
 
         runCatching {
-            val outbox = Outbox()
+            val outbox = Outbox(versjonAvKode)
             sessionFactory
                 .transactionalSessionScope { transaksjon ->
                     val response =
