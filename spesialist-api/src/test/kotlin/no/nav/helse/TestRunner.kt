@@ -29,6 +29,7 @@ import no.nav.helse.spesialist.api.graphql.lagSchemaMedResolversOgHandlers
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.rest.RestAdapter
 import no.nav.helse.spesialist.api.testfixtures.lagSaksbehandler
+import no.nav.helse.spesialist.application.InMemoryRepositoriesAndDaos
 import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
@@ -53,6 +54,8 @@ object TestRunner {
         eksponerOpenApi = true,
         versjonAvKode = "0.0.0"
     )
+
+    private val inMemoryRepositoriesAndDaos = InMemoryRepositoriesAndDaos()
 
     private val tilgangsgruppeUuider = randomTilgangsgruppeUuider()
 
@@ -79,7 +82,7 @@ object TestRunner {
     ) {
         val avhengigheter = Avhengigheter(
             daos = mockk(relaxed = true),
-            sessionFactory = mockk(relaxed = true),
+            sessionFactory = inMemoryRepositoriesAndDaos.sessionFactory,
             saksbehandlerMediator = mockk(relaxed = true),
             restAdapter = mockk(relaxed = true),
             apiOppgaveService = mockk(relaxed = true),

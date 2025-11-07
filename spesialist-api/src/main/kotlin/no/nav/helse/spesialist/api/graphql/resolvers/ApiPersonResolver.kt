@@ -42,6 +42,7 @@ import no.nav.helse.spesialist.api.overstyring.OverstyringTidslinjeDto
 import no.nav.helse.spesialist.api.overstyring.Skjonnsfastsettingstype
 import no.nav.helse.spesialist.api.overstyring.SkjønnsfastsettingSykepengegrunnlagDto
 import no.nav.helse.spesialist.api.risikovurdering.RisikovurderingApiDto
+import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.SaksbehandlerRepository
 import no.nav.helse.spesialist.application.snapshot.SnapshotGhostPeriode
 import no.nav.helse.spesialist.application.snapshot.SnapshotPerson
@@ -50,6 +51,7 @@ import java.time.LocalDate
 import java.util.UUID
 
 data class ApiPersonResolver(
+    private val personPseudoId: PersonPseudoId,
     private val sessionFactory: SessionFactory,
     private val snapshot: SnapshotPerson,
     private val personinfo: ApiPersoninfo,
@@ -70,6 +72,8 @@ data class ApiPersonResolver(
     private val saksbehandlerRepository: SaksbehandlerRepository,
 ) : PersonSchema {
     override fun versjon(): Int = snapshot.versjon
+
+    override fun personPseudoId(): UUID = personPseudoId.value
 
     override fun aktorId(): String = snapshot.aktorId
 

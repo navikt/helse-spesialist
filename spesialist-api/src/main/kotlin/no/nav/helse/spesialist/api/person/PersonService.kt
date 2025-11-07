@@ -32,12 +32,14 @@ import no.nav.helse.spesialist.api.graphql.resolvers.ApiPersonResolver
 import no.nav.helse.spesialist.api.graphql.schema.ApiPerson
 import no.nav.helse.spesialist.api.graphql.schema.ApiPersoninfo
 import no.nav.helse.spesialist.api.snapshot.SnapshotService
+import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.application.Reservasjonshenter.ReservasjonDto
 import no.nav.helse.spesialist.application.SaksbehandlerRepository
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.snapshot.SnapshotPerson
 import no.nav.helse.spesialist.application.tilgangskontroll.PersonTilgangskontroll
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.slf4j.LoggerFactory
@@ -135,11 +137,17 @@ class PersonService(
             return FetchPersonResult.Feil.ManglerTilgang
         }
 
-        return person(fødselsnummer, snapshot, reservasjon)
+        val personPseudoId =
+            sessionFactory.transactionalSessionScope {
+                it.personPseudoIdDao.nyPersonPseudoId(identitetsnummer = Identitetsnummer.fraString(fødselsnummer))
+            }
+
+        return person(fødselsnummer, personPseudoId, snapshot, reservasjon)
     }
 
     private suspend fun person(
         fødselsnummer: String,
+        personPseudoId: PersonPseudoId,
         snapshot: Pair<ApiPersoninfo, SnapshotPerson>,
         reservasjon: Deferred<ReservasjonDto?>,
     ): FetchPersonResult.Ok {
@@ -148,6 +156,7 @@ class PersonService(
             ApiPerson(
                 resolver =
                     ApiPersonResolver(
+                        personPseudoId = personPseudoId,
                         snapshot = personSnapshot,
                         personinfo =
                             personinfo.copy(

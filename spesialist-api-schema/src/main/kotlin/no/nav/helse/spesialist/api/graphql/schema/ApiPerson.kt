@@ -109,6 +109,8 @@ data class ApiAnnullering(
 interface PersonSchema {
     fun versjon(): Int
 
+    fun personPseudoId(): UUID
+
     fun aktorId(): String
 
     fun fodselsnummer(): String
