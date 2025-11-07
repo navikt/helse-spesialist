@@ -18,19 +18,19 @@ import java.util.UUID
 
 @Resource("personer")
 class Personer {
-    @Resource("{aktørId}")
-    class AktørId(
+    @Resource("{pseudoId}")
+    class PersonPseudoId(
         val parent: Personer = Personer(),
-        val aktørId: String,
+        val pseudoId: String,
     ) {
         @Resource("tilkomne-inntektskilder")
         class TilkomneInntektskilder(
-            val parent: AktørId,
+            val parent: PersonPseudoId,
         )
 
         @Resource("vurderinger")
         class Vurderinger(
-            val parent: AktørId,
+            val parent: PersonPseudoId,
         ) {
             @Resource("arbeidstid")
             class Arbeidstid(
@@ -40,7 +40,7 @@ class Personer {
 
         @Resource("dokumenter")
         class Dokumenter(
-            val parent: AktørId,
+            val parent: PersonPseudoId,
         ) {
             @Resource("{dokumentId}")
             class DokumentId(

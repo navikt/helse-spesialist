@@ -16,6 +16,7 @@ import no.nav.helse.spesialist.api.rest.ApiTilkommenInntektskilde
 import no.nav.helse.spesialist.api.rest.GetBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.Personer
+import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.domain.tilkommeninntekt.Endring
@@ -27,15 +28,24 @@ import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntektOpprettet
 import java.math.BigDecimal
 import java.time.ZoneId
 
-class GetTilkomneInntektskilderForPersonBehandler : GetBehandler<Personer.AktørId.TilkomneInntektskilder, List<ApiTilkommenInntektskilde>, ApiGetTilkomneInntektskilderForPersonErrorCode> {
+class GetTilkomneInntektskilderForPersonBehandler : GetBehandler<Personer.PersonPseudoId.TilkomneInntektskilder, List<ApiTilkommenInntektskilde>, ApiGetTilkomneInntektskilderForPersonErrorCode> {
     override fun behandle(
-        resource: Personer.AktørId.TilkomneInntektskilder,
+        resource: Personer.PersonPseudoId.TilkomneInntektskilder,
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
     ): RestResponse<List<ApiTilkommenInntektskilde>, ApiGetTilkomneInntektskilderForPersonErrorCode> {
+        val personId = resource.parent.pseudoId
         val fødselsnumre =
-            transaksjon.legacyPersonRepository.finnFødselsnumre(aktørId = resource.parent.aktørId).toSet()
+            if (personId.toLongOrNull() != null) {
+                transaksjon.legacyPersonRepository.finnFødselsnumre(aktørId = personId).toSet()
+            } else {
+                val pseudoId = PersonPseudoId.fraString(personId)
+                val identitetsnummer =
+                    transaksjon.personPseudoIdDao.hentIdentitetsnummer(pseudoId)
+                        ?: return RestResponse.Error(ApiGetTilkomneInntektskilderForPersonErrorCode.PERSON_IKKE_FUNNET)
+                setOf(identitetsnummer.value)
+            }
 
         fødselsnumre.forEach { fødselsnummer ->
             if (!harTilgangTilPerson(
@@ -171,5 +181,6 @@ enum class ApiGetTilkomneInntektskilderForPersonErrorCode(
     override val title: String,
     override val statusCode: HttpStatusCode,
 ) : ApiErrorCode {
+    PERSON_IKKE_FUNNET("Person ikke funnet", HttpStatusCode.NotFound),
     MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
 }

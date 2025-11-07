@@ -10,20 +10,30 @@ import no.nav.helse.spesialist.api.rest.GetBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.api.rest.tilkommeninntekt.harTilgangTilPerson
+import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 
 class GetSoknadBehandler(
     private val dokumentMediator: DokumentMediator,
-) : GetBehandler<Personer.AktørId.Dokumenter.DokumentId.Soknad, ApiSoknad, ApiGetSoknadErrorCode> {
+) : GetBehandler<Personer.PersonPseudoId.Dokumenter.DokumentId.Soknad, ApiSoknad, ApiGetSoknadErrorCode> {
     override fun behandle(
-        resource: Personer.AktørId.Dokumenter.DokumentId.Soknad,
+        resource: Personer.PersonPseudoId.Dokumenter.DokumentId.Soknad,
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
     ): RestResponse<ApiSoknad, ApiGetSoknadErrorCode> {
+        val personId = resource.parent.parent.parent.pseudoId
         val fødselsnumre =
-            transaksjon.legacyPersonRepository.finnFødselsnumre(aktørId = resource.parent.parent.parent.aktørId).toSet()
+            if (personId.toLongOrNull() != null) {
+                transaksjon.legacyPersonRepository.finnFødselsnumre(aktørId = personId).toSet()
+            } else {
+                val pseudoId = PersonPseudoId.fraString(personId)
+                val identitetsnummer =
+                    transaksjon.personPseudoIdDao.hentIdentitetsnummer(pseudoId)
+                        ?: return RestResponse.Error(ApiGetSoknadErrorCode.PERSON_IKKE_FUNNET)
+                setOf(identitetsnummer.value)
+            }
 
         val dokument =
             dokumentMediator.hentDokument(
@@ -61,6 +71,7 @@ enum class ApiGetSoknadErrorCode(
     override val title: String,
     override val statusCode: HttpStatusCode,
 ) : ApiErrorCode {
+    PERSON_IKKE_FUNNET("Person ikke funnet", HttpStatusCode.NotFound),
     MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
     FANT_IKKE_DOKUMENT("Fant ikke søknadsdokument", HttpStatusCode.NotFound),
 }

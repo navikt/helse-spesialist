@@ -18,9 +18,9 @@ import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import java.time.LocalDateTime
 import java.util.UUID
 
-class PostArbeidstidsvurderingBehandler : PostBehandler<Personer.AktørId.Vurderinger.Arbeidstid, ApiArbeidstidsvurderingRequest, Unit, ApiArbeidstidsvurderingErrorCode> {
+class PostArbeidstidsvurderingBehandler : PostBehandler<Personer.PersonPseudoId.Vurderinger.Arbeidstid, ApiArbeidstidsvurderingRequest, Unit, ApiArbeidstidsvurderingErrorCode> {
     override fun behandle(
-        resource: Personer.AktørId.Vurderinger.Arbeidstid,
+        resource: Personer.PersonPseudoId.Vurderinger.Arbeidstid,
         request: ApiArbeidstidsvurderingRequest,
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,

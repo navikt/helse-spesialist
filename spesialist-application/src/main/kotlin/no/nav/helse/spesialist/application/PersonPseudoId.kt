@@ -8,5 +8,7 @@ value class PersonPseudoId private constructor(
 ) {
     companion object {
         fun ny(): PersonPseudoId = PersonPseudoId(UUID.randomUUID())
+
+        fun fraString(value: String): PersonPseudoId = PersonPseudoId(UUID.fromString(value))
     }
 }

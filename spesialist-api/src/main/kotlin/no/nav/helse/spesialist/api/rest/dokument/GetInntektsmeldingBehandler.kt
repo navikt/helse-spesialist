@@ -10,20 +10,30 @@ import no.nav.helse.spesialist.api.rest.GetBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.api.rest.tilkommeninntekt.harTilgangTilPerson
+import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 
 class GetInntektsmeldingBehandler(
     private val dokumentMediator: DokumentMediator,
-) : GetBehandler<Personer.AktørId.Dokumenter.DokumentId.Inntektsmelding, ApiDokumentInntektsmelding, ApiGetInntektsmeldingErrorCode> {
+) : GetBehandler<Personer.PersonPseudoId.Dokumenter.DokumentId.Inntektsmelding, ApiDokumentInntektsmelding, ApiGetInntektsmeldingErrorCode> {
     override fun behandle(
-        resource: Personer.AktørId.Dokumenter.DokumentId.Inntektsmelding,
+        resource: Personer.PersonPseudoId.Dokumenter.DokumentId.Inntektsmelding,
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
     ): RestResponse<ApiDokumentInntektsmelding, ApiGetInntektsmeldingErrorCode> {
+        val personId = resource.parent.parent.parent.pseudoId
         val fødselsnumre =
-            transaksjon.legacyPersonRepository.finnFødselsnumre(aktørId = resource.parent.parent.parent.aktørId).toSet()
+            if (personId.toLongOrNull() != null) {
+                transaksjon.legacyPersonRepository.finnFødselsnumre(aktørId = personId).toSet()
+            } else {
+                val pseudoId = PersonPseudoId.fraString(personId)
+                val identitetsnummer =
+                    transaksjon.personPseudoIdDao.hentIdentitetsnummer(pseudoId)
+                        ?: return RestResponse.Error(ApiGetInntektsmeldingErrorCode.PERSON_IKKE_FUNNET)
+                setOf(identitetsnummer.value)
+            }
 
         val dokument =
             dokumentMediator.hentDokument(
@@ -74,6 +84,7 @@ enum class ApiGetInntektsmeldingErrorCode(
     override val title: String,
     override val statusCode: HttpStatusCode,
 ) : ApiErrorCode {
+    PERSON_IKKE_FUNNET("Person ikke funnet", HttpStatusCode.NotFound),
     MANGLER_TILGANG_TIL_PERSON("Mangler tilgang til person", HttpStatusCode.Forbidden),
     FANT_IKKE_DOKUMENT("Fant ikke inntektsmeldingdokument", HttpStatusCode.NotFound),
     MANGLER_FØDSELSNUMMER_OG_AKTØRID("IM mangler fødselsnummer og aktørId", HttpStatusCode.NotFound),
