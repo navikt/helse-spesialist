@@ -26,6 +26,7 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.saksbehandler.handlinger.PåVentÅrsak
 import no.nav.helse.spesialist.domain.BehandlingUnikId
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.VedtakBegrunnelse
@@ -229,5 +230,15 @@ class InMemorySessionContext(
         override fun lagre(vedtakBegrunnelse: VedtakBegrunnelse) {
             begrunnelser[vedtakBegrunnelse.behandlingId] = vedtakBegrunnelse
         }
+    }
+    override val personPseudoIdDao: PersonPseudoIdDao = object : PersonPseudoIdDao {
+        private val mapping = mutableMapOf<PersonPseudoId, Identitetsnummer>()
+        override fun nyPersonPseudoId(identitetsnummer: Identitetsnummer): PersonPseudoId {
+            val personPseudoId = PersonPseudoId.ny()
+            mapping[personPseudoId] = identitetsnummer
+            return personPseudoId
+        }
+
+        override fun hentIdentitetsnummer(personPseudoId: PersonPseudoId) = mapping[personPseudoId]
     }
 }

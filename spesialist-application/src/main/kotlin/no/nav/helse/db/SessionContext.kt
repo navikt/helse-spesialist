@@ -6,6 +6,7 @@ import no.nav.helse.spesialist.application.ArbeidsgiverRepository
 import no.nav.helse.spesialist.application.DialogRepository
 import no.nav.helse.spesialist.application.NotatRepository
 import no.nav.helse.spesialist.application.OverstyringRepository
+import no.nav.helse.spesialist.application.PersonPseudoIdDao
 import no.nav.helse.spesialist.application.PersonRepository
 import no.nav.helse.spesialist.application.PåVentRepository
 import no.nav.helse.spesialist.application.SaksbehandlerRepository
@@ -62,4 +63,5 @@ interface SessionContext {
     val varselRepository: VarselRepository
     val varseldefinisjonRepository: VarseldefinisjonRepository
     val vedtakBegrunnelseRepository: VedtakBegrunnelseRepository
+    val personPseudoIdDao: PersonPseudoIdDao
 }
