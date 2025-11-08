@@ -8,20 +8,56 @@ import java.time.LocalDate
 import java.util.SortedSet
 
 object InntektsendringerEventBygger {
+    data class PubliserbarTilstand(
+        val fjernet: Boolean,
+        val inntektskilde: String,
+        val dagerTilGradering: SortedSet<LocalDate>,
+        val dagsbeløp: BigDecimal,
+    )
+
     fun forNy(tilkommenInntekt: TilkommenInntekt): InntektsendringerEvent =
+        forNy(
+            inntektskilde = tilkommenInntekt.organisasjonsnummer,
+            dagerTilGradering = tilkommenInntekt.dagerTilGradering(),
+            dagsbeløp = tilkommenInntekt.dagbeløp(),
+        )
+
+    fun forNy(
+        inntektskilde: String,
+        dagerTilGradering: SortedSet<LocalDate>,
+        dagsbeløp: BigDecimal,
+    ): InntektsendringerEvent =
         InntektsendringerEvent(
             inntektskilder =
                 listOf(
                     InntektsendringerEvent.Inntektskilde(
-                        inntektskilde = tilkommenInntekt.organisasjonsnummer,
-                        inntekter =
-                            tilkommenInntekt.dagerTilGradering().tilInntekter(
-                                dagsbeløp = tilkommenInntekt.dagbeløp(),
-                            ),
+                        inntektskilde = inntektskilde,
+                        inntekter = dagerTilGradering.tilInntekter(dagsbeløp = dagsbeløp),
                         nullstill = emptyList(),
                     ),
                 ),
         )
+
+    fun forTilstandsendring(
+        tidligerePublisertTilstand: PubliserbarTilstand,
+        nåværendeTilstand: PubliserbarTilstand,
+    ): InntektsendringerEvent? =
+        if (tidligerePublisertTilstand.fjernet != nåværendeTilstand.fjernet) {
+            if (nåværendeTilstand.fjernet) {
+                forFjernet(tidligerePublisertTilstand.inntektskilde, tidligerePublisertTilstand.dagerTilGradering)
+            } else {
+                forNy(nåværendeTilstand.inntektskilde, nåværendeTilstand.dagerTilGradering, nåværendeTilstand.dagsbeløp)
+            }
+        } else {
+            forEndring(
+                arbeidsgiverFør = tidligerePublisertTilstand.inntektskilde,
+                arbeidsgiverEtter = nåværendeTilstand.inntektskilde,
+                dagerFør = tidligerePublisertTilstand.dagerTilGradering,
+                dagerEtter = nåværendeTilstand.dagerTilGradering,
+                dagsbeløpFør = tidligerePublisertTilstand.dagsbeløp,
+                dagsbeløpEtter = nåværendeTilstand.dagsbeløp,
+            )
+        }
 
     fun forEndring(
         arbeidsgiverFør: String,
@@ -74,13 +110,22 @@ object InntektsendringerEventBygger {
         }
 
     fun forFjernet(tilkommenInntekt: TilkommenInntekt): InntektsendringerEvent =
+        forFjernet(
+            inntektskilde = tilkommenInntekt.organisasjonsnummer,
+            dagerTilGradering = tilkommenInntekt.dagerTilGradering(),
+        )
+
+    fun forFjernet(
+        inntektskilde: String,
+        dagerTilGradering: SortedSet<LocalDate>,
+    ): InntektsendringerEvent =
         InntektsendringerEvent(
             inntektskilder =
                 listOf(
                     InntektsendringerEvent.Inntektskilde(
-                        inntektskilde = tilkommenInntekt.organisasjonsnummer,
+                        inntektskilde = inntektskilde,
                         inntekter = emptyList(),
-                        nullstill = tilkommenInntekt.dagerTilGradering().tilNullstillinger(),
+                        nullstill = dagerTilGradering.tilNullstillinger(),
                     ),
                 ),
         )

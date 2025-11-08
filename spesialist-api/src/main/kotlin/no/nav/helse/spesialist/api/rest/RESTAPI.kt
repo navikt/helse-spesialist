@@ -17,6 +17,7 @@ import no.nav.helse.spesialist.api.ApiModule
 import no.nav.helse.spesialist.api.rest.dokument.GetInntektsmeldingBehandler
 import no.nav.helse.spesialist.api.rest.dokument.GetSoknadBehandler
 import no.nav.helse.spesialist.api.rest.tilkommeninntekt.GetTilkomneInntektskilderForPersonBehandler
+import no.nav.helse.spesialist.api.rest.tilkommeninntekt.PatchTilkommenInntektBehandler
 import no.nav.helse.spesialist.api.rest.tilkommeninntekt.PostTilkommenInntektEndreBehandler
 import no.nav.helse.spesialist.api.rest.tilkommeninntekt.PostTilkommenInntektFjernBehandler
 import no.nav.helse.spesialist.api.rest.tilkommeninntekt.PostTilkommenInntektGjenopprettBehandler
@@ -49,6 +50,7 @@ fun Routing.restRoutes(
 
             get(GetTilkomneInntektskilderForPersonBehandler(), restAdapter)
             post(PostTilkomneInntekterBehandler(), restAdapter)
+            patch(PatchTilkommenInntektBehandler(), restAdapter)
             post(PostTilkommenInntektEndreBehandler(), restAdapter)
             post(PostTilkommenInntektFjernBehandler(), restAdapter)
             post(PostTilkommenInntektGjenopprettBehandler(), restAdapter)

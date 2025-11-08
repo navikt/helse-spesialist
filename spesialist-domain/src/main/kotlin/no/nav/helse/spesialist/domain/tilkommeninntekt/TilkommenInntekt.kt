@@ -61,29 +61,33 @@ class TilkommenInntekt private constructor(
         notatTilBeslutter: String,
         totrinnsvurderingId: TotrinnsvurderingId,
     ) {
-        apply(
-            TilkommenInntektEndretEvent(
-                TilkommenInntektEvent.Metadata(
-                    tilkommenInntektId = id(),
-                    sekvensnummer = versjon + 1,
-                    tidspunkt = Instant.now(),
-                    utførtAvSaksbehandlerIdent = saksbehandlerIdent,
-                    notatTilBeslutter = notatTilBeslutter,
-                    totrinnsvurderingId = totrinnsvurderingId,
-                ),
-                endringer =
-                    TilkommenInntektEvent.Endringer(
-                        organisasjonsnummer = muligEndring(fra = this.organisasjonsnummer, til = organisasjonsnummer),
-                        periode = muligEndring(fra = this.periode, til = periode),
-                        periodebeløp = muligEndring(fra = this.periodebeløp, til = periodebeløp),
-                        ekskluderteUkedager =
-                            muligEndring(
-                                fra = this.ekskluderteUkedager,
-                                til = ekskluderteUkedager.toSortedSet(),
-                            ),
+        val organisasjonsnummerEndring = muligEndring(fra = this.organisasjonsnummer, til = organisasjonsnummer)
+        val periodeEndring = muligEndring(fra = this.periode, til = periode)
+        val periodebeløpEndring = muligEndring(fra = this.periodebeløp, til = periodebeløp)
+        val ekskluderteUkedagerEndring =
+            muligEndring(fra = this.ekskluderteUkedager, til = ekskluderteUkedager.toSortedSet())
+        if (organisasjonsnummerEndring != null || periodeEndring != null || periodebeløpEndring != null || ekskluderteUkedagerEndring != null) {
+            apply(
+                TilkommenInntektEndretEvent(
+                    TilkommenInntektEvent.Metadata(
+                        tilkommenInntektId = id(),
+                        sekvensnummer = versjon + 1,
+                        tidspunkt = Instant.now(),
+                        utførtAvSaksbehandlerIdent = saksbehandlerIdent,
+                        notatTilBeslutter = notatTilBeslutter,
+                        totrinnsvurderingId = totrinnsvurderingId,
                     ),
-            ),
-        )
+                    endringer =
+                        TilkommenInntektEvent.Endringer(
+                            organisasjonsnummer = organisasjonsnummerEndring,
+                            periode = periodeEndring,
+                            periodebeløp = periodebeløpEndring,
+                            ekskluderteUkedager =
+                            ekskluderteUkedagerEndring,
+                        ),
+                ),
+            )
+        }
     }
 
     fun fjern(

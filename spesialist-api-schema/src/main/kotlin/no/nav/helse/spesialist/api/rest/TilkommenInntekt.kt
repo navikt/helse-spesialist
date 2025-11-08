@@ -151,6 +151,27 @@ data class ApiGjenopprettTilkommenInntektRequest(
 )
 
 @Serializable
+data class ApiTilkommenInntektPatch(
+    val endringer: ApiTilkommenInntektEndringer,
+    val notatTilBeslutter: String,
+) {
+    @Serializable
+    data class ApiTilkommenInntektEndringer(
+        val organisasjonsnummer: ApiPatchEndring<String>?,
+        val periode: ApiPatchEndring<ApiDatoPeriode>?,
+        val periodebeløp: ApiPatchEndring<BigDecimal>?,
+        val ekskluderteUkedager: ApiPatchEndring<List<LocalDate>>?,
+        val fjernet: ApiPatchEndring<Boolean>?,
+    )
+}
+
+@Serializable
+data class ApiPatchEndring<T>(
+    val fra: T,
+    val til: T,
+)
+
+@Serializable
 data class ApiLeggTilTilkommenInntektRequest(
     val fodselsnummer: String,
     val verdier: ApiTilkommenInntektInput,
