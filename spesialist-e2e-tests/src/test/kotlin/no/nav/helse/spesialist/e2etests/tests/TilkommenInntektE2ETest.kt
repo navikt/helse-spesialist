@@ -558,6 +558,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 assertEquals(2, inntekter.size())
                 assertApiInntekt(
                     inntekt = inntekter[0],
+                    expectedOrganisasjonsnummer = organisasjonsnummer,
                     expectedFom = 2 jan 2021,
                     expectedTom = 15 jan 2021,
                     expectedPeriodebeløp = BigDecimal("2222.22"),
@@ -575,6 +576,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 )
                 assertApiInntekt(
                     inntekt = inntekter[1],
+                    expectedOrganisasjonsnummer = organisasjonsnummer,
                     expectedFom = 16 jan 2021,
                     expectedTom = 31 jan 2021,
                     expectedPeriodebeløp = BigDecimal("2222.22"),
@@ -607,6 +609,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
             assertEquals(1, inntekter.size())
             assertApiInntekt(
                 inntekt = inntekter[0],
+                expectedOrganisasjonsnummer = expectedOrganisasjonsnummer,
                 expectedFom = expectedFom,
                 expectedTom = expectedTom,
                 expectedPeriodebeløp = expectedPeriodebeløp,
@@ -619,6 +622,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
 
     private fun assertApiInntekt(
         inntekt: JsonNode,
+        expectedOrganisasjonsnummer: String,
         expectedFom: LocalDate,
         expectedTom: LocalDate,
         expectedPeriodebeløp: BigDecimal,
@@ -626,6 +630,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         expectedFjernet: Boolean,
         expectedErDelAvAktivTotrinnsvurdering: Boolean
     ) {
+        assertEquals(expectedOrganisasjonsnummer, inntekt["organisasjonsnummer"].asText())
         assertEquals(expectedFom.toString(), inntekt["periode"]["fom"].asText())
         assertEquals(expectedTom.toString(), inntekt["periode"]["tom"].asText())
         assertEquals(expectedPeriodebeløp.toString(), inntekt["periodebelop"].asText())

@@ -30,6 +30,7 @@ data class ApiTilkommenInntektskilde(
 @Serializable
 data class ApiTilkommenInntekt(
     val tilkommenInntektId: UUID,
+    val organisasjonsnummer: String,
     val periode: ApiDatoPeriode,
     val periodebelop: BigDecimal,
     val ekskluderteUkedager: List<LocalDate>,
