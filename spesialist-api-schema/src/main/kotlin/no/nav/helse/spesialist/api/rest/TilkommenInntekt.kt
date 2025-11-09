@@ -134,23 +134,6 @@ data class ApiLeggTilTilkommenInntektResponse(
 )
 
 @Serializable
-data class ApiEndreTilkommenInntektRequest(
-    val endretTil: ApiTilkommenInntektInput,
-    val notatTilBeslutter: String,
-)
-
-@Serializable
-data class ApiFjernTilkommenInntektRequest(
-    val notatTilBeslutter: String,
-)
-
-@Serializable
-data class ApiGjenopprettTilkommenInntektRequest(
-    val endretTil: ApiTilkommenInntektInput,
-    val notatTilBeslutter: String,
-)
-
-@Serializable
 data class ApiTilkommenInntektPatch(
     val endringer: ApiTilkommenInntektEndringer,
     val notatTilBeslutter: String,

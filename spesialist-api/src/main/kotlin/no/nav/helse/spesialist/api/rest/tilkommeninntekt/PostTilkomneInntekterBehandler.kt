@@ -62,7 +62,12 @@ class PostTilkomneInntekterBehandler : PostBehandler<TilkomneInntekter, ApiLeggT
 
         outbox.leggTil(
             fødselsnummer = tilkommenInntekt.fødselsnummer,
-            hendelse = InntektsendringerEventBygger.forNy(tilkommenInntekt),
+            hendelse =
+                InntektsendringerEventBygger.forNy(
+                    inntektskilde = tilkommenInntekt.organisasjonsnummer,
+                    dagerTilGradering = tilkommenInntekt.dagerTilGradering(),
+                    dagsbeløp = tilkommenInntekt.dagbeløp(),
+                ),
             årsak = "tilkommen inntekt lagt til",
         )
 

@@ -22,20 +22,5 @@ class TilkomneInntekter {
     class Id(
         val parent: TilkomneInntekter = TilkomneInntekter(),
         val tilkommenInntektId: UUID,
-    ) {
-        @Resource("endre")
-        class Endre(
-            val parent: Id,
-        )
-
-        @Resource("fjern")
-        class Fjern(
-            val parent: Id,
-        )
-
-        @Resource("gjenopprett")
-        class Gjenopprett(
-            val parent: Id,
-        )
-    }
+    )
 }

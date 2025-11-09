@@ -2,7 +2,6 @@ package no.nav.helse.spesialist.api.rest.tilkommeninntekt
 
 import no.nav.helse.modell.melding.InntektsendringerEvent
 import no.nav.helse.spesialist.domain.Periode.Companion.tilPerioder
-import no.nav.helse.spesialist.domain.tilkommeninntekt.TilkommenInntekt
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.SortedSet
@@ -14,13 +13,6 @@ object InntektsendringerEventBygger {
         val dagerTilGradering: SortedSet<LocalDate>,
         val dagsbeløp: BigDecimal,
     )
-
-    fun forNy(tilkommenInntekt: TilkommenInntekt): InntektsendringerEvent =
-        forNy(
-            inntektskilde = tilkommenInntekt.organisasjonsnummer,
-            dagerTilGradering = tilkommenInntekt.dagerTilGradering(),
-            dagsbeløp = tilkommenInntekt.dagbeløp(),
-        )
 
     fun forNy(
         inntektskilde: String,
@@ -49,7 +41,7 @@ object InntektsendringerEventBygger {
                 forNy(nåværendeTilstand.inntektskilde, nåværendeTilstand.dagerTilGradering, nåværendeTilstand.dagsbeløp)
             }
         } else {
-            forEndring(
+            forEndret(
                 arbeidsgiverFør = tidligerePublisertTilstand.inntektskilde,
                 arbeidsgiverEtter = nåværendeTilstand.inntektskilde,
                 dagerFør = tidligerePublisertTilstand.dagerTilGradering,
@@ -59,7 +51,7 @@ object InntektsendringerEventBygger {
             )
         }
 
-    fun forEndring(
+    fun forEndret(
         arbeidsgiverFør: String,
         arbeidsgiverEtter: String,
         dagerFør: SortedSet<LocalDate>,
@@ -108,12 +100,6 @@ object InntektsendringerEventBygger {
         } else {
             null
         }
-
-    fun forFjernet(tilkommenInntekt: TilkommenInntekt): InntektsendringerEvent =
-        forFjernet(
-            inntektskilde = tilkommenInntekt.organisasjonsnummer,
-            dagerTilGradering = tilkommenInntekt.dagerTilGradering(),
-        )
 
     fun forFjernet(
         inntektskilde: String,
