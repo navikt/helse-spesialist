@@ -1,5 +1,6 @@
 package no.nav.helse.spesialist.e2etests.tests
 
+import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.e2etests.AbstractE2EIntegrationTest
@@ -22,8 +23,7 @@ class TotrinnsvurderingTilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         medPersonISpeil {
             saksbehandlerLeggerTilTilkommenInntekt(
                 organisasjonsnummer = lagOrganisasjonsnummer(),
-                fom = 2 jan 2021,
-                tom = 31 jan 2021,
+                periode = (2 jan 2021) tilOgMed (31 jan 2021),
                 periodebeløp = BigDecimal("1111.11"),
                 ekskluderteUkedager = listOf(12 jan 2021, 21 jan 2021, 25 jan 2021),
                 notatTilBeslutter = "notat"
@@ -53,8 +53,7 @@ class TotrinnsvurderingTilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
             saksbehandlerTildelerSegSaken() // Må til for å "opprette" saksbehandler
             saksbehandlerLeggerTilTilkommenInntekt(
                 organisasjonsnummer = lagOrganisasjonsnummer(),
-                fom = 2 jan 2021,
-                tom = 31 jan 2021,
+                periode = (2 jan 2021) tilOgMed (31 jan 2021),
                 periodebeløp = BigDecimal("1111.11"),
                 ekskluderteUkedager = listOf(12 jan 2021, 21 jan 2021, 25 jan 2021),
                 notatTilBeslutter = "notat"

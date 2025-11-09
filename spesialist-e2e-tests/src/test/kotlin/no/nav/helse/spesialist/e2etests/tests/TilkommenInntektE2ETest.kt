@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.e2etests.tests
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.e2etests.AbstractE2EIntegrationTest
@@ -22,8 +23,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
             tom = 31 jan 2021
         }
         val organisasjonsnummer = lagOrganisasjonsnummer()
-        val fom = 2 jan 2021
-        val tom = 31 jan 2021
+        val periode = 2 jan 2021 tilOgMed (31 jan 2021)
         val ekskluderteUkedager = listOf(12 jan 2021, 21 jan 2021, 25 jan 2021)
         val periodebeløp = BigDecimal("1111.11")
         val notatTilBeslutter = "notat"
@@ -34,8 +34,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         medPersonISpeil {
             saksbehandlerLeggerTilTilkommenInntekt(
                 organisasjonsnummer = organisasjonsnummer,
-                fom = fom,
-                tom = tom,
+                periode = periode,
                 periodebeløp = periodebeløp,
                 ekskluderteUkedager = ekskluderteUkedager,
                 notatTilBeslutter = notatTilBeslutter
@@ -46,8 +45,8 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
             assertApiInntektskilde(
                 tilkommenInntektskilde = tilkomneInntektskilder[0],
                 expectedOrganisasjonsnummer = organisasjonsnummer,
-                expectedFom = fom,
-                expectedTom = tom,
+                expectedFom = periode.fom,
+                expectedTom = periode.tom,
                 expectedPeriodebeløp = periodebeløp,
                 expectedEkskluderteUkedager = ekskluderteUkedager,
                 expectedFjernet = false
@@ -61,8 +60,8 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
             )
             val opprettetEvent = events.last()
             assertEquals(organisasjonsnummer, opprettetEvent["organisasjonsnummer"].asText())
-            assertEquals(fom.toString(), opprettetEvent["periode"]["fom"].asText())
-            assertEquals(tom.toString(), opprettetEvent["periode"]["tom"].asText())
+            assertEquals(periode.fom.toString(), opprettetEvent["periode"]["fom"].asText())
+            assertEquals(periode.tom.toString(), opprettetEvent["periode"]["tom"].asText())
             assertEquals(periodebeløp.toString(), opprettetEvent["periodebelop"].asText())
             assertEquals(ekskluderteUkedager.size, opprettetEvent["ekskluderteUkedager"].size())
             assertEquals(
@@ -93,14 +92,12 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
     fun `saksbehandler endrer tilkommen inntekt`() {
         // Given:
         val opprinneligOrganisasjonsnummer = lagOrganisasjonsnummer()
-        val opprinneligFom = 2 jan 2021
-        val opprinneligTom = 31 jan 2021
+        val opprinneligPeriode = (2 jan 2021) tilOgMed (31 jan 2021)
         val opprinneligPeriodebeløp = BigDecimal("1111.11")
         val opprinneligeEkskluderteUkedager = listOf(12 jan 2021, 21 jan 2021, 25 jan 2021)
 
         val endringOrganisasjonsnummer = lagOrganisasjonsnummer()
-        val endringFom = 3 jan 2021
-        val endringTom = 30 jan 2021
+        val endringPeriode = (3 jan 2021) tilOgMed (30 jan 2021)
         val endringPeriodebeløp = BigDecimal("2222.22")
         val endringEkskluderteUkedager = listOf(12 jan 2021, 21 jan 2021, 26 jan 2021)
         val endringNotatTilBeslutter = "endring i gang"
@@ -115,8 +112,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         medPersonISpeil {
             val tilkommenInntektId = saksbehandlerLeggerTilTilkommenInntekt(
                 organisasjonsnummer = opprinneligOrganisasjonsnummer,
-                fom = opprinneligFom,
-                tom = opprinneligTom,
+                periode = opprinneligPeriode,
                 periodebeløp = opprinneligPeriodebeløp,
                 ekskluderteUkedager = opprinneligeEkskluderteUkedager,
                 notatTilBeslutter = "notat"
@@ -125,11 +121,10 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
             // When:
             saksbehandlerEndrerTilkommenInntekt(
                 tilkommenInntektId = tilkommenInntektId,
-                organisasjonsnummer = endringOrganisasjonsnummer,
-                fom = endringFom,
-                tom = endringTom,
-                periodebeløp = endringPeriodebeløp,
-                ekskluderteUkedager = endringEkskluderteUkedager,
+                organisasjonsnummerEndring = opprinneligOrganisasjonsnummer to endringOrganisasjonsnummer,
+                periodeEndring = opprinneligPeriode to endringPeriode,
+                periodebeløpEndring = opprinneligPeriodebeløp to endringPeriodebeløp,
+                ekskluderteUkedagerEndring = opprinneligeEkskluderteUkedager to endringEkskluderteUkedager,
                 notatTilBeslutter = endringNotatTilBeslutter
             )
 
@@ -138,8 +133,8 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
             assertApiInntektskilde(
                 tilkommenInntektskilde = tilkomneInntektskilder[0],
                 expectedOrganisasjonsnummer = endringOrganisasjonsnummer,
-                expectedFom = endringFom,
-                expectedTom = endringTom,
+                expectedFom = endringPeriode.fom,
+                expectedTom = endringPeriode.tom,
                 expectedPeriodebeløp = endringPeriodebeløp,
                 expectedEkskluderteUkedager = endringEkskluderteUkedager,
                 expectedFjernet = false
@@ -156,10 +151,10 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 endringer = events.last()["endringer"],
                 expectedOrganisasjonsnummerFra = opprinneligOrganisasjonsnummer,
                 expectedOrganisasjonsnummerTil = endringOrganisasjonsnummer,
-                expectedFraFom = opprinneligFom,
-                expectedFraTom = opprinneligTom,
-                expectedTilFom = endringFom,
-                expectedTilTom = endringTom,
+                expectedFraFom = opprinneligPeriode.fom,
+                expectedFraTom = opprinneligPeriode.tom,
+                expectedTilFom = endringPeriode.fom,
+                expectedTilTom = endringPeriode.tom,
                 expectedPeriodebeløpFra = opprinneligPeriodebeløp,
                 expectedPeriodebeløpTil = endringPeriodebeløp,
                 expectedEkskluderteUkedagerFra = opprinneligeEkskluderteUkedager,
@@ -208,15 +203,13 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
         søknadOgGodkjenningbehovKommerInn()
         val opprinneligOrganisasjonsnummer = lagOrganisasjonsnummer()
-        val opprinneligFom = 2 jan 2021
-        val opprinneligTom = 31 jan 2021
+        val opprinneligPeriode = 2 jan 2021 tilOgMed (31 jan 2021)
         val opprinneligPeriodebeløp = BigDecimal("1111.11")
         val opprinneligeEkskluderteUkedager = listOf(12 jan 2021, 21 jan 2021, 25 jan 2021)
         medPersonISpeil {
             val tilkommenInntektId = saksbehandlerLeggerTilTilkommenInntekt(
                 organisasjonsnummer = opprinneligOrganisasjonsnummer,
-                fom = opprinneligFom,
-                tom = opprinneligTom,
+                periode = opprinneligPeriode,
                 periodebeløp = opprinneligPeriodebeløp,
                 ekskluderteUkedager = opprinneligeEkskluderteUkedager,
                 notatTilBeslutter = "notat"
@@ -234,8 +227,8 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
             assertApiInntektskilde(
                 tilkommenInntektskilde = tilkomneInntektskilder[0],
                 expectedOrganisasjonsnummer = opprinneligOrganisasjonsnummer,
-                expectedFom = opprinneligFom,
-                expectedTom = opprinneligTom,
+                expectedFom = opprinneligPeriode.fom,
+                expectedTom = opprinneligPeriode.tom,
                 expectedPeriodebeløp = opprinneligPeriodebeløp,
                 expectedEkskluderteUkedager = opprinneligeEkskluderteUkedager,
                 expectedFjernet = true
@@ -270,14 +263,12 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
     fun `saksbehandler gjenoppretter tilkommen inntekt`() {
         // Given:
         val opprinneligOrganisasjonsnummer = lagOrganisasjonsnummer()
-        val opprinneligFom = 2 jan 2021
-        val opprinneligTom = 31 jan 2021
+        val opprinneligPeriode = (2 jan 2021) tilOgMed (31 jan 2021)
         val opprinneligPeriodebeløp = BigDecimal("1111.11")
         val opprinneligeEkskluderteUkedager = listOf(12 jan 2021, 21 jan 2021, 25 jan 2021)
 
         val gjenopprettingOrganisasjonsnummer = lagOrganisasjonsnummer()
-        val gjenopprettingFom = 3 jan 2021
-        val gjenopprettingTom = 30 jan 2021
+        val gjenopprettingPeriode = (3 jan 2021) tilOgMed (30 jan 2021)
         val gjenopprettingPeriodebeløp = BigDecimal("2222.22")
         val gjenopprettingEkskluderteUkedager = listOf(12 jan 2021, 21 jan 2021, 26 jan 2021)
         val gjenopprettingNotatTilBeslutter = "gjenoppretter etter feilaktig fjerning"
@@ -292,8 +283,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         medPersonISpeil {
             val tilkommenInntektId = saksbehandlerLeggerTilTilkommenInntekt(
                 organisasjonsnummer = opprinneligOrganisasjonsnummer,
-                fom = opprinneligFom,
-                tom = opprinneligTom,
+                periode = opprinneligPeriode,
                 periodebeløp = opprinneligPeriodebeløp,
                 ekskluderteUkedager = opprinneligeEkskluderteUkedager,
                 notatTilBeslutter = "notat"
@@ -307,11 +297,10 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
             // When:
             saksbehandlerGjenoppretterTilkommenInntekt(
                 tilkommenInntektId = tilkommenInntektId,
-                organisasjonsnummer = gjenopprettingOrganisasjonsnummer,
-                fom = gjenopprettingFom,
-                tom = gjenopprettingTom,
-                periodebeløp = gjenopprettingPeriodebeløp,
-                ekskluderteUkedager = gjenopprettingEkskluderteUkedager,
+                organisasjonsnummerEndring = opprinneligOrganisasjonsnummer to gjenopprettingOrganisasjonsnummer,
+                periodeEndring = opprinneligPeriode to gjenopprettingPeriode,
+                periodebeløpEndring = opprinneligPeriodebeløp to gjenopprettingPeriodebeløp,
+                ekskluderteUkedagerEndring = opprinneligeEkskluderteUkedager to gjenopprettingEkskluderteUkedager,
                 notatTilBeslutter = gjenopprettingNotatTilBeslutter
             )
 
@@ -320,8 +309,8 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
             assertApiInntektskilde(
                 tilkommenInntektskilde = tilkomneInntektskilder[0],
                 expectedOrganisasjonsnummer = gjenopprettingOrganisasjonsnummer,
-                expectedFom = gjenopprettingFom,
-                expectedTom = gjenopprettingTom,
+                expectedFom = gjenopprettingPeriode.fom,
+                expectedTom = gjenopprettingPeriode.tom,
                 expectedPeriodebeløp = gjenopprettingPeriodebeløp,
                 expectedEkskluderteUkedager = gjenopprettingEkskluderteUkedager,
                 expectedFjernet = false
@@ -339,10 +328,10 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
                 endringer = events[2]["endringer"],
                 expectedOrganisasjonsnummerFra = opprinneligOrganisasjonsnummer,
                 expectedOrganisasjonsnummerTil = gjenopprettingOrganisasjonsnummer,
-                expectedFraFom = opprinneligFom,
-                expectedFraTom = opprinneligTom,
-                expectedTilFom = gjenopprettingFom,
-                expectedTilTom = gjenopprettingTom,
+                expectedFraFom = opprinneligPeriode.fom,
+                expectedFraTom = opprinneligPeriode.tom,
+                expectedTilFom = gjenopprettingPeriode.fom,
+                expectedTilTom = gjenopprettingPeriode.tom,
                 expectedPeriodebeløpFra = opprinneligPeriodebeløp,
                 expectedPeriodebeløpTil = gjenopprettingPeriodebeløp,
                 expectedEkskluderteUkedagerFra = opprinneligeEkskluderteUkedager,
@@ -379,62 +368,73 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         søknadOgGodkjenningbehovKommerInn()
 
         // When:
-        val nestSisteEndretOrganisasjonsnummer = lagOrganisasjonsnummer()
-        val nestSisteFom = 5 jan 2021
-        val nestSisteTom = 28 jan 2021
-
-        val sisteEndretOrganisasjonesnummer = lagOrganisasjonsnummer()
-        val sisteFom = 14 jan 2021
-        val sisteTom = 21 jan 2021
+        val organisasjonsnummer1 = lagOrganisasjonsnummer()
+        val organisasjonsnummer2 = lagOrganisasjonsnummer()
+        val organisasjonsnummer3 = lagOrganisasjonsnummer()
+        val organisasjonsnummer4 = lagOrganisasjonsnummer()
+        val organisasjonsnummer5 = lagOrganisasjonsnummer()
+        val periode1 = (2 jan 2021) tilOgMed (31 jan 2021)
+        val periode2 = (3 jan 2021) tilOgMed (30 jan 2021)
+        val periode3 = (4 jan 2021) tilOgMed (29 jan 2021)
+        val periode4 = (5 jan 2021) tilOgMed (28 jan 2021)
+        val periode5 = (14 jan 2021) tilOgMed (21 jan 2021)
+        val periodebeløp1 = BigDecimal("1111.11")
+        val periodebeløp2 = BigDecimal("2222.22")
+        val periodebeløp3 = BigDecimal("3333.33")
+        val periodebeløp4 = BigDecimal("4444.44")
+        val periodebeløp5 = BigDecimal("5555.55")
+        val ekskluderteUkedager1 = listOf(12 jan 2021, 21 jan 2021, 25 jan 2021)
+        val ekskluderteUkedager2 = listOf(12 jan 2021, 21 jan 2021, 26 jan 2021)
+        val ekskluderteUkedager3 = listOf(11 jan 2021)
+        val ekskluderteUkedager4 = listOf(6 jan 2021, 13 jan 2021, 20 jan 2021, 27 jan 2021)
+        val ekskluderteUkedager5 = listOf(15 jan 2021, 19 jan 2021)
 
         medPersonISpeil {
             val tilkommenInntektId = saksbehandlerLeggerTilTilkommenInntekt(
-                organisasjonsnummer = lagOrganisasjonsnummer(),
-                fom = 2 jan 2021,
-                tom = 31 jan 2021,
-                periodebeløp = BigDecimal("1111.11"),
-                ekskluderteUkedager = listOf(12 jan 2021, 21 jan 2021, 25 jan 2021),
+                organisasjonsnummer = organisasjonsnummer1,
+                periode = periode1,
+                periodebeløp = periodebeløp1,
+                ekskluderteUkedager = ekskluderteUkedager1,
                 notatTilBeslutter = "legger til tilkommen inntekt her"
             )
 
             saksbehandlerEndrerTilkommenInntekt(
                 tilkommenInntektId = tilkommenInntektId,
-                organisasjonsnummer = lagOrganisasjonsnummer(),
-                fom = 3 jan 2021,
-                tom = 30 jan 2021,
-                periodebeløp = BigDecimal("2222.22"),
-                ekskluderteUkedager = listOf(12 jan 2021, 21 jan 2021, 26 jan 2021),
+                organisasjonsnummerEndring = organisasjonsnummer1 to organisasjonsnummer2,
+                periodeEndring = periode1 to periode2,
+                periodebeløpEndring = periodebeløp1 to periodebeløp2,
+                ekskluderteUkedagerEndring = ekskluderteUkedager1 to ekskluderteUkedager2,
                 notatTilBeslutter = "endring nummer 1"
             )
+
             saksbehandlerEndrerTilkommenInntekt(
                 tilkommenInntektId = tilkommenInntektId,
-                organisasjonsnummer = lagOrganisasjonsnummer(),
-                fom = 4 jan 2021,
-                tom = 29 jan 2021,
-                periodebeløp = BigDecimal("3333.33"),
-                ekskluderteUkedager = listOf(11 jan 2021),
+                organisasjonsnummerEndring = organisasjonsnummer2 to organisasjonsnummer3,
+                periodeEndring = periode2 to periode3,
+                periodebeløpEndring = periodebeløp2 to periodebeløp3,
+                ekskluderteUkedagerEndring = ekskluderteUkedager2 to ekskluderteUkedager3,
                 notatTilBeslutter = "endring nummer 2"
             )
             saksbehandlerFjernerTilkommenInntekt(
                 tilkommenInntektId = tilkommenInntektId,
                 notatTilBeslutter = "fjerning"
             )
+
             saksbehandlerGjenoppretterTilkommenInntekt(
                 tilkommenInntektId = tilkommenInntektId,
-                organisasjonsnummer = nestSisteEndretOrganisasjonsnummer,
-                fom = nestSisteFom,
-                tom = nestSisteTom,
-                periodebeløp = BigDecimal("4444.44"),
-                ekskluderteUkedager = listOf(6 jan 2021, 13 jan 2021, 20 jan 2021, 27 jan 2021),
+                organisasjonsnummerEndring = organisasjonsnummer3 to organisasjonsnummer4,
+                periodeEndring = periode3 to periode4,
+                periodebeløpEndring = periodebeløp3 to periodebeløp4,
+                ekskluderteUkedagerEndring = ekskluderteUkedager3 to ekskluderteUkedager4,
                 notatTilBeslutter = "gjenoppretter etter feilaktig fjerning"
             )
+
             saksbehandlerEndrerTilkommenInntekt(
                 tilkommenInntektId = tilkommenInntektId,
-                organisasjonsnummer = sisteEndretOrganisasjonesnummer,
-                fom = sisteFom,
-                tom = sisteTom,
-                periodebeløp = BigDecimal("5555.55"),
-                ekskluderteUkedager = listOf(15 jan 2021, 19 jan 2021),
+                organisasjonsnummerEndring = organisasjonsnummer4 to organisasjonsnummer5,
+                periodeEndring = periode4 to periode5,
+                periodebeløpEndring = periodebeløp4 to periodebeløp5,
+                ekskluderteUkedagerEndring = ekskluderteUkedager4 to ekskluderteUkedager5,
                 notatTilBeslutter = "endring nummer 3"
             )
 
@@ -442,11 +442,11 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
             assertEquals(1, tilkomneInntektskilder.size())
             assertApiInntektskilde(
                 tilkommenInntektskilde = tilkomneInntektskilder[0],
-                expectedOrganisasjonsnummer = sisteEndretOrganisasjonesnummer,
-                expectedFom = 14 jan 2021,
-                expectedTom = 21 jan 2021,
-                expectedPeriodebeløp = BigDecimal("5555.55"),
-                expectedEkskluderteUkedager = listOf(15 jan 2021, 19 jan 2021),
+                expectedOrganisasjonsnummer = organisasjonsnummer5,
+                expectedFom = periode5.fom,
+                expectedTom = periode5.tom,
+                expectedPeriodebeløp = periodebeløp5,
+                expectedEkskluderteUkedager = ekskluderteUkedager5,
                 expectedFjernet = false
             )
             assertEventTypenamesAndMetadata(
@@ -466,7 +466,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         assertEquals(2, inntektsendringerMelding["inntektsendringer"].size())
         assertInntektsendringerInntektskilde(
             inntektskilde = inntektsendringerMelding["inntektsendringer"][0],
-            expectedOrganisasjonsnummer = nestSisteEndretOrganisasjonsnummer,
+            expectedOrganisasjonsnummer = organisasjonsnummer4,
             expectedInntekter = emptyList(),
             expectedNullstillinger = listOf(
                 Pair("2021-01-05", "2021-01-05"),
@@ -481,7 +481,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         )
         assertInntektsendringerInntektskilde(
             inntektskilde = inntektsendringerMelding["inntektsendringer"][1],
-            expectedOrganisasjonsnummer = sisteEndretOrganisasjonesnummer,
+            expectedOrganisasjonsnummer = organisasjonsnummer5,
             expectedInntekter = listOf(
                 Triple("2021-01-14", "2021-01-14", 1388.8875),
                 Triple("2021-01-18", "2021-01-18", 1388.8875),
@@ -506,8 +506,7 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
         medPersonISpeil {
             val tilkommenInntektId1 = saksbehandlerLeggerTilTilkommenInntekt(
                 organisasjonsnummer = organisasjonsnummer,
-                fom = 2 jan 2021,
-                tom = 15 jan 2021,
+                periode = (2 jan 2021) tilOgMed (15 jan 2021),
                 periodebeløp = BigDecimal("1111.11"),
                 ekskluderteUkedager = listOf(7 jan 2021, 8 jan 2021),
                 notatTilBeslutter = "legger til første tilkommen inntekt her"
@@ -515,18 +514,16 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
 
             saksbehandlerEndrerTilkommenInntekt(
                 tilkommenInntektId = tilkommenInntektId1,
-                organisasjonsnummer = organisasjonsnummer,
-                fom = 2 jan 2021,
-                tom = 15 jan 2021,
-                periodebeløp = BigDecimal("2222.22"),
-                ekskluderteUkedager = listOf(7 jan 2021, 8 jan 2021),
+                organisasjonsnummerEndring = null,
+                periodeEndring = null,
+                periodebeløpEndring = BigDecimal("1111.11") to BigDecimal("2222.22"),
+                ekskluderteUkedagerEndring = null,
                 notatTilBeslutter = "endret periodebeløp på første tilkomne inntekt"
             )
 
             val tilkommenInntektId2 = saksbehandlerLeggerTilTilkommenInntekt(
                 organisasjonsnummer = organisasjonsnummer,
-                fom = 16 jan 2021,
-                tom = 31 jan 2021,
+                periode = (16 jan 2021) tilOgMed (31 jan 2021),
                 periodebeløp = BigDecimal("1111.11"),
                 ekskluderteUkedager = listOf(18 jan 2021, 19 jan 2021, 20 jan 2021, 21 jan 2021),
                 notatTilBeslutter = "legger til enda en tilkommen inntekt her"
@@ -539,11 +536,10 @@ class TilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
 
             saksbehandlerEndrerTilkommenInntekt(
                 tilkommenInntektId = tilkommenInntektId2,
-                organisasjonsnummer = organisasjonsnummer,
-                fom = 16 jan 2021,
-                tom = 31 jan 2021,
-                periodebeløp = BigDecimal("2222.22"),
-                ekskluderteUkedager = listOf(18 jan 2021, 19 jan 2021, 20 jan 2021, 21 jan 2021),
+                organisasjonsnummerEndring = null,
+                periodeEndring = null,
+                periodebeløpEndring = BigDecimal("1111.11") to BigDecimal("2222.22"),
+                ekskluderteUkedagerEndring = null,
                 notatTilBeslutter = "endret periodebeløp på andre tilkomne inntekt"
             )
 

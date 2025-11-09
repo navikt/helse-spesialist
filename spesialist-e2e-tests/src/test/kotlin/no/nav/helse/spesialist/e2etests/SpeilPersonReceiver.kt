@@ -5,6 +5,7 @@ import com.github.navikt.tbd_libs.jackson.asUUID
 import com.github.navikt.tbd_libs.jackson.isMissingOrNull
 import no.nav.helse.spesialist.api.rest.ApiFattVedtakRequest
 import no.nav.helse.spesialist.application.logg.logg
+import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.e2etests.context.TestContext
@@ -139,8 +140,7 @@ class SpeilPersonReceiver(
 
     fun saksbehandlerLeggerTilTilkommenInntekt(
         organisasjonsnummer: String,
-        fom: LocalDate,
-        tom: LocalDate,
+        periode: Periode,
         periodebeløp: BigDecimal,
         ekskluderteUkedager: Collection<LocalDate>,
         notatTilBeslutter: String
@@ -151,8 +151,8 @@ class SpeilPersonReceiver(
             "verdier" to mapOf(
                 "organisasjonsnummer" to organisasjonsnummer,
                 "periode" to mapOf(
-                    "fom" to fom.toString(),
-                    "tom" to tom.toString(),
+                    "fom" to periode.fom.toString(),
+                    "tom" to periode.tom.toString(),
                 ),
                 "periodebelop" to periodebeløp.toString(),
                 "ekskluderteUkedager" to ekskluderteUkedager.map(LocalDate::toString),
@@ -165,25 +165,47 @@ class SpeilPersonReceiver(
 
     fun saksbehandlerEndrerTilkommenInntekt(
         tilkommenInntektId: UUID,
-        organisasjonsnummer: String,
-        fom: LocalDate,
-        tom: LocalDate,
-        periodebeløp: BigDecimal,
-        ekskluderteUkedager: Collection<LocalDate>,
+        organisasjonsnummerEndring: Pair<String, String>?,
+        periodeEndring: Pair<Periode, Periode>?,
+        periodebeløpEndring: Pair<BigDecimal, BigDecimal>?,
+        ekskluderteUkedagerEndring: Pair<Collection<LocalDate>, Collection<LocalDate>>?,
         notatTilBeslutter: String
     ) {
-        callHttpPost(
-            relativeUrl = "api/tilkomne-inntekter/${tilkommenInntektId}/endre",
+        callHttpPatch(
+            relativeUrl = "api/tilkomne-inntekter/${tilkommenInntektId}",
             request = mapOf(
-                "endretTil" to mapOf(
-                    "organisasjonsnummer" to organisasjonsnummer,
-                    "periode" to mapOf(
-                        "fom" to fom.toString(),
-                        "tom" to tom.toString(),
-                    ),
-                    "periodebelop" to periodebeløp.toString(),
-                    "ekskluderteUkedager" to ekskluderteUkedager.map(LocalDate::toString),
-                ),
+                "endringer" to listOfNotNull(
+                    organisasjonsnummerEndring?.let { (fra, til) ->
+                        "organisasjonsnummer" to mapOf(
+                            "fra" to fra,
+                            "til" to til
+                        )
+                    },
+                    periodeEndring?.let { (fra, til) ->
+                        "periode" to mapOf(
+                            "fra" to mapOf(
+                                "fom" to fra.fom.toString(),
+                                "tom" to fra.tom.toString(),
+                            ),
+                            "til" to mapOf(
+                                "fom" to til.fom.toString(),
+                                "tom" to til.tom.toString(),
+                            ),
+                        )
+                    },
+                    periodebeløpEndring?.let { (fra, til) ->
+                        "periodebeløp" to mapOf(
+                            "fra" to fra.toString(),
+                            "til" to til.toString()
+                        )
+                    },
+                    ekskluderteUkedagerEndring?.let { (fra, til) ->
+                        "ekskluderteUkedager" to mapOf(
+                            "fra" to fra.map(LocalDate::toString),
+                            "til" to til.map(LocalDate::toString)
+                        )
+                    },
+                ).toMap(),
                 "notatTilBeslutter" to notatTilBeslutter
             )
         )
@@ -194,9 +216,15 @@ class SpeilPersonReceiver(
         tilkommenInntektId: UUID,
         notatTilBeslutter: String
     ) {
-        callHttpPost(
-            relativeUrl = "api/tilkomne-inntekter/${tilkommenInntektId}/fjern",
+        callHttpPatch(
+            relativeUrl = "api/tilkomne-inntekter/${tilkommenInntektId}",
             request = mapOf(
+                "endringer" to mapOf(
+                    "fjernet" to mapOf(
+                        "fra" to false,
+                        "til" to true
+                    )
+                ),
                 "notatTilBeslutter" to notatTilBeslutter
             )
         )
@@ -205,25 +233,51 @@ class SpeilPersonReceiver(
 
     fun saksbehandlerGjenoppretterTilkommenInntekt(
         tilkommenInntektId: UUID,
-        organisasjonsnummer: String,
-        fom: LocalDate,
-        tom: LocalDate,
-        periodebeløp: BigDecimal,
-        ekskluderteUkedager: Collection<LocalDate>,
+        organisasjonsnummerEndring: Pair<String, String>?,
+        periodeEndring: Pair<Periode, Periode>?,
+        periodebeløpEndring: Pair<BigDecimal, BigDecimal>?,
+        ekskluderteUkedagerEndring: Pair<Collection<LocalDate>, Collection<LocalDate>>?,
         notatTilBeslutter: String
     ) {
-        callHttpPost(
-            relativeUrl = "api/tilkomne-inntekter/${tilkommenInntektId}/gjenopprett",
+        callHttpPatch(
+            relativeUrl = "api/tilkomne-inntekter/${tilkommenInntektId}",
             request = mapOf(
-                "endretTil" to mapOf(
-                    "organisasjonsnummer" to organisasjonsnummer,
-                    "periode" to mapOf(
-                        "fom" to fom.toString(),
-                        "tom" to tom.toString(),
+                "endringer" to listOfNotNull(
+                    "fjernet" to mapOf(
+                        "fra" to true,
+                        "til" to false,
                     ),
-                    "periodebelop" to periodebeløp.toString(),
-                    "ekskluderteUkedager" to ekskluderteUkedager.map(LocalDate::toString),
-                ),
+                    organisasjonsnummerEndring?.let { (fra, til) ->
+                        "organisasjonsnummer" to mapOf(
+                            "fra" to fra,
+                            "til" to til
+                        )
+                    },
+                    periodeEndring?.let { (fra, til) ->
+                        "periode" to mapOf(
+                            "fra" to mapOf(
+                                "fom" to fra.fom.toString(),
+                                "tom" to fra.tom.toString(),
+                            ),
+                            "til" to mapOf(
+                                "fom" to til.fom.toString(),
+                                "tom" to til.tom.toString(),
+                            ),
+                        )
+                    },
+                    periodebeløpEndring?.let { (fra, til) ->
+                        "periodebeløp" to mapOf(
+                            "fra" to fra.toString(),
+                            "til" to til.toString()
+                        )
+                    },
+                    ekskluderteUkedagerEndring?.let { (fra, til) ->
+                        "ekskluderteUkedager" to mapOf(
+                            "fra" to fra.map(LocalDate::toString),
+                            "til" to til.map(LocalDate::toString)
+                        )
+                    },
+                ).toMap(),
                 "notatTilBeslutter" to notatTilBeslutter
             )
         )
@@ -350,6 +404,9 @@ class SpeilPersonReceiver(
 
     private fun callHttpGet(relativeUrl: String) =
         REST.get(relativeUrl, saksbehandler, tilgangsgrupper)
+
+    private fun callHttpPatch(relativeUrl: String, request: Any) =
+        REST.patch(relativeUrl, saksbehandler, tilgangsgrupper, request)
 
     private fun callHttpPost(relativeUrl: String, request: Any) =
         REST.post(relativeUrl, saksbehandler, tilgangsgrupper, request)

@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.e2etests.tests
 
 import com.fasterxml.jackson.databind.JsonNode
+import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
 import no.nav.helse.spesialist.e2etests.AbstractE2EIntegrationTest
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
@@ -168,7 +169,13 @@ class RESTFattVedtakE2ETest : AbstractE2EIntegrationTest() {
         // When:
         medPersonISpeil {
             saksbehandlerTildelerSegSaken() // Må til for å "opprette" saksbehandler
-            saksbehandlerLeggerTilTilkommenInntekt("999999999", vedtaksperiode.fom, vedtaksperiode.tom, BigDecimal.valueOf(10000.0), emptyList(), "Et notat")
+            saksbehandlerLeggerTilTilkommenInntekt(
+                organisasjonsnummer = "999999999",
+                periode = vedtaksperiode.fom tilOgMed vedtaksperiode.tom,
+                periodebeløp = BigDecimal.valueOf(10000.0),
+                ekskluderteUkedager = emptyList(),
+                notatTilBeslutter = "Et notat"
+            )
             saksbehandlerGodkjennerAlleVarsler()
             saksbehandlerSenderTilGodkjenning("Her er min begrunnelse")
         }
