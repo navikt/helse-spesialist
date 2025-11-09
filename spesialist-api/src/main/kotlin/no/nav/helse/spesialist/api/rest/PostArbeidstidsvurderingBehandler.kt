@@ -110,7 +110,7 @@ class PostArbeidstidsvurderingBehandler : PostBehandler<Personer.PersonPseudoId.
 
     override fun openApi(config: RouteConfig) {
         with(config) {
-            tags = setOf("Overstyringer")
+            tags = setOf("Vurderinger")
         }
     }
 
