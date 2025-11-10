@@ -266,7 +266,9 @@ private fun String.tilSvartype(): ApiSvartype {
         "BELOP" -> ApiSvartype.BELOP
         "KILOMETER" -> ApiSvartype.KILOMETER
         "GRUPPE_AV_UNDERSPORSMAL" -> ApiSvartype.GRUPPE_AV_UNDERSPORSMAL
-        "AAR_MANED" -> ApiSvartype.AAR_MANED
+        "AAR_MANED",
+        "AAR_MAANED",
+        -> ApiSvartype.AAR_MAANED
         else -> {
             sikkerlogg.error("Søknad har ny Svartype som må støttes: {}, returnerer UKJENT enn så lenge", this)
             return ApiSvartype.UKJENT

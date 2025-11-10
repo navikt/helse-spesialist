@@ -106,7 +106,7 @@ enum class ApiSvartype {
     BELOP,
     KILOMETER,
     GRUPPE_AV_UNDERSPORSMAL,
-    AAR_MANED,
+    AAR_MAANED,
     UKJENT,
 }
 
