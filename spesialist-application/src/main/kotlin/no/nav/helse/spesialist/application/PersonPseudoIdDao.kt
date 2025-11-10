@@ -8,5 +8,5 @@ interface PersonPseudoIdDao {
 
     fun hentIdentitetsnummer(personPseudoId: PersonPseudoId): Identitetsnummer?
 
-    fun slettPseudoIderEldreEnn(alder: Duration)
+    fun slettPseudoIderEldreEnn(alder: Duration): Int
 }

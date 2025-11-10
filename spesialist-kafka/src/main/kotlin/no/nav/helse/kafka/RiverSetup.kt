@@ -54,7 +54,7 @@ class RiverSetup(
             BehovtidsbrukMetrikkRiver(),
             AvsluttetMedVedtakRiver(sessionFactory),
             AvsluttetUtenVedtakRiver(mediator),
-            MidnattRiver(mediator),
+            MidnattRiver(sessionFactory),
             BehandlingOpprettetRiver(mediator),
             KommandokjedePåminnelseRiver(mediator),
             StansAutomatiskBehandlingRiver(mediator),

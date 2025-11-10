@@ -242,10 +242,12 @@ class InMemorySessionContext(
         }
 
         override fun hentIdentitetsnummer(personPseudoId: PersonPseudoId) = mapping[personPseudoId]?.first
-        override fun slettPseudoIderEldreEnn(alder: Duration) {
+        override fun slettPseudoIderEldreEnn(alder: Duration): Int {
+            val antallFørSletting = mapping.size
             mapping.entries.removeIf {
                 it.value.second < Instant.now().minus(alder)
             }
+            return antallFørSletting - mapping.size
         }
     }
 }

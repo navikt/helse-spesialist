@@ -158,8 +158,6 @@ class MeldingMediator(
         return behandlinger
     }
 
-    fun slettGamleDokumenter(): Int = dokumentDao.slettGamleDokumenter()
-
     fun nullstillTilstand() {
         løsninger.set(null)
         meldingenHarBlittBehandletAvEnRiver.set(false)

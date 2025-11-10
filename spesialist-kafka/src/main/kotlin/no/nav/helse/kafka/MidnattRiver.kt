@@ -6,15 +6,17 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import io.micrometer.core.instrument.MeterRegistry
 import net.logstash.logback.argument.StructuredArguments.kv
-import no.nav.helse.mediator.MeldingMediator
+import no.nav.helse.db.SessionFactory
 import no.nav.helse.mediator.asUUID
 import org.slf4j.LoggerFactory
+import java.time.Duration
 
 class MidnattRiver(
-    private val mediator: MeldingMediator,
+    private val sessionFactory: SessionFactory,
 ) : SpesialistRiver {
     private companion object {
         private val logg = LoggerFactory.getLogger(this::class.java)
+        private val EN_UKE = Duration.ofDays(7)
     }
 
     override fun preconditions(): River.PacketValidation =
@@ -36,7 +38,14 @@ class MidnattRiver(
         val hendelseId = packet["@id"].asUUID()
         logg.info("Mottok melding midnatt, {}", kv("hendelseId", hendelseId))
 
-        val antallSlettet = mediator.slettGamleDokumenter()
-        logg.info("Slettet $antallSlettet dokumenter")
+        sessionFactory.transactionalSessionScope {
+            val antallSlettet = it.dokumentDao.slettGamleDokumenter()
+            logg.info("Slettet $antallSlettet dokumenter")
+        }
+
+        sessionFactory.transactionalSessionScope {
+            val antallSlettet = it.personPseudoIdDao.slettPseudoIderEldreEnn(EN_UKE)
+            logg.info("Slettet $antallSlettet pseudo-ider")
+        }
     }
 }

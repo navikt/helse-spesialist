@@ -33,10 +33,9 @@ class PgPersonPseudoIdDao(
             Identitetsnummer.fraString(identitetsnummer)
         }
 
-    override fun slettPseudoIderEldreEnn(alder: Duration) {
+    override fun slettPseudoIderEldreEnn(alder: Duration): Int =
         dbQuery.update(
             """DELETE FROM personpseudoid WHERE opprettet_tidspunkt < :cutOff""",
             "cutOff" to Instant.now().minus(alder),
         )
-    }
 }
