@@ -122,7 +122,7 @@ private fun SnapshotSykdomsdagtype.tilApiSykdomsdagtype() =
         SnapshotSykdomsdagtype.ANDREYTELSEROPPLARINGSPENGER -> ApiSykdomsdagtype.ANDRE_YTELSER_OPPLARINGSPENGER
         SnapshotSykdomsdagtype.ANDREYTELSERPLEIEPENGER -> ApiSykdomsdagtype.ANDRE_YTELSER_PLEIEPENGER
         SnapshotSykdomsdagtype.ANDREYTELSERSVANGERSKAPSPENGER -> ApiSykdomsdagtype.ANDRE_YTELSER_SVANGERSKAPSPENGER
-        SnapshotSykdomsdagtype.VENTETIDSDAG -> ApiSykdomsdagtype.VENTETIDSDAG
+        SnapshotSykdomsdagtype.MELDINGTILNAVDAG -> ApiSykdomsdagtype.MELDINGTILNAVDAG
         SnapshotSykdomsdagtype.UNKNOWN_VALUE -> ApiSykdomsdagtype.UKJENT
     }
 

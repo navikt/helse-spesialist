@@ -505,12 +505,12 @@ enum GraphQLSykdomsdagtype {
   Feriedag
   ForeldetSykedag
   FriskHelgedag
+  MeldingTilNavDag
   Permisjonsdag
   SykHelgedag
   Sykedag
   SykedagNav
   Ubestemtdag
-  Ventetidsdag
 }
 
 enum GraphQLUtbetalingsdagType {

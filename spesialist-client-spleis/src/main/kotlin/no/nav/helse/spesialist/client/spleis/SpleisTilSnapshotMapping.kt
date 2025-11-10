@@ -651,7 +651,7 @@ fun GraphQLSykdomsdagtype.tilSnapshotSykdomsdagtype() =
         GraphQLSykdomsdagtype.SYKEDAG -> SnapshotSykdomsdagtype.SYKEDAG
         GraphQLSykdomsdagtype.SYKEDAGNAV -> SnapshotSykdomsdagtype.SYKEDAGNAV
         GraphQLSykdomsdagtype.UBESTEMTDAG -> SnapshotSykdomsdagtype.UBESTEMTDAG
-        GraphQLSykdomsdagtype.VENTETIDSDAG -> SnapshotSykdomsdagtype.VENTETIDSDAG
+        GraphQLSykdomsdagtype.MELDINGTILNAVDAG -> SnapshotSykdomsdagtype.MELDINGTILNAVDAG
         GraphQLSykdomsdagtype.__UNKNOWN_VALUE -> SnapshotSykdomsdagtype.UNKNOWN_VALUE
     }
 

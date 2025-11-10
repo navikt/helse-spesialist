@@ -136,11 +136,6 @@ type Arbeidsgiverrefusjon {
     refusjonsopplysninger: [Refusjonselement!]!
 }
 
-type AvsenderSystem {
-    navn: String
-    versjon: String
-}
-
 type Avslag {
     begrunnelse: String!
     invalidert: Boolean!
@@ -243,26 +238,6 @@ type Dagoverstyring implements Overstyring {
     vedtaksperiodeId: UUID!
 }
 
-type DokumentInntektsmelding {
-    arbeidsforholdId: String
-    arbeidsgiverperioder: [IMPeriode!]
-    avsenderSystem: AvsenderSystem
-    begrunnelseForReduksjonEllerIkkeUtbetalt: String
-    beregnetInntekt: Float
-    bruttoUtbetalt: Float
-    endringIRefusjoner: [EndringIRefusjon!]
-    ferieperioder: [IMPeriode!]
-    foersteFravaersdag: LocalDate
-    gjenopptakelseNaturalytelser: [GjenopptakelseNaturalytelse!]
-    innsenderFulltNavn: String
-    innsenderTelefon: String
-    inntektEndringAarsaker: [InntektEndringAarsak!]
-    naerRelasjon: Boolean
-    opphoerAvNaturalytelser: [OpphoerAvNaturalytelse!]
-    refusjon: Refusjon
-    virksomhetsnummer: String
-}
-
 type EndrePaVent implements Historikkinnslag {
     arsaker: [String!]!
     dialogRef: Int
@@ -273,11 +248,6 @@ type EndrePaVent implements Historikkinnslag {
     saksbehandlerIdent: String
     timestamp: LocalDateTime!
     type: PeriodehistorikkType!
-}
-
-type EndringIRefusjon {
-    beloep: Float
-    endringsdato: LocalDate
 }
 
 type Enhet {
@@ -313,21 +283,10 @@ type GhostPeriode {
     vilkarsgrunnlagId: UUID
 }
 
-type GjenopptakelseNaturalytelse {
-    beloepPrMnd: Float
-    fom: LocalDate
-    naturalytelse: Naturalytelse
-}
-
 type Handling {
     begrunnelse: String
     tillatt: Boolean!
     type: Periodehandling!
-}
-
-type IMPeriode {
-    fom: LocalDate
-    tom: LocalDate
 }
 
 type Infotrygdutbetaling {
@@ -337,13 +296,6 @@ type Infotrygdutbetaling {
     organisasjonsnummer: String!
     tom: String!
     typetekst: String!
-}
-
-type InntektEndringAarsak {
-    aarsak: String!
-    bleKjent: LocalDate
-    gjelderFra: LocalDate
-    perioder: [IMPeriode!]
 }
 
 type InntektFraAOrdningen {
@@ -364,12 +316,6 @@ type Inntektoverstyring implements Overstyring {
     saksbehandler: Saksbehandler!
     timestamp: LocalDateTime!
     vedtaksperiodeId: UUID!
-}
-
-type Inntektsar {
-    ar: String!
-    erFerdigLignet: Boolean!
-    pensjonsgivendeInntektAvNaringsinntekt: Int!
 }
 
 type Inntektsmelding implements Hendelse {
@@ -415,9 +361,7 @@ type MinimumSykdomsgradOverstyring implements Overstyring {
 }
 
 type Mutation {
-    annuller(annullering: AnnulleringDataInput!): Boolean!
     endrePaVent(arsaker: [PaVentArsakInput!]!, frist: LocalDate!, notatTekst: String, oppgaveId: String!, tildeling: Boolean!): PaVent
-    fattVedtak(begrunnelse: String, oppgavereferanse: String!): Boolean!
     feilregistrerKommentar(id: Int!): Kommentar
     feilregistrerKommentarV2(id: Int!): Kommentar
     feilregistrerNotat(id: Int!): Notat
@@ -426,9 +370,7 @@ type Mutation {
     leggPaVent(arsaker: [PaVentArsakInput!], frist: LocalDate!, notatTekst: String, oppgaveId: String!, tildeling: Boolean!): PaVent
     leggTilKommentar(dialogRef: Int!, saksbehandlerident: String!, tekst: String!): Kommentar
     leggTilNotat(saksbehandlerOid: String!, tekst: String!, type: NotatType!, vedtaksperiodeId: String!): Notat
-    minimumSykdomsgrad(minimumSykdomsgrad: MinimumSykdomsgradInput!): Boolean
     oppdaterPerson(fodselsnummer: String!): Boolean!
-    opphevStans(begrunnelse: String!, fodselsnummer: String!): Boolean!
     opphevStansAutomatiskBehandling(begrunnelse: String!, fodselsnummer: String!): Boolean!
     opprettAbonnement(personidentifikator: String!): Boolean!
     opprettTildeling(oppgaveId: String!): Tildeling
@@ -470,31 +412,9 @@ type OppgaveForPeriodevisning {
     id: String!
 }
 
-type OppgaveTilBehandling {
-    aktorId: String!
-    antallArbeidsforhold: AntallArbeidsforhold!
-    egenskaper: [Oppgaveegenskap!]!
-    id: String!
-    mottaker: Mottaker!
-    navn: Personnavn!
-    oppgavetype: Oppgavetype!
-    opprettet: LocalDateTime!
-    opprinneligSoknadsdato: LocalDateTime!
-    paVentInfo: PaVentInfo
-    periodetype: Periodetype!
-    tidsfrist: LocalDate
-    tildeling: Tildeling
-    vedtaksperiodeId: UUID!
-}
-
 type Oppgaveegenskap {
     egenskap: Egenskap!
     kategori: Kategori!
-}
-
-type OppgaverTilBehandling {
-    oppgaver: [OppgaveTilBehandling!]!
-    totaltAntallOppgaver: Int!
 }
 
 type OpphevStansAutomatiskBehandlingSaksbehandler implements Historikkinnslag {
@@ -505,12 +425,6 @@ type OpphevStansAutomatiskBehandlingSaksbehandler implements Historikkinnslag {
     saksbehandlerIdent: String
     timestamp: LocalDateTime!
     type: PeriodehistorikkType!
-}
-
-type OpphoerAvNaturalytelse {
-    beloepPrMnd: Float
-    fom: LocalDate
-    naturalytelse: Naturalytelse
 }
 
 type Opptegnelse {
@@ -555,16 +469,6 @@ type PaVent {
     oid: UUID!
 }
 
-type PaVentInfo {
-    arsaker: [String!]!
-    dialogRef: Int!
-    kommentarer: [Kommentar!]!
-    opprettet: LocalDateTime!
-    saksbehandler: String!
-    tekst: String
-    tidsfrist: LocalDate!
-}
-
 type PensjonsgivendeInntekt {
     arligBelop: BigDecimal!
     inntektsar: Int!
@@ -590,6 +494,7 @@ type Person {
     enhet: Enhet!
     fodselsnummer: String!
     infotrygdutbetalinger: [Infotrygdutbetaling!]
+    personPseudoId: UUID!
     personinfo: Personinfo!
     selvstendigNaering: SelvstendigNaering
     tildeling: Tildeling
@@ -621,17 +526,8 @@ type Query {
     antallOppgaver: AntallOppgaver!
     behandledeOppgaverFeed(fom: LocalDate!, limit: Int!, offset: Int!, tom: LocalDate!): BehandledeOppgaver!
     behandlingsstatistikk: Behandlingsstatistikk!
-    hentInntektsmelding(dokumentId: String!, fnr: String!): DokumentInntektsmelding
-    hentSoknad(dokumentId: String!, fnr: String!): Soknad
-    oppgaveFeed(filtrering: FiltreringInput!, limit: Int!, offset: Int!, sortering: [OppgavesorteringInput!]!): OppgaverTilBehandling!
     opptegnelser(sekvensId: Int): [Opptegnelse!]!
     person(aktorId: String, fnr: String): Person
-    tildelteOppgaverFeed(limit: Int!, offset: Int!, oppslattSaksbehandler: SaksbehandlerInput!): OppgaverTilBehandling!
-}
-
-type Refusjon {
-    beloepPrMnd: Float
-    opphoersdato: LocalDate
 }
 
 type Refusjonselement {
@@ -729,16 +625,6 @@ type SkjonnsfastsattSykepengegrunnlag {
     type: Skjonnsfastsettingstype
 }
 
-type Soknad {
-    arbeidGjenopptatt: LocalDate
-    egenmeldingsdagerFraSykmelding: [LocalDate!]
-    selvstendigNaringsdrivende: SoknadSelvstendigNaringsdrivende
-    soknadsperioder: [Soknadsperioder!]
-    sporsmal: [Sporsmal!]
-    sykmeldingSkrevet: LocalDateTime
-    type: Soknadstype
-}
-
 type SoknadArbeidsgiver implements Hendelse {
     eksternDokumentId: UUID
     fom: LocalDate!
@@ -789,29 +675,6 @@ type SoknadSelvstendig implements Hendelse {
     type: Hendelsetype!
 }
 
-type SoknadSelvstendigNaringsdrivende {
-    inntekt: [Inntektsar!]!
-    ventetid: VentetidPeriode!
-}
-
-type Soknadsperioder {
-    faktiskGrad: Int
-    fom: LocalDate!
-    grad: Int
-    sykmeldingsgrad: Int
-    tom: LocalDate!
-}
-
-type Sporsmal {
-    kriterieForVisningAvUndersporsmal: Visningskriterium
-    sporsmalstekst: String
-    svar: [Svar!]
-    svartype: Svartype
-    tag: String
-    undersporsmal: [Sporsmal!]
-    undertekst: String
-}
-
 type StansAutomatiskBehandlingSaksbehandler implements Historikkinnslag {
     dialogRef: Int
     id: Int!
@@ -820,10 +683,6 @@ type StansAutomatiskBehandlingSaksbehandler implements Historikkinnslag {
     saksbehandlerIdent: String
     timestamp: LocalDateTime!
     type: PeriodehistorikkType!
-}
-
-type Svar {
-    verdi: String
 }
 
 type Sykepengedager {
@@ -953,11 +812,6 @@ type VedtakBegrunnelse {
     opprettet: LocalDateTime!
     saksbehandlerIdent: String!
     utfall: VedtakUtfall!
-}
-
-type VentetidPeriode {
-    fom: LocalDate!
-    tom: LocalDate!
 }
 
 type VilkarsgrunnlagAvviksvurdering {
@@ -1137,36 +991,6 @@ enum Kjonn {
     Ukjent
 }
 
-enum Mottaker {
-    ARBEIDSGIVER
-    BEGGE
-    INGEN
-    SYKMELDT
-}
-
-enum Naturalytelse {
-    AKSJERGRUNNFONDSBEVISTILUNDERKURS
-    ANNET
-    BEDRIFTSBARNEHAGEPLASS
-    BESOEKSREISERHJEMMETANNET
-    BIL
-    BOLIG
-    ELEKTRONISKKOMMUNIKASJON
-    FRITRANSPORT
-    INNBETALINGTILUTENLANDSKPENSJONSORDNING
-    KOSTBESPARELSEIHJEMMET
-    KOSTDAGER
-    KOSTDOEGN
-    LOSJI
-    OPSJONER
-    RENTEFORDELLAAN
-    SKATTEPLIKTIGDELFORSIKRINGER
-    TILSKUDDBARNEHAGEPLASS
-    UKJENT
-    YRKEBILTJENESTLIGBEHOVKILOMETER
-    YRKEBILTJENESTLIGBEHOVLISTEPRIS
-}
-
 enum NotatType {
     Generelt
     OpphevStans
@@ -1255,56 +1079,6 @@ enum Skjonnsfastsettingstype {
     RAPPORTERT_ARSINNTEKT
 }
 
-enum Soknadstype {
-    Annet_arbeidsforhold
-    Arbeidsledig
-    Arbeidstaker
-    Behandlingsdager
-    Gradert_reisetilskudd
-    Opphold_utland
-    Reisetilskudd
-    Selvstendig_og_frilanser
-    UKJENT
-}
-
-enum Sorteringsnokkel {
-    OPPRETTET
-    SOKNAD_MOTTATT
-    TIDSFRIST
-    TILDELT_TIL
-}
-
-enum Svartype {
-    BEKREFTELSESPUNKTER
-    BELOP
-    CHECKBOX
-    CHECKBOX_GRUPPE
-    CHECKBOX_PANEL
-    COMBOBOX_MULTI
-    COMBOBOX_SINGLE
-    DATO
-    DATOER
-    FRITEKST
-    GRUPPE_AV_UNDERSPORSMAL
-    IKKE_RELEVANT
-    INFO_BEHANDLINGSDAGER
-    JA_NEI
-    KILOMETER
-    KVITTERING
-    LAND
-    OPPSUMMERING
-    PERIODE
-    PERIODER
-    PROSENT
-    RADIO
-    RADIO_GRUPPE
-    RADIO_GRUPPE_TIMER_PROSENT
-    RADIO_GRUPPE_UKEKALENDER
-    TALL
-    TIMER
-    UKJENT
-}
-
 enum Sykdomsdagtype {
     ANDRE_YTELSER_AAP
     ANDRE_YTELSER_DAGPENGER
@@ -1320,13 +1094,13 @@ enum Sykdomsdagtype {
     FERIEDAG
     FORELDET_SYKEDAG
     FRISK_HELGEDAG
+    MELDINGTILNAVDAG
     PERMISJONSDAG
     SYKEDAG
     SYKEDAG_NAV
     SYK_HELGEDAG
     UBESTEMTDAG
     UKJENT
-    VENTETIDSDAG
 }
 
 enum Utbetalingsdagtype {
@@ -1384,13 +1158,6 @@ enum VilkarsgrunnlagVurdering {
     OPPFYLT
 }
 
-enum Visningskriterium {
-    CHECKED
-    JA
-    NEI
-    UKJENT
-}
-
 "class java.math.BigDecimal"
 scalar BigDecimal
 
@@ -1406,43 +1173,12 @@ scalar UUID
 "class java.time.YearMonth"
 scalar YearMonth
 
-input AnnulleringArsakInput {
-    _key: String!
-    arsak: String!
-}
-
-input AnnulleringDataInput {
-    aktorId: String!
-    arbeidsgiverFagsystemId: String!
-    arsaker: [AnnulleringArsakInput!]!
-    fodselsnummer: String!
-    kommentar: String
-    organisasjonsnummer: String!
-    personFagsystemId: String!
-    utbetalingId: UUID!
-    vedtaksperiodeId: UUID!
-}
-
 input ArbeidsforholdOverstyringHandlingInput {
     aktorId: String!
     fodselsnummer: String!
     overstyrteArbeidsforhold: [OverstyringArbeidsforholdInput!]!
     skjaringstidspunkt: LocalDate!
     vedtaksperiodeId: UUID!
-}
-
-input ArbeidsgiverInput {
-    berortVedtaksperiodeId: UUID!
-    organisasjonsnummer: String!
-}
-
-input FiltreringInput {
-    egenskaper: [OppgaveegenskapInput!]!
-    egneSaker: Boolean!
-    egneSakerPaVent: Boolean!
-    ekskluderteEgenskaper: [OppgaveegenskapInput!]
-    ingenUkategoriserteEgenskaper: Boolean!
-    tildelt: Boolean
 }
 
 input InntektOgRefusjonOverstyringInput {
@@ -1459,26 +1195,6 @@ input LovhjemmelInput {
     lovverk: String!
     lovverksversjon: String!
     paragraf: String!
-}
-
-input MinimumSykdomsgradInput {
-    aktorId: String!
-    arbeidsgivere: [ArbeidsgiverInput!]!
-    begrunnelse: String!
-    fodselsnummer: String!
-    initierendeVedtaksperiodeId: UUID!
-    perioderVurdertIkkeOk: [PeriodeInput!]!
-    perioderVurdertOk: [PeriodeInput!]!
-}
-
-input OppgaveegenskapInput {
-    egenskap: Egenskap!
-    kategori: Kategori!
-}
-
-input OppgavesorteringInput {
-    nokkel: Sorteringsnokkel!
-    stigende: Boolean!
 }
 
 input OverstyringArbeidsforholdInput {
@@ -1520,16 +1236,6 @@ input OverstyringRefusjonselementInput {
 input PaVentArsakInput {
     _key: String!
     arsak: String!
-}
-
-input PeriodeInput {
-    fom: LocalDate!
-    tom: LocalDate!
-}
-
-input SaksbehandlerInput {
-    ident: String
-    navn: String!
 }
 
 input SkjonnsfastsettelseArbeidsgiverInput {
