@@ -587,6 +587,7 @@ fragment tilleggsinfoForInntektskilde on TilleggsinfoForInntektskilde {
 
 fragment person on Person {
     fodselsnummer
+    personPseudoId
     dodsdato
     enhet {
         id

@@ -36,36 +36,26 @@ class GetTilkomneInntektskilderForPersonBehandler : GetBehandler<Personer.Person
         transaksjon: SessionContext,
     ): RestResponse<List<ApiTilkommenInntektskilde>, ApiGetTilkomneInntektskilderForPersonErrorCode> {
         val personId = resource.parent.pseudoId
-        val fødselsnumre =
-            if (personId.toLongOrNull() != null) {
-                transaksjon.legacyPersonRepository.finnFødselsnumre(aktørId = personId).toSet()
-            } else {
-                val pseudoId = PersonPseudoId.fraString(personId)
-                val identitetsnummer =
-                    transaksjon.personPseudoIdDao.hentIdentitetsnummer(pseudoId)
-                        ?: return RestResponse.Error(ApiGetTilkomneInntektskilderForPersonErrorCode.PERSON_IKKE_FUNNET)
-                setOf(identitetsnummer.value)
-            }
+        val pseudoId = PersonPseudoId.fraString(personId)
+        val identitetsnummer =
+            transaksjon.personPseudoIdDao.hentIdentitetsnummer(pseudoId)
+                ?: return RestResponse.Error(ApiGetTilkomneInntektskilderForPersonErrorCode.PERSON_IKKE_FUNNET)
 
-        fødselsnumre.forEach { fødselsnummer ->
-            if (!harTilgangTilPerson(
-                    fødselsnummer = fødselsnummer,
-                    saksbehandler = saksbehandler,
-                    tilgangsgrupper = tilgangsgrupper,
-                    transaksjon = transaksjon,
-                )
-            ) {
-                return RestResponse.Error(ApiGetTilkomneInntektskilderForPersonErrorCode.MANGLER_TILGANG_TIL_PERSON)
-            }
+        if (!harTilgangTilPerson(
+                fødselsnummer = identitetsnummer.value,
+                saksbehandler = saksbehandler,
+                tilgangsgrupper = tilgangsgrupper,
+                transaksjon = transaksjon,
+            )
+        ) {
+            return RestResponse.Error(ApiGetTilkomneInntektskilderForPersonErrorCode.MANGLER_TILGANG_TIL_PERSON)
         }
 
         return RestResponse.OK(
-            fødselsnumre.flatMap { fødselsnummer ->
-                hentTilkomneInntektskilder(
-                    fødselsnummer = fødselsnummer,
-                    transaksjon = transaksjon,
-                )
-            },
+            hentTilkomneInntektskilder(
+                fødselsnummer = identitetsnummer.value,
+                transaksjon = transaksjon,
+            ),
         )
     }
 

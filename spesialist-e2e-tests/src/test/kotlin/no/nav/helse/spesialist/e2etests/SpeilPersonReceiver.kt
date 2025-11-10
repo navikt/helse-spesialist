@@ -383,7 +383,7 @@ class SpeilPersonReceiver(
     }
 
     fun callGetTilkomneInntektskilder(): JsonNode =
-        callHttpGet("api/personer/${testContext.person.aktørId}/tilkomne-inntektskilder")
+        callHttpGet("api/personer/${person["personPseudoId"].asText()}/tilkomne-inntektskilder")
 
     private fun getOppgaveId(): String =
         person["arbeidsgivere"][0]["generasjoner"][0]["perioder"][0]["oppgave"]["id"].asText()

@@ -5,6 +5,7 @@ import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.application.logg.sikkerlogg
 import no.nav.helse.spesialist.application.tilgangskontroll.PersonTilgangskontroll
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 
@@ -33,3 +34,16 @@ internal fun harTilgangTilPerson(
     }
     return true
 }
+
+internal fun harTilgangTilPerson(
+    identitetsnummer: Identitetsnummer,
+    saksbehandler: Saksbehandler,
+    tilgangsgrupper: Set<Tilgangsgruppe>,
+    transaksjon: SessionContext,
+): Boolean =
+    harTilgangTilPerson(
+        fødselsnummer = identitetsnummer.value,
+        saksbehandler = saksbehandler,
+        tilgangsgrupper = tilgangsgrupper,
+        transaksjon = transaksjon,
+    )
