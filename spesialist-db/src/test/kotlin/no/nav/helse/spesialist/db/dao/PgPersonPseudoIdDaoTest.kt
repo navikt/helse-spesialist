@@ -21,15 +21,14 @@ class PgPersonPseudoIdDaoTest : AbstractDBIntegrationTest() {
 
     @Test
     fun `slett utdaterte pseudo-ider`() {
-        val dao = PgPersonPseudoIdDao(session)
         val fødselsnummer = Fødselsnummer(lagFødselsnummer())
         runAndRollback {
-            val pseudoId1 = dao.nyPersonPseudoId(fødselsnummer)
+            val pseudoId1 = it.nyPersonPseudoId(fødselsnummer)
             Thread.sleep(2000)
-            val pseudoId2 = dao.nyPersonPseudoId(fødselsnummer)
-            dao.slettPseudoIderEldreEnn(Duration.of(1, ChronoUnit.SECONDS))
-            assertEquals(null, dao.hentIdentitetsnummer(pseudoId1))
-            assertEquals(fødselsnummer, dao.hentIdentitetsnummer(pseudoId2))
+            val pseudoId2 = it.nyPersonPseudoId(fødselsnummer)
+            it.slettPseudoIderEldreEnn(Duration.of(1, ChronoUnit.SECONDS))
+            assertEquals(null, it.hentIdentitetsnummer(pseudoId1))
+            assertEquals(fødselsnummer, it.hentIdentitetsnummer(pseudoId2))
         }
     }
 
