@@ -31,6 +31,8 @@ import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.VedtakBegrunnelse
 import no.nav.helse.spesialist.typer.Kjønn
+import java.time.Duration
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -232,13 +234,18 @@ class InMemorySessionContext(
         }
     }
     override val personPseudoIdDao: PersonPseudoIdDao = object : PersonPseudoIdDao {
-        private val mapping = mutableMapOf<PersonPseudoId, Identitetsnummer>()
+        private val mapping = mutableMapOf<PersonPseudoId, Pair<Identitetsnummer, Instant>>()
         override fun nyPersonPseudoId(identitetsnummer: Identitetsnummer): PersonPseudoId {
             val personPseudoId = PersonPseudoId.ny()
-            mapping[personPseudoId] = identitetsnummer
+            mapping[personPseudoId] = identitetsnummer to Instant.now()
             return personPseudoId
         }
 
-        override fun hentIdentitetsnummer(personPseudoId: PersonPseudoId) = mapping[personPseudoId]
+        override fun hentIdentitetsnummer(personPseudoId: PersonPseudoId) = mapping[personPseudoId]?.first
+        override fun slettPseudoIderEldreEnn(alder: Duration) {
+            mapping.entries.removeIf {
+                it.value.second < Instant.now().minus(alder)
+            }
+        }
     }
 }
