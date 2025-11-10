@@ -7,6 +7,7 @@ import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.api.graphql.schema.ApiSoknadstype
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.testfixtures.lagSaksbehandler
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.testfixtures.fødselsdato
 import no.nav.helse.spesialist.domain.testfixtures.lagEtternavn
 import no.nav.helse.spesialist.domain.testfixtures.lagFornavn
@@ -22,7 +23,7 @@ class GetSøknadBehandlerIntegrationTest {
     private val dokumentDao = integrationTestFixture.sessionFactory.sessionContext.dokumentDao
     private val legacyPersonRepository = integrationTestFixture.sessionFactory.sessionContext.legacyPersonRepository
     private val personDao = integrationTestFixture.sessionFactory.sessionContext.personDao
-
+    private val personPseudoIdDao = integrationTestFixture.sessionFactory.sessionContext.personPseudoIdDao
 
     @Test
     fun `får hentet søknad hvis man har tilgang til person`() {
@@ -54,12 +55,13 @@ class GetSøknadBehandlerIntegrationTest {
             kjønn = Kjønn.Kvinne,
             adressebeskyttelse = Adressebeskyttelse.Ugradert
         )
+        val pseudoId = personPseudoIdDao.nyPersonPseudoId(Identitetsnummer.fraString(fødselsnummer))
 
         val saksbehandler = lagSaksbehandler()
 
         // When:
         val response = integrationTestFixture.get(
-            url = "/api/personer/$aktørId/dokumenter/$dokumentId/soknad",
+            url = "/api/personer/${pseudoId.value}/dokumenter/$dokumentId/soknad",
             saksbehandler = saksbehandler
         )
 
@@ -100,11 +102,13 @@ class GetSøknadBehandlerIntegrationTest {
 
         legacyPersonRepository.leggTilPerson(person)
 
+        val pseudoId = personPseudoIdDao.nyPersonPseudoId(Identitetsnummer.fraString(fødselsnummer))
+
         val saksbehandler = lagSaksbehandler()
 
         // When:
         val response = integrationTestFixture.get(
-            url = "/api/personer/$aktørId/dokumenter/$dokumentId/soknad",
+            url = "/api/personer/${pseudoId.value}/dokumenter/$dokumentId/soknad",
             saksbehandler = saksbehandler
         )
 

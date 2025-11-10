@@ -11,6 +11,7 @@ import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.api.rest.tilkommeninntekt.harTilgangTilPerson
 import no.nav.helse.spesialist.application.PersonPseudoId
+import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 
@@ -24,29 +25,28 @@ class GetSoknadBehandler(
         transaksjon: SessionContext,
     ): RestResponse<ApiSoknad, ApiGetSoknadErrorCode> {
         val personId = resource.parent.parent.parent.pseudoId
-        val fødselsnumre =
-            if (personId.toLongOrNull() != null) {
-                transaksjon.legacyPersonRepository.finnFødselsnumre(aktørId = personId).toSet()
-            } else {
-                val pseudoId = PersonPseudoId.fraString(personId)
-                val identitetsnummer =
-                    transaksjon.personPseudoIdDao.hentIdentitetsnummer(pseudoId)
-                        ?: return RestResponse.Error(ApiGetSoknadErrorCode.PERSON_IKKE_FUNNET)
-                setOf(identitetsnummer.value)
-            }
+        val pseudoId = PersonPseudoId.fraString(personId)
+        val identitetsnummer =
+            transaksjon.personPseudoIdDao.hentIdentitetsnummer(pseudoId)
+                ?: return RestResponse.Error(ApiGetSoknadErrorCode.PERSON_IKKE_FUNNET)
 
         val dokument =
             dokumentMediator.hentDokument(
                 dokumentDao = transaksjon.dokumentDao,
-                fødselsnummer = fødselsnumre.first(),
+                fødselsnummer = identitetsnummer.value,
                 dokumentId = resource.parent.dokumentId,
                 dokumentType = DokumentMediator.DokumentType.SØKNAD,
             ) ?: return RestResponse.Error(ApiGetSoknadErrorCode.FANT_IKKE_DOKUMENT)
 
         val fødselsnummerForSøknad = dokument.get("fnr").asText()
 
+        if (fødselsnummerForSøknad != identitetsnummer.value) {
+            logg.error("Fødselsnummer i søknad-dokumentet samsvarer ikke med identitetsnummer hentet via pseudo-id")
+            return RestResponse.Error(ApiGetSoknadErrorCode.FANT_IKKE_DOKUMENT)
+        }
+
         if (!harTilgangTilPerson(
-                fødselsnummer = fødselsnummerForSøknad,
+                identitetsnummer = identitetsnummer,
                 saksbehandler = saksbehandler,
                 tilgangsgrupper = tilgangsgrupper,
                 transaksjon = transaksjon,
