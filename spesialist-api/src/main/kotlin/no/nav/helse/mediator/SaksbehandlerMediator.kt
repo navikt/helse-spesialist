@@ -31,9 +31,6 @@ import no.nav.helse.modell.saksbehandler.handlinger.FjernPåVent
 import no.nav.helse.modell.saksbehandler.handlinger.FjernPåVentUtenHistorikkinnslag
 import no.nav.helse.modell.saksbehandler.handlinger.Handling
 import no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent
-import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgrad
-import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgradArbeidsgiver
-import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgradPeriode
 import no.nav.helse.modell.saksbehandler.handlinger.Oppgavehandling
 import no.nav.helse.modell.saksbehandler.handlinger.Overstyring
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtArbeidsforhold
@@ -60,7 +57,6 @@ import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutationHandler.VedtakResultat
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdOverstyringHandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiInntektOgRefusjonOverstyring
-import no.nav.helse.spesialist.api.graphql.schema.ApiMinimumSykdomsgrad
 import no.nav.helse.spesialist.api.graphql.schema.ApiOpptegnelse
 import no.nav.helse.spesialist.api.graphql.schema.ApiOpptegnelsetype
 import no.nav.helse.spesialist.api.graphql.schema.ApiPaVentRequest
@@ -644,7 +640,6 @@ class SaksbehandlerMediator(
             is ApiInntektOgRefusjonOverstyring -> this.tilModellversjon(saksbehandlerOid)
             is ApiTidslinjeOverstyring -> this.tilModellversjon(saksbehandlerOid)
             is ApiSkjonnsfastsettelse -> this.tilModellversjon(saksbehandlerOid)
-            is ApiMinimumSykdomsgrad -> this.tilModellversjon(saksbehandlerOid)
             is TildelOppgave -> this.tilModellversjon(saksbehandlerTilgangsgrupper)
             is AvmeldOppgave -> this.tilModellversjon()
             else -> throw IllegalStateException("Støtter ikke handling ${this::class.simpleName}")
@@ -710,36 +705,6 @@ class SaksbehandlerMediator(
                         initierendeVedtaksperiodeId = ag.initierendeVedtaksperiodeId,
                     )
                 },
-        )
-
-    private fun ApiMinimumSykdomsgrad.tilModellversjon(saksbehandlerOid: SaksbehandlerOid): MinimumSykdomsgrad =
-        MinimumSykdomsgrad.ny(
-            aktørId = aktorId,
-            fødselsnummer = fodselsnummer,
-            saksbehandlerOid = saksbehandlerOid,
-            perioderVurdertOk =
-                perioderVurdertOk.map {
-                    MinimumSykdomsgradPeriode(
-                        fom = it.fom,
-                        tom = it.tom,
-                    )
-                },
-            perioderVurdertIkkeOk =
-                perioderVurdertIkkeOk.map {
-                    MinimumSykdomsgradPeriode(
-                        fom = it.fom,
-                        tom = it.tom,
-                    )
-                },
-            begrunnelse = begrunnelse,
-            arbeidsgivere =
-                arbeidsgivere.map {
-                    MinimumSykdomsgradArbeidsgiver(
-                        organisasjonsnummer = it.organisasjonsnummer,
-                        berørtVedtaksperiodeId = it.berortVedtaksperiodeId,
-                    )
-                },
-            vedtaksperiodeId = initierendeVedtaksperiodeId,
         )
 
     private fun ApiInntektOgRefusjonOverstyring.tilModellversjon(saksbehandlerOid: SaksbehandlerOid): OverstyrtInntektOgRefusjon =

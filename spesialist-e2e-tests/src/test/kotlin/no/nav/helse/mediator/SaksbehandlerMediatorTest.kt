@@ -29,11 +29,9 @@ import no.nav.helse.spesialist.api.SendIReturResult
 import no.nav.helse.spesialist.api.SendTilGodkjenningResult
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveTildeltNoenAndre
-import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutationHandler.VedtakResultat
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdOverstyringHandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiInntektOgRefusjonOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiLovhjemmel
-import no.nav.helse.spesialist.api.graphql.schema.ApiMinimumSykdomsgrad
 import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringArbeidsforhold
 import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringDag
@@ -1310,64 +1308,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             assertEquals("En årsak 2", it["årsak"].asText())
             assertEquals(21000.0, it["årlig"].asDouble())
             assertEquals(25001.0, it["fraÅrlig"].asDouble())
-        }
-    }
-
-    @Test
-    fun `håndterer vurdering av minimum sykdomsgrad`() {
-        nyPerson(fødselsnummer = FØDSELSNUMMER, organisasjonsnummer = ORGANISASJONSNUMMER, aktørId = AKTØR_ID)
-        val minimumSykdomsgrad =
-            ApiMinimumSykdomsgrad(
-                fodselsnummer = FØDSELSNUMMER,
-                aktorId = AKTØR_ID,
-                perioderVurdertOk = listOf(
-                    ApiMinimumSykdomsgrad.ApiPeriode(
-                        fom = 1.januar,
-                        tom = 15.januar
-                    ), ApiMinimumSykdomsgrad.ApiPeriode(
-                        fom = 30.januar,
-                        tom = 31.januar
-                    )
-                ),
-                perioderVurdertIkkeOk = listOf(
-                    ApiMinimumSykdomsgrad.ApiPeriode(
-                        fom = 16.januar,
-                        tom = 29.januar
-                    )
-                ),
-                begrunnelse = "en begrunnelse",
-                arbeidsgivere =
-                    listOf(
-                        ApiMinimumSykdomsgrad.ApiArbeidsgiver(
-                            organisasjonsnummer = ORGANISASJONSNUMMER,
-                            berortVedtaksperiodeId = PERIODE.id,
-                        ),
-                    ),
-                initierendeVedtaksperiodeId = PERIODE.id,
-            )
-
-        mediator.håndter(minimumSykdomsgrad, saksbehandler, emptySet())
-
-        val hendelse = testRapid.inspektør.hendelser("minimum_sykdomsgrad_vurdert").first()
-
-        assertNotNull(hendelse["@id"].asText())
-        assertEquals(FØDSELSNUMMER, hendelse["fødselsnummer"].asText())
-        assertEquals(AKTØR_ID, hendelse["aktørId"].asText())
-        assertEquals(SAKSBEHANDLER_OID, hendelse["saksbehandlerOid"].asText().let { UUID.fromString(it) })
-        assertEquals(SAKSBEHANDLER_NAVN, hendelse["saksbehandlerNavn"].asText())
-        assertEquals(SAKSBEHANDLER_IDENT, hendelse["saksbehandlerIdent"].asText())
-        assertEquals(SAKSBEHANDLER_EPOST, hendelse["saksbehandlerEpost"].asText())
-        hendelse["perioderMedMinimumSykdomsgradVurdertOk"].first().let {
-            assertEquals(1.januar, it["fom"].asLocalDate())
-            assertEquals(15.januar, it["tom"].asLocalDate())
-        }
-        hendelse["perioderMedMinimumSykdomsgradVurdertOk"].last().let {
-            assertEquals(30.januar, it["fom"].asLocalDate())
-            assertEquals(31.januar, it["tom"].asLocalDate())
-        }
-        hendelse["perioderMedMinimumSykdomsgradVurdertIkkeOk"].first().let {
-            assertEquals(16.januar, it["fom"].asLocalDate())
-            assertEquals(29.januar, it["tom"].asLocalDate())
         }
     }
 

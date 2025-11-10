@@ -3,7 +3,6 @@ package no.nav.helse.spesialist.domain.legacy
 import no.nav.helse.modell.saksbehandler.SaksbehandlerObserver
 import no.nav.helse.modell.saksbehandler.handlinger.EndrePåVent
 import no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent
-import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgrad
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtArbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtInntektOgRefusjon
 import no.nav.helse.modell.saksbehandler.handlinger.OverstyrtTidslinje
@@ -61,21 +60,6 @@ class SaksbehandlerWrapper(
         val subsumsjonEvent = hendelse.byggSubsumsjon(saksbehandler.epost).byggEvent()
         observers.forEach { it.nySubsumsjon(subsumsjonEvent.fødselsnummer, subsumsjonEvent) }
         observers.forEach { it.sykepengegrunnlagSkjønnsfastsatt(event.fødselsnummer, event) }
-    }
-
-    internal fun håndter(hendelse: MinimumSykdomsgrad) {
-        val event =
-            hendelse.byggEvent(
-                oid = saksbehandler.id().value,
-                navn = saksbehandler.navn,
-                epost = saksbehandler.epost,
-                ident = saksbehandler.ident,
-            )
-        val subsumsjoner = hendelse.byggSubsumsjoner(saksbehandler.epost).map { it.byggEvent() }
-        subsumsjoner.forEach { subsumsjonEvent ->
-            observers.forEach { it.nySubsumsjon(subsumsjonEvent.fødselsnummer, subsumsjonEvent) }
-        }
-        observers.forEach { it.minimumSykdomsgradVurdert(event.fødselsnummer, event) }
     }
 
     internal fun håndter(hendelse: LeggPåVent) {

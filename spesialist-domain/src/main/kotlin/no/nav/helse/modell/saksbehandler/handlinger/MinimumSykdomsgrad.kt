@@ -1,11 +1,6 @@
 package no.nav.helse.modell.saksbehandler.handlinger
 
 import no.nav.helse.modell.melding.MinimumSykdomsgradVurdertEvent
-import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgradPeriode.Companion.byggSubsumsjoner
-import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
-import no.nav.helse.modell.vilkårsprøving.Subsumsjon
-import no.nav.helse.modell.vilkårsprøving.Subsumsjon.Utfall.VILKAR_IKKE_OPPFYLT
-import no.nav.helse.modell.vilkårsprøving.Subsumsjon.Utfall.VILKAR_OPPFYLT
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import java.time.LocalDate
@@ -26,9 +21,7 @@ class MinimumSykdomsgrad private constructor(
     val begrunnelse: String,
     val arbeidsgivere: List<MinimumSykdomsgradArbeidsgiver>,
 ) : Overstyring(id, ferdigstilt) {
-    override fun utførAv(saksbehandlerWrapper: SaksbehandlerWrapper) {
-        saksbehandlerWrapper.håndter(this)
-    }
+    override fun utførAv(saksbehandlerWrapper: SaksbehandlerWrapper) {}
 
     override fun loggnavn(): String = "minimum_sykdomsgrad_vurdert"
 
@@ -103,26 +96,6 @@ class MinimumSykdomsgrad private constructor(
             perioderMedMinimumSykdomsgradVurdertOk = perioderVurdertOk,
             perioderMedMinimumSykdomsgradVurdertIkkeOk = perioderVurdertIkkeOk,
         )
-
-    internal fun byggSubsumsjoner(saksbehandlerEpost: String): List<Subsumsjon> =
-        perioderVurdertOk
-            .byggSubsumsjoner(
-                overstyringId = eksternHendelseId,
-                fødselsnummer = fødselsnummer,
-                saksbehandlerEpost = saksbehandlerEpost,
-                initierendeVedtaksperiodeId = vedtaksperiodeId,
-                arbeidsgivere = arbeidsgivere,
-                avslag = false,
-            ).plus(
-                perioderVurdertIkkeOk.byggSubsumsjoner(
-                    overstyringId = eksternHendelseId,
-                    fødselsnummer = fødselsnummer,
-                    saksbehandlerEpost = saksbehandlerEpost,
-                    initierendeVedtaksperiodeId = vedtaksperiodeId,
-                    arbeidsgivere = arbeidsgivere,
-                    avslag = true,
-                ),
-            )
 }
 
 data class MinimumSykdomsgradArbeidsgiver(
@@ -133,42 +106,4 @@ data class MinimumSykdomsgradArbeidsgiver(
 data class MinimumSykdomsgradPeriode(
     val fom: LocalDate,
     val tom: LocalDate,
-) {
-    internal companion object {
-        internal fun List<MinimumSykdomsgradPeriode>.byggSubsumsjoner(
-            overstyringId: UUID,
-            fødselsnummer: String,
-            saksbehandlerEpost: String,
-            initierendeVedtaksperiodeId: UUID,
-            arbeidsgivere: List<MinimumSykdomsgradArbeidsgiver>,
-            avslag: Boolean,
-        ): List<Subsumsjon> =
-            this.map { periode ->
-                Subsumsjon(
-                    lovhjemmel =
-                        Lovhjemmel(
-                            paragraf = "8-13",
-                            ledd = "1",
-                            lovverk = "folketrygdloven",
-                            lovverksversjon = "2019-01-01",
-                        ),
-                    fødselsnummer = fødselsnummer,
-                    input =
-                        mapOf(
-                            "fom" to periode.fom,
-                            "tom" to periode.tom,
-                            "initierendeVedtaksperiode" to initierendeVedtaksperiodeId,
-                        ),
-                    output = emptyMap(),
-                    utfall = if (!avslag) VILKAR_OPPFYLT else VILKAR_IKKE_OPPFYLT,
-                    sporing =
-                        Subsumsjon.SporingVurdertMinimumSykdomsgrad(
-                            vedtaksperioder = arbeidsgivere.map { it.berørtVedtaksperiodeId },
-                            organisasjonsnummer = arbeidsgivere.map { it.organisasjonsnummer },
-                            minimumSykdomsgradId = overstyringId,
-                            saksbehandler = listOf(saksbehandlerEpost),
-                        ),
-                )
-            }
-    }
-}
+)

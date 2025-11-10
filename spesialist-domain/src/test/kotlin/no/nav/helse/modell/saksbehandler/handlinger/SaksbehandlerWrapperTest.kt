@@ -1,7 +1,6 @@
 package no.nav.helse.modell.saksbehandler.handlinger
 
 import no.nav.helse.modell.melding.LagtPåVentEvent
-import no.nav.helse.modell.melding.MinimumSykdomsgradVurdertEvent
 import no.nav.helse.modell.melding.OverstyrtArbeidsforholdEvent
 import no.nav.helse.modell.melding.OverstyrtInntektOgRefusjonEvent
 import no.nav.helse.modell.melding.OverstyrtTidslinjeEvent
@@ -189,32 +188,6 @@ internal class SaksbehandlerWrapperTest {
                 skjæringstidspunkt = 1 jan 2018,
                 overstyrteArbeidsforhold = emptyList(),
                 vedtaksperiodeId = UUID.randomUUID(),
-                saksbehandlerOid = saksbehandler.saksbehandler.id(),
-            )
-        )
-        assertEquals(true, observert)
-    }
-
-    @Test
-    fun `håndtering av MinimumSykdomsgrad medfører utgående event`() {
-        var observert = false
-        val observer = object : SaksbehandlerObserver {
-            override fun minimumSykdomsgradVurdert(fødselsnummer: String, event: MinimumSykdomsgradVurdertEvent) {
-                observert = true
-            }
-        }
-
-        val saksbehandler = saksbehandler()
-        saksbehandler.register(observer)
-        saksbehandler.håndter(
-            MinimumSykdomsgrad.ny(
-                aktørId = "123",
-                fødselsnummer = "1234",
-                begrunnelse = "begrunnelse",
-                vedtaksperiodeId = UUID.randomUUID(),
-                perioderVurdertOk = emptyList(),
-                perioderVurdertIkkeOk = listOf(MinimumSykdomsgradPeriode(1 jan 2018, 31 jan 2018)),
-                arbeidsgivere = listOf(MinimumSykdomsgradArbeidsgiver(organisasjonsnummer = "12345", berørtVedtaksperiodeId = UUID.randomUUID())),
                 saksbehandlerOid = saksbehandler.saksbehandler.id(),
             )
         )

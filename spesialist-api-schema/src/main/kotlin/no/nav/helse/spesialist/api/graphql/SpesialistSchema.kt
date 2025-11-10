@@ -1,8 +1,6 @@
 package no.nav.helse.spesialist.api.graphql
 
 import com.expediagroup.graphql.server.ktor.GraphQLConfiguration
-import no.nav.helse.spesialist.api.graphql.mutation.MinimumSykdomsgradMutation
-import no.nav.helse.spesialist.api.graphql.mutation.MinimumSykdomsgradMutationSchema
 import no.nav.helse.spesialist.api.graphql.mutation.NotatMutation
 import no.nav.helse.spesialist.api.graphql.mutation.NotatMutationSchema
 import no.nav.helse.spesialist.api.graphql.mutation.OpptegnelseMutation
@@ -52,7 +50,6 @@ class SpesialistSchema(
         val opptegnelse: OpptegnelseMutationSchema,
         val overstyring: OverstyringMutationSchema,
         val skjonnsfastsettelse: SkjonnsfastsettelseMutationSchema,
-        val minimumSykdomsgrad: MinimumSykdomsgradMutationSchema,
         val totrinnsvurdering: TotrinnsvurderingMutationSchema,
         val vedtak: VedtakMutationSchema,
         val person: PersonMutationSchema,
@@ -79,7 +76,6 @@ class SpesialistSchema(
                 OpptegnelseMutation(handler = mutationHandlers.opptegnelse),
                 OverstyringMutation(handler = mutationHandlers.overstyring),
                 SkjonnsfastsettelseMutation(handler = mutationHandlers.skjonnsfastsettelse),
-                MinimumSykdomsgradMutation(handler = mutationHandlers.minimumSykdomsgrad),
                 TotrinnsvurderingMutation(handler = mutationHandlers.totrinnsvurdering),
                 VedtakMutation(handler = mutationHandlers.vedtak),
                 PersonMutation(handler = mutationHandlers.person),

@@ -28,7 +28,6 @@ import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettBeregnetPeriod
 import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettSnapshotArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.GraphQLTestdata.opprettSnapshotGenerasjon
 import no.nav.helse.spesialist.api.graphql.SpesialistSchema
-import no.nav.helse.spesialist.api.graphql.mutation.MinimumSykdomsgradMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.NotatMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.OpptegnelseMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.OverstyringMutationHandler
@@ -139,7 +138,6 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                         saksbehandlerMediator = saksbehandlerMediator
                     ),
                     skjonnsfastsettelse = SkjonnsfastsettelseMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
-                    minimumSykdomsgrad = MinimumSykdomsgradMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
                     totrinnsvurdering = TotrinnsvurderingMutationHandler(
                         saksbehandlerMediator = saksbehandlerMediator,
                     ),

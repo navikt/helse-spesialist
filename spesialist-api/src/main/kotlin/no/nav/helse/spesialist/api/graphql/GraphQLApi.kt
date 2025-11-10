@@ -31,7 +31,6 @@ import no.nav.helse.spesialist.api.behandlingsstatistikk.IBehandlingsstatistikkS
 import no.nav.helse.spesialist.api.bootstrap.debugMinneApi
 import no.nav.helse.spesialist.api.bootstrap.installPlugins
 import no.nav.helse.spesialist.api.feilhåndtering.SpesialistDataFetcherExceptionHandler
-import no.nav.helse.spesialist.api.graphql.mutation.MinimumSykdomsgradMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.NotatMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.OpptegnelseMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.OverstyringMutationHandler
@@ -164,7 +163,6 @@ fun lagSchemaMedResolversOgHandlers(
                         saksbehandlerMediator = saksbehandlerMediator,
                     ),
                 skjonnsfastsettelse = SkjonnsfastsettelseMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
-                minimumSykdomsgrad = MinimumSykdomsgradMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
                 totrinnsvurdering =
                     TotrinnsvurderingMutationHandler(
                         saksbehandlerMediator = saksbehandlerMediator,
