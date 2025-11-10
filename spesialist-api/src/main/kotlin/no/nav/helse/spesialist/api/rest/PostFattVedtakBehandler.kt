@@ -70,11 +70,11 @@ class PostFattVedtakBehandler(
 
             if (totrinnsvurdering != null) {
                 beslutter = saksbehandler
-                totrinnsvurdering.godkjenn(saksbehandler, tilgangsgrupper)
+                totrinnsvurdering.godkjenn(beslutter, tilgangsgrupper)
                 saksbehandlerSomFattetVedtak =
                     totrinnsvurdering.saksbehandler?.let { transaksjon.saksbehandlerRepository.finn(it) }
                         ?: return RestResponse.Error(ApiPostFattVedtakErrorCode.TOTRINNSVURDERING_MANGLER_SAKSBEHANDLER)
-                val innslag = Historikkinnslag.totrinnsvurderingFerdigbehandletInnslag(saksbehandler)
+                val innslag = Historikkinnslag.totrinnsvurderingFerdigbehandletInnslag(beslutter)
                 transaksjon.periodehistorikkDao.lagreMedOppgaveId(innslag, oppgave.id)
                 transaksjon.totrinnsvurderingRepository.lagre(totrinnsvurdering)
             }
@@ -82,7 +82,7 @@ class PostFattVedtakBehandler(
             behandling.fattVedtak(
                 transaksjon = transaksjon,
                 fødselsnummer = fødselsnummer,
-                saksbehandler = saksbehandler,
+                saksbehandler = saksbehandlerSomFattetVedtak,
                 oppgave = oppgave,
                 spleisBehandlingId = spleisBehandlingId,
                 begrunnelse = request.begrunnelse,
