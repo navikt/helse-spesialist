@@ -23,7 +23,8 @@ class SkjønnsfastsattSykepengegrunnlag private constructor(
     ferdigstilt: Boolean,
     val skjæringstidspunkt: LocalDate,
     val arbeidsgivere: List<SkjønnsfastsattArbeidsgiver>,
-) : Overstyring(id, ferdigstilt) {
+) : Overstyring(id, ferdigstilt),
+    Personhandling {
     override fun utførAv(saksbehandlerWrapper: SaksbehandlerWrapper) {
         saksbehandlerWrapper.håndter(this)
     }

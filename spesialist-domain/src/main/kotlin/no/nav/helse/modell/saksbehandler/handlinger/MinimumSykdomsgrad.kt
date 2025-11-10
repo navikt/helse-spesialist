@@ -2,7 +2,6 @@ package no.nav.helse.modell.saksbehandler.handlinger
 
 import no.nav.helse.modell.melding.MinimumSykdomsgradVurdertEvent
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
-import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -21,10 +20,6 @@ class MinimumSykdomsgrad private constructor(
     val begrunnelse: String,
     val arbeidsgivere: List<MinimumSykdomsgradArbeidsgiver>,
 ) : Overstyring(id, ferdigstilt) {
-    override fun utførAv(saksbehandlerWrapper: SaksbehandlerWrapper) {}
-
-    override fun loggnavn(): String = "minimum_sykdomsgrad_vurdert"
-
     companion object {
         fun ny(
             saksbehandlerOid: SaksbehandlerOid,

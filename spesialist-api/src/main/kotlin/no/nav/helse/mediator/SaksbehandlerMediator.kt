@@ -127,6 +127,7 @@ class SaksbehandlerMediator(
             when (modellhandling) {
                 is Overstyring -> {
                     overstyringUnitOfWork(
+                        loggnavn = modellhandling.loggnavn(),
                         overstyring = modellhandling,
                         saksbehandler = saksbehandler,
                         sessionFactory = sessionFactory,
@@ -816,9 +817,10 @@ private fun overstyringUnitOfWork(
     overstyring: Overstyring,
     saksbehandler: Saksbehandler,
     sessionFactory: SessionFactory,
+    loggnavn: String,
 ) {
     sessionFactory.transactionalSessionScope { session ->
-        sikkerlogg.info("Utfører overstyring ${overstyring.loggnavn()} på vegne av saksbehandler $saksbehandler")
+        sikkerlogg.info("Utfører overstyring $loggnavn på vegne av saksbehandler $saksbehandler")
         session.saksbehandlerRepository.lagre(saksbehandler)
 
         val fødselsnummer = overstyring.fødselsnummer

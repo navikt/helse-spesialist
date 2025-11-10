@@ -24,7 +24,8 @@ class OverstyrtTidslinje private constructor(
     val organisasjonsnummer: String,
     val dager: List<OverstyrtTidslinjedag>,
     val begrunnelse: String,
-) : Overstyring(id, ferdigstilt) {
+) : Overstyring(id, ferdigstilt),
+    Personhandling {
     override fun utførAv(saksbehandlerWrapper: SaksbehandlerWrapper) {
         saksbehandlerWrapper.håndter(this)
     }

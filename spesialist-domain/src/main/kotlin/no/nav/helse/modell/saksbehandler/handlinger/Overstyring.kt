@@ -13,8 +13,8 @@ value class OverstyringId(
 sealed class Overstyring(
     id: OverstyringId?,
     ferdigstilt: Boolean,
-) : Entity<OverstyringId>(id),
-    Personhandling {
+) : Entity<OverstyringId>(id) {
+    abstract val fødselsnummer: String
     abstract val saksbehandlerOid: SaksbehandlerOid
     abstract val eksternHendelseId: UUID
     abstract val aktørId: String
