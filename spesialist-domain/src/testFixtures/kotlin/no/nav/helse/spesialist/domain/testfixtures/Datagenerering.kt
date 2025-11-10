@@ -1,7 +1,15 @@
 package no.nav.helse.spesialist.domain.testfixtures
 
+import no.nav.helse.modell.oppgave.Oppgave
+import no.nav.helse.spesialist.domain.Behandling
+import no.nav.helse.spesialist.domain.BehandlingUnikId
+import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
+import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.Vedtaksperiode
+import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.random.Random.Default.nextInt
 import kotlin.random.Random.Default.nextLong
@@ -65,3 +73,46 @@ fun lagMellomnavnOrNull() = (mellomnavnListe  + List(10) { null }).shuffled().ra
 fun lagMellomnavn() = mellomnavnListe.random()
 
 fun lagEtternavn() = etternavnListe.random()
+
+fun lagEnOppgave(behandlingId: UUID): Oppgave = Oppgave.ny(
+    id = nextLong(),
+    førsteOpprettet = LocalDateTime.now(),
+    vedtaksperiodeId = UUID.randomUUID(),
+    behandlingId = behandlingId,
+    utbetalingId = UUID.randomUUID(),
+    hendelseId = UUID.randomUUID(),
+    kanAvvises = true,
+    egenskaper = emptySet(),
+)
+
+fun lagEnSaksbehandler(): Saksbehandler {
+    val navn = lagSaksbehandlernavn()
+    return Saksbehandler(
+        id = SaksbehandlerOid(UUID.randomUUID()),
+        navn = navn,
+        epost = lagEpostadresseFraFulltNavn(navn),
+        ident = lagSaksbehandlerident()
+    )
+}
+
+fun lagEnBehandling(
+    id: UUID = UUID.randomUUID(),
+    spleisBehandlingId: UUID,
+    vedtaksperiodeId: VedtaksperiodeId,
+    tags: Set<String> = setOf("Innvilget"),
+): Behandling = Behandling.fraLagring(
+    id = BehandlingUnikId(id),
+    spleisBehandlingId = SpleisBehandlingId(spleisBehandlingId),
+    tags = tags,
+    søknadIder = emptySet(),
+    fom = 1.jan(2018),
+    tom = 31.jan(2018),
+    skjæringstidspunkt = 1.jan(2018),
+    vedtaksperiodeId = vedtaksperiodeId,
+)
+
+fun lagEnVedtaksperiode(
+    vedtaksperiodeId: UUID,
+    fødselsnummer: String,
+    organisasjonsnummer: String,
+): Vedtaksperiode = Vedtaksperiode(VedtaksperiodeId(vedtaksperiodeId), fødselsnummer, organisasjonsnummer)
