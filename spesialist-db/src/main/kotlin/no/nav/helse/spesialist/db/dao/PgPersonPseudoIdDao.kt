@@ -5,6 +5,8 @@ import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.PersonPseudoIdDao
 import no.nav.helse.spesialist.db.SessionDbQuery
 import no.nav.helse.spesialist.domain.Identitetsnummer
+import java.time.Duration
+import java.time.Instant
 
 class PgPersonPseudoIdDao(
     session: Session,
@@ -14,9 +16,10 @@ class PgPersonPseudoIdDao(
     override fun nyPersonPseudoId(identitetsnummer: Identitetsnummer): PersonPseudoId {
         val personPseudoId = PersonPseudoId.ny()
         dbQuery.update(
-            """INSERT INTO personpseudoid (pseudoid, identitetsnummer) VALUES (:pseudoid, :identitetsnummer)""",
+            """INSERT INTO personpseudoid (pseudoid, identitetsnummer, opprettet_tidspunkt) VALUES (:pseudoid, :identitetsnummer, :opprettet_tidspunkt)""",
             "pseudoid" to personPseudoId.value,
             "identitetsnummer" to identitetsnummer.value,
+            "opprettet_tidspunkt" to Instant.now(),
         )
         return personPseudoId
     }
@@ -29,4 +32,11 @@ class PgPersonPseudoIdDao(
             val identitetsnummer = it.string("identitetsnummer")
             Identitetsnummer.fraString(identitetsnummer)
         }
+
+    override fun slettPseudoIderEldreEnn(alder: Duration) {
+        dbQuery.update(
+            """DELETE FROM personpseudoid WHERE opprettet_tidspunkt < :cutOff""",
+            "cutOff" to Instant.now().minus(alder),
+        )
+    }
 }

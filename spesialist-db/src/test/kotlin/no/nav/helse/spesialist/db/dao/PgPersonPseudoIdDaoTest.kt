@@ -3,6 +3,9 @@ package no.nav.helse.spesialist.db.dao
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.Fødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
+import org.junit.jupiter.api.assertThrows
+import java.time.Duration
+import java.time.temporal.ChronoUnit
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -14,5 +17,30 @@ class PgPersonPseudoIdDaoTest : AbstractDBIntegrationTest() {
         val identitetsnummer = lagFødselsnummer()
         val personPseudoId = dao.nyPersonPseudoId(Fødselsnummer(identitetsnummer))
         assertEquals(identitetsnummer, dao.hentIdentitetsnummer(personPseudoId)?.value)
+    }
+
+    @Test
+    fun `slett utdaterte pseudo-ider`() {
+        val dao = PgPersonPseudoIdDao(session)
+        val fødselsnummer = Fødselsnummer(lagFødselsnummer())
+        runAndRollback {
+            val pseudoId1 = dao.nyPersonPseudoId(fødselsnummer)
+            Thread.sleep(2000)
+            val pseudoId2 = dao.nyPersonPseudoId(fødselsnummer)
+            dao.slettPseudoIderEldreEnn(Duration.of(1, ChronoUnit.SECONDS))
+            assertEquals(null, dao.hentIdentitetsnummer(pseudoId1))
+            assertEquals(fødselsnummer, dao.hentIdentitetsnummer(pseudoId2))
+        }
+    }
+
+    private fun runAndRollback(test: (dao: PgPersonPseudoIdDao) -> Unit) {
+        val rollbackMessage = "Rollback transaction"
+        val exception = assertThrows<IllegalStateException> {
+            session.transaction {
+                test(PgPersonPseudoIdDao(it))
+                error(rollbackMessage)
+            }
+        }
+        assertEquals(rollbackMessage, exception.message)
     }
 }
