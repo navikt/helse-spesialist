@@ -2,8 +2,11 @@ package no.nav.helse.spesialist.e2etests.tests
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
+import no.nav.helse.modell.melding.VedtakFattetMelding
 import no.nav.helse.spesialist.e2etests.AbstractE2EIntegrationTest
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvSource
 import java.math.BigDecimal
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
@@ -302,5 +305,28 @@ class RESTFattVedtakE2ETest : AbstractE2EIntegrationTest() {
         assertEquals(null, saksbehandlerLøsning["begrunnelser"])
         assertEquals(null, saksbehandlerLøsning["kommentar"])
         assertEquals(null, saksbehandlerLøsning["beslutter"])
+    }
+
+    @ParameterizedTest
+    @CsvSource("Innvilget,Innvilgelse", "DelvisInnvilget,DelvisInnvilgelse", "Avslag,Avslag")
+    fun `fatter vedtak med utfall innvilgelse basert på tags fra Spleis`(
+        tag: String,
+        utfall: VedtakFattetMelding.BegrunnelseType
+    ) {
+        // Given:
+        risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
+        søknadOgGodkjenningbehovKommerInn(tags = listOf(tag))
+
+        // When:
+        medPersonISpeil {
+            saksbehandlerTildelerSegSaken() // Må til for å "opprette" saksbehandler
+            saksbehandlerGodkjennerAlleVarsler()
+            saksbehandlerFatterVedtakREST(førsteVedtaksperiode().spleisBehandlingId!!)
+        }
+
+        // Then:
+        assertBehandlingTilstand("VedtakFattet")
+        assertVedtakFattetEtterHovedregel(utfall)
+        assertSykepengegrunnlagfakta()
     }
 }

@@ -11,7 +11,6 @@ import no.nav.helse.db.VedtakBegrunnelseFraDatabase
 import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
 import no.nav.helse.db.api.VarselDbDto
 import no.nav.helse.db.api.VedtaksperiodeDbDto.Companion.avvisVarsler
-import no.nav.helse.db.api.VedtaksperiodeDbDto.Companion.godkjennVarsler
 import no.nav.helse.db.api.VedtaksperiodeDbDto.Companion.harAktiveVarsler
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.mediator.oppgave.OppgaveService
@@ -148,34 +147,6 @@ class SaksbehandlerMediator(
         }
     }
 
-    fun vedtak(
-        saksbehandler: Saksbehandler,
-        tilgangsgrupper: Set<Tilgangsgruppe>,
-        oppgavereferanse: Long,
-        begrunnelse: String?,
-    ): VedtakResultat =
-        sessionFactory.transactionalSessionScope { sessionContext ->
-            val spleisBehandlingId = apiOppgaveService.spleisBehandlingId(oppgavereferanse)
-            val fødselsnummer = oppgaveApiDao.finnFødselsnummer(oppgavereferanse)
-            if (!apiOppgaveService.venterPåSaksbehandler(oppgavereferanse)) {
-                VedtakResultat.Feil.IkkeÅpenOppgave()
-            } else {
-                håndterTotrinnsvurderingBeslutning(
-                    fødselsnummer = fødselsnummer,
-                    saksbehandler = saksbehandler,
-                    tilgangsgrupper = tilgangsgrupper,
-                    totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository,
-                ) ?: håndterGodkjenning(oppgavereferanse, fødselsnummer, spleisBehandlingId, saksbehandler).also {
-                    håndterVedtakBegrunnelse(
-                        utfall = hentUtfallFraBehandling(spleisBehandlingId, sessionContext),
-                        begrunnelse = begrunnelse,
-                        oppgaveId = oppgavereferanse,
-                        saksbehandlerOid = saksbehandler.id().value,
-                    )
-                }
-            }
-        }
-
     private fun hentUtfallFraBehandling(
         spleisBehandlingId: UUID,
         sessionContext: SessionContext,
@@ -223,34 +194,6 @@ class SaksbehandlerMediator(
         oppgaveService.fjernFraPåVent(oppgavereferanse)
         påVentDao.slettPåVent(oppgavereferanse)
         return VedtakResultat.Ok(spleisBehandlingId)
-    }
-
-    private fun håndterGodkjenning(
-        oppgavereferanse: Long,
-        fødselsnummer: String,
-        spleisBehandlingId: UUID,
-        saksbehandler: Saksbehandler,
-    ): VedtakResultat {
-        val perioderTilBehandling = behandlingRepository.perioderTilBehandling(oppgavereferanse)
-        val periodeTilGodkjenning = behandlingRepository.periodeTilGodkjenning(oppgavereferanse)
-        return when {
-            perioderTilBehandling.harAktiveVarsler() -> VedtakResultat.Feil.HarAktiveVarsler(oppgavereferanse)
-            periodeTilGodkjenning.overlapperMedInfotrygd() ->
-                VedtakResultat.Feil.OverlapperMedInfotrygd(saksbehandler.ident)
-
-            else -> {
-                perioderTilBehandling.godkjennVarsler(
-                    fødselsnummer = fødselsnummer,
-                    behandlingId = spleisBehandlingId,
-                    ident = saksbehandler.ident,
-                    godkjenner = this::vurderVarsel,
-                )
-
-                oppgaveService.fjernFraPåVent(oppgavereferanse)
-                påVentDao.slettPåVent(oppgavereferanse)
-                VedtakResultat.Ok(spleisBehandlingId)
-            }
-        }
     }
 
     private fun håndterTotrinnsvurderingBeslutning(

@@ -3,6 +3,8 @@ package no.nav.helse.spesialist.e2etests
 import com.github.navikt.tbd_libs.rapids_and_rivers.asLocalDateTime
 import kotliquery.sessionOf
 import no.nav.helse.mediator.asUUID
+import no.nav.helse.modell.melding.VedtakFattetMelding
+import no.nav.helse.modell.vedtak.Utfall
 import no.nav.helse.spesialist.api.testfixtures.lagSaksbehandler
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.domain.Saksbehandler
@@ -59,11 +61,12 @@ abstract class AbstractE2EIntegrationTest {
 
     protected fun meldinger() = testRapid.meldingslogg(testContext.person.fødselsnummer)
 
-    protected fun søknadOgGodkjenningbehovKommerInn(tilleggsmeldinger: TilleggsmeldingReceiver.() -> Unit = {}) {
+    protected fun søknadOgGodkjenningbehovKommerInn(tags: List<String> = listOf("Innvilget"), tilleggsmeldinger: TilleggsmeldingReceiver.() -> Unit = {}): Vedtaksperiode {
         personSenderSøknad()
         val vedtaksperiode = førsteVedtaksperiode()
         spleisForberederBehandling(vedtaksperiode, tilleggsmeldinger)
-        spleisSenderGodkjenningsbehov(vedtaksperiode)
+        spleisSenderGodkjenningsbehov(vedtaksperiode, tags = tags)
+        return vedtaksperiode
     }
 
     protected fun personSenderSøknad() {
@@ -137,13 +140,13 @@ abstract class AbstractE2EIntegrationTest {
         }
     }
 
-    protected fun assertVedtakFattetEtterHovedregel() {
+    protected fun assertVedtakFattetEtterHovedregel(utfall: VedtakFattetMelding.BegrunnelseType = VedtakFattetMelding.BegrunnelseType.Innvilgelse) {
         val vedtakFattet = testRapid.meldingslogg(testContext.person.fødselsnummer)
             .find { it["@event_name"].asText() == "vedtak_fattet" }
             ?: error("Forventet å finne vedtak_fattet i meldingslogg")
 
         assertEquals(1, vedtakFattet["begrunnelser"].size())
-        assertEquals("Innvilgelse", vedtakFattet["begrunnelser"][0]["type"].asText())
+        assertEquals(utfall.name, vedtakFattet["begrunnelser"][0]["type"].asText())
         assertEquals("EtterHovedregel", vedtakFattet["sykepengegrunnlagsfakta"]["fastsatt"].asText())
     }
 
@@ -284,14 +287,15 @@ abstract class AbstractE2EIntegrationTest {
         )
     }
 
-    protected fun spleisSenderGodkjenningsbehov(vedtaksperiode: Vedtaksperiode) {
+    protected fun spleisSenderGodkjenningsbehov(vedtaksperiode: Vedtaksperiode, tags: List<String> = listOf("Innvilget")) {
         testRapid.publish(
             testContext.person.fødselsnummer,
             Meldingsbygger.byggGodkjenningsbehov(
                 person = testContext.person,
                 arbeidsgiver = testContext.arbeidsgiver,
                 vilkårsgrunnlagId = testContext.vilkårsgrunnlagId,
-                vedtaksperiode = vedtaksperiode
+                vedtaksperiode = vedtaksperiode,
+                tags = tags
             )
         )
     }
@@ -302,19 +306,6 @@ abstract class AbstractE2EIntegrationTest {
             Meldingsbygger.byggEndretSkjermetinfo(testContext.person, skjermet)
         )
     }
-
-    protected fun callGraphQL(
-        operationName: String,
-        saksbehandler: Saksbehandler = this.saksbehandler,
-        saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe> = this.saksbehandlerTilgangsgrupper,
-        variables: Map<String, Any>,
-    ) =
-        GraphQL.call(
-            operationName = operationName,
-            saksbehandler = saksbehandler,
-            tilgangsgrupper = saksbehandlerTilgangsgrupper,
-            variables = variables
-        )
 
     protected fun callHttpGet(
         relativeUrl: String,

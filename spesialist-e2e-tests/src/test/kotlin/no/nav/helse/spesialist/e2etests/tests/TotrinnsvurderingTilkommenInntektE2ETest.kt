@@ -41,7 +41,7 @@ class TotrinnsvurderingTilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
     @Test
     fun `tilkommen inntekt regnes ikke som del av aktiv totrinnsvurdering etter at totrinnsvurderingen blir godkjent`() {
         // Given:
-        førsteVedtaksperiode().apply {
+        val vedtaksperiode = førsteVedtaksperiode().apply {
             fom = 1 jan 2021
             tom = 31 jan 2021
         }
@@ -64,7 +64,7 @@ class TotrinnsvurderingTilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
 
         beslutterMedPersonISpeil {
             saksbehandlerTildelerSegSaken() // Må til for å "opprette" beslutter
-            saksbehandlerFatterVedtak()
+            saksbehandlerFatterVedtakREST(vedtaksperiode.spleisBehandlingId!!, "en begrunnelse")
         }
 
         // Then:

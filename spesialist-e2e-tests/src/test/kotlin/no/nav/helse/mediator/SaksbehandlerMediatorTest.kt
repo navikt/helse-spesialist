@@ -998,51 +998,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         assertFalse(melding["egenskaper"].map { it.asText() }.contains("PÅ_VENT"))
     }
 
-    @ParameterizedTest
-    @CsvSource("Innvilget,INNVILGELSE", "DelvisInnvilget,DELVIS_INNVILGELSE", "Avslag,AVSLAG")
-    fun `fatter vedtak med utfall innvilgelse basert på tags fra Spleis`(
-        tag: String,
-        utfall: VedtakBegrunnelseTypeFraDatabase
-    ) {
-        val vedtaksperiodeId = UUID.randomUUID()
-        val fødselsnummer = lagFødselsnummer()
-        val utbetalingId = UUID.randomUUID()
-        val spleisBehandlingId = UUID.randomUUID()
-        nyPerson(
-            fødselsnummer = fødselsnummer,
-            vedtaksperiodeId = vedtaksperiodeId,
-            utbetalingId = utbetalingId,
-            spleisBehandlingId = spleisBehandlingId
-        )
-        opprettSaksbehandler()
-        val saksbehandler = Saksbehandler(
-            id = SaksbehandlerOid(SAKSBEHANDLER_OID),
-            navn = SAKSBEHANDLER_NAVN,
-            epost = SAKSBEHANDLER_EPOST,
-            ident = SAKSBEHANDLER_IDENT
-        )
-        sessionFactory.transactionalSessionScope { session ->
-            session.legacyPersonRepository.brukPersonHvisFinnes(fødselsnummer = fødselsnummer) {
-                oppdaterPeriodeTilGodkjenning(
-                    vedtaksperiodeId = vedtaksperiodeId,
-                    spleisBehandlingId = spleisBehandlingId,
-                    tags = listOf(tag),
-                    utbetalingId = utbetalingId,
-                )
-            }
-        }
-
-        val result = mediator.vedtak(
-            saksbehandler = saksbehandler,
-            tilgangsgrupper = emptySet(),
-            oppgavereferanse = oppgaveId,
-            begrunnelse = "En begrunnelse",
-        )
-
-        assertEquals(VedtakResultat.Ok(spleisBehandlingId = spleisBehandlingId), result)
-        assertVedtakBegrunnelse(expectedUtfall = utfall, expectedBegrunnelse = "En begrunnelse")
-    }
-
     private fun assertVedtakBegrunnelse(expectedUtfall: VedtakBegrunnelseTypeFraDatabase, expectedBegrunnelse: String) {
         val vedtakBegrunnelse = daos.vedtakBegrunnelseDao.finnVedtakBegrunnelse(oppgaveId = oppgaveId)
         checkNotNull(vedtakBegrunnelse)

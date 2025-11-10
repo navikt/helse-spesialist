@@ -76,7 +76,8 @@ object Meldingsbygger {
                     omregnetÅrsinntekt = 123456.7
                 )
             )
-        )
+        ),
+        tags: List<String> = listOf("Innvilget")
     ): String {
         val meldingsnavn = "Godkjenningsbehov"
         return Testmeldingfabrikk.lagGodkjenningsbehov(
@@ -96,7 +97,7 @@ object Meldingsbygger {
             kanAvvises = true,
             spleisBehandlingId = vedtaksperiode.spleisBehandlingIdForÅByggeMelding(meldingsnavn),
             vilkårsgrunnlagId = vilkårsgrunnlagId,
-            tags = listOf("Innvilget"),
+            tags = tags,
             perioderMedSammeSkjæringstidspunkt = listOf(
                 mapOf(
                     "fom" to vedtaksperiode.fom,

@@ -65,17 +65,6 @@ class SpeilPersonReceiver(
         hentOppdatertPerson()
     }
 
-    fun saksbehandlerFatterVedtak(begrunnelse: String = "Fattet vedtak") {
-        callGraphQL(
-            operationName = "FattVedtak",
-            variables = mapOf(
-                "oppgavereferanse" to getOppgaveId(),
-                "begrunnelse" to begrunnelse,
-            )
-        )
-        hentOppdatertPerson()
-    }
-
     fun saksbehandlerFatterVedtakREST(behandlingId: UUID, begrunnelse: String? = null) : JsonNode = callHttpPost(
         relativeUrl = "api/vedtak/$behandlingId/fatt",
         request = ApiFattVedtakRequest(begrunnelse)

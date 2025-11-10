@@ -8,8 +8,6 @@ import graphql.schema.DataFetchingEnvironment
 import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.spesialist.api.Godkjenninghåndterer
 import no.nav.helse.spesialist.api.feilhåndtering.IkkeÅpenOppgave
-import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
-import no.nav.helse.spesialist.api.feilhåndtering.OverlapperMedInfotrygd
 import no.nav.helse.spesialist.api.graphql.ContextValues
 import no.nav.helse.spesialist.api.graphql.byggRespons
 import no.nav.helse.spesialist.api.graphql.schema.ApiAvslagstype
@@ -24,47 +22,6 @@ class VedtakMutationHandler(
 ) : VedtakMutationSchema {
     private companion object {
         private val logg = LoggerFactory.getLogger(VedtakMutationHandler::class.java)
-    }
-
-    override fun fattVedtak(
-        oppgavereferanse: String,
-        env: DataFetchingEnvironment,
-        begrunnelse: String?,
-    ): DataFetcherResult<Boolean> {
-        val saksbehandler: Saksbehandler = env.graphQlContext.get(ContextValues.SAKSBEHANDLER)
-        logg.info("Behandler kall for fatting av vedtak for oppgave $oppgavereferanse")
-
-        val resultat =
-            saksbehandlerMediator.vedtak(
-                saksbehandler = saksbehandler,
-                tilgangsgrupper = env.graphQlContext.get(ContextValues.TILGANGSGRUPPER),
-                oppgavereferanse = oppgavereferanse.toLong(),
-                begrunnelse = begrunnelse,
-            )
-        return when (resultat) {
-            is VedtakResultat.Ok -> {
-                val dto =
-                    GodkjenningDto(
-                        oppgavereferanse = oppgavereferanse.toLong(),
-                        godkjent = true,
-                        saksbehandlerIdent = saksbehandler.ident,
-                        årsak = null,
-                        begrunnelser = null,
-                        kommentar = null,
-                        avslag = null,
-                    )
-                godkjenninghåndterer.håndter(dto, saksbehandler.epost, saksbehandler.id().value)
-                byggRespons(true)
-            }
-
-            is VedtakResultat.Feil -> {
-                logg.warn("Kan ikke gjennomføre fatting av vedtak, årsak: ${resultat.melding}")
-                newResult<Boolean>()
-                    .error(vedtakGraphQLError(resultat.melding, resultat.code, resultat.exception))
-                    .data(false)
-                    .build()
-            }
-        }
     }
 
     override fun sendTilInfotrygd(
@@ -123,22 +80,6 @@ class VedtakMutationHandler(
                     melding = "Oppgaven er ikke åpen.",
                     code = 500,
                     exception = IkkeÅpenOppgave("Oppgaven er ikke åpen.", 500),
-                )
-
-            class OverlapperMedInfotrygd(
-                saksbehandlerIdent: String,
-            ) : Feil(
-                    melding = "Det er overlappende utbetaling i Infotrygd.",
-                    code = 409,
-                    exception = OverlapperMedInfotrygd(saksbehandlerIdent, 409),
-                )
-
-            class HarAktiveVarsler(
-                oppgavereferanse: Long,
-            ) : Feil(
-                    melding = "Har aktive varsler",
-                    code = 400,
-                    exception = ManglerVurderingAvVarsler(oppgavereferanse),
                 )
 
             sealed class BeslutterFeil(

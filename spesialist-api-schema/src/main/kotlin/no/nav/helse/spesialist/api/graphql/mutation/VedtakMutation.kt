@@ -5,12 +5,6 @@ import graphql.execution.DataFetcherResult
 import graphql.schema.DataFetchingEnvironment
 
 interface VedtakMutationSchema : Mutation {
-    fun fattVedtak(
-        oppgavereferanse: String,
-        env: DataFetchingEnvironment,
-        begrunnelse: String? = null,
-    ): DataFetcherResult<Boolean>
-
     fun sendTilInfotrygd(
         oppgavereferanse: String,
         arsak: String,
