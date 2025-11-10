@@ -7,6 +7,10 @@ sealed interface RestResponse<RESPONSE, ERROR : ApiErrorCode> {
         val body: RESPONSE,
     ) : Success<RESPONSE, ERROR>
 
+    class Created<ERROR : ApiErrorCode>(
+        val location: Any,
+    ) : Success<Unit, ERROR>
+
     class NoContent<ERROR : ApiErrorCode> : Success<Unit, ERROR>
 
     class Error<RESPONSE, ERROR : ApiErrorCode>(

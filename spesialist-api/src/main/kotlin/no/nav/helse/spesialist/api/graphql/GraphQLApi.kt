@@ -7,13 +7,16 @@ import com.expediagroup.graphql.server.types.GraphQLResponse
 import com.expediagroup.graphql.server.types.GraphQLServerResponse
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
+import io.ktor.server.application.plugin
 import io.ktor.server.auth.authenticate
 import io.ktor.server.request.ApplicationRequest
+import io.ktor.server.resources.Resources
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
+import no.nav.helse.MeldingPubliserer
 import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.db.Daos
 import no.nav.helse.db.SessionFactory
@@ -64,7 +67,8 @@ fun kobleOppApi(
     apiModuleConfiguration: ApiModule.Configuration,
     tilgangsgruppeUuider: TilgangsgruppeUuider,
     spesialistSchema: SpesialistSchema,
-    restAdapter: RestAdapter,
+    sessionFactory: SessionFactory,
+    meldingPubliserer: MeldingPubliserer,
     dokumentMediator: DokumentMediator,
     environmentToggles: EnvironmentToggles,
 ) {
@@ -91,6 +95,14 @@ fun kobleOppApi(
                 queryHandler(graphQLPlugin.server)
             }
         }
+        val restAdapter =
+            RestAdapter(
+                sessionFactory = sessionFactory,
+                tilgangsgruppeUuider = tilgangsgruppeUuider,
+                meldingPubliserer = meldingPubliserer,
+                resourcesFormat = ktorApplication.plugin(Resources).resourcesFormat,
+                versjonAvKode = apiModuleConfiguration.versjonAvKode,
+            )
         restRoutes(restAdapter, apiModuleConfiguration, dokumentMediator, environmentToggles)
     }
 }

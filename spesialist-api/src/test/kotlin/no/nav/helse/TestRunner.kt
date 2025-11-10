@@ -116,8 +116,9 @@ object TestRunner {
                     apiModuleConfiguration = configuration,
                     tilgangsgruppeUuider = avhengigheter.tilgangsgruppeUuider,
                     spesialistSchema = spesialistSchema,
-                    restAdapter = avhengigheter.restAdapter,
                     dokumentMediator = avhengigheter.dokumentMediator,
+                    sessionFactory = avhengigheter.sessionFactory,
+                    meldingPubliserer = avhengigheter.meldingPubliserer,
                     environmentToggles = object : EnvironmentToggles {
                         override val kanBeslutteEgneSaker: Boolean = false
                         override val kanGodkjenneUtenBesluttertilgang: Boolean = false

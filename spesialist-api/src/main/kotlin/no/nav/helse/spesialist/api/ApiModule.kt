@@ -15,7 +15,6 @@ import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlinghåndtererImpl
 import no.nav.helse.spesialist.api.graphql.kobleOppApi
 import no.nav.helse.spesialist.api.graphql.lagSchemaMedResolversOgHandlers
-import no.nav.helse.spesialist.api.rest.RestAdapter
 import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.application.Snapshothenter
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
@@ -25,9 +24,9 @@ class ApiModule(
     private val configuration: Configuration,
     private val tilgangsgruppeUuider: TilgangsgruppeUuider,
     daos: Daos,
-    meldingPubliserer: MeldingPubliserer,
+    private val meldingPubliserer: MeldingPubliserer,
     tilgangsgruppehenter: Tilgangsgruppehenter,
-    sessionFactory: SessionFactory,
+    private val sessionFactory: SessionFactory,
     private val environmentToggles: EnvironmentToggles,
     snapshothenter: Snapshothenter,
     reservasjonshenter: Reservasjonshenter,
@@ -75,14 +74,6 @@ class ApiModule(
             sessionFactory = sessionFactory,
         )
 
-    private val restAdapter =
-        RestAdapter(
-            sessionFactory = sessionFactory,
-            tilgangsgruppeUuider = tilgangsgruppeUuider,
-            meldingPubliserer = meldingPubliserer,
-            versjonAvKode = configuration.versjonAvKode,
-        )
-
     private val spesialistSchema =
         lagSchemaMedResolversOgHandlers(
             daos = daos,
@@ -111,9 +102,10 @@ class ApiModule(
             apiModuleConfiguration = configuration,
             tilgangsgruppeUuider = tilgangsgruppeUuider,
             spesialistSchema = spesialistSchema,
-            restAdapter = restAdapter,
             dokumentMediator = dokumentMediator,
             environmentToggles = environmentToggles,
+            sessionFactory = sessionFactory,
+            meldingPubliserer = meldingPubliserer,
         )
     }
 }

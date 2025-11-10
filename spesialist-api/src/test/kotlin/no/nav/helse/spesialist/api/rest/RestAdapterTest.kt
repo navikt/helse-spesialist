@@ -47,7 +47,8 @@ class RestAdapterTest {
             sessionFactory = sessionFactory,
             tilgangsgruppeUuider = IntegrationTestFixture.tilgangsgruppeUuider,
             meldingPubliserer = integrationTestFixture.meldingPubliserer,
-            versjonAvKode = "0.0.0"
+            versjonAvKode = "0.0.0",
+            resourcesFormat = mockk(relaxed = true),
         )
 
         runBlocking {
