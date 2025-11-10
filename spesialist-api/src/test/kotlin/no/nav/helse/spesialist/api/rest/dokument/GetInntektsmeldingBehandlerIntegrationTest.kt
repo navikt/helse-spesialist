@@ -6,6 +6,7 @@ import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.testfixtures.lagSaksbehandler
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.testfixtures.fødselsdato
 import no.nav.helse.spesialist.domain.testfixtures.lagAktørId
 import no.nav.helse.spesialist.domain.testfixtures.lagEtternavn
@@ -24,6 +25,7 @@ class GetInntektsmeldingBehandlerTest {
     private val dokumentDao = integrationTestFixture.sessionFactory.sessionContext.dokumentDao
     private val legacyPersonRepository = integrationTestFixture.sessionFactory.sessionContext.legacyPersonRepository
     private val personDao = integrationTestFixture.sessionFactory.sessionContext.personDao
+    private val personPseudoIdDao = integrationTestFixture.sessionFactory.sessionContext.personPseudoIdDao
 
     @Test
     fun `kan hente inntektsmelding hvis man har tilgang til person`() {
@@ -63,12 +65,13 @@ class GetInntektsmeldingBehandlerTest {
             kjønn = Kjønn.Kvinne,
             adressebeskyttelse = Adressebeskyttelse.Ugradert
         )
+        val pseudoId = personPseudoIdDao.nyPersonPseudoId(Identitetsnummer.fraString(fødselsnummer))
 
         val saksbehandler = lagSaksbehandler()
 
         // When:
         val response = integrationTestFixture.get(
-            url = "/api/personer/$aktørId/dokumenter/$dokumentId/inntektsmelding",
+            url = "/api/personer/${pseudoId.value}/dokumenter/$dokumentId/inntektsmelding",
             saksbehandler = saksbehandler
         )
 
@@ -115,12 +118,13 @@ class GetInntektsmeldingBehandlerTest {
             kjønn = Kjønn.Kvinne,
             adressebeskyttelse = Adressebeskyttelse.Ugradert
         )
+        val pseudoId = personPseudoIdDao.nyPersonPseudoId(Identitetsnummer.fraString(fødselsnummer))
 
         val saksbehandler = lagSaksbehandler()
 
         // When:
         val response = integrationTestFixture.get(
-            url = "/api/personer/$aktørId/dokumenter/$dokumentId/inntektsmelding",
+            url = "/api/personer/${pseudoId.value}/dokumenter/$dokumentId/inntektsmelding",
             saksbehandler = saksbehandler
         )
 
@@ -168,11 +172,13 @@ class GetInntektsmeldingBehandlerTest {
             adressebeskyttelse = Adressebeskyttelse.Ugradert
         )
 
+        val pseudoId = personPseudoIdDao.nyPersonPseudoId(Identitetsnummer.fraString(fødselsnummer))
+
         val saksbehandler = lagSaksbehandler()
 
         // When:
         val response = integrationTestFixture.get(
-            url = "/api/personer/$aktørId/dokumenter/$dokumentId/inntektsmelding",
+            url = "/api/personer/${pseudoId.value}/dokumenter/$dokumentId/inntektsmelding",
             saksbehandler = saksbehandler
         )
 
@@ -219,11 +225,13 @@ class GetInntektsmeldingBehandlerTest {
             adressebeskyttelse = Adressebeskyttelse.StrengtFortrolig
         )
 
+        val pseudoId = personPseudoIdDao.nyPersonPseudoId(Identitetsnummer.fraString(fødselsnummer))
+
         val saksbehandler = lagSaksbehandler()
 
         // When:
         val response = integrationTestFixture.get(
-            url = "/api/personer/$aktørId/dokumenter/$dokumentId/inntektsmelding",
+            url = "/api/personer/${pseudoId.value}/dokumenter/$dokumentId/inntektsmelding",
             saksbehandler = saksbehandler
         )
 
