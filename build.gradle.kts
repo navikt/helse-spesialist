@@ -35,20 +35,11 @@ allprojects {
 
     dependencies {
         constraints {
-            implementation("net.minidev:json-smart:[2.5.2,)") {
-                because("Sårbarhet CVE-2024-57699")
-            }
             implementation("org.apache.commons:commons-compress:[1.27.1,)") {
                 because("org.testcontainers:postgresql:1.19.7 -> 1.24.0 har en sårbarhet")
             }
             implementation("com.google.protobuf:protobuf-java:[4.31.1,)") {
                 because("com.expediagroup:graphql-kotlin-ktor-server:8.3.0 -> 4.27.1 har en sårbarhet")
-            }
-            implementation("io.micrometer:micrometer-registry-prometheus:[1.15.1,)") {
-                because("com.github.navikt:rapids-and-rivers avhenger av micrometer-registry-prometheus:1.14.5")
-            }
-            implementation("org.apache.kafka:kafka-clients:[3.9.1,)") {
-                because("Apache Kafka Client Arbitrary File Read and Server Side Request Forgery Vulnerability i versjon >= 3.1.0, < 3.9.1")
             }
             implementation("org.eclipse.jetty.http2:jetty-http2-common:12.0.25") {
                 because(
