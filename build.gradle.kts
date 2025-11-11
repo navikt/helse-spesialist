@@ -63,7 +63,7 @@ subprojects {
         named<Test>("test") {
             useJUnitPlatform()
             testLogging {
-                events("skipped", "failed")
+                events("passed", "skipped", "failed")
                 showStackTraces = true
                 exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
             }
