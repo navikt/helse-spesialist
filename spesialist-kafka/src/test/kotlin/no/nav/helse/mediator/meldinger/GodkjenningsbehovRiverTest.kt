@@ -6,6 +6,7 @@ import io.mockk.verify
 import no.nav.helse.kafka.GodkjenningsbehovRiver
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.utbetaling.Utbetalingtype
+import no.nav.helse.modell.vedtaksperiode.Arbeidssituasjon
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -101,6 +102,7 @@ internal class GodkjenningsbehovRiverTest {
                         ),
                         it.sykepengegrunnlagsfakta
                     )
+                    assertEquals(Arbeidssituasjon.ARBEIDSTAKER, it.arbeidssituasjon)
                 },
                 kontekstbasertPubliserer = any()
             )
@@ -173,6 +175,7 @@ internal class GodkjenningsbehovRiverTest {
                         ),
                         it.sykepengegrunnlagsfakta
                     )
+                    assertEquals(Arbeidssituasjon.ARBEIDSTAKER, it.arbeidssituasjon)
                 },
                 kontekstbasertPubliserer = any()
             )
@@ -221,6 +224,7 @@ internal class GodkjenningsbehovRiverTest {
                     assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, it.periodetype)
                     assertEquals(Utbetalingtype.UTBETALING, it.utbetalingtype)
                     assertEquals(Godkjenningsbehov.Sykepengegrunnlagsfakta.Infotrygd, it.sykepengegrunnlagsfakta)
+                    assertEquals(Arbeidssituasjon.ARBEIDSTAKER, it.arbeidssituasjon)
                 },
                 kontekstbasertPubliserer = any()
             )
@@ -289,6 +293,7 @@ internal class GodkjenningsbehovRiverTest {
                         ),
                         it.sykepengegrunnlagsfakta
                     )
+                    assertEquals(Arbeidssituasjon.ARBEIDSTAKER, it.arbeidssituasjon)
                 },
                 kontekstbasertPubliserer = any()
             )
