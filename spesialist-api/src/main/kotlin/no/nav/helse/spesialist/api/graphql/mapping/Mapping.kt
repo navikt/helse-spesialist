@@ -16,6 +16,7 @@ fun VarselDbDto.toVarselDto(): ApiVarselDTO {
     val varseldefinisjon = this.varseldefinisjon
     checkNotNull(varseldefinisjon)
     return ApiVarselDTO(
+        id = varselId,
         generasjonId = generasjonId,
         definisjonId = varseldefinisjon.definisjonId,
         opprettet = opprettet,
@@ -53,14 +54,6 @@ internal fun NotatApiDao.NotatType.tilSkjematype() =
         NotatApiDao.NotatType.Generelt -> ApiNotatType.Generelt
         NotatApiDao.NotatType.PaaVent -> ApiNotatType.PaaVent
         NotatApiDao.NotatType.OpphevStans -> ApiNotatType.OpphevStans
-    }
-
-internal fun ApiNotatType.tilDatabasetype() =
-    when (this) {
-        ApiNotatType.Retur -> NotatApiDao.NotatType.Retur
-        ApiNotatType.Generelt -> NotatApiDao.NotatType.Generelt
-        ApiNotatType.PaaVent -> NotatApiDao.NotatType.PaaVent
-        ApiNotatType.OpphevStans -> NotatApiDao.NotatType.OpphevStans
     }
 
 fun PeriodehistorikkType.tilApiPeriodehistorikkType() =
