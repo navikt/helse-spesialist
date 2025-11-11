@@ -5,7 +5,6 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.JsonMessage
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
-import no.nav.helse.modell.vedtaksperiode.Arbeidssituasjon
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
@@ -279,8 +278,7 @@ object Testmeldingfabrikk {
                     "inntektskilde" to "Arbeidsgiver"
                 )
             )
-        ),
-        arbeidssituasjon: Arbeidssituasjon = Arbeidssituasjon.ARBEIDSTAKER,
+        )
     ) =
         nyHendelse(
             id, "behov",
@@ -308,7 +306,6 @@ object Testmeldingfabrikk {
                     "perioderMedSammeSkjæringstidspunkt" to perioderMedSammeSkjæringstidspunkt,
                     "sykepengegrunnlagsfakta" to sykepengegrunnlagsfakta,
                     "foreløpigBeregnetSluttPåSykepenger" to LocalDate.of(2018, 12, 1).toString(),
-                    "arbeidssituasjon" to arbeidssituasjon
                 ),
             )
         )
