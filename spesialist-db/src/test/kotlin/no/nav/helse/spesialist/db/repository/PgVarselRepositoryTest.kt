@@ -5,7 +5,9 @@ import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.VarselId
+import no.nav.helse.spesialist.domain.VarseldefinisjonId
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
+import no.nav.helse.spesialist.domain.testfixtures.lagEnSaksbehandler
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlerident
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -13,12 +15,54 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.test.assertContains
+import kotlin.test.assertNotNull
 
 class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
     private val repository = sessionContext.varselRepository
 
     @Test
-    fun `finn varsel for gitt behandling`() {
+    fun `finn varsel gitt varselId`() {
+        // given
+        val vedtaksperiodeId = VedtaksperiodeId(UUID.randomUUID())
+        val spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID())
+        val varselId = VarselId(UUID.randomUUID())
+        val fødselsnummer = lagFødselsnummer()
+        val saksbehandler = lagEnSaksbehandler()
+        val varseldefinisjonId = VarseldefinisjonId(UUID.randomUUID())
+        opprettSaksbehandler(saksbehandler.id().value, saksbehandler.navn, saksbehandler.epost, saksbehandler.ident)
+        opprettPerson(fødselsnummer = fødselsnummer)
+        opprettArbeidsgiver()
+        opprettBehandling(
+            vedtaksperiodeId = vedtaksperiodeId.value,
+            spleisBehandlingId = spleisBehandlingId.value,
+            fødselsnummer = fødselsnummer,
+        )
+        nyttVarsel(
+            id = varselId.value,
+            vedtaksperiodeId = vedtaksperiodeId.value,
+            spleisBehandlingId = spleisBehandlingId.value,
+            saksbehandlerSomEndretId = saksbehandler.ident,
+            endretTidspunkt = LocalDateTime.now(),
+            status = "VURDERT",
+            kode = "RV_IV_1",
+            opprettet = LocalDateTime.now(),
+            definisjonRef = opprettVarseldefinisjon(kode = "RV_IV_1", definisjonId = varseldefinisjonId.value)
+        )
+
+        // when
+        val funnet = repository.finn(varselId)
+
+        // then
+        assertNotNull(funnet)
+        assertEquals(varselId, funnet.id())
+        assertEquals(Varsel.Status.VURDERT, funnet.status)
+        assertEquals("RV_IV_1", funnet.kode)
+        assertEquals(spleisBehandlingId, funnet.spleisBehandlingId)
+        assertEquals(varseldefinisjonId, funnet.vurdering?.vurdertDefinisjonId)
+    }
+
+    @Test
+    fun `finn varsler for gitt behandling`() {
         // given
         val vedtaksperiodeId = VedtaksperiodeId(UUID.randomUUID())
         val spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID())
@@ -57,6 +101,8 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
         val fødselsnummer = lagFødselsnummer()
         val saksbehandlerIdent = lagSaksbehandlerident()
         val saksbehandlerOid = SaksbehandlerOid(opprettSaksbehandler(ident = saksbehandlerIdent))
+        val varseldefinisjonId = VarseldefinisjonId(UUID.randomUUID())
+
         opprettPerson(fødselsnummer = fødselsnummer)
         opprettArbeidsgiver()
         opprettBehandling(
@@ -64,13 +110,15 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
             spleisBehandlingId = spleisBehandlingId.value,
             fødselsnummer = fødselsnummer,
         )
+
         nyttVarsel(
             id = varselId.value,
             vedtaksperiodeId = vedtaksperiodeId.value,
             spleisBehandlingId = spleisBehandlingId.value,
             saksbehandlerSomEndretId = saksbehandlerIdent,
             endretTidspunkt = LocalDateTime.now(),
-            status = "VURDERT"
+            status = "VURDERT",
+            definisjonRef = opprettVarseldefinisjon(kode = "RV_IV_1", definisjonId = varseldefinisjonId.value)
         )
 
         // when
@@ -140,7 +188,8 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
             vedtaksperiodeId = vedtaksperiodeId.value,
             spleisBehandlingId = spleisBehandlingId.value,
             saksbehandlerSomEndretId = saksbehandlerIdent,
-            status = "VURDERT"
+            status = "VURDERT",
+            definisjonRef = opprettVarseldefinisjon(kode = "RV_IV_1", definisjonId = UUID.randomUUID())
         )
 
         // when

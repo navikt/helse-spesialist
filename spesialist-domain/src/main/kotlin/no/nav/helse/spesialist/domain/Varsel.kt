@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.domain
 
 import no.nav.helse.Varselvurdering
 import no.nav.helse.spesialist.domain.ddd.Entity
+import java.time.LocalDateTime
 import java.util.UUID
 
 @JvmInline
@@ -13,9 +14,10 @@ class Varsel private constructor(
     id: VarselId,
     val spleisBehandlingId: SpleisBehandlingId?,
     val behandlingUnikId: BehandlingUnikId,
-    status: Status,
-    vurdering: Varselvurdering?,
     val kode: String,
+    status: Status,
+    val opprettetTidspunkt: LocalDateTime,
+    vurdering: Varselvurdering?,
 ) : Entity<VarselId>(id) {
     var status: Status = status
         private set
@@ -46,16 +48,18 @@ class Varsel private constructor(
             spleisBehandlingId: SpleisBehandlingId?,
             behandlingUnikId: BehandlingUnikId,
             status: Status,
-            vurdering: Varselvurdering?,
             kode: String,
+            opprettetTidspunkt: LocalDateTime,
+            vurdering: Varselvurdering?,
         ): Varsel =
             Varsel(
                 id = id,
                 spleisBehandlingId = spleisBehandlingId,
                 behandlingUnikId = behandlingUnikId,
-                status = status,
-                vurdering = vurdering,
                 kode = kode,
+                status = status,
+                opprettetTidspunkt = opprettetTidspunkt,
+                vurdering = vurdering,
             )
     }
 }

@@ -11,17 +11,33 @@ import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.VarselId
+import no.nav.helse.spesialist.domain.VarseldefinisjonId
 
 class PgVarselRepository private constructor(
     private val dbQuery: DbQuery,
 ) : VarselRepository {
     internal constructor(session: Session) : this(SessionDbQuery(session))
 
+    override fun finn(varselId: VarselId): Varsel? =
+        dbQuery.singleOrNull(
+            """
+                SELECT sv.unik_id, sv.status, b.unik_id as behandling_unik_id, b.spleis_behandling_id, sb.oid, sv.status_endret_tidspunkt, sv.kode, avd.unik_id as definisjon_id, sv.opprettet FROM selve_varsel sv 
+                JOIN behandling b ON sv.generasjon_ref = b.id
+                LEFT JOIN api_varseldefinisjon avd ON sv.definisjon_ref = avd.id
+                LEFT JOIN saksbehandler sb ON sv.status_endret_ident = sb.ident
+                WHERE sv.unik_id = :unikId
+            """,
+            "unikId" to varselId.value,
+        ) { row ->
+            row.mapTilVarsel()
+        }
+
     override fun finnVarsler(behandlingIder: List<SpleisBehandlingId>): List<Varsel> =
         dbQuery.listWithListParameter(
             """
-               SELECT sv.unik_id, b.spleis_behandling_id, b.unik_id as behandling_unik_id, sv.status, sb.oid, sv.status_endret_tidspunkt, sv.kode FROM selve_varsel sv 
+               SELECT sv.unik_id, b.spleis_behandling_id, b.unik_id as behandling_unik_id, sv.status, sb.oid, sv.status_endret_tidspunkt, sv.kode, avd.unik_id as definisjon_id, sv.opprettet FROM selve_varsel sv 
                 JOIN behandling b ON sv.generasjon_ref = b.id
+                LEFT JOIN api_varseldefinisjon avd ON sv.definisjon_ref = avd.id
                 LEFT JOIN saksbehandler sb ON sv.status_endret_ident = sb.ident
                 WHERE b.spleis_behandling_id IN (${behandlingIder.joinToString { "?" }})
             """,
@@ -33,8 +49,9 @@ class PgVarselRepository private constructor(
     override fun finnVarslerFor(behandlingUnikIder: List<BehandlingUnikId>): List<Varsel> =
         dbQuery.listWithListParameter(
             """
-                SELECT sv.unik_id, b.spleis_behandling_id, b.unik_id as behandling_unik_id, sv.status, sb.oid, sv.status_endret_tidspunkt, sv.kode FROM selve_varsel sv 
+                SELECT sv.unik_id, b.spleis_behandling_id, b.unik_id as behandling_unik_id, sv.status, sb.oid, sv.status_endret_tidspunkt, sv.kode, avd.unik_id as definisjon_id, sv.opprettet FROM selve_varsel sv 
                 JOIN behandling b ON sv.generasjon_ref = b.id
+                LEFT JOIN api_varseldefinisjon avd ON sv.definisjon_ref = avd.id
                 LEFT JOIN saksbehandler sb ON sv.status_endret_ident = sb.ident
                 WHERE b.unik_id IN (${behandlingUnikIder.joinToString { "?" }})
             """,
@@ -54,9 +71,11 @@ class PgVarselRepository private constructor(
                     Varselvurdering(
                         saksbehandlerId = SaksbehandlerOid(it),
                         tidspunkt = localDateTime("status_endret_tidspunkt"),
+                        vurdertDefinisjonId = VarseldefinisjonId(uuid("definisjon_id")),
                     )
                 },
             kode = string("kode"),
+            opprettetTidspunkt = localDateTime("opprettet"),
         )
 
     override fun lagre(varsel: Varsel) {

@@ -29,6 +29,7 @@ import no.nav.helse.spesialist.domain.BehandlingUnikId
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.Varsel
+import no.nav.helse.spesialist.domain.VarselId
 import no.nav.helse.spesialist.domain.VedtakBegrunnelse
 import no.nav.helse.spesialist.typer.Kjønn
 import java.time.Duration
@@ -206,6 +207,10 @@ class InMemorySessionContext(
         get() = TODO("Not yet implemented")
     override val varselRepository: VarselRepository = object : VarselRepository {
         private val varsler = mutableSetOf<Varsel>()
+        override fun finn(varselId: VarselId): Varsel? {
+            return varsler.find { it.id() == varselId }
+        }
+
         override fun finnVarsler(behandlingIder: List<SpleisBehandlingId>): List<Varsel> {
             return varsler.filter { it.spleisBehandlingId in behandlingIder }
         }

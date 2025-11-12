@@ -422,7 +422,8 @@ class PostFattVedtakIntegrationTest {
                 behandlingUnikId = behandling.id(),
                 status = Varsel.Status.AKTIV,
                 vurdering = null,
-                kode = kode
+                kode = kode,
+                opprettetTidspunkt = LocalDateTime.now(),
             )
         )
         val oppgave = lagEnOppgave(behandlingId)
@@ -482,7 +483,8 @@ class PostFattVedtakIntegrationTest {
                 behandlingUnikId = behandling.id(),
                 status = status,
                 vurdering = null,
-                kode = kode
+                kode = kode,
+                opprettetTidspunkt = LocalDateTime.now(),
             )
         )
         val oppgave = lagEnOppgave(behandlingId)
@@ -530,6 +532,7 @@ class PostFattVedtakIntegrationTest {
             status = Varsel.Status.GODKJENT,
             vurdering = null,
             kode = kode,
+            opprettetTidspunkt = LocalDateTime.now(),
         )
         val vurdertVarsel = Varsel.fraLagring(
             id = VarselId(UUID.randomUUID()),
@@ -538,6 +541,7 @@ class PostFattVedtakIntegrationTest {
             status = Varsel.Status.VURDERT,
             vurdering = null,
             kode = kode,
+            opprettetTidspunkt = LocalDateTime.now(),
         )
 
         varselRepository.lagre(godkjentVarsel)

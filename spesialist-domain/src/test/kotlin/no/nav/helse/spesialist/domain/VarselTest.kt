@@ -23,6 +23,7 @@ class VarselTest {
             status = Varsel.Status.VURDERT,
             vurdering = null,
             kode = "RV_IV_2",
+            opprettetTidspunkt = LocalDateTime.now(),
         )
 
         // then
@@ -38,7 +39,8 @@ class VarselTest {
             behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
             status = Varsel.Status.AKTIV,
             vurdering = null,
-            kode = "RV_IV_2"
+            kode = "RV_IV_2",
+            opprettetTidspunkt = LocalDateTime.now(),
         )
 
         // then
@@ -55,7 +57,8 @@ class VarselTest {
             behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
             status = status,
             vurdering = null,
-            kode = "RV_IV_2"
+            kode = "RV_IV_2",
+            opprettetTidspunkt = LocalDateTime.now(),
         )
 
         // then
@@ -72,7 +75,8 @@ class VarselTest {
             behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
             status = status,
             vurdering = null,
-            kode = "RV_IV_2"
+            kode = "RV_IV_2",
+            opprettetTidspunkt = LocalDateTime.now(),
         )
 
         // then
@@ -91,8 +95,10 @@ class VarselTest {
             vurdering = Varselvurdering(
                 saksbehandlerId = saksbehandlerSomVurderteVarselet,
                 tidspunkt = LocalDateTime.now(),
+                vurdertDefinisjonId = VarseldefinisjonId(UUID.randomUUID()),
             ),
-            kode = "RV_IV_2"
+            kode = "RV_IV_2",
+            opprettetTidspunkt = LocalDateTime.now(),
         )
 
         // given
@@ -112,7 +118,8 @@ class VarselTest {
             behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
             status = Varsel.Status.AKTIV,
             vurdering = null,
-            kode = "RV_IV_2"
+            kode = "RV_IV_2",
+            opprettetTidspunkt = LocalDateTime.now(),
         )
 
         // then
