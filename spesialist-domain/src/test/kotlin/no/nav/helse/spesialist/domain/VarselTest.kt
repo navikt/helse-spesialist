@@ -1,10 +1,12 @@
 package no.nav.helse.spesialist.domain
 
+import no.nav.helse.Varselvurdering
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
+import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -80,22 +82,25 @@ class VarselTest {
     @Test
     fun `godkjenn varsel`() {
         // given
+        val saksbehandlerSomVurderteVarselet = SaksbehandlerOid(UUID.randomUUID())
         val varsel = Varsel.fraLagring(
             id = VarselId(value = UUID.randomUUID()),
             spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
             behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
             status = Varsel.Status.VURDERT,
-            vurdering = null,
+            vurdering = Varselvurdering(
+                saksbehandlerId = saksbehandlerSomVurderteVarselet,
+                tidspunkt = LocalDateTime.now(),
+            ),
             kode = "RV_IV_2"
         )
-        val saksbehandlerId = SaksbehandlerOid(UUID.randomUUID())
 
         // given
-        varsel.godkjenn(saksbehandlerId)
+        varsel.godkjenn()
 
         // then
         assertEquals(Varsel.Status.GODKJENT, varsel.status)
-        assertEquals(saksbehandlerId, varsel.vurdering?.saksbehandlerId)
+        assertEquals(saksbehandlerSomVurderteVarselet, varsel.vurdering?.saksbehandlerId)
     }
 
     @Test
@@ -112,7 +117,7 @@ class VarselTest {
 
         // then
         assertThrows<IllegalStateException> {
-            varsel.godkjenn(SaksbehandlerOid(UUID.randomUUID()))
+            varsel.godkjenn()
         }
     }
 }
