@@ -122,7 +122,6 @@ class PostFattVedtakBehandler(
             varseldefinisjonRepository = transaksjon.varseldefinisjonRepository,
             fødselsnummer = fødselsnummer,
             spleisBehandlingId = spleisBehandlingId,
-            saksbehandlerOid = saksbehandlerOid,
             outbox = outbox,
         )
         oppgave.avventerSystem(saksbehandler.ident, saksbehandlerOid.value)
@@ -157,7 +156,6 @@ class PostFattVedtakBehandler(
         varselRepository: VarselRepository,
         fødselsnummer: String,
         spleisBehandlingId: SpleisBehandlingId,
-        saksbehandlerOid: SaksbehandlerOid,
         outbox: Outbox,
     ) {
         val behandlingerSomMåSeesUnderEtt =
@@ -175,7 +173,6 @@ class PostFattVedtakBehandler(
                 it.godkjennOgPubliserEndring(
                     vedtaksperiodeId = vedtaksperiodeId,
                     spleisBehandlingId = spleisBehandlingId,
-                    saksbehandlerOid = saksbehandlerOid,
                     varseldefinisjonRepository = varseldefinisjonRepository,
                     outbox = outbox,
                     fødselsnummer = fødselsnummer,
@@ -187,13 +184,12 @@ class PostFattVedtakBehandler(
     private fun Varsel.godkjennOgPubliserEndring(
         vedtaksperiodeId: VedtaksperiodeId,
         spleisBehandlingId: SpleisBehandlingId,
-        saksbehandlerOid: SaksbehandlerOid,
         varseldefinisjonRepository: VarseldefinisjonRepository,
         outbox: Outbox,
         fødselsnummer: String,
     ) {
         val gammelStatus = status
-        godkjenn(saksbehandlerOid)
+        godkjenn()
         val varseldefinisjon =
             varseldefinisjonRepository.finnGjeldendeFor(kode)
                 ?: throw FattVedtakException(ApiPostFattVedtakErrorCode.VARSEL_MANGLER_VARSELDEFINISJON)

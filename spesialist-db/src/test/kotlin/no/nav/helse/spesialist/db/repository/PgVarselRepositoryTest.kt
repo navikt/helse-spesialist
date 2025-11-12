@@ -146,7 +146,7 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
         // when
         val funnet = repository.finnVarsler(listOf(spleisBehandlingId)).single()
         assertEquals(Varsel.Status.VURDERT, funnet.status)
-        funnet.godkjenn(saksbehandlerId)
+        funnet.godkjenn()
         repository.lagre(funnet)
 
         val oppdatert = repository.finnVarsler(listOf(spleisBehandlingId)).single()
