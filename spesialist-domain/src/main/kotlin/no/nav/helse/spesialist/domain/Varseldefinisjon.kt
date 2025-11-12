@@ -12,12 +12,16 @@ class Varseldefinisjon private constructor(
     id: VarseldefinisjonId,
     val kode: String,
     val tittel: String,
+    val forklaring: String?,
+    val handling: String?,
 ) : Entity<VarseldefinisjonId>(id) {
     companion object {
         fun fraLagring(
             id: VarseldefinisjonId,
             kode: String,
             tittel: String,
-        ) = Varseldefinisjon(id, kode, tittel)
+            forklaring: String?,
+            handling: String?,
+        ) = Varseldefinisjon(id, kode, tittel, forklaring, handling)
     }
 }

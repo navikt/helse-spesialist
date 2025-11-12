@@ -10,11 +10,17 @@ class InMemoryVarseldefinisjonRepository: VarseldefinisjonRepository {
         return definisjoner[kode]
     }
 
+    override fun finn(id: VarseldefinisjonId): Varseldefinisjon? {
+        return definisjoner.values.find { it.id() == id }
+    }
+
     fun lagre(kode: String) {
         definisjoner[kode] = Varseldefinisjon.fraLagring(
             id = VarseldefinisjonId(UUID.randomUUID()),
             kode = kode,
-            tittel = "En tittel"
+            tittel = "En tittel",
+            forklaring = "En forklaring",
+            handling = "En handling",
         )
     }
 }
