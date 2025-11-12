@@ -18,6 +18,7 @@ enum class ApiDagtype {
     Svangerskapspengerdag,
     Opplaringspengerdag,
     Dagpengerdag,
+    MeldingTilNavdag,
 
     // OBS! Spleis støtter ikke å motta disse dagene. De brukes kun (🤞) til historikkvisning, altså hvilken dag det ble overstyrt _fra_.
     Avvistdag,
