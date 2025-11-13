@@ -27,6 +27,17 @@ class PgBehandlingRepository(
             "spleis_behandling_id" to id.value,
         ).singleOrNull(::tilBehandling)
 
+    override fun finn(id: BehandlingUnikId): Behandling? =
+        asSQL(
+            """
+            SELECT b.unik_id, b.vedtaksperiode_id, spleis_behandling_id, tags, b.fom, b.tom, b.skjæringstidspunkt
+            FROM behandling b
+            INNER JOIN vedtak v on v.vedtaksperiode_id = b.vedtaksperiode_id
+            WHERE b.unik_id = :behandling_unik_id
+        """,
+            "behandling_unik_id" to id.value,
+        ).singleOrNull(::tilBehandling)
+
     override fun finnAndreBehandlingerISykefraværstilfelle(
         behandling: Behandling,
         fødselsnummer: String,

@@ -50,6 +50,40 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
     }
 
     @Test
+    fun `finn behandling vha behandlingUnikId`() {
+        // given
+        val spleisBehandlingId = UUID.randomUUID()
+        val vedtaksperiodeId = UUID.randomUUID()
+        val tags = listOf("FOOBAR")
+        val fødselsnummer = lagFødselsnummer()
+        val fom = 1.jan(2018)
+        val tom = 31.jan(2018)
+        opprettPerson(fødselsnummer = fødselsnummer)
+        opprettArbeidsgiver()
+        opprettBehandling(
+            spleisBehandlingId = spleisBehandlingId,
+            vedtaksperiodeId = vedtaksperiodeId,
+            tags = tags,
+            fødselsnummer = fødselsnummer,
+            fom = fom,
+            tom = tom,
+        )
+
+        // when
+        val funnetMedBehandlingId = repository.finn(SpleisBehandlingId(spleisBehandlingId))
+        val funnetMedBehandlingUnikId = repository.finn(funnetMedBehandlingId!!.id())
+
+        // then
+        assertNotNull(funnetMedBehandlingUnikId)
+        assertEquals(spleisBehandlingId, funnetMedBehandlingUnikId.spleisBehandlingId!!.value)
+        assertEquals(vedtaksperiodeId, funnetMedBehandlingUnikId.vedtaksperiodeId.value)
+        assertEquals(tags.toSet(), funnetMedBehandlingUnikId.tags)
+        assertEquals(fom, funnetMedBehandlingUnikId.fom)
+        assertEquals(tom, funnetMedBehandlingUnikId.tom)
+        assertEquals(fom, funnetMedBehandlingUnikId.skjæringstidspunkt) //ved ny behandling defaultes skjæringstidspunkt til fom
+    }
+
+    @Test
     fun `finn behandling med søknad-ider`() {
         // given
         val spleisBehandlingId = UUID.randomUUID()
