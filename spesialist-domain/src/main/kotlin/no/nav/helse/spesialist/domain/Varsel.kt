@@ -36,7 +36,22 @@ class Varsel private constructor(
 
     fun kanGodkjennes() = status == Status.VURDERT
 
+    fun kanVurderes() = status == Status.AKTIV
+
     fun manglerVurdering() = status == Status.AKTIV
+
+    fun vurder(
+        saksbehandlerOid: SaksbehandlerOid,
+        definisjonId: VarseldefinisjonId,
+    ) {
+        vurdering =
+            Varselvurdering(
+                saksbehandlerId = saksbehandlerOid,
+                tidspunkt = LocalDateTime.now(),
+                vurdertDefinisjonId = definisjonId,
+            )
+        status = Status.VURDERT
+    }
 
     fun godkjenn() {
         if (!kanGodkjennes()) error("Kan ikke godkjennes, varselet er ikke vurdert")

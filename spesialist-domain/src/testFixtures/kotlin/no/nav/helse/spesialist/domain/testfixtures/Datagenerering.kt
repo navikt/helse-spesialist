@@ -96,6 +96,12 @@ fun lagAvviksvurderingMedEnArbeidsgiver(
     )
 )
 
+fun lagEtternavn() = etternavnListe.random()
+
+fun lagEnSpleisBehandlingId() = SpleisBehandlingId(UUID.randomUUID())
+fun lagEnBehandlingUnikId() = BehandlingUnikId(UUID.randomUUID())
+fun lagEnVedtaksperiodeId() = VedtaksperiodeId(UUID.randomUUID())
+
 fun lagOppgave(behandlingId: UUID): Oppgave = Oppgave.ny(
     id = nextLong(),
     førsteOpprettet = LocalDateTime.now(),

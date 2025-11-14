@@ -1,6 +1,11 @@
 package no.nav.helse.spesialist.domain
 
 import no.nav.helse.Varselvurdering
+import no.nav.helse.spesialist.domain.testfixtures.lagEnBehandlingUnikId
+import no.nav.helse.spesialist.domain.testfixtures.lagEnSaksbehandler
+import no.nav.helse.spesialist.domain.testfixtures.lagEnSpleisBehandlingId
+import no.nav.helse.spesialist.domain.testfixtures.lagEnVarseldefinisjon
+import no.nav.helse.spesialist.domain.testfixtures.lagEtVarsel
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.assertThrows
@@ -12,6 +17,47 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class VarselTest {
+
+    @ParameterizedTest
+    @EnumSource(Varsel.Status::class, names = ["AKTIV"], mode = EnumSource.Mode.EXCLUDE)
+    fun `varsel kan ikke vurderes hvis det ikke er aktivt`(status: Varsel.Status) {
+        // given
+        val varsel = lagEtVarsel(behandlingUnikId = lagEnBehandlingUnikId(), spleisBehandlingId = lagEnSpleisBehandlingId(), status = status)
+
+        // when
+        val kanVurderes = varsel.kanVurderes()
+
+        // then
+        assertEquals(false, kanVurderes)
+    }
+
+    @Test
+    fun `varsel kan vurderes hvis det er aktivt`() {
+        // given
+        val varsel = lagEtVarsel(behandlingUnikId = lagEnBehandlingUnikId(), spleisBehandlingId = lagEnSpleisBehandlingId(), status = Varsel.Status.AKTIV)
+
+        // when
+        val kanVurderes = varsel.kanVurderes()
+
+        // then
+        assertEquals(true, kanVurderes)
+    }
+
+    @Test
+    fun `varsel kan vurderes`() {
+        // given
+        val definisjon = lagEnVarseldefinisjon()
+        val saksbehandler = lagEnSaksbehandler()
+        val varsel = lagEtVarsel(behandlingUnikId = lagEnBehandlingUnikId(), spleisBehandlingId = lagEnSpleisBehandlingId())
+
+        // when
+        varsel.vurder(saksbehandler.id(), definisjon.id())
+
+        // then
+        assertEquals(Varsel.Status.VURDERT, varsel.status)
+        assertEquals(saksbehandler.id(), varsel.vurdering?.saksbehandlerId)
+        assertEquals(definisjon.id(), varsel.vurdering?.vurdertDefinisjonId)
+    }
 
     @Test
     fun `varsel kan godkjennes hvis det er vurdert`() {
