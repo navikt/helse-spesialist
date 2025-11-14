@@ -23,4 +23,7 @@ class InMemoryVarseldefinisjonRepository: VarseldefinisjonRepository {
             handling = "En handling",
         )
     }
+    fun lagre(varseldefinisjon: Varseldefinisjon) {
+        definisjoner[varseldefinisjon.kode] = varseldefinisjon
+    }
 }

@@ -1,11 +1,16 @@
 package no.nav.helse.spesialist.domain.testfixtures
 
+import no.nav.helse.Varselvurdering
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.BehandlingUnikId
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.Varsel
+import no.nav.helse.spesialist.domain.VarselId
+import no.nav.helse.spesialist.domain.Varseldefinisjon
+import no.nav.helse.spesialist.domain.VarseldefinisjonId
 import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import java.time.LocalDate
@@ -97,7 +102,7 @@ fun lagEnSaksbehandler(): Saksbehandler {
 
 fun lagEnBehandling(
     id: UUID = UUID.randomUUID(),
-    spleisBehandlingId: UUID,
+    spleisBehandlingId: UUID = UUID.randomUUID(),
     vedtaksperiodeId: VedtaksperiodeId,
     tags: Set<String> = setOf("Innvilget"),
 ): Behandling = Behandling.fraLagring(
@@ -112,7 +117,43 @@ fun lagEnBehandling(
 )
 
 fun lagEnVedtaksperiode(
-    vedtaksperiodeId: UUID,
-    fødselsnummer: String,
-    organisasjonsnummer: String,
-): Vedtaksperiode = Vedtaksperiode(VedtaksperiodeId(vedtaksperiodeId), fødselsnummer, organisasjonsnummer)
+    vedtaksperiodeId: UUID = UUID.randomUUID(),
+    fødselsnummer: String = lagFødselsnummer(),
+    organisasjonsnummer: String = lagOrganisasjonsnummer(),
+): Vedtaksperiode = Vedtaksperiode(
+    id = VedtaksperiodeId(vedtaksperiodeId),
+    fødselsnummer = fødselsnummer,
+    organisasjonsnummer = organisasjonsnummer
+)
+
+fun lagEtVarsel(
+    id: UUID = UUID.randomUUID(),
+    behandlingUnikId: BehandlingUnikId,
+    spleisBehandlingId: SpleisBehandlingId?,
+    status: Varsel.Status = Varsel.Status.AKTIV,
+    kode: String = "RV_IV_1",
+    opprettet: LocalDateTime = LocalDateTime.now(),
+    vurdering: Varselvurdering? = null,
+): Varsel = Varsel.fraLagring(
+    id = VarselId(id),
+    spleisBehandlingId = spleisBehandlingId,
+    behandlingUnikId = behandlingUnikId,
+    status = status,
+    kode = kode,
+    opprettetTidspunkt = opprettet,
+    vurdering = vurdering
+)
+
+fun lagEnVarseldefinisjon(
+    id: UUID = UUID.randomUUID(),
+    kode: String = "RV_IV_1",
+    tittel: String = "Dette er en tittel",
+    forklaring: String? = "Dette er en forklaring",
+    handling: String? = "Dette er en handling",
+): Varseldefinisjon = Varseldefinisjon.fraLagring(
+    id = VarseldefinisjonId(id),
+    kode = kode,
+    tittel = tittel,
+    forklaring = forklaring,
+    handling = handling
+)

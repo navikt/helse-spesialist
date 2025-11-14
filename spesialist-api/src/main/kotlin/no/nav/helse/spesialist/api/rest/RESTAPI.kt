@@ -19,6 +19,7 @@ import no.nav.helse.spesialist.api.rest.dokument.GetSoknadBehandler
 import no.nav.helse.spesialist.api.rest.tilkommeninntekt.GetTilkomneInntektskilderForPersonBehandler
 import no.nav.helse.spesialist.api.rest.tilkommeninntekt.PatchTilkommenInntektBehandler
 import no.nav.helse.spesialist.api.rest.tilkommeninntekt.PostTilkomneInntekterBehandler
+import no.nav.helse.spesialist.api.rest.varsler.GetVarselBehandler
 
 fun Routing.restRoutes(
     restAdapter: RestAdapter,
@@ -54,6 +55,8 @@ fun Routing.restRoutes(
             post(PostVedtaksperiodeAnnullerBehandler(), restAdapter)
 
             post(PostArbeidstidsvurderingBehandler(), restAdapter)
+
+            get(GetVarselBehandler(), restAdapter)
         }
     }
 }
