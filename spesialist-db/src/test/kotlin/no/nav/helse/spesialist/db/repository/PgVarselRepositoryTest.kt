@@ -10,12 +10,15 @@ import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.testfixtures.lagEnSaksbehandler
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlerident
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.test.assertContains
+import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
 class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
     private val repository = sessionContext.varselRepository
@@ -59,6 +62,92 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
         assertEquals("RV_IV_1", funnet.kode)
         assertEquals(spleisBehandlingId, funnet.spleisBehandlingId)
         assertEquals(varseldefinisjonId, funnet.vurdering?.vurdertDefinisjonId)
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = Varsel.Status::class, names = ["VURDERT", "GODKJENT"])
+    fun `map ut vurdering hvis status er VURDERT eller GODKJENT`(status: Varsel.Status) {
+        // given
+        val vedtaksperiodeId = VedtaksperiodeId(UUID.randomUUID())
+        val spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID())
+        val varselId = VarselId(UUID.randomUUID())
+        val fødselsnummer = lagFødselsnummer()
+        val saksbehandler = lagEnSaksbehandler()
+        val varseldefinisjonId = VarseldefinisjonId(UUID.randomUUID())
+        opprettSaksbehandler(saksbehandler.id().value, saksbehandler.navn, saksbehandler.epost, saksbehandler.ident)
+        opprettPerson(fødselsnummer = fødselsnummer)
+        opprettArbeidsgiver()
+        opprettBehandling(
+            vedtaksperiodeId = vedtaksperiodeId.value,
+            spleisBehandlingId = spleisBehandlingId.value,
+            fødselsnummer = fødselsnummer,
+        )
+        nyttVarsel(
+            id = varselId.value,
+            vedtaksperiodeId = vedtaksperiodeId.value,
+            spleisBehandlingId = spleisBehandlingId.value,
+            saksbehandlerSomEndretId = saksbehandler.ident,
+            endretTidspunkt = LocalDateTime.now(),
+            status = status.name,
+            kode = "RV_IV_1",
+            opprettet = LocalDateTime.now(),
+            definisjonRef = opprettVarseldefinisjon(kode = "RV_IV_1", definisjonId = varseldefinisjonId.value)
+        )
+
+        // when
+        val funnet = repository.finn(varselId)
+
+        // then
+        assertNotNull(funnet)
+        assertEquals(varselId, funnet.id())
+        assertEquals(status, funnet.status)
+        assertEquals("RV_IV_1", funnet.kode)
+        assertNotNull(funnet.vurdering)
+        assertEquals(spleisBehandlingId, funnet.spleisBehandlingId)
+        assertEquals(varseldefinisjonId, funnet.vurdering?.vurdertDefinisjonId)
+        assertEquals(saksbehandler.id(), funnet.vurdering?.saksbehandlerId)
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = Varsel.Status::class, names = ["VURDERT", "GODKJENT"], mode = EnumSource.Mode.EXCLUDE)
+    fun `ikke map ut vurdering hvis status er noe annet enn VURDERT eller GODKJENT`(status: Varsel.Status) {
+        // given
+        val vedtaksperiodeId = VedtaksperiodeId(UUID.randomUUID())
+        val spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID())
+        val varselId = VarselId(UUID.randomUUID())
+        val fødselsnummer = lagFødselsnummer()
+        val saksbehandler = lagEnSaksbehandler()
+        val varseldefinisjonId = VarseldefinisjonId(UUID.randomUUID())
+        opprettSaksbehandler(saksbehandler.id().value, saksbehandler.navn, saksbehandler.epost, saksbehandler.ident)
+        opprettPerson(fødselsnummer = fødselsnummer)
+        opprettArbeidsgiver()
+        opprettBehandling(
+            vedtaksperiodeId = vedtaksperiodeId.value,
+            spleisBehandlingId = spleisBehandlingId.value,
+            fødselsnummer = fødselsnummer,
+        )
+        nyttVarsel(
+            id = varselId.value,
+            vedtaksperiodeId = vedtaksperiodeId.value,
+            spleisBehandlingId = spleisBehandlingId.value,
+            saksbehandlerSomEndretId = saksbehandler.ident,
+            endretTidspunkt = LocalDateTime.now(),
+            status = status.name,
+            kode = "RV_IV_1",
+            opprettet = LocalDateTime.now(),
+            definisjonRef = opprettVarseldefinisjon(kode = "RV_IV_1", definisjonId = varseldefinisjonId.value)
+        )
+
+        // when
+        val funnet = repository.finn(varselId)
+
+        // then
+        assertNotNull(funnet)
+        assertEquals(varselId, funnet.id())
+        assertEquals(status, funnet.status)
+        assertEquals("RV_IV_1", funnet.kode)
+        assertEquals(spleisBehandlingId, funnet.spleisBehandlingId)
+        assertNull(funnet.vurdering)
     }
 
     @Test

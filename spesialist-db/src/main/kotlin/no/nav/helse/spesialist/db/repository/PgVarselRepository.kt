@@ -60,23 +60,27 @@ class PgVarselRepository private constructor(
             row.mapTilVarsel()
         }
 
-    private fun Row.mapTilVarsel(): Varsel =
-        Varsel.fraLagring(
+    private fun Row.mapTilVarsel(): Varsel {
+        val status = enumValueOf<Varsel.Status>(string("status"))
+        return Varsel.fraLagring(
             id = VarselId(uuid("unik_id")),
             spleisBehandlingId = uuidOrNull("spleis_behandling_id")?.let { SpleisBehandlingId(it) },
             behandlingUnikId = BehandlingUnikId(uuid("behandling_unik_id")),
-            status = enumValueOf(string("status")),
+            status = status,
             vurdering =
-                uuidOrNull("oid")?.let {
+                if (status in listOf(Varsel.Status.VURDERT, Varsel.Status.GODKJENT)) {
                     Varselvurdering(
-                        saksbehandlerId = SaksbehandlerOid(it),
+                        saksbehandlerId = SaksbehandlerOid(uuid("oid")),
                         tidspunkt = localDateTime("status_endret_tidspunkt"),
                         vurdertDefinisjonId = VarseldefinisjonId(uuid("definisjon_id")),
                     )
+                } else {
+                    null
                 },
             kode = string("kode"),
             opprettetTidspunkt = localDateTime("opprettet"),
         )
+    }
 
     override fun lagre(varsel: Varsel) {
         dbQuery.update(
