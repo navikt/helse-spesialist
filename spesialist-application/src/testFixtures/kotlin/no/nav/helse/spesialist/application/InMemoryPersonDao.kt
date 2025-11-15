@@ -5,12 +5,10 @@ import no.nav.helse.db.PersonDao
 import no.nav.helse.mediator.meldinger.løsninger.Inntekter
 import no.nav.helse.modell.kommando.MinimalPersonDto
 import no.nav.helse.modell.person.Adressebeskyttelse
-import no.nav.helse.spesialist.application.InMemorySessionContext.Personinfo
 import no.nav.helse.spesialist.typer.Kjønn
 import java.time.LocalDate
 
-class InMemoryPersonDao: PersonDao {
-    private val personinfo = mutableListOf<Personinfo>()
+class InMemoryPersonDao(private val personRepository: InMemoryPersonRepository) : PersonDao {
     override fun personKlargjort(fødselsnummer: String) {
         TODO("Not yet implemented")
     }
@@ -49,15 +47,24 @@ class InMemoryPersonDao: PersonDao {
         kjønn: Kjønn,
         adressebeskyttelse: Adressebeskyttelse
     ) {
-        personinfo.add(
-            Personinfo(
-                fødselsnummer = fødselsnummer,
+        personRepository.alle().first { it.identitetsnummer.value == fødselsnummer }.oppdaterInfo(
+            no.nav.helse.spesialist.domain.Personinfo(
                 fornavn = fornavn,
                 mellomnavn = mellomnavn,
                 etternavn = etternavn,
                 fødselsdato = fødselsdato,
-                kjønn = kjønn,
-                adressebeskyttelse = adressebeskyttelse
+                kjønn = when (kjønn) {
+                    Kjønn.Mann -> no.nav.helse.spesialist.domain.Personinfo.Kjønn.Mann
+                    Kjønn.Kvinne -> no.nav.helse.spesialist.domain.Personinfo.Kjønn.Kvinne
+                    Kjønn.Ukjent -> no.nav.helse.spesialist.domain.Personinfo.Kjønn.Ukjent
+                },
+                adressebeskyttelse = when (adressebeskyttelse) {
+                    Adressebeskyttelse.Ugradert -> no.nav.helse.spesialist.domain.Personinfo.Adressebeskyttelse.Ugradert
+                    Adressebeskyttelse.Fortrolig -> no.nav.helse.spesialist.domain.Personinfo.Adressebeskyttelse.Fortrolig
+                    Adressebeskyttelse.StrengtFortrolig -> no.nav.helse.spesialist.domain.Personinfo.Adressebeskyttelse.StrengtFortrolig
+                    Adressebeskyttelse.StrengtFortroligUtland -> no.nav.helse.spesialist.domain.Personinfo.Adressebeskyttelse.StrengtFortroligUtland
+                    Adressebeskyttelse.Ukjent -> no.nav.helse.spesialist.domain.Personinfo.Adressebeskyttelse.Ukjent
+                }
             )
         )
     }
@@ -94,7 +101,15 @@ class InMemoryPersonDao: PersonDao {
     }
 
     override fun finnAdressebeskyttelse(fødselsnummer: String) =
-        personinfo.find { it.fødselsnummer == fødselsnummer }?.adressebeskyttelse
+        personRepository.alle().find { it.identitetsnummer.value == fødselsnummer }?.info?.adressebeskyttelse?.let {
+            when (it) {
+                no.nav.helse.spesialist.domain.Personinfo.Adressebeskyttelse.Ugradert -> Adressebeskyttelse.Ugradert
+                no.nav.helse.spesialist.domain.Personinfo.Adressebeskyttelse.Fortrolig -> Adressebeskyttelse.Fortrolig
+                no.nav.helse.spesialist.domain.Personinfo.Adressebeskyttelse.StrengtFortrolig -> Adressebeskyttelse.StrengtFortrolig
+                no.nav.helse.spesialist.domain.Personinfo.Adressebeskyttelse.StrengtFortroligUtland -> Adressebeskyttelse.StrengtFortroligUtland
+                no.nav.helse.spesialist.domain.Personinfo.Adressebeskyttelse.Ukjent -> Adressebeskyttelse.Ukjent
+            }
+        }
 
     override fun finnAktørId(fødselsnummer: String): String? {
         TODO("Not yet implemented")

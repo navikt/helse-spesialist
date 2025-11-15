@@ -1,30 +1,22 @@
 package no.nav.helse.spesialist.api.rest
 
 import no.nav.helse.modell.oppgave.Oppgave
-import no.nav.helse.modell.person.Adressebeskyttelse
-import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.api.testfixtures.lagSaksbehandler
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.NotatType
-import no.nav.helse.spesialist.domain.testfixtures.fødselsdato
-import no.nav.helse.spesialist.domain.testfixtures.lagEtternavn
-import no.nav.helse.spesialist.domain.testfixtures.lagFornavn
+import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
-import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
-import no.nav.helse.spesialist.typer.Kjønn
+import no.nav.helse.spesialist.domain.testfixtures.lagPerson
+import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiode
+import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class PostOpphevStansIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
-
-    private val notatRepository = integrationTestFixture.sessionFactory.sessionContext.notatRepository
-    private val oppgaveRepository = integrationTestFixture.sessionFactory.sessionContext.oppgaveRepository
-    private val stansAutomatiskBehandlingDao =
-        integrationTestFixture.sessionFactory.sessionContext.stansAutomatiskBehandlingDao
-    private val vedtaksperiodeRepository = integrationTestFixture.sessionFactory.sessionContext.legacyVedtaksperiodeRepository
-    private val personDao = integrationTestFixture.sessionFactory.sessionContext.personDao
+    private val sessionContext = integrationTestFixture.sessionFactory.sessionContext
 
     @Test
     fun `Lagrer melding og notat når stans oppheves fra speil`() {
@@ -33,28 +25,17 @@ class PostOpphevStansIntegrationTest {
         val saksbehandler = lagSaksbehandler()
         val vedtaksperiodeId = UUID.randomUUID()
 
-        personDao.upsertPersoninfo(
-            fødselsnummer = fødselsnummer,
-            fornavn = lagFornavn(),
-            mellomnavn = null,
-            etternavn = lagEtternavn(),
-            fødselsdato = fødselsdato(),
-            kjønn = Kjønn.Kvinne,
-            adressebeskyttelse = Adressebeskyttelse.Ugradert
-        )
+        val person = lagPerson(
+            identitetsnummer = Identitetsnummer.fraString(fødselsnummer)
+        ).also(sessionContext.personRepository::lagre)
+        sessionContext.egenAnsattDao.lagre(fødselsnummer, false, LocalDateTime.now())
 
-        vedtaksperiodeRepository.lagreVedtaksperioder(
-            fødselsnummer = fødselsnummer,
-            vedtaksperioder = listOf(
-                VedtaksperiodeDto(
-                    organisasjonsnummer = lagOrganisasjonsnummer(),
-                    vedtaksperiodeId = vedtaksperiodeId,
-                    forkastet = false,
-                    behandlinger = emptyList(),
-                )
-            )
-        )
-        oppgaveRepository.lagre(
+        lagVedtaksperiode(
+            id = VedtaksperiodeId(vedtaksperiodeId),
+            identitetsnummer = person.identitetsnummer,
+        ).also(sessionContext.vedtaksperiodeRepository::lagre)
+
+        sessionContext.oppgaveRepository.lagre(
             Oppgave.ny(
                 id = 1,
                 førsteOpprettet = null,
@@ -79,7 +60,7 @@ class PostOpphevStansIntegrationTest {
 
         // Then:
         // Sjekk persistert data
-        val lagredeStans = stansAutomatiskBehandlingDao.hentFor(fødselsnummer)
+        val lagredeStans = sessionContext.stansAutomatiskBehandlingDao.hentFor(fødselsnummer)
         assertEquals(1, lagredeStans.size)
         val lagretStans = lagredeStans.first()
         assertEquals(fødselsnummer, lagretStans.fødselsnummer)
@@ -87,7 +68,7 @@ class PostOpphevStansIntegrationTest {
         assertEquals(emptySet(), lagretStans.årsaker)
         assertEquals(null, lagretStans.meldingId)
 
-        val notater = notatRepository.finnAlleForVedtaksperiode(vedtaksperiodeId)
+        val notater = sessionContext.notatRepository.finnAlleForVedtaksperiode(vedtaksperiodeId)
         assertEquals(1, notater.size)
         val notat = notater.first()
         assertEquals(vedtaksperiodeId, notat.vedtaksperiodeId)

@@ -1,21 +1,17 @@
 package no.nav.helse.spesialist.api.rest.dokument
 
 import io.ktor.http.HttpStatusCode
-import no.nav.helse.modell.person.Adressebeskyttelse
-import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.testfixtures.lagSaksbehandler
 import no.nav.helse.spesialist.domain.Identitetsnummer
-import no.nav.helse.spesialist.domain.testfixtures.fødselsdato
+import no.nav.helse.spesialist.domain.Personinfo
 import no.nav.helse.spesialist.domain.testfixtures.lagAktørId
-import no.nav.helse.spesialist.domain.testfixtures.lagEtternavn
-import no.nav.helse.spesialist.domain.testfixtures.lagFornavn
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
-import no.nav.helse.spesialist.domain.testfixtures.lagMellomnavn
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
-import no.nav.helse.spesialist.typer.Kjønn
+import no.nav.helse.spesialist.domain.testfixtures.lagPerson
 import org.intellij.lang.annotations.Language
+import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -23,49 +19,31 @@ import kotlin.test.assertEquals
 class GetInntektsmeldingBehandlerTest {
     private val integrationTestFixture = IntegrationTestFixture()
     private val dokumentDao = integrationTestFixture.sessionFactory.sessionContext.dokumentDao
-    private val legacyPersonRepository = integrationTestFixture.sessionFactory.sessionContext.legacyPersonRepository
-    private val personDao = integrationTestFixture.sessionFactory.sessionContext.personDao
+    private val egenAnsattDao = integrationTestFixture.sessionFactory.sessionContext.egenAnsattDao
+    private val personRepository = integrationTestFixture.sessionFactory.sessionContext.personRepository
     private val personPseudoIdDao = integrationTestFixture.sessionFactory.sessionContext.personPseudoIdDao
 
     @Test
     fun `kan hente inntektsmelding hvis man har tilgang til person`() {
         // Given:
         val dokumentId = UUID.randomUUID()
-        val fødselsnummer = "29419408008"
-        val aktørId = "100000123123"
+        val person = lagPerson().also(personRepository::lagre)
+        egenAnsattDao.lagre(person.identitetsnummer.value, false, LocalDateTime.now())
         val organisasjonsnummer = "99999999"
         dokumentDao.lagre(
-            fødselsnummer = fødselsnummer,
+            fødselsnummer = person.identitetsnummer.value,
             dokumentId = dokumentId,
             dokument = objectMapper.readTree(
                 lagInntektsmeldingJson(
                     id = dokumentId,
-                    fødselsnummer = fødselsnummer,
-                    aktørId = aktørId,
+                    fødselsnummer = person.identitetsnummer.value,
+                    aktørId = person.aktørId,
                     organisasjonsnummer = organisasjonsnummer
                 )
             )
         )
 
-        val person: LegacyPerson = LegacyPerson.gjenopprett(
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            vedtaksperioder = emptyList(),
-            skjønnsfastsattSykepengegrunnlag = emptyList(),
-            avviksvurderinger = emptyList()
-        )
-
-        legacyPersonRepository.leggTilPerson(person)
-        personDao.upsertPersoninfo(
-            fødselsnummer = fødselsnummer,
-            fornavn = lagFornavn(),
-            mellomnavn = lagMellomnavn(),
-            etternavn = lagEtternavn(),
-            fødselsdato = fødselsdato(),
-            kjønn = Kjønn.Kvinne,
-            adressebeskyttelse = Adressebeskyttelse.Ugradert
-        )
-        val pseudoId = personPseudoIdDao.nyPersonPseudoId(Identitetsnummer.fraString(fødselsnummer))
+        val pseudoId = personPseudoIdDao.nyPersonPseudoId(person.identitetsnummer)
 
         val saksbehandler = lagSaksbehandler()
 
@@ -81,44 +59,26 @@ class GetInntektsmeldingBehandlerTest {
     }
 
     @Test
-    fun `har tilgang til å hente inntektsmelding hvis person mangler FNR og har aktørId`() {
+    fun `har tilgang til å hente inntektsmelding hvis dokument mangler FNR og har aktørId`() {
         // Given:
         val dokumentId = UUID.randomUUID()
-        val fødselsnummer = "29419408008"
-        val aktørId = "100000123123"
+        val person = lagPerson().also(personRepository::lagre)
+        egenAnsattDao.lagre(person.identitetsnummer.value, false, LocalDateTime.now())
         val organisasjonsnummer = "99999999"
         dokumentDao.lagre(
-            fødselsnummer = fødselsnummer,
+            fødselsnummer = person.identitetsnummer.value,
             dokumentId = dokumentId,
             dokument = objectMapper.readTree(
                 lagInntektsmeldingJson(
                     id = dokumentId,
                     fødselsnummer = "",
-                    aktørId = aktørId,
+                    aktørId = person.aktørId,
                     organisasjonsnummer = organisasjonsnummer
                 )
             )
         )
 
-        val person: LegacyPerson = LegacyPerson.gjenopprett(
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            vedtaksperioder = emptyList(),
-            skjønnsfastsattSykepengegrunnlag = emptyList(),
-            avviksvurderinger = emptyList()
-        )
-
-        legacyPersonRepository.leggTilPerson(person)
-        personDao.upsertPersoninfo(
-            fødselsnummer = fødselsnummer,
-            fornavn = lagFornavn(),
-            mellomnavn = lagMellomnavn(),
-            etternavn = lagEtternavn(),
-            fødselsdato = fødselsdato(),
-            kjønn = Kjønn.Kvinne,
-            adressebeskyttelse = Adressebeskyttelse.Ugradert
-        )
-        val pseudoId = personPseudoIdDao.nyPersonPseudoId(Identitetsnummer.fraString(fødselsnummer))
+        val pseudoId = personPseudoIdDao.nyPersonPseudoId(Identitetsnummer.fraString(person.identitetsnummer.value))
 
         val saksbehandler = lagSaksbehandler()
 
@@ -134,14 +94,14 @@ class GetInntektsmeldingBehandlerTest {
     }
 
     @Test
-    fun `har ikke tilgang til å hente inntektsmelding hvis person mangler FNR og aktørId`() {
+    fun `har ikke tilgang til å hente inntektsmelding hvis dokument mangler FNR og aktørId`() {
         // Given:
         val dokumentId = UUID.randomUUID()
-        val fødselsnummer = "29419408008"
-        val aktørId = "100000123123"
+        val person = lagPerson().also(personRepository::lagre)
+        egenAnsattDao.lagre(person.identitetsnummer.value, false, LocalDateTime.now())
         val organisasjonsnummer = "99999999"
         dokumentDao.lagre(
-            fødselsnummer = fødselsnummer,
+            fødselsnummer = person.identitetsnummer.value,
             dokumentId = dokumentId,
             dokument = objectMapper.readTree(
                 lagInntektsmeldingJson(
@@ -153,26 +113,7 @@ class GetInntektsmeldingBehandlerTest {
             )
         )
 
-        val person: LegacyPerson = LegacyPerson.gjenopprett(
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            vedtaksperioder = emptyList(),
-            skjønnsfastsattSykepengegrunnlag = emptyList(),
-            avviksvurderinger = emptyList()
-        )
-
-        legacyPersonRepository.leggTilPerson(person)
-        personDao.upsertPersoninfo(
-            fødselsnummer = fødselsnummer,
-            fornavn = lagFornavn(),
-            mellomnavn = lagMellomnavn(),
-            etternavn = lagEtternavn(),
-            fødselsdato = fødselsdato(),
-            kjønn = Kjønn.Kvinne,
-            adressebeskyttelse = Adressebeskyttelse.Ugradert
-        )
-
-        val pseudoId = personPseudoIdDao.nyPersonPseudoId(Identitetsnummer.fraString(fødselsnummer))
+        val pseudoId = personPseudoIdDao.nyPersonPseudoId(Identitetsnummer.fraString(person.identitetsnummer.value))
 
         val saksbehandler = lagSaksbehandler()
 
@@ -190,42 +131,24 @@ class GetInntektsmeldingBehandlerTest {
     fun `kan ikke hente inntektsmelding hvis man ikke har tilgang til person`() {
         // Given:
         val dokumentId = UUID.randomUUID()
-        val fødselsnummer = "29419408008"
-        val aktørId = "100000123123"
+        val person = lagPerson(adressebeskyttelse = Personinfo.Adressebeskyttelse.StrengtFortrolig)
+            .also(personRepository::lagre)
+        egenAnsattDao.lagre(person.identitetsnummer.value, false, LocalDateTime.now())
         val organisasjonsnummer = "99999999"
         dokumentDao.lagre(
-            fødselsnummer = fødselsnummer,
+            fødselsnummer = person.identitetsnummer.value,
             dokumentId = dokumentId,
             dokument = objectMapper.readTree(
                 lagInntektsmeldingJson(
                     id = dokumentId,
-                    fødselsnummer = fødselsnummer,
-                    aktørId = aktørId,
+                    fødselsnummer = person.identitetsnummer.value,
+                    aktørId = person.aktørId,
                     organisasjonsnummer = organisasjonsnummer
                 )
             )
         )
 
-        val person: LegacyPerson = LegacyPerson.gjenopprett(
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            vedtaksperioder = emptyList(),
-            skjønnsfastsattSykepengegrunnlag = emptyList(),
-            avviksvurderinger = emptyList()
-        )
-
-        legacyPersonRepository.leggTilPerson(person)
-        personDao.upsertPersoninfo(
-            fødselsnummer = fødselsnummer,
-            fornavn = lagFornavn(),
-            mellomnavn = lagMellomnavn(),
-            etternavn = lagEtternavn(),
-            fødselsdato = fødselsdato(),
-            kjønn = Kjønn.Kvinne,
-            adressebeskyttelse = Adressebeskyttelse.StrengtFortrolig
-        )
-
-        val pseudoId = personPseudoIdDao.nyPersonPseudoId(Identitetsnummer.fraString(fødselsnummer))
+        val pseudoId = personPseudoIdDao.nyPersonPseudoId(Identitetsnummer.fraString(person.identitetsnummer.value))
 
         val saksbehandler = lagSaksbehandler()
 

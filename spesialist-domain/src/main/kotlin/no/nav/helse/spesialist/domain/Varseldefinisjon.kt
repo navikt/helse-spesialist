@@ -1,6 +1,6 @@
 package no.nav.helse.spesialist.domain
 
-import no.nav.helse.spesialist.domain.ddd.Entity
+import no.nav.helse.spesialist.domain.ddd.AggregateRoot
 import java.util.UUID
 
 @JvmInline
@@ -14,7 +14,7 @@ class Varseldefinisjon private constructor(
     val tittel: String,
     val forklaring: String?,
     val handling: String?,
-) : Entity<VarseldefinisjonId>(id) {
+) : AggregateRoot<VarseldefinisjonId>(id) {
     companion object {
         fun fraLagring(
             id: VarseldefinisjonId,
@@ -22,6 +22,13 @@ class Varseldefinisjon private constructor(
             tittel: String,
             forklaring: String?,
             handling: String?,
-        ) = Varseldefinisjon(id, kode, tittel, forklaring, handling)
+        ): Varseldefinisjon =
+            Varseldefinisjon(
+                id = id,
+                kode = kode,
+                tittel = tittel,
+                forklaring = forklaring,
+                handling = handling,
+            )
     }
 }

@@ -1,61 +1,39 @@
 package no.nav.helse.spesialist.api.rest.dokument
 
 import io.ktor.http.HttpStatusCode
-import no.nav.helse.modell.person.Adressebeskyttelse
-import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.api.graphql.schema.ApiSoknadstype
 import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.testfixtures.lagSaksbehandler
 import no.nav.helse.spesialist.domain.Identitetsnummer
-import no.nav.helse.spesialist.domain.testfixtures.fødselsdato
-import no.nav.helse.spesialist.domain.testfixtures.lagEtternavn
-import no.nav.helse.spesialist.domain.testfixtures.lagFornavn
-import no.nav.helse.spesialist.domain.testfixtures.lagMellomnavn
-import no.nav.helse.spesialist.typer.Kjønn
+import no.nav.helse.spesialist.domain.Personinfo
+import no.nav.helse.spesialist.domain.testfixtures.lagPerson
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.test.assertEquals
 
 class GetSøknadBehandlerIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
     private val dokumentDao = integrationTestFixture.sessionFactory.sessionContext.dokumentDao
-    private val legacyPersonRepository = integrationTestFixture.sessionFactory.sessionContext.legacyPersonRepository
-    private val personDao = integrationTestFixture.sessionFactory.sessionContext.personDao
+    private val egenAnsattDao = integrationTestFixture.sessionFactory.sessionContext.egenAnsattDao
+    private val personRepository = integrationTestFixture.sessionFactory.sessionContext.personRepository
     private val personPseudoIdDao = integrationTestFixture.sessionFactory.sessionContext.personPseudoIdDao
 
     @Test
     fun `får hentet søknad hvis man har tilgang til person`() {
         // Given:
         val dokumentId = UUID.randomUUID()
-        val fødselsnummer = "29419408008"
-        val aktørId = "100000123123"
+        val person = lagPerson().also(personRepository::lagre)
+        egenAnsattDao.lagre(person.identitetsnummer.value, false, LocalDateTime.now())
         dokumentDao.lagre(
-            fødselsnummer = fødselsnummer,
+            fødselsnummer = person.identitetsnummer.value,
             dokumentId = dokumentId,
-            dokument = objectMapper.readTree(jsonSøknad)
+            dokument = objectMapper.readTree(lagSøknadJson(fnr = person.identitetsnummer.value))
         )
 
-        val person: LegacyPerson = LegacyPerson.gjenopprett(
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            vedtaksperioder = emptyList(),
-            skjønnsfastsattSykepengegrunnlag = emptyList(),
-            avviksvurderinger = emptyList()
-        )
-
-        legacyPersonRepository.leggTilPerson(person)
-        personDao.upsertPersoninfo(
-            fødselsnummer = fødselsnummer,
-            fornavn = lagFornavn(),
-            mellomnavn = lagMellomnavn(),
-            etternavn = lagEtternavn(),
-            fødselsdato = fødselsdato(),
-            kjønn = Kjønn.Kvinne,
-            adressebeskyttelse = Adressebeskyttelse.Ugradert
-        )
-        val pseudoId = personPseudoIdDao.nyPersonPseudoId(Identitetsnummer.fraString(fødselsnummer))
+        val pseudoId = personPseudoIdDao.nyPersonPseudoId(person.identitetsnummer)
 
         val saksbehandler = lagSaksbehandler()
 
@@ -74,35 +52,16 @@ class GetSøknadBehandlerIntegrationTest {
     fun `får ikke hente søknad hvis man ikke har tilgang til person`() {
         // Given:
         val dokumentId = UUID.randomUUID()
-        val fødselsnummer = "29419408008"
-        val aktørId = "100000123123"
+        val person =
+            lagPerson(adressebeskyttelse = Personinfo.Adressebeskyttelse.StrengtFortrolig).also(personRepository::lagre)
+        egenAnsattDao.lagre(person.identitetsnummer.value, false, LocalDateTime.now())
         dokumentDao.lagre(
-            fødselsnummer = fødselsnummer,
+            fødselsnummer = person.identitetsnummer.value,
             dokumentId = dokumentId,
-            dokument = objectMapper.readTree(jsonSøknad)
+            dokument = objectMapper.readTree(lagSøknadJson(fnr = person.identitetsnummer.value))
         )
 
-        val person: LegacyPerson = LegacyPerson.gjenopprett(
-            aktørId = aktørId,
-            fødselsnummer = fødselsnummer,
-            vedtaksperioder = emptyList(),
-            skjønnsfastsattSykepengegrunnlag = emptyList(),
-            avviksvurderinger = emptyList()
-        )
-
-        personDao.upsertPersoninfo(
-            fødselsnummer = fødselsnummer,
-            fornavn = lagFornavn(),
-            mellomnavn = lagMellomnavn(),
-            etternavn = lagEtternavn(),
-            fødselsdato = fødselsdato(),
-            kjønn = Kjønn.Kvinne,
-            adressebeskyttelse = Adressebeskyttelse.StrengtFortrolig
-        )
-
-        legacyPersonRepository.leggTilPerson(person)
-
-        val pseudoId = personPseudoIdDao.nyPersonPseudoId(Identitetsnummer.fraString(fødselsnummer))
+        val pseudoId = personPseudoIdDao.nyPersonPseudoId(Identitetsnummer.fraString(person.identitetsnummer.value))
 
         val saksbehandler = lagSaksbehandler()
 
@@ -117,14 +76,13 @@ class GetSøknadBehandlerIntegrationTest {
     }
 }
 
-
 @Language("JSON")
-val jsonSøknad = """
+fun lagSøknadJson(fnr: String) = """
     {
           "id": "63b6913a-ce95-30d8-9b6e-6123f5262b05",
           "type": "SELVSTENDIGE_OG_FRILANSERE",
           "status": "SENDT",
-          "fnr": "29419408008",
+          "fnr": "$fnr",
           "sykmeldingId": "6aa9bd4f-b25a-446b-9126-7a513bcd673f",
           "arbeidsgiver": null,
           "arbeidssituasjon": "SELVSTENDIG_NARINGSDRIVENDE",

@@ -9,10 +9,10 @@ import java.util.UUID
 class InMemorySaksbehandlerDao(private val inMemorySaksbehandlerRepository: InMemorySaksbehandlerRepository) :
     SaksbehandlerDao {
     override fun hent(ident: String): Saksbehandler? =
-        inMemorySaksbehandlerRepository.data.values.find { it.ident == ident }
+        inMemorySaksbehandlerRepository.alle().find { it.ident == ident }
 
     override fun hentAlleAktiveSisteTreMnderEllerHarTildelteOppgaver(): List<Saksbehandler> =
-        inMemorySaksbehandlerRepository.data.values.toList()
+        inMemorySaksbehandlerRepository.alle().toList()
 
     override fun opprettEllerOppdater(oid: UUID, navn: String, epost: String, ident: String): Int {
         inMemorySaksbehandlerRepository.lagre(

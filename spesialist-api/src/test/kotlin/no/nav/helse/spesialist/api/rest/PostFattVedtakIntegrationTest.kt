@@ -2,29 +2,24 @@ package no.nav.helse.spesialist.api.rest
 
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.modell.melding.VarselEndret
-import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.spesialist.api.IntegrationTestFixture
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.VarselId
-import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.testfixtures.lagEnBehandling
 import no.nav.helse.spesialist.domain.testfixtures.lagEnOppgave
 import no.nav.helse.spesialist.domain.testfixtures.lagEnSaksbehandler
 import no.nav.helse.spesialist.domain.testfixtures.lagEnVedtaksperiode
-import no.nav.helse.spesialist.domain.testfixtures.lagEtternavn
-import no.nav.helse.spesialist.domain.testfixtures.lagFornavn
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
-import no.nav.helse.spesialist.domain.testfixtures.lagMellomnavn
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
+import no.nav.helse.spesialist.domain.testfixtures.lagPerson
 import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlerident
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
-import no.nav.helse.spesialist.typer.Kjønn
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.test.Test
@@ -33,22 +28,12 @@ class PostFattVedtakIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
     private val sessionContext = integrationTestFixture.sessionFactory.sessionContext
 
-    private val saksbehandlerRepository = sessionContext.saksbehandlerRepository
-    private val behandlingRepository = sessionContext.behandlingRepository
-    private val egenansattDao = sessionContext.egenAnsattDao
-    private val oppgaveRepository = sessionContext.oppgaveRepository
-    private val personDao = sessionContext.personDao
-    private val totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository
-    private val vedtaksperiodeRepository = sessionContext.vedtaksperiodeRepository
-    private val varselRepository = sessionContext.varselRepository
-    private val varseldefinisjonRepository = sessionContext.varseldefinisjonRepository
-
     @Test
     fun `gir NotFound hvis behandlingen ikke finnes`() {
         // Given:
         val behandlingId = UUID.randomUUID()
         val saksbehandler = lagEnSaksbehandler()
-        saksbehandlerRepository.lagre(saksbehandler)
+        sessionContext.saksbehandlerRepository.lagre(saksbehandler)
 
         // When:
         val response = integrationTestFixture.post(
@@ -78,9 +63,9 @@ class PostFattVedtakIntegrationTest {
         val behandlingId = UUID.randomUUID()
         val saksbehandler = lagEnSaksbehandler()
         val behandling =
-            lagEnBehandling(spleisBehandlingId = behandlingId, vedtaksperiodeId = VedtaksperiodeId(UUID.randomUUID()))
-        behandlingRepository.lagre(behandling)
-        saksbehandlerRepository.lagre(saksbehandler)
+            lagEnBehandling(spleisBehandlingId = behandlingId)
+        sessionContext.behandlingRepository.lagre(behandling)
+        sessionContext.saksbehandlerRepository.lagre(saksbehandler)
 
         // When:
         val response = integrationTestFixture.post(
@@ -112,10 +97,10 @@ class PostFattVedtakIntegrationTest {
         val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer, lagOrganisasjonsnummer())
         val behandling = lagEnBehandling(spleisBehandlingId = behandlingId, vedtaksperiodeId = vedtaksperiode.id())
         val saksbehandler = lagEnSaksbehandler()
-        saksbehandlerRepository.lagre(saksbehandler)
-        vedtaksperiodeRepository.lagre(vedtaksperiode)
-        behandlingRepository.lagre(behandling)
-        egenansattDao.lagre(fødselsnummer, true, LocalDateTime.now())
+        sessionContext.saksbehandlerRepository.lagre(saksbehandler)
+        sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
+        sessionContext.behandlingRepository.lagre(behandling)
+        sessionContext.egenAnsattDao.lagre(fødselsnummer, true, LocalDateTime.now())
 
         // When:
         val response = integrationTestFixture.post(
@@ -136,14 +121,13 @@ class PostFattVedtakIntegrationTest {
         val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer, lagOrganisasjonsnummer())
         val behandling = lagEnBehandling(spleisBehandlingId = behandlingId, vedtaksperiodeId = vedtaksperiode.id())
         val saksbehandler = lagEnSaksbehandler()
-        saksbehandlerRepository.lagre(saksbehandler)
-        vedtaksperiodeRepository.lagre(vedtaksperiode)
-        behandlingRepository.lagre(behandling)
-        egenansattDao.lagre(fødselsnummer, false, LocalDateTime.now())
-        personDao.upsertPersoninfo(
-            fødselsnummer, lagFornavn(), lagMellomnavn(), lagEtternavn(), LocalDate.now(),
-            Kjønn.Ukjent, Adressebeskyttelse.Ugradert
-        )
+        sessionContext.saksbehandlerRepository.lagre(saksbehandler)
+        sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
+        sessionContext.behandlingRepository.lagre(behandling)
+        lagPerson(
+            identitetsnummer = Identitetsnummer.fraString(fødselsnummer)
+        ).also(sessionContext.personRepository::lagre)
+        sessionContext.egenAnsattDao.lagre(fødselsnummer, false, LocalDateTime.now())
 
         // When:
         val response = integrationTestFixture.post(
@@ -175,17 +159,16 @@ class PostFattVedtakIntegrationTest {
         val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer, lagOrganisasjonsnummer())
         val behandling = lagEnBehandling(spleisBehandlingId = behandlingId, vedtaksperiodeId = vedtaksperiode.id())
         val saksbehandler = lagEnSaksbehandler()
-        saksbehandlerRepository.lagre(saksbehandler)
-        vedtaksperiodeRepository.lagre(vedtaksperiode)
-        behandlingRepository.lagre(behandling)
-        egenansattDao.lagre(fødselsnummer, false, LocalDateTime.now())
-        personDao.upsertPersoninfo(
-            fødselsnummer, lagFornavn(), lagMellomnavn(), lagEtternavn(), LocalDate.now(),
-            Kjønn.Ukjent, Adressebeskyttelse.Ugradert
-        )
+        sessionContext.saksbehandlerRepository.lagre(saksbehandler)
+        sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
+        sessionContext.behandlingRepository.lagre(behandling)
+        lagPerson(
+            identitetsnummer = Identitetsnummer.fraString(fødselsnummer)
+        ).also(sessionContext.personRepository::lagre)
+        sessionContext.egenAnsattDao.lagre(fødselsnummer, false, LocalDateTime.now())
         val oppgave = lagEnOppgave(behandlingId)
         oppgave.avventerSystem(lagSaksbehandlerident(), UUID.randomUUID())
-        oppgaveRepository.lagre(oppgave)
+        sessionContext.oppgaveRepository.lagre(oppgave)
         // When:
         val response = integrationTestFixture.post(
             url = "/api/vedtak/$behandlingId/fatt",
@@ -216,20 +199,19 @@ class PostFattVedtakIntegrationTest {
         val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer, lagOrganisasjonsnummer())
         val behandling = lagEnBehandling(spleisBehandlingId = behandlingId, vedtaksperiodeId = vedtaksperiode.id())
         val saksbehandler = lagEnSaksbehandler()
-        saksbehandlerRepository.lagre(saksbehandler)
-        vedtaksperiodeRepository.lagre(vedtaksperiode)
-        behandlingRepository.lagre(behandling)
-        egenansattDao.lagre(fødselsnummer, false, LocalDateTime.now())
-        personDao.upsertPersoninfo(
-            fødselsnummer, lagFornavn(), lagMellomnavn(), lagEtternavn(), LocalDate.now(),
-            Kjønn.Ukjent, Adressebeskyttelse.Ugradert
-        )
+        sessionContext.saksbehandlerRepository.lagre(saksbehandler)
+        sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
+        sessionContext.behandlingRepository.lagre(behandling)
+        lagPerson(
+            identitetsnummer = Identitetsnummer.fraString(fødselsnummer)
+        ).also(sessionContext.personRepository::lagre)
+        sessionContext.egenAnsattDao.lagre(fødselsnummer, false, LocalDateTime.now())
         val oppgave = lagEnOppgave(behandlingId)
-        oppgaveRepository.lagre(oppgave)
+        sessionContext.oppgaveRepository.lagre(oppgave)
 
         val totrinnsvurdering = Totrinnsvurdering.ny(fødselsnummer = fødselsnummer)
         totrinnsvurdering.sendTilBeslutter(oppgave.id, SaksbehandlerOid(UUID.randomUUID()))
-        totrinnsvurderingRepository.lagre(totrinnsvurdering)
+        sessionContext.totrinnsvurderingRepository.lagre(totrinnsvurdering)
 
         // When:
         val response = integrationTestFixture.post(
@@ -263,20 +245,19 @@ class PostFattVedtakIntegrationTest {
         val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer, lagOrganisasjonsnummer())
         val behandling = lagEnBehandling(spleisBehandlingId = behandlingId, vedtaksperiodeId = vedtaksperiode.id())
         val saksbehandler = lagEnSaksbehandler()
-        saksbehandlerRepository.lagre(saksbehandler)
-        vedtaksperiodeRepository.lagre(vedtaksperiode)
-        behandlingRepository.lagre(behandling)
-        egenansattDao.lagre(fødselsnummer, false, LocalDateTime.now())
-        personDao.upsertPersoninfo(
-            fødselsnummer, lagFornavn(), lagMellomnavn(), lagEtternavn(), LocalDate.now(),
-            Kjønn.Ukjent, Adressebeskyttelse.Ugradert
-        )
+        sessionContext.saksbehandlerRepository.lagre(saksbehandler)
+        sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
+        sessionContext.behandlingRepository.lagre(behandling)
+        lagPerson(
+            identitetsnummer = Identitetsnummer.fraString(fødselsnummer)
+        ).also(sessionContext.personRepository::lagre)
+        sessionContext.egenAnsattDao.lagre(fødselsnummer, false, LocalDateTime.now())
         val oppgave = lagEnOppgave(behandlingId)
-        oppgaveRepository.lagre(oppgave)
+        sessionContext.oppgaveRepository.lagre(oppgave)
 
         val totrinnsvurdering = Totrinnsvurdering.ny(fødselsnummer = fødselsnummer)
         totrinnsvurdering.sendTilBeslutter(oppgave.id, saksbehandler.id())
-        totrinnsvurderingRepository.lagre(totrinnsvurdering)
+        sessionContext.totrinnsvurderingRepository.lagre(totrinnsvurdering)
 
         // When:
         val response = integrationTestFixture.post(
@@ -309,19 +290,18 @@ class PostFattVedtakIntegrationTest {
         val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer, lagOrganisasjonsnummer())
         val behandling = lagEnBehandling(spleisBehandlingId = behandlingId, vedtaksperiodeId = vedtaksperiode.id())
         val saksbehandler = lagEnSaksbehandler()
-        saksbehandlerRepository.lagre(saksbehandler)
-        vedtaksperiodeRepository.lagre(vedtaksperiode)
-        behandlingRepository.lagre(behandling)
-        egenansattDao.lagre(fødselsnummer, false, LocalDateTime.now())
-        personDao.upsertPersoninfo(
-            fødselsnummer, lagFornavn(), lagMellomnavn(), lagEtternavn(), LocalDate.now(),
-            Kjønn.Ukjent, Adressebeskyttelse.Ugradert
-        )
+        sessionContext.saksbehandlerRepository.lagre(saksbehandler)
+        sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
+        sessionContext.behandlingRepository.lagre(behandling)
+        lagPerson(
+            identitetsnummer = Identitetsnummer.fraString(fødselsnummer)
+        ).also(sessionContext.personRepository::lagre)
+        sessionContext.egenAnsattDao.lagre(fødselsnummer, false, LocalDateTime.now())
         val oppgave = lagEnOppgave(behandlingId)
-        oppgaveRepository.lagre(oppgave)
+        sessionContext.oppgaveRepository.lagre(oppgave)
 
         val totrinnsvurdering = Totrinnsvurdering.ny(fødselsnummer = fødselsnummer)
-        totrinnsvurderingRepository.lagre(totrinnsvurdering)
+        sessionContext.totrinnsvurderingRepository.lagre(totrinnsvurdering)
 
         // When:
         val response = integrationTestFixture.post(
@@ -358,16 +338,15 @@ class PostFattVedtakIntegrationTest {
             tags = setOf("OverlapperMedInfotrygd")
         )
         val saksbehandler = lagEnSaksbehandler()
-        saksbehandlerRepository.lagre(saksbehandler)
-        vedtaksperiodeRepository.lagre(vedtaksperiode)
-        behandlingRepository.lagre(behandling)
-        egenansattDao.lagre(fødselsnummer, false, LocalDateTime.now())
-        personDao.upsertPersoninfo(
-            fødselsnummer, lagFornavn(), lagMellomnavn(), lagEtternavn(), LocalDate.now(),
-            Kjønn.Ukjent, Adressebeskyttelse.Ugradert
-        )
+        sessionContext.saksbehandlerRepository.lagre(saksbehandler)
+        sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
+        sessionContext.behandlingRepository.lagre(behandling)
+        lagPerson(
+            identitetsnummer = Identitetsnummer.fraString(fødselsnummer)
+        ).also(sessionContext.personRepository::lagre)
+        sessionContext.egenAnsattDao.lagre(fødselsnummer, false, LocalDateTime.now())
         val oppgave = lagEnOppgave(behandlingId)
-        oppgaveRepository.lagre(oppgave)
+        sessionContext.oppgaveRepository.lagre(oppgave)
 
         // When:
         val response = integrationTestFixture.post(
@@ -406,16 +385,15 @@ class PostFattVedtakIntegrationTest {
         )
         val saksbehandler = lagEnSaksbehandler()
         val kode = "RV_IV_2"
-        saksbehandlerRepository.lagre(saksbehandler)
-        vedtaksperiodeRepository.lagre(vedtaksperiode)
-        behandlingRepository.lagre(behandling)
-        egenansattDao.lagre(fødselsnummer, false, LocalDateTime.now())
-        personDao.upsertPersoninfo(
-            fødselsnummer, lagFornavn(), lagMellomnavn(), lagEtternavn(), LocalDate.now(),
-            Kjønn.Ukjent, Adressebeskyttelse.Ugradert
-        )
-        varseldefinisjonRepository.lagre(kode)
-        varselRepository.lagre(
+        sessionContext.saksbehandlerRepository.lagre(saksbehandler)
+        sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
+        sessionContext.behandlingRepository.lagre(behandling)
+        lagPerson(
+            identitetsnummer = Identitetsnummer.fraString(fødselsnummer)
+        ).also(sessionContext.personRepository::lagre)
+        sessionContext.egenAnsattDao.lagre(fødselsnummer, false, LocalDateTime.now())
+        sessionContext.varseldefinisjonRepository.lagre(kode)
+        sessionContext.varselRepository.lagre(
             Varsel.fraLagring(
                 VarselId(UUID.randomUUID()),
                 behandling.spleisBehandlingId!!,
@@ -427,7 +405,7 @@ class PostFattVedtakIntegrationTest {
             )
         )
         val oppgave = lagEnOppgave(behandlingId)
-        oppgaveRepository.lagre(oppgave)
+        sessionContext.oppgaveRepository.lagre(oppgave)
 
         // When:
         val response = integrationTestFixture.post(
@@ -467,16 +445,15 @@ class PostFattVedtakIntegrationTest {
         )
         val saksbehandler = lagEnSaksbehandler()
         val kode = "RV_IV_2"
-        saksbehandlerRepository.lagre(saksbehandler)
-        vedtaksperiodeRepository.lagre(vedtaksperiode)
-        behandlingRepository.lagre(behandling)
-        egenansattDao.lagre(fødselsnummer, false, LocalDateTime.now())
-        personDao.upsertPersoninfo(
-            fødselsnummer, lagFornavn(), lagMellomnavn(), lagEtternavn(), LocalDate.now(),
-            Kjønn.Ukjent, Adressebeskyttelse.Ugradert
-        )
-        varseldefinisjonRepository.lagre(kode)
-        varselRepository.lagre(
+        sessionContext.saksbehandlerRepository.lagre(saksbehandler)
+        sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
+        sessionContext.behandlingRepository.lagre(behandling)
+        lagPerson(
+            identitetsnummer = Identitetsnummer.fraString(fødselsnummer)
+        ).also(sessionContext.personRepository::lagre)
+        sessionContext.egenAnsattDao.lagre(fødselsnummer, false, LocalDateTime.now())
+        sessionContext.varseldefinisjonRepository.lagre(kode)
+        sessionContext.varselRepository.lagre(
             Varsel.fraLagring(
                 VarselId(UUID.randomUUID()),
                 behandling.spleisBehandlingId!!,
@@ -488,7 +465,7 @@ class PostFattVedtakIntegrationTest {
             )
         )
         val oppgave = lagEnOppgave(behandlingId)
-        oppgaveRepository.lagre(oppgave)
+        sessionContext.oppgaveRepository.lagre(oppgave)
 
         // When:
         val response = integrationTestFixture.post(
@@ -516,15 +493,14 @@ class PostFattVedtakIntegrationTest {
         )
         val saksbehandler = lagEnSaksbehandler()
         val kode = "RV_IV_2"
-        saksbehandlerRepository.lagre(saksbehandler)
-        vedtaksperiodeRepository.lagre(vedtaksperiode)
-        behandlingRepository.lagre(behandling)
-        egenansattDao.lagre(fødselsnummer, false, LocalDateTime.now())
-        personDao.upsertPersoninfo(
-            fødselsnummer, lagFornavn(), lagMellomnavn(), lagEtternavn(), LocalDate.now(),
-            Kjønn.Ukjent, Adressebeskyttelse.Ugradert
-        )
-        varseldefinisjonRepository.lagre(kode)
+        sessionContext.saksbehandlerRepository.lagre(saksbehandler)
+        sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
+        sessionContext.behandlingRepository.lagre(behandling)
+        lagPerson(
+            identitetsnummer = Identitetsnummer.fraString(fødselsnummer)
+        ).also(sessionContext.personRepository::lagre)
+        sessionContext.egenAnsattDao.lagre(fødselsnummer, false, LocalDateTime.now())
+        sessionContext.varseldefinisjonRepository.lagre(kode)
         val godkjentVarsel = Varsel.fraLagring(
             id = VarselId(UUID.randomUUID()),
             spleisBehandlingId = behandling.spleisBehandlingId!!,
@@ -544,10 +520,10 @@ class PostFattVedtakIntegrationTest {
             opprettetTidspunkt = LocalDateTime.now(),
         )
 
-        varselRepository.lagre(godkjentVarsel)
-        varselRepository.lagre(vurdertVarsel)
+        sessionContext.varselRepository.lagre(godkjentVarsel)
+        sessionContext.varselRepository.lagre(vurdertVarsel)
         val oppgave = lagEnOppgave(behandlingId)
-        oppgaveRepository.lagre(oppgave)
+        sessionContext.oppgaveRepository.lagre(oppgave)
 
         // When:
         val response = integrationTestFixture.post(

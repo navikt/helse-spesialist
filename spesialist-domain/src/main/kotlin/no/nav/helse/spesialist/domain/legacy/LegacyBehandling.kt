@@ -330,7 +330,7 @@ class LegacyBehandling private constructor(
         ): Unit = throw IllegalStateException("Mottatt godkjenningsbehov i tilstand=${navn()}")
     }
 
-    internal data object VidereBehandlingAvklares : Tilstand {
+    data object VidereBehandlingAvklares : Tilstand {
         override fun navn(): String = "VidereBehandlingAvklares"
 
         override fun nyUtbetaling(
@@ -362,7 +362,7 @@ class LegacyBehandling private constructor(
         }
     }
 
-    internal data object KlarTilBehandling : Tilstand {
+    data object KlarTilBehandling : Tilstand {
         override fun navn(): String = "KlarTilBehandling"
 
         override fun vedtakFattet(legacyBehandling: LegacyBehandling) {
@@ -402,7 +402,7 @@ class LegacyBehandling private constructor(
         override fun navn(): String = "VedtakFattet"
     }
 
-    internal data object AvsluttetUtenVedtak : Tilstand {
+    data object AvsluttetUtenVedtak : Tilstand {
         override fun navn(): String = "AvsluttetUtenVedtak"
 
         override fun nyttVarsel(legacyBehandling: LegacyBehandling) {
@@ -413,7 +413,7 @@ class LegacyBehandling private constructor(
         override fun vedtakFattet(legacyBehandling: LegacyBehandling) {}
     }
 
-    internal data object AvsluttetUtenVedtakMedVarsler : Tilstand {
+    data object AvsluttetUtenVedtakMedVarsler : Tilstand {
         override fun navn(): String = "AvsluttetUtenVedtakMedVarsler"
 
         override fun håndterGodkjenning(legacyBehandling: LegacyBehandling) {
@@ -460,7 +460,7 @@ class LegacyBehandling private constructor(
 
         internal fun List<LegacyBehandling>.finnSisteBehandlingUtenSpleisBehandlingId(): LegacyBehandling? = this.lastOrNull { it.spleisBehandlingId == null }
 
-        internal fun fraLagring(
+        fun fraLagring(
             id: UUID,
             vedtaksperiodeId: UUID,
             utbetalingId: UUID?,

@@ -11,9 +11,11 @@ import java.util.UUID
 class LegacyVedtaksperiode(
     private val vedtaksperiodeId: UUID,
     val organisasjonsnummer: String,
-    private var forkastet: Boolean,
+    forkastet: Boolean,
     behandlinger: List<LegacyBehandling>,
 ) {
+    var forkastet: Boolean = forkastet
+        private set
     private val behandlinger = behandlinger.toMutableList()
     private val gjeldendeBehandling get() = behandlinger.last()
     private val fom get() = gjeldendeBehandling.fom()

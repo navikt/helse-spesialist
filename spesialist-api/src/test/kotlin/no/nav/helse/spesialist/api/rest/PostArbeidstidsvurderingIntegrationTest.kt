@@ -2,19 +2,16 @@ package no.nav.helse.spesialist.api.rest
 
 import no.nav.helse.modell.melding.MinimumSykdomsgradVurdertEvent
 import no.nav.helse.modell.melding.SubsumsjonEvent
-import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgrad
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.api.testfixtures.lagSaksbehandler
 import no.nav.helse.spesialist.application.InMemoryMeldingPubliserer
+import no.nav.helse.spesialist.domain.Personinfo
 import no.nav.helse.spesialist.domain.testfixtures.lagAktørId
-import no.nav.helse.spesialist.domain.testfixtures.lagEtternavn
-import no.nav.helse.spesialist.domain.testfixtures.lagFornavn
-import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
-import no.nav.helse.spesialist.domain.testfixtures.lagMellomnavn
+import no.nav.helse.spesialist.domain.testfixtures.lagIdentitetsnummer
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
-import no.nav.helse.spesialist.typer.Kjønn
+import no.nav.helse.spesialist.domain.testfixtures.lagPerson
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -28,7 +25,8 @@ class PostArbeidstidsvurderingIntegrationTest {
 
     private val saksbehandler = lagSaksbehandler()
     private val aktørId = lagAktørId()
-    private val fødselsnummer = lagFødselsnummer()
+    private val identitetsnummer = lagIdentitetsnummer()
+    private val fødselsnummer = identitetsnummer.value
 
     private val begrunnelse = "En begrunnelse"
 
@@ -42,7 +40,7 @@ class PostArbeidstidsvurderingIntegrationTest {
     @Test
     fun `Forbidden dersom personen har adressebeskyttelse som saksbehandler ikke har tilgang til`() {
         // Given:
-        lagrePerson(Adressebeskyttelse.Fortrolig)
+        lagrePerson(Personinfo.Adressebeskyttelse.Fortrolig)
 
         // When:
         val response = integrationTestFixture.post(
@@ -282,15 +280,15 @@ class PostArbeidstidsvurderingIntegrationTest {
         )
     }
 
-    private fun lagrePerson(adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert) {
-        sessionContext.personDao.upsertPersoninfo(
-            fødselsnummer = fødselsnummer,
-            fornavn = lagFornavn(),
-            mellomnavn = lagMellomnavn(),
-            etternavn = lagEtternavn(),
-            fødselsdato = LocalDate.now(),
-            kjønn = Kjønn.Ukjent,
-            adressebeskyttelse = adressebeskyttelse
+    private fun lagrePerson(adressebeskyttelse: Personinfo.Adressebeskyttelse = Personinfo.Adressebeskyttelse.Ugradert) {
+        lagPerson(
+            identitetsnummer = identitetsnummer,
+            adressebeskyttelse = adressebeskyttelse,
+        ).also(sessionContext.personRepository::lagre)
+        sessionContext.egenAnsattDao.lagre(
+            fødselsnummer = identitetsnummer.value,
+            erEgenAnsatt = false,
+            opprettet = LocalDateTime.now()
         )
     }
 

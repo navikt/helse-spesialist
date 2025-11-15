@@ -1,6 +1,6 @@
 package no.nav.helse.spesialist.domain
 
-import no.nav.helse.spesialist.domain.ddd.Entity
+import no.nav.helse.spesialist.domain.ddd.AggregateRoot
 import java.util.UUID
 
 @JvmInline
@@ -13,6 +13,6 @@ class Saksbehandler(
     val navn: String,
     val epost: String,
     val ident: String,
-) : Entity<SaksbehandlerOid>(id) {
+) : AggregateRoot<SaksbehandlerOid>(id) {
     override fun toString(): String = "epostadresse=$epost, oid=${id().value}"
 }

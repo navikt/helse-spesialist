@@ -2,17 +2,9 @@ package no.nav.helse.spesialist.application
 
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
+import java.util.UUID
 
-class InMemorySaksbehandlerRepository : SaksbehandlerRepository {
-    val data = mutableMapOf<SaksbehandlerOid, Saksbehandler>()
-
-    override fun lagre(saksbehandler: Saksbehandler) {
-        data[saksbehandler.id()] = saksbehandler
-    }
-
-    override fun finn(oid: SaksbehandlerOid): Saksbehandler? =
-        data[oid]
-
-    override fun finnAlle(oider: Set<SaksbehandlerOid>): List<Saksbehandler> =
-        oider.mapNotNull { data[it] }
+class InMemorySaksbehandlerRepository : SaksbehandlerRepository,
+    AbstractInMemoryRepository<SaksbehandlerOid, Saksbehandler>() {
+    override fun generateId(): SaksbehandlerOid = SaksbehandlerOid(UUID.randomUUID())
 }

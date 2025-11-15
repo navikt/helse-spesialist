@@ -1,38 +1,41 @@
 package no.nav.helse.spesialist.application
 
-import no.nav.helse.db.DokumentDao
-import no.nav.helse.db.NotatDao
-import no.nav.helse.db.OppgaveDao
 import no.nav.helse.db.SessionContext
 import no.nav.helse.db.SessionFactory
 
 class InMemorySessionFactory(
-    notatRepository: InMemoryNotatRepository,
-    oppgaveRepository: InMemoryOppgaveRepository,
-    notatDao: NotatDao,
-    oppgaveDao: OppgaveDao,
-    dokumentDao: DokumentDao,
-    legacyVedtaksperiodeRepository: InMemoryLegacyVedtaksperiodeRepository,
-    dialogDao: InMemoryDialogDao,
-    stansAutomatiskBehandlingDao: InMemoryStansAutomatiskBehandlingDao,
     annulleringRepository: InMemoryAnnulleringRepository,
     saksbehandlerRepository: InMemorySaksbehandlerRepository,
+    dokumentDao: InMemoryDokumentDao,
+    oppgaveRepository: InMemoryOppgaveRepository,
+    overstyringRepository: InMemoryOverstyringRepository,
+    stansAutomatiskBehandlingDao: InMemoryStansAutomatiskBehandlingDao,
+    behandlingRepository: InMemoryBehandlingRepository,
+    dialogRepository: InMemoryDialogRepository,
+    egenAnsattDao: InMemoryEgenAnsattDao,
+    notatRepository: InMemoryNotatRepository,
+    opptegnelseDao: InMemoryOpptegnelseDao,
+    personRepository: InMemoryPersonRepository,
+    påVentRepository: InMemoryPåVentRepository,
+    varseldefinisjonRepository: InMemoryVarseldefinisjonRepository,
     vedtaksperiodeRepository: InMemoryVedtaksperiodeRepository,
-    varseldefinisjonRepository: InMemoryVarseldefinisjonRepository
 ) : SessionFactory {
     val sessionContext: InMemorySessionContext = InMemorySessionContext(
-        notatRepository,
-        oppgaveRepository,
-        notatDao,
-        oppgaveDao,
-        legacyVedtaksperiodeRepository,
-        dialogDao,
-        stansAutomatiskBehandlingDao,
-        annulleringRepository,
-        saksbehandlerRepository,
-        dokumentDao,
-        vedtaksperiodeRepository,
-        varseldefinisjonRepository
+        annulleringRepository = annulleringRepository,
+        behandlingRepository = behandlingRepository,
+        dialogRepository = dialogRepository,
+        egenAnsattDao = egenAnsattDao,
+        notatRepository = notatRepository,
+        opptegnelseDao = opptegnelseDao,
+        overstyringRepository = overstyringRepository,
+        personRepository = personRepository,
+        påVentRepository = påVentRepository,
+        saksbehandlerRepository = saksbehandlerRepository,
+        varseldefinisjonRepository = varseldefinisjonRepository,
+        vedtaksperiodeRepository = vedtaksperiodeRepository,
+        dokumentDao = dokumentDao,
+        oppgaveRepository = oppgaveRepository,
+        stansAutomatiskBehandlingDao = stansAutomatiskBehandlingDao,
     )
     override fun <T> transactionalSessionScope(transactionalBlock: (SessionContext) -> T) =
         transactionalBlock(sessionContext)

@@ -3,10 +3,11 @@ package no.nav.helse.spesialist.api.rest.varsler
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.Varselvurdering
 import no.nav.helse.mediator.asLocalDateTime
-import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.api.testfixtures.lagSaksbehandler
 import no.nav.helse.spesialist.domain.BehandlingUnikId
+import no.nav.helse.spesialist.domain.Identitetsnummer
+import no.nav.helse.spesialist.domain.Personinfo
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.Varsel
@@ -17,13 +18,9 @@ import no.nav.helse.spesialist.domain.testfixtures.lagEnSaksbehandler
 import no.nav.helse.spesialist.domain.testfixtures.lagEnVarseldefinisjon
 import no.nav.helse.spesialist.domain.testfixtures.lagEnVedtaksperiode
 import no.nav.helse.spesialist.domain.testfixtures.lagEtVarsel
-import no.nav.helse.spesialist.domain.testfixtures.lagEtternavn
-import no.nav.helse.spesialist.domain.testfixtures.lagFornavn
-import no.nav.helse.spesialist.domain.testfixtures.lagMellomnavn
-import no.nav.helse.spesialist.typer.Kjønn
+import no.nav.helse.spesialist.domain.testfixtures.lagPerson
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.test.Test
@@ -32,13 +29,6 @@ import kotlin.test.assertEquals
 class GetVarselBehandlerIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
     private val sessionContext = integrationTestFixture.sessionFactory.sessionContext
-    private val varselRepository = sessionContext.varselRepository
-    private val varseldefinisjonRepository = sessionContext.varseldefinisjonRepository
-    private val saksbehandlerRepository = sessionContext.saksbehandlerRepository
-    private val personDao = sessionContext.personDao
-    private val vedtaksperiodeRepository = sessionContext.vedtaksperiodeRepository
-    private val behandlingRepository = sessionContext.behandlingRepository
-    private val egenAnsattDao = sessionContext.egenAnsattDao
 
     @Test
     fun `gir OK og tilbake et varsel i happy case`() {
@@ -61,16 +51,14 @@ class GetVarselBehandlerIntegrationTest {
             kode = "RV_IV_1",
             opprettet = opprettetTidspunkt,
         )
-        varseldefinisjonRepository.lagre(varseldefinisjon)
-        varselRepository.lagre(varsel)
-        saksbehandlerRepository.lagre(saksbehandler)
-        vedtaksperiodeRepository.lagre(vedtaksperiode)
-        behandlingRepository.lagre(behandling)
-        egenAnsattDao.lagre(vedtaksperiode.fødselsnummer, false, LocalDateTime.now())
-        personDao.upsertPersoninfo(
-            vedtaksperiode.fødselsnummer, lagFornavn(), lagMellomnavn(), lagEtternavn(), LocalDate.now(),
-            Kjønn.Ukjent, Adressebeskyttelse.Ugradert
-        )
+        sessionContext.varseldefinisjonRepository.lagre(varseldefinisjon)
+        sessionContext.varselRepository.lagre(varsel)
+        sessionContext.saksbehandlerRepository.lagre(saksbehandler)
+        sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
+        sessionContext.behandlingRepository.lagre(behandling)
+        lagPerson(identitetsnummer = Identitetsnummer.fraString(vedtaksperiode.fødselsnummer))
+            .also(sessionContext.personRepository::lagre)
+        sessionContext.egenAnsattDao.lagre(vedtaksperiode.fødselsnummer, false, LocalDateTime.now())
 
         //when
         val response = integrationTestFixture.get("/api/varsler/${varsel.id().value}")
@@ -126,7 +114,7 @@ class GetVarselBehandlerIntegrationTest {
             behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
             vurdering = null,
         )
-        varselRepository.lagre(varsel)
+        sessionContext.varselRepository.lagre(varsel)
 
         // when
         val response = integrationTestFixture.get("/api/varsler/${varsel.id().value}")
@@ -156,9 +144,9 @@ class GetVarselBehandlerIntegrationTest {
             spleisBehandlingId = behandling.spleisBehandlingId,
             vurdering = null,
 
-        )
-        varselRepository.lagre(varsel)
-        behandlingRepository.lagre(behandling)
+            )
+        sessionContext.varselRepository.lagre(varsel)
+        sessionContext.behandlingRepository.lagre(behandling)
 
         // when
         val response = integrationTestFixture.get("/api/varsler/${varsel.id().value}")
@@ -187,14 +175,14 @@ class GetVarselBehandlerIntegrationTest {
             spleisBehandlingId = behandling.spleisBehandlingId,
             behandlingUnikId = behandling.id(),
         )
-        varselRepository.lagre(varsel)
-        behandlingRepository.lagre(behandling)
-        vedtaksperiodeRepository.lagre(vedtaksperiode)
-        egenAnsattDao.lagre(vedtaksperiode.fødselsnummer, false, LocalDateTime.now())
-        personDao.upsertPersoninfo(
-            vedtaksperiode.fødselsnummer, lagFornavn(), lagMellomnavn(), lagEtternavn(), LocalDate.now(),
-            Kjønn.Ukjent, Adressebeskyttelse.Fortrolig
-        )
+        sessionContext.varselRepository.lagre(varsel)
+        sessionContext.behandlingRepository.lagre(behandling)
+        sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
+        lagPerson(
+            identitetsnummer = Identitetsnummer.fraString(vedtaksperiode.fødselsnummer),
+            adressebeskyttelse = Personinfo.Adressebeskyttelse.Fortrolig
+        ).also(sessionContext.personRepository::lagre)
+        sessionContext.egenAnsattDao.lagre(vedtaksperiode.fødselsnummer, false, LocalDateTime.now())
 
         // when
         val response = integrationTestFixture.get("/api/varsler/${varsel.id().value}")
@@ -223,14 +211,12 @@ class GetVarselBehandlerIntegrationTest {
             spleisBehandlingId = behandling.spleisBehandlingId,
             behandlingUnikId = behandling.id(),
         )
-        varselRepository.lagre(varsel)
-        vedtaksperiodeRepository.lagre(vedtaksperiode)
-        behandlingRepository.lagre(behandling)
-        egenAnsattDao.lagre(vedtaksperiode.fødselsnummer, false, LocalDateTime.now())
-        personDao.upsertPersoninfo(
-            vedtaksperiode.fødselsnummer, lagFornavn(), lagMellomnavn(), lagEtternavn(), LocalDate.now(),
-            Kjønn.Ukjent, Adressebeskyttelse.Ugradert
-        )
+        sessionContext.varselRepository.lagre(varsel)
+        sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
+        sessionContext.behandlingRepository.lagre(behandling)
+        lagPerson(identitetsnummer = Identitetsnummer.fraString(vedtaksperiode.fødselsnummer))
+            .also(sessionContext.personRepository::lagre)
+        sessionContext.egenAnsattDao.lagre(vedtaksperiode.fødselsnummer, false, LocalDateTime.now())
 
         // when
         val response = integrationTestFixture.get("/api/varsler/${varsel.id().value}")
@@ -267,15 +253,13 @@ class GetVarselBehandlerIntegrationTest {
                 tidspunkt = LocalDateTime.now(),
             ),
         )
-        varseldefinisjonRepository.lagre(varseldefinisjon)
-        varselRepository.lagre(varsel)
-        vedtaksperiodeRepository.lagre(vedtaksperiode)
-        behandlingRepository.lagre(behandling)
-        egenAnsattDao.lagre(vedtaksperiode.fødselsnummer, false, LocalDateTime.now())
-        personDao.upsertPersoninfo(
-            vedtaksperiode.fødselsnummer, lagFornavn(), lagMellomnavn(), lagEtternavn(), LocalDate.now(),
-            Kjønn.Ukjent, Adressebeskyttelse.Ugradert
-        )
+        sessionContext.varseldefinisjonRepository.lagre(varseldefinisjon)
+        sessionContext.varselRepository.lagre(varsel)
+        sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
+        sessionContext.behandlingRepository.lagre(behandling)
+        lagPerson(identitetsnummer = Identitetsnummer.fraString(vedtaksperiode.fødselsnummer))
+            .also(sessionContext.personRepository::lagre)
+        sessionContext.egenAnsattDao.lagre(vedtaksperiode.fødselsnummer, false, LocalDateTime.now())
 
         // when
         val response = integrationTestFixture.get("/api/varsler/${varsel.id().value}")
@@ -311,15 +295,13 @@ class GetVarselBehandlerIntegrationTest {
                 tidspunkt = LocalDateTime.now(),
             )
         )
-        varselRepository.lagre(varsel)
-        vedtaksperiodeRepository.lagre(vedtaksperiode)
-        behandlingRepository.lagre(behandling)
-        saksbehandlerRepository.lagre(saksbehandler)
-        egenAnsattDao.lagre(vedtaksperiode.fødselsnummer, false, LocalDateTime.now())
-        personDao.upsertPersoninfo(
-            vedtaksperiode.fødselsnummer, lagFornavn(), lagMellomnavn(), lagEtternavn(), LocalDate.now(),
-            Kjønn.Ukjent, Adressebeskyttelse.Ugradert
-        )
+        sessionContext.varselRepository.lagre(varsel)
+        sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
+        sessionContext.behandlingRepository.lagre(behandling)
+        sessionContext.saksbehandlerRepository.lagre(saksbehandler)
+        lagPerson(identitetsnummer = Identitetsnummer.fraString(vedtaksperiode.fødselsnummer))
+            .also(sessionContext.personRepository::lagre)
+        sessionContext.egenAnsattDao.lagre(vedtaksperiode.fødselsnummer, false, LocalDateTime.now())
 
         // when
         val response = integrationTestFixture.get("/api/varsler/${varsel.id().value}")
@@ -352,15 +334,13 @@ class GetVarselBehandlerIntegrationTest {
             behandlingUnikId = behandling.id(),
             status = status,
         )
-        varseldefinisjonRepository.lagre(varseldefinisjon)
-        varselRepository.lagre(varsel)
-        vedtaksperiodeRepository.lagre(vedtaksperiode)
-        behandlingRepository.lagre(behandling)
-        egenAnsattDao.lagre(vedtaksperiode.fødselsnummer, false, LocalDateTime.now())
-        personDao.upsertPersoninfo(
-            vedtaksperiode.fødselsnummer, lagFornavn(), lagMellomnavn(), lagEtternavn(), LocalDate.now(),
-            Kjønn.Ukjent, Adressebeskyttelse.Ugradert
-        )
+        sessionContext.varseldefinisjonRepository.lagre(varseldefinisjon)
+        sessionContext.varselRepository.lagre(varsel)
+        sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
+        sessionContext.behandlingRepository.lagre(behandling)
+        lagPerson(identitetsnummer = Identitetsnummer.fraString(vedtaksperiode.fødselsnummer))
+            .also(sessionContext.personRepository::lagre)
+        sessionContext.egenAnsattDao.lagre(vedtaksperiode.fødselsnummer, false, LocalDateTime.now())
 
         // when
         val response = integrationTestFixture.get("/api/varsler/${varsel.id().value}")

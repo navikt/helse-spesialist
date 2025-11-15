@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.domain
 
 import no.nav.helse.Varselvurdering
-import no.nav.helse.spesialist.domain.ddd.Entity
+import no.nav.helse.spesialist.domain.ddd.AggregateRoot
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -18,7 +18,7 @@ class Varsel private constructor(
     status: Status,
     val opprettetTidspunkt: LocalDateTime,
     vurdering: Varselvurdering?,
-) : Entity<VarselId>(id) {
+) : AggregateRoot<VarselId>(id) {
     var status: Status = status
         private set
     var vurdering: Varselvurdering? = vurdering

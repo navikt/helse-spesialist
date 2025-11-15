@@ -1,6 +1,6 @@
 package no.nav.helse.spesialist.domain
 
-import no.nav.helse.spesialist.domain.ddd.Entity
+import no.nav.helse.spesialist.domain.ddd.AggregateRoot
 import java.util.UUID
 
 @JvmInline
@@ -12,4 +12,5 @@ class Vedtaksperiode(
     id: VedtaksperiodeId,
     val fødselsnummer: String,
     val organisasjonsnummer: String,
-) : Entity<VedtaksperiodeId>(id)
+    val forkastet: Boolean,
+) : AggregateRoot<VedtaksperiodeId>(id)

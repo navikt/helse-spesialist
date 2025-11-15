@@ -3,7 +3,7 @@ package no.nav.helse.spesialist.application
 import no.nav.helse.db.EgenAnsattDao
 import java.time.LocalDateTime
 
-class InMemoryEgenansattDao: EgenAnsattDao {
+class InMemoryEgenAnsattDao : EgenAnsattDao {
     private val personer = mutableMapOf<String, Boolean>()
 
     override fun erEgenAnsatt(fødselsnummer: String): Boolean? {

@@ -3,12 +3,14 @@ package no.nav.helse.spesialist.db.repository
 import kotliquery.Row
 import kotliquery.Session
 import no.nav.helse.db.BehandlingRepository
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.BehandlingUnikId
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.UtbetalingId
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import java.util.UUID
 
@@ -19,7 +21,7 @@ class PgBehandlingRepository(
     override fun finn(id: SpleisBehandlingId): Behandling? =
         asSQL(
             """
-            SELECT b.unik_id, b.vedtaksperiode_id, spleis_behandling_id, tags, b.fom, b.tom, b.skjæringstidspunkt
+            SELECT b.unik_id, b.vedtaksperiode_id, b.utbetaling_id, b.spleis_behandling_id, b.tags, b.fom, b.tom, b.skjæringstidspunkt, b.tilstand, b.yrkesaktivitetstype
             FROM behandling b
             INNER JOIN vedtak v on v.vedtaksperiode_id = b.vedtaksperiode_id
             WHERE b.spleis_behandling_id = :spleis_behandling_id
@@ -30,12 +32,11 @@ class PgBehandlingRepository(
     override fun finn(id: BehandlingUnikId): Behandling? =
         asSQL(
             """
-            SELECT b.unik_id, b.vedtaksperiode_id, spleis_behandling_id, tags, b.fom, b.tom, b.skjæringstidspunkt
-            FROM behandling b
-            INNER JOIN vedtak v on v.vedtaksperiode_id = b.vedtaksperiode_id
-            WHERE b.unik_id = :behandling_unik_id
+            SELECT unik_id, vedtaksperiode_id, utbetaling_id, spleis_behandling_id, tags, fom, tom, skjæringstidspunkt, tilstand, yrkesaktivitetstype
+            FROM behandling
+            WHERE unik_id = :unik_id
         """,
-            "behandling_unik_id" to id.value,
+            "unik_id" to id.value,
         ).singleOrNull(::tilBehandling)
 
     override fun finnAndreBehandlingerISykefraværstilfelle(
@@ -44,7 +45,7 @@ class PgBehandlingRepository(
     ): Set<Behandling> =
         asSQL(
             """
-            SELECT DISTINCT ON (b.vedtaksperiode_id) b.vedtaksperiode_id, b.unik_id, spleis_behandling_id, tags, b.fom, b.tom, b.skjæringstidspunkt
+            SELECT DISTINCT ON (b.vedtaksperiode_id) b.vedtaksperiode_id, b.utbetaling_id, b.unik_id, b.spleis_behandling_id, b.tags, b.fom, b.tom, b.skjæringstidspunkt, b.tilstand, b.yrkesaktivitetstype
             FROM behandling b
                      INNER JOIN vedtak v on v.vedtaksperiode_id = b.vedtaksperiode_id
                      INNER JOIN person p on p.id = v.person_ref
@@ -59,6 +60,7 @@ class PgBehandlingRepository(
             .toSet()
 
     override fun lagre(behandling: Behandling) {
+        // TODO: OBS OBS, DENNE LAGRER IKKE FAKTISK BEHANDLINGEN I BEHANDLING-TABELLEN (MEN BØR GJØRE DET)
         val spleisBehandlingId = checkNotNull(behandling.spleisBehandlingId)
         behandling.søknadIder().forEach { søknadId ->
             asSQL(
@@ -85,11 +87,49 @@ class PgBehandlingRepository(
             id = BehandlingUnikId(row.uuid("unik_id")),
             spleisBehandlingId = spleisBehandlingId,
             vedtaksperiodeId = VedtaksperiodeId(row.uuid("vedtaksperiode_id")),
+            utbetalingId = row.uuidOrNull("utbetaling_id")?.let(::UtbetalingId),
             tags = row.array<String>("tags").toSet(),
+            tilstand =
+                when (enumValueOf<DBTilstand>(row.string("tilstand"))) {
+                    DBTilstand.VedtakFattet -> Behandling.Tilstand.VedtakFattet
+                    DBTilstand.VidereBehandlingAvklares -> Behandling.Tilstand.VidereBehandlingAvklares
+                    DBTilstand.AvsluttetUtenVedtak -> Behandling.Tilstand.AvsluttetUtenVedtak
+                    DBTilstand.AvsluttetUtenVedtakMedVarsler -> Behandling.Tilstand.AvsluttetUtenVedtakMedVarsler
+                    DBTilstand.KlarTilBehandling -> Behandling.Tilstand.KlarTilBehandling
+                },
             fom = row.localDate("fom"),
             tom = row.localDate("tom"),
-            skjæringstidspunkt = row.localDate("skjæringstidspunkt"),
+            skjæringstidspunkt = row.localDateOrNull("skjæringstidspunkt") ?: row.localDate("fom"),
             søknadIder = spleisBehandlingId?.let { hentSøkadIderForBehandling(it) } ?: emptySet(),
+            yrkesaktivitetstype =
+                row
+                    .stringOrNull("yrkesaktivitetstype")
+                    ?.let { enumValueOf<DBYrkesaktivitetstype>(it) }
+                    .let {
+                        when (it) {
+                            DBYrkesaktivitetstype.ARBEIDSTAKER -> Yrkesaktivitetstype.ARBEIDSTAKER
+                            DBYrkesaktivitetstype.FRILANS -> Yrkesaktivitetstype.FRILANS
+                            DBYrkesaktivitetstype.ARBEIDSLEDIG -> Yrkesaktivitetstype.ARBEIDSLEDIG
+                            DBYrkesaktivitetstype.SELVSTENDIG -> Yrkesaktivitetstype.SELVSTENDIG
+                            null -> Yrkesaktivitetstype.ARBEIDSTAKER // Alle gamle behandlinger gjaldt arbeidstaker
+                        }
+                    },
         )
+    }
+
+    // For å støtte et potensielt annet sett med verdier i databasen, må vi definere og mappe nesten like enums
+    private enum class DBTilstand {
+        VedtakFattet,
+        VidereBehandlingAvklares,
+        AvsluttetUtenVedtak,
+        AvsluttetUtenVedtakMedVarsler,
+        KlarTilBehandling,
+    }
+
+    private enum class DBYrkesaktivitetstype {
+        ARBEIDSTAKER,
+        FRILANS,
+        ARBEIDSLEDIG,
+        SELVSTENDIG,
     }
 }

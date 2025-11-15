@@ -7,9 +7,6 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype
 import java.util.UUID
 
 class InMemoryVedtakDao : VedtakDao {
-    val vedtaksperiodeHendelseTabell = mutableListOf<Pair<UUID, UUID>>()
-
-
     override fun leggTilVedtaksperiodetype(
         vedtaksperiodeId: UUID,
         type: Periodetype,
@@ -48,5 +45,4 @@ class InMemoryVedtakDao : VedtakDao {
     override fun lagreOpprinneligSøknadsdato(vedtaksperiodeId: UUID) {
         TODO("Not yet implemented")
     }
-
 }

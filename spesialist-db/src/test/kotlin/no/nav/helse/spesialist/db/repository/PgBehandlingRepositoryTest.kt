@@ -1,11 +1,9 @@
 package no.nav.helse.spesialist.db.repository
 
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
-import no.nav.helse.spesialist.domain.Behandling
-import no.nav.helse.spesialist.domain.BehandlingUnikId
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
-import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.testfixtures.jan
+import no.nav.helse.spesialist.domain.testfixtures.lagEnBehandling
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import org.junit.jupiter.api.Test
 import java.util.UUID
@@ -149,16 +147,7 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
 
         // when
         val funnet = repository.finnAndreBehandlingerISykefraværstilfelle(
-            Behandling.fraLagring(
-                id = BehandlingUnikId(UUID.randomUUID()),
-                spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
-                tags = emptySet(),
-                søknadIder = emptySet(),
-                fom = 1.jan(2018),
-                tom = 31.jan(2018),
-                skjæringstidspunkt = 1.jan(2018),
-                vedtaksperiodeId = VedtaksperiodeId(UUID.randomUUID())
-            ),
+            lagEnBehandling(tags = emptySet()),
             fødselsnummer = fødselsnummer
         ).map { it.spleisBehandlingId!!.value }
 
@@ -195,16 +184,7 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
 
         // when
         val funnet = repository.finnAndreBehandlingerISykefraværstilfelle(
-            Behandling.fraLagring(
-                id = BehandlingUnikId(UUID.randomUUID()),
-                spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
-                tags = emptySet(),
-                søknadIder = emptySet(),
-                fom = 1.jan(2018),
-                tom = 31.jan(2018),
-                skjæringstidspunkt = 2.jan(2018),
-                vedtaksperiodeId = VedtaksperiodeId(UUID.randomUUID())
-            ),
+            lagEnBehandling(tags = emptySet(), skjæringstidspunkt = 2 jan 2018),
             fødselsnummer = fødselsnummer
         )
 
@@ -230,16 +210,7 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
 
         // when
         val funnet = repository.finnAndreBehandlingerISykefraværstilfelle(
-            Behandling.fraLagring(
-                id = BehandlingUnikId(UUID.randomUUID()),
-                spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
-                tags = emptySet(),
-                søknadIder = emptySet(),
-                fom = 1.jan(2018),
-                tom = 31.jan(2018),
-                skjæringstidspunkt = 1.jan(2018),
-                vedtaksperiodeId = VedtaksperiodeId(UUID.randomUUID())
-            ),
+            lagEnBehandling(tags = emptySet()),
             fødselsnummer = lagFødselsnummer()
         )
 

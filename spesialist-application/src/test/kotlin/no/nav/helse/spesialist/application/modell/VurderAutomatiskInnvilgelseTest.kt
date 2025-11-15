@@ -4,7 +4,6 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.helse.db.AutomatiseringDao
-import no.nav.helse.db.CommandContextDao
 import no.nav.helse.mediator.CommandContextObserver
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.KommandokjedeEndretEvent
@@ -19,6 +18,7 @@ import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
+import no.nav.helse.spesialist.application.InMemoryCommandContextDao
 import no.nav.helse.spesialist.application.Testdata.godkjenningsbehovData
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import no.nav.helse.spesialist.domain.testfixtures.jan
@@ -151,17 +151,7 @@ internal class VurderAutomatiskInnvilgelseTest {
         assertEquals("Ferdig", observatør.gjeldendeTilstand)
     }
 
-    private val commandContextDao = object : CommandContextDao {
-        override fun nyContext(meldingId: UUID) = error("Not implemented in test")
-        override fun opprett(hendelseId: UUID, contextId: UUID) {}
-        override fun ferdig(hendelseId: UUID, contextId: UUID) {}
-        override fun suspendert(hendelseId: UUID, contextId: UUID, hash: UUID, sti: List<Int>) {}
-        override fun feil(hendelseId: UUID, contextId: UUID) {}
-        override fun tidsbrukForContext(contextId: UUID) = error("Not implemented in test")
-        override fun avbryt(vedtaksperiodeId: UUID, contextId: UUID) = error("Not implemented in test")
-        override fun finnSuspendert(contextId: UUID) = error("Not implemented in test")
-        override fun finnSuspendertEllerFeil(contextId: UUID) = error("Not implemented in test")
-    }
+    private val commandContextDao = InMemoryCommandContextDao()
 
     private val observatør = object : CommandContextObserver {
         val hendelser = mutableListOf<UtgåendeHendelse>()

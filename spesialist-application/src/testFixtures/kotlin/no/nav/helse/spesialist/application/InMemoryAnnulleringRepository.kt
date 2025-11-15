@@ -5,28 +5,21 @@ import no.nav.helse.modell.Annullering
 import no.nav.helse.modell.AnnulleringId
 import java.util.UUID
 
-class InMemoryAnnulleringRepository : AnnulleringRepository {
-    private val data = mutableMapOf<AnnulleringId, Annullering>()
-
+class InMemoryAnnulleringRepository : AnnulleringRepository, AbstractInMemoryRepository<AnnulleringId, Annullering>() {
     override fun lagreAnnullering(annullering: Annullering) {
-        if (!annullering.harFåttTildeltId()) {
-            annullering.tildelId(AnnulleringId((data.keys.maxOfOrNull { it.value } ?: 0) + 1))
-        }
-        data[annullering.id()] = annullering
+        lagre(annullering)
     }
 
-    override fun finnAnnullering(id: AnnulleringId): Annullering? =
-        data[id]
+    override fun finnAnnullering(id: AnnulleringId): Annullering? = finn(id)
 
-    override fun finnAnnullering(vedtaksperiodeId: UUID): Annullering? = data.values.firstOrNull {
-        it.vedtaksperiodeId == vedtaksperiodeId
-    }
+    override fun finnAnnullering(vedtaksperiodeId: UUID): Annullering? =
+        alle().find { it.vedtaksperiodeId == vedtaksperiodeId }
 
     override fun finnAnnulleringMedEnAv(
         arbeidsgiverFagsystemId: String,
         personFagsystemId: String
     ): Annullering? =
-        data.values.firstOrNull {
-            it.arbeidsgiverFagsystemId == arbeidsgiverFagsystemId || it.personFagsystemId == personFagsystemId
-        }
+        alle().find { it.arbeidsgiverFagsystemId == arbeidsgiverFagsystemId || it.personFagsystemId == personFagsystemId }
+
+    override fun generateId(): AnnulleringId = AnnulleringId((alle().maxOfOrNull { it.id().value } ?: 0) + 1)
 }

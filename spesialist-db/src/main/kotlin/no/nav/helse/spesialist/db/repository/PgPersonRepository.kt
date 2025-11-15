@@ -6,6 +6,7 @@ import no.nav.helse.spesialist.application.PersonRepository
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.PersonId
 import no.nav.helse.spesialist.domain.Personinfo
@@ -41,7 +42,7 @@ internal class PgPersonRepository(
     private fun Row.toPerson(): Person =
         Person.Factory.fraLagring(
             id = PersonId(int("id")),
-            fødselsnummer = string("fødselsnummer"),
+            identitetsnummer = Identitetsnummer.fraString(string("fødselsnummer")),
             aktørId = string("aktør_id"),
             info =
                 intOrNull("person_info_id")?.let {

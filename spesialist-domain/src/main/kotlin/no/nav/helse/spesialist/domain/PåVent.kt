@@ -21,8 +21,26 @@ class PåVent private constructor(
     val notattekst: String?,
 ) : AggregateRoot<PåVentId>(id) {
     object Factory {
+        fun ny(
+            vedtaksperiodeId: UUID,
+            saksbehandlerOid: SaksbehandlerOid,
+            frist: LocalDate,
+            dialogRef: DialogId?,
+            årsaker: List<String>,
+            notattekst: String?,
+        ) = PåVent(
+            id = null,
+            vedtaksperiodeId = vedtaksperiodeId,
+            saksbehandlerOid = saksbehandlerOid,
+            frist = frist,
+            opprettetTidspunkt = Instant.now(),
+            dialogRef = dialogRef,
+            årsaker = årsaker,
+            notattekst = notattekst,
+        )
+
         fun fraLagring(
-            id: PåVentId?,
+            id: PåVentId,
             vedtaksperiodeId: UUID,
             saksbehandlerOid: SaksbehandlerOid,
             frist: LocalDate,

@@ -2,14 +2,9 @@ package no.nav.helse.spesialist.application
 
 import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
+import java.util.UUID
 
-class InMemoryVedtaksperiodeRepository: VedtaksperiodeRepository {
-    private val vedtaksperioder = mutableMapOf<VedtaksperiodeId, Vedtaksperiode>()
-    override fun finn(vedtaksperiodeId: VedtaksperiodeId): Vedtaksperiode? {
-        return vedtaksperioder[vedtaksperiodeId]
-    }
-
-    fun lagre(vedtaksperiode: Vedtaksperiode) {
-        vedtaksperioder[vedtaksperiode.id()] = vedtaksperiode
-    }
+class InMemoryVedtaksperiodeRepository : VedtaksperiodeRepository,
+    AbstractInMemoryRepository<VedtaksperiodeId, Vedtaksperiode>() {
+    override fun generateId(): VedtaksperiodeId = VedtaksperiodeId(UUID.randomUUID())
 }

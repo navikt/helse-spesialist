@@ -2,31 +2,24 @@ package no.nav.helse.spesialist.api.rest
 
 import no.nav.helse.modell.Annullering
 import no.nav.helse.modell.melding.AnnullertUtbetalingEvent
-import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.api.testfixtures.lagSaksbehandler
 import no.nav.helse.spesialist.application.InMemoryMeldingPubliserer
-import no.nav.helse.spesialist.domain.Vedtaksperiode
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
-import no.nav.helse.spesialist.domain.testfixtures.lagEtternavn
-import no.nav.helse.spesialist.domain.testfixtures.lagFornavn
 import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
-import no.nav.helse.spesialist.domain.testfixtures.lagMellomnavn
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
-import no.nav.helse.spesialist.typer.Kjønn
+import no.nav.helse.spesialist.domain.testfixtures.lagPerson
+import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiode
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertNotNull
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
 class PostVedtaksperiodeAnnullerIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
     private val sessionContext = integrationTestFixture.sessionFactory.sessionContext
-    private val egenansattDao = sessionContext.egenAnsattDao
-    private val personDao = sessionContext.personDao
-    private val vedtaksperiodeRepository = sessionContext.vedtaksperiodeRepository
     private val annulleringRepository = sessionContext.annulleringRepository
 
     @Test
@@ -41,12 +34,17 @@ class PostVedtaksperiodeAnnullerIntegrationTest {
         val personFagsystemId = "EN_PERSON_FAGSYSTEM_ID"
         val vedtaksperiodeId = UUID.randomUUID()
         val årsaker = mapOf("årsak-1" to "Ferie", "årsak-2" to "Ekstra ferie")
-        vedtaksperiodeRepository.lagre(Vedtaksperiode(VedtaksperiodeId(vedtaksperiodeId), fødselsnummer, organisasjonsnummer))
-        egenansattDao.lagre(fødselsnummer, false, LocalDateTime.now())
-        personDao.upsertPersoninfo(
-            fødselsnummer, lagFornavn(), lagMellomnavn(), lagEtternavn(), LocalDate.now(),
-            Kjønn.Ukjent, Adressebeskyttelse.Ugradert
-        )
+
+        val person = lagPerson(
+            identitetsnummer = Identitetsnummer.fraString(fødselsnummer)
+        ).also(sessionContext.personRepository::lagre)
+        sessionContext.egenAnsattDao.lagre(fødselsnummer, false, LocalDateTime.now())
+
+        lagVedtaksperiode(
+            id = VedtaksperiodeId(vedtaksperiodeId),
+            identitetsnummer = person.identitetsnummer,
+            organisasjonsnummer = organisasjonsnummer,
+        ).also(sessionContext.vedtaksperiodeRepository::lagre)
 
         // When:
         val response = integrationTestFixture.post(
@@ -118,12 +116,17 @@ class PostVedtaksperiodeAnnullerIntegrationTest {
         val personFagsystemId = "EN_PERSON_FAGSYSTEM_ID"
         val vedtaksperiodeId = UUID.randomUUID()
         val årsaker = emptyList<ApiVedtaksperiodeAnnullerRequest.Årsak>()
-        vedtaksperiodeRepository.lagre(Vedtaksperiode(VedtaksperiodeId(vedtaksperiodeId), fødselsnummer, organisasjonsnummer))
-        egenansattDao.lagre(fødselsnummer, false, LocalDateTime.now())
-        personDao.upsertPersoninfo(
-            fødselsnummer, lagFornavn(), lagMellomnavn(), lagEtternavn(), LocalDate.now(),
-            Kjønn.Ukjent, Adressebeskyttelse.Ugradert
-        )
+
+        val person = lagPerson(
+            identitetsnummer = Identitetsnummer.fraString(fødselsnummer)
+        ).also(sessionContext.personRepository::lagre)
+        sessionContext.egenAnsattDao.lagre(fødselsnummer, false, LocalDateTime.now())
+
+        lagVedtaksperiode(
+            id = VedtaksperiodeId(vedtaksperiodeId),
+            identitetsnummer = person.identitetsnummer,
+            organisasjonsnummer = organisasjonsnummer,
+        ).also(sessionContext.vedtaksperiodeRepository::lagre)
 
         // When:
         val response = integrationTestFixture.post(
@@ -197,12 +200,18 @@ class PostVedtaksperiodeAnnullerIntegrationTest {
         val vedtaksperiodeId = UUID.randomUUID()
         val tidligereÅrsaker = mapOf("årsak-1" to "Ferie", "årsak-2" to "Ekstra ferie")
         val årsaker = mapOf("årsak-3" to "Ny ferie", "årsak-4" to "Ny ferie")
-        vedtaksperiodeRepository.lagre(Vedtaksperiode(VedtaksperiodeId(vedtaksperiodeId), fødselsnummer, organisasjonsnummer))
-        egenansattDao.lagre(fødselsnummer, false, LocalDateTime.now())
-        personDao.upsertPersoninfo(
-            fødselsnummer, lagFornavn(), lagMellomnavn(), lagEtternavn(), LocalDate.now(),
-            Kjønn.Ukjent, Adressebeskyttelse.Ugradert
-        )
+
+        val person = lagPerson(
+            identitetsnummer = Identitetsnummer.fraString(fødselsnummer)
+        ).also(sessionContext.personRepository::lagre)
+        sessionContext.egenAnsattDao.lagre(fødselsnummer, false, LocalDateTime.now())
+
+        lagVedtaksperiode(
+            id = VedtaksperiodeId(vedtaksperiodeId),
+            identitetsnummer = person.identitetsnummer,
+            organisasjonsnummer = organisasjonsnummer,
+        ).also(sessionContext.vedtaksperiodeRepository::lagre)
+
         annulleringRepository
             .lagreAnnullering(
                 annullering = Annullering.Factory.ny(

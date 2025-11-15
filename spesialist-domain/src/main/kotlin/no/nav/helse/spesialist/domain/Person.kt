@@ -34,19 +34,45 @@ data class Personinfo(
 
 class Person private constructor(
     id: PersonId?,
-    val fødselsnummer: String,
+    val identitetsnummer: Identitetsnummer,
     val aktørId: String,
-    val info: Personinfo?,
-    val infoOppdatert: LocalDate?,
+    info: Personinfo?,
+    infoOppdatert: LocalDate?,
     val enhetRef: Int?,
     val enhetRefOppdatert: LocalDate?,
     val infotrygdutbetalingerRef: Int?,
     val infotrygdutbetalingerOppdatert: LocalDate?,
 ) : AggregateRoot<PersonId>(id) {
+    var info: Personinfo? = info
+        private set
+    var infoOppdatert: LocalDate? = infoOppdatert
+        private set
+
+    fun oppdaterInfo(personinfo: Personinfo) {
+        this.info = personinfo
+        this.infoOppdatert = LocalDate.now()
+    }
+
     object Factory {
+        fun ny(
+            identitetsnummer: Identitetsnummer,
+            aktørId: String,
+            info: Personinfo?,
+        ) = Person(
+            id = null,
+            identitetsnummer = identitetsnummer,
+            aktørId = aktørId,
+            info = info,
+            infoOppdatert = info?.let { LocalDate.now() },
+            enhetRef = null,
+            enhetRefOppdatert = null,
+            infotrygdutbetalingerRef = null,
+            infotrygdutbetalingerOppdatert = null,
+        )
+
         fun fraLagring(
             id: PersonId?,
-            fødselsnummer: String,
+            identitetsnummer: Identitetsnummer,
             aktørId: String,
             info: Personinfo?,
             infoOppdatert: LocalDate?,
@@ -56,7 +82,7 @@ class Person private constructor(
             infotrygdutbetalingerOppdatert: LocalDate?,
         ) = Person(
             id = id,
-            fødselsnummer = fødselsnummer,
+            identitetsnummer = identitetsnummer,
             aktørId = aktørId,
             info = info,
             infoOppdatert = infoOppdatert,

@@ -1,68 +1,73 @@
 package no.nav.helse.spesialist.kafka.rivers
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
-import no.nav.helse.modell.person.LegacyPerson
-import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
-import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel
-import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode
-import no.nav.helse.modell.person.vedtaksperiode.TilstandDto
-import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
-import no.nav.helse.spesialist.domain.testfixtures.lagAktørId
-import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
+import no.nav.helse.spesialist.domain.Behandling
+import no.nav.helse.spesialist.domain.Person
+import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.UtbetalingId
+import no.nav.helse.spesialist.domain.Vedtaksperiode
+import no.nav.helse.spesialist.domain.VedtaksperiodeId
+import no.nav.helse.spesialist.domain.testfixtures.lagBehandling
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
+import no.nav.helse.spesialist.domain.testfixtures.lagPerson
+import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiode
 import no.nav.helse.spesialist.kafka.IntegrationTestFixture
 import no.nav.helse.spesialist.kafka.TestRapidHelpers.publiserteMeldingerUtenGenererteFelter
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.UUID
 
 class BehandlingOpprettetRiverIntegrationTest {
     private val testRapid = TestRapid()
     private val integrationTestFixture = IntegrationTestFixture(testRapid)
-    private val legacyPersonRepository = integrationTestFixture.sessionFactory.sessionContext.legacyPersonRepository
+    private val sessionContext = integrationTestFixture.sessionFactory.sessionContext
 
     @Test
     fun `oppretter ny vedtaksperiode med behandling`() {
         // Given:
-        val fødselsnummer = lagFødselsnummer()
+        val person = lagPerson()
+            .also(sessionContext.personRepository::lagre)
+
+        val vedtaksperiodeId = VedtaksperiodeId(UUID.randomUUID())
+        val spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID())
         val organisasjonsnummer = lagOrganisasjonsnummer()
-        val vedtaksperiodeId = UUID.randomUUID()
-        val behandlingId = UUID.randomUUID()
         val fom = LocalDate.parse("2024-10-01")
         val tom = LocalDate.parse("2024-10-31")
-        initPerson(fødselsnummer = fødselsnummer, vedtaksperioder = emptyList())
 
         // When:
         testRapid.sendTestMessage(
             behandlingOpprettetMelding(
-                fødselsnummer = fødselsnummer,
-                organisasjonsnummer = organisasjonsnummer,
+                person = person,
                 vedtaksperiodeId = vedtaksperiodeId,
-                behandlingId = behandlingId,
+                spleisBehandlingId = spleisBehandlingId,
+                yrkesaktivitetstype = "ARBEIDSTAKER",
+                organisasjonsnummer = organisasjonsnummer,
                 fom = fom,
                 tom = tom,
-                yrkesaktivitetstype = "ARBEIDSTAKER"
             )
         )
 
         // Then:
-        legacyPersonRepository.brukPersonHvisFinnes(fødselsnummer) {
-            val behandling = vedtaksperioder().single().råBehandlinger().single()
-            assertEquals(vedtaksperiodeId, behandling.vedtaksperiodeId)
-            assertEquals(null, behandling.utbetalingId)
-            assertEquals(behandlingId, behandling.spleisBehandlingId)
-            assertEquals(fom, behandling.skjæringstidspunkt)
-            assertEquals(fom, behandling.fom())
-            assertEquals(tom, behandling.tom())
-            assertEquals("VidereBehandlingAvklares", behandling.tilstand.navn())
-            assertEquals(emptyList<String>(), behandling.tags)
-            assertEquals(null, behandling.vedtakBegrunnelse)
-            assertEquals(emptyList<LegacyVarsel>(), behandling.varsler())
-            assertEquals(Yrkesaktivitetstype.ARBEIDSTAKER, behandling.yrkesaktivitetstype)
-        }
+        val vedtaksperiode = sessionContext.vedtaksperiodeRepository.alle().single()
+        assertEquals(vedtaksperiodeId, vedtaksperiode.id())
+        assertEquals(person.identitetsnummer.value, vedtaksperiode.fødselsnummer)
+        assertEquals(organisasjonsnummer, vedtaksperiode.organisasjonsnummer)
+        assertEquals(false, vedtaksperiode.forkastet)
+
+        val behandling = sessionContext.behandlingRepository.alle().single()
+        assertEquals(spleisBehandlingId, behandling.spleisBehandlingId)
+        assertEquals(vedtaksperiodeId, behandling.vedtaksperiodeId)
+        assertEquals(null, behandling.utbetalingId)
+        assertEquals(emptySet<String>(), behandling.tags)
+        assertEquals(Behandling.Tilstand.VidereBehandlingAvklares, behandling.tilstand)
+        assertEquals(fom, behandling.fom)
+        assertEquals(tom, behandling.tom)
+        assertEquals(fom, behandling.skjæringstidspunkt)
+        assertEquals(Yrkesaktivitetstype.ARBEIDSTAKER, behandling.yrkesaktivitetstype)
 
         val meldinger = testRapid.publiserteMeldingerUtenGenererteFelter()
         assertEquals(0, meldinger.size)
@@ -71,69 +76,52 @@ class BehandlingOpprettetRiverIntegrationTest {
     @Test
     fun `oppretter ny behandling på eksisterende vedtaksperiode`() {
         // Given:
-        val fødselsnummer = lagFødselsnummer()
-        val organisasjonsnummer = lagOrganisasjonsnummer()
-        val vedtaksperiodeId = UUID.randomUUID()
-        val behandlingId = UUID.randomUUID()
-        val fom = LocalDate.parse("2024-10-01")
-        val tom = LocalDate.parse("2024-10-31")
-        initPerson(
-            fødselsnummer = fødselsnummer, vedtaksperioder = listOf(
-                VedtaksperiodeDto(
-                    organisasjonsnummer = organisasjonsnummer,
-                    vedtaksperiodeId = vedtaksperiodeId,
-                    forkastet = false,
-                    behandlinger = listOf(
-                        BehandlingDto(
-                            id = UUID.randomUUID(),
-                            vedtaksperiodeId = vedtaksperiodeId,
-                            utbetalingId = null,
-                            spleisBehandlingId = UUID.randomUUID(),
-                            skjæringstidspunkt = fom.minusMonths(1),
-                            fom = fom.minusMonths(1),
-                            tom = tom.minusMonths(1),
-                            tilstand = TilstandDto.KlarTilBehandling,
-                            tags = emptyList(),
-                            vedtakBegrunnelse = null,
-                            varsler = emptyList(),
-                            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
-                        )
-                    )
-                )
-            )
-        )
+        val person = lagPerson()
+            .also(sessionContext.personRepository::lagre)
+
+        val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.identitetsnummer)
+            .also(sessionContext.vedtaksperiodeRepository::lagre)
+
+        val eksisterendeBehandling = lagBehandling(
+            vedtaksperiodeId = vedtaksperiode.id(),
+            tags = setOf("Tag 1", "Tag 2"),
+            tilstand = Behandling.Tilstand.KlarTilBehandling,
+            utbetalingId = UtbetalingId(UUID.randomUUID()),
+            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
+        ).also(sessionContext.behandlingRepository::lagre)
+
+        val spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID())
+        val fom = eksisterendeBehandling.fom.plusMonths(1)
+        val tom = eksisterendeBehandling.tom.plusMonths(1)
 
         // When:
         testRapid.sendTestMessage(
             behandlingOpprettetMelding(
-                fødselsnummer = fødselsnummer,
-                organisasjonsnummer = organisasjonsnummer,
-                vedtaksperiodeId = vedtaksperiodeId,
-                behandlingId = behandlingId,
+                person = person,
+                vedtaksperiodeId = vedtaksperiode.id(),
+                spleisBehandlingId = spleisBehandlingId,
+                yrkesaktivitetstype = "ARBEIDSTAKER",
+                organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
                 fom = fom,
                 tom = tom,
-                yrkesaktivitetstype = "ARBEIDSTAKER"
             )
         )
 
         // Then:
-        legacyPersonRepository.brukPersonHvisFinnes(fødselsnummer) {
-            val vedtaksperiode = vedtaksperioder().single()
-            val behandlinger = vedtaksperiode.råBehandlinger()
-            assertEquals(2, behandlinger.size)
-            val behandling = vedtaksperiode.finnBehandling(behandlingId)
-            assertEquals(vedtaksperiodeId, behandling.vedtaksperiodeId)
-            assertEquals(null, behandling.utbetalingId)
-            assertEquals(behandlingId, behandling.spleisBehandlingId)
-            assertEquals(fom.minusMonths(1), behandling.skjæringstidspunkt)
-            assertEquals(fom, behandling.fom())
-            assertEquals(tom, behandling.tom())
-            assertEquals("VidereBehandlingAvklares", behandling.tilstand.navn())
-            assertEquals(emptyList<String>(), behandling.tags)
-            assertEquals(null, behandling.vedtakBegrunnelse)
-            assertEquals(emptyList<LegacyVarsel>(), behandling.varsler())
-            assertEquals(Yrkesaktivitetstype.ARBEIDSTAKER, behandling.yrkesaktivitetstype)
-        }
+        assertEquals(vedtaksperiode, sessionContext.vedtaksperiodeRepository.alle().single())
+
+        val behandlinger = sessionContext.behandlingRepository.alle()
+        assertEquals(2, behandlinger.size)
+        val behandling = behandlinger.first { it.spleisBehandlingId == spleisBehandlingId }
+        assertEquals(spleisBehandlingId, behandling.spleisBehandlingId)
+        assertEquals(vedtaksperiode.id(), behandling.vedtaksperiodeId)
+        assertEquals(null, behandling.utbetalingId)
+        assertEquals(emptySet<String>(), behandling.tags)
+        assertEquals(Behandling.Tilstand.VidereBehandlingAvklares, behandling.tilstand)
+        assertEquals(fom, behandling.fom)
+        assertEquals(tom, behandling.tom)
+        assertEquals(eksisterendeBehandling.skjæringstidspunkt, behandling.skjæringstidspunkt)
+        assertEquals(Yrkesaktivitetstype.ARBEIDSTAKER, behandling.yrkesaktivitetstype)
 
         val meldinger = testRapid.publiserteMeldingerUtenGenererteFelter()
         assertEquals(0, meldinger.size)
@@ -142,66 +130,55 @@ class BehandlingOpprettetRiverIntegrationTest {
     @Test
     fun `melding om samme behandling med ny data overses`() {
         // Given:
-        val fødselsnummer = lagFødselsnummer()
+        val person = lagPerson()
+            .also(sessionContext.personRepository::lagre)
+
         val organisasjonsnummer = lagOrganisasjonsnummer()
-        val vedtaksperiodeId = UUID.randomUUID()
-        val behandlingId = UUID.randomUUID()
-        val fom = LocalDate.parse("2024-10-01")
-        val tom = LocalDate.parse("2024-10-31")
-        initPerson(
-            fødselsnummer = fødselsnummer, vedtaksperioder = listOf(
-                VedtaksperiodeDto(
-                    organisasjonsnummer = organisasjonsnummer,
-                    vedtaksperiodeId = vedtaksperiodeId,
-                    forkastet = false,
-                    behandlinger = listOf(
-                        BehandlingDto(
-                            id = UUID.randomUUID(),
-                            vedtaksperiodeId = vedtaksperiodeId,
-                            utbetalingId = null,
-                            spleisBehandlingId = behandlingId,
-                            skjæringstidspunkt = fom,
-                            fom = fom,
-                            tom = tom,
-                            tilstand = TilstandDto.KlarTilBehandling,
-                            tags = emptyList(),
-                            vedtakBegrunnelse = null,
-                            varsler = emptyList(),
-                            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
-                        )
-                    )
-                )
-            )
-        )
+        val vedtaksperiode = lagVedtaksperiode(
+            identitetsnummer = person.identitetsnummer,
+            organisasjonsnummer = organisasjonsnummer
+        ).also(sessionContext.vedtaksperiodeRepository::lagre)
+
+        val fom = LocalDate.now().minusMonths(3).withDayOfMonth(1)
+        val tom = fom.withDayOfMonth(YearMonth.from(fom).lengthOfMonth())
+        val utbetalingId = UtbetalingId(UUID.randomUUID())
+        val tags = setOf("Tag 1", "Tag 2")
+        val eksisterendeBehandling = lagBehandling(
+            vedtaksperiodeId = vedtaksperiode.id(),
+            fom = fom,
+            tom = tom,
+            tilstand = Behandling.Tilstand.KlarTilBehandling,
+            tags = tags,
+            utbetalingId = utbetalingId,
+            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
+        ).also(sessionContext.behandlingRepository::lagre)
 
         // When:
         testRapid.sendTestMessage(
             behandlingOpprettetMelding(
-                fødselsnummer = fødselsnummer,
+                person = person,
+                vedtaksperiodeId = vedtaksperiode.id(),
+                spleisBehandlingId = eksisterendeBehandling.spleisBehandlingId!!,
+                yrkesaktivitetstype = "ARBEIDSTAKER",
                 organisasjonsnummer = lagOrganisasjonsnummer(),
-                vedtaksperiodeId = vedtaksperiodeId,
-                behandlingId = behandlingId,
                 fom = fom.plusMonths(1),
                 tom = tom.plusMonths(1),
-                yrkesaktivitetstype = "ARBEIDSTAKER"
             )
         )
 
         // Then:
-        legacyPersonRepository.brukPersonHvisFinnes(fødselsnummer) {
-            val behandling = vedtaksperioder().single().råBehandlinger().single()
-            assertEquals(vedtaksperiodeId, behandling.vedtaksperiodeId)
-            assertEquals(null, behandling.utbetalingId)
-            assertEquals(behandlingId, behandling.spleisBehandlingId)
-            assertEquals(fom, behandling.skjæringstidspunkt)
-            assertEquals(fom, behandling.fom())
-            assertEquals(tom, behandling.tom())
-            assertEquals("KlarTilBehandling", behandling.tilstand.navn())
-            assertEquals(emptyList<String>(), behandling.tags)
-            assertEquals(null, behandling.vedtakBegrunnelse)
-            assertEquals(emptyList<LegacyVarsel>(), behandling.varsler())
-            assertEquals(Yrkesaktivitetstype.ARBEIDSTAKER, behandling.yrkesaktivitetstype)
-        }
+        assertEquals(vedtaksperiode, sessionContext.vedtaksperiodeRepository.alle().single())
+
+        val behandling = sessionContext.behandlingRepository.alle().single()
+        assertEquals(eksisterendeBehandling, behandling)
+        assertEquals(vedtaksperiode.id(), behandling.vedtaksperiodeId)
+        assertEquals(utbetalingId, behandling.utbetalingId)
+        assertEquals(tags, behandling.tags)
+        assertEquals(Behandling.Tilstand.KlarTilBehandling, behandling.tilstand)
+        assertEquals(fom, behandling.fom)
+        assertEquals(tom, behandling.tom)
+        assertEquals(fom, behandling.skjæringstidspunkt)
+        assertEquals(Yrkesaktivitetstype.ARBEIDSTAKER, behandling.yrkesaktivitetstype)
 
         val meldinger = testRapid.publiserteMeldingerUtenGenererteFelter()
         assertEquals(0, meldinger.size)
@@ -210,26 +187,25 @@ class BehandlingOpprettetRiverIntegrationTest {
     @Test
     fun `oppretter ikke ny vedtaksperiode for frilans`() {
         // Given:
-        val fødselsnummer = lagFødselsnummer()
-        initPerson(fødselsnummer = fødselsnummer, vedtaksperioder = emptyList())
+        val person = lagPerson()
+            .also(sessionContext.personRepository::lagre)
 
         // When:
         testRapid.sendTestMessage(
             behandlingOpprettetMelding(
-                fødselsnummer = fødselsnummer,
+                person = person,
+                vedtaksperiodeId = VedtaksperiodeId(UUID.randomUUID()),
+                spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
+                yrkesaktivitetstype = "FRILANS",
                 organisasjonsnummer = "FRILANS",
-                vedtaksperiodeId = UUID.randomUUID(),
-                behandlingId = UUID.randomUUID(),
                 fom = LocalDate.parse("2024-10-01"),
                 tom = LocalDate.parse("2024-10-31"),
-                yrkesaktivitetstype = "FRILANS"
             )
         )
 
         // Then:
-        legacyPersonRepository.brukPersonHvisFinnes(fødselsnummer) {
-            assertEquals(emptyList<LegacyVedtaksperiode>(), vedtaksperioder())
-        }
+        assertEquals(emptyList<Vedtaksperiode>(), sessionContext.vedtaksperiodeRepository.alle())
+        assertEquals(emptyList<Behandling>(), sessionContext.behandlingRepository.alle())
 
         val meldinger = testRapid.publiserteMeldingerUtenGenererteFelter()
         assertEquals(0, meldinger.size)
@@ -238,26 +214,25 @@ class BehandlingOpprettetRiverIntegrationTest {
     @Test
     fun `oppretter ikke ny vedtaksperiode for arbeidsledig`() {
         // Given:
-        val fødselsnummer = lagFødselsnummer()
-        initPerson(fødselsnummer = fødselsnummer, vedtaksperioder = emptyList())
+        val person = lagPerson()
+            .also(sessionContext.personRepository::lagre)
 
         // When:
         testRapid.sendTestMessage(
             behandlingOpprettetMelding(
-                fødselsnummer = fødselsnummer,
+                person = person,
+                vedtaksperiodeId = VedtaksperiodeId(UUID.randomUUID()),
+                spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
+                yrkesaktivitetstype = "ARBEIDSLEDIG",
                 organisasjonsnummer = "ARBEIDSLEDIG",
-                vedtaksperiodeId = UUID.randomUUID(),
-                behandlingId = UUID.randomUUID(),
                 fom = LocalDate.parse("2024-10-01"),
                 tom = LocalDate.parse("2024-10-31"),
-                yrkesaktivitetstype = "ARBEIDSLEDIG"
             )
         )
 
         // Then:
-        legacyPersonRepository.brukPersonHvisFinnes(fødselsnummer) {
-            assertEquals(emptyList<LegacyVedtaksperiode>(), vedtaksperioder())
-        }
+        assertEquals(emptyList<Vedtaksperiode>(), sessionContext.vedtaksperiodeRepository.alle())
+        assertEquals(emptyList<Behandling>(), sessionContext.behandlingRepository.alle())
 
         val meldinger = testRapid.publiserteMeldingerUtenGenererteFelter()
         assertEquals(0, meldinger.size)
@@ -266,74 +241,65 @@ class BehandlingOpprettetRiverIntegrationTest {
     @Test
     fun `oppretter ny vedtaksperiode for selvstendig næringsdrivende`() {
         // Given:
-        val fødselsnummer = lagFødselsnummer()
-        val vedtaksperiodeId = UUID.randomUUID()
-        val behandlingId = UUID.randomUUID()
+        val person = lagPerson()
+            .also(sessionContext.personRepository::lagre)
+
+        val vedtaksperiodeId = VedtaksperiodeId(UUID.randomUUID())
+        val spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID())
         val fom = LocalDate.parse("2024-10-01")
         val tom = LocalDate.parse("2024-10-31")
-        initPerson(fødselsnummer = fødselsnummer, vedtaksperioder = emptyList())
 
         // When:
         testRapid.sendTestMessage(
             behandlingOpprettetMelding(
-                fødselsnummer = fødselsnummer,
-                organisasjonsnummer = "SELVSTENDIG",
+                person = person,
                 vedtaksperiodeId = vedtaksperiodeId,
-                behandlingId = behandlingId,
+                spleisBehandlingId = spleisBehandlingId,
+                yrkesaktivitetstype = "SELVSTENDIG",
+                organisasjonsnummer = "SELVSTENDIG",
                 fom = fom,
                 tom = tom,
-                yrkesaktivitetstype = "SELVSTENDIG"
             )
         )
 
         // Then:
-        legacyPersonRepository.brukPersonHvisFinnes(fødselsnummer) {
-            val behandling = vedtaksperioder().single().råBehandlinger().single()
-            assertEquals(vedtaksperiodeId, behandling.vedtaksperiodeId)
-            assertEquals(null, behandling.utbetalingId)
-            assertEquals(behandlingId, behandling.spleisBehandlingId)
-            assertEquals(fom, behandling.skjæringstidspunkt)
-            assertEquals(fom, behandling.fom())
-            assertEquals(tom, behandling.tom())
-            assertEquals("VidereBehandlingAvklares", behandling.tilstand.navn())
-            assertEquals(emptyList<String>(), behandling.tags)
-            assertEquals(null, behandling.vedtakBegrunnelse)
-            assertEquals(emptyList<LegacyVarsel>(), behandling.varsler())
-            assertEquals(Yrkesaktivitetstype.SELVSTENDIG, behandling.yrkesaktivitetstype)
-        }
+        val vedtaksperiode = sessionContext.vedtaksperiodeRepository.alle().single()
+        assertEquals(vedtaksperiodeId, vedtaksperiode.id())
+        assertEquals(person.identitetsnummer.value, vedtaksperiode.fødselsnummer)
+        assertEquals("SELVSTENDIG", vedtaksperiode.organisasjonsnummer)
+        assertEquals(false, vedtaksperiode.forkastet)
+
+        val behandling = sessionContext.behandlingRepository.alle().single()
+        assertEquals(spleisBehandlingId, behandling.spleisBehandlingId)
+        assertEquals(vedtaksperiodeId, behandling.vedtaksperiodeId)
+        assertEquals(null, behandling.utbetalingId)
+        assertEquals(emptySet<String>(), behandling.tags)
+        assertEquals(Behandling.Tilstand.VidereBehandlingAvklares, behandling.tilstand)
+        assertEquals(fom, behandling.fom)
+        assertEquals(tom, behandling.tom)
+        assertEquals(fom, behandling.skjæringstidspunkt)
+        assertEquals(Yrkesaktivitetstype.SELVSTENDIG, behandling.yrkesaktivitetstype)
 
         val meldinger = testRapid.publiserteMeldingerUtenGenererteFelter()
         assertEquals(0, meldinger.size)
     }
 
-    private fun initPerson(fødselsnummer: String, vedtaksperioder: List<VedtaksperiodeDto>) {
-        legacyPersonRepository.leggTilPerson(
-            LegacyPerson.gjenopprett(
-                aktørId = lagAktørId(),
-                fødselsnummer = fødselsnummer,
-                vedtaksperioder = vedtaksperioder,
-                skjønnsfastsattSykepengegrunnlag = emptyList(),
-                avviksvurderinger = emptyList()
-            )
-        )
-    }
-
     @Language("JSON")
     private fun behandlingOpprettetMelding(
-        fødselsnummer: String,
+        person: Person,
+        vedtaksperiodeId: VedtaksperiodeId,
+        spleisBehandlingId: SpleisBehandlingId,
+        yrkesaktivitetstype: String,
         organisasjonsnummer: String,
-        vedtaksperiodeId: UUID,
-        behandlingId: UUID,
         fom: LocalDate,
         tom: LocalDate,
-        yrkesaktivitetstype: String,
     ) = """
         {
           "@event_name": "behandling_opprettet",
           "organisasjonsnummer": "$organisasjonsnummer",
           "yrkesaktivitetstype": "$yrkesaktivitetstype",
-          "vedtaksperiodeId": "$vedtaksperiodeId",
-          "behandlingId": "$behandlingId",
+          "vedtaksperiodeId": "${vedtaksperiodeId.value}",
+          "behandlingId": "${spleisBehandlingId.value}",
           "søknadIder": [
             "77cc592f-58e3-48ef-8e25-4196c8299fe8"
           ],
@@ -365,7 +331,7 @@ class BehandlingOpprettetRiverIntegrationTest {
               "image": "europe-north1-docker.pkg.dev/nais-management-233d/tbd/helse-spesialist:2025.08.26-14.48-9333d1b"
             }
           ],
-          "fødselsnummer": "$fødselsnummer",
+          "fødselsnummer": "${person.identitetsnummer.value}",
           "@forårsaket_av": {
             "id": "77cc592f-58e3-48ef-8e25-4196c8299fe8",
             "opprettet": "2025-06-01T00:00",
