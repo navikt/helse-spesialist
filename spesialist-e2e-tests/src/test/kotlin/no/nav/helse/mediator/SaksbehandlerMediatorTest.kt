@@ -50,12 +50,10 @@ import no.nav.helse.spesialist.domain.Arbeidsgiver
 import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
-import no.nav.helse.spesialist.domain.testfixtures.lagAktørId
-import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
-import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlerident
-import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlernavn
-import no.nav.helse.spesialist.domain.testfixtures.lagTilfeldigSaksbehandlerepost
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagAktørId
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.e2etests.TestRapidHelpers.hendelser
 import no.nav.helse.spesialist.test.TestPerson
 import no.nav.helse.spesialist.typer.Kjønn
@@ -689,12 +687,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
 
         assertEquals(SendTilGodkjenningResult.Ok, result)
 
-        val beslutter = Saksbehandler(
-            id = SaksbehandlerOid(UUID.randomUUID()),
-            navn = lagSaksbehandlernavn(),
-            epost = lagTilfeldigSaksbehandlerepost(),
-            ident = lagSaksbehandlerident()
-        )
+        val beslutter = lagSaksbehandler()
         opprettSaksbehandler(beslutter.id().value, beslutter.navn, beslutter.epost, beslutter.ident)
         val resultRetur = mediator.sendIRetur(oppgaveId, beslutter, "begrunnelse")
 

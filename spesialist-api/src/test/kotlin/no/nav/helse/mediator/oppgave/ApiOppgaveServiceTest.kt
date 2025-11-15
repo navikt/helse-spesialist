@@ -21,9 +21,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavetype
 import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodetype
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
-import no.nav.helse.spesialist.domain.testfixtures.lagEpostadresseFraFulltNavn
-import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlerident
-import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlernavn
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -34,10 +32,11 @@ import java.util.UUID
 import kotlin.random.Random
 
 internal class ApiOppgaveServiceTest {
-    private val SAKSBEHANDLERIDENT = lagSaksbehandlerident()
-    private val SAKSBEHANDLEROID = UUID.randomUUID()
-    private val SAKSBEHANDLERNAVN = lagSaksbehandlernavn()
-    private val SAKSBEHANDLEREPOST = lagEpostadresseFraFulltNavn(SAKSBEHANDLERNAVN)
+    private val SAKSBEHANDLER = lagSaksbehandler()
+    private val SAKSBEHANDLERIDENT = SAKSBEHANDLER.ident
+    private val SAKSBEHANDLEROID = SAKSBEHANDLER.id().value
+    private val SAKSBEHANDLERNAVN = SAKSBEHANDLER.navn
+    private val SAKSBEHANDLEREPOST = SAKSBEHANDLER.epost
     private val EGENSKAPER =
         setOf(
             EgenskapForDatabase.SØKNAD,

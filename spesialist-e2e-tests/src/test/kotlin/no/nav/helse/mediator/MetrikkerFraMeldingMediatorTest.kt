@@ -8,7 +8,7 @@ import no.nav.helse.Meldingssender
 import no.nav.helse.e2e.AbstractDatabaseTest
 import no.nav.helse.modell.varsel.LegacyVarselRepository
 import no.nav.helse.spesialist.db.TransactionalSessionFactory
-import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 

@@ -4,7 +4,6 @@ import io.ktor.http.HttpStatusCode
 import no.nav.helse.Varselvurdering
 import no.nav.helse.mediator.asLocalDateTime
 import no.nav.helse.spesialist.api.IntegrationTestFixture
-import no.nav.helse.spesialist.api.testfixtures.lagSaksbehandler
 import no.nav.helse.spesialist.domain.BehandlingUnikId
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Personinfo
@@ -14,11 +13,11 @@ import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.VarselId
 import no.nav.helse.spesialist.domain.VarseldefinisjonId
 import no.nav.helse.spesialist.domain.testfixtures.lagEnBehandling
-import no.nav.helse.spesialist.domain.testfixtures.lagEnSaksbehandler
-import no.nav.helse.spesialist.domain.testfixtures.lagEnVarseldefinisjon
 import no.nav.helse.spesialist.domain.testfixtures.lagEnVedtaksperiode
-import no.nav.helse.spesialist.domain.testfixtures.lagEtVarsel
-import no.nav.helse.spesialist.domain.testfixtures.lagPerson
+import no.nav.helse.spesialist.domain.testfixtures.lagVarsel
+import no.nav.helse.spesialist.domain.testfixtures.lagVarseldefinisjon
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDateTime
@@ -33,13 +32,13 @@ class GetVarselBehandlerIntegrationTest {
     @Test
     fun `gir OK og tilbake et varsel i happy case`() {
         //given
-        val saksbehandler = lagEnSaksbehandler()
+        val saksbehandler = lagSaksbehandler()
         val vedtaksperiode = lagEnVedtaksperiode()
         val behandling = lagEnBehandling(vedtaksperiodeId = vedtaksperiode.id())
-        val varseldefinisjon = lagEnVarseldefinisjon(kode = "RV_IV_1")
+        val varseldefinisjon = lagVarseldefinisjon(kode = "RV_IV_1")
         val opprettetTidspunkt = LocalDateTime.now()
         val vurdertTidspunkt = LocalDateTime.now()
-        val varsel = lagEtVarsel(
+        val varsel = lagVarsel(
             spleisBehandlingId = behandling.spleisBehandlingId,
             behandlingUnikId = behandling.id(),
             status = Varsel.Status.VURDERT,
@@ -109,7 +108,7 @@ class GetVarselBehandlerIntegrationTest {
     @Test
     fun `gir 500 dersom behandlingen for det aktuelle varselet ikke finnes`() {
         // given
-        val varsel = lagEtVarsel(
+        val varsel = lagVarsel(
             spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
             behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
             vurdering = null,
@@ -139,7 +138,7 @@ class GetVarselBehandlerIntegrationTest {
         // given
         val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID())
         val behandling = lagEnBehandling(vedtaksperiodeId = vedtaksperiode.id())
-        val varsel = lagEtVarsel(
+        val varsel = lagVarsel(
             behandlingUnikId = behandling.id(),
             spleisBehandlingId = behandling.spleisBehandlingId,
             vurdering = null,
@@ -171,7 +170,7 @@ class GetVarselBehandlerIntegrationTest {
         // given
         val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID())
         val behandling = lagEnBehandling(vedtaksperiodeId = vedtaksperiode.id())
-        val varsel = lagEtVarsel(
+        val varsel = lagVarsel(
             spleisBehandlingId = behandling.spleisBehandlingId,
             behandlingUnikId = behandling.id(),
         )
@@ -207,7 +206,7 @@ class GetVarselBehandlerIntegrationTest {
         // given
         val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID())
         val behandling = lagEnBehandling(vedtaksperiodeId = vedtaksperiode.id())
-        val varsel = lagEtVarsel(
+        val varsel = lagVarsel(
             spleisBehandlingId = behandling.spleisBehandlingId,
             behandlingUnikId = behandling.id(),
         )
@@ -240,10 +239,10 @@ class GetVarselBehandlerIntegrationTest {
     @Test
     fun `gir 500 dersom saksbehandler som vurderte varselet ikke finnes`() {
         // given
-        val varseldefinisjon = lagEnVarseldefinisjon()
+        val varseldefinisjon = lagVarseldefinisjon()
         val vedtaksperiode = lagEnVedtaksperiode()
         val behandling = lagEnBehandling(vedtaksperiodeId = vedtaksperiode.id())
-        val varsel = lagEtVarsel(
+        val varsel = lagVarsel(
             spleisBehandlingId = behandling.spleisBehandlingId,
             behandlingUnikId = behandling.id(),
             status = Varsel.Status.VURDERT,
@@ -285,7 +284,7 @@ class GetVarselBehandlerIntegrationTest {
         val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID())
         val behandling = lagEnBehandling(vedtaksperiodeId = vedtaksperiode.id())
         val saksbehandler = lagSaksbehandler()
-        val varsel = lagEtVarsel(
+        val varsel = lagVarsel(
             spleisBehandlingId = behandling.spleisBehandlingId,
             behandlingUnikId = behandling.id(),
             status = Varsel.Status.VURDERT,
@@ -326,10 +325,10 @@ class GetVarselBehandlerIntegrationTest {
     @EnumSource(Varsel.Status::class, names = ["INAKTIV", "AVVIKLET"], mode = EnumSource.Mode.INCLUDE)
     fun `gir 500 dersom varselet har en status som medfører at varselet ikke skal vises i Speil`(status: Varsel.Status) {
         // given
-        val varseldefinisjon = lagEnVarseldefinisjon()
+        val varseldefinisjon = lagVarseldefinisjon()
         val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID())
         val behandling = lagEnBehandling(vedtaksperiodeId = vedtaksperiode.id())
-        val varsel = lagEtVarsel(
+        val varsel = lagVarsel(
             spleisBehandlingId = behandling.spleisBehandlingId,
             behandlingUnikId = behandling.id(),
             status = status,

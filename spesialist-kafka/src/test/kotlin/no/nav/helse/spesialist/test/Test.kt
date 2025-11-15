@@ -1,29 +1,9 @@
 package no.nav.helse.spesialist.test
 
-import no.nav.helse.spesialist.domain.Saksbehandler
-import no.nav.helse.spesialist.domain.SaksbehandlerOid
-import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
-import no.nav.helse.spesialist.domain.testfixtures.lagAktørId
-import no.nav.helse.spesialist.domain.testfixtures.lagEpostadresseFraFulltNavn
-import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
-import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlerident
-import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlernavn
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagAktørId
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import java.util.UUID
-
-fun lagSaksbehandler(
-    navn: String = lagSaksbehandlernavn(),
-    epostadresse: String = lagEpostadresseFraFulltNavn(navn),
-    oid: UUID = UUID.randomUUID(),
-    ident: String = lagSaksbehandlerident(),
-) = SaksbehandlerWrapper(
-    Saksbehandler(
-        id = SaksbehandlerOid(oid),
-        navn = navn,
-        epost = epostadresse,
-        ident = ident,
-    )
-)
 
 class TestPerson {
     val fødselsnummer: String = lagFødselsnummer()

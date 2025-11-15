@@ -20,13 +20,10 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.domain.testfixtures.feb
 import no.nav.helse.spesialist.domain.testfixtures.jan
-import no.nav.helse.spesialist.domain.testfixtures.lagAktørId
-import no.nav.helse.spesialist.domain.testfixtures.lagEpostadresseFraFulltNavn
-import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
-import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlerident
-import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlernavn
-import no.nav.helse.spesialist.domain.testfixtures.lagTilfeldigSaksbehandlerepost
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagAktørId
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.kafka.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -44,10 +41,12 @@ class UtgåendeHendelseMessageBuilderTest {
     private val vedtaksperiodeId = UUID.randomUUID()
     private val behandlingId = UUID.randomUUID()
     private val periodetype = Periodetype.FØRSTEGANGSBEHANDLING
-    private val saksbehandlerIdent = lagSaksbehandlerident()
-    private val saksbehandlerEpost = lagEpostadresseFraFulltNavn(lagSaksbehandlernavn())
-    private val beslutterIdent = lagSaksbehandlerident()
-    private val beslutterEpost = lagEpostadresseFraFulltNavn(lagSaksbehandlernavn())
+    private val saksbehandler = lagSaksbehandler()
+    private val saksbehandlerIdent = saksbehandler.ident
+    private val saksbehandlerEpost = saksbehandler.epost
+    private val beslutter = lagSaksbehandler()
+    private val beslutterIdent = beslutter.ident
+    private val beslutterEpost = beslutter.epost
     private fun UtgåendeHendelse.somJson() = this.somJsonMessage(fødselsnummer).toJson()
 
     @Test
@@ -254,8 +253,9 @@ class UtgåendeHendelseMessageBuilderTest {
 
     @Test
     fun `Godkjenningsbehovløsning-hendelse`() {
-        val saksbehandlerIdent = lagSaksbehandlerident()
-        val saksbehandlerEpost = lagTilfeldigSaksbehandlerepost()
+        val annenSaksbehandler = lagSaksbehandler()
+        val saksbehandlerIdent = annenSaksbehandler.ident
+        val saksbehandlerEpost = annenSaksbehandler.epost
         val saksbehandleroverstyringer = listOf(UUID.randomUUID(), UUID.randomUUID())
         val `godkjenningsbehov@opprettet` = LocalDateTime.now()
         val `godkjenningsbehov@id` = UUID.randomUUID()

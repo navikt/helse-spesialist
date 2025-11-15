@@ -2,10 +2,10 @@ package no.nav.helse.spesialist.api.graphql.mutation
 
 import io.mockk.every
 import no.nav.helse.TestRunner.runQuery
-import no.nav.helse.spesialist.api.testfixtures.lagSaksbehandler
 import no.nav.helse.spesialist.api.testfixtures.mutation.fjernPåVentMutation
 import no.nav.helse.spesialist.api.testfixtures.mutation.leggPåVentMutation
 import no.nav.helse.spesialist.domain.testfixtures.jan
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test

@@ -6,9 +6,9 @@ import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_SAKSBEHANDLER
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.vedtak.GodkjenningDto
-import no.nav.helse.spesialist.domain.testfixtures.lagEtternavn
-import no.nav.helse.spesialist.domain.testfixtures.lagFornavn
-import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlerident
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagEtternavn
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFornavn
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandlerident
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue

@@ -7,8 +7,8 @@ import no.nav.helse.Meldingssender
 import no.nav.helse.kafka.KlargjørPersonForVisningRiver
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.modell.person.KlargjørTilgangsrelaterteData
-import no.nav.helse.spesialist.domain.testfixtures.lagAktørId
-import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagAktørId
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import no.nav.helse.spesialist.kafka.medRivers
 import org.junit.jupiter.api.Test
 

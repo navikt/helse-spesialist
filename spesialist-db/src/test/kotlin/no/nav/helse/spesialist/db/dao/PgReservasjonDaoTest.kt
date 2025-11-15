@@ -54,9 +54,9 @@ internal class PgReservasjonDaoTest : AbstractDBIntegrationTest() {
         opprettPerson(fødselsnummer)
         saksbehandlerDao.opprettEllerOppdater(
             SAKSBEHANDLER_OID,
-            "Sara Saksbehandler",
-            "sara.saksbehandler@nav.no",
-            "S999999"
+            SAKSBEHANDLER_NAVN,
+            SAKSBEHANDLER_EPOST,
+            SAKSBEHANDLER_IDENT
         )
     }
 

@@ -6,10 +6,9 @@ import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Oppgave
-import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
-import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
-import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlerOid
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.kafka.TestRapidHelpers.meldinger
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -29,7 +28,7 @@ class OppgavemelderTest {
 
     private val testRapid = TestRapid()
     private val meldingPubliserer: MeldingPubliserer = MessageContextMeldingPubliserer(testRapid)
-    private val saksbehandler = saksbehandler("saksbehandler@nav.no")
+    private val saksbehandler = SaksbehandlerWrapper(lagSaksbehandler())
 
     @Test
     fun `bygg kafkamelding`() {
@@ -75,15 +74,6 @@ class OppgavemelderTest {
         assertEquals(saksbehandler.saksbehandler.id().value, melding["saksbehandler"].asUUID())
         assertEquals(listOf("SØKNAD"), melding["egenskaper"].map { it.asText() })
     }
-
-    private fun saksbehandler(@Suppress("SameParameterValue") epostadresse: String) = SaksbehandlerWrapper(
-        Saksbehandler(
-            id = lagSaksbehandlerOid(),
-            navn = "En Saksbehandler",
-            epost = epostadresse,
-            ident = "S123456",
-        )
-    )
 
     private fun nyOppgave() = Oppgave.ny(
         id = OPPGAVE_ID,

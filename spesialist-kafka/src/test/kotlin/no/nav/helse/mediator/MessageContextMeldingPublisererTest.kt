@@ -16,11 +16,12 @@ import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
-import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
+import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.kafka.TestRapidHelpers.meldinger
 import no.nav.helse.spesialist.kafka.objectMapper
-import no.nav.helse.spesialist.test.lagSaksbehandler
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -198,8 +199,8 @@ internal class MessageContextMeldingPublisererTest {
             egenskaper = setOf(Egenskap.SØKNAD)
         )
 
-        val saksbehandler = lagSaksbehandler()
-        val beslutter = lagSaksbehandler()
+        val saksbehandler = SaksbehandlerWrapper(lagSaksbehandler())
+        val beslutter = SaksbehandlerWrapper(lagSaksbehandler())
         oppgave.forsøkTildeling(
             saksbehandlerWrapper = saksbehandler,
             saksbehandlerTilgangsgrupper = Tilgangsgruppe.entries.toSet()

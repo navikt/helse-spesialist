@@ -36,19 +36,15 @@ import no.nav.helse.spesialist.db.testfixtures.ModuleIsolatedDBTestFixture
 import no.nav.helse.spesialist.domain.Arbeidsgiver
 import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
 import no.nav.helse.spesialist.domain.Dialog
-import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import no.nav.helse.spesialist.domain.testfixtures.jan
-import no.nav.helse.spesialist.domain.testfixtures.lagAktørId
-import no.nav.helse.spesialist.domain.testfixtures.lagEpostadresseFraFulltNavn
-import no.nav.helse.spesialist.domain.testfixtures.lagEtternavn
-import no.nav.helse.spesialist.domain.testfixtures.lagFornavn
-import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
-import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlerOid
-import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlerident
-import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlernavn
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagAktørId
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagEtternavn
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFornavn
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.helse.spesialist.typer.Kjønn
 import org.junit.jupiter.api.AfterEach
@@ -90,17 +86,11 @@ abstract class AbstractDBIntegrationTest {
     private val TOM: LocalDate = LocalDate.of(2018, 1, 31)
     protected val PERIODE = Periode(VEDTAKSPERIODE, FOM, TOM)
 
-    protected val SAKSBEHANDLER_OID: UUID = UUID.randomUUID()
-    protected val SAKSBEHANDLER_EPOST = "sara.saksbehandler@nav.no"
-    protected val SAKSBEHANDLER_NAVN = "Sara Saksbehandler"
-    protected val SAKSBEHANDLER_IDENT = lagSaksbehandlerident()
-    protected val SAKSBEHANDLER =
-        Saksbehandler(
-            id = SaksbehandlerOid(SAKSBEHANDLER_OID),
-            navn = SAKSBEHANDLER_NAVN,
-            epost = SAKSBEHANDLER_EPOST,
-            ident = SAKSBEHANDLER_IDENT,
-        )
+    protected val SAKSBEHANDLER = lagSaksbehandler()
+    protected val SAKSBEHANDLER_OID: UUID = SAKSBEHANDLER.id().value
+    protected val SAKSBEHANDLER_EPOST = SAKSBEHANDLER.epost
+    protected val SAKSBEHANDLER_NAVN = SAKSBEHANDLER.navn
+    protected val SAKSBEHANDLER_IDENT = SAKSBEHANDLER.ident
 
     protected val dataSource = DBDBTestFixture.fixture.module.dataSource
     protected val dbQuery = DataSourceDbQuery(dataSource)
@@ -693,15 +683,8 @@ abstract class AbstractDBIntegrationTest {
         val oppgave: Oppgave,
     )
 
-    protected fun nyLegacySaksbehandler(navn: String = lagSaksbehandlernavn()): SaksbehandlerWrapper {
-        val saksbehandler = SaksbehandlerWrapper(
-            Saksbehandler(
-                id = lagSaksbehandlerOid(),
-                navn = navn,
-                epost = lagEpostadresseFraFulltNavn(navn),
-                ident = lagSaksbehandlerident(),
-            )
-        )
+    protected fun nyLegacySaksbehandler(): SaksbehandlerWrapper {
+        val saksbehandler = SaksbehandlerWrapper(lagSaksbehandler())
         opprettSaksbehandler(
             saksbehandler.saksbehandler.id().value, saksbehandler.saksbehandler.navn,
             saksbehandler.saksbehandler.epost, saksbehandler.saksbehandler.ident

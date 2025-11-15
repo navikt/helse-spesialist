@@ -18,10 +18,8 @@ import no.nav.helse.modell.oppgave.Egenskap.STIKKPRØVE
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
-import no.nav.helse.spesialist.domain.testfixtures.lagEpostadresseFraFulltNavn
-import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
-import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlerident
-import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlernavn
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -38,10 +36,11 @@ internal class OppgaveServiceTest {
     private val UTBETALING_ID_2 = UUID.randomUUID()
     private val HENDELSE_ID = UUID.randomUUID()
     private val OPPGAVE_ID = nextLong()
-    private val SAKSBEHANDLERIDENT = lagSaksbehandlerident()
-    private val SAKSBEHANDLEROID = UUID.randomUUID()
-    private val SAKSBEHANDLERNAVN = lagSaksbehandlernavn()
-    private val SAKSBEHANDLEREPOST = lagEpostadresseFraFulltNavn(SAKSBEHANDLERNAVN)
+    private val SAKSBEHANDLER = lagSaksbehandler()
+    private val SAKSBEHANDLERIDENT = SAKSBEHANDLER.ident
+    private val SAKSBEHANDLEROID = SAKSBEHANDLER.id().value
+    private val SAKSBEHANDLERNAVN = SAKSBEHANDLER.navn
+    private val SAKSBEHANDLEREPOST = SAKSBEHANDLER.epost
     private val EGENSKAP_SØKNAD = SØKNAD
 
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)

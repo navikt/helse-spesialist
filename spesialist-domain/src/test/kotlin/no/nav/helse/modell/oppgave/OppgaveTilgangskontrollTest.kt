@@ -1,10 +1,6 @@
 package no.nav.helse.modell.oppgave
 
-import no.nav.helse.spesialist.domain.Saksbehandler
-import no.nav.helse.spesialist.domain.SaksbehandlerOid
-import no.nav.helse.spesialist.domain.testfixtures.lagEpostadresseFraFulltNavn
-import no.nav.helse.spesialist.domain.testfixtures.lagEtternavn
-import no.nav.helse.spesialist.domain.testfixtures.lagFornavn
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -12,7 +8,6 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.EnumSource
 import org.junit.jupiter.params.provider.MethodSource
-import java.util.UUID
 import java.util.stream.Stream
 
 class OppgaveTilgangskontrollTest {
@@ -22,7 +17,7 @@ class OppgaveTilgangskontrollTest {
         assertFalse(
             Oppgave.harTilgangTilEgenskap(
                 egenskap = egenskap,
-                saksbehandler = lagSaksbehandler(),
+                saksbehandler = lagSaksbehandler(ident = "A123456"),
                 saksbehandlerTilgangsgrupper = Tilgangsgruppe.entries.toSet()
             )
         )
@@ -119,15 +114,5 @@ class OppgaveTilgangskontrollTest {
                     (Tilgangsgruppe.entries - Tilgangsgruppe.TBD).toSet()
                 ),
             )
-    }
-
-    private fun lagSaksbehandler(ident: String = "A123456"): Saksbehandler {
-        val navn = lagFornavn() + " " + lagEtternavn()
-        return Saksbehandler(
-            id = SaksbehandlerOid(UUID.randomUUID()),
-            navn = navn,
-            epost = lagEpostadresseFraFulltNavn(navn),
-            ident = ident,
-        )
     }
 }

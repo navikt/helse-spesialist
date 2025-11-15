@@ -7,9 +7,9 @@ import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.VarselId
 import no.nav.helse.spesialist.domain.VarseldefinisjonId
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
-import no.nav.helse.spesialist.domain.testfixtures.lagEnSaksbehandler
-import no.nav.helse.spesialist.domain.testfixtures.lagFødselsnummer
-import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlerident
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandlerident
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
@@ -30,7 +30,7 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
         val spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID())
         val varselId = VarselId(UUID.randomUUID())
         val fødselsnummer = lagFødselsnummer()
-        val saksbehandler = lagEnSaksbehandler()
+        val saksbehandler = lagSaksbehandler()
         val varseldefinisjonId = VarseldefinisjonId(UUID.randomUUID())
         opprettSaksbehandler(saksbehandler.id().value, saksbehandler.navn, saksbehandler.epost, saksbehandler.ident)
         opprettPerson(fødselsnummer = fødselsnummer)
@@ -72,7 +72,7 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
         val spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID())
         val varselId = VarselId(UUID.randomUUID())
         val fødselsnummer = lagFødselsnummer()
-        val saksbehandler = lagEnSaksbehandler()
+        val saksbehandler = lagSaksbehandler()
         val varseldefinisjonId = VarseldefinisjonId(UUID.randomUUID())
         opprettSaksbehandler(saksbehandler.id().value, saksbehandler.navn, saksbehandler.epost, saksbehandler.ident)
         opprettPerson(fødselsnummer = fødselsnummer)
@@ -116,7 +116,7 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
         val spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID())
         val varselId = VarselId(UUID.randomUUID())
         val fødselsnummer = lagFødselsnummer()
-        val saksbehandler = lagEnSaksbehandler()
+        val saksbehandler = lagSaksbehandler()
         val varseldefinisjonId = VarseldefinisjonId(UUID.randomUUID())
         opprettSaksbehandler(saksbehandler.id().value, saksbehandler.navn, saksbehandler.epost, saksbehandler.ident)
         opprettPerson(fødselsnummer = fødselsnummer)

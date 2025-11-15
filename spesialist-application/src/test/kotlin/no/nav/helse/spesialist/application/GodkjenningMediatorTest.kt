@@ -22,8 +22,7 @@ import no.nav.helse.spesialist.application.Testdata.godkjenningsbehovData
 import no.nav.helse.spesialist.application.modell.inspektør
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import no.nav.helse.spesialist.domain.testfixtures.jan
-import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlerident
-import no.nav.helse.spesialist.domain.testfixtures.lagTilfeldigSaksbehandlerepost
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
@@ -46,13 +45,13 @@ internal class GodkjenningMediatorTest {
         }
     private val mediator = GodkjenningMediator(opptegnelseDao)
 
-    private val saksbehandler =
+    private val løsningSaksbehandler =
         Saksbehandlerløsning.Saksbehandler(
             ident = "saksbehandlerident",
             epostadresse = "saksbehandler@nav.no",
         )
 
-    private val beslutter =
+    private val løsningBeslutter =
         Saksbehandlerløsning.Saksbehandler(
             ident = "beslutterident",
             epostadresse = "beslutter@nav.no",
@@ -69,13 +68,14 @@ internal class GodkjenningMediatorTest {
 
     @Test
     fun `godkjent saksbehandlerløsning medfører VedtaksperiodeGodkjentManuelt`() {
+        val saksbehandler = lagSaksbehandler()
         mediator.saksbehandlerUtbetaling(
             context = context,
             behov = godkjenningsbehovData(),
-            saksbehandlerIdent = lagSaksbehandlerident(),
-            saksbehandlerEpost = lagTilfeldigSaksbehandlerepost(),
-            saksbehandler = saksbehandler,
-            beslutter = beslutter,
+            saksbehandlerIdent = saksbehandler.ident,
+            saksbehandlerEpost = saksbehandler.epost,
+            saksbehandler = løsningSaksbehandler,
+            beslutter = løsningBeslutter,
             godkjenttidspunkt = LocalDateTime.now(),
             saksbehandleroverstyringer = emptyList(),
             sykefraværstilfelle = Sykefraværstilfelle(fnr, 1 jan 2018, listOf(generasjon())),
@@ -86,12 +86,13 @@ internal class GodkjenningMediatorTest {
 
     @Test
     fun `avvist saksbehandlerløsning medfører VedtaksperiodeAvvistManuelt`() {
+        val saksbehandler = lagSaksbehandler()
         mediator.saksbehandlerAvvisning(
             context = context,
             behov = godkjenningsbehovData(),
-            saksbehandlerIdent = lagSaksbehandlerident(),
-            saksbehandlerEpost = lagTilfeldigSaksbehandlerepost(),
-            saksbehandler = saksbehandler,
+            saksbehandlerIdent = saksbehandler.ident,
+            saksbehandlerEpost = saksbehandler.epost,
+            saksbehandler = løsningSaksbehandler,
             godkjenttidspunkt = LocalDateTime.now(),
             saksbehandleroverstyringer = emptyList(),
             utbetaling = utbetaling,
@@ -151,8 +152,8 @@ internal class GodkjenningMediatorTest {
             behov = godkjenningsbehovData(fødselsnummer = fnr),
             saksbehandlerIdent = "1",
             saksbehandlerEpost = "2@nav.no",
-            saksbehandler = saksbehandler,
-            beslutter = beslutter,
+            saksbehandler = løsningSaksbehandler,
+            beslutter = løsningBeslutter,
             godkjenttidspunkt = LocalDateTime.now(),
             saksbehandleroverstyringer = emptyList(),
             sykefraværstilfelle = Sykefraværstilfelle(fnr, 1 jan 2018, listOf(generasjon())),
@@ -168,7 +169,7 @@ internal class GodkjenningMediatorTest {
             behov = godkjenningsbehovData(fødselsnummer = fnr),
             saksbehandlerIdent = "1",
             saksbehandlerEpost = "2@nav.no",
-            saksbehandler = saksbehandler,
+            saksbehandler = løsningSaksbehandler,
             godkjenttidspunkt = LocalDateTime.now(),
             årsak = null,
             begrunnelser = null,
@@ -221,8 +222,8 @@ internal class GodkjenningMediatorTest {
             behov = godkjenningsbehovData(fødselsnummer = fnr),
             saksbehandlerIdent = "Z000000",
             saksbehandlerEpost = "saksbehandler@nav.no",
-            saksbehandler = saksbehandler,
-            beslutter = beslutter,
+            saksbehandler = løsningSaksbehandler,
+            beslutter = løsningBeslutter,
             godkjenttidspunkt = LocalDateTime.now(),
             saksbehandleroverstyringer = emptyList(),
             sykefraværstilfelle = Sykefraværstilfelle(fnr, 1 jan 2018, generasjoner),
