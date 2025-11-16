@@ -107,7 +107,7 @@ class SaksbehandlerMediator(
     ) {
         val modellhandling =
             handlingFraApi.tilModellversjon(
-                saksbehandlerOid = saksbehandler.id(),
+                saksbehandlerOid = saksbehandler.id,
                 saksbehandlerTilgangsgrupper = tilgangsgrupper,
             )
         sessionFactory.transactionalSessionScope { it.saksbehandlerRepository.lagre(saksbehandler) }
@@ -119,7 +119,7 @@ class SaksbehandlerMediator(
 
         withMDC(
             mapOf(
-                "saksbehandlerOid" to saksbehandler.id().value.toString(),
+                "saksbehandlerOid" to saksbehandler.id.value.toString(),
                 "handlingId" to handlingId.toString(),
             ),
         ) {
@@ -204,10 +204,10 @@ class SaksbehandlerMediator(
             if (totrinnsvurdering?.tilstand == AVVENTER_BESLUTTER) {
                 if (Tilgangsgruppe.BESLUTTER !in tilgangsgrupper && !environmentToggles.kanGodkjenneUtenBesluttertilgang) {
                     VedtakResultat.Feil.BeslutterFeil.TrengerBeslutterRolle()
-                } else if (totrinnsvurdering.saksbehandler?.value == saksbehandler.id().value && !environmentToggles.kanBeslutteEgneSaker) {
+                } else if (totrinnsvurdering.saksbehandler?.value == saksbehandler.id.value && !environmentToggles.kanBeslutteEgneSaker) {
                     VedtakResultat.Feil.BeslutterFeil.KanIkkeBeslutteEgenOppgave()
                 } else {
-                    totrinnsvurdering.settBeslutter(saksbehandler.id())
+                    totrinnsvurdering.settBeslutter(saksbehandler.id)
                     totrinnsvurderingRepository.lagre(totrinnsvurdering)
                     null
                 }
@@ -228,7 +228,7 @@ class SaksbehandlerMediator(
 
         withMDC(
             mapOf(
-                "saksbehandlerOid" to saksbehandler.id().value.toString(),
+                "saksbehandlerOid" to saksbehandler.id.value.toString(),
                 "handlingId" to handlingId.toString(),
             ),
         ) {
@@ -286,7 +286,7 @@ class SaksbehandlerMediator(
                 )
             periodehistorikkDao.lagreMedOppgaveId(innslag, handling.oppgaveId)
             oppgaveService.leggPåVent(handling, saksbehandlerWrapper)
-            PåVentRepository(påVentDao).leggPåVent(saksbehandlerWrapper.saksbehandler.id().value, handling, dialogRef)
+            PåVentRepository(påVentDao).leggPåVent(saksbehandlerWrapper.saksbehandler.id.value, handling, dialogRef)
             saksbehandlerWrapper.register(Saksbehandlingsmelder(meldingPubliserer))
             handling.utførAv(saksbehandlerWrapper)
         } catch (e: Modellfeil) {
@@ -311,7 +311,7 @@ class SaksbehandlerMediator(
             )
         periodehistorikkDao.lagreMedOppgaveId(innslag, handling.oppgaveId)
         oppgaveService.endrePåVent(handling, saksbehandlerWrapper)
-        PåVentRepository(påVentDao).endrePåVent(saksbehandlerWrapper.saksbehandler.id().value, handling, dialogRef)
+        PåVentRepository(påVentDao).endrePåVent(saksbehandlerWrapper.saksbehandler.id.value, handling, dialogRef)
 
         saksbehandlerWrapper.register(Saksbehandlingsmelder(meldingPubliserer))
         handling.utførAv(saksbehandlerWrapper)
@@ -353,7 +353,7 @@ class SaksbehandlerMediator(
         personidentifikator: String,
     ) {
         sessionFactory.transactionalSessionScope { it.saksbehandlerRepository.lagre(saksbehandler) }
-        abonnementDao.opprettAbonnement(saksbehandler.id().value, personidentifikator)
+        abonnementDao.opprettAbonnement(saksbehandler.id.value, personidentifikator)
     }
 
     fun hentAbonnerteOpptegnelser(
@@ -361,15 +361,15 @@ class SaksbehandlerMediator(
         sisteSekvensId: Int,
     ): List<ApiOpptegnelse> {
         sessionFactory.transactionalSessionScope { it.saksbehandlerRepository.lagre(saksbehandler) }
-        abonnementDao.registrerSistekvensnummer(saksbehandler.id().value, sisteSekvensId)
-        return opptegnelseRepository.finnOpptegnelser(saksbehandler.id().value).toApiOpptegnelser()
+        abonnementDao.registrerSistekvensnummer(saksbehandler.id.value, sisteSekvensId)
+        return opptegnelseRepository.finnOpptegnelser(saksbehandler.id.value).toApiOpptegnelser()
     }
 
     fun hentAbonnerteOpptegnelser(saksbehandler: Saksbehandler): List<ApiOpptegnelse> =
         sessionFactory
             .transactionalSessionScope { session ->
                 session.saksbehandlerRepository.lagre(saksbehandler)
-                session.opptegnelseDao.finnOpptegnelser(saksbehandler.id().value)
+                session.opptegnelseDao.finnOpptegnelser(saksbehandler.id.value)
             }.toApiOpptegnelser()
 
     private fun List<OpptegnelseDao.Opptegnelse>.toApiOpptegnelser() =
@@ -428,7 +428,7 @@ class SaksbehandlerMediator(
         sikkerlogg.info(
             "Oppgave med {} sendes i retur av beslutter med {}",
             StructuredArguments.kv("oppgaveId", oppgavereferanse),
-            StructuredArguments.kv("oid", besluttendeSaksbehandler.id().value),
+            StructuredArguments.kv("oid", besluttendeSaksbehandler.id.value),
         )
 
         try {
@@ -448,7 +448,7 @@ class SaksbehandlerMediator(
                     }
 
                 apiOppgaveService.sendIRetur(oppgavereferanse, opprinneligSaksbehandler)
-                totrinnsvurdering.sendIRetur(oppgavereferanse, SaksbehandlerOid(besluttendeSaksbehandler.id().value))
+                totrinnsvurdering.sendIRetur(oppgavereferanse, SaksbehandlerOid(besluttendeSaksbehandler.id.value))
                 session.totrinnsvurderingRepository.lagre(totrinnsvurdering)
             }
         } catch (modellfeil: Modellfeil) {
@@ -507,7 +507,7 @@ class SaksbehandlerMediator(
                     utfall = hentUtfallFraBehandling(spleisBehandlingId, sessionContext),
                     begrunnelse = begrunnelse,
                     oppgaveId = oppgavereferanse,
-                    saksbehandlerOid = saksbehandler.id().value,
+                    saksbehandlerOid = saksbehandler.id.value,
                 )
             } catch (e: Exception) {
                 return@transactionalSessionScope SendTilGodkjenningResult.Feil.KunneIkkeHåndtereBegrunnelse(e)
@@ -526,7 +526,7 @@ class SaksbehandlerMediator(
                             ?.let(session.saksbehandlerRepository::finn)
                             ?.let { SaksbehandlerWrapper(saksbehandler = it) }
                     apiOppgaveService.sendTilBeslutter(oppgavereferanse, beslutter)
-                    totrinnsvurdering.sendTilBeslutter(oppgavereferanse, saksbehandler.id())
+                    totrinnsvurdering.sendTilBeslutter(oppgavereferanse, saksbehandler.id)
                     session.totrinnsvurderingRepository.lagre(totrinnsvurdering)
                 }
             } catch (modellfeil: Modellfeil) {
@@ -548,7 +548,7 @@ class SaksbehandlerMediator(
             sikkerlogg.info(
                 "Oppgave med {} sendes til godkjenning av saksbehandler med {}",
                 StructuredArguments.kv("oppgaveId", oppgavereferanse),
-                StructuredArguments.kv("oid", saksbehandler.id().value),
+                StructuredArguments.kv("oid", saksbehandler.id.value),
             )
 
             try {
@@ -607,7 +607,7 @@ class SaksbehandlerMediator(
                     TildelingApiDto(
                         saksbehandler.saksbehandler.navn,
                         saksbehandler.saksbehandler.epost,
-                        saksbehandler.saksbehandler.id().value,
+                        saksbehandler.saksbehandler.id.value,
                     ),
                 )
             }
@@ -825,7 +825,7 @@ private fun overstyringUnitOfWork(
 
         val fødselsnummer = overstyring.fødselsnummer
         sikkerlogg.info("Reserverer person $fødselsnummer til saksbehandler $saksbehandler")
-        session.reservasjonDao.reserverPerson(saksbehandler.id().value, fødselsnummer)
+        session.reservasjonDao.reserverPerson(saksbehandler.id.value, fødselsnummer)
 
         val totrinnsvurdering =
             session.totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer) ?: Totrinnsvurdering.ny(fødselsnummer)

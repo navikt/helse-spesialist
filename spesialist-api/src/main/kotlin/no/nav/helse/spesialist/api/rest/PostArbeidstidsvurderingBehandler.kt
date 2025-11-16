@@ -47,7 +47,7 @@ class PostArbeidstidsvurderingBehandler : PostBehandler<Personer.PersonPseudoId.
             MinimumSykdomsgrad.ny(
                 aktørId = request.aktørId,
                 fødselsnummer = request.fødselsnummer,
-                saksbehandlerOid = saksbehandler.id(),
+                saksbehandlerOid = saksbehandler.id,
                 perioderVurdertOk =
                     request.perioderVurdertOk.map {
                         MinimumSykdomsgradPeriode(
@@ -74,7 +74,7 @@ class PostArbeidstidsvurderingBehandler : PostBehandler<Personer.PersonPseudoId.
             )
 
         sikkerlogg.info("Reserverer person $fødselsnummer til saksbehandler $saksbehandler")
-        transaksjon.reservasjonDao.reserverPerson(saksbehandler.id().value, fødselsnummer)
+        transaksjon.reservasjonDao.reserverPerson(saksbehandler.id.value, fødselsnummer)
 
         val totrinnsvurdering =
             transaksjon.totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)
@@ -84,7 +84,7 @@ class PostArbeidstidsvurderingBehandler : PostBehandler<Personer.PersonPseudoId.
 
         val event =
             overstyring.byggEvent(
-                oid = saksbehandler.id().value,
+                oid = saksbehandler.id.value,
                 navn = saksbehandler.navn,
                 epost = saksbehandler.epost,
                 ident = saksbehandler.ident,

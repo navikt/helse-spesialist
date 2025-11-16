@@ -39,7 +39,7 @@ internal class SaksbehandlerWrapperTest {
                 organisasjonsnummer = "12345",
                 dager = emptyList(),
                 begrunnelse = "begrunnelse",
-                saksbehandlerOid = saksbehandler.saksbehandler.id(),
+                saksbehandlerOid = saksbehandler.saksbehandler.id,
             )
         )
         assertEquals(true, observert)
@@ -64,7 +64,7 @@ internal class SaksbehandlerWrapperTest {
             organisasjonsnummer = "12345",
             dager = overstyrteDager(),
             begrunnelse = "begrunnelse",
-            saksbehandlerOid = saksbehandler.saksbehandler.id(),
+            saksbehandlerOid = saksbehandler.saksbehandler.id,
         )
         saksbehandler.håndter(
             overstyring
@@ -164,7 +164,7 @@ internal class SaksbehandlerWrapperTest {
                 skjæringstidspunkt = 1 jan 2018,
                 arbeidsgivere = emptyList(),
                 vedtaksperiodeId = UUID.randomUUID(),
-                saksbehandlerOid = saksbehandler.saksbehandler.id(),
+                saksbehandlerOid = saksbehandler.saksbehandler.id,
             )
         )
         assertEquals(true, observert)
@@ -188,7 +188,7 @@ internal class SaksbehandlerWrapperTest {
                 skjæringstidspunkt = 1 jan 2018,
                 overstyrteArbeidsforhold = emptyList(),
                 vedtaksperiodeId = UUID.randomUUID(),
-                saksbehandlerOid = saksbehandler.saksbehandler.id(),
+                saksbehandlerOid = saksbehandler.saksbehandler.id,
             )
         )
         assertEquals(true, observert)

@@ -89,7 +89,7 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
         repository.lagre(oppgave)
         val funnetOppgave = repository.finn(oppgave.id)
         assertNotNull(funnetOppgave)
-        assertEquals(saksbehandler.saksbehandler.id(), funnetOppgave.tildeltTil)
+        assertEquals(saksbehandler.saksbehandler.id, funnetOppgave.tildeltTil)
     }
 
     @Test
@@ -139,7 +139,7 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
     @Test
     fun `endre tilstand`() {
         opprettSaksbehandler(
-            saksbehandler.saksbehandler.id().value, saksbehandler.saksbehandler.navn,
+            saksbehandler.saksbehandler.id.value, saksbehandler.saksbehandler.navn,
             saksbehandler.saksbehandler.epost, saksbehandler.saksbehandler.ident
         )
         val oppgave = Oppgave.ny(
@@ -153,7 +153,7 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
             egenskaper = setOf(SØKNAD)
         )
         repository.lagre(oppgave)
-        oppgave.avventerSystem(saksbehandler.saksbehandler.ident, saksbehandler.saksbehandler.id().value)
+        oppgave.avventerSystem(saksbehandler.saksbehandler.ident, saksbehandler.saksbehandler.id.value)
         repository.lagre(oppgave)
         val funnetOppgave = repository.finn(oppgave.id)
         assertNotNull(funnetOppgave)
@@ -163,7 +163,7 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
     @Test
     fun ferdigstill() {
         opprettSaksbehandler(
-            saksbehandler.saksbehandler.id().value, saksbehandler.saksbehandler.navn,
+            saksbehandler.saksbehandler.id.value, saksbehandler.saksbehandler.navn,
             saksbehandler.saksbehandler.epost, saksbehandler.saksbehandler.ident
         )
         val oppgave = Oppgave.ny(
@@ -177,14 +177,14 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
             egenskaper = setOf(SØKNAD)
         )
         repository.lagre(oppgave)
-        oppgave.avventerSystem(saksbehandler.saksbehandler.ident, saksbehandler.saksbehandler.id().value)
+        oppgave.avventerSystem(saksbehandler.saksbehandler.ident, saksbehandler.saksbehandler.id.value)
         oppgave.ferdigstill()
         repository.lagre(oppgave)
         val funnetOppgave = repository.finn(oppgave.id)
         assertNotNull(funnetOppgave)
         assertEquals(Oppgave.Ferdigstilt, funnetOppgave.tilstand)
         assertEquals(saksbehandler.saksbehandler.ident, funnetOppgave.ferdigstiltAvIdent)
-        assertEquals(saksbehandler.saksbehandler.id().value, funnetOppgave.ferdigstiltAvOid)
+        assertEquals(saksbehandler.saksbehandler.id.value, funnetOppgave.ferdigstiltAvOid)
     }
 
     @Test
@@ -227,7 +227,7 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
             kanAvvises = true,
             egenskaper = setOf(SØKNAD)
         )
-        oppgave1.avventerSystem(saksbehandler.saksbehandler.ident, saksbehandler.saksbehandler.id().value)
+        oppgave1.avventerSystem(saksbehandler.saksbehandler.ident, saksbehandler.saksbehandler.id.value)
         oppgave1.ferdigstill()
         val oppgave2 = Oppgave.ny(
             id = nextLong(),
@@ -275,7 +275,7 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
             kanAvvises = true,
             egenskaper = setOf(SØKNAD)
         )
-        oppgave.avventerSystem(saksbehandler.saksbehandler.ident, saksbehandler.saksbehandler.id().value)
+        oppgave.avventerSystem(saksbehandler.saksbehandler.ident, saksbehandler.saksbehandler.id.value)
         repository.lagre(oppgave)
 
         val oppgaveTilstand = repository.finnSisteOppgaveForUtbetaling(utbetalingId)?.tilstand
@@ -294,7 +294,7 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
             kanAvvises = true,
             egenskaper = setOf(SØKNAD)
         )
-        oppgave.avventerSystem(saksbehandler.saksbehandler.ident, saksbehandler.saksbehandler.id().value)
+        oppgave.avventerSystem(saksbehandler.saksbehandler.ident, saksbehandler.saksbehandler.id.value)
         oppgave.ferdigstill()
         repository.lagre(oppgave)
 
@@ -314,7 +314,7 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
             kanAvvises = true,
             egenskaper = setOf(SØKNAD)
         )
-        oppgave.avventerSystem(saksbehandler.saksbehandler.ident, saksbehandler.saksbehandler.id().value)
+        oppgave.avventerSystem(saksbehandler.saksbehandler.ident, saksbehandler.saksbehandler.id.value)
         oppgave.avbryt()
         repository.lagre(oppgave)
 
@@ -335,7 +335,7 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
             kanAvvises = true,
             egenskaper = setOf(SØKNAD)
         )
-        gammelOppgave.avventerSystem(saksbehandler.saksbehandler.ident, saksbehandler.saksbehandler.id().value)
+        gammelOppgave.avventerSystem(saksbehandler.saksbehandler.ident, saksbehandler.saksbehandler.id.value)
         gammelOppgave.avbryt()
         repository.lagre(gammelOppgave)
 
@@ -349,7 +349,7 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
             kanAvvises = true,
             egenskaper = setOf(SØKNAD)
         )
-        oppgave.avventerSystem(saksbehandler.saksbehandler.ident, saksbehandler.saksbehandler.id().value)
+        oppgave.avventerSystem(saksbehandler.saksbehandler.ident, saksbehandler.saksbehandler.id.value)
         oppgave.ferdigstill()
         repository.lagre(oppgave)
 
@@ -370,7 +370,7 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
             kanAvvises = true,
             egenskaper = setOf(SØKNAD)
         )
-        førsteOppgave.avventerSystem(saksbehandler.saksbehandler.ident, saksbehandler.saksbehandler.id().value)
+        førsteOppgave.avventerSystem(saksbehandler.saksbehandler.ident, saksbehandler.saksbehandler.id.value)
         førsteOppgave.avbryt()
         repository.lagre(førsteOppgave)
         val lagretFørsteOppgave = repository.finn(førsteOppgave.id)
@@ -389,7 +389,7 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
             kanAvvises = true,
             egenskaper = setOf(SØKNAD)
         )
-        andreOppgave.avventerSystem(saksbehandler.saksbehandler.ident, saksbehandler.saksbehandler.id().value)
+        andreOppgave.avventerSystem(saksbehandler.saksbehandler.ident, saksbehandler.saksbehandler.id.value)
         andreOppgave.avbryt()
         repository.lagre(andreOppgave)
         val lagretAndreOppgave = repository.finn(andreOppgave.id)

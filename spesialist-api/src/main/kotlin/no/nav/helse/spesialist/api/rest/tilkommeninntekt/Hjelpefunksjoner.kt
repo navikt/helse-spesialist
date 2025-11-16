@@ -29,7 +29,7 @@ internal fun harTilgangTilPerson(
             personDao = transaksjon.personDao,
         )
     ) {
-        sikkerlogg.warn("Saksbehandler ${saksbehandler.id().value} har ikke tilgang til person med fødselsnummer $fødselsnummer")
+        sikkerlogg.warn("Saksbehandler ${saksbehandler.id.value} har ikke tilgang til person med fødselsnummer $fødselsnummer")
         return false
     }
     return true

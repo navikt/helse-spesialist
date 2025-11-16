@@ -33,7 +33,7 @@ class TildelingMutationHandlerTest {
                     saksbehandler = saksbehandler,
                     tilgangsgrupper = emptySet()
                 ) }
-                assertEquals(saksbehandler.id().value, UUID.fromString(body["data"]["opprettTildeling"]["oid"].asText()))
+                assertEquals(saksbehandler.id.value, UUID.fromString(body["data"]["opprettTildeling"]["oid"].asText()))
             }
         )
     }

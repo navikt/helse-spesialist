@@ -1,6 +1,6 @@
 package no.nav.helse.spesialist.domain
 
-import no.nav.helse.spesialist.domain.ddd.AggregateRoot
+import no.nav.helse.spesialist.domain.ddd.LateIdAggregateRoot
 import no.nav.helse.spesialist.domain.ddd.ValueObject
 import java.time.LocalDate
 
@@ -42,7 +42,7 @@ class Person private constructor(
     val enhetRefOppdatert: LocalDate?,
     val infotrygdutbetalingerRef: Int?,
     val infotrygdutbetalingerOppdatert: LocalDate?,
-) : AggregateRoot<PersonId>(id) {
+) : LateIdAggregateRoot<PersonId>(id) {
     var info: Personinfo? = info
         private set
     var infoOppdatert: LocalDate? = infoOppdatert

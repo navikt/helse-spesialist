@@ -532,7 +532,7 @@ class OpprettEllerOppdaterInntektskilderTest {
         forventetNavn: String,
     ) {
         assertNotNull(this)
-        assertEquals(forventetIdentifikator, this.id())
+        assertEquals(forventetIdentifikator, this.id)
         assertEquals(forventetNavn, this.navn.navn)
     }
 

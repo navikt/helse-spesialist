@@ -51,7 +51,7 @@ class VedtakMutationHandler(
                         begrunnelser = begrunnelser,
                         kommentar = kommentar,
                     )
-                godkjenninghåndterer.håndter(godkjenning, saksbehandler.epost, saksbehandler.id().value)
+                godkjenninghåndterer.håndter(godkjenning, saksbehandler.epost, saksbehandler.id.value)
                 byggRespons(true)
             }
 

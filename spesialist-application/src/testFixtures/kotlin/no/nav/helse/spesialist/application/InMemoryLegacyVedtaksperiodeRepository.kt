@@ -28,10 +28,10 @@ class InMemoryLegacyVedtaksperiodeRepository(
 
     override fun lagreVedtaksperioder(fødselsnummer: String, vedtaksperioder: List<VedtaksperiodeDto>) {
         vedtaksperiodeRepository.alle().filter { it.fødselsnummer == fødselsnummer }.forEach { vedtaksperiode ->
-            behandlingRepository.alle().filter { it.vedtaksperiodeId == vedtaksperiode.id() }.forEach { behandling ->
-                behandlingRepository.slett(behandling.id())
+            behandlingRepository.alle().filter { it.vedtaksperiodeId == vedtaksperiode.id }.forEach { behandling ->
+                behandlingRepository.slett(behandling.id)
             }
-            vedtaksperiodeRepository.slett(vedtaksperiode.id())
+            vedtaksperiodeRepository.slett(vedtaksperiode.id)
         }
         vedtaksperioder.forEach { vedtaksperiode ->
             val vedtaksperiodeId = VedtaksperiodeId(vedtaksperiode.vedtaksperiodeId)
@@ -77,13 +77,13 @@ class InMemoryLegacyVedtaksperiodeRepository(
     private fun Vedtaksperiode.toVedtaksperiodeDto(): VedtaksperiodeDto =
         VedtaksperiodeDto(
             organisasjonsnummer = organisasjonsnummer,
-            vedtaksperiodeId = id().value,
+            vedtaksperiodeId = id.value,
             forkastet = forkastet,
             behandlinger = behandlingRepository.alle()
-                .filter { it.vedtaksperiodeId == id() }
+                .filter { it.vedtaksperiodeId == id }
                 .map { behandling ->
                     BehandlingDto(
-                        id = behandling.id().value,
+                        id = behandling.id.value,
                         vedtaksperiodeId = behandling.vedtaksperiodeId.value,
                         utbetalingId = behandling.utbetalingId?.value,
                         spleisBehandlingId = behandling.spleisBehandlingId?.value,
@@ -106,13 +106,13 @@ class InMemoryLegacyVedtaksperiodeRepository(
                                     begrunnelse = it.tekst
                                 )
                             },
-                        varsler = varselRepository.finnVarslerFor(listOf(behandling.id()))
+                        varsler = varselRepository.finnVarslerFor(listOf(behandling.id))
                             .map { varsel ->
                                 VarselDto(
-                                    id = varsel.id().value,
+                                    id = varsel.id.value,
                                     varselkode = varsel.kode,
                                     opprettet = varsel.opprettetTidspunkt,
-                                    vedtaksperiodeId = id().value,
+                                    vedtaksperiodeId = id.value,
                                     status = when (varsel.status) {
                                         Varsel.Status.AKTIV -> VarselStatusDto.AKTIV
                                         Varsel.Status.INAKTIV -> VarselStatusDto.INAKTIV

@@ -21,7 +21,7 @@ internal class PgArbeidsgiverRepository(
             ON CONFLICT (identifikator) DO UPDATE
             SET navn = excluded.navn, navn_sist_oppdatert_dato = excluded.navn_sist_oppdatert_dato
             """.trimIndent(),
-            "identifikator" to arbeidsgiver.id().tilDbIdentifikator(),
+            "identifikator" to arbeidsgiver.id.tilDbIdentifikator(),
             "navn" to arbeidsgiver.navn.navn,
             "navn_sist_oppdatert_dato" to arbeidsgiver.navn.sistOppdatertDato,
         ).update()

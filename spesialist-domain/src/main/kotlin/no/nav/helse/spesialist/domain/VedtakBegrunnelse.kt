@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.domain
 
 import no.nav.helse.modell.vedtak.Utfall
-import no.nav.helse.spesialist.domain.ddd.AggregateRoot
+import no.nav.helse.spesialist.domain.ddd.LateIdAggregateRoot
 
 @JvmInline
 value class VedtakBegrunnelseId(
@@ -9,13 +9,13 @@ value class VedtakBegrunnelseId(
 )
 
 class VedtakBegrunnelse private constructor(
-    val id: VedtakBegrunnelseId?,
+    id: VedtakBegrunnelseId?,
     val spleisBehandlingId: SpleisBehandlingId,
     val tekst: String,
     val utfall: Utfall,
     invalidert: Boolean,
     val saksbehandlerOid: SaksbehandlerOid,
-) : AggregateRoot<VedtakBegrunnelseId>(id) {
+) : LateIdAggregateRoot<VedtakBegrunnelseId>(id) {
     var invalidert: Boolean = invalidert
         private set
 

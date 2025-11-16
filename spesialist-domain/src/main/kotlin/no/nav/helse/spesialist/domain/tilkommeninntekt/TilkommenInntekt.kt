@@ -70,7 +70,7 @@ class TilkommenInntekt private constructor(
             apply(
                 TilkommenInntektEndretEvent(
                     TilkommenInntektEvent.Metadata(
-                        tilkommenInntektId = id(),
+                        tilkommenInntektId = id,
                         sekvensnummer = versjon + 1,
                         tidspunkt = Instant.now(),
                         utførtAvSaksbehandlerIdent = saksbehandlerIdent,
@@ -98,7 +98,7 @@ class TilkommenInntekt private constructor(
         apply(
             TilkommenInntektFjernetEvent(
                 TilkommenInntektEvent.Metadata(
-                    tilkommenInntektId = id(),
+                    tilkommenInntektId = id,
                     sekvensnummer = versjon + 1,
                     tidspunkt = Instant.now(),
                     utførtAvSaksbehandlerIdent = saksbehandlerIdent,
@@ -121,7 +121,7 @@ class TilkommenInntekt private constructor(
         apply(
             TilkommenInntektGjenopprettetEvent(
                 TilkommenInntektEvent.Metadata(
-                    tilkommenInntektId = id(),
+                    tilkommenInntektId = id,
                     sekvensnummer = versjon + 1,
                     tidspunkt = Instant.now(),
                     utførtAvSaksbehandlerIdent = saksbehandlerIdent,

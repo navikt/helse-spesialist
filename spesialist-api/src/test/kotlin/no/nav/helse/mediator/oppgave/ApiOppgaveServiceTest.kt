@@ -34,7 +34,7 @@ import kotlin.random.Random
 internal class ApiOppgaveServiceTest {
     private val SAKSBEHANDLER = lagSaksbehandler()
     private val SAKSBEHANDLERIDENT = SAKSBEHANDLER.ident
-    private val SAKSBEHANDLEROID = SAKSBEHANDLER.id().value
+    private val SAKSBEHANDLEROID = SAKSBEHANDLER.id.value
     private val SAKSBEHANDLERNAVN = SAKSBEHANDLER.navn
     private val SAKSBEHANDLEREPOST = SAKSBEHANDLER.epost
     private val EGENSKAPER =

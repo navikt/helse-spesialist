@@ -46,7 +46,7 @@ class PostVedtaksperiodeAnnullerBehandler : PostBehandler<Vedtaksperioder.Id.Ann
                 Annullering.Factory.ny(
                     arbeidsgiverFagsystemId = request.arbeidsgiverFagsystemId,
                     personFagsystemId = request.personFagsystemId,
-                    saksbehandlerOid = saksbehandler.id(),
+                    saksbehandlerOid = saksbehandler.id,
                     vedtaksperiodeId = vedtaksperiodeId,
                     årsaker = request.årsaker.map { it.årsak },
                     kommentar = request.kommentar,
@@ -59,7 +59,7 @@ class PostVedtaksperiodeAnnullerBehandler : PostBehandler<Vedtaksperioder.Id.Ann
                 AnnullertUtbetalingEvent(
                     fødselsnummer = vedtaksperiode.fødselsnummer,
                     organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
-                    saksbehandlerOid = saksbehandler.id().value,
+                    saksbehandlerOid = saksbehandler.id.value,
                     saksbehandlerIdent = saksbehandler.ident,
                     saksbehandlerEpost = saksbehandler.epost,
                     vedtaksperiodeId = vedtaksperiodeId,

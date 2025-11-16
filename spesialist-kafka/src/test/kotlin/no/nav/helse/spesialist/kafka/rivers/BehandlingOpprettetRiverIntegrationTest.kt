@@ -53,7 +53,7 @@ class BehandlingOpprettetRiverIntegrationTest {
 
         // Then:
         val vedtaksperiode = sessionContext.vedtaksperiodeRepository.alle().single()
-        assertEquals(vedtaksperiodeId, vedtaksperiode.id())
+        assertEquals(vedtaksperiodeId, vedtaksperiode.id)
         assertEquals(person.identitetsnummer.value, vedtaksperiode.fødselsnummer)
         assertEquals(organisasjonsnummer, vedtaksperiode.organisasjonsnummer)
         assertEquals(false, vedtaksperiode.forkastet)
@@ -83,7 +83,7 @@ class BehandlingOpprettetRiverIntegrationTest {
             .also(sessionContext.vedtaksperiodeRepository::lagre)
 
         val eksisterendeBehandling = lagBehandling(
-            vedtaksperiodeId = vedtaksperiode.id(),
+            vedtaksperiodeId = vedtaksperiode.id,
             tags = setOf("Tag 1", "Tag 2"),
             tilstand = Behandling.Tilstand.KlarTilBehandling,
             utbetalingId = UtbetalingId(UUID.randomUUID()),
@@ -98,7 +98,7 @@ class BehandlingOpprettetRiverIntegrationTest {
         testRapid.sendTestMessage(
             behandlingOpprettetMelding(
                 person = person,
-                vedtaksperiodeId = vedtaksperiode.id(),
+                vedtaksperiodeId = vedtaksperiode.id,
                 spleisBehandlingId = spleisBehandlingId,
                 yrkesaktivitetstype = "ARBEIDSTAKER",
                 organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
@@ -114,7 +114,7 @@ class BehandlingOpprettetRiverIntegrationTest {
         assertEquals(2, behandlinger.size)
         val behandling = behandlinger.first { it.spleisBehandlingId == spleisBehandlingId }
         assertEquals(spleisBehandlingId, behandling.spleisBehandlingId)
-        assertEquals(vedtaksperiode.id(), behandling.vedtaksperiodeId)
+        assertEquals(vedtaksperiode.id, behandling.vedtaksperiodeId)
         assertEquals(null, behandling.utbetalingId)
         assertEquals(emptySet<String>(), behandling.tags)
         assertEquals(Behandling.Tilstand.VidereBehandlingAvklares, behandling.tilstand)
@@ -144,7 +144,7 @@ class BehandlingOpprettetRiverIntegrationTest {
         val utbetalingId = UtbetalingId(UUID.randomUUID())
         val tags = setOf("Tag 1", "Tag 2")
         val eksisterendeBehandling = lagBehandling(
-            vedtaksperiodeId = vedtaksperiode.id(),
+            vedtaksperiodeId = vedtaksperiode.id,
             fom = fom,
             tom = tom,
             tilstand = Behandling.Tilstand.KlarTilBehandling,
@@ -157,7 +157,7 @@ class BehandlingOpprettetRiverIntegrationTest {
         testRapid.sendTestMessage(
             behandlingOpprettetMelding(
                 person = person,
-                vedtaksperiodeId = vedtaksperiode.id(),
+                vedtaksperiodeId = vedtaksperiode.id,
                 spleisBehandlingId = eksisterendeBehandling.spleisBehandlingId!!,
                 yrkesaktivitetstype = "ARBEIDSTAKER",
                 organisasjonsnummer = lagOrganisasjonsnummer(),
@@ -171,7 +171,7 @@ class BehandlingOpprettetRiverIntegrationTest {
 
         val behandling = sessionContext.behandlingRepository.alle().single()
         assertEquals(eksisterendeBehandling, behandling)
-        assertEquals(vedtaksperiode.id(), behandling.vedtaksperiodeId)
+        assertEquals(vedtaksperiode.id, behandling.vedtaksperiodeId)
         assertEquals(utbetalingId, behandling.utbetalingId)
         assertEquals(tags, behandling.tags)
         assertEquals(Behandling.Tilstand.KlarTilBehandling, behandling.tilstand)
@@ -264,7 +264,7 @@ class BehandlingOpprettetRiverIntegrationTest {
 
         // Then:
         val vedtaksperiode = sessionContext.vedtaksperiodeRepository.alle().single()
-        assertEquals(vedtaksperiodeId, vedtaksperiode.id())
+        assertEquals(vedtaksperiodeId, vedtaksperiode.id)
         assertEquals(person.identitetsnummer.value, vedtaksperiode.fødselsnummer)
         assertEquals("SELVSTENDIG", vedtaksperiode.organisasjonsnummer)
         assertEquals(false, vedtaksperiode.forkastet)

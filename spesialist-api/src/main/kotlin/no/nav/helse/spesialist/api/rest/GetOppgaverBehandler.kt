@@ -44,7 +44,7 @@ class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide, Ap
                         erTildelt = resource.erTildelt,
                         tildeltTilOid = resource.tildeltTilOid?.let(::SaksbehandlerOid),
                         erPåVent = resource.erPaaVent,
-                        ikkeSendtTilBeslutterAvOid = saksbehandler.id(),
+                        ikkeSendtTilBeslutterAvOid = saksbehandler.id,
                         sorterPå =
                             when (resource.sorteringsfelt) {
                                 null,
@@ -158,7 +158,7 @@ class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide, Ap
                             .mapNotNull { it.tildeltTilOid }
                             .plus(påVenter.values.map { it.saksbehandlerOid })
                             .toSet(),
-                    ).associateBy { it.id() }
+                    ).associateBy { it.id }
             }.let {
                 logg.info("Hentet saksbehandlere for oppgaver. Brukte ${it.duration.inWholeMilliseconds} ms.")
                 it.value
@@ -193,7 +193,7 @@ class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide, Ap
                                     ApiTildeling(
                                         navn = tildeltSaksbehandler.navn,
                                         epost = tildeltSaksbehandler.epost,
-                                        oid = tildeltSaksbehandler.id().value,
+                                        oid = tildeltSaksbehandler.id.value,
                                     )
                                 },
                         opprettetTidspunkt = oppgave.opprettetTidspunkt,

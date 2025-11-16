@@ -57,7 +57,7 @@ internal class OpprettEllerOppdaterInntektskilder(
         return false
     }
 
-    private fun Arbeidsgiver.toLogString(): String = "${id()}, $navn"
+    private fun Arbeidsgiver.toLogString(): String = "$id, $navn"
 
     override fun resume(context: CommandContext): Boolean {
         val (nyeArbeidsgiverIdentifikatorer, utdaterteArbeidsgivere) = finnNyeOgUtdaterteArbeidsgivere()
@@ -76,7 +76,7 @@ internal class OpprettEllerOppdaterInntektskilder(
         }
 
         utdaterteArbeidsgivere.forEach { arbeidsgiver ->
-            val identifikator = arbeidsgiver.id()
+            val identifikator = arbeidsgiver.id
             val navnFraLøsning = finnNavnILøsninger(identifikator, context)
             if (navnFraLøsning != null) {
                 arbeidsgiver.oppdaterMedNavn(navnFraLøsning)

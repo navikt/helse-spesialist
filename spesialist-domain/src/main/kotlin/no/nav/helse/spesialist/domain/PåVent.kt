@@ -1,6 +1,6 @@
 package no.nav.helse.spesialist.domain
 
-import no.nav.helse.spesialist.domain.ddd.AggregateRoot
+import no.nav.helse.spesialist.domain.ddd.LateIdAggregateRoot
 import java.time.Instant
 import java.time.LocalDate
 import java.util.UUID
@@ -19,7 +19,7 @@ class PåVent private constructor(
     val dialogRef: DialogId?,
     val årsaker: List<String>,
     val notattekst: String?,
-) : AggregateRoot<PåVentId>(id) {
+) : LateIdAggregateRoot<PåVentId>(id) {
     object Factory {
         fun ny(
             vedtaksperiodeId: UUID,

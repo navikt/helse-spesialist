@@ -25,11 +25,11 @@ class PgArbeidsgiverRepositoryTest : AbstractDBIntegrationTest() {
 
         // When:
         arbeidsgiverRepository.lagre(arbeidsgiver)
-        val actualArbeidsgiver = arbeidsgiverRepository.finn(arbeidsgiver.id())
+        val actualArbeidsgiver = arbeidsgiverRepository.finn(arbeidsgiver.id)
 
         // Then:
         assertNotNull(actualArbeidsgiver)
-        assertEquals(identifikator, actualArbeidsgiver!!.id())
+        assertEquals(identifikator, actualArbeidsgiver!!.id)
         assertEquals(organisasjonsnavn, actualArbeidsgiver.navn.navn)
         assertEquals(LocalDate.now(), actualArbeidsgiver.navn.sistOppdatertDato)
     }
@@ -49,11 +49,11 @@ class PgArbeidsgiverRepositoryTest : AbstractDBIntegrationTest() {
         // When:
         lagretArbeidsgiver!!.oppdaterMedNavn(nyttOrganisasjonsnavn)
         arbeidsgiverRepository.lagre(lagretArbeidsgiver)
-        val actualArbeidsgiver = arbeidsgiverRepository.finn(arbeidsgiver.id())
+        val actualArbeidsgiver = arbeidsgiverRepository.finn(arbeidsgiver.id)
 
         // Then:
         assertNotNull(actualArbeidsgiver)
-        assertEquals(identifikator, actualArbeidsgiver!!.id())
+        assertEquals(identifikator, actualArbeidsgiver!!.id)
         assertEquals(nyttOrganisasjonsnavn, actualArbeidsgiver.navn.navn)
         assertEquals(LocalDate.now(), actualArbeidsgiver.navn.sistOppdatertDato)
     }
@@ -73,7 +73,7 @@ class PgArbeidsgiverRepositoryTest : AbstractDBIntegrationTest() {
 
         // Then:
         assertNotNull(actualArbeidsgiver)
-        assertEquals(identifikator, actualArbeidsgiver!!.id())
+        assertEquals(identifikator, actualArbeidsgiver!!.id)
         assertEquals(organisasjonsnavn, actualArbeidsgiver.navn.navn)
         assertEquals(LocalDate.now(), actualArbeidsgiver.navn.sistOppdatertDato)
     }
@@ -94,7 +94,7 @@ class PgArbeidsgiverRepositoryTest : AbstractDBIntegrationTest() {
         // Then:
         assertEquals(1, actualArbeidsgivere.size)
         val actualArbeidsgiver = actualArbeidsgivere.first()
-        assertEquals(identifikator, actualArbeidsgiver.id())
+        assertEquals(identifikator, actualArbeidsgiver.id)
         assertEquals(organisasjonsnavn, actualArbeidsgiver.navn.navn)
         assertEquals(LocalDate.now(), actualArbeidsgiver.navn.sistOppdatertDato)
     }
@@ -111,9 +111,9 @@ class PgArbeidsgiverRepositoryTest : AbstractDBIntegrationTest() {
         arbeidsgiverRepository.lagre(arbeidsgiver)
 
         // Then:
-        val actualArbeidsgiver = arbeidsgiverRepository.finn(arbeidsgiver.id())
+        val actualArbeidsgiver = arbeidsgiverRepository.finn(arbeidsgiver.id)
         assertNotNull(actualArbeidsgiver)
-        assertEquals(identifikator, actualArbeidsgiver!!.id())
+        assertEquals(identifikator, actualArbeidsgiver!!.id)
     }
 
     @Test
@@ -128,8 +128,8 @@ class PgArbeidsgiverRepositoryTest : AbstractDBIntegrationTest() {
         arbeidsgiverRepository.lagre(arbeidsgiver)
 
         // Then:
-        val actualArbeidsgiver = arbeidsgiverRepository.finn(arbeidsgiver.id())
+        val actualArbeidsgiver = arbeidsgiverRepository.finn(arbeidsgiver.id)
         assertNotNull(actualArbeidsgiver)
-        assertEquals(identifikator, actualArbeidsgiver!!.id())
+        assertEquals(identifikator, actualArbeidsgiver!!.id)
     }
 }

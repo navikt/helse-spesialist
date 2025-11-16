@@ -36,7 +36,7 @@ class PostOpphevStansBehandler : PostBehandler<Opphevstans, ApiOpphevStansReques
                 transaksjon.oppgaveDao.finnOppgaveId(fødselsnummer = fødselsnummer)
                     ?: transaksjon.oppgaveDao.finnOppgaveIdUansettStatus(fødselsnummer = fødselsnummer),
             tekst = request.begrunnelse,
-            saksbehandlerOid = saksbehandler.id().value,
+            saksbehandlerOid = saksbehandler.id.value,
             notatType = NotatType.OpphevStans,
             dialogRef = transaksjon.dialogDao.lagre(),
         )

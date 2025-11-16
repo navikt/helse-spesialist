@@ -71,7 +71,7 @@ class OppgavemelderTest {
         assertEquals(BEHANDLING_ID, melding["behandlingId"].asUUID())
         assertEquals("AvventerSystem", melding["tilstand"].asText())
         assertEquals(FNR, melding["fødselsnummer"].asText())
-        assertEquals(saksbehandler.saksbehandler.id().value, melding["saksbehandler"].asUUID())
+        assertEquals(saksbehandler.saksbehandler.id.value, melding["saksbehandler"].asUUID())
         assertEquals(listOf("SØKNAD"), melding["egenskaper"].map { it.asText() })
     }
 

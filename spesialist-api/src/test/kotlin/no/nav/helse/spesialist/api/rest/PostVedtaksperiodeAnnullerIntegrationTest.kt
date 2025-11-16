@@ -74,7 +74,7 @@ class PostVedtaksperiodeAnnullerIntegrationTest {
 
         assertNotNull(lagretAnnullering)
 
-        assertEquals(saksbehandler.id(), lagretAnnullering.saksbehandlerOid)
+        assertEquals(saksbehandler.id, lagretAnnullering.saksbehandlerOid)
         assertEquals(arbeidsgiverFagsystemId, lagretAnnullering.arbeidsgiverFagsystemId)
         assertEquals(personFagsystemId, lagretAnnullering.personFagsystemId)
         assertEquals(årsaker.values.sorted(), lagretAnnullering.årsaker.sorted())
@@ -91,7 +91,7 @@ class PostVedtaksperiodeAnnullerIntegrationTest {
                 hendelse = AnnullertUtbetalingEvent(
                     fødselsnummer = fødselsnummer,
                     organisasjonsnummer = organisasjonsnummer,
-                    saksbehandlerOid = saksbehandler.id().value,
+                    saksbehandlerOid = saksbehandler.id.value,
                     saksbehandlerIdent = saksbehandler.ident,
                     saksbehandlerEpost = saksbehandler.epost,
                     vedtaksperiodeId = vedtaksperiodeId,
@@ -156,7 +156,7 @@ class PostVedtaksperiodeAnnullerIntegrationTest {
 
         assertNotNull(lagretAnnullering)
 
-        assertEquals(saksbehandler.id(), lagretAnnullering.saksbehandlerOid)
+        assertEquals(saksbehandler.id, lagretAnnullering.saksbehandlerOid)
         assertEquals(arbeidsgiverFagsystemId, lagretAnnullering.arbeidsgiverFagsystemId)
         assertEquals(personFagsystemId, lagretAnnullering.personFagsystemId)
         assertEquals(emptyList<String>(), lagretAnnullering.årsaker)
@@ -173,7 +173,7 @@ class PostVedtaksperiodeAnnullerIntegrationTest {
                 hendelse = AnnullertUtbetalingEvent(
                     fødselsnummer = fødselsnummer,
                     organisasjonsnummer = organisasjonsnummer,
-                    saksbehandlerOid = saksbehandler.id().value,
+                    saksbehandlerOid = saksbehandler.id.value,
                     saksbehandlerIdent = saksbehandler.ident,
                     saksbehandlerEpost = saksbehandler.epost,
                     vedtaksperiodeId = vedtaksperiodeId,
@@ -217,7 +217,7 @@ class PostVedtaksperiodeAnnullerIntegrationTest {
                 annullering = Annullering.Factory.ny(
                     arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
                     personFagsystemId = personFagsystemId,
-                    saksbehandlerOid = tidligereSaksbehandler.id(),
+                    saksbehandlerOid = tidligereSaksbehandler.id,
                     vedtaksperiodeId = vedtaksperiodeId,
                     årsaker = tidligereÅrsaker.map { it.value },
                     kommentar = kommentar
@@ -262,7 +262,7 @@ class PostVedtaksperiodeAnnullerIntegrationTest {
 
         assertNotNull(lagretAnnullering)
 
-        assertEquals(tidligereSaksbehandler.id(), lagretAnnullering.saksbehandlerOid)
+        assertEquals(tidligereSaksbehandler.id, lagretAnnullering.saksbehandlerOid)
         assertEquals(arbeidsgiverFagsystemId, lagretAnnullering.arbeidsgiverFagsystemId)
         assertEquals(personFagsystemId, lagretAnnullering.personFagsystemId)
         assertEquals(tidligereÅrsaker.values.sorted(), lagretAnnullering.årsaker.sorted())

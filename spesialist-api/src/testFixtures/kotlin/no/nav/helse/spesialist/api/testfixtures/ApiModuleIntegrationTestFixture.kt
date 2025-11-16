@@ -37,11 +37,11 @@ class ApiModuleIntegrationTestFixture(
         mockOAuth2Server.issueToken(
             issuerId = ISSUER_ID,
             audience = CLIENT_ID,
-            subject = saksbehandler.id().value.toString(),
+            subject = saksbehandler.id.value.toString(),
             claims = mapOf(
                 "NAVident" to saksbehandler.ident,
                 "preferred_username" to saksbehandler.epost,
-                "oid" to saksbehandler.id().value.toString(),
+                "oid" to saksbehandler.id.value.toString(),
                 "name" to saksbehandler.navn,
                 "groups" to tilgangsgruppeUuider.uuiderFor(tilgangsgrupper).map { it.toString() }
             )

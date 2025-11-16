@@ -1,0 +1,29 @@
+package no.nav.helse.spesialist.application
+
+import no.nav.helse.spesialist.domain.ddd.LateIdAggregateRoot
+
+abstract class AbstractLateIdInMemoryRepository<IDTYPE, T : LateIdAggregateRoot<IDTYPE>>() {
+    private val data = mutableListOf<T>()
+
+    protected abstract fun tildelIder(root: T)
+
+    protected abstract fun deepCopy(original: T): T
+
+    fun finn(id: IDTYPE): T? = data.find { it.id() == id }?.let(::deepCopy)
+
+    fun finnAlle(ider: Set<IDTYPE>): List<T> = data.filter { it.id() in ider }.map(::deepCopy)
+
+    fun alle(): List<T> = data.map(::deepCopy)
+
+    fun lagre(root: T) {
+        if (root.harFåttTildeltId()) {
+            data.removeIf { it.id() == root.id() }
+        }
+        tildelIder(root)
+        data.add(deepCopy(root))
+    }
+
+    fun slett(id: IDTYPE) {
+        data.removeIf { it.id() == id }
+    }
+}

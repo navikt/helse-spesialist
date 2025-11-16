@@ -1,7 +1,7 @@
 package no.nav.helse.modell
 
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
-import no.nav.helse.spesialist.domain.ddd.AggregateRoot
+import no.nav.helse.spesialist.domain.ddd.LateIdAggregateRoot
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -19,7 +19,7 @@ class Annullering private constructor(
     val årsaker: List<String>,
     val kommentar: String?,
     val vedtaksperiodeId: UUID,
-) : AggregateRoot<AnnulleringId>(id) {
+) : LateIdAggregateRoot<AnnulleringId>(id) {
     object Factory {
         fun ny(
             arbeidsgiverFagsystemId: String?,

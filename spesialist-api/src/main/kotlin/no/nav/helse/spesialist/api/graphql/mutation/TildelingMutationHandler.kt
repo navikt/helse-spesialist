@@ -35,7 +35,7 @@ class TildelingMutationHandler(
                 saksbehandler = saksbehandler,
                 tilgangsgrupper = env.graphQlContext.get(ContextValues.TILGANGSGRUPPER),
             )
-            byggRespons(ApiTildeling(saksbehandler.navn, saksbehandler.epost, saksbehandler.id().value))
+            byggRespons(ApiTildeling(saksbehandler.navn, saksbehandler.epost, saksbehandler.id.value))
         } catch (e: OppgaveTildeltNoenAndre) {
             byggFeilrespons(alleredeTildeltError(e))
         } catch (e: RuntimeException) {

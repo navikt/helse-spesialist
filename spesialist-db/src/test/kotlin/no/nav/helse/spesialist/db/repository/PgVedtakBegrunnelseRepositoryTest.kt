@@ -12,6 +12,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class PgVedtakBegrunnelseRepositoryTest : AbstractDBIntegrationTest() {
     private val repository = sessionContext.vedtakBegrunnelseRepository
@@ -44,7 +45,8 @@ class PgVedtakBegrunnelseRepositoryTest : AbstractDBIntegrationTest() {
         val vedtakBegrunnelse = repository.finn(spleisBehandlingId)
 
         //then
-        assertNotNull(vedtakBegrunnelse?.id)
+        assertNotNull(vedtakBegrunnelse)
+        assertTrue(vedtakBegrunnelse.harFåttTildeltId())
         assertEquals(spleisBehandlingId, vedtakBegrunnelse.spleisBehandlingId)
         assertEquals(tekst, vedtakBegrunnelse.tekst)
         assertEquals(Utfall.INNVILGELSE, vedtakBegrunnelse.utfall)

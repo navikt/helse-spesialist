@@ -14,5 +14,5 @@ class Saksbehandler(
     val epost: String,
     val ident: String,
 ) : AggregateRoot<SaksbehandlerOid>(id) {
-    override fun toString(): String = "epostadresse=$epost, oid=${id().value}"
+    override fun toString(): String = "epostadresse=$epost, oid=${id.value}"
 }

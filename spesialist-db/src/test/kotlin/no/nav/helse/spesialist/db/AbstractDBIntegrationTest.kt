@@ -87,7 +87,7 @@ abstract class AbstractDBIntegrationTest {
     protected val PERIODE = Periode(VEDTAKSPERIODE, FOM, TOM)
 
     protected val SAKSBEHANDLER = lagSaksbehandler()
-    protected val SAKSBEHANDLER_OID: UUID = SAKSBEHANDLER.id().value
+    protected val SAKSBEHANDLER_OID: UUID = SAKSBEHANDLER.id.value
     protected val SAKSBEHANDLER_EPOST = SAKSBEHANDLER.epost
     protected val SAKSBEHANDLER_NAVN = SAKSBEHANDLER.navn
     protected val SAKSBEHANDLER_IDENT = SAKSBEHANDLER.ident
@@ -593,7 +593,7 @@ abstract class AbstractDBIntegrationTest {
         saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe> = emptySet(),
     ): Oppgave {
         opprettSaksbehandler(
-            saksbehandlerOID = saksbehandlerWrapper.saksbehandler.id().value,
+            saksbehandlerOID = saksbehandlerWrapper.saksbehandler.id.value,
             navn = saksbehandlerWrapper.saksbehandler.navn,
             epost = saksbehandlerWrapper.saksbehandler.epost,
             ident = saksbehandlerWrapper.saksbehandler.ident
@@ -610,7 +610,7 @@ abstract class AbstractDBIntegrationTest {
         tekst: String? = null,
     ): Oppgave {
         opprettSaksbehandler(
-            saksbehandlerOID = saksbehandlerWrapper.saksbehandler.id().value,
+            saksbehandlerOID = saksbehandlerWrapper.saksbehandler.id.value,
             navn = saksbehandlerWrapper.saksbehandler.navn,
             epost = saksbehandlerWrapper.saksbehandler.epost,
             ident = saksbehandlerWrapper.saksbehandler.ident
@@ -622,7 +622,7 @@ abstract class AbstractDBIntegrationTest {
         sessionContext.dialogRepository.lagre(dialog)
         sessionContext.oppgaveRepository.lagre(this)
         påVentDao.lagrePåVent(this.id,
-            saksbehandlerWrapper.saksbehandler.id().value, frist, årsaker, tekst, dialog.id().value)
+            saksbehandlerWrapper.saksbehandler.id.value, frist, årsaker, tekst, dialog.id().value)
         return this
     }
 
@@ -639,7 +639,7 @@ abstract class AbstractDBIntegrationTest {
     }
 
     protected fun Oppgave.avventSystemOgLagre(saksbehandlerWrapper: SaksbehandlerWrapper): Oppgave {
-        this.avventerSystem(saksbehandlerWrapper.saksbehandler.ident, saksbehandlerWrapper.saksbehandler.id().value)
+        this.avventerSystem(saksbehandlerWrapper.saksbehandler.ident, saksbehandlerWrapper.saksbehandler.id.value)
         sessionContext.oppgaveRepository.lagre(this)
         return this
     }
@@ -665,13 +665,13 @@ abstract class AbstractDBIntegrationTest {
     }
 
     protected fun TotrinnsvurderingKontekst.sendTilBeslutterOgLagre(saksbehandlerWrapper: SaksbehandlerWrapper): TotrinnsvurderingKontekst {
-        totrinnsvurdering.sendTilBeslutter(oppgave.id, SaksbehandlerOid(saksbehandlerWrapper.saksbehandler.id().value))
+        totrinnsvurdering.sendTilBeslutter(oppgave.id, SaksbehandlerOid(saksbehandlerWrapper.saksbehandler.id.value))
         sessionContext.totrinnsvurderingRepository.lagre(totrinnsvurdering)
         return this
     }
 
     protected fun TotrinnsvurderingKontekst.ferdigstillOgLagre(beslutter: SaksbehandlerWrapper): TotrinnsvurderingKontekst {
-        totrinnsvurdering.settBeslutter(SaksbehandlerOid(beslutter.saksbehandler.id().value))
+        totrinnsvurdering.settBeslutter(SaksbehandlerOid(beslutter.saksbehandler.id.value))
         totrinnsvurdering.ferdigstill()
         sessionContext.totrinnsvurderingRepository.lagre(totrinnsvurdering)
         return this
@@ -686,7 +686,7 @@ abstract class AbstractDBIntegrationTest {
     protected fun nyLegacySaksbehandler(): SaksbehandlerWrapper {
         val saksbehandler = SaksbehandlerWrapper(lagSaksbehandler())
         opprettSaksbehandler(
-            saksbehandler.saksbehandler.id().value, saksbehandler.saksbehandler.navn,
+            saksbehandler.saksbehandler.id.value, saksbehandler.saksbehandler.navn,
             saksbehandler.saksbehandler.epost, saksbehandler.saksbehandler.ident
         )
         return saksbehandler

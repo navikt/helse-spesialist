@@ -69,12 +69,12 @@ class PgSaksbehandlerDaoTest : AbstractDBIntegrationTest() {
 
 
         saksbehandlerDao.oppdaterSistObservert(
-            saksbehandler.saksbehandler.id().value,
+            saksbehandler.saksbehandler.id.value,
             LocalDateTime.now().minusMonths(4)
         )
 
        saksbehandlerDao.oppdaterSistObservert(
-            saksbehandler2.saksbehandler.id().value,
+           saksbehandler2.saksbehandler.id.value,
             LocalDateTime.now().minusMonths(4)
         )
 

@@ -3,7 +3,7 @@ package no.nav.helse.spesialist.application
 import no.nav.helse.spesialist.domain.PåVent
 import no.nav.helse.spesialist.domain.PåVentId
 
-class InMemoryPåVentRepository : PåVentRepository, AbstractInMemoryRepository<PåVentId, PåVent>() {
+class InMemoryPåVentRepository : PåVentRepository, AbstractLateIdInMemoryRepository<PåVentId, PåVent>() {
     override fun tildelIder(root: PåVent) {
         if (!root.harFåttTildeltId())
             root.tildelId(PåVentId((alle().maxOfOrNull { it.id().value } ?: 0) + 1))

@@ -73,7 +73,7 @@ class GetTilkomneInntektskilderForPersonBehandler : GetBehandler<Personer.Person
                         inntekter
                             .map { tilkommenInntekt ->
                                 ApiTilkommenInntekt(
-                                    tilkommenInntektId = tilkommenInntekt.id().value,
+                                    tilkommenInntektId = tilkommenInntekt.id.value,
                                     organisasjonsnummer = organisasjonsnummer,
                                     periode =
                                         ApiDatoPeriode(

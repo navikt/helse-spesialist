@@ -96,7 +96,7 @@ class OppgavelisteE2ETest : AbstractE2EIntegrationTest() {
                   "tildeling": {
                     "navn" : "${saksbehandler.navn}",
                     "epost" : "${saksbehandler.epost}",
-                    "oid" : "${saksbehandler.id().value}"
+                    "oid" : "${saksbehandler.id.value}"
                   },
                   "paVentInfo": {
                     "arsaker" : [ "Min første årsak", "Min andre årsak" ],
@@ -142,7 +142,7 @@ class OppgavelisteE2ETest : AbstractE2EIntegrationTest() {
                 add("erTildelt=${tildelt}")
             }
             if (fane in setOf(Fane.MINE_OPPGAVER, Fane.PÅ_VENT)) {
-                add("tildeltTilOid=${saksbehandler.id().value}")
+                add("tildeltTilOid=${saksbehandler.id.value}")
             }
             when (fane) {
                 Fane.TIL_GODKJENNING -> {}

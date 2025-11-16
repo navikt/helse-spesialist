@@ -139,7 +139,7 @@ class PgTilkommenInntektRepository(
                 SELECT MAX(sekvensnummer) FROM tilkommen_inntekt_events
                 WHERE tilkommen_inntekt_id = :tilkommen_inntekt_id
                 """.trimIndent(),
-                "tilkommen_inntekt_id" to tilkommenInntekt.id().value,
+                "tilkommen_inntekt_id" to tilkommenInntekt.id.value,
             ).singleOrNull { it.intOrNull(1) }
         if (sistePersisterteSekvensnummer != null) {
             tilkommenInntekt.events.filter { it.metadata.sekvensnummer > sistePersisterteSekvensnummer }

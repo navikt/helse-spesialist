@@ -1,6 +1,6 @@
 package no.nav.helse.spesialist.domain
 
-import no.nav.helse.spesialist.domain.ddd.Entity
+import no.nav.helse.spesialist.domain.ddd.LateIdEntity
 import java.time.LocalDateTime
 
 @JvmInline
@@ -14,7 +14,7 @@ class Kommentar private constructor(
     val saksbehandlerident: String,
     val opprettetTidspunkt: LocalDateTime,
     feilregistrertTidspunkt: LocalDateTime?,
-) : Entity<KommentarId>(id) {
+) : LateIdEntity<KommentarId>(id) {
     var feilregistrertTidspunkt: LocalDateTime? = feilregistrertTidspunkt
         private set
 

@@ -76,7 +76,7 @@ class PgVedtakBegrunnelseRepository private constructor(
             UPDATE vedtak_begrunnelse SET invalidert = :invalidert WHERE begrunnelse_ref = :begrunnelse_ref
             """.trimIndent(),
             "invalidert" to vedtakBegrunnelse.invalidert,
-            "begrunnelse_ref" to vedtakBegrunnelse.id?.value,
+            "begrunnelse_ref" to vedtakBegrunnelse.id().value,
         )
     }
 }

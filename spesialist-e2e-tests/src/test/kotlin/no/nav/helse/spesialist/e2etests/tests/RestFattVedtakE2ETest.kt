@@ -1,8 +1,8 @@
 package no.nav.helse.spesialist.e2etests.tests
 
 import com.fasterxml.jackson.databind.JsonNode
-import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
 import no.nav.helse.modell.melding.VedtakFattetMelding
+import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
 import no.nav.helse.spesialist.e2etests.AbstractE2EIntegrationTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -228,7 +228,7 @@ class RESTFattVedtakE2ETest : AbstractE2EIntegrationTest() {
         val saksbehandlerLøsning = meldinger.single { it["@event_name"].asText() == "saksbehandler_løsning" }
         assertEquals("true", saksbehandlerLøsning["godkjent"].asText())
         assertEquals(saksbehandler.ident, saksbehandlerLøsning["saksbehandlerident"].asText())
-        assertEquals(saksbehandler.id().value.toString(), saksbehandlerLøsning["saksbehandleroid"].asText())
+        assertEquals(saksbehandler.id.value.toString(), saksbehandlerLøsning["saksbehandleroid"].asText())
         assertEquals(saksbehandler.epost, saksbehandlerLøsning["saksbehandlerepost"].asText())
         assertEquals(emptyList<JsonNode>(), saksbehandlerLøsning["saksbehandleroverstyringer"].toList())
         assertEquals(saksbehandler.ident, saksbehandlerLøsning["saksbehandler"]["ident"].asText())
@@ -296,7 +296,7 @@ class RESTFattVedtakE2ETest : AbstractE2EIntegrationTest() {
         val saksbehandlerLøsning = meldinger.single { it["@event_name"].asText() == "saksbehandler_løsning" }
         assertEquals("true", saksbehandlerLøsning["godkjent"].asText())
         assertEquals(saksbehandler.ident, saksbehandlerLøsning["saksbehandlerident"].asText())
-        assertEquals(saksbehandler.id().value.toString(), saksbehandlerLøsning["saksbehandleroid"].asText())
+        assertEquals(saksbehandler.id.value.toString(), saksbehandlerLøsning["saksbehandleroid"].asText())
         assertEquals(saksbehandler.epost, saksbehandlerLøsning["saksbehandlerepost"].asText())
         assertEquals(emptyList<JsonNode>(), saksbehandlerLøsning["saksbehandleroverstyringer"].toList())
         assertEquals(saksbehandler.ident, saksbehandlerLøsning["saksbehandler"]["ident"].asText())

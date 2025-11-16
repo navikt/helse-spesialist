@@ -255,7 +255,7 @@ fun lagVedtakBegrunnelse(
     spleisBehandlingId: SpleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
     tekst: String = "Her er en begrunnelsestekst",
     utfall: Utfall = Utfall.entries.random(),
-    saksbehandlerOid: SaksbehandlerOid = lagSaksbehandler().id(),
+    saksbehandlerOid: SaksbehandlerOid = lagSaksbehandler().id,
 ) = VedtakBegrunnelse.ny(
     spleisBehandlingId = spleisBehandlingId,
     tekst = tekst,

@@ -17,7 +17,7 @@ class ApiOppgaveService(
     private val oppgaveService: OppgaveService,
 ) {
     fun antallOppgaver(saksbehandler: Saksbehandler): ApiAntallOppgaver {
-        val antallOppgaver = oppgaveDao.finnAntallOppgaver(saksbehandlerOid = saksbehandler.id().value)
+        val antallOppgaver = oppgaveDao.finnAntallOppgaver(saksbehandlerOid = saksbehandler.id.value)
         return antallOppgaver.tilApiversjon()
     }
 
@@ -30,7 +30,7 @@ class ApiOppgaveService(
     ): ApiBehandledeOppgaver {
         val behandledeOppgaver =
             oppgaveDao.finnBehandledeOppgaver(
-                behandletAvOid = saksbehandler.id().value,
+                behandletAvOid = saksbehandler.id.value,
                 offset = offset,
                 limit = limit,
                 fom = fom,

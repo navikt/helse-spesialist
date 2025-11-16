@@ -3,7 +3,7 @@ package no.nav.helse.spesialist.application
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.PersonId
 
-class InMemoryPersonRepository : PersonRepository, AbstractInMemoryRepository<PersonId, Person>() {
+class InMemoryPersonRepository : PersonRepository, AbstractLateIdInMemoryRepository<PersonId, Person>() {
     override fun tildelIder(root: Person) {
         if (!root.harFåttTildeltId())
             root.tildelId(PersonId((alle().maxOfOrNull { it.id().value } ?: 0) + 1))

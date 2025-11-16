@@ -16,12 +16,8 @@ class InMemoryVarselRepository : VarselRepository, AbstractInMemoryRepository<Va
         varsler.forEach(::lagre)
     }
 
-    override fun tildelIder(root: Varsel) {
-        // ID er satt på forhånd, trenger aldri tildele en fra databasen
-    }
-
     override fun deepCopy(original: Varsel): Varsel = Varsel.fraLagring(
-        id = original.id(),
+        id = original.id,
         spleisBehandlingId = original.spleisBehandlingId,
         behandlingUnikId = original.behandlingUnikId,
         status = original.status,

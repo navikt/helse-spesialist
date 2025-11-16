@@ -38,15 +38,15 @@ class InMemoryLegacyPersonRepository(
             vedtaksperioder = vedtaksperiodeRepository.alle()
                 .filter { it.fødselsnummer == person.identitetsnummer.value }.map { vedtaksperiode ->
                     LegacyVedtaksperiode(
-                        vedtaksperiodeId = vedtaksperiode.id().value,
+                        vedtaksperiodeId = vedtaksperiode.id.value,
                         organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
                         forkastet = vedtaksperiode.forkastet,
                         behandlinger = behandlingRepository.alle()
-                            .filter { it.vedtaksperiodeId == vedtaksperiode.id() }
+                            .filter { it.vedtaksperiodeId == vedtaksperiode.id }
                             .map { behandling ->
                                 LegacyBehandling.fraLagring(
-                                    id = behandling.id().value,
-                                    vedtaksperiodeId = vedtaksperiode.id().value,
+                                    id = behandling.id.value,
+                                    vedtaksperiodeId = vedtaksperiode.id.value,
                                     utbetalingId = behandling.utbetalingId?.value,
                                     spleisBehandlingId = behandling.spleisBehandlingId?.value,
                                     skjæringstidspunkt = behandling.skjæringstidspunkt,
@@ -69,12 +69,12 @@ class InMemoryLegacyPersonRepository(
                                             )
                                         },
                                     varsler = varselRepository.alle()
-                                        .filter { it.behandlingUnikId == behandling.id() }.map { varsel ->
+                                        .filter { it.behandlingUnikId == behandling.id }.map { varsel ->
                                             LegacyVarsel(
-                                                id = varsel.id().value,
+                                                id = varsel.id.value,
                                                 varselkode = varsel.kode,
                                                 opprettet = varsel.opprettetTidspunkt,
-                                                vedtaksperiodeId = vedtaksperiode.id().value,
+                                                vedtaksperiodeId = vedtaksperiode.id.value,
                                                 status = when (varsel.status) {
                                                     Varsel.Status.AKTIV -> LegacyVarsel.Status.AKTIV
                                                     Varsel.Status.INAKTIV -> LegacyVarsel.Status.INAKTIV

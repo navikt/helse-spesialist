@@ -1,6 +1,6 @@
 package no.nav.helse.spesialist.domain
 
-import no.nav.helse.spesialist.domain.ddd.AggregateRoot
+import no.nav.helse.spesialist.domain.ddd.LateIdAggregateRoot
 import java.time.LocalDateTime
 
 @JvmInline
@@ -12,7 +12,7 @@ class Dialog private constructor(
     id: DialogId?,
     val opprettetTidspunkt: LocalDateTime,
     kommentarer: List<Kommentar>,
-) : AggregateRoot<DialogId>(id) {
+) : LateIdAggregateRoot<DialogId>(id) {
     private val _kommentarer: MutableList<Kommentar> = kommentarer.toMutableList()
     val kommentarer: List<Kommentar>
         get() = _kommentarer

@@ -208,7 +208,7 @@ class PostArbeidstidsvurderingIntegrationTest {
         assertEquals(TotrinnsvurderingTilstand.AVVENTER_SAKSBEHANDLER, totrinnsvurdering.tilstand)
 
         val overstyring = totrinnsvurdering.overstyringer.single() as MinimumSykdomsgrad
-        assertEquals(saksbehandler.id(), overstyring.saksbehandlerOid)
+        assertEquals(saksbehandler.id, overstyring.saksbehandlerOid)
         assertEquals(fødselsnummer, overstyring.fødselsnummer)
         assertEquals(aktørId, overstyring.aktørId)
         assertEquals(vedtaksperiodeId, overstyring.vedtaksperiodeId)
@@ -242,7 +242,7 @@ class PostArbeidstidsvurderingIntegrationTest {
                     eksternHendelseId = overstyring.eksternHendelseId,
                     fødselsnummer = fødselsnummer,
                     aktørId = aktørId,
-                    saksbehandlerOid = saksbehandler.id().value,
+                    saksbehandlerOid = saksbehandler.id.value,
                     saksbehandlerNavn = saksbehandler.navn,
                     saksbehandlerIdent = saksbehandler.ident,
                     saksbehandlerEpost = saksbehandler.epost,

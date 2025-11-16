@@ -65,7 +65,7 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
               "fødselsnummer": "${person.identitetsnummer.value}",
               "aktørId": "${person.aktørId}",
               "yrkesaktivitetstype": "SELVSTENDIG",
-              "vedtaksperiodeId": "${vedtaksperiode.id().value}",
+              "vedtaksperiodeId": "${vedtaksperiode.id.value}",
               "behandlingId": "${behandling.spleisBehandlingId?.value}",
               "organisasjonsnummer" : "SELVSTENDIG",
               "fom": "${behandling.fom}",
@@ -139,7 +139,7 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
               "fødselsnummer": "${person.identitetsnummer.value}",
               "aktørId": "${person.aktørId}",
               "yrkesaktivitetstype": "SELVSTENDIG",
-              "vedtaksperiodeId": "${vedtaksperiode.id().value}",
+              "vedtaksperiodeId": "${vedtaksperiode.id.value}",
               "behandlingId": "${behandling.spleisBehandlingId?.value}",
               "organisasjonsnummer" : "SELVSTENDIG",
               "fom": "${behandling.fom}",
@@ -206,7 +206,7 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
         ).also(sessionContext.vedtaksperiodeRepository::lagre)
 
         this.behandling = lagBehandling(
-            vedtaksperiodeId = vedtaksperiode.id(),
+            vedtaksperiodeId = vedtaksperiode.id,
             tags = behandlingTags,
             yrkesaktivitetstype = Yrkesaktivitetstype.SELVSTENDIG
         ).also(sessionContext.behandlingRepository::lagre)
@@ -214,7 +214,7 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
         this.vedtakBegrunnelse = lagVedtakBegrunnelse(
             spleisBehandlingId = behandling.spleisBehandlingId!!,
             utfall = Utfall.INNVILGELSE,
-            saksbehandlerOid = saksbehandler.id()
+            saksbehandlerOid = saksbehandler.id
         ).also(sessionContext.vedtakBegrunnelseRepository::lagre)
     }
 
@@ -250,7 +250,7 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
           "@event_name": "avsluttet_med_vedtak",
           "organisasjonsnummer": "SELVSTENDIG",
           "yrkesaktivitetstype": "SELVSTENDIG",
-          "vedtaksperiodeId": "${vedtaksperiode.id().value}",
+          "vedtaksperiodeId": "${vedtaksperiode.id.value}",
           "behandlingId": "${behandling.spleisBehandlingId?.value}",
           "fom": "${behandling.fom}",
           "tom": "${behandling.tom}",

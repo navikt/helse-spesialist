@@ -30,7 +30,7 @@ class SaksbehandlerWrapper(
     internal fun håndter(hendelse: OverstyrtInntektOgRefusjon) {
         val event =
             hendelse.byggEvent(
-                oid = saksbehandler.id().value,
+                oid = saksbehandler.id.value,
                 navn = saksbehandler.navn,
                 epost = saksbehandler.epost,
                 ident = saksbehandler.ident,
@@ -41,7 +41,7 @@ class SaksbehandlerWrapper(
     internal fun håndter(hendelse: OverstyrtArbeidsforhold) {
         val event =
             hendelse.byggEvent(
-                oid = saksbehandler.id().value,
+                oid = saksbehandler.id.value,
                 navn = saksbehandler.navn,
                 epost = saksbehandler.epost,
                 ident = saksbehandler.ident,
@@ -52,7 +52,7 @@ class SaksbehandlerWrapper(
     internal fun håndter(hendelse: SkjønnsfastsattSykepengegrunnlag) {
         val event =
             hendelse.byggEvent(
-                oid = saksbehandler.id().value,
+                oid = saksbehandler.id.value,
                 navn = saksbehandler.navn,
                 epost = saksbehandler.epost,
                 ident = saksbehandler.ident,
@@ -65,7 +65,7 @@ class SaksbehandlerWrapper(
     internal fun håndter(hendelse: LeggPåVent) {
         val event =
             hendelse.byggEvent(
-                oid = saksbehandler.id().value,
+                oid = saksbehandler.id.value,
                 ident = saksbehandler.ident,
             )
         observers.forEach { it.lagtPåVent(event.fødselsnummer, event) }
@@ -74,25 +74,25 @@ class SaksbehandlerWrapper(
     internal fun håndter(hendelse: EndrePåVent) {
         val event =
             hendelse.byggEvent(
-                oid = saksbehandler.id().value,
+                oid = saksbehandler.id.value,
                 ident = saksbehandler.ident,
             )
         observers.forEach { it.lagtPåVent(event.fødselsnummer, event) }
     }
 
-    override fun toString(): String = "epostadresse=${saksbehandler.epost}, oid=${saksbehandler.id().value}"
+    override fun toString(): String = "epostadresse=${saksbehandler.epost}, oid=${saksbehandler.id.value}"
 
     override fun equals(other: Any?) =
         this === other ||
             other is SaksbehandlerWrapper &&
             saksbehandler.epost == other.saksbehandler.epost &&
             saksbehandler.navn == other.saksbehandler.navn &&
-            saksbehandler.id().value == other.saksbehandler.id().value &&
+            saksbehandler.id.value == other.saksbehandler.id.value &&
             saksbehandler.ident == other.saksbehandler.ident
 
     override fun hashCode(): Int {
         var result = saksbehandler.epost.hashCode()
-        result = 31 * result + saksbehandler.id().value.hashCode()
+        result = 31 * result + saksbehandler.id.value.hashCode()
         result = 31 * result + saksbehandler.navn.hashCode()
         result = 31 * result + saksbehandler.ident.hashCode()
         return result

@@ -231,7 +231,7 @@ internal class MessageContextMeldingPublisererTest {
             assertEquals(Oppgavestatus.AvventerSaksbehandler, enumValueOf<Oppgavestatus>(it["tilstand"].asText()))
             assertEquals(setOf("SØKNAD", "RETUR"), it["egenskaper"].map(JsonNode::asText).toSet())
             assertEquals(behandlingId, UUID.fromString(it["behandlingId"]?.asText()))
-            assertEquals(saksbehandler.saksbehandler.id().value, it["saksbehandler"]?.asUUID())
+            assertEquals(saksbehandler.saksbehandler.id.value, it["saksbehandler"]?.asUUID())
         }
     }
 

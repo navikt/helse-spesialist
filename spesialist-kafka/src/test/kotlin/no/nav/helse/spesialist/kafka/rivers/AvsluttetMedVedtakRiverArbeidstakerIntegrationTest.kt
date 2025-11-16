@@ -72,7 +72,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
               "fødselsnummer": "${person.identitetsnummer.value}",
               "aktørId": "${person.aktørId}",
               "yrkesaktivitetstype" : "ARBEIDSTAKER",
-              "vedtaksperiodeId": "${vedtaksperiode.id().value}",
+              "vedtaksperiodeId": "${vedtaksperiode.id.value}",
               "behandlingId": "${behandling.spleisBehandlingId?.value}",
               "organisasjonsnummer": "${vedtaksperiode.organisasjonsnummer}",
               "fom": "${behandling.fom}",
@@ -140,7 +140,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
               "fødselsnummer": "${person.identitetsnummer.value}",
               "aktørId": "${person.aktørId}",
               "yrkesaktivitetstype" : "ARBEIDSTAKER",
-              "vedtaksperiodeId": "${vedtaksperiode.id().value}",
+              "vedtaksperiodeId": "${vedtaksperiode.id.value}",
               "behandlingId": "${behandling.spleisBehandlingId?.value}",
               "organisasjonsnummer": "${vedtaksperiode.organisasjonsnummer}",
               "fom": "${behandling.fom}",
@@ -209,7 +209,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
               "fødselsnummer": "${person.identitetsnummer.value}",
               "aktørId": "${person.aktørId}",
               "yrkesaktivitetstype" : "ARBEIDSTAKER",
-              "vedtaksperiodeId": "${vedtaksperiode.id().value}",
+              "vedtaksperiodeId": "${vedtaksperiode.id.value}",
               "behandlingId": "${behandling.spleisBehandlingId?.value}",
               "organisasjonsnummer": "${vedtaksperiode.organisasjonsnummer}",
               "fom": "${behandling.fom}",
@@ -278,7 +278,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
               "fødselsnummer": "${person.identitetsnummer.value}",
               "aktørId": "${person.aktørId}",
               "yrkesaktivitetstype" : "ARBEIDSTAKER",
-              "vedtaksperiodeId": "${vedtaksperiode.id().value}",
+              "vedtaksperiodeId": "${vedtaksperiode.id.value}",
               "behandlingId": "${behandling.spleisBehandlingId?.value}",
               "organisasjonsnummer": "${vedtaksperiode.organisasjonsnummer}",
               "fom": "${behandling.fom}",
@@ -350,7 +350,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
               "fødselsnummer": "${person.identitetsnummer.value}",
               "aktørId": "${person.aktørId}",
               "yrkesaktivitetstype" : "ARBEIDSTAKER",
-              "vedtaksperiodeId": "${vedtaksperiode.id().value}",
+              "vedtaksperiodeId": "${vedtaksperiode.id.value}",
               "behandlingId": "${behandling.spleisBehandlingId?.value}",
               "organisasjonsnummer": "${vedtaksperiode.organisasjonsnummer}",
               "fom": "${behandling.fom}",
@@ -456,7 +456,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
               "fødselsnummer": "${person.identitetsnummer.value}",
               "aktørId": "${person.aktørId}",
               "yrkesaktivitetstype" : "ARBEIDSTAKER",
-              "vedtaksperiodeId": "${vedtaksperiode.id().value}",
+              "vedtaksperiodeId": "${vedtaksperiode.id.value}",
               "behandlingId": "${behandling.spleisBehandlingId?.value}",
               "organisasjonsnummer": "${vedtaksperiode.organisasjonsnummer}",
               "fom": "${behandling.fom}",
@@ -559,7 +559,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
               "fødselsnummer": "${person.identitetsnummer.value}",
               "aktørId": "${person.aktørId}",
               "yrkesaktivitetstype" : "ARBEIDSTAKER",
-              "vedtaksperiodeId": "${vedtaksperiode.id().value}",
+              "vedtaksperiodeId": "${vedtaksperiode.id.value}",
               "behandlingId": "${behandling.spleisBehandlingId?.value}",
               "organisasjonsnummer": "${vedtaksperiode.organisasjonsnummer}",
               "fom": "${behandling.fom}",
@@ -609,7 +609,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
             .also(sessionContext.vedtaksperiodeRepository::lagre)
 
         this.behandling = lagBehandling(
-            vedtaksperiodeId = vedtaksperiode.id(),
+            vedtaksperiodeId = vedtaksperiode.id,
             tags = behandlingTags,
             yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
         ).also(sessionContext.behandlingRepository::lagre)
@@ -617,7 +617,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
         this.vedtakBegrunnelse = lagVedtakBegrunnelse(
             spleisBehandlingId = behandling.spleisBehandlingId!!,
             utfall = utfall,
-            saksbehandlerOid = saksbehandler.id()
+            saksbehandlerOid = saksbehandler.id
         ).also(sessionContext.vedtakBegrunnelseRepository::lagre)
 
         this.avviksvurdering = lagAvviksvurderingMedEnArbeidsgiver(
@@ -631,8 +631,8 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
 
     private fun setupSkjønnsfastsettelse(skjønnsfastsattBeløp: BigDecimal): SkjønnsfastsattSykepengegrunnlag =
         lagSkjønnsfastsattSykepengegrunnlag(
-            saksbehandlerOid = saksbehandler.id(),
-            vedtaksperiodeId = vedtaksperiode.id(),
+            saksbehandlerOid = saksbehandler.id,
+            vedtaksperiodeId = vedtaksperiode.id,
             identitetsnummer = person.identitetsnummer,
             aktørId = person.aktørId,
             skjæringstidspunkt = behandling.skjæringstidspunkt,
@@ -682,7 +682,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
           "@event_name": "avsluttet_med_vedtak",
           "organisasjonsnummer": "${vedtaksperiode.organisasjonsnummer}",
           "yrkesaktivitetstype": "ARBEIDSTAKER",
-          "vedtaksperiodeId": "${vedtaksperiode.id().value}",
+          "vedtaksperiodeId": "${vedtaksperiode.id.value}",
           "behandlingId": "${behandling.spleisBehandlingId?.value}",
           "fom": "${behandling.fom}",
           "tom": "${behandling.tom}",
@@ -742,7 +742,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
           "@event_name": "avsluttet_med_vedtak",
           "organisasjonsnummer": "${vedtaksperiode.organisasjonsnummer}",
           "yrkesaktivitetstype": "ARBEIDSTAKER",
-          "vedtaksperiodeId": "${vedtaksperiode.id().value}",
+          "vedtaksperiodeId": "${vedtaksperiode.id.value}",
           "behandlingId": "${behandling.spleisBehandlingId?.value}",
           "fom": "${behandling.fom}",
           "tom": "${behandling.tom}",
@@ -803,7 +803,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
           "@event_name": "avsluttet_med_vedtak",
           "organisasjonsnummer": "${vedtaksperiode.organisasjonsnummer}",
           "yrkesaktivitetstype": "ARBEIDSTAKER",
-          "vedtaksperiodeId": "${vedtaksperiode.id().value}",
+          "vedtaksperiodeId": "${vedtaksperiode.id.value}",
           "behandlingId": "${behandling.spleisBehandlingId?.value}",
           "fom": "${behandling.fom}",
           "tom": "${behandling.tom}",

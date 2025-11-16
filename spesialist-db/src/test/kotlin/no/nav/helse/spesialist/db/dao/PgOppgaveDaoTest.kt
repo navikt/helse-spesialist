@@ -101,7 +101,7 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
             .avventSystemOgLagre(legacySaksbehandler)
             .ferdigstillOgLagre()
 
-        val oppgaver = oppgaveDao.finnBehandledeOppgaver(legacySaksbehandler.saksbehandler.id().value)
+        val oppgaver = oppgaveDao.finnBehandledeOppgaver(legacySaksbehandler.saksbehandler.id.value)
         assertEquals(1, oppgaver.size)
         val førsteOppgave = oppgaver.first()
         assertEquals(oppgave.id, førsteOppgave.id)
@@ -138,7 +138,7 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
             .avventSystemOgLagre(annenSaksbehandler)
             .ferdigstillOgLagre()
 
-        val oppgaver = oppgaveDao.finnBehandledeOppgaver(legacySaksbehandler.saksbehandler.id().value)
+        val oppgaver = oppgaveDao.finnBehandledeOppgaver(legacySaksbehandler.saksbehandler.id.value)
         assertEquals(3, oppgaver.size)
         assertEquals(3, oppgaver.first().filtrertAntall)
     }
@@ -159,9 +159,9 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
             .avventSystemOgLagre(beslutter)
             .ferdigstillOgLagre()
 
-        val behandletIDagForSaksbehandler = oppgaveDao.finnBehandledeOppgaver(saksbehandler.saksbehandler.id().value)
-        val behandletIDagForBeslutter = oppgaveDao.finnBehandledeOppgaver(beslutter.saksbehandler.id().value)
-        val behandletIDagForAnnenSaksbehandler = oppgaveDao.finnBehandledeOppgaver(annenSaksbehandler.saksbehandler.id().value)
+        val behandletIDagForSaksbehandler = oppgaveDao.finnBehandledeOppgaver(saksbehandler.saksbehandler.id.value)
+        val behandletIDagForBeslutter = oppgaveDao.finnBehandledeOppgaver(beslutter.saksbehandler.id.value)
+        val behandletIDagForAnnenSaksbehandler = oppgaveDao.finnBehandledeOppgaver(annenSaksbehandler.saksbehandler.id.value)
 
         assertEquals(1, behandletIDagForSaksbehandler.size)
         assertEquals(beslutter.saksbehandler.ident, behandletIDagForSaksbehandler.first().ferdigstiltAv)
@@ -186,7 +186,7 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
             .avventSystemOgLagre(legacySaksbehandler)
             .ferdigstillOgLagre()
 
-        val oppgaver = oppgaveDao.finnBehandledeOppgaver(legacySaksbehandler.saksbehandler.id().value, 1, 2)
+        val oppgaver = oppgaveDao.finnBehandledeOppgaver(legacySaksbehandler.saksbehandler.id.value, 1, 2)
         assertEquals(2, oppgaver.size)
         oppgaver.assertIderSamsvarerMed(oppgave2, oppgave3)
     }
@@ -282,7 +282,7 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
             .tildelOgLagre(annenSaksbehandler)
             .leggPåVentOgLagre(annenSaksbehandler)
 
-        val antallOppgaver = oppgaveDao.finnAntallOppgaver(legacySaksbehandler.saksbehandler.id().value)
+        val antallOppgaver = oppgaveDao.finnAntallOppgaver(legacySaksbehandler.saksbehandler.id.value)
 
         assertEquals(2, antallOppgaver.antallMineSaker)
         assertEquals(1, antallOppgaver.antallMineSakerPåVent)
@@ -292,7 +292,7 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
     fun `Antall mine saker og mine saker på vent er 0 hvis det ikke finnes tildeling for saksbehandler`() {
         nyOppgaveForNyPerson()
 
-        val antallOppgaver = oppgaveDao.finnAntallOppgaver(legacySaksbehandler.saksbehandler.id().value)
+        val antallOppgaver = oppgaveDao.finnAntallOppgaver(legacySaksbehandler.saksbehandler.id.value)
 
         assertEquals(0, antallOppgaver.antallMineSaker)
         assertEquals(0, antallOppgaver.antallMineSakerPåVent)

@@ -29,7 +29,7 @@ internal class OppdaterPersondataRiverIntegrationTest {
         val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.identitetsnummer)
             .also(sessionContext.vedtaksperiodeRepository::lagre)
 
-        val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id())
+        val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
             .also(sessionContext.behandlingRepository::lagre)
 
         // When:

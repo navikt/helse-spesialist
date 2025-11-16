@@ -15,12 +15,8 @@ class InMemoryBehandlingRepository : BehandlingRepository, AbstractInMemoryRepos
             .filter { it.skjæringstidspunkt.isEqual(behandling.skjæringstidspunkt) }
             .toSet()
 
-    override fun tildelIder(root: Behandling) {
-        // ID er satt på forhånd, trenger aldri tildele en fra databasen
-    }
-
     override fun deepCopy(original: Behandling): Behandling = Behandling.fraLagring(
-        id = original.id(),
+        id = original.id,
         spleisBehandlingId = original.spleisBehandlingId,
         vedtaksperiodeId = original.vedtaksperiodeId,
         utbetalingId = original.utbetalingId,

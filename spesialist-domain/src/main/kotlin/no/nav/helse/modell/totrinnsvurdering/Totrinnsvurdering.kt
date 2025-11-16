@@ -8,7 +8,7 @@ import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_SAKSBEHANDLER
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.GODKJENT
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
-import no.nav.helse.spesialist.domain.ddd.AggregateRoot
+import no.nav.helse.spesialist.domain.ddd.LateIdAggregateRoot
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -33,7 +33,7 @@ class Totrinnsvurdering private constructor(
     overstyringer: List<Overstyring> = emptyList(),
     tilstand: TotrinnsvurderingTilstand,
     vedtaksperiodeForkastet: Boolean,
-) : AggregateRoot<TotrinnsvurderingId>(id) {
+) : LateIdAggregateRoot<TotrinnsvurderingId>(id) {
     private val _overstyringer: MutableList<Overstyring> = overstyringer.toMutableList()
     val overstyringer: List<Overstyring>
         get() = _overstyringer

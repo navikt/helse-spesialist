@@ -12,7 +12,7 @@ class PgPeriodehistorikkDaoTest : AbstractDBIntegrationTest() {
     fun `lagre periodehistorikk ved hjelp av oppgaveId`() {
         val saksbehandler = nyLegacySaksbehandler().let {
             Saksbehandler(
-                id = SaksbehandlerOid(it.saksbehandler.id().value),
+                id = SaksbehandlerOid(it.saksbehandler.id.value),
                 navn = it.saksbehandler.navn,
                 epost = it.saksbehandler.epost,
                 ident = it.saksbehandler.ident

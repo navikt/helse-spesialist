@@ -10,7 +10,7 @@ import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
 
 class InMemoryTotrinnsvurderingRepository : TotrinnsvurderingRepository,
-    AbstractInMemoryRepository<TotrinnsvurderingId, Totrinnsvurdering>() {
+    AbstractLateIdInMemoryRepository<TotrinnsvurderingId, Totrinnsvurdering>() {
     override fun finnAktivForPerson(fødselsnummer: String) = alle().find { it.fødselsnummer == fødselsnummer }
 
     override fun tildelIder(root: Totrinnsvurdering) {

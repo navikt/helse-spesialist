@@ -64,7 +64,7 @@ class Oppgave private constructor(
     ) {
         logg.info("Oppgave med {} forsøkes tildelt av saksbehandler.", kv("oppgaveId", id))
         val tildelt = tildeltTil
-        if (tildelt != null && tildelt != saksbehandlerWrapper.saksbehandler.id()) {
+        if (tildelt != null && tildelt != saksbehandlerWrapper.saksbehandler.id) {
             logg.warn("Oppgave med {} kan ikke tildeles fordi den er tildelt noen andre.", kv("oppgaveId", id))
             throw OppgaveTildeltNoenAndre(tildelt.value, false)
         }
@@ -83,7 +83,7 @@ class Oppgave private constructor(
                 throw OppgaveIkkeTildelt(this.id)
             }
 
-        if (tildelt != saksbehandlerWrapper.saksbehandler.id()) {
+        if (tildelt != saksbehandlerWrapper.saksbehandler.id) {
             logg.info("Oppgave med {} er tildelt noen andre, avmeldes", kv("oppgaveId", id))
             sikkerlogg.info(
                 "Oppgave med {} er tildelt $tildelt, avmeldes av $saksbehandlerWrapper",
@@ -116,14 +116,14 @@ class Oppgave private constructor(
     fun sendTilBeslutter(beslutter: SaksbehandlerWrapper?) {
         _egenskaper.remove(RETUR)
         _egenskaper.add(BESLUTTER)
-        tildeltTil = beslutter?.saksbehandler?.id()
+        tildeltTil = beslutter?.saksbehandler?.id
         oppgaveEndret()
     }
 
     fun sendIRetur(opprinneligSaksbehandlerWrapper: SaksbehandlerWrapper) {
         _egenskaper.remove(BESLUTTER)
         _egenskaper.add(RETUR)
-        tildeltTil = opprinneligSaksbehandlerWrapper.saksbehandler.id()
+        tildeltTil = opprinneligSaksbehandlerWrapper.saksbehandler.id
         oppgaveEndret()
     }
 
@@ -168,7 +168,7 @@ class Oppgave private constructor(
         skalTildeles: Boolean,
         saksbehandlerWrapper: SaksbehandlerWrapper,
     ) {
-        if (this.tildeltTil != saksbehandlerWrapper.saksbehandler.id() && skalTildeles) {
+        if (this.tildeltTil != saksbehandlerWrapper.saksbehandler.id && skalTildeles) {
             tildel(saksbehandlerWrapper)
         }
         if (this.tildeltTil != null && !skalTildeles) {
@@ -182,7 +182,7 @@ class Oppgave private constructor(
         skalVæreTildeltSaksbehandler: Boolean,
         saksbehandlerWrapper: SaksbehandlerWrapper,
     ) {
-        if (tildeltTil == saksbehandlerWrapper.saksbehandler.id()) {
+        if (tildeltTil == saksbehandlerWrapper.saksbehandler.id) {
             if (!skalVæreTildeltSaksbehandler) {
                 avmeld(saksbehandlerWrapper)
             }
@@ -212,13 +212,13 @@ class Oppgave private constructor(
     }
 
     private fun tildel(saksbehandlerWrapper: SaksbehandlerWrapper) {
-        this.tildeltTil = saksbehandlerWrapper.saksbehandler.id()
+        this.tildeltTil = saksbehandlerWrapper.saksbehandler.id
         logg.info(
             "Oppgave med {} tildeles saksbehandler med {}",
             kv("oppgaveId", id),
             kv(
                 "oid",
-                saksbehandlerWrapper.saksbehandler.id().value,
+                saksbehandlerWrapper.saksbehandler.id.value,
             ),
         )
         sikkerlogg.info("Oppgave med {} tildeles $saksbehandlerWrapper", kv("oppgaveId", id))
@@ -232,7 +232,7 @@ class Oppgave private constructor(
             kv("oppgaveId", id),
             kv(
                 "oid",
-                saksbehandlerWrapper.saksbehandler.id().value,
+                saksbehandlerWrapper.saksbehandler.id.value,
             ),
         )
         sikkerlogg.info("Oppgave med {} avmeldes $saksbehandlerWrapper", kv("oppgaveId", id))
@@ -336,9 +336,9 @@ class Oppgave private constructor(
                 logg.info(
                     "Oppgave med {} har egenskaper som saksbehandler med {} ikke har tilgang til å behandle.",
                     kv("oppgaveId", oppgave.id),
-                    kv("oid", saksbehandlerWrapper.saksbehandler.id().value),
+                    kv("oid", saksbehandlerWrapper.saksbehandler.id.value),
                 )
-                throw ManglerTilgang(saksbehandlerWrapper.saksbehandler.id().value, oppgave.id)
+                throw ManglerTilgang(saksbehandlerWrapper.saksbehandler.id.value, oppgave.id)
             }
             oppgave.tildel(saksbehandlerWrapper)
         }

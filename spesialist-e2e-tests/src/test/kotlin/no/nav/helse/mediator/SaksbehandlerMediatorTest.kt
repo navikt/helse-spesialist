@@ -496,7 +496,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             session.totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)
         }
         checkNotNull(totrinnsvurdering)
-        assertEquals(saksbehandler.id().value, totrinnsvurdering.saksbehandler?.value)
+        assertEquals(saksbehandler.id.value, totrinnsvurdering.saksbehandler?.value)
         assertEquals(AVVENTER_BESLUTTER, totrinnsvurdering.tilstand)
         assertVedtakBegrunnelse(expectedUtfall = utfall, expectedBegrunnelse = "Begrunnelse")
     }
@@ -546,7 +546,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             session.totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)
         }
         checkNotNull(totrinnsvurdering)
-        assertEquals(saksbehandler.id().value, totrinnsvurdering.saksbehandler?.value)
+        assertEquals(saksbehandler.id.value, totrinnsvurdering.saksbehandler?.value)
         assertEquals(AVVENTER_BESLUTTER, totrinnsvurdering.tilstand)
     }
 
@@ -688,7 +688,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         assertEquals(SendTilGodkjenningResult.Ok, result)
 
         val beslutter = lagSaksbehandler()
-        opprettSaksbehandler(beslutter.id().value, beslutter.navn, beslutter.epost, beslutter.ident)
+        opprettSaksbehandler(beslutter.id.value, beslutter.navn, beslutter.epost, beslutter.ident)
         val resultRetur = mediator.sendIRetur(oppgaveId, beslutter, "begrunnelse")
 
         assertEquals(SendIReturResult.Ok, resultRetur)
@@ -697,8 +697,8 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             session.totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)
         }
         checkNotNull(totrinnsvurdering)
-        assertEquals(saksbehandler.id().value, totrinnsvurdering.saksbehandler?.value)
-        assertEquals(beslutter.id().value, totrinnsvurdering.beslutter?.value)
+        assertEquals(saksbehandler.id.value, totrinnsvurdering.saksbehandler?.value)
+        assertEquals(beslutter.id.value, totrinnsvurdering.beslutter?.value)
         assertEquals(AVVENTER_SAKSBEHANDLER, totrinnsvurdering.tilstand)
     }
 
@@ -803,7 +803,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         mediator.påVent(
             ApiPaVentRequest.ApiLeggPaVent(
                 oppgaveId,
-                saksbehandler.id().value,
+                saksbehandler.id.value,
                 frist,
                 skalTildeles,
                 "en tekst",
@@ -818,7 +818,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         assertEquals(listOf("key" to "arsak"), årsaker)
         assertEquals(spleisBehandlingId, melding?.get("behandlingId")?.asUUID())
         assertEquals(oppgaveId, melding?.get("oppgaveId")?.asLong())
-        assertEquals(saksbehandler.id().value, melding?.get("saksbehandlerOid")?.asUUID())
+        assertEquals(saksbehandler.id.value, melding?.get("saksbehandlerOid")?.asUUID())
         assertEquals(saksbehandler.ident, melding?.get("saksbehandlerIdent")?.asText())
         assertEquals(frist, melding?.get("frist")?.asLocalDate())
         assertEquals(skalTildeles, melding?.get("skalTildeles")?.asBoolean())
@@ -833,7 +833,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         mediator.påVent(
             ApiPaVentRequest.ApiLeggPaVent(
                 oppgaveId,
-                saksbehandler.id().value,
+                saksbehandler.id.value,
                 frist,
                 skalTildeles,
                 "en tekst",
@@ -847,7 +847,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         mediator.påVent(
             ApiPaVentRequest.ApiEndrePaVent(
                 oppgaveId,
-                saksbehandler.id().value,
+                saksbehandler.id.value,
                 nyFrist,
                 skalTildeles,
                 "en ny tekst",
@@ -864,7 +864,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         assertEquals(listOf("key" to "arsak"), årsaker)
         assertEquals(spleisBehandlingId, melding2?.get("behandlingId")?.asUUID())
         assertEquals(oppgaveId, melding2?.get("oppgaveId")?.asLong())
-        assertEquals(saksbehandler.id().value, melding2?.get("saksbehandlerOid")?.asUUID())
+        assertEquals(saksbehandler.id.value, melding2?.get("saksbehandlerOid")?.asUUID())
         assertEquals(saksbehandler.ident, melding2?.get("saksbehandlerIdent")?.asText())
         assertEquals(nyFrist, melding2?.get("frist")?.asLocalDate())
         assertEquals(skalTildeles, melding2?.get("skalTildeles")?.asBoolean())
@@ -906,7 +906,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         mediator.påVent(
             ApiPaVentRequest.ApiLeggPaVent(
                 oppgaveId,
-                saksbehandler.id().value,
+                saksbehandler.id.value,
                 LocalDate.now().plusDays(21),
                 true,
                 "notat tekst",
@@ -929,7 +929,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         mediator.påVent(
             ApiPaVentRequest.ApiLeggPaVent(
                 oppgaveId,
-                saksbehandler.id().value,
+                saksbehandler.id.value,
                 LocalDate.now().plusDays(10),
                 true,
                 "notat tekst",
@@ -948,7 +948,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         mediator.påVent(
             ApiPaVentRequest.ApiEndrePaVent(
                 oppgaveId,
-                saksbehandler.id().value,
+                saksbehandler.id.value,
                 LocalDate.now().plusDays(20),
                 true,
                 "ny notat tekst",
@@ -970,7 +970,7 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         mediator.påVent(
             ApiPaVentRequest.ApiLeggPaVent(
                 oppgaveId,
-                saksbehandler.id().value,
+                saksbehandler.id.value,
                 LocalDate.now().plusDays(21),
                 false,
                 "notat tekst",

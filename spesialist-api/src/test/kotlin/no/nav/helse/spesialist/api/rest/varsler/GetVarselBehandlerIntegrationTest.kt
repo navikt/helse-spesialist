@@ -34,17 +34,17 @@ class GetVarselBehandlerIntegrationTest {
         //given
         val saksbehandler = lagSaksbehandler()
         val vedtaksperiode = lagEnVedtaksperiode()
-        val behandling = lagEnBehandling(vedtaksperiodeId = vedtaksperiode.id())
+        val behandling = lagEnBehandling(vedtaksperiodeId = vedtaksperiode.id)
         val varseldefinisjon = lagVarseldefinisjon(kode = "RV_IV_1")
         val opprettetTidspunkt = LocalDateTime.now()
         val vurdertTidspunkt = LocalDateTime.now()
         val varsel = lagVarsel(
             spleisBehandlingId = behandling.spleisBehandlingId,
-            behandlingUnikId = behandling.id(),
+            behandlingUnikId = behandling.id,
             status = Varsel.Status.VURDERT,
             vurdering = Varselvurdering(
-                saksbehandlerId = saksbehandler.id(),
-                vurdertDefinisjonId = varseldefinisjon.id(),
+                saksbehandlerId = saksbehandler.id,
+                vurdertDefinisjonId = varseldefinisjon.id,
                 tidspunkt = vurdertTidspunkt,
             ),
             kode = "RV_IV_1",
@@ -60,15 +60,15 @@ class GetVarselBehandlerIntegrationTest {
         sessionContext.egenAnsattDao.lagre(vedtaksperiode.fødselsnummer, false, LocalDateTime.now())
 
         //when
-        val response = integrationTestFixture.get("/api/varsler/${varsel.id().value}")
+        val response = integrationTestFixture.get("/api/varsler/${varsel.id.value}")
 
         //then
         assertEquals(HttpStatusCode.OK.value, response.status)
         integrationTestFixture.assertJsonEquals(
             """
             {
-              "id":  "${varsel.id().value}",
-              "definisjonId": "${varseldefinisjon.id().value}",
+              "id":  "${varsel.id.value}",
+              "definisjonId": "${varseldefinisjon.id.value}",
               "tittel": "${varseldefinisjon.tittel}",
               "forklaring": "${varseldefinisjon.forklaring}",
               "handling": "${varseldefinisjon.handling}",
@@ -116,7 +116,7 @@ class GetVarselBehandlerIntegrationTest {
         sessionContext.varselRepository.lagre(varsel)
 
         // when
-        val response = integrationTestFixture.get("/api/varsler/${varsel.id().value}")
+        val response = integrationTestFixture.get("/api/varsler/${varsel.id.value}")
 
         // then
         assertEquals(HttpStatusCode.InternalServerError.value, response.status)
@@ -137,9 +137,9 @@ class GetVarselBehandlerIntegrationTest {
     fun `gir 500 dersom vedtaksperioden for den aktuelle behandlingen ikke finnes`() {
         // given
         val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID())
-        val behandling = lagEnBehandling(vedtaksperiodeId = vedtaksperiode.id())
+        val behandling = lagEnBehandling(vedtaksperiodeId = vedtaksperiode.id)
         val varsel = lagVarsel(
-            behandlingUnikId = behandling.id(),
+            behandlingUnikId = behandling.id,
             spleisBehandlingId = behandling.spleisBehandlingId,
             vurdering = null,
 
@@ -148,7 +148,7 @@ class GetVarselBehandlerIntegrationTest {
         sessionContext.behandlingRepository.lagre(behandling)
 
         // when
-        val response = integrationTestFixture.get("/api/varsler/${varsel.id().value}")
+        val response = integrationTestFixture.get("/api/varsler/${varsel.id.value}")
 
         // then
         assertEquals(HttpStatusCode.InternalServerError.value, response.status)
@@ -169,10 +169,10 @@ class GetVarselBehandlerIntegrationTest {
     fun `gir 403 dersom saksbehandler ikke har tilgang til den aktuelle personen`() {
         // given
         val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID())
-        val behandling = lagEnBehandling(vedtaksperiodeId = vedtaksperiode.id())
+        val behandling = lagEnBehandling(vedtaksperiodeId = vedtaksperiode.id)
         val varsel = lagVarsel(
             spleisBehandlingId = behandling.spleisBehandlingId,
-            behandlingUnikId = behandling.id(),
+            behandlingUnikId = behandling.id,
         )
         sessionContext.varselRepository.lagre(varsel)
         sessionContext.behandlingRepository.lagre(behandling)
@@ -184,7 +184,7 @@ class GetVarselBehandlerIntegrationTest {
         sessionContext.egenAnsattDao.lagre(vedtaksperiode.fødselsnummer, false, LocalDateTime.now())
 
         // when
-        val response = integrationTestFixture.get("/api/varsler/${varsel.id().value}")
+        val response = integrationTestFixture.get("/api/varsler/${varsel.id.value}")
 
         // then
         assertEquals(HttpStatusCode.Forbidden.value, response.status)
@@ -205,10 +205,10 @@ class GetVarselBehandlerIntegrationTest {
     fun `gir 500 dersom varseldefinisjon ikke finnes for det aktuelle varselet når varselet ikke er vurdert enda`() {
         // given
         val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID())
-        val behandling = lagEnBehandling(vedtaksperiodeId = vedtaksperiode.id())
+        val behandling = lagEnBehandling(vedtaksperiodeId = vedtaksperiode.id)
         val varsel = lagVarsel(
             spleisBehandlingId = behandling.spleisBehandlingId,
-            behandlingUnikId = behandling.id(),
+            behandlingUnikId = behandling.id,
         )
         sessionContext.varselRepository.lagre(varsel)
         sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
@@ -218,7 +218,7 @@ class GetVarselBehandlerIntegrationTest {
         sessionContext.egenAnsattDao.lagre(vedtaksperiode.fødselsnummer, false, LocalDateTime.now())
 
         // when
-        val response = integrationTestFixture.get("/api/varsler/${varsel.id().value}")
+        val response = integrationTestFixture.get("/api/varsler/${varsel.id.value}")
 
         // then
         assertEquals(HttpStatusCode.InternalServerError.value, response.status)
@@ -241,14 +241,14 @@ class GetVarselBehandlerIntegrationTest {
         // given
         val varseldefinisjon = lagVarseldefinisjon()
         val vedtaksperiode = lagEnVedtaksperiode()
-        val behandling = lagEnBehandling(vedtaksperiodeId = vedtaksperiode.id())
+        val behandling = lagEnBehandling(vedtaksperiodeId = vedtaksperiode.id)
         val varsel = lagVarsel(
             spleisBehandlingId = behandling.spleisBehandlingId,
-            behandlingUnikId = behandling.id(),
+            behandlingUnikId = behandling.id,
             status = Varsel.Status.VURDERT,
             vurdering = Varselvurdering(
                 saksbehandlerId = SaksbehandlerOid(UUID.randomUUID()),
-                vurdertDefinisjonId = varseldefinisjon.id(),
+                vurdertDefinisjonId = varseldefinisjon.id,
                 tidspunkt = LocalDateTime.now(),
             ),
         )
@@ -261,7 +261,7 @@ class GetVarselBehandlerIntegrationTest {
         sessionContext.egenAnsattDao.lagre(vedtaksperiode.fødselsnummer, false, LocalDateTime.now())
 
         // when
-        val response = integrationTestFixture.get("/api/varsler/${varsel.id().value}")
+        val response = integrationTestFixture.get("/api/varsler/${varsel.id.value}")
 
         // then
         assertEquals(HttpStatusCode.InternalServerError.value, response.status)
@@ -282,14 +282,14 @@ class GetVarselBehandlerIntegrationTest {
     fun `gir 500 dersom varseldefinisjon ikke finnes for det aktuelle varselet når varselet er vurdert`() {
         // given
         val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID())
-        val behandling = lagEnBehandling(vedtaksperiodeId = vedtaksperiode.id())
+        val behandling = lagEnBehandling(vedtaksperiodeId = vedtaksperiode.id)
         val saksbehandler = lagSaksbehandler()
         val varsel = lagVarsel(
             spleisBehandlingId = behandling.spleisBehandlingId,
-            behandlingUnikId = behandling.id(),
+            behandlingUnikId = behandling.id,
             status = Varsel.Status.VURDERT,
             vurdering = Varselvurdering(
-                saksbehandlerId = saksbehandler.id(),
+                saksbehandlerId = saksbehandler.id,
                 vurdertDefinisjonId = VarseldefinisjonId(UUID.randomUUID()),
                 tidspunkt = LocalDateTime.now(),
             )
@@ -303,7 +303,7 @@ class GetVarselBehandlerIntegrationTest {
         sessionContext.egenAnsattDao.lagre(vedtaksperiode.fødselsnummer, false, LocalDateTime.now())
 
         // when
-        val response = integrationTestFixture.get("/api/varsler/${varsel.id().value}")
+        val response = integrationTestFixture.get("/api/varsler/${varsel.id.value}")
 
         // then
         assertEquals(HttpStatusCode.InternalServerError.value, response.status)
@@ -313,7 +313,7 @@ class GetVarselBehandlerIntegrationTest {
               "type": "about:blank",
               "status": 500,
               "title": "Fant ikke varseldefinisjon for varselvurdering",
-              "detail": "Varsel-id: ${varsel.id().value}",
+              "detail": "Varsel-id: ${varsel.id.value}",
               "code": "VARSELDEFINISJON_MANGLER_FOR_VURDERING"
             }
             """.trimIndent(),
@@ -327,10 +327,10 @@ class GetVarselBehandlerIntegrationTest {
         // given
         val varseldefinisjon = lagVarseldefinisjon()
         val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID())
-        val behandling = lagEnBehandling(vedtaksperiodeId = vedtaksperiode.id())
+        val behandling = lagEnBehandling(vedtaksperiodeId = vedtaksperiode.id)
         val varsel = lagVarsel(
             spleisBehandlingId = behandling.spleisBehandlingId,
-            behandlingUnikId = behandling.id(),
+            behandlingUnikId = behandling.id,
             status = status,
         )
         sessionContext.varseldefinisjonRepository.lagre(varseldefinisjon)
@@ -342,7 +342,7 @@ class GetVarselBehandlerIntegrationTest {
         sessionContext.egenAnsattDao.lagre(vedtaksperiode.fødselsnummer, false, LocalDateTime.now())
 
         // when
-        val response = integrationTestFixture.get("/api/varsler/${varsel.id().value}")
+        val response = integrationTestFixture.get("/api/varsler/${varsel.id.value}")
 
         // then
         assertEquals(HttpStatusCode.InternalServerError.value, response.status)

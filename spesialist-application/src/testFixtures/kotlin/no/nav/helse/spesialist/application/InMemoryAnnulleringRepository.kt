@@ -5,7 +5,7 @@ import no.nav.helse.modell.Annullering
 import no.nav.helse.modell.AnnulleringId
 import java.util.UUID
 
-class InMemoryAnnulleringRepository : AnnulleringRepository, AbstractInMemoryRepository<AnnulleringId, Annullering>() {
+class InMemoryAnnulleringRepository : AnnulleringRepository, AbstractLateIdInMemoryRepository<AnnulleringId, Annullering>() {
     override fun lagreAnnullering(annullering: Annullering) {
         lagre(annullering)
     }

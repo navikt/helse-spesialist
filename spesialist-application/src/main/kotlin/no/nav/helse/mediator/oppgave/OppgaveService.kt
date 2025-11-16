@@ -218,7 +218,7 @@ class OppgaveService(
                 return
             }
 
-        val saksbehandlerTilgangsgrupper = tilgangsgruppehenter.hentTilgangsgrupper(saksbehandler.id())
+        val saksbehandlerTilgangsgrupper = tilgangsgruppehenter.hentTilgangsgrupper(saksbehandler.id)
 
         try {
             oppgave.forsøkTildelingVedReservasjon(SaksbehandlerWrapper(saksbehandler = saksbehandler), saksbehandlerTilgangsgrupper)

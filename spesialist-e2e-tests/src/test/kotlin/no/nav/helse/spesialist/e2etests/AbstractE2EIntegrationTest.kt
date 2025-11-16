@@ -166,7 +166,7 @@ abstract class AbstractE2EIntegrationTest {
         val oppgaveEvent = testRapid.meldingslogg(testContext.person.fødselsnummer)
             .findLast { it["@event_name"].asText() in listOf("oppgave_oppdatert", "oppgave_opprettet") }
             ?: error("Forventet å finne oppgave_opprettet/oppdatert i meldingslogg")
-        assertEquals(saksbehandler.id().value, oppgaveEvent["saksbehandler"].asUUID())
+        assertEquals(saksbehandler.id.value, oppgaveEvent["saksbehandler"].asUUID())
     }
 
     protected fun assertBehandlingTilstand(expectedTilstand: String) {

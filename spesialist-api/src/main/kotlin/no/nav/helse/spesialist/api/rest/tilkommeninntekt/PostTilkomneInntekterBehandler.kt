@@ -71,7 +71,7 @@ class PostTilkomneInntekterBehandler : PostBehandler<TilkomneInntekter, ApiLeggT
             årsak = "tilkommen inntekt lagt til",
         )
 
-        return RestResponse.OK(ApiLeggTilTilkommenInntektResponse(tilkommenInntekt.id().value))
+        return RestResponse.OK(ApiLeggTilTilkommenInntektResponse(tilkommenInntekt.id.value))
     }
 
     override fun openApi(config: RouteConfig) {

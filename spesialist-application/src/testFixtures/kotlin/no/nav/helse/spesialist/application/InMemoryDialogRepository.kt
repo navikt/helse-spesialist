@@ -5,7 +5,7 @@ import no.nav.helse.spesialist.domain.DialogId
 import no.nav.helse.spesialist.domain.Kommentar
 import no.nav.helse.spesialist.domain.KommentarId
 
-class InMemoryDialogRepository : DialogRepository, AbstractInMemoryRepository<DialogId, Dialog>() {
+class InMemoryDialogRepository : DialogRepository, AbstractLateIdInMemoryRepository<DialogId, Dialog>() {
     override fun finnForKommentar(id: KommentarId): Dialog? = alle().find { id in it.kommentarer.map(Kommentar::id) }
 
     override fun tildelIder(root: Dialog) {

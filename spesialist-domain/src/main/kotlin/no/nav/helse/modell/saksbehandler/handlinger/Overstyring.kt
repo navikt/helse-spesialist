@@ -1,7 +1,7 @@
 package no.nav.helse.modell.saksbehandler.handlinger
 
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
-import no.nav.helse.spesialist.domain.ddd.Entity
+import no.nav.helse.spesialist.domain.ddd.LateIdEntity
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -13,7 +13,7 @@ value class OverstyringId(
 sealed class Overstyring(
     id: OverstyringId?,
     ferdigstilt: Boolean,
-) : Entity<OverstyringId>(id) {
+) : LateIdEntity<OverstyringId>(id) {
     abstract val fødselsnummer: String
     abstract val saksbehandlerOid: SaksbehandlerOid
     abstract val eksternHendelseId: UUID

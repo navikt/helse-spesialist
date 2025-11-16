@@ -38,7 +38,7 @@ internal class OppgaveServiceTest {
     private val OPPGAVE_ID = nextLong()
     private val SAKSBEHANDLER = lagSaksbehandler()
     private val SAKSBEHANDLERIDENT = SAKSBEHANDLER.ident
-    private val SAKSBEHANDLEROID = SAKSBEHANDLER.id().value
+    private val SAKSBEHANDLEROID = SAKSBEHANDLER.id.value
     private val SAKSBEHANDLERNAVN = SAKSBEHANDLER.navn
     private val SAKSBEHANDLEREPOST = SAKSBEHANDLER.epost
     private val EGENSKAP_SØKNAD = SØKNAD

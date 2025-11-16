@@ -56,7 +56,7 @@ class PgSaksbehandlerRepository private constructor(
                 WHERE (saksbehandler.navn, saksbehandler.epost, saksbehandler.ident, saksbehandler.siste_handling_utført_tidspunkt)
                     IS DISTINCT FROM (excluded.navn, excluded.epost, excluded.ident, excluded.siste_handling_utført_tidspunkt)
             """.trimIndent(),
-            "oid" to saksbehandler.id().value,
+            "oid" to saksbehandler.id.value,
             "navn" to saksbehandler.navn,
             "epost" to saksbehandler.epost,
             "ident" to saksbehandler.ident,

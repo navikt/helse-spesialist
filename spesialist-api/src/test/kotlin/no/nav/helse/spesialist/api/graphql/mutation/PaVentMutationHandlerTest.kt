@@ -21,7 +21,7 @@ internal class PaVentMutationHandlerTest {
             saksbehandler = saksbehandler,
             whenever = leggPåVentMutation(nextLong(), """Dette er et notat""", 1 jan 2024, true),
             then = { _, body, _ ->
-                assertEquals(saksbehandler.id().value.toString(), body["data"]["leggPaVent"]["oid"].asText())
+                assertEquals(saksbehandler.id.value.toString(), body["data"]["leggPaVent"]["oid"].asText())
             }
         )
     }
@@ -40,7 +40,7 @@ internal class PaVentMutationHandlerTest {
                 arsaker = mapOf("_key" to "en_key", "arsak" to "en_arsak")
             ),
             then = { _, body, _ ->
-                assertEquals(saksbehandler.id().value.toString(), body["data"]["leggPaVent"]["oid"].asText())
+                assertEquals(saksbehandler.id.value.toString(), body["data"]["leggPaVent"]["oid"].asText())
             }
         )
     }

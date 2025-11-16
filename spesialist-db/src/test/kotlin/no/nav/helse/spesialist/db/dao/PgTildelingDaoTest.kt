@@ -28,7 +28,7 @@ internal class PgTildelingDaoTest : AbstractDBIntegrationTest() {
             .tildelOgLagre(saksbehandler)
         val tildeling = tildelingDao.tildelingForOppgave(oppgave.id)
         assertNotNull(tildeling)
-        assertEquals(saksbehandler.saksbehandler.id().value, tildeling.oid)
+        assertEquals(saksbehandler.saksbehandler.id.value, tildeling.oid)
         assertEquals(saksbehandler.saksbehandler.epost, tildeling.epost)
         assertEquals(saksbehandler.saksbehandler.navn, tildeling.navn)
     }

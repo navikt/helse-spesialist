@@ -47,7 +47,7 @@ class GetVarselBehandler : GetBehandler<Varsler.VarselId, ApiVarsel, GetVarselEr
         val varseldefinisjon =
             if (varselvurdering != null) {
                 transaksjon.varseldefinisjonRepository.finn(varselvurdering.vurdertDefinisjonId)
-                    ?: return RestResponse.Error(VARSELDEFINISJON_MANGLER_FOR_VURDERING, detail = "Varsel-id: ${varsel.id().value}")
+                    ?: return RestResponse.Error(VARSELDEFINISJON_MANGLER_FOR_VURDERING, detail = "Varsel-id: ${varsel.id.value}")
             } else {
                 transaksjon.varseldefinisjonRepository.finnGjeldendeFor(varsel.kode)
                     ?: return RestResponse.Error(VARSELDEFINISJON_MANGLER_FOR_KODE, detail = "Varselkode: ${varsel.kode}")
@@ -55,8 +55,8 @@ class GetVarselBehandler : GetBehandler<Varsler.VarselId, ApiVarsel, GetVarselEr
 
         val apiVarsel =
             ApiVarsel(
-                id = varsel.id().value,
-                definisjonId = varseldefinisjon.id().value,
+                id = varsel.id.value,
+                definisjonId = varseldefinisjon.id.value,
                 opprettet = varsel.opprettetTidspunkt,
                 tittel = varseldefinisjon.tittel,
                 forklaring = varseldefinisjon.forklaring,

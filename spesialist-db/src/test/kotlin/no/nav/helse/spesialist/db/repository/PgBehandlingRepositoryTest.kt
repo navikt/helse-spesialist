@@ -69,7 +69,7 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
 
         // when
         val funnetMedBehandlingId = repository.finn(SpleisBehandlingId(spleisBehandlingId))
-        val funnetMedBehandlingUnikId = repository.finn(funnetMedBehandlingId!!.id())
+        val funnetMedBehandlingUnikId = repository.finn(funnetMedBehandlingId!!.id)
 
         // then
         assertNotNull(funnetMedBehandlingUnikId)

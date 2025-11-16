@@ -1,6 +1,6 @@
 package no.nav.helse.spesialist.domain
 
-import no.nav.helse.spesialist.domain.ddd.AggregateRoot
+import no.nav.helse.spesialist.domain.ddd.LateIdAggregateRoot
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -19,7 +19,7 @@ class Notat private constructor(
     val opprettetTidspunkt: LocalDateTime,
     feilregistrert: Boolean,
     feilregistrertTidspunkt: LocalDateTime?,
-) : AggregateRoot<NotatId>(id) {
+) : LateIdAggregateRoot<NotatId>(id) {
     var feilregistrert: Boolean = feilregistrert
         private set
     var feilregistrertTidspunkt: LocalDateTime? = feilregistrertTidspunkt

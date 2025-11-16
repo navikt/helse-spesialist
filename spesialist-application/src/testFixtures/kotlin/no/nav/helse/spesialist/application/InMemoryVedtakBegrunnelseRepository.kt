@@ -6,7 +6,7 @@ import no.nav.helse.spesialist.domain.VedtakBegrunnelse
 import no.nav.helse.spesialist.domain.VedtakBegrunnelseId
 
 class InMemoryVedtakBegrunnelseRepository : VedtakBegrunnelseRepository,
-    AbstractInMemoryRepository<VedtakBegrunnelseId, VedtakBegrunnelse>() {
+    AbstractLateIdInMemoryRepository<VedtakBegrunnelseId, VedtakBegrunnelse>() {
     override fun finn(spleisBehandlingId: SpleisBehandlingId): VedtakBegrunnelse? =
         alle().find { it.spleisBehandlingId == spleisBehandlingId }
 

@@ -29,7 +29,7 @@ internal class AvsluttetUtenVedtakRiverIntegrationTest {
             .also(sessionContext.vedtaksperiodeRepository::lagre)
 
         val behandling = lagBehandling(
-            vedtaksperiodeId = vedtaksperiode.id(),
+            vedtaksperiodeId = vedtaksperiode.id,
             tilstand = Behandling.Tilstand.VidereBehandlingAvklares,
             utbetalingId = null,
             yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
@@ -42,7 +42,7 @@ internal class AvsluttetUtenVedtakRiverIntegrationTest {
         assertEquals(0, testRapid.publiserteMeldingerUtenGenererteFelter().size)
         assertEquals(
             Behandling.Tilstand.AvsluttetUtenVedtak,
-            sessionContext.behandlingRepository.finn(behandling.id())?.tilstand
+            sessionContext.behandlingRepository.finn(behandling.id)?.tilstand
         )
     }
 
@@ -57,7 +57,7 @@ internal class AvsluttetUtenVedtakRiverIntegrationTest {
       "@event_name": "avsluttet_uten_vedtak",
       "organisasjonsnummer": "${vedtaksperiode.organisasjonsnummer}",
       "yrkesaktivitetstype": "ARBEIDSTAKER",
-      "vedtaksperiodeId": "${vedtaksperiode.id().value}",
+      "vedtaksperiodeId": "${vedtaksperiode.id.value}",
       "behandlingId": "${behandling.spleisBehandlingId!!.value}",
       "fom": "${behandling.fom}",
       "tom": "${behandling.tom}",

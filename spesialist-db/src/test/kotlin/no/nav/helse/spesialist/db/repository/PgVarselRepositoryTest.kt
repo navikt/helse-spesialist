@@ -32,7 +32,7 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
         val fødselsnummer = lagFødselsnummer()
         val saksbehandler = lagSaksbehandler()
         val varseldefinisjonId = VarseldefinisjonId(UUID.randomUUID())
-        opprettSaksbehandler(saksbehandler.id().value, saksbehandler.navn, saksbehandler.epost, saksbehandler.ident)
+        opprettSaksbehandler(saksbehandler.id.value, saksbehandler.navn, saksbehandler.epost, saksbehandler.ident)
         opprettPerson(fødselsnummer = fødselsnummer)
         opprettArbeidsgiver()
         opprettBehandling(
@@ -57,7 +57,7 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
 
         // then
         assertNotNull(funnet)
-        assertEquals(varselId, funnet.id())
+        assertEquals(varselId, funnet.id)
         assertEquals(Varsel.Status.VURDERT, funnet.status)
         assertEquals("RV_IV_1", funnet.kode)
         assertEquals(spleisBehandlingId, funnet.spleisBehandlingId)
@@ -74,7 +74,7 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
         val fødselsnummer = lagFødselsnummer()
         val saksbehandler = lagSaksbehandler()
         val varseldefinisjonId = VarseldefinisjonId(UUID.randomUUID())
-        opprettSaksbehandler(saksbehandler.id().value, saksbehandler.navn, saksbehandler.epost, saksbehandler.ident)
+        opprettSaksbehandler(saksbehandler.id.value, saksbehandler.navn, saksbehandler.epost, saksbehandler.ident)
         opprettPerson(fødselsnummer = fødselsnummer)
         opprettArbeidsgiver()
         opprettBehandling(
@@ -99,13 +99,13 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
 
         // then
         assertNotNull(funnet)
-        assertEquals(varselId, funnet.id())
+        assertEquals(varselId, funnet.id)
         assertEquals(status, funnet.status)
         assertEquals("RV_IV_1", funnet.kode)
         assertNotNull(funnet.vurdering)
         assertEquals(spleisBehandlingId, funnet.spleisBehandlingId)
         assertEquals(varseldefinisjonId, funnet.vurdering?.vurdertDefinisjonId)
-        assertEquals(saksbehandler.id(), funnet.vurdering?.saksbehandlerId)
+        assertEquals(saksbehandler.id, funnet.vurdering?.saksbehandlerId)
     }
 
     @ParameterizedTest
@@ -118,7 +118,7 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
         val fødselsnummer = lagFødselsnummer()
         val saksbehandler = lagSaksbehandler()
         val varseldefinisjonId = VarseldefinisjonId(UUID.randomUUID())
-        opprettSaksbehandler(saksbehandler.id().value, saksbehandler.navn, saksbehandler.epost, saksbehandler.ident)
+        opprettSaksbehandler(saksbehandler.id.value, saksbehandler.navn, saksbehandler.epost, saksbehandler.ident)
         opprettPerson(fødselsnummer = fødselsnummer)
         opprettArbeidsgiver()
         opprettBehandling(
@@ -143,7 +143,7 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
 
         // then
         assertNotNull(funnet)
-        assertEquals(varselId, funnet.id())
+        assertEquals(varselId, funnet.id)
         assertEquals(status, funnet.status)
         assertEquals("RV_IV_1", funnet.kode)
         assertEquals(spleisBehandlingId, funnet.spleisBehandlingId)
@@ -177,7 +177,7 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
 
         // then
         assertEquals(1, funnet.size)
-        assertEquals(varselId, funnet.first().id())
+        assertEquals(varselId, funnet.first().id)
         assertEquals(Varsel.Status.AKTIV, funnet.first().status)
     }
 
@@ -215,7 +215,7 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
 
         // then
         assertEquals(1, funnet.size)
-        assertEquals(varselId, funnet.first().id())
+        assertEquals(varselId, funnet.first().id)
         assertEquals(Varsel.Status.VURDERT, funnet.first().status)
         assertEquals(saksbehandlerOid, funnet.first().vurdering?.saksbehandlerId)
     }
@@ -250,10 +250,10 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
 
         // then
         assertEquals(2, funnet.size)
-        assertContains(funnet.map { it.id() }, varselId1)
-        assertContains(funnet.map { it.id() }, varselId2)
-        assertEquals(Varsel.Status.AKTIV, funnet.find { it.id() == varselId1 }?.status)
-        assertEquals(Varsel.Status.AKTIV, funnet.find { it.id() == varselId2 }?.status)
+        assertContains(funnet.map { it.id }, varselId1)
+        assertContains(funnet.map { it.id }, varselId2)
+        assertEquals(Varsel.Status.AKTIV, funnet.find { it.id == varselId1 }?.status)
+        assertEquals(Varsel.Status.AKTIV, funnet.find { it.id == varselId2 }?.status)
     }
 
     @Test

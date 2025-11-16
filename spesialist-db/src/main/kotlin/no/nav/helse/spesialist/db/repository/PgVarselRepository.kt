@@ -93,7 +93,7 @@ class PgVarselRepository private constructor(
             "status" to varsel.status.toString(),
             "saksbehandler" to varsel.vurdering?.saksbehandlerId?.value,
             "tidspunkt" to varsel.vurdering?.tidspunkt,
-            "unik_id" to varsel.id().value,
+            "unik_id" to varsel.id.value,
         )
     }
 

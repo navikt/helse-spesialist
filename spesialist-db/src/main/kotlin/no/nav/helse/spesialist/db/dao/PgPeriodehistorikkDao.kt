@@ -47,7 +47,7 @@ class PgPeriodehistorikkDao private constructor(
                 VALUES (:type, :saksbehandler_oid, :generasjon_id, null, :dialog_ref, :json::json)
         """,
             "type" to historikkinnslag.type(),
-            "saksbehandler_oid" to historikkinnslag.saksbehandler?.id()?.value,
+            "saksbehandler_oid" to historikkinnslag.saksbehandler?.id?.value,
             "generasjon_id" to generasjonId,
             "dialog_ref" to historikkinnslag.dialogRef,
             "json" to historikkinnslag.detaljer().let { objectMapper.writeValueAsString(it) },

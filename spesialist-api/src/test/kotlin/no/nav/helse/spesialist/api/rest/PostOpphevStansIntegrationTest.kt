@@ -74,7 +74,7 @@ class PostOpphevStansIntegrationTest {
         assertEquals(vedtaksperiodeId, notat.vedtaksperiodeId)
         assertEquals(NotatType.OpphevStans, notat.type)
         assertEquals(begrunnelse, notat.tekst)
-        assertEquals(saksbehandler.id(), notat.saksbehandlerOid)
+        assertEquals(saksbehandler.id, notat.saksbehandlerOid)
         assertEquals(false, notat.feilregistrert)
         assertEquals(null, notat.feilregistrertTidspunkt)
 

@@ -78,7 +78,7 @@ class PostFattVedtakBehandler(
                 transaksjon.periodehistorikkDao.lagreMedOppgaveId(innslag, oppgave.id)
                 transaksjon.totrinnsvurderingRepository.lagre(totrinnsvurdering)
             }
-            transaksjon.reservasjonDao.reserverPerson(saksbehandlerSomFattetVedtak.id().value, fødselsnummer)
+            transaksjon.reservasjonDao.reserverPerson(saksbehandlerSomFattetVedtak.id.value, fødselsnummer)
             behandling.fattVedtak(
                 transaksjon = transaksjon,
                 fødselsnummer = fødselsnummer,
@@ -115,7 +115,7 @@ class PostFattVedtakBehandler(
         outbox: Outbox,
     ) {
         if (overlapperMedInfotrygd()) throw FattVedtakException(ApiPostFattVedtakErrorCode.OVERLAPPER_MED_INFOTRYGD)
-        val saksbehandlerOid = saksbehandler.id()
+        val saksbehandlerOid = saksbehandler.id
         validerOgGodkjennVarsler(
             behandlingRepository = transaksjon.behandlingRepository,
             varselRepository = transaksjon.varselRepository,
@@ -164,7 +164,7 @@ class PostFattVedtakBehandler(
                 .filterNot { it.fom > tom }
                 .plus(this)
 
-        val behandlingUnikIder = behandlingerSomMåSeesUnderEtt.map { behandling -> behandling.id() }
+        val behandlingUnikIder = behandlingerSomMåSeesUnderEtt.map { behandling -> behandling.id }
         val varsler = varselRepository.finnVarslerFor(behandlingUnikIder)
         if (varsler.any { it.manglerVurdering() }) throw FattVedtakException(ApiPostFattVedtakErrorCode.VARSLER_MANGLER_VURDERING)
         varsler
@@ -199,7 +199,7 @@ class PostFattVedtakBehandler(
                 VarselEndret(
                     vedtaksperiodeId = vedtaksperiodeId.value,
                     behandlingIdForBehandlingSomBleGodkjent = spleisBehandlingId.value,
-                    varselId = id().value,
+                    varselId = id.value,
                     varseltittel = varseldefinisjon.tittel,
                     varselkode = kode,
                     forrigeStatus = gammelStatus.name,
@@ -216,10 +216,10 @@ class PostFattVedtakBehandler(
         if (Tilgangsgruppe.BESLUTTER !in tilgangsgrupper && !environmentToggles.kanGodkjenneUtenBesluttertilgang) {
             throw FattVedtakException(ApiPostFattVedtakErrorCode.SAKSBEHANDLER_MANGLER_BESLUTTERTILGANG)
         }
-        if (this.saksbehandler?.value == beslutter.id().value && !environmentToggles.kanBeslutteEgneSaker) {
+        if (this.saksbehandler?.value == beslutter.id.value && !environmentToggles.kanBeslutteEgneSaker) {
             throw FattVedtakException(ApiPostFattVedtakErrorCode.SAKSBEHANDLER_KAN_IKKE_BESLUTTE_EGEN_OPPGAVE)
         }
-        settBeslutter(beslutter.id())
+        settBeslutter(beslutter.id)
         ferdigstill()
     }
 
@@ -238,7 +238,7 @@ class PostFattVedtakBehandler(
                 oppgaveId = oppgave.id,
                 godkjent = true,
                 saksbehandlerIdent = saksbehandlerSomFattetVedtak.ident,
-                saksbehandlerOid = saksbehandlerSomFattetVedtak.id().value,
+                saksbehandlerOid = saksbehandlerSomFattetVedtak.id.value,
                 saksbehandlerEpost = saksbehandlerSomFattetVedtak.epost,
                 godkjenttidspunkt = LocalDateTime.now(),
                 saksbehandleroverstyringer =

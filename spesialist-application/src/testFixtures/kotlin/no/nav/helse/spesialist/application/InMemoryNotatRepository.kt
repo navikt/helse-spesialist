@@ -4,7 +4,7 @@ import no.nav.helse.spesialist.domain.Notat
 import no.nav.helse.spesialist.domain.NotatId
 import java.util.UUID
 
-class InMemoryNotatRepository : NotatRepository, AbstractInMemoryRepository<NotatId, Notat>() {
+class InMemoryNotatRepository : NotatRepository, AbstractLateIdInMemoryRepository<NotatId, Notat>() {
     override fun finnAlleForVedtaksperiode(vedtaksperiodeId: UUID): List<Notat> =
         alle().filter { it.vedtaksperiodeId == vedtaksperiodeId }
 

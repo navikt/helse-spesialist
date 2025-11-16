@@ -39,7 +39,7 @@ class PaVentMutationHandler(
             saksbehandlerMediator.påVent(
                 ApiPaVentRequest.ApiLeggPaVent(
                     oppgaveId.toLong(),
-                    saksbehandler.id().value,
+                    saksbehandler.id.value,
                     frist,
                     tildeling,
                     notatTekst,
@@ -47,7 +47,7 @@ class PaVentMutationHandler(
                 ),
                 saksbehandler,
             )
-            byggRespons(ApiPaVent(frist = frist, oid = saksbehandler.id().value))
+            byggRespons(ApiPaVent(frist = frist, oid = saksbehandler.id.value))
         } catch (e: OppgaveIkkeTildelt) {
             byggFeilrespons(graphqlErrorException(e.httpkode.value, "Oppgave ikke tildelt"))
         } catch (e: OppgaveTildeltNoenAndre) {
@@ -90,7 +90,7 @@ class PaVentMutationHandler(
             saksbehandlerMediator.påVent(
                 ApiPaVentRequest.ApiEndrePaVent(
                     oppgaveId = oppgaveId.toLong(),
-                    saksbehandlerOid = saksbehandler.id().value,
+                    saksbehandlerOid = saksbehandler.id.value,
                     frist = frist,
                     skalTildeles = tildeling,
                     notatTekst = notatTekst,
@@ -98,7 +98,7 @@ class PaVentMutationHandler(
                 ),
                 saksbehandler,
             )
-            byggRespons(ApiPaVent(frist = frist, oid = saksbehandler.id().value))
+            byggRespons(ApiPaVent(frist = frist, oid = saksbehandler.id.value))
         } catch (e: FinnerIkkeLagtPåVent) {
             e.logger()
             byggFeilrespons(getUpdateError(oppgaveId))
