@@ -62,14 +62,14 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
         // Then:
         val meldinger = testRapid.publiserteMeldingerUtenGenererteFelter()
         assertEquals(1, meldinger.size)
-        assertEquals(person.identitetsnummer.value, meldinger.single().key)
+        assertEquals(person.id.value, meldinger.single().key)
         val actualJsonNode = meldinger.single().json
 
         @Language("JSON")
         val expectedJson = """
             {
               "@event_name": "vedtak_fattet",
-              "fødselsnummer": "${person.identitetsnummer.value}",
+              "fødselsnummer": "${person.id.value}",
               "aktørId": "${person.aktørId}",
               "yrkesaktivitetstype" : "ARBEIDSTAKER",
               "vedtaksperiodeId": "${vedtaksperiode.id.value}",
@@ -130,14 +130,14 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
         // Then:
         val meldinger = testRapid.publiserteMeldingerUtenGenererteFelter()
         assertEquals(1, meldinger.size)
-        assertEquals(person.identitetsnummer.value, meldinger.single().key)
+        assertEquals(person.id.value, meldinger.single().key)
         val actualJsonNode = meldinger.single().json
 
         @Language("JSON")
         val expectedJson = """
             {
               "@event_name": "vedtak_fattet",
-              "fødselsnummer": "${person.identitetsnummer.value}",
+              "fødselsnummer": "${person.id.value}",
               "aktørId": "${person.aktørId}",
               "yrkesaktivitetstype" : "ARBEIDSTAKER",
               "vedtaksperiodeId": "${vedtaksperiode.id.value}",
@@ -199,14 +199,14 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
         // Then:
         val meldinger = testRapid.publiserteMeldingerUtenGenererteFelter()
         assertEquals(1, meldinger.size)
-        assertEquals(person.identitetsnummer.value, meldinger.single().key)
+        assertEquals(person.id.value, meldinger.single().key)
         val actualJsonNode = meldinger.single().json
 
         @Language("JSON")
         val expectedJson = """
             {
               "@event_name": "vedtak_fattet",
-              "fødselsnummer": "${person.identitetsnummer.value}",
+              "fødselsnummer": "${person.id.value}",
               "aktørId": "${person.aktørId}",
               "yrkesaktivitetstype" : "ARBEIDSTAKER",
               "vedtaksperiodeId": "${vedtaksperiode.id.value}",
@@ -268,14 +268,14 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
         // Then:
         val meldinger = testRapid.publiserteMeldingerUtenGenererteFelter()
         assertEquals(1, meldinger.size)
-        assertEquals(person.identitetsnummer.value, meldinger.single().key)
+        assertEquals(person.id.value, meldinger.single().key)
         val actualJsonNode = meldinger.single().json
 
         @Language("JSON")
         val expectedJson = """
             {
               "@event_name": "vedtak_fattet",
-              "fødselsnummer": "${person.identitetsnummer.value}",
+              "fødselsnummer": "${person.id.value}",
               "aktørId": "${person.aktørId}",
               "yrkesaktivitetstype" : "ARBEIDSTAKER",
               "vedtaksperiodeId": "${vedtaksperiode.id.value}",
@@ -340,14 +340,14 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
         // Then:
         val meldinger = testRapid.publiserteMeldingerUtenGenererteFelter()
         assertEquals(1, meldinger.size)
-        assertEquals(person.identitetsnummer.value, meldinger.single().key)
+        assertEquals(person.id.value, meldinger.single().key)
         val actualJsonNode = meldinger.single().json
 
         @Language("JSON")
         val expectedJson = """
             {
               "@event_name": "vedtak_fattet",
-              "fødselsnummer": "${person.identitetsnummer.value}",
+              "fødselsnummer": "${person.id.value}",
               "aktørId": "${person.aktørId}",
               "yrkesaktivitetstype" : "ARBEIDSTAKER",
               "vedtaksperiodeId": "${vedtaksperiode.id.value}",
@@ -446,14 +446,14 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
         // Then:
         val meldinger = testRapid.publiserteMeldingerUtenGenererteFelter()
         assertEquals(1, meldinger.size)
-        assertEquals(person.identitetsnummer.value, meldinger.single().key)
+        assertEquals(person.id.value, meldinger.single().key)
         val actualJsonNode = meldinger.single().json
 
         @Language("JSON")
         val expectedJson = """
             {
               "@event_name": "vedtak_fattet",
-              "fødselsnummer": "${person.identitetsnummer.value}",
+              "fødselsnummer": "${person.id.value}",
               "aktørId": "${person.aktørId}",
               "yrkesaktivitetstype" : "ARBEIDSTAKER",
               "vedtaksperiodeId": "${vedtaksperiode.id.value}",
@@ -549,14 +549,14 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
         // Then:
         val meldinger = testRapid.publiserteMeldingerUtenGenererteFelter()
         assertEquals(1, meldinger.size)
-        assertEquals(person.identitetsnummer.value, meldinger.single().key)
+        assertEquals(person.id.value, meldinger.single().key)
         val actualJsonNode = meldinger.single().json
 
         @Language("JSON")
         val expectedJson = """
             {
               "@event_name": "vedtak_fattet",
-              "fødselsnummer": "${person.identitetsnummer.value}",
+              "fødselsnummer": "${person.id.value}",
               "aktørId": "${person.aktørId}",
               "yrkesaktivitetstype" : "ARBEIDSTAKER",
               "vedtaksperiodeId": "${vedtaksperiode.id.value}",
@@ -605,7 +605,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
         this.person = lagPerson()
             .also(sessionContext.personRepository::lagre)
 
-        this.vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.identitetsnummer)
+        this.vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
             .also(sessionContext.vedtaksperiodeRepository::lagre)
 
         this.behandling = lagBehandling(
@@ -621,7 +621,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
         ).also(sessionContext.vedtakBegrunnelseRepository::lagre)
 
         this.avviksvurdering = lagAvviksvurderingMedEnArbeidsgiver(
-            identitetsnummer = person.identitetsnummer,
+            identitetsnummer = person.id,
             organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
             skjæringstidspunkt = behandling.skjæringstidspunkt,
             omregnetÅrsinntekt = omregnetÅrsinntekt,
@@ -633,7 +633,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
         lagSkjønnsfastsattSykepengegrunnlag(
             saksbehandlerOid = saksbehandler.id,
             vedtaksperiodeId = vedtaksperiode.id,
-            identitetsnummer = person.identitetsnummer,
+            identitetsnummer = person.id,
             aktørId = person.aktørId,
             skjæringstidspunkt = behandling.skjæringstidspunkt,
             organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
@@ -642,7 +642,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
         ).also {
             sessionContext.overstyringRepository.lagre(
                 overstyringer = listOf(it),
-                totrinnsvurderingId = Totrinnsvurdering.ny(person.identitetsnummer.value)
+                totrinnsvurderingId = Totrinnsvurdering.ny(person.id.value)
                     .also(sessionContext.totrinnsvurderingRepository::lagre).id()
             )
         }
@@ -652,7 +652,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
         val godkjenningsbehovJson = lagGodkjenningsbehov(
             id = godkjenningsbehovId,
             aktørId = person.aktørId,
-            fødselsnummer = person.identitetsnummer.value,
+            fødselsnummer = person.id.value,
             spleisBehandlingId = behandling.spleisBehandlingId!!.value,
             yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
             sykepengegrunnlagsfakta = godkjenningsbehovFastsattEtterHovedregel(
@@ -724,7 +724,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
               "image": "europe-north1-docker.pkg.dev/nais-management-233d/tbd/helse-spesialist:2025.08.05-08.17-593599a"
             }
           ],
-          "fødselsnummer": "${person.identitetsnummer.value}",
+          "fødselsnummer": "${person.id.value}",
           "@forårsaket_av": {
             "id": "37d42c5a-2f5c-4acf-88de-3e7f958730ad",
             "opprettet": "2025-08-06T07:20:35.756560675",
@@ -785,7 +785,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
               "image": "europe-north1-docker.pkg.dev/nais-management-233d/tbd/helse-spesialist:2025.08.06-08.08-3ed030a"
             }
           ],
-          "fødselsnummer": "${person.identitetsnummer.value}",
+          "fødselsnummer": "${person.id.value}",
           "@forårsaket_av": {
             "id": "853ff18a-c206-4688-9ad9-399c1a55b339",
             "opprettet": "2025-08-06T13:49:40.342278012",
@@ -835,7 +835,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
               "image": "europe-north1-docker.pkg.dev/nais-management-233d/tbd/helse-spesialist:2025.08.05-08.17-593599a"
             }
           ],
-          "fødselsnummer": "${person.identitetsnummer.value}",
+          "fødselsnummer": "${person.id.value}",
           "@forårsaket_av": {
             "id": "37d42c5a-2f5c-4acf-88de-3e7f958730ad",
             "opprettet": "2025-08-06T07:20:35.756560675",

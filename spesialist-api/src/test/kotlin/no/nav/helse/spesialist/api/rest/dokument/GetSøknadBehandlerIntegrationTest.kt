@@ -26,12 +26,12 @@ class GetSøknadBehandlerIntegrationTest {
         val dokumentId = UUID.randomUUID()
         val person = lagPerson().also(personRepository::lagre)
         dokumentDao.lagre(
-            fødselsnummer = person.identitetsnummer.value,
+            fødselsnummer = person.id.value,
             dokumentId = dokumentId,
-            dokument = objectMapper.readTree(lagSøknadJson(fnr = person.identitetsnummer.value))
+            dokument = objectMapper.readTree(lagSøknadJson(fnr = person.id.value))
         )
 
-        val pseudoId = personPseudoIdDao.nyPersonPseudoId(person.identitetsnummer)
+        val pseudoId = personPseudoIdDao.nyPersonPseudoId(person.id)
 
         val saksbehandler = lagSaksbehandler()
 
@@ -53,12 +53,12 @@ class GetSøknadBehandlerIntegrationTest {
         val person =
             lagPerson(adressebeskyttelse = Personinfo.Adressebeskyttelse.StrengtFortrolig).also(personRepository::lagre)
         dokumentDao.lagre(
-            fødselsnummer = person.identitetsnummer.value,
+            fødselsnummer = person.id.value,
             dokumentId = dokumentId,
-            dokument = objectMapper.readTree(lagSøknadJson(fnr = person.identitetsnummer.value))
+            dokument = objectMapper.readTree(lagSøknadJson(fnr = person.id.value))
         )
 
-        val pseudoId = personPseudoIdDao.nyPersonPseudoId(Identitetsnummer.fraString(person.identitetsnummer.value))
+        val pseudoId = personPseudoIdDao.nyPersonPseudoId(Identitetsnummer.fraString(person.id.value))
 
         val saksbehandler = lagSaksbehandler()
 

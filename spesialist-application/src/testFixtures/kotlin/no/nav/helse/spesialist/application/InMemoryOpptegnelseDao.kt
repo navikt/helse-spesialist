@@ -16,7 +16,7 @@ class InMemoryOpptegnelseDao(
     ) {
         data.add(
             OpptegnelseDao.Opptegnelse(
-                aktorId = personRepository.alle().first { it.identitetsnummer.value == fødselsnummer }.aktørId,
+                aktorId = personRepository.alle().first { it.id.value == fødselsnummer }.aktørId,
                 sekvensnummer = (data.maxOfOrNull { it.sekvensnummer } ?: 0) + 1,
                 type = type,
                 payload = payload

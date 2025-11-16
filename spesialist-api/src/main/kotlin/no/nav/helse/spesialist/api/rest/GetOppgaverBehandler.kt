@@ -123,8 +123,8 @@ class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide, Ap
         val personer =
             measureTimedValue {
                 transaksjon.personRepository
-                    .finnAlle(elementer.map { it.personId }.toSet())
-                    .associateBy { it.id() }
+                    .finnAlle(elementer.map { it.identitetsnummer }.toSet())
+                    .associateBy { it.id }
             }.let {
                 logg.info("Hentet personer for oppgaver. Brukte ${it.duration.inWholeMilliseconds} ms.")
                 it.value
@@ -170,7 +170,7 @@ class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide, Ap
             sidestoerrelse = sidestørrelse,
             elementer =
                 elementer.map { oppgave ->
-                    val person = personer.getRequired(oppgave.personId)
+                    val person = personer.getRequired(oppgave.identitetsnummer)
                     ApiOppgaveProjeksjon(
                         id = oppgave.id.toString(),
                         aktorId = person.aktørId,
@@ -181,7 +181,7 @@ class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide, Ap
                                     etternavn = personInfo.etternavn,
                                     mellomnavn = personInfo.mellomnavn,
                                 )
-                            } ?: error("Person med id ${oppgave.personId} har ingen info"),
+                            } ?: error("Person med identitetsnummer ${oppgave.identitetsnummer} har ingen info"),
                         egenskaper =
                             oppgave.egenskaper
                                 .map { egenskap -> egenskap.tilApiversjon() }

@@ -25,7 +25,7 @@ internal class AvsluttetUtenVedtakRiverIntegrationTest {
         val person = lagPerson()
             .also(sessionContext.personRepository::lagre)
 
-        val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.identitetsnummer)
+        val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
             .also(sessionContext.vedtaksperiodeRepository::lagre)
 
         val behandling = lagBehandling(
@@ -86,7 +86,7 @@ internal class AvsluttetUtenVedtakRiverIntegrationTest {
           "image": "europe-north1-docker.pkg.dev/nais-management-233d/tbd/helse-spesialist:2025.08.05-08.17-593599a"
         }
       ],
-      "fødselsnummer": "${person.identitetsnummer.value}",
+      "fødselsnummer": "${person.id.value}",
       "@forårsaket_av": {
         "id": "46cd1183-3c13-435e-a4a1-4321797159f7",
         "opprettet": "2024-05-01T00:00",

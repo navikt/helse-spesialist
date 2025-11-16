@@ -13,7 +13,7 @@ import kotlin.random.Random
 fun lagPerson(
     fødselsdato: LocalDate? = lagFødselsdato(),
     kjønn: Kjønn? = Kjønn.entries.random(),
-    identitetsnummer: Identitetsnummer = lagIdentitetsnummer(
+    id: Identitetsnummer = lagIdentitetsnummer(
         fødselsdato = fødselsdato ?: lagFødselsdato(),
         mann = kjønn == Kjønn.Mann
     ),
@@ -26,7 +26,7 @@ fun lagPerson(
     ),
     erEgenAnsatt: Boolean? = false,
 ): Person = Person.Factory.ny(
-    identitetsnummer = identitetsnummer,
+    id = id,
     aktørId = aktørId,
     info = info,
     egenAnsattStatus = erEgenAnsatt?.let {

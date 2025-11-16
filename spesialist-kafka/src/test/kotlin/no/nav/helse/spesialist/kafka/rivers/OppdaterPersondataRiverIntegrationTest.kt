@@ -26,7 +26,7 @@ internal class OppdaterPersondataRiverIntegrationTest {
         val person = lagPerson()
             .also(sessionContext.personRepository::lagre)
 
-        val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.identitetsnummer)
+        val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
             .also(sessionContext.vedtaksperiodeRepository::lagre)
 
         val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
@@ -39,7 +39,7 @@ internal class OppdaterPersondataRiverIntegrationTest {
         val meldinger = testRapid.publiserteMeldingerUtenGenererteFelter()
         assertEquals(2, meldinger.size)
         meldinger.forEach {
-            assertEquals(person.identitetsnummer.value, it.key)
+            assertEquals(person.id.value, it.key)
         }
         val behovMelding = meldinger.first { it.json["@event_name"].asText() == "behov" }
         val actualJsonNode = behovMelding.json
@@ -55,7 +55,7 @@ internal class OppdaterPersondataRiverIntegrationTest {
                 "historikkFom": "${behandling.fom.minusYears(3)}",
                 "historikkTom": "${LocalDate.now()}"
               },
-              "fødselsnummer": "${person.identitetsnummer.value}",
+              "fødselsnummer": "${person.id.value}",
               "hendelseId": "bff52e44-d009-43c8-af43-a14a38b66cfb"
             }
         """.trimIndent()
@@ -78,7 +78,7 @@ internal class OppdaterPersondataRiverIntegrationTest {
         val meldinger = testRapid.publiserteMeldingerUtenGenererteFelter()
         assertEquals(1, meldinger.size)
         meldinger.forEach {
-            assertEquals(person.identitetsnummer.value, it.key)
+            assertEquals(person.id.value, it.key)
         }
         assertEquals(null, meldinger.find { it.json["@event_name"].asText() == "behov" }?.json)
     }
@@ -96,7 +96,7 @@ internal class OppdaterPersondataRiverIntegrationTest {
         """
     {
       "@event_name": "oppdater_persondata",
-      "fødselsnummer": "${person.identitetsnummer.value}",
+      "fødselsnummer": "${person.id.value}",
       "@id": "bff52e44-d009-43c8-af43-a14a38b66cfb",
       "@opprettet": "2025-08-22T10:12:25.424748984",
       "system_read_count": 1,

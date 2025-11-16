@@ -26,7 +26,7 @@ class DelegatingLegacyPersonRepository(
     private val sykefraværstilfelleDao: DelegatingSykefraværstilfelleDao,
 ) : LegacyPersonRepository {
     override fun brukPersonHvisFinnes(fødselsnummer: String, personScope: LegacyPerson.() -> Unit) {
-        val person = personRepository.alle().find { it.identitetsnummer.value == fødselsnummer }
+        val person = personRepository.alle().find { it.id.value == fødselsnummer }
         if (person == null) {
             logg.info("Person med fødselsnummer $fødselsnummer er ikke lagt til i testen")
             return
@@ -34,9 +34,9 @@ class DelegatingLegacyPersonRepository(
 
         val legacyPerson = LegacyPerson(
             aktørId = person.aktørId,
-            fødselsnummer = person.identitetsnummer.value,
+            fødselsnummer = person.id.value,
             vedtaksperioder = vedtaksperiodeRepository.alle()
-                .filter { it.fødselsnummer == person.identitetsnummer.value }.map { vedtaksperiode ->
+                .filter { it.fødselsnummer == person.id.value }.map { vedtaksperiode ->
                     LegacyVedtaksperiode(
                         vedtaksperiodeId = vedtaksperiode.id.value,
                         organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
@@ -104,7 +104,7 @@ class DelegatingLegacyPersonRepository(
                             opprettet = it.opprettet,
                         )
                     },
-            avviksvurderinger = avviksvurderingRepository.finnAvviksvurderinger(person.identitetsnummer.value),
+            avviksvurderinger = avviksvurderingRepository.finnAvviksvurderinger(person.id.value),
         )
         val dtoFør = legacyPerson.toDto()
         legacyPerson.personScope()
@@ -136,5 +136,5 @@ class DelegatingLegacyPersonRepository(
     }
 
     override fun finnFødselsnumre(aktørId: String) =
-        personRepository.alle().filter { it.aktørId == aktørId }.map { it.identitetsnummer.value }
+        personRepository.alle().filter { it.aktørId == aktørId }.map { it.id.value }
 }

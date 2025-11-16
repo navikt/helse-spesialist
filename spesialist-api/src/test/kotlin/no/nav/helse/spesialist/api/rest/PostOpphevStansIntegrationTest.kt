@@ -25,12 +25,12 @@ class PostOpphevStansIntegrationTest {
         val vedtaksperiodeId = UUID.randomUUID()
 
         val person = lagPerson(
-            identitetsnummer = Identitetsnummer.fraString(fødselsnummer)
+            id = Identitetsnummer.fraString(fødselsnummer)
         ).also(sessionContext.personRepository::lagre)
 
         lagVedtaksperiode(
             id = VedtaksperiodeId(vedtaksperiodeId),
-            identitetsnummer = person.identitetsnummer,
+            identitetsnummer = person.id,
         ).also(sessionContext.vedtaksperiodeRepository::lagre)
 
         sessionContext.oppgaveRepository.lagre(

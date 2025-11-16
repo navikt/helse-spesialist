@@ -55,14 +55,14 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
         // Then:
         val meldinger = testRapid.publiserteMeldingerUtenGenererteFelter()
         assertEquals(1, meldinger.size)
-        assertEquals(person.identitetsnummer.value, meldinger.single().key)
+        assertEquals(person.id.value, meldinger.single().key)
         val actualJsonNode = meldinger.single().json
 
         @Language("JSON")
         val expectedJson = """
             {
               "@event_name": "vedtak_fattet",
-              "fødselsnummer": "${person.identitetsnummer.value}",
+              "fødselsnummer": "${person.id.value}",
               "aktørId": "${person.aktørId}",
               "yrkesaktivitetstype": "SELVSTENDIG",
               "vedtaksperiodeId": "${vedtaksperiode.id.value}",
@@ -129,14 +129,14 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
         // Then:
         val meldinger = testRapid.publiserteMeldingerUtenGenererteFelter()
         assertEquals(1, meldinger.size)
-        assertEquals(person.identitetsnummer.value, meldinger.single().key)
+        assertEquals(person.id.value, meldinger.single().key)
         val actualJsonNode = meldinger.single().json
 
         @Language("JSON")
         val expectedJson = """
             {
               "@event_name": "vedtak_fattet",
-              "fødselsnummer": "${person.identitetsnummer.value}",
+              "fødselsnummer": "${person.id.value}",
               "aktørId": "${person.aktørId}",
               "yrkesaktivitetstype": "SELVSTENDIG",
               "vedtaksperiodeId": "${vedtaksperiode.id.value}",
@@ -201,7 +201,7 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
             .also(sessionContext.personRepository::lagre)
 
         this.vedtaksperiode = lagVedtaksperiode(
-            identitetsnummer = person.identitetsnummer,
+            identitetsnummer = person.id,
             organisasjonsnummer = "SELVSTENDIG"
         ).also(sessionContext.vedtaksperiodeRepository::lagre)
 
@@ -223,7 +223,7 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
         val godkjenningsbehovJson = lagGodkjenningsbehov(
             id = godkjenningsbehovId,
             aktørId = person.aktørId,
-            fødselsnummer = person.identitetsnummer.value,
+            fødselsnummer = person.id.value,
             spleisBehandlingId = behandling.spleisBehandlingId!!.value,
             yrkesaktivitetstype = Yrkesaktivitetstype.SELVSTENDIG,
             sykepengegrunnlagsfakta = godkjenningsbehovSelvstendigNæringsdrivende(
@@ -292,7 +292,7 @@ class AvsluttetMedVedtakRiverSelvstendigNæringsdrivendeIntegrationTest {
               "image": "europe-north1-docker.pkg.dev/nais-management-233d/tbd/helse-spesialist:2025.08.07-13.55-163f597"
             }
           ],
-          "fødselsnummer": "${person.identitetsnummer.value}",
+          "fødselsnummer": "${person.id.value}",
           "@forårsaket_av": {
             "id": "d4a5fe16-3261-4a3f-a82e-f0c303a73c29",
             "opprettet": "2025-08-07T16:01:33.744250322",

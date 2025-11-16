@@ -2,20 +2,10 @@ package no.nav.helse.spesialist.application
 
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Person
-import no.nav.helse.spesialist.domain.PersonId
 
-class InMemoryPersonRepository : PersonRepository, AbstractLateIdInMemoryRepository<PersonId, Person>() {
-    override fun finn(identitetsnummer: Identitetsnummer): Person? =
-        alle().firstOrNull { it.identitetsnummer == identitetsnummer }
-
-    override fun tildelIder(root: Person) {
-        if (!root.harFåttTildeltId())
-            root.tildelId(PersonId((alle().maxOfOrNull { it.id().value } ?: 0) + 1))
-    }
-
+class InMemoryPersonRepository : PersonRepository, AbstractInMemoryRepository<Identitetsnummer, Person>() {
     override fun deepCopy(original: Person): Person = Person.Factory.fraLagring(
-        id = original.id(),
-        identitetsnummer = original.identitetsnummer,
+        id = original.id,
         aktørId = original.aktørId,
         info = original.info,
         infoOppdatert = original.infoOppdatert,

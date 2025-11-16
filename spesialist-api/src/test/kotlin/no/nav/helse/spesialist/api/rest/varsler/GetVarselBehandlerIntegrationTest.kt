@@ -55,7 +55,7 @@ class GetVarselBehandlerIntegrationTest {
         sessionContext.saksbehandlerRepository.lagre(saksbehandler)
         sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
         sessionContext.behandlingRepository.lagre(behandling)
-        lagPerson(identitetsnummer = Identitetsnummer.fraString(vedtaksperiode.fødselsnummer))
+        lagPerson(id = Identitetsnummer.fraString(vedtaksperiode.fødselsnummer))
             .also(sessionContext.personRepository::lagre)
 
         //when
@@ -177,7 +177,7 @@ class GetVarselBehandlerIntegrationTest {
         sessionContext.behandlingRepository.lagre(behandling)
         sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
         lagPerson(
-            identitetsnummer = Identitetsnummer.fraString(vedtaksperiode.fødselsnummer),
+            id = Identitetsnummer.fraString(vedtaksperiode.fødselsnummer),
             adressebeskyttelse = Personinfo.Adressebeskyttelse.Fortrolig
         ).also(sessionContext.personRepository::lagre)
 
@@ -211,7 +211,7 @@ class GetVarselBehandlerIntegrationTest {
         sessionContext.varselRepository.lagre(varsel)
         sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
         sessionContext.behandlingRepository.lagre(behandling)
-        lagPerson(identitetsnummer = Identitetsnummer.fraString(vedtaksperiode.fødselsnummer))
+        lagPerson(id = Identitetsnummer.fraString(vedtaksperiode.fødselsnummer))
             .also(sessionContext.personRepository::lagre)
 
         // when
@@ -253,7 +253,7 @@ class GetVarselBehandlerIntegrationTest {
         sessionContext.varselRepository.lagre(varsel)
         sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
         sessionContext.behandlingRepository.lagre(behandling)
-        lagPerson(identitetsnummer = Identitetsnummer.fraString(vedtaksperiode.fødselsnummer))
+        lagPerson(id = Identitetsnummer.fraString(vedtaksperiode.fødselsnummer))
             .also(sessionContext.personRepository::lagre)
 
         // when
@@ -294,7 +294,7 @@ class GetVarselBehandlerIntegrationTest {
         sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
         sessionContext.behandlingRepository.lagre(behandling)
         sessionContext.saksbehandlerRepository.lagre(saksbehandler)
-        lagPerson(identitetsnummer = Identitetsnummer.fraString(vedtaksperiode.fødselsnummer))
+        lagPerson(id = Identitetsnummer.fraString(vedtaksperiode.fødselsnummer))
             .also(sessionContext.personRepository::lagre)
 
         // when
@@ -332,7 +332,7 @@ class GetVarselBehandlerIntegrationTest {
         sessionContext.varselRepository.lagre(varsel)
         sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
         sessionContext.behandlingRepository.lagre(behandling)
-        lagPerson(identitetsnummer = Identitetsnummer.fraString(vedtaksperiode.fødselsnummer))
+        lagPerson(id = Identitetsnummer.fraString(vedtaksperiode.fødselsnummer))
             .also(sessionContext.personRepository::lagre)
 
         // when

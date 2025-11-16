@@ -96,7 +96,7 @@ class PostFattVedtakIntegrationTest {
         val behandlingId = UUID.randomUUID()
         val person = lagPerson(erEgenAnsatt = true)
             .also(sessionContext.personRepository::lagre)
-        val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.identitetsnummer)
+        val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
         val behandling = lagEnBehandling(spleisBehandlingId = behandlingId, vedtaksperiodeId = vedtaksperiode.id)
         val saksbehandler = lagSaksbehandler()
         sessionContext.saksbehandlerRepository.lagre(saksbehandler)
@@ -120,7 +120,7 @@ class PostFattVedtakIntegrationTest {
         val behandlingId = UUID.randomUUID()
         val person = lagPerson()
             .also(sessionContext.personRepository::lagre)
-        val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.identitetsnummer)
+        val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
         val behandling = lagEnBehandling(spleisBehandlingId = behandlingId, vedtaksperiodeId = vedtaksperiode.id)
         val saksbehandler = lagSaksbehandler()
         sessionContext.saksbehandlerRepository.lagre(saksbehandler)
@@ -161,7 +161,7 @@ class PostFattVedtakIntegrationTest {
         sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
         sessionContext.behandlingRepository.lagre(behandling)
         lagPerson(
-            identitetsnummer = Identitetsnummer.fraString(fødselsnummer)
+            id = Identitetsnummer.fraString(fødselsnummer)
         ).also(sessionContext.personRepository::lagre)
         val oppgave = lagOppgave(behandlingId)
         oppgave.avventerSystem(saksbehandler.ident, UUID.randomUUID())
@@ -200,7 +200,7 @@ class PostFattVedtakIntegrationTest {
         sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
         sessionContext.behandlingRepository.lagre(behandling)
         lagPerson(
-            identitetsnummer = Identitetsnummer.fraString(fødselsnummer)
+            id = Identitetsnummer.fraString(fødselsnummer)
         ).also(sessionContext.personRepository::lagre)
         val oppgave = lagOppgave(behandlingId)
         sessionContext.oppgaveRepository.lagre(oppgave)
@@ -245,7 +245,7 @@ class PostFattVedtakIntegrationTest {
         sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
         sessionContext.behandlingRepository.lagre(behandling)
         lagPerson(
-            identitetsnummer = Identitetsnummer.fraString(fødselsnummer)
+            id = Identitetsnummer.fraString(fødselsnummer)
         ).also(sessionContext.personRepository::lagre)
         val oppgave = lagOppgave(behandlingId)
         sessionContext.oppgaveRepository.lagre(oppgave)
@@ -289,7 +289,7 @@ class PostFattVedtakIntegrationTest {
         sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
         sessionContext.behandlingRepository.lagre(behandling)
         lagPerson(
-            identitetsnummer = Identitetsnummer.fraString(fødselsnummer)
+            id = Identitetsnummer.fraString(fødselsnummer)
         ).also(sessionContext.personRepository::lagre)
         val oppgave = lagOppgave(behandlingId)
         sessionContext.oppgaveRepository.lagre(oppgave)
@@ -336,7 +336,7 @@ class PostFattVedtakIntegrationTest {
         sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
         sessionContext.behandlingRepository.lagre(behandling)
         lagPerson(
-            identitetsnummer = Identitetsnummer.fraString(fødselsnummer)
+            id = Identitetsnummer.fraString(fødselsnummer)
         ).also(sessionContext.personRepository::lagre)
         val oppgave = lagOppgave(behandlingId)
         sessionContext.oppgaveRepository.lagre(oppgave)
@@ -382,7 +382,7 @@ class PostFattVedtakIntegrationTest {
         sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
         sessionContext.behandlingRepository.lagre(behandling)
         lagPerson(
-            identitetsnummer = Identitetsnummer.fraString(fødselsnummer)
+            id = Identitetsnummer.fraString(fødselsnummer)
         ).also(sessionContext.personRepository::lagre)
         sessionContext.varseldefinisjonRepository.lagre(lagVarseldefinisjon(kode = kode))
         sessionContext.varselRepository.lagre(
@@ -441,7 +441,7 @@ class PostFattVedtakIntegrationTest {
         sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
         sessionContext.behandlingRepository.lagre(behandling)
         lagPerson(
-            identitetsnummer = Identitetsnummer.fraString(fødselsnummer)
+            id = Identitetsnummer.fraString(fødselsnummer)
         ).also(sessionContext.personRepository::lagre)
         sessionContext.varseldefinisjonRepository.lagre(lagVarseldefinisjon(kode = kode))
         sessionContext.varselRepository.lagre(
@@ -488,7 +488,7 @@ class PostFattVedtakIntegrationTest {
         sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
         sessionContext.behandlingRepository.lagre(behandling)
         lagPerson(
-            identitetsnummer = Identitetsnummer.fraString(fødselsnummer)
+            id = Identitetsnummer.fraString(fødselsnummer)
         ).also(sessionContext.personRepository::lagre)
         sessionContext.varseldefinisjonRepository.lagre(lagVarseldefinisjon(kode = kode))
         val godkjentVarsel = Varsel.fraLagring(

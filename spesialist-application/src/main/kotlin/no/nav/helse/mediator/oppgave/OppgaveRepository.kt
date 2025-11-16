@@ -4,7 +4,7 @@ import no.nav.helse.db.SorteringsnøkkelForDatabase
 import no.nav.helse.db.Sorteringsrekkefølge
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Oppgave
-import no.nav.helse.spesialist.domain.PersonId
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.PåVentId
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
@@ -46,7 +46,7 @@ interface OppgaveRepository {
 
     data class OppgaveProjeksjon(
         val id: Long,
-        val personId: PersonId,
+        val identitetsnummer: Identitetsnummer,
         val egenskaper: Set<Egenskap>,
         val tildeltTilOid: SaksbehandlerOid?,
         val opprettetTidspunkt: Instant,

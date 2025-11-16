@@ -1,15 +1,10 @@
 package no.nav.helse.spesialist.domain
 
-import no.nav.helse.spesialist.domain.ddd.LateIdAggregateRoot
+import no.nav.helse.spesialist.domain.ddd.AggregateRoot
 import no.nav.helse.spesialist.domain.ddd.ValueObject
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import java.time.Instant
 import java.time.LocalDate
-
-@JvmInline
-value class PersonId(
-    val value: Int,
-)
 
 data class Personinfo(
     val fornavn: String,
@@ -35,8 +30,7 @@ data class Personinfo(
 }
 
 class Person private constructor(
-    id: PersonId?,
-    val identitetsnummer: Identitetsnummer,
+    id: Identitetsnummer,
     val aktørId: String,
     info: Personinfo?,
     infoOppdatert: LocalDate?,
@@ -45,7 +39,7 @@ class Person private constructor(
     val infotrygdutbetalingerRef: Int?,
     val infotrygdutbetalingerOppdatert: LocalDate?,
     egenAnsattStatus: EgenAnsattStatus?,
-) : LateIdAggregateRoot<PersonId>(id) {
+) : AggregateRoot<Identitetsnummer>(id) {
     var info: Personinfo? = info
         private set
     var infoOppdatert: LocalDate? = infoOppdatert
@@ -89,13 +83,12 @@ class Person private constructor(
 
     object Factory {
         fun ny(
-            identitetsnummer: Identitetsnummer,
+            id: Identitetsnummer,
             aktørId: String,
             info: Personinfo?,
             egenAnsattStatus: EgenAnsattStatus?,
         ) = Person(
-            id = null,
-            identitetsnummer = identitetsnummer,
+            id = id,
             aktørId = aktørId,
             info = info,
             infoOppdatert = info?.let { LocalDate.now() },
@@ -107,8 +100,7 @@ class Person private constructor(
         )
 
         fun fraLagring(
-            id: PersonId?,
-            identitetsnummer: Identitetsnummer,
+            id: Identitetsnummer,
             aktørId: String,
             info: Personinfo?,
             infoOppdatert: LocalDate?,
@@ -119,7 +111,6 @@ class Person private constructor(
             egenAnsattStatus: EgenAnsattStatus?,
         ) = Person(
             id = id,
-            identitetsnummer = identitetsnummer,
             aktørId = aktørId,
             info = info,
             infoOppdatert = infoOppdatert,

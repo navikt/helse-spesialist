@@ -29,19 +29,19 @@ class GetInntektsmeldingBehandlerTest {
         val person = lagPerson().also(personRepository::lagre)
         val organisasjonsnummer = "99999999"
         dokumentDao.lagre(
-            fødselsnummer = person.identitetsnummer.value,
+            fødselsnummer = person.id.value,
             dokumentId = dokumentId,
             dokument = objectMapper.readTree(
                 lagInntektsmeldingJson(
                     id = dokumentId,
-                    fødselsnummer = person.identitetsnummer.value,
+                    fødselsnummer = person.id.value,
                     aktørId = person.aktørId,
                     organisasjonsnummer = organisasjonsnummer
                 )
             )
         )
 
-        val pseudoId = personPseudoIdDao.nyPersonPseudoId(person.identitetsnummer)
+        val pseudoId = personPseudoIdDao.nyPersonPseudoId(person.id)
 
         val saksbehandler = lagSaksbehandler()
 
@@ -63,7 +63,7 @@ class GetInntektsmeldingBehandlerTest {
         val person = lagPerson().also(personRepository::lagre)
         val organisasjonsnummer = "99999999"
         dokumentDao.lagre(
-            fødselsnummer = person.identitetsnummer.value,
+            fødselsnummer = person.id.value,
             dokumentId = dokumentId,
             dokument = objectMapper.readTree(
                 lagInntektsmeldingJson(
@@ -75,7 +75,7 @@ class GetInntektsmeldingBehandlerTest {
             )
         )
 
-        val pseudoId = personPseudoIdDao.nyPersonPseudoId(Identitetsnummer.fraString(person.identitetsnummer.value))
+        val pseudoId = personPseudoIdDao.nyPersonPseudoId(Identitetsnummer.fraString(person.id.value))
 
         val saksbehandler = lagSaksbehandler()
 
@@ -97,7 +97,7 @@ class GetInntektsmeldingBehandlerTest {
         val person = lagPerson().also(personRepository::lagre)
         val organisasjonsnummer = "99999999"
         dokumentDao.lagre(
-            fødselsnummer = person.identitetsnummer.value,
+            fødselsnummer = person.id.value,
             dokumentId = dokumentId,
             dokument = objectMapper.readTree(
                 lagInntektsmeldingJson(
@@ -109,7 +109,7 @@ class GetInntektsmeldingBehandlerTest {
             )
         )
 
-        val pseudoId = personPseudoIdDao.nyPersonPseudoId(Identitetsnummer.fraString(person.identitetsnummer.value))
+        val pseudoId = personPseudoIdDao.nyPersonPseudoId(Identitetsnummer.fraString(person.id.value))
 
         val saksbehandler = lagSaksbehandler()
 
@@ -131,19 +131,19 @@ class GetInntektsmeldingBehandlerTest {
             .also(personRepository::lagre)
         val organisasjonsnummer = "99999999"
         dokumentDao.lagre(
-            fødselsnummer = person.identitetsnummer.value,
+            fødselsnummer = person.id.value,
             dokumentId = dokumentId,
             dokument = objectMapper.readTree(
                 lagInntektsmeldingJson(
                     id = dokumentId,
-                    fødselsnummer = person.identitetsnummer.value,
+                    fødselsnummer = person.id.value,
                     aktørId = person.aktørId,
                     organisasjonsnummer = organisasjonsnummer
                 )
             )
         )
 
-        val pseudoId = personPseudoIdDao.nyPersonPseudoId(Identitetsnummer.fraString(person.identitetsnummer.value))
+        val pseudoId = personPseudoIdDao.nyPersonPseudoId(Identitetsnummer.fraString(person.id.value))
 
         val saksbehandler = lagSaksbehandler()
 

@@ -282,7 +282,7 @@ class PostArbeidstidsvurderingIntegrationTest {
 
     private fun lagrePerson(adressebeskyttelse: Personinfo.Adressebeskyttelse = Personinfo.Adressebeskyttelse.Ugradert) {
         lagPerson(
-            identitetsnummer = identitetsnummer,
+            id = identitetsnummer,
             adressebeskyttelse = adressebeskyttelse,
         ).also(sessionContext.personRepository::lagre)
     }

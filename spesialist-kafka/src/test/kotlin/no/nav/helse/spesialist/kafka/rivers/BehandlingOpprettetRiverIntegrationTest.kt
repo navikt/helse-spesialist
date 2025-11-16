@@ -54,7 +54,7 @@ class BehandlingOpprettetRiverIntegrationTest {
         // Then:
         val vedtaksperiode = sessionContext.vedtaksperiodeRepository.alle().single()
         assertEquals(vedtaksperiodeId, vedtaksperiode.id)
-        assertEquals(person.identitetsnummer.value, vedtaksperiode.fødselsnummer)
+        assertEquals(person.id.value, vedtaksperiode.fødselsnummer)
         assertEquals(organisasjonsnummer, vedtaksperiode.organisasjonsnummer)
         assertEquals(false, vedtaksperiode.forkastet)
 
@@ -79,7 +79,7 @@ class BehandlingOpprettetRiverIntegrationTest {
         val person = lagPerson()
             .also(sessionContext.personRepository::lagre)
 
-        val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.identitetsnummer)
+        val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
             .also(sessionContext.vedtaksperiodeRepository::lagre)
 
         val eksisterendeBehandling = lagBehandling(
@@ -135,7 +135,7 @@ class BehandlingOpprettetRiverIntegrationTest {
 
         val organisasjonsnummer = lagOrganisasjonsnummer()
         val vedtaksperiode = lagVedtaksperiode(
-            identitetsnummer = person.identitetsnummer,
+            identitetsnummer = person.id,
             organisasjonsnummer = organisasjonsnummer
         ).also(sessionContext.vedtaksperiodeRepository::lagre)
 
@@ -265,7 +265,7 @@ class BehandlingOpprettetRiverIntegrationTest {
         // Then:
         val vedtaksperiode = sessionContext.vedtaksperiodeRepository.alle().single()
         assertEquals(vedtaksperiodeId, vedtaksperiode.id)
-        assertEquals(person.identitetsnummer.value, vedtaksperiode.fødselsnummer)
+        assertEquals(person.id.value, vedtaksperiode.fødselsnummer)
         assertEquals("SELVSTENDIG", vedtaksperiode.organisasjonsnummer)
         assertEquals(false, vedtaksperiode.forkastet)
 
@@ -331,7 +331,7 @@ class BehandlingOpprettetRiverIntegrationTest {
               "image": "europe-north1-docker.pkg.dev/nais-management-233d/tbd/helse-spesialist:2025.08.26-14.48-9333d1b"
             }
           ],
-          "fødselsnummer": "${person.identitetsnummer.value}",
+          "fødselsnummer": "${person.id.value}",
           "@forårsaket_av": {
             "id": "77cc592f-58e3-48ef-8e25-4196c8299fe8",
             "opprettet": "2025-06-01T00:00",

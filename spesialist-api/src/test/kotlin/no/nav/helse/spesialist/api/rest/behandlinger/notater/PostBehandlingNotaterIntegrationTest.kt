@@ -29,7 +29,7 @@ class PostBehandlingNotaterIntegrationTest {
 
         val identitetsnummer = lagPerson()
             .also(sessionContext.personRepository::lagre)
-            .identitetsnummer
+            .id
         val vedtaksperiodeId = lagVedtaksperiode(identitetsnummer = identitetsnummer)
             .also(sessionContext.vedtaksperiodeRepository::lagre)
             .id

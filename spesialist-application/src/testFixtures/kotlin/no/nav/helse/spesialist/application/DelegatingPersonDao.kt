@@ -47,7 +47,7 @@ class DelegatingPersonDao(private val personRepository: InMemoryPersonRepository
         kjønn: Kjønn,
         adressebeskyttelse: Adressebeskyttelse
     ) {
-        personRepository.alle().first { it.identitetsnummer.value == fødselsnummer }.oppdaterInfo(
+        personRepository.alle().first { it.id.value == fødselsnummer }.oppdaterInfo(
             no.nav.helse.spesialist.domain.Personinfo(
                 fornavn = fornavn,
                 mellomnavn = mellomnavn,
@@ -101,7 +101,7 @@ class DelegatingPersonDao(private val personRepository: InMemoryPersonRepository
     }
 
     override fun finnAdressebeskyttelse(fødselsnummer: String) =
-        personRepository.alle().find { it.identitetsnummer.value == fødselsnummer }?.info?.adressebeskyttelse?.let {
+        personRepository.alle().find { it.id.value == fødselsnummer }?.info?.adressebeskyttelse?.let {
             when (it) {
                 no.nav.helse.spesialist.domain.Personinfo.Adressebeskyttelse.Ugradert -> Adressebeskyttelse.Ugradert
                 no.nav.helse.spesialist.domain.Personinfo.Adressebeskyttelse.Fortrolig -> Adressebeskyttelse.Fortrolig

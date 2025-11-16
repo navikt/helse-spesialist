@@ -35,12 +35,12 @@ class PostVedtaksperiodeAnnullerIntegrationTest {
         val årsaker = mapOf("årsak-1" to "Ferie", "årsak-2" to "Ekstra ferie")
 
         val person = lagPerson(
-            identitetsnummer = Identitetsnummer.fraString(fødselsnummer)
+            id = Identitetsnummer.fraString(fødselsnummer)
         ).also(sessionContext.personRepository::lagre)
 
         lagVedtaksperiode(
             id = VedtaksperiodeId(vedtaksperiodeId),
-            identitetsnummer = person.identitetsnummer,
+            identitetsnummer = person.id,
             organisasjonsnummer = organisasjonsnummer,
         ).also(sessionContext.vedtaksperiodeRepository::lagre)
 
@@ -116,12 +116,12 @@ class PostVedtaksperiodeAnnullerIntegrationTest {
         val årsaker = emptyList<ApiVedtaksperiodeAnnullerRequest.Årsak>()
 
         val person = lagPerson(
-            identitetsnummer = Identitetsnummer.fraString(fødselsnummer)
+            id = Identitetsnummer.fraString(fødselsnummer)
         ).also(sessionContext.personRepository::lagre)
 
         lagVedtaksperiode(
             id = VedtaksperiodeId(vedtaksperiodeId),
-            identitetsnummer = person.identitetsnummer,
+            identitetsnummer = person.id,
             organisasjonsnummer = organisasjonsnummer,
         ).also(sessionContext.vedtaksperiodeRepository::lagre)
 
@@ -199,12 +199,12 @@ class PostVedtaksperiodeAnnullerIntegrationTest {
         val årsaker = mapOf("årsak-3" to "Ny ferie", "årsak-4" to "Ny ferie")
 
         val person = lagPerson(
-            identitetsnummer = Identitetsnummer.fraString(fødselsnummer)
+            id = Identitetsnummer.fraString(fødselsnummer)
         ).also(sessionContext.personRepository::lagre)
 
         lagVedtaksperiode(
             id = VedtaksperiodeId(vedtaksperiodeId),
-            identitetsnummer = person.identitetsnummer,
+            identitetsnummer = person.id,
             organisasjonsnummer = organisasjonsnummer,
         ).also(sessionContext.vedtaksperiodeRepository::lagre)
 

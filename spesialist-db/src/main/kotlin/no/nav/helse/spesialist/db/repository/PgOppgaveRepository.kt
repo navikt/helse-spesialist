@@ -16,7 +16,7 @@ import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.MedSession
 import no.nav.helse.spesialist.db.QueryRunner
 import no.nav.helse.spesialist.db.dao.PgTildelingDao
-import no.nav.helse.spesialist.domain.PersonId
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.PåVentId
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
@@ -150,7 +150,7 @@ class PgOppgaveRepository private constructor(
                         o.id as oppgave_id,
                         o.egenskaper,
                         o.første_opprettet,
-                        v.person_ref,
+                        p.fødselsnummer,
                         os.soknad_mottatt AS opprinnelig_soknadsdato,
                         t.saksbehandler_ref as tildelt_til_oid,
                         pv.id AS på_vent_id,
@@ -158,6 +158,7 @@ class PgOppgaveRepository private constructor(
                         count(1) OVER() AS filtered_count
                     FROM oppgave o
                     INNER JOIN vedtak v ON o.vedtak_ref = v.id
+                    INNER JOIN person p ON v.person_ref = p.id
                     INNER JOIN opprinnelig_soknadsdato os ON os.vedtaksperiode_id = v.vedtaksperiode_id
                     INNER JOIN behandling b ON b.spleis_behandling_id = o.behandling_id
                     LEFT JOIN tildeling t ON o.id = t.oppgave_id_ref
@@ -220,7 +221,7 @@ class PgOppgaveRepository private constructor(
                 row.long("filtered_count") to
                     OppgaveProjeksjon(
                         id = row.long("oppgave_id"),
-                        personId = PersonId(row.int("person_ref")),
+                        identitetsnummer = Identitetsnummer.fraString(row.string("fødselsnummer")),
                         egenskaper =
                             row
                                 .array<String>("egenskaper")
