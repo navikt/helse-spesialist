@@ -12,7 +12,7 @@ class InMemorySessionFactory(
     stansAutomatiskBehandlingDao: InMemoryStansAutomatiskBehandlingDao,
     behandlingRepository: InMemoryBehandlingRepository,
     dialogRepository: InMemoryDialogRepository,
-    egenAnsattDao: InMemoryEgenAnsattDao,
+    egenAnsattDao: DelegatingEgenAnsattDao,
     notatRepository: InMemoryNotatRepository,
     opptegnelseDao: InMemoryOpptegnelseDao,
     personRepository: InMemoryPersonRepository,

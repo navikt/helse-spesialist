@@ -13,7 +13,7 @@ class InMemoryRepositoriesAndDaos() {
 
     private val abonnementApiDao = InMemoryAbonnementApiDao()
     private val dokumentDao = InMemoryDokumentDao()
-    private val egenAnsattDao = InMemoryEgenAnsattDao(personRepository)
+    private val egenAnsattDao = DelegatingEgenAnsattDao(personRepository)
     private val oppgaveRepository = InMemoryOppgaveRepository()
     private val opptegnelseDao = InMemoryOpptegnelseDao(personRepository, abonnementApiDao)
     private val overstyringRepository = InMemoryOverstyringRepository()
