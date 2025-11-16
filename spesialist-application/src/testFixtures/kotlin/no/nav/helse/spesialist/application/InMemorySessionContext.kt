@@ -4,66 +4,49 @@ import no.nav.helse.db.SessionContext
 
 class InMemorySessionContext(
     override val annulleringRepository: InMemoryAnnulleringRepository,
+    override val arbeidsforholdDao: UnimplementedArbeidsforholdDao,
+    override val arbeidsgiverRepository: InMemoryArbeidsgiverRepository,
+    override val automatiseringDao: UnimplementedAutomatiseringDao,
+    override val avviksvurderingRepository: InMemoryAvviksvurderingRepository,
     override val behandlingRepository: InMemoryBehandlingRepository,
+    override val commandContextDao: InMemoryCommandContextDao,
+    override val dialogDao: DelegatingDialogDao,
     override val dialogRepository: InMemoryDialogRepository,
+    override val dokumentDao: InMemoryDokumentDao,
     override val egenAnsattDao: DelegatingEgenAnsattDao,
+    override val legacyBehandlingDao: UnimplementedLegacyBehandlingDao,
+    override val legacyPersonRepository: DelegatingLegacyPersonRepository,
+    override val legacyVedtaksperiodeRepository: DelegatingLegacyVedtaksperiodeRepository,
+    override val meldingDao: InMemoryMeldingDao,
+    override val metrikkDao: UnimplementedMetrikkDao,
+    override val notatDao: DelegatingNotatDao,
     override val notatRepository: InMemoryNotatRepository,
+    override val oppgaveDao: DelegatingOppgaveDao,
+    override val oppgaveRepository: InMemoryOppgaveRepository,
     override val opptegnelseDao: InMemoryOpptegnelseDao,
     override val overstyringRepository: InMemoryOverstyringRepository,
+    override val periodehistorikkDao: UnimplementedPeriodehistorikkDao,
+    override val personDao: DelegatingPersonDao,
     override val personRepository: InMemoryPersonRepository,
+    override val personPseudoIdDao: InMemoryPersonPseudoIdDao,
+    override val påVentDao: DelegatingPåVentDao,
     override val påVentRepository: InMemoryPåVentRepository,
+    override val reservasjonDao: InMemoryReservasjonDao,
+    override val risikovurderingDao: UnimplementedRisikovurderingDao,
+    override val saksbehandlerDao: DelegatingSaksbehandlerDao,
     override val saksbehandlerRepository: InMemorySaksbehandlerRepository,
+    override val stansAutomatiskBehandlingDao: InMemoryStansAutomatiskBehandlingDao,
+    override val stansAutomatiskBehandlingSaksbehandlerDao: UnimplementedStansAutomatiskBehandlingSaksbehandlerDao,
+    override val sykefraværstilfelleDao: DelegatingSykefraværstilfelleDao,
+    override val tildelingDao: UnimplementedTildelingDao,
+    override val tilkommenInntektRepository: InMemoryTilkommenInntektRepository,
+    override val totrinnsvurderingRepository: InMemoryTotrinnsvurderingRepository,
+    override val utbetalingDao: UnimplementedUtbetalingDao,
+    override val varselRepository: InMemoryVarselRepository,
     override val varseldefinisjonRepository: InMemoryVarseldefinisjonRepository,
     override val vedtaksperiodeRepository: InMemoryVedtaksperiodeRepository,
-    override val dokumentDao: InMemoryDokumentDao,
-    override val oppgaveRepository: InMemoryOppgaveRepository,
-    override val stansAutomatiskBehandlingDao: InMemoryStansAutomatiskBehandlingDao,
-) : SessionContext {
-    override val varselRepository = InMemoryVarselRepository()
-    override val vedtakBegrunnelseRepository = InMemoryVedtakBegrunnelseRepository()
-
-    override val arbeidsforholdDao = UnimplementedArbeidsforholdDao()
-    override val arbeidsgiverRepository = InMemoryArbeidsgiverRepository()
-    override val automatiseringDao = UnimplementedAutomatiseringDao()
-    override val avviksvurderingRepository = InMemoryAvviksvurderingRepository()
-    override val commandContextDao = InMemoryCommandContextDao()
-    override val dialogDao = DelegatingDialogDao(dialogRepository)
-    override val legacyBehandlingDao = UnimplementedLegacyBehandlingDao()
-    override val sykefraværstilfelleDao = DelegatingSykefraværstilfelleDao(overstyringRepository)
-    override val legacyVedtaksperiodeRepository =
-        DelegatingLegacyVedtaksperiodeRepository(
-            vedtaksperiodeRepository,
-            behandlingRepository,
-            vedtakBegrunnelseRepository,
-            varselRepository
-        )
-    override val legacyPersonRepository = DelegatingLegacyPersonRepository(
-        personRepository,
-        vedtaksperiodeRepository,
-        legacyVedtaksperiodeRepository,
-        behandlingRepository,
-        varselRepository,
-        vedtakBegrunnelseRepository,
-        avviksvurderingRepository,
-        sykefraværstilfelleDao,
-    )
-    override val meldingDao = InMemoryMeldingDao()
-    override val metrikkDao = UnimplementedMetrikkDao()
-    override val notatDao = DelegatingNotatDao(oppgaveRepository, notatRepository)
-    override val oppgaveDao = DelegatingOppgaveDao(oppgaveRepository, behandlingRepository, vedtaksperiodeRepository)
-    override val periodehistorikkDao = UnimplementedPeriodehistorikkDao()
-    override val personDao = DelegatingPersonDao(personRepository)
-    override val personPseudoIdDao = InMemoryPersonPseudoIdDao()
-    override val påVentDao = DelegatingPåVentDao(påVentRepository, oppgaveRepository)
-    override val reservasjonDao = InMemoryReservasjonDao(saksbehandlerRepository)
-    override val risikovurderingDao = UnimplementedRisikovurderingDao()
-    override val saksbehandlerDao = DelegatingSaksbehandlerDao(saksbehandlerRepository)
-    override val stansAutomatiskBehandlingSaksbehandlerDao = UnimplementedStansAutomatiskBehandlingSaksbehandlerDao()
-    override val tildelingDao = UnimplementedTildelingDao()
-    override val tilkommenInntektRepository = InMemoryTilkommenInntektRepository()
-    override val totrinnsvurderingRepository = InMemoryTotrinnsvurderingRepository()
-    override val utbetalingDao = UnimplementedUtbetalingDao()
-    override val vedtakDao = UnimplementedVedtakDao()
-    override val vergemålDao = UnimplementedVergemålDao()
-    override val åpneGosysOppgaverDao = UnimplementedÅpneGosysOppgaverDao()
-}
+    override val vedtakBegrunnelseRepository: InMemoryVedtakBegrunnelseRepository,
+    override val vedtakDao: UnimplementedVedtakDao,
+    override val vergemålDao: UnimplementedVergemålDao,
+    override val åpneGosysOppgaverDao: UnimplementedÅpneGosysOppgaverDao,
+) : SessionContext
