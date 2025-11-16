@@ -2,10 +2,7 @@ package no.nav.helse.spesialist.api.rest
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
-import io.ktor.resources.href
-import io.ktor.resources.serialization.ResourcesFormat
 import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.principal
 import io.ktor.server.request.receive
@@ -29,7 +26,6 @@ class RestAdapter(
     private val sessionFactory: SessionFactory,
     private val tilgangsgruppeUuider: TilgangsgruppeUuider,
     private val meldingPubliserer: MeldingPubliserer,
-    private val resourcesFormat: ResourcesFormat,
     private val versjonAvKode: String,
 ) {
     private val problemObjectMapper = objectMapper.copy().setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL)
@@ -152,10 +148,7 @@ class RestAdapter(
             when (result) {
                 is RestResponse.NoContent<*> -> call.respond(HttpStatusCode.NoContent)
                 is RestResponse.OK<*, *> -> call.respond(HttpStatusCode.OK, result.body as Any)
-                is RestResponse.Created<*> -> {
-                    call.response.headers.append(HttpHeaders.Location, href(resourcesFormat, result.location))
-                    call.respond(HttpStatusCode.Created)
-                }
+                is RestResponse.Created<*, *> -> call.respond(HttpStatusCode.Created, result.body as Any)
             }
         }
     }

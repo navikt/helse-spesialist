@@ -48,7 +48,6 @@ class RestAdapterTest {
             tilgangsgruppeUuider = IntegrationTestFixture.tilgangsgruppeUuider,
             meldingPubliserer = integrationTestFixture.meldingPubliserer,
             versjonAvKode = "0.0.0",
-            resourcesFormat = mockk(relaxed = true),
         )
 
         runBlocking {
