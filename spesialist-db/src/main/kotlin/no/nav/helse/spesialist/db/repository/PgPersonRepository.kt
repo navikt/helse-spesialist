@@ -77,7 +77,7 @@ internal class PgPersonRepository(
             infotrygdutbetalingerOppdatert = localDate("infotrygdutbetalinger_oppdatert"),
             egenAnsattStatus =
                 longOrNull("egen_ansatt_person_ref")?.let {
-                    EgenAnsattStatus.fraLagring(
+                    EgenAnsattStatus(
                         erEgenAnsatt = boolean("er_egen_ansatt"),
                         oppdatertTidspunkt = instant("egen_ansatt_opprettet"),
                     )

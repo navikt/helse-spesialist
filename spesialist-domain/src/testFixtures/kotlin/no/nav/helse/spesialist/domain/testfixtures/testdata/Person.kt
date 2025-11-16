@@ -6,6 +6,7 @@ import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.Personinfo
 import no.nav.helse.spesialist.domain.Personinfo.Adressebeskyttelse
 import no.nav.helse.spesialist.domain.Personinfo.Kjønn
+import java.time.Instant
 import java.time.LocalDate
 import kotlin.random.Random
 
@@ -28,7 +29,12 @@ fun lagPerson(
     identitetsnummer = identitetsnummer,
     aktørId = aktørId,
     info = info,
-    egenAnsattStatus = erEgenAnsatt?.let(EgenAnsattStatus::ny)
+    egenAnsattStatus = erEgenAnsatt?.let {
+        EgenAnsattStatus(
+            erEgenAnsatt = it,
+            oppdatertTidspunkt = Instant.now(),
+        )
+    }
 )
 
 fun lagPersoninfo(
