@@ -16,7 +16,12 @@ abstract class LateIdEntity<IDTYPE>(
                 " ${::harFåttTildeltId.name}() kan brukes for å sjekke om den har det.",
         )
 
-    override fun equals(other: Any?): Boolean = other != null && this::class == other::class && this.id == (other as LateIdEntity<*>).id
+    override fun equals(other: Any?): Boolean =
+        other != null &&
+            this::class == other::class &&
+            this.harFåttTildeltId() &&
+            (other as LateIdEntity<*>).harFåttTildeltId() &&
+            this.id == other.id
 
     override fun hashCode(): Int = 31 * id.hashCode() + javaClass.hashCode()
 }
