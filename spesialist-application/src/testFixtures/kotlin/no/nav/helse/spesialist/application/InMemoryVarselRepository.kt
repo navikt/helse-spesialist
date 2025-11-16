@@ -4,7 +4,6 @@ import no.nav.helse.spesialist.domain.BehandlingUnikId
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.VarselId
-import java.util.UUID
 
 class InMemoryVarselRepository : VarselRepository, AbstractInMemoryRepository<VarselId, Varsel>() {
     override fun finnVarsler(behandlingIder: List<SpleisBehandlingId>): List<Varsel> =
@@ -17,7 +16,10 @@ class InMemoryVarselRepository : VarselRepository, AbstractInMemoryRepository<Va
         varsler.forEach(::lagre)
     }
 
-    override fun generateId(): VarselId = VarselId(UUID.randomUUID())
+    override fun tildelIder(root: Varsel) {
+        // ID er satt på forhånd, trenger aldri tildele en fra databasen
+    }
+
     override fun deepCopy(original: Varsel): Varsel = Varsel.fraLagring(
         id = original.id(),
         spleisBehandlingId = original.spleisBehandlingId,

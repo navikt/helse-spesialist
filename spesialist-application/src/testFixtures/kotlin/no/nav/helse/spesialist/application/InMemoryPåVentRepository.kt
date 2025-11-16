@@ -4,7 +4,11 @@ import no.nav.helse.spesialist.domain.PåVent
 import no.nav.helse.spesialist.domain.PåVentId
 
 class InMemoryPåVentRepository : PåVentRepository, AbstractInMemoryRepository<PåVentId, PåVent>() {
-    override fun generateId(): PåVentId = PåVentId((alle().maxOfOrNull { it.id().value } ?: 0) + 1)
+    override fun tildelIder(root: PåVent) {
+        if (!root.harFåttTildeltId())
+            root.tildelId(PåVentId((alle().maxOfOrNull { it.id().value } ?: 0) + 1))
+    }
+
     override fun deepCopy(original: PåVent): PåVent = PåVent.Factory.fraLagring(
         id = original.id(),
         vedtaksperiodeId = original.vedtaksperiodeId,

@@ -3,18 +3,14 @@ package no.nav.helse.spesialist.application
 import no.nav.helse.spesialist.domain.Arbeidsgiver
 import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
 
-class InMemoryArbeidsgiverRepository : ArbeidsgiverRepository {
-    private val arbeidsgivere = mutableMapOf<ArbeidsgiverIdentifikator, Arbeidsgiver>()
-
-    override fun lagre(arbeidsgiver: Arbeidsgiver) {
-        arbeidsgivere[arbeidsgiver.id()] = arbeidsgiver
+class InMemoryArbeidsgiverRepository : ArbeidsgiverRepository,
+    AbstractInMemoryRepository<ArbeidsgiverIdentifikator, Arbeidsgiver>() {
+    override fun tildelIder(root: Arbeidsgiver) {
+        // ID er satt på forhånd, trenger aldri tildele en fra databasen
     }
 
-    override fun finn(id: ArbeidsgiverIdentifikator) =
-        arbeidsgivere[id]
-
-    override fun finnAlle(ider: Set<ArbeidsgiverIdentifikator>) =
-        ider.mapNotNull { arbeidsgivere[it] }
-
-    fun alle() = arbeidsgivere.values.toList()
+    override fun deepCopy(original: Arbeidsgiver): Arbeidsgiver = Arbeidsgiver.Factory.fraLagring(
+        id = original.id(),
+        navn = original.navn,
+    )
 }

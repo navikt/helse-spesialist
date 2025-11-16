@@ -21,7 +21,11 @@ class InMemoryAnnulleringRepository : AnnulleringRepository, AbstractInMemoryRep
     ): Annullering? =
         alle().find { it.arbeidsgiverFagsystemId == arbeidsgiverFagsystemId || it.personFagsystemId == personFagsystemId }
 
-    override fun generateId(): AnnulleringId = AnnulleringId((alle().maxOfOrNull { it.id().value } ?: 0) + 1)
+    override fun tildelIder(root: Annullering) {
+        if (!root.harFåttTildeltId())
+            root.tildelId(AnnulleringId((alle().maxOfOrNull { it.id().value } ?: 0) + 1))
+    }
+
     override fun deepCopy(original: Annullering): Annullering = Annullering.Factory.fraLagring(
         id = original.id(),
         arbeidsgiverFagsystemId = original.arbeidsgiverFagsystemId,

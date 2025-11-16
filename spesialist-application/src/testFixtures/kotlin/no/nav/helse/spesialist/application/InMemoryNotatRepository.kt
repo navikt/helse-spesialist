@@ -8,7 +8,11 @@ class InMemoryNotatRepository : NotatRepository, AbstractInMemoryRepository<Nota
     override fun finnAlleForVedtaksperiode(vedtaksperiodeId: UUID): List<Notat> =
         alle().filter { it.vedtaksperiodeId == vedtaksperiodeId }
 
-    override fun generateId(): NotatId = NotatId((alle().maxOfOrNull { it.id().value } ?: 0) + 1)
+    override fun tildelIder(root: Notat) {
+        if (!root.harFåttTildeltId())
+            root.tildelId(NotatId((alle().maxOfOrNull { it.id().value } ?: 0) + 1))
+    }
+
     override fun deepCopy(original: Notat): Notat = Notat.Factory.fraLagring(
         id = original.id(),
         type = original.type,

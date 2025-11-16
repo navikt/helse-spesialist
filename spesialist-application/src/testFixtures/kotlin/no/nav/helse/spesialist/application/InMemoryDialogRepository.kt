@@ -7,7 +7,12 @@ import no.nav.helse.spesialist.domain.KommentarId
 
 class InMemoryDialogRepository : DialogRepository, AbstractInMemoryRepository<DialogId, Dialog>() {
     override fun finnForKommentar(id: KommentarId): Dialog? = alle().find { id in it.kommentarer.map(Kommentar::id) }
-    override fun generateId(): DialogId = DialogId((alle().maxOfOrNull { it.id().value } ?: 0) + 1)
+
+    override fun tildelIder(root: Dialog) {
+        if (!root.harFåttTildeltId())
+            root.tildelId(DialogId((alle().maxOfOrNull { it.id().value } ?: 0) + 1))
+    }
+
     override fun deepCopy(original: Dialog): Dialog = Dialog.Factory.fraLagring(
         id = original.id(),
         opprettetTidspunkt = original.opprettetTidspunkt,

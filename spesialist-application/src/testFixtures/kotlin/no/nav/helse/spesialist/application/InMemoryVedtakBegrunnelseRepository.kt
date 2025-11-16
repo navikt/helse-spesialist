@@ -10,8 +10,10 @@ class InMemoryVedtakBegrunnelseRepository : VedtakBegrunnelseRepository,
     override fun finn(spleisBehandlingId: SpleisBehandlingId): VedtakBegrunnelse? =
         alle().find { it.spleisBehandlingId == spleisBehandlingId }
 
-    override fun generateId(): VedtakBegrunnelseId =
-        VedtakBegrunnelseId((alle().maxOfOrNull { it.id().value } ?: 0) + 1)
+    override fun tildelIder(root: VedtakBegrunnelse) {
+        if (!root.harFåttTildeltId())
+            root.tildelId(VedtakBegrunnelseId((alle().maxOfOrNull { it.id().value } ?: 0) + 1))
+    }
 
     override fun deepCopy(original: VedtakBegrunnelse): VedtakBegrunnelse = VedtakBegrunnelse.fraLagring(
         id = original.id(),

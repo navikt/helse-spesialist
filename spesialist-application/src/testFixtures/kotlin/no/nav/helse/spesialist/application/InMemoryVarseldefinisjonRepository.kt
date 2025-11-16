@@ -20,7 +20,10 @@ class InMemoryVarseldefinisjonRepository : VarseldefinisjonRepository,
         )
     }
 
-    override fun generateId(): VarseldefinisjonId = VarseldefinisjonId(UUID.randomUUID())
+    override fun tildelIder(root: Varseldefinisjon) {
+        // ID er satt på forhånd, trenger aldri tildele en fra databasen
+    }
+
     override fun deepCopy(original: Varseldefinisjon): Varseldefinisjon = Varseldefinisjon.fraLagring(
         id = original.id(),
         kode = original.kode,

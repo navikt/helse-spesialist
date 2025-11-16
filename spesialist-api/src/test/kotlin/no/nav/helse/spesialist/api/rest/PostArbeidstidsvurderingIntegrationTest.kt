@@ -85,7 +85,7 @@ class PostArbeidstidsvurderingIntegrationTest {
         )
 
         // Sjekk lagret data
-        assertEquals(0, totrinnsvurderingRepository.data.values.count { it.fødselsnummer == fødselsnummer })
+        assertEquals(0, totrinnsvurderingRepository.alle().count { it.fødselsnummer == fødselsnummer })
 
         // Sjekk publiserte meldinger
         integrationTestFixture.assertPubliserteBehovLister()
@@ -142,7 +142,7 @@ class PostArbeidstidsvurderingIntegrationTest {
         )
 
         // Sjekk lagret data
-        assertEquals(0, totrinnsvurderingRepository.data.values.count { it.fødselsnummer == fødselsnummer })
+        assertEquals(0, totrinnsvurderingRepository.alle().count { it.fødselsnummer == fødselsnummer })
 
         // Sjekk publiserte meldinger
         integrationTestFixture.assertPubliserteBehovLister()
@@ -204,7 +204,7 @@ class PostArbeidstidsvurderingIntegrationTest {
         assertEquals("", response.bodyAsText)
 
         // Sjekk lagret data
-        val totrinnsvurdering = totrinnsvurderingRepository.data.values.single { it.fødselsnummer == fødselsnummer }
+        val totrinnsvurdering = totrinnsvurderingRepository.alle().single { it.fødselsnummer == fødselsnummer }
         assertEquals(TotrinnsvurderingTilstand.AVVENTER_SAKSBEHANDLER, totrinnsvurdering.tilstand)
 
         val overstyring = totrinnsvurdering.overstyringer.single() as MinimumSykdomsgrad
