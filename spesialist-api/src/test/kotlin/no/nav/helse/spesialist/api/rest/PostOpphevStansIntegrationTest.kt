@@ -9,7 +9,6 @@ import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiode
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
-import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -28,7 +27,6 @@ class PostOpphevStansIntegrationTest {
         val person = lagPerson(
             identitetsnummer = Identitetsnummer.fraString(fødselsnummer)
         ).also(sessionContext.personRepository::lagre)
-        sessionContext.egenAnsattDao.lagre(fødselsnummer, false, LocalDateTime.now())
 
         lagVedtaksperiode(
             id = VedtaksperiodeId(vedtaksperiodeId),

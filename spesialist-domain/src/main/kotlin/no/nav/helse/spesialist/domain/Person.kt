@@ -2,6 +2,8 @@ package no.nav.helse.spesialist.domain
 
 import no.nav.helse.spesialist.domain.ddd.LateIdAggregateRoot
 import no.nav.helse.spesialist.domain.ddd.ValueObject
+import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
+import java.time.Instant
 import java.time.LocalDate
 
 @JvmInline
@@ -42,10 +44,13 @@ class Person private constructor(
     val enhetRefOppdatert: LocalDate?,
     val infotrygdutbetalingerRef: Int?,
     val infotrygdutbetalingerOppdatert: LocalDate?,
+    egenAnsattStatus: EgenAnsattStatus?,
 ) : LateIdAggregateRoot<PersonId>(id) {
     var info: Personinfo? = info
         private set
     var infoOppdatert: LocalDate? = infoOppdatert
+        private set
+    var egenAnsattStatus: EgenAnsattStatus? = egenAnsattStatus
         private set
 
     fun oppdaterInfo(personinfo: Personinfo) {
@@ -53,11 +58,41 @@ class Person private constructor(
         this.infoOppdatert = LocalDate.now()
     }
 
+    fun kanSeesAvSaksbehandlerMedGrupper(tilgangsgrupper: Set<Tilgangsgruppe>): Boolean =
+        girTilgangTilEgenAnsattStatus(tilgangsgrupper) &&
+            girTilgangTilAdressebeskyttelse(tilgangsgrupper)
+
+    private fun girTilgangTilEgenAnsattStatus(tilgangsgrupper: Set<Tilgangsgruppe>): Boolean =
+        when (egenAnsattStatus?.erEgenAnsatt) {
+            true -> Tilgangsgruppe.EGEN_ANSATT in tilgangsgrupper
+            false -> true
+            null -> false
+        }
+
+    private fun girTilgangTilAdressebeskyttelse(tilgangsgrupper: Set<Tilgangsgruppe>): Boolean =
+        when (info?.adressebeskyttelse) {
+            Personinfo.Adressebeskyttelse.Ugradert -> true
+            Personinfo.Adressebeskyttelse.Fortrolig -> Tilgangsgruppe.KODE_7 in tilgangsgrupper
+            else -> false
+        }
+
+    fun oppdaterEgenAnsattStatus(
+        erEgenAnsatt: Boolean,
+        oppdatertTidspunkt: Instant,
+    ) {
+        this.egenAnsattStatus =
+            EgenAnsattStatus(
+                erEgenAnsatt = erEgenAnsatt,
+                oppdatertTidspunkt = oppdatertTidspunkt,
+            )
+    }
+
     object Factory {
         fun ny(
             identitetsnummer: Identitetsnummer,
             aktørId: String,
             info: Personinfo?,
+            egenAnsattStatus: EgenAnsattStatus?,
         ) = Person(
             id = null,
             identitetsnummer = identitetsnummer,
@@ -68,6 +103,7 @@ class Person private constructor(
             enhetRefOppdatert = null,
             infotrygdutbetalingerRef = null,
             infotrygdutbetalingerOppdatert = null,
+            egenAnsattStatus = egenAnsattStatus,
         )
 
         fun fraLagring(
@@ -80,6 +116,7 @@ class Person private constructor(
             enhetRefOppdatert: LocalDate?,
             infotrygdutbetalingerRef: Int?,
             infotrygdutbetalingerOppdatert: LocalDate?,
+            egenAnsattStatus: EgenAnsattStatus?,
         ) = Person(
             id = id,
             identitetsnummer = identitetsnummer,
@@ -90,6 +127,7 @@ class Person private constructor(
             enhetRefOppdatert = enhetRefOppdatert,
             infotrygdutbetalingerRef = infotrygdutbetalingerRef,
             infotrygdutbetalingerOppdatert = infotrygdutbetalingerOppdatert,
+            egenAnsattStatus = egenAnsattStatus,
         )
     }
 }

@@ -159,8 +159,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
     @ResourceLock("auditlogg-lytter")
     fun `kan slå opp skjermede personer med riktige tilganger`() {
         mockSnapshot()
-        every { egenAnsattApiDao.erEgenAnsatt(FØDSELSNUMMER) } returns true
-        opprettVedtaksperiode(opprettPerson())
+        opprettVedtaksperiode(opprettPerson(erEgenAnsatt = true))
 
         val logglytter = Logglytter()
         val body = runQuery(
@@ -175,8 +174,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
     @Test
     @ResourceLock("auditlogg-lytter")
     fun `får 403-feil ved oppslag av skjermede personer`() {
-        every { egenAnsattApiDao.erEgenAnsatt(FØDSELSNUMMER) } returns true
-        opprettVedtaksperiode(opprettPerson())
+        opprettVedtaksperiode(opprettPerson(erEgenAnsatt = true))
 
         val logglytter = Logglytter()
         val body = runQuery("""{ person(fnr: "$FØDSELSNUMMER") { aktorId } }""")

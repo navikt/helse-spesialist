@@ -10,7 +10,6 @@ import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.test.assertEquals
 
@@ -26,7 +25,6 @@ class GetSøknadBehandlerIntegrationTest {
         // Given:
         val dokumentId = UUID.randomUUID()
         val person = lagPerson().also(personRepository::lagre)
-        egenAnsattDao.lagre(person.identitetsnummer.value, false, LocalDateTime.now())
         dokumentDao.lagre(
             fødselsnummer = person.identitetsnummer.value,
             dokumentId = dokumentId,
@@ -54,7 +52,6 @@ class GetSøknadBehandlerIntegrationTest {
         val dokumentId = UUID.randomUUID()
         val person =
             lagPerson(adressebeskyttelse = Personinfo.Adressebeskyttelse.StrengtFortrolig).also(personRepository::lagre)
-        egenAnsattDao.lagre(person.identitetsnummer.value, false, LocalDateTime.now())
         dokumentDao.lagre(
             fødselsnummer = person.identitetsnummer.value,
             dokumentId = dokumentId,

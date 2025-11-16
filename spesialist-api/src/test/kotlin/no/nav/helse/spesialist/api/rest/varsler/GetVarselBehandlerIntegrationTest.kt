@@ -57,7 +57,6 @@ class GetVarselBehandlerIntegrationTest {
         sessionContext.behandlingRepository.lagre(behandling)
         lagPerson(identitetsnummer = Identitetsnummer.fraString(vedtaksperiode.fødselsnummer))
             .also(sessionContext.personRepository::lagre)
-        sessionContext.egenAnsattDao.lagre(vedtaksperiode.fødselsnummer, false, LocalDateTime.now())
 
         //when
         val response = integrationTestFixture.get("/api/varsler/${varsel.id.value}")
@@ -181,7 +180,6 @@ class GetVarselBehandlerIntegrationTest {
             identitetsnummer = Identitetsnummer.fraString(vedtaksperiode.fødselsnummer),
             adressebeskyttelse = Personinfo.Adressebeskyttelse.Fortrolig
         ).also(sessionContext.personRepository::lagre)
-        sessionContext.egenAnsattDao.lagre(vedtaksperiode.fødselsnummer, false, LocalDateTime.now())
 
         // when
         val response = integrationTestFixture.get("/api/varsler/${varsel.id.value}")
@@ -215,7 +213,6 @@ class GetVarselBehandlerIntegrationTest {
         sessionContext.behandlingRepository.lagre(behandling)
         lagPerson(identitetsnummer = Identitetsnummer.fraString(vedtaksperiode.fødselsnummer))
             .also(sessionContext.personRepository::lagre)
-        sessionContext.egenAnsattDao.lagre(vedtaksperiode.fødselsnummer, false, LocalDateTime.now())
 
         // when
         val response = integrationTestFixture.get("/api/varsler/${varsel.id.value}")
@@ -258,7 +255,6 @@ class GetVarselBehandlerIntegrationTest {
         sessionContext.behandlingRepository.lagre(behandling)
         lagPerson(identitetsnummer = Identitetsnummer.fraString(vedtaksperiode.fødselsnummer))
             .also(sessionContext.personRepository::lagre)
-        sessionContext.egenAnsattDao.lagre(vedtaksperiode.fødselsnummer, false, LocalDateTime.now())
 
         // when
         val response = integrationTestFixture.get("/api/varsler/${varsel.id.value}")
@@ -300,7 +296,6 @@ class GetVarselBehandlerIntegrationTest {
         sessionContext.saksbehandlerRepository.lagre(saksbehandler)
         lagPerson(identitetsnummer = Identitetsnummer.fraString(vedtaksperiode.fødselsnummer))
             .also(sessionContext.personRepository::lagre)
-        sessionContext.egenAnsattDao.lagre(vedtaksperiode.fødselsnummer, false, LocalDateTime.now())
 
         // when
         val response = integrationTestFixture.get("/api/varsler/${varsel.id.value}")
@@ -339,7 +334,6 @@ class GetVarselBehandlerIntegrationTest {
         sessionContext.behandlingRepository.lagre(behandling)
         lagPerson(identitetsnummer = Identitetsnummer.fraString(vedtaksperiode.fødselsnummer))
             .also(sessionContext.personRepository::lagre)
-        sessionContext.egenAnsattDao.lagre(vedtaksperiode.fødselsnummer, false, LocalDateTime.now())
 
         // when
         val response = integrationTestFixture.get("/api/varsler/${varsel.id.value}")

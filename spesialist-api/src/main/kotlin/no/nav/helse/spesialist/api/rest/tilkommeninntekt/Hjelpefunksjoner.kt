@@ -4,7 +4,6 @@ import no.nav.helse.db.SessionContext
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.application.logg.sikkerlogg
-import no.nav.helse.spesialist.application.tilgangskontroll.PersonTilgangskontroll
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
@@ -21,29 +20,28 @@ internal fun harTilgangTilPerson(
     saksbehandler: Saksbehandler,
     tilgangsgrupper: Set<Tilgangsgruppe>,
     transaksjon: SessionContext,
-): Boolean {
-    if (!PersonTilgangskontroll.harTilgangTilPerson(
-            tilgangsgrupper = tilgangsgrupper,
-            fødselsnummer = fødselsnummer,
-            egenAnsattDao = transaksjon.egenAnsattDao,
-            personDao = transaksjon.personDao,
-        )
-    ) {
-        sikkerlogg.warn("Saksbehandler ${saksbehandler.id.value} har ikke tilgang til person med fødselsnummer $fødselsnummer")
-        return false
-    }
-    return true
-}
+): Boolean =
+    harTilgangTilPerson(
+        identitetsnummer = Identitetsnummer.fraString(fødselsnummer),
+        saksbehandler = saksbehandler,
+        tilgangsgrupper = tilgangsgrupper,
+        transaksjon = transaksjon,
+    )
 
 internal fun harTilgangTilPerson(
     identitetsnummer: Identitetsnummer,
     saksbehandler: Saksbehandler,
     tilgangsgrupper: Set<Tilgangsgruppe>,
     transaksjon: SessionContext,
-): Boolean =
-    harTilgangTilPerson(
-        fødselsnummer = identitetsnummer.value,
-        saksbehandler = saksbehandler,
-        tilgangsgrupper = tilgangsgrupper,
-        transaksjon = transaksjon,
-    )
+): Boolean {
+    val person = transaksjon.personRepository.finn(identitetsnummer)
+    if (person == null) {
+        sikkerlogg.warn("Person med identitetsnummer $identitetsnummer ble ikke funnet")
+        return false
+    }
+    if (!person.kanSeesAvSaksbehandlerMedGrupper(tilgangsgrupper)) {
+        sikkerlogg.warn("Saksbehandler ${saksbehandler.id.value} har ikke tilgang til person med identitetsnummer $identitetsnummer")
+        return false
+    }
+    return true
+}

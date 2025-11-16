@@ -3,7 +3,6 @@ package no.nav.helse.spesialist.api
 import io.mockk.mockk
 import no.nav.helse.db.SaksbehandlerDao
 import no.nav.helse.db.api.ArbeidsgiverApiDao.Inntekter
-import no.nav.helse.db.api.EgenAnsattApiDao
 import no.nav.helse.e2e.AbstractDatabaseTest
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.modell.oppgave.Egenskap
@@ -75,8 +74,8 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected val oppgaveApiDao = daos.oppgaveApiDao
     protected val periodehistorikkApiDao = daos.periodehistorikkApiDao
     protected val vergemålApiDao = daos.vergemålApiDao
+    protected val egenAnsattApiDao = daos.egenAnsattApiDao
 
-    protected val egenAnsattApiDao = mockk<EgenAnsattApiDao>(relaxed = true)
     protected val apiOppgaveService = mockk<ApiOppgaveService>(relaxed = true)
     protected val saksbehandlerDao = mockk<SaksbehandlerDao>(relaxed = true)
 

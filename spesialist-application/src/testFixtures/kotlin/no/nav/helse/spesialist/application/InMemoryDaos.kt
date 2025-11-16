@@ -25,7 +25,7 @@ class InMemoryDaos(
     override val commandContextDao = InMemoryCommandContextDao()
     override val definisjonDao = InMemoryDefinisjonDao(varseldefinisjonRepository)
     override val dialogDao = InMemoryDialogDao(dialogRepository)
-    override val egenAnsattApiDao = InMemoryEgenAnsattApiDao()
+    override val egenAnsattApiDao = InMemoryEgenAnsattApiDao(personRepository)
     override val legacyBehandlingDao = InMemoryLegacyBehandlingDao()
     override val legacyVarselDao = InMemoryLegacyVarselDao()
     override val meldingDao = InMemoryMeldingDao()

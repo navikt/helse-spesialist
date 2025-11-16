@@ -1,9 +1,13 @@
 package no.nav.helse.spesialist.application
 
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.PersonId
 
 class InMemoryPersonRepository : PersonRepository, AbstractLateIdInMemoryRepository<PersonId, Person>() {
+    override fun finn(identitetsnummer: Identitetsnummer): Person? =
+        alle().firstOrNull { it.identitetsnummer == identitetsnummer }
+
     override fun tildelIder(root: Person) {
         if (!root.harFåttTildeltId())
             root.tildelId(PersonId((alle().maxOfOrNull { it.id().value } ?: 0) + 1))
@@ -19,5 +23,6 @@ class InMemoryPersonRepository : PersonRepository, AbstractLateIdInMemoryReposit
         enhetRefOppdatert = original.enhetRefOppdatert,
         infotrygdutbetalingerRef = original.infotrygdutbetalingerRef,
         infotrygdutbetalingerOppdatert = original.infotrygdutbetalingerOppdatert,
+        egenAnsattStatus = original.egenAnsattStatus,
     )
 }

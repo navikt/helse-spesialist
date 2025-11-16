@@ -1,8 +1,10 @@
 package no.nav.helse.spesialist.domain.testfixtures.testdata
 
+import no.nav.helse.spesialist.domain.EgenAnsattStatus
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.Personinfo
+import no.nav.helse.spesialist.domain.Personinfo.Adressebeskyttelse
 import no.nav.helse.spesialist.domain.Personinfo.Kjønn
 import java.time.LocalDate
 import kotlin.random.Random
@@ -15,27 +17,34 @@ fun lagPerson(
         mann = kjønn == Kjønn.Mann
     ),
     aktørId: String = lagAktørId(),
-    adressebeskyttelse: Personinfo.Adressebeskyttelse = Personinfo.Adressebeskyttelse.Ugradert
-): Person = Person.Factory.ny(
-    identitetsnummer = identitetsnummer,
-    aktørId = aktørId,
-    info = Personinfo(
-        fornavn = lagFornavn(),
-        mellomnavn = lagMellomnavnOrNull(),
-        etternavn = lagEtternavn(),
+    adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert,
+    info: Personinfo? = lagPersoninfo(
         fødselsdato = fødselsdato,
         kjønn = kjønn,
         adressebeskyttelse = adressebeskyttelse
-    )
-)
-
-fun lagPersonUtenPersoninfo(
-    identitetsnummer: Identitetsnummer = lagIdentitetsnummer(),
-    aktørId: String = lagAktørId(),
+    ),
+    erEgenAnsatt: Boolean? = false,
 ): Person = Person.Factory.ny(
     identitetsnummer = identitetsnummer,
     aktørId = aktørId,
-    info = null
+    info = info,
+    egenAnsattStatus = erEgenAnsatt?.let(EgenAnsattStatus::ny)
+)
+
+fun lagPersoninfo(
+    fornavn: String = lagFornavn(),
+    mellomnavn: String? = lagMellomnavnOrNull(),
+    etternavn: String = lagEtternavn(),
+    fødselsdato: LocalDate? = lagFødselsdato(),
+    kjønn: Kjønn? = Kjønn.entries.random(),
+    adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert,
+): Personinfo = Personinfo(
+    fornavn = fornavn,
+    mellomnavn = mellomnavn,
+    etternavn = etternavn,
+    fødselsdato = fødselsdato,
+    kjønn = kjønn,
+    adressebeskyttelse = adressebeskyttelse,
 )
 
 private val fornavnListe = listOf(

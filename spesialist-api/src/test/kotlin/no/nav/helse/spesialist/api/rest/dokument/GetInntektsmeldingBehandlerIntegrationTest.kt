@@ -11,7 +11,6 @@ import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import org.intellij.lang.annotations.Language
-import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -28,7 +27,6 @@ class GetInntektsmeldingBehandlerTest {
         // Given:
         val dokumentId = UUID.randomUUID()
         val person = lagPerson().also(personRepository::lagre)
-        egenAnsattDao.lagre(person.identitetsnummer.value, false, LocalDateTime.now())
         val organisasjonsnummer = "99999999"
         dokumentDao.lagre(
             fødselsnummer = person.identitetsnummer.value,
@@ -63,7 +61,6 @@ class GetInntektsmeldingBehandlerTest {
         // Given:
         val dokumentId = UUID.randomUUID()
         val person = lagPerson().also(personRepository::lagre)
-        egenAnsattDao.lagre(person.identitetsnummer.value, false, LocalDateTime.now())
         val organisasjonsnummer = "99999999"
         dokumentDao.lagre(
             fødselsnummer = person.identitetsnummer.value,
@@ -98,7 +95,6 @@ class GetInntektsmeldingBehandlerTest {
         // Given:
         val dokumentId = UUID.randomUUID()
         val person = lagPerson().also(personRepository::lagre)
-        egenAnsattDao.lagre(person.identitetsnummer.value, false, LocalDateTime.now())
         val organisasjonsnummer = "99999999"
         dokumentDao.lagre(
             fødselsnummer = person.identitetsnummer.value,
@@ -133,7 +129,6 @@ class GetInntektsmeldingBehandlerTest {
         val dokumentId = UUID.randomUUID()
         val person = lagPerson(adressebeskyttelse = Personinfo.Adressebeskyttelse.StrengtFortrolig)
             .also(personRepository::lagre)
-        egenAnsattDao.lagre(person.identitetsnummer.value, false, LocalDateTime.now())
         val organisasjonsnummer = "99999999"
         dokumentDao.lagre(
             fødselsnummer = person.identitetsnummer.value,

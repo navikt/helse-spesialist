@@ -38,7 +38,6 @@ import no.nav.helse.spesialist.application.Reservasjonshenter.ReservasjonDto
 import no.nav.helse.spesialist.application.SaksbehandlerRepository
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.snapshot.SnapshotPerson
-import no.nav.helse.spesialist.application.tilgangskontroll.PersonTilgangskontroll
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
@@ -103,13 +102,14 @@ class PersonService(
 
             return FetchPersonResult.Feil.IkkeKlarTilVisning(aktørId)
         }
-        if (!PersonTilgangskontroll.harTilgangTilPerson(
-                tilgangsgrupper = tilgangsgrupper,
-                fødselsnummer = fødselsnummer,
-                egenAnsattApiDao = egenAnsattApiDao,
-                personApiDao = personApiDao,
-            )
-        ) {
+        val personEntity =
+            sessionFactory.transactionalSessionScope {
+                it.personRepository.finn(Identitetsnummer.fraString(fødselsnummer))
+            }
+        if (personEntity == null) {
+            return FetchPersonResult.Feil.IkkeFunnet
+        }
+        if (!personEntity.kanSeesAvSaksbehandlerMedGrupper(tilgangsgrupper)) {
             return FetchPersonResult.Feil.ManglerTilgang
         }
 

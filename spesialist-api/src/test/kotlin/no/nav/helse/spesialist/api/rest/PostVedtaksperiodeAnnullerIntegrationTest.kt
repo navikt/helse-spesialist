@@ -14,7 +14,6 @@ import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertNotNull
-import java.time.LocalDateTime
 import java.util.UUID
 
 class PostVedtaksperiodeAnnullerIntegrationTest {
@@ -38,7 +37,6 @@ class PostVedtaksperiodeAnnullerIntegrationTest {
         val person = lagPerson(
             identitetsnummer = Identitetsnummer.fraString(fødselsnummer)
         ).also(sessionContext.personRepository::lagre)
-        sessionContext.egenAnsattDao.lagre(fødselsnummer, false, LocalDateTime.now())
 
         lagVedtaksperiode(
             id = VedtaksperiodeId(vedtaksperiodeId),
@@ -120,7 +118,6 @@ class PostVedtaksperiodeAnnullerIntegrationTest {
         val person = lagPerson(
             identitetsnummer = Identitetsnummer.fraString(fødselsnummer)
         ).also(sessionContext.personRepository::lagre)
-        sessionContext.egenAnsattDao.lagre(fødselsnummer, false, LocalDateTime.now())
 
         lagVedtaksperiode(
             id = VedtaksperiodeId(vedtaksperiodeId),
@@ -204,7 +201,6 @@ class PostVedtaksperiodeAnnullerIntegrationTest {
         val person = lagPerson(
             identitetsnummer = Identitetsnummer.fraString(fødselsnummer)
         ).also(sessionContext.personRepository::lagre)
-        sessionContext.egenAnsattDao.lagre(fødselsnummer, false, LocalDateTime.now())
 
         lagVedtaksperiode(
             id = VedtaksperiodeId(vedtaksperiodeId),

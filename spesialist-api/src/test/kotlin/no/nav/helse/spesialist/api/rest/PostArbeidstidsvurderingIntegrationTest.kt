@@ -285,11 +285,6 @@ class PostArbeidstidsvurderingIntegrationTest {
             identitetsnummer = identitetsnummer,
             adressebeskyttelse = adressebeskyttelse,
         ).also(sessionContext.personRepository::lagre)
-        sessionContext.egenAnsattDao.lagre(
-            fødselsnummer = identitetsnummer.value,
-            erEgenAnsatt = false,
-            opprettet = LocalDateTime.now()
-        )
     }
 
     private fun lagPublisertSubsumsjon(utfall: String, fom: String, tom: String, overstyring: MinimumSykdomsgrad) =
