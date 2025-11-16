@@ -98,10 +98,6 @@ fun lagAvviksvurderingMedEnArbeidsgiver(
 
 fun lagEtternavn() = etternavnListe.random()
 
-fun lagEnSpleisBehandlingId() = SpleisBehandlingId(UUID.randomUUID())
-fun lagEnBehandlingUnikId() = BehandlingUnikId(UUID.randomUUID())
-fun lagEnVedtaksperiodeId() = VedtaksperiodeId(UUID.randomUUID())
-
 fun lagOppgave(behandlingId: UUID): Oppgave = Oppgave.ny(
     id = nextLong(),
     førsteOpprettet = LocalDateTime.now(),
@@ -112,6 +108,19 @@ fun lagOppgave(behandlingId: UUID): Oppgave = Oppgave.ny(
     kanAvvises = true,
     egenskaper = emptySet(),
 )
+fun lagEnSaksbehandler(): Saksbehandler {
+    val navn = lagSaksbehandlernavn()
+    return Saksbehandler(
+        id = SaksbehandlerOid(UUID.randomUUID()),
+        navn = navn,
+        epost = lagEpostadresseFraFulltNavn(navn),
+        ident = lagSaksbehandlerident()
+    )
+}
+
+fun lagEnSpleisBehandlingId() = SpleisBehandlingId(UUID.randomUUID())
+
+fun lagEnBehandlingUnikId() = BehandlingUnikId(UUID.randomUUID())
 
 @Deprecated("Bruk lagBehandling() i stedet")
 fun lagEnBehandling(
@@ -201,6 +210,7 @@ fun lagSkjønnsfastsattSykepengegrunnlag(
 )
 
 @Deprecated("Bruk lagVedtaksperiode() i stedet")
+fun lagEnVedtaksperiodeId() = VedtaksperiodeId(UUID.randomUUID())
 fun lagEnVedtaksperiode(
     vedtaksperiodeId: UUID = UUID.randomUUID(),
     fødselsnummer: String = lagFødselsnummer(),
@@ -243,6 +253,7 @@ fun lagVarsel(
     vurdering = vurdering
 )
 
+fun lagEnVarseldefinisjonId() = VarseldefinisjonId(UUID.randomUUID())
 fun lagVarseldefinisjon(
     id: UUID = UUID.randomUUID(),
     kode: String = "RV_IV_1",

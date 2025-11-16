@@ -21,6 +21,7 @@ import no.nav.helse.spesialist.api.rest.tilkommeninntekt.GetTilkomneInntektskild
 import no.nav.helse.spesialist.api.rest.tilkommeninntekt.PatchTilkommenInntektBehandler
 import no.nav.helse.spesialist.api.rest.tilkommeninntekt.PostTilkomneInntekterBehandler
 import no.nav.helse.spesialist.api.rest.varsler.GetVarselBehandler
+import no.nav.helse.spesialist.api.rest.varsler.PutVarselvurderingBehandler
 
 fun Routing.restRoutes(
     restAdapter: RestAdapter,
@@ -58,6 +59,7 @@ fun Routing.restRoutes(
             post(PostArbeidstidsvurderingBehandler(), restAdapter)
 
             get(GetVarselBehandler(), restAdapter)
+            put(PutVarselvurderingBehandler(), restAdapter)
 
             post(PostBehandlingNotaterBehandler(), restAdapter)
         }

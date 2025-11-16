@@ -7,6 +7,7 @@ import io.ktor.client.request.accept
 import io.ktor.client.request.bearerAuth
 import io.ktor.client.request.get
 import io.ktor.client.request.post
+import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
@@ -158,6 +159,42 @@ class IntegrationTestFixture() {
             runBlocking {
                 logg.info("Sender POST $url med data $body")
                 val httpResponse = client.post(url) {
+                    contentType(ContentType.Application.Json)
+                    accept(ContentType.Application.Json)
+                    bearerAuth(apiModuleIntegrationTestFixture.token(saksbehandler, tilgangsgrupper))
+                    setBody(body)
+                }
+                val bodyAsText = httpResponse.bodyAsText()
+                logg.info("Fikk respons: $bodyAsText")
+                response = Response(status = httpResponse.status.value, bodyAsText = bodyAsText)
+            }
+        }
+
+        return response
+    }
+
+    fun put(
+        url: String,
+        @Language("JSON") body: String,
+        saksbehandler: Saksbehandler = lagSaksbehandler(),
+        tilgangsgrupper: Set<Tilgangsgruppe> = emptySet(),
+    ): Response {
+        lateinit var response: Response
+
+        testApplication {
+            application {
+                apiModule.setUpApi(this)
+            }
+
+            client = createClient {
+                install(ContentNegotiation) {
+                    register(ContentType.Application.Json, JacksonConverter(objectMapper))
+                }
+            }
+
+            runBlocking {
+                logg.info("Sender PUT $url med data $body")
+                val httpResponse = client.put(url) {
                     contentType(ContentType.Application.Json)
                     accept(ContentType.Application.Json)
                     bearerAuth(apiModuleIntegrationTestFixture.token(saksbehandler, tilgangsgrupper))
