@@ -59,7 +59,7 @@ object REST {
         request: Any
     ): JsonNode {
         val url = "http://localhost:${E2ETestApplikasjon.port}/$relativeUrl"
-        logg.info("Gjør HTTP PATCH $url med body: $request")
+        logg.info("Gjør HTTP PATCH $url med body: ${objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(request)}")
         val (status, bodyAsText) = runBlocking {
             httpClient.patch(url) {
                 bearerAuth(E2ETestApplikasjon.apiModuleIntegrationTestFixture.token(saksbehandler, tilgangsgrupper))
@@ -80,7 +80,7 @@ object REST {
         request: Any
     ): JsonNode {
         val url = "http://localhost:${E2ETestApplikasjon.port}/$relativeUrl"
-        logg.info("Gjør HTTP POST $url med body: $request")
+        logg.info("Gjør HTTP POST $url med body: ${objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(request)}")
         val (status, bodyAsText) = runBlocking {
             httpClient.post(url) {
                 bearerAuth(E2ETestApplikasjon.apiModuleIntegrationTestFixture.token(saksbehandler, tilgangsgrupper))
