@@ -7,11 +7,13 @@ abstract class AbstractInMemoryRepository<IDTYPE, T : AggregateRoot<IDTYPE>>() {
 
     protected abstract fun generateId(): IDTYPE
 
-    fun finn(id: IDTYPE): T? = data.find { it.id() == id }
+    protected abstract fun deepCopy(original: T): T
 
-    fun finnAlle(ider: Set<IDTYPE>): List<T> = data.filter { it.id() in ider }
+    fun finn(id: IDTYPE): T? = data.find { it.id() == id }?.let(::deepCopy)
 
-    fun alle(): List<T> = data
+    fun finnAlle(ider: Set<IDTYPE>): List<T> = data.filter { it.id() in ider }.map(::deepCopy)
+
+    fun alle(): List<T> = data.map(::deepCopy)
 
     fun lagre(aggregateRoot: T) {
         if (aggregateRoot.harFåttTildeltId()) {
@@ -19,7 +21,7 @@ abstract class AbstractInMemoryRepository<IDTYPE, T : AggregateRoot<IDTYPE>>() {
         } else {
             aggregateRoot.tildelId(generateId())
         }
-        data.add(aggregateRoot)
+        data.add(aggregateRoot.let(::deepCopy))
     }
 
     fun slett(id: IDTYPE) {

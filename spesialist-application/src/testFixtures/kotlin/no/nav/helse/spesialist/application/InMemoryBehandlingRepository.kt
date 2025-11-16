@@ -7,7 +7,6 @@ import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import java.util.UUID
 
 class InMemoryBehandlingRepository : BehandlingRepository, AbstractInMemoryRepository<BehandlingUnikId, Behandling>() {
-    override fun generateId(): BehandlingUnikId = BehandlingUnikId(UUID.randomUUID())
     override fun finn(id: SpleisBehandlingId): Behandling? = alle().firstOrNull { it.spleisBehandlingId == id }
     override fun finnAndreBehandlingerISykefraværstilfelle(
         behandling: Behandling,
@@ -16,4 +15,19 @@ class InMemoryBehandlingRepository : BehandlingRepository, AbstractInMemoryRepos
         alle()
             .filter { it.skjæringstidspunkt.isEqual(behandling.skjæringstidspunkt) }
             .toSet()
+
+    override fun generateId(): BehandlingUnikId = BehandlingUnikId(UUID.randomUUID())
+    override fun deepCopy(original: Behandling): Behandling = Behandling.fraLagring(
+        id = original.id(),
+        spleisBehandlingId = original.spleisBehandlingId,
+        vedtaksperiodeId = original.vedtaksperiodeId,
+        utbetalingId = original.utbetalingId,
+        tags = original.tags.toSet(),
+        tilstand = original.tilstand,
+        fom = original.fom,
+        tom = original.tom,
+        skjæringstidspunkt = original.skjæringstidspunkt,
+        yrkesaktivitetstype = original.yrkesaktivitetstype,
+        søknadIder = original.søknadIder().toSet(),
+    )
 }

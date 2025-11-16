@@ -9,4 +9,15 @@ class InMemoryNotatRepository : NotatRepository, AbstractInMemoryRepository<Nota
         alle().filter { it.vedtaksperiodeId == vedtaksperiodeId }
 
     override fun generateId(): NotatId = NotatId((alle().maxOfOrNull { it.id().value } ?: 0) + 1)
+    override fun deepCopy(original: Notat): Notat = Notat.Factory.fraLagring(
+        id = original.id(),
+        type = original.type,
+        tekst = original.tekst,
+        dialogRef = original.dialogRef,
+        vedtaksperiodeId = original.vedtaksperiodeId,
+        saksbehandlerOid = original.saksbehandlerOid,
+        opprettetTidspunkt = original.opprettetTidspunkt,
+        feilregistrert = original.feilregistrert,
+        feilregistrertTidspunkt = original.feilregistrertTidspunkt,
+    )
 }

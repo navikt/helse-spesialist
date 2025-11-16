@@ -18,4 +18,13 @@ class InMemoryVarselRepository : VarselRepository, AbstractInMemoryRepository<Va
     }
 
     override fun generateId(): VarselId = VarselId(UUID.randomUUID())
+    override fun deepCopy(original: Varsel): Varsel = Varsel.fraLagring(
+        id = original.id(),
+        spleisBehandlingId = original.spleisBehandlingId,
+        behandlingUnikId = original.behandlingUnikId,
+        status = original.status,
+        kode = original.kode,
+        opprettetTidspunkt = original.opprettetTidspunkt,
+        vurdering = original.vurdering,
+    )
 }

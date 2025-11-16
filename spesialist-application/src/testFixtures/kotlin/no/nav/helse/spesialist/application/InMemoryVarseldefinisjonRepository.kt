@@ -21,4 +21,11 @@ class InMemoryVarseldefinisjonRepository : VarseldefinisjonRepository,
     }
 
     override fun generateId(): VarseldefinisjonId = VarseldefinisjonId(UUID.randomUUID())
+    override fun deepCopy(original: Varseldefinisjon): Varseldefinisjon = Varseldefinisjon.fraLagring(
+        id = original.id(),
+        kode = original.kode,
+        tittel = original.tittel,
+        forklaring = original.forklaring,
+        handling = original.handling,
+    )
 }

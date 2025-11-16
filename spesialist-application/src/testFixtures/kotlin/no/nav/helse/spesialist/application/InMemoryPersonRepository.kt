@@ -5,4 +5,15 @@ import no.nav.helse.spesialist.domain.PersonId
 
 class InMemoryPersonRepository : PersonRepository, AbstractInMemoryRepository<PersonId, Person>() {
     override fun generateId(): PersonId = PersonId((alle().maxOfOrNull { it.id().value } ?: 0) + 1)
+    override fun deepCopy(original: Person): Person = Person.Factory.fraLagring(
+        id = original.id(),
+        identitetsnummer = original.identitetsnummer,
+        aktørId = original.aktørId,
+        info = original.info,
+        infoOppdatert = original.infoOppdatert,
+        enhetRef = original.enhetRef,
+        enhetRefOppdatert = original.enhetRefOppdatert,
+        infotrygdutbetalingerRef = original.infotrygdutbetalingerRef,
+        infotrygdutbetalingerOppdatert = original.infotrygdutbetalingerOppdatert,
+    )
 }

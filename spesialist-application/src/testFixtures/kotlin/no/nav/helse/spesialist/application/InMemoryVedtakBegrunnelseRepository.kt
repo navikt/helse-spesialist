@@ -12,4 +12,13 @@ class InMemoryVedtakBegrunnelseRepository : VedtakBegrunnelseRepository,
 
     override fun generateId(): VedtakBegrunnelseId =
         VedtakBegrunnelseId((alle().maxOfOrNull { it.id().value } ?: 0) + 1)
+
+    override fun deepCopy(original: VedtakBegrunnelse): VedtakBegrunnelse = VedtakBegrunnelse.fraLagring(
+        id = original.id(),
+        spleisBehandlingId = original.behandlingId,
+        tekst = original.tekst,
+        utfall = original.utfall,
+        invalidert = original.invalidert,
+        saksbehandlerOid = original.saksbehandlerOid,
+    )
 }
