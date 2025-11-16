@@ -8,14 +8,14 @@ import no.nav.helse.spesialist.domain.VedtakBegrunnelseId
 class InMemoryVedtakBegrunnelseRepository : VedtakBegrunnelseRepository,
     AbstractInMemoryRepository<VedtakBegrunnelseId, VedtakBegrunnelse>() {
     override fun finn(spleisBehandlingId: SpleisBehandlingId): VedtakBegrunnelse? =
-        alle().find { it.behandlingId == spleisBehandlingId }
+        alle().find { it.spleisBehandlingId == spleisBehandlingId }
 
     override fun generateId(): VedtakBegrunnelseId =
         VedtakBegrunnelseId((alle().maxOfOrNull { it.id().value } ?: 0) + 1)
 
     override fun deepCopy(original: VedtakBegrunnelse): VedtakBegrunnelse = VedtakBegrunnelse.fraLagring(
         id = original.id(),
-        spleisBehandlingId = original.behandlingId,
+        spleisBehandlingId = original.spleisBehandlingId,
         tekst = original.tekst,
         utfall = original.utfall,
         invalidert = original.invalidert,

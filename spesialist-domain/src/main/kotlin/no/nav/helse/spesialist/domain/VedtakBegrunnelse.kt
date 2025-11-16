@@ -10,7 +10,7 @@ value class VedtakBegrunnelseId(
 
 class VedtakBegrunnelse private constructor(
     val id: VedtakBegrunnelseId?,
-    val behandlingId: SpleisBehandlingId,
+    val spleisBehandlingId: SpleisBehandlingId,
     val tekst: String,
     val utfall: Utfall,
     invalidert: Boolean,
@@ -38,7 +38,7 @@ class VedtakBegrunnelse private constructor(
             saksbehandlerOid: SaksbehandlerOid,
         ) = VedtakBegrunnelse(
             id = id,
-            behandlingId = spleisBehandlingId,
+            spleisBehandlingId = spleisBehandlingId,
             tekst = tekst,
             utfall = utfall,
             invalidert = invalidert,
@@ -52,7 +52,7 @@ class VedtakBegrunnelse private constructor(
             saksbehandlerOid: SaksbehandlerOid,
         ) = VedtakBegrunnelse(
             id = null,
-            behandlingId = spleisBehandlingId,
+            spleisBehandlingId = spleisBehandlingId,
             tekst = tekst,
             utfall = utfall,
             invalidert = false,

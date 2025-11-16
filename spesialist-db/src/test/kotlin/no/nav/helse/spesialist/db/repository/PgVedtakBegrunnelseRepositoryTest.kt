@@ -45,7 +45,7 @@ class PgVedtakBegrunnelseRepositoryTest : AbstractDBIntegrationTest() {
 
         //then
         assertNotNull(vedtakBegrunnelse?.id)
-        assertEquals(spleisBehandlingId, vedtakBegrunnelse.behandlingId)
+        assertEquals(spleisBehandlingId, vedtakBegrunnelse.spleisBehandlingId)
         assertEquals(tekst, vedtakBegrunnelse.tekst)
         assertEquals(Utfall.INNVILGELSE, vedtakBegrunnelse.utfall)
         assertFalse(vedtakBegrunnelse.invalidert)

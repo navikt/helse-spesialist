@@ -65,7 +65,7 @@ class PgVedtakBegrunnelseRepository private constructor(
             """.trimIndent(),
             "begrunnelseId" to begrunnelseId,
             "opprettet" to LocalDateTime.now(),
-            "spleisBehandlingId" to vedtakBegrunnelse.behandlingId.value,
+            "spleisBehandlingId" to vedtakBegrunnelse.spleisBehandlingId.value,
         )
         vedtakBegrunnelse.tildelId(VedtakBegrunnelseId(begrunnelseId))
     }
