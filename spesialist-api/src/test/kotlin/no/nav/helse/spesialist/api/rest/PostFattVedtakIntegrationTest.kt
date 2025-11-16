@@ -12,6 +12,7 @@ import no.nav.helse.spesialist.domain.testfixtures.lagEnBehandling
 import no.nav.helse.spesialist.domain.testfixtures.lagEnVedtaksperiode
 import no.nav.helse.spesialist.domain.testfixtures.lagOppgave
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
+import no.nav.helse.spesialist.domain.testfixtures.lagVarseldefinisjon
 import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiode
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
@@ -383,7 +384,7 @@ class PostFattVedtakIntegrationTest {
         lagPerson(
             identitetsnummer = Identitetsnummer.fraString(fødselsnummer)
         ).also(sessionContext.personRepository::lagre)
-        sessionContext.varseldefinisjonRepository.lagre(kode)
+        sessionContext.varseldefinisjonRepository.lagre(lagVarseldefinisjon(kode = kode))
         sessionContext.varselRepository.lagre(
             Varsel.fraLagring(
                 VarselId(UUID.randomUUID()),
@@ -442,7 +443,7 @@ class PostFattVedtakIntegrationTest {
         lagPerson(
             identitetsnummer = Identitetsnummer.fraString(fødselsnummer)
         ).also(sessionContext.personRepository::lagre)
-        sessionContext.varseldefinisjonRepository.lagre(kode)
+        sessionContext.varseldefinisjonRepository.lagre(lagVarseldefinisjon(kode = kode))
         sessionContext.varselRepository.lagre(
             Varsel.fraLagring(
                 VarselId(UUID.randomUUID()),
@@ -489,7 +490,7 @@ class PostFattVedtakIntegrationTest {
         lagPerson(
             identitetsnummer = Identitetsnummer.fraString(fødselsnummer)
         ).also(sessionContext.personRepository::lagre)
-        sessionContext.varseldefinisjonRepository.lagre(kode)
+        sessionContext.varseldefinisjonRepository.lagre(lagVarseldefinisjon(kode = kode))
         val godkjentVarsel = Varsel.fraLagring(
             id = VarselId(UUID.randomUUID()),
             spleisBehandlingId = behandling.spleisBehandlingId!!,
