@@ -156,6 +156,7 @@ fragment periode on Periode {
     periodetilstand
     skjaeringstidspunkt
     varsler {
+        id
         generasjonId
         definisjonId
         opprettet

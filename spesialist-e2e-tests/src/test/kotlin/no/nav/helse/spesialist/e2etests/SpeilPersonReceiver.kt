@@ -42,13 +42,11 @@ class SpeilPersonReceiver(
                 }
             }
         }.forEach { varsel ->
-            callGraphQL(
-                operationName = "SettVarselStatus",
-                variables = mapOf(
-                    "generasjonIdString" to varsel["generasjonId"].asText(),
-                    "varselkode" to varsel["kode"].asText(),
-                    "ident" to saksbehandler.ident,
-                    "definisjonIdString" to varsel["definisjonId"].asText(),
+            val varselId = varsel["id"].asText()
+            callHttpPut(
+                relativeUrl = "api/varsler/$varselId/vurdering",
+                request = mapOf(
+                    "definisjonId" to varsel["definisjonId"].asText(),
                 )
             )
         }
@@ -393,6 +391,9 @@ class SpeilPersonReceiver(
 
     private fun callHttpGet(relativeUrl: String) =
         REST.get(relativeUrl, saksbehandler, tilgangsgrupper)
+
+    private fun callHttpPut(relativeUrl: String, request: Any) =
+        REST.put(relativeUrl, saksbehandler, tilgangsgrupper, request)
 
     private fun callHttpPatch(relativeUrl: String, request: Any) =
         REST.patch(relativeUrl, saksbehandler, tilgangsgrupper, request)

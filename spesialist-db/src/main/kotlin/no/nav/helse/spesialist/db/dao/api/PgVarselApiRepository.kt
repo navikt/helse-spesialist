@@ -2,8 +2,6 @@ package no.nav.helse.spesialist.db.dao.api
 
 import no.nav.helse.db.api.VarselApiRepository
 import no.nav.helse.db.api.VarselDbDto
-import no.nav.helse.db.api.VarselDbDto.Varselstatus.AKTIV
-import no.nav.helse.db.api.VarselDbDto.Varselstatus.GODKJENT
 import no.nav.helse.db.api.VedtaksperiodeDbDto
 import java.util.UUID
 import javax.sql.DataSource
@@ -28,11 +26,6 @@ class PgVarselApiRepository internal constructor(
 
     override fun finnGodkjenteVarslerForUberegnetPeriode(vedtaksperiodeId: UUID): Set<VarselDbDto> = varselDao.finnGodkjenteVarslerForUberegnetPeriode(vedtaksperiodeId)
 
-    override fun godkjennVarslerFor(oppgaveId: Long) {
-        val vedtaksperioder = sammenhengendePerioder(oppgaveId)
-        varselDao.godkjennVarslerFor(vedtaksperioder.map { it.vedtaksperiodeId })
-    }
-
     override fun vurderVarselFor(
         varselId: UUID,
         gjeldendeStatus: VarselDbDto.Varselstatus,
@@ -40,35 +33,6 @@ class PgVarselApiRepository internal constructor(
     ) {
         varselDao.vurderVarselFor(varselId, gjeldendeStatus, saksbehandlerIdent)
     }
-
-    override fun erAktiv(
-        varselkode: String,
-        generasjonId: UUID,
-    ): Boolean? {
-        val varselstatus = varselDao.finnStatusFor(varselkode, generasjonId) ?: return null
-        return varselstatus == AKTIV
-    }
-
-    override fun erGodkjent(
-        varselkode: String,
-        generasjonId: UUID,
-    ): Boolean? {
-        val varselstatus = varselDao.finnStatusFor(varselkode, generasjonId) ?: return null
-        return varselstatus == GODKJENT
-    }
-
-    override fun settStatusVurdert(
-        generasjonId: UUID,
-        definisjonId: UUID,
-        varselkode: String,
-        ident: String,
-    ): VarselDbDto? = varselDao.settStatusVurdert(generasjonId, definisjonId, varselkode, ident)
-
-    override fun settStatusAktiv(
-        generasjonId: UUID,
-        varselkode: String,
-        ident: String,
-    ): VarselDbDto? = varselDao.settStatusAktiv(generasjonId, varselkode, ident)
 
     override fun perioderSomSkalViseVarsler(oppgaveId: Long?): Set<UUID> {
         if (oppgaveId == null) return emptySet()

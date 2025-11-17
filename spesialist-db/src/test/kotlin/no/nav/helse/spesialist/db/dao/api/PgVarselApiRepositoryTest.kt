@@ -5,7 +5,6 @@ import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -50,93 +49,6 @@ internal class PgVarselApiRepositoryTest: AbstractDBIntegrationTest() {
 
         assertTrue(varsler.isNotEmpty())
         assertEquals(2, varsler.size)
-    }
-
-    @Test
-    fun `varsel er aktivt`() {
-        val spleisBehandlingId = UUID.randomUUID()
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettVedtaksperiode(spleisBehandlingId = spleisBehandlingId)
-        opprettVarseldefinisjon(kode = "EN_KODE")
-        nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = PERIODE.id, spleisBehandlingId = spleisBehandlingId)
-
-        val generasjonId = finnGenerasjonId(spleisBehandlingId)
-        assertEquals(true, apiVarselRepository.erAktiv("EN_KODE", generasjonId))
-    }
-
-    @Test
-    fun `varsel er ikke aktivt - vurdert`() {
-        val spleisBehandlingId = UUID.randomUUID()
-        val definisjonId = UUID.randomUUID()
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettVedtaksperiode(spleisBehandlingId = spleisBehandlingId)
-        opprettVarseldefinisjon(definisjonId = definisjonId, kode = "EN_KODE")
-        val generasjonId = finnGenerasjonId(spleisBehandlingId)
-        nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = PERIODE.id, spleisBehandlingId = spleisBehandlingId)
-        apiVarselRepository.settStatusVurdert(generasjonId = generasjonId, definisjonId, "EN_KODE", "EN_IDENT")
-        assertEquals(false, apiVarselRepository.erAktiv("EN_KODE", generasjonId))
-    }
-
-    @Test
-    fun `varsel er ikke aktivt - godkjent`() {
-        val spleisBehandlingId = UUID.randomUUID()
-        val definisjonId = UUID.randomUUID()
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettVedtaksperiode(spleisBehandlingId = spleisBehandlingId)
-        opprettOppgave()
-        val oppgaveId = finnOppgaveIdFor(PERIODE.id)
-        opprettVarseldefinisjon(definisjonId = definisjonId, kode = "EN_KODE")
-        nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = PERIODE.id, spleisBehandlingId = spleisBehandlingId)
-        val generasjonId = finnGenerasjonId(spleisBehandlingId)
-        apiVarselRepository.settStatusVurdert(generasjonId, definisjonId, "EN_KODE", "EN_IDENT")
-        apiVarselRepository.godkjennVarslerFor(oppgaveId)
-        assertEquals(false, apiVarselRepository.erAktiv("EN_KODE", generasjonId))
-    }
-
-    @Test
-    fun `varsel er godkjent`() {
-        val spleisBehandlingId = UUID.randomUUID()
-        val definisjonId = UUID.randomUUID()
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettVedtaksperiode(spleisBehandlingId = spleisBehandlingId)
-        opprettOppgave()
-        val oppgaveId = finnOppgaveIdFor(PERIODE.id)
-        opprettVarseldefinisjon(definisjonId = definisjonId, kode = "EN_KODE")
-        nyttVarsel(kode = "EN_KODE", vedtaksperiodeId = PERIODE.id, spleisBehandlingId = spleisBehandlingId)
-        val generasjonId = finnGenerasjonId(spleisBehandlingId)
-        apiVarselRepository.settStatusVurdert(generasjonId, definisjonId, "EN_KODE", "EN_IDENT")
-        apiVarselRepository.godkjennVarslerFor(oppgaveId)
-        assertEquals(true, apiVarselRepository.erGodkjent("EN_KODE", generasjonId))
-    }
-
-    @Test
-    fun `erGodkjent returnerer null hvis varsel ikke finnes`() {
-        val spleisBehandlingId = UUID.randomUUID()
-        val definisjonId = UUID.randomUUID()
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettVedtaksperiode(spleisBehandlingId = spleisBehandlingId)
-        opprettVarseldefinisjon(definisjonId = definisjonId, kode = "EN_KODE")
-        opprettBehandling(vedtaksperiodeId = PERIODE.id, spleisBehandlingId = spleisBehandlingId)
-        val generasjonId = finnGenerasjonId(spleisBehandlingId)
-        assertNull(apiVarselRepository.erGodkjent("EN_KODE", generasjonId))
-    }
-
-    @Test
-    fun `erAktiv returnerer null hvis varsel ikke finnes`() {
-        val spleisBehandlingId = UUID.randomUUID()
-        val definisjonId = UUID.randomUUID()
-        opprettPerson()
-        opprettArbeidsgiver()
-        opprettVedtaksperiode(spleisBehandlingId = spleisBehandlingId)
-        opprettVarseldefinisjon(definisjonId = definisjonId, kode = "EN_KODE")
-        opprettBehandling(vedtaksperiodeId = PERIODE.id, spleisBehandlingId = spleisBehandlingId)
-        val generasjonId = finnGenerasjonId(spleisBehandlingId)
-        assertNull(apiVarselRepository.erAktiv("EN_KODE", generasjonId))
     }
 
     @Test

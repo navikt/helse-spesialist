@@ -19,8 +19,6 @@ import no.nav.helse.spesialist.api.graphql.mutation.TildelingMutation
 import no.nav.helse.spesialist.api.graphql.mutation.TildelingMutationSchema
 import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutation
 import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutationSchema
-import no.nav.helse.spesialist.api.graphql.mutation.VarselMutation
-import no.nav.helse.spesialist.api.graphql.mutation.VarselMutationSchema
 import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutation
 import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutationSchema
 import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQuery
@@ -45,7 +43,6 @@ class SpesialistSchema(
 
     class MutationHandlers(
         val notat: NotatMutationSchema,
-        val varsel: VarselMutationSchema,
         val tildeling: TildelingMutationSchema,
         val opptegnelse: OpptegnelseMutationSchema,
         val overstyring: OverstyringMutationSchema,
@@ -71,7 +68,6 @@ class SpesialistSchema(
         schemaConfiguration.mutations =
             listOf(
                 NotatMutation(handler = mutationHandlers.notat),
-                VarselMutation(handler = mutationHandlers.varsel),
                 TildelingMutation(handler = mutationHandlers.tildeling),
                 OpptegnelseMutation(handler = mutationHandlers.opptegnelse),
                 OverstyringMutation(handler = mutationHandlers.overstyring),

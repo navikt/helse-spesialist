@@ -27,40 +27,11 @@ class UnimplementedVarselApiRepository : VarselApiRepository {
         TODO("Not yet implemented")
     }
 
-    override fun godkjennVarslerFor(oppgaveId: Long) {
-        TODO("Not yet implemented")
-    }
-
     override fun vurderVarselFor(
         varselId: UUID,
         gjeldendeStatus: VarselDbDto.Varselstatus,
         saksbehandlerIdent: String
     ) {
-        TODO("Not yet implemented")
-    }
-
-    override fun erAktiv(varselkode: String, generasjonId: UUID): Boolean? {
-        TODO("Not yet implemented")
-    }
-
-    override fun erGodkjent(varselkode: String, generasjonId: UUID): Boolean? {
-        TODO("Not yet implemented")
-    }
-
-    override fun settStatusVurdert(
-        generasjonId: UUID,
-        definisjonId: UUID,
-        varselkode: String,
-        ident: String
-    ): VarselDbDto? {
-        TODO("Not yet implemented")
-    }
-
-    override fun settStatusAktiv(
-        generasjonId: UUID,
-        varselkode: String,
-        ident: String
-    ): VarselDbDto? {
         TODO("Not yet implemented")
     }
 

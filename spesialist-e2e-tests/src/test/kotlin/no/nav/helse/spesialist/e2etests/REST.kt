@@ -9,6 +9,7 @@ import io.ktor.client.request.bearerAuth
 import io.ktor.client.request.get
 import io.ktor.client.request.patch
 import io.ktor.client.request.post
+import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
@@ -91,6 +92,27 @@ object REST {
         }
         logg.info("Respons fra HTTP POST: $bodyAsText")
         assertTrue(status.isSuccess()) { "Fikk HTTP-feilkode ${status.value} fra HTTP POST" }
+        return objectMapper.readTree(bodyAsText)
+    }
+
+    fun put(
+        relativeUrl: String,
+        saksbehandler: Saksbehandler,
+        tilgangsgrupper: Set<Tilgangsgruppe>,
+        request: Any
+    ): JsonNode {
+        val url = "http://localhost:${E2ETestApplikasjon.port}/$relativeUrl"
+        logg.info("Gjør HTTP PUT $url med body: ${objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(request)}")
+        val (status, bodyAsText) = runBlocking {
+            httpClient.put(url) {
+                bearerAuth(E2ETestApplikasjon.apiModuleIntegrationTestFixture.token(saksbehandler, tilgangsgrupper))
+                accept(ContentType.Application.Json)
+                contentType(ContentType.Application.Json)
+                if (request !is Unit) setBody(request)
+            }.let { it.status to it.bodyAsText() }
+        }
+        logg.info("Respons fra HTTP PUT: $bodyAsText")
+        assertTrue(status.isSuccess()) { "Fikk HTTP-feilkode ${status.value} fra HTTP PUT" }
         return objectMapper.readTree(bodyAsText)
     }
 }
