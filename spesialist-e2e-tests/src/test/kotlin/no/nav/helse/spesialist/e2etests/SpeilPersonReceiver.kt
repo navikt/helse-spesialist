@@ -65,7 +65,7 @@ class SpeilPersonReceiver(
         hentOppdatertPerson()
     }
 
-    fun saksbehandlerFatterVedtakREST(behandlingId: UUID, begrunnelse: String? = null) : JsonNode = callHttpPost(
+    fun saksbehandlerFatterVedtak(behandlingId: UUID, begrunnelse: String? = null) : JsonNode = callHttpPost(
         relativeUrl = "api/vedtak/$behandlingId/fatt",
         request = ApiFattVedtakRequest(begrunnelse)
     ).also {

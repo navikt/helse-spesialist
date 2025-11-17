@@ -11,7 +11,7 @@ import java.math.BigDecimal
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 
-class RESTFattVedtakE2ETest : AbstractE2EIntegrationTest() {
+class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
 
     @Test
     fun `saksbehandler fatter vedtak etter hovedregel`() {
@@ -23,7 +23,7 @@ class RESTFattVedtakE2ETest : AbstractE2EIntegrationTest() {
         medPersonISpeil {
             saksbehandlerTildelerSegSaken() // Må til for å "opprette" saksbehandler
             saksbehandlerGodkjennerAlleVarsler()
-            saksbehandlerFatterVedtakREST(førsteVedtaksperiode().spleisBehandlingId!!)
+            saksbehandlerFatterVedtak(førsteVedtaksperiode().spleisBehandlingId!!)
         }
 
         // Then:
@@ -51,7 +51,7 @@ class RESTFattVedtakE2ETest : AbstractE2EIntegrationTest() {
 
         beslutterMedPersonISpeil {
             saksbehandlerTildelerSegSaken() // Må til for å "opprette" beslutter
-            saksbehandlerFatterVedtakREST(førsteVedtaksperiode().spleisBehandlingId!!)
+            saksbehandlerFatterVedtak(førsteVedtaksperiode().spleisBehandlingId!!)
         }
 
         // Then:
@@ -84,7 +84,7 @@ class RESTFattVedtakE2ETest : AbstractE2EIntegrationTest() {
         medPersonISpeil {
             saksbehandlerTildelerSegSaken() // Må til for å "opprette" saksbehandler
             saksbehandlerGodkjennerAlleVarsler()
-            saksbehandlerFatterVedtakREST(førsteVedtaksperiode.spleisBehandlingId!!)
+            saksbehandlerFatterVedtak(førsteVedtaksperiode.spleisBehandlingId!!)
         }
 
         // Then:
@@ -112,7 +112,7 @@ class RESTFattVedtakE2ETest : AbstractE2EIntegrationTest() {
             saksbehandlerGodkjennerAlleVarsler()
             saksbehandlerLeggerOppgavePåVent()
             assertHarOppgaveegenskap("PA_VENT")
-            saksbehandlerFatterVedtakREST(vedtaksperiode.spleisBehandlingId!!)
+            saksbehandlerFatterVedtak(vedtaksperiode.spleisBehandlingId!!)
         }
 
         // Then:
@@ -138,7 +138,7 @@ class RESTFattVedtakE2ETest : AbstractE2EIntegrationTest() {
         medPersonISpeil {
             saksbehandlerTildelerSegSaken() // Må til for å "opprette" saksbehandler
             saksbehandlerGodkjennerAlleVarsler()
-            saksbehandlerFatterVedtakREST(vedtaksperiode.spleisBehandlingId!!, "Her er min begrunnelse")
+            saksbehandlerFatterVedtak(vedtaksperiode.spleisBehandlingId!!, "Her er min begrunnelse")
         }
 
         // Then:
@@ -184,7 +184,7 @@ class RESTFattVedtakE2ETest : AbstractE2EIntegrationTest() {
         }
 
         beslutterMedPersonISpeil {
-            saksbehandlerFatterVedtakREST(vedtaksperiode.spleisBehandlingId!!, "Her er min begrunnelse")
+            saksbehandlerFatterVedtak(vedtaksperiode.spleisBehandlingId!!, "Her er min begrunnelse")
         }
 
         // Then:
@@ -250,7 +250,7 @@ class RESTFattVedtakE2ETest : AbstractE2EIntegrationTest() {
         medPersonISpeil {
             saksbehandlerTildelerSegSaken() // Må til for å "opprette" saksbehandler
             saksbehandlerGodkjennerAlleVarsler()
-            saksbehandlerFatterVedtakREST(førsteVedtaksperiode().spleisBehandlingId!!, "Her er min begrunnelse")
+            saksbehandlerFatterVedtak(førsteVedtaksperiode().spleisBehandlingId!!, "Her er min begrunnelse")
 
             // Sjekk at varsler er godkjent
             person["arbeidsgivere"].flatMap { arbeidsgiver ->
@@ -321,7 +321,7 @@ class RESTFattVedtakE2ETest : AbstractE2EIntegrationTest() {
         medPersonISpeil {
             saksbehandlerTildelerSegSaken() // Må til for å "opprette" saksbehandler
             saksbehandlerGodkjennerAlleVarsler()
-            saksbehandlerFatterVedtakREST(førsteVedtaksperiode().spleisBehandlingId!!)
+            saksbehandlerFatterVedtak(førsteVedtaksperiode().spleisBehandlingId!!)
         }
 
         // Then:

@@ -19,7 +19,7 @@ class GodkjenningsbehovE2ETest : AbstractE2EIntegrationTest() {
         medPersonISpeil {
             saksbehandlerTildelerSegSaken() // Må til for å "opprette" saksbehandler
             saksbehandlerGodkjennerAlleVarsler()
-            saksbehandlerFatterVedtakREST(vedtaksperiode.spleisBehandlingId!!, "En begrunnelse")
+            saksbehandlerFatterVedtak(vedtaksperiode.spleisBehandlingId!!, "En begrunnelse")
         }
 
         assertBehandlingTilstand("VedtakFattet")
@@ -42,7 +42,7 @@ class GodkjenningsbehovE2ETest : AbstractE2EIntegrationTest() {
 
         medPersonISpeil {
             saksbehandlerGodkjennerAlleVarsler()
-            saksbehandlerFatterVedtakREST(vedtaksperiode.spleisBehandlingId!!, "En begrunnelse")
+            saksbehandlerFatterVedtak(vedtaksperiode.spleisBehandlingId!!, "En begrunnelse")
         }
 
         assertOppgaveTildeltSaksbehandler()

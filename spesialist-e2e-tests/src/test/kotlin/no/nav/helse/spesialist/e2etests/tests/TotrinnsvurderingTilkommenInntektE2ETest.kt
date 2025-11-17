@@ -64,7 +64,7 @@ class TotrinnsvurderingTilkommenInntektE2ETest : AbstractE2EIntegrationTest() {
 
         beslutterMedPersonISpeil {
             saksbehandlerTildelerSegSaken() // Må til for å "opprette" beslutter
-            saksbehandlerFatterVedtakREST(vedtaksperiode.spleisBehandlingId!!, "en begrunnelse")
+            saksbehandlerFatterVedtak(vedtaksperiode.spleisBehandlingId!!, "en begrunnelse")
         }
 
         // Then:
