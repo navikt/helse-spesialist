@@ -9,9 +9,12 @@ import no.nav.helse.spesialist.api.rest.ApiPatchEndring
 import no.nav.helse.spesialist.api.rest.ApiTilkommenInntektPatch
 import no.nav.helse.spesialist.api.rest.PatchBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
+import no.nav.helse.spesialist.api.rest.finnEllerOpprettTotrinnsvurdering
+import no.nav.helse.spesialist.api.rest.harTilgangTilPerson
 import no.nav.helse.spesialist.api.rest.resources.TilkomneInntekter
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.sikkerlogg
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
 import no.nav.helse.spesialist.domain.Saksbehandler
@@ -38,9 +41,8 @@ class PatchTilkommenInntektBehandler : PatchBehandler<TilkomneInntekter.Id, ApiT
                     detail = "Tilkommen inntekt med id ${resource.tilkommenInntektId} ble ikke funnet",
                 )
 
-        if (!harTilgangTilPerson(
-                fødselsnummer = tilkommenInntekt.fødselsnummer,
-                saksbehandler = saksbehandler,
+        if (!saksbehandler.harTilgangTilPerson(
+                identitetsnummer = Identitetsnummer.fraString(identitetsnummer = tilkommenInntekt.fødselsnummer),
                 tilgangsgrupper = tilgangsgrupper,
                 transaksjon = transaksjon,
             )

@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.api.rest.tilkommeninntekt
+package no.nav.helse.spesialist.api.rest
 
 import no.nav.helse.db.SessionContext
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
@@ -15,22 +15,8 @@ internal fun finnEllerOpprettTotrinnsvurdering(
     totrinnsvurderingRepository.finnAktivForPerson(fodselsnummer)
         ?: Totrinnsvurdering.ny(fødselsnummer = fodselsnummer).also(totrinnsvurderingRepository::lagre)
 
-internal fun harTilgangTilPerson(
-    fødselsnummer: String,
-    saksbehandler: Saksbehandler,
-    tilgangsgrupper: Set<Tilgangsgruppe>,
-    transaksjon: SessionContext,
-): Boolean =
-    harTilgangTilPerson(
-        identitetsnummer = Identitetsnummer.fraString(fødselsnummer),
-        saksbehandler = saksbehandler,
-        tilgangsgrupper = tilgangsgrupper,
-        transaksjon = transaksjon,
-    )
-
-internal fun harTilgangTilPerson(
+internal fun Saksbehandler.harTilgangTilPerson(
     identitetsnummer: Identitetsnummer,
-    saksbehandler: Saksbehandler,
     tilgangsgrupper: Set<Tilgangsgruppe>,
     transaksjon: SessionContext,
 ): Boolean {
@@ -40,7 +26,7 @@ internal fun harTilgangTilPerson(
         return false
     }
     if (!person.kanSeesAvSaksbehandlerMedGrupper(tilgangsgrupper)) {
-        sikkerlogg.warn("Saksbehandler ${saksbehandler.id.value} har ikke tilgang til person med identitetsnummer $identitetsnummer")
+        sikkerlogg.warn("Saksbehandler ${id.value} har ikke tilgang til person med identitetsnummer $identitetsnummer")
         return false
     }
     return true

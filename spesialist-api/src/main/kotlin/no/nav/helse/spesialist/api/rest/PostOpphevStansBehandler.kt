@@ -4,8 +4,8 @@ import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.db.SessionContext
 import no.nav.helse.spesialist.api.rest.resources.Opphevstans
-import no.nav.helse.spesialist.api.rest.tilkommeninntekt.harTilgangTilPerson
 import no.nav.helse.spesialist.application.Outbox
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.NotatType
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
@@ -20,9 +20,8 @@ class PostOpphevStansBehandler : PostBehandler<Opphevstans, ApiOpphevStansReques
         outbox: Outbox,
     ): RestResponse<Unit, ApiPostOpphevStansErrorCode> {
         val fødselsnummer = request.fodselsnummer
-        if (!harTilgangTilPerson(
-                fødselsnummer = fødselsnummer,
-                saksbehandler = saksbehandler,
+        if (!saksbehandler.harTilgangTilPerson(
+                identitetsnummer = Identitetsnummer.fraString(identitetsnummer = fødselsnummer),
                 tilgangsgrupper = tilgangsgrupper,
                 transaksjon = transaksjon,
             )

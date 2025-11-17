@@ -8,8 +8,8 @@ import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.ApiSoknad
 import no.nav.helse.spesialist.api.rest.GetBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
+import no.nav.helse.spesialist.api.rest.harTilgangTilPerson
 import no.nav.helse.spesialist.api.rest.resources.Personer
-import no.nav.helse.spesialist.api.rest.tilkommeninntekt.harTilgangTilPerson
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.domain.Saksbehandler
@@ -45,9 +45,8 @@ class GetSoknadBehandler(
             return RestResponse.Error(ApiGetSoknadErrorCode.FANT_IKKE_DOKUMENT)
         }
 
-        if (!harTilgangTilPerson(
+        if (!saksbehandler.harTilgangTilPerson(
                 identitetsnummer = identitetsnummer,
-                saksbehandler = saksbehandler,
                 tilgangsgrupper = tilgangsgrupper,
                 transaksjon = transaksjon,
             )

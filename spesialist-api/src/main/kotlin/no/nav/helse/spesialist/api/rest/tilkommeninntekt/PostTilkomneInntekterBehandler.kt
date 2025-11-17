@@ -8,8 +8,11 @@ import no.nav.helse.spesialist.api.rest.ApiLeggTilTilkommenInntektRequest
 import no.nav.helse.spesialist.api.rest.ApiLeggTilTilkommenInntektResponse
 import no.nav.helse.spesialist.api.rest.PostBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
+import no.nav.helse.spesialist.api.rest.finnEllerOpprettTotrinnsvurdering
+import no.nav.helse.spesialist.api.rest.harTilgangTilPerson
 import no.nav.helse.spesialist.api.rest.resources.TilkomneInntekter
 import no.nav.helse.spesialist.application.Outbox
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
@@ -25,9 +28,8 @@ class PostTilkomneInntekterBehandler : PostBehandler<TilkomneInntekter, ApiLeggT
         transaksjon: SessionContext,
         outbox: Outbox,
     ): RestResponse<ApiLeggTilTilkommenInntektResponse, ApiPostTilkomneInntekterErrorCode> {
-        if (!harTilgangTilPerson(
-                fødselsnummer = request.fodselsnummer,
-                saksbehandler = saksbehandler,
+        if (!saksbehandler.harTilgangTilPerson(
+                identitetsnummer = Identitetsnummer.fraString(identitetsnummer = request.fodselsnummer),
                 tilgangsgrupper = tilgangsgrupper,
                 transaksjon = transaksjon,
             )

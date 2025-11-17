@@ -8,8 +8,8 @@ import no.nav.helse.spesialist.api.rest.ApiNotatRequest
 import no.nav.helse.spesialist.api.rest.ApiOpprettetRessurs
 import no.nav.helse.spesialist.api.rest.PostBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
+import no.nav.helse.spesialist.api.rest.harTilgangTilPerson
 import no.nav.helse.spesialist.api.rest.resources.Behandlinger
-import no.nav.helse.spesialist.api.rest.tilkommeninntekt.harTilgangTilPerson
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.domain.BehandlingUnikId
 import no.nav.helse.spesialist.domain.Dialog
@@ -36,9 +36,8 @@ class PostBehandlingNotaterBehandler : PostBehandler<Behandlinger.BehandlingId.N
             transaksjon.vedtaksperiodeRepository.finn(behandling.vedtaksperiodeId)
                 ?: error("Vedtaksperioden for behandlingen ble ikke funnet")
 
-        if (!harTilgangTilPerson(
+        if (!saksbehandler.harTilgangTilPerson(
                 identitetsnummer = Identitetsnummer.fraString(vedtaksperiode.fødselsnummer),
-                saksbehandler = saksbehandler,
                 tilgangsgrupper = tilgangsgrupper,
                 transaksjon = transaksjon,
             )

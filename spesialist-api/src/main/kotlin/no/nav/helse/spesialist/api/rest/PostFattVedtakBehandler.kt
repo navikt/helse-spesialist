@@ -13,12 +13,12 @@ import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.spesialist.api.rest.resources.Vedtak
-import no.nav.helse.spesialist.api.rest.tilkommeninntekt.harTilgangTilPerson
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.VarselRepository
 import no.nav.helse.spesialist.application.VarseldefinisjonRepository
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.domain.Behandling
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
@@ -49,9 +49,8 @@ class PostFattVedtakBehandler(
                     ?: return RestResponse.Error(ApiPostFattVedtakErrorCode.VEDTAKSPERIODE_IKKE_FUNNET)
             val fødselsnummer = vedtaksperiode.fødselsnummer
 
-            if (!harTilgangTilPerson(
-                    fødselsnummer = fødselsnummer,
-                    saksbehandler = saksbehandler,
+            if (!saksbehandler.harTilgangTilPerson(
+                    identitetsnummer = Identitetsnummer.fraString(identitetsnummer = fødselsnummer),
                     tilgangsgrupper = tilgangsgrupper,
                     transaksjon = transaksjon,
                 )

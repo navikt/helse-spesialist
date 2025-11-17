@@ -10,9 +10,9 @@ import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgradPeriode
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.SporingVurdertMinimumSykdomsgrad
 import no.nav.helse.spesialist.api.rest.resources.Personer
-import no.nav.helse.spesialist.api.rest.tilkommeninntekt.harTilgangTilPerson
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.logg.sikkerlogg
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import java.time.LocalDateTime
@@ -29,9 +29,8 @@ class PostArbeidstidsvurderingBehandler : PostBehandler<Personer.PersonPseudoId.
     ): RestResponse<Unit, ApiArbeidstidsvurderingErrorCode> {
         val fødselsnummer = request.fødselsnummer
 
-        if (!harTilgangTilPerson(
-                fødselsnummer = fødselsnummer,
-                saksbehandler = saksbehandler,
+        if (!saksbehandler.harTilgangTilPerson(
+                identitetsnummer = Identitetsnummer.fraString(identitetsnummer = fødselsnummer),
                 tilgangsgrupper = tilgangsgrupper,
                 transaksjon = transaksjon,
             )

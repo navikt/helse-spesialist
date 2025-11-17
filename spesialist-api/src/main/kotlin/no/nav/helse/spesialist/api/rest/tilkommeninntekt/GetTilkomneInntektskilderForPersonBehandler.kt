@@ -15,6 +15,7 @@ import no.nav.helse.spesialist.api.rest.ApiTilkommenInntektOpprettetEvent
 import no.nav.helse.spesialist.api.rest.ApiTilkommenInntektskilde
 import no.nav.helse.spesialist.api.rest.GetBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
+import no.nav.helse.spesialist.api.rest.harTilgangTilPerson
 import no.nav.helse.spesialist.api.rest.resources.Personer
 import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.domain.Saksbehandler
@@ -41,9 +42,8 @@ class GetTilkomneInntektskilderForPersonBehandler : GetBehandler<Personer.Person
             transaksjon.personPseudoIdDao.hentIdentitetsnummer(pseudoId)
                 ?: return RestResponse.Error(ApiGetTilkomneInntektskilderForPersonErrorCode.PERSON_IKKE_FUNNET)
 
-        if (!harTilgangTilPerson(
-                fødselsnummer = identitetsnummer.value,
-                saksbehandler = saksbehandler,
+        if (!saksbehandler.harTilgangTilPerson(
+                identitetsnummer = identitetsnummer,
                 tilgangsgrupper = tilgangsgrupper,
                 transaksjon = transaksjon,
             )
