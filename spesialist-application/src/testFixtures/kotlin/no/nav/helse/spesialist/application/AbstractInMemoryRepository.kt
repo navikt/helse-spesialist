@@ -15,8 +15,13 @@ abstract class AbstractInMemoryRepository<IDTYPE : ValueObject, T : AggregateRoo
     fun alle(): List<T> = data.map(::deepCopy)
 
     fun lagre(root: T) {
-        data.removeIf { it.id == root.id }
-        data.add(deepCopy(root))
+        if (root in data) {
+            val index = data.indexOf(root)
+            data.remove(root)
+            data.add(index, deepCopy(root))
+        } else {
+            data.add(deepCopy(root))
+        }
     }
 
     fun lagreAlle(roots: Collection<T>) {

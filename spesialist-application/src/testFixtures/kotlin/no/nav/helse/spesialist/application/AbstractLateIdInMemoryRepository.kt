@@ -18,10 +18,13 @@ abstract class AbstractLateIdInMemoryRepository<IDTYPE : ValueObject, T : LateId
 
     fun lagre(root: T) {
         if (root.harFåttTildeltId()) {
-            data.removeIf { it.id() == root.id() }
+            val index = data.indexOf(root)
+            data.remove(root)
+            data.add(index, deepCopy(root))
+        } else {
+            tildelIder(root)
+            data.add(deepCopy(root))
         }
-        tildelIder(root)
-        data.add(deepCopy(root))
     }
 
     fun lagreAlle(roots: Collection<T>) {
