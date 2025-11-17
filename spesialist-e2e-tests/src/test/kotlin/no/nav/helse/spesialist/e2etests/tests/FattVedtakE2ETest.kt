@@ -1,7 +1,10 @@
 package no.nav.helse.spesialist.e2etests.tests
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.github.navikt.tbd_libs.jackson.asLocalDateTime
 import no.nav.helse.modell.melding.VedtakFattetMelding
+import no.nav.helse.spesialist.application.testing.assertJsonEquals
+import no.nav.helse.spesialist.application.testing.assertMindreEnnNSekunderSiden
 import no.nav.helse.spesialist.domain.Periode.Companion.tilOgMed
 import no.nav.helse.spesialist.e2etests.AbstractE2EIntegrationTest
 import org.junit.jupiter.api.Test
@@ -238,6 +241,26 @@ class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
         assertEquals(null, saksbehandlerLøsning["kommentar"])
         assertEquals(beslutter.ident, saksbehandlerLøsning["beslutter"]["ident"].asText())
         assertEquals(beslutter.epost, saksbehandlerLøsning["beslutter"]["epostadresse"].asText())
+
+        // Sjekk at løsning på godkjenningsbehov ble publisert
+        val godkjenningsbehovLøsning = meldinger.single { it["@event_name"].asText() == "behov" && it["@behov"].first().asText() == "Godkjenning" && it["@løsning"] != null }
+        assertJsonEquals(
+            """
+                {
+                  "Godkjenning": {
+                    "godkjent": true,
+                    "saksbehandlerIdent": "${saksbehandler.ident}",
+                    "saksbehandlerEpost": "${saksbehandler.epost}",
+                    "automatiskBehandling": false,
+                    "saksbehandleroverstyringer": [],
+                    "refusjontype": "FULL_REFUSJON"
+                  }
+                }
+            """.trimIndent(),
+            godkjenningsbehovLøsning["@løsning"],
+            "Godkjenning.godkjenttidspunkt"
+        )
+        assertMindreEnnNSekunderSiden(30, godkjenningsbehovLøsning["@løsning"]["Godkjenning"]["godkjenttidspunkt"].asLocalDateTime())
     }
 
     @Test
@@ -305,6 +328,26 @@ class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
         assertEquals(null, saksbehandlerLøsning["begrunnelser"])
         assertEquals(null, saksbehandlerLøsning["kommentar"])
         assertEquals(null, saksbehandlerLøsning["beslutter"])
+
+        // Sjekk at løsning på godkjenningsbehov ble publisert
+        val godkjenningsbehovLøsning = meldinger.single { it["@event_name"].asText() == "behov" && it["@behov"].first().asText() == "Godkjenning" && it["@løsning"] != null }
+        assertJsonEquals(
+            """
+                {
+                  "Godkjenning": {
+                    "godkjent": true,
+                    "saksbehandlerIdent": "${saksbehandler.ident}",
+                    "saksbehandlerEpost": "${saksbehandler.epost}",
+                    "automatiskBehandling": false,
+                    "saksbehandleroverstyringer": [],
+                    "refusjontype": "FULL_REFUSJON"
+                  }
+                }
+            """.trimIndent(),
+            godkjenningsbehovLøsning["@løsning"],
+            "Godkjenning.godkjenttidspunkt"
+        )
+        assertMindreEnnNSekunderSiden(30, godkjenningsbehovLøsning["@løsning"]["Godkjenning"]["godkjenttidspunkt"].asLocalDateTime())
     }
 
     @ParameterizedTest
