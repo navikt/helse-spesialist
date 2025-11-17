@@ -186,6 +186,7 @@ fun lagVedtaksperiode(
     forkastet = forkastet
 )
 
+fun lagVarselId() = VarselId(UUID.randomUUID())
 fun lagVarsel(
     id: UUID = UUID.randomUUID(),
     behandlingUnikId: BehandlingUnikId,

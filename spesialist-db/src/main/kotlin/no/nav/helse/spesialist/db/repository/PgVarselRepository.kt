@@ -83,19 +83,30 @@ class PgVarselRepository private constructor(
     }
 
     override fun lagre(varsel: Varsel) {
-        dbQuery.update(
-            """
-            UPDATE selve_varsel 
-            SET status = :status, status_endret_ident = sb.ident, status_endret_tidspunkt = :tidspunkt, definisjon_ref = (SELECT id FROM api_varseldefinisjon WHERE unik_id = :definisjon_id LIMIT 1)
-            FROM saksbehandler sb WHERE sb.oid = :saksbehandler
-            AND unik_id = :unik_id
-            """.trimIndent(),
-            "status" to varsel.status.toString(),
-            "saksbehandler" to varsel.vurdering?.saksbehandlerId?.value,
-            "tidspunkt" to varsel.vurdering?.tidspunkt,
-            "unik_id" to varsel.id.value,
-            "definisjon_id" to varsel.vurdering?.vurdertDefinisjonId?.value,
-        )
+        val vurdering = varsel.vurdering
+        if (vurdering != null) {
+            dbQuery.update(
+                """
+                    UPDATE selve_varsel SET status = :status, status_endret_ident = sb.ident, status_endret_tidspunkt = :tidspunkt, definisjon_ref = (SELECT id FROM api_varseldefinisjon WHERE unik_id = :definisjon_id LIMIT 1)
+                    FROM saksbehandler sb WHERE sb.oid = :saksbehandler
+                    AND unik_id = :unik_id
+                """,
+                "status" to varsel.status.name,
+                "saksbehandler" to vurdering.saksbehandlerId.value,
+                "tidspunkt" to vurdering.tidspunkt,
+                "definisjon_id" to vurdering.vurdertDefinisjonId.value,
+                "unik_id" to varsel.id.value,
+            )
+        } else {
+            dbQuery.update(
+                """
+                    UPDATE selve_varsel SET status = :status, status_endret_ident = null, status_endret_tidspunkt = null, definisjon_ref = null
+                    WHERE unik_id = :unik_id
+                """,
+                "status" to varsel.status.name,
+                "unik_id" to varsel.id.value,
+            )
+        }
     }
 
     override fun lagre(varsler: List<Varsel>) {

@@ -7,9 +7,12 @@ import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.VarselId
 import no.nav.helse.spesialist.domain.VarseldefinisjonId
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
+import no.nav.helse.spesialist.domain.testfixtures.lagSpleisBehandlingId
+import no.nav.helse.spesialist.domain.testfixtures.lagVarselId
+import no.nav.helse.spesialist.domain.testfixtures.lagVarseldefinisjonId
+import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiodeId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
-import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandlerident
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
@@ -188,7 +191,7 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
         val spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID())
         val varselId = VarselId(UUID.randomUUID())
         val fødselsnummer = lagFødselsnummer()
-        val saksbehandlerIdent = lagSaksbehandlerident()
+        val saksbehandlerIdent = lagSaksbehandler().ident
         val saksbehandlerOid = SaksbehandlerOid(opprettSaksbehandler(ident = saksbehandlerIdent))
         val varseldefinisjonId = VarseldefinisjonId(UUID.randomUUID())
 
@@ -257,13 +260,13 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
     }
 
     @Test
-    fun `lagre varsel`(){
+    fun `lagre varsel med vurdering`(){
         // given
         val vedtaksperiodeId = VedtaksperiodeId(UUID.randomUUID())
         val spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID())
         val varselId = VarselId(UUID.randomUUID())
         val fødselsnummer = lagFødselsnummer()
-        val saksbehandlerIdent = lagSaksbehandlerident()
+        val saksbehandlerIdent = lagSaksbehandler().ident
         val saksbehandlerId = SaksbehandlerOid(opprettSaksbehandler(ident = saksbehandlerIdent))
         val definisjonId = VarseldefinisjonId(UUID.randomUUID())
         opprettPerson(fødselsnummer = fødselsnummer)
@@ -293,5 +296,46 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
         assertEquals(Varsel.Status.VURDERT, funnet.status)
         assertEquals(saksbehandlerId, oppdatert.vurdering?.saksbehandlerId)
         assertEquals(definisjonId, oppdatert.vurdering?.vurdertDefinisjonId)
+    }
+
+    @Test
+    fun `lagre varsel uten vurdering`(){
+        // given
+        val vedtaksperiodeId = lagVedtaksperiodeId()
+        val spleisBehandlingId = lagSpleisBehandlingId()
+        val varselId = lagVarselId()
+        val fødselsnummer = lagFødselsnummer()
+        val saksbehandlerIdent = lagSaksbehandler().ident
+        val saksbehandlerId = SaksbehandlerOid(opprettSaksbehandler(ident = saksbehandlerIdent))
+        val definisjonId = lagVarseldefinisjonId()
+        opprettPerson(fødselsnummer = fødselsnummer)
+        opprettArbeidsgiver()
+        opprettBehandling(
+            vedtaksperiodeId = vedtaksperiodeId.value,
+            spleisBehandlingId = spleisBehandlingId.value,
+            fødselsnummer = fødselsnummer,
+        )
+        nyttVarsel(
+            id = varselId.value,
+            vedtaksperiodeId = vedtaksperiodeId.value,
+            spleisBehandlingId = spleisBehandlingId.value,
+            saksbehandlerSomEndretId = saksbehandlerIdent,
+            status = "AKTIV",
+            definisjonRef = null,
+            kode = "RV_IV_1"
+        )
+
+        opprettVarseldefinisjon(kode = "RV_IV_1", definisjonId = definisjonId.value)
+        // when
+        val funnet = repository.finn(varselId) ?: error("Fant ikke varsel")
+        funnet.vurder(saksbehandlerId, definisjonId)
+        repository.lagre(funnet)
+        funnet.fjernVurdering()
+        repository.lagre(funnet)
+
+        // then
+        val oppdatert = repository.finn(funnet.id) ?: error("Fant ikke varsel")
+        assertEquals(Varsel.Status.AKTIV, funnet.status)
+        assertEquals(null, oppdatert.vurdering)
     }
 }
