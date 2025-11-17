@@ -11,8 +11,6 @@ import no.nav.helse.spesialist.api.rest.harTilgangTilPerson
 import no.nav.helse.spesialist.api.rest.resources.Varsler
 import no.nav.helse.spesialist.api.rest.varsler.GetVarselErrorCode.BEHANDLING_IKKE_FUNNET
 import no.nav.helse.spesialist.api.rest.varsler.GetVarselErrorCode.MANGLER_TILGANG_TIL_PERSON
-import no.nav.helse.spesialist.api.rest.varsler.GetVarselErrorCode.SAKSBEHANDLER_MANGLER
-import no.nav.helse.spesialist.api.rest.varsler.GetVarselErrorCode.UGYLDIG_VARSEL_STATUS
 import no.nav.helse.spesialist.api.rest.varsler.GetVarselErrorCode.VARSELDEFINISJON_MANGLER_FOR_KODE
 import no.nav.helse.spesialist.api.rest.varsler.GetVarselErrorCode.VARSELDEFINISJON_MANGLER_FOR_VURDERING
 import no.nav.helse.spesialist.api.rest.varsler.GetVarselErrorCode.VARSEL_IKKE_FUNNET
@@ -31,14 +29,17 @@ class GetVarselBehandler : GetBehandler<Varsler.VarselId, ApiVarsel, GetVarselEr
         transaksjon: SessionContext,
     ): RestResponse<ApiVarsel, GetVarselErrorCode> {
         val varselId = VarselId(resource.varselId)
-        val varsel = transaksjon.varselRepository.finn(varselId) ?: return RestResponse.Error(VARSEL_IKKE_FUNNET)
+        val varsel =
+            transaksjon.varselRepository.finn(varselId)
+                ?: return RestResponse.Error(VARSEL_IKKE_FUNNET)
+
         val behandling =
             transaksjon.behandlingRepository.finn(varsel.behandlingUnikId)
-                ?: return RestResponse.Error(BEHANDLING_IKKE_FUNNET)
+                ?: error("Fant ikke behandling")
 
         val vedtaksperiode =
             transaksjon.vedtaksperiodeRepository.finn(behandling.vedtaksperiodeId)
-                ?: return RestResponse.Error(VEDTAKSPERIODE_IKKE_FUNNET)
+                ?: error("Fant ikke vedtaksperiode")
 
         if (!saksbehandler.harTilgangTilPerson(
                 identitetsnummer = Identitetsnummer.fraString(vedtaksperiode.fødselsnummer),
@@ -72,13 +73,13 @@ class GetVarselBehandler : GetBehandler<Varsler.VarselId, ApiVarsel, GetVarselEr
                         Varsel.Status.AKTIV -> ApiVarsel.ApiVarselstatus.AKTIV
                         Varsel.Status.VURDERT -> ApiVarsel.ApiVarselstatus.VURDERT
                         Varsel.Status.GODKJENT -> ApiVarsel.ApiVarselstatus.GODKJENT
-                        else -> return RestResponse.Error(UGYLDIG_VARSEL_STATUS)
+                        else -> error("Varselet har en status som ikke er ment å vise til saksbehandler")
                     },
                 vurdering =
                     varsel.vurdering?.let { vurdering ->
                         val saksbehandler =
                             transaksjon.saksbehandlerRepository.finn(vurdering.saksbehandlerId)
-                                ?: return RestResponse.Error(SAKSBEHANDLER_MANGLER)
+                                ?: error("Finner ikke saksbehandler som vurderte varselet")
                         ApiVarsel.ApiVarselvurdering(
                             ident = saksbehandler.ident,
                             tidsstempel = vurdering.tidspunkt,
@@ -98,11 +99,7 @@ enum class GetVarselErrorCode(
     override val title: String,
 ) : ApiErrorCode {
     MANGLER_TILGANG_TIL_PERSON(HttpStatusCode.Forbidden, "Mangler tilgang til person"),
-    BEHANDLING_IKKE_FUNNET(HttpStatusCode.InternalServerError, "Fant ikke behandling"),
-    VEDTAKSPERIODE_IKKE_FUNNET(HttpStatusCode.InternalServerError, "Fant ikke vedtaksperiode"),
     VARSEL_IKKE_FUNNET(HttpStatusCode.NotFound, "Fant ikke varsel"),
     VARSELDEFINISJON_MANGLER_FOR_KODE(HttpStatusCode.InternalServerError, "Fant ikke varseldefinisjon for varselkode"),
     VARSELDEFINISJON_MANGLER_FOR_VURDERING(HttpStatusCode.InternalServerError, "Fant ikke varseldefinisjon for varselvurdering"),
-    SAKSBEHANDLER_MANGLER(HttpStatusCode.InternalServerError, "Fant ikke saksbehandler som vurderte varsel"),
-    UGYLDIG_VARSEL_STATUS(HttpStatusCode.InternalServerError, "Varselet har en status som impliserer at varselet ikke skal vises"),
 }

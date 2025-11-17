@@ -125,8 +125,7 @@ class GetVarselBehandlerIntegrationTest {
             {
               "type": "about:blank",
               "status": 500,
-              "title": "Fant ikke behandling",
-              "code": "BEHANDLING_IKKE_FUNNET" 
+              "title": "Internal Server Error"
             }
             """.trimIndent(),
             response.bodyAsJsonNode!!
@@ -157,8 +156,7 @@ class GetVarselBehandlerIntegrationTest {
             {
               "type": "about:blank",
               "status": 500,
-              "title": "Fant ikke vedtaksperiode",
-              "code": "VEDTAKSPERIODE_IKKE_FUNNET" 
+              "title": "Internal Server Error"
             }
             """.trimIndent(),
             response.bodyAsJsonNode!!
@@ -267,8 +265,7 @@ class GetVarselBehandlerIntegrationTest {
             {
               "type": "about:blank",
               "status": 500,
-              "title": "Fant ikke saksbehandler som vurderte varsel",
-              "code": "SAKSBEHANDLER_MANGLER"
+              "title": "Internal Server Error"
             }
             """.trimIndent(),
             response.bodyAsJsonNode!!
@@ -318,7 +315,7 @@ class GetVarselBehandlerIntegrationTest {
     }
 
     @ParameterizedTest
-    @EnumSource(Varsel.Status::class, names = ["INAKTIV", "AVVIKLET"], mode = EnumSource.Mode.INCLUDE)
+    @EnumSource(Varsel.Status::class, names = ["INAKTIV", "AVVIKLET", "AVVIST"], mode = EnumSource.Mode.INCLUDE)
     fun `gir 500 dersom varselet har en status som medfører at varselet ikke skal vises i Speil`(status: Varsel.Status) {
         // given
         val varseldefinisjon = lagVarseldefinisjon()
@@ -346,8 +343,7 @@ class GetVarselBehandlerIntegrationTest {
             {
               "type": "about:blank",
               "status": 500,
-              "title": "Varselet har en status som impliserer at varselet ikke skal vises",
-              "code": "UGYLDIG_VARSEL_STATUS"
+              "title": "Internal Server Error"
             }
             """.trimIndent(),
             response.bodyAsJsonNode!!
