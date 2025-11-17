@@ -133,23 +133,18 @@ class BehandlingOpprettetRiverIntegrationTest {
         val person = lagPerson()
             .also(sessionContext.personRepository::lagre)
 
-        val organisasjonsnummer = lagOrganisasjonsnummer()
-        val vedtaksperiode = lagVedtaksperiode(
-            identitetsnummer = person.id,
-            organisasjonsnummer = organisasjonsnummer
-        ).also(sessionContext.vedtaksperiodeRepository::lagre)
+        val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
+            .also(sessionContext.vedtaksperiodeRepository::lagre)
 
         val fom = LocalDate.now().minusMonths(3).withDayOfMonth(1)
         val tom = fom.withDayOfMonth(YearMonth.from(fom).lengthOfMonth())
-        val utbetalingId = UtbetalingId(UUID.randomUUID())
-        val tags = setOf("Tag 1", "Tag 2")
         val eksisterendeBehandling = lagBehandling(
             vedtaksperiodeId = vedtaksperiode.id,
             fom = fom,
             tom = tom,
             tilstand = Behandling.Tilstand.KlarTilBehandling,
-            tags = tags,
-            utbetalingId = utbetalingId,
+            tags = setOf("Tag 1", "Tag 2"),
+            utbetalingId = UtbetalingId(UUID.randomUUID()),
             yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
         ).also(sessionContext.behandlingRepository::lagre)
 
@@ -172,13 +167,13 @@ class BehandlingOpprettetRiverIntegrationTest {
         val behandling = sessionContext.behandlingRepository.alle().single()
         assertEquals(eksisterendeBehandling, behandling)
         assertEquals(vedtaksperiode.id, behandling.vedtaksperiodeId)
-        assertEquals(utbetalingId, behandling.utbetalingId)
-        assertEquals(tags, behandling.tags)
-        assertEquals(Behandling.Tilstand.KlarTilBehandling, behandling.tilstand)
-        assertEquals(fom, behandling.fom)
-        assertEquals(tom, behandling.tom)
-        assertEquals(fom, behandling.skjæringstidspunkt)
-        assertEquals(Yrkesaktivitetstype.ARBEIDSTAKER, behandling.yrkesaktivitetstype)
+        assertEquals(eksisterendeBehandling.utbetalingId, behandling.utbetalingId)
+        assertEquals(eksisterendeBehandling.tags, behandling.tags)
+        assertEquals(eksisterendeBehandling.tilstand, behandling.tilstand)
+        assertEquals(eksisterendeBehandling.fom, behandling.fom)
+        assertEquals(eksisterendeBehandling.tom, behandling.tom)
+        assertEquals(eksisterendeBehandling.fom, behandling.skjæringstidspunkt)
+        assertEquals(eksisterendeBehandling.yrkesaktivitetstype, behandling.yrkesaktivitetstype)
 
         val meldinger = testRapid.publiserteMeldingerUtenGenererteFelter()
         assertEquals(0, meldinger.size)
