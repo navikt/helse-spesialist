@@ -9,11 +9,11 @@ import no.nav.helse.spesialist.api.rest.PutBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.resources.Varsler
 import no.nav.helse.spesialist.api.rest.tilkommeninntekt.harTilgangTilPerson
-import no.nav.helse.spesialist.api.rest.varsler.PutVarselvurderingBehandlerError.MANGLER_TILGANG_TIL_PERSON
-import no.nav.helse.spesialist.api.rest.varsler.PutVarselvurderingBehandlerError.VARSEL_IKKE_FUNNET
-import no.nav.helse.spesialist.api.rest.varsler.PutVarselvurderingBehandlerError.VARSEL_KAN_IKKE_VURDERES
-import no.nav.helse.spesialist.api.rest.varsler.PutVarselvurderingBehandlerError.VARSEL_VURDERT_AV_ANNEN_SAKSBEHANDLER
-import no.nav.helse.spesialist.api.rest.varsler.PutVarselvurderingBehandlerError.VARSEL_VURDERT_MED_ANNEN_DEFINISJON
+import no.nav.helse.spesialist.api.rest.varsler.PutVarselvurderingErrorCode.MANGLER_TILGANG_TIL_PERSON
+import no.nav.helse.spesialist.api.rest.varsler.PutVarselvurderingErrorCode.VARSEL_IKKE_FUNNET
+import no.nav.helse.spesialist.api.rest.varsler.PutVarselvurderingErrorCode.VARSEL_KAN_IKKE_VURDERES
+import no.nav.helse.spesialist.api.rest.varsler.PutVarselvurderingErrorCode.VARSEL_VURDERT_AV_ANNEN_SAKSBEHANDLER
+import no.nav.helse.spesialist.api.rest.varsler.PutVarselvurderingErrorCode.VARSEL_VURDERT_MED_ANNEN_DEFINISJON
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.Varsel
@@ -21,7 +21,7 @@ import no.nav.helse.spesialist.domain.VarselId
 import no.nav.helse.spesialist.domain.VarseldefinisjonId
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 
-class PutVarselvurderingBehandler : PutBehandler<Varsler.VarselId.Vurdering, ApiVarselvurdering, Unit, PutVarselvurderingBehandlerError> {
+class PutVarselvurderingBehandler : PutBehandler<Varsler.VarselId.Vurdering, ApiVarselvurdering, Unit, PutVarselvurderingErrorCode> {
     override fun behandle(
         resource: Varsler.VarselId.Vurdering,
         request: ApiVarselvurdering,
@@ -29,7 +29,7 @@ class PutVarselvurderingBehandler : PutBehandler<Varsler.VarselId.Vurdering, Api
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
         outbox: Outbox,
-    ): RestResponse<Unit, PutVarselvurderingBehandlerError> {
+    ): RestResponse<Unit, PutVarselvurderingErrorCode> {
         val varselId = VarselId(resource.parent.varselId)
         val varseldefinisjonId = VarseldefinisjonId(request.definisjonId)
         val varsel =
@@ -75,7 +75,7 @@ class PutVarselvurderingBehandler : PutBehandler<Varsler.VarselId.Vurdering, Api
     }
 }
 
-enum class PutVarselvurderingBehandlerError(
+enum class PutVarselvurderingErrorCode(
     override val statusCode: HttpStatusCode,
     override val title: String,
 ) : ApiErrorCode {
