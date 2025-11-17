@@ -38,12 +38,13 @@ class Varsel private constructor(
 
     fun kanVurderes() = status == Status.AKTIV
 
-    fun manglerVurdering() = status == Status.AKTIV
+    fun manglerVurdering() = vurdering == null
 
     fun vurder(
         saksbehandlerOid: SaksbehandlerOid,
         definisjonId: VarseldefinisjonId,
     ) {
+        if (!kanVurderes()) error("Kan ikke vurderes, varselet er ikke aktivt")
         vurdering =
             Varselvurdering(
                 saksbehandlerId = saksbehandlerOid,
@@ -51,6 +52,12 @@ class Varsel private constructor(
                 vurdertDefinisjonId = definisjonId,
             )
         status = Status.VURDERT
+    }
+
+    fun fjernVurdering() {
+        if (status != Status.VURDERT) error("Kan ikke fjerne vurdering, varselet er ikke vurdert")
+        vurdering = null
+        status = Status.AKTIV
     }
 
     fun godkjenn() {

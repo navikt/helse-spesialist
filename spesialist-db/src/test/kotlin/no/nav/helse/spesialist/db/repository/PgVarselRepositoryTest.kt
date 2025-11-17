@@ -265,6 +265,7 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
         val fødselsnummer = lagFødselsnummer()
         val saksbehandlerIdent = lagSaksbehandlerident()
         val saksbehandlerId = SaksbehandlerOid(opprettSaksbehandler(ident = saksbehandlerIdent))
+        val definisjonId = VarseldefinisjonId(UUID.randomUUID())
         opprettPerson(fødselsnummer = fødselsnummer)
         opprettArbeidsgiver()
         opprettBehandling(
@@ -277,18 +278,20 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
             vedtaksperiodeId = vedtaksperiodeId.value,
             spleisBehandlingId = spleisBehandlingId.value,
             saksbehandlerSomEndretId = saksbehandlerIdent,
-            status = "VURDERT",
-            definisjonRef = opprettVarseldefinisjon(kode = "RV_IV_1", definisjonId = UUID.randomUUID())
+            status = "AKTIV",
+            definisjonRef = null
         )
 
+        opprettVarseldefinisjon(kode = "RV_IV_1", definisjonId = definisjonId.value)
         // when
         val funnet = repository.finnVarsler(listOf(spleisBehandlingId)).single()
-        assertEquals(Varsel.Status.VURDERT, funnet.status)
-        funnet.godkjenn()
+        funnet.vurder(saksbehandlerId, definisjonId)
         repository.lagre(funnet)
 
+        // then
         val oppdatert = repository.finnVarsler(listOf(spleisBehandlingId)).single()
-        assertEquals(Varsel.Status.GODKJENT, oppdatert.status)
+        assertEquals(Varsel.Status.VURDERT, funnet.status)
         assertEquals(saksbehandlerId, oppdatert.vurdering?.saksbehandlerId)
+        assertEquals(definisjonId, oppdatert.vurdering?.vurdertDefinisjonId)
     }
 }

@@ -20,6 +20,7 @@ import no.nav.helse.spesialist.api.rest.dokument.GetSoknadBehandler
 import no.nav.helse.spesialist.api.rest.tilkommeninntekt.GetTilkomneInntektskilderForPersonBehandler
 import no.nav.helse.spesialist.api.rest.tilkommeninntekt.PatchTilkommenInntektBehandler
 import no.nav.helse.spesialist.api.rest.tilkommeninntekt.PostTilkomneInntekterBehandler
+import no.nav.helse.spesialist.api.rest.varsler.DeleteVarselvurderingBehandler
 import no.nav.helse.spesialist.api.rest.varsler.GetVarselBehandler
 import no.nav.helse.spesialist.api.rest.varsler.PutVarselvurderingBehandler
 
@@ -60,6 +61,7 @@ fun Routing.restRoutes(
 
             get(GetVarselBehandler(), restAdapter)
             put(PutVarselvurderingBehandler(), restAdapter)
+            delete(DeleteVarselvurderingBehandler(), restAdapter)
 
             post(PostBehandlingNotaterBehandler(), restAdapter)
         }

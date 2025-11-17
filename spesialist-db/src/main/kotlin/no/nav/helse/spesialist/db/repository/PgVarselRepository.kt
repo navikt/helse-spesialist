@@ -86,7 +86,7 @@ class PgVarselRepository private constructor(
         dbQuery.update(
             """
             UPDATE selve_varsel 
-            SET status = :status, status_endret_ident = sb.ident, status_endret_tidspunkt = :tidspunkt
+            SET status = :status, status_endret_ident = sb.ident, status_endret_tidspunkt = :tidspunkt, definisjon_ref = (SELECT id FROM api_varseldefinisjon WHERE unik_id = :definisjon_id LIMIT 1)
             FROM saksbehandler sb WHERE sb.oid = :saksbehandler
             AND unik_id = :unik_id
             """.trimIndent(),
@@ -94,6 +94,7 @@ class PgVarselRepository private constructor(
             "saksbehandler" to varsel.vurdering?.saksbehandlerId?.value,
             "tidspunkt" to varsel.vurdering?.tidspunkt,
             "unik_id" to varsel.id.value,
+            "definisjon_id" to varsel.vurdering?.vurdertDefinisjonId?.value,
         )
     }
 

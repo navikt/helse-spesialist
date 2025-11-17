@@ -26,7 +26,7 @@ import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class PutVarselvurderingBehandlerTest {
+class PutVarselvurderingBehandlerIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
     private val sessionContext = integrationTestFixture.sessionFactory.sessionContext
     private val saksbehandlerRepository = sessionContext.saksbehandlerRepository

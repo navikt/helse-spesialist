@@ -5,7 +5,9 @@ import no.nav.helse.spesialist.domain.testfixtures.lagEnBehandlingUnikId
 import no.nav.helse.spesialist.domain.testfixtures.lagEnSaksbehandler
 import no.nav.helse.spesialist.domain.testfixtures.lagEnSpleisBehandlingId
 import no.nav.helse.spesialist.domain.testfixtures.lagEnVarseldefinisjon
+import no.nav.helse.spesialist.domain.testfixtures.lagEnVarseldefinisjonId
 import no.nav.helse.spesialist.domain.testfixtures.lagEtVarsel
+import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlerOid
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.assertThrows
@@ -93,21 +95,24 @@ class VarselTest {
         assertTrue(varsel.manglerVurdering())
     }
 
-    @ParameterizedTest
-    @EnumSource(Varsel.Status::class, names = ["AKTIV"], mode = EnumSource.Mode.EXCLUDE)
-    fun `varsel mangler ikke vurdering`(status: Varsel.Status) {
+    @Test
+    fun `varsel mangler ikke vurdering`() {
         // given
         val varsel = Varsel.fraLagring(
             id = VarselId(value = UUID.randomUUID()),
             spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
             behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
-            status = status,
-            vurdering = null,
+            status = Varsel.Status.VURDERT,
+            vurdering = Varselvurdering(
+                lagSaksbehandlerOid(),
+                LocalDateTime.now(),
+                lagEnVarseldefinisjonId()
+            ),
             kode = "RV_IV_2",
             opprettetTidspunkt = LocalDateTime.now(),
         )
 
-        // then
+        // when, then
         assertFalse(varsel.manglerVurdering())
     }
 
