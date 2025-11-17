@@ -9,7 +9,7 @@ fun lagSaksbehandler(
     id: SaksbehandlerOid = SaksbehandlerOid(UUID.randomUUID()),
     navn: String = listOfNotNull(lagFornavn(), lagMellomnavnOrNull(), lagEtternavn()).joinToString(separator = " "),
     epost: String = navn.split(" ").joinToString(".").lowercase() + "@nav.no",
-    ident: String = ('A'..'Z').random() + "${Random.nextInt(from = 100_000, until = 999_999)}",
+    ident: String = navn.substringAfterLast(' ').first() + "${Random.nextInt(from = 200_000, until = 999_999)}",
 ): Saksbehandler = Saksbehandler(
     id = id,
     navn = navn,
