@@ -1,9 +1,9 @@
 package no.nav.helse.spesialist.db.dao
 
+import no.nav.helse.spesialist.application.testing.assertAtLeast
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.Fødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.assertThrows
 import java.time.Duration
 import java.time.temporal.ChronoUnit
@@ -43,9 +43,5 @@ class PgPersonPseudoIdDaoTest : AbstractDBIntegrationTest() {
             }
         }
         assertEquals(rollbackMessage, exception.message)
-    }
-
-    private fun assertAtLeast(expectedMinimum: Int, actual: Int) {
-        assertTrue(actual >= expectedMinimum) { "Forventet minst $expectedMinimum, men var $actual" }
     }
 }

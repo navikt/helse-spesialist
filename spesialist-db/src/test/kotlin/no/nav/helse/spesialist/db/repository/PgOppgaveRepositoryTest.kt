@@ -4,18 +4,17 @@ import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.oppgave.Egenskap.PÅ_VENT
 import no.nav.helse.modell.oppgave.Egenskap.SØKNAD
 import no.nav.helse.modell.oppgave.Oppgave
+import no.nav.helse.spesialist.application.testing.assertEqualsByMicrosecond
+import no.nav.helse.spesialist.application.testing.assertNotEqualsByMicrosecond
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
-import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
 import java.util.UUID
 import kotlin.random.Random.Default.nextLong
 import kotlin.test.assertEquals
-import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 
 class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
@@ -436,18 +435,5 @@ class PgOppgaveRepositoryTest: AbstractDBIntegrationTest() {
         assertEquals(expected.ferdigstiltAvOid, actual.ferdigstiltAvOid)
         assertEquals(expected.egenskaper, actual.egenskaper)
         assertEquals(expected.tildeltTil, actual.tildeltTil)
-    }
-
-    private fun assertEqualsByMicrosecond(expected: LocalDateTime?, actual: LocalDateTime?) {
-        assertEquals(expected?.roundToMicros(), actual?.roundToMicros())
-    }
-
-    private fun assertNotEqualsByMicrosecond(expected: LocalDateTime?, actual: LocalDateTime?) {
-        assertNotEquals(expected?.roundToMicros(), actual?.roundToMicros())
-    }
-
-    private fun LocalDateTime.roundToMicros(): LocalDateTime {
-        val roundUp = (this.nano % 1000) >= 500
-        return truncatedTo(ChronoUnit.MICROS).plus(if (roundUp) 1 else 0, ChronoUnit.MICROS)
     }
 }

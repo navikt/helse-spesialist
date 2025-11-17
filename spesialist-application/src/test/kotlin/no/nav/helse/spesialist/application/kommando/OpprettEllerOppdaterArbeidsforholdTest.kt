@@ -7,6 +7,8 @@ import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.OpprettEllerOppdaterArbeidsforhold
 import no.nav.helse.modell.melding.Behov
+import no.nav.helse.spesialist.application.testing.assertIFortiden
+import no.nav.helse.spesialist.application.testing.assertMindreEnnNSekunderSiden
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -188,19 +190,5 @@ class OpprettEllerOppdaterArbeidsforholdTest {
         assertEquals(STILLINGSPROSENT, actual.stillingsprosent)
         assertIFortiden(actual.oppdatert)
         assertMindreEnnNSekunderSiden(5, actual.oppdatert)
-    }
-
-    private fun assertIFortiden(actual: LocalDateTime) {
-        val now = LocalDateTime.now()
-        assertTrue(actual.isBefore(now)) {
-            "Forventet at tidspunktet var i fortiden (i forhold til nå: $now), men det var $actual"
-        }
-    }
-
-    private fun assertMindreEnnNSekunderSiden(@Suppress("SameParameterValue") sekunder: Int, actual: LocalDateTime) {
-        val now = LocalDateTime.now()
-        assertTrue(actual.isAfter(now.minusSeconds(sekunder.toLong()))) {
-            "Forventet at tidspunktet var innenfor $sekunder sekunder tilbake i tid (i forhold til nå: $now), men det var $actual"
-        }
     }
 }

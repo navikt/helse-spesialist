@@ -4,6 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveSorteringsfelt
+import no.nav.helse.spesialist.application.testing.assertAfter
+import no.nav.helse.spesialist.application.testing.assertAtLeast
+import no.nav.helse.spesialist.application.testing.assertIsNumber
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.e2etests.AbstractE2EIntegrationTest
@@ -384,25 +387,5 @@ class OppgavelisteE2ETest : AbstractE2EIntegrationTest() {
             forventetDukketOpp = true,
             sorteringsfelt = sorteringsfelt
         )
-    }
-
-    private fun assertIsNumber(actual: JsonNode?) {
-        assertTrue(actual?.takeUnless { it.isNull }?.isNumber == true)
-    }
-
-    private fun assertAfter(expectedAfter: Instant, actual: Instant) {
-        assertTrue(actual.isAfter(expectedAfter)) { "Forventet tidspunkt etter $expectedAfter, men var $actual" }
-    }
-
-    private fun assertAfter(expectedAfter: LocalDateTime, actual: LocalDateTime) {
-        assertTrue(actual.isAfter(expectedAfter)) { "Forventet tidspunkt etter $expectedAfter, men var $actual" }
-    }
-
-    private fun assertAtLeast(expectedMinimum: Long, actual: Long) {
-        assertTrue(actual >= expectedMinimum) { "Forventet minst $expectedMinimum, men var $actual" }
-    }
-
-    private fun assertAtLeast(expectedMinimum: Int, actual: Int) {
-        assertTrue(actual >= expectedMinimum) { "Forventet minst $expectedMinimum, men var $actual" }
     }
 }
