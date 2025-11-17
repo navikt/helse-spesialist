@@ -1,7 +1,6 @@
 package no.nav.helse.spesialist.api
 
 import com.fasterxml.jackson.databind.JsonNode
-import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.accept
 import io.ktor.client.request.bearerAuth
@@ -64,39 +63,6 @@ class IntegrationTestFixture() {
         snapshothenter = mockk(relaxed = true),
         reservasjonshenter = mockk(relaxed = true),
     )
-
-    fun executeQuery(
-        @Language("GraphQL") query: String,
-        saksbehandler: Saksbehandler = lagSaksbehandler(),
-        tilgangsgrupper: Set<Tilgangsgruppe> = emptySet(),
-    ): JsonNode {
-        lateinit var responseJson: JsonNode
-
-        testApplication {
-            application {
-                apiModule.setUpApi(this)
-            }
-
-            client = createClient {
-                install(ContentNegotiation) {
-                    register(ContentType.Application.Json, JacksonConverter(objectMapper))
-                }
-            }
-
-            runBlocking {
-                logg.info("Posting query: $query")
-                responseJson = client.post("/graphql") {
-                    contentType(ContentType.Application.Json)
-                    accept(ContentType.Application.Json)
-                    bearerAuth(apiModuleIntegrationTestFixture.token(saksbehandler, tilgangsgrupper))
-                    setBody(mapOf("query" to query))
-                }.body<JsonNode>()
-                logg.info("Got response: $responseJson")
-            }
-        }
-
-        return responseJson
-    }
 
     class Response(
         val status: Int,
