@@ -3,7 +3,7 @@ package no.nav.helse.spesialist.db.repository
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.testfixtures.jan
-import no.nav.helse.spesialist.domain.testfixtures.lagEnBehandling
+import no.nav.helse.spesialist.domain.testfixtures.lagBehandling
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import org.junit.jupiter.api.Test
 import java.util.UUID
@@ -147,7 +147,7 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
 
         // when
         val funnet = repository.finnAndreBehandlingerISykefraværstilfelle(
-            lagEnBehandling(tags = emptySet()),
+            lagBehandling(tags = emptySet(), fom = 1.jan(2018)),
             fødselsnummer = fødselsnummer
         ).map { it.spleisBehandlingId!!.value }
 
@@ -184,7 +184,7 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
 
         // when
         val funnet = repository.finnAndreBehandlingerISykefraværstilfelle(
-            lagEnBehandling(tags = emptySet(), skjæringstidspunkt = 2 jan 2018),
+            lagBehandling(tags = emptySet(), skjæringstidspunkt = 2 jan 2018),
             fødselsnummer = fødselsnummer
         )
 
@@ -210,7 +210,7 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
 
         // when
         val funnet = repository.finnAndreBehandlingerISykefraværstilfelle(
-            lagEnBehandling(tags = emptySet()),
+            lagBehandling(tags = emptySet()),
             fødselsnummer = lagFødselsnummer()
         )
 

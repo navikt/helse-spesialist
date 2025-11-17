@@ -52,7 +52,7 @@ class PutVarselvurderingBehandler : PutBehandler<Varsler.VarselId.Vurdering, Api
             val eksisterendeVurdering =
                 varsel.vurdering
                     ?: error("Fant ikke varselvurdering for varsel som er vurdert")
-            if (eksisterendeVurdering.saksbehandlerId != saksbehandler.id()) {
+            if (eksisterendeVurdering.saksbehandlerId != saksbehandler.id) {
                 return RestResponse.Error(VARSEL_VURDERT_AV_ANNEN_SAKSBEHANDLER)
             }
             if (eksisterendeVurdering.vurdertDefinisjonId != varseldefinisjonId) {
@@ -65,7 +65,7 @@ class PutVarselvurderingBehandler : PutBehandler<Varsler.VarselId.Vurdering, Api
             return RestResponse.Error(VARSEL_KAN_IKKE_VURDERES)
         }
 
-        varsel.vurder(saksbehandler.id(), varseldefinisjonId)
+        varsel.vurder(saksbehandler.id, varseldefinisjonId)
         transaksjon.varselRepository.lagre(varsel)
         return RestResponse.OK(Unit)
     }

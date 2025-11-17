@@ -1,13 +1,12 @@
 package no.nav.helse.spesialist.domain
 
 import no.nav.helse.Varselvurdering
-import no.nav.helse.spesialist.domain.testfixtures.lagEnBehandlingUnikId
-import no.nav.helse.spesialist.domain.testfixtures.lagEnSaksbehandler
-import no.nav.helse.spesialist.domain.testfixtures.lagEnSpleisBehandlingId
-import no.nav.helse.spesialist.domain.testfixtures.lagEnVarseldefinisjon
-import no.nav.helse.spesialist.domain.testfixtures.lagEnVarseldefinisjonId
-import no.nav.helse.spesialist.domain.testfixtures.lagEtVarsel
-import no.nav.helse.spesialist.domain.testfixtures.lagSaksbehandlerOid
+import no.nav.helse.spesialist.domain.testfixtures.lagBehandlingUnikId
+import no.nav.helse.spesialist.domain.testfixtures.lagSpleisBehandlingId
+import no.nav.helse.spesialist.domain.testfixtures.lagVarsel
+import no.nav.helse.spesialist.domain.testfixtures.lagVarseldefinisjon
+import no.nav.helse.spesialist.domain.testfixtures.lagVarseldefinisjonId
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.assertThrows
@@ -24,7 +23,8 @@ class VarselTest {
     @EnumSource(Varsel.Status::class, names = ["AKTIV"], mode = EnumSource.Mode.EXCLUDE)
     fun `varsel kan ikke vurderes hvis det ikke er aktivt`(status: Varsel.Status) {
         // given
-        val varsel = lagEtVarsel(behandlingUnikId = lagEnBehandlingUnikId(), spleisBehandlingId = lagEnSpleisBehandlingId(), status = status)
+        val varsel =
+            lagVarsel(behandlingUnikId = lagBehandlingUnikId(), spleisBehandlingId = lagSpleisBehandlingId(), status = status)
 
         // when
         val kanVurderes = varsel.kanVurderes()
@@ -36,7 +36,8 @@ class VarselTest {
     @Test
     fun `varsel kan vurderes hvis det er aktivt`() {
         // given
-        val varsel = lagEtVarsel(behandlingUnikId = lagEnBehandlingUnikId(), spleisBehandlingId = lagEnSpleisBehandlingId(), status = Varsel.Status.AKTIV)
+        val varsel =
+            lagVarsel(behandlingUnikId = lagBehandlingUnikId(), spleisBehandlingId = lagSpleisBehandlingId(), status = Varsel.Status.AKTIV)
 
         // when
         val kanVurderes = varsel.kanVurderes()
@@ -48,17 +49,17 @@ class VarselTest {
     @Test
     fun `varsel kan vurderes`() {
         // given
-        val definisjon = lagEnVarseldefinisjon()
-        val saksbehandler = lagEnSaksbehandler()
-        val varsel = lagEtVarsel(behandlingUnikId = lagEnBehandlingUnikId(), spleisBehandlingId = lagEnSpleisBehandlingId())
+        val definisjon = lagVarseldefinisjon()
+        val saksbehandler = lagSaksbehandler()
+        val varsel = lagVarsel(behandlingUnikId = lagBehandlingUnikId(), spleisBehandlingId = lagSpleisBehandlingId())
 
         // when
-        varsel.vurder(saksbehandler.id(), definisjon.id())
+        varsel.vurder(saksbehandler.id, definisjon.id)
 
         // then
         assertEquals(Varsel.Status.VURDERT, varsel.status)
-        assertEquals(saksbehandler.id(), varsel.vurdering?.saksbehandlerId)
-        assertEquals(definisjon.id(), varsel.vurdering?.vurdertDefinisjonId)
+        assertEquals(saksbehandler.id, varsel.vurdering?.saksbehandlerId)
+        assertEquals(definisjon.id, varsel.vurdering?.vurdertDefinisjonId)
     }
 
     @Test
@@ -104,9 +105,9 @@ class VarselTest {
             behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
             status = Varsel.Status.VURDERT,
             vurdering = Varselvurdering(
-                lagSaksbehandlerOid(),
+                lagSaksbehandler().id,
                 LocalDateTime.now(),
-                lagEnVarseldefinisjonId()
+                lagVarseldefinisjonId()
             ),
             kode = "RV_IV_2",
             opprettetTidspunkt = LocalDateTime.now(),

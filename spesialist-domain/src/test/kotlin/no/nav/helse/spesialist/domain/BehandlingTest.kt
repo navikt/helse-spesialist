@@ -1,7 +1,7 @@
 package no.nav.helse.spesialist.domain
 
 import no.nav.helse.modell.vedtak.Utfall
-import no.nav.helse.spesialist.domain.testfixtures.lagEnBehandling
+import no.nav.helse.spesialist.domain.testfixtures.lagBehandling
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
@@ -17,14 +17,14 @@ class BehandlingTest {
     @ParameterizedTest()
     @MethodSource("utfallGittTagsSource")
     fun `tags gir utfall`(tags: Set<String>, expected: Utfall) {
-        val behandling = lagEnBehandling(tags = tags)
+        val behandling = lagBehandling(tags = tags)
         assertEquals(expected, behandling.utfall())
     }
 
     @ParameterizedTest
     @MethodSource("exceptionGittTagsSource")
     fun `tags gir exception`(tags: Set<String>) {
-        val behandling = lagEnBehandling(tags = tags)
+        val behandling = lagBehandling(tags = tags)
         assertThrows<IllegalStateException> {
             behandling.utfall()
         }
@@ -33,14 +33,14 @@ class BehandlingTest {
     @Test
     fun `behandlingen overlapper med infotrygd`() {
         val tags = setOf("OverlapperMedInfotrygd")
-        val behandling = lagEnBehandling(tags = tags)
+        val behandling = lagBehandling(tags = tags)
         assertTrue(behandling.overlapperMedInfotrygd())
     }
 
     @Test
     fun `behandlingen overlapper ikke med infotrygd`() {
         val tags = setOf("Innvilget")
-        val behandling = lagEnBehandling(tags = tags)
+        val behandling = lagBehandling(tags = tags)
         assertFalse(behandling.overlapperMedInfotrygd())
     }
 

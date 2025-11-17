@@ -1,21 +1,19 @@
 package no.nav.helse.spesialist.api.rest
 
 import io.ktor.http.HttpStatusCode
+import no.nav.helse.Varselvurdering
 import no.nav.helse.modell.melding.VarselEndret
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
-import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
-import no.nav.helse.spesialist.domain.Identitetsnummer
+import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.Varsel
-import no.nav.helse.spesialist.domain.VarselId
-import no.nav.helse.spesialist.domain.testfixtures.lagEnBehandling
-import no.nav.helse.spesialist.domain.testfixtures.lagEnVedtaksperiode
+import no.nav.helse.spesialist.domain.testfixtures.lagBehandling
 import no.nav.helse.spesialist.domain.testfixtures.lagOppgave
-import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
+import no.nav.helse.spesialist.domain.testfixtures.lagSpleisBehandlingId
+import no.nav.helse.spesialist.domain.testfixtures.lagVarsel
 import no.nav.helse.spesialist.domain.testfixtures.lagVarseldefinisjon
 import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiode
-import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
@@ -62,16 +60,16 @@ class PostFattVedtakIntegrationTest {
     @Test
     fun `gir NotFound hvis vedtaksperioden ikke finnes`() {
         // Given:
-        val behandlingId = UUID.randomUUID()
         val saksbehandler = lagSaksbehandler()
+        val behandlingId = lagSpleisBehandlingId()
         val behandling =
-            lagEnBehandling(spleisBehandlingId = behandlingId)
+            lagBehandling(spleisBehandlingId = behandlingId)
         sessionContext.behandlingRepository.lagre(behandling)
         sessionContext.saksbehandlerRepository.lagre(saksbehandler)
 
         // When:
         val response = integrationTestFixture.post(
-            url = "/api/vedtak/$behandlingId/fatt",
+            url = "/api/vedtak/${behandlingId.value}/fatt",
             body = "{}",
             saksbehandler = saksbehandler,
         )
@@ -94,11 +92,10 @@ class PostFattVedtakIntegrationTest {
     @Test
     fun `gir forbidden hvis saksbehandler ikke har tilgang til personen`() {
         // Given:
-        val behandlingId = UUID.randomUUID()
         val person = lagPerson(erEgenAnsatt = true)
             .also(sessionContext.personRepository::lagre)
         val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
-        val behandling = lagEnBehandling(spleisBehandlingId = behandlingId, vedtaksperiodeId = vedtaksperiode.id)
+        val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
         val saksbehandler = lagSaksbehandler()
         sessionContext.saksbehandlerRepository.lagre(saksbehandler)
         sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
@@ -106,7 +103,7 @@ class PostFattVedtakIntegrationTest {
 
         // When:
         val response = integrationTestFixture.post(
-            url = "/api/vedtak/$behandlingId/fatt",
+            url = "/api/vedtak/${behandling.spleisBehandlingId?.value}/fatt",
             body = "{}",
             saksbehandler = saksbehandler,
         )
@@ -118,11 +115,10 @@ class PostFattVedtakIntegrationTest {
     @Test
     fun `gir bad request hvis oppgaven ikke finnes`() {
         // Given:
-        val behandlingId = UUID.randomUUID()
         val person = lagPerson()
             .also(sessionContext.personRepository::lagre)
         val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
-        val behandling = lagEnBehandling(spleisBehandlingId = behandlingId, vedtaksperiodeId = vedtaksperiode.id)
+        val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
         val saksbehandler = lagSaksbehandler()
         sessionContext.saksbehandlerRepository.lagre(saksbehandler)
         sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
@@ -130,7 +126,7 @@ class PostFattVedtakIntegrationTest {
 
         // When:
         val response = integrationTestFixture.post(
-            url = "/api/vedtak/$behandlingId/fatt",
+            url = "/api/vedtak/${behandling.spleisBehandlingId?.value}/fatt",
             body = "{}",
             saksbehandler = saksbehandler,
         )
@@ -153,23 +149,19 @@ class PostFattVedtakIntegrationTest {
     @Test
     fun `gir bad request hvis oppgaven ikke avventer saksbehandler`() {
         // Given:
-        val behandlingId = UUID.randomUUID()
-        val fødselsnummer = lagFødselsnummer()
-        val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer, lagOrganisasjonsnummer())
-        val behandling = lagEnBehandling(spleisBehandlingId = behandlingId, vedtaksperiodeId = vedtaksperiode.id)
+        val person = lagPerson().also(sessionContext.personRepository::lagre)
+        val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
+        val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
         val saksbehandler = lagSaksbehandler()
         sessionContext.saksbehandlerRepository.lagre(saksbehandler)
         sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
         sessionContext.behandlingRepository.lagre(behandling)
-        lagPerson(
-            id = Identitetsnummer.fraString(fødselsnummer)
-        ).also(sessionContext.personRepository::lagre)
-        val oppgave = lagOppgave(behandlingId)
+        val oppgave = lagOppgave(behandling.spleisBehandlingId!!)
         oppgave.avventerSystem(saksbehandler.ident, UUID.randomUUID())
         sessionContext.oppgaveRepository.lagre(oppgave)
         // When:
         val response = integrationTestFixture.post(
-            url = "/api/vedtak/$behandlingId/fatt",
+            url = "/api/vedtak/${behandling.spleisBehandlingId?.value}/fatt",
             body = "{}",
             saksbehandler = saksbehandler,
         )
@@ -192,32 +184,28 @@ class PostFattVedtakIntegrationTest {
     @Test
     fun `gir forbidden hvis saksbehandler mangler besluttertilgang`() {
         // Given:
-        val behandlingId = UUID.randomUUID()
-        val fødselsnummer = lagFødselsnummer()
-        val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer, lagOrganisasjonsnummer())
-        val behandling = lagEnBehandling(spleisBehandlingId = behandlingId, vedtaksperiodeId = vedtaksperiode.id)
+        val person = lagPerson().also(sessionContext.personRepository::lagre)
+        val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
+        val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
+
         val saksbehandler = lagSaksbehandler()
         sessionContext.saksbehandlerRepository.lagre(saksbehandler)
         sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
         sessionContext.behandlingRepository.lagre(behandling)
-        lagPerson(
-            id = Identitetsnummer.fraString(fødselsnummer)
-        ).also(sessionContext.personRepository::lagre)
-        val oppgave = lagOppgave(behandlingId)
+        val oppgave = lagOppgave(behandling.spleisBehandlingId!!)
         sessionContext.oppgaveRepository.lagre(oppgave)
 
-        val totrinnsvurdering = Totrinnsvurdering.ny(fødselsnummer = fødselsnummer)
+        val totrinnsvurdering = Totrinnsvurdering.ny(fødselsnummer = person.id.value)
         totrinnsvurdering.sendTilBeslutter(oppgave.id, SaksbehandlerOid(UUID.randomUUID()))
         sessionContext.totrinnsvurderingRepository.lagre(totrinnsvurdering)
 
         // When:
         val response = integrationTestFixture.post(
-            url = "/api/vedtak/$behandlingId/fatt",
+            url = "/api/vedtak/${behandling.spleisBehandlingId?.value}/fatt",
             body = "{}",
             saksbehandler = saksbehandler,
             tilgangsgrupper = emptySet()
         )
-
 
         // Then:
         assertEquals(HttpStatusCode.Forbidden.value, response.status)
@@ -237,27 +225,23 @@ class PostFattVedtakIntegrationTest {
     @Test
     fun `gir forbidden hvis saksbehandler prøver å beslutte egen oppgave`() {
         // Given:
-        val behandlingId = UUID.randomUUID()
-        val fødselsnummer = lagFødselsnummer()
-        val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer, lagOrganisasjonsnummer())
-        val behandling = lagEnBehandling(spleisBehandlingId = behandlingId, vedtaksperiodeId = vedtaksperiode.id)
+        val person = lagPerson().also(sessionContext.personRepository::lagre)
+        val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
+        val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
         val saksbehandler = lagSaksbehandler()
         sessionContext.saksbehandlerRepository.lagre(saksbehandler)
         sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
         sessionContext.behandlingRepository.lagre(behandling)
-        lagPerson(
-            id = Identitetsnummer.fraString(fødselsnummer)
-        ).also(sessionContext.personRepository::lagre)
-        val oppgave = lagOppgave(behandlingId)
+        val oppgave = lagOppgave(behandling.spleisBehandlingId!!)
         sessionContext.oppgaveRepository.lagre(oppgave)
 
-        val totrinnsvurdering = Totrinnsvurdering.ny(fødselsnummer = fødselsnummer)
+        val totrinnsvurdering = Totrinnsvurdering.ny(fødselsnummer = person.id.value)
         totrinnsvurdering.sendTilBeslutter(oppgave.id, saksbehandler.id)
         sessionContext.totrinnsvurderingRepository.lagre(totrinnsvurdering)
 
         // When:
         val response = integrationTestFixture.post(
-            url = "/api/vedtak/$behandlingId/fatt",
+            url = "/api/vedtak/${behandling.spleisBehandlingId?.value}/fatt",
             body = "{}",
             saksbehandler = saksbehandler,
             tilgangsgrupper = setOf(Tilgangsgruppe.BESLUTTER)
@@ -281,26 +265,22 @@ class PostFattVedtakIntegrationTest {
     @Test
     fun `gir conflict hvis totrinnsvurdering mangler beslutter`() {
         // Given:
-        val behandlingId = UUID.randomUUID()
-        val fødselsnummer = lagFødselsnummer()
-        val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer, lagOrganisasjonsnummer())
-        val behandling = lagEnBehandling(spleisBehandlingId = behandlingId, vedtaksperiodeId = vedtaksperiode.id)
+        val person = lagPerson().also(sessionContext.personRepository::lagre)
+        val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
+        val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
         val saksbehandler = lagSaksbehandler()
         sessionContext.saksbehandlerRepository.lagre(saksbehandler)
         sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
         sessionContext.behandlingRepository.lagre(behandling)
-        lagPerson(
-            id = Identitetsnummer.fraString(fødselsnummer)
-        ).also(sessionContext.personRepository::lagre)
-        val oppgave = lagOppgave(behandlingId)
+        val oppgave = lagOppgave(behandling.spleisBehandlingId!!)
         sessionContext.oppgaveRepository.lagre(oppgave)
 
-        val totrinnsvurdering = Totrinnsvurdering.ny(fødselsnummer = fødselsnummer)
+        val totrinnsvurdering = Totrinnsvurdering.ny(person.id.value)
         sessionContext.totrinnsvurderingRepository.lagre(totrinnsvurdering)
 
         // When:
         val response = integrationTestFixture.post(
-            url = "/api/vedtak/$behandlingId/fatt",
+            url = "/api/vedtak/${behandling.spleisBehandlingId?.value}/fatt",
             body = "{}",
             saksbehandler = saksbehandler,
             tilgangsgrupper = setOf(Tilgangsgruppe.BESLUTTER)
@@ -324,11 +304,10 @@ class PostFattVedtakIntegrationTest {
     @Test
     fun `gir bad request hvis behandlingen overlapper med Infotrygd`() {
         // Given:
-        val behandlingId = UUID.randomUUID()
-        val fødselsnummer = lagFødselsnummer()
-        val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer, lagOrganisasjonsnummer())
-        val behandling = lagEnBehandling(
-            spleisBehandlingId = behandlingId,
+        val person =
+            lagPerson().also(sessionContext.personRepository::lagre)
+        val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
+        val behandling = lagBehandling(
             vedtaksperiodeId = vedtaksperiode.id,
             tags = setOf("OverlapperMedInfotrygd")
         )
@@ -336,15 +315,12 @@ class PostFattVedtakIntegrationTest {
         sessionContext.saksbehandlerRepository.lagre(saksbehandler)
         sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
         sessionContext.behandlingRepository.lagre(behandling)
-        lagPerson(
-            id = Identitetsnummer.fraString(fødselsnummer)
-        ).also(sessionContext.personRepository::lagre)
-        val oppgave = lagOppgave(behandlingId)
+        val oppgave = lagOppgave(behandling.spleisBehandlingId!!)
         sessionContext.oppgaveRepository.lagre(oppgave)
 
         // When:
         val response = integrationTestFixture.post(
-            url = "/api/vedtak/$behandlingId/fatt",
+            url = "/api/vedtak/${behandling.spleisBehandlingId?.value}/fatt",
             body = "{}",
             saksbehandler = saksbehandler,
             tilgangsgrupper = setOf(Tilgangsgruppe.BESLUTTER)
@@ -368,41 +344,29 @@ class PostFattVedtakIntegrationTest {
     @Test
     fun `gir bad request hvis det finnes relevante varsler som ikke er vurdert`() {
         // Given:
-        val behandlingId = UUID.randomUUID()
-        val fødselsnummer = lagFødselsnummer()
-        val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer, lagOrganisasjonsnummer())
-        val behandlingUnikId = UUID.randomUUID()
-        val behandling = lagEnBehandling(
-            id = behandlingUnikId,
-            spleisBehandlingId = behandlingId,
-            vedtaksperiodeId = vedtaksperiode.id
-        )
+        val person = lagPerson().also(sessionContext.personRepository::lagre)
+        val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
+        val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
         val saksbehandler = lagSaksbehandler()
         val kode = "RV_IV_2"
+        val varsel = lagVarsel(
+            behandlingUnikId = behandling.id,
+            spleisBehandlingId = behandling.spleisBehandlingId,
+            status = Varsel.Status.AKTIV,
+            vurdering = null,
+            kode = kode
+        )
         sessionContext.saksbehandlerRepository.lagre(saksbehandler)
         sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
         sessionContext.behandlingRepository.lagre(behandling)
-        lagPerson(
-            id = Identitetsnummer.fraString(fødselsnummer)
-        ).also(sessionContext.personRepository::lagre)
         sessionContext.varseldefinisjonRepository.lagre(lagVarseldefinisjon(kode = kode))
-        sessionContext.varselRepository.lagre(
-            Varsel.fraLagring(
-                VarselId(UUID.randomUUID()),
-                behandling.spleisBehandlingId!!,
-                behandlingUnikId = behandling.id,
-                status = Varsel.Status.AKTIV,
-                vurdering = null,
-                kode = kode,
-                opprettetTidspunkt = LocalDateTime.now(),
-            )
-        )
-        val oppgave = lagOppgave(behandlingId)
+        sessionContext.varselRepository.lagre(varsel)
+        val oppgave = lagOppgave(behandling.spleisBehandlingId!!)
         sessionContext.oppgaveRepository.lagre(oppgave)
 
         // When:
         val response = integrationTestFixture.post(
-            url = "/api/vedtak/$behandlingId/fatt",
+            url = "/api/vedtak/${behandling.spleisBehandlingId?.value}/fatt",
             body = "{}",
             saksbehandler = saksbehandler,
             tilgangsgrupper = setOf(Tilgangsgruppe.BESLUTTER)
@@ -427,41 +391,33 @@ class PostFattVedtakIntegrationTest {
     @EnumSource(value = Varsel.Status::class, names = ["AKTIV"], mode = EnumSource.Mode.EXCLUDE)
     fun `varsler som har status annet enn aktiv medfører ikke valideringsfeil`(status: Varsel.Status) {
         // Given:
-        val behandlingId = UUID.randomUUID()
-        val fødselsnummer = lagFødselsnummer()
-        val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer, lagOrganisasjonsnummer())
-        val behandlingUnikId = UUID.randomUUID()
-        val behandling = lagEnBehandling(
-            id = behandlingUnikId,
-            spleisBehandlingId = behandlingId,
-            vedtaksperiodeId = vedtaksperiode.id
-        )
+        val person = lagPerson().also(sessionContext.personRepository::lagre)
+        val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
+        val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
         val saksbehandler = lagSaksbehandler()
         val kode = "RV_IV_2"
+        val varsel = lagVarsel(
+            behandlingUnikId = behandling.id,
+            spleisBehandlingId = behandling.spleisBehandlingId,
+            status = status,
+            vurdering = Varselvurdering(
+                saksbehandlerId = saksbehandler.id,
+                tidspunkt = LocalDateTime.now(),
+                vurdertDefinisjonId = lagVarseldefinisjon(kode = kode).id
+            ),
+            kode = kode
+        )
         sessionContext.saksbehandlerRepository.lagre(saksbehandler)
         sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
         sessionContext.behandlingRepository.lagre(behandling)
-        lagPerson(
-            id = Identitetsnummer.fraString(fødselsnummer)
-        ).also(sessionContext.personRepository::lagre)
         sessionContext.varseldefinisjonRepository.lagre(lagVarseldefinisjon(kode = kode))
-        sessionContext.varselRepository.lagre(
-            Varsel.fraLagring(
-                VarselId(UUID.randomUUID()),
-                behandling.spleisBehandlingId!!,
-                behandlingUnikId = behandling.id,
-                status = status,
-                vurdering = null,
-                kode = kode,
-                opprettetTidspunkt = LocalDateTime.now(),
-            )
-        )
-        val oppgave = lagOppgave(behandlingId)
+        sessionContext.varselRepository.lagre(varsel)
+        val oppgave = lagOppgave(behandling.spleisBehandlingId!!)
         sessionContext.oppgaveRepository.lagre(oppgave)
 
         // When:
         val response = integrationTestFixture.post(
-            url = "/api/vedtak/$behandlingId/fatt",
+            url = "/api/vedtak/${behandling.spleisBehandlingId?.value}/fatt",
             body = "{}",
             saksbehandler = saksbehandler,
             tilgangsgrupper = setOf(Tilgangsgruppe.BESLUTTER)
@@ -474,51 +430,38 @@ class PostFattVedtakIntegrationTest {
     @Test
     fun `publiserer kun varsel_endret for varsler som har blitt godkjent`() {
         // Given:
-        val behandlingId = UUID.randomUUID()
-        val fødselsnummer = lagFødselsnummer()
-        val vedtaksperiode = lagEnVedtaksperiode(UUID.randomUUID(), fødselsnummer, lagOrganisasjonsnummer())
-        val behandlingUnikIdbehandling = UUID.randomUUID()
-        val behandling = lagEnBehandling(
-            id = behandlingUnikIdbehandling,
-            spleisBehandlingId = behandlingId,
-            vedtaksperiodeId = vedtaksperiode.id
-        )
+        val person = lagPerson().also(sessionContext.personRepository::lagre)
+        val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
+        val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
         val saksbehandler = lagSaksbehandler()
-        val kode = "RV_IV_2"
+        val varseldefinisjon = lagVarseldefinisjon()
+        val godkjentVarsel = lagVarsel(
+            behandlingUnikId = behandling.id,
+            spleisBehandlingId = behandling.spleisBehandlingId,
+            status = Varsel.Status.GODKJENT,
+            vurdering = Varselvurdering(saksbehandler.id, LocalDateTime.now(), varseldefinisjon.id),
+            kode = varseldefinisjon.kode
+        )
+        val vurdertVarsel = lagVarsel(
+            behandlingUnikId = behandling.id,
+            spleisBehandlingId = behandling.spleisBehandlingId,
+            status = Varsel.Status.VURDERT,
+            vurdering = Varselvurdering(saksbehandler.id, LocalDateTime.now(), varseldefinisjon.id),
+            kode = varseldefinisjon.kode
+        )
         sessionContext.saksbehandlerRepository.lagre(saksbehandler)
         sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
         sessionContext.behandlingRepository.lagre(behandling)
-        lagPerson(
-            id = Identitetsnummer.fraString(fødselsnummer)
-        ).also(sessionContext.personRepository::lagre)
-        sessionContext.varseldefinisjonRepository.lagre(lagVarseldefinisjon(kode = kode))
-        val godkjentVarsel = Varsel.fraLagring(
-            id = VarselId(UUID.randomUUID()),
-            spleisBehandlingId = behandling.spleisBehandlingId!!,
-            behandlingUnikId = behandling.id,
-            status = Varsel.Status.GODKJENT,
-            vurdering = null,
-            kode = kode,
-            opprettetTidspunkt = LocalDateTime.now(),
-        )
-        val vurdertVarsel = Varsel.fraLagring(
-            id = VarselId(UUID.randomUUID()),
-            spleisBehandlingId = behandling.spleisBehandlingId!!,
-            behandlingUnikId = behandling.id,
-            status = Varsel.Status.VURDERT,
-            vurdering = null,
-            kode = kode,
-            opprettetTidspunkt = LocalDateTime.now(),
-        )
+        sessionContext.varseldefinisjonRepository.lagre(varseldefinisjon)
 
         sessionContext.varselRepository.lagre(godkjentVarsel)
         sessionContext.varselRepository.lagre(vurdertVarsel)
-        val oppgave = lagOppgave(behandlingId)
+        val oppgave = lagOppgave(behandling.spleisBehandlingId!!)
         sessionContext.oppgaveRepository.lagre(oppgave)
 
         // When:
         val response = integrationTestFixture.post(
-            url = "/api/vedtak/$behandlingId/fatt",
+            url = "/api/vedtak/${behandling.spleisBehandlingId?.value}/fatt",
             body = "{}",
             saksbehandler = saksbehandler,
             tilgangsgrupper = setOf(Tilgangsgruppe.BESLUTTER)

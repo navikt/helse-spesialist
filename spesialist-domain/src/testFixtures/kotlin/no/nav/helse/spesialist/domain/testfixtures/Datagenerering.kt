@@ -26,7 +26,6 @@ import no.nav.helse.spesialist.domain.VarseldefinisjonId
 import no.nav.helse.spesialist.domain.VedtakBegrunnelse
 import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
-import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagIdentitetsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import java.math.BigDecimal
@@ -96,62 +95,27 @@ fun lagAvviksvurderingMedEnArbeidsgiver(
     )
 )
 
-fun lagEtternavn() = etternavnListe.random()
-
-fun lagOppgave(behandlingId: UUID): Oppgave = Oppgave.ny(
+fun lagOppgave(behandlingId: SpleisBehandlingId): Oppgave = Oppgave.ny(
     id = nextLong(),
     førsteOpprettet = LocalDateTime.now(),
     vedtaksperiodeId = UUID.randomUUID(),
-    behandlingId = behandlingId,
+    behandlingId = behandlingId.value,
     utbetalingId = UUID.randomUUID(),
     hendelseId = UUID.randomUUID(),
     kanAvvises = true,
     egenskaper = emptySet(),
 )
-fun lagEnSaksbehandler(): Saksbehandler {
-    val navn = lagSaksbehandlernavn()
-    return Saksbehandler(
-        id = SaksbehandlerOid(UUID.randomUUID()),
-        navn = navn,
-        epost = lagEpostadresseFraFulltNavn(navn),
-        ident = lagSaksbehandlerident()
-    )
-}
 
-fun lagEnSpleisBehandlingId() = SpleisBehandlingId(UUID.randomUUID())
+fun lagSpleisBehandlingId() = SpleisBehandlingId(UUID.randomUUID())
 
-fun lagEnBehandlingUnikId() = BehandlingUnikId(UUID.randomUUID())
-
-@Deprecated("Bruk lagBehandling() i stedet")
-fun lagEnBehandling(
-    id: UUID = UUID.randomUUID(),
-    spleisBehandlingId: UUID = UUID.randomUUID(),
-    utbetalingId: UtbetalingId = UtbetalingId(UUID.randomUUID()),
-    vedtaksperiodeId: VedtaksperiodeId = VedtaksperiodeId(UUID.randomUUID()),
-    tilstand: Behandling.Tilstand = Behandling.Tilstand.KlarTilBehandling,
-    tags: Set<String> = setOf("Innvilget"),
-    yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
-    skjæringstidspunkt: LocalDate = 1.jan(2018),
-): Behandling = lagBehandling(
-    id = BehandlingUnikId(id),
-    spleisBehandlingId = SpleisBehandlingId(spleisBehandlingId),
-    vedtaksperiodeId = vedtaksperiodeId,
-    utbetalingId = utbetalingId,
-    tags = tags,
-    tilstand = tilstand,
-    søknadIder = emptySet(),
-    fom = 1.jan(2018),
-    tom = 31.jan(2018),
-    skjæringstidspunkt = skjæringstidspunkt,
-    yrkesaktivitetstype = yrkesaktivitetstype
-)
+fun lagBehandlingUnikId() = BehandlingUnikId(UUID.randomUUID())
 
 fun lagBehandling(
     id: BehandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
     spleisBehandlingId: SpleisBehandlingId? = SpleisBehandlingId(UUID.randomUUID()),
     vedtaksperiodeId: VedtaksperiodeId = VedtaksperiodeId(UUID.randomUUID()),
     utbetalingId: UtbetalingId? = UtbetalingId(UUID.randomUUID()),
-    tags: Set<String> = setOf("Behandling tag 1", "Behandling tag 2"),
+    tags: Set<String> = setOf("Innvilget"),
     tilstand: Behandling.Tilstand = Behandling.Tilstand.KlarTilBehandling,
     fom: LocalDate = LocalDate.now().minusMonths(3).withDayOfMonth(1),
     tom: LocalDate = fom.withDayOfMonth(YearMonth.from(fom).lengthOfMonth()),
@@ -209,20 +173,7 @@ fun lagSkjønnsfastsattSykepengegrunnlag(
     ),
 )
 
-@Deprecated("Bruk lagVedtaksperiode() i stedet")
-fun lagEnVedtaksperiodeId() = VedtaksperiodeId(UUID.randomUUID())
-fun lagEnVedtaksperiode(
-    vedtaksperiodeId: UUID = UUID.randomUUID(),
-    fødselsnummer: String = lagFødselsnummer(),
-    organisasjonsnummer: String = lagOrganisasjonsnummer(),
-    forkastet: Boolean = false,
-): Vedtaksperiode = lagVedtaksperiode(
-    id = VedtaksperiodeId(vedtaksperiodeId),
-    identitetsnummer = Identitetsnummer.fraString(fødselsnummer),
-    organisasjonsnummer = organisasjonsnummer,
-    forkastet = forkastet
-)
-
+fun lagVedtaksperiodeId() = VedtaksperiodeId(UUID.randomUUID())
 fun lagVedtaksperiode(
     id: VedtaksperiodeId = VedtaksperiodeId(UUID.randomUUID()),
     identitetsnummer: Identitetsnummer = lagIdentitetsnummer(),
@@ -253,7 +204,7 @@ fun lagVarsel(
     vurdering = vurdering
 )
 
-fun lagEnVarseldefinisjonId() = VarseldefinisjonId(UUID.randomUUID())
+fun lagVarseldefinisjonId() = VarseldefinisjonId(UUID.randomUUID())
 fun lagVarseldefinisjon(
     id: UUID = UUID.randomUUID(),
     kode: String = "RV_IV_1",
