@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.api.rest.varsler.vurdering
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.Varselvurdering
 import no.nav.helse.spesialist.api.IntegrationTestFixture
+import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.domain.Personinfo
 import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.testfixtures.lagBehandling
@@ -85,7 +86,7 @@ class PutVarselvurderingBehandlerIntegrationTest {
 
         // then
         assertEquals(HttpStatusCode.Forbidden.value, response.status)
-        integrationTestFixture.assertJsonEquals(
+        assertJsonEquals(
             """{
                 "type": "about:blank",
                 "status": 403,
@@ -116,7 +117,7 @@ class PutVarselvurderingBehandlerIntegrationTest {
 
         // then
         assertEquals(HttpStatusCode.InternalServerError.value, response.status)
-        integrationTestFixture.assertJsonEquals(
+        assertJsonEquals(
             """{
                 "type": "about:blank",
                 "status": 500,
@@ -148,7 +149,7 @@ class PutVarselvurderingBehandlerIntegrationTest {
 
         // then
         assertEquals(HttpStatusCode.InternalServerError.value, response.status)
-        integrationTestFixture.assertJsonEquals(
+        assertJsonEquals(
             """{
                 "type": "about:blank",
                 "status": 500,
@@ -184,7 +185,7 @@ class PutVarselvurderingBehandlerIntegrationTest {
 
         // then
         assertEquals(HttpStatusCode.InternalServerError.value, response.status)
-        integrationTestFixture.assertJsonEquals(
+        assertJsonEquals(
             """{
                 "type": "about:blank",
                 "status": 500,
@@ -231,7 +232,7 @@ class PutVarselvurderingBehandlerIntegrationTest {
 
         // then
         assertEquals(HttpStatusCode.Conflict.value, response.status)
-        integrationTestFixture.assertJsonEquals(
+        assertJsonEquals(
             """{
                 "type": "about:blank",
                 "status": 409,
@@ -278,7 +279,7 @@ class PutVarselvurderingBehandlerIntegrationTest {
 
         // then
         assertEquals(HttpStatusCode.Conflict.value, response.status)
-        integrationTestFixture.assertJsonEquals(
+        assertJsonEquals(
             """{
                 "type": "about:blank",
                 "status": 409,

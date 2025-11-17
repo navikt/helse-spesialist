@@ -9,12 +9,10 @@ import no.nav.helse.spesialist.api.rest.GetBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.harTilgangTilPerson
 import no.nav.helse.spesialist.api.rest.resources.Varsler
-import no.nav.helse.spesialist.api.rest.varsler.GetVarselErrorCode.BEHANDLING_IKKE_FUNNET
 import no.nav.helse.spesialist.api.rest.varsler.GetVarselErrorCode.MANGLER_TILGANG_TIL_PERSON
 import no.nav.helse.spesialist.api.rest.varsler.GetVarselErrorCode.VARSELDEFINISJON_MANGLER_FOR_KODE
 import no.nav.helse.spesialist.api.rest.varsler.GetVarselErrorCode.VARSELDEFINISJON_MANGLER_FOR_VURDERING
 import no.nav.helse.spesialist.api.rest.varsler.GetVarselErrorCode.VARSEL_IKKE_FUNNET
-import no.nav.helse.spesialist.api.rest.varsler.GetVarselErrorCode.VEDTAKSPERIODE_IKKE_FUNNET
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.Varsel

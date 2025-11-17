@@ -7,14 +7,15 @@ import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.ApiVarselvurdering
 import no.nav.helse.spesialist.api.rest.PutBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
+import no.nav.helse.spesialist.api.rest.harTilgangTilPerson
 import no.nav.helse.spesialist.api.rest.resources.Varsler
-import no.nav.helse.spesialist.api.rest.tilkommeninntekt.harTilgangTilPerson
 import no.nav.helse.spesialist.api.rest.varsler.PutVarselvurderingErrorCode.MANGLER_TILGANG_TIL_PERSON
 import no.nav.helse.spesialist.api.rest.varsler.PutVarselvurderingErrorCode.VARSEL_IKKE_FUNNET
 import no.nav.helse.spesialist.api.rest.varsler.PutVarselvurderingErrorCode.VARSEL_KAN_IKKE_VURDERES
 import no.nav.helse.spesialist.api.rest.varsler.PutVarselvurderingErrorCode.VARSEL_VURDERT_AV_ANNEN_SAKSBEHANDLER
 import no.nav.helse.spesialist.api.rest.varsler.PutVarselvurderingErrorCode.VARSEL_VURDERT_MED_ANNEN_DEFINISJON
 import no.nav.helse.spesialist.application.Outbox
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.VarselId
@@ -44,7 +45,8 @@ class PutVarselvurderingBehandler : PutBehandler<Varsler.VarselId.Vurdering, Api
             transaksjon.vedtaksperiodeRepository.finn(behandling.vedtaksperiodeId)
                 ?: error("Fant ikke vedtaksperiode")
 
-        if (!harTilgangTilPerson(vedtaksperiode.fødselsnummer, saksbehandler, tilgangsgrupper, transaksjon)) {
+        val identitetsnummer = Identitetsnummer.fraString(vedtaksperiode.fødselsnummer)
+        if (!saksbehandler.harTilgangTilPerson(identitetsnummer, tilgangsgrupper, transaksjon)) {
             return RestResponse.Error(MANGLER_TILGANG_TIL_PERSON)
         }
 

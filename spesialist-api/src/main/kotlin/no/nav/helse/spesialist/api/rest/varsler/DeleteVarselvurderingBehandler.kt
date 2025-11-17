@@ -6,12 +6,13 @@ import no.nav.helse.db.SessionContext
 import no.nav.helse.spesialist.api.rest.ApiErrorCode
 import no.nav.helse.spesialist.api.rest.DeleteBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
+import no.nav.helse.spesialist.api.rest.harTilgangTilPerson
 import no.nav.helse.spesialist.api.rest.resources.Varsler
-import no.nav.helse.spesialist.api.rest.tilkommeninntekt.harTilgangTilPerson
 import no.nav.helse.spesialist.api.rest.varsler.DeleteVarselvurderingErrorCode.KAN_IKKE_FJERNE_VURDERING
 import no.nav.helse.spesialist.api.rest.varsler.DeleteVarselvurderingErrorCode.MANGLER_TILGANG_TIL_PERSON
 import no.nav.helse.spesialist.api.rest.varsler.DeleteVarselvurderingErrorCode.VARSEL_IKKE_FUNNET
 import no.nav.helse.spesialist.application.Outbox
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.Varsel.Status.AKTIV
 import no.nav.helse.spesialist.domain.Varsel.Status.AVVIKLET
@@ -42,7 +43,9 @@ class DeleteVarselvurderingBehandler : DeleteBehandler<Varsler.VarselId.Vurderin
             transaksjon.vedtaksperiodeRepository.finn(behandling.vedtaksperiodeId)
                 ?: error("Fant ikke vedtaksperiode")
 
-        if (!harTilgangTilPerson(vedtaksperiode.fødselsnummer, saksbehandler, tilgangsgrupper, transaksjon)) {
+        val identitetsnummer = Identitetsnummer.fraString(vedtaksperiode.fødselsnummer)
+
+        if (!saksbehandler.harTilgangTilPerson(identitetsnummer, tilgangsgrupper, transaksjon)) {
             return RestResponse.Error(MANGLER_TILGANG_TIL_PERSON)
         }
         if (varsel.status in listOf(GODKJENT, INAKTIV, AVVIST, AVVIKLET)) {
