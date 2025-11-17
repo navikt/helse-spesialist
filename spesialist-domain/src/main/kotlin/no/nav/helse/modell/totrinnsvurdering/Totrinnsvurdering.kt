@@ -9,6 +9,7 @@ import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.GODKJENT
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.ddd.LateIdAggregateRoot
+import no.nav.helse.spesialist.domain.ddd.ValueObject
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -21,7 +22,7 @@ enum class TotrinnsvurderingTilstand {
 @JvmInline
 value class TotrinnsvurderingId(
     val value: Long,
-)
+) : ValueObject
 
 class Totrinnsvurdering private constructor(
     id: TotrinnsvurderingId?,

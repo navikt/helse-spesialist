@@ -1,6 +1,7 @@
 package no.nav.helse.spesialist.domain
 
 import no.nav.helse.spesialist.domain.ddd.LateIdAggregateRoot
+import no.nav.helse.spesialist.domain.ddd.ValueObject
 import java.time.Instant
 import java.time.LocalDate
 import java.util.UUID
@@ -8,7 +9,7 @@ import java.util.UUID
 @JvmInline
 value class PåVentId(
     val value: Int,
-)
+) : ValueObject
 
 class PåVent private constructor(
     id: PåVentId?,

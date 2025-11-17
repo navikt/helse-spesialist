@@ -1,13 +1,14 @@
 package no.nav.helse.spesialist.domain
 
 import no.nav.helse.spesialist.domain.ddd.LateIdAggregateRoot
+import no.nav.helse.spesialist.domain.ddd.ValueObject
 import java.time.LocalDateTime
 import java.util.UUID
 
 @JvmInline
 value class NotatId(
     val value: Int,
-)
+) : ValueObject
 
 class Notat private constructor(
     id: NotatId?,

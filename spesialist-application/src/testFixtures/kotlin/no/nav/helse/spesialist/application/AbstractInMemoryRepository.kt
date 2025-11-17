@@ -1,8 +1,9 @@
 package no.nav.helse.spesialist.application
 
 import no.nav.helse.spesialist.domain.ddd.AggregateRoot
+import no.nav.helse.spesialist.domain.ddd.ValueObject
 
-abstract class AbstractInMemoryRepository<IDTYPE, T : AggregateRoot<IDTYPE>>() {
+abstract class AbstractInMemoryRepository<IDTYPE: ValueObject, T : AggregateRoot<IDTYPE>>() {
     private val data = mutableListOf<T>()
 
     protected abstract fun deepCopy(original: T): T

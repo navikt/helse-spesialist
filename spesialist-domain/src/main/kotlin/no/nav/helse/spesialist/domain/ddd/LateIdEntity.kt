@@ -1,6 +1,6 @@
 package no.nav.helse.spesialist.domain.ddd
 
-abstract class LateIdEntity<IDTYPE>(
+abstract class LateIdEntity<IDTYPE : ValueObject>(
     private var id: IDTYPE?,
 ) {
     fun harFåttTildeltId() = id != null

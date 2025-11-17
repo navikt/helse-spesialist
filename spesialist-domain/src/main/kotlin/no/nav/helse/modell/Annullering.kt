@@ -2,13 +2,14 @@ package no.nav.helse.modell
 
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.ddd.LateIdAggregateRoot
+import no.nav.helse.spesialist.domain.ddd.ValueObject
 import java.time.LocalDateTime
 import java.util.UUID
 
 @JvmInline
 value class AnnulleringId(
     val value: Int,
-)
+) : ValueObject
 
 class Annullering private constructor(
     id: AnnulleringId?,

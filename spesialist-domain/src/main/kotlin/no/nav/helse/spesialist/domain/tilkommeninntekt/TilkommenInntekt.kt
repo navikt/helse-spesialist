@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.domain.tilkommeninntekt
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingId
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.ddd.AggregateRoot
+import no.nav.helse.spesialist.domain.ddd.ValueObject
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.DayOfWeek
@@ -15,7 +16,7 @@ import kotlin.reflect.KMutableProperty0
 @JvmInline
 value class TilkommenInntektId(
     val value: UUID,
-)
+) : ValueObject
 
 class TilkommenInntekt private constructor(
     opprettetEvent: TilkommenInntektOpprettetEvent,

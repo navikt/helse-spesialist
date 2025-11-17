@@ -2,11 +2,12 @@ package no.nav.helse.spesialist.domain
 
 import no.nav.helse.modell.vedtak.Utfall
 import no.nav.helse.spesialist.domain.ddd.LateIdAggregateRoot
+import no.nav.helse.spesialist.domain.ddd.ValueObject
 
 @JvmInline
 value class VedtakBegrunnelseId(
     val value: Long,
-)
+) : ValueObject
 
 class VedtakBegrunnelse private constructor(
     id: VedtakBegrunnelseId?,

@@ -1,12 +1,13 @@
 package no.nav.helse.spesialist.domain
 
 import no.nav.helse.spesialist.domain.ddd.LateIdAggregateRoot
+import no.nav.helse.spesialist.domain.ddd.ValueObject
 import java.time.LocalDateTime
 
 @JvmInline
 value class DialogId(
     val value: Long,
-)
+) : ValueObject
 
 class Dialog private constructor(
     id: DialogId?,

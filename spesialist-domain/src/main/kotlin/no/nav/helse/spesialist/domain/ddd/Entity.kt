@@ -1,6 +1,6 @@
 package no.nav.helse.spesialist.domain.ddd
 
-abstract class Entity<IDTYPE>(
+abstract class Entity<IDTYPE : ValueObject>(
     val id: IDTYPE,
 ) {
     override fun equals(other: Any?): Boolean = other != null && this::class == other::class && this.id == (other as Entity<*>).id

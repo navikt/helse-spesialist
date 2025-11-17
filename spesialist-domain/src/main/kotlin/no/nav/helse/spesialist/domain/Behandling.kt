@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.domain
 import no.nav.helse.modell.vedtak.Utfall
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.domain.ddd.AggregateRoot
+import no.nav.helse.spesialist.domain.ddd.ValueObject
 import java.time.LocalDate
 import java.util.UUID
 
@@ -14,7 +15,7 @@ value class SpleisBehandlingId(
 @JvmInline
 value class BehandlingUnikId(
     val value: UUID,
-)
+) : ValueObject
 
 enum class Tag {
     Innvilget,

@@ -1,12 +1,13 @@
 package no.nav.helse.spesialist.domain
 
 import no.nav.helse.spesialist.domain.ddd.LateIdEntity
+import no.nav.helse.spesialist.domain.ddd.ValueObject
 import java.time.LocalDateTime
 
 @JvmInline
 value class KommentarId(
     val value: Int,
-)
+) : ValueObject
 
 class Kommentar private constructor(
     id: KommentarId?,
