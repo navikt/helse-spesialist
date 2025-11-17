@@ -3,7 +3,7 @@ package no.nav.helse.spesialist.application
 import no.nav.helse.spesialist.domain.ddd.LateIdAggregateRoot
 import no.nav.helse.spesialist.domain.ddd.ValueObject
 
-abstract class AbstractLateIdInMemoryRepository<IDTYPE: ValueObject, T : LateIdAggregateRoot<IDTYPE>>() {
+abstract class AbstractLateIdInMemoryRepository<IDTYPE : ValueObject, T : LateIdAggregateRoot<IDTYPE>>() {
     private val data = mutableListOf<T>()
 
     protected abstract fun tildelIder(root: T)
@@ -22,6 +22,10 @@ abstract class AbstractLateIdInMemoryRepository<IDTYPE: ValueObject, T : LateIdA
         }
         tildelIder(root)
         data.add(deepCopy(root))
+    }
+
+    fun lagreAlle(roots: Collection<T>) {
+        roots.forEach(::lagre)
     }
 
     fun slett(id: IDTYPE) {
