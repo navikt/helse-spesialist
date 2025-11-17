@@ -4,6 +4,7 @@ import io.ktor.http.HttpStatusCode
 import no.nav.helse.modell.melding.VarselEndret
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.spesialist.api.IntegrationTestFixture
+import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.Varsel
@@ -45,7 +46,7 @@ class PostFattVedtakIntegrationTest {
 
         // Then:
         assertEquals(HttpStatusCode.NotFound.value, response.status)
-        integrationTestFixture.assertJsonEquals(
+        assertJsonEquals(
             """
             {
               "type": "about:blank",
@@ -77,7 +78,7 @@ class PostFattVedtakIntegrationTest {
 
         // Then:
         assertEquals(HttpStatusCode.NotFound.value, response.status)
-        integrationTestFixture.assertJsonEquals(
+        assertJsonEquals(
             """
             {
               "type": "about:blank",
@@ -136,7 +137,7 @@ class PostFattVedtakIntegrationTest {
 
         // Then:
         assertEquals(HttpStatusCode.BadRequest.value, response.status)
-        integrationTestFixture.assertJsonEquals(
+        assertJsonEquals(
             """
             {
               "type": "about:blank",
@@ -175,7 +176,7 @@ class PostFattVedtakIntegrationTest {
 
         // Then:
         assertEquals(HttpStatusCode.BadRequest.value, response.status)
-        integrationTestFixture.assertJsonEquals(
+        assertJsonEquals(
             """
             {
               "type": "about:blank",
@@ -220,7 +221,7 @@ class PostFattVedtakIntegrationTest {
 
         // Then:
         assertEquals(HttpStatusCode.Forbidden.value, response.status)
-        integrationTestFixture.assertJsonEquals(
+        assertJsonEquals(
             """
             {
               "type": "about:blank",
@@ -264,7 +265,7 @@ class PostFattVedtakIntegrationTest {
 
         // Then:
         assertEquals(HttpStatusCode.Forbidden.value, response.status)
-        integrationTestFixture.assertJsonEquals(
+        assertJsonEquals(
             """
             {
               "type": "about:blank",
@@ -307,7 +308,7 @@ class PostFattVedtakIntegrationTest {
 
         // Then:
         assertEquals(HttpStatusCode.Conflict.value, response.status)
-        integrationTestFixture.assertJsonEquals(
+        assertJsonEquals(
             """
             {
               "type": "about:blank",
@@ -351,7 +352,7 @@ class PostFattVedtakIntegrationTest {
 
         // Then:
         assertEquals(HttpStatusCode.BadRequest.value, response.status)
-        integrationTestFixture.assertJsonEquals(
+        assertJsonEquals(
             """
             {
               "type": "about:blank",
@@ -409,7 +410,7 @@ class PostFattVedtakIntegrationTest {
 
         // Then:
         assertEquals(HttpStatusCode.BadRequest.value, response.status)
-        integrationTestFixture.assertJsonEquals(
+        assertJsonEquals(
             """
             {
               "type": "about:blank",

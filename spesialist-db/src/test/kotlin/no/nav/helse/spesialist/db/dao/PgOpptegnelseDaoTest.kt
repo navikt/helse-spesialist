@@ -1,11 +1,11 @@
 package no.nav.helse.spesialist.db.dao
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.OpptegnelseDao.Opptegnelse.Type.NY_SAKSBEHANDLEROPPGAVE
 import no.nav.helse.db.OpptegnelseDao.Opptegnelse.Type.UTBETALING_ANNULLERING_OK
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
 import no.nav.helse.spesialist.api.abonnement.UtbetalingPayload
+import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
 import no.nav.helse.spesialist.db.DBSessionContext
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -18,10 +18,6 @@ internal class PgOpptegnelseDaoTest : AbstractDBIntegrationTest() {
     private companion object {
         private val UTBETALING_PAYLOAD = UtbetalingPayload(UUID.randomUUID()).toJson()
         private val GODKJENNINGSBEHOV_PAYLOAD = GodkjenningsbehovPayload(UUID.randomUUID()).toJson()
-        private val objectMapper = jacksonObjectMapper()
-        private fun assertJson(expected: String, actual: String) {
-            assertEquals("${objectMapper.readTree(expected)}", "${objectMapper.readTree(actual)}")
-        }
     }
 
     @Test
@@ -42,12 +38,12 @@ internal class PgOpptegnelseDaoTest : AbstractDBIntegrationTest() {
 
         alle.first { it.type == OpptegnelseDao.Opptegnelse.Type.UTBETALING_ANNULLERING_OK }.also { opptegnelse ->
             assertEquals(AKTØR, opptegnelse.aktorId)
-            assertJson(UTBETALING_PAYLOAD, opptegnelse.payload)
+            assertJsonEquals(UTBETALING_PAYLOAD, opptegnelse.payload)
         }
 
         alle.first { it.type == OpptegnelseDao.Opptegnelse.Type.NY_SAKSBEHANDLEROPPGAVE }.also { opptegnelse ->
             assertEquals(AKTØR, opptegnelse.aktorId)
-            assertJson(GODKJENNINGSBEHOV_PAYLOAD, opptegnelse.payload)
+            assertJsonEquals(GODKJENNINGSBEHOV_PAYLOAD, opptegnelse.payload)
         }
     }
 

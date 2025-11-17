@@ -1,7 +1,6 @@
 package no.nav.helse.spesialist.api
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ObjectNode
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.accept
@@ -222,42 +221,6 @@ class IntegrationTestFixture() {
         assertEquals(
             publiserteUtgåendeHendelse.toList(),
             meldingPubliserer.publiserteUtgåendeHendelser
-        )
-    }
-
-    fun assertJsonEquals(@Language("JSON") expectedJson: String, actualJsonNode: JsonNode, vararg ignorerFelter: String) {
-        val writer = objectMapper.writerWithDefaultPrettyPrinter()
-        val actualAsObjectNode = (actualJsonNode.deepCopy<JsonNode>() as ObjectNode).apply {
-            ignorerFelter.forEach { sti ->
-                val gjeldende: JsonNode = this
-                val segmenter = sti.split(".")
-
-                fun følgStiOgFjernLeaf(gjeldende: JsonNode, index: Int) {
-                    if (index >= segmenter.size) return
-                    val key = segmenter[index]
-
-                    when {
-                        gjeldende.isArray -> {
-                            for (elem in gjeldende) {
-                                følgStiOgFjernLeaf(elem, index)
-                            }
-                        }
-                        gjeldende is ObjectNode -> {
-                            if (index == segmenter.lastIndex) {
-                                gjeldende.remove(key)
-                            } else {
-                                val next = gjeldende.get(key) ?: return
-                                følgStiOgFjernLeaf(next, index + 1)
-                            }
-                        }
-                    }
-                }
-                følgStiOgFjernLeaf(gjeldende, 0)
-            }
-        }
-        assertEquals(
-            writer.writeValueAsString(objectMapper.readTree(expectedJson)),
-            writer.writeValueAsString(actualAsObjectNode)
         )
     }
 }

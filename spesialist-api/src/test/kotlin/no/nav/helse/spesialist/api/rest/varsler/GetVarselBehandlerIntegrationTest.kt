@@ -4,6 +4,7 @@ import io.ktor.http.HttpStatusCode
 import no.nav.helse.Varselvurdering
 import no.nav.helse.mediator.asLocalDateTime
 import no.nav.helse.spesialist.api.IntegrationTestFixture
+import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.domain.BehandlingUnikId
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Personinfo
@@ -63,7 +64,7 @@ class GetVarselBehandlerIntegrationTest {
 
         //then
         assertEquals(HttpStatusCode.OK.value, response.status)
-        integrationTestFixture.assertJsonEquals(
+        assertJsonEquals(
             """
             {
               "id":  "${varsel.id.value}",
@@ -91,7 +92,7 @@ class GetVarselBehandlerIntegrationTest {
         val varselId = VarselId(UUID.randomUUID())
         val response = integrationTestFixture.get("/api/varsler/${varselId.value}")
         assertEquals(HttpStatusCode.NotFound.value, response.status)
-        integrationTestFixture.assertJsonEquals(
+        assertJsonEquals(
             """
             {
               "type": "about:blank",
@@ -119,7 +120,7 @@ class GetVarselBehandlerIntegrationTest {
 
         // then
         assertEquals(HttpStatusCode.InternalServerError.value, response.status)
-        integrationTestFixture.assertJsonEquals(
+        assertJsonEquals(
             """
             {
               "type": "about:blank",
@@ -151,7 +152,7 @@ class GetVarselBehandlerIntegrationTest {
 
         // then
         assertEquals(HttpStatusCode.InternalServerError.value, response.status)
-        integrationTestFixture.assertJsonEquals(
+        assertJsonEquals(
             """
             {
               "type": "about:blank",
@@ -186,7 +187,7 @@ class GetVarselBehandlerIntegrationTest {
 
         // then
         assertEquals(HttpStatusCode.Forbidden.value, response.status)
-        integrationTestFixture.assertJsonEquals(
+        assertJsonEquals(
             """
             {
               "type": "about:blank",
@@ -219,7 +220,7 @@ class GetVarselBehandlerIntegrationTest {
 
         // then
         assertEquals(HttpStatusCode.InternalServerError.value, response.status)
-        integrationTestFixture.assertJsonEquals(
+        assertJsonEquals(
             """
             {
               "type": "about:blank",
@@ -261,7 +262,7 @@ class GetVarselBehandlerIntegrationTest {
 
         // then
         assertEquals(HttpStatusCode.InternalServerError.value, response.status)
-        integrationTestFixture.assertJsonEquals(
+        assertJsonEquals(
             """
             {
               "type": "about:blank",
@@ -302,7 +303,7 @@ class GetVarselBehandlerIntegrationTest {
 
         // then
         assertEquals(HttpStatusCode.InternalServerError.value, response.status)
-        integrationTestFixture.assertJsonEquals(
+        assertJsonEquals(
             """
             {
               "type": "about:blank",
@@ -340,7 +341,7 @@ class GetVarselBehandlerIntegrationTest {
 
         // then
         assertEquals(HttpStatusCode.InternalServerError.value, response.status)
-        integrationTestFixture.assertJsonEquals(
+        assertJsonEquals(
             """
             {
               "type": "about:blank",

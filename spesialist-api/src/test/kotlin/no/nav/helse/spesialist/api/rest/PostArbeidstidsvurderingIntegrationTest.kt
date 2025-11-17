@@ -6,6 +6,7 @@ import no.nav.helse.modell.saksbehandler.handlinger.MinimumSykdomsgrad
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand
 import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.application.InMemoryMeldingPubliserer
+import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.domain.Personinfo
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagAktørId
@@ -72,7 +73,7 @@ class PostArbeidstidsvurderingIntegrationTest {
 
         // Sjekk respons
         assertEquals(403, response.status)
-        integrationTestFixture.assertJsonEquals(
+        assertJsonEquals(
             """
             {
               "type": "about:blank",
@@ -129,7 +130,7 @@ class PostArbeidstidsvurderingIntegrationTest {
 
         // Sjekk respons
         assertEquals(400, response.status)
-        integrationTestFixture.assertJsonEquals(
+        assertJsonEquals(
             """
             {
               "type": "about:blank",

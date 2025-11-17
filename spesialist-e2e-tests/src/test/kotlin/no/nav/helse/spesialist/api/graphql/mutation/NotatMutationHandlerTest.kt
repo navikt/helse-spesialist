@@ -1,13 +1,12 @@
 package no.nav.helse.spesialist.api.graphql.mutation
 
-import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
 import no.nav.helse.spesialist.api.graphql.schema.ApiNotatType
-import no.nav.helse.spesialist.api.objectMapper
 import no.nav.helse.spesialist.api.testfixtures.mutation.feilregistrerKommentarMutation
 import no.nav.helse.spesialist.api.testfixtures.mutation.feilregistrerNotatMutation
 import no.nav.helse.spesialist.api.testfixtures.mutation.leggTilKommentarMutation
 import no.nav.helse.spesialist.api.testfixtures.mutation.leggTilNotatMutation
+import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.domain.Dialog
 import no.nav.helse.spesialist.domain.DialogId
 import no.nav.helse.spesialist.domain.KommentarId
@@ -67,8 +66,8 @@ class NotatMutationHandlerTest : AbstractGraphQLApiTest() {
         assertNull(lagretNotat.feilregistrertTidspunkt) { "feilregistrertTidspunkt ble lagret selv om notatet er nytt" }
 
         // Bekreft svaret
-        assertEquals(
-            expectedJsonString = """
+        assertJsonEquals(
+            expectedJson = """
                             {
                               "data" : {
                                 "leggTilNotat" : {
@@ -122,8 +121,8 @@ class NotatMutationHandlerTest : AbstractGraphQLApiTest() {
         assertTrue(feilregistrertTidspunkt.isAfter(opprettetTidspunkt)) { "Forventet at den lagrede verdien av feilregistrertTidspunkt var etter opprettet tidspunkt ($opprettetTidspunkt), men den var $feilregistrertTidspunkt" }
 
         // Bekreft svaret
-        assertEquals(
-            expectedJsonString = """
+        assertJsonEquals(
+            expectedJson = """
                             {
                               "data" : {
                                 "feilregistrerNotat" : {
@@ -181,8 +180,8 @@ class NotatMutationHandlerTest : AbstractGraphQLApiTest() {
         assertNull(lagretKommentar.feilregistrertTidspunkt) { "feilregistrertTidspunkt ble lagret selv om kommentaren er ny" }
 
         // Bekreft svaret
-        assertEquals(
-            expectedJsonString = """
+        assertJsonEquals(
+            expectedJson = """
                             {
                               "data" : {
                                 "leggTilKommentar" : {
@@ -235,8 +234,8 @@ class NotatMutationHandlerTest : AbstractGraphQLApiTest() {
         assertTrue(feilregistrertTidspunkt.isAfter(opprettetTidspunkt)) { "Forventet at den lagrede verdien av feilregistrertTidspunkt var etter opprettet tidspunkt ($opprettetTidspunkt), men den var $feilregistrertTidspunkt" }
 
         // Bekreft svaret
-        assertEquals(
-            expectedJsonString = """
+        assertJsonEquals(
+            expectedJson = """
                             {
                               "data" : {
                                 "feilregistrerKommentar" : {
@@ -268,14 +267,6 @@ class NotatMutationHandlerTest : AbstractGraphQLApiTest() {
             )
 
         assertEquals(500, body["errors"][0]["extensions"]["code"].asInt())
-    }
-
-    private fun assertEquals(expectedJsonString: String, actualJsonNode: JsonNode) {
-        val writer = objectMapper.writerWithDefaultPrettyPrinter()
-        assertEquals(
-            writer.writeValueAsString(objectMapper.readTree(expectedJsonString)),
-            writer.writeValueAsString(actualJsonNode)
-        )
     }
 }
 

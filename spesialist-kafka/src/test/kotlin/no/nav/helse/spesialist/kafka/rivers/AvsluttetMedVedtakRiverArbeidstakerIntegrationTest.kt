@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.kafka.rivers
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
@@ -8,6 +7,7 @@ import no.nav.helse.modell.vedtak.Utfall
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
+import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.Saksbehandler
@@ -22,7 +22,6 @@ import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.kafka.IntegrationTestFixture
 import no.nav.helse.spesialist.kafka.TestRapidHelpers.publiserteMeldingerUtenGenererteFelter
-import no.nav.helse.spesialist.kafka.objectMapper
 import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk.godkjenningsbehovFastsattEtterHovedregel
 import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk.lagGodkjenningsbehov
 import org.intellij.lang.annotations.Language
@@ -666,14 +665,6 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
             )
         )
         sessionContext.meldingDao.godkjenningsbehov.add(Godkjenningsbehov.fraJson(godkjenningsbehovJson))
-    }
-
-    private fun assertJsonEquals(expectedJson: String, actualJsonNode: JsonNode) {
-        val writer = objectMapper.writerWithDefaultPrettyPrinter()
-        assertEquals(
-            writer.writeValueAsString(objectMapper.readTree(expectedJson)),
-            writer.writeValueAsString(actualJsonNode)
-        )
     }
 
     @Language("JSON")

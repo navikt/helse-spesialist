@@ -14,6 +14,7 @@ dependencies {
 
     testImplementation(testFixtures(project(":spesialist-domain")))
 
+    testFixturesImplementation(kotlin("test"))
     testFixturesImplementation(libs.bundles.jackson)
     testFixturesImplementation(libs.bundles.logback)
 }

@@ -1,15 +1,13 @@
 package no.nav.helse.spesialist.kafka.rivers
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ObjectNode
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
+import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.domain.Person
 import no.nav.helse.spesialist.domain.testfixtures.lagBehandling
 import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiode
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import no.nav.helse.spesialist.kafka.IntegrationTestFixture
 import no.nav.helse.spesialist.kafka.TestRapidHelpers.publiserteMeldingerUtenGenererteFelter
-import no.nav.helse.spesialist.kafka.objectMapper
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -59,10 +57,7 @@ internal class OppdaterPersondataRiverIntegrationTest {
               "hendelseId": "bff52e44-d009-43c8-af43-a14a38b66cfb"
             }
         """.trimIndent()
-        assertJsonEquals(expectedJson, (actualJsonNode as ObjectNode).apply {
-            remove("@behovId")
-            remove("contextId")
-        })
+        assertJsonEquals(expectedJson, actualJsonNode, "@behovId", "contextId")
     }
 
     @Test
@@ -81,14 +76,6 @@ internal class OppdaterPersondataRiverIntegrationTest {
             assertEquals(person.id.value, it.key)
         }
         assertEquals(null, meldinger.find { it.json["@event_name"].asText() == "behov" }?.json)
-    }
-
-    private fun assertJsonEquals(expectedJson: String, actualJsonNode: JsonNode) {
-        val writer = objectMapper.writerWithDefaultPrettyPrinter()
-        assertEquals(
-            writer.writeValueAsString(objectMapper.readTree(expectedJson)),
-            writer.writeValueAsString(actualJsonNode)
-        )
     }
 
     @Language("JSON")

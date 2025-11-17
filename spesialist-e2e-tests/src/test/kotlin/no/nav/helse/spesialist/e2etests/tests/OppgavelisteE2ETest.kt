@@ -1,13 +1,12 @@
 package no.nav.helse.spesialist.e2etests.tests
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ObjectNode
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveSorteringsfelt
+import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.e2etests.AbstractE2EIntegrationTest
-import no.nav.helse.spesialist.kafka.objectMapper
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -23,19 +22,11 @@ class OppgavelisteE2ETest : AbstractE2EIntegrationTest() {
     fun assertMinimalOppgaveJson(oppgave: JsonNode) {
         // Sjekk genererte felter
         assertTrue(oppgave["id"]?.takeUnless { it.isNull }?.isTextual == true)
-        val tiMinutterSiden = Instant.now().minusSeconds(60*10)
+        val tiMinutterSiden = Instant.now().minusSeconds(60 * 10)
         assertAfter(tiMinutterSiden, Instant.parse(oppgave["opprettetTidspunkt"].asText()))
         assertAfter(tiMinutterSiden, Instant.parse(oppgave["opprinneligSoeknadstidspunkt"].asText()))
         assertAfter(tiMinutterSiden, Instant.parse(oppgave["behandlingOpprettetTidspunkt"].asText()))
         assertDoesNotThrow { oppgave["personPseudoId"].asUUID() }
-
-        val oppgaveUtenGenererteFelter = (oppgave as ObjectNode).apply {
-            remove("id")
-            remove("opprettetTidspunkt")
-            remove("opprinneligSoeknadstidspunkt")
-            remove("behandlingOpprettetTidspunkt")
-            remove("personPseudoId")
-        }
 
         @Language("JSON")
         val expectedOppgaveJson = """
@@ -51,14 +42,22 @@ class OppgavelisteE2ETest : AbstractE2EIntegrationTest() {
                   "paVentInfo": null
                 }
             """.trimIndent()
-        assertJsonEquals(expectedOppgaveJson, oppgaveUtenGenererteFelter)
+        assertJsonEquals(
+            expectedOppgaveJson,
+            oppgave,
+            "id",
+            "opprettetTidspunkt",
+            "opprinneligSoeknadstidspunkt",
+            "behandlingOpprettetTidspunkt",
+            "personPseudoId"
+        )
     }
 
     fun assertMaksimalOppgaveJson(oppgave: JsonNode) {
         // Sjekk genererte felter
         assertTrue(oppgave["id"]?.takeUnless { it.isNull }?.isTextual == true)
-        val tiMinutterSidenLocalDateTime = LocalDateTime.now().minusSeconds(60*10)
-        val tiMinutterSiden = Instant.now().minusSeconds(60*10)
+        val tiMinutterSidenLocalDateTime = LocalDateTime.now().minusSeconds(60 * 10)
+        val tiMinutterSiden = Instant.now().minusSeconds(60 * 10)
         assertAfter(tiMinutterSiden, Instant.parse(oppgave["opprettetTidspunkt"].asText()))
         assertAfter(tiMinutterSiden, Instant.parse(oppgave["opprinneligSoeknadstidspunkt"].asText()))
         assertAfter(tiMinutterSiden, Instant.parse(oppgave["behandlingOpprettetTidspunkt"].asText()))
@@ -69,24 +68,6 @@ class OppgavelisteE2ETest : AbstractE2EIntegrationTest() {
             assertAfter(tiMinutterSidenLocalDateTime, LocalDateTime.parse(kommentar["opprettet"].asText()))
         }
         assertDoesNotThrow { oppgave["personPseudoId"].asUUID() }
-
-        val oppgaveUtenGenererteFelter = (oppgave as ObjectNode).apply {
-            remove("id")
-            remove("opprettetTidspunkt")
-            remove("opprinneligSoeknadstidspunkt")
-            remove("behandlingOpprettetTidspunkt")
-            (get("paVentInfo") as ObjectNode).apply {
-                remove("dialogRef")
-                remove("opprettet")
-                get("kommentarer").forEach { kommentar ->
-                    (kommentar as ObjectNode).apply {
-                        remove("id")
-                        remove("opprettet")
-                    }
-                }
-            }
-            remove("personPseudoId")
-        }
 
         // Sjekk mappede felter
         @Language("JSON")
@@ -124,7 +105,19 @@ class OppgavelisteE2ETest : AbstractE2EIntegrationTest() {
                   }
                 }
             """.trimIndent()
-        assertJsonEquals(expectedOppgaveJson, oppgaveUtenGenererteFelter)
+        assertJsonEquals(
+            expectedOppgaveJson,
+            oppgave,
+            "id",
+            "opprettetTidspunkt",
+            "opprinneligSoeknadstidspunkt",
+            "behandlingOpprettetTidspunkt",
+            "paVentInfo.dialogRef",
+            "paVentInfo.opprettet",
+            "paVentInfo.kommentarer.id",
+            "paVentInfo.kommentarer.opprettet",
+            "personPseudoId"
+        )
     }
 
     fun hentOgAssertOppgaveIOppgaveliste(
@@ -411,13 +404,5 @@ class OppgavelisteE2ETest : AbstractE2EIntegrationTest() {
 
     private fun assertAtLeast(expectedMinimum: Int, actual: Int) {
         assertTrue(actual >= expectedMinimum) { "Forventet minst $expectedMinimum, men var $actual" }
-    }
-
-    private fun assertJsonEquals(expectedJson: String, actualJsonNode: JsonNode) {
-        val writer = objectMapper.writerWithDefaultPrettyPrinter()
-        assertEquals(
-            writer.writeValueAsString(objectMapper.readTree(expectedJson)),
-            writer.writeValueAsString(actualJsonNode)
-        )
     }
 }

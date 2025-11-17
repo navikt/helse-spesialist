@@ -1,9 +1,8 @@
 package no.nav.helse.spesialist.api.rest.behandlinger.notater
 
-import com.fasterxml.jackson.databind.JsonNode
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.spesialist.api.IntegrationTestFixture
-import no.nav.helse.spesialist.api.objectMapper
+import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.domain.NotatId
 import no.nav.helse.spesialist.domain.NotatType
 import no.nav.helse.spesialist.domain.testfixtures.lagBehandling
@@ -77,14 +76,6 @@ class PostBehandlingNotaterIntegrationTest {
         assertNull(lagretNotat.feilregistrertTidspunkt, "feilregistrertTidspunkt ble lagret selv om notatet er nytt")
 
         // Bekreft at svaret ikke inneholdt noe mer
-        assertEquals(expectedJsonString = """{ "id" : ${notatId.value} }""", actualJsonNode = body)
-    }
-
-    private fun assertEquals(expectedJsonString: String, actualJsonNode: JsonNode) {
-        val writer = objectMapper.writerWithDefaultPrettyPrinter()
-        assertEquals(
-            writer.writeValueAsString(objectMapper.readTree(expectedJsonString)),
-            writer.writeValueAsString(actualJsonNode)
-        )
+        assertJsonEquals("""{ "id" : ${notatId.value} }""", body)
     }
 }

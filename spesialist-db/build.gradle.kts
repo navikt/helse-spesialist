@@ -16,5 +16,6 @@ dependencies {
     testFixturesImplementation(libs.testcontainers.postgres)
     testFixturesImplementation(libs.kotliquery)
 
+    testImplementation(testFixtures(project(":spesialist-application")))
     testImplementation(testFixtures(project(":spesialist-domain")))
 }
