@@ -171,9 +171,12 @@ class GetOppgaverBehandler : GetBehandler<Oppgaver, ApiOppgaveProjeksjonSide, Ap
             elementer =
                 elementer.map { oppgave ->
                     val person = personer.getRequired(oppgave.identitetsnummer)
+                    val personPseudoId =
+                        transaksjon.personPseudoIdDao.nyPersonPseudoId(identitetsnummer = person.id)
                     ApiOppgaveProjeksjon(
                         id = oppgave.id.toString(),
                         aktorId = person.aktørId,
+                        personPseudoId = personPseudoId.value,
                         navn =
                             person.info?.let { personInfo ->
                                 ApiPersonnavn(

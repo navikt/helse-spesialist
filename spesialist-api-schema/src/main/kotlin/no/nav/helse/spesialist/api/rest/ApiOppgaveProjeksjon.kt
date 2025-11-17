@@ -23,6 +23,7 @@ import java.util.UUID
 data class ApiOppgaveProjeksjon(
     val id: String,
     val aktorId: String,
+    val personPseudoId: UUID,
     val navn: ApiPersonnavn,
     val egenskaper: List<ApiEgenskap>,
     val tildeling: ApiTildeling?,

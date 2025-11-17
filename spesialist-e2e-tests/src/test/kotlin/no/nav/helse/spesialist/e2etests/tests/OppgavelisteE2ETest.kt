@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.e2etests.tests
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
+import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveSorteringsfelt
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
@@ -11,6 +12,7 @@ import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.time.Instant
@@ -25,12 +27,14 @@ class OppgavelisteE2ETest : AbstractE2EIntegrationTest() {
         assertAfter(tiMinutterSiden, Instant.parse(oppgave["opprettetTidspunkt"].asText()))
         assertAfter(tiMinutterSiden, Instant.parse(oppgave["opprinneligSoeknadstidspunkt"].asText()))
         assertAfter(tiMinutterSiden, Instant.parse(oppgave["behandlingOpprettetTidspunkt"].asText()))
+        assertDoesNotThrow { oppgave["personPseudoId"].asUUID() }
 
         val oppgaveUtenGenererteFelter = (oppgave as ObjectNode).apply {
             remove("id")
             remove("opprettetTidspunkt")
             remove("opprinneligSoeknadstidspunkt")
             remove("behandlingOpprettetTidspunkt")
+            remove("personPseudoId")
         }
 
         @Language("JSON")
@@ -64,6 +68,7 @@ class OppgavelisteE2ETest : AbstractE2EIntegrationTest() {
             assertIsNumber(kommentar["id"])
             assertAfter(tiMinutterSidenLocalDateTime, LocalDateTime.parse(kommentar["opprettet"].asText()))
         }
+        assertDoesNotThrow { oppgave["personPseudoId"].asUUID() }
 
         val oppgaveUtenGenererteFelter = (oppgave as ObjectNode).apply {
             remove("id")
@@ -80,6 +85,7 @@ class OppgavelisteE2ETest : AbstractE2EIntegrationTest() {
                     }
                 }
             }
+            remove("personPseudoId")
         }
 
         // Sjekk mappede felter
