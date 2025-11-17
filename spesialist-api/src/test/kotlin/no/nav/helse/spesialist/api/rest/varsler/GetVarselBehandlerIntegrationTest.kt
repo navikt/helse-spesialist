@@ -224,9 +224,7 @@ class GetVarselBehandlerIntegrationTest {
             {
               "type": "about:blank",
               "status": 500,
-              "title": "Fant ikke varseldefinisjon for varselkode",
-              "detail": "Varselkode: ${varsel.kode}",
-              "code": "VARSELDEFINISJON_MANGLER_FOR_KODE"
+              "title": "Internal Server Error"
             }
             """.trimIndent(),
             response.bodyAsJsonNode!!
@@ -306,9 +304,7 @@ class GetVarselBehandlerIntegrationTest {
             {
               "type": "about:blank",
               "status": 500,
-              "title": "Fant ikke varseldefinisjon for varselvurdering",
-              "detail": "Varsel-id: ${varsel.id.value}",
-              "code": "VARSELDEFINISJON_MANGLER_FOR_VURDERING"
+              "title": "Internal Server Error"
             }
             """.trimIndent(),
             response.bodyAsJsonNode!!

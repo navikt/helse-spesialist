@@ -10,8 +10,6 @@ import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.harTilgangTilPerson
 import no.nav.helse.spesialist.api.rest.resources.Varsler
 import no.nav.helse.spesialist.api.rest.varsler.GetVarselErrorCode.MANGLER_TILGANG_TIL_PERSON
-import no.nav.helse.spesialist.api.rest.varsler.GetVarselErrorCode.VARSELDEFINISJON_MANGLER_FOR_KODE
-import no.nav.helse.spesialist.api.rest.varsler.GetVarselErrorCode.VARSELDEFINISJON_MANGLER_FOR_VURDERING
 import no.nav.helse.spesialist.api.rest.varsler.GetVarselErrorCode.VARSEL_IKKE_FUNNET
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Saksbehandler
@@ -52,10 +50,10 @@ class GetVarselBehandler : GetBehandler<Varsler.VarselId, ApiVarsel, GetVarselEr
         val varseldefinisjon =
             if (varselvurdering != null) {
                 transaksjon.varseldefinisjonRepository.finn(varselvurdering.vurdertDefinisjonId)
-                    ?: return RestResponse.Error(VARSELDEFINISJON_MANGLER_FOR_VURDERING, detail = "Varsel-id: ${varsel.id.value}")
+                    ?: error("Fant ikke varseldefinisjon brukt i vurdering av varsel")
             } else {
                 transaksjon.varseldefinisjonRepository.finnGjeldendeFor(varsel.kode)
-                    ?: return RestResponse.Error(VARSELDEFINISJON_MANGLER_FOR_KODE, detail = "Varselkode: ${varsel.kode}")
+                    ?: error("Fant ikke gjeldende varseldefinisjon for aktuell varselkode")
             }
 
         val apiVarsel =
@@ -98,6 +96,4 @@ enum class GetVarselErrorCode(
 ) : ApiErrorCode {
     MANGLER_TILGANG_TIL_PERSON(HttpStatusCode.Forbidden, "Mangler tilgang til person"),
     VARSEL_IKKE_FUNNET(HttpStatusCode.NotFound, "Fant ikke varsel"),
-    VARSELDEFINISJON_MANGLER_FOR_KODE(HttpStatusCode.InternalServerError, "Fant ikke varseldefinisjon for varselkode"),
-    VARSELDEFINISJON_MANGLER_FOR_VURDERING(HttpStatusCode.InternalServerError, "Fant ikke varseldefinisjon for varselvurdering"),
 }

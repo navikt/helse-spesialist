@@ -8,8 +8,8 @@ import no.nav.helse.spesialist.api.rest.DeleteBehandler
 import no.nav.helse.spesialist.api.rest.RestResponse
 import no.nav.helse.spesialist.api.rest.harTilgangTilPerson
 import no.nav.helse.spesialist.api.rest.resources.Varsler
-import no.nav.helse.spesialist.api.rest.varsler.DeleteVarselvurderingErrorCode.KAN_IKKE_FJERNE_VURDERING
 import no.nav.helse.spesialist.api.rest.varsler.DeleteVarselvurderingErrorCode.MANGLER_TILGANG_TIL_PERSON
+import no.nav.helse.spesialist.api.rest.varsler.DeleteVarselvurderingErrorCode.VARSEL_HAR_FEIL_STATUS
 import no.nav.helse.spesialist.api.rest.varsler.DeleteVarselvurderingErrorCode.VARSEL_IKKE_FUNNET
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.domain.Identitetsnummer
@@ -49,7 +49,7 @@ class DeleteVarselvurderingBehandler : DeleteBehandler<Varsler.VarselId.Vurderin
             return RestResponse.Error(MANGLER_TILGANG_TIL_PERSON)
         }
         if (varsel.status in listOf(GODKJENT, INAKTIV, AVVIST, AVVIKLET)) {
-            return RestResponse.Error(KAN_IKKE_FJERNE_VURDERING)
+            return RestResponse.Error(VARSEL_HAR_FEIL_STATUS)
         }
         if (varsel.status == AKTIV && varsel.manglerVurdering()) return RestResponse.NoContent()
         varsel.fjernVurdering()
@@ -68,5 +68,5 @@ enum class DeleteVarselvurderingErrorCode(
 ) : ApiErrorCode {
     MANGLER_TILGANG_TIL_PERSON(HttpStatusCode.Forbidden, "Mangler tilgang til person"),
     VARSEL_IKKE_FUNNET(HttpStatusCode.NotFound, "Varsel ikke funnet"),
-    KAN_IKKE_FJERNE_VURDERING(HttpStatusCode.Conflict, "Varsel har en status som ikke tillater at vurderingen kan fjernes"),
+    VARSEL_HAR_FEIL_STATUS(HttpStatusCode.Conflict, "Varsel har en status som ikke tillater at vurderingen kan fjernes"),
 }
