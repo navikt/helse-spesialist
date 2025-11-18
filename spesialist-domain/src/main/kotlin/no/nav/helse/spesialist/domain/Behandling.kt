@@ -27,13 +27,13 @@ class Behandling private constructor(
     id: BehandlingUnikId,
     val spleisBehandlingId: SpleisBehandlingId?,
     val vedtaksperiodeId: VedtaksperiodeId,
-    val utbetalingId: UtbetalingId?,
-    val tags: Set<String>,
-    val tilstand: Tilstand,
-    val fom: LocalDate,
-    val tom: LocalDate,
-    val skjæringstidspunkt: LocalDate,
-    val yrkesaktivitetstype: Yrkesaktivitetstype,
+    utbetalingId: UtbetalingId?,
+    tags: Set<String>,
+    tilstand: Tilstand,
+    fom: LocalDate,
+    tom: LocalDate,
+    skjæringstidspunkt: LocalDate,
+    yrkesaktivitetstype: Yrkesaktivitetstype,
     søknadIder: Set<UUID>,
 ) : AggregateRoot<BehandlingUnikId>(id) {
     enum class Tilstand {
@@ -43,6 +43,21 @@ class Behandling private constructor(
         AvsluttetUtenVedtakMedVarsler,
         KlarTilBehandling,
     }
+
+    var utbetalingId: UtbetalingId? = utbetalingId
+        private set
+    var tags: Set<String> = tags
+        private set
+    var tilstand: Tilstand = tilstand
+        private set
+    var fom: LocalDate = fom
+        private set
+    var tom: LocalDate = tom
+        private set
+    var skjæringstidspunkt: LocalDate = skjæringstidspunkt
+        private set
+    var yrkesaktivitetstype: Yrkesaktivitetstype = yrkesaktivitetstype
+        private set
 
     private val søknadIder = søknadIder.toMutableSet()
 

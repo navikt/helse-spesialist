@@ -1,7 +1,11 @@
 package no.nav.helse.spesialist.db.repository
 
+import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
+import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.UtbetalingId
+import no.nav.helse.spesialist.domain.testfixtures.feb
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagBehandling
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
@@ -216,6 +220,73 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
 
         // then
         assertEquals(0, funnet.size)
+    }
+
+    @Test
+    fun `lagre behandling`() {
+        // given
+        val behandling = lagBehandling()
+
+        //when
+        repository.lagre(behandling)
+
+        //then
+        val funnet = repository.finn(behandling.id)
+        assertNotNull(funnet)
+        assertEquals(behandling.id, funnet.id)
+        assertEquals(behandling.spleisBehandlingId, funnet.spleisBehandlingId)
+        assertEquals(behandling.vedtaksperiodeId, funnet.vedtaksperiodeId)
+        assertEquals(behandling.utbetalingId, funnet.utbetalingId)
+        assertEquals(behandling.fom, funnet.fom)
+        assertEquals(behandling.tom, funnet.tom)
+        assertEquals(behandling.skjæringstidspunkt, funnet.skjæringstidspunkt)
+        assertEquals(behandling.tilstand, funnet.tilstand)
+        assertEquals(behandling.tags, funnet.tags)
+        assertEquals(behandling.yrkesaktivitetstype, funnet.yrkesaktivitetstype)
+    }
+
+    @Test
+    fun `oppdater behandling`() {
+        // given
+        val orginalBehandling = lagBehandling(
+            utbetalingId = UtbetalingId(UUID.randomUUID()),
+            fom = 1.feb(2018),
+            tom = 28.feb(2018),
+            skjæringstidspunkt = 1.feb(2018),
+            tilstand = Behandling.Tilstand.KlarTilBehandling,
+            tags = setOf("DelvisInnvilget"),
+            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
+        )
+        repository.lagre(orginalBehandling)
+
+        //when
+        val oppdatertBehandling = lagBehandling(
+            id = orginalBehandling.id,
+            spleisBehandlingId = orginalBehandling.spleisBehandlingId,
+            vedtaksperiodeId = orginalBehandling.vedtaksperiodeId,
+            utbetalingId = UtbetalingId(UUID.randomUUID()),
+            fom = 1.jan(2018),
+            tom = 31.jan(2018),
+            skjæringstidspunkt = 1.jan(2018),
+            tilstand = Behandling.Tilstand.VedtakFattet,
+            tags = setOf("Innvilget"),
+            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSLEDIG
+        )
+        repository.lagre(oppdatertBehandling)
+
+        //then
+        val funnet = repository.finn(orginalBehandling.id)
+        assertNotNull(funnet)
+        assertEquals(orginalBehandling.id, funnet.id)
+        assertEquals(orginalBehandling.spleisBehandlingId, funnet.spleisBehandlingId)
+        assertEquals(orginalBehandling.vedtaksperiodeId, funnet.vedtaksperiodeId)
+        assertEquals(oppdatertBehandling.utbetalingId, funnet.utbetalingId)
+        assertEquals(oppdatertBehandling.fom, funnet.fom)
+        assertEquals(oppdatertBehandling.tom, funnet.tom)
+        assertEquals(oppdatertBehandling.skjæringstidspunkt, funnet.skjæringstidspunkt)
+        assertEquals(oppdatertBehandling.tilstand, funnet.tilstand)
+        assertEquals(oppdatertBehandling.tags, funnet.tags)
+        assertEquals(oppdatertBehandling.yrkesaktivitetstype, funnet.yrkesaktivitetstype)
     }
 
     @Test

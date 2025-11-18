@@ -12,6 +12,7 @@ import no.nav.helse.spesialist.domain.BehandlingUnikId
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.UtbetalingId
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
+import java.time.LocalDateTime
 import java.util.UUID
 
 class PgBehandlingRepository(
@@ -60,7 +61,7 @@ class PgBehandlingRepository(
             .toSet()
 
     override fun lagre(behandling: Behandling) {
-        // TODO: OBS OBS, DENNE LAGRER IKKE FAKTISK BEHANDLINGEN I BEHANDLING-TABELLEN (MEN BØR GJØRE DET)
+        lagreBehandling(behandling)
         val spleisBehandlingId = checkNotNull(behandling.spleisBehandlingId)
         behandling.søknadIder().forEach { søknadId ->
             asSQL(
@@ -71,6 +72,45 @@ class PgBehandlingRepository(
                 "soknadId" to søknadId,
             ).update()
         }
+    }
+
+    private fun lagreBehandling(behandling: Behandling) {
+        asSQL(
+            """
+            INSERT INTO behandling(
+                unik_id, spleis_behandling_id, vedtaksperiode_id, utbetaling_id, 
+                fom, tom, skjæringstidspunkt, tilstand, tags, yrkesaktivitetstype,
+                opprettet_tidspunkt, opprettet_av_hendelse, tilstand_endret_tidspunkt, tilstand_endret_av_hendelse 
+            ) 
+            VALUES (
+                :unik_id, :spleis_behandling_id, :vedtaksperiode_id, :utbetaling_id, 
+                :fom, :tom, :skjaeringstidspunkt, :tilstand::generasjon_tilstand, :tags, :yrkesaktivitetstype,
+                :opprettet_tidspunkt, :placeholder_uuid::uuid, :tilstand_endret_tidspunkt, :placeholder_uuid::uuid 
+            )
+            ON CONFLICT (unik_id) DO UPDATE SET 
+                utbetaling_id = excluded.utbetaling_id,
+                fom = excluded.fom,
+                tom = excluded.tom,
+                skjæringstidspunkt = excluded.skjæringstidspunkt,
+                tilstand = excluded.tilstand,
+                tags = excluded.tags,
+                yrkesaktivitetstype = excluded.yrkesaktivitetstype,
+                tilstand_endret_tidspunkt = excluded.tilstand_endret_tidspunkt
+            """.trimIndent(),
+            "unik_id" to behandling.id.value,
+            "vedtaksperiode_id" to behandling.vedtaksperiodeId.value,
+            "spleis_behandling_id" to behandling.spleisBehandlingId?.value,
+            "utbetaling_id" to behandling.utbetalingId?.value,
+            "tags" to behandling.tags.toTypedArray(),
+            "tilstand" to behandling.tilstand.name,
+            "opprettet_tidspunkt" to LocalDateTime.now(),
+            "fom" to behandling.fom,
+            "tom" to behandling.tom,
+            "skjaeringstidspunkt" to behandling.skjæringstidspunkt,
+            "yrkesaktivitetstype" to behandling.yrkesaktivitetstype.name,
+            "tilstand_endret_tidspunkt" to LocalDateTime.now(),
+            "placeholder_uuid" to "00000000-0000-0000-0000-000000000000",
+        ).update()
     }
 
     private fun hentSøkadIderForBehandling(behandlingId: SpleisBehandlingId): Set<UUID> =
