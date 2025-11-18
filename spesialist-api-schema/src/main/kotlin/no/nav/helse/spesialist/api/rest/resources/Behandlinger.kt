@@ -19,7 +19,7 @@ class Behandlinger {
             val parent: BehandlingId,
         )
 
-        @Resource("/vedtak")
+        @Resource("vedtak")
         class Vedtak(
             val parent: BehandlingId,
         )
