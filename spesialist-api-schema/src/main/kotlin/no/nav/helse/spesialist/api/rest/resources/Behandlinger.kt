@@ -18,5 +18,10 @@ class Behandlinger {
         class Notater(
             val parent: BehandlingId,
         )
+
+        @Resource("/vedtak")
+        class Vedtak(
+            val parent: BehandlingId,
+        )
     }
 }

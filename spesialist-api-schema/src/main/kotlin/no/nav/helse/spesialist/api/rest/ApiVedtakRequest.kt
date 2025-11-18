@@ -17,6 +17,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 @Serializable
-class ApiFattVedtakRequest(
+class ApiVedtakRequest(
     val begrunnelse: String?,
 )

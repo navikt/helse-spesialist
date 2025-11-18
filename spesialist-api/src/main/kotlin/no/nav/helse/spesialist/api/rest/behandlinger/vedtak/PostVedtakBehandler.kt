@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.api.rest
+package no.nav.helse.spesialist.api.rest.behandlinger.vedtak
 
 import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
@@ -11,7 +11,12 @@ import no.nav.helse.modell.melding.VedtaksperiodeGodkjentManuelt
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
-import no.nav.helse.spesialist.api.rest.resources.Vedtak
+import no.nav.helse.spesialist.api.rest.ApiErrorCode
+import no.nav.helse.spesialist.api.rest.ApiVedtakRequest
+import no.nav.helse.spesialist.api.rest.PostBehandler
+import no.nav.helse.spesialist.api.rest.RestResponse
+import no.nav.helse.spesialist.api.rest.harTilgangTilPerson
+import no.nav.helse.spesialist.api.rest.resources.Behandlinger
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.VarselRepository
 import no.nav.helse.spesialist.application.VarseldefinisjonRepository
@@ -26,28 +31,28 @@ import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import java.time.LocalDateTime
 
-class PostFattVedtakBehandler(
+class PostVedtakBehandler(
     private val environmentToggles: EnvironmentToggles,
-) : PostBehandler<Vedtak.Id.Fatt, ApiFattVedtakRequest, Unit, ApiPostFattVedtakErrorCode> {
+) : PostBehandler<Behandlinger.BehandlingId.Vedtak, ApiVedtakRequest, Unit, ApiPostVedtakErrorCode> {
     override fun behandle(
-        resource: Vedtak.Id.Fatt,
-        request: ApiFattVedtakRequest,
+        resource: Behandlinger.BehandlingId.Vedtak,
+        request: ApiVedtakRequest,
         saksbehandler: Saksbehandler,
         tilgangsgrupper: Set<Tilgangsgruppe>,
         transaksjon: SessionContext,
         outbox: Outbox,
-    ): RestResponse<Unit, ApiPostFattVedtakErrorCode> {
+    ): RestResponse<Unit, ApiPostVedtakErrorCode> {
         try {
             val spleisBehandlingId = SpleisBehandlingId(resource.parent.behandlingId)
             val behandling =
                 transaksjon.behandlingRepository.finn(spleisBehandlingId)
-                    ?: return RestResponse.Error(ApiPostFattVedtakErrorCode.BEHANDLING_IKKE_FUNNET)
+                    ?: return RestResponse.Error(ApiPostVedtakErrorCode.BEHANDLING_IKKE_FUNNET)
             val vedtaksperiode =
                 transaksjon.vedtaksperiodeRepository.finn(behandling.vedtaksperiodeId)
-                    ?: return RestResponse.Error(ApiPostFattVedtakErrorCode.VEDTAKSPERIODE_IKKE_FUNNET)
+                    ?: return RestResponse.Error(ApiPostVedtakErrorCode.VEDTAKSPERIODE_IKKE_FUNNET)
 
             if (transaksjon.behandlingRepository.finnNyesteForVedtaksperiode(vedtaksperiode.id) != behandling) {
-                return RestResponse.Error(ApiPostFattVedtakErrorCode.KAN_IKKE_FATTE_VEDTAK_PÅ_ELDRE_BEHANDLING)
+                return RestResponse.Error(ApiPostVedtakErrorCode.KAN_IKKE_FATTE_VEDTAK_PÅ_ELDRE_BEHANDLING)
             }
 
             val fødselsnummer = vedtaksperiode.fødselsnummer
@@ -58,13 +63,13 @@ class PostFattVedtakBehandler(
                     transaksjon = transaksjon,
                 )
             ) {
-                return RestResponse.Error(ApiPostFattVedtakErrorCode.MANGLER_TILGANG_TIL_PERSON)
+                return RestResponse.Error(ApiPostVedtakErrorCode.MANGLER_TILGANG_TIL_PERSON)
             }
 
             val oppgave =
                 transaksjon.oppgaveRepository.finn(spleisBehandlingId)
-                    ?: return RestResponse.Error(ApiPostFattVedtakErrorCode.OPPGAVE_IKKE_FUNNET)
-            if (oppgave.tilstand != Oppgave.AvventerSaksbehandler) return RestResponse.Error(ApiPostFattVedtakErrorCode.OPPGAVE_FEIL_TILSTAND)
+                    ?: return RestResponse.Error(ApiPostVedtakErrorCode.OPPGAVE_IKKE_FUNNET)
+            if (oppgave.tilstand != Oppgave.AvventerSaksbehandler) return RestResponse.Error(ApiPostVedtakErrorCode.OPPGAVE_FEIL_TILSTAND)
 
             val totrinnsvurdering = transaksjon.totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)
             var saksbehandlerSomFattetVedtak = saksbehandler
@@ -75,7 +80,7 @@ class PostFattVedtakBehandler(
                 totrinnsvurdering.godkjenn(beslutter, tilgangsgrupper)
                 saksbehandlerSomFattetVedtak =
                     totrinnsvurdering.saksbehandler?.let { transaksjon.saksbehandlerRepository.finn(it) }
-                        ?: return RestResponse.Error(ApiPostFattVedtakErrorCode.TOTRINNSVURDERING_MANGLER_SAKSBEHANDLER)
+                        ?: return RestResponse.Error(ApiPostVedtakErrorCode.TOTRINNSVURDERING_MANGLER_SAKSBEHANDLER)
                 val innslag = Historikkinnslag.totrinnsvurderingFerdigbehandletInnslag(beslutter)
                 transaksjon.periodehistorikkDao.lagreMedOppgaveId(innslag, oppgave.id)
                 transaksjon.totrinnsvurderingRepository.lagre(totrinnsvurdering)
@@ -117,7 +122,7 @@ class PostFattVedtakBehandler(
         begrunnelse: String?,
         outbox: Outbox,
     ) {
-        if (overlapperMedInfotrygd()) throw FattVedtakException(ApiPostFattVedtakErrorCode.OVERLAPPER_MED_INFOTRYGD)
+        if (overlapperMedInfotrygd()) throw FattVedtakException(ApiPostVedtakErrorCode.OVERLAPPER_MED_INFOTRYGD)
         val saksbehandlerOid = saksbehandler.id
         validerOgGodkjennVarsler(
             behandlingRepository = transaksjon.behandlingRepository,
@@ -164,7 +169,7 @@ class PostFattVedtakBehandler(
         val behandlingspakke = behandlingRepository.finnBehandlingspakke(this, fødselsnummer)
         val behandlingUnikIder = behandlingspakke.map { behandling -> behandling.id }
         val varsler = varselRepository.finnVarslerFor(behandlingUnikIder)
-        if (varsler.any { it.trengerVurdering() }) throw FattVedtakException(ApiPostFattVedtakErrorCode.VARSLER_MANGLER_VURDERING)
+        if (varsler.any { it.trengerVurdering() }) throw FattVedtakException(ApiPostVedtakErrorCode.VARSLER_MANGLER_VURDERING)
         varsler
             .filter { it.kanGodkjennes() }
             .forEach {
@@ -190,7 +195,7 @@ class PostFattVedtakBehandler(
         godkjenn()
         val varseldefinisjon =
             varseldefinisjonRepository.finnGjeldendeFor(kode)
-                ?: throw FattVedtakException(ApiPostFattVedtakErrorCode.VARSEL_MANGLER_VARSELDEFINISJON)
+                ?: throw FattVedtakException(ApiPostVedtakErrorCode.VARSEL_MANGLER_VARSELDEFINISJON)
         outbox.leggTil(
             fødselsnummer = fødselsnummer,
             hendelse =
@@ -212,10 +217,10 @@ class PostFattVedtakBehandler(
         tilgangsgrupper: Set<Tilgangsgruppe>,
     ) {
         if (Tilgangsgruppe.BESLUTTER !in tilgangsgrupper && !environmentToggles.kanGodkjenneUtenBesluttertilgang) {
-            throw FattVedtakException(ApiPostFattVedtakErrorCode.SAKSBEHANDLER_MANGLER_BESLUTTERTILGANG)
+            throw FattVedtakException(ApiPostVedtakErrorCode.SAKSBEHANDLER_MANGLER_BESLUTTERTILGANG)
         }
         if (this.saksbehandler?.value == beslutter.id.value && !environmentToggles.kanBeslutteEgneSaker) {
-            throw FattVedtakException(ApiPostFattVedtakErrorCode.SAKSBEHANDLER_KAN_IKKE_BESLUTTE_EGEN_OPPGAVE)
+            throw FattVedtakException(ApiPostVedtakErrorCode.SAKSBEHANDLER_KAN_IKKE_BESLUTTE_EGEN_OPPGAVE)
         }
         settBeslutter(beslutter.id)
         ferdigstill()
@@ -295,11 +300,11 @@ class PostFattVedtakBehandler(
     }
 
     class FattVedtakException(
-        val code: ApiPostFattVedtakErrorCode,
+        val code: ApiPostVedtakErrorCode,
     ) : Exception()
 }
 
-enum class ApiPostFattVedtakErrorCode(
+enum class ApiPostVedtakErrorCode(
     override val title: String,
     override val statusCode: HttpStatusCode,
 ) : ApiErrorCode {

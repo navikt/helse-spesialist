@@ -1,4 +1,4 @@
-package no.nav.helse.spesialist.api.rest
+package no.nav.helse.spesialist.api.rest.behandlinger.vedtak
 
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.Varselvurdering
@@ -24,14 +24,14 @@ import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiode
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.test.Test
 
-class PostFattVedtakIntegrationTest {
+class PostVedtakBehandlerIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
     private val sessionContext = integrationTestFixture.sessionFactory.sessionContext
 
@@ -44,13 +44,13 @@ class PostFattVedtakIntegrationTest {
 
         // When:
         val response = integrationTestFixture.post(
-            url = "/api/vedtak/$behandlingId/fatt",
+            url = "/api/behandlinger/$behandlingId/vedtak",
             body = "{}",
             saksbehandler = saksbehandler,
         )
 
         // Then:
-        assertEquals(HttpStatusCode.NotFound.value, response.status)
+        Assertions.assertEquals(HttpStatusCode.NotFound.value, response.status)
         assertJsonEquals(
             """
             {
@@ -76,13 +76,13 @@ class PostFattVedtakIntegrationTest {
 
         // When:
         val response = integrationTestFixture.post(
-            url = "/api/vedtak/${behandlingId.value}/fatt",
+            url = "/api/behandlinger/${behandlingId.value}/vedtak",
             body = "{}",
             saksbehandler = saksbehandler,
         )
 
         // Then:
-        assertEquals(HttpStatusCode.NotFound.value, response.status)
+        Assertions.assertEquals(HttpStatusCode.NotFound.value, response.status)
         assertJsonEquals(
             """
             {
@@ -110,13 +110,13 @@ class PostFattVedtakIntegrationTest {
 
         // When:
         val response = integrationTestFixture.post(
-            url = "/api/vedtak/${behandling.spleisBehandlingId?.value}/fatt",
+            url = "/api/behandlinger/${behandling.spleisBehandlingId?.value}/vedtak",
             body = "{}",
             saksbehandler = saksbehandler,
         )
 
         // Then:
-        assertEquals(HttpStatusCode.Forbidden.value, response.status)
+        Assertions.assertEquals(HttpStatusCode.Forbidden.value, response.status)
     }
 
     @Test
@@ -133,13 +133,13 @@ class PostFattVedtakIntegrationTest {
 
         // When:
         val response = integrationTestFixture.post(
-            url = "/api/vedtak/${behandling.spleisBehandlingId?.value}/fatt",
+            url = "/api/behandlinger/${behandling.spleisBehandlingId?.value}/vedtak",
             body = "{}",
             saksbehandler = saksbehandler,
         )
 
         // Then:
-        assertEquals(HttpStatusCode.BadRequest.value, response.status)
+        Assertions.assertEquals(HttpStatusCode.BadRequest.value, response.status)
         assertJsonEquals(
             """
             {
@@ -170,13 +170,13 @@ class PostFattVedtakIntegrationTest {
         sessionContext.oppgaveRepository.lagre(oppgave)
         // When:
         val response = integrationTestFixture.post(
-            url = "/api/vedtak/${behandling.spleisBehandlingId?.value}/fatt",
+            url = "/api/behandlinger/${behandling.spleisBehandlingId?.value}/vedtak",
             body = "{}",
             saksbehandler = saksbehandler,
         )
 
         // Then:
-        assertEquals(HttpStatusCode.BadRequest.value, response.status)
+        Assertions.assertEquals(HttpStatusCode.BadRequest.value, response.status)
         assertJsonEquals(
             """
             {
@@ -212,14 +212,14 @@ class PostFattVedtakIntegrationTest {
 
         // When:
         val response = integrationTestFixture.post(
-            url = "/api/vedtak/${behandling.spleisBehandlingId?.value}/fatt",
+            url = "/api/behandlinger/${behandling.spleisBehandlingId?.value}/vedtak",
             body = "{}",
             saksbehandler = saksbehandler,
             tilgangsgrupper = emptySet()
         )
 
         // Then:
-        assertEquals(HttpStatusCode.Forbidden.value, response.status)
+        Assertions.assertEquals(HttpStatusCode.Forbidden.value, response.status)
         assertJsonEquals(
             """
             {
@@ -255,14 +255,14 @@ class PostFattVedtakIntegrationTest {
 
         // When:
         val response = integrationTestFixture.post(
-            url = "/api/vedtak/${behandling.spleisBehandlingId?.value}/fatt",
+            url = "/api/behandlinger/${behandling.spleisBehandlingId?.value}/vedtak",
             body = "{}",
             saksbehandler = saksbehandler,
             tilgangsgrupper = setOf(Tilgangsgruppe.BESLUTTER)
         )
 
         // Then:
-        assertEquals(HttpStatusCode.Forbidden.value, response.status)
+        Assertions.assertEquals(HttpStatusCode.Forbidden.value, response.status)
         assertJsonEquals(
             """
             {
@@ -298,14 +298,14 @@ class PostFattVedtakIntegrationTest {
 
         // When:
         val response = integrationTestFixture.post(
-            url = "/api/vedtak/${behandling.spleisBehandlingId?.value}/fatt",
+            url = "/api/behandlinger/${behandling.spleisBehandlingId?.value}/vedtak",
             body = "{}",
             saksbehandler = saksbehandler,
             tilgangsgrupper = setOf(Tilgangsgruppe.BESLUTTER)
         )
 
         // Then:
-        assertEquals(HttpStatusCode.Conflict.value, response.status)
+        Assertions.assertEquals(HttpStatusCode.Conflict.value, response.status)
         assertJsonEquals(
             """
             {
@@ -341,14 +341,14 @@ class PostFattVedtakIntegrationTest {
 
         // When:
         val response = integrationTestFixture.post(
-            url = "/api/vedtak/${behandling.spleisBehandlingId?.value}/fatt",
+            url = "/api/behandlinger/${behandling.spleisBehandlingId?.value}/vedtak",
             body = "{}",
             saksbehandler = saksbehandler,
             tilgangsgrupper = setOf(Tilgangsgruppe.BESLUTTER)
         )
 
         // Then:
-        assertEquals(HttpStatusCode.BadRequest.value, response.status)
+        Assertions.assertEquals(HttpStatusCode.BadRequest.value, response.status)
         assertJsonEquals(
             """
             {
@@ -391,14 +391,14 @@ class PostFattVedtakIntegrationTest {
 
         // When:
         val response = integrationTestFixture.post(
-            url = "/api/vedtak/${behandling.spleisBehandlingId?.value}/fatt",
+            url = "/api/behandlinger/${behandling.spleisBehandlingId?.value}/vedtak",
             body = "{}",
             saksbehandler = saksbehandler,
             tilgangsgrupper = setOf(Tilgangsgruppe.BESLUTTER)
         )
 
         // Then:
-        assertEquals(HttpStatusCode.BadRequest.value, response.status)
+        Assertions.assertEquals(HttpStatusCode.BadRequest.value, response.status)
         assertJsonEquals(
             """
             {
@@ -444,14 +444,14 @@ class PostFattVedtakIntegrationTest {
 
         // When:
         val response = integrationTestFixture.post(
-            url = "/api/vedtak/${behandling.spleisBehandlingId?.value}/fatt",
+            url = "/api/behandlinger/${behandling.spleisBehandlingId?.value}/vedtak",
             body = "{}",
             saksbehandler = saksbehandler,
             tilgangsgrupper = setOf(Tilgangsgruppe.BESLUTTER)
         )
 
         // Then:
-        assertEquals(HttpStatusCode.NoContent.value, response.status)
+        Assertions.assertEquals(HttpStatusCode.NoContent.value, response.status)
     }
 
     @Test
@@ -491,19 +491,19 @@ class PostFattVedtakIntegrationTest {
 
         // When:
         val response = integrationTestFixture.post(
-            url = "/api/vedtak/${behandling.spleisBehandlingId?.value}/fatt",
+            url = "/api/behandlinger/${behandling.spleisBehandlingId?.value}/vedtak",
             body = "{}",
             saksbehandler = saksbehandler,
             tilgangsgrupper = setOf(Tilgangsgruppe.BESLUTTER)
         )
 
         // Then:
-        assertEquals(HttpStatusCode.NoContent.value, response.status)
+        Assertions.assertEquals(HttpStatusCode.NoContent.value, response.status)
         val iderForPubliserteVarsler = integrationTestFixture.meldingPubliserer.publiserteUtgåendeHendelser
             .map { it.hendelse }
             .filterIsInstance<VarselEndret>()
             .map { it.varselId }
-        assertEquals(listOf(vurdertVarsel.id.value), iderForPubliserteVarsler)
+        Assertions.assertEquals(listOf(vurdertVarsel.id.value), iderForPubliserteVarsler)
     }
 
     private fun lagGodkjenningsbehov(behandling: Behandling, vedtaksperiode: Vedtaksperiode): Godkjenningsbehov {

@@ -15,6 +15,7 @@ import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.mediator.dokument.DokumentMediator
 import no.nav.helse.spesialist.api.ApiModule
 import no.nav.helse.spesialist.api.rest.behandlinger.notater.PostBehandlingNotaterBehandler
+import no.nav.helse.spesialist.api.rest.behandlinger.vedtak.PostVedtakBehandler
 import no.nav.helse.spesialist.api.rest.dokument.GetInntektsmeldingBehandler
 import no.nav.helse.spesialist.api.rest.dokument.GetSoknadBehandler
 import no.nav.helse.spesialist.api.rest.tilkommeninntekt.GetTilkomneInntektskilderForPersonBehandler
@@ -53,7 +54,7 @@ fun Routing.restRoutes(
             post(PostTilkomneInntekterBehandler(), restAdapter)
             patch(PatchTilkommenInntektBehandler(), restAdapter)
 
-            post(PostFattVedtakBehandler(environmentToggles), restAdapter)
+            post(PostVedtakBehandler(environmentToggles), restAdapter)
 
             post(PostVedtaksperiodeAnnullerBehandler(), restAdapter)
 

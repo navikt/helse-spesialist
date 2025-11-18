@@ -3,7 +3,7 @@ package no.nav.helse.spesialist.e2etests
 import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.jackson.asUUID
 import com.github.navikt.tbd_libs.jackson.isMissingOrNull
-import no.nav.helse.spesialist.api.rest.ApiFattVedtakRequest
+import no.nav.helse.spesialist.api.rest.ApiVedtakRequest
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.domain.Periode
 import no.nav.helse.spesialist.domain.Saksbehandler
@@ -64,8 +64,8 @@ class SpeilPersonReceiver(
     }
 
     fun saksbehandlerFatterVedtak(behandlingId: UUID, begrunnelse: String? = null) : JsonNode = callHttpPost(
-        relativeUrl = "api/vedtak/$behandlingId/fatt",
-        request = ApiFattVedtakRequest(begrunnelse)
+        relativeUrl = "api/behandlinger/$behandlingId/vedtak",
+        request = ApiVedtakRequest(begrunnelse)
     ).also {
         hentOppdatertPerson()
     }
