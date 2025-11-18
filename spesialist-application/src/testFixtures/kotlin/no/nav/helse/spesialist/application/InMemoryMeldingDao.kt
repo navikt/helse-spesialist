@@ -9,7 +9,7 @@ class InMemoryMeldingDao : MeldingDao {
     val godkjenningsbehov = mutableListOf<Godkjenningsbehov>()
 
     override fun finnGodkjenningsbehov(meldingId: UUID): Godkjenningsbehov {
-        TODO("Not yet implemented")
+        return godkjenningsbehov.first { it.id == meldingId }
     }
 
     override fun finnSisteGodkjenningsbehov(spleisBehandlingId: UUID): Godkjenningsbehov? {
@@ -20,7 +20,11 @@ class InMemoryMeldingDao : MeldingDao {
         TODO("Not yet implemented")
     }
 
-    override fun lagre(melding: Personmelding) {}
+    override fun lagre(melding: Personmelding) {
+        if (melding is Godkjenningsbehov) {
+            godkjenningsbehov.add(melding)
+        }
+    }
 
     override fun lagre(
         id: UUID,

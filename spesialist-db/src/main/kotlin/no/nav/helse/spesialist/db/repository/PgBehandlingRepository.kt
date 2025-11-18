@@ -60,6 +60,17 @@ class PgBehandlingRepository(
             .filterNot { it.spleisBehandlingId == behandling.spleisBehandlingId }
             .toSet()
 
+    override fun finnNyesteForVedtaksperiode(vedtaksperiodeId: VedtaksperiodeId): Behandling? =
+        asSQL(
+            """
+        SELECT unik_id, vedtaksperiode_id, utbetaling_id, spleis_behandling_id, tags, fom, tom, skjæringstidspunkt, opprettet_tidspunkt, tilstand, yrkesaktivitetstype
+        FROM behandling
+        WHERE vedtaksperiode_id = :vedtaksperiode_id
+        ORDER BY id DESC LIMIT 1
+    """,
+            "vedtaksperiode_id" to vedtaksperiodeId.value,
+        ).singleOrNull(::tilBehandling)
+
     override fun lagre(behandling: Behandling) {
         lagreBehandling(behandling)
         val spleisBehandlingId = checkNotNull(behandling.spleisBehandlingId)
@@ -111,6 +122,11 @@ class PgBehandlingRepository(
             "tilstand_endret_tidspunkt" to LocalDateTime.now(),
             "placeholder_uuid" to "00000000-0000-0000-0000-000000000000",
         ).update()
+    }
+
+    override fun lagreAlle(behandlinger: Collection<Behandling>) {
+        // Kan optimaliseres om nødvendig (batch insert / update)
+        behandlinger.forEach(::lagre)
     }
 
     private fun hentSøkadIderForBehandling(behandlingId: SpleisBehandlingId): Set<UUID> =

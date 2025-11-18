@@ -4,6 +4,7 @@ import no.nav.helse.db.BehandlingRepository
 import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.BehandlingUnikId
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.VedtaksperiodeId
 
 class InMemoryBehandlingRepository : BehandlingRepository, AbstractInMemoryRepository<BehandlingUnikId, Behandling>() {
     override fun finn(id: SpleisBehandlingId): Behandling? = alle().firstOrNull { it.spleisBehandlingId == id }
@@ -14,6 +15,9 @@ class InMemoryBehandlingRepository : BehandlingRepository, AbstractInMemoryRepos
         alle()
             .filter { it.skjæringstidspunkt.isEqual(behandling.skjæringstidspunkt) }
             .toSet()
+
+    override fun finnNyesteForVedtaksperiode(vedtaksperiodeId: VedtaksperiodeId): Behandling? =
+        alle().lastOrNull { it.vedtaksperiodeId == vedtaksperiodeId }
 
     override fun deepCopy(original: Behandling): Behandling = Behandling.fraLagring(
         id = original.id,

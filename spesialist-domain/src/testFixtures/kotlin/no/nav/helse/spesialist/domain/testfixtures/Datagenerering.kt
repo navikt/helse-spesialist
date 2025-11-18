@@ -95,13 +95,13 @@ fun lagAvviksvurderingMedEnArbeidsgiver(
     )
 )
 
-fun lagOppgave(behandlingId: SpleisBehandlingId): Oppgave = Oppgave.ny(
+fun lagOppgave(behandlingId: SpleisBehandlingId, godkjenningsbehovId: UUID): Oppgave = Oppgave.ny(
     id = nextLong(),
     førsteOpprettet = LocalDateTime.now(),
     vedtaksperiodeId = UUID.randomUUID(),
     behandlingId = behandlingId.value,
     utbetalingId = UUID.randomUUID(),
-    hendelseId = UUID.randomUUID(),
+    hendelseId = godkjenningsbehovId,
     kanAvvises = true,
     egenskaper = emptySet(),
 )

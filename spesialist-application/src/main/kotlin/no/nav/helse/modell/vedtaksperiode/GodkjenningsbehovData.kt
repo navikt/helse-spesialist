@@ -79,7 +79,7 @@ data class GodkjenningsbehovData(
         løsAutomatisk(false, "Automatisk avvist", begrunnelser)
     }
 
-    internal fun godkjennManuelt(
+    fun godkjennManuelt(
         saksbehandlerIdent: String,
         saksbehandlerEpost: String,
         godkjenttidspunkt: LocalDateTime,
@@ -184,7 +184,7 @@ data class GodkjenningsbehovData(
             )
     }
 
-    internal fun lagVedtaksperiodeGodkjentManuelt(
+    fun lagVedtaksperiodeGodkjentManuelt(
         saksbehandler: Saksbehandlerløsning.Saksbehandler,
         beslutter: Saksbehandlerløsning.Saksbehandler?,
     ) = VedtaksperiodeGodkjentManuelt(

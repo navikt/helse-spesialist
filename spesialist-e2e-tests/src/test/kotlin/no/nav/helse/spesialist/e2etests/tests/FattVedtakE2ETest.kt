@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.e2etests.tests
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.github.navikt.tbd_libs.jackson.asLocalDateTime
 import no.nav.helse.modell.melding.VedtakFattetMelding
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
@@ -13,6 +12,7 @@ import org.junit.jupiter.params.provider.CsvSource
 import java.math.BigDecimal
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
 
@@ -227,20 +227,8 @@ class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
         assertEquals("VURDERT", varselEndret["forrige_status"].asText())
         assertEquals("GODKJENT", varselEndret["gjeldende_status"].asText())
 
-        // Sjekk at saksbehandlerløsning blir publisert
-        val saksbehandlerLøsning = meldinger.single { it["@event_name"].asText() == "saksbehandler_løsning" }
-        assertEquals("true", saksbehandlerLøsning["godkjent"].asText())
-        assertEquals(saksbehandler.ident, saksbehandlerLøsning["saksbehandlerident"].asText())
-        assertEquals(saksbehandler.id.value.toString(), saksbehandlerLøsning["saksbehandleroid"].asText())
-        assertEquals(saksbehandler.epost, saksbehandlerLøsning["saksbehandlerepost"].asText())
-        assertEquals(emptyList<JsonNode>(), saksbehandlerLøsning["saksbehandleroverstyringer"].toList())
-        assertEquals(saksbehandler.ident, saksbehandlerLøsning["saksbehandler"]["ident"].asText())
-        assertEquals(saksbehandler.epost, saksbehandlerLøsning["saksbehandler"]["epostadresse"].asText())
-        assertEquals(null, saksbehandlerLøsning["årsak"])
-        assertEquals(null, saksbehandlerLøsning["begrunnelser"])
-        assertEquals(null, saksbehandlerLøsning["kommentar"])
-        assertEquals(beslutter.ident, saksbehandlerLøsning["beslutter"]["ident"].asText())
-        assertEquals(beslutter.epost, saksbehandlerLøsning["beslutter"]["epostadresse"].asText())
+        // Sjekk at saksbehandlerløsning ikke blir publisert
+        assertTrue(meldinger.none { it["@event_name"].asText() == "saksbehandler_løsning" })
 
         // Sjekk at løsning på godkjenningsbehov ble publisert
         val godkjenningsbehovLøsning = meldinger.single { it["@event_name"].asText() == "behov" && it["@behov"].first().asText() == "Godkjenning" && it["@løsning"] != null }
@@ -346,19 +334,8 @@ class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
         assertEquals("VURDERT", varselEndret["forrige_status"].asText())
         assertEquals("GODKJENT", varselEndret["gjeldende_status"].asText())
 
-        // Sjekk at saksbehandlerløsning blir publisert
-        val saksbehandlerLøsning = meldinger.single { it["@event_name"].asText() == "saksbehandler_løsning" }
-        assertEquals("true", saksbehandlerLøsning["godkjent"].asText())
-        assertEquals(saksbehandler.ident, saksbehandlerLøsning["saksbehandlerident"].asText())
-        assertEquals(saksbehandler.id.value.toString(), saksbehandlerLøsning["saksbehandleroid"].asText())
-        assertEquals(saksbehandler.epost, saksbehandlerLøsning["saksbehandlerepost"].asText())
-        assertEquals(emptyList<JsonNode>(), saksbehandlerLøsning["saksbehandleroverstyringer"].toList())
-        assertEquals(saksbehandler.ident, saksbehandlerLøsning["saksbehandler"]["ident"].asText())
-        assertEquals(saksbehandler.epost, saksbehandlerLøsning["saksbehandler"]["epostadresse"].asText())
-        assertEquals(null, saksbehandlerLøsning["årsak"])
-        assertEquals(null, saksbehandlerLøsning["begrunnelser"])
-        assertEquals(null, saksbehandlerLøsning["kommentar"])
-        assertEquals(null, saksbehandlerLøsning["beslutter"])
+        // Sjekk at saksbehandlerløsning ikke blir publisert
+        assertTrue(meldinger.none { it["@event_name"].asText() == "saksbehandler_løsning" })
 
         // Sjekk at løsning på godkjenningsbehov ble publisert
         val godkjenningsbehovLøsning = meldinger.single { it["@event_name"].asText() == "behov" && it["@behov"].first().asText() == "Godkjenning" && it["@løsning"] != null }

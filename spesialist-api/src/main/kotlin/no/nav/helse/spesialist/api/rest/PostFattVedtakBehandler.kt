@@ -2,13 +2,12 @@ package no.nav.helse.spesialist.api.rest
 
 import io.github.smiley4.ktoropenapi.config.RouteConfig
 import io.ktor.http.HttpStatusCode
-import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.db.BehandlingRepository
 import no.nav.helse.db.SessionContext
 import no.nav.helse.modell.melding.OppgaveOppdatert
-import no.nav.helse.modell.melding.Saksbehandlerløsning
 import no.nav.helse.modell.melding.VarselEndret
+import no.nav.helse.modell.melding.VedtaksperiodeGodkjentManuelt
 import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
@@ -16,7 +15,6 @@ import no.nav.helse.spesialist.api.rest.resources.Vedtak
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.application.VarselRepository
 import no.nav.helse.spesialist.application.VarseldefinisjonRepository
-import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Saksbehandler
@@ -47,6 +45,11 @@ class PostFattVedtakBehandler(
             val vedtaksperiode =
                 transaksjon.vedtaksperiodeRepository.finn(behandling.vedtaksperiodeId)
                     ?: return RestResponse.Error(ApiPostFattVedtakErrorCode.VEDTAKSPERIODE_IKKE_FUNNET)
+
+            if (transaksjon.behandlingRepository.finnNyesteForVedtaksperiode(vedtaksperiode.id) != behandling) {
+                return RestResponse.Error(ApiPostFattVedtakErrorCode.KAN_IKKE_FATTE_VEDTAK_PÅ_ELDRE_BEHANDLING)
+            }
+
             val fødselsnummer = vedtaksperiode.fødselsnummer
 
             if (!saksbehandler.harTilgangTilPerson(
@@ -88,7 +91,7 @@ class PostFattVedtakBehandler(
                 outbox = outbox,
             )
 
-            sendSaksbehandlerLøsning(
+            byttTilstandOgPubliserMeldinger(
                 fødselsnummer = fødselsnummer,
                 behandling = behandling,
                 oppgave = oppgave,
@@ -96,6 +99,7 @@ class PostFattVedtakBehandler(
                 saksbehandlerSomFattetVedtak = saksbehandlerSomFattetVedtak,
                 beslutter = beslutter,
                 outbox = outbox,
+                transaksjon = transaksjon,
             )
         } catch (e: FattVedtakException) {
             return RestResponse.Error(e.code)
@@ -157,13 +161,8 @@ class PostFattVedtakBehandler(
         spleisBehandlingId: SpleisBehandlingId,
         outbox: Outbox,
     ) {
-        val behandlingerSomMåSeesUnderEtt =
-            behandlingRepository
-                .finnAndreBehandlingerISykefraværstilfelle(this, fødselsnummer)
-                .filterNot { it.fom > tom }
-                .plus(this)
-
-        val behandlingUnikIder = behandlingerSomMåSeesUnderEtt.map { behandling -> behandling.id }
+        val behandlingspakke = behandlingRepository.finnBehandlingspakke(this, fødselsnummer)
+        val behandlingUnikIder = behandlingspakke.map { behandling -> behandling.id }
         val varsler = varselRepository.finnVarslerFor(behandlingUnikIder)
         if (varsler.any { it.trengerVurdering() }) throw FattVedtakException(ApiPostFattVedtakErrorCode.VARSLER_MANGLER_VURDERING)
         varsler
@@ -222,7 +221,7 @@ class PostFattVedtakBehandler(
         ferdigstill()
     }
 
-    private fun sendSaksbehandlerLøsning(
+    private fun byttTilstandOgPubliserMeldinger(
         fødselsnummer: String,
         behandling: Behandling,
         oppgave: Oppgave,
@@ -230,35 +229,64 @@ class PostFattVedtakBehandler(
         saksbehandlerSomFattetVedtak: Saksbehandler,
         beslutter: Saksbehandler?,
         outbox: Outbox,
+        transaksjon: SessionContext,
     ) {
-        val saksbehandlerløsning =
-            Saksbehandlerløsning(
-                godkjenningsbehovId = oppgave.godkjenningsbehovId,
-                oppgaveId = oppgave.id,
-                godkjent = true,
-                saksbehandlerIdent = saksbehandlerSomFattetVedtak.ident,
-                saksbehandlerOid = saksbehandlerSomFattetVedtak.id.value,
-                saksbehandlerEpost = saksbehandlerSomFattetVedtak.epost,
-                godkjenttidspunkt = LocalDateTime.now(),
-                saksbehandleroverstyringer =
-                    totrinnsvurdering
-                        ?.overstyringer
-                        ?.filter {
-                            it.vedtaksperiodeId == behandling.vedtaksperiodeId.value
-                        }?.map { it.eksternHendelseId } ?: emptyList(),
-                saksbehandler = saksbehandlerSomFattetVedtak,
-                årsak = null,
-                begrunnelser = null,
-                kommentar = null,
-                beslutter = beslutter,
-            )
-        logg.info(
-            "Publiserer saksbehandler-løsning for {}, {}",
-            StructuredArguments.keyValue("oppgaveId", oppgave.id),
-            StructuredArguments.keyValue("hendelseId", oppgave.godkjenningsbehovId),
+        val vedtaksperiodeId = behandling.vedtaksperiodeId
+        val saksbehandleroverstyringer =
+            totrinnsvurdering
+                ?.overstyringer
+                ?.filter { it.vedtaksperiodeId == vedtaksperiodeId.value }
+                ?.map { it.eksternHendelseId } ?: emptyList()
+
+        val godkjenningsbehov = transaksjon.meldingDao.finnGodkjenningsbehov(oppgave.godkjenningsbehovId)
+
+        val behandlingspakke = transaksjon.behandlingRepository.finnBehandlingspakke(behandling, fødselsnummer)
+        behandlingspakke.forEach(Behandling::håndterGodkjentAvSaksbehandler)
+        transaksjon.behandlingRepository.lagreAlle(behandlingspakke)
+
+        val behov = godkjenningsbehov.data()
+        behov.godkjennManuelt(
+            saksbehandlerIdent = saksbehandlerSomFattetVedtak.ident,
+            saksbehandlerEpost = saksbehandlerSomFattetVedtak.epost,
+            godkjenttidspunkt = LocalDateTime.now(),
+            saksbehandleroverstyringer = saksbehandleroverstyringer,
         )
-        outbox.leggTil(fødselsnummer, saksbehandlerløsning, "saksbehandlergodkjenning")
+
+        outbox.leggTil(
+            fødselsnummer = fødselsnummer,
+            hendelse = behov.medLøsning(),
+            årsak = "saksbehandlergodkjenning",
+        )
+
+        outbox.leggTil(
+            fødselsnummer = fødselsnummer,
+            hendelse =
+                VedtaksperiodeGodkjentManuelt(
+                    vedtaksperiodeId = behov.vedtaksperiodeId,
+                    behandlingId = behov.spleisBehandlingId,
+                    fødselsnummer = behov.fødselsnummer,
+                    yrkesaktivitetstype = behov.yrkesaktivitetstype,
+                    periodetype = behov.periodetype.name,
+                    saksbehandlerIdent = saksbehandlerSomFattetVedtak.ident,
+                    saksbehandlerEpost = saksbehandlerSomFattetVedtak.epost,
+                    beslutterIdent = beslutter?.ident,
+                    beslutterEpost = beslutter?.epost,
+                ),
+            årsak = "saksbehandlergodkjenning",
+        )
     }
+
+    private fun BehandlingRepository.finnBehandlingspakke(
+        behandling: Behandling,
+        fødselsnummer: String,
+    ): List<Behandling> =
+        finnAndreBehandlingerISykefraværstilfelle(
+            behandling = behandling,
+            fødselsnummer = fødselsnummer,
+        ).toList()
+            .sortedByDescending { it.tom }
+            .filter { it.fom <= behandling.tom }
+            .plus(behandling)
 
     override fun openApi(config: RouteConfig) {
         with(config) {
@@ -283,6 +311,7 @@ enum class ApiPostFattVedtakErrorCode(
     VARSLER_MANGLER_VURDERING("Kan ikke godkjenne varsler som ikke er vurdert av en saksbehandler", HttpStatusCode.BadRequest),
     OVERLAPPER_MED_INFOTRYGD("Kan ikke fatte vedtak fordi perioden overlapper med infotrygd", HttpStatusCode.BadRequest),
     BEHANDLING_IKKE_FUNNET("Fant ikke behandling", HttpStatusCode.NotFound),
+    KAN_IKKE_FATTE_VEDTAK_PÅ_ELDRE_BEHANDLING("Kan ikke fatte vedtak på en eldre behandling av vedtaksperioden", HttpStatusCode.BadRequest),
     VEDTAKSPERIODE_IKKE_FUNNET("Fant ikke vedtaksperiode", HttpStatusCode.NotFound),
     TOTRINNSVURDERING_MANGLER_SAKSBEHANDLER("Behandlende saksbehandler mangler i totrinnsvurdering", HttpStatusCode.Conflict),
     VARSEL_MANGLER_VARSELDEFINISJON("Varsel mangler varseldefinisjon", HttpStatusCode.BadRequest),

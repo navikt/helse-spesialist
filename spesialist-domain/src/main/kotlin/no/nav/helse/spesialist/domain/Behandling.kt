@@ -61,6 +61,12 @@ class Behandling private constructor(
 
     private val søknadIder = søknadIder.toMutableSet()
 
+    fun håndterGodkjentAvSaksbehandler() {
+        if (tilstand == Tilstand.AvsluttetUtenVedtakMedVarsler) {
+            tilstand = Tilstand.AvsluttetUtenVedtak
+        }
+    }
+
     fun søknadIder() = søknadIder.toSet()
 
     fun utfall(): Utfall {

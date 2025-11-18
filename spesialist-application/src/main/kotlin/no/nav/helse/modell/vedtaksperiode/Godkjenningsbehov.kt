@@ -104,7 +104,7 @@ class Godkjenningsbehov(
         kommandostarter { godkjenningsbehov(data(), person, sessionContext) }
     }
 
-    internal fun data(): GodkjenningsbehovData =
+    fun data(): GodkjenningsbehovData =
         GodkjenningsbehovData(
             id = id,
             fødselsnummer = fødselsnummer,

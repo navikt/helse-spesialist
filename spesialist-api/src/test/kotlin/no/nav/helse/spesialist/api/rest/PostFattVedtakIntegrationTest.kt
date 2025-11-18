@@ -4,10 +4,17 @@ import io.ktor.http.HttpStatusCode
 import no.nav.helse.Varselvurdering
 import no.nav.helse.modell.melding.VarselEndret
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
-import no.nav.helse.spesialist.application.testing.assertJsonEquals
+import no.nav.helse.modell.utbetaling.Utbetalingtype
+import no.nav.helse.modell.vedtaksperiode.Arbeidssituasjon
+import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
+import no.nav.helse.modell.vedtaksperiode.Inntektskilde
+import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.api.IntegrationTestFixture
+import no.nav.helse.spesialist.application.testing.assertJsonEquals
+import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.Varsel
+import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.testfixtures.lagBehandling
 import no.nav.helse.spesialist.domain.testfixtures.lagOppgave
 import no.nav.helse.spesialist.domain.testfixtures.lagSpleisBehandlingId
@@ -153,10 +160,12 @@ class PostFattVedtakIntegrationTest {
         val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
         val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
         val saksbehandler = lagSaksbehandler()
+        val godkjenningsbehov = lagGodkjenningsbehov(behandling, vedtaksperiode)
         sessionContext.saksbehandlerRepository.lagre(saksbehandler)
         sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
         sessionContext.behandlingRepository.lagre(behandling)
-        val oppgave = lagOppgave(behandling.spleisBehandlingId!!)
+        sessionContext.meldingDao.lagre(godkjenningsbehov)
+        val oppgave = lagOppgave(behandling.spleisBehandlingId!!, godkjenningsbehov.id)
         oppgave.avventerSystem(saksbehandler.ident, UUID.randomUUID())
         sessionContext.oppgaveRepository.lagre(oppgave)
         // When:
@@ -187,12 +196,14 @@ class PostFattVedtakIntegrationTest {
         val person = lagPerson().also(sessionContext.personRepository::lagre)
         val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
         val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
-
         val saksbehandler = lagSaksbehandler()
+        val godkjenningsbehov = lagGodkjenningsbehov(behandling, vedtaksperiode)
+
         sessionContext.saksbehandlerRepository.lagre(saksbehandler)
         sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
         sessionContext.behandlingRepository.lagre(behandling)
-        val oppgave = lagOppgave(behandling.spleisBehandlingId!!)
+        sessionContext.meldingDao.lagre(godkjenningsbehov)
+        val oppgave = lagOppgave(behandling.spleisBehandlingId!!, godkjenningsbehov.id)
         sessionContext.oppgaveRepository.lagre(oppgave)
 
         val totrinnsvurdering = Totrinnsvurdering.ny(fødselsnummer = person.id.value)
@@ -229,10 +240,13 @@ class PostFattVedtakIntegrationTest {
         val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
         val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
         val saksbehandler = lagSaksbehandler()
+        val godkjenningsbehov = lagGodkjenningsbehov(behandling, vedtaksperiode)
+
         sessionContext.saksbehandlerRepository.lagre(saksbehandler)
         sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
         sessionContext.behandlingRepository.lagre(behandling)
-        val oppgave = lagOppgave(behandling.spleisBehandlingId!!)
+        sessionContext.meldingDao.lagre(godkjenningsbehov)
+        val oppgave = lagOppgave(behandling.spleisBehandlingId!!, godkjenningsbehov.id)
         sessionContext.oppgaveRepository.lagre(oppgave)
 
         val totrinnsvurdering = Totrinnsvurdering.ny(fødselsnummer = person.id.value)
@@ -269,10 +283,14 @@ class PostFattVedtakIntegrationTest {
         val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
         val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
         val saksbehandler = lagSaksbehandler()
+        val godkjenningsbehov = lagGodkjenningsbehov(behandling, vedtaksperiode)
+
         sessionContext.saksbehandlerRepository.lagre(saksbehandler)
         sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
         sessionContext.behandlingRepository.lagre(behandling)
-        val oppgave = lagOppgave(behandling.spleisBehandlingId!!)
+        sessionContext.meldingDao.lagre(godkjenningsbehov)
+
+        val oppgave = lagOppgave(behandling.spleisBehandlingId!!, godkjenningsbehov.id)
         sessionContext.oppgaveRepository.lagre(oppgave)
 
         val totrinnsvurdering = Totrinnsvurdering.ny(person.id.value)
@@ -312,10 +330,13 @@ class PostFattVedtakIntegrationTest {
             tags = setOf("OverlapperMedInfotrygd")
         )
         val saksbehandler = lagSaksbehandler()
+        val godkjenningsbehov = lagGodkjenningsbehov(behandling, vedtaksperiode)
+
         sessionContext.saksbehandlerRepository.lagre(saksbehandler)
         sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
         sessionContext.behandlingRepository.lagre(behandling)
-        val oppgave = lagOppgave(behandling.spleisBehandlingId!!)
+        sessionContext.meldingDao.lagre(godkjenningsbehov)
+        val oppgave = lagOppgave(behandling.spleisBehandlingId!!, godkjenningsbehov.id)
         sessionContext.oppgaveRepository.lagre(oppgave)
 
         // When:
@@ -356,12 +377,16 @@ class PostFattVedtakIntegrationTest {
             vurdering = null,
             kode = kode
         )
+        val godkjenningsbehov = lagGodkjenningsbehov(behandling, vedtaksperiode)
+
         sessionContext.saksbehandlerRepository.lagre(saksbehandler)
         sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
         sessionContext.behandlingRepository.lagre(behandling)
         sessionContext.varseldefinisjonRepository.lagre(lagVarseldefinisjon(kode = kode))
         sessionContext.varselRepository.lagre(varsel)
-        val oppgave = lagOppgave(behandling.spleisBehandlingId!!)
+        sessionContext.meldingDao.lagre(godkjenningsbehov)
+
+        val oppgave = lagOppgave(behandling.spleisBehandlingId!!, godkjenningsbehov.id)
         sessionContext.oppgaveRepository.lagre(oppgave)
 
         // When:
@@ -407,13 +432,15 @@ class PostFattVedtakIntegrationTest {
             ),
             kode = kode
         )
+        val godkjenningsbehov = lagGodkjenningsbehov(behandling, vedtaksperiode)
         sessionContext.saksbehandlerRepository.lagre(saksbehandler)
         sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
         sessionContext.behandlingRepository.lagre(behandling)
         sessionContext.varseldefinisjonRepository.lagre(lagVarseldefinisjon(kode = kode))
         sessionContext.varselRepository.lagre(varsel)
-        val oppgave = lagOppgave(behandling.spleisBehandlingId!!)
+        val oppgave = lagOppgave(behandling.spleisBehandlingId!!, godkjenningsbehov.id)
         sessionContext.oppgaveRepository.lagre(oppgave)
+        sessionContext.meldingDao.lagre(godkjenningsbehov)
 
         // When:
         val response = integrationTestFixture.post(
@@ -449,6 +476,7 @@ class PostFattVedtakIntegrationTest {
             vurdering = Varselvurdering(saksbehandler.id, LocalDateTime.now(), varseldefinisjon.id),
             kode = varseldefinisjon.kode
         )
+        val godkjenningsbehov = lagGodkjenningsbehov(behandling, vedtaksperiode)
         sessionContext.saksbehandlerRepository.lagre(saksbehandler)
         sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
         sessionContext.behandlingRepository.lagre(behandling)
@@ -456,8 +484,10 @@ class PostFattVedtakIntegrationTest {
 
         sessionContext.varselRepository.lagre(godkjentVarsel)
         sessionContext.varselRepository.lagre(vurdertVarsel)
-        val oppgave = lagOppgave(behandling.spleisBehandlingId!!)
+        val oppgave = lagOppgave(behandling.spleisBehandlingId!!, godkjenningsbehov.id)
         sessionContext.oppgaveRepository.lagre(oppgave)
+        sessionContext.meldingDao.lagre(godkjenningsbehov)
+
 
         // When:
         val response = integrationTestFixture.post(
@@ -474,5 +504,44 @@ class PostFattVedtakIntegrationTest {
             .filterIsInstance<VarselEndret>()
             .map { it.varselId }
         assertEquals(listOf(vurdertVarsel.id.value), iderForPubliserteVarsler)
+    }
+
+    private fun lagGodkjenningsbehov(behandling: Behandling, vedtaksperiode: Vedtaksperiode): Godkjenningsbehov {
+        return Godkjenningsbehov(
+            id = UUID.randomUUID(),
+            opprettet = LocalDateTime.now(),
+            fødselsnummer = vedtaksperiode.fødselsnummer,
+            organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
+            yrkesaktivitetstype = behandling.yrkesaktivitetstype,
+            vedtaksperiodeId = vedtaksperiode.id.value,
+            spleisVedtaksperioder = emptyList(),
+            utbetalingId = behandling.utbetalingId?.value!!,
+            spleisBehandlingId = behandling.spleisBehandlingId!!.value,
+            vilkårsgrunnlagId = UUID.randomUUID(),
+            tags = behandling.tags.toList(),
+            periodeFom = behandling.fom,
+            periodeTom = behandling.tom,
+            periodetype = Periodetype.FØRSTEGANGSBEHANDLING,
+            førstegangsbehandling = true,
+            utbetalingtype = Utbetalingtype.UTBETALING,
+            kanAvvises = true,
+            inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
+            orgnummereMedRelevanteArbeidsforhold = emptyList(),
+            skjæringstidspunkt = behandling.skjæringstidspunkt,
+            sykepengegrunnlagsfakta = Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidstaker.EtterHovedregel(
+                seksG = 6 * 118620.0,
+                arbeidsgivere = listOf(
+                    Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
+                        organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
+                        inntektskilde = Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Arbeidsgiver,
+                        omregnetÅrsinntekt = 700_000.0,
+                    )
+                ),
+                sykepengegrunnlag = 700_000.0
+            ),
+            foreløpigBeregnetSluttPåSykepenger = behandling.fom.plusYears(1),
+            arbeidssituasjon = Arbeidssituasjon.ARBEIDSTAKER,
+            json = "{}",
+        )
     }
 }
