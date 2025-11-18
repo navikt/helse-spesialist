@@ -261,6 +261,38 @@ class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
             "Godkjenning.godkjenttidspunkt"
         )
         assertMindreEnnNSekunderSiden(30, godkjenningsbehovLøsning["@løsning"]["Godkjenning"]["godkjenttidspunkt"].asLocalDateTime())
+
+        // Sjekk at vedtaksperiode_godkjent ble publisert
+        val vedtaksperiodeGodkjent = meldinger.single { it["@event_name"].asText() == "vedtaksperiode_godkjent" }
+        assertJsonEquals(
+            """
+                {
+                  "@event_name": "vedtaksperiode_godkjent",
+                  "fødselsnummer": "${testContext.person.fødselsnummer}",
+                  "vedtaksperiodeId": "${førsteVedtaksperiode().vedtaksperiodeId}",
+                  "periodetype": "FØRSTEGANGSBEHANDLING",
+                  "saksbehandlerIdent": "${saksbehandler.ident}",
+                  "saksbehandlerEpost": "${saksbehandler.epost}",
+                  "automatiskBehandling": false,
+                  "saksbehandler": {
+                    "ident": "${saksbehandler.ident}",
+                    "epostadresse": "${saksbehandler.epost}"
+                  },
+                  "beslutter": {
+                    "ident": "${beslutter.ident}",
+                    "epostadresse": "${beslutter.epost}"
+                  },
+                  "behandlingId": "${førsteVedtaksperiode().spleisBehandlingId}",
+                  "yrkesaktivitetstype": "ARBEIDSTAKER"
+                }
+            """.trimIndent(),
+            vedtaksperiodeGodkjent,
+            "@id",
+            "@opprettet",
+            "system_read_count",
+            "system_participating_services",
+            "@forårsaket_av"
+        )
     }
 
     @Test
@@ -348,6 +380,34 @@ class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
             "Godkjenning.godkjenttidspunkt"
         )
         assertMindreEnnNSekunderSiden(30, godkjenningsbehovLøsning["@løsning"]["Godkjenning"]["godkjenttidspunkt"].asLocalDateTime())
+
+        // Sjekk at vedtaksperiode_godkjent ble publisert
+        val vedtaksperiodeGodkjent = meldinger.single { it["@event_name"].asText() == "vedtaksperiode_godkjent" }
+        assertJsonEquals(
+            """
+                {
+                  "@event_name": "vedtaksperiode_godkjent",
+                  "fødselsnummer": "${testContext.person.fødselsnummer}",
+                  "vedtaksperiodeId": "${førsteVedtaksperiode().vedtaksperiodeId}",
+                  "periodetype": "FØRSTEGANGSBEHANDLING",
+                  "saksbehandlerIdent": "${saksbehandler.ident}",
+                  "saksbehandlerEpost": "${saksbehandler.epost}",
+                  "automatiskBehandling": false,
+                  "saksbehandler": {
+                    "ident": "${saksbehandler.ident}",
+                    "epostadresse": "${saksbehandler.epost}"
+                  },
+                  "behandlingId": "${førsteVedtaksperiode().spleisBehandlingId}",
+                  "yrkesaktivitetstype": "ARBEIDSTAKER"
+                }
+            """.trimIndent(),
+            vedtaksperiodeGodkjent,
+            "@id",
+            "@opprettet",
+            "system_read_count",
+            "system_participating_services",
+            "@forårsaket_av"
+        )
     }
 
     @ParameterizedTest
