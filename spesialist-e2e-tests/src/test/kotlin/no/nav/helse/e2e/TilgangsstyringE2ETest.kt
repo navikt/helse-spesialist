@@ -113,7 +113,7 @@ class TilgangsstyringE2ETest : AbstractE2ETest() {
         håndterArbeidsforholdløsning()
     }
 
-    private fun fetchPerson() = runBlocking { personQuery.person(FØDSELSNUMMER, null, dataFetchingEnvironment) }
+    private fun fetchPerson() = runBlocking { personQuery.person(FØDSELSNUMMER, env = dataFetchingEnvironment) }
 
     private fun assertKanIkkeHentePerson(feilmelding: String) {
         fetchPerson().let { response ->

@@ -14,6 +14,8 @@ import no.nav.helse.spesialist.api.graphql.notFoundError
 import no.nav.helse.spesialist.api.graphql.personNotReadyError
 import no.nav.helse.spesialist.api.graphql.query.Inputvalidering.UgyldigInput
 import no.nav.helse.spesialist.api.graphql.schema.ApiPerson
+import no.nav.helse.spesialist.application.PersonPseudoId
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.slf4j.Logger
@@ -34,6 +36,15 @@ private sealed interface Inputvalidering {
 
         class UkjentAktørId(
             val aktørId: String,
+            graphqlError: GraphQLError,
+        ) : UgyldigInput(graphqlError)
+
+        class UkjentPersonPseudoId(
+            val personPseudoId: String,
+            graphqlError: GraphQLError,
+        ) : UgyldigInput(graphqlError)
+
+        class UgyldigPersonPseudoId(
             graphqlError: GraphQLError,
         ) : UgyldigInput(graphqlError)
 
@@ -62,6 +73,8 @@ interface PersonoppslagService {
     fun finnesPersonMedFødselsnummer(fødselsnummer: String): Boolean
 
     fun fødselsnumreKnyttetTil(aktørId: String): Set<String>
+
+    fun fødselsnummerKnyttetTil(personPseudoId: PersonPseudoId): Identitetsnummer?
 }
 
 sealed interface FetchPersonResult {
@@ -95,10 +108,11 @@ class PersonQueryHandler(
     override suspend fun person(
         fnr: String?,
         aktorId: String?,
+        personPseudoId: String?,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<ApiPerson?> {
         val fødselsnummer =
-            when (val validering = validerInput(fnr, aktorId)) {
+            when (val validering = validerInput(fnr, aktorId, personPseudoId)) {
                 is Inputvalidering.Ok -> validering.fødselsnummer
                 is UgyldigInput -> {
                     validering.auditlogg(env)
@@ -169,12 +183,22 @@ class PersonQueryHandler(
     private fun validerInput(
         fødselsnummer: String?,
         aktørId: String?,
+        personPseudoId: String?,
     ): Inputvalidering {
+        if (personPseudoId != null) {
+            val gyldigPersonPseudoId =
+                runCatching { PersonPseudoId.fraString(personPseudoId) }
+                    .getOrElse { return UgyldigInput.UgyldigPersonPseudoId(notFoundError(personPseudoId)) }
+
+            val identitetsnummer =
+                personoppslagService.fødselsnummerKnyttetTil(gyldigPersonPseudoId)
+                    ?: return UgyldigInput.UkjentPersonPseudoId(personPseudoId, notFoundError(personPseudoId))
+
+            return Inputvalidering.Ok(identitetsnummer.value)
+        }
         if (fødselsnummer != null) {
             if (personoppslagService.finnesPersonMedFødselsnummer(fødselsnummer)) {
-                return Inputvalidering.Ok(
-                    fødselsnummer,
-                )
+                return Inputvalidering.Ok(fødselsnummer)
             }
             return UgyldigInput.UkjentFødselsnummer(fødselsnummer, notFoundError(fødselsnummer))
         }
@@ -204,6 +228,14 @@ class PersonQueryHandler(
     ) {
         sikkerLogg.info("Svarer not found for parametere aktorId=$aktorId.")
         auditLog(env.graphQlContext, aktorId, null, notFoundError(aktorId).message)
+    }
+
+    private fun loggNotFoundForPersonPseudoId(
+        personPseudoId: String,
+        env: DataFetchingEnvironment,
+    ) {
+        sikkerLogg.info("Svarer not found for parametere personPseudoId=$personPseudoId.")
+        auditLog(env.graphQlContext, personPseudoId, null, notFoundError(personPseudoId).message)
     }
 
     private fun loggNotFoundForFødselsnummer(
@@ -255,9 +287,11 @@ class PersonQueryHandler(
         when (this) {
             is UgyldigInput.UkjentFødselsnummer -> loggNotFoundForFødselsnummer(this.fødselsnummer, env)
             is UgyldigInput.UkjentAktørId -> loggNotFoundForAktørId(aktørId, env)
+            is UgyldigInput.UkjentPersonPseudoId -> loggNotFoundForPersonPseudoId(personPseudoId, env)
             is UgyldigInput.HarFlereFødselsnumre -> auditLog(env.graphQlContext, aktørId, null, graphqlError.message)
             is UgyldigInput.ParametreMangler -> {}
             is UgyldigInput.UgyldigAktørId -> {}
+            is UgyldigInput.UgyldigPersonPseudoId -> {}
         }
     }
 }

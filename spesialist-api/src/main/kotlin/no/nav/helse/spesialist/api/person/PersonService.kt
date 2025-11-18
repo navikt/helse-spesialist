@@ -88,6 +88,11 @@ class PersonService(
 
     override fun fødselsnumreKnyttetTil(aktørId: String): Set<String> = personApiDao.finnFødselsnumre(aktørId).toSet()
 
+    override fun fødselsnummerKnyttetTil(personPseudoId: PersonPseudoId): Identitetsnummer? =
+        sessionFactory.transactionalSessionScope { session ->
+            session.personPseudoIdDao.hentIdentitetsnummer(personPseudoId)
+        }
+
     override suspend fun hentPerson(
         fødselsnummer: String,
         saksbehandler: Saksbehandler,

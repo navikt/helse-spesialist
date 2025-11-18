@@ -192,7 +192,7 @@ class OverstyringE2ETest : AbstractE2ETest() {
 
         mockSnapshot()
 
-        val snapshot: ApiPerson = runBlocking { personQuery.person(FØDSELSNUMMER, null, dataFetchingEnvironment).data!! }
+        val snapshot: ApiPerson = runBlocking { personQuery.person(FØDSELSNUMMER, env = dataFetchingEnvironment).data!! }
 
         assertNotNull(snapshot)
         val overstyringer = snapshot.arbeidsgivere().first().overstyringer()

@@ -55,7 +55,7 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
     }
 
     @Test
-    fun `får 400-feil når man ikke oppgir fødselsnummer eller aktørid i query`() {
+    fun `får 400-feil når man ikke oppgir fødselsnummer, aktørid eller personPseudoQuery i query`() {
         val body = runQuery("""{ person(fnr: null) { aktorId } }""")
 
         assertEquals(400, body["errors"].first()["extensions"]["code"].asInt())
@@ -92,6 +92,16 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
 
     @Test
     @ResourceLock("auditlogg-lytter")
+    fun `får 404-feil når personen man søker etter på personPseudoId ikke finnes`() {
+        val logglytter = Logglytter()
+        val body = runQuery("""{ person(personPseudoId: "$PERSONPSEUDOID") { aktorId } }""")
+
+        assertEquals(404, body["errors"].first()["extensions"]["code"].asInt())
+        logglytter.assertBleLogget("suid=${SAKSBEHANDLER.ident} duid=$PERSONPSEUDOID operation=PersonQuery msg=Finner ikke data for person med identifikator $PERSONPSEUDOID", Level.WARN)
+    }
+
+    @Test
+    @ResourceLock("auditlogg-lytter")
     fun `får 404-feil når personen ikke har noen arbeidsgivere`() {
         val logglytter = Logglytter()
         mockSnapshot(arbeidsgivere = emptyList())
@@ -104,12 +114,16 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
 
     @Test
     @ResourceLock("auditlogg-lytter")
-    fun `får 400-feil når det mangler både fødselsnummer og aktørId`() {
+    fun `får 400-feil når det mangler fødselsnummer, aktørId og personPseudoId `() {
         val logglytter = Logglytter()
-        val body = runQuery("""{ person(fnr: null, aktorId: null) { aktorId } }""")
+        val body = runQuery("""{ person(fnr: null, aktorId: null, personPseudoId: null) { aktorId } }""")
 
         assertEquals(400, body["errors"].first()["extensions"]["code"].asInt())
-        logglytter.assertIngenLoggingFor(FØDSELSNUMMER, AKTØRID)
+        logglytter.assertIngenLoggingFor(
+            fødselsnummer = FØDSELSNUMMER,
+            aktørid = AKTØRID,
+            personPseudoId = PERSONPSEUDOID.toString()
+        )
     }
 
     @Test
@@ -512,9 +526,13 @@ class PersonQueryHandlerTest : AbstractGraphQLApiTest() {
                 "Forventet ett innslag med $level og melding=$melding, dette ble logget: ${appender.list}"
             }
 
-        fun assertIngenLoggingFor(fødselsnummer: String, aktørid: String) =
-            assertTrue(appender.list.none { it.message.contains(fødselsnummer) || it.message.contains(aktørid)} ) {
-                "Forventet at det ikke skulle være logget noe for $fødselsnummer/$aktørid, dette ble logget: ${appender.list}"
+        fun assertIngenLoggingFor(fødselsnummer: String, aktørid: String, personPseudoId: String) =
+            assertTrue(appender.list.none {
+                it.message.contains(fødselsnummer) ||
+                it.message.contains(aktørid) ||
+                it.message.contains(personPseudoId)
+            } ) {
+                "Forventet at det ikke skulle være logget noe for $fødselsnummer/$aktørid/$personPseudoId, dette ble logget: ${appender.list}"
             }
     }
 }

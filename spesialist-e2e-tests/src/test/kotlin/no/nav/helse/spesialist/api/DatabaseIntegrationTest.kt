@@ -59,6 +59,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
 
     val FØDSELSNUMMER = lagFødselsnummer()
     val AKTØRID = lagAktørId()
+    val PERSONPSEUDOID = UUID.randomUUID()
     val ARBEIDSGIVER_NAVN = lagOrganisasjonsnavn()
     val ORGANISASJONSNUMMER = lagOrganisasjonsnummer()
     val ORGANISASJONSNUMMER_GHOST = lagOrganisasjonsnummer()

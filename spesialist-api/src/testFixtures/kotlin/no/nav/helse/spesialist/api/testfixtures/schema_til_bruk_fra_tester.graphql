@@ -158,6 +158,7 @@ type BehandletOppgave {
     id: String!
     oppgavetype: Oppgavetype!
     periodetype: Periodetype!
+    personPseudoId: UUID!
     personnavn: Personnavn!
     saksbehandler: String
 }
@@ -380,7 +381,6 @@ type Mutation {
     sendIRetur(notatTekst: String!, oppgavereferanse: String!): Boolean
     sendTilGodkjenningV2(oppgavereferanse: String!, vedtakBegrunnelse: String): Boolean
     sendTilInfotrygd(arsak: String!, begrunnelser: [String!]!, kommentar: String, oppgavereferanse: String!): Boolean!
-    settVarselstatus(definisjonIdString: String, generasjonIdString: String!, ident: String!, varselkode: String!): VarselDTO
     skjonnsfastsettSykepengegrunnlag(skjonnsfastsettelse: SkjonnsfastsettelseInput!): Boolean
     stansAutomatiskBehandling(begrunnelse: String!, fodselsnummer: String!): Boolean!
 }
@@ -527,7 +527,7 @@ type Query {
     behandledeOppgaverFeed(fom: LocalDate!, limit: Int!, offset: Int!, tom: LocalDate!): BehandledeOppgaver!
     behandlingsstatistikk: Behandlingsstatistikk!
     opptegnelser(sekvensId: Int): [Opptegnelse!]!
-    person(aktorId: String, fnr: String): Person
+    person(aktorId: String, fnr: String, personPseudoId: String): Person
 }
 
 type Refusjonselement {

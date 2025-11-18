@@ -9,6 +9,7 @@ interface PersonQuerySchema : Query {
     suspend fun person(
         fnr: String? = null,
         aktorId: String? = null,
+        personPseudoId: String? = null,
         env: DataFetchingEnvironment,
     ): DataFetcherResult<ApiPerson?>
 }
