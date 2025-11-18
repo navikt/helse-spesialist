@@ -13,6 +13,5 @@ data class Godkjenningsbehovløsning(
     val begrunnelser: List<String>?,
     val kommentar: String?,
     val saksbehandleroverstyringer: List<UUID>,
-    val refusjonstype: String,
     val json: String,
 ) : UtgåendeHendelse

@@ -451,7 +451,6 @@ internal class GodkjenningsbehovCommand(
                 personDao = personDao,
                 vergemålDao = vergemålDao,
                 godkjenningMediator = godkjenningMediator,
-                utbetaling = utbetaling,
                 godkjenningsbehov = behovData,
             ),
             VurderBehovForTotrinnskontroll(

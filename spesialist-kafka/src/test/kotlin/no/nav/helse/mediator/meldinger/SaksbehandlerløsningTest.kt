@@ -9,10 +9,6 @@ import no.nav.helse.modell.kommando.LøsGodkjenningsbehov
 import no.nav.helse.modell.melding.Godkjenningsbehovløsning
 import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.person.Sykefraværstilfelle
-import no.nav.helse.modell.utbetaling.Refusjonstype
-import no.nav.helse.modell.utbetaling.Refusjonstype.DELVIS_REFUSJON
-import no.nav.helse.modell.utbetaling.Utbetaling
-import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
@@ -45,10 +41,9 @@ internal class SaksbehandlerløsningTest {
         epostadresse = "beslutter@nav.no"
     )
 
-    private fun saksbehandlerløsning(godkjent: Boolean, saksbehandlerløsning: List<UUID> = emptyList(), arbeidsgiverbeløp: Int = 0, personbeløp: Int = 0): LøsGodkjenningsbehov {
+    private fun saksbehandlerløsning(godkjent: Boolean, saksbehandlerløsning: List<UUID> = emptyList()): LøsGodkjenningsbehov {
         val vedtaksperiodeId = randomUUID()
         return LøsGodkjenningsbehov(
-            utbetaling = Utbetaling(randomUUID(), arbeidsgiverbeløp, personbeløp, Utbetalingtype.UTBETALING),
             sykefraværstilfelle = Sykefraværstilfelle(
                 fødselsnummer = FNR,
                 skjæringstidspunkt = 1 jan 2018,
@@ -83,9 +78,9 @@ internal class SaksbehandlerløsningTest {
 
     @Test
     fun `løser godkjenningsbehov`() {
-        val saksbehandlerløsning = saksbehandlerløsning(true, arbeidsgiverbeløp = 1000, personbeløp = 1000)
+        val saksbehandlerløsning = saksbehandlerløsning(true)
         assertTrue(saksbehandlerløsning.execute(context))
-        assertLøsning(true, DELVIS_REFUSJON)
+        assertLøsning(true)
     }
 
     @Test
@@ -102,9 +97,9 @@ internal class SaksbehandlerløsningTest {
 
     @Test
     fun `løser godkjenningsbehov ved avvist utbetaling`() {
-        val saksbehandlerløsning = saksbehandlerløsning(false, arbeidsgiverbeløp = 1000, personbeløp = 1000)
+        val saksbehandlerløsning = saksbehandlerløsning(false)
         assertTrue(saksbehandlerløsning.execute(context))
-        assertLøsning(false, DELVIS_REFUSJON)
+        assertLøsning(false)
     }
 
     private val observer = object : CommandContextObserver {
@@ -119,11 +114,10 @@ internal class SaksbehandlerløsningTest {
         it.nyObserver(observer)
     }
 
-    private fun assertLøsning(godkjent: Boolean, refusjonstype: Refusjonstype) {
+    private fun assertLøsning(godkjent: Boolean) {
         val løsning = observer.hendelser.filterIsInstance<Godkjenningsbehovløsning>().singleOrNull()
         assertNotNull(løsning)
         assertEquals(godkjent, løsning?.godkjent)
-        assertEquals(refusjonstype.name, løsning?.refusjonstype)
     }
 
 }

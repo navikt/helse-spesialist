@@ -11,8 +11,6 @@ import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.automatisering.VurderAutomatiskAvvisning
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.Sykefraværstilfelle
-import no.nav.helse.modell.utbetaling.Utbetaling
-import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.spesialist.application.Testdata.godkjenningsbehovData
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -67,7 +65,6 @@ internal class VurderAutomatiskAvvisningTest {
             godkjenningMediator.automatiskAvvisning(
                 context = context,
                 begrunnelser = listOf(forventetÅrsak),
-                utbetaling = any(),
                 behov = any()
             )
         }
@@ -75,7 +72,7 @@ internal class VurderAutomatiskAvvisningTest {
 
     private fun assertIkkeAvvisning(command: VurderAutomatiskAvvisning) {
         assertTrue(command.execute(context))
-        verify(exactly = 0) { godkjenningMediator.automatiskAvvisning(any(), any(), any(), any()) }
+        verify(exactly = 0) { godkjenningMediator.automatiskAvvisning(any(), any(), any()) }
     }
 
     private fun lagCommand(
@@ -85,7 +82,6 @@ internal class VurderAutomatiskAvvisningTest {
         personDao = personDao,
         vergemålDao = vergemålDao,
         godkjenningMediator = godkjenningMediator,
-        utbetaling = Utbetaling(utbetalingId, 1000, 1000, Utbetalingtype.UTBETALING),
         godkjenningsbehov = godkjenningsbehovData(
             fødselsnummer = fødselsnummer,
             kanAvvises = kanAvvises,
@@ -94,6 +90,5 @@ internal class VurderAutomatiskAvvisningTest {
 
     private companion object {
         private const val fødselsnummer = "12345678910"
-        private val utbetalingId = UUID.randomUUID()
     }
 }

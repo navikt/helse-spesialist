@@ -8,7 +8,6 @@ import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
 import no.nav.helse.modell.person.HentEnhetløsning
-import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import org.slf4j.LoggerFactory
 
@@ -16,7 +15,6 @@ internal class VurderAutomatiskAvvisning(
     private val personDao: PersonDao,
     private val vergemålDao: VergemålDao,
     private val godkjenningMediator: GodkjenningMediator,
-    private val utbetaling: Utbetaling,
     private val godkjenningsbehov: GodkjenningsbehovData,
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
@@ -41,7 +39,6 @@ internal class VurderAutomatiskAvvisning(
         godkjenningMediator.automatiskAvvisning(
             context,
             begrunnelser = avvisningsårsaker.toList(),
-            utbetaling = utbetaling,
             behov = godkjenningsbehov,
         )
         logg.info("Automatisk avvisning av vedtaksperiode $vedtaksperiodeId pga:$avvisningsårsaker")

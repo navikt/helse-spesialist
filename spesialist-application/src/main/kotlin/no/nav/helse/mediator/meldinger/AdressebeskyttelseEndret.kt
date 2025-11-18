@@ -65,7 +65,6 @@ internal class AdressebeskyttelseEndretCommand(
                         oppgaveDao = oppgaveDao,
                         godkjenningMediator = godkjenningMediator,
                         godkjenningsbehov = godkjenningsbehov,
-                        utbetaling = utbetaling,
                     ),
                 )
             }

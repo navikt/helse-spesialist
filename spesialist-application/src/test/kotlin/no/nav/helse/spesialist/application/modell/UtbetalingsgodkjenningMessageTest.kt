@@ -1,8 +1,6 @@
 package no.nav.helse.spesialist.application.modell
 
 import no.nav.helse.modell.melding.Godkjenningsbehovløsning
-import no.nav.helse.modell.utbetaling.Utbetaling
-import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.spesialist.application.Testdata.godkjenningsbehovData
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -12,7 +10,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
-import java.util.UUID
 
 internal class UtbetalingsgodkjenningMessageTest {
     private companion object {
@@ -23,7 +20,6 @@ internal class UtbetalingsgodkjenningMessageTest {
     }
 
     private lateinit var godkjenningsbehov: GodkjenningsbehovData
-    private val utbetaling = Utbetaling(UUID.randomUUID(), 1000, 1000, Utbetalingtype.UTBETALING)
 
     @BeforeEach
     fun setup() {
@@ -32,19 +28,19 @@ internal class UtbetalingsgodkjenningMessageTest {
 
     @Test
     fun `automatisk behandlet`() {
-        godkjenningsbehov.godkjennAutomatisk(utbetaling)
+        godkjenningsbehov.godkjennAutomatisk()
         assertGodkjent(true, "Automatisk behandlet", "tbd@nav.no")
     }
 
     @Test
     fun `manuelt godkjent`() {
-        godkjenningsbehov.godkjennManuelt(IDENT, EPOST, GODKJENTTIDSPUNKT, emptyList(), utbetaling)
+        godkjenningsbehov.godkjennManuelt(IDENT, EPOST, GODKJENTTIDSPUNKT, emptyList())
         assertGodkjent(false, IDENT, EPOST, GODKJENTTIDSPUNKT)
     }
 
     @Test
     fun `manuelt avvist`() {
-        godkjenningsbehov.avvisManuelt(IDENT, EPOST, GODKJENTTIDSPUNKT, null, null, null, emptyList(), utbetaling)
+        godkjenningsbehov.avvisManuelt(IDENT, EPOST, GODKJENTTIDSPUNKT, null, null, null, emptyList())
         assertMessage { løsning ->
             assertFalse(løsning.godkjent)
             assertLøsning(false, IDENT, EPOST, GODKJENTTIDSPUNKT)

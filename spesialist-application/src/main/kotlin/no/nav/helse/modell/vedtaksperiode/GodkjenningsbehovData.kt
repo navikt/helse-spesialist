@@ -6,8 +6,6 @@ import no.nav.helse.modell.melding.VedtaksperiodeAvvistManuelt
 import no.nav.helse.modell.melding.VedtaksperiodeGodkjentAutomatisk
 import no.nav.helse.modell.melding.VedtaksperiodeGodkjentManuelt
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
-import no.nav.helse.modell.utbetaling.Refusjonstype
-import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import java.time.LocalDate
@@ -51,7 +49,6 @@ data class GodkjenningsbehovData(
             begrunnelser = løsning.begrunnelser,
             kommentar = løsning.kommentar,
             saksbehandleroverstyringer = løsning.saksbehandleroverstyringer,
-            refusjonstype = løsning.refusjonstype.name,
             json = json,
         )
 
@@ -65,7 +62,6 @@ data class GodkjenningsbehovData(
         val begrunnelser: List<String>?,
         val kommentar: String?,
         val saksbehandleroverstyringer: List<UUID>,
-        val refusjonstype: Refusjonstype,
     )
 
     private companion object {
@@ -73,15 +69,14 @@ data class GodkjenningsbehovData(
         private const val AUTOMATISK_BEHANDLET_EPOSTADRESSE = "tbd@nav.no"
     }
 
-    internal fun godkjennAutomatisk(utbetaling: Utbetaling) {
-        løsAutomatisk(true, utbetaling)
+    internal fun godkjennAutomatisk() {
+        løsAutomatisk(true)
     }
 
     internal fun avvisAutomatisk(
-        utbetaling: Utbetaling,
         begrunnelser: List<String>?,
     ) {
-        løsAutomatisk(false, utbetaling, "Automatisk avvist", begrunnelser)
+        løsAutomatisk(false, "Automatisk avvist", begrunnelser)
     }
 
     internal fun godkjennManuelt(
@@ -89,7 +84,6 @@ data class GodkjenningsbehovData(
         saksbehandlerEpost: String,
         godkjenttidspunkt: LocalDateTime,
         saksbehandleroverstyringer: List<UUID>,
-        utbetaling: Utbetaling,
     ) {
         løsManuelt(
             godkjent = true,
@@ -100,7 +94,6 @@ data class GodkjenningsbehovData(
             begrunnelser = null,
             kommentar = null,
             saksbehandleroverstyringer = saksbehandleroverstyringer,
-            utbetaling = utbetaling,
         )
     }
 
@@ -112,7 +105,6 @@ data class GodkjenningsbehovData(
         begrunnelser: List<String>?,
         kommentar: String?,
         saksbehandleroverstyringer: List<UUID>,
-        utbetaling: Utbetaling,
     ) {
         løsManuelt(
             godkjent = false,
@@ -123,13 +115,11 @@ data class GodkjenningsbehovData(
             begrunnelser = begrunnelser,
             kommentar = kommentar,
             saksbehandleroverstyringer = saksbehandleroverstyringer,
-            utbetaling = utbetaling,
         )
     }
 
     private fun løsAutomatisk(
         godkjent: Boolean,
-        utbetaling: Utbetaling,
         årsak: String? = null,
         begrunnelser: List<String>? = null,
     ) {
@@ -143,7 +133,6 @@ data class GodkjenningsbehovData(
             begrunnelser = begrunnelser,
             kommentar = null,
             saksbehandleroverstyringer = emptyList(),
-            utbetaling = utbetaling,
         )
     }
 
@@ -156,7 +145,6 @@ data class GodkjenningsbehovData(
         begrunnelser: List<String>?,
         kommentar: String?,
         saksbehandleroverstyringer: List<UUID>,
-        utbetaling: Utbetaling,
     ) {
         løs(
             automatisk = false,
@@ -168,7 +156,6 @@ data class GodkjenningsbehovData(
             begrunnelser = begrunnelser,
             kommentar = kommentar,
             saksbehandleroverstyringer = saksbehandleroverstyringer,
-            utbetaling = utbetaling,
         )
     }
 
@@ -182,7 +169,6 @@ data class GodkjenningsbehovData(
         begrunnelser: List<String>?,
         kommentar: String?,
         saksbehandleroverstyringer: List<UUID>,
-        utbetaling: Utbetaling,
     ) {
         løsning =
             Løsning(
@@ -195,7 +181,6 @@ data class GodkjenningsbehovData(
                 begrunnelser = begrunnelser,
                 kommentar = kommentar,
                 saksbehandleroverstyringer = saksbehandleroverstyringer,
-                refusjonstype = utbetaling.refusjonstype(),
             )
     }
 

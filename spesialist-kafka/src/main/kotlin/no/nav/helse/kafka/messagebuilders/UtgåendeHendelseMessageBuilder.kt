@@ -110,7 +110,6 @@ private fun Godkjenningsbehovløsning.detaljer(): Map<String, Any> {
                             begrunnelser?.let { put("begrunnelser", it) }
                             kommentar?.let { put("kommentar", it) }
                             put("saksbehandleroverstyringer", saksbehandleroverstyringer)
-                            put("refusjontype", refusjonstype)
                         },
                 ),
         )

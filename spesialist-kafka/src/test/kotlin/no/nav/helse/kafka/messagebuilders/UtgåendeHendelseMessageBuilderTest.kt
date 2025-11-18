@@ -15,7 +15,6 @@ import no.nav.helse.modell.melding.VedtaksperiodeAvvistAutomatisk
 import no.nav.helse.modell.melding.VedtaksperiodeAvvistManuelt
 import no.nav.helse.modell.melding.VedtaksperiodeGodkjentAutomatisk
 import no.nav.helse.modell.melding.VedtaksperiodeGodkjentManuelt
-import no.nav.helse.modell.utbetaling.Refusjonstype
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.domain.testfixtures.feb
@@ -267,7 +266,6 @@ class UtgåendeHendelseMessageBuilderTest {
             saksbehandlerIdent = saksbehandlerIdent,
             saksbehandlerEpost = saksbehandlerEpost,
             saksbehandleroverstyringer = saksbehandleroverstyringer,
-            refusjonstype = Refusjonstype.INGEN_REFUSJON.name,
             årsak = "En årsak",
             begrunnelser = listOf("En begrunnelse"),
             kommentar = "En kommentar",
@@ -278,7 +276,6 @@ class UtgåendeHendelseMessageBuilderTest {
             payload = mapOf(
                 "godkjent" to true,
                 "automatiskBehandling" to false,
-                "refusjontype" to "INGEN_REFUSJON",
                 "saksbehandlerIdent" to saksbehandlerIdent,
                 "saksbehandlerEpost" to saksbehandlerEpost,
                 "godkjenttidspunkt" to godkjenttidspunkt,

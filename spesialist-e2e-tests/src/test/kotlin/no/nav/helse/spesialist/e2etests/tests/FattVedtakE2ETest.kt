@@ -252,8 +252,7 @@ class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
                     "saksbehandlerIdent": "${saksbehandler.ident}",
                     "saksbehandlerEpost": "${saksbehandler.epost}",
                     "automatiskBehandling": false,
-                    "saksbehandleroverstyringer": [],
-                    "refusjontype": "FULL_REFUSJON"
+                    "saksbehandleroverstyringer": []
                   }
                 }
             """.trimIndent(),
@@ -371,8 +370,7 @@ class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
                     "saksbehandlerIdent": "${saksbehandler.ident}",
                     "saksbehandlerEpost": "${saksbehandler.epost}",
                     "automatiskBehandling": false,
-                    "saksbehandleroverstyringer": [],
-                    "refusjontype": "FULL_REFUSJON"
+                    "saksbehandleroverstyringer": []
                   }
                 }
             """.trimIndent(),

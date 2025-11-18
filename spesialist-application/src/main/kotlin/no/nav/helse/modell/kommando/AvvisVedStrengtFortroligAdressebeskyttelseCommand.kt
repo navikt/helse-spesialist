@@ -5,7 +5,6 @@ import no.nav.helse.db.PersonDao
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.modell.person.Adressebeskyttelse.StrengtFortrolig
 import no.nav.helse.modell.person.Adressebeskyttelse.StrengtFortroligUtland
-import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 
 internal class AvvisVedStrengtFortroligAdressebeskyttelseCommand(
@@ -13,7 +12,6 @@ internal class AvvisVedStrengtFortroligAdressebeskyttelseCommand(
     private val oppgaveDao: OppgaveDao,
     private val godkjenningMediator: GodkjenningMediator,
     private val godkjenningsbehov: GodkjenningsbehovData,
-    private val utbetaling: Utbetaling,
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
         val adressebeskyttelse =
@@ -29,7 +27,6 @@ internal class AvvisVedStrengtFortroligAdressebeskyttelseCommand(
         godkjenningMediator.automatiskAvvisning(
             context = context,
             begrunnelser = årsaker,
-            utbetaling = utbetaling,
             behov = godkjenningsbehov,
         )
         oppgaveDao.invaliderOppgaveFor(godkjenningsbehov.fødselsnummer)

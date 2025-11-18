@@ -10,8 +10,6 @@ import no.nav.helse.modell.kommando.LøsGodkjenningsbehov
 import no.nav.helse.modell.melding.Godkjenningsbehovløsning
 import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.person.Sykefraværstilfelle
-import no.nav.helse.modell.utbetaling.Utbetaling
-import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.spesialist.application.Testdata.godkjenningsbehovData
@@ -33,7 +31,6 @@ internal class LøsGodkjenningsbehovTest {
         private val GODKJENNINGSBEHOV_ID = UUID.randomUUID()
         private val vedtaksperiodeId = UUID.randomUUID()
         private const val fødselsnummer = "1234"
-        private val utbetaling = Utbetaling(UUID.randomUUID(), 1000, 1000, Utbetalingtype.UTBETALING)
     }
 
     private val godkjenningsbehovJson = """{ "@event_name": "behov" }"""
@@ -66,7 +63,6 @@ internal class LøsGodkjenningsbehovTest {
         commandContext = CommandContext(UUID.randomUUID())
         commandContext.nyObserver(observer)
         command = LøsGodkjenningsbehov(
-            utbetaling = utbetaling,
             sykefraværstilfelle = Sykefraværstilfelle(
                 fødselsnummer,
                 1 jan 2018,

@@ -279,9 +279,7 @@ class Kommandofabrikk(
     ): LøsGodkjenningsbehov {
         val godkjenningsbehov = sessionContext.meldingDao.finnGodkjenningsbehov(melding.godkjenningsbehovhendelseId)
         val sykefraværstilfelle = person.sykefraværstilfelle(godkjenningsbehov.vedtaksperiodeId())
-        val utbetaling = sessionContext.utbetalingDao.hentUtbetaling(godkjenningsbehov.data().utbetalingId)
         return LøsGodkjenningsbehov(
-            utbetaling = utbetaling,
             sykefraværstilfelle = sykefraværstilfelle,
             godkjent = melding.godkjent,
             godkjenttidspunkt = melding.godkjenttidspunkt,

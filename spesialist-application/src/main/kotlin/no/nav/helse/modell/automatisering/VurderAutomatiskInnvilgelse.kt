@@ -88,7 +88,7 @@ internal class VurderAutomatiskInnvilgelse(
 
     private fun automatiserSaksbehandling(context: CommandContext) {
         automatiseringDao.automatisert(vedtaksperiodeId, hendelseId, utbetalingId)
-        godkjenningMediator.automatiskUtbetaling(context, godkjenningsbehov, utbetaling)
+        godkjenningMediator.automatiskUtbetaling(context, godkjenningsbehov)
         oppgaveService.avbrytOppgaveFor(vedtaksperiodeId)
     }
 }

@@ -14,8 +14,6 @@ import no.nav.helse.modell.melding.VedtaksperiodeGodkjentAutomatisk
 import no.nav.helse.modell.melding.VedtaksperiodeGodkjentManuelt
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVarsel
-import no.nav.helse.modell.utbetaling.Utbetaling
-import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.spesialist.application.Testdata.godkjenningsbehovData
@@ -57,8 +55,6 @@ internal class GodkjenningMediatorTest {
             epostadresse = "beslutter@nav.no",
         )
 
-    private val utbetaling = Utbetaling(UUID.randomUUID(), 1000, 1000, Utbetalingtype.UTBETALING)
-
     @BeforeEach
     fun setup() {
         context = CommandContext(UUID.randomUUID())
@@ -79,7 +75,6 @@ internal class GodkjenningMediatorTest {
             godkjenttidspunkt = LocalDateTime.now(),
             saksbehandleroverstyringer = emptyList(),
             sykefraværstilfelle = Sykefraværstilfelle(fnr, 1 jan 2018, listOf(generasjon())),
-            utbetaling = utbetaling,
         )
         assertNotNull(hendelserInspektør.hendelseOrNull<VedtaksperiodeGodkjentManuelt>())
     }
@@ -95,7 +90,6 @@ internal class GodkjenningMediatorTest {
             saksbehandler = løsningSaksbehandler,
             godkjenttidspunkt = LocalDateTime.now(),
             saksbehandleroverstyringer = emptyList(),
-            utbetaling = utbetaling,
             årsak = null,
             begrunnelser = null,
             kommentar = null
@@ -107,8 +101,7 @@ internal class GodkjenningMediatorTest {
     fun `automatisk godkjenning medfører VedtaksperiodeGodkjentAutomatisk`() {
         mediator.automatiskUtbetaling(
             context = context,
-            behov = godkjenningsbehovData(fødselsnummer = fnr),
-            utbetaling = utbetaling
+            behov = godkjenningsbehovData(fødselsnummer = fnr)
         )
         assertNotNull(hendelserInspektør.hendelseOrNull<VedtaksperiodeGodkjentAutomatisk>())
     }
@@ -117,7 +110,6 @@ internal class GodkjenningMediatorTest {
     fun `automatisk avvisning medfører VedtaksperiodeAvvistAutomatisk`() {
         mediator.automatiskAvvisning(
             context = context,
-            utbetaling = utbetaling,
             behov = godkjenningsbehovData(fødselsnummer = fnr),
             begrunnelser = emptyList(),
         )
@@ -129,7 +121,6 @@ internal class GodkjenningMediatorTest {
         mediator.automatiskAvvisning(
             context = context,
             begrunnelser = listOf("foo"),
-            utbetaling = utbetaling,
             behov = godkjenningsbehovData(fødselsnummer = fnr),
         )
         assertFerdigbehandletGodkjenningsbehovOpptegnelseOpprettet()
@@ -139,8 +130,7 @@ internal class GodkjenningMediatorTest {
     fun `automatisk utbetaling skal opprette opptegnelse`() {
         mediator.automatiskUtbetaling(
             context = context,
-            behov = godkjenningsbehovData(fødselsnummer = fnr),
-            utbetaling = utbetaling
+            behov = godkjenningsbehovData(fødselsnummer = fnr)
         )
         assertFerdigbehandletGodkjenningsbehovOpptegnelseOpprettet()
     }
@@ -157,7 +147,6 @@ internal class GodkjenningMediatorTest {
             godkjenttidspunkt = LocalDateTime.now(),
             saksbehandleroverstyringer = emptyList(),
             sykefraværstilfelle = Sykefraværstilfelle(fnr, 1 jan 2018, listOf(generasjon())),
-            utbetaling = utbetaling,
         )
         assertOpptegnelseIkkeOpprettet()
     }
@@ -175,7 +164,6 @@ internal class GodkjenningMediatorTest {
             begrunnelser = null,
             kommentar = null,
             saksbehandleroverstyringer = emptyList(),
-            utbetaling = utbetaling,
         )
         assertOpptegnelseIkkeOpprettet()
     }
@@ -227,7 +215,6 @@ internal class GodkjenningMediatorTest {
             godkjenttidspunkt = LocalDateTime.now(),
             saksbehandleroverstyringer = emptyList(),
             sykefraværstilfelle = Sykefraværstilfelle(fnr, 1 jan 2018, generasjoner),
-            utbetaling = utbetaling,
         )
 
     private fun assertFerdigbehandletGodkjenningsbehovOpptegnelseOpprettet() =

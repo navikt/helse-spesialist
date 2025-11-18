@@ -4,7 +4,6 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.Sykefraværstilfelle
-import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.spesialist.api.abonnement.AutomatiskBehandlingPayload
@@ -21,7 +20,6 @@ class GodkjenningMediator(
     internal fun saksbehandlerUtbetaling(
         context: CommandContext,
         behov: GodkjenningsbehovData,
-        utbetaling: Utbetaling,
         saksbehandlerIdent: String,
         saksbehandlerEpost: String,
         saksbehandler: Saksbehandlerløsning.Saksbehandler,
@@ -35,7 +33,6 @@ class GodkjenningMediator(
             saksbehandlerEpost = saksbehandlerEpost,
             godkjenttidspunkt = godkjenttidspunkt,
             saksbehandleroverstyringer = saksbehandleroverstyringer,
-            utbetaling = utbetaling,
         )
         sykefraværstilfelle.håndterGodkjent(behov.vedtaksperiodeId)
 
@@ -51,7 +48,6 @@ class GodkjenningMediator(
     internal fun saksbehandlerAvvisning(
         context: CommandContext,
         behov: GodkjenningsbehovData,
-        utbetaling: Utbetaling,
         saksbehandlerIdent: String,
         saksbehandlerEpost: String,
         saksbehandler: Saksbehandlerløsning.Saksbehandler,
@@ -69,7 +65,6 @@ class GodkjenningMediator(
             begrunnelser = begrunnelser,
             kommentar = kommentar,
             saksbehandleroverstyringer = saksbehandleroverstyringer,
-            utbetaling = utbetaling,
         )
         context.hendelse(behov.medLøsning())
         context.hendelse(behov.lagVedtaksperiodeAvvistManuelt(saksbehandler))
@@ -78,9 +73,8 @@ class GodkjenningMediator(
     internal fun automatiskUtbetaling(
         context: CommandContext,
         behov: GodkjenningsbehovData,
-        utbetaling: Utbetaling,
     ) {
-        behov.godkjennAutomatisk(utbetaling)
+        behov.godkjennAutomatisk()
         context.hendelse(behov.medLøsning())
         context.hendelse(behov.lagVedtaksperiodeGodkjentAutomatisk())
         opptegnelseDao.opprettOpptegnelse(
@@ -98,11 +92,9 @@ class GodkjenningMediator(
     internal fun automatiskAvvisning(
         context: CommandContext,
         begrunnelser: List<String>,
-        utbetaling: Utbetaling,
         behov: GodkjenningsbehovData,
     ) {
         behov.avvisAutomatisk(
-            utbetaling = utbetaling,
             begrunnelser = begrunnelser,
         )
         context.hendelse(behov.medLøsning())
