@@ -60,7 +60,7 @@ class DeleteVarselvurderingBehandlerIntegrationTest {
             saksbehandler = saksbehandler,
         )
 
-        assertEquals(HttpStatusCode.OK.value, response.status)
+        assertEquals(HttpStatusCode.NoContent.value, response.status)
     }
 
     @Test
