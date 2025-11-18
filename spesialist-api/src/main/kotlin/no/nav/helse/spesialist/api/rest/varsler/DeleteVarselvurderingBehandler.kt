@@ -13,12 +13,14 @@ import no.nav.helse.spesialist.api.rest.varsler.DeleteVarselvurderingErrorCode.V
 import no.nav.helse.spesialist.api.rest.varsler.DeleteVarselvurderingErrorCode.VARSEL_IKKE_FUNNET
 import no.nav.helse.spesialist.application.Outbox
 import no.nav.helse.spesialist.domain.Identitetsnummer
+import no.nav.helse.spesialist.domain.ResultatAvSletting
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.Varsel.Status.AKTIV
 import no.nav.helse.spesialist.domain.Varsel.Status.AVVIKLET
 import no.nav.helse.spesialist.domain.Varsel.Status.AVVIST
 import no.nav.helse.spesialist.domain.Varsel.Status.GODKJENT
 import no.nav.helse.spesialist.domain.Varsel.Status.INAKTIV
+import no.nav.helse.spesialist.domain.Varsel.Status.VURDERT
 import no.nav.helse.spesialist.domain.VarselId
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 
@@ -48,13 +50,17 @@ class DeleteVarselvurderingBehandler : DeleteBehandler<Varsler.VarselId.Vurderin
         if (!saksbehandler.harTilgangTilPerson(identitetsnummer, tilgangsgrupper, transaksjon)) {
             return RestResponse.Error(MANGLER_TILGANG_TIL_PERSON)
         }
-        if (varsel.status in listOf(GODKJENT, INAKTIV, AVVIST, AVVIKLET)) {
-            return RestResponse.Error(VARSEL_HAR_FEIL_STATUS)
+
+        return when (varsel.status) {
+            GODKJENT, INAKTIV, AVVIST, AVVIKLET -> RestResponse.Error(VARSEL_HAR_FEIL_STATUS)
+            AKTIV, VURDERT -> {
+                val resultat = varsel.slettVurdering()
+                if (resultat is ResultatAvSletting.Slettet) {
+                    transaksjon.varselRepository.lagre(varsel)
+                }
+                RestResponse.NoContent()
+            }
         }
-        if (varsel.status == AKTIV && varsel.manglerVurdering()) return RestResponse.NoContent()
-        varsel.fjernVurdering()
-        transaksjon.varselRepository.lagre(varsel)
-        return RestResponse.OK(Unit)
     }
 
     override fun openApi(config: RouteConfig) {
@@ -68,5 +74,8 @@ enum class DeleteVarselvurderingErrorCode(
 ) : ApiErrorCode {
     MANGLER_TILGANG_TIL_PERSON(HttpStatusCode.Forbidden, "Mangler tilgang til person"),
     VARSEL_IKKE_FUNNET(HttpStatusCode.NotFound, "Varsel ikke funnet"),
-    VARSEL_HAR_FEIL_STATUS(HttpStatusCode.Conflict, "Varsel har en status som ikke tillater at vurderingen kan fjernes"),
+    VARSEL_HAR_FEIL_STATUS(
+        HttpStatusCode.Conflict,
+        "Varsel har en status som ikke tillater at vurderingen kan fjernes",
+    ),
 }

@@ -165,7 +165,7 @@ class PostFattVedtakBehandler(
 
         val behandlingUnikIder = behandlingerSomMåSeesUnderEtt.map { behandling -> behandling.id }
         val varsler = varselRepository.finnVarslerFor(behandlingUnikIder)
-        if (varsler.any { it.manglerVurdering() }) throw FattVedtakException(ApiPostFattVedtakErrorCode.VARSLER_MANGLER_VURDERING)
+        if (varsler.any { it.trengerVurdering() }) throw FattVedtakException(ApiPostFattVedtakErrorCode.VARSLER_MANGLER_VURDERING)
         varsler
             .filter { it.kanGodkjennes() }
             .forEach {

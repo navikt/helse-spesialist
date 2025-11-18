@@ -330,7 +330,7 @@ class PgVarselRepositoryTest : AbstractDBIntegrationTest() {
         val funnet = repository.finn(varselId) ?: error("Fant ikke varsel")
         funnet.vurder(saksbehandlerId, definisjonId)
         repository.lagre(funnet)
-        funnet.fjernVurdering()
+        funnet.slettVurdering()
         repository.lagre(funnet)
 
         // then

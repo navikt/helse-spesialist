@@ -11,6 +11,12 @@ value class VarselId(
     val value: UUID,
 ) : ValueObject
 
+sealed interface ResultatAvSletting {
+    data object Slettet : ResultatAvSletting
+
+    data object FantesIkke : ResultatAvSletting
+}
+
 class Varsel private constructor(
     id: VarselId,
     val spleisBehandlingId: SpleisBehandlingId?,
@@ -38,7 +44,11 @@ class Varsel private constructor(
 
     fun kanVurderes() = status == Status.AKTIV
 
-    fun manglerVurdering() = vurdering == null
+    fun trengerVurdering() =
+        when (status) {
+            Status.AKTIV, Status.GODKJENT, Status.VURDERT -> vurdering == null
+            Status.INAKTIV, Status.AVVIST, Status.AVVIKLET -> false
+        }
 
     fun vurder(
         saksbehandlerOid: SaksbehandlerOid,
@@ -54,10 +64,15 @@ class Varsel private constructor(
         status = Status.VURDERT
     }
 
-    fun fjernVurdering() {
-        if (status != Status.VURDERT) error("Kan ikke fjerne vurdering, varselet er ikke vurdert")
-        vurdering = null
-        status = Status.AKTIV
+    fun slettVurdering(): ResultatAvSletting {
+        if (vurdering != null) {
+            if (status != Status.VURDERT) error("Kan ikke fjerne vurdering, varselet er ikke vurdert")
+            vurdering = null
+            status = Status.AKTIV
+            return ResultatAvSletting.Slettet
+        } else {
+            return ResultatAvSletting.FantesIkke
+        }
     }
 
     fun godkjenn() {
