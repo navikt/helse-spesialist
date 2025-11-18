@@ -13,6 +13,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveegenskap
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavetype
 import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodetype
 import no.nav.helse.spesialist.api.graphql.schema.ApiPersonnavn
+import no.nav.helse.spesialist.application.PersonPseudoId
 
 internal object OppgaveMapper {
     internal fun Set<EgenskapForDatabase>.tilEgenskaperForVisning() =
@@ -26,27 +27,27 @@ internal object OppgaveMapper {
             antallMineSakerPaVent = this.antallMineSakerPåVent,
         )
 
-    internal fun List<BehandletOppgaveFraDatabaseForVisning>.tilBehandledeOppgaver() =
-        map {
-            val egenskaper = it.egenskaper.tilModellversjoner()
-            ApiBehandletOppgave(
-                id = it.id.toString(),
-                aktorId = it.aktørId,
-                oppgavetype = egenskaper.oppgavetype(),
-                periodetype = egenskaper.periodetype(),
-                antallArbeidsforhold = egenskaper.antallArbeidsforhold(),
-                ferdigstiltTidspunkt = it.ferdigstiltTidspunkt,
-                ferdigstiltAv = it.ferdigstiltAv,
-                beslutter = it.beslutter,
-                saksbehandler = it.saksbehandler,
-                personnavn =
-                    ApiPersonnavn(
-                        fornavn = it.navn.fornavn,
-                        etternavn = it.navn.etternavn,
-                        mellomnavn = it.navn.mellomnavn,
-                    ),
-            )
-        }
+    internal fun BehandletOppgaveFraDatabaseForVisning.tilBehandledeOppgaver(personPseudoId: PersonPseudoId): ApiBehandletOppgave {
+        val egenskaper = egenskaper.tilModellversjoner()
+        return ApiBehandletOppgave(
+            id = id.toString(),
+            aktorId = aktørId,
+            personPseudoId = personPseudoId.value,
+            oppgavetype = egenskaper.oppgavetype(),
+            periodetype = egenskaper.periodetype(),
+            antallArbeidsforhold = egenskaper.antallArbeidsforhold(),
+            ferdigstiltTidspunkt = ferdigstiltTidspunkt,
+            ferdigstiltAv = ferdigstiltAv,
+            beslutter = beslutter,
+            saksbehandler = saksbehandler,
+            personnavn =
+                ApiPersonnavn(
+                    fornavn = navn.fornavn,
+                    etternavn = navn.etternavn,
+                    mellomnavn = navn.mellomnavn,
+                ),
+        )
+    }
 
     private fun Set<EgenskapForDatabase>.tilModellversjoner(): List<Egenskap> = this.mapNotNull { it.tilModellversjon() }
 

@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.api.graphql.query
 
 import io.mockk.every
 import io.mockk.verify
+import no.nav.helse.mediator.asUUID
 import no.nav.helse.spesialist.api.AbstractGraphQLApiTest
 import no.nav.helse.spesialist.api.graphql.schema.ApiAntallArbeidsforhold
 import no.nav.helse.spesialist.api.graphql.schema.ApiAntallOppgaver
@@ -12,6 +13,7 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiPersonnavn
 import no.nav.helse.util.juni
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import java.time.LocalDateTime
 import java.util.UUID
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavetype as OppgavetypeForApi
@@ -71,6 +73,28 @@ class OppgaverQueryHandlerTest : AbstractGraphQLApiTest() {
     }
 
     @Test
+    fun `behandledeOppgaverFeed oppgaver inneholder personPseudoId`() {
+        every {
+            apiOppgaveService.behandledeOppgaver(any(), any(), any(), any(), any())
+        } returns ApiBehandledeOppgaver(oppgaver = listOf(behandletOppgave()), totaltAntallOppgaver = 1)
+
+        val body = runQuery(
+            """
+            {
+                behandledeOppgaverFeed(
+                    offset: 14,
+                    limit: 14,
+                    fom: "2025-06-10",
+                    tom: "2025-06-13"
+                ) { oppgaver { id, personPseudoId } }
+            }
+            """.trimIndent(),
+        )
+
+        assertDoesNotThrow { body["data"]["behandledeOppgaverFeed"]["oppgaver"][0]["personPseudoId"].asUUID() }
+    }
+
+    @Test
     fun `antallOppgaver returnerer antall oppgaver`() {
         every {
             apiOppgaveService.antallOppgaver(any())
@@ -103,6 +127,7 @@ class OppgaverQueryHandlerTest : AbstractGraphQLApiTest() {
         ApiBehandletOppgave(
             id = UUID.randomUUID().toString(),
             aktorId = "1017011111111",
+            personPseudoId = UUID.randomUUID(),
             oppgavetype = OppgavetypeForApi.SOKNAD,
             periodetype = ApiPeriodetype.FORSTEGANGSBEHANDLING,
             antallArbeidsforhold = ApiAntallArbeidsforhold.ET_ARBEIDSFORHOLD,

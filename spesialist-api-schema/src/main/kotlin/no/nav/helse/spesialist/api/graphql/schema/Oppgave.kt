@@ -142,6 +142,7 @@ data class ApiPersonnavn(
 data class ApiBehandletOppgave(
     val id: String,
     val aktorId: String,
+    val personPseudoId: UUID,
     val oppgavetype: ApiOppgavetype,
     val periodetype: ApiPeriodetype,
     val antallArbeidsforhold: ApiAntallArbeidsforhold,

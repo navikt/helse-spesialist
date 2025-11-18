@@ -419,7 +419,8 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
         )
     private val apiOppgaveService = ApiOppgaveService(
         oppgaveDao = daos.oppgaveDao,
-        oppgaveService = oppgaveService
+        oppgaveService = oppgaveService,
+        sessionFactory = TransactionalSessionFactory(dataSource)
     )
 
     private val mediator =

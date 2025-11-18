@@ -10,6 +10,7 @@ data class AntallOppgaverFraDatabase(
 data class BehandletOppgaveFraDatabaseForVisning(
     val id: Long,
     val aktørId: String,
+    val fødselsnummer: String,
     val egenskaper: Set<EgenskapForDatabase>,
     val ferdigstiltTidspunkt: LocalDateTime,
     val ferdigstiltAv: String?,

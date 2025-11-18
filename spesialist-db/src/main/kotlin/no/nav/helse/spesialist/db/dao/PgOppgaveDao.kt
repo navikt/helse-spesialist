@@ -265,6 +265,7 @@ class PgOppgaveDao internal constructor(
             SELECT
                 o.id as oppgave_id,
                 p.aktør_id,
+                p.fødselsnummer,
                 o.egenskaper,
                 o.oppdatert as ferdigstilt_tidspunkt,
                 o.ferdigstilt_av,
@@ -298,6 +299,7 @@ class PgOppgaveDao internal constructor(
             BehandletOppgaveFraDatabaseForVisning(
                 id = row.long("oppgave_id"),
                 aktørId = row.string("aktør_id"),
+                fødselsnummer = row.string("fødselsnummer"),
                 egenskaper =
                     row
                         .array<String>("egenskaper")

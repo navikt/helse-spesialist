@@ -16,15 +16,18 @@ import no.nav.helse.mediator.KommandokjedeEndretEvent
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.modell.melding.UtgåendeHendelse
+import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.api.graphql.schema.ApiAntallArbeidsforhold
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavetype
 import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodetype
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
+import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertNull
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -50,6 +53,9 @@ internal class ApiOppgaveServiceTest {
     private val reservasjonDao = mockk<ReservasjonDao>(relaxed = true)
     private val opptegnelseDao = mockk<OpptegnelseDao>(relaxed = true)
     private val oppgaveRepository = mockk<OppgaveRepository>(relaxed = true)
+
+    private val integrationTestFixture = IntegrationTestFixture()
+    private val sessionFactory = integrationTestFixture.sessionFactory
 
     private val meldingPubliserer = object : MeldingPubliserer {
         var antallMeldinger: Int = 0
@@ -82,7 +88,8 @@ internal class ApiOppgaveServiceTest {
                 meldingPubliserer = meldingPubliserer,
                 oppgaveRepository = oppgaveRepository,
                 tilgangsgruppehenter = { emptySet() },
-            )
+            ),
+            sessionFactory = sessionFactory
         )
 
     private fun saksbehandler() =
@@ -145,6 +152,7 @@ internal class ApiOppgaveServiceTest {
         assertEquals(1, oppgaver.oppgaver.size)
         val oppgave = oppgaver.oppgaver.single()
         assertEquals("1", oppgave.id)
+        assertDoesNotThrow { oppgave.personPseudoId }
         assertEquals("1234567891011", oppgave.aktorId)
         assertEquals("fornavn", oppgave.personnavn.fornavn)
         assertEquals("mellomnavn", oppgave.personnavn.mellomnavn)
@@ -161,6 +169,7 @@ internal class ApiOppgaveServiceTest {
     private fun behandletOppgaveFraDatabaseForVisning(
         oppgaveId: Long = Random.Default.nextLong(),
         aktørId: String = Random.Default.nextLong(1000000000000, 2000000000000).toString(),
+        fødselsnummer: String = lagFødselsnummer(),
         egenskaper: Set<EgenskapForDatabase> = EGENSKAPER,
         ferdigstiltAv: String? = "EN-SAKSBEHANDLER-IDENT",
         beslutter: String? = null,
@@ -171,6 +180,7 @@ internal class ApiOppgaveServiceTest {
     ) = BehandletOppgaveFraDatabaseForVisning(
         id = oppgaveId,
         aktørId = aktørId,
+        fødselsnummer = fødselsnummer,
         egenskaper = egenskaper,
         ferdigstiltAv = ferdigstiltAv,
         saksbehandler = saksbehandler ?: ferdigstiltAv,

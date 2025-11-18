@@ -1,12 +1,14 @@
 package no.nav.helse.mediator.oppgave
 
 import no.nav.helse.db.OppgaveDao
+import no.nav.helse.db.SessionFactory
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilApiversjon
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilBehandledeOppgaver
 import no.nav.helse.mediator.oppgave.OppgaveMapper.tilEgenskaperForVisning
 import no.nav.helse.spesialist.api.graphql.schema.ApiAntallOppgaver
 import no.nav.helse.spesialist.api.graphql.schema.ApiBehandledeOppgaver
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgaveegenskap
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import java.time.LocalDate
@@ -15,6 +17,7 @@ import java.util.UUID
 class ApiOppgaveService(
     private val oppgaveDao: OppgaveDao,
     private val oppgaveService: OppgaveService,
+    private val sessionFactory: SessionFactory,
 ) {
     fun antallOppgaver(saksbehandler: Saksbehandler): ApiAntallOppgaver {
         val antallOppgaver = oppgaveDao.finnAntallOppgaver(saksbehandlerOid = saksbehandler.id.value)
@@ -36,10 +39,18 @@ class ApiOppgaveService(
                 fom = fom,
                 tom = tom,
             )
-        return ApiBehandledeOppgaver(
-            oppgaver = behandledeOppgaver.tilBehandledeOppgaver(),
-            totaltAntallOppgaver = if (behandledeOppgaver.isEmpty()) 0 else behandledeOppgaver.first().filtrertAntall,
-        )
+        return sessionFactory.transactionalSessionScope { sessionContext ->
+            ApiBehandledeOppgaver(
+                oppgaver =
+                    behandledeOppgaver.map {
+                        val personPseudoId =
+                            sessionContext.personPseudoIdDao
+                                .nyPersonPseudoId(Identitetsnummer.fraString(it.fødselsnummer))
+                        it.tilBehandledeOppgaver(personPseudoId)
+                    },
+                totaltAntallOppgaver = if (behandledeOppgaver.isEmpty()) 0 else behandledeOppgaver.first().filtrertAntall,
+            )
+        }
     }
 
     fun hentEgenskaper(
