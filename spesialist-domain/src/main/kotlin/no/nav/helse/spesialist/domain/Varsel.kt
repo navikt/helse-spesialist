@@ -40,6 +40,8 @@ class Varsel private constructor(
         AVVIKLET,
     }
 
+    fun kanAvvises() = status in listOf(Status.AKTIV, Status.VURDERT)
+
     fun kanGodkjennes() = status == Status.VURDERT
 
     fun kanVurderes() = status == Status.AKTIV
@@ -73,6 +75,11 @@ class Varsel private constructor(
         } else {
             return ResultatAvSletting.FantesIkke
         }
+    }
+
+    fun avvis() {
+        if (!kanAvvises()) error("Skal ikke avvises, varselet er ikke aktivt eller vurdert")
+        status = Status.AVVIST
     }
 
     fun godkjenn() {

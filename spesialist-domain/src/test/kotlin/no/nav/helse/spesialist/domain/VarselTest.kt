@@ -10,6 +10,7 @@ import no.nav.helse.spesialist.domain.testfixtures.lagVarseldefinisjonId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
@@ -136,6 +137,82 @@ class VarselTest {
 
         // then
         assertFalse(varsel.trengerVurdering())
+    }
+
+    @ParameterizedTest
+    @EnumSource(Status::class, names = ["VURDERT", "AKTIV"], mode = EnumSource.Mode.EXCLUDE)
+    fun `varsel kan ikke avvises dersom varselet har tilstand`(status: Status) {
+        // given
+        val varsel = Varsel.fraLagring(
+            id = VarselId(value = UUID.randomUUID()),
+            spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
+            behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
+            status = status,
+            kode = "RV_IV_2",
+            opprettetTidspunkt = LocalDateTime.now(),
+            vurdering = null,
+        )
+
+        // then
+        assertFalse(varsel.kanAvvises())
+    }
+
+    @ParameterizedTest
+    @EnumSource(Status::class, names = ["VURDERT", "AKTIV"], mode = EnumSource.Mode.INCLUDE)
+    fun `varsel kan avvises dersom varselet har tilstand`(status: Status) {
+        // given
+        val varsel = Varsel.fraLagring(
+            id = VarselId(value = UUID.randomUUID()),
+            spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
+            behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
+            status = status,
+            kode = "RV_IV_2",
+            opprettetTidspunkt = LocalDateTime.now(),
+            vurdering = null,
+        )
+
+        // then
+        assertTrue(varsel.kanAvvises())
+    }
+
+    @ParameterizedTest
+    @EnumSource(Status::class, names = ["VURDERT", "AKTIV"], mode = EnumSource.Mode.EXCLUDE)
+    fun `error ved forsøk på å avvise når varselet har tilstand`(status: Status) {
+        // given
+        val varsel = Varsel.fraLagring(
+            id = VarselId(value = UUID.randomUUID()),
+            spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
+            behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
+            status = status,
+            kode = "RV_IV_2",
+            opprettetTidspunkt = LocalDateTime.now(),
+            vurdering = null,
+        )
+
+        // then
+        assertThrows<IllegalStateException> {
+            varsel.avvis()
+        }
+    }
+
+    @ParameterizedTest
+    @EnumSource(Status::class, names = ["VURDERT", "AKTIV"], mode = EnumSource.Mode.INCLUDE)
+    fun `ikke error ved forsøk på å avvise når varselet har tilstand`(status: Status) {
+        // given
+        val varsel = Varsel.fraLagring(
+            id = VarselId(value = UUID.randomUUID()),
+            spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID()),
+            behandlingUnikId = BehandlingUnikId(UUID.randomUUID()),
+            status = status,
+            kode = "RV_IV_2",
+            opprettetTidspunkt = LocalDateTime.now(),
+            vurdering = null,
+        )
+
+        // then
+        assertDoesNotThrow {
+            varsel.avvis()
+        }
     }
 
     @ParameterizedTest
