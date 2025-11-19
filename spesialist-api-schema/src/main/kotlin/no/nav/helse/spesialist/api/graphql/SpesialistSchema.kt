@@ -19,8 +19,6 @@ import no.nav.helse.spesialist.api.graphql.mutation.TildelingMutation
 import no.nav.helse.spesialist.api.graphql.mutation.TildelingMutationSchema
 import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutation
 import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutationSchema
-import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutation
-import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutationSchema
 import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQuery
 import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQuerySchema
 import no.nav.helse.spesialist.api.graphql.query.OppgaverQuery
@@ -48,7 +46,6 @@ class SpesialistSchema(
         val overstyring: OverstyringMutationSchema,
         val skjonnsfastsettelse: SkjonnsfastsettelseMutationSchema,
         val totrinnsvurdering: TotrinnsvurderingMutationSchema,
-        val vedtak: VedtakMutationSchema,
         val person: PersonMutationSchema,
         val paVent: PaVentMutationSchema,
         val stansAutomatiskBehandling: StansAutomatiskBehandlingMutationSchema,
@@ -73,7 +70,6 @@ class SpesialistSchema(
                 OverstyringMutation(handler = mutationHandlers.overstyring),
                 SkjonnsfastsettelseMutation(handler = mutationHandlers.skjonnsfastsettelse),
                 TotrinnsvurderingMutation(handler = mutationHandlers.totrinnsvurdering),
-                VedtakMutation(handler = mutationHandlers.vedtak),
                 PersonMutation(handler = mutationHandlers.person),
                 PaVentMutation(handler = mutationHandlers.paVent),
                 StansAutomatiskBehandlingMutation(handler = mutationHandlers.stansAutomatiskBehandling),

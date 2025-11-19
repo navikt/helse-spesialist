@@ -37,7 +37,6 @@ import no.nav.helse.spesialist.api.graphql.mutation.SkjonnsfastsettelseMutationH
 import no.nav.helse.spesialist.api.graphql.mutation.StansAutomatiskBehandlingMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.TildelingMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutationHandler
-import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutationHandler
 import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.OppgaverQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.OpptegnelseQueryHandler
@@ -65,7 +64,6 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
     protected val vedtakBegrunnelseDao = mockk<VedtakBegrunnelseDao>(relaxed = true)
     protected val stansAutomatiskBehandlingSaksbehandlerDao =
         mockk<StansAutomatiskBehandlingSaksbehandlerDao>(relaxed = true)
-    private val godkjenninghåndterer = mockk<Godkjenninghåndterer>(relaxed = true)
     private val personhåndterer = mockk<Personhåndterer>(relaxed = true)
     private val stansAutomatiskBehandlinghåndterer = mockk<StansAutomatiskBehandlinghåndterer>(relaxed = true)
 
@@ -138,10 +136,6 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                     skjonnsfastsettelse = SkjonnsfastsettelseMutationHandler(saksbehandlerMediator = saksbehandlerMediator),
                     totrinnsvurdering = TotrinnsvurderingMutationHandler(
                         saksbehandlerMediator = saksbehandlerMediator,
-                    ),
-                    vedtak = VedtakMutationHandler(
-                        saksbehandlerMediator = saksbehandlerMediator,
-                        godkjenninghåndterer = godkjenninghåndterer,
                     ),
                     person = PersonMutationHandler(personhåndterer = personhåndterer),
                     paVent = PaVentMutationHandler(saksbehandlerMediator = saksbehandlerMediator),

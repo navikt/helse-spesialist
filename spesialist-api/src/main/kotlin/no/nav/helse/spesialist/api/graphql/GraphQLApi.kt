@@ -22,7 +22,6 @@ import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.dokument.DokumentMediator
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.spesialist.api.ApiModule
-import no.nav.helse.spesialist.api.Godkjenninghåndterer
 import no.nav.helse.spesialist.api.GraphQLCallLogging
 import no.nav.helse.spesialist.api.GraphQLMetrikker
 import no.nav.helse.spesialist.api.Personhåndterer
@@ -41,7 +40,6 @@ import no.nav.helse.spesialist.api.graphql.mutation.SkjonnsfastsettelseMutationH
 import no.nav.helse.spesialist.api.graphql.mutation.StansAutomatiskBehandlingMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.TildelingMutationHandler
 import no.nav.helse.spesialist.api.graphql.mutation.TotrinnsvurderingMutationHandler
-import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutationHandler
 import no.nav.helse.spesialist.api.graphql.query.BehandlingsstatistikkQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.OppgaverQueryHandler
 import no.nav.helse.spesialist.api.graphql.query.OpptegnelseQueryHandler
@@ -113,7 +111,6 @@ fun lagSchemaMedResolversOgHandlers(
     reservasjonshenter: Reservasjonshenter,
     sessionFactory: SessionFactory,
     behandlingstatistikk: IBehandlingsstatistikkService,
-    godkjenninghåndterer: Godkjenninghåndterer,
 ): SpesialistSchema =
     SpesialistSchema(
         queryHandlers =
@@ -173,11 +170,6 @@ fun lagSchemaMedResolversOgHandlers(
                 totrinnsvurdering =
                     TotrinnsvurderingMutationHandler(
                         saksbehandlerMediator = saksbehandlerMediator,
-                    ),
-                vedtak =
-                    VedtakMutationHandler(
-                        saksbehandlerMediator = saksbehandlerMediator,
-                        godkjenninghåndterer = godkjenninghåndterer,
                     ),
                 person = PersonMutationHandler(personhåndterer = personhåndterer),
                 paVent = PaVentMutationHandler(saksbehandlerMediator = saksbehandlerMediator),

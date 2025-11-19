@@ -430,7 +430,6 @@ class SaksbehandlerMediatorTest : AbstractDatabaseTest() {
             meldingPubliserer = meldingPubliserer,
             oppgaveService = oppgaveService,
             apiOppgaveService = apiOppgaveService,
-            environmentToggles = environmentToggles,
             sessionFactory = TransactionalSessionFactory(dataSource)
         )
 

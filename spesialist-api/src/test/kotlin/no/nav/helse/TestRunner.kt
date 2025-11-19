@@ -20,7 +20,6 @@ import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.dokument.DokumentMediator
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.spesialist.api.ApiModule
-import no.nav.helse.spesialist.api.Godkjenninghåndterer
 import no.nav.helse.spesialist.api.Personhåndterer
 import no.nav.helse.spesialist.api.StansAutomatiskBehandlinghåndterer
 import no.nav.helse.spesialist.api.behandlingsstatistikk.IBehandlingsstatistikkService
@@ -86,7 +85,6 @@ object TestRunner {
             saksbehandlerMediator = mockk(relaxed = true),
             restAdapter = mockk(relaxed = true),
             apiOppgaveService = mockk(relaxed = true),
-            godkjenninghåndterer = mockk(relaxed = true),
             personhåndterer = mockk(relaxed = true),
             dokumentMediator = mockk(relaxed = true),
             stansAutomatiskBehandlinghåndterer = mockk(relaxed = true),
@@ -109,7 +107,6 @@ object TestRunner {
                         reservasjonshenter = avhengigheter.reservasjonshenter,
                         sessionFactory = avhengigheter.sessionFactory,
                         behandlingstatistikk = avhengigheter.behandlingstatistikk,
-                        godkjenninghåndterer = avhengigheter.godkjenninghåndterer,
                     )
                 kobleOppApi(
                     ktorApplication = this,
@@ -150,7 +147,6 @@ object TestRunner {
         val saksbehandlerMediator: SaksbehandlerMediator,
         val restAdapter: RestAdapter,
         val apiOppgaveService: ApiOppgaveService,
-        val godkjenninghåndterer: Godkjenninghåndterer,
         val personhåndterer: Personhåndterer,
         val dokumentMediator: DokumentMediator,
         val stansAutomatiskBehandlinghåndterer: StansAutomatiskBehandlinghåndterer,

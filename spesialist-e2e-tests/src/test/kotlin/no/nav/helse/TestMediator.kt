@@ -1,7 +1,6 @@
 package no.nav.helse
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
-import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.kafka.RiverSetup
 import no.nav.helse.mediator.GodkjenningMediator
@@ -23,7 +22,6 @@ import javax.sql.DataSource
 class TestMediator(
     testRapid: TestRapid,
     dataSource: DataSource,
-    environmentToggles: EnvironmentToggles,
 ) {
     private val daos = DBDaos(dataSource)
     private val opptegnelseDao = daos.opptegnelseDao
@@ -51,7 +49,6 @@ class TestMediator(
             meldingPubliserer = meldingPubliserer,
             oppgaveService = oppgaveService,
             apiOppgaveService = apiOppgaveService,
-            environmentToggles = environmentToggles,
             sessionFactory = TransactionalSessionFactory(dataSource)
         )
 

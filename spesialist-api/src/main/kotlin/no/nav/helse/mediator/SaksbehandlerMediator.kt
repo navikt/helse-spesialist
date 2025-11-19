@@ -2,15 +2,12 @@ package no.nav.helse.mediator
 
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.MeldingPubliserer
-import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.db.Daos
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.db.SessionContext
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.db.VedtakBegrunnelseFraDatabase
 import no.nav.helse.db.VedtakBegrunnelseTypeFraDatabase
-import no.nav.helse.db.api.VarselDbDto
-import no.nav.helse.db.api.VedtaksperiodeDbDto.Companion.avvisVarsler
 import no.nav.helse.db.api.VedtaksperiodeDbDto.Companion.harAktiveVarsler
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.mediator.oppgave.OppgaveService
@@ -23,7 +20,6 @@ import no.nav.helse.modell.OppgaveAlleredeSendtBeslutter
 import no.nav.helse.modell.OppgaveAlleredeSendtIRetur
 import no.nav.helse.modell.OppgaveKreverVurderingAvToSaksbehandlere
 import no.nav.helse.modell.OppgaveTildeltNoenAndre
-import no.nav.helse.modell.melding.VarselEndret
 import no.nav.helse.modell.periodehistorikk.Historikkinnslag
 import no.nav.helse.modell.saksbehandler.handlinger.Arbeidsforhold
 import no.nav.helse.modell.saksbehandler.handlinger.EndrePåVent
@@ -45,7 +41,6 @@ import no.nav.helse.modell.saksbehandler.handlinger.Refusjonselement
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattArbeidsgiver
 import no.nav.helse.modell.saksbehandler.handlinger.SkjønnsfastsattSykepengegrunnlag
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
-import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_BESLUTTER
 import no.nav.helse.modell.vedtak.Utfall
 import no.nav.helse.modell.vilkårsprøving.Lovhjemmel
 import no.nav.helse.spesialist.api.SendIReturResult
@@ -54,7 +49,6 @@ import no.nav.helse.spesialist.api.feilhåndtering.FinnerIkkeLagtPåVent
 import no.nav.helse.spesialist.api.feilhåndtering.IkkeTilgang
 import no.nav.helse.spesialist.api.feilhåndtering.ManglerVurderingAvVarsler
 import no.nav.helse.spesialist.api.feilhåndtering.OppgaveIkkeTildelt
-import no.nav.helse.spesialist.api.graphql.mutation.VedtakMutationHandler.VedtakResultat
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdOverstyringHandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiInntektOgRefusjonOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiOpptegnelse
@@ -69,7 +63,6 @@ import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
-import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.sikkerlogg
 import no.nav.helse.spesialist.domain.Saksbehandler
@@ -87,12 +80,9 @@ class SaksbehandlerMediator(
     private val meldingPubliserer: MeldingPubliserer,
     private val oppgaveService: OppgaveService,
     private val apiOppgaveService: ApiOppgaveService,
-    private val environmentToggles: EnvironmentToggles,
     private val sessionFactory: SessionFactory,
 ) {
     private val behandlingRepository = daos.behandlingApiRepository
-    private val varselRepository = daos.varselApiRepository
-    private val oppgaveApiDao = daos.oppgaveApiDao
     private val opptegnelseRepository = daos.opptegnelseDao
     private val abonnementDao = daos.abonnementApiDao
     private val påVentDao = daos.påVentDao
@@ -152,69 +142,6 @@ class SaksbehandlerMediator(
             sessionContext.behandlingRepository.finn(SpleisBehandlingId(spleisBehandlingId))
                 ?: error("Fant ikke behandling for SpleisBehandlingId $spleisBehandlingId")
         return behandling.utfall()
-    }
-
-    fun infotrygdVedtak(
-        saksbehandler: Saksbehandler,
-        tilgangsgrupper: Set<Tilgangsgruppe>,
-        oppgavereferanse: Long,
-    ): VedtakResultat =
-        sessionFactory.transactionalSessionScope { sessionContext ->
-            val spleisBehandlingId = apiOppgaveService.spleisBehandlingId(oppgavereferanse)
-            val fødselsnummer = oppgaveApiDao.finnFødselsnummer(oppgavereferanse)
-            if (!apiOppgaveService.venterPåSaksbehandler(oppgavereferanse)) {
-                VedtakResultat.Feil.IkkeÅpenOppgave()
-            } else {
-                håndterTotrinnsvurderingBeslutning(
-                    fødselsnummer = fødselsnummer,
-                    saksbehandler = saksbehandler,
-                    tilgangsgrupper = tilgangsgrupper,
-                    totrinnsvurderingRepository = sessionContext.totrinnsvurderingRepository,
-                ) ?: håndterAvvisning(oppgavereferanse, fødselsnummer, spleisBehandlingId, saksbehandler)
-            }
-        }
-
-    private fun håndterAvvisning(
-        oppgavereferanse: Long,
-        fødselsnummer: String,
-        spleisBehandlingId: UUID,
-        saksbehandler: Saksbehandler,
-    ): VedtakResultat.Ok {
-        val periodeTilGodkjenning = behandlingRepository.periodeTilGodkjenning(oppgavereferanse)
-        periodeTilGodkjenning.avvisVarsler(
-            fødselsnummer = fødselsnummer,
-            behandlingId = spleisBehandlingId,
-            ident = saksbehandler.ident,
-            godkjenner = this::vurderVarsel,
-        )
-
-        oppgaveService.fjernFraPåVent(oppgavereferanse)
-        påVentDao.slettPåVent(oppgavereferanse)
-        return VedtakResultat.Ok(spleisBehandlingId)
-    }
-
-    private fun håndterTotrinnsvurderingBeslutning(
-        fødselsnummer: String,
-        saksbehandler: Saksbehandler,
-        tilgangsgrupper: Set<Tilgangsgruppe>,
-        totrinnsvurderingRepository: TotrinnsvurderingRepository,
-    ): VedtakResultat.Feil.BeslutterFeil? {
-        val totrinnsvurdering = totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)
-        val feil =
-            if (totrinnsvurdering?.tilstand == AVVENTER_BESLUTTER) {
-                if (Tilgangsgruppe.BESLUTTER !in tilgangsgrupper && !environmentToggles.kanGodkjenneUtenBesluttertilgang) {
-                    VedtakResultat.Feil.BeslutterFeil.TrengerBeslutterRolle()
-                } else if (totrinnsvurdering.saksbehandler?.value == saksbehandler.id.value && !environmentToggles.kanBeslutteEgneSaker) {
-                    VedtakResultat.Feil.BeslutterFeil.KanIkkeBeslutteEgenOppgave()
-                } else {
-                    totrinnsvurdering.settBeslutter(saksbehandler.id)
-                    totrinnsvurderingRepository.lagre(totrinnsvurdering)
-                    null
-                }
-            } else {
-                null
-            }
-        return feil
     }
 
     fun påVent(
@@ -564,31 +491,6 @@ class SaksbehandlerMediator(
 
             return@transactionalSessionScope SendTilGodkjenningResult.Ok
         }
-
-    private fun vurderVarsel(
-        fødselsnummer: String,
-        behandlingId: UUID,
-        vedtaksperiodeId: UUID,
-        varselId: UUID,
-        varseltittel: String,
-        varselkode: String,
-        forrigeStatus: VarselDbDto.Varselstatus,
-        gjeldendeStatus: VarselDbDto.Varselstatus,
-        saksbehandlerIdent: String,
-    ) {
-        varselRepository.vurderVarselFor(varselId, gjeldendeStatus, saksbehandlerIdent)
-        val varselEndret =
-            VarselEndret(
-                vedtaksperiodeId = vedtaksperiodeId,
-                behandlingIdForBehandlingSomBleGodkjent = behandlingId,
-                varselId = varselId,
-                varseltittel = varseltittel,
-                varselkode = varselkode,
-                forrigeStatus = forrigeStatus.name,
-                gjeldendeStatus = gjeldendeStatus.name,
-            )
-        meldingPubliserer.publiser(fødselsnummer, varselEndret, "varsel vurdert")
-    }
 
     private fun Modellfeil.tilApiversjon(): ApiModellfeil =
         when (this) {

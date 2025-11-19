@@ -6,7 +6,6 @@ import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.db.Daos
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.mediator.BehandlingsstatistikkService
-import no.nav.helse.mediator.GodkjenningService
 import no.nav.helse.mediator.PersonhåndtererImpl
 import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.dokument.DokumentMediator
@@ -71,7 +70,6 @@ class ApiModule(
             meldingPubliserer = meldingPubliserer,
             oppgaveService = oppgaveService,
             apiOppgaveService = apiOppgaveService,
-            environmentToggles = environmentToggles,
             sessionFactory = sessionFactory,
         )
 
@@ -86,15 +84,6 @@ class ApiModule(
             reservasjonshenter = reservasjonshenter,
             sessionFactory = sessionFactory,
             behandlingstatistikk = BehandlingsstatistikkService(behandlingsstatistikkDao = daos.behandlingsstatistikkDao),
-            godkjenninghåndterer =
-                GodkjenningService(
-                    oppgaveDao = daos.oppgaveDao,
-                    publiserer = meldingPubliserer,
-                    oppgaveService = oppgaveService,
-                    reservasjonDao = daos.reservasjonDao,
-                    periodehistorikkDao = daos.periodehistorikkDao,
-                    sessionFactory = sessionFactory,
-                ),
         )
 
     fun setUpApi(application: Application) {
