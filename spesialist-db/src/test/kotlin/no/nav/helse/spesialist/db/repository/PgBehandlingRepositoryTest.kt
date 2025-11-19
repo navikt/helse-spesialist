@@ -8,6 +8,7 @@ import no.nav.helse.spesialist.domain.UtbetalingId
 import no.nav.helse.spesialist.domain.testfixtures.feb
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagBehandling
+import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiode
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import org.junit.jupiter.api.Test
 import java.util.UUID
@@ -225,7 +226,11 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
     @Test
     fun `lagre behandling`() {
         // given
-        val behandling = lagBehandling()
+        val vedtaksperiode = lagVedtaksperiode()
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode(vedtaksperiodeId = vedtaksperiode.id.value)
+        val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
 
         //when
         repository.lagre(behandling)
@@ -248,7 +253,12 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
     @Test
     fun `oppdater behandling`() {
         // given
+        val vedtaksperiode = lagVedtaksperiode()
+        opprettPerson()
+        opprettArbeidsgiver()
+        opprettVedtaksperiode(vedtaksperiodeId = vedtaksperiode.id.value)
         val orginalBehandling = lagBehandling(
+            vedtaksperiodeId = vedtaksperiode.id,
             utbetalingId = UtbetalingId(UUID.randomUUID()),
             fom = 1.feb(2018),
             tom = 28.feb(2018),

@@ -25,7 +25,7 @@ class PgBehandlingRepository(
             SELECT b.unik_id, b.vedtaksperiode_id, b.utbetaling_id, b.spleis_behandling_id, b.tags, b.fom, b.tom, b.skjæringstidspunkt, b.tilstand, b.yrkesaktivitetstype
             FROM behandling b
             INNER JOIN vedtak v on v.vedtaksperiode_id = b.vedtaksperiode_id
-            WHERE b.spleis_behandling_id = :spleis_behandling_id
+            WHERE b.spleis_behandling_id = :spleis_behandling_id AND v.forkastet = false
         """,
             "spleis_behandling_id" to id.value,
         ).singleOrNull(::tilBehandling)
@@ -33,9 +33,10 @@ class PgBehandlingRepository(
     override fun finn(id: BehandlingUnikId): Behandling? =
         asSQL(
             """
-            SELECT unik_id, vedtaksperiode_id, utbetaling_id, spleis_behandling_id, tags, fom, tom, skjæringstidspunkt, tilstand, yrkesaktivitetstype
-            FROM behandling
-            WHERE unik_id = :unik_id
+            SELECT unik_id, b.vedtaksperiode_id, utbetaling_id, spleis_behandling_id, tags, b.fom, b.tom, skjæringstidspunkt, tilstand, yrkesaktivitetstype
+            FROM behandling b
+            INNER JOIN vedtak v on v.vedtaksperiode_id = b.vedtaksperiode_id
+            WHERE unik_id = :unik_id AND v.forkastet = false
         """,
             "unik_id" to id.value,
         ).singleOrNull(::tilBehandling)
@@ -52,6 +53,7 @@ class PgBehandlingRepository(
                      INNER JOIN person p on p.id = v.person_ref
             WHERE fødselsnummer = :fodselsnummer
               AND skjæringstidspunkt = :skjaeringstidspunkt
+              AND v.forkastet = false
             ORDER BY b.vedtaksperiode_id, b.id DESC
         """,
             "fodselsnummer" to fødselsnummer,
@@ -63,10 +65,12 @@ class PgBehandlingRepository(
     override fun finnNyesteForVedtaksperiode(vedtaksperiodeId: VedtaksperiodeId): Behandling? =
         asSQL(
             """
-        SELECT unik_id, vedtaksperiode_id, utbetaling_id, spleis_behandling_id, tags, fom, tom, skjæringstidspunkt, opprettet_tidspunkt, tilstand, yrkesaktivitetstype
-        FROM behandling
-        WHERE vedtaksperiode_id = :vedtaksperiode_id
-        ORDER BY id DESC LIMIT 1
+        SELECT unik_id, b.vedtaksperiode_id, utbetaling_id, spleis_behandling_id, tags, b.fom, b.tom, skjæringstidspunkt, opprettet_tidspunkt, tilstand, yrkesaktivitetstype
+        FROM behandling b
+            INNER JOIN vedtak v on v.vedtaksperiode_id = b.vedtaksperiode_id
+        WHERE b.vedtaksperiode_id = :vedtaksperiode_id
+          AND v.forkastet = false
+        ORDER BY b.id DESC LIMIT 1
     """,
             "vedtaksperiode_id" to vedtaksperiodeId.value,
         ).singleOrNull(::tilBehandling)
