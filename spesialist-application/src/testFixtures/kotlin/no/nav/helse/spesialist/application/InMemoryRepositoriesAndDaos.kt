@@ -36,7 +36,7 @@ class InMemoryRepositoriesAndDaos() {
     private val egenAnsattApiDao = DelegatingEgenAnsattApiDao(personRepository)
     private val notatDao = DelegatingNotatDao(oppgaveRepository, notatRepository)
     private val oppgaveDao = DelegatingOppgaveDao(oppgaveRepository, behandlingRepository, vedtaksperiodeRepository)
-    private val oppgaveApiDao = DelegatingOppgaveApiDao(oppgaveRepository, vedtaksperiodeRepository)
+    private val oppgaveApiDao = DelegatingOppgaveApiDao()
     private val personDao = DelegatingPersonDao(personRepository)
     private val påVentDao = DelegatingPåVentDao(påVentRepository, oppgaveRepository)
     private val saksbehandlerDao = DelegatingSaksbehandlerDao(saksbehandlerRepository)

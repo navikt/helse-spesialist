@@ -13,19 +13,13 @@ interface OppgaveDao {
 
     fun finnOppgaveId(utbetalingId: UUID): Long?
 
-    fun finnVedtaksperiodeId(fødselsnummer: String): UUID
-
     fun finnVedtaksperiodeId(oppgaveId: Long): UUID
-
-    fun finnHendelseId(id: Long): UUID
 
     fun invaliderOppgaveFor(fødselsnummer: String)
 
     fun invaliderOppgave(oppgaveId: Long)
 
     fun reserverNesteId(): Long
-
-    fun venterPåSaksbehandler(oppgaveId: Long): Boolean
 
     fun finnSpleisBehandlingId(oppgaveId: Long): UUID
 

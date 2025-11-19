@@ -279,7 +279,7 @@ class SpeilPersonReceiver(
         hentOppdaterteTilkomneInntektskilder()
     }
 
-    fun saksbehandlerSkjønnsfastsetter830TredjeAvsnitt() {
+    fun saksbehandlerSkjønnsfastsetter830TredjeAvsnitt(begrunnelseFritekst: String = "skjønnsfastsetter tredje avsnitt") {
         callGraphQL(
             operationName = "SkjonnsfastsettelseMutation",
             variables = mapOf(
@@ -298,7 +298,7 @@ class SpeilPersonReceiver(
                                 "lovverk" to "folketrygdloven",
                                 "lovverksversjon" to "2019-01-01"
                             ),
-                            "begrunnelseFritekst" to "skjønnsfastsetter tredje avsnitt",
+                            "begrunnelseFritekst" to begrunnelseFritekst,
                             "begrunnelseKonklusjon" to "Vi har fastsatt sykepengegrunnlaget ditt til 450 000,00 kroner.",
                             "begrunnelseMal" to "Inntekten som arbeidsgiver har rapportert til Skatteetaten er mangelfull eller uriktig. Vi har derfor skjønnsfastsatt sykepengegrunnlaget ditt. Se folketrygdloven § 8-30 tredje avsnitt.\n\nMålet med den skjønnsmessige vurderingen er å komme frem til inntekten du ville hatt om du ikke hadde blitt syk.",
                             "fraArlig" to 480000,

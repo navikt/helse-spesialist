@@ -91,4 +91,35 @@ class ForkastingE2ETest : AbstractE2EIntegrationTest() {
             "@forårsaket_av"
         )
     }
+
+    @Test
+    fun `Forkasting endrer ikke status på oppgave dersom den allerede er ferdigstilt`() {
+        // Given:
+        risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
+        søknadOgGodkjenningbehovKommerInn()
+        medPersonISpeil {
+            saksbehandlerTildelerSegSaken() // Må til for å "opprette" saksbehandler
+            saksbehandlerGodkjennerAlleVarsler()
+            saksbehandlerFatterVedtak(førsteVedtaksperiode().spleisBehandlingId!!)
+        }
+
+        // When:
+        spleisKasterUtSaken(førsteVedtaksperiode())
+
+        // Then:
+        assertOppgavestatus("Ferdigstilt")
+    }
+
+    @Test
+    fun `Hvis spleis forkaster perioden, blir den forkastet i Spesialist også`() {
+        // Given:
+        risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
+        søknadOgGodkjenningbehovKommerInn()
+        // When:
+        spleisKasterUtSaken(førsteVedtaksperiode())
+
+        // Then:
+        assertOppgavestatus("Invalidert")
+        assertPeriodeForkastet(true)
+    }
 }

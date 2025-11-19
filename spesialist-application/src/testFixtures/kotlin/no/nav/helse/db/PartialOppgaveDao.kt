@@ -21,15 +21,7 @@ interface PartialOppgaveDao : OppgaveDao {
         error("Not implemented for this test")
     }
 
-    override fun finnVedtaksperiodeId(fødselsnummer: String): UUID {
-        error("Not implemented for this test")
-    }
-
     override fun finnVedtaksperiodeId(oppgaveId: Long): UUID {
-        error("Not implemented for this test")
-    }
-
-    override fun finnHendelseId(id: Long): UUID {
         error("Not implemented for this test")
     }
 
@@ -42,10 +34,6 @@ interface PartialOppgaveDao : OppgaveDao {
     }
 
     override fun reserverNesteId(): Long {
-        error("Not implemented for this test")
-    }
-
-    override fun venterPåSaksbehandler(oppgaveId: Long): Boolean {
         error("Not implemented for this test")
     }
 

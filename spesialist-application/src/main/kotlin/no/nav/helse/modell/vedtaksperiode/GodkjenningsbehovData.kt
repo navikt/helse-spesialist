@@ -2,12 +2,9 @@ package no.nav.helse.modell.vedtaksperiode
 
 import no.nav.helse.modell.melding.Godkjenningsbehovløsning
 import no.nav.helse.modell.melding.VedtaksperiodeAvvistAutomatisk
-import no.nav.helse.modell.melding.VedtaksperiodeAvvistManuelt
 import no.nav.helse.modell.melding.VedtaksperiodeGodkjentAutomatisk
-import no.nav.helse.modell.melding.VedtaksperiodeGodkjentManuelt
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.utbetaling.Utbetalingtype
-import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -184,21 +181,6 @@ data class GodkjenningsbehovData(
             )
     }
 
-    fun lagVedtaksperiodeGodkjentManuelt(
-        saksbehandler: Saksbehandlerløsning.Saksbehandler,
-        beslutter: Saksbehandlerløsning.Saksbehandler?,
-    ) = VedtaksperiodeGodkjentManuelt(
-        vedtaksperiodeId = this.vedtaksperiodeId,
-        behandlingId = this.spleisBehandlingId,
-        fødselsnummer = this.fødselsnummer,
-        yrkesaktivitetstype = this.yrkesaktivitetstype,
-        periodetype = periodetype.name,
-        saksbehandlerIdent = saksbehandler.ident,
-        saksbehandlerEpost = saksbehandler.epostadresse,
-        beslutterIdent = beslutter?.ident,
-        beslutterEpost = beslutter?.epostadresse,
-    )
-
     internal fun lagVedtaksperiodeGodkjentAutomatisk() =
         VedtaksperiodeGodkjentAutomatisk(
             vedtaksperiodeId = this.vedtaksperiodeId,
@@ -206,20 +188,6 @@ data class GodkjenningsbehovData(
             fødselsnummer = this.fødselsnummer,
             yrkesaktivitetstype = this.yrkesaktivitetstype,
             periodetype = periodetype.name,
-        )
-
-    internal fun lagVedtaksperiodeAvvistManuelt(saksbehandler: Saksbehandlerløsning.Saksbehandler) =
-        VedtaksperiodeAvvistManuelt(
-            vedtaksperiodeId = this.vedtaksperiodeId,
-            behandlingId = this.spleisBehandlingId,
-            fødselsnummer = this.fødselsnummer,
-            yrkesaktivitetstype = this.yrkesaktivitetstype,
-            periodetype = periodetype.name,
-            saksbehandlerIdent = saksbehandler.ident,
-            saksbehandlerEpost = saksbehandler.epostadresse,
-            årsak = løsning.årsak,
-            begrunnelser = løsning.begrunnelser,
-            kommentar = løsning.kommentar,
         )
 
     internal fun lagVedtaksperiodeAvvistAutomatisk() =

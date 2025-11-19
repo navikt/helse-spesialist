@@ -153,6 +153,16 @@ class SpleisStub(
         rapidsConnection.publish(person.fødselsnummer, melding)
     }
 
+    internal fun spleisForkasterPerioden(
+        testContext: TestContext,
+        vedtaksperiode: Vedtaksperiode,
+    ) {
+        rapidsConnection.publish(
+            testContext.person.fødselsnummer,
+            Meldingsbygger.byggVedtaksperiodeForkastet(vedtaksperiode, testContext.person)
+        )
+    }
+
     private fun spleisForkasterGammelUtbetaling(
         person: Person,
         arbeidsgiver: Arbeidsgiver,
@@ -216,7 +226,7 @@ class SpleisStub(
                 utbetalingSkjer(vedtaksperiode, testContext.person, testContext.arbeidsgiver)
                 spleisAvslutterPerioden(vedtaksperiode, testContext.person, testContext.arbeidsgiver)
             } else {
-                spleisForkasterPerioden(vedtaksperiode, testContext.person)
+                spleisForkasterPerioden(testContext, vedtaksperiode)
             }
         }
 
@@ -250,16 +260,6 @@ class SpleisStub(
             rapidsConnection.publish(
                 person.fødselsnummer,
                 Meldingsbygger.byggAvsluttetMedVedtak(person, arbeidsgiver, vedtaksperiode)
-            )
-        }
-
-        private fun spleisForkasterPerioden(
-            vedtaksperiode: Vedtaksperiode,
-            person: Person
-        ) {
-            rapidsConnection.publish(
-                person.fødselsnummer,
-                Meldingsbygger.byggVedtaksperiodeForkastet(vedtaksperiode, person)
             )
         }
     }

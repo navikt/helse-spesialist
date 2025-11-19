@@ -27,14 +27,6 @@ class UnimplementedVarselApiRepository : VarselApiRepository {
         TODO("Not yet implemented")
     }
 
-    override fun vurderVarselFor(
-        varselId: UUID,
-        gjeldendeStatus: VarselDbDto.Varselstatus,
-        saksbehandlerIdent: String
-    ) {
-        TODO("Not yet implemented")
-    }
-
     override fun perioderSomSkalViseVarsler(oppgaveId: Long?): Set<UUID> {
         TODO("Not yet implemented")
     }

@@ -8,26 +8,6 @@ import kotlin.test.Ignore
 @Ignore("Feiler med jevne mellomrom pga. timing på melding i fatting av vedtak (ingen outbox)") // TODO
 class RevurderingE2ETest : AbstractE2ETest() {
     @Test
-    fun `revurdering ved saksbehandlet oppgave`() {
-        vedtaksløsningenMottarNySøknad()
-        spleisOppretterNyBehandling()
-        spesialistBehandlerGodkjenningsbehovFremTilOppgave(regelverksvarsler = listOf("RV_IM_1"))
-        håndterSaksbehandlerløsning()
-        håndterAvsluttetMedVedtak()
-        assertSaksbehandleroppgave(oppgavestatus = Oppgavestatus.Ferdigstilt)
-
-        val utbetalingId2 = UUID.randomUUID()
-
-        spleisOppretterNyBehandling()
-        spesialistBehandlerGodkjenningsbehovFremTilOppgave(
-            harRisikovurdering = true,
-            harOppdatertMetadata = true,
-            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(utbetalingId = utbetalingId2),
-        )
-        assertSaksbehandleroppgave(oppgavestatus = Oppgavestatus.AvventerSaksbehandler)
-    }
-
-    @Test
     fun `revurdering av periode med negativt beløp medfører oppgave`() {
         vedtaksløsningenMottarNySøknad()
         val spleisBehandlingId = UUID.randomUUID()

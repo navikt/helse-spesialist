@@ -109,23 +109,6 @@ internal class LegacyBehandlingTilstandTest {
     }
 
     @Test
-    fun `AvsluttetUtenVedtakMedVarsler - godkjent forlengelse medfører tilstandsendring`() {
-        val behandlingId = UUID.randomUUID()
-        val vedtaksperiodeId = UUID.randomUUID()
-        val behandling = behandling(behandlingId, vedtaksperiodeId)
-
-        behandling.avsluttetUtenVedtak()
-        behandling.assertTilstand(TilstandDto.AvsluttetUtenVedtak)
-
-        behandling.håndterNyttVarsel(LegacyVarsel(UUID.randomUUID(), "SB_EX_1", LocalDateTime.now(), vedtaksperiodeId))
-        behandling.assertTilstand(TilstandDto.AvsluttetUtenVedtakMedVarsler)
-        behandling.assertAntallVarsler(1)
-
-        behandling.håndterGodkjentAvSaksbehandler()
-        behandling.assertTilstand(TilstandDto.AvsluttetUtenVedtak)
-    }
-
-    @Test
     fun `AvsluttetUtenVedtakMedVarsler - håndterer ikke vedtak fattet`() {
         val behandlingId = UUID.randomUUID()
         val vedtaksperiodeId = UUID.randomUUID()

@@ -8,7 +8,4 @@ class UnimplementedBehandlingApiRepository : BehandlingApiRepository {
         TODO("Not yet implemented")
     }
 
-    override fun periodeTilGodkjenning(oppgaveId: Long): VedtaksperiodeDbDto {
-        TODO("Not yet implemented")
-    }
 }

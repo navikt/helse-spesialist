@@ -16,8 +16,6 @@ class OppdaterPersondataE2ETest : AbstractE2ETest() {
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(vedtaksperiodeId = v1)
         )
-        håndterSaksbehandlerløsning(vedtaksperiodeId = v1)
-        håndterAvsluttetMedVedtak(vedtaksperiodeId = v1)
 
         håndterOppdaterPersondata()
 

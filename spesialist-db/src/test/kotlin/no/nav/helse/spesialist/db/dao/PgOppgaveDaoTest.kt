@@ -61,13 +61,6 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
     }
 
     @Test
-    fun `finner hendelseId`() {
-        val oppgave = nyOppgaveForNyPerson()
-
-        assertEquals(oppgave.godkjenningsbehovId, oppgaveDao.finnHendelseId(oppgave.id))
-    }
-
-    @Test
     fun `finner oppgaveId ved hjelp av fødselsnummer`() {
         val fødselsnummer = lagFødselsnummer()
         val oppgave = nyOppgaveForNyPerson(fødselsnummer = fødselsnummer)
@@ -196,17 +189,6 @@ class PgOppgaveDaoTest : AbstractDBIntegrationTest() {
         val oppgave = nyOppgaveForNyPerson()
         val actual = oppgaveDao.finnVedtaksperiodeId(oppgave.id)
         assertEquals(oppgave.vedtaksperiodeId, actual)
-    }
-
-    @Test
-    fun `sjekker om det fins aktiv oppgave`() {
-        val oppgave = nyOppgaveForNyPerson()
-        assertTrue(oppgaveDao.venterPåSaksbehandler(oppgave.id))
-
-        oppgave
-            .avventSystemOgLagre(legacySaksbehandler)
-            .ferdigstillOgLagre()
-        assertFalse(oppgaveDao.venterPåSaksbehandler(oppgave.id))
     }
 
     @Test

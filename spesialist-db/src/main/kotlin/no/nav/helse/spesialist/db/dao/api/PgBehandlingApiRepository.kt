@@ -17,8 +17,6 @@ class PgBehandlingApiRepository internal constructor(
         return sammenhengendePerioder + periodeTilGodkjenning
     }
 
-    override fun periodeTilGodkjenning(oppgaveId: Long): VedtaksperiodeDbDto = behandlingDao.gjeldendeBehandlingFor(oppgaveId, varselDao::finnVarslerFor)
-
     private fun Set<VedtaksperiodeDbDto>.tidligereEnnOgSammenhengende(periode: VedtaksperiodeDbDto): Set<VedtaksperiodeDbDto> =
         this
             .filter { other ->

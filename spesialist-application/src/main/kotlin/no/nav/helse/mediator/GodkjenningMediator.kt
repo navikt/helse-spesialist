@@ -3,73 +3,16 @@ package no.nav.helse.mediator
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
-import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.spesialist.api.abonnement.AutomatiskBehandlingPayload
 import no.nav.helse.spesialist.api.abonnement.AutomatiskBehandlingUtfall
 import no.nav.helse.tellAutomatisering
 import no.nav.helse.tellAvvistÅrsak
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
-import java.util.UUID
 
 class GodkjenningMediator(
     private val opptegnelseDao: OpptegnelseDao,
 ) {
-    internal fun saksbehandlerUtbetaling(
-        context: CommandContext,
-        behov: GodkjenningsbehovData,
-        saksbehandlerIdent: String,
-        saksbehandlerEpost: String,
-        saksbehandler: Saksbehandlerløsning.Saksbehandler,
-        beslutter: Saksbehandlerløsning.Saksbehandler?,
-        godkjenttidspunkt: LocalDateTime,
-        saksbehandleroverstyringer: List<UUID>,
-        sykefraværstilfelle: Sykefraværstilfelle,
-    ) {
-        behov.godkjennManuelt(
-            saksbehandlerIdent = saksbehandlerIdent,
-            saksbehandlerEpost = saksbehandlerEpost,
-            godkjenttidspunkt = godkjenttidspunkt,
-            saksbehandleroverstyringer = saksbehandleroverstyringer,
-        )
-        sykefraværstilfelle.håndterGodkjent(behov.vedtaksperiodeId)
-
-        context.hendelse(behov.medLøsning())
-        context.hendelse(
-            behov.lagVedtaksperiodeGodkjentManuelt(
-                saksbehandler = saksbehandler,
-                beslutter = beslutter,
-            ),
-        )
-    }
-
-    internal fun saksbehandlerAvvisning(
-        context: CommandContext,
-        behov: GodkjenningsbehovData,
-        saksbehandlerIdent: String,
-        saksbehandlerEpost: String,
-        saksbehandler: Saksbehandlerløsning.Saksbehandler,
-        godkjenttidspunkt: LocalDateTime,
-        årsak: String?,
-        begrunnelser: List<String>?,
-        kommentar: String?,
-        saksbehandleroverstyringer: List<UUID>,
-    ) {
-        behov.avvisManuelt(
-            saksbehandlerIdent = saksbehandlerIdent,
-            saksbehandlerEpost = saksbehandlerEpost,
-            avvisttidspunkt = godkjenttidspunkt,
-            årsak = årsak,
-            begrunnelser = begrunnelser,
-            kommentar = kommentar,
-            saksbehandleroverstyringer = saksbehandleroverstyringer,
-        )
-        context.hendelse(behov.medLøsning())
-        context.hendelse(behov.lagVedtaksperiodeAvvistManuelt(saksbehandler))
-    }
-
     internal fun automatiskUtbetaling(
         context: CommandContext,
         behov: GodkjenningsbehovData,

@@ -14,7 +14,6 @@ import no.nav.helse.db.MeldingDao.Meldingtype.GOSYS_OPPGAVE_ENDRET
 import no.nav.helse.db.MeldingDao.Meldingtype.KLARGJØR_TILGANGSRELATERTE_DATA
 import no.nav.helse.db.MeldingDao.Meldingtype.NYE_VARSLER
 import no.nav.helse.db.MeldingDao.Meldingtype.OPPDATER_PERSONSNAPSHOT
-import no.nav.helse.db.MeldingDao.Meldingtype.SAKSBEHANDLERLØSNING
 import no.nav.helse.db.MeldingDao.Meldingtype.SØKNAD_SENDT
 import no.nav.helse.db.MeldingDao.Meldingtype.UTBETALING_ENDRET
 import no.nav.helse.db.MeldingDao.Meldingtype.VEDTAKSPERIODE_FORKASTET
@@ -38,7 +37,6 @@ import no.nav.helse.modell.vedtaksperiode.NyeVarsler
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeForkastet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetaling
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnet
-import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.MedSession
@@ -214,7 +212,6 @@ class PgMeldingDao private constructor(
             GOSYS_OPPGAVE_ENDRET -> GosysOppgaveEndret(jsonNode)
             VEDTAKSPERIODE_FORKASTET -> VedtaksperiodeForkastet(jsonNode)
             GODKJENT_TILBAKEDATERT_SYKMELDING -> TilbakedateringBehandlet(jsonNode)
-            SAKSBEHANDLERLØSNING -> Saksbehandlerløsning(jsonNode)
             UTBETALING_ENDRET -> UtbetalingEndret(jsonNode)
             VEDTAKSPERIODE_REBEREGNET -> VedtaksperiodeReberegnet(jsonNode)
             ENDRET_EGEN_ANSATT_STATUS -> EndretEgenAnsattStatus(jsonNode)
@@ -233,7 +230,6 @@ class PgMeldingDao private constructor(
             is AdressebeskyttelseEndret -> ADRESSEBESKYTTELSE_ENDRET
             is VedtaksperiodeForkastet -> VEDTAKSPERIODE_FORKASTET
             is Godkjenningsbehov -> GODKJENNING
-            is Saksbehandlerløsning -> SAKSBEHANDLERLØSNING
             is OppdaterPersondata -> OPPDATER_PERSONSNAPSHOT
             is UtbetalingEndret -> UTBETALING_ENDRET
             is VedtaksperiodeReberegnet -> VEDTAKSPERIODE_REBEREGNET

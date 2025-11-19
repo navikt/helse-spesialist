@@ -3,7 +3,6 @@ package no.nav.helse
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.kafka.RiverSetup
-import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Kommandofabrikk
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.SaksbehandlerMediator
@@ -24,10 +23,8 @@ class TestMediator(
     dataSource: DataSource,
 ) {
     private val daos = DBDaos(dataSource)
-    private val opptegnelseDao = daos.opptegnelseDao
     private val meldingPubliserer = MessageContextMeldingPubliserer(testRapid)
 
-    private val godkjenningMediator = GodkjenningMediator(opptegnelseDao)
     private val oppgaveService =
         OppgaveService(
             oppgaveDao = daos.oppgaveDao,
@@ -72,7 +69,6 @@ class TestMediator(
     private val kommandofabrikk =
         Kommandofabrikk(
             oppgaveService = { oppgaveService },
-            godkjenningMediator = godkjenningMediator,
             subsumsjonsmelderProvider = { Subsumsjonsmelder("versjonAvKode", meldingPubliserer) },
             stikkprøver = stikkprøver,
         )

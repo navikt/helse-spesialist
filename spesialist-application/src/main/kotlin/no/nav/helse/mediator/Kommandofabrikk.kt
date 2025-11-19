@@ -14,7 +14,6 @@ import no.nav.helse.modell.gosysoppgaver.GosysOppgaveEndretCommand
 import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
-import no.nav.helse.modell.kommando.LøsGodkjenningsbehov
 import no.nav.helse.modell.kommando.OpprettMinimalPersonCommand
 import no.nav.helse.modell.kommando.TilbakedateringBehandlet
 import no.nav.helse.modell.kommando.TilbakedateringGodkjentCommand
@@ -38,7 +37,6 @@ import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetaling
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeNyUtbetalingCommand
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnetCommand
-import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.registrerTidsbrukForGodkjenningsbehov
 import no.nav.helse.registrerTidsbrukForHendelse
 import org.slf4j.LoggerFactory
@@ -48,7 +46,6 @@ typealias Kommandostarter = Personmelding.(Kommandofabrikk.() -> Command?) -> Un
 
 class Kommandofabrikk(
     oppgaveService: () -> OppgaveService,
-    private val godkjenningMediator: GodkjenningMediator,
     private val subsumsjonsmelderProvider: () -> Subsumsjonsmelder,
     private val stikkprøver: Stikkprøver,
 ) {
@@ -270,30 +267,6 @@ class Kommandofabrikk(
                 sessionContext,
                 subsumsjonsmelderProvider,
             ).håndter(hendelse)
-    }
-
-    internal fun løsGodkjenningsbehov(
-        melding: Saksbehandlerløsning,
-        person: LegacyPerson,
-        sessionContext: SessionContext,
-    ): LøsGodkjenningsbehov {
-        val godkjenningsbehov = sessionContext.meldingDao.finnGodkjenningsbehov(melding.godkjenningsbehovhendelseId)
-        val sykefraværstilfelle = person.sykefraværstilfelle(godkjenningsbehov.vedtaksperiodeId())
-        return LøsGodkjenningsbehov(
-            sykefraværstilfelle = sykefraværstilfelle,
-            godkjent = melding.godkjent,
-            godkjenttidspunkt = melding.godkjenttidspunkt,
-            ident = melding.ident,
-            epostadresse = melding.epostadresse,
-            årsak = melding.årsak,
-            begrunnelser = melding.begrunnelser,
-            kommentar = melding.kommentar,
-            saksbehandleroverstyringer = melding.saksbehandleroverstyringer,
-            saksbehandler = melding.saksbehandler,
-            beslutter = melding.beslutter,
-            godkjenningMediator = godkjenningMediator,
-            godkjenningsbehovData = godkjenningsbehov.data(),
-        )
     }
 
     internal fun godkjenningsbehov(

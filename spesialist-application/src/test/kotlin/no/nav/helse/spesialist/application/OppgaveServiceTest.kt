@@ -39,8 +39,6 @@ internal class OppgaveServiceTest {
     private val SAKSBEHANDLER = lagSaksbehandler()
     private val SAKSBEHANDLERIDENT = SAKSBEHANDLER.ident
     private val SAKSBEHANDLEROID = SAKSBEHANDLER.id.value
-    private val SAKSBEHANDLERNAVN = SAKSBEHANDLER.navn
-    private val SAKSBEHANDLEREPOST = SAKSBEHANDLER.epost
     private val EGENSKAP_SØKNAD = SØKNAD
 
     private val oppgaveDao = mockk<OppgaveDao>(relaxed = true)
@@ -116,7 +114,6 @@ internal class OppgaveServiceTest {
         val fødselsnummer = lagFødselsnummer()
         val oppgaveId = 0L
         every { oppgaveDao.reserverNesteId() } returns oppgaveId
-        every { oppgaveDao.finnHendelseId(any()) } returns HENDELSE_ID
         every { oppgaveDao.finnFødselsnummer(oppgaveId) } returns fødselsnummer
         every { reservasjonDao.hentReservasjonFor(fødselsnummer) } returns null
         lagSøknadsoppgave(fødselsnummer)
@@ -150,7 +147,6 @@ internal class OppgaveServiceTest {
     @Test
     fun `oppdaterer oppgave`() {
         every { oppgaveRepository.finn(OPPGAVE_ID) } returns oppgave()
-        every { oppgaveDao.finnHendelseId(any()) } returns HENDELSE_ID
         oppgaveService.oppgave(OPPGAVE_ID) {
             avventerSystem(SAKSBEHANDLERIDENT, SAKSBEHANDLEROID)
             ferdigstill()

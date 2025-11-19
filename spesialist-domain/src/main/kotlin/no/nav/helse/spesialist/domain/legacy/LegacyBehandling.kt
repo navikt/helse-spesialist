@@ -175,10 +175,6 @@ class LegacyBehandling private constructor(
         tilstand.oppdaterBehandlingsinformasjon(this, tags, spleisBehandlingId, utbetalingId)
     }
 
-    internal fun håndterGodkjentAvSaksbehandler() {
-        tilstand.håndterGodkjenning(this)
-    }
-
     fun håndterVedtakFattet() {
         tilstand.vedtakFattet(this)
     }
@@ -320,8 +316,6 @@ class LegacyBehandling private constructor(
 
         fun nyttVarsel(legacyBehandling: LegacyBehandling) {}
 
-        fun håndterGodkjenning(legacyBehandling: LegacyBehandling) {}
-
         fun oppdaterBehandlingsinformasjon(
             legacyBehandling: LegacyBehandling,
             tags: List<String>,
@@ -415,10 +409,6 @@ class LegacyBehandling private constructor(
 
     data object AvsluttetUtenVedtakMedVarsler : Tilstand {
         override fun navn(): String = "AvsluttetUtenVedtakMedVarsler"
-
-        override fun håndterGodkjenning(legacyBehandling: LegacyBehandling) {
-            legacyBehandling.nyTilstand(AvsluttetUtenVedtak)
-        }
 
         override fun vedtakFattet(legacyBehandling: LegacyBehandling) {}
     }
@@ -560,12 +550,6 @@ class LegacyBehandling private constructor(
             )
             behandlingMedVarsel.varsler.remove(varsel)
             behandlingForPeriodeTilGodkjenning.varsler.add(varsel)
-        }
-
-        internal fun List<LegacyBehandling>.håndterGodkjent(vedtaksperiodeId: UUID) {
-            overlapperMedEllerTidligereEnn(vedtaksperiodeId).forEach {
-                it.håndterGodkjentAvSaksbehandler()
-            }
         }
 
         private fun List<LegacyBehandling>.overlapperMedEllerTidligereEnn(vedtaksperiodeId: UUID): List<LegacyBehandling> {

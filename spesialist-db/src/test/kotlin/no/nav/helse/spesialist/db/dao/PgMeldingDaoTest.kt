@@ -10,7 +10,6 @@ import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
-import no.nav.helse.modell.vedtaksperiode.vedtak.Saksbehandlerløsning
 import no.nav.helse.spesialist.db.objectMapper
 import no.nav.helse.spesialist.db.testfixtures.DBTestFixture
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
@@ -103,21 +102,6 @@ class PgMeldingDaoTest {
     }
 
     @Test
-    fun `lagrer og finner saksbehandlerløsning`() {
-        // Given:
-        val fødselsnummer = lagFødselsnummer()
-        val meldingId = UUID.randomUUID()
-        val saksbehandlerløsning = lagSaksbehandlerløsning(meldingId = meldingId, fødselsnummer = fødselsnummer)
-
-        // When:
-        meldingDao.lagre(saksbehandlerløsning)
-
-        // Then:
-        val actual = meldingDao.finn(meldingId) ?: fail { "Forventet å finne en hendelse med id $meldingId" }
-        assertEquals(fødselsnummer, actual.fødselsnummer())
-    }
-
-    @Test
     fun `lagrer hendelser inkludert kobling til vedtak`() {
         // Given:
         val vedtaksperiodeId = UUID.randomUUID()
@@ -160,31 +144,6 @@ class PgMeldingDaoTest {
             ),
             "@forårsaket_av" to mapOf(
                 "event_name" to "sendt_søknad_nav"
-            )
-        ).toJsonNode()
-    )
-
-    private fun lagSaksbehandlerløsning(
-        meldingId: UUID,
-        fødselsnummer: String
-    ) = Saksbehandlerløsning(
-        jsonNode = mapOf(
-            "@event_name" to "saksbehandler_løsning",
-            "@id" to meldingId,
-            "@opprettet" to LocalDateTime.now(),
-            "fødselsnummer" to fødselsnummer,
-            "oppgaveId" to 3333333,
-            "hendelseId" to UUID.randomUUID(),
-            "behandlingId" to UUID.randomUUID(),
-            "godkjent" to true,
-            "saksbehandlerident" to "X001122",
-            "saksbehandleroid" to UUID.randomUUID(),
-            "saksbehandlerepost" to "en.saksbehandler@nav.no",
-            "godkjenttidspunkt" to "2024-07-27T08:05:22.051807803",
-            "saksbehandleroverstyringer" to emptyList<String>(),
-            "saksbehandler" to mapOf(
-                "ident" to "X001122",
-                "epostadresse" to "en.saksbehandler@nav.no"
             )
         ).toJsonNode()
     )

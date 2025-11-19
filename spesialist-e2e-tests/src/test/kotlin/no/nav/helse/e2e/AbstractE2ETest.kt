@@ -9,7 +9,6 @@ import no.nav.helse.AvviksvurderingTestdata
 import no.nav.helse.GodkjenningsbehovTestdata
 import no.nav.helse.Meldingssender
 import no.nav.helse.TestMediator
-import no.nav.helse.Testdata
 import no.nav.helse.Testdata.snapshot
 import no.nav.helse.modell.oppgave.Egenskap
 import no.nav.helse.modell.person.Adressebeskyttelse
@@ -28,7 +27,6 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiLovhjemmel
 import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringArbeidsforhold
 import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.schema.ApiOverstyringDag
-import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse
 import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus
 import no.nav.helse.spesialist.api.overstyring.Dagtype
@@ -43,7 +41,6 @@ import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import no.nav.helse.spesialist.e2etests.TestRapidHelpers.behov
 import no.nav.helse.spesialist.e2etests.TestRapidHelpers.hendelser
 import no.nav.helse.spesialist.e2etests.TestRapidHelpers.løsning
-import no.nav.helse.spesialist.e2etests.TestRapidHelpers.løsningOrNull
 import no.nav.helse.spesialist.e2etests.TestRapidHelpers.siste
 import no.nav.helse.spesialist.e2etests.TestRapidHelpers.sisteBehov
 import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk
@@ -115,10 +112,6 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     private fun resetTestRapid() = testRapid.reset()
-
-    // Tanken er at denne ikke skal eksponeres ut av AbstractE2ETest, for å unngå at enkelttester implementer egen kode
-    // som bør være felles
-    protected val __ikke_bruk_denne get() = testRapid
 
     private fun opprettSaksbehandler() = dbQuery.update(
         """
@@ -857,52 +850,6 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         )
     }
 
-    protected fun håndterSaksbehandlerløsning(
-        fødselsnummer: String = FØDSELSNUMMER,
-        vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
-        godkjent: Boolean = true,
-        kommentar: String? = null,
-        begrunnelser: List<String> = emptyList(),
-    ) {
-        fun oppgaveIdFor(vedtaksperiodeId: UUID): Long = dbQuery.single(
-            "SELECT id FROM oppgave WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId) ORDER BY id DESC LIMIT 1",
-            "vedtaksperiodeId" to vedtaksperiodeId,
-        ) { it.long(1) }
-
-        fun godkjenningsbehovIdFor(vedtaksperiodeId: UUID): UUID = dbQuery.single(
-            "SELECT id FROM hendelse h INNER JOIN vedtaksperiode_hendelse vh on h.id = vh.hendelse_ref WHERE vh.vedtaksperiode_id = :vedtaksperiodeId AND h.type = 'GODKJENNING' LIMIT 1",
-            "vedtaksperiodeId" to vedtaksperiodeId,
-        ) { it.uuid("id") }
-
-        fun settOppgaveIAvventerSystem(oppgaveId: Long) = dbQuery.update(
-            "UPDATE oppgave SET status = 'AvventerSystem' WHERE id = :oppgaveId", "oppgaveId" to oppgaveId
-        )
-
-        fun markerVarslerSomGodkjent(oppgaveId: Long) = dbQuery.update(
-            "UPDATE selve_varsel SET status = 'GODKJENT' WHERE generasjon_ref = (SELECT b.id FROM behandling b JOIN oppgave o ON b.unik_id = o.generasjon_ref WHERE o.id = :oppgaveId)",
-            "oppgaveId" to oppgaveId,
-        )
-
-        val oppgaveId = oppgaveIdFor(vedtaksperiodeId)
-        val godkjenningsbehovId = godkjenningsbehovIdFor(vedtaksperiodeId)
-        settOppgaveIAvventerSystem(oppgaveId)
-        markerVarslerSomGodkjent(oppgaveId)
-        sisteMeldingId = meldingssender.sendSaksbehandlerløsning(
-            fødselsnummer,
-            oppgaveId = oppgaveId,
-            godkjenningsbehovId = godkjenningsbehovId,
-            godkjent = godkjent,
-            begrunnelser = begrunnelser,
-            kommentar = kommentar,
-        )
-        if (godkjent) {
-            assertUtgåendeMelding("vedtaksperiode_godkjent")
-        } else {
-            assertUtgåendeMelding("vedtaksperiode_avvist")
-        }
-        assertUtgåendeBehovløsning("Godkjenning")
-    }
-
     protected fun håndterAvsluttetMedVedtak(
         aktørId: String = AKTØR,
         fødselsnummer: String = FØDSELSNUMMER,
@@ -977,28 +924,6 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     ) {
         sisteMeldingId = meldingssender.sendKlargjørPersonForVisning(aktørId, fødselsnummer)
         assertEtterspurteBehov("HentPersoninfoV2")
-    }
-
-    protected fun håndterSkjønnsfastsattSykepengegrunnlag(
-        aktørId: String = AKTØR,
-        fødselsnummer: String = FØDSELSNUMMER,
-        organisasjonsnummer: String = ORGNR,
-        vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
-        skjæringstidspunkt: LocalDate = 1.januar,
-        arbeidsgivere: List<ApiSkjonnsfastsettelse.ApiSkjonnsfastsettelseArbeidsgiver> = listOf(Testdata.skjønnsvurdering()),
-    ) {
-        håndterOverstyring(aktørId, fødselsnummer, organisasjonsnummer) {
-            val handling =
-                ApiSkjonnsfastsettelse(
-                    aktorId = aktørId,
-                    fodselsnummer = fødselsnummer,
-                    skjaringstidspunkt = skjæringstidspunkt,
-                    arbeidsgivere = arbeidsgivere,
-                    vedtaksperiodeId = vedtaksperiodeId,
-                )
-            testMediator.håndter(handling, saksbehandler, emptySet())
-            // Her må det gjøres kall til api for å sende inn skjønnsfastsettelse
-        }
     }
 
     protected fun håndterOverstyrTidslinje(
@@ -1161,24 +1086,6 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     protected fun assertGodkjenningsbehovIkkeBesvart() = testRapid.inspektør.løsning("Godkjenningsbehov") == null
 
-    protected fun assertVedtaksperiodeAvvist(
-        periodetype: String,
-        begrunnelser: List<String>? = null,
-        kommentar: String? = null,
-    ) {
-        testRapid.inspektør.hendelser("vedtaksperiode_avvist").first().let {
-            assertEquals(periodetype, it.path("periodetype").asText())
-            assertEquals(begrunnelser, it.path("begrunnelser")?.map(JsonNode::asText))
-            // TODO: BUG: Vi sender faktisk kommentar som "null", ikke null...
-            val faktiskKommentar = it.takeIf { it.hasNonNull("kommentar") }?.get("kommentar")?.asText()
-            if (kommentar == null) {
-                assertEquals("null", faktiskKommentar)
-            } else {
-                assertEquals(kommentar, faktiskKommentar)
-            }
-        }
-    }
-
     protected fun assertSaksbehandleroppgave(
         vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
         oppgavestatus: Oppgavestatus,
@@ -1272,10 +1179,6 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         assertEquals(1, vedtak(vedtaksperiodeId))
     }
 
-    protected fun assertVedtaksperiodeForkastet(vedtaksperiodeId: UUID) {
-        assertEquals(1, forkastedeVedtak(vedtaksperiodeId))
-    }
-
     protected fun assertPersonEksisterer(
         fødselsnummer: String,
         aktørId: String,
@@ -1293,13 +1196,6 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         assertEquals(0, person(fødselsnummer, aktørId))
     }
 
-    protected fun assertArbeidsgiverEksisterer(organisasjonsnummer: String) {
-        val arbeidsgiver = sessionFactory.transactionalSessionScope {
-            it.arbeidsgiverRepository.finn(ArbeidsgiverIdentifikator.fraString(organisasjonsnummer))
-        }
-        assertNotNull(arbeidsgiver) { "Arbeidsgiver med organisasjonsnummer=$organisasjonsnummer finnes ikke i databasen" }
-    }
-
     protected fun assertUtgåendeMelding(hendelse: String) {
         val meldinger = testRapid.inspektør.hendelser(hendelse, sisteMeldingId)
         assertEquals(1, meldinger.size) {
@@ -1312,11 +1208,6 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         assertEquals(0, meldinger.size) {
             "Utgående meldinger: ${meldinger.joinToString { it.path("@event_name").asText() }}"
         }
-    }
-
-    private fun assertUtgåendeBehovløsning(behov: String) {
-        val løsning = testRapid.inspektør.løsningOrNull(behov)
-        assertNotNull(løsning)
     }
 
     protected fun assertInnholdIBehov(
@@ -1413,11 +1304,6 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     private fun vedtak(vedtaksperiodeId: UUID) = dbQuery.single(
         "SELECT COUNT(*) FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId",
-        "vedtaksperiodeId" to vedtaksperiodeId,
-    ) { it.int(1) }
-
-    private fun forkastedeVedtak(vedtaksperiodeId: UUID) = dbQuery.single(
-        "SELECT COUNT(*) FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId AND forkastet = TRUE",
         "vedtaksperiodeId" to vedtaksperiodeId,
     ) { it.int(1) }
 

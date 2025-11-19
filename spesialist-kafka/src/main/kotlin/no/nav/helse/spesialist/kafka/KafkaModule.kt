@@ -6,7 +6,6 @@ import no.nav.helse.db.Daos
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.kafka.MessageContextMeldingPubliserer
 import no.nav.helse.kafka.RiverSetup
-import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.Kommandofabrikk
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.Subsumsjonsmelder
@@ -50,7 +49,6 @@ class KafkaModule(
                                     tilgangsgruppehenter = tilgangsgruppehenter,
                                 )
                             },
-                            godkjenningMediator = GodkjenningMediator(daos.opptegnelseDao),
                             subsumsjonsmelderProvider = {
                                 Subsumsjonsmelder(
                                     configuration.versjonAvKode,

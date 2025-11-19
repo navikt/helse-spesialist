@@ -15,7 +15,6 @@ import no.nav.helse.modell.melding.OppgaveOpprettet
 import no.nav.helse.modell.melding.OverstyrtArbeidsforholdEvent
 import no.nav.helse.modell.melding.OverstyrtInntektOgRefusjonEvent
 import no.nav.helse.modell.melding.OverstyrtTidslinjeEvent
-import no.nav.helse.modell.melding.Saksbehandlerløsning
 import no.nav.helse.modell.melding.SkjønnsfastsattSykepengegrunnlagEvent
 import no.nav.helse.modell.melding.UtgåendeHendelse
 import no.nav.helse.modell.melding.VarselEndret
@@ -53,7 +52,6 @@ internal fun UtgåendeHendelse.eventName() =
         is VedtakFattetMelding -> "vedtak_fattet"
         is KlargjørPersonForVisning -> "klargjør_person_for_visning"
         is OppdaterPersondata -> "oppdater_persondata"
-        is Saksbehandlerløsning -> "saksbehandler_løsning"
         is HentDokument -> "hent-dokument"
         is OppgaveOpprettet -> "oppgave_opprettet"
         is OppgaveOppdatert -> "oppgave_oppdatert"
@@ -78,7 +76,6 @@ private fun UtgåendeHendelse.detaljer(): Map<String, Any> =
         is VedtakFattetMelding -> this.detaljer()
         is KlargjørPersonForVisning -> emptyMap()
         is OppdaterPersondata -> emptyMap()
-        is Saksbehandlerløsning -> this.detaljer()
         is HentDokument -> this.detaljer()
         is OppgaveOpprettet -> this.detaljer()
         is OppgaveOppdatert -> this.detaljer()
@@ -206,39 +203,6 @@ private fun VedtaksperiodeGodkjentManuelt.detaljer(): Map<String, Any> =
         put("behandlingId", behandlingId)
         put("yrkesaktivitetstype", yrkesaktivitetstype)
     }
-
-private fun Saksbehandlerløsning.detaljer(): Map<String, Any> =
-    listOfNotNull(
-        "@forårsaket_av" to
-            mapOf(
-                "event_name" to "behov",
-                "behov" to "Godkjenning",
-                "id" to godkjenningsbehovId,
-            ),
-        "oppgaveId" to oppgaveId,
-        "hendelseId" to godkjenningsbehovId,
-        "godkjent" to godkjent,
-        "saksbehandlerident" to saksbehandlerIdent,
-        "saksbehandleroid" to saksbehandlerOid,
-        "saksbehandlerepost" to saksbehandlerEpost,
-        "godkjenttidspunkt" to godkjenttidspunkt,
-        "saksbehandleroverstyringer" to saksbehandleroverstyringer,
-        "saksbehandler" to
-            mapOf(
-                "ident" to saksbehandler.ident,
-                "epostadresse" to saksbehandler.epost,
-            ),
-        årsak?.let { "årsak" to it },
-        begrunnelser?.let { "begrunnelser" to it },
-        kommentar?.let { "kommentar" to it },
-        beslutter?.let {
-            "beslutter" to
-                mapOf(
-                    "ident" to it.ident,
-                    "epostadresse" to it.epost,
-                )
-        },
-    ).toMap()
 
 private fun HentDokument.detaljer(): Map<String, Any> =
     mapOf(

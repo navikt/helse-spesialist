@@ -51,7 +51,6 @@ class UtbetalingE2ETest : AbstractE2ETest() {
         spleisOppretterNyBehandling()
         val utbetalingId = godkjenningsbehovTestdata.utbetalingId
         spesialistBehandlerGodkjenningsbehovFremTilOppgave()
-        håndterSaksbehandlerløsning() // unødvendig, men holder testen "realistisk" :-)
         håndterUtbetalingEndret(forrigeStatus = IKKE_UTBETALT, gjeldendeStatus = GODKJENT)
         assertUtbetalinger(utbetalingId, 2)
     }

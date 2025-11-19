@@ -25,9 +25,6 @@ class DelegatingOppgaveDao(
             .spleisBehandlingId!!
             .value
 
-    override fun venterPåSaksbehandler(oppgaveId: Long): Boolean =
-        oppgaveRepository.finn(oppgaveId)!!.tilstand is Oppgave.AvventerSaksbehandler
-
     override fun finnOppgaveIdUansettStatus(fødselsnummer: String): Long {
         val vedtaksperiodeIder =
             vedtaksperiodeRepository.alle().filter { it.fødselsnummer == fødselsnummer }.map { it.id.value }

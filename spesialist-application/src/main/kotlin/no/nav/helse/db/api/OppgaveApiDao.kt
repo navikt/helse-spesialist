@@ -7,6 +7,4 @@ interface OppgaveApiDao {
     fun finnOppgaveId(fødselsnummer: String): Long?
 
     fun finnPeriodeoppgave(vedtaksperiodeId: UUID): OppgaveForPeriodevisningDto?
-
-    fun finnFødselsnummer(oppgaveId: Long): String
 }

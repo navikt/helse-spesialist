@@ -72,21 +72,6 @@ class PgOppgaveDao internal constructor(
             it.long("oppgaveId")
         }
 
-    override fun finnVedtaksperiodeId(fødselsnummer: String): UUID =
-        asSQL(
-            """
-            SELECT v.vedtaksperiode_id
-            FROM oppgave o
-                     JOIN vedtak v ON v.id = o.vedtak_ref
-                     JOIN person p ON v.person_ref = p.id
-            WHERE p.fødselsnummer = :fodselsnummer
-            AND status = 'AvventerSaksbehandler'::oppgavestatus;
-            """,
-            "fodselsnummer" to fødselsnummer,
-        ).single {
-            it.uuid("vedtaksperiode_id")
-        }
-
     override fun finnVedtaksperiodeId(oppgaveId: Long) =
         asSQL(
             """
@@ -97,14 +82,6 @@ class PgOppgaveDao internal constructor(
             """.trimIndent(),
             "oppgaveId" to oppgaveId,
         ).single { row -> row.uuid("vedtaksperiode_id") }
-
-    override fun finnHendelseId(id: Long): UUID =
-        asSQL(
-            "SELECT hendelse_id_godkjenningsbehov FROM oppgave WHERE id = :oppgaveId",
-            "oppgaveId" to id,
-        ).single {
-            it.uuid("hendelse_id_godkjenningsbehov")
-        }
 
     override fun invaliderOppgaveFor(fødselsnummer: String) {
         asSQL(
@@ -136,18 +113,6 @@ class PgOppgaveDao internal constructor(
             """,
         ).single {
             it.long("neste_id")
-        }
-
-    override fun venterPåSaksbehandler(oppgaveId: Long): Boolean =
-        asSQL(
-            """
-            SELECT EXISTS (
-                SELECT 1 FROM oppgave WHERE id=:oppgaveId AND status IN('AvventerSaksbehandler'::oppgavestatus)
-            ) 
-            """,
-            "oppgaveId" to oppgaveId,
-        ).single {
-            it.boolean(1)
         }
 
     override fun finnSpleisBehandlingId(oppgaveId: Long): UUID =

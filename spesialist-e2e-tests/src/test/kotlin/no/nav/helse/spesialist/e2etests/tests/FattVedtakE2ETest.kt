@@ -63,6 +63,37 @@ class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
     }
 
     @Test
+    fun `Velger nyeste skjønnsmessig fastsettelse når melding om vedtak sendes ut`() {
+        // Given:
+        risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
+        søknadOgGodkjenningbehovKommerInn()
+
+        // When:
+        medPersonISpeil {
+            saksbehandlerTildelerSegSaken() // Må til for å "opprette" saksbehandler
+            saksbehandlerSkjønnsfastsetter830TredjeAvsnitt("En begrunnelse")
+        }
+
+        medPersonISpeil {
+            saksbehandlerSkjønnsfastsetter830TredjeAvsnitt("En annen begrunnelse")
+        }
+
+        medPersonISpeil {
+            saksbehandlerGodkjennerAlleVarsler()
+            saksbehandlerSenderTilGodkjenning()
+        }
+
+        beslutterMedPersonISpeil {
+            saksbehandlerTildelerSegSaken() // Må til for å "opprette" beslutter
+            saksbehandlerFatterVedtak(førsteVedtaksperiode().spleisBehandlingId!!)
+        }
+
+        // Then:
+        assertBehandlingTilstand("VedtakFattet")
+        assertVedtakFattetEtterSkjønn("En annen begrunnelse")
+    }
+
+    @Test
     fun `alle varsler blir godkjent når saksbehandler fatter vedtak`() {
         // Given:
         risikovurderingBehovLøser.kanGodkjenneAutomatisk = false

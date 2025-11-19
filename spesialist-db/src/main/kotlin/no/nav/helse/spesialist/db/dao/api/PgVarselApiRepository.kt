@@ -26,14 +26,6 @@ class PgVarselApiRepository internal constructor(
 
     override fun finnGodkjenteVarslerForUberegnetPeriode(vedtaksperiodeId: UUID): Set<VarselDbDto> = varselDao.finnGodkjenteVarslerForUberegnetPeriode(vedtaksperiodeId)
 
-    override fun vurderVarselFor(
-        varselId: UUID,
-        gjeldendeStatus: VarselDbDto.Varselstatus,
-        saksbehandlerIdent: String,
-    ) {
-        varselDao.vurderVarselFor(varselId, gjeldendeStatus, saksbehandlerIdent)
-    }
-
     override fun perioderSomSkalViseVarsler(oppgaveId: Long?): Set<UUID> {
         if (oppgaveId == null) return emptySet()
         return sammenhengendePerioder(oppgaveId).map { it.vedtaksperiodeId }.toSet()

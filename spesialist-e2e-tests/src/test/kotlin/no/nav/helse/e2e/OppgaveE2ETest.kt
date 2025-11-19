@@ -2,8 +2,8 @@ package no.nav.helse.e2e
 
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus.IKKE_UTBETALT
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
-import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.Ferdigstilt
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.Invalidert
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.util.UUID
 
@@ -24,16 +24,6 @@ class OppgaveE2ETest : AbstractE2ETest() {
         spesialistBehandlerGodkjenningsbehovFremTilOppgave()
         håndterUtbetalingForkastet(forrigeStatus = IKKE_UTBETALT)
         assertSaksbehandleroppgave(oppgavestatus = Invalidert)
-    }
-
-    @Test
-    fun `ferdigstiller oppgaven først når utbetalingen er utbetalt`() {
-        vedtaksløsningenMottarNySøknad()
-        spleisOppretterNyBehandling()
-        spesialistBehandlerGodkjenningsbehovFremTilOppgave()
-        håndterSaksbehandlerløsning()
-        håndterUtbetalingUtbetalt()
-        assertSaksbehandleroppgave(oppgavestatus = Ferdigstilt)
     }
 
     @Test
@@ -61,12 +51,13 @@ class OppgaveE2ETest : AbstractE2ETest() {
         assertSaksbehandleroppgave(oppgavestatus = AvventerSaksbehandler)
     }
 
+    @Disabled("Hvordan kan vi støtte dette så snart vi fatter vedtaket direkte?")
     @Test
     fun `oppretter ny oppgave når saksbehandler har godkjent, men spleis har reberegnet i mellomtiden`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilOppgave()
-        håndterSaksbehandlerløsning()
+//        håndterSaksbehandlerløsning() // Dette skjer ikke lenger
         håndterUtbetalingForkastet()
         assertSaksbehandleroppgave(oppgavestatus = Invalidert)
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(

@@ -8,7 +8,6 @@ import no.nav.helse.e2e.AbstractE2ETest.Kommandokjedetilstand.SUSPENDERT
 import no.nav.helse.modell.person.Adressebeskyttelse.StrengtFortrolig
 import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSaksbehandler
-import no.nav.helse.spesialist.api.oppgave.Oppgavestatus.AvventerSystem
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import no.nav.helse.spesialist.e2etests.TestRapidHelpers.oppgaveId
 import no.nav.helse.spesialist.kafka.testfixtures.Testmeldingfabrikk.VergemålJson
@@ -37,30 +36,6 @@ class GodkjenningE2ETest : AbstractE2ETest() {
         håndterArbeidsgiverinformasjonløsning()
 
         assertVedtaksperiodeEksisterer(VEDTAKSPERIODE_ID)
-    }
-
-    @Test
-    fun `løser godkjenningsbehov når saksbehandler godkjenner`() {
-        vedtaksløsningenMottarNySøknad()
-        spleisOppretterNyBehandling()
-        spesialistBehandlerGodkjenningsbehovFremTilOppgave(regelverksvarsler = listOf("RV_SV_4"))
-        håndterSaksbehandlerløsning()
-
-        assertSaksbehandleroppgave(oppgavestatus = AvventerSystem)
-        assertGodkjenningsbehovBesvart(godkjent = true, automatiskBehandlet = false)
-    }
-
-    @Test
-    fun `løser godkjenningsbehov når saksbehandler avslår`() {
-        vedtaksløsningenMottarNySøknad()
-        spleisOppretterNyBehandling()
-        spesialistBehandlerGodkjenningsbehovFremTilOppgave(regelverksvarsler = listOf("RV_SV_4"))
-        val begrunnelser = listOf("Mangler opptjening")
-        val kommentar = "Vedkommende mangler opptjening"
-        håndterSaksbehandlerløsning(godkjent = false, kommentar = kommentar, begrunnelser = begrunnelser)
-        assertSaksbehandleroppgave(oppgavestatus = AvventerSystem)
-        assertGodkjenningsbehovBesvart(godkjent = false, automatiskBehandlet = false)
-        assertVedtaksperiodeAvvist("FØRSTEGANGSBEHANDLING", begrunnelser, kommentar)
     }
 
     @Test
@@ -213,7 +188,7 @@ class GodkjenningE2ETest : AbstractE2ETest() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()
         spesialistBehandlerGodkjenningsbehovFremTilVergemål()
-        håndterVergemålOgFullmaktløsning(vergemål = listOf(VergemålJson.Vergemål(VergemålJson.VergemålType.voksen)))
+        håndterVergemålOgFullmaktløsning(vergemål = listOf(VergemålJson.Vergemål(voksen)))
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning()
         assertGodkjenningsbehovBesvart(godkjent = false, automatiskBehandlet = true, "Vergemål")

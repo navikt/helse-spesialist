@@ -10,7 +10,6 @@ import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.harKunGo
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.harMedlemskapsvarsel
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.harVarselOmManglendeInntektsmelding
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.harÅpenGosysOppgave
-import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.håndterGodkjent
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.håndterNyttVarsel
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling.Companion.kreverSkjønnsfastsettelse
 import java.time.LocalDate
@@ -61,10 +60,6 @@ class Sykefraværstilfelle(
 
     fun deaktiver(varsel: LegacyVarsel) {
         gjeldendeBehandlinger.deaktiver(varsel)
-    }
-
-    fun håndterGodkjent(vedtaksperiodeId: UUID) {
-        gjeldendeBehandlinger.håndterGodkjent(vedtaksperiodeId)
     }
 
     fun harMedlemskapsvarsel(vedtaksperiodeId: UUID): Boolean = gjeldendeBehandlinger.harMedlemskapsvarsel(vedtaksperiodeId)

@@ -12,20 +12,6 @@ class AdressebeskyttelseEndretE2ETest : AbstractE2ETest() {
     }
 
     @Test
-    fun `Etterspør personinfo men avviser ikke når det ikke er noen åpne oppgaver`() {
-        vedtaksløsningenMottarNySøknad()
-        spleisOppretterNyBehandling()
-        spesialistBehandlerGodkjenningsbehovFremTilOppgave()
-        håndterSaksbehandlerløsning()
-        håndterAvsluttetMedVedtak()
-
-        håndterAdressebeskyttelseEndret()
-        assertSisteEtterspurteBehov("HentPersoninfoV2")
-        håndterPersoninfoløsning(adressebeskyttelse = Adressebeskyttelse.StrengtFortrolig)
-        assertIkkeUtgåendeMelding("vedtaksperiode_avvist")
-    }
-
-    @Test
     fun `Behandler ny strengt fortrolig adressebeskyttelse og avviser`() {
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling()

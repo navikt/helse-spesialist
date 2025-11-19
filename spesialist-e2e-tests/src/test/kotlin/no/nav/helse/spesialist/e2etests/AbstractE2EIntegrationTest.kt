@@ -97,6 +97,10 @@ abstract class AbstractE2EIntegrationTest {
         spleisStub.spleisReberegnerPerioden(testContext, vedtaksperiode)
     }
 
+    protected fun spleisKasterUtSaken(vedtaksperiode: Vedtaksperiode) {
+        spleisStub.spleisForkasterPerioden(testContext, vedtaksperiode)
+    }
+
     protected fun detPubliseresEnGosysOppgaveEndretMelding() {
         testRapid.publish(
             testContext.person.fødselsnummer,
@@ -149,7 +153,7 @@ abstract class AbstractE2EIntegrationTest {
         assertEquals("EtterHovedregel", vedtakFattet["sykepengegrunnlagsfakta"]["fastsatt"].asText())
     }
 
-    protected fun assertVedtakFattetEtterSkjønn() {
+    protected fun assertVedtakFattetEtterSkjønn(begrunnelseFritekst: String = "skjønnsfastsetter tredje avsnitt") {
         val vedtakFattet = testRapid.meldingslogg(testContext.person.fødselsnummer)
             .find { it["@event_name"].asText() == "vedtak_fattet" }
             ?: error("Forventet å finne vedtak_fattet i meldingslogg")
@@ -157,6 +161,7 @@ abstract class AbstractE2EIntegrationTest {
         assertEquals(4, vedtakFattet["begrunnelser"].size())
         assertEquals("SkjønnsfastsattSykepengegrunnlagMal", vedtakFattet["begrunnelser"][0]["type"].asText())
         assertEquals("SkjønnsfastsattSykepengegrunnlagFritekst", vedtakFattet["begrunnelser"][1]["type"].asText())
+        assertEquals(begrunnelseFritekst, vedtakFattet["begrunnelser"][1]["begrunnelse"].asText())
         assertEquals("SkjønnsfastsattSykepengegrunnlagKonklusjon", vedtakFattet["begrunnelser"][2]["type"].asText())
         assertEquals("Innvilgelse", vedtakFattet["begrunnelser"][3]["type"].asText())
         assertEquals("EtterSkjønn", vedtakFattet["sykepengegrunnlagsfakta"]["fastsatt"].asText())
@@ -179,6 +184,18 @@ abstract class AbstractE2EIntegrationTest {
             )
         }
         assertEquals(expectedTilstand, actualTilstand)
+    }
+
+    protected fun assertPeriodeForkastet(expectedForkastet: Boolean) {
+        val actualForkastet = sessionOf(E2ETestApplikasjon.dbModule.dataSource, strict = true).use { session ->
+            session.run(
+                asSQL(
+                    "SELECT forkastet FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiode_id",
+                    "vedtaksperiode_id" to førsteVedtaksperiode().vedtaksperiodeId,
+                ).map { it.boolean("forkastet") }.asSingle
+            )
+        }
+        assertEquals(expectedForkastet, actualForkastet)
     }
 
     protected fun assertOppgavestatus(expectedStatus: String) {

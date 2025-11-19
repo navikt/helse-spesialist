@@ -2,7 +2,6 @@ package no.nav.helse.e2e
 
 import kotliquery.queryOf
 import kotliquery.sessionOf
-import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -24,31 +23,6 @@ class VedtaksperiodeLegacyBehandlingE2ETest : AbstractE2ETest() {
         spleisOppretterNyBehandling()
         håndterVedtaksperiodeEndret()
         assertGenerasjoner(VEDTAKSPERIODE_ID, 1)
-    }
-
-    @Test
-    fun `Låser gjeldende generasjon når perioden er godkjent og utbetalt`() {
-        vedtaksløsningenMottarNySøknad()
-        val spleisBehandlingId = UUID.randomUUID()
-        spleisOppretterNyBehandling(spleisBehandlingId = spleisBehandlingId)
-        spesialistBehandlerGodkjenningsbehovFremTilOppgave()
-        håndterSaksbehandlerløsning()
-        håndterAvsluttetMedVedtak(spleisBehandlingId = spleisBehandlingId)
-        assertFerdigBehandledeGenerasjoner(VEDTAKSPERIODE_ID, 1)
-    }
-
-    @Test
-    fun `Oppretter ny generasjon når perioden blir revurdert`() {
-        vedtaksløsningenMottarNySøknad()
-        val spleisBehandlingId = UUID.randomUUID()
-        spleisOppretterNyBehandling(spleisBehandlingId = spleisBehandlingId)
-        spesialistBehandlerGodkjenningsbehovFremTilOppgave()
-        håndterSaksbehandlerløsning()
-        håndterAvsluttetMedVedtak(spleisBehandlingId = spleisBehandlingId)
-
-        spleisOppretterNyBehandling()
-        assertGenerasjoner(VEDTAKSPERIODE_ID, 2)
-        assertFerdigBehandledeGenerasjoner(VEDTAKSPERIODE_ID, 1)
     }
 
     @Test
@@ -97,24 +71,6 @@ class VedtaksperiodeLegacyBehandlingE2ETest : AbstractE2ETest() {
         assertGenerasjonHarVarsler(VEDTAKSPERIODE_ID, utbetalingId, 1)
     }
 
-    @Test
-    fun `Flytter aktive varsler for vanlige generasjoner`() {
-        vedtaksløsningenMottarNySøknad()
-        val spleisBehandlingId = UUID.randomUUID()
-        spleisOppretterNyBehandling(spleisBehandlingId = spleisBehandlingId)
-        håndterAktivitetsloggNyAktivitet(varselkoder = listOf("TESTKODE_42"))
-        spesialistBehandlerGodkjenningsbehovFremTilOppgave(kanGodkjennesAutomatisk = true)
-        håndterSaksbehandlerløsning()
-        håndterAvsluttetMedVedtak(spleisBehandlingId = spleisBehandlingId)
-        håndterAktivitetsloggNyAktivitet(varselkoder = listOf("RV_IM_1"))
-
-        val utbetalingId = UUID.randomUUID()
-        spleisOppretterNyBehandling()
-        håndterVedtaksperiodeNyUtbetaling(utbetalingId = utbetalingId)
-        assertGenerasjoner(VEDTAKSPERIODE_ID, 2)
-        assertGenerasjonHarVarsler(VEDTAKSPERIODE_ID, utbetalingId, 1)
-    }
-
     private fun assertGenerasjonHarVarsler(
         vedtaksperiodeId: UUID,
         utbetalingId: UUID,
@@ -145,22 +101,6 @@ class VedtaksperiodeLegacyBehandlingE2ETest : AbstractE2ETest() {
                 session.run(queryOf(query, vedtaksperiodeId).map { it.int(1) }.asSingle)
             }
         assertEquals(forventetAntall, antall) { "Forventet $forventetAntall generasjoner for $vedtaksperiodeId, fant $antall" }
-    }
-
-    private fun assertFerdigBehandledeGenerasjoner(
-        vedtaksperiodeId: UUID,
-        forventetAntall: Int,
-    ) {
-        val antall =
-            sessionOf(dataSource).use { session ->
-                @Language("PostgreSQL")
-                val query = "SELECT COUNT(1) FROM behandling WHERE vedtaksperiode_id = ? AND tilstand = '${LegacyBehandling.VedtakFattet.navn()}'"
-                session.run(queryOf(query, vedtaksperiodeId).map { it.int(1) }.asSingle)
-            }
-        assertEquals(
-            forventetAntall,
-            antall,
-        ) { "Forventet $forventetAntall ferdig behandlede generasjoner for $vedtaksperiodeId, fant $antall" }
     }
 
     private fun assertGenerasjonerMedUtbetaling(

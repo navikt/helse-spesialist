@@ -224,25 +224,6 @@ class Meldingssender(private val testRapid: TestRapid) {
         )
     }
 
-    fun sendUtbetalingAnnullert(
-        fødselsnummer: String,
-        utbetalingId: UUID,
-        epost: String,
-        arbeidsgiverFagsystemId: String,
-        personFagsystemId: String,
-    ): UUID = newUUID.also { id ->
-        testRapid.sendTestMessage(
-            Testmeldingfabrikk.lagUtbetalingAnnullert(
-                fødselsnummer = fødselsnummer,
-                arbeidsgiverFagsystemId = arbeidsgiverFagsystemId,
-                personFagsystemId = personFagsystemId,
-                utbetalingId = utbetalingId,
-                saksbehandlerEpost = epost,
-                id = id,
-            )
-        )
-    }
-
     fun sendGodkjenningsbehov(
         godkjenningsbehovTestdata: GodkjenningsbehovTestdata,
     ): UUID = newUUID.also { id ->
@@ -604,29 +585,6 @@ class Meldingssender(private val testRapid: TestRapid) {
                 contextId = contextId,
             )
         )
-    }
-
-    fun sendSaksbehandlerløsning(
-        fødselsnummer: String,
-        oppgaveId: Long,
-        godkjenningsbehovId: UUID,
-        godkjent: Boolean,
-        kommentar: String? = null,
-        begrunnelser: List<String> = emptyList(),
-    ): UUID {
-        return newUUID.also { id ->
-            testRapid.sendTestMessage(
-                Testmeldingfabrikk.lagSaksbehandlerløsning(
-                    fødselsnummer = fødselsnummer,
-                    godkjent = godkjent,
-                    id = id,
-                    oppgaveId = oppgaveId,
-                    hendelseId = godkjenningsbehovId,
-                    begrunnelser = begrunnelser,
-                    kommentar = kommentar
-                )
-            )
-        }
     }
 
     fun sendAvsluttetMedVedtak(

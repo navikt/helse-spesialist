@@ -34,15 +34,4 @@ class PgOppgaveApiDao internal constructor(
             """.trimIndent(),
             "vedtaksperiodeId" to vedtaksperiodeId,
         ).singleOrNull { OppgaveForPeriodevisningDto(id = it.string("id"), kanAvvises = it.boolean("kan_avvises")) }
-
-    override fun finnFødselsnummer(oppgaveId: Long) =
-        asSQL(
-            """
-            SELECT fødselsnummer from person
-            INNER JOIN vedtak v on person.id = v.person_ref
-            INNER JOIN oppgave o on v.id = o.vedtak_ref
-            WHERE o.id = :oppgaveId
-            """.trimIndent(),
-            "oppgaveId" to oppgaveId,
-        ).single { it.string("fødselsnummer") }
 }

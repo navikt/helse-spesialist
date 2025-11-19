@@ -29,7 +29,6 @@ class RiverSetup(
             FlerePersoninfoRiver(mediator),
             HentEnhetLøsningRiver(mediator),
             InfotrygdutbetalingerLøsningRiver(mediator),
-            SaksbehandlerløsningRiver(mediator),
             ArbeidsgiverinformasjonLøsningRiver(mediator),
             ArbeidsforholdLøsningRiver(mediator),
             VedtaksperiodeForkastetRiver(mediator),

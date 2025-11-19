@@ -17,11 +17,5 @@ interface VarselApiRepository {
 
     fun finnGodkjenteVarslerForUberegnetPeriode(vedtaksperiodeId: UUID): Set<VarselDbDto>
 
-    fun vurderVarselFor(
-        varselId: UUID,
-        gjeldendeStatus: VarselDbDto.Varselstatus,
-        saksbehandlerIdent: String,
-    )
-
     fun perioderSomSkalViseVarsler(oppgaveId: Long?): Set<UUID>
 }
