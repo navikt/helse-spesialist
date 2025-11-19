@@ -23,5 +23,10 @@ class Behandlinger {
         class Vedtak(
             val parent: BehandlingId,
         )
+
+        @Resource("forkasting")
+        class Forkasting(
+            val parent: BehandlingId,
+        )
     }
 }

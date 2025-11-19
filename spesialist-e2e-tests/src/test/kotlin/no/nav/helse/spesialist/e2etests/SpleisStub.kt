@@ -15,7 +15,6 @@ import com.github.tomakehurst.wiremock.client.WireMock.matchingJsonPath
 import com.github.tomakehurst.wiremock.client.WireMock.okJson
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import io.micrometer.core.instrument.MeterRegistry
-import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.e2etests.context.Arbeidsgiver
 import no.nav.helse.spesialist.e2etests.context.Person
 import no.nav.helse.spesialist.e2etests.context.Sykepengegrunnlagsfakta
@@ -205,17 +204,19 @@ class SpleisStub(
             meterRegistry: MeterRegistry
         ) {
             val jsonNode = objectMapper.readTree(packet.toJson())
-            if (jsonNode["@løsning"]["Godkjenning"]["godkjent"].asBoolean()) {
-                val fødselsnummer = jsonNode["fødselsnummer"].asText()
-                val testContext = contextsForFødselsnummer[fødselsnummer]
-                    ?: error("Ikke initialisert med context for person $fødselsnummer")
-                val vedtaksperiodeId = UUID.fromString(jsonNode["vedtaksperiodeId"].asText())
-                val vedtaksperiode = testContext.vedtaksperioder.find { it.vedtaksperiodeId == vedtaksperiodeId }
-                    ?: error("Fant ikke igjen vedtaksperiode $vedtaksperiodeId i context for person $fødselsnummer")
+            val fødselsnummer = jsonNode["fødselsnummer"].asText()
+            val testContext = contextsForFødselsnummer[fødselsnummer]
+                ?: error("Ikke initialisert med context for person $fødselsnummer")
+            val vedtaksperiodeId = UUID.fromString(jsonNode["vedtaksperiodeId"].asText())
+            val vedtaksperiode = testContext.vedtaksperioder.find { it.vedtaksperiodeId == vedtaksperiodeId }
+                ?: error("Fant ikke igjen vedtaksperiode $vedtaksperiodeId i context for person $fødselsnummer")
+
+            val godkjent = jsonNode["@løsning"]["Godkjenning"]["godkjent"].asBoolean()
+            if (godkjent) {
                 utbetalingSkjer(vedtaksperiode, testContext.person, testContext.arbeidsgiver)
                 spleisAvslutterPerioden(vedtaksperiode, testContext.person, testContext.arbeidsgiver)
             } else {
-                logg.warn("Mottok godkjent = false i løsning på Godkjenning, håndterer ikke dette per nå")
+                spleisForkasterPerioden(vedtaksperiode, testContext.person)
             }
         }
 
@@ -249,6 +250,16 @@ class SpleisStub(
             rapidsConnection.publish(
                 person.fødselsnummer,
                 Meldingsbygger.byggAvsluttetMedVedtak(person, arbeidsgiver, vedtaksperiode)
+            )
+        }
+
+        private fun spleisForkasterPerioden(
+            vedtaksperiode: Vedtaksperiode,
+            person: Person
+        ) {
+            rapidsConnection.publish(
+                person.fødselsnummer,
+                Meldingsbygger.byggVedtaksperiodeForkastet(vedtaksperiode, person)
             )
         }
     }

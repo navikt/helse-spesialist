@@ -97,10 +97,10 @@ data class GodkjenningsbehovData(
         )
     }
 
-    internal fun avvisManuelt(
+    fun avvisManuelt(
         saksbehandlerIdent: String,
         saksbehandlerEpost: String,
-        godkjenttidspunkt: LocalDateTime,
+        avvisttidspunkt: LocalDateTime,
         årsak: String?,
         begrunnelser: List<String>?,
         kommentar: String?,
@@ -110,7 +110,7 @@ data class GodkjenningsbehovData(
             godkjent = false,
             saksbehandlerIdent = saksbehandlerIdent,
             saksbehandlerEpost = saksbehandlerEpost,
-            godkjenttidspunkt = godkjenttidspunkt,
+            godkjenttidspunkt = avvisttidspunkt,
             årsak = årsak,
             begrunnelser = begrunnelser,
             kommentar = kommentar,

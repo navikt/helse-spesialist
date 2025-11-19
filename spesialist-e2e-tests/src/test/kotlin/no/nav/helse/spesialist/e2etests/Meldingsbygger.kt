@@ -63,6 +63,16 @@ object Meldingsbygger {
             gjeldendeTilstand = gjeldendeTilstand,
         )
 
+    fun byggVedtaksperiodeForkastet(
+        vedtaksperiode: Vedtaksperiode,
+        person: Person,
+    ) =
+        Testmeldingfabrikk.lagVedtaksperiodeForkastet(
+            fødselsnummer = person.fødselsnummer,
+            aktørId = person.aktørId,
+            vedtaksperiodeId = vedtaksperiode.vedtaksperiodeId,
+        )
+
     fun byggGodkjenningsbehov(
         person: Person,
         arbeidsgiver: Arbeidsgiver,

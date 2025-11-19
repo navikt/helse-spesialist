@@ -60,7 +60,7 @@ class GodkjenningMediator(
         behov.avvisManuelt(
             saksbehandlerIdent = saksbehandlerIdent,
             saksbehandlerEpost = saksbehandlerEpost,
-            godkjenttidspunkt = godkjenttidspunkt,
+            avvisttidspunkt = godkjenttidspunkt,
             årsak = årsak,
             begrunnelser = begrunnelser,
             kommentar = kommentar,

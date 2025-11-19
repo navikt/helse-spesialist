@@ -18,7 +18,7 @@ abstract class AbstractLateIdInMemoryRepository<IDTYPE : ValueObject, T : LateId
 
     fun lagre(root: T) {
         if (root.harFåttTildeltId()) {
-            val index = data.indexOf(root)
+            val index = data.indexOfFirst { it.id() == root.id() }
             data.remove(root)
             data.add(index, deepCopy(root))
         } else {

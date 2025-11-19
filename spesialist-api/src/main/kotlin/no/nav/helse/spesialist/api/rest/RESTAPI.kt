@@ -14,6 +14,7 @@ import io.ktor.server.routing.route
 import no.nav.helse.bootstrap.EnvironmentToggles
 import no.nav.helse.mediator.dokument.DokumentMediator
 import no.nav.helse.spesialist.api.ApiModule
+import no.nav.helse.spesialist.api.rest.behandlinger.forkasting.PostForkastingBehandler
 import no.nav.helse.spesialist.api.rest.behandlinger.notater.PostBehandlingNotaterBehandler
 import no.nav.helse.spesialist.api.rest.behandlinger.vedtak.PostVedtakBehandler
 import no.nav.helse.spesialist.api.rest.dokument.GetInntektsmeldingBehandler
@@ -55,6 +56,7 @@ fun Routing.restRoutes(
             patch(PatchTilkommenInntektBehandler(), restAdapter)
 
             post(PostVedtakBehandler(environmentToggles), restAdapter)
+            post(PostForkastingBehandler(), restAdapter)
 
             post(PostVedtaksperiodeAnnullerBehandler(), restAdapter)
 
