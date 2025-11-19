@@ -111,7 +111,7 @@ class PostForkastingBehandler : PostBehandler<Behandlinger.BehandlingId.Forkasti
     }
 
     override fun openApi(config: RouteConfig) {
-        config.tags("behandlinger")
+        config.tags("Behandlinger")
     }
 
     private fun Outbox.leggTilAvvistVarsel(

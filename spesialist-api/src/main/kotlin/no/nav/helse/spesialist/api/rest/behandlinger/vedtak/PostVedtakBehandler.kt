@@ -295,7 +295,7 @@ class PostVedtakBehandler(
 
     override fun openApi(config: RouteConfig) {
         with(config) {
-            tags = listOf("behandlinger")
+            tags = listOf("Behandlinger")
         }
     }
 
