@@ -56,11 +56,11 @@ internal class PgPersonRepository(
                         adressebeskyttelse = enumValueOf<Adressebeskyttelse>(string("adressebeskyttelse")),
                     )
                 },
-            infoOppdatert = localDate("personinfo_oppdatert"),
-            enhetRef = int("enhet_ref"),
-            enhetRefOppdatert = localDate("enhet_ref_oppdatert"),
-            infotrygdutbetalingerRef = int("infotrygdutbetalinger_ref"),
-            infotrygdutbetalingerOppdatert = localDate("infotrygdutbetalinger_oppdatert"),
+            infoOppdatert = localDateOrNull("personinfo_oppdatert"),
+            enhetRef = intOrNull("enhet_ref"),
+            enhetRefOppdatert = localDateOrNull("enhet_ref_oppdatert"),
+            infotrygdutbetalingerRef = intOrNull("infotrygdutbetalinger_ref"),
+            infotrygdutbetalingerOppdatert = localDateOrNull("infotrygdutbetalinger_oppdatert"),
             egenAnsattStatus =
                 longOrNull("egen_ansatt_person_ref")?.let {
                     EgenAnsattStatus(
