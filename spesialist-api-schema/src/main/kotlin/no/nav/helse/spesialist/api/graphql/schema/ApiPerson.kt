@@ -105,6 +105,12 @@ data class ApiAnnullering(
     val vedtaksperiodeId: UUID,
 )
 
+@GraphQLName("AnnetFodselsnummer")
+data class ApiAnnetFodselsnummer(
+    val fodselsnummer: String,
+    val personPseudoId: UUID,
+)
+
 @GraphQLIgnore
 interface PersonSchema {
     fun versjon(): Int
@@ -114,6 +120,8 @@ interface PersonSchema {
     fun aktorId(): String
 
     fun fodselsnummer(): String
+
+    fun andreFodselsnummer(): List<ApiAnnetFodselsnummer>
 
     fun dodsdato(): LocalDate?
 

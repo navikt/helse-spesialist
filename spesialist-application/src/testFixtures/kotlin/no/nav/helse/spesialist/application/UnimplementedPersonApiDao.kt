@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.application
 import no.nav.helse.db.api.PersonApiDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.vedtaksperiode.EnhetDto
+import no.nav.helse.spesialist.domain.Identitetsnummer
 
 class UnimplementedPersonApiDao : PersonApiDao {
     override fun personKlargjøres(fødselsnummer: String) {
@@ -34,6 +35,10 @@ class UnimplementedPersonApiDao : PersonApiDao {
     }
 
     override fun finnFødselsnumre(aktørId: String): List<String> {
+        TODO("Not yet implemented")
+    }
+
+    override fun finnAndreFødselsnumre(fødselsnummer: String): List<Pair<Identitetsnummer, PersonPseudoId>> {
         TODO("Not yet implemented")
     }
 

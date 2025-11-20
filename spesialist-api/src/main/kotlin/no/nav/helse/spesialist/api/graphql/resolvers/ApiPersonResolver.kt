@@ -15,6 +15,7 @@ import no.nav.helse.db.api.VarselApiRepository
 import no.nav.helse.mediator.SaksbehandlerMediator
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.spesialist.api.graphql.mapping.tilVilkarsgrunnlagV2
+import no.nav.helse.spesialist.api.graphql.schema.ApiAnnetFodselsnummer
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdoverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsgiver
 import no.nav.helse.spesialist.api.graphql.schema.ApiDagoverstyring
@@ -47,11 +48,13 @@ import no.nav.helse.spesialist.application.SaksbehandlerRepository
 import no.nav.helse.spesialist.application.snapshot.SnapshotGhostPeriode
 import no.nav.helse.spesialist.application.snapshot.SnapshotPerson
 import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import java.time.LocalDate
 import java.util.UUID
 
 data class ApiPersonResolver(
     private val personPseudoId: PersonPseudoId,
+    private val andreFødselsnummer: Set<Pair<Identitetsnummer, PersonPseudoId>>,
     private val sessionFactory: SessionFactory,
     private val snapshot: SnapshotPerson,
     private val personinfo: ApiPersoninfo,
@@ -78,6 +81,8 @@ data class ApiPersonResolver(
     override fun aktorId(): String = snapshot.aktorId
 
     override fun fodselsnummer(): String = snapshot.fodselsnummer
+
+    override fun andreFodselsnummer(): List<ApiAnnetFodselsnummer> = andreFødselsnummer.toList().map { ApiAnnetFodselsnummer(it.first.value, it.second.value) }
 
     override fun dodsdato(): LocalDate? = snapshot.dodsdato
 

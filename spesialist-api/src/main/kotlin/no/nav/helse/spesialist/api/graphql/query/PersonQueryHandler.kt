@@ -74,6 +74,8 @@ interface PersonoppslagService {
 
     fun fødselsnumreKnyttetTil(aktørId: String): Set<String>
 
+    fun andreFødselsnumreKnyttetTilPerson(fødselsnummer: String): Set<Pair<Identitetsnummer, PersonPseudoId>>
+
     fun fødselsnummerKnyttetTil(personPseudoId: PersonPseudoId): Identitetsnummer?
 }
 

@@ -3,9 +3,11 @@ package no.nav.helse.spesialist.db.dao.api
 import no.nav.helse.db.api.PersonApiDao
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.vedtaksperiode.EnhetDto
+import no.nav.helse.spesialist.application.PersonPseudoId
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
 import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.QueryRunner
+import no.nav.helse.spesialist.domain.Identitetsnummer
 import java.time.LocalDateTime
 import javax.sql.DataSource
 
@@ -70,6 +72,20 @@ class PgPersonApiDao internal constructor(
             " SELECT fødselsnummer FROM person WHERE aktør_id = :aktor_id; ",
             "aktor_id" to aktørId,
         ).list { it.string("fødselsnummer") }
+
+    override fun finnAndreFødselsnumre(fødselsnummer: String): List<Pair<Identitetsnummer, PersonPseudoId>> =
+        asSQL(
+            """
+            SELECT fødselsnummer, pseudoid
+            FROM person, personpseudoid
+            WHERE aktør_id = (
+                SELECT aktør_id 
+                FROM person 
+                WHERE fødselsnummer = :fodselsnummer
+            )
+            """.trimIndent(),
+            "fodselsnummer" to fødselsnummer,
+        ).list { Identitetsnummer.fraString(it.string("fødselsnummer")) to PersonPseudoId.fraString(it.string("pseudoid")) }
 
     override fun harDataNødvendigForVisning(fødselsnummer: String) =
         asSQL(

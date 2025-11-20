@@ -2,6 +2,8 @@ package no.nav.helse.db.api
 
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.vedtaksperiode.EnhetDto
+import no.nav.helse.spesialist.application.PersonPseudoId
+import no.nav.helse.spesialist.domain.Identitetsnummer
 
 interface PartialPersonApiDao : PersonApiDao {
     override fun personKlargjøres(fødselsnummer: String) {
@@ -33,6 +35,10 @@ interface PartialPersonApiDao : PersonApiDao {
     }
 
     override fun finnFødselsnumre(aktørId: String): List<String> {
+        error("Not implemented for this test")
+    }
+
+    override fun finnAndreFødselsnumre(fødselsnummer: String): List<Pair<Identitetsnummer, PersonPseudoId>> {
         error("Not implemented for this test")
     }
 

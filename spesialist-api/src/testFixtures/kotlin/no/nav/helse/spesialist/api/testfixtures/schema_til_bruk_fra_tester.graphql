@@ -59,6 +59,11 @@ type Alder {
     oppfylt: Boolean!
 }
 
+type AnnetFodselsnummer {
+    fodselsnummer: String!
+    personPseudoId: UUID!
+}
+
 type Annullering {
     arbeidsgiverFagsystemId: String
     arsaker: [String!]!
@@ -380,7 +385,6 @@ type Mutation {
     overstyrInntektOgRefusjon(overstyring: InntektOgRefusjonOverstyringInput!): Boolean
     sendIRetur(notatTekst: String!, oppgavereferanse: String!): Boolean
     sendTilGodkjenningV2(oppgavereferanse: String!, vedtakBegrunnelse: String): Boolean
-    sendTilInfotrygd(arsak: String!, begrunnelser: [String!]!, kommentar: String, oppgavereferanse: String!): Boolean!
     skjonnsfastsettSykepengegrunnlag(skjonnsfastsettelse: SkjonnsfastsettelseInput!): Boolean
     stansAutomatiskBehandling(begrunnelse: String!, fodselsnummer: String!): Boolean!
 }
@@ -489,6 +493,7 @@ type Periodevilkar {
 
 type Person {
     aktorId: String!
+    andreFodselsnummer: [AnnetFodselsnummer!]!
     arbeidsgivere: [Arbeidsgiver!]!
     dodsdato: LocalDate
     enhet: Enhet!
