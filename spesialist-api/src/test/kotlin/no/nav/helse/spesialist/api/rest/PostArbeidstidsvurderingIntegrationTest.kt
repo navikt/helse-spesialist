@@ -92,7 +92,7 @@ class PostArbeidstidsvurderingIntegrationTest {
         integrationTestFixture.assertPubliserteBehovLister()
         integrationTestFixture.assertPubliserteKommandokjedeEndretEvents()
         integrationTestFixture.assertPubliserteSubsumsjoner()
-        integrationTestFixture.assertPubliserteUtgåendeHendelser()
+        integrationTestFixture.assertIngenPubliserteUtgåendeHendelser()
     }
 
     @Test
@@ -149,7 +149,7 @@ class PostArbeidstidsvurderingIntegrationTest {
         integrationTestFixture.assertPubliserteBehovLister()
         integrationTestFixture.assertPubliserteKommandokjedeEndretEvents()
         integrationTestFixture.assertPubliserteSubsumsjoner()
-        integrationTestFixture.assertPubliserteUtgåendeHendelser()
+        integrationTestFixture.assertIngenPubliserteUtgåendeHendelser()
     }
 
     @Test

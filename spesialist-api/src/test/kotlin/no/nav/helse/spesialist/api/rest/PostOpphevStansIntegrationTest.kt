@@ -80,7 +80,7 @@ class PostOpphevStansIntegrationTest {
         integrationTestFixture.assertPubliserteBehovLister()
         integrationTestFixture.assertPubliserteKommandokjedeEndretEvents()
         integrationTestFixture.assertPubliserteSubsumsjoner()
-        integrationTestFixture.assertPubliserteUtgåendeHendelser()
+        integrationTestFixture.assertIngenPubliserteUtgåendeHendelser()
     }
 
 }

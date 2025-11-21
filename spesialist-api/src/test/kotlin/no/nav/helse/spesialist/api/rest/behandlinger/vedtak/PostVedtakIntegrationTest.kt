@@ -2,7 +2,10 @@ package no.nav.helse.spesialist.api.rest.behandlinger.vedtak
 
 import io.ktor.http.HttpStatusCode
 import no.nav.helse.Varselvurdering
+import no.nav.helse.modell.melding.Godkjenningsbehovløsning
+import no.nav.helse.modell.melding.OppgaveOppdatert
 import no.nav.helse.modell.melding.VarselEndret
+import no.nav.helse.modell.melding.VedtaksperiodeGodkjentManuelt
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Arbeidssituasjon
@@ -10,10 +13,14 @@ import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.spesialist.api.IntegrationTestFixture
+import no.nav.helse.spesialist.application.InMemoryMeldingPubliserer
 import no.nav.helse.spesialist.application.testing.assertJsonEquals
+import no.nav.helse.spesialist.application.testing.assertMindreEnnNSekunderSiden
 import no.nav.helse.spesialist.domain.Behandling
+import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.Varsel
+import no.nav.helse.spesialist.domain.Varseldefinisjon
 import no.nav.helse.spesialist.domain.Vedtaksperiode
 import no.nav.helse.spesialist.domain.testfixtures.lagBehandling
 import no.nav.helse.spesialist.domain.testfixtures.lagOppgave
@@ -24,14 +31,15 @@ import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiode
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertIs
 
-class PostVedtakBehandlerIntegrationTest {
+class PostVedtakIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
     private val sessionContext = integrationTestFixture.sessionFactory.sessionContext
 
@@ -50,7 +58,7 @@ class PostVedtakBehandlerIntegrationTest {
         )
 
         // Then:
-        Assertions.assertEquals(HttpStatusCode.NotFound.value, response.status)
+        assertEquals(HttpStatusCode.NotFound.value, response.status)
         assertJsonEquals(
             """
             {
@@ -82,7 +90,7 @@ class PostVedtakBehandlerIntegrationTest {
         )
 
         // Then:
-        Assertions.assertEquals(HttpStatusCode.NotFound.value, response.status)
+        assertEquals(HttpStatusCode.NotFound.value, response.status)
         assertJsonEquals(
             """
             {
@@ -116,7 +124,7 @@ class PostVedtakBehandlerIntegrationTest {
         )
 
         // Then:
-        Assertions.assertEquals(HttpStatusCode.Forbidden.value, response.status)
+        assertEquals(HttpStatusCode.Forbidden.value, response.status)
     }
 
     @Test
@@ -139,7 +147,7 @@ class PostVedtakBehandlerIntegrationTest {
         )
 
         // Then:
-        Assertions.assertEquals(HttpStatusCode.BadRequest.value, response.status)
+        assertEquals(HttpStatusCode.BadRequest.value, response.status)
         assertJsonEquals(
             """
             {
@@ -176,7 +184,7 @@ class PostVedtakBehandlerIntegrationTest {
         )
 
         // Then:
-        Assertions.assertEquals(HttpStatusCode.BadRequest.value, response.status)
+        assertEquals(HttpStatusCode.BadRequest.value, response.status)
         assertJsonEquals(
             """
             {
@@ -219,7 +227,7 @@ class PostVedtakBehandlerIntegrationTest {
         )
 
         // Then:
-        Assertions.assertEquals(HttpStatusCode.Forbidden.value, response.status)
+        assertEquals(HttpStatusCode.Forbidden.value, response.status)
         assertJsonEquals(
             """
             {
@@ -262,7 +270,7 @@ class PostVedtakBehandlerIntegrationTest {
         )
 
         // Then:
-        Assertions.assertEquals(HttpStatusCode.Forbidden.value, response.status)
+        assertEquals(HttpStatusCode.Forbidden.value, response.status)
         assertJsonEquals(
             """
             {
@@ -305,7 +313,7 @@ class PostVedtakBehandlerIntegrationTest {
         )
 
         // Then:
-        Assertions.assertEquals(HttpStatusCode.Conflict.value, response.status)
+        assertEquals(HttpStatusCode.Conflict.value, response.status)
         assertJsonEquals(
             """
             {
@@ -348,7 +356,7 @@ class PostVedtakBehandlerIntegrationTest {
         )
 
         // Then:
-        Assertions.assertEquals(HttpStatusCode.BadRequest.value, response.status)
+        assertEquals(HttpStatusCode.BadRequest.value, response.status)
         assertJsonEquals(
             """
             {
@@ -398,7 +406,7 @@ class PostVedtakBehandlerIntegrationTest {
         )
 
         // Then:
-        Assertions.assertEquals(HttpStatusCode.BadRequest.value, response.status)
+        assertEquals(HttpStatusCode.BadRequest.value, response.status)
         assertJsonEquals(
             """
             {
@@ -451,7 +459,7 @@ class PostVedtakBehandlerIntegrationTest {
         )
 
         // Then:
-        Assertions.assertEquals(HttpStatusCode.NoContent.value, response.status)
+        assertEquals(HttpStatusCode.NoContent.value, response.status)
     }
 
     @Test
@@ -469,13 +477,7 @@ class PostVedtakBehandlerIntegrationTest {
             vurdering = Varselvurdering(saksbehandler.id, LocalDateTime.now(), varseldefinisjon.id),
             kode = varseldefinisjon.kode
         )
-        val vurdertVarsel = lagVarsel(
-            behandlingUnikId = behandling.id,
-            spleisBehandlingId = behandling.spleisBehandlingId,
-            status = Varsel.Status.VURDERT,
-            vurdering = Varselvurdering(saksbehandler.id, LocalDateTime.now(), varseldefinisjon.id),
-            kode = varseldefinisjon.kode
-        )
+        val vurdertVarsel = lagVurdertVarsel(varseldefinisjon, saksbehandler, behandling)
         val godkjenningsbehov = lagGodkjenningsbehov(behandling, vedtaksperiode)
         sessionContext.saksbehandlerRepository.lagre(saksbehandler)
         sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
@@ -498,13 +500,127 @@ class PostVedtakBehandlerIntegrationTest {
         )
 
         // Then:
-        Assertions.assertEquals(HttpStatusCode.NoContent.value, response.status)
+        assertEquals(HttpStatusCode.NoContent.value, response.status)
         val iderForPubliserteVarsler = integrationTestFixture.meldingPubliserer.publiserteUtgåendeHendelser
             .map { it.hendelse }
             .filterIsInstance<VarselEndret>()
             .map { it.varselId }
-        Assertions.assertEquals(listOf(vurdertVarsel.id.value), iderForPubliserteVarsler)
+        assertEquals(listOf(vurdertVarsel.id.value), iderForPubliserteVarsler)
     }
+
+    @Test
+    fun `publiserer forventede meldinger`() {
+        // Given:
+        val person = lagPerson()
+            .also(sessionContext.personRepository::lagre)
+        val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
+            .also(sessionContext.vedtaksperiodeRepository::lagre)
+        val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
+            .also(sessionContext.behandlingRepository::lagre)
+        val spleisBehandlingId = behandling.spleisBehandlingId!!
+        val varseldefinisjon = lagVarseldefinisjon()
+            .also { sessionContext.varseldefinisjonRepository.lagre(it) }
+        val saksbehandler = lagSaksbehandler()
+        val vurdertVarsel = lagVurdertVarsel(varseldefinisjon, saksbehandler, behandling)
+            .also(sessionContext.varselRepository::lagre)
+        val godkjenningsbehov = lagGodkjenningsbehov(behandling, vedtaksperiode)
+            .also(sessionContext.meldingDao::lagre)
+        val oppgave = lagOppgave(spleisBehandlingId, godkjenningsbehov.id)
+            .also(sessionContext.oppgaveRepository::lagre)
+
+        // When:
+        val response = integrationTestFixture.post(
+            url = "/api/behandlinger/${spleisBehandlingId.value}/vedtak",
+            body = "{}",
+            saksbehandler = saksbehandler,
+        )
+
+        // Then:
+        assertEquals(HttpStatusCode.NoContent.value, response.status)
+        integrationTestFixture.assertPubliserteSubsumsjoner()
+        integrationTestFixture.assertPubliserteBehovLister()
+        integrationTestFixture.assertPubliserteKommandokjedeEndretEvents()
+        integrationTestFixture.assertPubliserteUtgåendeHendelser(
+            { actualUtgåendeHendelse ->
+                assertEquals(
+                    InMemoryMeldingPubliserer.PublisertUtgåendeHendelse(
+                        fødselsnummer = person.id.value,
+                        hendelse = VarselEndret(
+                            vedtaksperiodeId = vedtaksperiode.id.value,
+                            behandlingIdForBehandlingSomBleGodkjent = spleisBehandlingId.value,
+                            varselId = vurdertVarsel.id.value,
+                            varseltittel = varseldefinisjon.tittel,
+                            varselkode = varseldefinisjon.kode,
+                            forrigeStatus = "VURDERT",
+                            gjeldendeStatus = "GODKJENT"
+                        ),
+                        årsak = "varsel godkjent"
+                    ),
+                    actualUtgåendeHendelse
+                )
+            },
+            { actualUtgåendeHendelse ->
+                assertEquals(
+                    InMemoryMeldingPubliserer.PublisertUtgåendeHendelse(
+                        fødselsnummer = person.id.value,
+                        hendelse = OppgaveOppdatert(
+                            oppgave = oppgave
+                        ),
+                        årsak = "oppgave avventer system"
+                    ),
+                    actualUtgåendeHendelse
+                )
+            },
+            { actualUtgåendeHendelse ->
+                assertEquals(person.id.value, actualUtgåendeHendelse.fødselsnummer)
+                val hendelse = actualUtgåendeHendelse.hendelse
+                assertIs<Godkjenningsbehovløsning>(hendelse)
+                assertEquals(true, hendelse.godkjent)
+                assertEquals(saksbehandler.ident, hendelse.saksbehandlerIdent)
+                assertEquals(saksbehandler.epost, hendelse.saksbehandlerEpost)
+                assertMindreEnnNSekunderSiden(30, hendelse.godkjenttidspunkt)
+                assertEquals(false, hendelse.automatiskBehandling)
+                assertEquals(null, hendelse.årsak)
+                assertEquals(null, hendelse.begrunnelser)
+                assertEquals(null, hendelse.kommentar)
+                assertEquals(listOf(), hendelse.saksbehandleroverstyringer)
+                assertEquals("{}", hendelse.json)
+                assertEquals("saksbehandlergodkjenning", actualUtgåendeHendelse.årsak)
+            },
+            { actualUtgåendeHendelse ->
+                assertEquals(
+                    InMemoryMeldingPubliserer.PublisertUtgåendeHendelse(
+                        fødselsnummer = person.id.value,
+                        hendelse = VedtaksperiodeGodkjentManuelt(
+                            fødselsnummer = person.id.value,
+                            vedtaksperiodeId = vedtaksperiode.id.value,
+                            behandlingId = spleisBehandlingId.value,
+                            yrkesaktivitetstype = behandling.yrkesaktivitetstype,
+                            periodetype = godkjenningsbehov.periodetype.name,
+                            saksbehandlerIdent = saksbehandler.ident,
+                            saksbehandlerEpost = saksbehandler.epost,
+                            beslutterIdent = null,
+                            beslutterEpost = null
+                        ),
+                        årsak = "saksbehandlergodkjenning"
+                    ),
+                    actualUtgåendeHendelse
+                )
+            },
+        )
+    }
+
+    private fun lagVurdertVarsel(
+        varseldefinisjon: Varseldefinisjon,
+        saksbehandler: Saksbehandler,
+        behandling: Behandling
+    ): Varsel = lagVarsel(
+        behandlingUnikId = behandling.id,
+        spleisBehandlingId = behandling.spleisBehandlingId,
+        status = Varsel.Status.VURDERT,
+        vurdering = Varselvurdering(saksbehandler.id, LocalDateTime.now(), varseldefinisjon.id),
+        kode = varseldefinisjon.kode
+    )
 
     private fun lagGodkjenningsbehov(behandling: Behandling, vedtaksperiode: Vedtaksperiode): Godkjenningsbehov {
         return Godkjenningsbehov(

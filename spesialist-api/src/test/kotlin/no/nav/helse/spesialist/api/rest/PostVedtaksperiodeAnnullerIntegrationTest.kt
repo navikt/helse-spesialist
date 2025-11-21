@@ -270,7 +270,7 @@ class PostVedtaksperiodeAnnullerIntegrationTest {
         integrationTestFixture.assertPubliserteBehovLister()
         integrationTestFixture.assertPubliserteKommandokjedeEndretEvents()
         integrationTestFixture.assertPubliserteSubsumsjoner()
-        integrationTestFixture.assertPubliserteUtgåendeHendelser()
+        integrationTestFixture.assertIngenPubliserteUtgåendeHendelser()
     }
 
 }

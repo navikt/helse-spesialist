@@ -27,7 +27,7 @@ import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import no.nav.security.mock.oauth2.MockOAuth2Server
 import org.intellij.lang.annotations.Language
-import org.junit.jupiter.api.Assertions.assertEquals
+import kotlin.test.assertEquals
 
 class IntegrationTestFixture() {
     private val inMemoryRepositoriesAndDaos = InMemoryRepositoriesAndDaos()
@@ -259,6 +259,27 @@ class IntegrationTestFixture() {
         assertEquals(
             publiserteUtgåendeHendelse.toList(),
             meldingPubliserer.publiserteUtgåendeHendelser
+        )
+    }
+
+    fun assertPubliserteUtgåendeHendelser(
+        vararg assertionsPerHendelse: (actualUtgåendeHendelse: InMemoryMeldingPubliserer.PublisertUtgåendeHendelse) -> Unit
+    ) {
+        assertEquals(
+            expected = assertionsPerHendelse.size,
+            actual = meldingPubliserer.publiserteUtgåendeHendelser.size,
+            message = "Uventet antall meldinger. Faktiske meldinger: ${meldingPubliserer.publiserteUtgåendeHendelser}"
+        )
+        assertionsPerHendelse
+            .zip(meldingPubliserer.publiserteUtgåendeHendelser)
+            .forEach { (assertion, actual) -> assertion(actual) }
+    }
+
+    fun assertIngenPubliserteUtgåendeHendelser() {
+        assertEquals(
+            expected = 0,
+            actual = meldingPubliserer.publiserteUtgåendeHendelser.size,
+            message = "Forventet ingen meldinger, men følgende ble publisert: ${meldingPubliserer.publiserteUtgåendeHendelser}"
         )
     }
 }
