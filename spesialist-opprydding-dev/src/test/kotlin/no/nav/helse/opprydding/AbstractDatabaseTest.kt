@@ -226,7 +226,8 @@ internal abstract class AbstractDatabaseTest {
                 "risikovurdering_faresignal",
                 "overstyringer_for_vedtaksperioder",
                 "tilkommen_inntekt_events",
-                "ukoblede_annulleringer"
+                "ukoblede_annulleringer",
+                "midlertidig_behandling_vedtak_fattet"
             ),
         )
         tabeller.forEach { tabellnavn ->
