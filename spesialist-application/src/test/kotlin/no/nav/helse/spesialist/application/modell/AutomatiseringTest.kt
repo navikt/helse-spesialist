@@ -78,11 +78,13 @@ internal class AutomatiseringTest {
     private var stikkprøveFullRefusjonEnArbeidsgiver = false
     private var stikkprøveUtsEnArbeidsgiverFørstegangsbehandling = false
     private var stikkprøveUtsEnArbeidsgiverForlengelse = false
+    private var stikkprøveSelvstendigNæringsdrivendeForlengelse = false
     private val stikkprøver =
         object : Stikkprøver {
             override fun utsFlereArbeidsgivereFørstegangsbehandling() = false
 
             override fun utsFlereArbeidsgivereForlengelse() = false
+            override fun selvstendigNæringsdrivendeForlengelse() = stikkprøveSelvstendigNæringsdrivendeForlengelse
 
             override fun utsEnArbeidsgiverFørstegangsbehandling() = stikkprøveUtsEnArbeidsgiverFørstegangsbehandling
 
@@ -264,6 +266,17 @@ internal class AutomatiseringTest {
     }
 
     @Test
+    fun `selvstendig næringsdrivende forlengelse som plukkes ut som stikkprøve skal ikke automatisk godkjennes`() {
+        stikkprøveSelvstendigNæringsdrivendeForlengelse = true
+        blirStikkprøve(periodetype = FORLENGELSE, yrkesaktivitetstype = Yrkesaktivitetstype.SELVSTENDIG)
+    }
+
+    @Test
+    fun `periode med forlengelse av selvstendig næringsdrivende skal automatisk godkjennes`() {
+        blirAutomatiskBehandlet(enUtbetaling(personbeløp = 500, arbeidsgiverbeløp = 0), yrkesaktivitetstype = Yrkesaktivitetstype.SELVSTENDIG)
+    }
+
+    @Test
     fun `førstegangsbehandling med utbetaling til sykmeldt skal automatisk godkjennes`() {
         blirAutomatiskBehandlet(enUtbetaling(personbeløp = 500))
     }
@@ -327,8 +340,8 @@ internal class AutomatiseringTest {
     }
 
     @Test
-    fun `selvstendig næringsdrivende stanser automatisk behandling`() {
-        blirManuellOppgave(yrkesaktivitetstype = Yrkesaktivitetstype.SELVSTENDIG)
+    fun `førstegangsbehandling av selvstendig næringsdrivende stanser automatisk behandling`() {
+        blirManuellOppgave(yrkesaktivitetstype = Yrkesaktivitetstype.SELVSTENDIG, periodetype = FØRSTEGANGSBEHANDLING)
     }
 
     private fun assertKanIkkeAutomatiseres(resultat: Automatiseringsresultat) {
@@ -414,6 +427,7 @@ internal class AutomatiseringTest {
         yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
         maksdato: LocalDate = 1 des 2018,
         tags: List<String> = emptyList(),
+        periodetype: Periodetype = FORLENGELSE,
     ) =
         assertKanIkkeAutomatiseres(
             forsøkAutomatisering(
@@ -422,14 +436,16 @@ internal class AutomatiseringTest {
                 generasjoners = listOf(legacyBehandling),
                 maksdato = maksdato,
                 tags = tags,
+                periodetype = periodetype
             )
         )
 
     private fun blirStikkprøve(
         utbetaling: Utbetaling = enUtbetaling(),
-        periodetype: Periodetype = FØRSTEGANGSBEHANDLING
+        periodetype: Periodetype = FØRSTEGANGSBEHANDLING,
+        yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
     ) =
-        assertStikkprøve(forsøkAutomatisering(utbetaling = utbetaling, periodetype = periodetype))
+        assertStikkprøve(forsøkAutomatisering(utbetaling = utbetaling, periodetype = periodetype, yrkesaktivitetstype = yrkesaktivitetstype))
 
     private fun blirManuellOppgaveMedFeil(
         utbetaling: Utbetaling = enUtbetaling(),
@@ -441,8 +457,8 @@ internal class AutomatiseringTest {
         assertEquals(problems.toSet(), resultat.problemer.toSet())
     }
 
-    private fun blirAutomatiskBehandlet(utbetaling: Utbetaling = enUtbetaling()) =
-        assertKanAutomatiseres(forsøkAutomatisering(utbetaling = utbetaling))
+    private fun blirAutomatiskBehandlet(utbetaling: Utbetaling = enUtbetaling(), yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER) =
+        assertKanAutomatiseres(forsøkAutomatisering(utbetaling = utbetaling, yrkesaktivitetstype = yrkesaktivitetstype))
 
     private fun blirManuellOppgaveMedFeilOgVarsel(
         utbetaling: Utbetaling = enUtbetaling(),

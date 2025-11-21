@@ -121,6 +121,7 @@ internal class Automatisering(
         val erUTS = utbetaling.harEndringIUtbetalingTilSykmeldt()
         val flereArbeidsgivere = vedtakDao.finnInntektskilde(vedtaksperiodeId) == Inntektskilde.FLERE_ARBEIDSGIVERE
         val erFørstegangsbehandling = periodetype == FØRSTEGANGSBEHANDLING
+        val selvstendigNæringsdrivende = yrkesaktivitetstype == Yrkesaktivitetstype.SELVSTENDIG
 
         if (problemer.isNotEmpty()) return Automatiseringsresultat.KanIkkeAutomatiseres(problemer)
 
@@ -138,7 +139,7 @@ internal class Automatisering(
         }
 
         if (!erEgenAnsattEllerSkjermet(fødselsnummer)) {
-            avgjørStikkprøve(erUTS, flereArbeidsgivere, erFørstegangsbehandling)?.let {
+            avgjørStikkprøve(erUTS, flereArbeidsgivere, erFørstegangsbehandling, selvstendigNæringsdrivende)?.let {
                 return Automatiseringsresultat.Stikkprøve(it)
             }
         } else {
@@ -219,6 +220,7 @@ internal class Automatisering(
         UTS: Boolean,
         flereArbeidsgivere: Boolean,
         førstegangsbehandling: Boolean,
+        selvstendigNæringsdrivende: Boolean,
     ): String? {
         when {
             UTS ->
@@ -241,7 +243,10 @@ internal class Automatisering(
                     førstegangsbehandling && stikkprøver.fullRefusjonFlereArbeidsgivereFørstegangsbehandling() -> return "Refusjon, flere arbeidsgivere, førstegangsbehandling"
                     !førstegangsbehandling && stikkprøver.fullRefusjonFlereArbeidsgivereForlengelse() -> return "Refusjon, flere arbeidsgivere, forlengelse"
                 }
-
+            selvstendigNæringsdrivende ->
+                when {
+                    !førstegangsbehandling && stikkprøver.selvstendigNæringsdrivendeForlengelse() -> return "Forlengelse, selvstendig næringsdrivende"
+                }
             stikkprøver.fullRefusjonEnArbeidsgiver() -> return "Refusjon, en arbeidsgiver"
         }
         return null
@@ -275,11 +280,12 @@ internal class Automatisering(
         val harKravOmTotrinnsvurdering =
             totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)?.let { it.tilstand != GODKJENT } ?: false
         val harUtbetalingTilSykmeldt = utbetaling.harEndringIUtbetalingTilSykmeldt()
+        val selvstendigNæringsdrivendeFGB = yrkesaktivitetstype == Yrkesaktivitetstype.SELVSTENDIG && periodetype == FØRSTEGANGSBEHANDLING
 
         val skalStoppesPgaUTS = harUtbetalingTilSykmeldt && periodetype !in listOf(FORLENGELSE, FØRSTEGANGSBEHANDLING)
 
         return valider(
-            validering("Gjelder selvstendig næring") { yrkesaktivitetstype != Yrkesaktivitetstype.SELVSTENDIG },
+            validering("Gjelder selvstendig næring") { !selvstendigNæringsdrivendeFGB },
             risikovurdering,
             validering("Automatisering stanset av saksbehandler") { !automatiseringStansetAvSaksbehandler },
             validering("Unntatt fra automatisk godkjenning") { !unntattFraAutomatisering },
@@ -362,6 +368,8 @@ interface Stikkprøver {
 
     fun utsFlereArbeidsgivereForlengelse(): Boolean
 
+    fun selvstendigNæringsdrivendeForlengelse(): Boolean
+
     fun utsEnArbeidsgiverFørstegangsbehandling(): Boolean
 
     fun utsEnArbeidsgiverForlengelse(): Boolean
@@ -378,6 +386,8 @@ interface Stikkprøver {
                 override fun utsFlereArbeidsgivereFørstegangsbehandling() = plukkTilManuell(env["STIKKPROEVER_UTS_FLERE_AG_FGB_DIVISOR"])
 
                 override fun utsFlereArbeidsgivereForlengelse() = plukkTilManuell(env["STIKKPROEVER_UTS_FLERE_AG_FORLENGELSE_DIVISOR"])
+
+                override fun selvstendigNæringsdrivendeForlengelse() = plukkTilManuell(env["STIKKPROEVER_SN_FORLENGELSE"])
 
                 override fun utsEnArbeidsgiverFørstegangsbehandling() = plukkTilManuell(env["STIKKPROEVER_UTS_EN_AG_FGB_DIVISOR"])
 

@@ -54,6 +54,7 @@ class TestMediator(
             override fun utsFlereArbeidsgivereFørstegangsbehandling() = false
 
             override fun utsFlereArbeidsgivereForlengelse() = false
+            override fun selvstendigNæringsdrivendeForlengelse() = false
 
             override fun utsEnArbeidsgiverFørstegangsbehandling() = false
 

@@ -19,6 +19,7 @@ class IntegrationTestFixture(val testRapid: TestRapid) {
             stikkprøver = object : Stikkprøver {
                 override fun utsFlereArbeidsgivereFørstegangsbehandling() = false
                 override fun utsFlereArbeidsgivereForlengelse() = false
+                override fun selvstendigNæringsdrivendeForlengelse() = false
                 override fun utsEnArbeidsgiverFørstegangsbehandling() = false
                 override fun utsEnArbeidsgiverForlengelse() = false
                 override fun fullRefusjonFlereArbeidsgivereFørstegangsbehandling() = false
