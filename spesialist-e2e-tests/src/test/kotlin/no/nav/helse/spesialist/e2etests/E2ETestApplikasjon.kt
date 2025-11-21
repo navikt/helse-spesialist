@@ -46,6 +46,7 @@ object E2ETestApplikasjon {
             stikkprøver = object : Stikkprøver {
                 override fun utsFlereArbeidsgivereFørstegangsbehandling(): Boolean = false
                 override fun utsFlereArbeidsgivereForlengelse(): Boolean = false
+                override fun selvstendigNæringsdrivendeForlengelse(): Boolean = false
                 override fun utsEnArbeidsgiverFørstegangsbehandling(): Boolean = false
                 override fun utsEnArbeidsgiverForlengelse(): Boolean = false
                 override fun fullRefusjonFlereArbeidsgivereFørstegangsbehandling(): Boolean = false
