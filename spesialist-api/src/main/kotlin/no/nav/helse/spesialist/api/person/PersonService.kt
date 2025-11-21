@@ -88,12 +88,6 @@ class PersonService(
 
     override fun fødselsnumreKnyttetTil(aktørId: String): Set<String> = personApiDao.finnFødselsnumre(aktørId).toSet()
 
-    override fun andreFødselsnumreKnyttetTilPerson(fødselsnummer: String): Set<Pair<Identitetsnummer, PersonPseudoId>> =
-        personApiDao
-            .finnAndreFødselsnumre(fødselsnummer)
-            .filterNot { it.first.value == fødselsnummer }
-            .toSet()
-
     override fun fødselsnummerKnyttetTil(personPseudoId: PersonPseudoId): Identitetsnummer? =
         sessionFactory.transactionalSessionScope { session ->
             session.personPseudoIdDao.hentIdentitetsnummer(personPseudoId)
@@ -148,17 +142,20 @@ class PersonService(
             return FetchPersonResult.Feil.ManglerTilgang
         }
 
-        val personPseudoId =
-            sessionFactory.transactionalSessionScope {
-                it.personPseudoIdDao.nyPersonPseudoId(identitetsnummer = Identitetsnummer.fraString(fødselsnummer))
+        val fødselsnumrePseudoIdMap =
+            sessionFactory.transactionalSessionScope { session ->
+                fødselsnumreKnyttetTil(aktørId).associateWith { fnr ->
+                    session.personPseudoIdDao.nyPersonPseudoId(
+                        identitetsnummer = Identitetsnummer.fraString(fnr),
+                    )
+                }
             }
-
-        return person(fødselsnummer, personPseudoId, snapshot, reservasjon)
+        return person(fødselsnummer, fødselsnumrePseudoIdMap, snapshot, reservasjon)
     }
 
     private suspend fun person(
         fødselsnummer: String,
-        personPseudoId: PersonPseudoId,
+        fødselsnumrePseudoIdMap: Map<String, PersonPseudoId>,
         snapshot: Pair<ApiPersoninfo, SnapshotPerson>,
         reservasjon: Deferred<ReservasjonDto?>,
     ): FetchPersonResult.Ok {
@@ -167,8 +164,12 @@ class PersonService(
             ApiPerson(
                 resolver =
                     ApiPersonResolver(
-                        personPseudoId = personPseudoId,
-                        andreFødselsnummer = andreFødselsnumreKnyttetTilPerson(fødselsnummer),
+                        personPseudoId = fødselsnumrePseudoIdMap.getValue(fødselsnummer),
+                        andreFødselsnummer =
+                            fødselsnumrePseudoIdMap.entries
+                                .filterNot { (fnr, _) -> fnr == fødselsnummer }
+                                .map { (fødselsnummer, pseudoId) -> Identitetsnummer.fraString(fødselsnummer) to pseudoId }
+                                .toSet(),
                         snapshot = personSnapshot,
                         personinfo =
                             personinfo.copy(
