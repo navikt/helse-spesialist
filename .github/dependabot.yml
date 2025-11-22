@@ -4,7 +4,7 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     commit-message:
-      prefix: "⬆ "
+      prefix: "⬆️ "
     schedule:
       interval: "daily"
     cooldown:
@@ -14,7 +14,7 @@ updates:
   - package-ecosystem: "docker"
     directory: "/"
     commit-message:
-      prefix: "⬆ "
+      prefix: "⬆️ "
     schedule:
       interval: "daily"
     cooldown:
@@ -24,7 +24,7 @@ updates:
   - package-ecosystem: "gradle"
     directory: "/"
     commit-message:
-      prefix: "⬆ "
+      prefix: "⬆️ "
     schedule:
       interval: "daily"
     cooldown:
