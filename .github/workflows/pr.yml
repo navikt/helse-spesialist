@@ -21,7 +21,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v5
 
       - name: Bygg koden
-        run: ./gradlew build --no-daemon
+        run: ./gradlew build
         env:
           ORG_GRADLE_PROJECT_githubUser: x-access-token
           ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
