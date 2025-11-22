@@ -41,7 +41,7 @@ allprojects {
             implementation("com.google.protobuf:protobuf-java:[4.31.1,)") {
                 because("com.expediagroup:graphql-kotlin-ktor-server:8.3.0 -> 4.27.1 har en sårbarhet")
             }
-            implementation("org.eclipse.jetty.http2:jetty-http2-common:12.0.25") {
+            implementation("org.eclipse.jetty.http2:jetty-http2-common:12.1.4") {
                 because(
                     "Eclipse Jetty HTTP/2 client can force the server to allocate a humongous byte buffer that may lead to OoM and subsequently the JVM to exit i versjon >= 12.0.0, <= 12.0.16",
                 )
