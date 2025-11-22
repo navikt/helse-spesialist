@@ -5,7 +5,7 @@ jackson = "2.20.0"
 ktor = "3.3.1"
 tbdLibs = "2025.10.31-14.20-3733c982"
 testcontainers = "1.21.3"
-smiley4KtorOpenapiTools = "5.3.0"
+smiley4KtorOpenapiTools = "5.4.0"
 smiley4SchemaKenerator = "2.5.0"
 
 [libraries]
