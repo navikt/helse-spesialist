@@ -387,7 +387,7 @@ interface Stikkprøver {
 
                 override fun utsFlereArbeidsgivereForlengelse() = plukkTilManuell(env["STIKKPROEVER_UTS_FLERE_AG_FORLENGELSE_DIVISOR"])
 
-                override fun selvstendigNæringsdrivendeForlengelse() = plukkTilManuell(env["STIKKPROEVER_SN_FORLENGELSE"])
+                override fun selvstendigNæringsdrivendeForlengelse() = plukkTilManuell(env["STIKKPROEVER_SN_FORLENGELSE_DIVISOR"])
 
                 override fun utsEnArbeidsgiverFørstegangsbehandling() = plukkTilManuell(env["STIKKPROEVER_UTS_EN_AG_FGB_DIVISOR"])
 
