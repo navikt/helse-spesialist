@@ -15,6 +15,7 @@ class GodkjenningsbehovRiver(
         River.PacketValidation {
             it.requireAll("@behov", listOf("Godkjenning"))
             it.forbid("@løsning")
+            it.forbidValue("yrkesaktivitetstype", "JORDBRUKER")
         }
 
     override fun validations() = River.PacketValidation { }
