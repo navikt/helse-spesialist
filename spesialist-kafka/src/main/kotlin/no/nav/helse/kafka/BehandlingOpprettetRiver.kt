@@ -44,7 +44,7 @@ class BehandlingOpprettetRiver(
         meterRegistry: MeterRegistry,
     ) {
         val organisasjonsnummer = packet["organisasjonsnummer"].asText()
-        if (organisasjonsnummer in listOf("ARBEIDSLEDIG", "FRILANS")) {
+        if (organisasjonsnummer in listOf("ARBEIDSLEDIG", "FRILANS", "JORDBRUKER")) {
             behandlerIkke(organisasjonsnummer)
             return
         }
