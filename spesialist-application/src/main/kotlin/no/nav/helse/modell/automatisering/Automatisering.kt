@@ -121,7 +121,6 @@ internal class Automatisering(
         val erUTS = utbetaling.harEndringIUtbetalingTilSykmeldt()
         val flereArbeidsgivere = vedtakDao.finnInntektskilde(vedtaksperiodeId) == Inntektskilde.FLERE_ARBEIDSGIVERE
         val erFørstegangsbehandling = periodetype == FØRSTEGANGSBEHANDLING
-        val selvstendigNæringsdrivende = yrkesaktivitetstype == Yrkesaktivitetstype.SELVSTENDIG
 
         if (problemer.isNotEmpty()) return Automatiseringsresultat.KanIkkeAutomatiseres(problemer)
 
@@ -139,7 +138,7 @@ internal class Automatisering(
         }
 
         if (!erEgenAnsattEllerSkjermet(fødselsnummer)) {
-            avgjørStikkprøve(erUTS, flereArbeidsgivere, erFørstegangsbehandling, selvstendigNæringsdrivende)?.let {
+            avgjørStikkprøve(erUTS, flereArbeidsgivere, erFørstegangsbehandling, yrkesaktivitetstype)?.let {
                 return Automatiseringsresultat.Stikkprøve(it)
             }
         } else {
@@ -220,34 +219,39 @@ internal class Automatisering(
         UTS: Boolean,
         flereArbeidsgivere: Boolean,
         førstegangsbehandling: Boolean,
-        selvstendigNæringsdrivende: Boolean,
+        yrkesaktivitetstype: Yrkesaktivitetstype,
     ): String? {
-        when {
-            UTS ->
+        when (yrkesaktivitetstype) {
+            Yrkesaktivitetstype.ARBEIDSTAKER -> {
                 when {
+                    UTS ->
+                        when {
+                            flereArbeidsgivere ->
+                                when {
+                                    førstegangsbehandling && stikkprøver.utsFlereArbeidsgivereFørstegangsbehandling() -> return "UTS, flere arbeidsgivere, førstegangsbehandling"
+                                    !førstegangsbehandling && stikkprøver.utsFlereArbeidsgivereForlengelse() -> return "UTS, flere arbeidsgivere, forlengelse"
+                                }
+
+                            !flereArbeidsgivere ->
+                                when {
+                                    førstegangsbehandling && stikkprøver.utsEnArbeidsgiverFørstegangsbehandling() -> return "UTS, en arbeidsgiver, førstegangsbehandling"
+                                    !førstegangsbehandling && stikkprøver.utsEnArbeidsgiverForlengelse() -> return "UTS, en arbeidsgiver, forlengelse"
+                                }
+                        }
+
                     flereArbeidsgivere ->
                         when {
-                            førstegangsbehandling && stikkprøver.utsFlereArbeidsgivereFørstegangsbehandling() -> return "UTS, flere arbeidsgivere, førstegangsbehandling"
-                            !førstegangsbehandling && stikkprøver.utsFlereArbeidsgivereForlengelse() -> return "UTS, flere arbeidsgivere, forlengelse"
+                            førstegangsbehandling && stikkprøver.fullRefusjonFlereArbeidsgivereFørstegangsbehandling() -> return "Refusjon, flere arbeidsgivere, førstegangsbehandling"
+                            !førstegangsbehandling && stikkprøver.fullRefusjonFlereArbeidsgivereForlengelse() -> return "Refusjon, flere arbeidsgivere, forlengelse"
                         }
 
-                    !flereArbeidsgivere ->
-                        when {
-                            førstegangsbehandling && stikkprøver.utsEnArbeidsgiverFørstegangsbehandling() -> return "UTS, en arbeidsgiver, førstegangsbehandling"
-                            !førstegangsbehandling && stikkprøver.utsEnArbeidsgiverForlengelse() -> return "UTS, en arbeidsgiver, forlengelse"
-                        }
+                    stikkprøver.fullRefusjonEnArbeidsgiver() -> return "Refusjon, en arbeidsgiver"
                 }
-
-            flereArbeidsgivere ->
-                when {
-                    førstegangsbehandling && stikkprøver.fullRefusjonFlereArbeidsgivereFørstegangsbehandling() -> return "Refusjon, flere arbeidsgivere, førstegangsbehandling"
-                    !førstegangsbehandling && stikkprøver.fullRefusjonFlereArbeidsgivereForlengelse() -> return "Refusjon, flere arbeidsgivere, forlengelse"
-                }
-            selvstendigNæringsdrivende ->
-                when {
-                    !førstegangsbehandling && stikkprøver.selvstendigNæringsdrivendeForlengelse() -> return "Forlengelse, selvstendig næringsdrivende"
-                }
-            stikkprøver.fullRefusjonEnArbeidsgiver() -> return "Refusjon, en arbeidsgiver"
+            }
+            Yrkesaktivitetstype.SELVSTENDIG -> {
+                if (!førstegangsbehandling && stikkprøver.selvstendigNæringsdrivendeForlengelse()) return "Forlengelse, selvstendig næringsdrivende"
+            }
+            else -> error("Støtter ikke behandling av personer med yrkesaktivitetstype $yrkesaktivitetstype")
         }
         return null
     }

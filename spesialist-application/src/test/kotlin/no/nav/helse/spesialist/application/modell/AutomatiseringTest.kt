@@ -268,7 +268,7 @@ internal class AutomatiseringTest {
     @Test
     fun `selvstendig næringsdrivende forlengelse som plukkes ut som stikkprøve skal ikke automatisk godkjennes`() {
         stikkprøveSelvstendigNæringsdrivendeForlengelse = true
-        blirStikkprøve(periodetype = FORLENGELSE, yrkesaktivitetstype = Yrkesaktivitetstype.SELVSTENDIG)
+        blirStikkprøve(enUtbetaling(personbeløp = 500), periodetype = FORLENGELSE, yrkesaktivitetstype = Yrkesaktivitetstype.SELVSTENDIG)
     }
 
     @Test
