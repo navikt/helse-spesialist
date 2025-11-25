@@ -88,6 +88,7 @@ class InMemoryRepositoriesAndDaos() {
     private val vergemålDao = UnimplementedVergemålDao()
     private val vergemålApiDao = UnimplementedVergemålApiDao()
     private val åpneGosysOppgaverDao = UnimplementedÅpneGosysOppgaverDao()
+    private val midlertidigBehandlingVedtakFattetDao = InMemoryMidlertidigBehandlingVedtakFattetDao()
 
     val daos = InMemoryDaos(
         abonnementApiDao = abonnementApiDao,
@@ -182,6 +183,7 @@ class InMemoryRepositoriesAndDaos() {
             vedtakDao = vedtakDao,
             vergemålDao = vergemålDao,
             åpneGosysOppgaverDao = åpneGosysOppgaverDao,
+            midlertidigBehandlingVedtakFattetDao = midlertidigBehandlingVedtakFattetDao
         )
     )
 }

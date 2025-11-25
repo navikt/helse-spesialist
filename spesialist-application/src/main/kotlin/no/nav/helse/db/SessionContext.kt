@@ -4,6 +4,7 @@ import no.nav.helse.mediator.oppgave.OppgaveRepository
 import no.nav.helse.modell.person.LegacyPersonRepository
 import no.nav.helse.spesialist.application.ArbeidsgiverRepository
 import no.nav.helse.spesialist.application.DialogRepository
+import no.nav.helse.spesialist.application.MidlertidigBehandlingVedtakFattetDao
 import no.nav.helse.spesialist.application.NotatRepository
 import no.nav.helse.spesialist.application.OverstyringRepository
 import no.nav.helse.spesialist.application.PersonPseudoIdDao
@@ -64,4 +65,5 @@ interface SessionContext {
     val varseldefinisjonRepository: VarseldefinisjonRepository
     val vedtakBegrunnelseRepository: VedtakBegrunnelseRepository
     val personPseudoIdDao: PersonPseudoIdDao
+    val midlertidigBehandlingVedtakFattetDao: MidlertidigBehandlingVedtakFattetDao
 }

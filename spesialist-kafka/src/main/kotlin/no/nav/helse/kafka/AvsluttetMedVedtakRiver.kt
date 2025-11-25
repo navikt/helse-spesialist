@@ -28,6 +28,7 @@ import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
 import no.nav.helse.modell.vilkårsprøving.Inntekt
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.sikkerlogg
+import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import java.math.BigDecimal
 import java.util.UUID
@@ -74,6 +75,15 @@ class AvsluttetMedVedtakRiver(
             sikkerlogg.info("Melding $MELDINGNAVN mottatt:\n$meldingJson")
 
             try {
+                val spleisBehandlingId = packet["behandlingId"].asUUID()
+                val erVedtakFattet =
+                    sessionFactory.transactionalSessionScope {
+                        it.midlertidigBehandlingVedtakFattetDao.erVedtakFattet(SpleisBehandlingId(spleisBehandlingId))
+                    }
+                if (erVedtakFattet) {
+                    return@withMDC
+                }
+
                 val meldingPubliserer = MessageContextMeldingPubliserer(context)
                 val outbox = mutableListOf<UtgåendeHendelse>()
 
@@ -90,7 +100,6 @@ class AvsluttetMedVedtakRiver(
                         logg.info("Personen finnes i databasen, behandler melding $MELDINGNAVN")
                         sikkerlogg.info("Personen finnes i databasen, behandler melding $MELDINGNAVN")
 
-                        val spleisBehandlingId = packet["behandlingId"].asUUID()
                         val vedtaksperiode =
                             vedtaksperioder().finnBehandling(spleisBehandlingId)
                                 ?: error("Behandling med spleisBehandlingId=$spleisBehandlingId finnes ikke")
