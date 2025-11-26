@@ -23,6 +23,7 @@ import no.nav.helse.spesialist.domain.testfixtures.lagVarseldefinisjon
 import no.nav.helse.spesialist.domain.testfixtures.lagVedtaksperiode
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagPerson
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
+import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.test.Test
@@ -392,7 +393,7 @@ class PostForkastingBehandlerIntegrationTest {
                         omregnetÅrsinntekt = 700_000.0,
                     )
                 ),
-                sykepengegrunnlag = 700_000.0
+                sykepengegrunnlag = BigDecimal("700000.0")
             ),
             foreløpigBeregnetSluttPåSykepenger = behandling.fom.plusYears(1),
             arbeidssituasjon = Arbeidssituasjon.ARBEIDSTAKER,

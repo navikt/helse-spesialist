@@ -12,6 +12,7 @@ import no.nav.helse.spesialist.domain.testfixtures.jan
 import no.nav.helse.spesialist.domain.testfixtures.lagOrganisasjonsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagAktørId
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
+import java.math.BigDecimal
 import java.util.UUID
 
 class TestPerson {
@@ -108,7 +109,7 @@ object Testdata {
                         inntektskilde = inntektsopplysningkilde
                     )
                 ),
-                sykepengegrunnlag = 123456.7
+                sykepengegrunnlag = BigDecimal("123456.7")
             ),
             foreløpigBeregnetSluttPåSykepenger = 1 des 2018,
             json = json,

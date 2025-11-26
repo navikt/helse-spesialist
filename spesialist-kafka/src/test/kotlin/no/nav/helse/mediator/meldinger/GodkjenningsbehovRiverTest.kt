@@ -98,7 +98,7 @@ internal class GodkjenningsbehovRiverTest {
                                     inntektskilde = Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Arbeidsgiver
                                 )
                             ),
-                            sykepengegrunnlag = 600000.0
+                            sykepengegrunnlag = BigDecimal("600000.0")
                         ),
                         it.sykepengegrunnlagsfakta
                     )
@@ -132,7 +132,7 @@ internal class GodkjenningsbehovRiverTest {
                 id = HENDELSE,
                 vilkårsgrunnlagId = vilkårsgrunnlagId,
                 sykepengegrunnlagsfakta = Testmeldingfabrikk.godkjenningsbehovFastsattEtterSkjønn(
-                    sykepengegrunnlag = 500000.00,
+                    sykepengegrunnlag = BigDecimal("500000.0"),
                     seksG = 6 * 118620.0,
                     arbeidsgivere = listOf(
                         mapOf(
@@ -163,6 +163,7 @@ internal class GodkjenningsbehovRiverTest {
                     assertEquals(Utbetalingtype.UTBETALING, it.utbetalingtype)
                     assertEquals(
                         Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidstaker.EtterSkjønn(
+                            sykepengegrunnlag = BigDecimal("500000.0"),
                             seksG = 6 * 118620.0,
                             arbeidsgivere = listOf(
                                 Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterSkjønn(
@@ -223,7 +224,7 @@ internal class GodkjenningsbehovRiverTest {
                     assertEquals(true, it.førstegangsbehandling)
                     assertEquals(Periodetype.FØRSTEGANGSBEHANDLING, it.periodetype)
                     assertEquals(Utbetalingtype.UTBETALING, it.utbetalingtype)
-                    assertEquals(Godkjenningsbehov.Sykepengegrunnlagsfakta.Infotrygd, it.sykepengegrunnlagsfakta)
+                    assertEquals(Godkjenningsbehov.Sykepengegrunnlagsfakta.Infotrygd(BigDecimal("500000.0")), it.sykepengegrunnlagsfakta)
                     assertEquals(Arbeidssituasjon.ARBEIDSTAKER, it.arbeidssituasjon)
                 },
                 kontekstbasertPubliserer = any()
@@ -279,7 +280,7 @@ internal class GodkjenningsbehovRiverTest {
                     assertEquals(Utbetalingtype.UTBETALING, it.utbetalingtype)
                     assertEquals(
                         Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende(
-                            sykepengegrunnlag = 600000.00,
+                            sykepengegrunnlag = BigDecimal("600000.0"),
                             seksG = 666666.66,
                             selvstendig = Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende.Selvstendig(
                                 beregningsgrunnlag = BigDecimal("600000.0"),

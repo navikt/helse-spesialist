@@ -165,9 +165,7 @@ class Godkjenningsbehov(
                         .orEmpty(),
                 skjæringstidspunkt = godkjenning["skjæringstidspunkt"].asLocalDate(),
                 sykepengegrunnlagsfakta =
-                    godkjenning["sykepengegrunnlagsfakta"].asSykepengegrunnlagsfakta(
-                        yrkesaktivitetstype,
-                    ),
+                    godkjenning["sykepengegrunnlagsfakta"].asSykepengegrunnlagsfakta(yrkesaktivitetstype),
                 foreløpigBeregnetSluttPåSykepenger = godkjenning["foreløpigBeregnetSluttPåSykepenger"].asLocalDate(),
                 arbeidssituasjon = godkjenning["arbeidssituasjon"]?.asEnum<Arbeidssituasjon>(),
                 json = json,
@@ -192,7 +190,7 @@ class Godkjenningsbehov(
                         }
                         Sykepengegrunnlagsfakta.Spleis.SelvstendigNæringsdrivende(
                             seksG = this["6G"].asDouble(),
-                            sykepengegrunnlag = this["sykepengegrunnlag"].asDouble(),
+                            sykepengegrunnlag = this["sykepengegrunnlag"].asBigDecimal(),
                             selvstendig = this["selvstendig"].tilSelvstendig(),
                         )
                     }
@@ -202,7 +200,9 @@ class Godkjenningsbehov(
             } else {
                 when (val fastsatt = this["fastsatt"].asText()) {
                     "IInfotrygd" ->
-                        Sykepengegrunnlagsfakta.Infotrygd
+                        Sykepengegrunnlagsfakta.Infotrygd(
+                            this["sykepengegrunnlag"].asBigDecimal(),
+                        )
 
                     "EtterSkjønn" ->
                         Sykepengegrunnlagsfakta.Spleis.Arbeidstaker.EtterSkjønn(
@@ -216,12 +216,13 @@ class Godkjenningsbehov(
                                         inntektskilde = arbeidsgiver["inntektskilde"].asInntektskilde(),
                                     )
                                 },
+                            sykepengegrunnlag = this["sykepengegrunnlag"].asBigDecimal(),
                         )
 
                     "EtterHovedregel" ->
                         Sykepengegrunnlagsfakta.Spleis.Arbeidstaker.EtterHovedregel(
                             seksG = this["6G"].asDouble(),
-                            sykepengegrunnlag = this["sykepengegrunnlag"].asDouble(),
+                            sykepengegrunnlag = this["sykepengegrunnlag"].asBigDecimal(),
                             arbeidsgivere =
                                 this["arbeidsgivere"].map { arbeidsgiver ->
                                     Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
@@ -259,7 +260,11 @@ class Godkjenningsbehov(
     }
 
     sealed interface Sykepengegrunnlagsfakta {
-        data object Infotrygd : Sykepengegrunnlagsfakta
+        val sykepengegrunnlag: BigDecimal
+
+        data class Infotrygd(
+            override val sykepengegrunnlag: BigDecimal,
+        ) : Sykepengegrunnlagsfakta
 
         sealed class Spleis : Sykepengegrunnlagsfakta {
             abstract val seksG: Double
@@ -270,17 +275,18 @@ class Godkjenningsbehov(
                 data class EtterSkjønn(
                     override val seksG: Double,
                     override val arbeidsgivere: List<Arbeidsgiver.EtterSkjønn>,
+                    override val sykepengegrunnlag: BigDecimal,
                 ) : Arbeidstaker()
 
                 data class EtterHovedregel(
                     override val seksG: Double,
                     override val arbeidsgivere: List<Arbeidsgiver.EtterHovedregel>,
-                    val sykepengegrunnlag: Double,
+                    override val sykepengegrunnlag: BigDecimal,
                 ) : Arbeidstaker()
             }
 
             data class SelvstendigNæringsdrivende(
-                val sykepengegrunnlag: Double,
+                override val sykepengegrunnlag: BigDecimal,
                 override val seksG: Double,
                 val selvstendig: Selvstendig,
             ) : Spleis() {

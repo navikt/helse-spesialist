@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -243,7 +244,7 @@ internal class VurderVurderingsmomenterTest {
                 )
             ),
             seksG = 6 * 118620.0,
-            sykepengegrunnlag = 123456.7
+            sykepengegrunnlag = BigDecimal("123456.7")
         )
     )
 

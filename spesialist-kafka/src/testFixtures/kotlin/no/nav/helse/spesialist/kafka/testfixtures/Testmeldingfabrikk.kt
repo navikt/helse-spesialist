@@ -1073,7 +1073,7 @@ object Testmeldingfabrikk {
     }
 
     fun godkjenningsbehovFastsattEtterSkjønn(
-        sykepengegrunnlag: Double,
+        sykepengegrunnlag: BigDecimal,
         seksG: Double = 666666.66,
         arbeidsgivere: List<Map<String, Any>>
     ): Map<String, Any> = mapOf(
@@ -1084,7 +1084,7 @@ object Testmeldingfabrikk {
     )
 
     fun godkjenningsbehovFastsattEtterHovedregel(
-        sykepengegrunnlag: Double = 600000.0,
+        sykepengegrunnlag: BigDecimal = BigDecimal("600000.0"),
         seksG: Double = 666666.66,
         arbeidsgivere: List<Map<String, Any>>
     ): Map<String, Any> = mapOf(
@@ -1095,7 +1095,7 @@ object Testmeldingfabrikk {
     )
 
     fun godkjenningsbehovFastsattIInfotrygd(
-        sykepengegrunnlag: Double = 500000.0,
+        sykepengegrunnlag: BigDecimal = BigDecimal("500000.0"),
         seksG: Double = 666666.66,
     ): Map<String, Any> = mapOf(
         "fastsatt" to "IInfotrygd",

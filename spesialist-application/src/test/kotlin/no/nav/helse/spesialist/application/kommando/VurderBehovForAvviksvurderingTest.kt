@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertInstanceOf
+import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
@@ -49,7 +50,7 @@ class VurderBehovForAvviksvurderingTest {
                 inntektskilde = Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Arbeidsgiver
             )
         ),
-        sykepengegrunnlag = 666666.00
+        sykepengegrunnlag = BigDecimal("666666.0")
     )
     private val expectedOmregnedeÅrsinntekter = listOf(OmregnetÅrsinntekt(organisasjonsnummer, beregningsgrunnlagTotalbeløp))
     private val beregningsgrunnlag = Beregningsgrunnlag(
@@ -107,7 +108,11 @@ class VurderBehovForAvviksvurderingTest {
 
     @Test
     fun `Ikke send ut behov dersom inngangsvilkårene ikke er vurdert i Spleis`() {
-        val command = vurderBehovForAvviksvurderingCommand(sykepengegrunnlagsfakta = Godkjenningsbehov.Sykepengegrunnlagsfakta.Infotrygd)
+        val command = vurderBehovForAvviksvurderingCommand(
+            sykepengegrunnlagsfakta = Godkjenningsbehov.Sykepengegrunnlagsfakta.Infotrygd(
+                sykepengegrunnlag = BigDecimal("600000.0")
+            )
+        )
         val context = CommandContext(UUID.randomUUID())
         context.nyObserver(observer)
         assertTrue(command.execute(context))

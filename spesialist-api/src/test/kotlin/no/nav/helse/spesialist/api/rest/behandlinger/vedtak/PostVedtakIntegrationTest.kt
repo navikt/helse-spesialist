@@ -33,6 +33,7 @@ import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
+import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.test.Test
@@ -653,7 +654,7 @@ class PostVedtakIntegrationTest {
                         omregnetÅrsinntekt = 700_000.0,
                     )
                 ),
-                sykepengegrunnlag = 700_000.0
+                sykepengegrunnlag = BigDecimal("700000.0")
             ),
             foreløpigBeregnetSluttPåSykepenger = behandling.fom.plusYears(1),
             arbeidssituasjon = Arbeidssituasjon.ARBEIDSTAKER,
