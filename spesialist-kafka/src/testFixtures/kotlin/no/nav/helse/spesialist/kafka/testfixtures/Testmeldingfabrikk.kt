@@ -20,7 +20,6 @@ import java.time.LocalDate.now
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.UUID
-import kotlin.random.Random.Default.nextLong
 
 object Testmeldingfabrikk {
     private const val OSLO = "0301"
@@ -533,25 +532,6 @@ object Testmeldingfabrikk {
             )
         )
 
-    fun lagUtbetalingAnnullert(
-        fødselsnummer: String = "123456789",
-        arbeidsgiverFagsystemId: String,
-        personFagsystemId: String? = null,
-        utbetalingId: UUID = UUID.randomUUID(),
-        annullertAvSaksbehandler: LocalDateTime = LocalDateTime.now(),
-        saksbehandlerEpost: String = "saksbehandler_epost",
-        id: UUID = UUID.randomUUID(),
-    ) =
-        nyHendelse(
-            id, "utbetaling_annullert", mapOf(
-                "fødselsnummer" to fødselsnummer,
-                "arbeidsgiverFagsystemId" to arbeidsgiverFagsystemId,
-                "utbetalingId" to utbetalingId.toString(),
-                "tidspunkt" to annullertAvSaksbehandler.toString(),
-                "epost" to saksbehandlerEpost
-            ).let { if (personFagsystemId != null) it.plus("personFagsystemId" to personFagsystemId) else it }
-        )
-
     fun lagPersoninfoløsning(
         aktørId: String,
         fødselsnummer: String,
@@ -700,56 +680,6 @@ object Testmeldingfabrikk {
             "aktørId" to aktørId
         )
     )
-
-    fun lagSaksbehandlerløsning(
-        fødselsnummer: String,
-        hendelseId: UUID = UUID.randomUUID(),
-        contextId: UUID = UUID.randomUUID(),
-        oppgaveId: Long = nextLong(),
-        godkjent: Boolean = true,
-        godkjenttidspunkt: LocalDateTime = LocalDateTime.now(),
-        saksbehandlerident: String = "Z999999",
-        saksbehandlerepost: String = "saksbehandler@nav.no",
-        saksbehandlerOID: UUID = UUID.randomUUID(),
-        beslutterident: String? = null,
-        beslutterepost: String? = null,
-        saksbehandleroverstyringer: List<UUID> = emptyList(),
-        årsak: String? = null,
-        begrunnelser: List<String>? = null,
-        kommentar: String? = null,
-        id: UUID = UUID.randomUUID(),
-    ) =
-        nyHendelse(
-            id, "saksbehandler_løsning", mutableMapOf(
-                "fødselsnummer" to fødselsnummer,
-                "hendelseId" to hendelseId,
-                "contextId" to contextId,
-                "oppgaveId" to oppgaveId,
-                "godkjent" to godkjent,
-                "godkjenttidspunkt" to godkjenttidspunkt,
-                "saksbehandlerident" to saksbehandlerident,
-                "saksbehandlerepost" to saksbehandlerepost,
-                "saksbehandleroid" to saksbehandlerOID,
-                "saksbehandleroverstyringer" to saksbehandleroverstyringer,
-                "saksbehandler" to mapOf(
-                    "ident" to saksbehandlerident,
-                    "epostadresse" to saksbehandlerepost,
-                ),
-            ).apply {
-                årsak?.also { put("årsak", it) }
-                begrunnelser?.also { put("begrunnelser", it) }
-                kommentar?.also { put("kommentar", it) }
-                beslutterident?.also {
-                    put(
-                        "beslutter",
-                        mapOf(
-                            "ident" to beslutterident,
-                            "epostadresse" to beslutterepost,
-                        )
-                    )
-                }
-            }
-        )
 
     fun lagAvviksvurderingløsning(
         fødselsnummer: String,
@@ -1014,23 +944,6 @@ object Testmeldingfabrikk {
                     "vedtaksperiodeId" to vedtaksperiodeId
                 )
             )
-        )
-    )
-
-    fun lagVedtakFattet(
-        aktørId: String,
-        fødselsnummer: String,
-        organisasjonsnummer: String,
-        vedtaksperiodeId: UUID,
-        spleisBehandlingId: UUID = UUID.randomUUID(),
-        id: UUID,
-    ): String = nyHendelse(
-        id, "vedtak_fattet", mapOf(
-            "aktørId" to aktørId,
-            "fødselsnummer" to fødselsnummer,
-            "organisasjonsnummer" to organisasjonsnummer,
-            "vedtaksperiodeId" to vedtaksperiodeId,
-            "behandlingId" to spleisBehandlingId
         )
     )
 
