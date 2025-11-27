@@ -15,6 +15,7 @@ import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import io.ktor.http.isSuccess
 import io.ktor.http.path
 import io.ktor.serialization.jackson.JacksonConverter
 import kotlinx.coroutines.runBlocking
@@ -52,19 +53,32 @@ class MsGraphTilgangsgruppehenter(
 
     override fun hentTilgangsgrupper(saksbehandlerOid: SaksbehandlerOid): Set<Tilgangsgruppe> {
         sikkerlogg.info("Henter tilgangsgrupper for saksbehandler {}", saksbehandlerOid.value)
-        val responseBody =
+        val (responseStatus, responseBody) =
             runBlocking {
-                httpClient
-                    .post(msGraphUrl) {
-                        url {
-                            path("v1.0/users/${saksbehandlerOid.value}/checkMemberGroups")
+                val response =
+                    httpClient
+                        .post(msGraphUrl) {
+                            url {
+                                path("v1.0/users/${saksbehandlerOid.value}/checkMemberGroups")
+                            }
+                            bearerAuth(accessTokenGenerator.hentAccessToken("https://graph.microsoft.com/.default"))
+                            accept(ContentType.Application.Json)
+                            contentType(ContentType.Application.Json)
+                            setBody(
+                                mapOf(
+                                    "groupIds" to
+                                        tilgangsgruppeUuider
+                                            .uuiderFor(Tilgangsgruppe.entries)
+                                            .map { it.toString() },
+                                ),
+                            )
                         }
-                        bearerAuth(accessTokenGenerator.hentAccessToken("https://graph.microsoft.com/.default"))
-                        accept(ContentType.Application.Json)
-                        contentType(ContentType.Application.Json)
-                        setBody(mapOf("groupIds" to tilgangsgruppeUuider.uuiderFor(Tilgangsgruppe.entries).map { it.toString() }))
-                    }.bodyAsText()
+                response.status to response.bodyAsText()
             }
+
+        if (!responseStatus.isSuccess()) {
+            sikkerlogg.warn("Fikk kode ${responseStatus.value} fra MS Graph: $responseBody")
+        }
 
         val grupper =
             objectMapper
