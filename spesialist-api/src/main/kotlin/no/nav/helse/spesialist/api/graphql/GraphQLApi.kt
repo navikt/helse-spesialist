@@ -119,7 +119,6 @@ fun lagSchemaMedResolversOgHandlers(
                         personoppslagService =
                             PersonService(
                                 personApiDao = daos.personApiDao,
-                                egenAnsattApiDao = daos.egenAnsattApiDao,
                                 vergemålApiDao = daos.vergemålApiDao,
                                 tildelingApiDao = daos.tildelingApiDao,
                                 arbeidsgiverApiDao = daos.arbeidsgiverApiDao,

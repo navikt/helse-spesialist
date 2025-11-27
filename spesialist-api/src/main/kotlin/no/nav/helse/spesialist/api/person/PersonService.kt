@@ -10,7 +10,6 @@ import no.nav.helse.db.SessionFactory
 import no.nav.helse.db.StansAutomatiskBehandlingSaksbehandlerDao
 import no.nav.helse.db.VedtakBegrunnelseDao
 import no.nav.helse.db.api.ArbeidsgiverApiDao
-import no.nav.helse.db.api.EgenAnsattApiDao
 import no.nav.helse.db.api.NotatApiDao
 import no.nav.helse.db.api.OppgaveApiDao
 import no.nav.helse.db.api.OverstyringApiDao
@@ -57,7 +56,6 @@ private sealed interface HentSnapshotResult {
 
 class PersonService(
     private val personApiDao: PersonApiDao,
-    private val egenAnsattApiDao: EgenAnsattApiDao,
     private val vergemålApiDao: VergemålApiDao,
     private val tildelingApiDao: TildelingApiDao,
     private val arbeidsgiverApiDao: ArbeidsgiverApiDao,

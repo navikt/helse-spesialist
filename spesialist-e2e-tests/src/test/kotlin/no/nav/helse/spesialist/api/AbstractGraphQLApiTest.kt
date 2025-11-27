@@ -92,7 +92,6 @@ abstract class AbstractGraphQLApiTest : DatabaseIntegrationTest() {
                         personoppslagService =
                             PersonService(
                                 personApiDao = personApiDao,
-                                egenAnsattApiDao = egenAnsattApiDao,
                                 vergemålApiDao = vergemålApiDao,
                                 tildelingApiDao = tildelingApiDao,
                                 arbeidsgiverApiDao = arbeidsgiverApiDao,
