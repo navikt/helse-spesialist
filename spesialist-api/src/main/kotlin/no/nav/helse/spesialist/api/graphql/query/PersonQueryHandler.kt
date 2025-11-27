@@ -15,10 +15,10 @@ import no.nav.helse.spesialist.api.graphql.personNotReadyError
 import no.nav.helse.spesialist.api.graphql.query.Inputvalidering.UgyldigInput
 import no.nav.helse.spesialist.api.graphql.schema.ApiPerson
 import no.nav.helse.spesialist.application.PersonPseudoId
+import no.nav.helse.spesialist.application.logg.sikkerlogg
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
-import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 private sealed interface Inputvalidering {
@@ -98,7 +98,6 @@ sealed interface FetchPersonResult {
 class PersonQueryHandler(
     private val personoppslagService: PersonoppslagService,
 ) : PersonQuerySchema {
-    private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
     private val auditLog = LoggerFactory.getLogger("auditLogger")
 
     private companion object {
@@ -119,7 +118,7 @@ class PersonQueryHandler(
                     return byggFeilrespons(validering.graphqlError)
                 }
             }
-        sikkerLogg.info("Personoppslag på fnr=$fødselsnummer")
+        sikkerlogg.info("Personoppslag på fnr=$fødselsnummer")
 
         val saksbehandler = env.graphQlContext.get<Saksbehandler>(ContextValues.SAKSBEHANDLER)
         val tilgangsgrupper = env.graphQlContext.get<Set<Tilgangsgruppe>>(ContextValues.TILGANGSGRUPPER)
@@ -226,7 +225,7 @@ class PersonQueryHandler(
         aktorId: String,
         env: DataFetchingEnvironment,
     ) {
-        sikkerLogg.info("Svarer not found for parametere aktorId=$aktorId.")
+        sikkerlogg.info("Svarer not found for parametere aktorId=$aktorId.")
         auditLog(env.graphQlContext, aktorId, null, notFoundError(aktorId).message)
     }
 
@@ -234,7 +233,7 @@ class PersonQueryHandler(
         personPseudoId: String,
         env: DataFetchingEnvironment,
     ) {
-        sikkerLogg.info("Svarer not found for parametere personPseudoId=$personPseudoId.")
+        sikkerlogg.info("Svarer not found for parametere personPseudoId=$personPseudoId.")
         auditLog(env.graphQlContext, personPseudoId, null, notFoundError(personPseudoId).message)
     }
 
@@ -242,7 +241,7 @@ class PersonQueryHandler(
         fnr: String,
         env: DataFetchingEnvironment,
     ) {
-        sikkerLogg.info("Svarer not found for parametere fnr=$fnr.")
+        sikkerlogg.info("Svarer not found for parametere fnr=$fnr.")
         auditLog(env.graphQlContext, fnr, null, notFoundError(fnr).message)
     }
 
@@ -278,7 +277,7 @@ class PersonQueryHandler(
         } else {
             auditLog.info("end=${System.currentTimeMillis()} suid=$saksbehandlerIdent duid=$personId operation=PersonQuery")
         }
-        sikkerLogg.debug(
+        sikkerlogg.debug(
             "audit-logget, operationName: PersonQuery, harTilgang: $harTilgang, fantIkkePersonErrorMsg: $fantIkkePersonErrorMsg",
         )
     }

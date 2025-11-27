@@ -7,17 +7,14 @@ import no.nav.helse.spesialist.api.graphql.ContextValues
 import no.nav.helse.spesialist.api.graphql.byggRespons
 import no.nav.helse.spesialist.api.graphql.schema.ApiAntallOppgaver
 import no.nav.helse.spesialist.api.graphql.schema.ApiBehandledeOppgaver
+import no.nav.helse.spesialist.application.logg.sikkerlogg
 import no.nav.helse.spesialist.domain.Saksbehandler
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.time.LocalDate
 import kotlin.time.measureTimedValue
 
 class OppgaverQueryHandler(
     private val apiOppgaveService: ApiOppgaveService,
 ) : OppgaverQuerySchema {
-    private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
-
     override suspend fun behandledeOppgaverFeed(
         offset: Int,
         limit: Int,
@@ -40,14 +37,14 @@ class OppgaverQueryHandler(
 
     override suspend fun antallOppgaver(env: DataFetchingEnvironment): DataFetcherResult<ApiAntallOppgaver> {
         val saksbehandler = env.graphQlContext.get<Saksbehandler>(ContextValues.SAKSBEHANDLER)
-        sikkerLogg.info("Henter AntallOppgaver for ${saksbehandler.navn}")
+        sikkerlogg.info("Henter AntallOppgaver for ${saksbehandler.navn}")
         val (antallOppgaver, tid) =
             measureTimedValue {
                 apiOppgaveService.antallOppgaver(
                     saksbehandler = saksbehandler,
                 )
             }
-        sikkerLogg.debug("Query antallOppgaver er ferdig etter ${tid.inWholeMilliseconds} ms")
+        sikkerlogg.debug("Query antallOppgaver er ferdig etter ${tid.inWholeMilliseconds} ms")
 
         return byggRespons(antallOppgaver)
     }

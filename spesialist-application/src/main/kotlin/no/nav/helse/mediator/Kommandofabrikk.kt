@@ -39,7 +39,8 @@ import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnetCommand
 import no.nav.helse.registrerTidsbrukForGodkjenningsbehov
 import no.nav.helse.registrerTidsbrukForHendelse
-import org.slf4j.LoggerFactory
+import no.nav.helse.spesialist.application.logg.logg
+import no.nav.helse.spesialist.application.logg.sikkerlogg
 import java.util.UUID
 
 typealias Kommandostarter = Personmelding.(Kommandofabrikk.() -> Command?) -> Unit
@@ -49,11 +50,6 @@ class Kommandofabrikk(
     private val subsumsjonsmelderProvider: () -> Subsumsjonsmelder,
     private val stikkprøver: Stikkprøver,
 ) {
-    private companion object {
-        private val logg = LoggerFactory.getLogger(this::class.java)
-        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
-    }
-
     private val oppgaveService: OppgaveService by lazy { oppgaveService() }
 
     internal fun endretEgenAnsattStatus(

@@ -13,14 +13,12 @@ import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.løsninger.Fullmaktløsning
 import no.nav.helse.mediator.meldinger.løsninger.isSameOrAfter
 import no.nav.helse.mediator.meldinger.løsninger.isSameOrBefore
-import org.slf4j.LoggerFactory
+import no.nav.helse.spesialist.application.logg.sikkerlogg
 import java.time.LocalDate
 
 class FullmaktLøsningRiver(
     private val meldingMediator: MeldingMediator,
 ) : SpesialistRiver {
-    private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
-
     override fun preconditions(): River.PacketValidation =
         River.PacketValidation {
             it.requireValue("@event_name", "behov")

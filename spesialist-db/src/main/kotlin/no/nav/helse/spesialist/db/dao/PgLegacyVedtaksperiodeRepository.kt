@@ -6,7 +6,7 @@ import no.nav.helse.db.VedtakDao
 import no.nav.helse.modell.person.vedtaksperiode.BehandlingDto
 import no.nav.helse.modell.person.vedtaksperiode.VarselDto
 import no.nav.helse.modell.person.vedtaksperiode.VedtaksperiodeDto
-import org.slf4j.LoggerFactory
+import no.nav.helse.spesialist.application.logg.sikkerlogg
 import java.util.UUID
 
 class PgLegacyVedtaksperiodeRepository(
@@ -14,8 +14,6 @@ class PgLegacyVedtaksperiodeRepository(
     private val vedtakDao: VedtakDao,
 ) : LegacyVedtaksperiodeRepository {
     private val hentedeBehandlinger: MutableMap<UUID, List<BehandlingDto>> = mutableMapOf()
-
-    private val sikkerLogger = LoggerFactory.getLogger("tjenestekall")
 
     override fun finnVedtaksperioder(fødselsnummer: String): List<VedtaksperiodeDto> = legacyBehandlingDao.finnVedtaksperiodeIderFor(fødselsnummer).map { finnVedtaksperiode(it) }
 
@@ -85,7 +83,7 @@ class PgLegacyVedtaksperiodeRepository(
                 builder.appendLine("Historiske generasjoner ble ikke endret")
             }
         }
-        sikkerLogger.info(builder.toString())
+        sikkerlogg.info(builder.toString())
     }
 
     private fun StringBuilder.diffMellomToGenerasjoner(

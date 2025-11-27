@@ -4,16 +4,11 @@ import io.ktor.http.HttpStatusCode
 import net.logstash.logback.argument.StructuredArguments.keyValue
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import no.nav.helse.spesialist.application.logg.logg
+import no.nav.helse.spesialist.application.logg.sikkerlogg
 import java.util.UUID
 
 abstract class Modellfeil protected constructor() : RuntimeException() {
-    protected companion object {
-        val logg: Logger = LoggerFactory.getLogger(this::class.java)
-        val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
-    }
-
     protected abstract val eksternKontekst: Map<String, Any>
     protected abstract val feilkode: String
     abstract val httpkode: HttpStatusCode
@@ -54,7 +49,7 @@ class OppgaveTildeltNoenAndre(
             keyValue("httpkode", "${httpkode.value}"),
             keyValue("feilkode", feilkode),
         )
-        sikkerLogg.info(
+        sikkerlogg.info(
             "Returnerer {} for {}, tildelingsinfo=$eksternKontekst",
             keyValue("httpkode", "${httpkode.value}"),
             keyValue("feilkode", feilkode),
@@ -106,7 +101,7 @@ class IkkeTilgang(
             "Saksbehandler har ikke tilgang til å behandle oppgaven, {}",
             keyValue("oppgaveId", oppgaveId),
         )
-        sikkerLogg.info(
+        sikkerlogg.info(
             "Saksbehandler {} har ikke tilgang til å behandle oppgaven, {}",
             keyValue("oid", oid),
             keyValue("oppgaveId", oppgaveId),
@@ -163,7 +158,7 @@ class IkkeÅpenOppgave(
             "Behandler ikke godkjenning/avslag for {}, den er enten behandlet eller invalidert",
             keyValue("oppgaveId", oppgaveId),
         )
-        sikkerLogg.info(
+        sikkerlogg.info(
             "Saksbehandler {} forsøkte å utbetale/avvise {} eller sende den til godkjenning, men den er behandlet eller invalidert",
             keyValue("saksbehandlerIdent", saksbehandlerIdent),
             keyValue("oppgaveId", oppgaveId),
@@ -184,7 +179,7 @@ class OverlapperMedInfotrygd(
             "Behandler ikke fatting av vedtak for oppgaveId={}, på grunn av overlappende utbetaling i Infotrygd",
             oppgaveId,
         )
-        sikkerLogg.info(
+        sikkerlogg.info(
             "Saksbehandler med ident={} forsøkte å fatte vedtak for opppgaveId={}, men det er overlappende utbetaling i Infotrygd",
             saksbehandlerIdent,
             oppgaveId,

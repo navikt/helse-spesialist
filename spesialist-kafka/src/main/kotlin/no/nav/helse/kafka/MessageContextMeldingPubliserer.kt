@@ -9,7 +9,8 @@ import no.nav.helse.mediator.KommandokjedeEndretEvent
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.modell.melding.UtgåendeHendelse
-import org.slf4j.LoggerFactory
+import no.nav.helse.spesialist.application.logg.logg
+import no.nav.helse.spesialist.application.logg.sikkerlogg
 import java.util.UUID
 
 class MessageContextMeldingPubliserer(
@@ -64,10 +65,5 @@ class MessageContextMeldingPubliserer(
             message,
         )
         context.publish(fødselsnummer, message)
-    }
-
-    private companion object {
-        private val logg = LoggerFactory.getLogger(this::class.java)
-        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
     }
 }

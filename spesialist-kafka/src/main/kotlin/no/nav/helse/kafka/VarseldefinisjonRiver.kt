@@ -12,16 +12,11 @@ import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.hendelser.VarseldefinisjonMessage
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import no.nav.helse.spesialist.application.logg.sikkerlogg
 
 class VarseldefinisjonRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
-    private companion object {
-        private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
-    }
-
     override fun preconditions(): River.PacketValidation =
         River.PacketValidation {
             it.requireValue("@event_name", "varselkode_ny_definisjon")

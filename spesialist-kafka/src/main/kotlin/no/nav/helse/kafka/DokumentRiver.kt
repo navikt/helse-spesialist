@@ -8,13 +8,11 @@ import io.micrometer.core.instrument.MeterRegistry
 import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
-import org.slf4j.LoggerFactory
+import no.nav.helse.spesialist.application.logg.sikkerlogg
 
 class DokumentRiver(
     private val meldingMediator: MeldingMediator,
 ) : SpesialistRiver {
-    private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
-
     override fun preconditions(): River.PacketValidation =
         River.PacketValidation {
             it.requireValue("@event_name", "hent-dokument")

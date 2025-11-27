@@ -9,14 +9,11 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.registrerTidsbrukForBehov
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import no.nav.helse.spesialist.application.logg.logg
 import java.time.Duration
 import kotlin.time.toKotlinDuration
 
 class BehovtidsbrukMetrikkRiver : SpesialistRiver {
-    private val logg: Logger = LoggerFactory.getLogger("MetrikkRiver")
-
     override fun preconditions(): River.PacketValidation =
         River.PacketValidation {
             it.requireValue("@event_name", "behov")

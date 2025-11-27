@@ -6,9 +6,9 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.spesialist.api.abonnement.AutomatiskBehandlingPayload
 import no.nav.helse.spesialist.api.abonnement.AutomatiskBehandlingUtfall
+import no.nav.helse.spesialist.application.logg.sikkerlogg
 import no.nav.helse.tellAutomatisering
 import no.nav.helse.tellAvvistÅrsak
-import org.slf4j.LoggerFactory
 
 class GodkjenningMediator(
     private val opptegnelseDao: OpptegnelseDao,
@@ -26,7 +26,7 @@ class GodkjenningMediator(
             type = OpptegnelseDao.Opptegnelse.Type.FERDIGBEHANDLET_GODKJENNINGSBEHOV,
         )
         tellAutomatisering()
-        sikkerLogg.info(
+        sikkerlogg.info(
             "Automatisk godkjenning av vedtaksperiode ${behov.vedtaksperiodeId} for {}",
             keyValue("fødselsnummer", behov.fødselsnummer),
         )
@@ -49,10 +49,6 @@ class GodkjenningMediator(
         )
         begrunnelser.forEach { tellAvvistÅrsak(it) }
         tellAutomatisering()
-        sikkerLogg.info("Automatisk avvisning av vedtaksperiode ${behov.vedtaksperiodeId} pga: $begrunnelser")
-    }
-
-    private companion object {
-        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
+        sikkerlogg.info("Automatisk avvisning av vedtaksperiode ${behov.vedtaksperiodeId} pga: $begrunnelser")
     }
 }

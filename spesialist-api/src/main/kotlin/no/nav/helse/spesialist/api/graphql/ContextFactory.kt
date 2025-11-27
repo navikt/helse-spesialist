@@ -9,14 +9,11 @@ import io.ktor.server.auth.principal
 import io.ktor.server.request.ApplicationRequest
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGSGRUPPER
+import no.nav.helse.spesialist.application.logg.sikkerlogg
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.util.UUID
-
-private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
 
 enum class ContextValues {
     TILGANGSGRUPPER,

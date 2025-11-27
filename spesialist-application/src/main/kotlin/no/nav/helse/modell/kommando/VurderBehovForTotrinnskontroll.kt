@@ -8,7 +8,7 @@ import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.AVVENTER_BESLUTTER
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
-import org.slf4j.LoggerFactory
+import no.nav.helse.spesialist.application.logg.logg
 
 internal class VurderBehovForTotrinnskontroll(
     private val fødselsnummer: String,
@@ -18,10 +18,6 @@ internal class VurderBehovForTotrinnskontroll(
     private val totrinnsvurderingRepository: TotrinnsvurderingRepository,
     private val sykefraværstilfelle: Sykefraværstilfelle,
 ) : Command {
-    private companion object {
-        private val logg = LoggerFactory.getLogger(VurderBehovForTotrinnskontroll::class.java)
-    }
-
     override fun execute(context: CommandContext): Boolean {
         val vedtaksperiodeId = vedtaksperiode.vedtaksperiodeId()
         val kreverTotrinnsvurdering =

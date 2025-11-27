@@ -21,8 +21,8 @@ import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.application.Reservasjonshenter.ReservasjonDto
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import no.nav.helse.spesialist.application.logg.logg
+import no.nav.helse.spesialist.application.logg.sikkerlogg
 import java.util.UUID
 
 private val registry = Metrics.globalRegistry.add(PrometheusMeterRegistry(PrometheusConfig.DEFAULT))
@@ -43,8 +43,6 @@ class KRRClientReservasjonshenter(
     private val configuration: ClientKrrModule.Configuration.Client,
     private val accessTokenGenerator: AccessTokenGenerator,
 ) : Reservasjonshenter {
-    private val logg: Logger = LoggerFactory.getLogger(this.javaClass)
-    private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
     private val httpClient: HttpClient =
         HttpClient(Apache) {
             install(ContentNegotiation) {
@@ -84,7 +82,7 @@ class KRRClientReservasjonshenter(
                 .withRegistry(registry)
                 .withTag("status", "failure")
             logg.warn("Feil under kall til Kontakt- og reservasjonsregisteret")
-            sikkerLogg.warn("Feil under kall til Kontakt- og reservasjonsregisteret", e)
+            sikkerlogg.warn("Feil under kall til Kontakt- og reservasjonsregisteret", e)
             null
         } finally {
             sample.stop(responstidReservasjonsstatus)
@@ -98,7 +96,7 @@ class KRRClientReservasjonshenter(
         val feil = response["feil"]
         return if (!feil.isEmpty) {
             logg.warn("Feil fra Kontakt- og reservasjonsregisteret")
-            sikkerLogg.warn("Feil fra Kontakt- og reservasjonsregisteret: {}", feil)
+            sikkerlogg.warn("Feil fra Kontakt- og reservasjonsregisteret: {}", feil)
             null
         } else {
             response["personer"][fødselsnummer].let {

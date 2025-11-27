@@ -7,7 +7,7 @@ import no.nav.helse.mediator.KommandokjedeEndretEvent
 import no.nav.helse.mediator.UtgåendeMeldingerObserver
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.UtgåendeHendelse
-import org.slf4j.LoggerFactory
+import no.nav.helse.spesialist.application.logg.logg
 import java.util.UUID
 
 class CommandContext(
@@ -93,7 +93,7 @@ class CommandContext(
     ): Boolean {
         val newHash = command.hash().convertToUUID()
         if (hash != null && newHash != hash) {
-            logger.info(
+            logg.info(
                 "Restarter kommandokjede ${command.name} fordi rekkefølgen, antallet kommandoer eller navn på en eller flere kommandoer i kjeden har endret seg.",
             )
             sti.clear()
@@ -118,10 +118,8 @@ class CommandContext(
         }
 
     internal companion object {
-        private val logger = LoggerFactory.getLogger(CommandContext::class.java)
-
         internal fun Command.ferdigstill(context: CommandContext): Boolean {
-            logger.info(
+            logg.info(
                 "Kommando ${this.javaClass.simpleName} ferdigstilte {}",
                 keyValue("context_id", "${context.id}"),
             )

@@ -22,12 +22,12 @@ import io.ktor.serialization.jackson.JacksonConverter
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.spesialist.application.AccessTokenGenerator
 import no.nav.helse.spesialist.application.Either
+import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.sikkerlogg
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
-import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class MsGraphTilgangsgruppehenter(
@@ -35,7 +35,6 @@ class MsGraphTilgangsgruppehenter(
     private val tilgangsgruppeUuider: TilgangsgruppeUuider,
     private val msGraphUrl: String,
 ) : Tilgangsgruppehenter {
-    private val logg = LoggerFactory.getLogger(MsGraphTilgangsgruppehenter::class.java)
     private val httpClient: HttpClient =
         HttpClient(Apache) {
             install(ContentNegotiation) {

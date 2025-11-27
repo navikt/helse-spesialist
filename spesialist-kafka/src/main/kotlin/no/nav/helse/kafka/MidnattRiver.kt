@@ -8,14 +8,13 @@ import io.micrometer.core.instrument.MeterRegistry
 import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.mediator.asUUID
-import org.slf4j.LoggerFactory
+import no.nav.helse.spesialist.application.logg.logg
 import java.time.Duration
 
 class MidnattRiver(
     private val sessionFactory: SessionFactory,
 ) : SpesialistRiver {
     private companion object {
-        private val logg = LoggerFactory.getLogger(this::class.java)
         private val EN_UKE = Duration.ofDays(7)
     }
 

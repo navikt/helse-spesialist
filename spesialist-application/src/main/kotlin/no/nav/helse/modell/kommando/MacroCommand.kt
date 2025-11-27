@@ -1,15 +1,11 @@
 package no.nav.helse.modell.kommando
 
-import org.slf4j.LoggerFactory
+import no.nav.helse.spesialist.application.logg.logg
 
 abstract class MacroCommand : Command {
     private var currentIndex: Int = 0
     private val historikk: MutableList<Command> = mutableListOf()
     protected abstract val commands: List<Command>
-
-    private companion object {
-        private val logg = LoggerFactory.getLogger(MacroCommand::class.java)
-    }
 
     internal fun restore(currentIndex: Int) {
         historikk.clear()

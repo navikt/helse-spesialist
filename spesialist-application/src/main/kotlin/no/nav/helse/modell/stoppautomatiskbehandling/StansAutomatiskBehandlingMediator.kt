@@ -18,7 +18,8 @@ import no.nav.helse.modell.vilkårsprøving.Subsumsjon
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.SporingStansAutomatiskBehandling
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.Utfall.VILKAR_OPPFYLT
 import no.nav.helse.modell.vilkårsprøving.Subsumsjon.Utfall.VILKAR_UAVKLART
-import org.slf4j.LoggerFactory
+import no.nav.helse.spesialist.application.logg.logg
+import no.nav.helse.spesialist.application.logg.sikkerlogg
 import java.util.UUID
 
 class StansAutomatiskBehandlingMediator(
@@ -27,9 +28,6 @@ class StansAutomatiskBehandlingMediator(
     private val oppgaveDao: OppgaveDao,
     private val subsumsjonsmelderProvider: () -> Subsumsjonsmelder,
 ) : AutomatiseringStansetSjekker {
-    private val logg = LoggerFactory.getLogger(this::class.java)
-    private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
-
     private val subsumsjonsmelder by lazy { subsumsjonsmelderProvider() }
 
     object Factory {

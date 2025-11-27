@@ -9,15 +9,12 @@ import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.person.SøknadSendt
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import no.nav.helse.spesialist.application.logg.logg
+import no.nav.helse.spesialist.application.logg.sikkerlogg
 
 class SøknadSendtRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
-    private val logg = LoggerFactory.getLogger(this::class.java)
-    private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
-
     override fun preconditions(): River.PacketValidation =
         River.PacketValidation {
             it.requireAny(
@@ -42,7 +39,7 @@ class SøknadSendtRiver(
             keyValue("hendelse", packet["@event_name"].asText()),
             keyValue("hendelseId", packet["@id"].asUUID()),
         )
-        sikkerLogg.info(
+        sikkerlogg.info(
             "Mottok {} med {}, {}",
             keyValue("hendelse", packet["@event_name"].asText()),
             keyValue("hendelseId", packet["@id"].asUUID()),

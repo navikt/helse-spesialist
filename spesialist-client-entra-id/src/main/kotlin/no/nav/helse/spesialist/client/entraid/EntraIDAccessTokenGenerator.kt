@@ -23,8 +23,9 @@ import io.ktor.serialization.jackson.JacksonConverter
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import no.nav.helse.spesialist.application.AccessTokenGenerator
+import no.nav.helse.spesialist.application.logg.logg
+import no.nav.helse.spesialist.application.logg.sikkerlogg
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner
-import org.slf4j.LoggerFactory
 import java.net.ProxySelector
 import java.time.Duration
 import java.time.Instant
@@ -37,8 +38,6 @@ class EntraIDAccessTokenGenerator(
     private val tokenEndpoint: String,
     private val privateJwk: String,
 ) : AccessTokenGenerator {
-    private val log = LoggerFactory.getLogger(EntraIDAccessTokenGenerator::class.java)
-    private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
     private val httpClient = createHttpClient()
     private val mutex = Mutex()
 
@@ -52,7 +51,7 @@ class EntraIDAccessTokenGenerator(
                 tokenMap[scope]
                     ?.takeUnless { it.expiry.isBefore(omToMinutter) }
                     ?: run {
-                        log.info("Henter token fra Azure AD for $scope")
+                        logg.info("Henter token fra Azure AD for $scope")
 
                         val response: TokenEndpointResponse =
                             try {
@@ -76,11 +75,11 @@ class EntraIDAccessTokenGenerator(
                                         )
                                     }
                                 if (response.status != HttpStatusCode.OK) {
-                                    sikkerLogg.warn("Mottok ${response.status} fra Azure AD, respons:\n${response.body<String>()}")
+                                    sikkerlogg.warn("Mottok ${response.status} fra Azure AD, respons:\n${response.body<String>()}")
                                 }
                                 response.body()
                             } catch (e: Exception) {
-                                log.warn("Klarte ikke hente nytt token fra Azure AD")
+                                logg.warn("Klarte ikke hente nytt token fra Azure AD")
                                 throw RuntimeException("Klarte ikke hente nytt token fra Azure AD", e)
                             }
                         tokenMap[scope] = response
@@ -119,12 +118,12 @@ class EntraIDAccessTokenGenerator(
         HttpClient(Apache) {
             install(HttpRequestRetry) {
                 retryOnExceptionIf(3) { request, throwable ->
-                    log.warn("Caught exception ${throwable.message}, for url ${request.url}")
+                    logg.warn("Caught exception ${throwable.message}, for url ${request.url}")
                     true
                 }
                 retryIf(maxRetries) { request, response ->
                     if (response.status.value.let { it in 500..599 }) {
-                        log.warn(
+                        logg.warn(
                             "Retrying for statuscode ${response.status.value}, for url ${request.url}",
                         )
                         true

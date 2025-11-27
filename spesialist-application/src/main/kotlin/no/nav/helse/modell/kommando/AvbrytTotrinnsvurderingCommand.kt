@@ -1,7 +1,7 @@
 package no.nav.helse.modell.kommando
 
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
-import org.slf4j.LoggerFactory
+import no.nav.helse.spesialist.application.logg.sikkerlogg
 import java.util.UUID
 
 internal class AvbrytTotrinnsvurderingCommand(
@@ -9,10 +9,6 @@ internal class AvbrytTotrinnsvurderingCommand(
     private val alleForkastedeVedtaksperiodeIder: List<UUID>,
     private val totrinnsvurderingRepository: TotrinnsvurderingRepository,
 ) : Command {
-    private companion object {
-        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
-    }
-
     override fun execute(context: CommandContext): Boolean {
         sikkerlogg.info("setter vedtaksperiode_forkastet i totrinnsvurdering for fødselsnummer=$fødselsnummer")
 

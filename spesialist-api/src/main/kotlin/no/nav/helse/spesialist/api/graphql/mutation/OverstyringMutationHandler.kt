@@ -10,16 +10,11 @@ import no.nav.helse.spesialist.api.graphql.graphqlErrorException
 import no.nav.helse.spesialist.api.graphql.schema.ApiArbeidsforholdOverstyringHandling
 import no.nav.helse.spesialist.api.graphql.schema.ApiInntektOgRefusjonOverstyring
 import no.nav.helse.spesialist.api.graphql.schema.ApiTidslinjeOverstyring
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import no.nav.helse.spesialist.application.logg.logg
 
 class OverstyringMutationHandler(
     private val saksbehandlerMediator: SaksbehandlerMediator,
 ) : OverstyringMutationSchema {
-    private companion object {
-        private val logg: Logger = LoggerFactory.getLogger(OverstyringMutationHandler::class.java)
-    }
-
     override fun overstyrDager(
         overstyring: ApiTidslinjeOverstyring,
         env: DataFetchingEnvironment,

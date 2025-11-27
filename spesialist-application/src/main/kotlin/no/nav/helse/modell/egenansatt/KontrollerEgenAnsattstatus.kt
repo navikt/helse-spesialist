@@ -5,16 +5,12 @@ import no.nav.helse.mediator.meldinger.løsninger.EgenAnsattløsning
 import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.melding.Behov
-import org.slf4j.LoggerFactory
+import no.nav.helse.spesialist.application.logg.logg
 
 internal class KontrollerEgenAnsattstatus(
     private val fødselsnummer: String,
     private val egenAnsattDao: EgenAnsattDao,
 ) : Command {
-    private companion object {
-        private val logg = LoggerFactory.getLogger(KontrollerEgenAnsattstatus::class.java)
-    }
-
     override fun execute(context: CommandContext) = behandle(context)
 
     override fun resume(context: CommandContext) = behandle(context)

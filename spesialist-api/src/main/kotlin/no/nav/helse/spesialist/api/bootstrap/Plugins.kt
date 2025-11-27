@@ -46,16 +46,14 @@ import no.nav.helse.spesialist.api.serialization.InstantIsoSerializer
 import no.nav.helse.spesialist.api.serialization.LocalDateIsoSerializer
 import no.nav.helse.spesialist.api.serialization.LocalDateTimeIsoSerializer
 import no.nav.helse.spesialist.api.serialization.UUIDStringSerializer
-import org.slf4j.LoggerFactory
+import no.nav.helse.spesialist.application.logg.logg
+import no.nav.helse.spesialist.application.logg.sikkerlogg
 import org.slf4j.event.Level
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-
-private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
-private val logg = LoggerFactory.getLogger("SpesialistApp")
 
 internal fun Application.installPlugins(eksponerOpenApi: Boolean) {
     install(CallId) {

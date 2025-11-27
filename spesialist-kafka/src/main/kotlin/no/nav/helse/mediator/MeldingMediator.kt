@@ -20,8 +20,9 @@ import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode
 import no.nav.helse.modell.varsel.LegacyVarselRepository
 import no.nav.helse.modell.varsel.Varseldefinisjon
+import no.nav.helse.spesialist.application.logg.logg
+import no.nav.helse.spesialist.application.logg.sikkerlogg
 import no.nav.helse.spesialist.kafka.objectMapper
-import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.UUID
 
@@ -38,11 +39,6 @@ class MeldingMediator(
     private val ignorerMeldingerForUkjentePersoner: Boolean,
     poisonPillTimeToLive: Duration = Duration.ofMinutes(1),
 ) {
-    private companion object {
-        private val logg = LoggerFactory.getLogger(MeldingMediator::class.java)
-        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
-    }
-
     private val poisonPillsCache: LoadingCache<Unit, PoisonPills> =
         Caffeine
             .newBuilder()

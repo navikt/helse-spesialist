@@ -14,11 +14,12 @@ import no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent
 import no.nav.helse.modell.saksbehandler.handlinger.Oppgavehandling
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
 import no.nav.helse.spesialist.application.Either
+import no.nav.helse.spesialist.application.logg.logg
+import no.nav.helse.spesialist.application.logg.sikkerlogg
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter.Feil
 import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
-import org.slf4j.LoggerFactory
 import java.sql.SQLException
 import java.util.UUID
 
@@ -37,9 +38,6 @@ class OppgaveService(
     private val tilgangsgruppehenter: Tilgangsgruppehenter,
 ) : Oppgavehåndterer,
     Oppgavefinner {
-    private val logg = LoggerFactory.getLogger(this::class.java)
-    private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
-
     fun nyOppgaveService(sessionContext: SessionContext): OppgaveService =
         OppgaveService(
             oppgaveDao = sessionContext.oppgaveDao,

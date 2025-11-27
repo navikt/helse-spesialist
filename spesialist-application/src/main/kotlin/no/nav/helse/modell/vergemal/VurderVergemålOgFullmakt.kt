@@ -9,7 +9,7 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_EX_4
-import org.slf4j.LoggerFactory
+import no.nav.helse.spesialist.application.logg.logg
 import java.util.UUID
 
 internal class VurderVergemålOgFullmakt(
@@ -53,8 +53,4 @@ internal class VurderVergemålOgFullmakt(
     }
 
     private fun Vergemålløsning.harVergemål() = vergemålOgFremtidsfullmakt.harVergemål
-
-    private companion object {
-        private val logg = LoggerFactory.getLogger(VurderVergemålOgFullmakt::class.java)
-    }
 }

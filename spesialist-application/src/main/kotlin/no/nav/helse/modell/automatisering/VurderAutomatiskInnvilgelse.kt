@@ -10,7 +10,8 @@ import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
-import org.slf4j.LoggerFactory
+import no.nav.helse.spesialist.application.logg.logg
+import no.nav.helse.spesialist.application.logg.sikkerlogg
 
 internal class VurderAutomatiskInnvilgelse(
     private val automatisering: Automatisering,
@@ -21,11 +22,6 @@ internal class VurderAutomatiskInnvilgelse(
     private val automatiseringDao: AutomatiseringDao,
     private val oppgaveService: OppgaveService,
 ) : Command {
-    private companion object {
-        private val logg = LoggerFactory.getLogger(VurderAutomatiskInnvilgelse::class.java)
-        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
-    }
-
     private val vedtaksperiodeId = godkjenningsbehov.vedtaksperiodeId
     private val utbetalingId = godkjenningsbehov.utbetalingId
     private val hendelseId = godkjenningsbehov.id

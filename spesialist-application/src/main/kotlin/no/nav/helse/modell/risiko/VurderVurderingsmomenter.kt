@@ -11,7 +11,7 @@ import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_RV_1
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
-import org.slf4j.LoggerFactory
+import no.nav.helse.spesialist.application.logg.logg
 import java.util.UUID
 
 internal class VurderVurderingsmomenter(
@@ -76,9 +76,5 @@ internal class VurderVurderingsmomenter(
         if (!kanGodkjennesAutomatisk) {
             sykefraværstilfelle.håndter(SB_RV_1.nyttVarsel(vedtaksperiodeId))
         }
-    }
-
-    private companion object {
-        private val logg = LoggerFactory.getLogger(VurderVurderingsmomenter::class.java)
     }
 }

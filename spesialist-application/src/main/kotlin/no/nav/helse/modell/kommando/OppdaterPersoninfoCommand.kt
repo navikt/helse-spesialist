@@ -3,7 +3,7 @@ package no.nav.helse.modell.kommando
 import no.nav.helse.db.PersonDao
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.HentPersoninfoløsning
-import org.slf4j.LoggerFactory
+import no.nav.helse.spesialist.application.logg.logg
 import java.time.LocalDate
 
 internal class OppdaterPersoninfoCommand(
@@ -13,7 +13,6 @@ internal class OppdaterPersoninfoCommand(
 ) : Command {
     private companion object {
         private val BEHOV = Behov.Personinfo
-        private val logg = LoggerFactory.getLogger(OppdaterPersoninfoCommand::class.simpleName)
     }
 
     override fun execute(context: CommandContext): Boolean {

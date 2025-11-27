@@ -52,9 +52,8 @@ import no.nav.helse.spesialist.api.snapshot.SnapshotService
 import no.nav.helse.spesialist.api.websockets.webSocketsApi
 import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.application.Snapshothenter
+import no.nav.helse.spesialist.application.logg.sikkerlogg
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.time.Duration
 
 fun kobleOppApi(
@@ -188,7 +187,7 @@ fun Route.queryHandler(server: GraphQLServer<ApplicationRequest>) {
         loggFeil(result)
 
         val tidBrukt = Duration.ofNanos(System.nanoTime() - start)
-        sikkerLogg.trace("Kall behandlet etter ${tidBrukt.toMillis()} ms")
+        sikkerlogg.trace("Kall behandlet etter ${tidBrukt.toMillis()} ms")
         call.respond(result)
     }
 }
@@ -196,9 +195,7 @@ fun Route.queryHandler(server: GraphQLServer<ApplicationRequest>) {
 private fun loggFeil(result: GraphQLServerResponse) {
     if (result is GraphQLResponse<*>) {
         result.errors.takeUnless { it.isNullOrEmpty() }?.let {
-            sikkerLogg.warn("GraphQL-respons inneholder feil: ${it.joinToString()}")
+            sikkerlogg.warn("GraphQL-respons inneholder feil: ${it.joinToString()}")
         }
     }
 }
-
-private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")

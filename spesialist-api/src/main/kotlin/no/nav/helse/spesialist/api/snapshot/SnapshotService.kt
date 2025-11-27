@@ -5,21 +5,18 @@ import no.nav.helse.spesialist.api.graphql.schema.ApiAdressebeskyttelse
 import no.nav.helse.spesialist.api.graphql.schema.ApiKjonn
 import no.nav.helse.spesialist.api.graphql.schema.ApiPersoninfo
 import no.nav.helse.spesialist.application.Snapshothenter
+import no.nav.helse.spesialist.application.logg.sikkerlogg
 import no.nav.helse.spesialist.application.snapshot.SnapshotPerson
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 class SnapshotService(
     private val personinfoDao: PersoninfoDao,
     private val snapshothenter: Snapshothenter,
 ) {
-    private val sikkerLogg: Logger = LoggerFactory.getLogger("tjenestekall")
-
     fun hentSnapshot(fødselsnummer: String): Pair<ApiPersoninfo, SnapshotPerson>? {
-        sikkerLogg.info("Henter snapshot for person med fødselsnummer=$fødselsnummer")
+        sikkerlogg.info("Henter snapshot for person med fødselsnummer=$fødselsnummer")
         val graphqlPerson =
             snapshothenter.hentPerson(fødselsnummer)
-                ?: return null.also { sikkerLogg.warn("Fikk ikke personsnapshot fra Spleis") }
+                ?: return null.also { sikkerlogg.warn("Fikk ikke personsnapshot fra Spleis") }
         val personinfo =
             personinfoDao.hentPersoninfo(fødselsnummer)
                 ?: error("Fant ikke personinfo i databasen")

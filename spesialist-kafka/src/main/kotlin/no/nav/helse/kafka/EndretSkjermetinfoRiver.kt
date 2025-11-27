@@ -9,14 +9,11 @@ import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.person.EndretEgenAnsattStatus
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import no.nav.helse.spesialist.application.logg.sikkerlogg
 
 class EndretSkjermetinfoRiver(
     private val meldingMediator: MeldingMediator,
 ) : SpesialistRiver {
-    private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
-
     override fun preconditions(): River.PacketValidation =
         River.PacketValidation {
             it.requireValue("@event_name", "endret_skjermetinfo")
@@ -36,7 +33,7 @@ class EndretSkjermetinfoRiver(
         val fødselsnummer = packet["fødselsnummer"].asText()
         try {
             fødselsnummer.toLong()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             sikkerlogg.warn("Mottok ugyldig fødselsnummer $fødselsnummer, skipper videre håndtering")
             return
         }

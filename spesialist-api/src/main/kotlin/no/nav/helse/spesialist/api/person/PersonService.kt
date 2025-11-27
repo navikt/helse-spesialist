@@ -37,11 +37,11 @@ import no.nav.helse.spesialist.application.Reservasjonshenter
 import no.nav.helse.spesialist.application.Reservasjonshenter.ReservasjonDto
 import no.nav.helse.spesialist.application.SaksbehandlerRepository
 import no.nav.helse.spesialist.application.logg.logg
+import no.nav.helse.spesialist.application.logg.sikkerlogg
 import no.nav.helse.spesialist.application.snapshot.SnapshotPerson
 import no.nav.helse.spesialist.domain.Identitetsnummer
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
-import org.slf4j.LoggerFactory
 
 private sealed interface HentSnapshotResult {
     class Ok(
@@ -80,10 +80,6 @@ class PersonService(
     private val annulleringRepository: AnnulleringRepository,
     private val saksbehandlerRepository: SaksbehandlerRepository,
 ) : PersonoppslagService {
-    private companion object {
-        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
-    }
-
     override fun finnesPersonMedFødselsnummer(fødselsnummer: String): Boolean = personApiDao.finnesPersonMedFødselsnummer(fødselsnummer)
 
     override fun fødselsnumreKnyttetTil(aktørId: String): Set<String> = personApiDao.finnFødselsnumre(aktørId).toSet()

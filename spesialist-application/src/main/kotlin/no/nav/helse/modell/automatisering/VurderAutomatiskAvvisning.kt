@@ -9,7 +9,7 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
 import no.nav.helse.modell.person.HentEnhetløsning
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
-import org.slf4j.LoggerFactory
+import no.nav.helse.spesialist.application.logg.logg
 
 internal class VurderAutomatiskAvvisning(
     private val personDao: PersonDao,
@@ -51,9 +51,5 @@ internal class VurderAutomatiskAvvisning(
     ) = mutableListOf<String>().apply {
         if (tilhørerEnhetUtland) add("Utland")
         if (underVergemål) add("Vergemål")
-    }
-
-    private companion object {
-        private val logg = LoggerFactory.getLogger(VurderAutomatiskAvvisning::class.java)
     }
 }

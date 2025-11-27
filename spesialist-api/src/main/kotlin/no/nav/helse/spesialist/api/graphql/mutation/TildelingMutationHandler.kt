@@ -13,17 +13,12 @@ import no.nav.helse.spesialist.api.graphql.graphqlErrorException
 import no.nav.helse.spesialist.api.graphql.schema.ApiTildeling
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.AvmeldOppgave
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.TildelOppgave
+import no.nav.helse.spesialist.application.logg.sikkerlogg
 import no.nav.helse.spesialist.domain.Saksbehandler
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 
 class TildelingMutationHandler(
     private val saksbehandlerMediator: SaksbehandlerMediator,
 ) : TildelingMutationSchema {
-    private companion object {
-        private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
-    }
-
     override fun opprettTildeling(
         oppgaveId: String,
         env: DataFetchingEnvironment,
@@ -38,7 +33,7 @@ class TildelingMutationHandler(
             byggRespons(ApiTildeling(saksbehandler.navn, saksbehandler.epost, saksbehandler.id.value))
         } catch (e: OppgaveTildeltNoenAndre) {
             byggFeilrespons(alleredeTildeltError(e))
-        } catch (e: RuntimeException) {
+        } catch (_: RuntimeException) {
             byggFeilrespons(getUpdateError(oppgaveId))
         }
     }
@@ -54,9 +49,9 @@ class TildelingMutationHandler(
                 tilgangsgrupper = env.graphQlContext.get(ContextValues.TILGANGSGRUPPER),
             )
             byggRespons(true)
-        } catch (e: OppgaveIkkeTildelt) {
+        } catch (_: OppgaveIkkeTildelt) {
             byggRespons(false)
-        } catch (e: RuntimeException) {
+        } catch (_: RuntimeException) {
             byggRespons(false)
         }
 

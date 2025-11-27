@@ -29,7 +29,8 @@ import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FØRSTEGANGSBEHANDLING
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
-import org.slf4j.LoggerFactory
+import no.nav.helse.spesialist.application.logg.logg
+import no.nav.helse.spesialist.application.logg.sikkerlogg
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -77,11 +78,6 @@ internal class Automatisering(
             )
     }
 
-    private companion object {
-        private val logger = LoggerFactory.getLogger(Automatisering::class.java)
-        private val sikkerLogg = LoggerFactory.getLogger("tjenestekall")
-    }
-
     internal fun settInaktiv(
         vedtaksperiodeId: UUID,
         hendelseId: UUID,
@@ -102,7 +98,7 @@ internal class Automatisering(
         tags: List<String>,
     ): Automatiseringsresultat {
         if (automatiseringDao.skalTvingeAutomatisering(vedtaksperiodeId)) {
-            logger.info("Tvinger automatisering for vedtaksperiode $vedtaksperiodeId")
+            logg.info("Tvinger automatisering for vedtaksperiode $vedtaksperiodeId")
             return Automatiseringsresultat.KanAutomatiseres
         }
 
@@ -142,7 +138,7 @@ internal class Automatisering(
                 return Automatiseringsresultat.Stikkprøve(it)
             }
         } else {
-            logger.info("Vurderer ikke om det skal tas stikkprøve.")
+            logg.info("Vurderer ikke om det skal tas stikkprøve.")
         }
         return Automatiseringsresultat.KanAutomatiseres
     }
@@ -330,7 +326,7 @@ internal class Automatisering(
             !utbetaling.erRevurdering() ||
                 (utbetaling.refusjonstype() != Refusjonstype.NEGATIVT_BELØP).also {
                     if (it) {
-                        sikkerLogg.info(
+                        sikkerlogg.info(
                             "Revurdering av $vedtaksperiodeId (person $fødselsnummer) har ikke et negativt beløp, og er godkjent for automatisering",
                         )
                     }

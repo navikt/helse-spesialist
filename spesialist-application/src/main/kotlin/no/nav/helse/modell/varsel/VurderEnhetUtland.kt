@@ -6,7 +6,7 @@ import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.person.HentEnhetløsning
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode
-import org.slf4j.LoggerFactory
+import no.nav.helse.spesialist.application.logg.logg
 import java.util.UUID
 
 internal class VurderEnhetUtland(
@@ -23,9 +23,5 @@ internal class VurderEnhetUtland(
         }
 
         return true
-    }
-
-    private companion object {
-        private val logg = LoggerFactory.getLogger(VurderEnhetUtland::class.java)
     }
 }

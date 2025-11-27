@@ -4,14 +4,10 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageProblems
-import org.slf4j.LoggerFactory
+import no.nav.helse.spesialist.application.logg.logg
+import no.nav.helse.spesialist.application.logg.sikkerlogg
 
 sealed interface SpesialistRiver : River.PacketListener {
-    private companion object {
-        private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
-        private val logg = LoggerFactory.getLogger(this::class.java)
-    }
-
     fun preconditions(): River.PacketValidation
 
     fun validations(): River.PacketValidation

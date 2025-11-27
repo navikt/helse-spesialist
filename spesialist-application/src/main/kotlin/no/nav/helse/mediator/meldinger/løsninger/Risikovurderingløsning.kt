@@ -2,7 +2,7 @@ package no.nav.helse.mediator.meldinger.løsninger
 
 import com.fasterxml.jackson.databind.JsonNode
 import no.nav.helse.db.RisikovurderingDao
-import org.slf4j.LoggerFactory
+import no.nav.helse.spesialist.application.logg.logg
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -12,10 +12,6 @@ class Risikovurderingløsning(
     val kanGodkjennesAutomatisk: Boolean,
     private val løsning: JsonNode,
 ) {
-    private companion object {
-        private val logg = LoggerFactory.getLogger(Risikovurderingløsning::class.java)
-    }
-
     internal fun lagre(risikovurderingDao: RisikovurderingDao) {
         logg.info("Mottok risikovurdering for vedtaksperiode $vedtaksperiodeId")
         risikovurderingDao.lagre(

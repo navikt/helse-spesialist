@@ -14,18 +14,13 @@ import no.nav.helse.spesialist.api.graphql.byggRespons
 import no.nav.helse.spesialist.api.graphql.graphqlErrorException
 import no.nav.helse.spesialist.api.graphql.schema.ApiPaVent
 import no.nav.helse.spesialist.api.graphql.schema.ApiPaVentRequest
+import no.nav.helse.spesialist.application.logg.sikkerlogg
 import no.nav.helse.spesialist.domain.Saksbehandler
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
 class PaVentMutationHandler(
     private val saksbehandlerMediator: SaksbehandlerMediator,
 ) : PaVentMutationSchema {
-    private companion object {
-        private val sikkerlogg: Logger = LoggerFactory.getLogger("tjenestekall")
-    }
-
     override fun leggPaVent(
         oppgaveId: String,
         notatTekst: String?,

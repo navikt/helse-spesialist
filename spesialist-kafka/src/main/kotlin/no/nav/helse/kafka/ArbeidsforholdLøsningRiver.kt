@@ -11,13 +11,11 @@ import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
-import org.slf4j.LoggerFactory
+import no.nav.helse.spesialist.application.logg.sikkerlogg
 
 class ArbeidsforholdLøsningRiver(
     private val mediator: MeldingMediator,
 ) : SpesialistRiver {
-    private val sikkerlogg = LoggerFactory.getLogger("tjenestekall")
-
     override fun preconditions(): River.PacketValidation =
         River.PacketValidation {
             it.requireValue("@event_name", "behov")
