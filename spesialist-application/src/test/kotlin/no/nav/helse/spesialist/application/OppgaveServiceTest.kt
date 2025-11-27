@@ -73,7 +73,7 @@ internal class OppgaveServiceTest {
             reservasjonDao = reservasjonDao,
             meldingPubliserer = meldingPubliserer,
             oppgaveRepository = oppgaveRepository,
-            tilgangsgruppehenter = { emptySet() },
+            tilgangsgruppehenter = { Either.Success(emptySet()) },
         )
 
     private fun lagSøknadsoppgave(

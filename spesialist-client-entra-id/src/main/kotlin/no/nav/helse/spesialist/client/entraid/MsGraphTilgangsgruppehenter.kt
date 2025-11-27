@@ -14,12 +14,14 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import io.ktor.http.path
 import io.ktor.serialization.jackson.JacksonConverter
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.spesialist.application.AccessTokenGenerator
+import no.nav.helse.spesialist.application.Either
 import no.nav.helse.spesialist.application.logg.sikkerlogg
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
@@ -51,7 +53,7 @@ class MsGraphTilgangsgruppehenter(
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
-    override fun hentTilgangsgrupper(saksbehandlerOid: SaksbehandlerOid): Set<Tilgangsgruppe> {
+    override fun hentTilgangsgrupper(saksbehandlerOid: SaksbehandlerOid): Either<Set<Tilgangsgruppe>, Tilgangsgruppehenter.Feil> {
         sikkerlogg.info("Henter tilgangsgrupper for saksbehandler {}", saksbehandlerOid.value)
         val (responseStatus, responseBody) =
             runBlocking {
@@ -78,6 +80,13 @@ class MsGraphTilgangsgruppehenter(
 
         if (!responseStatus.isSuccess()) {
             sikkerlogg.warn("Fikk kode ${responseStatus.value} fra MS Graph: $responseBody")
+            if (responseStatus == HttpStatusCode.NotFound) {
+                val errorCode = objectMapper.readTree(responseBody)["error"]["code"].asText()
+                if (errorCode == "Request_ResourceNotFound") {
+                    return Either.Failure(Tilgangsgruppehenter.Feil.SaksbehandlerFinnesIkke)
+                }
+            }
+            error("Fikk HTTP-kode ${responseStatus.value} fra MS Graph. Se sikkerlogg for detaljer.")
         }
 
         val grupper =
@@ -86,6 +95,6 @@ class MsGraphTilgangsgruppehenter(
                 .map(JsonNode::asText)
                 .map(UUID::fromString)
         logg.debug("Hentet ${grupper.size} grupper fra MS")
-        return tilgangsgruppeUuider.grupperFor(grupper.toSet())
+        return Either.Success(tilgangsgruppeUuider.grupperFor(grupper.toSet()))
     }
 }

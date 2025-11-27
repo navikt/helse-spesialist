@@ -13,8 +13,11 @@ import no.nav.helse.modell.saksbehandler.handlinger.EndrePåVent
 import no.nav.helse.modell.saksbehandler.handlinger.LeggPåVent
 import no.nav.helse.modell.saksbehandler.handlinger.Oppgavehandling
 import no.nav.helse.spesialist.api.oppgave.Oppgavehåndterer
+import no.nav.helse.spesialist.application.Either
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
+import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter.Feil
 import no.nav.helse.spesialist.domain.legacy.SaksbehandlerWrapper
+import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
 import org.slf4j.LoggerFactory
 import java.sql.SQLException
 import java.util.UUID
@@ -216,16 +219,25 @@ class OppgaveService(
                 return
             }
 
-        val saksbehandlerTilgangsgrupper = tilgangsgruppehenter.hentTilgangsgrupper(saksbehandler.id)
-
-        try {
-            oppgave.forsøkTildelingVedReservasjon(SaksbehandlerWrapper(saksbehandler = saksbehandler), saksbehandlerTilgangsgrupper)
-        } catch (manglerTilgang: ManglerTilgang) {
-            logg.info("Saksbehandler har ikke (lenger) tilgang til egenskapene i denne oppgaven, tildeler ikke tross reservasjon")
-            sikkerlogg.info(
-                "Saksbehandler har ikke (lenger) tilgang til egenskapene i denne oppgaven, tildeler ikke tross reservasjon",
-                manglerTilgang,
-            )
+        when (val result = tilgangsgruppehenter.hentTilgangsgrupper(saksbehandler.id)) {
+            is Either.Failure<Set<Tilgangsgruppe>, Feil> -> {
+                when (result.error) {
+                    Feil.SaksbehandlerFinnesIkke -> {
+                        logg.info("Saksbehandler personen er reservert til eksisterer ikke (lenger). Tildeler ikke oppgaven.")
+                    }
+                }
+            }
+            is Either.Success<Set<Tilgangsgruppe>, Feil> -> {
+                try {
+                    oppgave.forsøkTildelingVedReservasjon(SaksbehandlerWrapper(saksbehandler = saksbehandler), result.result)
+                } catch (manglerTilgang: ManglerTilgang) {
+                    logg.info("Saksbehandler har ikke (lenger) tilgang til egenskapene i denne oppgaven, tildeler ikke tross reservasjon")
+                    sikkerlogg.info(
+                        "Saksbehandler har ikke (lenger) tilgang til egenskapene i denne oppgaven, tildeler ikke tross reservasjon",
+                        manglerTilgang,
+                    )
+                }
+            }
         }
     }
 

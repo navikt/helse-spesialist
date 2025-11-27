@@ -2,6 +2,7 @@ package no.nav.helse.spesialist.kafka
 
 import com.github.navikt.tbd_libs.rapids_and_rivers.test_support.TestRapid
 import no.nav.helse.modell.automatisering.Stikkprøver
+import no.nav.helse.spesialist.application.Either
 import no.nav.helse.spesialist.application.InMemoryRepositoriesAndDaos
 import no.nav.helse.spesialist.kafka.testfixtures.KafkaModuleTestRapidTestFixture
 
@@ -26,7 +27,7 @@ class IntegrationTestFixture(val testRapid: TestRapid) {
                 override fun fullRefusjonFlereArbeidsgivereForlengelse() = false
                 override fun fullRefusjonEnArbeidsgiver() = false
             },
-            tilgangsgruppehenter = { emptySet() },
+            tilgangsgruppehenter = { Either.Success(emptySet()) },
         ).also(KafkaModule::kobleOppRivers)
     }
 }

@@ -18,6 +18,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.spesialist.api.testfixtures.ApiModuleIntegrationTestFixture
+import no.nav.helse.spesialist.application.Either
 import no.nav.helse.spesialist.application.InMemoryMeldingPubliserer
 import no.nav.helse.spesialist.application.InMemoryRepositoriesAndDaos
 import no.nav.helse.spesialist.application.logg.logg
@@ -57,7 +58,7 @@ class IntegrationTestFixture() {
         tilgangsgruppeUuider = tilgangsgruppeUuider,
         daos = daos,
         meldingPubliserer = meldingPubliserer,
-        tilgangsgruppehenter = { emptySet() },
+        tilgangsgruppehenter = { Either.Success(emptySet()) },
         sessionFactory = sessionFactory,
         environmentToggles = mockk(relaxed = true),
         snapshothenter = mockk(relaxed = true),

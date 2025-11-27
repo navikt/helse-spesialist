@@ -20,6 +20,7 @@ import no.nav.helse.spesialist.api.IntegrationTestFixture
 import no.nav.helse.spesialist.api.graphql.schema.ApiAntallArbeidsforhold
 import no.nav.helse.spesialist.api.graphql.schema.ApiOppgavetype
 import no.nav.helse.spesialist.api.graphql.schema.ApiPeriodetype
+import no.nav.helse.spesialist.application.Either
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
@@ -87,7 +88,7 @@ internal class ApiOppgaveServiceTest {
                 reservasjonDao = reservasjonDao,
                 meldingPubliserer = meldingPubliserer,
                 oppgaveRepository = oppgaveRepository,
-                tilgangsgruppehenter = { emptySet() },
+                tilgangsgruppehenter = { Either.Success(emptySet()) },
             ),
             sessionFactory = sessionFactory
         )

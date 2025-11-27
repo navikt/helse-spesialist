@@ -12,6 +12,7 @@ import no.nav.helse.mediator.oppgave.OppgaveService
 import no.nav.helse.modell.automatisering.Stikkprøver
 import no.nav.helse.modell.varsel.LegacyVarselRepository
 import no.nav.helse.spesialist.api.saksbehandler.handlinger.HandlingFraApi
+import no.nav.helse.spesialist.application.Either
 import no.nav.helse.spesialist.db.DBDaos
 import no.nav.helse.spesialist.db.TransactionalSessionFactory
 import no.nav.helse.spesialist.domain.Saksbehandler
@@ -31,7 +32,7 @@ class TestMediator(
             reservasjonDao = daos.reservasjonDao,
             meldingPubliserer = meldingPubliserer,
             oppgaveRepository = daos.oppgaveRepository,
-            tilgangsgruppehenter = { emptySet() },
+            tilgangsgruppehenter = { Either.Success(emptySet()) },
         )
     private val apiOppgaveService = ApiOppgaveService(
         oppgaveDao = daos.oppgaveDao,
