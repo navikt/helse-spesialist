@@ -19,6 +19,7 @@ import io.ktor.http.path
 import io.ktor.serialization.jackson.JacksonConverter
 import kotlinx.coroutines.runBlocking
 import no.nav.helse.spesialist.application.AccessTokenGenerator
+import no.nav.helse.spesialist.application.logg.sikkerlogg
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
 import no.nav.helse.spesialist.application.tilgangskontroll.Tilgangsgruppehenter
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
@@ -50,6 +51,7 @@ class MsGraphTilgangsgruppehenter(
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
     override fun hentTilgangsgrupper(saksbehandlerOid: SaksbehandlerOid): Set<Tilgangsgruppe> {
+        sikkerlogg.info("Henter tilgangsgrupper for saksbehandler {}", saksbehandlerOid.value)
         val responseBody =
             runBlocking {
                 httpClient

@@ -3,6 +3,7 @@ package no.nav.helse.spesialist.db.dao
 import kotliquery.Session
 import no.nav.helse.db.Reservasjon
 import no.nav.helse.db.ReservasjonDao
+import no.nav.helse.spesialist.application.logg.sikkerlogg
 import no.nav.helse.spesialist.db.HelseDao
 import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.MedSession
@@ -50,13 +51,17 @@ class PgReservasjonDao private constructor(
                 """.trimIndent(),
                 "foedselsnummer" to fødselsnummer,
             ).singleOrNull { row ->
-                Reservasjon(
-                    Saksbehandler(
-                        id = SaksbehandlerOid(row.uuid("oid")),
-                        navn = row.string("navn"),
-                        epost = row.string("epost"),
-                        ident = row.string("ident"),
-                    ),
-                )
+                val personRef = row.long("person_ref")
+                val reservasjon =
+                    Reservasjon(
+                        Saksbehandler(
+                            id = SaksbehandlerOid(row.uuid("oid")),
+                            navn = row.string("navn"),
+                            epost = row.string("epost"),
+                            ident = row.string("ident"),
+                        ),
+                    )
+                sikkerlogg.info("Fant reservasjon for fødselsnummer $fødselsnummer med person_ref $personRef: $reservasjon")
+                reservasjon
             }
 }
