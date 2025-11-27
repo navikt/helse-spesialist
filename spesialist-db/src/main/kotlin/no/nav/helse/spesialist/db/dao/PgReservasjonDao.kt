@@ -44,7 +44,7 @@ class PgReservasjonDao private constructor(
         HelseDao
             .asSQL(
                 """
-                SELECT r.*, s.* FROM reserver_person r
+                SELECT r.*, s.*, now() as detteErNow FROM reserver_person r
                 JOIN person p ON p.id = r.person_ref
                 JOIN saksbehandler s ON r.saksbehandler_ref = s.oid
                 WHERE p.fødselsnummer = :foedselsnummer AND r.gyldig_til > now();
@@ -52,6 +52,8 @@ class PgReservasjonDao private constructor(
                 "foedselsnummer" to fødselsnummer,
             ).singleOrNull { row ->
                 val personRef = row.long("person_ref")
+                val gyldigTil = row.instant("gyldig_til")
+                val detteErNow = row.instant("detteErNow")
                 val reservasjon =
                     Reservasjon(
                         Saksbehandler(
@@ -61,7 +63,7 @@ class PgReservasjonDao private constructor(
                             ident = row.string("ident"),
                         ),
                     )
-                sikkerlogg.info("Fant reservasjon for fødselsnummer $fødselsnummer med person_ref $personRef: $reservasjon")
+                sikkerlogg.info("Fant reservasjon for fødselsnummer $fødselsnummer med person_ref $personRef, gyldig til: $gyldigTil databasen mener at now er $detteErNow: $reservasjon")
                 reservasjon
             }
 }
