@@ -32,17 +32,6 @@ følgende kommando:
 
 Det holder å kjøre kommandoen en gang, så er commithooken satt opp for fremtidige commits.
 
-#### Credentials
-
-For å kunne kjøre gradle må du legge til `githubUser` og `githubPassword` i `~/.gradle/gradle.properties` filen. For å 
-få tak i `githubPassword` må du lage et [personal access token](https://github.com/settings/tokens). Lag et classic token
-med `read:packages` scope. 
-
-```properties
-githubUser=x-access-token
-githubPassword=<token>
-```
-
 ### Docker
 
 For å kjøre tester trenger du docker. Du kan enten installere klienten fra [docker](https://www.docker.com/) eller bruke
