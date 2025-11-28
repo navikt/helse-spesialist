@@ -1,6 +1,5 @@
 package no.nav.helse.modell.automatisering
 
-import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.db.AutomatiseringDao
 import no.nav.helse.mediator.GodkjenningMediator
 import no.nav.helse.mediator.oppgave.OppgaveService
@@ -10,8 +9,7 @@ import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
-import no.nav.helse.spesialist.application.logg.logg
-import no.nav.helse.spesialist.application.logg.sikkerlogg
+import no.nav.helse.spesialist.application.logg.loggInfo
 
 internal class VurderAutomatiskInnvilgelse(
     private val automatisering: Automatisering,
@@ -29,11 +27,9 @@ internal class VurderAutomatiskInnvilgelse(
     private fun utfallslogger(
         tekst: String,
         problemer: List<String> = emptyList(),
-    ) = sikkerlogg.info(
+    ) = loggInfo(
         tekst,
-        keyValue("vedtaksperiodeId", vedtaksperiodeId),
-        keyValue("utbetalingId", utbetalingId),
-        problemer,
+        "vedtaksperiodeId: $vedtaksperiodeId, utbetalingId: $utbetalingId, problemer: ${problemer.joinToString()}",
     )
 
     override fun execute(context: CommandContext): Boolean {
@@ -52,21 +48,23 @@ internal class VurderAutomatiskInnvilgelse(
 
         when (resultat) {
             is Automatiseringsresultat.KanIkkeAutomatiseres -> {
-                utfallslogger("Automatiserer ikke {} ({}) fordi: {}", resultat.problemer)
+                utfallslogger("Behandler ikke perioden ferdig automatisk fordi: {}", resultat.problemer)
                 manuellSaksbehandling(resultat.problemer)
             }
+
             is Automatiseringsresultat.Stikkprøve -> {
-                utfallslogger("Automatiserer ikke {} ({}), plukket ut til stikkprøve for ${resultat.årsak}")
-                logg.info(
-                    "Automatisk godkjenning av {} avbrutt, sendes til manuell behandling",
-                    keyValue("vedtaksperiodeId", vedtaksperiodeId),
+                utfallslogger("Behandler ikke perioden ferdig automatisk, plukket ut til stikkprøve for ${resultat.årsak}")
+                loggInfo(
+                    "Automatisk godkjenning avbrutt, sendes til manuell behandling",
+                    "vedtaksperiodeId: $vedtaksperiodeId, utbetalingId: $utbetalingId",
                 )
                 stikkprøve()
             }
+
             is Automatiseringsresultat.KanAutomatiseres -> {
-                utfallslogger("Automatiserer {} ({})")
+                utfallslogger("Behandler perioden ferdig automatisk")
                 automatiserSaksbehandling(context)
-                logg.info("Automatisk godkjenning for vedtaksperiode $vedtaksperiodeId")
+                loggInfo("Automatisk godkjenning for vedtaksperiode", "vedtaksperiodeId: $vedtaksperiodeId")
                 return ferdigstill(context)
             }
         }

@@ -11,7 +11,7 @@ import no.nav.helse.modell.person.vedtaksperiode.Varselkode.SB_RV_1
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
-import no.nav.helse.spesialist.application.logg.logg
+import no.nav.helse.spesialist.application.logg.loggInfo
 import java.util.UUID
 
 internal class VurderVurderingsmomenter(
@@ -33,7 +33,7 @@ internal class VurderVurderingsmomenter(
 
         val løsning = context.get<Risikovurderingløsning>()
         if (løsning == null || !løsning.gjelderVedtaksperiode(vedtaksperiodeId)) {
-            logg.info("Trenger risikovurdering av vedtaksperiode $vedtaksperiodeId")
+            loggInfo("Trenger risikovurdering av vedtaksperiode $vedtaksperiodeId")
             context.behov(
                 Behov.Risikovurdering(
                     vedtaksperiodeId = vedtaksperiodeId,

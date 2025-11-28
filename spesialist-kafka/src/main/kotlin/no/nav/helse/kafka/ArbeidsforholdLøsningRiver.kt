@@ -11,7 +11,7 @@ import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.arbeidsforhold.Arbeidsforholdløsning
-import no.nav.helse.spesialist.application.logg.sikkerlogg
+import no.nav.helse.spesialist.application.logg.loggInfo
 
 class ArbeidsforholdLøsningRiver(
     private val mediator: MeldingMediator,
@@ -54,7 +54,7 @@ class ArbeidsforholdLøsningRiver(
         val løsninger = this["@løsning.Arbeidsforhold"].map(::toArbeidsforholdløsning)
 
         if (løsninger.isEmpty()) {
-            sikkerlogg.info("Ingen arbeidsforhold i løsningen.\n${this.toJson()}")
+            loggInfo("Ingen arbeidsforhold i løsningen", "json:\n${this.toJson()}")
         }
         return Arbeidsforholdløsning(løsninger)
     }

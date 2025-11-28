@@ -9,8 +9,7 @@ import no.nav.helse.mediator.KommandokjedeEndretEvent
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.SubsumsjonEvent
 import no.nav.helse.modell.melding.UtgåendeHendelse
-import no.nav.helse.spesialist.application.logg.logg
-import no.nav.helse.spesialist.application.logg.sikkerlogg
+import no.nav.helse.spesialist.application.logg.loggInfo
 import java.util.UUID
 
 class MessageContextMeldingPubliserer(
@@ -22,8 +21,7 @@ class MessageContextMeldingPubliserer(
         årsak: String,
     ) {
         val packet = hendelse.somJsonMessage(fødselsnummer).toJson()
-        logg.info("Publiserer hendelse på grunn av $årsak")
-        sikkerlogg.info("Publiserer hendelse på grunn av $årsak\n{}", packet)
+        loggInfo("Publiserer hendelse på grunn av $årsak", "json:\n$packet")
         context.publish(fødselsnummer, packet)
     }
 
@@ -33,8 +31,7 @@ class MessageContextMeldingPubliserer(
         versjonAvKode: String,
     ) {
         val packet = subsumsjonEvent.somJsonMessage(fødselsnummer, versjonAvKode).toJson()
-        logg.info("Publiserer subsumsjon")
-        sikkerlogg.info("Publiserer subsumsjon\n{}", packet)
+        loggInfo("Publiserer subsumsjon", "json:\n$packet")
         context.publish(fødselsnummer, packet)
     }
 
@@ -46,8 +43,7 @@ class MessageContextMeldingPubliserer(
     ) {
         val packet = behov.somJsonMessage(commandContextId, fødselsnummer, hendelseId).toJson()
         val behovNames = behov.map(Behov::behovName)
-        logg.info("Publiserer behov for $behovNames")
-        sikkerlogg.info("Publiserer behov for $behovNames\n{}", packet)
+        loggInfo("Publiserer behov for $behovNames", "json:\n$packet")
         context.publish(fødselsnummer, packet)
     }
 
@@ -57,13 +53,7 @@ class MessageContextMeldingPubliserer(
         hendelseNavn: String,
     ) {
         val message = JsonMessage.newMessage(event.eventName, event.detaljer()).toJson()
-        logg.info(
-            "Publiserer melding om tilstandsendring for kommandokjede startet av $hendelseNavn, ny tilstand: ${event::class.simpleName}",
-        )
-        sikkerlogg.info(
-            "Publiserer melding om tilstandsendring for kommandokjede startet av $hendelseNavn, ny tilstand: ${event::class.simpleName}\n{}",
-            message,
-        )
+        loggInfo("Publiserer melding om tilstandsendring for kommandokjede startet av $hendelseNavn, ny tilstand: ${event::class.simpleName}", "json:\n$message")
         context.publish(fødselsnummer, message)
     }
 }

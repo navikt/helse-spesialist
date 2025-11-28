@@ -5,10 +5,9 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import io.micrometer.core.instrument.MeterRegistry
-import net.logstash.logback.argument.StructuredArguments
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
-import no.nav.helse.spesialist.application.logg.sikkerlogg
+import no.nav.helse.spesialist.application.logg.loggInfo
 
 class DokumentRiver(
     private val meldingMediator: MeldingMediator,
@@ -34,10 +33,9 @@ class DokumentRiver(
         val dokumentId = packet["dokumentId"].asUUID()
         val dokument = packet["@løsning.dokument"]
 
-        sikkerlogg.info(
-            "Mottok hendelse hent-dokument og oppdaterer databasen for {} {}",
-            StructuredArguments.kv("fødselsnummer", fødselsnummer),
-            StructuredArguments.kv("dokumentId", dokumentId),
+        loggInfo(
+            "Mottok hendelse hent-dokument og lagrer dokumentet",
+            "fødselsnummer: $fødselsnummer, dokumentId: $dokumentId",
         )
 
         meldingMediator.mottaDokument(fødselsnummer, dokumentId, dokument)

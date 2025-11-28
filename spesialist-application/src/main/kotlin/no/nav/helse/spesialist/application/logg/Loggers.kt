@@ -23,6 +23,38 @@ inline fun <reified T> T.loggInfo(
     )
 }
 
+inline fun <reified T> T.loggWarn(
+    melding: String,
+    sikkerloggDetaljer: String = "",
+) {
+    logg.warn(melding)
+    sikkerlogg.warn(
+        buildString {
+            append(melding)
+            if (sikkerloggDetaljer.isNotEmpty()) {
+                append(" - ")
+                append(sikkerloggDetaljer)
+            }
+        },
+    )
+}
+
+inline fun <reified T> T.loggDebug(
+    melding: String,
+    sikkerloggDetaljer: String = "",
+) {
+    logg.debug(melding)
+    sikkerlogg.debug(
+        buildString {
+            append(melding)
+            if (sikkerloggDetaljer.isNotEmpty()) {
+                append(" - ")
+                append(sikkerloggDetaljer)
+            }
+        },
+    )
+}
+
 inline fun <reified T> T.loggThrowable(
     message: String,
     securelogDetails: String = "",
@@ -38,6 +70,22 @@ inline fun <reified T> T.loggThrowable(
             }
         },
         throwable,
+    )
+}
+
+inline fun <reified T> T.loggErrorWithNoThrowable(
+    message: String,
+    securelogDetails: String = "",
+) {
+    logg.error(message)
+    sikkerlogg.error(
+        buildString {
+            append(message)
+            if (securelogDetails.isNotEmpty()) {
+                append(" - ")
+                append(securelogDetails)
+            }
+        },
     )
 }
 

@@ -12,7 +12,8 @@ import no.nav.helse.modell.oppgave.Oppgave
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.spesialist.application.logg.logg
-import no.nav.helse.spesialist.application.logg.sikkerlogg
+import no.nav.helse.spesialist.application.logg.loggInfo
+import no.nav.helse.spesialist.application.logg.loggWarn
 import java.util.UUID
 
 internal class VurderVidereBehandlingAvGodkjenningsbehov(
@@ -31,14 +32,16 @@ internal class VurderVidereBehandlingAvGodkjenningsbehov(
         val meldingId = commandData.id
 
         if (utbetalingDao.erUtbetalingForkastet(utbetalingId)) {
-            logg.info("Ignorerer godkjenningsbehov med id=$meldingId for utbetalingId=$utbetalingId fordi utbetalingen er forkastet")
+            loggInfo(
+                "Ignorerer godkjenningsbehov med id: $meldingId for utbetalingId: $utbetalingId fordi utbetalingen er forkastet",
+            )
             return ferdigstill(context)
         }
 
         if (vedtakDao.erAutomatiskGodkjent(utbetalingId)) {
-            logg.info("Ignorerer godkjenningsbehov for utbetalingId=$utbetalingId. Er allerede automatisk godkjent.")
-            logg.warn(
-                "utbetalingId=$utbetalingId er allerede ferdig behandlet. " +
+            loggInfo("Ignorerer godkjenningsbehov for utbetalingId: $utbetalingId. Er allerede automatisk godkjent")
+            loggWarn(
+                "utbetalingId: $utbetalingId er allerede ferdig behandlet. " +
                     "Det var litt rart at dette kom inn, " +
                     "men det kan være normalt dersom behandlingen i Spesialist nettopp ble ferdig.",
             )
@@ -48,7 +51,7 @@ internal class VurderVidereBehandlingAvGodkjenningsbehov(
         val oppgave = oppgaveRepository.finnSisteOppgaveForUtbetaling(utbetalingId) ?: return true
 
         oppgaveDao.oppdaterPekerTilGodkjenningsbehov(meldingId, utbetalingId)
-        logg.info("Oppdaterte peker til godkjenningsbehov for oppgave med utbetalingId=$utbetalingId til id=$meldingId")
+        loggInfo("Oppdaterte peker til godkjenningsbehov for oppgave med utbetalingId=$utbetalingId til id=$meldingId")
 
         if (oppgave.tilstand is Oppgave.Invalidert) return true
 
@@ -56,7 +59,7 @@ internal class VurderVidereBehandlingAvGodkjenningsbehov(
 
         if (oppgave.tilstand is Oppgave.Ferdigstilt) {
             if (!harEndringerIGodkjenningsbehov) {
-                logg.info("Ignorerer duplikat av godkjenningsbehov for utbetalingId=$utbetalingId. Er allerede ferdigstilt.")
+                loggInfo("Ignorerer duplikat av godkjenningsbehov for utbetalingId=$utbetalingId. Er allerede ferdigstilt.")
                 logg.warn(
                     "utbetalingId=$utbetalingId er allerede ferdig behandlet. " +
                         "Det var litt rart at dette kom inn, " +
@@ -71,13 +74,16 @@ internal class VurderVidereBehandlingAvGodkjenningsbehov(
             val tildeltSaksbehandler = tildelingDao.tildelingForPerson(fødselsnummer)
             if (tildeltSaksbehandler != null) {
                 reservasjonDao.reserverPerson(tildeltSaksbehandler.oid, fødselsnummer)
-                sikkerlogg.info("Oppretter reservasjon for $fødselsnummer til ${tildeltSaksbehandler.oid} pga eksisterende tildeling")
+                loggInfo(
+                    "Reserverer person til ${tildeltSaksbehandler.oid} pga eksisterende tildeling",
+                    "fødselsnummer: $fødselsnummer",
+                )
             }
-            logg.info("Invaliderer oppgave med oppgaveId=${oppgave.id} pga endringer i godkjenningsbehovet")
+            loggInfo("Invaliderer oppgave med oppgaveId=${oppgave.id} pga endringer i godkjenningsbehovet")
             oppgaveDao.invaliderOppgave(oppgave.id)
             true
         } else {
-            logg.info("Ignorerer duplikat av godkjenningsbehov for utbetalingId=$utbetalingId")
+            loggInfo("Ignorerer duplikat av godkjenningsbehov for utbetalingId=$utbetalingId")
             ferdigstill(context)
         }
     }

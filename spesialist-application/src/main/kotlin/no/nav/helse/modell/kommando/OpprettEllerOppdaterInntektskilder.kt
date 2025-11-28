@@ -5,7 +5,7 @@ import no.nav.helse.modell.arbeidsgiver.Arbeidsgiverinformasjonløsning
 import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.person.HentPersoninfoløsninger
 import no.nav.helse.spesialist.application.ArbeidsgiverRepository
-import no.nav.helse.spesialist.application.logg.sikkerlogg
+import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.spesialist.domain.Arbeidsgiver
 import no.nav.helse.spesialist.domain.ArbeidsgiverIdentifikator
 import java.time.LocalDate
@@ -48,11 +48,18 @@ internal class OpprettEllerOppdaterInntektskilder(
         val (nyeArbeidsgiverIdentifikatorer, utdaterteArbeidsgivere) = finnNyeOgUtdaterteArbeidsgivere()
         if (nyeArbeidsgiverIdentifikatorer.isEmpty() && utdaterteArbeidsgivere.isEmpty()) return true
         if (nyeArbeidsgiverIdentifikatorer.isNotEmpty()) {
-            sikkerlogg.info("Trenger navn på nye arbeidsgivere: ${nyeArbeidsgiverIdentifikatorer.joinToString()}")
+            loggInfo(
+                "Trenger navn på nye arbeidsgivere",
+                "arbeidsgivere: ${nyeArbeidsgiverIdentifikatorer.joinToString()}",
+            )
         }
         if (utdaterteArbeidsgivere.isNotEmpty()) {
-            sikkerlogg.info("Trenger oppdatert navn på kjente arbeidsgivere: ${utdaterteArbeidsgivere.joinToString { it.toLogString() }}")
+            loggInfo(
+                "Trenger oppdatert navn på kjente arbeidsgivere",
+                "arbeidsgivere: ${utdaterteArbeidsgivere.joinToString { it.toLogString() }}",
+            )
         }
+
         sendBehov(context, nyeArbeidsgiverIdentifikatorer + utdaterteArbeidsgivere.map(Arbeidsgiver::id))
         return false
     }
@@ -70,7 +77,7 @@ internal class OpprettEllerOppdaterInntektskilder(
                         id = identifikator,
                         navnString = navnFraLøsning,
                     )
-                sikkerlogg.info("Lagrer ny arbeidsgiver: ${arbeidsgiver.toLogString()}")
+                loggInfo("Lagrer ny arbeidsgiver", "arbeidsgiver: ${arbeidsgiver.toLogString()}")
                 arbeidsgiverRepository.lagre(arbeidsgiver)
             }
         }
@@ -80,7 +87,7 @@ internal class OpprettEllerOppdaterInntektskilder(
             val navnFraLøsning = finnNavnILøsninger(identifikator, context)
             if (navnFraLøsning != null) {
                 arbeidsgiver.oppdaterMedNavn(navnFraLøsning)
-                sikkerlogg.info("Lagrer oppdatert arbeidsgiver: ${arbeidsgiver.toLogString()}")
+                loggInfo("Lagrer oppdatert arbeidsgiver", "arbeidsgiver: ${arbeidsgiver.toLogString()}")
                 arbeidsgiverRepository.lagre(arbeidsgiver)
             }
         }

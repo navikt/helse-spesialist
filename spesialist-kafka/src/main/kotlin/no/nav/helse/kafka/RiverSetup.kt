@@ -12,6 +12,8 @@ import no.nav.helse.db.SessionFactory
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.registrerTidsbrukForDuplikatsjekk
 import no.nav.helse.spesialist.application.logg.logg
+import no.nav.helse.spesialist.application.logg.loggDebug
+import no.nav.helse.spesialist.application.logg.loggInfo
 import java.util.UUID
 import kotlin.time.DurationUnit
 import kotlin.time.measureTimedValue
@@ -108,7 +110,7 @@ class DuplikatsjekkendeRiver(
     ) {
         val id = packet.id.toUUID()
         if (erDuplikat(id)) {
-            logg.info("Ignorerer melding {} pga duplikatkontroll", id)
+            loggInfo("Ignorerer melding $id pga duplikatkontroll")
             return
         }
         river.onPacket(packet, context, metadata, meterRegistry)
@@ -116,7 +118,7 @@ class DuplikatsjekkendeRiver(
 
     private fun erDuplikat(id: UUID): Boolean {
         val (erDuplikat, tid) = measureTimedValue { meldingDuplikatkontrollDao.erBehandlet(id) }
-        logg.info("Det tok ${tid.inWholeMilliseconds} ms å gjøre duplikatsjekk mot databasen")
+        loggDebug("Det tok ${tid.inWholeMilliseconds} ms å gjøre duplikatsjekk mot databasen")
         registrerTidsbrukForDuplikatsjekk(erDuplikat, tid.toDouble(DurationUnit.MILLISECONDS))
         return erDuplikat
     }

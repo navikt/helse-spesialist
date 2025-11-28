@@ -5,12 +5,10 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import io.micrometer.core.instrument.MeterRegistry
-import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.person.SøknadSendt
-import no.nav.helse.spesialist.application.logg.logg
-import no.nav.helse.spesialist.application.logg.sikkerlogg
+import no.nav.helse.spesialist.application.logg.loggInfo
 
 class SøknadSendtRiver(
     private val mediator: MeldingMediator,
@@ -34,16 +32,9 @@ class SøknadSendtRiver(
         metadata: MessageMetadata,
         meterRegistry: MeterRegistry,
     ) {
-        logg.info(
-            "Mottok {} med {}",
-            keyValue("hendelse", packet["@event_name"].asText()),
-            keyValue("hendelseId", packet["@id"].asUUID()),
-        )
-        sikkerlogg.info(
-            "Mottok {} med {}, {}",
-            keyValue("hendelse", packet["@event_name"].asText()),
-            keyValue("hendelseId", packet["@id"].asUUID()),
-            keyValue("hendelse", packet.toJson()),
+        loggInfo(
+            "Mottok hendelse: ${packet["@event_name"].asText()} med hendelseId: ${packet["@id"].asUUID()}",
+            "hendelse: ${packet.toJson()}",
         )
         mediator.mottaSøknadSendt(
             melding = søknadSendt(packet),

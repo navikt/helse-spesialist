@@ -1,7 +1,7 @@
 package no.nav.helse.modell.kommando
 
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
-import no.nav.helse.spesialist.application.logg.sikkerlogg
+import no.nav.helse.spesialist.application.logg.loggInfo
 import java.util.UUID
 
 internal class AvbrytTotrinnsvurderingCommand(
@@ -10,7 +10,10 @@ internal class AvbrytTotrinnsvurderingCommand(
     private val totrinnsvurderingRepository: TotrinnsvurderingRepository,
 ) : Command {
     override fun execute(context: CommandContext): Boolean {
-        sikkerlogg.info("setter vedtaksperiode_forkastet i totrinnsvurdering for fødselsnummer=$fødselsnummer")
+        loggInfo(
+            "setter vedtaksperiode_forkastet i totrinnsvurdering for person",
+            "fødselsnummer: $fødselsnummer",
+        )
 
         val totrinnsvurdering = totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer) ?: return true
 

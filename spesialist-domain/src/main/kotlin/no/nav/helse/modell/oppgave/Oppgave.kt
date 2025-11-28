@@ -478,15 +478,28 @@ class Oppgave private constructor(
             saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe>,
         ): Boolean =
             when (egenskap) {
-                STRENGT_FORTROLIG_ADRESSE -> false // Ingen skal ha tilgang til disse i Speil foreløpig
-                EGEN_ANSATT -> Tilgangsgruppe.EGEN_ANSATT in saksbehandlerTilgangsgrupper
-                FORTROLIG_ADRESSE -> Tilgangsgruppe.KODE_7 in saksbehandlerTilgangsgrupper
-                SELVSTENDIG_NÆRINGSDRIVENDE ->
+                STRENGT_FORTROLIG_ADRESSE -> {
+                    false
+                }
+
+                // Ingen skal ha tilgang til disse i Speil foreløpig
+                EGEN_ANSATT -> {
+                    Tilgangsgruppe.EGEN_ANSATT in saksbehandlerTilgangsgrupper
+                }
+
+                FORTROLIG_ADRESSE -> {
+                    Tilgangsgruppe.KODE_7 in saksbehandlerTilgangsgrupper
+                }
+
+                SELVSTENDIG_NÆRINGSDRIVENDE -> {
                     "dev-gcp" == System.getenv("NAIS_CLUSTER_NAME") ||
                         Tilgangsgruppe.TBD in saksbehandlerTilgangsgrupper ||
                         SaksbehandlerIdentGrupper.TILGANG_TIL_SN.inneholder(saksbehandler.ident)
+                }
 
-                else -> true
+                else -> {
+                    true
+                }
             }
     }
 }

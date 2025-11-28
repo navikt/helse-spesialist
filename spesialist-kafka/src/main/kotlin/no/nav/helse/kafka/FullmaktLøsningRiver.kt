@@ -13,7 +13,7 @@ import no.nav.helse.mediator.asUUID
 import no.nav.helse.mediator.meldinger.løsninger.Fullmaktløsning
 import no.nav.helse.mediator.meldinger.løsninger.isSameOrAfter
 import no.nav.helse.mediator.meldinger.løsninger.isSameOrBefore
-import no.nav.helse.spesialist.application.logg.sikkerlogg
+import no.nav.helse.spesialist.application.logg.loggInfo
 import java.time.LocalDate
 
 class FullmaktLøsningRiver(
@@ -42,7 +42,7 @@ class FullmaktLøsningRiver(
         metadata: MessageMetadata,
         meterRegistry: MeterRegistry,
     ) {
-        sikkerlogg.info("Mottok melding Fullmakt:\n{}", packet.toJson())
+        loggInfo("Mottok løsning på fullmakt-behov", "json:\n${packet.toJson()}")
         val contextId = packet["contextId"].asUUID()
         val hendelseId = packet["hendelseId"].asUUID()
 

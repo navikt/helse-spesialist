@@ -65,7 +65,8 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
         val actualJsonNode = meldinger.single().json
 
         @Language("JSON")
-        val expectedJson = """
+        val expectedJson =
+            """
             {
               "@event_name": "vedtak_fattet",
               "fødselsnummer": "${person.id.value}",
@@ -110,7 +111,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
                 }
               ]
             }
-        """.trimIndent()
+            """.trimIndent()
         assertJsonEquals(expectedJson, actualJsonNode)
     }
 
@@ -133,7 +134,8 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
         val actualJsonNode = meldinger.single().json
 
         @Language("JSON")
-        val expectedJson = """
+        val expectedJson =
+            """
             {
               "@event_name": "vedtak_fattet",
               "fødselsnummer": "${person.id.value}",
@@ -178,7 +180,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
                 }
               ]
             }
-        """.trimIndent()
+            """.trimIndent()
         assertJsonEquals(expectedJson, actualJsonNode)
     }
 
@@ -202,7 +204,8 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
         val actualJsonNode = meldinger.single().json
 
         @Language("JSON")
-        val expectedJson = """
+        val expectedJson =
+            """
             {
               "@event_name": "vedtak_fattet",
               "fødselsnummer": "${person.id.value}",
@@ -247,7 +250,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
                 }
               ]
             }
-        """.trimIndent()
+            """.trimIndent()
         assertJsonEquals(expectedJson, actualJsonNode)
     }
 
@@ -271,7 +274,8 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
         val actualJsonNode = meldinger.single().json
 
         @Language("JSON")
-        val expectedJson = """
+        val expectedJson =
+            """
             {
               "@event_name": "vedtak_fattet",
               "fødselsnummer": "${person.id.value}",
@@ -316,7 +320,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
                 }
               ]
             }
-        """.trimIndent()
+            """.trimIndent()
         assertJsonEquals(expectedJson, actualJsonNode)
     }
 
@@ -343,7 +347,8 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
         val actualJsonNode = meldinger.single().json
 
         @Language("JSON")
-        val expectedJson = """
+        val expectedJson =
+            """
             {
               "@event_name": "vedtak_fattet",
               "fødselsnummer": "${person.id.value}",
@@ -422,7 +427,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
                 }
               ]
             }
-        """.trimIndent()
+            """.trimIndent()
         assertJsonEquals(expectedJson, actualJsonNode)
     }
 
@@ -449,7 +454,8 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
         val actualJsonNode = meldinger.single().json
 
         @Language("JSON")
-        val expectedJson = """
+        val expectedJson =
+            """
             {
               "@event_name": "vedtak_fattet",
               "fødselsnummer": "${person.id.value}",
@@ -528,7 +534,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
                 }
               ]
             }
-        """.trimIndent()
+            """.trimIndent()
         assertJsonEquals(expectedJson, actualJsonNode)
     }
 
@@ -552,7 +558,8 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
         val actualJsonNode = meldinger.single().json
 
         @Language("JSON")
-        val expectedJson = """
+        val expectedJson =
+            """
             {
               "@event_name": "vedtak_fattet",
               "fødselsnummer": "${person.id.value}",
@@ -586,7 +593,7 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
                 }
               ]
             }
-        """.trimIndent()
+            """.trimIndent()
         assertJsonEquals(expectedJson, actualJsonNode)
     }
 
@@ -598,34 +605,40 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
     private lateinit var avviksvurdering: Avviksvurdering
 
     private fun setup() {
-        this.saksbehandler = lagSaksbehandler()
-            .also(sessionContext.saksbehandlerRepository::lagre)
+        this.saksbehandler =
+            lagSaksbehandler()
+                .also(sessionContext.saksbehandlerRepository::lagre)
 
-        this.person = lagPerson()
-            .also(sessionContext.personRepository::lagre)
+        this.person =
+            lagPerson()
+                .also(sessionContext.personRepository::lagre)
 
-        this.vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
-            .also(sessionContext.vedtaksperiodeRepository::lagre)
+        this.vedtaksperiode =
+            lagVedtaksperiode(identitetsnummer = person.id)
+                .also(sessionContext.vedtaksperiodeRepository::lagre)
 
-        this.behandling = lagBehandling(
-            vedtaksperiodeId = vedtaksperiode.id,
-            tags = behandlingTags,
-            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
-        ).also(sessionContext.behandlingRepository::lagre)
+        this.behandling =
+            lagBehandling(
+                vedtaksperiodeId = vedtaksperiode.id,
+                tags = behandlingTags,
+                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
+            ).also(sessionContext.behandlingRepository::lagre)
 
-        this.vedtakBegrunnelse = lagVedtakBegrunnelse(
-            spleisBehandlingId = behandling.spleisBehandlingId!!,
-            utfall = utfall,
-            saksbehandlerOid = saksbehandler.id
-        ).also(sessionContext.vedtakBegrunnelseRepository::lagre)
+        this.vedtakBegrunnelse =
+            lagVedtakBegrunnelse(
+                spleisBehandlingId = behandling.spleisBehandlingId!!,
+                utfall = utfall,
+                saksbehandlerOid = saksbehandler.id,
+            ).also(sessionContext.vedtakBegrunnelseRepository::lagre)
 
-        this.avviksvurdering = lagAvviksvurderingMedEnArbeidsgiver(
-            identitetsnummer = person.id,
-            organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
-            skjæringstidspunkt = behandling.skjæringstidspunkt,
-            omregnetÅrsinntekt = omregnetÅrsinntekt,
-            innrapportertÅrsinntekt = innrapportertÅrsinntekt
-        ).also(sessionContext.avviksvurderingRepository::lagre)
+        this.avviksvurdering =
+            lagAvviksvurderingMedEnArbeidsgiver(
+                identitetsnummer = person.id,
+                organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
+                skjæringstidspunkt = behandling.skjæringstidspunkt,
+                omregnetÅrsinntekt = omregnetÅrsinntekt,
+                innrapportertÅrsinntekt = innrapportertÅrsinntekt,
+            ).also(sessionContext.avviksvurderingRepository::lagre)
     }
 
     private fun setupSkjønnsfastsettelse(skjønnsfastsattBeløp: BigDecimal): SkjønnsfastsattSykepengegrunnlag =
@@ -637,38 +650,45 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
             skjæringstidspunkt = behandling.skjæringstidspunkt,
             organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
             skjønnsfastsattBeløp = skjønnsfastsattBeløp,
-            omregnetÅrsinntekt = omregnetÅrsinntekt
+            omregnetÅrsinntekt = omregnetÅrsinntekt,
         ).also {
             sessionContext.overstyringRepository.lagre(
                 overstyringer = listOf(it),
-                totrinnsvurderingId = Totrinnsvurdering.ny(person.id.value)
-                    .also(sessionContext.totrinnsvurderingRepository::lagre).id()
+                totrinnsvurderingId =
+                    Totrinnsvurdering
+                        .ny(person.id.value)
+                        .also(sessionContext.totrinnsvurderingRepository::lagre)
+                        .id(),
             )
         }
 
     private fun initGodkjenningsbehov() {
         val godkjenningsbehovId = UUID.randomUUID()
-        val godkjenningsbehovJson = lagGodkjenningsbehov(
-            id = godkjenningsbehovId,
-            aktørId = person.aktørId,
-            fødselsnummer = person.id.value,
-            spleisBehandlingId = behandling.spleisBehandlingId!!.value,
-            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
-            sykepengegrunnlagsfakta = godkjenningsbehovFastsattEtterHovedregel(
-                arbeidsgivere = listOf(
-                    mapOf(
-                        "arbeidsgiver" to vedtaksperiode.organisasjonsnummer,
-                        "omregnetÅrsinntekt" to omregnetÅrsinntekt.toDouble(),
-                        "inntektskilde" to "Arbeidsgiver"
-                    )
-                )
+        val godkjenningsbehovJson =
+            lagGodkjenningsbehov(
+                id = godkjenningsbehovId,
+                aktørId = person.aktørId,
+                fødselsnummer = person.id.value,
+                spleisBehandlingId = behandling.spleisBehandlingId!!.value,
+                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
+                sykepengegrunnlagsfakta =
+                    godkjenningsbehovFastsattEtterHovedregel(
+                        arbeidsgivere =
+                            listOf(
+                                mapOf(
+                                    "arbeidsgiver" to vedtaksperiode.organisasjonsnummer,
+                                    "omregnetÅrsinntekt" to omregnetÅrsinntekt.toDouble(),
+                                    "inntektskilde" to "Arbeidsgiver",
+                                ),
+                            ),
+                    ),
             )
-        )
         sessionContext.meldingDao.godkjenningsbehov.add(Godkjenningsbehov.fraJson(godkjenningsbehovJson))
     }
 
     @Language("JSON")
-    private fun fastsattEtterHovedregelMelding(sykepengegrunnlag: BigDecimal) = """
+    private fun fastsattEtterHovedregelMelding(sykepengegrunnlag: BigDecimal) =
+        """
         {
           "@event_name": "avsluttet_med_vedtak",
           "organisasjonsnummer": "${vedtaksperiode.organisasjonsnummer}",
@@ -725,10 +745,11 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
             ]
           }
         }
-    """.trimIndent()
+        """.trimIndent()
 
     @Language("JSON")
-    private fun fastsattEtterSkjønnMelding(skjønnsfastsattSykepengegrunnlag: BigDecimal) = """
+    private fun fastsattEtterSkjønnMelding(skjønnsfastsattSykepengegrunnlag: BigDecimal) =
+        """
         {
           "@event_name": "avsluttet_med_vedtak",
           "organisasjonsnummer": "${vedtaksperiode.organisasjonsnummer}",
@@ -786,10 +807,11 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
             ]
           }
         }
-    """.trimIndent()
+        """.trimIndent()
 
     @Language("JSON")
-    private fun fastsattIInfotrygdMelding(sykepengegrunnlag: BigDecimal) = """
+    private fun fastsattIInfotrygdMelding(sykepengegrunnlag: BigDecimal) =
+        """
         {
           "@event_name": "avsluttet_med_vedtak",
           "organisasjonsnummer": "${vedtaksperiode.organisasjonsnummer}",
@@ -836,5 +858,5 @@ class AvsluttetMedVedtakRiverArbeidstakerIntegrationTest {
             ]
           }
         }
-    """.trimIndent()
+        """.trimIndent()
 }

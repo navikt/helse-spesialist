@@ -39,8 +39,8 @@ import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnet
 import no.nav.helse.modell.vedtaksperiode.VedtaksperiodeReberegnetCommand
 import no.nav.helse.registrerTidsbrukForGodkjenningsbehov
 import no.nav.helse.registrerTidsbrukForHendelse
-import no.nav.helse.spesialist.application.logg.logg
-import no.nav.helse.spesialist.application.logg.sikkerlogg
+import no.nav.helse.spesialist.application.logg.loggDebug
+import no.nav.helse.spesialist.application.logg.loggInfo
 import java.util.UUID
 
 typealias Kommandostarter = Personmelding.(Kommandofabrikk.() -> Command?) -> Unit
@@ -122,20 +122,21 @@ class Kommandofabrikk(
     ): OppgaveDataForAutomatisering? {
         val oppgaveDao = sessionContext.oppgaveDao
         return oppgaveDao.finnOppgaveId(fødselsnummer)?.let { oppgaveId ->
-            sikkerlogg.info("Fant en oppgave for {}: {}", fødselsnummer, oppgaveId)
+            loggInfo("Fant en oppgave med id: $oppgaveId", "fødselsnummer: $fødselsnummer")
             val oppgaveDataForAutomatisering = oppgaveDao.oppgaveDataForAutomatisering(oppgaveId)
 
             if (oppgaveDataForAutomatisering == null) {
-                sikkerlogg.info("Fant ikke oppgavedata for {} og {}", fødselsnummer, oppgaveId)
+                loggInfo("Fant ikke oppgavedata med id: $oppgaveId", "fødselsnummer: $fødselsnummer")
                 null
             } else {
-                sikkerlogg.info(
-                    "Har aktiv saksbehandleroppgave og oppgavedata for fnr $fødselsnummer og vedtaksperiodeId ${oppgaveDataForAutomatisering.vedtaksperiodeId}",
+                loggInfo(
+                    melding = "Har aktiv saksbehandleroppgave med id: $oppgaveId, vedtaksperiodeId: ${oppgaveDataForAutomatisering.vedtaksperiodeId}",
+                    sikkerloggDetaljer = "fødselsnummer: $fødselsnummer",
                 )
                 oppgaveDataForAutomatisering
             }
         } ?: kotlin.run {
-            sikkerlogg.info("Ingen åpne oppgaver i Speil for {}", fødselsnummer)
+            loggInfo("Ingen aktive saksbehandleroppgaver funnet for personen", "fødselsnummer: $fødselsnummer")
             null
         }
     }
@@ -377,12 +378,10 @@ class Kommandofabrikk(
                 if (commandContext.utfør(commandContextDao, meldingId, command)) {
                     val kjøretid = commandContextDao.tidsbrukForContext(contextId)
                     metrikker(command.name, kjøretid, contextId, metrikkDao)
-                    logg.info(
-                        "Kommando(er) for ${command.name} er utført ferdig. Det tok ca {}ms å kjøre hele kommandokjeden",
-                        kjøretid,
-                    )
+                    loggInfo("Kommando(er) for ${command.name} er utført ferdig")
+                    loggDebug("Det tok ca ${kjøretid}ms å kjøre hele kommandokjeden")
                 } else {
-                    logg.info("${command.name} er suspendert")
+                    loggInfo("${command.name} er suspendert")
                 }
             } finally {
                 commandContextObservers.forEach { commandContext.avregistrerObserver(it) }

@@ -100,7 +100,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
             id = SaksbehandlerOid(value = SAKSBEHANDLER_OID),
             navn = SAKSBEHANDLER_NAVN,
             epost = SAKSBEHANDLER_EPOST,
-            ident = SAKSBEHANDLER_IDENT
+            ident = SAKSBEHANDLER_IDENT,
         )
     private val enhetsnummerOslo = "0301"
 
@@ -113,24 +113,26 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     private fun resetTestRapid() = testRapid.reset()
 
-    private fun opprettSaksbehandler() = dbQuery.update(
-        """
-        INSERT INTO saksbehandler
-        VALUES (:oid, :navn, :epost, :ident)
-        ON CONFLICT (oid) DO NOTHING
-        """.trimIndent(),
-        "oid" to SAKSBEHANDLER_OID,
-        "navn" to SAKSBEHANDLER_NAVN,
-        "epost" to SAKSBEHANDLER_EPOST,
-        "ident" to SAKSBEHANDLER_IDENT,
-    )
+    private fun opprettSaksbehandler() =
+        dbQuery.update(
+            """
+            INSERT INTO saksbehandler
+            VALUES (:oid, :navn, :epost, :ident)
+            ON CONFLICT (oid) DO NOTHING
+            """.trimIndent(),
+            "oid" to SAKSBEHANDLER_OID,
+            "navn" to SAKSBEHANDLER_NAVN,
+            "epost" to SAKSBEHANDLER_EPOST,
+            "ident" to SAKSBEHANDLER_IDENT,
+        )
 
     protected fun Int.oppgave(vedtaksperiodeId: UUID): Long {
         require(this > 0) { "Forventet oppgaveId for vedtaksperiodeId=$vedtaksperiodeId må være større enn 0" }
-        val oppgaveIder = dbQuery.list(
-            "SELECT id FROM oppgave WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)",
-            "vedtaksperiodeId" to vedtaksperiodeId,
-        ) { it.long("id") }
+        val oppgaveIder =
+            dbQuery.list(
+                "SELECT id FROM oppgave WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)",
+                "vedtaksperiodeId" to vedtaksperiodeId,
+            ) { it.long("id") }
         assertTrue(oppgaveIder.size >= this) {
             "Forventer at det finnes minimum $this antall oppgaver for vedtaksperiodeId=$vedtaksperiodeId. Fant ${oppgaveIder.size} oppgaver."
         }
@@ -212,7 +214,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         )
         håndterVergemålOgFullmaktløsning(
             fødselsnummer = godkjenningsbehovTestdata.fødselsnummer,
-            fullmakter = fullmakter
+            fullmakter = fullmakter,
         )
     }
 
@@ -225,10 +227,12 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         avviksvurderingTestdata: AvviksvurderingTestdata = this.avviksvurderingTestdata,
         godkjenningsbehovTestdata: GodkjenningsbehovTestdata = this.godkjenningsbehovTestdata,
     ) {
-        if (regelverksvarsler.isNotEmpty()) håndterAktivitetsloggNyAktivitet(
-            fødselsnummer = godkjenningsbehovTestdata.fødselsnummer,
-            varselkoder = regelverksvarsler
-        )
+        if (regelverksvarsler.isNotEmpty()) {
+            håndterAktivitetsloggNyAktivitet(
+                fødselsnummer = godkjenningsbehovTestdata.fødselsnummer,
+                varselkoder = regelverksvarsler,
+            )
+        }
         håndterGodkjenningsbehov(
             harOppdatertMetainfo = harOppdatertMetadata,
             arbeidsgiverbeløp = arbeidsgiverbeløp,
@@ -242,11 +246,11 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
             håndterEnhetløsning(
                 fødselsnummer = godkjenningsbehovTestdata.fødselsnummer,
                 vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId,
-                enhet = enhet
+                enhet = enhet,
             )
             håndterInfotrygdutbetalingerløsning(
                 fødselsnummer = godkjenningsbehovTestdata.fødselsnummer,
-                vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId
+                vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId,
             )
             håndterArbeidsgiverinformasjonløsning(
                 fødselsnummer = godkjenningsbehovTestdata.fødselsnummer,
@@ -254,7 +258,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
             )
             håndterArbeidsforholdløsning(
                 fødselsnummer = godkjenningsbehovTestdata.fødselsnummer,
-                vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId
+                vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId,
             )
         }
     }
@@ -287,7 +291,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 kanGodkjennesAutomatisk = kanGodkjennesAutomatisk,
                 risikofunn = risikofunn,
                 vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId,
-                fødselsnummer = godkjenningsbehovTestdata.fødselsnummer
+                fødselsnummer = godkjenningsbehovTestdata.fødselsnummer,
             )
         }
         if (!erFerdigstilt(sisteGodkjenningsbehovId)) håndterInntektløsning(fødselsnummer = godkjenningsbehovTestdata.fødselsnummer)
@@ -345,7 +349,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 fom = fom,
                 tom = tom,
                 spleisBehandlingId = spleisBehandlingId,
-                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
+                yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
             )
         assertIngenEtterspurteBehov()
         assertVedtaksperiodeEksisterer(vedtaksperiodeId)
@@ -607,7 +611,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         )
         håndterVedtaksperiodeEndret(
             fødselsnummer = godkjenningsbehovTestdata.fødselsnummer,
-            vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId
+            vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId,
         )
         sisteMeldingId = sendGodkjenningsbehov(godkjenningsbehovTestdata)
         sisteGodkjenningsbehovId = sisteMeldingId
@@ -621,13 +625,14 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         godkjenningsbehovTestdata: GodkjenningsbehovTestdata = this.godkjenningsbehovTestdata,
     ) {
         val arbeidsgivereSomSkalLagres = godkjenningsbehovTestdata.orgnummereMedRelevanteArbeidsforhold.toSet()
-        val lagredeArbeidsgivere = sessionFactory.transactionalSessionScope {
-            it.arbeidsgiverRepository.finnAlle(
-                arbeidsgivereSomSkalLagres
-                    .map(ArbeidsgiverIdentifikator::fraString)
-                    .toSet()
-            )
-        }
+        val lagredeArbeidsgivere =
+            sessionFactory.transactionalSessionScope {
+                it.arbeidsgiverRepository.finnAlle(
+                    arbeidsgivereSomSkalLagres
+                        .map(ArbeidsgiverIdentifikator::fraString)
+                        .toSet(),
+                )
+            }
         håndterGodkjenningsbehovUtenValidering(
             arbeidsgiverbeløp = arbeidsgiverbeløp,
             personbeløp = personbeløp,
@@ -639,19 +644,17 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
             organisasjonsnummer = godkjenningsbehovTestdata.organisasjonsnummer,
             sammenligningsgrunnlagTotalbeløp = avviksvurderingTestdata.sammenligningsgrunnlag,
             avviksprosent = avviksvurderingTestdata.avviksprosent,
-            avviksvurderingId = avviksvurderingTestdata.avviksvurderingId
+            avviksvurderingId = avviksvurderingTestdata.avviksvurderingId,
         )
 
         when {
             !harOppdatertMetainfo -> assertEtterspurteBehov("HentPersoninfoV2")
             arbeidsgivereSomSkalLagres.size != lagredeArbeidsgivere.size -> assertEtterspurteBehov("Arbeidsgiverinformasjon")
-
             else -> assertEtterspurteBehov("Vergemål", "Fullmakt")
         }
     }
 
-    private fun sendGodkjenningsbehov(godkjenningsbehovTestdata: GodkjenningsbehovTestdata) =
-        meldingssender.sendGodkjenningsbehov(godkjenningsbehovTestdata).also { sisteMeldingId = it }
+    private fun sendGodkjenningsbehov(godkjenningsbehovTestdata: GodkjenningsbehovTestdata) = meldingssender.sendGodkjenningsbehov(godkjenningsbehovTestdata).also { sisteMeldingId = it }
 
     private fun håndterAvviksvurderingløsning(
         fødselsnummer: String = FØDSELSNUMMER,
@@ -667,7 +670,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
                 organisasjonsnummer = organisasjonsnummer,
                 sammenligningsgrunnlagTotalbeløp = sammenligningsgrunnlagTotalbeløp,
                 avviksprosent = avviksprosent,
-                avviksvurderingId = avviksvurderingId
+                avviksvurderingId = avviksvurderingId,
             )
     }
 
@@ -939,7 +942,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
                     Dagtype.Sykedag.toString(),
                     null,
                     100,
-                    null
+                    null,
                 ),
             ),
     ) {
@@ -1033,26 +1036,28 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         håndterUtbetalingErstattet(aktørId, fødselsnummer, organisasjonsnummer, utbetalingId = UUID.randomUUID())
     }
 
-    private fun erRevurdering(vedtaksperiodeId: UUID) = dbQuery.singleOrNull(
-        """
-        SELECT 1 FROM behandling
-        WHERE vedtaksperiode_id = :vedtaksperiodeId AND tilstand = '${LegacyBehandling.VedtakFattet.navn()}'
-        """.trimIndent(),
-        "vedtaksperiodeId" to vedtaksperiodeId,
-    ) { true } ?: false
+    private fun erRevurdering(vedtaksperiodeId: UUID) =
+        dbQuery.singleOrNull(
+            """
+            SELECT 1 FROM behandling
+            WHERE vedtaksperiode_id = :vedtaksperiodeId AND tilstand = '${LegacyBehandling.VedtakFattet.navn()}'
+            """.trimIndent(),
+            "vedtaksperiodeId" to vedtaksperiodeId,
+        ) { true } ?: false
 
     protected fun assertUtbetalinger(
         utbetalingId: UUID,
         forventetAntall: Int,
     ) {
-        val antall = dbQuery.single(
-            """
-            SELECT COUNT(1) FROM utbetaling_id ui
-            INNER JOIN utbetaling u ON ui.id = u.utbetaling_id_ref
-            WHERE ui.utbetaling_id = :utbetalingId
-            """.trimIndent(),
-            "utbetalingId" to utbetalingId,
-        ) { it.int(1) }
+        val antall =
+            dbQuery.single(
+                """
+                SELECT COUNT(1) FROM utbetaling_id ui
+                INNER JOIN utbetaling u ON ui.id = u.utbetaling_id_ref
+                WHERE ui.utbetaling_id = :utbetalingId
+                """.trimIndent(),
+                "utbetalingId" to utbetalingId,
+            ) { it.int(1) }
         assertEquals(forventetAntall, antall)
     }
 
@@ -1060,10 +1065,11 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         hendelseId: UUID,
         vararg forventedeTilstander: Kommandokjedetilstand,
     ) {
-        val tilstander = dbQuery.list(
-            "SELECT tilstand FROM command_context WHERE hendelse_id = :hendelseId ORDER BY id",
-            "hendelseId" to hendelseId,
-        ) { it.string("tilstand") }
+        val tilstander =
+            dbQuery.list(
+                "SELECT tilstand FROM command_context WHERE hendelse_id = :hendelseId ORDER BY id",
+                "hendelseId" to hendelseId,
+            ) { it.string("tilstand") }
         assertEquals(forventedeTilstander.map { it.name }.toList(), tilstander)
     }
 
@@ -1090,15 +1096,16 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
         oppgavestatus: Oppgavestatus,
     ) {
-        val sisteOppgavestatus = dbQuery.single(
-            """
-            SELECT status FROM oppgave
-            WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)
-            ORDER by id DESC
-            LIMIT 1
-            """.trimIndent(),
-            "vedtaksperiodeId" to vedtaksperiodeId,
-        ) { enumValueOf<Oppgavestatus>(it.string("status")) }
+        val sisteOppgavestatus =
+            dbQuery.single(
+                """
+                SELECT status FROM oppgave
+                WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)
+                ORDER by id DESC
+                LIMIT 1
+                """.trimIndent(),
+                "vedtaksperiodeId" to vedtaksperiodeId,
+            ) { enumValueOf<Oppgavestatus>(it.string("status")) }
         assertEquals(oppgavestatus, sisteOppgavestatus)
     }
 
@@ -1119,22 +1126,24 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     private fun hentOppgaveegenskaper(oppgaveId: Long): Set<Egenskap> {
-        val egenskaper = dbQuery.singleOrNull(
-            "select egenskaper from oppgave where id = :oppgaveId",
-            "oppgaveId" to oppgaveId,
-        ) { it.array<String>("egenskaper").map<String, Egenskap>(::enumValueOf).toSet() }
+        val egenskaper =
+            dbQuery.singleOrNull(
+                "select egenskaper from oppgave where id = :oppgaveId",
+                "oppgaveId" to oppgaveId,
+            ) { it.array<String>("egenskaper").map<String, Egenskap>(::enumValueOf).toSet() }
         return requireNotNull(egenskaper) { "Forventer å finne en oppgave for id=$oppgaveId" }
     }
 
     protected fun assertSaksbehandleroppgaveBleIkkeOpprettet(vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1) {
-        val antallOppgaver = dbQuery.list(
-            """
-            SELECT 1 FROM oppgave
-            JOIN vedtak v ON v.id = oppgave.vedtak_ref
-            WHERE vedtaksperiode_id = :vedtaksperiodeId
-            """.trimIndent(),
-            "vedtaksperiodeId" to vedtaksperiodeId,
-        ) { it.int(1) }
+        val antallOppgaver =
+            dbQuery.list(
+                """
+                SELECT 1 FROM oppgave
+                JOIN vedtak v ON v.id = oppgave.vedtak_ref
+                WHERE vedtaksperiode_id = :vedtaksperiodeId
+                """.trimIndent(),
+                "vedtaksperiodeId" to vedtaksperiodeId,
+            ) { it.int(1) }
         assertEquals(0, antallOppgaver.size)
     }
 
@@ -1142,10 +1151,11 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         vedtaksperiodeId: UUID,
         forventetAntall: Int,
     ) {
-        val antall = dbQuery.single(
-            "SELECT COUNT(1) FROM selve_varsel WHERE vedtaksperiode_id = :vedtaksperiodeId",
-            "vedtaksperiodeId" to vedtaksperiodeId,
-        ) { it.int(1) }
+        val antall =
+            dbQuery.single(
+                "SELECT COUNT(1) FROM selve_varsel WHERE vedtaksperiode_id = :vedtaksperiodeId",
+                "vedtaksperiodeId" to vedtaksperiodeId,
+            ) { it.int(1) }
         assertEquals(forventetAntall, antall)
     }
 
@@ -1153,11 +1163,12 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         vedtaksperiodeId: UUID,
         varselkode: String,
     ) {
-        val antall = dbQuery.single(
-            "SELECT COUNT(1) FROM selve_varsel WHERE vedtaksperiode_id = :vedtaksperiodeId AND kode = :varselkode",
-            "vedtaksperiodeId" to vedtaksperiodeId,
-            "varselkode" to varselkode,
-        ) { it.int(1) }
+        val antall =
+            dbQuery.single(
+                "SELECT COUNT(1) FROM selve_varsel WHERE vedtaksperiode_id = :vedtaksperiodeId AND kode = :varselkode",
+                "vedtaksperiodeId" to vedtaksperiodeId,
+                "varselkode" to varselkode,
+            ) { it.int(1) }
         assertEquals(1, antall)
     }
 
@@ -1238,60 +1249,67 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
     }
 
     protected fun assertOverstyringer(fødselsnummer: String) {
-        val totrinnsvurderingId = dbQuery.single(
-            """
+        val totrinnsvurderingId =
+            dbQuery.single(
+                """
             select tv.id from totrinnsvurdering tv 
                 inner join person p on p.id = tv.person_ref 
-            where p.fødselsnummer = :fodselsnummer""".trimMargin(),
-            "fodselsnummer" to fødselsnummer
-        ) { TotrinnsvurderingId(it.long("id")) }
-        val overstyringer = sessionFactory.transactionalSessionScope { session ->
-            session.overstyringRepository.finnAktive(totrinnsvurderingId)
-        }
+            where p.fødselsnummer = :fodselsnummer
+                """.trimMargin(),
+                "fodselsnummer" to fødselsnummer,
+            ) { TotrinnsvurderingId(it.long("id")) }
+        val overstyringer =
+            sessionFactory.transactionalSessionScope { session ->
+                session.overstyringRepository.finnAktive(totrinnsvurderingId)
+            }
         assertTrue(overstyringer.isNotEmpty())
     }
 
     protected fun assertTotrinnsvurdering(oppgaveId: Long) {
-        val erToTrinnsvurdering = dbQuery.singleOrNull(
-            """
-            SELECT 1 FROM totrinnsvurdering tv
-            INNER JOIN vedtak v on tv.person_ref = v.person_ref
-            INNER JOIN oppgave o on v.id = o.vedtak_ref
-            WHERE o.id = :oppgaveId
-            AND tv.tilstand = 'AVVENTER_SAKSBEHANDLER'
-            """.trimIndent(),
-            "oppgaveId" to oppgaveId,
-        ) { it.boolean(1) } ?: throw IllegalStateException("Finner ikke oppgave med id $oppgaveId")
+        val erToTrinnsvurdering =
+            dbQuery.singleOrNull(
+                """
+                SELECT 1 FROM totrinnsvurdering tv
+                INNER JOIN vedtak v on tv.person_ref = v.person_ref
+                INNER JOIN oppgave o on v.id = o.vedtak_ref
+                WHERE o.id = :oppgaveId
+                AND tv.tilstand = 'AVVENTER_SAKSBEHANDLER'
+                """.trimIndent(),
+                "oppgaveId" to oppgaveId,
+            ) { it.boolean(1) } ?: throw IllegalStateException("Finner ikke oppgave med id $oppgaveId")
         assertTrue(erToTrinnsvurdering) {
             "Forventer at oppgaveId=$oppgaveId krever totrinnsvurdering"
         }
     }
 
     protected fun assertTotrinnsvurderingForkastet(fødselsnummer: String) {
-        val totrinnsvurderingForkastet = dbQuery.singleOrNull(
-            """
-            SELECT 1 FROM totrinnsvurdering tv
-            INNER JOIN person p on p.id = tv.person_ref
-            WHERE p.fødselsnummer = :fodselsnummer
-            AND tv.vedtaksperiode_forkastet = true
-            """.trimIndent(),
-            "fodselsnummer" to fødselsnummer,
-        ) { it.boolean(1) }
-            ?: throw IllegalStateException("Finner ikke totrinns markert som forkastet for fødselsnummer=$fødselsnummer")
+        val totrinnsvurderingForkastet =
+            dbQuery.singleOrNull(
+                """
+                SELECT 1 FROM totrinnsvurdering tv
+                INNER JOIN person p on p.id = tv.person_ref
+                WHERE p.fødselsnummer = :fodselsnummer
+                AND tv.vedtaksperiode_forkastet = true
+                """.trimIndent(),
+                "fodselsnummer" to fødselsnummer,
+            ) { it.boolean(1) }
+                ?: throw IllegalStateException("Finner ikke totrinns markert som forkastet for fødselsnummer=$fødselsnummer")
         assertTrue(totrinnsvurderingForkastet) {
             "Forventer at totrinnsvurdering er markert som forkastet"
         }
     }
 
-    fun erFerdigstilt(godkjenningsbehovId: UUID) = dbQuery.single(
-        "SELECT tilstand FROM command_context WHERE hendelse_id = :godkjenningsbehovId ORDER by id DESC LIMIT 1",
-        "godkjenningsbehovId" to godkjenningsbehovId,
-    ) { it.string("tilstand") } == "FERDIG"
+    fun erFerdigstilt(godkjenningsbehovId: UUID) =
+        dbQuery.single(
+            "SELECT tilstand FROM command_context WHERE hendelse_id = :godkjenningsbehovId ORDER by id DESC LIMIT 1",
+            "godkjenningsbehovId" to godkjenningsbehovId,
+        ) { it.string("tilstand") } == "FERDIG"
 
-    fun commandContextId(godkjenningsbehovId: UUID) = dbQuery.single(
-        "SELECT context_id FROM command_context WHERE hendelse_id = :godkjenningsbehovId ORDER by id DESC LIMIT 1",
-        "godkjenningsbehovId" to godkjenningsbehovId,
-    ) { it.uuid("context_id") }
+    fun commandContextId(godkjenningsbehovId: UUID) =
+        dbQuery.single(
+            "SELECT context_id FROM command_context WHERE hendelse_id = :godkjenningsbehovId ORDER by id DESC LIMIT 1",
+            "godkjenningsbehovId" to godkjenningsbehovId,
+        ) { it.uuid("context_id") }
 
     protected fun person(
         fødselsnummer: String,
@@ -1302,10 +1320,11 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         "aktoerId" to aktørId,
     ) { it.int(1) }
 
-    private fun vedtak(vedtaksperiodeId: UUID) = dbQuery.single(
-        "SELECT COUNT(*) FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId",
-        "vedtaksperiodeId" to vedtaksperiodeId,
-    ) { it.int(1) }
+    private fun vedtak(vedtaksperiodeId: UUID) =
+        dbQuery.single(
+            "SELECT COUNT(*) FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId",
+            "vedtaksperiodeId" to vedtaksperiodeId,
+        ) { it.int(1) }
 
     private fun lagVarseldefinisjoner() {
         Varselkode.entries.forEach { varselkode ->
@@ -1332,16 +1351,16 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     protected fun mockSnapshot(fødselsnummer: String = FØDSELSNUMMER) {
         every { spleisClient.hentPerson(fødselsnummer) } returns
-                snapshot(
-                    versjon = 1,
-                    fødselsnummer = godkjenningsbehovTestdata.fødselsnummer,
-                    aktørId = godkjenningsbehovTestdata.aktørId,
-                    organisasjonsnummer = godkjenningsbehovTestdata.organisasjonsnummer,
-                    vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId,
-                    utbetalingId = godkjenningsbehovTestdata.utbetalingId,
-                    arbeidsgiverbeløp = 0,
-                    personbeløp = 0,
-                )
+            snapshot(
+                versjon = 1,
+                fødselsnummer = godkjenningsbehovTestdata.fødselsnummer,
+                aktørId = godkjenningsbehovTestdata.aktørId,
+                organisasjonsnummer = godkjenningsbehovTestdata.organisasjonsnummer,
+                vedtaksperiodeId = godkjenningsbehovTestdata.vedtaksperiodeId,
+                utbetalingId = godkjenningsbehovTestdata.utbetalingId,
+                arbeidsgiverbeløp = 0,
+                personbeløp = 0,
+            )
     }
 
     protected enum class Kommandokjedetilstand {

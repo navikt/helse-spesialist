@@ -5,10 +5,9 @@ import com.github.navikt.tbd_libs.rapids_and_rivers.River
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import io.micrometer.core.instrument.MeterRegistry
-import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.db.SessionFactory
 import no.nav.helse.mediator.asUUID
-import no.nav.helse.spesialist.application.logg.logg
+import no.nav.helse.spesialist.application.logg.loggInfo
 import java.time.Duration
 
 class MidnattRiver(
@@ -35,16 +34,16 @@ class MidnattRiver(
         meterRegistry: MeterRegistry,
     ) {
         val hendelseId = packet["@id"].asUUID()
-        logg.info("Mottok melding midnatt, {}", kv("hendelseId", hendelseId))
+        loggInfo("Mottok melding midnatt, hendelseId: $hendelseId")
 
         sessionFactory.transactionalSessionScope {
             val antallSlettet = it.dokumentDao.slettGamleDokumenter()
-            logg.info("Slettet $antallSlettet dokumenter")
+            loggInfo("Slettet $antallSlettet dokumenter")
         }
 
         sessionFactory.transactionalSessionScope {
             val antallSlettet = it.personPseudoIdDao.slettPseudoIderEldreEnn(EN_UKE)
-            logg.info("Slettet $antallSlettet pseudo-ider")
+            loggInfo("Slettet $antallSlettet dokumenter")
         }
     }
 }

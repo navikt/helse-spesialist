@@ -1,12 +1,11 @@
 package no.nav.helse.mediator
 
-import net.logstash.logback.argument.StructuredArguments.keyValue
 import no.nav.helse.db.OpptegnelseDao
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.spesialist.api.abonnement.AutomatiskBehandlingPayload
 import no.nav.helse.spesialist.api.abonnement.AutomatiskBehandlingUtfall
-import no.nav.helse.spesialist.application.logg.sikkerlogg
+import no.nav.helse.spesialist.application.logg.loggInfo
 import no.nav.helse.tellAutomatisering
 import no.nav.helse.tellAvvistÅrsak
 
@@ -26,9 +25,9 @@ class GodkjenningMediator(
             type = OpptegnelseDao.Opptegnelse.Type.FERDIGBEHANDLET_GODKJENNINGSBEHOV,
         )
         tellAutomatisering()
-        sikkerlogg.info(
-            "Automatisk godkjenning av vedtaksperiode ${behov.vedtaksperiodeId} for {}",
-            keyValue("fødselsnummer", behov.fødselsnummer),
+        loggInfo(
+            "Automatisk godkjenning av vedtaksperiode ${behov.vedtaksperiodeId}",
+            "fødselsnummer: ${behov.fødselsnummer}",
         )
     }
 
@@ -49,6 +48,13 @@ class GodkjenningMediator(
         )
         begrunnelser.forEach { tellAvvistÅrsak(it) }
         tellAutomatisering()
-        sikkerlogg.info("Automatisk avvisning av vedtaksperiode ${behov.vedtaksperiodeId} pga: $begrunnelser")
+        loggInfo(
+            "Automatisk avvisning av vedtaksperiode ${behov.vedtaksperiodeId}",
+            "fødselsnummer: ${behov.fødselsnummer}",
+        )
+        loggInfo(
+            "Automatisk avvisning av vedtaksperiode ${behov.vedtaksperiodeId}",
+            "fødselsnummer: ${behov.fødselsnummer}, begrunnelser: $begrunnelser",
+        )
     }
 }

@@ -3,7 +3,6 @@ package no.nav.helse.spesialist.db.dao
 import kotliquery.Session
 import no.nav.helse.db.Reservasjon
 import no.nav.helse.db.ReservasjonDao
-import no.nav.helse.spesialist.application.logg.sikkerlogg
 import no.nav.helse.spesialist.db.HelseDao
 import no.nav.helse.spesialist.db.MedDataSource
 import no.nav.helse.spesialist.db.MedSession
@@ -44,16 +43,13 @@ class PgReservasjonDao private constructor(
         HelseDao
             .asSQL(
                 """
-                SELECT r.*, s.*, now() as detteErNow FROM reserver_person r
+                SELECT r.*, s.* FROM reserver_person r
                 JOIN person p ON p.id = r.person_ref
                 JOIN saksbehandler s ON r.saksbehandler_ref = s.oid
                 WHERE p.fødselsnummer = :foedselsnummer AND r.gyldig_til > now();
                 """.trimIndent(),
                 "foedselsnummer" to fødselsnummer,
             ).singleOrNull { row ->
-                val personRef = row.long("person_ref")
-                val gyldigTil = row.instant("gyldig_til")
-                val detteErNow = row.instant("detteErNow")
                 val reservasjon =
                     Reservasjon(
                         Saksbehandler(
@@ -63,7 +59,6 @@ class PgReservasjonDao private constructor(
                             ident = row.string("ident"),
                         ),
                     )
-                sikkerlogg.info("Fant reservasjon for fødselsnummer $fødselsnummer med person_ref $personRef, gyldig til: $gyldigTil databasen mener at now er $detteErNow: $reservasjon")
                 reservasjon
             }
 }

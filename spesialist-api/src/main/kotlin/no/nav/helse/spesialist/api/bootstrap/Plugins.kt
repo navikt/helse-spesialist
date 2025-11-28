@@ -46,7 +46,7 @@ import no.nav.helse.spesialist.api.serialization.InstantIsoSerializer
 import no.nav.helse.spesialist.api.serialization.LocalDateIsoSerializer
 import no.nav.helse.spesialist.api.serialization.LocalDateTimeIsoSerializer
 import no.nav.helse.spesialist.api.serialization.UUIDStringSerializer
-import no.nav.helse.spesialist.application.logg.logg
+import no.nav.helse.spesialist.application.logg.loggThrowable
 import no.nav.helse.spesialist.application.logg.sikkerlogg
 import org.slf4j.event.Level
 import java.math.BigDecimal
@@ -138,8 +138,7 @@ fun StatusPagesConfig.configureStatusPages() {
     exception<Throwable> { call, cause ->
         val uri = call.request.uri
         val verb = call.request.httpMethod.value
-        logg.error("Unhandled: $verb", cause)
-        sikkerlogg.error("Unhandled: $verb - $uri", cause)
+        loggThrowable("Unhandled: $verb", uri, cause)
         call.respondText(
             text = "Det skjedde en uventet feil",
             status = HttpStatusCode.InternalServerError,

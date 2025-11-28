@@ -1,11 +1,8 @@
 package no.nav.helse.spesialist.api.feilhåndtering
 
 import io.ktor.http.HttpStatusCode
-import net.logstash.logback.argument.StructuredArguments.keyValue
-import net.logstash.logback.argument.StructuredArguments.kv
 import no.nav.helse.spesialist.api.tildeling.TildelingApiDto
-import no.nav.helse.spesialist.application.logg.logg
-import no.nav.helse.spesialist.application.logg.sikkerlogg
+import no.nav.helse.spesialist.application.logg.loggInfo
 import java.util.UUID
 
 abstract class Modellfeil protected constructor() : RuntimeException() {
@@ -28,10 +25,9 @@ class OppgaveIkkeTildelt(
     override val feilkode: String = "oppgave_er_ikke_tildelt"
 
     override fun logger() {
-        logg.info(
-            "Returnerer {} for {} for oppgaveId=$oppgaveId",
-            keyValue("httpkode", "${httpkode.value}"),
-            keyValue("feilkode", feilkode),
+        loggInfo(
+            "Returnerer ${httpkode.value} for $feilkode for oppgave",
+            "oppgaveId: $oppgaveId",
         )
     }
 }
@@ -44,15 +40,9 @@ class OppgaveTildeltNoenAndre(
     override val feilkode: String = "oppgave_tildelt_noen_andre"
 
     override fun logger() {
-        logg.info(
-            "Returnerer {} for {}",
-            keyValue("httpkode", "${httpkode.value}"),
-            keyValue("feilkode", feilkode),
-        )
-        sikkerlogg.info(
-            "Returnerer {} for {}, tildelingsinfo=$eksternKontekst",
-            keyValue("httpkode", "${httpkode.value}"),
-            keyValue("feilkode", feilkode),
+        loggInfo(
+            "Returnerer ${httpkode.value} for $feilkode for tildeling",
+            "tildelingsinfo: $eksternKontekst",
         )
     }
 }
@@ -65,10 +55,9 @@ class ManglerVurderingAvVarsler(
     override val feilkode: String = "mangler_vurdering_av_varsler"
 
     override fun logger() {
-        logg.info(
-            "Returnerer {} for {} for oppgaveId=$oppgaveId",
-            keyValue("httpkode", "${httpkode.value}"),
-            keyValue("feilkode", feilkode),
+        loggInfo(
+            "Returnerer ${httpkode.value} for $feilkode for tildeling",
+            "oppgaveId: $oppgaveId",
         )
     }
 }
@@ -81,9 +70,9 @@ class FinnerIkkeLagtPåVent(
     override val feilkode: String = "finner_ikke_paa_vent"
 
     override fun logger() {
-        logg.info(
-            "Finner ikke påvent-innslag for {}",
-            keyValue("oppgaveId", oppgaveId),
+        loggInfo(
+            "Finner ikke påvent-innslag for oppgave",
+            "oppgaveId: $oppgaveId",
         )
     }
 }
@@ -97,14 +86,9 @@ class IkkeTilgang(
     override val feilkode: String = "ikke_tilgang_til_oppgave"
 
     override fun logger() {
-        logg.info(
-            "Saksbehandler har ikke tilgang til å behandle oppgaven, {}",
-            keyValue("oppgaveId", oppgaveId),
-        )
-        sikkerlogg.info(
-            "Saksbehandler {} har ikke tilgang til å behandle oppgaven, {}",
-            keyValue("oid", oid),
-            keyValue("oppgaveId", oppgaveId),
+        loggInfo(
+            "Saksbehandler har ikke tilgang til å behandle oppgaven",
+            "oppgaveId: $oppgaveId, saksbehandlerOid: $oid",
         )
     }
 }
@@ -117,7 +101,10 @@ class OppgaveAlleredeSendtBeslutter(
     override val httpkode: HttpStatusCode = HttpStatusCode.Conflict
 
     override fun logger() {
-        logg.info("Oppgave med {} er allerede sendt til beslutter for totrinnsvurdering", kv("oppgaveId", oppgaveId))
+        loggInfo(
+            "Oppgave er allerede sendt til beslutter for totrinnsvurdering",
+            "oppgaveId: $oppgaveId",
+        )
     }
 }
 
@@ -129,7 +116,10 @@ class OppgaveAlleredeSendtIRetur(
     override val httpkode: HttpStatusCode = HttpStatusCode.Conflict
 
     override fun logger() {
-        logg.info("Oppgave med {} er allerede sendt i retur av beslutter til opprinnelig saksbehandler", kv("oppgaveId", oppgaveId))
+        loggInfo(
+            "Oppgave er allerede sendt i retur av beslutter til opprinnelig saksbehandler",
+            "oppgaveId: $oppgaveId",
+        )
     }
 }
 
@@ -141,6 +131,9 @@ class OppgaveKreverVurderingAvToSaksbehandlere(
     override val httpkode: HttpStatusCode = HttpStatusCode.Conflict
 
     override fun logger() {
-        logg.info("Oppgave med {} må behandles og besluttes av to forskjellige saksbehandlere", kv("oppgaveId", oppgaveId))
+        loggInfo(
+            "Oppgave må behandles og besluttes av to forskjellige saksbehandlere",
+            "oppgaveId: $oppgaveId",
+        )
     }
 }

@@ -9,7 +9,7 @@ import io.ktor.server.auth.principal
 import io.ktor.server.request.ApplicationRequest
 import no.nav.helse.spesialist.api.graphql.ContextValues.SAKSBEHANDLER
 import no.nav.helse.spesialist.api.graphql.ContextValues.TILGANGSGRUPPER
-import no.nav.helse.spesialist.application.logg.sikkerlogg
+import no.nav.helse.spesialist.application.logg.loggErrorWithNoThrowable
 import no.nav.helse.spesialist.application.tilgangskontroll.TilgangsgruppeUuider
 import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
@@ -27,7 +27,7 @@ class ContextFactory(
         val jwt =
             (
                 request.call.principal<JWTPrincipal>() ?: this.run {
-                    sikkerlogg.error("Ingen access_token for graphql-kall")
+                    loggErrorWithNoThrowable("Ingen access_token for graphql-kall")
                     return emptyMap<Any, Any>().toGraphQLContext()
                 }
             ).payload

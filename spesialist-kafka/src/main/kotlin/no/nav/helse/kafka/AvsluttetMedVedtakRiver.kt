@@ -26,8 +26,9 @@ import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vilkårsprøving.Avviksvurdering
 import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
 import no.nav.helse.modell.vilkårsprøving.Inntekt
-import no.nav.helse.spesialist.application.logg.logg
-import no.nav.helse.spesialist.application.logg.sikkerlogg
+import no.nav.helse.spesialist.application.logg.loggErrorWithNoThrowable
+import no.nav.helse.spesialist.application.logg.loggInfo
+import no.nav.helse.spesialist.application.logg.loggWarn
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import java.math.BigDecimal
@@ -70,9 +71,8 @@ class AvsluttetMedVedtakRiver(
                 put("vedtaksperiodeId", packet["vedtaksperiodeId"].asText())
             },
         ) {
-            logg.info("Melding $MELDINGNAVN mottatt")
             val meldingJson = packet.toJson()
-            sikkerlogg.info("Melding $MELDINGNAVN mottatt:\n$meldingJson")
+            loggInfo("Melding $MELDINGNAVN mottatt", "json:\n$meldingJson")
 
             try {
                 val spleisBehandlingId = packet["behandlingId"].asUUID()
@@ -97,8 +97,7 @@ class AvsluttetMedVedtakRiver(
                 }
                 sessionFactory.transactionalSessionScope { sessionContext ->
                     sessionContext.legacyPersonRepository.brukPersonHvisFinnes(packet["fødselsnummer"].asText()) {
-                        logg.info("Personen finnes i databasen, behandler melding $MELDINGNAVN")
-                        sikkerlogg.info("Personen finnes i databasen, behandler melding $MELDINGNAVN")
+                        loggInfo("Personen finnes i databasen, behandler melding $MELDINGNAVN", "fødselsnummer: $fødselsnummer")
 
                         val vedtaksperiode =
                             vedtaksperioder().finnBehandling(spleisBehandlingId)
@@ -106,15 +105,16 @@ class AvsluttetMedVedtakRiver(
                         val behandling = vedtaksperiode.finnBehandling(spleisBehandlingId)
 
                         if (behandling.tags.isEmpty()) {
-                            sikkerlogg.error(
-                                "Ingen tags funnet for spleisBehandlingId: ${behandling.spleisBehandlingId} på vedtaksperiodeId: ${behandling.vedtaksperiodeId}",
+                            loggErrorWithNoThrowable(
+                                "Ingen tags funnet for behandling",
+                                "vedtaksperiodeId: ${behandling.vedtaksperiodeId}, spleisBehandlingId: ${behandling.spleisBehandlingId}",
                             )
                         }
 
                         val sisteGodkjenningsbehov: Godkjenningsbehov? =
                             sessionContext.meldingDao.finnSisteGodkjenningsbehov(spleisBehandlingId)
                         if (sisteGodkjenningsbehov == null) {
-                            logg.warn("Finner ikke godkjenningsbehov for spleis behandlingid $spleisBehandlingId")
+                            loggWarn("Finner ikke godkjenningsbehov tilhørende behandling", "spleisBehandlingId: $spleisBehandlingId")
                         }
 
                         behandling.håndterVedtakFattet()
@@ -137,8 +137,7 @@ class AvsluttetMedVedtakRiver(
                     )
                 }
             } finally {
-                logg.info("Melding $MELDINGNAVN lest")
-                sikkerlogg.info("Melding $MELDINGNAVN lest")
+                loggInfo("Melding $MELDINGNAVN lest")
             }
         }
     }
@@ -210,15 +209,17 @@ class AvsluttetMedVedtakRiver(
                     )
                 } else {
                     when (fastsatt) {
-                        FASTSATT_I_INFOTRYGD ->
+                        FASTSATT_I_INFOTRYGD -> {
                             byggFastsattIInfotrygdSykepengegrunnlagsfakta(packet = packet)
+                        }
 
-                        FASTSATT_ETTER_HOVEDREGEL ->
+                        FASTSATT_ETTER_HOVEDREGEL -> {
                             byggFastsattEtterHovedregelSykepengegrunnlagsfakta(
                                 packet = packet,
                                 tags = behandling.tags,
                                 avviksvurdering = finnAvviksvurdering(behandling),
                             )
+                        }
 
                         FASTSATT_ETTER_SKJØNN -> {
                             val skjønnsfastsattSykepengegrunnlag =
@@ -232,7 +233,9 @@ class AvsluttetMedVedtakRiver(
                             )
                         }
 
-                        else -> error("Ukjent verdi for sykepengegrunnlagsfakta.fastsatt: \"$fastsatt\"")
+                        else -> {
+                            error("Ukjent verdi for sykepengegrunnlagsfakta.fastsatt: \"$fastsatt\"")
+                        }
                     }
                 },
         )

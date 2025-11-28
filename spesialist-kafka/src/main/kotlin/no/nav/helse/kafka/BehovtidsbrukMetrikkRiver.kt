@@ -9,7 +9,7 @@ import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageContext
 import com.github.navikt.tbd_libs.rapids_and_rivers_api.MessageMetadata
 import io.micrometer.core.instrument.MeterRegistry
 import no.nav.helse.registrerTidsbrukForBehov
-import no.nav.helse.spesialist.application.logg.logg
+import no.nav.helse.spesialist.application.logg.loggDebug
 import java.time.Duration
 import kotlin.time.toKotlinDuration
 
@@ -48,7 +48,7 @@ class BehovtidsbrukMetrikkRiver : SpesialistRiver {
                 ""
             }
 
-        logg.info("Registrerer svartid for $behov som $delay.$godkjenningslog")
+        loggDebug("Registrerer svartid for $behov som $delay.$godkjenningslog")
         registrerTidsbrukForBehov(behov.first(), delay)
     }
 }

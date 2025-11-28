@@ -15,6 +15,7 @@ import io.micrometer.core.instrument.Timer
 import io.micrometer.prometheusmetrics.PrometheusConfig
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import kotlinx.coroutines.runBlocking
+import no.nav.helse.spesialist.application.logg.loggThrowable
 import org.slf4j.Logger
 
 private val meterRegistry = Metrics.globalRegistry.add(PrometheusMeterRegistry(PrometheusConfig.DEFAULT))
@@ -45,7 +46,7 @@ internal fun Application.requestResponseTracing(logger: Logger) {
                     }
                 }.run()
         } catch (err: Throwable) {
-            logger.error("exception thrown during processing: ${err.message} callId=${call.callId} ", err)
+            loggThrowable("exception thrown during processing: ${err.message} callId=${call.callId} ", err)
             throw err
         }
     }

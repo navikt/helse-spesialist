@@ -20,8 +20,9 @@ import no.nav.helse.modell.person.SøknadSendt
 import no.nav.helse.modell.person.vedtaksperiode.LegacyVedtaksperiode
 import no.nav.helse.modell.varsel.LegacyVarselRepository
 import no.nav.helse.modell.varsel.Varseldefinisjon
-import no.nav.helse.spesialist.application.logg.logg
-import no.nav.helse.spesialist.application.logg.sikkerlogg
+import no.nav.helse.spesialist.application.logg.loggInfo
+import no.nav.helse.spesialist.application.logg.loggThrowable
+import no.nav.helse.spesialist.application.logg.loggWarn
 import no.nav.helse.spesialist.kafka.objectMapper
 import java.time.Duration
 import java.util.UUID
@@ -49,8 +50,10 @@ class MeldingMediator(
     fun skalBehandleMelding(melding: String): Boolean {
         val jsonNode = objectMapper.readTree(melding)
         if (poisonPillsCache.get(Unit).erPoisonPill(jsonNode)) {
-            logg.info("Hopper over melding med @id={}", jsonNode["@id"].asText())
-            sikkerlogg.info("Hopper over melding med @id={}, json=\n{}", jsonNode["@id"].asText(), jsonNode)
+            loggInfo(
+                "Hopper over melding med @id: ${jsonNode["@id"].asText()}",
+                "json: \n$jsonNode",
+            )
 
             return false
         }
@@ -76,10 +79,9 @@ class MeldingMediator(
         if (fødselsnummer.toDoubleOrNull() == null) return true
         val harPerson = personDao.finnPersonMedFødselsnummer(fødselsnummer) != null
         if (!harPerson) {
-            sikkerlogg.warn(
-                "Ignorerer melding med event_name: {}, person med fødselsnummer {} fins ikke i databasen",
-                eventName,
-                fødselsnummer,
+            loggWarn(
+                "Ignorerer melding med event_name: $eventName, person finnes ikke i databasen",
+                "fødselsnummer: $fødselsnummer",
             )
         }
         return harPerson
@@ -104,8 +106,8 @@ class MeldingMediator(
             ),
         ) {
             løsninger(kontekstbasertPubliserer, hendelseId, contextId)?.also { it.add(hendelseId, contextId, løsning) }
-                ?: logg.info(
-                    "mottok løsning som ikke kunne brukes fordi kommandoen ikke lengre er suspendert, eller fordi hendelsen er ukjent",
+                ?: loggInfo(
+                    "mottok løsning som ikke kan brukes fordi kommandoen ikke lengre er suspendert, eller fordi hendelsen er ukjent",
                 )
         }
     }
@@ -124,7 +126,7 @@ class MeldingMediator(
             ),
         ) {
             påminnelse(kontekstbasertPubliserer, hendelseId, contextId)?.fortsett(this)
-                ?: logg.info("mottok påminnelse som ikke kunne brukes fordi kommandoen ikke lengre er suspendert, eller fordi hendelsen er ukjent")
+                ?: loggInfo("mottok påminnelse som ikke kan brukes fordi kommandoen ikke lengre er suspendert, eller fordi hendelsen er ukjent")
         }
     }
 
@@ -167,7 +169,7 @@ class MeldingMediator(
         return løsninger.get() ?: run {
             val commandContext =
                 commandContextDao.finnSuspendert(contextId) ?: run {
-                    logg.info("Ignorerer melding fordi kommandokonteksten ikke er suspendert")
+                    loggInfo("Ignorerer melding fordi kommandokonteksten ikke er suspendert")
                     return null
                 }
             val melding = finnMelding(meldingId) ?: return null
@@ -182,7 +184,7 @@ class MeldingMediator(
     ): Påminnelse? {
         val commandContext =
             commandContextDao.finnSuspendertEllerFeil(contextId) ?: run {
-                logg.info("Ignorerer melding fordi kommandokonteksten ikke er suspendert eller feil")
+                loggInfo("Ignorerer melding fordi kommandokonteksten ikke er suspendert eller feil")
                 return null
             }
         val melding = finnMelding(meldingId) ?: return null
@@ -192,7 +194,7 @@ class MeldingMediator(
 
     private fun finnMelding(meldingId: UUID): Personmelding? =
         meldingDao.finn(meldingId) ?: run {
-            logg.info("Ignorerer melding fordi opprinnelig melding ikke finnes i databasen")
+            loggInfo("Ignorerer melding fordi opprinnelig melding ikke finnes i databasen")
             return null
         }
 
@@ -208,7 +210,7 @@ class MeldingMediator(
                         "behov" -> "behov: " + jsonNode["@behov"].joinToString { it.asText() }
                         else -> eventName
                     }
-                logg.info("Markerer melding id=$id, type=$type som behandlet i duplikatkontroll")
+                loggInfo("Markerer melding id=$id, type=$type som behandlet i duplikatkontroll")
                 meldingDuplikatkontrollDao.lagre(id, type)
             }
         }
@@ -224,8 +226,11 @@ class MeldingMediator(
                 meldingId?.let { put("meldingId", it.toString()) }
             },
         ) {
-            logg.error("alvorlig feil: ${err.message} (se sikkerlogg for melding)", err)
-            sikkerlogg.error("alvorlig feil: ${err.message}\n$message", err)
+            loggThrowable(
+                "alvorlig feil: ${err.message}",
+                "json:\n$message",
+                err,
+            )
         }
     }
 
@@ -240,16 +245,14 @@ class MeldingMediator(
                 "meldingnavn" to meldingnavn,
             ),
         ) {
-            logg.info("Melding SøknadSendt mottatt")
-            sikkerlogg.info("Melding SøknadSendt mottatt:\n${melding.toJson()}")
+            loggInfo("Melding SøknadSendt mottatt", "json: \n${melding.toJson()}")
             meldingDao.lagre(melding)
             val utgåendeMeldingerMediator = UtgåendeMeldingerMediator()
             sessionFactory.transactionalSessionScope { sessionContext ->
                 kommandofabrikk.iverksettSøknadSendt(melding, utgåendeMeldingerMediator, sessionContext)
             }
             utgåendeMeldingerMediator.publiserOppsamledeMeldinger(melding, kontekstbasertPubliserer)
-            logg.info("Melding SøknadSendt lest")
-            sikkerlogg.info("Melding SøknadSendt lest")
+            loggInfo("Melding SøknadSendt lest")
         }
     }
 
@@ -265,8 +268,7 @@ class MeldingMediator(
                 if (melding is Vedtaksperiodemelding) put("vedtaksperiodeId", melding.vedtaksperiodeId().toString())
             },
         ) {
-            logg.info("Melding $meldingnavn mottatt")
-            sikkerlogg.info("Melding $meldingnavn mottatt:\n${melding.toJson()}")
+            loggInfo("Melding $meldingnavn mottatt", "json: \n${melding.toJson()}")
             meldingDao.lagre(melding)
             behandleMelding(melding, kontekstbasertPubliserer)
         }
@@ -284,8 +286,7 @@ class MeldingMediator(
                 "meldingnavn" to meldingnavn,
             ),
         ) {
-            logg.info("Melding $meldingnavn gjenopptatt")
-            sikkerlogg.info("Melding $meldingnavn gjenopptatt:\n${melding.toJson()}")
+            loggInfo("Melding $meldingnavn gjenopptatt", "json: \n${melding.toJson()}")
             behandleMelding(melding, kontekstbasertPubliserer) { commandContext }
         }
     }
@@ -310,8 +311,7 @@ class MeldingMediator(
         try {
             sessionFactory.transactionalSessionScope { sessionContext ->
                 sessionContext.legacyPersonRepository.brukPersonHvisFinnes(melding.fødselsnummer()) {
-                    logg.info("Personen finnes i databasen, behandler melding $meldingnavn")
-                    sikkerlogg.info("Personen finnes i databasen, behandler melding $meldingnavn")
+                    loggInfo("Personen finnes i databasen, behandler melding $meldingnavn", "fødselsnummer: ${melding.fødselsnummer()}")
                     val kommandostarter =
                         kommandofabrikk.lagKommandostarter(
                             setOf(utgåendeMeldingerMediator),
@@ -325,8 +325,7 @@ class MeldingMediator(
         } catch (e: Exception) {
             throw RuntimeException("Feil ved behandling av melding $meldingnavn", e)
         } finally {
-            logg.info("Melding $meldingnavn lest")
-            sikkerlogg.info("Melding $meldingnavn lest")
+            loggInfo("Melding $meldingnavn lest")
         }
     }
 
@@ -351,10 +350,7 @@ class MeldingMediator(
             jsonNode: JsonNode,
         ) {
             val behov = jsonNode["@behov"].map(JsonNode::asText)
-            "fortsetter utførelse av kommandokjede for ${melding::class.simpleName} som følge av løsninger $behov".let {
-                logg.info(it)
-                sikkerlogg.info("$it\nInnkommende melding:\n\t$jsonNode")
-            }
+            loggInfo("fortsetter utførelse av kommandokjede for ${melding::class.simpleName} som følge av løsninger på $behov", "løsning-json: \n$jsonNode")
             mediator.gjenopptaMelding(melding, commandContext, kontekstbasertPubliserer)
         }
     }
@@ -365,10 +361,7 @@ class MeldingMediator(
         private val commandContext: CommandContext,
     ) {
         fun fortsett(mediator: MeldingMediator) {
-            "Fortsetter utførelse av kommandokontekst som følge av påminnelse".let {
-                logg.info(it)
-                sikkerlogg.info("$it:\n{}", melding.toJson())
-            }
+            loggInfo("fortsetter utførelse av kommandokjede for ${melding::class.simpleName} som følge av påminnelse", "melding-json: \n${melding.toJson()}")
             mediator.gjenopptaMelding(melding, commandContext, kontekstbasertPubliserer)
         }
     }

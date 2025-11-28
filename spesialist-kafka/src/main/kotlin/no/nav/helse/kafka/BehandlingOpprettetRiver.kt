@@ -10,7 +10,7 @@ import no.nav.helse.mediator.MeldingMediator
 import no.nav.helse.mediator.asUUID
 import no.nav.helse.modell.vedtaksperiode.BehandlingOpprettet
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
-import no.nav.helse.spesialist.application.logg.logg
+import no.nav.helse.spesialist.application.logg.loggInfo
 
 class BehandlingOpprettetRiver(
     private val mediator: MeldingMediator,
@@ -34,7 +34,10 @@ class BehandlingOpprettetRiver(
         }
 
     fun behandlerIkke(organisasjonsnummer: String) {
-        logg.info("Tar ikke imot behandling opprettet for: $organisasjonsnummer")
+        loggInfo(
+            "Tar ikke imot behandling opprettet på grunn av manglende støtte for yrkesaktivitetstype",
+            "organisasjonsnummer: $organisasjonsnummer",
+        )
     }
 
     override fun onPacket(
