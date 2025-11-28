@@ -76,11 +76,10 @@ class PgPersonApiDao internal constructor(
             """
             select 1
             from person p
-            left join person_info pi on p.info_ref = pi.id
-            left join egen_ansatt ea on ea.person_ref = p.id
-            left join enhet e on p.enhet_ref = e.id
+            join person_info pi on p.info_ref = pi.id
+            join egen_ansatt ea on ea.person_ref = p.id
+            join enhet e on p.enhet_ref = e.id
             where p.fødselsnummer = :fodselsnummer
-                and (pi.id is not null and ea.er_egen_ansatt is not null and e.id is not null)
             """.trimIndent(),
             "fodselsnummer" to fødselsnummer,
         ).singleOrNull { true } ?: false
