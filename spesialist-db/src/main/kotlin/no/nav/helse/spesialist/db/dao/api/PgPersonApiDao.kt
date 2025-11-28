@@ -79,7 +79,7 @@ class PgPersonApiDao internal constructor(
             join person_info pi on p.info_ref = pi.id
             join egen_ansatt ea on ea.person_ref = p.id
             join enhet e on p.enhet_ref = e.id
-            where p.fødselsnummer = :fodselsnummer
+            where p.fødselsnummer = :fodselsnummer and p.personinfo_oppdatert > current_timestamp - interval '14 days'
             """.trimIndent(),
             "fodselsnummer" to fødselsnummer,
         ).singleOrNull { true } ?: false

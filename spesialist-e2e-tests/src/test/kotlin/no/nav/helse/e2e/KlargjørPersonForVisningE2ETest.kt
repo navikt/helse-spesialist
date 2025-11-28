@@ -55,11 +55,48 @@ class KlargjørPersonForVisningE2ETest : AbstractE2ETest() {
         assertOpptegnelse(fødselsnummer, OpptegnelseDao.Opptegnelse.Type.PERSON_KLAR_TIL_BEHANDLING)
     }
 
+    @Test
+    fun `Innhenter personinfo hvis personinfo er utdatert`() {
+        val fødselsnummer = lagFødselsnummer()
+        vedtaksløsningenMottarNySøknad(fødselsnummer = fødselsnummer)
+        spleisOppretterNyBehandling(fødselsnummer = fødselsnummer)
+        spesialistBehandlerGodkjenningsbehovFremTilOppgave(godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(fødselsnummer = fødselsnummer))
+
+        settPersoninfoTilUtdatert(fødselsnummer)
+        håndterSkalKlargjøresForVisning(fødselsnummer = fødselsnummer)
+        håndterPersoninfoløsning(fødselsnummer = fødselsnummer)
+
+        assertHarTilgangsdata(fødselsnummer)
+        assertOpptegnelse(fødselsnummer, OpptegnelseDao.Opptegnelse.Type.PERSON_KLAR_TIL_BEHANDLING)
+    }
+
+    fun settPersoninfoTilUtdatert(fødselsnummer: String) =
+        sessionOf(dataSource).use {
+            @Language("PostgreSQL") val query = """
+                update person
+                set personinfo_oppdatert = current_timestamp - interval '14 days'
+                where fødselsnummer = :foedselsnummer
+            """
+            it.run(queryOf(query, mapOf("foedselsnummer" to fødselsnummer)).asUpdate)
+        }
+
+
     private fun assertOpptegnelse(fødselsnummer: String, opptegnelseType: OpptegnelseDao.Opptegnelse.Type) {
         val opptegnelser = sessionOf(dataSource).use {
             @Language("PostgreSQL")
-            val query = """SELECT type FROM opptegnelse WHERE person_id = (SELECT id FROM person WHERE fødselsnummer = ?)"""
-            it.run(queryOf(query, fødselsnummer).map { row -> enumValueOf<OpptegnelseDao.Opptegnelse.Type>(row.string("type")) }.asList)
+            val query = """
+                SELECT type
+                FROM opptegnelse
+                WHERE person_id = (
+                    SELECT id FROM person WHERE fødselsnummer = :foedselsnummer
+                ) AND type = :opptegnelseType
+            """.trimIndent()
+            it.run(
+                queryOf(
+                    query,
+                    mapOf("foedselsnummer" to fødselsnummer, "opptegnelseType" to opptegnelseType.name)
+                ).map { row -> enumValueOf<OpptegnelseDao.Opptegnelse.Type>(row.string("type")) }.asList
+            )
         }
 
         assertEquals(1, opptegnelser.size)
