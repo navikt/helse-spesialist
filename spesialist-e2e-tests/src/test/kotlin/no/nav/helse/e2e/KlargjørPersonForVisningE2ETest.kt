@@ -55,20 +55,6 @@ class KlargjørPersonForVisningE2ETest : AbstractE2ETest() {
         assertOpptegnelse(fødselsnummer, OpptegnelseDao.Opptegnelse.Type.PERSON_KLAR_TIL_BEHANDLING)
     }
 
-    @Test
-    fun `Feilende test - skal kunne vise personen når tilgangsdata er hentet inn`() {
-        val fødselsnummer = lagFødselsnummer()
-
-        vedtaksløsningenMottarNySøknad(fødselsnummer = fødselsnummer)
-        spleisOppretterNyBehandling(fødselsnummer = fødselsnummer)
-        håndterSkalKlargjøresForVisning(fødselsnummer = fødselsnummer)
-        håndterPersoninfoløsning(fødselsnummer = fødselsnummer)
-        håndterEnhetløsning(fødselsnummer = fødselsnummer)
-        håndterEgenansattløsning(fødselsnummer = fødselsnummer)
-
-        assertKanVisePersonen(fødselsnummer)
-    }
-
     private fun assertOpptegnelse(fødselsnummer: String, opptegnelseType: OpptegnelseDao.Opptegnelse.Type) {
         val opptegnelser = sessionOf(dataSource).use {
             @Language("PostgreSQL")
@@ -81,11 +67,6 @@ class KlargjørPersonForVisningE2ETest : AbstractE2ETest() {
     }
 
     private fun assertHarTilgangsdata(fødselsnummer: String) {
-        val dao = daos.personApiDao
-        assertTrue(dao.harDataNødvendigForVisning(fødselsnummer))
-    }
-
-    private fun assertKanVisePersonen(fødselsnummer: String) {
         val dao = daos.personApiDao
         assertTrue(dao.harDataNødvendigForVisning(fødselsnummer))
     }
