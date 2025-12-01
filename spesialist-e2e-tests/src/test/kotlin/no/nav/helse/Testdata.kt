@@ -3,8 +3,6 @@ package no.nav.helse
 import no.nav.helse.modell.utbetaling.Utbetalingtype.UTBETALING
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
-import no.nav.helse.spesialist.api.graphql.schema.ApiLovhjemmel
-import no.nav.helse.spesialist.api.graphql.schema.ApiSkjonnsfastsettelse
 import no.nav.helse.spesialist.test.TestPerson
 import no.nav.helse.spleis.graphql.enums.GraphQLInntektstype
 import no.nav.helse.spleis.graphql.enums.GraphQLPeriodetilstand
@@ -111,26 +109,6 @@ object Testdata {
             dodsdato = null,
             vilkarsgrunnlag = emptyList(),
         )
-
-    fun skjønnsvurdering() = ApiSkjonnsfastsettelse.ApiSkjonnsfastsettelseArbeidsgiver(
-        organisasjonsnummer = testperson.orgnummer,
-        arlig = 1.0,
-        fraArlig = 1.0,
-        arsak = "årsak",
-        type = ApiSkjonnsfastsettelse.ApiSkjonnsfastsettelseArbeidsgiver.ApiSkjonnsfastsettelseType.OMREGNET_ARSINNTEKT,
-        begrunnelseMal = "begrunnelseMal",
-        begrunnelseKonklusjon = "begrunnelseKonklusjon",
-        begrunnelseFritekst = "begrunnelseFritekst",
-        lovhjemmel = ApiLovhjemmel(
-            paragraf = "paragraf",
-            ledd = "ledd",
-            bokstav = "bokstav",
-            lovverk = "folketrygdloven",
-            lovverksversjon = "",
-        ),
-        initierendeVedtaksperiodeId = testperson.vedtaksperiodeId1.toString(),
-    )
-
 }
 
 data class GodkjenningsbehovTestdata(
