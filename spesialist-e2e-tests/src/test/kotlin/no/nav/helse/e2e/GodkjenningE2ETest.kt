@@ -95,7 +95,7 @@ class GodkjenningE2ETest : AbstractE2ETest() {
     @Test
     fun `oppdaterer behandlingsinformasjon ved påminnet godkjenningsbehov`() {
         val spleisBehandlingId1 = UUID.randomUUID()
-        val tags1 = listOf("tag 1", "tag 2")
+        val tags1 = listOf("tag 1", "tag 2", "Arbeidsgiverutbetaling")
         vedtaksløsningenMottarNySøknad()
         spleisOppretterNyBehandling(spleisBehandlingId = spleisBehandlingId1)
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
@@ -104,7 +104,7 @@ class GodkjenningE2ETest : AbstractE2ETest() {
         )
         assertBehandlingsinformasjon(VEDTAKSPERIODE_ID, tags1, spleisBehandlingId1)
 
-        val tags2 = listOf("tag 2", "tag 3")
+        val tags2 = listOf("tag 2", "tag 3", "Arbeidsgiverutbetaling")
         håndterGodkjenningsbehovUtenValidering(
             godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(tags = tags2, spleisBehandlingId = spleisBehandlingId1),
         )
@@ -219,7 +219,7 @@ class GodkjenningE2ETest : AbstractE2ETest() {
                         gyldigFraOgMed = LocalDate.now(),
                     ),
                 ),
-            fremtidsfullmakter = listOf(VergemålJson.Vergemål(voksen))
+            fremtidsfullmakter = listOf(VergemålJson.Vergemål(voksen)),
         )
         håndterÅpneOppgaverløsning()
         håndterRisikovurderingløsning()
@@ -304,15 +304,16 @@ class GodkjenningE2ETest : AbstractE2ETest() {
         // simulerer at første periode omgjøres
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             kanGodkjennesAutomatisk = true,
-            godkjenningsbehovTestdata = GodkjenningsbehovTestdata(
-                fødselsnummer = FØDSELSNUMMER,
-                aktørId = AKTØR,
-                organisasjonsnummer = ORGNR,
-                vedtaksperiodeId = vedtaksperiodeId1,
-                utbetalingId = UTBETALING_ID,
-                spleisBehandlingId = behandlingId1,
-                skjæringstidspunkt = 1.januar
-            ),
+            godkjenningsbehovTestdata =
+                GodkjenningsbehovTestdata(
+                    fødselsnummer = FØDSELSNUMMER,
+                    aktørId = AKTØR,
+                    organisasjonsnummer = ORGNR,
+                    vedtaksperiodeId = vedtaksperiodeId1,
+                    utbetalingId = UTBETALING_ID,
+                    spleisBehandlingId = behandlingId1,
+                    skjæringstidspunkt = 1.januar,
+                ),
         )
 
         assertVarsler(vedtaksperiodeId1, 1)
@@ -337,15 +338,16 @@ class GodkjenningE2ETest : AbstractE2ETest() {
         // simulerer at første periode omgjøres
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
             kanGodkjennesAutomatisk = true,
-            godkjenningsbehovTestdata = GodkjenningsbehovTestdata(
-                fødselsnummer = FØDSELSNUMMER,
-                aktørId = AKTØR,
-                organisasjonsnummer = ORGNR,
-                vedtaksperiodeId = vedtaksperiodeId1,
-                utbetalingId = UTBETALING_ID,
-                spleisBehandlingId = behandlingId1,
-                skjæringstidspunkt = 1.januar
-            ),
+            godkjenningsbehovTestdata =
+                GodkjenningsbehovTestdata(
+                    fødselsnummer = FØDSELSNUMMER,
+                    aktørId = AKTØR,
+                    organisasjonsnummer = ORGNR,
+                    vedtaksperiodeId = vedtaksperiodeId1,
+                    utbetalingId = UTBETALING_ID,
+                    spleisBehandlingId = behandlingId1,
+                    skjæringstidspunkt = 1.januar,
+                ),
         )
 
         assertVarsler(vedtaksperiodeId1, 0)
@@ -359,7 +361,7 @@ class GodkjenningE2ETest : AbstractE2ETest() {
         spleisOppretterNyBehandling()
         val gammelTag = "GAMMEL_KJEDELIG_TAG"
         spesialistBehandlerGodkjenningsbehovFremTilOppgave(
-            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(tags = listOf(gammelTag))
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(tags = listOf(gammelTag, "Arbeidsgiverutbetaling")),
         )
         val oppgaveId = inspektør.oppgaveId()
         val godkjenningsbehovData = finnGodkjenningsbehovJson(oppgaveId).let { it["Godkjenning"] }
@@ -367,30 +369,34 @@ class GodkjenningE2ETest : AbstractE2ETest() {
 
         val nyTag = "NY_OG_BANEBRYTENDE_TAG"
         håndterGodkjenningsbehovUtenValidering(
-            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(tags = listOf(nyTag))
+            godkjenningsbehovTestdata = godkjenningsbehovTestdata.copy(tags = listOf(nyTag, "Arbeidsgiverutbetaling")),
         )
         val oppdaterteGodkjenningsbehovData = finnGodkjenningsbehovJson(oppgaveId).let { it["Godkjenning"] }
-        assertEquals(setOf(nyTag), oppdaterteGodkjenningsbehovData["tags"].map { it.asText() }.toSet())
+        assertEquals(setOf(nyTag, "Arbeidsgiverutbetaling"), oppdaterteGodkjenningsbehovData["tags"].map { it.asText() }.toSet())
     }
 
-    private fun finnGodkjenningsbehovJson(oppgaveId: Long) = dbQuery.single(
-        """
-        select h.data from hendelse h
-        join oppgave o on h.id = o.hendelse_id_godkjenningsbehov
-        where o.id = :oppgaveId
-        """.trimIndent(),
-        "oppgaveId" to oppgaveId
-    ) { it.string("data") }.let { objectMapper.readTree(it) }
+    private fun finnGodkjenningsbehovJson(oppgaveId: Long) =
+        dbQuery
+            .single(
+                """
+                select h.data from hendelse h
+                join oppgave o on h.id = o.hendelse_id_godkjenningsbehov
+                where o.id = :oppgaveId
+                """.trimIndent(),
+                "oppgaveId" to oppgaveId,
+            ) { it.string("data") }
+            .let { objectMapper.readTree(it) }
 
     private fun assertBehandlingsinformasjon(
         vedtaksperiodeId: UUID,
         forventedeTags: List<String>,
         forventetSpleisBehandlingId: UUID,
     ) {
-        val (tags, spleisBehandlingId) = dbQuery.single(
-            "SELECT tags, spleis_behandling_id FROM behandling WHERE vedtaksperiode_id = :vedtaksperiodeId",
-            "vedtaksperiodeId" to vedtaksperiodeId
-        ) { it.array<String>("tags").toList() to it.uuid("spleis_behandling_id") }
+        val (tags, spleisBehandlingId) =
+            dbQuery.single(
+                "SELECT tags, spleis_behandling_id FROM behandling WHERE vedtaksperiode_id = :vedtaksperiodeId",
+                "vedtaksperiodeId" to vedtaksperiodeId,
+            ) { it.array<String>("tags").toList() to it.uuid("spleis_behandling_id") }
 
         assertEquals(forventedeTags, tags)
         assertEquals(forventetSpleisBehandlingId, spleisBehandlingId)

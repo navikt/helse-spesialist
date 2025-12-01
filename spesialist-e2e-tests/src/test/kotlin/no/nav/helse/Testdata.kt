@@ -128,8 +128,8 @@ data class GodkjenningsbehovTestdata(
     val utbetalingtype: no.nav.helse.modell.utbetaling.Utbetalingtype = UTBETALING,
     val vilkårsgrunnlagId: UUID = UUID.randomUUID(),
     val spleisBehandlingId: UUID = UUID.randomUUID(),
-    val tags: List<String> = emptyList(),
-    val foreløpigBeregnetSluttPåSykepenger: LocalDate = 1.desember()
+    val tags: List<String> = listOf("Arbeidsgiverutbetaling"),
+    val foreløpigBeregnetSluttPåSykepenger: LocalDate = 1.desember(),
 )
 
 data class AvviksvurderingTestdata(

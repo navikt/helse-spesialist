@@ -63,7 +63,7 @@ abstract class AbstractE2EIntegrationTest {
     protected fun meldinger() = testRapid.meldingslogg(testContext.person.fødselsnummer)
 
     protected fun søknadOgGodkjenningbehovKommerInn(
-        tags: List<String> = listOf("Innvilget"),
+        tags: List<String> = listOf("Innvilget", "Arbeidsgiverutbetaling"),
         tilleggsmeldinger: TilleggsmeldingReceiver.() -> Unit = {},
     ): Vedtaksperiode {
         personSenderSøknad()
@@ -352,8 +352,9 @@ abstract class AbstractE2EIntegrationTest {
 
     protected fun spleisSenderGodkjenningsbehov(
         vedtaksperiode: Vedtaksperiode,
-        tags: List<String> = listOf("Innvilget"),
+        tags: List<String> = listOf("Innvilget", "Arbeidsgiverutbetaling"),
     ) {
+        vedtaksperiode.tags = tags
         testRapid.publish(
             testContext.person.fødselsnummer,
             Meldingsbygger.byggGodkjenningsbehov(

@@ -12,17 +12,21 @@ class Vedtaksperiode(
     var tom: LocalDate = 31 jan 2018,
     var skjæringstidspunkt: LocalDate = fom,
     arbeidsgiver: Arbeidsgiver,
-    var sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta = Sykepengegrunnlagsfakta(
-        skjæringstidspunkt = skjæringstidspunkt,
-        fastsatt = Sykepengegrunnlagsfakta.FastsattType.EtterHovedregel,
-        arbeidsgivere = listOf(
-            Sykepengegrunnlagsfakta.Arbeidsgiver(
-                organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
-                omregnetÅrsinntekt = 600000.0,
-            )
-        )
-    ),
+    var sykepengegrunnlagsfakta: Sykepengegrunnlagsfakta =
+        Sykepengegrunnlagsfakta(
+            skjæringstidspunkt = skjæringstidspunkt,
+            fastsatt = Sykepengegrunnlagsfakta.FastsattType.EtterHovedregel,
+            arbeidsgivere =
+                listOf(
+                    Sykepengegrunnlagsfakta.Arbeidsgiver(
+                        organisasjonsnummer = arbeidsgiver.organisasjonsnummer,
+                        omregnetÅrsinntekt = 600000.0,
+                    ),
+                ),
+        ),
 ) {
+    var tags: List<String> = emptyList()
+
     fun spleisBehandlingIdForÅByggeMelding(meldingsnavn: String): UUID =
         spleisBehandlingId
             ?: error("Feil i testoppsett: Forsøkte å lage en $meldingsnavn-melding før spleisBehandlingId var satt")
@@ -31,5 +35,7 @@ class Vedtaksperiode(
         utbetalingId
             ?: error("Feil i testoppsett: Forsøkte å lage en $meldingsnavn-melding før utbetalingId var satt")
 
-    fun nyUtbetaling() { utbetalingId = UUID.randomUUID() }
+    fun nyUtbetaling() {
+        utbetalingId = UUID.randomUUID()
+    }
 }

@@ -31,8 +31,6 @@ class Utbetaling(
 
     internal fun ingenUtbetaling() = arbeidsgiverbeløp == 0 && personbeløp == 0
 
-    internal fun harEndringIUtbetalingTilSykmeldt() = personbeløp != 0
-
     override fun equals(other: Any?): Boolean =
         this === other ||
             (

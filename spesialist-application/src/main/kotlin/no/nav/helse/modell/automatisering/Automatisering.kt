@@ -31,6 +31,7 @@ import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.sikkerlogg
+import no.nav.helse.spesialist.domain.UtbetalingTag.Companion.inneholderUtbetalingTilSykmeldt
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -114,7 +115,7 @@ internal class Automatisering(
                 maksdato = maksdato,
                 tags = tags,
             )
-        val erUTS = utbetaling.harEndringIUtbetalingTilSykmeldt()
+        val harUtbetalingTilSykmeldt = tags.inneholderUtbetalingTilSykmeldt()
         val flereArbeidsgivere = vedtakDao.finnInntektskilde(vedtaksperiodeId) == Inntektskilde.FLERE_ARBEIDSGIVERE
         val erFørstegangsbehandling = periodetype == FØRSTEGANGSBEHANDLING
 
@@ -125,7 +126,9 @@ internal class Automatisering(
                 vurderOmBehandlingSkyldesKorrigertSøknad(fødselsnummer, vedtaksperiodeId, sykefraværstilfelle)
         ) {
             is SkyldesKorrigertSøknad.KanIkkeAutomatiseres,
-            -> return Automatiseringsresultat.KanIkkeAutomatiseres(listOf(resultat.årsak))
+            -> {
+                return Automatiseringsresultat.KanIkkeAutomatiseres(listOf(resultat.årsak))
+            }
 
             is AutomatiserKorrigertSøknadResultat.SkyldesIkkeKorrigertSøknad,
             is SkyldesKorrigertSøknad.KanAutomatiseres,
@@ -134,7 +137,7 @@ internal class Automatisering(
         }
 
         if (!erEgenAnsattEllerSkjermet(fødselsnummer)) {
-            avgjørStikkprøve(erUTS, flereArbeidsgivere, erFørstegangsbehandling, yrkesaktivitetstype)?.let {
+            avgjørStikkprøve(harUtbetalingTilSykmeldt, flereArbeidsgivere, erFørstegangsbehandling, yrkesaktivitetstype)?.let {
                 return Automatiseringsresultat.Stikkprøve(it)
             }
         } else {
@@ -220,34 +223,44 @@ internal class Automatisering(
         when (yrkesaktivitetstype) {
             Yrkesaktivitetstype.ARBEIDSTAKER -> {
                 when {
-                    UTS ->
+                    UTS -> {
                         when {
-                            flereArbeidsgivere ->
+                            flereArbeidsgivere -> {
                                 when {
                                     førstegangsbehandling && stikkprøver.utsFlereArbeidsgivereFørstegangsbehandling() -> return "UTS, flere arbeidsgivere, førstegangsbehandling"
                                     !førstegangsbehandling && stikkprøver.utsFlereArbeidsgivereForlengelse() -> return "UTS, flere arbeidsgivere, forlengelse"
                                 }
+                            }
 
-                            !flereArbeidsgivere ->
+                            !flereArbeidsgivere -> {
                                 when {
                                     førstegangsbehandling && stikkprøver.utsEnArbeidsgiverFørstegangsbehandling() -> return "UTS, en arbeidsgiver, førstegangsbehandling"
                                     !førstegangsbehandling && stikkprøver.utsEnArbeidsgiverForlengelse() -> return "UTS, en arbeidsgiver, forlengelse"
                                 }
+                            }
                         }
+                    }
 
-                    flereArbeidsgivere ->
+                    flereArbeidsgivere -> {
                         when {
                             førstegangsbehandling && stikkprøver.fullRefusjonFlereArbeidsgivereFørstegangsbehandling() -> return "Refusjon, flere arbeidsgivere, førstegangsbehandling"
                             !førstegangsbehandling && stikkprøver.fullRefusjonFlereArbeidsgivereForlengelse() -> return "Refusjon, flere arbeidsgivere, forlengelse"
                         }
+                    }
 
-                    stikkprøver.fullRefusjonEnArbeidsgiver() -> return "Refusjon, en arbeidsgiver"
+                    stikkprøver.fullRefusjonEnArbeidsgiver() -> {
+                        return "Refusjon, en arbeidsgiver"
+                    }
                 }
             }
+
             Yrkesaktivitetstype.SELVSTENDIG -> {
                 if (!førstegangsbehandling && stikkprøver.selvstendigNæringsdrivendeForlengelse()) return "Forlengelse, selvstendig næringsdrivende"
             }
-            else -> error("Støtter ikke behandling av personer med yrkesaktivitetstype $yrkesaktivitetstype")
+
+            else -> {
+                error("Støtter ikke behandling av personer med yrkesaktivitetstype $yrkesaktivitetstype")
+            }
         }
         return null
     }
@@ -279,7 +292,7 @@ internal class Automatisering(
         val antallÅpneGosysoppgaver = åpneGosysOppgaverDao.antallÅpneOppgaver(fødselsnummer)
         val harKravOmTotrinnsvurdering =
             totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)?.let { it.tilstand != GODKJENT } ?: false
-        val harUtbetalingTilSykmeldt = utbetaling.harEndringIUtbetalingTilSykmeldt()
+        val harUtbetalingTilSykmeldt = tags.inneholderUtbetalingTilSykmeldt()
         val selvstendigNæringsdrivendeFGB = yrkesaktivitetstype == Yrkesaktivitetstype.SELVSTENDIG && periodetype == FØRSTEGANGSBEHANDLING
 
         val skalStoppesPgaUTS = harUtbetalingTilSykmeldt && periodetype !in listOf(FORLENGELSE, FØRSTEGANGSBEHANDLING)

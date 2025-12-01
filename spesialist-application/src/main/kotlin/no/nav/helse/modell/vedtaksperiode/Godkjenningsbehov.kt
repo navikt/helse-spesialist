@@ -195,16 +195,19 @@ class Godkjenningsbehov(
                         )
                     }
 
-                    else -> error("Ugyldig verdi for fastsatt for selvstendig næringsdrivende: \"$fastsatt\"")
+                    else -> {
+                        error("Ugyldig verdi for fastsatt for selvstendig næringsdrivende: \"$fastsatt\"")
+                    }
                 }
             } else {
                 when (val fastsatt = this["fastsatt"].asText()) {
-                    "IInfotrygd" ->
+                    "IInfotrygd" -> {
                         Sykepengegrunnlagsfakta.Infotrygd(
                             this["sykepengegrunnlag"].asBigDecimal(),
                         )
+                    }
 
-                    "EtterSkjønn" ->
+                    "EtterSkjønn" -> {
                         Sykepengegrunnlagsfakta.Spleis.Arbeidstaker.EtterSkjønn(
                             seksG = this["6G"].asDouble(),
                             arbeidsgivere =
@@ -218,8 +221,9 @@ class Godkjenningsbehov(
                                 },
                             sykepengegrunnlag = this["sykepengegrunnlag"].asBigDecimal(),
                         )
+                    }
 
-                    "EtterHovedregel" ->
+                    "EtterHovedregel" -> {
                         Sykepengegrunnlagsfakta.Spleis.Arbeidstaker.EtterHovedregel(
                             seksG = this["6G"].asDouble(),
                             sykepengegrunnlag = this["sykepengegrunnlag"].asBigDecimal(),
@@ -232,8 +236,11 @@ class Godkjenningsbehov(
                                     )
                                 },
                         )
+                    }
 
-                    else -> error("Ukjent verdi for fastsatt: \"$fastsatt\"")
+                    else -> {
+                        error("Ukjent verdi for fastsatt: \"$fastsatt\"")
+                    }
                 }
             }
 
@@ -450,7 +457,7 @@ internal class GodkjenningsbehovCommand(
                 yrkesaktivitetstype = behovData.yrkesaktivitetstype,
                 førstegangsbehandling = behovData.førstegangsbehandling,
                 sykefraværstilfelle = sykefraværstilfelle,
-                utbetaling = utbetaling,
+                tags = behovData.tags,
                 sykepengegrunnlagsfakta = behovData.sykepengegrunnlagsfakta,
             ),
             VurderAutomatiskAvvisning(

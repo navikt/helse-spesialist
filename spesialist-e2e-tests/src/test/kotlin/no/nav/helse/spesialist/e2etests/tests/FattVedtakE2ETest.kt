@@ -432,7 +432,7 @@ class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
     ) {
         // Given:
         risikovurderingBehovLøser.kanGodkjenneAutomatisk = false
-        søknadOgGodkjenningbehovKommerInn(tags = listOf(tag))
+        søknadOgGodkjenningbehovKommerInn(tags = listOf(tag, "Arbeidsgiverutbetaling"))
 
         // When:
         medPersonISpeil {

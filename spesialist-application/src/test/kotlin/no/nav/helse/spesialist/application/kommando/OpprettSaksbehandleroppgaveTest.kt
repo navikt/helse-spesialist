@@ -72,7 +72,13 @@ internal class OpprettSaksbehandleroppgaveTest {
     private val påVentDao = mockk<PåVentDao>(relaxed = true)
     private val opptegnelseDao = mockk<OpptegnelseDao>(relaxed = true)
 
-    private val command get() = opprettSaksbehandlerOppgaveCommand()
+    private val command get() = command()
+
+    private fun command(tags: List<String> = listOf("Arbeidsgiverutbetaling")) =
+        opprettSaksbehandlerOppgaveCommand(
+            tags = tags,
+        )
+
     private val utbetaling = mockk<Utbetaling>(relaxed = true)
 
     @BeforeEach
@@ -127,7 +133,7 @@ internal class OpprettSaksbehandleroppgaveTest {
             INGEN_UTBETALING,
             EN_ARBEIDSGIVER,
             FORSTEGANGSBEHANDLING,
-            ARBEIDSTAKER
+            ARBEIDSTAKER,
         )
     }
 
@@ -141,7 +147,7 @@ internal class OpprettSaksbehandleroppgaveTest {
             INGEN_UTBETALING,
             EN_ARBEIDSGIVER,
             FORSTEGANGSBEHANDLING,
-            ARBEIDSTAKER
+            ARBEIDSTAKER,
         )
     }
 
@@ -175,6 +181,7 @@ internal class OpprettSaksbehandleroppgaveTest {
 
     @Test
     fun `oppretter ikke oppgave med egenskap haster dersom det er utbetaling til arbeidsgiver`() {
+        val command = command(tags = listOf("Arbeidsgiverutbetaling"))
         every { utbetaling.kunUtbetalingTilArbeidsgiver() } returns true
         every { sykefraværstilfelle.haster(VEDTAKSPERIODE_ID) } returns true
         assertTrue(command.execute(context))
@@ -182,8 +189,16 @@ internal class OpprettSaksbehandleroppgaveTest {
     }
 
     @Test
-    fun `oppretter oppgave med egenskap haster dersom det er endring i utbetaling til sykmeldte`() {
-        every { utbetaling.harEndringIUtbetalingTilSykmeldt() } returns true
+    fun `oppretter oppgave med egenskap haster dersom det er utbetaling til sykmeldte`() {
+        val command = command(tags = listOf("Personutbetaling"))
+        every { sykefraværstilfelle.haster(VEDTAKSPERIODE_ID) } returns true
+        assertTrue(command.execute(context))
+        assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, HASTER, ARBEIDSTAKER)
+    }
+
+    @Test
+    fun `oppretter oppgave med egenskap haster dersom det er endring i negativ utbetaling til sykmeldte (trekker penger)`() {
+        val command = command(tags = listOf("NegativPersonutbetaling"))
         every { sykefraværstilfelle.haster(VEDTAKSPERIODE_ID) } returns true
         assertTrue(command.execute(context))
         assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, HASTER, ARBEIDSTAKER)
@@ -199,7 +214,7 @@ internal class OpprettSaksbehandleroppgaveTest {
             EN_ARBEIDSGIVER,
             FORSTEGANGSBEHANDLING,
             SKJØNNSFASTSETTELSE,
-            ARBEIDSTAKER
+            ARBEIDSTAKER,
         )
     }
 
@@ -266,7 +281,7 @@ internal class OpprettSaksbehandleroppgaveTest {
     @Test
     fun `legger til oppgave med kanAvvises lik false`() {
         assertTrue(opprettSaksbehandlerOppgaveCommand(kanAvvises = false).execute(context))
-        assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER, kanAvvises = false,)
+        assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER, kanAvvises = false)
     }
 
     @Test
@@ -274,8 +289,8 @@ internal class OpprettSaksbehandleroppgaveTest {
         assertTrue(
             opprettSaksbehandlerOppgaveCommand(
                 utbetalingtype = Utbetalingtype.REVURDERING,
-                tags = listOf("Grunnbeløpsregulering")
-            ).execute(context)
+                tags = listOf("Grunnbeløpsregulering"),
+            ).execute(context),
         )
         assertForventedeEgenskaper(
             REVURDERING,
@@ -283,7 +298,7 @@ internal class OpprettSaksbehandleroppgaveTest {
             EN_ARBEIDSGIVER,
             FORSTEGANGSBEHANDLING,
             GRUNNBELØPSREGULERING,
-            ARBEIDSTAKER
+            ARBEIDSTAKER,
         )
     }
 
@@ -292,20 +307,22 @@ internal class OpprettSaksbehandleroppgaveTest {
         assertTrue(
             opprettSaksbehandlerOppgaveCommand(
                 utbetalingtype = Utbetalingtype.UTBETALING,
-                tags = listOf("Grunnbeløpsregulering")
-            ).execute(context)
+                tags = listOf("Grunnbeløpsregulering"),
+            ).execute(context),
         )
         assertForventedeEgenskaper(
             SØKNAD,
             INGEN_UTBETALING,
             EN_ARBEIDSGIVER,
             FORSTEGANGSBEHANDLING,
-            ARBEIDSTAKER
+            ARBEIDSTAKER,
         )
     }
 
-
-    private fun assertForventedeEgenskaper(vararg egenskaper: Egenskap, kanAvvises: Boolean = true) {
+    private fun assertForventedeEgenskaper(
+        vararg egenskaper: Egenskap,
+        kanAvvises: Boolean = true,
+    ) {
         verify(exactly = 1) {
             oppgaveService.nyOppgave(
                 FNR,
@@ -314,7 +331,7 @@ internal class OpprettSaksbehandleroppgaveTest {
                 UTBETALING_ID,
                 HENDELSE_ID,
                 kanAvvises,
-                egenskaper.toSet()
+                egenskaper.toSet(),
             )
         }
     }
@@ -324,20 +341,21 @@ internal class OpprettSaksbehandleroppgaveTest {
         periodetype: Periodetype = FØRSTEGANGSBEHANDLING,
         utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING,
         kanAvvises: Boolean = true,
-        tags: List<String> = emptyList()
+        tags: List<String> = emptyList(),
     ) = OpprettSaksbehandleroppgave(
-        behovData = godkjenningsbehovData(
-            id = HENDELSE_ID,
-            fødselsnummer = FNR,
-            vedtaksperiodeId = VEDTAKSPERIODE_ID,
-            spleisBehandlingId = BEHANDLING_ID,
-            utbetalingId = UTBETALING_ID,
-            inntektskilde = inntektskilde,
-            periodetype = periodetype,
-            utbetalingtype = utbetalingtype,
-            kanAvvises = kanAvvises,
-            tags = tags
-        ),
+        behovData =
+            godkjenningsbehovData(
+                id = HENDELSE_ID,
+                fødselsnummer = FNR,
+                vedtaksperiodeId = VEDTAKSPERIODE_ID,
+                spleisBehandlingId = BEHANDLING_ID,
+                utbetalingId = UTBETALING_ID,
+                inntektskilde = inntektskilde,
+                periodetype = periodetype,
+                utbetalingtype = utbetalingtype,
+                kanAvvises = kanAvvises,
+                tags = tags,
+            ),
         oppgaveService = oppgaveService,
         automatisering = automatisering,
         personDao = personDao,
@@ -348,6 +366,6 @@ internal class OpprettSaksbehandleroppgaveTest {
         utbetaling = utbetaling,
         vergemålDao = vergemålDao,
         påVentDao = påVentDao,
-        opptegnelseDao = opptegnelseDao
+        opptegnelseDao = opptegnelseDao,
     )
 }

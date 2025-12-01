@@ -14,7 +14,6 @@ import no.nav.helse.modell.melding.Behov
 import no.nav.helse.modell.melding.InntektTilRisk
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.risiko.VurderVurderingsmomenter
-import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.Godkjenningsbehov
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.application.TestPerson
@@ -31,21 +30,19 @@ import java.util.UUID
 
 internal class VurderVurderingsmomenterTest {
     private val risikovurderingDao = mockk<RisikovurderingDao>()
-    private val utbetalingMock = mockk<Utbetaling>(relaxed = true)
 
     private companion object {
         private val testperson = TestPerson()
 
         private fun behovløsning(
             vedtaksperiodeId: UUID = testperson.vedtaksperiodeId1,
-            kanGodkjennesAutomatisk: Boolean = true
+            kanGodkjennesAutomatisk: Boolean = true,
         ) = Risikovurderingløsning(
             vedtaksperiodeId = vedtaksperiodeId,
             opprettet = LocalDateTime.now(),
             kanGodkjennesAutomatisk = kanGodkjennesAutomatisk,
             løsning = JsonNodeFactory.instance.objectNode(),
         )
-
     }
 
     private val legacyBehandling =
@@ -55,7 +52,7 @@ internal class VurderVurderingsmomenterTest {
             fom = 1 jan 2018,
             tom = 31 jan 2018,
             skjæringstidspunkt = 1 jan 2018,
-            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
+            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
         )
     private val sykefraværstilfelle =
         Sykefraværstilfelle(testperson.fødselsnummer, 1 jan 2018, listOf(legacyBehandling))
@@ -66,7 +63,10 @@ internal class VurderVurderingsmomenterTest {
         object : CommandContextObserver {
             val behov = mutableListOf<Behov>()
 
-            override fun behov(behov: Behov, commandContextId: UUID) {
+            override fun behov(
+                behov: Behov,
+                commandContextId: UUID,
+            ) {
                 this.behov.add(behov)
             }
         }
@@ -80,8 +80,7 @@ internal class VurderVurderingsmomenterTest {
 
     @Test
     fun `Sender behov for risikovurdering ved execute`() {
-        every { utbetalingMock.harEndringIUtbetalingTilSykmeldt() } returns true
-        val risikoCommand = risikoCommand()
+        val risikoCommand = risikoCommand(tags = listOf("Arbeidsgiverutbetaling"))
         assertFalse(risikoCommand.execute(context))
         assertTrue(observer.behov.isNotEmpty())
 
@@ -91,16 +90,16 @@ internal class VurderVurderingsmomenterTest {
                 organisasjonsnummer = testperson.orgnummer,
                 yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
                 førstegangsbehandling = true,
-                kunRefusjon = false,
-                inntekt = inntekt()
-            ), observer.behov.single()
+                kunRefusjon = true,
+                inntekt = inntekt(),
+            ),
+            observer.behov.single(),
         )
     }
 
     @Test
     fun `Sender behov for risikovurdering ved resume dersom vi mangler løsning`() {
-        every { utbetalingMock.harEndringIUtbetalingTilSykmeldt() } returns true
-        val risikoCommand = risikoCommand()
+        val risikoCommand = risikoCommand(tags = listOf("Arbeidsgiverutbetaling"))
         assertFalse(risikoCommand.resume(context))
         assertTrue(observer.behov.isNotEmpty())
 
@@ -110,17 +109,16 @@ internal class VurderVurderingsmomenterTest {
                 organisasjonsnummer = testperson.orgnummer,
                 yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
                 førstegangsbehandling = true,
-                kunRefusjon = false,
-                inntekt = inntekt()
-            ), observer.behov.single()
+                kunRefusjon = true,
+                inntekt = inntekt(),
+            ),
+            observer.behov.single(),
         )
     }
 
     @Test
     fun `Sender kunRefusjon=true når det ikke skal utbetales noe til den sykmeldte`() {
-        every { utbetalingMock.harEndringIUtbetalingTilSykmeldt() } returns false
-
-        assertFalse(risikoCommand().execute(context))
+        assertFalse(risikoCommand(tags = listOf("Arbeidsgiverutbetaling")).execute(context))
 
         assertEquals(
             Behov.Risikovurdering(
@@ -129,16 +127,15 @@ internal class VurderVurderingsmomenterTest {
                 yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
                 førstegangsbehandling = true,
                 kunRefusjon = true,
-                inntekt = inntekt()
-            ), observer.behov.single()
+                inntekt = inntekt(),
+            ),
+            observer.behov.single(),
         )
     }
 
     @Test
     fun `Sender kunRefusjon=false når det er utbetaling til den sykmeldte`() {
-        every { utbetalingMock.harEndringIUtbetalingTilSykmeldt() } returns true
-
-        assertFalse(risikoCommand().execute(context))
+        assertFalse(risikoCommand(tags = listOf("Personutbetaling")).execute(context))
 
         assertEquals(
             Behov.Risikovurdering(
@@ -147,8 +144,9 @@ internal class VurderVurderingsmomenterTest {
                 yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
                 førstegangsbehandling = true,
                 kunRefusjon = false,
-                inntekt = inntekt()
-            ), observer.behov.single()
+                inntekt = inntekt(),
+            ),
+            observer.behov.single(),
         )
     }
 
@@ -164,7 +162,7 @@ internal class VurderVurderingsmomenterTest {
     fun `Om vi har fått løsning på rett vedtaksperiode lagres den`() {
         every { risikovurderingDao.lagre(testperson.vedtaksperiodeId1, any(), any(), any()) } just Runs
         context.add(
-            behovløsning()
+            behovløsning(),
         )
         val risikoCommand = risikoCommand()
         assertTrue(risikoCommand.execute(context))
@@ -177,11 +175,11 @@ internal class VurderVurderingsmomenterTest {
         val enAnnenVedtaksperiodeId = UUID.randomUUID()
         context.add(
             behovløsning(
-                vedtaksperiodeId = enAnnenVedtaksperiodeId
-            )
+                vedtaksperiodeId = enAnnenVedtaksperiodeId,
+            ),
         )
 
-        assertFalse(risikoCommand().execute(context))
+        assertFalse(risikoCommand(tags = listOf("Arbeidsgiverutbetaling")).execute(context))
         assertEquals(
             Behov.Risikovurdering(
                 vedtaksperiodeId = testperson.vedtaksperiodeId1,
@@ -189,13 +187,14 @@ internal class VurderVurderingsmomenterTest {
                 yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
                 førstegangsbehandling = true,
                 kunRefusjon = true,
-                inntekt = inntekt()
-            ), observer.behov.single()
+                inntekt = inntekt(),
+            ),
+            observer.behov.single(),
         )
 
         observer.behov.clear()
 
-        assertFalse(risikoCommand().resume(context))
+        assertFalse(risikoCommand(tags = listOf("Arbeidsgiverutbetaling")).resume(context))
         assertEquals(
             Behov.Risikovurdering(
                 vedtaksperiodeId = testperson.vedtaksperiodeId1,
@@ -203,8 +202,9 @@ internal class VurderVurderingsmomenterTest {
                 yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
                 førstegangsbehandling = true,
                 kunRefusjon = true,
-                inntekt = inntekt()
-            ), observer.behov.single()
+                inntekt = inntekt(),
+            ),
+            observer.behov.single(),
         )
     }
 
@@ -213,8 +213,8 @@ internal class VurderVurderingsmomenterTest {
         every { risikovurderingDao.lagre(testperson.vedtaksperiodeId1, any(), any(), any()) } just Runs
         context.add(
             behovløsning(
-                kanGodkjennesAutomatisk = false
-            )
+                kanGodkjennesAutomatisk = false,
+            ),
         )
 
         risikoCommand().execute(context)
@@ -227,6 +227,7 @@ internal class VurderVurderingsmomenterTest {
         risikovurderingDao: RisikovurderingDao = this.risikovurderingDao,
         organisasjonsnummer: String = testperson.orgnummer,
         førstegangsbehandling: Boolean = true,
+        tags: List<String> = emptyList(),
     ) = VurderVurderingsmomenter(
         vedtaksperiodeId = vedtaksperiodeId,
         risikovurderingDao = risikovurderingDao,
@@ -234,22 +235,25 @@ internal class VurderVurderingsmomenterTest {
         yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
         førstegangsbehandling = førstegangsbehandling,
         sykefraværstilfelle = sykefraværstilfelle,
-        utbetaling = utbetalingMock,
-        sykepengegrunnlagsfakta = Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidstaker.EtterHovedregel(
-            arbeidsgivere = listOf(
-                Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
-                    omregnetÅrsinntekt = 123456.7,
-                    organisasjonsnummer = testperson.orgnummer,
-                    inntektskilde = Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Arbeidsgiver,
-                )
+        tags = tags,
+        sykepengegrunnlagsfakta =
+            Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidstaker.EtterHovedregel(
+                arbeidsgivere =
+                    listOf(
+                        Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
+                            omregnetÅrsinntekt = 123456.7,
+                            organisasjonsnummer = testperson.orgnummer,
+                            inntektskilde = Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Arbeidsgiver,
+                        ),
+                    ),
+                seksG = 6 * 118620.0,
+                sykepengegrunnlag = BigDecimal("123456.7"),
             ),
-            seksG = 6 * 118620.0,
-            sykepengegrunnlag = BigDecimal("123456.7")
-        )
     )
 
-    private fun inntekt() = InntektTilRisk(
-        omregnetÅrsinntekt = 123456.7,
-        inntektskilde = "Arbeidsgiver"
-    )
+    private fun inntekt() =
+        InntektTilRisk(
+            omregnetÅrsinntekt = 123456.7,
+            inntektskilde = "Arbeidsgiver",
+        )
 }

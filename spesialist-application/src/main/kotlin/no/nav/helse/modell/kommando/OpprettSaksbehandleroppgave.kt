@@ -50,6 +50,7 @@ import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
+import no.nav.helse.spesialist.domain.UtbetalingTag.Companion.inneholderUtbetalingTilSykmeldt
 import java.util.UUID
 
 internal class OpprettSaksbehandleroppgave(
@@ -94,7 +95,7 @@ internal class OpprettSaksbehandleroppgave(
                 kunÅpenGosysOppgave(vedtaksperiodeId)
                 manglerIM(vedtaksperiodeId)
                 medlemskap(vedtaksperiodeId)
-                haster(vedtaksperiodeId)
+                haster(behovData.tags, vedtaksperiodeId)
                 grunnbeløpsregulering(behovData.tags, utbetalingtype)
             }
 
@@ -125,7 +126,9 @@ internal class OpprettSaksbehandleroppgave(
             StrengtFortrolig,
             StrengtFortroligUtland,
             -> add(STRENGT_FORTROLIG_ADRESSE)
+
             Fortrolig -> add(FORTROLIG_ADRESSE)
+
             else -> Unit
         }
     }
@@ -178,7 +181,9 @@ internal class OpprettSaksbehandleroppgave(
     private fun MutableSet<Egenskap>.inntektsforhold(yrkesaktivitetstype: Yrkesaktivitetstype) {
         when (yrkesaktivitetstype) {
             Yrkesaktivitetstype.SELVSTENDIG -> add(SELVSTENDIG_NÆRINGSDRIVENDE)
+
             Yrkesaktivitetstype.ARBEIDSTAKER -> add(ARBEIDSTAKER)
+
             Yrkesaktivitetstype.FRILANS,
             Yrkesaktivitetstype.ARBEIDSLEDIG,
             -> error("Støtter ikke yrkesaktivitetstype $yrkesaktivitetstype")
@@ -225,7 +230,10 @@ internal class OpprettSaksbehandleroppgave(
         if (tags.contains("Grunnbeløpsregulering") and (utbetalingtype == Utbetalingtype.REVURDERING)) add(GRUNNBELØPSREGULERING)
     }
 
-    private fun MutableSet<Egenskap>.haster(vedtaksperiodeId: UUID) {
-        if (sykefraværstilfelle.haster(vedtaksperiodeId) && utbetaling.harEndringIUtbetalingTilSykmeldt()) add(HASTER)
+    private fun MutableSet<Egenskap>.haster(
+        tags: List<String>,
+        vedtaksperiodeId: UUID,
+    ) {
+        if (sykefraværstilfelle.haster(vedtaksperiodeId) && tags.inneholderUtbetalingTilSykmeldt()) add(HASTER)
     }
 }

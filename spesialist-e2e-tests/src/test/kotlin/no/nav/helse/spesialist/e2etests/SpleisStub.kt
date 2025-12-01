@@ -25,7 +25,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 class SpleisStub(
     private val rapidsConnection: RapidsConnection,
-    private val wireMockServer: WireMockServer
+    private val wireMockServer: WireMockServer,
 ) {
     private val contextsForFødselsnummer = ConcurrentHashMap<String, TestContext>()
 
@@ -56,7 +56,7 @@ class SpleisStub(
         settVerdi(
             jsonNode = data,
             pointer = "/data/person/vilkarsgrunnlag/0/id",
-            verdi = context.vilkårsgrunnlagId.toString()
+            verdi = context.vilkårsgrunnlagId.toString(),
         )
 
         context.vedtaksperioder.forEachIndexed { index, vedtaksperiode ->
@@ -81,32 +81,32 @@ class SpleisStub(
             settVerdi(
                 jsonNode = data,
                 pointer = "/data/person/arbeidsgivere/0/generasjoner/0/perioder/$index/utbetaling/arbeidsgiveroppdrag/simulering/perioder/0/utbetalinger/0/utbetalesTilNavn",
-                verdi = context.arbeidsgiver.navn
+                verdi = context.arbeidsgiver.navn,
             )
 
             settVerdi(
                 jsonNode = data,
                 pointer = "/data/person/arbeidsgivere/0/generasjoner/0/perioder/$index/behandlingId",
-                verdi = vedtaksperiode.spleisBehandlingId.toString()
+                verdi = vedtaksperiode.spleisBehandlingId.toString(),
             )
             settVerdi(
                 jsonNode = data,
                 pointer = "/data/person/arbeidsgivere/0/generasjoner/0/perioder/$index/vedtaksperiodeId",
-                verdi = vedtaksperiode.vedtaksperiodeId.toString()
+                verdi = vedtaksperiode.vedtaksperiodeId.toString(),
             )
             settVerdi(
                 jsonNode = data,
                 pointer = "/data/person/arbeidsgivere/0/generasjoner/0/perioder/$index/vilkarsgrunnlagId",
-                verdi = context.vilkårsgrunnlagId.toString()
+                verdi = context.vilkårsgrunnlagId.toString(),
             )
             sequenceOf(
                 "/data/person/arbeidsgivere/0/generasjoner/0/perioder/$index/beregningId",
-                "/data/person/arbeidsgivere/0/generasjoner/0/perioder/$index/utbetaling/id"
+                "/data/person/arbeidsgivere/0/generasjoner/0/perioder/$index/utbetaling/id",
             ).forEach {
                 settVerdi(
                     jsonNode = data,
                     pointer = it,
-                    verdi = vedtaksperiode.utbetalingId.toString()
+                    verdi = vedtaksperiode.utbetalingId.toString(),
                 )
             }
         }
@@ -114,11 +114,15 @@ class SpleisStub(
         wireMockServer.stubFor(
             post("/graphql")
                 .withRequestBody(matchingJsonPath("\$.variables[?(@.fnr == '${person.fødselsnummer}')]"))
-                .willReturn(okJson(data.toPrettyString()))
+                .willReturn(okJson(data.toPrettyString())),
         )
     }
 
-    private fun settVerdi(jsonNode: JsonNode, pointer: String, verdi: String) {
+    private fun settVerdi(
+        jsonNode: JsonNode,
+        pointer: String,
+        verdi: String,
+    ) {
         val jsonPointer = JsonPointer.compile(pointer)
         jsonNode.at(jsonPointer.head()).let {
             if (it.isMissingNode) {
@@ -136,20 +140,24 @@ class SpleisStub(
 
     internal fun spleisReberegnerPerioden(
         testContext: TestContext,
-        vedtaksperiode: Vedtaksperiode
+        vedtaksperiode: Vedtaksperiode,
     ) {
         spleisReberegnerPerioden(testContext.person, vedtaksperiode)
         spleisForkasterGammelUtbetaling(testContext.person, testContext.arbeidsgiver, vedtaksperiode)
         spleisLagerNyUtbetalingForVedtaksperiode(testContext.person, testContext.arbeidsgiver, vedtaksperiode)
     }
 
-    private fun spleisReberegnerPerioden(person: Person, vedtaksperiode: Vedtaksperiode) {
-        val melding = Meldingsbygger.byggVedtaksperiodeEndret(
-            vedtaksperiode = vedtaksperiode,
-            person = person,
-            forrigeTilstand = "AVVENTER_GODKJENNING",
-            gjeldendeTilstand = "AVVENTER_BLOKKERENDE_PERIODE"
-        )
+    private fun spleisReberegnerPerioden(
+        person: Person,
+        vedtaksperiode: Vedtaksperiode,
+    ) {
+        val melding =
+            Meldingsbygger.byggVedtaksperiodeEndret(
+                vedtaksperiode = vedtaksperiode,
+                person = person,
+                forrigeTilstand = "AVVENTER_GODKJENNING",
+                gjeldendeTilstand = "AVVENTER_BLOKKERENDE_PERIODE",
+            )
         rapidsConnection.publish(person.fødselsnummer, melding)
     }
 
@@ -159,22 +167,23 @@ class SpleisStub(
     ) {
         rapidsConnection.publish(
             testContext.person.fødselsnummer,
-            Meldingsbygger.byggVedtaksperiodeForkastet(vedtaksperiode, testContext.person)
+            Meldingsbygger.byggVedtaksperiodeForkastet(vedtaksperiode, testContext.person),
         )
     }
 
     private fun spleisForkasterGammelUtbetaling(
         person: Person,
         arbeidsgiver: Arbeidsgiver,
-        vedtaksperiode: Vedtaksperiode
+        vedtaksperiode: Vedtaksperiode,
     ) {
-        val melding = Meldingsbygger.byggUtbetalingEndret(
-            vedtaksperiode = vedtaksperiode,
-            person = person,
-            arbeidsgiver = arbeidsgiver,
-            forrigeStatus = "IKKE_UTBETALT",
-            gjeldendeStatus = "FORKASTET"
-        )
+        val melding =
+            Meldingsbygger.byggUtbetalingEndret(
+                vedtaksperiode = vedtaksperiode,
+                person = person,
+                arbeidsgiver = arbeidsgiver,
+                forrigeStatus = "IKKE_UTBETALT",
+                gjeldendeStatus = "FORKASTET",
+            )
         vedtaksperiode.utbetalingId = null
         rapidsConnection.publish(person.fødselsnummer, melding)
     }
@@ -182,44 +191,51 @@ class SpleisStub(
     private fun spleisLagerNyUtbetalingForVedtaksperiode(
         person: Person,
         arbeidsgiver: Arbeidsgiver,
-        vedtaksperiode: Vedtaksperiode
+        vedtaksperiode: Vedtaksperiode,
     ) {
         vedtaksperiode.nyUtbetaling()
-        val utbetalingEndret = Meldingsbygger.byggUtbetalingEndret(
-            vedtaksperiode = vedtaksperiode,
-            person = person,
-            arbeidsgiver = arbeidsgiver,
-            forrigeStatus = "NY",
-            gjeldendeStatus = "IKKE_UTBETALT",
-        )
-        val vedtaksperiodeNyUtbetaling = Meldingsbygger.byggVedtaksperiodeNyUtbetaling(
-            vedtaksperiode = vedtaksperiode,
-            person = person,
-            arbeidsgiver = arbeidsgiver,
-        )
+        val utbetalingEndret =
+            Meldingsbygger.byggUtbetalingEndret(
+                vedtaksperiode = vedtaksperiode,
+                person = person,
+                arbeidsgiver = arbeidsgiver,
+                forrigeStatus = "NY",
+                gjeldendeStatus = "IKKE_UTBETALT",
+            )
+        val vedtaksperiodeNyUtbetaling =
+            Meldingsbygger.byggVedtaksperiodeNyUtbetaling(
+                vedtaksperiode = vedtaksperiode,
+                person = person,
+                arbeidsgiver = arbeidsgiver,
+            )
         rapidsConnection.publish(person.fødselsnummer, utbetalingEndret)
         rapidsConnection.publish(person.fødselsnummer, vedtaksperiodeNyUtbetaling)
     }
 
-    private inner class GodkjenningsbehovløsningRiver(rapidsConnection: RapidsConnection) : River.PacketListener {
+    private inner class GodkjenningsbehovløsningRiver(
+        rapidsConnection: RapidsConnection,
+    ) : River.PacketListener {
         init {
             River(rapidsConnection)
                 .precondition(::precondition)
                 .register(this)
         }
+
         override fun onPacket(
             packet: JsonMessage,
             context: MessageContext,
             metadata: MessageMetadata,
-            meterRegistry: MeterRegistry
+            meterRegistry: MeterRegistry,
         ) {
             val jsonNode = objectMapper.readTree(packet.toJson())
             val fødselsnummer = jsonNode["fødselsnummer"].asText()
-            val testContext = contextsForFødselsnummer[fødselsnummer]
-                ?: error("Ikke initialisert med context for person $fødselsnummer")
+            val testContext =
+                contextsForFødselsnummer[fødselsnummer]
+                    ?: error("Ikke initialisert med context for person $fødselsnummer")
             val vedtaksperiodeId = UUID.fromString(jsonNode["vedtaksperiodeId"].asText())
-            val vedtaksperiode = testContext.vedtaksperioder.find { it.vedtaksperiodeId == vedtaksperiodeId }
-                ?: error("Fant ikke igjen vedtaksperiode $vedtaksperiodeId i context for person $fødselsnummer")
+            val vedtaksperiode =
+                testContext.vedtaksperioder.find { it.vedtaksperiodeId == vedtaksperiodeId }
+                    ?: error("Fant ikke igjen vedtaksperiode $vedtaksperiodeId i context for person $fødselsnummer")
 
             val godkjent = jsonNode["@løsning"]["Godkjenning"]["godkjent"].asBoolean()
             if (godkjent) {
@@ -238,7 +254,7 @@ class SpleisStub(
         private fun utbetalingSkjer(
             vedtaksperiode: Vedtaksperiode,
             person: Person,
-            arbeidsgiver: Arbeidsgiver
+            arbeidsgiver: Arbeidsgiver,
         ) {
             rapidsConnection.publish(
                 person.fødselsnummer,
@@ -247,24 +263,26 @@ class SpleisStub(
                     person = person,
                     arbeidsgiver = arbeidsgiver,
                     forrigeStatus = "SENDT",
-                    gjeldendeStatus = "UTBETALT"
-                )
+                    gjeldendeStatus = "UTBETALT",
+                ),
             )
         }
 
         private fun spleisAvslutterPerioden(
             vedtaksperiode: Vedtaksperiode,
             person: Person,
-            arbeidsgiver: Arbeidsgiver
+            arbeidsgiver: Arbeidsgiver,
         ) {
             rapidsConnection.publish(
                 person.fødselsnummer,
-                Meldingsbygger.byggAvsluttetMedVedtak(person, arbeidsgiver, vedtaksperiode)
+                Meldingsbygger.byggAvsluttetMedVedtak(person, arbeidsgiver, vedtaksperiode),
             )
         }
     }
 
-    private inner class OverstyringRiver(rapidsConnection: RapidsConnection) : River.PacketListener {
+    private inner class OverstyringRiver(
+        rapidsConnection: RapidsConnection,
+    ) : River.PacketListener {
         init {
             River(rapidsConnection)
                 .precondition(::precondition)
@@ -275,24 +293,26 @@ class SpleisStub(
             packet: JsonMessage,
             context: MessageContext,
             metadata: MessageMetadata,
-            meterRegistry: MeterRegistry
+            meterRegistry: MeterRegistry,
         ) {
             val jsonNode = objectMapper.readTree(packet.toJson())
             val skjønnsfastsatteArbeidsgivere = jsonNode["arbeidsgivere"]
             val skjæringstidspunkt = jsonNode["skjæringstidspunkt"].asLocalDate()
             val fødselsnummer = jsonNode["fødselsnummer"].asText()
-            val testContext = contextsForFødselsnummer[fødselsnummer]
-                ?: error("Ikke initialisert med context for person $fødselsnummer")
-            val vedtaksperiode = testContext.vedtaksperioder
-                .find { it.skjæringstidspunkt == skjæringstidspunkt }
-                ?: error("Fant ikke vedtaksperiode med skjæringstidspunkt $skjæringstidspunkt i context for person $fødselsnummer")
+            val testContext =
+                contextsForFødselsnummer[fødselsnummer]
+                    ?: error("Ikke initialisert med context for person $fødselsnummer")
+            val vedtaksperiode =
+                testContext.vedtaksperioder
+                    .find { it.skjæringstidspunkt == skjæringstidspunkt }
+                    ?: error("Fant ikke vedtaksperiode med skjæringstidspunkt $skjæringstidspunkt i context for person $fødselsnummer")
             spleisReberegnerPerioden(testContext, vedtaksperiode)
             spleisSenderGodkjenningsbehovMedSkjønnsfastsattSykepengegrunnlag(
                 person = testContext.person,
                 arbeidsgiver = testContext.arbeidsgiver,
                 vedtaksperiode = vedtaksperiode,
                 vilkårsgrunnlagId = testContext.vilkårsgrunnlagId,
-                skjønnsfastsatteArbeidsgivereJson = skjønnsfastsatteArbeidsgivere
+                skjønnsfastsatteArbeidsgivereJson = skjønnsfastsatteArbeidsgivere,
             )
         }
 
@@ -305,26 +325,30 @@ class SpleisStub(
             arbeidsgiver: Arbeidsgiver,
             vedtaksperiode: Vedtaksperiode,
             vilkårsgrunnlagId: UUID,
-            skjønnsfastsatteArbeidsgivereJson: JsonNode
+            skjønnsfastsatteArbeidsgivereJson: JsonNode,
         ) {
-            vedtaksperiode.sykepengegrunnlagsfakta = Sykepengegrunnlagsfakta(
-                skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt,
-                fastsatt = Sykepengegrunnlagsfakta.FastsattType.EtterSkjønn,
-                arbeidsgivere = skjønnsfastsatteArbeidsgivereJson.map {
-                    Sykepengegrunnlagsfakta.SkjønnsfastsattArbeidsgiver(
-                        organisasjonsnummer = it["organisasjonsnummer"].asText(),
-                        omregnetÅrsinntekt = 123456.7,
-                        skjønnsfastsatt = it["årlig"].asDouble()
-                    )
-                }
-            )
-            val melding = Meldingsbygger.byggGodkjenningsbehov(
-                person = person,
-                arbeidsgiver = arbeidsgiver,
-                vedtaksperiode = vedtaksperiode,
-                vilkårsgrunnlagId = vilkårsgrunnlagId,
-                sykepengegrunnlagsfakta = vedtaksperiode.sykepengegrunnlagsfakta,
-            )
+            vedtaksperiode.sykepengegrunnlagsfakta =
+                Sykepengegrunnlagsfakta(
+                    skjæringstidspunkt = vedtaksperiode.skjæringstidspunkt,
+                    fastsatt = Sykepengegrunnlagsfakta.FastsattType.EtterSkjønn,
+                    arbeidsgivere =
+                        skjønnsfastsatteArbeidsgivereJson.map {
+                            Sykepengegrunnlagsfakta.SkjønnsfastsattArbeidsgiver(
+                                organisasjonsnummer = it["organisasjonsnummer"].asText(),
+                                omregnetÅrsinntekt = 123456.7,
+                                skjønnsfastsatt = it["årlig"].asDouble(),
+                            )
+                        },
+                )
+            val melding =
+                Meldingsbygger.byggGodkjenningsbehov(
+                    person = person,
+                    arbeidsgiver = arbeidsgiver,
+                    vedtaksperiode = vedtaksperiode,
+                    vilkårsgrunnlagId = vilkårsgrunnlagId,
+                    sykepengegrunnlagsfakta = vedtaksperiode.sykepengegrunnlagsfakta,
+                    tags = vedtaksperiode.tags,
+                )
             rapidsConnection.publish(person.fødselsnummer, melding)
         }
     }
