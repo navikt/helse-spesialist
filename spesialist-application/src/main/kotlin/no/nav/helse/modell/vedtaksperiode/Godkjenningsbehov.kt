@@ -492,7 +492,6 @@ internal class GodkjenningsbehovCommand(
                 egenAnsattDao = egenAnsattDao,
                 utbetalingtype = behovData.utbetalingtype,
                 sykefraværstilfelle = sykefraværstilfelle,
-                utbetaling = utbetaling,
                 vergemålDao = vergemålDao,
                 påVentDao = påVentDao,
                 opptegnelseDao = opptegnelseDao,

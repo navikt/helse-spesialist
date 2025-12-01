@@ -43,14 +43,16 @@ import no.nav.helse.modell.person.Adressebeskyttelse.StrengtFortrolig
 import no.nav.helse.modell.person.Adressebeskyttelse.StrengtFortroligUtland
 import no.nav.helse.modell.person.HentEnhetløsning
 import no.nav.helse.modell.person.Sykefraværstilfelle
-import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.api.abonnement.GodkjenningsbehovPayload
+import no.nav.helse.spesialist.domain.UtbetalingTag.Companion.deltUtbetaling
 import no.nav.helse.spesialist.domain.UtbetalingTag.Companion.inneholderUtbetalingTilSykmeldt
+import no.nav.helse.spesialist.domain.UtbetalingTag.Companion.kunUtbetalingTilArbeidsgiver
+import no.nav.helse.spesialist.domain.UtbetalingTag.Companion.kunUtbetalingTilSykmeldt
 import java.util.UUID
 
 internal class OpprettSaksbehandleroppgave(
@@ -62,7 +64,6 @@ internal class OpprettSaksbehandleroppgave(
     private val egenAnsattDao: EgenAnsattDao,
     private val utbetalingtype: Utbetalingtype,
     private val sykefraværstilfelle: Sykefraværstilfelle,
-    private val utbetaling: Utbetaling,
     private val vergemålDao: VergemålDao,
     private val påVentDao: PåVentDao,
     private val opptegnelseDao: OpptegnelseDao,
@@ -85,7 +86,7 @@ internal class OpprettSaksbehandleroppgave(
                 vurderingsmomenter(vedtaksperiodeId, utbetalingtype)
                 vergemål(fødselsnummer)
                 enhetUtland(fødselsnummer)
-                mottaker()
+                mottaker(behovData.tags)
                 inntektskilde(inntektskilde)
                 inntektsforhold(behovData.yrkesaktivitetstype)
                 periodetype(periodetype)
@@ -161,13 +162,12 @@ internal class OpprettSaksbehandleroppgave(
         if (HentEnhetløsning.erEnhetUtland(personDao.finnEnhetId(fødselsnummer))) add(UTLAND)
     }
 
-    private fun MutableSet<Egenskap>.mottaker() {
+    private fun MutableSet<Egenskap>.mottaker(tags: List<String>) {
         when {
-            utbetaling.delvisRefusjon() -> add(DELVIS_REFUSJON)
-            utbetaling.kunUtbetalingTilSykmeldt() -> add(UTBETALING_TIL_SYKMELDT)
-            utbetaling.kunUtbetalingTilArbeidsgiver() -> add(UTBETALING_TIL_ARBEIDSGIVER)
-            utbetaling.ingenUtbetaling() -> add(INGEN_UTBETALING)
-            else -> Unit
+            tags.deltUtbetaling() -> add(DELVIS_REFUSJON)
+            tags.kunUtbetalingTilSykmeldt() -> add(UTBETALING_TIL_SYKMELDT)
+            tags.kunUtbetalingTilArbeidsgiver() -> add(UTBETALING_TIL_ARBEIDSGIVER)
+            else -> add(INGEN_UTBETALING)
         }
     }
 

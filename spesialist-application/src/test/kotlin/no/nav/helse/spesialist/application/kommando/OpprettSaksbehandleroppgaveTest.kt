@@ -38,7 +38,6 @@ import no.nav.helse.modell.oppgave.Egenskap.UTBETALING_TIL_SYKMELDT
 import no.nav.helse.modell.oppgave.Egenskap.UTLAND
 import no.nav.helse.modell.person.Adressebeskyttelse
 import no.nav.helse.modell.person.Sykefraværstilfelle
-import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
@@ -74,16 +73,8 @@ internal class OpprettSaksbehandleroppgaveTest {
 
     private val command get() = command()
 
-    private fun command(tags: List<String> = listOf("Arbeidsgiverutbetaling")) =
-        opprettSaksbehandlerOppgaveCommand(
-            tags = tags,
-        )
-
-    private val utbetaling = mockk<Utbetaling>(relaxed = true)
-
     @BeforeEach
     fun beforeEach() {
-        every { utbetaling.ingenUtbetaling() } returns true
         clearMocks(oppgaveService)
     }
 
@@ -112,7 +103,7 @@ internal class OpprettSaksbehandleroppgaveTest {
 
     @Test
     fun `oppretter revurdering`() {
-        assertTrue(opprettSaksbehandlerOppgaveCommand(utbetalingtype = Utbetalingtype.REVURDERING).execute(context))
+        assertTrue(command(utbetalingtype = Utbetalingtype.REVURDERING).execute(context))
         assertForventedeEgenskaper(REVURDERING, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER)
     }
 
@@ -153,36 +144,37 @@ internal class OpprettSaksbehandleroppgaveTest {
 
     @Test
     fun `oppretter oppgave med egen oppgavetype for utbetaling til sykmeldt`() {
-        every { utbetaling.kunUtbetalingTilSykmeldt() } returns true
-        assertTrue(command.execute(context))
+        assertTrue(command(tags = listOf("Personutbetaling")).execute(context))
         assertForventedeEgenskaper(SØKNAD, UTBETALING_TIL_SYKMELDT, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER)
     }
 
     @Test
     fun `oppretter oppgave med egen oppgavetype for delvis refusjon`() {
-        every { utbetaling.delvisRefusjon() } returns true
-        assertTrue(command.execute(context))
+        assertTrue(command(tags = listOf("Arbeidsgiverutbetaling", "Personutbetaling")).execute(context))
         assertForventedeEgenskaper(SØKNAD, DELVIS_REFUSJON, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER)
     }
 
     @Test
     fun `oppretter oppgave med egenskap utbetaling til arbeidsgiver`() {
-        every { utbetaling.kunUtbetalingTilArbeidsgiver() } returns true
-        assertTrue(command.execute(context))
+        assertTrue(command(tags = listOf("Arbeidsgiverutbetaling")).execute(context))
+        assertForventedeEgenskaper(SØKNAD, UTBETALING_TIL_ARBEIDSGIVER, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER)
+    }
+
+    @Test
+    fun `oppretter oppgave med egenskap utbetaling til arbeidsgiver når det trekkes penger fra arbeidsgiver`() {
+        assertTrue(command(tags = listOf("NegativArbeidsgiverutbetaling")).execute(context))
         assertForventedeEgenskaper(SØKNAD, UTBETALING_TIL_ARBEIDSGIVER, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER)
     }
 
     @Test
     fun `oppretter oppgave med egenskap ingen utbetaling`() {
-        every { utbetaling.ingenUtbetaling() } returns true
-        assertTrue(command.execute(context))
+        assertTrue(command(tags = listOf("IngenUtbetaling")).execute(context))
         assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER)
     }
 
     @Test
     fun `oppretter ikke oppgave med egenskap haster dersom det er utbetaling til arbeidsgiver`() {
         val command = command(tags = listOf("Arbeidsgiverutbetaling"))
-        every { utbetaling.kunUtbetalingTilArbeidsgiver() } returns true
         every { sykefraværstilfelle.haster(VEDTAKSPERIODE_ID) } returns true
         assertTrue(command.execute(context))
         assertForventedeEgenskaper(SØKNAD, UTBETALING_TIL_ARBEIDSGIVER, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER)
@@ -193,15 +185,15 @@ internal class OpprettSaksbehandleroppgaveTest {
         val command = command(tags = listOf("Personutbetaling"))
         every { sykefraværstilfelle.haster(VEDTAKSPERIODE_ID) } returns true
         assertTrue(command.execute(context))
-        assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, HASTER, ARBEIDSTAKER)
+        assertForventedeEgenskaper(SØKNAD, UTBETALING_TIL_SYKMELDT, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, HASTER, ARBEIDSTAKER)
     }
 
     @Test
-    fun `oppretter oppgave med egenskap haster dersom det er endring i negativ utbetaling til sykmeldte (trekker penger)`() {
+    fun `oppretter oppgave med egenskap haster dersom det er negativ utbetaling til sykmeldte (trekker penger)`() {
         val command = command(tags = listOf("NegativPersonutbetaling"))
         every { sykefraværstilfelle.haster(VEDTAKSPERIODE_ID) } returns true
         assertTrue(command.execute(context))
-        assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, HASTER, ARBEIDSTAKER)
+        assertForventedeEgenskaper(SØKNAD, UTBETALING_TIL_SYKMELDT, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, HASTER, ARBEIDSTAKER)
     }
 
     @Test
@@ -241,25 +233,25 @@ internal class OpprettSaksbehandleroppgaveTest {
 
     @Test
     fun `oppretter oppgave med egenskap FLERE_ARBEIDSGIVERE`() {
-        assertTrue(opprettSaksbehandlerOppgaveCommand(inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE).execute(context))
+        assertTrue(command(inntektskilde = Inntektskilde.FLERE_ARBEIDSGIVERE).execute(context))
         assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, FLERE_ARBEIDSGIVERE, FORSTEGANGSBEHANDLING, ARBEIDSTAKER)
     }
 
     @Test
     fun `oppretter oppgave med egenskap FORLENGELSE`() {
-        assertTrue(opprettSaksbehandlerOppgaveCommand(periodetype = FORLENGELSE).execute(context))
+        assertTrue(command(periodetype = FORLENGELSE).execute(context))
         assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, Egenskap.FORLENGELSE, ARBEIDSTAKER)
     }
 
     @Test
     fun `oppretter oppgave med egenskap INFOTRYGDFORLENGELSE`() {
-        assertTrue(opprettSaksbehandlerOppgaveCommand(periodetype = INFOTRYGDFORLENGELSE).execute(context))
+        assertTrue(command(periodetype = INFOTRYGDFORLENGELSE).execute(context))
         assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, Egenskap.INFOTRYGDFORLENGELSE, ARBEIDSTAKER)
     }
 
     @Test
     fun `oppretter oppgave med egenskap OVERGANG_FRA_IT`() {
-        assertTrue(opprettSaksbehandlerOppgaveCommand(periodetype = OVERGANG_FRA_IT).execute(context))
+        assertTrue(command(periodetype = OVERGANG_FRA_IT).execute(context))
         assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, Egenskap.OVERGANG_FRA_IT, ARBEIDSTAKER)
     }
 
@@ -273,23 +265,23 @@ internal class OpprettSaksbehandleroppgaveTest {
     @Test
     fun `legger ikke til egenskap RISK_QA hvis oppgaven har egenskap REVURDERING`() {
         every { risikovurderingDao.måTilManuell(VEDTAKSPERIODE_ID) } returns true
-        assertTrue(opprettSaksbehandlerOppgaveCommand(utbetalingtype = Utbetalingtype.REVURDERING).execute(context))
+        assertTrue(command(utbetalingtype = Utbetalingtype.REVURDERING).execute(context))
 
         assertForventedeEgenskaper(REVURDERING, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER)
     }
 
     @Test
     fun `legger til oppgave med kanAvvises lik false`() {
-        assertTrue(opprettSaksbehandlerOppgaveCommand(kanAvvises = false).execute(context))
+        assertTrue(command(kanAvvises = false).execute(context))
         assertForventedeEgenskaper(SØKNAD, INGEN_UTBETALING, EN_ARBEIDSGIVER, FORSTEGANGSBEHANDLING, ARBEIDSTAKER, kanAvvises = false)
     }
 
     @Test
     fun `oppretter oppgave med egenskapen grunnbeløpsregulering`() {
         assertTrue(
-            opprettSaksbehandlerOppgaveCommand(
+            command(
                 utbetalingtype = Utbetalingtype.REVURDERING,
-                tags = listOf("Grunnbeløpsregulering"),
+                tags = listOf("Grunnbeløpsregulering", "IngenUtbetaling"),
             ).execute(context),
         )
         assertForventedeEgenskaper(
@@ -305,9 +297,9 @@ internal class OpprettSaksbehandleroppgaveTest {
     @Test
     fun `legger ikke til egenskapen grunnbeløpsregulering ved oppgavetype søknad`() {
         assertTrue(
-            opprettSaksbehandlerOppgaveCommand(
+            command(
                 utbetalingtype = Utbetalingtype.UTBETALING,
-                tags = listOf("Grunnbeløpsregulering"),
+                tags = listOf("Grunnbeløpsregulering", "IngenUtbetaling"),
             ).execute(context),
         )
         assertForventedeEgenskaper(
@@ -336,12 +328,12 @@ internal class OpprettSaksbehandleroppgaveTest {
         }
     }
 
-    private fun opprettSaksbehandlerOppgaveCommand(
+    private fun command(
         inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
         periodetype: Periodetype = FØRSTEGANGSBEHANDLING,
         utbetalingtype: Utbetalingtype = Utbetalingtype.UTBETALING,
         kanAvvises: Boolean = true,
-        tags: List<String> = emptyList(),
+        tags: List<String> = listOf("IngenUtbetaling"),
     ) = OpprettSaksbehandleroppgave(
         behovData =
             godkjenningsbehovData(
@@ -363,7 +355,6 @@ internal class OpprettSaksbehandleroppgaveTest {
         egenAnsattDao = egenAnsattDao,
         utbetalingtype = utbetalingtype,
         sykefraværstilfelle = sykefraværstilfelle,
-        utbetaling = utbetaling,
         vergemålDao = vergemålDao,
         påVentDao = påVentDao,
         opptegnelseDao = opptegnelseDao,
