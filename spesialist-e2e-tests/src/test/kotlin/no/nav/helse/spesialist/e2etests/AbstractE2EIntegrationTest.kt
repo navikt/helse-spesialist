@@ -22,6 +22,7 @@ import no.nav.helse.spesialist.e2etests.context.Vedtaksperiode
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.assertNull
 import java.util.UUID
 
 abstract class AbstractE2EIntegrationTest {
@@ -149,6 +150,16 @@ abstract class AbstractE2EIntegrationTest {
         }
     }
 
+    protected fun assertGodkjenningsbehovIkkeBesvart() {
+        val løsning =
+            testRapid
+                .meldingslogg(testContext.person.fødselsnummer)
+                .mapNotNull { it["@løsning"] }
+                .mapNotNull { it["Godkjenning"] }
+                .lastOrNull()
+        assertNull(løsning)
+    }
+
     protected fun assertVedtakFattetEtterHovedregel(utfall: VedtakFattetMelding.BegrunnelseType = VedtakFattetMelding.BegrunnelseType.Innvilgelse) {
         val vedtakFattet =
             testRapid
@@ -228,6 +239,25 @@ abstract class AbstractE2EIntegrationTest {
                 )
             }
         assertEquals(expectedStatus, actualStatus)
+    }
+
+    protected fun assertOppgavestatuserKronoligisk(vararg expectedStatuses: String) {
+        val actualStatus =
+            sessionOf(E2ETestApplikasjon.dbModule.dataSource, strict = true).use { session ->
+                session.run(
+                    asSQL(
+                        """
+                        SELECT o.status
+                        FROM oppgave o, vedtak v
+                        WHERE o.vedtak_ref = v.id
+                        AND v.vedtaksperiode_id = :vedtaksperiode_id
+                        ORDER BY o.oppdatert
+                        """.trimIndent(),
+                        "vedtaksperiode_id" to førsteVedtaksperiode().vedtaksperiodeId,
+                    ).map { it.string("status") }.asList,
+                )
+            }
+        assertEquals(expectedStatuses.toList(), actualStatus)
     }
 
     protected fun assertSykepengegrunnlagfakta() {
