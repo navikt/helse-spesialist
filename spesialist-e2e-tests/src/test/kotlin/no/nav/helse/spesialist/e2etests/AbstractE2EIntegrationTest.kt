@@ -34,12 +34,14 @@ abstract class AbstractE2EIntegrationTest {
         saksbehandlerTilgangsgrupper += tilgangsgruppe
     }
 
-    private val behovLøserStub = E2ETestApplikasjon.behovLøserStub.also {
-        it.init(person = testContext.person, arbeidsgiver = testContext.arbeidsgiver)
-    }
-    private val spleisStub = E2ETestApplikasjon.spleisStub.also {
-        it.init(testContext)
-    }
+    private val behovLøserStub =
+        E2ETestApplikasjon.behovLøserStub.also {
+            it.init(person = testContext.person, arbeidsgiver = testContext.arbeidsgiver)
+        }
+    private val spleisStub =
+        E2ETestApplikasjon.spleisStub.also {
+            it.init(testContext)
+        }
     private val testRapid = E2ETestApplikasjon.testRapid
 
     protected val hentPersoninfoV2BehovLøser = finnLøserForDenneTesten<HentPersoninfoV2BehovLøser>()
@@ -47,8 +49,7 @@ abstract class AbstractE2EIntegrationTest {
     protected val åpneOppgaverBehovLøser = finnLøserForDenneTesten<ÅpneOppgaverBehovLøser>()
     protected val hentInfotrygdutbetalingerBehovLøser = finnLøserForDenneTesten<HentInfotrygdutbetalingerBehovLøser>()
 
-    private inline fun <reified T : AbstractBehovLøser> finnLøserForDenneTesten() =
-        behovLøserStub.finnLøser<T>(testContext.person.fødselsnummer)
+    private inline fun <reified T : AbstractBehovLøser> finnLøserForDenneTesten() = behovLøserStub.finnLøser<T>(testContext.person.fødselsnummer)
 
     protected fun besvarBehovIgjen(behov: String) {
         behovLøserStub.besvarIgjen(testContext.person.fødselsnummer, behov)
@@ -60,7 +61,10 @@ abstract class AbstractE2EIntegrationTest {
 
     protected fun meldinger() = testRapid.meldingslogg(testContext.person.fødselsnummer)
 
-    protected fun søknadOgGodkjenningbehovKommerInn(tags: List<String> = listOf("Innvilget"), tilleggsmeldinger: TilleggsmeldingReceiver.() -> Unit = {}): Vedtaksperiode {
+    protected fun søknadOgGodkjenningbehovKommerInn(
+        tags: List<String> = listOf("Innvilget"),
+        tilleggsmeldinger: TilleggsmeldingReceiver.() -> Unit = {},
+    ): Vedtaksperiode {
         personSenderSøknad()
         val vedtaksperiode = førsteVedtaksperiode()
         spleisForberederBehandling(vedtaksperiode, tilleggsmeldinger)
@@ -71,23 +75,23 @@ abstract class AbstractE2EIntegrationTest {
     protected fun personSenderSøknad() {
         testRapid.publish(
             testContext.person.fødselsnummer,
-            Meldingsbygger.byggSendSøknadNav(testContext.person, testContext.arbeidsgiver)
+            Meldingsbygger.byggSendSøknadNav(testContext.person, testContext.arbeidsgiver),
         )
     }
 
     protected fun spleisForberederBehandling(
         vedtaksperiode: Vedtaksperiode,
-        tilleggsmeldinger: TilleggsmeldingReceiver.() -> Unit
+        tilleggsmeldinger: TilleggsmeldingReceiver.() -> Unit,
     ) {
         spleisOppretterBehandling(
             vedtaksperiode = vedtaksperiode,
             person = testContext.person,
-            arbeidsgiver = testContext.arbeidsgiver
+            arbeidsgiver = testContext.arbeidsgiver,
         )
         spleisOppretterNyUtbetaling(
             vedtaksperiode = vedtaksperiode,
             person = testContext.person,
-            arbeidsgiver = testContext.arbeidsgiver
+            arbeidsgiver = testContext.arbeidsgiver,
         )
         TilleggsmeldingReceiver(testRapid, testContext, vedtaksperiode).tilleggsmeldinger()
         utbetalingEndres(vedtaksperiode, testContext.person, testContext.arbeidsgiver)
@@ -104,21 +108,21 @@ abstract class AbstractE2EIntegrationTest {
     protected fun detPubliseresEnGosysOppgaveEndretMelding() {
         testRapid.publish(
             testContext.person.fødselsnummer,
-            Meldingsbygger.byggGosysOppgaveEndret(testContext.person)
+            Meldingsbygger.byggGosysOppgaveEndret(testContext.person),
         )
     }
 
     protected fun detPubliseresEnAdressebeskyttelseEndretMelding() {
         testRapid.publish(
             testContext.person.fødselsnummer,
-            Meldingsbygger.byggAdressebeskyttelseEndret(testContext.person)
+            Meldingsbygger.byggAdressebeskyttelseEndret(testContext.person),
         )
     }
 
     protected fun varseldefinisjonOpprettes(varselkode: String) {
         testRapid.publish(
             testContext.person.fødselsnummer,
-            Meldingsbygger.byggVarselkodeNyDefinisjon(varselkode)
+            Meldingsbygger.byggVarselkodeNyDefinisjon(varselkode),
         )
     }
 
@@ -127,10 +131,12 @@ abstract class AbstractE2EIntegrationTest {
         automatiskBehandlet: Boolean,
         vararg årsakerTilAvvist: String,
     ) {
-        val løsning = testRapid.meldingslogg(testContext.person.fødselsnummer)
-            .mapNotNull { it["@løsning"] }
-            .mapNotNull { it["Godkjenning"] }
-            .last()
+        val løsning =
+            testRapid
+                .meldingslogg(testContext.person.fødselsnummer)
+                .mapNotNull { it["@løsning"] }
+                .mapNotNull { it["Godkjenning"] }
+                .last()
 
         assertTrue(løsning["godkjent"].isBoolean)
         assertEquals(godkjent, løsning["godkjent"].booleanValue())
@@ -144,9 +150,11 @@ abstract class AbstractE2EIntegrationTest {
     }
 
     protected fun assertVedtakFattetEtterHovedregel(utfall: VedtakFattetMelding.BegrunnelseType = VedtakFattetMelding.BegrunnelseType.Innvilgelse) {
-        val vedtakFattet = testRapid.meldingslogg(testContext.person.fødselsnummer)
-            .find { it["@event_name"].asText() == "vedtak_fattet" }
-            ?: error("Forventet å finne vedtak_fattet i meldingslogg")
+        val vedtakFattet =
+            testRapid
+                .meldingslogg(testContext.person.fødselsnummer)
+                .find { it["@event_name"].asText() == "vedtak_fattet" }
+                ?: error("Forventet å finne vedtak_fattet i meldingslogg")
 
         assertEquals(1, vedtakFattet["begrunnelser"].size())
         assertEquals(utfall.name, vedtakFattet["begrunnelser"][0]["type"].asText())
@@ -154,9 +162,11 @@ abstract class AbstractE2EIntegrationTest {
     }
 
     protected fun assertVedtakFattetEtterSkjønn(begrunnelseFritekst: String = "skjønnsfastsetter tredje avsnitt") {
-        val vedtakFattet = testRapid.meldingslogg(testContext.person.fødselsnummer)
-            .find { it["@event_name"].asText() == "vedtak_fattet" }
-            ?: error("Forventet å finne vedtak_fattet i meldingslogg")
+        val vedtakFattet =
+            testRapid
+                .meldingslogg(testContext.person.fødselsnummer)
+                .find { it["@event_name"].asText() == "vedtak_fattet" }
+                ?: error("Forventet å finne vedtak_fattet i meldingslogg")
 
         assertEquals(4, vedtakFattet["begrunnelser"].size())
         assertEquals("SkjønnsfastsattSykepengegrunnlagMal", vedtakFattet["begrunnelser"][0]["type"].asText())
@@ -168,65 +178,72 @@ abstract class AbstractE2EIntegrationTest {
     }
 
     protected fun assertOppgaveTildeltSaksbehandler() {
-        val oppgaveEvent = testRapid.meldingslogg(testContext.person.fødselsnummer)
-            .findLast { it["@event_name"].asText() in listOf("oppgave_oppdatert", "oppgave_opprettet") }
-            ?: error("Forventet å finne oppgave_opprettet/oppdatert i meldingslogg")
+        val oppgaveEvent =
+            testRapid
+                .meldingslogg(testContext.person.fødselsnummer)
+                .findLast { it["@event_name"].asText() in listOf("oppgave_oppdatert", "oppgave_opprettet") }
+                ?: error("Forventet å finne oppgave_opprettet/oppdatert i meldingslogg")
         assertEquals(saksbehandler.id.value, oppgaveEvent["saksbehandler"].asUUID())
     }
 
     protected fun assertBehandlingTilstand(expectedTilstand: String) {
-        val actualTilstand = sessionOf(E2ETestApplikasjon.dbModule.dataSource, strict = true).use { session ->
-            session.run(
-                asSQL(
-                    "SELECT tilstand FROM behandling WHERE vedtaksperiode_id = :vedtaksperiode_id",
-                    "vedtaksperiode_id" to førsteVedtaksperiode().vedtaksperiodeId,
-                ).map { it.string("tilstand") }.asSingle
-            )
-        }
+        val actualTilstand =
+            sessionOf(E2ETestApplikasjon.dbModule.dataSource, strict = true).use { session ->
+                session.run(
+                    asSQL(
+                        "SELECT tilstand FROM behandling WHERE vedtaksperiode_id = :vedtaksperiode_id",
+                        "vedtaksperiode_id" to førsteVedtaksperiode().vedtaksperiodeId,
+                    ).map { it.string("tilstand") }.asSingle,
+                )
+            }
         assertEquals(expectedTilstand, actualTilstand)
     }
 
     protected fun assertPeriodeForkastet(expectedForkastet: Boolean) {
-        val actualForkastet = sessionOf(E2ETestApplikasjon.dbModule.dataSource, strict = true).use { session ->
-            session.run(
-                asSQL(
-                    "SELECT forkastet FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiode_id",
-                    "vedtaksperiode_id" to førsteVedtaksperiode().vedtaksperiodeId,
-                ).map { it.boolean("forkastet") }.asSingle
-            )
-        }
+        val actualForkastet =
+            sessionOf(E2ETestApplikasjon.dbModule.dataSource, strict = true).use { session ->
+                session.run(
+                    asSQL(
+                        "SELECT forkastet FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiode_id",
+                        "vedtaksperiode_id" to førsteVedtaksperiode().vedtaksperiodeId,
+                    ).map { it.boolean("forkastet") }.asSingle,
+                )
+            }
         assertEquals(expectedForkastet, actualForkastet)
     }
 
-    protected fun assertOppgavestatus(expectedStatus: String) {
-        val actualStatus = sessionOf(E2ETestApplikasjon.dbModule.dataSource, strict = true).use { session ->
-            session.run(
-                asSQL(
-                    """
+    protected fun assertGjeldendeOppgavestatus(expectedStatus: String) {
+        val actualStatus =
+            sessionOf(E2ETestApplikasjon.dbModule.dataSource, strict = true).use { session ->
+                session.run(
+                    asSQL(
+                        """
                         SELECT o.status
                         FROM oppgave o, vedtak v
                         WHERE o.vedtak_ref = v.id
                         AND v.vedtaksperiode_id = :vedtaksperiode_id
                         """.trimIndent(),
-                    "vedtaksperiode_id" to førsteVedtaksperiode().vedtaksperiodeId,
-                ).map { it.string("status") }.asSingle
-            )
-        }
+                        "vedtaksperiode_id" to førsteVedtaksperiode().vedtaksperiodeId,
+                    ).map { it.string("status") }.asSingle,
+                )
+            }
         assertEquals(expectedStatus, actualStatus)
     }
 
     protected fun assertSykepengegrunnlagfakta() {
-        val vedtakFattet = testRapid.meldingslogg(testContext.person.fødselsnummer)
-            .find { it["@event_name"].asText() == "vedtak_fattet" }
-            ?: error("Forventet å finne vedtak_fattet i meldingslogg")
+        val vedtakFattet =
+            testRapid
+                .meldingslogg(testContext.person.fødselsnummer)
+                .find { it["@event_name"].asText() == "vedtak_fattet" }
+                ?: error("Forventet å finne vedtak_fattet i meldingslogg")
 
         assertEquals(
             AvviksvurderingBehovLøser.AVVIKSPROSENT,
-            vedtakFattet["sykepengegrunnlagsfakta"]["avviksprosent"].asDouble()
+            vedtakFattet["sykepengegrunnlagsfakta"]["avviksprosent"].asDouble(),
         )
         assertEquals(
             AvviksvurderingBehovLøser.SAMMENLIGNINGSGRUNNLAG_TOTALBELØP,
-            vedtakFattet["sykepengegrunnlagsfakta"]["innrapportertÅrsinntekt"].asDouble()
+            vedtakFattet["sykepengegrunnlagsfakta"]["innrapportertÅrsinntekt"].asDouble(),
         )
     }
 
@@ -243,7 +260,7 @@ abstract class AbstractE2EIntegrationTest {
     protected fun medPersonISpeil(
         saksbehandler: Saksbehandler = this.saksbehandler,
         saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe> = this.saksbehandlerTilgangsgrupper,
-        block: SpeilPersonReceiver.() -> Unit
+        block: SpeilPersonReceiver.() -> Unit,
     ) {
         spleisStub.stubSnapshotForPerson(testContext)
         SpeilPersonReceiver(
@@ -265,31 +282,31 @@ abstract class AbstractE2EIntegrationTest {
     private fun spleisOppretterBehandling(
         vedtaksperiode: Vedtaksperiode,
         person: Person,
-        arbeidsgiver: Arbeidsgiver
+        arbeidsgiver: Arbeidsgiver,
     ) {
         vedtaksperiode.spleisBehandlingId = UUID.randomUUID()
         testRapid.publish(
             person.fødselsnummer,
-            Meldingsbygger.byggBehandlingOpprettet(vedtaksperiode, person, arbeidsgiver)
+            Meldingsbygger.byggBehandlingOpprettet(vedtaksperiode, person, arbeidsgiver),
         )
     }
 
     private fun spleisOppretterNyUtbetaling(
         vedtaksperiode: Vedtaksperiode,
         person: Person,
-        arbeidsgiver: Arbeidsgiver
+        arbeidsgiver: Arbeidsgiver,
     ) {
         vedtaksperiode.utbetalingId = UUID.randomUUID()
         testRapid.publish(
             person.fødselsnummer,
-            Meldingsbygger.byggVedtaksperiodeNyUtbetaling(vedtaksperiode, person, arbeidsgiver)
+            Meldingsbygger.byggVedtaksperiodeNyUtbetaling(vedtaksperiode, person, arbeidsgiver),
         )
     }
 
     private fun utbetalingEndres(
         vedtaksperiode: Vedtaksperiode,
         person: Person,
-        arbeidsgiver: Arbeidsgiver
+        arbeidsgiver: Arbeidsgiver,
     ) {
         testRapid.publish(
             person.fødselsnummer,
@@ -298,12 +315,15 @@ abstract class AbstractE2EIntegrationTest {
                 person = person,
                 arbeidsgiver = arbeidsgiver,
                 forrigeStatus = "NY",
-                gjeldendeStatus = "IKKE_UTBETALT"
-            )
+                gjeldendeStatus = "IKKE_UTBETALT",
+            ),
         )
     }
 
-    protected fun spleisSenderGodkjenningsbehov(vedtaksperiode: Vedtaksperiode, tags: List<String> = listOf("Innvilget")) {
+    protected fun spleisSenderGodkjenningsbehov(
+        vedtaksperiode: Vedtaksperiode,
+        tags: List<String> = listOf("Innvilget"),
+    ) {
         testRapid.publish(
             testContext.person.fødselsnummer,
             Meldingsbygger.byggGodkjenningsbehov(
@@ -311,15 +331,15 @@ abstract class AbstractE2EIntegrationTest {
                 arbeidsgiver = testContext.arbeidsgiver,
                 vilkårsgrunnlagId = testContext.vilkårsgrunnlagId,
                 vedtaksperiode = vedtaksperiode,
-                tags = tags
-            )
+                tags = tags,
+            ),
         )
     }
 
     protected fun skjermetInfoEndres(skjermet: Boolean) {
         testRapid.publish(
             testContext.person.fødselsnummer,
-            Meldingsbygger.byggEndretSkjermetinfo(testContext.person, skjermet)
+            Meldingsbygger.byggEndretSkjermetinfo(testContext.person, skjermet),
         )
     }
 
@@ -327,24 +347,21 @@ abstract class AbstractE2EIntegrationTest {
         relativeUrl: String,
         saksbehandler: Saksbehandler = this.saksbehandler,
         saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe> = this.saksbehandlerTilgangsgrupper,
-    ) =
-        REST.get(
-            relativeUrl = relativeUrl,
-            saksbehandler = saksbehandler,
-            tilgangsgrupper = saksbehandlerTilgangsgrupper
-        )
+    ) = REST.get(
+        relativeUrl = relativeUrl,
+        saksbehandler = saksbehandler,
+        tilgangsgrupper = saksbehandlerTilgangsgrupper,
+    )
 
     protected fun callHttpPost(
         relativeUrl: String,
         saksbehandler: Saksbehandler = this.saksbehandler,
         saksbehandlerTilgangsgrupper: Set<Tilgangsgruppe> = this.saksbehandlerTilgangsgrupper,
-        request: Any
-    ) =
-        REST.post(
-            relativeUrl = relativeUrl,
-            saksbehandler = saksbehandler,
-            tilgangsgrupper = saksbehandlerTilgangsgrupper,
-            request = request
-        )
-
+        request: Any,
+    ) = REST.post(
+        relativeUrl = relativeUrl,
+        saksbehandler = saksbehandler,
+        tilgangsgrupper = saksbehandlerTilgangsgrupper,
+        request = request,
+    )
 }

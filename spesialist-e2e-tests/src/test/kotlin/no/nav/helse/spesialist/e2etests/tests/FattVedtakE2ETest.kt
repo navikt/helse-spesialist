@@ -15,7 +15,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
-
     @Test
     fun `saksbehandler fatter vedtak etter hovedregel`() {
         // Given:
@@ -127,6 +126,7 @@ class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
             assertVarslerHarStatus("GODKJENT", andreVedtaksperiode.spleisBehandlingId!!)
         }
     }
+
     @Test
     fun `opphever på vent-status når vedtaket fattes`() {
         // Given:
@@ -178,13 +178,15 @@ class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
         // Then:
         medPersonISpeil {
             // Sjekk at vedtaksbegrunnelse er lagret
-            val vedtakBegrunnelse = person["arbeidsgivere"].flatMap { arbeidsgiver ->
-                arbeidsgiver["generasjoner"].flatMap { generasjon ->
-                    generasjon["perioder"].flatMap { periode ->
-                        periode["vedtakBegrunnelser"]?.toList().orEmpty()
-                    }
-                }
-            }.single()
+            val vedtakBegrunnelse =
+                person["arbeidsgivere"]
+                    .flatMap { arbeidsgiver ->
+                        arbeidsgiver["generasjoner"].flatMap { generasjon ->
+                            generasjon["perioder"].flatMap { periode ->
+                                periode["vedtakBegrunnelser"]?.toList().orEmpty()
+                            }
+                        }
+                    }.single()
 
             assertEquals("INNVILGELSE", vedtakBegrunnelse["utfall"].asText())
             assertEquals("Her er min begrunnelse", vedtakBegrunnelse["begrunnelse"].asText())
@@ -211,7 +213,7 @@ class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
                 periode = vedtaksperiode.fom tilOgMed vedtaksperiode.tom,
                 periodebeløp = BigDecimal.valueOf(10000.0),
                 ekskluderteUkedager = emptyList(),
-                notatTilBeslutter = "Et notat"
+                notatTilBeslutter = "Et notat",
             )
             saksbehandlerGodkjennerAlleVarsler()
             saksbehandlerSenderTilGodkjenning("Her er min begrunnelse")
@@ -224,29 +226,32 @@ class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
         // Then:
         medPersonISpeil {
             // Sjekk at vedtaksbegrunnelse er lagret
-            val vedtakBegrunnelse = person["arbeidsgivere"].flatMap { arbeidsgiver ->
-                arbeidsgiver["generasjoner"].flatMap { generasjon ->
-                    generasjon["perioder"].flatMap { periode ->
-                        periode["vedtakBegrunnelser"]?.toList().orEmpty()
-                    }
-                }
-            }.single()
+            val vedtakBegrunnelse =
+                person["arbeidsgivere"]
+                    .flatMap { arbeidsgiver ->
+                        arbeidsgiver["generasjoner"].flatMap { generasjon ->
+                            generasjon["perioder"].flatMap { periode ->
+                                periode["vedtakBegrunnelser"]?.toList().orEmpty()
+                            }
+                        }
+                    }.single()
 
             assertEquals("INNVILGELSE", vedtakBegrunnelse["utfall"].asText())
             assertEquals("Her er min begrunnelse", vedtakBegrunnelse["begrunnelse"].asText())
             assertEquals(saksbehandler.ident, vedtakBegrunnelse["saksbehandlerIdent"].asText())
 
-            val historikkinnslag = person["arbeidsgivere"].flatMap { arbeidsgiver ->
-                arbeidsgiver["generasjoner"].flatMap { generasjon ->
-                    generasjon["perioder"].flatMap { periode ->
-                        periode["historikkinnslag"]?.toList().orEmpty()
+            val historikkinnslag =
+                person["arbeidsgivere"].flatMap { arbeidsgiver ->
+                    arbeidsgiver["generasjoner"].flatMap { generasjon ->
+                        generasjon["perioder"].flatMap { periode ->
+                            periode["historikkinnslag"]?.toList().orEmpty()
+                        }
                     }
                 }
-            }
             assertContains(historikkinnslag.map { it["type"].asText() }, "TOTRINNSVURDERING_ATTESTERT")
         }
 
-        assertOppgavestatus("Ferdigstilt")
+        assertGjeldendeOppgavestatus("Ferdigstilt")
 
         val meldinger = meldinger()
         val nestSisteOppgaveOppdatert = meldinger.filter { it["@event_name"].asText() == "oppgave_oppdatert" }.dropLast(1).last()
@@ -265,18 +270,18 @@ class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
         val godkjenningsbehovLøsning = meldinger.single { it["@event_name"].asText() == "behov" && it["@behov"].first().asText() == "Godkjenning" && it["@løsning"] != null }
         assertJsonEquals(
             """
-                {
-                  "Godkjenning": {
-                    "godkjent": true,
-                    "saksbehandlerIdent": "${saksbehandler.ident}",
-                    "saksbehandlerEpost": "${saksbehandler.epost}",
-                    "automatiskBehandling": false,
-                    "saksbehandleroverstyringer": []
-                  }
-                }
+            {
+              "Godkjenning": {
+                "godkjent": true,
+                "saksbehandlerIdent": "${saksbehandler.ident}",
+                "saksbehandlerEpost": "${saksbehandler.epost}",
+                "automatiskBehandling": false,
+                "saksbehandleroverstyringer": []
+              }
+            }
             """.trimIndent(),
             godkjenningsbehovLøsning["@løsning"],
-            "Godkjenning.godkjenttidspunkt"
+            "Godkjenning.godkjenttidspunkt",
         )
         assertMindreEnnNSekunderSiden(30, godkjenningsbehovLøsning["@løsning"]["Godkjenning"]["godkjenttidspunkt"].asLocalDateTime())
 
@@ -284,32 +289,32 @@ class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
         val vedtaksperiodeGodkjent = meldinger.single { it["@event_name"].asText() == "vedtaksperiode_godkjent" }
         assertJsonEquals(
             """
-                {
-                  "@event_name": "vedtaksperiode_godkjent",
-                  "fødselsnummer": "${testContext.person.fødselsnummer}",
-                  "vedtaksperiodeId": "${førsteVedtaksperiode().vedtaksperiodeId}",
-                  "periodetype": "FØRSTEGANGSBEHANDLING",
-                  "saksbehandlerIdent": "${saksbehandler.ident}",
-                  "saksbehandlerEpost": "${saksbehandler.epost}",
-                  "automatiskBehandling": false,
-                  "saksbehandler": {
-                    "ident": "${saksbehandler.ident}",
-                    "epostadresse": "${saksbehandler.epost}"
-                  },
-                  "beslutter": {
-                    "ident": "${beslutter.ident}",
-                    "epostadresse": "${beslutter.epost}"
-                  },
-                  "behandlingId": "${førsteVedtaksperiode().spleisBehandlingId}",
-                  "yrkesaktivitetstype": "ARBEIDSTAKER"
-                }
+            {
+              "@event_name": "vedtaksperiode_godkjent",
+              "fødselsnummer": "${testContext.person.fødselsnummer}",
+              "vedtaksperiodeId": "${førsteVedtaksperiode().vedtaksperiodeId}",
+              "periodetype": "FØRSTEGANGSBEHANDLING",
+              "saksbehandlerIdent": "${saksbehandler.ident}",
+              "saksbehandlerEpost": "${saksbehandler.epost}",
+              "automatiskBehandling": false,
+              "saksbehandler": {
+                "ident": "${saksbehandler.ident}",
+                "epostadresse": "${saksbehandler.epost}"
+              },
+              "beslutter": {
+                "ident": "${beslutter.ident}",
+                "epostadresse": "${beslutter.epost}"
+              },
+              "behandlingId": "${førsteVedtaksperiode().spleisBehandlingId}",
+              "yrkesaktivitetstype": "ARBEIDSTAKER"
+            }
             """.trimIndent(),
             vedtaksperiodeGodkjent,
             "@id",
             "@opprettet",
             "system_read_count",
             "system_participating_services",
-            "@forårsaket_av"
+            "@forårsaket_av",
         )
     }
 
@@ -326,26 +331,29 @@ class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
             saksbehandlerFatterVedtak(førsteVedtaksperiode().spleisBehandlingId!!, "Her er min begrunnelse")
 
             // Sjekk at varsler er godkjent
-            person["arbeidsgivere"].flatMap { arbeidsgiver ->
-                arbeidsgiver["generasjoner"].flatMap { generasjon ->
-                    generasjon["perioder"].flatMap { periode ->
-                        periode["varsler"].map {
-                            it["vurdering"]?.get("status")?.asText()
+            person["arbeidsgivere"]
+                .flatMap { arbeidsgiver ->
+                    arbeidsgiver["generasjoner"].flatMap { generasjon ->
+                        generasjon["perioder"].flatMap { periode ->
+                            periode["varsler"].map {
+                                it["vurdering"]?.get("status")?.asText()
+                            }
                         }
                     }
+                }.forEach { varselStatus ->
+                    assertEquals("GODKJENT", varselStatus)
                 }
-            }.forEach { varselStatus ->
-                assertEquals("GODKJENT", varselStatus)
-            }
 
             // Sjekk at vedtaksbegrunnelse er lagret
-            val vedtakBegrunnelse = person["arbeidsgivere"].flatMap { arbeidsgiver ->
-                arbeidsgiver["generasjoner"].flatMap { generasjon ->
-                    generasjon["perioder"].flatMap { periode ->
-                        periode["vedtakBegrunnelser"]?.toList().orEmpty()
-                    }
-                }
-            }.single()
+            val vedtakBegrunnelse =
+                person["arbeidsgivere"]
+                    .flatMap { arbeidsgiver ->
+                        arbeidsgiver["generasjoner"].flatMap { generasjon ->
+                            generasjon["perioder"].flatMap { periode ->
+                                periode["vedtakBegrunnelser"]?.toList().orEmpty()
+                            }
+                        }
+                    }.single()
 
             assertEquals("INNVILGELSE", vedtakBegrunnelse["utfall"].asText())
             assertEquals("Her er min begrunnelse", vedtakBegrunnelse["begrunnelse"].asText())
@@ -353,7 +361,7 @@ class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
         }
 
         // Then:
-        assertOppgavestatus("Ferdigstilt")
+        assertGjeldendeOppgavestatus("Ferdigstilt")
 
         val meldinger = meldinger()
         val nestSisteOppgaveOppdatert = meldinger.filter { it["@event_name"].asText() == "oppgave_oppdatert" }.dropLast(1).last()
@@ -372,18 +380,18 @@ class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
         val godkjenningsbehovLøsning = meldinger.single { it["@event_name"].asText() == "behov" && it["@behov"].first().asText() == "Godkjenning" && it["@løsning"] != null }
         assertJsonEquals(
             """
-                {
-                  "Godkjenning": {
-                    "godkjent": true,
-                    "saksbehandlerIdent": "${saksbehandler.ident}",
-                    "saksbehandlerEpost": "${saksbehandler.epost}",
-                    "automatiskBehandling": false,
-                    "saksbehandleroverstyringer": []
-                  }
-                }
+            {
+              "Godkjenning": {
+                "godkjent": true,
+                "saksbehandlerIdent": "${saksbehandler.ident}",
+                "saksbehandlerEpost": "${saksbehandler.epost}",
+                "automatiskBehandling": false,
+                "saksbehandleroverstyringer": []
+              }
+            }
             """.trimIndent(),
             godkjenningsbehovLøsning["@løsning"],
-            "Godkjenning.godkjenttidspunkt"
+            "Godkjenning.godkjenttidspunkt",
         )
         assertMindreEnnNSekunderSiden(30, godkjenningsbehovLøsning["@løsning"]["Godkjenning"]["godkjenttidspunkt"].asLocalDateTime())
 
@@ -391,28 +399,28 @@ class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
         val vedtaksperiodeGodkjent = meldinger.single { it["@event_name"].asText() == "vedtaksperiode_godkjent" }
         assertJsonEquals(
             """
-                {
-                  "@event_name": "vedtaksperiode_godkjent",
-                  "fødselsnummer": "${testContext.person.fødselsnummer}",
-                  "vedtaksperiodeId": "${førsteVedtaksperiode().vedtaksperiodeId}",
-                  "periodetype": "FØRSTEGANGSBEHANDLING",
-                  "saksbehandlerIdent": "${saksbehandler.ident}",
-                  "saksbehandlerEpost": "${saksbehandler.epost}",
-                  "automatiskBehandling": false,
-                  "saksbehandler": {
-                    "ident": "${saksbehandler.ident}",
-                    "epostadresse": "${saksbehandler.epost}"
-                  },
-                  "behandlingId": "${førsteVedtaksperiode().spleisBehandlingId}",
-                  "yrkesaktivitetstype": "ARBEIDSTAKER"
-                }
+            {
+              "@event_name": "vedtaksperiode_godkjent",
+              "fødselsnummer": "${testContext.person.fødselsnummer}",
+              "vedtaksperiodeId": "${førsteVedtaksperiode().vedtaksperiodeId}",
+              "periodetype": "FØRSTEGANGSBEHANDLING",
+              "saksbehandlerIdent": "${saksbehandler.ident}",
+              "saksbehandlerEpost": "${saksbehandler.epost}",
+              "automatiskBehandling": false,
+              "saksbehandler": {
+                "ident": "${saksbehandler.ident}",
+                "epostadresse": "${saksbehandler.epost}"
+              },
+              "behandlingId": "${førsteVedtaksperiode().spleisBehandlingId}",
+              "yrkesaktivitetstype": "ARBEIDSTAKER"
+            }
             """.trimIndent(),
             vedtaksperiodeGodkjent,
             "@id",
             "@opprettet",
             "system_read_count",
             "system_participating_services",
-            "@forårsaket_av"
+            "@forårsaket_av",
         )
     }
 
@@ -420,7 +428,7 @@ class FattVedtakE2ETest : AbstractE2EIntegrationTest() {
     @CsvSource("Innvilget,Innvilgelse", "DelvisInnvilget,DelvisInnvilgelse", "Avslag,Avslag")
     fun `fatter vedtak med utfall innvilgelse basert på tags fra Spleis`(
         tag: String,
-        utfall: VedtakFattetMelding.BegrunnelseType
+        utfall: VedtakFattetMelding.BegrunnelseType,
     ) {
         // Given:
         risikovurderingBehovLøser.kanGodkjenneAutomatisk = false

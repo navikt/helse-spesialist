@@ -23,7 +23,7 @@ class ForkastingE2ETest : AbstractE2EIntegrationTest() {
         }
 
         // Then:
-        assertOppgavestatus("Invalidert")
+        assertGjeldendeOppgavestatus("Invalidert")
 
         val meldinger = meldinger()
         val nestSisteOppgaveOppdatert = meldinger.filter { it["@event_name"].asText() == "oppgave_oppdatert" }.dropLast(1).last()
@@ -42,21 +42,21 @@ class ForkastingE2ETest : AbstractE2EIntegrationTest() {
         val godkjenningsbehovLøsning = meldinger.single { it["@event_name"].asText() == "behov" && it["@behov"].first().asText() == "Godkjenning" && it["@løsning"] != null }
         assertJsonEquals(
             """
-                {
-                  "Godkjenning": {
-                    "godkjent": false,
-                    "saksbehandlerIdent": "${saksbehandler.ident}",
-                    "saksbehandlerEpost": "${saksbehandler.epost}",
-                    "automatiskBehandling": false,
-                    "årsak" : "Her er en årsak",
-                    "begrunnelser" : ["Mangler støtte"],
-                    "kommentar" : "ingen kommentar",
-                    "saksbehandleroverstyringer": []
-                  }
-                }
+            {
+              "Godkjenning": {
+                "godkjent": false,
+                "saksbehandlerIdent": "${saksbehandler.ident}",
+                "saksbehandlerEpost": "${saksbehandler.epost}",
+                "automatiskBehandling": false,
+                "årsak" : "Her er en årsak",
+                "begrunnelser" : ["Mangler støtte"],
+                "kommentar" : "ingen kommentar",
+                "saksbehandleroverstyringer": []
+              }
+            }
             """.trimIndent(),
             godkjenningsbehovLøsning["@løsning"],
-            "Godkjenning.godkjenttidspunkt"
+            "Godkjenning.godkjenttidspunkt",
         )
         assertMindreEnnNSekunderSiden(30, godkjenningsbehovLøsning["@løsning"]["Godkjenning"]["godkjenttidspunkt"].asLocalDateTime())
 
@@ -64,31 +64,31 @@ class ForkastingE2ETest : AbstractE2EIntegrationTest() {
         val vedtaksperiodeAvvist = meldinger.single { it["@event_name"].asText() == "vedtaksperiode_avvist" }
         assertJsonEquals(
             """
-                {
-                  "@event_name": "vedtaksperiode_avvist",
-                  "fødselsnummer": "${testContext.person.fødselsnummer}",
-                  "vedtaksperiodeId": "${førsteVedtaksperiode().vedtaksperiodeId}",
-                  "saksbehandlerIdent": "${saksbehandler.ident}",
-                  "saksbehandlerEpost": "${saksbehandler.epost}",
-                  "saksbehandler": {
-                    "ident": "${saksbehandler.ident}",
-                    "epostadresse": "${saksbehandler.epost}"
-                  },
-                  "automatiskBehandling": false,
-                  "årsak" : "Her er en årsak",
-                  "begrunnelser" : ["Mangler støtte"],
-                  "kommentar" : "ingen kommentar",
-                  "periodetype": "FØRSTEGANGSBEHANDLING",
-                  "behandlingId": "${førsteVedtaksperiode().spleisBehandlingId}",
-                  "yrkesaktivitetstype": "ARBEIDSTAKER"
-                }
+            {
+              "@event_name": "vedtaksperiode_avvist",
+              "fødselsnummer": "${testContext.person.fødselsnummer}",
+              "vedtaksperiodeId": "${førsteVedtaksperiode().vedtaksperiodeId}",
+              "saksbehandlerIdent": "${saksbehandler.ident}",
+              "saksbehandlerEpost": "${saksbehandler.epost}",
+              "saksbehandler": {
+                "ident": "${saksbehandler.ident}",
+                "epostadresse": "${saksbehandler.epost}"
+              },
+              "automatiskBehandling": false,
+              "årsak" : "Her er en årsak",
+              "begrunnelser" : ["Mangler støtte"],
+              "kommentar" : "ingen kommentar",
+              "periodetype": "FØRSTEGANGSBEHANDLING",
+              "behandlingId": "${førsteVedtaksperiode().spleisBehandlingId}",
+              "yrkesaktivitetstype": "ARBEIDSTAKER"
+            }
             """.trimIndent(),
             vedtaksperiodeAvvist,
             "@id",
             "@opprettet",
             "system_read_count",
             "system_participating_services",
-            "@forårsaket_av"
+            "@forårsaket_av",
         )
     }
 
@@ -107,7 +107,7 @@ class ForkastingE2ETest : AbstractE2EIntegrationTest() {
         spleisKasterUtSaken(førsteVedtaksperiode())
 
         // Then:
-        assertOppgavestatus("Ferdigstilt")
+        assertGjeldendeOppgavestatus("Ferdigstilt")
     }
 
     @Test
@@ -119,7 +119,7 @@ class ForkastingE2ETest : AbstractE2EIntegrationTest() {
         spleisKasterUtSaken(førsteVedtaksperiode())
 
         // Then:
-        assertOppgavestatus("Invalidert")
+        assertGjeldendeOppgavestatus("Invalidert")
         assertPeriodeForkastet(true)
     }
 }
