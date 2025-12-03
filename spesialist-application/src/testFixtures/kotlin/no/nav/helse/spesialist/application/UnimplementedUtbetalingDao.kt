@@ -1,7 +1,6 @@
 package no.nav.helse.spesialist.application
 
 import no.nav.helse.db.UtbetalingDao
-import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import java.time.LocalDateTime
@@ -12,20 +11,19 @@ class UnimplementedUtbetalingDao : UtbetalingDao {
         TODO("Not yet implemented")
     }
 
-    override fun hentUtbetaling(utbetalingId: UUID): Utbetaling {
-        TODO("Not yet implemented")
-    }
-
     override fun nyUtbetalingStatus(
         utbetalingIdRef: Long,
         status: Utbetalingsstatus,
         opprettet: LocalDateTime,
-        json: String
+        json: String,
     ) {
         TODO("Not yet implemented")
     }
 
-    override fun nyttOppdrag(fagsystemId: String, mottaker: String): Long? {
+    override fun nyttOppdrag(
+        fagsystemId: String,
+        mottaker: String,
+    ): Long? {
         TODO("Not yet implemented")
     }
 
@@ -38,12 +36,15 @@ class UnimplementedUtbetalingDao : UtbetalingDao {
         arbeidsgiverFagsystemIdRef: Long,
         personFagsystemIdRef: Long,
         arbeidsgiverbeløp: Int,
-        personbeløp: Int
+        personbeløp: Int,
     ): Long {
         TODO("Not yet implemented")
     }
 
-    override fun opprettKobling(vedtaksperiodeId: UUID, utbetalingId: UUID) {
+    override fun opprettKobling(
+        vedtaksperiodeId: UUID,
+        utbetalingId: UUID,
+    ) {
         TODO("Not yet implemented")
     }
 

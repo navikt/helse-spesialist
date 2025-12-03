@@ -21,8 +21,6 @@ import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.person.vedtaksperiode.Varselkode
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
 import no.nav.helse.modell.totrinnsvurdering.TotrinnsvurderingTilstand.GODKJENT
-import no.nav.helse.modell.utbetaling.Refusjonstype
-import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
@@ -32,10 +30,13 @@ import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
 import no.nav.helse.spesialist.application.logg.logg
 import no.nav.helse.spesialist.application.logg.sikkerlogg
 import no.nav.helse.spesialist.domain.UtbetalingTag.Companion.inneholderUtbetalingTilSykmeldt
+import no.nav.helse.spesialist.domain.UtbetalingTag.Companion.trekkesPenger
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 import kotlin.random.Random
+
+private fun List<String>.erRevurdering() = "Revurdering" in this
 
 internal class Automatisering(
     private val risikovurderingDao: RisikovurderingDao,
@@ -90,7 +91,6 @@ internal class Automatisering(
     internal fun utfør(
         fødselsnummer: String,
         vedtaksperiodeId: UUID,
-        utbetaling: Utbetaling,
         periodetype: Periodetype,
         sykefraværstilfelle: Sykefraværstilfelle,
         organisasjonsnummer: String,
@@ -107,7 +107,6 @@ internal class Automatisering(
             vurder(
                 fødselsnummer = fødselsnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
-                utbetaling = utbetaling,
                 periodetype = periodetype,
                 sykefraværstilfelle = sykefraværstilfelle,
                 organisasjonsnummer = organisasjonsnummer,
@@ -268,7 +267,6 @@ internal class Automatisering(
     private fun vurder(
         fødselsnummer: String,
         vedtaksperiodeId: UUID,
-        utbetaling: Utbetaling,
         periodetype: Periodetype,
         sykefraværstilfelle: Sykefraværstilfelle,
         organisasjonsnummer: String,
@@ -309,7 +307,7 @@ internal class Automatisering(
             validering("Bruker er under verge") { !harVergemål },
             validering("Bruker tilhører utlandsenhet") { !tilhørerUtlandsenhet },
             validering("Utbetaling til sykmeldt") { !skalStoppesPgaUTS },
-            AutomatiserRevurderinger(utbetaling, fødselsnummer, vedtaksperiodeId),
+            AutomatiserRevurderinger(fødselsnummer, vedtaksperiodeId, tags),
             validering("Vedtaksperioden har et krav om totrinnsvurdering") { !harKravOmTotrinnsvurdering },
             IkkeAutomatiserNåddMaksdatoOgRefusjonAG(maksdato, tags, sykefraværstilfelle, vedtaksperiodeId),
         )
@@ -331,13 +329,13 @@ internal class Automatisering(
     }
 
     private class AutomatiserRevurderinger(
-        private val utbetaling: Utbetaling,
         private val fødselsnummer: String,
         private val vedtaksperiodeId: UUID,
+        private val tags: List<String>,
     ) : AutomatiseringValidering {
         override fun erAautomatiserbar() =
-            !utbetaling.erRevurdering() ||
-                (utbetaling.refusjonstype() != Refusjonstype.NEGATIVT_BELØP).also {
+            !tags.erRevurdering() ||
+                !tags.trekkesPenger().also {
                     if (it) {
                         sikkerlogg.info(
                             "Revurdering av $vedtaksperiodeId (person $fødselsnummer) har ikke et negativt beløp, og er godkjent for automatisering",

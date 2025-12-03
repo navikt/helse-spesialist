@@ -33,6 +33,12 @@ enum class UtbetalingTag {
             return tags.utbetalingTilSykmeldt() && tags.utbetalingTilArbeidsgiver()
         }
 
+        @Deprecated("Bør flyttes inn i Behandling når kommandoløypa bruker nye domeneklasser. Innfører denne midlertidig for å strupe bruk av Utbetaling")
+        fun List<String>.trekkesPenger(): Boolean {
+            val tags = utbetalingTags()
+            return NegativArbeidsgiverutbetaling in tags || NegativPersonutbetaling in tags
+        }
+
         private fun List<UtbetalingTag>.utbetalingTilSykmeldt() = Personutbetaling in this || NegativPersonutbetaling in this
 
         private fun List<UtbetalingTag>.utbetalingTilArbeidsgiver() = Arbeidsgiverutbetaling in this || NegativArbeidsgiverutbetaling in this

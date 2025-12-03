@@ -13,7 +13,6 @@ import no.nav.helse.modell.automatisering.VurderAutomatiskInnvilgelse
 import no.nav.helse.modell.gosysoppgaver.OppgaveDataForAutomatisering
 import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.modell.person.Sykefraværstilfelle
-import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.spesialist.domain.Periode
 import java.time.LocalDate
@@ -58,7 +57,6 @@ class TilbakedateringBehandlet(
 
 internal class TilbakedateringGodkjentCommand(
     sykefraværstilfelle: Sykefraværstilfelle,
-    utbetaling: Utbetaling,
     automatisering: Automatisering,
     oppgaveDataForAutomatisering: OppgaveDataForAutomatisering,
     oppgaveService: OppgaveService,
@@ -82,7 +80,6 @@ internal class TilbakedateringGodkjentCommand(
                 automatisering = automatisering,
                 godkjenningMediator = godkjenningMediator,
                 oppgaveService = oppgaveService,
-                utbetaling = utbetaling,
                 sykefraværstilfelle = sykefraværstilfelle,
                 godkjenningsbehov = godkjenningsbehov,
                 automatiseringDao = automatiseringDao,

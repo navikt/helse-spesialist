@@ -69,7 +69,6 @@ class Kommandofabrikk(
         oppgaveDataForAutomatisering: OppgaveDataForAutomatisering,
         sessionContext: SessionContext,
     ): GosysOppgaveEndretCommand {
-        val utbetaling = sessionContext.utbetalingDao.hentUtbetaling(oppgaveDataForAutomatisering.utbetalingId)
         val harTildeltOppgave =
             sessionContext.tildelingDao.tildelingForOppgave(oppgaveDataForAutomatisering.oppgaveId) != null
         val godkjenningsbehovData =
@@ -78,7 +77,6 @@ class Kommandofabrikk(
                 .data()
 
         return GosysOppgaveEndretCommand(
-            utbetaling = utbetaling,
             sykefraværstilfelle = person.sykefraværstilfelle(oppgaveDataForAutomatisering.vedtaksperiodeId),
             harTildeltOppgave = harTildeltOppgave,
             oppgavedataForAutomatisering = oppgaveDataForAutomatisering,
@@ -101,11 +99,9 @@ class Kommandofabrikk(
         val godkjenningsbehovData =
             sessionContext.meldingDao.finnGodkjenningsbehov(oppgaveDataForAutomatisering.hendelseId).data()
         val sykefraværstilfelle = person.sykefraværstilfelle(godkjenningsbehovData.vedtaksperiodeId)
-        val utbetaling = sessionContext.utbetalingDao.hentUtbetaling(godkjenningsbehovData.utbetalingId)
 
         return TilbakedateringGodkjentCommand(
             sykefraværstilfelle = sykefraværstilfelle,
-            utbetaling = utbetaling,
             automatisering = transaksjonellAutomatisering(sessionContext),
             oppgaveDataForAutomatisering = oppgaveDataForAutomatisering,
             oppgaveService = transaksjonellOppgaveService(sessionContext),
@@ -177,14 +173,12 @@ class Kommandofabrikk(
                 ?.let {
                     sessionContext.meldingDao.finnGodkjenningsbehov(it.hendelseId)
                 }?.data()
-        val utbetaling = godkjenningsbehovData?.let { sessionContext.utbetalingDao.hentUtbetaling(it.utbetalingId) }
         return AdressebeskyttelseEndretCommand(
             fødselsnummer = melding.fødselsnummer(),
             personDao = sessionContext.personDao,
             oppgaveDao = sessionContext.oppgaveDao,
             godkjenningMediator = GodkjenningMediator(sessionContext.opptegnelseDao),
             godkjenningsbehov = godkjenningsbehovData,
-            utbetaling = utbetaling,
         )
     }
 
@@ -271,7 +265,6 @@ class Kommandofabrikk(
         person: LegacyPerson,
         sessionContext: SessionContext,
     ): GodkjenningsbehovCommand {
-        val utbetaling = sessionContext.utbetalingDao.hentUtbetaling(godkjenningsbehovData.utbetalingId)
         val førsteKjenteDagFinner = {
             sessionContext.legacyVedtaksperiodeRepository.førsteKjenteDag(
                 godkjenningsbehovData.fødselsnummer,
@@ -279,7 +272,6 @@ class Kommandofabrikk(
         }
         return GodkjenningsbehovCommand(
             behovData = godkjenningsbehovData,
-            utbetaling = utbetaling,
             førsteKjenteDagFinner = førsteKjenteDagFinner,
             automatisering = transaksjonellAutomatisering(sessionContext),
             vedtakDao = sessionContext.vedtakDao,

@@ -2,7 +2,6 @@ package no.nav.helse.spesialist.db.dao
 
 import kotliquery.Session
 import no.nav.helse.db.UtbetalingDao
-import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.spesialist.db.HelseDao.Companion.asSQL
@@ -119,21 +118,4 @@ class PgUtbetalingDao internal constructor(
             "utbetaling_id" to utbetalingId,
         ).update()
     }
-
-    override fun hentUtbetaling(utbetalingId: UUID): Utbetaling = checkNotNull(utbetalingFor(utbetalingId)) { "Finner ikke utbetaling, utbetalingId=$utbetalingId" }
-
-    private fun utbetalingFor(utbetalingId: UUID): Utbetaling? =
-        asSQL(
-            """
-            SELECT arbeidsgiverbeløp, personbeløp, type FROM utbetaling_id u WHERE u.utbetaling_id = :utbetaling_id
-            """.trimIndent(),
-            "utbetaling_id" to utbetalingId,
-        ).singleOrNull {
-            Utbetaling(
-                utbetalingId,
-                it.int("arbeidsgiverbeløp"),
-                it.int("personbeløp"),
-                enumValueOf(it.string("type")),
-            )
-        }
 }

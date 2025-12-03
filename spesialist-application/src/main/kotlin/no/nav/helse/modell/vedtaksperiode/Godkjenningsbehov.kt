@@ -53,7 +53,6 @@ import no.nav.helse.modell.kommando.VurderVidereBehandlingAvGodkjenningsbehov
 import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.modell.person.vedtaksperiode.SpleisVedtaksperiode
 import no.nav.helse.modell.risiko.VurderVurderingsmomenter
-import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.varsel.VurderEnhetUtland
 import no.nav.helse.modell.vergemal.VurderVergemålOgFullmakt
@@ -339,7 +338,6 @@ class Godkjenningsbehov(
 
 internal class GodkjenningsbehovCommand(
     behovData: GodkjenningsbehovData,
-    utbetaling: Utbetaling,
     førsteKjenteDagFinner: () -> LocalDate?,
     automatisering: Automatisering,
     vedtakDao: VedtakDao,
@@ -477,7 +475,6 @@ internal class GodkjenningsbehovCommand(
             VurderAutomatiskInnvilgelse(
                 automatisering = automatisering,
                 godkjenningMediator = godkjenningMediator,
-                utbetaling = utbetaling,
                 sykefraværstilfelle = sykefraværstilfelle,
                 godkjenningsbehov = behovData,
                 automatiseringDao = automatiseringDao,

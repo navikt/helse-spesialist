@@ -7,14 +7,12 @@ import no.nav.helse.modell.kommando.Command
 import no.nav.helse.modell.kommando.CommandContext
 import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
 import no.nav.helse.modell.person.Sykefraværstilfelle
-import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import no.nav.helse.spesialist.application.logg.loggInfo
 
 internal class VurderAutomatiskInnvilgelse(
     private val automatisering: Automatisering,
     private val godkjenningMediator: GodkjenningMediator,
-    private val utbetaling: Utbetaling,
     private val sykefraværstilfelle: Sykefraværstilfelle,
     private val godkjenningsbehov: GodkjenningsbehovData,
     private val automatiseringDao: AutomatiseringDao,
@@ -37,7 +35,6 @@ internal class VurderAutomatiskInnvilgelse(
             automatisering.utfør(
                 fødselsnummer = godkjenningsbehov.fødselsnummer,
                 vedtaksperiodeId = vedtaksperiodeId,
-                utbetaling = utbetaling,
                 periodetype = godkjenningsbehov.periodetype,
                 sykefraværstilfelle = sykefraværstilfelle,
                 organisasjonsnummer = godkjenningsbehov.organisasjonsnummer,

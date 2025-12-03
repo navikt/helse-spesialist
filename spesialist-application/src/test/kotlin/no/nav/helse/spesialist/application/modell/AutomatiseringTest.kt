@@ -23,9 +23,6 @@ import no.nav.helse.modell.person.vedtaksperiode.Varselkode
 import no.nav.helse.modell.risiko.Risikovurdering
 import no.nav.helse.modell.stoppautomatiskbehandling.StansAutomatiskBehandlingMediator
 import no.nav.helse.modell.totrinnsvurdering.Totrinnsvurdering
-import no.nav.helse.modell.utbetaling.Utbetaling
-import no.nav.helse.modell.utbetaling.Utbetalingtype
-import no.nav.helse.modell.utbetaling.Utbetalingtype.REVURDERING
 import no.nav.helse.modell.vedtaksperiode.Inntektskilde
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Periodetype.FORLENGELSE
@@ -50,7 +47,6 @@ internal class AutomatiseringTest {
     private val fødselsnummer = lagFødselsnummer()
     private val orgnummer = lagOrganisasjonsnummer()
     private val vedtaksperiodeId = UUID.randomUUID()
-    private val utbetalingId = UUID.randomUUID()
     private val hendelseId = UUID.randomUUID()
 
     private val vedtakDaoMock = mockk<VedtakDao>()
@@ -147,7 +143,7 @@ internal class AutomatiseringTest {
 
     @Test
     fun `vedtaksperiode som oppfyller krav blir automatisk godkjent og lagret`() {
-        blirAutomatiskBehandlet(enUtbetaling())
+        blirAutomatiskBehandlet()
     }
 
     @Test
@@ -232,23 +228,17 @@ internal class AutomatiseringTest {
 
     @Test
     fun `periode med positiv revurdering skal automatisk godkjennes`() {
-        blirAutomatiskBehandlet(enUtbetaling(personbeløp = 1, type = REVURDERING))
+        blirAutomatiskBehandlet()
     }
 
     @Test
     fun `periode med negativ revurdering skal ikke automatisk godkjennes`() {
-        blirManuellOppgave(enUtbetaling(personbeløp = -1, type = REVURDERING))
+        blirManuellOppgave(tags = listOf("Revurdering", "NegativArbeidsgiverutbetaling"))
     }
 
     @Test
     fun `revurdering uten endringer i beløp kan automatisk godkjennes`() {
-        blirAutomatiskBehandlet(
-            enUtbetaling(
-                arbeidsgiverbeløp = 0,
-                personbeløp = 0,
-                type = REVURDERING,
-            ),
-        )
+        blirAutomatiskBehandlet()
     }
 
     @Test
@@ -259,36 +249,35 @@ internal class AutomatiseringTest {
 
     @Test
     fun `forlengelse med utbetaling til sykmeldt skal automatisk godkjennes`() {
-        blirAutomatiskBehandlet(enUtbetaling(personbeløp = 500))
+        blirAutomatiskBehandlet()
     }
 
     @Test
     fun `forlengelse med utbetaling til sykmeldt som plukkes ut som stikkprøve skal ikke automatisk godkjennes`() {
         stikkprøveUtsEnArbeidsgiverForlengelse = true
-        blirStikkprøve(enUtbetaling(personbeløp = 500), periodetype = FORLENGELSE, tags = listOf("Personutbetaling"))
+        blirStikkprøve(periodetype = FORLENGELSE, tags = listOf("Personutbetaling"))
     }
 
     @Test
     fun `selvstendig næringsdrivende forlengelse som plukkes ut som stikkprøve skal ikke automatisk godkjennes`() {
         stikkprøveSelvstendigNæringsdrivendeForlengelse = true
-        blirStikkprøve(enUtbetaling(personbeløp = 500), periodetype = FORLENGELSE, yrkesaktivitetstype = Yrkesaktivitetstype.SELVSTENDIG)
+        blirStikkprøve(periodetype = FORLENGELSE, yrkesaktivitetstype = Yrkesaktivitetstype.SELVSTENDIG)
     }
 
     @Test
     fun `periode med forlengelse av selvstendig næringsdrivende skal automatisk godkjennes`() {
-        blirAutomatiskBehandlet(enUtbetaling(personbeløp = 500, arbeidsgiverbeløp = 0), yrkesaktivitetstype = Yrkesaktivitetstype.SELVSTENDIG)
+        blirAutomatiskBehandlet(yrkesaktivitetstype = Yrkesaktivitetstype.SELVSTENDIG)
     }
 
     @Test
     fun `førstegangsbehandling med utbetaling til sykmeldt skal automatisk godkjennes`() {
-        blirAutomatiskBehandlet(enUtbetaling(personbeløp = 500))
+        blirAutomatiskBehandlet()
     }
 
     @Test
     fun `førstegangsbehandling med utbetaling til sykmeldt som plukkes ut som stikkprøve skal ikke automatisk godkjennes`() {
         stikkprøveUtsEnArbeidsgiverFørstegangsbehandling = true
-        val utbetaling = enUtbetaling(personbeløp = 500)
-        blirStikkprøve(utbetaling, periodetype = FØRSTEGANGSBEHANDLING, tags = listOf("Personutbetaling"))
+        blirStikkprøve(periodetype = FØRSTEGANGSBEHANDLING, tags = listOf("Personutbetaling"))
     }
 
     @Test
@@ -309,7 +298,7 @@ internal class AutomatiseringTest {
 
     @Test
     fun `periode med delvis refusjon skal automatisk godkjennes`() {
-        blirAutomatiskBehandlet(enUtbetaling(personbeløp = 500, arbeidsgiverbeløp = 500))
+        blirAutomatiskBehandlet()
     }
 
     @Test
@@ -323,8 +312,7 @@ internal class AutomatiseringTest {
 
     @Test
     fun `nullrevurdering grunnet saksbehandleroverstyring skal ikke automatisk godkjennes`() {
-        val utbetaling = enUtbetaling(arbeidsgiverbeløp = 0, personbeløp = 0, type = REVURDERING)
-        blirAutomatiskBehandlet(utbetaling)
+        blirAutomatiskBehandlet()
         every { totrinnsvurderingRepositoryMock.finnAktivForPerson(fødselsnummer = any()) } returns
             Totrinnsvurdering.ny(
                 fødselsnummer,
@@ -385,13 +373,11 @@ internal class AutomatiseringTest {
                     yrkesaktivitetstype = yrkesaktivitetstype,
                 ),
             ),
-        utbetaling: Utbetaling = enUtbetaling(),
         maksdato: LocalDate = 1 des 2018,
         tags: List<String> = listOf("Arbeidsgiverutbetaling"),
     ) = automatisering.utfør(
         fødselsnummer = fødselsnummer,
         vedtaksperiodeId = vedtaksperiodeId,
-        utbetaling = utbetaling,
         periodetype = periodetype,
         sykefraværstilfelle = Sykefraværstilfelle(fødselsnummer, 1 jan 2018, generasjoners),
         organisasjonsnummer = orgnummer,
@@ -399,12 +385,6 @@ internal class AutomatiseringTest {
         maksdato = maksdato,
         tags = tags,
     )
-
-    private fun enUtbetaling(
-        arbeidsgiverbeløp: Int = 500,
-        personbeløp: Int = 0,
-        type: Utbetalingtype = Utbetalingtype.UTBETALING,
-    ) = Utbetaling(utbetalingId, arbeidsgiverbeløp, personbeløp, type)
 
     private fun enGenerasjon(
         fom: LocalDate = 1 jan 2018,
@@ -428,7 +408,6 @@ internal class AutomatiseringTest {
     ) = LegacyVarsel(varselId, varselkode, LocalDateTime.now(), vedtaksperiodeId)
 
     private fun blirManuellOppgave(
-        utbetaling: Utbetaling = enUtbetaling(),
         legacyBehandling: LegacyBehandling = enGenerasjon(),
         yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
         maksdato: LocalDate = 1 des 2018,
@@ -437,7 +416,6 @@ internal class AutomatiseringTest {
     ) = assertKanIkkeAutomatiseres(
         forsøkAutomatisering(
             yrkesaktivitetstype = yrkesaktivitetstype,
-            utbetaling = utbetaling,
             generasjoners = listOf(legacyBehandling),
             maksdato = maksdato,
             tags = tags,
@@ -446,31 +424,27 @@ internal class AutomatiseringTest {
     )
 
     private fun blirStikkprøve(
-        utbetaling: Utbetaling = enUtbetaling(),
         periodetype: Periodetype = FØRSTEGANGSBEHANDLING,
         yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
         tags: List<String> = listOf("Arbeidsgiverutbetaling"),
-    ) = assertStikkprøve(forsøkAutomatisering(utbetaling = utbetaling, periodetype = periodetype, yrkesaktivitetstype = yrkesaktivitetstype, tags = tags))
+    ) = assertStikkprøve(forsøkAutomatisering(periodetype = periodetype, yrkesaktivitetstype = yrkesaktivitetstype, tags = tags))
 
     private fun blirManuellOppgaveMedFeil(
-        utbetaling: Utbetaling = enUtbetaling(),
         problems: List<String>,
         tags: List<String> = listOf("Arbeidsgiverutbetaling"),
     ) {
-        val resultat = forsøkAutomatisering(utbetaling = utbetaling, tags = tags)
+        val resultat = forsøkAutomatisering(tags = tags)
         assertKanIkkeAutomatiseres(resultat)
         check(resultat is Automatiseringsresultat.KanIkkeAutomatiseres)
         assertEquals(problems.toSet(), resultat.problemer.toSet())
     }
 
     private fun blirAutomatiskBehandlet(
-        utbetaling: Utbetaling = enUtbetaling(),
         yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
         tags: List<String> = listOf("Arbeidsgiverutbetaling"),
-    ) = assertKanAutomatiseres(forsøkAutomatisering(utbetaling = utbetaling, yrkesaktivitetstype = yrkesaktivitetstype, tags = tags))
+    ) = assertKanAutomatiseres(forsøkAutomatisering(yrkesaktivitetstype = yrkesaktivitetstype, tags = tags))
 
     private fun blirManuellOppgaveMedFeilOgVarsel(
-        utbetaling: Utbetaling = enUtbetaling(),
         problems: List<String>,
         legacyBehandling: LegacyBehandling = enGenerasjon(),
         varselkode: Varselkode,
@@ -479,7 +453,6 @@ internal class AutomatiseringTest {
     ) {
         val resultat =
             forsøkAutomatisering(
-                utbetaling = utbetaling,
                 generasjoners = listOf(legacyBehandling),
                 maksdato = maksdato,
                 tags = tags,

@@ -1,6 +1,5 @@
 package no.nav.helse.spesialist.db.dao
 
-import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.utbetaling.Utbetalingsstatus
 import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.spesialist.db.AbstractDBIntegrationTest
@@ -11,31 +10,6 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 class PgUtbetalingDaoTest : AbstractDBIntegrationTest() {
-    @Test
-    fun `finner utbetaling`() {
-        nyPerson()
-        val arbeidsgiverFagsystemId = fagsystemId()
-        val personFagsystemId = fagsystemId()
-
-        val arbeidsgiveroppdragId1 = lagArbeidsgiveroppdrag(arbeidsgiverFagsystemId)
-        val personOppdragId1 = lagPersonoppdrag(personFagsystemId)
-        val utbetalingId = UUID.randomUUID()
-        utbetalingDao.opprettUtbetalingId(
-            utbetalingId,
-            FNR,
-            ORGNUMMER,
-            Utbetalingtype.UTBETALING,
-            LocalDateTime.now(),
-            arbeidsgiveroppdragId1,
-            personOppdragId1,
-            2000,
-            2000,
-        )
-
-        val utbetaling = utbetalingDao.hentUtbetaling(utbetalingId)
-        assertEquals(Utbetaling(utbetalingId, 2000, 2000, Utbetalingtype.UTBETALING), utbetaling)
-    }
-
     @Test
     fun `lagrer personbeløp og arbeidsgiverbeløp på utbetaling`() {
         nyPerson()
@@ -80,10 +54,11 @@ class PgUtbetalingDaoTest : AbstractDBIntegrationTest() {
         beløp: Int,
         utbetalingId: UUID,
     ) {
-        val arbeidsgiverbeløp = dbQuery.single(
-            "SELECT arbeidsgiverbeløp FROM utbetaling_id WHERE utbetaling_id = :utbetalingId",
-            "utbetalingId" to utbetalingId,
-        ) { it.intOrNull("arbeidsgiverbeløp") }
+        val arbeidsgiverbeløp =
+            dbQuery.single(
+                "SELECT arbeidsgiverbeløp FROM utbetaling_id WHERE utbetaling_id = :utbetalingId",
+                "utbetalingId" to utbetalingId,
+            ) { it.intOrNull("arbeidsgiverbeløp") }
         assertEquals(beløp, arbeidsgiverbeløp)
     }
 
@@ -91,10 +66,11 @@ class PgUtbetalingDaoTest : AbstractDBIntegrationTest() {
         beløp: Int,
         utbetalingId: UUID,
     ) {
-        val personbeløp = dbQuery.single(
-            "SELECT personbeløp FROM utbetaling_id WHERE utbetaling_id = :utbetalingId",
-            "utbetalingId" to utbetalingId,
-        ) { it.intOrNull("personbeløp") }
+        val personbeløp =
+            dbQuery.single(
+                "SELECT personbeløp FROM utbetaling_id WHERE utbetaling_id = :utbetalingId",
+                "utbetalingId" to utbetalingId,
+            ) { it.intOrNull("personbeløp") }
         assertEquals(beløp, personbeløp)
     }
 }

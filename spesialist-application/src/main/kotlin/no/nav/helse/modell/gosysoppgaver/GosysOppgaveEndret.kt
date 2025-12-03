@@ -17,7 +17,6 @@ import no.nav.helse.modell.kommando.MacroCommand
 import no.nav.helse.modell.oppgave.SjekkAtOppgaveFortsattErÅpenCommand
 import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.modell.person.Sykefraværstilfelle
-import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
 import java.util.UUID
 
@@ -50,7 +49,6 @@ class GosysOppgaveEndret(
 }
 
 internal class GosysOppgaveEndretCommand(
-    utbetaling: Utbetaling,
     sykefraværstilfelle: Sykefraværstilfelle,
     harTildeltOppgave: Boolean,
     oppgavedataForAutomatisering: OppgaveDataForAutomatisering,
@@ -84,7 +82,6 @@ internal class GosysOppgaveEndretCommand(
                 automatisering = automatisering,
                 godkjenningMediator = godkjenningMediator,
                 oppgaveService = oppgaveService,
-                utbetaling = utbetaling,
                 sykefraværstilfelle = sykefraværstilfelle,
                 godkjenningsbehov = godkjenningsbehov,
                 automatiseringDao = automatiseringDao,
