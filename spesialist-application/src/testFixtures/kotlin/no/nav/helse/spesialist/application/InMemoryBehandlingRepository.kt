@@ -30,6 +30,5 @@ class InMemoryBehandlingRepository : BehandlingRepository, AbstractInMemoryRepos
         tom = original.tom,
         skjæringstidspunkt = original.skjæringstidspunkt,
         yrkesaktivitetstype = original.yrkesaktivitetstype,
-        søknadIder = original.søknadIder().toSet(),
     )
 }

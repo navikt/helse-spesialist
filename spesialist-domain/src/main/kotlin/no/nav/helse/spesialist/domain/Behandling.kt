@@ -34,7 +34,6 @@ class Behandling private constructor(
     tom: LocalDate,
     skjæringstidspunkt: LocalDate,
     yrkesaktivitetstype: Yrkesaktivitetstype,
-    søknadIder: Set<UUID>,
 ) : AggregateRoot<BehandlingUnikId>(id) {
     enum class Tilstand {
         VedtakFattet,
@@ -59,15 +58,11 @@ class Behandling private constructor(
     var yrkesaktivitetstype: Yrkesaktivitetstype = yrkesaktivitetstype
         private set
 
-    private val søknadIder = søknadIder.toMutableSet()
-
     fun håndterGodkjentAvSaksbehandler() {
         if (tilstand == Tilstand.AvsluttetUtenVedtakMedVarsler) {
             tilstand = Tilstand.AvsluttetUtenVedtak
         }
     }
-
-    fun søknadIder() = søknadIder.toSet()
 
     fun utfall(): Utfall {
         val tags =
@@ -81,10 +76,6 @@ class Behandling private constructor(
                     }
                 }
         return tags.singleOrNull() ?: error("Mangler utfall-tag eller har flere utfall-tags")
-    }
-
-    fun kobleSøknader(eksterneSøknadIder: Set<UUID>) {
-        søknadIder += eksterneSøknadIder
     }
 
     fun overlapperMedInfotrygd(): Boolean = tags.any { it == "OverlapperMedInfotrygd" }
@@ -101,7 +92,6 @@ class Behandling private constructor(
             tom: LocalDate,
             skjæringstidspunkt: LocalDate,
             yrkesaktivitetstype: Yrkesaktivitetstype,
-            søknadIder: Set<UUID>,
         ) = Behandling(
             id = id,
             spleisBehandlingId = spleisBehandlingId,
@@ -113,7 +103,6 @@ class Behandling private constructor(
             tom = tom,
             skjæringstidspunkt = skjæringstidspunkt,
             yrkesaktivitetstype = yrkesaktivitetstype,
-            søknadIder = søknadIder,
         )
     }
 }

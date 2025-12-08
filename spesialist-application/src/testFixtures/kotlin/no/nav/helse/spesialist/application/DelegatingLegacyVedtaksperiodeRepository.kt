@@ -54,7 +54,6 @@ class DelegatingLegacyVedtaksperiodeRepository(
                         fom = behandling.fom,
                         tom = behandling.tom,
                         skjæringstidspunkt = behandling.skjæringstidspunkt,
-                        søknadIder = emptySet(),
                         tilstand = when (behandling.tilstand) {
                             TilstandDto.VedtakFattet -> Behandling.Tilstand.VedtakFattet
                             TilstandDto.VidereBehandlingAvklares -> Behandling.Tilstand.VidereBehandlingAvklares

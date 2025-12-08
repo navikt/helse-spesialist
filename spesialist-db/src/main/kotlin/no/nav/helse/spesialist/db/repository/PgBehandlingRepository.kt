@@ -13,7 +13,6 @@ import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.UtbetalingId
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import java.time.LocalDateTime
-import java.util.UUID
 
 class PgBehandlingRepository(
     session: Session,
@@ -76,20 +75,6 @@ class PgBehandlingRepository(
         ).singleOrNull(::tilBehandling)
 
     override fun lagre(behandling: Behandling) {
-        lagreBehandling(behandling)
-        val spleisBehandlingId = checkNotNull(behandling.spleisBehandlingId)
-        behandling.søknadIder().forEach { søknadId ->
-            asSQL(
-                """
-                INSERT INTO behandling_soknad (behandling_id, søknad_id) VALUES (:behandlingId, :soknadId) ON CONFLICT DO NOTHING
-                """.trimIndent(),
-                "behandlingId" to spleisBehandlingId.value,
-                "soknadId" to søknadId,
-            ).update()
-        }
-    }
-
-    private fun lagreBehandling(behandling: Behandling) {
         asSQL(
             """
             INSERT INTO behandling(
@@ -133,14 +118,6 @@ class PgBehandlingRepository(
         behandlinger.forEach(::lagre)
     }
 
-    private fun hentSøkadIderForBehandling(behandlingId: SpleisBehandlingId): Set<UUID> =
-        asSQL(
-            "SELECT søknad_id FROM behandling_soknad bs WHERE bs.behandling_id = :spleisBehandlingId",
-            "spleisBehandlingId" to behandlingId.value,
-        ).list {
-            it.uuid("søknad_id")
-        }.toSet()
-
     private fun tilBehandling(row: Row): Behandling {
         val spleisBehandlingId = row.uuidOrNull("spleis_behandling_id")?.let { SpleisBehandlingId(it) }
         return Behandling.fraLagring(
@@ -160,7 +137,6 @@ class PgBehandlingRepository(
             fom = row.localDate("fom"),
             tom = row.localDate("tom"),
             skjæringstidspunkt = row.localDateOrNull("skjæringstidspunkt") ?: row.localDate("fom"),
-            søknadIder = spleisBehandlingId?.let { hentSøkadIderForBehandling(it) } ?: emptySet(),
             yrkesaktivitetstype =
                 row
                     .stringOrNull("yrkesaktivitetstype")

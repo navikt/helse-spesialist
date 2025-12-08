@@ -121,7 +121,6 @@ fun lagBehandling(
     tom: LocalDate = fom.withDayOfMonth(YearMonth.from(fom).lengthOfMonth()),
     skjæringstidspunkt: LocalDate = fom,
     yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
-    søknadIder: Set<UUID> = emptySet(),
 ): Behandling = Behandling.fraLagring(
     id = id,
     spleisBehandlingId = spleisBehandlingId,
@@ -133,7 +132,6 @@ fun lagBehandling(
     tom = tom,
     skjæringstidspunkt = skjæringstidspunkt,
     yrkesaktivitetstype = yrkesaktivitetstype,
-    søknadIder = søknadIder,
 )
 
 fun lagSkjønnsfastsattSykepengegrunnlag(

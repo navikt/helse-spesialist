@@ -87,38 +87,6 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
     }
 
     @Test
-    fun `finn behandling med søknad-ider`() {
-        // given
-        val spleisBehandlingId = UUID.randomUUID()
-        val tags = listOf("FOOBAR")
-        val fødselsnummer = lagFødselsnummer()
-        val fom = 1.jan(2018)
-        val tom = 31.jan(2018)
-        val søknadId = UUID.randomUUID()
-        opprettPerson(fødselsnummer = fødselsnummer)
-        opprettArbeidsgiver()
-        opprettBehandling(
-            spleisBehandlingId = spleisBehandlingId,
-            tags = tags,
-            fødselsnummer = fødselsnummer,
-            fom = fom,
-            tom = tom
-        )
-        repository.finn(SpleisBehandlingId(spleisBehandlingId))
-            ?.also {
-                it.kobleSøknader(setOf(søknadId))
-                repository.lagre(it)
-            }
-
-        // when
-        val funnet = repository.finn(SpleisBehandlingId(spleisBehandlingId))
-
-        // then
-        assertNotNull(funnet)
-        assertEquals(setOf(søknadId), funnet.søknadIder())
-    }
-
-    @Test
     fun `finn behandlinger med fødselsnummer og skjæringstidspunkt`() {
         // given
         val spleisBehandlingId1 = UUID.randomUUID()
@@ -297,32 +265,5 @@ class PgBehandlingRepositoryTest : AbstractDBIntegrationTest() {
         assertEquals(oppdatertBehandling.tilstand, funnet.tilstand)
         assertEquals(oppdatertBehandling.tags, funnet.tags)
         assertEquals(oppdatertBehandling.yrkesaktivitetstype, funnet.yrkesaktivitetstype)
-    }
-
-    @Test
-    fun `lagre kobling mellom behandling og søknadId`() {
-        // given
-        val spleisBehandlingId = UUID.randomUUID()
-        val tags = listOf("FOOBAR")
-        val fødselsnummer = lagFødselsnummer()
-        opprettPerson(fødselsnummer = fødselsnummer)
-        opprettArbeidsgiver()
-        opprettBehandling(
-            spleisBehandlingId = spleisBehandlingId,
-            tags = tags,
-            fødselsnummer = fødselsnummer
-        )
-
-        val funnet = requireNotNull(repository.finn(SpleisBehandlingId(spleisBehandlingId)))
-
-        //when
-        val søknadId = UUID.randomUUID()
-        funnet.kobleSøknader(mutableSetOf(søknadId))
-        repository.lagre(funnet)
-
-        val funnetIgjen = requireNotNull(repository.finn(SpleisBehandlingId(spleisBehandlingId)))
-
-        //then
-        assertContains(funnetIgjen.søknadIder(), søknadId)
     }
 }
