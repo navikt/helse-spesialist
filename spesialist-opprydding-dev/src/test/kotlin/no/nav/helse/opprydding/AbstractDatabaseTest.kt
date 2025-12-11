@@ -65,6 +65,8 @@ internal abstract class AbstractDatabaseTest {
             VALUES (${sequence_number}, '${vedtaksperiode_id}', now(), now(), '$organisasjonsnummer', ${sequence_number}, false);
             INSERT INTO behandling(id, unik_id, vedtaksperiode_id, opprettet_av_hendelse, tilstand, spleis_behandling_id)
             VALUES (${sequence_number}, '${generasjon_id}', '${vedtaksperiode_id}', '${hendelse_id}', 'VidereBehandlingAvklares', '$spleisBehandlingId');
+            INSERT INTO vedtak(behandling_id, fattet_automatisk, saksbehandler_ident, beslutter_ident, tidspunkt)
+            VALUES ('$spleisBehandlingId', true, null, null, now());
             INSERT INTO behandling_v2(vedtaksperiode_id, behandling_id, fom, tom, skjæringstidspunkt, opprettet)
             VALUES ('${vedtaksperiode_id}', gen_random_uuid(), now(), now(), now(), now());
             INSERT INTO opprinnelig_soknadsdato (vedtaksperiode_id, soknad_mottatt)
