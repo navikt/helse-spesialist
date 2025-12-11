@@ -1,8 +1,6 @@
 package no.nav.helse.spesialist.api
 
 import io.mockk.mockk
-import no.nav.helse.db.SaksbehandlerDao
-import no.nav.helse.db.api.ArbeidsgiverApiDao.Inntekter
 import no.nav.helse.e2e.AbstractDatabaseTest
 import no.nav.helse.mediator.oppgave.ApiOppgaveService
 import no.nav.helse.modell.oppgave.Egenskap
@@ -13,7 +11,6 @@ import no.nav.helse.modell.vilkårsprøving.InnrapportertInntekt
 import no.nav.helse.modell.vilkårsprøving.Inntekt
 import no.nav.helse.modell.vilkårsprøving.OmregnetÅrsinntekt
 import no.nav.helse.modell.vilkårsprøving.Sammenligningsgrunnlag
-import no.nav.helse.objectMapper
 import no.nav.helse.spesialist.api.person.Adressebeskyttelse
 import no.nav.helse.spesialist.api.vedtaksperiode.Inntektskilde
 import no.nav.helse.spesialist.api.vedtaksperiode.Periodetype
@@ -37,7 +34,6 @@ import no.nav.helse.spesialist.domain.testfixtures.testdata.lagEtternavn
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFornavn
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagFødselsnummer
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandlerident
-import org.junit.jupiter.api.Assertions.assertEquals
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -49,7 +45,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     private val ENHET = Enhet(101, "Halden")
     protected val PERIODE = Periode(UUID.randomUUID(), LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 31))
 
-    protected val ARBEIDSFORHOLD = Arbeidsforhold(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 1, 2), "EN TITTEL", 100)
     protected val SAKSBEHANDLER =
         Saksbehandler(
             oid = UUID.randomUUID(),
@@ -63,7 +58,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     val PERSONPSEUDOID = UUID.randomUUID()
     val ARBEIDSGIVER_NAVN = lagOrganisasjonsnavn()
     val ORGANISASJONSNUMMER = lagOrganisasjonsnummer()
-    val ORGANISASJONSNUMMER_GHOST = lagOrganisasjonsnummer()
 
     protected val apiVarselRepository = daos.varselApiRepository
     protected val arbeidsgiverApiDao = daos.arbeidsgiverApiDao
@@ -76,10 +70,8 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     protected val oppgaveApiDao = daos.oppgaveApiDao
     protected val periodehistorikkApiDao = daos.periodehistorikkApiDao
     protected val vergemålApiDao = daos.vergemålApiDao
-    protected val egenAnsattApiDao = daos.egenAnsattApiDao
 
     protected val apiOppgaveService = mockk<ApiOppgaveService>(relaxed = true)
-    protected val saksbehandlerDao = mockk<SaksbehandlerDao>(relaxed = true)
 
     protected fun opprettVedtaksperiode(
         personId: Long,
@@ -280,15 +272,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         kode: String = "EN_KODE",
         generasjonRef: Long,
         definisjonRef: Long? = null,
-    ) = nyttVarsel(id, vedtaksperiodeId, opprettet, kode, generasjonRef, definisjonRef, "AKTIV", null)
-
-    protected fun nyttVarsel(
-        id: UUID = UUID.randomUUID(),
-        vedtaksperiodeId: UUID = UUID.randomUUID(),
-        opprettet: LocalDateTime? = LocalDateTime.now(),
-        kode: String = "EN_KODE",
-        generasjonRef: Long,
-        definisjonRef: Long? = null,
         status: String,
         endretTidspunkt: LocalDateTime? = LocalDateTime.now(),
     ) = dbQuery.update(
@@ -373,20 +356,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             .id()
     }
 
-    protected fun opprettPersonOld(
-        fødselsnummer: String = FØDSELSNUMMER,
-        aktørId: String = AKTØRID,
-        adressebeskyttelse: Adressebeskyttelse = Adressebeskyttelse.Ugradert,
-        bostedId: Int = ENHET.id,
-        erEgenAnsatt: Boolean = false,
-    ): Long {
-        val personinfoid = opprettPersoninfo(adressebeskyttelse)
-        val infotrygdutbetalingerid = opprettInfotrygdutbetalinger()
-        val personId = opprettHelPerson(fødselsnummer, aktørId, personinfoid, bostedId, infotrygdutbetalingerid)
-        opprettEgenAnsatt(personId, erEgenAnsatt)
-        return personId
-    }
-
     protected fun opprettPerson(
         fødselsnummer: String = FØDSELSNUMMER,
         aktørId: String = AKTØRID,
@@ -440,22 +409,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             "infotrygdutbetalingerId" to infotrygdutbetalingerid,
         ),
     )
-
-    protected fun opprettPåVent(
-        vedtaksperiodeId: UUID = UUID.randomUUID(),
-        frist: LocalDate = LocalDate.now().plusDays(21),
-        saksbehandlerOid: UUID = SAKSBEHANDLER.oid,
-    ) = dbQuery.update(
-        "INSERT INTO pa_vent (vedtaksperiode_id, frist, saksbehandler_ref) VALUES (:vedtaksperiodeId, :frist, :oid)",
-        "vedtaksperiodeId" to vedtaksperiodeId,
-        "frist" to frist,
-        "oid" to saksbehandlerOid,
-    )
-
-    protected fun oppdaterPersoninfo(adressebeskyttelse: Adressebeskyttelse) {
-        val personinfoId = opprettPersoninfo(adressebeskyttelse)
-        oppdaterPersonpekere(FØDSELSNUMMER, personinfoId)
-    }
 
     private fun opprettPersoninfo(adressebeskyttelse: Adressebeskyttelse) =
         dbQuery.updateAndReturnGeneratedKey(
@@ -610,41 +563,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         "utbetalingId" to utbetalingId,
     )
 
-    protected fun opprettInntekt(
-        personId: Long,
-        skjæringstidspunkt: LocalDate,
-        inntekter: List<Inntekter>,
-    ) = dbQuery.update(
-        """
-        INSERT INTO inntekt (person_ref, skjaeringstidspunkt, inntekter)
-        VALUES (:person_ref, :skjaeringstidspunkt, :inntekter::json)
-        """.trimIndent(),
-        "person_ref" to personId,
-        "skjaeringstidspunkt" to skjæringstidspunkt,
-        "inntekter" to objectMapper.writeValueAsString(inntekter),
-    )
-
-    protected fun tildelOppgave(
-        oppgaveRef: Long,
-        saksbehandlerOid: UUID,
-    ) = dbQuery.update(
-        "INSERT INTO tildeling (saksbehandler_ref, oppgave_id_ref) VALUES (:oid, :oppgaveRef)",
-        "oid" to saksbehandlerOid,
-        "oppgaveRef" to oppgaveRef,
-    )
-
-    protected fun assertGodkjenteVarsler(
-        generasjonRef: Long,
-        forventetAntall: Int,
-    ) {
-        val antall =
-            dbQuery.single(
-                "SELECT COUNT(1) FROM selve_varsel sv WHERE sv.generasjon_ref = :generasjonRef AND status = 'GODKJENT'",
-                "generasjonRef" to generasjonRef,
-            ) { it.int(1) }
-        assertEquals(forventetAntall, antall)
-    }
-
     protected fun finnOppgaveIdFor(vedtaksperiodeId: UUID): Long =
         dbQuery.single(
             "SELECT o.id FROM oppgave o JOIN vedtaksperiode v ON v.id = o.vedtak_ref WHERE v.vedtaksperiode_id = :vedtaksperiode_id;",
@@ -671,13 +589,6 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             infix fun LocalDate.til(tom: LocalDate) = Periode(UUID.randomUUID(), this, tom)
         }
     }
-
-    protected data class Arbeidsforhold(
-        val start: LocalDate,
-        val slutt: LocalDate,
-        val tittel: String,
-        val prosent: Int,
-    )
 
     protected data class Saksbehandler(
         val oid: UUID,
