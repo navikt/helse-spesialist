@@ -59,6 +59,7 @@ import no.nav.helse.modell.varsel.VurderEnhetUtland
 import no.nav.helse.modell.vergemal.VurderVergemålOgFullmakt
 import no.nav.helse.spesialist.application.ArbeidsgiverRepository
 import no.nav.helse.spesialist.application.TotrinnsvurderingRepository
+import no.nav.helse.spesialist.application.VedtakRepository
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -198,16 +199,19 @@ class Godkjenningsbehov(
                         )
                     }
 
-                    else -> error("Ugyldig verdi for fastsatt for selvstendig næringsdrivende: \"$fastsatt\"")
+                    else -> {
+                        error("Ugyldig verdi for fastsatt for selvstendig næringsdrivende: \"$fastsatt\"")
+                    }
                 }
             } else {
                 when (val fastsatt = this["fastsatt"].asText()) {
-                    "IInfotrygd" ->
+                    "IInfotrygd" -> {
                         Sykepengegrunnlagsfakta.Infotrygd(
                             this["sykepengegrunnlag"].asBigDecimal(),
                         )
+                    }
 
-                    "EtterSkjønn" ->
+                    "EtterSkjønn" -> {
                         Sykepengegrunnlagsfakta.Spleis.Arbeidstaker.EtterSkjønn(
                             seksG = this["6G"].asDouble(),
                             arbeidsgivere =
@@ -221,8 +225,9 @@ class Godkjenningsbehov(
                                 },
                             sykepengegrunnlag = this["sykepengegrunnlag"].asBigDecimal(),
                         )
+                    }
 
-                    "EtterHovedregel" ->
+                    "EtterHovedregel" -> {
                         Sykepengegrunnlagsfakta.Spleis.Arbeidstaker.EtterHovedregel(
                             seksG = this["6G"].asDouble(),
                             sykepengegrunnlag = this["sykepengegrunnlag"].asBigDecimal(),
@@ -235,8 +240,11 @@ class Godkjenningsbehov(
                                     )
                                 },
                         )
+                    }
 
-                    else -> error("Ukjent verdi for fastsatt: \"$fastsatt\"")
+                    else -> {
+                        error("Ukjent verdi for fastsatt: \"$fastsatt\"")
+                    }
                 }
             }
 
@@ -360,6 +368,7 @@ internal class GodkjenningsbehovCommand(
     tildelingDao: TildelingDao,
     reservasjonDao: ReservasjonDao,
     oppgaveService: OppgaveService,
+    vedtakRepository: VedtakRepository,
     godkjenningMediator: GodkjenningMediator,
     person: LegacyPerson,
 ) : MacroCommand() {
@@ -478,6 +487,7 @@ internal class GodkjenningsbehovCommand(
                 godkjenningsbehov = behovData,
                 automatiseringDao = automatiseringDao,
                 oppgaveService = oppgaveService,
+                vedtakRepository = vedtakRepository,
             ),
             OpprettSaksbehandleroppgave(
                 behovData = behovData,

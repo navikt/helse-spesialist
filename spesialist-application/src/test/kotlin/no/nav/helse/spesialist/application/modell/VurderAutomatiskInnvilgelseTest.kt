@@ -19,15 +19,18 @@ import no.nav.helse.modell.utbetaling.Utbetalingtype
 import no.nav.helse.modell.vedtaksperiode.Periodetype
 import no.nav.helse.modell.vedtaksperiode.Yrkesaktivitetstype
 import no.nav.helse.spesialist.application.InMemoryCommandContextDao
+import no.nav.helse.spesialist.application.InMemoryVedtakRepository
 import no.nav.helse.spesialist.application.Testdata.godkjenningsbehovData
+import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.legacy.LegacyBehandling
 import no.nav.helse.spesialist.domain.testfixtures.jan
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.UUID
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
 internal class VurderAutomatiskInnvilgelseTest {
     private companion object {
@@ -39,6 +42,8 @@ internal class VurderAutomatiskInnvilgelseTest {
         private val periodetype = Periodetype.FORLENGELSE
     }
 
+    private val spleisBehandlingId = SpleisBehandlingId(UUID.randomUUID())
+
     private val automatisering = mockk<Automatisering>(relaxed = true)
     private val legacyBehandling =
         LegacyBehandling(
@@ -47,9 +52,11 @@ internal class VurderAutomatiskInnvilgelseTest {
             fom = 1 jan 2018,
             tom = 31 jan 2018,
             skjæringstidspunkt = 1 jan 2018,
-            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
+            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
+            spleisBehandlingId = spleisBehandlingId.value,
         )
     private val automatiseringDao = mockk<AutomatiseringDao>(relaxed = true)
+    private val vedtakRepository = InMemoryVedtakRepository()
     private val command =
         VurderAutomatiskInnvilgelse(
             automatisering,
@@ -57,21 +64,25 @@ internal class VurderAutomatiskInnvilgelseTest {
                 opptegnelseDao = mockk(relaxed = true),
             ),
             utbetaling = Utbetaling(utbetalingId, 0, 0, Utbetalingtype.UTBETALING),
-            sykefraværstilfelle = Sykefraværstilfelle(
-                fødselsnummer = fødselsnummer,
-                skjæringstidspunkt = 1 jan 2018,
-                gjeldendeBehandlinger = listOf(legacyBehandling),
-            ),
-            godkjenningsbehov = godkjenningsbehovData(
-                id = hendelseId,
-                organisasjonsnummer = orgnummer,
-                vedtaksperiodeId = vedtaksperiodeId,
-                utbetalingId = utbetalingId,
-                periodetype = periodetype,
-                json = """{ "@event_name": "behov" }"""
-            ),
+            sykefraværstilfelle =
+                Sykefraværstilfelle(
+                    fødselsnummer = fødselsnummer,
+                    skjæringstidspunkt = 1 jan 2018,
+                    gjeldendeBehandlinger = listOf(legacyBehandling),
+                ),
+            godkjenningsbehov =
+                godkjenningsbehovData(
+                    id = hendelseId,
+                    organisasjonsnummer = orgnummer,
+                    vedtaksperiodeId = vedtaksperiodeId,
+                    utbetalingId = utbetalingId,
+                    periodetype = periodetype,
+                    json = """{ "@event_name": "behov" }""",
+                    spleisBehandlingId = spleisBehandlingId.value,
+                ),
             automatiseringDao = automatiseringDao,
             oppgaveService = mockk(relaxed = true),
+            vedtakRepository = vedtakRepository,
         )
 
     private lateinit var context: CommandContext
@@ -105,13 +116,16 @@ internal class VurderAutomatiskInnvilgelseTest {
                 .filterIsInstance<Godkjenningsbehovløsning>()
                 .singleOrNull()
         assertNotNull(løsning)
-        assertEquals(true, løsning?.automatiskBehandling)
+        assertEquals(true, løsning.automatiskBehandling)
     }
 
     @Test
     fun `automatiserer når resultat er at perioden kan automatiseres`() {
         every { automatisering.utfør(any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanAutomatiseres
         assertTrue(command.execute(context))
+        val vedtak = vedtakRepository.finn(spleisBehandlingId)
+        assertNotNull(vedtak)
+        assertEquals(true, vedtak.automatiskFattet)
         verify(exactly = 1) { automatiseringDao.automatisert(vedtaksperiodeId, hendelseId, utbetalingId) }
         verify(exactly = 0) { automatiseringDao.manuellSaksbehandling(any(), any(), any(), any()) }
     }
@@ -119,20 +133,24 @@ internal class VurderAutomatiskInnvilgelseTest {
     @Test
     fun `automatiserer ikke når resultat er at perioden kan ikke automatiseres`() {
         val problemer = listOf("Problem 1", "Problem 2")
-        every { automatisering.utfør(any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.KanIkkeAutomatiseres(
-            problemer
-        )
+        every { automatisering.utfør(any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns
+            Automatiseringsresultat.KanIkkeAutomatiseres(
+                problemer,
+            )
         assertTrue(command.execute(context))
+        assertNull(vedtakRepository.finn(spleisBehandlingId))
         verify(exactly = 0) { automatiseringDao.automatisert(any(), any(), any()) }
         verify(exactly = 1) { automatiseringDao.manuellSaksbehandling(problemer, vedtaksperiodeId, hendelseId, utbetalingId) }
     }
 
     @Test
     fun `automatiserer ikke når resultat er at perioden er stikkprøve`() {
-        every { automatisering.utfør(any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns Automatiseringsresultat.Stikkprøve(
-            "En årsak"
-        )
+        every { automatisering.utfør(any(), any(), any(), any(), any(), any(), any(), any(), any()) } returns
+            Automatiseringsresultat.Stikkprøve(
+                "En årsak",
+            )
         assertTrue(command.execute(context))
+        assertNull(vedtakRepository.finn(spleisBehandlingId))
         verify(exactly = 0) { automatiseringDao.automatisert(any(), any(), any()) }
         verify(exactly = 1) { automatiseringDao.stikkprøve(vedtaksperiodeId, hendelseId, utbetalingId) }
     }
@@ -144,26 +162,20 @@ internal class VurderAutomatiskInnvilgelseTest {
         assertEquals("Ferdig", observatør.gjeldendeTilstand)
     }
 
-    @Test
-    fun `Ferdigstiller kjede når perioden er spesialsak som kan behandles automatisk`() {
-        every { automatisering.utfør(any(), any(), any(), any(), any(), any(), any(), any(),any()) } returns Automatiseringsresultat.KanAutomatiseres
-        context.utfør(commandContextDao, UUID.randomUUID(), command)
-        assertEquals("Ferdig", observatør.gjeldendeTilstand)
-    }
-
     private val commandContextDao = InMemoryCommandContextDao()
 
-    private val observatør = object : CommandContextObserver {
-        val hendelser = mutableListOf<UtgåendeHendelse>()
-        lateinit var gjeldendeTilstand: String
-            private set
+    private val observatør =
+        object : CommandContextObserver {
+            val hendelser = mutableListOf<UtgåendeHendelse>()
+            lateinit var gjeldendeTilstand: String
+                private set
 
-        override fun hendelse(hendelse: UtgåendeHendelse) {
-            hendelser.add(hendelse)
-        }
+            override fun hendelse(hendelse: UtgåendeHendelse) {
+                hendelser.add(hendelse)
+            }
 
-        override fun tilstandEndret(event: KommandokjedeEndretEvent) {
-            gjeldendeTilstand = event::class.simpleName!!
+            override fun tilstandEndret(event: KommandokjedeEndretEvent) {
+                gjeldendeTilstand = event::class.simpleName!!
+            }
         }
-    }
 }

@@ -19,6 +19,7 @@ import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
+import no.nav.helse.spesialist.application.VedtakRepository
 import java.util.UUID
 
 class GosysOppgaveEndret(
@@ -61,6 +62,7 @@ internal class GosysOppgaveEndretCommand(
     godkjenningMediator: GodkjenningMediator,
     godkjenningsbehov: GodkjenningsbehovData,
     automatiseringDao: AutomatiseringDao,
+    vedtakRepository: VedtakRepository,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
@@ -88,6 +90,7 @@ internal class GosysOppgaveEndretCommand(
                 sykefraværstilfelle = sykefraværstilfelle,
                 godkjenningsbehov = godkjenningsbehov,
                 automatiseringDao = automatiseringDao,
+                vedtakRepository = vedtakRepository,
             ),
         )
 }

@@ -15,6 +15,7 @@ import no.nav.helse.modell.person.LegacyPerson
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
+import no.nav.helse.spesialist.application.VedtakRepository
 import no.nav.helse.spesialist.domain.Periode
 import java.time.LocalDate
 import java.util.UUID
@@ -66,6 +67,7 @@ internal class TilbakedateringGodkjentCommand(
     søknadsperioder: List<Periode>,
     godkjenningsbehov: GodkjenningsbehovData,
     automatiseringDao: AutomatiseringDao,
+    vedtakRepository: VedtakRepository,
 ) : MacroCommand() {
     override val commands: List<Command> =
         listOf(
@@ -86,6 +88,7 @@ internal class TilbakedateringGodkjentCommand(
                 sykefraværstilfelle = sykefraværstilfelle,
                 godkjenningsbehov = godkjenningsbehov,
                 automatiseringDao = automatiseringDao,
+                vedtakRepository = vedtakRepository,
             ),
         )
 }

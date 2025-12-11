@@ -9,7 +9,10 @@ import no.nav.helse.modell.kommando.CommandContext.Companion.ferdigstill
 import no.nav.helse.modell.person.Sykefraværstilfelle
 import no.nav.helse.modell.utbetaling.Utbetaling
 import no.nav.helse.modell.vedtaksperiode.GodkjenningsbehovData
+import no.nav.helse.spesialist.application.VedtakRepository
 import no.nav.helse.spesialist.application.logg.loggInfo
+import no.nav.helse.spesialist.domain.SpleisBehandlingId
+import no.nav.helse.spesialist.domain.Vedtak
 
 internal class VurderAutomatiskInnvilgelse(
     private val automatisering: Automatisering,
@@ -19,6 +22,7 @@ internal class VurderAutomatiskInnvilgelse(
     private val godkjenningsbehov: GodkjenningsbehovData,
     private val automatiseringDao: AutomatiseringDao,
     private val oppgaveService: OppgaveService,
+    private val vedtakRepository: VedtakRepository,
 ) : Command {
     private val vedtaksperiodeId = godkjenningsbehov.vedtaksperiodeId
     private val utbetalingId = godkjenningsbehov.utbetalingId
@@ -81,6 +85,8 @@ internal class VurderAutomatiskInnvilgelse(
     }
 
     private fun automatiserSaksbehandling(context: CommandContext) {
+        val vedtak = Vedtak.automatisk(SpleisBehandlingId(godkjenningsbehov.spleisBehandlingId))
+        vedtakRepository.lagre(vedtak)
         automatiseringDao.automatisert(vedtaksperiodeId, hendelseId, utbetalingId)
         godkjenningMediator.automatiskUtbetaling(context, godkjenningsbehov)
         oppgaveService.avbrytOppgaveFor(vedtaksperiodeId)

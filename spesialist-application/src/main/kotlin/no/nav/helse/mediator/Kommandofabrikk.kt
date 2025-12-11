@@ -89,6 +89,7 @@ class Kommandofabrikk(
             godkjenningMediator = GodkjenningMediator(sessionContext.opptegnelseDao),
             godkjenningsbehov = godkjenningsbehovData,
             automatiseringDao = sessionContext.automatiseringDao,
+            vedtakRepository = sessionContext.vedtakRepository,
         )
     }
 
@@ -113,6 +114,7 @@ class Kommandofabrikk(
             søknadsperioder = melding.perioder,
             godkjenningsbehov = godkjenningsbehovData,
             automatiseringDao = sessionContext.automatiseringDao,
+            vedtakRepository = sessionContext.vedtakRepository,
         )
     }
 
@@ -306,6 +308,7 @@ class Kommandofabrikk(
             person = person,
             tildelingDao = sessionContext.tildelingDao,
             reservasjonDao = sessionContext.reservasjonDao,
+            vedtakRepository = sessionContext.vedtakRepository,
         )
     }
 
