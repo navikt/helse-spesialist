@@ -34,7 +34,7 @@ class Vedtak private constructor(
                 tidspunkt = Instant.now(),
             )
 
-        fun manuelt(
+        fun manueltUtenTotrinnskontroll(
             id: SpleisBehandlingId,
             saksbehandlerIdent: String,
         ) = Vedtak(
@@ -45,7 +45,7 @@ class Vedtak private constructor(
             tidspunkt = Instant.now(),
         )
 
-        fun medTotrinnskontroll(
+        fun manueltMedTotrinnskontroll(
             id: SpleisBehandlingId,
             saksbehandlerIdent: String,
             beslutterIdent: String,
