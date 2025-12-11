@@ -26,6 +26,7 @@ import no.nav.helse.spesialist.domain.Saksbehandler
 import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.SpleisBehandlingId
 import no.nav.helse.spesialist.domain.Varsel
+import no.nav.helse.spesialist.domain.Vedtak
 import no.nav.helse.spesialist.domain.VedtakBegrunnelse
 import no.nav.helse.spesialist.domain.VedtaksperiodeId
 import no.nav.helse.spesialist.domain.tilgangskontroll.Tilgangsgruppe
@@ -72,24 +73,37 @@ class PostVedtakBehandler(
             if (oppgave.tilstand != Oppgave.AvventerSaksbehandler) return RestResponse.Error(ApiPostVedtakErrorCode.OPPGAVE_FEIL_TILSTAND)
 
             val totrinnsvurdering = transaksjon.totrinnsvurderingRepository.finnAktivForPerson(fødselsnummer)
-            var saksbehandlerSomFattetVedtak = saksbehandler
-            var beslutter: Saksbehandler? = null
+            val saksbehandlerSomFattetVedtaket: Saksbehandler
+            val beslutter: Saksbehandler?
+
+            val vedtak: Vedtak
 
             if (totrinnsvurdering != null) {
                 beslutter = saksbehandler
-                totrinnsvurdering.godkjenn(beslutter, tilgangsgrupper)
-                saksbehandlerSomFattetVedtak =
+                saksbehandlerSomFattetVedtaket =
                     totrinnsvurdering.saksbehandler?.let { transaksjon.saksbehandlerRepository.finn(it) }
                         ?: return RestResponse.Error(ApiPostVedtakErrorCode.TOTRINNSVURDERING_MANGLER_SAKSBEHANDLER)
+                vedtak =
+                    Vedtak.manueltMedTotrinnskontroll(
+                        id = spleisBehandlingId,
+                        saksbehandlerIdent = saksbehandlerSomFattetVedtaket.ident,
+                        beslutterIdent = beslutter.ident,
+                    )
+                totrinnsvurdering.godkjenn(beslutter, tilgangsgrupper)
                 val innslag = Historikkinnslag.totrinnsvurderingFerdigbehandletInnslag(beslutter)
                 transaksjon.periodehistorikkDao.lagreMedOppgaveId(innslag, oppgave.id)
                 transaksjon.totrinnsvurderingRepository.lagre(totrinnsvurdering)
+            } else {
+                beslutter = null
+                saksbehandlerSomFattetVedtaket = saksbehandler
+                vedtak = Vedtak.manueltUtenTotrinnskontroll(spleisBehandlingId, saksbehandlerSomFattetVedtaket.ident)
             }
-            transaksjon.reservasjonDao.reserverPerson(saksbehandlerSomFattetVedtak.id.value, fødselsnummer)
+            transaksjon.vedtakRepository.lagre(vedtak)
+            transaksjon.reservasjonDao.reserverPerson(saksbehandlerSomFattetVedtaket.id.value, fødselsnummer)
             behandling.fattVedtak(
                 transaksjon = transaksjon,
                 fødselsnummer = fødselsnummer,
-                saksbehandler = saksbehandlerSomFattetVedtak,
+                saksbehandler = saksbehandlerSomFattetVedtaket,
                 oppgave = oppgave,
                 spleisBehandlingId = spleisBehandlingId,
                 begrunnelse = request.begrunnelse,
@@ -101,7 +115,7 @@ class PostVedtakBehandler(
                 behandling = behandling,
                 oppgave = oppgave,
                 totrinnsvurdering = totrinnsvurdering,
-                saksbehandlerSomFattetVedtak = saksbehandlerSomFattetVedtak,
+                saksbehandlerSomFattetVedtak = saksbehandlerSomFattetVedtaket,
                 beslutter = beslutter,
                 outbox = outbox,
                 transaksjon = transaksjon,

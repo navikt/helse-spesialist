@@ -18,7 +18,6 @@ import no.nav.helse.spesialist.application.testing.assertJsonEquals
 import no.nav.helse.spesialist.application.testing.assertMindreEnnNSekunderSiden
 import no.nav.helse.spesialist.domain.Behandling
 import no.nav.helse.spesialist.domain.Saksbehandler
-import no.nav.helse.spesialist.domain.SaksbehandlerOid
 import no.nav.helse.spesialist.domain.Varsel
 import no.nav.helse.spesialist.domain.Varseldefinisjon
 import no.nav.helse.spesialist.domain.Vedtaksperiode
@@ -213,9 +212,11 @@ class PostVedtakIntegrationTest {
         val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
         val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
         val saksbehandler = lagSaksbehandler()
+        val beslutter = lagSaksbehandler()
         val godkjenningsbehov = lagGodkjenningsbehov(behandling, vedtaksperiode)
 
         sessionContext.saksbehandlerRepository.lagre(saksbehandler)
+        sessionContext.saksbehandlerRepository.lagre(beslutter)
         sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
         sessionContext.behandlingRepository.lagre(behandling)
         sessionContext.meldingDao.lagre(godkjenningsbehov)
@@ -223,7 +224,7 @@ class PostVedtakIntegrationTest {
         sessionContext.oppgaveRepository.lagre(oppgave)
 
         val totrinnsvurdering = Totrinnsvurdering.ny(fødselsnummer = person.id.value)
-        totrinnsvurdering.sendTilBeslutter(oppgave.id, SaksbehandlerOid(UUID.randomUUID()))
+        totrinnsvurdering.sendTilBeslutter(oppgave.id, saksbehandler.id)
         sessionContext.totrinnsvurderingRepository.lagre(totrinnsvurdering)
 
         // When:
@@ -231,7 +232,7 @@ class PostVedtakIntegrationTest {
             integrationTestFixture.post(
                 url = "/api/behandlinger/${behandling.spleisBehandlingId?.value}/vedtak",
                 body = "{}",
-                saksbehandler = saksbehandler,
+                saksbehandler = beslutter,
                 tilgangsgrupper = emptySet(),
             )
 
