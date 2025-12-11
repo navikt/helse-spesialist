@@ -90,7 +90,7 @@ class PgOppgaveRepository private constructor(
                 CAST(:oppgavestatus as oppgavestatus),
                 :ferdigstilt_av,
                 :ferdigstilt_av_oid,
-                (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiode_id),
+                (SELECT id FROM vedtaksperiode WHERE vedtaksperiode_id = :vedtaksperiode_id),
                 (SELECT unik_id FROM behandling WHERE spleis_behandling_id = :behandling_id),
                 :behandling_id,
                 :godkjenningsbehov_id,
@@ -157,7 +157,7 @@ class PgOppgaveRepository private constructor(
                         b.opprettet_tidspunkt as behandling_opprettet_tidspunkt,
                         count(1) OVER() AS filtered_count
                     FROM oppgave o
-                    INNER JOIN vedtak v ON o.vedtak_ref = v.id
+                    INNER JOIN vedtaksperiode v ON o.vedtak_ref = v.id
                     INNER JOIN person p ON v.person_ref = p.id
                     INNER JOIN opprinnelig_soknadsdato os ON os.vedtaksperiode_id = v.vedtaksperiode_id
                     INNER JOIN behandling b ON b.spleis_behandling_id = o.behandling_id
@@ -261,37 +261,69 @@ class PgOppgaveRepository private constructor(
     private fun EgenskapForDatabase.tilModellversjon(): Egenskap? =
         when (this) {
             EgenskapForDatabase.RISK_QA -> Egenskap.RISK_QA
+
             EgenskapForDatabase.FORTROLIG_ADRESSE -> Egenskap.FORTROLIG_ADRESSE
+
             EgenskapForDatabase.STRENGT_FORTROLIG_ADRESSE -> Egenskap.STRENGT_FORTROLIG_ADRESSE
+
             EgenskapForDatabase.EGEN_ANSATT -> Egenskap.EGEN_ANSATT
+
             EgenskapForDatabase.BESLUTTER -> Egenskap.BESLUTTER
+
             EgenskapForDatabase.SPESIALSAK -> Egenskap.SPESIALSAK
+
             EgenskapForDatabase.REVURDERING -> Egenskap.REVURDERING
+
             EgenskapForDatabase.SØKNAD -> Egenskap.SØKNAD
+
             EgenskapForDatabase.STIKKPRØVE -> Egenskap.STIKKPRØVE
+
             EgenskapForDatabase.UTBETALING_TIL_SYKMELDT -> Egenskap.UTBETALING_TIL_SYKMELDT
+
             EgenskapForDatabase.DELVIS_REFUSJON -> Egenskap.DELVIS_REFUSJON
+
             EgenskapForDatabase.UTBETALING_TIL_ARBEIDSGIVER -> Egenskap.UTBETALING_TIL_ARBEIDSGIVER
+
             EgenskapForDatabase.INGEN_UTBETALING -> Egenskap.INGEN_UTBETALING
+
             EgenskapForDatabase.HASTER -> Egenskap.HASTER
+
             EgenskapForDatabase.RETUR -> Egenskap.RETUR
+
             EgenskapForDatabase.VERGEMÅL -> Egenskap.VERGEMÅL
+
             EgenskapForDatabase.EN_ARBEIDSGIVER -> Egenskap.EN_ARBEIDSGIVER
+
             EgenskapForDatabase.FLERE_ARBEIDSGIVERE -> Egenskap.FLERE_ARBEIDSGIVERE
+
             EgenskapForDatabase.UTLAND -> Egenskap.UTLAND
+
             EgenskapForDatabase.FORLENGELSE -> Egenskap.FORLENGELSE
+
             EgenskapForDatabase.FORSTEGANGSBEHANDLING -> Egenskap.FORSTEGANGSBEHANDLING
+
             EgenskapForDatabase.INFOTRYGDFORLENGELSE -> Egenskap.INFOTRYGDFORLENGELSE
+
             EgenskapForDatabase.OVERGANG_FRA_IT -> Egenskap.OVERGANG_FRA_IT
+
             EgenskapForDatabase.SKJØNNSFASTSETTELSE -> Egenskap.SKJØNNSFASTSETTELSE
+
             EgenskapForDatabase.PÅ_VENT -> Egenskap.PÅ_VENT
+
             EgenskapForDatabase.TILBAKEDATERT -> Egenskap.TILBAKEDATERT
+
             EgenskapForDatabase.GOSYS -> Egenskap.GOSYS
+
             EgenskapForDatabase.MANGLER_IM -> Egenskap.MANGLER_IM
+
             EgenskapForDatabase.MEDLEMSKAP -> Egenskap.MEDLEMSKAP
+
             EgenskapForDatabase.GRUNNBELØPSREGULERING -> Egenskap.GRUNNBELØPSREGULERING
+
             EgenskapForDatabase.SELVSTENDIG_NÆRINGSDRIVENDE -> Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE
+
             EgenskapForDatabase.ARBEIDSTAKER -> Egenskap.ARBEIDSTAKER
+
             // Gammel egenskap fra tidligere iterasjon av tilkommen inntekt, skal overses
             EgenskapForDatabase.TILKOMMEN -> null
         }
@@ -327,11 +359,11 @@ class PgOppgaveRepository private constructor(
         asSQL(
             """
             SELECT 1 FROM oppgave o 
-                JOIN vedtak v ON o.vedtak_ref = v.id
+                JOIN vedtaksperiode v ON o.vedtak_ref = v.id
                 JOIN person p on v.person_ref = p.id
             WHERE p.id = (
                 SELECT p.id FROM person p
-                JOIN vedtak v ON v.person_ref = p.id
+                JOIN vedtaksperiode v ON v.person_ref = p.id
                 WHERE v.vedtaksperiode_id = :vedtaksperiode_id
             )
             AND o.id != :oppgave_id 
@@ -358,7 +390,7 @@ class PgOppgaveRepository private constructor(
                 t.saksbehandler_ref, 
                 o.kan_avvises
             FROM oppgave o
-            INNER JOIN vedtak v on o.vedtak_ref = v.id
+            INNER JOIN vedtaksperiode v on o.vedtak_ref = v.id
             LEFT JOIN tildeling t on o.id = t.oppgave_id_ref
             WHERE o.id = :oppgaveId
             ORDER BY o.id DESC LIMIT 1
@@ -399,7 +431,7 @@ class PgOppgaveRepository private constructor(
                 t.saksbehandler_ref, 
                 o.kan_avvises
             FROM oppgave o
-            INNER JOIN vedtak v on o.vedtak_ref = v.id
+            INNER JOIN vedtaksperiode v on o.vedtak_ref = v.id
             LEFT JOIN tildeling t on o.id = t.oppgave_id_ref
             WHERE o.behandling_id = :spleisBehandlingId
             ORDER BY o.id DESC LIMIT 1
@@ -479,39 +511,72 @@ class PgOppgaveRepository private constructor(
     private fun String.fromDb(): Egenskap? =
         when (this) {
             "RISK_QA" -> Egenskap.RISK_QA
+
             "FORTROLIG_ADRESSE" -> Egenskap.FORTROLIG_ADRESSE
+
             "STRENGT_FORTROLIG_ADRESSE" -> Egenskap.STRENGT_FORTROLIG_ADRESSE
+
             "EGEN_ANSATT" -> Egenskap.EGEN_ANSATT
+
             "BESLUTTER" -> Egenskap.BESLUTTER
+
             "SPESIALSAK" -> Egenskap.SPESIALSAK
+
             "REVURDERING" -> Egenskap.REVURDERING
+
             "SØKNAD" -> Egenskap.SØKNAD
+
             "STIKKPRØVE" -> Egenskap.STIKKPRØVE
+
             "UTBETALING_TIL_SYKMELDT" -> Egenskap.UTBETALING_TIL_SYKMELDT
+
             "DELVIS_REFUSJON" -> Egenskap.DELVIS_REFUSJON
+
             "UTBETALING_TIL_ARBEIDSGIVER" -> Egenskap.UTBETALING_TIL_ARBEIDSGIVER
+
             "INGEN_UTBETALING" -> Egenskap.INGEN_UTBETALING
+
             "EN_ARBEIDSGIVER" -> Egenskap.EN_ARBEIDSGIVER
+
             "FLERE_ARBEIDSGIVERE" -> Egenskap.FLERE_ARBEIDSGIVERE
+
             "FORLENGELSE" -> Egenskap.FORLENGELSE
+
             "FORSTEGANGSBEHANDLING" -> Egenskap.FORSTEGANGSBEHANDLING
+
             "INFOTRYGDFORLENGELSE" -> Egenskap.INFOTRYGDFORLENGELSE
+
             "OVERGANG_FRA_IT" -> Egenskap.OVERGANG_FRA_IT
+
             "UTLAND" -> Egenskap.UTLAND
+
             "HASTER" -> Egenskap.HASTER
+
             "RETUR" -> Egenskap.RETUR
+
             "SKJØNNSFASTSETTELSE" -> Egenskap.SKJØNNSFASTSETTELSE
+
             "PÅ_VENT" -> Egenskap.PÅ_VENT
+
             "TILBAKEDATERT" -> Egenskap.TILBAKEDATERT
+
             "GOSYS" -> Egenskap.GOSYS
+
             "MANGLER_IM" -> Egenskap.MANGLER_IM
+
             "MEDLEMSKAP" -> Egenskap.MEDLEMSKAP
+
             "VERGEMÅL" -> Egenskap.VERGEMÅL
+
             "GRUNNBELØPSREGULERING" -> Egenskap.GRUNNBELØPSREGULERING
+
             "SELVSTENDIG_NÆRINGSDRIVENDE" -> Egenskap.SELVSTENDIG_NÆRINGSDRIVENDE
+
             "ARBEIDSTAKER" -> Egenskap.ARBEIDSTAKER
+
             // Gammel egenskap fra tidligere iterasjon av tilkommen inntekt, skal overses
             "TILKOMMEN" -> null
+
             else -> error("Ukjent oppgaveegenskap")
         }
 }

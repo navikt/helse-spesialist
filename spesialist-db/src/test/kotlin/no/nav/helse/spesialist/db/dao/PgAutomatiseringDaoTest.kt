@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 internal class PgAutomatiseringDaoTest : AbstractDBIntegrationTest() {
-
     @BeforeEach
     fun setup() {
         testhendelse()
@@ -34,7 +33,6 @@ internal class PgAutomatiseringDaoTest : AbstractDBIntegrationTest() {
         assertEquals(UTBETALING_ID, automatiseringSvar.utbetalingId)
         assertEquals(1, automatiseringSvar.problemer.size)
     }
-
 
     @Test
     fun `lagre og lese false uten utbetalingsId`() {
@@ -87,14 +85,15 @@ internal class PgAutomatiseringDaoTest : AbstractDBIntegrationTest() {
     fun `to automatiseringer på samme vedtaksperiode og samme hendelseID kræsjer`() {
         automatiseringDao.manuellSaksbehandling(listOf("problem"), VEDTAKSPERIODE, HENDELSE_ID, UTBETALING_ID)
 
-        val actualException = assertThrows(
-            Exception::class.java,
-            { automatiseringDao.automatisert(VEDTAKSPERIODE, HENDELSE_ID, UTBETALING_ID) },
-            "Testfeil"
-        )
+        val actualException =
+            assertThrows(
+                Exception::class.java,
+                { automatiseringDao.automatisert(VEDTAKSPERIODE, HENDELSE_ID, UTBETALING_ID) },
+                "Testfeil",
+            )
         assertEquals(
             "Det kan bare finnes 1 aktiv automatisering. Klarer ikke opprette ny automatisering for vedtaksperiodeId $VEDTAKSPERIODE og hendelseId $HENDELSE_ID.",
-            actualException.message
+            actualException.message,
         )
 
         val automatiseringSvar = requireNotNull(automatiseringDao.hentAktivAutomatisering(VEDTAKSPERIODE, HENDELSE_ID))
@@ -115,7 +114,6 @@ internal class PgAutomatiseringDaoTest : AbstractDBIntegrationTest() {
         automatiseringDao.automatisert(VEDTAKSPERIODE, HENDELSE_ID, UTBETALING_ID)
         assertFalse(automatiseringDao.plukketUtTilStikkprøve(VEDTAKSPERIODE, HENDELSE_ID))
     }
-
 
     @Test
     fun `ikke stikkprøve hvis manglende vedtak`() {
@@ -162,7 +160,7 @@ internal class PgAutomatiseringDaoTest : AbstractDBIntegrationTest() {
         vedtaksperiodeId: UUID,
         hendelseId: UUID,
         problems: List<String> = emptyList(),
-        utbetalingId: UUID?
+        utbetalingId: UUID?,
     ) {
         sessionOf(dataSource).use { session ->
             session.transaction { transactionalSession ->
@@ -170,22 +168,24 @@ internal class PgAutomatiseringDaoTest : AbstractDBIntegrationTest() {
                     queryOf(
                         """
                             INSERT INTO automatisering (vedtaksperiode_ref, hendelse_ref, automatisert, stikkprøve, utbetaling_id)
-                            VALUES ((SELECT id FROM vedtak WHERE vedtaksperiode_id = ?), ?, ?, ?, ?)
+                            VALUES ((SELECT id FROM vedtaksperiode WHERE vedtaksperiode_id = ?), ?, ?, ?, ?)
                         """,
                         vedtaksperiodeId,
                         hendelseId,
                         automatisert,
                         stikkprøve,
-                        utbetalingId
-                    ).asUpdate
+                        utbetalingId,
+                    ).asUpdate,
                 )
 
                 problems.forEach { problem ->
                     transactionalSession.run(
                         queryOf(
-                            "INSERT INTO automatisering_problem(vedtaksperiode_ref, hendelse_ref, problem) VALUES ((SELECT id FROM vedtak WHERE vedtaksperiode_id = ?), ?, ?)",
-                            vedtaksperiodeId, hendelseId, problem
-                        ).asUpdate
+                            "INSERT INTO automatisering_problem(vedtaksperiode_ref, hendelse_ref, problem) VALUES ((SELECT id FROM vedtaksperiode WHERE vedtaksperiode_id = ?), ?, ?)",
+                            vedtaksperiodeId,
+                            hendelseId,
+                            problem,
+                        ).asUpdate,
                     )
                 }
             }
@@ -202,10 +202,9 @@ internal class PgAutomatiseringDaoTest : AbstractDBIntegrationTest() {
                             VALUES (?)
                         """,
                         vedtaksperiodeId,
-                    ).asUpdate
+                    ).asUpdate,
                 )
             }
         }
     }
-
 }

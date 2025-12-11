@@ -20,7 +20,7 @@ class PgRisikovurderingApiDao internal constructor(
             """
             with vedtaksperioder_for_person as (
                 select vedtaksperiode_id
-                from vedtak v
+                from vedtaksperiode v
                 join person p on v.person_ref = p.id
                 where p.fødselsnummer = :foedselsnummer
             )

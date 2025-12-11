@@ -20,7 +20,7 @@ class PgBehandlingsstatistikkDao internal constructor(
             """
             SELECT count(1)
             FROM oppgave o
-            INNER JOIN vedtak v ON o.vedtak_ref = v.id
+            INNER JOIN vedtaksperiode v ON o.vedtak_ref = v.id
             WHERE o.status='AvventerSaksbehandler'::oppgavestatus
               AND v.forkastet = false 
               AND 'BESLUTTER' = ANY (o.egenskaper)
@@ -32,7 +32,7 @@ class PgBehandlingsstatistikkDao internal constructor(
             """
             SELECT count(1)
             FROM oppgave o
-            INNER JOIN vedtak v ON o.vedtak_ref = v.id
+            INNER JOIN vedtaksperiode v ON o.vedtak_ref = v.id
             WHERE o.status='AvventerSaksbehandler'::oppgavestatus
               AND v.forkastet = false 
               AND 'EGEN_ANSATT' = ANY (o.egenskaper)
@@ -76,7 +76,7 @@ class PgBehandlingsstatistikkDao internal constructor(
                     count(distinct a.id)
                 FROM automatisering a
                          INNER JOIN saksbehandleroppgavetype s on s.vedtak_ref = a.vedtaksperiode_ref
-                         INNER JOIN vedtak v ON v.id = a.vedtaksperiode_ref
+                         INNER JOIN vedtaksperiode v ON v.id = a.vedtaksperiode_ref
                          INNER JOIN vedtaksperiode_utbetaling_id vui on vui.vedtaksperiode_id = v.vedtaksperiode_id 
                          INNER JOIN utbetaling_id ui on ui.utbetaling_id = vui.utbetaling_id
                 WHERE a.opprettet >= :fom
@@ -222,7 +222,7 @@ class PgBehandlingsstatistikkDao internal constructor(
         asSQL(
             """
             SELECT count(*) AS avvisninger
-            FROM vedtak v
+            FROM vedtaksperiode v
             JOIN oppgave o ON v.id = o.vedtak_ref
             WHERE status = 'Ferdigstilt' AND oppdatert >= :fom AND forkastet;
             """.trimIndent(),

@@ -32,7 +32,7 @@ class PgOppgaveDao internal constructor(
             """
             SELECT o.id as oppgaveId
             FROM oppgave o
-                     JOIN vedtak v ON v.id = o.vedtak_ref
+                     JOIN vedtaksperiode v ON v.id = o.vedtak_ref
                      JOIN person p ON v.person_ref = p.id
             WHERE p.fødselsnummer = :fodselsnummer
             ORDER BY o.id DESC
@@ -48,7 +48,7 @@ class PgOppgaveDao internal constructor(
             """
             SELECT o.id as oppgaveId
             FROM oppgave o
-            JOIN vedtak v ON v.id = o.vedtak_ref
+            JOIN vedtaksperiode v ON v.id = o.vedtak_ref
             JOIN person p ON v.person_ref = p.id
             WHERE o.status = 'AvventerSaksbehandler'::oppgavestatus
                 AND p.fødselsnummer = :fodselsnummer;
@@ -76,7 +76,7 @@ class PgOppgaveDao internal constructor(
         asSQL(
             """
             SELECT v.vedtaksperiode_id
-            FROM vedtak v
+            FROM vedtaksperiode v
             INNER JOIN oppgave o on v.id = o.vedtak_ref
             WHERE o.id = :oppgaveId
             """.trimIndent(),
@@ -89,7 +89,7 @@ class PgOppgaveDao internal constructor(
             UPDATE oppgave o
             SET status = 'Invalidert'
             FROM oppgave o2
-            JOIN vedtak v on v.id = o2.vedtak_ref
+            JOIN vedtaksperiode v on v.id = o2.vedtak_ref
             JOIN person p on v.person_ref = p.id
             WHERE p.fødselsnummer = :fodselsnummer
             and o.id = o2.id
@@ -131,7 +131,7 @@ class PgOppgaveDao internal constructor(
         asSQL(
             """
             SELECT v.vedtaksperiode_id, v.fom, v.tom, o.utbetaling_id, h.id AS hendelseId, h.data AS godkjenningbehovJson, s.type as periodetype
-            FROM vedtak v
+            FROM vedtaksperiode v
             INNER JOIN oppgave o ON o.vedtak_ref = v.id
             INNER JOIN hendelse h ON h.id = o.hendelse_id_godkjenningsbehov
             INNER JOIN saksbehandleroppgavetype s ON s.vedtak_ref = v.id
@@ -182,7 +182,7 @@ class PgOppgaveDao internal constructor(
         asSQL(
             """
             SELECT fødselsnummer from person
-            INNER JOIN vedtak v on person.id = v.person_ref
+            INNER JOIN vedtaksperiode v on person.id = v.person_ref
             INNER JOIN oppgave o on v.id = o.vedtak_ref
             WHERE o.id = :oppgaveId
             """,
@@ -210,7 +210,7 @@ class PgOppgaveDao internal constructor(
         asSQL(
             """
             SELECT COUNT(1) AS oppgave_count FROM oppgave o
-            INNER JOIN vedtak v on o.vedtak_ref = v.id
+            INNER JOIN vedtaksperiode v on o.vedtak_ref = v.id
             WHERE v.vedtaksperiode_id = :vedtaksperiodeId AND o.status = 'Ferdigstilt'::oppgavestatus
             """,
             "vedtaksperiodeId" to vedtaksperiodeId,
@@ -239,7 +239,7 @@ class PgOppgaveDao internal constructor(
                 pi.fornavn, pi.mellomnavn, pi.etternavn,
                 count(1) OVER() AS filtered_count
             FROM oppgave o
-                INNER JOIN vedtak v ON o.vedtak_ref = v.id
+                INNER JOIN vedtaksperiode v ON o.vedtak_ref = v.id
                 INNER JOIN person p ON v.person_ref = p.id
                 INNER JOIN person_info pi ON p.info_ref = pi.id
                 LEFT JOIN (SELECT tv.person_ref, tv.tilstand, beslutter.ident as beslutter, saksbehandler.ident as saksbehandler
@@ -291,7 +291,7 @@ class PgOppgaveDao internal constructor(
         asSQL(
             """
             SELECT o.egenskaper FROM oppgave o 
-            INNER JOIN vedtak v ON o.vedtak_ref = v.id
+            INNER JOIN vedtaksperiode v ON o.vedtak_ref = v.id
             WHERE v.vedtaksperiode_id = :vedtaksperiodeId
             AND o.utbetaling_id = :utbetalingId
             ORDER BY o.opprettet DESC
@@ -308,7 +308,7 @@ class PgOppgaveDao internal constructor(
             """
             SELECT id FROM oppgave
             WHERE vedtak_ref =
-                (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)
+                (SELECT id FROM vedtaksperiode WHERE vedtaksperiode_id = :vedtaksperiodeId)
                     AND status not in ('Ferdigstilt'::oppgavestatus, 'Invalidert'::oppgavestatus)
             ORDER BY opprettet DESC
             LIMIT 1

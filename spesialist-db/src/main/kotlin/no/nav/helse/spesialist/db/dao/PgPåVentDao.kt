@@ -30,7 +30,7 @@ class PgPåVentDao private constructor(
         val vedtaksperiodeId =
             asSQL(
                 """
-                SELECT v.vedtaksperiode_id FROM vedtak v
+                SELECT v.vedtaksperiode_id FROM vedtaksperiode v
                 INNER JOIN oppgave o ON v.id = o.vedtak_ref
                 WHERE o.id = :oppgaveId
                 """.trimIndent(),
@@ -55,7 +55,7 @@ class PgPåVentDao private constructor(
         asSQL(
             """
             SELECT v.vedtaksperiode_id
-            FROM vedtak v
+            FROM vedtaksperiode v
             INNER JOIN oppgave o on v.id = o.vedtak_ref
             WHERE o.id = :oppgaveId
             """.trimIndent(),
@@ -81,7 +81,7 @@ class PgPåVentDao private constructor(
         asSQL(
             """
             select 1 from pa_vent
-            join vedtak v on pa_vent.vedtaksperiode_id = v.vedtaksperiode_id
+            join vedtaksperiode v on pa_vent.vedtaksperiode_id = v.vedtaksperiode_id
             join oppgave o on v.id = o.vedtak_ref
             where o.id = :oppgaveId
             """.trimIndent(),
@@ -102,7 +102,7 @@ class PgPåVentDao private constructor(
               (frist, dialog_ref, saksbehandler_ref, notattekst, årsaker) =
               ( :frist, :dialogRef, :saksbehandlerRef, :notatTekst, :arsaker::varchar[])
               where vedtaksperiode_id = (
-                SELECT v.vedtaksperiode_id FROM vedtak v, oppgave o
+                SELECT v.vedtaksperiode_id FROM vedtaksperiode v, oppgave o
                   WHERE v.id = o.vedtak_ref
                   AND o.id = :oppgaveId
               )

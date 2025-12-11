@@ -255,7 +255,7 @@ internal class PersonRepository(
 
     private fun TransactionalSession.slettAvslag(personRef: Int) {
         @Language("PostgreSQL")
-        val query = "DELETE FROM vedtak_begrunnelse WHERE vedtaksperiode_id IN (SELECT vedtaksperiode_id FROM vedtak WHERE person_ref = ?) RETURNING begrunnelse_ref"
+        val query = "DELETE FROM vedtak_begrunnelse WHERE vedtaksperiode_id IN (SELECT vedtaksperiode_id FROM vedtaksperiode WHERE person_ref = ?) RETURNING begrunnelse_ref"
         val begrunnelseRef =
             run(
                 queryOf(query, personRef)
@@ -290,7 +290,7 @@ internal class PersonRepository(
         slettOpprinneligSøknadsdato(personRef)
         slettUtbetalingIdVedtaksperiodeId(personRef)
         @Language("PostgreSQL")
-        val query = "DELETE FROM vedtak WHERE person_ref = ?"
+        val query = "DELETE FROM vedtaksperiode WHERE person_ref = ?"
         run(queryOf(query, personRef).asExecute)
     }
 
@@ -301,7 +301,7 @@ internal class PersonRepository(
             WITH slettet_rad AS (
                 DELETE FROM periodehistorikk ph
                 USING behandling b
-                JOIN vedtak v ON v.vedtaksperiode_id = b.vedtaksperiode_id
+                JOIN vedtaksperiode v ON v.vedtaksperiode_id = b.vedtaksperiode_id
                 WHERE ph.generasjon_id = b.unik_id
                 AND v.person_ref = :personRef returning dialog_ref
             )
@@ -312,7 +312,7 @@ internal class PersonRepository(
 
     private fun TransactionalSession.slettPåVent(personRef: Int) {
         @Language("PostgreSQL")
-        val query = "DELETE FROM pa_vent pv USING vedtak v WHERE pv.vedtaksperiode_id = v.vedtaksperiode_id AND v.person_ref = ?"
+        val query = "DELETE FROM pa_vent pv USING vedtaksperiode v WHERE pv.vedtaksperiode_id = v.vedtaksperiode_id AND v.person_ref = ?"
         run(queryOf(query, personRef).asExecute)
     }
 
@@ -320,7 +320,7 @@ internal class PersonRepository(
         slettGenerasjonBegrunnelseKoblinger(personRef)
         @Language("PostgreSQL")
         val query = """
-             DELETE FROM behandling b USING vedtak v WHERE b.vedtaksperiode_id = v.vedtaksperiode_id AND v.person_ref = ?
+             DELETE FROM behandling b USING vedtaksperiode v WHERE b.vedtaksperiode_id = v.vedtaksperiode_id AND v.person_ref = ?
         """
         run(queryOf(query, personRef).asExecute)
     }
@@ -328,7 +328,7 @@ internal class PersonRepository(
     private fun TransactionalSession.slettVedtaksperiodebehandlingV2(personRef: Int) {
         @Language("PostgreSQL")
         val query = """
-             DELETE FROM behandling_v2 b USING vedtak v WHERE b.vedtaksperiode_id = v.vedtaksperiode_id AND v.person_ref = ?
+             DELETE FROM behandling_v2 b USING vedtaksperiode v WHERE b.vedtaksperiode_id = v.vedtaksperiode_id AND v.person_ref = ?
         """
         run(queryOf(query, personRef).asExecute)
     }
@@ -336,7 +336,7 @@ internal class PersonRepository(
     private fun TransactionalSession.slettGenerasjonBegrunnelseKoblinger(personRef: Int) {
         @Language("PostgreSQL")
         val query = """
-             DELETE FROM generasjon_begrunnelse_kobling gbk USING vedtak v INNER JOIN behandling b on v.vedtaksperiode_id = b.vedtaksperiode_id WHERE gbk.generasjon_id = b.unik_id AND v.person_ref = ?
+             DELETE FROM generasjon_begrunnelse_kobling gbk USING vedtaksperiode v INNER JOIN behandling b on v.vedtaksperiode_id = b.vedtaksperiode_id WHERE gbk.generasjon_id = b.unik_id AND v.person_ref = ?
         """
         run(queryOf(query, personRef).asExecute)
     }
@@ -344,7 +344,7 @@ internal class PersonRepository(
     private fun TransactionalSession.slettOpprinneligSøknadsdato(personRef: Int) {
         @Language("PostgreSQL")
         val query = """
-             DELETE FROM opprinnelig_soknadsdato os USING vedtak v WHERE os.vedtaksperiode_id = v.vedtaksperiode_id AND v.person_ref = ?
+             DELETE FROM opprinnelig_soknadsdato os USING vedtaksperiode v WHERE os.vedtaksperiode_id = v.vedtaksperiode_id AND v.person_ref = ?
         """
         run(queryOf(query, personRef).asExecute)
     }
@@ -352,7 +352,7 @@ internal class PersonRepository(
     private fun TransactionalSession.slettVarsler(personRef: Int) {
         @Language("PostgreSQL")
         val query = """
-             DELETE FROM selve_varsel sv USING vedtak v WHERE sv.vedtaksperiode_id = v.vedtaksperiode_id AND v.person_ref = ?
+             DELETE FROM selve_varsel sv USING vedtaksperiode v WHERE sv.vedtaksperiode_id = v.vedtaksperiode_id AND v.person_ref = ?
         """
         run(queryOf(query, personRef).asExecute)
     }
@@ -364,7 +364,7 @@ internal class PersonRepository(
             WHERE dialog_ref IN (
                 SELECT n.dialog_ref 
                 FROM notat n 
-                    INNER JOIN vedtak v ON n.vedtaksperiode_id = v.vedtaksperiode_id 
+                    INNER JOIN vedtaksperiode v ON n.vedtaksperiode_id = v.vedtaksperiode_id 
                 WHERE v.person_ref = ?
             )"""
         run(queryOf(query, personRef).asExecute)
@@ -375,7 +375,7 @@ internal class PersonRepository(
         val query =
             """
             WITH slettet_rad AS (
-                DELETE FROM notat WHERE vedtaksperiode_id IN (SELECT vedtaksperiode_id FROM vedtak WHERE person_ref = :personRef) returning dialog_ref
+                DELETE FROM notat WHERE vedtaksperiode_id IN (SELECT vedtaksperiode_id FROM vedtaksperiode WHERE person_ref = :personRef) returning dialog_ref
             )
             DELETE FROM dialog USING slettet_rad sr WHERE id = sr.dialog_ref
             """.trimIndent()
@@ -384,31 +384,31 @@ internal class PersonRepository(
 
     private fun TransactionalSession.slettAutomatiseringProblem(personRef: Int) {
         @Language("PostgreSQL")
-        val query = "DELETE FROM automatisering_problem WHERE vedtaksperiode_ref IN (SELECT id FROM vedtak WHERE person_ref = ?)"
+        val query = "DELETE FROM automatisering_problem WHERE vedtaksperiode_ref IN (SELECT id FROM vedtaksperiode WHERE person_ref = ?)"
         run(queryOf(query, personRef).asExecute)
     }
 
     private fun TransactionalSession.slettAutomatisering(personRef: Int) {
         @Language("PostgreSQL")
-        val query = "DELETE FROM automatisering WHERE vedtaksperiode_ref IN (SELECT id FROM vedtak WHERE person_ref = ?)"
+        val query = "DELETE FROM automatisering WHERE vedtaksperiode_ref IN (SELECT id FROM vedtaksperiode WHERE person_ref = ?)"
         run(queryOf(query, personRef).asExecute)
     }
 
     private fun TransactionalSession.slettSaksbehandleroppgavetype(personRef: Int) {
         @Language("PostgreSQL")
-        val query = "DELETE FROM saksbehandleroppgavetype WHERE vedtak_ref IN (SELECT id FROM vedtak WHERE person_ref = ?)"
+        val query = "DELETE FROM saksbehandleroppgavetype WHERE vedtak_ref IN (SELECT id FROM vedtaksperiode WHERE person_ref = ?)"
         run(queryOf(query, personRef).asExecute)
     }
 
     private fun TransactionalSession.slettTildeling(personRef: Int) {
         @Language("PostgreSQL")
-        val query = "DELETE FROM tildeling WHERE oppgave_id_ref IN (SELECT o.id FROM oppgave o INNER JOIN vedtak v ON o.vedtak_ref = v.id WHERE v.person_ref = ?)"
+        val query = "DELETE FROM tildeling WHERE oppgave_id_ref IN (SELECT o.id FROM oppgave o INNER JOIN vedtaksperiode v ON o.vedtak_ref = v.id WHERE v.person_ref = ?)"
         run(queryOf(query, personRef).asExecute)
     }
 
     private fun TransactionalSession.slettOppgaveBehandlingKobling(personRef: Int) {
         @Language("PostgreSQL")
-        val query = "DELETE FROM oppgave_behandling_kobling WHERE oppgave_id IN (SELECT o.id FROM oppgave o INNER JOIN vedtak v on v.id = o.vedtak_ref WHERE v.person_ref = ?)"
+        val query = "DELETE FROM oppgave_behandling_kobling WHERE oppgave_id IN (SELECT o.id FROM oppgave o INNER JOIN vedtaksperiode v on v.id = o.vedtak_ref WHERE v.person_ref = ?)"
         run(queryOf(query, personRef).asExecute)
     }
 
@@ -416,13 +416,13 @@ internal class PersonRepository(
         slettTildeling(personRef)
         slettOppgaveBehandlingKobling(personRef)
         @Language("PostgreSQL")
-        val query = "DELETE FROM oppgave WHERE vedtak_ref IN (SELECT id FROM vedtak WHERE person_ref = ?)"
+        val query = "DELETE FROM oppgave WHERE vedtak_ref IN (SELECT id FROM vedtaksperiode WHERE person_ref = ?)"
         run(queryOf(query, personRef).asExecute)
     }
 
     private fun TransactionalSession.slettRisikovurdering(personRef: Int) {
         @Language("PostgreSQL")
-        val query = "DELETE FROM risikovurdering_2021 WHERE vedtaksperiode_id IN (SELECT vedtaksperiode_id FROM vedtak WHERE person_ref = ?)"
+        val query = "DELETE FROM risikovurdering_2021 WHERE vedtaksperiode_id IN (SELECT vedtaksperiode_id FROM vedtaksperiode WHERE person_ref = ?)"
         run(queryOf(query, personRef).asExecute)
     }
 
@@ -440,7 +440,7 @@ internal class PersonRepository(
 
     private fun TransactionalSession.slettUtbetalingIdVedtaksperiodeId(personRef: Int) {
         @Language("PostgreSQL")
-        val query = "DELETE FROM vedtaksperiode_utbetaling_id WHERE vedtaksperiode_id IN (SELECT vedtaksperiode_id FROM vedtak WHERE person_ref = ?)"
+        val query = "DELETE FROM vedtaksperiode_utbetaling_id WHERE vedtaksperiode_id IN (SELECT vedtaksperiode_id FROM vedtaksperiode WHERE person_ref = ?)"
         run(queryOf(query, personRef).asExecute)
     }
 
@@ -478,7 +478,7 @@ internal class PersonRepository(
         val query =
             """
             SELECT aas.id FROM annullert_av_saksbehandler aas 
-            INNER JOIN vedtak v USING (vedtaksperiode_id)
+            INNER JOIN vedtaksperiode v USING (vedtaksperiode_id)
             WHERE v.person_ref = ?
             """
         return run(queryOf(query, personRef).map { it.int("id") }.asList)

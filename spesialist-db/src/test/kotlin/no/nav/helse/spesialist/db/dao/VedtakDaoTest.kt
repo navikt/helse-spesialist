@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Test
 import java.util.UUID
 
 internal class VedtakDaoTest : AbstractDBIntegrationTest() {
-
     @Test
     fun `lagre og finn vedtaksperiode`() {
         opprettPerson()
@@ -26,31 +25,31 @@ internal class VedtakDaoTest : AbstractDBIntegrationTest() {
         sessionOf(dataSource).use {
             it.transaction {
                 PgVedtakDao(it).lagreVedtaksperiode(
-                        fødselsnummer = FNR,
-                        vedtaksperiodeDto =
-                            VedtaksperiodeDto(
-                                organisasjonsnummer = ORGNUMMER,
-                                vedtaksperiodeId = VEDTAKSPERIODE,
-                                forkastet = false,
-                                behandlinger =
-                                    listOf(
-                                        BehandlingDto(
-                                            id = UUID.randomUUID(),
-                                            vedtaksperiodeId = VEDTAKSPERIODE,
-                                            utbetalingId = null,
-                                            spleisBehandlingId = UUID.randomUUID(),
-                                            skjæringstidspunkt = 1 jan 2018,
-                                            fom = 1 jan 2018,
-                                            tom = 31 jan 2018,
-                                            tilstand = TilstandDto.VidereBehandlingAvklares,
-                                            tags = emptyList(),
-                                            vedtakBegrunnelse = null,
-                                            varsler = emptyList(),
-                                            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
-                                        ),
+                    fødselsnummer = FNR,
+                    vedtaksperiodeDto =
+                        VedtaksperiodeDto(
+                            organisasjonsnummer = ORGNUMMER,
+                            vedtaksperiodeId = VEDTAKSPERIODE,
+                            forkastet = false,
+                            behandlinger =
+                                listOf(
+                                    BehandlingDto(
+                                        id = UUID.randomUUID(),
+                                        vedtaksperiodeId = VEDTAKSPERIODE,
+                                        utbetalingId = null,
+                                        spleisBehandlingId = UUID.randomUUID(),
+                                        skjæringstidspunkt = 1 jan 2018,
+                                        fom = 1 jan 2018,
+                                        tom = 31 jan 2018,
+                                        tilstand = TilstandDto.VidereBehandlingAvklares,
+                                        tags = emptyList(),
+                                        vedtakBegrunnelse = null,
+                                        varsler = emptyList(),
+                                        yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
                                     ),
-                            ),
-                    )
+                                ),
+                        ),
+                )
             }
         }
         val vedtaksperiode =
@@ -72,31 +71,31 @@ internal class VedtakDaoTest : AbstractDBIntegrationTest() {
         sessionOf(dataSource).use {
             it.transaction {
                 PgVedtakDao(it).lagreVedtaksperiode(
-                        fødselsnummer = FNR,
-                        vedtaksperiodeDto =
-                            VedtaksperiodeDto(
-                                organisasjonsnummer = ORGNUMMER,
-                                vedtaksperiodeId = VEDTAKSPERIODE,
-                                forkastet = true,
-                                behandlinger =
-                                    listOf(
-                                        BehandlingDto(
-                                            id = UUID.randomUUID(),
-                                            vedtaksperiodeId = VEDTAKSPERIODE,
-                                            utbetalingId = null,
-                                            spleisBehandlingId = UUID.randomUUID(),
-                                            skjæringstidspunkt = 1 jan 2018,
-                                            fom = 1 jan 2018,
-                                            tom = 31 jan 2018,
-                                            tilstand = TilstandDto.VidereBehandlingAvklares,
-                                            tags = emptyList(),
-                                            vedtakBegrunnelse = null,
-                                            varsler = emptyList(),
-                                            yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
-                                        ),
+                    fødselsnummer = FNR,
+                    vedtaksperiodeDto =
+                        VedtaksperiodeDto(
+                            organisasjonsnummer = ORGNUMMER,
+                            vedtaksperiodeId = VEDTAKSPERIODE,
+                            forkastet = true,
+                            behandlinger =
+                                listOf(
+                                    BehandlingDto(
+                                        id = UUID.randomUUID(),
+                                        vedtaksperiodeId = VEDTAKSPERIODE,
+                                        utbetalingId = null,
+                                        spleisBehandlingId = UUID.randomUUID(),
+                                        skjæringstidspunkt = 1 jan 2018,
+                                        fom = 1 jan 2018,
+                                        tom = 31 jan 2018,
+                                        tilstand = TilstandDto.VidereBehandlingAvklares,
+                                        tags = emptyList(),
+                                        vedtakBegrunnelse = null,
+                                        varsler = emptyList(),
+                                        yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
                                     ),
-                            ),
-                    )
+                                ),
+                        ),
+                )
             }
         }
         val vedtaksperiode =
@@ -159,20 +158,21 @@ internal class VedtakDaoTest : AbstractDBIntegrationTest() {
         assertEquals(ORGNUMMER, vedtakDao.finnOrganisasjonsnummer(VEDTAKSPERIODE))
     }
 
-    private fun finnVedtaksperiodetype(vedtaksperiodeId: UUID): Periodetype {
-        return sessionOf(dataSource).use {
+    private fun finnVedtaksperiodetype(vedtaksperiodeId: UUID): Periodetype =
+        sessionOf(dataSource).use {
             it.run(
-                queryOf("SELECT type FROM saksbehandleroppgavetype WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = ?)", vedtaksperiodeId)
-                    .map { row -> enumValueOf<Periodetype>(row.string("type")) }.asSingle,
+                queryOf("SELECT type FROM saksbehandleroppgavetype WHERE vedtak_ref = (SELECT id FROM vedtaksperiode WHERE vedtaksperiode_id = ?)", vedtaksperiodeId)
+                    .map { row -> enumValueOf<Periodetype>(row.string("type")) }
+                    .asSingle,
             )!!
         }
-    }
 
     private fun finnKobling(hendelseId: UUID) =
         sessionOf(dataSource).use {
             it.run(
                 queryOf("SELECT vedtaksperiode_id FROM vedtaksperiode_hendelse WHERE hendelse_ref = ?", hendelseId)
-                    .map { row -> row.uuid("vedtaksperiode_id") }.asSingle,
+                    .map { row -> row.uuid("vedtaksperiode_id") }
+                    .asSingle,
             )
         }
 }

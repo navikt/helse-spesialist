@@ -95,7 +95,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             personId = personId,
             periode = periode,
             skjæringstidspunkt = skjæringstidspunkt,
-            forkastet = forkastet
+            forkastet = forkastet,
         ).also {
             klargjørVedtak(
                 vedtakId = it,
@@ -110,21 +110,21 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     private fun opprettBehandling(
         behandlingId: UUID?,
         periode: Periode,
-        skjæringstidspunkt: LocalDate
+        skjæringstidspunkt: LocalDate,
     ) {
         requireNotNull(
             dbQuery.update(
                 """
-                    INSERT INTO behandling (unik_id, vedtaksperiode_id, opprettet_av_hendelse, tilstand, fom, tom, skjæringstidspunkt)
-                    VALUES (:unik_id, :vedtaksperiode_id, :hendelse_id, 'VidereBehandlingAvklares',:fom, :tom, :skjaeringstidspunkt)
-                    """.trimIndent(),
+                INSERT INTO behandling (unik_id, vedtaksperiode_id, opprettet_av_hendelse, tilstand, fom, tom, skjæringstidspunkt)
+                VALUES (:unik_id, :vedtaksperiode_id, :hendelse_id, 'VidereBehandlingAvklares',:fom, :tom, :skjaeringstidspunkt)
+                """.trimIndent(),
                 "unik_id" to behandlingId,
                 "vedtaksperiode_id" to periode.id,
                 "hendelse_id" to UUID.randomUUID(),
                 "fom" to periode.fom,
                 "tom" to periode.tom,
                 "skjaeringstidspunkt" to skjæringstidspunkt,
-            )
+            ),
         )
     }
 
@@ -133,7 +133,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         skjæringstidspunkt: LocalDate = 1 jan 2018,
         avviksvurderingId: UUID = UUID.randomUUID(),
         vilkårsgrunnlagId: UUID = UUID.randomUUID(),
-        avviksprosent: Double = 25.0
+        avviksprosent: Double = 25.0,
     ) {
         sessionFactory.transactionalSessionScope {
             it.avviksvurderingRepository.lagre(
@@ -195,16 +195,16 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                                     OmregnetÅrsinntekt(arbeidsgiverreferanse = ORGANISASJONSNUMMER, beløp = 10000.0),
                                 ),
                         ),
-                )
-
+                ),
             )
         }
     }
 
-    private fun opprettOpprinneligSøknadsdato(periode: Periode) = dbQuery.update(
-        "INSERT INTO opprinnelig_soknadsdato VALUES (:vedtaksperiode_id, now())",
-        "vedtaksperiode_id" to periode.id,
-    )
+    private fun opprettOpprinneligSøknadsdato(periode: Periode) =
+        dbQuery.update(
+            "INSERT INTO opprinnelig_soknadsdato VALUES (:vedtaksperiode_id, now())",
+            "vedtaksperiode_id" to periode.id,
+        )
 
     protected fun opprettVedtak(
         behandlingId: UUID = UUID.randomUUID(),
@@ -217,9 +217,9 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         opprettOpprinneligSøknadsdato(periode)
         return dbQuery.updateAndReturnGeneratedKey(
             """
-                INSERT INTO vedtak (vedtaksperiode_id, fom, tom, arbeidsgiver_identifikator, person_ref, forkastet)
+                INSERT INTO vedtaksperiode (vedtaksperiode_id, fom, tom, arbeidsgiver_identifikator, person_ref, forkastet)
                 VALUES (:id, :fom, :tom, :arbeidsgiver_identifikator, :personId, :forkastet)
-                """.trimMargin(),
+            """.trimMargin(),
             "id" to periode.id,
             "fom" to periode.fom,
             "tom" to periode.tom,
@@ -233,18 +233,19 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         tittel: String = "EN_TITTEL",
         kode: String = "EN_KODE",
         definisjonId: UUID = UUID.randomUUID(),
-    ): Long = requireNotNull(
-        dbQuery.updateAndReturnGeneratedKey(
-            """
-            INSERT INTO api_varseldefinisjon (unik_id, kode, tittel, forklaring, handling, opprettet) 
-            VALUES (:definisjonId, :kode, :tittel, null, null, :opprettet)
-            """.trimIndent(),
-            "definisjonId" to definisjonId,
-            "kode" to kode,
-            "tittel" to tittel,
-            "opprettet" to LocalDateTime.now(),
-        ),
-    )
+    ): Long =
+        requireNotNull(
+            dbQuery.updateAndReturnGeneratedKey(
+                """
+                INSERT INTO api_varseldefinisjon (unik_id, kode, tittel, forklaring, handling, opprettet) 
+                VALUES (:definisjonId, :kode, :tittel, null, null, :opprettet)
+                """.trimIndent(),
+                "definisjonId" to definisjonId,
+                "kode" to kode,
+                "tittel" to tittel,
+                "opprettet" to LocalDateTime.now(),
+            ),
+        )
 
     protected fun nyGenerasjon(
         vedtaksperiodeId: UUID = UUID.randomUUID(),
@@ -253,23 +254,24 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         periode: Periode = PERIODE,
         tilstandEndretTidspunkt: LocalDateTime? = null,
         skjæringstidspunkt: LocalDate = periode.fom,
-    ): Long = requireNotNull(
-        dbQuery.updateAndReturnGeneratedKey(
-            """
-            INSERT INTO behandling (vedtaksperiode_id, unik_id, utbetaling_id, opprettet_av_hendelse, tilstand_endret_tidspunkt, tilstand_endret_av_hendelse, tilstand, fom, tom, skjæringstidspunkt) 
-            VALUES (:vedtaksperiodeId, :generasjonId, :utbetalingId, :opprettetAvHendelse, :tilstandEndretTidspunkt, :tilstandEndretAvHendelse, 'VidereBehandlingAvklares', :fom, :tom, :skjaeringstidspunkt)
-            """.trimIndent(),
-            "vedtaksperiodeId" to vedtaksperiodeId,
-            "generasjonId" to generasjonId,
-            "utbetalingId" to utbetalingId,
-            "opprettetAvHendelse" to UUID.randomUUID(),
-            "tilstandEndretTidspunkt" to tilstandEndretTidspunkt,
-            "tilstandEndretAvHendelse" to UUID.randomUUID(),
-            "fom" to periode.fom,
-            "tom" to periode.tom,
-            "skjaeringstidspunkt" to skjæringstidspunkt,
+    ): Long =
+        requireNotNull(
+            dbQuery.updateAndReturnGeneratedKey(
+                """
+                INSERT INTO behandling (vedtaksperiode_id, unik_id, utbetaling_id, opprettet_av_hendelse, tilstand_endret_tidspunkt, tilstand_endret_av_hendelse, tilstand, fom, tom, skjæringstidspunkt) 
+                VALUES (:vedtaksperiodeId, :generasjonId, :utbetalingId, :opprettetAvHendelse, :tilstandEndretTidspunkt, :tilstandEndretAvHendelse, 'VidereBehandlingAvklares', :fom, :tom, :skjaeringstidspunkt)
+                """.trimIndent(),
+                "vedtaksperiodeId" to vedtaksperiodeId,
+                "generasjonId" to generasjonId,
+                "utbetalingId" to utbetalingId,
+                "opprettetAvHendelse" to UUID.randomUUID(),
+                "tilstandEndretTidspunkt" to tilstandEndretTidspunkt,
+                "tilstandEndretAvHendelse" to UUID.randomUUID(),
+                "fom" to periode.fom,
+                "tom" to periode.tom,
+                "skjaeringstidspunkt" to skjæringstidspunkt,
+            ),
         )
-    )
 
     protected fun nyttVarsel(
         id: UUID = UUID.randomUUID(),
@@ -332,22 +334,26 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         "INSERT INTO saksbehandleroppgavetype (type, vedtak_ref, inntektskilde) VALUES (:type, :vedtakRef, :inntektskilde)",
         "type" to type.toString(),
         "vedtakRef" to vedtakRef,
-        "inntektskilde" to inntektskilde.toString()
+        "inntektskilde" to inntektskilde.toString(),
     )
 
-    protected fun ferdigstillOppgave(vedtakRef: Long) = dbQuery.update(
-        """
-        UPDATE oppgave SET ferdigstilt_av = :ident, ferdigstilt_av_oid = :oid, status = 'Ferdigstilt', oppdatert = now()
-        WHERE oppgave.vedtak_ref = :vedtakRef
-        """.trimIndent(),
-        "ident" to SAKSBEHANDLER.ident,
-        "oid" to SAKSBEHANDLER.oid,
-        "vedtakRef" to vedtakRef,
-    )
+    protected fun ferdigstillOppgave(vedtakRef: Long) =
+        dbQuery.update(
+            """
+            UPDATE oppgave SET ferdigstilt_av = :ident, ferdigstilt_av_oid = :oid, status = 'Ferdigstilt', oppdatert = now()
+            WHERE oppgave.vedtak_ref = :vedtakRef
+            """.trimIndent(),
+            "ident" to SAKSBEHANDLER.ident,
+            "oid" to SAKSBEHANDLER.oid,
+            "vedtakRef" to vedtakRef,
+        )
 
     protected fun opprettDialog() =
         sessionFactory.transactionalSessionScope { session ->
-            Dialog.Factory.ny().also(session.dialogRepository::lagre).id()
+            Dialog.Factory
+                .ny()
+                .also(session.dialogRepository::lagre)
+                .id()
         }
 
     protected fun opprettNotat(
@@ -356,13 +362,15 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         vedtaksperiodeId: UUID = PERIODE.id,
         dialogRef: DialogId = opprettDialog(),
     ) = sessionFactory.transactionalSessionScope { session ->
-        Notat.Factory.ny(
-            type = NotatType.Generelt,
-            tekst = tekst,
-            dialogRef = dialogRef,
-            vedtaksperiodeId = vedtaksperiodeId,
-            saksbehandlerOid = saksbehandlerOid
-        ).also(session.notatRepository::lagre).id()
+        Notat.Factory
+            .ny(
+                type = NotatType.Generelt,
+                tekst = tekst,
+                dialogRef = dialogRef,
+                vedtaksperiodeId = vedtaksperiodeId,
+                saksbehandlerOid = saksbehandlerOid,
+            ).also(session.notatRepository::lagre)
+            .id()
     }
 
     protected fun opprettPersonOld(
@@ -400,9 +408,11 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         val pseudoId = PersonPseudoId.ny().value
         dbQuery.update(
             """
-                INSERT INTO personpseudoid (pseudoid, identitetsnummer) 
-                VALUES  (:pseudoId, :fodselsnummer)
-            """.trimIndent(), "pseudoId" to pseudoId, "fodselsnummer" to fødselsnummer
+            INSERT INTO personpseudoid (pseudoid, identitetsnummer) 
+            VALUES  (:pseudoId, :fodselsnummer)
+            """.trimIndent(),
+            "pseudoId" to pseudoId,
+            "fodselsnummer" to fødselsnummer,
         )
     }
 
@@ -428,7 +438,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             "personinfoId" to personinfoid,
             "enhetId" to bostedId,
             "infotrygdutbetalingerId" to infotrygdutbetalingerid,
-        )
+        ),
     )
 
     protected fun opprettPåVent(
@@ -447,18 +457,19 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         oppdaterPersonpekere(FØDSELSNUMMER, personinfoId)
     }
 
-    private fun opprettPersoninfo(adressebeskyttelse: Adressebeskyttelse) = dbQuery.updateAndReturnGeneratedKey(
-        """
-        INSERT INTO person_info (fornavn, mellomnavn, etternavn, fodselsdato, kjonn, adressebeskyttelse)
-        VALUES (:fornavn, :mellomnavn, :etternavn, :foedselsdato::date, :kjoenn::person_kjonn, :adressebeskyttelse)
-        """.trimIndent(),
-        "fornavn" to NAVN.fornavn,
-        "mellomnavn" to NAVN.mellomnavn,
-        "etternavn" to NAVN.etternavn,
-        "foedselsdato" to LocalDate.of(1970, 1, 1),
-        "kjoenn" to "Ukjent",
-        "adressebeskyttelse" to adressebeskyttelse.name,
-    )
+    private fun opprettPersoninfo(adressebeskyttelse: Adressebeskyttelse) =
+        dbQuery.updateAndReturnGeneratedKey(
+            """
+            INSERT INTO person_info (fornavn, mellomnavn, etternavn, fodselsdato, kjonn, adressebeskyttelse)
+            VALUES (:fornavn, :mellomnavn, :etternavn, :foedselsdato::date, :kjoenn::person_kjonn, :adressebeskyttelse)
+            """.trimIndent(),
+            "fornavn" to NAVN.fornavn,
+            "mellomnavn" to NAVN.mellomnavn,
+            "etternavn" to NAVN.etternavn,
+            "foedselsdato" to LocalDate.of(1970, 1, 1),
+            "kjoenn" to "Ukjent",
+            "adressebeskyttelse" to adressebeskyttelse.name,
+        )
 
     private fun oppdaterPersonpekere(
         fødselsnummer: String,
@@ -514,7 +525,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                 Arbeidsgiver.Factory.ny(
                     id = ArbeidsgiverIdentifikator.fraString(ORGANISASJONSNUMMER),
                     navnString = ARBEIDSGIVER_NAVN,
-                )
+                ),
             )
         }
     }
@@ -530,14 +541,15 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
             "oid" to oid,
             "navn" to navn,
             "epost" to epost,
-            "ident" to ident
+            "ident" to ident,
         )
         return oid
     }
 
-    private fun opprettInfotrygdutbetalinger() = dbQuery.updateAndReturnGeneratedKey(
-        "INSERT INTO infotrygdutbetalinger (data) VALUES ('[]')"
-    )
+    private fun opprettInfotrygdutbetalinger() =
+        dbQuery.updateAndReturnGeneratedKey(
+            "INSERT INTO infotrygdutbetalinger (data) VALUES ('[]')",
+        )
 
     private fun opprettOppgave(
         vedtaksperiodeId: UUID,
@@ -556,13 +568,14 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
                         utbetalingId = utbetalingId,
                         hendelseId = UUID.randomUUID(),
                         kanAvvises = kanAvvises,
-                        egenskaper = setOf(
-                            Egenskap.SØKNAD,
-                            Egenskap.FORSTEGANGSBEHANDLING,
-                            Egenskap.UTBETALING_TIL_ARBEIDSGIVER,
-                            Egenskap.EN_ARBEIDSGIVER
-                        )
-                    )
+                        egenskaper =
+                            setOf(
+                                Egenskap.SØKNAD,
+                                Egenskap.FORSTEGANGSBEHANDLING,
+                                Egenskap.UTBETALING_TIL_ARBEIDSGIVER,
+                                Egenskap.EN_ARBEIDSGIVER,
+                            ),
+                    ),
                 )
             }
         }
@@ -576,7 +589,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         VALUES (:hendelseId, :data::json, 'type')
         """.trimIndent(),
         "hendelseId" to hendelseId,
-        "data" to """ { "fødselsnummer": "$fødselsnummer" } """
+        "data" to """ { "fødselsnummer": "$fødselsnummer" } """,
     )
 
     private fun opprettAutomatisering(
@@ -588,7 +601,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
     ) = dbQuery.update(
         """
         INSERT INTO automatisering (vedtaksperiode_ref, hendelse_ref, automatisert, stikkprøve, utbetaling_id)
-        VALUES ((SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId), :hendelseId, :automatisert, :stikkproeve, :utbetalingId);
+        VALUES ((SELECT id FROM vedtaksperiode WHERE vedtaksperiode_id = :vedtaksperiodeId), :hendelseId, :automatisert, :stikkproeve, :utbetalingId);
         """.trimIndent(),
         "vedtaksperiodeId" to vedtaksperiodeId,
         "hendelseId" to hendelseId,
@@ -624,17 +637,19 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         generasjonRef: Long,
         forventetAntall: Int,
     ) {
-        val antall = dbQuery.single(
-            "SELECT COUNT(1) FROM selve_varsel sv WHERE sv.generasjon_ref = :generasjonRef AND status = 'GODKJENT'",
-            "generasjonRef" to generasjonRef
-        ) { it.int(1) }
+        val antall =
+            dbQuery.single(
+                "SELECT COUNT(1) FROM selve_varsel sv WHERE sv.generasjon_ref = :generasjonRef AND status = 'GODKJENT'",
+                "generasjonRef" to generasjonRef,
+            ) { it.int(1) }
         assertEquals(forventetAntall, antall)
     }
 
-    protected fun finnOppgaveIdFor(vedtaksperiodeId: UUID): Long = dbQuery.single(
-        "SELECT o.id FROM oppgave o JOIN vedtak v ON v.id = o.vedtak_ref WHERE v.vedtaksperiode_id = :vedtaksperiode_id;",
-        "vedtaksperiode_id" to vedtaksperiodeId
-    ) { it.long("id") }
+    protected fun finnOppgaveIdFor(vedtaksperiodeId: UUID): Long =
+        dbQuery.single(
+            "SELECT o.id FROM oppgave o JOIN vedtaksperiode v ON v.id = o.vedtak_ref WHERE v.vedtaksperiode_id = :vedtaksperiode_id;",
+            "vedtaksperiode_id" to vedtaksperiodeId,
+        ) { it.long("id") }
 
     protected data class Navn(
         val fornavn: String,
@@ -653,8 +668,7 @@ abstract class DatabaseIntegrationTest : AbstractDatabaseTest() {
         val tom: LocalDate,
     ) {
         companion object {
-            infix fun LocalDate.til(tom: LocalDate) =
-                Periode(UUID.randomUUID(), this, tom)
+            infix fun LocalDate.til(tom: LocalDate) = Periode(UUID.randomUUID(), this, tom)
         }
     }
 

@@ -26,7 +26,7 @@ class PgVedtakDao private constructor(
                 vedtaksperiode_id,
                 arbeidsgiver_identifikator,
                 forkastet
-            FROM vedtak
+            FROM vedtaksperiode
             WHERE vedtaksperiode_id = :vedtaksperiode_id
             """,
             "vedtaksperiode_id" to vedtaksperiodeId,
@@ -45,7 +45,7 @@ class PgVedtakDao private constructor(
     ) {
         asSQL(
             """
-            INSERT INTO vedtak(vedtaksperiode_id, fom, tom, arbeidsgiver_identifikator, person_ref, forkastet)
+            INSERT INTO vedtaksperiode(vedtaksperiode_id, fom, tom, arbeidsgiver_identifikator, person_ref, forkastet)
             VALUES (:vedtaksperiode_id, :fom, :tom, :arbeidsgiver_identifikator, (SELECT id FROM person WHERE fødselsnummer = :fodselsnummer), :forkastet)
             ON CONFLICT (vedtaksperiode_id) DO UPDATE SET forkastet = excluded.forkastet
             """,
@@ -120,7 +120,7 @@ class PgVedtakDao private constructor(
     override fun finnOrganisasjonsnummer(vedtaksperiodeId: UUID): String? =
         asSQL(
             """
-            SELECT arbeidsgiver_identifikator FROM vedtak
+            SELECT arbeidsgiver_identifikator FROM vedtaksperiode
             WHERE vedtaksperiode_id = :vedtaksperiodeId
             """,
             "vedtaksperiodeId" to vedtaksperiodeId,
@@ -130,7 +130,7 @@ class PgVedtakDao private constructor(
 
     override fun finnInntektskilde(vedtaksperiodeId: UUID): Inntektskilde? =
         asSQL(
-            "SELECT inntektskilde FROM saksbehandleroppgavetype WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)",
+            "SELECT inntektskilde FROM saksbehandleroppgavetype WHERE vedtak_ref = (SELECT id FROM vedtaksperiode WHERE vedtaksperiode_id = :vedtaksperiodeId)",
             "vedtaksperiodeId" to vedtaksperiodeId,
         ).singleOrNull {
             enumValueOf<Inntektskilde>(it.string("inntektskilde"))
@@ -138,7 +138,7 @@ class PgVedtakDao private constructor(
 
     fun finnVedtakId(vedtaksperiodeId: UUID): Long? =
         asSQL(
-            "SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId",
+            "SELECT id FROM vedtaksperiode WHERE vedtaksperiode_id = :vedtaksperiodeId",
             "vedtaksperiodeId" to vedtaksperiodeId,
         ).singleOrNull {
             it.long("id")

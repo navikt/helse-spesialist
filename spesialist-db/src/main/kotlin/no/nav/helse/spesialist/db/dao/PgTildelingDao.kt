@@ -44,7 +44,7 @@ class PgTildelingDao internal constructor(
         asSQL(
             """
             SELECT s.epost, s.oid, s.navn FROM person p
-            JOIN vedtak v on p.id = v.person_ref
+            JOIN vedtaksperiode v on p.id = v.person_ref
             JOIN oppgave o on v.id = o.vedtak_ref
             JOIN tildeling t on o.id = t.oppgave_id_ref
             JOIN saksbehandler s on t.saksbehandler_ref = s.oid

@@ -39,7 +39,7 @@ class PgVedtakBegrunnelseDao internal constructor(
             """
             INSERT INTO vedtak_begrunnelse (vedtaksperiode_id, begrunnelse_ref, generasjon_ref)
             SELECT v.vedtaksperiode_id, :begrunnelseId, b.id
-            FROM vedtak v
+            FROM vedtaksperiode v
             INNER JOIN oppgave o on v.id = o.vedtak_ref
             INNER JOIN behandling b ON b.unik_id = o.generasjon_ref
             WHERE o.id = :oppgaveId
@@ -56,7 +56,7 @@ class PgVedtakBegrunnelseDao internal constructor(
             """
             WITH t as ( 
                 SELECT v.vedtaksperiode_id, b.id 
-                FROM vedtak v
+                FROM vedtaksperiode v
                 INNER JOIN oppgave o ON v.id = o.vedtak_ref
                 INNER JOIN behandling b ON o.generasjon_ref = b.unik_id
                 WHERE o.id = :oppgaveId
@@ -93,7 +93,7 @@ class PgVedtakBegrunnelseDao internal constructor(
     override fun finnVedtakBegrunnelse(oppgaveId: Long): VedtakBegrunnelseFraDatabase? =
         asSQL(
             """
-            SELECT b.type, b.tekst FROM begrunnelse AS b, vedtak_begrunnelse AS vb, oppgave AS o, behandling AS bh, vedtak AS v
+            SELECT b.type, b.tekst FROM begrunnelse AS b, vedtak_begrunnelse AS vb, oppgave AS o, behandling AS bh, vedtaksperiode AS v
             WHERE b.id = vb.begrunnelse_ref
             AND vb.invalidert = false 
             AND vb.vedtaksperiode_id = v.vedtaksperiode_id

@@ -215,7 +215,7 @@ abstract class AbstractE2EIntegrationTest {
             sessionOf(E2ETestApplikasjon.dbModule.dataSource, strict = true).use { session ->
                 session.run(
                     asSQL(
-                        "SELECT forkastet FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiode_id",
+                        "SELECT forkastet FROM vedtaksperiode WHERE vedtaksperiode_id = :vedtaksperiode_id",
                         "vedtaksperiode_id" to førsteVedtaksperiode().vedtaksperiodeId,
                     ).map { it.boolean("forkastet") }.asSingle,
                 )
@@ -230,7 +230,7 @@ abstract class AbstractE2EIntegrationTest {
                     asSQL(
                         """
                         SELECT o.status
-                        FROM oppgave o, vedtak v
+                        FROM oppgave o, vedtaksperiode v
                         WHERE o.vedtak_ref = v.id
                         AND v.vedtaksperiode_id = :vedtaksperiode_id
                         """.trimIndent(),
@@ -248,7 +248,7 @@ abstract class AbstractE2EIntegrationTest {
                     asSQL(
                         """
                         SELECT o.status
-                        FROM oppgave o, vedtak v
+                        FROM oppgave o, vedtaksperiode v
                         WHERE o.vedtak_ref = v.id
                         AND v.vedtaksperiode_id = :vedtaksperiode_id
                         ORDER BY o.oppdatert

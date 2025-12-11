@@ -176,7 +176,7 @@ class PgLegacyBehandlingDao private constructor(
         asSQL(
             """
             SELECT b.vedtaksperiode_id FROM behandling b 
-            INNER JOIN vedtak v on b.vedtaksperiode_id = v.vedtaksperiode_id
+            INNER JOIN vedtaksperiode v on b.vedtaksperiode_id = v.vedtaksperiode_id
             INNER JOIN person p on p.id = v.person_ref
             WHERE fødselsnummer = :fodselsnummer
             """,
@@ -204,7 +204,7 @@ class PgLegacyBehandlingDao private constructor(
             """
             select min(b.fom) as foersteFom
             from behandling b
-            join vedtak v on b.vedtaksperiode_id = v.vedtaksperiode_id
+            join vedtaksperiode v on b.vedtaksperiode_id = v.vedtaksperiode_id
             join person p on p.id = v.person_ref
             where p.fødselsnummer = :fodselsnummer
             """,

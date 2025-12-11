@@ -16,7 +16,7 @@ class PgVedtaksperiodeRepository private constructor(
         dbQuery.singleOrNull(
             """
                 SELECT vedtaksperiode_id, fødselsnummer, arbeidsgiver_identifikator, forkastet
-                FROM vedtak v
+                FROM vedtaksperiode v
                          JOIN person p ON v.person_ref = p.id
                 WHERE v.vedtaksperiode_id = :vedtaksperiodeId
                 """,

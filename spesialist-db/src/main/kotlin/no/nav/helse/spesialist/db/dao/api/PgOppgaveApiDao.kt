@@ -16,7 +16,7 @@ class PgOppgaveApiDao internal constructor(
         asSQL(
             """
             SELECT o.id as oppgaveId FROM oppgave o
-            JOIN vedtak v ON v.id = o.vedtak_ref
+            JOIN vedtaksperiode v ON v.id = o.vedtak_ref
             JOIN person p ON v.person_ref = p.id
             WHERE p.fødselsnummer = :fodselsnummer AND status = 'AvventerSaksbehandler'::oppgavestatus;
             """.trimIndent(),
@@ -28,7 +28,7 @@ class PgOppgaveApiDao internal constructor(
             """
             SELECT o.id, o.kan_avvises
             FROM oppgave o
-            INNER JOIN vedtak v ON o.vedtak_ref = v.id
+            INNER JOIN vedtaksperiode v ON o.vedtak_ref = v.id
             WHERE v.vedtaksperiode_id = :vedtaksperiodeId 
                 AND status = 'AvventerSaksbehandler'::oppgavestatus 
             """.trimIndent(),

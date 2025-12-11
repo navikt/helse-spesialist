@@ -16,7 +16,7 @@ class PgBehandlingApiDao internal constructor(
         asSQL(
             """
             SELECT b.vedtaksperiode_id, b.fom, b.tom, b.skjæringstidspunkt, b.tags
-            FROM vedtak v 
+            FROM vedtaksperiode v 
             INNER JOIN behandling b on v.vedtaksperiode_id = b.vedtaksperiode_id
             JOIN oppgave o ON v.id = o.vedtak_ref
             WHERE o.id = :oppgave_id
@@ -29,10 +29,10 @@ class PgBehandlingApiDao internal constructor(
         asSQL(
             """
             SELECT DISTINCT ON (b.vedtaksperiode_id) b.vedtaksperiode_id, b.fom, b.tom, b.skjæringstidspunkt, b.tags 
-            FROM vedtak v
+            FROM vedtaksperiode v
             INNER JOIN behandling b on v.vedtaksperiode_id = b.vedtaksperiode_id
             WHERE person_ref = 
-                (SELECT person_ref FROM vedtak v2
+                (SELECT person_ref FROM vedtaksperiode v2
                 JOIN oppgave o on v2.id = o.vedtak_ref
                 WHERE o.id = :oppgave_id) AND v.forkastet = false
             ORDER BY b.vedtaksperiode_id, b.id DESC;
@@ -47,7 +47,7 @@ class PgBehandlingApiDao internal constructor(
         asSQL(
             """
             SELECT b.vedtaksperiode_id, b.unik_id, b.fom, b.tom, b.skjæringstidspunkt, b.tags
-            FROM vedtak v 
+            FROM vedtaksperiode v 
             INNER JOIN behandling b on v.vedtaksperiode_id = b.vedtaksperiode_id
             JOIN oppgave o ON v.id = o.vedtak_ref
             WHERE o.id = :oppgave_id
@@ -63,10 +63,10 @@ class PgBehandlingApiDao internal constructor(
         asSQL(
             """
             SELECT DISTINCT ON (b.vedtaksperiode_id) b.vedtaksperiode_id, b.unik_id, b.fom, b.tom, b.skjæringstidspunkt, b.tags 
-            FROM vedtak v
+            FROM vedtaksperiode v
             INNER JOIN behandling b on v.vedtaksperiode_id = b.vedtaksperiode_id
             WHERE person_ref = 
-                (SELECT person_ref FROM vedtak v2
+                (SELECT person_ref FROM vedtaksperiode v2
                 JOIN oppgave o on v2.id = o.vedtak_ref
                 WHERE o.id = :oppgave_id) AND v.forkastet = false
             ORDER BY b.vedtaksperiode_id, b.id DESC;

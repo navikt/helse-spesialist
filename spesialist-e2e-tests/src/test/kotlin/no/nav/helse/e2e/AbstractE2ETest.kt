@@ -130,7 +130,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
         require(this > 0) { "Forventet oppgaveId for vedtaksperiodeId=$vedtaksperiodeId må være større enn 0" }
         val oppgaveIder =
             dbQuery.list(
-                "SELECT id FROM oppgave WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)",
+                "SELECT id FROM oppgave WHERE vedtak_ref = (SELECT id FROM vedtaksperiode WHERE vedtaksperiode_id = :vedtaksperiodeId)",
                 "vedtaksperiodeId" to vedtaksperiodeId,
             ) { it.long("id") }
         assertTrue(oppgaveIder.size >= this) {
@@ -1100,7 +1100,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
             dbQuery.single(
                 """
                 SELECT status FROM oppgave
-                WHERE vedtak_ref = (SELECT id FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId)
+                WHERE vedtak_ref = (SELECT id FROM vedtaksperiode WHERE vedtaksperiode_id = :vedtaksperiodeId)
                 ORDER by id DESC
                 LIMIT 1
                 """.trimIndent(),
@@ -1139,7 +1139,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
             dbQuery.list(
                 """
                 SELECT 1 FROM oppgave
-                JOIN vedtak v ON v.id = oppgave.vedtak_ref
+                JOIN vedtaksperiode v ON v.id = oppgave.vedtak_ref
                 WHERE vedtaksperiode_id = :vedtaksperiodeId
                 """.trimIndent(),
                 "vedtaksperiodeId" to vedtaksperiodeId,
@@ -1270,7 +1270,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
             dbQuery.singleOrNull(
                 """
                 SELECT 1 FROM totrinnsvurdering tv
-                INNER JOIN vedtak v on tv.person_ref = v.person_ref
+                INNER JOIN vedtaksperiode v on tv.person_ref = v.person_ref
                 INNER JOIN oppgave o on v.id = o.vedtak_ref
                 WHERE o.id = :oppgaveId
                 AND tv.tilstand = 'AVVENTER_SAKSBEHANDLER'
@@ -1322,7 +1322,7 @@ abstract class AbstractE2ETest : AbstractDatabaseTest() {
 
     private fun vedtak(vedtaksperiodeId: UUID) =
         dbQuery.single(
-            "SELECT COUNT(*) FROM vedtak WHERE vedtaksperiode_id = :vedtaksperiodeId",
+            "SELECT COUNT(*) FROM vedtaksperiode WHERE vedtaksperiode_id = :vedtaksperiodeId",
             "vedtaksperiodeId" to vedtaksperiodeId,
         ) { it.int(1) }
 

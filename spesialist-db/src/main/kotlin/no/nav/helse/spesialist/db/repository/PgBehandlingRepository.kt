@@ -23,7 +23,7 @@ class PgBehandlingRepository(
             """
             SELECT b.unik_id, b.vedtaksperiode_id, b.utbetaling_id, b.spleis_behandling_id, b.tags, b.fom, b.tom, b.skjæringstidspunkt, b.tilstand, b.yrkesaktivitetstype
             FROM behandling b
-            INNER JOIN vedtak v on v.vedtaksperiode_id = b.vedtaksperiode_id
+            INNER JOIN vedtaksperiode v on v.vedtaksperiode_id = b.vedtaksperiode_id
             WHERE b.spleis_behandling_id = :spleis_behandling_id AND v.forkastet = false
         """,
             "spleis_behandling_id" to id.value,
@@ -34,7 +34,7 @@ class PgBehandlingRepository(
             """
             SELECT unik_id, b.vedtaksperiode_id, utbetaling_id, spleis_behandling_id, tags, b.fom, b.tom, skjæringstidspunkt, tilstand, yrkesaktivitetstype
             FROM behandling b
-            INNER JOIN vedtak v on v.vedtaksperiode_id = b.vedtaksperiode_id
+            INNER JOIN vedtaksperiode v on v.vedtaksperiode_id = b.vedtaksperiode_id
             WHERE unik_id = :unik_id AND v.forkastet = false
         """,
             "unik_id" to id.value,
@@ -48,7 +48,7 @@ class PgBehandlingRepository(
             """
             SELECT DISTINCT ON (b.vedtaksperiode_id) b.vedtaksperiode_id, b.utbetaling_id, b.unik_id, b.spleis_behandling_id, b.tags, b.fom, b.tom, b.skjæringstidspunkt, b.tilstand, b.yrkesaktivitetstype
             FROM behandling b
-                     INNER JOIN vedtak v on v.vedtaksperiode_id = b.vedtaksperiode_id
+                     INNER JOIN vedtaksperiode v on v.vedtaksperiode_id = b.vedtaksperiode_id
                      INNER JOIN person p on p.id = v.person_ref
             WHERE fødselsnummer = :fodselsnummer
               AND skjæringstidspunkt = :skjaeringstidspunkt
@@ -66,7 +66,7 @@ class PgBehandlingRepository(
             """
         SELECT unik_id, b.vedtaksperiode_id, utbetaling_id, spleis_behandling_id, tags, b.fom, b.tom, skjæringstidspunkt, opprettet_tidspunkt, tilstand, yrkesaktivitetstype
         FROM behandling b
-            INNER JOIN vedtak v on v.vedtaksperiode_id = b.vedtaksperiode_id
+            INNER JOIN vedtaksperiode v on v.vedtaksperiode_id = b.vedtaksperiode_id
         WHERE b.vedtaksperiode_id = :vedtaksperiode_id
           AND v.forkastet = false
         ORDER BY b.id DESC LIMIT 1

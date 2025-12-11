@@ -29,7 +29,7 @@ class PgNotatDao private constructor(
             INSERT INTO notat (vedtaksperiode_id, tekst, saksbehandler_oid, type, dialog_ref)
             VALUES (
                 (SELECT v.vedtaksperiode_id 
-                    FROM vedtak v 
+                    FROM vedtaksperiode v 
                     INNER JOIN oppgave o on v.id = o.vedtak_ref 
                     WHERE o.id = :oppgave_id), 
                 :tekst, 

@@ -344,7 +344,7 @@ class PgOverstyringRepository(
             FROM overstyring o
                 INNER JOIN overstyring_tidslinje ot ON ot.overstyring_ref = o.id
                 INNER JOIN person p ON p.id = o.person_ref
-                INNER JOIN vedtak v on o.vedtaksperiode_id = v.vedtaksperiode_id
+                INNER JOIN vedtaksperiode v on o.vedtaksperiode_id = v.vedtaksperiode_id
             WHERE o.totrinnsvurdering_ref = :totrinnsvurderingId and o.ferdigstilt = false and v.forkastet = false;
             """,
             "totrinnsvurderingId" to totrinnsvurderingId.value,
@@ -366,7 +366,7 @@ class PgOverstyringRepository(
             FROM overstyring o
                 INNER JOIN overstyring_inntekt oi on o.id = oi.overstyring_ref
                 INNER JOIN person p ON p.id = o.person_ref
-                INNER JOIN vedtak v on o.vedtaksperiode_id = v.vedtaksperiode_id
+                INNER JOIN vedtaksperiode v on o.vedtaksperiode_id = v.vedtaksperiode_id
             WHERE o.totrinnsvurdering_ref = :totrinnsvurderingId and o.ferdigstilt = false and v.forkastet = false;
             """,
             "totrinnsvurderingId" to totrinnsvurderingId.value,
@@ -389,7 +389,7 @@ class PgOverstyringRepository(
             FROM overstyring o
                 INNER JOIN overstyring_arbeidsforhold oa on o.id = oa.overstyring_ref
                 INNER JOIN person p ON p.id = o.person_ref
-                INNER JOIN vedtak v on o.vedtaksperiode_id = v.vedtaksperiode_id
+                INNER JOIN vedtaksperiode v on o.vedtaksperiode_id = v.vedtaksperiode_id
             WHERE o.totrinnsvurdering_ref = :totrinnsvurderingId and o.ferdigstilt = false and v.forkastet = false;
             """,
             "totrinnsvurderingId" to totrinnsvurderingId.value,
@@ -412,7 +412,7 @@ class PgOverstyringRepository(
             FROM overstyring o
                 JOIN person p ON o.person_ref = p.id
                 JOIN overstyring_minimum_sykdomsgrad oms ON oms.overstyring_ref = o.id
-                INNER JOIN vedtak v on o.vedtaksperiode_id = v.vedtaksperiode_id
+                INNER JOIN vedtaksperiode v on o.vedtaksperiode_id = v.vedtaksperiode_id
              WHERE o.totrinnsvurdering_ref = :totrinnsvurderingId and o.ferdigstilt = false and v.forkastet = false;
             """.trimIndent(),
             "totrinnsvurderingId" to totrinnsvurderingId.value,
@@ -444,7 +444,7 @@ class PgOverstyringRepository(
                      INNER JOIN begrunnelse b1 ON ss.begrunnelse_fritekst_ref = b1.id
                      INNER JOIN begrunnelse b2 ON ss.begrunnelse_mal_ref = b2.id
                      INNER JOIN begrunnelse b3 ON ss.begrunnelse_konklusjon_ref = b3.id
-                     INNER JOIN vedtak v on o.vedtaksperiode_id = v.vedtaksperiode_id
+                     INNER JOIN vedtaksperiode v on o.vedtaksperiode_id = v.vedtaksperiode_id
             WHERE o.totrinnsvurdering_ref = :totrinnsvurderingId and o.ferdigstilt = false and v.forkastet = false;
             """,
             "totrinnsvurderingId" to totrinnsvurderingId.value,
