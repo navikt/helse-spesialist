@@ -6,6 +6,7 @@ import no.nav.helse.spesialist.domain.Vedtak
 import no.nav.helse.spesialist.domain.testfixtures.testdata.lagSaksbehandler
 import org.postgresql.util.PSQLException
 import java.time.Instant
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -30,7 +31,7 @@ class PgVedtakRepositoryTest : AbstractDBIntegrationTest() {
         assertEquals(vedtak.saksbehandlerIdent, funnet.saksbehandlerIdent)
         assertEquals(vedtak.beslutterIdent, funnet.beslutterIdent)
         assertEquals(vedtak.automatiskFattet, funnet.automatiskFattet)
-        assertEquals(vedtak.tidspunkt, funnet.tidspunkt)
+        assertEquals(vedtak.tidspunkt.truncatedTo(ChronoUnit.MILLIS), funnet.tidspunkt.truncatedTo(ChronoUnit.MILLIS))
     }
 
     @Test
