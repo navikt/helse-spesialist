@@ -30,13 +30,12 @@ class TestPerson {
     private val utbetalingId1 = vedtaksperiode1.utbetalingId
     private val utbetalingId2 = vedtaksperiode2.utbetalingId
 
-    override fun toString(): String {
-        return "Testdatasett(fødselsnummer='$fødselsnummer', aktørId='$aktørId', orgnummer='$orgnummer', orgnummer2='$orgnummer2', vedtaksperiodeId1=$vedtaksperiodeId1, vedtaksperiodeId2=$vedtaksperiodeId2, utbetalingId1=$utbetalingId1, utbetalingId2=$utbetalingId2)"
-    }
+    override fun toString(): String = "Testdatasett(fødselsnummer='$fødselsnummer', aktørId='$aktørId', orgnummer='$orgnummer', orgnummer2='$orgnummer2', vedtaksperiodeId1=$vedtaksperiodeId1, vedtaksperiodeId2=$vedtaksperiodeId2, utbetalingId1=$utbetalingId1, utbetalingId2=$utbetalingId2)"
 
-    fun nyArbeidsgiver() = TestArbeidsgiver(fødselsnummer).also {
-        arbeidsgivere[arbeidsgivere.size] = it
-    }
+    fun nyArbeidsgiver() =
+        TestArbeidsgiver(fødselsnummer).also {
+            arbeidsgivere[arbeidsgivere.size] = it
+        }
 }
 
 class TestArbeidsgiver(
@@ -45,14 +44,16 @@ class TestArbeidsgiver(
     private val vedtaksperioder = mutableMapOf<Int, TestVedtaksperiode>()
     val organisasjonsnummer = lagOrganisasjonsnummer()
 
-    fun nyVedtaksperiode() = TestVedtaksperiode(fødselsnummer, organisasjonsnummer).also {
-        vedtaksperioder[vedtaksperioder.size] = it
-    }
+    fun nyVedtaksperiode() =
+        TestVedtaksperiode(fødselsnummer, organisasjonsnummer).also {
+            vedtaksperioder[vedtaksperioder.size] = it
+        }
 
     val Int.vedtaksperiode
-        get() = vedtaksperioder[this] ?: throw IllegalArgumentException(
-            "Vedtaksperiode med index $this for arbeidsgiver $organisasjonsnummer finnes ikke",
-        )
+        get() =
+            vedtaksperioder[this] ?: throw IllegalArgumentException(
+                "Vedtaksperiode med index $this for arbeidsgiver $organisasjonsnummer finnes ikke",
+            )
 }
 
 class TestVedtaksperiode(
@@ -79,8 +80,8 @@ object Testdata {
         inntektskilde: Inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
         inntektsopplysningkilde: Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde = Arbeidsgiver,
         json: String = "{}",
-    ): GodkjenningsbehovData {
-        return GodkjenningsbehovData(
+    ): GodkjenningsbehovData =
+        GodkjenningsbehovData(
             id = id,
             fødselsnummer = fødselsnummer,
             organisasjonsnummer = organisasjonsnummer,
@@ -100,20 +101,21 @@ object Testdata {
             inntektskilde = inntektskilde,
             orgnummereMedRelevanteArbeidsforhold = emptyList(),
             skjæringstidspunkt = 1 jan 2018,
-            sykepengegrunnlagsfakta = Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidstaker.EtterHovedregel(
-                seksG = 6 * 118620.0,
-                arbeidsgivere = listOf(
-                    Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
-                        organisasjonsnummer = organisasjonsnummer,
-                        omregnetÅrsinntekt = 123456.7,
-                        inntektskilde = inntektsopplysningkilde
-                    )
+            sykepengegrunnlagsfakta =
+                Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidstaker.EtterHovedregel(
+                    seksG = 6 * 118620.0,
+                    arbeidsgivere =
+                        listOf(
+                            Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
+                                organisasjonsnummer = organisasjonsnummer,
+                                omregnetÅrsinntekt = 123456.7,
+                                inntektskilde = inntektsopplysningkilde,
+                            ),
+                        ),
+                    sykepengegrunnlag = BigDecimal("123456.7"),
                 ),
-                sykepengegrunnlag = BigDecimal("123456.7")
-            ),
             foreløpigBeregnetSluttPåSykepenger = 1 des 2018,
+            relevanteSøknader = listOf(UUID.randomUUID()),
             json = json,
         )
-    }
-
 }

@@ -32,13 +32,15 @@ object Testmeldingfabrikk {
         organisasjonsnummer: String,
         id: UUID = UUID.randomUUID(),
     ) = nyHendelse(
-        id, "vedtaksperiode_ny_utbetaling", mapOf(
+        id,
+        "vedtaksperiode_ny_utbetaling",
+        mapOf(
             "vedtaksperiodeId" to "$vedtaksperiodeId",
             "utbetalingId" to "$utbetalingId",
             "fødselsnummer" to fødselsnummer,
             "aktørId" to aktørId,
             "organisasjonsnummer" to organisasjonsnummer,
-        )
+        ),
     )
 
     fun lagAktivitetsloggNyAktivitet(
@@ -48,29 +50,29 @@ object Testmeldingfabrikk {
         organisasjonsnummer: String,
         vedtaksperiodeId: UUID,
         varselkoder: List<String>,
-    ): String {
-        return nyHendelse(
-            id, "aktivitetslogg_ny_aktivitet",
+    ): String =
+        nyHendelse(
+            id,
+            "aktivitetslogg_ny_aktivitet",
             mapOf(
                 "aktørId" to aktørId,
                 "fødselsnummer" to fødselsnummer,
-                "aktiviteter" to varselkoder.map {
-                    lagVarsel(
-                        fødselsnummer = fødselsnummer,
-                        kode = it,
-                        vedtaksperiodeId = vedtaksperiodeId,
-                        orgnummer = organisasjonsnummer,
-                    )
-                }
-            )
+                "aktiviteter" to
+                    varselkoder.map {
+                        lagVarsel(
+                            fødselsnummer = fødselsnummer,
+                            kode = it,
+                            vedtaksperiodeId = vedtaksperiodeId,
+                            orgnummer = organisasjonsnummer,
+                        )
+                    },
+            ),
         )
-    }
 
     fun lagGosysOppgaveEndret(
         fødselsnummer: String,
         id: UUID = UUID.randomUUID(),
-    ): String =
-        nyHendelse(id, "gosys_oppgave_endret", mapOf("fødselsnummer" to fødselsnummer))
+    ): String = nyHendelse(id, "gosys_oppgave_endret", mapOf("fødselsnummer" to fødselsnummer))
 
     fun lagTilbakedateringBehandlet(
         fødselsnummer: String,
@@ -80,82 +82,95 @@ object Testmeldingfabrikk {
         nyHendelse(
             id = id,
             navn = "tilbakedatering_behandlet",
-            hendelse = mapOf(
-                "fødselsnummer" to fødselsnummer,
-                "sykmeldingId" to "${UUID.randomUUID()}",
-                "perioder" to perioder.map {
-                    mapOf(
-                        "fom" to it.fom,
-                        "tom" to it.tom
-                    )
-                }
-            )
+            hendelse =
+                mapOf(
+                    "fødselsnummer" to fødselsnummer,
+                    "sykmeldingId" to "${UUID.randomUUID()}",
+                    "perioder" to
+                        perioder.map {
+                            mapOf(
+                                "fom" to it.fom,
+                                "tom" to it.tom,
+                            )
+                        },
+                ),
         )
 
     fun lagFullmaktløsningMedFullmakt(
         fødselsnummer: String,
         fom: LocalDate,
-        tom: LocalDate?
-    ): String = nyHendelse(
-        id = UUID.randomUUID(), "behov",
-        mapOf(
-            "fødselsnummer" to fødselsnummer,
-            "@final" to true,
-            "@behov" to listOf("Fullmakt"),
-            "contextId" to "${UUID.randomUUID()}",
-            "hendelseId" to "${UUID.randomUUID()}",
-            "@løsning" to mapOf(
-                "Fullmakt" to listOf(
+        tom: LocalDate?,
+    ): String =
+        nyHendelse(
+            id = UUID.randomUUID(),
+            "behov",
+            mapOf(
+                "fødselsnummer" to fødselsnummer,
+                "@final" to true,
+                "@behov" to listOf("Fullmakt"),
+                "contextId" to "${UUID.randomUUID()}",
+                "hendelseId" to "${UUID.randomUUID()}",
+                "@løsning" to
                     mapOf(
-                        "omraade" to listOf("SYK", "SYM"),
-                        "gyldigFraOgMed" to fom,
-                        "gyldigTilOgMed" to tom,
-                    )
-                )
-
-            )
+                        "Fullmakt" to
+                            listOf(
+                                mapOf(
+                                    "omraade" to listOf("SYK", "SYM"),
+                                    "gyldigFraOgMed" to fom,
+                                    "gyldigTilOgMed" to tom,
+                                ),
+                            ),
+                    ),
+            ),
         )
-    )
 
     fun lagFullmaktløsningUtenFullmakter(
         fødselsnummer: String,
         hendelseId: UUID = UUID.randomUUID(),
         contextId: UUID = UUID.randomUUID(),
-    ): String = nyHendelse(
-        id = UUID.randomUUID(), "behov",
-        mapOf(
-            "fødselsnummer" to fødselsnummer,
-            "@final" to true,
-            "@behov" to listOf("Fullmakt"),
-            "contextId" to "$contextId",
-            "hendelseId" to "$hendelseId",
-            "@løsning" to mapOf(
-                "Fullmakt" to emptyList<Map<String, String>>()
-            )
+    ): String =
+        nyHendelse(
+            id = UUID.randomUUID(),
+            "behov",
+            mapOf(
+                "fødselsnummer" to fødselsnummer,
+                "@final" to true,
+                "@behov" to listOf("Fullmakt"),
+                "contextId" to "$contextId",
+                "hendelseId" to "$hendelseId",
+                "@løsning" to
+                    mapOf(
+                        "Fullmakt" to emptyList<Map<String, String>>(),
+                    ),
+            ),
         )
-    )
 
     fun lagEndretSkjermetinfo(
         fødselsnummer: String,
         skjermet: Boolean,
         id: UUID,
-    ): String = nyHendelse(
-        id, "endret_skjermetinfo", mapOf(
-            "fødselsnummer" to fødselsnummer,
-            "skjermet" to skjermet,
-            "@opprettet" to LocalDateTime.now()
+    ): String =
+        nyHendelse(
+            id,
+            "endret_skjermetinfo",
+            mapOf(
+                "fødselsnummer" to fødselsnummer,
+                "skjermet" to skjermet,
+                "@opprettet" to LocalDateTime.now(),
+            ),
         )
-    )
 
     fun lagAdressebeskyttelseEndret(
         aktørId: String,
         fødselsnummer: String,
         id: UUID = UUID.randomUUID(),
     ) = nyHendelse(
-        id, "adressebeskyttelse_endret", mapOf(
+        id,
+        "adressebeskyttelse_endret",
+        mapOf(
             "fødselsnummer" to fødselsnummer,
-            "aktørId" to aktørId
-        )
+            "aktørId" to aktørId,
+        ),
     )
 
     fun lagSøknadSendt(
@@ -163,16 +178,18 @@ object Testmeldingfabrikk {
         aktørId: String,
         fødselsnummer: String,
         id: UUID = UUID.randomUUID(),
-    ) =
-        nyHendelse(
-            id, "sendt_søknad_nav", mapOf(
-                "fnr" to fødselsnummer,
-                "aktorId" to aktørId,
-                "arbeidsgiver" to mapOf(
-                    "orgnummer" to organisasjonsnummer
-                )
-            )
-        )
+    ) = nyHendelse(
+        id,
+        "sendt_søknad_nav",
+        mapOf(
+            "fnr" to fødselsnummer,
+            "aktorId" to aktørId,
+            "arbeidsgiver" to
+                mapOf(
+                    "orgnummer" to organisasjonsnummer,
+                ),
+        ),
+    )
 
     fun lagVedtaksperiodeEndret(
         id: UUID = UUID.randomUUID(),
@@ -185,22 +202,24 @@ object Testmeldingfabrikk {
         forårsaketAvId: UUID = UUID.randomUUID(),
         fom: LocalDate = LocalDate.of(2018, 1, 1),
         tom: LocalDate = LocalDate.of(2018, 1, 31),
-    ) =
-        nyHendelse(
-            id, "vedtaksperiode_endret", mapOf(
-                "vedtaksperiodeId" to "$vedtaksperiodeId",
-                "fødselsnummer" to fødselsnummer,
-                "aktørId" to aktørId,
-                "organisasjonsnummer" to organisasjonsnummer,
-                "gjeldendeTilstand" to gjeldendeTilstand,
-                "forrigeTilstand" to forrigeTilstand,
-                "@forårsaket_av" to mapOf(
-                    "id" to forårsaketAvId
+    ) = nyHendelse(
+        id,
+        "vedtaksperiode_endret",
+        mapOf(
+            "vedtaksperiodeId" to "$vedtaksperiodeId",
+            "fødselsnummer" to fødselsnummer,
+            "aktørId" to aktørId,
+            "organisasjonsnummer" to organisasjonsnummer,
+            "gjeldendeTilstand" to gjeldendeTilstand,
+            "forrigeTilstand" to forrigeTilstand,
+            "@forårsaket_av" to
+                mapOf(
+                    "id" to forårsaketAvId,
                 ),
-                "fom" to fom,
-                "tom" to tom
-            )
-        )
+            "fom" to fom,
+            "tom" to tom,
+        ),
+    )
 
     fun lagBehandlingOpprettet(
         id: UUID = UUID.randomUUID(),
@@ -211,20 +230,21 @@ object Testmeldingfabrikk {
         spleisBehandlingId: UUID,
         fom: LocalDate = 1 jan 2018,
         tom: LocalDate = 31 jan 2018,
-        yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER
-    ) =
-        nyHendelse(
-            id, "behandling_opprettet", mapOf(
-                "vedtaksperiodeId" to "$vedtaksperiodeId",
-                "behandlingId" to "$spleisBehandlingId",
-                "fødselsnummer" to fødselsnummer,
-                "aktørId" to aktørId,
-                "organisasjonsnummer" to organisasjonsnummer,
-                "fom" to fom,
-                "tom" to tom,
-                "yrkesaktivitetstype" to yrkesaktivitetstype
-            )
-        )
+        yrkesaktivitetstype: Yrkesaktivitetstype = Yrkesaktivitetstype.ARBEIDSTAKER,
+    ) = nyHendelse(
+        id,
+        "behandling_opprettet",
+        mapOf(
+            "vedtaksperiodeId" to "$vedtaksperiodeId",
+            "behandlingId" to "$spleisBehandlingId",
+            "fødselsnummer" to fødselsnummer,
+            "aktørId" to aktørId,
+            "organisasjonsnummer" to organisasjonsnummer,
+            "fom" to fom,
+            "tom" to tom,
+            "yrkesaktivitetstype" to yrkesaktivitetstype,
+        ),
+    )
 
     fun lagVedtaksperiodeForkastet(
         aktørId: String,
@@ -232,15 +252,16 @@ object Testmeldingfabrikk {
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         organisasjonsnummer: String = "orgnr",
         id: UUID = UUID.randomUUID(),
-    ) =
-        nyHendelse(
-            id, "vedtaksperiode_forkastet", mapOf(
-                "vedtaksperiodeId" to "$vedtaksperiodeId",
-                "fødselsnummer" to fødselsnummer,
-                "aktørId" to aktørId,
-                "organisasjonsnummer" to organisasjonsnummer
-            )
-        )
+    ) = nyHendelse(
+        id,
+        "vedtaksperiode_forkastet",
+        mapOf(
+            "vedtaksperiodeId" to "$vedtaksperiodeId",
+            "fødselsnummer" to fødselsnummer,
+            "aktørId" to aktørId,
+            "organisasjonsnummer" to organisasjonsnummer,
+        ),
+    )
 
     fun lagGodkjenningsbehov(
         aktørId: String,
@@ -262,36 +283,41 @@ object Testmeldingfabrikk {
         vilkårsgrunnlagId: UUID = UUID.randomUUID(),
         spleisBehandlingId: UUID = UUID.randomUUID(),
         tags: List<String> = emptyList(),
-        perioderMedSammeSkjæringstidspunkt: List<Map<String, Any>> = listOf(
-            mapOf(
-                "fom" to periodeFom,
-                "tom" to periodeTom,
-                "vedtaksperiodeId" to vedtaksperiodeId,
-                "behandlingId" to spleisBehandlingId
-            )
-        ),
-        sykepengegrunnlagsfakta: Map<String, Any> = godkjenningsbehovFastsattEtterHovedregel(
-            arbeidsgivere = listOf(
+        perioderMedSammeSkjæringstidspunkt: List<Map<String, Any>> =
+            listOf(
                 mapOf(
-                    "arbeidsgiver" to organisasjonsnummer,
-                    "omregnetÅrsinntekt" to 600000.00,
-                    "inntektskilde" to "Arbeidsgiver"
-                )
-            )
-        ),
+                    "fom" to periodeFom,
+                    "tom" to periodeTom,
+                    "vedtaksperiodeId" to vedtaksperiodeId,
+                    "behandlingId" to spleisBehandlingId,
+                ),
+            ),
+        sykepengegrunnlagsfakta: Map<String, Any> =
+            godkjenningsbehovFastsattEtterHovedregel(
+                arbeidsgivere =
+                    listOf(
+                        mapOf(
+                            "arbeidsgiver" to organisasjonsnummer,
+                            "omregnetÅrsinntekt" to 600000.00,
+                            "inntektskilde" to "Arbeidsgiver",
+                        ),
+                    ),
+            ),
         arbeidssituasjon: Arbeidssituasjon = Arbeidssituasjon.ARBEIDSTAKER,
-    ) =
-        nyHendelse(
-            id, "behov",
-            mapOf(
-                "@behov" to listOf("Godkjenning"),
-                "aktørId" to aktørId,
-                "fødselsnummer" to fødselsnummer,
-                "organisasjonsnummer" to organisasjonsnummer,
-                "yrkesaktivitetstype" to yrkesaktivitetstype,
-                "vedtaksperiodeId" to "$vedtaksperiodeId",
-                "utbetalingId" to "$utbetalingId",
-                "Godkjenning" to mapOf(
+        relevanteSøknader: List<UUID> = listOf(UUID.randomUUID()),
+    ) = nyHendelse(
+        id,
+        "behov",
+        mapOf(
+            "@behov" to listOf("Godkjenning"),
+            "aktørId" to aktørId,
+            "fødselsnummer" to fødselsnummer,
+            "organisasjonsnummer" to organisasjonsnummer,
+            "yrkesaktivitetstype" to yrkesaktivitetstype,
+            "vedtaksperiodeId" to "$vedtaksperiodeId",
+            "utbetalingId" to "$utbetalingId",
+            "Godkjenning" to
+                mapOf(
                     "periodeFom" to "$periodeFom",
                     "periodeTom" to "$periodeTom",
                     "skjæringstidspunkt" to skjæringstidspunkt.toString(),
@@ -307,13 +333,13 @@ object Testmeldingfabrikk {
                     "perioderMedSammeSkjæringstidspunkt" to perioderMedSammeSkjæringstidspunkt,
                     "sykepengegrunnlagsfakta" to sykepengegrunnlagsfakta,
                     "foreløpigBeregnetSluttPåSykepenger" to LocalDate.of(2018, 12, 1).toString(),
-                    "arbeidssituasjon" to arbeidssituasjon
+                    "relevanteSøknader" to relevanteSøknader,
+                    "arbeidssituasjon" to arbeidssituasjon,
                 ),
-            )
-        )
+        ),
+    )
 
-    private fun arbeidsgiverinformasjon(ekstraArbeidsgivere: List<ArbeidsgiverinformasjonJson>) =
-        ekstraArbeidsgivere.map(ArbeidsgiverinformasjonJson::toBody)
+    private fun arbeidsgiverinformasjon(ekstraArbeidsgivere: List<ArbeidsgiverinformasjonJson>) = ekstraArbeidsgivere.map(ArbeidsgiverinformasjonJson::toBody)
 
     fun lagArbeidsgiverinformasjonløsning(
         aktørId: String,
@@ -325,7 +351,9 @@ object Testmeldingfabrikk {
         hendelseId: UUID = UUID.randomUUID(),
         contextId: UUID = UUID.randomUUID(),
     ) = nyHendelse(
-        id, "behov", mapOf(
+        id,
+        "behov",
+        mapOf(
             "@besvart" to LocalDateTime.now(),
             "@final" to true,
             "@behov" to listOf("Arbeidsgiverinformasjon"),
@@ -335,10 +363,11 @@ object Testmeldingfabrikk {
             "fødselsnummer" to fødselsnummer,
             "aktørId" to aktørId,
             "orgnummer" to organisasjonsnummer,
-            "@løsning" to mapOf(
-                "Arbeidsgiverinformasjon" to arbeidsgiverinformasjon(ekstraArbeidsgivere)
-            )
-        )
+            "@løsning" to
+                mapOf(
+                    "Arbeidsgiverinformasjon" to arbeidsgiverinformasjon(ekstraArbeidsgivere),
+                ),
+        ),
     )
 
     fun lagArbeidsgiverinformasjonKomposittLøsning(
@@ -352,7 +381,9 @@ object Testmeldingfabrikk {
         contextId: UUID,
         id: UUID,
     ) = nyHendelse(
-        id, "behov", mapOf(
+        id,
+        "behov",
+        mapOf(
             "@besvart" to LocalDateTime.now(),
             "@final" to true,
             "@behov" to listOf("Arbeidsgiverinformasjon", "HentPersoninfoV2"),
@@ -362,13 +393,13 @@ object Testmeldingfabrikk {
             "fødselsnummer" to fødselsnummer,
             "aktørId" to aktørId,
             "orgnummer" to organisasjonsnummer,
-            "@løsning" to mapOf(
-                "Arbeidsgiverinformasjon" to organisasjoner.map(ArbeidsgiverinformasjonJson::toBody),
-                "HentPersoninfoV2" to personer
-            )
-        )
+            "@løsning" to
+                mapOf(
+                    "Arbeidsgiverinformasjon" to organisasjoner.map(ArbeidsgiverinformasjonJson::toBody),
+                    "HentPersoninfoV2" to personer,
+                ),
+        ),
     )
-
 
     fun lagVergemålOgFullmaktKomposittLøsning(
         aktørId: String,
@@ -378,7 +409,9 @@ object Testmeldingfabrikk {
         hendelseId: UUID = UUID.randomUUID(),
         contextId: UUID = UUID.randomUUID(),
     ) = nyHendelse(
-        id, "behov", mapOf(
+        id,
+        "behov",
+        mapOf(
             "@besvart" to LocalDateTime.now(),
             "@final" to true,
             "@behov" to listOf("Vergemål", "Fullmakt"),
@@ -386,11 +419,12 @@ object Testmeldingfabrikk {
             "contextId" to "$contextId",
             "fødselsnummer" to fødselsnummer,
             "aktørId" to aktørId,
-            "@løsning" to mapOf(
-                "Vergemål" to vergemål.toBody(),
-                "Fullmakt" to emptyList<Map<String, String>>()
-            )
-        )
+            "@løsning" to
+                mapOf(
+                    "Vergemål" to vergemål.toBody(),
+                    "Fullmakt" to emptyList<Map<String, String>>(),
+                ),
+        ),
     )
 
     fun lagArbeidsforholdløsning(
@@ -403,7 +437,9 @@ object Testmeldingfabrikk {
         hendelseId: UUID = UUID.randomUUID(),
         contextId: UUID = UUID.randomUUID(),
     ) = nyHendelse(
-        id, "behov", mapOf(
+        id,
+        "behov",
+        mapOf(
             "@besvart" to LocalDateTime.now(),
             "@final" to true,
             "@behov" to listOf("Arbeidsforhold"),
@@ -413,18 +449,21 @@ object Testmeldingfabrikk {
             "fødselsnummer" to fødselsnummer,
             "aktørId" to aktørId,
             "orgnummer" to organisasjonsnummer,
-            "@løsning" to mapOf("Arbeidsforhold" to løsning)
-        )
+            "@løsning" to mapOf("Arbeidsforhold" to løsning),
+        ),
     )
 
-    private fun lagHentPersoninfoV2(ident: String, adressebeskyttelse: String = "Ugradert") = mapOf(
+    private fun lagHentPersoninfoV2(
+        ident: String,
+        adressebeskyttelse: String = "Ugradert",
+    ) = mapOf(
         "ident" to ident,
         "fornavn" to "Kari",
         "mellomnavn" to "",
         "etternavn" to "Nordmann",
         "fødselsdato" to "1970-01-01",
         "kjønn" to "Kvinne",
-        "adressebeskyttelse" to adressebeskyttelse
+        "adressebeskyttelse" to adressebeskyttelse,
     )
 
     private fun lagFullstendigBehov(
@@ -437,20 +476,21 @@ object Testmeldingfabrikk {
         behov: List<String>,
         detaljer: Map<String, Any>,
         id: UUID = UUID.randomUUID(),
-    ) =
-        nyHendelse(
-            id, "behov", mapOf(
-                "@besvart" to LocalDateTime.now(),
-                "@final" to true,
-                "@behov" to behov,
-                "hendelseId" to "$hendelseId",
-                "contextId" to "$contextId",
-                "vedtaksperiodeId" to "$vedtaksperiodeId",
-                "fødselsnummer" to fødselsnummer,
-                "aktørId" to aktørId,
-                "orgnummer" to organisasjonsnummer,
-            ) + detaljer
-        )
+    ) = nyHendelse(
+        id,
+        "behov",
+        mapOf(
+            "@besvart" to LocalDateTime.now(),
+            "@final" to true,
+            "@behov" to behov,
+            "hendelseId" to "$hendelseId",
+            "contextId" to "$contextId",
+            "vedtaksperiodeId" to "$vedtaksperiodeId",
+            "fødselsnummer" to fødselsnummer,
+            "aktørId" to aktørId,
+            "orgnummer" to organisasjonsnummer,
+        ) + detaljer,
+    )
 
     fun lagPersoninfoløsningComposite(
         aktørId: String,
@@ -471,26 +511,29 @@ object Testmeldingfabrikk {
         organisasjonsnummer,
         listOf("HentEnhet", "HentPersoninfoV2", "HentInfotrygdutbetalinger"),
         mapOf(
-            "HentInfotrygdutbetalinger" to mapOf(
-                "historikkFom" to "2017-01-01",
-                "historikkTom" to "2020-12-31"
-            ),
-            "@løsning" to mapOf(
-                "HentInfotrygdutbetalinger" to listOf(
-                    mapOf(
-                        "fom" to "2018-01-01",
-                        "tom" to "2018-01-31",
-                        "dagsats" to "1000.0",
-                        "grad" to "100",
-                        "typetekst" to "ArbRef",
-                        "organisasjonsnummer" to organisasjonsnummer
-                    )
+            "HentInfotrygdutbetalinger" to
+                mapOf(
+                    "historikkFom" to "2017-01-01",
+                    "historikkTom" to "2020-12-31",
                 ),
-                "HentEnhet" to enhet,
-                "HentPersoninfoV2" to lagHentPersoninfoV2(fødselsnummer, adressebeskyttelse)
-            )
+            "@løsning" to
+                mapOf(
+                    "HentInfotrygdutbetalinger" to
+                        listOf(
+                            mapOf(
+                                "fom" to "2018-01-01",
+                                "tom" to "2018-01-31",
+                                "dagsats" to "1000.0",
+                                "grad" to "100",
+                                "typetekst" to "ArbRef",
+                                "organisasjonsnummer" to organisasjonsnummer,
+                            ),
+                        ),
+                    "HentEnhet" to enhet,
+                    "HentPersoninfoV2" to lagHentPersoninfoV2(fødselsnummer, adressebeskyttelse),
+                ),
         ),
-        id
+        id,
     )
 
     fun lagInfotrygdutbetalingerløsning(
@@ -501,36 +544,40 @@ object Testmeldingfabrikk {
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         organisasjonsnummer: String = "orgnr",
         id: UUID = UUID.randomUUID(),
-    ) =
-        nyHendelse(
-            id, "behov", mapOf(
-                "@besvart" to LocalDateTime.now(),
-                "@final" to true,
-                "@behov" to listOf("HentInfotrygdutbetalinger"),
-                "hendelseId" to "$hendelseId",
-                "contextId" to "$contextId",
-                "vedtaksperiodeId" to "$vedtaksperiodeId",
-                "fødselsnummer" to fødselsnummer,
-                "aktørId" to aktørId,
-                "orgnummer" to organisasjonsnummer,
-                "HentInfotrygdutbetalinger" to mapOf(
+    ) = nyHendelse(
+        id,
+        "behov",
+        mapOf(
+            "@besvart" to LocalDateTime.now(),
+            "@final" to true,
+            "@behov" to listOf("HentInfotrygdutbetalinger"),
+            "hendelseId" to "$hendelseId",
+            "contextId" to "$contextId",
+            "vedtaksperiodeId" to "$vedtaksperiodeId",
+            "fødselsnummer" to fødselsnummer,
+            "aktørId" to aktørId,
+            "orgnummer" to organisasjonsnummer,
+            "HentInfotrygdutbetalinger" to
+                mapOf(
                     "historikkFom" to "2017-01-01",
-                    "historikkTom" to "2020-12-31"
+                    "historikkTom" to "2020-12-31",
                 ),
-                "@løsning" to mapOf(
-                    "HentInfotrygdutbetalinger" to listOf(
-                        mapOf(
-                            "fom" to "2018-01-01",
-                            "tom" to "2018-01-31",
-                            "dagsats" to "1000.0",
-                            "grad" to "100",
-                            "typetekst" to "ArbRef",
-                            "organisasjonsnummer" to organisasjonsnummer
-                        )
-                    )
-                )
-            )
-        )
+            "@løsning" to
+                mapOf(
+                    "HentInfotrygdutbetalinger" to
+                        listOf(
+                            mapOf(
+                                "fom" to "2018-01-01",
+                                "tom" to "2018-01-31",
+                                "dagsats" to "1000.0",
+                                "grad" to "100",
+                                "typetekst" to "ArbRef",
+                                "organisasjonsnummer" to organisasjonsnummer,
+                            ),
+                        ),
+                ),
+        ),
+    )
 
     fun lagPersoninfoløsning(
         aktørId: String,
@@ -539,28 +586,31 @@ object Testmeldingfabrikk {
         contextId: UUID = UUID.randomUUID(),
         adressebeskyttelse: String = "Ugradert",
         id: UUID = UUID.randomUUID(),
-    ) =
-        nyHendelse(
-            id, "behov", mapOf(
-                "@besvart" to LocalDateTime.now(),
-                "@final" to true,
-                "@behov" to listOf("HentPersoninfoV2"),
-                "hendelseId" to "$hendelseId",
-                "contextId" to "$contextId",
-                "fødselsnummer" to fødselsnummer,
-                "aktørId" to aktørId,
-                "@løsning" to mapOf(
-                    "HentPersoninfoV2" to mapOf(
-                        "fornavn" to "Kari",
-                        "mellomnavn" to "",
-                        "etternavn" to "Nordmann",
-                        "fødselsdato" to "1970-01-01",
-                        "kjønn" to "Kvinne",
-                        "adressebeskyttelse" to adressebeskyttelse
-                    )
-                )
-            )
-        )
+    ) = nyHendelse(
+        id,
+        "behov",
+        mapOf(
+            "@besvart" to LocalDateTime.now(),
+            "@final" to true,
+            "@behov" to listOf("HentPersoninfoV2"),
+            "hendelseId" to "$hendelseId",
+            "contextId" to "$contextId",
+            "fødselsnummer" to fødselsnummer,
+            "aktørId" to aktørId,
+            "@løsning" to
+                mapOf(
+                    "HentPersoninfoV2" to
+                        mapOf(
+                            "fornavn" to "Kari",
+                            "mellomnavn" to "",
+                            "etternavn" to "Nordmann",
+                            "fødselsdato" to "1970-01-01",
+                            "kjønn" to "Kvinne",
+                            "adressebeskyttelse" to adressebeskyttelse,
+                        ),
+                ),
+        ),
+    )
 
     fun lagEnhetløsning(
         aktørId: String,
@@ -571,37 +621,40 @@ object Testmeldingfabrikk {
         organisasjonsnummer: String = "orgnr",
         enhet: String = OSLO,
         id: UUID = UUID.randomUUID(),
-    ) =
-        nyHendelse(
-            id, "behov", mapOf(
-                "@besvart" to LocalDateTime.now(),
-                "@final" to true,
-                "@behov" to listOf("HentEnhet"),
-                "hendelseId" to "$hendelseId",
-                "contextId" to contextId,
-                "vedtaksperiodeId" to "$vedtaksperiodeId",
-                "fødselsnummer" to fødselsnummer,
-                "aktørId" to aktørId,
-                "orgnummer" to organisasjonsnummer,
-                "@løsning" to mapOf(
-                    "HentEnhet" to enhet
-                )
-            )
-        )
+    ) = nyHendelse(
+        id,
+        "behov",
+        mapOf(
+            "@besvart" to LocalDateTime.now(),
+            "@final" to true,
+            "@behov" to listOf("HentEnhet"),
+            "hendelseId" to "$hendelseId",
+            "contextId" to contextId,
+            "vedtaksperiodeId" to "$vedtaksperiodeId",
+            "fødselsnummer" to fødselsnummer,
+            "aktørId" to aktørId,
+            "orgnummer" to organisasjonsnummer,
+            "@løsning" to
+                mapOf(
+                    "HentEnhet" to enhet,
+                ),
+        ),
+    )
 
     fun lagHentDokumentLøsning(
         fødselsnummer: String,
         dokumentId: UUID,
         id: UUID = UUID.randomUUID(),
         dokument: JsonNode = objectMapper.createObjectNode(),
-    ) =
-        nyHendelse(
-            id, "hent-dokument", mapOf(
-                "fødselsnummer" to fødselsnummer,
-                "dokumentId" to "$dokumentId",
-                "@løsning" to mapOf("dokument" to dokument),
-            )
-        )
+    ) = nyHendelse(
+        id,
+        "hent-dokument",
+        mapOf(
+            "fødselsnummer" to fødselsnummer,
+            "dokumentId" to "$dokumentId",
+            "@løsning" to mapOf("dokument" to dokument),
+        ),
+    )
 
     fun lagUtbetalingEndret(
         aktørId: String,
@@ -618,7 +671,9 @@ object Testmeldingfabrikk {
         opprettet: LocalDateTime,
         id: UUID,
     ) = nyHendelse(
-        id, "utbetaling_endret", mapOf(
+        id,
+        "utbetaling_endret",
+        mapOf(
             "utbetalingId" to "$utbetalingId",
             "aktørId" to aktørId,
             "fødselsnummer" to fødselsnummer,
@@ -627,58 +682,73 @@ object Testmeldingfabrikk {
             "forrigeStatus" to "$forrigeStatus",
             "gjeldendeStatus" to "$gjeldendeStatus",
             "@opprettet" to opprettet,
-            "arbeidsgiverOppdrag" to mapOf(
-                "mottaker" to organisasjonsnummer,
-                "fagområde" to "SPREF",
-                "fagsystemId" to arbeidsgiverFagsystemId,
-                "nettoBeløp" to arbeidsgiverbeløp,
-                "linjer" to listOf(
-                    mapOf(
-                        "fom" to "${now()}",
-                        "tom" to "${now()}",
-                        "totalbeløp" to 2000
-                    ),
-                    mapOf(
-                        "fom" to "${now()}",
-                        "tom" to "${now()}",
-                        "totalbeløp" to 2000
-                    )
-                )
-            ),
-            "personOppdrag" to mapOf(
-                "mottaker" to fødselsnummer,
-                "fagområde" to "SP",
-                "fagsystemId" to personFagsystemId,
-                "nettoBeløp" to personbeløp,
-                "linjer" to listOf(
-                    mapOf(
-                        "fom" to "${now()}",
-                        "tom" to "${now()}",
-                        "totalbeløp" to 2000
-                    ),
-                    mapOf(
-                        "fom" to "${now()}",
-                        "tom" to "${now()}",
-                        "totalbeløp" to 2000
-                    )
-                )
-
-            )
-        )
+            "arbeidsgiverOppdrag" to
+                mapOf(
+                    "mottaker" to organisasjonsnummer,
+                    "fagområde" to "SPREF",
+                    "fagsystemId" to arbeidsgiverFagsystemId,
+                    "nettoBeløp" to arbeidsgiverbeløp,
+                    "linjer" to
+                        listOf(
+                            mapOf(
+                                "fom" to "${now()}",
+                                "tom" to "${now()}",
+                                "totalbeløp" to 2000,
+                            ),
+                            mapOf(
+                                "fom" to "${now()}",
+                                "tom" to "${now()}",
+                                "totalbeløp" to 2000,
+                            ),
+                        ),
+                ),
+            "personOppdrag" to
+                mapOf(
+                    "mottaker" to fødselsnummer,
+                    "fagområde" to "SP",
+                    "fagsystemId" to personFagsystemId,
+                    "nettoBeløp" to personbeløp,
+                    "linjer" to
+                        listOf(
+                            mapOf(
+                                "fom" to "${now()}",
+                                "tom" to "${now()}",
+                                "totalbeløp" to 2000,
+                            ),
+                            mapOf(
+                                "fom" to "${now()}",
+                                "tom" to "${now()}",
+                                "totalbeløp" to 2000,
+                            ),
+                        ),
+                ),
+        ),
     )
 
-    fun lagOppdaterPersondata(aktørId: String, fødselsnummer: String, id: UUID) = nyHendelse(
-        id, "oppdater_persondata", mutableMapOf(
+    fun lagOppdaterPersondata(
+        aktørId: String,
+        fødselsnummer: String,
+        id: UUID,
+    ) = nyHendelse(
+        id,
+        "oppdater_persondata",
+        mutableMapOf(
             "fødselsnummer" to fødselsnummer,
-            "aktørId" to aktørId
-        )
+            "aktørId" to aktørId,
+        ),
     )
 
-    fun lagKlargjørPersonForVisning(aktørId: String, fødselsnummer: String, id: UUID) = nyHendelse(
-        id, "klargjør_person_for_visning", mutableMapOf(
+    fun lagKlargjørPersonForVisning(
+        aktørId: String,
+        fødselsnummer: String,
+        id: UUID,
+    ) = nyHendelse(
+        id,
+        "klargjør_person_for_visning",
+        mutableMapOf(
             "fødselsnummer" to fødselsnummer,
-            "aktørId" to aktørId
-        )
+            "aktørId" to aktørId,
+        ),
     )
 
     fun lagAvviksvurderingløsning(
@@ -690,51 +760,59 @@ object Testmeldingfabrikk {
         contextId: UUID = UUID.randomUUID(),
         id: UUID = UUID.randomUUID(),
         avviksvurderingId: UUID = UUID.randomUUID(),
-    ) =
-        nyHendelse(
-            id, "behov", mapOf(
-                "@besvart" to LocalDateTime.now(),
-                "@besvart" to LocalDateTime.now(),
-                "@final" to true,
-                "@behov" to listOf("Avviksvurdering"),
-                "hendelseId" to "$hendelseId",
-                "contextId" to "$contextId",
-                "fødselsnummer" to fødselsnummer,
-                "@løsning" to mapOf(
-                    "Avviksvurdering" to mapOf(
-                        "avviksvurderingId" to avviksvurderingId,
-                        "utfall" to "NyVurderingForetatt",
-                        "avviksprosent" to avviksprosent,
-                        "harAkseptabeltAvvik" to true,
-                        "maksimaltTillattAvvik" to 25.0,
-                        "opprettet" to LocalDateTime.now(),
-                        "beregningsgrunnlag" to mapOf(
-                            "totalbeløp" to 600000.0,
-                            "omregnedeÅrsinntekter" to listOf(
+    ) = nyHendelse(
+        id,
+        "behov",
+        mapOf(
+            "@besvart" to LocalDateTime.now(),
+            "@besvart" to LocalDateTime.now(),
+            "@final" to true,
+            "@behov" to listOf("Avviksvurdering"),
+            "hendelseId" to "$hendelseId",
+            "contextId" to "$contextId",
+            "fødselsnummer" to fødselsnummer,
+            "@løsning" to
+                mapOf(
+                    "Avviksvurdering" to
+                        mapOf(
+                            "avviksvurderingId" to avviksvurderingId,
+                            "utfall" to "NyVurderingForetatt",
+                            "avviksprosent" to avviksprosent,
+                            "harAkseptabeltAvvik" to true,
+                            "maksimaltTillattAvvik" to 25.0,
+                            "opprettet" to LocalDateTime.now(),
+                            "beregningsgrunnlag" to
                                 mapOf(
-                                    "arbeidsgiverreferanse" to organisasjonsnummer,
-                                    "beløp" to 600000.0
-                                )
-                            )
-                        ),
-                        "sammenligningsgrunnlag" to mapOf(
-                            "totalbeløp" to sammenligningsgrunnlagTotalbeløp,
-                            "innrapporterteInntekter" to listOf(
+                                    "totalbeløp" to 600000.0,
+                                    "omregnedeÅrsinntekter" to
+                                        listOf(
+                                            mapOf(
+                                                "arbeidsgiverreferanse" to organisasjonsnummer,
+                                                "beløp" to 600000.0,
+                                            ),
+                                        ),
+                                ),
+                            "sammenligningsgrunnlag" to
                                 mapOf(
-                                    "arbeidsgiverreferanse" to organisasjonsnummer,
-                                    "inntekter" to listOf(
-                                        mapOf(
-                                            "årMåned" to YearMonth.now(),
-                                            "beløp" to sammenligningsgrunnlagTotalbeløp
-                                        )
-                                    )
-                                )
-                            )
+                                    "totalbeløp" to sammenligningsgrunnlagTotalbeløp,
+                                    "innrapporterteInntekter" to
+                                        listOf(
+                                            mapOf(
+                                                "arbeidsgiverreferanse" to organisasjonsnummer,
+                                                "inntekter" to
+                                                    listOf(
+                                                        mapOf(
+                                                            "årMåned" to YearMonth.now(),
+                                                            "beløp" to sammenligningsgrunnlagTotalbeløp,
+                                                        ),
+                                                    ),
+                                            ),
+                                        ),
+                                ),
                         ),
-                    )
-                )
-            )
-        )
+                ),
+        ),
+    )
 
     fun lagInntektløsning(
         aktørId: String,
@@ -746,7 +824,8 @@ object Testmeldingfabrikk {
     ): String =
         nyHendelse(
             id,
-            "behov", mapOf(
+            "behov",
+            mapOf(
                 "@besvart" to LocalDateTime.now(),
                 "aktørId" to aktørId,
                 "fødselsnummer" to fødselsnummer,
@@ -755,21 +834,24 @@ object Testmeldingfabrikk {
                 "contextId" to contextId,
                 "hendelseId" to hendelseId,
                 "orgnummer" to orgnummer,
-                "@løsning" to mapOf(
-                    "InntekterForSykepengegrunnlag" to listOf(
-                        mapOf(
-                            "årMåned" to "${YearMonth.now().minusMonths(1)}",
-                            "inntektsliste" to listOf(
+                "@løsning" to
+                    mapOf(
+                        "InntekterForSykepengegrunnlag" to
+                            listOf(
                                 mapOf(
-                                    "beløp" to 20000,
-                                    "inntektstype" to "LOENNSINNTEKT",
-                                    "orgnummer" to orgnummer
-                                )
-                            )
-                        )
-                    )
-                )
-            )
+                                    "årMåned" to "${YearMonth.now().minusMonths(1)}",
+                                    "inntektsliste" to
+                                        listOf(
+                                            mapOf(
+                                                "beløp" to 20000,
+                                                "inntektstype" to "LOENNSINNTEKT",
+                                                "orgnummer" to orgnummer,
+                                            ),
+                                        ),
+                                ),
+                            ),
+                    ),
+            ),
         )
 
     fun lagEgenAnsattløsning(
@@ -779,21 +861,24 @@ object Testmeldingfabrikk {
         id: UUID = UUID.randomUUID(),
         hendelseId: UUID = UUID.randomUUID(),
         contextId: UUID = UUID.randomUUID(),
-    ): String = nyHendelse(
-        id,
-        "behov", mapOf(
-            "@besvart" to LocalDateTime.now(),
-            "aktørId" to aktørId,
-            "fødselsnummer" to fødselsnummer,
-            "@final" to true,
-            "@behov" to listOf("EgenAnsatt"),
-            "contextId" to contextId,
-            "hendelseId" to hendelseId,
-            "@løsning" to mapOf(
-                "EgenAnsatt" to erEgenAnsatt
-            )
+    ): String =
+        nyHendelse(
+            id,
+            "behov",
+            mapOf(
+                "@besvart" to LocalDateTime.now(),
+                "aktørId" to aktørId,
+                "fødselsnummer" to fødselsnummer,
+                "@final" to true,
+                "@behov" to listOf("EgenAnsatt"),
+                "contextId" to contextId,
+                "hendelseId" to hendelseId,
+                "@løsning" to
+                    mapOf(
+                        "EgenAnsatt" to erEgenAnsatt,
+                    ),
+            ),
         )
-    )
 
     fun lagÅpneGosysOppgaverløsning(
         aktørId: String,
@@ -806,7 +891,8 @@ object Testmeldingfabrikk {
     ): String =
         nyHendelse(
             id,
-            "behov", mapOf(
+            "behov",
+            mapOf(
                 "@besvart" to LocalDateTime.now(),
                 "aktørId" to aktørId,
                 "fødselsnummer" to fødselsnummer,
@@ -814,13 +900,15 @@ object Testmeldingfabrikk {
                 "@behov" to listOf("ÅpneOppgaver"),
                 "contextId" to contextId,
                 "hendelseId" to hendelseId,
-                "@løsning" to mapOf(
-                    "ÅpneOppgaver" to mapOf(
-                        "antall" to antall,
-                        "oppslagFeilet" to oppslagFeilet
-                    )
-                )
-            )
+                "@løsning" to
+                    mapOf(
+                        "ÅpneOppgaver" to
+                            mapOf(
+                                "antall" to antall,
+                                "oppslagFeilet" to oppslagFeilet,
+                            ),
+                    ),
+            ),
         )
 
     fun lagRisikovurderingløsning(
@@ -836,7 +924,8 @@ object Testmeldingfabrikk {
     ): String =
         nyHendelse(
             id,
-            "behov", mapOf(
+            "behov",
+            mapOf(
                 "@besvart" to LocalDateTime.now(),
                 "aktørId" to aktørId,
                 "fødselsnummer" to fødselsnummer,
@@ -844,24 +933,28 @@ object Testmeldingfabrikk {
                 "@behov" to listOf("Risikovurdering"),
                 "contextId" to contextId,
                 "hendelseId" to hendelseId,
-                "Risikovurdering" to mapOf(
-                    "vedtaksperiodeId" to vedtaksperiodeId.toString(),
-                    "organisasjonsnummer" to organisasjonsnummer,
-                    "førstegangsbehandling" to Periodetype.FORLENGELSE,
-                    "kunRefusjon" to true,
-                    "inntekt" to mapOf(
-                        "omregnetÅrsinntekt" to "123456.7",
-                        "inntektskilde" to "Arbeidsgiver"
-                    )
-                ),
-                "@løsning" to mapOf(
-                    "Risikovurdering" to mapOf(
-                        "kanGodkjennesAutomatisk" to kanGodkjennesAutomatisk,
-                        "funn" to funn.tilJson(),
-                        "kontrollertOk" to emptyList<JsonNode>(),
-                    )
-                )
-            )
+                "Risikovurdering" to
+                    mapOf(
+                        "vedtaksperiodeId" to vedtaksperiodeId.toString(),
+                        "organisasjonsnummer" to organisasjonsnummer,
+                        "førstegangsbehandling" to Periodetype.FORLENGELSE,
+                        "kunRefusjon" to true,
+                        "inntekt" to
+                            mapOf(
+                                "omregnetÅrsinntekt" to "123456.7",
+                                "inntektskilde" to "Arbeidsgiver",
+                            ),
+                    ),
+                "@løsning" to
+                    mapOf(
+                        "Risikovurdering" to
+                            mapOf(
+                                "kanGodkjennesAutomatisk" to kanGodkjennesAutomatisk,
+                                "funn" to funn.tilJson(),
+                                "kontrollertOk" to emptyList<JsonNode>(),
+                            ),
+                    ),
+            ),
         )
 
     fun lagAktivitetsloggNyAktivitet(
@@ -875,19 +968,17 @@ object Testmeldingfabrikk {
                     fødselsnummer = fødselsnummer,
                     vedtaksperiodeId = vedtaksperiodeId,
                     orgnummer = orgnummer,
-                )
+                ),
             ),
-
-        ): String {
-        return nyHendelse(
-            id, "aktivitetslogg_ny_aktivitet",
+    ): String =
+        nyHendelse(
+            id,
+            "aktivitetslogg_ny_aktivitet",
             mapOf(
                 "fødselsnummer" to fødselsnummer,
-                "aktiviteter" to aktiviteter
-            )
+                "aktiviteter" to aktiviteter,
+            ),
         )
-    }
-
 
     fun lagNyeVarsler(
         fødselsnummer: String,
@@ -900,17 +991,17 @@ object Testmeldingfabrikk {
                     fødselsnummer = fødselsnummer,
                     vedtaksperiodeId = vedtaksperiodeId,
                     orgnummer = orgnummer,
-                )
+                ),
             ),
-    ): String {
-        return nyHendelse(
-            id, "nye_varsler",
+    ): String =
+        nyHendelse(
+            id,
+            "nye_varsler",
             mapOf(
                 "fødselsnummer" to fødselsnummer,
-                "aktiviteter" to aktiviteter
-            )
+                "aktiviteter" to aktiviteter,
+            ),
         )
-    }
 
     private fun lagVarsel(
         fødselsnummer: String,
@@ -918,34 +1009,39 @@ object Testmeldingfabrikk {
         kode: String = "RV_VV",
         vedtaksperiodeId: UUID = UUID.randomUUID(),
         orgnummer: String,
-    ): Map<String, Any> = mapOf(
-        "id" to id,
-        "melding" to "en melding",
-        "nivå" to "VARSEL",
-        "varselkode" to kode,
-        "tidsstempel" to LocalDateTime.now(),
-        "kontekster" to listOf(
-            mapOf(
-                "konteksttype" to "Person",
-                "kontekstmap" to mapOf(
-                    "fødselsnummer" to fødselsnummer,
-                    "aktørId" to "2093088099680"
-                )
-            ),
-            mapOf(
-                "konteksttype" to "Arbeidsgiver",
-                "kontekstmap" to mapOf(
-                    "organisasjonsnummer" to orgnummer
-                )
-            ),
-            mapOf(
-                "konteksttype" to "Vedtaksperiode",
-                "kontekstmap" to mapOf(
-                    "vedtaksperiodeId" to vedtaksperiodeId
-                )
-            )
+    ): Map<String, Any> =
+        mapOf(
+            "id" to id,
+            "melding" to "en melding",
+            "nivå" to "VARSEL",
+            "varselkode" to kode,
+            "tidsstempel" to LocalDateTime.now(),
+            "kontekster" to
+                listOf(
+                    mapOf(
+                        "konteksttype" to "Person",
+                        "kontekstmap" to
+                            mapOf(
+                                "fødselsnummer" to fødselsnummer,
+                                "aktørId" to "2093088099680",
+                            ),
+                    ),
+                    mapOf(
+                        "konteksttype" to "Arbeidsgiver",
+                        "kontekstmap" to
+                            mapOf(
+                                "organisasjonsnummer" to orgnummer,
+                            ),
+                    ),
+                    mapOf(
+                        "konteksttype" to "Vedtaksperiode",
+                        "kontekstmap" to
+                            mapOf(
+                                "vedtaksperiodeId" to vedtaksperiodeId,
+                            ),
+                    ),
+                ),
         )
-    )
 
     fun lagAvsluttetMedVedtak(
         aktørId: String,
@@ -959,27 +1055,30 @@ object Testmeldingfabrikk {
         skjæringstidspunkt: LocalDate,
         sykepengegrunnlagsfakta: Map<String, Any> = avsluttetMedVedtakFastsattEtterHovedregel(organisasjonsnummer),
         id: UUID,
-    ): String = nyHendelse(
-        id, "avsluttet_med_vedtak", mutableMapOf(
-            "yrkesaktivitetstype" to "ARBEIDSTAKER",
-            "aktørId" to aktørId,
-            "fødselsnummer" to fødselsnummer,
-            "organisasjonsnummer" to organisasjonsnummer,
-            "vedtaksperiodeId" to vedtaksperiodeId,
-            "behandlingId" to spleisBehandlingId,
-            "fom" to fom,
-            "tom" to tom,
-            "skjæringstidspunkt" to skjæringstidspunkt,
-            "sykepengegrunnlag" to 600000.0,
-            "vedtakFattetTidspunkt" to LocalDateTime.now(),
-            "hendelser" to emptyList<String>()
-        ).apply {
-            compute("utbetalingId") { _, _ -> utbetalingId }
-            if (utbetalingId != null) {
-                put("sykepengegrunnlagsfakta", sykepengegrunnlagsfakta)
-            }
-        }
-    )
+    ): String =
+        nyHendelse(
+            id,
+            "avsluttet_med_vedtak",
+            mutableMapOf(
+                "yrkesaktivitetstype" to "ARBEIDSTAKER",
+                "aktørId" to aktørId,
+                "fødselsnummer" to fødselsnummer,
+                "organisasjonsnummer" to organisasjonsnummer,
+                "vedtaksperiodeId" to vedtaksperiodeId,
+                "behandlingId" to spleisBehandlingId,
+                "fom" to fom,
+                "tom" to tom,
+                "skjæringstidspunkt" to skjæringstidspunkt,
+                "sykepengegrunnlag" to 600000.0,
+                "vedtakFattetTidspunkt" to LocalDateTime.now(),
+                "hendelser" to emptyList<String>(),
+            ).apply {
+                compute("utbetalingId") { _, _ -> utbetalingId }
+                if (utbetalingId != null) {
+                    put("sykepengegrunnlagsfakta", sykepengegrunnlagsfakta)
+                }
+            },
+        )
 
     fun lagAvsluttetUtenVedtak(
         aktørId: String,
@@ -991,20 +1090,23 @@ object Testmeldingfabrikk {
         tom: LocalDate,
         skjæringstidspunkt: LocalDate,
         id: UUID,
-    ): String = nyHendelse(
-        id, "avsluttet_uten_vedtak", mutableMapOf(
-            "aktørId" to aktørId,
-            "fødselsnummer" to fødselsnummer,
-            "organisasjonsnummer" to organisasjonsnummer,
-            "vedtaksperiodeId" to vedtaksperiodeId,
-            "fom" to fom,
-            "tom" to tom,
-            "skjæringstidspunkt" to skjæringstidspunkt,
-            "hendelser" to emptyList<String>(),
-            "avsluttetTidspunkt" to LocalDateTime.now(),
-            "behandlingId" to spleisBehandlingId,
+    ): String =
+        nyHendelse(
+            id,
+            "avsluttet_uten_vedtak",
+            mutableMapOf(
+                "aktørId" to aktørId,
+                "fødselsnummer" to fødselsnummer,
+                "organisasjonsnummer" to organisasjonsnummer,
+                "vedtaksperiodeId" to vedtaksperiodeId,
+                "fom" to fom,
+                "tom" to tom,
+                "skjæringstidspunkt" to skjæringstidspunkt,
+                "hendelser" to emptyList<String>(),
+                "avsluttetTidspunkt" to LocalDateTime.now(),
+                "behandlingId" to spleisBehandlingId,
+            ),
         )
-    )
 
     fun avsluttetMedVedtakFastsattEtterSkjønn(
         organisasjonsnummer: String,
@@ -1013,28 +1115,28 @@ object Testmeldingfabrikk {
         skjønnsfastsatt: Double = 600000.0,
         innrapportertÅrsinntekt: Double = 600000.0,
         avviksprosent: Double = 16.67,
-        arbeidsgivere: List<Map<String, Any>> = listOf(
-            mapOf(
-                "arbeidsgiver" to organisasjonsnummer,
-                "omregnetÅrsinntekt" to 500000.00,
-                "skjønnsfastsatt" to 600000.00,
-                "inntektskilde" to "Saksbehandler"
-            )
-        ),
-    ): Map<String, Any> {
-        return mutableMapOf(
+        arbeidsgivere: List<Map<String, Any>> =
+            listOf(
+                mapOf(
+                    "arbeidsgiver" to organisasjonsnummer,
+                    "omregnetÅrsinntekt" to 500000.00,
+                    "skjønnsfastsatt" to 600000.00,
+                    "inntektskilde" to "Saksbehandler",
+                ),
+            ),
+    ): Map<String, Any> =
+        mutableMapOf(
             "fastsatt" to "EtterSkjønn",
             "omregnetÅrsinntektTotalt" to omregnetÅrsinntektTotalt,
             "skjønnsfastsatt" to skjønnsfastsatt,
             "6G" to 6 * 118620.0,
-            "arbeidsgivere" to arbeidsgivere
+            "arbeidsgivere" to arbeidsgivere,
         ).apply {
             if (settInnAvviksvurderingFraSpleis) {
                 this["innrapportertÅrsinntekt"] = innrapportertÅrsinntekt
                 this["avviksprosent"] = avviksprosent
             }
         }
-    }
 
     fun avsluttetMedVedtakFastsattEtterHovedregel(
         organisasjonsnummer: String,
@@ -1043,111 +1145,128 @@ object Testmeldingfabrikk {
         sykepengegrunnlag: Double = 600000.0,
         innrapportertÅrsinntekt: Double = 600000.0,
         avviksprosent: Double = 0.0,
-        arbeidsgivere: List<Map<String, Any>> = listOf(
-            mapOf(
-                "arbeidsgiver" to organisasjonsnummer,
-                "omregnetÅrsinntekt" to 600000.00,
-                "inntektskilde" to "Arbeidsgiver"
-            )
-        )
-    ): Map<String, Any> {
-        return mutableMapOf(
+        arbeidsgivere: List<Map<String, Any>> =
+            listOf(
+                mapOf(
+                    "arbeidsgiver" to organisasjonsnummer,
+                    "omregnetÅrsinntekt" to 600000.00,
+                    "inntektskilde" to "Arbeidsgiver",
+                ),
+            ),
+    ): Map<String, Any> =
+        mutableMapOf(
             "fastsatt" to "EtterHovedregel",
             "omregnetÅrsinntektTotalt" to omregnetÅrsinntektTotalt,
             "sykepengegrunnlag" to sykepengegrunnlag,
             "6G" to 6 * 118620.0,
-            "arbeidsgivere" to arbeidsgivere
+            "arbeidsgivere" to arbeidsgivere,
         ).apply {
             if (settInnAvviksvurderingFraSpleis) {
                 this["innrapportertÅrsinntekt"] = innrapportertÅrsinntekt
                 this["avviksprosent"] = avviksprosent
             }
         }
-    }
 
-    fun avsluttetMedVedtakFastsattIInfotrygd(omregnetÅrsinntektTotalt: Double = 500000.0): Map<String, Any> {
-        return mapOf(
+    fun avsluttetMedVedtakFastsattIInfotrygd(omregnetÅrsinntektTotalt: Double = 500000.0): Map<String, Any> =
+        mapOf(
             "fastsatt" to "IInfotrygd",
             "omregnetÅrsinntektTotalt" to omregnetÅrsinntektTotalt,
         )
-    }
 
     fun godkjenningsbehovFastsattEtterSkjønn(
         sykepengegrunnlag: BigDecimal,
         seksG: Double = 666666.66,
-        arbeidsgivere: List<Map<String, Any>>
-    ): Map<String, Any> = mapOf(
-        "fastsatt" to "EtterSkjønn",
-        "sykepengegrunnlag" to sykepengegrunnlag,
-        "6G" to seksG,
-        "arbeidsgivere" to arbeidsgivere
-    )
+        arbeidsgivere: List<Map<String, Any>>,
+    ): Map<String, Any> =
+        mapOf(
+            "fastsatt" to "EtterSkjønn",
+            "sykepengegrunnlag" to sykepengegrunnlag,
+            "6G" to seksG,
+            "arbeidsgivere" to arbeidsgivere,
+        )
 
     fun godkjenningsbehovFastsattEtterHovedregel(
         sykepengegrunnlag: BigDecimal = BigDecimal("600000.0"),
         seksG: Double = 666666.66,
-        arbeidsgivere: List<Map<String, Any>>
-    ): Map<String, Any> = mapOf(
-        "fastsatt" to "EtterHovedregel",
-        "sykepengegrunnlag" to sykepengegrunnlag,
-        "6G" to seksG,
-        "arbeidsgivere" to arbeidsgivere
-    )
+        arbeidsgivere: List<Map<String, Any>>,
+    ): Map<String, Any> =
+        mapOf(
+            "fastsatt" to "EtterHovedregel",
+            "sykepengegrunnlag" to sykepengegrunnlag,
+            "6G" to seksG,
+            "arbeidsgivere" to arbeidsgivere,
+        )
 
     fun godkjenningsbehovFastsattIInfotrygd(
         sykepengegrunnlag: BigDecimal = BigDecimal("500000.0"),
         seksG: Double = 666666.66,
-    ): Map<String, Any> = mapOf(
-        "fastsatt" to "IInfotrygd",
-        "sykepengegrunnlag" to sykepengegrunnlag,
-        "6G" to seksG,
-    )
+    ): Map<String, Any> =
+        mapOf(
+            "fastsatt" to "IInfotrygd",
+            "sykepengegrunnlag" to sykepengegrunnlag,
+            "6G" to seksG,
+        )
 
     fun godkjenningsbehovSelvstendigNæringsdrivende(
         sykepengegrunnlag: BigDecimal,
         seksG: BigDecimal,
         beregningsgrunnlag: BigDecimal,
         pensjonsgivendeInntekter: List<Pair<Int, BigDecimal>>,
-    ): Map<String, Any> = mapOf(
-        "fastsatt" to "EtterHovedregel",
-        "sykepengegrunnlag" to sykepengegrunnlag,
-        "6G" to seksG,
-        "selvstendig" to mapOf(
-            "beregningsgrunnlag" to beregningsgrunnlag,
-            "pensjonsgivendeInntekter" to pensjonsgivendeInntekter.map {(årstall, beløp)  ->
+    ): Map<String, Any> =
+        mapOf(
+            "fastsatt" to "EtterHovedregel",
+            "sykepengegrunnlag" to sykepengegrunnlag,
+            "6G" to seksG,
+            "selvstendig" to
                 mapOf(
-                    "årstall" to årstall,
-                    "beløp" to beløp
-                )
-            }
+                    "beregningsgrunnlag" to beregningsgrunnlag,
+                    "pensjonsgivendeInntekter" to
+                        pensjonsgivendeInntekter.map { (årstall, beløp) ->
+                            mapOf(
+                                "årstall" to årstall,
+                                "beløp" to beløp,
+                            )
+                        },
+                ),
         )
-    )
 
-    private fun nyHendelse(id: UUID, navn: String, hendelse: Map<String, Any>) =
-        JsonMessage.newMessage(nyHendelse(id, navn) + hendelse).toJson()
+    private fun nyHendelse(
+        id: UUID,
+        navn: String,
+        hendelse: Map<String, Any>,
+    ) = JsonMessage.newMessage(nyHendelse(id, navn) + hendelse).toJson()
 
-    private fun nyHendelse(id: UUID, navn: String) = mutableMapOf(
+    private fun nyHendelse(
+        id: UUID,
+        navn: String,
+    ) = mutableMapOf(
         "@event_name" to navn,
         "@id" to id,
-        "@opprettet" to LocalDateTime.now()
+        "@opprettet" to LocalDateTime.now(),
     )
 
-    fun lagKommandokjedePåminnelse(commandContextId: UUID, meldingId: UUID, id: UUID) =
-        nyHendelse(
-            id, "kommandokjede_påminnelse", mapOf(
-                "commandContextId" to commandContextId,
-                "meldingId" to meldingId
-            )
-        )
+    fun lagKommandokjedePåminnelse(
+        commandContextId: UUID,
+        meldingId: UUID,
+        id: UUID,
+    ) = nyHendelse(
+        id,
+        "kommandokjede_påminnelse",
+        mapOf(
+            "commandContextId" to commandContextId,
+            "meldingId" to meldingId,
+        ),
+    )
 
     data class ArbeidsgiverinformasjonJson(
         private val orgnummer: String,
         private val navn: String,
     ) {
-        fun toBody() = mapOf(
-            "orgnummer" to orgnummer,
-            "navn" to navn,
-        )
+        fun toBody() =
+            mapOf(
+                "orgnummer" to orgnummer,
+                "navn" to navn,
+            )
     }
 
     data class VergemålJson(
@@ -1155,11 +1274,12 @@ object Testmeldingfabrikk {
         val fremtidsfullmakter: List<Vergemål> = emptyList(),
         val fullmakter: List<Fullmakt> = emptyList(),
     ) {
-        fun toBody() = mapOf(
-            "vergemål" to vergemål,
-            "fremtidsfullmakter" to fremtidsfullmakter,
-            "fullmakter" to fullmakter,
-        )
+        fun toBody() =
+            mapOf(
+                "vergemål" to vergemål,
+                "fremtidsfullmakter" to fremtidsfullmakter,
+                "fullmakter" to fullmakter,
+            )
 
         data class Vergemål(
             val type: VergemålType,
@@ -1183,22 +1303,22 @@ object Testmeldingfabrikk {
             mindreaarig,
             midlertidigForMindreaarig,
             forvaltningUtenforVergemaal,
-            stadfestetFremtidsfullmakt
+            stadfestetFremtidsfullmakt,
         }
     }
 
     class Risikofunn(
         private val kategori: List<String>,
-        private val beskrivelse: String
+        private val beskrivelse: String,
     ) {
-
         @Language("JSON")
-        private fun tilJson() = """
-    {
-        "kategori": ${kategori.map { "\"$it\"" }},
-        "beskrivelse": "$beskrivelse"
-    }
-    """.trimIndent()
+        private fun tilJson() =
+            """
+            {
+                "kategori": ${kategori.map { "\"$it\"" }},
+                "beskrivelse": "$beskrivelse"
+            }
+            """.trimIndent()
 
         companion object {
             fun Iterable<Risikofunn>.tilJson(): JsonNode = objectMapper.readTree("${map { it.tilJson() }}")

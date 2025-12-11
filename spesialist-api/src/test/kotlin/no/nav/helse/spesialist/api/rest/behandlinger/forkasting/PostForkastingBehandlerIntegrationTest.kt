@@ -65,22 +65,25 @@ class PostForkastingBehandlerIntegrationTest {
         varseldefinisjonRepository.lagre(varseldefinisjon)
 
         // When:
-        val response = integrationTestFixture.post(
-            url = "/api/behandlinger/${behandling.spleisBehandlingId?.value}/forkasting",
-            body = """
+        val response =
+            integrationTestFixture.post(
+                url = "/api/behandlinger/${behandling.spleisBehandlingId?.value}/forkasting",
+                body = """
                 {
                   "årsak": "En årsak",
                   "begrunnelser": ["Begrunnelse 1", "Begrunnelse 2"],
                   "kommentar": "En kommentar"
                 }""",
-            saksbehandler = saksbehandler,
-        )
+                saksbehandler = saksbehandler,
+            )
 
         // Then:
         val funnetVarsel = varselRepository.finn(varsel.id)
         val funnetTotrinnsvurdering = totrinnsvurderingRepository.finn(totrinnsvurdering.id())
         val funnetOppgave = oppgaveRepository.finn(oppgave.id)
-        val reservasjon = integrationTestFixture.sessionFactory.sessionContext.reservasjonDao.hentReservasjonFor(person.id.value)
+        val reservasjon =
+            integrationTestFixture.sessionFactory.sessionContext.reservasjonDao
+                .hentReservasjonFor(person.id.value)
         assertEquals(HttpStatusCode.NoContent.value, response.status)
         assertEquals(Varsel.Status.AVVIST, funnetVarsel?.status)
         assertEquals(TotrinnsvurderingTilstand.GODKJENT, funnetTotrinnsvurdering?.tilstand)
@@ -98,15 +101,16 @@ class PostForkastingBehandlerIntegrationTest {
         saksbehandlerRepository.lagre(saksbehandler)
 
         // When:
-        val response = integrationTestFixture.post(
-            url = "/api/behandlinger/$behandlingId/forkasting",
-            body = """{
+        val response =
+            integrationTestFixture.post(
+                url = "/api/behandlinger/$behandlingId/forkasting",
+                body = """{
                   "årsak": "En årsak",
                     "begrunnelser": ["Begrunnelse 1", "Begrunnelse 2"],
                     "kommentar": "En kommentar"
                 }""",
-            saksbehandler = saksbehandler,
-        )
+                saksbehandler = saksbehandler,
+            )
 
         // Then:
         assertEquals(HttpStatusCode.NotFound.value, response.status)
@@ -119,7 +123,7 @@ class PostForkastingBehandlerIntegrationTest {
               "code": "BEHANDLING_IKKE_FUNNET" 
             }
             """.trimIndent(),
-            response.bodyAsJsonNode!!
+            response.bodyAsJsonNode!!,
         )
     }
 
@@ -134,16 +138,17 @@ class PostForkastingBehandlerIntegrationTest {
         saksbehandlerRepository.lagre(saksbehandler)
 
         // When:
-        val response = integrationTestFixture.post(
-            url = "/api/behandlinger/${behandlingId.value}/forkasting",
-            body = """
+        val response =
+            integrationTestFixture.post(
+                url = "/api/behandlinger/${behandlingId.value}/forkasting",
+                body = """
                 {
                   "årsak": "En årsak",
                   "begrunnelser": ["Begrunnelse 1", "Begrunnelse 2"],
                   "kommentar": "En kommentar"
                 }""",
-            saksbehandler = saksbehandler,
-        )
+                saksbehandler = saksbehandler,
+            )
 
         // Then:
         assertEquals(HttpStatusCode.NotFound.value, response.status)
@@ -156,15 +161,16 @@ class PostForkastingBehandlerIntegrationTest {
               "code": "VEDTAKSPERIODE_IKKE_FUNNET" 
             }
             """.trimIndent(),
-            response.bodyAsJsonNode!!
+            response.bodyAsJsonNode!!,
         )
     }
 
     @Test
     fun `gir forbidden hvis saksbehandler ikke har tilgang til personen`() {
         // Given:
-        val person = lagPerson(erEgenAnsatt = true)
-            .also(personRepository::lagre)
+        val person =
+            lagPerson(erEgenAnsatt = true)
+                .also(personRepository::lagre)
         val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
         val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
         val saksbehandler = lagSaksbehandler()
@@ -173,16 +179,17 @@ class PostForkastingBehandlerIntegrationTest {
         behandlingRepository.lagre(behandling)
 
         // When:
-        val response = integrationTestFixture.post(
-            url = "/api/behandlinger/${behandling.spleisBehandlingId?.value}/forkasting",
-            body = """
+        val response =
+            integrationTestFixture.post(
+                url = "/api/behandlinger/${behandling.spleisBehandlingId?.value}/forkasting",
+                body = """
                 {
                   "årsak": "En årsak",
                   "begrunnelser": ["Begrunnelse 1", "Begrunnelse 2"],
                   "kommentar": "En kommentar"
                 }""",
-            saksbehandler = saksbehandler,
-        )
+                saksbehandler = saksbehandler,
+            )
 
         // Then:
         assertEquals(HttpStatusCode.Forbidden.value, response.status)
@@ -191,8 +198,9 @@ class PostForkastingBehandlerIntegrationTest {
     @Test
     fun `gir bad request hvis oppgaven ikke finnes`() {
         // Given:
-        val person = lagPerson()
-            .also(personRepository::lagre)
+        val person =
+            lagPerson()
+                .also(personRepository::lagre)
         val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
         val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
         val saksbehandler = lagSaksbehandler()
@@ -201,16 +209,17 @@ class PostForkastingBehandlerIntegrationTest {
         behandlingRepository.lagre(behandling)
 
         // When:
-        val response = integrationTestFixture.post(
-            url = "/api/behandlinger/${behandling.spleisBehandlingId?.value}/forkasting",
-            body = """
+        val response =
+            integrationTestFixture.post(
+                url = "/api/behandlinger/${behandling.spleisBehandlingId?.value}/forkasting",
+                body = """
                 {
                   "årsak": "En årsak",
                   "begrunnelser": ["Begrunnelse 1", "Begrunnelse 2"],
                   "kommentar": "En kommentar"
                 }""",
-            saksbehandler = saksbehandler,
-        )
+                saksbehandler = saksbehandler,
+            )
 
         // Then:
         assertEquals(HttpStatusCode.BadRequest.value, response.status)
@@ -223,7 +232,7 @@ class PostForkastingBehandlerIntegrationTest {
               "code": "OPPGAVE_IKKE_FUNNET" 
             }
             """.trimIndent(),
-            response.bodyAsJsonNode!!
+            response.bodyAsJsonNode!!,
         )
     }
 
@@ -243,16 +252,17 @@ class PostForkastingBehandlerIntegrationTest {
         oppgave.avventerSystem(saksbehandler.ident, UUID.randomUUID())
         oppgaveRepository.lagre(oppgave)
         // When:
-        val response = integrationTestFixture.post(
-            url = "/api/behandlinger/${behandling.spleisBehandlingId?.value}/forkasting",
-            body = """
+        val response =
+            integrationTestFixture.post(
+                url = "/api/behandlinger/${behandling.spleisBehandlingId?.value}/forkasting",
+                body = """
                 {
                   "årsak": "En årsak",
                   "begrunnelser": ["Begrunnelse 1", "Begrunnelse 2"],
                   "kommentar": "En kommentar"
                 }""",
-            saksbehandler = saksbehandler,
-        )
+                saksbehandler = saksbehandler,
+            )
 
         // Then:
         assertEquals(HttpStatusCode.BadRequest.value, response.status)
@@ -265,7 +275,7 @@ class PostForkastingBehandlerIntegrationTest {
               "code": "OPPGAVE_FEIL_TILSTAND"
             }
             """.trimIndent(),
-            response.bodyAsJsonNode!!
+            response.bodyAsJsonNode!!,
         )
     }
 
@@ -290,16 +300,17 @@ class PostForkastingBehandlerIntegrationTest {
         totrinnsvurderingRepository.lagre(totrinnsvurdering)
 
         // When:
-        val response = integrationTestFixture.post(
-            url = "/api/behandlinger/${behandling.spleisBehandlingId?.value}/forkasting",
-            body = """
+        val response =
+            integrationTestFixture.post(
+                url = "/api/behandlinger/${behandling.spleisBehandlingId?.value}/forkasting",
+                body = """
                 {
                   "årsak": "En årsak",
                   "begrunnelser": ["Begrunnelse 1", "Begrunnelse 2"],
                   "kommentar": "En kommentar"
                 }""",
-            saksbehandler = saksbehandler,
-        )
+                saksbehandler = saksbehandler,
+            )
 
         // Then:
         assertEquals(HttpStatusCode.BadRequest.value, response.status)
@@ -312,7 +323,7 @@ class PostForkastingBehandlerIntegrationTest {
               "code": "TOTRINNSVURDERING_SENDT_TIL_BESLUTTER"
             }
             """.trimIndent(),
-            response.bodyAsJsonNode!!
+            response.bodyAsJsonNode!!,
         )
     }
 
@@ -337,16 +348,17 @@ class PostForkastingBehandlerIntegrationTest {
         totrinnsvurderingRepository.lagre(totrinnsvurdering)
 
         // When:
-        val response = integrationTestFixture.post(
-            url = "/api/behandlinger/${behandling.spleisBehandlingId?.value}/forkasting",
-            body = """
+        val response =
+            integrationTestFixture.post(
+                url = "/api/behandlinger/${behandling.spleisBehandlingId?.value}/forkasting",
+                body = """
                 {
                   "årsak": "En årsak",
                   "begrunnelser": ["Begrunnelse 1", "Begrunnelse 2"],
                   "kommentar": "En kommentar"
                 }""",
-            saksbehandler = saksbehandler,
-        )
+                saksbehandler = saksbehandler,
+            )
 
         // Then:
         assertEquals(HttpStatusCode.InternalServerError.value, response.status)
@@ -358,12 +370,15 @@ class PostForkastingBehandlerIntegrationTest {
               "title": "Internal Server Error"
             }
             """.trimIndent(),
-            response.bodyAsJsonNode!!
+            response.bodyAsJsonNode!!,
         )
     }
 
-    private fun lagGodkjenningsbehov(behandling: Behandling, vedtaksperiode: Vedtaksperiode): Godkjenningsbehov {
-        return Godkjenningsbehov(
+    private fun lagGodkjenningsbehov(
+        behandling: Behandling,
+        vedtaksperiode: Vedtaksperiode,
+    ): Godkjenningsbehov =
+        Godkjenningsbehov(
             id = UUID.randomUUID(),
             opprettet = LocalDateTime.now(),
             fødselsnummer = vedtaksperiode.fødselsnummer,
@@ -384,20 +399,22 @@ class PostForkastingBehandlerIntegrationTest {
             inntektskilde = Inntektskilde.EN_ARBEIDSGIVER,
             orgnummereMedRelevanteArbeidsforhold = emptyList(),
             skjæringstidspunkt = behandling.skjæringstidspunkt,
-            sykepengegrunnlagsfakta = Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidstaker.EtterHovedregel(
-                seksG = 6 * 118620.0,
-                arbeidsgivere = listOf(
-                    Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
-                        organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
-                        inntektskilde = Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Arbeidsgiver,
-                        omregnetÅrsinntekt = 700_000.0,
-                    )
+            sykepengegrunnlagsfakta =
+                Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidstaker.EtterHovedregel(
+                    seksG = 6 * 118620.0,
+                    arbeidsgivere =
+                        listOf(
+                            Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.EtterHovedregel(
+                                organisasjonsnummer = vedtaksperiode.organisasjonsnummer,
+                                inntektskilde = Godkjenningsbehov.Sykepengegrunnlagsfakta.Spleis.Arbeidsgiver.Inntektskilde.Arbeidsgiver,
+                                omregnetÅrsinntekt = 700_000.0,
+                            ),
+                        ),
+                    sykepengegrunnlag = BigDecimal("700000.0"),
                 ),
-                sykepengegrunnlag = BigDecimal("700000.0")
-            ),
             foreløpigBeregnetSluttPåSykepenger = behandling.fom.plusYears(1),
             arbeidssituasjon = Arbeidssituasjon.ARBEIDSTAKER,
+            relevanteSøknader = listOf(UUID.randomUUID()),
             json = "{}",
         )
-    }
 }
