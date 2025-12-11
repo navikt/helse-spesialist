@@ -72,7 +72,7 @@ class InMemoryRepositoriesAndDaos {
     private val metrikkDao = UnimplementedMetrikkDao()
     private val notatApiDao = UnimplementedNotatApiDao()
     private val overstyringApiDao = UnimplementedOverstyringApiDao()
-    private val periodehistorikkDao = UnimplementedPeriodehistorikkDao()
+    private val periodehistorikkDao = InMemoryDoNothingPeriodehistorikkDao()
     private val periodehistorikkApiDao = UnimplementedPeriodehistorikkApiDao()
     private val personApiDao = UnimplementedPersonApiDao()
     private val personinfoDao = UnimplementedPersoninfoDao()

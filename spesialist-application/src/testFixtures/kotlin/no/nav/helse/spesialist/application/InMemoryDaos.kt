@@ -25,7 +25,7 @@ class InMemoryDaos(
     override val oppgaveRepository: InMemoryOppgaveRepository,
     override val opptegnelseDao: InMemoryOpptegnelseDao,
     override val overstyringApiDao: UnimplementedOverstyringApiDao,
-    override val periodehistorikkDao: UnimplementedPeriodehistorikkDao,
+    override val periodehistorikkDao: InMemoryDoNothingPeriodehistorikkDao,
     override val periodehistorikkApiDao: UnimplementedPeriodehistorikkApiDao,
     override val personDao: DelegatingPersonDao,
     override val personApiDao: UnimplementedPersonApiDao,

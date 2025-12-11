@@ -38,10 +38,82 @@ import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
 class PostVedtakIntegrationTest {
     private val integrationTestFixture = IntegrationTestFixture()
     private val sessionContext = integrationTestFixture.sessionFactory.sessionContext
+
+    @Test
+    fun `happy case - ingen totrinnskontroll`() {
+        // Given:
+        val person = lagPerson().also(sessionContext.personRepository::lagre)
+        val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
+        val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
+        val saksbehandler = lagSaksbehandler()
+        val godkjenningsbehov = lagGodkjenningsbehov(behandling, vedtaksperiode)
+        sessionContext.saksbehandlerRepository.lagre(saksbehandler)
+        sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
+        sessionContext.behandlingRepository.lagre(behandling)
+        val oppgave = lagOppgave(behandling.spleisBehandlingId!!, godkjenningsbehov.id)
+        sessionContext.oppgaveRepository.lagre(oppgave)
+        sessionContext.meldingDao.lagre(godkjenningsbehov)
+
+        // When:
+        val response =
+            integrationTestFixture.post(
+                url = "/api/behandlinger/${behandling.spleisBehandlingId?.value}/vedtak",
+                body = "{}",
+                saksbehandler = saksbehandler,
+            )
+
+        // Then:
+        assertEquals(HttpStatusCode.NoContent.value, response.status)
+        val vedtak = sessionContext.vedtakRepository.finn(behandling.spleisBehandlingId!!)
+        assertNotNull(vedtak)
+        assertEquals(false, vedtak.automatiskFattet)
+        assertEquals(saksbehandler.ident, vedtak.saksbehandlerIdent)
+        assertNull(vedtak.beslutterIdent)
+    }
+
+    @Test
+    fun `happy case - med krav om totrinnskontroll`() {
+        // Given:
+        val person = lagPerson().also(sessionContext.personRepository::lagre)
+        val vedtaksperiode = lagVedtaksperiode(identitetsnummer = person.id)
+        val behandling = lagBehandling(vedtaksperiodeId = vedtaksperiode.id)
+        val saksbehandler = lagSaksbehandler()
+        val beslutter = lagSaksbehandler()
+        val godkjenningsbehov = lagGodkjenningsbehov(behandling, vedtaksperiode)
+        val totrinnsvurdering = Totrinnsvurdering.ny(person.id.value)
+        sessionContext.saksbehandlerRepository.lagre(saksbehandler)
+        sessionContext.saksbehandlerRepository.lagre(beslutter)
+        sessionContext.vedtaksperiodeRepository.lagre(vedtaksperiode)
+        sessionContext.behandlingRepository.lagre(behandling)
+        val oppgave = lagOppgave(behandling.spleisBehandlingId!!, godkjenningsbehov.id)
+        totrinnsvurdering.sendTilBeslutter(oppgave.id, saksbehandler.id)
+        sessionContext.totrinnsvurderingRepository.lagre(totrinnsvurdering)
+        sessionContext.oppgaveRepository.lagre(oppgave)
+        sessionContext.meldingDao.lagre(godkjenningsbehov)
+
+        // When:
+        val response =
+            integrationTestFixture.post(
+                url = "/api/behandlinger/${behandling.spleisBehandlingId?.value}/vedtak",
+                body = "{}",
+                saksbehandler = beslutter,
+                tilgangsgrupper = setOf(Tilgangsgruppe.BESLUTTER),
+            )
+
+        // Then:
+        assertEquals(HttpStatusCode.NoContent.value, response.status)
+        val vedtak = sessionContext.vedtakRepository.finn(behandling.spleisBehandlingId!!)
+        assertNotNull(vedtak)
+        assertEquals(false, vedtak.automatiskFattet)
+        assertEquals(saksbehandler.ident, vedtak.saksbehandlerIdent)
+        assertEquals(beslutter.ident, vedtak.beslutterIdent)
+    }
 
     @Test
     fun `gir NotFound hvis behandlingen ikke finnes`() {

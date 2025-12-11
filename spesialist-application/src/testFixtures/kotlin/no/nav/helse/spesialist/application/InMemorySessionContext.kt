@@ -25,7 +25,7 @@ class InMemorySessionContext(
     override val oppgaveRepository: InMemoryOppgaveRepository,
     override val opptegnelseDao: InMemoryOpptegnelseDao,
     override val overstyringRepository: InMemoryOverstyringRepository,
-    override val periodehistorikkDao: UnimplementedPeriodehistorikkDao,
+    override val periodehistorikkDao: InMemoryDoNothingPeriodehistorikkDao,
     override val personDao: DelegatingPersonDao,
     override val personRepository: InMemoryPersonRepository,
     override val personPseudoIdDao: InMemoryPersonPseudoIdDao,
