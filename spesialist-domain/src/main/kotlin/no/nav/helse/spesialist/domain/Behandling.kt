@@ -10,7 +10,7 @@ import java.util.UUID
 @JvmInline
 value class SpleisBehandlingId(
     val value: UUID,
-)
+) : ValueObject
 
 @JvmInline
 value class BehandlingUnikId(
